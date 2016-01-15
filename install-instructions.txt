@@ -1,0 +1,17 @@
+
+For convinience (access to local files) this software use "nw.js" witch is basically a "browser" with Node.js
+
+1. Get a copy of nw.js from http://nwjs.io if you don't have it already.
+
+2. (If you are not on windows) Rebuild nodehun:
+npm install nodehun (npm is a packet manager for nodejs)
+
+3. (for convinience) Add the path to nw.js to the enivorment variables (PATH)
+
+4. Start the program via nw.js:
+Open nw and drag the folder to it. 
+Or start nw with the folder path as first argument. 
+
+5. Create a shortcut/launcher that does nr 4.
+
+
