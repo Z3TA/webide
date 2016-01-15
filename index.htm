@@ -7,21 +7,19 @@
 	<link rel="stylesheet" type="text/css" href="menu.css">
 	
 	<script>
-		/* For some reason all require needs to be placed before all else!???
+		/* 
+			For some reason all require needs to be placed before all else!???
 			
 			To build for the right modules version:
 			node-gyp rebuild --target=1.2.0 --msvs_version=2015
 		
 		*/
-		
-		var fs = require("fs"); // Need to be here for some reason :/
+		var fs = require("fs"); 
 		var path = require('path');
 		var Nodehun = require('nodehun');
 	
 		var global = {}; // Put global objects in this
 		var MODULE = {}; // Put helper modules in this. Save them in modules/ folder.
-		
-
 		
 	</script>
 	
