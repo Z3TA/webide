@@ -11,7 +11,7 @@
 		"always-on-top": false
 	},
 	"private": true,
-	"license" : "SEE LICENSE IN LICENSE.txt"
+	"license" : "SEE LICENSE IN LICENSE.txt",
 	"description": "A text/code editor for JavaScript made in JavaScript",
 	"version": "1.0.0",
 	"author" : "Johan Zetterberg <zeta@zetafiles.org>", 
@@ -22,6 +22,4 @@
 		"type": "Mercurial",
 		"url": "http://hg.webtigerteam.com/js-editor/"
 	}
-}
-	
 }
