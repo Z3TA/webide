@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="menu.css">
+	
+	<script>
+		/* For some reason all require needs to be placed before all else!???
+			
+			To build for the right modules version:
+			node-gyp rebuild --target=1.2.0 --msvs_version=2015
+		
+		*/
+		
+		var fs = require("fs"); // Need to be here for some reason :/
+		var path = require('path');
+		var Nodehun = require('nodehun');
+	
+		var global = {}; // Put global objects in this
+		var MODULE = {}; // Put helper modules in this. Save them in modules/ folder.
+		
+
+		
+	</script>
+	
+	<script type="text/javascript" src="settings.js"></script>
+	
+	<script type="text/javascript" src="editor.js"></script>
+	<script type="text/javascript" src="File.js"></script> <!-- Object to handle files. -->
+	<script type="text/javascript" src="Box.js"></script> <!-- Object for storing the characters in File.grid -->
+
+	<!--
+	<script type="text/javascript" src="modules/Typo.js"></script>
+	-->
+	
+	<script type="text/javascript" src="plugin/winstate.js"></script>
+	<script type="text/javascript" src="plugin/spellcheck_nodehun.js"></script>
+	
+	<script type="text/javascript" src="plugin/undo_redo.js"></script> <!-- Needs to be high -->
+	<script type="text/javascript" src="plugin/render_highlight-line.js"></script>
+	<script type="text/javascript" src="plugin/render_text_selection.js"></script>
+	<script type="text/javascript" src="plugin/render_highlight.js"></script>
+	<script type="text/javascript" src="plugin/render_text.js"></script>
+	<script type="text/javascript" src="plugin/render_caret.js"></script>
+	<script type="text/javascript" src="plugin/render_charsinmargin.js"></script>
+	<script type="text/javascript" src="plugin/render_lineNumbers.js"></script>
+	<script type="text/javascript" src="plugin/render_info.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_arrows.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_enter.js"></script>
+
+	<script type="text/javascript" src="plugin/keyboard_delete.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_backSpace.js"></script>
+
+	<script type="text/javascript" src="plugin/select_all.js"></script>
+	
+	<script type="text/javascript" src="plugin/mouse_place_caret.js"></script>
+	<script type="text/javascript" src="plugin/mouse_select.js"></script>
+
+	<script type="text/javascript" src="plugin/mouse_scroll.js"></script>
+	<script type="text/javascript" src="plugin/find_replace.js"></script>
+	<script type="text/javascript" src="plugin/file_open.js"></script>
+	<script type="text/javascript" src="plugin/magnification_glass.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_scroll.js"></script>
+	<script type="text/javascript" src="plugin/document_preview.js"></script>
+	
+	<script type="text/javascript" src="plugin/file_tabs.js"></script>
+	<script type="text/javascript" src="plugin/file_new.js"></script>
+	<script type="text/javascript" src="plugin/file_save.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_page_nav.js"></script>
+	<script type="text/javascript" src="plugin/paste_format.js"></script>
+	<script type="text/javascript" src="plugin/devmode.js"></script>
+	<script type="text/javascript" src="plugin/goto_line.js"></script>
+
+	<script type="text/javascript" src="plugin/javascript/jsParser.js"></script>
+	<script type="text/javascript" src="plugin/javascript/autocomplete.js"></script>
+	<script type="text/javascript" src="plugin/javascript/colors.js"></script>
+	<script type="text/javascript" src="plugin/javascript/functionlist.js"></script>
+	<script type="text/javascript" src="plugin/javascript/fixIndentation.js"></script>
+	<script type="text/javascript" src="plugin/javascript/autoQuote.js"></script>
+
+	<script type="text/javascript" src="plugin/xmatching.js"></script>
+
+	
+	<meta name="description" content="Text editor specializing in JavaScript and Node.JS">
+	<meta name="keywords" content="text editor, editor, javascript, node, node.js, nodejs">
+	<meta name="viewport" content="width=device-width, initial-scale=0.8">
+	<meta http-equiv="content-language" content="en">
+	
+	<!-- Try to disable caching of files, very annoying when you are developing on the editor -->
+	<meta http-equiv="cache-control" content="max-age=0" />
+	<meta http-equiv="cache-control" content="no-cache" />
+	<meta http-equiv="expires" content="0" />
+	<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+	<meta http-equiv="pragma" content="no-cache" />
+	
+</head>
+
+<body id="body" ondragstart="return false" draggable="false"
+        ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"  
+        ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"  
+        ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
+	<div class="wireframe rows">
+		
+		
+		<div id="header" class="header" draggable="false"></div>
+		
+		<div id="columns" class="columns">
+			<div id="leftColumn" class="leftColumn"></div>
+			<div id="content" class="content centerColumn"></div>
+			<div id="rightColumn" class="rightColumn"></div>
+			
+		</div>
+		
+		<div id="footer" class="footer"></div>
+
+	</div>
+	
+	<input style="display:none;" id="fileInput" type="file" />
+	
+	<input style="display:none;" id="fileSaveAs" type="file" nwsaveas />
+
+	<ul id="canvasContextmenu" class="menu" style="display: block; position: absolute;">
+		<div id="canvasContextmenuTemp"></div>
+		<li>First item</li>
+		<li>Second item</li>
+		<li>Second item</li>
+		<li>Second item</li>
+		<li>Second item</li>
+		<li class="sep">Separator</li>
+		<li>Second item</li>
+		<li>Second item</li>
+		<li>Second item</li>
+	</ul>
+	
+</body>
+</html>

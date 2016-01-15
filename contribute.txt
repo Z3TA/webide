@@ -1,0 +1,43 @@
+
+Your are Not allowed to distribute any of the software! (see LICENSE.txt)
+And you Must send me any changes you make, and give me full/unlimited rights to use the code you send.
+
+This is to allow me to keep full control of the software. I might even make money on it ...
+
+If you add a new feature to the software, you should make it into a plugin: a .js file in the plugin directory.
+
+Send any changes to zeta@zetafiles.org. Compress using zip/gzip. 
+
+If you want to be helpful, also use the Mercurial SCM so that it will be easier for me to manage:
+* Clone from http://hg.webtigerteam.com/js-editor/
+* Make your changes
+* Commit the changes
+* Sending changes by email
+
+hg clone http://hg.webtigerteam.com/js-editor/ js-editor-new-feature
+# Make changes ...
+hg ci -m "my changes"
+hg log
+# See latest changeset at the top
+# Replace 3 and 4 with the actual changeset number(s)
+hg export 3 > change3.diff 
+hg export 4 > change4.diff 
+
+
+---
+
+https://www.mercurial-scm.org/guide
+
+To be careful, they first clone their repository to have an integration directory as sandbox
+
+$ hg clone project integration
+$ cd integration
+$ hg import change3.diff
+$ hg import change4.diff
+
+That's it. They can now test your changes in feature clones. If they accept them, they pull the changes into the main repository
+
+$ cd ../project
+$ hg pull ../integration
+ 
+

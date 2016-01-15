@@ -1,0 +1,429 @@
+/*
+
+	This file contains all styling outside the canvas. 
+	For example the positioning of the head, footer, right column, left column and the main editor area.
+
+	Plugins should have their own css file. Unless it's "built-in" functionality.
+	
+	
+
+	
+	Designing tips
+	--------------
+	The coding area should be the "happy place" (most colorful and most contrast)
+	
+	
+*/
+
+
+
+/* 
+	To be on the safe side. All element, unless specified, should have no border boxing ...
+	Do it here so that we do not have to specify it on everything.
+ */
+* {
+	padding: 0px;
+	border: 0px solid red;
+	margin: 0px;
+}
+
+
+html {
+	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+}
+
+body {
+	margin: 0px;
+	background-color:rgba(0,255,0,0); /* bgcolor will not show, change the wireframe background instead! */
+	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+}
+
+
+.wireframe {
+}
+
+
+/* Only the file canvas should have the fileCanvas class! */
+.fileCanvas { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
+	cursor: text;
+}
+
+
+.columns {
+	background-color: yellow;
+}
+
+.columns div {
+		/*border: 1px solid red; */
+		background-color: white;
+		background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+
+}
+
+ 
+.leftColumn {
+	float: left;
+	/* Needs to have width! */
+	vertical-align: top;
+	/* Can not have height! */
+}
+
+.centerColumn { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
+	overflow:hidden;
+	background-color: #b29467; /* background will only show when there is little text, or flash a little when reloading the page */
+	vertical-align: top;
+	float: left;
+	overflow: auto!important;
+}
+
+.rightColumn {
+	float: right;
+
+	background-color: orange;
+	/* Needs to have width! */
+	vertical-align: top;
+}
+
+
+.header {
+	/* Needs to have height! */
+	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+}
+
+.footer {
+	clear: both;
+	background: linear-gradient(#595959, #555555);
+	border-top: 2px solid #767676;
+	/* Needs to have height! */
+	box-shadow: inset 0px 4px 10px #888888;
+}
+.footer:empty { 
+    border: none; /* Hide the border if the footer is empty */
+}
+
+
+.sizer {
+	background-color: #682c35;
+}
+
+
+
+
+/* ###### Standard settings ####### */
+ul, li {
+	margin: 0px;
+	list-style-type: none;
+}
+
+ul {
+	margin-top: 2px;
+}
+
+li ul {
+	margin-left: 1em;
+}
+
+label {
+	color: #f6f6f3;
+	text-shadow: 0px -1px 0px #1f2020;
+}
+
+input[type=text] {
+	border-radius: 2px;
+	border: 1px inset #4a4a4a;
+
+	background-color: #e6e6e6;
+	box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
+	padding: 3px;
+	margin: 4px;
+	font-size: 12px;
+	font-family: Verdana;
+}
+
+input[type=checkbox] {
+	text-align: absmiddle;
+}
+
+input[type=button] {
+	border-radius: 3px;
+	border: 1px solid rgba(19, 19, 19, 0.5);
+	box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
+	color: #f6f6f3;
+	min-width: 120px;
+	background-color: #414141;
+	background: linear-gradient(#545657, #434343, #454545);
+	cursor: pointer;
+	text-shadow: 0px -1px 0px #1f2020;
+	padding: 4px;
+	margin: 4px;
+	font-size: 12px;
+	font-family: Verdana;
+}
+
+input[type=button].half {
+	min-width: 55px;
+}
+
+
+
+
+/* ############### File Tabs ############## */
+
+.tabList {
+	margin: 0px;
+	display: block;
+	
+line-height: 10px; /* Keep small to Prevent space under the list */
+	
+	
+	padding-left: 3px;
+	
+/* Child's can not overlap (z-index) this! */
+	
+}
+
+.tabFileItem {
+	border-radius: 6px 6px 0px 0px;
+	border-top: 1px solid #d6d6d6;
+	display: inline-block;
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-top: 3px;
+	margin-bottom: -3px;
+	padding: 6px;
+	padding-bottom: 5px;
+	font-size: 12px;
+	cursor: pointer;
+	line-height: 12px;
+	background: linear-gradient(#f2f2f2, #ffffff);
+	border-bottom: 1px solid #d6d6d6;
+	box-shadow: 0px -1px 2px #eeeeee, inset 0px 1px 1px #ecebf0;
+	z-index: 3;
+	position: relative; /* need position for z-index to work! */
+}
+
+.tabFolderItem {
+	border-radius: 10px 10px 0px 0px;
+	border-top: 1px solid #d6d6d6;
+	border-bottom: 1px solid #d6d6d6;
+	border: 1px solid rgba(200,200,200,0.5);
+	font-size: 10px;
+	text-align: center;
+	line-height: 1px;
+	
+	margin-top: 3px;
+	margin-bottom: 0px;
+	margin-left: -1px;
+	padding-left: 2px;
+	
+	padding-top: 4px;
+	color: #585565;
+	display: inline-block;
+	line-height: 6px;
+	box-shadow: 0px 1px 2px #dcdae3, inset 0px 1px 1px #ecebf0;
+	background: linear-gradient(#f2f2f2, #f6f6f6);
+	cursor: default;
+
+	z-index: 2;
+	position: relative; /* need position for z-index to work! */
+}
+
+.folderFileList {
+	margin: 0px;
+	line-height: 12px;
+}
+
+
+.closeFileTab {
+	display: none;
+	font-size: 12px;
+	font-weight: bold;
+	vertical-align: text-top;
+	margin-left: 2px;
+	margin-right: 2px;
+	border-radius: 40%;
+	width: 12px;
+	height: 12px;
+	background-color: rgba(0,0,0,0);
+}
+
+.closeFileTab:hover {
+	color: red;
+}
+
+.tabFileItem.active .closeFileTab {
+	display: inline-block;
+}
+
+
+.folderFileList.active, .tabFileItem.active, .tabFolderItem.active {
+	border-bottom: 0px solid red;
+	background-color: none;
+}
+
+.tabFolderItem.active {
+	border-bottom: 0px solid black;
+	color: #000000;
+	min-width: 120px;
+	background-color: #414141;
+	background: linear-gradient(#d7dde6, #f6f6f6, #FFFFFF);
+	z-index: 99;
+	position: relative;  /* need position for z-index to work! */
+}
+
+.tabFolderItem.single {
+	font-size: 0px;
+	line-height: 0px;
+}
+
+.tabFolderItem.single .tabFileItem {
+	border: 0px solid black;
+	background: rgba(0,0,0,0);
+	box-shadow: none;
+	
+}
+
+.tabFileItem.active  {
+	box-shadow: 0px -2px 1px #eeeeee, inset 0px 1px 1px #ecebf0;
+	z-index: 99;
+	border-bottom: 1px solid #ffffff;
+	border-bottom: 1px solid orange;
+}
+
+.tabFolderItem.single .tabFileItem.active {
+	border: 0px solid black;
+	background: rgba(0,0,0,0);
+	box-shadow: none;
+	border-bottom: 1px solid orange;
+}
+
+
+
+
+
+
+
+/* ###### Document Preview ####### */
+.documentPreviewDiv {
+	border: 0px solid blue;
+	margin: 0px;
+	
+}
+
+.documentPreviewCanvas {
+
+}
+
+
+
+
+
+
+
+/* ############### Function List ############### */
+
+.functionList {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	color: black;
+	outline: 0;
+	padding-right: 21px; /* Just in case there is a scrollbar, so that the scrollbar doesnt hide the text */
+}
+
+.wrap {
+	overflow: auto!important;
+	overflow-y: scroll!important; /* So that you never need the x-scroll */
+	white-space: nowrap;
+}
+
+
+
+
+/* ############### Search box ############### */
+
+
+
+
+
+/* ############### File List ############### */
+div.fileList {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	color: black;
+	background-color: blue;
+	border: 2px solid red;
+}
+
+
+
+
+.blink {
+    -webkit-animation-name: blinker; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 1s; /* Chrome, Safari, Opera */
+    -webkit-animation-timing-function: steps;
+    -webkit-animation-iteration-count: infinite;
+	
+}
+
+
+@-webkit-keyframes blinker {
+
+    from {
+
+		color: yellow;
+	}
+    to {
+
+		color: red;
+
+	}
+}
+
+
+
+
+/*
+	We CAN NOT have margin, padding or border on the .centerDiv or .fileCanvas !!!
+	It kinda works with box-sizing: border-box; But then the text get screwed.
+	
+	It's however OK to have it on the surrounding boxes.
+*/
+.centerDiv, .fileCanvas {
+	margin: 0px!important; 
+	padding: 0px!important; 
+	border: 0px solid black!important; 
+}
+
+
+
+/*
+	Having overflow on any element will totally screw out the layout!
+*/
+* {
+	overflow: hidden;
+}
+
+
+/* Add this class to elements that should not be selectable (text) */
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+
+/*
+* {
+	 So that we only have to do this once 
+	padding: 0px!important;
+	margin: 0px!important;
+	border: 0px solid #ff8059!important;
+	border-spacing: 0px!important;
+	overflow: auto!important;
+}
+
+*/

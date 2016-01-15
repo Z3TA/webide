@@ -1,0 +1,27 @@
+{
+	"name": "JZedit",
+	"main": "index.htm",
+	"window": {
+		"title": "JZedit",
+		"show": false,
+		"icon": "logo/bean3.png", 
+		"toolbar": true,
+		"frame": true,
+		"transparent": false,
+		"always-on-top": false
+	},
+	"private": true,
+	"license" : "SEE LICENSE IN LICENSE.txt"
+	"description": "A text/code editor for JavaScript made in JavaScript",
+	"version": "1.0.0",
+	"author" : "Johan Zetterberg <zeta@zetafiles.org>", 
+	"dependencies": {
+		"nodehun" : "^2.0.8"
+	},
+	"repository": {
+		"type": "Mercurial",
+		"url": "http://hg.webtigerteam.com/js-editor/"
+	}
+}
+	
+}

@@ -1,0 +1,243 @@
+
+(function() {
+	
+	"use strict";
+
+	console.log("undo_redo.js loaded!");
+
+		
+	var history = {}, // Holds the state of all files
+		versionIndex = {}; // Keeps track of current index in the state array
+	
+	
+	editor.on("start", undor_redo_init);
+	
+	function undor_redo_init() {
+		
+		global.keyBindings.push({charCode: 89, fun: redo, combo: CTRL});
+		
+		global.keyBindings.push({charCode: 90, fun: undo, combo: CTRL});
+		
+		
+		// When to save state !??
+		global.keyBindings.push({charCode: 46, fun: saveState}); // Delete
+		global.keyBindings.push({charCode: 8, fun: saveState}); // Backspace
+
+		editor.on("paste", saveState); // Before pasting text
+		
+		editor.on("fileLoad", saveState); // When loading a file
+
+	
+		/* Save state every seconds!
+		setInterval(function() {
+			if(global.currentFile) {
+				saveState(global.currentFile);
+			}
+		}, 1000);
+		*/
+	}
+	
+	editor.on("edit", function(file, change, text, index, row, col) {
+		
+		if(change != "undo-redo") {
+			
+			// Make the current state the last state (delete future states) when something is changed
+			if(versionIndex.hasOwnProperty(file.index)) {
+					
+				history[file.index].length = versionIndex[file.index]+1;
+			
+			}
+		}
+		
+	});
+
+	
+	
+
+	
+	
+	function undo(file) {
+		
+		if(file.gotFocus) {
+			
+			console.log("UNDO");
+			
+			if(versionIndex.hasOwnProperty(file.index)) {
+				
+				// If we are at last/current/latest state, save before going back.
+				if(versionIndex[file.index] == history[file.index].length-1) {
+					if(saveState(file)) {
+						//versionIndex[file.index]--;
+					};
+					
+				}
+				
+				if(versionIndex[file.index] > 0) {
+					versionIndex[file.index]--;
+				}
+				else {
+					console.log("Did not go back because we are already at the very first");
+				}
+				
+				loadState(file, versionIndex[file.index]);
+				
+
+
+				
+			}
+			else {
+				console.warn("No saved state!");
+			}
+			
+			return false; // Prevent default
+		}
+		
+	}
+	
+	
+	function redo(file) {
+		
+		if(file.gotFocus) {
+			
+			console.log("REDO");
+			
+			if(versionIndex.hasOwnProperty(file.index)) {
+				
+				if(versionIndex[file.index] < history[file.index].length-1) {
+					versionIndex[file.index]++;
+					
+					loadState(file, versionIndex[file.index]);
+				}
+				else {
+					console.log("We are already at the latest saved sate! version=" + versionIndex[file.index] + " history.lenght-1=" + (history[file.index].length -1) + "");
+				}
+				
+			}
+			else {
+				console.warn("No saved state!");
+			}
+			
+			return false; // Prevent default
+		}
+			
+			
+	}
+	
+	
+	function timeDiff(d1, d2) {
+		var time = (d1.getTime() - d2.getTime()) / 1000;
+		var hours = Math.floor(time / 3600);
+		var minutes = Math.floor((time - hours * 3600) / 60);
+		var seconds = time - minutes * 60 - hours * 3600;
+		
+
+		return fillZero(hours) + ":" + fillZero(minutes) + ":" + fillZero(seconds);
+		
+		function fillZero(n) {
+			n = parseInt(n);
+			
+			if(n<10) {
+				return "0" + n;
+			}
+			else {
+				return n;
+			}
+		}
+		
+	}
+	
+	
+	function loadState(file, stateIndex) {
+		
+		var state = history[file.index][stateIndex],
+			timeAgo = timeDiff(new Date(), state.date);
+		
+		if(file.text == state.text) {
+			console.warn("Current state is not different then the state you try to load! state-index=" + stateIndex + "");
+			return;
+		}
+		
+		console.log("Loading file state from " + timeAgo + " ago ...");
+		
+		// Scroll to first diff
+		var oldGrid = file.text.split("\n");
+		var newGrid = state.text.split("\n");
+		
+		for(var i=0; i<oldGrid.length, i<newGrid.length; i++) {
+			if(oldGrid[i] != newGrid[i]) {
+				console.log("First diff on line=" + i);
+				// Do not scroll if it's visible
+				if(i < file.startRow || i > (file.startRow + global.view.visibleRows)) {
+					file.scrollTo(0, i-global.view.visibleRows/2);
+				}
+				break;
+			}
+		}
+		
+		file.text = state.text;
+		file.selected = state.selected.splice(); // copy
+		file.grid = file.createGrid();
+
+		file.mutateCaret(file.caret, state.caret);
+		
+		file.load(); // Call event listeners
+		
+
+		
+		// Call file edit listeners
+		file.change("undo-redo", state.text, 0, 0, 0) // change, text, index, row, col
+
+		global.render = true;
+		
+	}
+	
+	
+	
+	function saveState(file) {
+		
+		
+		if(file.gotFocus) {
+			var state;
+			
+			console.log("saveState:\n" + file.text);
+
+			
+			if(!history.hasOwnProperty(file.index)) {
+				 history[file.index] = [];
+				 versionIndex[file.index] = 0;
+				state = history[file.index];
+			}
+			else {
+				state = history[file.index];
+				// Do not save if current state is the same as last state
+				var lastState = state[state.length-1];
+				
+				if(file.text == lastState.text) {
+					console.log("current state is the same as last state");
+					return false;
+				}
+			}
+			
+			// Only save if versionIndex is at current state!
+			if(versionIndex[file.index] != (state.length-1) && state.length > 0) {
+				console.log("Current state version=" + versionIndex[file.index] + " is not the last version=" + (state.length-1) + ".");
+				return false;
+			}
+
+			versionIndex[file.index] = state.push({
+				date: new Date(),
+				text: file.text, // copy text
+				caret: file.mutateCaret({}, file.caret), // copy caret
+				selected: file.selected.slice() // copy selected
+			}) - 1; // Array.push returns the new length, hence the minus 1 to get the new index
+			
+			
+			console.log("State for " + file.name + " saved!");
+			
+			return true;
+		}
+		
+	}
+	
+	
+})();

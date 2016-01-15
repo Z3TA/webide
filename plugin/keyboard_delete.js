@@ -1,0 +1,34 @@
+
+(function() {
+	
+	global.keyBindings.push({
+		charCode: 46, 
+		fun: keydel
+	});
+	
+	
+	function keydel(file, combo, character, charCode, keyPush) {
+		
+		if(file.gotFocus) {
+			
+			if(file.selected.length > 0) {
+				
+				// Delete all selected
+				
+				file.deleteSelection();
+				
+			}
+			else {
+				file.deleteCharacter(file.caret);
+			}
+				
+
+			global.render = true;
+			
+			return false; // Prevent default
+				
+		}
+		
+	}
+
+})();
