@@ -1,17 +1,42 @@
 
+Install instructions for developers
+===================================
+
+Dependencies:
+
+nw.js (http://nwjs.io)
+nodejs (https://nodejs.org/)
+npm (comes with nodejs)
+nodehun (npm install nodehun)
+
+
+Windows instructions
+--------------------
 For convinience (access to local files) this software use "nw.js" witch is basically a "browser" with Node.js
 
 1. Get a copy of nw.js from http://nwjs.io if you don't have it already.
 
-2. (If you are not on windows) Rebuild nodehun:
-npm install nodehun (npm is a packet manager for nodejs)
+2. (for convinience) Add the path to nw.js to the enivorment variables (PATH)
 
-3. (for convinience) Add the path to nw.js to the enivorment variables (PATH)
-
-4. Start the program via nw.js:
+3. Start the program via nw.js:
 Open nw and drag the folder to it. 
 Or start nw with the folder path as first argument. 
 
-5. Create a shortcut/launcher that does nr 4.
+4. Create a shortcut/launcher that does nr 4.
+
+
+Linux instructions (Ubuntu)
+---------------------------
+
+1. Download nw.js from nwjs.io and extract the files.
+
+2. Install npm: sudo apt-get install npm
+
+3. Install nodehun: npm install nodehun
+
+
+Start the program by typing:
+
+./path-to-nwjs/nw path-to-js-editor/
 
 
