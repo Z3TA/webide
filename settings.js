@@ -28,8 +28,8 @@ global.settings = { // sugg: separate view options
 	},
 	style: {
 		fontSize: 15,
-		font: "Consolas",
-		highlightParenthesisFont: "bold 15px Consolas",
+		font: "Source Code Pro",
+		highlightParenthesisFont: "15px Source Code Pro",
 		highlightParenthesisFontColor: "rgb(0,180,0)",
 		textColor: "rgb(0,0,0)",
 		bgColor: "rgb(256,256,256)",

@@ -5,6 +5,8 @@
 	
 	if(global.settings.enableSpellchecker===false) return;
 	
+	if(!Nodehun) return; // Notehun is required for this plugin to work!
+	
 	if(global.settings.enableSpellchecker===undefined) {
 		// Add ourself to settings
 		global.settings.enableSpellchecker = true;
