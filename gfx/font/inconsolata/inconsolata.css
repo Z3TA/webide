@@ -1,0 +1,10 @@
+@font-face{
+	font-family: 'Inconsolata';
+	src: url('Inconsolata-Regular.ttf') format('truetype');
+}
+
+@font-face{
+	font-family: 'Inconsolata';
+	font-weight: bold;
+	src: url('Inconsolata-Bold.ttf') format('truetype');
+}

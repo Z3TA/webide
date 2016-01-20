@@ -1,0 +1,12 @@
+
+
+@font-face{
+	font-family: 'DejaVuSansMono';
+	src: url('ttf/DejaVuSansMono.ttf') format('truetype');
+}
+
+@font-face{
+	font-family: 'DejaVuSansMono';
+	font-weight: bold;
+	src: url('ttf/DejaVuSansMono-Bold.ttf') format('truetype');
+}
