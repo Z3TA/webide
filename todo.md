@@ -122,7 +122,7 @@ Increase search input box when there is a long string
 
 The tabs look funky, changes places when you switch tab, and are on multiple lines, when the window is too small.
 
-
+Use a session file(s) instead of storing stuff in localstorage. Ex. JZedit/timemashine/filename.txt/date
 
 
 
