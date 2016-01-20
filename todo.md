@@ -132,3 +132,11 @@ Black screen when opening file
 
 Ctrl+X not working
 
+
+Feature
+-------
+
+Drag and drop files into the editor.
+
+
+

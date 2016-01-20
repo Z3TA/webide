@@ -4,7 +4,7 @@
 	"window": {
 		"title": "JZedit",
 		"show": false,
-		"icon": "logo/bean3.png", 
+		"icon": "gfx/bean3.png", 
 		"toolbar": true,
 		"frame": true,
 		"transparent": false,
