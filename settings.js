@@ -2,7 +2,7 @@
 	
 	I put these in a separate file to make them easier to find.
 	
-	It might need more orginisation. The rest is in editor.js
+	It might need more organization. The rest is in editor.js
 
 */
 
@@ -13,7 +13,7 @@ global.settings = { // sugg: separate view options
 	gridHeight: 22,
 	gridWidth: 8, // 7.8
 	leftMargin: 50,
-	indentAfterTags: ["div", "ul", "ol", "head", "script", "table", "tr", "form", "select"], // Indendent after these tags
+	indentAfterTags: ["div", "ul", "ol", "head", "script", "table", "tr", "form", "select"], // Intendent after these tags
 	rightMargin: 50,
 	topMargin: 10,
 	bottomMargin: 5,
@@ -37,6 +37,6 @@ global.settings = { // sugg: separate view options
 		quoteColor: "rgb(51, 128, 128)",
 		selectedTextBg: "rgb(193, 214, 253)",
 		currentLineColor: "rgb(255, 255, 230)",
-		highlightTextBg: "rgb(155, 255, 155)"          // For text highlightning
+		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting
 	}
 };

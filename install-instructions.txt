@@ -1,42 +1,27 @@
 
-Install instructions for developers
-===================================
-
 Dependencies:
+nw.js - The chromium browser with nodejs module support.
+nodehun - A nodejs module used for spell checking
 
-nw.js (http://nwjs.io)
-nodejs (https://nodejs.org/)
-npm (comes with nodejs)
-nodehun (npm install nodehun)
+Download nw.js from the web: http://nwjs.io/
 
+You can find the binaries for nodehun (zipped) in the install folder!
 
-Windows instructions
---------------------
-For convinience (access to local files) this software use "nw.js" witch is basically a "browser" with Node.js
+Start the editor using nw and the path-to-editor as first argument.
 
-1. Get a copy of nw.js from http://nwjs.io if you don't have it already.
-
-2. (for convinience) Add the path to nw.js to the enivorment variables (PATH)
-
-3. Start the program via nw.js:
-Open nw and drag the folder to it. 
-Or start nw with the folder path as first argument. 
-
-4. Create a shortcut/launcher that does nr 4.
+Ex: (linux): ./path-to-nwjs/nw path-to-js-editor/
 
 
-Linux instructions (Ubuntu)
----------------------------
+Compiling nodehun (spell checker)
+-------------------------------------
+You will need:
+nodejs - JavaScript runtime using V8 JavaScript engine
+npm - The package manager for nodejs (included in nodejs package)
 
-1. Download nw.js from nwjs.io and extract the files.
+https://nodejs.org/
 
-2. Install npm: sudo apt-get install npm
+npm install nodehun --target=1.2.0
 
-3. Install nodehun: npm install nodehun
-
-
-Start the program by typing:
-
-./path-to-nwjs/nw path-to-js-editor/
-
+If you are on Windows, you might also need to add:
+--msvs_version=2015
 

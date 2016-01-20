@@ -233,7 +233,7 @@
 			/*
 			
 				problem: 
-					user makes a spelling misstake, then corrects it. And the correction is wrong.
+			user makes a spelling mistake, then corrects it. And the correction is wrong.
 			
 			
 			*/
