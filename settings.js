@@ -27,9 +27,9 @@ global.settings = { // sugg: separate view options
 		color: "rgb(0,0,0)"
 	},
 	style: {
-		fontSize: 15,
-		font: "Source Code Pro",
-		highlightParenthesisFont: "15px Source Code Pro",
+		fontSize: 13,
+		font: "DejaVuSansMono", // You'll want to use Consolas 15px on Windows! DejaVuSansMono 13px loops best on Linux (Ubuntu)
+		highlightParenthesisFont: "13px DejaVuSansMono",
 		highlightParenthesisFontColor: "rgb(0,180,0)",
 		textColor: "rgb(0,0,0)",
 		bgColor: "rgb(256,256,256)",
