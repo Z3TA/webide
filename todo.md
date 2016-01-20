@@ -4,11 +4,11 @@ Prioritize: bug fixing, then some polishing and maybe some optimization
 
 BUGS
 ====
-Font not found in Linux!
 
 Ctrl + Z, missed one step (deletion)
 
 File marked as not saved when reloading.
+Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
 
 Colors etc gets messed up after this line:
 var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
