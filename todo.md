@@ -6,14 +6,21 @@ Don't implement new stuff until we have a stable release!
 
 Currently working on: 
 
+
 BUGS
 ====
-Double inserts ' when editing plain text. (annoying)
 
-Ctrl + Z, missed one step (deletion)
 
 File marked as not saved when reloading.
 Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
+
+
+Ctrl + Z, missed one step (deletion)
+
+
+Doesn't remember last size and position when started
+
+Doesn't load fonts right away
 
 Colors etc gets messed up after this line:
 var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";

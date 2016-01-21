@@ -16,7 +16,8 @@
 
 	function onEdit(file, type, character, index, row, col) {
 
-
+		// Only auto-insert quotes when we are coding, not when writing text!
+		if(!file.parse) return;
 		
 		if(type=="insert") {
 			

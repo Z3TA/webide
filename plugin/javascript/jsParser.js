@@ -57,7 +57,9 @@
 	
 	function shouldParse(file) {
 		
-		console.log("file.fileExtension=" + file.fileExtension);
+		console.log("file.fileExtension=" + file.fileExtension + " file.parse=" + file.parse);
+		
+		if(file.parse == false) return;
 		
 		// file.fileExtension == "", Assume all new files are JavaScript files :P
 		
