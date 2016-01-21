@@ -10,7 +10,7 @@ Currently working on:
 BUGS
 ====
 
-Sometimes it keeps selecting stuff ... ?? when?
+Sometimes it keeps selecting stuff ... When dragging the mouse outside the canvas while selecting.
 
 
 File marked as not saved when reloading.
@@ -95,13 +95,26 @@ Coloring gets weird when adding more lines above
 
 Polishing
 =========
-Do not render until spellcheck is finished.
 Context menu (right click) doesn't disappear when saving As
 Auto complete file names when editing href or src 
 Auto complete markdown lines ---- and ==== to fit (same length) as text above.
 Add words like href, src, etc to the spell-checker ignore.
 
+Don't insert double ' inside comments
 
+Indent inside if's
+if(word.length > 0 && 
+				htmlTags.indexOf(word) == -1 && 
+				jsKeywords.indexOf(word) == -1 && 
+				!isNumeric(word) &&
+				fileExtensions.indexOf(word) == -1) {
+
+
+
+Spell-checking is laggy
+
+
+				
 Add words to the spellchecker, using context menu
 
 Files dont have tabs ...

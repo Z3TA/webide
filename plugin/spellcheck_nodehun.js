@@ -216,13 +216,12 @@
 	function runSpellCheck(file, change, text, index, row, col) {
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
-		var htmlTags = ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
-		var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
 		
+		 
 		var grid = file.grid;
 		
 
-		// possible change: text (insertText), insert (putCharacter), deletedSelection, linebreak, delete, undo-redo
+		// possible change: text (insertText), insert (putCharacter), deletedSelection, line break, delete, undo-redo
 		
 		console.log("change=" + change);
 		
@@ -240,7 +239,7 @@
 			
 			
 			if(change=="insert") {
-				// Only spellcheck if a wordDelimiter was inserted/deleted. 
+				// Only spell check if a wordDelimiter was inserted/deleted. 
 				console.log("HOPPLA: " + text + " in " + wordDelimiters + " ? " + (wordDelimiters.indexOf(text) != -1));
 				if(wordDelimiters.indexOf(text) == -1) { // Not a wordDelimiter
 					
@@ -255,9 +254,8 @@
 				}
 			}
 			
-			
-			// Do not run spellcheck if a line break was inserted
-			if(change=="linebreak") return;
+			// Do not run spellcheck if a line break was inserted ... Why?
+			//if(change=="linebreak") return;
 			if(change=="deletedSelection") return;
 			if(change=="undo-redo") return;
 			
@@ -324,8 +322,7 @@
 				
 				var ignoreTogether = "'"; // Letters to ignore if they are uppercase
 				
-				if(word.length > 0 && htmlTags.indexOf(word) == -1 && jsKeywords.indexOf(word) == -1 && !isNumeric(word) ) {
-					
+				if(word.length > 0) {
 					
 					
 					// Break up camelCasing into two words
@@ -378,10 +375,9 @@
 
 		console.log("wordsInQueue=" + wordsInQueue);
 		if(wordsInQueue==0) {
-			//editor.render();
 			global.render = true;
 		}
-			
+		
 		function colorGrid(row, col, length) {
 			
 			for(var c=col-1; c>col-length-1; c--) {
@@ -409,25 +405,32 @@
 			might have changed when the answer is returned.
 		
 		*/
+		var htmlTags = ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
+var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
+var fileExtensions = ["js", "htm", "css", "txt", "json"];
+var programmersAbbr = ["str", "num"];
 		
 		var checkedDictionaries = 0;
 		var voteCorrect = 0;
 		var suggestion = "";
 		
-		//console.time("spellcheck " + word);
+		//console.time("spell-check " + word);
 		
-		console.log("spellchecking:" + word);
-		
+		console.log("spell-checking:" + word);
+		 
 		wordsInQueue++;
 		
-		if(cache.hasOwnProperty(word)) {
+		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
+			callback(file, true, word, row, col); // It's spelled correct
+			}
+		else if(cache.hasOwnProperty(word)) {
 			callback(file, cache[word], word, row, col);
 		}
 		else {
 			
 			/* 
 				Run the word through all dictionaries ...
-				The word is considered corret if either of them think it's correct.
+				The word is considered correct if either of them think it's correct.
 			*/
 			
 			for(var i=0; i<numDictionaries; i++) {
@@ -438,7 +441,7 @@
 
 		}
 		
-		//console.timeEnd("spellcheck " + word);
+		//console.timeEnd("spell-check " + word);
 		
 		function spellAnswer(err, correct, sugg, origWord){
 			
@@ -454,7 +457,7 @@
 			}
 			
 			if(checkedDictionaries == numDictionaries) {
-				// All directores has been checked!
+				// All directories has been checked!
 				
 				if(voteCorrect > 0) {
 					// At least one dictionary think it's correct
