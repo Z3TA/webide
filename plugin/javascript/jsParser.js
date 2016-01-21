@@ -674,6 +674,8 @@
 		
 		function checkCharacter(charIndex) {
 			
+			var backSlash = String.fromCharCode(92); // this: \
+			
 			// Save a history of the last characters
 			pastChar[6] = pastChar[5];
 			pastChar[5] = pastChar[4];
@@ -755,12 +757,14 @@
 				return;
 			}
 			// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
-			else if(char === '"' && lastChar != "\\" && !insdeLineComment && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) {
+			else if(char === '"' && !insdeLineComment && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) {
 				if(insdeDblQuote) {
-					insdeDblQuote = false;
-					quotes.push(new Quote(quoteStart, i));
-					word = text.substring(quoteStart, i+1);
-					return;
+					if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {				
+						insdeDblQuote = false;
+						quotes.push(new Quote(quoteStart, i));
+						word = text.substring(quoteStart, i+1);
+						return;
+					}
 				}
 				else {
 					insdeDblQuote = true;

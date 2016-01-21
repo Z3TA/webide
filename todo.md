@@ -10,6 +10,8 @@ Currently working on:
 BUGS
 ====
 
+Sometimes it keeps selecting stuff ... ?? when?
+
 
 File marked as not saved when reloading.
 Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
@@ -21,9 +23,6 @@ Ctrl + Z, missed one step (deletion)
 Doesn't remember last size and position when started
 
 Doesn't load fonts right away
-
-Colors etc gets messed up after this line:
-var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 
 
 Weird indent after:
