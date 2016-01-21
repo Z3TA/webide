@@ -266,7 +266,7 @@
 			for(var x = 0; x < grid[row].length; x++) {
 				grid[row][x].decoration.redWave = false;
 			}
-			global.render = true;
+			
 
 			if(change=="insert" || change=="delete") {
 				// Only spellcheck the current line
@@ -378,7 +378,8 @@
 
 		console.log("wordsInQueue=" + wordsInQueue);
 		if(wordsInQueue==0) {
-			editor.render();
+			//editor.render();
+			global.render = true;
 		}
 			
 		function colorGrid(row, col, length) {
@@ -392,7 +393,7 @@
 
 			}
 			
-			global.render = true;
+			//global.render = true;
 			
 		}
 			
