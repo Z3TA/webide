@@ -3,10 +3,14 @@
 	
 	"use strict";
 	
-	global.keyBindings.push({
-		charCode: 8, 
-		fun: backSpace
-	});
+	editor.on("start", keyboard_backspace);
+	
+	function keyboard_backspace() {
+		global.keyBindings.push({
+			charCode: 8, 
+			fun: backSpace
+		});
+	}
 	
 	function backSpace(file, combo, character, charCode, keyPush) {
 		

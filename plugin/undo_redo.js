@@ -3,21 +3,17 @@
 	
 	"use strict";
 
-	console.log("undo_redo.js loaded!");
-
-		
 	var history = {}, // Holds the state of all files
 		versionIndex = {}; // Keeps track of current index in the state array
 	
 	
-	editor.on("start", undor_redo_init);
+	editor.on("start", undor_redo_init, 0); // High prio! Run before keyboard_delete and backspace! Set order low
 	
 	function undor_redo_init() {
 		
 		global.keyBindings.push({charCode: 89, fun: redo, combo: CTRL});
 		
 		global.keyBindings.push({charCode: 90, fun: undo, combo: CTRL});
-		
 		
 		// When to save state !??
 		global.keyBindings.push({charCode: 46, fun: saveState}); // Delete
@@ -27,7 +23,7 @@
 		
 		editor.on("fileLoad", saveState); // When loading a file
 
-	
+		
 		/* Save state every seconds!
 		setInterval(function() {
 			if(global.currentFile) {
@@ -35,6 +31,9 @@
 			}
 		}, 1000);
 		*/
+		
+		console.log("undo_redo.js loaded!");
+
 	}
 	
 	editor.on("edit", function(file, change, text, index, row, col) {

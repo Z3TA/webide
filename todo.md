@@ -10,14 +10,18 @@ Currently working on:
 BUGS
 ====
 
-Sometimes it keeps selecting stuff ... When dragging the mouse outside the canvas while selecting.
+Opening another file shewed the div's so that preview dropped down and canvas halved.
 
-
+---
 File marked as not saved when reloading.
 Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
+Unsupported! combo: {"shift":false,"alt":false,"ctrl":true,"sum":2} character:
 
-
-Ctrl + Z, missed one step (deletion)
+File not saving because spell-check is running and eventually returning an error!
+Uncaught TypeError: Cannot read property 'decoration' of undefined spellcheck_nodehun.js:385 colorGrid spellcheck_nodehun.js:373 doSomething
+---
+Abort the spell-checker if something is deleted or if the whole grid changes to ^
+You get weird errors while the spell-checker is running, you can for example not save files.
 
 
 Doesn't remember last size and position when started
@@ -102,6 +106,9 @@ Add words like href, src, etc to the spell-checker ignore.
 
 Don't insert double ' inside comments
 
+
+Show big fat warning if = inside if( a = b) instead of ==, always a bug!
+
 Indent inside if's
 if(word.length > 0 && 
 				htmlTags.indexOf(word) == -1 && 
@@ -142,6 +149,8 @@ Increase search input box when there is a long string
 The tabs look funky, changes places when you switch tab, and are on multiple lines, when the window is too small.
 
 Use a session file(s) instead of storing stuff in localstorage. Ex. JZedit/timemashine/filename.txt/date
+
+auto-complete variable names!
 
 
 

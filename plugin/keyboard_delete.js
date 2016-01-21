@@ -1,11 +1,14 @@
 
 (function() {
+
+	editor.on("start", keyboard_delete);
 	
-	global.keyBindings.push({
-		charCode: 46, 
-		fun: keydel
-	});
-	
+	function keyboard_delete() {
+		global.keyBindings.push({
+			charCode: 46, 
+			fun: keydel
+		});
+	}
 	
 	function keydel(file, combo, character, charCode, keyPush) {
 		

@@ -19,7 +19,7 @@ const ALT = 4;
 
 global.render = false;   // Flag for plug-ins, the editor will re-render at first opportunity if it's true
 global.resize = false;   // Flag for plug-ins
-global.devMode = false;  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
+global.devMode = true;  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
 global.fileIndex = -1;   // Keep track on opened files (for undo/redo)
 global.keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events, more info in docs.
 global.files = {};       // List of all opened files with the path as key
@@ -685,7 +685,7 @@ function objInfo(o) {
 		var index = global.eventListeners[eventName].push(options);
 		
 		
-		// Sort the events so they fire in order
+		// Sort the events so they fire in order (lowest order nr will execute first)
 		global.eventListeners[eventName].sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
@@ -1524,6 +1524,12 @@ function objInfo(o) {
 		var captured = false;
 		
 		console.log("keyDown: " + charCode + " = " + character + "");
+		console.warn("keyDown: " + charCode + " = " + character + "");
+		
+		// Prevent unsupported combo error:
+		if(charCode == 17) return; // Ctrl
+		if(charCode == 18) return; // ALT
+		
 		
 		// Call events
 		for(var i=0; i<global.eventListeners.keyDown.length; i++) {
@@ -1574,6 +1580,7 @@ function objInfo(o) {
 
 		editor.interact("keyDown");
 
+		
 		if(combo.sum > 0 && !captured) {
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 			
@@ -1585,7 +1592,7 @@ function objInfo(o) {
 			else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 				
 			else {
-				console.warn("Unsupported! combo: " + JSON.stringify(combo) + " character:" + character);
+				console.error(Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode));
 				
 				preventDefault = true;
 			}

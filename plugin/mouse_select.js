@@ -502,6 +502,10 @@
 				global.render = true;
 			}
 		}
+		else {
+			// Mouse is outside the canvas
+			isSelecting = false;
+		}
 	}
 	
 	function findWord(index, text) {
