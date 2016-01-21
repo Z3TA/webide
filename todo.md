@@ -58,7 +58,7 @@ Dont auto insert '' when typing in a comment (just like when typing ' inside an 
 Sometimes contine selecting stuff even if mouse up.
 ex: when hitting delete.
 
-Easier to scroll right on a long line! bug? Using the preview win
+Easier to scroll right on a long line! bug? Using the preview window
 
 
 Save history when moving the cursor.
