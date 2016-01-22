@@ -5,8 +5,7 @@
 	
 	if(global.settings.enableSpellchecker===false) return;
 	
-	if(!Nodehun) return; // Notehun is required for this plugin to work!
-	
+
 	if(global.settings.enableSpellchecker===undefined) {
 		// Add ourself to settings
 		global.settings.enableSpellchecker = true;
@@ -19,21 +18,16 @@
 			
 			Do not spellcheck the word we are currently typing!
 			
-			
-		We might want to disable spellchecking for some files!?
-			
+			We might want to disable spellchecking for some files!?
 	
-	*/
-	
-	/*
+
 		Place hunspell dictionaries (and .aff) in ./languages/lang_prefix/*
 		
 		Can be downloaded from: http://cgit.freedesktop.org/libreoffice/dictionaries/tree/
 	*/
-		
+	
 	var useLanguages = ["en_US", "sv_SE"]; // Add more languages by including the language prefix
 	
-	var dict = [];
 	var cache = {}; // true for OK, false for misspelled
 	var misspelled = {}; // suggested word
 	
@@ -41,119 +35,99 @@
 	var isWaiting = false;
 	var wordsInQueue = 0;
 	var waitBeforeSpellcheckingMiddleOfWord = 1200;  // So that we do not spell-check a word that we are currently typing
-	var numDictionaries = 0;
-	var languagesLoaded = 0;
+	var numWorkers = 1; // How many workers to use (one for every cpu core!?)
+	var worker = [];
+	var workersReady = 0;
 	
 	editor.on("start", spellCheckerMain);
 	
 	function spellCheckerMain() {
 		
-		for(var i=0; i<useLanguages.length; i++) {
-			loadDictionary(useLanguages[i]);
-		}
-		
-		/*
-		var english = "./languages/en_US/en_US";
-		var swedish = "./languages/sv_SE/sv_SE";
-		
-		// Read the dictionary files (can be slow!)
-		var affbuf1 = fs.readFileSync(swedish + ".aff");
-		var affbuf2 = fs.readFileSync(english + ".aff");
-
-		var dictbuf1 = fs.readFileSync(swedish + ".dic");
-		var dictbuf2 = fs.readFileSync(english + ".dic");
-		
-		// Create dictionary
-		
-		dict.push(new Nodehun(affbuf1,dictbuf1));
-		dict.push(new Nodehun(affbuf2,dictbuf2));
-
-		numDictionaries = dict.length;
-		*/
 		
 		
-		
-		/* Add second language
-		dict.addDictionary(dictbuf2,function(err){
-			if(err) throw err;            
-		});
-		*/
-		
-
-		function allDictionariesLoaded() {
-			// All dictionaries has loaded: now add event listeners.
-			
-			numDictionaries = dict.length;
-			
-			editor.on("edit", runSpellCheck);
-			
-			editor.on("fileLoad", spellCheckFile);
-			
-			editor.on("mouseClick", showSpellSuggestion);
-			
-			console.log("All dictionaries loaded! numDictionaries=" + numDictionaries);
-				
-			// Spellcheck currently opened files
-			for(var file in global.files) {
-				runSpellCheck(global.files[file]);
-			}
-		
+		for(var i=0; i<numWorkers; i++) {
+			loadWorker(useLanguages);
 		}
 
+	}
 
-		function loadDictionary(lang) {
-			
-			// Async load the .aff and .dic files. Then create a dictionary
-			
-			var affBuffer;
-			var dictBuffer;
-			var gotAff = false;
-			var gotDict = false;
-			
-			editor.readFromDisk("./languages/" + lang + "/" + lang + ".aff", readAff, true);  // true = return buffer
-			editor.readFromDisk("./languages/" + lang + "/" + lang + ".dic", readDict, true);
-			
-			function readAff(path, buffer) {
-				affBuffer = buffer;
-				gotAff = true;
-				
-				if(gotAff && gotDict) gotAll();
-			}
-			
-			function readDict(path, buffer) {
-				dictBuffer = buffer;
-				gotDict = true;
-				
-				if(gotAff && gotDict) gotAll();
-			}
-			
-			function gotAll() {
-				/*
-					We have both the aff and dict content!
-					Create the dictionary:
-				*/
-				
-				dict.push(new Nodehun(affBuffer,dictBuffer));
-				
-				console.log("BEFORE languagesLoaded=" + languagesLoaded + " / " + useLanguages.length);
-				
-				languagesLoaded++; // WTF, why can't I put this inside the if ???
-				
-				if(languagesLoaded == useLanguages.length) {
-					console.log("IN languagesLoaded=" + languagesLoaded + " / " + useLanguages.length);
 
-					allDictionariesLoaded();
-				}
-				
-				console.log("AFTER languagesLoaded=" + languagesLoaded + " / " + useLanguages.length);
-				
-			}
-			
-		}
+	function allWorkersReady() {
 		
+		console.log("All spell-check workers ready!");
+		
+		editor.on("edit", runSpellCheck);
+		
+		editor.on("fileLoad", spellCheckFile);
+		
+		editor.on("mouseClick", showSpellSuggestion);
+		
+		console.log("All workers ready!");
+		
+		// Spellcheck currently opened files
+		for(var file in global.files) {
+			runSpellCheck(global.files[file]);
+		}
+	
+	}
+
+
+	function loadWorker(languages) {
+		
+		var id = worker.push(childProcess.fork("./plugin/spellcheck_worker.js", [languages.join(";")])) -1;
+		
+		console.log("spell-check worker " + id + "/" + worker.length + " loaded!");
+
+		worker[id].on('message', worker_message);
+		worker[id].on('error', worker_error);
+		worker[id].on('exit', worker_exit);
+		
+		//worker[id].send("foo;test;0;0"); // Send test
 		
 	}
 	
+
+	function worker_message(data) {
+		
+		console.log("spell-check worker data:" + data);
+		
+		if(data == "ready!") {
+			workersReady++;
+		
+			if(workersReady == numWorkers) allWorkersReady();
+		}
+		else {
+			var arr = data.split(";");
+			var filePath = arr[0];
+			var word = arr[1];
+			var row = arr[2];
+			var col = arr[3];
+			var spell = arr[4]; // Added by the worker, * for correct, or a (list?) of suggestions
+			var correct = (spell == "*");
+			
+			if(correct) {
+				cache[word] = true;
+			}
+			else {
+				// All dictionaries think it's spelled wrong
+				cache[word] = false;
+				misspelled[word] = spell; 
+			}
+			
+			doSomething(filePath, correct, word, row, col);
+			
+			
+		}
+	}
+
+	function worker_error(code) {
+		console.log("spell-check worker error:" + code);
+	}
+
+	function worker_exit(code) {
+		console.log("spell-check worker exit:" + code);
+	}
+		
 	function spellCheckFile(file) {
 		runSpellCheck(file);
 	}
@@ -216,27 +190,19 @@
 	function runSpellCheck(file, change, text, index, row, col) {
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
-		
-		 
 		var grid = file.grid;
-		
 
 		// possible change: text (insertText), insert (putCharacter), deletedSelection, line break, delete, undo-redo
 		
 		console.log("change=" + change);
 		
-		
-		
 		if(change) { // Also calls on file load
 			
 			/*
-			
 				problem: 
-			user makes a spelling mistake, then corrects it. And the correction is wrong.
-			
+					user makes a spelling mistake, then corrects it. And the correction is wrong.
 			
 			*/
-			
 			
 			if(change=="insert") {
 				// Only spell check if a wordDelimiter was inserted/deleted. 
@@ -265,7 +231,6 @@
 				grid[row][x].decoration.redWave = false;
 			}
 			
-
 			if(change=="insert" || change=="delete") {
 				// Only spellcheck the current line
 				checkRow(grid[row]);
@@ -273,14 +238,10 @@
 
 			}
 			
-			
-			
 		}
 		
 		clearTimeout(waitTimer);
 		isWaiting = false;
-		
-
 		
 		// Run on visible rows
 		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+global.view.visibleRows); row++) {
@@ -323,8 +284,6 @@
 				var ignoreTogether = "'"; // Letters to ignore if they are uppercase
 				
 				if(word.length > 0) {
-					
-					
 					// Break up camelCasing into two words
 					for(var i=1; i<word.length; i++) { // Ignore first letter
 						if(word[i].toUpperCase() == word[i] && ignoreTogether.indexOf(word[i]) == -1) {
@@ -332,7 +291,7 @@
 							lastUpper = i;
 							if(part.length > 1) {
 								console.log("runTogether:" + part);
-								spellCheck(file, part, doSomething, row, col - word.length + i);
+								spellCheck(file, part, row, col - word.length + i);
 							}
 						}
 					}
@@ -341,10 +300,7 @@
 						word = word.substring(lastUpper, word.length);
 					}
 					
-					if(word.length > 1) spellCheck(file, word, doSomething, row, col);
-					
-					
-					
+					if(word.length > 1) spellCheck(file, word, row, col);
 				
 				}
 				else {
@@ -363,7 +319,9 @@
 	  return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 	
-	function doSomething(file, correct, origWord, row, col) {
+	function doSomething(filePath, correct, origWord, row, col) {
+		
+		var file = global.files[filePath];
 		var grid = file.grid;
 		
 		wordsInQueue--;
@@ -395,7 +353,7 @@
 			
 	}
 	
-	function spellCheck(file, word, callback, row, col) {
+	function spellCheck(file, word, row, col) {
 		/*
 			Check if a word is spelled correctly or not. This is a very slow async function.
 			
@@ -405,10 +363,11 @@
 			might have changed when the answer is returned.
 		
 		*/
+
 		var htmlTags = ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
-var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
-var fileExtensions = ["js", "htm", "css", "txt", "json"];
-var programmersAbbr = ["str", "num"];
+		var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
+		var fileExtensions = ["js", "htm", "css", "txt", "json"];
+		var programmersAbbr = ["str", "num"];
 		
 		var checkedDictionaries = 0;
 		var voteCorrect = 0;
@@ -421,59 +380,29 @@ var programmersAbbr = ["str", "num"];
 		wordsInQueue++;
 		
 		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
-			callback(file, true, word, row, col); // It's spelled correct
+			doSomething(file.path, true, word, row, col); // It's spelled correct
 			}
 		else if(cache.hasOwnProperty(word)) {
-			callback(file, cache[word], word, row, col);
+			doSomething(file.path, cache[word], word, row, col);
 		}
 		else {
 			
 			/* 
-				Run the word through all dictionaries ...
-				The word is considered correct if either of them think it's correct.
+				Tell any of the workers to spell-check the word
 			*/
 			
-			for(var i=0; i<numDictionaries; i++) {
-				dict[i].spellSuggest(word, spellAnswer);
-				//dict.isCorrect(word, spellAnswer);
-			}
+			var workerId = wordsInQueue % numWorkers;
 			
+			var data = file.path + ";" + word + ";" + row + ";" + col;
+			
+			console.log("Sending data to spell-check worker " + workerId + "\ndata=" + data);
+			
+			worker[workerId].send(data);
 
 		}
 		
 		//console.timeEnd("spell-check " + word);
-		
-		function spellAnswer(err, correct, sugg, origWord){
-			
-			if(err) console.error(err);
-			
-			checkedDictionaries++;
-			
-			if(correct) {
-				voteCorrect++;
-			}
-			else if(sugg && !suggestion) { // sugg is either a string or null
-				suggestion = sugg;
-			}
-			
-			if(checkedDictionaries == numDictionaries) {
-				// All directories has been checked!
-				
-				if(voteCorrect > 0) {
-					// At least one dictionary think it's correct
-					cache[word] = true;
-					correct = true;
-				}
-				else {
-					// All dictionaries think it's spelled wrong
-					cache[word] = false;
-					misspelled[word] = suggestion; 
-				}
 
-				callback(file, correct, origWord, row, col);
-			}
-
-		}
 	}
 	
 

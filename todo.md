@@ -4,14 +4,37 @@ Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
 
-Currently working on: 
+Currently working on: spellchecker
+
 
 
 BUGS
 ====
 
-Opening another file shewed the div's so that preview dropped down and canvas halved.
+Opening files with inconsistent line breaks.
 
+Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
+
+Can't insert ALT+ keyboard characters. 
+
+Do not include {} or : when double clicking a word!
+
+Auto-complete inside a function-name seems to auto-complete itself!
+function foo..
+
+---
+Colors are off after pasting:
+console.error = function(err) {
+
+alert(err);
+console.log(err.stack);
+throw err;
+
+// It's really not safe to continue from here!
+
+
+}
+---
 ---
 File marked as not saved when reloading.
 Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
@@ -108,6 +131,7 @@ Don't insert double ' inside comments
 
 
 Show big fat warning if = inside if( a = b) instead of ==, always a bug!
+Also warn when  you use == outside an if!?
 
 Indent inside if's
 if(word.length > 0 && 

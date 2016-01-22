@@ -13,7 +13,7 @@ global.settings = { // sugg: separate view options
 	gridHeight: 22,
 	gridWidth: 8, // 7.8
 	leftMargin: 50,
-	indentAfterTags: ["div", "ul", "ol", "head", "script", "table", "tr", "form", "select"], // Intendent after these tags
+	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these tags
 	rightMargin: 50,
 	topMargin: 10,
 	bottomMargin: 5,
@@ -28,7 +28,7 @@ global.settings = { // sugg: separate view options
 	},
 	style: {
 		fontSize: 13,
-		font: "DejaVuSansMono", // You'll want to use Consolas 15px on Windows! DejaVuSansMono 13px loops best on Linux (Ubuntu)
+		font: "DejaVuSansMono, monospace", // You'll want to use Consolas 15px on Windows! DejaVuSansMono 13px loops best on Linux (Ubuntu)
 		highlightParenthesisFont: "13px DejaVuSansMono",
 		highlightParenthesisFontColor: "rgb(0,180,0)",
 		textColor: "rgb(0,0,0)",

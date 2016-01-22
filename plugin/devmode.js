@@ -1,16 +1,33 @@
 (function() {
 	"use strict";
 	
+	var consoleLogOriginal = console.log;
+	
 	editor.on("start", init);
 	
 	function init() {
 		
 		// For convenience we can press F5 to reload while developing on the app itself
 		global.keyBindings.push({charCode: 116, fun: reloadEditor});
-	
-	
-	if(global.devMode == false) {
 		
+		// Switch devMode on or off by hitting Ctrl + Alt + D
+		global.keyBindings.push({charCode: 68, fun: toggleDevMode, combo: CTRL + ALT});
+		
+		
+		
+	if(global.devMode == false) {
+			disableDevMode();
+			
+	}
+	else if(global.devMode == true) {
+	
+			enableDevMode();
+	
+		
+	}
+	}
+	
+	function disableDevMode() {
 		// Disable console.log
 		console.log = function() {
 			// Eaten by the void
@@ -33,25 +50,33 @@
 			//process.exit();
 			
 		}
-
-		
 	}
-	else if(global.devMode == true) {
 	
-	
+	function enableDevMode() {
+		console.log = consoleLogOriginal;
+		
 		console.error = function(err) {
-
+			
 			alert(err);
 			console.log(err.stack);
 			throw err;
-
+			
 			// It's really not safe to continue from here!
-
+			
 			
 		}
-	
 		
 	}
+	
+	function toggleDevMode() {
+		global.devMode = global.devMode ? false : true;
+		console.warn("devMode = " + global.devMode);
+		if(global.devMode) {
+			enableDevMode()
+		}
+		else {
+			disableDevMode()
+		}
 	}
 	
 		function reloadEditor() {

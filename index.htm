@@ -7,11 +7,26 @@
 	<link rel="stylesheet" type="text/css" href="menu.css">
 	
 	<!-- Font(s): Change font in settings.js, experiment with font size, and grid width/height for the best look -->
+	<!--
 	<link rel="stylesheet" type="text/css" href="gfx/font/source-code-pro/source-code-pro.css">
 	<link rel="stylesheet" type="text/css" href="gfx/font/inconsolata/inconsolata.css">
 	<link rel="stylesheet" type="text/css" href="gfx/font/DroidFonts/DroidSansMono.css">
 	<link rel="stylesheet" type="text/css" href="gfx/font/DejaVuSansMono/DejaVuSansMono.css">
+	-->
+	<!-- Inlinde the default font so that it loads faster -->
+	<style>
 	
+	@font-face{
+		font-family: 'DejaVuSansMono';
+		src: local('DejaVuSansMono'), url('gfx/font/DejaVuSansMono/ttf/DejaVuSansMono.ttf') format('truetype');
+	}
+	
+	@font-face{
+		font-family: 'DejaVuSansMono';
+		font-weight: bold;
+		src: local('DejaVuSansMono-Bold'),url('gfx/font/DejaVuSansMono/ttf/DejaVuSansMono-Bold.ttf') format('truetype');
+	}
+	</style>
 	
 	<script>
 		/* 
@@ -23,8 +38,8 @@
 		*/
 		var fs = require("fs"); 
 		var path = require('path');
-		var Nodehun = require('nodehun');
-	
+		const childProcess = require("child_process");
+		
 		var global = {}; // Put global objects in this
 		var MODULE = {}; // Put helper modules in this. Save them in modules/ folder.
 		
@@ -42,7 +57,7 @@
 	
 	<!-- Place plugins here: (note that the order *should* not matter, use editor.on("start, function, order) instead!! -->
 	<script type="text/javascript" src="plugin/winstate.js"></script>
-	<script type="text/javascript" src="plugin/spellcheck_nodehun.js"></script>
+	<script type="text/javascript" src="plugin/spellcheck.js"></script>
 	
 	<script type="text/javascript" src="plugin/undo_redo.js"></script> <!-- Needs to be high -->
 	<script type="text/javascript" src="plugin/render_highlight-line.js"></script>
