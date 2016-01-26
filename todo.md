@@ -4,12 +4,14 @@ Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
 
-Currently working on: spellchecker
+Currently working on: sub-pixel-rendering (it doesn't work on Linux!) See plugin/render_sub_pixel_precision.js and subpixel2.htm
 
 
 
 BUGS
 ====
+
+sub-pixel-rendering (it doesn't work on Linux!)
 
 Opening files with inconsistent line breaks.
 
