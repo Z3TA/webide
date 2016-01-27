@@ -192,5 +192,10 @@ Feature
 
 Drag and drop files into the editor.
 
+Check for .editorconfig and set default indent_size, etc: http://EditorConfig.org
+
+Replace in function
+
+
 
 

@@ -25,3 +25,14 @@ npm install nodehun --target=1.2.0
 If you are on Windows, you might also need to add:
 --msvs_version=2015
 
+
+
+Linux crisp font
+----------------
+
+In order to turn text smoothing on in Ubuntu, do the following:
+
+    * Go to System > Preferences > Appearance
+    * Go to the Fonts tab
+    * Under rendering, select Subpixel Smoothing (LCDs)
+
