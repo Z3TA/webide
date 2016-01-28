@@ -74,11 +74,16 @@
 				for(var col=gridRow.length-1; col>=0; col--) {
 
 					if(gridRow[col].index < startIndex) {
-						//if(hmmm) console.log("Break from col");
+						console.log("Break from col: char=" + gridRow[col].char + " index=" + gridRow[col].index + " startIndex=" + startIndex);
 						break;
 					}
 					else if(gridRow[col].index <= endIndex) {
+						console.log("Coloring: color=" + color + " char=" + gridRow[col].char + " index=" + gridRow[col].index + " endIndex=" + endIndex);
+
 						gridRow[col].color = color;
+					}
+					else {
+						console.log("Doing nothing! char=" + gridRow[col].char + " index=" + gridRow[col].index + " startIndex=" + startIndex);
 					}
 					
 				}

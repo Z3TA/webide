@@ -6,6 +6,7 @@ Don't implement new stuff until we have a stable release!
 
 Currently working on: Fixing bugs!
 
+Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
 
 BUGS
@@ -21,12 +22,12 @@ throw err;
 
 // It's really not safe to continue from here!
 
-
+// another comment
 }
 ---
 
+bug: Cant load a file with two lines and a tab on each line.
 
-Cant do anything when opening a file without content (only whitespace)
 
 
 Do not select } when double clicking!

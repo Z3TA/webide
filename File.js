@@ -402,7 +402,8 @@ File.prototype.checkGrid = function() {
 		if(grid[i].length > 0) {
 			// Startindex should be the same as the index of the first letter box
 			if(grid[i].startIndex != grid[i][0].index) {
-				console.error(new Error("startIndex (" + grid[i].startIndex + ") on row " + i + " doesn't match index (" + grid[i][0].index + ") of first box"));
+				file.debugGrid();
+				console.error(new Error("startIndex (" + grid[i].startIndex + ") on row " + i + " doesn't match index (" + grid[i][0].index + ") of first box=" + JSON.stringify(grid[i][0])));
 			}
 		}
 		else if(i>0){
@@ -1854,7 +1855,17 @@ File.prototype.createGrid = function() {
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 
+	var lastLinebreakCharacter = "";
+	var lineBreakCharacters = file.lineBreak.length
 	
+	if(lineBreakCharacters > 1) {
+		lastLinebreakCharacter = file.lineBreak.charAt(1);
+	}
+	else {
+		lastLinebreakCharacter = file.lineBreak.charAt(0);
+	}
+	
+	console.log("lastLinebreakCharacter=" + lastLinebreakCharacter.charCodeAt(0) + " (charcode)");
 	
 	grid[0] = []; // First column
 	grid[0].lineNumber = 1;
@@ -1865,7 +1876,7 @@ File.prototype.createGrid = function() {
 	console.log("global.view.visibleColumns=" + global.view.visibleColumns);
 	
 	for(var i=0; i<totalCharacters; i++) {
-		addCharacterToGrid();
+		addCharacterToGrid(i);
 	}
 	
 	
@@ -1880,15 +1891,15 @@ File.prototype.createGrid = function() {
 	// Optimization is the root of all evil!!!
 	
 	
-	function addCharacterToGrid() {
-		//console.log(i);
+	function addCharacterToGrid(textIndex) {
+		//console.log(textIndex);
 		
 		charBeforeThat = lastChar;
 		lastChar = char;
 		
-		char = text.charAt(i);
+		char = text.charAt(textIndex);
 		
-		//console.log("row=" + row + " col=" + col + " char=" + char + " index=" + i + "");
+		//console.log("row=" + row + " col=" + col + " char=" + char + " index=" + textIndex + "");
 		
 		/* Check if we're inside a word
 		if(char.indexOf(global.settings.wordDelimiters) === -1) {
@@ -1906,7 +1917,7 @@ File.prototype.createGrid = function() {
 		}
 		*/
 		
-		grid[row][col] = new Box(char, i);
+		grid[row][col] = new Box(char, textIndex);
 		
 		/*
 		Line Feed = \n
@@ -1920,21 +1931,25 @@ File.prototype.createGrid = function() {
 		
 		//console.log("row=" + row + " codeBlockDepth=" + codeBlockDepth);
 		
-		if(char == "\n") {
+		
+		
+		if(char == lastLinebreakCharacter) {
 			
-			grid[row].pop(); // Remove the line feed
+			// note:  Atari 8-bit and QNX pre-POSIX implementation not supported. All other systems use and combination of \n and \r
 			
-			if(lastChar == "\r") {
-				grid[row].pop(); // Remove the Carriage Return
-			}
+			grid[row].pop(); // Remove the character (the line-break character)
 			
+			if(lastChar == "\r" || lastChar == "\n") grid[row].pop(); // Remove the first line-break character too!
+			
+			
+						
 			lineNumber++;
 			row++;
 			
 			grid[row] = [];
 			
 			grid[row].lineNumber = lineNumber;
-			grid[row].startIndex = i+1;
+			grid[row].startIndex = textIndex+1;
 			grid[row].indentation = codeBlockDepth;
 			grid[row].indentationCharacters = "";
 			col = 0;
@@ -1953,7 +1968,15 @@ File.prototype.createGrid = function() {
 			grid[row].startIndex++;
 			//console.log("indentation++");
 		}
+		else if(char == "\n" || char == "\r") {
+			// Ignore additional line-breaks
+			grid[row].pop();
+			tabulation = true;
+		}
 		else {
+			
+			console.log("character=" + char + " (" + char.charCodeAt(0) + ")");
+			
 			tabulation = false;
 			col++;
 			
