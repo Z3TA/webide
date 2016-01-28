@@ -15,11 +15,11 @@
 		
 		
 		
-	if(global.devMode == false) {
+		if(global.settings.devMode == false) {
 			disableDevMode();
 			
 	}
-	else if(global.devMode == true) {
+		else if(global.settings.devMode == true) {
 	
 			enableDevMode();
 	
@@ -69,9 +69,9 @@
 	}
 	
 	function toggleDevMode() {
-		global.devMode = global.devMode ? false : true;
-		console.warn("devMode = " + global.devMode);
-		if(global.devMode) {
+		global.settings.devMode = global.settings.devMode ? false : true;
+		console.warn("devMode = " + global.settings.devMode);
+		if(global.settings.devMode) {
 			enableDevMode()
 		}
 		else {

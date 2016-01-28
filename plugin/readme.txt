@@ -4,7 +4,7 @@ Guide for writing plug-in
 
 All file names should be in small caps! (to avoid modules made in non-case-sensitive enviroment stops workin in case-sensetive enviroments).
 
-Leave console.log's unless they severley affect performance. They will only show if global.devMode is set to true.
+Leave console.log's unless they severley affect performance. They will only show if global.settings.devMode is set to true.
 
 Don't be tempted to write spaghetti code ... Everything that has to do with one plug-in, 
 should be located in that plug-in. Don't edit other plug-ins while adding functionality to another.

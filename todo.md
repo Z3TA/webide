@@ -27,6 +27,7 @@ throw err;
 
 Do not select } when double clicking!
 
+Ctrl+A outside the canvas selects all instead of the input box.
 
 sub-pixel-rendering (it doesn't work on Linux!)
 
@@ -184,6 +185,15 @@ auto-complete variable names!
 
 
 
+
+Optimization
+============
+
+Typing is slow, espcecially in full screen.
+
+
+
+
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 Black screen when opening file
@@ -196,19 +206,13 @@ Feature
 
 Drag and drop files into the editor.
 
-<<<<<<< local
 Bootstrap: nw.js project, web-page, etc. Create all the kakakaka
-=======
+
 Check for .editorconfig and set default indent_size, etc: http://EditorConfig.org
->>>>>>> other
 
 Replace in function
 
-<<<<<<< local
-
-
-=======
 
 
 
->>>>>>> other
+

@@ -7,6 +7,7 @@
 */
 
 global.settings = { // sugg: separate view options
+	devMode: false,  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
 	insert: false,
 	enableSpellchecker: true,
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!

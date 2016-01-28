@@ -19,7 +19,6 @@ const ALT = 4;
 
 global.render = false;   // Flag for plug-ins, the editor will re-render at first opportunity if it's true
 global.resize = false;   // Flag for plug-ins
-global.devMode = false;  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
 global.fileIndex = -1;   // Keep track on opened files (for undo/redo)
 global.keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events, more info in docs.
 global.files = {};       // List of all opened files with the path as key

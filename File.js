@@ -370,7 +370,7 @@ File.prototype.createCaret = function(index, row, col) {
 File.prototype.checkGrid = function() {
 	// Sanity check for the grid to detect possible bugs
 	
-	if(global.devMode == false) {
+	if(global.settings.devMode == false) {
 		return;
 	}
 	
@@ -479,7 +479,7 @@ File.prototype.checkGrid = function() {
 File.prototype.checkCaret = function(caret) {
 	// Sanity check to detect possible bugs
 	
-	if(global.devMode == false) {
+	if(global.settings.devMode == false) {
 		return;
 	}
 	
@@ -538,7 +538,7 @@ File.prototype.checkCaret = function(caret) {
 File.prototype.sanityCheck = function() {
 	var file = this;
 	
-	if(global.devMode == false) {
+	if(global.settings.devMode == false) {
 		return;
 	}
 	
@@ -1983,7 +1983,7 @@ File.prototype.debugGrid = function() {
 	
 	*/
 	
-	if(!global.devMode) {
+	if(!global.settings.devMode) {
 		return;
 	}
 	
