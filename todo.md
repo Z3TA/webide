@@ -11,19 +11,6 @@ Currently working on: sub-pixel-rendering (it doesn't work on Linux!) See plugin
 BUGS
 ====
 
-sub-pixel-rendering (it doesn't work on Linux!)
-
-Opening files with inconsistent line breaks.
-
-Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
-
-Can't insert ALT+ keyboard characters. 
-
-Do not include {} or : when double clicking a word!
-
-Auto-complete inside a function-name seems to auto-complete itself!
-function foo..
-
 ---
 Colors are off after pasting:
 console.error = function(err) {
@@ -37,6 +24,23 @@ throw err;
 
 }
 ---
+
+Do not select } when double clicking!
+
+
+sub-pixel-rendering (it doesn't work on Linux!)
+
+Opening files with inconsistent line breaks.
+
+Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
+
+Can't insert ALT+ keyboard characters. 
+
+Do not include {} or : when double clicking a word!
+
+Auto-complete inside a function-name seems to auto-complete itself!
+function foo..
+
 ---
 File marked as not saved when reloading.
 Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
@@ -191,6 +195,9 @@ Feature
 -------
 
 Drag and drop files into the editor.
+
+Bootstrap: nw.js project, web-page, etc. Create all the kakakaka
+
 
 
 

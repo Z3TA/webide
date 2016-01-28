@@ -53,5 +53,10 @@ The data object should have this standard:
 .functions = {name: String, lineNumber: Number, arguments: String, subFunctions: [...]}
 
 
+Know issues
+-----------
+
+Crisp font rendering: Linux has grayscale antialias in the Canvas, instead of sub-pixel (LCD text) antialias.
+
 
   
