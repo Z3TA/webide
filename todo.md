@@ -196,8 +196,19 @@ Feature
 
 Drag and drop files into the editor.
 
+<<<<<<< local
 Bootstrap: nw.js project, web-page, etc. Create all the kakakaka
+=======
+Check for .editorconfig and set default indent_size, etc: http://EditorConfig.org
+>>>>>>> other
+
+Replace in function
+
+<<<<<<< local
+
+
+=======
 
 
 
-
+>>>>>>> other
