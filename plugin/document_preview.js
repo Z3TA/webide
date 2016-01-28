@@ -9,6 +9,8 @@
 	
 	"use strict";
 	
+	if(global.settings.enableDocumentPreview === false) return; 
+	
 	var minification = 3; // 3
 	var originalRightMargin = global.view.rightMargin;
 	var documentPreviewDiv; 
