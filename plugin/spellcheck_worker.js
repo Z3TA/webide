@@ -87,7 +87,7 @@ function allDictionariesLoaded() {
 	//log("All dictionaries loaded");
 	numDictionaries = dict.length;
 	process.send("ready!");
-	log("Worker ready");
+	//log("Worker ready");
 }
 
 
