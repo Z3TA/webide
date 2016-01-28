@@ -38,7 +38,7 @@
 		
 		if(shouldParse(file)) {
 			
-			console.log("Parsing " + file.path);
+			console.warn("Parsing " + file.path);
 			
 			var js = parseJavaScript(file);
 
@@ -46,7 +46,7 @@
 			
 		}
 		else {
-			console.log(file.path + " didn't want to be parsed");			
+			console.warn(file.path + " didn't want to be parsed");			
 		}
 
 	}
@@ -84,6 +84,8 @@
 			onFileOpen(file); // For now ... :P
 			
 		}
+		else {
+			}
 		
 		
 		
@@ -278,7 +280,7 @@
 		console.log("words:" + JSON.stringify(words, null, 2));
 		console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
 		console.log("functions:" + JSON.stringify(functions, null, 2));
-		//console.log("comments:" + JSON.stringify(comments, null, 2));
+		console.log("comments:" + JSON.stringify(comments, null, 2));
 		
 
 		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};

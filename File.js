@@ -578,7 +578,8 @@ File.prototype.insertText = function(text, caret) {
 	// Insert the text
 	file.text = file.text.substr(0, index) + text + file.text.substring(index, file.text.length);
 	
-	/* Update the grid ...
+	/* 
+		Update the grid ...
 	   It's probably faster to re-create the grid then to insert all characters one by one.
 	*/
 	file.grid = file.createGrid();

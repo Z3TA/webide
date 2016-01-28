@@ -19,6 +19,8 @@
 	
 	function selectionRender(ctx, buffer) {
 		
+		if(buffer.length === 0) return;
+		
 		console.time("selectionRender");
 		
 		//console.log(JSON.stringify(buffer, null, 2));

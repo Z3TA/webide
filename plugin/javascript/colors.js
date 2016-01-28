@@ -21,15 +21,16 @@
 	
 	
 	function applyJScolors(buffer, file) {
+		// This is a preRender function! It must returnt he buffer!
+		
+		if(buffer.length === 0) return buffer;
 		
 		console.time("applyJScolors");
-		
 		
 		// Asume the buffer doesn't have any colors applied? Nope! 
 		// Makes this function 6 times slower
 		resetColors(buffer);
-		
-		
+			
 		var firstIndex = buffer[0].startIndex;
 		var lastRow = buffer[buffer.length-1];
 		var lastIndex = lastRow.length > 0 ? lastRow[lastRow.length-1].index : lastRow.startIndex;

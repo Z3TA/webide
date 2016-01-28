@@ -400,6 +400,10 @@ function objInfo(o) {
 				buffer.push(file.cloneRow(row)); // Clone the row
 			}
 			
+			if(buffer.length == 0) {
+				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " global.view.visibleRows=" + global.view.visibleRows);
+			}
+			
 			// Load on the fly functionality on the buffer
 			for(var i=0; i<global.preRenders.length; i++) {
 				buffer = global.preRenders[i](buffer, file); // Call render
@@ -1170,7 +1174,7 @@ function objInfo(o) {
 
 		console.log("main() called");
 		
-		//global.resize = true;
+		global.resize = true; // We must call the resize function at least once at editor startup.
 
 		
 		// Handle file save dialog
@@ -1425,8 +1429,6 @@ function objInfo(o) {
 					textChanged = true;
 				}
 			}
-			
-			
 			
 			// Insert text at caret position
 			if(global.currentFile) {

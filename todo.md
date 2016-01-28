@@ -4,7 +4,7 @@ Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
 
-Currently working on: font-bitmap-generator.htm
+Currently working on: Fixing bugs!
 
 
 
@@ -25,11 +25,15 @@ throw err;
 }
 ---
 
+
+Cant do anything when opening a file without content (only whitespace)
+
+
 Do not select } when double clicking!
 
 Ctrl+A outside the canvas selects all instead of the input box.
 
-sub-pixel-rendering (it doesn't work on Linux!)
+Show file as saved, when Ctrl+Z to last saved state.
 
 Opening files with inconsistent line breaks.
 
@@ -212,7 +216,7 @@ Check for .editorconfig and set default indent_size, etc: http://EditorConfig.or
 
 Replace in function
 
-
+Tool to create text bitmap, so that font looks the same in all OS's. Problem: Background colors! Might have to redo the text renderer!
 
 
 
