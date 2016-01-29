@@ -14,20 +14,6 @@ test bitmap fonts to see if it's faster.
 BUGS
 ====
 
----
-Colors are off after pasting:
-console.error = function(err) {
-
-alert(err);
-console.log(err.stack);
-throw err;
-
-// It's really not safe to continue from here!
-
-// another comment
-}
----
-
 Do not select } when double clicking!
 
 Ctrl+A outside the canvas selects all instead of the input box.

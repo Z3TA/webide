@@ -6,11 +6,27 @@
 	
 	function fixIndentationMain() {
 	
-		editor.on("edit", onEdit, 10); // Make sure jsParser runs first!
+		/*
+			Problem: 
+			If this runs before the jsParser, we will not have any editor indentation
+			But if we run it after the jsParser, indexes for comments etc will be off!
+			
+			Solution:
+			
+			1. Parse file
+			2. Fix indentation of inserted text
+			3. Parse file again, or fix index's for comments etc?
+			
+		*/
+		
+		
+		editor.on("edit", onEdit, 110);
 
 	}
 
 	function onEdit(file, type, character, index, row, col) {
+		
+		// todo: Only do this for files parsed by jsParser! (or we will fuck up files parsed by other parsers. unless ... we are very strict on what a parser should return)
 		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
@@ -29,7 +45,7 @@
 	
 	function fixIndentation(file, row) {
 		
-		console.log("Fixing indentation");
+		console.log("Fixing indentation on row=" + row);
 		
 		var grid = file.grid,
 			gridRow = grid[row],
@@ -86,11 +102,63 @@
 			// Update caret index
 			file.caret.index += totalCharactersAdded;
 			
+			// Update index's for parsed data
+			var js = file.parsed;
+			var somethingChanged = false;
+			
+			// 		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
+			
+			// Update functions
+			var fun;
+			for(var name in js.functions) {
+				fun = js.functions[name];
+				if(fun.end >= index || fun.start >= index) {
+					updateFunction(fun);
+					somethingChanged = true;
+				}
+			}
+			
+			// Update quotes
+			var quote;
+			for(var i=js.quotes.length-1; i>0; i--) { // start from bottom
+				quote = js.quotes[i];
+				if(quote.start >= index || quote.end >= index) {
+					if(quote.start >= index) quote.start += totalCharactersAdded;
+					if(quote.end >= index) quote.end += totalCharactersAdded;
+					somethingChanged = true;
+				}
+				else {
+					break;
+				}
+			}
+			
+			// Update comments
+			var comment;
+			for(var i=js.comments.length-1; i>0; i--) { // start from bottom
+				comment = js.comments[i];
+				if(comment.start >= index || comment.end >= index) {
+					if(comment.start >= index) comment.start += totalCharactersAdded;
+					if(comment.end >= index) comment.end += totalCharactersAdded;
+					somethingChanged = true;
+				}
+				else {
+					break;
+				}
+			}
+			
+			if(somethingChanged) file.parsed(js);
+			
 		}
 		
 		file.sanityCheck();
 		
-		
+		function updateFunction(fun) {
+			if(index <= fun.start) fun.start += totalCharactersAdded;
+			if(index <= fun.end) fun.end += totalCharactersAdded;
+			for(var name in fun.subFunctions) {
+				updateFunction(fun.subFunctions[name]);
+			}
+		}
 		
 	}
 

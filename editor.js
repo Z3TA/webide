@@ -682,11 +682,10 @@ function objInfo(o) {
 		
 		if(options.order == undefined) options.order = 1;
 		if(typeof options.fun != "function") {
-			console.error(new Error("1There needs to be a function!"));
+			console.error(new Error("There needs to be a function!"));
 		}
 			
 		var index = global.eventListeners[eventName].push(options);
-		
 		
 		// Sort the events so they fire in order (lowest order nr will execute first)
 		global.eventListeners[eventName].sort(function(a, b) {

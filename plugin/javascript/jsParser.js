@@ -27,7 +27,7 @@
 	function jsParserMain() {
 	
 		editor.on("fileLoad", onFileOpen); // Why did I remove this???
-		editor.on("edit", onEdit, 1);
+		editor.on("edit", onEdit, 100);
 
 	}
 

@@ -9,6 +9,9 @@
 		
 	*/
 	
+	"use strict";
+	
+	
 	editor.on("start", colors_main);
 
 	function colors_main() {
@@ -23,7 +26,11 @@
 	function applyJScolors(buffer, file) {
 		// This is a preRender function! It must returnt he buffer!
 		
+		//file.debugGrid();
+		
 		if(buffer.length === 0) return buffer;
+		
+		var applyColor = applyColor1; // applyColor1 or applyColor2, applyColor1 might be sligly faster!?
 		
 		console.time("applyJScolors");
 		
@@ -62,28 +69,55 @@
 		return buffer;
 	}
 	
-	function applyColor(grid, startIndex, endIndex, color) {
+	function applyColor2(gridBuffer, colorStart, colorEnd, color) {
+		var gridRow, colIndex;
+		for(var row = 0; row<gridBuffer.length; row++) {
+			gridRow = gridBuffer[row];
+			
+			for(var col=gridRow.length-1; col>=0; col--) { // Check last column first
+				colIndex = gridRow[col].index;
+
+				if(colIndex < colorStart) {
+					//console.log("col=" + col + "colIndex=" +colIndex + " colorStart=" + colorStart + " colorEnd=" + colorEnd + " char=" + gridRow[col].char + " color=" + color + " break");
+
+					break; // We are done on this row
+				}
+				else if(colIndex >= colorStart && colIndex <= colorEnd) {
+					//console.log("col=" + col + "colIndex=" +colIndex + " colorStart=" + colorStart + " colorEnd=" + colorEnd + " char=" + gridRow[col].char + " color=" + color + " coloring!");
+					gridRow[col].color = color;
+				}
+				else {
+					//console.log("col=" + col + "colIndex=" +colIndex + " colorStart=" + colorStart + " colorEnd=" + colorEnd + " char=" + gridRow[col].char + " color=" + color + " no color");
+				}
+			}
+			
+		}
+	}
+	
+	function applyColor1(grid, startIndex, endIndex, color) {
+		
 		var gridRow;
 		
-		for(var row=grid.length-1; row>=0; row--) {
+		for(var row=grid.length-1; row>=0; row--) { // Start from bottom
 
 			gridRow = grid[row];
 			
 			if(endIndex >= gridRow.startIndex) {
 				
 				for(var col=gridRow.length-1; col>=0; col--) {
-
+					
+					
 					if(gridRow[col].index < startIndex) {
-						console.log("Break from col: char=" + gridRow[col].char + " index=" + gridRow[col].index + " startIndex=" + startIndex);
+						//console.log("col=" + col + " gridRow[" + col + "].index=" + gridRow[col].index + " startIndex=" + startIndex + " endIndex=" + endIndex + " char=" + gridRow[col].char + " color=" + color + " break");
 						break;
 					}
 					else if(gridRow[col].index <= endIndex) {
-						console.log("Coloring: color=" + color + " char=" + gridRow[col].char + " index=" + gridRow[col].index + " endIndex=" + endIndex);
+						//console.log("col=" + col + " gridRow[" + col + "].index=" + gridRow[col].index + " startIndex=" + startIndex + " endIndex=" + endIndex + " char=" + gridRow[col].char + " color=" + color + " Coloring!");
 
 						gridRow[col].color = color;
 					}
 					else {
-						console.log("Doing nothing! char=" + gridRow[col].char + " index=" + gridRow[col].index + " startIndex=" + startIndex);
+						//console.log("col=" + col + " gridRow[" + col + "].index=" + gridRow[col].index + " startIndex=" + startIndex + " endIndex=" + endIndex + " char=" + gridRow[col].char + " color=" + color + " do nothing");
 					}
 					
 				}
@@ -93,6 +127,7 @@
 			}
 
 		}
+		
 	}
 	
 	
