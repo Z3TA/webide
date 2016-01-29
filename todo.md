@@ -18,13 +18,9 @@ Ctrl+A outside the canvas selects all instead of the input box.
 
 Show file as saved, when Ctrl+Z to last saved state.
 
-Opening files with inconsistent line breaks.
-
 Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
 
 Can't insert ALT+ keyboard characters. 
-
-Do not include {} or : when double clicking a word!
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
@@ -186,6 +182,9 @@ Unable to repeat bugs (happens rarely)
 Black screen when opening file
 
 Ctrl+X not working
+
+Opening files with inconsistent line breaks.
+
 
 
 Feature
