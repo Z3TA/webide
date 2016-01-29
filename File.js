@@ -1901,47 +1901,22 @@ File.prototype.createGrid = function() {
 		
 		//console.log("row=" + row + " col=" + col + " char=" + char + " index=" + textIndex + "");
 		
-		/* Check if we're inside a word
-		if(char.indexOf(global.settings.wordDelimiters) === -1) {
-			if(!inWord) {
-				word = new Word();
-			};
-
-			inWord = true;
-			
-			word.add(char);
-			
-		}
-		else {
-			inWord = false;
-		}
-		*/
-		
-		grid[row][col] = new Box(char, textIndex);
+		//grid[row][col] = new Box(char, textIndex);
 		
 		/*
-		Line Feed = \n
-		Carriage Return = \r
-		
-		windows linebreak = \r\n
-		
+			note:  Atari 8-bit and QNX pre-POSIX implementation not supported. All other systems use and combination of \n and \r
+			
+			Line Feed = \n
+			Carriage Return = \r
+			
+			windows linebreak = \r\n
 		*/
-		
-
-		
-		//console.log("row=" + row + " codeBlockDepth=" + codeBlockDepth);
-		
-		
-		
+	
 		if(char == lastLinebreakCharacter) {
 			
-			// note:  Atari 8-bit and QNX pre-POSIX implementation not supported. All other systems use and combination of \n and \r
+			//grid[row].pop(); // Remove the character (the line-break character)
 			
-			grid[row].pop(); // Remove the character (the line-break character)
-			
-			if(lastChar == "\r" || lastChar == "\n") grid[row].pop(); // Remove the first line-break character too!
-			
-			
+			//if(lastChar == "\r" || lastChar == "\n") grid[row].pop(); // Remove the first line-break character too!
 						
 			lineNumber++;
 			row++;
@@ -1969,28 +1944,19 @@ File.prototype.createGrid = function() {
 			//console.log("indentation++");
 		}
 		else if(char == "\n" || char == "\r") {
-			// Ignore additional line-breaks
-			grid[row].pop();
-			tabulation = true;
+			// Ignoring LF, CR
 		}
 		else {
 			
 			console.log("character=" + char + " (" + char.charCodeAt(0) + ")");
 			
 			tabulation = false;
+			
+			grid[row].push(new Box(char, textIndex));
+			
 			col++;
 			
-			/*  Let the code parser/intelligence handle the indentation!
-			
-			if(char == codeBlockStartCharacter) {
-				codeBlockDepth++;
-			}
-			else if(char == codeBlockEndCharacter) {
-				codeBlockDepth--;
-				grid[row].indentation--;
-			}
-			
-			*/
+			//  Let the code parser/intelligence handle the indentation!
 			
 		}
 	}
