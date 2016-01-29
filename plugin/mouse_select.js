@@ -557,7 +557,7 @@
 			
 			console.log(letter);
 			
-			var nonLetters = [" ", "\n", "\r", "'", '"', "+", "-", "/", "*", "=", "(", ")", "[", "]", ",", ".", "<", ">", ";"];
+			var nonLetters = [" ", "\n", "\r", "'", '"', "+", "-", "/", "*", "=", "(", ")", "[", "]", ",", ".", "<", ">", ";", "{", "}"];
 			
 			for(var i=0; i<nonLetters.length; i++) {
 				if(letter == nonLetters[i]) {

@@ -14,8 +14,6 @@ test bitmap fonts to see if it's faster.
 BUGS
 ====
 
-Do not select } when double clicking!
-
 Ctrl+A outside the canvas selects all instead of the input box.
 
 Show file as saved, when Ctrl+Z to last saved state.
