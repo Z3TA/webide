@@ -41,6 +41,8 @@ Putting stuff in the left column:
 If you want scroll:auto, create a div with class "wrap". All "wrap" objects will be resized by editor.resize()
 
 
+Note: Function bound to keys need to return true or false!
+
 
 Making a parser
 ---------------

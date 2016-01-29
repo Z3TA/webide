@@ -1948,7 +1948,7 @@ File.prototype.createGrid = function() {
 		}
 		else {
 			
-			console.log("character=" + char + " (" + char.charCodeAt(0) + ")");
+			//console.log("character=" + char + " (" + char.charCodeAt(0) + ")");
 			
 			tabulation = false;
 			

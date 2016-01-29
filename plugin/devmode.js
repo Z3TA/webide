@@ -14,17 +14,19 @@
 		global.keyBindings.push({charCode: 68, fun: toggleDevMode, combo: CTRL + ALT});
 		
 		
+		editor.addMenuItem("Toggle dev-mode", toggleDevMode); // Add items to the canvas context meny
+		
 		
 		if(global.settings.devMode == false) {
 			disableDevMode();
 			
-	}
+		}
 		else if(global.settings.devMode == true) {
 	
 			enableDevMode();
 	
 		
-	}
+		}
 	}
 	
 	function disableDevMode() {
@@ -77,6 +79,7 @@
 		else {
 			disableDevMode()
 		}
+		editor.hideMenu();
 	}
 	
 		function reloadEditor() {

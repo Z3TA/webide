@@ -63,7 +63,7 @@
 	<script type="text/javascript" src="plugin/render_highlight-line.js"></script>
 	<script type="text/javascript" src="plugin/render_text_selection.js"></script>
 	<script type="text/javascript" src="plugin/render_highlight.js"></script>
-	<script type="text/javascript" src="plugin/render_text.js"></script>
+	<script type="text/javascript" src="plugin/render_text.js"></script> <!-- fillText is about 3 times faster then putImageData or drawImage on Windows! -->
 	<script type="text/javascript" src="plugin/render_caret.js"></script>
 	<script type="text/javascript" src="plugin/render_charsinmargin.js"></script>
 	<script type="text/javascript" src="plugin/render_lineNumbers.js"></script>
@@ -102,6 +102,8 @@
 	<script type="text/javascript" src="plugin/javascript/autoQuote.js"></script>
 
 	<script type="text/javascript" src="plugin/xmatching.js"></script>
+
+	<script type="text/javascript" src="plugin/lorem_ipsum.js"></script>
 
 	
 	<meta name="description" content="Text editor specializing in JavaScript and Node.JS">
@@ -145,13 +147,7 @@
 	<ul id="canvasContextmenu" class="menu" style="display: block; position: absolute;">
 		<div id="canvasContextmenuTemp"></div>
 		<li>First item</li>
-		<li>Second item</li>
-		<li>Second item</li>
-		<li>Second item</li>
-		<li>Second item</li>
 		<li class="sep">Separator</li>
-		<li>Second item</li>
-		<li>Second item</li>
 		<li>Second item</li>
 	</ul>
 	

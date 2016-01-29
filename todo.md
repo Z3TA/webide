@@ -1,5 +1,3 @@
-
-
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
@@ -8,11 +6,12 @@ Currently working on: Fixing bugs!
 
 Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
-test bitmap fonts to see if it's faster.
 
 
 BUGS
 ====
+
+scroll bug when Reloading the editor while scrolled to the right. Resizing seems to fix it.
 
 Ctrl+A outside the canvas selects all instead of the input box.
 
@@ -68,12 +67,6 @@ mouse_select.js:213 Uncaught TypeError: Cannot read property 'index' of undefine
 Dont auto insert '' when typing in a comment (just like when typing ' inside an "string") ex: Can't ship's chimp's
 
 
-Sometimes contine selecting stuff even if mouse up.
-ex: when hitting delete.
-
-Easier to scroll right on a long line! bug? Using the preview window
-
-
 Save history when moving the cursor.
 
 
@@ -107,7 +100,6 @@ Ctrl+Tab when a name of a function is selected, will insert () after the functio
 (warn/error when a key-combo does many things!!!?)
 
 
-Coloring gets weird when adding more lines above
 
 
 Polishing
@@ -174,6 +166,14 @@ Optimization
 
 Typing is slow, espcecially in full screen.
 
+Rendering is slow when there are many misspelled words.
+
+Render only the row when typing along ...
+
+Go to Power Options -> Create a power plan -> Change advanced power settings and set CPU Maximum Rate to 5% or how much you need.
+
+Hide lag by rendering before doing work.
+
 
 
 
@@ -200,5 +200,6 @@ Replace in function
 
 Tool to create text bitmap, so that font looks the same in all OS's. Problem: Background colors! Might have to redo the text renderer!
 
+test bitmap fonts to see if it's faster: Result: its 3 times faster without bitmaps.
 
 

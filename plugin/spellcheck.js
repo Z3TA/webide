@@ -1,6 +1,10 @@
 
 (function() {
-
+	/*
+		todo: A way to abort the spell-checker when text is removed!?
+	
+	
+	*/
 	"use strict";
 	
 	if(global.settings.enableSpellchecker===false) return;
@@ -44,13 +48,20 @@
 	function spellCheckerMain() {
 		
 		
+		editor.addMenuItem("Toggle spell-checker", toggleSpellCheck); // Add items to the canvas context meny
+
 		
 		for(var i=0; i<numWorkers; i++) {
 			loadWorker(useLanguages);
 		}
 
 	}
-
+	
+	function toggleSpellCheck() {
+		global.settings.enableSpellchecker = global.settings.enableSpellchecker ? false : true;
+		console.warn("global.settings.enableSpellchecker=" + global.settings.enableSpellchecker);
+		editor.hideMenu();
+	}
 
 	function allWorkersReady() {
 		
@@ -89,7 +100,7 @@
 
 	function worker_message(data) {
 		
-		console.log("spell-check worker data:" + data);
+		//console.log("spell-check worker data:" + data);
 		
 		if(data == "ready!") {
 			workersReady++;
@@ -121,11 +132,11 @@
 	}
 
 	function worker_error(code) {
-		console.log("spell-check worker error:" + code);
+		console.warn("spell-check worker error:" + code);
 	}
 
 	function worker_exit(code) {
-		console.log("spell-check worker exit:" + code);
+		console.error(new Error("spell-check worker exit:" + code));
 	}
 		
 	function spellCheckFile(file) {
@@ -189,12 +200,14 @@
 	
 	function runSpellCheck(file, change, text, index, row, col) {
 		
+		if(global.settings.enableSpellchecker === false) return;
+		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
 
 		// possible change: text (insertText), insert (putCharacter), deletedSelection, line break, delete, undo-redo
 		
-		console.log("change=" + change);
+		//console.log("change=" + change);
 		
 		if(change) { // Also calls on file load
 			
@@ -327,11 +340,11 @@
 		wordsInQueue--;
 		
 		if(!correct) {
-			console.log("'" + origWord + "' is miss-spelled. Suggestion: " + misspelled[origWord]);
+			//console.log("'" + origWord + "' is miss-spelled. Suggestion: " + misspelled[origWord]);
 			colorGrid(row, col, origWord.length);
 		}
 
-		console.log("wordsInQueue=" + wordsInQueue);
+		//console.log("wordsInQueue=" + wordsInQueue);
 		if(wordsInQueue==0) {
 			global.render = true;
 		}
@@ -375,7 +388,7 @@
 		
 		//console.time("spell-check " + word);
 		
-		console.log("spell-checking:" + word);
+		//console.log("spell-checking:" + word);
 		 
 		wordsInQueue++;
 		
@@ -395,7 +408,7 @@
 			
 			var data = file.path + ";" + word + ";" + row + ";" + col;
 			
-			console.log("Sending data to spell-check worker " + workerId + "\ndata=" + data);
+			//console.log("Sending data to spell-check worker " + workerId + "\ndata=" + data);
 			
 			worker[workerId].send(data);
 
