@@ -146,7 +146,7 @@
 				}
 			}
 			
-			if(somethingChanged) file.parsed(js);
+			if(somethingChanged) file.haveParsed(js);
 			
 		}
 		
