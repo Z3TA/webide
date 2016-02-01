@@ -11,7 +11,7 @@ Every time I try to fix one bug, I find five more major bugs! And all are super 
 BUGS
 ====
 
-scroll bug when Reloading the editor while scrolled to the right. Resizing seems to fix it.
+After having the context window open (fixing a miss-spelled word) the editor do not have focus (cant write).
 
 Ctrl+A outside the canvas selects all instead of the input box.
 

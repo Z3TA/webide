@@ -1,8 +1,6 @@
 (function() {
 	/*
 	
-	
-	
 	Reopen file (tabs) opened from last session 
 	
 	Note: window.localStorage only supports strings!!
@@ -103,7 +101,8 @@
 		global.keyBindings.push({charCode: 37, combo: CTRL + ALT, fun: orderLeft}); // Ctrl + alt + left
 		global.keyBindings.push({charCode: 39, combo: CTRL + ALT, fun: orderRight}); // Ctrl + alt + right
 		// toto: implement tab drag and drop to change order
-
+		
+		global.resize = true; // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
 		function openFile(path) {
 			

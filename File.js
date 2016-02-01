@@ -1,8 +1,7 @@
 /*
 	The File object is in global space so that your plug-in's can patch it.
-	Feel free to add additional methods to this object here thoght!
-	
-*/
+	Feel free to add additional methods to this object here though!
+	*/
 
 "use strict";
 
