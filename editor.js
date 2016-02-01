@@ -782,6 +782,8 @@ function objInfo(o) {
 			tempItems.removeChild(tempItems.firstChild);
 		}
 		
+		if(global.currentFile) global.currentFile.gotFocus = true; // Give focus back for text entry
+		
 	}
 
 	editor.showMenu = function(posX, posY) {
