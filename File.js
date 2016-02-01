@@ -233,6 +233,8 @@ File.prototype.mutateCaret = function(oldCaret, newCaret) {
 	/*
 		Takes all properties from newCaret and gives it to oldCaret
 		Can be used to mutate, clone, or copy the caret object
+		
+		Consider using File.fixCaret() !
 	*/
 	
 	if(typeof oldCaret != "object") {

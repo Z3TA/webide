@@ -10,6 +10,7 @@ Every time I try to fix one bug, I find five more major bugs! And all are super 
 
 BUGS
 ====
+ 
 
 After having the context window open (fixing a miss-spelled word) the editor do not have focus (cant write).
 
@@ -179,6 +180,8 @@ editor.renderPart(row, col, length); // Render part of the grid
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+Sometimes when undoing (ctrl+Z) the caret is placed on a non existing grid column!
+
 Black screen when opening file
 
 Ctrl+X not working

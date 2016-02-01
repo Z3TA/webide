@@ -176,7 +176,7 @@
 		file.text = state.text;
 		file.selected = state.selected.splice(); // copy
 		file.grid = file.createGrid();
-
+		//file.fixCaret(state.caret); // I shouldn't be needing this! 
 		file.mutateCaret(file.caret, state.caret);
 		
 		file.load(); // Call event listeners

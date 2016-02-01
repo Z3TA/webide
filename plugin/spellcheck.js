@@ -61,6 +61,7 @@
 		global.settings.enableSpellchecker = global.settings.enableSpellchecker ? false : true;
 		console.warn("global.settings.enableSpellchecker=" + global.settings.enableSpellchecker);
 		editor.hideMenu();
+		if(global.currentFile) global.currentFile.gotFocus = true; // Give focus back for text entry
 	}
 
 	function allWorkersReady() {
@@ -187,7 +188,7 @@
 								
 				file.insertText(suggestion);
 				
-				
+				if(global.currentFile) global.currentFile.gotFocus = true; // Give focus back for text entry
 				
 			}
 			
