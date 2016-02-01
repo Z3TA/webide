@@ -219,7 +219,7 @@
 			
 			if(change=="insert") {
 				// Only spell check if a wordDelimiter was inserted/deleted. 
-				console.log("HOPPLA: " + text + " in " + wordDelimiters + " ? " + (wordDelimiters.indexOf(text) != -1));
+				console.log("wordDelimiter?: " + text + " in " + wordDelimiters + " ? " + (wordDelimiters.indexOf(text) != -1));
 				if(wordDelimiters.indexOf(text) == -1) { // Not a wordDelimiter
 					
 					clearTimeout(waitTimer);
@@ -335,6 +335,11 @@
 	function doSomething(filePath, correct, origWord, row, col) {
 		
 		var file = global.files[filePath];
+		
+		if(file === undefined) {
+			console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
+			return;
+		}
 		var grid = file.grid;
 		
 		wordsInQueue--;
@@ -350,17 +355,25 @@
 		}
 		
 		function colorGrid(row, col, length) {
+			// col is the end-column. The range is col-length to col
+			
+			if(grid[row].length < col) {
+				console.log("spellcheck: The grid has changed! grid[" + row + "].length=" + grid[row].length + " col=" + col + " length=" + length + "");
+				return; //  
+			}
 			
 			for(var c=col-1; c>col-length-1; c--) {
-				if(grid[row].length >= c-1) {
+				
 					grid[row][c].decoration.redWave = true;
 					//grid[row][c].color="red";
 					//console.log("coloring row=" + row + " col=" + c);
-				}
-
+				
 			}
 			
-			//global.render = true;
+			if(file == global.currentFile) {
+				global.render = true;
+			}
+			
 			
 		}
 			

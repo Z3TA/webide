@@ -174,7 +174,7 @@ Go to Power Options -> Create a power plan -> Change advanced power settings and
 
 Hide lag by rendering before doing work.
 
-
+editor.renderPart(row, col, length); // Render part of the grid 
 
 
 Unable to repeat bugs (happens rarely)
@@ -189,6 +189,10 @@ Opening files with inconsistent line breaks.
 
 Feature
 -------
+
+When the cursor is on a } show a split screen with the matching {
+
+A key to toggle scope-coloring.
 
 Drag and drop files into the editor.
 
