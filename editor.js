@@ -39,7 +39,7 @@ global.eventListeners = { // Use editor.on to add listeners to these events:
 	paste: [],
 	beforeResize: [],
 	afterResize: [],
-	save: [],
+	saved: [],
 	exit: [],
 	start: [],
 	fileParse: [],
@@ -296,7 +296,7 @@ function objInfo(o) {
 					}
 				}
 				
-				file.save(); // Call functions that listen for save events
+				file.saved(); // Call functions that listen for save events
 				
 				if(callback) callback();
 			}

@@ -50,7 +50,7 @@
 				editor.openFile(filePath, content, function(file) {  // path, content, callback
 				
 					// Mark the file as saved, because we just opened it
-					file.saved = true;
+					file.isSaved = true;
 					file.savedAs = true;
 					file.changed = false;
 					
@@ -78,7 +78,7 @@
 			editor.openFile(filePath, content, function(file) {  // path, content, callback
 			
 				// Mark the file as saved, because we just opened it
-				file.saved = true;
+				file.isSaved = true;
 				file.savedAs = true;
 				file.changed = false;
 				

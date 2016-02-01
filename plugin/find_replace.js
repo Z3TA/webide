@@ -304,7 +304,7 @@
 			
 			reportFile = file;
 			
-			file.saved = false;
+			file.isSaved = false;
 			file.savedAs = false;
 			file.parse = false;
 		});

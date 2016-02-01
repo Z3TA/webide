@@ -54,10 +54,7 @@
 		
 		console.log("files=" + JSON.stringify(files));
 		
-
-		
-		
-		if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFiles is a string with path separated by comma
+if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFiles is a string with path separated by comma
 			console.log("Opening " + openFile.length + " files ...");
 			files.forEach(openFile);
 			
@@ -94,7 +91,7 @@
 		setInterval(reopen_files_closeEditor, saveStateInterval);
 		
 		editor.on("edit", tabFileChange);
-		editor.on("save", tabFileSave);
+		editor.on("saved", tabFileSave);
 
 		global.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 
@@ -114,7 +111,7 @@
 			var lastFileState = loadState(path);
 			
 			if(lastFileState) {
-				if( content == undefined || lastFileState.saved === false) {
+				if( content == undefined || lastFileState.isSaved === false) {
 					// Open from temp
 					content = lastFileState.text;
 				}
@@ -128,7 +125,7 @@
 				editor.openFile(path, content, function(file) {
 					
 					// Mark the file as saved, because we just opened it
-					//file.saved = true;
+					//file.isSaved = true;
 					//file.savedAs = true;
 					//No! We should use last state, from when the editor was closed.
 					
@@ -148,11 +145,9 @@
 						}
 						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
 						
-						if(lastFileState.saved !== undefined) {
-							file.saved = lastFileState.saved;
-
-							
-						}
+						if(lastFileState.isSaved !== undefined) {
+							file.isSaved = lastFileState.isSaved;
+}
 
 						if(lastFileState.open === true) setCurrent = path;
 						
@@ -160,8 +155,8 @@
 						
 					}
 					else {
-						// If there is no last state: Asume the file is saved.
-						file.saved = true;
+						// If there is no last state: Assume the file is saved.
+						file.isSaved = true;
 						file.savedAs = true;
 						
 					}
@@ -433,7 +428,7 @@
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
 		
 
-		if(global.files[path].saved == false) {
+		if(global.files[path].isSaved == false) {
 			showUnsavedStatus(tabFileItem)
 		}
 		
@@ -524,13 +519,13 @@
 		function closeTab(e) {
 			var closeFileButton = e.target;
 
-			console.log("saved?" + global.files[path].saved);
+			console.log("saved?" + global.files[path].isSaved);
 			console.log("e.ctrlKey?" + e.ctrlKey);
 			console.log("closeFileButton=" + closeFileButton);
 			console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
 			
 			
-			if(!global.files[path].saved && !e.ctrlKey) {
+			if(!global.files[path].isSaved && !e.ctrlKey) {
 				
 				
 				closeFileButton.setAttribute("title", "Ctrl click to close "+ fileName + " without saving");
@@ -629,14 +624,14 @@
 			state.open = false;
 		}
 		
-		state.saved = file.saved;
+		state.isSaved = file.isSaved;
 		state.savedAs = file.savedAs;
 		state.startRow = file.startRow;
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;
 		state.order = file.order;
 		
-		if(!state.saved) {
+		if(!state.isSaved) {
 			// Size limit!??
 			state.text = file.text;
 		}

@@ -51,10 +51,6 @@
 	});
 
 	
-	
-
-	
-	
 	function undo(file) {
 		
 		if(file.gotFocus) {
@@ -80,8 +76,6 @@
 				
 				loadState(file, versionIndex[file.index]);
 				
-
-
 				
 			}
 			else {
@@ -187,6 +181,16 @@
 		file.change("undo-redo", state.text, 0, 0, 0) // change, text, index, row, col
 
 		global.render = true;
+		
+		if(file.savedAs) {
+		// Check if this is the current version on the disk:
+			editor.readFromDisk(file.path, function compare(path, string) {
+			if(file.text == string) {
+				// It's saved
+					file.saved(); // Doesn't actually save on disk. Only calls event listeners and sets state to saved.
+					}
+			});
+			}
 		
 	}
 	

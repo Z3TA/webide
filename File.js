@@ -55,7 +55,7 @@ function File(text, path, fileIndex) {
 	file.canvas.setAttribute("id", "canvas_" + path);
 	file.canvas.setAttribute("class", "fileCanvas");
 	
-	file.saved = false;
+	file.isSaved = false;
 	file.savedAs = false;
 
 	
@@ -2256,19 +2256,19 @@ File.prototype.scrollToCaret = function(caret) {
 }
 
 
-File.prototype.save = function(path) {
+File.prototype.saved = function(path) {
 	/*
 		Only call listeners. 
 		Let the editor handle saving and loading from disk
 	*/
 	var file = this;
 	
-	file.saved = true;
+	file.isSaved = true;
 	file.changed = false;
 	file.savedAs = true;
 	
-	for(var i=0; i<global.eventListeners.save.length; i++) {
-		global.eventListeners.save[i].fun(file);
+	for(var i=0; i<global.eventListeners.saved.length; i++) {
+		global.eventListeners.saved[i].fun(file);
 	}
 	
 }

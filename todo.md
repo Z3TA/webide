@@ -1,20 +1,15 @@
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
-
 Currently working on: Fixing bugs!
 
 Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
-
+Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif
 
 BUGS
 ====
  
-Show file as saved, when Ctrl+Z to last saved state.
-
-Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
-
 Can't insert ALT+ keyboard characters. 
 
 Auto-complete inside a function-name seems to auto-complete itself!
@@ -183,10 +178,16 @@ Ctrl+X not working
 
 Opening files with inconsistent line breaks.
 
+Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
+
 
 
 Feature
 -------
+
+Auto insert } outside of strings or regexp when typing {. And only if there is an un-match.
+Auto insert matching } at the Right place! For example when encapsulating code in an if-statement.
+
 
 When the cursor is on a } show a split screen with the matching {
 

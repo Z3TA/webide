@@ -25,7 +25,7 @@
 		
 		editor.openFile(path, content, function(file) {
 			// Mark the file as NOT saved, because its a NEW file
-			file.saved = false;
+			file.isSaved = false;
 			file.savedAs = false;
 		});
 				

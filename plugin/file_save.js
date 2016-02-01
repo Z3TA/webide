@@ -33,7 +33,7 @@
 	}
 	
 	function fileNotSaved(file, change, text, index, row, col) {
-		file.saved = false;
+		file.isSaved = false;
 	}
 	
 	function saveAs(e) {
