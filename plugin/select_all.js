@@ -13,7 +13,7 @@
 		
 		console.log("Ctrl + A = SELECT ALL");
 		
-		if(file) {
+		if(file && file.gotFocus) {
 			// Select everything
 			
 			var everything = [],
@@ -31,6 +31,9 @@
 			
 			return false; // Disable bubble
 
+		}
+		else {
+			return true; // Allow default browser action
 		}
 	}
 	

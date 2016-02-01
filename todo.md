@@ -11,11 +11,6 @@ Every time I try to fix one bug, I find five more major bugs! And all are super 
 BUGS
 ====
  
-
-After having the context window open (fixing a miss-spelled word) the editor do not have focus (cant write).
-
-Ctrl+A outside the canvas selects all instead of the input box.
-
 Show file as saved, when Ctrl+Z to last saved state.
 
 Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
