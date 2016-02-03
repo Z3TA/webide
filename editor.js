@@ -414,6 +414,8 @@ function objInfo(o) {
 			var canvas = global.currentFile.canvas;
 			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
 			
+			//ctx.translate(0,0);
+			
 			ctx.fillStyle = global.settings.style.bgColor;
 			
 			//ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -438,7 +440,76 @@ function objInfo(o) {
 		
 		console.log("rendering finish");
 	}
-
+	
+	editor.renderRow = function(gridRow) {
+		
+		console.log("rendering ROW ... global.resize=" + global.resize + "");
+		
+		if(global.currentFile) {
+			
+			var file = global.currentFile;
+			
+			if(gridRow == undefined) gridRow = file.caret.row;
+			if(file.grid.length <= gridRow) console.error(new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " "));
+			
+			// Is the row visible?
+			var startRow = file.startRow;
+			var endRow = Math.min(file.grid.length, file.startRow+global.view.visibleRows);
+			
+			if(gridRow < startRow || gridRow > endRow) {
+				console.warn("Row=" + gridRow + " not in view!");
+				return;
+				}
+			
+			var screenRow = Math.max(0, gridRow - startRow);
+			
+			console.time("renderRow");
+			
+				var buffer = [];
+				
+			// Create the buffer
+			buffer.push(file.cloneRow(gridRow)); // Clone the row
+			
+			
+			// Load on the fly functionality on the buffer
+			for(var i=0; i<global.preRenders.length; i++) {
+				buffer = global.preRenders[i](buffer, file);
+			}
+			
+			//console.log(JSON.stringify(buffer, null, 4));
+			
+			var canvas = file.canvas;
+			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
+			
+			
+			ctx.fillStyle = global.settings.style.bgColor;
+			
+			var top = global.settings.topMargin + screenRow * global.settings.gridHeight;
+			
+			// Clear only that row
+			ctx.fillRect(0, top, canvas.width, global.settings.gridHeight);
+			
+			/*
+				ctx.fillStyle = "#FF0000";
+				ctx.fillRect(0,0,150,75);
+				ctx.lineWidth = 1;
+			*/
+			
+			for(var i=0; i<global.renders.length; i++) {
+				global.renders[i](ctx, buffer, file, screenRow); // Call render
+			}
+			
+			console.timeEnd("renderRow");
+			
+		}
+		else {
+			console.log("No file open");
+		}
+		
+	}
+	
+	
+	
 
 	editor.resize = function(e) {
 		/*

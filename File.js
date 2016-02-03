@@ -685,7 +685,8 @@ File.prototype.putCharacter = function(character, caret) {
 		caret.col++;
 		caret.index++;
 		
-
+		editor.renderRow(row); // Render the row
+		
 		// Increment index of the rest of the columns on this row
 		for(var j=col+1; j<grid[row].length; j++) {
 			grid[row][j].index++;
@@ -714,7 +715,7 @@ File.prototype.putCharacter = function(character, caret) {
 	file.sanityCheck();
 
 
-	global.render = true;
+	global.render = false;
 	
 }
 

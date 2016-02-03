@@ -15,6 +15,10 @@ Can't insert ALT+ keyboard characters.
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
+Sometimes Cant type after typing in the function list and double clicking there
+
+Clicking 4 times to select with {} match doesn't work, stops at first }.
+
 ---
 File marked as not saved when reloading.
 Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
@@ -102,6 +106,7 @@ Add words like href, src, etc to the spell-checker ignore.
 
 Don't insert double ' inside comments
 
+Auto remove mathching } when removing an if statement.
 
 Show big fat warning if = inside if( a = b) instead of ==, always a bug!
 Also warn when  you use == outside an if!?
@@ -154,6 +159,8 @@ auto-complete variable names!
 
 Optimization
 ============
+
+Test a huuuge .js file with many functions to see how the editor performs.
 
 Typing is slow, espcecially in full screen.
 

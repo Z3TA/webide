@@ -21,7 +21,7 @@
 		ctx.fillRect(left, top, global.settings.caret.width, global.settings.gridHeight);
 
 		// Show the "direction" of the caret
-		ctx.fillRect(left, top+global.settings.gridHeight, 4, global.settings.caret.width);
+		ctx.fillRect(left, top+global.settings.gridHeight - global.settings.caret.width, 4, global.settings.caret.width);
 
 		
 		console.log("caret: " + JSON.stringify(caret));

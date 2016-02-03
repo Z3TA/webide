@@ -21,11 +21,13 @@
 	
 	console.log("Loaded textRenderer");
 	
-	function textRender(ctx, buffer, file) {
+	function textRender(ctx, buffer, file, startRow) {
 		
 		console.time("textRender");
 		
 		console.log("global.view.endingColumn=" + global.view.endingColumn);
+		
+		if(startRow == undefined) startRow = 0;
 		
 		var left = 0,
 			top = 0,
@@ -34,15 +36,29 @@
 			bufferRowCol,
 			x = 0,
 			y = 0,
-			char = "";
+			char = "",
+			oldStyle = global.settings.style.textColor;
 		
 
 		ctx.strokeStyle="rgba(0,255,0,0.5)";
 		ctx.font=global.settings.style.fontSize + "px " + global.settings.style.font;
 		ctx.textBaseline = "top";
+		ctx.fillStyle = oldStyle;
 		
 		ctx.beginPath(); // Reset all the paths!
-
+		/*
+			Optimization:
+			
+			Addin colStart & colStop had no effect!
+			Commenting some if's had no effect!
+			Commenting (not setting) ctx.fillStyle made it faster 30% faster! textRender: 9.792ms
+			ctx.fillStyle behind if, textRender: 8.727ms, even faster!
+			
+			
+			*/
+		
+		var colStart = 0;
+		var colStop = 0;
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -51,15 +67,19 @@
 			
 			//console.log("indentation=" + indentation);
 			
-			top = global.settings.topMargin + row * global.settings.gridHeight;
+			top = global.settings.topMargin + (row + startRow) * global.settings.gridHeight;
 			
 			
 			//ctx.fillText(indentation, 15, top);
 			
-			for(var col = Math.max(0, file.startColumn - indentationWidth); col < Math.min(global.view.endingColumn-indentationWidth, global.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length); col++) {
+			colStart = Math.max(0, file.startColumn - indentationWidth)
+			colStop = Math.min(global.view.endingColumn-indentationWidth, global.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
+			
+			for(var col = colStart; col < colStop; col++) {
 				
 				
 				left = global.settings.leftMargin + (col + indentationWidth - file.startColumn) * global.settings.gridWidth;
+				
 				
 				if(isNaN(left)) console.error(new Error("left is NaN"));
 				if(isNaN(top)) console.error(new Error("top is NaN"));
@@ -70,14 +90,16 @@
 					ctx.stroke();
 				}
 				
+				
 				bufferRowCol = buffer[row][col];
 				
 				if(bufferRowCol.hasCharacter) {
 					
 					char = bufferRowCol.char;
-								
-					ctx.fillStyle = bufferRowCol.color;// for fillText rgb 
 					
+					if(oldStyle != bufferRowCol.color) {
+						ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb 
+					}
 					//console.log(bufferRowCol.char + " " + bufferRowCol.color + " top=" + top + " left=" + left + "");
 					
 					ctx.fillText(char, left, top);
@@ -88,6 +110,7 @@
 					//ctx.fillText(String.fromCharCode(229), left, top);
 					
 					// You need to save at UTF8 for åäö character to work
+					
 					
 					if(bufferRowCol.decoration.redWave) {
 						ctx.beginPath();
@@ -107,9 +130,9 @@
 						}
 						
 						ctx.stroke();
-						
-						
+											
 					}
+					
 					
 				}
 				
