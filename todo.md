@@ -9,24 +9,12 @@ Every time I try to fix one bug, I find five more major bugs! And all are super 
 
 BUGS
 ====
- 
- Auto-complete inside a function-name seems to auto-complete itself!
-function foo..
-
 Sometimes Cant type after typing in the function list and double clicking there
 
-Clicking 4 times to select with {} match doesn't work, stops at first }.
 
----
-File marked as not saved when reloading.
-Sometimes file doesn't save!? (if you reload quickly after Ctrl+S)
-Unsupported! combo: {"shift":false,"alt":false,"ctrl":true,"sum":2} character:
+fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)
 
-File not saving because spell-check is running and eventually returning an error!
-Uncaught TypeError: Cannot read property 'decoration' of undefined spellcheck_nodehun.js:385 colorGrid spellcheck_nodehun.js:373 doSomething
----
-Abort the spell-checker if something is deleted or if the whole grid changes to ^
-You get weird errors while the spell-checker is running, you can for example not save files.
+
 
 
 Doesn't remember last size and position when started
@@ -77,7 +65,8 @@ bar
 bar
 
 
-
+Abort the spell-checker if something is deleted or if the whole grid changes to ^
+You get weird errors while the spell-checker is running, you can for example not save files.
 
 
 Page is black (no render) after opening from Ctrl+O clicking a path
@@ -91,6 +80,15 @@ at keyPressed (editor.js:1494)
 
 Ctrl+Tab when a name of a function is selected, will insert () after the function-name.
 (warn/error when a key-combo does many things!!!?)
+
+
+
+Auto-complete inside a function-name seems to auto-complete itself!
+function foo..
+
+
+
+Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 
 
