@@ -30,9 +30,11 @@
 	}
 	
 	
-	function paintLineNumbers(ctx, buffer, file) {
+	function paintLineNumbers(ctx, buffer, file, startRow) {
 		var line = 0,
 			lastLine = -1;
+		
+		if(startRow == undefined) startRow = 0;
 		
 		ctx.font=global.settings.fontSize + "px " + global.settings.font;
 		ctx.textBaseline = "top";
@@ -46,7 +48,7 @@
 			
 			if(line > lastLine) {
 				lastLine = line;
-				ctx.fillText(line, leftMargin, global.settings.topMargin + row * global.settings.gridHeight);
+				ctx.fillText(line, leftMargin, global.settings.topMargin + (row+startRow) * global.settings.gridHeight);
 			}
 			
 		}

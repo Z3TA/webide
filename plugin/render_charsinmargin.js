@@ -40,7 +40,9 @@
 	
 	var transpLvlStep = Math.round(8 / transparentChars * 10);
 	
-	function transparentMarginCharacters(ctx, buffer, file) {
+	function transparentMarginCharacters(ctx, buffer, file, startRow) {
+		
+		if(startRow == undefined) startRow = 0;
 		
 		console.time("transparentMarginCharacters");
 		
@@ -61,7 +63,7 @@
 		
 		for(var row = 0; row < buffer.length; row++) {
 
-			top = global.settings.topMargin + row * global.settings.gridHeight;
+			top = global.settings.topMargin + (row+startRow) * global.settings.gridHeight;
 
 			indentation = buffer[row].indentation;
 			indentationWidth = indentation * global.settings.tabSpace;

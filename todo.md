@@ -5,7 +5,7 @@ Currently working on: Fixing bugs!
 
 Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
-Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif
+
 
 BUGS
 ====
@@ -118,6 +118,7 @@ if(word.length > 0 &&
 				!isNumeric(word) &&
 				fileExtensions.indexOf(word) == -1) {
 
+Do not overwrite line-nr with chars-in-margin!
 
 
 Spell-checking is laggy
@@ -154,11 +155,14 @@ Use a session file(s) instead of storing stuff in localstorage. Ex. JZedit/timem
 
 auto-complete variable names!
 
+fonts: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif
 
 
 
 Optimization
 ============
+
+Do the grid boxes really have to know their character index!?
 
 Test a huuuge .js file with many functions to see how the editor performs.
 
@@ -192,6 +196,8 @@ Opening another file shewed the div's so that preview dropped down and canvas ha
 Feature
 -------
 
+Fullscreen mode.
+
 Auto insert } outside of strings or regexp when typing {. And only if there is an un-match.
 Auto insert matching } at the Right place! For example when encapsulating code in an if-statement.
 
@@ -212,4 +218,4 @@ Tool to create text bitmap, so that font looks the same in all OS's. Problem: Ba
 
 test bitmap fonts to see if it's faster: Result: its 3 times faster without bitmaps.
 
-
+Smooth scrolling. Make it easier to read text while scrolling.
