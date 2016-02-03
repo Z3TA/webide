@@ -10,9 +10,7 @@ Every time I try to fix one bug, I find five more major bugs! And all are super 
 BUGS
 ====
  
-Can't insert ALT+ keyboard characters. 
-
-Auto-complete inside a function-name seems to auto-complete itself!
+ Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
 Sometimes Cant type after typing in the function list and double clicking there
@@ -99,6 +97,9 @@ Ctrl+Tab when a name of a function is selected, will insert () after the functio
 
 Polishing
 =========
+
+Annoying flashing yellow when opening a file.
+
 Context menu (right click) doesn't disappear when saving As
 Auto complete file names when editing href or src 
 Auto complete markdown lines ---- and ==== to fit (same length) as text above.

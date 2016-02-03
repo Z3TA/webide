@@ -1663,7 +1663,8 @@ function objInfo(o) {
 			else if(combo.ctrl && character == "X") {console.log("cut");}
 			else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
 			else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
-				
+			else if(combo.alt) {} // Wait for ALT+key combo!
+			
 			else {
 				console.error(Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode));
 				
