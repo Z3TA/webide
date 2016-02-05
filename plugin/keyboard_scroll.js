@@ -17,7 +17,7 @@
 		
 		file.sanityCheck();
 		
-		global.render = true;
+		editor.renderNeeded();
 		
 	}
 	
@@ -33,7 +33,7 @@
 				file.startColumn = 0;
 			}
 			
-			global.render = true;
+			editor.renderNeeded();
 		}
 
 	}

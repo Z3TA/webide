@@ -105,7 +105,7 @@
 			/* We need the footer to be this high
 			if(footerHeight < heightNeeded) {
 				//footer.style.height = footerHeight + heightNeeded + "px";
-				global.resize = true;
+				editor.resizeNeeded();
 			}
 			*/
 			
@@ -122,8 +122,8 @@
 			
 			gotoInputIsVisible = true;
 			
-			global.resize = true;
-			global.render = true;
+			editor.resizeNeeded();
+			editor.renderNeeded();
 			
 		}
 		
@@ -149,8 +149,8 @@
 			
 			gotoInputIsVisible = false;
 			
-			global.resize = true;
-			global.render = true;
+			editor.resizeNeeded();
+			editor.renderNeeded();
 		}
 
 	}

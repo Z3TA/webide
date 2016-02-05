@@ -22,7 +22,7 @@
 		file.checkCaret();
 		file.scrollToCaret();
 
-		global.render = true;
+		editor.renderNeeded();
 		
 	}
 	
@@ -36,7 +36,7 @@
 		file.checkCaret();
 		file.scrollToCaret();
 
-		global.render = true;
+		editor.renderNeeded();
 	}
 
 	function end(file, combo) {
@@ -56,7 +56,7 @@
 
 		file.scrollToCaret();
 
-		global.render = true;
+		editor.renderNeeded();
 	}
 	
 	
@@ -78,7 +78,7 @@
 
 		file.scrollToCaret();
 
-		global.render = true;
+		editor.renderNeeded();
 	}
 	
 	

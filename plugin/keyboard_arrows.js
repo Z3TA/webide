@@ -70,7 +70,7 @@
 			
 			file.scrollToCaret(caret);
 
-			global.render = true;
+			editor.renderNeeded();
 		}
 		else {
 			console.log("File dont have focus!");
@@ -121,7 +121,7 @@
 
 			file.scrollToCaret(caret);
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 		}
 		
@@ -197,7 +197,7 @@
 			
 			file.scrollToCaret(caret);
 			
-			global.render = true;
+			editor.renderNeeded();
 
 		}
 		
@@ -263,7 +263,7 @@
 			
 			file.scrollToCaret(caret);
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 		}
 		

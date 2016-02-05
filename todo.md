@@ -1,9 +1,9 @@
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
-Currently working on: Fixing bugs!
+Currently working on: Figure out why the editor renders
 
-Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
+Fighting the hydra: Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
 
 BUGS
@@ -11,17 +11,34 @@ BUGS
 
 Sometimes Cant type after typing in the function list and double clicking there
 
+Doesn't remember last size and position when started
+
+Auto-complete inside a function-name seems to auto-complete itself!
+function foo..
+
+Auto-completion of variable names doesn't seem to work!?
+
+The screen becomes black when typing (due to resize!?)
+
 
 fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)
 
+---
+When having two tabs open and closing one of them:
+file_tabs.js:339 Tab to C:\Users\Z\dev-repositories\js-editor\test\ansi.txt already in view!
+Tab to C:\Users\Z\dev-repositories\js-editor\test\ansi.txt already in view!
+devmode.js:50 Error: There is no file open with path=C:\shares\Z\documents\todo\todo.txt
+    at switchToFile (file_tabs.js:344)
+    at Object.closeFile_tabs [as fun] (file_tabs.js:322)
+    at File.close (File.js:1840)
+    at HTMLButtonElement.closeTab (file_tabs.js:543)
+devmode.js:51 Uncaught Error: There is no file open with path=C:\shares\Z\documents\todo\todo.txt
+12file_tabs.js:610 Attempted to save state for a file without path!
+---
 
 
 
-Doesn't remember last size and position when started
-
-Doesn't load fonts right away
-
-
+---
 Weird indent after:
 var firstLocation = {
 x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
@@ -29,17 +46,7 @@ y: global.settings.topMargin + row * global.settings.gridHeight
 }// HAHA! I had forgot semicolon here!!
 
 What to do about this in the future!?
-
-console.log("firstP=" + firstP + " on row=" + row);
-
-
-var secondLocation = {
-x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
-y: global.settings.topMargin + row * global.settings.gridHeight
-}
-
-}
-
+---
 
 
 
@@ -48,13 +55,13 @@ mouse_select.js:213 Uncaught TypeError: Cannot read property 'index' of undefine
 Dont auto insert '' when typing in a comment (just like when typing ' inside an "string") ex: Can't ship's chimp's
 
 
-Save history when moving the cursor.
+Save history when moving the cursor.?? Append the current cursor position to last saved state, when moving the cursor.
 
 
 functionlist.js:163 Uncaught SyntaxError: Invalid regular expression: /'(/: Unterminated group
 
 
-
+---
 When copying code, also indent the first line, even if the selection started in the middle of it
 and remove all indention before base. ex:
 foo
@@ -63,11 +70,9 @@ bar {
 bar
 }
 bar
-
+---
 
 Abort the spell-checker if something is deleted or if the whole grid changes to ^
-You get weird errors while the spell-checker is running, you can for example not save files.
-
 
 Page is black (no render) after opening from Ctrl+O clicking a path
 Also go to the line we are searching for after opening!
@@ -80,12 +85,6 @@ at keyPressed (editor.js:1494)
 
 Ctrl+Tab when a name of a function is selected, will insert () after the function-name.
 (warn/error when a key-combo does many things!!!?)
-
-
-
-Auto-complete inside a function-name seems to auto-complete itself!
-function foo..
-
 
 
 Clicking 4 times to select with {} match doesn't work, stops at first }.

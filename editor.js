@@ -17,8 +17,8 @@ const ALT = 4;
 
 // sugg: Maybe this global object should be part of the editor object!?
 
-global.render = false;   // Flag for plug-ins, the editor will re-render at first opportunity if it's true
-global.resize = false;   // Flag for plug-ins
+global.render = false;   // Internal flag, use editor.renderNeeded() to re-render!
+global.resize = false;   // Internal flag, use editor.resizeNeeded() to re-size!
 global.fileIndex = -1;   // Keep track on opened files (for undo/redo)
 global.keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events, more info in docs.
 global.files = {};       // List of all opened files with the path as key
@@ -289,7 +289,7 @@ function objInfo(o) {
 						var win = gui.Window.get();
 						win.title = file.path;
 						
-						global.render = true;
+						editor.renderNeeded();
 						editor.render();
 					}
 					else {
@@ -371,6 +371,24 @@ function objInfo(o) {
 		return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"))); 
 	}
 
+	editor.renderNeeded = function() {
+		// Tell the editor that it needs to render
+		if(global.settings.devMode && global.render == false) {
+			// For debugging, so we know why a render was needed
+			console.log(new Error("Render").stack);
+		}
+		global.render = true;
+	}
+	
+	editor.resizeNeeded = function() {
+		// Tell the editor that it needs to resize
+		if(global.settings.devMode && global.resize == false) {
+			// For debugging, so we know why a resize was needed
+			console.log(new Error("Resize").stack);
+		}
+		global.resize = true;
+	}
+	
 	editor.render = function() {
 		
 		if(!global.render) {
@@ -713,7 +731,7 @@ function objInfo(o) {
 					canvasNodes[i].style.display = "block";
 				}
 			}
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 		if(global.render) editor.render();
@@ -952,7 +970,7 @@ function objInfo(o) {
 			
 			console.timeEnd("addInfo");
 			
-			global.render = true;
+			editor.renderNeeded();
 			editor.render();
 
 		}
@@ -1189,8 +1207,8 @@ function objInfo(o) {
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function() {
 		console.log("EVENT RESIZE!");
-		global.resize = true;
-		global.render = true;
+		editor.resizeNeeded();
+		editor.renderNeeded();
 	}, false);
 	
 	
@@ -1248,7 +1266,7 @@ function objInfo(o) {
 
 		console.log("main() called");
 		
-		global.resize = true; // We must call the resize function at least once at editor startup.
+		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 
 		
 		// Handle file save dialog
@@ -1315,7 +1333,7 @@ function objInfo(o) {
 				global.eventListeners.start[i].fun(); // Call function
 			}
 			
-			global.render = true;
+			editor.renderNeeded();
 			editor.render();
 			
 		}
@@ -1347,7 +1365,7 @@ function objInfo(o) {
 			
 			console.log("File loaded.");
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 			global.fileOpenCallback = undefined;
 			
@@ -2063,7 +2081,7 @@ function objInfo(o) {
 		
 		//global.files[path].canvas.focus();
 		
-		global.render = true;
+		editor.renderNeeded();
 
 	}
 	

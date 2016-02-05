@@ -108,8 +108,8 @@
 			console.log("lengthOfLongestFunction=" + lengthOfLongestFunction);
 			
 			if(firstLoad || (lengthOfLongestFunction != lastLengthOfLongestFunction && (lengthOfLongestFunction <= functionlistMaxCharacters && lastLengthOfLongestFunction != 0))) {
-				global.resize = true; // Fixed bug of function list not starting at 100% height. PS: The file hides/show when resizing! So I had to make this extra function to prevent loop
-				global.render = true;
+				editor.resizeNeeded(); // Fixed bug of function list not starting at 100% height. PS: The file hides/show when resizing! So I had to make this extra function to prevent loop
+				editor.renderNeeded();
 
 				if(firstLoad) firstLoad = false;
 			}
@@ -195,7 +195,7 @@
 	function hideFunctionList(file) {
 		if(functionListWrap) {
 			functionListWrap.style.display="none";
-			global.resize = true;
+			editor.resizeNeeded();
 			console.log("Functionlist is now hidden");
 		}
 	}
@@ -205,7 +205,7 @@
 			
 			if(functionListWrap.style.display != "block") { // bugfix: editor resized at every key stroke because of fileParse event
 				functionListWrap.style.display="block";
-				global.resize = true;
+				editor.resizeNeeded();
 				console.log("Functionlist is now visible");
 			}
 			else {

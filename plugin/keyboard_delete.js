@@ -26,7 +26,7 @@
 			}
 				
 
-			global.render = true;
+			editor.renderNeeded();
 			
 			return false; // Prevent default
 				

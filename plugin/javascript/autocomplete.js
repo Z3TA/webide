@@ -226,7 +226,7 @@
 			if(moveCaret) file.moveCaretLeft(file.caret, moveCaret);
 	
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 		}
 		

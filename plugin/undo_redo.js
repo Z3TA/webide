@@ -180,7 +180,7 @@
 		// Call file edit listeners
 		file.change("undo-redo", state.text, 0, 0, 0) // change, text, index, row, col
 
-		global.render = true;
+		editor.renderNeeded();
 		
 		if(file.savedAs) {
 		// Check if this is the current version on the disk:

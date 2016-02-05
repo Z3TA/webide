@@ -29,8 +29,8 @@
 			file.savedAs = false;
 		});
 				
-		global.render = true;
-		global.resize = true;
+		editor.renderNeeded();
+		editor.resizeNeeded();
 		
 		return false;
 		

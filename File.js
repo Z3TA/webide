@@ -436,9 +436,10 @@ File.prototype.checkGrid = function() {
 			if(lineBreakCharacters != file.lineBreak) {
 				expect = "";
 				for(var k=0; k<file.lineBreak.length; k++) {
-					expect += lineBreakCharacters.charCodeAt(k) + "=" + file.lineBreak.charCodeAt(k) + " "
+					expect += lineBreakCharacters.charCodeAt(k) + "==" + file.lineBreak.charCodeAt(k) + " "
 				}
-				console.error(new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + i + " to be a line-break! (" + expect + ")"));
+				file.debugGrid();
+				console.error(new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + i + " to be a line-break: (" + expect + ")"));
 			}
 		}
 		
@@ -485,8 +486,6 @@ File.prototype.checkCaret = function(caret) {
 		return;
 	}
 	
-	console.log("Checking caret=" + JSON.stringify(caret));
-	
 	var file = this,
 		char;
 	
@@ -495,6 +494,8 @@ File.prototype.checkCaret = function(caret) {
 		caret = file.caret;
 	}
 	
+	console.log("Checking caret=" + JSON.stringify(caret));
+
 	if(caret.index == null) {
 		console.error(new Error("Caret index is null!"));
 	}
@@ -603,7 +604,7 @@ File.prototype.insertText = function(text, caret) {
 	file.change("text", text, index, row, col);
 	
 	
-	global.render = true;
+	editor.renderNeeded();
 
 	
 	
@@ -701,6 +702,10 @@ File.prototype.putCharacter = function(character, caret) {
 			}
 		}
 		
+		console.log("Done fixing grid indexes");
+		
+		//global.render = false;
+		
 		file.scrollToCaret(caret);
 		
 	}
@@ -715,7 +720,7 @@ File.prototype.putCharacter = function(character, caret) {
 	file.sanityCheck();
 
 
-	global.render = false;
+	//editor.renderNeeded();
 	
 }
 
@@ -756,7 +761,7 @@ File.prototype.select = function(box, direction) {
 		Array.prototype.splice.apply(selected, [start, 0].concat(box)); // inserts the boxes at the start position
 	}
 
-	global.render = true;
+	editor.renderNeeded();
 	
 	function selectBox(box) {
 		if(box.selected) {
@@ -794,7 +799,7 @@ File.prototype.deselect = function(box) {
 		selected.length = 0;
 	}
 	
-	global.render = true;
+	editor.renderNeeded();
 
 }
 
@@ -902,7 +907,7 @@ File.prototype.deleteSelection = function(selection) {
 	file.change("deletedSelection", text, firstIndex);
 	
 	
-	global.render = true;
+	editor.renderNeeded();
 	
 
 	function isContinuous(selection) {
@@ -1113,7 +1118,7 @@ File.prototype.insertLineBreak = function(caret) {
 	
 	editor.fireEvent("moveCaret", file, caret);
 	
-	global.render = true;
+	editor.renderNeeded();
 	
 }
 
@@ -1513,7 +1518,7 @@ File.prototype.deleteCharacter = function(caret, bubble) {
 	
 	file.scrollToCaret();
 	
-	global.render = true;
+	editor.renderNeeded();
 	
 	return caret;
 	
@@ -1665,7 +1670,7 @@ File.prototype.getIndexFromRowCol = function(row, col) {
 		console.error(new Error("col=" + col + " must be higher then zero!"));
 	}
 	else if(col > gridRow.length) {
-		console.error(new Error("col=" + col + " is higher then available columns on row " + row + ", witch is " + grid[row].length + ""));
+		console.error(new Error("col=" + col + " > " + gridRow.length + " (higher then available columns on row " + row + ")"));
 	}
 	else if(col === 0) {
 		return gridRow.startIndex;
@@ -1781,7 +1786,7 @@ File.prototype.reload = function(text) {
 	file.grid = file.createGrid(); 
 	file.caret = file.createCaret(0,0,0);
 	
-	global.render = true;
+	editor.renderNeeded();
 	
 	file.load(file); // Fire events
 	
@@ -1840,8 +1845,8 @@ File.prototype.close = function() {
 		global.eventListeners.fileClose[i].fun(file); // Call function
 	}
 	
-	global.render = true;
-	global.resize = true;
+	editor.renderNeeded();
+	editor.resizeNeeded();
 }
 
 
@@ -1876,7 +1881,10 @@ File.prototype.createGrid = function() {
 		codeBlockEndCharacter = "}";
 
 	var lastLinebreakCharacter = "";
-	var lineBreakCharacters = file.lineBreak.length
+	var lineBreakCharacters = file.lineBreak.length;
+	var currentLineBreakCharacters = 0;
+	
+	console.log("lineBreakCharacters=" + lineBreakCharacters + " (" + file.lineBreak.replace(/\r/g, "R(10)").replace(/\n/g, "N(13)") + ")");
 	
 	if(lineBreakCharacters > 1) {
 		lastLinebreakCharacter = file.lineBreak.charAt(1);
@@ -1944,12 +1952,12 @@ File.prototype.createGrid = function() {
 			grid[row] = [];
 			
 			grid[row].lineNumber = lineNumber;
-			grid[row].startIndex = textIndex+1;
+			grid[row].startIndex = textIndex + currentLineBreakCharacters;
 			grid[row].indentation = codeBlockDepth;
 			grid[row].indentationCharacters = "";
 			col = 0;
 			tabulation = true;
-			
+			currentLineBreakCharacters = 0;
 		}
 		else if((char == "\t" || char == " ") && tabulation) {
 			/*
@@ -1965,6 +1973,7 @@ File.prototype.createGrid = function() {
 		}
 		else if(char == "\n" || char == "\r") {
 			// Ignoring LF, CR
+			currentLineBreakCharacters++;
 		}
 		else {
 			
@@ -2008,7 +2017,7 @@ File.prototype.debugGrid = function() {
 	
 	console.log("letters:" + letters);
 	
-	console.log("text:\n" + text.replace(/ /g, "~"));
+	console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 	
 	for(var row=0; row<grid.length; row++) {
 		for(var col=0; col<grid[row].length; col++) {
@@ -2253,14 +2262,14 @@ File.prototype.scrollToCaret = function(caret) {
 	if(caret.col > columnEnd) {
 		// Caret is after the visible space
 		delta = caret.col - columnEnd;
-		global.view.endingColumn += delta;
+		//global.view.endingColumn += delta; // Do I need to do this!?
 		startColumn += delta;
 	}
 	else if(caret.col < columnStart) {
 		// Caret is infront of the visible space
 		delta = columnStart - caret.col;
 		
-		global.view.endingColumn -= delta;
+		//global.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
 		startColumn -= delta;
 	}
 	
@@ -2269,7 +2278,7 @@ File.prototype.scrollToCaret = function(caret) {
 
 	file.scrollTo(startColumn, startRow);
 	
-	global.render = true;
+	//editor.renderNeeded(); // Don't need to render until actually scrolled
 
 	
 }
@@ -2386,7 +2395,7 @@ File.prototype.gotoLine = function(line) {
 	//console.log("file.startRow=" + file.startRow);
 	//console.log("maxStartRow=" +maxStartRow);
 
-	global.render = true;
+	editor.renderNeeded();
 }
 
 File.prototype.scrollTo = function(x, y) {
@@ -2396,27 +2405,44 @@ File.prototype.scrollTo = function(x, y) {
 		Use this function instead of modifying file.startColumn and file.startRow directly!
 	*/
 	var file = this;
-	
-	var maxY = Math.floor(file.grid.length - global.view.visibleRows / 2);
-	
-	if(x != undefined) file.startColumn = parseInt(x);
-	if(y != undefined) file.startRow = parseInt(y);
+	var startColumn = file.startColumn;
+	var startRow = file.startRow;
+	var scrolled = false;
 	
 	// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
-	if(file.startRow >= maxY) {
-		//console.warn("Attempted to scroll below visible veiw");
-		file.startRow = maxY;
-	}
-	if(file.startRow < 0) {
-		console.warn("We can not scroll up higher then the first row. But we can increase the top margin!");
-		file.startRow = 0;
+	var maxY = Math.floor(file.grid.length - global.view.visibleRows / 2);
+	
+	if(x != undefined) startColumn = parseInt(x);
+	if(y != undefined) startRow = Math.max(Math.min(parseInt(y), maxY), 0); // > 0 && < maxY
+	
+	if(file.startColumn != startColumn || file.startRow != startRow) {
+		file.startColumn = startColumn;
+		file.startRow = startRow;
+		scrolled = true;
 	}
 	
-	if(file.isVisible()) {
-		// Update endingcolumn
-		global.view.endingColumn = file.startColumn + global.view.visibleColumns;
-		global.render = true;
+	/*
+	if(file.startRow > maxY) {
+		console.warn("Attempted to scroll below visible veiw");
+		file.startRow = maxY;
+		scrolled = true;
 	}
+	
+	if(file.startRow < 0) {
+		console.warn("We can not scroll up higher then the first row."); // But we can increase the top margin!? erm noo
+		file.startRow = 0;
+		scrolled = true;
+	}
+	*/
+	
+	// Update endingcolumn and render?
+	if(file.isVisible() && global.view.endingColumn != file.startColumn + global.view.visibleColumns) {
+		global.view.endingColumn = file.startColumn + global.view.visibleColumns;
+		scrolled = true;
+	}
+	
+	if(scrolled) editor.renderNeeded();
+	
 }
 
 File.prototype.scroll = function(deltaX, deltaY) {

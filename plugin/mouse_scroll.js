@@ -82,7 +82,7 @@
 			}
 		}
 		
-		global.render = true;
+		editor.renderNeeded();
 		
 	}
 	

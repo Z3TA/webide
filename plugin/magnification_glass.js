@@ -32,7 +32,7 @@
 			removeFromListeners();
 		}
 		
-		global.render = true;
+		editor.renderNeeded();
 		
 		return false; // preventDefault;
 		
@@ -59,7 +59,7 @@
 
 			mouseX = x;
 			mouseY = y;
-			global.render = true;
+			editor.renderNeeded();
 
 		}
 		

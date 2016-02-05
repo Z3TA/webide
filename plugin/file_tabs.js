@@ -99,7 +99,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		global.keyBindings.push({charCode: 39, combo: CTRL + ALT, fun: orderRight}); // Ctrl + alt + right
 		// toto: implement tab drag and drop to change order
 		
-		global.resize = true; // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
+		editor.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
 		function openFile(path) {
 			
@@ -324,8 +324,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		buildTabs();
 		
-		global.render = true;
-		global.resize = true;
+		editor.renderNeeded();
+		editor.resizeNeeded();
 		
 
 		
@@ -360,8 +360,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		buildTabs();
 		
-		global.resize = true;
-		global.render = true;
+		editor.resizeNeeded();
+		editor.renderNeeded();
 
 		console.log("Switched file to: " + path);
 

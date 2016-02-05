@@ -309,7 +309,7 @@
 			file.parse = false;
 		});
 				
-		global.render = true;
+		editor.renderNeeded();
 		
 		reportFile.insertText("Files in '" + searchPath + "' that contains '" + searchString + "'");
 		reportFile.insertLineBreak();
@@ -461,8 +461,8 @@
 			
 			searchVisible = false;
 
-			global.resize = true;
-			global.render = true;
+			editor.resizeNeeded();
+			editor.renderNeeded();
 		}
 
 	}
@@ -482,7 +482,7 @@
 			
 			if(footerHeight < heightNeeded) {
 				footer.style.height = footerHeight + heightNeeded + "px";
-				global.resize = true;
+				editor.resizeNeeded();
 			}
 			
 			// Remove focus from the editor when bringing up the search box.
@@ -493,8 +493,8 @@
 			
 			console.log("Search visible! global.currentFile.gotFocus=" + global.currentFile.gotFocus);
 			
-			global.resize = true;
-			global.render = true;
+			editor.resizeNeeded();
+			editor.renderNeeded();
 		}		
 		
 	}
@@ -613,7 +613,7 @@
 			
 			file.select(textRange);
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 
 		}
@@ -634,7 +634,7 @@
 
 		}
 		
-		global.render = true;
+		editor.renderNeeded();
 		
 	}
 	
@@ -657,7 +657,7 @@
 				file.insertText(newString, file.caret);
 			}
 			
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 		return start;
@@ -674,7 +674,7 @@
 			console.log("start=" + start);
 		}
 		
-		global.render = true;
+		editor.renderNeeded();
 
 	}
 	

@@ -7,7 +7,7 @@
 */
 
 global.settings = { // sugg: separate view options
-	devMode: false,  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
 	insert: false,
 	enableSpellchecker: false,
 	enableDocumentPreview: false,

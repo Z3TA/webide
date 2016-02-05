@@ -27,7 +27,7 @@
 			
 			editor.fireEvent("moveCaret", global.currentFile, caret);
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 			/*
 			var canvas =global.currentFile.canvas,

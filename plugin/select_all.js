@@ -27,7 +27,7 @@
 			
 			file.select(everything, "right");
 				
-			global.render = true;
+			editor.renderNeeded();
 			
 			return false; // Disable bubble
 

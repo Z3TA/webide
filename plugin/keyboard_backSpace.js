@@ -32,7 +32,7 @@
 				file.moveCaretLeft();
 				file.deleteCharacter();
 
-				global.render = true;
+				editor.renderNeeded();
 				
 			}
 			

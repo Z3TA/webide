@@ -59,7 +59,7 @@
 		fileList.appendChild(li);
 		
 		function switchFile(e) {
-			global.render = true;
+			editor.renderNeeded();
 			
 			var target = e.target,
 				name = target.getAttribute("name");

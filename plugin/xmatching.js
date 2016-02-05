@@ -1,4 +1,9 @@
 (function() {
+	/*
+		The editor can render (single row) before the index's for the grid is recalculated!
+		So we can not depend on these index's for rendering!
+	
+	*/
 	
 	editor.on("start", init);
 	
@@ -22,10 +27,6 @@
 		console.log("Rendering highlight/match for " + lP + " and " + rP + "...");
 		
 		if(file) {
-			
-			
-			// Sanity check
-			file.checkGrid();
 			
 			// Is the caret visible on the screen?
 			var caret = file.caret;

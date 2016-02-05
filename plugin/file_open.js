@@ -54,7 +54,7 @@
 					file.savedAs = true;
 					file.changed = false;
 					
-					global.render = true;
+					editor.renderNeeded();
 					editor.render();
 					
 				});
@@ -82,7 +82,7 @@
 				file.savedAs = true;
 				file.changed = false;
 				
-				global.render = true;
+				editor.renderNeeded();
 				editor.render();
 				console.log("File ready for editing");
 				

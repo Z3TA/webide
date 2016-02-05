@@ -349,7 +349,7 @@
 
 		//console.log("wordsInQueue=" + wordsInQueue);
 		if(wordsInQueue==0) {
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 		function colorGrid(row, col, length) {
@@ -369,7 +369,7 @@
 			}
 			
 			if(file == global.currentFile) {
-				global.render = true;
+				editor.renderNeeded();
 			}
 			
 			

@@ -19,7 +19,7 @@
 			file.startColumn = 0;
 			
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 			return false; // Prevent default
 		}

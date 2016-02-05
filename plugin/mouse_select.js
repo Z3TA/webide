@@ -199,7 +199,7 @@
 			}
 			
 			
-			global.render = true;
+			editor.renderNeeded();
 			
 			return false;
 			
@@ -217,7 +217,7 @@
 		function mouseSelect_mouseMove() {
 			// Render
 			console.log("Moving ...");
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 
@@ -351,7 +351,7 @@
 			//file.caret = caret;
 			
 			console.log("Select text!");
-			global.render = true;
+			editor.renderNeeded();
 			/*
 			var canvas =global.currentFile.canvas,
 				ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
@@ -366,7 +366,7 @@
 		else if(Math.sqrt(  Math.pow(mouseX-oldMouseX, 2)  +  Math.pow(mouseY-oldMouseY, 2)  ) > distSelfSelect) {
 			// Select the current caret
 			file.select(file.grid[caret.row][caret.col]);
-			global.render = true;
+			editor.renderNeeded();
 		}
 
 		
@@ -499,7 +499,7 @@
 				
 				makeSelection(file, caret);
 				
-				global.render = true;
+				editor.renderNeeded();
 			}
 		}
 		else {

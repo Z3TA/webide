@@ -124,7 +124,7 @@
 			
 			lastX = mouseX;
 			
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 		if(Math.abs(moveY) > 1) {
@@ -146,7 +146,7 @@
 			
 			lastY = mouseY;
 			
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 		
@@ -187,7 +187,7 @@
 				global.currentFile.gotFocus = true;
 			}
 			
-			global.render = true;
+			editor.renderNeeded();
 		}
 		
 	}
@@ -269,12 +269,12 @@
 			
 			rightColumn.appendChild(documentPreviewDiv);
 			
-			global.resize = true; // Fixed bug: preview not loading for the first file that opends.
+			editor.resizeNeeded(); // Fixed bug: preview not loading for the first file that opens.
 		}
 		
 		
 		
-		global.resize = true;
+		editor.resizeNeeded();
 
 	}
 	
