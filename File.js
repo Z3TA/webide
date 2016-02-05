@@ -1769,6 +1769,24 @@ File.prototype.createTextRange = function(start, end) {
 	
 }
 
+File.prototype.reload = function(text) {
+	// ex: Re-open the file in another encoding
+
+	var file = this;
+	
+	if(text == undefined) console.error(new Error("No text!"));
+	
+	file.text = text;
+	
+	file.grid = file.createGrid(); 
+	file.caret = file.createCaret(0,0,0);
+	
+	global.render = true;
+	
+	file.load(file); // Fire events
+	
+}
+
 File.prototype.open = function() {
 	var file = this,
 		content = document.getElementById("content");	
@@ -1782,7 +1800,7 @@ File.prototype.open = function() {
 	file.show(file);
 	
 	file.load(file);
-
+	
 }
 
 File.prototype.load = function() { // Rename to triggerLoadListeners or something like that!?

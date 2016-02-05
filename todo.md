@@ -6,9 +6,9 @@ Currently working on: Fixing bugs!
 Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
 
-
 BUGS
 ====
+
 Sometimes Cant type after typing in the function list and double clicking there
 
 
@@ -194,6 +194,12 @@ Opening another file shewed the div's so that preview dropped down and canvas ha
 
 Feature
 -------
+
+When caret is next to {, make everything orange down to matching }
+When selecting several rows and hitting tab, make it a block by inserting { selection }
+
+
+FTP/SSH module!!
 
 Fullscreen mode.
 

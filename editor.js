@@ -211,14 +211,14 @@ function objInfo(o) {
 	}
 
 
-	editor.readFromDisk = function(path, callback, returnBuffer) {
+	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		
 		if(!callback) {
 			console.error(new Error("No callback defined!"));
 		}
 		
 		if(returnBuffer) {
-			// If no encoding is specified, then the raw buffer is returned.
+			// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 			
 			fs.readFile(path, function(err, buffer) {
 				if (err) console.error(err);
@@ -228,7 +228,8 @@ function objInfo(o) {
 			});
 		}
 		else {
-			fs.readFile(path, 'utf8', function(err, string) {
+			if(encoding == undefined) encoding = "utf8";
+			fs.readFile(path, encoding, function(err, string) {
 				if (err) console.error(err);
 				
 				callback(path, string);
@@ -813,6 +814,7 @@ function objInfo(o) {
 		
 		// Don't forget to call editor.hideMenu() after the item has been clicked!
 		
+		return menuElement;
 	}
 
 	editor.addTempMenuItem = function(htmlText, callback) {
