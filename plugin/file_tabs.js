@@ -71,7 +71,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			var file = global.files[setCurrent];
 			global.currentFile = file; 
 			file.show();
-			file.load();
+			//file.load(); // It has already loaded, right!? So we do not have to fire load events again!!??
 		}
 		
 		
