@@ -15,8 +15,6 @@ Editor sometimes fale to save!!!
 
 Tab framför </table> (ska inte vara det)
 
-HTML-kod ska vara blå!
-
 Don't insert " +  + " when finishing a "quote".
 
 Editor sometimes becomes black when writing in some files ... Because the editor resizes.
@@ -24,20 +22,6 @@ Editor sometimes becomes black when writing in some files ... Because the editor
 Render!? when inserting " (auto inserting) "
 
 making { codeblocks ... no render
-
---- Double clicking to select and mark word doesn't work on some words, even if they are the same!
-else if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
-insideHTMLComment = true;
-commentStart = i-4;
-}
-else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->
-insideHTMLComment = false;
-comments.push(new Comment(commentStart, i));
-//console.warn("Found HTML comment! line=" + lineNumber + " ");
-}
----
-
-
 
 ---
 

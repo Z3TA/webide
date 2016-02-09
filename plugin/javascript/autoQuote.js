@@ -51,7 +51,7 @@
 		var insideDbl = false;
 		var char = "";
 		var inQuote = false;
-		var openQuote = false;
+		var openQuote = true; // If true, it doesn't have an ending quote on the same line
 		// 		var openQuote = insideQuote(rowText, col, quote, false);
 
 		for(var i=0; i<col; i++) {
@@ -71,7 +71,7 @@
 			for(var i=col; i<rowText.length; i++) {
 				char = rowText.charAt(i);
 				if(char == quote) {
-					openQuote = true;
+					openQuote = false;
 					break;
 				}
 			}
@@ -81,10 +81,13 @@
 			if(inQuote) {
 				file.insertText(" +  + " + quote);
 				file.moveCaretLeft(file.caret, 4);
+				editor.renderNeeded();
 			}
-			else if(!openQuote && !(quote == singleQuote && insideDbl)) {
+			else if(openQuote && !(quote == singleQuote && insideDbl)) {
+				// Insert one quote character
 				file.putCharacter(quote);
 				file.moveCaretLeft();
+				editor.renderNeeded();
 			}
 		}
 		

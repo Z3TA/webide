@@ -1169,10 +1169,11 @@ File.prototype.moveCaretRight = function(caret) {
 			caret.eof = false;
 		}
 		
-		
 	}
 	
 	file.sanityCheck();
+	
+	//if(caret == file.caret) editor.renderNeeded();
 	
 }
 
@@ -1235,6 +1236,8 @@ File.prototype.moveCaretLeft = function(caret, times) {
 	
 	editor.fireEvent("moveCaret", file, caret);
 	
+	//if(caret == file.caret) editor.renderNeeded();
+	
 	return caret;
 	
 }
@@ -1296,6 +1299,8 @@ File.prototype.moveCaretUp = function(caret) {
 	file.sanityCheck();
 	
 	editor.fireEvent("moveCaret", file, caret);
+	
+	//if(caret == file.caret) editor.renderNeeded();
 	
 	return caret;
 }
@@ -1367,6 +1372,8 @@ File.prototype.moveCaretDown = function(caret) {
 	file.sanityCheck();
 	
 	editor.fireEvent("moveCaret", file, caret);
+	
+	//if(caret == file.caret) editor.renderNeeded();
 	
 	return caret;
 }
@@ -2343,8 +2350,8 @@ File.prototype.highlightText = function(text) {
 	}
 	
 	function highLight(box) {
-		file.highlighted.push(box);
 		box.highlighted = true;
+		file.highlighted.push(box);
 	}
 	
 }
