@@ -39,7 +39,7 @@ global.settings = { // sugg: separate view options
 		bgColor: "rgb(256,256,256)",
 		commentColor: "rgb(8, 134, 29)",
 		quoteColor: "rgb(51, 128, 128)",
-		xmlTagColor: "rgb(0, 0, 255)",
+		xmlTagColor: "rgb(0, 21, 162)",
 		selectedTextBg: "rgb(193, 214, 253)",
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting

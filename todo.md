@@ -11,11 +11,16 @@ Blog about sub-pixel-antialias (LCD Text).
 BUGS
 ====
 
-Editor sometimes fale to save!!!
+Editor sometimes fails to save!!!
 
-Tab framför </table> (ska inte vara det)
-
-Editor sometimes becomes black when writing in some files ... Because the editor resizes.
+---
+winstateOnClose returned true
+file_tabs.js:618 Error: File='C:\Users\Z\dev-repositories\cmsjz\home\sv\blog\nodejs.htm' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A","C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\functions.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\functionlist.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\xmatching.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\install-instructions.txt","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\colors.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\markWord.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autocomplete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autoQuote.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_delete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_backSpace.js","C:\\Users\\Z\\dev-repositories\\cmsjz\\home\\sv\\blog\\_nodejs.htm"]message: "File='C:\Users\Z\dev-repositories\cmsjz\home\sv\blog\nodejs.htm' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A","C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\functions.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\functionlist.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\xmatching.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\install-instructions.txt","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\colors.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\markWord.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autocomplete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autoQuote.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_delete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_backSpace.js","C:\\Users\\Z\\dev-repositories\\cmsjz\\home\\sv\\blog\\_nodejs.htm"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:618 saveSate
+file_tabs.js:627 Uncaught TypeError: Cannot read property 'isSaved' of undefined
+61486 console messages are not shown.
+editor.js:1169 Closing the editor ...
+editor.js:1181 winstateOnClose returned true
+---
 
 making { codeblocks ... no render
 
@@ -103,6 +108,9 @@ Ctrl+Tab when a name of a function is selected, will insert () after the functio
 
 
 Clicking 4 times to select with {} match doesn't work, stops at first }.
+
+
+Tab framför </table> (ska inte vara det)
 
 
 
