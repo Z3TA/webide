@@ -28,6 +28,11 @@
 		
 		if(file) {
 			
+			var blockMatch = true;
+			
+			if(lP == "{") {
+				blockMatch = file.parsed.blockMatch;
+			}
 			// Is the caret visible on the screen?
 			var caret = file.caret;
 
@@ -218,7 +223,12 @@
 			*/
 			
 			// Render the things
-			ctx.fillStyle=global.settings.style.highlightMatchFontColor;
+			if(blockMatch === true) {
+				ctx.fillStyle=global.settings.style.highlightMatchFontColor;
+			}
+			else {
+			ctx.fillStyle=global.settings.style.highlightMissMatchFontColor;
+			}
 			
 			if(firstP > secondP) { // right parenthesis first
 				if(canSeeFirst) ctx.fillText(rP, firstLocation.x, firstLocation.y);

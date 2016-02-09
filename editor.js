@@ -431,7 +431,10 @@ function objInfo(o) {
 			//console.log(JSON.stringify(buffer, null, 4));
 			
 			var canvas = global.currentFile.canvas;
+			
 			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
+			
+			//ctx.imageSmoothingEnabled = true;
 			
 			//ctx.translate(0,0);
 			

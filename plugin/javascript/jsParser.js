@@ -7,8 +7,9 @@
 			quotes
 			comments
 			globalVariables
-	
-	
+	blockMatch = true|false (if there are as many { as there are }
+		xmlTags
+		
 	
 		Goals: 
 			Intelli:
@@ -198,8 +199,7 @@
 			insideHTMLComment = false,
 			L = [], // {
 			R = [], // }
-			LR = [],
-			subCount = 0,
+			subCount = 0, // Level of function scope depth
 			functions = {},
 			myFunction = [],
 			functionId = -1,
@@ -209,8 +209,6 @@
 			quoteStart = 0,
 			commentStart = 0,
 			commentStartIndentation = 0,
-			oL = [],
-			oR = [],
 			objCount = 0,
 			codeBlockDepth = 0,
 			row = 0,
@@ -241,6 +239,11 @@
 			rightSide = "",
 			variableIndex = -1,
 			insdeComment = false,
+			insideXmlTag = false,  
+			xmlTagStart = -1, 
+			xmlTags = [],
+			xmlTagWordLength = 0,
+			xmlTagSelfEnding = false,
 			llChar = "",
 			lllChar = "",
 			willBeJSON = false,
@@ -255,12 +258,9 @@
 		// -----
 		
 		insideFunctionBody[subCount] = false;
-		L[subCount] = 1; // Asume open
-		R[subCount] = 0;
+		L[subCount] = 1; // { Asume open
+		R[subCount] = 0; // }
 
-		
-		oL[objCount] = 0;
-		oL[objCount] = 0;
 		
 		insideVariableDeclaration[0] = false;
 		
@@ -282,8 +282,8 @@
 		console.log("functions:" + JSON.stringify(functions, null, 2));
 		console.log("comments:" + JSON.stringify(comments, null, 2));
 		
-
-		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
+		
+		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
 		
 		//console.log(JSON.stringify(functions, null, 4));
 		
@@ -732,13 +732,15 @@
 				return;
 			}
 			
-			else if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment  && !insideHTMLComment) { // <!--
+			else if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
 				insideHTMLComment = true;
+				insideXmlTag = false;
 				commentStart = i-4;
-			}
+				}
 			else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->
 				insideHTMLComment = false;
 				comments.push(new Comment(commentStart, i));
+				//console.warn("Found HTML comment! line=" + lineNumber + " ");
 			}
 			
 			else if(char == "*" && lastChar == "/" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insideHTMLComment) {
@@ -792,6 +794,31 @@
 			
 			//console.log("char(" + i + ")=" + char + "  " + insideQuote + " " + insdeComment);
 			
+			if(!insdeComment) {
+				/*
+					Find xml-tags.
+					
+					Look out for if( x < y) and bitwise operations >> <<
+					and lists , "<", ">",
+					
+					PS: We are Not insde an HTML comment until the parser finds the last - in <!--
+					*/
+				if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+				insideXmlTag = true;
+					xmlTagStart = i;
+					if(insideHTMLComment) console.error(new Error("WTF"));
+				}
+				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
+					xmlTagWordLength = i - xmlTagStart;
+				}
+				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+					if(xmlTagWordLength === 0) xmlTagWordLength = i - xmlTagStart;
+					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, lastChar == "/") );
+					insideXmlTag = false;
+					xmlTagWordLength = 0;
+				}
+				
+			}
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;
@@ -1435,6 +1462,13 @@
 		
 		// Only functions Should have a prototype! 
 		
+	}
+	
+	function XmlTag(start, end, wordLength, selfEnding) {
+		this.start = start;
+		this.end = end;
+		this.wordLength = wordLength;
+		this.selfEnding = selfEnding;
 	}
 	
 	

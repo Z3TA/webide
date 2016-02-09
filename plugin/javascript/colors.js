@@ -24,7 +24,7 @@
 	
 	
 	function applyJScolors(buffer, file) {
-		// This is a preRender function! It must returnt he buffer!
+		// This is a preRender function! It must return the buffer!
 		
 		//file.debugGrid();
 		
@@ -35,8 +35,7 @@
 		console.time("applyJScolors");
 		
 		// Asume the buffer doesn't have any colors applied? Nope! 
-		// Makes this function 6 times slower
-		resetColors(buffer);
+		resetColors(buffer); // Makes this function 6 times slower
 			
 		var firstIndex = buffer[0].startIndex;
 		var lastRow = buffer[buffer.length-1];
@@ -61,6 +60,24 @@
 			for(var i=0; i<quotes.length; i++) {
 				if(quotes[i].start > lastIndex) break;
 				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor);
+			}
+		}
+		
+		// Color xml tags
+		var xmlTags = file.parsed.xmlTags;
+		var xmlTagColor = global.settings.style.xmlTagColor;
+		
+		if(xmlTags) {
+			for(var i=0; i<xmlTags.length; i++) {
+				if(xmlTags[i].start > lastIndex) break;
+				applyColor(buffer, xmlTags[i].start, xmlTags[i].start + xmlTags[i].wordLength, xmlTagColor);
+				if(xmlTags[i].selfEnding) {
+					applyColor(buffer, xmlTags[i].end-2, xmlTags[i].end, xmlTagColor);
+				}
+				else {
+					applyColor(buffer, xmlTags[i].end-1, xmlTags[i].end, xmlTagColor);
+					}
+				
 			}
 		}
 		

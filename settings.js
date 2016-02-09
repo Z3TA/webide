@@ -32,12 +32,14 @@ global.settings = { // sugg: separate view options
 		fontSize: 13,
 		font: "DejaVuSansMono, monospace", // You'll want to use Consolas 15px on Windows! DejaVuSansMono 13px looks best on Linux (Ubuntu)
 		highlightMatchFont: "bold 13px DejaVuSansMono",
-		highlightMatchFontColor: "rgb(0,0,255)",
+		highlightMatchFontColor: "rgb(31, 119, 32)",
+		highlightMissMatchFontColor: "rgb(255, 159, 0)",
 		highlightMatchBackground: "rgb(255, 255, 230)",
 		textColor: "rgb(0,0,0)",
 		bgColor: "rgb(256,256,256)",
 		commentColor: "rgb(8, 134, 29)",
 		quoteColor: "rgb(51, 128, 128)",
+		xmlTagColor: "rgb(0, 0, 255)",
 		selectedTextBg: "rgb(193, 214, 253)",
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting
