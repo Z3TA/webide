@@ -26,13 +26,20 @@ If you are on Windows, you might also need to add:
 --msvs_version=2015
 
 
+Font rendering
+--------------
+Each person, screen and OS seems to have different opinions on what type of font to use and how it should be rendered ...
 
-Linux crisp font
-----------------
+The most common method to make the text look "crisp" is anti-alias by increasing the RGB level for the edges.
+But if you have a modern screen with high pixel density, this might not be optimal. To turn off "LCD Text"
+you have to start the program with --disable-lcd-text.
 
-In order to turn text smoothing on in Ubuntu, do the following:
+Note that "LCD Text" is not (yet) supported for the Canvas in the nw.js build for Linux. 
 
-    * Go to System > Preferences > Appearance
-    * Go to the Fonts tab
-    * Under rendering, select Subpixel Smoothing (LCDs)
+You can change the font and colors under style in settings.js 
+If you like the default font, it's recommended to install it to the local system for faster loading.
+
+http://www.binarytides.com/gorgeous-looking-fonts-ubuntu-linux/
+
+
 
