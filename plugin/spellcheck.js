@@ -7,7 +7,7 @@
 	*/
 	"use strict";
 	
-	if(global.settings.enableSpellchecker===false) return;
+	//if(global.settings.enableSpellchecker===false) return;
 	
 
 	if(global.settings.enableSpellchecker===undefined) {
