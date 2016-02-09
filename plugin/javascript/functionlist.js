@@ -38,9 +38,13 @@
 	}
 	
 	function searchFunctionList(file, char, combo) {
-		if(captureKeyboard) {
+		if(captureKeyboard && !file.gotFocus) {
 			charBuffer += char;
 		}
+		else {
+			return true;
+		}
+		
 		if(charBuffer.length > 1) {
 			// Find the function in the functionlist
 			var currentFunctionName = searchFunctions(charBuffer, file.parsed.functions);
@@ -52,7 +56,8 @@
 				charBuffer = ""; // Clear the buffer if there is no match
 			}
 			
-			}
+		}
+		return true;
 		}
 	
 	function highlightCurrentFunction(eventName, file, cursor) {
@@ -194,9 +199,11 @@
 	
 	function hideFunctionList(file) {
 		if(functionListWrap) {
+			if(functionListWrap.style.display != "none") {
 			functionListWrap.style.display="none";
 			editor.resizeNeeded();
-			console.log("Functionlist is now hidden");
+				console.log("Functionlist is now hidden");
+				}
 		}
 	}
 	
