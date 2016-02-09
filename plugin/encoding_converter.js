@@ -30,7 +30,7 @@
 		}
 		
 		function problemFound(i) {
-			if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + "@" + i + " ? Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
+			if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + " ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
 				editor.readFromDisk(file.path, fileRead, false, "binary");
 			}
 
