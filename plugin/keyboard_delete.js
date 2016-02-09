@@ -22,12 +22,9 @@
 				
 			}
 			else {
-				file.deleteCharacter(file.caret);
+				file.deleteCharacter(file.caret, undefined, true); // true = renderRow
 			}
 				
-
-			editor.renderNeeded();
-			
 			return false; // Prevent default
 				
 		}

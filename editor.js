@@ -737,7 +737,7 @@ function objInfo(o) {
 			editor.renderNeeded();
 		}
 		
-		if(global.render) editor.render();
+		editor.renderNeeded(); // Always render after a resize (bot nor right away!?
 		
 	}
 

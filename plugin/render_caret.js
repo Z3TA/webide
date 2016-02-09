@@ -23,7 +23,7 @@
 		// Show the "direction" of the caret
 		ctx.fillRect(left, top+global.settings.gridHeight - global.settings.caret.width, 4, global.settings.caret.width);
 
-		
+		/*
 		console.log("caret: " + JSON.stringify(caret));
 		
 		if(caret.index == file.text.length) {
@@ -35,7 +35,8 @@
 		else {
 			console.log("caret at char=" + file.grid[caret.row][caret.col].char + "=" + file.text.charAt(caret.index) + " charCode=" + file.text.charCodeAt(caret.index) + "");
 		}
-
+		*/
+		
 	}
 
 })();

@@ -23,6 +23,7 @@
 			
 			if(file.selected.length > 0) {
 				file.deleteSelection();
+				//editor.renderNeeded();
 			}
 			
 			if(caret.index > 0) {
@@ -30,9 +31,7 @@
 				// Move the caret to the left, then delete that character
 				
 				file.moveCaretLeft();
-				file.deleteCharacter();
-
-				editor.renderNeeded();
+				file.deleteCharacter(undefined, undefined, true); // true = renderRow
 				
 			}
 			

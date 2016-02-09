@@ -17,8 +17,6 @@ Tab framför </table> (ska inte vara det)
 
 Editor sometimes becomes black when writing in some files ... Because the editor resizes.
 
-Render!? when inserting " (auto inserting) "
-
 making { codeblocks ... no render
 
 ---
@@ -172,6 +170,7 @@ auto-complete variable names!
 
 fonts: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif
 
+Better search in file. Like Nodepad++
 
 
 Optimization

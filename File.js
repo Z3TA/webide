@@ -1383,7 +1383,7 @@ File.prototype.unindentRow = function(row) {
 	
 }
 
-File.prototype.deleteCharacter = function(caret, bubble) {
+File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 	/*
 		Removes the character the caret is on.
 		Behaves like delete in most editors.	
@@ -1462,6 +1462,8 @@ File.prototype.deleteCharacter = function(caret, bubble) {
 		
 		console.log("Row " + (row+1) + " removed");
 		
+		renderRow = false;
+		
 	}
 	else {
 		
@@ -1480,6 +1482,8 @@ File.prototype.deleteCharacter = function(caret, bubble) {
 		}
 		*/
 	}
+	
+	if(renderRow) editor.renderRow(); // early paint
 	
 	// Remove the character(s) from the text string
 	file.text = file.text.substr(0, index) + file.text.substring(index+indexDecrementor, file.text.length);
@@ -1525,7 +1529,7 @@ File.prototype.deleteCharacter = function(caret, bubble) {
 	
 	file.scrollToCaret();
 	
-	editor.renderNeeded();
+	if(!renderRow) editor.renderNeeded();
 	
 	return caret;
 	
