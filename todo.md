@@ -1,15 +1,50 @@
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
-Currently working on: Figure out why the editor renders
+Currently working on: gtg in hurry! xmatching!?
 
 Fighting the hydra: Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
 
+Blog about sub-pixel-antialias (LCD Text).
+
 BUGS
 ====
 
-Sometimes Cant type after typing in the function list and double clicking there
+Editor sometimes fale to save!!!
+
+Tab framför </table> (ska inte vara det)
+
+HTML-kod ska vara blå!
+
+Don't insert " +  + " when finishing a "quote".
+
+Editor sometimes becomes black when writing in some files ... Because the editor resizes.
+
+Render!? when inserting " (auto inserting) "
+
+making { codeblocks ... no render
+
+--- Double clicking to select and mark word doesn't work on some words, even if they are the same!
+else if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
+insideHTMLComment = true;
+commentStart = i-4;
+}
+else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->
+insideHTMLComment = false;
+comments.push(new Comment(commentStart, i));
+//console.warn("Found HTML comment! line=" + lineNumber + " ");
+}
+---
+
+
+
+---
+
+xmatching.js:134 Uncaught TypeError: Cannot read property 'indentation' of undefined
+xmatching.js:134 highlightMatchxmatching.js:19 (anonymous function)editor.js:450 editor.rendereditor.js:1604 resizeAndRendereditor.js:1040 editor.interacteditor.js:1998 scrollWheel
+
+---
 
 Doesn't remember last size and position when started
 
@@ -160,6 +195,8 @@ fonts: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bit
 Optimization
 ============
 
+Wait some times before starting a parse. (dont have to parse while we're typing, most of the time). 
+
 Do the grid boxes really have to know their character index!?
 
 Test a huuuge .js file with many functions to see how the editor performs.
@@ -205,6 +242,8 @@ Fullscreen mode.
 Auto insert } outside of strings or regexp when typing {. And only if there is an un-match.
 Auto insert matching } at the Right place! For example when encapsulating code in an if-statement.
 
+Ctrl + D to declare a variable, add it to first var declaration above!?
+Color undeclared (global) variables in an evil color.
 
 When the cursor is on a } show a split screen with the matching {
 
