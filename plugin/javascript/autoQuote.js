@@ -33,7 +33,7 @@
 		// character is a single or double quote ...
 		
 		var lastCharacter = "";
-		var nextCharacter = ""
+		var nextCharacter = "";
 		
 		if(index > 0) {
 			lastCharacter = file.text.charAt(index-1);
@@ -70,6 +70,7 @@
 			// Check if the quote has an ending quote
 			for(var i=col+1; i<rowText.length; i++) {
 				char = rowText.charAt(i);
+				console.log("char=" + char);
 				if(char == quote) {
 					openQuote = false; // It's closed
 					break;
@@ -79,7 +80,7 @@
 		
 		var xor = ( ( openQuote|inQuote && !openQuote|inQuote ) || ( !openQuote|inQuote && openQuote|inQuote ) );
 		
-		/*
+		
 		console.log("quote=" + quote);
 		console.log("dblQuote=" + dblQuote);
 		console.log("singleQuote=" + singleQuote);
@@ -89,7 +90,7 @@
 		console.log("openQuote=" + openQuote);
 		
 		console.log("xor=" + xor);
-		*/
+		
 		
 		if(lastCharacter != "\\" && lastCharacter != quote && nextCharacter != quote) {
 			
@@ -119,7 +120,7 @@
 		
 		if(lastCol < 0) return "";
 		
-		var end = gridRow[lastCol].index;
+		var end = gridRow[lastCol].index+1;
 
 		//substr: second argument: Length
 		//substring: second argument: Index
