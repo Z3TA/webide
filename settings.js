@@ -7,7 +7,7 @@
 */
 
 global.settings = { // sugg: separate view options
-	devMode: true,  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
+	devMode: false,  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
 	insert: false,
 	enableSpellchecker: false,
 	enableDocumentPreview: false,
@@ -30,9 +30,10 @@ global.settings = { // sugg: separate view options
 	},
 	style: {
 		fontSize: 13,
-		font: "DejaVuSansMono, monospace", // You'll want to use Consolas 15px on Windows! DejaVuSansMono 13px loops best on Linux (Ubuntu)
-		highlightParenthesisFont: "13px DejaVuSansMono",
-		highlightParenthesisFontColor: "rgb(0,180,0)",
+		font: "DejaVuSansMono, monospace", // You'll want to use Consolas 15px on Windows! DejaVuSansMono 13px looks best on Linux (Ubuntu)
+		highlightMatchFont: "bold 13px DejaVuSansMono",
+		highlightMatchFontColor: "rgb(0,0,255)",
+		highlightMatchBackground: "rgb(255, 255, 230)",
 		textColor: "rgb(0,0,0)",
 		bgColor: "rgb(256,256,256)",
 		commentColor: "rgb(8, 134, 29)",

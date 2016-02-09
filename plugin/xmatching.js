@@ -133,7 +133,7 @@
 			var firstLocation = {
 				x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
 				y: global.settings.topMargin + row * global.settings.gridHeight
-			}
+			};
 			
 			console.log("firstP=" + firstP + " on row=" + row);
 
@@ -191,7 +191,7 @@
 			var secondLocation = {
 				x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
 				y: global.settings.topMargin + row * global.settings.gridHeight
-			}
+			};
 					
 				}
 			
@@ -200,21 +200,30 @@
 			
 			// Now when we got both positions, lets show something!
 			
-			ctx.fillStyle=global.settings.style.highlightParenthesisFontColor;
+			
 			
 			//ctx.rect(firstLocation.x, firstLocation.y, global.settings.gridWidth, global.settings.gridHeight); // x,y,width,height
 			//ctx.rect(secondLocation.x, secondLocation.y, global.settings.gridWidth, global.settings.gridHeight); // x,y,width,height
 			
-			ctx.font=global.settings.style.highlightParenthesisFont;
+			ctx.font=global.settings.style.highlightMatchFont;
 			
 			console.log("ctx.font=" + ctx.font);
-			console.log("global.settings.style.highlightParenthesisFont=" + global.settings.style.highlightParenthesisFont);
+			console.log("global.settings.style.highlightMatchFont=" + global.settings.style.highlightMatchFont);
+			
+			// Clear boxes before painting in them
+			/*
+			ctx.fillStyle = global.settings.style.highlightMatchBackground;
+			ctx.fillRect(firstLocation.x, firstLocation.y, global.settings.gridWidth, global.settings.gridHeight);
+			ctx.fillRect(secondLocation.x, secondLocation.y, global.settings.gridWidth, global.settings.gridHeight);
+			*/
+			
+			// Render the things
+			ctx.fillStyle=global.settings.style.highlightMatchFontColor;
 			
 			if(firstP > secondP) { // right parenthesis first
 				if(canSeeFirst) ctx.fillText(rP, firstLocation.x, firstLocation.y);
 				if(canSeeSecond) ctx.fillText(lP, secondLocation.x, secondLocation.y);
-				
-			}
+				}
 			else { // left parenthesis first
 				if(canSeeFirst) ctx.fillText(lP, firstLocation.x, firstLocation.y);
 				if(canSeeSecond) ctx.fillText(rP, secondLocation.x, secondLocation.y);
