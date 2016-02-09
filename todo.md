@@ -15,8 +15,6 @@ Editor sometimes fale to save!!!
 
 Tab framför </table> (ska inte vara det)
 
-Don't insert " +  + " when finishing a "quote".
-
 Editor sometimes becomes black when writing in some files ... Because the editor resizes.
 
 Render!? when inserting " (auto inserting) "

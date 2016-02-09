@@ -68,22 +68,37 @@
 			inQuote = true;
 			
 			// Check if the quote has an ending quote
-			for(var i=col; i<rowText.length; i++) {
+			for(var i=col+1; i<rowText.length; i++) {
 				char = rowText.charAt(i);
 				if(char == quote) {
-					openQuote = false;
+					openQuote = false; // It's closed
 					break;
 				}
 			}
 		}
-
+		
+		var xor = ( ( openQuote|inQuote && !openQuote|inQuote ) || ( !openQuote|inQuote && openQuote|inQuote ) );
+		
+		/*
+		console.log("quote=" + quote);
+		console.log("dblQuote=" + dblQuote);
+		console.log("singleQuote=" + singleQuote);
+		console.log("inQuote=" + inQuote);
+		console.log("insideDbl=" + insideDbl);
+		console.log("insideSingle=" + insideSingle);
+		console.log("openQuote=" + openQuote);
+		
+		console.log("xor=" + xor);
+		*/
+		
 		if(lastCharacter != "\\" && lastCharacter != quote && nextCharacter != quote) {
-			if(inQuote) {
+			
+			if(inQuote && !openQuote) {
 				file.insertText(" +  + " + quote);
 				file.moveCaretLeft(file.caret, 4);
 				editor.renderNeeded();
 			}
-			else if(openQuote && !(quote == singleQuote && insideDbl)) {
+			else if(   !xor    && !(quote == singleQuote && insideDbl)) {
 				// Insert one quote character
 				file.putCharacter(quote);
 				file.moveCaretLeft();
