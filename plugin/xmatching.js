@@ -2,7 +2,8 @@
 	/*
 		The editor can render (single row) before the index's for the grid is recalculated!
 		So we can not depend on these index's for rendering!
-	
+		
+		A renderer should Only depend on the buffer! Not the text nor the grid!
 	*/
 	
 	editor.on("start", init);
@@ -15,197 +16,105 @@
 	}
 	
 	function highLightX(a, b) {
-		global.renders.push(function(ctx, buffer, file) {
-			highlightMatch(ctx, buffer, file, a, b);
+		global.renders.push(function(ctx, buffer, file, startRow) {
+			highlightMatch(ctx, buffer, file, a, b, startRow);
 		});
 	}
 	
-	function highlightMatch(ctx, buffer, file, lP, rP) {
+	function highlightMatch(ctx, buffer, file, lP, rP, startRow) {
 		
-		console.time("highlightMatch " + lP + rP);
+		if(startRow == undefined) startRow = 0;
 		
-		console.log("Rendering highlight/match for " + lP + " and " + rP + "...");
+		var leftEqualsRightCount = true;
 		
-		if(file) {
+		// The caret position on the buffer
+		var row = file.caret.row - file.startRow + startRow;
+		var col = file.caret.col;
+		
+		console.log("row=" + row + " col=" + col + "");
+		
+		// Is the caret inside the buffer!?
+		var caretInsideBuffer = row >= 0 && row < buffer.length;
+		
+		if(caretInsideBuffer) {
+			// What type of character is the caret on?
+			var charAtCaret = "";
+			var charToTheLeft = "";
 			
-			var blockMatch = true;
-			
-			if(lP == "{") {
-				blockMatch = file.parsed.blockMatch;
-			}
-			// Is the caret visible on the screen?
-			var caret = file.caret;
-
-			
-			// Only highlight if the caret is close to a parenthesis 
-			var index = caret.index,
-				text = file.text,
-				char = text.charAt(index),
-				match,
-				firstP,
-				secondP,
-				skip = 0, // How many matches to skip before matching
-				lastChar = text.charAt(index - 1); // bug at first char?
-			
-			if(lastChar == lP && char == rP) {
-				// We are between two parenthesis
-				
-				console.log("We are between two parenthesis");
-				return;
-				
-			}
-			else if(char == lP || char == rP) {
-				firstP = index;
-			}
-			else if(lastChar == lP || lastChar == rP) {
-				firstP = index - 1;
+			if(!file.caret.eol && buffer[row].length > 0) {
+				charAtCaret = buffer[row][col].char;
 			}
 			
-			if(firstP == undefined) {
-				console.log("Caret is not next to a parenthesis! char=" + char + " lastChar=" + lastChar + "");
+			if(col > 0) {
+				charToTheLeft = buffer[row][col-1].char;
+			}
+			
+			
+			console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
+			
+			if(charToTheLeft == lP && charAtCaret == rP) { // (|)
+				console.log("We are between two matches");
 				return;
 			}
 			
+			// Figure out if we are next to a character we want to match, and witch one
+			var charToMatch;
+			if(charAtCaret == lP || charAtCaret == rP) {
+				console.log("charAtCaret==lP||rP, " + charAtCaret + "=" + lP + " || " + rP);
+				charToMatch = charAtCaret;
+			}
+			else if(charToTheLeft == lP || charToTheLeft == rP) {
+				console.log("wooot");
+				col--;
+				charToMatch = charToTheLeft;
+			}
+			else {
+				console.log("Caret is not close to an " + lP + " or " + rP + " ");
+				console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
+			
+				return;
+			}
+			
+			// todo: If the one at the character is not inside a string: ignore strings. If it's inside a string, search just that string.
+			
+				// A render function should not depend on a parser. Because some times there will be a render before a parse!
+			
+			// Search the buffer for the matching character
 			
 			
-			if(char == lP || lastChar == lP) {
-				// Search to the right
-				console.log("Searching right:");
-				for(var i=firstP+1, char; i<text.length; i++) {
-					char = text.charAt(i);
-					//console.log("i=" + i + " char= " + char + " skip=" + skip);
-					if(char == lP) skip++
-					else if(char == rP) {
-						if(skip--===0) {
-							secondP = i;
-							console.log("Found second RIGHT parenthesis at index=" + i + "");
-							break;
-						}
-					}
+			var leftPosition, rightPosition;
+			
+			if(charToMatch == lP) {
+				leftPosition = {row: row, col: col};
+				rightPosition = searchBufferRight(row, col+1);
 				}
-			}
 			else {// if(char == rP || lastChar == rP) {
-				// Search to the left
-				
-				console.log("Searching left:");
-				for(var i=firstP-1, char; i>=0; i--) {
-					char = text.charAt(i);
-					//console.log("i=" + i + " char= " + char + " skip=" + skip);
-					if(char == rP) skip++
-					else if(char == lP) {
-						if(skip--===0) {
-							secondP = i;
-							console.log("Found second LEFT parenthesis at index=" + i + "");
-							break;
-						}
-					}
+				leftPosition = searchBufferLeft(row, col-1);
+				rightPosition = {row: row, col: col};
 				}
-			}
 			
-			if(secondP == undefined) {
-				console.log("Matching parenthesis not found!")
+			console.log("leftPosition=" + JSON.stringify(leftPosition) + " rightPosition=" + JSON.stringify(rightPosition) );
+			
+			if(!leftPosition || !rightPosition) {
+				console.log("No match found! (probably located outside the buffer)")
 				return;
 			}
 			
-			
-			
-			/* 
-				Figure out where the parenthesis's are located on the screen ...
-				We know where the caret is! So we know firstP's location already
-			*/
-			console.log("caret.row=" + caret.row);
-			var row = caret.row - file.startRow; // the buffer row! (not file.grid row)
-			var col = caret.col - file.startColumn;
-			
-			var canSeeFirst = true;
-			
-			if(row > buffer.length) {
-				// We have now scrolled up and can no longer see the xmatch the cursor is on
-				canSeeFirst = false;
-				row = buffer.length-1;
-			}
-			
-			if(row < 0) {
-				// 
-				row = 0;
-				canSeeFirst = false;
-			}
-			
-			if(firstP < caret.index) col--;
-			
-			//console.warn("row=" + row );
 			
 			var firstLocation = {
-				x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
-				y: global.settings.topMargin + row * global.settings.gridHeight
+				x: global.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
+				y: global.settings.topMargin + (leftPosition.row+startRow) * global.settings.gridHeight
 			};
 			
-			console.log("firstP=" + firstP + " on row=" + row);
-
-			// Use the buffer to search the grid to find the location of the second parenthesis ...
-			var firstBufferIndex = buffer[0].startIndex;
-			var lastBufferIndex = getLastBufferIndex(buffer);
 			
-			//console.warn("row=" + row);
-			
-			
-			var canSeeSecond = true;
-			
-				
-			if(secondP < firstBufferIndex) {
-				console.log("Parenthesis is located above the buffer")
-				canSeeSecond = false;
-				}
-			if(secondP > lastBufferIndex) {
-				console.log("Parenthesis is located below the buffer");
-				canSeeSecond = false;
-			}
-			
-			if(!canSeeFirst && !canSeeSecond) {
-				// Can't see neither
-				//console.warn("Cant see neither");
-				return;
-				}
-			
-			row = buffer.length-1;
-			
-			if(canSeeSecond) {
-			// Start from the bottom and go up until we find the row that has the second parenthesis
-			console.log("Before: buffer[" + row + "].startIndex=" + buffer[row].startIndex + " > secondP=" + secondP + "");
-
-			while(buffer[row].startIndex > secondP) {
-				console.log("buffer[" + row + "].startIndex=" + buffer[row].startIndex + " > secondP=" + secondP + "");
-				row--;
-			}
-			
-			console.log("Second parenthesis can be found on row=" + row);
-			
-			// Traverse the column's to find what column the second parenthesis is on
-			for(col=0; col<buffer[row].length; col++) {
-				if(buffer[row][col].index == secondP) {
-					// We've found it!
-					console.log("Found col=" + col);
-					break;
-				}
-			}
-			
-			console.log("col is now " + col);
-			
-			col -= file.startColumn; // So that we get it right when scrolled horizontally
 			
 			var secondLocation = {
-				x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
-				y: global.settings.topMargin + row * global.settings.gridHeight
+				x: global.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
+					y: global.settings.topMargin + (rightPosition.row+startRow) * global.settings.gridHeight
 			};
 					
-				}
-			
-			console.log("firstLocation=" + JSON.stringify(firstLocation) + " secondLocation=" + JSON.stringify(secondLocation));
-			
-			
+				
 			// Now when we got both positions, lets show something!
-			
-			
 			
 			//ctx.rect(firstLocation.x, firstLocation.y, global.settings.gridWidth, global.settings.gridHeight); // x,y,width,height
 			//ctx.rect(secondLocation.x, secondLocation.y, global.settings.gridWidth, global.settings.gridHeight); // x,y,width,height
@@ -223,40 +132,78 @@
 			*/
 			
 			// Render the things
-			if(blockMatch === true) {
+			if(leftEqualsRightCount === true) {
 				ctx.fillStyle=global.settings.style.highlightMatchFontColor;
 			}
 			else {
 			ctx.fillStyle=global.settings.style.highlightMissMatchFontColor;
 			}
 			
-			if(firstP > secondP) { // right parenthesis first
-				if(canSeeFirst) ctx.fillText(rP, firstLocation.x, firstLocation.y);
-				if(canSeeSecond) ctx.fillText(lP, secondLocation.x, secondLocation.y);
-				}
-			else { // left parenthesis first
-				if(canSeeFirst) ctx.fillText(lP, firstLocation.x, firstLocation.y);
-				if(canSeeSecond) ctx.fillText(rP, secondLocation.x, secondLocation.y);
-			}
-			
+			ctx.fillText(lP, firstLocation.x, firstLocation.y);
+				ctx.fillText(rP, secondLocation.x, secondLocation.y);
 			
 			//ctx.fill(); // Needed for rect to fill!
 			
-			
-			
-			function getLastBufferIndex(buffer) {
-				var lastRow = buffer[buffer.length-1];
-				
-				if(lastRow.length > 0) {
-					return lastRow[lastRow.length-1].index;
-				}
-				else {
-					return lastRow.startIndex;
-				}
-			}
 		}
 		
 		console.timeEnd("highlightMatch " + lP + rP);
+		
+		
+		
+		function searchBufferRight(row, col) {
+			var skip = 0, char = "";
+			console.log("Searching right:");
+			for(var row=row; row<buffer.length; row++) {
+				for(var col=col; col<buffer[row].length; col++) {
+					char = buffer[row][col].char;
+					console.log(char + "=" + rP + " ? " + (char==rP));
+					if(char == lP) skip++
+					else if(char == rP) {
+						if(skip--===0) {
+							console.log("Found second RIGHT match at row=" + row + " col=" + col + " ");
+							return {row: row, col: col};
+						}
+					}
+				}
+				col = 0; // Start from the first column
+			}
+			return false; // Nothing found
+		}
+		
+		
+		function searchBufferLeft(row, col) {
+			// Look for lP ...
+		console.log("Searching left:");
+			// First search current row
+			var skip = 0, char = "";
+		for(var col=col; col>=0; col--) {
+			char = buffer[row][col].char;
+			console.log(char + "=" + lP + " ? " + (char==lP));
+			if(char == rP) skip++
+			else if(char == lP) {
+				if(skip--===0) {
+					console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
+					return {row: row, col: col};
+				}
+			}
+		}
+		// Then search the rest
+		for(var row=row-1; row>=0; row--) { // Search up
+			for(var col=0; col<buffer[row].length; col++) { // We can start from the left because we already searched the first row
+				char = buffer[row][col].char;
+				console.log(char + "=" + lP + " ? " + (char==lP));
+				if(char == rP) skip++
+				else if(char == lP) {
+					if(skip--===0) {
+						console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
+							return {row: row, col: col};
+					}
+				}
+			}
+			}
+			return false; // Did not find it.
+			}
+		
 	}
 	
 	

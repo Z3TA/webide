@@ -8,6 +8,12 @@ Fighting the hydra: Every time I try to fix one bug, I find five more major bugs
 
 Blog about sub-pixel-antialias (LCD Text).
 
+Auto insert .. } if it makes sense to do so. 
+
+Not giving  } the right indentation
+
+Really need to warn if there is = inside an if() !!
+
 BUGS
 ====
 
@@ -38,7 +44,7 @@ function foo..
 
 Auto-completion of variable names doesn't seem to work!?
 
-The screen becomes black when typing (due to resize!?)
+The screen becomes black when typing (due to resize!?) asdasd  
 
 
 fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)

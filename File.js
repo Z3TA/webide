@@ -686,7 +686,7 @@ File.prototype.putCharacter = function(character, caret) {
 		caret.col++;
 		caret.index++;
 		
-		editor.renderRow(row); // Render the row
+		editor.renderRow(row); // Render the row early (before heavy indexing)
 		
 		// Increment index of the rest of the columns on this row
 		for(var j=col+1; j<grid[row].length; j++) {
@@ -1483,11 +1483,10 @@ File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 		*/
 	}
 	
-	if(renderRow) editor.renderRow(); // early paint
-	
 	// Remove the character(s) from the text string
 	file.text = file.text.substr(0, index) + file.text.substring(index+indexDecrementor, file.text.length);
-
+	
+	
 	// Did we delete the last character on the row?
 	if(grid[caret.row].length == caret.col) {
 		caret.eol = true;
@@ -1500,6 +1499,9 @@ File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 	
 	// Update the caret index ??
 	//caret.index -= indexDecrementor;
+	
+	if(renderRow) editor.renderRow(); // early paint (always change/update both the text, grid and cursor before rendering! Or some functionality like xmatching will not work properly.
+	
 	
 	// Decrement index of the rest of the columns on this row
 	for(var j=col; j<grid[row].length; j++) {
