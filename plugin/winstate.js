@@ -111,8 +111,6 @@
 		   window.localStorage['windowState'] = JSON.stringify(winState);
 	}
 
-	initWindowState();
-
 	win.on('maximize', function () {
 		isMaximizationEvent = true;
 		currWinMode = 'maximized';
@@ -163,10 +161,11 @@
 	}, false);
 
 	
-	// Use editor close event
+	// Use editor events!
+	
 	editor.on("exit", winstateOnClose);
 	
-	
+	editor.on("start", initWindowState);
 	
 	function winstateOnClose() {
 		try {
@@ -174,7 +173,7 @@
 			return true;
 		} catch(err) {
 			console.warn("winstateError: " + err);
-			return false;
+			return false; // False means: Do not close
 		}
     }
     

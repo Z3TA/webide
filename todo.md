@@ -31,7 +31,7 @@ xmatching.js:134 highlightMatchxmatching.js:19 (anonymous function)editor.js:450
 
 ---
 
-Doesn't remember last size and position when started
+Sometimes on Linux, open file doesn't start in last folder.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
