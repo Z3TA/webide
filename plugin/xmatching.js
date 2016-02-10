@@ -143,7 +143,21 @@
 				ctx.fillText(rP, secondLocation.x, secondLocation.y);
 			
 			//ctx.fill(); // Needed for rect to fill!
+		}
+		else {
+			// The caret is not inside the buffer.
 			
+			// Draw a line depending on the caret indentation
+			
+			var indentation = file.grid[file.caret.row].indentation;
+			
+			var x = global.settings.leftMargin + (indentation * global.settings.tabSpace) * global.settings.gridWidth;
+			
+			ctx.beginPath();
+			ctx.moveTo(x, 0);
+			ctx.lineTo(x, global.view.canvasHeight);
+			ctx.stroke();
+				
 		}
 		
 		console.timeEnd("highlightMatch " + lP + rP);

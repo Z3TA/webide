@@ -5,17 +5,33 @@ Currently working on: gtg in hurry! xmatching!?
 
 Fighting the hydra: Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
 
-
 Blog about sub-pixel-antialias (LCD Text).
 
-Auto insert .. } if it makes sense to do so. 
 
-Not giving  } the right indentation
+* Auto insert .. } if it makes sense to do so. 
 
-Really need to warn if there is = inside an if() !!
+* Really need to warn if there is = inside an if() !!
+
+* Some sort of block helper: when for example inserting in if-statement, the indentation get lost. 
+  Show a ruler or something!? When there is not a matching count of {} in the document.
+  ex: {{<-- 
+      }
+
+* When editing plain text it would be nice to be able to have spaces/tabs for indentation!
+  Example, when making a dot list. Or should the editor do that to!?
+
 
 BUGS
 ====
+
+
+
+--
+
+File.js:2361 Uncaught TypeError: Cannot read property 'highlighted' of undefinedFile.js:2361 File.highLightBoxFile.js:2349 File.highlightTextmouse_select.js:171 mouseSelecteditor.js:1910 mouseUp
+--
+
+Not giving  } (or the last thing at the block) the right indentation
 
 Editor sometimes fails to save!!!
 

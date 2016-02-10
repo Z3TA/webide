@@ -2346,13 +2346,14 @@ File.prototype.highlightText = function(text) {
 		
 		textRange = file.createTextRange(start, end);
 		
-		textRange.forEach(highLight);
+		textRange.forEach(highLightBox);
 		
 		start = end+1; // Continue search at the end of the word to prevent loop
 		
 	}
 	
-	function highLight(box) {
+	function highLightBox(box) {
+		// box is a gridBox
 		box.highlighted = true;
 		file.highlighted.push(box);
 	}
