@@ -1893,7 +1893,6 @@ File.prototype.createGrid = function() {
 
 	var lastLinebreakCharacter = "";
 	var lineBreakCharacters = file.lineBreak.length;
-	var currentLineBreakCharacters = 0;
 	
 	console.log("lineBreakCharacters=" + lineBreakCharacters + " (" + file.lineBreak.replace(/\r/g, "R(10)").replace(/\n/g, "N(13)") + ")");
 	
@@ -1927,7 +1926,7 @@ File.prototype.createGrid = function() {
 	
 	return grid;
 	
-	// Optimization is the root of all evil!!!
+	// Optimizations are the root of all evil!!!
 	
 	
 	function addCharacterToGrid(textIndex) {
@@ -1963,13 +1962,12 @@ File.prototype.createGrid = function() {
 			grid[row] = [];
 			
 			grid[row].lineNumber = lineNumber;
-			grid[row].startIndex = textIndex + currentLineBreakCharacters;
+			grid[row].startIndex = textIndex + 1; // It will star at next character (+1)
 			grid[row].indentation = codeBlockDepth;
 			grid[row].indentationCharacters = "";
 			col = 0;
 			tabulation = true;
-			currentLineBreakCharacters = 0;
-		}
+			}
 		else if((char == "\t" || char == " ") && tabulation) {
 			/*
 				Tabs and spaces after a line break will be ignored.
@@ -1984,8 +1982,7 @@ File.prototype.createGrid = function() {
 		}
 		else if(char == "\n" || char == "\r") {
 			// Ignoring LF, CR
-			currentLineBreakCharacters++;
-		}
+			}
 		else {
 			
 			//console.log("character=" + char + " (" + char.charCodeAt(0) + ")");
