@@ -21,14 +21,7 @@
 
 		
 		// Add items to the canvas context meny
-		var menu = document.getElementById("canvasContextmenu");
-		
-		var menuElement = document.createElement("li");
-		menuElement.appendChild(document.createTextNode("Save as ..."));
-		menuElement.onclick = saveAs;
-		
-		menu.appendChild(menuElement);
-		
+		editor.addMenuItem("Save as ...", saveAs);
 		
 	}
 	
@@ -41,12 +34,13 @@
 		var file = global.currentFile;
 		var defaultPath;
 		
-		if(!file) console.error("No file open!?");
+		if(!file) console.error(new Error("No file open!?"));
 		
 		if(file.savedAs) {
 			// Set the current path as default
 			defaultPath = file.path;
 		}
+		// else: it will use the path of the last savedAs file viewed
 
 		editor.fileSaveDialog(defaultPath, function(path) {
 			editor.save(file, path);

@@ -313,11 +313,22 @@ function objInfo(o) {
 		
 		var fileSaveAs = document.getElementById("fileSaveAs");
 		
-		if(defaultPath) fileSaveAs.setAttribute("nwsaveas", defaultPath);
+		if(defaultPath) editor.setFileSavePath(defaultPath);
 					
 		fileSaveAs.click(); // Bring up the OS path selector window
 	}
-
+	
+	editor.setFileSavePath = function(defaultPath) {
+		var fileSaveAs = document.getElementById("fileSaveAs");
+		fileSaveAs.setAttribute("nwsaveas", defaultPath);
+	}
+	
+	editor.setFileOpenPath = function(defaultPath) {
+		// path needs to be a directory
+		var fileOpen = document.getElementById("fileInput");
+		fileOpen.setAttribute("nwworkingdir", defaultPath);
+	}
+	
 	editor.fileOpenDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS file select dialog window.
@@ -341,9 +352,8 @@ function objInfo(o) {
 			
 			if(! (lastChar == "/" || lastChar == "\\")) {
 				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
-			} 
-			fileOpen.setAttribute("nwworkingdir", defaultPath);
-			
+			}
+			editor.setFileOpenPath(defaultPath);
 			
 			// If we want to choose a while directory,  fileOpen.setAttribute webkitdirectory
 		}
@@ -363,14 +373,24 @@ function objInfo(o) {
 			}
 			else {
 				console.warn("No file open!");
-				return process.cwd();
+				return process.cwd(); // Return (editor) working dir
 			}
 			
 		}
 		
 		return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"))); 
 	}
-
+	
+	editor.isFilePath = function(filePath) {
+		try {
+			var stat = fs.lstatSync(filePath);
+			return stat.isFile();
+		}
+		catch(e) {
+			return false;
+		}
+	}
+	
 	editor.renderNeeded = function() {
 		// Tell the editor that it needs to render
 		if(global.settings.devMode && global.render == false) {

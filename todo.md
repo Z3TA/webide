@@ -10,29 +10,12 @@ Blog about sub-pixel-antialias (LCD Text).
 BUGS
 ====
 
-Not giving  } (or the last thing at the block) the right indentation
-
-Editor sometimes fails to save!!! When?
-
----
-winstateOnClose returned true
-file_tabs.js:618 Error: File='C:\Users\Z\dev-repositories\cmsjz\home\sv\blog\nodejs.htm' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A","C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\functions.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\functionlist.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\xmatching.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\install-instructions.txt","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\colors.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\markWord.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autocomplete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autoQuote.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_delete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_backSpace.js","C:\\Users\\Z\\dev-repositories\\cmsjz\\home\\sv\\blog\\_nodejs.htm"]message: "File='C:\Users\Z\dev-repositories\cmsjz\home\sv\blog\nodejs.htm' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A","C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\functions.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\functionlist.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\xmatching.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\install-instructions.txt","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\colors.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\markWord.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autocomplete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\autoQuote.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_delete.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\keyboard_backSpace.js","C:\\Users\\Z\\dev-repositories\\cmsjz\\home\\sv\\blog\\_nodejs.htm"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:618 saveSate
-file_tabs.js:627 Uncaught TypeError: Cannot read property 'isSaved' of undefined
-61486 console messages are not shown.
-editor.js:1169 Closing the editor ...
-editor.js:1181 winstateOnClose returned true
----
+Sometimes when closing a file, the editor doesn't swtich to an existing one ...
+And when the next file is closed, it tries to switch to an already closed file!
 
 making { codeblocks ... no render
 
----
-
-xmatching.js:134 Uncaught TypeError: Cannot read property 'indentation' of undefined
-xmatching.js:134 highlightMatchxmatching.js:19 (anonymous function)editor.js:450 editor.rendereditor.js:1604 resizeAndRendereditor.js:1040 editor.interacteditor.js:1998 scrollWheel
-
----
-
-Sometimes on Linux, open file doesn't start in last folder.
+Function help hinting doesnt go away when typing.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
@@ -119,6 +102,10 @@ Tab framför </table> (ska inte vara det)
 Polishing
 =========
 
+Switch file-tab positions
+
+A "check" sign when toggling stuff (if its on or off) in the context menu (right click).
+
 * Auto insert .. } if it makes sense to do so.
 
 * Really need to warn if there is = inside an if() !!
@@ -200,6 +187,8 @@ Better search in file. Like Nodepad++
 Optimization
 ============
 
+
+
 Wait some times before starting a parse. (dont have to parse while we're typing, most of the time). 
 
 Do the grid boxes really have to know their character index!?
@@ -218,9 +207,17 @@ Hide lag by rendering before doing work.
 
 editor.renderPart(row, col, length); // Render part of the grid 
 
+Can we get rid of the file.text and only use the grid!? Only convert the grid to text when saving. 
+
+
+
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+Sometimes get error about file not being open, when closing a bunch of files: file_tabs.js:618 
+
+Editor sometimes fails to save!!! When? there's an error / something crash?
+
 Sometimes when undoing (ctrl+Z) the caret is placed on a non existing grid column!
 
 Black screen when opening file
@@ -236,9 +233,17 @@ Opening another file shewed the div's so that preview dropped down and canvas ha
 Feature
 -------
 
+
 Drop files into the editor to open them.
 
+Different themses during day/night (sun up/down). Black on white is best when the room is light, but if the room is dark, a black background also works!
+Light bounce off light colors, that's why you can't have light text when it's light, or the text will seem blurry.
+Light also makes the eye focus more. And contrast will atttract most focus.
+
+Gameification, skinners box, highscore, get more points the more time you spend in the editor. Achemenets (for duing unusual stuff) and rewards (thropfies!?)
+
 When caret is next to {, make everything orange down to matching }
+
 When selecting several rows and hitting tab, make it a block by inserting { selection }
 
 

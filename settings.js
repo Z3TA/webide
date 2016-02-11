@@ -35,8 +35,8 @@ global.settings = { // sugg: separate view options
 		highlightMatchFontColor: "rgb(31, 119, 32)",
 		highlightMissMatchFontColor: "rgb(255, 159, 0)",
 		highlightMatchBackground: "rgb(255, 255, 230)",
-		textColor: "rgb(0,0,0)",
-		bgColor: "rgb(256,256,256)",
+		textColor: "rgb(0,0,0)", // Should be in rgb(0,0,0) format because some functions like to convert and make darker/lighter/transparent
+		bgColor: "rgb(256,256,256)", // Studies say that black on white is the best for readability. todo: themes
 		commentColor: "rgb(8, 134, 29)",
 		quoteColor: "rgb(51, 128, 128)",
 		xmlTagColor: "rgb(0, 21, 162)",

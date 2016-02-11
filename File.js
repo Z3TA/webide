@@ -2118,10 +2118,9 @@ File.prototype.show = function(focus) {
 	
 	// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 	if(file.savedAs) {
-		var fileSaveAs = document.getElementById("fileSaveAs");
-		fileSaveAs.setAttribute("nwsaveas", editor.getDir(file.path));
-		//console.warn(fileSaveAs.getAttribute("nwsaveas"));
-	}
+		editor.setFileSavePath(file.path);
+		editor.setFileOpenPath(editor.getDir(file.path));
+		}
 	
 	
 	file.canvas.style.display = "block";

@@ -33,15 +33,7 @@
 			var startIndex = file.grid[file.caret.row].startIndex;
 			var endIndex = (file.grid.length-1 > file.caret.row ? file.grid[file.caret.row+1].startIndex : file.text.length) - file.lineBreak.length;
 			var filePath = file.text.substring(startIndex, endIndex).trim(); //substring: second argument: Index
-			var isFilePath = false;
-			
-			try {
-				var stat = fs.lstatSync(filePath);
-				isFilePath = stat.isFile();
-			}
-			catch(e) {
-				//console.log(e);
-			}
+			var isFilePath = editor.isFilePath(filePath);
 			
 			if(isFilePath) {
 				// The text on the row is a file path! Open that file.
@@ -68,6 +60,10 @@
 			defaultPath = editor.getDir(global.currentFile.path);
 
 		
+		}
+		else {
+			// No current file opened. Use working dir!?
+			//defaultPath = editor.workingDirectory;
 		}
 		
 		console.log("Telling the editor to open the file dialog window ...");
