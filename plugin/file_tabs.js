@@ -78,11 +78,11 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		buildTabs();
 		
 		// After we have opened the files, set listener for file load and close ...
-		editor.on("fileLoad", addToOpenedFiles);
-		editor.on("fileClose", removeFromOpenedFiles);
-		editor.on("fileLoad", loadFile_tabs);
-		editor.on("fileClose", closeFile_tabs);
-
+		editor.on("fileLoad", addToOpenedFiles, 1);
+		editor.on("fileLoad", loadFile_tabs, 2);
+		
+		editor.on("fileClose", removeFromOpenedFiles, 1);
+		editor.on("fileClose", closeFile_tabs, 2);
 		
 		// Use editor close event
 		editor.on("exit", reopen_files_closeEditor);

@@ -7,10 +7,12 @@ Fighting the hydra: Every time I try to fix one bug, I find five more major bugs
 
 Blog about sub-pixel-antialias (LCD Text).
 
+Try do debug without console.log!
+
 BUGS
 ====
 
-Seems like we have a memory leak!? l
+Seems like we have a memory leak!?
 
 Sometimes when closing a file, the editor doesn't swtich to an existing one ...
 And when the next file is closed, it tries to switch to an already closed file!
