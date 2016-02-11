@@ -128,8 +128,8 @@ function File(text, path, fileIndex) {
 			
 		}
 		
-		console.log("voteTabs:" + voteTabs);
-		console.log("voteSpaces:" + voteSpaces);
+		//console.log("voteTabs:" + voteTabs);
+		//console.log("voteSpaces:" + voteSpaces);
 		
 		
 		if(voteTabs >= voteSpaces) {
@@ -139,13 +139,13 @@ function File(text, path, fileIndex) {
 			// Use spaces for indentation, but how many?
 			spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
 			
-			console.log("spaces count:" + spaces);
+			//console.log("spaces count:" + spaces);
 			
 			for(var i=0; i<spaces; i++) {
 				returnString += " ";
 			}
 			
-			console.log("indentation-string: '" + returnString + "'");
+			//console.log("indentation-string: '" + returnString + "'");
 			
 			return returnString;
 		}
@@ -203,7 +203,7 @@ function File(text, path, fileIndex) {
 		var nr = occurrences(text, "\n\r", true),
 			rn = occurrences(text, "\r\n", true)
 		
-		console.log("Line break? nr=" + nr + " rn=" + rn + "");
+		//console.log("Line break? nr=" + nr + " rn=" + rn + "");
 		
 		if(rn > nr) {
 			return "\r\n";
@@ -277,12 +277,12 @@ File.prototype.createCaret = function(index, row, col) {
 	
 	file.checkGrid();
 
-	console.log("caret=" + JSON.stringify(caret));
+	//console.log("caret=" + JSON.stringify(caret));
 
 	
 	if(index == undefined && (row == undefined || col == undefined)) {
 		// We have nothing
-		console.log("Placing new caret at the first column");
+		//console.log("Placing new caret at the first column");
 		
 		if(file.text.length > 0) {
 			var firstColumn = file.grid[0][0];
@@ -688,6 +688,11 @@ File.prototype.putCharacter = function(character, caret) {
 		
 		editor.renderRow(row); // Render the row early (before heavy indexing)
 		
+		// Mehh, it wont render until JavaScript have finished crushing ... 
+		// Fix!? Use setTimeout!? Works sometimes. But sanityCheck fails! asdasdas alksjdalskjdlaksdjalskdj asdlkjasdlj
+		
+		
+		
 		// Increment index of the rest of the columns on this row
 		for(var j=col+1; j<grid[row].length; j++) {
 			grid[row][j].index++;
@@ -702,11 +707,12 @@ File.prototype.putCharacter = function(character, caret) {
 			}
 		}
 		
-		console.log("Done fixing grid indexes");
+		//console.log("Done fixing grid indexes");
 		
 		//global.render = false;
 		
 		file.scrollToCaret(caret);
+		
 		
 	}
 	
@@ -714,13 +720,11 @@ File.prototype.putCharacter = function(character, caret) {
 	// Call file edit listeners
 	file.change("insert", character, index, row, col) // change, text, index, row, col
 
-	
 	console.timeEnd("putCharacter");
 	
 	file.sanityCheck();
 
-
-	//editor.renderNeeded();
+//editor.renderNeeded();
 	
 }
 
@@ -735,9 +739,9 @@ File.prototype.select = function(box, direction) {
 		return;
 	}
 	
-	console.log("Selecting ...");
+	//console.log("Selecting ...");
 	
-	console.log(typeof box);
+	//console.log(typeof box);
 	
 	// Turn the box to an array of boxes, if it's not already an array
 	if(Object.prototype.toString.call( box ) != '[object Array]') {
@@ -837,7 +841,7 @@ File.prototype.deleteSelection = function(selection) {
 		return;
 	}
 	
-	console.log("Removing selection:\n" + JSON.stringify(selection));
+	//console.log("Removing selection:\n" + JSON.stringify(selection));
 	
 	var firstIndex = selection[0].index;
 
@@ -879,7 +883,7 @@ File.prototype.deleteSelection = function(selection) {
 			
 			box = selection[i];
 			
-			console.log("Deselecting box:\n" + JSON.stringify(box));
+			//console.log("Deselecting box:\n" + JSON.stringify(box));
 			
 			// Move caret to the box
 			file.caret = file.moveCaretToIndex(box.index);
@@ -948,7 +952,7 @@ File.prototype.getSelectedText = function() {
 		box,
 		missed = "";
 	
-	console.log("SEL:" + JSON.stringify(selected, null, 2));
+	//console.log("SEL:" + JSON.stringify(selected, null, 2));
 	
 	// Selected text always goes from left to right!
 	
@@ -962,7 +966,7 @@ File.prototype.getSelectedText = function() {
 				index++;
 				missed = file.text.charAt(index);
 				text += missed;
-				console.log("missed=" + missed + " (" + missed.charCodeAt(0) + ")");
+				//console.log("missed=" + missed + " (" + missed.charCodeAt(0) + ")");
 			}
 		}
 		text += selected[i].char;
@@ -986,7 +990,7 @@ File.prototype.insertLineBreak = function(caret) {
 	file.sanityCheck();
 	
 	
-	console.log("Inserting lalaline breaka at " + JSON.stringify(caret));
+	//console.log("Inserting lalaline breaka at " + JSON.stringify(caret));
 
 	// Sanity check in case someting is wrong
 	file.sanityCheck();
@@ -1003,7 +1007,7 @@ File.prototype.insertLineBreak = function(caret) {
 		newRow,
 		movedCharacters = 0;
 	
-	console.log("Inserting line break at index=" + index);
+	//console.log("Inserting line break at index=" + index);
 
 	
 	// Insert a new row
@@ -1044,20 +1048,20 @@ File.prototype.insertLineBreak = function(caret) {
 
 	
 	
-	console.log("totalCharactersAdded=" + totalCharactersAdded);
+	//console.log("totalCharactersAdded=" + totalCharactersAdded);
 	
 	file.debugGrid();
 	
-	console.log("currentRow.length=" + currentRow.length);
-	console.log("newRow.length=" + newRow.length);
+	//console.log("currentRow.length=" + currentRow.length);
+	//console.log("newRow.length=" + newRow.length);
 	
-	console.log("currentRow=" + JSON.stringify(currentRow));
-	console.log("newRow=" + JSON.stringify(newRow));
+	//console.log("currentRow=" + JSON.stringify(currentRow));
+	//console.log("newRow=" + JSON.stringify(newRow));
 
 	
 	// Move all characters right of col to the new line
 	for(var i=col; i<currentRow.length; i++) {
-		console.log(i);
+		//console.log(i);
 		movedCharacters++;
 		newRow.push(currentRow[i]);
 	}
@@ -1068,7 +1072,7 @@ File.prototype.insertLineBreak = function(caret) {
 	currentRow.length = col;
 	
 	
-	console.log("movedCharacters=" + movedCharacters);
+	//console.log("movedCharacters=" + movedCharacters);
 	if(movedCharacters===0) {
 		// Caret should be on eol if no characters where moved
 		caret.eol = true;
@@ -1098,7 +1102,7 @@ File.prototype.insertLineBreak = function(caret) {
 	}
 	
 	
-	console.log("row=" + row + " " + file.startRow + " + " + global.view.visibleRows + " = " + (file.startRow + global.view.visibleRows) + "");
+	//console.log("row=" + row + " " + file.startRow + " + " + global.view.visibleRows + " = " + (file.startRow + global.view.visibleRows) + "");
 	
 	// Scroll down if we ended up under visible space
 	if(row >= file.startRow + global.view.visibleRows - 1 ) {
@@ -1138,10 +1142,10 @@ File.prototype.moveCaretRight = function(caret) {
 			caret.row++;
 			caret.col = 0;
 			caret.index += file.lineBreak.length;
-			console.log("Moved caret.index " + file.lineBreak.length + " steps to the right doe to linebreak");
+			//console.log("Moved caret.index " + file.lineBreak.length + " steps to the right doe to linebreak");
 			
 			caret.index += file.grid[caret.row].indentationCharacters.length;
-			console.log("Moved caret.index " + file.grid[caret.row].indentationCharacters.length + " steps to the right due to indentation");
+			//console.log("Moved caret.index " + file.grid[caret.row].indentationCharacters.length + " steps to the right due to indentation");
 			
 			if(file.grid[caret.row].length == 0) {
 				caret.eol = true;
@@ -1194,7 +1198,7 @@ File.prototype.moveCaretLeft = function(caret, times) {
 	var grid = file.grid;
 	var row = caret.row;
 		
-	console.log("Moving caret left from " + JSON.stringify(caret) + "...");
+	//console.log("Moving caret left from " + JSON.stringify(caret) + "...");
 
 
 	 // Sanity check in case something is wrong
@@ -1205,14 +1209,14 @@ File.prototype.moveCaretLeft = function(caret, times) {
 		
 		if(caret.col == -1) {
 			// Move one row up
-			console.log("Moving one row up");
+			//console.log("Moving one row up");
 			caret.row--;
 			caret.col = grid[caret.row].length;
 			caret.eol = true;
 			caret.index -= file.lineBreak.length;
 			caret.index -= grid[row].indentationCharacters.length;
 			
-			console.log("caret.index=" + caret.index + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
+			//console.log("caret.index=" + caret.index + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
 			
 		}
 		else {
@@ -1293,7 +1297,7 @@ File.prototype.moveCaretUp = function(caret) {
 		// Move the the start of the file
 		file.moveCaretToIndex(0, caret);
 		
-		console.log("Moved to start of file: " + JSON.stringify(caret));
+		//console.log("Moved to start of file: " + JSON.stringify(caret));
 	}
 	
 	file.sanityCheck();
@@ -1327,7 +1331,7 @@ File.prototype.moveCaretDown = function(caret) {
 		var gridRowLength = gridRow.length;
 		var indentationDiff = (rowBefore.indentation - gridRow.indentation) * global.settings.tabSpace;
 		
-		console.log("indentationDiff=" + indentationDiff);
+		//console.log("indentationDiff=" + indentationDiff);
 		
 
 
@@ -1362,7 +1366,7 @@ File.prototype.moveCaretDown = function(caret) {
 		else {
 			caret.eol = false;
 			
-			console.log(JSON.stringify(caret, null, 4));
+			//console.log(JSON.stringify(caret, null, 4));
 			
 			caret.index = gridRow[caret.col].index;
 		}
@@ -1397,7 +1401,7 @@ File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 	
 	file.sanityCheck();
 	
-	console.log("Deleting character at " + JSON.stringify(caret) + " ...");
+	//console.log("Deleting character at " + JSON.stringify(caret) + " ...");
 	
 	var grid = file.grid,
 		row = caret.row,
@@ -1460,7 +1464,7 @@ File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 			grid[i].lineNumber--;
 		}
 		
-		console.log("Row " + (row+1) + " removed");
+		//console.log("Row " + (row+1) + " removed");
 		
 		renderRow = false;
 		
@@ -1560,7 +1564,7 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 	
 	*/
 	
-	console.log("moveCaretToIndex: " + index + "(text.length=" + file.text.length + ")");
+	//console.log("moveCaretToIndex: " + index + "(text.length=" + file.text.length + ")");
 	
 	if(file.text.length == 0) {
 		caret.index = 0;
@@ -1665,7 +1669,7 @@ File.prototype.getIndexFromRowCol = function(row, col) {
 	var file = this,
 		grid = file.grid;
 	
-	console.log("getIndexFromRowCol!")
+	//console.log("getIndexFromRowCol!")
 	
 	if(row == undefined) console.error(new Error("row is undefined!"));
 	if(col == undefined) console.error(new Error("col is undefined!"));
@@ -1809,11 +1813,11 @@ File.prototype.open = function() {
 	var file = this,
 		content = document.getElementById("content");	
 	
-	console.log("opening file " + file.path + ""); 
+	//console.log("opening file " + file.path + ""); 
 	
 	content.appendChild(file.canvas);
 	
-	console.log("file " + file.path + " canvas appended to document");
+	//console.log("file " + file.path + " canvas appended to document");
 	
 	file.show(file);
 	
@@ -1836,10 +1840,10 @@ File.prototype.load = function() { // Rename to triggerLoadListeners or somethin
 	
 	*/
 	
-	console.log("Calling fileLoad listeners for: " + file.path);
+	//console.log("Calling fileLoad listeners for: " + file.path);
 	
 	for(var i=0; i<global.eventListeners.fileLoad.length; i++) {
-		console.log("function " + functionName(global.eventListeners.fileLoad[i].fun));
+		//console.log("function " + functionName(global.eventListeners.fileLoad[i].fun));
 		global.eventListeners.fileLoad[i].fun(file); // Call function
 	}
 }
@@ -1871,7 +1875,7 @@ File.prototype.createGrid = function() {
 	
 	*/
 	
-	console.log("creating grid");
+	//console.log("creating grid");
 	
 	console.time("createGrid");
 
@@ -1896,7 +1900,7 @@ File.prototype.createGrid = function() {
 	var lastLinebreakCharacter = "";
 	var lineBreakCharacters = file.lineBreak.length;
 	
-	console.log("lineBreakCharacters=" + lineBreakCharacters + " (" + file.lineBreak.replace(/\r/g, "R(10)").replace(/\n/g, "N(13)") + ")");
+	//console.log("lineBreakCharacters=" + lineBreakCharacters + " (" + file.lineBreak.replace(/\r/g, "R(10)").replace(/\n/g, "N(13)") + ")");
 	
 	if(lineBreakCharacters > 1) {
 		lastLinebreakCharacter = file.lineBreak.charAt(1);
@@ -1905,7 +1909,7 @@ File.prototype.createGrid = function() {
 		lastLinebreakCharacter = file.lineBreak.charAt(0);
 	}
 	
-	console.log("lastLinebreakCharacter=" + lastLinebreakCharacter.charCodeAt(0) + " (charcode)");
+	//console.log("lastLinebreakCharacter=" + lastLinebreakCharacter.charCodeAt(0) + " (charcode)");
 	
 	grid[0] = []; // First column
 	grid[0].lineNumber = 1;
@@ -1913,7 +1917,7 @@ File.prototype.createGrid = function() {
 	grid[0].indentationCharacters = "";
 	grid[0].startIndex = 0;
 	
-	console.log("global.view.visibleColumns=" + global.view.visibleColumns);
+	//console.log("global.view.visibleColumns=" + global.view.visibleColumns);
 	
 	for(var i=0; i<totalCharacters; i++) {
 		addCharacterToGrid(i);
@@ -1924,7 +1928,7 @@ File.prototype.createGrid = function() {
 	
 	console.timeEnd("createGrid");
 	
-	console.log("grid created");
+	//console.log("grid created");
 	
 	return grid;
 	
@@ -2025,14 +2029,14 @@ File.prototype.debugGrid = function() {
 	
 	//console.log(JSON.stringify(grid, null, 4));
 	
-	console.log("letters:" + letters);
+	//console.log("letters:" + letters);
 	
-	console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+	//console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 	
 	for(var row=0; row<grid.length; row++) {
 		for(var col=0; col<grid[row].length; col++) {
 			if(grid[row][col] == undefined) {
-				console.log("(grid[" + row + "][" + col + "] undefined!");
+				//console.log("(grid[" + row + "][" + col + "] undefined!");
 				str += tableCell("!!");
 			}
 			else {
@@ -2044,7 +2048,7 @@ File.prototype.debugGrid = function() {
 		
 	}
 
-	console.log(str);
+	//console.log(str);
 	
 	function tableCell(str) {
 		
@@ -2090,7 +2094,7 @@ File.prototype.hide = function() {
 	
 	*/
 	
-	console.log("Hiding " + file.path + " (focus=" + file.gotFocus + "");
+	//console.log("Hiding " + file.path + " (focus=" + file.gotFocus + "");
 	
 	file.canvas.style.display = "none";
 	
@@ -2106,7 +2110,7 @@ File.prototype.hide = function() {
 File.prototype.show = function(focus) {
 	var file = this;
 
-	console.log("Showing " + file.path + " (file.focus=" + file.gotFocus + " focus=" + focus + "");
+	//console.log("Showing " + file.path + " (file.focus=" + file.gotFocus + " focus=" + focus + "");
 
 	
 	if(focus == undefined) focus = true;
@@ -2230,7 +2234,7 @@ File.prototype.scrollToCaret = function(caret) {
 	
 	if(caret == undefined) caret = file.caret;
 
-	console.log("scrolling to caret:" + JSON.stringify(caret));
+	//console.log("scrolling to caret:" + JSON.stringify(caret));
 	
 	
 	// Up and down ...
@@ -2282,8 +2286,8 @@ File.prototype.scrollToCaret = function(caret) {
 		startColumn -= delta;
 	}
 	
-	console.log("delta=" + delta);
-	console.log("global.view.endingColumn=" + global.view.endingColumn);
+	//console.log("delta=" + delta);
+	//console.log("global.view.endingColumn=" + global.view.endingColumn);
 
 	file.scrollTo(startColumn, startRow);
 	
@@ -2319,7 +2323,7 @@ File.prototype.highlightText = function(text) {
 		return;
 	}
 	
-	console.log("text=" + text);
+	//console.log("text=" + text);
 	
 	/*
 		Hmm, for highlighting to stay, we need to modify insertText 
@@ -2335,7 +2339,7 @@ File.prototype.highlightText = function(text) {
 	
 	while(true) { // while(true) loops are very prone for bugs! (for example if the word is one character long)
 		
-		console.log("Searching for '" + text + "' start=" + start);
+		//console.log("Searching for '" + text + "' start=" + start);
 	
 		start = file.text.indexOf(text, start);
 		
@@ -2386,7 +2390,7 @@ File.prototype.haveParsed = function(parseData) {
 File.prototype.gotoLine = function(line) {
 	var file = this;
 	
-	console.log("Line " + line);
+	//console.log("Line " + line);
 	
 	var maxStartRow = Math.max(0, file.grid.length - global.view.visibleRows);
 	

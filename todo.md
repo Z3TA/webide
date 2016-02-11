@@ -10,6 +10,8 @@ Blog about sub-pixel-antialias (LCD Text).
 BUGS
 ====
 
+Seems like we have a memory leak!? l
+
 Sometimes when closing a file, the editor doesn't swtich to an existing one ...
 And when the next file is closed, it tries to switch to an already closed file!
 
@@ -101,6 +103,10 @@ Tab framför </table> (ska inte vara det)
 
 Polishing
 =========
+
+Allow context menu everywhere, or at least on the file tabs too.
+
+Reopen last closed file tab.
 
 Switch file-tab positions
 

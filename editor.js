@@ -763,8 +763,7 @@ function objInfo(o) {
 
 	editor.on = function(eventName, callback, order) {
 		/*
-		
-		
+			lowest order nr will execute first!
 		*/
 		
 		if(typeof callback !== "function") console.error(new Error("The second argument needs to be a function! Did you mean editor.addEvent ?"));
