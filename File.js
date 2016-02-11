@@ -316,7 +316,7 @@ File.prototype.createCaret = function(index, row, col) {
 	}
 	
 	
-	console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
+	//console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
 
 	
 	// Check valid data (this should / could be omitted) ...

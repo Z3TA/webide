@@ -31,7 +31,7 @@
 		var row = file.caret.row - file.startRow + startRow;
 		var col = file.caret.col;
 		
-		console.log("row=" + row + " col=" + col + "");
+		//console.log("row=" + row + " col=" + col + "");
 		
 		// Is the caret inside the buffer!?
 		var caretInsideBuffer = row >= 0 && row < buffer.length;
@@ -50,27 +50,27 @@
 			}
 			
 			
-			console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
+			//console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
 			
 			if(charToTheLeft == lP && charAtCaret == rP) { // (|)
-				console.log("We are between two matches");
+				//console.log("We are between two matches");
 				return;
 			}
 			
 			// Figure out if we are next to a character we want to match, and witch one
 			var charToMatch;
 			if(charAtCaret == lP || charAtCaret == rP) {
-				console.log("charAtCaret==lP||rP, " + charAtCaret + "=" + lP + " || " + rP);
+				//console.log("charAtCaret==lP||rP, " + charAtCaret + "=" + lP + " || " + rP);
 				charToMatch = charAtCaret;
 			}
 			else if(charToTheLeft == lP || charToTheLeft == rP) {
-				console.log("wooot");
+				//console.log("wooot");
 				col--;
 				charToMatch = charToTheLeft;
 			}
 			else {
-				console.log("Caret is not close to an " + lP + " or " + rP + " ");
-				console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
+				//console.log("Caret is not close to an " + lP + " or " + rP + " ");
+				//console.log("lP=" + lP + " rP=" + rP + " charAtCaret=" + charAtCaret + " (" + (charAtCaret == lP || charAtCaret == rP) + ") charToTheLeft=" + charToTheLeft + " (" + (charToTheLeft==lP || charToTheLeft==rP) + ") ");
 			
 				return;
 			}
@@ -93,10 +93,10 @@
 				rightPosition = {row: row, col: col};
 				}
 			
-			console.log("leftPosition=" + JSON.stringify(leftPosition) + " rightPosition=" + JSON.stringify(rightPosition) );
+			//console.log("leftPosition=" + JSON.stringify(leftPosition) + " rightPosition=" + JSON.stringify(rightPosition) );
 			
 			if(!leftPosition || !rightPosition) {
-				console.log("No match found! (probably located outside the buffer)")
+				//console.log("No match found! (probably located outside the buffer)")
 				return;
 			}
 			
@@ -121,8 +121,8 @@
 			
 			ctx.font=global.settings.style.highlightMatchFont;
 			
-			console.log("ctx.font=" + ctx.font);
-			console.log("global.settings.style.highlightMatchFont=" + global.settings.style.highlightMatchFont);
+			//console.log("ctx.font=" + ctx.font);
+			//console.log("global.settings.style.highlightMatchFont=" + global.settings.style.highlightMatchFont);
 			
 			// Clear boxes before painting in them
 			/*
@@ -168,15 +168,15 @@
 		
 		function searchBufferRight(row, col) {
 			var skip = 0, char = "";
-			console.log("Searching right:");
+			//console.log("Searching right:");
 			for(var row=row; row<buffer.length; row++) {
 				for(var col=col; col<buffer[row].length; col++) {
 					char = buffer[row][col].char;
-					console.log(char + "=" + rP + " ? " + (char==rP));
+					//console.log(char + "=" + rP + " ? " + (char==rP));
 					if(char == lP) skip++
 					else if(char == rP) {
 						if(skip--===0) {
-							console.log("Found second RIGHT match at row=" + row + " col=" + col + " ");
+							//console.log("Found second RIGHT match at row=" + row + " col=" + col + " ");
 							return {row: row, col: col};
 						}
 					}
@@ -189,16 +189,16 @@
 		
 		function searchBufferLeft(row, col) {
 			// Look for lP ...
-		console.log("Searching left:");
+		//console.log("Searching left:");
 			// First search current row
 			var skip = 0, char = "";
 		for(var col=col; col>=0; col--) {
 			char = buffer[row][col].char;
-			console.log(char + "=" + lP + " ? " + (char==lP));
+			//console.log(char + "=" + lP + " ? " + (char==lP));
 			if(char == rP) skip++
 			else if(char == lP) {
 				if(skip--===0) {
-					console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
+					//console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
 					return {row: row, col: col};
 				}
 			}
@@ -207,11 +207,11 @@
 		for(var row=row-1; row>=0; row--) { // Search up
 			for(var col=0; col<buffer[row].length; col++) { // We can start from the left because we already searched the first row
 				char = buffer[row][col].char;
-				console.log(char + "=" + lP + " ? " + (char==lP));
+				//console.log(char + "=" + lP + " ? " + (char==lP));
 				if(char == rP) skip++
 				else if(char == lP) {
 					if(skip--===0) {
-						console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
+						//console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
 							return {row: row, col: col};
 					}
 				}

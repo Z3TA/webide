@@ -106,6 +106,8 @@ Tab framför </table> (ska inte vara det)
 Polishing
 =========
 
+When the state (file.text == last saved state) mark the tab as saved.
+
 Allow context menu everywhere, or at least on the file tabs too.
 
 Reopen last closed file tab.

@@ -110,7 +110,7 @@
 			var currentFunctionName = findCurrentFunction(file.parsed.functions, file.caret.index);
 			if(currentFunctionName) elements[currentFunctionName].selected = true;
 
-			console.log("lengthOfLongestFunction=" + lengthOfLongestFunction);
+			//console.log("lengthOfLongestFunction=" + lengthOfLongestFunction);
 			
 			if(firstLoad || (lengthOfLongestFunction != lastLengthOfLongestFunction && (lengthOfLongestFunction <= functionlistMaxCharacters && lastLengthOfLongestFunction != 0))) {
 				editor.resizeNeeded(); // Fixed bug of function list not starting at 100% height. PS: The file hides/show when resizing! So I had to make this extra function to prevent loop
@@ -343,7 +343,7 @@
 				for(var i=0; i<level*nrOfSpacesPerLevel; i++) {
 					str.push("\u00A0"); // space or &nbsp; doesn't work, so we use unicode
 				}
-				console.log(level + " spaces");
+				//console.log(level + " spaces");
 				return str.join("");
 				
 			}

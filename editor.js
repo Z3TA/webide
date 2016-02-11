@@ -348,7 +348,7 @@ function objInfo(o) {
 			
 			var lastChar = defaultPath.substr(defaultPath.length-1);
 			
-			console.log("lastChar of defaultPath=" + lastChar);
+			//console.log("lastChar of defaultPath=" + lastChar);
 			
 			if(! (lastChar == "/" || lastChar == "\\")) {
 				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
@@ -480,7 +480,7 @@ function objInfo(o) {
 			console.log("No file open");
 		}
 		
-		console.log("rendering finish");
+		//console.log("rendering finish");
 	}
 	
 	editor.renderRow = function(gridRow) {
@@ -604,7 +604,7 @@ function objInfo(o) {
 			//global.currentFile.hide(); // So that events will fire
 		}
 		
-		console.log("Resizing stuff ...")
+		//console.log("Resizing stuff ...")
 		
 		
 		var header = document.getElementById("header");
@@ -630,7 +630,7 @@ function objInfo(o) {
 		var columnsHeight = contentHeight;
 		
 
-
+/*
 		console.log("windowWidth=" + windowWidth);
 		console.log("windowHeight=" + windowHeight);
 		console.log("leftColumnWidth=" + leftColumnWidth);
@@ -643,13 +643,12 @@ function objInfo(o) {
 		console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " computedHeight=" + contentComputedStyle.height + ")");
 		console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " cunputedHeight=" + columnsComputedStyle.height + ")");
 		
-		
 		console.log("offsetWidth=" + content.offsetWidth)
 		console.log("innerWidth=" + content.innerWidth)
 		console.log("outherWidth=" + content.outherWidth)
 		console.log("width=" + contentComputedStyle.width);
 		console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
-
+*/
 		
 		global.windowHeight = windowHeight;
 		global.windowWidth = windowWidth;
@@ -670,8 +669,8 @@ function objInfo(o) {
 		content.style.height = global.view.canvasHeight + "px";
 		*/
 		
-		console.log("canvasWidth=" + global.view.canvasWidth);
-		console.log("canvasHeight=" + global.view.canvasHeight);
+		//console.log("canvasWidth=" + global.view.canvasWidth);
+		//console.log("canvasHeight=" + global.view.canvasHeight);
 		
 		
 		leftColumn.style.height = global.view.canvasHeight + "px";
@@ -681,27 +680,27 @@ function objInfo(o) {
 		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
 		var wrappers = document.getElementsByClassName("wrap");
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
-		console.log("leftColumnPadding=" + leftColumnPadding);
+		//console.log("leftColumnPadding=" + leftColumnPadding);
 		var columnPadding = parseInt(leftColumnPadding);
 		for (var i = 0; i < wrappers.length; i++) {
 			wrappers[i].style.height = (contentHeight) + "px"; // - (columnPadding * 2 + 2) + "px";
 			wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
-		console.log("columnPadding=" + columnPadding);
+		//console.log("columnPadding=" + columnPadding);
 
 		
 		// Calculate column width and row height
 		global.view.visibleColumns = Math.ceil((global.view.canvasWidth - global.settings.leftMargin - global.settings.rightMargin) / global.settings.gridWidth);
 		
-		console.log("(resize1) global.view.visibleColumns=" + global.view.visibleColumns);
-		console.log("(resize1) global.view.endingColumn=" + global.view.endingColumn);
+		//console.log("(resize1) global.view.visibleColumns=" + global.view.visibleColumns);
+		//console.log("(resize1) global.view.endingColumn=" + global.view.endingColumn);
 
 		// ceil (overflow)
 		global.view.visibleRows = Math.ceil((global.view.canvasHeight - global.settings.topMargin - global.settings.bottomMargin) / global.settings.gridHeight);
 		
-		console.log("visibleRows=" + global.view.visibleRows);
-		console.log("topMargin=" + global.settings.topMargin);
-		console.log("bottomMargin=" + global.settings.bottomMargin);
+		//console.log("visibleRows=" + global.view.visibleRows);
+		//console.log("topMargin=" + global.settings.topMargin);
+		//console.log("bottomMargin=" + global.settings.bottomMargin);
 		
 		
 		if(global.currentFile) {
@@ -728,8 +727,8 @@ function objInfo(o) {
 
 		}
 
-		console.log("(resize2) global.view.visibleColumns=" + global.view.visibleColumns);
-		console.log("(resize2) global.view.endingColumn=" + global.view.endingColumn);
+		//console.log("(resize2) global.view.visibleColumns=" + global.view.visibleColumns);
+		//console.log("(resize2) global.view.endingColumn=" + global.view.endingColumn);
 
 		// Resize listeners (after)
 		for(var i=0; i<global.eventListeners.afterResize.length; i++) {
@@ -750,7 +749,7 @@ function objInfo(o) {
 			for(var i=0; i<canvasNodes.length; i++) {
 				// Do not show hidden fileCanvas's
 				if(canvasNodes[i].getAttribute("class") != "fileCanvas") { 
-					console.log("canvasNodes[" + i + "].getAttribute('class')=" + canvasNodes[i].getAttribute("class"));
+					//console.log("canvasNodes[" + i + "].getAttribute('class')=" + canvasNodes[i].getAttribute("class"));
 					canvasNodes[i].style.display = "block";
 				}
 			}
@@ -960,7 +959,7 @@ function objInfo(o) {
 			
 			var found = false;
 			
-			console.log("imgArray=" + imgArray.length);
+			//console.log("imgArray=" + imgArray.length);
 			
 			// Remove all text at next editor interaction
 			editor.onNextInteraction(function() {
@@ -1001,13 +1000,13 @@ function objInfo(o) {
 		
 		function makeImage(item) {
 			
-			console.log("item=" + item);
+			//console.log("item=" + item);
 			
 			htmlToImage(item, function(img) {
 				imgArray.push(img);
 				
-				console.log("imagesToMake=" + imagesToMake);
-				console.log("imagesMade=" + imagesMade);
+				//console.log("imagesToMake=" + imagesToMake);
+				//console.log("imagesMade=" + imagesMade);
 				
 				//global.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
 
@@ -1116,7 +1115,7 @@ function objInfo(o) {
 			
 			var mouseRow = Math.floor((mouseY - global.settings.topMargin) / global.settings.gridHeight) + file.startRow;
 			
-			console.log("mouseRow=" + mouseRow);
+			//console.log("mouseRow=" + mouseRow);
 			
 			if(mouseRow >= grid.length) {
 				//console.warn("Mouse position under the grid!");
@@ -1129,13 +1128,13 @@ function objInfo(o) {
 			else {
 				var row = grid[mouseRow];
 				
-				console.log("Mouse on row " + row.lineNumber);
+				//console.log("Mouse on row " + row.lineNumber);
 				
-				console.log("indentation=" + row.indentation);
+				//console.log("indentation=" + row.indentation);
 				
 				var mouseCol = Math.floor((mouseX - global.settings.leftMargin - (row.indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth + clickFeel) / global.settings.gridWidth);
 			
-				console.log("mouseCol=" + mouseCol);
+				//console.log("mouseCol=" + mouseCol);
 
 				
 				if(mouseCol > row.length) { // End of line
@@ -1286,7 +1285,7 @@ function objInfo(o) {
 	
 	function main() {
 
-		console.log("main() called");
+		console.log("Starting the editor ...");
 		
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 
@@ -1321,7 +1320,7 @@ function objInfo(o) {
 		body.ondrop = fileDrop;
 		
 		
-		console.log("main function loaded");
+		//console.log("main function loaded");
 		
 		// Sort the start events (some modules depeonds on others, and want to start after or before them)
 		global.eventListeners.start.sort(function(a, b) {
@@ -1336,7 +1335,7 @@ function objInfo(o) {
 			}
 		});
 		for(var i=0; i<global.eventListeners.start.length; i++) {
-			console.log("startlistener:" + functionName(global.eventListeners.start[i].fun) + " (order=" + global.eventListeners.start[i].order + ")");
+			//console.log("startlistener:" + functionName(global.eventListeners.start[i].fun) + " (order=" + global.eventListeners.start[i].order + ")");
 		}
 		
 		
@@ -1436,7 +1435,7 @@ function objInfo(o) {
 			var content = event.target.result;
 			var filePath = file.path;
 			
-			console.log(event.target);
+			console.log("Drop op: " + event.target);
 			
 			editor.openFile(filePath, content);
 			
@@ -1533,7 +1532,7 @@ function objInfo(o) {
 				
 				ret = fun(global.currentFile, e.clipboardData);
 				
-				console.log("Paste listener: " + functionName(fun) + " returned:\n" + ret);
+				//console.log("Paste listener: " + functionName(fun) + " returned:\n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
@@ -1639,7 +1638,6 @@ function objInfo(o) {
 		var captured = false;
 		
 		console.log("keyDown: " + charCode + " = " + character + "");
-		console.warn("keyDown: " + charCode + " = " + character + "");
 		
 		// Prevent unsupported combo error:
 		if(charCode == 17) return; // Ctrl
@@ -1671,7 +1669,7 @@ function objInfo(o) {
 			//if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined && combo===0)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 				
-				console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
+				//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
 				
 				captured = true;
 				
@@ -1765,7 +1763,7 @@ function objInfo(o) {
 			
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				
-				console.log("keyUp: Calling function: " + functionName(binding.fun) + "...");
+				//console.log("keyUp: Calling function: " + functionName(binding.fun) + "...");
 
 				binding.fun(global.currentFile, combo, character, charCode, "up");
 			}
@@ -1802,7 +1800,7 @@ function objInfo(o) {
 	
 		var menu = document.getElementById("canvasContextmenu");
 		
-		console.log("target.className=" + target.className);
+		//console.log("mouseDown on target.className=" + target.className);
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 
@@ -1868,7 +1866,7 @@ function objInfo(o) {
 				(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				console.log("Calling " + functionName(click.fun) + " ...");
+				//console.log("Calling " + functionName(click.fun) + " ...");
 				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				
@@ -1931,7 +1929,7 @@ function objInfo(o) {
 		}
 
 		
-		console.log("mouseUp, global.render=" + global.render);
+		//console.log("mouseUp, global.render=" + global.render);
 
 		
 		editor.interact("mouseUp");
@@ -2034,7 +2032,7 @@ function objInfo(o) {
 		function processRequest() {
 			if (xmlHttp.readyState == 4) {
 				
-				console.log("xmlHttp.status=" + xmlHttp.status);
+				//console.log("xmlHttp.status=" + xmlHttp.status);
 				
 				if(xmlHttp.status == 200) {
 					
@@ -2141,7 +2139,7 @@ function objInfo(o) {
 		
 		//  width="' + width + '" height="' + height + '"
 		
-		console.log("width=" + width);
+		//console.log("width=" + width);
 		
 		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
 		             '<foreignObject width="100%" height="100%">' +
@@ -2161,7 +2159,7 @@ function objInfo(o) {
 		img.onload = function () {
 			callback(img);
 			DOMURL.revokeObjectURL(url);
-			console.log("Image yo!");
+			//console.log("Image yo!");
 
 		}
 

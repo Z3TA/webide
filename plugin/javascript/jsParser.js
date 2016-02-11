@@ -35,11 +35,11 @@
 	
 	function onFileOpen(file) {
 		
-		console.log("jsParser.js");
+		//console.log("jsParser.js");
 		
 		if(shouldParse(file)) {
 			
-			console.warn("Parsing " + file.path);
+			console.log("Parsing " + file.path);
 			
 			var js = parseJavaScript(file);
 
@@ -58,7 +58,7 @@
 	
 	function shouldParse(file) {
 		
-		console.log("file.fileExtension=" + file.fileExtension + " file.parse=" + file.parse);
+		//console.log("file.fileExtension=" + file.fileExtension + " file.parse=" + file.parse);
 		
 		if(file.parse == false) return;
 		
@@ -277,10 +277,10 @@
 		console.timeEnd("parseJavaScript");
 		
 		
-		console.log("words:" + JSON.stringify(words, null, 2));
-		console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
-		console.log("functions:" + JSON.stringify(functions, null, 2));
-		console.log("comments:" + JSON.stringify(comments, null, 2));
+		//console.log("words:" + JSON.stringify(words, null, 2));
+		//console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
+		//console.log("functions:" + JSON.stringify(functions, null, 2));
+		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
 		
 		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
@@ -299,7 +299,7 @@
 			codeBlockLeft++;
 			codeBlockLeftRow = row;
 			
-			console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
+			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
 			codeBlock[codeBlockDepth] = {word: lastWord, indenttation: codeBlockDepth, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
@@ -414,7 +414,7 @@
 					type = rightSide.substr(0, par).trim();
 				}
 				else {
-					console.log("Dunno what " + rightSide + " is!??");
+					//console.log("Dunno what " + rightSide + " is!??");
 				}
 
 				
@@ -451,7 +451,7 @@
 				*/
 				
 				
-				console.log("figuring out leftside. word=" + word + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "");
+				//console.log("figuring out leftside. word=" + word + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "");
 				
 				//leftSide = lastWord;
 				
@@ -476,8 +476,8 @@
 					
 
 					d--;
-					console.log("while leftSide=" + leftSide);
-					console.log("afterPointer[" + d + "]=" + afterPointer[d]);
+					//console.log("while leftSide=" + leftSide);
+					//console.log("afterPointer[" + d + "]=" + afterPointer[d]);
 				}
 			
 				
@@ -552,14 +552,14 @@
 			}
 			else if(pointerCharacter == "=") {
 				// Ex: x = y; (leftside=x)
-				console.log("What is best? leftSide=" + leftSide + " lastWord=" + lastWord + "");
+				//console.log("What is best? leftSide=" + leftSide + " lastWord=" + lastWord + "");
 				leftSide = lastWord;
 			}
 			else {
 				console.error(new Error("Unexpected pointerCharacter=" + pointerCharacter + " (line=" + lineNumber + ")"));
 			}
 			
-			console.log("findLeftSide return leftSide=" + leftSide);
+			//console.log("findLeftSide return leftSide=" + leftSide);
 
 			return leftSide;
 		}
@@ -573,7 +573,7 @@
 			var func = myFunction[subCount];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			//console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -584,7 +584,7 @@
 			}
 			
 			if(leftSide.length > 0 && rightSide.length > 0) {
-				console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
+				//console.log("We have Left & right side of variable pointer: " + leftSide + "=" + rightSide + "");
 				
 				var properties = leftSide.split(".");
 				var variableName = properties[0];
@@ -593,12 +593,12 @@
 				if(insideFunctionBody[subCount]) {
 					if(func.variables.hasOwnProperty(variableName)) {
 						variable = func.variables[variableName];
-						console.log("Variable= '" + variableName + "' listed in function=" + func.name + " variables! Yey!");
+						//console.log("Variable= '" + variableName + "' listed in function=" + func.name + " variables! Yey!");
 					}
 					else {
 						// We have found a GLOBAL variable inside a function!?
 						// or an if statement: if*(foo) bar* = baz
-						console.log("varibale='" + variableName + "' does not exist in function=" + func.name + " rightSide=" + rightSide + " (line=" + lineNumber + ")");
+						//console.log("varibale='" + variableName + "' does not exist in function=" + func.name + " rightSide=" + rightSide + " (line=" + lineNumber + ")");
 					}
 						
 				}
@@ -610,7 +610,7 @@
 					}
 					// Look for function names
 					else if(functions.hasOwnProperty(variableName)) {
-						console.log("hmm? " + variableName + " is a function!");
+						//console.log("hmm? " + variableName + " is a function!");
 						
 						if(properties.length > 1) {
 							if(!functions[properties[0]].variables.hasOwnProperty(properties[1])) {
@@ -624,7 +624,7 @@
 					else {
 						// We have found an undeclared (no var) global variable?
 						// or arr[foo] = 1, where [foo] is leftSide
-						console.log("varibale=" + variableName + " does not exist in globalVariables! lastWord=" + lastWord + " word=" + word + "");
+						//console.log("varibale=" + variableName + " does not exist in globalVariables! lastWord=" + lastWord + " word=" + word + "");
 					}
 					
 				}
@@ -657,7 +657,7 @@
 				
 			}
 			else {
-				console.log("Nothing to do?");
+				//console.log("Nothing to do?");
 			}
 			
 		}
@@ -702,7 +702,7 @@
 				row++;
 				
 				
-				console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insdeBlockComment=" + insdeBlockComment + " line:" + lineNumber);
+				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insdeBlockComment=" + insdeBlockComment + " line:" + lineNumber);
 				
 				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insdeBlockComment);
 				
@@ -917,7 +917,7 @@
 				}
 				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
 					
-					console.log("Found character=, insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " leftSide=" + leftSide + " rightSide=" + rightSide + " word=" + word + " lastWord=" + lastWord + " (line=" + lineNumber + ")");
+					//console.log("Found character=, insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " leftSide=" + leftSide + " rightSide=" + rightSide + " word=" + word + " lastWord=" + lastWord + " (line=" + lineNumber + ")");
 
 					if(insideArray[codeBlockDepth]) {
 						arrayItemCount[codeBlockDepth]++;
@@ -939,7 +939,7 @@
 				}
 				*/
 				else if(char == "[") {
-					console.log("array! word=" + word + " lastWord=" + lastWord);
+					//console.log("array! word=" + word + " lastWord=" + lastWord);
 					
 					insideArray[codeBlockDepth] = lastWord;
 					
@@ -949,7 +949,7 @@
 					arrayStart[codeBlockDepth] = i;
 				}
 				else if(char == "]") {
-					console.log("End of array=" + insideArray[codeBlockDepth] + " word=" + word + " lastWord=" + lastWord + " leftSide=" + leftSide + " rightSide=" + rightSide + "");
+					//console.log("End of array=" + insideArray[codeBlockDepth] + " word=" + word + " lastWord=" + lastWord + " leftSide=" + leftSide + " rightSide=" + rightSide + "");
 					
 					lastWord = insideArray[codeBlockDepth];
 					
@@ -971,7 +971,7 @@
 					
 					*/
 					
-					console.log("} insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " line:" + lineNumber + "");
+					//console.log("} insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " line:" + lineNumber + "");
 
 					
 					if(insideFunctionBody[subCount]) {
@@ -983,12 +983,12 @@
 						
 						//console.log("R[" + subCount + "]++");
 						
-						console.log("L[" + subCount + "]=" + L[subCount] + ", R[" + subCount + "]=" + R[subCount] + " (line:" + lineNumber + ")");
+						//console.log("L[" + subCount + "]=" + L[subCount] + ", R[" + subCount + "]=" + R[subCount] + " (line:" + lineNumber + ")");
 
 						
 						if(L[subCount] === R[subCount]) {
 							// End of current function
-							console.log("Reached end of function body for " + myFunction[subCount].name + " L[" + subCount + "]=" + L[subCount] + "  R[" + subCount + "]=" + R[subCount] + " (line:" + lineNumber + ")");
+							//console.log("Reached end of function body for " + myFunction[subCount].name + " L[" + subCount + "]=" + L[subCount] + "  R[" + subCount + "]=" + R[subCount] + " (line:" + lineNumber + ")");
 							insideFunctionBody[subCount] = false;
 							
 							myFunction[subCount].end = i;
@@ -1018,14 +1018,14 @@
 					
 					afterPointer[codeBlockDepth] = char;
 					
-					console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
+					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
 
 					// Figure out the left side (the variable name)
 					
 					//leftSide = findLeftSide(char);
 					
 
-					console.log("ap leftSide=" + leftSide);
+					//console.log("ap leftSide=" + leftSide);
 
 				}
 				else if(char == "(") {
@@ -1037,7 +1037,7 @@
 						
 						// Figure out the name of the function
 						
-						console.log("function!? word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName);
+						//console.log("function!? word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName);
 						// Sometimes you have var infront of function. 
 						
 						functionName = lastWord;
@@ -1098,7 +1098,7 @@
 				
 				else if(char == "{") {
 					
-					console.log("{ insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
+					//console.log("{ insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
 					
 					if(insideFunctionBody[subCount]) L[subCount]++;
 					
@@ -1106,7 +1106,7 @@
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -1124,7 +1124,7 @@
 						
 						let newFunc = new Func(functionName, functionArguments, i, lineNumber);
 						
-						console.log("functionName=" + functionName + " type=" + typeof functionName);
+						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a booliean (false) !???
@@ -1198,7 +1198,7 @@
 
 					}
 					else {
-						console.log("1130: Did we find a JSON? (line:" + lineNumber + ")")
+						//console.log("1130: Did we find a JSON? (line:" + lineNumber + ")")
 						
 					}
 				}
@@ -1222,7 +1222,7 @@
 					insideParenthesis[codeBlockDepth] += char;
 					}
 				if(  insideParenthesis[codeBlockDepth] + char == "(function " || insideParenthesis[codeBlockDepth] == "(function(" ) {
-						console.log("clousure line=" + lineNumber + "");
+						//console.log("clousure line=" + lineNumber + "");
 						insideFunctionDeclaration = true;
 						lastWord="";
 					}
@@ -1246,7 +1246,7 @@
 			}
 			else if(char == "(" && word == "function") {
 				// Anonymous function
-				console.log("anon function line=" + lineNumber + "");
+				//console.log("anon function line=" + lineNumber + "");
 				insideFunctionDeclaration = true;
 				variableName = "Anonymous function";
 				word = "";
@@ -1297,19 +1297,19 @@
 
 						words.push(word);
 						
-						console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subCount + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subCount + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
 							rightSide += word;
-							console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + ")");
+							//console.log("found rightSide=" + rightSide + " (leftSide=" + leftSide + ")");
 							endPointer();
 						}
 						else if(insideArray[codeBlockDepth]) {
 							// Got a array value, 
 							//leftSide = insideArray[codeBlockDepth];
 							rightSide += word;
-							console.log("got array=" + insideArray[codeBlockDepth] + " value=" + rightSide + "");
+							//console.log("got array=" + insideArray[codeBlockDepth] + " value=" + rightSide + "");
 							if(afterPointer[codeBlockDepth]) {
 								// ex: foo = [1,*]
 								endPointer();
@@ -1327,14 +1327,14 @@
 								
 								// We are inside a var declaration!
 								
-								console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + "");
+								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + "");
 								
 								
 								if(!insideCodeBlock) {
 									// A global variable is declared:
 
 									globalVariables[word] = new Variable();
-									console.log("Added GLOBAL variable=" + word + "");
+									//console.log("Added GLOBAL variable=" + word + "");
 									foundVariableInVariableDeclaration = false;
 								}
 								else {
@@ -1351,16 +1351,16 @@
 										}
 										let rootWord = codeBlock[codeBlockDepthTemp].word;
 										
-										console.log("Inside function=" + insideFunctionBody[subCount].name + " word=" + word + " rootWord=" + rootWord + "");
+										//console.log("Inside function=" + insideFunctionBody[subCount].name + " word=" + word + " rootWord=" + rootWord + "");
 										
 										
 										if(!myFunction[subCount].variables.hasOwnProperty(rootWord)) {
 											myFunction[subCount].variables[word] = new Variable("");
-											console.log("Added variable=" + word + " to function=" + myFunction[subCount].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
+											//console.log("Added variable=" + word + " to function=" + myFunction[subCount].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
 										}
 										else {
 											
-											console.log("WTF happaned!??");
+											//console.log("WTF happaned!??");
 											
 											//myFunction[subCount].variables[rootWord].type = new Variable("Object");
 										}
@@ -1371,14 +1371,14 @@
 									}
 									else {
 										// Inside a global object notation declaration
-										console.log("Inside a global object notation declaration !??? word=" + word + " (line:" + lineNumber + ")");
+										//console.log("Inside a global object notation declaration !??? word=" + word + " (line:" + lineNumber + ")");
 									}
 									
 								}
 								
 							}
 							else {
-								console.log("Inside a JSON declaration? (line=" + lineNumber + ")")
+								//console.log("Inside a JSON declaration? (line=" + lineNumber + ")")
 							}
 						}
 						
