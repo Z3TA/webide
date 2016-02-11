@@ -3,19 +3,21 @@ Don't implement new stuff until we have a stable release!
 
 Currently working on: gtg in hurry! xmatching!?
 
-Fighting the hydra: Every time I try to fix one bug, I find five more major bugs! And all are super hard to fix!
-
-Blog about sub-pixel-antialias (LCD Text).
-
 Try do debug without console.log!
 
 BUGS
 ====
 
+Single quotes like in I'm cool get's colored in html documents.
+
+Toggle parser, option in meny. To turn on/off the parser for a document.
+
 Seems like we have a memory leak!?
 
 Sometimes when closing a file, the editor doesn't swtich to an existing one ...
 And when the next file is closed, it tries to switch to an already closed file!
+bug: lastViewedFileHistory contains the closed files (only the closed files, several times), then tries to switch to it.
+file_tabs.js line 322
 
 making { codeblocks ... no render
 
