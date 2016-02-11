@@ -19,8 +19,8 @@
 			
 		*/
 		
-		
-		editor.on("edit", onEdit, 110);
+		var runOrder = 110; // Make sure this runs after the parser
+		editor.on("edit", onEdit, runOrder);
 
 	}
 
@@ -30,8 +30,11 @@
 		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
-			fixIndentation(file, row);
-			fixIndentation(file, row+1);
+			var newLine = row+1; 
+			fixIndentation(file, row); // The line we where on when pressing Enter
+			fixIndentation(file, newLine); // The new line
+			file.grid[newLine].owned = true;
+			
 			//file.grid[row+1].unshift(new Box("*"));
 		}
 		else if(type=="text") {
@@ -39,6 +42,11 @@
 			for(var i = row; i<=file.caret.row; i++) {
 				fixIndentation(file, i);
 			}
+		}
+		else if(type=="insert") {
+			// A character was inserted. Check if we "own" this line and in that case, fix indentation
+			// optimization tip: Only do this when chars that affect indentation is inserted
+			if(file.grid[row].owned) fixIndentation(file, row);
 		}
 	
 	}
@@ -63,8 +71,8 @@
 		}
 		
 		//console.log("defaultIndentationCharacters=" + defaultIndentationCharacters + " (" + defaultIndentationCharacters.length + ")");
-		//console.log("currentIndentationCharacters=" + currentIndentationCharacters + " (" + currentIndentationCharacters.length + ")");
-		//console.log("shouldHaveIndentationCharacters=" + shouldHaveIndentationCharacters + " (" + shouldHaveIndentationCharacters.length + ")");
+		console.log("currentIndentationCharacters=" + currentIndentationCharacters + " (" + currentIndentationCharacters.length + ")");
+		console.log("shouldHaveIndentationCharacters=" + shouldHaveIndentationCharacters + " (" + shouldHaveIndentationCharacters.length + ")");
 		
 		if(shouldHaveIndentationCharacters == currentIndentationCharacters) {
 			return; // Do nothing 

@@ -147,8 +147,10 @@
 		else {
 			// The caret is not inside the buffer.
 			
-			// Draw a line depending on the caret indentation
+			// Make separate curlyBracketMather module!
 			
+			// Draw a line depending on the caret indentation
+			/*
 			var indentation = file.grid[file.caret.row].indentation;
 			
 			var x = global.settings.leftMargin + (indentation * global.settings.tabSpace) * global.settings.gridWidth;
@@ -157,7 +159,7 @@
 			ctx.moveTo(x, 0);
 			ctx.lineTo(x, global.view.canvasHeight);
 			ctx.stroke();
-				
+				*/
 		}
 		
 		console.timeEnd("highlightMatch " + lP + rP);

@@ -383,10 +383,14 @@
 			reportFile.insertText(underline(filePath));
 			reportFile.insertLineBreak();
 			
-			var lines = contents.split(reportFile.lineBreak);
+			var lines = contents.split("\n");
 			
 			for(var i=0; i<lines.length; i++) {
 				if(lines[i].indexOf(searchString) != -1) {
+					
+					lines[i] = lines[i].replace("\r", "");
+					//lines[i] = lines[i].replace("\t", "");
+					
 					reportFile.insertText(lineFix(i+1) + lines[i]);
 					reportFile.insertLineBreak();
 
