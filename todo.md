@@ -5,8 +5,14 @@ Currently working on:
 
 Try do debug without console.log!
 
+Autocomplete closing of open xml tag.
+
+make a full render when messing with indentation.
+
 BUGS
 ====
+
+Selecting something, then shift clicking should add to the selection.
 
 Single quotes like in I'm cool get's colored in html documents.
 
@@ -109,6 +115,10 @@ Tab framför </table> (ska inte vara det)
 
 Polishing
 =========
+
+Colors when parsing next text next to a html tag, it turns blue </>
+
+
 
 When the state (file.text == last saved state) mark the tab as saved.
 
