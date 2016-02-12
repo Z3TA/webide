@@ -259,6 +259,8 @@
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
+		tmpXmlMode = xmlMode;
+		
 		insideFunctionBody[subCount] = false;
 		L[subCount] = 1; // { Asume open
 		R[subCount] = 0; // }
@@ -727,6 +729,7 @@
 			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
+				xmlMode = tmpXmlMode;
 				commentStart = i-4;
 			}
 			else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->

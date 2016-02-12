@@ -9,6 +9,8 @@ Autocomplete closing of open xml tag.
 
 make a full render when messing with indentation.
 
+cmsjz live preview!
+
 BUGS
 ====
 
