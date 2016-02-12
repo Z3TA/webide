@@ -43,6 +43,26 @@
 			var nextCharacter = file.text.charAt(index+1);
 		}
 		
+		var isXml = (file.fileExtension == "htm" || file.fileExtension == "html");
+		
+		if(isXml) {
+			// Don't auto quote ' in HTML documents unless we're inside a tag or <script> 
+			var insideTag = isInside(file.text, index, "<", ">");
+			var insideScript = isInside(file.text, index, "<script", "</script>");
+			
+			if(!insideTag && !insideScript) return;
+			
+		}
+		
+		
+		var insideHtmlComment = isInside(file.text, index, "<!--", "-->");
+		var insideBlockComment = isInside(file.text, index, "/*", "*/");
+		var insideLineComment = isInside(file.text, index, "//", file.lineBreak);
+		
+		// Don't auto quote inside comments
+		if(insideHtmlComment || insideBlockComment || insideLineComment) return; 
+		
+		
 		// todo: test if we get an error if at the beginning or end!
 		
 		var rowText = getRowText(file, row);
@@ -128,6 +148,25 @@
 		return file.text.substring(start, end);
 
 	}
+	
+	function isInside(text, index, str1, str2) {
+		// Returns true if index inside text is between str1 and str2
+		/*
+			Eu ad incididunt id <b>irure</b> reprehenderit duis (insde b?) esse eu <b>pariatur</b> ut adipisicing.
+			'                   |    
+			
+		*/
+		
+		var before = text.substr(0, index).lastIndexOf(str1);
+		
+		if(before == -1) return false; // str1 doesn't exist before index
+		
+		var beforeEnded = text.indexOf(str2, before);
+		
+		return beforeEnded > index; // index is between str1 and str2, or not
+		
+	}
+	
 	
 	function insideQuote(text, pos, quote, checkEnding) {
 		/*
