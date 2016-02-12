@@ -1,7 +1,7 @@
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 
-Currently working on: gtg in hurry! xmatching!?
+Currently working on: 
 
 Try do debug without console.log!
 
@@ -10,7 +10,9 @@ BUGS
 
 Single quotes like in I'm cool get's colored in html documents.
 
-Toggle parser, option in meny. To turn on/off the parser for a document.
+Updat function list (in what function!?) when searching.
+
+A toggler for document preview
 
 Seems like we have a memory leak!?
 
@@ -240,11 +242,17 @@ Opening files with inconsistent line breaks.
 
 Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
 
+Test if inlining functions in jsParser makes it faster.
 
 
 Feature
 -------
 
+Make a better document preview ...
+
+Being able to split the same file into two views so you can look at two parts of the same file at once.
+
+Key binding for: put the selected text in clipboard and put the cliboard instead of the selected text.
 
 Drop files into the editor to open them.
 

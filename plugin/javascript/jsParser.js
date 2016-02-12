@@ -170,9 +170,7 @@
 
 		/*
 			Todo:
-			 Include object name in function name
-			 Do not add anonymous functions!?
-		
+			 ES6 (fuck you) support!?
 		*/
 		
 		console.time("parseJavaScript");
@@ -222,11 +220,10 @@
 			codeBlockRight = 0,
 			codeBlockLeft = 0,
 			insideCodeBlock = false,
-			insideTag = false,
-			insideTagEnding = false,
-			tag = "",
-			lastTag = "",
-			tagStart = 0,
+			insideXmlTag = false,
+			insideXmlTagEnding = false,
+			xmlTag = "",
+			lastXmlTag = "",
 			tagBreak = global.settings.indentAfterTags,
 			codeBlockLeftRow = -1,
 			codeBlockRightRow = -2,
@@ -239,11 +236,13 @@
 			rightSide = "",
 			variableIndex = -1,
 			insdeComment = false,
-			insideXmlTag = false,  
 			xmlTagStart = -1, 
 			xmlTags = [],
 			xmlTagWordLength = 0,
 			xmlTagSelfEnding = false,
+			openXmlTags = 0,
+			xmlTagLastOpenRow = -1,
+			tmpXmlMode = false,
 			llChar = "",
 			lllChar = "",
 			willBeJSON = false,
@@ -251,11 +250,14 @@
 			eq = "=",
 			colon = ":",
 			pastChar = [],
+			xmlMode = false,
 			textLength = text.length,
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 			lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
 			
 		// -----
+		
+		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
 		insideFunctionBody[subCount] = false;
 		L[subCount] = 1; // { Asume open
@@ -278,8 +280,8 @@
 		
 		
 		//console.log("words:" + JSON.stringify(words, null, 2));
-		//console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
-		//console.log("functions:" + JSON.stringify(functions, null, 2));
+		console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
+		console.log("functions:" + JSON.stringify(functions, null, 2));
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
 		
@@ -704,7 +706,7 @@
 				
 				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insdeBlockComment=" + insdeBlockComment + " line:" + lineNumber);
 				
-				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insdeBlockComment);
+				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insdeBlockComment + openXmlTags);
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insdeBlockComment=" + insdeBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
@@ -720,6 +722,22 @@
 			
 			//console.log("insdeLineComment="+ insdeLineComment);
 			
+			
+			// Comments: <!-- -->
+			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
+				insideHTMLComment = true;
+				insideXmlTag = false;
+				commentStart = i-4;
+			}
+			else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->
+				insideHTMLComment = false;
+				comments.push(new Comment(commentStart, i));
+				//console.warn("Found HTML comment! line=" + lineNumber + " ");
+			}
+			
+			if(!xmlMode) {
+			
+			// Comments: //
 			if(char == "/" && lastChar == "/" && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insdeLineComment  && !insideHTMLComment) {
 				insdeLineComment = true;
 				commentStart = i-1;
@@ -732,17 +750,7 @@
 				return;
 			}
 			
-			else if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
-				insideHTMLComment = true;
-				insideXmlTag = false;
-				commentStart = i-4;
-				}
-			else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->
-				insideHTMLComment = false;
-				comments.push(new Comment(commentStart, i));
-				//console.warn("Found HTML comment! line=" + lineNumber + " ");
-			}
-			
+			// Comments: /*   */
 			else if(char == "*" && lastChar == "/" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insideHTMLComment) {
 				insdeBlockComment = true;
 				commentStart = i-1;
@@ -760,6 +768,8 @@
 				
 				return;
 			}
+			
+			// Quotes: double
 			// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
 			else if(char === '"' && !insdeLineComment && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) {
 				if(insdeDblQuote) {
@@ -776,6 +786,8 @@
 					//console.log("insdeDblQuote!");
 				}
 			}
+			
+			// Quotes: single
 			else if(char === "'" && !insdeDblQuote && !insdeLineComment && !insdeBlockComment && !insideHTMLComment) {
 				if(insideSingleQuote) {
 					insideSingleQuote = false;
@@ -788,7 +800,9 @@
 					//console.log("insideSingleQuote!");
 				}
 			}
-
+				
+			}
+			
 			insideQuote = insdeDblQuote || insideSingleQuote;
 			insdeComment = insdeLineComment || insdeBlockComment || insideHTMLComment;
 			
@@ -799,13 +813,22 @@
 					Find xml-tags.
 					
 					Look out for if( x < y) and bitwise operations >> <<
-					and lists , "<", ">",
+					and array of strings: "<", ">",
 					
 					PS: We are Not insde an HTML comment until the parser finds the last - in <!--
-					*/
-				if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
-				insideXmlTag = true;
+				*/
+				if(char == "/") {
+					if(insideXmlTag) {
+						insideXmlTagEnding = true;
+					}
+				}
+				else if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+					insideXmlTag = true;
 					xmlTagStart = i;
+					if(!insideXmlTagEnding) {
+						tmpXmlMode = xmlMode;
+						xmlMode = false;
+					}
 					if(insideHTMLComment) console.error(new Error("WTF"));
 				}
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
@@ -813,9 +836,47 @@
 				}
 				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) {
 					if(xmlTagWordLength === 0) xmlTagWordLength = i - xmlTagStart;
-					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, lastChar == "/") );
-					insideXmlTag = false;
+					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
+					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, insideXmlTagEnding) );
+					
+										
+					xmlMode = tmpXmlMode;
+					
+					if(xmlTag.toLowerCase() == "script") {
+						if(insideXmlTagEnding) {
+							xmlMode = true;
+						}
+						else {
+							xmlMode = false;
+						}
+					}
+					
+					if(tagBreak.indexOf(xmlTag) > -1) {
+						
+						//console.log("tag=" + tag + " lastXmlTag=" + lastXmlTag);
+						
+						if(insideXmlTagEnding) {
+							// It's a ending tag </tag>
+							openXmlTags--;
+							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0) file.grid[row].indentation--;
+						}
+						else {
+							// It's a tag opening
+							openXmlTags++;
+							xmlTagLastOpenRow = row;
+						}
+						
+						
+					}
+					
+					lastXmlTag = xmlTag;
+					xmlTag = "";
+					
 					xmlTagWordLength = 0;
+					insideXmlTag = false;
+					insideXmlTagEnding = false;
+					
+					
 				}
 				
 			}
@@ -827,7 +888,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insdeComment) {
+			if(!insideQuote && !insdeComment && !xmlMode) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
@@ -857,53 +918,6 @@
 					codeBlockL();
 					willBeJSON = true; // Maybe :P
 				}
-				
-				
-				// Tag indentation for HTML
-				if(char == "/") {
-					if(insideTag) {
-						insideTagEnding = true;
-
-					}
-				}
-				else if(char == "<") {
-					insideTag = true;
-					tagStart = i;
-				}
-				else if(char == " " && insideTag && tag == "") {
-					tag = text.substring(tagStart + 1 + insideTagEnding, i);
-
-				}
-				else if(char == ">") {
-					
-					if(tag == "") {
-						tag = text.substring(tagStart + 1 + insideTagEnding, i);
-					}
-					
-					//console.log("tag=" + tag);
-					
-					if(tagBreak.indexOf(tag) > -1) {
-						
-						//console.log("tag=" + tag + " lastTag=" + lastTag);
-						
-						if(insideTagEnding) {
-							codeBlockR();
-							
-						}
-						else {
-							codeBlockL();
-						}
-					}
-					
-					lastTag = tag;
-					tag = "";
-					
-					insideTag = false;
-					insideTagEnding = false;
-					
-				}
-
-				
 				
 				
 				if(char == ";") {
@@ -1211,7 +1225,6 @@
 			// Collects the words to find variables
 			
 			//console.log("char=" + char + " word=" + word);
-			
 			
 			
 			// .substr(start,length)   .substring(start,end)
