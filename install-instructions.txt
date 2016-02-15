@@ -41,5 +41,7 @@ If you like the default font, it's recommended to install it to the local system
 
 http://www.binarytides.com/gorgeous-looking-fonts-ubuntu-linux/
 
+--enable-lcd-text --force-device-scale-factor=1
+
 
 

@@ -11,6 +11,13 @@ make a full render when messing with indentation.
 
 cmsjz live preview!
 
+A list of code comments for easier code navigation, click on the code to go to it. Ett kompliment till function-list.
+
+Debugger integration! No more console.log debugging!
+When in dev-mode, you can just place a break-point and the program will stop there and you can see all the variable values, like in the debugger.
+
+
+
 BUGS
 ====
 
