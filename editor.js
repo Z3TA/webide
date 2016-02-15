@@ -452,7 +452,7 @@ function objInfo(o) {
 			
 			var canvas = global.currentFile.canvas;
 			
-			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
+			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 			
 			//ctx.imageSmoothingEnabled = true;
 			

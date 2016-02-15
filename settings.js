@@ -6,13 +6,13 @@
 
 */
 
-global.settings = { // sugg: separate view options
+global.settings = { // sugg: separate view options 
 	devMode: true,  // devMode: true will spew out debug info and make sanity checks (will slow down the editor because of all the console.log's)
 	insert: false,
 	enableSpellchecker: false,
 	enableDocumentPreview: false,
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!  
-	gridHeight: 23, // 22    New finding: cld-text turns on after typing somwhere    asd  
+	gridHeight: 23, // 22    New finding: cld-text turns on after typing somwhere
 	gridWidth: 8.5, // 8, 7.8
 	leftMargin: 50,
 	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these tags
@@ -29,7 +29,7 @@ global.settings = { // sugg: separate view options
 		color: "rgb(0,0,0)"
 	},
 	style: {
-		fontSize: 15, // Also play with gridHeight and gridWidth 
+		fontSize: 15, // Also play with gridHeight and gridWidth  
 		font: "Consolas, DejaVu Sans Mono, monospace", // You'll want to use Consolas 15px on Windows! DejaVu Sans Mono 13px looks best on Linux (Ubuntu). Font's need to be installed on system (not CSS) for lcx-text to work.
 		highlightMatchFont: "bold 15px Consolas, DejaVu Sans Mono, monospace",
 		highlightMatchFontColor: "rgb(31, 119, 32)",
