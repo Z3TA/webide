@@ -1,6 +1,7 @@
 {
 	"name": "JZedit",
 	"main": "index.htm",
+	"chromium-args": "--disable-cld-text", // chromium-args not working!?
 	"window": {
 		"title": "JZedit",
 		"show": false,

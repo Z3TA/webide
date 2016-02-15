@@ -21,6 +21,19 @@ When in dev-mode, you can just place a break-point and the program will stop the
 BUGS
 ====
 
+xmatching is off when scrolled to the right.
+
+---
+[3474:0215/112548:ERROR:nw_shell.cc(336)] TypeError: Cannot read property 'isSaved' of undefined
+at saveSate (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:627:23)
+at reopen_files_closeEditor (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:590:5)
+at Window.<anonymous> (file:///home/zeta/dev/js-editor/editor.js:1197:10)
+at emitNone (events.js:70:20)
+at Window.emit (events.js:147:7)
+at IDWeakMap.global.__nwObjectsRegistry.handleEvent (node.js:786:26)
+[3474:0215/112548:INFO:CONSOLE(627)] "Uncaught TypeError: Cannot read property 'isSaved' of undefined", source: file:///home/zeta/dev/js-editor/plugin/file_tabs.js (627)
+---
+
 Selecting something, then shift clicking should add to the selection.
 
 Single quotes like in I'm cool get's colored in html documents.
