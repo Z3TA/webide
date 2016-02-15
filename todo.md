@@ -21,6 +21,8 @@ When in dev-mode, you can just place a break-point and the program will stop the
 BUGS
 ====
 
+When reloading in devMode, the file is sometimes not marked as saved in file-tabs.
+
 xmatching is off when scrolled to the right.
 
 ---

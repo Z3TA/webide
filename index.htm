@@ -6,33 +6,12 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<link rel="stylesheet" type="text/css" href="menu.css">
 	
-	<!-- Font(s): Change font in settings.js, experiment with font size, and grid width/height for the best look -->
-	<!--
-	<link rel="stylesheet" type="text/css" href="gfx/font/source-code-pro/source-code-pro.css">
-	<link rel="stylesheet" type="text/css" href="gfx/font/inconsolata/inconsolata.css">
-	<link rel="stylesheet" type="text/css" href="gfx/font/DroidFonts/DroidSansMono.css">
-	<link rel="stylesheet" type="text/css" href="gfx/font/DejaVuSansMono/DejaVuSansMono.css">
-	-->
-	<!-- Inlinde the default font so that it loads faster -->
-	<style>
-		@font-face{
-		font-family: 'DejaVuSansMono';
-		src: local('DejaVuSansMono'), url('gfx/font/DejaVuSansMono/ttf/DejaVuSansMono.ttf') format('truetype');
-	}
-	
-	@font-face{
-		font-family: 'DejaVuSansMono';
-		font-weight: bold;
-		src: local('DejaVuSansMono-Bold'),url('gfx/font/DejaVuSansMono/ttf/DejaVuSansMono-Bold.ttf') format('truetype');
-	}
-	</style>
-	
 	<script>
 		/* 
-			For some reason all require needs to be placed before all else!???
+			For some reason all require needs to be placed before all else!??? 
 			
 			To build for the right modules version:
-			node-gyp rebuild --target=1.2.0 --msvs_version=2015
+			node-gyp rebuild --target=1.2.0 --msvs_version=2015 
 		
 		*/
 		var fs = require("fs"); 

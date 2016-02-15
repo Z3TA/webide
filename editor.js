@@ -669,8 +669,8 @@ function objInfo(o) {
 		content.style.height = global.view.canvasHeight + "px";
 		*/
 		
-		//console.log("canvasWidth=" + global.view.canvasWidth);
-		//console.log("canvasHeight=" + global.view.canvasHeight);
+		console.log("canvasWidth=" + global.view.canvasWidth);
+		console.log("canvasHeight=" + global.view.canvasHeight);
 		
 		
 		leftColumn.style.height = global.view.canvasHeight + "px";
