@@ -310,8 +310,10 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 	function closeFile_tabs(file) {
 		
 		console.log("closing " + file.path);
-	
+		
+		while(lastViewedFileHistory.indexOf(file.path) > -1) {
 		lastViewedFileHistory.splice(lastViewedFileHistory.indexOf(file.path),1);
+		}
 		
 		lastViewedFileHistory.forEach(function(obj) {
 			console.log("lastViewedFileHistory:" + obj)

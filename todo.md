@@ -1,25 +1,21 @@
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
-
-Currently working on: 
-
 Try do debug without console.log!
 
-Autocomplete closing of open xml tag.
-
-make a full render when messing with indentation.
-
-cmsjz live preview!
-
-A list of code comments for easier code navigation, click on the code to go to it. Ett kompliment till function-list.
+Currently working on: 
 
 Debugger integration! No more console.log debugging!
 When in dev-mode, you can just place a break-point and the program will stop there and you can see all the variable values, like in the debugger.
 
-
+Open files dropped into the editor!!!
 
 BUGS
 ====
+abcabvd
+Wrong coloring of end of tag:
+<a href=""><img src="http://imgs.xkcd.com/comics/compiling.png"></a>
+
+A file doesn't automatically go into xml mode when saving as or surronded by <html>
 
 When reloading in devMode, the file is sometimes not marked as saved in file-tabs.
 
@@ -142,7 +138,7 @@ Polishing
 
 Colors when parsing next text next to a html tag, it turns blue </>
 
-
+Moving file tabs, change position.
 
 When the state (file.text == last saved state) mark the tab as saved.
 
@@ -282,6 +278,8 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+cmsjz live preview!
+
 Make a better document preview ...
 
 Being able to split the same file into two views so you can look at two parts of the same file at once.
@@ -328,3 +326,16 @@ Tool to create text bitmap, so that font looks the same in all OS's. Problem: Ba
 test bitmap fonts to see if it's faster: Result: its 3 times faster without bitmaps.
 
 Smooth scrolling. Make it easier to read text while scrolling.
+
+
+
+
+Need though
+-----------
+make a full render when messing with indentation!?
+
+A list of code comments for easier code navigation, click on the code to go to it. Ett kompliment till function-list.
+
+
+
+
