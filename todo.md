@@ -4,14 +4,10 @@ Try do debug without console.log!
 
 Currently working on: 
 
-Debugger integration! No more console.log debugging!
-When in dev-mode, you can just place a break-point and the program will stop there and you can see all the variable values, like in the debugger.
-
-Open files dropped into the editor!!!
 
 BUGS
 ====
-abcabvd
+
 Wrong coloring of end of tag:
 <a href=""><img src="http://imgs.xkcd.com/comics/compiling.png"></a>
 
@@ -20,6 +16,20 @@ A file doesn't automatically go into xml mode when saving as or surronded by <ht
 When reloading in devMode, the file is sometimes not marked as saved in file-tabs.
 
 xmatching is off when scrolled to the right.
+
+xmitching when just ( typed a ) 
+
+---
+xmatching wrong curlybracket:
+var DebuggerSetBreakpoint = {"id": 7, "method": "Debugger.setBreakpoint", "params": {
+"location": {
+"scriptId": "100", "lineNumber": 425
+},
+"condition": ""
+}
+};
+---
+
 
 ---
 [3474:0215/112548:ERROR:nw_shell.cc(336)] TypeError: Cannot read property 'isSaved' of undefined
@@ -277,6 +287,15 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Open files dropped into the editor!!!
+
+Debugger integration! No more console.log debugging!
+When in dev-mode, you can just place a break-point and the program will stop there and you can see all the variable values, like in the debugger.
+
+When hitting F5 and the file starts with "#!/usr/bin/env node".
+Run node with debugger and when there is an error, go to that line and display the error message!
+If there is no error, open a new file with the stdout.
 
 cmsjz live preview!
 
