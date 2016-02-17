@@ -71,13 +71,20 @@
 	}
 	
 	function toggleDevMode() {
+		
 		global.settings.devMode = global.settings.devMode ? false : true;
 		console.warn("devMode = " + global.settings.devMode);
+		
 		if(global.settings.devMode) {
-			enableDevMode()
+			enableDevMode();
+			console.warn("dev tools!?");
+			// Show dev tools:
+			require('nw.gui').Window.get().showDevTools();
+			console.warn("devMode enabled!");
 		}
 		else {
-			disableDevMode()
+			disableDevMode();
+			console.warn("devMode disabled!");
 		}
 		editor.hideMenu();
 	}
@@ -112,7 +119,7 @@
 			}
 			
 			if(ret !== true) {
-				console.error(error("There was an error in " + name + " (global.eventListeners.exit) when reloading the app!\nYou have to reload manually."));
+				console.error(error("There was an error in " + name + " (global.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
 			}
 			else {
 				document.location = document.location.href;
