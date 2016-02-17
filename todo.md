@@ -30,6 +30,9 @@ var DebuggerSetBreakpoint = {"id": 7, "method": "Debugger.setBreakpoint", "param
 };
 ---
 
+Replace all doesn't seem to work.
+
+Replace replaces all but one (the first)
 
 ---
 [3474:0215/112548:ERROR:nw_shell.cc(336)] TypeError: Cannot read property 'isSaved' of undefined
@@ -241,7 +244,7 @@ Better search in file. Like Nodepad++
 Optimization
 ============
 
-
+Inline functions in jsParser.js (make a better document previewer before that!? *smile*)
 
 Wait some times before starting a parse. (dont have to parse while we're typing, most of the time). 
 
@@ -287,6 +290,15 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+#pragma mark label
+http://cocoasamurai.blogspot.se/2006/09/tip-pragma-mark-organizing-your-source.html
+Marking source code to make things easier to find. For example if you inline functions.
+
+
+ASCII-text module for writing LARGE text for the previewer
+http://patorjk.com/software/taag/#p=display&f=Sweet&t=I'm%20cool
+http://www.network-science.de/ascii/
 
 Open files dropped into the editor!!!
 

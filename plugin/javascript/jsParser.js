@@ -176,7 +176,7 @@
 		console.time("parseJavaScript");
 		
 		var text = file.text,
-			insdeDblQuote = false,
+			insideDblQuote = false,
 			insideSingleQuote = false,
 			insideFunctionDeclaration = false,
 			insideFunctionArguments = false,
@@ -192,8 +192,8 @@
 			insideFunctionBody = [],
 			insideQuote = false,
 			lastChar = "",
-			insdeLineComment = false,
-			insdeBlockComment = false,
+			insideLineComment = false,
+			insideBlockComment = false,
 			insideHTMLComment = false,
 			L = [], // {
 			R = [], // }
@@ -235,7 +235,7 @@
 			leftSide = "",
 			rightSide = "",
 			variableIndex = -1,
-			insdeComment = false,
+			insideComment = false,
 			xmlTagStart = -1, 
 			xmlTags = [],
 			xmlTagWordLength = 0,
@@ -706,11 +706,11 @@
 				row++;
 				
 				
-				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insdeBlockComment=" + insdeBlockComment + " line:" + lineNumber);
+				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
 				
-				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insdeBlockComment + openXmlTags);
+				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment + openXmlTags);
 				
-				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insdeBlockComment=" + insdeBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
+				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
 			}
 
@@ -722,17 +722,17 @@
 			
 			*/
 			
-			//console.log("insdeLineComment="+ insdeLineComment);
+			//console.log("insideLineComment="+ insideLineComment);
 			
 			
 			// Comments: <!-- -->
-			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) { // <!--
+			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
 				xmlMode = tmpXmlMode;
 				commentStart = i-4;
 			}
-			else if(char == ">" && lastChar == "-" && llChar == "-" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && insideHTMLComment) { // -->
+			else if(char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment) { // -->
 				insideHTMLComment = false;
 				comments.push(new Comment(commentStart, i));
 				//console.warn("Found HTML comment! line=" + lineNumber + " ");
@@ -741,27 +741,27 @@
 			if(!xmlMode) {
 			
 			// Comments: //
-			if(char == "/" && lastChar == "/" && !insdeDblQuote && !insideSingleQuote && !insdeBlockComment && !insdeLineComment  && !insideHTMLComment) {
-				insdeLineComment = true;
+				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment) {
+					insideLineComment = true;
 				commentStart = i-1;
-				//console.log("insdeLineComment!");
+				//console.log("insideLineComment!");
 			}
-			else if(char == "\n" && insdeLineComment) {
-				insdeLineComment = false;
+			else if(char == "\n" && insideLineComment) {
+				insideLineComment = false;
 				comments.push(new Comment(commentStart, i));
 				//console.log("Found line comment: " +  text.substring(commentStart, i))
 				return;
 			}
 			
 			// Comments: /*   */
-			else if(char == "*" && lastChar == "/" && !insdeLineComment && !insdeDblQuote && !insideSingleQuote && !insideHTMLComment) {
-				insdeBlockComment = true;
+			else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment) {
+					insideBlockComment = true;
 				commentStart = i-1;
 				commentStartIndentation = file.grid[row].indentation;
-				//console.log("insdeBlockComment!");
+					//console.log("insideBlockComment!");
 			}
-			else if(char == "/" && lastChar == "*" && insdeBlockComment) {
-				insdeBlockComment = false;
+				else if(char == "/" && lastChar == "*" && insideBlockComment) {
+					insideBlockComment = false;
 				comments.push(new Comment(commentStart, i));
 				//console.log("Found block comment: " + text.substring(commentStart, i));
 				if(file.grid[row].indentation > 0) {
@@ -774,24 +774,24 @@
 			
 			// Quotes: double
 			// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
-			else if(char === '"' && !insdeLineComment && !insideSingleQuote && !insdeBlockComment && !insideHTMLComment) {
-				if(insdeDblQuote) {
+				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
+				if(insideDblQuote) {
 					if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {				
-						insdeDblQuote = false;
+						insideDblQuote = false;
 						quotes.push(new Quote(quoteStart, i));
 						word = text.substring(quoteStart, i+1);
 						return;
 					}
 				}
 				else {
-					insdeDblQuote = true;
+					insideDblQuote = true;
 					quoteStart = i;
-					//console.log("insdeDblQuote!");
+					//console.log("insideDblQuote!");
 				}
 			}
 			
 			// Quotes: single
-			else if(char === "'" && !insdeDblQuote && !insdeLineComment && !insdeBlockComment && !insideHTMLComment) {
+				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment) {
 				if(insideSingleQuote) {
 					insideSingleQuote = false;
 					quotes.push(new Quote(quoteStart, i));
@@ -806,19 +806,19 @@
 				
 			}
 			
-			insideQuote = insdeDblQuote || insideSingleQuote;
-			insdeComment = insdeLineComment || insdeBlockComment || insideHTMLComment;
+			insideQuote = insideDblQuote || insideSingleQuote;
+			insideComment = insideLineComment || insideBlockComment || insideHTMLComment;
 			
-			//console.log("char(" + i + ")=" + char + "  " + insideQuote + " " + insdeComment);
+			//console.log("char(" + i + ")=" + char + "  " + insideQuote + " " + insideComment);
 			
-			if(!insdeComment) {
+			if(!insideComment) {
 				/*
 					Find xml-tags.
 					
 					Look out for if( x < y) and bitwise operations >> <<
 					and array of strings: "<", ">",
 					
-					PS: We are Not insde an HTML comment until the parser finds the last - in <!--
+					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
 				if(char == "/") {
 					if(insideXmlTag) {
@@ -891,7 +891,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insdeComment && !xmlMode) {
+			if(!insideQuote && !insideComment && !xmlMode) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
