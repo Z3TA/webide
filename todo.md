@@ -1,14 +1,17 @@
 Prioritize: bug fixing, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 Try do debug without console.log!
+Always use F5 to reload! Or exit functions might not fire!
 
-Currently working on: 
+Currently working on: show the dev tools by clicking Ctrl + Alt + D (devMode.js). So that we are not tricked to hit the reload button.
 
 
 BUGS
 ====
 
-When reloading in devMode, the file is sometimes not marked as saved in file-tabs.
+Somtimes when closing the editor. The file path is already removed from global.files!
+
+When reloading in devMode, the file is sometimes not marked as saved in file-tabs. (because we hit the reload button. Use F5 instead!)
 
 xmatching is off when scrolled to the right.
 

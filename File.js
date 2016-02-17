@@ -1856,11 +1856,11 @@ File.prototype.close = function() {
 	
 	content.removeChild(file.canvas);
 	
-	delete global.files[file.path];
-	
 	for(var i=0; i<global.eventListeners.fileClose.length; i++) {
 		global.eventListeners.fileClose[i].fun(file); // Call function
 	}
+	
+	delete global.files[file.path];
 	
 	editor.renderNeeded();
 	editor.resizeNeeded();
