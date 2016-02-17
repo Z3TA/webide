@@ -38,6 +38,7 @@ you have to start the program with --disable-lcd-text.
 You can change the font and colors under style in settings.js 
 
 
+
 Consolas font
 -------------
 Consolas is a monospace font that comes with Windows and some Windows programs.
@@ -59,3 +60,13 @@ Font-manager is a GUI tool:
 Click on the "cog wheels" icon (Manage Fonts) bottom left, to get a meny with "Install Fonts". 
 Select CONSOLA from the temp-folder you extracted the cab files in.
 
+
+
+Other fonts
+-----------
+
+While Consolas looks best with sub-pixel-anti-aliasing on. 
+These font's look good with without  sub-pixel-anti-aliasing:
+
+* Courier New
+* Source Code Pro
