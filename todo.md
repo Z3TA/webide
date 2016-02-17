@@ -8,9 +8,6 @@ Currently working on:
 BUGS
 ====
 
-Wrong coloring of end of tag:
-<a href=""><img src="http://imgs.xkcd.com/comics/compiling.png"></a>
-
 A file doesn't automatically go into xml mode when saving as or surronded by <html>
 
 When reloading in devMode, the file is sometimes not marked as saved in file-tabs.

@@ -820,7 +820,7 @@
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
-				if(char == "/") {
+				if(char == "/" && !insideQuote) {
 					if(insideXmlTag) {
 						insideXmlTagEnding = true;
 					}
