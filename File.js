@@ -26,8 +26,8 @@ function File(text, path, fileIndex) {
 	file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
 	file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
 	
-	// Never parse text of markdown files
-	if(file.fileExtension == "txt" || file.fileExtension == "md") file.parse = false;
+	// Never parse text or markdown files
+	//if(file.fileExtension == "txt" || file.fileExtension == "md") file.parse = false;
 	
 	file.index = fileIndex;
 

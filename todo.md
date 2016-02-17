@@ -8,8 +8,6 @@ Currently working on:
 BUGS
 ====
 
-A file doesn't automatically go into xml mode when saving as or surronded by <html>
-
 When reloading in devMode, the file is sometimes not marked as saved in file-tabs.
 
 xmatching is off when scrolled to the right.
@@ -26,6 +24,8 @@ var DebuggerSetBreakpoint = {"id": 7, "method": "Debugger.setBreakpoint", "param
 }
 };
 ---
+
+Search in file couln't find: "file.parse = false"
 
 Replace all doesn't seem to work.
 

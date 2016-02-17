@@ -44,6 +44,13 @@
 
 		editor.fileSaveDialog(defaultPath, function(path) {
 			editor.save(file, path);
+			
+			// Update file extension
+			file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
+			
+			// Fire file open event (because we saved as)
+			//file.load(file);
+			
 		})
 		
 	}
