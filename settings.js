@@ -12,8 +12,8 @@ global.settings = { // sugg: separate view options
 	enableSpellchecker: false,
 	enableDocumentPreview: false,
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!  
-	gridHeight: 23, // 22    New finding: cld-text turns on after typing somwhere
-	gridWidth: 8.5, // 8, 7.8
+	gridHeight: 23, // 23, 22    New finding: cld-text turns on after typing somwhere
+	gridWidth: 8.5, // 8.5, 7.8
 	leftMargin: 50,
 	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these tags
 	rightMargin: 50,
