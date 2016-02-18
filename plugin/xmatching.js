@@ -196,25 +196,36 @@
 		for(var col=col; col>=0; col--) {
 			char = buffer[row][col].char;
 			//console.log(char + "=" + lP + " ? " + (char==lP));
-			if(char == rP) skip++
-			else if(char == lP) {
-				if(skip--===0) {
-					//console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
-					return {row: row, col: col};
+				if(char == rP) {
+					skip++;
+					//console.log("skip=" + skip);
 				}
-			}
+			else if(char == lP) {
+					if(skip <= 0) {
+						//console.log("1Found second LEFT match at row=" + row + " col=" + col + " skip=" + skip);
+					return {row: row, col: col};
+					}
+					skip--;
+					//console.log("skip=" + skip);
+				}
+				
 		}
 		// Then search the rest
 		for(var row=row-1; row>=0; row--) { // Search up
-			for(var col=0; col<buffer[row].length; col++) { // We can start from the left because we already searched the first row
+				for(var col=buffer[row].length-1; col>-1; col--) { // Search left
 				char = buffer[row][col].char;
 				//console.log(char + "=" + lP + " ? " + (char==lP));
-				if(char == rP) skip++
-				else if(char == lP) {
-					if(skip--===0) {
-						//console.log("Found second LEFT match at row=" + row + " col=" + col + " ");
-							return {row: row, col: col};
+					if(char == rP) {
+						skip++;
+						//console.log("skip=" + skip);
 					}
+					else if(char == lP) {
+						if(skip <= 0) {
+							//console.log("2Found second LEFT match at row=" + row + " col=" + col + " skip=" + skip);
+							return {row: row, col: col};
+						}
+						skip--;
+						//console.log("skip=" + skip);
 				}
 			}
 			}

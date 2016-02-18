@@ -8,8 +8,9 @@ Currently working on:
 
 BUGS
 ====
-
-xmitching when just ( typed a )
+When reloading using F5:
+node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
+use location.reload() instead!?
 
 ---
 xmatching wrong curlybracket:
