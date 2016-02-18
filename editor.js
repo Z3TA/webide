@@ -1636,15 +1636,25 @@ function objInfo(o) {
 		var preventDefault = false;
 		var funReturn;
 		var captured = false;
+		var charCodeShift = 16;
+		var charCodeCtrl = 17;
+		var charCodeAlt = 18;
+		console.log("keyDown: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
-		console.log("keyDown: " + charCode + " = " + character + "");
+		// Prevent unsupported combo error ? 
+		// But what if we want a binding of *just* ALT!?
+		// Can't have that or it will mess all native combos. You need to bind to shift|alt|ctrl PLUS something else
+		// Shift <> stopped working
 		
-		// Prevent unsupported combo error:
-		if(charCode == 17) return; // Ctrl
-		if(charCode == 18) return; // ALT
+		if(charCode == charCodeCtrl) return; // Ctrl
+		if(charCode == charCodeAlt) return; // ALT
+		// Seems to work now!!? No! There is a bug, that every %2 time, after pressing Alt+: shift+ and alt-gr+ stops working like when making ( and [
 		
 		
-		// Call events
+		// PS. Alt Gr = Ctrl+Alt
+		
+		
+		// You probably want to push to global.keyBindings instead of using eventListeners.keyDown!
 		for(var i=0; i<global.eventListeners.keyDown.length; i++) {
 			funReturn = global.eventListeners.keyDown[i].fun(global.currentFile, character, combo); // Call function
 			
@@ -1669,6 +1679,11 @@ function objInfo(o) {
 			//if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined && combo===0)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 				
+				if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
+					console.error(new Error("Can't have nice things! Causes a bug that will make native shit+ or algGr+ keyboard combos not work"));
+				}
+				else {
+				
 				//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
 				
 				captured = true;
@@ -1679,7 +1694,10 @@ function objInfo(o) {
 					preventDefault = true;
 					console.log("Default action will be prevented!");
 				}
-				
+				}
+			}
+			else {
+				//console.log("NOT calling function:" + functionName(binding.fun) + " " + JSON.stringify(binding));
 			}
 		}
 		
@@ -1704,7 +1722,9 @@ function objInfo(o) {
 			else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
 			else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 			else if(combo.alt) {} // Wait for ALT+key combo!
-			
+			else if(charCode == 17 || combo.ctrl) {console.log("Ctrl ...");} // Wait for Ctrl+key combo!
+			//else if(combo.shift) {} // Wait for Shift+key combo!
+			//&&//&&//
 			else {
 				console.error(Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode));
 				
@@ -1754,7 +1774,7 @@ function objInfo(o) {
 		var combo = getCombo(e);
 
 		
-		console.log("keyUp: " + charCode + " = " + character + "");
+		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
 		// Check key bindings
 		for(var i=0, binding; i<global.keyBindings.length; i++) {

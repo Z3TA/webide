@@ -140,13 +140,12 @@
 		if(file.gotFocus) {
 			file.removeHighlights();
 			
-			console.log("Moving caret up ...");
-
 			var caret = file.caret;
 			
 			if(combo.alt) return; // Do nothing if alt key is down
 			if(combo.ctrl) return; // Do nothing if alt ctrl is down
-
+			
+			console.log("Moving caret up ...");
 		
 			if(combo.sum == SHIFT) {
 				// End the selection with the character left of the caret

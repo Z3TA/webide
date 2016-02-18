@@ -282,8 +282,8 @@
 		
 		
 		//console.log("words:" + JSON.stringify(words, null, 2));
-		console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
-		console.log("functions:" + JSON.stringify(functions, null, 2));
+		//console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
+		//console.log("functions:" + JSON.stringify(functions, null, 2));
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
 		

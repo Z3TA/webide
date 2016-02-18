@@ -106,7 +106,7 @@
 			
 			if(wordLength > 0) {
 				if("for".substr(0, wordLength) == word) {
-					options.push([word, "for (var i=0, i<.length; i++) {" + file.lineBreak + file.lineBreak + "}", 15 + lbLength*2]);
+					options.push([word, "for (var i=0; i<.length; i++) {" + file.lineBreak + file.lineBreak + "}", 15 + lbLength*2]);
 				}
 				else if("switch".substr(0, wordLength) == word) {
 					options.push([word, "switch() {" + file.lineBreak + "case :    ; break" + file.lineBreak + "}", 19 + lbLength*2]);
@@ -141,7 +141,7 @@
 			// Found nothing to complete. Maybe we want to close last opened xml tag!?
 			var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
 			
-			if(lastOpenXmlTag) {
+			if(lastOpenXmlTag.length > 0 && lastOpenXmlTag != "<") {
 				options.push(["", "</" + lastOpenXmlTag + ">", 0]);
 			}
 			

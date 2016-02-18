@@ -660,6 +660,8 @@ File.prototype.putCharacter = function(character, caret) {
 	// Sanity check in case someting is wrong
 	file.sanityCheck();
 	
+	console.log("Inserting character: " + character);
+	
 	console.time("putCharacter");
 	
 	// Insert the character in the text string
@@ -882,6 +884,8 @@ File.prototype.deleteSelection = function(selection) {
 		for(var i=0; i<selection.length; i++) {
 			
 			box = selection[i];
+			
+			if(box.index == undefined) debugger;
 			
 			//console.log("Deselecting box:\n" + JSON.stringify(box));
 			

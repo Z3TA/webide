@@ -3,25 +3,15 @@ Don't implement new stuff until we have a stable release!
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
-Currently working on: 
+Currently working on: zoom.js, trying to get the text to show up!! paint ctx
+
+While holding down ALT, everyting is zoomed out and goes to "find mode", with a box of the original view.
 
 
 BUGS
 ====
-When reloading using F5:
-node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
-use location.reload() instead!?
 
----
-xmatching wrong curlybracket:
-var DebuggerSetBreakpoint = {"id": 7, "method": "Debugger.setBreakpoint", "params": {
-"location": {
-"scriptId": "100", "lineNumber": 425
-},
-"condition": ""
-}
-};
----
+File tabs not removed when closing file.
 
 Search in file couln't find: "file.parse = false"
 
@@ -271,6 +261,14 @@ Can we get rid of the file.text and only use the grid!? Only convert the grid to
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Somtimes keys with shift or alt-gr doesn't work! native
+
+
+When reloading using F5:
+node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
+use location.reload() instead!?
+
 Somtimes when closing the editor. The file path is already removed from global.files!
 
 Sometimes get error about file not being open, when closing a bunch of files: file_tabs.js:618 
@@ -296,6 +294,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Dumb autocompletion: Auto-complete words that we have already typed.
 
 Cltr + P: Type somthing to open any file (like in debug tools)
 
