@@ -9,7 +9,7 @@ Currently working on:
 BUGS
 ====
 
-xmitching when just ( typed a ) 
+xmitching when just ( typed a )
 
 ---
 xmatching wrong curlybracket:
@@ -295,6 +295,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Cltr + P: Type somthing to open any file (like in debug tools)
 
 #pragma mark label
 http://cocoasamurai.blogspot.se/2006/09/tip-pragma-mark-organizing-your-source.html

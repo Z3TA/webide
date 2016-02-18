@@ -28,7 +28,8 @@
 		var leftEqualsRightCount = true;
 		
 		// The caret position on the buffer
-		var row = file.caret.row - file.startRow + startRow;
+		//var row = file.caret.row - file.startRow + startRow;
+		var row = file.caret.row - file.startRow - startRow;
 		var col = file.caret.col;
 		
 		//console.log("row=" + row + " col=" + col + "");
