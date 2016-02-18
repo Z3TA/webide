@@ -102,14 +102,14 @@
 			
 			
 			var firstLocation = {
-				x: global.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
+				x: global.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth,
 				y: global.settings.topMargin + (leftPosition.row+startRow) * global.settings.gridHeight
 			};
 			
 			
 			
 			var secondLocation = {
-				x: global.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
+				x: global.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth,
 					y: global.settings.topMargin + (rightPosition.row+startRow) * global.settings.gridHeight
 			};
 					

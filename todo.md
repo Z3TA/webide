@@ -3,17 +3,11 @@ Don't implement new stuff until we have a stable release!
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
-Currently working on: show the dev tools by clicking Ctrl + Alt + D (devMode.js). So that we are not tricked to hit the reload button.
+Currently working on: 
 
 
 BUGS
 ====
-
-Somtimes when closing the editor. The file path is already removed from global.files!
-
-When reloading in devMode, the file is sometimes not marked as saved in file-tabs. (because we hit the reload button. Use F5 instead!)
-
-xmatching is off when scrolled to the right.
 
 xmitching when just ( typed a ) 
 
@@ -149,6 +143,9 @@ Tab framför </table> (ska inte vara det)
 Polishing
 =========
 
+Write letter starting in center!? 
+Bigger chars in xmatching.
+
 Colors when parsing next text next to a html tag, it turns blue </>
 
 Moving file tabs, change position.
@@ -269,8 +266,12 @@ Can we get rid of the file.text and only use the grid!? Only convert the grid to
 
 
 
+
+
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+Somtimes when closing the editor. The file path is already removed from global.files!
+
 Sometimes get error about file not being open, when closing a bunch of files: file_tabs.js:618 
 
 Editor sometimes fails to save!!! When? there's an error / something crash?
@@ -286,6 +287,10 @@ Opening files with inconsistent line breaks.
 Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
 
 Test if inlining functions in jsParser makes it faster.
+
+
+
+
 
 
 Feature
