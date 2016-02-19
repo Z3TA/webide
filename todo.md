@@ -11,12 +11,6 @@ While holding down ALT, everyting is zoomed out and goes to "find mode", with a 
 BUGS
 ====
 
-Pressing enter mess up the colors (no parse?)
-
-Single quotes like in I'm cool get's colored in html documents.
-
-Updat function list (in what function!?) when searching.
-
 making { codeblocks ... no render
 
 Function help hinting doesnt go away when typing.
@@ -238,6 +232,8 @@ Can we get rid of the file.text and only use the grid!? Only convert the grid to
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Pressing enter mess up the colors
 
 Somtimes keys with shift or alt-gr doesn't work! native
 

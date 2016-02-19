@@ -1577,10 +1577,8 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 		caret.eol = true;
 		caret.eof = true;
 		
-		file.checkCaret(caret);
-		return caret;
 	}
-	
+	else {
 	// Set the index
 	caret.index = index;
 
@@ -1591,16 +1589,14 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 		caret.eol = true;
 		caret.eof = true;
 		
-		file.checkCaret(caret);
-		return caret;
-		
 	}
-	
+	else {
 	//console.log("grid.length=" + grid.length);
 	
-	
+			var found = false;
+			
 	// Set the row, col, eol and eof
-	for(var row=0; row<grid.length; row++) {
+	main: for(var row=0; row<grid.length; row++) {
 		
 		//console.log("grid[" + row + "].length=" + grid[row].length);
 
@@ -1616,8 +1612,9 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 				caret.eol = false;
 				caret.eof = false;
 				
-				file.checkCaret(caret);
-				return caret;
+						found = true;
+						break main;
+						
 			}
 			else if(gridIndex > index) {
 				// We are at the end of last row
@@ -1630,19 +1627,21 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 				}
 				else {
 					caret.index = grid[caret.row].startIndex;
-				}
-				
-				file.checkCaret(caret);
-				return caret;
+						}
+						
+						found = true;
+						break main;
+						
 			}
 			else if(gridIndex == (index-1) && col==grid[row].length-1) {
 				// eol on this row! (but not eof)
 				caret.row = row;
 				caret.col = col+1;
 				caret.eol = true;
-				
-				file.checkCaret(caret);
-				return caret;
+						
+						found = true;
+						break main;
+						
 			}
 		}
 	}
@@ -1650,7 +1649,9 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 	
 		Probably because all lines are empty!
 	*/
-	
+			
+			if(!found) {
+			
 	caret.col = 0;
 	caret.eol = true;
 	caret.row = index / file.lineBreak.length;
@@ -1658,13 +1659,18 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 	if(caret.row == grid.length-1) caret.eof = true;
 	
 	if(caret.row % 1 !== 0) {
-		console.error(new Error("Couldn't set cursor! index=" + index + ""));
+					console.error(new Error("Couldn't set cursor! index=" + index + ""));
+					//return undefined;
 	}
-	else {
-		file.checkCaret(caret);
-		return caret;
 	}
-
+	}
+	}
+	
+	file.checkCaret(caret);
+	
+	if(caret == file.caret) editor.fireEvent("moveCaret", file, caret);
+	
+	return caret;
 	
 }
 
