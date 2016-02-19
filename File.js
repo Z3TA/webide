@@ -885,7 +885,7 @@ File.prototype.deleteSelection = function(selection) {
 			
 			box = selection[i];
 			
-			if(box.index == undefined) debugger;
+			if(box.index == undefined) console.error(new Error("Index is undefined. Stuff will go wrong!"));
 			
 			//console.log("Deselecting box:\n" + JSON.stringify(box));
 			

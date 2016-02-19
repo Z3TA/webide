@@ -5,13 +5,26 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+render_indentation.js
+
 problem: When making an if() { its hard to know where to place the second } because all looks right already.'
 
+Thinking about some way to ease finding where to insert the second }
+
+If there is indentation on the last row. There's an unclosed block!
+
+If the caret is located near { Show a red line during that indention level.
+
+If it was OK before the { was inserted, show a warning triangle!?
+
+When one or more lines are selected while pressing tab, make it a code block, insert { arount it } and place the caret to the left of the first one
 
 BUGS
 ====
 
 After hitting Alt+Shift, the shift button no longer work. Need to hit alt+shit again for it to work.
+
+Lots of auto-complete stuff not working.
 
 making { codeblocks ... no render
 
