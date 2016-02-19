@@ -2,14 +2,10 @@
 (function() {
 	/*
 		Allows selecting text using the mouse.
-	
-		todo: add selection and re-render while moving the mouse.
-	
+		
 	*/
 	
 	"use strict";
-	
-
 	
 	var oldMouseX,
 		oldMouseY,
@@ -24,6 +20,8 @@
 		lastCaretIndex = 0,
 		lastDown,
 		lastDirection,
+		lastSelectionStart = 0,
+		lastSelectionEnd = 0,
 		mouseStartX = 0,
 		mouseStartY = 0,
 		mouseX = 0,
@@ -66,9 +64,16 @@
 				endSelecting();
 			}
 			
-			
 			if(keyboardCombo.sum == SHIFT && direction == "down") {
-				startIndex = file.caret.index;
+				
+				// If there's already an selection, use the old startIndex
+				if(file.selected.length == 0) {
+					startIndex = file.caret.index;
+				} else {
+					// Use old startIndex
+					file.deselect();
+					}
+				console.log("sel startIndex=" + startIndex);
 				endIndex = caret.index;
 				oldCaretEol = file.caret.eol;
 				makeSelection(file, caret);
@@ -170,7 +175,7 @@
 							// Find more occurencie(s) of the select text and highlight it.
 							file.highlightText(range.word);
 							
-							console.warn("range.word=" + range.word);
+							console.log("range.word=" + range.word);
 							
 							// Place caret at the end of the selection (to prevent the last character from popping)
 							file.moveCaretToIndex(endIndex, caret);
@@ -333,6 +338,10 @@
 				rightCaretEol = caret.eol;
 			}
 			
+			if(start == lastSelectionStart && end == lastSelectionEnd) {
+				console.warn("Selecting the same selection again!");
+			}
+			
 			console.log("Making selection from " + start + " to " + end + "")
 			
 			// Select the text
@@ -349,6 +358,9 @@
 			file.select(textRange);
 			
 			//file.caret = caret;
+			
+			lastSelectionStart = start;
+			lastSelectionEnd = end;
 			
 			console.log("Select text!");
 			editor.renderNeeded();
@@ -396,6 +408,7 @@
 		
 		isSelecting = false;
 		//editor.removeRender(select_render);
+		
 	}
 	
 	function adjustToGridY(v) {
@@ -491,6 +504,9 @@
 			if(isSelecting) {
 				var file = global.currentFile;
 				var caret = editor.mousePositionToCaret(mouseX, mouseY);
+				
+				// Place the caret
+				global.currentFile.caret = caret;
 				
 				endIndex = caret.index;
 				

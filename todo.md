@@ -11,32 +11,11 @@ While holding down ALT, everyting is zoomed out and goes to "find mode", with a 
 BUGS
 ====
 
-
----
-[3474:0215/112548:ERROR:nw_shell.cc(336)] TypeError: Cannot read property 'isSaved' of undefined
-at saveSate (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:627:23)
-at reopen_files_closeEditor (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:590:5)
-at Window.<anonymous> (file:///home/zeta/dev/js-editor/editor.js:1197:10)
-at emitNone (events.js:70:20)
-at Window.emit (events.js:147:7)
-at IDWeakMap.global.__nwObjectsRegistry.handleEvent (node.js:786:26)
-[3474:0215/112548:INFO:CONSOLE(627)] "Uncaught TypeError: Cannot read property 'isSaved' of undefined", source: file:///home/zeta/dev/js-editor/plugin/file_tabs.js (627)
----
-
-Selecting something, then shift clicking should add to the selection.
+Pressing enter mess up the colors (no parse?)
 
 Single quotes like in I'm cool get's colored in html documents.
 
 Updat function list (in what function!?) when searching.
-
-A toggler for document preview
-
-Seems like we have a memory leak!?
-
-Sometimes when closing a file, the editor doesn't swtich to an existing one ...
-And when the next file is closed, it tries to switch to an already closed file!
-bug: lastViewedFileHistory contains the closed files (only the closed files, several times), then tries to switch to it.
-file_tabs.js line 322
 
 making { codeblocks ... no render
 
@@ -228,6 +207,8 @@ inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner
 Optimization
 ============
 
+Deleting a slelection is slow!!
+
 Inline functions in jsParser.js (make a better document previewer before that!? *smile*)
 
 Wait some times before starting a parse. (dont have to parse while we're typing, most of the time). 
@@ -260,6 +241,7 @@ Unable to repeat bugs (happens rarely)
 
 Somtimes keys with shift or alt-gr doesn't work! native
 
+Sometimes you get an error when closing the editor, that one of the file we want to save state for is not in global.files.
 
 When reloading using F5:
 node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
@@ -294,10 +276,6 @@ Feature
 Dumb autocompletion: Auto-complete words that we have already typed.
 
 Cltr + P: Type somthing to open any file (like in debug tools)
-
-#pragma mark label
-http://cocoasamurai.blogspot.se/2006/09/tip-pragma-mark-organizing-your-source.html
-Marking source code to make things easier to find. For example if you inline functions.
 
 
 ASCII-text module for writing LARGE text for the previewer
