@@ -3,7 +3,7 @@ Don't implement new stuff until we have a stable release!
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
-Currently working on: zoom.js, trying to get the text to show up!! paint ctx
+Currently working on: 
 
 While holding down ALT, everyting is zoomed out and goes to "find mode", with a box of the original view.
 
@@ -227,6 +227,9 @@ auto-complete variable names!
 fonts: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif
 
 Better search in file. Like Nodepad++
+
+prettify the zoom heading labels. (show line number)
+inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner-design-image28200429
 
 
 Optimization

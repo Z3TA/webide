@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	var o_gridHeight, o_gridWidth, o_fontSize, visibleRows, visibleColumns, blueBoxStartRow;
+	var o_gridHeight, o_gridWidth, o_fontSize, visibleRows, visibleColumns, blueBoxStartRow, o_font, o_scrollStep;
 	
 	var zoomedIn = false;
 	
@@ -11,13 +11,16 @@
 	var charCodeShift = 16;
 	var charCodeZ = 90;
 	var scrollStep = 5;
+	var loadOrder = 999; // Should load after the renders
 	
-	editor.on("start", zoomInit);
+	editor.on("start", zoomInit, loadOrder);
 	
 	function zoomInit() {
 		o_gridHeight = global.settings.gridHeight;
 		o_gridWidth = global.settings.gridWidth;
 		o_fontSize = global.settings.style.fontSize;
+		o_font = global.settings.style.font;
+		o_scrollStep = global.settings.scrollStep;
 		
 		global.keyBindings.push({charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 		
@@ -39,9 +42,11 @@
 	function zoom(file, combo, character, charCode, direction) {
 	
 		console.log("zooming!");
-		global.settings.gridHeight = 7;
-		global.settings.gridWidth = 3;
-		global.settings.style.fontSize = 10;
+		global.settings.gridHeight = global.settings.gridHeight / 6;
+		global.settings.gridWidth = global.settings.gridWidth / 6;
+		global.settings.style.fontSize = global.settings.style.fontSize / 4;
+		//global.settings.style.font = "bold " + o_font;
+		global.settings.scrollStep = 20;
 		
 		visibleRows = global.view.visibleRows;
 		visibleColumns = global.view.visibleColumns;
@@ -63,15 +68,15 @@
 		/*
 			Make mardown topics bigger letters
 			
-			## foo
+			## foo2 A
 			
-			foo
-			---
+			foo2 B underline
+			----
 			
-			foo
-			===
+			foo1 A underline
+			================
 			
-			# foo
+			# foo1 B
 		*/
 		
 		
@@ -96,7 +101,9 @@
 		global.settings.gridHeight = o_gridHeight;
 		global.settings.gridWidth = o_gridWidth;
 		global.settings.style.fontSize = o_fontSize;
-		
+			global.settings.style.font = o_font;
+			global.settings.scrollStep = o_scrollStep;
+			
 		zoomedIn = false;
 		
 			resetView();
@@ -219,14 +226,24 @@
 			
 			for (var col=0; col<buffer[row].length; col++) {
 				let char = buffer[row][col].char;
+				
+				//console.log("char=" + char);
+				
 				if( !foundH && (char == "/" || char == "*")) {
 					start++;
+					//console.log("comment");
 				}
 				else if(char == H && !foundH) {
 					start++;
 					size++;
-					}
+					//console.log("#");
+				}
+				else if(char == " " && !foundH) {
+					start++;
+					//console.log("space");
+				}
 				else {
+					//console.log("found=true");
 					foundH = true; // The rest of the characters will be treated as words
 					text = text + char;
 				}
@@ -235,19 +252,42 @@
 			console.log("Heading " + size + " :" + text);
 			
 			if(size > 0 || 1==1) {
-				// ### Paint header
+				// ## Paint header
 				let col = 0;
 				let startRow = file.startRow;
 				let left = global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth;
-				let top = global.settings.topMargin + (row + startRow) * global.settings.gridHeight;
+				let top = global.settings.topMargin + (row) * global.settings.gridHeight;
+				let bgColor = "blue"; // global.settings.style.commentColor
+				let textColor = "yellow" // global.settings.style.textColor
 				
-				ctx.font= "12px " + global.settings.style.font;
+				// ### Set font (size)
+				let fontSize = 22 - size * 2.5;
+				ctx.font= fontSize + "px " + global.settings.style.font;
+				//ctx.textBaseline = "bottom"; // top
 				
-				ctx.fillStyle = "red";
+				// ### Measure text
+				
+				let width = ctx.measureText(text).width;
+				let height = fontSize;
+				
+				// ### Clear background
+				ctx.fillStyle = bgColor;
+				ctx.fillRect(left, top, width, height);
+				
+				
+				// # Paint text
+				ctx.fillStyle = textColor;
 				ctx.fillText(text, left, top);
 				ctx.stroke();
 				
-				console.log("left=" + left + " top=" + top);
+				//console.log("left=" + left + " top=" + top + " width=" + width + " height=" + height);
+				
+				/*
+					##############################
+					#         PRETTY!            #
+					##############################
+					*/
+				
 				
 			}
 			
