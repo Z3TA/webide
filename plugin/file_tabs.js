@@ -343,7 +343,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		}
 		
 		if(global.files[path] == undefined) {
-			console.error(new Error("There is no file open with path=" + path));
+			console.warn("There is no file open with path=" + path);
+			return;
 		}
 		
 		lastFile = currentFile;
@@ -529,7 +530,6 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			
 			if(!global.files[path].isSaved && !e.ctrlKey) {
 				
-				
 				closeFileButton.setAttribute("title", "Ctrl click to close "+ fileName + " without saving");
 				
 				//closeFileButton.setAttribute("class", "blink closeFileTab ");
@@ -542,7 +542,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 				
 			}
 			else {
-				global.files[path].close();
+				editor.closeFile(path);
 			}
 			
 			return false;

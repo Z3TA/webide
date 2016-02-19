@@ -162,38 +162,76 @@ function objInfo(o) {
 	}
 
 
-	editor.openFile = function(path, content, callback) {
-		console.log("Loading file to editor: " + path);
-		
+	editor.openFile = function(path, text, callback) {
+				
 		if(typeof path != "string") console.error(new Error("path is not a string: " + path));
-		if(typeof content != "string") console.error(new Error("content is not a string: " + content));
+		
+		if(text == undefined) {
+			editor.readFromDisk(path, load);
+		}
+		else {
+		
+			if(typeof text != "string") {
+				console.error(new Error("text is not a string: " + text));
+			}
+			else {
+				load();
+			}
 			
-		global.files[path] = new File(content, path, global.fileIndex++);
-		
-		var file = global.files[path];
-		
-		if(global.currentFile) {
-			global.currentFile.hide();
 		}
 		
-		// Switch to this file
-		global.currentFile = file; 
-		
-		/* We might want to change some state before file open events get fired, 
-		so call the callback before file.open()
-		
-		used by: file.open to set saved to true
-		*/	
-		if(callback) callback(file);
+		function load() {
+			console.log("Loading file to editor: " + path);
+			global.files[path] = new File(text, path, global.fileIndex++);
+			
+			var file = global.files[path];
+			
+			if(global.currentFile) {
+				global.currentFile.hide();
+			}
+			
+			// Switch to this file
+			global.currentFile = file; 
+			
+			/* We might want to change some state before file open events get fired, 
+			so call the callback before file.open()
+			
+			used by: file.open to set saved to true
+			*/	
+			if(callback) callback(file);
 
-		
-		file.open(); // in turn calls file.load() witch fire file-load events
-		
-
-		// Always resize and render after opening a file! (where, when????)
+			file.open(); // in turn calls file.load() witch fire file-load events
+			
+			// Always resize and render after opening a file! (where, when????)
+		}
 		
 	}
 
+	editor.closeFile = function(path) {
+		
+		if(!global.files.hasOwnProperty(path)) {
+			throw new Error("Can't close file that is not open: " + path);
+		}
+		else {
+			
+			var file = global.files[path];
+			
+			if(global.currentFile == file) global.currentFile = null;
+			
+			delete global.files[file.path];
+			
+			// Call listeners
+			for(var i=0; i<global.eventListeners.fileClose.length; i++) {
+				global.eventListeners.fileClose[i].fun(file); // Call function
+			}
+						
+			file.close();
+			
+			editor.renderNeeded();
+			//editor.resizeNeeded();
+		}
+	}
+	
 
 	editor.readFileSync = function(path) {
 		
