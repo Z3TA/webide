@@ -619,7 +619,12 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		var file = global.files[path];
 		
-		if(!file) console.error(new Error("File='" + path + "' not open! global.files=" + JSON.stringify(Object.keys(global.files)) + ""));
+		if(!file) {
+			// Possible reasons: it was renamed!? It should have been removed first!
+			//console.warn("File not in global.files, was it renamed? open: " + file);
+			//return;
+			console.error(new Error("File='" + path + "' not open! global.files=" + JSON.stringify(Object.keys(global.files)) + ""));
+		}
 		
 		if(file == global.currentFile) {
 			state.open = true;
@@ -658,6 +663,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		window.localStorage.openedFiles = fixCommas(window.localStorage.openedFiles);
 		
+			
 		console.log("window.localStorage.openedFiles:\n" + window.localStorage.openedFiles);
 
 	}
@@ -680,6 +686,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		// Remove state
 		window.localStorage.removeItem("state_" + filePath);
 		
+		console.log("Removing from opened files: " + file.path)
 		console.log("AFTER REMOVE");
 		console.log("window.localStorage.openedFiles:\n" + window.localStorage.openedFiles);
 		

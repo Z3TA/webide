@@ -5,11 +5,13 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-While holding down ALT, everyting is zoomed out and goes to "find mode", with a box of the original view.
+problem: When making an if() { its hard to know where to place the second } because all looks right already.'
 
 
 BUGS
 ====
+
+After hitting Alt+Shift, the shift button no longer work. Need to hit alt+shit again for it to work.
 
 making { codeblocks ... no render
 

@@ -295,6 +295,38 @@ function objInfo(o) {
 		}
 
 		
+		if(file.path != path) {
+			 // File saved under another path!
+			
+			// Close file BEFORE setting new path
+			//file.close(); // This will close the file
+			editor.closeFile(file.path);
+			
+			// Delete old key
+			//delete global.files[file.path];
+			
+			// Add the new path as key in global.files
+			global.files[path] = file;
+
+			// Set the new path
+			file.path = path;
+			
+			file.open();
+			
+			if(file == global.currentFile) {
+				// Set window title to current file path
+				var gui = require('nw.gui');
+				var win = gui.Window.get();
+				win.title = file.path;
+				
+				editor.renderNeeded();
+				editor.render();
+			}
+			else {
+				console.warn("Saved file is NOT the current file!");
+			}
+		}
+		
 		fs.writeFile(path, file.text, function(err) {
 			console.log("Attempting saving to disk: " + path + " ...");
 			
@@ -303,38 +335,7 @@ function objInfo(o) {
 			}
 			else {
 				console.log("The file was successfully saved: " + path + "");
-				
-				if(file.path != path) {
-					 // File saved under another path!
 					
-					// Close file BEFORE setting new path
-					file.close(); // This will close the file
-					
-					// Delete old key
-					delete global.files[file.path];
-					
-					// Add the new path as key in global.files
-					global.files[path] = file;
-
-					// Set the new path
-					file.path = path;
-					
-					file.open();
-					
-					if(file == global.currentFile) {
-						// Set window title to current file path
-						var gui = require('nw.gui');
-						var win = gui.Window.get();
-						win.title = file.path;
-						
-						editor.renderNeeded();
-						editor.render();
-					}
-					else {
-						console.warn("Saved file is NOT the current file!");
-					}
-				}
-				
 				file.saved(); // Call functions that listen for save events
 				
 				if(callback) callback();
