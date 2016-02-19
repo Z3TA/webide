@@ -11,10 +11,6 @@ While holding down ALT, everyting is zoomed out and goes to "find mode", with a 
 BUGS
 ====
 
-File tabs not removed when closing file.
-
-Search in file couln't find: "file.parse = false"
-
 Replace all doesn't seem to work.
 
 Replace replaces all but one (the first)

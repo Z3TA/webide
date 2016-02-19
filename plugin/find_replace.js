@@ -60,23 +60,28 @@
 		div.setAttribute("class", "findReplace");
 		 
 		// Build the input stuff ...
-		 
+		
+		var size = editor.getDir().length;
+		
 		inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
 		inputFind.setAttribute("id", "inputFind");
 		inputFind.setAttribute("class", "inputtext");
-
+		inputFind.setAttribute("size", size);
+		
 		inputReplace = document.createElement("input");
 		inputReplace.setAttribute("type", "text");
 		inputReplace.setAttribute("id", "inputReplace");
 		inputReplace.setAttribute("class", "inputtext replace");
-
+		inputReplace.setAttribute("size", size);
+		
 		inputInDir = document.createElement("input");
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
 		inputInDir.value = editor.getDir();
-
+		inputInDir.setAttribute("size", size);
+		
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
 		labelFind.appendChild(document.createTextNode("Find:")); // Language settings!?
@@ -349,6 +354,8 @@
 			fs.readFile(filePath, 'utf-8', function(err, contents) { 
 			
 				if(err) console.error(err);
+				
+				console.log("Searching " + filePath);
 				
 				inspectFile(filePath, contents); 
 			})
