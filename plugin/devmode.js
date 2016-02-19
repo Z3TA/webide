@@ -122,7 +122,8 @@
 				console.error(error("There was an error in " + name + " (global.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
 			}
 			else {
-				document.location = document.location.href;
+			//document.location = document.location.href;
+			location.reload();
 			}
 			
 		};
