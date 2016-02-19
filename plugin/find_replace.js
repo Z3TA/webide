@@ -6,7 +6,7 @@
 	var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, replaceAllButton, findInFilesButton, replaceInFilesButton;
 	
 	var inputFindGotFocus = false;
-	var lastSearchEnd = -1;
+	var lastSearchEnd = -1; // Depricated !??
 	var searchReportCounter = 0;
 	var searchVisible = false;
 	var lastSearchStrLength = 0;
@@ -553,6 +553,8 @@
 	
 	function find(str, file, useRegex, keepSelection, dontLoop, direction) {
 		
+		// Selects the text, and moves the caret to it, return first text index of str
+		
 		var text = file.text;
 		var start = file.caret.index + lastSearchStrLength;
 		var end = 0;
@@ -594,6 +596,7 @@
 				
 				if(start == -1 && !dontLoop) {
 					// Try again from the top
+					console.log("Trying again from the start");
 					start = text.indexOf(str);
 				}
 			}
@@ -650,14 +653,20 @@
 	}
 	
 	
-	function replace(newString, oldString, file, useRegex) {
+	function replace(newString, oldString, file, useRegex, dontLoop) {
 		
 		console.log("Replacing '" + oldString + "' with '" + newString + "'");
 		
 		lastSearchEnd = file.caret.index;
 		
+		lastSearchStrLength = 0;
+		
+		var keepSelection = false;
+		
+		if(dontLoop == undefined) dontLoop = true; // We dont want it to loop, or it will be confusing when it starts from the beginning.
+		
 		// Find the string
-		var start = find(oldString, file, useRegex, false, true); // Clear selection and don't loop
+		var start = find(oldString, file, useRegex, keepSelection, dontLoop);
 		
 		if(start > -1) {
 			// Delete the selected text
@@ -677,11 +686,14 @@
 	
 	function replaceAll(newString, oldString, file, useRegex) {
 		var start = 0;
+		var dontLoop = false;
 		
 		lastSearchEnd = -1; // Begin from the start
 		
+		console.log("Replace all " + oldString + " width " + newString);
+		
 		while(start > -1) {
-			start = replace(newString, oldString, file, useRegex);
+			start = replace(newString, oldString, file, useRegex, dontLoop);
 			console.log("start=" + start);
 		}
 		

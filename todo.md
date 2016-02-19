@@ -11,9 +11,6 @@ While holding down ALT, everyting is zoomed out and goes to "find mode", with a 
 BUGS
 ====
 
-Replace all doesn't seem to work.
-
-Replace replaces all but one (the first)
 
 ---
 [3474:0215/112548:ERROR:nw_shell.cc(336)] TypeError: Cannot read property 'isSaved' of undefined
