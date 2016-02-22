@@ -9,23 +9,6 @@ Currently working on:
 BUGS
 ====
 
-Lots of auto-complete stuff not working.
-
-making { codeblocks ... no render
-
-Function help hinting doesnt go away when typing.
-
-Auto-complete inside a function-name seems to auto-complete itself!
-function foo..
-
-Auto-completion of variable names doesn't seem to work!?
-
-The screen becomes black when typing (due to resize!?) asdasd  
-
-
-fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)
-
-
 ---
 when closing:
 Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
@@ -45,7 +28,7 @@ devmode.js:51 Uncaught Error: There is no file open with path=C:\shares\Z\docume
 12file_tabs.js:610 Attempted to save state for a file without path!
 ---
 
-
+fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)
 
 ---
 Weird indent after:
@@ -100,6 +83,17 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 
 Tab framför </table> (ska inte vara det)
+
+
+Lots of auto-complete stuff not working.
+
+Function help hinting doesnt go away when typing.
+
+Auto-complete inside a function-name seems to auto-complete itself!
+function foo..
+
+Auto-completion of variable names doesn't seem to work!?
+
 
 
 

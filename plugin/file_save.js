@@ -48,12 +48,17 @@
 			// Update file extension
 			file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
 			
+			file.parsed = {}; // Remove parsed data
+			
+			editor.renderNeeded();
+			
 			// Fire file open event (because we saved as)
 			//file.load(file);
 			
-		})
+		});
 		
 	}
+	
 	
 	function saveCurrentFile(file, combo, character, charCode, direction) {
 		
