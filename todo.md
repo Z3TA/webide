@@ -9,10 +9,6 @@ Currently working on:
 BUGS
 ====
 
-
-Page is black (no render) after opening from Ctrl+O clicking a path
-Also go to the line we are searching for after opening!
-
 Error: Tried to insert a tab character
 at File.putCharacter (File.js:644)
 at keyPressed (editor.js:1494)
@@ -223,6 +219,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Better search in file. Look at notepad++ for inspiration.
 
 Dumb autocompletion: Auto-complete words that we have already typed.
 

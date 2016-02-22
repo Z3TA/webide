@@ -47,7 +47,7 @@
 					file.changed = false;
 					
 					editor.renderNeeded();
-					editor.render();
+					//editor.render(); // It will be black!? if we render right away!
 					
 				});
 				
