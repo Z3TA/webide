@@ -10,42 +10,6 @@ BUGS
 ====
 
 
----
-Weird indent after:
-var firstLocation = {
-x: global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace) * global.settings.gridWidth,
-y: global.settings.topMargin + row * global.settings.gridHeight
-}// HAHA! I had forgot semicolon here!!
-
-What to do about this in the future!?
----
-
-
-
-mouse_select.js:213 Uncaught TypeError: Cannot read property 'index' of undefined
-
-Dont auto insert '' when typing in a comment (just like when typing ' inside an "string") ex: Can't ship's chimp's
-
-
-Save history when moving the cursor.?? Append the current cursor position to last saved state, when moving the cursor.
-
-
-functionlist.js:163 Uncaught SyntaxError: Invalid regular expression: /'(/: Unterminated group
-
-
----
-When copying code, also indent the first line, even if the selection started in the middle of it
-and remove all indention before base. ex:
-foo
-bar
-bar {
-bar
-}
-bar
----
-
-Abort the spell-checker if something is deleted or if the whole grid changes to ^
-
 Page is black (no render) after opening from Ctrl+O clicking a path
 Also go to the line we are searching for after opening!
 

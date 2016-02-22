@@ -1509,6 +1509,7 @@ function objInfo(o) {
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 			
+			
 			if (isIe) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
