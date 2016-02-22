@@ -1667,7 +1667,11 @@ function objInfo(o) {
 	
 	
 	function keyIsDown(e) {
-
+		/*
+			
+			note: Windows OS (or Chromium?) has some weird keyboard commands, like Ctrl + I to insert a tab!
+			
+		*/
 		e = e || window.event; 
 		
 		var charCode = e.charCode || e.keyCode;

@@ -9,10 +9,12 @@ Currently working on:
 BUGS
 ====
 
-Error: Tried to insert a tab character
-at File.putCharacter (File.js:644)
-at keyPressed (editor.js:1494)
-(when Ctrl+shift+I)
+
+---
+Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"] {stack: (...), message: "File='C:\Users\Z\dev-repositories\js-editor\plugin…ies\\js-editor\\plugin\\javascript\\jsParser.js"]"}message: "File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:626 saveSate
+file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
+---
+
 
 
 Ctrl+Tab when a name of a function is selected, will insert () after the function-name.
