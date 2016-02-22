@@ -9,8 +9,6 @@ Currently working on:
 BUGS
 ====
 
-After hitting Alt+Shift, the shift button no longer work. Need to hit alt+shit again for it to work.
-
 Lots of auto-complete stuff not working.
 
 making { codeblocks ... no render

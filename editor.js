@@ -1687,7 +1687,10 @@ function objInfo(o) {
 		
 		if(charCode == charCodeCtrl) return; // Ctrl
 		if(charCode == charCodeAlt) return; // ALT
-		// Seems to work now!!? No! There is a bug, that every %2 time, after pressing Alt+: shift+ and alt-gr+ stops working like when making ( and [
+		
+		if(combo.alt && combo.shift) {
+			console.warn("Alt + shift is the default for changing keyboard layout in Windows!");
+		}
 		
 		
 		// PS. Alt Gr = Ctrl+Alt

@@ -25,9 +25,9 @@
 		global.keyBindings.push({charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 		
 		
-		global.keyBindings.push({charCode: charCodeUp, combo: ALT + SHIFT, fun: scrollUp});
+		global.keyBindings.push({charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
 		
-		global.keyBindings.push({charCode: charCodeDown, combo: ALT + SHIFT, fun: scrollDown});
+		global.keyBindings.push({charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
 		
 		global.renders.push(showMarkdownHeadings);
 	}
