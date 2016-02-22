@@ -698,9 +698,16 @@
 			
 			char = text.charAt(charIndex);
 			
-			// We can not have /* after a lineComment, it will do nothing
+			
 
-
+			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
+				// A new line without , exits variable declaration
+				insideVariableDeclaration[codeBlockDepth] = false;
+				foundVariableInVariableDeclaration = false;
+				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") );
+			}
+			
+			
 			if(char == lastLineBreakCharacter) {
 				lineNumber++;
 				row++;
@@ -724,6 +731,7 @@
 			
 			//console.log("insideLineComment="+ insideLineComment);
 			
+			// We can not have /* after a lineComment, it will do nothing
 			
 			// Comments: <!-- -->
 			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) { // <!--
@@ -913,7 +921,7 @@
 		
 				
 				
-				// Code block indentation for JavaScript & CSS
+				// ### Code block indentation for JavaScript & CSS
 				if(char == "}") {
 					codeBlockR();
 				}
@@ -932,6 +940,7 @@
 					//endPointer();
 					
 				}
+				
 				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
 					
 					//console.log("Found character=, insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " leftSide=" + leftSide + " rightSide=" + rightSide + " word=" + word + " lastWord=" + lastWord + " (line=" + lineNumber + ")");
