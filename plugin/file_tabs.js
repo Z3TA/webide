@@ -695,6 +695,18 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			console.log(item + "=" + window.localStorage[item]);
 		}
 		
+		// Sanity check
+		for(var path in global.files) {
+			if(window.localStorage.openedFiles.indexOf(path) == -1) {
+				console.error(new Error("global.files path=" + path + " not in window.localStorage.openedFiles!"));
+			}
+		}
+		var check = window.localStorage.openedFiles.split(",");
+		for(var i=0; i<check.length; i++) {
+			if(!global.files.hasOwnProperty(check[i])) {
+				console.error(new Error("window.localStorage.openedFiles path=" + check[i] + " not in global.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles));
+			}
+		}
 		
 	}
 	
