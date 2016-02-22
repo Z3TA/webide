@@ -9,26 +9,6 @@ Currently working on:
 BUGS
 ====
 
----
-when closing:
-Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
-file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
----
-
----
-When having two tabs open and closing one of them:
-file_tabs.js:339 Tab to C:\Users\Z\dev-repositories\js-editor\test\ansi.txt already in view!
-Tab to C:\Users\Z\dev-repositories\js-editor\test\ansi.txt already in view!
-devmode.js:50 Error: There is no file open with path=C:\shares\Z\documents\todo\todo.txt
-    at switchToFile (file_tabs.js:344)
-    at Object.closeFile_tabs [as fun] (file_tabs.js:322)
-    at File.close (File.js:1840)
-    at HTMLButtonElement.closeTab (file_tabs.js:543)
-devmode.js:51 Uncaught Error: There is no file open with path=C:\shares\Z\documents\todo\todo.txt
-12file_tabs.js:610 Attempted to save state for a file without path!
----
-
-fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)
 
 ---
 Weird indent after:
@@ -237,6 +217,12 @@ Can we get rid of the file.text and only use the grid!? Only convert the grid to
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+---
+when closing:
+Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
+file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
+---
 
 Pressing enter mess up the colors
 

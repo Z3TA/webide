@@ -127,6 +127,7 @@
 			}
 			
 			// Update quotes
+			if(js.quotes) {
 			var quote;
 			for(var i=js.quotes.length-1; i>0; i--) { // start from bottom
 				quote = js.quotes[i];
@@ -139,8 +140,10 @@
 					break;
 				}
 			}
+			}
 			
 			// Update comments
+			if(js.comments) {
 			var comment;
 			for(var i=js.comments.length-1; i>0; i--) { // start from bottom
 				comment = js.comments[i];
@@ -156,6 +159,7 @@
 			
 			if(somethingChanged) file.haveParsed(js);
 			
+		}
 		}
 		
 		file.sanityCheck();
