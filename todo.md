@@ -5,19 +5,6 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-render_indentation.js
-
-problem: When making an if() { its hard to know where to place the second } because all looks right already.'
-
-Thinking about some way to ease finding where to insert the second }
-
-If there is indentation on the last row. There's an unclosed block!
-
-If the caret is located near { Show a red line during that indention level.
-
-If it was OK before the { was inserted, show a warning triangle!?
-
-When one or more lines are selected while pressing tab, make it a code block, insert { arount it } and place the caret to the left of the first one
 
 BUGS
 ====
@@ -39,6 +26,13 @@ The screen becomes black when typing (due to resize!?) asdasd
 
 
 fixIndentation.js:123 Uncaught TypeError: Cannot read property 'length' of undefined (when copy->pasting)
+
+
+---
+when closing:
+Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
+file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
+---
 
 ---
 When having two tabs open and closing one of them:
@@ -114,6 +108,8 @@ Tab framför </table> (ska inte vara det)
 
 Polishing
 =========
+
+xmatch: do not count { inside strings.
 
 Write letter starting in center!? 
 Bigger chars in xmatching.
@@ -216,6 +212,8 @@ inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner
 Optimization
 ============
 
+It lags while moving the character (arrows) in a large file.
+
 Deleting a slelection is slow!!
 
 Inline functions in jsParser.js (make a better document previewer before that!? *smile*)
@@ -288,6 +286,9 @@ Dumb autocompletion: Auto-complete words that we have already typed.
 
 Cltr + P: Type somthing to open any file (like in debug tools)
 
+When one or more lines are selected while pressing tab, make it a code block, insert { arount it } and place the caret to the left of the first one
+
+Keybinding-override: A GUI for over-riding all keybindings, lets you edit the key's for all functions in global.keyBindings
 
 ASCII-text module for writing LARGE text for the previewer
 http://patorjk.com/software/taag/#p=display&f=Sweet&t=I'm%20cool
