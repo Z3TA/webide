@@ -638,6 +638,7 @@ File.prototype.putCharacter = function(character, caret) {
 		col = caret.col,
 		index = caret.index;
 	
+	var renderRow = true; // Optimization
 	
 	if(character == undefined) {
 		console.error(new Error("character is undefined!"));
@@ -656,6 +657,8 @@ File.prototype.putCharacter = function(character, caret) {
 		return;
 	}
 
+	
+	if(character == "{" || character == "}") renderRow = false;
 	
 	// Sanity check in case someting is wrong
 	file.sanityCheck();
@@ -688,7 +691,7 @@ File.prototype.putCharacter = function(character, caret) {
 		caret.col++;
 		caret.index++;
 		
-		editor.renderRow(row); // Render the row early (before heavy indexing)
+		if(renderRow) editor.renderRow(row); // Render the row early (before heavy indexing)
 		
 		// Mehh, it wont render until JavaScript have finished crushing ... 
 		// Fix!? Use setTimeout!? Works sometimes. But sanityCheck fails! asdasdas alksjdalskjdlaksdjalskdj asdlkjasdlj
@@ -711,8 +714,6 @@ File.prototype.putCharacter = function(character, caret) {
 		
 		//console.log("Done fixing grid indexes");
 		
-		//global.render = false;
-		
 		file.scrollToCaret(caret);
 		
 		
@@ -726,7 +727,7 @@ File.prototype.putCharacter = function(character, caret) {
 	
 	file.sanityCheck();
 
-//editor.renderNeeded();
+	if(!renderRow) editor.renderNeeded();
 	
 }
 
@@ -1491,6 +1492,8 @@ File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 		*/
 	}
 	
+	if(character == "{" || character == "}") renderRow = false;
+	
 	// Remove the character(s) from the text string
 	file.text = file.text.substr(0, index) + file.text.substring(index+indexDecrementor, file.text.length);
 	
@@ -2175,6 +2178,8 @@ File.prototype.change = function(change, text, index, row, col) {
 	/*
 		This method is hopefully called every time the file changes.
 		So that we can know if the file has been saved or not.
+		
+		Note: there is no change event, use the edit event!
 	*/
 	var file = this;
 	
