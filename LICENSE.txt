@@ -1,8 +1,8 @@
 
 Copyright (c) Johan Zetterberg, All rights reserved!
 
-You are free to use this software in condition that any updates (for example bug fixes, new features, or derative work) 
+You are free to use this software in condition that any updates (for example bug fixes, new features, or derivative work) 
 gets submitted to me, along with a note giving me full copyright permission. And that you do Not redistribute any of the code.
  
 The software is provided "as is" without any warranty. Use at your own risk! 
-Under no circumstance should I be hold resposible for any damages that this software might cause.
+Under no circumstance should I be hold responsible for any damages that this software might cause.

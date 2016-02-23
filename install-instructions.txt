@@ -3,6 +3,8 @@ Dependencies:
 nw.js - The chromium browser with nodejs module support.
 nodehun - A nodejs module used for spell checking
 
+The executable for nw.js can be found in the runtime folder
+
 Download nw.js from the web: http://nwjs.io/
 
 You can find the binaries for nodehun (zipped) in the install folder!
@@ -36,6 +38,7 @@ But if you have a modern screen with high pixel density, this might not be optim
 you have to start the program with --disable-lcd-text.
 
 You can change the font and colors under style in settings.js 
+
 
 
 
