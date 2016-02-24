@@ -223,6 +223,8 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+Mark unused variables (and properties)
+
 Better search in file. Look at notepad++ for inspiration.
 
 Dumb autocompletion: Auto-complete words that we have already typed.
