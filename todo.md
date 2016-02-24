@@ -5,12 +5,16 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+Quick file open: Ctrl + P
+
+autoComplete listeners
 
 BUGS
 ====
 
-When removing a file, last opened in the editor
+file_tabs not med när editorn byter fil.
 
+Opening files with weird formatting: files inside .hg for example
 
 ---
 Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"] {stack: (...), message: "File='C:\Users\Z\dev-repositories\js-editor\plugin…ies\\js-editor\\plugin\\javascript\\jsParser.js"]"}message: "File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:626 saveSate
@@ -28,6 +32,7 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 Tab framför </table> (ska inte vara det)
 
+Function args wont come up in autocomplete.
 
 Lots of auto-complete stuff not working.
 
@@ -39,11 +44,21 @@ function foo..
 Auto-completion of variable names doesn't seem to work!?
 
 
+support CSS comments H1,, in zoom: /* ############### File List ############### */
+
 
 
 
 Polishing
 =========
+
+goto_file.js: Seach in subfolder option, ignore dot filder and folders option. Better coloring.
+
+A key command for closing a file.
+
+A list of all key-bdings available, F1!?
+
+Also show the indention helper if we pasted in something and the last char was a {
 
 xmatch: do not count { inside strings.
 
@@ -309,10 +324,11 @@ Smooth scrolling. Make it easier to read text while scrolling.
 
 Need though
 -----------
+How should plugin do with CSS? Have their own CSS file!?
+
 make a full render when messing with indentation!?
 
 A list of code comments for easier code navigation, click on the code to go to it. Ett kompliment till function-list.
-
 
 
 

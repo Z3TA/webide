@@ -182,9 +182,29 @@ function isString(text) {
 
 
 	editor.openFile = function(path, text, callback) {
+		/*
+			Note: The caller of this function needs to handle file state, 
+			such as file.isSaved, file.savedAs and file.changed
+			Unless text==undefined, then it will be opened from disk and asumed saved.
+			
+		*/
 		
 		console.log("Opening file: " + path);
 		
+		// Check if the file is already oepned
+		if(global.files.hasOwnProperty(path)) {
+				console.warn("File already opened: " + path);
+				if(global.currentFile) {
+				if(global.currentFile.path != path) {
+					// Switch to it:
+						global.currentFile.hide();
+					global.currentFile = global.files[path];
+					global.currentFile.show();
+						}
+			}
+			return;
+					}
+				
 		if(!isString(path)) console.error(new Error("path is not a string: " + path));
 		
 		if(text == undefined) {
@@ -198,16 +218,21 @@ function isString(text) {
 				console.error(new Error("text is not a string!"));
 			}
 			else {
-				load();
+				load(path, text);
 			}
 			
 		}
 		
-		function load() {
+		function load(path, text) {
 			console.log("Loading file to editor: " + path);
 			global.files[path] = new File(text, path, global.fileIndex++);
 			
 			var file = global.files[path];
+			
+			// Because we opened it from disk:
+			file.isSaved = true;
+			file.savedAs = true;
+			file.changed = false;
 			
 			if(global.currentFile) {
 				global.currentFile.hide();
