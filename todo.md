@@ -5,16 +5,20 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Quick file open: Ctrl + P
-
+todo:
 autoComplete listeners
+
+self debugger!?
 
 BUGS
 ====
 
+Editor became un-responsible when searching for: smoothing
+
+
 file_tabs not med när editorn byter fil.
 
-Opening files with weird formatting: files inside .hg for example
+Opening files with weird formatting: files inside .hg for example, try binary files!
 
 ---
 Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"] {stack: (...), message: "File='C:\Users\Z\dev-repositories\js-editor\plugin…ies\\js-editor\\plugin\\javascript\\jsParser.js"]"}message: "File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:626 saveSate
@@ -51,6 +55,8 @@ support CSS comments H1,, in zoom: /* ############### File List ############### 
 
 Polishing
 =========
+
+Auto load/connect to the debugger so that we can more easely find editor errors. Self debugging.
 
 goto_file.js: Seach in subfolder option, ignore dot filder and folders option. Better coloring.
 
