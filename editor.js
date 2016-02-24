@@ -129,6 +129,25 @@ function objInfo(o) {
 	}
 }
 
+function isString(text) {
+	// When a string is created with new String, it will be typeof object!
+	
+	var objectString = "[object String]";
+	var string = "string";
+	var typeOf = typeof content;
+	var instanceofString = (content instanceof String);
+	var objectToString = Object.prototype.toString.call(text);
+	
+	
+	if(typeOf != string && !instanceofString && objectToString != objectString) {
+		console.log("typeOf=" + typeOf);
+		console.log("objectToString=" + objectToString);
+	}
+	return typeOf == string || instanceofString || objectToString == objectString;
+
+}
+
+
 
 // Non global editor code ...
 (function() {
@@ -163,16 +182,20 @@ function objInfo(o) {
 
 
 	editor.openFile = function(path, text, callback) {
-				
-		if(typeof path != "string") console.error(new Error("path is not a string: " + path));
+		
+		console.log("Opening file: " + path);
+		
+		if(!isString(path)) console.error(new Error("path is not a string: " + path));
 		
 		if(text == undefined) {
+			console.warn("Text is undefined! Reading file from disk: " + path)
 			editor.readFromDisk(path, load);
 		}
 		else {
 		
-			if(typeof text != "string") {
-				console.error(new Error("text is not a string: " + text));
+			if(!isString(text)) {
+				console.log("text=" + text);
+				console.error(new Error("text is not a string!"));
 			}
 			else {
 				load();
@@ -250,6 +273,9 @@ function objInfo(o) {
 
 
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
+		
+		console.log("Reading file from disk: " + path);
+		console.log(new Error("Read file from disk").stack);
 		
 		if(!callback) {
 			console.error(new Error("No callback defined!"));

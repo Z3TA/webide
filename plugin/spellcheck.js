@@ -150,7 +150,9 @@
 
 		var file = global.currentFile;
 		
-		file.getWordOnCaret(caret, wordOnCaret);
+		if(file) {
+			file.getWordOnCaret(caret, wordOnCaret);
+		}
 		
 		function wordOnCaret(word, start, end) {
 			

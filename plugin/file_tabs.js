@@ -106,22 +106,45 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			// Check protocol!?
 			
 			// Open in sync to get them in the same order
-			var content = editor.readFileSync(path);
+			var content, notFound = false, loadLastState = true;
+			try {
+			  content = fs.readFileSync(path, "utf8");
+			} catch (e) {
+				if (e.code === 'ENOENT') {
+				  console.log('File not found!');
+				  //console.error(e);
+				  notFound = true;
+				  content = null;
+				} else {
+				  console.error(e);
+				}
+			}
 			
 			var lastFileState = loadState(path);
 			
-			if(lastFileState) {
+			if(notFound && lastFileState) {
+				// Only ask if we actually have the last state, otherwise just ignore that it's gone.
+				if(confirm("File not found: " + path + "\nLoad last saved state?")) {
+					loadLastState = true;
+				}
+				else {
+					loadLastState = false;
+				}
+			}
+			
+			if(lastFileState && loadLastState) {
 				if( content == undefined || lastFileState.isSaved === false) {
 					// Open from temp
 					content = lastFileState.text;
 				}
 			}
 
-			if(content == undefined) {
-				console.warn("Unable to load content from " + path + "");
+			if(!isString(content)) {
+				console.warn("Unable to load content from " + path + " (it's not a string!)");
 				removeFromOpenedFiles(path);
 			}
 			else {
+				
 				editor.openFile(path, content, function(file) {
 					
 					// Mark the file as saved, because we just opened it
@@ -147,7 +170,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 						
 						if(lastFileState.isSaved !== undefined) {
 							file.isSaved = lastFileState.isSaved;
-}
+						}
 
 						if(lastFileState.open === true) setCurrent = path;
 						
@@ -588,8 +611,13 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		}
 		else {
 			var openFiles = window.localStorage.openedFiles.split(",");
-			for(var i=0; i<openFiles.length; i++) {
-				saveSate(openFiles[i]);
+			
+			// note: "".split(",").length == 1 !!
+			if(window.localStorage.openedFiles != "") {
+				console.log("openFiles.length=" + openFiles.length);
+				for(var i=0; i<openFiles.length; i++) {
+					saveSate(openFiles[i]);
+				}
 			}
 			
 			if(global.currentFile) {
@@ -612,6 +640,10 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		if(path.length == 0) {
 			console.warn("Attempted to save state for a file without path!");
+			console.log(new Error("saveState").stack);
+			console.log("global.files=" + Object.keys(global.files).join(","));
+			console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles);
+			
 			return;
 		}
 		
@@ -623,7 +655,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			// Possible reasons: it was renamed!? It should have been removed first!
 			//console.warn("File not in global.files, was it renamed? open: " + file);
 			//return;
-			console.error(new Error("File='" + path + "' not open! global.files=" + JSON.stringify(Object.keys(global.files)) + ""));
+			console.warn("File='" + path + "' not open! global.files=" + JSON.stringify(Object.keys(global.files)) + "");
+			return false;
 		}
 		
 		if(file == global.currentFile) {
@@ -698,13 +731,13 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		// Sanity check
 		for(var path in global.files) {
 			if(window.localStorage.openedFiles.indexOf(path) == -1) {
-				console.error(new Error("global.files path=" + path + " not in window.localStorage.openedFiles!"));
+				console.warn("global.files path=" + path + " not in window.localStorage.openedFiles!");
 			}
 		}
 		var check = window.localStorage.openedFiles.split(",");
 		for(var i=0; i<check.length; i++) {
 			if(!global.files.hasOwnProperty(check[i])) {
-				console.error(new Error("window.localStorage.openedFiles path=" + check[i] + " not in global.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles));
+				console.warn("window.localStorage.openedFiles path=" + check[i] + " not in global.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
 		}
 		

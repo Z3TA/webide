@@ -5,10 +5,11 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-hg pull!
 
 BUGS
 ====
+
+When removing a file, last opened in the editor
 
 
 ---
@@ -222,6 +223,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Increase text size by Ctrl + Scroll wheel. (for presentation mode)
 
 Mark unused variables (and properties)
 

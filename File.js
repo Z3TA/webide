@@ -9,7 +9,8 @@ function File(text, path, fileIndex) {
 	var file = this,
 		content = document.getElementById("content");
 	
-	if(typeof text !== "string") console.error(new Error("text is not a string:\n" + text));
+	if(!isString(text)) console.error(new Error("text is not a string!"));
+	
 	
 	file.startRow = 0;    // Scrolling up/down
 	file.startColumn = 0; // Scrolling left/right
@@ -2489,7 +2490,7 @@ File.prototype.getWordOnCaret = function(caret, callback) {
 	var file = this;
 	
 	if(callback === undefined) {
-		console.error("Expected a callback function!");
+		console.error(new Error("Expected a callback function!"));
 		return;
 	}
 
