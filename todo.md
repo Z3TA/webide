@@ -224,6 +224,10 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+A faster way to open files: Ctrl + G, goto line or file:line (insipration: Chrome debugger)
+
+When there is no file open, show a list of file? or a text: <p>Press <b>Ctrl + O</b> to open a file</p>
+
 Increase text size by Ctrl + Scroll wheel. (for presentation mode)
 
 Mark unused variables (and properties)

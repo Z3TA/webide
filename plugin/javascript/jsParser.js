@@ -68,7 +68,7 @@
 			return true;
 		}
 		else {
-			console.warn(file.name + "will not be parsed!");
+			console.warn(file.name + " will not be parsed!");
 			return false;
 		}
 	}

@@ -202,7 +202,7 @@
 		if(file.gotFocus) {
 			var state;
 			
-			console.log("saveState:\n" + file.text);
+			//console.log("saveState:\n" + file.text);
 
 			
 			if(!history.hasOwnProperty(file.index)) {

@@ -106,15 +106,15 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			// Check protocol!?
 			
 			// Open in sync to get them in the same order
-			var content, notFound = false, loadLastState = true;
+			var content, notFound = false, loadLastState = false;
 			try {
 			  content = fs.readFileSync(path, "utf8");
 			} catch (e) {
 				if (e.code === 'ENOENT') {
-				  console.log('File not found!');
+				  console.log('File not found:' + path);
 				  //console.error(e);
 				  notFound = true;
-				  content = null;
+					content = "";
 				} else {
 				  console.error(e);
 				}
@@ -122,20 +122,39 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			
 			var lastFileState = loadState(path);
 			
-			if(notFound && lastFileState) {
-				// Only ask if we actually have the last state, otherwise just ignore that it's gone.
-				if(confirm("File not found: " + path + "\nLoad last saved state?")) {
-					loadLastState = true;
+			if(lastFileState) {
+				
+				console.log("loadLastState=" + loadLastState);
+				console.log("lastFileState.isSaved=" + lastFileState.isSaved);
+				
+				if(notFound) {
+					// Only ask if we actually have the last state, otherwise just ignore that it's gone.
+					if(confirm("File not found! Load last saved state? path=: " + path)) {
+						loadLastState = true;
+					}
+					else {
+						loadLastState = false;
+					}
+				} 
+				// scenario: File has been emptied because of no disk space (*couch* Linux *couch*)
+				else if(content.length === 0 && lastFileState.text.length > 0) {
+					if(confirm("File on disk is empty! Load last saved state instead? path=: " + path + "")) {
+						loadLastState = true;
+					}
+					else {
+						loadLastState = false;
+					}
 				}
-				else {
-					loadLastState = false;
-				}
-			}
-			
-			if(lastFileState && loadLastState) {
-				if( content == undefined || lastFileState.isSaved === false) {
+				
+				if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved.
+				
+				if( loadLastState || lastFileState.isSaved === false ) {
 					// Open from temp
+					console.warn("Loading last saved state for file path=" + path);
 					content = lastFileState.text;
+					
+					//console.log("content=" + content);
+					
 				}
 			}
 
@@ -673,10 +692,11 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		state.caret = file.caret;
 		state.order = file.order;
 		
-		if(!state.isSaved) {
+		//if(!state.isSaved) {
 			// Size limit!??
-			state.text = file.text;
-		}
+		// Always save the text, even if it's saved to disk. (it can be deleted, or disk space limit truncated it)
+		state.text = file.text;
+		//}
 		
 		window.localStorage["state_" + path] = JSON.stringify(state);
 		
