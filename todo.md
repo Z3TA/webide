@@ -19,8 +19,8 @@ Opening files with weird formatting: files inside .hg for example, try binary fi
 Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"] {stack: (...), message: "File='C:\Users\Z\dev-repositories\js-editor\plugin…ies\\js-editor\\plugin\\javascript\\jsParser.js"]"}message: "File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:626 saveSate
 file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
 ---
-
-Indentation for good looking multi-dimensional arrays:
+ 
+Indentation for good looking multidimensional arrays:
 var arr = [
 [1, "foo"],
 [2, "bar"],
@@ -34,14 +34,15 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 Tab framför </table> (ska inte vara det)
 
-Function args wont come up in autocomplete.
+
+Function args wont come up in autocomplete.  
 
 Function help hinting doesn’t go away when typing.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
-
+misspell markings seem to be off
 
 
 support CSS comments H1,, in zoom: /* ############### File List ############### */
@@ -165,13 +166,15 @@ inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner
 Optimization
 ============
 
+Running the spellchcker will throttle the CPU at maximum for up to 30s or more!
+
 Deleting selected text is Sloooow.
 
 Editor became un-responsible when searching for: smoothing
 
 It lags while moving the character (arrows) in a large file.
 
-Deleting a slelection is slow!!
+Deleting a selection is slow!!
 
 Inline functions in jsParser.js (make a better document previewer before that!? *smile*)
 
@@ -181,7 +184,7 @@ Do the grid boxes really have to know their character index!?
 
 Test a huuuge .js file with many functions to see how the editor performs.
 
-Typing is slow, espcecially in full screen.
+Typing is slow, especially in full screen.
 
 Rendering is slow when there are many misspelled words.
 

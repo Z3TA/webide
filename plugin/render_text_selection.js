@@ -17,11 +17,13 @@
 	
 	console.log("Loaded selectionRender");
 	
-	function selectionRender(ctx, buffer) {
+	function selectionRender(ctx, buffer, file, startRow) {
 		
 		if(buffer.length === 0) return;
 		
 		console.time("selectionRender");
+		
+		if(startRow == undefined) startRow = 0;
 		
 		//console.log(JSON.stringify(buffer, null, 2));
 		
@@ -40,7 +42,7 @@
 			
 			indentation = buffer[row].indentation;
 			
-			top = global.settings.topMargin + row * global.settings.gridHeight;
+			top = global.settings.topMargin + (row + startRow) * global.settings.gridHeight;
 
 			if(buffer[row].selected) { // The whole row is selected
 				ctx.rect(global.settings.leftMargin, top,	global.settings.gridWidth * buffer[row].length, global.settings.gridHeight);

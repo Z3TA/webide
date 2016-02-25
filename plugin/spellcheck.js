@@ -59,7 +59,24 @@
 	
 	function toggleSpellCheck() {
 		global.settings.enableSpellchecker = global.settings.enableSpellchecker ? false : true;
-		console.warn("global.settings.enableSpellchecker=" + global.settings.enableSpellchecker);
+		console.log("global.settings.enableSpellchecker=" + global.settings.enableSpellchecker);
+		
+		if(global.settings.enableSpellchecker) {
+			// Begin spell-checking all opened files
+			
+			let change = "toggleSpellcheckerOn"
+			let text = "";
+			let index = 0;
+			let row = 0;
+			let col = 0;
+			
+			if(global.currentFile) runSpellCheck(global.currentFile, change, text, index, row, col); // Start with the file in view
+			
+			for(var path in global.files) {
+				if(global.currentFile != global.files[path]) runSpellCheck(global.files[path], change, text, index, row, col);
+			}
+			
+		}
 		editor.hideMenu();
 		}
 
@@ -113,7 +130,10 @@
 			var word = arr[1];
 			var row = arr[2];
 			var col = arr[3];
-			var spell = arr[4]; // Added by the worker, * for correct, or a (list?) of suggestions
+			var textLength = arr[4];
+			var spell = arr[5]; // Added by the worker, * for correct, or a (list?) of suggestions
+			
+			
 			var correct = (spell == "*");
 			
 			if(correct) {
@@ -125,7 +145,7 @@
 				misspelled[word] = spell; 
 			}
 			
-			doSomething(filePath, correct, word, row, col);
+			doSomething(filePath, correct, word, row, col, textLength);
 			
 			
 		}
@@ -209,12 +229,12 @@
 		
 		//console.log("change=" + change);
 		
-		if(change) { // Also calls on file load
+		if(change) { // Also calls on file load, but then change is undefined
 			
 			/*
 				problem: 
 					user makes a spelling mistake, then corrects it. And the correction is wrong.
-			
+				
 			*/
 			
 			if(change=="insert") {
@@ -259,12 +279,12 @@
 		// Run on visible rows
 		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+global.view.visibleRows); row++) {
 		
-		console.time("runSpellCheck");
+		console.time("runSpellCheckTimer");
 
 		for(var row = 0; row < grid.length; row++) {
 			checkRow(grid[row]);
 		}
-		console.timeEnd("runSpellCheck");
+		console.timeEnd("runSpellCheckTimer");
 		
 		function checkRow(gridRow) {
 
@@ -311,7 +331,7 @@
 							part = word.substring(lastUpper, i)
 							lastUpper = i;
 							if(part.length > 1) {
-								console.log("runTogether:" + part);
+								//console.log("runTogether:" + part);
 								spellCheck(file, part, row, col + cp - word.length + i);
 							}
 						}
@@ -340,21 +360,51 @@
 	  return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 	
-	function doSomething(filePath, correct, origWord, row, col) {
+	function doSomething(filePath, correct, origWord, row, col, textLength) {
 		
 		var file = global.files[filePath];
+		
+		wordsInQueue--;
 		
 		if(file === undefined) {
 			console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
 			return;
 		}
+		
 		var grid = file.grid;
 		
-		wordsInQueue--;
+		if(textLength == undefined) textLength = file.text.length;
 		
-		if(!correct) {
-			//console.log("'" + origWord + "' is miss-spelled. Suggestion: " + misspelled[origWord]);
-			colorGrid(row, col, origWord.length);
+		if(file.text.length < textLength) {
+			// Don't do any coloring if something has been removed.
+			console.log("Not showing spelling error because text has been removed");
+		}
+		else if(!correct) { 
+			//console.log("'" + origWord + "' is miss-spelled. Suggestion: " + misspelled[origWord] +" row=" + row + " col=" + col);
+			
+			// ### Color the grid
+			var origWordLength = origWord.length;
+			// col is the end-column. The range is col-origWordLength to col
+				
+				if(grid[row].length < col) {
+				//console.log("spellcheck: The grid has changed! grid[" + row + "].length=" + grid[row].length + " col=" + col + " origWordLength=" + origWordLength + "");
+					return; //
+				}
+				
+			for(var c=col-1; c>col-origWordLength-1; c--) {
+					
+					grid[row][c].decoration.redWave = true;
+					//grid[row][c].color="red";
+					//console.log("coloring row=" + row + " col=" + c);
+					
+				}
+				
+			if(file == global.currentFile) {
+				editor.renderRow(row);
+					//editor.renderNeeded();
+				}
+				
+			
 		}
 
 		//console.log("wordsInQueue=" + wordsInQueue);
@@ -362,28 +412,6 @@
 			editor.renderNeeded();
 		}
 		
-		function colorGrid(row, col, length) {
-			// col is the end-column. The range is col-length to col
-			
-			if(grid[row].length < col) {
-				console.log("spellcheck: The grid has changed! grid[" + row + "].length=" + grid[row].length + " col=" + col + " length=" + length + "");
-				return; //  
-			}
-			
-			for(var c=col-1; c>col-length-1; c--) {
-				
-					grid[row][c].decoration.redWave = true;
-					//grid[row][c].color="red";
-					//console.log("coloring row=" + row + " col=" + c);
-				
-			}
-			
-			if(file == global.currentFile) {
-				editor.renderNeeded();
-			}
-			
-			
-		}
 			
 	}
 	
@@ -398,7 +426,7 @@
 		
 		*/
 		
-		console.log("spellchecking:" + word);
+		//console.log("spellchecking:" + word);
 		
 		var htmlTags = ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
 		var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
@@ -429,7 +457,7 @@
 			
 			var workerId = wordsInQueue % numWorkers;
 			
-			var data = file.path + ";" + word + ";" + row + ";" + col;
+			var data = file.path + ";" + word + ";" + row + ";" + col + ";" + file.text.length;
 			
 			//console.log("Sending data to spell-check worker " + workerId + "\ndata=" + data);
 			
