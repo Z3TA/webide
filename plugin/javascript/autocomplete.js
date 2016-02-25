@@ -28,7 +28,7 @@
 		var charIndex = file.caret.index;
 		
 		if(!js) {
-			console.log("File has not been parsed. No auto-complete available");
+			console.log("File has not been parsed. No JavaScript auto-complete available");
 			return;
 			}
 		

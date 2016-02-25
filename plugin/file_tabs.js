@@ -655,7 +655,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 	
 	function saveSate(path) {
 		
-		console.log("Saving state for: " + path);
+		//console.log("Saving state for: " + path);
 		
 		if(path.length == 0) {
 			console.warn("Attempted to save state for a file without path!");

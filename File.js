@@ -631,7 +631,12 @@ File.prototype.putCharacter = function(character, caret) {
 	if(file.selected.length > 0) {
 		file.deleteSelection();
 		caret = file.caret;
-		}
+		
+		// Then it's proabably also highlighted, so remove the highlight
+		//file.removeHighlights();
+	}
+	
+	
 	
 
 	var grid = file.grid,

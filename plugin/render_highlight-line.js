@@ -1,7 +1,7 @@
 
 (function() {
 	
-	global.renders.push(highLightLine); // lineNumbers function will be called on every frame render
+	global.renders.push(highLightLine); // function will be called on every frame render
 
 	var color = global.settings.style.currentLineColor;
 	

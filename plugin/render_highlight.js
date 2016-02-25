@@ -17,9 +17,11 @@
 	
 	console.log("Loaded highlightRender");
 	
-	function highlightRender(ctx, buffer) {
+	function highlightRender(ctx, buffer, file, startRow) {
 		
 		console.time("highlightRender");
+		
+		if(startRow == undefined) startRow = 0;
 		
 		//console.log(JSON.stringify(buffer, null, 2));
 		
@@ -38,7 +40,7 @@
 			
 			indentation = buffer[row].indentation;
 			
-			top = global.settings.topMargin + row * global.settings.gridHeight;
+			top = global.settings.topMargin + (row + startRow) * global.settings.gridHeight;
 			
 			/*
 			if(buffer[row].selected) { // The whole row is selected

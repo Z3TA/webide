@@ -106,7 +106,7 @@
 			}
 			else if(direction == "up" && lastDirection == "down" && keyboardCombo.sum == 0) {
 					
-				// Select text ...
+				// ## Select text ...
 				endSelecting();
 				
 				endIndex = caret.index;
@@ -165,14 +165,14 @@
 						
 					}
 					else {
-						// Select the word we dbl-clicked on
+						// ### Select the word we dbl-clicked on
 						var range = findWord(caret.index, file.text);
 						
 						if(range.word.length > 0) {
 							startIndex = range.start;
 							endIndex = range.end;
 							
-							// Find more occurencie(s) of the select text and highlight it.
+							// ### Find more occurencie(s) of the select text and highlight it.
 							file.highlightText(range.word);
 							
 							console.log("range.word=" + range.word);

@@ -6,15 +6,11 @@ Always use F5 to reload! Or exit functions might not fire!
 Currently working on: 
 
 todo:
-autoComplete listeners
-
-self debugger!?
 
 
 BUGS
 ====
 
-When a word is marked, and you type something, the marked text (renderRow)'s at the top. Ex: foo, foo (double click foo, then write bar instead)
 
 --
 Uncaught Error: ENOENT: no such file or directory, scandir 'C:\Users\Z\dev-repositories\js-editor\plugins'fs.js:803 fs.readdirSyncfind_replace.js:331 searchDirfind_replace.js:322 findInFilesfind_replace.js:276 (anonymous function)
@@ -53,14 +49,12 @@ Tab framför </table> (ska inte vara det)
 
 Function args wont come up in autocomplete.
 
-Lots of auto-complete stuff not working.
-
 Function help hinting doesnt go away when typing.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
-Auto-completion of variable names doesn't seem to work!?
+
 
 
 support CSS comments H1,, in zoom: /* ############### File List ############### */
