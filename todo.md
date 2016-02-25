@@ -11,12 +11,6 @@ todo:
 BUGS
 ====
 
-
---
-Uncaught Error: ENOENT: no such file or directory, scandir 'C:\Users\Z\dev-repositories\js-editor\plugins'fs.js:803 fs.readdirSyncfind_replace.js:331 searchDirfind_replace.js:322 findInFilesfind_replace.js:276 (anonymous function)
---
-
-
 file_tabs not med när editorn byter fil.
 
 Opening files with weird formatting: files inside .hg for example, try binary files!
@@ -36,10 +30,6 @@ var arr = [
 
 
 spellchecker: ignore the quotes if there are quotes on both sides: 'error' 
-
-
-Ctrl+Tab when a name of a function is selected, will insert () after the function-name.
-(warn/error when a key-combo does many things!!!?)
 
 
 Clicking 4 times to select with {} match doesn't work, stops at first }.

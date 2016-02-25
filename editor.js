@@ -1946,7 +1946,6 @@ function isString(text) {
 		
 		// PS. Alt Gr = Ctrl+Alt
 		
-		
 		// You probably want to push to global.keyBindings instead of using eventListeners.keyDown!
 		for(var i=0; i<global.eventListeners.keyDown.length; i++) {
 			funReturn = global.eventListeners.keyDown[i].fun(global.currentFile, character, combo); // Call function
@@ -1978,7 +1977,9 @@ function isString(text) {
 				else {
 				
 				//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
-				
+					
+					if(captured) console.warn("Key combo has already been captured: charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
+					
 				captured = true;
 				
 				funReturn = binding.fun(global.currentFile, combo, character, charCode, "down");
