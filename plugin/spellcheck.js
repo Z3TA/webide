@@ -293,6 +293,14 @@
 				
 				var lastUpper = 0;
 				var part = "";
+				var firstChar = word.substr(0, 1);
+				var lastChar = word.substr(word.length-1, 1);
+				var cp = 0;
+				
+				if(firstChar == "'" && lastChar == "'") {
+					word = word.substring(1, word.length-1);
+					cp = -1;
+				}
 				
 				var ignoreTogether = "'"; // Letters to ignore if they are uppercase
 				
@@ -304,7 +312,7 @@
 							lastUpper = i;
 							if(part.length > 1) {
 								console.log("runTogether:" + part);
-								spellCheck(file, part, row, col - word.length + i);
+								spellCheck(file, part, row, col + cp - word.length + i);
 							}
 						}
 					}
@@ -313,7 +321,7 @@
 						word = word.substring(lastUpper, word.length);
 					}
 					
-					if(word.length > 1) spellCheck(file, word, row, col);
+					if(word.length > 1) spellCheck(file, word, row, col + cp);
 				
 				}
 				else {
@@ -389,7 +397,9 @@
 			might have changed when the answer is returned.
 		
 		*/
-
+		
+		console.log("spellchecking:" + word);
+		
 		var htmlTags = ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "-", "h6", "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "pre", "progress", "q", "rb", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"]; // HTML 5
 		var jsKeywords = ["do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval", "null", "this", "true", "void", "with", "await", "break", "catch", "class", "const", "false", "super", "throw", "while", "yield", "delete", "export", "import", "public", "return", "static", "switch", "typeof", "default", "extends", "finally", "package", "private", "continue", "debugger", "function", "arguments", "interface", "protected", "implements", "instanceof"]; // ES6
 		var fileExtensions = ["js", "htm", "css", "txt", "json"];

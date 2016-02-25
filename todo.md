@@ -27,9 +27,7 @@ var arr = [
 [3, "baz"]
 ];
 
-
-spellchecker: ignore the quotes if there are quotes on both sides: 'error' 
-
+Editor became unresponsive while playing with the spellchecker and having many files open.
 
 Clicking 4 times to select with {} match doesn't work, stops at first }.
 
@@ -38,7 +36,7 @@ Tab framför </table> (ska inte vara det)
 
 Function args wont come up in autocomplete.
 
-Function help hinting doesnt go away when typing.
+Function help hinting doesn’t go away when typing.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
