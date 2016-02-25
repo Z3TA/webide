@@ -10,6 +10,7 @@ autoComplete listeners
 
 self debugger!?
 
+
 BUGS
 ====
 
@@ -18,8 +19,6 @@ When a word is marked, and you type something, the marked text (renderRow)'s at 
 --
 Uncaught Error: ENOENT: no such file or directory, scandir 'C:\Users\Z\dev-repositories\js-editor\plugins'fs.js:803 fs.readdirSyncfind_replace.js:331 searchDirfind_replace.js:322 findInFilesfind_replace.js:276 (anonymous function)
 --
-
-goto_file.js:358 Uncaught TypeError: Cannot read property 'childNodes' of null
 
 
 file_tabs not med när editorn byter fil.
@@ -264,6 +263,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Drop file into editor!!
 
 Give a warning when doing this: options.push[something]; when "options" in an array (should be .push() a method)
 

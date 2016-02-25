@@ -17,69 +17,25 @@
 	};
 	
 	
-	editor.on("start", autocomplete_main);
-	
-	function autocomplete_main() {
-		//global.keyBindings.push({charCode: 9, fun: autoComplete, combo: 0}); // Tab key
-		
-		
-	}
+	editor.on("autoComplete", autoCompleteJS);
 	
 	
-	function autoComplete(file, combo, character, charCode, keyPushDirection) {
-		// Pressed tab
+	
+	function autoCompleteJS(file, word, wordLength, gotOptions) {
 		
-		var word = "";
-		var char = "";
 		var options = [];
-		var wordLength = 0;
 		var js = file.parsed;
 		var charIndex = file.caret.index;
-		var lbLength = file.lineBreak.length;
-		var wordDelimiters = " ()[]{}+-/<>\r\n";
 		
 		if(!js) {
 			console.log("File has not been parsed. No auto-complete available");
 			return;
 			}
 		
-		// Go left to get the word
-		for(var i=file.caret.index-1; i>0; i--) {
-			char = file.text.charAt(i);
-			
-			console.log("char=" + char);
-			
-			if(wordDelimiters.indexOf(char) > -1) break; // Exit loop
-			
-			//if(isWhiteSpace(char) || char == ",") break;
-			
-			word = char + word;
-		}
-		// Also go right just in case we are inside a word
-		
-		for(var i=file.caret.index; i<file.text.length; i++) {
-			char = file.text.charAt(i);
-			
-			console.log("char=" + char);
-			
-			if(wordDelimiters.indexOf(char) > -1) break; // Exit loop
-			
-			//if(isWhiteSpace(char) || char == ",") break;
-			
-			word = word + char;
-		}
-		
-		word = word.trim();
-		console.log("Autocomplete: *" + word + "* (" + word.length + " chars)");
-		
-		wordLength = word.length;
-		
 		/*
 			When pushing to options,
-			Push an array with 0: word, 1:text, 2: characters to move
+			Push an array with 0:text, 1: characters to move
 		*/
-		
-		
 		
 		
 		// Give the current function argument if inside a function call
@@ -95,27 +51,11 @@
 				editor.addInfo(file.caret.row, file.caret.col, "Nothing found");
 			}
 			else if(fc.argument.substring(0, word.length) == word && word.length > 0) {
-				options.push([word, fc.argument, 0]);
+				options.push([fc.argument, 0]);
 			}
 			else {
 				editor.addInfo(file.caret.row, file.caret.col, fc.allArguments);
 			}
-		}
-		else {
-			// Only if not inside function call
-			
-			if(wordLength > 0) {
-				if("for".substr(0, wordLength) == word) {
-					options.push([word, "for (var i=0; i<.length; i++) {" + file.lineBreak + file.lineBreak + "}", 15 + lbLength*2]);
-				}
-				else if("switch".substr(0, wordLength) == word) {
-					options.push([word, "switch() {" + file.lineBreak + "case :    ; break" + file.lineBreak + "}", 19 + lbLength*2]);
-				}
-				else if("if".substr(0, wordLength) == word) {
-					options.push([word, "if () {" + file.lineBreak + file.lineBreak + "}", 2 + lbLength*2]);
-				}
-			}
-
 		}
 		
 		if(wordLength > 0) {
@@ -129,58 +69,10 @@
 			if(js.globalVariables) searchVariables(js.globalVariables, word); // Check global variables
 
 			
-			// Auto type keyword blocks ...
-			
-			if("function".substr(0, wordLength) == word) {
-				options.push([word, "function () {" + file.lineBreak + file.lineBreak + "}", 3 + lbLength*2]);
-			}
-			
 		}
 		
-		if(options.length == 0) {
-			// Found nothing to complete. Maybe we want to close last opened xml tag!?
-			var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
-			
-			if(lastOpenXmlTag.length > 0 && lastOpenXmlTag != "<") {
-				options.push(["", "</" + lastOpenXmlTag + ">", 0]);
-			}
-			
-			
-		}
-
-		if(options.length > 1) {
-			console.log("options:" + JSON.stringify(options, null, 2));
-			
-			// Type up until the common character  fooBar vs fooBaz, type fooBa|
-			
-			var shared = sharedStart(options);
-			
-			console.log("sharedStart=" + shared + " word=" + word);
-			
-			if(shared.length > 0) {
-				if(word.indexOf(".") != -1) {
-					let arr = word.split(".");
-					
-					completeWord([arr[arr.length-1], shared, 0]);
-				}
-				else {
-					completeWord([word, shared, 0]);
-				}
-				
-			}
-			
-			// Show info
-			for(var i=0; i<options.length; i++) {
-				editor.addInfo(file.caret.row, file.caret.col, options[i][1].replace(new RegExp(file.lineBreak,"g"), " "));
-			}
-			
-			
-		}
-		else if(options.length == 1) {
-			completeWord(options[0]);
-		}
-
-		return false; // disable default action
+		
+		return options; // disable default action
 		
 		
 		function checkFunctionName(functionName, word) {
@@ -188,7 +80,7 @@
 			//if(typeof functionName != "string") return; // It can be an anonymous function
 			//console.warn(functionName + "(" + typeof functionName + ")");
 			if(functionName.substr(0, wordLength) == word) {
-				options.push([word, functionName + "()", 1]);
+				options.push([functionName + "()", 1]);
 			}
 		}
 		
@@ -374,23 +266,23 @@
 			
 			function pushVariable(word, variable, variableName) {
 				if(variable.type=="Array") {
-					options.push([word, variableName + "[]", 1]);
+					options.push([variableName + "[]", 1]);
 
 				}
 				else if(variable.type == "Method") {
-					options.push([word, variableName + "()", 1]);
+					options.push([variableName + "()", 1]);
 				}
 				else if(variable.hasOwnProperty("keys")) {
 					if(Object.keys(variable.keys).length > 0) {
 						// It's a json: Add a dot at the end
-						options.push([word, variableName + ".", 0]);
+						options.push([variableName + ".", 0]);
 					}
 					else {
-						options.push([word, variableName, 0]);
+						options.push([variableName, 0]);
 					}
 				}
 				else {
-					options.push([word, variableName, 0]);
+					options.push([variableName, 0]);
 				}
 
 			}
@@ -468,40 +360,6 @@
 	function isWhiteSpace(char) {
 		return /\s/.test(char);
 	}
-	
-	
-	function findLastOpenXmlTag(text, charIndex) {
-		var textUpUntilChar = text.substr(0, charIndex);
-		// PS: lastIndexOf searches backwards!
-		var lastXmlTagClose = textUpUntilChar.lastIndexOf("</");
-		
-		if(lastXmlTagClose != -1) textUpUntilChar = textUpUntilChar.substring(lastXmlTagClose+2, lastXmlTagClose.length);
-		
-		var lastOpenXmlTagStart = textUpUntilChar.lastIndexOf("<");
-		
-		// todo: support nested tags like <div><span><b>x</b> ... close span
-		
-		var xmlTagName = "";
-		
-		if(lastOpenXmlTagStart != -1) {
-			// We have an open xml tag ... What is it?
-			var xmlTagBody = textUpUntilChar.substring(lastOpenXmlTagStart, charIndex);
-			let firstSpace = xmlTagBody.indexOf(" ");
-			let firstRightTag = xmlTagBody.indexOf(">");
-			let end = 0;
-			if(firstSpace > -1 && firstSpace < firstRightTag) {
-				end = firstSpace;
-			}
-			else {
-				end = firstRightTag;
-			}
-			xmlTagName = xmlTagBody.substring( 1, end );
-			
-		}
-		
-		return xmlTagName;
-	}
-	
 	
 	function insideFunctionCall(file, caret, js) {
 		// Return false if not inside function call, or the function name and argument index if inside

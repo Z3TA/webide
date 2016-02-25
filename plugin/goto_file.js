@@ -330,6 +330,9 @@
 	}
 	
 	function moveUp() {
+		
+		if(!gotoList) return;
+		
 		var listItems = gotoList.childNodes;
 		
 		inputGoto.blur();
@@ -355,6 +358,9 @@
 	}
 	
 	function moveDown() {
+		
+		if(!gotoList) return;
+		
 		var listItems = gotoList.childNodes;
 		
 		inputGoto.blur();

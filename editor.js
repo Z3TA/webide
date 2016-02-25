@@ -1258,8 +1258,6 @@ function isString(text) {
 			
 			Ex: [word1, word2, word3] or [[wordl, n], [word2, n]]
 			
-			Todo: add support for ccc --> camelCasingCompleaton
-			
 		*/
 		
 		var wordDelimiters = " ()[]{}+-/<>\r\n";
@@ -1302,7 +1300,7 @@ function isString(text) {
 		for(var i=0; i<global.eventListeners.autoComplete.length; i++) {
 			
 			fun = global.eventListeners.autoComplete[i].fun;
-			ret = fun(file, word, wordLength options.length);
+			ret = fun(file, word, wordLength, options.length);
 			
 			console.log("function " + functionName(fun) + " returned: " + JSON.stringify(ret));
 			
