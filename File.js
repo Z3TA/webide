@@ -24,7 +24,7 @@ function File(text, path, fileIndex) {
 	file.lineBreak = determineLineBreakCharacters(text);
 	file.indentation = determineIndentationConvention(text, file.lineBreak);
 	file.parse = true; // Tell parsers wheter this file should be parsed or not
-	file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
+	file.fileExtension = editor.getFileExtension(path);
 	file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
 	
 	// Never parse text or markdown files

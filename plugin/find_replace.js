@@ -328,6 +328,15 @@
 			
 			console.log("Searching: " + currentDirPath);
 			
+			// Make the box red if the folder doesn't exist
+			if(editor.isFolderPath(currentDirPath)) {
+				inputInDir.setAttribute("class", "inputtext indir");
+			}
+			else {
+				inputInDir.setAttribute("class", "inputtext indir error");
+				console.log("Path does not exist: " + currentDirPath);
+			}
+			
 			var folderItems = fs.readdirSync(currentDirPath);
 			
 			//folderItems.filter(function(file) { return file.substr(-5) === '.html'; })

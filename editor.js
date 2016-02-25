@@ -482,6 +482,21 @@ function isString(text) {
 		}
 	}
 	
+	editor.isFolderPath = function(path) {
+		try {
+			var stat = fs.lstatSync(path);
+			return stat.isDirectory();
+		}
+		catch(e) {
+			return false;
+		}
+	}
+	
+	editor.getFileExtension = function(filePath) {
+		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
+	}
+	
+	
 	editor.renderNeeded = function() {
 		// Tell the editor that it needs to render
 		if(global.settings.devMode && global.render == false) {

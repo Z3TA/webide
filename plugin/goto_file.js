@@ -10,6 +10,8 @@
 	var gotoButton;
 	var gotoList;
 	var selectedChild = 0;
+	var firstRun = true;
+	var files = [];
 	
 	window.addEventListener("load", gotoFile_init, false);
 
@@ -126,30 +128,36 @@
 		/*
 			First check for file names, then content of files
 			
-			
+			First time, search all dirs, then search files array
 		*/
 		
 		
 		var searchPath = editor.workingDirectory;
-		var maxResults = 5;
+		var maxResults = 20;
 		var matchesFound = 0;
 		var searchSubfolders = true;
 		var totalFiles = 0;
 		var filesSearched = 0;
-		var files = [];
+		var ext = ["html", "htm", "css", "txt", "md", "js"];
 		
-		searchDir(searchPath);
-		
-		
+		if (firstRun) {
+			searchDir(searchPath);
+			firstRun = false;
+		} 
+		else {
+			console.log("Searcing files array! length=" + files.length);
+			for (var i=0; i<files.length; i++) {
+				console.log("look: " + files[i]);
+				if(files[i].indexOf(searchString) != -1) {
+					appendResult(files[i]);
+					if(matchesFound >= maxResults) break; // matchesFound is incremented in appendResult
+				}
+			}
+		}
 		
 		function searchDir(currentDirPath) {
 			var filePath;
 			var stat;
-			
-			if(matchesFound >= maxResults) {
-				console.log("Enough results found.");
-				return;
-			}
 			
 			console.log("Searching: " + currentDirPath);
 			
@@ -175,19 +183,31 @@
 		}
 		
 		function searchFile(filePath) {
-			if(matchesFound >= maxResults) {
-				console.log("Enough results found.");
-				return;
+			
+			var fileExt = editor.getFileExtension(filePath);
+			var checkit = fileExt == ""; // Always check files with no extension
+			
+			console.log("fileExt=" + fileExt);
+			
+			for(var i=0; i<ext.length; i++) {
+				if(ext[i] == fileExt) {
+					console.log("checkit!");
+					checkit = true; 
+					break;
+				}
 			}
 			
-			files.push(path);
+			if(!checkit) return;
 			
+			files.push(filePath);
+			
+			if(matchesFound < maxResults) {
 			if(filePath.indexOf(searchString) != -1) {
 				appendResult(filePath);
 			}
 			
 			totalFiles++;
-			
+			}
 		}
 		
 		function readFile(filePath) {
@@ -322,6 +342,9 @@
 			}
 			
 			gotoInputIsVisible = false;
+			
+			firstRun = true;
+			files.length = 0;
 			
 			editor.resizeNeeded();
 			editor.renderNeeded();

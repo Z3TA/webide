@@ -164,8 +164,9 @@ input[type=button].half {
 	min-width: 55px;
 }
 
-
-
+input[type=text].error {
+	background-color: #f88a99;
+}
 
 /* ############### File Tabs ############## */
 
