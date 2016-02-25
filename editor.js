@@ -45,7 +45,8 @@ global.eventListeners = { // Use editor.on to add listeners to these events:
 	fileParse: [],
 	interaction: [],
 	keyDown: [],
-	moveCaret: []
+	moveCaret: [],
+	autoComplete: []
 };
 
 global.renders = [];
@@ -1245,7 +1246,187 @@ function isString(text) {
 		}
 		
 	}
-
+	
+	editor.autoComplete = function(file, combo, character, charCode, keyPushDirection) {
+		/*
+			An abstraction that lets you have many auto-complete functions. 
+			Register using: editor.on("autoComplete", function)
+			
+			The function should return an array with possible auto-complete options,
+			or optionally, an array of arrays where the second index is how many characters
+			the mouse should be moved left, after inserting the text.
+			
+			Ex: [word1, word2, word3] or [[wordl, n], [word2, n]]
+			
+			Todo: add support for ccc --> camelCasingCompleaton
+			
+		*/
+		
+		var wordDelimiters = " ()[]{}+-/<>\r\n";
+		var char = "";
+		var word = "";
+		var options = []; // Word options
+		var mcl = []; // Move caret left
+		
+		// Go left to get the word
+		for(var i=file.caret.index-1; i>0; i--) {
+			char = file.text.charAt(i);
+			
+			console.log("char=" + char);
+			
+			if(wordDelimiters.indexOf(char) > -1) break; // Exit loop
+			
+			//if(isWhiteSpace(char) || char == ",") break;
+			
+			word = char + word;
+		}
+		// Also go right just in case we are inside a word
+		
+		for(var i=file.caret.index; i<file.text.length; i++) {
+			char = file.text.charAt(i);
+			
+			console.log("char=" + char);
+			
+			if(wordDelimiters.indexOf(char) > -1) break; // Exit loop
+			
+			//if(isWhiteSpace(char) || char == ",") break;
+			
+			word = word + char;
+		}
+		
+		word = word.trim();
+		var wordLength = word.length;
+		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
+		
+		var ret, fun, addWord, addMcl;
+		for(var i=0; i<global.eventListeners.autoComplete.length; i++) {
+			
+			fun = global.eventListeners.autoComplete[i].fun;
+			ret = fun(file, word, wordLength options.length);
+			
+			console.log("function " + functionName(fun) + " returned: " + JSON.stringify(ret));
+			
+			if(ret) {
+			if(Array.isArray(ret)) {
+				for(var j=0; j<ret.length; j++) {
+						if(Array.isArray(ret[j])) {
+							addWord = ret[j][0];
+							addMcl = ret[j][1];
+						}
+						else {
+							addWord = ret[j];
+							addMcl = 0;
+						}
+						
+						console.log("addWord=" + addWord + " addMcl=" + addMcl);
+						
+						if(options.indexOf(addWord) == -1) {
+							options.push(addWord);
+							mcl.push(addMcl);
+						}
+				}
+			}
+			else {
+				console.error(new Error(functionName(fun) + " did not return an array"));
+				}
+			}
+			 }
+		
+		if(options.length != mcl.length) {
+			console.error(new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " "));
+			return false;
+		}
+		
+		console.log("options:" + JSON.stringify(options, null, 2));
+		
+		if(options.length > 1) {
+			
+			// Type up until the common character  fooBar vs fooBaz, type fooBa|
+			var shared = sharedStart(options);
+			
+			console.log("sharedStart=" + shared + " word=" + word);
+			
+			// hmm!?
+			/*
+			if(shared.length > 0) {
+				if(word.indexOf(".") != -1) {
+					var arr = word.split(".");
+					
+					completeWord(arr[arr.length-1], shared, 0);
+				}
+				else {
+					completeWord(word, shared, 0);
+				}
+			*/
+			
+			completeWord(word, shared, 0);
+			
+						
+			// Show info
+			for(var i=0; i<options.length; i++) {
+				editor.addInfo(file.caret.row, file.caret.col, options[i].replace(new RegExp(file.lineBreak,"g"), " "));
+			}
+			
+		}
+		else if(options.length == 1) {
+			completeWord(word, options[0], mcl[0]);
+		}
+		
+		return false; // disable default action
+		
+		function sharedStart(array) {
+			// Return the text that all words in an array share
+			var A= array.concat().sort(), // Create new array with the words sorted
+				a1= A[0],
+				a2= A[A.length-1],
+				L= a1.length,
+				i= 0;
+			
+			while(i<L && a1.charAt(i) === a2.charAt(i)) i++;
+			
+			return a1.substring(0, i);
+		}
+		
+		function completeWord(word, wholeWord, moveCaret) {
+			
+			if(wholeWord.substring(0, word.length) != word) {
+				// Delete the word, then insert the text
+				for(var i=0; i<word.length; i++) {
+				file.moveCaretLeft();
+					file.deleteCharacter(undefined, undefined, false); // false = Do not renderRow
+				}
+				var insert = wholeWord;
+			}
+			else {
+				var insert = wholeWord.substring(word.length); // Start at length, continue to end
+			}
+			
+			console.log("Completing word=" + word + " wholeWord=" + wholeWord + " moveCaret=" + moveCaret + " insert=" + insert + "");
+			
+			
+			/* Use insertText for non-single letters ...
+				for(var i=wordLength; i<word.length; i++) {
+				file.putCharacter(word.charAt(i));
+				}
+			*/
+			
+			//console.log("wordLength=" + wordLength);
+			//console.log("word.length=" + word.length);
+			//console.log("insert=" + insert);
+			
+			file.insertText(insert);
+			
+			//console.log("moveCaret="+ moveCaret);
+			
+			if(moveCaret) file.moveCaretLeft(file.caret, moveCaret);
+			
+			// If not linebreak was inserted, render only row!? (check file.insertText and file.moveCaretLeft)
+			
+			editor.renderNeeded();
+			
+		}
+		
+	}
 	
 	
 	
@@ -1378,7 +1559,8 @@ function isString(text) {
 		console.log("Starting the editor ...");
 		
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
-
+		
+		global.keyBindings.push({charCode: global.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");

@@ -24,6 +24,7 @@ global.settings = { // sugg: separate view options
 	canBreakBefore: "}]\t",
 	drawGridBox: false,
 	scrollStep: 3,
+	autoCompleteKey: 9, // Tab
 	caret: {
 		width: 1,
 		color: "rgb(0,0,0)"

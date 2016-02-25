@@ -20,7 +20,7 @@
 	editor.on("start", autocomplete_main);
 	
 	function autocomplete_main() {
-		global.keyBindings.push({charCode: 9, fun: autoComplete, combo: 0}); // Tab key
+		//global.keyBindings.push({charCode: 9, fun: autoComplete, combo: 0}); // Tab key
 		
 		
 	}

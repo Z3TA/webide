@@ -13,7 +13,13 @@ self debugger!?
 BUGS
 ====
 
-Editor became un-responsible when searching for: smoothing
+When a word is marked, and you type something, the marked text (renderRow)'s at the top. Ex: foo, foo (double click foo, then write bar instead)
+
+--
+Uncaught Error: ENOENT: no such file or directory, scandir 'C:\Users\Z\dev-repositories\js-editor\plugins'fs.js:803 fs.readdirSyncfind_replace.js:331 searchDirfind_replace.js:322 findInFilesfind_replace.js:276 (anonymous function)
+--
+
+goto_file.js:358 Uncaught TypeError: Cannot read property 'childNodes' of null
 
 
 file_tabs not med när editorn byter fil.
@@ -25,6 +31,16 @@ Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open
 file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
 ---
 
+Indentation for good looking multi-dimensional arrays:
+var arr = [
+[1, "foo"],
+[2, "bar"],
+[3, "baz"]
+];
+
+
+
+spellchecker: ignore the quotes if there are quotes on both sides: 'error' 
 
 
 Ctrl+Tab when a name of a function is selected, will insert () after the function-name.
@@ -169,6 +185,10 @@ inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner
 Optimization
 ============
 
+Deleting selected text is Sloooow.
+
+Editor became un-responsible when searching for: smoothing
+
 It lags while moving the character (arrows) in a large file.
 
 Deleting a slelection is slow!!
@@ -245,6 +265,16 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+Give a warning when doing this: options.push[something]; when "options" in an array (should be .push() a method)
+
+optioin (menu option) to Add misspelled words to dictionary overload.
+
+More help with huge {} block nesting, detect problems, show warnings triangles!?
+
+Auto insert */ when typing /* in JS mode.
+
+A key to move something to the right *over* existing code. ex: place A|B xxxxxxxxx B <--- here
+
 A faster way to open files: Ctrl + G, goto line or file:line (insipration: Chrome debugger)
 
 When there is no file open, show a list of file? or a text: <p>Press <b>Ctrl + O</b> to open a file</p>
@@ -275,6 +305,10 @@ When in dev-mode, you can just place a break-point and the program will stop the
 When hitting F5 and the file starts with "#!/usr/bin/env node".
 Run node with debugger and when there is an error, go to that line and display the error message!
 If there is no error, open a new file with the stdout.
+
+Broadcast to local network that you are working on a spcific file. If someone else have the same file open, you can colaborate, and you get each others changes.
+You can also open up another copy of the editor locally (for split screen) and make changes to the same document. (how to do Ctrl+Z ?)
+
 
 cmsjz live preview!
 
