@@ -28,7 +28,6 @@ var arr = [
 ];
 
 
-
 spellchecker: ignore the quotes if there are quotes on both sides: 'error' 
 
 

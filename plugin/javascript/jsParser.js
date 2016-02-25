@@ -722,7 +722,7 @@
 			}
 
 
-			// Quotes and comments ...
+			// ### Quotes and comments ...
 			
 			/*
 			kjjkj
@@ -733,7 +733,7 @@
 			
 			// We can not have /* after a lineComment, it will do nothing
 			
-			// Comments: <!-- -->
+			// ### Comments: <!-- -->
 			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
@@ -748,7 +748,7 @@
 			
 			if(!xmlMode) {
 			
-			// Comments: //
+			// ### Comments: //
 				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment) {
 					insideLineComment = true;
 				commentStart = i-1;
@@ -761,8 +761,8 @@
 				return;
 			}
 			
-			// Comments: /*   */
-			else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment) {
+			// ### Comments: /*   */
+				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment) {
 					insideBlockComment = true;
 				commentStart = i-1;
 				commentStartIndentation = file.grid[row].indentation;
@@ -780,7 +780,7 @@
 				return;
 			}
 			
-			// Quotes: double
+			// ### Quotes: double
 			// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
 				if(insideDblQuote) {
@@ -798,7 +798,7 @@
 				}
 			}
 			
-			// Quotes: single
+			// ### Quotes: single
 				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment) {
 				if(insideSingleQuote) {
 					insideSingleQuote = false;
