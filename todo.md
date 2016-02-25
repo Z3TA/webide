@@ -11,6 +11,8 @@ todo:
 BUGS
 ====
 
+Remove all text marked as miss-spelled when toggling the spellchecker off.
+
 file_tabs not med när editorn byter fil.
 
 Opening files with weird formatting: files inside .hg for example, try binary files!
@@ -27,7 +29,6 @@ var arr = [
 [3, "baz"]
 ];
 
-Editor became unresponsive while playing with the spellchecker and having many files open.
 
 Clicking 4 times to select with {} match doesn't work, stops at first }.
 
@@ -41,8 +42,6 @@ Function help hinting doesn’t go away when typing.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
-
-misspell markings seem to be off
 
 
 support CSS comments H1,, in zoom: /* ############### File List ############### */
