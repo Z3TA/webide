@@ -29,92 +29,69 @@ Via GUI: Right click, Properties, Permissions tab, Allow executing file as progr
 "install": Double click on JZedit.desktop, then: Right click on the icon on the Launcher (left side), select "Lock to Launcher"
 
 
-Other platform
---------------
+Other platforms
+---------------
 
 Dependencies:
-nw.js - The chromium browser with nodejs module support.
-nodehun - A nodejs module used for spell checking
+* nw.js - The chromium browser with nodejs libaries.
+* nodehun - A nodejs module used for spell checking (only if you want spellchecking)
 
-The executable for nw.js can be found in the runtime folder
+Download nw.js from the web: http://nwjs.io/ (v0.12.3)
 
-Download nw.js from the web: http://nwjs.io/
-
-You can find the binaries for nodehun (zipped) in the install folder!
-
-Start the editor using nw and the path-to-editor as first argument.
-
-Ex: (linux): ./path-to-nwjs/nw path-to-js-editor/
-
-
-Compiling nodehun (spell checker)
--------------------------------------
-You will need:
-nodejs - JavaScript runtime using V8 JavaScript engine
-npm - The package manager for nodejs (included in nodejs package)
-
-https://nodejs.org/
+To install nodehun you will need nodejs and npm, get it from https://nodejs.org/
+You also need build dependencies for C/C++
 
 npm install nodehun --target=1.2.0
 
-If you are on Windows, you might also need to add:
---msvs_version=2015
+Start the editor using nw.js and the path-to-editor as first argument. See start.bat and start.sh
 
 
 
 
-About Fonts
-===========
-You'll want to a mono-space font (because of the "grid").
+
+Font settings and styling
+=========================
+The editor only works with mono-space font's (because of the "grid").
+
+Use settings_overload.js to make changes to settings.js.
+
+For the optimal text experience you want to go into system/OS settings and change font hinting etc.
+
+Some of the most popular open source programming fonts can be found in gfx/font.
 
 
-On Linux
---------
-For sub_pixel_antialias/lcx-text to work, font's need to be installed on system (not included in CSS).
+Problems on Linux
+-----------------
+For sub_pixel_antialias/lcx-text to work, font's need to be installed on system (not included as @font-face in CSS).
 
 There's however a bug in some versions of Chromium for Linux,
 that makes the editor sometimes renders with subpixel-antailas/LCD-text and sometimes not ...
-Unless you have set global.settings.sub_pixel_antialias = false, then it will always render without subpixel-antailas/LCD-text.
+Unless you have set global.settings.sub_pixel_antialias = false (then it will always render without subpixel-antailas/LCD-text).
 
 
-sub_pixel_antialias/lcd-text off
+"LCD Text" / sub-pixel-antialas
 --------------------------------
-Liberation Mono can be made to look very crisp with a bit of fiddling
-(https://bugs.chromium.org/p/chromium/issues/detail?id=408079)
+This is the default on most systems/OS. But some people might see "rainbows".
+If you take a screen-shot and zoom in, you will notice the text edges has red, green or blue colors!
+This works because each pixel on LCD monitors has a red, green and blue line!
 
-You might want to go into system settings and change font hinting etc.
+
+Turn off "LCD Text" / sub-pixel-antialas
+-----------------------------------------
+Start the program with --disable-lcd-text. (See start.bat / start.sh)
+And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
 
-What I think looks best
------------------------
+What I think looks best (default settings)
+-----------------------------
 Consolas 15px on Windows!
-DejaVu Sans Mono 13px on Linux (Ubuntu).
-Liberation Mono 14px
-
-These fonts can be found in the gfx/font folder, along with some other open source fonts that also looks OK.
-
-
-https://fedorahosted.org/liberation-fonts/
-
-
-Font rendering
---------------
-Each person, screen and OS seems to have different opinions on what type of font to use and how it should be rendered ...
-
-The most common method to make the text look "crisp" is anti-alias by increasing the RGB level for the edges,
-often called sub-pixel-antialas or "LCD Text".
-But if you have a modern screen with high pixel density, this might not be optimal. To turn off "LCD Text"
-you have to start the program with --disable-lcd-text.
-
-You can change the font and colors under style in settings.js
+DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
 
 
 
-
-Consolas font
--------------
-Consolas is a monospace font that comes with Windows and some Windows programs.
-It's made to look good with sub-pixel-antialias (LCD Text).
+Where can I get Consolas font?
+------------------------------
+Is only distributed in Windows and some windows applications. 
 
 Type these commands in a terminal window:
 
@@ -134,19 +111,16 @@ Select CONSOLA from the temp-folder you extracted the cab files in.
 
 
 
-Other fonts
------------
-
-While Consolas looks best with sub-pixel-anti-aliasing on.
-These font's look good with without  sub-pixel-anti-aliasing:
-
-* Courier New (Windows)
-* Liberation Mono (get it from gx)
-
-
 
 Upgrading
 =========
 
-repo
+Go to the repository to get the latest updates:
+http://hg.webtigerteam.com/js-editor/
+
+
+
+
+
+
 

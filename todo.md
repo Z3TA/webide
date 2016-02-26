@@ -34,6 +34,8 @@ When opening a file (via Ctrl+P) without functions (function-list) it doesn't re
 
 It's hard to see if a file is saved or not!
 
+Text dissappears from some lines when the spellchecker is running.
+
 Can't insert våg-character. ~
 
 Double '' when writing in text.

@@ -22,15 +22,21 @@
 	
 */
 
-global.settings.sub_pixel_antialias = false;
 
-global.settings.gridHeight = 17;
+/*
+	global.settings.sub_pixel_antialias = false;
+	global.settings.gridHeight = 17;
 global.settings.gridWidth = 8;
-
 global.settings.leftMargin = 30;
-
-
 global.settings.style.fontSize = 12;
 global.settings.style.font = "Liberation Mono";
 global.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
+*/
+
+global.settings.sub_pixel_antialias = false;
+global.settings.style.font = "DejaVu Sans Mono";
+global.settings.style.highlightMatchFont = "bold 13px DejaVu Sans Mono";
+global.settings.style.fontSize = 13;
+global.settings.gridHeight = 22;
+global.settings.gridWidth = 7.8;
 
