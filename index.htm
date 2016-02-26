@@ -8,7 +8,7 @@
 	
 	<script>
 		/* 
-			For some reason all require needs to be placed before all else!??? 
+			For some reason all require's needs to be placed before all else!??? 
 			
 			To build for the right modules version:
 			node-gyp rebuild --target=1.2.0 --msvs_version=2015 
@@ -19,27 +19,22 @@
 		const childProcess = require("child_process");
 		
 		var global = {}; // Put global objects in this
-		var MODULE = {}; // Put helper modules in this. Save them in modules/ folder.
 		
 	</script>
 	
+	<!-- Core files. The editor wont work without these -->
 	<script type="text/javascript" src="settings.js"></script>
-	<script type="text/javascript" src="settings_overload.js"></script>
-	
 	<script type="text/javascript" src="editor.js"></script>
 	<script type="text/javascript" src="File.js"></script> <!-- Object to handle files. -->
 	<script type="text/javascript" src="Box.js"></script> <!-- Object for storing the characters in File.grid -->
 
-	<!--
-	<script type="text/javascript" src="modules/Typo.js"></script>
-	-->
-	
-	
+	<script type="text/javascript" src="settings_overload.js"></script>
 	
 	
 	<!-- Place plugins here: (note that the order *should* not matter, use editor.on("start, function, order) instead!! -->
 	<script type="text/javascript" src="plugin/winstate.js"></script>
-	<script type="text/javascript" src="plugin/spellcheck.js"></script>
+
+	<script type="text/javascript" src="plugin/spellcheck/spellcheck.js"></script>
 	
 	<script type="text/javascript" src="plugin/undo_redo.js"></script> <!-- Needs to be high -->
 	<script type="text/javascript" src="plugin/render_highlight-line.js"></script>
@@ -97,6 +92,7 @@
 	
 	<script type="text/javascript" src="plugin/autocomplete_example.js"></script>
 	<script type="text/javascript" src="plugin/autocomplete_xml_tags.js"></script>
+	
 	
 	<meta name="description" content="Text editor specializing in JavaScript and Node.JS">
 	<meta name="keywords" content="text editor, editor, javascript, node, node.js, nodejs">
