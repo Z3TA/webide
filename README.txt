@@ -1,4 +1,4 @@
-js-editor / JZeditor
+#js-editor / JZeditor
 ====================
 
 This is a text/code editor that specialize in JavaScript, CSS and HTML.
@@ -6,11 +6,19 @@ This is a text/code editor that specialize in JavaScript, CSS and HTML.
 See LICENCE.txt to know what you are allowed to do with it.
 
 
+ 
+
+
 How to run
 ==========
 Windows: Click on the shortcut: JZedit
 
 Linux: You'll need to make JZedit.desktop and start.sh executable! (chmod +x JZedit.desktop start.sh)
+
+
+
+
+
 
 
 About Fonts

@@ -1,41 +1,47 @@
 
-Your are Not allowed to distribute any of the software! (see LICENSE.txt)
-And you Must send me any changes you make, and give me full/unlimited rights to use the code you send.
-
-This is to allow me to keep full control of the software. I might even make money on it ...
-
 If you add a new feature to the software, you should make it into a plugin: a .js file in the plugin directory.
 
 Send any changes to zeta@zetafiles.org. Compress using zip/gzip. 
 
+If your contribution is of any value I will implement it into the editor or publish it to the web.
+
+
 If you want to be helpful, also use the Mercurial SCM so that it will be easier for me to manage:
-* Clone from http://hg.webtigerteam.com/js-editor/
-* Make your changes
-* Commit the changes
-* Sending changes by email
 
-hg clone http://hg.webtigerteam.com/js-editor/ js-editor-new-feature
-# Make changes ...
-hg ci -m "my changes"
-hg log
-# See latest changeset at the top
-# Replace 3 and 4 with the actual changeset number(s)
-hg export 3 > change3.diff 
-hg export 4 > change4.diff 
+1. Clone from http://hg.webtigerteam.com/js-editor/
+2. Make sure it's up to date! (hg pull)
+3. Make your changes
+4. Commit the changes
+5. Sending changes by email, with a note: "I give you full (copyright) permission to use this code"
+
+Mercurial commands:
+-------------------
+# Clone the repository/folder
+$ hg clone http://hg.webtigerteam.com/js-editor/ js-editor-new-feature
+
+# Make changes and commit them...
+$ hg ci -m "my changes"
+
+# See latest changeset(s)
+$ hg log 
+
+$ hg export 3 > change3.diff 
+# replace 3 with the actual changeset
 
 
----
+Importing
+---------
 
-https://www.mercurial-scm.org/guide
+Guide from: https://www.mercurial-scm.org/guide
 
-To be careful, they first clone their repository to have an integration directory as sandbox
+# First clone the repository/folder to have an integration sandbox
 
 $ hg clone project integration
 $ cd integration
 $ hg import change3.diff
 $ hg import change4.diff
 
-That's it. They can now test your changes in feature clones. If they accept them, they pull the changes into the main repository
+# Test changes ... If you like them, pull the changes into the main repository
 
 $ cd ../project
 $ hg pull ../integration
