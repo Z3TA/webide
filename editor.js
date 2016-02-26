@@ -558,7 +558,13 @@ function isString(text) {
 			
 			var canvas = global.currentFile.canvas;
 			
+			if(global.settings.sub_pixel_antialias == false) {
+				var ctx = canvas.getContext("2d");
+				//console.warn("No sub_pixel_antialias! global.settings.sub_pixel_antialias=" + global.settings.sub_pixel_antialias);
+			}
+			else {
 			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
+			}
 			
 			//ctx.imageSmoothingEnabled = true;
 			
