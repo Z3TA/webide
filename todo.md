@@ -7,6 +7,9 @@ Currently working on:
 
 todo:
 
+Writing documentation (README.txt)
+
+Making installation and running more simple.
 
 BUGS
 ====
