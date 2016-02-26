@@ -102,7 +102,7 @@
 
 	function loadWorker(languages) {
 		
-		var id = worker.push(childProcess.fork("./plugin/spellcheck_worker.js", [languages.join(";")])) -1;
+		var id = worker.push(childProcess.fork("./plugin/spellcheck/spellcheck_worker.js", [languages.join(";")])) -1;
 		
 		console.log("spell-check worker " + id + "/" + worker.length + " loaded!");
 

@@ -14,10 +14,10 @@ var isWin = /^win/.test(process.platform);
 var isLinux = /^Linux/.test(process.platform);
 
 if(isWin) {
-	var Nodehun = require('../node_modules/nodehun/nodehun_windows.node');
+	var Nodehun = require('./nodehun_windows.node');
 }
 else {
-	var Nodehun = require('../node_modules/nodehun/nodehun_linux.node');
+	var Nodehun = require('./nodehun_linux.node');
 }
 
 var dict = [];
