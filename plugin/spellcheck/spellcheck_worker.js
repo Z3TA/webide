@@ -11,7 +11,7 @@ process.on('uncaughtException', function (err) {
 
 
 var isWin = /^win/.test(process.platform);
-var isLinux = /^Linux/.test(process.platform);
+var isLinux = /^linux/.test(process.platform);
 
 if(isWin) {
 	var Nodehun = require('./nodehun_windows.node');
