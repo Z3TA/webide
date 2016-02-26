@@ -138,7 +138,7 @@
 		var searchSubfolders = true;
 		var totalFiles = 0;
 		var filesSearched = 0;
-		var ext = ["html", "htm", "css", "txt", "md", "js"];
+		var ext = ["html", "htm", "css", "txt", "md", "js", "", "bat", "sh"];
 		
 		if (firstRun) {
 			searchDir(searchPath);

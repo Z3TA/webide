@@ -14,6 +14,12 @@ Making installation and running more simple.
 BUGS
 ====
 
+Can't insert våg-character. ~
+
+Double '' when writing in text.
+
+Auto-complete from all opened files (global variables)!
+
 Remove all text marked as miss-spelled when toggling the spellchecker off.
 
 file_tabs not med när editorn byter fil.
