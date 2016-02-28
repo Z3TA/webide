@@ -1,3 +1,4 @@
+
 js-editor / JZeditor
 ====================
 
@@ -5,45 +6,108 @@ This is a text/code editor that specialize in JavaScript, CSS and HTML.
 
 See LICENCE.txt to know what you are allowed to do with it.
 
+See contribute.txt on how to send your changes.
+ 
+
 
 How to run
 ==========
+
 Windows: Click on the shortcut: JZedit
 
-Linux: You'll need to make JZedit.desktop and start.sh executable! (chmod +x JZedit.desktop start.sh)
+"install": Copy the shortcut to desktop or start menu.
 
 
-About Fonts
-===========
-You'll want to use mono-space fonts only (because of the "grid").
+Linux:
+------
+Make JZedit.desktop and start.sh executable:
+
+via terminal: chmod +x JZedit.desktop start.sh; ./start.sh
+
+Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
+
+"install": Double click on JZedit.desktop, then: Right click on the icon on the Launcher (left side), select "Lock to Launcher"
 
 
-On Linux
---------
-For sub_pixel_antialias/lcx-text to work, font's need to be installed on system (not included in CSS).
+Other platforms
+---------------
+
+Dependencies:
+* nw.js - The chromium browser with nodejs libaries.
+* nodehun - A nodejs module used for spell checking (only if you want spellchecking)
+
+Download nw.js from the web: http://nwjs.io/ (v0.12.3)
+
+To install nodehun you will need nodejs and npm, get it from https://nodejs.org/
+You also need build dependencies for C/C++
+
+npm install nodehun --target=1.2.0
+
+Start the editor using nw.js and the path-to-editor as first argument. See start.bat and start.sh
+
+
+
+
+
+Font settings and styling
+=========================
+The editor only works with mono-space font's (because of the "grid").
+
+Use settings_overload.js to make changes to settings.js.
+
+For the optimal text experience you want to go into system/OS settings and change font hinting etc.
+
+Some of the most popular open source programming fonts can be found in gfx/font.
+
+
+Problems on Linux
+-----------------
+For sub_pixel_antialias/lcx-text to work, font's need to be installed on system (not included as @font-face in CSS).
 
 There's however a bug in some versions of Chromium for Linux,
 that makes the editor sometimes renders with subpixel-antailas/LCD-text and sometimes not ...
-Unless you have set global.settings.sub_pixel_antialias = false, then it will always render without subpixel-antailas/LCD-text.
+Unless you have set global.settings.sub_pixel_antialias = false (then it will always render without subpixel-antailas/LCD-text).
 
 
-sub_pixel_antialias/lcd-text off
+"LCD Text" / sub-pixel-antialas
 --------------------------------
-Liberation Mono can be made to look very crisp with a bit of fiddling
-(https://bugs.chromium.org/p/chromium/issues/detail?id=408079)
+This is the default on most systems/OS. But some people might see "rainbows".
+If you take a screen-shot and zoom in, you will notice the text edges has red, green or blue colors!
+This works because each pixel on LCD monitors has a red, green and blue line!
 
-You might want to go into system settings and change font hinting etc.
+
+Turn off "LCD Text" / sub-pixel-antialas
+-----------------------------------------
+Start the program with --disable-lcd-text. (See start.bat / start.sh)
+And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
 
-What I think looks best
------------------------
+What I think looks best (default settings)
+-----------------------------
 Consolas 15px on Windows!
-DejaVu Sans Mono 13px on Linux (Ubuntu).
-Liberation Mono 14px
-
-These fonts can be found in the gfx/font folder, along with some other open source fonts that also looks OK.
+DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
 
 
+
+Where can I get Consolas font?
+------------------------------
+Is only distributed in Windows and some windows applications. 
+
+Type these commands in a terminal window:
+
+sudo apt-get install cabextract
+sudo apt-get install font-manager
+mkdir temp
+cd temp
+wget http://download.microsoft.com/download/E/6/7/E675FFFC-2A6D-4AB0-B3EB-27C9F8C8F696/PowerPointViewer.exe
+cabextract -L -F ppviewer.cab PowerPointViewer.exe
+cabextract ppviewer.cab
+
+font-manager
+
+Font-manager is a GUI tool:
+Click on the "cog wheels" icon (Manage Fonts) bottom left, to get a meny with "Install Fonts".
+Select CONSOLA from the temp-folder you extracted the cab files in.
 
 
 
@@ -51,5 +115,12 @@ These fonts can be found in the gfx/font folder, along with some other open sour
 Upgrading
 =========
 
-repo
+Go to the repository to get the latest updates:
+http://hg.webtigerteam.com/js-editor/
+
+
+
+
+
+
 

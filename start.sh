@@ -9,4 +9,5 @@ rm JZedit.desktop-bak
 chmod +x JZedit.desktop
 
 # Start the editor
-runtime/nwjs-v0.12.3-linux-x64/nw .
+#runtime/nwjs-v0.12.3-linux-x64/nw .
+runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text
