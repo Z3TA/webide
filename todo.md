@@ -14,6 +14,10 @@ Making installation and running more simple.
 BUGS
 ====
 
+When ctrl+z, move the caret to before the text being removed.
+
+A better confirmation/indication that the file has been saved.
+
 Remove all text marked as miss-spelled when toggling the spellchecker off.
 
 file_tabs not med när editorn byter fil.
