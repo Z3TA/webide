@@ -1993,7 +1993,10 @@ function isString(text) {
 				if(funReturn === false) {
 					preventDefault = true;
 					console.log("Default action will be prevented!");
-				}
+					}
+					else if(funReturn !== true) {
+						//console.error(new Error("Function bound to keys need to return true or false! When returning false, the default (chromium) behaviour is prevented."));
+					}
 				}
 			}
 			else {
