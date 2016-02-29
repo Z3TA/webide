@@ -14,7 +14,7 @@ Making installation and running more simple.
 BUGS
 ====
 
-Text dissappears from some lines when the spellchecker is running.
+Text disappears from some lines when the spellchecker is running.
 
 Can't insert våg-character. ~
 
