@@ -2544,4 +2544,14 @@ File.prototype.getWordOnCaret = function(caret, callback) {
 	
 }
 
+File.prototype.rowVisible = function (gridRow) {
+	var file = this;
+	
+	// Is the row visible?
+	var startRow = file.startRow;
+	var endRow = Math.min(file.grid.length, file.startRow+global.view.visibleRows);
+	
+	return !(gridRow < startRow || gridRow > endRow);
+}
+
 

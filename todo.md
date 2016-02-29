@@ -54,6 +54,7 @@ Function help hinting doesn’t go away when typing.
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
+Autocomplete function arguments inside the function!
 
 
 

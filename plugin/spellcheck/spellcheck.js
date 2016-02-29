@@ -57,6 +57,25 @@
 
 	}
 	
+	function allWorkersReady() {
+		
+		console.log("All spell-check workers ready!");
+		
+		editor.on("edit", runSpellCheck);
+		
+		editor.on("fileLoad", spellCheckFile);
+		
+		editor.on("mouseClick", showSpellSuggestion);
+		
+		console.log("All workers ready!");
+		
+		// Spellcheck currently opened files
+		for(var file in global.files) {
+			runSpellCheck(global.files[file]);
+		}
+		
+	}
+	
 	function toggleSpellCheck() {
 		global.settings.enableSpellchecker = global.settings.enableSpellchecker ? false : true;
 		console.log("global.settings.enableSpellchecker=" + global.settings.enableSpellchecker);
@@ -80,26 +99,7 @@
 		editor.hideMenu();
 		}
 
-	function allWorkersReady() {
-		
-		console.log("All spell-check workers ready!");
-		
-		editor.on("edit", runSpellCheck);
-		
-		editor.on("fileLoad", spellCheckFile);
-		
-		editor.on("mouseClick", showSpellSuggestion);
-		
-		console.log("All workers ready!");
-		
-		// Spellcheck currently opened files
-		for(var file in global.files) {
-			runSpellCheck(global.files[file]);
-		}
 	
-	}
-
-
 	function loadWorker(languages) {
 		
 		var id = worker.push(childProcess.fork("./plugin/spellcheck/spellcheck_worker.js", [languages.join(";")])) -1;
@@ -400,8 +400,11 @@
 				}
 				
 			if(file == global.currentFile) {
-				editor.renderRow(row);
+				
+				if(file.rowVisible(row)) { // We only need to render if the row is visible on the screen
 					//editor.renderNeeded();
+				editor.renderRow(row);
+					}
 				}
 				
 			

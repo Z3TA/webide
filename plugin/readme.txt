@@ -14,7 +14,6 @@ Make a new folder if your plugin uses many files.
 Use console.error(new Error("custom error")) to display friendly error messages. (See devmode.js)
 
 
-
 Naming files
 ------------
 All file names should be in small caps! (to avoid modules made in non-case-sensitive environment stops working in case-sensitive environments).

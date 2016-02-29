@@ -608,16 +608,12 @@ function isString(text) {
 			if(gridRow == undefined) gridRow = file.caret.row;
 			if(file.grid.length <= gridRow) console.error(new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " "));
 			
-			// Is the row visible?
-			var startRow = file.startRow;
-			var endRow = Math.min(file.grid.length, file.startRow+global.view.visibleRows);
-			
-			if(gridRow < startRow || gridRow > endRow) {
+			if(!file.rowVisible(gridRow)) {
 				console.warn("Row=" + gridRow + " not in view!");
 				return;
 				}
 			
-			var screenRow = Math.max(0, gridRow - startRow);
+			var screenRow = Math.max(0, gridRow - file.startRow);
 			
 			console.time("renderRow");
 			
