@@ -79,9 +79,6 @@ Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
 
-support CSS comments H1,, in zoom: /* ############### File List ############### */
-
-
 
 
 Polishing

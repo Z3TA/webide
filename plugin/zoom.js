@@ -197,7 +197,7 @@
 				else if(char1 == "=" && char2 == "=") {
 					headingMaybe(row-1, 1);
 				}
-				else if(char1 == "/" && char2 == "/" && columns > 4) { // It's a line comment
+				else if(char1 == "/" && (char2 == "/" || char2 == "*") && columns > 4) { // It's a line comment
 					let char4 = bufferRow[3].char;
 					let char5 = bufferRow[4].char;
 					
@@ -261,7 +261,7 @@
 				let textColor = "yellow" // global.settings.style.textColor
 				
 				// ### Set font (size)
-				let fontSize = 22 - size * 2.5;
+				let fontSize = Math.max(10, 22 - size * 2.5);
 				ctx.font= fontSize + "px " + global.settings.style.font;
 				//ctx.textBaseline = "bottom"; // top
 				
