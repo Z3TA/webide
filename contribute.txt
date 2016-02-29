@@ -1,10 +1,9 @@
-
-If you add a new feature to the software, you should make it into a plugin: a .js file in the plugin directory.
+Contributing
+============
 
 Send any changes to zeta@zetafiles.org. Compress using zip/gzip. 
 
 If your contribution is of any value I will implement it into the editor or publish it to the web.
-
 
 If you want to be helpful, also use the Mercurial SCM so that it will be easier for me to manage:
 
@@ -26,7 +25,8 @@ $ hg ci -m "my changes"
 $ hg log 
 
 $ hg export 3 > change3.diff 
-# replace 3 with the actual changeset
+$ hg export 4 > change4.diff 
+# replace 3, 4, etc with the actual changeset
 
 
 Importing

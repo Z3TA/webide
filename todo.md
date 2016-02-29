@@ -14,7 +14,7 @@ Making installation and running more simple.
 BUGS
 ====
 
-When ctrl+z, move the caret to before the text being removed.
+
 
 A better confirmation/indication that the file has been saved.
 
@@ -378,6 +378,7 @@ test bitmap fonts to see if it's faster: Result: its 3 times faster without bitm
 
 Smooth scrolling. Make it easier to read text while scrolling.
 
+When ctrl+z, move the caret to before the text being removed. For every action, create an undo-action.
 
 
 

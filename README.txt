@@ -33,19 +33,23 @@ Other platforms
 ---------------
 
 Dependencies:
-* nw.js - The chromium browser with nodejs libaries.
+* nw.js - The chromium browser with nodejs libraries.
 * nodehun - A nodejs module used for spell checking (only if you want spellchecking)
 
 Download nw.js from the web: http://nwjs.io/ (v0.12.3)
 
-To install nodehun you will need nodejs and npm, get it from https://nodejs.org/
+To install nodehun you need nodejs and npm, get it from https://nodejs.org/
 You also need build dependencies for C/C++
 
 npm install nodehun --target=1.2.0
 
 Start the editor using nw.js and the path-to-editor as first argument. See start.bat and start.sh
 
+Remove unnecessary files from nw.js then place it in a new folder inside .runtime/ with your system ($SYS) as folder name.
 
+Move nodehun.node and raname it to ./plugin/spellcheck/nodehun_$SYS.node
+
+Submit the changes! (see contribute.txt)
 
 
 
@@ -117,6 +121,8 @@ Upgrading
 
 Go to the repository to get the latest updates:
 http://hg.webtigerteam.com/js-editor/
+
+
 
 
 
