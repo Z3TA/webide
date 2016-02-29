@@ -14,26 +14,6 @@ Making installation and running more simple.
 BUGS
 ====
 
-
-
-A better confirmation/indication that the file has been saved.
-
----
-When cutting out large texts:
-keyPress: 24 =  (charCode=24, keyCode=24, which=24) global.currentFile.gotFocus=true
-File.js:886 Selection is not continuous!
-devmode.js:63 Error: Couldn't set cursor! index=791
-at File.moveCaretToIndex (File.js:1671)
-at File.deleteSelection (File.js:900)
-at File.putCharacter (File.js:632)
-at keyPressed (editor.js:1905)
-at Console.console.error (devmode.js:62)
-at File.moveCaretToIndex (File.js:1671)
-at File.deleteSelection (File.js:878)
-at cut (editor.js:1790)
-devmode.js:64 Uncaught Error: Couldn't set cursor! index=791
----
-
 When opening a file (via Ctrl+P) without functions (function-list) it doesn't render right away.
 
 It's hard to see if a file is saved or not!
@@ -83,6 +63,9 @@ function foo..
 
 Polishing
 =========
+
+A better confirmation/indication that the file has been saved.
+Better looking file
 
 Auto load/connect to the debugger so that we can more easely find editor errors. Self debugging.
 

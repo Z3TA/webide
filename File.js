@@ -1591,14 +1591,14 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 	// Set the index
 	caret.index = index;
 
-	if(index == file.text.length) {
+	if(index >= file.text.length) {
 		// EOF
 		caret.row = grid.length-1;
 		caret.col = grid[caret.row].length;
 		caret.eol = true;
 		caret.eof = true;
 		
-	}
+		}
 	else {
 	//console.log("grid.length=" + grid.length);
 	
@@ -1654,21 +1654,20 @@ File.prototype.moveCaretToIndex = function(index, caret) {
 			}
 		}
 	}
-	/* 	There are no more grid ...
 	
-		Probably because all lines are empty!
-	*/
-			
 			if(!found) {
-			
+				// Probably because all lines are empty!
 	caret.col = 0;
 	caret.eol = true;
-	caret.row = index / file.lineBreak.length;
+	caret.row = Math.floor(index / file.lineBreak.length); // Aproximate line
 	
-	if(caret.row == grid.length-1) caret.eof = true;
+	if(caret.row >= grid.length-1) {
+		caret.row = grid.length-1;
+		caret.eof = true;
+	}
 	
-	if(caret.row % 1 !== 0) {
-					console.error(new Error("Couldn't set cursor! index=" + index + ""));
+	if(caret.row % 1 !== 0) { // Make sure it's an integer
+					console.error(new Error("Couldn't set cursor! index=" + index + " caret.row=" + caret.row));
 					//return undefined;
 	}
 	}
