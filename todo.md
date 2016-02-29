@@ -9,13 +9,7 @@ Currently working on:
 BUGS
 ====
 
-Can't insert våg-character. ~
-
-Cant insert ALT+num chars
-
 Double '' when writing in text.
-
-Auto-complete from all opened files (global variables)!
 
 Remove all text marked as miss-spelled when toggling the spellchecker off.
 
@@ -41,6 +35,8 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 Tab framför </table> (ska inte vara det)
 
+
+Auto-complete from all opened files (global variables)!
 
 Function args wont come up in autocomplete.  
 
@@ -268,6 +264,9 @@ Text disappears from some lines when the spellchecker is running.
 
 Feature
 -------
+
+Cant insert ALT+num chars (Is this only a Windows thing!?)
+Maybe a command that brings up a palette that lets you insert a extended ascii character!?
 
 Drop file into editor!!
 
