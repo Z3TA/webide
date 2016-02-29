@@ -45,7 +45,7 @@
 		
 		global.keyBindings.push({charCode: charP, combo: CTRL, fun: show_gotoInput}); // ctrl + R
 		global.keyBindings.push({charCode: charEscape, fun: hide_gotoInput}); // Escape
-		global.keyBindings.push({charCode: charEnter, fun: gotoLine}); // Enter
+		global.keyBindings.push({charCode: charEnter, fun: gotoFile}); // Enter
 		global.keyBindings.push({charCode: keyUp, fun: moveUp});
 		global.keyBindings.push({charCode: keyDown, fun: moveDown});
 		
@@ -96,7 +96,7 @@
 		
 		footer.appendChild(gotoDiv);
 	
-		gotoButton.addEventListener("click", gotoLine, false);
+		gotoButton.addEventListener("click", gotoFile, false);
 		
 		cancelButton.addEventListener("click", hide_gotoInput, false);
 		
@@ -410,7 +410,7 @@
 		return false; // false: prevent default browser action
 	}
 	
-	function gotoLine() {
+	function gotoFile() {
 		
 		if(gotoInputIsVisible) {
 			
@@ -435,6 +435,7 @@
 				editor.openFile(path, undefined, function(file) {
 					
 					console.log("Going to line " + lineNr);
+					editor.renderNeeded();
 					
 				});
 				

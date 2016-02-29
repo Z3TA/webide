@@ -246,12 +246,14 @@ function isString(text) {
 			so call the callback before file.open()
 			
 			used by: file.open to set saved to true
-			*/	
+			*/
 			if(callback) callback(file);
 
 			file.open(); // in turn calls file.load() witch fire file-load events
 			
-			// Always resize and render after opening a file! (where, when????)
+			// Always render (and resize) after opening a file! (where=here, when=now!)
+			editor.renderNeeded();
+			
 		}
 		
 	}

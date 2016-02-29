@@ -14,10 +14,6 @@ Making installation and running more simple.
 BUGS
 ====
 
-When opening a file (via Ctrl+P) without functions (function-list) it doesn't render right away.
-
-It's hard to see if a file is saved or not!
-
 Text dissappears from some lines when the spellchecker is running.
 
 Can't insert våg-character. ~
@@ -64,6 +60,7 @@ function foo..
 Polishing
 =========
 
+It's hard to see if a file is saved or not!
 A better confirmation/indication that the file has been saved.
 Better looking file
 
