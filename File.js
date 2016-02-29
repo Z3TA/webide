@@ -495,7 +495,7 @@ File.prototype.checkCaret = function(caret) {
 		caret = file.caret;
 	}
 	
-	console.log("Checking caret=" + JSON.stringify(caret));
+	//console.log("Checking caret=" + JSON.stringify(caret));
 
 	if(caret.index == null) {
 		console.error(new Error("Caret index is null!"));

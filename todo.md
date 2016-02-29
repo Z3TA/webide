@@ -5,18 +5,13 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-todo:
-
-Writing documentation (README.txt)
-
-Making installation and running more simple.
 
 BUGS
 ====
 
-Text disappears from some lines when the spellchecker is running.
-
 Can't insert våg-character. ~
+
+Cant insert ALT+num chars
 
 Double '' when writing in text.
 
@@ -56,10 +51,22 @@ function foo..
 
 Autocomplete function arguments inside the function!
 
-
+No autocomplete in editor.js keyIsDown function avter the var decl.
 
 Polishing
 =========
+
+Move  languages/  to spellcheck plugin
+
+remove tests/
+
+Show white space at the end of a row. Auto remove them!?
+
+Indent lines starting with a dot
+foo
+.map
+.shortMap
+.cool
 
 It's hard to see if a file is saved or not!
 A better confirmation/indication that the file has been saved.
@@ -252,7 +259,9 @@ Opening another file shewed the div's so that preview dropped down and canvas ha
 
 Test if inlining functions in jsParser makes it faster.
 
+Editor crashed when searching for a common string:
 
+Text disappears from some lines when the spellchecker is running.
 
 
 

@@ -37,7 +37,7 @@
 	
 	var waitTimer;
 	var isWaiting = false;
-	var wordsInQueue = 0;
+	var wordsInQueue = 0; // Only adds to this country if we are asking a worker.
 	var waitBeforeSpellcheckingMiddleOfWord = 1200;  // So that we do not spell-check a word that we are currently typing
 	var numWorkers = 1; // How many workers to use (one for every cpu core!?)
 	var worker = [];
@@ -142,10 +142,19 @@
 			else {
 				// All dictionaries think it's spelled wrong
 				cache[word] = false;
-				misspelled[word] = spell; 
+				misspelled[word] = spell;
+				
+				spellingError(filePath, word, row, col, textLength);
 			}
 			
-			doSomething(filePath, correct, word, row, col, textLength);
+			
+			wordsInQueue--;
+			//console.log("wordsInQueue=" + wordsInQueue);
+			if(wordsInQueue==0) {
+				editor.renderNeeded();
+			}
+			
+			
 			
 			
 		}
@@ -360,11 +369,9 @@
 	  return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 	
-	function doSomething(filePath, correct, origWord, row, col, textLength) {
+	function spellingError(filePath, origWord, row, col, textLength) {
 		
 		var file = global.files[filePath];
-		
-		wordsInQueue--;
 		
 		if(file === undefined) {
 			console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
@@ -379,7 +386,7 @@
 			// Don't do any coloring if something has been removed.
 			console.log("Not showing spelling error because text has been removed");
 		}
-		else if(!correct) { 
+		else { 
 			//console.log("'" + origWord + "' is miss-spelled. Suggestion: " + misspelled[origWord] +" row=" + row + " col=" + col);
 			
 			// ### Color the grid
@@ -400,8 +407,8 @@
 				}
 				
 			if(file == global.currentFile) {
-				
-				if(file.rowVisible(row)) { // We only need to render if the row is visible on the screen
+				// We only need to render if the row is visible on the screen
+				if(file.rowVisible(row)) { 
 					//editor.renderNeeded();
 				editor.renderRow(row);
 					}
@@ -410,11 +417,6 @@
 			
 		}
 
-		//console.log("wordsInQueue=" + wordsInQueue);
-		if(wordsInQueue==0) {
-			editor.renderNeeded();
-		}
-		
 			
 	}
 	
@@ -444,13 +446,11 @@
 		
 		//console.log("spell-checking:" + word);
 		 
-		wordsInQueue++;
-		
 		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
-			doSomething(file.path, true, word, row, col); // It's spelled correct
+			//doSomething(file.path, true, word, row, col); // It's spelled correct
 			}
 		else if(cache.hasOwnProperty(word)) {
-			doSomething(file.path, cache[word], word, row, col);
+			if(cache[word] == false) spellingError(file.path, word, row, col);
 		}
 		else {
 			
@@ -465,7 +465,8 @@
 			//console.log("Sending data to spell-check worker " + workerId + "\ndata=" + data);
 			
 			worker[workerId].send(data);
-
+			wordsInQueue++;
+			
 		}
 		
 		//console.timeEnd("spell-check " + word);

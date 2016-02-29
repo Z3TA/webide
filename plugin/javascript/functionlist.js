@@ -70,7 +70,7 @@
 			
 			var currentFunctionName = findCurrentFunction(file.parsed.functions, cursor.index);
 			
-			console.warn("currentFunctionName=" + currentFunctionName + "");
+			//console.log("currentFunctionName=" + currentFunctionName + "");
 			
 			if(currentFunctionName) elements[currentFunctionName].selected = true;
 			

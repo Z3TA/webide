@@ -166,6 +166,10 @@ function isString(text) {
 	
 	var executeOnNextInteraction = [];
 	
+	var lastKeyDown = 0;
+	var tildeActive = false;
+	var tildeShiftActive = false;
+	var tildeAltActive = false;
 	
 	// Editor functionality (accessible from global scope) By having this code here, we can use private variables
 
@@ -1933,7 +1937,11 @@ function isString(text) {
 		var charCodeShift = 16;
 		var charCodeCtrl = 17;
 		var charCodeAlt = 18;
-		console.log("keyDown: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
+		
+		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo));
+		
+		lastKeyDown = charCode;
+		
 		
 		// Prevent unsupported combo error ? 
 		// But what if we want a binding of *just* ALT!?
@@ -2076,6 +2084,55 @@ function isString(text) {
 
 		
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
+		
+		if(global.currentFile) {
+			// Handle the special tidle key: Puts a ~ ^ or " over a character
+			// Is it only the swedish keyboard layout that does this!?
+			// OMG! This might become very messy
+			var spaceKey = 32;
+			if(charCode == spaceKey) {
+				//console.log("tildeActive=" + tildeActive);
+				//console.log("tildeAltActive=" + tildeAltActive);
+				//console.log("tildeShiftActive=" + tildeShiftActive);
+				
+				if(tildeActive) {
+					// Put two dots over the letter
+					
+				}
+				else if(tildeAltActive) {
+					global.currentFile.putCharacter("~");
+				}
+				else if(tildeShiftActive) {
+					global.currentFile.putCharacter("^");
+				}
+			}
+		}
+		
+		
+		// Handle the tilde key: Puts a ~ ^ or " over a character
+		var altGr = 225;
+		var shiftKey = 16;
+		var tildeKey = 221;
+		
+			if(charCode == tildeKey) {
+			if(lastKeyDown == shiftKey) {
+					tildeShiftActive = true;
+			}
+			else if(lastKeyDown == altGr) {
+				tildeAltActive = true;
+			}
+			else {
+				tildeActive = true;
+			}
+			}
+		else if(charCode != shiftKey) { // Prevent shift up to setting tildeShiftActive = false.
+			tildeActive = false;
+			tildeShiftActive = false;
+			tildeAltActive = false;
+			}
+		//console.log("a tildeActive=" + tildeActive);
+		//console.log("a tildeAltActive=" + tildeAltActive);
+		//console.log("a tildeShiftActive=" + tildeShiftActive);
 		
 		// Check key bindings
 		for(var i=0, binding; i<global.keyBindings.length; i++) {
