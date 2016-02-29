@@ -29,6 +29,11 @@ You can also make the function start after another function by passing a number 
 as a third argument to editor.on("start", nameOfTheCallbackFunction, order);
 
 
+CSS / stylesheet
+----------------
+Insert your CSS code in gfx/style.css. It will easier to do themes if all CSS is located at the same place.
+Use /* ## My section */ to make it easier to find (using the zoom plugin, Alt+Z).
+
 
 Debugging
 ---------
@@ -56,6 +61,25 @@ See editor.js: function keyIsDown
 
 Note: Function bound to keys need to return true or false! When returning false, the default (chromium) behaviour is prevented.
 
+
+Performance tips
+----------------
+It's important that your plugin doesn't make the editor slower. Test how fast your code runs:
+console.time("nameOfTimer");
+console.timeEnd("nameOfTimer");
+
+Then set: global.settings.devMode = false;
+
+Open up the debugger (Ctrl+D, two times) to see the console messages.
+
+Easy improvements:
+functions: 20% overhead, inline them!
+daclaring with let or const: 50% overhead, use var instead!
+loops: Avoid them
+
+child processes: There is a huge overhead cost, but it can be worth it if all other optimizations fail. See spellchecker for examples.
+
+render early/hide lag: When the user hits a button, it shouln't take more then a millisecond before they can see a result.
 
 
 Making a parser
