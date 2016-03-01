@@ -437,7 +437,7 @@ File.prototype.checkGrid = function() {
 			expect = lastRow.startIndex + lastRow.length + file.lineBreak.length + grid[i].indentationCharacters.length;
 			if(grid[i].startIndex != expect) {
 				file.debugGrid();
-				console.error(new Error("Row " + i + " has startIndex=" + grid[i].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[i].indentationCharacters.length + ""));
+				console.error(new Error("Row " + i + " has startIndex=" + grid[i].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[i].indentationCharacters.length + " path=" + file.path));
 			}
 		}
 

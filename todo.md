@@ -14,8 +14,6 @@ hg bug: changes lost!
 BUGS
 ====
 
-functionlist.js:86 Uncaught TypeError: Cannot read property 'blur' of undefined
-
 When one key bound fails to return (there's an error) all after it also dont run.
 
 When writing in the functionlist not all matches get highlighted
@@ -88,6 +86,8 @@ Autocomplete function arguments inside the function!
 
 Polishing
 =========
+
+See repo: remove files not needed.
 
 It's hard to see if a file is saved or not!
 A better confirmation/indication that the file has been saved.
