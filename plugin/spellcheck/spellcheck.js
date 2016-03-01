@@ -2,8 +2,7 @@
 (function() {
 	/*
 		todo: A way to abort the spell-checker when text is removed!?
-	
-	
+		
 	*/
 	"use strict";
 	
