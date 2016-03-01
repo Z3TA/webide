@@ -7,11 +7,18 @@ Currently working on:
 
 todo:
 
+hg bug: changes lost!
+
 
 
 BUGS
 ====
 
+functionlist.js:86 Uncaught TypeError: Cannot read property 'blur' of undefined
+
+When one key bound fails to return (there's an error) all after it also dont run.
+
+When writing in the functionlist not all matches get highlighted
 
 ---
 After removing inconistent linebreaks:
