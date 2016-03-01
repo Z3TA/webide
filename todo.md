@@ -12,6 +12,25 @@ todo:
 BUGS
 ====
 
+
+---
+After removing inconistent linebreaks:
+Error: Row 3 has startIndex=13 but it was expected to be 12.
+lastRow.startIndex=8 lastRow.indentationCharacters.length=0 lastRow.length=2 file.lineBreak.length=2 currentRow.indentationCharacters.length=0
+    at File.checkGrid (file:///home/zeta/dev/js-editor/File.js:440:19)
+    at File.createCaret (file:///home/zeta/dev/js-editor/File.js:302:7)
+    at new File (file:///home/zeta/dev/js-editor/File.js:68:20)
+    at load (file:///home/zeta/dev/js-editor/editor.js:233:25)
+    at Object.editor.openFile (file:///home/zeta/dev/js-editor/editor.js:226:5)
+    at openFile (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:167:12)
+    at Array.forEach (native)
+    at Object.file_tabs [as fun] (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:59:10)
+    at display (file:///home/zeta/dev/js-editor/editor.js:1647:36)
+    at main (file:///home/zeta/dev/js-editor/editor.js:1639:3)
+---
+
+
+
 Still doesn't get tabs right!
 
 Editor crashes whean searching for "try to"
