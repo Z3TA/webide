@@ -497,7 +497,7 @@ File.prototype.checkGrid = function() {
 	
 	// Check if the scrolling is OK
 	if(global.view.endingColumn != file.startColumn + global.view.visibleColumns) {
-		console.error(new Error("Scrolling bug: global.view.endingColumn=" + global.view.endingColumn + " file.startColumn=" + file.startColumn + " global.view.visibleColumns=" + global.view.visibleColumns + ""));
+		console.error(new Error("Scrolling bug: global.view.endingColumn=" + global.view.endingColumn + " file.startColumn=" + file.startColumn + " global.view.visibleColumns=" + global.view.visibleColumns + " path=" + file.path));
 	}
 	
 	

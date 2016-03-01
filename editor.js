@@ -223,21 +223,23 @@ function isString(text) {
 				console.error(new Error("text is not a string!"));
 			}
 			else {
-				load(path, text);
+				load(path, text, true);
 			}
 			
 		}
 		
-		function load(path, text) {
+		function load(path, text, notFromDisk) {
 			console.log("Loading file to editor: " + path);
 			global.files[path] = new File(text, path, global.fileIndex++);
 			
 			var file = global.files[path];
 			
+			if(!notFromDisk) {
 			// Because we opened it from disk:
 			file.isSaved = true;
 			file.savedAs = true;
 			file.changed = false;
+			}
 			
 			if(global.currentFile) {
 				global.currentFile.hide();

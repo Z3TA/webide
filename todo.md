@@ -14,9 +14,25 @@ hg bug: changes lost!
 BUGS
 ====
 
+Opening a file via Ctrl+P marks it as not saved.
+
+After closing a file, the function list will not show up on the file it switches to.
+
 When one key bound fails to return (there's an error) all after it also dont run.
 
 When writing in the functionlist not all matches get highlighted
+
+---
+When opening a file:
+Error: Scrolling bug: global.view.endingColumn=182 file.startColumn=0 global.view.visibleColumns=181
+at File.checkGrid (File.js:500)
+at File.createCaret (File.js:302)
+at new File (File.js:68)
+at load (editor.js:233)
+at editor.js:331
+at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:375)
+---
+
 
 ---
 After removing inconistent linebreaks:
@@ -289,6 +305,9 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+A self debugger that runs in the background and auto sends bug reports if there is any error.
+A timer on the web page: Time since last bug.
 
 Show help for standard JS methods like: text.substring( show: start, end
 
