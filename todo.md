@@ -306,6 +306,11 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+A merge resolver. Show a diff. Then hit left arrow to select line from A, 
+or right arrow to select line from B. Or shift + arrow to insert a NEW line witch the content from A or B.
+And Delete by hitting delete.
+
+
 A self debugger that runs in the background and auto sends bug reports if there is any error.
 A timer on the web page: Time since last bug.
 
