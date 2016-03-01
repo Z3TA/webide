@@ -36,6 +36,29 @@ function File(text, path, fileIndex) {
 	
 	file.order = fileIndex; // For ordering files, in for example a tab list
 	
+	if(file.lineBreak = "\r\n") {
+		// Search for lonely \n (LF) chars and insert \r
+		var fixedILF = false;
+		var indexILF = file.text.indexOf("\n");
+		var rowCount = 0;
+		while(indexILF > -1) {
+			if(file.text.charAt(indexILF-1) != "\r") {
+				file.text = file.text.substring(0, indexILF-1) + "\r" + file.text.substring(indexILF);
+				fixedILF = true;
+			}
+			rowCount++;
+			indexILF = file.text.indexOf("\n", indexILF+1);
+		}
+		
+		if(fixedILF) {
+			alert("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
+		}
+			
+		
+	}
+	
+
+	
 	/* 
 		The grid ... A digital frontier ... I tried to picture clusters of information ... 
 		And then ... One day ... I got in!!!
@@ -190,7 +213,7 @@ function File(text, path, fileIndex) {
 			What line break character is used !??
 			
 			Line Feed & New Line (10) = \n
-			Carriage return (13) = \r
+			Carriage Return (13) = \r
 			
 			Default in windows: cr lf = \r\n
 			

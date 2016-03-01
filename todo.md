@@ -5,11 +5,24 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+todo:
+
+
 
 BUGS
 ====
 
+Still doesn't get tabs right!
+
+Editor crashes whean searching for "try to"
+
+keyboard_enter.js:14 Uncaught TypeError: Cannot read property 'gotFocus' of undefined
+
+Opening files with inconsistent line breaks.
+
 Double '' when writing in text.
+
+Auto-complete from all opened files (global variables)!
 
 Remove all text marked as miss-spelled when toggling the spellchecker off.
 
@@ -36,8 +49,6 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 Tab framför </table> (ska inte vara det)
 
 
-Auto-complete from all opened files (global variables)!
-
 Function args wont come up in autocomplete.  
 
 Function help hinting doesn’t go away when typing.
@@ -47,22 +58,10 @@ function foo..
 
 Autocomplete function arguments inside the function!
 
-No autocomplete in editor.js keyIsDown function avter the var decl.
+
 
 Polishing
 =========
-
-Move  languages/  to spellcheck plugin
-
-remove tests/
-
-Show white space at the end of a row. Auto remove them!?
-
-Indent lines starting with a dot
-foo
-.map
-.shortMap
-.cool
 
 It's hard to see if a file is saved or not!
 A better confirmation/indication that the file has been saved.
@@ -221,6 +220,8 @@ Can we get rid of the file.text and only use the grid!? Only convert the grid to
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+Text disappears from some lines when the spellchecker is running.
+
 ---
 when closing:
 Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
@@ -255,9 +256,7 @@ Opening another file shewed the div's so that preview dropped down and canvas ha
 
 Test if inlining functions in jsParser makes it faster.
 
-Editor crashed when searching for a common string:
 
-Text disappears from some lines when the spellchecker is running.
 
 
 
@@ -265,8 +264,7 @@ Text disappears from some lines when the spellchecker is running.
 Feature
 -------
 
-Cant insert ALT+num chars (Is this only a Windows thing!?)
-Maybe a command that brings up a palette that lets you insert a extended ascii character!?
+Show help for standard JS methods like: text.substring( show: start, end
 
 Drop file into editor!!
 
