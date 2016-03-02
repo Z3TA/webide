@@ -246,7 +246,8 @@ function isString(text) {
 			}
 			
 			// Switch to this file
-			global.currentFile = file; 
+			global.currentFile = file;
+			global.view.endingColumn = global.view.visibleColumns; // Because file.startColumn = 0;
 			
 			/* We might want to change some state before file open events get fired, 
 			so call the callback before file.open()
@@ -2473,9 +2474,8 @@ function isString(text) {
 			global.currentFile.hide();
 		}
 
-		
 		global.currentFile = global.files[path];
-		
+		global.view.endingColumn = global.view.visibleColumns; // Because file.startColumn = 0;
 		
 		global.files[path].open();
 		

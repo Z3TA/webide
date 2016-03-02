@@ -28,17 +28,6 @@ When one key bound fails to return (there's an error) all after it also dont run
 
 When writing in the functionlist not all matches get highlighted
 
----
-When opening a file:
-Error: Scrolling bug: global.view.endingColumn=182 file.startColumn=0 global.view.visibleColumns=181
-at File.checkGrid (File.js:500)
-at File.createCaret (File.js:302)
-at new File (File.js:68)
-at load (editor.js:233)
-at editor.js:331
-at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:375)
----
-
 
 ---
 After removing inconistent linebreaks:
@@ -56,7 +45,7 @@ lastRow.startIndex=8 lastRow.indentationCharacters.length=0 lastRow.length=2 fil
     at main (file:///home/zeta/dev/js-editor/editor.js:1639:3)
 ---
 
-
+Ctrl+Tab after opening a new file doesn't go to the file we where in before.
 
 Still doesn't get tabs right!
 

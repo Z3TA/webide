@@ -293,7 +293,7 @@ File.prototype.createCaret = function(index, row, col) {
 	
 	*/
 	
-	var file = this,		
+	var file = this,
 		grid = file.grid,
 		caret = {index: index, row: row, col: col, eol: false, eof: false};
 	
@@ -304,7 +304,7 @@ File.prototype.createCaret = function(index, row, col) {
 	//console.log("caret=" + JSON.stringify(caret));
 
 	
-	if(index == undefined && (row == undefined || col == undefined)) {
+	if(index === undefined && (row === undefined || col === undefined)) {
 		// We have nothing
 		//console.log("Placing new caret at the first column");
 		
@@ -324,7 +324,7 @@ File.prototype.createCaret = function(index, row, col) {
 			caret.eof = true;
 		}
 	}
-	else if(row == undefined || col == undefined){
+	else if(row === undefined || col === undefined){
 		// We have index, but not row AND col
 		if(isNaN(index)) {
 			console.error(new Error("Index is not a number!"));
