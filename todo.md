@@ -12,6 +12,9 @@ Rafactoring!
 BUGS
 ====
 
+keyboard_arrows.js:140 Uncaught TypeError: Cannot read property 'gotFocus' of null
+keyboard_enter.js:14 Uncaught TypeError: Cannot read property 'gotFocus' of undefined
+
 HTML auto complete tags, removes word if character is next to it.
 
 When inserting a tag next (left) to a word, it gets colored blue.
@@ -26,30 +29,11 @@ When one key bound fails to return (there's an error) all after it also dont run
 
 When writing in the functionlist not all matches get highlighted
 
-
----
-After removing inconistent linebreaks:
-Error: Row 3 has startIndex=13 but it was expected to be 12.
-lastRow.startIndex=8 lastRow.indentationCharacters.length=0 lastRow.length=2 file.lineBreak.length=2 currentRow.indentationCharacters.length=0
-    at File.checkGrid (file:///home/zeta/dev/js-editor/File.js:440:19)
-    at File.createCaret (file:///home/zeta/dev/js-editor/File.js:302:7)
-    at new File (file:///home/zeta/dev/js-editor/File.js:68:20)
-    at load (file:///home/zeta/dev/js-editor/editor.js:233:25)
-    at Object.editor.openFile (file:///home/zeta/dev/js-editor/editor.js:226:5)
-    at openFile (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:167:12)
-    at Array.forEach (native)
-    at Object.file_tabs [as fun] (file:///home/zeta/dev/js-editor/plugin/file_tabs.js:59:10)
-    at display (file:///home/zeta/dev/js-editor/editor.js:1647:36)
-    at main (file:///home/zeta/dev/js-editor/editor.js:1639:3)
----
-
 Ctrl+Tab after opening a new file doesn't go to the file we where in before.
 
-Still doesn't get tabs right!
+Still doesn't get tabs indention right in the source code!
 
-Editor crashes whean searching for "try to"
-
-keyboard_enter.js:14 Uncaught TypeError: Cannot read property 'gotFocus' of undefined
+Editor crashes whean searching for "try to" in files.
 
 Opening files with inconsistent line breaks.
 
@@ -95,6 +79,9 @@ Autocomplete function arguments inside the function!
 
 Polishing
 =========
+
+Send back the domObject when calling editor.menu so you can change the text!
+Check "Enable spellchecker" if its not running and "Disable spellchecker" if it's running.
 
 Show comment markdown headers in the function list
 

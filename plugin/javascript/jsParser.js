@@ -853,7 +853,7 @@
 										
 					xmlMode = tmpXmlMode;
 					
-					if(xmlTag.toLowerCase() == "script") {
+					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						if(insideXmlTagEnding) {
 							xmlMode = true;
 						}

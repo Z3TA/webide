@@ -29,9 +29,10 @@
 		}
 		else {
 			// Close the editor!?
-			
+			editor.exit();
 		}
 		
+		return false;
 		
 	}
 	

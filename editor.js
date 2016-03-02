@@ -1402,7 +1402,16 @@ editor.currentFile = undefined; // A File object
 		
 	}
 	
-	
+	editor.exit = function() {
+		/* Close the editor
+			
+			Or just hide it?
+			And listen to an event that will bring it back!?
+			
+		*/
+		window.close();
+		
+	}
 	
 	
 	function removeFrom(list, fun) {
@@ -1996,11 +2005,12 @@ editor.currentFile = undefined; // A File object
 		}
 		
 		if(preventDefault) {
-			console.log("I am preventing default browser action!");
+			console.log("Preventing default browser action!");
 			e.preventDefault();
 			return false;
 		}
 		else {
+			console.log("Executing default browser/OS action ...");
 			return true;
 		}
 		

@@ -10,7 +10,6 @@
 		
 		console.log("Pushed Enter");
 		
-		
 		if(file.gotFocus) {
 			
 			file.insertLineBreak();
