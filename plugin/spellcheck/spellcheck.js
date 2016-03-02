@@ -6,12 +6,12 @@
 	*/
 	"use strict";
 	
-	//if(global.settings.enableSpellchecker===false) return;
+	//if(editor.settings.enableSpellchecker===false) return;
 	
 
-	if(global.settings.enableSpellchecker===undefined) {
+	if(editor.settings.enableSpellchecker===undefined) {
 		// Add ourself to settings
-		global.settings.enableSpellchecker = true;
+		editor.settings.enableSpellchecker = true;
 	}
 	
 	/*
@@ -69,17 +69,17 @@
 		console.log("All workers ready!");
 		
 		// Spellcheck currently opened files
-		for(var file in global.files) {
-			runSpellCheck(global.files[file]);
+		for(var file in editor.files) {
+			runSpellCheck(editor.files[file]);
 		}
 		
 	}
 	
 	function toggleSpellCheck() {
-		global.settings.enableSpellchecker = global.settings.enableSpellchecker ? false : true;
-		console.log("global.settings.enableSpellchecker=" + global.settings.enableSpellchecker);
+		editor.settings.enableSpellchecker = editor.settings.enableSpellchecker ? false : true;
+		console.log("editor.settings.enableSpellchecker=" + editor.settings.enableSpellchecker);
 		
-		if(global.settings.enableSpellchecker) {
+		if(editor.settings.enableSpellchecker) {
 			// Begin spell-checking all opened files
 			
 			let change = "toggleSpellcheckerOn"
@@ -88,10 +88,10 @@
 			let row = 0;
 			let col = 0;
 			
-			if(global.currentFile) runSpellCheck(global.currentFile, change, text, index, row, col); // Start with the file in view
+			if(editor.currentFile) runSpellCheck(editor.currentFile, change, text, index, row, col); // Start with the file in view
 			
-			for(var path in global.files) {
-				if(global.currentFile != global.files[path]) runSpellCheck(global.files[path], change, text, index, row, col);
+			for(var path in editor.files) {
+				if(editor.currentFile != editor.files[path]) runSpellCheck(editor.files[path], change, text, index, row, col);
 			}
 			
 		}
@@ -176,7 +176,7 @@
 
 		if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
 
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		
 		if(file) {
 			file.getWordOnCaret(caret, wordOnCaret);
@@ -228,7 +228,7 @@
 	
 	function runSpellCheck(file, change, text, index, row, col) {
 		
-		if(global.settings.enableSpellchecker === false) return;
+		if(editor.settings.enableSpellchecker === false) return;
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
@@ -285,7 +285,7 @@
 		isWaiting = false;
 		
 		// Run on visible rows
-		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+global.view.visibleRows); row++) {
+		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+editor.view.visibleRows); row++) {
 		
 		console.time("runSpellCheckTimer");
 
@@ -370,7 +370,7 @@
 	
 	function spellingError(filePath, origWord, row, col, textLength) {
 		
-		var file = global.files[filePath];
+		var file = editor.files[filePath];
 		
 		if(file === undefined) {
 			console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
@@ -405,7 +405,7 @@
 					
 				}
 				
-			if(file == global.currentFile) {
+			if(file == editor.currentFile) {
 				// We only need to render if the row is visible on the screen
 				if(file.rowVisible(row)) { 
 					//editor.renderNeeded();

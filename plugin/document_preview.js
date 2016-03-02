@@ -9,10 +9,10 @@
 	
 	"use strict";
 	
-	if(global.settings.enableDocumentPreview === false) return; 
+	if(editor.settings.enableDocumentPreview === false) return; 
 	
 	var minification = 3; // 3
-	var originalRightMargin = global.view.rightMargin;
+	var originalRightMargin = editor.view.rightMargin;
 	var documentPreviewDiv; 
 	var canvas;
 	var context;
@@ -38,7 +38,7 @@
 		editor.on("fileHide", hideDocumentPreviewDiv);
 		editor.on("fileShow", showDocumentPreviewDiv);
 
-		global.renders.push(renderPreview);
+		editor.renderFunctions.push(renderPreview);
 		editor.addEvent("mouseClick", {fun: scrollToSection, dir: "down", targetClass:"documentPreviewCanvas", button: 0});
 		editor.addEvent("mouseClick", {fun: mouseClick, targetClass:"documentPreviewCanvas", button: 0});
 		
@@ -76,7 +76,7 @@
 		isScrolling = false;
 		console.log("stopped scrolling");
 		editor.removeEvent("mouseMove", document_preview_mouseMove);
-		global.currentFile.gotFocus = true; // Give back focus to the file, it auto lose focus when clicking outside the canvas.
+		editor.currentFile.gotFocus = true; // Give back focus to the file, it auto lose focus when clicking outside the canvas.
 	}
 	
 	function document_preview_mouseMove(mouseX, mouseY, target) {
@@ -84,7 +84,7 @@
 		console.log("document_preview_mouseMove");
 		
 		var moveUp = lastY > mouseY;
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		var fileRows = file.grid.length;
 		var movePerPxY = fileRows / 500;
 		var movePerPxX = maxColumns / 500;
@@ -116,8 +116,8 @@
 			if(startColumn < 0) {
 				startColumn = 0;
 			}
-			else if(startColumn > maxColumns - global.view.visibleColumns) {
-				startColumn = Math.max(0, maxColumns - global.view.visibleColumns);
+			else if(startColumn > maxColumns - editor.view.visibleColumns) {
+				startColumn = Math.max(0, maxColumns - editor.view.visibleColumns);
 			}
 			
 			file.scrollTo(startColumn, undefined);
@@ -136,8 +136,8 @@
 			if(startRow < 0) {
 				startRow = 0;
 			}
-			else if(startRow > fileRows - global.view.visibleRows) {
-				startRow = Math.max(0, fileRows - global.view.visibleRows);
+			else if(startRow > fileRows - editor.view.visibleRows) {
+				startRow = Math.max(0, fileRows - editor.view.visibleRows);
 			}
 			
 			console.log("startRow=" + startRow);
@@ -166,25 +166,25 @@
 
 	function scrollToSection(mouseX, mouseY, caret, direction, button, target, keyboardCombo) {
 		
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		
 		if(button == 0) {
 			
 			// Translate mouse position to row
 			
-			var mouseRow = Math.floor(mouseY / global.settings.gridHeight * minification) + previewStartRow + 1;
+			var mouseRow = Math.floor(mouseY / editor.settings.gridHeight * minification) + previewStartRow + 1;
 
 			console.log("CLICKZA SIG " + mouseRow);
 			
 			// Center on that row
-			var startRow = Math.max(0, mouseRow - Math.floor(global.view.visibleRows / 2));
+			var startRow = Math.max(0, mouseRow - Math.floor(editor.view.visibleRows / 2));
 			
 			file.scrollTo(undefined, startRow);
 			
 			// Keep focus on the document
 			
-			if(global.currentFile) {
-				global.currentFile.gotFocus = true;
+			if(editor.currentFile) {
+				editor.currentFile.gotFocus = true;
 			}
 			
 			editor.renderNeeded();
@@ -204,7 +204,7 @@
 				
 				columnWidth = (minification * combinedWidth) / (minification+1)
 				
-				global.settings.gridWidth ?
+				editor.settings.gridWidth ?
 			*/
 			
 			var rightColumn = document.getElementById("rightColumn");
@@ -292,27 +292,27 @@
 		
 		var grid = file.grid,
 			startRow = file.startRow, // starting visible row on the document
-			endRow = Math.min(grid.length, startRow+global.view.visibleRows), // ending visible row on the document
-			maxRows = Math.floor(global.view.visibleRows * minification); // Visible lines in the preview
+			endRow = Math.min(grid.length, startRow+editor.view.visibleRows), // ending visible row on the document
+			maxRows = Math.floor(editor.view.visibleRows * minification); // Visible lines in the preview
 
-		previewStartRow = Math.floor(Math.min( Math.max(0, grid.length-maxRows), Math.max(0, endRow - maxRows/2 - global.view.visibleRows/2) ));
+		previewStartRow = Math.floor(Math.min( Math.max(0, grid.length-maxRows), Math.max(0, endRow - maxRows/2 - editor.view.visibleRows/2) ));
 
 		var previewEndRow = Math.min(grid.length, startRow+maxRows),
 			indentation = 0,
 			top = 0,
-			topMargin = 0 - previewStartRow * global.settings.gridHeight / minification,
+			topMargin = 0 - previewStartRow * editor.settings.gridHeight / minification,
 			left = 0,
 			char = "",
-			previewStartCol = global.view.visibleColumns * global.settings.gridWidth - global.settings.leftMargin - global.view.visibleColumns / minification;
+			previewStartCol = editor.view.visibleColumns * editor.settings.gridWidth - editor.settings.leftMargin - editor.view.visibleColumns / minification;
 			
 		
 		//console.log("previewStartRow=" + previewStartRow);
 		//console.log("previewEndRow=" + previewEndRow);
 		
-		context.font=global.settings.style.fontSize / minification + "px " + global.settings.style.font;
+		context.font=editor.settings.style.fontSize / minification + "px " + editor.settings.style.font;
 
 		// Clear the canvas
-		context.fillStyle = global.settings.style.bgColor;
+		context.fillStyle = editor.settings.style.bgColor;
 		//context.clearRect(0, 0, canvas.width, canvas.height);
 		context.fillRect(0, 0, canvas.width, canvas.height);
 		
@@ -328,13 +328,13 @@
 			
 			maxColumns = Math.max(maxColumns, grid[row].length);
 			
-			top = row * global.settings.gridHeight / minification + topMargin;
+			top = row * editor.settings.gridHeight / minification + topMargin;
 			
 			//console.log("top=" + top);
 			
 			for(var col = 0; col < grid[row].length; col++) {
 				
-				left = (col + indentation * global.settings.tabSpace) * global.settings.gridWidth / minification;
+				left = (col + indentation * editor.settings.tabSpace) * editor.settings.gridWidth / minification;
 				
 				if(grid[row][col].hasCharacter) {
 					
@@ -353,9 +353,9 @@
 		
 		// Overlay of current view
 		context.rect(0,
-			(startRow-1) * global.settings.gridHeight / minification + topMargin,
-			global.view.visibleColumns * global.settings.gridWidth / minification, 
-			global.view.visibleRows * global.settings.gridHeight / minification
+			(startRow-1) * editor.settings.gridHeight / minification + topMargin,
+			editor.view.visibleColumns * editor.settings.gridWidth / minification, 
+			editor.view.visibleRows * editor.settings.gridHeight / minification
 		);
 		context.fillStyle = "rgba(255,255,0, 0.1)"; // Same as #ffffe6 (the default current line color)
 		context.fill();

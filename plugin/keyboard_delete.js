@@ -4,7 +4,7 @@
 	editor.on("start", keyboard_delete);
 	
 	function keyboard_delete() {
-		global.keyBindings.push({
+		editor.keyBindings.push({
 			charCode: 46, 
 			fun: keydel
 		});

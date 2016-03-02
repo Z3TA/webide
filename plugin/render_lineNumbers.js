@@ -9,12 +9,12 @@
 	
 	var leftMargin = 1;
 	
-	// Add new item for lineNumberColor to global.settings if it's not already added
-	global.settings.lineNumberColor = global.settings.lineNumberColor ? global.settings.lineNumberColor : "rgb(200,200,200)";
+	// Add new item for lineNumberColor to editor.settings if it's not already added
+	editor.settings.lineNumberColor = editor.settings.lineNumberColor ? editor.settings.lineNumberColor : "rgb(200,200,200)";
 	
 	
 	
-	global.renders.push(paintLineNumbers); // lineNumbers function will be called on every frame render
+	editor.renderFunctions.push(paintLineNumbers); // lineNumbers function will be called on every frame render
 	
 	
 	console.log("Loaded lineNumbers");
@@ -36,9 +36,9 @@
 		
 		if(startRow == undefined) startRow = 0;
 		
-		ctx.font=global.settings.fontSize + "px " + global.settings.font;
+		ctx.font=editor.settings.fontSize + "px " + editor.settings.font;
 		ctx.textBaseline = "top";
-		ctx.fillStyle = global.settings.lineNumberColor;
+		ctx.fillStyle = editor.settings.lineNumberColor;
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -48,7 +48,7 @@
 			
 			if(line > lastLine) {
 				lastLine = line;
-				ctx.fillText(line, leftMargin, global.settings.topMargin + (row+startRow) * global.settings.gridHeight);
+				ctx.fillText(line, leftMargin, editor.settings.topMargin + (row+startRow) * editor.settings.gridHeight);
 			}
 			
 		}

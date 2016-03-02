@@ -137,14 +137,14 @@
 			
 			for(var i=0; i<js.quotes.length; i++) {
 				if(inRange(js.quotes[i])) {
-					box.color = global.settings.style.quoteColor;
+					box.color = editor.settings.style.quoteColor;
 					return; // We do not have to do anything else
 				};
 			}
 			
 			for(var i=0; i<js.comments.length; i++) {
 				if(inRange(js.comments[i])) {
-					box.color = global.settings.style.commentColor;
+					box.color = editor.settings.style.commentColor;
 					return; // We do not have to do anything else
 				};
 			}
@@ -224,7 +224,7 @@
 			insideXmlTagEnding = false,
 			xmlTag = "",
 			lastXmlTag = "",
-			tagBreak = global.settings.indentAfterTags,
+			tagBreak = editor.settings.indentAfterTags,
 			codeBlockLeftRow = -1,
 			codeBlockRightRow = -2,
 			insideArray = [],

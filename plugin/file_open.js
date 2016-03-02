@@ -11,7 +11,7 @@
 	function main() {
 		
 		// Bind to ctrl + O
-		global.keyBindings.push({charCode: 79, combo: CTRL, fun: openFile});
+		editor.keyBindings.push({charCode: 79, combo: CTRL, fun: openFile});
 
 		// Add items to the canvas context meny
 		editor.addMenuItem("Open file (Ctrl+O)", openFile);
@@ -25,7 +25,7 @@
 		console.log("Opening file ...");
 		
 		var defaultPath = "";
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		
 		if(file) {
 			// Check if the cursor is on a file path
@@ -57,7 +57,7 @@
 		
 		
 			// Change default directory to the same as current file
-			defaultPath = editor.getDir(global.currentFile.path);
+			defaultPath = editor.getDir(editor.currentFile.path);
 
 		
 		}

@@ -1,7 +1,7 @@
 
 (function() {
 	
-	global.keyBindings.push({
+	editor.keyBindings.push({
 		charCode: 13, 
 		fun: keyboard_enter,
 	});

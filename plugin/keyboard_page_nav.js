@@ -3,10 +3,10 @@
 	
 	"use strict";
 	
-	global.keyBindings.push({charCode: 33, fun: pageUp});
-	global.keyBindings.push({charCode: 34, fun: pageDown});
-	global.keyBindings.push({charCode: 35, fun: end});
-	global.keyBindings.push({charCode: 36, fun: home});
+	editor.keyBindings.push({charCode: 33, fun: pageUp});
+	editor.keyBindings.push({charCode: 34, fun: pageDown});
+	editor.keyBindings.push({charCode: 35, fun: end});
+	editor.keyBindings.push({charCode: 36, fun: home});
 	
 	
 	
@@ -16,7 +16,7 @@
 		// Move temporary caret and then scroll!??
 		
 		file.checkCaret();
-		file.caret.row = Math.max(0, file.caret.row - global.view.visibleRows);
+		file.caret.row = Math.max(0, file.caret.row - editor.view.visibleRows);
 		
 		file.fixCaret();
 		file.checkCaret();
@@ -30,7 +30,7 @@
 		// Move the cursor one page down
 		
 		file.checkCaret();
-		file.caret.row = Math.min(file.grid.length, file.caret.row + global.view.visibleRows);
+		file.caret.row = Math.min(file.grid.length, file.caret.row + editor.view.visibleRows);
 		
 		file.fixCaret();
 		file.checkCaret();

@@ -6,13 +6,13 @@
 	
 	function main() {
 		// Bind to ctrl + L
-		global.keyBindings.push({charCode: 76, combo: CTRL, fun: lorem});
+		editor.keyBindings.push({charCode: 76, combo: CTRL, fun: lorem});
 		
 	}
 	
 	function lorem(file, combo, character, charCode, keyDirection) {
 		var text = capitalizeFirstLetter(randomWord());
-		var visibleColumns = global.view.visibleColumns;
+		var visibleColumns = editor.view.visibleColumns;
 		var words = visibleColumns / 8;
 		var length = Math.ceil(words/4) + Math.floor(Math.random()*words);
 		

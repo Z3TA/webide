@@ -9,7 +9,7 @@
 	var newFileCounter = 1;
 	
 	// Bind to ctrl + N
-	global.keyBindings.push({charCode: 78, combo: CTRL, fun: createNewFile});
+	editor.keyBindings.push({charCode: 78, combo: CTRL, fun: createNewFile});
 
 
 	
@@ -19,7 +19,7 @@
 			path = "new file " + (newFileCounter++);
 		
 		// Do not overwrite opened files!
-		while(global.files[path]) {
+		while(editor.files[path]) {
 			path = "new file " + (newFileCounter++);
 		}
 		

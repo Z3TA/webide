@@ -43,11 +43,11 @@
 		var keyUp = 38;
 		var keyDown = 40;
 		
-		global.keyBindings.push({charCode: charP, combo: CTRL, fun: show_gotoInput}); // ctrl + R
-		global.keyBindings.push({charCode: charEscape, fun: hide_gotoInput}); // Escape
-		global.keyBindings.push({charCode: charEnter, fun: gotoFile}); // Enter
-		global.keyBindings.push({charCode: keyUp, fun: moveUp});
-		global.keyBindings.push({charCode: keyDown, fun: moveDown});
+		editor.keyBindings.push({charCode: charP, combo: CTRL, fun: show_gotoInput}); // ctrl + R
+		editor.keyBindings.push({charCode: charEscape, fun: hide_gotoInput}); // Escape
+		editor.keyBindings.push({charCode: charEnter, fun: gotoFile}); // Enter
+		editor.keyBindings.push({charCode: keyUp, fun: moveUp});
+		editor.keyBindings.push({charCode: keyDown, fun: moveDown});
 		
 	}
 	
@@ -303,8 +303,8 @@
 			*/
 			
 			// Remove focus from the editor
-			if(global.currentFile) {
-				global.currentFile.gotFocus = false;
+			if(editor.currentFile) {
+				editor.currentFile.gotFocus = false;
 			}
 			
 			
@@ -337,8 +337,8 @@
 			//footer.style.height = "0px"; // Hmm, can't be less then one px
 			
 			// Bring back focus to the current file
-			if(global.currentFile) {
-				global.currentFile.gotFocus = true;
+			if(editor.currentFile) {
+				editor.currentFile.gotFocus = true;
 			}
 			
 			gotoInputIsVisible = false;

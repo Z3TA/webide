@@ -12,31 +12,31 @@
 	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button) {
 
 		
-		if(global.currentFile && caret) {
+		if(editor.currentFile && caret) {
 			
 			console.log("Setting caret to " + JSON.stringify(caret));
 
 			console.log("caret.row=" + caret.row);
-			console.log("global.currentFile.caret.row=" + global.currentFile.caret.row);
+			console.log("editor.currentFile.caret.row=" + editor.currentFile.caret.row);
 			
 
-			global.currentFile.scrollToCaret(caret);
+			editor.currentFile.scrollToCaret(caret);
 
 		
-			global.currentFile.caret = caret;
+			editor.currentFile.caret = caret;
 			
-			editor.fireEvent("moveCaret", global.currentFile, caret);
+			editor.fireEvent("moveCaret", editor.currentFile, caret);
 			
 			editor.renderNeeded();
 			
 			/*
-			var canvas =global.currentFile.canvas,
+			var canvas =editor.currentFile.canvas,
 				ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
 			
 				ctx.strokeStyle="rgba(0,255,255,0.5)";
 
 				ctx.beginPath();
-				ctx.rect(mouseX, mouseY, global.settings.gridWidth, global.settings.gridHeight);
+				ctx.rect(mouseX, mouseY, editor.settings.gridWidth, editor.settings.gridHeight);
 				ctx.stroke();
 			
 			*/

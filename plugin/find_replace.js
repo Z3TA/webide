@@ -18,13 +18,13 @@
 		console.log("find_replace.js loaded!");
 		
 		// Bind to ctrl + F
-		global.keyBindings.push({charCode: 70, combo: CTRL, fun: findReplace}); // Ctrl + F
+		editor.keyBindings.push({charCode: 70, combo: CTRL, fun: findReplace}); // Ctrl + F
 		
 		// Pressing enter should do a search if the search window is open
-		global.keyBindings.push({charCode: 13, fun: pressEnter});
+		editor.keyBindings.push({charCode: 13, fun: pressEnter});
 
 		// Pressing escape should clear and hide the search window
-		global.keyBindings.push({charCode: 27, fun: pressEscape});
+		editor.keyBindings.push({charCode: 27, fun: pressEscape});
 
 		
 		// Point variables to the document object model
@@ -258,19 +258,19 @@
 			inputFindGotFocus = false;
 		}, false);
 		findButtonLeft.addEventListener("click", function() {
-			find(inputFind.value, global.currentFile, regexOption.checked, false, false, "left"); // str, file, useRegex, keepSelection, dontLoop, direction
+			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "left"); // str, file, useRegex, keepSelection, dontLoop, direction
 		}, false);
 		findButtonRight.addEventListener("click", function() {
-			find(inputFind.value, global.currentFile, regexOption.checked, false, false, "right");
+			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "right");
 		}, false);
 		findAllButton.addEventListener("click", function() {
-			findAll(inputFind.value, global.currentFile, regexOption.checked);
+			findAll(inputFind.value, editor.currentFile, regexOption.checked);
 		}, false);
 		replaceButton.addEventListener("click", function() {
-			replace(inputReplace.value, inputFind.value, global.currentFile, regexOption.checked);
+			replace(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked);
 		}, false);
 		replaceAllButton.addEventListener("click", function() {
-			replaceAll(inputReplace.value, inputFind.value, global.currentFile, regexOption.checked);
+			replaceAll(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked);
 		}, false);
 		findInFilesButton.addEventListener("click", function() {
 			findInFiles();
@@ -299,7 +299,7 @@
 		var reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
 		
 		// Do not overwrite opened files!
-		while(global.files[reportFilePath]) {
+		while(editor.files[reportFilePath]) {
 			reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
 		}
 		
@@ -452,8 +452,8 @@
 		
 		// Only search if there is anything in the search field, and the search box has focus
 		if(searchVisible) {
-			if(inputFind.value.length > 0 && global.currentFile.gotFocus===false) {
-				find(inputFind.value, global.currentFile, regexOption.checked);
+			if(inputFind.value.length > 0 && editor.currentFile.gotFocus===false) {
+				find(inputFind.value, editor.currentFile, regexOption.checked);
 			}
 		}
 	}
@@ -474,7 +474,7 @@
 			//footer.style.border = ""
 			
 			// Bring back focus to the current file
-			var file = global.currentFile;
+			var file = editor.currentFile;
 			if(file) {
 				file.gotFocus = true;
 			}
@@ -506,12 +506,12 @@
 			}
 			
 			// Remove focus from the editor when bringing up the search box.
-			var file = global.currentFile;
+			var file = editor.currentFile;
 			if(file) {
 				file.gotFocus = false;
 			}
 			
-			console.log("Search visible! global.currentFile.gotFocus=" + global.currentFile.gotFocus);
+			console.log("Search visible! editor.currentFile.gotFocus=" + editor.currentFile.gotFocus);
 			
 			editor.resizeNeeded();
 			editor.renderNeeded();

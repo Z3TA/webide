@@ -17,7 +17,7 @@
 	function colors_main() {
 		//editor.on("fileParse", colorize);
 
-		global.preRenders.push(applyJScolors);
+		editor.preRenderFunctions.push(applyJScolors);
 		
 	}
 	
@@ -43,7 +43,7 @@
 		
 		// Color comments
 		var comments = file.parsed.comments;
-		var commentColor = global.settings.style.commentColor;
+		var commentColor = editor.settings.style.commentColor;
 		
 		if(comments) {
 			for(var i=0; i<comments.length; i++) {
@@ -54,7 +54,7 @@
 		
 		// Color quotes
 		var quotes = file.parsed.quotes;
-		var quoteColor = global.settings.style.quoteColor;
+		var quoteColor = editor.settings.style.quoteColor;
 		
 		if(quotes) {
 			for(var i=0; i<quotes.length; i++) {
@@ -65,7 +65,7 @@
 		
 		// Color xml tags
 		var xmlTags = file.parsed.xmlTags;
-		var xmlTagColor = global.settings.style.xmlTagColor;
+		var xmlTagColor = editor.settings.style.xmlTagColor;
 		
 		if(xmlTags) {
 			for(var i=0; i<xmlTags.length; i++) {
@@ -167,7 +167,7 @@
 
 	function colorComments(comments, file) {
 		
-		var color = global.settings.style.commentColor;
+		var color = editor.settings.style.commentColor;
 
 		comments.forEach(colorComment);
 		
@@ -187,7 +187,7 @@
 	
 	function colorQuotes(quotes, file) {
 		
-		var color = global.settings.style.quoteColor;
+		var color = editor.settings.style.quoteColor;
 		
 		//console.log(JSON.stringify(quotes, null, 4));
 		
@@ -222,7 +222,7 @@
 	}
 	
 	function resetColors(grid) {
-		var defaultColor = global.settings.style.textColor;
+		var defaultColor = editor.settings.style.textColor;
 		for(var row=0; row<grid.length; row++) {
 			for(var col=0; col<grid[row].length; col++) {
 				grid[row][col].color = defaultColor;

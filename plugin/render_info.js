@@ -21,7 +21,7 @@
 		// Extend editor (moved to core, because many plugins depend on this)
 		
 		// Add renderer
-		global.renders.push(infoRender);
+		editor.renderFunctions.push(infoRender);
 
 	}
 	
@@ -34,22 +34,22 @@
 		var textWidth = 0;
 		var textHeight = 0;
 		var radius = 10;
-		var gridHeight = global.settings.gridHeight;
-		var gridWidth = global.settings.gridWidth;
+		var gridHeight = editor.settings.gridHeight;
+		var gridWidth = editor.settings.gridWidth;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
-		var visibleRows = global.view.visibleRows;
-		var comments = global.info;
+		var visibleRows = editor.view.visibleRows;
+		var comments = editor.info;
 		var comment;
-		var topMargin = global.settings.topMargin;
-		var leftMargin = global.settings.leftMargin;
+		var topMargin = editor.settings.topMargin;
+		var leftMargin = editor.settings.leftMargin;
 		var indentation = 0;
 		var indentationWidth = 0;
-		var tabSpace = global.settings.tabSpace;
+		var tabSpace = editor.settings.tabSpace;
 		
 		//ctx.font="14px Arial";
 		
-		ctx.font=global.settings.style.fontSize + "px " + global.settings.style.font;
+		ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
 
 		
 		for(var i=0; i<comments.length; i++) {
@@ -75,12 +75,12 @@
 			}
 			
 			// Draw the bubble
-			ctx.fillStyle=global.settings.style.currentLineColor;
+			ctx.fillStyle=editor.settings.style.currentLineColor;
 			drawBubble(ctx, x, y, textWidth + textPadding*2, textHeight + textPadding*2, radius);
 
 			// Draw the text
 			/*
-			ctx.fillStyle=global.settings.style.textColor;
+			ctx.fillStyle=editor.settings.style.textColor;
 			for(var j=0; j<comment.text.length;j++) {
 				ctx.fillText(comment.text[j], x + textPadding, y + textPadding + j * gridHeight);
 			}

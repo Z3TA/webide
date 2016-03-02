@@ -1,13 +1,11 @@
-Prioritize: bug fixing, then some polishing and maybe some optimization.
+Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization.
 Don't implement new stuff until we have a stable release!
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-todo:
-
-hg bug: changes lost!
+Rafactoring!
 
 
 
@@ -97,6 +95,8 @@ Autocomplete function arguments inside the function!
 
 Polishing
 =========
+
+Show comment markdown headers in the function list
 
 See repo: remove files not needed.
 
@@ -413,11 +413,13 @@ When ctrl+z, move the caret to before the text being removed. For every action, 
 
 Need though
 -----------
-How should plugin do with CSS? Have their own CSS file!?
+Switch SCM from Mercurial to Git because hg lost file changes!?
 
-make a full render when messing with indentation!?
+Moving back to browser for a while, just to fix compatiblity issues. Then move back to nw.js. To make sure it works in the browser too.
 
-A list of code comments for easier code navigation, click on the code to go to it. Ett kompliment till function-list.
+About trying other runtimes, like native rendering. We should stick with "browser" because getting something to render natively, like openGL is too damn complicated.
+
+
 
 
 

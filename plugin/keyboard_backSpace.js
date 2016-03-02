@@ -6,7 +6,7 @@
 	editor.on("start", keyboard_backspace);
 	
 	function keyboard_backspace() {
-		global.keyBindings.push({
+		editor.keyBindings.push({
 			charCode: 8, 
 			fun: backSpace
 		});

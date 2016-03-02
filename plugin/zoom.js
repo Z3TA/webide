@@ -16,20 +16,20 @@
 	editor.on("start", zoomInit, loadOrder);
 	
 	function zoomInit() {
-		o_gridHeight = global.settings.gridHeight;
-		o_gridWidth = global.settings.gridWidth;
-		o_fontSize = global.settings.style.fontSize;
-		o_font = global.settings.style.font;
-		o_scrollStep = global.settings.scrollStep;
+		o_gridHeight = editor.settings.gridHeight;
+		o_gridWidth = editor.settings.gridWidth;
+		o_fontSize = editor.settings.style.fontSize;
+		o_font = editor.settings.style.font;
+		o_scrollStep = editor.settings.scrollStep;
 		
-		global.keyBindings.push({charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
+		editor.keyBindings.push({charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 		
 		
-		global.keyBindings.push({charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
+		editor.keyBindings.push({charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
 		
-		global.keyBindings.push({charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
+		editor.keyBindings.push({charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
 		
-		global.renders.push(showMarkdownHeadings);
+		editor.renderFunctions.push(showMarkdownHeadings);
 	}
 	
 	function zoomSwitch(file, combo, character, charCode, direction) {
@@ -42,14 +42,14 @@
 	function zoom(file, combo, character, charCode, direction) {
 	
 		console.log("zooming!");
-		global.settings.gridHeight = global.settings.gridHeight / 6;
-		global.settings.gridWidth = global.settings.gridWidth / 6;
-		global.settings.style.fontSize = global.settings.style.fontSize / 4;
-		//global.settings.style.font = "bold " + o_font;
-		global.settings.scrollStep = 20;
+		editor.settings.gridHeight = editor.settings.gridHeight / 6;
+		editor.settings.gridWidth = editor.settings.gridWidth / 6;
+		editor.settings.style.fontSize = editor.settings.style.fontSize / 4;
+		//editor.settings.style.font = "bold " + o_font;
+		editor.settings.scrollStep = 20;
 		
-		visibleRows = global.view.visibleRows;
-		visibleColumns = global.view.visibleColumns;
+		visibleRows = editor.view.visibleRows;
+		visibleColumns = editor.view.visibleColumns;
 		blueBoxStartRow = file.startRow;
 		
 		zoomedIn = true;
@@ -98,11 +98,11 @@
 		if(zoomedIn) {
 		
 		console.log("zoom reset!");
-		global.settings.gridHeight = o_gridHeight;
-		global.settings.gridWidth = o_gridWidth;
-		global.settings.style.fontSize = o_fontSize;
-			global.settings.style.font = o_font;
-			global.settings.scrollStep = o_scrollStep;
+		editor.settings.gridHeight = o_gridHeight;
+		editor.settings.gridWidth = o_gridWidth;
+		editor.settings.style.fontSize = o_fontSize;
+			editor.settings.style.font = o_font;
+			editor.settings.scrollStep = o_scrollStep;
 			
 		zoomedIn = false;
 		
@@ -116,7 +116,7 @@
 	}
 	
 	function makeCaretCenter(file) {
-		file.scrollTo(0, file.caret.row - Math.round(global.view.visibleRows / 2));
+		file.scrollTo(0, file.caret.row - Math.round(editor.view.visibleRows / 2));
 	}
 	
 	function scrollUp(file, combo, character, charCode, direction) {
@@ -150,17 +150,17 @@
 	}
 	
 	function resetView() {
-		global.view.visibleColumns = Math.ceil((global.view.canvasWidth - global.settings.leftMargin - global.settings.rightMargin) / global.settings.gridWidth);
+		editor.view.visibleColumns = Math.ceil((editor.view.canvasWidth - editor.settings.leftMargin - editor.settings.rightMargin) / editor.settings.gridWidth);
 		
-		global.view.visibleRows = Math.ceil((global.view.canvasHeight - global.settings.topMargin - global.settings.bottomMargin) / global.settings.gridHeight);
+		editor.view.visibleRows = Math.ceil((editor.view.canvasHeight - editor.settings.topMargin - editor.settings.bottomMargin) / editor.settings.gridHeight);
 		
 		// Fix horizontal column
-		if(global.view.endingColumn < global.view.visibleColumns) {
-			global.currentFile.startColumn = 0;
-			global.view.endingColumn = global.view.visibleColumns;
+		if(editor.view.endingColumn < editor.view.visibleColumns) {
+			editor.currentFile.startColumn = 0;
+			editor.view.endingColumn = editor.view.visibleColumns;
 		}
 		else {
-			global.view.endingColumn = global.currentFile.startColumn + global.view.visibleColumns;
+			editor.view.endingColumn = editor.currentFile.startColumn + editor.view.visibleColumns;
 		}
 		
 		
@@ -255,14 +255,14 @@
 				// ## Paint header
 				let col = 0;
 				let startRow = file.startRow;
-				let left = global.settings.leftMargin + (col + buffer[row].indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth;
-				let top = global.settings.topMargin + (row) * global.settings.gridHeight;
-				let bgColor = "blue"; // global.settings.style.commentColor
-				let textColor = "yellow" // global.settings.style.textColor
+				let left = editor.settings.leftMargin + (col + buffer[row].indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
+				let top = editor.settings.topMargin + (row) * editor.settings.gridHeight;
+				let bgColor = "blue"; // editor.settings.style.commentColor
+				let textColor = "yellow" // editor.settings.style.textColor
 				
 				// ### Set font (size)
 				let fontSize = Math.max(10, 22 - size * 2.5);
-				ctx.font= fontSize + "px " + global.settings.style.font;
+				ctx.font= fontSize + "px " + editor.settings.style.font;
 				//ctx.textBaseline = "bottom"; // top
 				
 				// ### Measure text

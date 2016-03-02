@@ -1,1 +1,0 @@
-hmm: libGLESv2.dll and libEGL.dll needed for CLD-text!?

@@ -14,13 +14,13 @@
 	
 	function indention_helper() {
 		
-		global.renders.push(indention_render);
+		editor.renderFunctions.push(indention_render);
 		
 		editor.on("edit", edit);
 		
 		var charCode = 73; // I
 		
-		global.keyBindings.push({charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
+		editor.keyBindings.push({charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
 		
 	}
 	
@@ -54,11 +54,11 @@
 		
 		if(buffer.length == 0) return; // Nothing to render
 		
-		var tabSpace = global.settings.tabSpace;
-		var gridWidth = global.settings.gridWidth;
-		var gridHeight = global.settings.gridHeight;
-		var leftMargin = global.settings.leftMargin;
-		var topMargin = global.settings.topMargin;
+		var tabSpace = editor.settings.tabSpace;
+		var gridWidth = editor.settings.gridWidth;
+		var gridHeight = editor.settings.gridHeight;
+		var leftMargin = editor.settings.leftMargin;
+		var topMargin = editor.settings.topMargin;
 		
 		
 		var lastIndentation = file.grid[file.grid.length-1].indentation;

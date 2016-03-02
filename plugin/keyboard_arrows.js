@@ -3,12 +3,12 @@
 	
 	"use strict";
 	
-	global.keyBindings.push({charCode: 39, fun: moveRight, dir: "down"});
-	//global.keyBindings.push({charCode: 39, fun: moveRightAndSelect, combo: 1});
+	editor.keyBindings.push({charCode: 39, fun: moveRight, dir: "down"});
+	//editor.keyBindings.push({charCode: 39, fun: moveRightAndSelect, combo: 1});
 	
-	global.keyBindings.push({charCode: 37, fun: moveLeft});
-	global.keyBindings.push({charCode: 38, fun: moveUp});
-	global.keyBindings.push({charCode: 40, fun: moveDown});
+	editor.keyBindings.push({charCode: 37, fun: moveLeft});
+	editor.keyBindings.push({charCode: 38, fun: moveUp});
+	editor.keyBindings.push({charCode: 40, fun: moveDown});
 	
 	var selectStart, selectEnd;
 

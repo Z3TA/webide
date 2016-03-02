@@ -1,32 +1,64 @@
-/*
-	This file should load first (after settings.js)!
-	
-	The reason why we use console.error() instead of throw is that nw.js will continue even if we throw.
-	You can also not overwrite the throw functions! Check plugin/devmode.js
-	
-*/
-
 "use strict";
 
 
-// Global constants
-const SHIFT = 1;
-const CTRL = 2;
-const ALT = 4;
+// The editor object lives in global scope, so that it can be accessed everywhere.
+var editor = {};
 
 
-// sugg: Maybe this global object should be part of the editor object!?
+// Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
+editor.settings = {
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
+	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
+	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
+	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these XML tags
+	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
+	caret: {
+		width: 1,
+		color: "rgb(0,0,0)"
+	},
+	leftMargin: 50,
+	rightMargin: 50,
+	topMargin: 10,
+	bottomMargin: 5,
+	gridHeight: 23, // 23, 22
+	gridWidth: 8.5, // 8.5, 7.8
+	sub_pixel_antialias: true, // For the main text area (canvas) only. If set to false, you want to start the editor with --disable-lcd-text
+	style: {
+		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!
+		font: "Consolas, DejaVu Sans Mono, Liberation Mono, monospace",
+		highlightMatchFont: "bold 15px Consolas, DejaVu Sans Mono, Liberation Mono, monospace",
+		highlightMatchFontColor: "rgb(31, 119, 32)",
+		highlightMissMatchFontColor: "rgb(255, 159, 0)",
+		highlightMatchBackground: "rgb(255, 255, 230)",
+		textColor: "rgb(0,0,0)", // Should be in rgb(0,0,0) format because some functions like to convert and make darker/lighter/transparent
+		bgColor: "rgb(255,255,255)", // Studies say that black on white is the best for readability. todo: themes
+		commentColor: "rgb(8, 134, 29)",
+		quoteColor: "rgb(51, 128, 128)",
+		xmlTagColor: "rgb(0, 21, 162)",
+		selectedTextBg: "rgb(193, 214, 253)",
+		currentLineColor: "rgb(255, 255, 230)",
+		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting
+	},
+	wordDelimiters: "(){}[]/*-+\\,'\" \n",
+	canBreakAfter: " \n,{}[];",
+	canBreakBefore: "}]\t",
+	drawGridBox: false,
+	scrollStep: 3,
+	autoCompleteKey: 9, // Tab
+	insert: false
+};
 
-global.render = false;   // Internal flag, use editor.renderNeeded() to re-render!
-global.resize = false;   // Internal flag, use editor.resizeNeeded() to re-size!
-global.fileIndex = -1;   // Keep track on opened files (for undo/redo)
-global.keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events, more info in docs.
-global.files = {};       // List of all opened files with the path as key
-global.mouseX = 0;       // Current mouse position
-global.mouseY = 0;
-global.info = [];        // Talk bubbles. See editor.addInfo()
 
-global.eventListeners = { // Use editor.on to add listeners to these events:
+editor.shouldRender = false;   // Internal flag, use editor.renderNeeded() to re-render!
+editor.shouldResize = false;   // Internal flag, use editor.resizeNeeded() to re-size!
+editor.fileIndex = -1;   // Keep track on opened files (for undo/redo)
+editor.keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events, more info in docs.
+editor.files = {};       // List of all opened files with the path as key
+editor.mouseX = 0;       // Current mouse position
+editor.mouseY = 0;
+editor.info = [];        // Talk bubbles. See editor.addInfo()
+
+editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
 	fileLoad: [], 
 	fileHide: [],
@@ -49,10 +81,10 @@ global.eventListeners = { // Use editor.on to add listeners to these events:
 	autoComplete: []
 };
 
-global.renders = [];
-global.preRenders = [];
+editor.renderFunctions = [];
+editor.preRenderFunctions = [];
 
-global.view = {
+editor.view = {
 	visibleColumns: 0, 
 	visibleRows: 0, 
 	canvasWidth: 0,
@@ -61,99 +93,12 @@ global.view = {
 	endingColumn: 0
 };
 
-global.currentFile = undefined // text, grid, etc
+editor.currentFile = undefined; // A File object
+
+(function() { // Non global editor code ...
 	
-
-
-/*
-	The editor object lives in global scope, so that it can be accessed and extended from everywhere.
-	Feel free to add more editor methods here though!
-	
-	To make it more fun to write plugins, the editor and File object should take care of the
-	"low level" stuff and heavy lifting. 
-	
-*/
-var editor = {};
-
-
-
-
-/* Added to global scope as a utility function */
-function functionName(fun) {
-	var ret = fun.toString();
-	ret = ret.substr('function '.length);
-	ret = ret.substr(0, ret.indexOf('('));
-	return ret;
-}
-
-function occurrences(string, subString, allowOverlapping){
-	/** Function count the occurrences of substring in a string;
-	 * @param {String} string   Required. The string;
-	 * @param {String} subString    Required. The string to search for;
-	 * @param {Boolean} allowOverlapping    Optional. Default: false;
-	 */
-	string+=""; subString+="";
-	if(subString.length<=0) return string.length+1;
-
-	var n=0, pos=0;
-	var step=(allowOverlapping)?(1):(subString.length);
-
-	while(true){
-		pos=string.indexOf(subString,pos);
-		if(pos>=0){
-			//console.log(n + " " + pos + " " + subString);
-			n++; 
-			pos+=step; 
-		} 
-		else break;
-	}
-	return(n);
-}
-
-
-function functionName(fun) {
-	var ret = fun.toString();
-	ret = ret.substr('function '.length);
-	ret = ret.substr(0, ret.indexOf('('));
-	return ret;
-}
-
-
-function objInfo(o) {
-	/*
-		Use for debug, to see properties in an object. 
-		Useful for events like click etc.
-	*/
-	console.log("######################## OBJ INFO #########################");
-	for(var p in o) {
-		console.log(p + "=" + o[p]);
-	}
-}
-
-function isString(text) {
-	// When a string is created with new String, it will be typeof object!
-	
-	var objectString = "[object String]";
-	var string = "string";
-	var typeOf = typeof content;
-	var instanceofString = (content instanceof String);
-	var objectToString = Object.prototype.toString.call(text);
-	
-	
-	if(typeOf != string && !instanceofString && objectToString != objectString) {
-		console.log("typeOf=" + typeOf);
-		console.log("objectToString=" + objectToString);
-	}
-	return typeOf == string || instanceofString || objectToString == objectString;
-
-}
-
-
-
-// Non global editor code ...
-(function() {
-	
-	// These variables are private ...
+	// These variables and functions are private ...
+	// We only expose methods that are in the editor object.
 	
 	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
 
@@ -171,8 +116,13 @@ function isString(text) {
 	var tildeShiftActive = false;
 	var tildeAltActive = false;
 	
-	// Editor functionality (accessible from global scope) By having this code here, we can use private variables
-
+	/*
+		Editor functionality (accessible from global scope) By having this code here, we can use private variables
+		
+		To make it more fun to write plugins, the editor and File object should take care of the "low level" stuff and heavy lifting. 
+		Feel free to add more editor API methods below. Do not extend the editor object elsewhere!!
+	*/
+	
 	editor.workingDirectory = process.cwd();
 
 	editor.getFilenameFromPath = function(path) {
@@ -197,14 +147,14 @@ function isString(text) {
 		console.log("Opening file: " + path);
 		
 		// Check if the file is already oepned
-		if(global.files.hasOwnProperty(path)) {
+		if(editor.files.hasOwnProperty(path)) {
 				console.warn("File already opened: " + path);
-				if(global.currentFile) {
-				if(global.currentFile.path != path) {
+				if(editor.currentFile) {
+				if(editor.currentFile.path != path) {
 					// Switch to it:
-						global.currentFile.hide();
-					global.currentFile = global.files[path];
-					global.currentFile.show();
+						editor.currentFile.hide();
+					editor.currentFile = editor.files[path];
+					editor.currentFile.show();
 						}
 			}
 			return;
@@ -230,9 +180,9 @@ function isString(text) {
 		
 		function load(path, text, notFromDisk) {
 			console.log("Loading file to editor: " + path);
-			global.files[path] = new File(text, path, global.fileIndex++);
+			editor.files[path] = new File(text, path, editor.fileIndex++);
 			
-			var file = global.files[path];
+			var file = editor.files[path];
 			
 			if(!notFromDisk) {
 			// Because we opened it from disk:
@@ -241,13 +191,13 @@ function isString(text) {
 			file.changed = false;
 			}
 			
-			if(global.currentFile) {
-				global.currentFile.hide();
+			if(editor.currentFile) {
+				editor.currentFile.hide();
 			}
 			
 			// Switch to this file
-			global.currentFile = file;
-			global.view.endingColumn = global.view.visibleColumns; // Because file.startColumn = 0;
+			editor.currentFile = file;
+			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
 			/* We might want to change some state before file open events get fired, 
 			so call the callback before file.open()
@@ -267,20 +217,20 @@ function isString(text) {
 
 	editor.closeFile = function(path) {
 		
-		if(!global.files.hasOwnProperty(path)) {
+		if(!editor.files.hasOwnProperty(path)) {
 			throw new Error("Can't close file that is not open: " + path);
 		}
 		else {
 			
-			var file = global.files[path];
+			var file = editor.files[path];
 			
-			if(global.currentFile == file) global.currentFile = null;
+			if(editor.currentFile == file) editor.currentFile = null;
 			
-			delete global.files[file.path];
+			delete editor.files[file.path];
 			
 			// Call listeners
-			for(var i=0; i<global.eventListeners.fileClose.length; i++) {
-				global.eventListeners.fileClose[i].fun(file); // Call function
+			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
+				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 						
 			file.close();
@@ -345,7 +295,7 @@ function isString(text) {
 			It can handle "save-as". 
 		*/
 		
-		if(file == undefined) file = global.currentFile;
+		if(file == undefined) file = editor.currentFile;
 		
 		if(!file) {
 			console.error(new Error("No file open when save was called"));
@@ -364,17 +314,17 @@ function isString(text) {
 			editor.closeFile(file.path);
 			
 			// Delete old key
-			//delete global.files[file.path];
+			//delete editor.files[file.path];
 			
-			// Add the new path as key in global.files
-			global.files[path] = file;
+			// Add the new path as key in editor.files
+			editor.files[path] = file;
 
 			// Set the new path
 			file.path = path;
 			
 			file.open();
 			
-			if(file == global.currentFile) {
+			if(file == editor.currentFile) {
 				// Set window title to current file path
 				var gui = require('nw.gui');
 				var win = gui.Window.get();
@@ -409,7 +359,7 @@ function isString(text) {
 		/*
 			Brings up the OS save file dialog window and calls the callback with the path.
 		*/
-		global.fileSaveAsCallback = callback;
+		editor.filesaveAsCallback = callback;
 		
 		var fileSaveAs = document.getElementById("fileSaveAs");
 		
@@ -468,8 +418,8 @@ function isString(text) {
 		*/
 		
 		if(path == undefined) {
-			if(global.currentFile) {
-				path = global.currentFile.path;
+			if(editor.currentFile) {
+				path = editor.currentFile.path;
 			}
 			else {
 				console.warn("No file open!");
@@ -508,68 +458,68 @@ function isString(text) {
 	
 	editor.renderNeeded = function() {
 		// Tell the editor that it needs to render
-		if(global.settings.devMode && global.render == false) {
+		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
 			console.log(new Error("Render").stack);
 		}
-		global.render = true;
+		editor.shouldRender = true;
 	}
 	
 	editor.resizeNeeded = function() {
 		// Tell the editor that it needs to resize
-		if(global.settings.devMode && global.resize == false) {
+		if(editor.settings.devMode && editor.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
 			console.log(new Error("Resize").stack);
 		}
-		global.resize = true;
+		editor.shouldResize = true;
 	}
 	
 	editor.render = function() {
 		
-		if(!global.render) {
+		if(!editor.shouldRender) {
 			console.warn("Not rendering because it's not needed!");
 			return;
 		}
-		if(global.resize) {
+		if(editor.shouldResize) {
 			console.warn("Resizing before rendering!");
 			editor.resize();
 		}
 		
 		
 		
-		global.render = false; // Flag (change to true whenever we need to render)
+		editor.shouldRender = false; // Flag (change to true whenever we need to render)
 				
-		console.log("rendering ... global.resize=" + global.resize + "");
+		console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
 		
-		if(global.currentFile) {
+		if(editor.currentFile) {
 			
 			console.time("render");
 			
-			var file = global.currentFile,
+			var file = editor.currentFile,
 				buffer = [],
-				grid = global.currentFile.grid;
+				grid = editor.currentFile.grid;
 			
 			// Create the buffer
-			for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+global.view.visibleRows); row++) {
+			for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+editor.view.visibleRows); row++) {
 				buffer.push(file.cloneRow(row)); // Clone the row
 			}
 			
 			if(buffer.length == 0) {
-				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " global.view.visibleRows=" + global.view.visibleRows);
+				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " editor.view.visibleRows=" + editor.view.visibleRows);
 			}
 			
 			// Load on the fly functionality on the buffer
-			for(var i=0; i<global.preRenders.length; i++) {
-				buffer = global.preRenders[i](buffer, file); // Call render
+			for(var i=0; i<editor.preRenderFunctions.length; i++) {
+				buffer = editor.preRenderFunctions[i](buffer, file); // Call render
 			}
 			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
-			var canvas = global.currentFile.canvas;
+			var canvas = editor.currentFile.canvas;
 			
-			if(global.settings.sub_pixel_antialias == false) {
+			if(editor.settings.sub_pixel_antialias == false) {
 				var ctx = canvas.getContext("2d");
-				//console.warn("No sub_pixel_antialias! global.settings.sub_pixel_antialias=" + global.settings.sub_pixel_antialias);
+				//console.warn("No sub_pixel_antialias! editor.settings.sub_pixel_antialias=" + editor.settings.sub_pixel_antialias);
 			}
 			else {
 			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
@@ -579,7 +529,7 @@ function isString(text) {
 			
 			//ctx.translate(0,0);
 			
-			ctx.fillStyle = global.settings.style.bgColor;
+			ctx.fillStyle = editor.settings.style.bgColor;
 			
 			//ctx.clearRect(0, 0, canvas.width, canvas.height);
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -590,8 +540,8 @@ function isString(text) {
 			ctx.lineWidth = 1;
 			*/
 			
-			for(var i=0; i<global.renders.length; i++) {
-				global.renders[i](ctx, buffer, global.currentFile); // Call render
+			for(var i=0; i<editor.renderFunctions.length; i++) {
+				editor.renderFunctions[i](ctx, buffer, editor.currentFile); // Call render
 			}
 			
 			console.timeEnd("render");
@@ -606,11 +556,11 @@ function isString(text) {
 	
 	editor.renderRow = function(gridRow) {
 		
-		console.log("rendering ROW ... global.resize=" + global.resize + "");
+		console.log("rendering ROW ... editor.shouldResize=" + editor.shouldResize + "");
 		
-		if(global.currentFile) {
+		if(editor.currentFile) {
 			
-			var file = global.currentFile;
+			var file = editor.currentFile;
 			
 			if(gridRow == undefined) gridRow = file.caret.row;
 			if(file.grid.length <= gridRow) console.error(new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " "));
@@ -631,8 +581,8 @@ function isString(text) {
 			
 			
 			// Load on the fly functionality on the buffer
-			for(var i=0; i<global.preRenders.length; i++) {
-				buffer = global.preRenders[i](buffer, file);
+			for(var i=0; i<editor.preRenderFunctions.length; i++) {
+				buffer = editor.preRenderFunctions[i](buffer, file);
 			}
 			
 			//console.log(JSON.stringify(buffer, null, 4));
@@ -641,12 +591,12 @@ function isString(text) {
 			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
 			
 			
-			ctx.fillStyle = global.settings.style.bgColor;
+			ctx.fillStyle = editor.settings.style.bgColor;
 			
-			var top = global.settings.topMargin + screenRow * global.settings.gridHeight;
+			var top = editor.settings.topMargin + screenRow * editor.settings.gridHeight;
 			
 			// Clear only that row
-			ctx.fillRect(0, top, canvas.width, global.settings.gridHeight);
+			ctx.fillRect(0, top, canvas.width, editor.settings.gridHeight);
 			
 			/*
 				ctx.fillStyle = "#FF0000";
@@ -654,8 +604,8 @@ function isString(text) {
 				ctx.lineWidth = 1;
 			*/
 			
-			for(var i=0; i<global.renders.length; i++) {
-				global.renders[i](ctx, buffer, file, screenRow); // Call render
+			for(var i=0; i<editor.renderFunctions.length; i++) {
+				editor.renderFunctions[i](ctx, buffer, file, screenRow); // Call render
 			}
 			
 			console.timeEnd("renderRow");
@@ -677,12 +627,12 @@ function isString(text) {
 		
 		*/
 		
-		if(!global.resize) return; // Don't resize if it's not needed.
-		global.resize = false; // Prevent this function from running again
+		if(!editor.shouldResize) return; // Don't resize if it's not needed.
+		editor.shouldResize = false; // Prevent this function from running again
 		
 		//if(global.lastKeyPressed=="a") console.error(new Error("why resize now?"));
 		
-		console.log("Resizing ... e=" + e + " global.render=" + global.render + "");
+		console.log("Resizing ... e=" + e + " editor.shouldRender=" + editor.shouldRender + "");
 		
 		console.time("resize");
 		
@@ -695,8 +645,8 @@ function isString(text) {
 		
 		
 		// Resize listeners (before)
-		for(var i=0; i<global.eventListeners.beforeResize.length; i++) {
-			global.eventListeners.beforeResize[i].fun(global.currentFile);
+		for(var i=0; i<editor.eventListeners.beforeResize.length; i++) {
+			editor.eventListeners.beforeResize[i].fun(editor.currentFile);
 		}
 		
 		/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
@@ -712,13 +662,13 @@ function isString(text) {
 		
 		
 		// Save focus for the current file and give back focus after ther resize
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		var fileGotFocus = false;
 		
 		
 		if(file) {
 			fileGotFocus = file.gotFocus;
-			//global.currentFile.hide(); // So that events will fire
+			//editor.currentFile.hide(); // So that events will fire
 		}
 		
 		//console.log("Resizing stuff ...")
@@ -774,24 +724,24 @@ function isString(text) {
 		//objInfo(centerColumn);
 
 		
-		//global.view.canvasWidth = windowWidth - leftRightColumnWidth;
-		global.view.canvasWidth = contentWidth;
-		global.view.canvasHeight = contentHeight;
+		//editor.view.canvasWidth = windowWidth - leftRightColumnWidth;
+		editor.view.canvasWidth = contentWidth;
+		editor.view.canvasHeight = contentHeight;
 		/*
-		global.view.canvasWidth = (windowWidth - leftRightColumnWidth);
-		global.view.canvasHeight = (windowHeight - headerFooterHeight);
+		editor.view.canvasWidth = (windowWidth - leftRightColumnWidth);
+		editor.view.canvasHeight = (windowHeight - headerFooterHeight);
 		
 		
-		content.style.width = global.view.canvasWidth + "px";
-		content.style.height = global.view.canvasHeight + "px";
+		content.style.width = editor.view.canvasWidth + "px";
+		content.style.height = editor.view.canvasHeight + "px";
 		*/
 		
-		console.log("canvasWidth=" + global.view.canvasWidth);
-		console.log("canvasHeight=" + global.view.canvasHeight);
+		console.log("canvasWidth=" + editor.view.canvasWidth);
+		console.log("canvasHeight=" + editor.view.canvasHeight);
 		
 		
-		leftColumn.style.height = global.view.canvasHeight + "px";
-		rightColumn.style.height = global.view.canvasHeight + "px";
+		leftColumn.style.height = editor.view.canvasHeight + "px";
+		rightColumn.style.height = editor.view.canvasHeight + "px";
 
 
 		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
@@ -807,49 +757,49 @@ function isString(text) {
 
 		
 		// Calculate column width and row height
-		global.view.visibleColumns = Math.ceil((global.view.canvasWidth - global.settings.leftMargin - global.settings.rightMargin) / global.settings.gridWidth);
+		editor.view.visibleColumns = Math.ceil((editor.view.canvasWidth - editor.settings.leftMargin - editor.settings.rightMargin) / editor.settings.gridWidth);
 		
-		//console.log("(resize1) global.view.visibleColumns=" + global.view.visibleColumns);
-		//console.log("(resize1) global.view.endingColumn=" + global.view.endingColumn);
+		//console.log("(resize1) editor.view.visibleColumns=" + editor.view.visibleColumns);
+		//console.log("(resize1) editor.view.endingColumn=" + editor.view.endingColumn);
 
 		// ceil (overflow)
-		global.view.visibleRows = Math.ceil((global.view.canvasHeight - global.settings.topMargin - global.settings.bottomMargin) / global.settings.gridHeight);
+		editor.view.visibleRows = Math.ceil((editor.view.canvasHeight - editor.settings.topMargin - editor.settings.bottomMargin) / editor.settings.gridHeight);
 		
-		//console.log("visibleRows=" + global.view.visibleRows);
-		//console.log("topMargin=" + global.settings.topMargin);
-		//console.log("bottomMargin=" + global.settings.bottomMargin);
+		//console.log("visibleRows=" + editor.view.visibleRows);
+		//console.log("topMargin=" + editor.settings.topMargin);
+		//console.log("bottomMargin=" + editor.settings.bottomMargin);
 		
 		
-		if(global.currentFile) {
+		if(editor.currentFile) {
 			
-			global.currentFile.canvas.style.width = global.view.canvasWidth + "px";
-			global.currentFile.canvas.style.height = global.view.canvasHeight + "px";
+			editor.currentFile.canvas.style.width = editor.view.canvasWidth + "px";
+			editor.currentFile.canvas.style.height = editor.view.canvasHeight + "px";
 
-			global.currentFile.canvas.width  = global.view.canvasWidth;
-			global.currentFile.canvas.height = global.view.canvasHeight;
+			editor.currentFile.canvas.width  = editor.view.canvasWidth;
+			editor.currentFile.canvas.height = editor.view.canvasHeight;
 			
 			// Fix horizontal column after resizing
-			if(global.view.endingColumn < global.view.visibleColumns) {
-				global.currentFile.startColumn = 0;
-				global.view.endingColumn = global.view.visibleColumns;
+			if(editor.view.endingColumn < editor.view.visibleColumns) {
+				editor.currentFile.startColumn = 0;
+				editor.view.endingColumn = editor.view.visibleColumns;
 			}
 			else {
-				global.view.endingColumn = global.currentFile.startColumn + global.view.visibleColumns;
+				editor.view.endingColumn = editor.currentFile.startColumn + editor.view.visibleColumns;
 			}
 
 		}
 		else {
-			console.warn("No current file! global.currentFile=" + global.currentFile);
-			global.view.endingColumn = global.view.visibleColumns;
+			console.warn("No current file! editor.currentFile=" + editor.currentFile);
+			editor.view.endingColumn = editor.view.visibleColumns;
 
 		}
 
-		//console.log("(resize2) global.view.visibleColumns=" + global.view.visibleColumns);
-		//console.log("(resize2) global.view.endingColumn=" + global.view.endingColumn);
+		//console.log("(resize2) editor.view.visibleColumns=" + editor.view.visibleColumns);
+		//console.log("(resize2) editor.view.endingColumn=" + editor.view.endingColumn);
 
 		// Resize listeners (after)
-		for(var i=0; i<global.eventListeners.afterResize.length; i++) {
-			global.eventListeners.afterResize[i].fun(global.currentFile);
+		for(var i=0; i<editor.eventListeners.afterResize.length; i++) {
+			editor.eventListeners.afterResize[i].fun(editor.currentFile);
 		}
 		
 		// Show the canvas nodes again
@@ -889,8 +839,8 @@ function isString(text) {
 
 	editor.addEvent = function(eventName, options) {
 		
-		if(!(eventName in global.eventListeners)) {
-			console.error("eventName=" + eventName + " does not exist in global.eventListeners!");
+		if(!(eventName in editor.eventListeners)) {
+			console.error("eventName=" + eventName + " does not exist in editor.eventListeners!");
 		}
 		
 		if(arguments.length > 2) {
@@ -913,10 +863,10 @@ function isString(text) {
 			console.error(new Error("There needs to be a function!"));
 		}
 			
-		var index = global.eventListeners[eventName].push(options);
+		var index = editor.eventListeners[eventName].push(options);
 		
 		// Sort the events so they fire in order (lowest order nr will execute first)
-		global.eventListeners[eventName].sort(function(a, b) {
+		editor.eventListeners[eventName].sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
 			}
@@ -939,7 +889,7 @@ function isString(text) {
 			
 		*/
 		var fname = functionName(fun);
-		var events = global.eventListeners[eventName];
+		var events = editor.eventListeners[eventName];
 		var found = 0;
 		
 		removeit(); // Removes them all (recursive)
@@ -1011,7 +961,7 @@ function isString(text) {
 			tempItems.removeChild(tempItems.firstChild);
 		}
 		
-		if(global.currentFile) global.currentFile.gotFocus = true; // Give focus back for text entry
+		if(editor.currentFile) editor.currentFile.gotFocus = true; // Give focus back for text entry
 		
 	}
 
@@ -1020,9 +970,9 @@ function isString(text) {
 		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 		var menuDownABit = 10;
 		
-		if(posX === global.mouseX || posX === undefined) posX = global.mouseX + notUpOnMenu;
+		if(posX === editor.mouseX || posX === undefined) posX = editor.mouseX + notUpOnMenu;
 
-		if(posY === undefined) posY = global.mouseY + menuDownABit;
+		if(posY === undefined) posY = editor.mouseY + menuDownABit;
 		
 		// Make sure it fits on the screen!!
 		/*
@@ -1036,9 +986,9 @@ function isString(text) {
 		if((posY+offsetHeight) > global.windowHeight) posY = global.windowHeight - offsetHeight;
 		if((posX+offsetWidth) > global.windowWidth) posX = global.windowWidth - offsetWidth;
 		
-		if(posX <= global.mouseX) {
+		if(posX <= editor.mouseX) {
 			// Place the menu on the left side
-			posX = global.mouseX - offsetWidth - notUpOnMenu;
+			posX = editor.mouseX - offsetWidth - notUpOnMenu;
 		}
 		
 		menu.style.visibility = "visible";
@@ -1048,7 +998,7 @@ function isString(text) {
 
 	editor.addInfo = function(row, col, txt) {
 		// Will display a talk bubble (plugin/render_info.js)
-		var info = global.info;
+		var info = editor.info;
 		
 		console.time("addInfo");
 		
@@ -1125,7 +1075,7 @@ function isString(text) {
 				//console.log("imagesToMake=" + imagesToMake);
 				//console.log("imagesMade=" + imagesMade);
 				
-				//global.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
+				//editor.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
 
 				
 				if(++imagesMade == imagesToMake) {
@@ -1140,7 +1090,7 @@ function isString(text) {
 
 	editor.removeAllInfo = function(row, col, txt) {
 		// Find the item in the array, then splice it ...
-		var info = global.info;
+		var info = editor.info;
 		
 		for(var i=0; i<info.length; i++) {
 			if(info[i].row == row && info[i].col == col) {
@@ -1171,8 +1121,8 @@ function isString(text) {
 			func(interaction); // Execute
 		}
 		
-		for(var i=0; i<global.eventListeners.interaction.length; i++) {
-			global.eventListeners.interaction[i].fun(global.currentFile); // Call function
+		for(var i=0; i<editor.eventListeners.interaction.length; i++) {
+			editor.eventListeners.interaction[i].fun(editor.currentFile); // Call function
 		}
 		
 		resizeAndRender();
@@ -1184,16 +1134,16 @@ function isString(text) {
 		var eventListeners;
 		var callback;
 			
-		if(eventName in global.eventListeners) {
+		if(eventName in editor.eventListeners) {
 				
-			eventListeners = global.eventListeners[eventName];
+			eventListeners = editor.eventListeners[eventName];
 			
 			for(var i=0; i<eventListeners.length; i++) {
 				callback = eventListeners[i].fun;
 				callback.apply(this, arguments);
 			}
 			
-			global.eventListeners[eventName]
+			editor.eventListeners[eventName]
 		}
 		else {
 			console.error(new Error("Uknown event listener:" + eventName));
@@ -1202,17 +1152,17 @@ function isString(text) {
 	}
 	
 	editor.addRender = function(fun) {
-		return global.renders.push(fun) - 1;
+		return editor.renderFunctions.push(fun) - 1;
 	}
 	editor.removeRender = function(fun) {
-		return removeFrom(global.renders, fun)
+		return removeFrom(editor.renderFunctions, fun)
 	}
 	
 	editor.addPreRender = function(renderFunction) {
-		return global.preRenders.push(fun) - 1;
+		return editor.preRenderFunctions.push(fun) - 1;
 	}
 	editor.removePreRender = function(renderFunction) {
-		return removeFrom(global.preRenders, fun);
+		return removeFrom(editor.preRenderFunctions, fun);
 	}
 	
 	editor.mousePositionToCaret = function (mouseX, mouseY) {
@@ -1224,13 +1174,13 @@ function isString(text) {
 			We also need to take into account how much is scrolled
 			
 		*/
-		if(global.currentFile) {
+		if(editor.currentFile) {
 			
-			var file = global.currentFile,
+			var file = editor.currentFile,
 				grid = file.grid,
-				clickFeel = global.settings.gridWidth / 2;
+				clickFeel = editor.settings.gridWidth / 2;
 			
-			var mouseRow = Math.floor((mouseY - global.settings.topMargin) / global.settings.gridHeight) + file.startRow;
+			var mouseRow = Math.floor((mouseY - editor.settings.topMargin) / editor.settings.gridHeight) + file.startRow;
 			
 			//console.log("mouseRow=" + mouseRow);
 			
@@ -1249,7 +1199,7 @@ function isString(text) {
 				
 				//console.log("indentation=" + row.indentation);
 				
-				var mouseCol = Math.floor((mouseX - global.settings.leftMargin - (row.indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth + clickFeel) / global.settings.gridWidth);
+				var mouseCol = Math.floor((mouseX - editor.settings.leftMargin - (row.indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth + clickFeel) / editor.settings.gridWidth);
 			
 				//console.log("mouseCol=" + mouseCol);
 
@@ -1323,9 +1273,9 @@ function isString(text) {
 		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
 		var ret, fun, addWord, addMcl;
-		for(var i=0; i<global.eventListeners.autoComplete.length; i++) {
+		for(var i=0; i<editor.eventListeners.autoComplete.length; i++) {
 			
-			fun = global.eventListeners.autoComplete[i].fun;
+			fun = editor.eventListeners.autoComplete[i].fun;
 			ret = fun(file, word, wordLength, options.length);
 			
 			console.log("function " + functionName(fun) + " returned: " + JSON.stringify(ret));
@@ -1472,7 +1422,7 @@ function isString(text) {
 	
 	// Handle window close
 	win.on('close', function() {
-		var editor = this;
+		//var editor = this;
 		
 		//editor.hide(); // Pretend to be closed already
 		
@@ -1485,9 +1435,9 @@ function isString(text) {
 			console.warn("window.localStorage=" + window.localStorage);
 		}
 		
-		for(var i=0, f; i<global.eventListeners.exit.length; i++) {
+		for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 			
-			f = global.eventListeners.exit[i].fun;
+			f = editor.eventListeners.exit[i].fun;
 			name = functionName(f);
 			ret = f();
 			
@@ -1498,10 +1448,10 @@ function isString(text) {
 		
 
 		if(ret == true) {
-			editor.close(true);
+			this.close(true);
 		}
 		else {
-			editor.show();
+			this.show();
 			console.error(new Error("Something went wrong when closing the editor!"));
 		}
 		
@@ -1537,7 +1487,7 @@ function isString(text) {
 	
 	
 	/*
-		Add your own key listeners by pushing to global.keyBindings
+		Add your own key listeners by pushing to editor.keyBindings
 		Your function should return false to prevent default action.
 	*/
 	window.addEventListener("keydown",keyIsDown,false);  // captures 
@@ -1547,7 +1497,7 @@ function isString(text) {
 
 	
 	/*
-		Add your own key listeners by pushing to global.eventListeners.mouseClick
+		Add your own key listeners by pushing to editor.eventListeners.mouseClick
 		Your function should return false to prevent default action.
 	*/
 	window.addEventListener("click", mouseclick, false);
@@ -1584,7 +1534,7 @@ function isString(text) {
 		
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
-		global.keyBindings.push({charCode: global.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
+		editor.keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");
@@ -1619,7 +1569,7 @@ function isString(text) {
 		//console.log("main function loaded");
 		
 		// Sort the start events (some modules depeonds on others, and want to start after or before them)
-		global.eventListeners.start.sort(function(a, b) {
+		editor.eventListeners.start.sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
 			}
@@ -1630,8 +1580,8 @@ function isString(text) {
 				return 0;
 			}
 		});
-		for(var i=0; i<global.eventListeners.start.length; i++) {
-			//console.log("startlistener:" + functionName(global.eventListeners.start[i].fun) + " (order=" + global.eventListeners.start[i].order + ")");
+		for(var i=0; i<editor.eventListeners.start.length; i++) {
+			//console.log("startlistener:" + functionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
 		}
 		
 		
@@ -1646,8 +1596,8 @@ function isString(text) {
 			editor.resize();
 			
 			// Call start listeners
-			for(var i=0; i<global.eventListeners.start.length; i++) {
-				global.eventListeners.start[i].fun(); // Call function
+			for(var i=0; i<editor.eventListeners.start.length; i++) {
+				editor.eventListeners.start[i].fun(); // Call function
 			}
 			
 			editor.renderNeeded();
@@ -1699,22 +1649,22 @@ function isString(text) {
 	function chooseSaveAsPath(e) {
 		var file = e.target.files[0];
 		
-		if(global.fileSaveAsCallback == undefined) {
+		if(editor.filesaveAsCallback == undefined) {
 			console.error(new Error("There is no listener for the save file dialog!"));
 		}
 		
 		if (!file) {
 			console.warn("No file selected!");
-			global.fileSaveAsCallback(undefined);
+			editor.filesaveAsCallback(undefined);
 			return;
 		}
 		
 		var fileName = file.name;
 		var filePath = file.path;
 		
-		global.fileSaveAsCallback(filePath);
+		editor.filesaveAsCallback(filePath);
 		
-		global.fileSaveAsCallback = undefined; // Prevent old callback from firing again
+		editor.filesaveAsCallback = undefined; // Prevent old callback from firing again
 	}
 	
 	
@@ -1757,11 +1707,11 @@ function isString(text) {
 	
 	function copy(e) {
 		
-		if(global.currentFile.gotFocus) {
+		if(editor.currentFile.gotFocus) {
 			var textToPutOnClipboard = "";
 			
-			if(global.currentFile) {
-				textToPutOnClipboard = global.currentFile.getSelectedText();
+			if(editor.currentFile) {
+				textToPutOnClipboard = editor.currentFile.getSelectedText();
 			}
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
@@ -1784,15 +1734,15 @@ function isString(text) {
 	
 	function cut(e) {
 		
-		if(global.currentFile.gotFocus) {
+		if(editor.currentFile.gotFocus) {
 		
 			var textToPutOnClipboard = "";
 			
-			if(global.currentFile) {
-				textToPutOnClipboard = global.currentFile.getSelectedText();
+			if(editor.currentFile) {
+				textToPutOnClipboard = editor.currentFile.getSelectedText();
 				
 				// Delete the selected text
-				global.currentFile.deleteSelection();
+				editor.currentFile.deleteSelection();
 			}
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
@@ -1818,16 +1768,16 @@ function isString(text) {
 		
 		console.log("PASTE!" + text);
 		
-		if(global.currentFile.gotFocus) {
+		if(editor.currentFile.gotFocus) {
 		
 			e.preventDefault();
 		
 			// Call events listening on paste
-			for(var i=0, fun; i<global.eventListeners.paste.length; i++) {
+			for(var i=0, fun; i<editor.eventListeners.paste.length; i++) {
 				
-				fun = global.eventListeners.paste[i].fun;
+				fun = editor.eventListeners.paste[i].fun;
 				
-				ret = fun(global.currentFile, e.clipboardData);
+				ret = fun(editor.currentFile, e.clipboardData);
 				
 				//console.log("Paste listener: " + functionName(fun) + " returned:\n" + ret);
 				
@@ -1841,8 +1791,8 @@ function isString(text) {
 			}
 			
 			// Insert text at caret position
-			if(global.currentFile) {
-				var file = global.currentFile;
+			if(editor.currentFile) {
+				var file = editor.currentFile;
 				
 				// If there is a text selection. Delete the selection first!
 				file.deleteSelection();
@@ -1899,15 +1849,15 @@ function isString(text) {
 		 }
 		*/
 		
-		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") global.currentFile.gotFocus=" + (global.currentFile ? global.currentFile.gotFocus : "NoFileOpen") + "");
+		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") editor.currentFile.gotFocus=" + (editor.currentFile ? editor.currentFile.gotFocus : "NoFileOpen") + "");
 		
 		global.lastKeyPressed = character;
 		
-		if(global.currentFile) {
-			if(global.currentFile.gotFocus) {
+		if(editor.currentFile) {
+			if(editor.currentFile.gotFocus) {
 				// Put character at current caret position:
 							
-				global.currentFile.putCharacter(character);
+				editor.currentFile.putCharacter(character);
 
 			}
 
@@ -1918,8 +1868,8 @@ function isString(text) {
 	}
 	
 	function resizeAndRender() {
-		if(global.resize) editor.resize();
-		if(global.render) editor.render();
+		if(editor.shouldResize) editor.resize();
+		if(editor.shouldRender) editor.render();
 	}
 	
 	
@@ -1961,9 +1911,9 @@ function isString(text) {
 		
 		// PS. Alt Gr = Ctrl+Alt
 		
-		// You probably want to push to global.keyBindings instead of using eventListeners.keyDown!
-		for(var i=0; i<global.eventListeners.keyDown.length; i++) {
-			funReturn = global.eventListeners.keyDown[i].fun(global.currentFile, character, combo); // Call function
+		// You probably want to push to editor.keyBindings instead of using eventListeners.keyDown!
+		for(var i=0; i<editor.eventListeners.keyDown.length; i++) {
+			funReturn = editor.eventListeners.keyDown[i].fun(editor.currentFile, character, combo); // Call function
 			
 			if(funReturn === false) {
 				preventDefault = true;
@@ -1972,9 +1922,9 @@ function isString(text) {
 		}
 		
 		// Check key bindings
-		for(var i=0, binding; i<global.keyBindings.length; i++) {
+		for(var i=0, binding; i<editor.keyBindings.length; i++) {
 			
-			binding = global.keyBindings[i];
+			binding = editor.keyBindings[i];
 			
 			/*
 				I probably had a good reason to edit this so that undefined combos didnt capture combos
@@ -1997,7 +1947,7 @@ function isString(text) {
 					
 				captured = true;
 				
-				funReturn = binding.fun(global.currentFile, combo, character, charCode, "down");
+				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down");
 				
 				if(funReturn === false) {
 					preventDefault = true;
@@ -2016,9 +1966,9 @@ function isString(text) {
 		
 
 		
-		if(global.currentFile) {
-			global.currentFile.checkGrid();
-			global.currentFile.checkCaret();
+		if(editor.currentFile) {
+			editor.currentFile.checkGrid();
+			editor.currentFile.checkCaret();
 		}
 
 		editor.interact("keyDown");
@@ -2088,7 +2038,7 @@ function isString(text) {
 		
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
-		if(global.currentFile) {
+		if(editor.currentFile) {
 			// Handle the special tidle key: Puts a ~ ^ or " over a character
 			// Is it only the swedish keyboard layout that does this!?
 			// OMG! This might become very messy
@@ -2103,10 +2053,10 @@ function isString(text) {
 					
 				}
 				else if(tildeAltActive) {
-					global.currentFile.putCharacter("~");
+					editor.currentFile.putCharacter("~");
 				}
 				else if(tildeShiftActive) {
-					global.currentFile.putCharacter("^");
+					editor.currentFile.putCharacter("^");
 				}
 			}
 		}
@@ -2138,15 +2088,15 @@ function isString(text) {
 		//console.log("a tildeShiftActive=" + tildeShiftActive);
 		
 		// Check key bindings
-		for(var i=0, binding; i<global.keyBindings.length; i++) {
+		for(var i=0, binding; i<editor.keyBindings.length; i++) {
 			
-			binding = global.keyBindings[i];
+			binding = editor.keyBindings[i];
 			
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				
 				//console.log("keyUp: Calling function: " + functionName(binding.fun) + "...");
 
-				binding.fun(global.currentFile, combo, character, charCode, "up");
+				binding.fun(editor.currentFile, combo, character, charCode, "up");
 			}
 			
 		}
@@ -2190,13 +2140,13 @@ function isString(text) {
 			caret = editor.mousePositionToCaret(mouseX, mouseY);
 			
 
-			if(global.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+			if(editor.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				// Give focus
-				global.currentFile.gotFocus = true;
+				editor.currentFile.gotFocus = true;
 				
 				// Remove focus from everything else
 				document.activeElement.blur();
-				global.currentFile.canvas.focus();
+				editor.currentFile.canvas.focus();
 			
 				// Delete selection outside of the canvas
 				window.getSelection().removeAllRanges();
@@ -2207,7 +2157,7 @@ function isString(text) {
 					Meh, why doesn't this work!!!?
 				
 				
-				document.body.focus(); // global.currentFile.canvas
+				document.body.focus(); // editor.currentFile.canvas
 				
 				document.getElementById("leftColumn").focus();
 				
@@ -2224,11 +2174,11 @@ function isString(text) {
 			
 		}
 		else{
-			if(global.currentFile) {
+			if(editor.currentFile) {
 				// Remove focus
-				global.currentFile.gotFocus = false;
+				editor.currentFile.gotFocus = false;
 				
-				//global.currentFile = undefined;
+				//editor.currentFile = undefined;
 			}
 		}
 		
@@ -2236,9 +2186,9 @@ function isString(text) {
 		
 
 		
-		for(var i=0, binding; i<global.eventListeners.mouseClick.length; i++) {
+		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
 			
-			click = global.eventListeners.mouseClick[i];
+			click = editor.eventListeners.mouseClick[i];
 			
 			if((click.dir == "down" || click.dir == undefined) && 
 				(click.button == button || click.button == undefined) && 
@@ -2292,8 +2242,8 @@ function isString(text) {
 
 		console.log("Mouse up on class " + target.className + "!");
 		
-		for(var i=0, binding; i<global.eventListeners.mouseClick.length; i++) {
-			click = global.eventListeners.mouseClick[i];
+		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
+			click = editor.eventListeners.mouseClick[i];
 			
 			// Make sure to define click.dir (to prevent double action)!
 			if((click.dir == "up" || click.dir == undefined) && 
@@ -2310,7 +2260,7 @@ function isString(text) {
 		}
 
 		
-		//console.log("mouseUp, global.render=" + global.render);
+		//console.log("mouseUp, editor.shouldRender=" + editor.shouldRender);
 
 		
 		editor.interact("mouseUp");
@@ -2332,13 +2282,13 @@ function isString(text) {
 		var target = e.target;
 		
 		// Mouse position is on the whole page
-		global.mouseX = parseInt(e.clientX);
-		global.mouseY = parseInt(e.clientY);
+		editor.mouseX = parseInt(e.clientX);
+		editor.mouseY = parseInt(e.clientY);
 		
 		//console.log("mouseY=" + mouseY);
 		
-		for(var i=0, fun; i<global.eventListeners.mouseMove.length; i++) {
-			fun = global.eventListeners.mouseMove[i].fun;
+		for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
+			fun = editor.eventListeners.mouseMove[i].fun;
 			
 			//console.log(functionName(fun));
 			
@@ -2346,7 +2296,7 @@ function isString(text) {
 
 		}
 
-		//console.log("global.currentFile.gotFocus=" + global.currentFile.gotFocus);
+		//console.log("editor.currentFile.gotFocus=" + editor.currentFile.gotFocus);
 		
 		editor.interact("mouseMove");
 		
@@ -2356,11 +2306,11 @@ function isString(text) {
 	
 	function mouseclick(e) {
 		/*
-			Check for the global.render flag and render if true
+			Check for the editor.shouldRender flag and render if true
 			
 			For events that are not bound to mouseUp or mouseDown
 		*/
-		console.log("mouseClick, global.render=" + global.render + ", global.resize=" + global.resize);
+		console.log("mouseClick, editor.shouldRender=" + editor.shouldRender + ", editor.shouldResize=" + editor.shouldResize);
 		
 		editor.interact("mouseClick");
 
@@ -2391,8 +2341,8 @@ function isString(text) {
 		console.log("Scrolling on " + tagName);
 		
 		if(tagName == "CANVAS") {
-			for(var i=0; i<global.eventListeners.scroll.length; i++) {
-				global.eventListeners.scroll[i].fun(dir, steps, combo);
+			for(var i=0; i<editor.eventListeners.scroll.length; i++) {
+				editor.eventListeners.scroll[i].fun(dir, steps, combo);
 			}
 		}
 		
@@ -2431,11 +2381,6 @@ function isString(text) {
 	}
 
 
-
-
-
-
-
 	function openFile(text, path) {
 		/*
 		
@@ -2468,18 +2413,18 @@ function isString(text) {
 		
 		var header = document.getElementById("header");
 		
-		global.files[path] = new File(text, path, global.fileIndex++);
+		editor.files[path] = new File(text, path, editor.fileIndex++);
 		
-		if(global.currentFile) {
-			global.currentFile.hide();
+		if(editor.currentFile) {
+			editor.currentFile.hide();
 		}
 
-		global.currentFile = global.files[path];
-		global.view.endingColumn = global.view.visibleColumns; // Because file.startColumn = 0;
+		editor.currentFile = editor.files[path];
+		editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 		
-		global.files[path].open();
+		editor.files[path].open();
 		
-		//global.files[path].canvas.focus();
+		//editor.files[path].canvas.focus();
 		
 		editor.renderNeeded();
 
@@ -2488,9 +2433,9 @@ function isString(text) {
 	
 	function unloadFile(filename) {
 		
-		global.files[name].close();
+		editor.files[name].close();
 		
-		delete global.files[name];
+		delete editor.files[name];
 		
 	}
 
@@ -2514,8 +2459,8 @@ function isString(text) {
 		*/
 		
 		// The svg seems to need a width and height beforehand, or it will use a default width of 100px
-		var width = global.settings.gridWidth * html.length;
-		var height = global.settings.gridHeight;
+		var width = editor.settings.gridWidth * html.length;
+		var height = editor.settings.gridHeight;
 		
 		//  width="' + width + '" height="' + height + '"
 		
@@ -2523,7 +2468,7 @@ function isString(text) {
 		
 		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
 		             '<foreignObject width="100%" height="100%">' +
-		               '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + global.settings.style.fontSize + 'px; font-family: ' + global.settings.style.font + ';">' +
+		               '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + editor.settings.style.fontSize + 'px; font-family: ' + editor.settings.style.font + ';">' +
 		                 html +
 		               '</div>' +
 		             '</foreignObject>' +

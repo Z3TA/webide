@@ -4,15 +4,15 @@
 	
 	var delta = 5;
 		
-	global.keyBindings.push({charCode: 39, combo: ALT, fun: right});
-	global.keyBindings.push({charCode: 37, combo: ALT, fun: left});
+	editor.keyBindings.push({charCode: 39, combo: ALT, fun: right});
+	editor.keyBindings.push({charCode: 37, combo: ALT, fun: left});
 	
-	global.keyBindings.push({charCode: 38, combo: ALT, fun: up});
-	global.keyBindings.push({charCode: 40, combo: ALT, fun: down});
+	editor.keyBindings.push({charCode: 38, combo: ALT, fun: up});
+	editor.keyBindings.push({charCode: 40, combo: ALT, fun: down});
 
 	
 	function right(file) {
-		global.view.endingColumn += delta;
+		editor.view.endingColumn += delta;
 		file.startColumn += delta;
 		
 		file.sanityCheck();
@@ -25,11 +25,11 @@
 		
 		if(file.startColumn > 0) {
 			if(file.startColumn > delta) {
-				global.view.endingColumn -= delta;
+				editor.view.endingColumn -= delta;
 				file.startColumn -= delta;
 			}
 			else {
-				global.view.endingColumn = global.view.visibleColumns;
+				editor.view.endingColumn = editor.view.visibleColumns;
 				file.startColumn = 0;
 			}
 			

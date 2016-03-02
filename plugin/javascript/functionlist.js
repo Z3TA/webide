@@ -34,7 +34,7 @@
 		
 		editor.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
-		global.keyBindings.push({charCode: 27, fun: pressEscape});
+		editor.keyBindings.push({charCode: 27, fun: pressEscape});
 	}
 	
 	function searchFunctionList(file, char, combo) {
@@ -260,7 +260,7 @@
 			 functionListSelect.setAttribute("multiple", "multiple");
 			 
 			functionListSelect.onchange = function(e) {
-				global.currentFile.gotoLine(this.value);
+				editor.currentFile.gotoLine(this.value);
 			}
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
@@ -318,7 +318,7 @@
 				}
 				
 				option.onclick = function() {
-					global.currentFile.gotoLine(func.lineNumber);
+					editor.currentFile.gotoLine(func.lineNumber);
 				}
 				
 				option.setAttribute("id", func.name);

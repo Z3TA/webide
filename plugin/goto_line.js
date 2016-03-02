@@ -33,9 +33,9 @@
 		
 		hide_gotoInput();
 		
-		global.keyBindings.push({charCode: 71, combo: CTRL, fun: show_gotoInput}); // ctrl + G
-		global.keyBindings.push({charCode: 27, fun: hide_gotoInput}); // Escape
-		global.keyBindings.push({charCode: 13, fun: gotoLine}); // Enter
+		editor.keyBindings.push({charCode: 71, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		editor.keyBindings.push({charCode: 27, fun: hide_gotoInput}); // Escape
+		editor.keyBindings.push({charCode: 13, fun: gotoLine}); // Enter
 
 	}
 	
@@ -110,8 +110,8 @@
 			*/
 			
 			// Remove focus from the editor
-			if(global.currentFile) {
-				global.currentFile.gotFocus = false;
+			if(editor.currentFile) {
+				editor.currentFile.gotFocus = false;
 			}
 			
 			
@@ -143,8 +143,8 @@
 			//footer.style.height = "0px"; // Hmm, can't be less then one px
 			
 			// Bring back focus to the current file
-			if(global.currentFile) {
-				global.currentFile.gotFocus = true;
+			if(editor.currentFile) {
+				editor.currentFile.gotFocus = true;
 			}
 			
 			gotoInputIsVisible = false;
@@ -161,7 +161,7 @@
 		if(gotoInputIsVisible) {
 			
 			var line = parseInt(inputGoto.value);
-			var file = global.currentFile;
+			var file = editor.currentFile;
 			
 			if(isNaN(line)) {
 				alert("Enter line number!");

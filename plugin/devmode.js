@@ -8,20 +8,20 @@
 	function init() {
 		
 		// For convenience we can press F5 to reload while developing on the app itself
-		global.keyBindings.push({charCode: 116, fun: reloadEditor});
+		editor.keyBindings.push({charCode: 116, fun: reloadEditor});
 		
 		// Switch devMode on or off by hitting Ctrl + Alt + D
-		global.keyBindings.push({charCode: 68, fun: toggleDevMode, combo: CTRL + ALT});
+		editor.keyBindings.push({charCode: 68, fun: toggleDevMode, combo: CTRL + ALT});
 		
 		
 		editor.addMenuItem("Toggle dev-mode", toggleDevMode); // Add items to the canvas context meny
 		
 		
-		if(global.settings.devMode == false) {
+		if(editor.settings.devMode == false) {
 			disableDevMode();
 			
 		}
-		else if(global.settings.devMode == true) {
+		else if(editor.settings.devMode == true) {
 	
 			enableDevMode();
 	
@@ -72,10 +72,10 @@
 	
 	function toggleDevMode() {
 		
-		global.settings.devMode = global.settings.devMode ? false : true;
-		console.warn("devMode = " + global.settings.devMode);
+		editor.settings.devMode = editor.settings.devMode ? false : true;
+		console.warn("devMode = " + editor.settings.devMode);
 		
-		if(global.settings.devMode) {
+		if(editor.settings.devMode) {
 			enableDevMode();
 			console.warn("dev tools!?");
 			// Show dev tools:
@@ -95,9 +95,9 @@
 			
 			
 			// Call exit listeners before reloading
-			for(var i=0, f; i<global.eventListeners.exit.length; i++) {
+			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 			
-			func = global.eventListeners.exit[i].fun;
+			func = editor.eventListeners.exit[i].fun;
 			name = functionName(func);
 				
 			if(typeof func != "function") {
@@ -105,7 +105,7 @@
 					console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
 					//console.warn(objInfo(f));
 					
-					console.error( new Error("Index=" + i + " of global.eventListeners.exit has no valid function!"));
+					console.error( new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!"));
 					
 				}
 				else {
@@ -119,7 +119,7 @@
 			}
 			
 			if(ret !== true) {
-				console.error(error("There was an error in " + name + " (global.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
+				console.error(error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
 			}
 			else {
 			//document.location = document.location.href;

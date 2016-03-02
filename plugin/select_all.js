@@ -3,7 +3,7 @@
 	
 	"use strict";
 		
-	global.keyBindings.push({
+	editor.keyBindings.push({
 		charCode: 65,
 		combo: CTRL,
 		fun: selectAll

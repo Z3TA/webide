@@ -11,7 +11,7 @@
 		oldMouseY,
 		startIndex, 
 		endIndex,
-		distSelfSelect = global.settings.gridWidth / 3,
+		distSelfSelect = editor.settings.gridWidth / 3,
 		oldCaret,
 		oldCaretEol = false,
 		rightCaretEol = false,
@@ -49,9 +49,9 @@
 		
 		// Note that caret is a temporary position caret (not the current file.caret)!
 
-		if(global.currentFile && caret) {
+		if(editor.currentFile && caret) {
 			
-			var file = global.currentFile;
+			var file = editor.currentFile;
 			
 			file.removeHighlights();
 			
@@ -96,7 +96,7 @@
 			
 				// Clicking in the left margin should select the whole line!? Or du we have to double click for that!?
 				/*
-				if(mouseX < global.settings.leftMargin/2) {
+				if(mouseX < editor.settings.leftMargin/2) {
 					selectWholeLine();
 					makeSelection(file, caret, false);
 				}
@@ -159,7 +159,7 @@
 					console.log("It's a double click!");
 					
 					// When you double click in the margin, the whole line should be selected
-					if(caret.col==0 && file.grid[caret.row].length > 0 && mouseX < global.settings.leftMargin * 0.85) {
+					if(caret.col==0 && file.grid[caret.row].length > 0 && mouseX < editor.settings.leftMargin * 0.85) {
 						selectWholeLine();
 						makeSelection(file, caret, false);
 						
@@ -365,7 +365,7 @@
 			console.log("Select text!");
 			editor.renderNeeded();
 			/*
-			var canvas =global.currentFile.canvas,
+			var canvas =editor.currentFile.canvas,
 				ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
 			
 			ctx.strokeStyle="rgba(0,255,255,0.5)";
@@ -391,8 +391,8 @@
 		
 		console.log("indentation=" + file.grid[caret.row].indentation);
 		
-		mouseStartX = (caret.col - file.startColumn + file.grid[caret.row].indentation * global.settings.tabSpace ) * global.settings.gridWidth + global.settings.leftMargin;
-		mouseStartY = (caret.row - file.startRow + 1) * global.settings.gridHeight + global.settings.topMargin;
+		mouseStartX = (caret.col - file.startColumn + file.grid[caret.row].indentation * editor.settings.tabSpace ) * editor.settings.gridWidth + editor.settings.leftMargin;
+		mouseStartY = (caret.row - file.startRow + 1) * editor.settings.gridHeight + editor.settings.topMargin;
 		
 
 		mouseStartX = mouseX;
@@ -412,7 +412,7 @@
 	}
 	
 	function adjustToGridY(v) {
-		var g = global.settings.gridHeight;
+		var g = editor.settings.gridHeight;
 		
 		var av = Math.abs(v);
 		
@@ -426,7 +426,7 @@
 	}
 	
 	function adjustToGridX(v) {
-		var g = global.settings.gridWidth;
+		var g = editor.settings.gridWidth;
 		
 		var av = Math.abs(v);
 		
@@ -454,7 +454,7 @@
 		ctx.lineWidth=1;
 		//ctx.setLineDash([4,8]);
 		
-		var gh = global.settings.gridHeight;
+		var gh = editor.settings.gridHeight;
 		
 		if(1 == 1) {
 			ctx.strokeStyle="rgba(255,0,0, 1)";
@@ -502,11 +502,11 @@
 			//console.log("isSelecting=" + isSelecting);
 			
 			if(isSelecting) {
-				var file = global.currentFile;
+				var file = editor.currentFile;
 				var caret = editor.mousePositionToCaret(mouseX, mouseY);
 				
 				// Place the caret
-				global.currentFile.caret = caret;
+				editor.currentFile.caret = caret;
 				
 				endIndex = caret.index;
 				

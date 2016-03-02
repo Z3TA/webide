@@ -13,7 +13,7 @@
 	function file_save() {
 		
 		// Bind to ctrl + S
-		global.keyBindings.push({charCode: 83, combo: CTRL, fun: saveCurrentFile});
+		editor.keyBindings.push({charCode: 83, combo: CTRL, fun: saveCurrentFile});
 
 		
 		// Listen for edits and set the file as not saved
@@ -31,7 +31,7 @@
 	
 	function saveAs(e) {
 		
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		var defaultPath;
 		
 		if(!file) console.error(new Error("No file open!?"));

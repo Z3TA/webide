@@ -63,13 +63,13 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		if(setCurrent) {
 			// Now make the file with last state "open" the current file
-			if(global.currentFile) {
-				global.currentFile.hide();
+			if(editor.currentFile) {
+				editor.currentFile.hide();
 			}
 			
 			// Switch to this file
-			var file = global.files[setCurrent];
-			global.currentFile = file;
+			var file = editor.files[setCurrent];
+			editor.currentFile = file;
 			file.show();
 			//file.load(); // It has already loaded, right!? So we do not have to fire load events again!!??
 		}
@@ -93,10 +93,10 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		editor.on("edit", tabFileChange);
 		editor.on("saved", tabFileSave);
 
-		global.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
+		editor.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 
-		global.keyBindings.push({charCode: 37, combo: CTRL + ALT, fun: orderLeft}); // Ctrl + alt + left
-		global.keyBindings.push({charCode: 39, combo: CTRL + ALT, fun: orderRight}); // Ctrl + alt + right
+		editor.keyBindings.push({charCode: 37, combo: CTRL + ALT, fun: orderLeft}); // Ctrl + alt + left
+		editor.keyBindings.push({charCode: 39, combo: CTRL + ALT, fun: orderRight}); // Ctrl + alt + right
 		// toto: implement tab drag and drop to change order
 		
 		editor.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
@@ -220,7 +220,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		/*
 		for(var i=0; i<fileList.length; i++) {
-			if(fileList[i] == global.currentFile) {
+			if(fileList[i] == editor.currentFile) {
 				break;
 			}
 			
@@ -230,7 +230,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		}
 		*/
 		
-		global.currentFile.order-=1.5;
+		editor.currentFile.order-=1.5;
 
 		buildTabs(); // sorts again
 	}
@@ -242,7 +242,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		var found = false;
 
 		for(var i=0; i<fileList.length; i++) {
-			if(fileList[i] == global.currentFile) {
+			if(fileList[i] == editor.currentFile) {
 				found = true;
 			}
 			else if(found) {
@@ -252,7 +252,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		}
 		*/
 		
-		global.currentFile.order+=1.5;
+		editor.currentFile.order+=1.5;
 
 		buildTabs(); // sorts again
 	}
@@ -260,8 +260,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 	
 	function sortFileList() {
 		fileList.length = 0;
-		for(var path in global.files) {
-			fileList.push(global.files[path]);
+		for(var path in editor.files) {
+			fileList.push(editor.files[path]);
 		}
 		fileList.sort(sortOrder);
 		
@@ -384,7 +384,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			return;
 		}
 		
-		if(global.files[path] == undefined) {
+		if(editor.files[path] == undefined) {
 			console.warn("There is no file open with path=" + path);
 			return;
 		}
@@ -394,14 +394,14 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 			
 		console.log("Swithing to " + path);
 			
-		if(global.currentFile) {
-			console.log("Hiding " + global.currentFile.path)
-			global.currentFile.hide();
+		if(editor.currentFile) {
+			console.log("Hiding " + editor.currentFile.path)
+			editor.currentFile.hide();
 		}
 		
-		global.currentFile = global.files[path];
+		editor.currentFile = editor.files[path];
 		
-		global.currentFile.show();
+		editor.currentFile.show();
 		
 		buildTabs();
 		
@@ -453,7 +453,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		var folderList;
 		var single = ""; // Single file in tabgroup
 		var tabFolderItem;
-		var active = global.currentFile ? (global.currentFile.path==path) : false;
+		var active = editor.currentFile ? (editor.currentFile.path==path) : false;
 		
 	
 		console.log("path=" + path + " active=" + active);
@@ -473,7 +473,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
 		
 
-		if(global.files[path].isSaved == false) {
+		if(editor.files[path].isSaved == false) {
 			showUnsavedStatus(tabFileItem)
 		}
 		
@@ -564,13 +564,13 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		function closeTab(e) {
 			var closeFileButton = e.target;
 
-			console.log("saved?" + global.files[path].isSaved);
+			console.log("saved?" + editor.files[path].isSaved);
 			console.log("e.ctrlKey?" + e.ctrlKey);
 			console.log("closeFileButton=" + closeFileButton);
 			console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
 			
 			
-			if(!global.files[path].isSaved && !e.ctrlKey) {
+			if(!editor.files[path].isSaved && !e.ctrlKey) {
 				
 				closeFileButton.setAttribute("title", "Ctrl click to close "+ fileName + " without saving");
 				
@@ -639,9 +639,9 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 				}
 			}
 			
-			if(global.currentFile) {
+			if(editor.currentFile) {
 				// Make sure the last viewed file is the last file in the window.localStorage.openedFiles list! So that it opens lasts and will be in view when we reload.
-				//reopenToFiles(global.currentFile);
+				//reopenToFiles(editor.currentFile);
 				//This caused the editor to open them in a weird order.
 				//Instead, add opened state to file state
 			}
@@ -660,7 +660,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		if(path.length == 0) {
 			console.warn("Attempted to save state for a file without path!");
 			console.log(new Error("saveState").stack);
-			console.log("global.files=" + Object.keys(global.files).join(","));
+			console.log("editor.files=" + Object.keys(editor.files).join(","));
 			console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			
 			return;
@@ -668,17 +668,17 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		var state = {};
 		
-		var file = global.files[path];
+		var file = editor.files[path];
 		
 		if(!file) {
 			// Possible reasons: it was renamed!? It should have been removed first!
-			//console.warn("File not in global.files, was it renamed? open: " + file);
+			//console.warn("File not in editor.files, was it renamed? open: " + file);
 			//return;
-			console.warn("File='" + path + "' not open! global.files=" + JSON.stringify(Object.keys(global.files)) + "");
+			console.warn("File='" + path + "' not open! editor.files=" + JSON.stringify(Object.keys(editor.files)) + "");
 			return false;
 		}
 		
-		if(file == global.currentFile) {
+		if(file == editor.currentFile) {
 			state.open = true;
 		}
 		else {
@@ -749,15 +749,15 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		}
 		
 		// Sanity check
-		for(var path in global.files) {
+		for(var path in editor.files) {
 			if(window.localStorage.openedFiles.indexOf(path) == -1) {
-				console.warn("global.files path=" + path + " not in window.localStorage.openedFiles!");
+				console.warn("editor.files path=" + path + " not in window.localStorage.openedFiles!");
 			}
 		}
 		var check = window.localStorage.openedFiles.split(",");
 		for(var i=0; i<check.length; i++) {
-			if(!global.files.hasOwnProperty(check[i])) {
-				console.warn("window.localStorage.openedFiles path=" + check[i] + " not in global.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
+			if(!editor.files.hasOwnProperty(check[i])) {
+				console.warn("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
 		}
 		

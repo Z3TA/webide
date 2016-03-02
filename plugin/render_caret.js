@@ -1,6 +1,6 @@
 (function() {
 	
-	global.renders.push(caretRender);
+	editor.renderFunctions.push(caretRender);
 
 	function caretRender(ctx, buffer, file) {
 		
@@ -9,19 +9,19 @@
 			row = caret.row,
 			col = caret.col,
 			indentation = file.grid[row].indentation,
-			left = global.settings.leftMargin + (col - file.startColumn + indentation * global.settings.tabSpace) * global.settings.gridWidth,
-			top = global.settings.topMargin + (row-file.startRow) * global.settings.gridHeight;
+			left = editor.settings.leftMargin + (col - file.startColumn + indentation * editor.settings.tabSpace) * editor.settings.gridWidth,
+			top = editor.settings.topMargin + (row-file.startRow) * editor.settings.gridHeight;
 
 		
 		
 		console.log("Rendering caret");
 		
-		ctx.fillStyle = global.settings.caret.color;
+		ctx.fillStyle = editor.settings.caret.color;
 		
-		ctx.fillRect(left, top, global.settings.caret.width, global.settings.gridHeight);
+		ctx.fillRect(left, top, editor.settings.caret.width, editor.settings.gridHeight);
 
 		// Show the "direction" of the caret
-		ctx.fillRect(left, top+global.settings.gridHeight - global.settings.caret.width, 4, global.settings.caret.width);
+		ctx.fillRect(left, top+editor.settings.gridHeight - editor.settings.caret.width, 4, editor.settings.caret.width);
 
 		/*
 		console.log("caret: " + JSON.stringify(caret));

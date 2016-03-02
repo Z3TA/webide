@@ -13,21 +13,20 @@
 			node-gyp rebuild --target=1.2.0 --msvs_version=2015 
 		
 		*/
-		var fs = require("fs"); 
-		var path = require('path');
+		const fs = require("fs"); 
+		const path = require('path');
 		const childProcess = require("child_process");
-		
-		var global = {}; // Put global objects in this
+
 		
 	</script>
 	
-	<!-- Core files. The editor wont work without these -->
-	<script type="text/javascript" src="settings.js"></script>
+	<!-- Core API/PPI  (Plugin Programming Interface). The editor wont work without these -->
+	<script type="text/javascript" src="global.js"></script>
 	<script type="text/javascript" src="editor.js"></script>
-	<script type="text/javascript" src="File.js"></script> <!-- Object to handle files. -->
-	<script type="text/javascript" src="Box.js"></script> <!-- Object for storing the characters in File.grid -->
+	<script type="text/javascript" src="File.js"></script>
 
-	<script type="text/javascript" src="settings_overload.js"></script>
+	
+	<script type="text/javascript" src="settings_overload.js"></script> <!-- Make your custom setting changes in here -->
 	
 	
 	<!-- Place plugins here: (note that the order *should* not matter, use editor.on("start, function, order) instead!! -->

@@ -16,7 +16,7 @@
 	}
 	
 	function highLightX(a, b) {
-		global.renders.push(function(ctx, buffer, file, startRow) {
+		editor.renderFunctions.push(function(ctx, buffer, file, startRow) {
 			highlightMatch(ctx, buffer, file, a, b, startRow);
 		});
 	}
@@ -103,41 +103,41 @@
 			
 			
 			var firstLocation = {
-				x: global.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth,
-				y: global.settings.topMargin + (leftPosition.row+startRow) * global.settings.gridHeight
+				x: editor.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth,
+				y: editor.settings.topMargin + (leftPosition.row+startRow) * editor.settings.gridHeight
 			};
 			
 			
 			
 			var secondLocation = {
-				x: global.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth,
-					y: global.settings.topMargin + (rightPosition.row+startRow) * global.settings.gridHeight
+				x: editor.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth,
+					y: editor.settings.topMargin + (rightPosition.row+startRow) * editor.settings.gridHeight
 			};
 					
 				
 			// Now when we got both positions, lets show something!
 			
-			//ctx.rect(firstLocation.x, firstLocation.y, global.settings.gridWidth, global.settings.gridHeight); // x,y,width,height
-			//ctx.rect(secondLocation.x, secondLocation.y, global.settings.gridWidth, global.settings.gridHeight); // x,y,width,height
+			//ctx.rect(firstLocation.x, firstLocation.y, editor.settings.gridWidth, editor.settings.gridHeight); // x,y,width,height
+			//ctx.rect(secondLocation.x, secondLocation.y, editor.settings.gridWidth, editor.settings.gridHeight); // x,y,width,height
 			
-			ctx.font=global.settings.style.highlightMatchFont;
+			ctx.font=editor.settings.style.highlightMatchFont;
 			
 			//console.log("ctx.font=" + ctx.font);
-			//console.log("global.settings.style.highlightMatchFont=" + global.settings.style.highlightMatchFont);
+			//console.log("editor.settings.style.highlightMatchFont=" + editor.settings.style.highlightMatchFont);
 			
 			// Clear boxes before painting in them
 			/*
-			ctx.fillStyle = global.settings.style.highlightMatchBackground;
-			ctx.fillRect(firstLocation.x, firstLocation.y, global.settings.gridWidth, global.settings.gridHeight);
-			ctx.fillRect(secondLocation.x, secondLocation.y, global.settings.gridWidth, global.settings.gridHeight);
+			ctx.fillStyle = editor.settings.style.highlightMatchBackground;
+			ctx.fillRect(firstLocation.x, firstLocation.y, editor.settings.gridWidth, editor.settings.gridHeight);
+			ctx.fillRect(secondLocation.x, secondLocation.y, editor.settings.gridWidth, editor.settings.gridHeight);
 			*/
 			
 			// Render the things
 			if(leftEqualsRightCount === true) {
-				ctx.fillStyle=global.settings.style.highlightMatchFontColor;
+				ctx.fillStyle=editor.settings.style.highlightMatchFontColor;
 			}
 			else {
-			ctx.fillStyle=global.settings.style.highlightMissMatchFontColor;
+			ctx.fillStyle=editor.settings.style.highlightMissMatchFontColor;
 			}
 			
 			ctx.fillText(lP, firstLocation.x, firstLocation.y);
@@ -154,11 +154,11 @@
 			/*
 			var indentation = file.grid[file.caret.row].indentation;
 			
-			var x = global.settings.leftMargin + (indentation * global.settings.tabSpace) * global.settings.gridWidth;
+			var x = editor.settings.leftMargin + (indentation * editor.settings.tabSpace) * editor.settings.gridWidth;
 			
 			ctx.beginPath();
 			ctx.moveTo(x, 0);
-			ctx.lineTo(x, global.view.canvasHeight);
+			ctx.lineTo(x, editor.view.canvasHeight);
 			ctx.stroke();
 				*/
 		}

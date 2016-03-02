@@ -8,12 +8,12 @@
 	*/
 	
 	// Sanity check
-	if(!global.settings.style.highlightTextBg) {
+	if(!editor.settings.style.highlightTextBg) {
 		debug.warn("No highlightTextBg style defined!");
 	}
 
 
-	global.renders.push(highlightRender);
+	editor.renderFunctions.push(highlightRender);
 	
 	console.log("Loaded highlightRender");
 	
@@ -31,33 +31,33 @@
 			top = 0,
 			indentation = 0;
 			
-		var file = global.currentFile;
+		var file = editor.currentFile;
 		
-		ctx.fillStyle=global.settings.style.highlightTextBg;
+		ctx.fillStyle=editor.settings.style.highlightTextBg;
 	
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
 			indentation = buffer[row].indentation;
 			
-			top = global.settings.topMargin + (row + startRow) * global.settings.gridHeight;
+			top = editor.settings.topMargin + (row + startRow) * editor.settings.gridHeight;
 			
 			/*
 			if(buffer[row].selected) { // The whole row is selected
-				ctx.rect(global.settings.leftMargin, top,	global.settings.gridWidth * buffer[row].length, global.settings.gridHeight);
+				ctx.rect(editor.settings.leftMargin, top,	editor.settings.gridWidth * buffer[row].length, editor.settings.gridHeight);
 			}
 			*/
 			
 			for(var col = 0; col < buffer[row].length; col++) {
 				
 				
-				left = global.settings.leftMargin + (col + indentation * global.settings.tabSpace - file.startColumn) * global.settings.gridWidth;
+				left = editor.settings.leftMargin + (col + indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
 				
 				if(isNaN(left)) console.error(new Error("left is NaN"));
 				if(isNaN(top)) console.error(new Error("top is NaN"));
 				
 				if(buffer[row][col].highlighted && !buffer[row][col].selected) {
-					ctx.rect(left, top,	global.settings.gridWidth, global.settings.gridHeight);
+					ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);
 				}
 				
 			

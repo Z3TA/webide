@@ -32,21 +32,21 @@ if(process.platform == "linux") {
 
 
 /*
-	global.settings.sub_pixel_antialias = false;
-	global.settings.gridHeight = 17;
-global.settings.gridWidth = 8;
-global.settings.leftMargin = 30;
-global.settings.style.fontSize = 12;
-global.settings.style.font = "Liberation Mono";
-global.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
+	editor.settings.sub_pixel_antialias = false;
+	editor.settings.gridHeight = 17;
+editor.settings.gridWidth = 8;
+editor.settings.leftMargin = 30;
+editor.settings.style.fontSize = 12;
+editor.settings.style.font = "Liberation Mono";
+editor.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
 */
 
 
-global.settings.sub_pixel_antialias = false;
-global.settings.style.font = "DejaVu Sans Mono";
-global.settings.style.highlightMatchFont = "bold 13px DejaVu Sans Mono";
-global.settings.style.fontSize = 13;
-global.settings.gridHeight = 22;
-global.settings.gridWidth = 7.8;
+editor.settings.sub_pixel_antialias = false;
+editor.settings.style.font = "DejaVu Sans Mono";
+editor.settings.style.highlightMatchFont = "bold 13px DejaVu Sans Mono";
+editor.settings.style.fontSize = 13;
+editor.settings.gridHeight = 22;
+editor.settings.gridWidth = 7.8;
 
 }

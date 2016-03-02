@@ -57,8 +57,8 @@ function loadDictionary(lang) {
 	var gotAff = false;
 	var gotDict = false;
 	
-	readFromDisk("./languages/" + lang + "/" + lang + ".aff", readAff, true);  // true = return buffer
-	readFromDisk("./languages/" + lang + "/" + lang + ".dic", readDict, true);
+	readFromDisk(__dirname + "/languages/" + lang + "/" + lang + ".aff", readAff, true);  // true = return buffer
+	readFromDisk(__dirname + "/languages/" + lang + "/" + lang + ".dic", readDict, true);
 	
 	function readAff(path, buffer) {
 		affBuffer = buffer;

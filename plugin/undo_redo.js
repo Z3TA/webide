@@ -11,13 +11,13 @@
 	
 	function undor_redo_init() {
 		
-		global.keyBindings.push({charCode: 89, fun: redo, combo: CTRL});
+		editor.keyBindings.push({charCode: 89, fun: redo, combo: CTRL});
 		
-		global.keyBindings.push({charCode: 90, fun: undo, combo: CTRL});
+		editor.keyBindings.push({charCode: 90, fun: undo, combo: CTRL});
 		
 		// When to save state !??
-		global.keyBindings.push({charCode: 46, fun: saveState}); // Delete
-		global.keyBindings.push({charCode: 8, fun: saveState}); // Backspace
+		editor.keyBindings.push({charCode: 46, fun: saveState}); // Delete
+		editor.keyBindings.push({charCode: 8, fun: saveState}); // Backspace
 
 		editor.on("paste", saveState); // Before pasting text
 		
@@ -26,8 +26,8 @@
 		
 		/* Save state every seconds!
 		setInterval(function() {
-			if(global.currentFile) {
-				saveState(global.currentFile);
+			if(editor.currentFile) {
+				saveState(editor.currentFile);
 			}
 		}, 1000);
 		*/
@@ -160,8 +160,8 @@
 			if(oldGrid[i] != newGrid[i]) {
 				console.log("First diff on line=" + i);
 				// Do not scroll if it's visible
-				if(i < file.startRow || i > (file.startRow + global.view.visibleRows)) {
-					file.scrollTo(0, i-global.view.visibleRows/2);
+				if(i < file.startRow || i > (file.startRow + editor.view.visibleRows)) {
+					file.scrollTo(0, i-editor.view.visibleRows/2);
 				}
 				break;
 			}
