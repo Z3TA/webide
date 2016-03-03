@@ -14,7 +14,6 @@
 		
 		if(!isString(text)) console.error(new Error("text is not a string!"));
 		
-		
 		file.startRow = 0;    // Scrolling up/down
 		file.startColumn = 0; // Scrolling left/right
 		file.path = path;

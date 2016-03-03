@@ -187,11 +187,12 @@
 		
 		editor.showFile(editor.files[path]);
 		
+		/*
 		buildTabs();
 		
 		editor.resizeNeeded();
 		editor.renderNeeded();
-
+*/
 		console.log("Switched file to: " + path);
 
 		

@@ -94,12 +94,12 @@
 		
 		if(!file.parsed.functions) {
 			console.warn("No functions in file.parsed!");
-			hideFunctionList();
+			hideFunctionList(file);
 		}
 		else if(Object.keys(file.parsed.functions).length == 0) {
 			console.warn("Zero functions in file.parsed!");
 
-			hideFunctionList();
+			hideFunctionList(file);
 		}
 		else {
 			
@@ -189,22 +189,35 @@
 	
 	function loadFunctionList(file) {
 		
+		console.log("Load functionlist for file.path=" + file.path);
+		
 		if(file.parsed.functions) {
 			if(Object.keys(file.parsed.functions).length > 0) {
 				buildFunctionList(file.parsed.functions);
 			}
 			else {
-				hideFunctionList();
+				console.log("Hiding the function list because there are no functions parsed for file.path=" + file.path);
+				hideFunctionList(file);
 			}
 		}
+		else {
+			console.log("No functions parsed for file.path=" + file.path);
+		}
+		
 	}
 	
 	function hideFunctionList(file) {
+		
+		if(file == undefined) console.error(new Error("File is undefined!"));
+		
+		console.log("Hiding the functionlist for file.path=" + file.path);
+		
 		if(functionListWrap) {
 			if(functionListWrap.style.display != "none") {
 			functionListWrap.style.display="none";
 			editor.resizeNeeded();
 				console.log("Functionlist is now hidden");
+				console.log((new Error("why hide?")).stack);
 				}
 		}
 	}

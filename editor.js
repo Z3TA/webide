@@ -241,24 +241,27 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			var file = editor.files[path];
 			
+			delete editor.files[file.path];
+			
+			// Call listeners (before we switch to another file)
+			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
+				editor.eventListeners.fileClose[i].fun(file); // Call function
+			}
+			
 			if(editor.lastFile == file) editor.lastFile = editor.lastChangedFile();
 			
 			if(editor.currentFile == file) {
 				
 				// Show another file!?
 				if(editor.lastFile) {
+					
+					if(editor.lastFile == editor.currentFile) console.error(new Error("Current file is the same as last file!"));
+					
 					editor.showFile(editor.lastFile);
 				}
 				else {
 					editor.currentFile = null;
 				}
-			}
-			
-			delete editor.files[file.path];
-			
-			// Call listeners
-			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
-				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
 			editor.renderNeeded();
@@ -1427,11 +1430,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 
 		console.log("Showing " + file.path + " (editor.focus=" + editor.input + " focus=" + focus + "");
 		
+		if(file == editor.currentFile) {
+			console.warn("File already in view: " + file.path);
+			return false;
+		}
+		
 		if(editor.currentFile) {
 			// Hide current file
 			
+			console.log("Firing fileHide events file.path=" + editor.currentFile.path);
 			for(var i=0; i<editor.eventListeners.fileHide.length; i++) {
-				editor.eventListeners.fileHide[i].fun(file); // Call function
+				editor.eventListeners.fileHide[i].fun(editor.currentFile); // Call function
 			}
 			
 			editor.lastFile = editor.currentFile;
@@ -1455,6 +1464,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.input = focus;
 		
+		console.log("Firing fileShow events file.path=" + file.path);
 		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
 			editor.eventListeners.fileShow[i].fun(file); // Call function
 		}

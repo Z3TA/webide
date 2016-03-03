@@ -215,6 +215,7 @@
 		// Remove state
 		window.localStorage.removeItem("state_" + filePath);
 		
+		/*
 		console.log("Removing from opened files: " + file.path)
 		console.log("AFTER REMOVE");
 		console.log("window.localStorage.openedFiles:\n" + window.localStorage.openedFiles);
@@ -223,6 +224,7 @@
 		for(var item in window.localStorage) {
 			console.log(item + "=" + window.localStorage[item]);
 		}
+		*/
 		
 		// Sanity check
 		for(var path in editor.files) {

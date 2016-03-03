@@ -12,12 +12,6 @@ fixing bugs ...
 BUGS
 ====
 
-due to spellchecker? When you write something, then go to the row below, the row below get blank!
-
-Opening a file via Ctrl+P marks it as not saved.
-
-After closing a file, the function list will not show up on the file it switches to.
-
 When one key bound fails to return (there's an error) all after it also dont run.
 
 When writing in the functionlist not all matches get highlighted
