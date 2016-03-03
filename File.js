@@ -27,6 +27,7 @@
 		file.parse = true; // Tell parsers wheter this file should be parsed or not
 		file.fileExtension = editor.getFileExtension(path);
 		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
+		file.lastChange = new Date();
 		
 		// Never parse text or markdown files
 		//if(file.fileExtension == "txt" || file.fileExtension == "md") file.parse = false;
@@ -2106,6 +2107,8 @@
 		file.changed = true;
 		
 		file.isSaved = false;
+		
+		file.lastChange = new Date();
 		
 		// Call file edit listeners
 		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {

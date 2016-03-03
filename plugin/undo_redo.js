@@ -173,7 +173,7 @@
 		//file.fixCaret(state.caret); // I shouldn't be needing this! 
 		file.mutateCaret(file.caret, state.caret);
 		
-		file.edit("loadState", file.text, 0, 0, 0); // Call event listeners
+		file.change("loadState", file.text, 0, 0, 0); // Call event listeners
 		
 
 		

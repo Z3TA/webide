@@ -217,7 +217,20 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 	}
-
+	
+	editor.lastChangedFile = function() {
+		var files = Object.keys(editor.files);
+		
+		if(files.length == 0) return null;
+		
+		files.sort(function(a, b) {
+			return editor.files[a].lastChanged > editor.files[b].lastChanged;
+		});
+		
+		return editor.files[files[0]];
+		
+	}
+	
 	editor.closeFile = function(path) {
 		
 		if(!editor.files.hasOwnProperty(path)) {
@@ -227,7 +240,18 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			var file = editor.files[path];
 			
-			if(editor.currentFile == file) editor.currentFile = null;
+			if(editor.lastFile == file) editor.lastFile = editor.lastChangedFile();
+			
+			if(editor.currentFile == file) {
+				
+				// Show another file!?
+				if(editor.lastFile) {
+					editor.showFile(editor.lastFile);
+				}
+				else {
+					editor.currentFile = null;
+				}
+			}
 			
 			delete editor.files[file.path];
 			
@@ -235,8 +259,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
-						
-			file.close();
 			
 			editor.renderNeeded();
 			//editor.resizeNeeded();
@@ -757,14 +779,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("bottomMargin=" + editor.settings.bottomMargin);
 		
 		
-		if(editor.currentFile) {
-			
-			canvas.style.width = editor.view.canvasWidth + "px";
-			canvas.style.height = editor.view.canvasHeight + "px";
+		canvas.style.width = editor.view.canvasWidth + "px";
+		canvas.style.height = editor.view.canvasHeight + "px";
 
-			canvas.width  = editor.view.canvasWidth;
-			canvas.height = editor.view.canvasHeight;
+		canvas.width  = editor.view.canvasWidth;
+		canvas.height = editor.view.canvasHeight;
 			
+		if(editor.currentFile) {
 			// Fix horizontal column after resizing
 			if(editor.view.endingColumn < editor.view.visibleColumns) {
 				editor.currentFile.startColumn = 0;
@@ -809,7 +830,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.renderNeeded();
 		}
 		
-		editor.renderNeeded(); // Always render after a resize (bot nor right away!?
+		editor.renderNeeded(); // Always render after a resize (but nor right away!?
 		
 	}
 
@@ -1410,6 +1431,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileHide[i].fun(file); // Call function
 			}
 			
+			editor.lastFile = editor.currentFile;
+			
 		}
 		
 		editor.currentFile = file;
@@ -1432,6 +1455,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
 			editor.eventListeners.fileShow[i].fun(file); // Call function
 		}
+		
+		editor.renderNeeded();
 		
 	}
 	
@@ -1640,6 +1665,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 
 		
 		function display() {
+			editor.resizeNeeded();
 			editor.resize();
 			
 			// Call start listeners

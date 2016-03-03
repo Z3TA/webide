@@ -7,7 +7,9 @@
 	
 	var timer = 1000; // Milliseconds
 	
-	editor.on("start", openReadme);
+	var loadOrder = 999; // Load late
+	
+	editor.on("start", openReadme, loadOrder);
 	
 	function openReadme() {
 		setTimeout(function () {
