@@ -364,16 +364,7 @@
 			
 			console.log("Select text!");
 			editor.renderNeeded();
-			/*
-			var canvas =editor.currentFile.canvas,
-				ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
-			
-			ctx.strokeStyle="rgba(0,255,255,0.5)";
 
-			ctx.beginPath();
-			ctx.rect(oldMouseX, oldMouseY, mouseX-oldMouseX, mouseY-oldMouseX);
-			ctx.stroke();
-			*/
 		}
 		else if(Math.sqrt(  Math.pow(mouseX-oldMouseX, 2)  +  Math.pow(mouseY-oldMouseY, 2)  ) > distSelfSelect) {
 			// Select the current caret

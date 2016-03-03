@@ -1,5 +1,5 @@
-Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization.
-Don't implement new stuff until we have a stable release!
+Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization. No new features until that is done!
+
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 

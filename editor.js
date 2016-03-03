@@ -116,6 +116,10 @@ editor.currentFile = undefined; // A File object
 	var tildeShiftActive = false;
 	var tildeAltActive = false;
 	
+	
+	var canvas, ctx; 
+	
+	
 	/*
 		Editor functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -515,15 +519,7 @@ editor.currentFile = undefined; // A File object
 			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
-			var canvas = editor.currentFile.canvas;
 			
-			if(editor.settings.sub_pixel_antialias == false) {
-				var ctx = canvas.getContext("2d");
-				//console.warn("No sub_pixel_antialias! editor.settings.sub_pixel_antialias=" + editor.settings.sub_pixel_antialias);
-			}
-			else {
-			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
-			}
 			
 			//ctx.imageSmoothingEnabled = true;
 			
@@ -586,11 +582,7 @@ editor.currentFile = undefined; // A File object
 			}
 			
 			//console.log(JSON.stringify(buffer, null, 4));
-			
-			var canvas = file.canvas;
-			var ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias
-			
-			
+					
 			ctx.fillStyle = editor.settings.style.bgColor;
 			
 			var top = editor.settings.topMargin + screenRow * editor.settings.gridHeight;
@@ -680,6 +672,7 @@ editor.currentFile = undefined; // A File object
 		var rightColumn = document.getElementById("rightColumn");
 		var content = document.getElementById("content"); // Center column
 		var columns = document.getElementById("columns");
+		
 		
 		var contentComputedStyle = window.getComputedStyle(content, null); // Center column
 		var columnsComputedStyle = window.getComputedStyle(columns, null);
@@ -772,11 +765,11 @@ editor.currentFile = undefined; // A File object
 		
 		if(editor.currentFile) {
 			
-			editor.currentFile.canvas.style.width = editor.view.canvasWidth + "px";
-			editor.currentFile.canvas.style.height = editor.view.canvasHeight + "px";
+			canvas.style.width = editor.view.canvasWidth + "px";
+			canvas.style.height = editor.view.canvasHeight + "px";
 
-			editor.currentFile.canvas.width  = editor.view.canvasWidth;
-			editor.currentFile.canvas.height = editor.view.canvasHeight;
+			canvas.width  = editor.view.canvasWidth;
+			canvas.height = editor.view.canvasHeight;
 			
 			// Fix horizontal column after resizing
 			if(editor.view.endingColumn < editor.view.visibleColumns) {
@@ -1541,6 +1534,16 @@ editor.currentFile = undefined; // A File object
 
 		console.log("Starting the editor ...");
 		
+		canvas = document.getElementById("canvas");
+			
+		if(editor.settings.sub_pixel_antialias == false) {
+			ctx = canvas.getContext("2d");
+			//console.warn("No sub_pixel_antialias! editor.settings.sub_pixel_antialias=" + editor.settings.sub_pixel_antialias);
+		}
+		else {
+			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
+		}
+		
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
 		editor.keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
@@ -1559,10 +1562,15 @@ editor.currentFile = undefined; // A File object
 		fileOpen.addEventListener('change', readSingleFile, false);
 		
 		// cleanup
+		/*
 		var content = document.getElementById("content");
 		while (content.firstChild) {
 			content.removeChild(content.firstChild);
 		}
+		*/
+		
+		
+		
 		
 		//getFile("http://joha.nz/editor/editor.js", openFile);
 		//getFile("http://joha.nz/editor/test.js", openFile);
@@ -1955,7 +1963,9 @@ editor.currentFile = undefined; // A File object
 					if(captured) console.warn("Key combo has already been captured: charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
 					
 				captured = true;
-				
+					
+					if(!editor.currentFile) console.warn("No file open!");
+					
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down");
 				
 				if(funReturn === false) {
@@ -2156,7 +2166,7 @@ editor.currentFile = undefined; // A File object
 				
 				// Remove focus from everything else
 				document.activeElement.blur();
-				editor.currentFile.canvas.focus();
+				canvas.focus();
 			
 				// Delete selection outside of the canvas
 				window.getSelection().removeAllRanges();
@@ -2433,8 +2443,6 @@ editor.currentFile = undefined; // A File object
 		editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 		
 		editor.files[path].open();
-		
-		//editor.files[path].canvas.focus();
 		
 		editor.renderNeeded();
 

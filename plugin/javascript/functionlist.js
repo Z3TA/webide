@@ -84,8 +84,8 @@
 	function pressEscape(file, combo, character, charCode, pushDirection) {
 		// Remove focus from the select box
 		if(functionListSelect) {
-		functionListSelect.blur();
-		file.canvas.focus();
+			functionListSelect.blur();
+			//file.canvas.focus(); // Do I need to focus elsewhere for blur to work!?
 			file.gotFocus = true;
 		}
 	}

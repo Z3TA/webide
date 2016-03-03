@@ -19,7 +19,6 @@
 		file.startColumn = 0; // Scrolling left/right
 		file.path = path;
 		file.text = text; // The whole file as a string. Try not to change it directly. Use file.insertText etc instead!
-		file.canvas = document.createElement("canvas");
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
 		file.gotFocus = true; // If the file is focused for input, set it to false to prevent file input when typing in html input boxes. Remember to put focus back to true!
@@ -79,8 +78,7 @@
 			}
 		}
 		*/
-		file.canvas.setAttribute("id", "canvas_" + path);
-		file.canvas.setAttribute("class", "fileCanvas");
+
 		
 		file.isSaved = false;
 		file.savedAs = false;
@@ -1854,14 +1852,7 @@
 	}
 
 	File.prototype.open = function() {
-		var file = this,
-			content = document.getElementById("content");	
-		
-		//console.log("opening file " + file.path + ""); 
-		
-		content.appendChild(file.canvas);
-		
-		//console.log("file " + file.path + " canvas appended to document");
+		var file = this;
 		
 		file.show(file);
 		
@@ -1893,12 +1884,9 @@
 	}
 
 	File.prototype.close = function() {
-		var file = this,
-			content = document.getElementById("content");
+		var file = this;
 		
 		file.hide(file);
-		
-		content.removeChild(file.canvas);
 		
 	}
 
@@ -2126,13 +2114,8 @@
 		var file = this;
 		
 		/*
-			Use hide and show to toggle the file canvas. Like when switching between files.
-		
+			Like when switching between files.
 		*/
-		
-		//console.log("Hiding " + file.path + " (focus=" + file.gotFocus + "");
-		
-		file.canvas.style.display = "none";
 		
 		file.gotFocus = false;
 		file.visible = false;
@@ -2148,6 +2131,7 @@
 
 		//console.log("Showing " + file.path + " (file.focus=" + file.gotFocus + " focus=" + focus + "");
 
+		file.visible = true;
 		
 		if(focus == undefined) focus = true;
 		
@@ -2160,18 +2144,7 @@
 		if(file.savedAs) {
 			editor.setFileSavePath(file.path);
 			editor.setFileOpenPath(editor.getDir(file.path));
-			}
-		
-		
-		file.canvas.style.display = "block";
-		
-		// Set the height both in CSS and the Canvas
-		var fillAll = 0; // Extra pixels needed to fill the whole box
-		file.canvas.style.width = editor.view.canvasWidth + "px";
-		file.canvas.style.height = editor.view.canvasHeight + fillAll + "px";
-		file.canvas.width  = editor.view.canvasWidth;
-		file.canvas.height = editor.view.canvasHeight + fillAll;
-		
+		}
 		
 		file.gotFocus = focus;
 		
@@ -2488,7 +2461,7 @@
 		*/
 		
 		// Update endingcolumn and render?
-		if(file.isVisible() && editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
+		if(file.visible && editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
 			editor.view.endingColumn = file.startColumn + editor.view.visibleColumns;
 			scrolled = true;
 		}
@@ -2511,10 +2484,6 @@
 		file.scrollTo(file.startColumn + deltaX, file.startRow + deltaY);
 	}
 
-	File.prototype.isVisible = function() {
-		var file = this;
-		return (file.canvas.style.display == "block");
-	}
 
 	File.prototype.getWordOnCaret = function(caret, callback) {
 		var file = this;
