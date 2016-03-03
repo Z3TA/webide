@@ -5,15 +5,12 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Rafactoring!
+fixing bugs ...
 
 
 
 BUGS
 ====
-
-keyboard_arrows.js:140 Uncaught TypeError: Cannot read property 'gotFocus' of null
-keyboard_enter.js:14 Uncaught TypeError: Cannot read property 'gotFocus' of undefined
 
 HTML auto complete tags, removes word if character is next to it.
 

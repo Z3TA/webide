@@ -17,7 +17,7 @@
 		var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
 		
 		if(lastOpenXmlTag.length > 0 && lastOpenXmlTag != "<") {
-			options.push("</" + lastOpenXmlTag + ">");
+			options.push(word + "</" + lastOpenXmlTag + ">");
 		}
 		
 		return options;
