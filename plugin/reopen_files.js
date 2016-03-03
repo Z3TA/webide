@@ -105,13 +105,9 @@
 				
 				if(notFound) {
 					// Only ask if we actually have the last state, otherwise just ignore that it's gone.
-					if(confirm("File not found! Load last saved state? path=: " + path)) {
-						loadLastState = true;
+					// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
+					if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path);
 					}
-					else {
-						loadLastState = false;
-					}
-				}
 				// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
 				else if(content.length === 0 && lastFileState.text.length > 0) {
 					if(confirm("File on disk is empty! Load last saved state instead? path=: " + path + "")) {

@@ -668,7 +668,7 @@
 			col = caret.col,
 			index = caret.index;
 		
-		var renderRow = true; // Optimization
+		var renderRow = editor.settings.renderRowOptimization; // Optimization
 		
 		if(character == undefined) {
 			console.error(new Error("character is undefined!"));
@@ -1435,6 +1435,8 @@
 		if(caret == undefined) caret = file.caret;
 		
 		file.sanityCheck();
+		
+		if(editor.settings.renderRowOptimization==false) renderRow = false;
 		
 		//console.log("Deleting character at " + JSON.stringify(caret) + " ...");
 		

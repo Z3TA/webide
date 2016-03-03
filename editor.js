@@ -45,6 +45,7 @@ editor.settings = {
 	drawGridBox: false,
 	scrollStep: 3,
 	autoCompleteKey: 9, // Tab
+	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc
 	insert: false
 };
 
@@ -224,7 +225,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(files.length == 0) return null;
 		
 		files.sort(function(a, b) {
-			return editor.files[a].lastChanged > editor.files[b].lastChanged;
+			return editor.files[a].lastChanged < editor.files[b].lastChanged;
 		});
 		
 		return editor.files[files[0]];
@@ -598,6 +599,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			
 			// Load on the fly functionality on the buffer
+			// No prerender when rendering rows!?
+			
 			for(var i=0; i<editor.preRenderFunctions.length; i++) {
 				buffer = editor.preRenderFunctions[i](buffer, file);
 			}

@@ -12,10 +12,6 @@ fixing bugs ...
 BUGS
 ====
 
-HTML auto complete tags, removes word if character is next to it.
-
-When inserting a tag next (left) to a word, it gets colored blue.
-
 due to spellchecker? When you write something, then go to the row below, the row below get blank!
 
 Opening a file via Ctrl+P marks it as not saved.

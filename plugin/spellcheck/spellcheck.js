@@ -408,8 +408,8 @@
 			if(file == editor.currentFile) {
 				// We only need to render if the row is visible on the screen
 				if(file.rowVisible(row)) { 
-					//editor.renderNeeded();
-				editor.renderRow(row);
+					editor.renderNeeded();
+				//editor.renderRow(row);
 					}
 				}
 				
