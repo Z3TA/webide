@@ -21,11 +21,12 @@
 
 		buildTabs();
 		
-		editor.on("fileOpen", loadFile_tabs, 2);
+		editor.on("fileOpen", tabFileOpen, 2);
 		editor.on("fileClose", closeFile_tabs, 2);
 		editor.on("fileChange", tabFileChange);
 		editor.on("fileSave", tabFileSave);
-
+		editor.on("fileShow", tabFileShow);
+		
 		editor.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 
 		editor.keyBindings.push({charCode: 37, combo: CTRL + ALT, fun: orderLeft}); // Ctrl + alt + left
@@ -149,12 +150,16 @@
 	}
 	
 	
-	function loadFile_tabs(file) {
+	function tabFileOpen(file) {
 		
 		buildTabs();
 		
 		// Switch to the file we just loaded
-		switchToFile(file.path);
+		//switchToFile(file.path);
+	}
+	
+	function tabFileShow(file) {
+		buildTabs();
 	}
 	
 	function closeFile_tabs(file) {

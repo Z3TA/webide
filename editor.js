@@ -1422,7 +1422,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	editor.showFile = function(file, focus) {
 
-		//console.log("Showing " + file.path + " (file.focus=" + editor.input + " focus=" + focus + "");
+		console.log("Showing " + file.path + " (editor.focus=" + editor.input + " focus=" + focus + "");
 		
 		if(editor.currentFile) {
 			// Hide current file
