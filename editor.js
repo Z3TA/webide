@@ -293,7 +293,7 @@ editor.currentFile = undefined; // A File object
 
 	}
 
-	editor.save = function(file, path, callback) {
+	editor.saveFile = function(file, path, callback) {
 		/*
 			This is the only save function.
 			It can handle "save-as". 

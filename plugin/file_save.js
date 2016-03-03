@@ -43,7 +43,7 @@
 		// else: it will use the path of the last savedAs file viewed
 
 		editor.fileSaveDialog(defaultPath, function(path) {
-			editor.save(file, path);
+			editor.saveFile(file, path);
 			
 			// Update file extension
 			file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
@@ -68,7 +68,7 @@
 			saveAs();
 		}
 		else {
-			editor.save(file);
+			editor.saveFile(file);
 		}
 		
 		return false;
