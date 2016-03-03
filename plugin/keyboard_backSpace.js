@@ -14,7 +14,7 @@
 	
 	function backSpace(file, combo, character, charCode, keyPush) {
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			
 			var caret = file.caret,
 				leftIndex = caret.index - 1,

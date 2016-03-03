@@ -16,7 +16,7 @@
 	"use strict";
 	
 	var saveStateInterval = 5000;
-	var loadOrder = 50000; // Plugins depending on fileLoad must be loaded before this plugin, so we set it high!
+	var loadOrder = 50000; // Plugins depending on openFile must be loaded before this plugin, so we set it high!
 	
 	var lastViewedFileHistory = [],
 		lastFile,
@@ -63,23 +63,18 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		
 		if(setCurrent) {
 			// Now make the file with last state "open" the current file
-			if(editor.currentFile) {
-				editor.currentFile.hide();
-			}
 			
 			// Switch to this file
-			var file = editor.files[setCurrent];
-			editor.currentFile = file;
-			file.show();
-			//file.load(); // It has already loaded, right!? So we do not have to fire load events again!!??
+			editor.showFile(editor.files[setCurrent])
+
 		}
 		
 		
 		buildTabs();
 		
 		// After we have opened the files, set listener for file load and close ...
-		editor.on("fileLoad", addToOpenedFiles, 1);
-		editor.on("fileLoad", loadFile_tabs, 2);
+		editor.on("openFile", addToOpenedFiles, 1);
+		editor.on("openFile", loadFile_tabs, 2);
 		
 		editor.on("fileClose", removeFromOpenedFiles, 1);
 		editor.on("fileClose", closeFile_tabs, 2);
@@ -136,7 +131,7 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 						loadLastState = false;
 					}
 				} 
-				// scenario: File has been emptied because of no disk space (*couch* Linux *couch*)
+				// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
 				else if(content.length === 0 && lastFileState.text.length > 0) {
 					if(confirm("File on disk is empty! Load last saved state instead? path=: " + path + "")) {
 						loadLastState = true;
@@ -393,15 +388,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		currentFile = path;
 			
 		console.log("Swithing to " + path);
-			
-		if(editor.currentFile) {
-			console.log("Hiding " + editor.currentFile.path)
-			editor.currentFile.hide();
-		}
 		
-		editor.currentFile = editor.files[path];
-		
-		editor.currentFile.show();
+		editor.showFile(editor.files[path]);
 		
 		buildTabs();
 		

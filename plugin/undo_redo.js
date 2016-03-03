@@ -21,7 +21,7 @@
 
 		editor.on("paste", saveState); // Before pasting text
 		
-		editor.on("fileLoad", saveState); // When loading a file
+		editor.on("openFile", saveState); // When loading a file
 
 		
 		/* Save state every seconds!
@@ -53,7 +53,7 @@
 	
 	function undo(file) {
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			
 			console.log("UNDO");
 			
@@ -90,7 +90,7 @@
 	
 	function redo(file) {
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			
 			console.log("REDO");
 			
@@ -173,7 +173,7 @@
 		//file.fixCaret(state.caret); // I shouldn't be needing this! 
 		file.mutateCaret(file.caret, state.caret);
 		
-		file.load(); // Call event listeners
+		file.edit("loadState", file.text, 0, 0, 0); // Call event listeners
 		
 
 		
@@ -199,7 +199,7 @@
 	function saveState(file) {
 		
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			var state;
 			
 			//console.log("saveState:\n" + file.text);

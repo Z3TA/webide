@@ -33,10 +33,10 @@
 		documentLoad();
 		
 		editor.on("beforeResize", setCanvasSize);
-		editor.on("fileLoad", setCanvasSize);
+		editor.on("openFile", setCanvasSize);
 		
 		editor.on("fileHide", hideDocumentPreviewDiv);
-		editor.on("fileShow", showDocumentPreviewDiv);
+		editor.on("showFile", showDocumentPreviewDiv);
 
 		editor.renderFunctions.push(renderPreview);
 		editor.addEvent("mouseClick", {fun: scrollToSection, dir: "down", targetClass:"documentPreviewCanvas", button: 0});
@@ -76,7 +76,7 @@
 		isScrolling = false;
 		console.log("stopped scrolling");
 		editor.removeEvent("mouseMove", document_preview_mouseMove);
-		editor.currentFile.gotFocus = true; // Give back focus to the file, it auto lose focus when clicking outside the canvas.
+		editor.input = true; // Give back focus to the file, it auto lose focus when clicking outside the canvas.
 	}
 	
 	function document_preview_mouseMove(mouseX, mouseY, target) {
@@ -184,7 +184,7 @@
 			// Keep focus on the document
 			
 			if(editor.currentFile) {
-				editor.currentFile.gotFocus = true;
+				editor.input = true;
 			}
 			
 			editor.renderNeeded();

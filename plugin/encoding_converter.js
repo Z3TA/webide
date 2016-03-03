@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 
-	editor.on("fileLoad", checkEncoding);
+	editor.on("openFile", checkEncoding);
 
 	function checkEncoding(file) {
 		/*

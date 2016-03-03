@@ -20,7 +20,7 @@
 	
 	function moveLeft(file, combo, character, charCode, keyPush) {
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			file.removeHighlights();
 
 			console.log("Move caret left!");
@@ -85,7 +85,7 @@
 		
 		// Holding down ctrl should step a while word!?
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			
 			file.removeHighlights();
 			
@@ -137,7 +137,7 @@
 	function moveUp(file, combo) {
 		
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			file.removeHighlights();
 			
 			var caret = file.caret;
@@ -205,7 +205,7 @@
 	
 	function moveDown(file, combo) {
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			file.removeHighlights();
 			
 			if(combo.alt) return; // Do nothing if alt key is down

@@ -62,7 +62,7 @@
 		
 		editor.on("edit", runSpellCheck);
 		
-		editor.on("fileLoad", spellCheckFile);
+		editor.on("openFile", spellCheckFile);
 		
 		editor.on("mouseClick", showSpellSuggestion);
 		

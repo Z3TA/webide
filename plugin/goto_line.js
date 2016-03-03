@@ -111,7 +111,7 @@
 			
 			// Remove focus from the editor
 			if(editor.currentFile) {
-				editor.currentFile.gotFocus = false;
+				editor.input = false;
 			}
 			
 			
@@ -144,7 +144,7 @@
 			
 			// Bring back focus to the current file
 			if(editor.currentFile) {
-				editor.currentFile.gotFocus = true;
+				editor.input = true;
 			}
 			
 			gotoInputIsVisible = false;

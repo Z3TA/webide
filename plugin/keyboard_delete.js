@@ -12,7 +12,7 @@
 	
 	function keydel(file, combo, character, charCode, keyPush) {
 		
-		if(file.gotFocus) {
+		if(editor.input) {
 			
 			if(file.selected.length > 0) {
 				

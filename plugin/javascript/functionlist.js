@@ -27,7 +27,7 @@
 		editor.on("fileParse", initFunctionList);
 
 		editor.on("fileHide", hideFunctionList); // The files hide/show when tabbing between them
-		editor.on("fileShow", loadFunctionList);
+		editor.on("showFile", loadFunctionList);
 		editor.on("fileClose", hideFunctionList);
 		
 		editor.on("moveCaret", highlightCurrentFunction);
@@ -38,7 +38,7 @@
 	}
 	
 	function searchFunctionList(file, char, combo) {
-		if(captureKeyboard && !file.gotFocus) {
+		if(captureKeyboard && !editor.input) {
 			charBuffer += char;
 		}
 		else {
@@ -86,7 +86,7 @@
 		if(functionListSelect) {
 			functionListSelect.blur();
 			//file.canvas.focus(); // Do I need to focus elsewhere for blur to work!?
-			file.gotFocus = true;
+			editor.input = true;
 		}
 	}
 

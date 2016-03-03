@@ -58,11 +58,11 @@ editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 
-editor.eventListeners = { // Use editor.on to add listeners to these events:
+editor.eventListeners = { // Use editor.on to add listeners to these events: todo: Naming convention!??
 	fileClose: [], 
-	fileLoad: [], 
+	openFile: [], 
 	fileHide: [],
-	fileShow: [],
+	showFile: [],
 	edit: [], 
 	caret: [], // Not currently used!
 	scroll: [], 
@@ -94,6 +94,8 @@ editor.view = {
 };
 
 editor.currentFile = undefined; // A File object
+
+editor.input = false; // Wheter inputs should go to the current file in focus or to some other element like an html input box.
 
 (function() { // Non global editor code ...
 	
@@ -156,10 +158,8 @@ editor.currentFile = undefined; // A File object
 				if(editor.currentFile) {
 				if(editor.currentFile.path != path) {
 					// Switch to it:
-						editor.currentFile.hide();
-					editor.currentFile = editor.files[path];
-					editor.currentFile.show();
-						}
+					editor.showFile(editor.files[path]);
+				}
 			}
 			return;
 					}
@@ -195,12 +195,9 @@ editor.currentFile = undefined; // A File object
 			file.changed = false;
 			}
 			
-			if(editor.currentFile) {
-				editor.currentFile.hide();
-			}
 			
 			// Switch to this file
-			editor.currentFile = file;
+			editor.showFile(file);
 			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
 			/* We might want to change some state before file open events get fired, 
@@ -210,7 +207,10 @@ editor.currentFile = undefined; // A File object
 			*/
 			if(callback) callback(file);
 
-			file.open(); // in turn calls file.load() witch fire file-load events
+			for(var i=0; i<editor.eventListeners.openFile.length; i++) {
+				//console.log("function " + functionName(editor.eventListeners.openFile[i].fun));
+				editor.eventListeners.openFile[i].fun(file); // Call function
+			}
 			
 			// Always render (and resize) after opening a file! (where=here, when=now!)
 			editor.renderNeeded();
@@ -655,14 +655,9 @@ editor.currentFile = undefined; // A File object
 		
 		// Save focus for the current file and give back focus after ther resize
 		var file = editor.currentFile;
-		var fileGotFocus = false;
 		
 		
-		if(file) {
-			fileGotFocus = file.gotFocus;
-			//editor.currentFile.hide(); // So that events will fire
-		}
-		
+	
 		//console.log("Resizing stuff ...")
 		
 		
@@ -801,7 +796,6 @@ editor.currentFile = undefined; // A File object
 		//showCanvasNodes();
 		
 		// Show the file canvas again and set focus
-		//if(file) file.show(fileGotFocus);
 		
 		console.timeEnd("resize");
 		
@@ -954,7 +948,7 @@ editor.currentFile = undefined; // A File object
 			tempItems.removeChild(tempItems.firstChild);
 		}
 		
-		if(editor.currentFile) editor.currentFile.gotFocus = true; // Give focus back for text entry
+		if(editor.currentFile) editor.input = true; // Give focus back for text entry
 		
 	}
 
@@ -1406,6 +1400,43 @@ editor.currentFile = undefined; // A File object
 		
 	}
 	
+	editor.showFile = function(file, focus) {
+
+		//console.log("Showing " + file.path + " (file.focus=" + editor.input + " focus=" + focus + "");
+		
+		if(editor.currentFile) {
+			// Hide current file
+			
+			for(var i=0; i<editor.eventListeners.fileHide.length; i++) {
+				editor.eventListeners.fileHide[i].fun(file); // Call function
+			}
+			
+		}
+		
+		editor.currentFile = file;
+		
+		if(focus == undefined) focus = true;
+		
+		// Set window title
+		var gui = require('nw.gui');
+		var win = gui.Window.get();
+		win.title = file.path;
+		
+		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
+		if(file.savedAs) {
+			editor.setFileSavePath(file.path);
+			editor.setFileOpenPath(editor.getDir(file.path));
+		}
+		
+		editor.input = focus;
+		
+		for(var i=0; i<editor.eventListeners.showFile.length; i++) {
+			editor.eventListeners.showFile[i].fun(file); // Call function
+		}
+		
+	}
+	
+	
 	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
@@ -1724,7 +1755,7 @@ editor.currentFile = undefined; // A File object
 	
 	function copy(e) {
 		
-		if(editor.currentFile.gotFocus) {
+		if(editor.input) {
 			var textToPutOnClipboard = "";
 			
 			if(editor.currentFile) {
@@ -1751,7 +1782,7 @@ editor.currentFile = undefined; // A File object
 	
 	function cut(e) {
 		
-		if(editor.currentFile.gotFocus) {
+		if(editor.input) {
 		
 			var textToPutOnClipboard = "";
 			
@@ -1785,7 +1816,7 @@ editor.currentFile = undefined; // A File object
 		
 		console.log("PASTE!" + text);
 		
-		if(editor.currentFile.gotFocus) {
+		if(editor.input) {
 		
 			e.preventDefault();
 		
@@ -1866,12 +1897,12 @@ editor.currentFile = undefined; // A File object
 		 }
 		*/
 		
-		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") editor.currentFile.gotFocus=" + (editor.currentFile ? editor.currentFile.gotFocus : "NoFileOpen") + "");
+		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
 		
 		global.lastKeyPressed = character;
 		
 		if(editor.currentFile) {
-			if(editor.currentFile.gotFocus) {
+			if(editor.input) {
 				// Put character at current caret position:
 							
 				editor.currentFile.putCharacter(character);
@@ -2162,7 +2193,7 @@ editor.currentFile = undefined; // A File object
 
 			if(editor.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				// Give focus
-				editor.currentFile.gotFocus = true;
+				editor.input = true;
 				
 				// Remove focus from everything else
 				document.activeElement.blur();
@@ -2196,7 +2227,7 @@ editor.currentFile = undefined; // A File object
 		else{
 			if(editor.currentFile) {
 				// Remove focus
-				editor.currentFile.gotFocus = false;
+				editor.input = false;
 				
 				//editor.currentFile = undefined;
 			}
@@ -2316,7 +2347,7 @@ editor.currentFile = undefined; // A File object
 
 		}
 
-		//console.log("editor.currentFile.gotFocus=" + editor.currentFile.gotFocus);
+		//console.log("editor.input=" + editor.input);
 		
 		editor.interact("mouseMove");
 		
@@ -2422,7 +2453,7 @@ editor.currentFile = undefined; // A File object
 				
 			
 			The solution:
-				Have the arrow, enter, etc plug-ins check file.gotFocus before doing their thing.
+				Have the arrow, enter, etc plug-ins check editor.input before doing their thing.
 			
 				
 			
@@ -2435,14 +2466,9 @@ editor.currentFile = undefined; // A File object
 		
 		editor.files[path] = new File(text, path, editor.fileIndex++);
 		
-		if(editor.currentFile) {
-			editor.currentFile.hide();
-		}
-
-		editor.currentFile = editor.files[path];
-		editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
+		editor.showFile(editor.files[path]);
 		
-		editor.files[path].open();
+		editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 		
 		editor.renderNeeded();
 

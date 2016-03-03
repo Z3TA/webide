@@ -21,7 +21,6 @@
 		file.text = text; // The whole file as a string. Try not to change it directly. Use file.insertText etc instead!
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
-		file.gotFocus = true; // If the file is focused for input, set it to false to prevent file input when typing in html input boxes. Remember to put focus back to true!
 		file.changed = false; // If the file has changed from last save
 		file.lineBreak = determineLineBreakCharacters(text);
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
@@ -1847,46 +1846,7 @@
 		
 		editor.renderNeeded();
 		
-		file.load(file); // Fire events
-		
-	}
-
-	File.prototype.open = function() {
-		var file = this;
-		
-		file.show(file);
-		
-		file.load(file);
-		
-	}
-
-	File.prototype.load = function() { // Rename to triggerLoadListeners or something like that!?
-		var file = this;
-		
-		/*
-			This method exist so that plugins can trigger the load events without doing anything else
-			with the file. 
-			Note that there is no "open" event, and "load" should be used as such.
-			
-			The load event is called when the file is opened or when there is a major change, 
-			like an undo/redo, or save-as.
-			
-			The difference between load and show is that show is usually only called after a hide.		
-		
-		*/
-		
-		//console.log("Calling fileLoad listeners for: " + file.path);
-		
-		for(var i=0; i<editor.eventListeners.fileLoad.length; i++) {
-			//console.log("function " + functionName(editor.eventListeners.fileLoad[i].fun));
-			editor.eventListeners.fileLoad[i].fun(file); // Call function
-		}
-	}
-
-	File.prototype.close = function() {
-		var file = this;
-		
-		file.hide(file);
+		file.change("reload", text, 0, 0, 0); // Fire events
 		
 	}
 
@@ -2110,50 +2070,7 @@
 		
 	}
 
-	File.prototype.hide = function() {
-		var file = this;
-		
-		/*
-			Like when switching between files.
-		*/
-		
-		file.gotFocus = false;
-		file.visible = false;
-		
-		for(var i=0; i<editor.eventListeners.fileHide.length; i++) {
-			editor.eventListeners.fileHide[i].fun(file); // Call function
-		}
-		
-	}
-
-	File.prototype.show = function(focus) {
-		var file = this;
-
-		//console.log("Showing " + file.path + " (file.focus=" + file.gotFocus + " focus=" + focus + "");
-
-		file.visible = true;
-		
-		if(focus == undefined) focus = true;
-		
-		// Set window title
-		var gui = require('nw.gui');
-		var win = gui.Window.get();
-		win.title = file.path;
-		
-		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
-		if(file.savedAs) {
-			editor.setFileSavePath(file.path);
-			editor.setFileOpenPath(editor.getDir(file.path));
-		}
-		
-		file.gotFocus = focus;
-		
-		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
-			editor.eventListeners.fileShow[i].fun(file); // Call function
-		}
-		
-	}
-
+	
 	File.prototype.cloneRow = function(row) {
 		var file = this;
 		var grid = file.grid;
@@ -2461,7 +2378,7 @@
 		*/
 		
 		// Update endingcolumn and render?
-		if(file.visible && editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
+		if(editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
 			editor.view.endingColumn = file.startColumn + editor.view.visibleColumns;
 			scrolled = true;
 		}

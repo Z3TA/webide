@@ -51,10 +51,7 @@
 			file.parsed = {}; // Remove parsed data
 			
 			editor.renderNeeded();
-			
-			// Fire file open event (because we saved as)
-			//file.load(file);
-			
+						
 		});
 		
 		editor.hideMenu();

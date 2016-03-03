@@ -13,7 +13,7 @@
 		
 		console.log("Ctrl + A = SELECT ALL");
 		
-		if(file && file.gotFocus) {
+		if(file && editor.input) {
 			// Select everything
 			
 			var everything = [],

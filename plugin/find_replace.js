@@ -452,7 +452,7 @@
 		
 		// Only search if there is anything in the search field, and the search box has focus
 		if(searchVisible) {
-			if(inputFind.value.length > 0 && editor.currentFile.gotFocus===false) {
+			if(inputFind.value.length > 0 && editor.input===false) {
 				find(inputFind.value, editor.currentFile, regexOption.checked);
 			}
 		}
@@ -476,7 +476,7 @@
 			// Bring back focus to the current file
 			var file = editor.currentFile;
 			if(file) {
-				file.gotFocus = true;
+				editor.input = true;
 			}
 			
 			searchVisible = false;
@@ -508,10 +508,10 @@
 			// Remove focus from the editor when bringing up the search box.
 			var file = editor.currentFile;
 			if(file) {
-				file.gotFocus = false;
+				editor.input = false;
 			}
 			
-			console.log("Search visible! editor.currentFile.gotFocus=" + editor.currentFile.gotFocus);
+			console.log("Search visible! editor.input=" + editor.input);
 			
 			editor.resizeNeeded();
 			editor.renderNeeded();
@@ -553,7 +553,7 @@
 				inputFind.focus();
 			}
 			
-			file.gotFocus = false; // Remove focus from the file
+			editor.input = false; // Remove focus from the file
 			
 			return false; // Prevent default (browser) action
 		}
