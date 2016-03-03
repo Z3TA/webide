@@ -16,7 +16,7 @@
 		
 		editor.renderFunctions.push(indention_render);
 		
-		editor.on("edit", edit);
+		editor.on("fileChange", edit);
 		
 		var charCode = 73; // I
 		

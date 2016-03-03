@@ -60,9 +60,9 @@
 		
 		console.log("All spell-check workers ready!");
 		
-		editor.on("edit", runSpellCheck);
+		editor.on("fileChange", runSpellCheck);
 		
-		editor.on("openFile", spellCheckFile);
+		editor.on("fileOpen", spellCheckFile);
 		
 		editor.on("mouseClick", showSpellSuggestion);
 		

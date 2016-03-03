@@ -73,8 +73,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		buildTabs();
 		
 		// After we have opened the files, set listener for file load and close ...
-		editor.on("openFile", addToOpenedFiles, 1);
-		editor.on("openFile", loadFile_tabs, 2);
+		editor.on("fileOpen", addToOpenedFiles, 1);
+		editor.on("fileOpen", loadFile_tabs, 2);
 		
 		editor.on("fileClose", removeFromOpenedFiles, 1);
 		editor.on("fileClose", closeFile_tabs, 2);
@@ -85,8 +85,8 @@ if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFi
 		// Save state on regular intervals in case the editor crashes (or refresh)
 		setInterval(reopen_files_closeEditor, saveStateInterval);
 		
-		editor.on("edit", tabFileChange);
-		editor.on("saved", tabFileSave);
+		editor.on("fileChange", tabFileChange);
+		editor.on("fileSave", tabFileSave);
 
 		editor.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 

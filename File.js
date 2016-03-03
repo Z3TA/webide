@@ -2107,8 +2107,8 @@
 		file.changed = true;
 		
 		// Call file edit listeners
-		for(var i=0; i<editor.eventListeners.edit.length; i++) {
-			editor.eventListeners.edit[i].fun(file, change, text, index, row, col);
+		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
+			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
 		}
 
 		
@@ -2236,8 +2236,8 @@
 		file.changed = false;
 		file.savedAs = true;
 		
-		for(var i=0; i<editor.eventListeners.saved.length; i++) {
-			editor.eventListeners.saved[i].fun(file);
+		for(var i=0; i<editor.eventListeners.fileSave.length; i++) {
+			editor.eventListeners.fileSave[i].fun(file);
 		}
 		
 	}

@@ -27,7 +27,7 @@
 		editor.on("fileParse", initFunctionList);
 
 		editor.on("fileHide", hideFunctionList); // The files hide/show when tabbing between them
-		editor.on("showFile", loadFunctionList);
+		editor.on("fileShow", loadFunctionList);
 		editor.on("fileClose", hideFunctionList);
 		
 		editor.on("moveCaret", highlightCurrentFunction);

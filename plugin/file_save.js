@@ -17,7 +17,7 @@
 
 		
 		// Listen for edits and set the file as not saved
-		editor.on("edit", fileNotSaved);
+		editor.on("fileChange", fileNotSaved);
 
 		
 		// Add items to the canvas context meny

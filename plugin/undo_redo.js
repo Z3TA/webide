@@ -21,7 +21,7 @@
 
 		editor.on("paste", saveState); // Before pasting text
 		
-		editor.on("openFile", saveState); // When loading a file
+		editor.on("fileOpen", saveState); // When loading a file
 
 		
 		/* Save state every seconds!
@@ -36,7 +36,7 @@
 
 	}
 	
-	editor.on("edit", function(file, change, text, index, row, col) {
+	editor.on("fileChange", function(file, change, text, index, row, col) {
 		
 		if(change != "undo-redo") {
 			

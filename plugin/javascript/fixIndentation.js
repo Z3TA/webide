@@ -20,7 +20,7 @@
 		*/
 		
 		var runOrder = 110; // Make sure this runs after the parser
-		editor.on("edit", onEdit, runOrder);
+		editor.on("fileChange", onEdit, runOrder);
 
 	}
 

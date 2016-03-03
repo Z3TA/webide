@@ -6,7 +6,7 @@
 
 	var originalTopMargin = editor.settings.topMargin;
 
-	editor.on("scroll", onScroll);
+	editor.on("mouseScroll", onScroll);
 	
 	
 	function onScroll(dir, steps, combo) {

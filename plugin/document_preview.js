@@ -33,10 +33,10 @@
 		documentLoad();
 		
 		editor.on("beforeResize", setCanvasSize);
-		editor.on("openFile", setCanvasSize);
+		editor.on("fileOpen", setCanvasSize);
 		
 		editor.on("fileHide", hideDocumentPreviewDiv);
-		editor.on("showFile", showDocumentPreviewDiv);
+		editor.on("fileShow", showDocumentPreviewDiv);
 
 		editor.renderFunctions.push(renderPreview);
 		editor.addEvent("mouseClick", {fun: scrollToSection, dir: "down", targetClass:"documentPreviewCanvas", button: 0});

@@ -10,7 +10,7 @@
 	
 	function autoSemicolonMain() {
 	
-		editor.on("edit", onEdit);
+		editor.on("fileChange", onEdit);
 
 	}
 

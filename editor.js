@@ -58,23 +58,22 @@ editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 
-editor.eventListeners = { // Use editor.on to add listeners to these events: todo: Naming convention!??
+editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
-	openFile: [], 
+	fileOpen: [], 
 	fileHide: [],
-	showFile: [],
-	edit: [], 
-	caret: [], // Not currently used!
-	scroll: [], 
+	fileShow: [],
+	fileParse: [],
+	fileSave: [],
+	fileChange: [], 
+	mouseScroll: [], 
 	mouseClick: [], 
 	mouseMove: [],
-	paste: [],
+	paste: [],  // You get a chance to format the pasted data ...
 	beforeResize: [],
 	afterResize: [],
-	saved: [],
 	exit: [],
 	start: [],
-	fileParse: [],
 	interaction: [],
 	keyDown: [],
 	moveCaret: [],
@@ -207,9 +206,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			*/
 			if(callback) callback(file);
 
-			for(var i=0; i<editor.eventListeners.openFile.length; i++) {
-				//console.log("function " + functionName(editor.eventListeners.openFile[i].fun));
-				editor.eventListeners.openFile[i].fun(file); // Call function
+			for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
+				//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
+				editor.eventListeners.fileOpen[i].fun(file); // Call function
 			}
 			
 			// Always render (and resize) after opening a file! (where=here, when=now!)
@@ -1430,8 +1429,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.input = focus;
 		
-		for(var i=0; i<editor.eventListeners.showFile.length; i++) {
-			editor.eventListeners.showFile[i].fun(file); // Call function
+		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
+			editor.eventListeners.fileShow[i].fun(file); // Call function
 		}
 		
 	}
@@ -2392,8 +2391,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Scrolling on " + tagName);
 		
 		if(tagName == "CANVAS") {
-			for(var i=0; i<editor.eventListeners.scroll.length; i++) {
-				editor.eventListeners.scroll[i].fun(dir, steps, combo);
+			for(var i=0; i<editor.eventListeners.mouseScroll.length; i++) {
+				editor.eventListeners.mouseScroll[i].fun(dir, steps, combo);
 			}
 		}
 		
