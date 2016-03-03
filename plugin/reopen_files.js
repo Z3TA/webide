@@ -313,11 +313,17 @@
 		state.caret = file.caret;
 		state.order = file.order;
 		
-		//if(!state.isSaved) {
-		// Size limit!??
-		// Always save the text, even if it's saved to disk. (it can be deleted, or disk space limit truncated it)
+		
+		var sizeLimit = 100000;
+		
+		if(file.text.length < 100000) {
+			// Always save the text, even if it's saved to disk. (it can be deleted, or disk space limit truncated it)
 		state.text = file.text;
-		//}
+		}
+		else {
+			console.warn("Not saving state for file because it has over " + sizeLimit + " characters file.path=" + path);
+		}
+			
 		
 		window.localStorage["state_" + path] = JSON.stringify(state);
 		

@@ -5,7 +5,6 @@
 
 "use strict";
 
-
 (function() { // Allows private variables
 
 	File = function File(text, path, fileIndex) { // Note: No var infront. Expose this object to global scope!
@@ -38,7 +37,8 @@
 		file.order = fileIndex; // For ordering files, in for example a tab list
 		
 		if(file.lineBreak = "\r\n") {
-			// Search for lonely \n (LF) chars and insert \r
+			console.log("Searching for lonely (LF) characters ... ");
+			
 			var fixedILF = false;
 			var indexILF = file.text.indexOf("\n");
 			var rowCount = 0;
@@ -89,6 +89,8 @@
 				Is it tabs? Or spaces, and how many?
 			
 			*/
+			
+			console.log("Determining what line indention convention to use ...");
 			
 			var maxCheckLength = 500,
 				char = "",
@@ -224,6 +226,9 @@
 				nr = 2
 			
 			*/
+			
+			console.log("Determining what line break characters to use ...");
+			
 			var nr = occurrences(text, "\n\r", true),
 				rn = occurrences(text, "\r\n", true)
 			
@@ -1565,7 +1570,7 @@
 		}
 
 		
-		console.timeEnd("removeCharacter");
+		console.timeEnd("deleteCharacter");
 		
 		//file.debugGrid();
 		
@@ -1861,7 +1866,7 @@
 		
 		*/
 		
-		//console.log("creating grid");
+		console.log("Creating grid ...");
 		
 		console.time("createGrid");
 

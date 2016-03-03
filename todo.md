@@ -1,11 +1,22 @@
-Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization. No new features until that is done!
+Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). No new features until that is done!
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-fixing bugs ...
+The most common editor benchmark: Open huge files.
+Do not open files that are too large for the editor to handle. 
+Or open part of file!?
+"The file is too large to handle. But we can open parts of it. Type a nr between X and Y:"
+
+parseJavaScript: 27.613ms on 65k file
+
+optemize it!
+
+try inlining all functions, and move to separate worker.
+
+
 
 
 
@@ -223,7 +234,7 @@ editor.renderPart(row, col, length); // Render part of the grid
 
 Can we get rid of the file.text and only use the grid!? Only convert the grid to text when saving. 
 
-
+Try the editor on a super slow PC to see what needs further optimization.
 
 
 

@@ -2,7 +2,9 @@
 (function() {
 	
 	"use strict";
-
+	
+	var sizeLimit = 1000000;
+	
 	var history = {}, // Holds the state of all files
 		versionIndex = {}; // Keeps track of current index in the state array
 	
@@ -198,6 +200,10 @@
 	
 	function saveState(file) {
 		
+		if(file.text.length > sizeLimit) {
+			console.warn("Not saving undor/redo state for file because it has more then " + sizeLimit + " characters! file.path=" + file.path);
+			return;
+		}
 		
 		if(editor.input) {
 			var state;
