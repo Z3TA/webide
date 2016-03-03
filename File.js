@@ -2099,12 +2099,13 @@
 		/*
 			This method is hopefully called every time the file changes.
 			So that we can know if the file has been saved or not.
-			
-			Note: there is no change event, use the edit event!
+						
 		*/
 		var file = this;
 		
 		file.changed = true;
+		
+		file.isSaved = false;
 		
 		// Call file edit listeners
 		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {

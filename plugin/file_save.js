@@ -15,19 +15,11 @@
 		// Bind to ctrl + S
 		editor.keyBindings.push({charCode: 83, combo: CTRL, fun: saveCurrentFile});
 
-		
-		// Listen for edits and set the file as not saved
-		editor.on("fileChange", fileNotSaved);
-
-		
 		// Add items to the canvas context meny
 		editor.addMenuItem("Save as ...", saveAs);
 		
 	}
 	
-	function fileNotSaved(file, change, text, index, row, col) {
-		file.isSaved = false;
-	}
 	
 	function saveAs(e) {
 		
