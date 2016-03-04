@@ -858,7 +858,7 @@
 							xmlMode = true;
 						}
 						else {
-							xmlMode = false;
+							xmlMode = tmpXmlMode;
 						}
 					}
 					

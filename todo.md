@@ -5,13 +5,11 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Unselect all whilse searching in functionlist
+
 
 
 BUGS
 ====
-
-When writing in the functionlist not all matches get highlighted
 
 After </script> html tages are not fully blue.
 
