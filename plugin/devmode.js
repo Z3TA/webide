@@ -13,6 +13,7 @@
 		// Switch devMode on or off by hitting Ctrl + Alt + D
 		editor.keyBindings.push({charCode: 68, fun: toggleDevMode, combo: CTRL + ALT});
 		
+		editor.keyBindings.push({charCode: 69, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 		
 		editor.addMenuItem("Toggle dev-mode", toggleDevMode); // Add items to the canvas context meny
 		
@@ -27,6 +28,10 @@
 	
 		
 		}
+	}
+	
+	function testErrorHandler() {
+		throw new Error("This is a test error");
 	}
 	
 	function disableDevMode() {

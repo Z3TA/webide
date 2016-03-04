@@ -6,25 +6,8 @@ Always use F5 to reload! Or exit functions might not fire!
 Currently working on: 
 
 
-
 BUGS
 ====
-
---
-Error: Saving C:\Users\Z\dev-repositories\js-editor\test\saveme.txt, but it doesn't exist in file tabs!
-at Object.tabFileSave [as fun] (file:///C:/Users/Z/dev-repositories/js-editor/plugin/file_tabs.js:142:25)
-at File.saved (file:///C:/Users/Z/dev-repositories/js-editor/File.js:2250:38)
-at file:///C:/Users/Z/dev-repositories/js-editor/editor.js:377:10
-at FSReqWrap.oncomplete (fs.js:73:15)
-devmode.js:64 Uncaught Error: Saving C:\Users\Z\dev-repositories\js-editor\test\saveme.txt, but it doesn't exist in file tabs!
----
-
----
-When double clicking a world and started typing:
-Index is undefined. Stuff will go wrong!
----
-
-When one key bound fails to return (there's an error) all after it also dont run.
 
 When writing in the functionlist not all matches get highlighted
 
@@ -257,6 +240,12 @@ Try the editor on a super slow PC to see what needs further optimization.
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+---
+When double clicking a world and started typing:
+Index is undefined. Stuff will go wrong!
+---
+
 
 Text disappears from some lines when the spellchecker is running.
 

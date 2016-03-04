@@ -2001,6 +2001,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCodeShift = 16;
 		var charCodeCtrl = 17;
 		var charCodeAlt = 18;
+		var gotError;
 		
 		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo));
 		
@@ -2021,6 +2022,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 		// PS. Alt Gr = Ctrl+Alt
+		// AltGr is the same as hitting Ctrl+ Alt
 		
 		// You probably want to push to editor.keyBindings instead of using eventListeners.keyDown!
 		console.log("Calling keyDown listeners (" + editor.eventListeners.keyDown.length + ") ...");
@@ -2061,8 +2063,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 					if(!editor.currentFile) console.warn("No file open!");
 					
+					try {
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down");
-				
+					} 
+					catch(err) {
+						gotError = err;
+						console.warn("Error when running key bound function:" + err.stack);
+					}
+					
 				if(funReturn === false) {
 					preventDefault = true;
 					console.log("Default action will be prevented!");
@@ -2077,8 +2085,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 		}
 		
+		if(gotError) console.error(new Error("Got an error while running keyBindings! See console warnings."));
 		
-
 		
 		if(editor.currentFile) {
 			editor.currentFile.checkGrid();
