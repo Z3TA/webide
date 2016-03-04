@@ -5,13 +5,11 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-
+Maybe have to fix auto complete ...
 
 
 BUGS
 ====
-
-After </script> html tages are not fully blue.
 
 Auto complete removes text: (editor.currentFile) editor.curr => currentFile
 

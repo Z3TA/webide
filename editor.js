@@ -1415,6 +1415,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			if(wholeWord.substring(0, word.length) != word) {
 				// Delete the word, then insert the text
+				
+				/*
+					Removing the whole word is very annoying if that's Not what the user intended!
+					Can me make a smart decision somehow!?
+					
+					ex: User writes editor.curr| but there is not editor.curr.. BUT there's a currentFile
+					
+					
+				*/
+				console.warn("Deleting word=" + word + " to autocomple wholeWord=" + wholeWord);
 				for(var i=0; i<word.length; i++) {
 				file.moveCaretLeft();
 					file.deleteCharacter(undefined, undefined, false); // false = Do not renderRow
