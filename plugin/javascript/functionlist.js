@@ -42,23 +42,46 @@
 			charBuffer += char;
 		}
 		else {
-			charBuffer = "";
-			return true;
+			return true; // Do the default
 		}
 		
 		if(charBuffer.length > 1) {
 			// Find the function in the functionlist
-			var currentFunctionName = searchFunctions(charBuffer, file.parsed.functions);
-			if(currentFunctionName != null) {
-				elements[currentFunctionName].selected = true;
-				return false; // Prevent default
+			var currentFunctionName; //  = searchFunctions(charBuffer, file.parsed.functions);
+			var matchFound = false;
+			
+			// Clear all selected
+			for (var i=0; i<functionListSelect.options.length; i++) {
+				if(functionListSelect.options[i].selected) functionListSelect.options[i].selected = false;
+			}
+			
+			
+			var matches = searchFunctions(charBuffer, file.parsed.functions);
+			
+			if(matches.length > 0) {
+			
+			console.log("functions found (" + charBuffer + ") =" + JSON.stringify(matches));
+				
+			for (var i=0; i < matches.length; i++) {
+				elements[matches[i]].selected = true;
+			}
+				
+				// todo: Make sure the options found are visible on the screen.
+				
+					
+				
+				return false; // Prevent default (chromium selectbox goto firstletter)
+			
+			
+				
+				
 			}
 			else {
 				charBuffer = ""; // Clear the buffer if there is no match
 			}
-			
 		}
-		return true;
+		
+		return true; // Do the default (the chromium way)
 		}
 	
 	function highlightCurrentFunction(file, cursor) {
@@ -161,15 +184,20 @@
 	
 	function searchFunctions(str, functions) {
 		/* 
+			Return an array of matched function names.
+			
 			Hmm, this is a weird function ...
 			The tree can have an endless depth, so we have to reach sub-functions recursivley
 			
 		*/
 		
+		var matches = [];
+		
 		for(var name in functions) {
 			
 			if(name.search(new RegExp(str, "i")) != -1) {
-					return name;
+				matches.push(name);
+				//console.log(name);
 			}
 			
 			let func = functions[name];
@@ -177,12 +205,12 @@
 			if(Object.keys(func.subFunctions).length > 0) {
 				let result = searchFunctions(str, func.subFunctions);
 					
-					if(result != null) return result;
+				if(result.length > 0) matches = matches.concat(result);
 				}
 				
 		}
 		
-		return null; // Nothing found
+		return matches;
 		
 		}
 	
@@ -249,6 +277,8 @@
 
 		functionListSelect = document.getElementById("functionList");
 		
+
+		
 		var leftColumn = document.getElementById("leftColumn");
 		var ul;
 		var li;
@@ -279,12 +309,16 @@
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
 				charBuffer = "";
-				}
+			}
 			functionListSelect.onblur = function(e) {
 				captureKeyboard = false;
 			}
-			true;
-			 functionListWrap.appendChild(functionListSelect);
+			functionListSelect.onclick = function() {
+				// Reset search for function string
+				charBuffer = "";
+			}
+			
+			functionListWrap.appendChild(functionListSelect);
 			 
 		}
 		
