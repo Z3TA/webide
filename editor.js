@@ -152,17 +152,26 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Opening file: " + path);
 		
-		// Check if the file is already oepned
+		// Check if the file is already opened
 		if(editor.files.hasOwnProperty(path)) {
-				console.warn("File already opened: " + path);
-				if(editor.currentFile) {
-				if(editor.currentFile.path != path) {
-					// Switch to it:
-					editor.showFile(editor.files[path]);
+			console.warn("File already opened: " + path);
+			
+			
+			
+			var file = editor.files[path];
+			
+			if(!editor.currentFile) console.error(new Error("No current file!"));
+			
+			if(editor.currentFile != file) {
+				// Switch to it ...
+				
+				if(text != undefined && text != file.text) console.error(new Error("The text is not the same!"));
+					
+				editor.showFile(file);
 				}
-			}
+			
 			return;
-					}
+		}
 				
 		if(!isString(path)) console.error(new Error("path is not a string: " + path));
 		
@@ -189,10 +198,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var file = editor.files[path];
 			
 			if(!notFromDisk) {
-			// Because we opened it from disk:
-			file.isSaved = true;
-			file.savedAs = true;
-			file.changed = false;
+				// Because we opened it from disk:
+				file.isSaved = true;
+				file.savedAs = true;
+				file.changed = false;
 			}
 			
 			
@@ -206,7 +215,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			used by: file.open to set saved to true
 			*/
 			if(callback) callback(file);
-
+			
+			console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
 			for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
 				//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
 				editor.eventListeners.fileOpen[i].fun(file); // Call function
@@ -232,7 +242,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
-	editor.closeFile = function(path) {
+	editor.closeFile = function(path, doNotSwitchFile) {
 		
 		if(!editor.files.hasOwnProperty(path)) {
 			throw new Error("Can't close file that is not open: " + path);
@@ -244,28 +254,33 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			delete editor.files[file.path];
 			
 			// Call listeners (before we switch to another file)
+			console.log("Calling fileClose listeners (" + editor.eventListeners.fileClose.length + ") ...");
 			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
-			if(editor.lastFile == file) editor.lastFile = editor.lastChangedFile();
+			if(editor.lastFile == file) {
+				console.error(new Error("The file being closed is also the last file (opened/changed?)"));
+				
+				//editor.lastFile = editor.lastChangedFile();
+			}
 			
-			if(editor.currentFile == file) {
+			if(editor.currentFile == file && !doNotSwitchFile) {
 				
 				// Show another file!?
 				if(editor.lastFile) {
 					
 					if(editor.lastFile == editor.currentFile) console.error(new Error("Current file is the same as last file!"));
 					
+					console.log("Showing " + editor.lastFile.path + " because " + file.path + " is closing.");
 					editor.showFile(editor.lastFile);
 				}
 				else {
 					editor.currentFile = null;
 				}
+				
 			}
 			
-			editor.renderNeeded();
-			//editor.resizeNeeded();
 		}
 	}
 	
@@ -330,59 +345,51 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.error(new Error("No file open when save was called"));
 		}
 		
+		// Do not specify path for saving in old path!
+		
+		if(editor.files.hasOwnProperty(path)) console.error(new Error("There is already a file open with path=" + path));
+		
 		if(path == undefined) {
 			path = file.path;
 		}
-
+		
+		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
 		if(file.path != path) {
-			 // File saved under another path!
-			
-			// Close file BEFORE setting new path
-			//file.close(); // This will close the file
-			editor.closeFile(file.path);
-			
-			// Delete old key
-			//delete editor.files[file.path];
-			
-			// Add the new path as key in editor.files
-			editor.files[path] = file;
 
-			// Set the new path
-			file.path = path;
+			console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
 			
-			file.open();
+			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
-			if(file == editor.currentFile) {
-				// Set window title to current file path
-				var gui = require('nw.gui');
-				var win = gui.Window.get();
-				win.title = file.path;
-				
-				editor.renderNeeded();
-				editor.render();
-			}
-			else {
-				console.warn("Saved file is NOT the current file!");
-			}
+			editor.closeFile(file.path, true); // true = do not switch to another file
+			
+			editor.openFile(path, text, saveToDisk); // Reopen the file with the new path, makres sure fileSave events in file.save gets called after we have a new path.
+			
+		}
+		else {
+			saveToDisk(file);
 		}
 		
-		fs.writeFile(path, file.text, function(err) {
-			console.log("Attempting saving to disk: " + path + " ...");
-			
-			if(err) {
-				console.error(new Error("Unable to save " + path + "\n" + err));
-			}
-			else {
-				console.log("The file was successfully saved: " + path + "");
-					
-				file.saved(); // Call functions that listen for save events
+		function saveToDisk(file) {
+			fs.writeFile(path, file.text, function(err) {
+				console.log("Attempting saving to disk: " + path + " ...");
 				
-				if(callback) callback();
-			}
-			
-		});
+				if(err) {
+					console.warn("Unable to save " + path + "!");
+					console.error(err);
+				}
+				else {
+					console.log("The file was successfully saved: " + path + "");
+						
+					file.saved(); // Call functions that listen for save events
+					
+					if(callback) callback();
+				}
+				
+			});
+		}
 	}
+
 
 	editor.fileSaveDialog = function(defaultPath, callback) {
 		/*
@@ -664,6 +671,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 		// Resize listeners (before)
+		console.log("Calling beforeResize listeners (" + editor.eventListeners.beforeResize.length + ") ...");
 		for(var i=0; i<editor.eventListeners.beforeResize.length; i++) {
 			editor.eventListeners.beforeResize[i].fun(editor.currentFile);
 		}
@@ -812,6 +820,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("(resize2) editor.view.endingColumn=" + editor.view.endingColumn);
 
 		// Resize listeners (after)
+		console.log("Calling afterResize listeners (" + editor.eventListeners.afterResize.length + ") ...");
 		for(var i=0; i<editor.eventListeners.afterResize.length; i++) {
 			editor.eventListeners.afterResize[i].fun(editor.currentFile);
 		}
@@ -1134,8 +1143,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			func(interaction); // Execute
 		}
 		
-		for(var i=0; i<editor.eventListeners.interaction.length; i++) {
-			editor.eventListeners.interaction[i].fun(editor.currentFile); // Call function
+		if(editor.eventListeners.interaction.length > 0) {
+			console.log("Calling interaction listeners (" + editor.eventListeners.interaction.length + ") ...");
+			for(var i=0; i<editor.eventListeners.interaction.length; i++) {
+				editor.eventListeners.interaction[i].fun(editor.currentFile); // Call function
+			}
 		}
 		
 		resizeAndRender();
@@ -1143,20 +1155,29 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	editor.fireEvent = function(eventName) {
-
+		
+		//console.error(new Error("todo: shift/splice arguments before sending them to listener"));
+		
 		var eventListeners;
-		var callback;
+		var func;
 			
 		if(eventName in editor.eventListeners) {
 				
 			eventListeners = editor.eventListeners[eventName];
 			
+			console.log("Calling " + eventName + " listeners (" + editor.eventListeners[eventName].length + ") ...");
 			for(var i=0; i<eventListeners.length; i++) {
-				callback = eventListeners[i].fun;
-				callback.apply(this, arguments);
+				func = eventListeners[i].fun;
+				
+				if(func == undefined) console.error(new Error("Undefined function in " + eventName + " listener!"));
+				
+				//fun.apply(this, Array.prototype.shift.call(arguments)); // Remove eventName from arguments
+				
+				func.apply(this, Array.prototype.slice.call(arguments, 1));
+				
 			}
 			
-			editor.eventListeners[eventName]
+			// editor.eventListeners[eventName] // ?????
 		}
 		else {
 			console.error(new Error("Uknown event listener:" + eventName));
@@ -1286,6 +1307,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
 		var ret, fun, addWord, addMcl;
+		
+		console.log("Calling autoComplete listeners (" + editor.eventListeners.autoComplete.length + ") ...");
 		for(var i=0; i<editor.eventListeners.autoComplete.length; i++) {
 			
 			fun = editor.eventListeners.autoComplete[i].fun;
@@ -1438,7 +1461,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.currentFile) {
 			// Hide current file
 			
-			console.log("Firing fileHide events file.path=" + editor.currentFile.path);
+			console.log("Calling fileHide listeners (" + editor.eventListeners.fileHide.length + ") editor.currentFile.path=" + editor.currentFile.path);
 			for(var i=0; i<editor.eventListeners.fileHide.length; i++) {
 				editor.eventListeners.fileHide[i].fun(editor.currentFile); // Call function
 			}
@@ -1464,15 +1487,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.input = focus;
 		
-		console.log("Firing fileShow events file.path=" + file.path);
+		console.log("Calling fileShow listeners (" + editor.eventListeners.fileShow.length + ") file.path=" + file.path);
 		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
 			editor.eventListeners.fileShow[i].fun(file); // Call function
 		}
 		
 		editor.renderNeeded();
 		
+		
 	}
-	
 	
 	
 	function removeFrom(list, fun) {
@@ -1505,6 +1528,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.warn("window.localStorage=" + window.localStorage);
 		}
 		
+		console.log("Calling exit listeners (" + editor.eventListeners.exit.length + ")");
 		for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 			
 			f = editor.eventListeners.exit[i].fun;
@@ -1665,9 +1689,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				return 0;
 			}
 		});
-		for(var i=0; i<editor.eventListeners.start.length; i++) {
+		
+		//for(var i=0; i<editor.eventListeners.start.length; i++) {
 			//console.log("startlistener:" + functionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
-		}
+		//}
 		
 		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
@@ -1681,7 +1706,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.resizeNeeded();
 			editor.resize();
 			
-			// Call start listeners
+			console.log("Calling start listeners (" + editor.eventListeners.start.length + ")");
 			for(var i=0; i<editor.eventListeners.start.length; i++) {
 				editor.eventListeners.start[i].fun(); // Call function
 			}
@@ -1858,7 +1883,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 			e.preventDefault();
 		
-			// Call events listening on paste
+			console.log("Calling parse listeners (" + editor.eventListeners.paste.length + ") ...");
 			for(var i=0, fun; i<editor.eventListeners.paste.length; i++) {
 				
 				fun = editor.eventListeners.paste[i].fun;
@@ -1998,6 +2023,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// PS. Alt Gr = Ctrl+Alt
 		
 		// You probably want to push to editor.keyBindings instead of using eventListeners.keyDown!
+		console.log("Calling keyDown listeners (" + editor.eventListeners.keyDown.length + ") ...");
 		for(var i=0; i<editor.eventListeners.keyDown.length; i++) {
 			funReturn = editor.eventListeners.keyDown[i].fun(editor.currentFile, character, combo); // Call function
 			
@@ -2274,7 +2300,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 		
 
-		
+		console.log("Calling mouseClick (down) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
 		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
 			
 			click = editor.eventListeners.mouseClick[i];
@@ -2331,6 +2357,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 
 		console.log("Mouse up on class " + target.className + "!");
 		
+		console.log("Calling mouseClick (up) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
 		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
 			click = editor.eventListeners.mouseClick[i];
 			
@@ -2376,13 +2403,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		//console.log("mouseY=" + mouseY);
 		
-		for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
-			fun = editor.eventListeners.mouseMove[i].fun;
-			
-			//console.log(functionName(fun));
-			
-			fun(mouseX, mouseY, target); // Call it
+		if(editor.eventListeners.mouseMove.length > 0) {
+			console.log("Calling mouseMove listeners (" + editor.eventListeners.mouseMove.length + ") ...");
+			for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
+				fun = editor.eventListeners.mouseMove[i].fun;
+				
+				//console.log(functionName(fun));
+				
+				fun(mouseX, mouseY, target); // Call it
 
+			}
 		}
 
 		//console.log("editor.input=" + editor.input);
@@ -2430,6 +2460,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Scrolling on " + tagName);
 		
 		if(tagName == "CANVAS") {
+			console.log("Calling mouseScroll listeners (" + editor.eventListeners.mouseScroll.length + ") ...");
 			for(var i=0; i<editor.eventListeners.mouseScroll.length; i++) {
 				editor.eventListeners.mouseScroll[i].fun(dir, steps, combo);
 			}

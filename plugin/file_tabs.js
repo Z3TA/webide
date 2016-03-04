@@ -139,7 +139,7 @@
 	function tabFileSave(file) {
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
-		if(!el) console.error(new Error("Saving " + file.path + ", but it doesn't exist in file tabs!"));
+		if(!el) console.error(new Error("Saving '" + file.path + "', but it doesn't exist in file tabs!"));
 		
 		// What will happen when the file is saved:
 		el.style.fontWeight = "normal";

@@ -60,7 +60,7 @@
 		return true;
 		}
 	
-	function highlightCurrentFunction(eventName, file, cursor) {
+	function highlightCurrentFunction(file, cursor) {
 		if(file.parsed.functions) {
 			
 			// Deselect all

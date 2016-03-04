@@ -5,23 +5,24 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-The most common editor benchmark: Open huge files.
-Do not open files that are too large for the editor to handle. 
-Or open part of file!?
-"The file is too large to handle. But we can open parts of it. Type a nr between X and Y:"
-
-parseJavaScript: 27.613ms on 65k file
-
-optemize it!
-
-try inlining all functions, and move to separate worker.
-
-
-
 
 
 BUGS
 ====
+
+--
+Error: Saving C:\Users\Z\dev-repositories\js-editor\test\saveme.txt, but it doesn't exist in file tabs!
+at Object.tabFileSave [as fun] (file:///C:/Users/Z/dev-repositories/js-editor/plugin/file_tabs.js:142:25)
+at File.saved (file:///C:/Users/Z/dev-repositories/js-editor/File.js:2250:38)
+at file:///C:/Users/Z/dev-repositories/js-editor/editor.js:377:10
+at FSReqWrap.oncomplete (fs.js:73:15)
+devmode.js:64 Uncaught Error: Saving C:\Users\Z\dev-repositories\js-editor\test\saveme.txt, but it doesn't exist in file tabs!
+---
+
+---
+When double clicking a world and started typing:
+Index is undefined. Stuff will go wrong!
+---
 
 When one key bound fails to return (there's an error) all after it also dont run.
 
@@ -202,6 +203,21 @@ inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner
 Optimization
 ============
 
+
+
+The most common editor benchmark: Open huge files.
+Do not open files that are too large for the editor to handle. 
+Or open part of file!?
+"The file is too large to handle. But we can open parts of it. Type a nr between X and Y:"
+
+parseJavaScript: 27.613ms on 65k file
+
+optemize it!
+
+try inlining all functions, and move to separate worker.
+
+
+
 Running the spellchcker will throttle the CPU at maximum for up to 30s or more!
 
 Deleting selected text is Sloooow.
@@ -285,6 +301,9 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+
+Ctrl+T -> Choose between templates : blogpost.htm, websocketwebclient.js, nodewebsockserver.js, emptyhtml.htm
 
 A merge resolver. Show a diff. Then hit left arrow to select line from A, 
 or right arrow to select line from B. Or shift + arrow to insert a NEW line witch the content from A or B.

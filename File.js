@@ -2476,8 +2476,7 @@
 		return !(gridRow < startRow || gridRow > endRow);
 	}
 
-
-	
+		
 	/*
 		
 		Every character is a box!
