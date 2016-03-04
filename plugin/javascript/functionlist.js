@@ -42,6 +42,7 @@
 			charBuffer += char;
 		}
 		else {
+			charBuffer = "";
 			return true;
 		}
 		

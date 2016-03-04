@@ -5,18 +5,14 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Try open txt.txt
+
 
 BUGS
 ====
 
-Auto complete removes text: (editor.currentFile) editor.curr => currentFile
-
-It doesn't render!? or swtich!? when closing files.
-
 When writing in the functionlist not all matches get highlighted
 
-Ctrl+Tab after opening a new file doesn't go to the file we where in before.
+Auto complete removes text: (editor.currentFile) editor.curr => currentFile
 
 Still doesn't get tabs indention right in the source code!
 
@@ -24,9 +20,11 @@ Editor crashes whean searching for "try to" in files.
 
 Opening files with inconsistent line breaks.
 
-Double '' when writing in text.
+Try open txt.txt! In Ubunut. Get sanity check error 
 
-Auto-complete from all opened files (global variables)!
+Ctrl+Y to redo undo desn't work!!
+
+Double '' when writing in text.
 
 Remove all text marked as miss-spelled when toggling the spellchecker off.
 
@@ -53,19 +51,20 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 Tab framför </table> (ska inte vara det)
 
 
-Function args wont come up in autocomplete.  
 
-Function help hinting doesn’t go away when typing.
+
+
+Polishing
+=========
+
+Function args wont come up in autocomplete.
 
 Auto-complete inside a function-name seems to auto-complete itself!
 function foo..
 
 Autocomplete function arguments inside the function!
 
-
-
-Polishing
-=========
+Auto-complete from all opened files (global variables)!
 
 Send back the domObject when calling editor.menu so you can change the text!
 Check "Enable spellchecker" if its not running and "Disable spellchecker" if it's running.
@@ -186,6 +185,11 @@ Better search in file. Like Nodepad++
 
 prettify the zoom heading labels. (show line number)
 inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner-design-image28200429
+
+Switch app icon to a ship container, because the editor helps you ship stuff ... 
+
+
+
 
 
 Optimization

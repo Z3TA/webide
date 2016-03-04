@@ -45,7 +45,7 @@ editor.settings = {
 	drawGridBox: false,
 	scrollStep: 3,
 	autoCompleteKey: 9, // Tab
-	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc
+	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc, Function help hinting doesn’t go away when typing.
 	insert: false
 };
 
@@ -193,7 +193,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		function load(path, text, notFromDisk) {
 			console.log("Loading file to editor: " + path);
-			editor.files[path] = new File(text, path, editor.fileIndex++);
+			editor.files[path] = new File(text, path, ++editor.fileIndex);
 			
 			var file = editor.files[path];
 			
@@ -2557,7 +2557,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		var header = document.getElementById("header");
 		
-		editor.files[path] = new File(text, path, editor.fileIndex++);
+		editor.files[path] = new File(text, path, ++editor.fileIndex);
 		
 		editor.showFile(editor.files[path]);
 		

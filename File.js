@@ -52,10 +52,9 @@
 			}
 			
 			if(fixedILF) {
-				alert("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
+				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
 			}
 				
-			
 		}
 		
 

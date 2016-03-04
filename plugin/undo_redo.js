@@ -43,9 +43,9 @@
 		if(change != "undo-redo") {
 			
 			// Make the current state the last state (delete future states) when something is changed
-			if(versionIndex.hasOwnProperty(file.index)) {
+			if(versionIndex.hasOwnProperty(file.path)) {
 					
-				history[file.index].length = versionIndex[file.index]+1;
+				history[file.path].length = versionIndex[file.path]+1;
 			
 			}
 		}
@@ -59,24 +59,24 @@
 			
 			console.log("UNDO");
 			
-			if(versionIndex.hasOwnProperty(file.index)) {
+			if(versionIndex.hasOwnProperty(file.path)) {
 				
 				// If we are at last/current/latest state, save before going back.
-				if(versionIndex[file.index] == history[file.index].length-1) {
+				if(versionIndex[file.path] == history[file.path].length-1) {
 					if(saveState(file)) {
-						//versionIndex[file.index]--;
+						//versionIndex[file.path]--;
 					};
 					
 				}
 				
-				if(versionIndex[file.index] > 0) {
-					versionIndex[file.index]--;
+				if(versionIndex[file.path] > 0) {
+					versionIndex[file.path]--;
 				}
 				else {
 					console.log("Did not go back because we are already at the very first");
 				}
 				
-				loadState(file, versionIndex[file.index]);
+				loadState(file, versionIndex[file.path]);
 				
 				
 			}
@@ -96,15 +96,15 @@
 			
 			console.log("REDO");
 			
-			if(versionIndex.hasOwnProperty(file.index)) {
+			if(versionIndex.hasOwnProperty(file.path)) {
 				
-				if(versionIndex[file.index] < history[file.index].length-1) {
-					versionIndex[file.index]++;
+				if(versionIndex[file.path] < history[file.path].length-1) {
+					versionIndex[file.path]++;
 					
-					loadState(file, versionIndex[file.index]);
+					loadState(file, versionIndex[file.path]);
 				}
 				else {
-					console.log("We are already at the latest saved sate! version=" + versionIndex[file.index] + " history.lenght-1=" + (history[file.index].length -1) + "");
+					console.log("We are already at the latest saved sate! version=" + versionIndex[file.path] + " history.lenght-1=" + (history[file.path].length -1) + "");
 				}
 				
 			}
@@ -144,7 +144,7 @@
 	
 	function loadState(file, stateIndex) {
 		
-		var state = history[file.index][stateIndex],
+		var state = history[file.path][stateIndex],
 			timeAgo = timeDiff(new Date(), state.date);
 		
 		if(file.text == state.text) {
@@ -175,9 +175,6 @@
 		//file.fixCaret(state.caret); // I shouldn't be needing this! 
 		file.mutateCaret(file.caret, state.caret);
 		
-		file.change("loadState", file.text, 0, 0, 0); // Call event listeners
-		
-
 		
 		// Call file edit listeners
 		file.change("undo-redo", state.text, 0, 0, 0) // change, text, index, row, col
@@ -211,13 +208,13 @@
 			//console.log("saveState:\n" + file.text);
 
 			
-			if(!history.hasOwnProperty(file.index)) {
-				 history[file.index] = [];
-				 versionIndex[file.index] = 0;
-				state = history[file.index];
+			if(!history.hasOwnProperty(file.path)) {
+				history[file.path] = [];
+				versionIndex[file.path] = 0;
+				state = history[file.path];
 			}
 			else {
-				state = history[file.index];
+				state = history[file.path];
 				// Do not save if current state is the same as last state
 				var lastState = state[state.length-1];
 				
@@ -228,12 +225,12 @@
 			}
 			
 			// Only save if versionIndex is at current state!
-			if(versionIndex[file.index] != (state.length-1) && state.length > 0) {
-				console.log("Current state version=" + versionIndex[file.index] + " is not the last version=" + (state.length-1) + ".");
+			if(versionIndex[file.path] != (state.length-1) && state.length > 0) {
+				console.log("Current state version=" + versionIndex[file.path] + " is not the last version=" + (state.length-1) + ".");
 				return false;
 			}
 
-			versionIndex[file.index] = state.push({
+			versionIndex[file.path] = state.push({
 				date: new Date(),
 				text: file.text, // copy text
 				caret: file.mutateCaret({}, file.caret), // copy caret
