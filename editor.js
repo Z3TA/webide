@@ -232,7 +232,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.lastChangedFile = function() {
 		var files = Object.keys(editor.files);
 		
-		if(files.length == 0) return null;
+		if(files.length == 0) return undefined;
 		
 		files.sort(function(a, b) {
 			return editor.files[a].lastChanged < editor.files[b].lastChanged;
@@ -245,7 +245,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.closeFile = function(path, doNotSwitchFile) {
 		
 		if(!editor.files.hasOwnProperty(path)) {
-			throw new Error("Can't close file that is not open: " + path);
+			console.error(new Error("Can't close file that is not open: " + path));
 		}
 		else {
 			
@@ -259,26 +259,40 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
-			if(editor.lastFile == file) {
-				console.error(new Error("The file being closed is also the last file (opened/changed?)"));
-				
-				//editor.lastFile = editor.lastChangedFile();
+			if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
+				// lastFile is no longer open!
+				editor.lastFile = editor.lastChangedFile();
 			}
+			
+			if(editor.lastFile == file) {
+				// Change lastFile to a file that is not currentFile:
+				editor.lastFile = editor.lastChangedFile();
+				if(editor.lastFile == editor.currentFile) {
+					// Select *any* file that is not the current file
+					for(var path in editor.files) {
+						if(path != editor.currentFile.path) {
+							editor.lastFile = editor.files[path];
+							break;
+						}
+					}
+				}
+				if(editor.lastFile == editor.currentFile) editor.lastFile = undefined;
+				}
 			
 			if(editor.currentFile == file && !doNotSwitchFile) {
 				
-				// Show another file!?
+				// We are closing the file currently in view. Show another file!?
 				if(editor.lastFile) {
-					
-					if(editor.lastFile == editor.currentFile) console.error(new Error("Current file is the same as last file!"));
 					
 					console.log("Showing " + editor.lastFile.path + " because " + file.path + " is closing.");
 					editor.showFile(editor.lastFile);
 				}
-				else {
-					editor.currentFile = null;
-				}
 				
+			}
+			
+			if(editor.currentFile == file) {
+				editor.currentFile = undefined;
+				// Honour the doNotSwitchFile argument!
 			}
 			
 		}
@@ -1457,6 +1471,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.warn("File already in view: " + file.path);
 			return false;
 		}
+		
+		if(!editor.files.hasOwnProperty(file.path)) console.error(new Error("Showing a file that is not open!"));
 		
 		if(editor.currentFile) {
 			// Hide current file

@@ -5,9 +5,14 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+Try open txt.txt
 
 BUGS
 ====
+
+Auto complete removes text: (editor.currentFile) editor.curr => currentFile
+
+It doesn't render!? or swtich!? when closing files.
 
 When writing in the functionlist not all matches get highlighted
 
