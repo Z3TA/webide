@@ -2438,7 +2438,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("mouseY=" + mouseY);
 		
 		if(editor.eventListeners.mouseMove.length > 0) {
-			console.log("Calling mouseMove listeners (" + editor.eventListeners.mouseMove.length + ") ...");
+			//console.log("Calling mouseMove listeners (" + editor.eventListeners.mouseMove.length + ") ...");
 			for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
 				fun = editor.eventListeners.mouseMove[i].fun;
 				

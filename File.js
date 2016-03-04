@@ -21,6 +21,8 @@
 		file.highlighted = []; // Highlighted text boxes
 		file.changed = false; // If the file has changed from last save
 		file.lineBreak = determineLineBreakCharacters(text);
+		console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
+		
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
 		file.parse = true; // Tell parsers wheter this file should be parsed or not
 		file.fileExtension = editor.getFileExtension(path);
@@ -36,15 +38,17 @@
 		
 		file.order = fileIndex; // For ordering files, in for example a tab list
 		
-		if(file.lineBreak = "\r\n") {
-			console.log("Searching for lonely (LF) characters ... ");
+		if(file.lineBreak == "\r\n") {
+			console.log("Searching for lonely (LF) \\n characters ... ");
 			
 			var fixedILF = false;
 			var indexILF = file.text.indexOf("\n");
 			var rowCount = 0;
 			while(indexILF > -1) {
 				if(file.text.charAt(indexILF-1) != "\r") {
-					file.text = file.text.substring(0, indexILF-1) + "\r" + file.text.substring(indexILF);
+					if(!fixedILF) console.log("text:\n" + file.text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					file.text = file.text.substring(0, indexILF) + "\r" + file.text.substring(indexILF);
+					console.log("Inserted (CR) on index=" + indexILF);
 					fixedILF = true;
 				}
 				rowCount++;
@@ -231,7 +235,7 @@
 			var nr = occurrences(text, "\n\r", true),
 				rn = occurrences(text, "\r\n", true)
 			
-			//console.log("Line break? nr=" + nr + " rn=" + rn + "");
+			console.log("Line break? nr=" + nr + " rn=" + rn + "");
 			
 			if(rn > nr) {
 				return "\r\n";
@@ -239,7 +243,7 @@
 			else if(nr > rn) {
 				return "\n\r";
 			}
-			else if(text.indexOf("\n") > 0) {
+			else if(text.indexOf("\n") > -1) {
 				return "\n";
 			}
 			else {
@@ -2019,9 +2023,9 @@
 		
 		//console.log(JSON.stringify(grid, null, 4));
 		
-		//console.log("letters:" + letters);
+		console.log("letters:" + letters);
 		
-		//console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+		console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 		
 		for(var row=0; row<grid.length; row++) {
 			for(var col=0; col<grid[row].length; col++) {
