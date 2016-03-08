@@ -1291,7 +1291,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var mcl = []; // Move caret left
 		
 		// Go left to get the word
-		for(var i=file.caret.index-1; i>0; i--) {
+		for(var i=file.caret.index-1; i>-1; i--) {
 			char = file.text.charAt(i);
 			
 			console.log("char=" + char);

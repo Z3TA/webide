@@ -22,7 +22,8 @@ Double '' and "" when writing in text.
 
 Tab framför </table> (ska inte vara det)
 
-Editor crashes whean searching for "try to" in files.
+Editor crashes whean searching for "try to" or ">0;" in files.
+
 
 Auto complete removes text: (editor.currentFile) editor.curr => currentFile
 Maybe have to fix auto complete ...

@@ -41,7 +41,7 @@
 			
 			if(combo.ctrl) {
 				// step to next word
-				for(var i=stepStop-2; i>0; i--) {
+				for(var i=stepStop-2; i>-1; i--) {
 					if(isWhiteSpace(file.text.charAt(i))) {
 						spacesFound++;
 						if(spacesFound==1) {

@@ -76,7 +76,7 @@
 				}
 				else if(lastCharacter == "}" && row > 0) {
 			var indentation = file.grid[row+1].indentation;
-			for (var i=row-1; i>0; i--) {
+			for (var i=row-1; i>-1; i--) {
 				rowIndentation = file.grid[i].indentation;
 				
 				if(rowIndentation < indentation) break;
@@ -87,6 +87,7 @@
 			}
 			
 		}
+		
 	
 	}
 	
@@ -110,8 +111,8 @@
 		}
 		
 		//console.log("defaultIndentationCharacters=" + defaultIndentationCharacters + " (" + defaultIndentationCharacters.length + ")");
-		console.log("currentIndentationCharacters=" + currentIndentationCharacters + " (" + currentIndentationCharacters.length + ")");
-		console.log("shouldHaveIndentationCharacters=" + shouldHaveIndentationCharacters + " (" + shouldHaveIndentationCharacters.length + ")");
+		console.log("currentIndentationCharacters='" + currentIndentationCharacters + "' (" + currentIndentationCharacters.length + ")");
+		console.log("shouldHaveIndentationCharacters='" + shouldHaveIndentationCharacters + "' (" + shouldHaveIndentationCharacters.length + ")");
 		
 		if(shouldHaveIndentationCharacters == currentIndentationCharacters) {
 			return; // Do nothing 
@@ -166,10 +167,12 @@
 			}
 			
 			// Update quotes
+			//console.log("js.quotes=" + JSON.stringify(js.quotes));
 			if(js.quotes) {
 			var quote;
-			for(var i=js.quotes.length-1; i>0; i--) { // start from bottom
-				quote = js.quotes[i];
+			for(var i=js.quotes.length-1; i>-1; i--) { // start from bottom
+					quote = js.quotes[i];
+					//console.log("quote.start=" + quote.start + " quote.end=" + quote.end + " index=" + index);
 				if(quote.start >= index || quote.end >= index) {
 					if(quote.start >= index) quote.start += totalCharactersAdded;
 					if(quote.end >= index) quote.end += totalCharactersAdded;
@@ -184,7 +187,7 @@
 			// Update comments
 			if(js.comments) {
 			var comment;
-			for(var i=js.comments.length-1; i>0; i--) { // start from bottom
+			for(var i=js.comments.length-1; i>-1; i--) { // start from bottom
 				comment = js.comments[i];
 				if(comment.start >= index || comment.end >= index) {
 					if(comment.start >= index) comment.start += totalCharactersAdded;

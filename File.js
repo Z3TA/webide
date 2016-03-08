@@ -2455,7 +2455,7 @@
 		
 		
 		// First go left, and break on non-letter
-		for(var i=caret.index-1; i>0; i--) {
+		for(var i=caret.index-1; i>-1; i--) {
 			char = file.text.charAt(i);
 			
 			if(isLetter(char)) {
