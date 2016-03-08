@@ -21,7 +21,6 @@ Error: Scrolling bug: editor.view.endingColumn=155 file.startColumn=0 editor.vie
     at openFile (file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js:139:12)
     at Array.forEach (native)
 
-Double '' and "" when writing in text.
 
 Tab framför </table> (ska inte vara det)
 
