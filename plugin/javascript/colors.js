@@ -7,6 +7,8 @@
 		Try moving the colorization to a prerenderer:
 		applyJScolors: 0.168ms
 		
+		After not needing to reset:
+		applyJScolors: 0.013ms
 	*/
 	
 	"use strict";
@@ -30,12 +32,12 @@
 		
 		if(buffer.length === 0) return buffer;
 		
-		var applyColor = applyColor1; // applyColor1 or applyColor2, applyColor1 might be sligly faster!?
+		//var applyColor = applyColor1; // applyColor1 or applyColor2, applyColor1 might be sligly faster!?
 		
-		console.time("applyJScolors");
+		//console.time("applyJScolors");
 		
 		// Asume the buffer doesn't have any colors applied? Nope! 
-		resetColors(buffer); // Makes this function 6 times slower
+		//resetColors(buffer); // Makes this function 6 times slower
 			
 		var firstIndex = buffer[0].startIndex;
 		var lastRow = buffer[buffer.length-1];
@@ -48,7 +50,7 @@
 		if(comments) {
 			for(var i=0; i<comments.length; i++) {
 				if(comments[i].start > lastIndex) break;
-				applyColor(buffer, comments[i].start, comments[i].end, commentColor);
+				applyColor(buffer, comments[i].start, comments[i].end, commentColor, false, true);
 			}
 		}
 		
@@ -59,7 +61,7 @@
 		if(quotes) {
 			for(var i=0; i<quotes.length; i++) {
 				if(quotes[i].start > lastIndex) break;
-				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor);
+				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor, true, false);
 			}
 		}
 		
@@ -70,22 +72,23 @@
 		if(xmlTags) {
 			for(var i=0; i<xmlTags.length; i++) {
 				if(xmlTags[i].start > lastIndex) break;
-				applyColor(buffer, xmlTags[i].start, xmlTags[i].start + xmlTags[i].wordLength, xmlTagColor);
+				applyColor(buffer, xmlTags[i].start, xmlTags[i].start + xmlTags[i].wordLength, xmlTagColor, false, false);
 				if(xmlTags[i].selfEnding) {
-					applyColor(buffer, xmlTags[i].end-2, xmlTags[i].end, xmlTagColor);
+					applyColor(buffer, xmlTags[i].end-2, xmlTags[i].end, xmlTagColor, false, false);
 				}
 				else {
-					applyColor(buffer, xmlTags[i].end-1, xmlTags[i].end, xmlTagColor);
+					applyColor(buffer, xmlTags[i].end-1, xmlTags[i].end, xmlTagColor, false, false);
 					}
 				
 			}
 		}
 		
-		console.timeEnd("applyJScolors");
+		//console.timeEnd("applyJScolors");
 
 		return buffer;
 	}
 	
+	/*
 	function applyColor2(gridBuffer, colorStart, colorEnd, color) {
 		var gridRow, colIndex;
 		for(var row = 0; row<gridBuffer.length; row++) {
@@ -110,8 +113,9 @@
 			
 		}
 	}
+	*/
 	
-	function applyColor1(grid, startIndex, endIndex, color) {
+	function applyColor(grid, startIndex, endIndex, color, quote, comment) {
 		
 		var gridRow;
 		
@@ -132,6 +136,14 @@
 						//console.log("col=" + col + " gridRow[" + col + "].index=" + gridRow[col].index + " startIndex=" + startIndex + " endIndex=" + endIndex + " char=" + gridRow[col].char + " color=" + color + " Coloring!");
 
 						gridRow[col].color = color;
+						
+						if(quote) {
+							gridRow[col].quote = true;
+						}
+						else if(comment) {
+							gridRow[col].comment = true;
+						}
+						
 					}
 					else {
 						//console.log("col=" + col + " gridRow[" + col + "].index=" + gridRow[col].index + " startIndex=" + startIndex + " endIndex=" + endIndex + " char=" + gridRow[col].char + " color=" + color + " do nothing");
@@ -149,6 +161,7 @@
 	
 	
 	
+	/*
 	
 	function colorize(file) {
 
@@ -178,6 +191,7 @@
 			
 			function changeBoxColor(box) {
 				box.color = color;
+				box.comment = true;
 			}
 			
 		}
@@ -214,6 +228,7 @@
 			function changeBoxColor(box) {
 				box.color = color;
 				//box.char = "Z";
+				box.quote = true;
 			}
 			
 		}
@@ -230,6 +245,6 @@
 		}
 	}
 	
-
+*/
 
 })();

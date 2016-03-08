@@ -132,6 +132,18 @@
 						ctx.stroke();
 											
 					}
+					else if(bufferRowCol.decoration.circle) {
+						// ### Circle
+						var x = left + editor.settings.gridWidth / 2;
+						var y = top + editor.settings.gridHeight / 2;
+						
+						ctx.strokeStyle="rgba(255,0,0,0.6)";
+						ctx.lineWidth=4;
+						ctx.beginPath();
+						ctx.arc(x, y, editor.settings.gridWidth * 2.2, 0, 2*Math.PI);
+						ctx.stroke();
+						
+					}
 					
 					
 				}

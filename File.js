@@ -2095,7 +2095,13 @@
 		}
 		
 		var clone = grid[row].slice(0);
-			
+		
+		
+		for (var i=0; i<clone.length; i++) {
+			clone[i] = clone[i].clone();
+		}
+		
+		
 		// slice wont copy these
 		clone.indentation = grid[row].indentation;
 		clone.lineNumber = grid[row].lineNumber;
@@ -2499,21 +2505,28 @@
 		
 		box.char = char;
 		box.index = index;
-		box.color = editor.settings.style.textColor;
 		box.selected = false;
 		box.highlighted = false;
 		box.hasCharacter = (char != undefined);
 		box.decoration = {
-			redWave: false
+			redWave: false,
+			circle: false
 		};
-		
+		box.color = editor.settings.style.textColor;
+		box.quote = false; // part of a quote
+		box.comment = false; // part of a comment
 	}
+	
 
 	Box.prototype.clone = function() {
 		var box = this,
 			newBox = new Box(box.char, box.index);
 			
-		newBox.color = box.color;
+		//newBox.color = box.color;
+		newBox.selected = box.selected;
+		newBox.highlighted = box.highlighted;
+		
+		// Decoration and color will not be cloned, and have to be applied by preRender functions
 		
 		return newBox;		
 	}

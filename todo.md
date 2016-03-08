@@ -5,17 +5,14 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Visa en Fet jävla varning när det endast är ett likhetstecken i en if(a=b)!!!
 
-Maybe have to fix auto complete ...
 
 
 BUGS
 ====
 
-Editor keeps reopen some old state of opened files (Ubuntu), because it was an error when it loaded ...
-
 Auto complete removes text: (editor.currentFile) editor.curr => currentFile
+Maybe have to fix auto complete ...
 
 Still doesn't get tabs indention right in the source code!
 
@@ -59,6 +56,8 @@ Tab framför </table> (ska inte vara det)
 
 Polishing
 =========
+
+Classic ASP, bash indention, and function list!
 
 Function args wont come up in autocomplete.
 
