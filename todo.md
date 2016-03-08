@@ -5,57 +5,51 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+Get indentation right in source files!
 
+ex: Removing an { or }
 
 
 BUGS
 ====
 
-Auto complete removes text: (editor.currentFile) editor.curr => currentFile
-Maybe have to fix auto complete ...
+Auto insert an extra = when writing a = inside an if, to prevent the annoying warning to "flash". Or dont flash if it's next to the caret!?
+Annoying when warning shows when we are in an open if( just typing it. Auto insert )  after ( after if!?
 
 Still doesn't get tabs indention right in the source code!
 
+Double '' and "" when writing in text.
+
+Tab framför </table> (ska inte vara det)
+
 Editor crashes whean searching for "try to" in files.
 
-Opening files with inconsistent line breaks.
-
-Try open txt.txt! In Ubunut. Get sanity check error 
-
-Ctrl+Y to redo undo desn't work!!
-
-Double '' when writing in text.
+Auto complete removes text: (editor.currentFile) editor.curr => currentFile
+Maybe have to fix auto complete ...
 
 Remove all text marked as miss-spelled when toggling the spellchecker off.
 
-file_tabs not med när editorn byter fil.
-
 Opening files with weird formatting: files inside .hg for example, try binary files!
-
----
-Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"] {stack: (...), message: "File='C:\Users\Z\dev-repositories\js-editor\plugin…ies\\js-editor\\plugin\\javascript\\jsParser.js"]"}message: "File='C:\Users\Z\dev-repositories\js-editor\plugin\file_open.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\javascript\\jsParser.js"]"stack: (...)get stack: function () { [native code] }set stack: function () { [native code] }__proto__: dfile_tabs.js:626 saveSate
-file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
----
- 
-Indentation for good looking multidimensional arrays:
-var arr = [
-[1, "foo"],
-[2, "bar"],
-[3, "baz"]
-];
-
 
 Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 
-Tab framför </table> (ska inte vara det)
-
+Moving a tab doesn't "stay" after reload.
 
 
 
 
 Polishing
 =========
+
+A better search in file.
+
+Indentation for good looking multidimensional arrays:
+var arr = [
+[1, "foo"],
+[2, "bar"],
+[3, "baz"]
+];
 
 Classic ASP, bash indention, and function list!
 

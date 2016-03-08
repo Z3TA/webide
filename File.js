@@ -871,6 +871,7 @@
 		var box;
 		var row = 0;
 		
+		var bubbleUp = false;
 		
 		if(selection == undefined) {
 			selection = file.selected;
@@ -881,10 +882,14 @@
 			return;
 		}
 		
+		// selection is an array of Box's
+		
 		//console.log("Removing selection:\n" + JSON.stringify(selection));
 		
-		var firstIndex = selection[0].index;
-
+		var firstBox = selection[0];
+		var firstIndex = firstBox.index;
+		
+		
 		// Get the selected text into a string
 		var chars = [];
 		for(var i=0; i<selection.length; i++) {
@@ -897,16 +902,20 @@
 			Optimization if needed ...
 		*/
 		if(selection.length > 1000) {
-
+			
 			if(isContinuous(selection)) {
 				var lastIndex = selection[selection.length-1].index;
 				
 				file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
-
+				
 				file.grid = file.createGrid();
-
+				
 				// Place the caret where the selection was
 				file.caret = file.moveCaretToIndex(firstIndex);
+				
+				// Set these based on the new caret postion (for "deletedSelection" event)
+				var firstRow = file.caret.row;
+				var firstCol = file.caret.col;
 				
 				// Reset the view
 				file.scrollTo(undefined, file.caret.row-1);
@@ -919,6 +928,12 @@
 		}
 		
 		if(!optimized) {
+			
+			file.caret = file.moveCaretToIndex(firstBox.index);
+			
+			var firstRow = file.caret.row;
+			var firstCol = file.caret.col;
+			
 			for(var i=0; i<selection.length; i++) {
 				
 				box = selection[i];
@@ -934,7 +949,7 @@
 				box.selected = false;
 				
 				// Delete character
-				file.deleteCharacter(file.caret, false);
+				file.deleteCharacter(file.caret, bubbleUp);
 				
 			}
 		}
@@ -943,47 +958,48 @@
 		selection.length = 0;
 		
 		console.timeEnd("deleteSelection");
-
-			
+		
+		
 		// Delete cleared rows if they are empty!?
 		
 		file.debugGrid();
 		file.sanityCheck();
-
-		file.change("deletedSelection", text, firstIndex);
 		
 		
-		editor.renderNeeded();
+		file.change("deletedSelection", text, firstIndex, firstRow, firstCol);
 		
-
-		function isContinuous(selection) {
-			var index = 0;
-			var lastIndex = selection[0].index;
-			var sp = " ";
-			var tab = "\t";
-			var lf = "\n";
-			var cr = "\r";
-			var char = "";
-			for(var i=0; i<selection.length; i++) {
-				index = selection[i].index;
-				if( (index - lastIndex) > 1) {
-					// Check if it's white-space or not
-					for(var j=lastIndex+1; j<index; j++) {
-						char = file.text.charAt(j);
-						//console.log("char=" + char);
-						if(!(char == sp || char == tab || char == lf || char == cr )) {
-							// It has a non-whitespace character inbetween selections.
-							// So the selection is not continuous.
-							//console.log("Char: '" + char + "' is not a white-space character!");
-							return false; 
+			
+			editor.renderNeeded();
+			
+			
+			function isContinuous(selection) {
+				var index = 0;
+				var lastIndex = selection[0].index;
+				var sp = " ";
+				var tab = "\t";
+				var lf = "\n";
+				var cr = "\r";
+				var char = "";
+				for(var i=0; i<selection.length; i++) {
+					index = selection[i].index;
+					if( (index - lastIndex) > 1) {
+						// Check if it's white-space or not
+						for(var j=lastIndex+1; j<index; j++) {
+							char = file.text.charAt(j);
+							//console.log("char=" + char);
+							if(!(char == sp || char == tab || char == lf || char == cr )) {
+								// It has a non-whitespace character inbetween selections.
+								// So the selection is not continuous.
+								//console.log("Char: '" + char + "' is not a white-space character!");
+								return false; 
+							}
 						}
 					}
+					lastIndex = index;
 				}
-				lastIndex = index;
+				
+				return true;
 			}
-			
-			return true;
-		}
 	}
 
 	File.prototype.getSelectedText = function() {
@@ -1962,9 +1978,11 @@
 				grid[row] = [];
 				
 				grid[row].lineNumber = lineNumber;
-				grid[row].startIndex = textIndex + 1; // It will star at next character (+1)
-				grid[row].indentation = codeBlockDepth;
+				grid[row].startIndex = textIndex + 1; // It will start at next character (+1)
+				grid[row].indentation = codeBlockDepth; // Will be updated by the parser
 				grid[row].indentationCharacters = "";
+				grid[row].owned = false; // Wheter we can "do whatever we want" with this line, like messing with the indentation
+				
 				col = 0;
 				tabulation = true;
 				}
@@ -2106,6 +2124,7 @@
 		clone.indentation = grid[row].indentation;
 		clone.lineNumber = grid[row].lineNumber;
 		clone.startIndex = grid[row].startIndex;
+		clone.owned = grid[row].owned;
 		
 		return clone;
 		
@@ -2530,7 +2549,6 @@
 		
 		return newBox;		
 	}
-
 
 
 })();

@@ -15,7 +15,7 @@
 			
 			1. Parse file
 			2. Fix indentation of inserted text
-			3. Parse file again, or fix index's for comments etc?
+			3. Fix index's for comments etc?
 			
 		*/
 		
@@ -27,6 +27,8 @@
 	function onEdit(file, type, character, index, row, col) {
 		
 		// todo: Only do this for files parsed by jsParser! (or we will fuck up files parsed by other parsers. unless ... we are very strict on what a parser should return)
+		
+		var rowIndentation = 0;
 		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
@@ -40,6 +42,7 @@
 		else if(type=="text") {
 			// A bunch of text was inserted. We own this text so it's safe to fix indentation ...
 			for(var i = row; i<=file.caret.row; i++) {
+				file.grid[i].owned = true; // Take ownership because a bunch of text was inserted.
 				fixIndentation(file, i);
 			}
 		}
@@ -47,6 +50,42 @@
 			// A character was inserted. Check if we "own" this line and in that case, fix indentation
 			// optimization tip: Only do this when chars that affect indentation is inserted
 			if(file.grid[row].owned) fixIndentation(file, row);
+			}
+			
+		
+		var lastCharacter = character.trim();
+		if(lastCharacter.length > 1) lastCharacter = lastCharacter.substr(lastCharacter.length-1, 1);
+		
+		console.log("lastCharacter=" + lastCharacter + " file.grid.length=" + file.grid.length + " row=" + row + " type=" + type);
+		
+		if(lastCharacter == "{" && file.grid.length > row+1) {
+				// Take ownership and fix indentation until this code block ends
+					var indentation = file.grid[row+1].indentation;
+					
+					for (var i=row+1; i<file.grid.length; i++) {
+						rowIndentation = file.grid[i].indentation;
+				
+				console.log("indentation=" + indentation + " rowIndentation=" + rowIndentation);
+				
+						if(rowIndentation < indentation) break;
+						
+						file.grid[i].owned = true;
+						fixIndentation(file, i);
+					
+				}
+				}
+				else if(lastCharacter == "}" && row > 0) {
+			var indentation = file.grid[row+1].indentation;
+			for (var i=row-1; i>0; i--) {
+				rowIndentation = file.grid[i].indentation;
+				
+				if(rowIndentation < indentation) break;
+				
+				file.grid[i].owned = true;
+				fixIndentation(file, i);
+				
+			}
+			
 		}
 	
 	}
@@ -108,7 +147,7 @@
 			}
 			
 			// Update caret index
-			file.caret.index += totalCharactersAdded;
+			if(file.caret.row >= row) file.caret.index += totalCharactersAdded;
 			
 			// Update index's for parsed data
 			var js = file.parsed;
