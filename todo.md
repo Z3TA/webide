@@ -5,18 +5,21 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Get indentation right in source files!
 
-ex: Removing an { or }
 
 
 BUGS
 ====
 
-Auto insert an extra = when writing a = inside an if, to prevent the annoying warning to "flash". Or dont flash if it's next to the caret!?
-Annoying when warning shows when we are in an open if( just typing it. Auto insert )  after ( after if!?
 
-Still doesn't get tabs indention right in the source code!
+Error: Scrolling bug: editor.view.endingColumn=155 file.startColumn=0 editor.view.visibleColumns=154 path=C:\Users\Z\dev-repositories\js-editor\index.htm
+    at File.checkGrid (file:///C:/Users/Z/dev-repositories/js-editor/File.js:508:18)
+    at File.createCaret (file:///C:/Users/Z/dev-repositories/js-editor/File.js:310:8)
+    at new File (file:///C:/Users/Z/dev-repositories/js-editor/File.js:72:21)
+    at load (file:///C:/Users/Z/dev-repositories/js-editor/editor.js:196:25)
+    at Object.editor.openFile (file:///C:/Users/Z/dev-repositories/js-editor/editor.js:189:5)
+    at openFile (file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js:139:12)
+    at Array.forEach (native)
 
 Double '' and "" when writing in text.
 
@@ -37,11 +40,13 @@ Clicking 4 times to select with {} match doesn't work, stops at first }.
 
 Moving a tab doesn't "stay" after reload.
 
-
+Source indentation in html documents might be "off" if you remove or add div's.
 
 
 Polishing
 =========
+
+Refactor spellchecker: Apply wave via preRender function. Check against spellcheck cache.
 
 A better search in file.
 

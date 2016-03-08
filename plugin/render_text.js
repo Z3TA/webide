@@ -112,7 +112,7 @@
 					// You need to save at UTF8 for åäö character to work
 					
 					
-					if(bufferRowCol.decoration.redWave) {
+					if(bufferRowCol.wave) {
 						ctx.beginPath();
 						ctx.strokeStyle="rgba(255,0,0,0.5)";
 						
@@ -132,7 +132,7 @@
 						ctx.stroke();
 											
 					}
-					else if(bufferRowCol.decoration.circle) {
+					else if(bufferRowCol.circle) {
 						// ### Circle
 						var x = left + editor.settings.gridWidth / 2;
 						var y = top + editor.settings.gridHeight / 2;

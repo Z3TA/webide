@@ -269,7 +269,7 @@
 
 			// clear text decoration from current line
 			for(var x = 0; x < grid[row].length; x++) {
-				grid[row][x].decoration.redWave = false;
+				grid[row][x].wave = false;
 			}
 			
 			if(change=="insert" || change=="delete") {
@@ -399,7 +399,7 @@
 				
 			for(var c=col-1; c>col-origWordLength-1; c--) {
 					
-					grid[row][c].decoration.redWave = true;
+					grid[row][c].wave = true;
 					//grid[row][c].color="red";
 					//console.log("coloring row=" + row + " col=" + c);
 					

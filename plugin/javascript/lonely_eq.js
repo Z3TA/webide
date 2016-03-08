@@ -1,12 +1,18 @@
 (function() {
 	/*
 		
+		Warn if there is an assigment inside an if statement (a common JS bug)
+		
+		if (foo = bar) ...
+		
 		This plugin depends on colors.js to set quote / comment to true!
 		Might need refactoring to make it independent!
 		
-		Finds = inside if
+		We do not have to check across several rows because having additional conditions with a=b will throw an error anyway!
 		
-		if (foo = bar) ...
+		will Not throw error: if(a=b)
+		will Not throw error: if(a=b && 1==1)
+		but this will: if(1==1 && a=b) Invalid left-hand side in assignment
 		
 	*/
 	
@@ -46,7 +52,7 @@
 				
 				char = buffer[row][col].char;
 				
-				if(!buffer[row][col].comment && !buffer[row][col].quote) {
+				if(!buffer[row][col].comment && !buffer[row][col].quote && !(file.caret.row == row)) {
 					
 					//console.log("char=" + char);
 					
@@ -76,9 +82,9 @@
 							right=0;
 						}
 					}
-						else if(char == "=" && lastChar != "!" && lastChar != ">" && lastChar != "<") {
+						else if(char == "="  && lastChar != "!" && lastChar != ">" && lastChar != "<" && llChar != "!") {
 						lc++;
-						if(lc==1) {
+							if(lc==1) {
 						lcAtRow = row;
 							lcAtCol = col;
 						}
@@ -102,12 +108,14 @@
 			
 			// End of row
 			
-			if(!insideIfP) insideIf = false;
-			
+			insideIf = false;
+			left = 0;
+			right = 0;
+			lc = 0;
 		}
 		
 		for (var i=0; i<lonely.length; i++) {
-			buffer[ lonely[i][0] ][ lonely[i][1] ].decoration.circle = true;
+			buffer[ lonely[i][0] ][ lonely[i][1] ].circle = true;
 		}
 		
 		//console.timeEnd("lonelyeq");

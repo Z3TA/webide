@@ -2527,10 +2527,8 @@
 		box.selected = false;
 		box.highlighted = false;
 		box.hasCharacter = (char != undefined);
-		box.decoration = {
-			redWave: false,
-			circle: false
-		};
+		box.wave = false;
+		box.circle = false;
 		box.color = editor.settings.style.textColor;
 		box.quote = false; // part of a quote
 		box.comment = false; // part of a comment
@@ -2544,6 +2542,8 @@
 		//newBox.color = box.color;
 		newBox.selected = box.selected;
 		newBox.highlighted = box.highlighted;
+		newBox.highlighted = box.highlighted;
+		newBox.wave = box.wave;
 		
 		// Decoration and color will not be cloned, and have to be applied by preRender functions
 		
