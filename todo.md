@@ -22,8 +22,6 @@ Error: Scrolling bug: editor.view.endingColumn=155 file.startColumn=0 editor.vie
     at Array.forEach (native)
 
 
-Tab framför </table> (ska inte vara det)
-
 Editor crashes whean searching for "try to" or ">0;" in files.
 
 
