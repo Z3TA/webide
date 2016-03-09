@@ -630,7 +630,7 @@
 		
 		console.timeEnd("insertText");
 		
-		file.debugGrid();
+		//file.debugGrid();
 		file.sanityCheck();
 
 		file.change("text", text, index, row, col);
@@ -962,7 +962,7 @@
 		
 		// Delete cleared rows if they are empty!?
 		
-		file.debugGrid();
+		//file.debugGrid();
 		file.sanityCheck();
 		
 		
@@ -1108,7 +1108,7 @@
 		
 		//console.log("totalCharactersAdded=" + totalCharactersAdded);
 		
-		file.debugGrid();
+		//file.debugGrid();
 		
 		//console.log("currentRow.length=" + currentRow.length);
 		//console.log("newRow.length=" + newRow.length);
@@ -1124,7 +1124,7 @@
 			newRow.push(currentRow[i]);
 		}
 		
-		file.debugGrid();
+		//file.debugGrid();
 
 		// Remove the columns right of col
 		currentRow.length = col;
@@ -2549,6 +2549,7 @@
 		
 		return newBox;		
 	}
-
+	
+	// 
 
 })();

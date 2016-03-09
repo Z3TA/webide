@@ -5,26 +5,53 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Optimization for opening huge files.
+Optimization for opening and reading huge files ...
+
+When opening a file, first check file size.
+If it's under limit, open normally.
+If it's over limit, open in chucks using read stream
+Open X rows or byte? 
+
+
+
+Continue loading the rest and map every one hundred line with an index (for faster opening)
+For every 1000 line scrolled, reload the file!?
+
+With 20k lines: createGrid: 742.418ms
+
+
+If the file is huge, 1M+ open up 100 rows at a time, and switch them out while moving around. Index every 100 line.
+
+
+Saving a big file:
+readstream -> writestream to a temp file, up until the chunk loaded in the editor. Then continue with the original. When finished replace the original with the temp file.
+
+
+When searching in a file marked as big, do a whole file search from disk.
+
+
+
+
+(Notepad++ fails at everything with 2M rows)
+
 
 
 BUGS
 ====
 
-Editor crashes whean searching for "try to" or ">0;" in files.
-
+Opening files with weird formatting: files inside .hg for example, try binary files!
 
 Auto complete removes text: (editor.currentFile) editor.curr => currentFile
 Maybe have to fix auto complete ...
 
-Opening files with weird formatting: files inside .hg for example, try binary files!
-
 Clicking 4 times to select with {} match doesn't work, stops at first }.
-
 
 Moving a tab doesn't "stay" after reload.
 
 Source indentation in html documents might be "off" if you remove or add div's.
+
+
+
 
 
 Polishing
@@ -35,6 +62,8 @@ Remove all text marked as miss-spelled when toggling the spellchecker off.
 
 
 A better search in file.
+Editor crashes whean searching for "try to" or ">0;" in files.
+
 
 Indentation for good looking multidimensional arrays:
 var arr = [
@@ -183,6 +212,8 @@ Switch app icon to a ship container, because the editor helps you ship stuff ...
 Optimization
 ============
 
+
+
 Copying the content of editor.js into another file was sloow!
 
 The most common editor benchmark: Open huge files.
@@ -231,6 +262,8 @@ editor.renderPart(row, col, length); // Render part of the grid
 Can we get rid of the file.text and only use the grid!? Only convert the grid to text when saving. 
 
 Try the editor on a super slow PC to see what needs further optimization.
+
+createBuffer in render takes a very long time > 500 ms on files with very long lines. 
 
 
 

@@ -17,7 +17,14 @@
 
 			Parser:
 				Find property name variables xxx.prop = yyy
-
+		
+		
+		Optimization:
+		parseJavaScript: 18-31ms (File.js)
+		
+		after accessing string like an array (char = text.charAt(charIndex); vs char = text[charIndex];): 21-31ms (no improvement)
+		
+		
 		
 	*/
 
@@ -696,8 +703,8 @@
 			llChar = lastChar;
 			lastChar = char;
 			
-			char = text.charAt(charIndex);
-			
+			//char = text.charAt(charIndex);
+			char = text[charIndex];
 			
 
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
