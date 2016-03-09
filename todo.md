@@ -5,7 +5,7 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-
+''
 
 
 BUGS
@@ -21,6 +21,9 @@ Error: Scrolling bug: editor.view.endingColumn=155 file.startColumn=0 editor.vie
     at openFile (file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js:139:12)
     at Array.forEach (native)
 
+Double '' and "" when writing in text.
+
+Tab framför </table> (ska inte vara det)
 
 Editor crashes whean searching for "try to" or ">0;" in files.
 
@@ -194,7 +197,7 @@ Switch app icon to a ship container, because the editor helps you ship stuff ...
 Optimization
 ============
 
-
+Copying the content of editor.js into another file was sloow!
 
 The most common editor benchmark: Open huge files.
 Do not open files that are too large for the editor to handle. 
