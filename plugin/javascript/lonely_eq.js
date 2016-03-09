@@ -73,7 +73,7 @@
 					else if(char == ")") {
 						if(insideIfP) right++;
 						
-						console.log("insideIf=" + insideIf + " insideIfP=" + insideIfP + " left=" + left + " right=" + right);
+						//console.log("insideIf=" + insideIf + " insideIfP=" + insideIfP + " left=" + left + " right=" + right);
 						
 						if(left == right) {
 							insideIfP = false;

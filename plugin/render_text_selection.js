@@ -4,7 +4,7 @@
 	/*
 	
 		Effects for selected text
-	
+		
 	*/
 	
 	// Sanity check
@@ -21,7 +21,7 @@
 		
 		if(buffer.length === 0) return;
 		
-		console.time("selectionRender");
+		//console.time("selectionRender");
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -43,33 +43,33 @@
 			indentation = buffer[row].indentation;
 			
 			top = editor.settings.topMargin + (row + startRow) * editor.settings.gridHeight;
-
+			
 			if(buffer[row].selected) { // The whole row is selected
 				ctx.rect(editor.settings.leftMargin, top,	editor.settings.gridWidth * buffer[row].length, editor.settings.gridHeight);
 			}
-			
-			for(var col = 0; col < buffer[row].length; col++) {
+			{
 				
-				
-				left = editor.settings.leftMargin + (col + indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
-				
-				if(isNaN(left)) console.error(new Error("left is NaN! editor.settings.leftMargin=" + editor.settings.leftMargin + " col=" + col + " indentation=" + indentation + " editor.settings.tabSpace=" + editor.settings.tabSpace + " file.startColumn=" + file.startColumn + " editor.settings.gridWidth=" + editor.settings.gridWidth + ""));
-				if(isNaN(top)) console.error(new Error("top is NaN"));
-				
-				if(buffer[row][col].selected) {
-					ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);
+				for(var col = 0; col < buffer[row].length; col++) {
+					
+					
+					left = editor.settings.leftMargin + (col + indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
+					
+					//if(isNaN(left)) console.error(new Error("left is NaN! editor.settings.leftMargin=" + editor.settings.leftMargin + " col=" + col + " indentation=" + indentation + " editor.settings.tabSpace=" + editor.settings.tabSpace + " file.startColumn=" + file.startColumn + " editor.settings.gridWidth=" + editor.settings.gridWidth + ""));
+					//if(isNaN(top)) console.error(new Error("top is NaN"));
+					
+					if(buffer[row][col].selected) {
+						ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);
+					}
+					
 				}
-				
-			
 			}
-			
-			
+				
 		}
 		
 		ctx.fill();
 
 		//ctx.stroke();
-		console.timeEnd("selectionRender");
+		//console.timeEnd("selectionRender");
 
 
 	}

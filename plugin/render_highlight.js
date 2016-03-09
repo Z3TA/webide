@@ -19,7 +19,7 @@
 	
 	function highlightRender(ctx, buffer, file, startRow) {
 		
-		console.time("highlightRender");
+		//console.time("highlightRender");
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -53,8 +53,8 @@
 				
 				left = editor.settings.leftMargin + (col + indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
 				
-				if(isNaN(left)) console.error(new Error("left is NaN"));
-				if(isNaN(top)) console.error(new Error("top is NaN"));
+				//if(isNaN(left)) console.error(new Error("left is NaN"));
+				//if(isNaN(top)) console.error(new Error("top is NaN"));
 				
 				if(buffer[row][col].highlighted && !buffer[row][col].selected) {
 					ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);
@@ -69,7 +69,7 @@
 		ctx.fill();
 
 		//ctx.stroke();
-		console.timeEnd("highlightRender");
+		//console.timeEnd("highlightRender");
 
 
 	}

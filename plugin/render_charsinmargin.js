@@ -44,7 +44,7 @@
 		
 		if(startRow == undefined) startRow = 0;
 		
-		console.time("transparentMarginCharacters");
+		//console.time("transparentMarginCharacters");
 		
 		var left = 0,
 			top = 0,
@@ -102,7 +102,7 @@
 		}
 		
 		
-		console.timeEnd("transparentMarginCharacters");
+		//console.timeEnd("transparentMarginCharacters");
 
 		function print(box) {
 			if(box.hasCharacter) {

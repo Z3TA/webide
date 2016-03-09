@@ -539,7 +539,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.shouldRender = false; // Flag (change to true whenever we need to render)
 				
-		console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
+		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
 		
 		if(editor.currentFile) {
 			
@@ -549,22 +549,31 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				buffer = [],
 				grid = editor.currentFile.grid;
 			
+			
+			var funName = "";
+			
 			// Create the buffer
+			//console.time("createBuffer");
 			for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+editor.view.visibleRows); row++) {
 				buffer.push(file.cloneRow(row)); // Clone the row
 			}
+			//console.timeEnd("createBuffer");
 			
 			if(buffer.length == 0) {
 				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " editor.view.visibleRows=" + editor.view.visibleRows);
 			}
 			
 			// Load on the fly functionality on the buffer
+			
+			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging perforamce issues.
+			//console.time("preRenders");
 			for(var i=0; i<editor.preRenderFunctions.length; i++) {
+				//funName = functionName(editor.preRenderFunctions[i]);
+				//console.time("prerender: " + funName);
 				buffer = editor.preRenderFunctions[i](buffer, file); // Call render
+				//console.timeEnd("prerender: " + funName);
 			}
-			
-			//console.log(JSON.stringify(buffer, null, 4));
-			
+			//console.timeEnd("preRenders");
 			
 			
 			//ctx.imageSmoothingEnabled = true;
@@ -577,14 +586,20 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
 			/*
-			ctx.fillStyle = "#FF0000";
-			ctx.fillRect(0,0,150,75);
-			ctx.lineWidth = 1;
+				ctx.fillStyle = "#FF0000";
+				ctx.fillRect(0,0,150,75);
+				ctx.lineWidth = 1;
 			*/
 			
+			//console.time("renders");
 			for(var i=0; i<editor.renderFunctions.length; i++) {
+				//funName = functionName(editor.renderFunctions[i]);
+				//console.time("render: " + funName);
 				editor.renderFunctions[i](ctx, buffer, editor.currentFile); // Call render
+				//console.timeEnd("render: " + funName);
 			}
+			//console.timeEnd("renders");
+			
 			
 			console.timeEnd("render");
 			

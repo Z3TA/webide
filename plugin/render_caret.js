@@ -14,7 +14,7 @@
 
 		
 		
-		console.log("Rendering caret");
+		//console.log("Rendering caret");
 		
 		ctx.fillStyle = editor.settings.caret.color;
 		

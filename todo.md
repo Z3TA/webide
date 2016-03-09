@@ -5,32 +5,17 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+Optimization for opening huge files.
 
 
 BUGS
 ====
-
-
-Error: Scrolling bug: editor.view.endingColumn=155 file.startColumn=0 editor.view.visibleColumns=154 path=C:\Users\Z\dev-repositories\js-editor\index.htm
-    at File.checkGrid (file:///C:/Users/Z/dev-repositories/js-editor/File.js:508:18)
-    at File.createCaret (file:///C:/Users/Z/dev-repositories/js-editor/File.js:310:8)
-    at new File (file:///C:/Users/Z/dev-repositories/js-editor/File.js:72:21)
-    at load (file:///C:/Users/Z/dev-repositories/js-editor/editor.js:196:25)
-    at Object.editor.openFile (file:///C:/Users/Z/dev-repositories/js-editor/editor.js:189:5)
-    at openFile (file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js:139:12)
-    at Array.forEach (native)
-
-Double '' and "" when writing in text.
-
-Tab framför </table> (ska inte vara det)
 
 Editor crashes whean searching for "try to" or ">0;" in files.
 
 
 Auto complete removes text: (editor.currentFile) editor.curr => currentFile
 Maybe have to fix auto complete ...
-
-Remove all text marked as miss-spelled when toggling the spellchecker off.
 
 Opening files with weird formatting: files inside .hg for example, try binary files!
 
@@ -46,6 +31,8 @@ Polishing
 =========
 
 Refactor spellchecker: Apply wave via preRender function. Check against spellcheck cache.
+Remove all text marked as miss-spelled when toggling the spellchecker off.
+
 
 A better search in file.
 

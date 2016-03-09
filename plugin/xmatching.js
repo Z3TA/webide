@@ -16,7 +16,7 @@
 	}
 	
 	function highLightX(a, b) {
-		editor.renderFunctions.push(function(ctx, buffer, file, startRow) {
+		editor.renderFunctions.push(function xmatch(ctx, buffer, file, startRow) {
 			highlightMatch(ctx, buffer, file, a, b, startRow);
 		});
 	}

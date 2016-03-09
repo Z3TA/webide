@@ -23,9 +23,9 @@
 	
 	function textRender(ctx, buffer, file, startRow) {
 		
-		console.time("textRender");
+		//console.time("textRender");
 		
-		console.log("editor.view.endingColumn=" + editor.view.endingColumn);
+		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -154,7 +154,7 @@
 		}
 		
 		
-		console.timeEnd("textRender");
+		//console.timeEnd("textRender");
 
 
 	}
