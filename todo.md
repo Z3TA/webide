@@ -5,7 +5,6 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-''
 
 
 BUGS
