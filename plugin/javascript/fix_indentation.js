@@ -4,8 +4,10 @@
 	
 	editor.on("start", fixIndentationMain);
 	
-	function fixIndentationMain() {
+	var somethingChanged = false;
 	
+	function fixIndentationMain() {
+		
 		/*
 			Problem: 
 			If this runs before the jsParser, we will not have any editor indentation
@@ -21,12 +23,14 @@
 		
 		var runOrder = 110; // Make sure this runs after the parser
 		editor.on("fileChange", onEdit, runOrder);
-
+		
 	}
-
+	
 	function onEdit(file, type, character, index, row, col) {
 		
 		// todo: Only do this for files parsed by jsParser! (or we will fuck up files parsed by other parsers. unless ... we are very strict on what a parser should return)
+		
+		if(!file.parsed.blockMatch) return;
 		
 		var rowIndentation = 0;
 		
@@ -50,8 +54,8 @@
 			// A character was inserted. Check if we "own" this line and in that case, fix indentation
 			// optimization tip: Only do this when chars that affect indentation is inserted
 			if(file.grid[row].owned) fixIndentation(file, row);
-			}
-			
+		}
+		
 		
 		var lastCharacter = character.trim();
 		if(lastCharacter.length > 1) lastCharacter = lastCharacter.substr(lastCharacter.length-1, 1);
@@ -59,22 +63,22 @@
 		console.log("lastCharacter=" + lastCharacter + " file.grid.length=" + file.grid.length + " row=" + row + " type=" + type);
 		
 		if(lastCharacter == "{" && file.grid.length > row+1) {
-				// Take ownership and fix indentation until this code block ends
-					var indentation = file.grid[row+1].indentation;
-					
-					for (var i=row+1; i<file.grid.length; i++) {
-						rowIndentation = file.grid[i].indentation;
+			// Take ownership and fix indentation until this code block ends
+			var indentation = file.grid[row+1].indentation;
+			
+			for (var i=row+1; i<file.grid.length; i++) {
+				rowIndentation = file.grid[i].indentation;
 				
 				console.log("indentation=" + indentation + " rowIndentation=" + rowIndentation);
 				
-						if(rowIndentation < indentation) break;
-						
-						file.grid[i].owned = true;
-						fixIndentation(file, i);
-					
-				}
-				}
-				else if(lastCharacter == "}" && row > 0) {
+				if(rowIndentation < indentation) break;
+				
+				file.grid[i].owned = true;
+				fixIndentation(file, i);
+				
+			}
+		}
+		else if(lastCharacter == "}" && row > 0) {
 			var indentation = file.grid[row+1].indentation;
 			for (var i=row-1; i>-1; i--) {
 				rowIndentation = file.grid[i].indentation;
@@ -88,7 +92,10 @@
 			
 		}
 		
-	
+		if(somethingChanged) file.haveParsed(file.parsed); // Call events depening on the parsed data
+		
+		somethingChanged = false;
+		
 	}
 	
 	function fixIndentation(file, row) {
@@ -105,7 +112,7 @@
 			charactersToAdd = 0,
 			totalCharactersAdded = 0,
 			index = gridRow.startIndex;
-			
+		
 		for(var i=0; i<indentation; i++) {
 			shouldHaveIndentationCharacters += defaultIndentationCharacters;
 		}
@@ -131,10 +138,10 @@
 			
 			// Remove
 			//file.text = file.text.substr(0, index-charactersToRemove) + file.text.substring(index, file.text.length);
-
+			
 			// Remove and add
 			file.text = file.text.substr(0, index-charactersToRemove) + gridRow.indentationCharacters + file.text.substring(index, file.text.length);
-
+			
 			// Update indexes
 			for(var i=row; i<grid.length; i++) {
 				grid[i].startIndex += totalCharactersAdded;
@@ -152,9 +159,8 @@
 			
 			// Update index's for parsed data
 			var js = file.parsed;
-			var somethingChanged = false;
 			
-			// 		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
+			// return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
 			
 			// Update functions
 			var fun;
@@ -169,39 +175,39 @@
 			// Update quotes
 			//console.log("js.quotes=" + JSON.stringify(js.quotes));
 			if(js.quotes) {
-			var quote;
-			for(var i=js.quotes.length-1; i>-1; i--) { // start from bottom
+				var quote;
+				for(var i=js.quotes.length-1; i>-1; i--) { // start from bottom
 					quote = js.quotes[i];
 					//console.log("quote.start=" + quote.start + " quote.end=" + quote.end + " index=" + index);
-				if(quote.start >= index || quote.end >= index) {
-					if(quote.start >= index) quote.start += totalCharactersAdded;
-					if(quote.end >= index) quote.end += totalCharactersAdded;
-					somethingChanged = true;
+					if(quote.start >= index || quote.end >= index) {
+						if(quote.start >= index) quote.start += totalCharactersAdded;
+						if(quote.end >= index) quote.end += totalCharactersAdded;
+						somethingChanged = true;
+					}
+					else {
+						break;
+					}
 				}
-				else {
-					break;
-				}
-			}
 			}
 			
 			// Update comments
 			if(js.comments) {
-			var comment;
-			for(var i=js.comments.length-1; i>-1; i--) { // start from bottom
-				comment = js.comments[i];
-				if(comment.start >= index || comment.end >= index) {
-					if(comment.start >= index) comment.start += totalCharactersAdded;
-					if(comment.end >= index) comment.end += totalCharactersAdded;
-					somethingChanged = true;
+				var comment;
+				for(var i=js.comments.length-1; i>-1; i--) { // start from bottom
+					comment = js.comments[i];
+					if(comment.start >= index || comment.end >= index) {
+						if(comment.start >= index) comment.start += totalCharactersAdded;
+						if(comment.end >= index) comment.end += totalCharactersAdded;
+						somethingChanged = true;
+					}
+					else {
+						break;
+					}
 				}
-				else {
-					break;
-				}
+				
+				
+				
 			}
-			
-			if(somethingChanged) file.haveParsed(js);
-			
-		}
 		}
 		
 		file.sanityCheck();
@@ -215,5 +221,5 @@
 		}
 		
 	}
-
+	
 })();
