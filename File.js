@@ -6,24 +6,47 @@
 "use strict";
 
 (function() { // Allows private variables
-
+	
 	File = function File(text, path, fileIndex) { // Note: No var infront. Expose this object to global scope!
-		var file = this,
-			content = document.getElementById("content");
+		var file = this;
 		
-		if(!isString(text)) console.error(new Error("text is not a string!"));
+		// Text can be both a string and a read stream
+		if(text.on) { // It's a stream!
+			file.stream = text;
+			file.stream.setEncoding('utf8');
+			file.text = "";
+			file.lineBreak = "";
+			file.indentation = "";
+			file.lastPart = false;
+			file.partLineStart = 0;
+			
+		}
+		else {
+			file.stream = false;
+			if(!isString(text)) console.error(new Error("text is not a string!"));
+			
+			file.text = text;
+			
+			file.lineBreak = determineLineBreakCharacters(text);
+			file.indentation = determineIndentationConvention(text, file.lineBreak);
+			file.fixInconsistentLineBreaks();
+			
+			file.lastPart = true;
+			file.partLineStart = 0;
+						
+		}
 		
 		file.startRow = 0;    // Scrolling up/down
 		file.startColumn = 0; // Scrolling left/right
 		file.path = path;
-		file.text = text; // The whole file as a string. Try not to change it directly. Use file.insertText etc instead!
+		
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
 		file.changed = false; // If the file has changed from last save
-		file.lineBreak = determineLineBreakCharacters(text);
+		
 		console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
 		
-		file.indentation = determineIndentationConvention(text, file.lineBreak);
+		
 		file.parse = true; // Tell parsers wheter this file should be parsed or not
 		file.fileExtension = editor.getFileExtension(path);
 		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
@@ -33,10 +56,44 @@
 		//if(file.fileExtension == "txt" || file.fileExtension == "md") file.parse = false;
 		
 		file.index = fileIndex;
-
+		
 		file.name = editor.getFilenameFromPath(path);
 		
 		file.order = fileIndex; // For ordering files, in for example a tab list
+		
+		
+		/* 
+			The grid ... A digital frontier ... I tried to picture clusters of information ... 
+			And then ... One day ... I got in!!!
+		*/	
+		
+		file.grid = file.createGrid();
+		
+		file.caret = file.createCaret(0,0,0);
+		
+		
+		/*
+			if(file.grid[0].length == 0) {
+			file.caret.eol = true;
+			
+			if(grid.length == 0) {
+			file.eof = true;
+			}
+			}
+		*/
+		
+		
+		file.isSaved = false;
+		file.savedAs = false;
+		
+		if(file.stream) catchStream(file);
+		
+		
+	}
+	
+	
+	File.prototype.fixInconsistentLineBreaks = function() {
+		var file = this;
 		
 		if(file.lineBreak == "\r\n") {
 			console.log("Searching for lonely (LF) \\n characters ... ");
@@ -58,209 +115,10 @@
 			if(fixedILF) {
 				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
 			}
-				
+			
 		}
-		
-
-		
-		/* 
-			The grid ... A digital frontier ... I tried to picture clusters of information ... 
-			And then ... One day ... I got in!!!
-		*/	
-		
-		file.grid = file.createGrid(); 
-		file.caret = file.createCaret(0,0,0);
-		
-		/*
-		if(file.grid[0].length == 0) {
-			file.caret.eol = true;
-			
-			if(grid.length == 0) {
-				file.eof = true;
-			}
-		}
-		*/
-
-		
-		file.isSaved = false;
-		file.savedAs = false;
-
-		
-		function determineIndentationConvention(text, lineBreak) {
-			/*
-				Find out the indentation convention for this file
-				Is it tabs? Or spaces, and how many?
-			
-			*/
-			
-			console.log("Determining what line indention convention to use ...");
-			
-			var maxCheckLength = 500,
-				char = "",
-				lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
-				voteTabs = 0,
-				voteSpaces = 0,
-				spaceCount = [],
-				codeBlockStartCharacter = "{",
-				codeBlockEndCharacter = "}",
-				codeBlockDepth = 0,
-				returnString = "",
-				lastChar = "",
-				identation = false,
-				spaces = 0,
-				tabs = 0;
-			
-			
-			
-			for(var i=0; i<text.length; i++) {
-				
-				lastChar = char;
-				
-				char = text.charAt(i);
-				
-				if(char == codeBlockStartCharacter) {
-					codeBlockDepth++;
-				}
-				else if(char == codeBlockEndCharacter) {
-					codeBlockDepth--;
-				}
-				
-				if(char == lastLineBreakCharacter && codeBlockDepth) {
-					identation = true;
-				}
-				else if(char == " " && identation) {
-					spaces++;
-				}
-				else if(char == "\t" && identation) {
-					tabs++;
-				}
-				else {
-					// End of indentation
-
-					if(identation) {
-						if(tabs > 0) {
-							voteTabs++;
-						}
-						else if(spaces > 0) {
-							voteSpaces++;
-							spaceCount.push(spaces / codeBlockDepth);
-						}
-						
-						spaces = 0;
-						tabs = 0;
-					}
-					
-					identation = false;
-				}
-				
-				//console.log("char=" + char + " identation=" + identation + " isLineBreak=" + (char == lastLineBreakCharacter) + "");
-				
-			}
-			
-			//console.log("voteTabs:" + voteTabs);
-			//console.log("voteSpaces:" + voteSpaces);
-			
-			
-			if(voteTabs >= voteSpaces) {
-				return "\t";
-			}
-			else {
-				// Use spaces for indentation, but how many?
-				spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
-				
-				//console.log("spaces count:" + spaces);
-				
-				for(var i=0; i<spaces; i++) {
-					returnString += " ";
-				}
-				
-				//console.log("indentation-string: '" + returnString + "'");
-				
-				return returnString;
-			}
-
-
-
-			function sortByFrequencyAndRemoveDuplicates(array) {
-				var frequency = {}, value;
-
-				// compute frequencies of each value
-				for(var i = 0; i < array.length; i++) {
-					value = array[i];
-					if(value in frequency) {
-						frequency[value]++;
-					}
-					else {
-						frequency[value] = 1;
-					}
-				}
-
-				// make array from the frequency object to de-duplicate
-				var uniques = [];
-				for(value in frequency) {
-					uniques.push(value);
-				}
-
-				// sort the uniques array in descending order by frequency
-				function compareFrequency(a, b) {
-					return frequency[b] - frequency[a];
-				}
-
-				return uniques.sort(compareFrequency);
-
-			}
-
-		}
-		
-		
-		function determineLineBreakCharacters(text) {
-			/*
-				What line break character is used !??
-				
-				Line Feed & New Line (10) = \n
-				Carriage Return (13) = \r
-				
-				Default in windows: cr lf = \r\n
-				
-				Example:
-				rnrnrn
-				
-				rn = 3 (wins)
-				nr = 2
-			
-			*/
-			
-			console.log("Determining what line break characters to use ...");
-			
-			var nr = occurrences(text, "\n\r", true),
-				rn = occurrences(text, "\r\n", true)
-			
-			console.log("Line break? nr=" + nr + " rn=" + rn + "");
-			
-			if(rn > nr) {
-				return "\r\n";
-			}
-			else if(nr > rn) {
-				return "\n\r";
-			}
-			else if(text.indexOf("\n") > -1) {
-				return "\n";
-			}
-			else {
-				// Text has no line breaks. Use the default: (cr lf in windows)
-				if(navigator.platform.indexOf("Win") > -1) {
-					return "\r\n";
-				}
-				else {
-					return "\n";
-				}
-			}
-		}
-		
-
-		
 	}
-
+	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {
 		/*
 			Takes all properties from newCaret and gives it to oldCaret
@@ -273,32 +131,48 @@
 			console.error(new Error("Caret (first argument) need to be an object! (but not necessarily a caret)"));
 		}
 		
-		 var file = this;
-		 
-		 file.checkCaret(newCaret);
-		 
-		 oldCaret.index = newCaret.index;
-		 oldCaret.col = newCaret.col;
-		 oldCaret.row = newCaret.row;
-		 oldCaret.eol = newCaret.eol;
-		 oldCaret.eof = newCaret.eof;
-
+		var file = this;
+		
+		file.checkCaret(newCaret);
+		
+		oldCaret.index = newCaret.index;
+		oldCaret.col = newCaret.col;
+		oldCaret.row = newCaret.row;
+		oldCaret.eol = newCaret.eol;
+		oldCaret.eof = newCaret.eof;
+		
 		return oldCaret;
 	}
-
+	
+	
+	File.prototype.moveCaret = function(index, row, col) {
+		
+		if(index != undefined) file.caret.index = index;
+		if(row != undefined) file.caret.row = row;
+		if(col != undefined) file.caret.col = col;
+		
+		file.fixCaret();
+		
+		editor.fireEvent("moveCaret", file, file.caret);
+		
+	}
+	
+	
+	
+	
 	File.prototype.createCaret = function(index, row, col) {
 		/*
 			Returns a valid caret position
-		
+			
 			16259=102| 16260=117| 16261=110| 16262=99| 16263=116| 16264=105| 16265=111| 16266=110| 16267=76| 16268=105| 16269=115| 16270=116| 16271=87| 16272=114| 16273=97| 16274=112| 16275=46| 16276=115|
-
+			
 			Creating caret at index=16265 row=675 col=0
 			grid[675].length=0
 			grid[675].startIndex=16329
-
+			
 			Character "o" (111) at the caret.index=16265, should be either a Line Feed (10) or Carriage return (13) when caret.eol = true and not caret.eof=true
 			File size=36411 rows=1464
-		
+			
 		*/
 		
 		var file = this,
@@ -307,10 +181,10 @@
 		
 		
 		
-		file.checkGrid();
-
+		if(index > 0) file.checkGrid();
+		
 		//console.log("caret=" + JSON.stringify(caret));
-
+		
 		
 		if(index === undefined && (row === undefined || col === undefined)) {
 			// We have nothing
@@ -349,7 +223,7 @@
 		
 		
 		//console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
-
+		
 		
 		// Check valid data (this should / could be omitted) ...
 		if(grid.length < caret.row) {
@@ -397,9 +271,9 @@
 		
 		return caret;
 	}
-
-
-
+	
+	
+	
 	File.prototype.checkGrid = function() {
 		// Sanity check for the grid to detect possible bugs
 		
@@ -415,9 +289,9 @@
 			expect,
 			box,
 			lineBreakCharacters;
-
+		
 		if(file.startRow % 1 > 0) console.error(new Error("file.startRow=" + file.startRow + " Needs to be an integer!"));
-			
+		
 		if(file.startRow < 0) console.error(new Error("file.startRow=" + file.startRow + " editor.view.visibleRows=" + editor.view.visibleRows + ""));
 		if(file.startRow >= grid.length) console.error(new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length));
 		
@@ -448,7 +322,7 @@
 					console.error(new Error("Row " + i + " has startIndex=" + grid[i].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[i].indentationCharacters.length + " path=" + file.path));
 				}
 			}
-
+			
 			// Check Line number
 			if(i>0){
 				lastRow = grid[i-1];
@@ -510,7 +384,7 @@
 		
 		
 	}
-
+	
 	File.prototype.checkCaret = function(caret) {
 		// Sanity check to detect possible bugs
 		
@@ -527,7 +401,7 @@
 		}
 		
 		//console.log("Checking caret=" + JSON.stringify(caret));
-
+		
 		if(caret.index == null) {
 			console.error(new Error("Caret index is null!"));
 		}
@@ -569,7 +443,7 @@
 		
 		
 	}
-
+	
 	File.prototype.sanityCheck = function() {
 		var file = this;
 		
@@ -583,10 +457,10 @@
 		//file.debugGrid();
 		
 	}
-
+	
 	File.prototype.insertText = function(text, caret) {
 		var file = this;
-
+		
 		if(caret == undefined) {
 			caret = file.caret;
 		}
@@ -601,7 +475,7 @@
 			console.warn("No text to insert! (text.length=" + text.length + ")");
 			return;
 		}
-
+		
 		file.sanityCheck();
 		
 		console.log("Inserting '" + text + "' (text.length=" + text.length + ") on " + JSON.stringify(caret) + " (file.text.length=" + file.text.length + ")");
@@ -615,7 +489,7 @@
 		
 		/* 
 			Update the grid ...
-		   It's probably faster to re-create the grid then to insert all characters one by one.
+			It's probably faster to re-create the grid then to insert all characters one by one.
 		*/
 		file.grid = file.createGrid();
 		
@@ -632,25 +506,25 @@
 		
 		//file.debugGrid();
 		file.sanityCheck();
-
+		
 		file.change("text", text, index, row, col);
 		
 		
 		editor.renderNeeded();
-
+		
 		
 		
 		return caret;
 		
 	}
-		
-		
-
+	
+	
+	
 	File.prototype.putCharacter = function(character, caret) {
 		/*
-		
+			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
-		
+			
 		*/
 		var file = this;
 		
@@ -669,7 +543,7 @@
 		
 		
 		
-
+		
 		var grid = file.grid,
 			row = caret.row,
 			col = caret.col,
@@ -693,7 +567,7 @@
 			console.error(new Error("Tried to insert a control character (" + character + " = " + character.charCodeAt(0) + ")"));
 			return;
 		}
-
+		
 		
 		if(character == "{" || character == "}") renderRow = false;
 		
@@ -756,18 +630,18 @@
 			
 		}
 		
-
+		
 		// Call file edit listeners
 		file.change("insert", character, index, row, col) // change, text, index, row, col
-
+		
 		console.timeEnd("putCharacter");
 		
 		file.sanityCheck();
-
+		
 		if(!renderRow) editor.renderNeeded();
 		
 	}
-
+	
 	File.prototype.select = function(box, direction) {
 		var file = this,
 			selected = file.selected,
@@ -789,7 +663,7 @@
 		}
 		
 		box.forEach(selectBox);
-
+		
 		if(allSelected) {
 			// Remove the selected 
 			selected.splice(selected.indexOf(box[0]), box.length);
@@ -804,7 +678,7 @@
 			}
 			Array.prototype.splice.apply(selected, [start, 0].concat(box)); // inserts the boxes at the start position
 		}
-
+		
 		editor.renderNeeded();
 		
 		function selectBox(box) {
@@ -818,11 +692,11 @@
 				box.selected = true;
 			}
 			
-
+			
 		}
-
+		
 	}
-
+	
 	File.prototype.deselect = function(box) {
 		var file = this;
 		var selected = file.selected;
@@ -844,9 +718,9 @@
 		}
 		
 		editor.renderNeeded();
-
+		
 	}
-
+	
 	File.prototype.deleteSelection = function(selection) {
 		/*
 			Deletes the selected text ...
@@ -968,40 +842,40 @@
 		
 		file.change("deletedSelection", text, firstIndex, firstRow, firstCol);
 		
-			
-			editor.renderNeeded();
-			
-			
-			function isContinuous(selection) {
-				var index = 0;
-				var lastIndex = selection[0].index;
-				var sp = " ";
-				var tab = "\t";
-				var lf = "\n";
-				var cr = "\r";
-				var char = "";
-				for(var i=0; i<selection.length; i++) {
-					index = selection[i].index;
-					if( (index - lastIndex) > 1) {
-						// Check if it's white-space or not
-						for(var j=lastIndex+1; j<index; j++) {
-							char = file.text.charAt(j);
-							//console.log("char=" + char);
-							if(!(char == sp || char == tab || char == lf || char == cr )) {
-								// It has a non-whitespace character inbetween selections.
-								// So the selection is not continuous.
-								//console.log("Char: '" + char + "' is not a white-space character!");
-								return false; 
-							}
+		
+		editor.renderNeeded();
+		
+		
+		function isContinuous(selection) {
+			var index = 0;
+			var lastIndex = selection[0].index;
+			var sp = " ";
+			var tab = "\t";
+			var lf = "\n";
+			var cr = "\r";
+			var char = "";
+			for(var i=0; i<selection.length; i++) {
+				index = selection[i].index;
+				if( (index - lastIndex) > 1) {
+					// Check if it's white-space or not
+					for(var j=lastIndex+1; j<index; j++) {
+						char = file.text.charAt(j);
+						//console.log("char=" + char);
+						if(!(char == sp || char == tab || char == lf || char == cr )) {
+							// It has a non-whitespace character inbetween selections.
+							// So the selection is not continuous.
+							//console.log("Char: '" + char + "' is not a white-space character!");
+							return false; 
 						}
 					}
-					lastIndex = index;
 				}
-				
-				return true;
+				lastIndex = index;
 			}
+			
+			return true;
+		}
 	}
-
+	
 	File.prototype.getSelectedText = function() {
 		var file = this,
 			text = "",
@@ -1034,9 +908,9 @@
 		return text;
 		
 	}
-
-
-
+	
+	
+	
 	File.prototype.insertLineBreak = function(caret) {
 		var file = this;
 		
@@ -1049,11 +923,11 @@
 		
 		
 		//console.log("Inserting lalaline breaka at " + JSON.stringify(caret));
-
+		
 		// Sanity check in case someting is wrong
 		file.sanityCheck();
 		
-
+		
 		var row = caret.row,
 			col = caret.col,
 			totalCharactersAdded = file.lineBreak.length,
@@ -1066,7 +940,7 @@
 			movedCharacters = 0;
 		
 		//console.log("Inserting line break at index=" + index);
-
+		
 		
 		// Insert a new row
 		grid.splice(row+1, 0, []);
@@ -1078,32 +952,32 @@
 		newRow.lineNumber = currentRow.lineNumber; // It will be incremented later when all other rows are incremented // currentRow.lineNumber + 1;
 		newRow.indentationCharacters = "";
 		newRow.indentation = 0;
-
-
+		
+		
 		
 		/* How much indentation?
 			Let the code intelligence handle the indentation!
 			
-		newRow.indentation = currentRow.indentation;
-		
-		
-		for(var i=0; i<newRow.indentation; i++) {
+			newRow.indentation = currentRow.indentation;
+			
+			
+			for(var i=0; i<newRow.indentation; i++) {
 			tabCharacters += "\t";
-		}
-		totalCharactersAdded += newRow.indentation;
+			}
+			totalCharactersAdded += newRow.indentation;
 		*/
 		
 		// Insert the line-break character(s) and indentation (tab characters) to the text string
 		file.text = file.text.substr(0, index) + file.lineBreak + tabCharacters + file.text.substring(index, file.text.length);
 		
-
+		
 		// Move caret to the new row
 		caret.row++;
 		caret.col = 0;
 		
 		// Set caret.index to the text position of the first non-whitespace character (column)
 		caret.index += totalCharactersAdded;
-
+		
 		
 		
 		//console.log("totalCharactersAdded=" + totalCharactersAdded);
@@ -1115,7 +989,7 @@
 		
 		//console.log("currentRow=" + JSON.stringify(currentRow));
 		//console.log("newRow=" + JSON.stringify(newRow));
-
+		
 		
 		// Move all characters right of col to the new line
 		for(var i=col; i<currentRow.length; i++) {
@@ -1125,7 +999,7 @@
 		}
 		
 		//file.debugGrid();
-
+		
 		// Remove the columns right of col
 		currentRow.length = col;
 		
@@ -1174,7 +1048,7 @@
 		
 		// Call file edit listeners
 		file.change("linebreak", file.lineBreak, index, row, col) // change, text, index, row, col
-
+		
 		
 		file.sanityCheck();
 		
@@ -1183,12 +1057,12 @@
 		editor.renderNeeded();
 		
 	}
-
+	
 	File.prototype.moveCaretRight = function(caret) {
 		var file = this;
 		
 		if(caret == undefined) caret = file.caret;
-
+		
 		file.checkCaret(caret);
 		
 		file.sanityCheck();
@@ -1238,13 +1112,13 @@
 		//if(caret == file.caret) editor.renderNeeded();
 		
 	}
-
-
+	
+	
 	File.prototype.moveCaretLeft = function(caret, times) {
 		/*
 			Moves any caret one step to the left in this file.
 			Caret must pass the sanity check!
-		
+			
 		*/
 		var file = this;
 		
@@ -1255,11 +1129,11 @@
 		
 		var grid = file.grid;
 		var row = caret.row;
-			
+		
 		//console.log("Moving caret left from " + JSON.stringify(caret) + "...");
-
-
-		 // Sanity check in case something is wrong
+		
+		
+		// Sanity check in case something is wrong
 		file.sanityCheck();
 		
 		if(caret.col > 0 || caret.row > 0) {
@@ -1303,8 +1177,8 @@
 		return caret;
 		
 	}
-
-
+	
+	
 	File.prototype.moveCaretUp = function(caret) {
 		var file = this;
 		
@@ -1327,7 +1201,7 @@
 			
 			caret.col += indentationDiff;
 			caret.index += indentationDiff;
-				
+			
 			if(caret.col < 0) {
 				caret.index -= caret.col;
 				caret.col = 0;
@@ -1349,7 +1223,7 @@
 			}
 			
 			caret.eof = false;
-
+			
 		}
 		else {
 			// Move the the start of the file
@@ -1366,7 +1240,7 @@
 		
 		return caret;
 	}
-
+	
 	File.prototype.moveCaretDown = function(caret) {
 		var file = this;
 		
@@ -1376,7 +1250,7 @@
 		file.sanityCheck();
 		
 		if(caret.row < (file.grid.length-1)) {
-
+			
 			var rowBefore = file.grid[caret.row];
 			
 			caret.row++;
@@ -1391,8 +1265,8 @@
 			
 			//console.log("indentationDiff=" + indentationDiff);
 			
-
-
+			
+			
 			caret.col += indentationDiff;
 			caret.index += indentationDiff;
 			
@@ -1418,7 +1292,7 @@
 					else {
 						caret.index = gridRow[gridRowLength - 1].index + 1;
 					}
-
+					
 				}
 			}
 			else {
@@ -1439,19 +1313,19 @@
 		
 		return caret;
 	}
-
-
+	
+	
 	File.prototype.unindentRow = function(row) {
 		
 	}
-
+	
 	File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
 		/*
 			Removes the character the caret is on.
 			Behaves like delete in most editors.	
-
+			
 		*/
-
+		
 		var file = this;
 		
 		if(bubble == undefined) bubble = true;
@@ -1471,9 +1345,9 @@
 			rowBelow = row < grid.length ? grid[row+1] : undefined,
 			character = caret.eof ? undefined : file.text.charAt(index),
 			indexDecrementor = 1, // How many characters to remove
-			box;
-			
-
+		box;
+		
+		
 		file.checkCaret(caret); // Sanity check in case something is wrong
 		
 		//file.debugGrid();
@@ -1491,7 +1365,7 @@
 				Remove the line break (and row). Plus all indentation characters
 			*/
 			
-
+			
 			// Remove all tabs and line-break characters
 			indexDecrementor = file.lineBreak.length + rowBelow.indentationCharacters.length;
 			
@@ -1507,7 +1381,7 @@
 			
 			// put all characters on the line below to this line
 			if(rowBelow.length > 0) {
-			
+				
 				while(rowBelow.length > 0) {
 					box = rowBelow.shift();
 					thisRow.push(box);
@@ -1541,9 +1415,9 @@
 			thisRow.splice(col, 1);
 			
 			/*
-			if(character == "\t") {
+				if(character == "\t") {
 				thisRow.indentation--;
-			}
+				}
 			*/
 		}
 		
@@ -1587,7 +1461,7 @@
 		if(bubble) {
 			file.change("delete", character, index, row, col) // change, text, index, row, col
 		}
-
+		
 		
 		console.timeEnd("deleteCharacter");
 		
@@ -1602,8 +1476,9 @@
 		return caret;
 		
 	}
+	
 
-
+	
 	File.prototype.moveCaretToIndex = function(index, caret) {
 		var file = this,
 			grid = file.grid,
@@ -1623,7 +1498,7 @@
 		
 		/*
 			If the file text contains Anything, file grid will have at least one row.
-		
+			
 		*/
 		
 		//console.log("moveCaretToIndex: " + index + "(text.length=" + file.text.length + ")");
@@ -1637,90 +1512,90 @@
 			
 		}
 		else {
-		// Set the index
-		caret.index = index;
-
-		if(index >= file.text.length) {
-			// EOF
-			caret.row = grid.length-1;
-			caret.col = grid[caret.row].length;
-			caret.eol = true;
-			caret.eof = true;
+			// Set the index
+			caret.index = index;
 			
+			if(index >= file.text.length) {
+				// EOF
+				caret.row = grid.length-1;
+				caret.col = grid[caret.row].length;
+				caret.eol = true;
+				caret.eof = true;
+				
 			}
-		else {
-		//console.log("grid.length=" + grid.length);
-		
+			else {
+				//console.log("grid.length=" + grid.length);
+				
 				var found = false;
 				
-		// Set the row, col, eol and eof
-		main: for(var row=0; row<grid.length; row++) {
-			
-			//console.log("grid[" + row + "].length=" + grid[row].length);
-
-			for(var col=0; col<grid[row].length; col++) {
-				
-				gridIndex = grid[row][col].index;
-				
-				//console.log("gridIndex=" + gridIndex);
-				
-				if(gridIndex == index) {
-					caret.row = row;
-					caret.col = col;
-					caret.eol = false;
-					caret.eof = false;
+				// Set the row, col, eol and eof
+				main: for(var row=0; row<grid.length; row++) {
 					
+					//console.log("grid[" + row + "].length=" + grid[row].length);
+					
+					for(var col=0; col<grid[row].length; col++) {
+						
+						gridIndex = grid[row][col].index;
+						
+						//console.log("gridIndex=" + gridIndex);
+						
+						if(gridIndex == index) {
+							caret.row = row;
+							caret.col = col;
+							caret.eol = false;
+							caret.eof = false;
+							
 							found = true;
 							break main;
 							
-				}
-				else if(gridIndex > index) {
-					// We are at the end of last row
-					caret.row = row-1;
-					caret.col = grid[caret.row].length;
-					caret.eol = true;
-					
-					if(grid[caret.row].length > 0) {
-						caret.index = grid[caret.row][caret.col].index;
-					}
-					else {
-						caret.index = grid[caret.row].startIndex;
+						}
+						else if(gridIndex > index) {
+							// We are at the end of last row
+							caret.row = row-1;
+							caret.col = grid[caret.row].length;
+							caret.eol = true;
+							
+							if(grid[caret.row].length > 0) {
+								caret.index = grid[caret.row][caret.col].index;
+							}
+							else {
+								caret.index = grid[caret.row].startIndex;
 							}
 							
 							found = true;
 							break main;
 							
-				}
-				else if(gridIndex == (index-1) && col==grid[row].length-1) {
-					// eol on this row! (but not eof)
-					caret.row = row;
-					caret.col = col+1;
-					caret.eol = true;
+						}
+						else if(gridIndex == (index-1) && col==grid[row].length-1) {
+							// eol on this row! (but not eof)
+							caret.row = row;
+							caret.col = col+1;
+							caret.eol = true;
 							
 							found = true;
 							break main;
 							
+						}
+					}
 				}
-			}
-		}
-		
+				
 				if(!found) {
 					// Probably because all lines are empty!
-		caret.col = 0;
-		caret.eol = true;
-		caret.row = Math.floor(index / file.lineBreak.length); // Aproximate line
-		
-		if(caret.row >= grid.length-1) {
-			caret.row = grid.length-1;
-			caret.eof = true;
-		}
-		
-		if(caret.row % 1 !== 0) { // Make sure it's an integer
+					caret.col = 0;
+					caret.eol = true;
+					caret.row = Math.floor(index / file.lineBreak.length); // Aproximate line
+					
+					if(caret.row >= grid.length-1) {
+						caret.row = grid.length-1;
+						caret.eof = true;
+					}
+					
+					if(caret.row % 1 !== 0) { // Make sure it's an integer
 						console.error(new Error("Couldn't set cursor! index=" + index + " caret.row=" + caret.row));
 						//return undefined;
-		}
-		}
-		}
+					}
+				}
+			}
 		}
 		
 		file.checkCaret(caret);
@@ -1730,8 +1605,8 @@
 		return caret;
 		
 	}
-
-
+	
+	
 	File.prototype.getIndexFromRowCol = function(row, col) {
 		var file = this,
 			grid = file.grid;
@@ -1767,34 +1642,34 @@
 			return gridRow[col].index;
 		}
 	}
-
+	
 	/*
-	File.prototype.getGridPositionFromIndex = function(index) {
+		File.prototype.getGridPositionFromIndex = function(index) {
 		var file = this,
-			grid = file.grid;
+		grid = file.grid;
 		
 		file.sanityCheck();
-
+		
 		
 		// Could probably be optimized
 		for(var row=0; row<grid.length; row++) {
-			for(var col=0; col<grid[row].length; col++) {
-				if(grid[row][col].index == index) {
-					return {row: row, col: col};
-				}
-			}
+		for(var col=0; col<grid[row].length; col++) {
+		if(grid[row][col].index == index) {
+		return {row: row, col: col};
+		}
+		}
 		}
 		
 		if(index == file.text.length) {
-			return {row: row-1, col: col};
+		return {row: row-1, col: col};
 		}
 		
 		console.warn("Can not find index=" + index + " in file text-length=" + file.text.length + "", (new Error).lineNumber);
-	}
+		}
 	*/
-
+	
 	var hmmm = false;
-
+	
 	File.prototype.createTextRange = function(start, end) {
 		
 		// Returns an array of "boxes" (that you can apply styles on)
@@ -1804,7 +1679,7 @@
 			boxes;
 		
 		//file.sanityCheck();
-
+		
 		if(start > end) {
 			// Switch places
 			console.warn("start-position is over end-position. They will be switched!")
@@ -1813,7 +1688,7 @@
 			end = oldStart;
 		}
 		//else if(start == end) {
-			// Select that character!
+		// Select that character!
 		//	return boxes;
 		//}
 		
@@ -1821,9 +1696,9 @@
 			This function took up 75% of the CPU time so I had to optimize it ...
 			putCharacter: 103.782ms
 			putCharacter: 19.756ms
-
+			
 		*/
-
+		
 		return getBoxes(grid, start, end);
 		
 		function getBoxes(grid, start, end) {
@@ -1831,13 +1706,13 @@
 				boxes = [];
 			
 			for(var row=grid.length-1; row>=0; row--) {
-
+				
 				gridRow = grid[row];
 				
 				if(end >= gridRow.startIndex) {
 					
 					for(var col=gridRow.length-1; col>=0; col--) {
-
+						
 						if(gridRow[col].index < start) {
 							//if(hmmm) console.log("Break from col");
 							break;
@@ -1851,16 +1726,16 @@
 				else if(start >= gridRow.startIndex) {
 					break;
 				}
-
+				
 			}
 			return boxes;
 		}
 		
 	}
-
+	
 	File.prototype.reload = function(text) {
 		// ex: Re-open the file in another encoding
-
+		
 		var file = this;
 		
 		if(text == undefined) console.error(new Error("No text!"));
@@ -1875,20 +1750,18 @@
 		file.change("reload", text, 0, 0, 0); // Fire events
 		
 	}
-
-
+	
+	
 	File.prototype.createGrid = function() {
 		/*
 			
 			Tabs after a line break will indent the line. 
 			Tabs Not after a line break will be displayed as white space.
-		
+			
 		*/
-		
-		console.log("Creating grid ...");
-		
-		console.time("createGrid");
 
+		console.time("createGrid");
+		
 		var file = this,
 			text = file.text,
 			grid = [],
@@ -1906,7 +1779,9 @@
 			codeBlockDepth = 0,
 			codeBlockStartCharacter = "{",
 			codeBlockEndCharacter = "}";
-
+		
+		console.log("Creating grid (text.length=" + text.length + ") ...");	
+		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;
 		
@@ -1965,13 +1840,13 @@
 				
 				windows linebreak = \r\n
 			*/
-		
+			
 			if(char == lastLinebreakCharacter) {
 				
 				//grid[row].pop(); // Remove the character (the line-break character)
 				
 				//if(lastChar == "\r" || lastChar == "\n") grid[row].pop(); // Remove the first line-break character too!
-							
+				
 				lineNumber++;
 				row++;
 				
@@ -1985,7 +1860,7 @@
 				
 				col = 0;
 				tabulation = true;
-				}
+			}
 			else if((char == "\t" || char == " ") && tabulation) {
 				/*
 					Tabs and spaces after a line break will be ignored.
@@ -2000,7 +1875,7 @@
 			}
 			else if(char == "\n" || char == "\r") {
 				// Ignoring LF, CR
-				}
+			}
 			else {
 				
 				//console.log("character=" + char + " (" + char.charCodeAt(0) + ")");
@@ -2017,22 +1892,22 @@
 		}
 		
 		file.checkGrid();
-
+		
 	}
-
-
+	
+	
 	File.prototype.debugGrid = function() {
 		/*
 			Useful when debugging ...
-		
-		
+			
+			
 		*/
 		
 		if(!editor.settings.devMode) {
 			return;
 		}
 		
-
+		
 		var file = this,
 			grid = this.grid,
 			text = this.text,
@@ -2059,13 +1934,13 @@
 			str += "\n";
 			
 		}
-
+		
 		//console.log(str);
 		
 		function tableCell(str) {
 			
 			str = (" " + str).trim(); // Convert to string
-
+			
 			if(str == undefined || str == "undefined") {
 				str = "X";
 			}
@@ -2080,7 +1955,7 @@
 				str += " ";
 			}
 			//console.log("hmm=" + str + "*");
-
+			
 			return " " + str + "|";
 			
 		}
@@ -2097,7 +1972,7 @@
 		}
 		
 	}
-
+	
 	
 	File.prototype.cloneRow = function(row) {
 		var file = this;
@@ -2129,12 +2004,12 @@
 		return clone;
 		
 	}
-
+	
 	File.prototype.change = function(change, text, index, row, col) {
 		/*
 			This method is hopefully called every time the file changes.
 			So that we can know if the file has been saved or not.
-						
+			
 		*/
 		var file = this;
 		
@@ -2148,10 +2023,10 @@
 		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
 			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
 		}
-
+		
 		
 	}
-
+	
 	File.prototype.fixCaret = function(caret) {
 		/*
 			Moves the caret to a possible position 
@@ -2159,7 +2034,7 @@
 		
 		var file = this;
 		
-
+		
 		if(caret == undefined) caret = file.caret;
 		
 		if(caret.row < 0) caret.row = 0;
@@ -2171,7 +2046,7 @@
 		else if(caret.col > file.grid[caret.row].length) {
 			caret.col = file.grid[caret.row].length;
 		}
-
+		
 		if(caret.col == file.grid[caret.row].length) {
 			caret.eol = true;
 			
@@ -2194,12 +2069,12 @@
 		editor.fireEvent("moveCaret", file, caret);
 		
 	}
-
+	
 	File.prototype.scrollToCaret = function(caret) {
 		var file = this;
 		
 		if(caret == undefined) caret = file.caret;
-
+		
 		//console.log("scrolling to caret:" + JSON.stringify(caret));
 		
 		
@@ -2207,11 +2082,11 @@
 		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows) + 1;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
-
+		
 		//console.log("visibleRows=" + editor.view.visibleRows);
 		//console.log("caret.row=" + caret.row + " < file.startRow=" + file.startRow + " ? " + (caret.row < file.startRow))
 		//console.log("caret.row=" + caret.row + " > file.startRow=" + file.startRow + " + editor.view.visibleRows=" + editor.view.visibleRows + " (" + (file.startRow + editor.view.visibleRows) + ")? " + (caret.row > file.startRow + editor.view.visibleRows))
-
+		
 		if(caret.row < file.startRow) {
 			// Caret is above the visible space. 
 			startRow = caret.row;
@@ -2224,7 +2099,7 @@
 		}
 		
 		if(startRow < 0) startRow = 0;
-			
+		
 		
 		
 		// Left & Right
@@ -2254,15 +2129,15 @@
 		
 		//console.log("delta=" + delta);
 		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
-
+		
 		file.scrollTo(startColumn, startRow);
 		
 		//editor.renderNeeded(); // Don't need to render until actually scrolled
-
+		
 		
 	}
-
-
+	
+	
 	File.prototype.saved = function(path) {
 		/*
 			Only call listeners. 
@@ -2279,8 +2154,8 @@
 		}
 		
 	}
-
-
+	
+	
 	File.prototype.highlightText = function(text) {
 		var file = this;
 		
@@ -2294,7 +2169,7 @@
 		/*
 			Hmm, for highlighting to stay, we need to modify insertText 
 			to not touch the grid above or under the inserted text ...
-		
+			
 		*/
 		
 		// Find all occurencie(s) of text and highlight it
@@ -2306,7 +2181,7 @@
 		while(true) { // while(true) loops are very prone for bugs! (for example if the word is one character long)
 			
 			//console.log("Searching for '" + text + "' start=" + start);
-		
+			
 			start = file.text.indexOf(text, start);
 			
 			if(start == -1) break;
@@ -2328,7 +2203,7 @@
 		}
 		
 	}
-
+	
 	File.prototype.removeHighlights = function() {
 		var file = this;
 		
@@ -2341,18 +2216,18 @@
 		file.highlighted.length = 0;	
 		
 	}
-
+	
 	File.prototype.haveParsed = function(parseData) {
 		var file = this;
-
+		
 		file.parsed = parseData; // After the file has been parsed, "file.parsed" property should hold the parsed data
-
+		
 		for(var i=0; i<editor.eventListeners.fileParse.length; i++) {
 			editor.eventListeners.fileParse[i].fun(file); // Call function
 		}
 		
 	}
-
+	
 	File.prototype.gotoLine = function(line) {
 		var file = this;
 		
@@ -2374,10 +2249,10 @@
 		
 		//console.log("file.startRow=" + file.startRow);
 		//console.log("maxStartRow=" +maxStartRow);
-
+		
 		editor.renderNeeded();
 	}
-
+	
 	File.prototype.scrollTo = function(x, y) {
 		/*
 			Sets the startColumn and startRow
@@ -2402,17 +2277,17 @@
 		}
 		
 		/*
-		if(file.startRow > maxY) {
+			if(file.startRow > maxY) {
 			console.warn("Attempted to scroll below visible veiw");
 			file.startRow = maxY;
 			scrolled = true;
-		}
-		
-		if(file.startRow < 0) {
+			}
+			
+			if(file.startRow < 0) {
 			console.warn("We can not scroll up higher then the first row."); // But we can increase the top margin!? erm noo
 			file.startRow = 0;
 			scrolled = true;
-		}
+			}
 		*/
 		
 		// Update endingcolumn and render?
@@ -2424,7 +2299,7 @@
 		if(scrolled) editor.renderNeeded();
 		
 	}
-
+	
 	File.prototype.scroll = function(deltaX, deltaY) {
 		/*
 			Adds to the current scroll possition.
@@ -2438,8 +2313,8 @@
 		
 		file.scrollTo(file.startColumn + deltaX, file.startRow + deltaY);
 	}
-
-
+	
+	
 	File.prototype.getWordOnCaret = function(caret, callback) {
 		var file = this;
 		
@@ -2447,7 +2322,7 @@
 			console.error(new Error("Expected a callback function!"));
 			return;
 		}
-
+		
 		if(caret === undefined) caret = file.caret;
 		
 		var word = "";
@@ -2481,8 +2356,8 @@
 		var end = i-1;
 		
 		/*
-		console.log("start=" + start + "=" + file.text.charAt(start));
-		console.log("end=" + end + "=" + file.text.charAt(end));
+			console.log("start=" + start + "=" + file.text.charAt(start));
+			console.log("end=" + end + "=" + file.text.charAt(end));
 		*/
 		
 		callback(word, start, end);
@@ -2493,7 +2368,7 @@
 		}
 		
 	}
-
+	
 	File.prototype.rowVisible = function (gridRow) {
 		var file = this;
 		
@@ -2503,16 +2378,16 @@
 		
 		return !(gridRow < startRow || gridRow > endRow);
 	}
-
-		
+	
+	
 	/*
 		
 		Every character is a box!
 		
 		Only the File object should use this Object.
-
+		
 	*/
-
+	
 	function Box(char, index) {
 		
 		var box = this;
@@ -2534,11 +2409,11 @@
 		box.comment = false; // part of a comment
 	}
 	
-
+	
 	Box.prototype.clone = function() {
 		var box = this,
 			newBox = new Box(box.char, box.index);
-			
+		
 		//newBox.color = box.color;
 		newBox.selected = box.selected;
 		newBox.highlighted = box.highlighted;
@@ -2550,6 +2425,297 @@
 		return newBox;		
 	}
 	
-	// 
+	function determineIndentationConvention(text, lineBreak) {
+		/*
+			Find out the indentation convention for this file
+			Is it tabs? Or spaces, and how many?
+			
+		*/
+		
+		console.log("Determining what line indention convention to use ...");
+		
+		var maxCheckLength = 500,
+			char = "",
+			lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
+			voteTabs = 0,
+			voteSpaces = 0,
+			spaceCount = [],
+			codeBlockStartCharacter = "{",
+			codeBlockEndCharacter = "}",
+			codeBlockDepth = 0,
+			returnString = "",
+			lastChar = "",
+			identation = false,
+			spaces = 0,
+			tabs = 0;
+		
+		
+		
+		for(var i=0; i<text.length; i++) {
+			
+			lastChar = char;
+			
+			char = text.charAt(i);
+			
+			if(char == codeBlockStartCharacter) {
+				codeBlockDepth++;
+			}
+			else if(char == codeBlockEndCharacter) {
+				codeBlockDepth--;
+			}
+			
+			if(char == lastLineBreakCharacter && codeBlockDepth) {
+				identation = true;
+			}
+			else if(char == " " && identation) {
+				spaces++;
+			}
+			else if(char == "\t" && identation) {
+				tabs++;
+			}
+			else {
+				// End of indentation
+				
+				if(identation) {
+					if(tabs > 0) {
+						voteTabs++;
+					}
+					else if(spaces > 0) {
+						voteSpaces++;
+						spaceCount.push(spaces / codeBlockDepth);
+					}
+					
+					spaces = 0;
+					tabs = 0;
+				}
+				
+				identation = false;
+			}
+			
+			//console.log("char=" + char + " identation=" + identation + " isLineBreak=" + (char == lastLineBreakCharacter) + "");
+			
+		}
+		
+		//console.log("voteTabs:" + voteTabs);
+		//console.log("voteSpaces:" + voteSpaces);
+		
+		
+		if(voteTabs >= voteSpaces) {
+			return "\t";
+		}
+		else {
+			// Use spaces for indentation, but how many?
+			spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
+			
+			//console.log("spaces count:" + spaces);
+			
+			for(var i=0; i<spaces; i++) {
+				returnString += " ";
+			}
+			
+			//console.log("indentation-string: '" + returnString + "'");
+			
+			return returnString;
+		}
+		
+		
+		
+		function sortByFrequencyAndRemoveDuplicates(array) {
+			var frequency = {}, value;
+			
+			// compute frequencies of each value
+			for(var i = 0; i < array.length; i++) {
+				value = array[i];
+				if(value in frequency) {
+					frequency[value]++;
+				}
+				else {
+					frequency[value] = 1;
+				}
+			}
+			
+			// make array from the frequency object to de-duplicate
+			var uniques = [];
+			for(value in frequency) {
+				uniques.push(value);
+			}
+			
+			// sort the uniques array in descending order by frequency
+			function compareFrequency(a, b) {
+				return frequency[b] - frequency[a];
+			}
+			
+			return uniques.sort(compareFrequency);
+			
+		}
+		
+	}
+	
+	
+	function determineLineBreakCharacters(text) {
+		/*
+			What line break character is used !??
+			
+			Line Feed & New Line (10) = \n
+			Carriage Return (13) = \r
+			
+			Default in windows: cr lf = \r\n
+			
+			Example:
+			rnrnrn
+			
+			rn = 3 (wins)
+			nr = 2
+			
+		*/
+		
+		console.log("Determining what line break characters to use ...");
+		
+		var nr = occurrences(text, "\n\r", true),
+			rn = occurrences(text, "\r\n", true)
+		
+		console.log("Line break? nr=" + nr + " rn=" + rn + "");
+		
+		if(rn > nr) {
+			return "\r\n";
+		}
+		else if(nr > rn) {
+			return "\n\r";
+		}
+		else if(text.indexOf("\n") > -1) {
+			return "\n";
+		}
+		else {
+			// Text has no line breaks. Use the default: (cr lf in windows)
+			if(navigator.platform.indexOf("Win") > -1) {
+				return "\r\n";
+			}
+			else {
+				return "\n";
+			}
+		}
+	}
+	
+	function catchStream(file, startLine, callback) {
+		
+		var totalLength = 0;
+		var text = "";
+		var endReached = false;
+		var lineBreakCount = 0;
+		var gotLineBreaks = file.lineBreak ? true : false;
+		
+		if(startLine == undefined) startLine = 0;
+		
+		if(startLine < file.partLineStart) {
+			// Restart the file stream
+			file.stream.close();
+			file.stream.destroy();
+			file.stream = fs.createReadStream(file.path);
+		}
+		else if(startLine > 0) {
+			file.stream.resume(); // Continue reading
+		}
+		
+		console.log("Gone fishing ...")
+		
+		file.stream.on('readable', readStream);
+		file.stream.on("end", function() {
+			endReached = true;
+		});
+		
+		function readStream() {
+		
+			// Called each time there is someting comming down the stream
+			
+			var chunk;
+			var lineBreaks = 0;
+			var linesToCut = 0;
+			
+			while (null !== (chunk = file.stream.read()) && !file.stream.isPaused() ) {
+				
+				if(!gotLineBreaks) {
+					file.lineBreak = determineLineBreakCharacters(chunk);
+					gotLineBreaks = true;
+				}
+				
+				lineBreaks = occurrences(chunk, file.lineBreak, false);
+				
+				lineBreakCount += lineBreaks;
+				
+				if(lineBreakCount > startLine) {
+				
+					if(text.length == 0) {
+						// Cut the chunk so we start at startLine
+						linesToCut = lineBreakCount - startLine;
+						while(--linesToCut != 0) {
+							chunk = chunk.substring(chunk.indexOf(file.lineBreak) + file.lineBreak.length, chunk.length);
+						}
+					}
 
+					text = text + chunk;
+					
+					if(text.length > editor.settings.bigFileCharLimit) gotFish(); 
+				}
+				
+				console.log("Got chunk length=" + chunk.length + ", text.length=" + text.length + " lineBreakCount=" + lineBreakCount + " startLine=" + startLine);
+								
+			}
+		}
+		
+		
+		function gotFish() {
+			console.log("Got fish!");
+			file.stream.pause();
+				
+			if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
+			
+			if(!endReached) {
+				// Cut the text at last newline so that we don't stop in the middle of a line
+				
+				var cutAt = text.lastIndexOf(file.lineBreak);
+				var cutText = text.substring(cutAt, text.length);
+				
+				file.stream.unshift(cutText); // Put the cut text back into the stream
+				
+				text = text.substr(0, cutAt);				
+				
+			}
+			
+			file.text = text;
+			
+			console.log("file.text.length=" + file.text.length);
+			
+			//file.debugGrid();
+			
+			file.indentation = determineIndentationConvention(file.text, file.lineBreak);
+			file.fixInconsistentLineBreaks();
+			file.grid = file.createGrid();
+			
+			if(file.caret.row < startLine) {
+				// Place the caret at the top
+				file.caret.row = 0;
+				file.caret.col = 0;
+			}
+			else if(file.caret.row >= file.grid.length) {
+				// Place the caret at EOF
+				file.caret.row = file.grid.length-1;
+				file.caret.col = file.grid[file.grid.length-1].length -1;
+			}
+			else {
+				// Place the caret where it was
+				file.caret.row += file.partLineStart - startLine;
+			}
+
+			file.fixCaret();
+			
+			file.partLineStart = startLine;
+			
+			editor.renderNeeded();
+			
+			if(callback) callback();
+			
+		}
+		
+	}
+	
 })();

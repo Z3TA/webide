@@ -13,7 +13,6 @@ If it's over limit, open in chucks using read stream
 Open X rows or byte? 
 
 
-
 Continue loading the rest and map every one hundred line with an index (for faster opening)
 For every 1000 line scrolled, reload the file!?
 
@@ -39,6 +38,10 @@ When searching in a file marked as big, do a whole file search from disk.
 BUGS
 ====
 
+JS inside <script> tags doesn't get parsed!? Colorized.
+
+Only fixIndentation on {} if there is a match!
+
 Opening files with weird formatting: files inside .hg for example, try binary files!
 
 Auto complete removes text: (editor.currentFile) editor.curr => currentFile
@@ -56,6 +59,9 @@ Source indentation in html documents might be "off" if you remove or add div's.
 
 Polishing
 =========
+
+Regex (or *) search in Goto file.
+
 
 Refactor spellchecker: Apply wave via preRender function. Check against spellcheck cache.
 Remove all text marked as miss-spelled when toggling the spellchecker off.
@@ -154,10 +160,10 @@ Also warn when  you use == outside an if!?
 
 Indent inside if's
 if(word.length > 0 && 
-				htmlTags.indexOf(word) == -1 && 
-				jsKeywords.indexOf(word) == -1 && 
-				!isNumeric(word) &&
-				fileExtensions.indexOf(word) == -1) {
+htmlTags.indexOf(word) == -1 && 
+jsKeywords.indexOf(word) == -1 && 
+!isNumeric(word) &&
+fileExtensions.indexOf(word) == -1) {
 
 Do not overwrite line-nr with chars-in-margin!
 
@@ -165,7 +171,7 @@ Do not overwrite line-nr with chars-in-margin!
 Spell-checking is laggy
 
 
-				
+
 Add words to the spellchecker, using context menu
 
 Files dont have tabs ...
@@ -212,7 +218,7 @@ Switch app icon to a ship container, because the editor helps you ship stuff ...
 Optimization
 ============
 
-
+Inserting a { took a very long time in a large file, probably because of fixIndentation.js 
 
 Copying the content of editor.js into another file was sloow!
 

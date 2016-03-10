@@ -23,7 +23,7 @@ function functionName(fun) {
 	return ret;
 }
 
-function occurrences(string, subString, allowOverlapping){
+function occurrences(string, subString, allowOverlapping) {
 	/** Function count the occurrences of substring in a string;
 	 * @param {String} string   Required. The string;
 	 * @param {String} subString    Required. The string to search for;

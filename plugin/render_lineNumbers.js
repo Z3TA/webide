@@ -42,7 +42,7 @@
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
-			line = buffer[row].lineNumber;
+			line = buffer[row].lineNumber + file.partLineStart;
 			
 			//console.log("Line " + line);
 			

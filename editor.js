@@ -44,6 +44,8 @@ editor.settings = {
 	canBreakBefore: "}]\t",
 	drawGridBox: false,
 	scrollStep: 3,
+	bigFileSize: 150000, // Bytes, all files larger then this will be opened as streams
+	bigFileCharLimit: 500, // Characters to show in the editor for big files
 	autoCompleteKey: 9, // Tab
 	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc, Function help hinting doesn’t go away when typing.
 	insert: false
@@ -103,11 +105,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	// We only expose methods that are in the editor object.
 	
 	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
-
+	
 	
 	// Load native UI library
 	var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
-
+	
 	// Get the current window
 	var win = gui.Window.get();
 	
@@ -130,7 +132,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	*/
 	
 	editor.workingDirectory = process.cwd();
-
+	
 	editor.getFilenameFromPath = function(path) {
 		if(path.indexOf("/") > -1) {
 			return path.substr(path.lastIndexOf('/')+1);
@@ -140,8 +142,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			return path.substr(path.lastIndexOf('\\')+1);
 		}
 	}
-
-
+	
+	
 	editor.openFile = function(path, text, callback) {
 		/*
 			Note: The caller of this function needs to handle file state, 
@@ -166,21 +168,34 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				// Switch to it ...
 				
 				if(text != undefined && text != file.text) console.error(new Error("The text is not the same!"));
-					
+				
 				editor.showFile(file);
-				}
+			}
 			
 			return;
 		}
-				
+		
 		if(!isString(path)) console.error(new Error("path is not a string: " + path));
 		
 		if(text == undefined) {
 			console.warn("Text is undefined! Reading file from disk: " + path)
-			editor.readFromDisk(path, load);
+			
+			// Check the file size
+			var stats = fs.statSync(path);
+			var fileSizeInBytes = stats["size"];
+			
+			console.log("fileSizeInBytes=" + fileSizeInBytes);
+			
+			if(fileSizeInBytes > editor.settings.bigFileSize) {
+				console.warn("Loading file as stream because it's larger then " + editor.settings.bigFileSize + " bytes");
+				load(path, fs.createReadStream(path), false);
+			}
+			else {
+				editor.readFromDisk(path, load);
+			}
 		}
 		else {
-		
+			
 			if(!isString(text)) {
 				console.log("text=" + text);
 				console.error(new Error("text is not a string!"));
@@ -210,9 +225,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
 			/* We might want to change some state before file open events get fired, 
-			so call the callback before file.open()
-			
-			used by: file.open to set saved to true
+				so call the callback before file.open()
+				
+				used by: file.open to set saved to true
 			*/
 			if(callback) callback(file);
 			
@@ -277,7 +292,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					}
 				}
 				if(editor.lastFile == editor.currentFile) editor.lastFile = undefined;
-				}
+			}
 			
 			if(editor.currentFile == file && !doNotSwitchFile) {
 				
@@ -298,7 +313,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
-
+	
 	editor.readFileSync = function(path) {
 		
 		console.log("Reading file syncroniously from disk: " + path);
@@ -313,8 +328,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		return content;
 	}
-
-
+	
+	
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		
 		console.log("Reading file from disk: " + path);
@@ -331,7 +346,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				if (err) console.error(err);
 				
 				callback(path, buffer);
-					
+				
 			});
 		}
 		else {
@@ -340,13 +355,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				if (err) console.error(err);
 				
 				callback(path, string);
-					
+				
 			});
 		}
 		
-
+		
 	}
-
+	
 	editor.saveFile = function(file, path, callback) {
 		/*
 			This is the only save function.
@@ -370,7 +385,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
 		if(file.path != path) {
-
+			
 			console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
 			
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
@@ -394,7 +409,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 				else {
 					console.log("The file was successfully saved: " + path + "");
-						
+					
 					file.saved(); // Call functions that listen for save events
 					
 					if(callback) callback();
@@ -403,8 +418,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			});
 		}
 	}
-
-
+	
+	
 	editor.fileSaveDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS save file dialog window and calls the callback with the path.
@@ -414,7 +429,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var fileSaveAs = document.getElementById("fileSaveAs");
 		
 		if(defaultPath) editor.setFileSavePath(defaultPath);
-					
+		
 		fileSaveAs.click(); // Bring up the OS path selector window
 	}
 	
@@ -433,7 +448,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		/*
 			Brings up the OS file select dialog window.
 			If a file is selected, it's opened (readSingleFile).
-			File path and file content is then passed to the callback function.
+			File path is then passed to the callback function.
 		*/
 		
 		console.log("Bringing up the file open dialog ...");
@@ -458,10 +473,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			// If we want to choose a while directory,  fileOpen.setAttribute webkitdirectory
 		}
 		
-
+		
 		fileOpen.click(); // Bring up the OS path selector window
 	}
-
+	
 	editor.getDir = function(path) {
 		/* 
 			Returns the directory of a file path
@@ -538,7 +553,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 		editor.shouldRender = false; // Flag (change to true whenever we need to render)
-				
+		
 		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
 		
 		if(editor.currentFile) {
@@ -625,14 +640,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(!file.rowVisible(gridRow)) {
 				console.warn("Row=" + gridRow + " not in view!");
 				return;
-				}
+			}
 			
 			var screenRow = Math.max(0, gridRow - file.startRow);
 			
 			console.time("renderRow");
 			
-				var buffer = [];
-				
+			var buffer = [];
+			
 			// Create the buffer
 			buffer.push(file.cloneRow(gridRow)); // Clone the row
 			
@@ -645,7 +660,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 			
 			//console.log(JSON.stringify(buffer, null, 4));
-					
+			
 			ctx.fillStyle = editor.settings.style.bgColor;
 			
 			var top = editor.settings.topMargin + screenRow * editor.settings.gridHeight;
@@ -674,12 +689,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	
 	
-
+	
 	editor.resize = function(e) {
 		/*
 			
 			Why does the resize clear the canvas's !???
-		
+			
 		*/
 		
 		if(!editor.shouldResize) return; // Don't resize if it's not needed.
@@ -706,22 +721,22 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
-		var canvasNodes = document.getElementsByTagName("CANVAS");
-		for(var i=0; i<canvasNodes.length; i++) {
+			var canvasNodes = document.getElementsByTagName("CANVAS");
+			for(var i=0; i<canvasNodes.length; i++) {
 			canvasNodes[i].style.display = "none";
-		}
+			}
 		*/
-
 		
-
-
+		
+		
+		
 		
 		
 		// Save focus for the current file and give back focus after ther resize
 		var file = editor.currentFile;
 		
 		
-	
+		
 		//console.log("Resizing stuff ...")
 		
 		
@@ -748,44 +763,44 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var contentHeight = windowHeight - headerFooterHeight;
 		var columnsHeight = contentHeight;
 		
-
-/*
-		console.log("windowWidth=" + windowWidth);
-		console.log("windowHeight=" + windowHeight);
-		console.log("leftColumnWidth=" + leftColumnWidth);
-		console.log("rightColumnWidth=" + rightColumnWidth);
-		console.log("leftRightColumnWidth=" + leftRightColumnWidth);
-		console.log("headerHeight=" + headerHeight);
-		console.log("footerHeight=" + footerHeight);
-		console.log("headerFooterHeight=" + headerFooterHeight);
-		console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " computedWidth=" + contentComputedStyle.width + ")");
-		console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " computedHeight=" + contentComputedStyle.height + ")");
-		console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " cunputedHeight=" + columnsComputedStyle.height + ")");
 		
-		console.log("offsetWidth=" + content.offsetWidth)
-		console.log("innerWidth=" + content.innerWidth)
-		console.log("outherWidth=" + content.outherWidth)
-		console.log("width=" + contentComputedStyle.width);
-		console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
-*/
+		/*
+			console.log("windowWidth=" + windowWidth);
+			console.log("windowHeight=" + windowHeight);
+			console.log("leftColumnWidth=" + leftColumnWidth);
+			console.log("rightColumnWidth=" + rightColumnWidth);
+			console.log("leftRightColumnWidth=" + leftRightColumnWidth);
+			console.log("headerHeight=" + headerHeight);
+			console.log("footerHeight=" + footerHeight);
+			console.log("headerFooterHeight=" + headerFooterHeight);
+			console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " computedWidth=" + contentComputedStyle.width + ")");
+			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " computedHeight=" + contentComputedStyle.height + ")");
+			console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " cunputedHeight=" + columnsComputedStyle.height + ")");
+			
+			console.log("offsetWidth=" + content.offsetWidth)
+			console.log("innerWidth=" + content.innerWidth)
+			console.log("outherWidth=" + content.outherWidth)
+			console.log("width=" + contentComputedStyle.width);
+			console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
+		*/
 		
 		global.windowHeight = windowHeight;
 		global.windowWidth = windowWidth;
 		
 		
 		//objInfo(centerColumn);
-
+		
 		
 		//editor.view.canvasWidth = windowWidth - leftRightColumnWidth;
 		editor.view.canvasWidth = contentWidth;
 		editor.view.canvasHeight = contentHeight;
 		/*
-		editor.view.canvasWidth = (windowWidth - leftRightColumnWidth);
-		editor.view.canvasHeight = (windowHeight - headerFooterHeight);
-		
-		
-		content.style.width = editor.view.canvasWidth + "px";
-		content.style.height = editor.view.canvasHeight + "px";
+			editor.view.canvasWidth = (windowWidth - leftRightColumnWidth);
+			editor.view.canvasHeight = (windowHeight - headerFooterHeight);
+			
+			
+			content.style.width = editor.view.canvasWidth + "px";
+			content.style.height = editor.view.canvasHeight + "px";
 		*/
 		
 		console.log("canvasWidth=" + editor.view.canvasWidth);
@@ -794,8 +809,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		leftColumn.style.height = editor.view.canvasHeight + "px";
 		rightColumn.style.height = editor.view.canvasHeight + "px";
-
-
+		
+		
 		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
 		var wrappers = document.getElementsByClassName("wrap");
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
@@ -806,14 +821,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		//console.log("columnPadding=" + columnPadding);
-
+		
 		
 		// Calculate column width and row height
 		editor.view.visibleColumns = Math.ceil((editor.view.canvasWidth - editor.settings.leftMargin - editor.settings.rightMargin) / editor.settings.gridWidth);
 		
 		//console.log("(resize1) editor.view.visibleColumns=" + editor.view.visibleColumns);
 		//console.log("(resize1) editor.view.endingColumn=" + editor.view.endingColumn);
-
+		
 		// ceil (overflow)
 		editor.view.visibleRows = Math.ceil((editor.view.canvasHeight - editor.settings.topMargin - editor.settings.bottomMargin) / editor.settings.gridHeight);
 		
@@ -824,10 +839,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		canvas.style.width = editor.view.canvasWidth + "px";
 		canvas.style.height = editor.view.canvasHeight + "px";
-
+		
 		canvas.width  = editor.view.canvasWidth;
 		canvas.height = editor.view.canvasHeight;
-			
+		
 		if(editor.currentFile) {
 			// Fix horizontal column after resizing
 			if(editor.view.endingColumn < editor.view.visibleColumns) {
@@ -837,17 +852,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			else {
 				editor.view.endingColumn = editor.currentFile.startColumn + editor.view.visibleColumns;
 			}
-
+			
 		}
 		else {
 			console.warn("No current file! editor.currentFile=" + editor.currentFile);
 			editor.view.endingColumn = editor.view.visibleColumns;
-
+			
 		}
-
+		
 		//console.log("(resize2) editor.view.visibleColumns=" + editor.view.visibleColumns);
 		//console.log("(resize2) editor.view.endingColumn=" + editor.view.endingColumn);
-
+		
 		// Resize listeners (after)
 		console.log("Calling afterResize listeners (" + editor.eventListeners.afterResize.length + ") ...");
 		for(var i=0; i<editor.eventListeners.afterResize.length; i++) {
@@ -877,7 +892,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		editor.renderNeeded(); // Always render after a resize (but nor right away!?
 		
 	}
-
+	
 	editor.on = function(eventName, callback, order) {
 		/*
 			lowest order nr will execute first!
@@ -887,7 +902,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		return editor.addEvent(eventName, {fun: callback, order: order});
 	}
-
+	
 	editor.addEvent = function(eventName, options) {
 		
 		if(!(eventName in editor.eventListeners)) {
@@ -900,7 +915,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(!options.hasOwnProperty("fun")) {
 			console.warn(new Error("The second argument should be an object containing the property fun. You might want to use editor.on instead.").stack);
-
+			
 			if(typeof options === "function") {
 				options = {fun: options};
 			}
@@ -913,7 +928,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(typeof options.fun != "function") {
 			console.error(new Error("There needs to be a function!"));
 		}
-			
+		
 		var index = editor.eventListeners[eventName].push(options);
 		
 		// Sort the events so they fire in order (lowest order nr will execute first)
@@ -929,9 +944,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 		});
 		
-
+		
 	}
-
+	
 	editor.removeEvent = function(eventName, fun) {
 		/*
 			Make sure you use an unique function name.
@@ -957,23 +972,23 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
-
-
+	
+	
 	editor.addMenuItem = function(htmlText, callback) {
 		var menu = document.getElementById("canvasContextmenu");
-
+		
 		var menuElement = document.createElement("li");
 		menuElement.innerHTML = htmlText;
 		
 		if(callback) menuElement.onclick = callback;
-
+		
 		menu.appendChild(menuElement);
 		
 		// Don't forget to call editor.hideMenu() after the item has been clicked!
 		
 		return menuElement;
 	}
-
+	
 	editor.addTempMenuItem = function(htmlText, callback) {
 		/*
 			These items are removed when the menu is hidden
@@ -981,7 +996,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		//var menu = document.getElementById("canvasContextmenu");
 		var tempItems = document.getElementById("canvasContextmenuTemp");
-
+		
 		var menuElement = document.createElement("li");
 		menuElement.innerHTML = htmlText;
 		
@@ -998,8 +1013,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		//tempItems.insertBefore(menuElement, tempItems.firstChild);
 	}
-
-
+	
+	
 	editor.hideMenu = function() {
 		// Hide the menu
 		var menu = document.getElementById("canvasContextmenu");
@@ -1015,21 +1030,21 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.currentFile) editor.input = true; // Give focus back for text entry
 		
 	}
-
+	
 	editor.showMenu = function(posX, posY) {
 		var menu = document.getElementById("canvasContextmenu");
 		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 		var menuDownABit = 10;
 		
 		if(posX === editor.mouseX || posX === undefined) posX = editor.mouseX + notUpOnMenu;
-
+		
 		if(posY === undefined) posY = editor.mouseY + menuDownABit;
 		
 		// Make sure it fits on the screen!!
 		/*
-		setTimeout(function() { // Wait for div content to load
+			setTimeout(function() { // Wait for div content to load
 			
-		}, 100); 
+			}, 100); 
 		*/
 		var offsetHeight = parseInt(menu.offsetHeight);
 		var offsetWidth = parseInt(menu.offsetWidth);
@@ -1046,7 +1061,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		menu.style.top = posY + "px";
 		menu.style.left = posX + "px";
 	}
-
+	
 	editor.addInfo = function(row, col, txt) {
 		// Will display a talk bubble (plugin/render_info.js)
 		var info = editor.info;
@@ -1068,8 +1083,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		/*
 			Problem: Because info is pushed after each other, and is async, not all messages
 			might be shown
-		
-		
+			
+			
 		*/
 		
 		function allImagesMade() {
@@ -1111,10 +1126,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			editor.renderNeeded();
 			editor.render();
-
+			
 		}
 		
-
+		
 		
 		function makeImage(item) {
 			
@@ -1127,18 +1142,18 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				//console.log("imagesMade=" + imagesMade);
 				
 				//editor.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
-
+				
 				
 				if(++imagesMade == imagesToMake) {
 					allImagesMade();
 				}
 			});
 			
-
+			
 		}
 		
 	}
-
+	
 	editor.removeAllInfo = function(row, col, txt) {
 		// Find the item in the array, then splice it ...
 		var info = editor.info;
@@ -1152,15 +1167,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				// Call removeAllInfo again, just to make sure ALL is removed
 				editor.removeAllInfo(row, col);
 				return; // Splice can be buggy if many rows are removed in a for-loop
-
+				
 			}
 		}
 	}
-
+	
 	editor.onNextInteraction = function(func) {
 		executeOnNextInteraction.push(func);
 	}
-
+	
 	editor.interact = function(interaction) {
 		// This function will be called on every interaction
 		
@@ -1189,9 +1204,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		var eventListeners;
 		var func;
-			
+		
 		if(eventName in editor.eventListeners) {
-				
+			
 			eventListeners = editor.eventListeners[eventName];
 			
 			console.log("Calling " + eventName + " listeners (" + editor.eventListeners[eventName].length + ") ...");
@@ -1263,9 +1278,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				//console.log("indentation=" + row.indentation);
 				
 				var mouseCol = Math.floor((mouseX - editor.settings.leftMargin - (row.indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth + clickFeel) / editor.settings.gridWidth);
-			
+				
 				//console.log("mouseCol=" + mouseCol);
-
+				
 				
 				if(mouseCol > row.length) { // End of line
 					mouseCol = row.length;
@@ -1273,9 +1288,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				else if(mouseCol < 0) { // Start of line
 					mouseCol = 0;
 				}
-
+				
 				return file.createCaret(undefined, mouseRow, mouseCol);
-
+				
 				
 			}
 			
@@ -1346,8 +1361,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.log("function " + functionName(fun) + " returned: " + JSON.stringify(ret));
 			
 			if(ret) {
-			if(Array.isArray(ret)) {
-				for(var j=0; j<ret.length; j++) {
+				if(Array.isArray(ret)) {
+					for(var j=0; j<ret.length; j++) {
 						if(Array.isArray(ret[j])) {
 							addWord = ret[j][0];
 							addMcl = ret[j][1];
@@ -1363,13 +1378,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 							options.push(addWord);
 							mcl.push(addMcl);
 						}
+					}
+				}
+				else {
+					console.error(new Error(functionName(fun) + " did not return an array"));
 				}
 			}
-			else {
-				console.error(new Error(functionName(fun) + " did not return an array"));
-				}
-			}
-			 }
+		}
 		
 		if(options.length != mcl.length) {
 			console.error(new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " "));
@@ -1387,20 +1402,20 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			// hmm!?
 			/*
-			if(shared.length > 0) {
+				if(shared.length > 0) {
 				if(word.indexOf(".") != -1) {
-					var arr = word.split(".");
-					
-					completeWord(arr[arr.length-1], shared, 0);
+				var arr = word.split(".");
+				
+				completeWord(arr[arr.length-1], shared, 0);
 				}
 				else {
-					completeWord(word, shared, 0);
+				completeWord(word, shared, 0);
 				}
 			*/
 			
 			completeWord(word, shared, 0);
 			
-						
+			
 			// Show info
 			for(var i=0; i<options.length; i++) {
 				editor.addInfo(file.caret.row, file.caret.col, options[i].replace(new RegExp(file.lineBreak,"g"), " "));
@@ -1416,10 +1431,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		function sharedStart(array) {
 			// Return the text that all words in an array share
 			var A= array.concat().sort(), // Create new array with the words sorted
-				a1= A[0],
-				a2= A[A.length-1],
-				L= a1.length,
-				i= 0;
+			a1= A[0],
+			a2= A[A.length-1],
+			L= a1.length,
+			i= 0;
 			
 			while(i<L && a1.charAt(i) === a2.charAt(i)) i++;
 			
@@ -1441,7 +1456,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				*/
 				console.warn("Deleting word=" + word + " to autocomple wholeWord=" + wholeWord);
 				for(var i=0; i<word.length; i++) {
-				file.moveCaretLeft();
+					file.moveCaretLeft();
 					file.deleteCharacter(undefined, undefined, false); // false = Do not renderRow
 				}
 				var insert = wholeWord;
@@ -1489,7 +1504,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	editor.showFile = function(file, focus) {
-
+		
 		console.log("Showing " + file.path + " (editor.focus=" + editor.input + " focus=" + focus + "");
 		
 		if(file == editor.currentFile) {
@@ -1581,7 +1596,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(ret !== true) break;
 		}
 		
-
+		
 		if(ret == true) {
 			this.close(true);
 		}
@@ -1591,19 +1606,19 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 	});
-
-
+	
+	
 	// Move Event listeners ...
-
+	
 	
 	//window.addEventListener("drop", fileDrop, false);
 	window.ondragover = function(e) { e.preventDefault(); return false };
 	window.ondrop = function(e) { e.preventDefault(); return false };
-
-
-
-
-
+	
+	
+	
+	
+	
 	
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function() {
@@ -1628,8 +1643,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.addEventListener("keydown",keyIsDown,false);  // captures 
 	window.addEventListener("keyup",keyIsUp,false);      // keyBindings
 	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
-
-
+	
+	
 	
 	/*
 		Add your own key listeners by pushing to editor.eventListeners.mouseClick
@@ -1643,10 +1658,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.addEventListener("touchend", mouseUp, false);
 	window.addEventListener("touchcancel", mouseUp, false);
 	window.addEventListener("touchleave", mouseUp, false);
-
+	
 	
 	window.addEventListener("mousemove", mouseMove, false);
-
+	
 	
 	// Disable annoying menus
 	window.addEventListener("contextmenu", function(e) {
@@ -1654,21 +1669,21 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		e.preventDefault();
 		return false;
 	}, false);
-
-
+	
+	
 	window.addEventListener('copy', copy);
 	window.addEventListener('paste', paste);
 	window.addEventListener('cut', cut);
 	
 	
-
+	
 	
 	function main() {
-
+		
 		console.log("Starting the editor ...");
 		
 		canvas = document.getElementById("canvas");
-			
+		
 		if(editor.settings.sub_pixel_antialias == false) {
 			ctx = canvas.getContext("2d");
 			//console.warn("No sub_pixel_antialias! editor.settings.sub_pixel_antialias=" + editor.settings.sub_pixel_antialias);
@@ -1696,10 +1711,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		// cleanup
 		/*
-		var content = document.getElementById("content");
-		while (content.firstChild) {
+			var content = document.getElementById("content");
+			while (content.firstChild) {
 			content.removeChild(content.firstChild);
-		}
+			}
 		*/
 		
 		
@@ -1732,7 +1747,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		});
 		
 		//for(var i=0; i<editor.eventListeners.start.length; i++) {
-			//console.log("startlistener:" + functionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
+		//console.log("startlistener:" + functionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
 		//}
 		
 		
@@ -1741,7 +1756,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		//setTimeout(display, 500); // Why do I need to do this?
 		display();
-
+		
 		
 		function display() {
 			editor.resizeNeeded();
@@ -1762,8 +1777,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	function readSingleFile(e) {
 		
-		console.log("Reading single file ...");
-
+		//console.log("Reading single file ...");
+		
 		if(global.fileOpenCallback == undefined) {
 			console.error(new Error("There is no listener for the open file dialog!"));
 		}
@@ -1776,6 +1791,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		var fileName = file.name;
 		var filePath = file.path;
+		
+		
+		global.fileOpenCallback(filePath);
+		global.fileOpenCallback = undefined;
+		
+		
+		/*
+		
 		var reader = new FileReader();
 		
 		reader.onload = function(e) {
@@ -1794,7 +1817,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		};
 		reader.readAsText(file);
-
+		*/
 	}
 	
 	
@@ -1822,7 +1845,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	function fileDrop(e) {
 		e.preventDefault();
-
+		
 		console.log("DROP!");
 		
 		var file = e.dataTransfer.files[0];
@@ -1842,10 +1865,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		reader.readAsDataURL(file);
 		
 		/*
-		for (var i = 0; i < e.dataTransfer.files.length; ++i) {
+			for (var i = 0; i < e.dataTransfer.files.length; ++i) {
 			console.log(e.dataTransfer.files[i].path + "\n" + e.dataTransfer.files[i].data);
 			objInfo(e.dataTransfer.files[i]);
-		}
+			}
 		*/
 		
 		editor.interact("fileDrop");
@@ -1875,7 +1898,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				e.clipboardData.setData('text/plain', textToPutOnClipboard);
 			}
 			e.preventDefault();
-		
+			
 		}
 		
 		// else: Do the default action (enable copying outside the canvas)
@@ -1887,7 +1910,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	function cut(e) {
 		
 		if(editor.input) {
-		
+			
 			var textToPutOnClipboard = "";
 			
 			if(editor.currentFile) {
@@ -1906,24 +1929,24 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 			e.preventDefault();
 		}
-
+		
 		// else: Do the default action (enable cutting outside the canvas)
-
+		
 		editor.interact("cut");
 	}
 	
 	
 	function paste(e) {
 		var text = e.clipboardData.getData('text'),
-		ret,
-		textChanged = false;
+			ret,
+			textChanged = false;
 		
 		console.log("PASTE!" + text);
 		
 		if(editor.input) {
-		
+			
 			e.preventDefault();
-		
+			
 			console.log("Calling parse listeners (" + editor.eventListeners.paste.length + ") ...");
 			for(var i=0, fun; i<editor.eventListeners.paste.length; i++) {
 				
@@ -1959,11 +1982,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
-
-
+	
+	
 	
 	/*
-	function updateCaretGridPosition(caret, file) {
+		function updateCaretGridPosition(caret, file) {
 		var gridPosition = file.getGridPositionFromIndex(caret.index);
 		
 		caret.row = gridPosition.row;
@@ -1972,16 +1995,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("caret: " + JSON.stringify(caret));
 		
 		if(caret.index == file.text.length) {
-			console.log("caret at EOF");
+		console.log("caret at EOF");
 		}
 		else {
-			console.log("caret at char=" + file.grid[caret.row][caret.col].char + " charCode=" + file.grid[caret.row][caret.col].char.charCodeAt(0) + "");
+		console.log("caret at char=" + file.grid[caret.row][caret.col].char + " charCode=" + file.grid[caret.row][caret.col].char.charCodeAt(0) + "");
 		}
 		
-	}
+		}
 	*/
 	
-
+	
 	function keyPressed(e){
 		e = e || window.event; 
 		
@@ -1991,12 +2014,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var character = String.fromCharCode(charCode); 
 		
 		/*
-		var charCode;
-		
-		if(window.event){ // IE					
+			var charCode;
+			
+			if(window.event){ // IE					
 			charCode = e.keyCode;
-		}
-		else if(e.which){ // Netscape/Firefox/Opera					
+			}
+			else if(e.which){ // Netscape/Firefox/Opera					
 			charCode = e.which;
 		 }
 		*/
@@ -2008,11 +2031,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.currentFile) {
 			if(editor.input) {
 				// Put character at current caret position:
-							
+				
 				editor.currentFile.putCharacter(character);
-
+				
 			}
-
+			
 		}
 		
 		editor.interact("keyPressed");
@@ -2085,7 +2108,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				I probably had a good reason to edit this so that undefined combos didnt capture combos
 				Lets change back and see if I discover why ...
 				Note to self: comments! comments damnit!
-			
+				
 			*/
 			
 			//if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined && combo===0)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
@@ -2095,26 +2118,26 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					console.error(new Error("Can't have nice things! Causes a bug that will make native shit+ or algGr+ keyboard combos not work"));
 				}
 				else {
-				
-				//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
+					
+					//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
 					
 					if(captured) console.warn("Key combo has already been captured: charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
 					
-				captured = true;
+					captured = true;
 					
 					if(!editor.currentFile) console.warn("No file open!");
 					
 					try {
-				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down");
+						funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down");
 					} 
 					catch(err) {
 						gotError = err;
 						console.warn("Error when running key bound function:" + err.stack);
 					}
 					
-				if(funReturn === false) {
-					preventDefault = true;
-					console.log("Default action will be prevented!");
+					if(funReturn === false) {
+						preventDefault = true;
+						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
 						//console.error(new Error("Function bound to keys need to return true or false! When returning false, the default (chromium) behaviour is prevented."));
@@ -2133,9 +2156,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.currentFile.checkGrid();
 			editor.currentFile.checkCaret();
 		}
-
+		
 		editor.interact("keyDown");
-
+		
 		
 		if(combo.sum > 0 && !captured) {
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
@@ -2170,7 +2193,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 	}
-
+	
 	function getCombo(e) {
 		
 		var combo = {shift: false, alt: false, ctrl: false, sum: 0};
@@ -2190,7 +2213,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	function keyIsUp(e) {
-
+		
 		e = e || window.event; 
 		
 		//e.preventDefault();
@@ -2198,7 +2221,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCode = e.charCode || e.keyCode;
 		var character = String.fromCharCode(charCode);
 		var combo = getCombo(e);
-
+		
 		
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
@@ -2231,9 +2254,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var shiftKey = 16;
 		var tildeKey = 221;
 		
-			if(charCode == tildeKey) {
+		if(charCode == tildeKey) {
 			if(lastKeyDown == shiftKey) {
-					tildeShiftActive = true;
+				tildeShiftActive = true;
 			}
 			else if(lastKeyDown == altGr) {
 				tildeAltActive = true;
@@ -2241,12 +2264,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			else {
 				tildeActive = true;
 			}
-			}
+		}
 		else if(charCode != shiftKey) { // Prevent shift up to setting tildeShiftActive = false.
 			tildeActive = false;
 			tildeShiftActive = false;
 			tildeAltActive = false;
-			}
+		}
 		//console.log("a tildeActive=" + tildeActive);
 		//console.log("a tildeAltActive=" + tildeAltActive);
 		//console.log("a tildeShiftActive=" + tildeShiftActive);
@@ -2259,7 +2282,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				
 				//console.log("keyUp: Calling function: " + functionName(binding.fun) + "...");
-
+				
 				binding.fun(editor.currentFile, combo, character, charCode, "up");
 			}
 			
@@ -2269,9 +2292,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		editor.interact("keyUp");
 		
 		//return false;
-
+		
 	}
-
+	
 	
 	
 	function mouseDown(e) {
@@ -2292,18 +2315,18 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		//objInfo(target);
 		
-	
+		
 		var menu = document.getElementById("canvasContextmenu");
 		
 		//console.log("mouseDown on target.className=" + target.className);
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
-
+			
 			editor.hideMenu();
-
+			
 			caret = editor.mousePositionToCaret(mouseX, mouseY);
 			
-
+			
 			if(editor.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				// Give focus
 				editor.input = true;
@@ -2311,7 +2334,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				// Remove focus from everything else
 				document.activeElement.blur();
 				canvas.focus();
-			
+				
 				// Delete selection outside of the canvas
 				window.getSelection().removeAllRanges();
 				
@@ -2319,13 +2342,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					Try to steal focus from any textboxes like find/replace.
 					
 					Meh, why doesn't this work!!!?
-				
-				
-				document.body.focus(); // editor.currentFile.canvas
-				
-				document.getElementById("leftColumn").focus();
-				
-				console.log("REFOCUS!");
+					
+					
+					document.body.focus(); // editor.currentFile.canvas
+					
+					document.getElementById("leftColumn").focus();
+					
+					console.log("REFOCUS!");
 				*/
 			}
 			else {
@@ -2348,17 +2371,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 		
-
+		
 		console.log("Calling mouseClick (down) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
 		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
 			
 			click = editor.eventListeners.mouseClick[i];
 			
 			if((click.dir == "down" || click.dir == undefined) && 
-				(click.button == button || click.button == undefined) && 
-				(click.targetClass == target.className || click.targetClass == undefined) && 
-				(click.combo == keyboardCombo.sum || click.combo === undefined) &&
-				(click.targetTag == target.tagName || click.targetTag == undefined)
+			(click.button == button || click.button == undefined) && 
+			(click.targetClass == target.className || click.targetClass == undefined) && 
+			(click.combo == keyboardCombo.sum || click.combo === undefined) &&
+			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
 				//console.log("Calling " + functionName(click.fun) + " ...");
@@ -2384,13 +2407,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		//return true;
-
+		
 	}
-
+	
 	
 	function mouseUp(e) {
 		e = e || window.event;
-
+		
 		//e.preventDefault(); // Commented this because I couln't click on selected text inside html input 
 		
 		// Mouse position is on the current object (Canvas) 
@@ -2403,7 +2426,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			keyboardCombo = getCombo(e),
 			mouseDirection = "up";
 		
-
+		
 		console.log("Mouse up on class " + target.className + "!");
 		
 		console.log("Calling mouseClick (up) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
@@ -2412,38 +2435,38 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			// Make sure to define click.dir (to prevent double action)!
 			if((click.dir == "up" || click.dir == undefined) && 
-				(click.button == button || click.button == undefined) && 
-				(click.targetClass == target.className || click.targetClass == undefined) && 
-				(click.combo == keyboardCombo.sum || click.combo == undefined) && 
-				(click.targetTag == target.tagName || click.targetTag == undefined)
+			(click.button == button || click.button == undefined) && 
+			(click.targetClass == target.className || click.targetClass == undefined) && 
+			(click.combo == keyboardCombo.sum || click.combo == undefined) && 
+			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
-			
+				
 				console.log("Calling " + functionName(click.fun) + " ...");
-
+				
 				click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo); // Call it
 			}
 		}
-
+		
 		
 		//console.log("mouseUp, editor.shouldRender=" + editor.shouldRender);
-
+		
 		
 		editor.interact("mouseUp");
 		
 		return false;
 		//return true;
-
+		
 	}
 	
 	function mouseMove(e) {
-			
+		
 		e = e || window.event;
-
+		
 		//e.preventDefault();
- 		// Mouse position is on the current object (Canvas) 
+		// Mouse position is on the current object (Canvas) 
 		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX;
 		var mouseY = e.offsetY==undefined?e.layerY:e.offsetY;
-
+		
 		var target = e.target;
 		
 		// Mouse position is on the whole page
@@ -2460,10 +2483,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				//console.log(functionName(fun));
 				
 				fun(mouseX, mouseY, target); // Call it
-
+				
 			}
 		}
-
+		
 		//console.log("editor.input=" + editor.input);
 		
 		editor.interact("mouseMove");
@@ -2481,15 +2504,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("mouseClick, editor.shouldRender=" + editor.shouldRender + ", editor.shouldResize=" + editor.shouldResize);
 		
 		editor.interact("mouseClick");
-
+		
 	}
-
+	
 	
 	
 	
 	
 	function scrollWheel(e) {
-
+		
 		e = e || window.event;
 		
 		console.log("scroll ... e.ctrlKey=" + e.ctrlKey);
@@ -2497,7 +2520,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 		//console.log("wheelDelta=" + e.wheelDelta + " wheelDeltaY=" + e.wheelDeltaY + " deltaY=" + e.deltaY + " detail=" + e.detail );
-
+		
 		var delta = e.wheelDelta || -e.detail,
 			target = e.target,
 			tagName = target.tagName,
@@ -2521,7 +2544,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	
 	function getFile(url, callback) {
-
+		
 		console.log("Opening url:" + url);
 		
 		var xmlHttp = new XMLHttpRequest();
@@ -2548,13 +2571,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 		}
 	}
-
-
+	
+	
 	function openFile(text, path) {
 		/*
-		
+			
 			No split screen support (for now ... just resize and bring up another instance instead)
-		
+			
 			We should however support having many files open!
 			
 			File focus problem:
@@ -2567,13 +2590,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			Possible solutions:
 			
 			Only listen to key strokes if the "document" has focus
-				* Esc key wont work
-				
+			* Esc key wont work
+			
 			
 			The solution:
-				Have the arrow, enter, etc plug-ins check editor.input before doing their thing.
+			Have the arrow, enter, etc plug-ins check editor.input before doing their thing.
 			
-				
+			
 			
 		*/
 		
@@ -2589,7 +2612,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 		
 		editor.renderNeeded();
-
+		
 	}
 	
 	
@@ -2600,7 +2623,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		delete editor.files[name];
 		
 	}
-
+	
 	function htmlToImage(html, callback) {
 		
 		if(!callback) console.error(new Error("No callback function in htmlToImage"));
@@ -2608,16 +2631,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		html = html + " "; // Last word wont show unless there's a space at the end! WTF!?
 		
 		/*
-		var data = '<svg xmlns="http://www.w3.org/2000/svg">' +
-				   '<foreignObject width="100%" height="100%">' +
-				   '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
-					 '<em>I</em> like ' + 
-					 '<span style="color:white; text-shadow:0 0 2px blue;">' +
-					 'cheese</span>' +
-				   '</div>' +
-				   '</foreignObject>' +
-				   '</svg>';
-
+			var data = '<svg xmlns="http://www.w3.org/2000/svg">' +
+			'<foreignObject width="100%" height="100%">' +
+			'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
+			'<em>I</em> like ' + 
+			'<span style="color:white; text-shadow:0 0 2px blue;">' +
+			'cheese</span>' +
+			'</div>' +
+			'</foreignObject>' +
+			'</svg>';
+			
 		*/
 		
 		// The svg seems to need a width and height beforehand, or it will use a default width of 100px
@@ -2629,32 +2652,32 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("width=" + width);
 		
 		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
-		             '<foreignObject width="100%" height="100%">' +
-		               '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + editor.settings.style.fontSize + 'px; font-family: ' + editor.settings.style.font + ';">' +
-		                 html +
-		               '</div>' +
-		             '</foreignObject>' +
-		           '</svg>';
+		'<foreignObject width="100%" height="100%">' +
+		'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + editor.settings.style.fontSize + 'px; font-family: ' + editor.settings.style.font + ';">' +
+			html +
+			'</div>' +
+			'</foreignObject>' +
+			'</svg>';
 			
-		
-		var DOMURL = window.URL || window.webkitURL || window;
-
-		var img = new Image();
-		var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-		var url = DOMURL.createObjectURL(svg);
-
-		img.onload = function () {
-			callback(img);
-			DOMURL.revokeObjectURL(url);
-			//console.log("Image yo!");
-
+			
+			var DOMURL = window.URL || window.webkitURL || window;
+			
+			var img = new Image();
+			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+			var url = DOMURL.createObjectURL(svg);
+			
+			img.onload = function () {
+				callback(img);
+				DOMURL.revokeObjectURL(url);
+				//console.log("Image yo!");
+				
+			}
+			
+			img.src = url;
 		}
-
-		img.src = url;
-	}
-
-
-
-
-
-})();
+		
+		
+		
+		
+		
+	})();
