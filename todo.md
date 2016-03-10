@@ -1,5 +1,6 @@
 Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). No new features until that is done!
 
+
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 

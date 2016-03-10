@@ -18,7 +18,7 @@
 			file.lineBreak = "";
 			file.indentation = "";
 			file.lastPart = false;
-			file.partLineStart = 0;
+			file.partStartRow = 0;
 			
 		}
 		else {
@@ -32,7 +32,7 @@
 			file.fixInconsistentLineBreaks();
 			
 			file.lastPart = true;
-			file.partLineStart = 0;
+			file.partStartRow = 0;
 						
 		}
 		
@@ -1916,7 +1916,7 @@
 		
 		//console.log(JSON.stringify(grid, null, 4));
 		
-		console.log("letters:" + letters);
+		//console.log("letters:" + letters);
 		
 		console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 		
@@ -2014,6 +2014,11 @@
 		var file = this;
 		
 		file.changed = true;
+		
+		
+		if(file.partStartRow > 0) {
+			alert("Big file support not yet implemented. Changes will not be saved!")
+		}
 		
 		file.isSaved = false;
 		
@@ -2264,39 +2269,74 @@
 		var startRow = file.startRow;
 		var scrolled = false;
 		
-		// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
-		var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
 		
 		if(x != undefined) startColumn = parseInt(x);
-		if(y != undefined) startRow = Math.max(Math.min(parseInt(y), maxY), 0); // > 0 && < maxY
-		
-		if(file.startColumn != startColumn || file.startRow != startRow) {
-			file.startColumn = startColumn;
-			file.startRow = startRow;
-			scrolled = true;
-		}
-		
-		/*
-			if(file.startRow > maxY) {
-			console.warn("Attempted to scroll below visible veiw");
-			file.startRow = maxY;
-			scrolled = true;
+		if(y != undefined) {
+			
+			if(file.stream) {
+				var loadTail = parseInt(file.grid.length * .75);
+				var loadHead = parseInt(file.grid.length * .25);
+				
+				if(y > loadTail) {
+					catchStream(file, file.partStartRow + loadHead, streamLoaded);
+					return;
+				}
+				else if(y < loadHead && file.partStartRow > 0) {
+					//catchStream(file, startLine, streamLoaded);
+					//return;
+				}
+				
 			}
 			
-			if(file.startRow < 0) {
-			console.warn("We can not scroll up higher then the first row."); // But we can increase the top margin!? erm noo
-			file.startRow = 0;
-			scrolled = true;
-			}
-		*/
+			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
+			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
 		
-		// Update endingcolumn and render?
-		if(editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
-			editor.view.endingColumn = file.startColumn + editor.view.visibleColumns;
-			scrolled = true;
+			startRow = Math.max(Math.min(parseInt(y), maxY), 0); // > 0 && < maxY
+				
 		}
 		
-		if(scrolled) editor.renderNeeded();
+		doTheScrolling();
+		
+		function doTheScrolling() {
+			if(file.startColumn != startColumn || file.startRow != startRow) {
+				file.startColumn = startColumn;
+				file.startRow = startRow;
+				scrolled = true;
+			}
+			
+			/*
+				if(file.startRow > maxY) {
+				console.warn("Attempted to scroll below visible veiw");
+				file.startRow = maxY;
+				scrolled = true;
+				}
+				
+				if(file.startRow < 0) {
+				console.warn("We can not scroll up higher then the first row."); // But we can increase the top margin!? erm noo
+				file.startRow = 0;
+				scrolled = true;
+				}
+			*/
+			
+			// Update endingcolumn and render?
+			if(editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
+				editor.view.endingColumn = file.startColumn + editor.view.visibleColumns;
+				scrolled = true;
+			}
+			
+			if(scrolled) editor.renderNeeded();
+		}
+		
+		function streamLoaded() {
+			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
+			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
+		
+			startRow = Math.max(Math.min(parseInt(y - loadHead), maxY), 0);
+			
+			doTheScrolling();
+			
+		}
+		
 		
 	}
 	
@@ -2596,31 +2636,41 @@
 		}
 	}
 	
-	function catchStream(file, startLine, callback) {
+	function catchStream(file, partStartRow, callback) {
+		
+		// partStartRow 0 = line 1
+		
+		// note: Stream is always restarted besides first time the file is opened.
 		
 		var totalLength = 0;
 		var text = "";
 		var endReached = false;
-		var lineBreakCount = 0;
-		var gotLineBreaks = file.lineBreak ? true : false;
+		var lineBreakCount = file.partStartRow + (file.grid.length > 0 ? file.grid.length-1 : 0);
+		var gotLineBreaks = file.lineBreak.length > 0 ? true : false;
+		var firstChunk = true;
 		
-		if(startLine == undefined) startLine = 0;
+		if(partStartRow == undefined) partStartRow = 0;
 		
-		if(startLine < file.partLineStart) {
+		if(partStartRow < lineBreakCount) {
 			// Restart the file stream
+			console.log("Restarting stream!");
+			
 			file.stream.close();
 			file.stream.destroy();
+			
 			file.stream = fs.createReadStream(file.path);
+			lineBreakCount = 0;
 		}
-		else if(startLine > 0) {
+		else if(partStartRow > 1) {
 			file.stream.resume(); // Continue reading
 		}
 		
-		console.log("Gone fishing ...")
+		console.log("Gone fishing partStartRow=" + partStartRow + "...")
 		
 		file.stream.on('readable', readStream);
 		file.stream.on("end", function() {
-			endReached = true;
+			//endReached = true;
+			gotFish(true);
 		});
 		
 		function readStream() {
@@ -2630,42 +2680,54 @@
 			var chunk;
 			var lineBreaks = 0;
 			var linesToCut = 0;
+			var str = "";
+			var chunkSize = 300;
 			
-			while (null !== (chunk = file.stream.read()) && !file.stream.isPaused() ) {
+			TODO: Cut the string after! Can't cut in the middle might cut in linebreak
+			
+			while (null !== (chunk = file.stream.read(chunkSize)) && !file.stream.isPaused() ) {
+				
+				console.log("Got chunk length=" + chunk.length + ", text.length=" + text.length + " lineBreakCount=" + lineBreakCount + " partStartRow=" + partStartRow);
+				
+				// Convert chunk to string
+				str = "" + chunk;
 				
 				if(!gotLineBreaks) {
-					file.lineBreak = determineLineBreakCharacters(chunk);
+					file.lineBreak = determineLineBreakCharacters(str);
 					gotLineBreaks = true;
 				}
 				
-				lineBreaks = occurrences(chunk, file.lineBreak, false);
+				lineBreaks = occurrences(str, file.lineBreak, false);
 				
 				lineBreakCount += lineBreaks;
 				
-				if(lineBreakCount > startLine) {
+				if(lineBreakCount > partStartRow) {
 				
-					if(text.length == 0) {
-						// Cut the chunk so we start at startLine
-						linesToCut = lineBreakCount - startLine;
-						while(--linesToCut != 0) {
-							chunk = chunk.substring(chunk.indexOf(file.lineBreak) + file.lineBreak.length, chunk.length);
+					if(text.length == 0 && partStartRow > 0) {
+						// 
+						linesToCut = lineBreakCount - partStartRow;
+						console.log("lineBreakCount=" + lineBreakCount + " partStartRow=" + partStartRow + " linesToCut=" + linesToCut);
+						while(linesToCut-- > 0) {
+							str = str.substring(str.indexOf(file.lineBreak) + file.lineBreak.length, str.length);
 						}
+						
+						// lineBreakCount -= linesToCut;
 					}
 
-					text = text + chunk;
+					text = text + str;
 					
-					if(text.length > editor.settings.bigFileCharLimit) gotFish(); 
+					if(text.length > editor.settings.bigFileCharLimit) gotFish(false); 
 				}
 				
-				console.log("Got chunk length=" + chunk.length + ", text.length=" + text.length + " lineBreakCount=" + lineBreakCount + " startLine=" + startLine);
-								
+				firstChunk = false;
 			}
 		}
 		
 		
-		function gotFish() {
-			console.log("Got fish!");
-			file.stream.pause();
+		function gotFish(endReached) {
+			console.log("Got fish! L=" + (partStartRow+1));
+			
+			if(!endReached) file.stream.pause();
 				
 			if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
 			
@@ -2685,13 +2747,14 @@
 			
 			console.log("file.text.length=" + file.text.length);
 			
-			//file.debugGrid();
+			file.debugGrid();
 			
 			file.indentation = determineIndentationConvention(file.text, file.lineBreak);
 			file.fixInconsistentLineBreaks();
 			file.grid = file.createGrid();
 			
-			if(file.caret.row < startLine) {
+			
+			if(file.caret.row <= partStartRow) {
 				// Place the caret at the top
 				file.caret.row = 0;
 				file.caret.col = 0;
@@ -2703,12 +2766,12 @@
 			}
 			else {
 				// Place the caret where it was
-				file.caret.row += file.partLineStart - startLine;
+				file.caret.row += file.partStartRow - partStartRow;
 			}
 
 			file.fixCaret();
 			
-			file.partLineStart = startLine;
+			file.partStartRow = partStartRow;
 			
 			editor.renderNeeded();
 			

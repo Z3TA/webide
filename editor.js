@@ -1,6 +1,8 @@
 "use strict";
 
 
+var testfile = "test/testfile.txt";
+
 // The editor object lives in global scope, so that it can be accessed everywhere.
 var editor = {};
 
@@ -45,7 +47,7 @@ editor.settings = {
 	drawGridBox: false,
 	scrollStep: 3,
 	bigFileSize: 150000, // Bytes, all files larger then this will be opened as streams
-	bigFileCharLimit: 500, // Characters to show in the editor for big files
+	bigFileCharLimit: 4000, // Characters to show in the editor for big files
 	autoCompleteKey: 9, // Tab
 	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc, Function help hinting doesn’t go away when typing.
 	insert: false
@@ -374,6 +376,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.error(new Error("No file open when save was called"));
 		}
 		
+		
 		// Do not specify path for saving in old path!
 		
 		if(editor.files.hasOwnProperty(path)) console.error(new Error("There is already a file open with path=" + path));
@@ -525,7 +528,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Tell the editor that it needs to render
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			console.log(new Error("Render").stack);
+			//console.log(new Error("Render").stack);
 		}
 		editor.shouldRender = true;
 	}
@@ -534,7 +537,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Tell the editor that it needs to resize
 		if(editor.settings.devMode && editor.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			console.log(new Error("Resize").stack);
+			//console.log(new Error("Resize").stack);
 		}
 		editor.shouldResize = true;
 	}
@@ -1579,6 +1582,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var name = "";
 		
 		console.log("Closing the editor ...");
+
 		
 		if(!window.localStorage) {
 			console.warn("window.localStorage=" + window.localStorage);
@@ -1769,6 +1773,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			editor.renderNeeded();
 			editor.render();
+			
+			if(editor.devMode = true) editor.openFile(testfile);
 			
 		}
 		
