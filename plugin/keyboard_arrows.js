@@ -6,9 +6,9 @@
 	editor.keyBindings.push({charCode: 39, fun: moveRight, dir: "down"});
 	//editor.keyBindings.push({charCode: 39, fun: moveRightAndSelect, combo: 1});
 	
-	editor.keyBindings.push({charCode: 37, fun: moveLeft});
-	editor.keyBindings.push({charCode: 38, fun: moveUp});
-	editor.keyBindings.push({charCode: 40, fun: moveDown});
+	editor.keyBindings.push({charCode: 37, fun: keyboard_arrows_moveLeft});
+	editor.keyBindings.push({charCode: 38, fun: keyboard_arrows_moveUp});
+	editor.keyBindings.push({charCode: 40, fun: keyboard_arrows_moveDown});
 	
 	var selectStart, selectEnd;
 
@@ -18,7 +18,7 @@
 	}
 	
 	
-	function moveLeft(file, combo, character, charCode, keyPush) {
+	function keyboard_arrows_moveLeft(file, combo, character, charCode, keyPush) {
 		
 		if(editor.input) {
 			file.removeHighlights();
@@ -134,7 +134,7 @@
 	}
 	
 	
-	function moveUp(file, combo) {
+	function keyboard_arrows_moveUp(file, combo) {
 		
 		
 		if(editor.input) {
@@ -203,7 +203,7 @@
 	
 	}
 	
-	function moveDown(file, combo) {
+	function keyboard_arrows_moveDown(file, combo) {
 		
 		if(editor.input) {
 			file.removeHighlights();
@@ -238,9 +238,9 @@
 				file.deselect();
 			}
 			
-			file.moveCaretDown(caret); // Moves the caret
+			caret = file.moveCaretDown(caret); // Moves the caret
 			
-			
+						
 			if(combo.sum == SHIFT) {
 				selectEnd = caret.index;
 				
@@ -260,7 +260,9 @@
 					
 			}
 			
-			file.scrollToCaret(caret);
+			file.scrollToCaret(caret); // Scroll to the new caret
+			
+			file.caret = caret; // Set the new caret
 			
 			editor.renderNeeded();
 			

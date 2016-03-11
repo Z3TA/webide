@@ -47,7 +47,7 @@
 		editor.keyBindings.push({charCode: charEscape, fun: hide_gotoInput}); // Escape
 		editor.keyBindings.push({charCode: charEnter, fun: gotoFile}); // Enter
 		editor.keyBindings.push({charCode: keyUp, fun: moveUp});
-		editor.keyBindings.push({charCode: keyDown, fun: moveDown});
+		editor.keyBindings.push({charCode: keyDown, fun: gotoFile_moveDown});
 		
 	}
 	
@@ -380,9 +380,9 @@
 		
 	}
 	
-	function moveDown() {
+	function gotoFile_moveDown() {
 		
-		if(!gotoList) return;
+		if(!gotoList) return false;
 		
 		var listItems = gotoList.childNodes;
 		

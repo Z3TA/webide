@@ -47,7 +47,7 @@ editor.settings = {
 	drawGridBox: false,
 	scrollStep: 3,
 	bigFileSize: 150000, // Bytes, all files larger then this will be opened as streams
-	bigFileCharLimit: 4000, // Characters to show in the editor for big files
+	bigFileLoadRows: 50, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc, Function help hinting doesn’t go away when typing.
 	insert: false
@@ -523,12 +523,32 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
 	}
 	
+	editor.getcallStack = function(msg) {
+		
+		if(msg == undefined) msg = "";
+		
+		var str = new Error(msg).stack;
+		
+		// Remove first at (this function)
+		str = str.substr(str.indexOf("\n")+5, str.length);
+		str = str.substr(str.indexOf("\n")+5, str.length);
+		
+		return msg + ": " + str;
+	}
 	
 	editor.renderNeeded = function() {
 		// Tell the editor that it needs to render
+		
+		if(editor.currentFile) {
+			if(editor.currentFile.isStreaming) {
+				console.warn("Will not render while the file is streaming!");
+				return;
+			}
+		}
+		
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			//console.log(new Error("Render").stack);
+			console.log(editor.getcallStack("Render"));
 		}
 		editor.shouldRender = true;
 	}
@@ -2127,9 +2147,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 					//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
 					
-					if(captured) console.warn("Key combo has already been captured: charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo));
+					if(captured) console.warn("Key combo has already been captured by " + functionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + functionName(binding.fun));
 					
-					captured = true;
+					captured = binding.fun;
 					
 					if(!editor.currentFile) console.warn("No file open!");
 					
