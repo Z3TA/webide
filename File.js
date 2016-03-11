@@ -2313,19 +2313,20 @@
 				var high = Math.min((file.grid.length - editor.view.visibleRows), Math.floor(file.grid.length * .85 - editor.view.visibleRows));
 				var low = Math.floor(file.grid.length * .15);
 				var middle = Math.floor(file.grid.length * .5);
+				var moveRows = Math.floor(file.grid.length * .25);
 				
-				if(high < low) console.error(new Error("You need to increase editor.settings.bigFileLoadRows!"));
+				if(high < low) console.error(new Error("This will not work!"));
 				
-				console.log(editor.getcallStack("scrollTo"));
+				//console.log(editor.getcallStack("scrollTo"));
 				
 				console.log("Scrolling in big file: file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
 				
 				if(y > high) {
-					catchStream(file, file.partStartRow + Math.floor(file.grid.length * .25), streamLoaded);
+					catchStream(file, file.partStartRow + moveRows, streamLoaded);
 					return;
 				}
 				else if(y < low && file.partStartRow > 0) {
-					catchStream(file, Math.max(0, file.partStartRow - Math.floor(file.grid.length * .25)), streamLoaded);
+					catchStream(file, Math.max(0, file.partStartRow - moveRows), streamLoaded);
 					return;
 				}
 				
