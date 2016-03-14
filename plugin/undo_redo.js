@@ -197,8 +197,8 @@
 	
 	function saveState(file) {
 		
-		if(file.text.length > sizeLimit) {
-			console.warn("Not saving undor/redo state for file because it has more then " + sizeLimit + " characters! file.path=" + file.path);
+		if(file.text.length > editor.settings.bigFileSize || file.stream) {
+			console.warn("Not saving undor/redo state for file because it has more then " + editor.settings.bigFileSize + " characters! (or is a stream) file.path=" + file.path);
 			return;
 		}
 		

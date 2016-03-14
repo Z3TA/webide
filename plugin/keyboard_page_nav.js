@@ -49,14 +49,16 @@
 		}
 		else {
 			// Move caret to the bottom
-			file.caret.row = file.grid.length;
+			//file.caret.row = file.grid.length;
+			file.moveCaretToEnd(file.caret, function() {
+				
+				file.scrollToCaret();
+
+				editor.renderNeeded();
+				
+			});
 		}
 
-		file.fixCaret();
-
-		file.scrollToCaret();
-
-		editor.renderNeeded();
 	}
 	
 	
@@ -69,16 +71,18 @@
 		}
 		else {
 			// Move caret to the top
-			file.caret.row = 0;
-			file.caret.col = 0;
+			//file.caret.row = 0;
+			//file.caret.col = 0;
+			file.moveCaretToStart(file.caret, function() {
+				
+				file.scrollToCaret();
+
+				editor.renderNeeded();
+				
+			});
+			
 		}
 
-		
-		file.fixCaret(); // also calls checkCaret
-
-		file.scrollToCaret();
-
-		editor.renderNeeded();
 	}
 	
 	

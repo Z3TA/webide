@@ -20,6 +20,8 @@
 			file.lastPart = false;
 			file.partStartRow = 0;
 			file.parse = false; // Do not parse big files
+			file.totalRows = undefined;
+			file.grid = [];
 		}
 		else {
 			file.stream = false;
@@ -34,6 +36,7 @@
 			file.lastPart = true;
 			file.partStartRow = 0;
 			file.parse = true; // Always parse new files by default
+			file.totalRows = 0;
 		}
 		
 		file.isStreaming = false; // If the file is currently pulling data from the file read stream
@@ -68,10 +71,12 @@
 			And then ... One day ... I got in!!!
 		*/	
 		
-		file.grid = file.createGrid();
-		
-		file.caret = file.createCaret(0,0,0);
-		
+		if(!file.stream) {
+			file.grid = file.createGrid();
+			file.totalRows = file.grid.length-1;
+		}
+		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
+	
 		
 		/*
 			if(file.grid[0].length == 0) {
@@ -181,6 +186,16 @@
 			caret = {index: index, row: row, col: col, eol: false, eof: false};
 		
 		
+		if(file.grid.length == 0) {
+			if(index == 0 && row == 0 && col == 0) {
+				caret.eof = true;
+				caret.eol = true;
+				return caret;
+			}
+			else {
+				console.error(new Error("Can't place the caret on index=" + index + " row=" + row + " col=" + col + " when file.grid.length=" + file.grid.length + " !"));
+			}
+		}
 		
 		if(index > 0) file.checkGrid();
 		
@@ -1612,8 +1627,10 @@
 		
 		// Moves the caret to the start of the file
 		
+		if(caret == undefined) caret = file.caret;
+		
 		if(file.stream && file.partStartRow > 0) {
-			if(caret != file.caret) console.error(new Error("Can only place the file.caret if the file is big!"));
+			if(caret != file.caret) console.error(new Error("Can not place virtual caret, only file.caret if the file is big!"));
 			
 			var partStartRow = 0;
 			catchStream(file, partStartRow, cb);
@@ -1633,12 +1650,64 @@
 		
 	}
 	
-	File.prototype.moveCaretToEnd = function(caret) {
+	File.prototype.moveCaretToEnd = function(caret, cb) {
+		var file = this;
 		// Moves the caret to the end of the file
 		
+		if(caret == undefined) caret = file.caret;
+		
+		if(file.stream) {
+			
+			console.log("file is a stream!");
+			
+			if(caret != file.caret) console.error(new Error("Can not place virtual caret, only file.caret if the file is big!"));
+			
+			if(file.totalRows == undefined) console.error(new Error("totalRows not yet found! Wait ...?"));
+			
+			var startRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
+		
+			if(startRow < 0) console.error(new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!"));
+			
+			catchStream(file, startRow, function() {
+				
+				file.caret.row = file.grid.length;
+				
+				file.fixCaret();
+				
+				if(cb) cb(file.caret);
+				
+			});
+			
+		}
+		else {
+			
+			console.log("file Not a stream!");
+			
+			caret.row = 0;
+			caret.col = 0;
+			
+			file.fixCaret(caret);
+			
+			if(cb) {
+				cb(caret);
+			}
+			else {
+				return caret;
+			}
+		}
 		
 	}
 	
+	File.prototype.tail = function(row, col) {
+		// Loads the last part of the file
+		if(file.stream) {
+			
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
 	
 	File.prototype.getIndexFromRowCol = function(row, col) {
 		var file = this,
@@ -2480,7 +2549,6 @@
 		return !(gridRow < startRow || gridRow > endRow);
 	}
 	
-	
 	/*
 		
 		Every character is a box!
@@ -2704,6 +2772,11 @@
 			return;
 		}
 		
+		if(file.isStreaming) {
+			alert("The file is already busy streaming ...");
+			return;
+		}
+		
 		// partStartRow 0 = line 1
 		
 		// note: Stream is always restarted besides first time the file is opened.
@@ -2713,6 +2786,7 @@
 		var endReached = false;
 		var totalLineBreaks = file.partStartRow + (file.grid.length > 0 ? file.grid.length-1 : 0);
 		var startLinebreaks = 0;
+		var continueToEnd = false; // If set to true, only count line breaks
 		
 		if(partStartRow == undefined) partStartRow = 0;
 		
@@ -2748,10 +2822,10 @@
 			// Called each time there is someting comming down the stream
 			
 			var chunk;
-			var chunkSize = 512; // How many bytes to recive in each chunk
 			var lineBreaks = 0;
 			var str = "";
 			var decoder = new StringDecoder('utf8');
+			var chunkSize = 512; // How many bytes to recive in each chunk
 			
 			while (null !== (chunk = file.stream.read(chunkSize)) && !file.stream.isPaused() ) {
 				
@@ -2770,108 +2844,138 @@
 				
 				totalLineBreaks += lineBreaks;
 				
-				if(totalLineBreaks >= partStartRow) {
+				if(totalLineBreaks >= partStartRow && !continueToEnd) {
 					// Start saving characters
 					if(!startLinebreaks) startLinebreaks = totalLineBreaks - lineBreaks; // Accumulated linebreaks when we started capturing text
 					text = text + str;
 				}
 				
-				//console.log("Got chunk! length=" + chunk.length + ", text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow);
+				console.log("Got chunk! length=" + chunk.length + ", text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " continueToEnd=" + continueToEnd);
 
 				
 				// Stop when we got enough characters (not line breaks)
 				//if(text.length > editor.settings.bigFileLoadRows) gotFish(false); 
 				
-				if( startLinebreaks && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows ) gotFish(false); 
+				if( startLinebreaks && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows && !continueToEnd) gotFish(false); 
 				
 			}
 		}
 		
 		
 		function gotFish(endReached) {
-			console.log("Got fish! L=" + (partStartRow+1) + " text.length=" + text.length);
 			
-			if(partStartRow > totalLineBreaks) {
-				console.error(new Error("Cant begin stream after it has ended! partStartRow=" + partStartRow + " is above totalLineBreaks=" + totalLineBreaks));
-			}
+			console.log("Got fish! continueToEnd=" + continueToEnd);
 			
-			if(!endReached) file.stream.pause();
-			
-			file.stream.removeListener("readable", readStream);
-			file.stream.removeListener("end", streamEnded);
-			
-			file.isStreaming = false;
-			
-			if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
-			
-			if(partStartRow > 0) {
-				// Make the text start at partStartRow
-				// 
-				var linesToCut = partStartRow - startLinebreaks;
-				if(linesToCut < 0) linesToCut = partStartRow;
-				//console.log("startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " linesToCut=" + linesToCut);
-				while(linesToCut-- > 0) {
-					text = text.substring(text.indexOf(file.lineBreak) + file.lineBreak.length, text.length);
-					//console.log("cutting! linesToCut=" + linesToCut);
+			if(!continueToEnd) {
+
+				console.log("L=" + (partStartRow+1) + " text.length=" + text.length);
+
+				if(partStartRow > totalLineBreaks) {
+					console.error(new Error("Cant begin stream after it has ended! partStartRow=" + partStartRow + " is above totalLineBreaks=" + totalLineBreaks));
 				}
+			
+				if(!endReached) file.stream.pause();
+				
+				if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
+				
+				if(partStartRow > 0) {
+					// Make the text start at partStartRow
+					// 
+					var linesToCut = partStartRow - startLinebreaks;
+					if(linesToCut < 0) linesToCut = partStartRow;
+					//console.log("startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " linesToCut=" + linesToCut);
+					while(linesToCut-- > 0) {
+						text = text.substring(text.indexOf(file.lineBreak) + file.lineBreak.length, text.length);
+						//console.log("cutting! linesToCut=" + linesToCut);
+					}
+				}
+				
+				if(!endReached) {
+					// Cut the text at last newline so that we don't stop in the middle of a line
+					
+					var cutAt = text.lastIndexOf(file.lineBreak);
+					var cutText = text.substring(cutAt, text.length);
+					
+					file.stream.unshift(cutText); // Put the cut text back into the stream
+					
+					text = text.substr(0, cutAt);				
+					
+				}
+				
+				file.text = text;
+				
+				//file.debugGrid();
+				
+				file.indentation = determineIndentationConvention(file.text, file.lineBreak);
+				file.fixInconsistentLineBreaks();
+				file.grid = file.createGrid();
+				
+				console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
+				
+				console.log("Fixing caret ... ");
+				console.log("file.caret.row=" + file.caret.row + " ");
+				
+				var diff = (file.partStartRow - partStartRow);
+				
+				console.log("diff=" + diff);
+				
+				// Move the caret to the same position it was on
+				file.caret.row += diff;
+				console.log("Placed it at file.caret.row=" + file.caret.row + " ");
+				
+				if(file.caret.row < 0) {
+					// Place the caret at the top
+					console.log("Place the caret at the top");
+					file.caret.row = 0;
+					file.caret.col = 0;
+				}
+				else if(file.caret.row >= (file.grid.length)) {
+					// Place the caret at EOF
+					console.log("Place the caret at EOF");
+					file.caret.row = file.grid.length-1;
+					file.caret.col = file.grid[file.grid.length-1].length -1;
+					file.caret.eol = true;
+					file.caret.eof = true;
+				}
+
+				file.fixCaret();
+				
+				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
+				
+				file.partStartRow = partStartRow;
+				
+				
+				editor.renderNeeded();
+				
+				if(callback) callback();
+				
+				if(endReached) {
+					file.totalRows = totalLineBreaks-1;
+				}
+				else if(file.totalRows == undefined && partStartRow == 0) {
+					// Continue to load the file to find out how many rows it has
+					continueToEnd = true; // We have to reuse the old event listeners, or nodejs will complain about too many event listeners (even if we have removed them!)
+					file.stream.resume();
+				}
+				else if(partStartRow > 0) {
+					console.error(new Error("partStartRow=" + partStartRow + " > 0, .file.totalRows=" + file.totalRows + ". This should never happen!"));
+				}
+				
+
 			}
-			
-			if(!endReached) {
-				// Cut the text at last newline so that we don't stop in the middle of a line
-				
-				var cutAt = text.lastIndexOf(file.lineBreak);
-				var cutText = text.substring(cutAt, text.length);
-				
-				file.stream.unshift(cutText); // Put the cut text back into the stream
-				
-				text = text.substr(0, cutAt);				
-				
+			else if(endReached) {
+				// We have reached the end!
+				file.totalRows = totalLineBreaks-1;
 			}
-			
-			file.text = text;
-			
-			//file.debugGrid();
-			
-			file.indentation = determineIndentationConvention(file.text, file.lineBreak);
-			file.fixInconsistentLineBreaks();
-			file.grid = file.createGrid();
-			
-			console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
-			
-			console.log("Fixing caret ... file.caret.row=" + file.caret.row + " ");
-			
-			var diff = (file.partStartRow - partStartRow);
-			
-			console.log("diff=" + diff);
-			
-			// Move the caret to the same position it was on
-			file.caret.row += diff;
-			console.log("Placed it at file.caret.row=" + file.caret.row + " ");
-			
-			if(file.caret.row < 0) {
-				// Place the caret at the top
-				console.log("Place the caret at the top");
-				file.caret.row = 0;
-				file.caret.col = 0;
-			}
-			else if(file.caret.row >= (file.grid.length)) {
-				// Place the caret at EOF
-				console.log("Place the caret at EOF");
-				file.caret.row = file.grid.length-1;
-				file.caret.col = file.grid[file.grid.length-1].length -1;
-				file.caret.eol = true;
-				file.caret.eof = true;
+			else {
+				console.error(new Error(" continueToEnd=" + continueToEnd + " endReached=" + endReached + ". This should never happen!"));
 			}
 
-			file.fixCaret();
-			
-			console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
-			
-			file.partStartRow = partStartRow;
-			
-			editor.renderNeeded();
-			
-			if(callback) callback();
+			if(file.totalRows != undefined) {
+				file.stream.removeListener("readable", readStream);
+				file.stream.removeListener("end", streamEnded);
+				file.isStreaming = false; // We can only render if it's false! (how to fix this??)
+			}
 			
 		}
 		
