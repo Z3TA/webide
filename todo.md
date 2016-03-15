@@ -6,17 +6,8 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Possible to go to End of a big file (stream). End button.
-problem: not rendering while streaming
-solution: add a file.render bool.
+Loading icon while the file is streaming!?
 
-
-Optimization for opening and reading huge files ...
-
-When opening a file, first check file size.
-If it's under limit, open normally.
-If it's over limit, open in chucks using read stream
-Open X rows or byte? 
 
 
 Continue loading the rest and map every one hundred line with an index (for faster opening)

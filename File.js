@@ -2768,7 +2768,10 @@
 		
 		*/
 		
-		var stream = fs.createReadStream(file.path);
+		options can include start and end values !!!
+		https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
+		
+		var stream = fs.createReadStream(file.path, options);
 		stream.setEncoding('utf8');
 		
 		console.log("Catching stream .... partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
@@ -2993,6 +2996,10 @@
 			else {
 				// Flush the stream down the toilet (do nothing with it)
 				flush = true;
+				
+				// It's stupid why we have to flush, why wont this work!?
+				stream.close()
+				
 			}
 
 			
