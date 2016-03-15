@@ -51,38 +51,88 @@
 		
 		if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFiles is a string with path separated by comma
 			console.log("Opening " + openFile.length + " files ...");
-			files.forEach(openFile);
+			
+			// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
+			for(var i=0; i<files.length; i++) {
+				
+				console.log("gonna open files[" + i + "]=" + files[i]);
+				
+				openFile(files[i], function(file, lastOpened) {
+
+					console.log("opened file.path=" + file.path);
+					
+					if(lastOpened) setCurrent = file.path;
+					
+					// Check if all has been opened
+					var files = window.localStorage.openedFiles.split(","); // A file can be removed, so remake the array
+					var allOpened = true;
+					for(var j=0; j<files.length; j++) {
+						if(!editor.files.hasOwnProperty(files[j])) {
+							console.log("not yet all opened");
+							allOpened = false;
+							break;
+						} 
+					}
+					
+					if(allOpened) allFilesOpened();
+
+					
+				});
+			}
+
 			
 		}
 		
-		if(setCurrent) {
-			// Now make the file with last state "open" the current file
+
+		function allFilesOpened() {
 			
-			// Switch to this file
-			editor.showFile(editor.files[setCurrent])
+			console.log("All files from last lession opened!");
+			
+			console.log("setCurrent=" + setCurrent);
+
+			
+			if(setCurrent) {
+				// Now make the file with last state "open" the current file
+				
+				// Switch to this file
+				editor.showFile(editor.files[setCurrent])
+				
+			}
+			
+			// After we have opened the files, set listener for file load and close ...
+			editor.on("fileOpen", addToOpenedFiles, 1)
+			
+			editor.on("fileClose", removeFromOpenedFiles, 1);
+			
+			// Use editor close event
+			editor.on("exit", reopen_files_closeEditor);
+			
+			
+			// Save state on regular intervals in case the editor crashes (or refresh)
+			setInterval(reopen_files_closeEditor, saveStateInterval);
 			
 		}
 		
 		
+
 		
-		// After we have opened the files, set listener for file load and close ...
-		editor.on("fileOpen", addToOpenedFiles, 1)
-		
-		editor.on("fileClose", removeFromOpenedFiles, 1);
-		
-		// Use editor close event
-		editor.on("exit", reopen_files_closeEditor);
-		
-		
-		// Save state on regular intervals in case the editor crashes (or refresh)
-		setInterval(reopen_files_closeEditor, saveStateInterval);
-		
-		function openFile(path) {
+		function openFile(path, callback) {
 			
 			// Check protocol!?
 			
-			// Open in sync to get them in the same order
 			var content, notFound = false, loadLastState = false;
+
+			var fileSizeOnDisk = editor.fileSizeOnDisk(path);
+			
+			if(fileSizeOnDisk.code === 'ENOENT') {
+				notFound = true;
+			}
+			else if(fileSizeOnDisk.code) {
+				console.error(fileSizeOnDisk);
+			}
+			
+			
+			/*
 			try {
 				content = fs.readFileSync(path, "utf8");
 			} catch (e) {
@@ -95,6 +145,7 @@
 					console.error(e);
 				}
 			}
+			*/
 			
 			var lastFileState = loadState(path);
 			
@@ -107,9 +158,9 @@
 					// Only ask if we actually have the last state, otherwise just ignore that it's gone.
 					// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
 					if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path);
-					}
+				}
 				// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
-				else if(content.length === 0 && lastFileState.text.length > 0) {
+				else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
 					if(confirm("File on disk is empty! Load last saved state instead? path=: " + path + "")) {
 						loadLastState = true;
 					}
@@ -128,59 +179,54 @@
 					//console.log("content=" + content);
 					
 				}
+
 			}
 			
-			if(!isString(content)) {
-				console.warn("Unable to load content from " + path + " (it's not a string!)");
-				removeFromOpenedFiles(path);
-			}
-			else {
+			
+			editor.openFile(path, content, function(file) {
 				
-				editor.openFile(path, content, function(file) {
+				console.log("Opening file:" + path);
+				
+				// Mark the file as saved, because we just opened it
+				//file.isSaved = true;
+				//file.savedAs = true;
+				//No! We should use last state, from when the editor was closed.
+				
+				if(lastFileState) {
 					
-					console.log("Opening file:" + path);
+					file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
 					
-					// Mark the file as saved, because we just opened it
-					//file.isSaved = true;
-					//file.savedAs = true;
-					//No! We should use last state, from when the editor was closed.
-					
-					if(lastFileState) {
-						
-						file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
-						
-						if(lastFileState.order !== undefined) file.order = lastFileState.order;
-						if(lastFileState.caret !== undefined) {
-							// Place the caret
-							try {
-								file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-							}
-							catch(e) {
-								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
-							}
+					if(lastFileState.order !== undefined) file.order = lastFileState.order;
+					if(lastFileState.caret !== undefined) {
+						// Place the caret
+						try {
+							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
 						}
-						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
-						
-						if(lastFileState.isSaved !== undefined) {
-							file.isSaved = lastFileState.isSaved;
+						catch(e) {
+							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
 						}
-						
-						if(lastFileState.open === true) setCurrent = path;
-						
-						console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
-						
 					}
-					else {
-						// If there is no last state: Assume the file is saved.
-						file.isSaved = true;
-						file.savedAs = true;
-						
+					if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
+					
+					if(lastFileState.isSaved !== undefined && content) {
+						file.isSaved = lastFileState.isSaved;
 					}
 					
-				});
-			}
-			
+					console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
+					
+				}
+				else {
+					// If there is no last state: Assume the file is saved.
+					file.isSaved = true;
+					file.savedAs = true;
+					
+				}
+				
+				if(callback) callback(file, lastFileState.open === true);
+				
+			});
 		}
+
 		
 	}
 	
@@ -349,6 +395,18 @@
 	
 	function fixCommas(text) {
 		// Sometimes extra commas sneak in, I dunno why, so let's fix the symptoms :P
+		// No. Lets do it property and throw errors if we find something wrong
+		
+		var firstChar = text.charAt(0);
+		var lastChar = text.charAt(text.length-1);
+		
+		if(text.indexOf(",,") > -1)) console.error(new Error("Text contains double commas: " + text));
+		if(firstChar == ",") console.error(new Error("First character is a comma: " + text));
+		if(lastChar == ",") console.error(new Error("Last character is a comma: " + text));
+		if(firstChar == " ") console.error(new Error("First character is a space: " + text));
+		if(lastChar == " ") console.error(new Error("Last character is a space: " + text));
+		
+		return text;
 		
 		text = text.trim();
 		

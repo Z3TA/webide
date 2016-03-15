@@ -160,8 +160,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
 			
-			
-			
 			var file = editor.files[path];
 			
 			if(!editor.currentFile) console.error(new Error("No current file!"));
@@ -183,14 +181,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
-			var stats = fs.statSync(path);
-			var fileSizeInBytes = stats["size"];
+			var fileSizeInBytes = editor.fileSizeOnDisk(path);
+			
+			if(fileSizeInBytes.code) console.error(new Error(fileSizeInBytes));
 			
 			console.log("fileSizeInBytes=" + fileSizeInBytes);
 			
 			if(fileSizeInBytes > editor.settings.bigFileSize) {
-				console.warn("Loading file as stream because it's larger then " + editor.settings.bigFileSize + " bytes");
-				load(path, fs.createReadStream(path), false);
+				console.warn("File larger then " + editor.settings.bigFileSize + " bytes");
+				load(path, "", false, true);
 			}
 			else {
 				editor.readFromDisk(path, load);
@@ -208,9 +207,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		
-		function load(path, text, notFromDisk) {
+		function load(path, text, notFromDisk, tooBig) {
 			console.log("Loading file to editor: " + path);
-			editor.files[path] = new File(text, path, ++editor.fileIndex);
+			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig);
 			
 			var file = editor.files[path];
 			
@@ -244,6 +243,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		
+	}
+	
+	editor.fileSizeOnDisk = function(path) {
+		// Check the file size
+		try {
+			var stats = fs.statSync(path);
+		}
+		catch(err) {
+			return err;
+		}
+		return stats["size"];
 	}
 	
 	editor.lastChangedFile = function() {
@@ -540,8 +550,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Tell the editor that it needs to render
 		
 		if(editor.currentFile) {
-			if(editor.currentFile.isStreaming) {
-				console.warn("Will not render while the file is streaming!");
+			if(!editor.currentFile.render) {
+				console.warn("File render flag set to '" + editor.currentFile.render + "'");
 				return;
 			}
 		}
