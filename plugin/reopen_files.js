@@ -24,10 +24,9 @@
 	function reopenFilesMain() {
 		
 		if(!window.localStorage) console.error(new Error("window.localStorage not available!"));
-		
+				
 		//window.localStorage.openedFiles = "";
-		
-		//window.localStorage.openedFiles = "";
+
 		
 		// Reset localstorage
 		//for(var item in window.localStorage) {
@@ -400,7 +399,7 @@
 		var firstChar = text.charAt(0);
 		var lastChar = text.charAt(text.length-1);
 		
-		if(text.indexOf(",,") > -1)) console.error(new Error("Text contains double commas: " + text));
+		if(text.indexOf(",,") > -1) console.error(new Error("Text contains double commas: " + text));
 		if(firstChar == ",") console.error(new Error("First character is a comma: " + text));
 		if(lastChar == ",") console.error(new Error("Last character is a comma: " + text));
 		if(firstChar == " ") console.error(new Error("First character is a space: " + text));

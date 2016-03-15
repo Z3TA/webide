@@ -115,6 +115,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	// Get the current window
 	var win = gui.Window.get();
 	
+
+	
 	var executeOnNextInteraction = [];
 	
 	var lastKeyDown = 0;
@@ -183,7 +185,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			// Check the file size
 			var fileSizeInBytes = editor.fileSizeOnDisk(path);
 			
-			if(fileSizeInBytes.code) console.error(new Error(fileSizeInBytes));
+			if(fileSizeInBytes.code) {
+				
+				if(fileSizeInBytes.code == "ENOENT") alert("File not found: " + path);
+				
+				// Maybe it was removed? Or it's a bug!
+				
+				console.error(new Error(fileSizeInBytes));
+			}
 			
 			console.log("fileSizeInBytes=" + fileSizeInBytes);
 			
@@ -286,8 +295,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
-			if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
-				// lastFile is no longer open!
+			if(editor.lastFile) {
+				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
+					// lastFile is no longer open!
+					editor.lastFile = editor.lastChangedFile();
+				}
+			}
+			else {
 				editor.lastFile = editor.lastChangedFile();
 			}
 			
@@ -558,7 +572,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			console.log(editor.getcallStack("Render"));
+			console.log(editor.getcallStack("renderNeeded"));
 		}
 		editor.shouldRender = true;
 	}
@@ -567,7 +581,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Tell the editor that it needs to resize
 		if(editor.settings.devMode && editor.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			//console.log(new Error("Resize").stack);
+			console.log(editor.getcallStack("resizeNeeded"));
 		}
 		editor.shouldResize = true;
 	}
@@ -1709,8 +1723,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.addEventListener('paste', paste);
 	window.addEventListener('cut', cut);
 	
-	
-	
+
 	
 	function main() {
 		
@@ -1785,29 +1798,39 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//}
 		
 		
+		
+		console.log("Calling start listeners (" + editor.eventListeners.start.length + ")");
+		for(var i=0; i<editor.eventListeners.start.length; i++) {
+			editor.eventListeners.start[i].fun(); // Call function
+		}
+
+		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
+		// note to self: Just temorary, dont forget to remove:
+		if(editor.devMode = true) editor.openFile(testfile);
 		
-		//setTimeout(display, 500); // Why do I need to do this?
-		display();
+		/*
+		// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
+		//setTimeout(display, 500);
+		//display();
+		
+		
+		// Prevent the void from ruling the earth the first 500ms
+		editor.resizeNeeded();
+		editor.resize();
+		editor.renderNeeded();
+		editor.render();
 		
 		
 		function display() {
+
 			editor.resizeNeeded();
-			editor.resize();
-			
-			console.log("Calling start listeners (" + editor.eventListeners.start.length + ")");
-			for(var i=0; i<editor.eventListeners.start.length; i++) {
-				editor.eventListeners.start[i].fun(); // Call function
-			}
-			
-			editor.renderNeeded();
-			editor.render();
-			
-			if(editor.devMode = true) editor.openFile(testfile);
+			editor.resize(); // Will also force a render
+
 			
 		}
-		
+		*/
 	}
 	
 	

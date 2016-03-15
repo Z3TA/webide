@@ -2154,7 +2154,7 @@
 		
 		if(caret == undefined) caret = file.caret;
 		
-		//console.log("scrolling to caret:" + JSON.stringify(caret));
+		console.log("scrolling to caret:" + JSON.stringify(caret) + " editor.view.visibleRows=" + editor.view.visibleRows);
 		
 		
 		// Up and down ...
@@ -2344,6 +2344,10 @@
 		var scrolled = false;
 		var oldPartStartRow = file.partStartRow;
 		
+		console.log("scrollTo: x=" + x + " y=" + y);
+		
+		//console.log(editor.getcallStack());
+		
 		if(x != undefined) startColumn = parseInt(x);
 		if(y != undefined) {
 			
@@ -2366,7 +2370,6 @@
 					
 				}
 				else if(y > high && !file.tail) {
-					
 					loadFilePart(file, file.partStartRow + moveRows, streamLoaded);
 					return;
 				}
@@ -2379,14 +2382,22 @@
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
-		
-			startRow = Math.max(Math.min(y, maxY), 0); // > 0 && < maxY
-				
+			
+			startRow = Math.min(y, maxY);
+			
+			if(startRow < 0) {
+				console.warn("y=" + y + " maxY=" + maxY);
+				startRow = 0;
+			}
+			
 		}
 		
 		doTheScrolling(false);
 		
 		function doTheScrolling(scrolled) {
+			
+			console.log("Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow );
+			
 			if(file.startColumn != startColumn || file.startRow != startRow) {
 				file.startColumn = startColumn;
 				file.startRow = startRow;
