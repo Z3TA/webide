@@ -2353,7 +2353,7 @@
 		
 		console.log("scrollTo: x=" + x + " y=" + y);
 		
-		//console.log(editor.getcallStack());
+		//console.log(editor.getStack());
 		
 		if(x != undefined) startColumn = parseInt(x);
 		if(y != undefined) {
@@ -2369,7 +2369,7 @@
 				
 				if(high < low) console.error(new Error("high=" + high + " < low=" + low + ". file.grid.length=" + file.grid.length + " path=" + file.path));
 				
-				//console.log(editor.getcallStack("scrollTo"));
+				//console.log(editor.getStack("scrollTo"));
 				
 				console.log("Scrolling in big file: file.isStreaming=" + file.isStreaming + " file.totalRows=" + file.totalRows + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
 				

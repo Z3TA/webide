@@ -1,19 +1,18 @@
 (function() {
 	/*
-		Open up the files from last time, when opening the editor.
+		1. Open up the files from last time, when opening the editor.
 		
-		Save a backup on each file when it close, and on regular intervals (incase the editor crash)
-		Offer to load the backup file if it's gone or empty
-		
-		Load unsaved files from when the editor last closed.
+		2. Save a backup on each file when it close, and on regular intervals (incase the editor crash)
+		Offer to load the backup file if it's gone or empty, or unsaved.
 		
 		Note: window.localStorage only supports strings!!
-		
-		nwjs bug: window.localStorage sometimes not available!
+
 		
 	*/
 	
 	"use strict";
+
+	var fileDelimiter = ";"; // User to separate the file paths in the window.localStorage.openedFiles string
 	
 	var saveStateInterval = 5000;
 
@@ -34,22 +33,23 @@
 		//}
 		
 		if(window.localStorage.getItem("openedFiles") == null) {
-			window.localStorage.openedFiles = "Z:\\nw\\JZedit\\test\\bar"; // text string!
+			window.localStorage.openedFiles = "";
 		}
 		
-		// Fix old bugs
-		window.localStorage.openedFiles = fixCommas(window.localStorage.openedFiles);
+		findBugs();
 		
-		
-		console.log("window.localStorage.openedFiles:\n" + window.localStorage.openedFiles);
 		
 		var setCurrent = "";
-		var files = window.localStorage.openedFiles.split(",");
+		var files = window.localStorage.openedFiles.split(fileDelimiter);
 		
 		console.log("files=" + JSON.stringify(files));
 		
-		if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFiles is a string with path separated by comma
-			console.log("Opening " + openFile.length + " files ...");
+		//return;
+		
+		var openedFiles = "";
+		
+		if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFiles is a string with path's separated by fileDelimiter
+			console.log("Opening " + files.length + " files ...");
 			
 			// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
 			for(var i=0; i<files.length; i++) {
@@ -58,28 +58,22 @@
 				
 				openFile(files[i], function(file, lastOpened) {
 
-					console.log("opened file.path=" + file.path);
+					console.log("we now have it opened file.path=" + file.path);
+					
 					
 					if(lastOpened) setCurrent = file.path;
 					
-					// Check if all has been opened
-					var files = window.localStorage.openedFiles.split(","); // A file can be removed, so remake the array
-					var allOpened = true;
-					for(var j=0; j<files.length; j++) {
-						if(!editor.files.hasOwnProperty(files[j])) {
-							console.log("not yet all opened");
-							allOpened = false;
-							break;
-						} 
-					}
-					
-					if(allOpened) allFilesOpened();
-
+					// Is all files we want to open opened!?
+					openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);
+					if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) allFilesOpened();
 					
 				});
 			}
 
 			
+		}
+		else {
+			allFilesOpened();
 		}
 		
 
@@ -91,7 +85,7 @@
 
 			
 			if(setCurrent) {
-				// Now make the file with last state "open" the current file
+				// Make the file with last state "open" the current file
 				
 				// Switch to this file
 				editor.showFile(editor.files[setCurrent])
@@ -181,10 +175,10 @@
 
 			}
 			
-			
+			console.log("Opening file path=" + path);
 			editor.openFile(path, content, function(file) {
 				
-				console.log("Opening file:" + path);
+				console.log("Got file from editor path=" + path);
 				
 				// Mark the file as saved, because we just opened it
 				//file.isSaved = true;
@@ -229,60 +223,113 @@
 		
 	}
 	
+	function addToStringList(text, add, delimiter) {
+		
+		if(!isString(text)) console.error(new Error("text is not a string!"));
+		if(!isString(add)) console.error(new Error("add is not a string!"));
+		if(!isString(delimiter)) console.error(new Error("delimiter is not a string!"));
+		
+		var array = text.split(delimiter); // Convert string to array
+		
+		// Splitting an empty string will result in an array with ONE item (an empty string)
+		if(array[0] == "") array.shift(); // Remove the first emty string
+		
+		array.push(add); // Add string to list
+		
+		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
+		
+		// Makse sure the added string is in the text
+		if(text.indexOf(add) == -1) console.error(new Error("The added string is not part of the text! add='" + add + "' text='" + text + "'"));
+		
+		return text;
+	}
+	
 	function addToOpenedFiles(file) {
 		
-		if(window.localStorage.openedFiles.indexOf(file.path) == -1) {
-			window.localStorage.openedFiles += "," + file.path;
-		}
+		if(!file.path) console.error(new Error("Argument need to be a file object!"));
 		
-		window.localStorage.openedFiles = fixCommas(window.localStorage.openedFiles);
+		window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
 		
+		findBugs();
 		
-		console.log("window.localStorage.openedFiles:\n" + window.localStorage.openedFiles);
+		console.log("File added to opened files: path=" + file.path);
 		
 	}
 	
+	function compareStringLists(str1, str2, delimiter) {
+		// Compare two string lists, return true if they match, or false if they do not 
+		
+		if(str1.length != str2.length) return false; // Even if they are ordered differently, they still have to be the same size to match
+		
+		// Convert the strings to arrays
+		var arr1 = str1.split(delimiter);
+		var arr2 = str2.split(delimiter);
+		
+		if(arr1.length != arr2.length) return false; // One of the lists have more items
+		
+		// Splitting an emty string will create an array with One item (an emty string)
+		if(arr1[0] == "") arr1.shift();
+		if(arr2[0] == "") arr2.shift();
+		
+		if(arr1.length == 0 && arr2.length == 0) return true; // They are both emty!
+		
+		// Sort the arrays, as they are both string lists, they will be sorted the same
+		arr1.sort();
+		arr2.sort();
+		
+		// Compare each item
+		for(var i=0; i<arr1.length; i++) {
+			if(arr1[i] != arr2[i]) return false;
+		}
+		
+		return true; // If we got this far, they are identical!
+	
+	}
+	
+	function removeFromStringList(text, remove, delimiter) {
+		
+		if(!isString(text)) console.error(new Error("text is not a string!"));
+		if(!isString(remove)) console.error(new Error("remove is not a string!"));
+		if(!isString(delimiter)) console.error(new Error("delimiter is not a string!"));
+		
+		var array = text.split(delimiter); // Convert text to array
+
+		// Splitting an empty string will result in an array with ONE item (an empty string)
+		if(array[0] == "") array.shift(); // Remove the first emty string
+		
+		var index = array.indexOf(remove); // Get the array index of the string to me removed
+		
+		if(index == -1) console.error( new Error(  "remove='" + remove + "' not in array=" + JSON.stringify(array)  ) );
+		
+		array.splice(index); // Remove the string to be removed from the text
+		
+		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
+		
+		// Check to see if the string has been removed
+		if(text.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + file.path + "' text='" + openedFiles + "'"));
+		
+		return text;
+	}
+	
+
+	
 	function removeFromOpenedFiles(file) {
 		
-		var filePath = "";
+		if(!file.path) console.error(new Error("Argument need to be a file object!"));
+
+		window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
 		
-		if(typeof file == "string") {
-			filePath = file;
-		}
-		else {
-			filePath = file.path;
-		}
 		
-		window.localStorage.openedFiles = removeText(window.localStorage.openedFiles, filePath);
 		
-		window.localStorage.openedFiles = fixCommas(window.localStorage.openedFiles);
 		
 		// Remove state
 		window.localStorage.removeItem("state_" + filePath);
 		
-		/*
-		console.log("Removing from opened files: " + file.path)
-		console.log("AFTER REMOVE");
-		console.log("window.localStorage.openedFiles:\n" + window.localStorage.openedFiles);
 		
-		console.log("Items in localstorage:");
-		for(var item in window.localStorage) {
-			console.log(item + "=" + window.localStorage[item]);
-		}
-		*/
+		findBugs();
+
 		
-		// Sanity check
-		for(var path in editor.files) {
-			if(window.localStorage.openedFiles.indexOf(path) == -1) {
-				console.warn("editor.files path=" + path + " not in window.localStorage.openedFiles!");
-			}
-		}
-		var check = window.localStorage.openedFiles.split(",");
-		for(var i=0; i<check.length; i++) {
-			if(!editor.files.hasOwnProperty(check[i])) {
-				console.warn("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
-			}
-		}
+		console.log("File removed from opened files: path=" + file.path);
 		
 	}
 	
@@ -296,9 +343,9 @@
 			return true;
 		}
 		else {
-			var openFiles = window.localStorage.openedFiles.split(",");
+			var openFiles = window.localStorage.openedFiles.split(fileDelimiter);
 			
-			// note: "".split(",").length == 1 !!
+			// note: "".split(fileDelimiter).length == 1 !!
 			if(window.localStorage.openedFiles != "") {
 				console.log("openFiles.length=" + openFiles.length);
 				for(var i=0; i<openFiles.length; i++) {
@@ -326,7 +373,7 @@
 		if(path.length == 0) {
 			console.warn("Attempted to save state for a file without path!");
 			console.log(new Error("saveState").stack);
-			console.log("editor.files=" + Object.keys(editor.files).join(","));
+			console.log("editor.files=" + Object.keys(editor.files).join(fileDelimiter));
 			console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			
 			return;
@@ -380,30 +427,48 @@
 		
 	*/
 	
-	function removeText(text, removeString) {
-		var pos = text.indexOf(removeString)-1,
-			length = removeString.length,
-			index = pos + length +1;
-		
-		console.log("Removing '" + removeString + "' from:\n'" + text + "'");
-		
-		text = text.substring(0, pos) + text.substring(index, text.length);
-		
-		return text;
-	}
 	
-	function fixCommas(text) {
-		// Sometimes extra commas sneak in, I dunno why, so let's fix the symptoms :P
-		// No. Lets do it property and throw errors if we find something wrong
+	function findBugs() {
+		// Checks the openedFiles string for errors:
+		
+		var text = window.localStorage.openedFiles;
+
 		
 		var firstChar = text.charAt(0);
 		var lastChar = text.charAt(text.length-1);
 		
-		if(text.indexOf(",,") > -1) console.error(new Error("Text contains double commas: " + text));
-		if(firstChar == ",") console.error(new Error("First character is a comma: " + text));
-		if(lastChar == ",") console.error(new Error("Last character is a comma: " + text));
+		if(text.indexOf(fileDelimiter + fileDelimiter) > -1) console.error(new Error("Text contains double commas: " + text));
+		if(firstChar == fileDelimiter) console.error(new Error("First character is a comma: " + text));
+		if(lastChar == fileDelimiter) console.error(new Error("Last character is a comma: " + text));
 		if(firstChar == " ") console.error(new Error("First character is a space: " + text));
 		if(lastChar == " ") console.error(new Error("Last character is a space: " + text));
+		
+		if(text == undefined) console.error(new Error("Text is undefined: " + text));
+		if(text == 'undefined') console.error(new Error("Text is 'undefined': " + text));
+		
+		// Check for duplex
+		var array = text.split(fileDelimiter);
+		for(var i=0; i<array.length; i++) {
+			for(var j=i+1; j<array.length; j++) {
+				if(array[i] == array[j]) console.error(new Error("Element " + i + ": " + array[i] + " and  " + j + ": " + array[j] + " is the same! "));
+			}
+		}
+		
+		
+		/*
+		// Sanity check
+		for(var path in editor.files) {
+			if(window.localStorage.openedFiles.indexOf(path) == -1) {
+				console.error(new Error("editor.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles));
+			}
+		}
+		var check = window.localStorage.openedFiles.split(fileDelimiter);
+		for(var i=0; i<check.length; i++) {
+			if(!editor.files.hasOwnProperty(check[i])) {
+				console.error(new Error("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles));
+			}
+		}
+		
 		
 		return text;
 		
@@ -412,19 +477,19 @@
 		// Remove double commas
 		while(text.indexOf(",,") > -1) {
 			console.warn("Removing double comma from: " + text);
-			text = text.replace(",,", ",");
+			text = text.replace(fileDelimiter + fileDelimiter, fileDelimiter);
 		}
 		
 		text = text.trim();
 		
 		// Remove leading commas
-		while(text.charAt(0) == ",") {
+		while(text.charAt(0) == fileDelimiter) {
 			console.warn("Removing leading comma from: " + text);
 			text = text.substring(1, text.length);
 		}
 		
 		// Remove trailing commas
-		while(text.charAt(text.length-1) == ",") {
+		while(text.charAt(text.length-1) == fileDelimiter) {
 			console.warn("Removing trailing comma from: " + text);
 			text = text.substring(1, text.length-1);
 		}
@@ -432,6 +497,7 @@
 		
 		
 		return text;
+		*/
 	}
 	
 	

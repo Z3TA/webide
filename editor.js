@@ -155,9 +155,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			such as file.isSaved, file.savedAs and file.changed
 			Unless text==undefined, then it will be opened from disk and asumed saved.
 			
+			problem: The same file might be opened many times while we are waiting for it's data
+			solution: Add temporary emty object to editor.files while opening the file.
+			
 		*/
 		
 		console.log("Opening file: " + path);
+		
 		
 		// Check if the file is already opened
 		if(editor.files.hasOwnProperty(path)) {
@@ -175,6 +179,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.showFile(file);
 			}
 			
+			if(callback) callback(file);
 			return;
 		}
 		
@@ -182,6 +187,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(text == undefined) {
 			console.warn("Text is undefined! Reading file from disk: " + path)
+			
+			
 			
 			// Check the file size
 			var fileSizeInBytes = editor.fileSizeOnDisk(path);
@@ -197,6 +204,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			console.log("fileSizeInBytes=" + fileSizeInBytes);
 			
+			editor.files[path] = {}; // Temporary object while we are loading the data, to prevent loading the same file many times
+			
 			if(fileSizeInBytes > editor.settings.bigFileSize) {
 				console.warn("File larger then " + editor.settings.bigFileSize + " bytes");
 				load(path, "", false, true);
@@ -210,6 +219,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(!isString(text)) {
 				console.log("text=" + text);
 				console.error(new Error("text is not a string!"));
+
+				
 			}
 			else {
 				load(path, text, true);
@@ -235,18 +246,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.showFile(file);
 			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
-			/* We might want to change some state before file open events get fired, 
-				so call the callback before file.open()
-				
-				used by: file.open to set saved to true
-			*/
-			if(callback) callback(file);
+			// Dilemma: should file open even listeners be called before or after the callback!??
+			
 			
 			console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
 			for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
 				//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
 				editor.eventListeners.fileOpen[i].fun(file); // Call function
 			}
+			
+			if(callback) callback(file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			
 			// Always render (and resize) after opening a file! (where=here, when=now!)
 			editor.renderNeeded();
@@ -360,7 +369,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		
 		console.log("Reading file from disk: " + path);
-		console.log(new Error("Read file from disk").stack);
+		console.log(editor.getStack("Read from disk"));
 		
 		if(!callback) {
 			console.error(new Error("No callback defined!"));
@@ -548,7 +557,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
 	}
 	
-	editor.getcallStack = function(msg) {
+	editor.getStack = function(msg) {
+		// Used in debugging, to get a stack trace of function being called
 		
 		if(msg == undefined) msg = "";
 		
@@ -573,7 +583,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			console.log(editor.getcallStack("renderNeeded"));
+			console.log(editor.getStack("renderNeeded"));
 		}
 		editor.shouldRender = true;
 	}
@@ -582,7 +592,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Tell the editor that it needs to resize
 		if(editor.settings.devMode && editor.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			console.log(editor.getcallStack("resizeNeeded"));
+			console.log(editor.getStack("resizeNeeded"));
 		}
 		editor.shouldResize = true;
 	}
@@ -2633,7 +2643,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	
-	function openFile(text, path) {
+	function openFileDepricated(text, path) {
 		/*
 			
 			No split screen support (for now ... just resize and bring up another instance instead)

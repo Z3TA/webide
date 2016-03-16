@@ -96,8 +96,12 @@ The data object should have this standard:
 
 
 
+Common problems
+---------------
 
+Problem: The program seems totally "bricked". Not even the HTML loads.
 
+Solution: This happens if there's a loop somwhere, check the code you last entered.
 
 
   
