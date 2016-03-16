@@ -1,7 +1,7 @@
 "use strict";
 
 
-var testfile = "test/testfile.txt";
+//var testfile = "test/testfile.txt";
 
 // The editor object lives in global scope, so that it can be accessed everywhere.
 var editor = {};
@@ -46,8 +46,9 @@ editor.settings = {
 	canBreakBefore: "}]\t",
 	drawGridBox: false,
 	scrollStep: 3,
-	bigFileSize: 150000, // Bytes, all files larger then this will be opened as streams
-	bigFileLoadRows: 50, // Rows to load into the editor if the file size is over bigFileSize
+	defaultLineBreakCharacter: "\n", // Can be many, like CR & LF, \n == LF, \r == CR
+	bigFileSize: 234000, // Bytes, all files larger then this will be opened as streams
+	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc, Function help hinting doesn’t go away when typing.
 	insert: false
@@ -1808,7 +1809,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
 		// note to self: Just temorary, dont forget to remove:
-		if(editor.devMode = true) editor.openFile(testfile);
+		//if(editor.devMode == true) editor.openFile(testfile);
 		
 		/*
 		// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff

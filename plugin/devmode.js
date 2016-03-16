@@ -98,7 +98,7 @@
 			
 			var func, name, ret = true;
 			
-			editor.closeFile(testfile);
+			//editor.closeFile(testfile);
 			
 			// Call exit listeners before reloading
 			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {

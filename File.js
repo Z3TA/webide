@@ -33,6 +33,8 @@
 		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
 		file.head = false, // We are on the first part of the stream if true
+		file.byteRow = []; // Indexing of byte to row for faster seeking in big files [[row, byte],[row, byte],[row, byte]]
+
 		
 		file.isStreaming = false; // If the file is currently pulling data from the file read stream
 		file.render = true; // Can (temporary) disable rendering for this file by setting it to false
@@ -69,7 +71,12 @@
 
 			loadFilePart(file, file.partStartRow);
 		
-		}	
+		}
+		else {
+			
+			if(file.lineBreak == "") file.lineBreak = editor.settings.defaultLineBreakCharacter; 
+			
+		}
 	}
 	
 
@@ -2766,15 +2773,59 @@
 			
 			Each time we load a part, we have to make a new stream			
 		
+			options can include start and end values !!!
+			https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
+		
 		*/
 		
-		options can include start and end values !!!
-		https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
+		if(partStartRow == undefined) partStartRow = 0;
+		
+		if(partStartRow < 0) console.error(new Error("Can not begin stream in negative row:" + partStartRow));
+
+		var text = "";
+		var endReached = false;
+		var totalLineBreaks = 0;
+		var startLinebreaks = -1;
+		var countRows = false; // If set to true, only count line breaks
+		var flush = false;
+		var byteCounter = 0;
+
+		var options = {}
+		
+		/*
+		Why wont this work!??? AAAaaaAAAaaaAAAA!
+		if(partStartRow > 0 && file.byteRow.length > 0) {
+			// Figure out where we should start
+			// Can be optimized by binary search if needed
+
+			for(var i=0; i<file.byteRow.length; i++) {
+				if(file.byteRow[i][0] > partStartRow) {
+					
+					//if(file.byteRow[i][0] == partStartRow) {
+					//	options.start = file.byteRow[i][1];
+					//	totalLineBreaks = file.byteRow[i][0];
+					//	byteCounter = file.byteRow[i][1];
+					//}
+					
+					
+					
+					if(i>1) {
+						options.start = file.byteRow[i-1][1];
+						totalLineBreaks = file.byteRow[i-1][0];
+						byteCounter = file.byteRow[i-1][1];
+						console.log("seek i=" + i);
+					}
+					// else: start from the beginning
+					break;
+				}
+			}
+		}
+		*/
 		
 		var stream = fs.createReadStream(file.path, options);
 		stream.setEncoding('utf8');
 		
-		console.log("Catching stream .... partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
+		console.log("Catching stream .... options=" + JSON.stringify(options) + " partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
 		
 		if(file.changed && !file.isSaved) {
 			alert("Can not catch the stream if the file is not saved! File is too large.");
@@ -2786,22 +2837,6 @@
 			return;
 		}
 
-		
-		var text = "";
-		var endReached = false;
-		var totalLineBreaks = 0;
-		var startLinebreaks = -1;
-		var countRows = false; // If set to true, only count line breaks
-		var flush = false;
-		
-		if(partStartRow == undefined) partStartRow = 0;
-		
-		if(partStartRow < 0) console.error(new Error("Can not begin stream in negative row:" + partStartRow));
-		
-
-		
-		console.log("Gone fishing ... partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " isPaused=" + stream.isPaused() + " ...")
-		
 		
 		file.isStreaming = true;
 		file.render = false;
@@ -2832,7 +2867,9 @@
 		function streamEnded() {
 			console.log("Stream ended! countRows=" + countRows + " flush=" + flush);
 			if(countRows) {
-				file.totalRows = totalLineBreaks-1;
+				file.totalRows = totalLineBreaks;
+				console.log("file.byteRow.length=" + file.byteRow.length);
+				console.log("file.totalRows=" + file.totalRows);
 			}
 			else if(!flush) {
 				gotFish(true);
@@ -2847,12 +2884,13 @@
 			var lineBreaks = 0;
 			var str = "";
 			var decoder = new StringDecoder('utf8');
-			var chunkSize = 512; // How many bytes to recive in each chunk
+			//var chunkSize = 512; // How many bytes to recive in each chunk
 			
 			//console.log("Reading stream ... isPaused=" + stream.isPaused());
 			
-			while (null !== (chunk = stream.read(chunkSize)) && !stream.isPaused() ) {
+			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
 				
+
 				if(flush) {
 					//console.log("Flushing the toilet ....");
 				}
@@ -2871,7 +2909,18 @@
 						if(str.charAt(0) == file.lineBreak.charAt(1)) lineBreaks++;
 					}
 					
+					if(countRows) {
+						file.byteRow.push([ totalLineBreaks, byteCounter ]);
+					}
+					
+					byteCounter += parseInt(chunk.length);
+					//byteCounter+= chunkSize;
+					
 					totalLineBreaks += lineBreaks;
+					
+
+					
+					
 					
 					if(totalLineBreaks >= partStartRow && !countRows) {
 						// Start saving characters
@@ -2879,11 +2928,10 @@
 						text = text + str;
 					}
 					
-					//console.log("Got chunk! chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
 
-					
-					// Stop when we got enough characters (not line breaks)
-					//if(text.length > editor.settings.bigFileLoadRows) gotFish(false); 
+					//console.log("Got chunk! totalLineBreaks=" + totalLineBreaks + " byteCounter=" + byteCounter + " chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
+
+
 					
 					if( startLinebreaks != -1 && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows && !countRows) gotFish(false); 
 				}
@@ -2992,13 +3040,17 @@
 			if(file.totalRows == -1) {
 				// Continue to load the file to find out how many rows it has
 				countRows = true;
+				
+				// Empty the byte to row mapper?
+				//file.byteRow.length = 0;
+				
 			}
 			else {
 				// Flush the stream down the toilet (do nothing with it)
 				flush = true;
 				
 				// It's stupid why we have to flush, why wont this work!?
-				stream.close()
+				stream.close(); // Cool, it seems to work!
 				
 			}
 

@@ -52,6 +52,7 @@
 				lastLine = line;
 				ctx.fillText(line, leftMargin, editor.settings.topMargin + (row+startRow) * editor.settings.gridHeight);
 				
+				/*
 				if(file.partStartRow > 0 && editor.settings.devMode) {
 					ctx.save();
 					ctx.font = "10px " + editor.settings.style.font;
@@ -59,8 +60,7 @@
 					ctx.fillText("" + (buffer[row].lineNumber-1), leftMargin+22, editor.settings.topMargin + (row+startRow) * editor.settings.gridHeight);
 					ctx.restore();
 				}
-					
-				
+				*/
 				
 			}
 			
