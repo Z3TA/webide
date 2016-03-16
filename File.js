@@ -12,7 +12,9 @@
 		var file = this;
 		
 		if(!isString(text)) console.error(new Error("text is not a string!"));
-
+		
+		if(!isString(path)) console.error(new Error("path is not a string!"));
+		
 		file.text = text;
 		file.path = path;
 		file.isBig = bigFile ? true : false;

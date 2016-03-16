@@ -230,9 +230,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		function load(path, text, notFromDisk, tooBig) {
 			console.log("Loading file to editor: " + path);
+			
+			if(editor.files.hasOwnProperty(path)) {
+				if(editor.files[path].path || editor.files[path].text) console.error(new Error("Overwriting Real (not temp) file object!"));
+				delete editor.files[path]; // Delete temporary object
+			}
 			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig);
 			
 			var file = editor.files[path];
+			
+			if(!file.path) console.error(new Error("The file has no path!"));
 			
 			if(!notFromDisk) {
 				// Because we opened it from disk:
@@ -255,7 +262,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileOpen[i].fun(file); // Call function
 			}
 			
-			if(callback) callback(file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
+			if(callback) {
+				console.log("Calling callback: " + functionName(callback));
+				callback(file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
+			}
+			else {
+				console.log("No callback for file.path=" + file.path);
+			}
 			
 			// Always render (and resize) after opening a file! (where=here, when=now!)
 			editor.renderNeeded();

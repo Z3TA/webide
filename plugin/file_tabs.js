@@ -227,6 +227,8 @@
 	
 	function openTab(path) {
 		
+		if(path == undefined) console.error(new Error("Path is undefined!"));
+		
 		console.log("openTab: " + path);
 		
 		var header = document.getElementById("header");

@@ -65,8 +65,13 @@
 					
 					// Is all files we want to open opened!?
 					openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);
-					if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) allFilesOpened();
-					
+					if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) {
+						allFilesOpened();
+					}
+					else {
+						console.log("openedFiles=" + openedFiles);
+						console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
+					}
 				});
 			}
 
@@ -176,7 +181,7 @@
 			}
 			
 			console.log("Opening file path=" + path);
-			editor.openFile(path, content, function(file) {
+			editor.openFile(path, content, function reopen_files_(file) {
 				
 				console.log("Got file from editor path=" + path);
 				

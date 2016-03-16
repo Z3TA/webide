@@ -6,9 +6,11 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+Tracing bug: Uncaught Error: Path is undefined!
+
 reopen_files.js
 
-
+Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
 
 Loading icon while the file is streaming!?
 
