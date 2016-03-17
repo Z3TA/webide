@@ -6,42 +6,10 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Tracing bug: Uncaught Error: Path is undefined!
-
-reopen_files.js
-
 Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
 
 Bug found! Bug report form: How to get the error? Describe in steps how to reproduce this error.
 Ctlr + shift + S to send the bug report
-
-
-
-
-Loading icon while the file is streaming!?
-
-
-
-Continue loading the rest and map every one hundred line with an index (for faster opening)
-For every 1000 line scrolled, reload the file!?
-
-With 20k lines: createGrid: 742.418ms
-
-
-If the file is huge, 1M+ open up 100 rows at a time, and switch them out while moving around. Index every 100 line.
-
-
-Saving a big file:
-readstream -> writestream to a temp file, up until the chunk loaded in the editor. Then continue with the original. When finished replace the original with the temp file.
-
-
-When searching in a file marked as big, do a whole file search from disk.
-
-
-
-
-(Notepad++ fails at everything with 2M rows)
-
 
 
 BUGS
@@ -69,6 +37,8 @@ Source indentation in html documents might be "off" if you remove or add div's.
 Polishing
 =========
 
+Loading icon while the file is streaming!?
+
 Regex (or *) search in Goto file.
 
 
@@ -78,6 +48,9 @@ Remove all text marked as miss-spelled when toggling the spellchecker off.
 
 A better search in file.
 Editor crashes whean searching for "try to" or ">0;" in files.
+
+
+
 
 
 Indentation for good looking multidimensional arrays:
@@ -219,6 +192,15 @@ prettify the zoom heading labels. (show line number)
 inspiration: http://www.dreamstime.com/royalty-free-stock-images-colorful-banner-design-image28200429
 
 Switch app icon to a ship container, because the editor helps you ship stuff ... 
+
+
+
+Saving a big file:
+readstream -> writestream to a temp file, up until the chunk loaded in the editor. Then continue with the original. When finished replace the original with the temp file.
+
+
+When searching in a file marked as big, do a whole file search from disk.
+
 
 
 

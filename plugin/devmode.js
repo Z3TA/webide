@@ -28,6 +28,11 @@
 	
 		
 		}
+		
+		setInterval(function() {
+			throw new Error("test error msg");
+		}, 5000);
+		
 	}
 	
 	function testErrorHandler() {

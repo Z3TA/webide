@@ -4,4 +4,5 @@ SET EDITOR_PATH=.
 REM Use REM to comment out
 
 REM start %NW_PATH% %EDITOR_PATH% --disable-lcd-text
-start %NW_PATH% %EDITOR_PATH%
+REM start %NW_PATH% %EDITOR_PATH%
+start %NW_PATH% %EDITOR_PATH% --remote-debugging-port=57341
