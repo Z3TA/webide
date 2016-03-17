@@ -12,6 +12,12 @@ reopen_files.js
 
 Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
 
+Bug found! Bug report form: How to get the error? Describe in steps how to reproduce this error.
+Ctlr + shift + S to send the bug report
+
+
+
+
 Loading icon while the file is streaming!?
 
 

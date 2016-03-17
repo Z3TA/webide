@@ -126,6 +126,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	var tildeAltActive = false;
 	
 	
+	var openFileQueue = []; // Files listed here are waiting for data
+	
 	var canvas, ctx; 
 	
 	
@@ -149,6 +151,51 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	
+	
+	editor.sortFileList = function() {
+		
+		// Resport editor.files by file.order and returns an array of the files
+		
+		var fileList = [];
+		
+		for(var path in editor.files) {
+			fileList.push(editor.files[path]);
+		}
+		fileList.sort(sortOrder);
+		
+		var order = 0;
+		
+		// debug
+		//for(var i=0; i<fileList.length; i++) {
+		//	console.log(fileList[i].order + " = " + fileList[i].path);
+		//}
+		
+		// Reorder it
+		var order = 0;
+		for(var i=0; i<fileList.length; i++) {
+			fileList[i].order = order++;
+		}
+		
+		return fileList;
+		
+		function sortOrder(a, b) {
+			if(a.order < b.order) {
+				return -1;
+			}
+			else if(b.order < a.order) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
 	editor.openFile = function(path, text, callback) {
 		/*
 			Note: The caller of this function needs to handle file state, 
@@ -156,20 +203,23 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			Unless text==undefined, then it will be opened from disk and asumed saved.
 			
 			problem: The same file might be opened many times while we are waiting for it's data
-			solution: Add temporary emty object to editor.files while opening the file.
-			
+			solution1: (did not work due to plugins using the editor.files list to build stuff) Add temporary emty object to editor.files while opening the file.
+			solution2: A list of files that are beaing opened
 		*/
 		
+		var file;
+		
 		console.log("Opening file: " + path);
+
 		
-		
+
 		// Check if the file is already opened
 		if(editor.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
 			
 			var file = editor.files[path];
 			
-			if(!editor.currentFile) console.error(new Error("No current file!"));
+			if(!editor.currentFile) return fileOpenError(new Error("Internal error: No current file!"));
 			
 			if(editor.currentFile != file) {
 				// Switch to it ...
@@ -182,44 +232,49 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(callback) callback(file);
 			return;
 		}
+		else if(openFileQueue.indexOf(path) != -1) {
+			var err = new Error("File is already in the queue to be opened, please wait!");			
+			err.code = "INQUEUE";
+			return fileOpenError(err);
+		}
 		
-		if(!isString(path)) console.error(new Error("path is not a string: " + path));
-		
+		if(!isString(path)) return fileOpenError(new Error("path is not a string: " + path));
+
+		openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
+
 		if(text == undefined) {
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
-			
-			
 			// Check the file size
-			var fileSizeInBytes = editor.fileSizeOnDisk(path);
+			editor.getFileSizeOnDisk(path, gotFileSize);
 			
-			if(fileSizeInBytes.code) {
+			function gotFileSize(fileSizeInBytes, err) {
 				
-				if(fileSizeInBytes.code == "ENOENT") alert("File not found: " + path);
+				if(err) {
 				
-				// Maybe it was removed? Or it's a bug!
-				
-				console.error(new Error(fileSizeInBytes));
-			}
-			
-			console.log("fileSizeInBytes=" + fileSizeInBytes);
-			
-			editor.files[path] = {}; // Temporary object while we are loading the data, to prevent loading the same file many times
-			
-			if(fileSizeInBytes > editor.settings.bigFileSize) {
-				console.warn("File larger then " + editor.settings.bigFileSize + " bytes");
-				load(path, "", false, true);
-			}
-			else {
-				editor.readFromDisk(path, load);
+					if(err.code == "ENOENT") alert("File not found: " + path);
+										
+					fileOpenError(err);
+				}
+				else {
+					
+					console.log("fileSizeInBytes=" + fileSizeInBytes);
+					
+					if(fileSizeInBytes > editor.settings.bigFileSize) {
+						console.warn("File larger then " + editor.settings.bigFileSize + " bytes. It will be opened as a stream!");
+						load(path, "", false, true);
+					}
+					else {
+						editor.readFromDisk(path, load);
+					}
+				}
 			}
 		}
 		else {
 			
 			if(!isString(text)) {
 				console.log("text=" + text);
-				console.error(new Error("text is not a string!"));
-
+				return fileOpenError(new Error("text is not a string!"));
 				
 			}
 			else {
@@ -230,16 +285,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		function load(path, text, notFromDisk, tooBig) {
 			console.log("Loading file to editor: " + path);
-			
-			if(editor.files.hasOwnProperty(path)) {
-				if(editor.files[path].path || editor.files[path].text) console.error(new Error("Overwriting Real (not temp) file object!"));
-				delete editor.files[path]; // Delete temporary object
-			}
+
 			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig);
 			
-			var file = editor.files[path];
+			file = editor.files[path];
 			
-			if(!file.path) console.error(new Error("The file has no path!"));
+			if(!file.path) fileOpenError(new Error("Internal error: The file has no path!"));
 			
 			if(!notFromDisk) {
 				// Because we opened it from disk:
@@ -248,6 +299,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				file.changed = false;
 			}
 			
+			for(var p in editor.files) {
+				if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
+			}
 			
 			// Switch to this file
 			editor.showFile(file);
@@ -275,17 +329,56 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		
+		function fileOpenError(err) {
+			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
+			
+			if(callback) callback(file, err);
+
+			console.warn("Error when opening file path=" + path + " message: " + err.message);
+			
+			return err;
+			
+		}
+		
 	}
 	
-	editor.fileSizeOnDisk = function(path) {
+	editor.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
-		try {
-			var stats = fs.statSync(path);
+		
+		if(!callback) console.error(new Error("Callback not defined!"));
+		
+		fs.stat(path, checkSize);
+
+		function checkSize(err, stats) {
+			
+			if(err) callback(-1, err)
+			else callback(stats["size"]);
+			
 		}
-		catch(err) {
-			return err;
+		
+	}
+	
+	editor.doesFileExist = function(path, callback) {
+		// An easier method then getFileSizeOnDisk to check if a file exist on disk (add support for other protocols later!?)
+		// Be aware of racing conditions, it's often better to just open the file and see what happends
+		
+		editor.getFileSizeOnDisk(path, gotSize);
+		
+		function gotSize(size, err) {
+			
+			if(err) {
+				if(err.code === 'ENOENT') {
+					callback(false);
+				}
+				else {
+					console.warn("Unexpected error when checking if file exist:")
+					console.error(err);
+				}
+			}
+			else {
+				callback(true);
+			}
 		}
-		return stats["size"];
 	}
 	
 	editor.lastChangedFile = function() {

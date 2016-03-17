@@ -11,7 +11,7 @@
 	
 	"use strict";
 	
-	var fileList = []; // Temporary array copy of opened files!?
+	//var fileList = []; // Temporary array copy of opened files!?
 	
 	
 	editor.on("start", file_tabs);
@@ -41,18 +41,6 @@
 		
 		console.log("Orderleft");
 		
-		/*
-		for(var i=0; i<fileList.length; i++) {
-			if(fileList[i] == editor.currentFile) {
-				break;
-			}
-			
-			console.log("incrementing " + fileList[i].name);
-
-			fileList[i].order++;
-		}
-		*/
-		
 		editor.currentFile.order-=1.5;
 
 		buildTabs(); // sorts again
@@ -61,60 +49,12 @@
 	function orderRight() {
 		console.log("Orderright");
 
-		/*
-		var found = false;
-
-		for(var i=0; i<fileList.length; i++) {
-			if(fileList[i] == editor.currentFile) {
-				found = true;
-			}
-			else if(found) {
-				console.log("decrementing " + fileList[i].name);
-				fileList[i].order--;
-			}
-		}
-		*/
-		
 		editor.currentFile.order+=1.5;
 
 		buildTabs(); // sorts again
 	}
 	
 	
-	function sortFileList() {
-		fileList.length = 0;
-		for(var path in editor.files) {
-			fileList.push(editor.files[path]);
-		}
-		fileList.sort(sortOrder);
-		
-		var order = 0;
-		
-		// debug
-		for(var i=0; i<fileList.length; i++) {
-			console.log(fileList[i].order + " = " + fileList[i].path);
-		}
-		
-		// Reorder it
-		var order = 0;
-		for(var i=0; i<fileList.length; i++) {
-			fileList[i].order = order++;
-		}
-		
-		global.fileOrder = order++;
-		
-		function sortOrder(a, b) {
-			if(a.order < b.order) {
-				return -1;
-			}
-			else if(b.order < a.order) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		}
-	}
 	
 	function switchTab() {
 		// Open last file
@@ -212,13 +152,11 @@
 			}
 		}
 		
-		
-		
-		sortFileList(); // Make sure the file's are in order
+		var fileList = editor.sortFileList(); // Sorted by file.order
 		
 		// Create tabs
 		for(var i=0; i<fileList.length; i++) {
-			console.log(i + "=" + fileList[i].path);
+			console.log("file_tab_" + i + "=" + fileList[i].path);
 			openTab(fileList[i].path);
 		}
 

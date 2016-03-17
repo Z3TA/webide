@@ -56,23 +56,8 @@
 				
 				console.log("gonna open files[" + i + "]=" + files[i]);
 				
-				openFile(files[i], function(file, lastOpened) {
-
-					console.log("we now have it opened file.path=" + file.path);
-					
-					
-					if(lastOpened) setCurrent = file.path;
-					
-					// Is all files we want to open opened!?
-					openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);
-					if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) {
-						allFilesOpened();
-					}
-					else {
-						console.log("openedFiles=" + openedFiles);
-						console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
-					}
-				});
+				openFile(files[i], fileInListOpened);
+	
 			}
 
 			
@@ -81,6 +66,31 @@
 			allFilesOpened();
 		}
 		
+		
+		function fileInListOpened(file, lastOpened, err) {
+		
+			if(err) {
+				if(err.code == "INQUEUE") {
+					// Some other plugin is already on it's way opening it ...
+					console.warn("Double open file.path=" + file.path);
+					return;
+				}
+				else throw err;
+			}
+			console.log("we now have it open: file.path=" + file.path);
+			
+			if(lastOpened) setCurrent = file.path;
+			
+			// Is all files we want to open opened!?
+			openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);
+			if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) {
+				allFilesOpened();
+			}
+			else {
+				console.log("openedFiles=" + openedFiles);
+				console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
+			}
+		}
 
 		function allFilesOpened() {
 			
@@ -116,116 +126,112 @@
 		
 		function openFile(path, callback) {
 			
-			// Check protocol!?
+			var content;
+			var notFound = false;
+			var loadLastState = false;
+			var file;
+			var lastFileState;
 			
-			var content, notFound = false, loadLastState = false;
+			// Check if the file size and if it exist
+			editor.getFileSizeOnDisk(path, gotFileSize);
 
-			var fileSizeOnDisk = editor.fileSizeOnDisk(path);
-			
-			if(fileSizeOnDisk.code === 'ENOENT') {
-				notFound = true;
-			}
-			else if(fileSizeOnDisk.code) {
-				console.error(fileSizeOnDisk);
-			}
-			
-			
-			/*
-			try {
-				content = fs.readFileSync(path, "utf8");
-			} catch (e) {
-				if (e.code === 'ENOENT') {
-					console.log('File not found:' + path);
-					//console.error(e);
-					notFound = true;
-					content = "";
-				} else {
-					console.error(e);
-				}
-			}
-			*/
-			
-			var lastFileState = loadState(path);
-			
-			if(lastFileState) {
+			function gotFileSize(fileSizeOnDisk, err) {
 				
-				console.log("loadLastState=" + loadLastState);
-				console.log("lastFileState.isSaved=" + lastFileState.isSaved);
+				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				if(notFound) {
-					// Only ask if we actually have the last state, otherwise just ignore that it's gone.
-					// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
-					if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path);
-				}
-				// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
-				else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
-					if(confirm("File on disk is empty! Load last saved state instead? path=: " + path + "")) {
-						loadLastState = true;
+
+				
+				if(err) {
+					if(err.code === 'ENOENT') {
+						notFound = true;
 					}
 					else {
-						loadLastState = false;
+						console.error(err);
 					}
 				}
-				
-				if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved.
-				
-				if( loadLastState || lastFileState.isSaved === false ) {
-					// Open from temp
-					console.warn("Loading last saved state for file path=" + path);
-					content = lastFileState.text;
-					
-					//console.log("content=" + content);
-					
-				}
 
-			}
-			
-			console.log("Opening file path=" + path);
-			editor.openFile(path, content, function reopen_files_(file) {
-				
-				console.log("Got file from editor path=" + path);
-				
-				// Mark the file as saved, because we just opened it
-				//file.isSaved = true;
-				//file.savedAs = true;
-				//No! We should use last state, from when the editor was closed.
+				lastFileState = loadState(path);
 				
 				if(lastFileState) {
 					
-					file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
+					console.log("loadLastState=" + loadLastState);
+					console.log("lastFileState.isSaved=" + lastFileState.isSaved);
 					
-					if(lastFileState.order !== undefined) file.order = lastFileState.order;
-					if(lastFileState.caret !== undefined) {
-						// Place the caret
-						try {
-							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-						}
-						catch(e) {
-							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
-						}
+					if(notFound && lastFileState.text.length > 0) {
+						// Only ask if we actually have the last state, otherwise just ignore that it's gone.
+						// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
+						if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path);
 					}
-					if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
-					
-					if(lastFileState.isSaved !== undefined && content) {
-						file.isSaved = lastFileState.isSaved;
+					// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
+					else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
+						loadLastState = confirm("File on disk is empty! Load last saved state instead? path=: " + path + "");
 					}
 					
-					console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
+					if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved. Because it was "Not found" or "Emty on disk"
 					
+					if( loadLastState || lastFileState.isSaved === false ) {
+						// Open from temp
+						console.warn("Loading last saved state for file path=" + path);
+						content = lastFileState.text;
+						
+					}
+
+				}
+				
+				console.log("Reopening file path=" + path);
+				editor.openFile(path, content, fileReopened); 
+				
+				
+			}
+			
+			
+			function fileReopened(file, err) {
+
+				console.log("Got (Reopening) file from editor path=" + path);
+
+				if(err) {
+					callback(file, false, err);
 				}
 				else {
-					// If there is no last state: Assume the file is saved.
-					file.isSaved = true;
-					file.savedAs = true;
-					
-				}
-				
-				if(callback) callback(file, lastFileState.open === true);
-				
-			});
-		}
 
-		
+					// Mark the file as saved, because we just opened it
+					//file.isSaved = true;
+					//file.savedAs = true;
+					//No! We should use last state, from when the editor was closed.
+					
+					if(lastFileState) {
+						
+						file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
+						
+						if(lastFileState.order !== undefined) file.order = lastFileState.order;
+						if(lastFileState.caret !== undefined) {
+							// Place the caret
+							try {
+								file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
+							}
+							catch(e) {
+								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
+							}
+						}
+						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
+						
+						if(lastFileState.isSaved !== undefined && content) {
+							file.isSaved = lastFileState.isSaved;
+						}
+						
+						console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
+						
+					}
+					else {
+						// If there is no last state: Assume the file is saved.
+						file.isSaved = true;
+						file.savedAs = true;
+					}
+					
+					if(callback) callback(file, lastFileState.open === true);
+				}
+			}
+		}
 	}
 	
 	function addToStringList(text, add, delimiter) {
