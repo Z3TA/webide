@@ -6,7 +6,15 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
+1) Optimization on input latency. Can I go lower then 20 ms!??
+ window.postMessage
+http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
+
+
+2) Writing blog post
+
+
+3) Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
 
 Bug found! Bug report form: How to get the error? Describe in steps how to reproduce this error.
 Ctlr + shift + S to send the bug report

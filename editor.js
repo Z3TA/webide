@@ -2221,6 +2221,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	function resizeAndRender() {
+		
+		Optimize this!???
+		http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
+		 window.postMessage
+		
+		
 		if(editor.shouldResize) editor.resize();
 		if(editor.shouldRender) editor.render();
 	}
