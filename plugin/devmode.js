@@ -2,6 +2,10 @@
 	"use strict";
 	
 	var consoleLogOriginal = console.log;
+	var consoleTimeOriginal = console.time;
+	var consoleTimeEndOriginal = console.timeEnd;
+	var consoleWarnOriginal = console.warn;
+	
 	
 	editor.on("start", init);
 	
@@ -29,9 +33,11 @@
 		
 		}
 		
+		/*
 		setInterval(function() {
 			throw new Error("test error msg");
 		}, 5000);
+		*/
 		
 	}
 	
@@ -41,7 +47,7 @@
 	
 	function disableDevMode() {
 		// Disable console.log
-		console.log = function() {
+		console.log = console.time = console.timeEnd = console.warn = function() {
 			// Eaten by the void
 		}
 		
@@ -66,6 +72,10 @@
 	
 	function enableDevMode() {
 		console.log = consoleLogOriginal;
+		console.warn = consoleWarnOriginal;
+		
+		console.time = consoleTimeOriginal
+		console.timeEnd = consoleTimeEndOriginal
 		
 		console.error = function(err) {
 			

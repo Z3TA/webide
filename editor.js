@@ -2243,6 +2243,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCodeAlt = 18;
 		var gotError;
 		
+		// Test optimization
+		//var file = editor.currentFile;
+		//var caret = file.caret;
+		//var top = editor.settings.topMargin + (caret.row - file.startRow) * editor.settings.gridHeight;
+		//var left = editor.settings.leftMargin + (caret.col + (file.grid[caret.row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth;
+		//ctx.fillText(character, left, top);
+		//ctx.fillText(character, 0, 0);
+		// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
+		
 		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo));
 		
 		lastKeyDown = charCode;

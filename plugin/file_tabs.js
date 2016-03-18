@@ -285,7 +285,9 @@
 		
 		function closeTab(e) {
 			var closeFileButton = e.target;
-
+			
+			console.log("Closing tab for path=" + path);
+			
 			console.log("saved?" + editor.files[path].isSaved);
 			console.log("e.ctrlKey?" + e.ctrlKey);
 			console.log("closeFileButton=" + closeFileButton);

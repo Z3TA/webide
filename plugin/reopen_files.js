@@ -334,7 +334,7 @@
 		
 		
 		// Remove state
-		window.localStorage.removeItem("state_" + filePath);
+		window.localStorage.removeItem("state_" + file.path);
 		
 		
 		findBugs();
