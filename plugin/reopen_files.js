@@ -18,6 +18,8 @@
 
 	var loadOrder = 999; // Load after the parser and other stuff that has fileOpen event listener
 	
+	var saveStateIntervalTimer;
+	
 	editor.on("start", reopenFilesMain, loadOrder)
 	
 	function reopenFilesMain() {
@@ -96,8 +98,10 @@
 			
 			console.log("All files from last lession opened!");
 			
+			findBugs(true); // true == also check if the list match editor.files
+			
 			console.log("setCurrent=" + setCurrent);
-
+		
 			
 			if(setCurrent) {
 				// Make the file with last state "open" the current file
@@ -117,7 +121,7 @@
 			
 			
 			// Save state on regular intervals in case the editor crashes (or refresh)
-			setInterval(reopen_files_closeEditor, saveStateInterval);
+			saveStateIntervalTimer = setInterval(reopen_files_closeEditor, saveStateInterval);
 			
 		}
 		
@@ -256,10 +260,14 @@
 	}
 	
 	function addToOpenedFiles(file) {
-		
+
+		console.log("Adding file to openedFiles path=" + file.path);
+
 		if(!file.path) console.error(new Error("Argument need to be a file object!"));
 		
+		console.log("List before=" + window.localStorage.openedFiles);	
 		window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
+		console.log("List after=" + window.localStorage.openedFiles);	
 		
 		findBugs();
 		
@@ -312,7 +320,7 @@
 		
 		if(index == -1) console.error( new Error(  "remove='" + remove + "' not in array=" + JSON.stringify(array)  ) );
 		
-		array.splice(index); // Remove the string to be removed from the text
+		array.splice(index, 1); // Remove the string to be removed from the text
 		
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
 		
@@ -328,8 +336,11 @@
 		
 		if(!file.path) console.error(new Error("Argument need to be a file object!"));
 
-		window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
+		console.log(editor.getStack("Removing file from openedFiles path=" + file.path));
 		
+		console.log("List before=" + window.localStorage.openedFiles);	
+		window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
+		console.log("List after=" + window.localStorage.openedFiles);
 		
 		
 		
@@ -354,7 +365,19 @@
 			return true;
 		}
 		else {
+			
+			try {
+				findBugs(true); // true == also check if the list match editor.files
+			}
+			catch(err) {
+				clearInterval(saveStateIntervalTimer);
+				console.error(err);
+			}
+			
+			
 			var openFiles = window.localStorage.openedFiles.split(fileDelimiter);
+			
+			// Check if openFiles list match the editor.files list
 			
 			// note: "".split(fileDelimiter).length == 1 !!
 			if(window.localStorage.openedFiles != "") {
@@ -439,7 +462,7 @@
 	*/
 	
 	
-	function findBugs() {
+	function findBugs(checkMatch) {
 		// Checks the openedFiles string for errors:
 		
 		var text = window.localStorage.openedFiles;
@@ -465,6 +488,15 @@
 			}
 		}
 		
+		if(checkMatch && array[0] != "") {
+			// Does the list match editor.files!?
+			for(var i=0; i<array.length; i++) {
+				if(!editor.files.hasOwnProperty(array[i])) console.error( new Error("File does not exist in editor.files: path=" + array[i] + " array=" + JSON.stringify(array) + " editor.files=" + JSON.stringify(Object.keys(editor.files))));
+			}
+			for(var path in editor.files) {
+				if(array.indexOf(path) == -1) console.error(new Error("File does not exist in openedFiles list: path=" + path + " array=" + JSON.stringify(array) + " editor.files=" + JSON.stringify(Object.keys(editor.files))));
+			}
+		}
 		
 		/*
 		// Sanity check

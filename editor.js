@@ -401,15 +401,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		else {
 			
+			console.log("Closing file: path=" + path);
+			
 			var file = editor.files[path];
 			
-			delete editor.files[file.path];
-			
-			// Call listeners (before we switch to another file)
+			// Call listeners (before we switch to another file, and before we delete the file content)
 			console.log("Calling fileClose listeners (" + editor.eventListeners.fileClose.length + ") ...");
 			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
+			
+			delete editor.files[file.path];
 			
 			if(editor.lastFile) {
 				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
