@@ -38,7 +38,7 @@
 		
 		// Asume the buffer doesn't have any colors applied? Nope! 
 		//resetColors(buffer); // Makes this function 6 times slower
-			
+		
 		var firstIndex = buffer[0].startIndex;
 		var lastRow = buffer[buffer.length-1];
 		var lastIndex = lastRow.length > 0 ? lastRow[lastRow.length-1].index : lastRow.startIndex;
@@ -51,17 +51,6 @@
 			for(var i=0; i<comments.length; i++) {
 				if(comments[i].start > lastIndex) break;
 				applyColor(buffer, comments[i].start, comments[i].end, commentColor, false, true);
-			}
-		}
-		
-		// Color quotes
-		var quotes = file.parsed.quotes;
-		var quoteColor = editor.settings.style.quoteColor;
-		
-		if(quotes) {
-			for(var i=0; i<quotes.length; i++) {
-				if(quotes[i].start > lastIndex) break;
-				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor, true, false);
 			}
 		}
 		
@@ -78,10 +67,23 @@
 				}
 				else {
 					applyColor(buffer, xmlTags[i].end-1, xmlTags[i].end, xmlTagColor, false, false);
-					}
+				}
 				
 			}
 		}
+		
+		// Color quotes
+		var quotes = file.parsed.quotes;
+		var quoteColor = editor.settings.style.quoteColor;
+		
+		if(quotes) {
+			for(var i=0; i<quotes.length; i++) {
+				if(quotes[i].start > lastIndex) break;
+				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor, true, false);
+			}
+		}
+		
+		
 		
 		//console.timeEnd("applyJScolors");
 
