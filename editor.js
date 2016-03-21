@@ -6,6 +6,10 @@
 // The editor object lives in global scope, so that it can be accessed everywhere.
 var editor = {};
 
+var tempTest = 0;
+var benchmarkCharacter = ".";
+var benchmarkCharacterCode = 190;
+var inputCount = 0;
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 editor.settings = {
@@ -50,7 +54,7 @@ editor.settings = {
 	bigFileSize: 234000, // Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
-	renderRowOptimization: false, // Turn off this for now, due to coloring bugs: When writing infront of (left) or something color, the last char gets colored. When inserting a tag next (left) to a word, it gets colored blue. until we know how to fix colors etc, Function help hinting doesn’t go away when typing.
+	renderColumnOptimization: false, // Characters show up on the screen ca 3ms faster.
 	insert: false
 };
 
@@ -854,6 +858,36 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	
+	editor.renderColumn = function(row, col, character, textColor) {
+		// For optimization: Prints a character on the screen.
+		
+		if(textColor == undefined) textColor = editor.settings.style.textColor;
+		
+		var file = editor.currentFile;
+		
+		var top = editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight;
+		var left = editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth;
+		
+		ctx.fillStyle = textColor;
+		
+		//ctx.fillStyle = "rgb(0,0,0)";
+		ctx.fillText(character, left, top);
+		
+	}
+	
+	editor.clearColumn = function(row, col) {
+		// For optimization: Clears a box (screen area)
+		
+		var file = editor.currentFile;
+		
+		var top = editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight;
+		var left = editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth;
+		
+		ctx.fillStyle = editor.settings.style.bgColor;
+		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
+		ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
+		
+	}
 	
 	
 	editor.resize = function(e) {
@@ -1842,7 +1876,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.addEventListener('paste', paste);
 	window.addEventListener('cut', cut);
 	
-
+	//window.addEventListener("message", onMessage, false);
 	
 	function main() {
 		
@@ -1857,6 +1891,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		else {
 			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
+		
+		editor.canvasContext = ctx;
 		
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
@@ -1924,6 +1960,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 
 		
+		
+		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
 		// note to self: Just temorary, dont forget to remove:
@@ -1950,6 +1988,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		*/
+	}
+	
+	function mainLoop() {
+		resizeAndRender();
+		
+		//requestanimframe
+		
+		// animation renders
 	}
 	
 	
@@ -2191,6 +2237,27 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCode = e.charCode || e.keyCode || e.which;
 		var character = String.fromCharCode(charCode); 
 		
+
+		/*
+		if(character == benchmarkCharacter) {
+			
+			//process.nextTick(function() {
+				// Test optimization
+				var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
+				var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+				//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+				ctx.fillStyle = "rgb(0,0,0)";
+				ctx.fillText(benchmarkCharacter, left, top);
+				tempTest++;
+				return;
+				//ctx.fillText(character, 0, 0);
+				// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
+			//});
+
+		}
+		*/
+		
+		
 		/*
 			var charCode;
 			
@@ -2206,11 +2273,48 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		global.lastKeyPressed = character;
 		
-		if(editor.currentFile) {
+		var file = editor.currentFile
+		
+		if(file) {
 			if(editor.input) {
 				// Put character at current caret position:
 				
-				editor.currentFile.putCharacter(character);
+				
+				// Optimization. The benchmarking tool need 4 "test" before benchmarking, so 
+				if(editor.settings.renderColumnOptimization && file.caret.eol && inputCount++ > 5) { //  && character == benchmarkCharacter
+					
+					/*
+					var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
+					//var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+					var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+					ctx.fillStyle = "rgb(0,0,0)";
+					ctx.fillText(character, left, top);
+					tempTest++;
+					*/
+					
+					// There's a higher "chance" to get faster responses if this function is inlined
+					editor.renderColumn(file.caret.row, file.caret.col, character)
+					
+					/*
+						Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
+						
+					*/
+					
+					// We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
+					//setTimeout(function waitforrender() {
+						
+						file.putCharacter(character, undefined, true);
+						
+					//}, 22);
+					
+					// 
+					
+					//editor.renderColumn(row, col, character, editor.settings.style.textColor);
+				}
+				else {
+					file.putCharacter(character);
+				}
+
 				
 			}
 			
@@ -2221,16 +2325,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	function resizeAndRender() {
-		
-		Optimize this!???
-		http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
-		 window.postMessage
-		
-		
 		if(editor.shouldResize) editor.resize();
 		if(editor.shouldRender) editor.render();
 	}
-	
+
 	
 	function keyIsDown(e) {
 		/*
@@ -2250,15 +2348,22 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCodeCtrl = 17;
 		var charCodeAlt = 18;
 		var gotError;
-		
-		// Test optimization
-		//var file = editor.currentFile;
-		//var caret = file.caret;
-		//var top = editor.settings.topMargin + (caret.row - file.startRow) * editor.settings.gridHeight;
-		//var left = editor.settings.leftMargin + (caret.col + (file.grid[caret.row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth;
-		//ctx.fillText(character, left, top);
-		//ctx.fillText(character, 0, 0);
-		// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
+
+		/*
+		var backspaceCharCode = 8;
+		if(charCode == backspaceCharCode) {
+			tempTest--;
+
+			var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
+			//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+			var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+			ctx.fillStyle = editor.settings.style.bgColor;
+			//ctx.fillStyle = "rgba(255,0,0, 0.5)";
+			ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
+			return;
+			
+		}
+		*/
 		
 		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo));
 		

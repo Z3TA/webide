@@ -21,17 +21,27 @@
 				char,
 				grid = file.grid;
 			
+			var renderNotNeeded = editor.settings.clearColumnOptimization;
+			
 			if(file.selected.length > 0) {
+				renderNotNeeded = false;
 				file.deleteSelection();
-				//editor.renderNeeded();
 			}
 			
-			if(caret.index > 0) {
 
-				// Move the caret to the left, then delete that character
+			
+			if(caret.index > 0) {
 				
+				if(renderNotNeeded && caret.eol && grid[caret.row].length > 0) {
+					editor.clearColumn(caret.row, caret.col-1);
+				}
+				else {
+					renderNotNeeded = false;
+				}
+				
+				// Move the caret to the left, then delete that character
 				file.moveCaretLeft();
-				file.deleteCharacter(undefined, undefined, true); // true = renderRow
+				file.deleteCharacter(undefined, undefined, renderNotNeeded);
 				
 			}
 			

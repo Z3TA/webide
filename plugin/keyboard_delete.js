@@ -22,7 +22,7 @@
 				
 			}
 			else {
-				file.deleteCharacter(file.caret, undefined, true); // true = renderRow
+				file.deleteCharacter(file.caret, undefined);
 			}
 				
 			return false; // Prevent default

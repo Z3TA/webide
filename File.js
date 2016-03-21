@@ -521,7 +521,7 @@
 	
 	
 	
-	File.prototype.putCharacter = function(character, caret) {
+	File.prototype.putCharacter = function(character, caret, renderNotNeeded) {
 		/*
 			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
@@ -537,20 +537,13 @@
 		if(file.selected.length > 0) {
 			file.deleteSelection();
 			caret = file.caret;
-			
-			// Then it's proabably also highlighted, so remove the highlight
-			//file.removeHighlights();
 		}
-		
-		
-		
 		
 		var grid = file.grid,
 			row = caret.row,
 			col = caret.col,
 			index = caret.index;
 		
-		var renderRow = editor.settings.renderRowOptimization; // Optimization
 		
 		if(character == undefined) {
 			console.error(new Error("character is undefined!"));
@@ -569,8 +562,6 @@
 			return;
 		}
 		
-		
-		if(character == "{" || character == "}") renderRow = false;
 		
 		// Sanity check in case someting is wrong
 		file.sanityCheck();
@@ -603,13 +594,7 @@
 			caret.col++;
 			caret.index++;
 			
-			if(renderRow) editor.renderRow(row); // Render the row early (before heavy indexing)
-			
-			// Mehh, it wont render until JavaScript have finished crushing ... 
-			// Fix!? Use setTimeout!? Works sometimes. But sanityCheck fails! asdasdas alksjdalskjdlaksdjalskdj asdlkjasdlj
-			
-			
-			
+		
 			// Increment index of the rest of the columns on this row
 			for(var j=col+1; j<grid[row].length; j++) {
 				grid[row][j].index++;
@@ -639,7 +624,7 @@
 		
 		file.sanityCheck();
 		
-		if(!renderRow) editor.renderNeeded();
+		if(!renderNotNeeded) editor.renderNeeded();
 		
 	}
 	
@@ -1320,7 +1305,7 @@
 		
 	}
 	
-	File.prototype.deleteCharacter = function(caret, bubble, renderRow) {
+	File.prototype.deleteCharacter = function(caret, bubble, renderNotNeeded) {
 		/*
 			Removes the character the caret is on.
 			Behaves like delete in most editors.	
@@ -1334,7 +1319,6 @@
 		
 		file.sanityCheck();
 		
-		if(editor.settings.renderRowOptimization==false) renderRow = false;
 		
 		//console.log("Deleting character at " + JSON.stringify(caret) + " ...");
 		
@@ -1401,12 +1385,13 @@
 			
 			//console.log("Row " + (row+1) + " removed");
 			
-			renderRow = false;
+			renderNotNeeded = false;
 			
 		}
 		else {
 			
 			// Remove box from the grid
+			
 			
 			var box = grid[row][col];
 			
@@ -1422,7 +1407,8 @@
 			*/
 		}
 		
-		if(character == "{" || character == "}") renderRow = false;
+	
+		if(character == "{" || character == "}") renderNotNeeded = false;
 		
 		// Remove the character(s) from the text string
 		file.text = file.text.substr(0, index) + file.text.substring(index+indexDecrementor, file.text.length);
@@ -1441,7 +1427,7 @@
 		// Update the caret index ??
 		//caret.index -= indexDecrementor;
 		
-		if(renderRow) editor.renderRow(); // early paint (always change/update both the text, grid and cursor before rendering! Or some functionality like xmatching will not work properly.
+		//if(renderRow) editor.renderRow(); // early paint (always change/update both the text, grid and cursor before rendering! Or some functionality like xmatching will not work properly.
 		
 		
 		// Decrement index of the rest of the columns on this row
@@ -1472,7 +1458,7 @@
 		
 		file.scrollToCaret();
 		
-		if(!renderRow) editor.renderNeeded();
+		if(!renderNotNeeded) editor.renderNeeded();
 		
 		return caret;
 		

@@ -7,6 +7,12 @@ Always use F5 to reload! Or exit functions might not fire!
 Currently working on: 
 
 1) Optimization on input latency. Can I go lower then 20 ms!??
+
+Sometimes it takes ca 6ms (unoptimized) for characters to show up. But most of the time it takes ca 20ms. 
+Depending on what!?!?!?
+
+Having problems where rendering times goes up: see test/weird_render_times.png
+
  window.postMessage
 http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
 
@@ -216,6 +222,10 @@ When searching in a file marked as big, do a whole file search from disk.
 
 Optimization
 ============
+
+Note about trying to render before doing something. It will not be visible on the screen until the main thread is idle.
+
+
 
 Inserting a { took a very long time in a large file, probably because of fixIndentation.js 
 
