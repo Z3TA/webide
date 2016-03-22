@@ -54,7 +54,7 @@ editor.settings = {
 	bigFileSize: 234000, // Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
-	renderColumnOptimization: true, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
+	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
 	insert: false
 };
 
@@ -335,6 +335,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		function fileOpenError(err) {
 			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
+			
+			console.warn(err.message);
 			
 			if(callback) callback(file, err);
 

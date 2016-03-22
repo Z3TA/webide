@@ -71,7 +71,9 @@
 			
 			console.log("File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
-			editor.openFile(filePath, content, function(file) {  // path, content, callback
+			editor.openFile(filePath, content, function(file, err) {  // path, content, callback
+			
+				if(err) console.error(err);
 			
 				// Mark the file as saved, because we just opened it
 				file.isSaved = true;
