@@ -588,6 +588,7 @@
 				grid[row].splice(col, 0, new Box(character, caret.index));
 			}
 			
+			
 			console.log("Added " + character + " at index=" + index + " row=" + row + " col=" + col + "");
 			
 			// Update the caret

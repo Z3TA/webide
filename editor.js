@@ -54,7 +54,7 @@ editor.settings = {
 	bigFileSize: 234000, // Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
-	renderColumnOptimization: true, // Characters show up on the screen ca 3ms faster.
+	renderColumnOptimization: true, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
 	insert: false
 };
 
@@ -737,9 +737,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			var funName = "";
 			
+			
+			// The reason why we clone the rows and not just push the pointer, is so that the coloring functions don't have to reset all the colors!
+			
 			// Create the buffer
 			//console.time("createBuffer");
-			for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+editor.view.visibleRows); row++) {
+			var bufferStartRow = Math.max(0, file.startRow);
+			var bufferEndRow = Math.min(grid.length, file.startRow+editor.view.visibleRows);
+			for(var row = bufferStartRow; row < bufferEndRow; row++) {
 				buffer.push(file.cloneRow(row)); // Clone the row
 			}
 			//console.timeEnd("createBuffer");
@@ -787,6 +792,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			
 			editor.renderCaret(file.caret);
+			
 			
 			console.timeEnd("render");
 			
@@ -2309,10 +2315,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(editor.input) {
 				// Put character at current caret position:
 				
+				if(editor.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
+					// Makes characters appear on the screen faster ...
 				
-				// Optimization. The benchmarking tool need 4 "test" before benchmarking, so 
-				if(editor.settings.renderColumnOptimization && file.caret.eol && inputCount++ > 5) { //  && character == benchmarkCharacter
-					
 					/*
 					var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
 					//var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
@@ -2321,20 +2326,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					ctx.fillText(character, left, top);
 					tempTest++;
 					*/
+
+					// Always use the default color. It's impossible to guess what color to use without parsing! Set renderColumnOptimization to false if this is too annoying
 					
-					var textColor = editor.settings.style.textColor;
-					
-					if(file.caret.col > 0) {
-						// Use color from last character
-						textColor = file.grid[file.caret.row][file.caret.col-1].color;
-					}
-					console.log("file.caret.col=" + file.caret.col + " textColor=" + textColor);
-					
-					// What will happen if we clear the canvas before? No impact on performace
+					// What will happen if we clear the canvas before? No impact on performace!
 					editor.clearColumn(file.caret.row, file.caret.col);
 					
 					// There's a higher "chance" to get faster responses if this function is inlined
-					editor.renderColumn(file.caret.row, file.caret.col, character, textColor)
+					editor.renderColumn(file.caret.row, file.caret.col, character);
 					
 					// Repaint the caret
 					editor.renderCaret(file.caret, 1); // 1 so that the caret will be rendered right 
@@ -2353,9 +2352,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						
 					//}, 22);
 					
-					// 
-					
-					//editor.renderColumn(row, col, character, editor.settings.style.textColor);
 				}
 				else {
 					file.putCharacter(character);

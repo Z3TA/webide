@@ -6,6 +6,8 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+Rethinking on how coloring works.
+
 1) Optimization on input latency. Can I go lower then 20 ms!??
 
 Sometimes it takes ca 6ms (unoptimized) for characters to show up. But most of the time it takes ca 20ms. 
@@ -223,8 +225,11 @@ When searching in a file marked as big, do a whole file search from disk.
 Optimization
 ============
 
-Note about trying to render before doing something. It will not be visible on the screen until the main thread is idle.
+Note about trying to render before doing something:
+- It will not be visible on the screen until the main thread is idle.
 
+Note about optimizing for faster screen updates: 
+- VSync is usually 60 Hz, so the crunshing need to be faster then 16ms or we will miss this time-window and the editor will appear sluggish.
 
 
 Inserting a { took a very long time in a large file, probably because of fixIndentation.js 
