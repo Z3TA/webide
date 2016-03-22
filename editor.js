@@ -134,6 +134,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	var canvas, ctx; 
 	
+	var fileOpenHtmlElement;
 	
 	/*
 		Editor functionality (accessible from global scope) By having this code here, we can use private variables
@@ -327,6 +328,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			else {
 				console.log("No callback for file.path=" + file.path);
 			}
+			
+			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 			
 			// Always render (and resize) after opening a file! (where=here, when=now!)
 			editor.renderNeeded();
@@ -623,7 +626,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			// If we want to choose a while directory,  fileOpen.setAttribute webkitdirectory
 		}
-		
 		
 		fileOpen.click(); // Bring up the OS path selector window
 	}
@@ -1946,8 +1948,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		// Handle file open dialog
-		var fileOpen = document.getElementById("fileInput");
-		fileOpen.addEventListener('change', readSingleFile, false);
+		fileOpenHtmlElement = document.getElementById("fileInput");
+		fileOpenHtmlElement.addEventListener('change', readSingleFile, false);
 		
 		// cleanup
 		/*
@@ -2039,7 +2041,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	function readSingleFile(e) {
 		
-		//console.log("Reading single file ...");
+		console.log("Reading single file ...");
 		
 		if(global.fileOpenCallback == undefined) {
 			console.error(new Error("There is no listener for the open file dialog!"));
@@ -2054,9 +2056,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var fileName = file.name;
 		var filePath = file.path;
 		
-		
+		console.log("Calling file-dialog callback: " + functionName(global.fileOpenCallback) + " ...");
 		global.fileOpenCallback(filePath);
 		global.fileOpenCallback = undefined;
+		
+		fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
 		
 		
 		/*
