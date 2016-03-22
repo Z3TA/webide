@@ -78,7 +78,7 @@
 				
 			}
 		}
-		else if(lastCharacter == "}" && row > 0) {
+		else if( lastCharacter == "}" && row > 0 && file.grid.length > (row+1) ) {
 			var indentation = file.grid[row+1].indentation;
 			for (var i=row-1; i>-1; i--) {
 				rowIndentation = file.grid[i].indentation;
