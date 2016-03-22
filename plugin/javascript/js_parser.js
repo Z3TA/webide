@@ -257,7 +257,8 @@
 			eq = "=",
 			colon = ":",
 			pastChar = [],
-			xmlMode = false,
+		xmlMode = false,
+		xmlModeBeforeScript = false,
 			textLength = text.length,
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 			lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
@@ -267,6 +268,7 @@
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
 		tmpXmlMode = xmlMode;
+		xmlModeBeforeScript = xmlMode;
 		
 		insideFunctionBody[subCount] = false;
 		L[subCount] = 1; // { Asume open
@@ -844,7 +846,7 @@
 					insideXmlTag = true;
 					xmlTagStart = i;
 					if(!insideXmlTagEnding) {
-						tmpXmlMode = xmlMode;
+						tmpXmlMode = xmlMode; // xmlMode when the tag starts
 						xmlMode = false;
 					}
 					if(insideHTMLComment) console.error(new Error("WTF"));
@@ -857,17 +859,20 @@
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, insideXmlTagEnding) );
 					
-										
-					xmlMode = tmpXmlMode;
+										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
+						
 						if(insideXmlTagEnding) {
-							xmlMode = true;
+							// Use default xmlMode after script tag ended
+							xmlMode = xmlModeBeforeScript;
 						}
 						else {
-							xmlMode = tmpXmlMode;
+							// We are <script HERE>
+							xmlModeBeforeScript = xmlMode;
+							xmlMode = false;
 						}
-					}
+						}
 					
 					if(tagBreak.indexOf(xmlTag) > -1) {
 						
@@ -883,9 +888,7 @@
 							openXmlTags++;
 							xmlTagLastOpenRow = row;
 						}
-						
-						
-					}
+						}
 					
 					lastXmlTag = xmlTag;
 					xmlTag = "";
