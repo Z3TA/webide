@@ -54,7 +54,7 @@ editor.settings = {
 	bigFileSize: 234000, // Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
-	renderColumnOptimization: false, // Characters show up on the screen ca 3ms faster.
+	renderColumnOptimization: true, // Characters show up on the screen ca 3ms faster.
 	insert: false
 };
 
@@ -786,6 +786,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			//console.timeEnd("renders");
 			
 			
+			editor.renderCaret(file.caret);
+			
 			console.timeEnd("render");
 			
 		}
@@ -881,12 +883,40 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var file = editor.currentFile;
 		
 		var top = editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight;
-		var left = editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth;
+		var left = editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth - 0.5; // -0.5 to clear sub pixels (caret)
 		
-		ctx.fillStyle = editor.settings.style.bgColor;
+		if(row == file.caret.row) {
+			ctx.fillStyle = editor.settings.style.currentLineColor;
+		}
+		else {
+			ctx.fillStyle = editor.settings.style.bgColor;
+		}
+				
 		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
 		ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
 		
+	}
+	
+	editor.renderCaret = function(caret, colPlus) {
+		
+		if(colPlus == undefined) colPlus = 0;
+		
+		var row = caret.row;
+		var col = caret.col + colPlus;
+		
+		var file = editor.currentFile;
+		
+		// Math.floor to prevent sub pixels
+		var top = Math.floor(editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight);
+		var left = Math.floor(editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth);
+
+		ctx.fillStyle = editor.settings.caret.color;
+		
+		ctx.fillRect(left, top, editor.settings.caret.width, editor.settings.gridHeight);
+
+		// Show the "direction" of the caret
+		ctx.fillRect(left, top+editor.settings.gridHeight - editor.settings.caret.width, 4, editor.settings.caret.width);
+
 	}
 	
 	
@@ -2292,12 +2322,28 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					tempTest++;
 					*/
 					
+					var textColor = editor.settings.style.textColor;
+					
+					if(file.caret.col > 0) {
+						// Use color from last character
+						textColor = file.grid[file.caret.row][file.caret.col-1].color;
+					}
+					console.log("file.caret.col=" + file.caret.col + " textColor=" + textColor);
+					
+					// What will happen if we clear the canvas before? No impact on performace
+					editor.clearColumn(file.caret.row, file.caret.col);
+					
 					// There's a higher "chance" to get faster responses if this function is inlined
-					editor.renderColumn(file.caret.row, file.caret.col, character)
+					editor.renderColumn(file.caret.row, file.caret.col, character, textColor)
+					
+					// Repaint the caret
+					editor.renderCaret(file.caret, 1); // 1 so that the caret will be rendered right 
 					
 					/*
 						Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
+						And sometimes it will not go down to 3-4ms ever! (stay at 17-18ms)
 						
+						note: Canvas size didn't have an impact when only writing one character
 					*/
 					
 					// We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
