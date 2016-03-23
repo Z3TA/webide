@@ -29,7 +29,12 @@
 	var restartTime = 5000; // How many second to wait before restrying to connect to the debugger after a disconnect or failed websock
 	
 	if(!alert) var alert = console.log; // If we are running in nodejs
+	if(!fs) var fs = require("fs"); // If we are running in nodejs
 
+	var messageLog = []; // Recent log messages.
+	var maxLogLength = 50;
+	var firstUrl = ""; // url of the first console message recieved
+	
 	var connection;
 	
 	var WebSocketClient = require('websocket').client;
@@ -177,14 +182,45 @@
 
 		var msg = json.params.message;
 		
+		if(!firstUrl) {
+			firstUrl =  msg.url;
+			console.log("firstUrl=" + firstUrl);
+			console.log("__dirname=" + __dirname);
+			
+		}
+		
 		if(msg.level=="error") {
 			
 			//console.log(JSON.stringify(json, null, 2));
-
-			alert(msg.text + "\n" + msg.url + ", line " + msg.line + stackTrace(msg.stackTrace, msg.url, msg.line));
+			
+			var alertMsg = msg.text + "\n" + msg.url + ", line " + msg.line + stackTrace(msg.stackTrace, firstUrl, msg.line);
+			
+			log("##############################" + myDate() + "##############################\n" + messageLog.join("\n") + "\n" + alertMsg);
+			
+			alert(alertMsg);
 			
 			// Clear the console so we do not get the same error again if we reconnect
-			send(consoleClearMessages());
+			//send(consoleClearMessages());
+			// This clears for others too, so leave the messages
+			
+		}
+		else {
+			// Keep a list of the 100 latest message
+			messageLog.push(parseText(msg.text) + ", " + shortenUrl(msg.url, firstUrl) + ":" + msg.line);
+			
+			if(messageLog.length > maxLogLength) messageLog.shift();
+		}
+		
+		function parseText(txt) {
+			txt = txt.replace("\\n", "\n");
+			txt = txt.replace('\\"', '"');
+			
+			
+			var baseUrl = firstUrl.substr(0, lastSlash(firstUrl));
+			console.log("baseUrl=" + baseUrl);
+			txt = txt.replace(baseUrl, "");
+			
+			return txt;
 			
 		}
 		
@@ -201,9 +237,8 @@
 			
 			for(var i=0; i<stack.length; i++) {
 				functionName = stack[i].functionName;
-				url = stack[i].url;
-				sharedUrl = sharedStart([commonUrl, url]);
-				url = url.replace(sharedUrl, ""); // Remove the shared path from the url
+				url = shortenUrl(stack[i].url);
+
 				if(!(url == "" && stack[i].lineNumber == line)) { // Dont write if it's the same file and line as parent
 				
 					if(functionName == "") {
@@ -218,6 +253,20 @@
 			return str;
 		}
 		
+		function shortenUrl(url) {
+			//var sharedUrl = sharedStart([commonUrl, url]);
+			
+			//url = url.replace(sharedUrl, ""); // Remove the shared path from the url
+			
+			return url.substr(lastSlash(firstUrl), url.length);;
+		}
+		
+		function lastSlash(url) {
+			var slash = url.lastIndexOf("/");
+			if(slash == -1) slash = url.lastIndexOf("\\");
+			return slash;
+		}
+		
 		function sharedStart(array){
 			var A= array.concat().sort(), 
 			a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
@@ -226,10 +275,36 @@
 		}
 	}
 	
+
+	function myDate() {
+		var d = new Date();
+
+		var hour = addZero(d.getHours());
+		var minute = addZero(d.getMinutes());
+		var second = addZero(d.getSeconds());
+
+		var day = addZero(d.getDate());
+		var month = addZero(1+d.getMonth());
+		var year = d.getFullYear();
+
+		return year + "-" + month + "-" + day + " (" + hour + ":" + minute + ":" + second + ")";
+
+		function addZero(n) {
+			if(n < 10) return "0" + n;
+			else return n;
+		}
+	}
+
+	function log(txt) {
+		fs.appendFileSync("error.log", txt + "\n");
+	}
+	
+	
+	
 	function main() {
 		restart();
 	}
-	
+		
 	main(); // Run main function after everything have been declared
 	
 })();

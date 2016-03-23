@@ -6,10 +6,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-1) Writing blog post
+Cleaning up message, shorter urls, etc in self_debug.js
 
-
-2) Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
+Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
 
 Bug found! Bug report form: How to get the error? Describe in steps how to reproduce this error.
 Ctlr + shift + S to send the bug report
@@ -17,6 +16,18 @@ Ctlr + shift + S to send the bug report
 
 BUGS
 ====
+
+Saving takes a long time sometimes.
+
+function list gets biiiig:
+window.requestAnimFrame = (function(callback) {
+return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+function(callback) {
+window.setTimeout(callback, 1000 / fps);
+};
+})();
+
+
 
 JS inside <script> tags doesn't get parsed!? Colorized.
 
