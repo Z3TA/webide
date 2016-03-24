@@ -28,91 +28,85 @@
 	
 	var restartTime = 5000; // How many second to wait before restrying to connect to the debugger after a disconnect or failed websock
 	
-	if(!alert) var alert = console.log; // If we are running in nodejs
+	//if(!alert) var alert = console.log; // If we are running in nodejs
 	if(!fs) var fs = require("fs"); // If we are running in nodejs
 
 	var messageLog = []; // Recent log messages.
 	var maxLogLength = 50;
-	var firstUrl = ""; // url of the first console message recieved
+	//var baseUrl = "file:///" + __dirname.replace(/\\/g, "/").replace(/\/plugin$/, "/");
+	var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
+	console.log("baseUrl=" + baseUrl);
 	
-	var connection;
+	var padLength = 42; // How many blank spaces in url padding
 	
-	var WebSocketClient = require('websocket').client;
+	var fullPad = ""; for(var i=0; i<padLength; i++) fullPad += " "; // A string with padLength spaces
 	
-	var client = new WebSocketClient();
-		
-	client.on("connectFailed", wsConnectFailed);
-	client.on("connect", wsConnect);
+	var newLine = "\n";
+	
+	var WebSocket = require('ws');
+	var client;
+	
+	var ignoreErrors = false;
 
-	function wsConnectFailed(err) {
-		console.error(err);
+	
+	
+	function wsError(err) {
+		console.log("Connection Error: " + err.toString());
 	}
 
-	function wsConnect(conn) {
+	function wsClose(code, data) {
+		console.log("Connection Closed. code=" + code + " data=" + data);
+		client = undefined;
+		setTimeout(restart, restartTime);
+	}
 	
-		connection = conn;
+	function wsMessage(data, flags) {
+		
+		var json = JSON.parse(data);
+		var method = json.method;
 	
-		console.log('Connected to the chromium debugger');
-		
-		
-		connection.on('error', function(error) {
-			console.log("Connection Error: " + error.toString());
-		});
-		connection.on('close', function() {
-			console.log('Connection Closed');
-			connection = undefined;
-			setTimeout(restart, restartTime);
-		});
-		connection.on('message', wsMessage);
-		
-
-		send(consoleEnable());
-		//send(consoleClearMessages());
-		//send(pageNavigate("index.htm"));
-
-
-		function wsMessage(message) {
-			if (message.type === 'utf8') {
+		if(json.error) {
+			throw new Error("json=" + JSON.stringify(json, null, 2));
+		}
+		else if(method=="Console.messageAdded") {
+			captureErrors(json);
+		}
+		else if(method=="Console.messagesCleared") {
+			//console.log("")
+		}
+		else {
 			
-				var json = JSON.parse(message.utf8Data);
-				var method = json.method;
-			
-				if(json.error) {
-					throw new Error("json=" + JSON.stringify(json, null, 2));
-				}
-				else if(method=="Console.messageAdded") {
-					captureErrors(json);
-				}
-				else if(method=="Console.messagesCleared") {
-					//console.log("")
-				}
-				else {
-					
-					if(json.id) {
-						if(json.id == ID) {
-							//console.log("Answer: " + JSON.stringify(json.result, null, 2));
-						}
-					}
-					else {
-						console.log("UNKNOWN: json=" + JSON.stringify(json, null, 2));
-					}
-					
+			if(json.id) {
+				if(json.id == ID) {
+					//console.log("Answer: " + JSON.stringify(json.result, null, 2));
 				}
 			}
 			else {
-				console.log(message);
-				throw new Error("Expected utf8");
+				console.log("UNKNOWN: json=" + JSON.stringify(json, null, 2));
 			}
+			
 		}
+	}
+	
+	function wsOpen() {
+	
+		console.log('Connected to the chromium debugger');
+		
+		// The first thing we want to do is to clear ?
+		//send(consoleClearMessages());
+		
+		send(consoleEnable());
+		//send(consoleClearMessages());
+		//send(pageNavigate("index.htm"));
 
 	}
 	
 	function send(json) {
 		
-		if(!connection) throw new Error("Can't send message: No connection!");
+		if(!client) throw new Error("Can't send message: No connection!");
 		
 		//console.log("Sending: " + JSON.stringify(json));
-		connection.sendUTF(JSON.stringify(json));
+		client.send(JSON.stringify(json));
 	}
 	
 	function restart() {
@@ -120,7 +114,14 @@
 			
 			console.log("Connecting to url=" + url);
 			
-			client.connect(url);
+			var WebSocket = require('ws');
+			client = new WebSocket(url); // , {protocolVersion: 8, origin: 'http://websocket.org'}
+
+			client.on('open', wsOpen);
+			client.on('close', wsClose);
+			client.on('error', wsError);
+			client.on('message', wsMessage);
+			
 		});
 	}
 
@@ -182,22 +183,51 @@
 
 		var msg = json.params.message;
 		
-		if(!firstUrl) {
-			firstUrl =  msg.url;
-			console.log("firstUrl=" + firstUrl);
-			console.log("__dirname=" + __dirname);
-			
-		}
-		
 		if(msg.level=="error") {
 			
 			//console.log(JSON.stringify(json, null, 2));
+
 			
-			var alertMsg = msg.text + "\n" + msg.url + ", line " + msg.line + stackTrace(msg.stackTrace, firstUrl, msg.line);
+			//var alertMsg = msg.text + "\n" + msg.url + ", line " + msg.line + stackTrace(msg.stackTrace, msg.line);
 			
-			log("##############################" + myDate() + "##############################\n" + messageLog.join("\n") + "\n" + alertMsg);
+			log("############################## " + myDate() + " ##############################\n")
+			log(messageLog.join(newLine)); // Last log messages before the error
 			
-			alert(alertMsg);
+			//log(pad(shortenUrl(msg.url) + ":" + msg.line) + parseText(msg.text));
+			log(newLine + newLine + fullPad + parseText(msg.text));
+			log(stackTrace(msg.stackTrace));
+			log(newLine + newLine);
+			
+			var alertMsg = parseText(msg.text);
+			
+			console.log("alertMsg=" + alertMsg);
+			
+			
+			if(!ignoreErrors) {
+				// Ignore errors for a while so we don't have to close a shitload of alert boxes
+				ignoreErrors = true;
+				setTimeout(function continueCapturingErrors() {
+					ignoreErrors = false;
+				}, 2000);
+				
+				alert(alertMsg); // Does alert stop the world!?
+			}
+			
+			editor.openFile("error.log", undefined, function errorlogOpened(file, err) {
+				
+				if(err) console.error(err);
+				
+				file.moveCaretToEnd(file.caret, function fileCaretMoved(fileCaret) {
+					
+					file.insertText("How to repeat:");
+					file.insertLineBreak();
+					//file.insertLineBreak();
+					//file.insertLineBreak();
+					
+				});
+			});
+			
+
 			
 			// Clear the console so we do not get the same error again if we reconnect
 			//send(consoleClearMessages());
@@ -206,59 +236,91 @@
 		}
 		else {
 			// Keep a list of the 100 latest message
-			messageLog.push(parseText(msg.text) + ", " + shortenUrl(msg.url, firstUrl) + ":" + msg.line);
+			messageLog.push(pad(shortenUrl(msg.url) + ":" + msg.line) + parseText(msg.text));
 			
 			if(messageLog.length > maxLogLength) messageLog.shift();
 		}
+
+		function decodeJSON(str) {
+			// Decode JSON
+			var json = JSON.parse(txt);
+			txt = JSON.stringify(json);
+		}
+
 		
 		function parseText(txt) {
-			txt = txt.replace("\\n", "\n");
-			txt = txt.replace('\\"', '"');
+			// Some text is decoded in JSON... and some are not
+
+			// Remove first and lost quote
+			txt = txt.replace(/^"/g, ""); 
+			txt = txt.replace(/"$/g, "");
 			
 			
-			var baseUrl = firstUrl.substr(0, lastSlash(firstUrl));
-			console.log("baseUrl=" + baseUrl);
-			txt = txt.replace(baseUrl, "");
+			// Remove padding
+			txt = txt.replace(/\s\s+/g, ' ');
+			
+			// Make proper line breaks
+			// 	ex: at Object.editor.renderNeeded (editor.js:702:23)\n    at mouseMove (file:///C:/Users/Z/dev-repositories/js-editor/plugin/mouse_select.js:509:12)\n    at mouseMove (file:///C:/Users/Z/dev-repositories/js-editor/editor.js:2831:5)
+			txt = txt.replace(/\\n/g, newLine);
+			
+			// Unquote quotes
+			txt = txt.replace(/\\"/g, '"');
+
+
+			// Add padding to new lines
+			txt = txt.replace(/\n/g, newLine + fullPad); 
+			
+			// Shorten url's
+			var urlRegex = new RegExp(baseUrl, "g"); // All of them!
+			txt = txt.replace(urlRegex, ""); 
+			
+			txt = parseUnicode(txt);
 			
 			return txt;
 			
+			
+			function parseUnicode(str) {
+				var regExp = /\\u([\d\w]{4})/gi;
+				str = str.replace(regExp, function (match, grp) {
+					return String.fromCharCode(parseInt(grp, 16)); 
+				} );
+				str = unescape(str);
+				return str;
+			}
+			
+			
 		}
 		
-		function stackTrace(stack, commonUrl, line) {
+		function stackTrace(stack) {
 			
-			if(!stack) return "";
+			if(!stack) return fullPad + "No stack available!";
 			
 			var str = "\n";
 			var url = "";
 			var functionName = "";
-			var sharedUrl = "";
 			
 			//console.log(JSON.stringify(stack, null, 2));
 			
 			for(var i=0; i<stack.length; i++) {
 				functionName = stack[i].functionName;
 				url = shortenUrl(stack[i].url);
-
-				if(!(url == "" && stack[i].lineNumber == line)) { // Dont write if it's the same file and line as parent
 				
-					if(functionName == "") {
-						functionName = "Anonymous function"
-						console.warn("Anonymous function detected: " + (url ? url : stack[i].url) + ", line " + stack[i].lineNumber)
-					}
-
-					str += functionName + ": " + url + ", line " + stack[i].lineNumber + "\n";
+				if(functionName == "") {
+					functionName = "Anonymous function"
+					//console.warn("Anonymous function detected: " + (url ? url : stack[i].url) + ", line " + stack[i].lineNumber)
 				}
+				
+				str += fullPad + "@ " + functionName + " (" + url + ":" + stack[i].lineNumber + ")" + newLine;
+				
+				//str += pad(url + ":" + stack[i].lineNumber) + functionName + "\n";
+
 			}
 			
 			return str;
 		}
 		
 		function shortenUrl(url) {
-			//var sharedUrl = sharedStart([commonUrl, url]);
-			
-			//url = url.replace(sharedUrl, ""); // Remove the shared path from the url
-			
-			return url.substr(lastSlash(firstUrl), url.length);;
+			return url.replace(baseUrl, "");
 		}
 		
 		function lastSlash(url) {
@@ -296,10 +358,18 @@
 	}
 
 	function log(txt) {
-		fs.appendFileSync("error.log", txt + "\n");
+		fs.appendFileSync("error.log", txt + newLine);
 	}
 	
-	
+	function pad(str) {
+		
+		var left = padLength - str.length;
+		if (left < 0) return str; // Return early if no padding is needed
+		
+		var padding = "";
+		for(var i=0; i<left; i++) padding += " ";
+		return str + padding;
+	}
 	
 	function main() {
 		restart();

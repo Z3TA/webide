@@ -38,6 +38,10 @@
 			window.localStorage.openedFiles = "";
 		}
 		
+		// This is a fresh reload, so try to recover from old bugs.
+		// 1. Remove dublicate entries
+		window.localStorage.openedFiles = removeDublicates(window.localStorage.openedFiles);
+		
 		findBugs();
 		
 		
@@ -192,7 +196,9 @@
 			function fileReopened(file, err) {
 
 				console.log("Got (Reopening) file from editor path=" + path);
-
+				
+				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
+				
 				if(err) {
 					callback(file, false, err);
 				}
@@ -223,6 +229,8 @@
 							file.isSaved = lastFileState.isSaved;
 						}
 						
+						if(lastFileState.currentFile === true) fileWasCurrentfile = true;
+						
 						console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
 						
 					}
@@ -232,7 +240,7 @@
 						file.savedAs = true;
 					}
 					
-					if(callback) callback(file, lastFileState.open === true);
+					if(callback) callback(file, fileWasCurrentfile);
 				}
 			}
 		}
@@ -261,7 +269,7 @@
 	
 	function addToOpenedFiles(file) {
 
-		console.log("Adding file to openedFiles path=" + file.path);
+		console.log(editor.getStack("Adding file to openedFiles path=" + file.path));
 
 		if(!file.path) console.error(new Error("Argument need to be a file object!"));
 		
@@ -325,7 +333,7 @@
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
 		
 		// Check to see if the string has been removed
-		if(text.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + file.path + "' text='" + openedFiles + "'"));
+		if(text.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'"));
 		
 		return text;
 	}
@@ -376,8 +384,7 @@
 			
 			
 			var openFiles = window.localStorage.openedFiles.split(fileDelimiter);
-			
-			// Check if openFiles list match the editor.files list
+
 			
 			// note: "".split(fileDelimiter).length == 1 !!
 			if(window.localStorage.openedFiles != "") {
@@ -426,10 +433,10 @@
 		}
 		
 		if(file == editor.currentFile) {
-			state.open = true;
+			state.currentFile = true;
 		}
 		else {
-			state.open = false;
+			state.currentFile = false;
 		}
 		
 		state.isSaved = file.isSaved;
@@ -575,7 +582,32 @@
 		}
 	}
 	
-	
+	function removeDublicates(str) {
+		var array = str.split(fileDelimiter);
+		
+		if(array[0] == "") {
+			if(array.length > 1) console.error(new Error("First item is emty! str=" + str));
+			return str; // The string was empty
+		}
+		
+		checkAndRemove();
+		
+		return array.join(fileDelimiter);
+		
+		function checkAndRemove() {
+			// Check for duplex
+			for(var i=0; i<array.length; i++) {
+				for(var j=i+1; j<array.length; j++) {
+					if(array[i] == array[j]) {
+						console.warn("Removed dublicate: " + array[i]);
+						array.splice(i, 1); // Remove the item
+						return checkAndRemove(); // Check the array again
+					}
+				}
+			}
+		}
+		
+	}
 	
 	
 })();

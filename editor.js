@@ -216,11 +216,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Opening file: " + path);
 
-		
+		if(typeof text === "function") console.error(new Error("The callback should be in the third argument. Second argument is for file content"));
 
+		
 		// Check if the file is already opened
 		if(editor.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
+			
+			// Reload file from disk if it's saved!?
 			
 			var file = editor.files[path];
 			
@@ -277,6 +280,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		else {
 			
+			//console.log("text is NOT undefined! But is it a string?");
 			if(!isString(text)) {
 				console.log("text=" + text);
 				return fileOpenError(new Error("text is not a string!"));
@@ -350,6 +354,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 	}
+	
 	
 	editor.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size

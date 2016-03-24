@@ -246,8 +246,8 @@
 			functionListWrap.style.display="none";
 			editor.resizeNeeded();
 				console.log("Functionlist is now hidden");
-				console.log((new Error("why hide?")).stack);
-				}
+				console.log(editor.getStack("why hide?"));
+			}
 		}
 	}
 	

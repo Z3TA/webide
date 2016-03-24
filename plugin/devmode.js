@@ -42,7 +42,9 @@
 	}
 	
 	function testErrorHandler() {
-		throw new Error("This is a test error");
+		setTimeout(function throwError() {
+			throw new Error("This is a test error");
+		}, 2000);
 	}
 	
 	function disableDevMode() {

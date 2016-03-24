@@ -6,8 +6,6 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Cleaning up message, shorter urls, etc in self_debug.js
-
 Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
 
 Bug found! Bug report form: How to get the error? Describe in steps how to reproduce this error.
@@ -50,6 +48,8 @@ Source indentation in html documents might be "off" if you remove or add div's.
 
 Polishing
 =========
+
+
 
 Loading icon while the file is streaming!?
 
@@ -338,6 +338,13 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+
+After tabbing back to the editor from another program. Check each file if it has changed from last saved state.
+Silently create a backup?
+When you save a file, and the file on disk doesn't match last saved state. Create a backup of the file on disk before overwriting.
+Then open the other file and make a diff.
+Hitting F5 = Reload all files from disk.
 
 
 Ctrl+T -> Choose between templates : blogpost.htm, websocketwebclient.js, nodewebsockserver.js, emptyhtml.htm
