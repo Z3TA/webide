@@ -255,7 +255,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(text == undefined) {
 			
 			var fspath = require("path");
-			path = fspath.resolve(path); // Make the path absolute
+			if(!fspath.isAbsolute(path)) {
+				let absolutePath = fspath.resolve(path);
+				console.warn("Making path absolute: " + path + " ==> " + absolutePath);
+				path = absolutePath; // Make the path absolute
+			}
 			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			

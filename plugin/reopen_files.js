@@ -20,6 +20,8 @@
 	
 	var saveStateIntervalTimer;
 	
+	var allFilesOpenedNeverCalled = true;
+	
 	editor.on("start", reopenFilesMain, loadOrder)
 	
 	function reopenFilesMain() {
@@ -72,6 +74,10 @@
 			allFilesOpened();
 		}
 		
+		// Just in case allFilesOpenedNeverCalled
+		setTimeout(function checkIfallFilesOpenedWasCalled() {
+			if(allFilesOpenedNeverCalled) console.error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!");
+		}, 10000);
 		
 		function fileInListOpened(file, wasCurrent, err) {
 		
@@ -99,6 +105,8 @@
 		}
 
 		function allFilesOpened() {
+			
+			allFilesOpenedNeverCalled = false;
 			
 			console.log("All files from last lession opened!");
 			
@@ -209,6 +217,20 @@
 					//file.savedAs = true;
 					//No! We should use last state, from when the editor was closed.
 					
+					// The file path can change from an relative to absolute path when opening from disk
+					if(path != file.path) {
+						
+						// Replace the path in opened files
+						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+						window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
+						
+						// Change the state holder item
+						let state = window.localStorage["state_" + file.path];
+						window.localStorage.removeItem("state_" + path);
+						window.localStorage["state_" + file.path] = state;
+
+					}
+
 					if(lastFileState) {
 						
 						file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
@@ -342,8 +364,10 @@
 	
 	function removeFromOpenedFiles(file) {
 		
-		if(!file.path) console.error(new Error("Argument need to be a file object!"));
-
+		if(!file.path) {
+			console.error(new Error("Argument need to be a file object!"));
+		}
+		
 		console.log(editor.getStack("Removing file from openedFiles path=" + file.path));
 		
 		console.log("List before=" + window.localStorage.openedFiles);	
