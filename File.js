@@ -771,6 +771,8 @@
 				
 				file.grid = file.createGrid();
 				
+				//console.log("after selection removed, text.length=" + text.length);
+				
 				// Place the caret where the selection was
 				file.caret = file.moveCaretToIndex(firstIndex);
 				
@@ -1571,6 +1573,7 @@
 					// Probably because all lines are empty!
 					caret.col = 0;
 					caret.eol = true;
+					caret.eof = false; // We do not know this yet, asume it's not. It Will be set to true if we are on the last row
 					caret.row = Math.floor(index / file.lineBreak.length); // Aproximate line
 					
 					if(caret.row >= grid.length-1) {

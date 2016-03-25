@@ -6,10 +6,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-Self debugger then listen for errors and then make the user aware! (because its not thrown in our face hard enough for me to notice! Had this happen many times)
+self_debug.js ... Getting errors when clearing error.log (Ctrl + A --> Del) See error.log
 
-Bug found! Bug report form: How to get the error? Describe in steps how to reproduce this error.
-Ctlr + shift + S to send the bug report
+
 
 
 BUGS
@@ -49,7 +48,8 @@ Source indentation in html documents might be "off" if you remove or add div's.
 Polishing
 =========
 
-
+Plain text mode, where you can see spaces in front of text (inlining)
+file.isCode, 
 
 Loading icon while the file is streaming!?
 
