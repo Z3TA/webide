@@ -6,7 +6,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-self_debug.js ... 
+Parser for vbScript.
+
+vbScript parser
 
 
 
