@@ -48,7 +48,9 @@
 	
 	var ignoreErrors = false;
 
-	
+	var errorReportCounter = 0; // Used for file names
+	var thisSessionErrorCount = 0;
+	var maxErrors = 5;
 	
 	function wsError(err) {
 		console.log("Connection Error: " + err.toString());
@@ -190,17 +192,20 @@
 			
 			//var alertMsg = msg.text + "\n" + msg.url + ", line " + msg.line + stackTrace(msg.stackTrace, msg.line);
 			
-			log("############################## " + myDate() + " ##############################\n")
-			log(messageLog.join(newLine)); // Last log messages before the error
+			var errorReport = "############################## " + myDate() + " ##############################" + newLine
 			
-			//log(pad(shortenUrl(msg.url) + ":" + msg.line) + parseText(msg.text));
-			log(newLine + newLine + fullPad + parseText(msg.text));
-			log(stackTrace(msg.stackTrace));
-			log(newLine + newLine);
+			errorReport += messageLog.join(newLine) + newLine; // Last log messages before the error
+
+			errorReport += newLine + newLine + fullPad + parseText(msg.text) + newLine;
+			
+			errorReport += stackTrace(msg.stackTrace) + newLine + newLine;
+
+			
+			log(errorReport);
 			
 			var alertMsg = parseText(msg.text);
 			
-			console.log("alertMsg=" + alertMsg);
+			//console.log("alertMsg=" + alertMsg);
 			
 			
 			if(!ignoreErrors) {
@@ -213,19 +218,36 @@
 				alert(alertMsg); // Does alert stop the world!?
 			}
 			
-			editor.openFile("error.log", undefined, function errorlogOpened(file, err) {
+			var errorReportFilePath = "error_report " + (errorReportCounter++) + ".tmp";
+			// Do not overwrite opened files!
+			while(editor.files[errorReportFilePath]) {
+				errorReportFilePath = "error_report " + (errorReportCounter++) + ".tmp";
+			}
+			
+			if(thisSessionErrorCount > maxErrors) {
+				alert("Too many errors detected. You should restart the editor! See error.log and/or the debug console.");
+			}
+			else {
 				
-				if(err) console.error(err);
+				thisSessionErrorCount++;
 				
-				file.moveCaretToEnd(file.caret, function fileCaretMoved(fileCaret) {
+				editor.openFile(errorReportFilePath, errorReport, function errorReportOpened(file, err) {
 					
-					file.insertText("How to repeat:");
-					file.insertLineBreak();
-					//file.insertLineBreak();
-					//file.insertLineBreak();
+					if(err) console.error(err);
 					
+					file.moveCaretToEnd(file.caret, function fileCaretMoved(fileCaret) {
+						
+						file.insertText("How to repeat:");
+						file.insertLineBreak();
+						//file.insertLineBreak();
+						//file.insertLineBreak();
+						
+						file.scrollToCaret();
+						
+					});
 				});
-			});
+			}
+
 			
 
 			

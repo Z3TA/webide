@@ -213,6 +213,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		*/
 		
 		var file;
+
 		
 		console.log("Opening file: " + path);
 
@@ -223,7 +224,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
 			
-			// Reload file from disk if it's saved!?
+			// Reload file from disk ... ?
+			// If it's not saved, ask 
 			
 			var file = editor.files[path];
 			
@@ -251,12 +253,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
 
 		if(text == undefined) {
+			
+			var fspath = require("path");
+			path = fspath.resolve(path); // Make the path absolute
+			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
-			editor.getFileSizeOnDisk(path, gotFileSize);
-			
-			function gotFileSize(fileSizeInBytes, err) {
+			editor.getFileSizeOnDisk(path, function gotFileSize(fileSizeInBytes, err) {
 				
 				if(err) {
 				
@@ -270,13 +274,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 					if(fileSizeInBytes > editor.settings.bigFileSize) {
 						console.warn("File larger then " + editor.settings.bigFileSize + " bytes. It will be opened as a stream!");
-						load(path, "", false, true);
+						let notFromDisk = false;
+						let tooBig = true;
+						let text = "";
+						load(path, text, notFromDisk, tooBig);
 					}
 					else {
 						editor.readFromDisk(path, load);
 					}
 				}
-			}
+			});
+			
 		}
 		else {
 			
@@ -294,12 +302,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		function load(path, text, notFromDisk, tooBig) {
 			console.log("Loading file to editor: " + path);
-
+			
+			if(editor.files.hasOwnProperty(path)) console.error(new Error("File is already opened!"));
+			
 			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig);
 			
 			file = editor.files[path];
 			
 			if(!file.path) fileOpenError(new Error("Internal error: The file has no path!"));
+			
+			if(!editor.files.hasOwnProperty(path)) console.error(new Error("File didn't enter editor.files"));
+
 			
 			if(!notFromDisk) {
 				// Because we opened it from disk:
@@ -312,18 +325,21 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 			}
 			
-			// Switch to this file
-			editor.showFile(file);
-			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
-			// Dilemma: should file open even listeners be called before or after the callback!??
+			// Dilemma: Should file open even listeners be called before or after the callback!??
 			
+			// Dilemma 2: Should fileOpen events fire before or after fileShow events?
 			
 			console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
 			for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
 				//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
 				editor.eventListeners.fileOpen[i].fun(file); // Call function
 			}
+			
+			// Switch to this file
+			editor.showFile(file);
+			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
+			
 			
 			if(callback) {
 				console.log("Calling callback: " + functionName(callback));

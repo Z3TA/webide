@@ -61,7 +61,7 @@
 
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
-
+		//console.log("Gonna create the grid for file.path=" + file.path);	
 		file.grid = file.createGrid();
 		file.totalRows = file.grid.length-2;
 		console.log("file.totalRows=" + file.totalRows);

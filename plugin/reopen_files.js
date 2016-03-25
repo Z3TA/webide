@@ -73,7 +73,7 @@
 		}
 		
 		
-		function fileInListOpened(file, lastOpened, err) {
+		function fileInListOpened(file, wasCurrent, err) {
 		
 			if(err) {
 				if(err.code == "INQUEUE") {
@@ -85,7 +85,7 @@
 			}
 			console.log("we now have it open: file.path=" + file.path);
 			
-			if(lastOpened) setCurrent = file.path;
+			if(wasCurrent) setCurrent = file.path;
 			
 			// Is all files we want to open opened!?
 			openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);

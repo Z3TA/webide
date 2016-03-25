@@ -6,15 +6,14 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
-self_debug.js ... Getting errors when clearing error.log (Ctrl + A --> Del) See error.log
-
+self_debug.js ... 
 
 
 
 BUGS
 ====
 
-Saving takes a long time sometimes.
+Saving takes a long time sometimes. (i get nervious, how to confort?)
 
 function list gets biiiig:
 window.requestAnimFrame = (function(callback) {
