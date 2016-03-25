@@ -6,6 +6,10 @@ Always use F5 to reload! Or exit functions might not fire!
 
 Currently working on: 
 
+problem: If a plugin are opening a file that is already in queue to be opened ... what should happen?
+solution: WHen the file has been opened, call all callbacks that are waiting for it!
+
+
 Parser for vbScript.
 
 vbScript parser

@@ -136,6 +136,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	var fileOpenHtmlElement;
 	
+	var fileOpenExtraCallbacks = {};
+	
 	/*
 		Editor functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -242,10 +244,19 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(callback) callback(file);
 			return;
 		}
-		else if(openFileQueue.indexOf(path) != -1) {
+		
+		if(openFileQueue.indexOf(path) != -1) {
+			
+			// Add callback to the waiting list to be called once the file has been loaded
+			if(callback) {
+				if(!fileOpenExtraCallbacks.hasOwnProperty(path)) fileOpenExtraCallbacks[path] = [];
+				fileOpenExtraCallbacks[path].push(callback);
+			}
+			/*
 			var err = new Error("File is already in the queue to be opened, please wait!");			
 			err.code = "INQUEUE";
 			return fileOpenError(err);
+			*/
 		}
 		
 		if(!isString(path)) return fileOpenError(new Error("path is not a string: " + path));
@@ -344,14 +355,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.showFile(file);
 			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
-			
-			if(callback) {
-				console.log("Calling callback: " + functionName(callback));
-				callback(file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
-			}
-			else {
-				console.log("No callback for file.path=" + file.path);
-			}
+			callCallbacks(file, err);
 			
 			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 			
@@ -365,12 +369,31 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			console.warn(err.message);
 			
-			if(callback) callback(file, err);
+			callCallbacks(file, err);
 
 			console.warn("Error when opening file path=" + path + " message: " + err.message);
 			
 			return err;
 			
+		}
+		
+		function callCallbacks(file, err) {
+			if(callback) {
+				console.log("Calling callback: " + functionName(callback));
+				callback(file, err); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
+			}
+			else {
+				console.log("No callback for file.path=" + file.path);
+			}
+			
+			if(!fileOpenExtraCallbacks.hasOwnProperty(path)) {
+				// Call the other callbacks that are also waiting for the file to be opened
+				for(var i=0; i<fileOpenExtraCallbacks[path].length; i++) {
+					fileOpenExtraCallbacks[path][i](file, err);
+				}
+				// Then remove them
+				delete fileOpenExtraCallbacks[path]
+			}
 		}
 		
 	}

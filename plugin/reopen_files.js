@@ -87,7 +87,13 @@
 					console.warn("Double open file.path=" + file.path);
 					return;
 				}
-				else throw err;
+				else if(err.code === 'ENOENT') {
+					// File did not exist, and the user did not want to load the last state
+					compareAndDone();
+					return;
+					
+				}
+				else console.error(err);
 			}
 			console.log("we now have it open: file.path=" + file.path);
 			
@@ -95,12 +101,17 @@
 			
 			// Is all files we want to open opened!?
 			openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);
-			if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) {
-				allFilesOpened();
-			}
-			else {
-				console.log("openedFiles=" + openedFiles);
-				console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
+			
+			compareAndDone();
+			
+			function compareAndDone() {
+				if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) {
+					allFilesOpened();
+				}
+				else {
+					console.log("openedFiles=" + openedFiles);
+					console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
+				}
 			}
 		}
 
@@ -191,6 +202,13 @@
 						content = lastFileState.text;
 						
 					}
+					else if(notFound) {
+						// Do not open it! Remove from openedFiles
+						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+						// Should we remove the state!?
+						window.localStorage.removeItem("state_" + path);
+						if(callback) callback(path, false, err);
+					}
 
 				}
 				
@@ -208,6 +226,11 @@
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				
 				if(err) {
+					if(err.code == "INQUEUE") {
+						// It's on it's way being opened ...
+						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+
+					}
 					callback(file, false, err);
 				}
 				else {
