@@ -1579,7 +1579,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		*/
 		
-		var wordDelimiters = " ()[]{}+-/<>\r\n";
+		var wordDelimiters = " ()[]{}+-/<>\r\n!";
 		var char = "";
 		var word = "";
 		var options = []; // Word options
