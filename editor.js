@@ -214,7 +214,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			solution2: A list of files that are beaing opened
 		*/
 		
-		var file;
+		var file = null;
 
 		
 		console.log("Opening file: " + path);
@@ -355,7 +355,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.showFile(file);
 			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 			
-			callCallbacks(file, err);
+			callCallbacks(file);
 			
 			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 			
@@ -386,7 +386,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				console.log("No callback for file.path=" + file.path);
 			}
 			
-			if(!fileOpenExtraCallbacks.hasOwnProperty(path)) {
+			if(fileOpenExtraCallbacks.hasOwnProperty(path)) {
 				// Call the other callbacks that are also waiting for the file to be opened
 				for(var i=0; i<fileOpenExtraCallbacks[path].length; i++) {
 					fileOpenExtraCallbacks[path][i](file, err);

@@ -82,16 +82,10 @@
 		function fileInListOpened(file, wasCurrent, err) {
 		
 			if(err) {
-				if(err.code == "INQUEUE") {
-					// Some other plugin is already on it's way opening it ...
-					console.warn("Double open file.path=" + file.path);
-					return;
-				}
-				else if(err.code === 'ENOENT') {
-					// File did not exist, and the user did not want to load the last state
+				if(err.code === 'ENOENT') {
+					// File did not exist, and the user did not want to load the last state. It has alsom been removed from localStorage.openedFiles
 					compareAndDone();
 					return;
-					
 				}
 				else console.error(err);
 			}
@@ -225,68 +219,58 @@
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				
-				if(err) {
-					if(err.code == "INQUEUE") {
-						// It's on it's way being opened ...
-						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+				// Mark the file as saved, because we just opened it
+				//file.isSaved = true;
+				//file.savedAs = true;
+				//No! We should use last state, from when the editor was closed.
+				
+				// The file path can change from an relative to absolute path when opening from disk
+				if(path != file.path) {
+					
+					// Replace the path in opened files
+					window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+					window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
+					
+					// Change the state holder item
+					let state = window.localStorage["state_" + file.path];
+					window.localStorage.removeItem("state_" + path);
+					window.localStorage["state_" + file.path] = state;
 
+				}
+
+				if(lastFileState) {
+					
+					file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
+					
+					if(lastFileState.order !== undefined) file.order = lastFileState.order;
+					if(lastFileState.caret !== undefined) {
+						// Place the caret
+						try {
+							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
+						}
+						catch(e) {
+							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
+						}
 					}
-					callback(file, false, err);
+					if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
+					
+					if(lastFileState.isSaved !== undefined && content) {
+						file.isSaved = lastFileState.isSaved;
+					}
+					
+					if(lastFileState.currentFile === true) fileWasCurrentfile = true;
+					
+					console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
+					
 				}
 				else {
-
-					// Mark the file as saved, because we just opened it
-					//file.isSaved = true;
-					//file.savedAs = true;
-					//No! We should use last state, from when the editor was closed.
-					
-					// The file path can change from an relative to absolute path when opening from disk
-					if(path != file.path) {
-						
-						// Replace the path in opened files
-						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
-						window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
-						
-						// Change the state holder item
-						let state = window.localStorage["state_" + file.path];
-						window.localStorage.removeItem("state_" + path);
-						window.localStorage["state_" + file.path] = state;
-
-					}
-
-					if(lastFileState) {
-						
-						file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
-						
-						if(lastFileState.order !== undefined) file.order = lastFileState.order;
-						if(lastFileState.caret !== undefined) {
-							// Place the caret
-							try {
-								file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-							}
-							catch(e) {
-								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
-							}
-						}
-						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
-						
-						if(lastFileState.isSaved !== undefined && content) {
-							file.isSaved = lastFileState.isSaved;
-						}
-						
-						if(lastFileState.currentFile === true) fileWasCurrentfile = true;
-						
-						console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
-						
-					}
-					else {
-						// If there is no last state: Assume the file is saved.
-						file.isSaved = true;
-						file.savedAs = true;
-					}
-					
-					if(callback) callback(file, fileWasCurrentfile);
+					// If there is no last state: Assume the file is saved.
+					file.isSaved = true;
+					file.savedAs = true;
 				}
+				
+				if(callback) callback(file, fileWasCurrentfile);
+
 			}
 		}
 	}
