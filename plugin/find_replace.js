@@ -75,12 +75,6 @@
 		inputReplace.setAttribute("class", "inputtext replace");
 		inputReplace.setAttribute("size", size);
 		
-		inputInDir = document.createElement("input");
-		inputInDir.setAttribute("type", "text");
-		inputInDir.setAttribute("id", "inputInDir");
-		inputInDir.setAttribute("class", "inputtext indir");
-		inputInDir.value = editor.getDir();
-		inputInDir.setAttribute("size", size);
 		
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
@@ -89,10 +83,6 @@
 		var labelReplace = document.createElement("label");
 		labelReplace.setAttribute("for", "inputReplace");
 		labelReplace.appendChild(document.createTextNode("Replace with:")); // Language settings!?
-
-		var labelInDir = document.createElement("label");
-		labelInDir.setAttribute("for", "inputInDir");
-		labelInDir.appendChild(document.createTextNode("In directory:")); // Language settings!?
 
 		
 		findButtonLeft = document.createElement("input");
@@ -125,26 +115,12 @@
 		replaceAllButton.setAttribute("id", "replaceAllButton");
 		replaceAllButton.setAttribute("value", "Replace All");
 
-		findInFilesButton = document.createElement("input");
-		findInFilesButton.setAttribute("type", "button");
-		findInFilesButton.setAttribute("class", "button");
-		findInFilesButton.setAttribute("id", "findInFilesButton");
-		findInFilesButton.setAttribute("value", "Search in files");
-
-		replaceInFilesButton = document.createElement("input");
-		replaceInFilesButton.setAttribute("type", "button");
-		replaceInFilesButton.setAttribute("class", "button");
-		replaceInFilesButton.setAttribute("id", "replaceInFilesButton");
-		replaceInFilesButton.setAttribute("value", "Replace in files");
 
 		
 		var regexOptionLabel = document.createElement("label");
 		regexOptionLabel.setAttribute("for", "regexOption");
 		regexOptionLabel.appendChild(document.createTextNode("Use regex:")); // Language settings!?
 
-		var subfolderOptionLabel = document.createElement("label");
-		subfolderOptionLabel.setAttribute("for", "subfolderOption");
-		subfolderOptionLabel.appendChild(document.createTextNode("Search subfolders:")); // Language settings!?
 
 		
 		regexOption = document.createElement("input");
@@ -152,10 +128,6 @@
 		regexOption.setAttribute("id", "regexOption");
 		regexOption.setAttribute("class", "option regex");
 
-		subfolderOption = document.createElement("input");
-		subfolderOption.setAttribute("type", "checkbox");
-		subfolderOption.setAttribute("id", "subfolderOption");
-		subfolderOption.setAttribute("class", "option subfolder");
 		
 		var table = document.createElement("table"),
 			tr = document.createElement("tr"),
@@ -211,38 +183,6 @@
 		tr.appendChild(td);
 		
 		table.appendChild(tr);
-		
-		
-
-		// Search in files ...
-		tr = document.createElement("tr"),
-		
-		
-		td = document.createElement("td");
-		td.appendChild(labelInDir);
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		td.appendChild(inputInDir);
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		td.appendChild(findInFilesButton);
-		tr.appendChild(td);
-
-		td = document.createElement("td");
-		td.appendChild(replaceInFilesButton);
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		td.appendChild(subfolderOption);
-		td.appendChild(subfolderOptionLabel);
-		tr.appendChild(td);
-		
-		table.appendChild(tr);
-		
-		
-		// wow, adding dom elements is really tedious!
 
 		
 		div.appendChild(table);
@@ -272,179 +212,10 @@
 		replaceAllButton.addEventListener("click", function() {
 			replaceAll(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked);
 		}, false);
-		findInFilesButton.addEventListener("click", function() {
-			findInFiles();
-		}, false);		
-		replaceInFilesButton.addEventListener("click", function() {
-			alert("Not yet implemented!");
-		}, false);
 		
 		
 		searchVisible = true;
 
-	}
-	
-	
-	
-	function findInFiles() {
-		
-		var searchString = inputFind.value;
-		var useRegEx = regexOption.checked;
-		var searchSubfolders = subfolderOption.checked;
-		var searchPath = inputInDir.value;
-		var totalFiles = 0;
-		var filesSearched = 0;
-		var content = "";
-		var reportFile;
-		var reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
-		
-		// Do not overwrite opened files!
-		while(editor.files[reportFilePath]) {
-			reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
-		}
-		
-		// File ending so that it's not formatted by the JS parser
-		
-		editor.openFile(reportFilePath, content, function(file) {
-			
-			reportFile = file;
-			
-			file.isSaved = false;
-			file.savedAs = false;
-			file.parse = false;
-		});
-				
-		editor.renderNeeded();
-		
-		reportFile.insertText("Files in '" + searchPath + "' that contains '" + searchString + "'");
-		reportFile.insertLineBreak();
-		
-		searchDir(searchPath);
-		
-		
-		function searchDir(currentDirPath) {
-			var filePath;
-			var stat;
-			
-			console.log("Searching: " + currentDirPath);
-			
-			// Make the box red if the folder doesn't exist
-			if(editor.isFolderPath(currentDirPath)) {
-				inputInDir.setAttribute("class", "inputtext indir");
-			}
-			else {
-				inputInDir.setAttribute("class", "inputtext indir error");
-				console.log("Path does not exist: " + currentDirPath);
-			}
-			
-			var folderItems = fs.readdirSync(currentDirPath);
-			
-			//folderItems.filter(function(file) { return file.substr(-5) === '.html'; })
-			for(var i=0; i<folderItems.length; i++) {
-				
-				filePath = path.join(currentDirPath, folderItems[i]);
-				stat = fs.statSync(filePath);
-				
-				console.log("What is: " + filePath);
-				
-				if (stat.isFile()) {
-					searchFile(filePath, stat);
-				} 
-				else if (stat.isDirectory() && searchSubfolders) {
-					searchDir(filePath);
-				}
-				
-			}
-			
-		}
-
-		function searchFile(filePath) {
-			totalFiles++;
-			fs.readFile(filePath, 'utf-8', function(err, contents) { 
-			
-				if(err) console.error(err);
-				
-				console.log("Searching " + filePath);
-				
-				inspectFile(filePath, contents); 
-			})
-		
-		}
-		
-		function inspectFile(filePath, contents) {
-			
-			try {
-				if (contents.indexOf(searchString) != -1) {
-					
-					appendReport(filePath, contents);
-					
-				}
-			}
-			catch(e) {
-				console.log(e);
-				console.log("filePath=" + filePath);
-				console.log("contents=" + contents);
-			}
-			
-			if(filesSearched++ == totalFiles) {
-				allDone();
-			}
-
-		}
-		
-		function appendReport(filePath, contents) {
-			reportFile.insertLineBreak();
-			reportFile.insertText(filePath);
-			reportFile.insertLineBreak();
-			reportFile.insertText(underline(filePath));
-			reportFile.insertLineBreak();
-			
-			var lines = contents.split("\n");
-			
-			for(var i=0; i<lines.length; i++) {
-				if(lines[i].indexOf(searchString) != -1) {
-					
-					lines[i] = lines[i].replace("\r", "");
-					//lines[i] = lines[i].replace("\t", "");
-					
-					reportFile.insertText(lineFix(i+1) + lines[i]);
-					reportFile.insertLineBreak();
-
-				}
-			}
-			
-			function lineFix(nr) {
-				// Add spacing and a dot
-				var space = 8;
-				var str = "" + nr + "";
-				var length = str.length;
-				
-				for(var i=length; i<space; i++) {
-					str += " ";
-				}
-				return str;				
-			}
-			
-			function underline(txt) {
-				// Make a line as long as the text
-				var line = [];
-				
-				for(var i=0; i<txt.length; i++) {
-					line.push("-");
-				}
-				
-				return line.join("");
-				
-			}
-			
-		}
-		
-		function allDone() {
-			reportFile.insertLineBreak();
-			reportFile.insertText("Searched a total of " + totalFiles + " files.");
-
-		}
-		
 	}
 	
 	

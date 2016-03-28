@@ -1,18 +1,20 @@
 Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). No new features until that is done!
 
+Prio: 
+* Bug/issue fixing, 
+* better search in file.
+* Beta release!
+
+
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
-Currently working on: 
 
-problem: If a plugin are opening a file that is already in queue to be opened ... what should happen?
-solution: WHen the file has been opened, call all callbacks that are waiting for it!
+What I'm working on:
 
 
-Parser for vbScript.
-
-vbScript parser
+find_in_files.js (and find_replace.js), separating
 
 
 
