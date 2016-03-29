@@ -76,8 +76,13 @@
 		
 		// Just in case allFilesOpenedNeverCalled
 		setTimeout(function checkIfallFilesOpenedWasCalled() {
-			if(allFilesOpenedNeverCalled) console.error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!");
-		}, 10000);
+			if(allFilesOpenedNeverCalled) {
+				
+				findBugs(true); // Compare opened files with window.localStorage.openedFiles
+
+				console.error(new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!"));
+			}
+		}, 3000);
 		
 		function fileInListOpened(file, wasCurrent, err) {
 		
@@ -178,7 +183,7 @@
 					console.log("loadLastState=" + loadLastState);
 					console.log("lastFileState.isSaved=" + lastFileState.isSaved);
 					
-					if(notFound && lastFileState.text.length > 0) {
+					if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 						// Only ask if we actually have the last state, otherwise just ignore that it's gone.
 						// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
 						if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path);
@@ -542,10 +547,10 @@
 		if(checkMatch && array[0] != "") {
 			// Does the list match editor.files!?
 			for(var i=0; i<array.length; i++) {
-				if(!editor.files.hasOwnProperty(array[i])) console.error( new Error("File does not exist in editor.files: path=" + array[i] + " array=" + JSON.stringify(array) + " editor.files=" + JSON.stringify(Object.keys(editor.files))));
+				if(!editor.files.hasOwnProperty(array[i])) console.error( new Error("File does not exist in editor.files: path=" + array[i] + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files))));
 			}
 			for(var path in editor.files) {
-				if(array.indexOf(path) == -1) console.error(new Error("File does not exist in openedFiles list: path=" + path + " array=" + JSON.stringify(array) + " editor.files=" + JSON.stringify(Object.keys(editor.files))));
+				if(array.indexOf(path) == -1) console.error(new Error("File does not exist in openedFiles list: path=" + path + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files))));
 			}
 		}
 		
