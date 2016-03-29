@@ -83,7 +83,7 @@
 		
 			if(err) {
 				if(err.code === 'ENOENT') {
-					// File did not exist, and the user did not want to load the last state. It has alsom been removed from localStorage.openedFiles
+					// File did not exist, and the user did not want to load the last state. It has also been removed from localStorage.openedFiles
 					compareAndDone();
 					return;
 				}
@@ -147,6 +147,8 @@
 		
 		function openFile(path, callback) {
 			
+			if(!callback) console.error("Internal error: Expected a callback!");
+			
 			var content;
 			var notFound = false;
 			var loadLastState = false;
@@ -159,9 +161,7 @@
 			function gotFileSize(fileSizeOnDisk, err) {
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
-				
 
-				
 				if(err) {
 					if(err.code === 'ENOENT') {
 						notFound = true;
@@ -201,12 +201,12 @@
 						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
 						// Should we remove the state!?
 						window.localStorage.removeItem("state_" + path);
-						if(callback) callback(path, false, err);
+						callback(path, false, err);
 					}
 
 				}
 				
-				console.log("Reopening file path=" + path);
+				console.log("Reopening file path=" + path +" typeof content=" + typeof content);
 				editor.openFile(path, content, fileReopened); 
 				
 				
@@ -218,6 +218,19 @@
 				console.log("Got (Reopening) file from editor path=" + path);
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
+				
+				if(err) {
+					if(err.code == "ENOENT") {
+						// Trying to reopen a file that doesn't exist. The editor will only send this error if it tried to open from disk. 
+						// Remove from opened files
+						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+						
+						callback(file, false, err);
+						
+						return;
+					}
+					else console.error(err);
+				}
 				
 				// Mark the file as saved, because we just opened it
 				//file.isSaved = true;
@@ -269,7 +282,7 @@
 					file.savedAs = true;
 				}
 				
-				if(callback) callback(file, fileWasCurrentfile);
+				callback(file, fileWasCurrentfile);
 
 			}
 		}

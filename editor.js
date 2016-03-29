@@ -1,5 +1,6 @@
 "use strict";
 
+// foobar
 
 //var testfile = "test/testfile.txt";
 
@@ -217,7 +218,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var file = null;
 
 		
-		console.log("Opening file: " + path);
+		console.log("Opening file: " + path + " typeof text=" + typeof text);
 
 		if(typeof text === "function") console.error(new Error("The callback should be in the third argument. Second argument is for file content"));
 
