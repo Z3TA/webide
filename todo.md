@@ -16,6 +16,7 @@ What I'm working on:
 
 find_in_files.js (and find_replace.js), separating
 
+When double clicking on a line, we should open that file and goto that line.
 
 
 BUGS
@@ -232,6 +233,9 @@ When searching in a file marked as big, do a whole file search from disk.
 
 Optimization
 ============
+
+Optimize file.insertText, when inserting at EOF. sugg: file.addToGrid(text)
+
 
 Note about trying to render before doing something:
 - It will not be visible on the screen until the main thread is idle.
