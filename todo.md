@@ -21,6 +21,9 @@ find_in_files.js (and find_replace.js), separating
 BUGS
 ====
 
+reopen_files.js, when restarting the editor with temporary files like search reports. Can't get rid of them.
+
+
 Saving takes a long time sometimes. (i get nervious, how to confort?)
 
 function list gets biiiig:

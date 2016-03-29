@@ -23,6 +23,55 @@ function functionName(fun) {
 	return ret;
 }
 
+function determineLineBreakCharacters(text) {
+	/*
+		What line break character is used !??
+		
+		Line Feed & New Line (10) = \n
+		Carriage Return (13) = \r
+		
+		Default in windows: cr lf = \r\n
+		
+		Example:
+		rnrnrn
+		
+		rn = 3 (wins)
+		nr = 2
+		
+	*/
+	
+	console.log("Determining what line break characters to use ...");
+	
+	if(text.length == 0) {
+		console.warn("Can't determine line breaks without any text!");
+		return "";
+	}
+	
+	var nr = occurrences(text, "\n\r", true),
+		rn = occurrences(text, "\r\n", true)
+	
+	console.log("Line break? nr=" + nr + " rn=" + rn + "");
+	
+	if(rn > nr) {
+		return "\r\n";
+	}
+	else if(nr > rn) {
+		return "\n\r";
+	}
+	else if(text.indexOf("\n") > -1) {
+		return "\n";
+	}
+	else {
+		// Text has no line breaks. Use the default: (cr lf in windows)
+		if(navigator.platform.indexOf("Win") > -1) {
+			return "\r\n";
+		}
+		else {
+			return "\n";
+		}
+	}
+}
+
 function occurrences(string, subString, allowOverlapping) {
 	/** Function count the occurrences of substring in a string;
 	 * @param {String} string   Required. The string;
