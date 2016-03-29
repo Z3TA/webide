@@ -406,14 +406,13 @@
 
 		function searchFile(filePath) {
 			
-			// Search all files as streams
+			// Search all files as streams ...
 			
-			
-			var lineBreakCharacters = "";
-			var totalLineBreaks = 0;
+			var lineBreakCharacters;
 			var lineIndex = []; // Character index: lineIndex[0] = Index of first line break, lineIndex[1] = Index of second line break, etc
 			var charCounter = 0; 
 			var matchFound = false;
+			var totalRows = 0; // So we can calculate the line number
 			
 			console.log("Opening as stream: " + filePath);
 			
@@ -445,7 +444,13 @@
 				else {
 					
 					reportFile.insertLineBreak();
-					reportFile.insertText("Searched a total of " + totalFiles + " files and found a total of " + totalMatches + " matches.");
+					
+					if(totalFilesFound == totalFiles) {
+						reportFile.insertText("Found " + totalMatches + " match(es) in " + totalFiles + " file(s).");
+					}
+					else {
+						reportFile.insertText("Found " + totalMatches + " match(es) in " + totalFiles + " of " + totalFilesFound + " files.");
+					}
 					
 					// Highlight the matches
 					for(var i=0; i<matches.length; i++) {
@@ -481,14 +486,14 @@
 					str = decoder.write(chunk);
 					
 					if(!lineBreakCharacters) lineBreakCharacters = determineLineBreakCharacters(str);
-					
-
 				
 					// Map each line to a character index
+					totalRows += lineIndex.length;
+					lineIndex.length = 0; // Reset
 					for(var i=0; i<str.length; i++) {
 						char = str.charAt(i);
 						if(char == lineBreakCharacters[0]) {
-							lineIndex.push(charCounter + i);
+							lineIndex.push(i); // Index is for this cunk
 						}
 					}
 					console.log("Current total lines=" + lineIndex.length);
@@ -506,24 +511,28 @@
 						
 						// Figure out what the line number is
 						// opt tip: binarysort could be used here
-						//console.log("result.index=" + result.index + " charCounter=" + charCounter);
+						
+						index = result.index;
+						
+						console.log("index=" + index + " result.index=" + result.index + " charCounter=" + charCounter);
 						
 						rowNr = -1;
 
-						for(var i=charCounter; i<lineIndex.length; i++) {
-							//console.log(i + ": " + lineIndex[i] + " >= " + result.index + " ?")
-							if(lineIndex[i] >= result.index) {
+						for(var row=lastRowNr; row<lineIndex.length; row++) {
+							//console.log(row + ": " + lineIndex[row] + " >= " + index + " ?")
+							if(lineIndex[row] >= index) {
 								
-								rowNr = i;
+								rowNr = row;
 								break;
 							}
 						}
 						
 						if(rowNr == -1) {
+							console.log("Last line!");
 							rowNr = lineIndex.length; // Last line
 						}
 						
-						console.log("rowNr=" + rowNr);
+						console.log("rowNr=" + rowNr + " lastRowNr=" + lastRowNr + " lineIndex.length=" + lineIndex.length);
 						
 						if(!matchFound) {
 							reportFile.insertLineBreak();
@@ -537,13 +546,13 @@
 						//if(rowNr != lastRowNr) {
 							// Print all content of that line
 							if(rowNr == 0) {
-								lineText = str.substring(0, lineIndex[0-charCounter]).trim(); // First line
+								lineText = str.substring(0, lineIndex[0]).trim(); // First line
 							}
 							else {
-								lineText = str.substring(lineIndex[rowNr-charCounter-1], lineIndex[rowNr-charCounter]).trim();
+								lineText = str.substring(lineIndex[rowNr-1] , lineIndex[rowNr]).trim();
 							}
 							
-							reportFile.insertText( linePad(rowNr+1) + lineText );
+							reportFile.insertText( linePad(rowNr+totalRows+1) + lineText );
 							reportFile.insertLineBreak();
 						//}
 						
