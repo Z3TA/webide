@@ -13,13 +13,11 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-When a big file is loaded, do not callback until it has loadFilePart
+file.scrollCaret, both scroll and move caret. test using Ctrl+G
 
-find_in_files.js (and find_replace.js), separating
+test the search in file function, polish it maybe
 
-When double clicking on a line, we should open that file and goto that line.
-
-Bigfile support for movecaret!
+Bigfile support for movecaret ... refactor needed!?
 
 
 BUGS

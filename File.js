@@ -216,10 +216,18 @@
 		
 		//console.log("caret=" + JSON.stringify(caret));
 		
-		
-		if(index === undefined && (row === undefined || col === undefined)) {
+		if(grid.length == 0) { // There's no grid
+			caret.index = 0;
+			caret.row = 0;
+			caret.col = 0;
+			caret.eol = true;
+			caret.eof = true;
+			
+			return caret;
+		}
+		else if(index === undefined && (row === undefined || col === undefined)) {
 			// We have nothing
-			//console.log("Placing new caret at the first column");
+			console.log("Placing new caret at the first column");
 			
 			if(file.text.length > 0) {
 				var firstColumn = file.grid[0][0];
@@ -255,7 +263,7 @@
 		
 		//console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
 		
-		
+
 		// Check valid data (this should / could be omitted) ...
 		if(grid.length < caret.row) {
 			console.error(new Error("Row " + caret.row + " is higher then last row=" + grid.length + ""));
@@ -263,7 +271,7 @@
 		else if(caret.row < 0) {
 			console.error(new Error("Caret row=" + caret.row + " must be higher then zero!"));
 		}
-		else if(grid[row].length < caret.col) {
+		else if(grid[caret.row].length < caret.col) {
 			console.error(new Error("Caret col=" + caret.col + " is higher then available columns on row " + caret.row + ", witch is " + grid[row].length + ""));
 		}
 		else if(caret.col < 0) {
@@ -439,6 +447,8 @@
 		else if(isNaN(caret.index)) {
 			console.error(new Error("Caret index is NaN!"));
 		}
+		
+		if(caret.row >= file.grid.length) console.error(new Error("caret.row=" + caret.row + " >= file.grid.length=" + file.grid.length));
 		
 		if(caret.eof) {
 			if(caret.row != (file.grid.length-1)) {
@@ -1500,6 +1510,8 @@
 	File.prototype.scrollCaret = function(row, col, callback, caret) {
 		// Moves a caret and scrolls to it
 		
+		console.log("Scrolling and moving the caret ...");
+		
 		var file = this;
 		
 		if(undefined == row) console.error(new Error("row is undefined!"));
@@ -1507,25 +1519,33 @@
 		if(undefined == col) col = 0;
 		if(undefined == caret) caret = file.caret;
 		
-		caret.row = row;
-		caret.col = col;
+		// Do not set the carret until we have scrolled. Createa temporary caret
 		
-		file.scrollToCaret(caret, function afterScrolled() {
+		var tempCaret = file.createCaret();
+		tempCaret.row = row;
+		tempCaret.col = col;
+		
+		file.scrollToCaret(tempCaret, function afterScrolled() {
 			
 			console.log("Done scrolling to caret!");
 			
 			if(file.isBig) {
 				// Adjust for file.partStartRow
-				caret.row -= file.partStartRow;
+				tempCaret.row -= file.partStartRow;
 				
 				 // Sanity check
-				if(caret.row < 0 || caret.row > file.grid.length) {
+				if(tempCaret.row < 0 || tempCaret.row > file.grid.length) {
 					//file.debugGrid();
 					console.error(new Error("It appears that the file didn't scroll to the right part ... caret.row=" + caret.row + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length));
 				}
 			}
 			
-			file.fixCaret(caret);
+			caret.row = row;
+			caret.col = col;
+			
+			file.fixCaret(tempCaret);
+			
+			caret = tempCaret; // Set the caret to the new position
 			
 			if(callback) callback(caret);
 			

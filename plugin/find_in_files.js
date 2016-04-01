@@ -198,11 +198,13 @@
 	
 	function pressEnter() {
 		// Only search if there is anything in the search field, and the search box has focus
-		if(divVisible) {
+		if(divVisible && inputFindGotFocus) {
 			if(inputFind.value.length > 0 && editor.input===false) {
 				searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked);
 			}
 		}
+		
+		return false; // Prevent default
 	}
 	
 	function pressEscape() {
@@ -509,18 +511,16 @@
 			file.isSaved = false;
 			file.savedAs = false;
 			file.parse = false;
-			file.mode = "findinfiles";
+			
+			editor.renderNeeded();
+			
+			reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match: " + searchString + "/" + flags);
+			//reportFile.insertLineBreak();
+			
+			searchDir(searchPath);
 			
 		});
-				
-		editor.renderNeeded();
-		
-		reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match: " + searchString + "/" + flags);
-		//reportFile.insertLineBreak();
-		
-		searchDir(searchPath);
-		
-		
+
 		function searchDir(currentDirPath) {
 			
 			console.log("Searching: " + currentDirPath);
