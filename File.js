@@ -8,7 +8,7 @@
 (function() { // Allows private variables
 	
 	// Note: No var infront. Expose this object to global scope!
-	File = function File(text, path, fileIndex, bigFile) { 
+	File = function File(text, path, fileIndex, bigFile, callback) { 
 		var file = this;
 		
 		if(!isString(text)) console.error(new Error("text is not a string!"));
@@ -23,14 +23,17 @@
 		
 		file.name = editor.getFilenameFromPath(path);
 		
+		file.mode = "code"; // text, code, or other, ...
+		
+
 		file.lineBreak = determineLineBreakCharacters(text);
 		console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
-
-
 		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
 
 		
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
+
+
 		
 		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
@@ -57,7 +60,7 @@
 		
 		file.parse = true; // Always parse new files by default
 
-		//if(file.fileExtension == "txt" || file.fileExtension == "md") file.parse = false; // Never parse text or markdown files
+		if(file.fileExtension == "txt" || file.fileExtension == "md") file.mode = "text";
 
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
@@ -71,12 +74,18 @@
 		if(file.isBig) {
 			file.parse = false; // Do not parse big files
 
-			loadFilePart(file, file.partStartRow);
+			loadFilePart(file, file.partStartRow, function filePartLoaded() {
+				
+				if(callback) callback();
+			
+			});
 		
 		}
 		else {
 			
 			if(file.lineBreak == "") file.lineBreak = editor.settings.defaultLineBreakCharacter; 
+			
+			if(callback) setTimeout(callback, 0); // Make it async
 			
 		}
 	}
@@ -110,6 +119,22 @@
 		return text;
 	}
 	
+	File.prototype.rowText = function(row) {
+		// Returns the characters on that row
+		var file = this;
+		
+		// No need to check row because it will throw an error anyway if it's "wrong". But it does give friendlier errors.
+		if(row < 0) console.error(new Error("row=" + row + " less then zero"));
+		if(row > file.grid.length) console.error(new Error("row=" + row + " more then file.grid.length=" + ile.grid.length));
+		
+		var txt = file.grid[row].indentationCharacters;
+		for(var col=0; col<file.grid[row].length; col++) {
+			txt = txt + file.grid[row][col].char;
+		}
+		return txt;
+	}
+
+	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {
 		/*
 			Takes all properties from newCaret and gives it to oldCaret
@@ -136,15 +161,20 @@
 	}
 	
 	
-	File.prototype.moveCaret = function(index, row, col) {
+	File.prototype.moveCaret = function(index, row, col, caret) {
+		var file = this;
 		
-		if(index != undefined) file.caret.index = index;
-		if(row != undefined) file.caret.row = row;
-		if(col != undefined) file.caret.col = col;
+		if(caret == undefined) caret = file.caret;
 		
-		file.fixCaret();
+		if(index != undefined) caret.index = index;
+		if(row != undefined) caret.row = row;
+		if(col != undefined) caret.col = col;
 		
-		editor.fireEvent("moveCaret", file, file.caret);
+		file.fixCaret(caret);
+		
+		if(caret == file.caret) editor.fireEvent("moveCaret", file, file.caret);
+		
+		return caret;
 		
 	}
 	
@@ -1467,7 +1497,41 @@
 		
 	}
 	
-
+	File.prototype.scrollCaret = function(row, col, callback, caret) {
+		// Moves a caret and scrolls to it
+		
+		var file = this;
+		
+		if(undefined == row) console.error(new Error("row is undefined!"));
+		if(row < 0) console.error(new Error("Can't move the caret to row=" + row + " because " + row + "<1"));
+		if(undefined == col) col = 0;
+		if(undefined == caret) caret = file.caret;
+		
+		caret.row = row;
+		caret.col = col;
+		
+		file.scrollToCaret(caret, function afterScrolled() {
+			
+			console.log("Done scrolling to caret!");
+			
+			if(file.isBig) {
+				// Adjust for file.partStartRow
+				caret.row -= file.partStartRow;
+				
+				 // Sanity check
+				if(caret.row < 0 || caret.row > file.grid.length) {
+					//file.debugGrid();
+					console.error(new Error("It appears that the file didn't scroll to the right part ... caret.row=" + caret.row + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length));
+				}
+			}
+			
+			file.fixCaret(caret);
+			
+			if(callback) callback(caret);
+			
+		});
+		
+	}
 	
 	File.prototype.moveCaretToIndex = function(index, caret) {
 		var file = this,
@@ -1825,6 +1889,9 @@
 		
 	}
 	
+	File.prototype.addToGrid = function() {
+		// Add text to the file grid. Like when inserting text at EOF.
+	}
 	
 	File.prototype.createGrid = function() {
 		/*
@@ -2146,9 +2213,11 @@
 		
 		editor.fireEvent("moveCaret", file, caret);
 		
+		return caret;
+		
 	}
 	
-	File.prototype.scrollToCaret = function(caret) {
+	File.prototype.scrollToCaret = function(caret, callback) {
 		var file = this;
 		
 		if(caret == undefined) caret = file.caret;
@@ -2157,7 +2226,7 @@
 		
 		
 		// Up and down ...
-		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows) + 1;
+		//var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows) + 1;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
 		
@@ -2179,36 +2248,53 @@
 		if(startRow < 0) startRow = 0;
 		
 		
-		
-		// Left & Right
-		var delta = 0;
-		var startColumn = file.startColumn;
-		
-		//console.log("caret.col=" + caret.col + " > editor.view.endingColumn=" + editor.view.endingColumn + " ? " + (caret.col > editor.view.endingColumn));
-		//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
-		
-		var indentationWidth = file.grid[caret.row].indentation * editor.settings.tabSpace;
-		var columnEnd = editor.view.endingColumn - indentationWidth;
-		var columnStart = file.startColumn; // Intentional: Omitting indentation here
-		
-		if(caret.col > columnEnd) {
-			// Caret is after the visible space
-			delta = caret.col - columnEnd;
-			//editor.view.endingColumn += delta; // Do I need to do this!?
-			startColumn += delta;
-		}
-		else if(caret.col < columnStart) {
-			// Caret is infront of the visible space
-			delta = columnStart - caret.col;
+		if(!file.isBig && caret.row >= file.grid.length) console.error(new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length));
+		else if(caret.row < file.grid.length) {
 			
-			//editor.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
-			startColumn -= delta;
+			// Left & Right
+			var delta = 0;
+			var startColumn = file.startColumn;
+			
+			//console.log("caret.col=" + caret.col + " > editor.view.endingColumn=" + editor.view.endingColumn + " ? " + (caret.col > editor.view.endingColumn));
+			//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
+			
+
+			
+			var indentationWidth = file.grid[caret.row].indentation * editor.settings.tabSpace;
+			var columnEnd = editor.view.endingColumn - indentationWidth;
+			var columnStart = file.startColumn; // Intentional: Omitting indentation here
+			
+			if(caret.col > columnEnd) {
+				// Caret is after the visible space
+				delta = caret.col - columnEnd;
+				//editor.view.endingColumn += delta; // Do I need to do this!?
+				startColumn += delta;
+			}
+			else if(caret.col < columnStart) {
+				// Caret is infront of the visible space
+				delta = columnStart - caret.col;
+				
+				//editor.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
+				startColumn -= delta;
+			}
+			
+			//console.log("delta=" + delta);
+			//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
+			
+		}
+		else {
+			console.warn("Did not scroll horizontally because the row was not loaded!");
 		}
 		
-		//console.log("delta=" + delta);
-		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
-		
-		file.scrollTo(startColumn, startRow);
+		file.scrollTo(startColumn, startRow, function() {
+			
+			// Attempt horizontal scrolling now!?
+			
+			console.log("in scrollToCaret after scrollTo");
+			
+			if(callback) callback();
+			
+		});
 		
 		//editor.renderNeeded(); // Don't need to render until actually scrolled
 		
@@ -2234,7 +2320,7 @@
 	}
 	
 	
-	File.prototype.highlightText = function(text) {
+	File.prototype.highlightText = function(text, startAt, stopAt) {
 		var file = this;
 		
 		if(text.length == 0) {
@@ -2251,10 +2337,12 @@
 		*/
 		
 		// Find all occurencie(s) of text and highlight it
-		var start = 0;
+		var start = (startAt == undefined) ? 0 : startAt;
 		var end = 0;
 		var highlightRanges = [];
 		var textRange;
+		
+		if(stopAt == undefined) stopAt = file.text.length;
 		
 		while(true) { // while(true) loops are very prone for bugs! (for example if the word is one character long)
 			
@@ -2262,7 +2350,7 @@
 			
 			start = file.text.indexOf(text, start);
 			
-			if(start == -1) break;
+			if(start == -1 || start >= stopAt) break;
 			
 			end = start + text.length-1;
 			
@@ -2331,7 +2419,7 @@
 		editor.renderNeeded();
 	}
 	
-	File.prototype.scrollTo = function(x, y) {
+	File.prototype.scrollTo = function(x, y, callback) {
 		/*
 			Sets the startColumn and startRow
 			
@@ -2385,10 +2473,9 @@
 			startRow = Math.min(y, maxY);
 			
 			if(startRow < 0) {
-				console.warn("y=" + y + " maxY=" + maxY);
+				console.warn("y=" + y + " maxY=" + maxY + " file.grid.length=" + file.grid.length);
 				startRow = 0;
 			}
-			
 		}
 		
 		doTheScrolling(false);
@@ -2424,6 +2511,9 @@
 			}
 			
 			if(scrolled) editor.renderNeeded();
+			
+			if(callback) callback();
+			
 		}
 		
 		function streamLoaded() {
@@ -2431,7 +2521,7 @@
 			
 			var diff = oldPartStartRow - file.partStartRow;
 
-			console.log("scroll y=" + y + " file.partStartRow=" + file.partStartRow + " oldPartStartRow=" + oldPartStartRow + " diff=" + diff + " file.startRow=" + file.startRow);
+			console.log("streamLoaded scroll y=" + y + " file.partStartRow=" + file.partStartRow + " oldPartStartRow=" + oldPartStartRow + " diff=" + diff + " file.startRow=" + file.startRow);
 			
 			y = y + diff;
 
@@ -2725,6 +2815,8 @@
 		
 		if(partStartRow < 0) console.error(new Error("Can not begin stream in negative row:" + partStartRow));
 
+		if(callback == undefined) console.warn("loadFilePart with no callback!");
+		
 		var text = "";
 		var endReached = false;
 		var totalLineBreaks = 0;
@@ -2768,7 +2860,7 @@
 		var stream = fs.createReadStream(file.path, options);
 		stream.setEncoding('utf8');
 		
-		console.log("Catching stream .... options=" + JSON.stringify(options) + " partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
+		console.log("loadFilePart Catching stream .... options=" + JSON.stringify(options) + " partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows + " path=" + file.path);
 		
 		if(file.changed && !file.isSaved) {
 			alert("Can not catch the stream if the file is not saved! File is too large.");

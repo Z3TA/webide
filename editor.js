@@ -79,6 +79,7 @@ editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileChange: [], 
 	mouseScroll: [], 
 	mouseClick: [], 
+	dblclick: [],
 	mouseMove: [],
 	paste: [],  // You get a chance to format the pasted data ...
 	beforeResize: [],
@@ -321,14 +322,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			if(editor.files.hasOwnProperty(path)) console.error(new Error("File is already opened!"));
 			
-			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig);
+			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig, fileLoaded);
 			
 			file = editor.files[path];
 			
 			if(!file.path) fileOpenError(new Error("Internal error: The file has no path!"));
 			
 			if(!editor.files.hasOwnProperty(path)) console.error(new Error("File didn't enter editor.files"));
-
 			
 			if(!notFromDisk) {
 				// Because we opened it from disk:
@@ -341,28 +341,31 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 			}
 			
-			
-			// Dilemma: Should file open even listeners be called before or after the callback!??
-			
-			// Dilemma 2: Should fileOpen events fire before or after fileShow events?
-			
-			console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
-			for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
-				//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
-				editor.eventListeners.fileOpen[i].fun(file); // Call function
+			function fileLoaded() {
+				
+				// Dilemma: Should file open even listeners be called before or after the callback!??
+				
+				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
+				
+				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
+				for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
+					//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
+					editor.eventListeners.fileOpen[i].fun(file); // Call function
+				}
+				
+				// Switch to this file
+				editor.showFile(file);
+				editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
+				
+				callCallbacks(file);
+				
+				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
+				
+				// Always render (and resize) after opening a file! (where=here, when=now!)
+				editor.renderNeeded();
+				
 			}
-			
-			// Switch to this file
-			editor.showFile(file);
-			editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
-			
-			callCallbacks(file);
-			
-			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
-			
-			// Always render (and resize) after opening a file! (where=here, when=now!)
-			editor.renderNeeded();
-			
+
 		}
 		
 		function fileOpenError(err) {
@@ -739,13 +742,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.renderNeeded = function() {
 		// Tell the editor that it needs to render
 		
-		if(editor.currentFile) {
-			if(!editor.currentFile.render) {
-				console.warn("File render flag set to '" + editor.currentFile.render + "'");
-				return;
-			}
-		}
-		
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
 			console.log(editor.getStack("renderNeeded"));
@@ -780,6 +776,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
 		
 		if(editor.currentFile) {
+
+			if(!editor.currentFile.render) {
+				console.warn("File render flag set to '" + editor.currentFile.render + "'");
+				return;
+			}
 			
 			console.time("render");
 			
@@ -1905,10 +1906,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.ondragover = function(e) { e.preventDefault(); return false };
 	window.ondrop = function(e) { e.preventDefault(); return false };
 	
-	
-	
-	
-	
+	window.addEventListener("dblclick", dblclick);
+		
 	
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function() {
@@ -2422,6 +2421,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	function resizeAndRender() {
+		
 		if(editor.shouldResize) editor.resize();
 		if(editor.shouldRender) editor.render();
 	}
@@ -2902,6 +2902,84 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
+	
+	function dblclick(e) {
+		
+		e = e || windows.event;
+		
+		// Mouse position is on the current object (Canvas) 
+		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX;
+		var mouseY = e.offsetY==undefined?e.layerY:e.offsetY;
+		var caret;
+		var button = e.button;
+		var click;
+		var target = e.target;
+		var preventDefault = false;
+		var keyboardCombo = getCombo(e);
+		var funReturn;
+		
+		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
+			
+			caret = editor.mousePositionToCaret(mouseX, mouseY);
+			
+			if(editor.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+				
+				// Remove focus from everything else
+				document.activeElement.blur();
+				
+				// Give focus
+				editor.input = true;
+				canvas.focus();
+				
+				// Delete selection outside of the canvas
+				window.getSelection().removeAllRanges();
+
+			}
+			
+		}
+		else{
+			if(editor.currentFile) {
+				// Remove focus
+				editor.input = false;
+			}
+		}
+		
+		console.log("dblclick: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
+		
+		
+		console.log("Calling dblclick listeners (" + editor.eventListeners.dblclick.length + ") ...");
+		for(var i=0, binding; i<editor.eventListeners.dblclick.length; i++) {
+			
+			click = editor.eventListeners.dblclick[i];
+			
+			if((click.button == button || click.button == undefined) && 
+			(click.targetClass == target.className || click.targetClass == undefined) && 
+			(click.combo == keyboardCombo.sum || click.combo === undefined) &&
+			(click.targetTag == target.tagName || click.targetTag == undefined)
+			) {
+				
+				//console.log("Calling " + functionName(click.fun) + " ...");
+				
+				// Note that caret is a temporary position caret (not the current file.caret)!
+				
+				funReturn = click.fun(mouseX, mouseY, caret, button, target, keyboardCombo); // Call it
+				
+				if(funReturn === false) {
+					preventDefault = true;
+				}
+				
+				
+			}
+		}
+		
+		editor.interact("dblclick");
+		
+		if(preventDefault) {
+			e.preventDefault(); // To prevent the annoying menus
+			return false;
+		}
+
+	}
 	
 	
 	

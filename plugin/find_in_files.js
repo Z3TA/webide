@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	var footer, div, regexOption, subfolderOption, inputInDir;
+	var footer, div, regexOption, subfolderOption, inputInDir, inputFileFilter, optionCaseSensitive;
 	
 	var inputFindGotFocus = false;
 	
@@ -29,22 +29,212 @@
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
 
-		buildDiv();
+		//buildDiv();
+		
+		editor.on("dblclick", fifdblclick);
 		
 		
 	});
 	
-	
-	function findInFiles() {
+	function isSearchReport(file) {
+		
+		if(!file) return false;
+		
+		var text = file.text;
+		
+		var containsFilesIn = (text.search(/Files in .* that match:/) != -1);
+		var containsLines = (text.search(/Line\s*?\d*:/) != -1);
+		var containsPathMd = (text.search(/^-*$/) != -1 != -1);
+		
+		console.log("containsFilesIn=" + containsFilesIn + " containsLines=" + containsLines + " containsPathMd=" + containsPathMd);
+		
+		if(containsFilesIn && containsLines && containsPathMd) return true
+		else return false;
 		
 	}
 	
-	function pressEnter() {
+	function fifdblclick(mouseX, mouseY, caret, button, target, keyboardCombo) {
+		var file = editor.currentFile;
 		
+		if(isSearchReport(file) && caret) {
+			
+			// Get the line number
+			var clickedRowText = file.rowText(caret.row);
+			
+			var arr = clickedRowText.match(/Line.\s*(\d*):/);
+			
+			if(arr.length != 2) console.error(new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)"));
+			
+			var line = parseInt(arr[1]);
+			
+			//clickedRowText = clickedRowText.substring(clickedRowText.indexOf(":")); // Remove the line part
+			
+			
+			// Get the file path
+			var row = caret.row;
+			while(row > 0 && file.grid[row][0].char != "-") row--; // Search up for a row that starts with "--------" (below a path)
+			var path = file.rowText(row-1);
+			
+			// Find the search string
+			var firstRowText = file.rowText(0);
+			var searchFor = "that match: "; // This string could change depending on localization/language
+			var searchString = firstRowText.substring(firstRowText.indexOf(searchFor) + searchFor.length);
+			
+			console.log("searchString=" + searchString);
+
+			
+			// Create a regEx to find the word(s) to highlight
+			var flags = searchString.replace(/.*\/([gimy]*)$/, '$1');
+			var pattern = searchString.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+			//var regex = new RegExp(pattern, flags);
+			//var regex = new RegExp(searchString);
+			
+			var match = searchString.match(new RegExp('^(.*?)/([gimy]*)$'));
+			// sanity check here
+			var regex = new RegExp(match[1], match[2]);
+			
+			console.log("flags=" + flags);
+			console.log("pattern=" + pattern);
+			console.log("regex.flags=" + regex.flags);
+			console.log("regex.source=" + regex.source);
+			
+			// Open the file, then go to the line, and highlight the search word
+			
+			console.log("line=" + line);
+			console.log("path=" + path);
+			
+			editor.openFile(path, undefined, function highlightGoto(file) {
+				
+				//var scrollRow = Math.round(line - editor.view.visibleRows / 2)
+				var scrollRow = line-1;
+				var scrollCol = 0;
+				
+				if(scrollRow < 0) scrollRow = 0;
+				
+				// Scroll to and place the caret on the line
+				file.scrollCaret(scrollRow, scrollCol, function afterScrolled() {
+					
+					console.log("scrolled to the right place!?")
+					
+					// Find all matches in the whole file (can be many!)
+					var result;
+					var words = [];
+					while ((result = regex.exec(file.text)) !== null) { // Find the word(s)
+						if(words.indexOf(result[0]) == -1) words.push(result[0]); 
+					}
+					
+					// Highlight the matched words
+					console.log("words=" + words);
+					console.log("regex flags=" + regex.flags + " source=" + regex.source);
+					for(var i=0; i<words.length; i++) {
+						file.highlightText(words[i]);						
+					}
+				
+				
+				});
+				
+				
+			});
+
+			
+		}
+		
+		
+	}
+	
+	
+	function show_find_in_files() {
+		if(!divVisible) {
+			var footerHeight = parseInt(footer.style.height);
+			var heightNeeded = 120;
+			
+			//if(!div) buildDiv();
+			buildDiv(); // Always build!
+
+			
+			div.style.display="block";
+			//footer.style.display = "table-cell";
+			
+			if(footerHeight < heightNeeded) {
+				footer.style.height = footerHeight + heightNeeded + "px";
+				editor.resizeNeeded();
+			}
+			
+			// Remove focus from the editor when bringing up the search box.
+			var file = editor.currentFile;
+			if(file) {
+				editor.input = false;
+			}
+			
+			console.log("Search visible! editor.input=" + editor.input);
+			
+			editor.resizeNeeded();
+			editor.renderNeeded();
+		}		
+		
+	}
+	
+	function findInFiles(file) {
+		if(file) {
+			console.log("divVisible=" + divVisible);
+			if(!divVisible) {
+				show_find_in_files();
+				var selectedText = file.getSelectedText();
+				if(selectedText.length > 0) {
+					// Put the selected text into the search box
+					inputFind.value = selectedText;
+				}
+			}
+			
+			if(!inputFindGotFocus) {
+				inputFind.focus();
+			}
+			
+			editor.input = false; // Remove focus from the file
+			
+			return false; // Prevent default (browser) action
+		}
+	}
+	
+	function pressEnter() {
+		// Only search if there is anything in the search field, and the search box has focus
+		if(divVisible) {
+			if(inputFind.value.length > 0 && editor.input===false) {
+				searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked);
+			}
+		}
 	}
 	
 	function pressEscape() {
 		
+		hide_find_in_files();
+	
+	}
+	
+	function hide_find_in_files() {
+		// Clear the search box?
+		if(divVisible) {
+			
+			// Hide the search window
+			//div.style.display="none"; // Need to hide this, or the footer will not scrimp
+			
+			div.parentNode.removeChild(div);
+			divVisible = false;
+			
+			//footer.style.height = "0px"; // Hmm, can't be less then one px
+			//footer.style.display = "none"; // But we can hide the table cell! nope :/
+			
+			//footer.style.border = ""
+			
+			// Bring back focus to the current file
+			var file = editor.currentFile;
+			if(file) {
+				editor.input = true;
+			}
+
+			editor.resizeNeeded();
+			editor.renderNeeded();
+		}
 	}
 	
 	function buildDiv() {
@@ -82,7 +272,7 @@
 		
 		inputInDir.setAttribute("size", size);
 
-		var inputFileFilter = document.createElement("input");
+		inputFileFilter = document.createElement("input");
 		inputFileFilter.setAttribute("type", "text");
 		inputFileFilter.setAttribute("id", "inputFileFilter");
 		inputFileFilter.setAttribute("class", "inputtext inputFileFilter");
@@ -132,17 +322,17 @@
 		labelSubFolderOption.setAttribute("for", "subfolderOption");
 		labelSubFolderOption.appendChild(document.createTextNode("Search subfolders")); // Language settings!?
 
-		var regexOption = document.createElement("input");
+		regexOption = document.createElement("input");
 		regexOption.setAttribute("type", "checkbox");
 		regexOption.setAttribute("id", "regexOption");
 		regexOption.setAttribute("class", "option regex");
 
-		var optionCaseSensitive = document.createElement("input");
+		optionCaseSensitive = document.createElement("input");
 		optionCaseSensitive.setAttribute("type", "checkbox");
 		optionCaseSensitive.setAttribute("id", "optionCaseSensitive");
 		optionCaseSensitive.setAttribute("class", "option optionCaseSensitive");
 		
-		var subfolderOption = document.createElement("input");
+		subfolderOption = document.createElement("input");
 		subfolderOption.setAttribute("type", "checkbox");
 		subfolderOption.setAttribute("id", "subfolderOption");
 		subfolderOption.setAttribute("class", "option subfolder");
@@ -319,12 +509,14 @@
 			file.isSaved = false;
 			file.savedAs = false;
 			file.parse = false;
+			file.mode = "findinfiles";
+			
 		});
 				
 		editor.renderNeeded();
 		
-		reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match '" + searchString + "'");
-		reportFile.insertLineBreak();
+		reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match: " + searchString + "/" + flags);
+		//reportFile.insertLineBreak();
 		
 		searchDir(searchPath);
 		
@@ -453,6 +645,7 @@
 					}
 					
 					// Highlight the matches
+					console.log("matches=" + matches);
 					for(var i=0; i<matches.length; i++) {
 						reportFile.highlightText(matches[i]);						
 					}
@@ -507,7 +700,7 @@
 						
 						totalMatches++;
 						
-						matches.push(result[0]); // Highlight these later
+						if(matches.indexOf(result[0]) == -1) matches.push(result[0]); // Highlight these later
 						
 						// Figure out what the line number is
 						// opt tip: binarysort could be used here

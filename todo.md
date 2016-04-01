@@ -13,17 +13,17 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
+When a big file is loaded, do not callback until it has loadFilePart
 
 find_in_files.js (and find_replace.js), separating
 
 When double clicking on a line, we should open that file and goto that line.
 
+Bigfile support for movecaret!
+
 
 BUGS
 ====
-
-reopen_files.js, when restarting the editor with temporary files like search reports. Can't get rid of them.
-
 
 Saving takes a long time sometimes. (i get nervious, how to confort?)
 
@@ -60,7 +60,6 @@ Polishing
 =========
 
 Plain text mode, where you can see spaces in front of text (inlining)
-file.isCode, 
 
 Loading icon while the file is streaming!?
 

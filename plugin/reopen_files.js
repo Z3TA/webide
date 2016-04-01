@@ -261,6 +261,7 @@
 					file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
 					
 					if(lastFileState.order !== undefined) file.order = lastFileState.order;
+					if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
 					if(lastFileState.caret !== undefined) {
 						// Place the caret
 						try {
@@ -494,6 +495,7 @@
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;
 		state.order = file.order;
+		state.mode = file.mode;
 		
 		
 		var sizeLimit = 100000;
