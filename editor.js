@@ -383,6 +383,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		function callCallbacks(file, err) {
 			if(callback) {
+				console.log("Fully loaded file.path=" + file.path);
 				console.log("Calling callback: " + functionName(callback));
 				callback(file, err); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
@@ -1541,6 +1542,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			We also need to take into account how much is scrolled
 			
+			And file streams! (file.partStartRow)
+			
 		*/
 		if(editor.currentFile) {
 			
@@ -1552,12 +1555,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			//console.log("mouseRow=" + mouseRow);
 			
-			if(mouseRow >= grid.length) {
-				//console.warn("Mouse position under the grid!");
-				return file.createCaret(file.text.length);
+			if(mouseRow > grid.length) {
+				console.warn("Mouse position, mouseRow=" + mouseRow + " over grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
+				
+				// For example when clicking under the text when scrolled down so only half the screen contains text
+				return file.createCaret(undefined, grid.length-1, 0);
+				
 			}
 			else if(mouseRow < 0) {
-				//console.warn("Mouse position above the grid!");
+				console.warn("Mouse position above the grid!");
 				return file.createCaret(0, 0, 0);
 			}
 			else {

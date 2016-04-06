@@ -80,7 +80,7 @@
 				
 				findBugs(true); // Compare opened files with window.localStorage.openedFiles
 
-				console.error(new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!"));
+				console.error(new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles + "\nopenedFiles=" + openedFiles));
 			}
 		}, 3000);
 		
@@ -258,19 +258,23 @@
 
 				if(lastFileState) {
 					
-					file.scroll(lastFileState.startColumn, lastFileState.startRow); // Set startRow if it's saved
+					file.scrollTo(lastFileState.startColumn, lastFileState.startRow, function placeCaret() {
+						
+						if(lastFileState.caret !== undefined) {
+							// Place the caret
+							console.log("Placing caret in file.path=" + file.path);
+							try {
+								file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
+							}
+							catch(e) {
+								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
+							}
+						}
+
+					}); // Set startRow if it's saved
 					
 					if(lastFileState.order !== undefined) file.order = lastFileState.order;
 					if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
-					if(lastFileState.caret !== undefined) {
-						// Place the caret
-						try {
-							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-						}
-						catch(e) {
-							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
-						}
-					}
 					if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
 					
 					if(lastFileState.isSaved !== undefined && content) {

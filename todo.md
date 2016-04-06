@@ -5,15 +5,18 @@ Prio:
 * better search in file.
 * Beta release!
 
-
-
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 
 
 What I'm working on:
 
-file.scrollCaret, both scroll and move caret. test using Ctrl+G
+file.scrollCaret, both scroll and move caret. 
+
+test using Ctrl+G on 20k.txt goto line 10000
+
+
+
 
 test the search in file function, polish it maybe
 
@@ -22,6 +25,8 @@ Bigfile support for movecaret ... refactor needed!?
 
 BUGS
 ====
+
+Didn't get file input focus when opening a file... 
 
 Saving takes a long time sometimes. (i get nervious, how to confort?)
 

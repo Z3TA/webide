@@ -332,7 +332,7 @@
 		if(file.startRow % 1 > 0) console.error(new Error("file.startRow=" + file.startRow + " Needs to be an integer!"));
 		
 		if(file.startRow < 0) console.error(new Error("file.startRow=" + file.startRow + " editor.view.visibleRows=" + editor.view.visibleRows + ""));
-		if(file.startRow >= grid.length) console.error(new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length));
+		if(file.startRow >= (grid.length + file.partStartRow)) console.error(new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow));
 		
 		
 		for(var i=0; i<grid.length; i++) {
@@ -1519,8 +1519,9 @@
 		if(undefined == col) col = 0;
 		if(undefined == caret) caret = file.caret;
 		
-		// Do not set the carret until we have scrolled. Createa temporary caret
+		// Do not set the carret until we have scrolled!
 		
+		// Create a temporary caret
 		var tempCaret = file.createCaret();
 		tempCaret.row = row;
 		tempCaret.col = col;
@@ -1536,16 +1537,19 @@
 				 // Sanity check
 				if(tempCaret.row < 0 || tempCaret.row > file.grid.length) {
 					//file.debugGrid();
-					console.error(new Error("It appears that the file didn't scroll to the right part ... caret.row=" + caret.row + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length));
+					console.error(new Error("It appears that the file didn't scroll to the right part ... tempCaret.row=" + tempCaret.row + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length));
 				}
 			}
 			
-			caret.row = row;
-			caret.col = col;
-			
 			file.fixCaret(tempCaret);
 			
-			caret = tempCaret; // Set the caret to the new position
+			if(caret == file.caret) {
+				 file.caret = tempCaret
+				 editor.fireEvent("moveCaret", file, caret);
+			}
+			else {
+				caret = tempCaret;
+			}
 			
 			if(callback) callback(caret);
 			
@@ -1774,11 +1778,13 @@
 		if(row == undefined) console.error(new Error("row is undefined!"));
 		if(col == undefined) console.error(new Error("col is undefined!"));
 		
+		row -= file.partStartRow;
+		
 		if(row < 0) {
 			console.error(new Error("row=" + row + " must be higher then zero!"));
 		}
 		else if(row > grid.length) {
-			console.error(new Error("Row " + row + " is higher then last row=" + grid.length + ""));
+			console.error(new Error("Row " + row + " is higher then grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow));
 		}
 		
 		var gridRow = grid[row];
@@ -2474,7 +2480,7 @@
 				console.log("Scrolling in big file: file.isStreaming=" + file.isStreaming + " file.totalRows=" + file.totalRows + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
 				
 				if(file.isStreaming) {
-					
+					console.warn("Scrolling while the file is streaming ...");
 				}
 				else if(y > high && !file.tail) {
 					loadFilePart(file, file.partStartRow + moveRows, streamLoaded);
@@ -2988,7 +2994,10 @@
 
 
 					
-					if( startLinebreaks != -1 && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows && !countRows) gotFish(false); 
+					if( startLinebreaks != -1 && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows && !countRows) {
+						console.log("gotFish: startLinebreaks=" + startLinebreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " countRows=" + countRows);
+						gotFish(false);
+					}
 				}
 			}
 		}
@@ -2996,7 +3005,7 @@
 		
 		function gotFish(endReached) {
 			
-			console.log("Got fish! countRows=" + countRows);
+			console.log("Got fish! countRows=" + countRows + " endReached=" + endReached);
 			
 			file.render = true; // Let the editor render the file again
 			
@@ -3088,10 +3097,11 @@
 				file.head = false;
 				file.tail = false;
 			}
+
 			
-			if(callback) callback();
+			if(!countRows && callback) callback();
 
-
+			
 			if(file.totalRows == -1) {
 				// Continue to load the file to find out how many rows it has
 				countRows = true;
@@ -3108,7 +3118,6 @@
 				stream.close(); // Cool, it seems to work!
 				
 			}
-
 			
 		}
 		
