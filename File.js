@@ -2473,7 +2473,9 @@
 
 		var fileRow = line-1;
 		
-		if((fileRow + file.partStartRow) < file.grid.length) {
+		if(fileRow >= file.partStartRow && (fileRow + file.partStartRow) < file.grid.length) {
+			console.log("fileRow=" + fileRow + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length);
+			
 			// We gan go to the line without loading a new part
 			file.caret = file.createCaret(undefined, fileRow);
 			file.scrollToCaret();
