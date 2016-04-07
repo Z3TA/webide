@@ -61,11 +61,13 @@
 			// Get the line number
 			var clickedRowText = file.rowText(caret.row);
 			
-			var arr = clickedRowText.match(/Line.\s*(\d*):/);
+			var arr = clickedRowText.match(/Line\s*?(\d*):/);
 			
-			if(arr.length != 2) console.error(new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)"));
-			
-			var line = parseInt(arr[1]);
+			if(arr == null) {
+				console.warn("Doesn't seem to be a line: " + clickedRowText);
+				return;
+			}
+			else if(arr.length != 2) console.error(new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)"));
 			
 			//clickedRowText = clickedRowText.substring(clickedRowText.indexOf(":")); // Remove the line part
 			
