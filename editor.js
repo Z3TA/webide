@@ -1555,8 +1555,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			//console.log("mouseRow=" + mouseRow);
 			
-			if(mouseRow > grid.length) {
-				console.warn("Mouse position, mouseRow=" + mouseRow + " over grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
+			if(mouseRow >= grid.length) {
+				console.warn("Mouse position, mouseRow=" + mouseRow + " >= grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
 				
 				// For example when clicking under the text when scrolled down so only half the screen contains text
 				return file.createCaret(undefined, grid.length-1, 0);
@@ -1567,19 +1567,19 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				return file.createCaret(0, 0, 0);
 			}
 			else {
-				var row = grid[mouseRow];
+				var gridRow = grid[mouseRow];
 				
-				//console.log("Mouse on row " + row.lineNumber);
+				//console.log("Mouse on row " + gridRow.lineNumber);
 				
-				//console.log("indentation=" + row.indentation);
+				//console.log("indentation=" + gridRow.indentation);
 				
-				var mouseCol = Math.floor((mouseX - editor.settings.leftMargin - (row.indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth + clickFeel) / editor.settings.gridWidth);
+				var mouseCol = Math.floor((mouseX - editor.settings.leftMargin - (gridRow.indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth + clickFeel) / editor.settings.gridWidth);
 				
 				//console.log("mouseCol=" + mouseCol);
 				
 				
-				if(mouseCol > row.length) { // End of line
-					mouseCol = row.length;
+				if(mouseCol > gridRow.length) { // End of line
+					mouseCol = gridRow.length;
 				}
 				else if(mouseCol < 0) { // Start of line
 					mouseCol = 0;

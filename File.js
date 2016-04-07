@@ -179,8 +179,7 @@
 	}
 	
 	
-	
-	
+
 	File.prototype.createCaret = function(index, row, col) {
 		/*
 			Returns a valid caret position
@@ -196,75 +195,161 @@
 			
 		*/
 		
-		var file = this,
-			grid = file.grid,
-			caret = {index: index, row: row, col: col, eol: false, eof: false};
+		var file = this;
+		var grid = file.grid;
+		var caret = {index: index, row: row, col: col, eol: false, eof: false};
 		
-		
-		if(file.grid.length == 0) {
-			if(index == 0 && row == 0 && col == 0) {
-				caret.eof = true;
-				caret.eol = true;
-				return caret;
-			}
-			else {
-				console.error(new Error("Can't place the caret on index=" + index + " row=" + row + " col=" + col + " when file.grid.length=" + file.grid.length + " !"));
-			}
+		if(index != undefined) {
+			if(index > 0) file.checkGrid(); // Check the grid for errors
 		}
 		
-		if(index > 0) file.checkGrid();
-		
-		//console.log("caret=" + JSON.stringify(caret));
-		
-		if(grid.length == 0) { // There's no grid
-			caret.index = 0;
-			caret.row = 0;
-			caret.col = 0;
-			caret.eol = true;
-			caret.eof = true;
-			
-			return caret;
-		}
-		else if(index === undefined && (row === undefined || col === undefined)) {
-			// We have nothing
-			console.log("Placing new caret at the first column");
-			
-			if(file.text.length > 0) {
-				var firstColumn = file.grid[0][0];
-				caret.index = firstColumn.index;
-				caret.row = 0;
-				caret.col = 0;
-				caret.eol = false;
-				caret.eof = false;
-			}
-			else {
-				caret.index = 0;
+		if(grid.length == 0) {
+			// The file has no rows! But it can still have text, like white space
+			// Caret can only be at index=file.text.length, row=0, col=0
+			if(index == undefined && row == undefined && col == undefined) {
+				caret.index = file.text.length;
 				caret.row = 0;
 				caret.col = 0;
 				caret.eol = true;
 				caret.eof = true;
 			}
+			else if(index != undefined) {
+				// Index must be file.text.length
+				if(index != file.text.length) console.error(new Error("Index needs to be text.length=" + file.text.length + " when grid.length=" + grid.length));
+			}
+			else if(row != undefined) {
+				if(row !== 0) console.error(new Error("row=" + row + " must be 0 when grid.length=" + grid.length));
+			}
+			else if(col != undefined) {
+				if(col !== 0) console.error(new Error("col=" + col + " must be 0 when grid.length=" + grid.length));
+			}
 		}
-		else if(row === undefined || col === undefined){
-			// We have index, but not row AND col
+		else if(index == undefined && row == undefined && col == undefined) {
+			// We got nothing 
+			placeCaretAtFirstRowWithTextOrEof();
+		}
+		else if(index == undefined && row != undefined && col != undefined) {
+			// We have row and col, but not index
+			if(isNaN(row)) {
+				console.error(new Error("row=" + row + " is not a number!"));
+			}
+			else if(row < 0) {
+				console.error(new Error("row=" + row + " < 0"));
+			}
+			else if(row >= grid.length) {
+				console.error(new Error("row=" + row + " >= grid.length=" + grid.length));
+			}
+			else if(isNaN(col)) {
+				console.error(new Error("col=" + col + " is not a number!"));
+			}
+			else if(col < 0) {
+				console.error(new Error("col=" + col + " < 0"));
+			}
+			else if(col > grid[row].length) {
+				console.error(new Error("col=" + col + " > grid[" + row + "].length=" + grid[row].length));
+			}
+			else {
+				index = file.getIndexFromRowCol(row, col);
+				caret.index = index;
+				caret.row = row;
+				caret.col = col;
+				
+				if(col == grid[row].length) {
+					caret.eol = true;
+					
+					if(row == (grid.length-1)) caret.eof = true;
+				}
+				// Default caret.eol and caret.eof is false!
+			}
+		}
+ 		else if(index == undefined && row != undefined) {
+			// We have only the row
+			if(isNaN(row)) {
+				console.error(new Error("row=" + row + " is not a number!"));
+			}
+			else if(row < 0) {
+				console.error(new Error("row=" + row + " < 0"));
+			}
+			else if(row >= grid.length) {
+				console.error(new Error("row=" + row + " >= grid.length=" + grid.length));
+			}
+			else {
+				// Plate the caret on that row
+				caret.index = grid[row].startIndex;
+				caret.row = row;
+				caret.col = 0;
+				
+				if(grid[row].length == 0) caret.eol = true;
+				if(row == (grid.length-1)) caret.eof = true;
+			}
+			
+		}
+ 		else if(index == undefined && col != undefined) {
+			// We have only the col
+			if(isNaN(col)) {
+				console.error(new Error("col=" + col + " is not a number!"));
+			}
+			else if(col < 0) {
+				console.error(new Error("col=" + col + " < 0"));
+			}
+			else {
+				if(col == 0) {
+					placeCaretAtFirstRowWithTextOrEof();
+				}
+				else {
+					// Find a row with at least col characters
+					row = 0;
+					while(row < grid.length) {
+						if(grid[row].length >= col) break;
+						row++;
+					}
+					if(row == grid.length) {
+						// Place caret at EOF
+						row--;
+						caret.index = file.text.length;
+						caret.row = row;
+						caret.col = grid[row].length;
+						caret.eol = true;
+						caret.eof = true;
+					}
+					else {
+						caret.index = file.getIndexFromRowCol(row, col);
+						caret.row = row;
+						caret.col = col;
+						
+						if(col == grid[row].length) caret.eol = true;
+						
+					}
+					
+				}
+			}
+
+		}
+		else {
+			// We have only index
 			if(isNaN(index)) {
 				console.error(new Error("Index is not a number!"));
 			}
 			else {
 				console.log("Placing new caret at index=" + index + " (character=" + file.text.charAt(index) + " charCode=" + file.text.charCodeAt(index) + ")");
-				return file.moveCaretToIndex(index, caret);
+				caret = file.moveCaretToIndex(index, caret);
 			}
 		}
-		else {
-			// We have row and col!
-			caret.index = file.getIndexFromRowCol(row, col);
-		}
-		
-		
-		//console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
+
+
+		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
 		
 
-		// Check valid data (this should / could be omitted) ...
+		// Sanity check if we got it right
+		if(caret.index == undefined) {
+			console.error(new Error("caret.index=" + caret.index + " is undefined!"));
+		}
+		if(caret.row == undefined) {
+			console.error(new Error("caret.row=" + caret.row + " is undefined!"));
+		}
+		if(caret.col == undefined) {
+			console.error(new Error("caret.col=" + caret.col + " is undefined!"));
+		}
 		if(grid.length < caret.row) {
 			console.error(new Error("Row " + caret.row + " is higher then last row=" + grid.length + ""));
 		}
@@ -282,35 +367,67 @@
 		console.log("grid[" + caret.row + "].startIndex=" + grid[caret.row].startIndex);
 		
 		
-		// Apply eol, eof ...
+		// Check if we got eol & eof right ...
 		if(caret.col == grid[caret.row].length) {
 			
+			if(caret.eol != true) console.error(new Error("caret.eol=" + caret.eol + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length));
 			caret.eol = true;
 			
 			if(caret.index == file.text.length) {
+				if(caret.eof != true) console.error(new Error("caret.eof=" + caret.eof + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and caret.index=" + caret.index + " == file.text.length=" + file.text.length));
 				caret.eof = true;
 			}
 			else {
+				if(caret.eof != false) {
+					//file.debugGrid();
+					console.error(new Error("caret.eof=" + caret.eof + " should be false when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and NOT caret.index=" + caret.index + " == file.text.length=" + file.text.length));
+				}
 				caret.eof = false;
 			}
 		}
 		else {
+			if(caret.eol != false && caret.eof != false) console.error(new Error("Both caret.eol=" + caret.eol + " and  caret.eof=" + caret.eof + " should be false when NOT caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length));
 			caret.eol = false;
 			caret.eof = false;
 		}
 		
 		if(!caret.eol) {
 			if(grid[caret.row][caret.col].index != caret.index) {
-				console.warn("Caret index=" + caret.index + " is not the same as the index on row=" + caret.row + " and col=" + caret.col + ", and will change to that index=" + grid[caret.row][caret.col].index + "!");
+				console.error(new Error("Caret index=" + caret.index + " is not the same as the index on row=" + caret.row + " and col=" + caret.col + ", and it should be index=" + grid[caret.row][caret.col].index + ""));
 				caret.index = grid[caret.row][caret.col].index;
 			}
 		}
 		
-		file.checkCaret(caret);
+		file.checkCaret(caret); // Another sanity check
 		
 		return caret;
+		
+		function placeCaretAtFirstRowWithTextOrEof() {
+			row = 0;
+			while(row < grid.length) {
+				if(grid[row].length > 0) break;
+				row++;
+			}
+			if(row == file.grid.length) {
+				// Didn't find any line with text. Place caret at EOF
+				caret.index = file.text.length;
+				caret.row = grid.length-1;
+				caret.col = 0;
+				caret.eol = true;
+				caret.eof = true;
+			}
+			else {
+				// We found some text
+				var firstCol = grid[row];
+				caret.index = firstCol.index;
+				caret.row = row;
+				caret.col = 0;
+				caret.eol = false;
+				caret.eof = false;
+			}
+		}
+		
 	}
-	
 	
 	
 	File.prototype.checkGrid = function() {
@@ -1587,19 +1704,17 @@
 			caret.col = 0;
 			caret.eol = true;
 			caret.eof = true;
-			
 		}
 		else {
 			// Set the index
 			caret.index = index;
 			
-			if(index >= file.text.length) {
+			if(index == file.text.length) {
 				// EOF
 				caret.row = grid.length-1;
 				caret.col = grid[caret.row].length;
 				caret.eol = true;
 				caret.eof = true;
-				
 			}
 			else {
 				//console.log("grid.length=" + grid.length);
@@ -1649,6 +1764,7 @@
 							caret.row = row;
 							caret.col = col+1;
 							caret.eol = true;
+							caret.eof = false;
 							
 							found = true;
 							break main;
@@ -1658,15 +1774,18 @@
 				}
 				
 				if(!found) {
-					// Probably because all lines are empty!
+					console.log("Are all lines emty?");
+					// Probably because all lines (below row) are empty!
 					caret.col = 0;
 					caret.eol = true;
 					caret.eof = false; // We do not know this yet, asume it's not. It Will be set to true if we are on the last row
 					caret.row = Math.floor(index / file.lineBreak.length); // Aproximate line
 					
-					if(caret.row >= grid.length-1) {
+					if(caret.row >= (grid.length-1)) {
 						caret.row = grid.length-1;
 						caret.eof = true;
+						
+						caret.index = file.text.length; // Update the index
 					}
 					
 					if(caret.row % 1 !== 0) { // Make sure it's an integer
@@ -1783,7 +1902,7 @@
 		if(row < 0) {
 			console.error(new Error("row=" + row + " must be higher then zero!"));
 		}
-		else if(row > grid.length) {
+		else if(row >= grid.length) {
 			console.error(new Error("Row " + row + " is higher then grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow));
 		}
 		

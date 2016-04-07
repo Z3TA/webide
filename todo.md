@@ -23,6 +23,10 @@ test the search in file function, polish it maybe
 Bigfile support for movecaret ... refactor needed!?
 
 
+Feature: Uncaught SyntaxError: Unexpected token )
+Find unmatched parentheses !!
+
+
 BUGS
 ====
 
