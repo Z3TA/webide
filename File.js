@@ -3140,8 +3140,6 @@
 				
 				console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
 				
-				// Do not fix caret here!
-				/*
 				console.log("Fixing caret ... ");
 				console.log("file.caret.row=" + file.caret.row + " ");
 				
@@ -3187,8 +3185,9 @@
 				file.fixCaret();
 				
 				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
+
 				
-				*/
+				
 				
 				file.partStartRow = partStartRow;
 				
