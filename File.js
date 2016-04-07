@@ -1900,7 +1900,7 @@
 		if(row == undefined) console.error(new Error("row is undefined!"));
 		if(col == undefined) console.error(new Error("col is undefined!"));
 		
-		row -= file.partStartRow;
+		// Note: caret always represent the position on the grid and index in file.text (not the whole file in big files)
 		
 		if(row < 0) {
 			console.error(new Error("row=" + row + " must be higher then zero!"));
@@ -2359,7 +2359,7 @@
 		
 		file.checkCaret(caret);
 		
-		editor.fireEvent("moveCaret", file, caret);
+		if(caret == file.caret) editor.fireEvent("moveCaret", file, caret);
 		
 		return caret;
 		
@@ -3124,104 +3124,123 @@
 			}
 		}
 		
-		
 		function gotFish(endReached) {
 			
 			console.log("Got fish! countRows=" + countRows + " endReached=" + endReached);
 			
-			file.render = true; // Let the editor render the file again
-			
-			console.log("L=" + (partStartRow+1) + " text.length=" + text.length);
+			if(!countRows) {
+				
+				file.render = true; // Let the editor render the file again
+				
+				console.log("L=" + (partStartRow+1) + " text.length=" + text.length);
 
+				if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
+				
+				if(partStartRow > 0) {
+					// Make the text start at partStartRow
 
-			if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
-			
-			if(partStartRow > 0) {
-				// Make the text start at partStartRow
-
-				var linesToCut = partStartRow - startLinebreaks;
-				if(linesToCut < 0) linesToCut = partStartRow;
-				//console.log("startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " linesToCut=" + linesToCut);
-				while(linesToCut-- > 0) {
-					text = text.substring(text.indexOf(file.lineBreak) + file.lineBreak.length, text.length);
-					//console.log("cutting! linesToCut=" + linesToCut);
+					var linesToCut = partStartRow - startLinebreaks;
+					if(linesToCut < 0) linesToCut = partStartRow;
+					//console.log("startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " linesToCut=" + linesToCut);
+					while(linesToCut-- > 0) {
+						text = text.substring(text.indexOf(file.lineBreak) + file.lineBreak.length, text.length);
+						//console.log("cutting! linesToCut=" + linesToCut);
+					}
 				}
-			}
-			
-			if(!endReached) {
-				// Cut the text at last newline so that we don't stop in the middle of a line
 				
-				var cutAt = text.lastIndexOf(file.lineBreak);
-				var cutText = text.substring(cutAt, text.length);
+				if(!endReached) {
+					// Cut the text at last newline so that we don't stop in the middle of a line
+					
+					var cutAt = text.lastIndexOf(file.lineBreak);
+					var cutText = text.substring(cutAt, text.length);
+					
+					//stream.unshift(cutText); // Put the cut text back into the stream
+					
+					text = text.substr(0, cutAt);				
+					
+				}
 				
-				//stream.unshift(cutText); // Put the cut text back into the stream
+				text = fixInconsistentLineBreaks(text, file.lineBreak);
 				
-				text = text.substr(0, cutAt);				
+				file.text = text;
 				
-			}
-			
-			text = fixInconsistentLineBreaks(text, file.lineBreak);
-			
-			file.text = text;
-			
-			//file.debugGrid();
-			
-			file.indentation = determineIndentationConvention(file.text, file.lineBreak);
+				//file.debugGrid();
+				
+				file.indentation = determineIndentationConvention(file.text, file.lineBreak);
 
-			file.grid = file.createGrid();
-			
-			console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
-			
-			console.log("Fixing caret ... ");
-			console.log("file.caret.row=" + file.caret.row + " ");
-			
-			var diff = (file.partStartRow - partStartRow);
-			
-			console.log("diff=" + diff);
-			
-			// Move the caret to the same position it was on
-			file.caret.row += diff;
-			console.log("Placed it at file.caret.row=" + file.caret.row + " ");
-			
-			if(file.caret.row < 0) {
-				// Place the caret at the top
-				console.log("Place the caret at the top");
-				file.caret.row = 0;
-				file.caret.col = 0;
-			}
-			else if(file.caret.row >= (file.grid.length)) {
-				// Place the caret at EOF
-				console.log("Place the caret at EOF");
-				file.caret.row = file.grid.length-1;
-				file.caret.col = file.grid[file.grid.length-1].length -1;
-				file.caret.eol = true;
-				file.caret.eof = true;
-			}
+				file.grid = file.createGrid();
+				
+				console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
+				
+				
+				console.log("Fixing caret ... ");
+				console.log("file.caret.row=" + file.caret.row + " ");
+				
+				var diff = (file.partStartRow - partStartRow);
+				
+				console.log("diff=" + diff);
+				
+				// Move the caret to the same position it was on
+				file.caret.row += diff;
+				console.log("Placed it at file.caret.row=" + file.caret.row + " ");
+				
+				if(file.caret.row < 0) {
+					// Place the caret at the top
+					console.log("Place the caret at the top");
+					file.caret.row = 0;
+					file.caret.col = 0;
+					
+					
+					if(file.grid[0].length > 0) {
+						file.caret.eol = false;
+						file.caret.eof = false;
+					}
+					else {
+						file.caret.eol = true;
+						if(file.caret.row == (file.grid.length-1)) {
+							file.caret.eof = true;
+						}
+						else {
+							file.caret.eof = false;
+						}
+					}
+					
+				}
+				else if(file.caret.row >= (file.grid.length)) {
+					// Place the caret at EOF
+					console.log("Place the caret at EOF");
+					file.caret.row = file.grid.length-1;
+					file.caret.col = file.grid[file.grid.length-1].length -1;
+					file.caret.eol = true;
+					file.caret.eof = true;
+				}
 
-			file.fixCaret();
+				file.fixCaret();
+				
+				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
+				
+				file.partStartRow = partStartRow;
+				
 			
-			console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
-			
-			file.partStartRow = partStartRow;
-			
-			
-			editor.renderNeeded();
-			
-			if(endReached) {
-				file.tail = true;
-				file.head = false;
-			}
-			else if(partStartRow == 0) {
-				file.head = true;
-				file.tail = false;
-			}
-			else {
-				file.head = false;
-				file.tail = false;
-			}
-
-			
-			if(!countRows && callback) callback();
+				
+				
+				editor.renderNeeded();
+				
+				if(endReached) {
+					file.tail = true;
+					file.head = false;
+				}
+				else if(partStartRow == 0) {
+					file.head = true;
+					file.tail = false;
+				}
+				else {
+					file.head = false;
+					file.tail = false;
+				}
+				
+				if(callback) callback();
+			} 
 
 			
 			if(file.totalRows == -1) {

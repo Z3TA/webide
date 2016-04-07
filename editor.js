@@ -1542,7 +1542,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			We also need to take into account how much is scrolled
 			
-			And file streams! (file.partStartRow)
+			FILE CARET IS BOUND TO THE GRID!
+			caret.index is always the index in file.text (it doesn't correspond to the position in a big file)
 			
 		*/
 		if(editor.currentFile) {
@@ -1576,7 +1577,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				var mouseCol = Math.floor((mouseX - editor.settings.leftMargin - (gridRow.indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth + clickFeel) / editor.settings.gridWidth);
 				
 				//console.log("mouseCol=" + mouseCol);
-				
 				
 				if(mouseCol > gridRow.length) { // End of line
 					mouseCol = gridRow.length;
