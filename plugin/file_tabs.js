@@ -108,7 +108,7 @@
 		
 		console.log("closing " + file.path);
 		
-		buildTabs();
+		buildTabs(file);
 		
 		editor.renderNeeded();
 		editor.resizeNeeded();
@@ -139,9 +139,9 @@
 	}
 	
 
-	function buildTabs() {
+	function buildTabs(excludeFile) {
 		
-		console.log("Building tabs ...");
+		console.log(editor.getStack("Building tabs ..."));
 		
 		var tabList = document.getElementById("tabList");
 		
@@ -152,7 +152,18 @@
 			}
 		}
 		
-		var fileList = editor.sortFileList(); // Sorted by file.order
+		var fileList = editor.sortFileList(); // An array of files sorted by file.order
+		
+		if(excludeFile) {
+			if(fileList.indexOf(excludeFile) == -1) console.error(new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path));
+			
+			var removed = fileList.splice(fileList.indexOf(excludeFile), 1);
+			
+			console.log("Excluded removed.path=" + removed.path);
+		}
+		else {
+			console.log("No file will be excluded!");
+		}
 		
 		// Create tabs
 		for(var i=0; i<fileList.length; i++) {

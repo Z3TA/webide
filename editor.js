@@ -498,22 +498,24 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 			}
 			
+			var switchTo;
+			
 			if(editor.currentFile == file && !doNotSwitchFile) {
 				// The file we are closing is the current file, and we are "allowed" to swith 
 				
-				if(editor.lastFile) {
-					
-					console.log("Showing '" + editor.lastFile.path + "' because '" + file.path + "' is closing.");
-					editor.showFile(editor.lastFile);
-				}
+				if(editor.lastFile) switchTo = editor.lastFile;
 			}
 			
-			// Sanity check again
-			if(editor.currentFile == file) {
-				console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + file.path));
+			delete editor.files[file.path]; // Remove all references to the file BEFORE switching to another file
+			
+			console.log("Showing '" + editor.lastFile.path + "' because '" + path + "' was closing.");
+			editor.showFile(editor.lastFile);
+
+			// Sanity check again. Make shure we didn't switch to the file being closed
+			if(editor.currentFile.path == path) {
+				console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path));
 			}
 			
-			delete editor.files[file.path]; // Remove all references to the file
 		}
 	}
 	
