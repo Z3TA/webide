@@ -11,7 +11,6 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-bug: Tripple clicking on emty line
 
 
 file.scrollCaret, both scroll and move caret. 

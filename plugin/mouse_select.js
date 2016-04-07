@@ -215,7 +215,12 @@
 		
 		function selectWholeLine() {
 			startIndex = file.grid[caret.row].startIndex;
-			endIndex = file.grid[caret.row][  file.grid[caret.row].length-1  ].index + 1;
+			if(caret.eol) {
+				endIndex = startIndex;
+			}
+			else {
+				endIndex = file.grid[caret.row][  file.grid[caret.row].length-1  ].index + 1;
+			}
 		}
 		
 		
