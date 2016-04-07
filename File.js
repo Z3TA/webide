@@ -2473,7 +2473,7 @@
 
 		var fileRow = line-1;
 		
-		if(fileRow < file.grid.length) {
+		if((fileRow + file.partStartRow) < file.grid.length) {
 			// We gan go to the line without loading a new part
 			file.caret = file.createCaret(undefined, fileRow);
 			file.scrollToCaret();
@@ -2481,7 +2481,7 @@
 		else if(file.isBig) {
 			// It's a big file and we'll have to load another part of the file ...
 			var column = 0;
-			var partStartRow = Math.round(gridRow - editor.settings.bigFileLoadRows / 2);
+			var partStartRow = Math.round(fileRow - editor.settings.bigFileLoadRows / 2);
 			
 			if(partStartRow < 0) partStartRow = 0;
 			
