@@ -2456,6 +2456,8 @@
 		
 		console.log("Going to line=" + line + " ...");
 		
+		if(file.isStreaming) console.error(new Error("Can't goto line in a file that is streaming!"));
+		
 		var file = this;
 
 		if(undefined == line) {
