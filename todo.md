@@ -11,21 +11,15 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-refactoring scrolling to work in big files. file.scrollTo
-
-
-file.scrollCaret, both scroll and move caret. 
-
+goto line in bif giles:
 test using Ctrl+G on 20k.txt goto line 10000
-
-
 
 
 test the search in file function, polish it maybe
 
-Bigfile support for movecaret ... refactor needed!?
 
-todo: KEEP TRACK OF file.totalRows !!! new lines, delete, cut, etc
+todo: (needs thinking) KEEP TRACK OF file.totalRows !!! ??? new lines, delete, cut, etc
+
 
 
 BUGS

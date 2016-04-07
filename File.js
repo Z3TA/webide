@@ -572,7 +572,7 @@
 		
 		if(caret.eof) {
 			if(caret.row != (file.grid.length-1)) {
-				console.error(new Error("Caret on row " + caret.row + ". Expected it to be on row " + file.grid.length + " because caret.eof = true"));
+				console.error(new Error("Caret on row " + caret.row + ". Expected it to be on row " + file.grid.length + " because caret.eof = true in file.path=" + file.path));
 			}
 			else if(caret.eol != true) {
 				console.error(new Error("Caret should be on EOL when caret.eof = true\ncaret=" + JSON.stringify(caret) + "\n" + "file.text.length=" + file.text.length + ""));
@@ -2471,17 +2471,23 @@
 			console.error(new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + ""));
 		}
 
-		var gridRow = line-1;
+		var fileRow = line-1;
 		
-		if(file.isBig) {
+		if(fileRow < file.grid.length) {
+			// We gan go to the line without loading a new part
+			file.caret = file.createCaret(undefined, fileRow);
+			file.scrollToCaret();
+		}
+		else if(file.isBig) {
+			// It's a big file and we'll have to load another part of the file ...
 			var column = 0;
 			var partStartRow = Math.round(gridRow - editor.settings.bigFileLoadRows / 2);
 			
 			if(partStartRow < 0) partStartRow = 0;
 			
-			loadFilePart(file, partStartRow, function filePartLoaded() {
-				// Place the caret
-				gridRow -= file.partStartRow;
+			loadFilePart(file, partStartRow, function placeCaretAfterLoadingPart() {
+
+				var gridRow = fileRow - file.partStartRow; // This is the line we want to go to, translated to the new file part
 
 				file.caret = file.createCaret(undefined, gridRow); // index, row, col
 				file.scrollToCaret();
@@ -2489,8 +2495,7 @@
 			});
 		} 
 		else {
-			file.caret = file.createCaret(undefined, gridRow);
-			file.scrollToCaret();
+			console.error(new Error("fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length));
 		}
 
 	}
@@ -2597,8 +2602,6 @@
 			}
 			
 			if(scrolled) editor.renderNeeded();
-			
-			if(callback) callback();
 			
 		}
 		
