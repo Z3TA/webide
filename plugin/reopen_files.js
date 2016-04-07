@@ -255,7 +255,9 @@
 					window.localStorage["state_" + file.path] = state;
 
 				}
-
+				
+				var caretSet = false;
+				
 				if(lastFileState) {
 					
 					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
@@ -265,16 +267,18 @@
 					}
 					
 					if(lastFileState.caret !== undefined) {
-						// Place the caret
+						// Set the caret as it was
 						console.log("Placing caret in file.path=" + file.path);
+						caretSet = true;
+						// There can be errors, for example if the file has been changed by another program
 						try {
 							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
 						}
 						catch(e) {
-							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
+							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);
+							caretSet = false;
 						}
 					}
-
 					
 					if(lastFileState.order !== undefined) file.order = lastFileState.order;
 					if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
@@ -295,7 +299,24 @@
 					file.savedAs = true;
 				}
 				
-				callback(file, fileWasCurrentfile);
+				console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + " caretSet=" + caretSet);
+				
+				if(lastFileState.partStartRow > 0 && caretSet) {
+					
+					var lineNr = lastFileState.partStartRow + file.caret.row + 1;
+					
+					file.gotoLine(lineNr, function afterGotoLine(file) {
+						
+						console.log("reopen_aftergotoline");
+						
+						callback(file, fileWasCurrentfile);
+						
+					});
+					
+				}
+				else {
+					callback(file, fileWasCurrentfile);
+				}
 
 			}
 		}

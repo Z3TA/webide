@@ -1703,7 +1703,7 @@
 							caret.eol = true;
 							
 							if(grid[caret.row].length > 0) {
-								caret.index = grid[caret.row][caret.col].index;
+								caret.index = grid[caret.row][caret.col-1].index + 1; // Last character on the row + 1
 							}
 							else {
 								caret.index = grid[caret.row].startIndex;
@@ -3070,7 +3070,8 @@
 			if(file.totalRows == -1) console.error(new Error("Stream closed before we got file.totalRows!"));
 			
 			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
-			if(callback) callback();
+			console.log("Calling callback name=" + functionName(callback));
+			if(callback) callback(file);
 		}
 		
 		function streamEnded() {
