@@ -443,7 +443,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
-	editor.lastChangedFile = function() {
+	editor.lastChangedFile = function(notThisFile) {
 		var files = Object.keys(editor.files);
 		
 		if(files.length == 0) return undefined;
@@ -452,7 +452,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			return editor.files[a].lastChanged < editor.files[b].lastChanged;
 		});
 		
-		return editor.files[files[0]];
+		var file = editor.files[files[0]];
+		
+		if(file == notThisFile) {
+			if(files.length > 1) {
+				file = editor.files[files[1]];
+			}
+			else file = undefined;
+		}
+		
+		return file;
 		
 	}
 	
@@ -473,49 +482,38 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
-			delete editor.files[file.path];
-			
-			if(editor.lastFile) {
-				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
-					// lastFile is no longer open!
-					editor.lastFile = editor.lastChangedFile();
-				}
-			}
-			else {
-				editor.lastFile = editor.lastChangedFile();
-			}
-			
 			if(editor.lastFile == file) {
-				// Change lastFile to a file that is not currentFile:
-				editor.lastFile = editor.lastChangedFile();
+				editor.lastFile = editor.lastChangedFile(file);
+				
 				if(editor.lastFile == editor.currentFile) {
 					// Select *any* file that is not the current file
-					for(var path in editor.files) {
-						if(path != editor.currentFile.path) {
-							editor.lastFile = editor.files[path];
-							break;
-						}
-					}
+					editor.lastFile = editor.lastChangedFile(editor.currentFile);
 				}
-				if(editor.lastFile == editor.currentFile) editor.lastFile = undefined;
+			}
+			
+			// Sanity check
+			if(editor.lastFile) {
+				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
+					console.error(new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path));
+				}
 			}
 			
 			if(editor.currentFile == file && !doNotSwitchFile) {
+				// The file we are closing is the current file, and we are "allowed" to swith 
 				
-				// We are closing the file currently in view. Show another file!?
 				if(editor.lastFile) {
 					
-					console.log("Showing " + editor.lastFile.path + " because " + file.path + " is closing.");
+					console.log("Showing '" + editor.lastFile.path + "' because '" + file.path + "' is closing.");
 					editor.showFile(editor.lastFile);
 				}
-				
 			}
 			
+			// Sanity check again
 			if(editor.currentFile == file) {
-				editor.currentFile = undefined;
-				// Honour the doNotSwitchFile argument!
+				console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + file.path));
 			}
 			
+			delete editor.files[file.path]; // Remove all references to the file
 		}
 	}
 	

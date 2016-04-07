@@ -119,7 +119,7 @@
 	function switchToFile(path) {
 		
 		if(!editor.files.hasOwnProperty(path)) {
-			console.warn("There is no file open with path=" + path);
+			console.error(new Error("Trying to swith to a file that is not open! path=" + path));
 			return;
 		}
 		
