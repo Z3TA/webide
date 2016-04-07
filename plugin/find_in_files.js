@@ -69,6 +69,9 @@
 			}
 			else if(arr.length != 2) console.error(new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)"));
 			
+			var lineNr = arr[1]; // The part captured by the group (parenthesis)
+			
+			
 			//clickedRowText = clickedRowText.substring(clickedRowText.indexOf(":")); // Remove the line part
 			
 			
@@ -102,13 +105,13 @@
 			
 			// Open the file, then go to the line, and highlight the search word
 			
-			console.log("line=" + line);
+			console.log("line=" + lineNr);
 			console.log("path=" + path);
 			
 			editor.openFile(path, undefined, function highlightGoto(file) {
 				
 				// Scroll to and place the caret on the line
-				file.gotoLine(line-1, function afterScrolled() {
+				file.gotoLine(lineNr, function afterScrolled() {
 					
 					console.log("scrolled to the right place!?")
 					

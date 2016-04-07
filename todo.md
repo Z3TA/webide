@@ -11,10 +11,6 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-goto line in bif giles:
-test using Ctrl+G on 20k.txt goto line 10000
-
-
 test the search in file function, polish it maybe
 
 
