@@ -85,7 +85,6 @@
 	}
 	
 	function show_gotoInput(file, combo) {
-		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 
 		if(!gotoInputIsVisible) {
@@ -109,24 +108,23 @@
 			}
 			*/
 			
-			// Remove focus from the editor
-			if(editor.currentFile) {
-				editor.input = false;
-			}
-			
-			
-			inputGoto.focus();   // Add focus to the input
-			inputGoto.select();  // Select all
-			
-		
-			
 			gotoInputIsVisible = true;
 			
 			editor.resizeNeeded();
 			editor.renderNeeded();
 			
 		}
-		
+
+		// Remove focus from the editor
+		if(editor.currentFile) {
+			editor.input = false;
+		}
+
+		inputGoto.focus();   // Add focus to the input
+		inputGoto.select();  // Select all
+				
+		return false; // Function must return false to ignore default browser action!
+
 	}
 
 	function hide_gotoInput() {
@@ -163,6 +161,8 @@
 			var line = parseInt(inputGoto.value);
 			var file = editor.currentFile;
 			
+			if(!file) console.error(new Error("No current file!"));
+			
 			if(isNaN(line)) {
 				alert("Enter line number!");
 			}
@@ -170,6 +170,12 @@
 				alert("No file open!");
 			}
 			else {
+				
+				if(line < 1) line = 1;
+				
+				console.log("file.totalRows=" + file.totalRows);
+				
+				if(line > (file.totalRows+1)) line = file.totalRows+1;
 				
 				console.log("Going to line " + line + ".");
 				

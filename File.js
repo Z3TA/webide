@@ -66,7 +66,7 @@
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
 		//console.log("Gonna create the grid for file.path=" + file.path);	
 		file.grid = file.createGrid();
-		file.totalRows = file.grid.length-2;
+		file.totalRows = file.grid.length-1; // Why was this -2 ?
 		console.log("file.totalRows=" + file.totalRows);
 		
 		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
@@ -418,7 +418,7 @@
 			}
 			else {
 				// We found some text
-				var firstCol = grid[row];
+				var firstCol = grid[row][0];
 				caret.index = firstCol.index;
 				caret.row = row;
 				caret.col = 0;
@@ -1632,7 +1632,7 @@
 		var file = this;
 		
 		if(undefined == row) console.error(new Error("row is undefined!"));
-		if(row < 0) console.error(new Error("Can't move the caret to row=" + row + " because " + row + "<1"));
+		if(row < 0) console.error(new Error("Can't move the caret to row=" + row + " because " + row + " < 0"));
 		if(undefined == col) col = 0;
 		if(undefined == caret) caret = file.caret;
 		

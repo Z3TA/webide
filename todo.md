@@ -11,6 +11,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
+bug: Tripple clicking on emty line
+
+
 file.scrollCaret, both scroll and move caret. 
 
 test using Ctrl+G on 20k.txt goto line 10000
@@ -22,9 +25,7 @@ test the search in file function, polish it maybe
 
 Bigfile support for movecaret ... refactor needed!?
 
-
-Feature: Uncaught SyntaxError: Unexpected token )
-Find unmatched parentheses !!
+KEEP TRACK OF file.totalRows !!! new lines, delete, cut, etc
 
 
 BUGS
@@ -358,6 +359,9 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Uncaught SyntaxError: Unexpected token )
+Find unmatched parentheses !!
 
 
 After tabbing back to the editor from another program. Check each file if it has changed from last saved state.
