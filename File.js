@@ -66,8 +66,11 @@
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
 		//console.log("Gonna create the grid for file.path=" + file.path);	
 		file.grid = file.createGrid();
-		file.totalRows = file.grid.length-1; // Why was this -2 ?
-		console.log("file.totalRows=" + file.totalRows);
+		
+		// A splitted emty string will always become one item in an array. So if the file is empty: file.grid.length=1
+		file.totalRows = file.grid.length-1; 
+		if(file.isBig) file.totalRows = -1; // Leaving it to loadFilePart() to find totalRows
+		
 		
 		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
 	
