@@ -179,15 +179,7 @@
 				
 				console.log("Going to line " + line + ".");
 				
-				file.scrollCaret(line-1);
-				
-				/*
-				file.caret.row = line-1;
-				//file.caret.col = 0;
-				
-				file.fixCaret();
-				file.scrollToCaret();
-				*/
+				file.gotoLine(line);
 				
 				hide_gotoInput();
 				

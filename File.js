@@ -941,7 +941,7 @@
 				var firstCol = file.caret.col;
 				
 				// Reset the view
-				file.scrollTo(undefined, file.caret.row-1);
+				file.scrollTo(undefined, file.caret.row-1 + file.partStartRow);
 				
 				optimized = true;
 			}
@@ -1627,55 +1627,6 @@
 		
 	}
 	
-	File.prototype.scrollCaret = function(row, col, callback, caret) {
-		// Moves a caret and scrolls to it
-		
-		console.log("Scrolling and moving the caret ...");
-		
-		var file = this;
-		
-		if(undefined == row) console.error(new Error("row is undefined!"));
-		if(row < 0) console.error(new Error("Can't move the caret to row=" + row + " because " + row + " < 0"));
-		if(undefined == col) col = 0;
-		if(undefined == caret) caret = file.caret;
-		
-		// Do not set the carret until we have scrolled!
-		
-		// Create a temporary caret
-		var tempCaret = file.createCaret();
-		tempCaret.row = row;
-		tempCaret.col = col;
-		
-		file.scrollToCaret(tempCaret, function afterScrolled() {
-			
-			console.log("Done scrolling to caret!");
-			
-			if(file.isBig) {
-				// Adjust for file.partStartRow
-				tempCaret.row -= file.partStartRow;
-				
-				 // Sanity check
-				if(tempCaret.row < 0 || tempCaret.row > file.grid.length) {
-					//file.debugGrid();
-					console.error(new Error("It appears that the file didn't scroll to the right part ... tempCaret.row=" + tempCaret.row + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length));
-				}
-			}
-			
-			file.fixCaret(tempCaret);
-			
-			if(caret == file.caret) {
-				 file.caret = tempCaret
-				 editor.fireEvent("moveCaret", file, caret);
-			}
-			else {
-				caret = tempCaret;
-			}
-			
-			if(callback) callback(caret);
-			
-		});
-		
-	}
 	
 	File.prototype.moveCaretToIndex = function(index, caret) {
 		var file = this,
@@ -1806,42 +1757,7 @@
 		return caret;
 		
 	}
-	
-	File.prototype.moveCaretToStart = function(caret, cb) {
-		var file = this;
-		
-		// Moves the caret to the start of the file
-		
-		var startIndex = 0;
-		
-		if(caret == undefined) caret = file.caret;
-		
-		if(file.isBig && !file.head) {
-			if(caret != file.caret) console.error(new Error("Can not place virtual caret, only file.caret if the file is big!"));
-			
-			var partStartRow = 0;
-			loadFilePart(file, partStartRow, function() {
 
-				caret = file.moveCaretToIndex(startIndex, caret);
-				
-				if(cb) cb(caret);
-			});
-			
-		}
-		else {
-			
-			caret = file.moveCaretToIndex(startIndex, caret);
-			
-			if(cb) {
-				cb(caret);
-			}
-			else {
-				return caret;
-			}
-		}
-		
-	}
-	
 	File.prototype.moveCaretToEnd = function(caret, cb) {
 		var file = this;
 		// Moves the caret to the end of the file
@@ -1856,13 +1772,15 @@
 			
 			if(file.totalRows == -1) console.error(new Error("totalRows not yet found! Wait ...?"));
 			
-			var startRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
+			var partStartRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
 		
-			if(startRow < 0) console.error(new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!"));
+			if(partStartRow < 0) console.error(new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!"));
 			
-			loadFilePart(file, startRow, function() {
+			loadFilePart(file, partStartRow, function loadPartDone() {
 				
-				file.caret.row = file.grid.length;
+				console.log("loadPartDone! partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow);
+				
+				file.caret.row = file.grid.length-1;
 				
 				file.fixCaret();
 				
@@ -2368,13 +2286,16 @@
 	File.prototype.scrollToCaret = function(caret, callback) {
 		var file = this;
 		
+		// note: Caret is bound to the grid! And caret.index is the index in file.text
+		// This function only scrolls the grid (not the whole file) use file.scrollTo() to scroll in the whole file
+		
 		if(caret == undefined) caret = file.caret;
 		
 		console.log("scrolling to caret:" + JSON.stringify(caret) + " editor.view.visibleRows=" + editor.view.visibleRows);
 		
 		
 		// Up and down ...
-		//var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows) + 1;
+		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows) + 1;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
 		
@@ -2396,53 +2317,41 @@
 		if(startRow < 0) startRow = 0;
 		
 		
-		if(!file.isBig && caret.row >= file.grid.length) console.error(new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length));
-		else if(caret.row < file.grid.length) {
-			
-			// Left & Right
-			var delta = 0;
-			var startColumn = file.startColumn;
-			
-			//console.log("caret.col=" + caret.col + " > editor.view.endingColumn=" + editor.view.endingColumn + " ? " + (caret.col > editor.view.endingColumn));
-			//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
-			
+		if(caret.row >= file.grid.length) console.error(new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length));
 
-			
-			var indentationWidth = file.grid[caret.row].indentation * editor.settings.tabSpace;
-			var columnEnd = editor.view.endingColumn - indentationWidth;
-			var columnStart = file.startColumn; // Intentional: Omitting indentation here
-			
-			if(caret.col > columnEnd) {
-				// Caret is after the visible space
-				delta = caret.col - columnEnd;
-				//editor.view.endingColumn += delta; // Do I need to do this!?
-				startColumn += delta;
-			}
-			else if(caret.col < columnStart) {
-				// Caret is infront of the visible space
-				delta = columnStart - caret.col;
-				
-				//editor.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
-				startColumn -= delta;
-			}
-			
-			//console.log("delta=" + delta);
-			//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
-			
+		
+		// Left & Right
+		var delta = 0;
+		var startColumn = file.startColumn;
+		
+		//console.log("caret.col=" + caret.col + " > editor.view.endingColumn=" + editor.view.endingColumn + " ? " + (caret.col > editor.view.endingColumn));
+		//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
+		
+
+		
+		var indentationWidth = file.grid[caret.row].indentation * editor.settings.tabSpace;
+		var columnEnd = editor.view.endingColumn - indentationWidth;
+		var columnStart = file.startColumn; // Intentional: Omitting indentation here
+		
+		if(caret.col > columnEnd) {
+			// Caret is after the visible space
+			delta = caret.col - columnEnd;
+			//editor.view.endingColumn += delta; // Do I need to do this!?
+			startColumn += delta;
 		}
-		else {
-			console.warn("Did not scroll horizontally because the row was not loaded!");
+		else if(caret.col < columnStart) {
+			// Caret is infront of the visible space
+			delta = columnStart - caret.col;
+			
+			//editor.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
+			startColumn -= delta;
 		}
 		
-		file.scrollTo(startColumn, startRow, function() {
-			
-			// Attempt horizontal scrolling now!?
-			
-			console.log("in scrollToCaret after scrollTo");
-			
-			if(callback) callback();
-			
-		});
+		//console.log("delta=" + delta);
+		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
+
+		
+		file.scrollTo(startColumn, startRow + file.partStartRow);
 		
 		//editor.renderNeeded(); // Don't need to render until actually scrolled
 		
@@ -2542,29 +2451,48 @@
 		
 	}
 	
-	File.prototype.gotoLine = function(line) {
+	File.prototype.gotoLine = function(line, callback) {
+		// Goes to a line in a file. Loads part of a file if necessary (big files)
+		
+		console.log("Going to line=" + line + " ...");
+		
 		var file = this;
-		
-		//console.log("Line " + line);
-		
-		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows);
-		
-		var startRow = line-2;
-		
-		if(startRow > maxStartRow) {
-			startRow = maxStartRow;
+
+		if(undefined == line) {
+			console.error(new Error("line=" + line + " is undefined!"));
 		}
-		
-		if(startRow < 0) {
-			file.startRow = 0;
+		else if(isNaN(line)) {
+			console.error(new Error("line=" + line + " is not a number!"));
 		}
+		else if(line < 1) {
+			console.error(new Error("Can't go to line=" + line + " because it's below 1!"));
+		}
+		else if(line >= file.totalRows) {
+			console.error(new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + ""));
+		}
+
+		var gridRow = line-1;
 		
-		file.scrollTo(undefined, startRow);
-		
-		//console.log("file.startRow=" + file.startRow);
-		//console.log("maxStartRow=" +maxStartRow);
-		
-		editor.renderNeeded();
+		if(file.isBig) {
+			var column = 0;
+			var partStartRow = Math.round(gridRow - editor.settings.bigFileLoadRows / 2);
+			
+			if(partStartRow < 0) partStartRow = 0;
+			
+			loadFilePart(file, partStartRow, function filePartLoaded() {
+				// Place the caret
+				gridRow -= file.partStartRow;
+
+				file.caret = file.createCaret(undefined, gridRow); // index, row, col
+				file.scrollToCaret();
+			
+			});
+		} 
+		else {
+			file.caret = file.createCaret(undefined, gridRow);
+			file.scrollToCaret();
+		}
+
 	}
 	
 	File.prototype.scrollTo = function(x, y, callback) {
@@ -2572,7 +2500,13 @@
 			Sets the startColumn and startRow
 			
 			Use this function instead of modifying file.startColumn and file.startRow directly!
+			
+			y is the row in the whole file (big file)
+			
 		*/
+		
+		if(callback == undefined) console.warn("file.scrollTo called without a callback function!");
+		
 		var file = this;
 		var startColumn = file.startColumn;
 		var startRow = file.startRow;
@@ -2589,7 +2523,13 @@
 			y = parseInt(y);
 			
 			if(file.isBig && file.grid.length > 1) {
-
+				
+				// We only want to re-stream the file if it's near the "edge" OR if y is not loaded
+				
+				var yLoaded = (y > file.partStartRow && y < (file.partStartRow + file.grid.length-1));
+				
+				if(y > file.totalRows) console.error(new Error("Can't scroll y=" + y + " over file.totalRows=" + file.totalRows));
+				
 				var high = Math.min((file.grid.length - editor.view.visibleRows), Math.floor(file.grid.length * .85 - editor.view.visibleRows));
 				var low = Math.floor(file.grid.length * .15);
 				var middle = Math.floor(file.grid.length * .5);
@@ -2604,7 +2544,17 @@
 				if(file.isStreaming) {
 					console.warn("Scrolling while the file is streaming ...");
 				}
+				else if(!yLoaded) {
+					// Try to get y somewhere in the middle of the big file
+					var partStartRow = Math.round(y - editor.settings.bigFileLoadRows/2);
+					if(partStartRow < 0) partStartRow = 0;
+					
+					loadFilePart(file, partStartRow, streamLoaded);
+					return;
+					
+				}
 				else if(y > high && !file.tail) {
+					
 					loadFilePart(file, file.partStartRow + moveRows, streamLoaded);
 					return;
 				}
@@ -2678,7 +2628,7 @@
 			
 			console.log("y=" + y);
 
-			if(y < low) console.error(new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  ));
+			//if(y < low) console.error(new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  ));
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
@@ -2699,13 +2649,16 @@
 			Adds to the current scroll possition.
 			
 			Use this function instead of modifying file.startColumn and file.startRow directly!
+			
+			This function only scrolls on the grid!
+			
 		*/
 		var file = this;
 		
 		if(deltaX == undefined) deltaX = 0;
 		if(deltaY == undefined) deltaY = 0;
 		
-		file.scrollTo(file.startColumn + deltaX, file.startRow + deltaY);
+		file.scrollTo(file.startColumn + deltaX, file.startRow + deltaY + file.partStartRow);
 	}
 	
 	
@@ -2962,7 +2915,11 @@
 		if(partStartRow == undefined) partStartRow = 0;
 		
 		if(partStartRow < 0) console.error(new Error("Can not begin stream in negative row:" + partStartRow));
-
+		
+		if(file.totalRows != -1) {
+			if(partStartRow >= file.totalRows) console.error(new Error("Can not begin stream in above file.totalRows=" + file.totalRows));
+		}
+		
 		if(callback == undefined) console.warn("loadFilePart with no callback!");
 		
 		var text = "";
@@ -2972,7 +2929,8 @@
 		var countRows = false; // If set to true, only count line breaks
 		var flush = false;
 		var byteCounter = 0;
-
+		var gotFishAlready = false;
+		
 		var options = {}
 		
 		/*
@@ -3031,34 +2989,14 @@
 		stream.on("close", streamClose);
 		
 		
-		function streamClose() {
-			console.log("Stream closed! flush=" + flush);
-			// Tidy up ?
-			//stream.removeListener("readable", readStream);
-			//stream.removeListener("end", streamEnded);
-			//stream.removeListener("error", streamError);
-			//stream.removeListener("close", streamClose);
-			
-			file.isStreaming = false;
-		}
+
 		
 		function streamError(err) {
 			console.log("Stream error!");
 			console.error(err);
 		}
 		
-		function streamEnded() {
-			console.log("Stream ended! countRows=" + countRows + " flush=" + flush);
-			if(countRows) {
-				file.totalRows = totalLineBreaks;
-				console.log("file.byteRow.length=" + file.byteRow.length);
-				console.log("file.totalRows=" + file.totalRows);
-			}
-			else if(!flush) {
-				gotFish(true);
-			}
 
-		}
 		
 		function readStream() {
 			// Called each time there is someting comming down the stream
@@ -3075,7 +3013,7 @@
 				
 
 				if(flush) {
-					//console.log("Flushing the toilet ....");
+					console.log("Flushing the toilet ....");
 				}
 				else {
 
@@ -3107,12 +3045,16 @@
 					
 					if(totalLineBreaks >= partStartRow && !countRows) {
 						// Start saving characters
-						if(startLinebreaks == -1) startLinebreaks = totalLineBreaks - lineBreaks; // Accumulated linebreaks when we started capturing text
+						// The rows above partStartRow will be chopped off when the stream is finished
+						if(startLinebreaks == -1) {
+							startLinebreaks = totalLineBreaks - lineBreaks; // Accumulated linebreaks when we started capturing text
+							console.log("set startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " totalLineBreaks=" + totalLineBreaks + " lineBreaks=" + lineBreaks);
+						}
 						text = text + str;
 					}
 					
 
-					//console.log("Got chunk! totalLineBreaks=" + totalLineBreaks + " byteCounter=" + byteCounter + " chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
+					console.log("Got chunk! totalLineBreaks=" + totalLineBreaks + " byteCounter=" + byteCounter + " chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
 
 
 					
@@ -3123,12 +3065,49 @@
 				}
 			}
 		}
+
+		function streamClose() {
+			console.log("Stream closed! flush=" + flush);
+			// Tidy up ?
+			//stream.removeListener("readable", readStream);
+			//stream.removeListener("end", streamEnded);
+			//stream.removeListener("error", streamError);
+			//stream.removeListener("close", streamClose);
+			
+			file.isStreaming = false;
+			
+			if(file.totalRows == -1) console.error(new Error("Stream closed before we got file.totalRows!"));
+			
+			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
+			if(callback) callback();
+		}
+		
+		function streamEnded() {
+			// Beware! The stream will never end if we close it prematurely 
+			console.log("Stream ended! countRows=" + countRows + " flush=" + flush);
+			if(countRows) {
+				file.totalRows = totalLineBreaks;
+				console.log("file.byteRow.length=" + file.byteRow.length);
+				console.log("file.totalRows=" + file.totalRows + " totalLineBreaks=" + totalLineBreaks);
+			}
+			else if(!flush && !gotFishAlready) {
+				gotFish(true);
+			}
+		}
 		
 		function gotFish(endReached) {
 			
-			console.log("Got fish! countRows=" + countRows + " endReached=" + endReached);
+			gotFishAlready = true;
+			
+			// This function wont be called if countRows==true  !!????
+			
+			console.log("Got fish! countRows=" + countRows + " endReached=" + endReached + " file.totalRows=" + file.totalRows);
 			
 			if(!countRows) {
+				
+				
+				// Only pause the streem If we have already counted the rows! For some weird reason we can't pause and then continue the stream 
+				if(file.totalRows != -1) stream.pause(); // We need to pause the stream so that gotFish wont be called many times
 				
 				file.render = true; // Let the editor render the file again
 				
@@ -3172,7 +3151,8 @@
 				
 				console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
 				
-				
+				// Do not fix caret here!
+				/*
 				console.log("Fixing caret ... ");
 				console.log("file.caret.row=" + file.caret.row + " ");
 				
@@ -3219,6 +3199,8 @@
 				
 				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
 				
+				*/
+				
 				file.partStartRow = partStartRow;
 				
 			
@@ -3238,28 +3220,42 @@
 					file.head = false;
 					file.tail = false;
 				}
+
 				
-				if(callback) callback();
+				console.log("file.totalRows=" + file.totalRows);
+				if(file.totalRows == -1) {
+					// Continue to load the file to find out how many rows it has
+					countRows = true;
+					
+					// hmm ... Is streamEnded called before gotFish!?
+					if(endReached) {
+						console.error(new Error("Stream end reached before we got file.totalRows!"));
+					}
+					else {
+						//stream.resume();
+						console.log("Continue the stream so we can count the rows ...");
+						//readStream();
+					}
+					
+					// Empty the byte to row mapper?
+					//file.byteRow.length = 0;
+					
+				}
+				else {
+					// Flush the stream down the toilet (do nothing with it)
+					flush = true;
+					
+					// It's stupid why we have to flush, why wont this work!?
+					stream.close(); // Cool, it seems to work!
+					
+					console.log("Gotta close the stream yo!");
+					
+				}
+				
+				
 			} 
 
-			
-			if(file.totalRows == -1) {
-				// Continue to load the file to find out how many rows it has
-				countRows = true;
-				
-				// Empty the byte to row mapper?
-				//file.byteRow.length = 0;
-				
-			}
-			else {
-				// Flush the stream down the toilet (do nothing with it)
-				flush = true;
-				
-				// It's stupid why we have to flush, why wont this work!?
-				stream.close(); // Cool, it seems to work!
-				
-			}
-			
+		
 		}
 		
 	}

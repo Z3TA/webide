@@ -116,14 +116,14 @@
 	}
 	
 	function makeCaretCenter(file) {
-		file.scrollTo(0, file.caret.row - Math.round(editor.view.visibleRows / 2));
+		file.scrollTo(0, file.caret.row - Math.round(editor.view.visibleRows / 2) + file.partStartRow);
 	}
 	
 	function scrollUp(file, combo, character, charCode, direction) {
 		
 		var delta = -scrollStep;
 		
-		file.scrollTo(0, file.startRow + delta);
+		file.scrollTo(0, file.startRow + delta + file.partStartRow);
 		
 		// Move the caret while scrolling
 		for(var i=0; i<scrollStep; i++) {
@@ -138,7 +138,7 @@
 		
 		var delta = scrollStep;
 		
-		file.scrollTo(0, file.startRow + delta);
+		file.scrollTo(0, file.startRow + delta + file.partStartRow);
 		
 		// Move the caret while scrolling
 		for(var i=0; i<scrollStep; i++) {

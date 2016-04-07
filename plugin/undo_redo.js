@@ -163,7 +163,7 @@
 				console.log("First diff on line=" + i);
 				// Do not scroll if it's visible
 				if(i < file.startRow || i > (file.startRow + editor.view.visibleRows)) {
-					file.scrollTo(0, i-editor.view.visibleRows/2);
+					file.scrollTo(0, Math.round(i-editor.view.visibleRows/2) + file.partStartRow);
 				}
 				break;
 			}

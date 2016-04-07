@@ -107,14 +107,8 @@
 			
 			editor.openFile(path, undefined, function highlightGoto(file) {
 				
-				//var scrollRow = Math.round(line - editor.view.visibleRows / 2)
-				var scrollRow = line-1;
-				var scrollCol = 0;
-				
-				if(scrollRow < 0) scrollRow = 0;
-				
 				// Scroll to and place the caret on the line
-				file.scrollCaret(scrollRow, scrollCol, function afterScrolled() {
+				file.gotoLine(line-1, function afterScrolled() {
 					
 					console.log("scrolled to the right place!?")
 					

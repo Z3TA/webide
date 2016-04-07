@@ -71,16 +71,7 @@
 		}
 		else {
 			// Move caret to the top
-			//file.caret.row = 0;
-			//file.caret.col = 0;
-			file.moveCaretToStart(file.caret, function() {
-				
-				file.scrollToCaret();
-
-				editor.renderNeeded();
-				
-			});
-			
+			file.gotoLine(1);
 		}
 
 	}

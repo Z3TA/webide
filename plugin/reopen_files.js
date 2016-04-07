@@ -258,7 +258,9 @@
 
 				if(lastFileState) {
 					
-					file.scrollTo(lastFileState.startColumn, lastFileState.startRow, function placeCaret() {
+					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
+					
+					file.scrollTo(lastFileState.startColumn, lastFileState.startRow + lastFileState.partStartRow, function placeCaret() {
 						
 						if(lastFileState.caret !== undefined) {
 							// Place the caret
@@ -496,6 +498,7 @@
 		state.isSaved = file.isSaved;
 		state.savedAs = file.savedAs;
 		state.startRow = file.startRow;
+		state.partStartRow = file.partStartRow; // For loading big files as streams
 		state.startColumn = file.startColumn;
 		state.caret = file.caret;
 		state.order = file.order;
