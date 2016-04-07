@@ -142,7 +142,7 @@
 			
 			console.log("startRow=" + startRow);
 			
-			file.scrollTo(undefined, startRow + file.partStartRow);
+			file.scrollTo(undefined, startRow);
 			
 			lastY = mouseY;
 			
@@ -179,7 +179,7 @@
 			// Center on that row
 			var startRow = Math.max(0, mouseRow - Math.floor(editor.view.visibleRows / 2));
 			
-			file.scrollTo(undefined, startRow + file.partStartRow);
+			file.scrollTo(undefined, startRow);
 			
 			// Keep focus on the document
 			

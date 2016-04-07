@@ -260,20 +260,21 @@
 					
 					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
 					
-					file.scrollTo(lastFileState.startColumn, lastFileState.startRow + lastFileState.partStartRow, function placeCaret() {
-						
-						if(lastFileState.caret !== undefined) {
-							// Place the caret
-							console.log("Placing caret in file.path=" + file.path);
-							try {
-								file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-							}
-							catch(e) {
-								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
-							}
+					if(lastFileState.startColumn != undefined && lastFileState.startRow != undefined) {
+						file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
+					}
+					
+					if(lastFileState.caret !== undefined) {
+						// Place the caret
+						console.log("Placing caret in file.path=" + file.path);
+						try {
+							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
 						}
+						catch(e) {
+							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path);
+						}
+					}
 
-					}); // Set startRow if it's saved
 					
 					if(lastFileState.order !== undefined) file.order = lastFileState.order;
 					if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;

@@ -72,7 +72,7 @@
 				console.log("editor.settings.topMargin=" +editor.settings.topMargin);
 
 
-				file.scrollTo(undefined, startRow + file.partStartRow);
+				file.scrollTo(undefined, startRow);
 				
 				
 			}

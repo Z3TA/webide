@@ -941,7 +941,7 @@
 				var firstCol = file.caret.col;
 				
 				// Reset the view
-				file.scrollTo(undefined, file.caret.row-1 + file.partStartRow);
+				file.scrollTo(undefined, file.caret.row-1);
 				
 				optimized = true;
 			}
@@ -2287,7 +2287,7 @@
 		var file = this;
 		
 		// note: Caret is bound to the grid! And caret.index is the index in file.text
-		// This function only scrolls the grid (not the whole file) use file.scrollTo() to scroll in the whole file
+		// This function only scrolls the grid (not the whole file)
 		
 		if(caret == undefined) caret = file.caret;
 		
@@ -2351,7 +2351,7 @@
 		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
 
 		
-		file.scrollTo(startColumn, startRow + file.partStartRow);
+		file.scrollTo(startColumn, startRow);
 		
 		//editor.renderNeeded(); // Don't need to render until actually scrolled
 		
@@ -2495,17 +2495,17 @@
 
 	}
 	
-	File.prototype.scrollTo = function(x, y, callback) {
+	File.prototype.scrollTo = function(x, y) {
 		/*
 			Sets the startColumn and startRow
 			
 			Use this function instead of modifying file.startColumn and file.startRow directly!
 			
-			y is the row in the whole file (big file)
+			This function is ONLY used to scroll the grid. It should NOT be used to load parts of large files. Although it will automatically load "ahead" in large files. 
+			
+			y is the row in the grid (not large file)
 			
 		*/
-		
-		if(callback == undefined) console.warn("file.scrollTo called without a callback function!");
 		
 		var file = this;
 		var startColumn = file.startColumn;
@@ -2524,11 +2524,10 @@
 			
 			if(file.isBig && file.grid.length > 1) {
 				
-				// We only want to re-stream the file if it's near the "edge" OR if y is not loaded
+				// We only want to "load more" of "large files" if the caret is near the "edge"
 				
-				var yLoaded = (y > file.partStartRow && y < (file.partStartRow + file.grid.length-1));
-				
-				if(y > file.totalRows) console.error(new Error("Can't scroll y=" + y + " over file.totalRows=" + file.totalRows));
+				if(y < 0) console.error(new Error("y=" + y + " < 0"));
+				if(y >= file.grid.length) console.error(new Error("y=" + y + " >= file.grid.length=" + file.grid.length));
 				
 				var high = Math.min((file.grid.length - editor.view.visibleRows), Math.floor(file.grid.length * .85 - editor.view.visibleRows));
 				var low = Math.floor(file.grid.length * .15);
@@ -2544,17 +2543,7 @@
 				if(file.isStreaming) {
 					console.warn("Scrolling while the file is streaming ...");
 				}
-				else if(!yLoaded) {
-					// Try to get y somewhere in the middle of the big file
-					var partStartRow = Math.round(y - editor.settings.bigFileLoadRows/2);
-					if(partStartRow < 0) partStartRow = 0;
-					
-					loadFilePart(file, partStartRow, streamLoaded);
-					return;
-					
-				}
 				else if(y > high && !file.tail) {
-					
 					loadFilePart(file, file.partStartRow + moveRows, streamLoaded);
 					return;
 				}
@@ -2562,7 +2551,6 @@
 					loadFilePart(file, Math.max(0, file.partStartRow - moveRows), streamLoaded);
 					return;
 				}
-				
 			}
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
@@ -2628,7 +2616,7 @@
 			
 			console.log("y=" + y);
 
-			//if(y < low) console.error(new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  ));
+			if(y < low) console.error(new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  ));
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
@@ -2640,8 +2628,6 @@
 			doTheScrolling(true);
 			
 		}
-		
-		
 	}
 	
 	File.prototype.scroll = function(deltaX, deltaY) {
@@ -2658,7 +2644,7 @@
 		if(deltaX == undefined) deltaX = 0;
 		if(deltaY == undefined) deltaY = 0;
 		
-		file.scrollTo(file.startColumn + deltaX, file.startRow + deltaY + file.partStartRow);
+		file.scrollTo(file.startColumn + deltaX, file.startRow + deltaY);
 	}
 	
 	
