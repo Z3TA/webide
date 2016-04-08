@@ -206,16 +206,19 @@
 		if(divVisible && inputFindGotFocus) {
 			if(inputFind.value.length > 0 && editor.input===false) {
 				searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked);
+				return false; // Prevent default
 			}
 		}
-		
-		return false; // Prevent default
+		return true;		
 	}
 	
 	function pressEscape() {
 		
-		hide_find_in_files();
-	
+		if(!divVisible) {
+			hide_find_in_files();
+			return false;
+		}
+		return true;
 	}
 	
 	function hide_find_in_files() {

@@ -81,6 +81,7 @@
 	function moveRight(file, combo) {
 
 		if(!editor.input) return true;
+		if(!file) return true;
 		
 		console.log("Moving caret right ...");
 		

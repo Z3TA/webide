@@ -225,8 +225,10 @@
 		if(searchVisible) {
 			if(inputFind.value.length > 0 && editor.input===false) {
 				find(inputFind.value, editor.currentFile, regexOption.checked);
+				return false;
 			}
 		}
+		return true;
 	}
 	
 	

@@ -17,6 +17,8 @@ Thinking about if I should call all events on a dummy file
 BUGS
 ====
 
+No directory for search in files
+
 No render when clicking on a function in the functionlist
 
 Didn't get file input focus when opening a file... 
