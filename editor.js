@@ -1638,7 +1638,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		*/
 		
-		if(!editor.input) return;
+		if(!editor.input) return true;
 		
 		var wordDelimiters = " ()[]{}+-/<>\r\n!";
 		var char = "";
@@ -2474,7 +2474,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			note: Windows OS (or Chromium?) has some weird keyboard commands, like Ctrl + I to insert a tab!
 			
 		*/
-		e = e || window.event; 
+		e = e || window.event;
 		
 		var charCode = e.charCode || e.keyCode;
 		var character = String.fromCharCode(charCode);
@@ -2486,7 +2486,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCodeCtrl = 17;
 		var charCodeAlt = 18;
 		var gotError;
-
+		var targetElementClass = e.target.className;
+		
 		/*
 		var backspaceCharCode = 8;
 		if(charCode == backspaceCharCode) {
@@ -2564,7 +2565,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					if(!editor.currentFile) console.warn("No file open!");
 					
 					try {
-						funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down");
+						funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 					} 
 					catch(err) {
 						gotError = err;
@@ -2576,7 +2577,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
-						console.log("function called: " + functionName(binding.fun));
+						console.log("function called: " + functionName(binding.fun)); // Sometimes the file doesn't show up in the stack!!? So show the function name and we can do a search in file.
 						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc."));
 					}
 				}
