@@ -304,7 +304,7 @@
 			 functionListSelect.setAttribute("multiple", "multiple");
 			 
 			functionListSelect.onchange = function(e) {
-				editor.currentFile.gotoLine(this.value);
+				editor.currentFile.scrollToLine(this.value);
 			}
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
@@ -366,7 +366,10 @@
 				}
 				
 				option.onclick = function() {
-					editor.currentFile.scrollToLine(func.lineNumber);
+					//editor.currentFile.scrollToLine(func.lineNumber);
+					
+					// We need to keep the functionlist focused to allow typing in it
+
 				}
 				
 				option.setAttribute("id", func.name);
