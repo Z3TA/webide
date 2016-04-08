@@ -21,8 +21,6 @@ todo: (needs thinking) KEEP TRACK OF file.totalRows !!! ??? new lines, delete, c
 BUGS
 ====
 
-Sometimes doesn't call callback after loadFilePart() in File.js
-
 Sometimes doesn't render after goto line.
 
 Didn't remember file.partStartRow when reloading

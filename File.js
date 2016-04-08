@@ -2495,7 +2495,9 @@
 
 				file.caret = file.createCaret(undefined, gridRow); // index, row, col
 				file.scrollToCaret();
-			
+				
+				if(callback) callback();
+				
 			});
 		} 
 		else {
@@ -2959,7 +2961,7 @@
 		var stream = fs.createReadStream(file.path, options);
 		stream.setEncoding('utf8');
 		
-		console.log("loadFilePart Catching stream .... options=" + JSON.stringify(options) + " partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows + " path=" + file.path);
+		console.log("loadFilePart Catching stream .... options=" + JSON.stringify(options) + " partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows + " file.path=" + file.path);
 		
 		if(file.changed && !file.isSaved) {
 			alert("Can not catch the stream if the file is not saved! File is too large.");
@@ -3060,7 +3062,7 @@
 		}
 
 		function streamClose() {
-			console.log("Stream closed! flush=" + flush);
+			console.log("Stream closed! flush=" + flush + " file.path=" + file.path);
 			// Tidy up ?
 			//stream.removeListener("readable", readStream);
 			//stream.removeListener("end", streamEnded);
@@ -3073,7 +3075,7 @@
 			
 			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
 			console.log("Calling callback name=" + functionName(callback));
-			if(callback) callback(file);
+			if(callback) callback();
 		}
 		
 		function streamEnded() {

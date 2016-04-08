@@ -305,7 +305,7 @@
 					
 					var lineNr = lastFileState.partStartRow + file.caret.row + 1;
 					
-					file.gotoLine(lineNr, function afterGotoLine(file) {
+					file.gotoLine(lineNr, function afterGotoLine() {
 						
 						console.log("reopen_aftergotoline");
 						
