@@ -11,8 +11,8 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-Hitting right arrow when in the function list should give focus back to the canvas (and scroll!?)
 
+Thinking about if I should call all events on a dummy file 
 
 BUGS
 ====
