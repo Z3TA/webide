@@ -492,7 +492,8 @@
 		
 		if(!useRegEx) {
 			// Convert to a regexp
-			searchString = searchString.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+			searchString = escapeRegExp(searchString);
+			
 		}
 
 		if(!caseSensitive) flags += "i";

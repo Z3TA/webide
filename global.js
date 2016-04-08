@@ -1,7 +1,9 @@
 /*
 
-	Expose some handy constands and functions to global scope.
-	These are the only global variables except editor, File, and Box.
+	Expose some handy constants and functions to global scope.
+	These are the only global variables except editor and File.
+	
+	Hide File from global scope!? Then it would have to be merged with editor.js
 
 */
 
@@ -132,4 +134,9 @@ function isString(text) {
 	}
 	return typeOf == string || instanceofString || objectToString == objectString;
 
+}
+
+
+function escapeRegExp(str) {
+	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }

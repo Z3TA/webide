@@ -195,7 +195,7 @@
 		
 		for(var name in functions) {
 			
-			if(name.search(new RegExp(str, "i")) != -1) {
+			if(name.search(new RegExp(escapeRegExp(str), "i")) != -1) {
 				matches.push(name);
 				//console.log(name);
 			}
