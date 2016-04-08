@@ -2572,7 +2572,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.warn("Error when running key bound function:" + err.stack);
 					}
 					
-					if(funReturn === false) {
+					if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 						preventDefault = true;
 						console.log("Default action will be prevented!");
 					}

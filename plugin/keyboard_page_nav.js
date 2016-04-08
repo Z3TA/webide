@@ -9,7 +9,6 @@
 	editor.keyBindings.push({charCode: 36, fun: home});
 	
 	
-	
 	function pageUp(file, combo, character, charCode, pushDirection) {
 		// Move the cursor one page up
 		
@@ -24,6 +23,7 @@
 
 		editor.renderNeeded();
 		
+		return false;
 	}
 	
 	function pageDown(file) {
@@ -37,6 +37,8 @@
 		file.scrollToCaret();
 
 		editor.renderNeeded();
+		
+		return false;
 	}
 
 	function end(file, combo) {
@@ -58,7 +60,8 @@
 				
 			});
 		}
-
+		
+		return false;
 	}
 	
 	
@@ -73,7 +76,8 @@
 			// Move caret to the top
 			file.gotoLine(1);
 		}
-
+		
+		return false;
 	}
 	
 	
