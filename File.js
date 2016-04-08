@@ -2469,7 +2469,7 @@
 		else if(line < 1) {
 			console.error(new Error("Can't go to line=" + line + " because it's below 1!"));
 		}
-		else if(line >= file.totalRows) {
+		else if(line > (file.totalRows+1)) {
 			console.error(new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + ""));
 		}
 
