@@ -309,7 +309,9 @@
 							// There can be errors, for example if the file has been changed by another program
 							try {
 								//file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-								file.caret = file.createCaret(undefined, lastFileState.caret.row, lastFileState.caret.col);
+								// Don't set the caret, move it, so events can fire
+								file.moveCaret(undefined, lastFileState.caret.row, lastFileState.caret.col);
+								//file.caret = file.createCaret(undefined, lastFileState.caret.row, lastFileState.caret.col);
 							}
 							catch(e) {
 								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);

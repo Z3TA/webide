@@ -2492,6 +2492,9 @@
 			//file.scrollTo(undefined, Math.min(maxFileRow, Math.max(0, fileRow-2)));
 			//file.scrollTo(undefined, Math.max(0, fileRow-topSpace));
 			file.scrollToCaret();
+			
+			editor.fireEvent("moveCaret", file, file.caret); // Always fire an event when we move the file caret!
+			
 			editor.renderNeeded();
 			
 		}
