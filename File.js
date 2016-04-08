@@ -20,27 +20,17 @@
 		file.isBig = bigFile ? true : false;
 		file.index = fileIndex;
 		file.order = fileIndex; // For ordering files, in for example a tab list
-		
 		file.name = editor.getFilenameFromPath(path);
-		
 		file.mode = "code"; // text, code, or other, ...
-		
-
 		file.lineBreak = determineLineBreakCharacters(text);
-		console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
+		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
 		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
-
-		
-		file.indentation = determineIndentationConvention(text, file.lineBreak);
-
-
-		
-		file.partStartRow = 0;
+file.indentation = determineIndentationConvention(text, file.lineBreak);
+file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
 		file.head = false, // We are on the first part of the stream if true
 		file.byteRow = []; // Indexing of byte to row for faster seeking in big files [[row, byte],[row, byte],[row, byte]]
 
-		
 		file.isStreaming = false; // If the file is currently pulling data from the file read stream
 		file.render = true; // Can (temporary) disable rendering for this file by setting it to false
 		
@@ -341,7 +331,7 @@
 
 
 		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
-		
+		console.log(editor.getStack("creating caret"));
 
 		// Sanity check if we got it right
 		if(caret.index == undefined) {
@@ -2459,7 +2449,7 @@
 	File.prototype.gotoLine = function(line, callback) {
 		// Goes to a line in a file. Loads part of a file if necessary (big files)
 		
-		console.log("Going to line=" + line + " ...");
+		console.log(editor.getStack("Going to line=" + line + " ..."));
 		
 		var file = this;
 		
