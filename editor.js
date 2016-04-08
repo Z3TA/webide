@@ -2165,7 +2165,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(fails === 0) testResults.push("All " + counter + " tests passed!")
 			else testResults.push(fails + " of " + counter + " test failed:");
 			
-			editor.openFile("testresults", testResults.join("\n"));
+			editor.openFile("testresults", testResults.join("\n"), function(file) {
+				file.parse = false;
+			});
 			
 			function testFail(description, result) {
 				fails++;

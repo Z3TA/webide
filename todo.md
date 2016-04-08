@@ -11,8 +11,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
+Making tests! (coreTests.js). Use callback instead of return! so we can have async tests.
 
-Thinking about if I should call all events on a dummy file 
+
 
 BUGS
 ====
