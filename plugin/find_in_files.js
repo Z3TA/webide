@@ -11,6 +11,10 @@
 	var searchMaxFiles = 100000;
 	var maxTotalMatches = 500;
 	
+	var defaultSearchTerm = "Connection on websocket from 107.192.233.200";
+	var defaultSearchFolder = editor.workingDirectory;
+	var defaultSearchFilter = "\.js|htm|html$";
+	
 	editor.on("start", function find_in_files_main() {
 		
 		var keyF = 70;
@@ -258,7 +262,7 @@
 		inputFind.setAttribute("id", "inputFind");
 		inputFind.setAttribute("class", "inputtext");
 		inputFind.setAttribute("size", size);
-		inputFind.value = "Connection on websocket from 107.192.233.200";
+		inputFind.value = defaultSearchTerm;
 		
 		var inputReplace = document.createElement("input");
 		inputReplace.setAttribute("type", "text");
@@ -270,8 +274,8 @@
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
-		//inputInDir.value = editor.getDir();
-		inputInDir.value = "C:\\Users\\Z\\dev-repositories\\js-editor\\test\\";
+		inputInDir.value = editor.getDir(); // The directory of the current file being open
+		//inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);
 
@@ -279,10 +283,9 @@
 		inputFileFilter.setAttribute("type", "text");
 		inputFileFilter.setAttribute("id", "inputFileFilter");
 		inputFileFilter.setAttribute("class", "inputtext inputFileFilter");
-		//inputFileFilter.value = ".js$|.htm$/i"
-		inputFileFilter.value = "20k"
+		inputFileFilter.value = defaultSearchFilter
 		inputFileFilter.setAttribute("size", size);
-
+		
 		
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
