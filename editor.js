@@ -382,9 +382,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		function callCallbacks(file, err) {
+			if(err) console.warn(err.message);
+			
 			if(callback) {
-				console.log("Fully loaded file.path=" + file.path);
-				console.log("Calling callback: " + functionName(callback));
 				callback(file, err); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
 			else {
