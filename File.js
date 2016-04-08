@@ -2289,9 +2289,10 @@
 	
 	File.prototype.scrollToCaret = function(caret, callback) {
 		var file = this;
-		
-		// note: Caret is bound to the grid! And caret.index is the index in file.text
-		// This function only scrolls the grid (not the whole file)
+		/*
+		note: Caret is bound to the grid! And caret.index is the index in file.text
+		This function only scrolls the grid (not the whole file)
+		*/
 		
 		if(caret == undefined) caret = file.caret;
 		
@@ -2461,7 +2462,7 @@
 		console.log("Going to line=" + line + " ...");
 		
 		var file = this;
-
+		
 		if(file.isStreaming) console.error(new Error("Can't goto line in a file that is streaming!"));
 		
 		if(undefined == line) {
@@ -2476,15 +2477,23 @@
 		else if(line > Math.max(file.grid.length, (file.totalRows+1))) {
 			console.error(new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + ""));
 		}
-
+		
+		//var maxFileRow = Math.max(0, Math.max(file.grid.length, (file.totalRows+1)) - editor.view.visibleRows);
+		
 		var fileRow = line-1;
+		
+		var topSpace = 1; // How many lines that should be visible above the caret
 		
 		if(fileRow >= file.partStartRow && (fileRow + file.partStartRow) < file.grid.length) {
 			console.log("fileRow=" + fileRow + " file.partStartRow=" + file.partStartRow + " file.grid.length=" + file.grid.length);
 			
 			// We gan go to the line without loading a new part
 			file.caret = file.createCaret(undefined, fileRow);
+			//file.scrollTo(undefined, Math.min(maxFileRow, Math.max(0, fileRow-2)));
+			//file.scrollTo(undefined, Math.max(0, fileRow-topSpace));
 			file.scrollToCaret();
+			editor.renderNeeded();
+			
 		}
 		else if(file.isBig) {
 			// It's a big file and we'll have to load another part of the file ...
@@ -2500,6 +2509,8 @@
 				file.caret = file.createCaret(undefined, gridRow); // index, row, col
 				file.scrollToCaret();
 				
+				editor.renderNeeded();
+				
 				if(callback) callback();
 				
 			});
@@ -2509,6 +2520,55 @@
 		}
 
 	}
+	
+	File.prototype.scrollToLine = function(line) {
+		/* 
+			Only scrolls on the grid. 
+			Do not support large files. 
+			Does not move the caret!
+			
+		*/
+			console.log("Scrolling to line=" + line + " ...");
+		
+		var file = this;
+		
+		if(file.isStreaming) console.error(new Error("Can't scroll to line in a file that is streaming!"));
+		
+		if(undefined == line) {
+			console.error(new Error("line=" + line + " is undefined!"));
+		}
+		else if(isNaN(line)) {
+			console.error(new Error("line=" + line + " is not a number!"));
+		}
+		else if(line < 1) {
+			console.error(new Error("Can't scroll to line=" + line + " because it's below 1!"));
+		}
+		else if(line > file.grid.length) {
+			console.error(new Error("Can't scroll to line=" + line + " because it's above file.grid.length=" + file.grid.length + ""));
+		}
+		
+		//console.log("Line " + line);
+		
+		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows);
+		
+		var startRow = line-2;
+		
+		if(startRow > maxStartRow) {
+			startRow = maxStartRow;
+		}
+		
+		if(startRow < 0) {
+			file.startRow = 0;
+		}
+		
+		file.scrollTo(undefined, startRow);
+		
+		//console.log("file.startRow=" + file.startRow);
+		//console.log("maxStartRow=" +maxStartRow);
+		
+		editor.renderNeeded();
+	}
+	
 	
 	File.prototype.scrollTo = function(x, y) {
 		/*
@@ -2527,6 +2587,11 @@
 		var startRow = file.startRow;
 		var scrolled = false;
 		var oldPartStartRow = file.partStartRow;
+		
+		if((x == undefined || x == startColumn) && (y == undefined || y == startRow)) {
+			console.warn("No need to scroll! x=" + x + " y=" + y + " startRow=" + startRow + " startColumn=" + startColumn + "");
+			return;
+}
 		
 		console.log("scrollTo: x=" + x + " y=" + y);
 		

@@ -366,7 +366,7 @@
 				}
 				
 				option.onclick = function() {
-					editor.currentFile.gotoLine(func.lineNumber);
+					editor.currentFile.scrollToLine(func.lineNumber);
 				}
 				
 				option.setAttribute("id", func.name);
