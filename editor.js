@@ -1638,6 +1638,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		*/
 		
+		if(!editor.input) return;
+		
 		var wordDelimiters = " ()[]{}+-/<>\r\n!";
 		var char = "";
 		var word = "";
@@ -2549,7 +2551,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 				
 				if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
-					console.error(new Error("Can't have nice things! Causes a bug that will make native shit+ or algGr+ keyboard combos not work"));
+					console.error(new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work"));
 				}
 				else {
 					
@@ -2574,7 +2576,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
-						//console.error(new Error("Function bound to keys need to return true or false! When returning false, the default (chromium) behaviour is prevented."));
+						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc."));
 					}
 				}
 			}
@@ -2655,7 +2657,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var charCode = e.charCode || e.keyCode;
 		var character = String.fromCharCode(charCode);
 		var combo = getCombo(e);
-		
+		var funReturn;
 		
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
@@ -2717,7 +2719,18 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				//console.log("keyUp: Calling function: " + functionName(binding.fun) + "...");
 				
-				binding.fun(editor.currentFile, combo, character, charCode, "up");
+				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "up");
+				
+				// There is no browser actions bound to keyUp events (only keydown). So we don't have to care about preventing default
+					
+				if(funReturn === false) {
+					preventDefault = true;
+					console.log("Default action will be prevented!");
+				}
+				else if(funReturn !== true) {
+					console.error(new Error("To prevent bugs, keybound functions always need to return either true or false!\nAlthough it doesn't matter on keyup events. Returning false on keydown event will prevent default action."));
+				}
+				
 			}
 			
 		}
@@ -2853,7 +2866,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Mouse position is on the current object (Canvas) 
 		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX,
 			mouseY = e.offsetY==undefined?e.layerY:e.offsetY,
-			caret = editor.mousePositionToCaret(mouseX, mouseY),
+			caret,
 			button = e.button,
 			click,
 			target = e.target,
@@ -2862,6 +2875,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 		console.log("Mouse up on class " + target.className + "!");
+		
+		if(target.className == "fileCanvas") {
+			
+			// Only get a caret if the click is on the canvas 
+			caret = editor.mousePositionToCaret(mouseX, mouseY);
+		}
 		
 		console.log("Calling mouseClick (up) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
 		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {

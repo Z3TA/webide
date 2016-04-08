@@ -11,7 +11,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
+Should I force keyBindings to return either true or false!?
 
+Hitting right arrow when in the function list should give focus back to the canvas (and scroll!?)
 
 
 BUGS
