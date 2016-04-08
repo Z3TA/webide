@@ -59,6 +59,8 @@
 	function switchTab() {
 		// Open last file
 		
+		if(editor.lastFile == editor.currentFile) console.error(new Error("editor.lastFile = editor.currentFile = " + editor.currentFile.path));
+		
 		if(editor.lastFile) editor.showFile(editor.lastFile);
 		else console.warn("No file to switch to!");
 		}

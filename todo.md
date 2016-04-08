@@ -17,7 +17,7 @@ What I'm working on:
 BUGS
 ====
 
-Sometimes doesn't render after goto line.
+No render when clicking on a function in the functionlist
 
 Didn't get file input focus when opening a file... 
 

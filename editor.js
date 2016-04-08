@@ -1853,6 +1853,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.currentFile = file;
 		
+		if(editor.currentFile == editor.lastFile) {
+			editor.lastFile = editor.lastChangedFile([editor.currentFile]);
+}
+		
 		if(focus == undefined) focus = true;
 		
 		// Set window title
