@@ -443,7 +443,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
-	editor.lastChangedFile = function(notThisFile) {
+	editor.lastChangedFile = function(excludeFileList) {
+		// Returns the file that was last changed
+		
 		var files = Object.keys(editor.files);
 		
 		if(files.length == 0) return undefined;
@@ -452,13 +454,17 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			return editor.files[a].lastChanged < editor.files[b].lastChanged;
 		});
 		
-		var file = editor.files[files[0]];
+		var index = 0;
+		var file = editor.files[files[index]];
 		
-		if(file == notThisFile) {
-			if(files.length > 1) {
-				file = editor.files[files[1]];
+		if(excludeFileList) {
+			// Make sure the files in thist list doesn't get selected
+			index++;
+			while(file != undefined && excludeFileList.indexOf(file) != -1) {
+				if(index == files.length) file = undefined
+				else file = editor.files[files[index]];
+				index++;
 			}
-			else file = undefined;
 		}
 		
 		return file;
@@ -482,35 +488,47 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
+			// Make sure lastFile is not the file being closed
 			if(editor.lastFile == file) {
-				editor.lastFile = editor.lastChangedFile(file);
-				
-				if(editor.lastFile == editor.currentFile) {
-					// Select *any* file that is not the current file
-					editor.lastFile = editor.lastChangedFile(editor.currentFile);
-				}
+				console.warn("lastFile is the file being closed!");
+				editor.lastFile = editor.lastChangedFile([file]);
+				console.log("Changed lastfile to: " + editor.lastFile.path);
 			}
+			// Make sure lastFile is not currentFile
+			if(editor.lastFile == editor.currentFile) {
+				console.warn("lastFile is the currentFile:" + editor.currentFile.path);
+				editor.lastFile = editor.lastChangedFile([editor.currentFile, file]);
+				console.log("Changed lastfile to: " + editor.lastFile.path);
+			}
+			
+			console.log("editor.lastFile.path=" + editor.lastFile.path + "\nWhen closing: " + file.path);
 			
 			// Sanity check
 			if(editor.lastFile) {
 				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
-					console.error(new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path));
+					console.error(new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path + "\nWhen closing file.path=" + file.path));
 				}
 			}
 			
-			var switchTo;
-			
-			if(editor.currentFile == file && !doNotSwitchFile) {
-				// The file we are closing is the current file, and we are "allowed" to swith 
+			var switchTo; // Have to check this before removing the file reference
+			if(editor.currentFile == file) {
 				
-				if(editor.lastFile) switchTo = editor.lastFile;
+				editor.currentFile = undefined; // Closed, kinda
+			
+				if(!doNotSwitchFile) { // double negative => true
+					
+					// The file we are closing is the current file, and we are "allowed" to swith 
+					if(editor.lastFile) switchTo = editor.lastFile;
+				}
 			}
 			
 			delete editor.files[file.path]; // Remove all references to the file BEFORE switching to another file
 			
-			console.log("Showing '" + editor.lastFile.path + "' because '" + path + "' was closing.");
-			editor.showFile(editor.lastFile);
-
+			if(switchTo) {
+				editor.showFile(switchTo);
+				console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
+			}
+			
 			// Sanity check again. Make shure we didn't switch to the file being closed
 			if(editor.currentFile.path == path) {
 				console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path));
@@ -1828,7 +1846,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.eventListeners.fileHide[i].fun(editor.currentFile); // Call function
 			}
 			
-			editor.lastFile = editor.currentFile;
+			if(editor.currentFile) editor.lastFile = editor.currentFile
+			else editor.lastFile = editor.lastChangedFile([file]);
 			
 		}
 		
