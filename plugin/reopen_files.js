@@ -256,8 +256,6 @@
 
 				}
 				
-				var caretSet = false;
-				
 				if(lastFileState) {
 					
 					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
@@ -266,19 +264,7 @@
 						file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
 					}
 					
-					if(lastFileState.caret !== undefined) {
-						// Set the caret as it was
-						console.log("Placing caret in file.path=" + file.path);
-						caretSet = true;
-						// There can be errors, for example if the file has been changed by another program
-						try {
-							file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
-						}
-						catch(e) {
-							console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);
-							caretSet = false;
-						}
-					}
+					setCaret();
 					
 					if(lastFileState.order !== undefined) file.order = lastFileState.order;
 					if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
@@ -299,25 +285,43 @@
 					file.savedAs = true;
 				}
 				
-				console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + " caretSet=" + caretSet);
+				console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
 				
-				if(lastFileState.partStartRow > 0 && caretSet) {
+				if(lastFileState.partStartRow > 0) {
 					
 					var lineNr = lastFileState.partStartRow + file.caret.row + 1;
 					
 					file.gotoLine(lineNr, function afterGotoLine() {
 						
 						console.log("reopen_aftergotoline");
-						
+						setCaret();
 						callback(file, fileWasCurrentfile);
 						
 					});
 					
 				}
 				else {
+					setCaret();
 					callback(file, fileWasCurrentfile);
 				}
 
+				function setCaret() {
+					if(lastFileState) { // <-- This is needed because we can't check a property of a undefined variable
+						if(lastFileState.caret !== undefined) {
+							// Set the caret as it was
+							console.log("Placing caret in file.path=" + file.path);
+							// There can be errors, for example if the file has been changed by another program
+							try {
+								//file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
+								file.caret = file.createCaret(undefined, lastFileState.caret.row, lastFileState.caret.col);
+							}
+							catch(e) {
+								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);
+							}
+						}
+					}
+				}				
+				
 			}
 		}
 	}
