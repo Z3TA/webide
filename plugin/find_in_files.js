@@ -7,7 +7,9 @@
 	
 	var divVisible = false; 
 	
-	var searchMaxResults = 10000;
+	// It's a good idea to have a limit for example if we accidently saarch for spaces
+	var searchMaxFiles = 100000;
+	var maxTotalMatches = 500;
 	
 	editor.on("start", function find_in_files_main() {
 		
@@ -625,11 +627,14 @@
 			
 			function streamEnded() {
 				console.log("Stream ended! filePath=" + filePath);
+				
+				// Should this be in streamClose instead !?
+				
 				fileQueue.shift(); // Remove first element in the array, the file we just searched.
 				
 				totalFiles++;
 				
-				if(fileQueue.length > 0 && totalMatches < searchMaxResults) {
+				if(fileQueue.length > 0 && totalFiles < searchMaxFiles && totalMatches < maxTotalMatches) {
 					searchFile(fileQueue[0]); // Search next file in queue
 				}
 				else {
@@ -643,13 +648,16 @@
 						reportFile.insertText("Found " + totalMatches + " match(es) in " + totalFiles + " of " + totalFilesFound + " files.");
 					}
 					
+					
 					// Highlight the matches
 					console.log("matches=" + matches);
 					for(var i=0; i<matches.length; i++) {
 						reportFile.highlightText(matches[i]);						
 					}
+
+					if(totalFiles >= searchMaxFiles) alert("Aborted the search because we reached searchMaxFiles=" + searchMaxFiles + " limit!");
+					if(totalMatches >= maxTotalMatches) alert("Aborted the search because we reached maxTotalMatches=" + maxTotalMatches + " limit!");
 					
-					//alert("Search complete!");
 				}
 			}
 			
@@ -672,7 +680,7 @@
 				
 				//console.log("Reading stream ... isPaused=" + stream.isPaused());
 				
-				while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
+				while (null !== (chunk = stream.read()) && !stream.isPaused() && totalMatches < maxTotalMatches ) {
 
 					// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 					str = decoder.write(chunk);
@@ -735,7 +743,7 @@
 							reportFile.insertLineBreak();
 						}
 						
-						//if(rowNr != lastRowNr) {
+						if(rowNr != lastRowNr) {
 							// Print all content of that line
 							if(rowNr == 0) {
 								lineText = str.substring(0, lineIndex[0]).trim(); // First line
@@ -746,7 +754,7 @@
 							
 							reportFile.insertText( linePad(rowNr+totalRows+1) + lineText );
 							reportFile.insertLineBreak();
-						//}
+						}
 						
 						lastRowNr = rowNr;
 						

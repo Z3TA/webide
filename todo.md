@@ -1,4 +1,4 @@
-Prioritize: bug fixing, refactoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). No new features until that is done!
+Prioritize: bug fixing, re-factoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). No new features until that is done!
 
 Prio: 
 * Bug/issue fixing, 
@@ -11,16 +11,11 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-Trying to figure out why the background goes black when removing the canvas (resizing).
-
-test the search in file function, polish it maybe
 
 
 
 BUGS
 ====
-
-When searching in files, lines that has two or more matches will show up many times.
 
 Sometimes doesn't render after goto line.
 

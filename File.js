@@ -651,6 +651,10 @@
 		/* 
 			Update the grid ...
 			It's probably faster to re-create the grid then to insert all characters one by one.
+			
+			Streaming content into a file via file.insertText is terrible slow though.
+			We should be able to optemize if caret.eof!
+			
 		*/
 		file.grid = file.createGrid();
 		
