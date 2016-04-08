@@ -23,8 +23,6 @@ BUGS
 
 Sometimes doesn't render after goto line.
 
-Didn't remember file.partStartRow when reloading
-
 Didn't get file input focus when opening a file... 
 
 Saving takes a long time sometimes. (i get nervious, how to confort?)

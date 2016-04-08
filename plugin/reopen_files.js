@@ -224,6 +224,8 @@
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				
+				var loadFilePart = false;
+				
 				if(err) {
 					if(err.code == "ENOENT") {
 						// Trying to reopen a file that doesn't exist. The editor will only send this error if it tried to open from disk. 
@@ -260,53 +262,47 @@
 					
 					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
 					
-					if(lastFileState.startColumn != undefined && lastFileState.startRow != undefined) {
-						file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
-					}
-					
-					setCaret();
-					
-					if(lastFileState.order !== undefined) file.order = lastFileState.order;
-					if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
-					if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
-					
-					if(lastFileState.isSaved !== undefined && content) {
-						file.isSaved = lastFileState.isSaved;
-					}
-					
-					if(lastFileState.currentFile === true) fileWasCurrentfile = true;
-					
-					console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
-					
+					if(lastFileState.partStartRow > 0) loadFilePart = true;
+
 				}
-				else {
-					// If there is no last state: Assume the file is saved.
-					file.isSaved = true;
-					file.savedAs = true;
-				}
+
 				
 				console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
 				
-				if(lastFileState.partStartRow > 0) {
+				if(loadFilePart) {
 					
-					var lineNr = lastFileState.partStartRow + file.caret.row + 1;
-					
-					file.gotoLine(lineNr, function afterGotoLine() {
+					file.loadFilePart(lastFileState.partStartRow, function setStateAtReopen() {
 						
-						console.log("reopen_aftergotoline");
-						setCaret();
+						console.log("setStateAtReopen");
+						setLastState();
 						callback(file, fileWasCurrentfile);
 						
 					});
 					
 				}
 				else {
-					setCaret();
+					setLastState();
 					callback(file, fileWasCurrentfile);
 				}
 
-				function setCaret() {
+				function setLastState() {
+					
 					if(lastFileState) { // <-- This is needed because we can't check a property of a undefined variable
+
+						if(lastFileState.startColumn != undefined && lastFileState.startRow != undefined) {
+							file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
+						}
+						
+						if(lastFileState.order !== undefined) file.order = lastFileState.order;
+						if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
+						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
+						
+						if(lastFileState.isSaved !== undefined && content) {
+							file.isSaved = lastFileState.isSaved;
+						}
+						
+						if(lastFileState.currentFile === true) fileWasCurrentfile = true;
+					
 						if(lastFileState.caret !== undefined) {
 							// Set the caret as it was
 							console.log("Placing caret in file.path=" + file.path);
@@ -319,7 +315,17 @@
 								console.warn("Unable to set last caret position (" + JSON.stringify(lastFileState.caret) + ") in: " + file.path + "\n" + e.message + "\n" + e.stack);
 							}
 						}
+						
+						console.log("Loaded old state for " + path + " file.startRow=" + file.startRow);
+						
 					}
+					else {
+						// If there is no last state: Assume the file is saved.
+						file.isSaved = true;
+						file.savedAs = true;
+					}
+					
+					
 				}				
 				
 			}
