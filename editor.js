@@ -104,9 +104,12 @@ editor.view = {
 	endingColumn: 0
 };
 
+editor.tests = []; // {description, fun}
+
 editor.currentFile = undefined; // A File object
 
 editor.input = false; // Wheter inputs should go to the current file in focus or to some other element like an html input box.
+
 
 (function() { // Non global editor code ...
 	
@@ -159,8 +162,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
-	
-	
+
 	editor.sortFileList = function() {
 		
 		// Resport editor.files by file.order and returns an array of the files
@@ -199,11 +201,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 		}
 	}
-	
-	
-	
-	
-	
+
 	
 	editor.openFile = function(path, text, callback) {
 		/*
@@ -495,13 +493,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				console.log("Changed lastfile to: " + editor.lastFile.path);
 			}
 			// Make sure lastFile is not currentFile
-			if(editor.lastFile == editor.currentFile) {
+			if(editor.lastFile == editor.currentFile && editor.lastFile != undefined) {
 				console.warn("lastFile is the currentFile:" + editor.currentFile.path);
 				editor.lastFile = editor.lastChangedFile([editor.currentFile, file]);
-				console.log("Changed lastfile to: " + editor.lastFile.path);
 			}
-			
-			console.log("editor.lastFile.path=" + editor.lastFile.path + "\nWhen closing: " + file.path);
 			
 			// Sanity check
 			if(editor.lastFile) {
@@ -530,10 +525,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 			
 			// Sanity check again. Make shure we didn't switch to the file being closed
-			if(editor.currentFile.path == path) {
-				console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path));
+			if(editor.currentFile) {
+				if(editor.currentFile.path == path) {
+					console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path));
+				}
 			}
-			
 		}
 	}
 	
@@ -2025,7 +2021,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
+		
 		editor.keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
+		
+		var keyT = 84;
+		editor.keyBindings.push({charCode: keyT, fun: runTests, combo: CTRL + SHIFT});
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");
@@ -2117,6 +2117,63 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		*/
+	}
+	
+	function runTests() {
+		
+		// Prepare for tests ...
+		
+		// Close all files
+		for(var path in editor.files) {
+			if(editor.files[path].saved) editor.closeFile(path)
+			else {
+				alert("Please save or close file before running tests: " + path);
+				return;
+			}
+		}
+		
+		// Create some test files ...
+		for(var i=1; i<10; i++) {
+			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5");
+		}
+		
+		var test;
+		var fails = 0;
+		var result;
+		var counter = 0;
+		for(var i=0; i<editor.tests.length; i++) {
+			counter++;
+			test = editor.tests[i];
+			try{
+				result = test.fun();
+			}
+			catch(err) {
+				testFail(test.text, err.message + "\n" + err.stack);
+			}
+			
+			if(result !== true) testFail(test.text, result);
+		}
+		
+		if(fails === 0) alert("All " + counter + " tests passed!")
+		else alert(fails + " of " + counter + " test failed. See console log!");
+		
+		return false;
+		
+		function testFail(description, result) {
+			fails++;
+			console.log("============ FAIL ============")
+			console.log(description);
+			if(result.message) {
+				// It returned an error
+				//console.log(result.message);
+				console.log(result.stack);
+			}
+			else {
+				console.log(result);
+			}
+			
+		}
+		
 	}
 	
 	function mainLoop() {
@@ -2541,14 +2598,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			binding = editor.keyBindings[i];
 			
-			/*
-				I probably had a good reason to edit this so that undefined combos didnt capture combos
-				Lets change back and see if I discover why ...
-				Note to self: comments! comments damnit!
-				
-			*/
-			
-			//if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined && combo===0)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 				
 				if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
