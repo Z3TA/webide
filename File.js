@@ -77,7 +77,7 @@
 		if(file.isBig) {
 			file.parse = false; // Do not parse big files
 
-			loadFilePart(file, file.partStartRow, function filePartLoaded() {
+			file.loadFilePart(file.partStartRow, function filePartLoaded() {
 				
 				if(callback) callback();
 			
@@ -1776,7 +1776,7 @@
 		
 			if(partStartRow < 0) console.error(new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!"));
 			
-			loadFilePart(file, partStartRow, function loadPartDone() {
+			file.loadFilePart(partStartRow, function loadPartDone() {
 				
 				console.log("loadPartDone! partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow);
 				
@@ -2489,7 +2489,7 @@
 			
 			if(partStartRow < 0) partStartRow = 0;
 			
-			loadFilePart(file, partStartRow, function placeCaretAfterLoadingPart() {
+			file.loadFilePart(partStartRow, function placeCaretAfterLoadingPart() {
 
 				var gridRow = fileRow - file.partStartRow; // This is the line we want to go to, translated to the new file part
 
@@ -2555,11 +2555,11 @@
 					console.warn("Scrolling while the file is streaming ...");
 				}
 				else if(y > high && !file.tail) {
-					loadFilePart(file, file.partStartRow + moveRows, streamLoaded);
+					file.loadFilePart(file.partStartRow + moveRows, streamLoaded);
 					return;
 				}
 				else if(y < low && !file.head) {
-					loadFilePart(file, Math.max(0, file.partStartRow - moveRows), streamLoaded);
+					file.loadFilePart(Math.max(0, file.partStartRow - moveRows), streamLoaded);
 					return;
 				}
 			}
@@ -2721,180 +2721,9 @@
 		return !(gridRow < startRow || gridRow > endRow);
 	}
 	
-	/*
-		
-		Every character is a box!
-		
-		Only the File object should use this Object.
-		
-	*/
-	
-	function Box(char, index) {
-		
-		var box = this;
-		
-		if(index == undefined) index = -1;
-		if(char == undefined) {
-			console.error(new Error("No character!"));
-		}
-		
-		box.char = char;
-		box.index = index;
-		box.selected = false;
-		box.highlighted = false;
-		box.hasCharacter = (char != undefined);
-		box.wave = false;
-		box.circle = false;
-		box.color = editor.settings.style.textColor;
-		box.quote = false; // part of a quote
-		box.comment = false; // part of a comment
-	}
-	
-	
-	Box.prototype.clone = function() {
-		var box = this,
-			newBox = new Box(box.char, box.index);
-		
-		//newBox.color = box.color;
-		newBox.selected = box.selected;
-		newBox.highlighted = box.highlighted;
-		newBox.highlighted = box.highlighted;
-		newBox.wave = box.wave;
-		
-		// Decoration and color will not be cloned, and have to be applied by preRender functions
-		
-		return newBox;		
-	}
-	
-	function determineIndentationConvention(text, lineBreak) {
-		/*
-			Find out the indentation convention for this file
-			Is it tabs? Or spaces, and how many?
-			
-		*/
-		
-		console.log("Determining what line indention convention to use ...");
-		
-		var maxCheckLength = 500,
-			char = "",
-			lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
-			voteTabs = 0,
-			voteSpaces = 0,
-			spaceCount = [],
-			codeBlockStartCharacter = "{",
-			codeBlockEndCharacter = "}",
-			codeBlockDepth = 0,
-			returnString = "",
-			lastChar = "",
-			identation = false,
-			spaces = 0,
-			tabs = 0;
-		
-		
-		
-		for(var i=0; i<text.length; i++) {
-			
-			lastChar = char;
-			
-			char = text.charAt(i);
-			
-			if(char == codeBlockStartCharacter) {
-				codeBlockDepth++;
-			}
-			else if(char == codeBlockEndCharacter) {
-				codeBlockDepth--;
-			}
-			
-			if(char == lastLineBreakCharacter && codeBlockDepth) {
-				identation = true;
-			}
-			else if(char == " " && identation) {
-				spaces++;
-			}
-			else if(char == "\t" && identation) {
-				tabs++;
-			}
-			else {
-				// End of indentation
-				
-				if(identation) {
-					if(tabs > 0) {
-						voteTabs++;
-					}
-					else if(spaces > 0) {
-						voteSpaces++;
-						spaceCount.push(spaces / codeBlockDepth);
-					}
-					
-					spaces = 0;
-					tabs = 0;
-				}
-				
-				identation = false;
-			}
-			
-			//console.log("char=" + char + " identation=" + identation + " isLineBreak=" + (char == lastLineBreakCharacter) + "");
-			
-		}
-		
-		//console.log("voteTabs:" + voteTabs);
-		//console.log("voteSpaces:" + voteSpaces);
-		
-		
-		if(voteTabs >= voteSpaces) {
-			return "\t";
-		}
-		else {
-			// Use spaces for indentation, but how many?
-			spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
-			
-			//console.log("spaces count:" + spaces);
-			
-			for(var i=0; i<spaces; i++) {
-				returnString += " ";
-			}
-			
-			//console.log("indentation-string: '" + returnString + "'");
-			
-			return returnString;
-		}
-		
-		
-		
-		function sortByFrequencyAndRemoveDuplicates(array) {
-			var frequency = {}, value;
-			
-			// compute frequencies of each value
-			for(var i = 0; i < array.length; i++) {
-				value = array[i];
-				if(value in frequency) {
-					frequency[value]++;
-				}
-				else {
-					frequency[value] = 1;
-				}
-			}
-			
-			// make array from the frequency object to de-duplicate
-			var uniques = [];
-			for(value in frequency) {
-				uniques.push(value);
-			}
-			
-			// sort the uniques array in descending order by frequency
-			function compareFrequency(a, b) {
-				return frequency[b] - frequency[a];
-			}
-			
-			return uniques.sort(compareFrequency);
-			
-		}
-		
-	}
-	
-	
 
-	function loadFilePart(file, partStartRow, callback) {
+	
+	File.prototype.loadFilePart = function loadFilePart(partStartRow, callback) {
 		/*
 			
 			To not get event limit errors we have to flush the toilet after we are done.
@@ -2906,6 +2735,7 @@
 			https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
 		
 		*/
+		var file = this;
 		
 		if(partStartRow == undefined) partStartRow = 0;
 		
@@ -3254,6 +3084,187 @@
 		}
 		
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+		
+		Every character is a box!
+		
+		Only the File object should use this Object.
+		
+	*/
+	
+	function Box(char, index) {
+		
+		var box = this;
+		
+		if(index == undefined) index = -1;
+		if(char == undefined) {
+			console.error(new Error("No character!"));
+		}
+		
+		box.char = char;
+		box.index = index;
+		box.selected = false;
+		box.highlighted = false;
+		box.hasCharacter = (char != undefined);
+		box.wave = false;
+		box.circle = false;
+		box.color = editor.settings.style.textColor;
+		box.quote = false; // part of a quote
+		box.comment = false; // part of a comment
+	}
+	
+	
+	Box.prototype.clone = function() {
+		var box = this,
+			newBox = new Box(box.char, box.index);
+		
+		//newBox.color = box.color;
+		newBox.selected = box.selected;
+		newBox.highlighted = box.highlighted;
+		newBox.highlighted = box.highlighted;
+		newBox.wave = box.wave;
+		
+		// Decoration and color will not be cloned, and have to be applied by preRender functions
+		
+		return newBox;		
+	}
+	
+	function determineIndentationConvention(text, lineBreak) {
+		/*
+			Find out the indentation convention for this file
+			Is it tabs? Or spaces, and how many?
+			
+		*/
+		
+		console.log("Determining what line indention convention to use ...");
+		
+		var maxCheckLength = 500,
+			char = "",
+			lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
+			voteTabs = 0,
+			voteSpaces = 0,
+			spaceCount = [],
+			codeBlockStartCharacter = "{",
+			codeBlockEndCharacter = "}",
+			codeBlockDepth = 0,
+			returnString = "",
+			lastChar = "",
+			identation = false,
+			spaces = 0,
+			tabs = 0;
+		
+		
+		
+		for(var i=0; i<text.length; i++) {
+			
+			lastChar = char;
+			
+			char = text.charAt(i);
+			
+			if(char == codeBlockStartCharacter) {
+				codeBlockDepth++;
+			}
+			else if(char == codeBlockEndCharacter) {
+				codeBlockDepth--;
+			}
+			
+			if(char == lastLineBreakCharacter && codeBlockDepth) {
+				identation = true;
+			}
+			else if(char == " " && identation) {
+				spaces++;
+			}
+			else if(char == "\t" && identation) {
+				tabs++;
+			}
+			else {
+				// End of indentation
+				
+				if(identation) {
+					if(tabs > 0) {
+						voteTabs++;
+					}
+					else if(spaces > 0) {
+						voteSpaces++;
+						spaceCount.push(spaces / codeBlockDepth);
+					}
+					
+					spaces = 0;
+					tabs = 0;
+				}
+				
+				identation = false;
+			}
+			
+			//console.log("char=" + char + " identation=" + identation + " isLineBreak=" + (char == lastLineBreakCharacter) + "");
+			
+		}
+		
+		//console.log("voteTabs:" + voteTabs);
+		//console.log("voteSpaces:" + voteSpaces);
+		
+		
+		if(voteTabs >= voteSpaces) {
+			return "\t";
+		}
+		else {
+			// Use spaces for indentation, but how many?
+			spaces = sortByFrequencyAndRemoveDuplicates(spaceCount)[0];
+			
+			//console.log("spaces count:" + spaces);
+			
+			for(var i=0; i<spaces; i++) {
+				returnString += " ";
+			}
+			
+			//console.log("indentation-string: '" + returnString + "'");
+			
+			return returnString;
+		}
+		
+		
+		
+		function sortByFrequencyAndRemoveDuplicates(array) {
+			var frequency = {}, value;
+			
+			// compute frequencies of each value
+			for(var i = 0; i < array.length; i++) {
+				value = array[i];
+				if(value in frequency) {
+					frequency[value]++;
+				}
+				else {
+					frequency[value] = 1;
+				}
+			}
+			
+			// make array from the frequency object to de-duplicate
+			var uniques = [];
+			for(value in frequency) {
+				uniques.push(value);
+			}
+			
+			// sort the uniques array in descending order by frequency
+			function compareFrequency(a, b) {
+				return frequency[b] - frequency[a];
+			}
+			
+			return uniques.sort(compareFrequency);
+			
+		}
+		
+	}
+	
+
 	
 	
 })();
