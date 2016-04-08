@@ -67,7 +67,7 @@ body {
 
 .centerColumn { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
 	overflow:hidden;
-	background-color: #b29467; /* background will only show when there is little text, or flash a little when reloading the page */
+	background-color: #FFFFFF; /* background will only show when there is little text, or flash a little when reloading the page */
 	vertical-align: top;
 	float: left;
 	overflow: auto!important;

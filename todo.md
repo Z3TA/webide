@@ -11,6 +11,8 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
+Trying to figure out why the background goes black when removing the canvas (resizing).
+
 test the search in file function, polish it maybe
 
 

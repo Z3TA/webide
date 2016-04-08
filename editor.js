@@ -780,6 +780,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 
 			if(!editor.currentFile.render) {
 				console.warn("File render flag set to '" + editor.currentFile.render + "'");
+				
+				// Just paint the background
+				ctx.fillStyle = editor.settings.style.bgColor;
+				
+				//ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				
 				return;
 			}
 			
@@ -1180,7 +1187,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.renderNeeded();
 		}
 		
-		editor.renderNeeded(); // Always render after a resize (but nor right away!?
+		editor.renderNeeded();
+		editor.render(); // Always render (right away to brevent black background blink) after a resize
+		
+		//editor.renderNeeded(); // Always render after a resize (but nor right away!?
 		
 	}
 	
