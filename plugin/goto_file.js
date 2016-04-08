@@ -354,7 +354,7 @@
 	
 	function moveUp() {
 		
-		if(!gotoList) return;
+		if(!gotoList) return true;
 		
 		var listItems = gotoList.childNodes;
 		
@@ -382,7 +382,7 @@
 	
 	function gotoFile_moveDown() {
 		
-		if(!gotoList) return; // Allow default browser action if the gotoList doesn't exist, so do not return false!
+		if(!gotoList) return true; // Allow default browser action if the gotoList doesn't exist
 		
 		var listItems = gotoList.childNodes;
 		

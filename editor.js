@@ -2576,6 +2576,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
+						console.log("function called: " + functionName(binding.fun));
 						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc."));
 					}
 				}

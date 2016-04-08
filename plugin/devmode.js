@@ -45,6 +45,8 @@
 		setTimeout(function throwError() {
 			throw new Error("This is a test error");
 		}, 2000);
+		
+		return false;
 	}
 	
 	function disableDevMode() {
@@ -109,6 +111,9 @@
 			console.warn("devMode disabled!");
 		}
 		editor.hideMenu();
+		
+		return false;
+		
 	}
 	
 		function reloadEditor() {
@@ -148,6 +153,8 @@
 			//document.location = document.location.href;
 			location.reload();
 			}
+			
+			return false;
 			
 		};
 		
