@@ -175,7 +175,9 @@
 				
 				console.log("file.totalRows=" + file.totalRows);
 				
-				if(line > (file.totalRows+1)) line = file.totalRows+1;
+				var maxLine = Math.max(file.grid.length, (file.totalRows+1));
+				
+				if(line > maxLine) line = maxLine;
 				
 				console.log("Going to line " + line + ".");
 				

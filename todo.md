@@ -16,12 +16,11 @@ Trying to figure out why the background goes black when removing the canvas (res
 test the search in file function, polish it maybe
 
 
-todo: (needs thinking) KEEP TRACK OF file.totalRows !!! ??? new lines, delete, cut, etc
-
-
 
 BUGS
 ====
+
+When searching in files, lines that has two or more matches will show up many times.
 
 Sometimes doesn't render after goto line.
 

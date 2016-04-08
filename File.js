@@ -68,7 +68,7 @@
 		file.grid = file.createGrid();
 		
 		// A splitted emty string will always become one item in an array. So if the file is empty: file.grid.length=1
-		file.totalRows = file.grid.length-1; 
+		file.totalRows = file.grid.length-1; // Only big files use this, and big files (currently) can't be edited, so we don't have to track and update this (yet)
 		if(file.isBig) file.totalRows = -1; // Leaving it to loadFilePart() to find totalRows
 		
 		
@@ -2469,7 +2469,7 @@
 		else if(line < 1) {
 			console.error(new Error("Can't go to line=" + line + " because it's below 1!"));
 		}
-		else if(line > (file.totalRows+1)) {
+		else if(line > Math.max(file.grid.length, (file.totalRows+1))) {
 			console.error(new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + ""));
 		}
 
