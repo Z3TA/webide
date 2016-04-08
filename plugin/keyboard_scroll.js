@@ -12,6 +12,9 @@
 
 	
 	function right(file) {
+		
+		if(!file) return true;
+		
 		editor.view.endingColumn += delta;
 		file.startColumn += delta;
 		
@@ -19,9 +22,13 @@
 		
 		editor.renderNeeded();
 		
+		return false;
+		
 	}
 	
 	function left(file) {
+		
+		if(!file) return true;
 		
 		if(file.startColumn > 0) {
 			if(file.startColumn > delta) {
@@ -35,15 +42,18 @@
 			
 			editor.renderNeeded();
 		}
-
+		
+		return false;
 	}
 	
 	function up(file) {
 		verticalScroll(file, -1);
+		return false;
 	}
 	
 	function down(file) {
 		verticalScroll(file, 1);
+		return false;
 	}
 	
 	function verticalScroll(file, direction) {

@@ -21,7 +21,7 @@
 	function keyboard_arrows_moveLeft(file, combo, character, charCode, keyPush) {
 		
 		if(!editor.input) return true;
-		
+		if(!file) return true;
 
 		file.removeHighlights();
 
@@ -138,7 +138,7 @@
 	function keyboard_arrows_moveUp(file, combo) {
 		
 		if(!editor.input) return true;
-		
+		if(!file) return true;
 
 		file.removeHighlights();
 		
@@ -207,7 +207,8 @@
 	function keyboard_arrows_moveDown(file, combo) {
 		
 		if(!editor.input) return true;
-	
+		if(!file) return true;
+
 		file.removeHighlights();
 		
 		if(combo.alt) return; // Do nothing if alt key is down

@@ -21,11 +21,17 @@
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 			} 
 			catch(err) {
+				err.message += "\nWhen calling function:" + functionName(binding.fun);
 				return err;				
 			}
 			
 			if(funReturn !== true && funReturn !== false) {
-				return new Error("Function: " + functionName(binding.fun) + " returned " + funReturn);
+				
+				//objInfo(binding.fun);
+				
+				return "Function: " + functionName(binding.fun) + " returned " + funReturn;
+				// This is not very helpful. But how can we get the source file and line number of the function!?
+				// If we create a new Error here, the stack will only point here, and not to the function
 			}
 			
 		}

@@ -2133,47 +2133,58 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		// Create some test files ...
-		for(var i=1; i<10; i++) {
-			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5");
+		var filesToOpen = 5;
+		var filesOpened = 0;
+		for(var i=0; i<filesToOpen; i++) {
+			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened() {
+				if(++filesOpened == filesToOpen) doTheTests();
+			});
 		}
 		
-		var test;
-		var fails = 0;
-		var result;
-		var counter = 0;
-		for(var i=0; i<editor.tests.length; i++) {
-			counter++;
-			test = editor.tests[i];
-			try{
-				result = test.fun();
-			}
-			catch(err) {
-				testFail(test.text, err.message + "\n" + err.stack);
+					
+		function doTheTests() {
+			var test;
+			var fails = 0;
+			var result;
+			var counter = 0;
+			var testResults = [];
+			
+			for(var i=0; i<editor.tests.length; i++) {
+				counter++;
+				test = editor.tests[i];
+				try{
+					result = test.fun();
+				}
+				catch(err) {
+					testFail(test.text, err.message + "\n" + err.stack);
+				}
+				
+				if(result !== true) testFail(test.text, result);
 			}
 			
-			if(result !== true) testFail(test.text, result);
+			if(fails === 0) testResults.push("All " + counter + " tests passed!")
+			else testResults.push(fails + " of " + counter + " test failed:");
+			
+			editor.openFile("testresults", testResults.join("\n"));
+			
+			function testFail(description, result) {
+				fails++;
+				testResults.push("");
+				testResults.push(description);
+				if(result.message) {
+					// It returned an error
+					//console.log(result.message);
+					testResults.push(result.stack);
+				}
+				else {
+					testResults.push(result);
+				}
+				
+			}
 		}
-		
-		if(fails === 0) alert("All " + counter + " tests passed!")
-		else alert(fails + " of " + counter + " test failed. See console log!");
 		
 		return false;
-		
-		function testFail(description, result) {
-			fails++;
-			console.log("============ FAIL ============")
-			console.log(description);
-			if(result.message) {
-				// It returned an error
-				//console.log(result.message);
-				console.log(result.stack);
-			}
-			else {
-				console.log(result);
-			}
-			
-		}
-		
+
 	}
 	
 	function mainLoop() {
