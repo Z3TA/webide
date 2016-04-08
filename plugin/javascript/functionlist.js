@@ -34,7 +34,31 @@
 		
 		editor.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
-		editor.keyBindings.push({charCode: 27, fun: pressEscape});
+		var keyEscape = 27;
+		var keyLeft = 37;
+		var keyRight = 39;
+		
+		editor.keyBindings.push({charCode: keyEscape, fun: pressEscape});
+
+		editor.keyBindings.push({charCode: keyLeft, fun: leftOrRight});
+		editor.keyBindings.push({charCode: keyRight, fun: leftOrRight});
+		
+	}
+	
+	function leftOrRight(file, combo, character, charCode, charDirection, className) {
+		// If we are inside the function list, pressing left or right should go back to the caret
+		if(className == "functionList") {
+			
+			functionListSelect.blur();
+			
+			file.scrollToCaret();
+			
+			editor.input = true;
+			
+			return false;
+		}
+		else return true;
+		
 	}
 	
 	function searchFunctionList(file, char, combo) {
