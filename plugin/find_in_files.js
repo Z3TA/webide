@@ -11,9 +11,9 @@
 	var searchMaxFiles = 100000;
 	var maxTotalMatches = 500;
 	
-	var defaultSearchTerm = "Connection on websocket from 107.192.233.200";
+	var defaultSearchTerm = "";
 	var defaultSearchFolder = editor.workingDirectory;
-	var defaultSearchFilter = "\.js|htm|html$";
+	var defaultSearchFilter = "\.js$|\.htm$|\.html$|\.css$";
 	
 	editor.on("start", function find_in_files_main() {
 		
