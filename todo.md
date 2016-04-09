@@ -18,6 +18,9 @@ Making tests! (coreTests.js). Use callback instead of return! so we can have asy
 BUGS
 ====
 
+After: editor.tests.push({text: "All keyBindings should return true or false",fun: function testKeyBindings(callback) {
+// Next { will indent two times
+
 No directory for search in files
 
 No render when clicking on a function in the functionlist
@@ -350,6 +353,9 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Display white space characters (space and tabs) at start of a line and at end of line.
+render function: start from end, then break at first char.
 
 Uncaught SyntaxError: Unexpected token )
 Find unmatched parentheses !!

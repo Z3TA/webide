@@ -24,7 +24,6 @@
 		
 		editor.keyBindings.push({charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 		
-		
 		editor.keyBindings.push({charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
 		
 		editor.keyBindings.push({charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
@@ -35,8 +34,7 @@
 	function zoomSwitch(file, combo, character, charCode, direction) {
 		if(zoomedIn) zoomReset(file, combo, character, charCode, direction)
 		else zoom(file, combo, character, charCode, direction);
-		
-		
+		return true;		
 	}
 	
 	function zoom(file, combo, character, charCode, direction) {
@@ -130,9 +128,10 @@
 			file.moveCaretUp();
 		}
 		
-		
 		editor.renderNeeded();
-			}
+		
+		return true;
+	}
 	
 	function scrollDown(file, combo, character, charCode, direction) {
 		
@@ -147,6 +146,7 @@
 		
 		editor.renderNeeded();
 		
+		return true;
 	}
 	
 	function resetView() {

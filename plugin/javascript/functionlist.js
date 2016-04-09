@@ -136,6 +136,7 @@
 			//file.canvas.focus(); // Do I need to focus elsewhere for blur to work!?
 			editor.input = true;
 		}
+		return true;
 	}
 
 	function initFunctionList(file) {

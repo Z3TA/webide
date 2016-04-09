@@ -149,8 +149,11 @@
 			
 			editor.resizeNeeded();
 			editor.renderNeeded();
+			
+			return false;
 		}
-
+		
+		return true;
 	}
 
 	
@@ -190,6 +193,8 @@
 			return false; // Return false to prevent default (typing a linebreak character)
 
 		}
+		
+		return true;
 	}
 	
 })();

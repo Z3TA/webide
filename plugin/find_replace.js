@@ -296,7 +296,8 @@
 	function pressEscape() {
 		
 		hide_search();
-	
+		
+		return true;
 	}
 	
 	
