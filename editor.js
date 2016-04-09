@@ -2146,28 +2146,50 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var test;
 			var fails = 0;
 			var result;
-			var counter = 0;
 			var testResults = [];
+			var finished = 0;
+			var started = 0;
+			var wait = true;
 			
 			for(var i=0; i<editor.tests.length; i++) {
-				counter++;
-				test = editor.tests[i];
+				runTest(editor.tests[i]);
+			}
+			wait = false; // We can now call allTestsDone() when finished==started
+			
+			function runTest(test) {
+				
+				console.log("Running test:" + test.text);
+				
 				try{
-					result = test.fun();
+					started++;
+					test.fun(testResult);
 				}
 				catch(err) {
+					finished++;
 					testFail(test.text, err.message + "\n" + err.stack);
 				}
 				
-				if(result !== true) testFail(test.text, result);
+				console.log("started=" + started);
+				
+				function testResult(result) {
+					finished++;
+					
+					console.log("finished=" + finished + " started=" + started + " wait=" + wait)
+					
+					if(result !== true) testFail(test.text, result);
+				
+					if(finished == started && !wait) allTestsDone();
+				}
 			}
 			
-			if(fails === 0) testResults.push("All " + counter + " tests passed!")
-			else testResults.push(fails + " of " + counter + " test failed:");
-			
-			editor.openFile("testresults", testResults.join("\n"), function(file) {
-				file.parse = false;
-			});
+			function allTestsDone() {
+				if(fails === 0) testResults.push("All " + finished + " tests passed!")
+				else testResults.push(fails + " of " + finished + " test failed:");
+				
+				editor.openFile("testresults", testResults.join("\n"), function(file) {
+					file.parse = false;
+				});
+			}
 			
 			function testFail(description, result) {
 				fails++;
