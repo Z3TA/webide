@@ -118,43 +118,46 @@
 	
 		function reloadEditor() {
 			
-			var func, name, ret = true;
-			
-			//editor.closeFile(testfile);
-			
-			// Call exit listeners before reloading
-			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
-			
-			func = editor.eventListeners.exit[i].fun;
-			name = functionName(func);
+			if(confirm("Do you want to reload the editor ?")) { // All keyBindings that reload or exit the editor should have a confirmation box, or we will not get test results!
+
+				var func, name, ret = true;
 				
-			if(typeof func != "function") {
+				//editor.closeFile(testfile);
+				
+				// Call exit listeners before reloading
+				for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
+				
+				func = editor.eventListeners.exit[i].fun;
+				name = functionName(func);
 					
-					console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
-					//console.warn(objInfo(f));
+				if(typeof func != "function") {
+						
+						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
+						//console.warn(objInfo(f));
+						
+						console.error( new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!"));
+						
+					}
+					else {
+					ret = func();
+					}
 					
-					console.error( new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!"));
 					
+					console.log(name + " returned " + ret);
+					
+					if(ret !== true) break; // Not true means there's an error
+				}
+				
+				if(ret !== true) {
+					console.error(error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
 				}
 				else {
-				ret = func();
+				//document.location = document.location.href;
+				location.reload();
 				}
-				
-				
-				console.log(name + " returned " + ret);
-				
-				if(ret !== true) break; // Not true means there's an error
 			}
 			
-			if(ret !== true) {
-				console.error(error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
-			}
-			else {
-			//document.location = document.location.href;
-			location.reload();
-			}
-			
-			return false;
+			return false; // Don't want a browser refresh!
 			
 		};
 		
