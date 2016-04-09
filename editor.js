@@ -236,7 +236,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(editor.currentFile != file) {
 				// Switch to it ...
 				
-				if(text != undefined && text != file.text) console.error(new Error("The text is not the same!"));
+				if(text != undefined && text != file.text) console.error(new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path));
 				
 				editor.showFile(file);
 			}
@@ -2150,6 +2150,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var finished = 0;
 			var started = 0;
 			var testsCompleted = []; // Prevent same test to make several callbacks
+			var allDone = false; // Prevent calling allTestsDone twice
 			
 			for(var i=0; i<editor.tests.length; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
@@ -2174,13 +2175,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					testFail(test.text, err.message + "\n" + err.stack);
 				}
 				
-				if(finished == started) allTestsDone();
+				if(finished == started && !allDone) allTestsDone();
 				
 				function testResult(result) {
 					
 					if(testsCompleted.indexOf(test.text) != -1) {
 						console.error(new Error("Test called callback more then once, or there's two tests with the same descrition: " + test.text));
+						return;
 					}
+					
 					testsCompleted.push(test.text);
 					
 					finished++;
@@ -2194,6 +2197,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 			
 			function allTestsDone() {
+				
+				allDone = true;
+				
 				if(fails === 0) testResults.push("All " + finished + " tests passed!")
 				else testResults.push(fails + " of " + finished + " test failed:");
 				
