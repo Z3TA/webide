@@ -4,6 +4,8 @@
 	/*
 		This file has all the tests for the editor core (editor.js and File.js).
 		All (other) tests that has to do with a plugin, should be located together with the plugin file(s).
+		
+		Tests should only call the callback once!
 	*/
 	
 	editor.tests.push({
@@ -24,14 +26,14 @@
 			}
 			catch(err) {
 				err.message += "\nWhen calling function:" + functionName(binding.fun);
-				callback(err);				
+				return callback(err);				
 			}
 			
 			if(funReturn !== true && funReturn !== false) {
 				
 				//objInfo(binding.fun);
 				
-					callback("Function: " + functionName(binding.fun) + " returned " + funReturn);
+				return callback("Function: " + functionName(binding.fun) + " returned " + funReturn);
 				// This is not very helpful. But how can we get the source file and line number of the function!?
 				// If we create a new Error here, the stack will only point here, and not to the function
 			}

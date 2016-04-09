@@ -2149,19 +2149,24 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var testResults = [];
 			var finished = 0;
 			var started = 0;
-			var wait = true;
+			var testsCompleted = []; // Prevent same test to make several callbacks
 			
 			for(var i=0; i<editor.tests.length; i++) {
-				runTest(editor.tests[i]);
+				started++;// This counter here to prevent any sync test to finish all tests
+				asyncInitTest(editor.tests[i])
 			}
-			wait = false; // We can now call allTestsDone() when finished==started
+			
+			function asyncInitTest(test) {
+				setTimeout(function() { // Make all tests async
+					runTest(test);
+				}, 0);
+			}
 			
 			function runTest(test) {
 				
 				console.log("Running test:" + test.text);
 				
 				try{
-					started++;
 					test.fun(testResult);
 				}
 				catch(err) {
@@ -2169,16 +2174,22 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					testFail(test.text, err.message + "\n" + err.stack);
 				}
 				
-				console.log("started=" + started);
+				if(finished == started) allTestsDone();
 				
 				function testResult(result) {
+					
+					if(testsCompleted.indexOf(test.text) != -1) {
+						console.error(new Error("Test called callback more then once, or there's two tests with the same descrition: " + test.text));
+					}
+					testsCompleted.push(test.text);
+					
 					finished++;
 					
-					console.log("finished=" + finished + " started=" + started + " wait=" + wait)
+					console.log("finished=" + finished + " started=" + started + "")
 					
 					if(result !== true) testFail(test.text, result);
 				
-					if(finished == started && !wait) allTestsDone();
+					if(finished == started) allTestsDone();
 				}
 			}
 			
