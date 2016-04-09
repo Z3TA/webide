@@ -19,8 +19,10 @@
 		var targetElementClass = "fileCanvas";
 		
 		for(var i=0, binding; i<editor.keyBindings.length; i++) {
-				
 			binding = editor.keyBindings[i];
+			
+			console.log("Testing " + functionName(binding.fun));
+			
 			try {
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 			}

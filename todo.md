@@ -11,8 +11,9 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-Making tests! (coreTests.js). Use callback instead of return! so we can have async tests.
+Making/running tests! (coreTests.js). 
 
+stuck on closing same file twice!?
 
 
 BUGS
