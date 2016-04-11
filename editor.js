@@ -320,30 +320,33 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			if(editor.files.hasOwnProperty(path)) console.error(new Error("File is already opened!"));
 			
-			editor.files[path] = new File(text, path, ++editor.fileIndex, tooBig, fileLoaded);
+			// Do not add file to editor.files until its fully loaded! And fileOpen events can be run sync
+			var newFile = new File(text, path, ++editor.fileIndex, tooBig, fileLoaded);
 			
-			file = editor.files[path];
-			
-			if(!file.path) fileOpenError(new Error("Internal error: The file has no path!"));
-			
-			if(!editor.files.hasOwnProperty(path)) console.error(new Error("File didn't enter editor.files"));
+			if(!newFile.path) fileOpenError(new Error("Internal error: The file has no path!")); // For sanity
 			
 			if(!notFromDisk) {
 				// Because we opened it from disk:
-				file.isSaved = true;
-				file.savedAs = true;
-				file.changed = false;
+				newFile.isSaved = true;
+				newFile.savedAs = true;
+				newFile.changed = false;
 			}
-			
-			for(var p in editor.files) {
-				if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
-			}
-			
+
 			function fileLoaded() {
 				
 				// Dilemma: Should file open even listeners be called before or after the callback!??
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
+				
+				editor.files[path] = newFile;
+				
+				file = editor.files[path];
+				
+				if(!editor.files.hasOwnProperty(path)) console.error(new Error("File didn't enter editor.files")); // For sanity
+				
+				for(var p in editor.files) { // Make sure we are not insane
+					if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
+				}
 				
 				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
 				for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
@@ -502,6 +505,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(editor.lastFile) {
 				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
 					console.error(new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path + "\nWhen closing file.path=" + file.path));
+					return;
 				}
 			}
 			
@@ -1853,7 +1857,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(editor.currentFile == editor.lastFile) {
 			editor.lastFile = editor.lastChangedFile([editor.currentFile]);
-}
+		}
 		
 		if(focus == undefined) focus = true;
 		

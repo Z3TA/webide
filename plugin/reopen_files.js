@@ -357,7 +357,7 @@
 	
 	function addToOpenedFiles(file) {
 
-		console.log(editor.getStack("Adding file to openedFiles path=" + file.path));
+		console.log(editor.getStack("Adding file to openedFiles path='" + file.path + "'"));
 
 		if(!file.path) console.error(new Error("Argument need to be a file object!"));
 		
@@ -434,7 +434,7 @@
 			console.error(new Error("Argument need to be a file object!"));
 		}
 		
-		console.log(editor.getStack("Removing file from openedFiles path=" + file.path));
+		console.log(editor.getStack("Removing file from openedFiles path='" + file.path + "'"));
 		
 		console.log("List before=" + window.localStorage.openedFiles);	
 		window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, file.path, fileDelimiter);

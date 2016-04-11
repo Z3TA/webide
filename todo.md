@@ -355,6 +355,9 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+Integrate mysql Query browser as a plugin
+
+
 Display white space characters (space and tabs) at start of a line and at end of line.
 render function: start from end, then break at first char.
 
