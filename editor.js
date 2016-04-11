@@ -228,24 +228,49 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
 			
-			// Reload file from disk ... ?
-			// If it's not saved, ask 
-			
-			var file = editor.files[path];
-			
-			if(!editor.currentFile) return fileOpenError(new Error("Internal error: No current file!"));
-			
-			if(editor.currentFile != file) {
-				// Switch to it ...
+			/*
+				What to do!?
 				
-				if(text != undefined && text != file.text) console.error(new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path));
+				a) Reload file from disk ... ? If it's not saved, ask
+				b) Add a incrementor to the name
+				c) Switch to it
 				
-				editor.showFile(file);
+				If text is undefined, switch to the file already opened, else add a number incrementor to the path.
+			*/
+			
+			if(text == undefined) {
+				
+				var file = editor.files[path];
+				
+				if(!editor.currentFile) return fileOpenError(new Error("Internal error: No current file!")); // For sanity
+				
+				if(editor.currentFile != file) {
+					// Switch to it ...
+					
+					if(text != undefined && text != file.text) console.error(new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path));
+					
+					editor.showFile(file);
+				}
+				
+				if(callback) callback(file);
+				return;
 			}
-			
-			if(callback) callback(file);
-			return;
-		}
+			else {
+				
+				var nr = 0;
+				var pathPart1 = path.substring(0, path.lastIndexOf("."));
+				var pathPart2 = path.substring(path.lastIndexOf("."), path.length);
+				
+				if(pathPart1=="") {
+					// path has no dot
+					pathPart1 = pathPart2;
+					pathPart2 = "";
+				}
+				while(editor.files.hasOwnProperty(path)) {
+					path = pathPart1 + " (" + ++nr + ")" + pathPart2;
+				}
+				}
+			}
 		
 		if(openFileQueue.indexOf(path) != -1) {
 			
