@@ -613,7 +613,8 @@
 		/*
 			Insert a new line at EOF
 			
-			Write on the first row if the file is emty
+			Always add another row because it's more simple, sligly faster and less bug prone.
+			If you want to add text to the first row, open the file using that text.
 		*/
 		if(text.length == 0) {
 			console.warn("No text in writeLine argument!");
@@ -622,16 +623,7 @@
 		
 		var file = this;
 		var grid = file.grid;
-		var textIndex = file.text.length;
-		var addLineBreakBefore = false;
-		
-		//alert("grid.length=" + grid.length);
-		
-		if(textIndex > 0) {
-			// Adding a linebreak on last row before inserting another row
-			addLineBreakBefore = true;
-			textIndex + file.lineBreak.length; 
-		}
+		var textIndex = file.text.length + file.lineBreak.length;
 		
 		if(text.indexOf(file.lineBreak) != -1) {
 			var rows = text.split(file.lineBreak);
@@ -645,17 +637,14 @@
 		
 		var lastGridRow = grid[grid.length-1];
 		
-		if(addLineBreakBefore) {
-			var rowIndex = grid.push([]) - 1; // Push returns the new Array.length
-			var gridRow = grid[rowIndex];
-			gridRow.lineNumber = rowIndex+1;
-			gridRow.indentation = 0;
-			gridRow.indentationCharacters = "";
-			gridRow.startIndex = textIndex;
-		}
-		else {
-			var gridRow = grid[0]; // First row
-		}
+		
+		var rowIndex = grid.push([]) - 1; // Push returns the new Array.length
+		var gridRow = grid[rowIndex];
+		
+		gridRow.lineNumber = rowIndex+1;
+		gridRow.indentation = 0;
+		gridRow.indentationCharacters = "";
+		gridRow.startIndex = textIndex;
 		gridRow.owned = true;
 		
 		var char = "";
@@ -666,7 +655,7 @@
 			
 			if((char == "\t" || char == " ") && tabulation) {
 				gridRow.indentationCharacters += char;
-				if(addLineBreakBefore) gridRow.startIndex++;
+				gridRow.startIndex++;
 			}
 			else {
 				tabulation = false;
@@ -678,9 +667,7 @@
 			textIndex++;
 		}
 		
-		if(addLineBreakBefore) file.text += file.lineBreak;
-		
-		file.text += text;
+		file.text += file.lineBreak + text;
 		
 		file.checkGrid();
 		
