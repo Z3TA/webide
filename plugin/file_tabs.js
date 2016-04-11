@@ -44,6 +44,9 @@
 		editor.currentFile.order-=1.5;
 
 		buildTabs(); // sorts again
+		
+		return false;
+		
 	}
 	
 	function orderRight() {
@@ -52,6 +55,8 @@
 		editor.currentFile.order+=1.5;
 
 		buildTabs(); // sorts again
+		
+		return false;
 	}
 	
 	
@@ -63,6 +68,9 @@
 		
 		if(editor.lastFile) editor.showFile(editor.lastFile);
 		else console.warn("No file to switch to!");
+		
+		return false;
+		
 		}
 	
 	function tabFileChange(file, change, text, index, row, col) {

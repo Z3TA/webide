@@ -22,6 +22,8 @@
 			
 			return false; // Prevent default
 		}
+		
+		return true;
 	}
 	
 	

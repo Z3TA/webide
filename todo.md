@@ -62,6 +62,8 @@ Source indentation in html documents might be "off" if you remove or add div's.
 Polishing
 =========
 
+Blink or something, green flashing on the file tabs!? To indicate the file has been successfully saved.
+
 Plain text mode, where you can see spaces in front of text (inlining)
 
 Loading icon while the file is streaming!?
