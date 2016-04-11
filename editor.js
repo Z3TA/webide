@@ -165,7 +165,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 
 	editor.sortFileList = function() {
 		
-		// Resport editor.files by file.order and returns an array of the files
+		// Sorts editor.files by file.order and returns an array of the files
 		
 		var fileList = [];
 		
@@ -2681,8 +2681,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
-						console.log("function called: " + functionName(binding.fun)); // Sometimes the file doesn't show up in the stack!!? So show the function name and we can do a search in file.
-						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc."));
+						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc.\nFunction called: " + functionName(binding.fun)));
 					}
 				}
 			}
