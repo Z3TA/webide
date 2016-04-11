@@ -82,7 +82,7 @@
 
 				console.error(new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles + "\nopenedFiles=" + openedFiles));
 			}
-		}, 3000);
+		}, 5000);
 		
 		function fileInListOpened(file, wasCurrent, err) {
 		
