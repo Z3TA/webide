@@ -350,6 +350,7 @@
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
 		
 		// Makse sure the added string is in the text
+		if(array.indexOf(add) == -1) console.error(new Error("The added string is not part of the array! add='" + add + "' text='" + text + "'"));
 		if(text.indexOf(add) == -1) console.error(new Error("The added string is not part of the text! add='" + add + "' text='" + text + "'"));
 		
 		return text;
@@ -418,10 +419,10 @@
 		
 		array.splice(index, 1); // Remove the string to be removed from the text
 		
-		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
+		// Check to see if the string has been removed from the array to keep sanity
+		if(array.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'"));
 		
-		// Check to see if the string has been removed
-		if(text.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'"));
+		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
 		
 		return text;
 	}
