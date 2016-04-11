@@ -25,12 +25,12 @@
 		file.lineBreak = determineLineBreakCharacters(text);
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
 		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
-file.indentation = determineIndentationConvention(text, file.lineBreak);
-file.partStartRow = 0;
+		file.indentation = determineIndentationConvention(text, file.lineBreak);
+		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
 		file.head = false, // We are on the first part of the stream if true
 		file.byteRow = []; // Indexing of byte to row for faster seeking in big files [[row, byte],[row, byte],[row, byte]]
-
+		
 		file.isStreaming = false; // If the file is currently pulling data from the file read stream
 		file.render = true; // Can (temporary) disable rendering for this file by setting it to false
 		
@@ -49,9 +49,9 @@ file.partStartRow = 0;
 		file.lastChange = new Date();
 		
 		file.parse = true; // Always parse new files by default
-
+		
 		if(file.fileExtension == "txt" || file.fileExtension == "md") file.mode = "text";
-
+		
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
 		//console.log("Gonna create the grid for file.path=" + file.path);	
@@ -63,16 +63,16 @@ file.partStartRow = 0;
 		
 		
 		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
-	
+		
 		if(file.isBig) {
 			file.parse = false; // Do not parse big files
-
+			
 			file.loadFilePart(file.partStartRow, function filePartLoaded() {
 				
 				if(callback) callback();
-			
+				
 			});
-		
+			
 		}
 		else {
 			
@@ -83,13 +83,13 @@ file.partStartRow = 0;
 		}
 	}
 	
-
-
+	
+	
 	function fixInconsistentLineBreaks(text, lineBreak) {
 		
 		if(lineBreak == "\r\n") {
 			console.log("Searching for lonely (LF) \\n characters ... ");
-				
+			
 			var fixedILF = false;
 			var indexILF = text.indexOf("\n");
 			var rowCount = 0;
@@ -108,7 +108,7 @@ file.partStartRow = 0;
 				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
 			}
 		}
-			
+		
 		return text;
 	}
 	
@@ -126,7 +126,7 @@ file.partStartRow = 0;
 		}
 		return txt;
 	}
-
+	
 	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {
 		/*
@@ -172,7 +172,7 @@ file.partStartRow = 0;
 	}
 	
 	
-
+	
 	File.prototype.createCaret = function(index, row, col) {
 		/*
 			Returns a valid caret position
@@ -255,7 +255,7 @@ file.partStartRow = 0;
 				// Default caret.eol and caret.eof is false!
 			}
 		}
- 		else if(index == undefined && row != undefined) {
+		else if(index == undefined && row != undefined) {
 			// We have only the row
 			if(isNaN(row)) {
 				console.error(new Error("row=" + row + " is not a number!"));
@@ -277,7 +277,7 @@ file.partStartRow = 0;
 			}
 			
 		}
- 		else if(index == undefined && col != undefined) {
+		else if(index == undefined && col != undefined) {
 			// We have only the col
 			if(isNaN(col)) {
 				console.error(new Error("col=" + col + " is not a number!"));
@@ -316,7 +316,7 @@ file.partStartRow = 0;
 					
 				}
 			}
-
+			
 		}
 		else {
 			// We have only index
@@ -328,11 +328,11 @@ file.partStartRow = 0;
 				caret = file.moveCaretToIndex(index, caret);
 			}
 		}
-
-
+		
+		
 		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
 		console.log(editor.getStack("creating caret"));
-
+		
 		// Sanity check if we got it right
 		if(caret.index == undefined) {
 			console.error(new Error("caret.index=" + caret.index + " is undefined!"));
@@ -445,82 +445,82 @@ file.partStartRow = 0;
 		if(file.startRow >= (grid.length + file.partStartRow)) console.error(new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow));
 		
 		
-		for(var i=0; i<grid.length; i++) {
+		for(var row=0; row<grid.length; row++) {
 			
 			// Check Startindex
 			
-			if(typeof grid[i].startIndex !== "number") console.error(new Error("startIndex of grid row=" + i + " is " + grid[i].startIndex + " (not a number)"));
-			if(typeof grid[i].lineNumber !== "number") console.error(new Error("lineNumber of grid row=" + i + " is " + grid[i].lineNumber + " (not a number)"));
-			if(typeof grid[i].indentation !== "number") console.error(new Error("indentation of grid row=" + i + " is " + grid[i].indentation + " (not a number)"));
-			if(typeof grid[i].indentationCharacters !== "string") console.error(new Error("indentationCharacters of grid row=" + i + " is " + grid[i].indentationCharacters + " (not a string)"));
+			if(typeof grid[row].startIndex !== "number") console.error(new Error("startIndex of grid row=" + row + " is " + grid[row].startIndex + " (not a number)"));
+			if(typeof grid[row].lineNumber !== "number") console.error(new Error("lineNumber of grid row=" + row + " is " + grid[row].lineNumber + " (not a number)"));
+			if(typeof grid[row].indentation !== "number") console.error(new Error("indentation of grid row=" + row + " is " + grid[row].indentation + " (not a number)"));
+			if(typeof grid[row].indentationCharacters !== "string") console.error(new Error("indentationCharacters of grid row=" + row + " is " + grid[row].indentationCharacters + " (not a string)"));
 			
 			
-			if(grid[i].length > 0) {
+			if(grid[row].length > 0) {
 				// Startindex should be the same as the index of the first letter box
-				if(grid[i].startIndex != grid[i][0].index) {
+				if(grid[row].startIndex != grid[row][0].index) {
 					file.debugGrid();
-					console.error(new Error("startIndex (" + grid[i].startIndex + ") on row " + i + " doesn't match index (" + grid[i][0].index + ") of first box=" + JSON.stringify(grid[i][0])));
+					console.error(new Error("startIndex (" + grid[row].startIndex + ") on row " + row + " doesn't match index (" + grid[row][0].index + ") of first box=" + JSON.stringify(grid[row][0])));
 				}
 			}
-			else if(i>0){
-				lastRow = grid[i-1];
+			else if(row>0){
+				lastRow = grid[row-1];
 				// Startindex should be: lastrow.startIndex + lastRow.length + lineBreak.length + currentRow.indentationCharacters.length
-				expect = lastRow.startIndex + lastRow.length + file.lineBreak.length + grid[i].indentationCharacters.length;
-				if(grid[i].startIndex != expect) {
+				expect = lastRow.startIndex + lastRow.length + file.lineBreak.length + grid[row].indentationCharacters.length;
+				if(grid[row].startIndex != expect) {
 					file.debugGrid();
-					console.error(new Error("Row " + i + " has startIndex=" + grid[i].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[i].indentationCharacters.length + " path=" + file.path));
+					console.error(new Error("Row " + row + " has startIndex=" + grid[row].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[row].indentationCharacters.length + " path=" + file.path));
 				}
 			}
 			
 			// Check Line number
-			if(i>0){
-				lastRow = grid[i-1];
-				if((grid[i].lineNumber-1) != lastRow.lineNumber) {
-					console.error(new Error("Line number of row " + i + " is " + grid[i].lineNumber + " but was expected to be " + (lastRow.lineNumber+1) + ". Row " + (i-1) + " lineNumber = " + lastRow.lineNumber + ""));
+			if(row>0){
+				lastRow = grid[row-1];
+				if((grid[row].lineNumber-1) != lastRow.lineNumber) {
+					console.error(new Error("Line number of row " + row + " is " + grid[row].lineNumber + " but was expected to be " + (lastRow.lineNumber+1) + ". Row " + (row-1) + " lineNumber = " + lastRow.lineNumber + ""));
 				}
 			}
 			
 			
-			// Check for line breaks
-			if(i>0){
+			// Check line breaks from the row above
+			if(row>0){
 				lineBreakCharacters = "";
-				for(var k=file.lineBreak.length; k>0; k--) {
-					lineBreakCharacters += file.text.charAt(grid[i].startIndex - grid[i].indentationCharacters.length - k);
+				for(var lbCharNr=file.lineBreak.length; lbCharNr>0; lbCharNr--) {
+					lineBreakCharacters += file.text.charAt(grid[row].startIndex - grid[row].indentationCharacters.length - lbCharNr);
 				}
 				
 				if(lineBreakCharacters != file.lineBreak) {
 					expect = "";
-					for(var k=0; k<file.lineBreak.length; k++) {
-						expect += lineBreakCharacters.charCodeAt(k) + "==" + file.lineBreak.charCodeAt(k) + " "
+					for(var lbCharNr=0; lbCharNr<file.lineBreak.length; lbCharNr++) {
+						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					console.error(new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + i + " to be a line-break: (" + expect + ")"));
+					console.error(new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex));
 				}
 			}
 			
 			// Check indentation
-			if(grid[i].indentation < 0) {
-				console.error(new Error("Indentation is " + grid[i].indentation + " or row " + i + "!"));
+			if(grid[row].indentation < 0) {
+				console.error(new Error("Indentation is " + grid[row].indentation + " or row " + row + "!"));
 			}
 			
 			
-			for(var j=0; j<grid[i].length; j++) {
+			for(var col=0; col<grid[row].length; col++) {
 				// Check if character on the grid and on file.text is the same
-				if(grid[i][j].char != file.text.charAt(grid[i][j].index)) {
-					console.error(new Error("grid[" + i + "][" + j + "].char=" + grid[i][j].char + " is not the same as file.text.charAt(" + grid[i][j].index + ")=" + file.text.charAt(grid[i][j].index + "")));
+				if(grid[row][col].char != file.text.charAt(grid[row][col].index)) {
+					console.error(new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + file.text.charAt(grid[row][col].index + "")));
 				}
 				// Make sure there is no line break character in the middle of the text
-				else if(file.text.charCodeAt(grid[i][j].index) == 10 || file.text.charCodeAt(grid[i][j].index) == 13) {
-					console.error(new Error("grid[" + i + "][" + j + "].char=" + grid[i][j].char + " (" + file.text.charCodeAt(grid[i][j].index) + ") is a line break character!"));
+				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
+					console.error(new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character!"));
 				}
 				
 				// Make sure the box has these properties:
-				box = grid[i][j];
-				if(box.char === undefined) console.error(new Error("grid[" + i + "][" + j + "] doesn't have a char value!"));
-				if(box.index === undefined) console.error(new Error("grid[" + i + "][" + j + "] doesn't have a index value!"));
-				if(box.color === undefined) console.error(new Error("grid[" + i + "][" + j + "] doesn't have a color value!"));
-				if(box.selected === undefined) console.error(new Error("grid[" + i + "][" + j + "] doesn't have a selected value!"));
-				if(box.highlighted === undefined) console.error(new Error("grid[" + i + "][" + j + "] doesn't have a highlighted value!"));
+				box = grid[row][col];
+				if(box.char === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a char value!"));
+				if(box.index === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a index value!"));
+				if(box.color === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a color value!"));
+				if(box.selected === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a selected value!"));
+				if(box.highlighted === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a highlighted value!"));
 				
 			}
 			
@@ -608,6 +608,94 @@ file.partStartRow = 0;
 		//file.debugGrid();
 		
 	}
+	
+	File.prototype.writeLine = function(text) {
+		/*
+			Insert a new line at EOF
+			
+			Write on the first row if the file is emty
+		*/
+		if(text.length == 0) {
+			console.warn("No text in writeLine argument!");
+			return;
+		}
+		
+		var file = this;
+		var grid = file.grid;
+		var textIndex = file.text.length;
+		var addLineBreakBefore = false;
+		
+		//alert("grid.length=" + grid.length);
+		
+		if(textIndex > 0) {
+			// Adding a linebreak on last row before inserting another row
+			addLineBreakBefore = true;
+			textIndex + file.lineBreak.length; 
+		}
+		
+		if(text.indexOf(file.lineBreak) != -1) {
+			var rows = text.split(file.lineBreak);
+			// Add the lines one by one
+			for(var i=0; i<rows.length; i++) {
+				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
+				file.writeLine(rows[i]);
+			}
+			return;
+		}
+		
+		var lastGridRow = grid[grid.length-1];
+		
+		if(addLineBreakBefore) {
+			var rowIndex = grid.push([]) - 1; // Push returns the new Array.length
+			var gridRow = grid[rowIndex];
+			gridRow.lineNumber = rowIndex+1;
+			gridRow.indentation = 0;
+			gridRow.indentationCharacters = "";
+			gridRow.startIndex = textIndex;
+		}
+		else {
+			var gridRow = grid[0]; // First row
+		}
+		gridRow.owned = true;
+		
+		var char = "";
+		var tabulation = file.mode != "text";
+		
+		for(var i=0; i<text.length; i++) {
+			char = text.charAt(i);
+			
+			if((char == "\t" || char == " ") && tabulation) {
+				gridRow.indentationCharacters += char;
+				if(addLineBreakBefore) gridRow.startIndex++;
+			}
+			else {
+				tabulation = false;
+				
+				gridRow.push(new Box(char, textIndex));
+				
+			}
+			
+			textIndex++;
+		}
+		
+		if(addLineBreakBefore) file.text += file.lineBreak;
+		
+		file.text += text;
+		
+		file.checkGrid();
+		
+		if(file.caret.eof) {
+			// Move the caret (only have to do that if it's EOF)
+			file.caret.index = file.text.length;
+			file.caret.row = grid.length - 1;
+			file.caret.col = grid[grid.length-1].length;
+			
+			file.checkCaret();
+			
+			file.scrollToCaret();
+		}
+		
+}
 	
 	File.prototype.insertText = function(text, caret) {
 		var file = this;
@@ -1951,6 +2039,7 @@ file.partStartRow = 0;
 	
 	File.prototype.addToGrid = function() {
 		// Add text to the file grid. Like when inserting text at EOF.
+		
 	}
 	
 	File.prototype.createGrid = function() {

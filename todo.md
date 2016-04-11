@@ -13,11 +13,23 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
+writeLine function so I can create dummy files for tests.
+
+Making more tests !?
+
+Adding functionality to make it easier to do tests. like editor.simulateKey(key, combo, targetElement)
+
 
 
 
 BUGS
 ====
+
+When searching the function list and (only find one match) click on it, doesn't scroll to the function
+
+Files doesn't load in the same order when reopening/reloading the editor! Sort tabs after every new tab being opened!
+
+Automcompletion in calsslike object replace the text: ex: file.lineBreak; file.lineB, tab
 
 After: editor.tests.push({text: "All keyBindings should return true or false",fun: function testKeyBindings(callback) {
 // Next { will indent two times
@@ -57,6 +69,12 @@ Source indentation in html documents might be "off" if you remove or add div's.
 
 Polishing
 =========
+
+Detect misspelled/unknown object properties!
+
+Ctrl+Shift+Tab = Goto last function we where in
+
+List of all keyBindings and a disciption of what each do
 
 Blink or something, green flashing on the file tabs!? To indicate the file has been successfully saved.
 
@@ -352,6 +370,11 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Undo/redo for caret/scrolling. shift+backspace: Go back to where we where before
+Ctrl+G when caret on a function name, goes to that function. Go to function declaration.
+
+Split/gline veiw, so you can edito the same file, but on different positions. Handy when you want to lookup stuff in the same file.
 
 Integrate mysql Query browser as a plugin
 

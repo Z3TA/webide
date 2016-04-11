@@ -14,9 +14,15 @@
 		text: "Testing File.writeLine() function",
 		fun: function fileWriteLine(callback) {
 			
-			callback(false);
-			
-		}
+			editor.openFile("testing_writeLine", "", function(file) {
+				file.writeLine("Hello world!");
+				file.writeLine("Hello again!");
+				
+				//editor.closeFile(file.path);
+				
+				callback(true);
+				});
+			}
 });
 	
 	
