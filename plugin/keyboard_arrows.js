@@ -39,7 +39,7 @@
 		var alt = (combo==4 || combo==5 || combo==6 || combo==7); // alt: 4, 5, 6, 7
 		*/
 		
-		if(combo.alt) return; // Do nothing if alt key is down
+		if(combo.alt) return true; // Do nothing if alt key is down
 		
 		if(combo.ctrl) {
 			// step to next word
@@ -96,7 +96,7 @@
 		var stepStop = caretIndex;
 		
 
-		if(combo.alt) return; // Do nothing if alt key is down
+		if(combo.alt) return true; // Do nothing if alt key is down
 		
 		if(combo.ctrl) {
 			// step to next word
@@ -144,8 +144,8 @@
 		
 		var caret = file.caret;
 		
-		if(combo.alt) return; // Do nothing if alt key is down
-		if(combo.ctrl) return; // Do nothing if alt ctrl is down
+		if(combo.alt) return true; // Do nothing if alt key is down
+		if(combo.ctrl) return true; // Do nothing if alt ctrl is down
 		
 		console.log("Moving caret up ...");
 	
@@ -211,8 +211,8 @@
 
 		file.removeHighlights();
 		
-		if(combo.alt) return; // Do nothing if alt key is down
-		if(combo.ctrl) return; // Do nothing if alt ctrl is down
+		if(combo.alt) return true; // Do nothing if alt key is down
+		if(combo.ctrl) return true; // Do nothing if alt ctrl is down
 
 		console.log("Moving caret down ...");
 		

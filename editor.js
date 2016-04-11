@@ -348,7 +348,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 				}
 				
-				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") ...");
+				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") path=" + path);
 				for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
 					//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
 					editor.eventListeners.fileOpen[i].fun(file); // Call function

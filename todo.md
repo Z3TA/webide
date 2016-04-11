@@ -1,8 +1,10 @@
-Prioritize: bug fixing, re-factoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). No new features until that is done!
+Prioritize: bug fixing, re-factoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). 
+No new features until that is done!
 
 Prio: 
 * Bug/issue fixing, 
-* better search in file.
+* PHP/vbScript/Java parsing !?
+* Built in FTP/SFTP/SSH !?
 * Beta release!
 
 Try do debug without console.log!
@@ -11,9 +13,7 @@ Always use F5 to reload! Or exit functions might not fire!
 
 What I'm working on:
 
-Making/running tests! (coreTests.js). 
 
-stuck on closing same file twice!?
 
 
 BUGS
@@ -21,10 +21,6 @@ BUGS
 
 After: editor.tests.push({text: "All keyBindings should return true or false",fun: function testKeyBindings(callback) {
 // Next { will indent two times
-
-No directory for search in files
-
-No render when clicking on a function in the functionlist
 
 Didn't get file input focus when opening a file... 
 
