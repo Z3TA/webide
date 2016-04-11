@@ -2029,7 +2029,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		editor.keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
 		var keyT = 84;
-		editor.keyBindings.push({charCode: keyT, fun: runTests, combo: CTRL + SHIFT});
+		editor.keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");
@@ -2123,7 +2123,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		*/
 	}
 	
-	function runTests() {
+	function runTests_5616458984153156() { // Random numbers to make sure it's unique
 		
 		// Prepare for tests ...
 		
@@ -2147,7 +2147,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 					
 		function doTheTests() {
-			var test;
 			var fails = 0;
 			var result;
 			var testResults = [];
@@ -2158,7 +2157,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			for(var i=0; i<editor.tests.length; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
-				asyncInitTest(editor.tests[i])
+				asyncInitTest(editor.tests[i]);
 			}
 			
 			function asyncInitTest(test) {
