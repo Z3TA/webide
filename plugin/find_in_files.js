@@ -209,12 +209,12 @@
 				return false; // Prevent default
 			}
 		}
-		return true;		
+		return true;
 	}
 	
 	function pressEscape() {
 		
-		if(!divVisible) {
+		if(divVisible) {
 			hide_find_in_files();
 			return false;
 		}
@@ -278,7 +278,7 @@
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
 		inputInDir.value = editor.getDir(); // The directory of the current file being open
-		//inputInDir.value = defaultSearchFolder;
+		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);
 
