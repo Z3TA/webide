@@ -9,15 +9,10 @@ Prio:
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
+Write tests!
 
 
 What I'm working on:
-
-writeLine function so I can create dummy files for tests.
-
-Making more tests !?
-
-Adding functionality to make it easier to do tests. like editor.simulateKey(key, combo, targetElement)
 
 
 

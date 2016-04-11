@@ -11,7 +11,7 @@
 	*/
 	
 	editor.tests.push({
-		text: "Testing File.writeLine() function",
+		text: "Create a new file and insert lines using File.writeLine()",
 		fun: function fileWriteLine(callback) {
 			
 			editor.openFile("testing_writeLine", "", function(file) {
@@ -25,9 +25,8 @@
 			}
 });
 	
-	
 	editor.tests.push({
-		text: "All keyBindings should return true or false", 
+		text: "Run all keyBindings and see if they return true or false", 
 		fun: function testKeyBindings(callback) {
 		
 			var binding;
