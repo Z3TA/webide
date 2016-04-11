@@ -6,7 +6,19 @@
 		All (other) tests that has to do with a plugin, should be located together with the plugin file(s).
 		
 		Tests should only call the callback once!
+		
+		Place new tests at top. Ctrl+Shift+T first times runs the first test, second time, runs all tests.
 	*/
+	
+	editor.tests.push({
+		text: "Testing File.writeLine() function",
+		fun: function fileWriteLine(callback) {
+			
+			callback(false);
+			
+		}
+});
+	
 	
 	editor.tests.push({
 		text: "All keyBindings should return true or false", 

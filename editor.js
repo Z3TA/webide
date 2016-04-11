@@ -143,6 +143,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	var fileOpenExtraCallbacks = {};
 	
+	var testFirstTest = true;
+	
 	/*
 		Editor functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -2137,7 +2139,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		// Create some test files ...
-		var filesToOpen = 5;
+		var filesToOpen = 2;
 		var filesOpened = 0;
 		for(var i=0; i<filesToOpen; i++) {
 			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened() {
@@ -2154,8 +2156,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var started = 0;
 			var testsCompleted = []; // Prevent same test to make several callbacks
 			var allDone = false; // Prevent calling allTestsDone twice
-			
-			for(var i=0; i<editor.tests.length; i++) {
+			var testsToRun = testFirstTest ? 1 : editor.tests.length;
+			for(var i=0; i<testsToRun; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
 				asyncInitTest(editor.tests[i]);
 			}
@@ -2209,6 +2211,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.openFile("testresults", testResults.join("\n"), function(file) {
 					file.parse = false;
 				});
+				
+				testFirstTest = false; // Run only the first test the first time, and all tests after that.
 			}
 			
 			function testFail(description, result) {
@@ -2681,7 +2685,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
-						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc.\nFunction called: " + functionName(binding.fun)));
+						console.log("function called: " + functionName(binding.fun)); // Sometimes the file doesn't show up in the stack!!? So show the function name and we can do a search in file.
+						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc."));
 					}
 				}
 			}
