@@ -31,7 +31,7 @@
 
 		editor.keyBindings.push({charCode: 37, combo: CTRL + ALT, fun: orderLeft}); // Ctrl + alt + left
 		editor.keyBindings.push({charCode: 39, combo: CTRL + ALT, fun: orderRight}); // Ctrl + alt + right
-		// toto: implement tab drag and drop to change order
+		// todo: implement tab drag and drop to change order
 		
 		editor.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
