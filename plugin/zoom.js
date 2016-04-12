@@ -218,6 +218,8 @@
 		
 		function headingMaybe(row, size) {
 			
+			if(row < 0 || row >= buffer.length) return;
+			
 			var text = "";
 			var start = 0;
 			var foundH = false;
