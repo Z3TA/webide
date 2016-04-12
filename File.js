@@ -3271,9 +3271,14 @@
 		newBox.highlighted = box.highlighted;
 		newBox.wave = box.wave;
 		
-		// Decoration and color will not be cloned, and have to be applied by preRender functions
+		/* 
+			we are not cloning circle, quote or comment because those are set by pre-renders 
+			(only used in the javascript plugin, and added to the Box template to prevent "hidden classes".
+			. We probably will have to refactor how this work. )
 		
-		return newBox;		
+		color will not be cloned, and have to be applied by preRender functions
+		*/
+		return newBox;
 	}
 	
 	function determineIndentationConvention(text, lineBreak) {
