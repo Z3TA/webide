@@ -54,7 +54,7 @@
 			
 		}
 		else {
-			console.warn(file.path + " didn't want to be parsed");			
+			console.warn(file.path + " didn't want to be parsed by the JavaScript parser");			
 		}
 
 	}
@@ -75,7 +75,7 @@
 			return true;
 		}
 		else {
-			console.warn(file.name + " will not be parsed!");
+			console.warn(file.name + " will not be parsed by the JavaScript parser!");
 			return false;
 		}
 	}

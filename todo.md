@@ -14,24 +14,32 @@ Write tests!
 
 What I'm working on:
 
+Making a simple parser for vbScript to get indentation right.
 
+Add language to the haveParsed so plugins can decide if they want to do stuff or not
 
 
 BUGS
 ====
 
+No undo available after save!
+
+Auto complete doesn't find variable declarations inside for loops, ex: for(var charIndex=0; charIndex<text.length; charIndex++) {
+
+Double clicking on a file path should open the file!
+
 When searching the function list and (only find one match) click on it, doesn't scroll to the function
 
 Files doesn't load in the same order when reopening/reloading the editor! Sort tabs after every new tab being opened!
 
-Automcompletion in calsslike object replace the text: ex: file.lineBreak; file.lineB, tab
+Auto-completion in class-like object replace the text: ex: file.lineBreak; file.lineB, tab
 
 After: editor.tests.push({text: "All keyBindings should return true or false",fun: function testKeyBindings(callback) {
 // Next { will indent two times
 
 Didn't get file input focus when opening a file... 
 
-Saving takes a long time sometimes. (i get nervious, how to confort?)
+Saving takes a long time sometimes. because of network drive, can take several seconds! (i get nervious, how to confort?)
 
 function list gets biiiig:
 window.requestAnimFrame = (function(callback) {
@@ -366,6 +374,13 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+Multiple cursors! Ctrl+Shift + up/down, or Ctrl+Shift + mouse click creates another cursors. 
+Useful when you want to format stuff that look the same, ex. if you want to make many var's into one long line var
+var foo=1, ... place bar and baz here
+var bar = 2;
+var baz = 3;
+
+
 Undo/redo for caret/scrolling. shift+backspace: Go back to where we where before
 Ctrl+G when caret on a function name, goes to that function. Go to function declaration.
 
@@ -498,6 +513,7 @@ Smooth scrolling. Make it easier to read text while scrolling.
 
 When ctrl+z, move the caret to before the text being removed. For every action, create an undo-action.
 
+plugin idea: Translate code comments from one language to another. (as a preRender, do not change source)
 
 
 Need though
