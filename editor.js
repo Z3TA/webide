@@ -644,7 +644,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			editor.closeFile(file.path, true); // true = do not switch to another file
 			
-			editor.openFile(path, text, saveToDisk); // Reopen the file with the new path, makres sure fileSave events in file.save gets called after we have a new path.
+			editor.openFile(path, text, saveToDisk); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
 			
 		}
 		else {
@@ -862,7 +862,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			// Load on the fly functionality on the buffer
 			
-			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging perforamce issues.
+			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging performance issues.
 			//console.time("preRenders");
 			for(var i=0; i<editor.preRenderFunctions.length; i++) {
 				//funName = functionName(editor.preRenderFunctions[i]);
