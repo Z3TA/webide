@@ -524,6 +524,8 @@ Moving back to browser for a while, just to fix compatiblity issues. Then move b
 
 About trying other runtimes, like native rendering. We should stick with "browser" because getting something to render natively, like openGL is too damn complicated.
 
+How should updating work!? Stable branch=double work!?
+
 
 
 
