@@ -33,17 +33,22 @@
 			defaultPath = file.path;
 		}
 		// else: it will use the path of the last savedAs file viewed
-
+		
 		editor.fileSaveDialog(defaultPath, function(path) {
-			editor.saveFile(file, path);
 			
-			// Update file extension
-			file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
+			if(path) {
+				
+				editor.saveFile(file, path);
+				
+				// Update file extension
+				file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
+				
+				file.parsed = {}; // Remove parsed data
+				
+				editor.renderNeeded();
+			}
+			// else: user clicked cancel!?
 			
-			file.parsed = {}; // Remove parsed data
-			
-			editor.renderNeeded();
-						
 		});
 		
 		editor.hideMenu();
