@@ -14,11 +14,19 @@ Write tests!
 
 What I'm working on:
 
-Handle include files in ASP? To get global variables
 
 
 BUGS
 ====
+
+Opening a tag (<) before a tag that adds indentation de-indentate and mess up the indentation
+
+Gets scrolling bug alert when: scrolled to the right, then tabbing to a file that doesn't have that many colums
+
+auto completion of xml tags can be super annoying (buggy) ex:
+else if(insX</!--
+				*/
+
 
 Doesn't add indent characters for last curly bracket!
 {
@@ -72,12 +80,14 @@ Moving a tab doesn't "stay" after reload.
 
 Source indentation in html documents might be "off" if you remove or add div's.
 
-
+The caret is off in the magnification glass
 
 
 
 Polishing
 =========
+
+Regex support in find/replace!
 
 Detect misspelled/unknown object properties!
 
