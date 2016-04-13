@@ -61,9 +61,10 @@
 		var doubleQuoteStart = 0;
 		var quotes = [];
 		
-		var insideComment = false;
+		var insideLineComment = false;
 		var commentStart = 0;
 		var comments = [];
+		var insideHTMLComment = false;
 		
 		var codeBlockLeft = 0;
 		var codeBlockRight = 0;
@@ -74,10 +75,10 @@
 		var variables = [];
 		var globalVariables = [];
 		
-		var insideIf = false;
+		var insideCondition = false;
 		
 		var LF="\n", CR="\r", C="c", D="d", E="e", F="f", H="h", I="i", L="l", M="m", N="n", O="o", P="p", R="r", S="s", T="t", W="w"; 
-		var space = " ", tab = "\t", comma = ",", colon = ":";
+		var space = " ", tab = "\t", comma = ",", colon = ":", percent = "%", leftArrow = "<", rightArrow = ">";
 		var singleQuote = "'";
 		var doubleQuote = '"';
 		
@@ -102,6 +103,20 @@
 		
 		var row = 0;
 		
+		var xmlMode = (file.fileExtension == "asp");
+		var insideXmlTag = false;
+		var insideXmlTagEnding = false;
+		var xmlTag = "";
+		var lastXmlTag = "";
+		var xmlTagStart = -1; 
+		var xmlTags = [];
+		var xmlTagWordLength = 0;
+		var xmlTagSelfEnding = false;
+		var openXmlTags = 0;
+		var xmlTagLastOpenRow = -1;
+		var tmpXmlMode = xmlMode;
+		var tagBreak = editor.settings.indentAfterTags;
+		
 		for(var charIndex=0; charIndex<text.length; charIndex++) {
 			
 			// Save a history of the last characters
@@ -114,144 +129,264 @@
 			pastChar[0] = char;
 			char = text.charAt(charIndex);
 			
-			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
+			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
+			
 			
 			/*
-				## Comments
-				REM bla bla
-				' bla bla
-			*/
-			if(!insideComment && (char == singleQuote || (char == space && pastChar[0] == M && pastChar[1] == E && pastChar[2] == R))) {
-				insideComment = true;
-				commentStart = charIndex + (char == M);
-			}
-			else if(insideComment && char == firstLineBreakCharacter) {
-				insideComment = false;
-				comments.push(new Comment(commentStart, charIndex-1));
-			}
-			
-			
-			
-			/* 
-				## Quotes
-				vbScript escape double quotes with "", 
-				ex: 
-				foo = "one ""two"" three"
-				foo = "" ' Empty string
-			*/
-			else if(char == doubleQuote) {
-				if(insideDblQuote) {
-					insideDblQuote = false;
-					quotes.push(new Quote(doubleQuoteStart, charIndex));
-				}
-				else {
-					insideDblQuote = true;
-					doubleQuoteStart = charIndex;
-				}
-			}
-			
-			else if(!insideDblQuote && !insideComment) {
+				### ASP script tags
+				<% 
+				...
+				%>
 				
-				// ### Collect words
-				
-				if(char == LF || char == CR || char == space || char == tab || char == colon || char == comma) {
-									
-					// ### Variable declarations
-					if(insideVariableDeclaration && char == firstLineBreakCharacter) {
-						insideVariableDeclaration = false;
-						if(word) globalVariables.push(word);
-					}
-					else if(word == "dim") {
-						insideVariableDeclaration = true;
-						word = "";
-					}
-					else if(word) {
-						
-						if(insideVariableDeclaration) globalVariables.push(word);
-						
-						// ### IF .. THEN .. ELSE ..
-						else if(word == "if" && lastWord == "end") { // END IF
-							thisRowIndentation--;
-						}
-						else if(word == "if") {
-							afterIf = true; // Inside single line if maybe!?
-							nextRowIndentation = true; 
-						}
-						else if(word == "then" && afterIf) {
-							afterThen = true; // If a word comes next; it's a single line if-statement
-						}
-						else if(afterThen) {
-							afterThen = false;
-							// This is a single line if-statement!
-							nextRowIndentation = false; // Cancel out the indentation
-							console.log("afterThen yo!");
-						}
-						else if(word == "else") {
-							thisRowIndentation--;
-							nextRowIndentation = true; 
-						}
-						else if(word == "elseif") {
-							thisRowIndentation--;
-							nextRowIndentation = true
-						}
-						
-						// ### DO ... LOOP
-						else if(word == "do") {
-							nextRowIndentation = true;
-						}
-						else if(word == "loop") {
-							thisRowIndentation--;
-						}
-						
-						// ### FOR ... NEXT
-						else if(word == "for") {
-							console.log("for: nextRowIndentation=" + nextRowIndentation);
-							nextRowIndentation = true;
-						}
-						else if(word == "next") {
-							thisRowIndentation--;
-						}
-						
-						// ### CLASS ... END CLASS
-						else if(word == "class" && lastWord == "end") {
-							thisRowIndentation--;
-						}
-						else if(word == "class") {
-							nextRowIndentation = true;
-						}
-						
-						// ### WHILE ... WEND
-						else if(word == "while") {
-							nextRowIndentation = true;
-						}
-						else if(word == "wend") {
-							thisRowIndentation--;
-						}
-						
-						// ### SELECT CASE ... END SELECT
-						else if(word == "select" && lastWord == "end") {
-							thisRowIndentation--;
-						}
-						else if(word == "case" && lastWord == "select") {
-							nextRowIndentation = true;
-						}
-						
-						console.log("line=" + (row+1) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
-						
-						lastWord = word;
-						word = "";
-					}
-					
+			*/
+			if(!insideLineComment && !insideDblQuote) {
+				if(pastChar[0] == leftArrow && char == percent) { // <%
+					xmlMode = false;
 				}
-				else {
-					
-					word += char; // Add to the word
-					
+				else if(pastChar[0] == percent && char == rightArrow) { // %>
+					xmlMode = true;
 				}
 			}
+			
+			// ### Comments: <!-- -->
+			if(char == "-" && pastChar[0] == "-" && pastChar[1] == "!" && pastChar[2] == "<" && !insideLineComment && !insideDblQuote && !insideHTMLComment) { // <!--
+				insideHTMLComment = true;
+				insideXmlTag = false;
+				xmlMode = tmpXmlMode;
+				commentStart = charIndex-4;
+			}
+			else if(char == ">" && pastChar[0] == "-" && pastChar[1] == "-" && !insideLineComment && !insideDblQuote && insideHTMLComment) { // -->
+				insideHTMLComment = false;
+				comments.push(new Comment(commentStart, charIndex));
+				//console.warn("Found HTML comment! line=" + lineNumber + " ");
+			}
+			
+			if(!xmlMode) {
+				
+				/*
+					## Comments
+					REM bla bla
+					' bla bla
+				*/
+				if(!insideLineComment && (char == singleQuote || (char == space && pastChar[0] == M && pastChar[1] == E && pastChar[2] == R))) {
+					insideLineComment = true;
+					commentStart = charIndex + (char == M);
+				}
+				else if(insideLineComment && char == firstLineBreakCharacter) {
+					insideLineComment = false;
+					comments.push(new Comment(commentStart, charIndex-1));
+				}
+				
+				
+				/* 
+					## Quotes
+					vbScript escape double quotes with "", 
+					ex: 
+					foo = "one ""two"" three"
+					foo = "" ' Empty string
+				*/
+				if(char == doubleQuote) {
+					if(insideDblQuote) {
+						insideDblQuote = false;
+						quotes.push(new Quote(doubleQuoteStart, charIndex));
+					}
+					else {
+						insideDblQuote = true;
+						doubleQuoteStart = charIndex;
+					}
+				}
+				
+				else if(!insideDblQuote && !insideLineComment) {
+					
+					// ### Collect words
+					
+					if(char == LF || char == CR || char == space || char == tab || char == colon || char == comma) {
+										
+						// ### Variable declarations
+						if(insideVariableDeclaration && char == firstLineBreakCharacter) {
+							insideVariableDeclaration = false;
+							if(word) globalVariables.push(word);
+						}
+						else if(word == "dim") {
+							insideVariableDeclaration = true;
+							word = "";
+						}
+						else if(word) {
+							
+							if(insideVariableDeclaration) globalVariables.push(word);
+							
+							// ### IF .. THEN .. ELSE ..
+							else if(word == "if" && lastWord == "end") { // END IF
+								thisRowIndentation--;
+							}
+							else if(word == "if") {
+								afterIf = true; // Inside single line if maybe!?
+								insideCondition = true;
+								nextRowIndentation = true; 
+							}
+							else if(word == "then" && afterIf) {
+								afterThen = true; // If a word comes next; it's a single line if-statement
+							}
+							else if(afterThen) {
+								afterThen = false;
+								// This is a single line if-statement!
+								nextRowIndentation = false; // Cancel out the indentation
+								console.log("afterThen yo!");
+							}
+							else if(word == "else") {
+								thisRowIndentation--;
+								nextRowIndentation = true; 
+							}
+							else if(word == "elseif") {
+								insideCondition = true;
+								thisRowIndentation--;
+								nextRowIndentation = true
+							}
+							
+							// ### DO ... LOOP
+							else if(word == "do") {
+								nextRowIndentation = true;
+								insideCondition = true;
+							}
+							else if(word == "loop") {
+								thisRowIndentation--;
+								insideCondition = true;
+							}
+							
+							// ### FOR ... NEXT
+							else if(word == "for") {
+								console.log("for: nextRowIndentation=" + nextRowIndentation);
+								nextRowIndentation = true;
+							}
+							else if(word == "next") {
+								thisRowIndentation--;
+							}
+							
+							// ### CLASS ... END CLASS
+							else if(word == "class" && lastWord == "end") {
+								thisRowIndentation--;
+							}
+							else if(word == "class") {
+								nextRowIndentation = true;
+							}
+							
+							// ### WHILE ... WEND
+							else if(word == "while") {
+								nextRowIndentation = true;
+								insideCondition = true;
+							}
+							else if(word == "wend") {
+								thisRowIndentation--;
+							}
+							
+							// ### SELECT CASE ... END SELECT
+							else if(word == "select" && lastWord == "end") {
+								thisRowIndentation--;
+							}
+							else if(word == "case" && lastWord == "select") {
+								nextRowIndentation = true;
+							}
+							
+							console.log("line=" + (row+1) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
+							
+							lastWord = word;
+							word = "";
+						}
+						
+					}
+					else {
+						
+						word += char; // Add to the word
+						
+					}
+				}
+			}
+			
+			if(!insideLineComment && !insideHTMLComment) {
+				/*
+					Find xml-tags.
+					
+					Look out for IF x < y
+					and array of strings: "<", ">",
+					
+					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
+				*/
+				if(char == "/" && !insideDblQuote) {
+					if(insideXmlTag) {
+						insideXmlTagEnding = true;
+					}
+				}
+				else if(char == "%" && insideXmlTag) {
+					insideXmlTag = false;
+				}
+				else if(char == "<" && !insideXmlTag && !insideCondition && (xmlMode || insideDblQuote)) {
+					insideXmlTag = true;
+					xmlTagStart = charIndex;
+					if(!insideXmlTagEnding) {
+						tmpXmlMode = xmlMode; // xmlMode when the tag starts
+						xmlMode = false;
+					}
+					if(insideHTMLComment) console.error(new Error("WTF"));
+				}
+				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
+					xmlTagWordLength = charIndex - xmlTagStart;
+				}
+				else if(char == ">" && insideXmlTag && !insideCondition) {
+					if(xmlTagWordLength === 0) xmlTagWordLength = charIndex - xmlTagStart;
+					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
+					xmlTags.push(new XmlTag(xmlTagStart, charIndex, xmlTagWordLength, insideXmlTagEnding) );
+					
+										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
+					
+					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
+						
+						if(insideXmlTagEnding) {
+							// Use default xmlMode after script tag ended
+							xmlMode = xmlModeBeforeScript;
+						}
+						else {
+							// We are <script HERE>
+							xmlModeBeforeScript = xmlMode;
+							xmlMode = false;
+						}
+						}
+					
+					if(tagBreak.indexOf(xmlTag) > -1) {
+						
+						//console.log("tag=" + tag + " lastXmlTag=" + lastXmlTag);
+						
+						if(insideXmlTagEnding) {
+							// It's a ending tag </tag>
+							openXmlTags--;
+							if(xmlTagLastOpenRow != row && thisRowIndentation > 0) thisRowIndentation--;
+						}
+						else {
+							// It's a tag opening
+							openXmlTags++;
+							xmlTagLastOpenRow = row;
+							nextRowIndentation = true;
+						}
+						}
+					
+					lastXmlTag = xmlTag;
+					xmlTag = "";
+					
+					xmlTagWordLength = 0;
+					insideXmlTag = false;
+					insideXmlTagEnding = false;
+					
+					
+				}
+				
+			}
+			
+			
+			
 			
 			// ### Line break
 			if(char == lastLineBreakCharacter) {
+				
+				insideCondition = false;
 				
 				console.log("--- new line=" + (row+2) + " thisRowIndentation=" + thisRowIndentation + " ---");
 				file.grid[row].indentation = Math.max(0, thisRowIndentation);
