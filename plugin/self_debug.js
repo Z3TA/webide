@@ -51,6 +51,7 @@
 	var errorReportCounter = 0; // Used for file names
 	var thisSessionErrorCount = 0;
 	var maxErrors = 5;
+	var alertNoticeToManyErrors = false;
 	
 	function wsError(err) {
 		console.log("Connection Error: " + err.toString());
@@ -225,7 +226,10 @@
 			}
 			
 			if(thisSessionErrorCount > maxErrors) {
-				alert("Too many errors detected. You should restart the editor! See error.log and/or the debug console.");
+				if(!alertNoticeToManyErrors) {
+					alertNoticeToManyErrors = true;
+					alert("Too many errors detected. You should restart the editor! See error.log and/or the debug console.");
+				}
 			}
 			else {
 				
