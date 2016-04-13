@@ -830,20 +830,20 @@
 			
 			if(!insideComment) {
 				/*
-					Find xml-tags.
+					### Find xml-tags.
 					
 					Look out for if( x < y) and bitwise operations >> <<
 					and array of strings: "<", ">",
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
-				if(char == "/" && insideXmlTag) {
-
+				if(insideXmlTag && pastChar[0] == "<" && char == "/") {
+					// Ending tag: </foo>
 					insideXmlTagEnding = true;
-
 				}
 				else if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
 					insideXmlTag = true;
+					xmlTagSelfEnding = false;
 					xmlTagStart = i;
 					if(!insideXmlTagEnding) {
 						tmpXmlMode = xmlMode; // xmlMode when the tag starts
@@ -855,9 +855,13 @@
 					xmlTagWordLength = i - xmlTagStart;
 				}
 				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+					if(pastChar[0] == "/") {
+						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
+					}
+					
 					if(xmlTagWordLength === 0) xmlTagWordLength = i - xmlTagStart;
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
-					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, insideXmlTagEnding) );
+					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
 					
 										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
 					

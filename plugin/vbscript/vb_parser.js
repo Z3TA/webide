@@ -118,6 +118,8 @@
 		var xmlTagLastOpenRow = -1;
 		var tmpXmlMode = xmlMode;
 		var tagBreak = editor.settings.indentAfterTags;
+		var xmlModeBeforeScript = xmlMode;
+		
 		
 		for(var charIndex=0; charIndex<text.length; charIndex++) {
 			
@@ -131,7 +133,7 @@
 			pastChar[0] = char;
 			char = text.charAt(charIndex);
 			
-			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
+			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
 			
 			
 			/*
@@ -306,23 +308,27 @@
 			
 			if(!insideLineComment && !insideHTMLComment) {
 				/*
-					Find xml-tags.
+					### Find xml-tags.
 					
 					Look out for IF x < y
 					and array of strings: "<", ">",
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
+					
+					In for example img src there can be a /
+					but we can also have html inside quotes! foo='<img src="foo/bar.jpg"/>'
 				*/
-				if(char == "/" && insideXmlTag) {
-					
+				
+				if(insideXmlTag && pastChar[0] == "<" && char == "/") {
+					// Ending tag: </foo>
 					insideXmlTagEnding = true;
-					
 				}
 				else if(char == "%" && insideXmlTag) {
 					insideXmlTag = false;
 				}
-				else if(char == "<" && !insideXmlTag && !insideCondition && (xmlMode || insideDblQuote)) {
+				else if(char == "<" && !insideXmlTag && !insideCondition) { //  && (xmlMode || insideDblQuote)
 					insideXmlTag = true;
+					xmlTagSelfEnding = false;
 					xmlTagStart = charIndex;
 					if(!insideXmlTagEnding) {
 						tmpXmlMode = xmlMode; // xmlMode when the tag starts
@@ -334,9 +340,12 @@
 					xmlTagWordLength = charIndex - xmlTagStart;
 				}
 				else if(char == ">" && insideXmlTag && !insideCondition) {
+					if(pastChar[0] == "/") {
+						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
+					}
 					if(xmlTagWordLength === 0) xmlTagWordLength = charIndex - xmlTagStart;
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
-					xmlTags.push(new XmlTag(xmlTagStart, charIndex, xmlTagWordLength, insideXmlTagEnding) );
+					xmlTags.push(new XmlTag(xmlTagStart, charIndex, xmlTagWordLength, xmlTagSelfEnding) );
 					
 					xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
 					
@@ -345,6 +354,7 @@
 						if(insideXmlTagEnding) {
 							// Use default xmlMode after script tag ended
 							xmlMode = xmlModeBeforeScript;
+							console.log("Ended tag:" + xmlTag);
 						}
 						else {
 							// We are <script HERE>
