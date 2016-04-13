@@ -311,10 +311,10 @@
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
-				if(char == "/" && !insideDblQuote) {
-					if(insideXmlTag) {
-						insideXmlTagEnding = true;
-					}
+				if(char == "/" && insideXmlTag) {
+
+					insideXmlTagEnding = true;
+
 				}
 				else if(char == "%" && insideXmlTag) {
 					insideXmlTag = false;
@@ -357,8 +357,14 @@
 						
 						if(insideXmlTagEnding) {
 							// It's a ending tag </tag>
+							
+							console.log("Ending tag=" + xmlTag + " xmlTagLastOpenRow=" + xmlTagLastOpenRow + " row=" + row + " ");
+							
 							openXmlTags--;
 							if(xmlTagLastOpenRow != row && thisRowIndentation > 0) thisRowIndentation--;
+							
+							if(xmlTagLastOpenRow == row) nextRowIndentation = false;
+							
 						}
 						else {
 							// It's a tag opening

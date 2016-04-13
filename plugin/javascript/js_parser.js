@@ -837,10 +837,10 @@
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
-				if(char == "/" && !insideQuote) {
-					if(insideXmlTag) {
-						insideXmlTagEnding = true;
-					}
+				if(char == "/" && insideXmlTag) {
+
+					insideXmlTagEnding = true;
+
 				}
 				else if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
 					insideXmlTag = true;
