@@ -21,6 +21,8 @@
 		
 		editor.addMenuItem("Toggle dev-mode", toggleDevMode); // Add items to the canvas context meny
 		
+		editor.addMenuItem("Show dev tools", showDevTools);
+		
 		
 		if(editor.settings.devMode == false) {
 			disableDevMode();
@@ -102,8 +104,7 @@
 		if(editor.settings.devMode) {
 			enableDevMode();
 			console.warn("dev tools!?");
-			// Show dev tools:
-			require('nw.gui').Window.get().showDevTools();
+			showDevTools()
 			console.warn("devMode enabled!");
 		}
 		else {
@@ -114,6 +115,11 @@
 		
 		return false;
 		
+	}
+	
+	function showDevTools() {
+		require('nw.gui').Window.get().showDevTools();
+		editor.hideMenu();
 	}
 	
 		function reloadEditor() {
