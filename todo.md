@@ -16,6 +16,8 @@ What I'm working on:
 
 Fixing stuff needed for a beta release, like bug reporting and (auto) updating
 
+See (and change!?) key bindings some how
+
 
 BUGS
 ====
