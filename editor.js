@@ -905,6 +905,26 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		else {
+			// Show some useful info for new users
+			
+			ctx.fillStyle = editor.settings.style.bgColor;
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			ctx.fillStyle = editor.settings.style.textColor;
+			
+			ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
+			ctx.textBaseline = "top";
+			
+			var friendlyString = "Ctrl + O to open a file";
+			// Place the string in the center
+			var textMeasure = ctx.measureText(friendlyString);
+			var left = editor.view.canvasWidth / 2 - textMeasure.width / 2;
+			var top =  editor.view.canvasHeight / 2 - 20;
+			
+			ctx.beginPath(); // Reset all the paths!
+			
+			ctx.fillText(friendlyString, left, top);
+			
 			console.log("No file open");
 		}
 		
