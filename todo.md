@@ -18,9 +18,19 @@ Making a simple parser for vbScript to get indentation right.
 
 Add language to the haveParsed so plugins can decide if they want to do stuff or not
 
+Handle include files in ASP
+
 
 BUGS
 ====
+
+Doesn't add indent characters for last curly bracket!
+{
+{
+{
+}
+}
+}
 
 No undo available after save!
 

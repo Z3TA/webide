@@ -296,7 +296,7 @@
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
 		
-		return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
+		return {language: "JavaScript", functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
 		
 		//console.log(JSON.stringify(functions, null, 4));
 		

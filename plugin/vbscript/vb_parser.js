@@ -118,7 +118,7 @@
 			
 			/*
 				## Comments
-				
+				REM bla bla
 				' bla bla
 			*/
 			if(!insideComment && (char == singleQuote || (char == space && pastChar[0] == M && pastChar[1] == E && pastChar[2] == R))) {
@@ -148,25 +148,26 @@
 					insideDblQuote = true;
 					doubleQuoteStart = charIndex;
 				}
-				
 			}
 			
 			else if(!insideDblQuote && !insideComment) {
 				
 				// ### Collect words
 				
-				if(char == LF || char == CR || char == space || char == tab || char == colon) {
-										
-					if(word) {
-					
-						// ### Variable declarations
-						if(insideVariableDeclaration && char == firstLineBreakCharacter) {
-							insideVariableDeclaration = false;
-							if(word) variables.push(word);
-						}
-						else if(word == "dim") {
-							insideVariableDeclaration = true;
-						}
+				if(char == LF || char == CR || char == space || char == tab || char == colon || char == comma) {
+									
+					// ### Variable declarations
+					if(insideVariableDeclaration && char == firstLineBreakCharacter) {
+						insideVariableDeclaration = false;
+						if(word) globalVariables.push(word);
+					}
+					else if(word == "dim") {
+						insideVariableDeclaration = true;
+						word = "";
+					}
+					else if(word) {
+						
+						if(insideVariableDeclaration) globalVariables.push(word);
 						
 						// ### IF .. THEN .. ELSE ..
 						else if(word == "if" && lastWord == "end") { // END IF
@@ -244,15 +245,7 @@
 				}
 				else {
 					
-					if(insideVariableDeclaration && char == comma) {
-						if(word) variables.push(word);
-						word = "";
-					}
-					else {
-						
-						// Add to the word ...
-						word += char;
-					}
+					word += char; // Add to the word
 					
 				}
 			}
@@ -274,10 +267,15 @@
 			
 		}
 		
-		//return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
-		return {quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (thisRowIndentation === 0), xmlTags: xmlTags};
+		console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
+		//console.log("functions:" + JSON.stringify(functions, null, 2));
+		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
-}
+		
+		//return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
+		return {language: "VbScript", quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (thisRowIndentation === 0), xmlTags: xmlTags};
+		
+	}
 	
 	
 	function Func(name, args, start, lineNumber) {
