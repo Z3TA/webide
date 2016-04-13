@@ -14,10 +14,6 @@ Write tests!
 
 What I'm working on:
 
-Making a simple parser for vbScript to get indentation right.
-
-xml in vbScript (ASP)
-
 Handle include files in ASP? To get global variables
 
 

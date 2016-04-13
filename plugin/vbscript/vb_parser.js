@@ -312,9 +312,9 @@
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
 				if(char == "/" && insideXmlTag) {
-
+					
 					insideXmlTagEnding = true;
-
+					
 				}
 				else if(char == "%" && insideXmlTag) {
 					insideXmlTag = false;
@@ -336,7 +336,7 @@
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, charIndex, xmlTagWordLength, insideXmlTagEnding) );
 					
-										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
+					xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						

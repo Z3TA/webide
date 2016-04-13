@@ -74,10 +74,10 @@
 				if(xmlTags[i].start > lastIndex) break;
 				applyColor(buffer, xmlTags[i].start, xmlTags[i].start + xmlTags[i].wordLength, xmlTagColor, false, false);
 				if(xmlTags[i].selfEnding) {
-					applyColor(buffer, xmlTags[i].end-2, xmlTags[i].end, xmlTagColor, false, false);
+					applyColor(buffer, xmlTags[i].end-1, xmlTags[i].end, xmlTagColor, false, false);
 				}
 				else {
-					applyColor(buffer, xmlTags[i].end-1, xmlTags[i].end, xmlTagColor, false, false);
+					applyColor(buffer, xmlTags[i].end, xmlTags[i].end, xmlTagColor, false, false);
 				}
 				
 			}
@@ -138,6 +138,7 @@
 
 						gridRow[col].color = color;
 						
+						// This needs to be refactored as it creates dependencies between plugins!
 						if(quote) {
 							gridRow[col].quote = true;
 						}
