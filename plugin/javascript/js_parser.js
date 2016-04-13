@@ -71,7 +71,7 @@
 		
 		// file.fileExtension == "", Assume all new files are JavaScript files :P
 		
-		if((file.fileExtension == "") || file.fileExtension == "js" || file.fileExtension == "json" || file.fileExtension == "css" || file.fileExtension == "htm" || file.fileExtension == "html") {
+		if((file.fileExtension == "") || file.fileExtension == "js" || file.fileExtension == "json" || file.fileExtension == "css" || file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "java") {
 			return true;
 		}
 		else {
