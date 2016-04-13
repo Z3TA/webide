@@ -130,7 +130,7 @@
 					editor.renderNeeded();
 				}
 				else if(file.parsed.language=="PHP") {
-					file.insertText(",  , " + quote);
+					file.insertText(" .  . " + quote);
 					file.moveCaretLeft(file.caret, 4);
 					editor.renderNeeded();
 				}
