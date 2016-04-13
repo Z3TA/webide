@@ -1,9 +1,7 @@
 (function() {
 	/*
 		Shows a function list in the left column.
-		
-		Depends on jsParser!
-	
+				
 	*/
 	
 	"use strict";

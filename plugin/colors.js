@@ -1,14 +1,12 @@
 (function() {
 	/*
-		Optimization needed:
 		
-		colorize: 22.256ms
-		
-		Try moving the colorization to a prerenderer:
-		applyJScolors: 0.168ms
-		
-		After not needing to reset:
-		applyJScolors: 0.013ms
+		Applies general coloring (quotes, comments and xml).
+		Checks file.parsed.quotes, file.parsed.comments and file.parsed.xmlTags
+	
+		Optimization log: colorize: 22.256ms
+		Try moving the colorization to a prerenderer: applyJScolors: 0.168ms
+		After not needing to reset:	applyJScolors: 0.013ms
 	*/
 	
 	"use strict";
