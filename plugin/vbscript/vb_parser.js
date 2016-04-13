@@ -51,6 +51,8 @@
 
 	function parseVbScript(file) {
 		
+		console.time("parseVbScript");
+		
 		var text = file.text.toLowerCase(); // vbScript is not case sensitive!
 		
 		var char = "";
@@ -129,7 +131,7 @@
 			pastChar[0] = char;
 			char = text.charAt(charIndex);
 			
-			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
+			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
 			
 			
 			/*
@@ -168,7 +170,7 @@
 					REM bla bla
 					' bla bla
 				*/
-				if(!insideLineComment && (char == singleQuote || (char == space && pastChar[0] == M && pastChar[1] == E && pastChar[2] == R))) {
+				if(!insideLineComment && !insideDblQuote && (char == singleQuote || (char == space && pastChar[0] == M && pastChar[1] == E && pastChar[2] == R))) {
 					insideLineComment = true;
 					commentStart = charIndex + (char == M);
 				}
@@ -231,7 +233,7 @@
 								afterThen = false;
 								// This is a single line if-statement!
 								nextRowIndentation = false; // Cancel out the indentation
-								console.log("afterThen yo!");
+								//console.log("afterThen yo!");
 							}
 							else if(word == "else") {
 								thisRowIndentation--;
@@ -255,7 +257,7 @@
 							
 							// ### FOR ... NEXT
 							else if(word == "for") {
-								console.log("for: nextRowIndentation=" + nextRowIndentation);
+								//console.log("for: nextRowIndentation=" + nextRowIndentation);
 								nextRowIndentation = true;
 							}
 							else if(word == "next") {
@@ -287,7 +289,7 @@
 								nextRowIndentation = true;
 							}
 							
-							console.log("line=" + (row+1) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
+							//console.log("line=" + (row+1) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
 							
 							lastWord = word;
 							word = "";
@@ -358,7 +360,7 @@
 						if(insideXmlTagEnding) {
 							// It's a ending tag </tag>
 							
-							console.log("Ending tag=" + xmlTag + " xmlTagLastOpenRow=" + xmlTagLastOpenRow + " row=" + row + " ");
+							//console.log("Ending tag=" + xmlTag + " xmlTagLastOpenRow=" + xmlTagLastOpenRow + " row=" + row + " ");
 							
 							openXmlTags--;
 							if(xmlTagLastOpenRow != row && thisRowIndentation > 0) thisRowIndentation--;
@@ -394,7 +396,7 @@
 				
 				insideCondition = false;
 				
-				console.log("--- new line=" + (row+2) + " thisRowIndentation=" + thisRowIndentation + " ---");
+				//console.log("--- new line=" + (row+2) + " thisRowIndentation=" + thisRowIndentation + " ---");
 				file.grid[row].indentation = Math.max(0, thisRowIndentation);
 				
 				row++;
@@ -408,10 +410,11 @@
 			
 		}
 		
-		console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
+		//console.log("globalVariables:" + JSON.stringify(globalVariables, null, 2));
 		//console.log("functions:" + JSON.stringify(functions, null, 2));
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
+		console.timeEnd("parseVbScript");
 		
 		//return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (codeBlockLeft - codeBlockRight) === 0, xmlTags: xmlTags};
 		return {language: "VbScript", quotes: quotes, comments: comments, globalVariables: globalVariables, blockMatch: (thisRowIndentation === 0), xmlTags: xmlTags};
