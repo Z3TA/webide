@@ -326,7 +326,7 @@
 				else if(char == "%" && insideXmlTag) {
 					insideXmlTag = false;
 				}
-				else if(char == "<" && !insideXmlTag && !insideCondition) { //  && (xmlMode || insideDblQuote)
+				else if(char == "<" && !insideXmlTag && !insideCondition) { // Removed  && (xmlMode || insideDblQuote) because of script tag turning off xmlMode causing not to find end of script tag, so xmlMode never turns on again
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = charIndex;
