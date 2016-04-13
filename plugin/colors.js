@@ -51,6 +51,19 @@
 				applyColor(buffer, comments[i].start, comments[i].end, commentColor, false, true);
 			}
 		}
+
+
+		// Color quotes
+		var quotes = file.parsed.quotes;
+		var quoteColor = editor.settings.style.quoteColor;
+		
+		if(quotes) {
+			for(var i=0; i<quotes.length; i++) {
+				if(quotes[i].start > lastIndex) break;
+				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor, true, false);
+			}
+		}
+		
 		
 		// Color xml tags
 		var xmlTags = file.parsed.xmlTags;
@@ -69,19 +82,7 @@
 				
 			}
 		}
-		
-		// Color quotes
-		var quotes = file.parsed.quotes;
-		var quoteColor = editor.settings.style.quoteColor;
-		
-		if(quotes) {
-			for(var i=0; i<quotes.length; i++) {
-				if(quotes[i].start > lastIndex) break;
-				applyColor(buffer, quotes[i].start, quotes[i].end, quoteColor, true, false);
-			}
-		}
-		
-		
+
 		
 		//console.timeEnd("applyJScolors");
 
