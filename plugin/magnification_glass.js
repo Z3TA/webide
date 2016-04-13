@@ -88,7 +88,7 @@
 
 		
 		// The image
-		var img = file.canvas, 
+		var img = document.getElementById("canvas"), 
 			clipStartX = mouseX - radius / magnification, 
 			clipStartY = mouseY - radius / magnification,
 			clipWidth = glassSize / magnification, 
