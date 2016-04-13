@@ -3,9 +3,9 @@
 	"main": "index.htm",
 	"window": {
 		"title": "JZedit",
-		"show": true,
+		"show": false,
 		"icon": "gfx/bean3.png", 
-		"toolbar": true,
+		"toolbar": false,
 		"frame": true,
 		"transparent": false,
 		"always-on-top": false
