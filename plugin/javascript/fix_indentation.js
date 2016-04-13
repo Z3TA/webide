@@ -204,10 +204,24 @@
 						break;
 					}
 				}
-				
-				
-				
 			}
+			
+			// Update xmlTags
+			if(js.xmlTags) {
+				var xmlTag;
+				for(var i=js.xmlTags.length-1; i>-1; i--) { // start from bottom
+					xmlTag = js.xmlTags[i];
+					if(xmlTag.start >= index || xmlTag.end >= index) {
+						if(xmlTag.start >= index) xmlTag.start += totalCharactersAdded;
+						if(xmlTag.end >= index) xmlTag.end += totalCharactersAdded;
+						somethingChanged = true;
+					}
+					else {
+						break;
+					}
+				}
+			}
+			
 		}
 		
 		file.sanityCheck();
