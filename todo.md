@@ -14,10 +14,15 @@ Write tests!
 
 What I'm working on:
 
+Fixing stuff needed for a beta release, like bug reporting and (auto) updating
 
 
 BUGS
 ====
+
+When last file gets closed, the toolbar still show it's path
+
+When auto completing JSON objects, ex: editor.settings.style.textColor, editor.settings.style. part gets removed.
 
 Opening a tag (<) before a tag that adds indentation de-indentate and mess up the indentation
 
@@ -86,6 +91,8 @@ The caret is off in the magnification glass
 
 Polishing
 =========
+
+Feature to quickly navigate to a function (and back again)
 
 Regex support in find/replace!
 

@@ -3,11 +3,9 @@
 	
 	(You might want to add it to .hgignore .gitignore or equivalent)
 	
-	{}
-	
-	
 */
 
+//editor.settings.style.xmlTagColor = "rgb(255,0,0)";
 
 if(process.platform == "linux") {
 	
