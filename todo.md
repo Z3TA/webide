@@ -16,9 +16,9 @@ What I'm working on:
 
 Making a simple parser for vbScript to get indentation right.
 
-Add language to the haveParsed so plugins can decide if they want to do stuff or not
+xml in vbScript (ASP)
 
-Handle include files in ASP
+Handle include files in ASP? To get global variables
 
 
 BUGS
