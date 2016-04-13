@@ -59,16 +59,17 @@ The editor only works with mono-space font's (because of the "grid").
 
 Use settings_overload.js to make changes to settings.js.
 
-For the optimal text experience you want to go into system/OS settings and change font hinting etc.
+For the optimal text experience, try different system/OS font settings like hinting etc.
 
-Some of the most popular open source programming fonts can be found in gfx/font.
+Some of the most popular open source programming fonts can be found in gfx/font 
+(You need to install them to your system for them to work in the editor!)
+
 
 
 Problems on Linux
 -----------------
-For sub_pixel_antialias/lcx-text to work, font's need to be installed on system (not included as @font-face in CSS).
 
-There's however a bug in some versions of Chromium for Linux,
+There's a bug in some versions of Chromium for Linux,
 that makes the editor sometimes renders with subpixel-antailas/LCD-text and sometimes not ...
 Unless you have set global.settings.sub_pixel_antialias = false (then it will always render without subpixel-antailas/LCD-text).
 
@@ -87,7 +88,7 @@ And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
 
 What I think looks best (default settings)
------------------------------
+------------------------------------------
 Consolas 15px on Windows!
 DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
 
