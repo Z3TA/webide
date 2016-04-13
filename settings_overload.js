@@ -8,7 +8,6 @@
 	
 */
 
-editor.settings.style.xmlTagColor = "rgb(255,0,0)";
 
 if(process.platform == "linux") {
 	
