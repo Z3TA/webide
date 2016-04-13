@@ -34,6 +34,8 @@
 	function autoQuote(file, type, character, index, row, col) {
 		// character is a single or double quote ...
 		
+		if(file.parsed.language=="VbScript" && character == "'") return; // ' Are used to make comments in vbScript
+		
 		var lastCharacter = "";
 		var nextCharacter = "";
 		
@@ -117,9 +119,21 @@
 		if(lastCharacter != "\\" && lastCharacter != quote && nextCharacter != quote) {
 			
 			if(inQuote && !openQuote) {
-				file.insertText(" +  + " + quote);
-				file.moveCaretLeft(file.caret, 4);
-				editor.renderNeeded();
+				if(file.parsed.language=="JavaScript") {
+					file.insertText(" +  + " + quote);
+					file.moveCaretLeft(file.caret, 4);
+					editor.renderNeeded();
+				}
+				else if(file.parsed.language=="VbScript") {
+					file.insertText(" &  & " + quote);
+					file.moveCaretLeft(file.caret, 4);
+					editor.renderNeeded();
+				}
+				else if(file.parsed.language=="PHP") {
+					file.insertText(",  , " + quote);
+					file.moveCaretLeft(file.caret, 4);
+					editor.renderNeeded();
+				}
 			}
 			else if(   !xor    && !(quote == singleQuote && insideDbl)) {
 				// Insert one quote character
