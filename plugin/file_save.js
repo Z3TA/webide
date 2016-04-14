@@ -26,7 +26,7 @@
 		var file = editor.currentFile;
 		var defaultPath;
 		
-		if(!file) console.error(new Error("No file open!?"));
+		if(!file) throw new Error("No file open!?");
 		
 		if(file.savedAs) {
 			// Set the current path as default

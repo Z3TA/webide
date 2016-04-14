@@ -48,7 +48,7 @@
 	function buildDiv() {
 		
 		if(!footer) {
-			console.error(new Error("Can not find the footer!"));
+			throw new Error("Can not find the footer!");
 		}
 		
 		//if(!div) { // This will still return true after it has been removed!!!

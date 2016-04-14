@@ -21,7 +21,7 @@
 		
 		// Sanity check
 		if(!footer) {
-			console.error(new Error("Can not find the footer!"));
+			throw new Error("Can not find the footer!");
 		}
 		
 		// Insert text into translation dictionary if they dont exist
@@ -164,7 +164,7 @@
 			var line = parseInt(inputGoto.value);
 			var file = editor.currentFile;
 			
-			if(!file) console.error(new Error("No current file!"));
+			if(!file) throw new Error("No current file!");
 			
 			if(isNaN(line)) {
 				alert("Enter line number!");

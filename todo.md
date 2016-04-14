@@ -19,7 +19,8 @@ Fixing stuff needed for a beta release:
 * Bug reporting 
 * Updating method, to get bug fixes
 * See (and change!?) key bindings some how
-
+* Replace in file (using regex)
+* Regex search/replace
 
 
 

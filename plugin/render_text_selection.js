@@ -54,8 +54,8 @@
 					
 					left = editor.settings.leftMargin + (col + indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
 					
-					//if(isNaN(left)) console.error(new Error("left is NaN! editor.settings.leftMargin=" + editor.settings.leftMargin + " col=" + col + " indentation=" + indentation + " editor.settings.tabSpace=" + editor.settings.tabSpace + " file.startColumn=" + file.startColumn + " editor.settings.gridWidth=" + editor.settings.gridWidth + ""));
-					//if(isNaN(top)) console.error(new Error("top is NaN"));
+					//if(isNaN(left)) throw new Error("left is NaN! editor.settings.leftMargin=" + editor.settings.leftMargin + " col=" + col + " indentation=" + indentation + " editor.settings.tabSpace=" + editor.settings.tabSpace + " file.startColumn=" + file.startColumn + " editor.settings.gridWidth=" + editor.settings.gridWidth + "");
+					//if(isNaN(top)) throw new Error("top is NaN");
 					
 					if(buffer[row][col].selected) {
 						ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);

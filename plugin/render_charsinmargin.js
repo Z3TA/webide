@@ -12,16 +12,16 @@
 	
 	// Sanity check
 	if(!editor.settings.style.fontSize) {
-		console.error("No fontSize defined!");
+		throw "No fontSize defined!";
 	}
 	if(!editor.settings.style.font) {
-		console.error("No font defined!");
+		throw "No font defined!";
 	}
 	if(editor.settings.gridWidth <= 0) {
-		console.error("gridWidth too small!");
+		throw "gridWidth too small!";
 	}
 	if(editor.settings.gridHeight <= 0) {
-		console.error("gridHeight too small!");
+		throw "gridHeight too small!";
 	}
 	
 	

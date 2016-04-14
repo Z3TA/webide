@@ -221,7 +221,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Opening file: " + path + " typeof text=" + typeof text);
 		
-		if(typeof text === "function") console.error(new Error("The callback should be in the third argument. Second argument is for file content"));
+		if(typeof text === "function") throw new Error("The callback should be in the third argument. Second argument is for file content");
 		
 		
 		// Check if the file is already opened
@@ -247,7 +247,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				if(editor.currentFile != file) {
 					// Switch to it ...
 					
-					if(text != undefined && text != file.text) console.error(new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path));
+					if(text != undefined && text != file.text) throw new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path);
 					
 					editor.showFile(file);
 				}
@@ -345,7 +345,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		function load(path, text, notFromDisk, tooBig) {
 			console.log("Loading file to editor: " + path);
 			
-			if(editor.files.hasOwnProperty(path)) console.error(new Error("File is already opened!"));
+			if(editor.files.hasOwnProperty(path)) throw new Error("File is already opened!");
 			
 			// Do not add file to editor.files until its fully loaded! And fileOpen events can be run sync
 			var newFile = new File(text, path, ++editor.fileIndex, tooBig, fileLoaded);
@@ -369,7 +369,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				file = editor.files[path];
 				
-				if(!editor.files.hasOwnProperty(path)) console.error(new Error("File didn't enter editor.files")); // For sanity
+				if(!editor.files.hasOwnProperty(path)) throw new Error("File didn't enter editor.files"); // For sanity
 				
 				for(var p in editor.files) { // Make sure we are not insane
 					if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
@@ -435,7 +435,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
-		if(!callback) console.error(new Error("Callback not defined!"));
+		if(!callback) throw new Error("Callback not defined!");
 		
 		fs.stat(path, checkSize);
 		
@@ -462,7 +462,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 				else {
 					console.warn("Unexpected error when checking if file exist:")
-					console.error(err);
+					throw err;
 				}
 			}
 			else {
@@ -502,7 +502,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.closeFile = function(path, doNotSwitchFile) {
 		
 		if(!editor.files.hasOwnProperty(path)) {
-			console.error(new Error("Can't close file that is not open: " + path));
+			throw new Error("Can't close file that is not open: " + path);
 		}
 		else {
 			
@@ -531,7 +531,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			// Sanity check
 			if(editor.lastFile) {
 				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
-					console.error(new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path + "\nWhen closing file.path=" + file.path));
+					throw new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path + "\nWhen closing file.path=" + file.path);
 					return;
 				}
 			}
@@ -558,7 +558,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			// Sanity check again. Make shure we didn't switch to the file being closed
 			if(editor.currentFile) {
 				if(editor.currentFile.path == path) {
-					console.error(new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path));
+					throw new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path);
 				}
 			}
 		}
@@ -587,14 +587,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log(editor.getStack("Read from disk"));
 		
 		if(!callback) {
-			console.error(new Error("No callback defined!"));
+			throw new Error("No callback defined!");
 		}
 		
 		if(returnBuffer) {
 			// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 			
 			fs.readFile(path, function(err, buffer) {
-				if (err) console.error(err);
+				if (err) throw err;
 				
 				callback(path, buffer);
 				
@@ -603,7 +603,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		else {
 			if(encoding == undefined) encoding = "utf8";
 			fs.readFile(path, encoding, function(err, string) {
-				if (err) console.error(err);
+				if (err) throw err;
 				
 				callback(path, string);
 				
@@ -622,13 +622,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(file == undefined) file = editor.currentFile;
 		
 		if(!file) {
-			console.error(new Error("No file open when save was called"));
+			throw new Error("No file open when save was called");
 		}
 		
 		
 		// Do not specify path for saving in old path!
 		
-		if(editor.files.hasOwnProperty(path)) console.error(new Error("There is already a file open with path=" + path));
+		if(editor.files.hasOwnProperty(path)) throw new Error("There is already a file open with path=" + path);
 		
 		if(path == undefined) {
 			path = file.path;
@@ -657,7 +657,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				if(err) {
 					console.warn("Unable to save " + path + "!");
-					console.error(err);
+					throw err;
 				}
 				else {
 					console.log("The file was successfully saved: " + path + "");
@@ -940,7 +940,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var file = editor.currentFile;
 			
 			if(gridRow == undefined) gridRow = file.caret.row;
-			if(file.grid.length <= gridRow) console.error(new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " "));
+			if(file.grid.length <= gridRow) throw new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " ");
 			
 			if(!file.rowVisible(gridRow)) {
 				console.warn("Row=" + gridRow + " not in view!");
@@ -1063,7 +1063,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(!editor.shouldResize) return; // Don't resize if it's not needed.
 		editor.shouldResize = false; // Prevent this function from running again
 		
-		//if(global.lastKeyPressed=="a") console.error(new Error("why resize now?"));
+		//if(global.lastKeyPressed=="a") throw new Error("why resize now?");
 		
 		console.log("Resizing ... e=" + e + " editor.shouldRender=" + editor.shouldRender + "");
 		
@@ -1264,7 +1264,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			lowest order nr will execute first!
 		*/
 		
-		if(typeof callback !== "function") console.error(new Error("The second argument needs to be a function! Did you mean editor.addEvent ?"));
+		if(typeof callback !== "function") throw new Error("The second argument needs to be a function! Did you mean editor.addEvent ?");
 		
 		return editor.addEvent(eventName, {fun: callback, order: order});
 	}
@@ -1272,7 +1272,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.addEvent = function(eventName, options) {
 		
 		if(!(eventName in editor.eventListeners)) {
-			console.error("eventName=" + eventName + " does not exist in editor.eventListeners!");
+			throw "eventName=" + eventName + " does not exist in editor.eventListeners!";
 		}
 		
 		if(arguments.length > 2) {
@@ -1286,13 +1286,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				options = {fun: options};
 			}
 			else {
-				console.error(new Error("A function, or an object with the property fun, need to be passed in the second argument! options=" + options));
+				throw new Error("A function, or an object with the property fun, need to be passed in the second argument! options=" + options);
 			}
 		}
 		
 		if(options.order == undefined) options.order = 1;
 		if(typeof options.fun != "function") {
-			console.error(new Error("There needs to be a function!"));
+			throw new Error("There needs to be a function!");
 		}
 		
 		var index = editor.eventListeners[eventName].push(options);
@@ -1594,7 +1594,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	editor.fireEvent = function(eventName) {
 		
-		//console.error(new Error("todo: shift/splice arguments before sending them to listener"));
+		//throw new Error("todo: shift/splice arguments before sending them to listener");
 		
 		var eventListeners;
 		var func;
@@ -1607,7 +1607,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			for(var i=0; i<eventListeners.length; i++) {
 				func = eventListeners[i].fun;
 				
-				if(func == undefined) console.error(new Error("Undefined function in " + eventName + " listener!"));
+				if(func == undefined) throw new Error("Undefined function in " + eventName + " listener!");
 				
 				//fun.apply(this, Array.prototype.shift.call(arguments)); // Remove eventName from arguments
 				
@@ -1618,7 +1618,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			// editor.eventListeners[eventName] // ?????
 		}
 		else {
-			console.error(new Error("Uknown event listener:" + eventName));
+			throw new Error("Uknown event listener:" + eventName);
 		}
 		
 	}
@@ -1782,13 +1782,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					}
 				}
 				else {
-					console.error(new Error(functionName(fun) + " did not return an array"));
+					throw new Error(functionName(fun) + " did not return an array");
 				}
 			}
 		}
 		
 		if(options.length != mcl.length) {
-			console.error(new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " "));
+			throw new Error("Something went wrong! options=" + JSON.stringify(options) + "\nmcl=" +  JSON.stringify(mcl) + " ");
 			return false;
 		}
 		
@@ -1913,7 +1913,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			return false;
 		}
 		
-		if(!editor.files.hasOwnProperty(file.path)) console.error(new Error("Showing a file that is not open!"));
+		if(!editor.files.hasOwnProperty(file.path)) throw new Error("Showing a file that is not open!");
 		
 		if(editor.currentFile) {
 			// Hide current file
@@ -2034,7 +2034,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		else {
 			this.show();
-			console.error(new Error("Something went wrong when closing the editor!"));
+			throw new Error("Something went wrong when closing the editor!");
 		}
 		
 	});
@@ -2112,7 +2112,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Starting the editor ...");
 		
 		fs.readFile("version.inc", "utf8", function(err, string) {
-			if(err) console.error("Could not read version.inc\n" + err.stack);
+			if(err) throw "Could not read version.inc\n" + err.stack;
 			editor.version = parseInt(string);
 			});
 		
@@ -2288,7 +2288,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				function testResult(result) {
 					
 					if(testsCompleted.indexOf(test.text) != -1) {
-						console.error(new Error("Test called callback more then once, or there's two tests with the same descrition: " + test.text));
+						throw new Error("Test called callback more then once, or there's two tests with the same descrition: " + test.text);
 						return;
 					}
 					
@@ -2352,12 +2352,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Reading single file ...");
 		
 		if(global.fileOpenCallback == undefined) {
-			console.error(new Error("There is no listener for the open file dialog!"));
+			throw new Error("There is no listener for the open file dialog!");
 		}
 		
 		var file = e.target.files[0];
 		if (!file) {
-			console.error(new Error("No file selected from the open-file dialog."));
+			throw new Error("No file selected from the open-file dialog.");
 			return;
 		}
 		
@@ -2399,7 +2399,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var file = e.target.files[0];
 		
 		if(editor.filesaveAsCallback == undefined) {
-			console.error(new Error("There is no listener for the save file dialog!"));
+			throw new Error("There is no listener for the save file dialog!");
 		}
 		
 		if (!file) {
@@ -2532,7 +2532,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
-						console.error(new Error("Another listener has already changed the pasted text!"));
+						throw new Error("Another listener has already changed the pasted text!");
 					}
 					text = ret;
 					textChanged = true;
@@ -2763,7 +2763,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 				
 				if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
-					console.error(new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work"));
+					throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
 				}
 				else {
 					
@@ -2789,7 +2789,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					}
 					else if(funReturn !== true) {
 						console.log("function called: " + functionName(binding.fun)); // Sometimes the file doesn't show up in the stack!!? So show the function name and we can do a search in file.
-						console.error(new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc."));
+						throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc.");
 					}
 				}
 			}
@@ -2798,7 +2798,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 		}
 		
-		if(gotError) console.error(new Error("Got an error while running keyBindings! See console warnings."));
+		if(gotError) throw new Error("Got an error while running keyBindings! See console warnings.");
 		
 		
 		if(editor.currentFile) {
@@ -2823,7 +2823,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			//else if(combo.shift) {} // Wait for Shift+key combo!
 			//&&//&&//
 			else {
-				console.error(Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode));
+				throw Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode);
 				
 				preventDefault = true;
 			}
@@ -2941,7 +2941,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					console.log("Default action will be prevented!");
 				}
 				else if(funReturn !== true) {
-					console.error(new Error("To prevent bugs, keybound functions always need to return either true or false!\nAlthough it doesn't matter on keyup events. Returning false on keydown event will prevent default action."));
+					throw new Error("To prevent bugs, keybound functions always need to return either true or false!\nAlthough it doesn't matter on keyup events. Returning false on keydown event will prevent default action.");
 				}
 				
 			}
@@ -3370,7 +3370,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	function htmlToImage(html, callback) {
 		
-		if(!callback) console.error(new Error("No callback function in htmlToImage"));
+		if(!callback) throw new Error("No callback function in htmlToImage");
 		
 		html = html + " "; // Last word wont show unless there's a space at the end! WTF!?
 		

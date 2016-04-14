@@ -81,8 +81,8 @@
 				left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
 				
 				
-				if(isNaN(left)) console.error(new Error("left is NaN"));
-				if(isNaN(top)) console.error(new Error("top is NaN"));
+				if(isNaN(left)) throw new Error("left is NaN");
+				if(isNaN(top)) throw new Error("top is NaN");
 				
 				if(editor.settings.drawGridBox) {
 					ctx.beginPath();

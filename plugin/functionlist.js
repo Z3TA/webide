@@ -260,7 +260,7 @@
 	
 	function hideFunctionList(file) {
 		
-		if(file == undefined) console.error(new Error("File is undefined!"));
+		if(file == undefined) throw new Error("File is undefined!");
 		
 		console.log("Hiding the functionlist for file.path=" + file.path);
 		

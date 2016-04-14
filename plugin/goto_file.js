@@ -25,7 +25,7 @@
 		
 		// Sanity check
 		if(!footer) {
-			console.error(new Error("Can not find the footer!"));
+			throw new Error("Can not find the footer!");
 		}
 		
 		// Insert text into translation dictionary if they dont exist
@@ -213,7 +213,7 @@
 		function readFile(filePath) {
 			fs.readFile(filePath, 'utf-8', function(err, contents) {
 				
-				if(err) console.error(err);
+				if(err) throw err;
 				
 				console.log("Searching " + filePath);
 				

@@ -46,12 +46,14 @@
 	var WebSocket = require('ws');
 	var client;
 	
-	var ignoreErrors = false;
+	var showAlertMessage = true;
 
 	var errorReportCounter = 0; // Used for file names
 	var thisSessionErrorCount = 0;
 	var maxErrors = 5;
 	var alertNoticeToManyErrors = false;
+	
+	var GUI = require('nw.gui').Window.get();
 	
 	function wsError(err) {
 		console.log("Connection Error: " + err.toString());
@@ -181,26 +183,30 @@
 
 	
 	function captureErrors(json) {
-					
+		
 		// {"method":"Console.messageAdded","params":{"message":{"source":"console-api","level":"log","text":"\"openFiles.length=4\"","timestamp":1458219335.99887,"type":"log","line":361,"column":13,"url":"file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js","executionContextId":1,"parameters":[{"type":"string","value":"openFiles.length=4"}],"stackTrace":[{"functionName":"reopen_files_closeEditor","scriptId":"151","url":"file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js","lineNumber":361,"columnNumber":13}]}}}
-
+		
 		var msg = json.params.message;
 		
 		if(msg.level=="error") {
 			
+			// Save all state to temporary files !?
+			
+			
+			
 			//console.log(JSON.stringify(json, null, 2));
-
+			
 			
 			//var alertMsg = msg.text + "\n" + msg.url + ", line " + msg.line + stackTrace(msg.stackTrace, msg.line);
 			
 			var errorReport = "############################## " + myDate() + " ##############################" + newLine
 			
 			errorReport += messageLog.join(newLine) + newLine; // Last log messages before the error
-
+			
 			errorReport += newLine + newLine + fullPad + parseText(msg.text) + newLine;
 			
 			errorReport += stackTrace(msg.stackTrace) + newLine + newLine;
-
+			
 			
 			log(errorReport);
 			
@@ -208,48 +214,59 @@
 			
 			//console.log("alertMsg=" + alertMsg);
 			
-			
-			if(!ignoreErrors) {
-				// Ignore errors for a while so we don't have to close a shitload of alert boxes
-				ignoreErrors = true;
-				setTimeout(function continueCapturingErrors() {
-					ignoreErrors = false;
-				}, 2000);
-				
-				alert(alertMsg); // Does alert stop the world!?
-			}
-			
-			var errorReportFilePath = "error_report " + (errorReportCounter++) + ".tmp";
-			// Do not overwrite opened files!
-			while(editor.files[errorReportFilePath]) {
-				errorReportFilePath = "error_report " + (errorReportCounter++) + ".tmp";
-			}
-			
-			if(thisSessionErrorCount > maxErrors) {
-				if(!alertNoticeToManyErrors) {
-					alertNoticeToManyErrors = true;
-					alert("Too many errors detected. You should restart the editor! See error.log and/or the debug console.");
-				}
+			if(editor.settings.devMode) {
+				// If the developer tools are open, we don't need to open a bug report template file
+				GUI.showDevTools();
 			}
 			else {
 				
-				thisSessionErrorCount++;
 				
-				editor.openFile(errorReportFilePath, editor.reportTemplate(errorReport), function errorReportOpened(file, err) {
+				if(thisSessionErrorCount > maxErrors) {
+					if(!alertNoticeToManyErrors) {
+						alertNoticeToManyErrors = true;
+						
+						if(confirm("Max error limit reached. Do you want to *hard boot* the editor? The errors has been saved to error.log")) {
+							GUI.reload();
+						}
+						
+						}
+				}
+				else {
 					
-					if(err) console.error(err);
+					// Don't *ask* to generate a bug report
 					
-					file.moveCaretToEnd();
-				});
+					if(showAlertMessage) {
+						
+						// Prevent spamming of alert boxes
+						showAlertMessage = false;
+						setTimeout(function continueCapturingErrors() {
+							showAlertMessage = true;
+						}, 2000);
+						
+						alert(alertMsg); // Does alert stop the world!?
+					}
+					
+					thisSessionErrorCount++;
+					
+					var errorReportFilePath = "bug_report.txt"; // The editor will add a counter to double files
+					
+					editor.openFile(errorReportFilePath, editor.reportTemplate(errorReport), function errorReportOpened(file, err) {
+						
+						if(err) GUI.showDevTools();
+						
+						file.moveCaretToEnd(file.caret, function() {
+							file.scrollToCaret(file.caret);
+						});
+					});
+				}
+				
+				
+				// Clear the console so we do not get the same error again if we reconnect
+				//send(consoleClearMessages());
+				// This clears for others too, so leave the messages
+				
+				// If in production, you better restart the editor
 			}
-
-			
-
-			
-			// Clear the console so we do not get the same error again if we reconnect
-			//send(consoleClearMessages());
-			// This clears for others too, so leave the messages
-			
 		}
 		else {
 			// Keep a list of the 100 latest message

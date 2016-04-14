@@ -569,7 +569,7 @@
 				leftSide = lastWord;
 			}
 			else {
-				console.error(new Error("Unexpected pointerCharacter=" + pointerCharacter + " (line=" + lineNumber + ")"));
+				throw new Error("Unexpected pointerCharacter=" + pointerCharacter + " (line=" + lineNumber + ")");
 			}
 			
 			//console.log("findLeftSide return leftSide=" + leftSide);
@@ -849,7 +849,7 @@
 						tmpXmlMode = xmlMode; // xmlMode when the tag starts
 						xmlMode = false;
 					}
-					if(insideHTMLComment) console.error(new Error("WTF"));
+					if(insideHTMLComment) throw new Error("WTF");
 				}
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;

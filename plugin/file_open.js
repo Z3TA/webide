@@ -73,7 +73,7 @@
 			
 			editor.openFile(filePath, content, function after_open_file(file, err) {  // path, content, callback
 			
-				if(err) console.error(err);
+				if(err) throw err;
 			
 				// Mark the file as saved, because we just opened it
 				file.isSaved = true;

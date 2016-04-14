@@ -73,7 +73,7 @@
 				console.warn("Doesn't seem to be a line: " + clickedRowText);
 				return;
 			}
-			else if(arr.length != 2) console.error(new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)"));
+			else if(arr.length != 2) throw new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)");
 			
 			var lineNr = arr[1]; // The part captured by the group (parenthesis)
 			
@@ -249,7 +249,7 @@
 	
 	function buildDiv() {
 		if(!footer) {
-			console.error(new Error("Can not find the footer!"));
+			throw new Error("Can not find the footer!");
 		}
 		
 		div = document.createElement("div");
@@ -536,7 +536,7 @@
 			foldersToRead++;
 			
 			fs.readdir(currentDirPath, function dirRead(err, folderItems) {
-				if(err) console.error(err);
+				if(err) throw err;
 				
 				var filePath;
 				for(var i=0; i<folderItems.length; i++) {
@@ -557,7 +557,7 @@
 						
 						var filterMatch = true;
 						
-						if(err) console.error(err);
+						if(err) throw err;
 						
 						console.log("What is: " + filePath);
 						
@@ -629,7 +629,7 @@
 			
 			function streamError(err) {
 				console.log("Stream error! filePath=" + filePath);
-				console.error(err);
+				throw err;
 			}
 			
 			function streamEnded() {

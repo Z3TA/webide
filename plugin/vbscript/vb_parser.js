@@ -92,7 +92,7 @@
 			var firstLineBreakCharacter = LF;
 			var lastLineBreakCharacter = LF;
 		}
-		else console.error(new Error("No linebreaks!"));
+		else throw new Error("No linebreaks!");
 		
 		var word = "";
 		var lastWord = "";
@@ -334,7 +334,7 @@
 						tmpXmlMode = xmlMode; // xmlMode when the tag starts
 						xmlMode = false;
 					}
-					if(insideHTMLComment) console.error(new Error("WTF"));
+					if(insideHTMLComment) throw new Error("WTF");
 				}
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = charIndex - xmlTagStart;

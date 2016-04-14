@@ -11,9 +11,9 @@
 	File = function File(text, path, fileIndex, bigFile, callback) { 
 		var file = this;
 		
-		if(!isString(text)) console.error(new Error("text is not a string!"));
+		if(!isString(text)) throw new Error("text is not a string!");
 		
-		if(!isString(path)) console.error(new Error("path is not a string!"));
+		if(!isString(path)) throw new Error("path is not a string!");
 		
 		file.text = text;
 		file.path = path;
@@ -117,8 +117,8 @@
 		var file = this;
 		
 		// No need to check row because it will throw an error anyway if it's "wrong". But it does give friendlier errors.
-		if(row < 0) console.error(new Error("row=" + row + " less then zero"));
-		if(row > file.grid.length) console.error(new Error("row=" + row + " more then file.grid.length=" + ile.grid.length));
+		if(row < 0) throw new Error("row=" + row + " less then zero");
+		if(row > file.grid.length) throw new Error("row=" + row + " more then file.grid.length=" + ile.grid.length);
 		
 		var txt = file.grid[row].indentationCharacters;
 		for(var col=0; col<file.grid[row].length; col++) {
@@ -137,7 +137,7 @@
 		*/
 		
 		if(typeof oldCaret != "object") {
-			console.error(new Error("Caret (first argument) need to be an object! (but not necessarily a caret)"));
+			throw new Error("Caret (first argument) need to be an object! (but not necessarily a caret)");
 		}
 		
 		var file = this;
@@ -208,13 +208,13 @@
 			}
 			else if(index != undefined) {
 				// Index must be file.text.length
-				if(index != file.text.length) console.error(new Error("Index needs to be text.length=" + file.text.length + " when grid.length=" + grid.length));
+				if(index != file.text.length) throw new Error("Index needs to be text.length=" + file.text.length + " when grid.length=" + grid.length);
 			}
 			else if(row != undefined) {
-				if(row !== 0) console.error(new Error("row=" + row + " must be 0 when grid.length=" + grid.length));
+				if(row !== 0) throw new Error("row=" + row + " must be 0 when grid.length=" + grid.length);
 			}
 			else if(col != undefined) {
-				if(col !== 0) console.error(new Error("col=" + col + " must be 0 when grid.length=" + grid.length));
+				if(col !== 0) throw new Error("col=" + col + " must be 0 when grid.length=" + grid.length);
 			}
 		}
 		else if(index == undefined && row == undefined && col == undefined) {
@@ -224,22 +224,22 @@
 		else if(index == undefined && row != undefined && col != undefined) {
 			// We have row and col, but not index
 			if(isNaN(row)) {
-				console.error(new Error("row=" + row + " is not a number!"));
+				throw new Error("row=" + row + " is not a number!");
 			}
 			else if(row < 0) {
-				console.error(new Error("row=" + row + " < 0"));
+				throw new Error("row=" + row + " < 0");
 			}
 			else if(row >= grid.length) {
-				console.error(new Error("row=" + row + " >= grid.length=" + grid.length));
+				throw new Error("row=" + row + " >= grid.length=" + grid.length);
 			}
 			else if(isNaN(col)) {
-				console.error(new Error("col=" + col + " is not a number!"));
+				throw new Error("col=" + col + " is not a number!");
 			}
 			else if(col < 0) {
-				console.error(new Error("col=" + col + " < 0"));
+				throw new Error("col=" + col + " < 0");
 			}
 			else if(col > grid[row].length) {
-				console.error(new Error("col=" + col + " > grid[" + row + "].length=" + grid[row].length));
+				throw new Error("col=" + col + " > grid[" + row + "].length=" + grid[row].length);
 			}
 			else {
 				index = file.getIndexFromRowCol(row, col);
@@ -258,13 +258,13 @@
 		else if(index == undefined && row != undefined) {
 			// We have only the row
 			if(isNaN(row)) {
-				console.error(new Error("row=" + row + " is not a number!"));
+				throw new Error("row=" + row + " is not a number!");
 			}
 			else if(row < 0) {
-				console.error(new Error("row=" + row + " < 0"));
+				throw new Error("row=" + row + " < 0");
 			}
 			else if(row >= grid.length) {
-				console.error(new Error("row=" + row + " >= grid.length=" + grid.length));
+				throw new Error("row=" + row + " >= grid.length=" + grid.length);
 			}
 			else {
 				// Plate the caret on that row
@@ -280,10 +280,10 @@
 		else if(index == undefined && col != undefined) {
 			// We have only the col
 			if(isNaN(col)) {
-				console.error(new Error("col=" + col + " is not a number!"));
+				throw new Error("col=" + col + " is not a number!");
 			}
 			else if(col < 0) {
-				console.error(new Error("col=" + col + " < 0"));
+				throw new Error("col=" + col + " < 0");
 			}
 			else {
 				if(col == 0) {
@@ -321,7 +321,7 @@
 		else {
 			// We have only index
 			if(isNaN(index)) {
-				console.error(new Error("Index is not a number!"));
+				throw new Error("Index is not a number!");
 			}
 			else {
 				console.log("Placing new caret at index=" + index + " (character=" + file.text.charAt(index) + " charCode=" + file.text.charCodeAt(index) + ")");
@@ -335,25 +335,25 @@
 		
 		// Sanity check if we got it right
 		if(caret.index == undefined) {
-			console.error(new Error("caret.index=" + caret.index + " is undefined!"));
+			throw new Error("caret.index=" + caret.index + " is undefined!");
 		}
 		if(caret.row == undefined) {
-			console.error(new Error("caret.row=" + caret.row + " is undefined!"));
+			throw new Error("caret.row=" + caret.row + " is undefined!");
 		}
 		if(caret.col == undefined) {
-			console.error(new Error("caret.col=" + caret.col + " is undefined!"));
+			throw new Error("caret.col=" + caret.col + " is undefined!");
 		}
 		if(grid.length < caret.row) {
-			console.error(new Error("Row " + caret.row + " is higher then last row=" + grid.length + ""));
+			throw new Error("Row " + caret.row + " is higher then last row=" + grid.length + "");
 		}
 		else if(caret.row < 0) {
-			console.error(new Error("Caret row=" + caret.row + " must be higher then zero!"));
+			throw new Error("Caret row=" + caret.row + " must be higher then zero!");
 		}
 		else if(grid[caret.row].length < caret.col) {
-			console.error(new Error("Caret col=" + caret.col + " is higher then available columns on row " + caret.row + ", witch is " + grid[row].length + ""));
+			throw new Error("Caret col=" + caret.col + " is higher then available columns on row " + caret.row + ", witch is " + grid[row].length + "");
 		}
 		else if(caret.col < 0) {
-			console.error(new Error("Caret col=" + caret.col + " must be higher then zero!"));
+			throw new Error("Caret col=" + caret.col + " must be higher then zero!");
 		}
 		
 		console.log("grid[" + caret.row + "].length=" + grid[caret.row].length);
@@ -363,30 +363,30 @@
 		// Check if we got eol & eof right ...
 		if(caret.col == grid[caret.row].length) {
 			
-			if(caret.eol != true) console.error(new Error("caret.eol=" + caret.eol + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length));
+			if(caret.eol != true) throw new Error("caret.eol=" + caret.eol + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length);
 			caret.eol = true;
 			
 			if(caret.index == file.text.length) {
-				if(caret.eof != true) console.error(new Error("caret.eof=" + caret.eof + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and caret.index=" + caret.index + " == file.text.length=" + file.text.length));
+				if(caret.eof != true) throw new Error("caret.eof=" + caret.eof + " should be true when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and caret.index=" + caret.index + " == file.text.length=" + file.text.length);
 				caret.eof = true;
 			}
 			else {
 				if(caret.eof != false) {
 					//file.debugGrid();
-					console.error(new Error("caret.eof=" + caret.eof + " should be false when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and NOT caret.index=" + caret.index + " == file.text.length=" + file.text.length));
+					throw new Error("caret.eof=" + caret.eof + " should be false when caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length + " and NOT caret.index=" + caret.index + " == file.text.length=" + file.text.length);
 				}
 				caret.eof = false;
 			}
 		}
 		else {
-			if(caret.eol != false && caret.eof != false) console.error(new Error("Both caret.eol=" + caret.eol + " and  caret.eof=" + caret.eof + " should be false when NOT caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length));
+			if(caret.eol != false && caret.eof != false) throw new Error("Both caret.eol=" + caret.eol + " and  caret.eof=" + caret.eof + " should be false when NOT caret.col=" + caret.col + " == grid[" + caret.row + "].length=" + grid[caret.row].length);
 			caret.eol = false;
 			caret.eof = false;
 		}
 		
 		if(!caret.eol) {
 			if(grid[caret.row][caret.col].index != caret.index) {
-				console.error(new Error("Caret index=" + caret.index + " is not the same as the index on row=" + caret.row + " and col=" + caret.col + ", and it should be index=" + grid[caret.row][caret.col].index + ""));
+				throw new Error("Caret index=" + caret.index + " is not the same as the index on row=" + caret.row + " and col=" + caret.col + ", and it should be index=" + grid[caret.row][caret.col].index + "");
 				caret.index = grid[caret.row][caret.col].index;
 			}
 		}
@@ -439,27 +439,27 @@
 			box,
 			lineBreakCharacters;
 		
-		if(file.startRow % 1 > 0) console.error(new Error("file.startRow=" + file.startRow + " Needs to be an integer!"));
+		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
-		if(file.startRow < 0) console.error(new Error("file.startRow=" + file.startRow + " editor.view.visibleRows=" + editor.view.visibleRows + ""));
-		if(file.startRow >= (grid.length + file.partStartRow)) console.error(new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow));
+		if(file.startRow < 0) throw new Error("file.startRow=" + file.startRow + " editor.view.visibleRows=" + editor.view.visibleRows + "");
+		if(file.startRow >= (grid.length + file.partStartRow)) throw new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
 		
 		
 		for(var row=0; row<grid.length; row++) {
 			
 			// Check Startindex
 			
-			if(typeof grid[row].startIndex !== "number") console.error(new Error("startIndex of grid row=" + row + " is " + grid[row].startIndex + " (not a number)"));
-			if(typeof grid[row].lineNumber !== "number") console.error(new Error("lineNumber of grid row=" + row + " is " + grid[row].lineNumber + " (not a number)"));
-			if(typeof grid[row].indentation !== "number") console.error(new Error("indentation of grid row=" + row + " is " + grid[row].indentation + " (not a number)"));
-			if(typeof grid[row].indentationCharacters !== "string") console.error(new Error("indentationCharacters of grid row=" + row + " is " + grid[row].indentationCharacters + " (not a string)"));
+			if(typeof grid[row].startIndex !== "number") throw new Error("startIndex of grid row=" + row + " is " + grid[row].startIndex + " (not a number)");
+			if(typeof grid[row].lineNumber !== "number") throw new Error("lineNumber of grid row=" + row + " is " + grid[row].lineNumber + " (not a number)");
+			if(typeof grid[row].indentation !== "number") throw new Error("indentation of grid row=" + row + " is " + grid[row].indentation + " (not a number)");
+			if(typeof grid[row].indentationCharacters !== "string") throw new Error("indentationCharacters of grid row=" + row + " is " + grid[row].indentationCharacters + " (not a string)");
 			
 			
 			if(grid[row].length > 0) {
 				// Startindex should be the same as the index of the first letter box
 				if(grid[row].startIndex != grid[row][0].index) {
 					file.debugGrid();
-					console.error(new Error("startIndex (" + grid[row].startIndex + ") on row " + row + " doesn't match index (" + grid[row][0].index + ") of first box=" + JSON.stringify(grid[row][0])));
+					throw new Error("startIndex (" + grid[row].startIndex + ") on row " + row + " doesn't match index (" + grid[row][0].index + ") of first box=" + JSON.stringify(grid[row][0]));
 				}
 			}
 			else if(row>0){
@@ -468,7 +468,7 @@
 				expect = lastRow.startIndex + lastRow.length + file.lineBreak.length + grid[row].indentationCharacters.length;
 				if(grid[row].startIndex != expect) {
 					file.debugGrid();
-					console.error(new Error("Row " + row + " has startIndex=" + grid[row].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[row].indentationCharacters.length + " path=" + file.path));
+					throw new Error("Row " + row + " has startIndex=" + grid[row].startIndex + " but it was expected to be " + expect + ".\nlastRow.startIndex=" + lastRow.startIndex + " lastRow.indentationCharacters.length=" + lastRow.indentationCharacters.length + " lastRow.length=" + (lastRow.length) + " file.lineBreak.length=" + file.lineBreak.length + " currentRow.indentationCharacters.length=" + grid[row].indentationCharacters.length + " path=" + file.path);
 				}
 			}
 			
@@ -476,7 +476,7 @@
 			if(row>0){
 				lastRow = grid[row-1];
 				if((grid[row].lineNumber-1) != lastRow.lineNumber) {
-					console.error(new Error("Line number of row " + row + " is " + grid[row].lineNumber + " but was expected to be " + (lastRow.lineNumber+1) + ". Row " + (row-1) + " lineNumber = " + lastRow.lineNumber + ""));
+					throw new Error("Line number of row " + row + " is " + grid[row].lineNumber + " but was expected to be " + (lastRow.lineNumber+1) + ". Row " + (row-1) + " lineNumber = " + lastRow.lineNumber + "");
 				}
 			}
 			
@@ -494,33 +494,33 @@
 						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					console.error(new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex));
+					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex);
 				}
 			}
 			
 			// Check indentation
 			if(grid[row].indentation < 0) {
-				console.error(new Error("Indentation is " + grid[row].indentation + " or row " + row + "!"));
+				throw new Error("Indentation is " + grid[row].indentation + " or row " + row + "!");
 			}
 			
 			
 			for(var col=0; col<grid[row].length; col++) {
 				// Check if character on the grid and on file.text is the same
 				if(grid[row][col].char != file.text.charAt(grid[row][col].index)) {
-					console.error(new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + file.text.charAt(grid[row][col].index + "")));
+					throw new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + file.text.charAt(grid[row][col].index + ""));
 				}
 				// Make sure there is no line break character in the middle of the text
 				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
-					console.error(new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character!"));
+					throw new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character!");
 				}
 				
 				// Make sure the box has these properties:
 				box = grid[row][col];
-				if(box.char === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a char value!"));
-				if(box.index === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a index value!"));
-				if(box.color === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a color value!"));
-				if(box.selected === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a selected value!"));
-				if(box.highlighted === undefined) console.error(new Error("grid[" + row + "][" + col + "] doesn't have a highlighted value!"));
+				if(box.char === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a char value!");
+				if(box.index === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a index value!");
+				if(box.color === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a color value!");
+				if(box.selected === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a selected value!");
+				if(box.highlighted === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a highlighted value!");
 				
 			}
 			
@@ -528,7 +528,7 @@
 		
 		// Check if the scrolling is OK
 		if(editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
-			console.error(new Error("Scrolling bug: editor.view.endingColumn=" + editor.view.endingColumn + " file.startColumn=" + file.startColumn + " editor.view.visibleColumns=" + editor.view.visibleColumns + " path=" + file.path));
+			throw new Error("Scrolling bug: editor.view.endingColumn=" + editor.view.endingColumn + " file.startColumn=" + file.startColumn + " editor.view.visibleColumns=" + editor.view.visibleColumns + " path=" + file.path);
 		}
 		
 		
@@ -552,43 +552,43 @@
 		//console.log("Checking caret=" + JSON.stringify(caret));
 		
 		if(caret.index == null) {
-			console.error(new Error("Caret index is null!"));
+			throw new Error("Caret index is null!");
 		}
 		else if(isNaN(caret.index)) {
-			console.error(new Error("Caret index is NaN!"));
+			throw new Error("Caret index is NaN!");
 		}
 		
-		if(caret.row >= file.grid.length) console.error(new Error("caret.row=" + caret.row + " >= file.grid.length=" + file.grid.length));
+		if(caret.row >= file.grid.length) throw new Error("caret.row=" + caret.row + " >= file.grid.length=" + file.grid.length);
 		
 		if(caret.eof) {
 			if(caret.row != (file.grid.length-1)) {
-				console.error(new Error("Caret on row " + caret.row + ". Expected it to be on row " + file.grid.length + " because caret.eof = true in file.path=" + file.path));
+				throw new Error("Caret on row " + caret.row + ". Expected it to be on row " + file.grid.length + " because caret.eof = true in file.path=" + file.path);
 			}
 			else if(caret.eol != true) {
-				console.error(new Error("Caret should be on EOL when caret.eof = true\ncaret=" + JSON.stringify(caret) + "\n" + "file.text.length=" + file.text.length + ""));
+				throw new Error("Caret should be on EOL when caret.eof = true\ncaret=" + JSON.stringify(caret) + "\n" + "file.text.length=" + file.text.length + "");
 			}
 		}
 		if(caret.eol) {
 			if(caret.col != file.grid[caret.row].length) {
-				console.error(new Error("Caret on column " + caret.col + ". Expected it to be on column " + file.grid[caret.row].length + " because caret.eol = true"));
+				throw new Error("Caret on column " + caret.col + ". Expected it to be on column " + file.grid[caret.row].length + " because caret.eol = true");
 			}
 			if(!caret.eof) {
 				char = file.text.charAt(caret.index);
 				if(char != "\r" && char != "\n") {
 					file.debugGrid();
-					console.error(new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = true and not caret.eof=true\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + ""));
+					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = true and not caret.eof=true\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + "");
 				}
 			}
 		}
 		else if(!caret.eof) {
 			if(!file.grid[caret.row][caret.col]) {
-				console.error(new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col]));
+				throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col]);
 			}
 			else if(file.grid[caret.row][caret.col].char != file.text.charAt(caret.index)) {
-				console.error(new Error("Character \"" + file.grid[caret.row][caret.col].char + "\" on file.grid[" + caret.row + "][" + caret.col + "] is not the same as character \"" + file.text.charAt(caret.index) + "\" in file.text on caret.index=" + caret.index + ""));
+				throw new Error("Character \"" + file.grid[caret.row][caret.col].char + "\" on file.grid[" + caret.row + "][" + caret.col + "] is not the same as character \"" + file.text.charAt(caret.index) + "\" in file.text on caret.index=" + caret.index + "");
 			}
 			else if(caret.index==file.text.length) {
-				console.error(new Error("Caret should be on EOF! caret.index=" + caret.index + " file.text.length=" + file.text.length + ""));
+				throw new Error("Caret should be on EOF! caret.index=" + caret.index + " file.text.length=" + file.text.length + "");
 			}
 		}
 		
@@ -745,10 +745,10 @@
 		}
 		
 		if(text == undefined) {
-			console.error(new Error("No text to insert! text is undefined!"));
+			throw new Error("No text to insert! text is undefined!");
 		}
 		else if(typeof text != "string") {
-			console.error(new Error("text need to be a string!\n" + text));
+			throw new Error("text need to be a string!\n" + text);
 		}
 		else if(text.length === 0) {
 			console.warn("No text to insert! (text.length=" + text.length + ")");
@@ -828,19 +828,19 @@
 		
 		
 		if(character == undefined) {
-			console.error(new Error("character is undefined!"));
+			throw new Error("character is undefined!");
 		}
 		else if(character.charCodeAt(0) == 13) {
-			console.error(new Error("Tried to insert a new line character"));
+			throw new Error("Tried to insert a new line character");
 		}
 		else if(character.charCodeAt(0) == 9) {
-			console.error(new Error("Tried to insert a tab character"));
+			throw new Error("Tried to insert a tab character");
 		}
 		else if(character.charCodeAt(0) == 8) {
-			console.error(new Error("Tried to insert a backspace character"));
+			throw new Error("Tried to insert a backspace character");
 		}
 		else if(character.charCodeAt(0) < 32) {
-			console.error(new Error("Tried to insert a control character (" + character + " = " + character.charCodeAt(0) + ")"));
+			throw new Error("Tried to insert a control character (" + character + " = " + character.charCodeAt(0) + ")");
 			return;
 		}
 		
@@ -1083,7 +1083,7 @@
 				
 				box = selection[i];
 				
-				if(box.index == undefined) console.error(new Error("Index is undefined. Stuff will go wrong!"));
+				if(box.index == undefined) throw new Error("Index is undefined. Stuff will go wrong!");
 				
 				//console.log("Deselecting box:\n" + JSON.stringify(box));
 				
@@ -1756,13 +1756,13 @@
 			gridIndex;
 		
 		if(index == undefined) {
-			console.error(new Error("index is undefined!"));
+			throw new Error("index is undefined!");
 		}
 		else if(index < 0) {
-			console.error(new Error("Index can not be less then zero!"));
+			throw new Error("Index can not be less then zero!");
 		}
 		else if(index > file.text.length) {
-			console.error(new Error("Index can not be over file length=" + file.text.length + ""));
+			throw new Error("Index can not be over file length=" + file.text.length + "");
 		}
 		
 		if(caret == undefined) caret = file.caret;
@@ -1865,7 +1865,7 @@
 					}
 					
 					if(caret.row % 1 !== 0) { // Make sure it's an integer
-						console.error(new Error("Couldn't set cursor! index=" + index + " caret.row=" + caret.row));
+						throw new Error("Couldn't set cursor! index=" + index + " caret.row=" + caret.row);
 						//return undefined;
 					}
 				}
@@ -1890,13 +1890,13 @@
 			
 			console.log("file is a stream! And it's not at the end");
 			
-			if(caret != file.caret) console.error(new Error("Can not place virtual caret, only file.caret if the file is big!"));
+			if(caret != file.caret) throw new Error("Can not place virtual caret, only file.caret if the file is big!");
 			
-			if(file.totalRows == -1) console.error(new Error("totalRows not yet found! Wait ...?"));
+			if(file.totalRows == -1) throw new Error("totalRows not yet found! Wait ...?");
 			
 			var partStartRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
 		
-			if(partStartRow < 0) console.error(new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!"));
+			if(partStartRow < 0) throw new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!");
 			
 			file.loadFilePart(partStartRow, function loadPartDone() {
 				
@@ -1905,8 +1905,6 @@
 				file.caret.row = file.grid.length-1;
 				
 				file.fixCaret();
-				
-				if(caret == file.caret && editor.currentFile == file) editor.renderNeeded();
 				
 				if(cb) cb(file.caret);
 				
@@ -1921,8 +1919,6 @@
 			caret.col = file.grid[caret.row].length-1;
 			
 			file.fixCaret(caret);
-			
-			if(caret == file.caret && editor.currentFile == file) editor.renderNeeded(); 
 			
 			if(cb) {
 				cb(caret);
@@ -1941,25 +1937,25 @@
 		
 		//console.log("getIndexFromRowCol!")
 		
-		if(row == undefined) console.error(new Error("row is undefined!"));
-		if(col == undefined) console.error(new Error("col is undefined!"));
+		if(row == undefined) throw new Error("row is undefined!");
+		if(col == undefined) throw new Error("col is undefined!");
 		
 		// Note: caret always represent the position on the grid and index in file.text (not the whole file in big files)
 		
 		if(row < 0) {
-			console.error(new Error("row=" + row + " must be higher then zero!"));
+			throw new Error("row=" + row + " must be higher then zero!");
 		}
 		else if(row >= grid.length) {
-			console.error(new Error("Row " + row + " is higher then grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow));
+			throw new Error("Row " + row + " is higher then grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
 		}
 		
 		var gridRow = grid[row];
 		
 		if(col < 0) {
-			console.error(new Error("col=" + col + " must be higher then zero!"));
+			throw new Error("col=" + col + " must be higher then zero!");
 		}
 		else if(col > gridRow.length) {
-			console.error(new Error("col=" + col + " > " + gridRow.length + " (higher then available columns on row " + row + ")"));
+			throw new Error("col=" + col + " > " + gridRow.length + " (higher then available columns on row " + row + ")");
 		}
 		else if(col === 0) {
 			return gridRow.startIndex;
@@ -2068,7 +2064,7 @@
 		
 		var file = this;
 		
-		if(text == undefined) console.error(new Error("No text!"));
+		if(text == undefined) throw new Error("No text!");
 		
 		file.text = text;
 		
@@ -2313,11 +2309,11 @@
 		var grid = file.grid;
 		
 		if(row < 0) {
-			console.error(new Error("row=" + row));
+			throw new Error("row=" + row);
 			return;
 		}
 		else if(row >= grid.length) {
-			console.error(new Error("row=" + row + " > grid.length=" + grid.length));
+			throw new Error("row=" + row + " > grid.length=" + grid.length);
 			return;
 		}
 		
@@ -2445,7 +2441,7 @@
 		if(startRow < 0) startRow = 0;
 		
 		
-		if(caret.row >= file.grid.length) console.error(new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length));
+		if(caret.row >= file.grid.length) throw new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length);
 
 		
 		// Left & Right
@@ -2509,7 +2505,7 @@
 		var file = this;
 		
 		if(text.length == 0) {
-			console.error(new Error("No text to highlight!"));
+			throw new Error("No text to highlight!");
 			return;
 		}
 		
@@ -2586,19 +2582,19 @@
 		
 		var file = this;
 		
-		if(file.isStreaming) console.error(new Error("Can't goto line in a file that is streaming!"));
+		if(file.isStreaming) throw new Error("Can't goto line in a file that is streaming!");
 		
 		if(undefined == line) {
-			console.error(new Error("line=" + line + " is undefined!"));
+			throw new Error("line=" + line + " is undefined!");
 		}
 		else if(isNaN(line)) {
-			console.error(new Error("line=" + line + " is not a number!"));
+			throw new Error("line=" + line + " is not a number!");
 		}
 		else if(line < 1) {
-			console.error(new Error("Can't go to line=" + line + " because it's below 1!"));
+			throw new Error("Can't go to line=" + line + " because it's below 1!");
 		}
 		else if(line > Math.max(file.grid.length, (file.totalRows+1))) {
-			console.error(new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + ""));
+			throw new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + "");
 		}
 		
 		//var maxFileRow = Math.max(0, Math.max(file.grid.length, (file.totalRows+1)) - editor.view.visibleRows);
@@ -2642,7 +2638,7 @@
 			});
 		} 
 		else {
-			console.error(new Error("fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length));
+			throw new Error("fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length);
 		}
 
 	}
@@ -2658,19 +2654,19 @@
 		
 		var file = this;
 		
-		if(file.isStreaming) console.error(new Error("Can't scroll to line in a file that is streaming!"));
+		if(file.isStreaming) throw new Error("Can't scroll to line in a file that is streaming!");
 		
 		if(undefined == line) {
-			console.error(new Error("line=" + line + " is undefined!"));
+			throw new Error("line=" + line + " is undefined!");
 		}
 		else if(isNaN(line)) {
-			console.error(new Error("line=" + line + " is not a number!"));
+			throw new Error("line=" + line + " is not a number!");
 		}
 		else if(line < 1) {
-			console.error(new Error("Can't scroll to line=" + line + " because it's below 1!"));
+			throw new Error("Can't scroll to line=" + line + " because it's below 1!");
 		}
 		else if(line > file.grid.length) {
-			console.error(new Error("Can't scroll to line=" + line + " because it's above file.grid.length=" + file.grid.length + ""));
+			throw new Error("Can't scroll to line=" + line + " because it's above file.grid.length=" + file.grid.length + "");
 		}
 		
 		//console.log("Line " + line);
@@ -2732,15 +2728,15 @@
 				
 				// We only want to "load more" of "large files" if the caret is near the "edge"
 				
-				if(y < 0) console.error(new Error("y=" + y + " < 0"));
-				if(y >= file.grid.length) console.error(new Error("y=" + y + " >= file.grid.length=" + file.grid.length));
+				if(y < 0) throw new Error("y=" + y + " < 0");
+				if(y >= file.grid.length) throw new Error("y=" + y + " >= file.grid.length=" + file.grid.length);
 				
 				var high = Math.min((file.grid.length - editor.view.visibleRows), Math.floor(file.grid.length * .85 - editor.view.visibleRows));
 				var low = Math.floor(file.grid.length * .15);
 				var middle = Math.floor(file.grid.length * .5);
 				var moveRows = Math.floor(file.grid.length * .25);
 				
-				if(high < low) console.error(new Error("high=" + high + " < low=" + low + ". file.grid.length=" + file.grid.length + " path=" + file.path));
+				if(high < low) throw new Error("high=" + high + " < low=" + low + ". file.grid.length=" + file.grid.length + " path=" + file.path);
 				
 				//console.log(editor.getStack("scrollTo"));
 				
@@ -2820,7 +2816,7 @@
 			
 			console.log("y=" + y);
 
-			if(y < low) console.error(new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  ));
+			if(y < low) throw new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  );
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
@@ -2856,7 +2852,7 @@
 		var file = this;
 		
 		if(callback === undefined) {
-			console.error(new Error("Expected a callback function!"));
+			throw new Error("Expected a callback function!");
 			return;
 		}
 		
@@ -2934,10 +2930,10 @@
 		
 		if(partStartRow == undefined) partStartRow = 0;
 		
-		if(partStartRow < 0) console.error(new Error("Can not begin stream in negative row:" + partStartRow));
+		if(partStartRow < 0) throw new Error("Can not begin stream in negative row:" + partStartRow);
 		
 		if(file.totalRows != -1) {
-			if(partStartRow >= file.totalRows) console.error(new Error("Can not begin stream in above file.totalRows=" + file.totalRows));
+			if(partStartRow >= file.totalRows) throw new Error("Can not begin stream in above file.totalRows=" + file.totalRows);
 		}
 		
 		if(callback == undefined) console.warn("loadFilePart with no callback!");
@@ -2994,7 +2990,7 @@
 		}
 		
 		if(file.isStreaming) {
-			console.error(new Error("The file is already busy streaming! isPaused=" + stream.isPaused() + ""));
+			throw new Error("The file is already busy streaming! isPaused=" + stream.isPaused() + "");
 			return;
 		}
 
@@ -3013,7 +3009,7 @@
 		
 		function streamError(err) {
 			console.log("Stream error!");
-			console.error(err);
+			throw err;
 		}
 		
 
@@ -3096,7 +3092,7 @@
 			
 			file.isStreaming = false;
 			
-			if(file.totalRows == -1) console.error(new Error("Stream closed before we got file.totalRows!"));
+			if(file.totalRows == -1) throw new Error("Stream closed before we got file.totalRows!");
 			
 			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
 			console.log("Calling callback name=" + functionName(callback));
@@ -3249,7 +3245,7 @@
 					
 					// hmm ... Is streamEnded called before gotFish!?
 					if(endReached) {
-						console.error(new Error("Stream end reached before we got file.totalRows!"));
+						throw new Error("Stream end reached before we got file.totalRows!");
 					}
 					else {
 						//stream.resume();
@@ -3302,7 +3298,7 @@
 		
 		if(index == undefined) index = -1;
 		if(char == undefined) {
-			console.error(new Error("No character!"));
+			throw new Error("No character!");
 		}
 		
 		box.char = char;

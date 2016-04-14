@@ -64,7 +64,7 @@
 	function switchTab() {
 		// Open last file
 		
-		if(editor.lastFile == editor.currentFile) console.error(new Error("editor.lastFile = editor.currentFile = " + editor.currentFile.path));
+		if(editor.lastFile == editor.currentFile) throw new Error("editor.lastFile = editor.currentFile = " + editor.currentFile.path);
 		
 		if(editor.lastFile) editor.showFile(editor.lastFile);
 		else console.warn("No file to switch to!");
@@ -89,7 +89,7 @@
 	function tabFileSave(file) {
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
-		if(!el) console.error(new Error("Saving '" + file.path + "', but it doesn't exist in file tabs!"));
+		if(!el) throw new Error("Saving '" + file.path + "', but it doesn't exist in file tabs!");
 		
 		// What will happen when the file is saved:
 		el.style.fontWeight = "normal";
@@ -129,7 +129,7 @@
 	function switchToFile(path) {
 		
 		if(!editor.files.hasOwnProperty(path)) {
-			console.error(new Error("Trying to swith to a file that is not open! path=" + path));
+			throw new Error("Trying to swith to a file that is not open! path=" + path);
 			return;
 		}
 		
@@ -165,7 +165,7 @@
 		var fileList = editor.sortFileList(); // An array of files sorted by file.order
 		
 		if(excludeFile) {
-			if(fileList.indexOf(excludeFile) == -1) console.error(new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path));
+			if(fileList.indexOf(excludeFile) == -1) throw new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path);
 			
 			var removed = fileList.splice(fileList.indexOf(excludeFile), 1);
 			
@@ -186,7 +186,7 @@
 	
 	function openTab(path) {
 		
-		if(path == undefined) console.error(new Error("Path is undefined!"));
+		if(path == undefined) throw new Error("Path is undefined!");
 		
 		console.log("openTab: " + path);
 		

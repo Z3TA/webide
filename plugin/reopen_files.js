@@ -26,7 +26,7 @@
 	
 	function reopenFilesMain() {
 		
-		if(!window.localStorage) console.error(new Error("window.localStorage not available!"));
+		if(!window.localStorage) throw new Error("window.localStorage not available!");
 				
 		//window.localStorage.openedFiles = "";
 
@@ -81,7 +81,7 @@
 				
 				findBugs(true); // Compare opened files with window.localStorage.openedFiles
 
-				console.error(new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles + "\nopenedFiles=" + openedFiles));
+				throw new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles + "\nopenedFiles=" + openedFiles);
 			}
 		}, 5000);
 		*/
@@ -94,7 +94,7 @@
 					compareAndDone();
 					return;
 				}
-				else console.error(err);
+				else throw err;
 			}
 			console.log("we now have it open: file.path=" + file.path);
 			
@@ -154,7 +154,7 @@
 		
 		function openFile(path, callback) {
 			
-			if(!callback) console.error("Internal error: Expected a callback!");
+			if(!callback) throw "Internal error: Expected a callback!";
 			
 			var content;
 			var notFound = false;
@@ -174,7 +174,7 @@
 						notFound = true;
 					}
 					else {
-						console.error(err);
+						throw err;
 					}
 				}
 
@@ -240,7 +240,7 @@
 						
 						return;
 					}
-					else console.error(err);
+					else throw err;
 				}
 				
 				// Mark the file as saved, because we just opened it
@@ -342,9 +342,9 @@
 	
 	function addToStringList(text, add, delimiter) {
 		
-		if(!isString(text)) console.error(new Error("text is not a string!"));
-		if(!isString(add)) console.error(new Error("add is not a string!"));
-		if(!isString(delimiter)) console.error(new Error("delimiter is not a string!"));
+		if(!isString(text)) throw new Error("text is not a string!");
+		if(!isString(add)) throw new Error("add is not a string!");
+		if(!isString(delimiter)) throw new Error("delimiter is not a string!");
 		
 		var array = text.split(delimiter); // Convert string to array
 		
@@ -356,8 +356,8 @@
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
 		
 		// Makse sure the added string is in the text
-		if(array.indexOf(add) == -1) console.error(new Error("The added string is not part of the array! add='" + add + "' text='" + text + "'"));
-		if(text.indexOf(add) == -1) console.error(new Error("The added string is not part of the text! add='" + add + "' text='" + text + "'"));
+		if(array.indexOf(add) == -1) throw new Error("The added string is not part of the array! add='" + add + "' text='" + text + "'");
+		if(text.indexOf(add) == -1) throw new Error("The added string is not part of the text! add='" + add + "' text='" + text + "'");
 		
 		console.log("Added to string: " + add);
 		
@@ -368,7 +368,7 @@
 
 		console.log(editor.getStack("Adding file to openedFiles path='" + file.path + "'"));
 
-		if(!file.path) console.error(new Error("Argument need to be a file object!"));
+		if(!file.path) throw new Error("Argument need to be a file object!");
 		
 		console.log("List before=" + window.localStorage.openedFiles);	
 		window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
@@ -412,9 +412,9 @@
 	
 	function removeFromStringList(text, remove, delimiter) {
 		
-		if(!isString(text)) console.error(new Error("text is not a string!"));
-		if(!isString(remove)) console.error(new Error("remove is not a string!"));
-		if(!isString(delimiter)) console.error(new Error("delimiter is not a string!"));
+		if(!isString(text)) throw new Error("text is not a string!");
+		if(!isString(remove)) throw new Error("remove is not a string!");
+		if(!isString(delimiter)) throw new Error("delimiter is not a string!");
 		
 		var array = text.split(delimiter); // Convert text to array
 
@@ -423,12 +423,12 @@
 		
 		var index = array.indexOf(remove); // Get the array index of the string to me removed
 		
-		if(index == -1) console.error( new Error(  "remove='" + remove + "' not in array=" + JSON.stringify(array)  ) );
+		if(index == -1) throw  new Error(  "remove='" + remove + "' not in array=" + JSON.stringify(array)  ) ;
 		
 		array.splice(index, 1); // Remove the string to be removed from the text
 		
 		// Check to see if the string has been removed from the array to keep sanity
-		if(array.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'"));
+		if(array.indexOf(remove) != -1) throw new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'");
 		
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
 		
@@ -442,7 +442,7 @@
 	function removeFromOpenedFiles(file) {
 		
 		if(!file.path) {
-			console.error(new Error("Argument need to be a file object!"));
+			throw new Error("Argument need to be a file object!");
 		}
 		
 		console.log(editor.getStack("Removing file from openedFiles path='" + file.path + "'"));
@@ -467,7 +467,7 @@
 	function reopen_files_closeEditor() {
 		// Save file state
 		
-		if(!window.localStorage) console.error(new Error("window.localStorage not available!"));
+		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
 		if(window.localStorage.getItem("openedFiles") == null) {
 			console.warn("No open files!?");
@@ -480,7 +480,7 @@
 			}
 			catch(err) {
 				clearInterval(saveStateIntervalTimer);
-				console.error(err);
+				throw err;
 			}
 			
 			
@@ -581,30 +581,30 @@
 		var firstChar = text.charAt(0);
 		var lastChar = text.charAt(text.length-1);
 		
-		if(text.indexOf(fileDelimiter + fileDelimiter) > -1) console.error(new Error("Text contains double commas: " + text));
-		if(firstChar == fileDelimiter) console.error(new Error("First character is a comma: " + text));
-		if(lastChar == fileDelimiter) console.error(new Error("Last character is a comma: " + text));
-		if(firstChar == " ") console.error(new Error("First character is a space: " + text));
-		if(lastChar == " ") console.error(new Error("Last character is a space: " + text));
+		if(text.indexOf(fileDelimiter + fileDelimiter) > -1) throw new Error("Text contains double commas: " + text);
+		if(firstChar == fileDelimiter) throw new Error("First character is a comma: " + text);
+		if(lastChar == fileDelimiter) throw new Error("Last character is a comma: " + text);
+		if(firstChar == " ") throw new Error("First character is a space: " + text);
+		if(lastChar == " ") throw new Error("Last character is a space: " + text);
 		
-		if(text == undefined) console.error(new Error("Text is undefined: " + text));
-		if(text == 'undefined') console.error(new Error("Text is 'undefined': " + text));
+		if(text == undefined) throw new Error("Text is undefined: " + text);
+		if(text == 'undefined') throw new Error("Text is 'undefined': " + text);
 		
 		// Check for duplex
 		var array = text.split(fileDelimiter);
 		for(var i=0; i<array.length; i++) {
 			for(var j=i+1; j<array.length; j++) {
-				if(array[i] == array[j]) console.error(new Error("Element " + i + ": " + array[i] + " and  " + j + ": " + array[j] + " is the same! "));
+				if(array[i] == array[j]) throw new Error("Element " + i + ": " + array[i] + " and  " + j + ": " + array[j] + " is the same! ");
 			}
 		}
 		
 		if(checkMatch && array[0] != "") {
 			// Does the list match editor.files!?
 			for(var i=0; i<array.length; i++) {
-				if(!editor.files.hasOwnProperty(array[i])) console.error( new Error("File does not exist in editor.files: path=" + array[i] + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files))));
+				if(!editor.files.hasOwnProperty(array[i])) throw  new Error("File does not exist in editor.files: path=" + array[i] + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files)));
 			}
 			for(var path in editor.files) {
-				if(array.indexOf(path) == -1) console.error(new Error("File does not exist in openedFiles list: path=" + path + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files))));
+				if(array.indexOf(path) == -1) throw new Error("File does not exist in openedFiles list: path=" + path + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files)));
 			}
 		}
 		
@@ -612,13 +612,13 @@
 		// Sanity check
 		for(var path in editor.files) {
 			if(window.localStorage.openedFiles.indexOf(path) == -1) {
-				console.error(new Error("editor.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles));
+				throw new Error("editor.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
 		}
 		var check = window.localStorage.openedFiles.split(fileDelimiter);
 		for(var i=0; i<check.length; i++) {
 			if(!editor.files.hasOwnProperty(check[i])) {
-				console.error(new Error("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles));
+				throw new Error("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
 		}
 		
@@ -689,7 +689,7 @@
 		var array = str.split(fileDelimiter);
 		
 		if(array[0] == "") {
-			if(array.length > 1) console.error(new Error("First item is emty! str=" + str));
+			if(array.length > 1) throw new Error("First item is emty! str=" + str);
 			return str; // The string was empty
 		}
 		

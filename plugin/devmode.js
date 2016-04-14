@@ -5,6 +5,7 @@
 	var consoleTimeOriginal = console.time;
 	var consoleTimeEndOriginal = console.timeEnd;
 	var consoleWarnOriginal = console.warn;
+	var consoleErrorOriginal = console.error;
 	
 	var toggleDevmodeMenuItem;
 	var toggleDevmodeMenuItemPosition = 0;
@@ -46,9 +47,8 @@
 	
 	function testErrorHandler() {
 		setTimeout(function throwError() {
-			//throw new Error("Test error, just throw");
 			
-			console.error(new Error("Test error with console.error"));
+			throw new Error("Test error");
 			
 		}, 2000);
 		
@@ -65,34 +65,12 @@
 		
 		require('nw.gui').Window.get().closeDevTools();
 		
-		// Notify and report errors ..
-		// 
-		console.error = function(err) {
-			// Save all state to temporary files !?
-			
-			console.warn(err.stack);
-			
-			// If devmode is disabled ... 
-			
-			if(confirm(err + " ... Send error report?")) {
-				
-				// Send input history to be able to repeat the bug!??
-				
-				editor.openFile("bug_report.txt", editor.reportTemplate(err.stack), function(file) {
-					file.moveCaretToEnd();
-				});
-				
-			}
-			else {
-				
-				throw err;
-}
-			
-			// It's really not safe to continue from here
-			
-			//process.exit();
-			
-		}
+		/*
+			The console.error(new Error("custom error")) way of *handling* errors has been depricated in favor for the self_debug.js plugin.
+			The self_debug plugin will however not catch errors if the Chrome dev tools are open!
+			Only use the Chrome dev tools when you are actually debugging! Turn devMode OFF when you are not debugging (watching the console)
+		*/
+		
 	}
 	
 	function enableDevMode() {
@@ -107,17 +85,6 @@
 		
 		console.time = consoleTimeOriginal
 		console.timeEnd = consoleTimeEndOriginal
-		
-		console.error = function(err) {
-			
-			alert(err);
-			console.log(err.stack);
-			throw err;
-			
-			// It's really not safe to continue from here!
-			
-			
-		}
 		
 	}
 	
@@ -164,7 +131,7 @@
 						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
 						//console.warn(objInfo(f));
 						
-						console.error( new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!"));
+						throw  new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!");
 						
 					}
 					else {
@@ -178,7 +145,7 @@
 				}
 				
 				if(ret !== true) {
-					console.error(error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually."));
+					throw error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 				}
 				else {
 				//document.location = document.location.href;

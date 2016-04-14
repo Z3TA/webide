@@ -89,7 +89,7 @@
 		var movePerPxY = fileRows / 500;
 		var movePerPxX = maxColumns / 500;
 		
-		if(!file) console.error(new Error("No file selected while scrolling!"));
+		if(!file) throw new Error("No file selected while scrolling!");
 		
 		if(target.id != "documentPreviewCanvas") { // Mouse goes outside
 			stopScrolling(); 

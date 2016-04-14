@@ -164,7 +164,7 @@
 	}
 
 	function worker_exit(code) {
-		console.error(new Error("spell-check worker exit:" + code));
+		throw new Error("spell-check worker exit:" + code);
 	}
 		
 	function spellCheckFile(file) {
