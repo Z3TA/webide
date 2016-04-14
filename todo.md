@@ -99,6 +99,10 @@ The caret is off in the magnification glass
 Polishing
 =========
 
+Update with confirm if a file have been changed by another program.
+
+Making a multi line string was very annoying due to auto inserts of double '' and ' + + '
+
 Ctrl + click on a file path to open it. (no double click!!)
 
 Regex support in find/replace!
@@ -404,6 +408,7 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+Pipe to other program: Sends the text to stdin of another program.
 
 File cloning/file views: Have the same file open in two tabs, but with different file positions, caret, selections and highlights
 

@@ -1379,9 +1379,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var i = 0;
 			while( (child = child.previousSibling) != null ) i++;
 			return i;
-}
-		
 		}
+		
+	}
 	
 	editor.addTempMenuItem = function(htmlText, callback) {
 		/*
@@ -1958,6 +1958,31 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		
 	}
+	
+	editor.reportTemplate = function (body, subject) {
+		// Create a template used to report bugs
+		
+		if(!subject) {
+			subject = "";
+		}
+		else {
+			subject = ": " + subject;
+		}
+		
+		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
+		'Subject: JZedit bug report' + subject + '\n' +
+		'\n' + 
+		'Date:' + (new Date()) + '\n' +
+		'Version: Beta\n' +
+		'Platform: ' + process.platform + '\n' + 
+		'Arguments: ' + require('nw.gui').App.argv + '\n' + 
+		'\n' +
+		body + '\n' +
+		'\n' +
+		'How to repeat:\n';
+		
+		return message;
+}
 	
 	
 	function removeFrom(list, fun) {

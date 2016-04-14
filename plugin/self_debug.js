@@ -235,20 +235,11 @@
 				
 				thisSessionErrorCount++;
 				
-				editor.openFile(errorReportFilePath, errorReport, function errorReportOpened(file, err) {
+				editor.openFile(errorReportFilePath, editor.reportTemplate(errorReport), function errorReportOpened(file, err) {
 					
 					if(err) console.error(err);
 					
-					file.moveCaretToEnd(file.caret, function fileCaretMoved(fileCaret) {
-						
-						file.insertText("How to repeat:");
-						file.insertLineBreak();
-						//file.insertLineBreak();
-						//file.insertLineBreak();
-						
-						file.scrollToCaret();
-						
-					});
+					file.moveCaretToEnd();
 				});
 			}
 

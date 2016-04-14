@@ -26,8 +26,7 @@
 		// Test how the editor handles errors
 		editor.keyBindings.push({charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 		
-		
-		editor.addMenuItem("Show dev tools", showDevTools);
+		editor.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 		
 		
 		if(editor.settings.devMode == false) {
@@ -47,7 +46,10 @@
 	
 	function testErrorHandler() {
 		setTimeout(function throwError() {
-			throw new Error("This is a test error");
+			//throw new Error("Test error, just throw");
+			
+			console.error(new Error("Test error with console.error"));
+			
 		}, 2000);
 		
 		return false;
@@ -66,16 +68,17 @@
 		// Notify and report errors ..
 		// 
 		console.error = function(err) {
-			// Save all state to temporary files
-			
-			// Notify the user about the error
+			// Save all state to temporary files !?
 			
 			console.warn(err.stack);
+			
+			// If devmode is disabled ... 
 			
 			if(confirm(err + " ... Send error report?")) {
 				
 				// Send input history to be able to repeat the bug!??
-				editor.openFile("bug_report.txt", err.message + "\n" + err.stack + "\nHow to repeat:\n", function(file) {
+				
+				editor.openFile("bug_report.txt", editor.reportTemplate(err.stack), function(file) {
 					file.moveCaretToEnd();
 				});
 				
@@ -93,6 +96,8 @@
 	}
 	
 	function enableDevMode() {
+		
+		showDevTools();
 		
 		toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
 		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
@@ -119,18 +124,16 @@
 	function toggleDevMode() {
 		
 		editor.settings.devMode = editor.settings.devMode ? false : true;
-		console.warn("devMode = " + editor.settings.devMode);
+		console.warn("Toggling devMode = " + editor.settings.devMode);
 		
 		if(editor.settings.devMode) {
 			enableDevMode();
-			console.warn("dev tools!?");
-			showDevTools()
-			console.warn("devMode enabled!");
-		}
+			console.log("devMode enabled");
+			}
 		else {
 			disableDevMode();
-			console.warn("devMode disabled!");
-		}
+			console.log("devMode disabled");
+			}
 		editor.hideMenu();
 		
 		return false;
