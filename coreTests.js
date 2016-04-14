@@ -11,14 +11,28 @@
 	*/
 	
 	editor.tests.push({
-		text: "Create a new file and insert lines using File.writeLine()",
+		text: "Write text using File.write()",
+		fun: function fileWriteLine(callback) {
+			editor.openFile("testing_write", "Line1\nLine2\nLine3\n", function(file) {
+				file.write("Hello");
+				file.write(" world!\nYou are great!");
+				
+				//editor.closeFile(file.path);
+				
+				callback(true);
+			});
+		}
+	});
+	
+	editor.tests.push({
+		text: "Write text using File.writeLine()",
 		fun: function fileWriteLine(callback) {
 			
 			editor.openFile("testing_writeLine", "", function(file) {
 				file.writeLine("Hello world!");
 				file.writeLine("Hello again!");
 				
-				//editor.closeFile(file.path);
+				editor.closeFile(file.path);
 				
 				callback(true);
 				});

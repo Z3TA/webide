@@ -609,6 +609,59 @@
 		
 	}
 	
+	File.prototype.write = function(text) {
+		// Writes text at EOF
+		
+		if(text.length == 0) {
+			console.warn("No text in write argument!");
+			return;
+		}
+		
+		var file = this;
+		
+		if(text.indexOf(file.lineBreak) != -1) {
+			var rows = text.split(file.lineBreak);
+			// Write first line
+			rows[0].replace(/\n|\r/g, ""); // Remove all CR and LF
+			file.write(rows[0]);
+			
+			// Then write the rest using writeLine()
+			for(var i=1; i<rows.length; i++) {
+				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
+				file.writeLine(rows[i]);
+			}
+			return;
+		}
+		
+		var grid = file.grid;
+		var textIndex = file.text.length;
+		var gridRow = grid[grid.length-1]; // Last row
+		
+		var char = "";
+		for(var i=0; i<text.length; i++) {
+			char = text.charAt(i);
+			
+			gridRow.push(new Box(char, textIndex));
+			
+			textIndex++;
+		}
+		
+		file.text += text;
+		
+		file.checkGrid();
+		
+		if(file.caret.eof) {
+			// Move the caret (only have to do that if it's EOF)
+			file.caret.index = file.text.length;
+			file.caret.row = grid.length - 1;
+			file.caret.col = grid[grid.length-1].length;
+			
+			file.checkCaret();
+			
+			file.scrollToCaret();
+		}
+	}
+	
 	File.prototype.writeLine = function(text) {
 		/*
 			Insert a new line at EOF

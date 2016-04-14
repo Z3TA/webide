@@ -12,11 +12,14 @@ Always use F5 to reload! Or exit functions might not fire!
 Write tests!
 
 
+
 What I'm working on:
 
-Fixing stuff needed for a beta release, like bug reporting and (auto) updating
+Fixing stuff needed for a beta release:
+* Bug reporting 
+* Updating method, to get bug fixes
+* See (and change!?) key bindings some how
 
-See (and change!?) key bindings some how
 
 
 BUGS
@@ -399,6 +402,15 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+JavaScript: Warn when a new line starts with with (, [, /, +, ++, or -- 
+
+Open file on SSH!
+
+Profile idea: The editor will come with everyones profile: keyBindings, plugins, theme
+It should be easy to quickly get your own custom settings when installing the program on a new machine.
+Maybe give each user their own mercurial repository!?
+
+
 Multiple cursors! Ctrl+Shift + up/down, or Ctrl+Shift + mouse click creates another cursors. 
 Useful when you want to format stuff that look the same, ex. if you want to make many var's into one long line var
 var foo=1, ... place bar and baz here
@@ -539,6 +551,9 @@ Smooth scrolling. Make it easier to read text while scrolling.
 When ctrl+z, move the caret to before the text being removed. For every action, create an undo-action.
 
 plugin idea: Translate code comments from one language to another. (as a preRender, do not change source)
+
+Printing text (on printer)
+
 
 
 Need though
