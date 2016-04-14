@@ -1,1 +1,1 @@
-node update_version_hook.js
+node increment_version.js
