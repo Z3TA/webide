@@ -15,6 +15,8 @@ Write tests!
 
 What I'm working on:
 
+Exit full screen before closing the editor! (to prevent oversize when it starts again)
+
 Fixing stuff needed for a beta release:
 * Bug reporting 
 * Updating method, to get bug fixes
