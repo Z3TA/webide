@@ -6,34 +6,36 @@
 	var consoleTimeEndOriginal = console.timeEnd;
 	var consoleWarnOriginal = console.warn;
 	
+	var toggleDevmodeMenuItem;
+	var toggleDevmodeMenuItemPosition = 0;
 	
 	editor.on("start", init);
 	
 	function init() {
 		
+		var keyF5 = 116;
+		var keyD = 68;
+		var keyE = 69;
+		
 		// For convenience we can press F5 to reload while developing on the app itself
-		editor.keyBindings.push({charCode: 116, fun: reloadEditor});
+		editor.keyBindings.push({charCode: keyF5, fun: reloadEditor});
 		
 		// Switch devMode on or off by hitting Ctrl + Alt + D
-		editor.keyBindings.push({charCode: 68, fun: toggleDevMode, combo: CTRL + ALT});
+		editor.keyBindings.push({charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
 		
-		editor.keyBindings.push({charCode: 69, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
+		// Test how the editor handles errors
+		editor.keyBindings.push({charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 		
-		editor.addMenuItem("Toggle dev-mode", toggleDevMode); // Add items to the canvas context meny
 		
 		editor.addMenuItem("Show dev tools", showDevTools);
 		
 		
 		if(editor.settings.devMode == false) {
 			disableDevMode();
-			
-		}
+			}
 		else if(editor.settings.devMode == true) {
-	
-			enableDevMode();
-	
-		
-		}
+	enableDevMode();
+	}
 		
 		/*
 		setInterval(function() {
@@ -52,31 +54,49 @@
 	}
 	
 	function disableDevMode() {
-		// Disable console.log
-		console.log = console.time = console.timeEnd = console.warn = function() {
-			// Eaten by the void
-		}
 		
-		// Notify and report errors
+		toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
+		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
+		
+		// Disable console.log
+		console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
+		
+		require('nw.gui').Window.get().closeDevTools();
+		
+		// Notify and report errors ..
+		// 
 		console.error = function(err) {
 			// Save all state to temporary files
 			
 			// Notify the user about the error
+			
+			console.warn(err.stack);
+			
 			if(confirm(err + " ... Send error report?")) {
 				
 				// Send input history to be able to repeat the bug!??
+				editor.openFile("bug_report.txt", err.message + "\n" + err.stack + "\nHow to repeat:\n", function(file) {
+					file.moveCaretToEnd();
+				});
 				
 			}
+			else {
+				
+				throw err;
+}
 			
 			// It's really not safe to continue from here
-			console.warn(err.stack);
-			throw err;
+			
 			//process.exit();
 			
 		}
 	}
 	
 	function enableDevMode() {
+		
+		toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
+		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
+		
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;
 		

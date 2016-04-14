@@ -25,6 +25,8 @@ Fixing stuff needed for a beta release:
 BUGS
 ====
 
+When creating the first JS function in a file. And copying in the function name, will result in a a very thin function-list.
+
 When last file gets closed, the toolbar still show it's path
 
 When auto completing JSON objects, ex: editor.settings.style.textColor, editor.settings.style. part gets removed.
@@ -97,7 +99,7 @@ The caret is off in the magnification glass
 Polishing
 =========
 
-Feature to quickly navigate to a function (and back again)
+Ctrl + click on a file path to open it. (no double click!!)
 
 Regex support in find/replace!
 
@@ -401,6 +403,12 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+
+File cloning/file views: Have the same file open in two tabs, but with different file positions, caret, selections and highlights
+
+Go to defenition: Ctrl click on a function name to cline the file in another tab and scroll down to that function.
+
 
 JavaScript: Warn when a new line starts with with (, [, /, +, ++, or -- 
 

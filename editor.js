@@ -125,7 +125,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	// Get the current window
 	var win = gui.Window.get();
 	
-
+	
 	
 	var executeOnNextInteraction = [];
 	
@@ -164,7 +164,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
-
+	
 	editor.sortFileList = function() {
 		
 		// Sorts editor.files by file.order and returns an array of the files
@@ -203,7 +203,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 		}
 	}
-
+	
 	
 	editor.openFile = function(path, text, callback) {
 		/*
@@ -217,12 +217,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		*/
 		
 		var file = null;
-
+		
 		
 		console.log("Opening file: " + path + " typeof text=" + typeof text);
-
+		
 		if(typeof text === "function") console.error(new Error("The callback should be in the third argument. Second argument is for file content"));
-
+		
 		
 		// Check if the file is already opened
 		if(editor.files.hasOwnProperty(path)) {
@@ -269,8 +269,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				while(editor.files.hasOwnProperty(path)) {
 					path = pathPart1 + " (" + ++nr + ")" + pathPart2;
 				}
-				}
 			}
+		}
 		
 		if(openFileQueue.indexOf(path) != -1) {
 			
@@ -280,16 +280,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				fileOpenExtraCallbacks[path].push(callback);
 			}
 			/*
-			var err = new Error("File is already in the queue to be opened, please wait!");			
-			err.code = "INQUEUE";
-			return fileOpenError(err);
+				var err = new Error("File is already in the queue to be opened, please wait!");			
+				err.code = "INQUEUE";
+				return fileOpenError(err);
 			*/
 		}
 		
 		if(!isString(path)) return fileOpenError(new Error("path is not a string: " + path));
-
+		
 		openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
-
+		
 		if(text == undefined) {
 			
 			var fspath = require("path");
@@ -305,9 +305,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.getFileSizeOnDisk(path, function gotFileSize(fileSizeInBytes, err) {
 				
 				if(err) {
-				
+					
 					if(err.code == "ENOENT") alert("File not found: " + path);
-										
+					
 					fileOpenError(err);
 				}
 				else {
@@ -358,7 +358,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				newFile.savedAs = true;
 				newFile.changed = false;
 			}
-
+			
 			function fileLoaded() {
 				
 				// Dilemma: Should file open even listeners be called before or after the callback!??
@@ -393,7 +393,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.renderNeeded();
 				
 			}
-
+			
 		}
 		
 		function fileOpenError(err) {
@@ -402,7 +402,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.warn(err.message);
 			
 			callCallbacks(file, err);
-
+			
 			console.warn("Error when opening file path=" + path + " message: " + err.message);
 			
 			return err;
@@ -438,7 +438,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(!callback) console.error(new Error("Callback not defined!"));
 		
 		fs.stat(path, checkSize);
-
+		
 		function checkSize(err, stats) {
 			
 			if(err) callback(-1, err)
@@ -540,7 +540,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(editor.currentFile == file) {
 				
 				editor.currentFile = undefined; // Closed, kinda
-			
+				
 				if(!doNotSwitchFile) { // double negative => true
 					
 					// The file we are closing is the current file, and we are "allowed" to swith 
@@ -822,7 +822,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
 		
 		if(editor.currentFile) {
-
+			
 			if(!editor.currentFile.render) {
 				console.warn("File render flag set to '" + editor.currentFile.render + "'");
 				
@@ -1024,7 +1024,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		else {
 			ctx.fillStyle = editor.settings.style.bgColor;
 		}
-				
+		
 		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
 		ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
 		
@@ -1042,14 +1042,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight);
 		var left = Math.floor(editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth);
-
+		
 		ctx.fillStyle = editor.settings.caret.color;
 		
 		ctx.fillRect(left, top, editor.settings.caret.width, editor.settings.gridHeight);
-
+		
 		// Show the "direction" of the caret
 		ctx.fillRect(left, top+editor.settings.gridHeight - editor.settings.caret.width, 4, editor.settings.caret.width);
-
+		
 	}
 	
 	
@@ -1340,7 +1340,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	
-	editor.addMenuItem = function(htmlText, callback) {
+	editor.addMenuItem = function(htmlText, callback, position) {
 		var menu = document.getElementById("canvasContextmenu");
 		
 		var menuElement = document.createElement("li");
@@ -1348,12 +1348,40 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(callback) menuElement.onclick = callback;
 		
-		menu.appendChild(menuElement);
+		if(position) {
+			if(position < 0) position = 0
+			else if(position >= menu.children.length) position = menu.children.length-1;
+			menu.insertBefore(menuElement, menu.children[position]);
+		}
+		else {
+			menu.appendChild(menuElement);
+		}
 		
 		// Don't forget to call editor.hideMenu() after the item has been clicked!
 		
 		return menuElement;
 	}
+	
+	editor.removeMenuItem = function(menuElement) {
+		
+		if(!menuElement) return;
+		if(!menuElement.tagName) return; // It's node a Node
+		
+		var menu = document.getElementById("canvasContextmenu");
+		
+		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
+		
+		menu.removeChild(menuElement);
+		
+		return positionIndex; // So we can insert another node at this position
+		
+		function getItemPosition(child) {
+			var i = 0;
+			while( (child = child.previousSibling) != null ) i++;
+			return i;
+}
+		
+		}
 	
 	editor.addTempMenuItem = function(htmlText, callback) {
 		/*
