@@ -204,11 +204,13 @@
 						
 					}
 					else if(notFound) {
+						// The file was not found and the user didn't want to load last state
 						// Do not open it! Remove from openedFiles
 						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
 						// Should we remove the state!?
 						window.localStorage.removeItem("state_" + path);
 						callback(path, false, err);
+						return; // Don't attempt to open the file
 					}
 
 				}
@@ -257,7 +259,9 @@
 					let state = window.localStorage["state_" + file.path];
 					window.localStorage.removeItem("state_" + path);
 					window.localStorage["state_" + file.path] = state;
-
+					
+					path = file.path;
+					
 				}
 				
 				if(lastFileState) {
@@ -355,6 +359,8 @@
 		if(array.indexOf(add) == -1) console.error(new Error("The added string is not part of the array! add='" + add + "' text='" + text + "'"));
 		if(text.indexOf(add) == -1) console.error(new Error("The added string is not part of the text! add='" + add + "' text='" + text + "'"));
 		
+		console.log("Added to string: " + add);
+		
 		return text;
 	}
 	
@@ -425,6 +431,8 @@
 		if(array.indexOf(remove) != -1) console.error(new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'"));
 		
 		text = array.join(delimiter); // Convert the array back to string (localStorage can only hold strings!)
+		
+		console.log("Removed from string: " + remove);
 		
 		return text;
 	}
