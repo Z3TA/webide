@@ -1906,6 +1906,8 @@
 				
 				file.fixCaret();
 				
+				if(caret == file.caret && editor.currentFile == file) editor.renderNeeded();
+				
 				if(cb) cb(file.caret);
 				
 			});
@@ -1919,6 +1921,8 @@
 			caret.col = file.grid[caret.row].length-1;
 			
 			file.fixCaret(caret);
+			
+			if(caret == file.caret && editor.currentFile == file) editor.renderNeeded(); 
 			
 			if(cb) {
 				cb(caret);
