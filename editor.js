@@ -59,7 +59,6 @@ editor.settings = {
 	insert: false
 };
 
-
 editor.shouldRender = false;   // Internal flag, use editor.renderNeeded() to re-render!
 editor.shouldResize = false;   // Internal flag, use editor.resizeNeeded() to re-size!
 editor.fileIndex = -1;   // Keep track on opened files (for undo/redo)
@@ -68,6 +67,7 @@ editor.files = {};       // List of all opened files with the path as key
 editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
+editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -1973,7 +1973,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		'Subject: JZedit bug report' + subject + '\n' +
 		'\n' + 
 		'Date:' + (new Date()) + '\n' +
-		'Version: Beta\n' +
+		'Commit: ' + editor.version + '\n' +
 		'Platform: ' + process.platform + '\n' + 
 		'Arguments: ' + require('nw.gui').App.argv + '\n' + 
 		'\n' +
@@ -2110,6 +2110,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	function main() {
 		
 		console.log("Starting the editor ...");
+		
+		fs.readFile("version.inc", "utf8", function(err, string) {
+			if(err) console.error("Could not read version.inc\n" + err.stack);
+			editor.version = parseInt(string);
+			});
 		
 		canvas = document.getElementById("canvas");
 		
