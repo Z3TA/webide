@@ -16,7 +16,8 @@ Write tests!
 
 What I'm working on:
 
-Not saving state for file because it has over 100000 characters file.path=C:\Users\Z\dev-repositories\js-editor\editor.js
+editor.getKeyFor() so we can get the right keyBinding (if it has changed) for the friendly message when there are no files open.
+
 
 Fixing stuff needed for a beta release:
 * Bug reporting 

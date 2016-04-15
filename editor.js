@@ -1915,6 +1915,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	editor.getKeyFor = function(funName) {
+		// Returns a string
+		
+		for(var i=0; i<editor.keyBindings.length; i++) {
+			
+		}
+		
+		return "Ctrl + O"
 		
 	}
 	
