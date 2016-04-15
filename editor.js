@@ -656,6 +656,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				console.log("Attempting saving to disk: " + path + " ...");
 				
 				if(err) {
+					alert("Unable to save file! " + err.message + "\n" + path);
 					console.warn("Unable to save " + path + "!");
 					throw err;
 				}
@@ -1982,7 +1983,52 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		'How to repeat:\n';
 		
 		return message;
-}
+	}
+	
+	editor.httpPost = function(urlStr, form, callback) {
+		var querystring = require('querystring');
+		var http = require('http');
+		var url = require("url");
+		
+		var urlObj = url.parse(urlStr);
+		
+		// Build the post string from an object
+		var post_data = querystring.stringify(form);
+		
+		// An object of options to indicate where to post to
+		var post_options = {
+			host: urlObj.hostname,
+			port: urlObj.port ? urlObj.port : '80',
+			path: urlObj.path, // path comtains querystring (search)
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Content-Length': Buffer.byteLength(post_data)
+			}
+		};
+		
+		// Set up the request
+		var dataStr = "";
+		var post_req = http.request(post_options, function(res) {
+			res.setEncoding('utf8');
+			res.on('data', function (chunk) {
+				dataStr += chunk;
+				console.log('Response: ' + chunk);
+			});
+			res.on('end', function () {
+				callback(dataStr, null);
+			});
+		});
+		post_req.on('error', function(e) {
+			console.log(`problem with request: ${e.message}`);
+			callback(null, e);
+		});
+		// post the data
+		post_req.write(post_data);
+		post_req.end();
+		
+		
+	}
 	
 	
 	function removeFrom(list, fun) {
