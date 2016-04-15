@@ -3094,7 +3094,7 @@
 			if(file.totalRows == -1) throw new Error("Stream closed before we got file.totalRows!");
 			
 			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
-			console.log("Calling callback name=" + functionName(callback));
+			console.log("Calling callback name=" + getFunctionName(callback));
 			if(callback) callback();
 		}
 		

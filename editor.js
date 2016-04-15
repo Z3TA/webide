@@ -367,7 +367,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") path=" + path);
 				for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
-					//console.log("function " + functionName(editor.eventListeners.fileOpen[i].fun));
+					//console.log("function " + getFunctionName(editor.eventListeners.fileOpen[i].fun));
 					editor.eventListeners.fileOpen[i].fun(file); // Call function
 				}
 				
@@ -799,7 +799,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging performance issues.
 			//console.time("preRenders");
 			for(var i=0; i<editor.preRenderFunctions.length; i++) {
-				//funName = functionName(editor.preRenderFunctions[i]);
+				//funName = getFunctionName(editor.preRenderFunctions[i]);
 				//console.time("prerender: " + funName);
 				buffer = editor.preRenderFunctions[i](buffer, file); // Call render
 				//console.timeEnd("prerender: " + funName);
@@ -824,7 +824,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			//console.time("renders");
 			for(var i=0; i<editor.renderFunctions.length; i++) {
-				//funName = functionName(editor.renderFunctions[i]);
+				//funName = getFunctionName(editor.renderFunctions[i]);
 				//console.time("render: " + funName);
 				editor.renderFunctions[i](ctx, buffer, editor.currentFile); // Call render
 				//console.timeEnd("render: " + funName);
@@ -841,6 +841,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		else {
 			// Show some useful info for new users
 			
+			var keyCombo = editor.getKeyFor("openFile");
+			
 			ctx.fillStyle = editor.settings.style.bgColor;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
@@ -849,7 +851,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
 			ctx.textBaseline = "top";
 			
-			var friendlyString = "Ctrl + O to open a file";
+			var friendlyString = keyCombo +" to open a file";
 			// Place the string in the center
 			var textMeasure = ctx.measureText(friendlyString);
 			var left = editor.view.canvasWidth / 2 - textMeasure.width / 2;
@@ -1254,7 +1256,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			Note to myself: Some events have objects and others just have the function!!
 			
 		*/
-		var fname = functionName(fun);
+		var fname = getFunctionName(fun);
 		var events = editor.eventListeners[eventName];
 		var found = 0;
 		
@@ -1693,7 +1695,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			fun = editor.eventListeners.autoComplete[i].fun;
 			ret = fun(file, word, wordLength, options.length);
 			
-			console.log("function " + functionName(fun) + " returned: " + JSON.stringify(ret));
+			console.log("function " + getFunctionName(fun) + " returned: " + JSON.stringify(ret));
 			
 			if(ret) {
 				if(Array.isArray(ret)) {
@@ -1716,7 +1718,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					}
 				}
 				else {
-					throw new Error(functionName(fun) + " did not return an array");
+					throw new Error(getFunctionName(fun) + " did not return an array");
 				}
 			}
 		}
@@ -1878,7 +1880,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 		if(file.savedAs) {
 			editor.setFileSavePath(file.path);
-			editor.setFileOpenPath(getDir(file.path));
+			editor.setFileOpenPath(editor.getDir(file.path));
 		}
 		
 		editor.input = focus;
@@ -1893,11 +1895,34 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
+	editor.getDir = function (path) {
+		/*
+			Returns the directory of a file path
+		*/
+		
+		if(path == undefined) {
+			if(editor.currentFile) {
+				path = editor.currentFile.path;
+			}
+			else {
+				console.warn("No file open!");
+				return process.cwd(); // Return (editor) working dir
+			}
+			
+		}
+		
+		return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")));
+	}
+	
+	editor.getKeyFor = function(funName) {
+		
+	}
+	
 	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
 			
-			//console.log(functionName(fun) + " = " + functionName(list[i]) + " ? " + (list[i] == fun));
+			//console.log(getFunctionName(fun) + " = " + getFunctionName(list[i]) + " ? " + (list[i] == fun));
 			
 			if(list[i] == fun) {
 				list.splice(i, 1);
@@ -1931,7 +1956,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 			
 			f = editor.eventListeners.exit[i].fun;
-			name = functionName(f);
+			name = getFunctionName(f);
 			ret = f();
 			
 			console.log(name + " returned " + ret);
@@ -2097,7 +2122,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		});
 		
 		//for(var i=0; i<editor.eventListeners.start.length; i++) {
-		//console.log("startlistener:" + functionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
+		//console.log("startlistener:" + getFunctionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
 		//}
 		
 		
@@ -2274,7 +2299,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var fileName = file.name;
 		var filePath = file.path;
 		
-		console.log("Calling file-dialog callback: " + functionName(global.fileOpenCallback) + " ...");
+		console.log("Calling file-dialog callback: " + getFunctionName(global.fileOpenCallback) + " ...");
 		global.fileOpenCallback(filePath);
 		global.fileOpenCallback = undefined;
 		
@@ -2438,7 +2463,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				ret = fun(editor.currentFile, e.clipboardData);
 				
-				//console.log("Paste listener: " + functionName(fun) + " returned:\n" + ret);
+				//console.log("Paste listener: " + getFunctionName(fun) + " returned:\n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
@@ -2677,9 +2702,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 				else {
 					
-					//console.log("keyDown: Calling function: " + functionName(binding.fun) + "...");
+					//console.log("keyDown: Calling function: " + getFunctionName(binding.fun) + "...");
 					
-					if(captured) console.warn("Key combo has already been captured by " + functionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + functionName(binding.fun));
+					if(captured) console.warn("Key combo has already been captured by " + getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + getFunctionName(binding.fun));
 					
 					captured = binding.fun;
 					
@@ -2698,13 +2723,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
-						console.log("function called: " + functionName(binding.fun)); // Sometimes the file doesn't show up in the stack!!? So show the function name and we can do a search in file.
-						throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc.");
+						throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc. function called: " + getFunctionName(binding.fun));
 					}
 				}
 			}
 			else {
-				//console.log("NOT calling function:" + functionName(binding.fun) + " " + JSON.stringify(binding));
+				//console.log("NOT calling function:" + getFunctionName(binding.fun) + " " + JSON.stringify(binding));
 			}
 		}
 		
@@ -2840,7 +2864,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				
-				//console.log("keyUp: Calling function: " + functionName(binding.fun) + "...");
+				//console.log("keyUp: Calling function: " + getFunctionName(binding.fun) + "...");
 				
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "up");
 				
@@ -2954,7 +2978,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				//console.log("Calling " + functionName(click.fun) + " ...");
+				//console.log("Calling " + getFunctionName(click.fun) + " ...");
 				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				
@@ -3017,7 +3041,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				console.log("Calling " + functionName(click.fun) + " ...");
+				console.log("Calling " + getFunctionName(click.fun) + " ...");
 				
 				click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo); // Call it
 			}
@@ -3056,7 +3080,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
 				fun = editor.eventListeners.mouseMove[i].fun;
 				
-				//console.log(functionName(fun));
+				//console.log(getFunctionName(fun));
 				
 				fun(mouseX, mouseY, target); // Call it
 				
@@ -3139,7 +3163,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				//console.log("Calling " + functionName(click.fun) + " ...");
+				//console.log("Calling " + getFunctionName(click.fun) + " ...");
 				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				

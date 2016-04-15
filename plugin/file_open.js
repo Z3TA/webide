@@ -56,7 +56,7 @@
 		
 		
 			// Change default directory to the same as current file
-			defaultPath = getDir(editor.currentFile.path);
+			defaultPath = editor.getDir(editor.currentFile.path);
 
 		
 		}

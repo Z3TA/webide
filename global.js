@@ -17,8 +17,9 @@ const ALT = 4;
 
 
 
-/* Added to global scope as a utility function */
-function functionName(fun) {
+// Global functions ...
+
+function getFunctionName(fun) {
 	var ret = fun.toString();
 	ret = ret.substr('function '.length);
 	ret = ret.substr(0, ret.indexOf('('));
@@ -97,15 +98,6 @@ function occurrences(string, subString, allowOverlapping) {
 	}
 	return(n);
 }
-
-
-function functionName(fun) {
-	var ret = fun.toString();
-	ret = ret.substr('function '.length);
-	ret = ret.substr(0, ret.indexOf('('));
-	return ret;
-}
-
 
 function objInfo(o) {
 	/*
@@ -187,25 +179,6 @@ function getStack(msg) {
 	str = str.substr(str.indexOf("\n")+5, str.length);
 	
 	return msg + ": " + str;
-}
-
-function getDir(path) {
-	/*
-		Returns the directory of a file path
-	*/
-	
-	if(path == undefined) {
-		if(editor.currentFile) {
-			path = editor.currentFile.path;
-		}
-		else {
-			console.warn("No file open!");
-			return process.cwd(); // Return (editor) working dir
-		}
-		
-	}
-	
-	return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")));
 }
 
 

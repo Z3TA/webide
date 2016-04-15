@@ -36,6 +36,8 @@ editor.changeKeyBinding(funcName, new Binding)
 BUGS
 ====
 
+Got a bug after opening a file with the exact same content and path as a file already opened.
+
 When creating the first JS function in a file. And copying in the function name, will result in a a very thin function-list.
 
 When last file gets closed, the toolbar still show it's path

@@ -54,15 +54,15 @@
 				binding = editor.keyBindings[i];
 				
 				
-				if(functionName(binding.fun) != "runTests_5616458984153156") { // Prevent endless loop
+				if(getFunctionName(binding.fun) != "runTests_5616458984153156") { // Prevent endless loop
 				
-					console.log("Testing " + functionName(binding.fun));
+					console.log("Testing " + getFunctionName(binding.fun));
 					
 					try {
 						funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 					}
 					catch(err) {
-						err.message += "\nWhen calling function:" + functionName(binding.fun);
+						err.message += "\nWhen calling function:" + getFunctionName(binding.fun);
 						return callback(err);				
 					}
 					
@@ -70,7 +70,7 @@
 						
 						//objInfo(binding.fun);
 						
-						return callback("Function: " + functionName(binding.fun) + " returned " + funReturn);
+						return callback("Function: " + getFunctionName(binding.fun) + " returned " + funReturn);
 						// This is not very helpful. But how can we get the source file and line number of the function!?
 						// If we create a new Error here, the stack will only point here, and not to the function
 					}

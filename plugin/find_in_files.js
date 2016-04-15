@@ -277,7 +277,7 @@
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
-		inputInDir.value = getDir(); // The directory of the current file being open
+		inputInDir.value = editor.getDir(); // The directory of the current file being open
 		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);

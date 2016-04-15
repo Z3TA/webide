@@ -124,7 +124,7 @@
 				for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 				
 				func = editor.eventListeners.exit[i].fun;
-				name = functionName(func);
+				name = getFunctionName(func);
 					
 				if(typeof func != "function") {
 						
