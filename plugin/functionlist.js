@@ -269,7 +269,7 @@
 			functionListWrap.style.display="none";
 			editor.resizeNeeded();
 				console.log("Functionlist is now hidden");
-				console.log(editor.getStack("why hide?"));
+				console.log(getStack("why hide?"));
 			}
 		}
 	}

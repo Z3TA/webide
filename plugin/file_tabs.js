@@ -151,7 +151,7 @@
 
 	function buildTabs(excludeFile) {
 		
-		console.log(editor.getStack("Building tabs ..."));
+		console.log(getStack("Building tabs ..."));
 		
 		var tabList = document.getElementById("tabList");
 		

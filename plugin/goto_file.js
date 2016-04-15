@@ -184,7 +184,7 @@
 		
 		function searchFile(filePath) {
 			
-			var fileExt = editor.getFileExtension(filePath);
+			var fileExt = getFileExtension(filePath);
 			var checkit = fileExt == ""; // Always check files with no extension
 			
 			console.log("fileExt=" + fileExt);

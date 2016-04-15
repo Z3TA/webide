@@ -250,7 +250,7 @@
 					
 					var errorReportFilePath = "bug_report.txt"; // The editor will add a counter to double files
 					
-					editor.openFile(errorReportFilePath, editor.reportTemplate(errorReport), function errorReportOpened(file, err) {
+					editor.openFile(errorReportFilePath, reportTemplate(errorReport), function errorReportOpened(file, err) {
 						
 						if(err) GUI.showDevTools();
 						
@@ -379,7 +379,7 @@
 			
 			var message = file.text;
 			
-			editor.httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
+			httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
 				if(err) {
 					alert("Problem sending bug report:  " + err.message);
 					throw err;
@@ -433,6 +433,32 @@
 		for(var i=0; i<left; i++) padding += " ";
 		return str + padding;
 	}
+	
+	function reportTemplate(body, subject) {
+		// Create a template used to report bugs
+		
+		if(!subject) {
+			subject = "";
+		}
+		else {
+			subject = ": " + subject;
+		}
+		
+		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
+		'Subject: JZedit bug report' + subject + '\n' +
+		'\n' +
+		'Date:' + (new Date()) + '\n' +
+		'Commit: ' + editor.version + '\n' +
+		'Platform: ' + process.platform + '\n' +
+		'Arguments: ' + require('nw.gui').App.argv + '\n' +
+		'\n' +
+		body + '\n' +
+		'\n' +
+		'How to repeat:\n';
+		
+		return message;
+	}
+	
 	
 	function main() {
 		var key_S = 83;

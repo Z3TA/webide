@@ -277,7 +277,7 @@
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
-		inputInDir.value = editor.getDir(); // The directory of the current file being open
+		inputInDir.value = getDir(); // The directory of the current file being open
 		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);
@@ -482,7 +482,7 @@
 		var matches = [];
 		var flags = "g"; // Always make a global search!
 		
-		if(editor.isFolderPath(searchPath)) {
+		if(isFolderPath(searchPath)) {
 			inputInDir.setAttribute("class", "inputtext indir");
 		}
 		else {

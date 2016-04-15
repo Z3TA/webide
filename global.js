@@ -1,10 +1,10 @@
 /*
-
+	
 	Expose some handy constants and functions to global scope.
 	These are the only global variables except editor and File.
 	
 	Hide File from global scope!? Then it would have to be merged with editor.js
-
+	
 */
 
 "use strict";
@@ -79,13 +79,13 @@ function occurrences(string, subString, allowOverlapping) {
 	 * @param {String} string   Required. The string;
 	 * @param {String} subString    Required. The string to search for;
 	 * @param {Boolean} allowOverlapping    Optional. Default: false;
-	 */
+	*/
 	string+=""; subString+="";
 	if(subString.length<=0) return string.length+1;
-
+	
 	var n=0, pos=0;
 	var step=(allowOverlapping)?(1):(subString.length);
-
+	
 	while(true){
 		pos=string.indexOf(subString,pos);
 		if(pos>=0){
@@ -133,10 +133,148 @@ function isString(text) {
 		console.log("objectToString=" + objectToString);
 	}
 	return typeOf == string || instanceofString || objectToString == objectString;
-
+	
 }
 
 
 function escapeRegExp(str) {
 	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
+
+function getFilenameFromPath(path) {
+	if(path.indexOf("/") > -1) {
+		return path.substr(path.lastIndexOf('/')+1);
+	}
+	else {
+		// Assume \ is the folder separator
+		return path.substr(path.lastIndexOf('\\')+1);
+	}
+}
+
+function isFilePath(filePath) {
+	try {
+		var stat = fs.lstatSync(filePath);
+		return stat.isFile();
+	}
+	catch(e) {
+		return false;
+	}
+}
+
+function getFileExtension(filePath) {
+	return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
+}
+
+function isFolderPath(path) {
+	try {
+		var stat = fs.lstatSync(path);
+		return stat.isDirectory();
+	}
+	catch(e) {
+		return false;
+	}
+}
+
+function getStack(msg) {
+	// Used in debugging, to get a stack trace of function being called
+	
+	if(msg == undefined) msg = "";
+	
+	var str = new Error(msg).stack;
+	
+	// Remove first at (this function)
+	str = str.substr(str.indexOf("\n")+5, str.length);
+	str = str.substr(str.indexOf("\n")+5, str.length);
+	
+	return msg + ": " + str;
+}
+
+function getDir(path) {
+	/*
+		Returns the directory of a file path
+	*/
+	
+	if(path == undefined) {
+		if(editor.currentFile) {
+			path = editor.currentFile.path;
+		}
+		else {
+			console.warn("No file open!");
+			return process.cwd(); // Return (editor) working dir
+		}
+		
+	}
+	
+	return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")));
+}
+
+
+function httpPost(urlStr, form, callback) {
+	var querystring = require('querystring');
+	var http = require('http');
+	var url = require("url");
+	
+	var urlObj = url.parse(urlStr);
+	
+	// Build the post string from an object
+	var post_data = querystring.stringify(form);
+	
+	// An object of options to indicate where to post to
+	var post_options = {
+		host: urlObj.hostname,
+		port: urlObj.port ? urlObj.port : '80',
+		path: urlObj.path, // path comtains querystring (search)
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': Buffer.byteLength(post_data)
+		}
+	};
+	
+	// Set up the request
+	var dataStr = "";
+	var post_req = http.request(post_options, function(res) {
+		res.setEncoding('utf8');
+		res.on('data', function (chunk) {
+			dataStr += chunk;
+			console.log('Response: ' + chunk);
+		});
+		res.on('end', function () {
+			callback(dataStr, null);
+		});
+	});
+	post_req.on('error', function(e) {
+		console.log(`problem with request: ${e.message}`);
+		callback(null, e);
+	});
+	// post the data
+	post_req.write(post_data);
+	post_req.end();
+	
+	
+}
+	
+	
+		
+	
+	
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+

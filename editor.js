@@ -154,16 +154,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	editor.workingDirectory = process.cwd();
 	
-	editor.getFilenameFromPath = function(path) {
-		if(path.indexOf("/") > -1) {
-			return path.substr(path.lastIndexOf('/')+1);
-		}
-		else {
-			// Assume \ is the folder separator
-			return path.substr(path.lastIndexOf('\\')+1);
-		}
-	}
-	
 	
 	editor.sortFileList = function() {
 		
@@ -584,7 +574,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		
 		console.log("Reading file from disk: " + path);
-		console.log(editor.getStack("Read from disk"));
+		console.log(getStack("Read from disk"));
 		
 		if(!callback) {
 			throw new Error("No callback defined!");
@@ -729,69 +719,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		fileOpen.click(); // Bring up the OS path selector window
 	}
 	
-	editor.getDir = function(path) {
-		/* 
-			Returns the directory of a file path
-		*/
-		
-		if(path == undefined) {
-			if(editor.currentFile) {
-				path = editor.currentFile.path;
-			}
-			else {
-				console.warn("No file open!");
-				return process.cwd(); // Return (editor) working dir
-			}
-			
-		}
-		
-		return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"))); 
-	}
-	
-	editor.isFilePath = function(filePath) {
-		try {
-			var stat = fs.lstatSync(filePath);
-			return stat.isFile();
-		}
-		catch(e) {
-			return false;
-		}
-	}
-	
-	editor.isFolderPath = function(path) {
-		try {
-			var stat = fs.lstatSync(path);
-			return stat.isDirectory();
-		}
-		catch(e) {
-			return false;
-		}
-	}
-	
-	editor.getFileExtension = function(filePath) {
-		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
-	}
-	
-	editor.getStack = function(msg) {
-		// Used in debugging, to get a stack trace of function being called
-		
-		if(msg == undefined) msg = "";
-		
-		var str = new Error(msg).stack;
-		
-		// Remove first at (this function)
-		str = str.substr(str.indexOf("\n")+5, str.length);
-		str = str.substr(str.indexOf("\n")+5, str.length);
-		
-		return msg + ": " + str;
-	}
-	
 	editor.renderNeeded = function() {
 		// Tell the editor that it needs to render
 		
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			console.log(editor.getStack("renderNeeded"));
+			console.log(getStack("renderNeeded"));
 		}
 		editor.shouldRender = true;
 	}
@@ -800,7 +733,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Tell the editor that it needs to resize
 		if(editor.settings.devMode && editor.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			console.log(editor.getStack("resizeNeeded"));
+			console.log(getStack("resizeNeeded"));
 		}
 		editor.shouldResize = true;
 	}
@@ -1945,7 +1878,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 		if(file.savedAs) {
 			editor.setFileSavePath(file.path);
-			editor.setFileOpenPath(editor.getDir(file.path));
+			editor.setFileOpenPath(getDir(file.path));
 		}
 		
 		editor.input = focus;
@@ -1956,76 +1889,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		editor.renderNeeded();
-		
-		
-	}
-	
-	editor.reportTemplate = function (body, subject) {
-		// Create a template used to report bugs
-		
-		if(!subject) {
-			subject = "";
-		}
-		else {
-			subject = ": " + subject;
-		}
-		
-		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
-		'Subject: JZedit bug report' + subject + '\n' +
-		'\n' + 
-		'Date:' + (new Date()) + '\n' +
-		'Commit: ' + editor.version + '\n' +
-		'Platform: ' + process.platform + '\n' + 
-		'Arguments: ' + require('nw.gui').App.argv + '\n' + 
-		'\n' +
-		body + '\n' +
-		'\n' +
-		'How to repeat:\n';
-		
-		return message;
-	}
-	
-	editor.httpPost = function(urlStr, form, callback) {
-		var querystring = require('querystring');
-		var http = require('http');
-		var url = require("url");
-		
-		var urlObj = url.parse(urlStr);
-		
-		// Build the post string from an object
-		var post_data = querystring.stringify(form);
-		
-		// An object of options to indicate where to post to
-		var post_options = {
-			host: urlObj.hostname,
-			port: urlObj.port ? urlObj.port : '80',
-			path: urlObj.path, // path comtains querystring (search)
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Content-Length': Buffer.byteLength(post_data)
-			}
-		};
-		
-		// Set up the request
-		var dataStr = "";
-		var post_req = http.request(post_options, function(res) {
-			res.setEncoding('utf8');
-			res.on('data', function (chunk) {
-				dataStr += chunk;
-				console.log('Response: ' + chunk);
-			});
-			res.on('end', function () {
-				callback(dataStr, null);
-			});
-		});
-		post_req.on('error', function(e) {
-			console.log(`problem with request: ${e.message}`);
-			callback(null, e);
-		});
-		// post the data
-		post_req.write(post_data);
-		post_req.end();
 		
 		
 	}

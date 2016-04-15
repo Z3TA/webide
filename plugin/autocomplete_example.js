@@ -11,7 +11,7 @@
 		if(wordLength == 0) return; // Return early, unless we have super smart suggestions
 		
 		var myWords = ["editor.renderNeeded()", "editor.resizeNeeded()"]
-		var andMoveCaret = [['editor.on("")', 2], ['editor.isFilePath()', 1]];
+		var andMoveCaret = [['editor.on("")', 2], ['editor.closeFile()', 1]];
 		var camelSmart = [["rend", "editor.renderNeeded()"], ["rez", "editor.resizeNeeded()"]];
 		
 		var options = [];

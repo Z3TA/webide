@@ -20,7 +20,7 @@
 		file.isBig = bigFile ? true : false;
 		file.index = fileIndex;
 		file.order = fileIndex; // For ordering files, in for example a tab list
-		file.name = editor.getFilenameFromPath(path);
+		file.name = getFilenameFromPath(path);
 		file.mode = "code"; // text, code, or other, ...
 		file.lineBreak = determineLineBreakCharacters(text);
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
@@ -44,7 +44,7 @@
 		file.isSaved = false;
 		file.savedAs = false;
 		
-		file.fileExtension = editor.getFileExtension(path);
+		file.fileExtension = getFileExtension(path);
 		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
 		file.lastChange = new Date();
 		
@@ -331,7 +331,7 @@
 		
 		
 		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
-		console.log(editor.getStack("creating caret"));
+		console.log(getStack("creating caret"));
 		
 		// Sanity check if we got it right
 		if(caret.index == undefined) {
@@ -2578,7 +2578,7 @@
 	File.prototype.gotoLine = function(line, callback) {
 		// Goes to a line in a file. Loads part of a file if necessary (big files)
 		
-		console.log(editor.getStack("Going to line=" + line + " ..."));
+		console.log(getStack("Going to line=" + line + " ..."));
 		
 		var file = this;
 		
@@ -2717,7 +2717,6 @@
 		
 		console.log("scrollTo: x=" + x + " y=" + y);
 		
-		//console.log(editor.getStack());
 		
 		if(x != undefined) startColumn = parseInt(x);
 		if(y != undefined) {
@@ -2738,7 +2737,7 @@
 				
 				if(high < low) throw new Error("high=" + high + " < low=" + low + ". file.grid.length=" + file.grid.length + " path=" + file.path);
 				
-				//console.log(editor.getStack("scrollTo"));
+				//console.log(getStack("scrollTo"));
 				
 				console.log("Scrolling in big file: file.isStreaming=" + file.isStreaming + " file.totalRows=" + file.totalRows + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
 				

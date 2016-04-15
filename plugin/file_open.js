@@ -33,9 +33,8 @@
 			var startIndex = file.grid[file.caret.row].startIndex;
 			var endIndex = (file.grid.length-1 > file.caret.row ? file.grid[file.caret.row+1].startIndex : file.text.length) - file.lineBreak.length;
 			var filePath = file.text.substring(startIndex, endIndex).trim(); //substring: second argument: Index
-			var isFilePath = editor.isFilePath(filePath);
 			
-			if(isFilePath) {
+			if(isFilePath(filePath)) {
 				// The text on the row is a file path! Open that file.
 				var content = editor.readFileSync(filePath);
 				
@@ -57,7 +56,7 @@
 		
 		
 			// Change default directory to the same as current file
-			defaultPath = editor.getDir(editor.currentFile.path);
+			defaultPath = getDir(editor.currentFile.path);
 
 		
 		}
