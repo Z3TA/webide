@@ -16,7 +16,7 @@ Write tests!
 
 What I'm working on:
 
-
+Not saving state for file because it has over 100000 characters file.path=C:\Users\Z\dev-repositories\js-editor\editor.js
 
 Fixing stuff needed for a beta release:
 * Bug reporting 
@@ -24,7 +24,13 @@ Fixing stuff needed for a beta release:
 * See (and change!?) key bindings some how
 * Regex search/replace
 * Replace in file (using regex)
+* Keybinding overload, if functioName == ...
 
+
+editor.addPlugin?
+editor.bindKey?
+editor.blockPlugin!?
+editor.changeKeyBinding(funcName, new Binding)
 
 
 BUGS
@@ -99,6 +105,7 @@ Source indentation in html documents might be "off" if you remove or add div's.
 
 The caret is off in the magnification glass
 
+A file (that was opened, but never closed) was removed from editor.files!!
 
 
 Polishing

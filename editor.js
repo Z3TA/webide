@@ -2076,7 +2076,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(ret !== true) break;
 		}
 		
-		
 		if(ret == true) {
 			this.close(true);
 		}
@@ -3364,58 +3363,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
-	
-	function openFileDepricated(text, path) {
-		/*
-			
-			No split screen support (for now ... just resize and bring up another instance instead)
-			
-			We should however support having many files open!
-			
-			File focus problem:
-			
-			When we are not on the "document", lets say we're on a widget, like the search window. 
-			Then we do not want keystrokes to propagate to the "document"! Like arrow keys and delete
-			We however want all plug-ins that listen on key strokes to work! Like Esc key to hide the search window!
-			>And we also want the search widget to know in what file to search (what the currently active file is)
-			
-			Possible solutions:
-			
-			Only listen to key strokes if the "document" has focus
-			* Esc key wont work
-			
-			
-			The solution:
-			Have the arrow, enter, etc plug-ins check editor.input before doing their thing.
-			
-			
-			
-		*/
-		
-		
-		console.log("Opening file " + path);
-		
-		var header = document.getElementById("header");
-		
-		editor.files[path] = new File(text, path, ++editor.fileIndex);
-		
-		editor.showFile(editor.files[path]);
-		
-		editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
-		
-		editor.renderNeeded();
-		
-	}
-	
-	
-	function unloadFile(filename) {
-		
-		editor.files[name].close();
-		
-		delete editor.files[name];
-		
-	}
-	
+
 	function htmlToImage(html, callback) {
 		
 		if(!callback) throw new Error("No callback function in htmlToImage");
@@ -3446,27 +3394,26 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
 		'<foreignObject width="100%" height="100%">' +
 		'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + editor.settings.style.fontSize + 'px; font-family: ' + editor.settings.style.font + ';">' +
-			html +
-			'</div>' +
-			'</foreignObject>' +
-			'</svg>';
+		html +
+		'</div>' +
+		'</foreignObject>' +
+		'</svg>';
+		
+		var DOMURL = window.URL || window.webkitURL || window;
+		
+		var img = new Image();
+		var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+		var url = DOMURL.createObjectURL(svg);
+		
+		img.onload = function () {
+			callback(img);
+			DOMURL.revokeObjectURL(url);
+			//console.log("Image yo!");
 			
-			
-			var DOMURL = window.URL || window.webkitURL || window;
-			
-			var img = new Image();
-			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-			var url = DOMURL.createObjectURL(svg);
-			
-			img.onload = function () {
-				callback(img);
-				DOMURL.revokeObjectURL(url);
-				//console.log("Image yo!");
-				
-			}
-			
-			img.src = url;
 		}
+			
+		img.src = url;
+	}
 		
 		
 		
