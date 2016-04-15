@@ -3,7 +3,7 @@
 	
 	/*
 		Attach to the chromium debug tool's console and watch for errors	
-
+		
 		Note: This is not a "full debugger". An app that debug itself is not a good idea.
 		A "full debugger" is on the todo list, but for debugging Other chromium apps, 
 		so you would have to use another instance of the editor, to debug the editor with the editor.
@@ -23,14 +23,14 @@
 	*/
 	
 	var port = 57341; // For this plugin to work, the editor needs to be started with --remote-debugging-port=#port nr
-
+	
 	var ID = 0;
 	
 	var restartTime = 5000; // How many second to wait before restrying to connect to the debugger after a disconnect or failed websock
 	
 	//if(!alert) var alert = console.log; // If we are running in nodejs
 	if(!fs) var fs = require("fs"); // If we are running in nodejs
-
+	
 	var messageLog = []; // Recent log messages.
 	var maxLogLength = 50;
 	//var baseUrl = "file:///" + __dirname.replace(/\\/g, "/").replace(/\/plugin$/, "/");
@@ -47,7 +47,7 @@
 	var client;
 	
 	var showAlertMessage = true;
-
+	
 	var errorReportCounter = 0; // Used for file names
 	var thisSessionErrorCount = 0;
 	var maxErrors = 5;
@@ -58,7 +58,7 @@
 	function wsError(err) {
 		console.log("Connection Error: " + err.toString());
 	}
-
+	
 	function wsClose(code, data) {
 		console.log("Connection Closed. code=" + code + " data=" + data);
 		client = undefined;
@@ -69,7 +69,7 @@
 		
 		var json = JSON.parse(data);
 		var method = json.method;
-	
+		
 		if(json.error) {
 			throw new Error("json=" + JSON.stringify(json, null, 2));
 		}
@@ -94,7 +94,7 @@
 	}
 	
 	function wsOpen() {
-	
+		
 		console.log('Connected to the chromium debugger');
 		
 		// The first thing we want to do is to clear ?
@@ -103,7 +103,7 @@
 		send(consoleEnable());
 		//send(consoleClearMessages());
 		//send(pageNavigate("index.htm"));
-
+		
 	}
 	
 	function send(json) {
@@ -121,7 +121,7 @@
 			
 			var WebSocket = require('ws');
 			client = new WebSocket(url); // , {protocolVersion: 8, origin: 'http://websocket.org'}
-
+			
 			client.on('open', wsOpen);
 			client.on('close', wsClose);
 			client.on('error', wsError);
@@ -129,7 +129,7 @@
 			
 		});
 	}
-
+	
 	function getWebSocketDebuggerUrl(host, port, callback) {
 		// Gets the websocket URL of the debugger
 		
@@ -168,7 +168,7 @@
 		
 	}
 	
-
+	
 	function consoleEnable() {
 		return {"id": ++ID, "method": "Console.enable"};
 	}
@@ -180,7 +180,7 @@
 	function pageNavigate(url) {
 		return  {"id": ++ID, "method": "Page.navigate", "params": {"url": url} };
 	}
-
+	
 	
 	function captureErrors(json) {
 		
@@ -229,7 +229,7 @@
 							GUI.reload();
 						}
 						
-						}
+					}
 				}
 				else {
 					
@@ -274,17 +274,17 @@
 			
 			if(messageLog.length > maxLogLength) messageLog.shift();
 		}
-
+		
 		function decodeJSON(str) {
 			// Decode JSON
 			var json = JSON.parse(txt);
 			txt = JSON.stringify(json);
 		}
-
+		
 		
 		function parseText(txt) {
 			// Some text is decoded in JSON... and some are not
-
+			
 			// Remove first and lost quote
 			txt = txt.replace(/^"/g, ""); 
 			txt = txt.replace(/"$/g, "");
@@ -299,8 +299,8 @@
 			
 			// Unquote quotes
 			txt = txt.replace(/\\"/g, '"');
-
-
+			
+			
 			// Add padding to new lines
 			txt = txt.replace(/\n/g, newLine + fullPad); 
 			
@@ -347,7 +347,7 @@
 				str += fullPad + "@ " + functionName + " (" + url + ":" + stack[i].lineNumber + ")" + newLine;
 				
 				//str += pad(url + ":" + stack[i].lineNumber) + functionName + "\n";
-
+				
 			}
 			
 			return str;
@@ -365,13 +365,42 @@
 		
 		function sharedStart(array){
 			var A= array.concat().sort(), 
-			a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
+				a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
 			while(i<L && a1.charAt(i)=== a2.charAt(i)) i++;
 			return a1.substring(0, i);
 		}
 	}
 	
+	function sendBugReport() {
+		
+		var file = editor.currentFile;
+		
+		if(file) {
+			
+			var message = file.text;
+			
+			editor.httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
+				if(err) {
+					alert("Problem sending bug report:  " + err.message);
+					throw err;
+				}
+				else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
+					alert("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
+					console.log("respStr=" + respStr);
+				}
+				else {
+					alert("Bug report sent!");
+				}
 
+			});
+			
+			return false;
+		}
+		
+		return true;
+}
+	
+	
 	function myDate() {
 		var d = new Date();
 
@@ -406,6 +435,9 @@
 	}
 	
 	function main() {
+		var key_S = 83;
+		editor.keyBindings.push({charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		
 		restart();
 	}
 		
