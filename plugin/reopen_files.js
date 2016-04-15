@@ -22,6 +22,10 @@
 	
 	var allFilesOpenedNeverCalled = true;
 	
+	var copyOfEditorFiles = [];
+	setInterval(insaneBugCatcher, 1000);
+
+	
 	editor.on("start", reopenFilesMain, loadOrder)
 	
 	function reopenFilesMain() {
@@ -712,5 +716,20 @@
 		
 	}
 	
+	function insaneBugCatcher() {
+		// bug: A file (that was opened, but never closed) was removed from editor.files!!
+		
+		for(var i=0; i<copyOfEditorFiles.length; i++) {
+			if(!editor.files.hasOwnProperty(copyOfEditorFiles[i])) {
+				console.log("Removed from editor.files:" + copyOfEditorFiles[i]);
+			}
+		}
+		
+		for(var path in editor.files) {
+			if(copyOfEditorFiles.indexOf(path) == -1) console.log("Added to editor.files:" + path);
+		}
+
+		copyOfEditorFiles = Object.keys(editor.files);
+	} 	
 	
 })();
