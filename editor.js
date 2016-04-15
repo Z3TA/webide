@@ -2008,9 +2008,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		var ret = true;
 		var name = "";
+		var GUI = require('nw.gui').Window.get();
 		
 		console.log("Closing the editor ...");
-
+		
+		GUI.leaveKioskMode();
 		
 		if(!window.localStorage) {
 			console.warn("window.localStorage=" + window.localStorage);

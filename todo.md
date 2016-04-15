@@ -2,10 +2,11 @@ Prioritize: bug fixing, re-factoring, then some polishing and maybe some optimiz
 No new features until that is done!
 
 Prio: 
-* Bug/issue fixing, 
-* PHP/vbScript/Java parsing !?
+* Bug/issue fixing 
 * Built in FTP/SFTP/SSH !?
+* PHP parser !?
 * Beta release!
+
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
@@ -21,9 +22,8 @@ Fixing stuff needed for a beta release:
 * Bug reporting 
 * Updating method, to get bug fixes
 * See (and change!?) key bindings some how
-* Replace in file (using regex)
 * Regex search/replace
-
+* Replace in file (using regex)
 
 
 
@@ -412,6 +412,12 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+auto paste in snippets from stack exchange, Ctrl+H, write question, select result, paste the code from the most popular answer. 
+
+vi keybindings
+
+column selection
 
 Pipe to other program: Sends the text to stdin of another program.
 
