@@ -377,24 +377,27 @@
 		
 		if(file) {
 			
-			var message = file.text;
-			
-			httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
-				if(err) {
-					alert("Problem sending bug report:  " + err.message);
-					throw err;
-				}
-				else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
-					alert("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
-					console.log("respStr=" + respStr);
-				}
-				else {
-					alert("Bug report sent!");
-				}
-
-			});
-			
-			return false;
+			if(confirm("Send this file as bug report?\n" + file.path)) {
+				
+				var message = file.text;
+				
+				httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
+					if(err) {
+						alert("Problem sending bug report:  " + err.message);
+						throw err;
+					}
+					else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
+						alert("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
+						console.log("respStr=" + respStr);
+					}
+					else {
+						alert("Bug report sent!");
+					}
+					
+				});
+				
+				return false;
+			}
 		}
 		
 		return true;
