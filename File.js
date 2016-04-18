@@ -918,6 +918,10 @@
 			Each box in file.selected is a reference to a box in the grid. 
 			
 		*/
+		
+		if(editor.settings.devMode == false) return; // Do not check in production
+		
+		
 		var file = this;
 		var box = file.selected;
 		
@@ -937,16 +941,15 @@
 					if(box.indexOf(grid[row][col]) == -1) throw new Error("grid[" + row + "][" + col + "] is selected but not in file.selected!");
 				}
 			}
-}
+		}
 		
-		console.log("checkSelection passed!");
+		//console.log("checkSelection passed!");
 	}
 	
 	File.prototype.select = function(box, direction) {
-		var file = this,
-			selected = file.selected,
-			start = 0,
-			allSelected = true;
+		var file = this;
+		var selection = file.selected;
+		var start = 0;
 		
 		if(box == undefined) {
 			console.warn("Nothing to select!");
@@ -962,40 +965,51 @@
 			box = [box];
 		}
 		
-		box.forEach(selectBox);
-		
-		if(allSelected) {
-			// Remove the selected 
-			selected.splice(selected.indexOf(box[0]), box.length);
-		}
-		else {
-			// Insert the new boxes on the left or right side
-			if(direction == "left") {
-				start = 0;
+		// mark boxes as selected ...
+		// boxes already selected will be deselected
+		var deselect = [];
+		for(var i=0; i<box.length; i++) {
+			if(box[i].selected) {
+				box[i].selected = false;
+				//console.log("DESEL " + JSON.stringify(box[i]));
+				deselect.push(box[i]);
 			}
 			else {
-				start = selected.length;
+				box[i].selected = true;
+				//console.log("SEL " + JSON.stringify(box[i]));
 			}
-			Array.prototype.splice.apply(selected, [start, 0].concat(box)); // inserts the boxes at the start position
 		}
+		
+		// Remove all deselected boxes
+		//console.log("deselect.length=" + deselect.length + " box.length=" + box.length + " selection.length=" + selection.length);
+		var remove;
+		while(deselect.length > 0) {
+			remove = deselect.pop();
+			box.splice(box.indexOf(remove), 1);
+			selection.splice(box.indexOf(remove), 1);
+		}
+		//console.log("deselect.length=" + deselect.length + " box.length=" + box.length + " selection.length=" + selection.length);
+		
+		if(box.length > 0) {
+			// Insert the new boxes on the left or right side
+			if(direction == "left") {
+				for(var i=0; i<box.length; i++) {
+					selection.unshift(box[i]);
+				}
+			}
+			else {
+				for(var i=0; i<box.length; i++) {
+					selection.push(box[i]);
+				}
+			}
+		}
+		
+		// Sort selection by index !?
+		
 		
 		file.checkSelection();
 		
 		editor.renderNeeded();
-		
-		function selectBox(box) {
-			if(box.selected) {
-				//console.log("DESEL " + box.char);
-				box.selected = false;
-			}
-			else {
-				allSelected = false;
-				//console.log("SEL " + box.char);
-				box.selected = true;
-			}
-			
-			
-		}
 		
 	}
 	

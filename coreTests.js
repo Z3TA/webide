@@ -14,13 +14,17 @@
 		text: "Select text that has a part that is already selected",
 		fun: function selectText(callback) {
 			editor.openFile("testing_select", "", function(file) {
-				file.write("foo bar baz");
+				file.write("abc def ghi");
 				
-				file.select(file.grid[0, 4], file.grid[0, 5], file.grid[0, 6]); // select bar
+				file.select([file.grid[0][4], file.grid[0][5], file.grid[0][6]]); // select def
 				
-				file.select(file.grid[0, 0], file.grid[0, 1], file.grid[0, 2], file.grid[0, 3], file.grid[0, 4], file.grid[0, 5], file.grid[0, 6], file.grid[0, 7], file.grid[0, 8], file.grid[0, 9], file.grid[0, 10]); // select all
+				if(file.selected.length != 3) return new Error("Expected file.selected.length=" + file.selected.length + " to be 3.");
 				
-				//editor.closeFile(file.path);
+				file.select([file.grid[0][0], file.grid[0][1], file.grid[0][2], file.grid[0][3], file.grid[0][4], file.grid[0][5], file.grid[0][6], file.grid[0][7], file.grid[0][8], file.grid[0][9], file.grid[0][10]]); // select all
+				
+				if(file.selected.length != 6) return new Error("Expected file.selected.length=" + file.selected.length + " to be 6.");
+				
+				editor.closeFile(file.path);
 				
 				callback(true);
 			});
