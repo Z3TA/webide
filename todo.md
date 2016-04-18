@@ -14,6 +14,8 @@ Write tests!
 
 What I'm working on:
 
+Trying to figoure out whats wrong: bug-ish: Loading all files at startup takes lots of time and another file is opened during that time:
+
 editor.getKeyFor() so we can get the right keyBinding (if it has changed) for the friendly message when there are no files open.
 and witch key to send bug report. show in bug report.
 
@@ -35,6 +37,14 @@ editor.changeKeyBinding(funcName, new Binding)
 
 BUGS
 ====
+
+bug-ish: Loading all files at startup takes lots of time and another file is opened during that time:
+Uncaught Error: File does not exist in openedFiles list: path=C:\Users\Z\dev-repositories\js-editor\README.txt
+array=["C:\\shares\\Z\\documents\\anteckningar\\fiber_iggesund.txt"]
+editor.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\README.txt","C:\\shares\\Z\\documents\\anteckningar\\fiber_iggesund.txt"]reopen_files.js:611 findBugsreopen_files.js:129 allFilesOpenedreopen_files.js:114 compareAndDonereopen_files.js:110 fileInListOpenedreopen_files.js:295 fileReopenededitor.js:406 callCallbackseditor.js:378 fileLoaded
+
+
+
 
 red circle:
 setInterval( functionCheckStatus() {

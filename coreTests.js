@@ -11,10 +11,19 @@
 	*/
 	
 
-	
+	editor.tests.push({
+		text: "Opening a file while another is loading",
+		fun: function openFileWhileAnotherIsLoading(callback) {
+			
+			// Open file from the internet (via HTTP)
+			
+			// Directly load another file (also with latency?)
+			
+		}
+	});
 	editor.tests.push({
 		text: "Testing File.moveCaretToIndex()",
-		fun: function selectText(callback) {
+		fun: function test_moveCaretToIndex(callback) {
 			editor.openFile("test_moveCaretToIndex.js", "  if(a==b) {\n     c=d;\n  }\n", function(file) {
 				
 				for(var i=0; i<file.text.length; i++) {
@@ -30,7 +39,7 @@
 	});
 	editor.tests.push({
 		text: "Opening a file that starts with a tab or space",
-		fun: function selectText(callback) {
+		fun: function testTabAtBeginning(callback) {
 			editor.openFile("file_starts_with_tab", "\tfoo\nbar\nbaz", function(file) {
 				editor.closeFile(file.path);
 				
