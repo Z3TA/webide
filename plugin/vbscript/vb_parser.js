@@ -133,7 +133,7 @@
 			pastChar[0] = char;
 			char = text.charAt(charIndex);
 			
-			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
+			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " insideCondition=" + insideCondition + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment);
 			
 			
 			/*
@@ -354,7 +354,7 @@
 						if(insideXmlTagEnding) {
 							// Use default xmlMode after script tag ended
 							xmlMode = xmlModeBeforeScript;
-							console.log("Ended tag:" + xmlTag);
+							//console.log("Ended tag:" + xmlTag);
 						}
 						else {
 							// We are <script HERE>

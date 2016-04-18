@@ -1823,7 +1823,7 @@
 			
 		*/
 		
-		//console.log("moveCaretToIndex: " + index + "(text.length=" + file.text.length + ")");
+		console.log("moveCaretToIndex: " + index + "(text.length=" + file.text.length + ")");
 		
 		if(file.text.length == 0) {
 			caret.index = 0;
@@ -1842,6 +1842,14 @@
 				caret.col = grid[caret.row].length;
 				caret.eol = true;
 				caret.eof = true;
+			}
+			else if(index == 0) {
+				// Start of the file, and not EOF
+				caret.index = grid[0].startIndex;
+				caret.row = 0;
+				caret.col = 0;
+				caret.eol = (grid[0].length == 0);
+				caret.eof = false;
 			}
 			else {
 				//console.log("grid.length=" + grid.length);
@@ -1862,7 +1870,7 @@
 						if(gridIndex == index) {
 							caret.row = row;
 							caret.col = col;
-							caret.eol = false;
+							caret.eol = (col == (grid[row].length-1));
 							caret.eof = false;
 							
 							found = true;
@@ -1870,16 +1878,27 @@
 							
 						}
 						else if(gridIndex > index) {
-							// We are at the end of last row
-							caret.row = row-1;
-							caret.col = grid[caret.row].length;
-							caret.eol = true;
-							
-							if(grid[caret.row].length > 0) {
-								caret.index = grid[caret.row][caret.col-1].index + 1; // Last character on the row + 1
+							// index might be in the indentation characters
+							if(row == 0) {
+								// Place caret at col
+								caret.index = gridIndex;
+								caret.row = row;
+								caret.col = col;
+								caret.eol = (col == (grid[row].length-1));
+								caret.eof = false;
 							}
 							else {
-								caret.index = grid[caret.row].startIndex;
+								// Place caret at the end of last row
+								caret.row = row-1;
+								caret.col = grid[caret.row].length;
+								caret.eol = true;
+								
+								if(grid[caret.row].length > 0) {
+									caret.index = grid[caret.row][caret.col-1].index + 1; // Last character on the row + 1
+								}
+								else {
+									caret.index = grid[caret.row].startIndex;
+								}
 							}
 							
 							found = true;

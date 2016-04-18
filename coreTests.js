@@ -11,6 +11,21 @@
 	*/
 	
 	editor.tests.push({
+		text: "Opening a file that starts with a tab or space",
+		fun: function selectText(callback) {
+			editor.openFile("file_starts_with_tab", "\tfoo\nbar\nbaz", function(file) {
+				editor.closeFile(file.path);
+				
+				editor.openFile("file_starts_with_space", "   foo\nbar\nbaz", function(file) {
+					editor.closeFile(file.path);
+					
+					callback(true);
+				});
+				
+			});
+		}
+	});
+	editor.tests.push({
 		text: "Select text that has a part that is already selected",
 		fun: function selectText(callback) {
 			editor.openFile("testing_select", "", function(file) {

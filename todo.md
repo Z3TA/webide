@@ -1,12 +1,10 @@
-Prioritize: bug fixing, re-factoring, then some polishing and maybe some optimization (toggle devMode off when testing!!!). 
-No new features until that is done!
+Feature freeze!
 
 Prio: 
-* Bug/issue fixing 
-* Built in FTP/SFTP/SSH !?
-* PHP parser !?
-* Beta release!
-
+1) Beta release!
+2) Bug/issue fixing and refactoring
+3) Polishing
+4) Optimization (toggle devMode off when testing!)
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
@@ -20,14 +18,14 @@ editor.getKeyFor() so we can get the right keyBinding (if it has changed) for th
 and witch key to send bug report. show in bug report.
 
 Fixing stuff needed for a beta release:
-* Bug reporting 
-* Updating method, to get bug fixes
 * See (and change!?) key bindings some how
 * Regex search/replace
 * Replace in file (using regex)
 * Keybinding overload, if functioName == ...
 * PHP parser
 * bash script parser
+* Built in FTP/SFTP/SSH !?
+
 
 editor.addPlugin?
 editor.bindKey?
