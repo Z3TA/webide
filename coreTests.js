@@ -11,13 +11,30 @@
 	*/
 	
 	editor.tests.push({
+		text: "Select text that has a part that is already selected",
+		fun: function selectText(callback) {
+			editor.openFile("testing_select", "", function(file) {
+				file.write("foo bar baz");
+				
+				file.select(file.grid[0, 4], file.grid[0, 5], file.grid[0, 6]); // select bar
+				
+				file.select(file.grid[0, 0], file.grid[0, 1], file.grid[0, 2], file.grid[0, 3], file.grid[0, 4], file.grid[0, 5], file.grid[0, 6], file.grid[0, 7], file.grid[0, 8], file.grid[0, 9], file.grid[0, 10]); // select all
+				
+				//editor.closeFile(file.path);
+				
+				callback(true);
+			});
+		}
+	});
+	
+	editor.tests.push({
 		text: "Write text using File.write()",
 		fun: function fileWriteLine(callback) {
 			editor.openFile("testing_write", "Line1\nLine2\nLine3\n", function(file) {
 				file.write("Hello");
 				file.write(" world!\nYou are great!");
 				
-				//editor.closeFile(file.path);
+				editor.closeFile(file.path);
 				
 				callback(true);
 			});

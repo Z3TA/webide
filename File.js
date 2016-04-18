@@ -735,7 +735,7 @@
 			file.scrollToCaret();
 		}
 		
-}
+	}
 	
 	File.prototype.insertText = function(text, caret) {
 		var file = this;
@@ -877,7 +877,7 @@
 			caret.col++;
 			caret.index++;
 			
-		
+			
 			// Increment index of the rest of the columns on this row
 			for(var j=col+1; j<grid[row].length; j++) {
 				grid[row][j].index++;
@@ -909,6 +909,37 @@
 		
 		if(!renderNotNeeded) editor.renderNeeded();
 		
+	}
+	
+	File.prototype.checkSelection = function() {
+		/* 
+			Sanity check selection
+			
+			Each box in file.selected is a reference to a box in the grid. 
+			
+		*/
+		var file = this;
+		var box = file.selected;
+		
+		for(var i=0; i<box.length; i++) {
+			// Each box must have an index!
+			if(isNaN(box[i].index)) throw new Error("Selected box i=" + i + " has no index! box[" + i + "].index=" + box[i].index + " box[" + i + "]=" + JSON.stringify(box[i]));
+			
+			// Each selected box must also have the selected boolen set to true
+			if(!box[i].selected) throw new Error("Selected box i=" + i + " is not selected! box[" + i + "]=" + JSON.stringify(box[i]));
+		}
+		
+		// All grid boxes that are selected must be in file.selected Array
+		var grid = file.grid;
+		for(var row=0; row<grid.length; row++) {
+			for (var col=0; col<grid[row].length; col++) {
+				if(grid[row][col].selected) {
+					if(box.indexOf(grid[row][col]) == -1) throw new Error("grid[" + row + "][" + col + "] is selected but not in file.selected!");
+				}
+			}
+}
+		
+		console.log("checkSelection passed!");
 	}
 	
 	File.prototype.select = function(box, direction) {
@@ -948,6 +979,8 @@
 			Array.prototype.splice.apply(selected, [start, 0].concat(box)); // inserts the boxes at the start position
 		}
 		
+		file.checkSelection();
+		
 		editor.renderNeeded();
 		
 		function selectBox(box) {
@@ -986,6 +1019,8 @@
 			selected.length = 0;
 		}
 		
+		file.checkSelection();
+		
 		editor.renderNeeded();
 		
 	}
@@ -1019,6 +1054,8 @@
 		if(selection == undefined) {
 			selection = file.selected;
 		}
+		
+		file.checkSelection();
 		
 		if(selection.length == 0) {
 			console.warn("Nothing is selected!");
@@ -1083,7 +1120,7 @@
 				
 				box = selection[i];
 				
-				if(box.index == undefined) throw new Error("Index is undefined. Stuff will go wrong!");
+				if(box.index == undefined) throw new Error("Index is undefined. Stuff will go wrong! box=" + JSON.stringify(box));
 				
 				//console.log("Deselecting box:\n" + JSON.stringify(box));
 				

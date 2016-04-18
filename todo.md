@@ -17,7 +17,7 @@ Write tests!
 What I'm working on:
 
 editor.getKeyFor() so we can get the right keyBinding (if it has changed) for the friendly message when there are no files open.
-
+and witch key to send bug report. show in bug report.
 
 Fixing stuff needed for a beta release:
 * Bug reporting 
@@ -26,7 +26,8 @@ Fixing stuff needed for a beta release:
 * Regex search/replace
 * Replace in file (using regex)
 * Keybinding overload, if functioName == ...
-
+* PHP parser
+* bash script parser
 
 editor.addPlugin?
 editor.bindKey?
@@ -36,6 +37,14 @@ editor.changeKeyBinding(funcName, new Binding)
 
 BUGS
 ====
+
+red circle:
+setInterval( functionCheckStatus() {
+
+var dif = t1.getTime() - t2.getTime();
+
+}, 60000);
+
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {
 

@@ -175,6 +175,7 @@
 		//file.fixCaret(state.caret); // I shouldn't be needing this! 
 		file.mutateCaret(file.caret, state.caret);
 		
+		file.checkSelection();
 		
 		// Call file edit listeners
 		file.change("undo-redo", state.text, 0, 0, 0) // change, text, index, row, col
