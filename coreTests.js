@@ -10,6 +10,24 @@
 		Place new tests at top. Ctrl+Shift+T first times runs the first test, second time, runs all tests.
 	*/
 	
+
+	
+	editor.tests.push({
+		text: "Testing File.moveCaretToIndex()",
+		fun: function selectText(callback) {
+			editor.openFile("test_moveCaretToIndex.js", "  if(a==b) {\n     c=d;\n  }\n", function(file) {
+				
+				for(var i=0; i<file.text.length; i++) {
+					file.moveCaretToIndex(i);
+				}
+				
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
 	editor.tests.push({
 		text: "Opening a file that starts with a tab or space",
 		fun: function selectText(callback) {

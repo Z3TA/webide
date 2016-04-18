@@ -1870,7 +1870,7 @@
 						if(gridIndex == index) {
 							caret.row = row;
 							caret.col = col;
-							caret.eol = (col == (grid[row].length-1));
+							caret.eol = (col > (grid[row].length-1));
 							caret.eof = false;
 							
 							found = true;
@@ -1884,7 +1884,7 @@
 								caret.index = gridIndex;
 								caret.row = row;
 								caret.col = col;
-								caret.eol = (col == (grid[row].length-1));
+								caret.eol = (col > (grid[row].length-1));
 								caret.eof = false;
 							}
 							else {
