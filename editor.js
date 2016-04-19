@@ -1918,13 +1918,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	editor.getKeyFor = function(funName) {
 		// Returns a string representing the key combination for the keyBidning "fun" name.
+		
+		if(typeof funName == "function") funName = getFunctionName(funName); // Convert to string
+		
 		var f, character, combo = "";
 		for(var i=0; i<editor.keyBindings.length; i++) {
 			f = editor.keyBindings[i]
 			if(getFunctionName(f.fun) == funName) {
 				
 				if(f.charCode) {
-					character = String.fromCharCode(f.charCode);
+					character = getKeyboardMapping[f.charCode];
 				}
 				else {
 					character = f.char;

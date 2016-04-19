@@ -51,11 +51,7 @@ var dif = t1.getTime() - t2.getTime();
 
 
 indentation:
-editor.plugin({desc: "Show all keyBindings", load: function showKeyBindings() {
-editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() {
-"use strict";
-}});
-}});
+var fileOpenExtraCallbacks = {};
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {

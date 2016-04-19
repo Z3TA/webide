@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	/*
+		/*
 		Attach to the chromium debug tool's console and watch for errors	
 		
 		Note: This is not a "full debugger". An app that debug itself is not a good idea.
@@ -37,8 +37,7 @@
 	var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
 	console.log("baseUrl=" + baseUrl);
 	
-	var padLength = 42; // How many blank spaces in url padding
-	
+	var padLength = 42;
 	var fullPad = ""; for(var i=0; i<padLength; i++) fullPad += " "; // A string with padLength spaces
 	
 	var newLine = "\n";
@@ -270,7 +269,7 @@
 		}
 		else {
 			// Keep a list of the 100 latest message
-			messageLog.push(pad(shortenUrl(msg.url) + ":" + msg.line) + parseText(msg.text));
+			messageLog.push(spacePad(shortenUrl(msg.url) + ":" + msg.line, padLength) + parseText(msg.text));
 			
 			if(messageLog.length > maxLogLength) messageLog.shift();
 		}
@@ -346,7 +345,7 @@
 				
 				str += fullPad + "@ " + functionName + " (" + url + ":" + stack[i].lineNumber + ")" + newLine;
 				
-				//str += pad(url + ":" + stack[i].lineNumber) + functionName + "\n";
+				//str += spacePad(url + ":" + stack[i].lineNumber, padLength) + functionName + "\n";
 				
 			}
 			
@@ -364,8 +363,8 @@
 		}
 		
 		function sharedStart(array){
-			var A= array.concat().sort(), 
-				a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
+				var A= array.concat().sort(), 
+			a1= A[0], a2= A[A.length-1], L= a1.length, i= 0;
 			while(i<L && a1.charAt(i)=== a2.charAt(i)) i++;
 			return a1.substring(0, i);
 		}
@@ -401,41 +400,32 @@
 		}
 		
 		return true;
-}
+	}
 	
 	
 	function myDate() {
 		var d = new Date();
-
+		
 		var hour = addZero(d.getHours());
 		var minute = addZero(d.getMinutes());
 		var second = addZero(d.getSeconds());
-
+		
 		var day = addZero(d.getDate());
 		var month = addZero(1+d.getMonth());
 		var year = d.getFullYear();
-
+		
 		return year + "-" + month + "-" + day + " (" + hour + ":" + minute + ":" + second + ")";
-
+		
 		function addZero(n) {
 			if(n < 10) return "0" + n;
 			else return n;
 		}
 	}
-
+	
 	function log(txt) {
 		fs.appendFileSync("error.log", txt + newLine);
 	}
 	
-	function pad(str) {
-		
-		var left = padLength - str.length;
-		if (left < 0) return str; // Return early if no padding is needed
-		
-		var padding = "";
-		for(var i=0; i<left; i++) padding += " ";
-		return str + padding;
-	}
 	
 	function reportTemplate(body, subject) {
 		// Create a template used to report bugs
