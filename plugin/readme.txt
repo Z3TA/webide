@@ -2,6 +2,14 @@
 Guidelines for writing a plugin/extension or new feature
 ========================================================
 
+A plugin that is just a key binding:
+editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() { ... }});
+
+While more advanced plugins should call:
+editor.plugin({desc: "Open up the files from last session", order: 999, load: function reopenFiles() { ... }});
+
+
+
 If you add a new feature to the editor, you should make it into a plugin: A .js file in the plugin directory.
 
 Run the editor in devMode: Ctrl + D. Or add "editor.settings.devMode = true" in settings_overload.js
