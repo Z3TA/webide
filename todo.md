@@ -14,11 +14,10 @@ Write tests!
 
 What I'm working on:
 
-
+Searching left with regexp in find_replace.js
 
 
 Fixing stuff needed for a beta release:
-* See (and change!?) key bindings some how
 * Regex search/replace
 * Replace in file (using regex)
 * PHP parser
@@ -27,16 +26,7 @@ Fixing stuff needed for a beta release:
 * word wrap
 
 
-editor.bindKey?
-editor.blockPlugin!?
-editor.changeKeyBinding(funcName, new Binding)
 
-editor.plugin = editor.plugins.push({description: "bla bla", order: loadOrder, fun: startFunction()
-
-Remove a plugin in settings_overload.js: editor.disablePlugin(nameOfFunction);
-or: Remove the script in index.htm !?
-
-Change a keyBinding: editor.keyBinding(nameOfFunction, {charCode: 100, combo: CTRL});
 
 
 BUGS
@@ -51,7 +41,9 @@ var dif = t1.getTime() - t2.getTime();
 
 
 indentation:
-var fileOpenExtraCallbacks = {};
+var foo,
+bar,
+baz,
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {
@@ -132,6 +124,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 
 Polishing
 =========
+
+Better undo/redo!!
 
 Update with confirm if a file have been changed by another program.
 

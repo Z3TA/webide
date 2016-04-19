@@ -3,8 +3,10 @@
 	
 	"use strict";
 	
-	var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, replaceAllButton, findInFilesButton, replaceInFilesButton;
+		var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, 
+	replaceAllButton, ignoreCaseOption;
 	
+		
 	var inputFindGotFocus = false;
 	var lastSearchEnd = -1; // Depricated !??
 	var searchReportCounter = 0;
@@ -39,8 +41,8 @@
 		regexOption = document.getElementById("regexOption");
 		subfolderOption = document.getElementById("subfolderOption");
 		findAllButton = document.getElementById("findAllButton");
-		replaceAllButton = document.getElementById("findAllButton");
-		
+		replaceAllButton = document.getElementById("replaceAllButton");
+		ignoreCaseOption  = document.getElementById("ignoreCaseOption");
 
 	}
 	
@@ -119,15 +121,23 @@
 		
 		var regexOptionLabel = document.createElement("label");
 		regexOptionLabel.setAttribute("for", "regexOption");
-		regexOptionLabel.appendChild(document.createTextNode("Use regex:")); // Language settings!?
+		regexOptionLabel.appendChild(document.createTextNode("Use regex")); // Language settings!?
 
-
-		
 		regexOption = document.createElement("input");
 		regexOption.setAttribute("type", "checkbox");
 		regexOption.setAttribute("id", "regexOption");
 		regexOption.setAttribute("class", "option regex");
-
+		
+		
+		var ignoreCaseLabel = document.createElement("label");
+		ignoreCaseLabel.setAttribute("for", "ignoreCaseOption");
+		ignoreCaseLabel.appendChild(document.createTextNode("Ignore case")); // Language settings!?
+		
+		ignoreCaseOption = document.createElement("input");
+		ignoreCaseOption.setAttribute("type", "checkbox");
+		ignoreCaseOption.setAttribute("id", "ignoreCaseOption");
+		ignoreCaseOption.setAttribute("class", "option ignoreCase");
+		
 		
 		var table = document.createElement("table"),
 			tr = document.createElement("tr"),
@@ -153,7 +163,12 @@
 		td = document.createElement("td");
 		td.appendChild(findAllButton);
 		tr.appendChild(td);
-
+		
+		td = document.createElement("td");
+		td.appendChild(ignoreCaseOption);
+		td.appendChild(ignoreCaseLabel);
+		tr.appendChild(td);
+		
 		table.appendChild(tr);
 		
 		
@@ -198,19 +213,19 @@
 			inputFindGotFocus = false;
 		}, false);
 		findButtonLeft.addEventListener("click", function() {
-			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "left"); // str, file, useRegex, keepSelection, dontLoop, direction
+			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "left", ignoreCaseOption.checked); // str, file, useRegex, keepSelection, dontLoop, direction
 		}, false);
 		findButtonRight.addEventListener("click", function() {
-			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "right");
+			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
 		}, false);
 		findAllButton.addEventListener("click", function() {
-			findAll(inputFind.value, editor.currentFile, regexOption.checked);
+			findAll(inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		replaceButton.addEventListener("click", function() {
-			replace(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked);
+			replace(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		replaceAllButton.addEventListener("click", function() {
-			replaceAll(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked);
+			replaceAll(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
 		
@@ -334,19 +349,15 @@
 		
 	}
 	
-	function find(str, file, useRegex, keepSelection, dontLoop, direction) {
+	function find(str, file, useRegex, keepSelection, dontLoop, direction, ignoreCase) {
 		
 		// Selects the text, and moves the caret to it, return first text index of str
 		
 		var text = file.text;
-		var start = file.caret.index + lastSearchStrLength;
+		var start = file.caret.index; // Will change depending if we search left or right
 		var end = 0;
 		
 		lastSearchStrLength = str.length;
-		
-		if(start == undefined) {
-			start = file.caret.index;
-		}
 		
 		if(useRegex == undefined) useRegex = false;
 		if(keepSelection == undefined) keepSelection = false;
@@ -355,13 +366,77 @@
 		
 		
 		if(useRegex) {
-			alert("Not yet implemented! (regex search)");
-		}
-		else {
+			
+			// ## Search using RegExp
+			
+			var flags = "g";
+			
+			if(ignoreCase) flags += "i";
+			
+			var re = new RegExp(str, flags);
+			var result;
 			
 			if(direction=="left") {
 				//console.log("searching left");
-				let begin = start-str.length-1
+				re.lastIndex = 0; // Always start from the beginning
+
+				start = Math.max(0, start - lastSearchStrLength - 1); // Don't search more then this
+				
+				// Searches left to right, but stops before last match
+				while((result = re.exec(text)) != null && re.index < start) {}
+				
+				if( result==null && !dontLoop) {
+					// Try again from the bottom
+					start = text.length;
+					while((result = re.exec(text)) != null && re.lastIndex < start) {}
+				}
+				
+				if(result == null) {
+					console.log("Search did not find anything!");
+					return -1;
+				}
+				
+				start = result.index;
+				
+				//console.log("start=" + start);
+			}
+			else {
+				// Search to the right (default)
+				//console.log("searching right");
+				
+				re.lastIndex = start + lastSearchStrLength; // Start search at 
+				
+				result = re.exec(text);
+				
+				if(result == null && !dontLoop) {
+					// Try again from the top
+					console.log("Trying again from the start");
+					re.lastIndex = 0;
+					result = re.exec(text);
+					
+				}
+				
+				if(result == null) {
+					console.log("Search did not find anything!");
+					return -1;
+				}
+				
+				start = result.index;
+				
+			}
+			
+			lastSearchStrLength = result[0].length;
+			
+			end = start + result[0].length;
+			
+		}
+		else {
+			
+			// ## Search using plain text
+			
+			if(direction=="left") {
+				//console.log("searching left");
+				let begin = start-1;
 				start = text.lastIndexOf(str, begin);
 				//console.log("start=" + start + " begin=" + begin);
 				
@@ -375,6 +450,11 @@
 			else {
 				// Search to the right (default)
 				//console.log("searching right");
+				
+				start = start + lastSearchStrLength;
+				
+				lastSearchStrLength = str.length;
+				
 				start = text.indexOf(str, start);
 				
 				if(start == -1 && !dontLoop) {
@@ -386,8 +466,10 @@
 			
 			end = start + str.length;
 			
-			lastSearchEnd = end;
+			
 		}
+		
+		lastSearchEnd = end;
 		
 		if(start >= 0) {
 			if(!keepSelection) {
@@ -419,14 +501,14 @@
 		
 	}
 	
-	function findAll(str, file, useRegex) {
+	function findAll(str, file, useRegex, ignoreCase) {
 		
 		var start = 0;
 		
 		lastSearchEnd = -1; // Begin from the start
 		
 		while(start > -1) {
-			start = find(str, file, useRegex, true, true);
+			start = find(str, file, useRegex, true, true, "right", ignoreCase);
 			console.log("start=" + start);
 
 		}
@@ -436,7 +518,7 @@
 	}
 	
 	
-	function replace(newString, oldString, file, useRegex, dontLoop) {
+	function replace(newString, oldString, file, useRegex, dontLoop, ignoreCase) {
 		
 		console.log("Replacing '" + oldString + "' with '" + newString + "'");
 		
@@ -452,10 +534,20 @@
 		var start = find(oldString, file, useRegex, keepSelection, dontLoop);
 		
 		if(start > -1) {
+			
+			var found = file.getSelectedText();
+			
 			// Delete the selected text
 			file.deleteSelection();
 			
 			if(newString.length > 0) {
+				
+				if(useRegex) {
+					// Support groups: $1 etc
+					var re = new RegExp(newString, flags);
+					newString = found.replace(re, newString);
+}
+				
 				// Insert the new string
 				file.insertText(newString, file.caret);
 			}
@@ -467,7 +559,7 @@
 		
 	}
 	
-	function replaceAll(newString, oldString, file, useRegex) {
+	function replaceAll(newString, oldString, file, useRegex, ignoreCase) {
 		var start = 0;
 		var dontLoop = false;
 		
@@ -476,12 +568,35 @@
 		console.log("Replace all " + oldString + " width " + newString);
 		
 		while(start > -1) {
-			start = replace(newString, oldString, file, useRegex, dontLoop);
+			start = replace(newString, oldString, file, useRegex, dontLoop, ignoreCase);
 			console.log("start=" + start);
 		}
 		
 		editor.renderNeeded();
 
+	}
+	
+	function regexIndexOf(text, regex, startpos) {
+		var indexOf = text.substring(startpos || 0).search(regex);
+		return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+	}
+	
+	function regexLastIndexOf(text, regex, startpos) {
+		regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+		if(typeof (startpos) == "undefined") {
+			startpos = text.length;
+		} else if(startpos < 0) {
+			startpos = 0;
+		}
+		var stringToWorkWith = text.substring(0, startpos + 1);
+		var lastIndexOf = -1;
+		var nextStop = 0;
+		var result;
+		while((result = regex.exec(stringToWorkWith)) != null) {
+			lastIndexOf = result.index;
+			regex.lastIndex = ++nextStop;
+		}
+		return lastIndexOf;
 	}
 	
 	
