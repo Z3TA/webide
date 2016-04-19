@@ -1,4 +1,7 @@
-(function() {
+editor.plugin({
+	desc: "Open up the files from last session", 
+	order: 999, // Load after the parser and other stuff that has fileOpen event listener
+	load: function reopenFiles() {
 	/*
 		1. Open up the files from last time, when opening the editor.
 		
@@ -16,8 +19,6 @@
 	
 	var saveStateInterval = 5000;
 
-	var loadOrder = 999; // Load after the parser and other stuff that has fileOpen event listener
-	
 	var saveStateIntervalTimer;
 	
 	var allFilesOpenedNeverCalled = true;
@@ -26,12 +27,11 @@
 	setInterval(insaneBugCatcher, 1000);
 
 	
-	editor.on("start", reopenFilesMain, loadOrder)
-	
 	editor.on("fileOpen", addToOpenedFiles, 1);
 	
 	editor.on("fileClose", removeFromOpenedFiles, 1);
 	
+	reopenFilesMain();
 	
 	function reopenFilesMain() {
 		
@@ -731,4 +731,4 @@
 		copyOfEditorFiles = Object.keys(editor.files);
 	} 	
 	
-})();
+}});

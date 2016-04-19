@@ -89,11 +89,13 @@ editor.eventListeners = { // Use editor.on to add listeners to these events:
 	interaction: [],
 	keyDown: [],
 	moveCaret: [],
-	autoComplete: []
+	autoComplete: [],
 };
 
 editor.renderFunctions = [];
 editor.preRenderFunctions = [];
+
+editor.plugins = [];
 
 editor.view = {
 	visibleColumns: 0, 
@@ -1954,6 +1956,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
 		
+		if(!b.desc) getStack("Key binding should have a description!");
+		
 		editor.keyBindings.push(b);
 		
 	}
@@ -1992,8 +1996,42 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		return null;
-}
+	}
 	
+	editor.plugin = function(p) {
+		
+		if((typeof p.load !== "function")) throw new Error("The plugin needs to have a load method!");
+		
+		if((typeof p.unload !== "function")) getStack("The plugin should have a unload method!");
+		if(!p.desc) getStack("The plugin should have a description!");
+		
+		p.loaded = false;
+		
+		editor.plugins.push(p);
+		
+	}
+	
+	editor.disablePlugin = function(loadFunName) {
+		
+		var f;
+		for(var i=0; i<editor.plugins.length; i++) {
+			f = editor.plugins[i]
+			if(getFunctionName(f.load) == loadFunName) {
+				
+				if(f.loaded && !f.unload) throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
+				
+				if(f.unload) f.unload();
+				
+				editor.plugins.splice(i, 1);
+				
+				console.log("Plugin " + loadFunName + " disabled");
+				
+				return editor.disablePlugin(loadFunName);
+			}
+		}
+		
+		return null;
+}
 	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
@@ -2208,6 +2246,24 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.eventListeners.start[i].fun(); // Call function
 		}
 
+		
+		// Sort and load plugins
+		editor.plugins.sort(function(a, b) {
+			if(a.order < b.order) {
+				return -1;
+			}
+			else if(a.order > b.order) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		});
+		console.log("Loading plugin (" + editor.eventListeners.start.length + ")");
+		for(var i=0; i<editor.plugins.length; i++) {
+			editor.plugins[i].load(editor); // Call function (and pass global objects!?)
+		}
+		
 		
 		
 		

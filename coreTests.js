@@ -19,7 +19,7 @@
 			var key_X = 88;
 			var key_Y = 89;
 			
-			editor.bindKey({charCode: key_X, combo: CTRL, fun: testMethod});
+			editor.bindKey({charCode: key_X, combo: CTRL, fun: testMethod, desc: "Just testing"});
 			
 			editor.rebindKey("testMethod", key_Y, CTRL);
 			
