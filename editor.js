@@ -1936,18 +1936,63 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					case 5: combo = "SHIFT + ALT"; break;
 					case 6: combo = "CTRL + ALT"; break;
 					case 7: combo = "SHIFT + CTRL + ALT"; break;
-}
+				}
 				
 				if(combo) return combo + " + " + character;
 				else return character;
 				
 				break;
-}
+			}
 		}
 		
 		return null;
 		
 	}
+	
+	editor.bindKey = function(b) {
+		
+		if(isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
+		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
+		
+		editor.keyBindings.push(b);
+		
+	}
+	
+	editor.rebindKey = function(funName, charCode, combo) {
+		
+		if(isNaN(charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
+		
+		var f, rebound = false;
+		for(var i=0; i<editor.keyBindings.length; i++) {
+			f = editor.keyBindings[i]
+			if(getFunctionName(f.fun) == funName) {
+				
+				if(rebound) console.warn("Double rebound of " + funName);
+				
+				f.charCode = charCode;
+				f.combo = combo;
+				rebound = true;
+				console.log("Rebound " + funName + " to " + editor.getKeyFor(funName) );
+			}
+		}
+	}
+	
+	editor.unbindKey = function(funName) {
+		var f;
+		for(var i=0; i<editor.keyBindings.length; i++) {
+			f = editor.keyBindings[i]
+			if(getFunctionName(f.fun) == funName) {
+				
+				editor.keyBindings.splice(i, 1);
+				
+				console.log("Ubound " + funName);
+				
+				return editor.unbindKey(funName);
+			}
+		}
+		
+		return null;
+}
 	
 	
 	function removeFrom(list, fun) {

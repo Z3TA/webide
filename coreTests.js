@@ -10,7 +10,34 @@
 		Place new tests at top. Ctrl+Shift+T first times runs the first test, second time, runs all tests.
 	*/
 	
-
+	
+	
+	editor.tests.push({
+		text: "Testing editor.bindKey(), editor.rebindKey(), editor.getKeyFor() and editor.unbindKey()",
+		fun: function testKeyBindings(callback) {
+			
+			var key_X = 88;
+			var key_Y = 89;
+			
+			editor.bindKey({charCode: key_X, combo: CTRL, fun: testMethod});
+			
+			editor.rebindKey("testMethod", key_Y, CTRL);
+			
+			var key = editor.getKeyFor("testMethod");
+			var expect = "CTRL + Y";
+			
+			if(key != expect) return new Error("editor.getKeyFor returned: " + key + " expected: " + expect);
+			
+			editor.unbindKey("testMethod");
+			
+			callback(true);
+			
+			function testMethod() {}
+			
+		}
+	});
+	
+/*
 	editor.tests.push({
 		text: "Opening a file while another is loading",
 		fun: function openFileWhileAnotherIsLoading(callback) {
@@ -21,6 +48,8 @@
 			
 		}
 	});
+	*/
+	
 	editor.tests.push({
 		text: "Testing File.moveCaretToIndex()",
 		fun: function test_moveCaretToIndex(callback) {
