@@ -341,8 +341,7 @@
 				let parent = codeBlock[codeBlockDepth-1];
 				let parentWord = parent.word;
 				let parentLine = parent.line;
-				
-				//if(parentLine != lineNumber) thisRowIndentation--;
+						
 				
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
 					codeBlock[codeBlockDepth].parent = codeBlock[codeBlockDepth-1];
@@ -356,10 +355,9 @@
 			codeBlockRightRow = row;
 			
 			codeBlockDepth--;
-			
-			//nextRowIndentation = false;
-			
+
 			thisRowDeIndentate = true;
+			nextRowIndentation = false;
 			
 			if(codeBlockDepth < 0) {
 				console.warn("Code-block doesn't match in:" + file.path);
@@ -374,6 +372,8 @@
 			
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
 			//console.log()
+			
+			if(codeBlockLeftRow == codeBlockRightRow) thisRowDeIndentate = false;
 			
 			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
 				//file.grid[row].indentation--;

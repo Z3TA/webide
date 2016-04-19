@@ -14,7 +14,7 @@
 	editor.tests.push({
 		text: "Testing if the JavaScript parser handles indentation correctly",
 		fun: function test_moveCaretToIndex(callback) {
-			editor.openFile("test_indentation.js", "{{\n{\n{\n{\nfoo\n}\n}\n}\n}}", function(file) {
+			editor.openFile("test_indentation.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
 				
 				var grid = file.grid;
 				
