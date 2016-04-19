@@ -1915,13 +1915,37 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	editor.getKeyFor = function(funName) {
-		// Returns a string
-		
+		// Returns a string representing the key combination for the keyBidning "fun" name.
+		var f, character, combo = "";
 		for(var i=0; i<editor.keyBindings.length; i++) {
-			
+			f = editor.keyBindings[i]
+			if(getFunctionName(f.fun) == funName) {
+				
+				if(f.charCode) {
+					character = String.fromCharCode(f.charCode);
+				}
+				else {
+					character = f.char;
+				}
+				
+				switch(f.combo) {
+					case 1: combo = "SHIFT"; break;
+					case 2: combo = "CTRL"; break;
+					case 3: combo = "SHIFT + CTRL"; break;
+					case 4: combo = "ALT"; break;
+					case 5: combo = "SHIFT + ALT"; break;
+					case 6: combo = "CTRL + ALT"; break;
+					case 7: combo = "SHIFT + CTRL + ALT"; break;
+}
+				
+				if(combo) return combo + " + " + character;
+				else return character;
+				
+				break;
+}
 		}
 		
-		return "Ctrl + O"
+		return null;
 		
 	}
 	
