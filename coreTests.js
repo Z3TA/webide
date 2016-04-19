@@ -11,6 +11,31 @@
 	*/
 	
 	
+	editor.tests.push({
+		text: "Testing if the JavaScript parser handles indentation correctly",
+		fun: function test_moveCaretToIndex(callback) {
+			editor.openFile("test_indentation.js", "{{\n{\n{\n{\nfoo\n}\n}\n}\n}}", function(file) {
+				
+				var grid = file.grid;
+				
+				if(grid[0].indentation != 0) return callback(new Error("grid[0].indentation=" + grid[0].indentation));
+				if(grid[1].indentation != 1) return callback(new Error("grid[1].indentation=" + grid[1].indentation));
+				if(grid[2].indentation != 2) return callback(new Error("grid[2].indentation=" + grid[2].indentation));
+				if(grid[3].indentation != 3) return callback(new Error("grid[3].indentation=" + grid[3].indentation));
+				if(grid[4].indentation != 4) return callback(new Error("grid[4].indentation=" + grid[4].indentation));
+				if(grid[5].indentation != 3) return callback(new Error("grid[5].indentation=" + grid[5].indentation));
+				if(grid[6].indentation != 2) return callback(new Error("grid[6].indentation=" + grid[6].indentation));
+				if(grid[7].indentation != 1) return callback(new Error("grid[7].indentation=" + grid[7].indentation));
+				if(grid[8].indentation != 0) return callback(new Error("grid[8].indentation=" + grid[8].indentation));
+				
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
+	
 	
 	editor.tests.push({
 		text: "Testing editor.bindKey(), editor.rebindKey(), editor.getKeyFor() and editor.unbindKey()",
@@ -26,7 +51,7 @@
 			var key = editor.getKeyFor("testMethod");
 			var expect = "CTRL + Y";
 			
-			if(key != expect) return new Error("editor.getKeyFor returned: " + key + " expected: " + expect);
+			if(key != expect) return callback(new Error("editor.getKeyFor returned: " + key + " expected: " + expect));
 			
 			editor.unbindKey("testMethod");
 			

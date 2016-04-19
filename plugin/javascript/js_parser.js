@@ -223,7 +223,7 @@
 			lastWord = "",
 			insideVariableDeclaration = [],
 			globalVariables = {},
-			codeBlock = [{word: "", indenttation: 0, line: 0}],
+			codeBlock = [{word: "", line: 0}],
 			codeBlockRight = 0,
 			codeBlockLeft = 0,
 			insideCodeBlock = false,
@@ -264,6 +264,10 @@
 			lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
 			
 		// -----
+		
+		var thisRowIndentation = 0;
+		var nextRowIndentation = false;
+		var thisRowDeIndentate = false;
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
@@ -311,10 +315,11 @@
 			codeBlockDepth++;
 			codeBlockLeft++;
 			codeBlockLeftRow = row;
-			
+			nextRowIndentation = true;
+				
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
-			codeBlock[codeBlockDepth] = {word: lastWord, indenttation: codeBlockDepth, line: lineNumber};
+			codeBlock[codeBlockDepth] = {word: lastWord, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
 			insideArray[codeBlockDepth] = false;
 			arrayStart[codeBlockDepth] = -1;
@@ -334,18 +339,16 @@
 			
 			if(codeBlockDepth > 1) {
 				let parent = codeBlock[codeBlockDepth-1];
-					let parentWord = parent.word;
+				let parentWord = parent.word;
 				let parentLine = parent.line;
 				
-				if(parentLine == lineNumber) codeBlock[codeBlockDepth].indenttation--;
+				//if(parentLine != lineNumber) thisRowIndentation--;
 				
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
 					codeBlock[codeBlockDepth].parent = codeBlock[codeBlockDepth-1];
 				}
 			}
 
-			
-			
 		}
 		
 		function codeBlockR() {
@@ -354,6 +357,9 @@
 			
 			codeBlockDepth--;
 			
+			//nextRowIndentation = false;
+			
+			thisRowDeIndentate = true;
 			
 			if(codeBlockDepth < 0) {
 				console.warn("Code-block doesn't match in:" + file.path);
@@ -370,7 +376,7 @@
 			//console.log()
 			
 			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
-				file.grid[row].indentation--;
+				//file.grid[row].indentation--;
 			}
 		}
 		
@@ -718,16 +724,29 @@
 			
 			
 			if(char == lastLineBreakCharacter) {
+				
+				//console.log("(Indent) nextRowIndentation=" + nextRowIndentation + " thisRowIndentation=" + thisRowIndentation + " thisRowDeIndentate=" + thisRowDeIndentate + " codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + (lineNumber+1));
+
+				if(thisRowDeIndentate) {
+					thisRowIndentation--;
+					thisRowDeIndentate = false;
+				}
+
+				file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment + openXmlTags);
+				
 				lineNumber++;
 				row++;
-				
-				
-				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
-				
-				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment + openXmlTags);
+
+				if(nextRowIndentation) {
+					thisRowIndentation++;
+					nextRowIndentation = false;
+				}
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
+				
+
+				
 			}
 
 
