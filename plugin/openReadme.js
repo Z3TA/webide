@@ -5,7 +5,7 @@
 	*/
 "use strict";
 	
-	var timer = 0; // Milliseconds
+	var timer = 1000; // Milliseconds
 	
 	var loadOrder = 999; // Load late
 	

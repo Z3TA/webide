@@ -28,6 +28,11 @@
 	
 	editor.on("start", reopenFilesMain, loadOrder)
 	
+	editor.on("fileOpen", addToOpenedFiles, 1);
+	
+	editor.on("fileClose", removeFromOpenedFiles, 1);
+	
+	
 	function reopenFilesMain() {
 		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
@@ -58,19 +63,14 @@
 		
 		//return;
 		
-		var openedFiles = "";
-		
 		if(window.localStorage.openedFiles.length > 0) { // window.localStorage.openedFiles is a string with path's separated by fileDelimiter
 			console.log("Opening " + files.length + " files ...");
 			
 			// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
 			for(var i=0; i<files.length; i++) {
-				
 				console.log("gonna open files[" + i + "]=" + files[i]);
-				
 				openFile(files[i], fileInListOpened);
-	
-			}
+	}
 
 			
 		}
@@ -94,7 +94,8 @@
 		
 			if(err) {
 				if(err.code === 'ENOENT') {
-					// File did not exist, and the user did not want to load the last state. It has also been removed from localStorage.openedFiles
+					// File did not exist, and the user did not want to load the last state. 
+					// It has also been removed from localStorage.openedFiles
 					compareAndDone();
 					return;
 				}
@@ -105,16 +106,14 @@
 			if(wasCurrent) setCurrent = file.path;
 			
 			// Is all files we want to open opened!?
-			openedFiles = addToStringList(openedFiles, file.path, fileDelimiter);
-			
 			compareAndDone();
 			
 			function compareAndDone() {
-				if(compareStringLists(openedFiles, window.localStorage.openedFiles, fileDelimiter)) {
+				if(compareStringLists(Object.keys(editor.files).join(fileDelimiter), window.localStorage.openedFiles, fileDelimiter)) {
 					allFilesOpened();
 				}
 				else {
-					console.log("openedFiles=" + openedFiles);
+					console.log("openedFiles=" + Object.keys(editor.files).join(fileDelimiter));
 					console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
 				}
 			}
@@ -139,10 +138,7 @@
 				
 			}
 			
-			// After we have opened the files, set listener for file load and close ...
-			editor.on("fileOpen", addToOpenedFiles, 1)
 			
-			editor.on("fileClose", removeFromOpenedFiles, 1);
 			
 			// Use editor close event
 			editor.on("exit", reopen_files_closeEditor);
@@ -270,15 +266,14 @@
 				
 				if(lastFileState) {
 					
+					console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
+					
 					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
 					
 					if(lastFileState.partStartRow > 0) loadFilePart = true;
 
 				}
 
-				
-				console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
-				
 				if(loadFilePart) {
 					
 					file.loadFilePart(lastFileState.partStartRow, function setStateAtReopen() {
@@ -369,18 +364,22 @@
 	}
 	
 	function addToOpenedFiles(file) {
-
-		console.log(getStack("Adding file to openedFiles path='" + file.path + "'"));
-
+		
 		if(!file.path) throw new Error("Argument need to be a file object!");
 		
-		console.log("List before=" + window.localStorage.openedFiles);	
-		window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
-		console.log("List after=" + window.localStorage.openedFiles);	
+		if(window.localStorage.openedFiles.split(fileDelimiter).indexOf(file.path) != -1) {
+			console.warn("File already in window.localStorage.openedFiles: " + file.path);
+		}
+		else {
+		
+			console.log(getStack("Adding file to openedFiles path='" + file.path + "'"));
+			
+			console.log("List before=" + window.localStorage.openedFiles);	
+			window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
+			console.log("List after=" + window.localStorage.openedFiles);	
+		}
 		
 		findBugs();
-		
-		console.log("File added to opened files: path=" + file.path);
 		
 	}
 	

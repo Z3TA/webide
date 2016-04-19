@@ -14,8 +14,6 @@ Write tests!
 
 What I'm working on:
 
-Trying to figoure out whats wrong: bug-ish: Loading all files at startup takes lots of time and another file is opened during that time:
-
 editor.getKeyFor() so we can get the right keyBinding (if it has changed) for the friendly message when there are no files open.
 and witch key to send bug report. show in bug report.
 
@@ -27,12 +25,19 @@ Fixing stuff needed for a beta release:
 * PHP parser
 * bash script parser
 * Built in FTP/SFTP/SSH !?
+* word wrap
 
 
-editor.addPlugin?
 editor.bindKey?
 editor.blockPlugin!?
 editor.changeKeyBinding(funcName, new Binding)
+
+editor.plugin = editor.plugins.push({description: "bla bla", order: loadOrder, fun: startFunction()
+
+Remove a plugin in settings_overload.js: editor.disablePlugin(nameOfFunction);
+or: Remove the script in index.htm !?
+
+Change a keyBinding: editor.keyBinding(nameOfFunction, {charCode: 100, combo: CTRL});
 
 
 BUGS
