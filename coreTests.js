@@ -12,7 +12,26 @@
 	
 	
 	
-	
+	editor.tests.push({
+		text: "Indentation of JavaScript var declarations",
+		fun: function test_moveCaretToIndex(callback) {
+			editor.openFile("test_indentation.js", "{\nvar foo,\nbar;\n\n}", function(file) {
+				
+				var grid = file.grid;
+				
+				if(grid[0].indentation != 0) return callback(new Error("grid[0].indentation=" + grid[0].indentation));
+				if(grid[1].indentation != 1) return callback(new Error("grid[1].indentation=" + grid[1].indentation));
+				if(grid[2].indentation != 2) return callback(new Error("grid[2].indentation=" + grid[2].indentation));
+				if(grid[3].indentation != 1) return callback(new Error("grid[3].indentation=" + grid[3].indentation));
+				if(grid[4].indentation != 0) return callback(new Error("grid[4].indentation=" + grid[4].indentation));
+
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
 	editor.tests.push({
 		text: "Indentation of HTML",
 		fun: function test_moveCaretToIndex(callback) {

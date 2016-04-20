@@ -38,6 +38,13 @@ Fixing stuff needed for a beta release:
 BUGS
 ====
 
+
+Uncaught Error: File does not exist in openedFiles list: path=testfile0
+array=["new file"]
+editor.files=["testfile0","testfile1","testresults","new file"]
+
+
+
 js-parser: 
 function formatValue(text) {
       return reFormat.test(text) ? '"' + text.replace(/\"/g, '""') + '"' : text;

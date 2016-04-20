@@ -269,6 +269,7 @@
 		var thisRowIndentation = 0;
 		var indentNextRow = false;
 		var deIndentThisRow = false;
+		var deIndentNextRow = false;
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
@@ -718,6 +719,10 @@
 
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
 				// A new line without , exits variable declaration
+				if(insideVariableDeclaration[codeBlockDepth]) {
+					deIndentNextRow = true;
+				}
+				
 				insideVariableDeclaration[codeBlockDepth] = false;
 				foundVariableInVariableDeclaration = false;
 				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") );
@@ -733,8 +738,8 @@
 					deIndentThisRow = false;
 				}
 
-				file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment);
-				//file.grid[row].indentation = Math.max(0, thisRowIndentation);
+				//file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment);
+				file.grid[row].indentation = Math.max(0, thisRowIndentation + insideBlockComment);
 				
 				lineNumber++;
 				row++;
@@ -744,6 +749,11 @@
 				if(indentNextRow) {
 					thisRowIndentation++;
 					indentNextRow = false;
+				}
+				else if(deIndentNextRow) {
+					thisRowIndentation--;
+					deIndentNextRow = false;
+					if(thisRowIndentation < 0) thisRowIndentation = 0;
 				}
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
@@ -988,6 +998,10 @@
 				
 				
 				if(char == ";") {
+					if(insideVariableDeclaration[codeBlockDepth]) {
+						deIndentNextRow = true;
+					}
+					
 					insideVariableDeclaration[codeBlockDepth] = false;
 					foundVariableInVariableDeclaration = false;
 					
@@ -1316,6 +1330,7 @@
 			// Letters keeps adding to the word ...
 			else if(char == " " && word == "var") {
 				insideVariableDeclaration[codeBlockDepth] = true;
+				indentNextRow = true;
 				word = "";
 				return;
 			}
