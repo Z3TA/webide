@@ -733,8 +733,8 @@
 					deIndentThisRow = false;
 				}
 
-				//file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment);
-				file.grid[row].indentation = Math.max(0, thisRowIndentation);
+				file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment);
+				//file.grid[row].indentation = Math.max(0, thisRowIndentation);
 				
 				lineNumber++;
 				row++;

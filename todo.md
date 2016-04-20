@@ -9,12 +9,15 @@ Prio:
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 Write tests!
-
+Use hg mv to move/rename files!
 
 
 What I'm working on:
 
-Fixing indentation in the js-parser.
+Fixing indentation in js_parser.js for var declarations var,
+foo,
+bar,
+baz;
 
 
 Searching left with regexp in find_replace.js
@@ -48,12 +51,6 @@ var foo,
 bar,
 baz,
 
-
-indentation:
-<html>
-<head>
-</head>
-</html>
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {
