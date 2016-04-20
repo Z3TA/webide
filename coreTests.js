@@ -2,19 +2,47 @@
 	"use strict";
 	
 	/*
+	
 		This file has all the tests for the editor core (editor.js and File.js).
 		All (other) tests that has to do with a plugin, should be located together with the plugin file(s).
 		
+		Ctrl+Shift+T first times runs the first test, second time, runs all tests.
+		Add property t:1, to run that test first!
+	
 		Tests should only call the callback once!
-		
-		Place new tests at top. Ctrl+Shift+T first times runs the first test, second time, runs all tests.
-		
-		Node: (due to bug in chromium?) there can only be one callback() in each function, or it will be called twice, 
+		Note: (due to bug in chromium?) there can only be one callback() in each function, or it will be called twice, 
 		even when preceded with a return.
 		
 		If the test doesn't finish with a test result file. You have to do some detective work to see what test failed.
 		
 	*/
+	
+
+	editor.tests.push({
+		text: "Indentation of curly brackets",
+		fun: function indentCurlyBrackets(callback) {
+			editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
+				
+				var grid = file.grid;
+				
+				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 3) throw new Error("grid[3].indentation=" + grid[3].indentation);
+				if(grid[4].indentation != 4) throw new Error("grid[4].indentation=" + grid[4].indentation);
+				if(grid[5].indentation != 3) throw new Error("grid[5].indentation=" + grid[5].indentation);
+				if(grid[6].indentation != 2) throw new Error("grid[6].indentation=" + grid[6].indentation);
+				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
+
+				
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
 	
 	editor.tests.push({
 		text: "Indentation of HTML",
@@ -39,13 +67,18 @@
 	editor.tests.push({
 		text: "Parse RegExp",
 		fun: function parseRegExp(callback) {
-			editor.openFile("indent_var.js", "{\n'foo'.match(/\"/g);\n}", function(file) {
+			editor.openFile("regexp.js", "{\n/*\nblock comment\n*/\n'foo'.match(/\"/g);\n}", function(file) {
+				
+				// note: block comments are indented
 				
 				var grid = file.grid;
 				
 				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
 				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-				if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
+				if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
+				if(grid[5].indentation != 0) throw new Error("grid[5].indentation=" + grid[5].indentation);
 
 				editor.closeFile(file.path);
 				
@@ -72,34 +105,6 @@
 				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
 				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
 
-				editor.closeFile(file.path);
-				
-				callback(true);
-				
-			});
-		}
-	});
-	
-
-	
-	editor.tests.push({
-		text: "Indentation of curly brackets",
-		fun: function indentCurlyBrackets(callback) {
-			editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
-				
-				var grid = file.grid;
-				
-				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
-				if(grid[3].indentation != 3) throw new Error("grid[3].indentation=" + grid[3].indentation);
-				if(grid[4].indentation != 4) throw new Error("grid[4].indentation=" + grid[4].indentation);
-				if(grid[5].indentation != 3) throw new Error("grid[5].indentation=" + grid[5].indentation);
-				if(grid[6].indentation != 2) throw new Error("grid[6].indentation=" + grid[6].indentation);
-				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
-				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
-
-				
 				editor.closeFile(file.path);
 				
 				callback(true);

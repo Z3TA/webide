@@ -2330,6 +2330,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var testsCompleted = []; // Prevent same test to make several callbacks
 			var allDone = false; // Prevent calling allTestsDone twice
 			var testsToRun = testFirstTest ? 1 : editor.tests.length;
+
+if(testsToRun == 1) {
+// Sort the tests by property t
+editor.tests.sort(function sortTests(t) {
+return !t.t;
+});
+alert("Testing: " + editor.tests[0].text);
+}
+
 			for(var i=0; i<testsToRun; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
 				asyncInitTest(editor.tests[i]);

@@ -15,7 +15,6 @@ Use hg mv to move/rename files!
 What I'm working on:
 
 js_parser.js:
-* ignore <open tags
 * handle double {{
 
 
@@ -37,6 +36,7 @@ Fixing stuff needed for a beta release:
 BUGS
 ====
 
+/* comment vs / RegExp
 
 Uncaught Error: File does not exist in openedFiles list: path=testfile0
 array=["new file"]
@@ -138,6 +138,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 
 Polishing
 =========
+
+Auto scroll the function list when searching in it so we see matches.
 
 Better undo/redo!!
 

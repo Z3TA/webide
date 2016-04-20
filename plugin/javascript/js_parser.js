@@ -738,6 +738,8 @@
 				
 				Anything between / and / not escaped by \
 				
+				RegExp or block comment!? RegExp can not start with *!
+				
 			*/
 			if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
 				insideRegExp = true;
@@ -787,8 +789,9 @@
 			}
 			
 			// ### Comments: /*   */
-				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment && !insideRegExp) {
+				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment) {
 					insideBlockComment = true;
+					insideRegExp = false;
 				commentStart = i-1;
 				commentStartIndentation = file.grid[row].indentation;
 					//console.log("insideBlockComment!");
