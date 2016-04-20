@@ -17,6 +17,12 @@ What I'm working on:
 js_parser.js:
 * handle double {{
 
+* handle:
+var foo = {
+		baz: buz;
+	},
+	bar
+	
 
 Searching left with regexp in find_replace.js
 
@@ -36,7 +42,6 @@ Fixing stuff needed for a beta release:
 BUGS
 ====
 
-/* comment vs / RegExp
 
 Uncaught Error: File does not exist in openedFiles list: path=testfile0
 array=["new file"]
@@ -138,6 +143,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 
 Polishing
 =========
+
+Try different (JSON) js files in the wild and see how it handles the indentation.
 
 Auto scroll the function list when searching in it so we see matches.
 
