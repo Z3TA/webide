@@ -14,6 +14,9 @@ Write tests!
 
 What I'm working on:
 
+Fixing indentation in the js-parser.
+
+
 Searching left with regexp in find_replace.js
 
 
@@ -40,15 +43,6 @@ function formatValue(text) {
   };
   
 
-
-red circle:
-setInterval( functionCheckStatus() {
-
-var dif = t1.getTime() - t2.getTime();
-
-}, 60000);
-
-
 indentation:
 var foo,
 bar,
@@ -63,6 +57,14 @@ indentation:
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {
+
+
+red circle:
+setInterval( functionCheckStatus() {
+
+var dif = t1.getTime() - t2.getTime();
+
+}, 60000);
 
 Got a bug after opening a file with the exact same content and path as a file already opened.
 

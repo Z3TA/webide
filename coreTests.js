@@ -11,8 +11,29 @@
 	*/
 	
 	
+	
+	
 	editor.tests.push({
-		text: "Testing if the JavaScript parser handles indentation correctly",
+		text: "Indentation of HTML",
+		fun: function test_moveCaretToIndex(callback) {
+			editor.openFile("test_indentation.htm", "<div>\n<div></div>\n<meh\n</div>\n", function(file) {
+				
+				var grid = file.grid;
+				
+				if(grid[0].indentation != 0) return callback(new Error("grid[0].indentation=" + grid[0].indentation));
+				if(grid[1].indentation != 1) return callback(new Error("grid[1].indentation=" + grid[1].indentation));
+				if(grid[2].indentation != 1) return callback(new Error("grid[2].indentation=" + grid[2].indentation));
+				if(grid[3].indentation != 0) return callback(new Error("grid[3].indentation=" + grid[3].indentation));
+				
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
+	editor.tests.push({
+		text: "Indentation of curly brackets",
 		fun: function test_moveCaretToIndex(callback) {
 			editor.openFile("test_indentation.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
 				

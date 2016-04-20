@@ -248,6 +248,7 @@
 			xmlTagWordLength = 0,
 			xmlTagSelfEnding = false,
 			openXmlTags = 0,
+			openXmlTagsOnThisRow = 0,
 			xmlTagLastOpenRow = -1,
 			tmpXmlMode = false,
 			llChar = "",
@@ -266,8 +267,8 @@
 		// -----
 		
 		var thisRowIndentation = 0;
-		var nextRowIndentation = false;
-		var thisRowDeIndentate = false;
+		var indentNextRow = false;
+		var deIndentThisRow = false;
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
@@ -315,7 +316,7 @@
 			codeBlockDepth++;
 			codeBlockLeft++;
 			codeBlockLeftRow = row;
-			nextRowIndentation = true;
+			indentNextRow = true;
 				
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
@@ -356,8 +357,8 @@
 			
 			codeBlockDepth--;
 
-			thisRowDeIndentate = true;
-			nextRowIndentation = false;
+			deIndentThisRow = true;
+			indentNextRow = false;
 			
 			if(codeBlockDepth < 0) {
 				console.warn("Code-block doesn't match in:" + file.path);
@@ -373,11 +374,11 @@
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
 			//console.log()
 			
-			if(codeBlockLeftRow == codeBlockRightRow) thisRowDeIndentate = false;
+			if(codeBlockLeftRow == codeBlockRightRow) deIndentThisRow = false;
 			
-			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
+			//if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
 				//file.grid[row].indentation--;
-			}
+			//}
 		}
 		
 		
@@ -725,21 +726,24 @@
 			
 			if(char == lastLineBreakCharacter) {
 				
-				//console.log("(Indent) nextRowIndentation=" + nextRowIndentation + " thisRowIndentation=" + thisRowIndentation + " thisRowDeIndentate=" + thisRowDeIndentate + " codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + (lineNumber+1));
+				//console.log("(Indent) indentNextRow=" + indentNextRow + " thisRowIndentation=" + thisRowIndentation + " deIndentThisRow=" + deIndentThisRow + " codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + (lineNumber+1));
 
-				if(thisRowDeIndentate) {
+				if(deIndentThisRow) {
 					thisRowIndentation--;
-					thisRowDeIndentate = false;
+					deIndentThisRow = false;
 				}
 
-				file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment + openXmlTags);
+				//file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment);
+				file.grid[row].indentation = Math.max(0, thisRowIndentation);
 				
 				lineNumber++;
 				row++;
-
-				if(nextRowIndentation) {
+				
+				openXmlTagsOnThisRow = 0;
+				
+				if(indentNextRow) {
 					thisRowIndentation++;
-					nextRowIndentation = false;
+					indentNextRow = false;
 				}
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
@@ -860,7 +864,7 @@
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+				else if(char == "<"  && !insideParenthesis[codeBlockDepth]) {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
@@ -882,7 +886,9 @@
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
 					
-										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
+					xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
+					
+					//console.log("line=" + lineNumber + " xmlTag=" + xmlTag + " lastXmlTag=" + lastXmlTag);
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						
@@ -897,21 +903,38 @@
 						}
 						}
 					
-					if(tagBreak.indexOf(xmlTag) > -1) {
+					if(tagBreak.indexOf(xmlTag) != -1) {
 						
-						//console.log("tag=" + tag + " lastXmlTag=" + lastXmlTag);
+						//console.log("line=" + lineNumber + " xmlTag=" + xmlTag + " lastXmlTag=" + lastXmlTag);
 						
 						if(insideXmlTagEnding) {
 							// It's a ending tag </tag>
 							openXmlTags--;
-							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0) file.grid[row].indentation--;
+							
+							openXmlTagsOnThisRow--;
+							
+							if(openXmlTagsOnThisRow == 0) {
+								// Same amount of opening tags as closing tags
+								indentNextRow = false; 
+							}
+							else if(openXmlTagsOnThisRow < 0) {
+								// More closed then opened
+								deIndentThisRow = true;
+							}
+							
+							
+							//if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0) deIndentThisRow = true;
 						}
 						else {
 							// It's a tag opening
 							openXmlTags++;
+							openXmlTagsOnThisRow++;
+							
+							indentNextRow = true;
+							
 							xmlTagLastOpenRow = row;
 						}
-						}
+					}
 					
 					lastXmlTag = xmlTag;
 					xmlTag = "";
