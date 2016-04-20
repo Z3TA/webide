@@ -223,7 +223,7 @@
 			lastWord = "",
 			insideVariableDeclaration = [],
 			globalVariables = {},
-			codeBlock = [{word: "", line: 0}],
+			codeBlock = [{word: "", indenttation: 0, line: 0}],
 			codeBlockRight = 0,
 			codeBlockLeft = 0,
 			insideCodeBlock = false,
@@ -248,7 +248,6 @@
 			xmlTagWordLength = 0,
 			xmlTagSelfEnding = false,
 			openXmlTags = 0,
-			openXmlTagsOnThisRow = 0,
 			xmlTagLastOpenRow = -1,
 			tmpXmlMode = false,
 			llChar = "",
@@ -265,11 +264,6 @@
 			lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
 			
 		// -----
-		
-		var thisRowIndentation = 0;
-		var indentNextRow = false;
-		var deIndentThisRow = false;
-		var deIndentNextRow = false;
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
@@ -317,11 +311,10 @@
 			codeBlockDepth++;
 			codeBlockLeft++;
 			codeBlockLeftRow = row;
-			indentNextRow = true;
-				
+			
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
-			codeBlock[codeBlockDepth] = {word: lastWord, line: lineNumber};
+			codeBlock[codeBlockDepth] = {word: lastWord, indenttation: codeBlockDepth, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
 			insideArray[codeBlockDepth] = false;
 			arrayStart[codeBlockDepth] = -1;
@@ -341,15 +334,18 @@
 			
 			if(codeBlockDepth > 1) {
 				let parent = codeBlock[codeBlockDepth-1];
-				let parentWord = parent.word;
+					let parentWord = parent.word;
 				let parentLine = parent.line;
-						
+				
+				if(parentLine == lineNumber) codeBlock[codeBlockDepth].indenttation--;
 				
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
 					codeBlock[codeBlockDepth].parent = codeBlock[codeBlockDepth-1];
 				}
 			}
 
+			
+			
 		}
 		
 		function codeBlockR() {
@@ -357,9 +353,7 @@
 			codeBlockRightRow = row;
 			
 			codeBlockDepth--;
-
-			deIndentThisRow = true;
-			indentNextRow = false;
+			
 			
 			if(codeBlockDepth < 0) {
 				console.warn("Code-block doesn't match in:" + file.path);
@@ -375,11 +369,9 @@
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
 			//console.log()
 			
-			if(codeBlockLeftRow == codeBlockRightRow) deIndentThisRow = false;
-			
-			//if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
-				//file.grid[row].indentation--;
-			//}
+			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
+				file.grid[row].indentation--;
+			}
 		}
 		
 		
@@ -719,10 +711,6 @@
 
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
 				// A new line without , exits variable declaration
-				if(insideVariableDeclaration[codeBlockDepth]) {
-					deIndentNextRow = true;
-				}
-				
 				insideVariableDeclaration[codeBlockDepth] = false;
 				foundVariableInVariableDeclaration = false;
 				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") );
@@ -730,37 +718,16 @@
 			
 			
 			if(char == lastLineBreakCharacter) {
-				
-				//console.log("(Indent) indentNextRow=" + indentNextRow + " thisRowIndentation=" + thisRowIndentation + " deIndentThisRow=" + deIndentThisRow + " codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + (lineNumber+1));
-
-				if(deIndentThisRow) {
-					thisRowIndentation--;
-					deIndentThisRow = false;
-				}
-
-				//file.grid[row].indentation = Math.max(0, thisRowIndentation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment);
-				file.grid[row].indentation = Math.max(0, thisRowIndentation + insideBlockComment);
-				
 				lineNumber++;
 				row++;
 				
-				openXmlTagsOnThisRow = 0;
 				
-				if(indentNextRow) {
-					thisRowIndentation++;
-					indentNextRow = false;
-				}
-				else if(deIndentNextRow) {
-					thisRowIndentation--;
-					deIndentNextRow = false;
-					if(thisRowIndentation < 0) thisRowIndentation = 0;
-				}
+				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
+				
+				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment + openXmlTags);
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
-				
-
-				
 			}
 
 
@@ -874,7 +841,7 @@
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<"  && !insideParenthesis[codeBlockDepth]) {
+				else if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
@@ -896,9 +863,7 @@
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
 					
-					xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
-					
-					//console.log("line=" + lineNumber + " xmlTag=" + xmlTag + " lastXmlTag=" + lastXmlTag);
+										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						
@@ -913,38 +878,21 @@
 						}
 						}
 					
-					if(tagBreak.indexOf(xmlTag) != -1) {
+					if(tagBreak.indexOf(xmlTag) > -1) {
 						
-						//console.log("line=" + lineNumber + " xmlTag=" + xmlTag + " lastXmlTag=" + lastXmlTag);
+						//console.log("tag=" + tag + " lastXmlTag=" + lastXmlTag);
 						
 						if(insideXmlTagEnding) {
 							// It's a ending tag </tag>
 							openXmlTags--;
-							
-							openXmlTagsOnThisRow--;
-							
-							if(openXmlTagsOnThisRow == 0) {
-								// Same amount of opening tags as closing tags
-								indentNextRow = false; 
-							}
-							else if(openXmlTagsOnThisRow < 0) {
-								// More closed then opened
-								deIndentThisRow = true;
-							}
-							
-							
-							//if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0) deIndentThisRow = true;
+							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0) file.grid[row].indentation--;
 						}
 						else {
 							// It's a tag opening
 							openXmlTags++;
-							openXmlTagsOnThisRow++;
-							
-							indentNextRow = true;
-							
 							xmlTagLastOpenRow = row;
 						}
-					}
+						}
 					
 					lastXmlTag = xmlTag;
 					xmlTag = "";
@@ -998,10 +946,6 @@
 				
 				
 				if(char == ";") {
-					if(insideVariableDeclaration[codeBlockDepth]) {
-						deIndentNextRow = true;
-					}
-					
 					insideVariableDeclaration[codeBlockDepth] = false;
 					foundVariableInVariableDeclaration = false;
 					
@@ -1330,7 +1274,6 @@
 			// Letters keeps adding to the word ...
 			else if(char == " " && word == "var") {
 				insideVariableDeclaration[codeBlockDepth] = true;
-				indentNextRow = true;
 				word = "";
 				return;
 			}

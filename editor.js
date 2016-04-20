@@ -2343,7 +2343,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			function runTest(test) {
 				
-				console.log("Running test:" + test.text);
+				//console.log("Running test:" + test.text);
 				
 				try{
 					test.fun(testResult);
@@ -2355,10 +2355,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				if(finished == started && !allDone) allTestsDone();
 				
+				
+				
 				function testResult(result) {
 					
+					console.log("Test: " + test.text + " result:" + result);
+					
 					if(testsCompleted.indexOf(test.text) != -1) {
-						throw new Error("Test called callback more then once, or there's two tests with the same descrition: " + test.text);
+						throw new Error("Test called callback more then once, or there's two tests with the same description: " + test.text);
 						return;
 					}
 					

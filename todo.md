@@ -8,16 +8,15 @@ Prio:
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
-Write tests!
+Write tests (first)!
 Use hg mv to move/rename files!
 
 
 What I'm working on:
 
-Fixing indentation in js_parser.js for var declarations var,
-foo,
-bar,
-baz;
+js_parser.js:
+* insideRegExp in js_parser.js
+* ignore <open tags
 
 
 Searching left with regexp in find_replace.js
@@ -54,9 +53,12 @@ function formatValue(text) {
   
 
 indentation:
-var foo,
-bar,
-baz,
+editor.plugin({desc: "Show all keyBindings", load: function showKeyBindings() {
+editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() {
+"use strict";
+}});
+}});
+
 
 
 
@@ -65,9 +67,7 @@ Doesn't find bug when the = is together in other if(data.type="temperaturehumidi
 
 red circle:
 setInterval( functionCheckStatus() {
-
 var dif = t1.getTime() - t2.getTime();
-
 }, 60000);
 
 Got a bug after opening a file with the exact same content and path as a file already opened.

@@ -8,22 +8,30 @@
 		Tests should only call the callback once!
 		
 		Place new tests at top. Ctrl+Shift+T first times runs the first test, second time, runs all tests.
+		
+		Node: (due to bug in chromium?) there can only be one callback() in each function, or it will be called twice, 
+		even when preceded with a return.
+		
+		If the test doesn't finish with a test result file. You have to do some detective work to see what test failed.
+		
 	*/
-	
-	
 	
 	editor.tests.push({
 		text: "Indentation of JavaScript var declarations",
-		fun: function test_moveCaretToIndex(callback) {
-			editor.openFile("test_indentation.js", "{\nvar foo,\nbar;\n\n}", function(file) {
+		fun: function indentVarDeclarations(callback) {
+			editor.openFile("indent_var.js", "{\nvar foo,\nbar;\nvar baz = {\nban:ana\n}\nvar bus = {};\n\n}\n", function(file) {
 				
 				var grid = file.grid;
 				
-				if(grid[0].indentation != 0) return callback(new Error("grid[0].indentation=" + grid[0].indentation));
-				if(grid[1].indentation != 1) return callback(new Error("grid[1].indentation=" + grid[1].indentation));
-				if(grid[2].indentation != 2) return callback(new Error("grid[2].indentation=" + grid[2].indentation));
-				if(grid[3].indentation != 1) return callback(new Error("grid[3].indentation=" + grid[3].indentation));
-				if(grid[4].indentation != 0) return callback(new Error("grid[4].indentation=" + grid[4].indentation));
+				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
+				if(grid[4].indentation != 2) throw new Error("grid[4].indentation=" + grid[4].indentation);
+				if(grid[5].indentation != 1) throw new Error("grid[5].indentation=" + grid[5].indentation);
+				if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
+				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
 
 				editor.closeFile(file.path);
 				
@@ -34,15 +42,15 @@
 	});
 	editor.tests.push({
 		text: "Indentation of HTML",
-		fun: function test_moveCaretToIndex(callback) {
-			editor.openFile("test_indentation.htm", "<div>\n<div></div>\n<meh\n</div>\n", function(file) {
+		fun: function indentHTML(callback) {
+			editor.openFile("indent_html.htm", "<div>\n<div></div>\n<meh\n</div>\n", function(file) {
 				
 				var grid = file.grid;
 				
-				if(grid[0].indentation != 0) return callback(new Error("grid[0].indentation=" + grid[0].indentation));
-				if(grid[1].indentation != 1) return callback(new Error("grid[1].indentation=" + grid[1].indentation));
-				if(grid[2].indentation != 1) return callback(new Error("grid[2].indentation=" + grid[2].indentation));
-				if(grid[3].indentation != 0) return callback(new Error("grid[3].indentation=" + grid[3].indentation));
+				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
 				
 				editor.closeFile(file.path);
 				
@@ -51,22 +59,24 @@
 			});
 		}
 	});
+	
 	editor.tests.push({
 		text: "Indentation of curly brackets",
-		fun: function test_moveCaretToIndex(callback) {
-			editor.openFile("test_indentation.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
+		fun: function indentCurlyBrackets(callback) {
+			editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
 				
 				var grid = file.grid;
 				
-				if(grid[0].indentation != 0) return callback(new Error("grid[0].indentation=" + grid[0].indentation));
-				if(grid[1].indentation != 1) return callback(new Error("grid[1].indentation=" + grid[1].indentation));
-				if(grid[2].indentation != 2) return callback(new Error("grid[2].indentation=" + grid[2].indentation));
-				if(grid[3].indentation != 3) return callback(new Error("grid[3].indentation=" + grid[3].indentation));
-				if(grid[4].indentation != 4) return callback(new Error("grid[4].indentation=" + grid[4].indentation));
-				if(grid[5].indentation != 3) return callback(new Error("grid[5].indentation=" + grid[5].indentation));
-				if(grid[6].indentation != 2) return callback(new Error("grid[6].indentation=" + grid[6].indentation));
-				if(grid[7].indentation != 1) return callback(new Error("grid[7].indentation=" + grid[7].indentation));
-				if(grid[8].indentation != 0) return callback(new Error("grid[8].indentation=" + grid[8].indentation));
+				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 3) throw new Error("grid[3].indentation=" + grid[3].indentation);
+				if(grid[4].indentation != 4) throw new Error("grid[4].indentation=" + grid[4].indentation);
+				if(grid[5].indentation != 3) throw new Error("grid[5].indentation=" + grid[5].indentation);
+				if(grid[6].indentation != 2) throw new Error("grid[6].indentation=" + grid[6].indentation);
+				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
+
 				
 				editor.closeFile(file.path);
 				
@@ -91,7 +101,7 @@
 			var key = editor.getKeyFor("testMethod");
 			var expect = "CTRL + Y";
 			
-			if(key != expect) return callback(new Error("editor.getKeyFor returned: " + key + " expected: " + expect));
+			if(key != expect) throw new Error("editor.getKeyFor returned: " + key + " expected: " + expect);
 			
 			editor.unbindKey("testMethod");
 			
@@ -154,11 +164,11 @@
 				
 				file.select([file.grid[0][4], file.grid[0][5], file.grid[0][6]]); // select def
 				
-				if(file.selected.length != 3) return new Error("Expected file.selected.length=" + file.selected.length + " to be 3.");
+				if(file.selected.length != 3) throw new Error("Expected file.selected.length=" + file.selected.length + " to be 3.");
 				
 				file.select([file.grid[0][0], file.grid[0][1], file.grid[0][2], file.grid[0][3], file.grid[0][4], file.grid[0][5], file.grid[0][6], file.grid[0][7], file.grid[0][8], file.grid[0][9], file.grid[0][10]]); // select all
 				
-				if(file.selected.length != 6) return new Error("Expected file.selected.length=" + file.selected.length + " to be 6.");
+				if(file.selected.length != 8) throw new Error("Expected file.selected.length=" + file.selected.length + " to be 8.");
 				
 				editor.closeFile(file.path);
 				
@@ -194,8 +204,9 @@
 				callback(true);
 				});
 			}
-});
+	});
 	
+	/*
 	editor.tests.push({
 		text: "Run all keyBindings and see if they return true or false", 
 		fun: function testKeyBindings(callback) {
@@ -215,19 +226,11 @@
 				
 					console.log("Testing " + getFunctionName(binding.fun));
 					
-					try {
-						funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
-					}
-					catch(err) {
-						err.message += "\nWhen calling function:" + getFunctionName(binding.fun);
-						return callback(err);				
-					}
+					funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 					
 					if(funReturn !== true && funReturn !== false) {
 						
-						//objInfo(binding.fun);
-						
-						return callback("Function: " + getFunctionName(binding.fun) + " returned " + funReturn);
+						throw new Error("Function: " + getFunctionName(binding.fun) + " returned " + funReturn);
 						// This is not very helpful. But how can we get the source file and line number of the function!?
 						// If we create a new Error here, the stack will only point here, and not to the function
 					}
@@ -239,6 +242,6 @@
 		}
 	});
 	
-	
+	*/
 	
 })();
