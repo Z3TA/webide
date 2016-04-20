@@ -16,6 +16,26 @@
 		
 	*/
 	
+	
+	editor.tests.push({
+		text: "Parse RegExp",
+		fun: function parseRegExp(callback) {
+			editor.openFile("indent_var.js", "{\n'foo'.match(/\"/g);\n}", function(file) {
+				
+				var grid = file.grid;
+				
+				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
+	
 	editor.tests.push({
 		text: "Indentation of JavaScript var declarations",
 		fun: function indentVarDeclarations(callback) {

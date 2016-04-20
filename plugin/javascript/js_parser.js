@@ -254,6 +254,7 @@
 			lllChar = "",
 			willBeJSON = false,
 			willBeJSONValue = false,
+			insideRegExp = false,
 			eq = "=",
 			colon = ":",
 			pastChar = [],
@@ -731,6 +732,21 @@
 			}
 
 
+			
+			/*
+				### RegExp strings
+				
+				Anything between / and / not escaped by \
+				
+			*/
+			if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
+				insideRegExp = true;
+			}
+			else if(insideRegExp && char == "/" && lastChar != backSlash) {
+				insideRegExp = false;
+			}
+			
+			
 			// ### Quotes and comments ...
 			
 			/*
@@ -743,13 +759,13 @@
 			// We can not have /* after a lineComment, it will do nothing
 			
 			// ### Comments: <!-- -->
-			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) { // <!--
+			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
 				xmlMode = tmpXmlMode;
 				commentStart = i-4;
 			}
-			else if(char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment) { // -->
+			else if(char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
 				insideHTMLComment = false;
 				comments.push(new Comment(commentStart, i));
 				//console.warn("Found HTML comment! line=" + lineNumber + " ");
@@ -757,8 +773,8 @@
 			
 			if(!xmlMode) {
 			
-			// ### Comments: //
-				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment) {
+				// ### Comments: //
+				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp) {
 					insideLineComment = true;
 				commentStart = i-1;
 				//console.log("insideLineComment!");
@@ -771,7 +787,7 @@
 			}
 			
 			// ### Comments: /*   */
-				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment) {
+				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment && !insideRegExp) {
 					insideBlockComment = true;
 				commentStart = i-1;
 				commentStartIndentation = file.grid[row].indentation;
@@ -791,7 +807,7 @@
 			
 			// ### Quotes: double
 			// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
-				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
+				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 				if(insideDblQuote) {
 					if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {				
 						insideDblQuote = false;
@@ -808,7 +824,7 @@
 			}
 			
 			// ### Quotes: single
-				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment) {
+				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 				if(insideSingleQuote) {
 					insideSingleQuote = false;
 					quotes.push(new Quote(quoteStart, i));

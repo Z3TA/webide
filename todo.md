@@ -15,8 +15,8 @@ Use hg mv to move/rename files!
 What I'm working on:
 
 js_parser.js:
-* insideRegExp in js_parser.js
 * ignore <open tags
+* handle double {{
 
 
 Searching left with regexp in find_replace.js
@@ -43,15 +43,7 @@ array=["new file"]
 editor.files=["testfile0","testfile1","testresults","new file"]
 
 
-
-js-parser: 
-function formatValue(text) {
-      return reFormat.test(text) ? '"' + text.replace(/\"/g, '""') + '"' : text;
-    }
-    return dsv;
-  };
   
-
 indentation:
 editor.plugin({desc: "Show all keyBindings", load: function showKeyBindings() {
 editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() {
