@@ -16,6 +16,25 @@
 		
 	*/
 	
+	editor.tests.push({
+		text: "Indentation of HTML",
+		fun: function indentHTML(callback) {
+			editor.openFile("indent_html.htm", "<div>\n<div></div>\n<meh\n</div>\n", function(file) {
+				
+				var grid = file.grid;
+				
+				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
+				
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
 	
 	editor.tests.push({
 		text: "Parse RegExp",
@@ -60,25 +79,8 @@
 			});
 		}
 	});
-	editor.tests.push({
-		text: "Indentation of HTML",
-		fun: function indentHTML(callback) {
-			editor.openFile("indent_html.htm", "<div>\n<div></div>\n<meh\n</div>\n", function(file) {
-				
-				var grid = file.grid;
-				
-				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-				if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
-				if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
-				
-				editor.closeFile(file.path);
-				
-				callback(true);
-				
-			});
-		}
-	});
+	
+
 	
 	editor.tests.push({
 		text: "Indentation of curly brackets",

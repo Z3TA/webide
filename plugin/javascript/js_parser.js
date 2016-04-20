@@ -857,7 +857,7 @@
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<" && !insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+				else if(char == "<" && !insideParenthesis[codeBlockDepth]) {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
