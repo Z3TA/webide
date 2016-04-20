@@ -32,7 +32,14 @@ Fixing stuff needed for a beta release:
 BUGS
 ====
 
-Increase bigfile limit so we can at least have 10k lines of JS
+js-parser: 
+function formatValue(text) {
+      return reFormat.test(text) ? '"' + text.replace(/\"/g, '""') + '"' : text;
+    }
+    return dsv;
+  };
+  
+
 
 red circle:
 setInterval( functionCheckStatus() {

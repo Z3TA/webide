@@ -52,7 +52,7 @@ editor.settings = {
 	drawGridBox: false,
 	scrollStep: 3,
 	defaultLineBreakCharacter: "\n", // Can be many, like CR & LF, \n == LF, \r == CR
-	bigFileSize: 234000, // Bytes, all files larger then this will be opened as streams
+	bigFileSize: 400000, // Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
