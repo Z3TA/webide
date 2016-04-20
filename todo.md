@@ -32,6 +32,8 @@ Fixing stuff needed for a beta release:
 BUGS
 ====
 
+Increase bigfile limit so we can at least have 10k lines of JS
+
 red circle:
 setInterval( functionCheckStatus() {
 
@@ -44,6 +46,13 @@ indentation:
 var foo,
 bar,
 baz,
+
+
+indentation:
+<html>
+<head>
+</head>
+</html>
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {

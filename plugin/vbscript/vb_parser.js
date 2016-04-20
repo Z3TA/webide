@@ -189,7 +189,7 @@
 					foo = "one ""two"" three"
 					foo = "" ' Empty string
 				*/
-				if(char == doubleQuote) {
+				if(char == doubleQuote && !insideLineComment) {
 					if(insideDblQuote) {
 						insideDblQuote = false;
 						quotes.push(new Quote(doubleQuoteStart, charIndex));
