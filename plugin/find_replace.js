@@ -24,10 +24,13 @@
 		
 		// Pressing enter should do a search if the search window is open
 		editor.keyBindings.push({charCode: 13, fun: pressEnter});
-
+		
 		// Pressing escape should clear and hide the search window
 		editor.keyBindings.push({charCode: 27, fun: pressEscape});
-
+		
+		editor.on("moveCaret", function resetLastSearchStrLength(file, caret) {
+			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
+});
 		
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
@@ -70,13 +73,15 @@
 		inputFind.setAttribute("id", "inputFind");
 		inputFind.setAttribute("class", "inputtext");
 		inputFind.setAttribute("size", size);
+		inputFind.setAttribute("value", "X(..)X");
+		
 		
 		inputReplace = document.createElement("input");
 		inputReplace.setAttribute("type", "text");
 		inputReplace.setAttribute("id", "inputReplace");
 		inputReplace.setAttribute("class", "inputtext replace");
 		inputReplace.setAttribute("size", size);
-		
+		inputReplace.setAttribute("value", "Y$1Y");
 		
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
@@ -353,11 +358,13 @@
 		
 		// Selects the text, and moves the caret to it, return first text index of str
 		
+		file.checkCaret();
+		
 		var text = file.text;
 		var start = file.caret.index; // Will change depending if we search left or right
 		var end = 0;
+		var searchStrLenght = str.length;
 		
-		lastSearchStrLength = str.length;
 		
 		if(useRegex == undefined) useRegex = false;
 		if(keepSelection == undefined) keepSelection = false;
@@ -378,25 +385,34 @@
 			
 			if(direction=="left") {
 				//console.log("searching left");
-				re.lastIndex = 0; // Always start from the beginning
-
-				start = Math.max(0, start - lastSearchStrLength - 1); // Don't search more then this
 				
-				// Searches left to right, but stops before last match
-				while((result = re.exec(text)) != null && re.index < start) {}
+				start = Math.max(0, start - lastSearchStrLength); // Don't search more then this
 				
-				if( result==null && !dontLoop) {
-					// Try again from the bottom
-					start = text.length;
-					while((result = re.exec(text)) != null && re.lastIndex < start) {}
+				var tempText = text.substring(0, start); // Cut the text at last result so we don't find it again
+				
+				var index = -1;
+				
+				// Searches until we have found the last match
+				while((result = re.exec(tempText)) != null) {
+					index = result.index;
+					searchStrLenght = result[0].length;
 				}
 				
-				if(result == null) {
+				if( index==-1 && !dontLoop) {
+					// Try again, but with the whole string
+					tempText = text;
+					while((result = re.exec(tempText)) != null) {
+						index = result.index;
+						searchStrLenght = result[0].length;
+					}
+				}
+				
+				if(index == -1) {
 					console.log("Search did not find anything!");
 					return -1;
 				}
 				
-				start = result.index;
+				start = index;
 				
 				//console.log("start=" + start);
 			}
@@ -423,11 +439,10 @@
 				
 				start = result.index;
 				
+				searchStrLenght = result[0].length;
 			}
 			
-			lastSearchStrLength = result[0].length;
-			
-			end = start + result[0].length;
+			end = start + searchStrLenght; // Will select from start to end
 			
 		}
 		else {
@@ -451,9 +466,12 @@
 				// Search to the right (default)
 				//console.log("searching right");
 				
-				start = start + lastSearchStrLength;
+				start = start + lastSearchStrLength; // Start search after last match
 				
-				lastSearchStrLength = str.length;
+				/*
+					problem: If the caret is moved since last search, we'll most likely start from the wrong position!
+					solution: reset lastSearchStrLength when the caret is moved, and set it again after the selection
+*/
 				
 				start = text.indexOf(str, start);
 				
@@ -464,8 +482,11 @@
 				}
 			}
 			
-			end = start + str.length;
+			searchStrLenght = str.length;
 			
+			console.log("lastSearchStrLength=" + lastSearchStrLength);
+			
+			end = start + searchStrLenght;
 			
 		}
 		
@@ -489,6 +510,8 @@
 			file.moveCaretToIndex(start, file.caret);
 			
 			file.scrollToCaret(file.caret);
+			
+			lastSearchStrLength = searchStrLenght;
 			
 			file.select(textRange);
 			
@@ -518,24 +541,33 @@
 	}
 	
 	
-	function replace(newString, oldString, file, useRegex, dontLoop, ignoreCase) {
+	function replace(newString, searchString, file, useRegex, dontLoop, ignoreCase) {
 		
-		console.log("Replacing '" + oldString + "' with '" + newString + "'");
+		console.log("Replacing '" + searchString + "' with '" + newString + "'");
 		
 		lastSearchEnd = file.caret.index;
 		
-		lastSearchStrLength = 0;
+		lastSearchStrLength = 0; // Set this to zero so next right search begin at the care and not left of it
 		
 		var keepSelection = false;
 		
 		if(dontLoop == undefined) dontLoop = true; // We dont want it to loop, or it will be confusing when it starts from the beginning.
 		
+		//console.log("file.selected.length=" + file.selected.length + "");
+		//if(file.selected.length > 0) file.moveCaretLeft(file.caret, lastSearchStrLength); // Find the selected text agan
+		//return;
+		
 		// Find the string
-		var start = find(oldString, file, useRegex, keepSelection, dontLoop);
+		var start = find(searchString, file, useRegex, keepSelection, dontLoop);
+		
 		
 		if(start > -1) {
 			
-			var found = file.getSelectedText();
+			var selectedText = file.getSelectedText();
+			
+			console.log("YOYODOG");
+			
+			console.log("selectedText=" + selectedText);
 			
 			// Delete the selected text
 			file.deleteSelection();
@@ -543,9 +575,17 @@
 			if(newString.length > 0) {
 				
 				if(useRegex) {
+					
+					var flags = "";
+					
+					if(ignoreCase) flags += "i";
+					
 					// Support groups: $1 etc
-					var re = new RegExp(newString, flags);
-					newString = found.replace(re, newString);
+					var re = new RegExp(searchString, flags);
+					newString = selectedText.replace(re, newString);
+					
+					console.log("Regex replacing '" + selectedText + "' with '" + newString + "'");
+					
 }
 				
 				// Insert the new string
@@ -559,16 +599,16 @@
 		
 	}
 	
-	function replaceAll(newString, oldString, file, useRegex, ignoreCase) {
+	function replaceAll(newString, searchString, file, useRegex, ignoreCase) {
 		var start = 0;
 		var dontLoop = false;
 		
 		lastSearchEnd = -1; // Begin from the start
 		
-		console.log("Replace all " + oldString + " width " + newString);
+		console.log("Replace all " + searchString + " width " + newString);
 		
 		while(start > -1) {
-			start = replace(newString, oldString, file, useRegex, dontLoop, ignoreCase);
+			start = replace(newString, searchString, file, useRegex, dontLoop, ignoreCase);
 			console.log("start=" + start);
 		}
 		
