@@ -642,13 +642,12 @@
 	
 	
 	// ## Tests
-	/*
+	
 	editor.addTest(function test_searchAndReplace(callback) {
-		editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(file) {
+		editor.openFile("searchAndReplace.txt", "abcX1XdefX2XghiX2X", function(file) {
 			
-			for(var i=0; i<file.text.length; i++) {
-				file.moveCaretToIndex(i);
-			}
+			
+				
 			
 			editor.closeFile(file.path);
 			
@@ -657,10 +656,6 @@
 		});
 		
 	});
-	
-	*/
-	
-	
 	
 	
 	

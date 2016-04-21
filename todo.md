@@ -16,6 +16,7 @@ What I'm working on:
 
 Refactoring tests: removing text (redundant), only use functions 
 	
+Optimizing! Typing in editor.js is really slow!
 
 
 Fixing stuff needed for a beta release:

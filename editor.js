@@ -2034,6 +2034,28 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		return null;
+	}
+	
+	editor.addTest = function(fun, order) {
+		
+		var funName = getFunctionName(fun)
+		
+		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
+		
+		if(order == undefined) order = 0;
+		
+		for(var i=0; i<editor.tests.length; i++) {
+			if(editor.tests[i].text == funName) throw new Error("The test function name=" + funName + " is already used!");
+			if(order > 0 && editor.tests[i].order > order) throw new Error("Remove order from test '" + editor.tests[i].text + "' if you want " + funName + " to run first!");
+}
+		
+		editor.tests.push({fun: fun, text: funName, order: order});
+		
+		// Sort the tests by order
+		editor.tests.sort(function sortTests(a, b) {
+			return a.order > b.order;
+		});
+		
 }
 	
 	function removeFrom(list, fun) {
@@ -2332,10 +2354,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var testsToRun = testFirstTest ? 1 : editor.tests.length;
 
 if(testsToRun == 1) {
-// Sort the tests by property t
-editor.tests.sort(function sortTests(t) {
-return !t.t;
-});
 alert("Testing: " + editor.tests[0].text);
 }
 
@@ -2371,7 +2389,7 @@ alert("Testing: " + editor.tests[0].text);
 					console.log("Test: " + test.text + " result:" + result);
 					
 					if(testsCompleted.indexOf(test.text) != -1) {
-						throw new Error("Test called callback more then once, or there's two tests with the same description: " + test.text);
+						throw new Error("Test called callback more then once, or there's two tests with the same name: " + test.text);
 						return;
 					}
 					
