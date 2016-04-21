@@ -20,9 +20,9 @@ Writing a test for the search and replace function so that it doesn't break in t
 Fixing stuff needed for a beta release:
 * Regex search/replace
 * Replace in file (using regex)
-* PHP parser
-* bash script parser
-* Built in FTP/SFTP/SSH
+* PHP parser !?
+* bash script parser !?
+* Built in FTP/SFTP/SSH !?
 
 
 
