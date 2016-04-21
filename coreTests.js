@@ -18,7 +18,7 @@
 	*/
 	
 
-	editor.tests.push({t:1,
+	editor.tests.push({
 		text: "Indentation of curly brackets",
 		fun: function indentCurlyBrackets(callback) {
 			editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}\n}\n", function(file) {
@@ -153,10 +153,10 @@
 	});
 	*/
 	
-	editor.tests.push({
+	editor.tests.push({t:1,
 		text: "Testing File.moveCaretToIndex()",
 		fun: function test_moveCaretToIndex(callback) {
-			editor.openFile("test_moveCaretToIndex.js", "  if(a==b) {\n     c=d;\n  }\n", function(file) {
+			editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(file) {
 				
 				for(var i=0; i<file.text.length; i++) {
 					file.moveCaretToIndex(i);

@@ -325,6 +325,7 @@
 			}
 			else {
 				console.log("Placing new caret at index=" + index + " (character=" + file.text.charAt(index) + " charCode=" + file.text.charCodeAt(index) + ")");
+				
 				caret = file.moveCaretToIndex(index, caret);
 			}
 		}
@@ -552,10 +553,34 @@
 		//console.log("Checking caret=" + JSON.stringify(caret));
 		
 		if(caret.index == null) {
-			throw new Error("Caret index is null!");
+			throw new Error("Caret index is null! isFileCaret=" + (caret == file.caret) + " caret=" + JSON.stringify(caret));
 		}
 		else if(isNaN(caret.index)) {
 			throw new Error("Caret index is NaN!");
+		}
+		else if(caret.eof == undefined) {
+			throw new Error("Caret eof is undefined!");
+		}
+		else if(caret.eof == null) {
+			throw new Error("Caret eof is null!");
+		}
+		else if(caret.eof != true && caret.eof != false) {
+			throw new Error("Caret eof is not true or false!");
+		}
+		else if(caret.eol == undefined) {
+			throw new Error("Caret eol is undefined!");
+		}
+		else if(caret.eol == null) {
+			throw new Error("Caret eol is null!");
+		}
+		else if(caret.eol != true && caret.eol != false) {
+			throw new Error("Caret eol is not true or false!");
+		}
+		else if(isNaN(caret.row)) {
+			throw new Error("Caret row is NaN!");
+		}
+		else if(isNaN(caret.col)) {
+			throw new Error("Caret col is NaN!");
 		}
 		
 		if(caret.row >= file.grid.length) throw new Error("caret.row=" + caret.row + " >= file.grid.length=" + file.grid.length);
@@ -580,14 +605,19 @@
 				}
 			}
 		}
-		else if(!caret.eof) {
-			if(!file.grid[caret.row][caret.col]) {
-				throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col]);
+		else if(caret.eof == false) {
+			
+			if(caret.eol == false) {
+				
+				if(!file.grid[caret.row][caret.col]) {
+					throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col] + " when caret.eol=" + caret.eol + " grid.length=" + file.grid.length + " in file.path=" + file.path);
+				}
+				else if(file.grid[caret.row][caret.col].char != file.text.charAt(caret.index)) {
+					throw new Error("Character \"" + file.grid[caret.row][caret.col].char + "\" on file.grid[" + caret.row + "][" + caret.col + "] is not the same as character \"" + file.text.charAt(caret.index) + "\" in file.text on caret.index=" + caret.index + "");
+				}
 			}
-			else if(file.grid[caret.row][caret.col].char != file.text.charAt(caret.index)) {
-				throw new Error("Character \"" + file.grid[caret.row][caret.col].char + "\" on file.grid[" + caret.row + "][" + caret.col + "] is not the same as character \"" + file.text.charAt(caret.index) + "\" in file.text on caret.index=" + caret.index + "");
-			}
-			else if(caret.index==file.text.length) {
+
+			if(caret.index==file.text.length) {
 				throw new Error("Caret should be on EOF! caret.index=" + caret.index + " file.text.length=" + file.text.length + "");
 			}
 		}
@@ -1444,7 +1474,13 @@
 		*/
 		var file = this;
 		
-		if(caret == undefined) caret = file.caret;
+		if(caret == undefined) {
+			caret = file.caret;
+		}
+		else {
+			// Is it a real caret, or did we place "times" as the first argument!?
+			if(caret.index == null) throw new Error("First argument should be a caret! arguments=" + JSON.stringify(arguments));
+		}
 		
 		file.checkCaret(caret);
 		
@@ -1452,7 +1488,7 @@
 		var grid = file.grid;
 		var row = caret.row;
 		
-		//console.log("Moving caret left from " + JSON.stringify(caret) + "...");
+		console.log("Moving caret left from " + JSON.stringify(caret) + "...");
 		
 		
 		// Sanity check in case something is wrong
@@ -1494,7 +1530,7 @@
 		
 		editor.fireEvent("moveCaret", file, caret);
 		
-		//if(caret == file.caret) editor.renderNeeded();
+		if(caret == file.caret) editor.renderNeeded();
 		
 		return caret;
 		
@@ -1816,7 +1852,11 @@
 			throw new Error("Index can not be over file length=" + file.text.length + "");
 		}
 		
-		if(caret == undefined) caret = file.caret;
+		if(caret == undefined || caret == file.caret) {
+			file.checkCaret(file.caret);
+			caret = file.caret;
+		}
+		// else: Do not check the caret in the argument, because it might be a dummy caret that use this function to place it correctly!
 		
 		/*
 			If the file text contains Anything, file grid will have at least one row.
@@ -2484,6 +2524,8 @@
 		*/
 		
 		if(caret == undefined) caret = file.caret;
+		
+		file.checkCaret(caret);
 		
 		console.log("scrolling to caret:" + JSON.stringify(caret) + " editor.view.visibleRows=" + editor.view.visibleRows);
 		
