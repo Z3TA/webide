@@ -864,7 +864,7 @@
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<" && !insideParenthesis[codeBlockDepth]) {
+				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (tmpXmlMode || insideQuote)) {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;

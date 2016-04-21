@@ -14,9 +14,7 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Refactoring tests: removing text (redundant), only use functions 
-	
-Optimizing! Typing in editor.js is really slow!
+Writing a test for the search and replace function so that it doesn't break in the future.
 
 
 Fixing stuff needed for a beta release:
@@ -24,10 +22,7 @@ Fixing stuff needed for a beta release:
 * Replace in file (using regex)
 * PHP parser
 * bash script parser
-* Built in FTP/SFTP/SSH !?
-* word wrap
-
-
+* Built in FTP/SFTP/SSH
 
 
 
@@ -327,6 +322,10 @@ When searching in a file marked as big, do a whole file search from disk.
 Optimization
 ============
 
+Typing in editor.js is really slow because of the JS parser. Only parse if special characters are entered!? Optimize the parser function.
+
+
+
 Optimize file.insertText, when inserting at EOF. sugg: file.addToGrid(text)
 
 
@@ -445,6 +444,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+word wrap!!
 
 auto paste in snippets from stack exchange, Ctrl+H, write question, select result, paste the code from the most popular answer. 
 

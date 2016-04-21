@@ -1,7 +1,5 @@
 "use strict";
 
-// foobar
-
 //var testfile = "test/testfile.txt";
 
 // The editor object lives in global scope, so that it can be accessed everywhere.
@@ -2053,7 +2051,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		// Sort the tests by order
 		editor.tests.sort(function sortTests(a, b) {
-			return a.order > b.order;
+			return b.order - a.order;
 		});
 		
 }
