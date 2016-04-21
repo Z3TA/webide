@@ -331,6 +331,10 @@
 			}
 			*/
 			
+			if(insideVariableDeclaration[codeBlockDepth-1]) {
+				codeBlock[codeBlockDepth].indenttation++;
+			}
+			
 			insideVariableDeclaration[codeBlockDepth] = false;
 			
 			if(codeBlockDepth > 1) {
@@ -338,7 +342,7 @@
 					let parentWord = parent.word;
 				let parentLine = parent.line;
 				
-				if(parentLine == lineNumber) codeBlock[codeBlockDepth].indenttation--;
+				//if(parentLine == lineNumber) codeBlock[codeBlockDepth].indenttation--;
 				
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
 					codeBlock[codeBlockDepth].parent = codeBlock[codeBlockDepth-1];

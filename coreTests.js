@@ -18,22 +18,23 @@
 	*/
 	
 
-	editor.tests.push({
+	editor.tests.push({t:1,
 		text: "Indentation of curly brackets",
 		fun: function indentCurlyBrackets(callback) {
-			editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}}", function(file) {
+			editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}\n}\n", function(file) {
 				
 				var grid = file.grid;
 				
 				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
-				if(grid[3].indentation != 3) throw new Error("grid[3].indentation=" + grid[3].indentation);
-				if(grid[4].indentation != 4) throw new Error("grid[4].indentation=" + grid[4].indentation);
-				if(grid[5].indentation != 3) throw new Error("grid[5].indentation=" + grid[5].indentation);
-				if(grid[6].indentation != 2) throw new Error("grid[6].indentation=" + grid[6].indentation);
-				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
-				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
+				if(grid[1].indentation != 2) throw new Error("grid[1].indentation=" + grid[1].indentation);
+				if(grid[2].indentation != 3) throw new Error("grid[2].indentation=" + grid[2].indentation);
+				if(grid[3].indentation != 4) throw new Error("grid[3].indentation=" + grid[3].indentation);
+				if(grid[4].indentation != 5) throw new Error("grid[4].indentation=" + grid[4].indentation);
+				if(grid[5].indentation != 4) throw new Error("grid[5].indentation=" + grid[5].indentation);
+				if(grid[6].indentation != 3) throw new Error("grid[6].indentation=" + grid[6].indentation);
+				if(grid[7].indentation != 2) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+				if(grid[8].indentation != 1) throw new Error("grid[8].indentation=" + grid[8].indentation);
+				if(grid[9].indentation != 0) throw new Error("grid[9].indentation=" + grid[9].indentation);
 
 				
 				editor.closeFile(file.path);
@@ -99,8 +100,8 @@
 				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
 				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
 				if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
-				if(grid[4].indentation != 2) throw new Error("grid[4].indentation=" + grid[4].indentation);
-				if(grid[5].indentation != 1) throw new Error("grid[5].indentation=" + grid[5].indentation);
+				if(grid[4].indentation != 3) throw new Error("grid[4].indentation=" + grid[4].indentation);
+				if(grid[5].indentation != 2) throw new Error("grid[5].indentation=" + grid[5].indentation);
 				if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
 				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
 				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);

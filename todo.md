@@ -14,14 +14,7 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-js_parser.js:
-* handle double {{
 
-* handle:
-var foo = {
-		baz: buz;
-	},
-	bar
 	
 
 Searching left with regexp in find_replace.js
@@ -46,16 +39,6 @@ BUGS
 Uncaught Error: File does not exist in openedFiles list: path=testfile0
 array=["new file"]
 editor.files=["testfile0","testfile1","testresults","new file"]
-
-
-  
-indentation:
-editor.plugin({desc: "Show all keyBindings", load: function showKeyBindings() {
-editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() {
-"use strict";
-}});
-}});
-
 
 
 
