@@ -14,10 +14,8 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-
+Refactoring tests: removing text (redundant), only use functions 
 	
-
-Searching left with regexp in find_replace.js
 
 
 Fixing stuff needed for a beta release:
@@ -34,6 +32,11 @@ Fixing stuff needed for a beta release:
 
 BUGS
 ====
+
+js_parser doesn't find functions inside arguments for function calls:
+foo(function bar() {
+});
+
 
 
 Uncaught Error: File does not exist in openedFiles list: path=testfile0

@@ -15,8 +15,36 @@
 		
 		If the test doesn't finish with a test result file. You have to do some detective work to see what test failed.
 		
+		---
+		
+		editor.addTest(testFunction, runFirst)
+		
+		The name of the test function should be unique and describing. Use comments for extra documentation.
+		The testFunction has to accept a callback as first argument and call in with bool true. Ex: callback(true)
+		If the test function detects any errors, just throw new Error("whats wrong") and the test will fail. 
+		
+		
+		
 	*/
 	
+	editor.tests.push({t:1,
+		text: "Js-parser find function in function call argument",
+		fun: function findJsFunctions(callback) {
+			editor.openFile("functionInCallArgument.js", "foo(function bar() {});\nmeh\nfoo(function () {});\nfunction baz() {}", function(file) {
+				
+				if(!file.parsed) throw new Error("The file was not parsed!");
+				if(!file.parsed.language=="JavaScript") throw new Error("The file was not parsed as JavaScript!");
+				if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Function bar was not found when parsing!");
+				if(file.parsed.functions.hasOwnProperty("meh")) throw new Error("The second function should be anonymous!");
+				if(!file.parsed.functions.hasOwnProperty("baz")) throw new Error("Function baz was not found when parsing!");
+				
+				editor.closeFile(file.path);
+				
+				callback(true);
+				
+			});
+		}
+	});
 
 	editor.tests.push({
 		text: "Indentation of curly brackets",
@@ -153,7 +181,7 @@
 	});
 	*/
 	
-	editor.tests.push({t:1,
+	editor.tests.push({
 		text: "Testing File.moveCaretToIndex()",
 		fun: function test_moveCaretToIndex(callback) {
 			editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(file) {
@@ -169,6 +197,7 @@
 			});
 		}
 	});
+	
 	editor.tests.push({
 		text: "Opening a file that starts with a tab or space",
 		fun: function testTabAtBeginning(callback) {

@@ -1100,10 +1100,12 @@
 						
 						// Figure out the name of the function
 						
-						//console.log("function!? word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName);
+						//console.log("function!? line=" + lineNumber + " col=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
-						functionName = lastWord;
+						functionName = lastWord || word.replace("(", "");
+						
+						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
 						insideFunctionArguments = true;
 						
@@ -1190,7 +1192,7 @@
 						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
-						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a booliean (false) !???
+						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???
 						
 						let properties = functionName.split(".");
 						
@@ -1282,16 +1284,17 @@
 			if(insideParenthesis[codeBlockDepth]) {
 				if(char != " ") { // Why do I need to ignore spaces?
 					insideParenthesis[codeBlockDepth] += char;
-					}
+					word = word + char;
+				}
 				if(  insideParenthesis[codeBlockDepth] + char == "(function " || insideParenthesis[codeBlockDepth] == "(function(" ) {
 						//console.log("clousure line=" + lineNumber + "");
 						insideFunctionDeclaration = true;
 						lastWord="";
+						word = "";
 					}
 				
-				
-				
-				word = "";
+				//word = "";
+				lastWord = "";
 				return;
 			}
 			// Letters keeps adding to the word ...

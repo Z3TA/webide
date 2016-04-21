@@ -3,10 +3,10 @@
 	
 	"use strict";
 	
-		var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, 
-	replaceAllButton, ignoreCaseOption;
+	var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, 
+		replaceAllButton, ignoreCaseOption;
 	
-		
+	
 	var inputFindGotFocus = false;
 	var lastSearchEnd = -1; // Depricated !??
 	var searchReportCounter = 0;
@@ -30,7 +30,7 @@
 		
 		editor.on("moveCaret", function resetLastSearchStrLength(file, caret) {
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
-});
+		});
 		
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
@@ -46,7 +46,7 @@
 		findAllButton = document.getElementById("findAllButton");
 		replaceAllButton = document.getElementById("replaceAllButton");
 		ignoreCaseOption  = document.getElementById("ignoreCaseOption");
-
+		
 	}
 	
 	
@@ -57,13 +57,13 @@
 		}
 		
 		//if(!div) { // This will still return true after it has been removed!!!
-			
+		
 		
 		div = document.createElement("div");
-		 
+		
 		div.setAttribute("id", "findReplace");
 		div.setAttribute("class", "findReplace");
-		 
+		
 		// Build the input stuff ...
 		
 		var size = editor.getDir().length;
@@ -90,7 +90,7 @@
 		var labelReplace = document.createElement("label");
 		labelReplace.setAttribute("for", "inputReplace");
 		labelReplace.appendChild(document.createTextNode("Replace with:")); // Language settings!?
-
+		
 		
 		findButtonLeft = document.createElement("input");
 		findButtonLeft.setAttribute("type", "button");
@@ -103,7 +103,7 @@
 		findButtonRight.setAttribute("class", "button half");
 		findButtonRight.setAttribute("id", "findButtonRight");
 		findButtonRight.setAttribute("value", "Right");
-
+		
 		replaceButton = document.createElement("input");
 		replaceButton.setAttribute("type", "button");
 		replaceButton.setAttribute("class", "button");
@@ -115,19 +115,19 @@
 		findAllButton.setAttribute("class", "button");
 		findAllButton.setAttribute("id", "findAllButton");
 		findAllButton.setAttribute("value", "Find All");
-
+		
 		replaceAllButton = document.createElement("input");
 		replaceAllButton.setAttribute("type", "button");
 		replaceAllButton.setAttribute("class", "button");
 		replaceAllButton.setAttribute("id", "replaceAllButton");
 		replaceAllButton.setAttribute("value", "Replace All");
-
-
+		
+		
 		
 		var regexOptionLabel = document.createElement("label");
 		regexOptionLabel.setAttribute("for", "regexOption");
 		regexOptionLabel.appendChild(document.createTextNode("Use regex")); // Language settings!?
-
+		
 		regexOption = document.createElement("input");
 		regexOption.setAttribute("type", "checkbox");
 		regexOption.setAttribute("id", "regexOption");
@@ -164,7 +164,7 @@
 		td.appendChild(findButtonRight);
 		tr.appendChild(td);
 		
-
+		
 		td = document.createElement("td");
 		td.appendChild(findAllButton);
 		tr.appendChild(td);
@@ -192,7 +192,7 @@
 		td = document.createElement("td");
 		td.appendChild(replaceButton);
 		tr.appendChild(td);
-
+		
 		td = document.createElement("td");
 		td.appendChild(replaceAllButton);
 		tr.appendChild(td);
@@ -203,7 +203,7 @@
 		tr.appendChild(td);
 		
 		table.appendChild(tr);
-
+		
 		
 		div.appendChild(table);
 		
@@ -235,7 +235,7 @@
 		
 		
 		searchVisible = true;
-
+		
 	}
 	
 	
@@ -273,11 +273,11 @@
 			}
 			
 			searchVisible = false;
-
+			
 			editor.resizeNeeded();
 			editor.renderNeeded();
 		}
-
+		
 	}
 	
 	function show_search() {
@@ -471,7 +471,7 @@
 				/*
 					problem: If the caret is moved since last search, we'll most likely start from the wrong position!
 					solution: reset lastSearchStrLength when the caret is moved, and set it again after the selection
-*/
+				*/
 				
 				start = text.indexOf(str, start);
 				
@@ -517,9 +517,9 @@
 			
 			editor.renderNeeded();
 			
-
+			
 		}
-
+		
 		return start;
 		
 	}
@@ -533,7 +533,7 @@
 		while(start > -1) {
 			start = find(str, file, useRegex, true, true, "right", ignoreCase);
 			console.log("start=" + start);
-
+			
 		}
 		
 		editor.renderNeeded();
@@ -586,7 +586,7 @@
 					
 					console.log("Regex replacing '" + selectedText + "' with '" + newString + "'");
 					
-}
+				}
 				
 				// Insert the new string
 				file.insertText(newString, file.caret);
@@ -613,7 +613,7 @@
 		}
 		
 		editor.renderNeeded();
-
+		
 	}
 	
 	function regexIndexOf(text, regex, startpos) {
@@ -638,6 +638,30 @@
 		}
 		return lastIndexOf;
 	}
+	
+	
+	
+	// ## Tests
+	/*
+	editor.addTest(function test_searchAndReplace(callback) {
+		editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(file) {
+			
+			for(var i=0; i<file.text.length; i++) {
+				file.moveCaretToIndex(i);
+			}
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+		
+	});
+	
+	*/
+	
+	
+	
 	
 	
 })();
