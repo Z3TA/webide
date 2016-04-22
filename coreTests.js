@@ -28,21 +28,43 @@
 	*/
 	
 	
-	editor.addTest(function htmlWithIfAndArrow(callback) {
-		editor.openFile("htmlWithIfAndArrow.js", "if((1+1) <= b) {\nfoo ='<div></div>';\n}", function(file) {
-
+	
+	editor.addTest(function scriptTagInHtmlMode(callback) {
+		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n</div>\n', function(file) {
+			// .htm and .html files start with xmlMode on
 			var grid = file.grid;
 			
 			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
 			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 3) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 2) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 1) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			if(grid[6].indentation != 0) throw new Error("grid[6].indentation=" + grid[6].indentation);
 
 			editor.closeFile(file.path);
 			
 			callback(true);
 			
 		});
-	}, 1);
+	});
+	
+	editor.addTest(function htmlWithIfAndArrow(callback) {
+		editor.openFile("htmlWithIfAndArrow.js", "if((1+1) <= b) {\nfoo ='<div></div>';\n}\n", function(file) {
+			
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 0) throw new Error("grid[4].indentation=" + grid[4].indentation);
+
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
 
 
 	editor.addTest(function findJsFunctions(callback) {
@@ -86,7 +108,7 @@
 	});
 	
 	editor.addTest(function indentHTML(callback) {
-		editor.openFile("indent_html.htm", "<div>\n<div></div>\n<meh\n</div>\n", function(file) {
+		editor.openFile("indent_html.htm", "<div>\n<div></div>\n\n</div>\n", function(file) {
 			
 			var grid = file.grid;
 			

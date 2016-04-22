@@ -249,12 +249,14 @@
 			xmlTagSelfEnding = false,
 			openXmlTags = 0,
 			xmlTagLastOpenRow = -1,
-			tmpXmlMode = false,
+			xmlModeBeforeTag = false,
+			insideScriptTag = false,
 			llChar = "",
 			lllChar = "",
 			willBeJSON = false,
 			willBeJSONValue = false,
 			insideRegExp = false,
+			column = 0,
 			eq = "=",
 			colon = ":",
 			pastChar = [],
@@ -268,7 +270,7 @@
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
 		
-		tmpXmlMode = xmlMode;
+		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
 		
 		insideFunctionBody[subCount] = false;
@@ -713,6 +715,7 @@
 			//char = text.charAt(charIndex);
 			char = text[charIndex];
 			
+			column++;
 
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
 				// A new line without , exits variable declaration
@@ -725,7 +728,7 @@
 			if(char == lastLineBreakCharacter) {
 				lineNumber++;
 				row++;
-				
+				column = 0;
 				
 				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
 				
@@ -768,7 +771,7 @@
 			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
-				xmlMode = tmpXmlMode;
+				xmlMode = xmlModeBeforeTag;
 				commentStart = i-4;
 			}
 			else if(char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
@@ -864,15 +867,21 @@
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (tmpXmlMode || insideQuote)) {
+				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || insideQuote)) {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
 					if(!insideXmlTagEnding) {
-						tmpXmlMode = xmlMode; // xmlMode when the tag starts
+						xmlModeBeforeTag = xmlMode; // xmlMode when the tag starts
 						xmlMode = false;
 					}
 					if(insideHTMLComment) throw new Error("WTF");
+				}
+				else if(insideScriptTag && pastChar[6] == "<" && pastChar[5] == "/" && pastChar[4] == "s" && pastChar[3] == "c" && pastChar[2] == "r" && pastChar[1] == "i" && pastChar[0] == "p" && char == "t") {
+					insideXmlTag = true;
+					xmlTagSelfEnding = false;
+					xmlTagStart = i-7;
+					insideXmlTagEnding = true;
 				}
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
@@ -886,20 +895,22 @@
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
 					
-										xmlMode = tmpXmlMode; // Set the xmlMode we had when the tag started
+					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						
 						if(insideXmlTagEnding) {
 							// Use default xmlMode after script tag ended
 							xmlMode = xmlModeBeforeScript;
+							insideScriptTag = false;
 						}
-						else {
+						else { // Tag start
 							// We are <script HERE>
-							xmlModeBeforeScript = xmlMode;
+							xmlModeBeforeScript = xmlMode; // xmlMode;
 							xmlMode = false;
+							insideScriptTag = true;
 						}
-						}
+					}
 					
 					if(tagBreak.indexOf(xmlTag) > -1) {
 						
@@ -915,7 +926,7 @@
 							openXmlTags++;
 							xmlTagLastOpenRow = row;
 						}
-						}
+					}
 					
 					lastXmlTag = xmlTag;
 					xmlTag = "";
@@ -928,6 +939,8 @@
 				}
 				
 			}
+			
+			//console.log("Line " + lineNumber + " char=" + char + "  xmlMode=" + xmlMode + " insideXmlTag=" + insideXmlTag )
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;
@@ -1100,7 +1113,7 @@
 						
 						// Figure out the name of the function
 						
-						//console.log("function!? line=" + lineNumber + " col=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
+						//console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
 						functionName = lastWord || word.replace("(", "");
