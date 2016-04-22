@@ -1069,6 +1069,35 @@
 		
 	}
 	
+	File.prototype.deleteTextRange = function(firstIndex, lastIndex) {
+		var file = this;
+		
+		if(firstIndex > lastIndex) throw new Error("firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex);
+		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
+		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
+		
+		var removedText = file.text.substring(firstIndex, lastIndex+1);
+		
+		file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
+				
+		file.grid = file.createGrid();
+		
+		// Create dummy caret to get row and col for the change event
+		var dummyCaret = file.createCaret(firstIndex);
+		
+		if(file.caret.index >= firstIndex) {
+			file.fixCaret(file.caret);
+		}
+		
+		file.sanityCheck();
+		
+		editor.renderNeeded();
+		
+		file.change("deleteTextRange", removedText, firstIndex, dummyCaret.row, dummyCaret.col);
+		
+		return removedText;
+	}
+	
 	File.prototype.deleteSelection = function(selection) {
 		/*
 			Deletes the selected text ...
@@ -1130,18 +1159,15 @@
 			if(isContinuous(selection)) {
 				var lastIndex = selection[selection.length-1].index;
 				
-				file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
-				
-				file.grid = file.createGrid();
-				
-				//console.log("after selection removed, text.length=" + text.length);
-				
 				// Place the caret where the selection was
 				file.caret = file.moveCaretToIndex(firstIndex);
 				
-				// Set these based on the new caret postion (for "deletedSelection" event)
-				var firstRow = file.caret.row;
-				var firstCol = file.caret.col;
+				file.deleteTextRange(firstIndex, lastIndex);
+				
+				firstRow = file.caret.row;
+				firstCol = file.caret.col;
+				
+				//console.log("after selection removed, text.length=" + text.length);
 				
 				// Reset the view
 				file.scrollTo(undefined, file.caret.row-1);
@@ -1178,24 +1204,19 @@
 				file.deleteCharacter(file.caret, bubbleUp);
 				
 			}
+			
+			file.sanityCheck();
+		
 		}
 		
 		// Deselect all 
 		selection.length = 0;
 		
 		console.timeEnd("deleteSelection");
-		
-		
-		// Delete cleared rows if they are empty!?
-		
-		//file.debugGrid();
-		file.sanityCheck();
-		
-		
-		file.change("deletedSelection", text, firstIndex, firstRow, firstCol);
-		
-		
+
 		editor.renderNeeded();
+		file.change("deletedSelection", text, firstIndex, firstRow, firstCol);
+
 		
 		
 		function isContinuous(selection) {

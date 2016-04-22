@@ -19,6 +19,11 @@ const ALT = 4;
 
 // Global functions ...
 
+function debugWhiteSpace(str) {
+	return str.replace(/\r/g, "R").replace(/\n/g, "N\n").replace(/ /g, "S").replace(/\t/g, "T");
+}
+
+
 function getFunctionName(fun) {
 	var ret = fun.toString();
 	ret = ret.substr('function '.length);

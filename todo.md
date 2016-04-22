@@ -14,6 +14,8 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
+Wordwrap function. A global word-wrap would be too complex. But we can make a word-wrap helper with Ctrl+W
+
 Writing a test for the search and replace function so that it doesn't break in the future.
 
 
@@ -125,6 +127,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 
 Polishing
 =========
+
+Pasing while searching should replace 
 
 Try different (JSON) js files in the wild and see how it handles the indentation.
 
@@ -445,7 +449,7 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
-word wrap!!
+Instead of word map. Make a plugin that when clicking Ctrl + W word wraps a paragraph.
 
 auto paste in snippets from stack exchange, Ctrl+H, write question, select result, paste the code from the most popular answer. 
 
