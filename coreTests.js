@@ -29,6 +29,21 @@
 	
 	
 	
+	
+	editor.addTest(function noRegExpInHtmlComment(callback) {
+		editor.openFile("noRegExpInHtmlComment.htm", '<img src="foo"/><!-- comment -->', function(file) {
+			// .htm and .html files start with xmlMode on
+			var grid = file.grid;
+
+			if(file.parsed.comments.length == 0) throw new Error("Expected at leat one comment");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function scriptTagInHtmlMode(callback) {
 		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n<!-- foo -->\n</div>\n', function(file) {
 			// .htm and .html files start with xmlMode on
@@ -50,7 +65,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function htmlWithIfAndArrow(callback) {
 		editor.openFile("htmlWithIfAndArrow.js", "if((1+1) <= b) {\nfoo ='<div></div>';\n}\n", function(file) {

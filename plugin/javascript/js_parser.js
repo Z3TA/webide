@@ -779,7 +779,7 @@
 					RegExp or block comment!? RegExp can not start with *!
 					
 				*/
-				if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
+				if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag) {
 					insideRegExp = true;
 					//console.log("RegExp: line=" + lineNumber + " column=" + column);
 				}
