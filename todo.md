@@ -14,7 +14,27 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Wordwrap function. A global word-wrap would be too complex. But we can make a word-wrap helper with Ctrl+W
+A new blog post. Write tests for edge cases. And to replace manual testing. If you have a
+specification of all the cases the function should handle, then go along and write a test for
+each case Before you start coding the function. But if you do not have all the edge cases figured
+out, then go ahed and make the first iteration of the function. And do manual tests on it until
+it works like you want to.
+
+Then use it for a while and implement new features etc. No need to write an automatic test yet,
+as manual testing still lates you iterate faster.
+
+Later you might find a bug, an issue or some wierd edge case. <i>Now</i> is the time to start
+writing tests for that function. As you now have a clue about what the function should do. Now go
+ahead and write a test for each case the function should handle, plus the bug/case you just found
+before fixing it.
+
+
+
+
+
+
+
+Word-wrap plugin: Scroll back to the left after wrapping!
 
 Writing a test for the search and replace function so that it doesn't break in the future.
 
@@ -30,6 +50,14 @@ Fixing stuff needed for a beta release:
 
 BUGS
 ====
+
+When closing the editor:
+
+Uncaught Error: File does not exist in editor.files: path=C:\Users\Z\dev-repositories\js-editor\test\wordwraptest.txt
+array=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\wordwraptest.txt","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\word_wrap.js","C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\global.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\wordwraptest2.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js"]
+editor.files=["testfile0","testfile1","testresults"]reopen_files.js:607 findBugsreopen_files.js:482 reopen_files_closeEditoreditor.js:2097 (anonymous function)events.js:70 emitNoneevents.js:147 emitwindow_bindings.js:152 Window.init.Window.handleEvent
+
+
 
 js_parser doesn't find functions inside arguments for function calls:
 foo(function bar() {
@@ -448,6 +476,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Show a vertical ruler if we are typing a too long line.
 
 Instead of word map. Make a plugin that when clicking Ctrl + W word wraps a paragraph.
 
