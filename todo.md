@@ -58,6 +58,8 @@ array=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\wordwraptest.txt","C:\\
 editor.files=["testfile0","testfile1","testresults"]reopen_files.js:607 findBugsreopen_files.js:482 reopen_files_closeEditoreditor.js:2097 (anonymous function)events.js:70 emitNoneevents.js:147 emitwindow_bindings.js:152 Window.init.Window.handleEvent
 
 
+vb_parser: Lots of indention errors (double END IF ??) ex: castSpell.asp
+
 
 js_parser doesn't find functions inside arguments for function calls:
 foo(function bar() {

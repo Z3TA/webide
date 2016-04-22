@@ -5,6 +5,7 @@ editor.bindKey({
 		"use strict";
 		
 		var maxTextWidth = editor.view.visibleColumns;
+		var space = " ";
 		
 		//maxTextWidth = 20;
 		
@@ -58,6 +59,11 @@ editor.bindKey({
 		
 		//return false;
 		
+		var caretIndex = file.caret.index;
+		var wordLeftOfCaret = getWord(caretIndex, true);
+		var wordRightOfCaret = getWord(caretIndex, false);
+		
+		
 		file.moveCaretToIndex(startOfParagraph);
 		
 		var indentation = file.grid[file.caret.row].indentation;
@@ -65,18 +71,67 @@ editor.bindKey({
 		//console.log("file.caret=" + JSON.stringify(file.caret));
 		
 		var text = file.deleteTextRange(startOfParagraph, endOfParagraph);
+		var textLengthBefore = text.length;
 		
 		//file.debugGrid();
 		
 		text = wordWrapText(text, maxTextWidth - indentation * editor.settings.tabSpace);
+		var textLengthAfter = text.length;
 		
 		//console.log("text='" + debugWhiteSpace(text) + "'");
 		
 		file.insertText(text, file.caret);
 		
+		var textLengthDiff = textLengthBefore - textLengthAfter;
+		console.log("textLengthDiff=" + textLengthDiff);
 		// Place the caret where it was in the text
+		var leftWord, rightWord;
+		for(var i=Math.max(0, caretIndex - Math.abs(textLengthDiff)); i<Math.min(Math.max(0, endOfParagraph - Math.abs(textLengthDiff)), file.text.length); i++) {
+			leftWord = getWord(i, true);
+			rightWord = getWord(i, false);
+			
+			console.log("'" + leftWord + "==" + wordLeftOfCaret + "' '" + rightWord + "==" + wordRightOfCaret + "'");
+			
+			if( leftWord == wordLeftOfCaret && rightWord == wordRightOfCaret) {
+				file.moveCaretToIndex(i);
+				break;
+			}
+}
+		
+		if(file.startColumn > 0) file.scrollTo(0, file.startRow); // Scroll to the left
 		
 		return false;
+		
+		
+		function getWord(index, searchLeft) {
+			// Get the word directly at the caret (so we can find the position later)
+			var word = "";
+			var char = "";
+			if(searchLeft) {
+				for(var i=index; i>0; i--) {
+					char = file.text.charAt(i);
+					if( (char == space && word.length > 0) || char == "\r" || char == "\n") {
+						return word;
+					}
+					else {
+						word = char + word;
+					}
+				}
+			}
+			else { // Search right
+				for(var i=index; i<file.text.length; i++) {
+					char = file.text.charAt(i);
+					if( (char == space && word.length > 0) || char == "\r" || char == "\n") {
+						return word;
+					}
+					else {
+						word = word + char;
+					}
+				}
+			}
+			return word;
+}
+		
 		
 		function wordWrapText(text, width) {
 			/*
@@ -106,8 +161,6 @@ editor.bindKey({
 			text = text.replace(/\s{2,}/g, ' '); // Remove multiple spaces
 			text = text.trim(); // Remove white space at the edges
 			
-			var space = " ";
-			
 			if(text.length <= width) {
 				console.log("text.length=" + text.length + " <= width=" + width);
 				return text;
@@ -116,15 +169,35 @@ editor.bindKey({
 			var words = text.split(space);
 			var rows = []; // Array of strings
 			var rowNr = 0;
-			var lineLength = 0;
+			var lineLength = words[0].length + 1;
+			var lc = ""; // Last character of last word
+			var breakAnyway = false;
 			rows.push([]); // First row, each row is a array of strings (the words)
-			for(var i=0; i<words.length; i++) {
+			rows[rowNr].push(words[0]); // Add the first word to the first row
+			for(var i=1; i<words.length; i++) { // Start with the second word (so we can check the word before)
+				
+				if(lineLength > (width*.8)) {
+					lc = words[i-1].charAt(words[i-1].length-1);
+					if(lc == "." || lc == ":" || lc == "," || lc == ";" || lc == "!" || lc == "?") {
+						breakAnyway = true;
+					}
+					else {
+						breakAnyway = false;
+					}
+				}
+				else {
+					breakAnyway = false;
+				}
+				
 				lineLength += words[i].length;
 				
-				if((lineLength) > width && rows[rowNr].length != 0) {
+				if((lineLength > width || breakAnyway) && rows[rowNr].length != 0) {
+					
+					//if(breakAnyway) rows[rowNr].push("YAYA!");
 					
 					rowNr = rows.push([]) - 1;
 					lineLength = words[i].length;
+					breakAnyway = false;
 					
 				}
 				rows[rowNr].push(words[i]);
@@ -139,7 +212,7 @@ editor.bindKey({
 			// Join the rows with line breaks in between
 			text = rows.join(file.lineBreak);
 			
-			console.log("Duke Nukem");
+			 
 			
 			return text;
 }
