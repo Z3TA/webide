@@ -30,7 +30,7 @@
 	
 	
 	editor.addTest(function scriptTagInHtmlMode(callback) {
-		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n</div>\n', function(file) {
+		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n<!-- foo -->\n</div>\n', function(file) {
 			// .htm and .html files start with xmlMode on
 			var grid = file.grid;
 			
@@ -40,14 +40,17 @@
 			if(grid[3].indentation != 3) throw new Error("grid[3].indentation=" + grid[3].indentation);
 			if(grid[4].indentation != 2) throw new Error("grid[4].indentation=" + grid[4].indentation);
 			if(grid[5].indentation != 1) throw new Error("grid[5].indentation=" + grid[5].indentation);
-			if(grid[6].indentation != 0) throw new Error("grid[6].indentation=" + grid[6].indentation);
+			if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
+			if(grid[7].indentation != 0) throw new Error("grid[7].indentation=" + grid[7].indentation); 
 
+			if(file.parsed.comments.length == 0) throw new Error("Expected at leat one comment");
+			
 			editor.closeFile(file.path);
 			
 			callback(true);
 			
 		});
-	});
+	}, 1);
 	
 	editor.addTest(function htmlWithIfAndArrow(callback) {
 		editor.openFile("htmlWithIfAndArrow.js", "if((1+1) <= b) {\nfoo ='<div></div>';\n}\n", function(file) {

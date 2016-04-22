@@ -740,20 +740,7 @@
 
 
 			
-			/*
-				### RegExp strings
-				
-				Anything between / and / not escaped by \
-				
-				RegExp or block comment!? RegExp can not start with *!
-				
-			*/
-			if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
-				insideRegExp = true;
-			}
-			else if(insideRegExp && char == "/" && lastChar != backSlash) {
-				insideRegExp = false;
-			}
+
 			
 			
 			// ### Quotes and comments ...
@@ -768,6 +755,7 @@
 			// We can not have /* after a lineComment, it will do nothing
 			
 			// ### Comments: <!-- -->
+			//if(char == "-" && lastChar == "-" && llChar == "!") console.log("lllChar=" + lllChar + " insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
@@ -782,70 +770,88 @@
 			
 			if(!xmlMode) {
 			
+			
+				/*
+					### RegExp strings
+					
+					Anything between / and / not escaped by \
+					
+					RegExp or block comment!? RegExp can not start with *!
+					
+				*/
+				if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment) {
+					insideRegExp = true;
+					//console.log("RegExp: line=" + lineNumber + " column=" + column);
+				}
+				else if(insideRegExp && char == "/" && lastChar != backSlash) {
+					insideRegExp = false;
+				}
+			
+			
 				// ### Comments: //
 				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp) {
 					insideLineComment = true;
-				commentStart = i-1;
-				//console.log("insideLineComment!");
-			}
-			else if(char == "\n" && insideLineComment) {
-				insideLineComment = false;
-				comments.push(new Comment(commentStart, i));
-				//console.log("Found line comment: " +  text.substring(commentStart, i))
-				return;
-			}
+					commentStart = i-1;
+					//console.log("insideLineComment!");
+				}
+				else if(char == "\n" && insideLineComment) {
+					insideLineComment = false;
+					comments.push(new Comment(commentStart, i));
+					//console.log("Found line comment: " +  text.substring(commentStart, i))
+					return;
+				}
 			
-			// ### Comments: /*   */
+				// ### Comments: /*   */
 				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment) {
 					insideBlockComment = true;
 					insideRegExp = false;
-				commentStart = i-1;
-				commentStartIndentation = file.grid[row].indentation;
+					commentStart = i-1;
+					commentStartIndentation = file.grid[row].indentation;
 					//console.log("insideBlockComment!");
-			}
+				}
 				else if(char == "/" && lastChar == "*" && insideBlockComment) {
 					insideBlockComment = false;
-				comments.push(new Comment(commentStart, i));
-				//console.log("Found block comment: " + text.substring(commentStart, i));
-				if(file.grid[row].indentation > 0) {
-					// Set same indentation as the start of the comment
-					file.grid[row].indentation = commentStartIndentation;
-				}
-				
-				return;
-			}
-			
-			// ### Quotes: double
-			// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
-				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
-				if(insideDblQuote) {
-					if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {				
-						insideDblQuote = false;
-						quotes.push(new Quote(quoteStart, i));
-						word = text.substring(quoteStart, i+1);
-						return;
+					comments.push(new Comment(commentStart, i));
+					//console.log("Found block comment: " + text.substring(commentStart, i));
+					if(file.grid[row].indentation > 0) {
+						// Set same indentation as the start of the comment
+						file.grid[row].indentation = commentStartIndentation;
 					}
-				}
-				else {
-					insideDblQuote = true;
-					quoteStart = i;
-					//console.log("insideDblQuote!");
-				}
-			}
-			
-			// ### Quotes: single
-				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
-				if(insideSingleQuote) {
-					insideSingleQuote = false;
-					quotes.push(new Quote(quoteStart, i));
+					
 					return;
 				}
-				else {
-					insideSingleQuote = true;
-					quoteStart = i;
-					//console.log("insideSingleQuote!");
+			
+				// ### Quotes: double
+				// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
+				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+					if(insideDblQuote) {
+						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {				
+							insideDblQuote = false;
+							quotes.push(new Quote(quoteStart, i));
+							word = text.substring(quoteStart, i+1);
+							return;
+						}
+					}
+					else {
+						insideDblQuote = true;
+						quoteStart = i;
+						//console.log("insideDblQuote!");
+					}
 				}
-			}
+			
+				// ### Quotes: single
+				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+					if(insideSingleQuote) {
+						insideSingleQuote = false;
+						quotes.push(new Quote(quoteStart, i));
+						return;
+					}
+					else {
+						insideSingleQuote = true;
+						quoteStart = i;
+						//console.log("insideSingleQuote!");
+					}
+				}
 				
 			}
 			
@@ -882,6 +888,7 @@
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-7;
 					insideXmlTagEnding = true;
+					insideRegExp = false;
 				}
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
@@ -940,7 +947,7 @@
 				
 			}
 			
-			//console.log("Line " + lineNumber + " char=" + char + "  xmlMode=" + xmlMode + " insideXmlTag=" + insideXmlTag )
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " insideXmlTag=" + insideXmlTag + " insideHTMLComment=" + insideHTMLComment);
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;
