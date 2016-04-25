@@ -8,6 +8,7 @@ See LICENCE.txt to know what you are allowed to do with it.
 
 See contribute.txt on how to send your changes.
  
+Available for Linux, Windows (and soon Mac OS X)
 
 
 How to run
@@ -21,40 +22,21 @@ Windows: Click on the shortcut: JZedit
 Linux:
 ------
 Make JZedit.desktop and start.sh executable:
-
-via terminal: chmod +x JZedit.desktop start.sh; ./start.sh
-
+Via terminal: chmod +x JZedit.desktop start.sh; ./start.sh
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
 
 "install": Double click on JZedit.desktop, then: Right click on the icon on the Launcher (left side), select "Lock to Launcher"
 
 
-Other platforms
----------------
-
-Dependencies:
-* nw.js - The chromium browser with nodejs libraries.
-* nodehun - A nodejs module used for spell checking (only if you want spellchecking)
-
-Download nw.js from the web: http://nwjs.io/ (v0.12.3)
-
-To install nodehun you need nodejs and npm, get it from https://nodejs.org/
-You also need build dependencies for C/C++
-
-npm install nodehun --target=1.2.0
-
-Start the editor using nw.js and the path-to-editor as first argument. See start.bat and start.sh
-
-Remove unnecessary files from nw.js then place it in a new folder inside .runtime/ with your system ($SYS) as folder name.
-
-Move nodehun.node and raname it to ./plugin/spellcheck/nodehun_$SYS.node
-
-Submit the changes! (see contribute.txt)
+Mac OS X
+--------
+Not yet officially supported (let me borrow your Mac and I'll fix it)
 
 
 
 Font settings and styling
 =========================
+
 The editor only works with mono-space font's (because of the "grid").
 
 Use settings_overload.js to make changes to settings.js.
@@ -63,7 +45,6 @@ For the optimal text experience, try different system/OS font settings like hint
 
 Some of the most popular open source programming fonts can be found in gfx/font 
 (You need to install them to your system for them to work in the editor!)
-
 
 
 Problems on Linux
@@ -94,8 +75,8 @@ DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
 
 
 
-Where can I get Consolas font?
-------------------------------
+Where can I get Consolas font on Linux?
+---------------------------------------
 Is only distributed in Windows and some windows applications. 
 
 Type these commands in a terminal window:
@@ -115,13 +96,6 @@ Click on the "cog wheels" icon (Manage Fonts) bottom left, to get a meny with "I
 Select CONSOLA from the temp-folder you extracted the cab files in.
 
 
-
-
-Upgrading
-=========
-
-Go to the repository to get the latest updates:
-http://hg.webtigerteam.com/js-editor/
 
 
 

@@ -1,22 +1,20 @@
 Contributing
 ============
 
-Send any changes to zeta@zetafiles.org. Compress using zip/gzip. 
+Install Mercurial SCM - https://www.mercurial-scm.org
 
-If your contribution is of any value I will implement it into the editor or publish it to the web.
+Send any changes to zeta@zetafiles.org,
+with a note: "I give you full (copyright) permission to use this code"
 
-If you want to be helpful, also use the Mercurial SCM so that it will be easier for me to manage:
 
-1. Clone from http://hg.webtigerteam.com/js-editor/
-2. Make sure it's up to date! (hg pull)
-3. Make your changes
-4. Commit the changes
-5. Sending changes by email, with a note: "I give you full (copyright) permission to use this code"
 
 Mercurial commands:
 -------------------
 # Clone the repository/folder
 $ hg clone http://hg.webtigerteam.com/js-editor/ js-editor-new-feature
+
+# Make sure you are up to date
+$ hg pull
 
 # Make changes and commit them...
 $ hg ci -m "my changes"
@@ -29,8 +27,9 @@ $ hg export 4 > change4.diff
 # replace 3, 4, etc with the actual changeset
 
 
-Importing
----------
+
+Importing (notes to self)
+-------------------------
 
 Guide from: https://www.mercurial-scm.org/guide
 

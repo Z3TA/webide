@@ -137,6 +137,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
+Ignore $ in variables for the spellchecker
+
 Pasing while searching should replace 
 
 Try different (JSON) js files in the wild and see how it handles the indentation.
