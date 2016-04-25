@@ -8,7 +8,7 @@
 	
 	
 	var inputFindGotFocus = false;
-	var lastSearchEnd = -1; // Depricated !??
+	var lastSearchEnd = -1; // Deprecated !??
 	var searchReportCounter = 0;
 	var searchVisible = false;
 	var lastSearchStrLength = 0;
@@ -73,7 +73,7 @@
 		inputFind.setAttribute("id", "inputFind");
 		inputFind.setAttribute("class", "inputtext");
 		inputFind.setAttribute("size", size);
-		inputFind.setAttribute("value", "X(..)X");
+		//inputFind.setAttribute("value", "X(..)X");
 		
 		
 		inputReplace = document.createElement("input");
@@ -81,7 +81,7 @@
 		inputReplace.setAttribute("id", "inputReplace");
 		inputReplace.setAttribute("class", "inputtext replace");
 		inputReplace.setAttribute("size", size);
-		inputReplace.setAttribute("value", "Y$1Y");
+		//inputReplace.setAttribute("value", "Y$1Y");
 		
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
