@@ -14,42 +14,21 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-A new blog post. Write tests for edge cases. And to replace manual testing. If you have a
-specification of all the cases the function should handle, then go along and write a test for
-each case Before you start coding the function. But if you do not have all the edge cases figured
-out, then go ahed and make the first iteration of the function. And do manual tests on it until
-it works like you want to.
-
-Then use it for a while and implement new features etc. No need to write an automatic test yet,
-as manual testing still lates you iterate faster.
-
-Later you might find a bug, an issue or some wierd edge case. <i>Now</i> is the time to start
-writing tests for that function. As you now have a clue about what the function should do. Now go
-ahead and write a test for each case the function should handle, plus the bug/case you just found
-before fixing it.
-
-
-
-
-
-
-
-Word-wrap plugin: Scroll back to the left after wrapping!
-
-Writing a test for the search and replace function so that it doesn't break in the future.
-
-
 Fixing stuff needed for a beta release:
-* Regex search/replace
-* Replace in file (using regex)
-* PHP parser !?
-* bash script parser !?
-* Built in FTP/SFTP/SSH !?
+* Install script
+* Release script
+
+
 
 
 
 BUGS
 ====
+
+bug: Find in file will not work if the search term is split between chunks
+
+bug: When selecting text using shift + mouse click, then clicking again, it sometimes removes the most right character. test ex:
+before fixing it.
 
 When closing the editor:
 
@@ -479,6 +458,16 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+* Replace in file (using regex)
+
+The JavaScript parser should be able to handle <script>code</script> snippets from other language parsers
+
+* PHP parser !
+
+* Built in FTP/SFTP/SSH !
+
+* bash script parser !
+
 Show a vertical ruler if we are typing a too long line.
 
 Instead of word map. Make a plugin that when clicking Ctrl + W word wraps a paragraph.
@@ -520,7 +509,7 @@ Split/gline veiw, so you can edito the same file, but on different positions. Ha
 Integrate mysql Query browser as a plugin
 
 
-Display white space characters (space and tabs) at start of a line and at end of line.
+Display white space characters (space and tabs) at start of a line and at end of line. (unless it's a comment)
 render function: start from end, then break at first char.
 
 Uncaught SyntaxError: Unexpected token )

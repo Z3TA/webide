@@ -710,6 +710,8 @@
 					
 					while ((result = myRe.exec(str)) !== null) {
 						
+						// todo: Find between chunks
+						
 						console.log("Found " + result[0]);
 						
 						totalMatches++;
