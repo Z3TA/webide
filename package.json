@@ -16,7 +16,8 @@
 	"version": "1.0.0",
 	"author" : "Johan Zetterberg <zeta@zetafiles.org>", 
 	"dependencies": {
-		"nodehun" : "^2.0.8"
+		"nodehun" : ">=2.0.8",
+		"ws" : "^1.0.1"
 	},
 	"repository": {
 		"type": "Mercurial",
