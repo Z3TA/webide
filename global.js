@@ -9,20 +9,50 @@
 
 "use strict";
 
-const runtime = function is_nwjs() {
+var runtime = (function is_nwjs() {
 	try{
 		return (typeof require('nw.gui') !== "undefined");
 	} catch (e){
 		return false;
 	}
-} ? "nw.js" : "browser";
+})() ? "nw.js" : "browser";
+
+
+
+if(runtime == "browser") {
+	//alert("runtime=" + runtime);
+	var process = {
+		platform: (function findPlatForm() {
+			var platform = "win32";
+			if(navigator.platform == "Win32") platform = "win32";
+			if(navigator.platform.indexOf("Linux") != -1) platform = "linux";
+			return platform;
+		})(),
+		cwd: function getWorkingDirectory() {
+			return getDirectoryFromPath(document.location.href);
+		},
+		nextTick: function(cb) {
+			setTimout(cb, 0);
+		},
+		argv: (function getArguments() {
+			var query = window.location.search.substring(1);
+			var arr = query.split('&');
+			
+			arr.unshift(document.location.href);
+			
+			return arr;
+			
+})()
+		
+	};
+}
 
 
 
 Error.stackTraceLimit = Infinity;
 
 
-// Global constants
+// Global constants, note that const is block scoped!! (can't if(foo) const bar =1)
 const SHIFT = 1;
 const CTRL = 2;
 const ALT = 4;
@@ -30,6 +60,36 @@ const ALT = 4;
 
 
 // Global functions ...
+
+function getFile(url, callback) {
+	
+	console.log("Opening url:" + url);
+	
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.onreadystatechange = processRequest;
+	xmlHttp.open( "GET", url, true );
+	xmlHttp.send( null );
+	
+	function processRequest() {
+		if (xmlHttp.readyState == 4) {
+			
+			console.log("xmlHttp.status=" + xmlHttp.status);
+			
+			if(xmlHttp.status == 200) {
+				
+				console.log("File loaded.");
+				
+				callback(xmlHttp.responseText, url);
+				
+			}
+			else {
+				console.err("Error when opening" + url + "\n" + xmlHttp.responseText);
+			}
+			
+		}
+	}
+}
+
 
 function debugWhiteSpace(str) {
 	return str.replace(/\r/g, "R").replace(/\n/g, "N\n").replace(/ /g, "S").replace(/\t/g, "T");
@@ -68,7 +128,7 @@ function determineLineBreakCharacters(text) {
 	}
 	
 	var nr = occurrences(text, "\n\r", true),
-		rn = occurrences(text, "\r\n", true)
+	rn = occurrences(text, "\r\n", true)
 	
 	console.log("Line break? nr=" + nr + " rn=" + rn + "");
 	
@@ -158,6 +218,19 @@ function getFilenameFromPath(path) {
 		// Assume \ is the folder separator
 		return path.substr(path.lastIndexOf('\\')+1);
 	}
+}
+
+function getDirectoryFromPath(path) {
+	var backSlashIndex = path.lastIndexOf("\\");
+	var slashIndex = path.lastIndexOf("/")
+	
+	if(backSlashIndex > slashIndex) {
+		path = path.substring(0,backSlashIndex+1);
+	}
+	else {
+		path = path.substring(0,slashIndex+1);
+	}
+	return path;
 }
 
 function isFilePath(filePath) {

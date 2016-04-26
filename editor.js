@@ -121,14 +121,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
 	
 	
-	// Load native UI library
-	var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
-	
-	// Get the current window
-	var win = gui.Window.get();
-	
-	
-	
 	var executeOnNextInteraction = [];
 	
 	var lastKeyDown = 0;
@@ -153,6 +145,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		To make it more fun to write plugins, the editor and File object should take care of the "low level" stuff and heavy lifting. 
 		Feel free to add more editor API methods below. Do not extend the editor object elsewhere!!
 	*/
+	
 	
 	editor.workingDirectory = process.cwd();
 	
@@ -284,13 +277,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(text == undefined) {
 			
-			var fspath = require("path");
-			if(!fspath.isAbsolute(path)) {
-				let absolutePath = fspath.resolve(path);
-				console.warn("Making path absolute: " + path + " ==> " + absolutePath);
-				path = absolutePath; // Make the path absolute
+			if(runtime!="browser") {
+				var fspath = require("path");
+				if(!fspath.isAbsolute(path)) {
+					let absolutePath = fspath.resolve(path);
+					console.warn("Making path absolute: " + path + " ==> " + absolutePath);
+					path = absolutePath; // Make the path absolute
+				}
 			}
-			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
@@ -427,19 +421,30 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
-		var fs = require("fs");
-		
 		if(!callback) throw new Error("Callback not defined!");
 		
-		fs.stat(path, checkSize);
-		
-		function checkSize(err, stats) {
-			
-			if(err) callback(-1, err)
-			else callback(stats["size"]);
-			
+		if(runtime=="browser") {
+			var xhr = new XMLHttpRequest();
+			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
+			xhr.onreadystatechange = function() {
+				if (this.readyState == this.DONE) {
+					callback(parseInt(xhr.getResponseHeader("Content-Length")));
+				}
+			};
+			xhr.send();
 		}
-		
+		else {
+			var fs = require("fs");
+			
+			fs.stat(path, checkSize);
+			
+			function checkSize(err, stats) {
+				
+				if(err) callback(-1, err)
+				else callback(stats["size"]);
+				
+			}
+		}
 	}
 	
 	editor.doesFileExist = function(path, callback) {
@@ -576,39 +581,48 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
+		// todo: Rename this function, or refactor, because we can also run in the browser!
 		
-		var fs = require("fs");
-		
-		console.log("Reading file from disk: " + path);
-		console.log(getStack("Read from disk"));
-		
-		if(!callback) {
-			throw new Error("No callback defined!");
-		}
-		
-		if(returnBuffer) {
-			// If no encoding is specified in fs.readFile, then the raw buffer is returned.
+		if(runtime == "nw.js") {
+			var fs = require("fs");
 			
-			fs.readFile(path, function(err, buffer) {
-				if (err) throw err;
+			console.log("Reading file from disk: " + path);
+			console.log(getStack("Read from disk"));
+			
+			if(!callback) {
+				throw new Error("No callback defined!");
+			}
+			
+			if(returnBuffer) {
+				// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 				
-				callback(path, buffer);
+				fs.readFile(path, function(err, buffer) {
+					if (err) throw err;
+					
+					callback(path, buffer);
+					
+				});
+			}
+			else {
 				
+				if(encoding == undefined) encoding = "utf8";
+				fs.readFile(path, encoding, function(err, string) {
+					if (err) throw err;
+					
+					callback(path, string);
+					
+				});
+			}
+			
+		}
+		else if(runtime == "browser") {
+			getFile(path, function(string, url) {
+				callback(url, string);
 			});
 		}
-		else {
-						
-			if(encoding == undefined) encoding = "utf8";
-			fs.readFile(path, encoding, function(err, string) {
-				if (err) throw err;
-				
-				callback(path, string);
-				
-			});
-		}
-		
 		
 	}
+	
 	
 	editor.saveFile = function(file, path, callback) {
 		/*
@@ -780,8 +794,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.time("render");
 			
 			var file = editor.currentFile,
-				buffer = [],
-				grid = editor.currentFile.grid;
+			buffer = [],
+			grid = editor.currentFile.grid;
 			
 			
 			var funName = "";
@@ -1091,8 +1105,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
 		*/
 		
-		global.windowHeight = windowHeight;
-		global.windowWidth = windowWidth;
+		editor.height = windowHeight;
+		editor.with = windowWidth;
 		
 		
 		//objInfo(centerColumn);
@@ -1387,8 +1401,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var offsetHeight = parseInt(menu.offsetHeight);
 		var offsetWidth = parseInt(menu.offsetWidth);
 		
-		if((posY+offsetHeight) > global.windowHeight) posY = global.windowHeight - offsetHeight;
-		if((posX+offsetWidth) > global.windowWidth) posX = global.windowWidth - offsetWidth;
+		if((posY+offsetHeight) > editor.height) posY = editor.height - offsetHeight;
+		if((posX+offsetWidth) > editor.with) posX = editor.with - offsetWidth;
 		
 		if(posX <= editor.mouseX) {
 			// Place the menu on the left side
@@ -1596,8 +1610,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(editor.currentFile) {
 			
 			var file = editor.currentFile,
-				grid = file.grid,
-				clickFeel = editor.settings.gridWidth / 2;
+			grid = file.grid,
+			clickFeel = editor.settings.gridWidth / 2;
 			
 			var mouseRow = Math.floor((mouseY - editor.settings.topMargin) / editor.settings.gridHeight) + file.startRow;
 			
@@ -1881,9 +1895,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(focus == undefined) focus = true;
 		
 		// Set window title
-		var gui = require('nw.gui');
-		var win = gui.Window.get();
-		win.title = file.path;
+		if(runtime=="nw.js") {
+			var gui = require('nw.gui');
+			var win = gui.Window.get();
+			win.title = file.path;
+		}
+		else if(runtime=="browser") {
+			window.title = file.path;
+		}
 		
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 		if(file.savedAs) {
@@ -2053,7 +2072,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		for(var i=0; i<editor.tests.length; i++) {
 			if(editor.tests[i].text == funName) throw new Error("The test function name=" + funName + " is already used!");
 			if(order > 0 && editor.tests[i].order > order) throw new Error("Remove order from test '" + editor.tests[i].text + "' if you want " + funName + " to run first!");
-}
+		}
 		
 		editor.tests.push({fun: fun, text: funName, order: order});
 		
@@ -2062,7 +2081,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			return b.order - a.order;
 		});
 		
-}
+	}
 	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
@@ -2078,47 +2097,52 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		return false; // Function not found in list
 	}
 	
-	
-	// Handle window close
-	win.on('close', function() {
-		//var editor = this;
+	if(runtime == "nw.js") {
+		// Handle window close
+		// Load native UI library
+		var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
 		
-		//editor.hide(); // Pretend to be closed already
-		
-		var ret = true;
-		var name = "";
-		var GUI = require('nw.gui').Window.get();
-		
-		console.log("Closing the editor ...");
-		
-		GUI.leaveKioskMode();
-		
-		if(!window.localStorage) {
-			console.warn("window.localStorage=" + window.localStorage);
-		}
-		
-		console.log("Calling exit listeners (" + editor.eventListeners.exit.length + ")");
-		for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
+		// Get the current window
+		var win = gui.Window.get();
+		win.on('close', function() {
+			//var editor = this;
 			
-			f = editor.eventListeners.exit[i].fun;
-			name = getFunctionName(f);
-			ret = f();
+			//editor.hide(); // Pretend to be closed already
 			
-			console.log(name + " returned " + ret);
+			var ret = true;
+			var name = "";
+			var GUI = require('nw.gui').Window.get();
 			
-			if(ret !== true) break;
-		}
-		
-		if(ret == true) {
-			this.close(true);
-		}
-		else {
-			this.show();
-			throw new Error("Something went wrong when closing the editor!");
-		}
-		
-	});
-	
+			console.log("Closing the editor ...");
+			
+			GUI.leaveKioskMode();
+			
+			if(!window.localStorage) {
+				console.warn("window.localStorage=" + window.localStorage);
+			}
+			
+			console.log("Calling exit listeners (" + editor.eventListeners.exit.length + ")");
+			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
+				
+				f = editor.eventListeners.exit[i].fun;
+				name = getFunctionName(f);
+				ret = f();
+				
+				console.log(name + " returned " + ret);
+				
+				if(ret !== true) break;
+			}
+			
+			if(ret == true) {
+				this.close(true);
+			}
+			else {
+				this.show();
+				throw new Error("Something went wrong when closing the editor!");
+			}
+			
+		});
+	}
 	
 	// Move Event listeners ...
 	
@@ -2189,14 +2213,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	function main() {
 		
-		var fs = require("fs");
+		//var fs = require("fs");
 		
 		console.log("Starting the editor ...");
 		
-		fs.readFile("version.inc", "utf8", function(err, string) {
-			if(err) throw "Could not read version.inc\n" + err.stack;
+		// Get the commit ID
+		editor.readFromDisk("version.inc", function(string) {
 			editor.version = parseInt(string);
-			});
+		});
 		
 		canvas = document.getElementById("canvas");
 		

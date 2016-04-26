@@ -1,6 +1,11 @@
 (function() {
 	"use strict";
 	
+if(runtime == "browser") {
+console.warn("Self debugger not yet supported in the browser!");
+return;
+}
+
 		/*
 		Attach to the chromium debug tool's console and watch for errors	
 		

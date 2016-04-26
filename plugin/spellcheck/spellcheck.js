@@ -6,7 +6,10 @@
 	*/
 	"use strict";
 	
-	//if(editor.settings.enableSpellchecker===false) return;
+	if(runtime == "browser") {
+		console.warn("Spell-checking not yet supported in the browser!");
+		return;
+	}
 	
 
 	if(editor.settings.enableSpellchecker===undefined) {

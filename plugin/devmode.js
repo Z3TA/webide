@@ -108,8 +108,11 @@
 	}
 	
 	function showDevTools() {
-		require('nw.gui').Window.get().showDevTools();
+		if(runtime=="nw.js") {
+			require('nw.gui').Window.get().showDevTools();
+}
 		editor.hideMenu();
+		
 	}
 	
 		function reloadEditor() {

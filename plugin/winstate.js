@@ -1,5 +1,10 @@
 (function() {
 	
+	if(runtime == "browser") {
+		console.warn("Winstate not yet supported in the browser!");
+		return;
+	}
+	
 	'use strict';
 
 	/*

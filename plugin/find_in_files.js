@@ -537,6 +537,7 @@
 			foldersToRead++;
 			
 			var fs = require("fs");
+			var path = require("path");
 			fs.readdir(currentDirPath, function dirRead(err, folderItems) {
 				if(err) throw err;
 				
