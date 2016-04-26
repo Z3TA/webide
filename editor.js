@@ -66,14 +66,8 @@ editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
-editor.runtime = function is_nwjs() {
-	try{
-		return (typeof require('nw.gui') !== "undefined");
-	} catch (e){
-		return false;
-	}
-} ? "nw.js" : "browser";
 
+	
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -433,6 +427,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
+		var fs = require("fs");
+		
 		if(!callback) throw new Error("Callback not defined!");
 		
 		fs.stat(path, checkSize);
@@ -564,7 +560,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	
 	editor.readFileSync = function(path) {
-		
+		var fs = require("fs");
 		console.log("Reading file syncroniously from disk: " + path);
 		
 		try {
@@ -580,6 +576,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
+		
+		var fs = require("fs");
 		
 		console.log("Reading file from disk: " + path);
 		console.log(getStack("Read from disk"));
@@ -599,6 +597,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			});
 		}
 		else {
+						
 			if(encoding == undefined) encoding = "utf8";
 			fs.readFile(path, encoding, function(err, string) {
 				if (err) throw err;
@@ -650,6 +649,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		function saveToDisk(file) {
+			var fs = require("fs");
 			fs.writeFile(path, file.text, function(err) {
 				console.log("Attempting saving to disk: " + path + " ...");
 				
@@ -2188,6 +2188,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	//window.addEventListener("message", onMessage, false);
 	
 	function main() {
+		
+		var fs = require("fs");
 		
 		console.log("Starting the editor ...");
 		

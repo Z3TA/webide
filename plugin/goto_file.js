@@ -158,6 +158,7 @@
 		function searchDir(currentDirPath) {
 			var filePath;
 			var stat;
+			var fs = require("fs");
 			
 			console.log("Searching: " + currentDirPath);
 			
@@ -211,6 +212,7 @@
 		}
 		
 		function readFile(filePath) {
+			var fs = require("fs");
 			fs.readFile(filePath, 'utf-8', function(err, contents) {
 				
 				if(err) throw err;

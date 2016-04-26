@@ -530,11 +530,13 @@
 		});
 
 		function searchDir(currentDirPath) {
+			var fs = require("fs");
 			
 			console.log("Searching: " + currentDirPath);
 			
 			foldersToRead++;
 			
+			var fs = require("fs");
 			fs.readdir(currentDirPath, function dirRead(err, folderItems) {
 				if(err) throw err;
 				
@@ -552,6 +554,9 @@
 				doWeHaveAllFiles();
 				
 				function doStat(filePath) {
+					
+					var fs = require("fs");
+					
 					statsToDo++;
 					fs.stat(filePath, function fileStat(err, stat) {
 						
@@ -616,6 +621,7 @@
 			
 			console.log("Opening as stream: " + filePath);
 			
+			var fs = require("fs");
 			var stream = fs.createReadStream(filePath);
 			stream.setEncoding('utf8');
 			stream.on('readable', readStream);
@@ -674,6 +680,7 @@
 				var chunk;
 				var lineBreaks = 0;
 				var str = "";
+				var StringDecoder = require('string_decoder').StringDecoder;
 				var decoder = new StringDecoder('utf8');
 				var result;
 				var index = -1;

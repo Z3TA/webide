@@ -100,6 +100,7 @@
 
 	
 	function loadWorker(languages) {
+		var childProcess = require("child_process");
 		
 		var id = worker.push(childProcess.fork("./plugin/spellcheck/spellcheck_worker.js", [languages.join(";")])) -1;
 		

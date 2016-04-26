@@ -9,6 +9,18 @@
 
 "use strict";
 
+const runtime = function is_nwjs() {
+	try{
+		return (typeof require('nw.gui') !== "undefined");
+	} catch (e){
+		return false;
+	}
+} ? "nw.js" : "browser";
+
+
+
+Error.stackTraceLimit = Infinity;
+
 
 // Global constants
 const SHIFT = 1;
@@ -149,6 +161,7 @@ function getFilenameFromPath(path) {
 }
 
 function isFilePath(filePath) {
+	var fs = require("fs");
 	try {
 		var stat = fs.lstatSync(filePath);
 		return stat.isFile();
@@ -163,6 +176,7 @@ function getFileExtension(filePath) {
 }
 
 function isFolderPath(path) {
+	var fs = require("fs");
 	try {
 		var stat = fs.lstatSync(path);
 		return stat.isDirectory();

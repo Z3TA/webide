@@ -3111,6 +3111,7 @@
 		}
 		*/
 		
+		var fs = require("fs");
 		var stream = fs.createReadStream(file.path, options);
 		stream.setEncoding('utf8');
 		
@@ -3152,6 +3153,7 @@
 			var chunk;
 			var lineBreaks = 0;
 			var str = "";
+			var StringDecoder = require('string_decoder').StringDecoder;
 			var decoder = new StringDecoder('utf8');
 			//var chunkSize = 512; // How many bytes to recive in each chunk
 			
