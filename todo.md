@@ -16,6 +16,11 @@ What I'm working on:
 
 Support for running the editor in a browser!? why? For showcasing the editor. So they don't have to "download" it.
 
+http-server .
+
+about.txt: An indroduction to the editor
+tutorial.txt: Learn how to use it
+
 Spellchecker can be run as a service.
 
 
