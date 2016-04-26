@@ -14,8 +14,9 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Fixing stuff needed for a beta release:
-* Fix some bugs (like the one you get when closing the editor)
+Support for running the editor in a browser!? why? For showcasing the editor. So they don't have to "download" it.
+
+Spellchecker can be run as a service.
 
 
 

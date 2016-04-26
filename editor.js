@@ -66,6 +66,14 @@ editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
+editor.runtime = function is_nwjs() {
+	try{
+		return (typeof require('nw.gui') !== "undefined");
+	} catch (e){
+		return false;
+	}
+} ? "nw.js" : "browser";
+
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 

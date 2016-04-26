@@ -48,10 +48,16 @@
 		* Less keyboard typing ... Neglectable
 		* Smaller file size ... Use a minifier
 		
-		Arguments for havin many var declarations:
+		Arguments for having many var declarations:
 		* Easier to remove/reorder
 		* Looks better in SCM commits when you remove/add
 		* Less prone to errors (important!)
+		
+		
+		
+		What about indentation inside parentheses?
+		Have not decided yet, it's fairly uncommon to have line breaks inside a function call or function arguments,
+		and in that case you should probably make the argument's into an array instead.
 		
 	*/
 
