@@ -27,8 +27,50 @@
 		
 	*/
 	
+	editor.addTest(function indentArrInJson(callback) {
+		editor.openFile("indent_arr_in_json.js", '{\nlabel: "foo",\ndatasets: [\n{\nname: "Adam"\n},\n{\nname: "Eve"\n}\n]\n};\n', function(file) {
+			
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 2) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 3) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 2) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			if(grid[6].indentation != 2) throw new Error("grid[6].indentation=" + grid[6].indentation);
+			if(grid[7].indentation != 3) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+			if(grid[8].indentation != 2) throw new Error("grid[8].indentation=" + grid[8].indentation);
+			if(grid[9].indentation != 1) throw new Error("grid[9].indentation=" + grid[9].indentation);
+			if(grid[10].indentation != 0) throw new Error("grid[10].indentation=" + grid[10].indentation);
+
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
 	
-	
+	editor.addTest(function indentVarObj(callback) {
+		editor.openFile("indent_var_obj.js", 'var data = {\nobj1: {\nname: "Adam"\n},\nobj2: {\nname: "Eve"\n}\n};\n', function(file) {
+			
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 2) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
+			if(grid[7].indentation != 0) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	editor.addTest(function noRegExpInHtmlComment(callback) {
 		editor.openFile("noRegExpInHtmlComment.htm", '<img src="foo"/><!-- comment -->', function(file) {
@@ -42,7 +84,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function scriptTagInHtmlMode(callback) {
 		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n<!-- foo -->\n</div>\n', function(file) {

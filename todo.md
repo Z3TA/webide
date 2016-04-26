@@ -15,8 +15,7 @@ Use hg mv to move/rename files!
 What I'm working on:
 
 Fixing stuff needed for a beta release:
-* Install script
-* Release script
+* Fix some bugs (like the one you get when closing the editor)
 
 
 
