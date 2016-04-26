@@ -7,8 +7,8 @@
 			quotes
 			comments
 			globalVariables
-	blockMatch = true|false (if there are as many { as there are }
-		xmlTags
+			blockMatch = true|false (if there are as many { as there are }
+			xmlTags
 		
 	
 		Goals: 
@@ -25,6 +25,33 @@
 		after accessing string like an array (char = text.charAt(charIndex); vs char = text[charIndex];): 21-31ms (no improvement)
 		
 		
+		
+		About var declarations: They will not be indented, witch will encurage you to write:
+		var a, b, c;
+		var a;
+		var b;
+		var c;
+		
+		instead of:
+		var a,
+			b,
+			b;
+		
+		var foo = {
+		},
+		bar = 1;
+		
+		see: http://benalman.com/news/2012/05/multiple-var-statements-javascript/
+		
+		Arguments for only having one var declaration:
+		* Faster parsing ... Neglectable
+		* Less keyboard typing ... Neglectable
+		* Smaller file size ... Use a minifier
+		
+		Arguments for havin many var declarations:
+		* Easier to remove/reorder
+		* Looks better in SCM commits when you remove/add
+		* Less prone to errors (important!)
 		
 	*/
 
@@ -222,8 +249,9 @@
 			words = [],
 			lastWord = "",
 			insideVariableDeclaration = [],
+			lastVariableDeclarationLine = 0,
 			globalVariables = {},
-			codeBlock = [{word: "", indenttation: 0, line: 0}],
+			codeBlock = [{word: "", indentation: 0, line: 0}],
 			codeBlockRight = 0,
 			codeBlockLeft = 0,
 			insideCodeBlock = false,
@@ -308,8 +336,10 @@
 			
 			/*
 				Entered a new codeblock {
-				
+				The character is always a {
 			*/
+			
+			let parentCodeBlock = codeBlock[codeBlockDepth];
 			
 			codeBlockDepth++;
 			codeBlockLeft++;
@@ -317,7 +347,9 @@
 			
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
-			codeBlock[codeBlockDepth] = {word: lastWord, indenttation: codeBlockDepth, line: lineNumber};
+			if(parentCodeBlock.indentation < 0) throw new Error("parentCodeBlock.indentation=" + parentCodeBlock.indentation);
+			
+			codeBlock[codeBlockDepth] = {word: lastWord, indentation: parentCodeBlock.indentation+1, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
 			insideArray[codeBlockDepth] = false;
 			arrayStart[codeBlockDepth] = -1;
@@ -333,21 +365,17 @@
 			}
 			*/
 			
-			if(insideVariableDeclaration[codeBlockDepth-1]) {
-				codeBlock[codeBlockDepth].indenttation++;
-			}
+			if(codeBlockDepth == 0) throw new Error("codeBlockDepth can not be zero")
 			
 			insideVariableDeclaration[codeBlockDepth] = false;
 			
 			if(codeBlockDepth > 1) {
-				let parent = codeBlock[codeBlockDepth-1];
-					let parentWord = parent.word;
-				let parentLine = parent.line;
 				
-				//if(parentLine == lineNumber) codeBlock[codeBlockDepth].indenttation--;
-				
+				// why only on codeBlockDepth 2 and higher???
+				let parentWord = parentCodeBlock.word;
+
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
-					codeBlock[codeBlockDepth].parent = codeBlock[codeBlockDepth-1];
+					codeBlock[codeBlockDepth].parent = parentCodeBlock;
 				}
 			}
 
@@ -732,9 +760,9 @@
 				
 				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
 				
-				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indenttation + insideVariableDeclaration[codeBlockDepth] + insideBlockComment + openXmlTags);
+				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags);
 				
-				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indenttation=" + codeBlock[codeBlockDepth].indenttation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
+				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
 			}
 
@@ -1320,6 +1348,7 @@
 			// Letters keeps adding to the word ...
 			else if(char == " " && word == "var") {
 				insideVariableDeclaration[codeBlockDepth] = true;
+				lastVariableDeclarationLine = lineNumber;
 				word = "";
 				return;
 			}

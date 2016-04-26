@@ -207,6 +207,7 @@
 		
 	});
 	
+	/*
 	editor.addTest(function indentVarDeclarations(callback) {
 			editor.openFile("indent_var.js", "{\nvar foo,\nbar;\nvar baz = {\nban:ana\n}\nvar bus = {};\n\n}\n", function(file) {
 				
@@ -229,7 +230,7 @@
 			});
 		
 	});
-	
+	*/
 	
 	editor.addTest(function testKeyBindingFunctions(callback) {
 			

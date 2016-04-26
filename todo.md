@@ -136,6 +136,12 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
+Warn if a new line starts with (, [, /, +, ++, or --. 
+(And if there is a line break after return, break or continue.)
+
+
+Allow white space at start of line in block comments
+
 Ignore $ in variables for the spellchecker
 
 Pasing while searching should replace 
