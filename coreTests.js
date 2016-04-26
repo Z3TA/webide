@@ -49,7 +49,7 @@
 			callback(true);
 			
 		});
-	});
+	}, 1);
 	
 	editor.addTest(function indentVarObj(callback) {
 		editor.openFile("indent_var_obj.js", 'var data = {\nobj1: {\nname: "Adam"\n},\nobj2: {\nname: "Eve"\n}\n};\n', function(file) {
@@ -70,7 +70,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function noRegExpInHtmlComment(callback) {
 		editor.openFile("noRegExpInHtmlComment.htm", '<img src="foo"/><!-- comment -->', function(file) {

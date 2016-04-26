@@ -264,6 +264,7 @@
 			codeBlockRightRow = -2,
 			insideArray = [],
 			arrayStart = [],
+			arrayStartRow = 0,
 			arrayItemCount = [],
 			insideParenthesis = [],
 			parenthesisStart = [],
@@ -1058,6 +1059,11 @@
 					
 					//afterPointer[codeBlockDepth] = false; // only endpointer should end it!?
 					arrayStart[codeBlockDepth] = i;
+					
+					codeBlock[codeBlockDepth].indentation++;
+					
+					arrayStartRow = row;
+					
 				}
 				else if(char == "]") {
 					//console.log("End of array=" + insideArray[codeBlockDepth] + " word=" + word + " lastWord=" + lastWord + " leftSide=" + leftSide + " rightSide=" + rightSide + "");
@@ -1068,6 +1074,10 @@
 					
 					insideArray[codeBlockDepth] = false;
 				
+					codeBlock[codeBlockDepth].indentation--;
+					
+					if(file.grid[row].indentation > 0 && arrayStartRow != row) file.grid[row].indentation--;				
+					
 				}
 				else if(char == "}") {
 					/*
