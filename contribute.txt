@@ -1,10 +1,11 @@
 Contributing
 ============
 
-Install Mercurial SCM - https://www.mercurial-scm.org
+Get Mercurial SCM: https://www.mercurial-scm.org
 
-Send any changes to zeta@zetafiles.org,
-with a note: "I give you full (copyright) permission to use this code"
+Send any changes to zeta@zetafiles.org, with a note: 
+"I transfer all copyright for this code to you, including but not limited to the right to sell, and distribute."
+
 
 
 

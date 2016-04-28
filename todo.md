@@ -14,14 +14,8 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Support for running the editor in a browser!? why? For showcasing the editor. So they don't have to "download" it.
-
-http-server .
-
-about.txt: An indroduction to the editor
-tutorial.txt: Learn how to use it
-
-Spellchecker can be run as a service.
+* PHP parser
+* FTP/SFTP
 
 
 
@@ -471,6 +465,10 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 -------
 
+tutorial.txt: Learn how to use it
+
+Smooth scrolling. Show text while scrolling
+
 * Replace in file (using regex)
 
 The JavaScript parser should be able to handle <script>code</script> snippets from other language parsers
@@ -657,6 +655,9 @@ Need though
 Switch SCM from Mercurial to Git because hg lost file changes!?
 
 Moving back to browser for a while, just to fix compatiblity issues. Then move back to nw.js. To make sure it works in the browser too.
+http-server .
+Spellchecker can be run as a service.
+
 
 About trying other runtimes, like native rendering. We should stick with "browser" because getting something to render natively, like openGL is too damn complicated.
 

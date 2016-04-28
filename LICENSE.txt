@@ -24,10 +24,8 @@ Enterprise license
 ------------------
 You are free to use this software for any work, including for profit or business work.
 You are allowed to make changes to the software, without having to submit it, or giving me copyright permission.
-You are allowed to copy and redistribute up to one hundred copies of this software within your company or organisation.
+You are allowed to copy and redistribute up to ten copies of this software within your company or organisation.
 You are Not allowed to distribute any updates (for example bug fixes, new features, or derivative work) outside of your organisation.
-
-
 
 
 
