@@ -47,7 +47,6 @@ return;
 	
 	var newLine = "\n";
 	
-	var WebSocket = require('ws');
 	var client;
 	
 	var showAlertMessage = true;
@@ -69,7 +68,10 @@ return;
 		setTimeout(restart, restartTime);
 	}
 	
-	function wsMessage(data, flags) {
+	function wsMessage(evt) {
+		
+		var data = evt.data;
+		//console.log("data=" + data);
 		
 		var json = JSON.parse(data);
 		var method = json.method;
@@ -123,6 +125,7 @@ return;
 			
 			console.log("Connecting to url=" + url);
 			
+			/*
 			var WebSocket = require('ws');
 			client = new WebSocket(url); // , {protocolVersion: 8, origin: 'http://websocket.org'}
 			
@@ -130,6 +133,17 @@ return;
 			client.on('close', wsClose);
 			client.on('error', wsError);
 			client.on('message', wsMessage);
+			*/
+			
+			// Use native Websocket
+			client = new WebSocket(url);
+			
+			client.onopen = wsOpen;
+			client.onmessage = wsMessage;
+			client.onerror = wsError;
+			client.onclose = wsClose;
+			
+			
 			
 		});
 	}
@@ -189,6 +203,8 @@ return;
 	function captureErrors(json) {
 		
 		var msg = json.params.message;
+		
+		//console.log("msg=" + JSON.stringify(msg));
 		
 		if(msg.level=="error") {
 			

@@ -9,10 +9,10 @@ linkPath = fso.BuildPath(desktopPath, "JZedit.LNK") ' Place link on desktop
 
 Set shortCut = shell.CreateShortcut(linkPath)
 
-shortCut.TargetPath =  fso.BuildPath(workingPath, "start.bat") '"C:\Program Files\MyApp\MyProgram.EXE"
+shortCut.TargetPath =  fso.BuildPath(workingPath, "start.bat")
 '  shortCut.Arguments = ""
 '  shortCut.Description = "JZedit"
-'  shortCut.HotKey = "ALT+CTRL+F"
+'  shortCut.HotKey = "ALT+CTRL+J"
 shortCut.IconLocation = fso.BuildPath(workingPath, "gfx\bean3.ico") '"C:\Program Files\MyApp\MyProgram.EXE, 2"
 '  shortCut.WindowStyle = "1"
 shortCut.WorkingDirectory = workingPath

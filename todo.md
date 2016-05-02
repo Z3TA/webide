@@ -14,7 +14,7 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Install file that creates a shortcut on desktop with the right icon.
+Self debugger. Use native Websocket client!?
 
 * Fix search in file and replace in file
 
@@ -24,6 +24,10 @@ Check if working dir is the same as index.htm on start-up
 
 BUGS
 ====
+
+regexp parse error:
+var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
+asdasd("fooo");
 
 Lots of errors (absolute paths when dragging the folder to nw.exe):
 Uncaught Error: ENOENT: no such file or directory, open 'C:\Users\Z\dev-repositories\js-editor\runtime\nwjs-v0.12.3-win-x64\version.inc'
@@ -146,7 +150,7 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
-Self debugger. Use native Websocket client!?
+
 
 Warn if a new line starts with (, [, /, +, ++, or --. 
 (And if there is a line break after return, break or continue.)
