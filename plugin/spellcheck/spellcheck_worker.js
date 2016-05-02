@@ -13,11 +13,13 @@ process.on('uncaughtException', function (err) {
 var isWin = /^win/.test(process.platform);
 var isLinux = /^linux/.test(process.platform);
 
+var dir = require("dirname") + "/plugin/spellcheck/";
+
 if(isWin) {
-	var Nodehun = require('./nodehun_windows.node');
+	var Nodehun = require(dir + 'nodehun_windows.node');
 }
 else {
-	var Nodehun = require('./nodehun_linux.node');
+	var Nodehun = require(dir + 'nodehun_linux.node');
 }
 
 var dict = [];

@@ -1,0 +1,14 @@
+{
+  "name": "dirname",
+  "version": "1.0.0",
+  "description": "Get the directory of the current file",
+  "main": "dirname.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dirname"
+  ],
+  "author": "Johan Zetterberg",
+  "license": "MIT"
+}

@@ -39,7 +39,7 @@ return;
 	var messageLog = []; // Recent log messages.
 	var maxLogLength = 50;
 	//var baseUrl = "file:///" + __dirname.replace(/\\/g, "/").replace(/\/plugin$/, "/");
-	var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
+	var baseUrl = "file:///" + require("dirname").replace(/\\/g, "/");
 	console.log("baseUrl=" + baseUrl);
 	
 	var padLength = 42;

@@ -14,8 +14,6 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Self debugger. Use native Websocket client!?
-
 * Fix search in file and replace in file
 
 Check if working dir is the same as index.htm on start-up

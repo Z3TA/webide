@@ -15,7 +15,11 @@
 		setTimeout(function () {
 			
 			if(Object.keys(editor.files).length === 0) {
-				editor.openFile("README.txt");
+				
+				
+				var path = require("dirname") + "/README.txt";
+				
+				editor.openFile(path);
 			}
 			
 		}, timer);
