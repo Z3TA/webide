@@ -1,6 +1,6 @@
 
-js-editor / JZeditor
-====================
+JZeditor
+========
 
 This is a text/code editor that specialize in JavaScript, CSS and HTML.
 

@@ -13,10 +13,10 @@ Mercurial SCM: https://www.mercurial-scm.org
 
 Clone the project: 
 cd my-projects (where you want to place the files)
-hg clone http://hg.webtigerteam.com/js-editor/
+hg clone http://hg.webtigerteam.com/JZedit/
 
-Install nodeJS modules: 
-cd js-editor
+Install nodeJS modules:
+cd JZedit
 npm install
 
 
@@ -25,7 +25,7 @@ npm install
 Mercurial commands:
 -------------------
 # Clone the repository/folder
-$ hg clone http://hg.webtigerteam.com/js-editor/ js-editor-new-feature
+$ hg clone http://hg.webtigerteam.com/JZedit/ JZedit-new-feature
 
 # Make sure you are up to date
 $ hg pull

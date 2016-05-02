@@ -188,8 +188,6 @@ return;
 	
 	function captureErrors(json) {
 		
-		// {"method":"Console.messageAdded","params":{"message":{"source":"console-api","level":"log","text":"\"openFiles.length=4\"","timestamp":1458219335.99887,"type":"log","line":361,"column":13,"url":"file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js","executionContextId":1,"parameters":[{"type":"string","value":"openFiles.length=4"}],"stackTrace":[{"functionName":"reopen_files_closeEditor","scriptId":"151","url":"file:///C:/Users/Z/dev-repositories/js-editor/plugin/reopen_files.js","lineNumber":361,"columnNumber":13}]}}}
-		
 		var msg = json.params.message;
 		
 		if(msg.level=="error") {
@@ -298,7 +296,6 @@ return;
 			txt = txt.replace(/\s\s+/g, ' ');
 			
 			// Make proper line breaks
-			// 	ex: at Object.editor.renderNeeded (editor.js:702:23)\n    at mouseMove (file:///C:/Users/Z/dev-repositories/js-editor/plugin/mouse_select.js:509:12)\n    at mouseMove (file:///C:/Users/Z/dev-repositories/js-editor/editor.js:2831:5)
 			txt = txt.replace(/\\n/g, newLine);
 			
 			// Unquote quotes
