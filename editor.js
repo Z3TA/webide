@@ -2218,9 +2218,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		console.log("Starting the editor ...");
 		
 		// Get the commit ID
-		editor.readFromDisk("version.inc", function(string) {
-			editor.version = parseInt(string);
-		});
+		try {
+			editor.readFromDisk("version.inc", function(string) {
+				editor.version = parseInt(string);
+			});
+		}
+		catch(e) {
+			editor.version = "Dev";
+		}
 		
 		canvas = document.getElementById("canvas");
 		

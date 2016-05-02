@@ -1,4 +1,5 @@
 # Get the current version
+node changeset.js
 commit=$(cat version.inc)
 version=1
 beta=_beta
@@ -51,6 +52,10 @@ rm -rf temp/release/windows/
 # Create a tarball and compress it for the Linux release
 tar -zcf temp/release/$name-v$version$beta-c$commit-linux-x64.tar.gz temp/release/linux
 rm -rf temp/release/linux/
+
+# Remove files no longer needed
+rm version.inc
+
 
 # Move the files to www
 
