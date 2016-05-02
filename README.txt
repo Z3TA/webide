@@ -11,12 +11,11 @@ See contribute.txt on how to send your changes.
 Available for Linux, Windows (and soon Mac OS X)
 
 
-How to run
-==========
+Windows
+-------
+Double click (run) start.bat
 
-Windows: Click on the shortcut: JZedit
-
-"install": Copy the shortcut to desktop or start menu.
+"install": Double click (run) create_shortcut.vbs, it will place a shortcut to start.bat on your desktop.
 
 
 Linux:

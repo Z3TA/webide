@@ -14,6 +14,8 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
+Install file that creates a shortcut on desktop with the right icon.
+
 * Fix search in file and replace in file
 
 Check if working dir is the same as index.htm on start-up

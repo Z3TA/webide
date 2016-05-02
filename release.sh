@@ -26,6 +26,9 @@ rm -rf temp/release/linux/release.sh
 rm -rf temp/release/linux/todo.md
 rm -rf temp/release/linux/update_version_hook.py
 
+# Copy over version.inc
+cp version.inc temp/release/linux/
+
 
 # Make a Windows release
 cp -rf temp/release/linux/. temp/release/windows/
@@ -35,7 +38,7 @@ cp -rf temp/release/linux/. temp/release/windows/
 rm -rf temp/release/linux/runtime/nwjs-v0.12.3-win-x64/
 rm -rf temp/release/linux/plugin/spellcheck/nodehun_windows.node
 rm -rf temp/release/linux/start.bat
-rm -rf temp/release/linux/JZedit.lnk
+rm -rf temp/release/linux/create_shortcut.vbs
 
 
 # Clean up the Windows release
@@ -45,8 +48,8 @@ rm -rf temp/release/windows/start.sh
 rm -rf temp/release/windows/JZedit.desktop
 
 # zip and remove the Windows release
-zip -r temp/release/$name-v$version$beta-c$commit-win-x64.zip temp/release/windows
-rm -rf temp/release/windows/
+#zip -r temp/release/$name-v$version$beta-c$commit-win-x64.zip temp/release/windows
+#rm -rf temp/release/windows/
 
 
 # Create a tarball and compress it for the Linux release
