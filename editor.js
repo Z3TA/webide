@@ -1871,7 +1871,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			return false;
 		}
 		
-		if(!editor.files.hasOwnProperty(file.path)) throw new Error("Showing a file that is not open!");
+		if(!editor.files.hasOwnProperty(file.path)) throw new Error("Showing a file that is not open! file.path=" + file.path);
 		
 		if(editor.currentFile) {
 			// Hide current file
