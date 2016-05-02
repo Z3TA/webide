@@ -16,8 +16,6 @@ What I'm working on:
 
 * Fix search in file and replace in file
 
-Check if working dir is the same as index.htm on start-up
-
 
 
 BUGS
