@@ -1,3 +1,7 @@
+
+// Reset from bricket state:
+//window.localStorage.openedFiles = "";
+
 editor.plugin({
 	desc: "Open up the files from last session", 
 	order: 999, // Load after the parser and other stuff that has fileOpen event listener

@@ -1,10 +1,10 @@
 Feature freeze!
 
 Prio: 
-1) Beta release!
-2) Bug/issue fixing and refactoring
-3) Polishing
-4) Optimization (toggle devMode off when testing!)
+
+1) Bug/issue fixing and refactoring
+2) Polishing
+3) Optimization (toggle devMode off when testing!)
 
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
@@ -14,15 +14,23 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-* PHP parser
-* FTP/SFTP
+* Fix search in file and replace in file
 
-
+Check if working dir is the same as index.htm on start-up
 
 
 
 BUGS
 ====
+
+Lots of errors (absolute paths when dragging the folder to nw.exe):
+Uncaught Error: ENOENT: no such file or directory, open 'C:\Users\Z\dev-repositories\js-editor\runtime\nwjs-v0.12.3-win-x64\version.inc'
+Uncaught Error: spell-check worker exit:0
+
+
+Editor not visible !??????
+
+Uncaught Error: getaddrinfo ENOENT localhost:57341
 
 bug: Find in file will not work if the search term is split between chunks
 
@@ -135,6 +143,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 
 Polishing
 =========
+
+Self debugger. Use native Websocket client!?
 
 Warn if a new line starts with (, [, /, +, ++, or --. 
 (And if there is a line break after return, break or continue.)
@@ -464,6 +474,10 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+bash .sh file support/parser
+
+Edit files over ssh
 
 tutorial.txt: Learn how to use it
 

@@ -401,7 +401,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(callback) {
 				callback(file, err); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
-			else {
+			else if(file) {
 				console.log("No callback for file.path=" + file.path);
 			}
 			
@@ -2350,6 +2350,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		*/
+		
 	}
 	
 	function runTests_5616458984153156() { // Random numbers to make sure it's unique

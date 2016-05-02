@@ -1,10 +1,23 @@
 Contributing
 ============
 
-Get Mercurial SCM: https://www.mercurial-scm.org
-
-Send any changes to zeta@zetafiles.org, with a note: 
+Send any changes to zeta@zetafiles.org, with a note:
 "I transfer all copyright for this code to you, including but not limited to the right to sell, and distribute."
+
+
+Get the source code
+-------------------
+Install developer dependencies:
+Mercurial SCM: https://www.mercurial-scm.org
+ NodeJS and NPM: https://nodejs.org/
+
+Clone the project: 
+cd my-projects (where you want to place the files)
+hg clone http://hg.webtigerteam.com/js-editor/
+
+Install nodeJS modules: 
+cd js-editor
+npm install
 
 
 

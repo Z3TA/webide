@@ -55,11 +55,7 @@ Consider using the built in debugger instead of console.log's for debugging!
 
 Once the plugin is finished and all bugs have bean ironed out, leave the (important) console.log's, unless they severely affect performance.
 
-If the editor doesn't start:
-1. Open up package.json in another editor
-2. Change view: true and toolbar: true
-3. Kill all running nw executable's and restart the editor.
-Then you can open the Chromium debugger and see what's wrong.
+
 
 
 
@@ -108,11 +104,34 @@ Making a parser
 
 
 
-Common problems
----------------
+Bricked the editor
+------------------
 
-Problem: The program seems totally "bricked". Not even the HTML loads.
-Solution: This happens if there's a loop somewhere, check the code you last entered.
+1. Open up package.json in another editor
+2. Change view: true and toolbar: true
+3. Kill all running nw executable's and restart the editor.
+Then you can open the Chromium debugger and see what's wrong.
+
+Possible errors ...
+
+The is a loop somewhere, ex: while(true) that never breaks:
+Check the last changed code.
+
+Trying to load files on the network:
+Edit plugin/reopen_files.js and reset the localStorage:
+window.localStorage.openedFiles = "";
+
+Error in Windows/OS: Restart the operating system
+
+
+
+
+
+
+
+
+
+
 
 
 
