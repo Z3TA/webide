@@ -918,10 +918,19 @@
 					}
 					if(insideHTMLComment) throw new Error("WTF");
 				}
+				// Exit out of script
 				else if(insideScriptTag && pastChar[6] == "<" && pastChar[5] == "/" && pastChar[4] == "s" && pastChar[3] == "c" && pastChar[2] == "r" && pastChar[1] == "i" && pastChar[0] == "p" && char == "t") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-7;
+					insideXmlTagEnding = true;
+					insideRegExp = false;
+				}
+				// Exit out of pre
+				else if(insideScriptTag && pastChar[3] == "<" && pastChar[2] == "/" && pastChar[1] == "p" && pastChar[0] == "r" && char == "e") {
+					insideXmlTag = true;
+					xmlTagSelfEnding = false;
+					xmlTagStart = i-4;
 					insideXmlTagEnding = true;
 					insideRegExp = false;
 				}
@@ -939,7 +948,11 @@
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
 					
+					console.log("xmlTag=" + xmlTag);
+					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
+						
+						console.log(xmlTag);
 						
 						if(insideXmlTagEnding) {
 							// Use default xmlMode after script tag ended
@@ -982,7 +995,7 @@
 				
 			}
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " insideXmlTag=" + insideXmlTag + " insideHTMLComment=" + insideHTMLComment);
+			console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " insideXmlTag=" + insideXmlTag + " xmlTag=" + xmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;
