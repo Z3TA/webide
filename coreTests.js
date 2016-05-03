@@ -26,7 +26,22 @@
 		
 		
 	*/
-	
+	editor.addTest(function parseXML(callback) {
+		editor.openFile("parseXML.xml", '<foo>\n<bar></bar>\n</foo>\n', function(file) {
+			
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	editor.addTest(function preHtml(callback) {
 		editor.openFile("preHtml.htm", '<pre></pre>\n<div>\nfoo\n</div>\n', function(file) {
@@ -43,7 +58,7 @@
 		callback(true);
 
 		});
-	}, 1);
+	});
 
 	editor.addTest(function indentArrInJson(callback) {
 		editor.openFile("indent_arr_in_json.js", '{\nlabel: "foo",\ndatasets: [\n{\nname: "Adam"\n},\n{\nname: "Eve"\n}\n]\n};\n', function(file) {

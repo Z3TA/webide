@@ -21,6 +21,15 @@ What I'm working on:
 BUGS
 ====
 
+Linux: keydown for left arrow (37) + ALT+CTRL. No keyDown event!!!
+keyDown: 17 =  lastKeyDown=65 combo={"shift":false,"alt":false,"ctrl":true,"sum":2}
+editor.js:2893 keyDown: 18 =  lastKeyDown=17 combo={"shift":false,"alt":true,"ctrl":true,"sum":6}
+reopen_files.js:499 openFiles.length=9
+editor.js:3041 keyUp: 37 = % combo={"shift":false,"alt":true,"ctrl":true,"sum":6}
+editor.js:3041 keyUp: 18 =  combo={"shift":false,"alt":false,"ctrl":true,"sum":2}
+editor.js:3041 keyUp: 17 =  combo={"shift":false,"alt":false,"ctrl":false,"sum":0}
+
+
 Indent breaks in string concatenation!
 foo = "bar" +
 baz;
@@ -482,6 +491,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 -------
+
+Mark unused variables!
 
 bash .sh file support/parser
 
