@@ -67,7 +67,7 @@ editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 
-	
+
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -554,7 +554,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 			}
 			
-			delete editor.files[file.path]; // Remove all references to the file BEFORE switching to another file
+			delete editor.files[path]; // Remove all references to the file BEFORE switching to another file
+			
+			
+			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
+				if(editor.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor!");
+			}, 10);
 			
 			if(switchTo) {
 				editor.showFile(switchTo);

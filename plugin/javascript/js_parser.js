@@ -948,11 +948,11 @@
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
 					
-					console.log("xmlTag=" + xmlTag);
+					//console.log("xmlTag=" + xmlTag);
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						
-						console.log(xmlTag);
+						//console.log(xmlTag);
 						
 						if(insideXmlTagEnding) {
 							// Use default xmlMode after script tag ended
@@ -995,7 +995,7 @@
 				
 			}
 			
-			console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " insideXmlTag=" + insideXmlTag + " xmlTag=" + xmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " insideXmlTag=" + insideXmlTag + " xmlTag=" + xmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;

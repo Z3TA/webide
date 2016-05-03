@@ -21,6 +21,12 @@ What I'm working on:
 BUGS
 ====
 
+Indent breaks in string concatenation!
+foo = "bar" +
+baz;
+
+Adding a } should fix indentation of all lines below!
+
 regexp parse error:
 var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
 asdasd("fooo");
