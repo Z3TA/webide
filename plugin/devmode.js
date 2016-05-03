@@ -151,8 +151,15 @@
 					throw error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 				}
 				else {
-				//document.location = document.location.href;
-				location.reload();
+					/*
+					for(var file in editor.files) {
+						delete editor.files[file];
+					}
+					*/
+					
+					document.location = "about:blank";
+					document.location = "file:///" + require("dirname") + "/index.htm";
+					//location.reload();
 				}
 			}
 			
