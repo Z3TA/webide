@@ -160,6 +160,9 @@
 					document.location = "about:blank";
 					document.location = "file:///" + require("dirname") + "/index.htm";
 					//location.reload();
+					
+					// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+					
 				}
 			}
 			
