@@ -106,6 +106,8 @@
 		var nextRowIndentation = false;
 		var thisRowIndentation = false;
 		
+		var docType = false;
+		
 		for(var charIndex=0; charIndex<text.length; charIndex++) {
 			
 			// Save a history of the last characters
@@ -204,6 +206,8 @@
 					if(pastChar[0] == "/") {
 						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
+					
+					
 					if(xmlTagWordLength === 0) xmlTagWordLength = charIndex - xmlTagStart;
 					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, charIndex, xmlTagWordLength, xmlTagSelfEnding) );
@@ -226,8 +230,8 @@
 							if(xmlTagLastOpenRow == row) nextRowIndentation = false;
 							
 						}
-						else {
-							// It's a tag opening
+						else if(pastChar[0] != "?") {
+							// It's a tag opening (ignore doc type declaration)
 							openXmlTags++;
 							xmlTagLastOpenRow = row;
 							nextRowIndentation = true;
