@@ -494,11 +494,13 @@
 	
 	function isVbScript(file) {
 		
+		if(file.parsed.language) return false; // Parsed by another parser
+		
 		// console.time("regex detect vbScript");
 		
 		if(file.fileExtension == "vb" || file.fileExtension == "vbs") return true;
 		
-		if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
+		//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
 		
 		return false;
 	}

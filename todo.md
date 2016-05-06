@@ -14,12 +14,16 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-* Fix search in file and replace in file
-
-
 
 BUGS
 ====
+
+pase bug after:
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+
+
+
 
 Linux: keydown for left arrow (37) + ALT+CTRL. No keyDown event!!!
 keyDown: 17 =  lastKeyDown=65 combo={"shift":false,"alt":false,"ctrl":true,"sum":2}

@@ -104,7 +104,22 @@
 		
 		// file.fileExtension == "", Assume all new files are JavaScript files :P
 		
-		if((file.fileExtension == "") || file.fileExtension == "js" || file.fileExtension == "json" || file.fileExtension == "css" || file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "java") {
+		/* 
+			Dilemma: Should we also parse ASP and PHP here!? (Go into vbScript PHP , etc mode when encontering <% or <?PHP)
+			or invoke the JS-parser when we find html and JavaScript inside ASP and PHP!?
+			or just say fuck off ASP and PHP, and other (web) template languages, or languages that treat JavaScript as a second class citizen
+			by including snippets of it instead of separating them in different files.
+			Personally I think it's good practice to separate HTML, CSS, JavaScript, PHP, etc in Different files. Ex: <script src="myscript.js"></script>
+			
+		*/
+		
+		if( file.fileExtension == "" || 
+		file.fileExtension == "js" || 
+		file.fileExtension == "json" || 
+		file.fileExtension == "css" || 
+		file.fileExtension == "htm" || 
+		file.fileExtension == "html" || 
+		file.fileExtension == "java") {
 			return true;
 		}
 		else {
@@ -299,7 +314,8 @@
 		xmlModeBeforeScript = false,
 			textLength = text.length,
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
-			lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
+		lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1),
+		vbScript = false;
 			
 		// -----
 		
@@ -776,7 +792,23 @@
 
 			
 
-			
+			/*
+				### ASP script tags
+				<%
+				...
+				%>
+				
+			*/
+			if(!insideLineComment && !insideDblQuote) {
+				if(pastChar[0] == "<" && char == "%" && file.fileExtension == "asp") { // <%
+					// Is it vbScript?
+					//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
+					vbScript = true;
+				}
+				else if(pastChar[0] == "%" && char == ">" && vbScript) { // %>
+					vbScript = false;
+				}
+			}
 			
 			// ### Quotes and comments ...
 			
