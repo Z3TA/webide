@@ -18,7 +18,7 @@ What I'm working on:
 BUGS
 ====
 
-pase bug after:
+parse bug after:
 
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 

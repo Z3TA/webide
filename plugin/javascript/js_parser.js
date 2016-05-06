@@ -950,6 +950,12 @@
 					}
 					if(insideHTMLComment) throw new Error("WTF");
 				}
+				
+				else if(pastChar[3] == "<" && pastChar[2] == "h" && pastChar[1] == "t" && pastChar[0] == "m" && char == "l") {
+					xmlModeBeforeTag = true; // Turn on HTML mode if we find a html tag
+					insideXmlTag = true;
+					xmlTagStart = i-5;
+				}
 				// Exit out of script
 				else if(insideScriptTag && pastChar[6] == "<" && pastChar[5] == "/" && pastChar[4] == "s" && pastChar[3] == "c" && pastChar[2] == "r" && pastChar[1] == "i" && pastChar[0] == "p" && char == "t") {
 					insideXmlTag = true;
@@ -1027,7 +1033,7 @@
 				
 			}
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " insideXmlTag=" + insideXmlTag + " xmlTag=" + xmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;

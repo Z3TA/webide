@@ -26,6 +26,28 @@
 		
 		
 	*/
+	
+
+	editor.addTest(function htmlTag(callback) {
+		editor.openFile("html", '<html>\n<head>\n<script type="text/javascript">\nfoo = 1;\n</script>\n</head>\n', function(file) {
+// Test if the parser switch to thml mode when a the <html tag is found
+var grid = file.grid;
+
+if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+if(grid[3].indentation != 2) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 0) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			
+editor.closeFile(file.path);
+
+callback(true);
+
+});
+}, 1);
+
+	
 	editor.addTest(function parseXML(callback) {
 		editor.openFile("parseXML.xml", '<foo>\n<bar></bar>\n</foo>\n', function(file) {
 			
@@ -41,7 +63,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function preHtml(callback) {
 		editor.openFile("preHtml.htm", '<pre></pre>\n<div>\nfoo\n</div>\n', function(file) {
