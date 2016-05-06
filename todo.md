@@ -18,13 +18,6 @@ What I'm working on:
 BUGS
 ====
 
-parse bug after:
-
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
-
-
-
-
 Linux: keydown for left arrow (37) + ALT+CTRL. No keyDown event!!!
 keyDown: 17 =  lastKeyDown=65 combo={"shift":false,"alt":false,"ctrl":true,"sum":2}
 editor.js:2893 keyDown: 18 =  lastKeyDown=17 combo={"shift":false,"alt":true,"ctrl":true,"sum":6}
@@ -58,12 +51,6 @@ bug: Find in file will not work if the search term is split between chunks
 bug: When selecting text using shift + mouse click, then clicking again, it sometimes removes the most right character. test ex:
 before fixing it.
 
-When closing the editor:
-
-Uncaught Error: File does not exist in editor.files: path=C:\Users\Z\dev-repositories\js-editor\test\wordwraptest.txt
-array=["C:\\Users\\Z\\dev-repositories\\js-editor\\test\\wordwraptest.txt","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\word_wrap.js","C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js","C:\\Users\\Z\\dev-repositories\\js-editor\\global.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\wordwraptest2.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js"]
-editor.files=["testfile0","testfile1","testresults"]reopen_files.js:607 findBugsreopen_files.js:482 reopen_files_closeEditoreditor.js:2097 (anonymous function)events.js:70 emitNoneevents.js:147 emitwindow_bindings.js:152 Window.init.Window.handleEvent
-
 
 vb_parser: Lots of indention errors (double END IF ??) ex: castSpell.asp
 
@@ -71,13 +58,6 @@ vb_parser: Lots of indention errors (double END IF ??) ex: castSpell.asp
 js_parser doesn't find functions inside arguments for function calls:
 foo(function bar() {
 });
-
-
-
-Uncaught Error: File does not exist in openedFiles list: path=testfile0
-array=["new file"]
-editor.files=["testfile0","testfile1","testresults","new file"]
-
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {

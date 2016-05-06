@@ -2900,8 +2900,8 @@ alert("Testing: " + editor.tests[0].text);
 		// Can't have that or it will mess all native combos. You need to bind to shift|alt|ctrl PLUS something else
 		// Shift <> stopped working
 		
-		if(charCode == charCodeCtrl) return; // Ctrl
-		if(charCode == charCodeAlt) return; // ALT
+		if(charCode == charCodeCtrl) return true; // Ctrl
+		if(charCode == charCodeAlt) return true; // ALT
 		
 		if(combo.alt && combo.shift) {
 			console.warn("Alt + shift is the default for changing keyboard layout in Windows!");
