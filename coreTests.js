@@ -45,7 +45,7 @@ editor.closeFile(file.path);
 callback(true);
 
 });
-}, 1);
+});
 
 	
 	editor.addTest(function parseXML(callback) {

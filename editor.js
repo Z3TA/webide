@@ -2907,6 +2907,8 @@ alert("Testing: " + editor.tests[0].text);
 			console.warn("Alt + shift is the default for changing keyboard layout in Windows!");
 		}
 		
+		// Be aware of OS/shell specific key bindings! If there for example is a Gnome shell keybinding for Ctrl+Alt+Arrow (switiching workspace) the editor wont capture it! (the arrow key)
+		
 		
 		// PS. Alt Gr = Ctrl+Alt
 		// AltGr is the same as hitting Ctrl+ Alt

@@ -3,10 +3,10 @@
 	
 	"use strict";
 	
-	editor.keyBindings.push({charCode: 33, fun: pageUp});
-	editor.keyBindings.push({charCode: 34, fun: pageDown});
-	editor.keyBindings.push({charCode: 35, fun: end});
-	editor.keyBindings.push({charCode: 36, fun: home});
+	editor.keyBindings.push({charCode: 33, combo: 0, fun: pageUp});
+	editor.keyBindings.push({charCode: 34, combo: 0, fun: pageDown});
+	editor.keyBindings.push({charCode: 35, combo: 0, fun: end});
+	editor.keyBindings.push({charCode: 36, combo: 0, fun: home});
 	
 	
 	function pageUp(file, combo, character, charCode, pushDirection) {

@@ -27,17 +27,20 @@
 		editor.on("fileSave", tabFileSave);
 		editor.on("fileShow", tabFileShow);
 		
+		var key_pageUP = 33;
+		var key_pageDown = 34;
+		
 		editor.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 
-		editor.keyBindings.push({charCode: 37, combo: CTRL + ALT, fun: orderLeft}); // Ctrl + alt + left
-		editor.keyBindings.push({charCode: 39, combo: CTRL + ALT, fun: orderRight}); // Ctrl + alt + right
+		editor.keyBindings.push({charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
+		editor.keyBindings.push({charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight}); // Ctrl + alt + right
 		// todo: implement tab drag and drop to change order
 		
 		editor.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
 	}
 	
-	function orderLeft() {
+	function orderTabLeft() {
 		
 		console.log("Orderleft");
 		
@@ -49,7 +52,7 @@
 		
 	}
 	
-	function orderRight() {
+	function orderTabRight() {
 		console.log("Orderright");
 
 		editor.currentFile.order+=1.5;
@@ -354,6 +357,57 @@
 		}
 		
 	}
+	
+	// ## Tests
+	
+	editor.addTest(function changeFileTabOrder(callback) {
+		// Close all open files
+		for(var path in editor.files) {
+			editor.closeFile(path);
+		}
+		
+		// Open test files
+		editor.openFile("dirA/File1", 'File1', function(file) {
+			editor.openFile("dirA/File2", 'File2', function(file) {
+editor.openFile("dirB/File3", 'File3', function(file) {
+			editor.openFile("dirB/File4", 'File4', function(file) {
+				editor.openFile("dirB/File5", 'File5', function(file) {
+					var list;
+					
+							editor.currentFile = editor.files["dirB/File5"];
+					
+					console.log("order=" + editor.currentFile.order);
+					
+					editor.currentFile.order-=1.5;
+					list = editor.sortFileList();
+							if(list[3].path != "dirB/File5") throw new Error("dirB/File5 should be fourh! list=" + JSON.stringify( list.map((file)=>file.path) ));
+					
+					editor.currentFile.order-=1.5;
+					list = editor.sortFileList();
+							if(list[2].path != "dirB/File5") throw new Error("dirB/File5 should be third! list=" + JSON.stringify(list));
+							
+							editor.currentFile.order-=1.5;
+							list = editor.sortFileList();
+							if(list[1].path != "dirB/File5") throw new Error("dirB/File5 should be second! list=" + JSON.stringify(list));
+							
+							editor.currentFile.order-=1.5;
+							list = editor.sortFileList();
+							if(list[0].path != "dirB/File5") throw new Error("dirB/File5 should be first! list=" + JSON.stringify(list));
+							
+					// Close test files
+					for(var path in editor.files) {
+						//editor.closeFile(path);
+					}
+					
+					callback(true);
+					
+				});
+				});
+			});
+		});
+		});
+		
+	}, 1);
 	
 	
 })();
