@@ -102,15 +102,10 @@
 		
 		if(file.parse === false) return;
 		
-		// file.fileExtension == "", Assume all new files are JavaScript files :P
-		
 		/* 
 			Dilemma: Should we also parse ASP and PHP here!? (Go into vbScript PHP , etc mode when encontering <% or <?PHP)
-			or invoke the JS-parser when we find html and JavaScript inside ASP and PHP!?
-			or just say fuck off ASP and PHP, and other (web) template languages, or languages that treat JavaScript as a second class citizen
-			by including snippets of it instead of separating them in different files.
-			Personally I think it's good practice to separate HTML, CSS, JavaScript, PHP, etc in Different files. Ex: <script src="myscript.js"></script>
-			
+			Yes, this is the easiest solution, and we do not have to redo xmlParsing (like we would have to if we had separate plugins)
+			We could argue that PHP scripts should not include html, or JS, but most php scripts probably does.
 		*/
 		
 		if( file.fileExtension == "" || 
