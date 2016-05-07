@@ -1,6 +1,6 @@
 (function() {
 	/*
-	
+		
 		Show open files as tabs.
 		
 		This plugin should be "dumb". Let the editor or other plugins decide what file to open if one is closed
@@ -15,10 +15,10 @@
 	
 	
 	editor.on("start", file_tabs);
-
+	
 	
 	function file_tabs() {
-
+		
 		buildTabs();
 		
 		editor.on("fileOpen", tabFileOpen, 2);
@@ -31,21 +31,102 @@
 		var key_pageDown = 34;
 		
 		editor.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
-
+		
 		editor.keyBindings.push({charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
-		editor.keyBindings.push({charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight}); // Ctrl + alt + right
+		editor.keyBindings.push({charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
 		// todo: implement tab drag and drop to change order
+		
+		editor.keyBindings.push({charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
+		editor.keyBindings.push({charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
+		
+		
 		
 		editor.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
 	}
 	
+	function switchTabLeft() {
+		var list = editor.sortFileList(); // Array sorted by file.order
+		list.sort(sortListByFolder);
+		if(editor.currentFile.order == 0) {
+			editor.showFile(list[list.length-1]); // Show the last file
+		}
+		else if(list.length > 0) {
+			for(var i=0; i<list.length; i++) {
+				if(list[i] == editor.currentFile) break;
+			}
+			editor.showFile(list[i-1]); // Show the file to the left
+		}
+		return false;
+	}
+	
+	function switchTabRight() {
+		var list = editor.sortFileList(); // Array sorted by file.order
+		/*
+for(var i=0; i<list.length; i++) {
+			console.log(i + ": " + list[i].path);
+			}
+		console.log("efter");
+		*/
+		list.sort(sortListByFolder);
+		if(editor.currentFile.order == (list.length-1)) {
+			editor.showFile(list[0]); // Show the first file
+		}
+		else if(list.length > 0) {
+			for(var i=0; i<list.length; i++) {
+				//console.log(i + ": " + list[i].path);
+				if(list[i] == editor.currentFile) break;
+			}
+			console.log(" i=" + i + " / " + (list.length-1));
+			editor.showFile(list[i+1]); // Show the file to the right
+		}
+		return false;
+	}
+	
+	function sortListByFolder(a, b) {
+		var fA = getFolder(a.path);
+		var fB = getFolder(b.path);
+		if(!document.getElementById("tab_folder_" + fA) || !document.getElementById("tab_folder_" + fB) ) {
+			if(a.order > b.order) return 1
+			else if(b.order > a.order) return -1
+			else return 0;
+		}
+		if(fA > fB) return 1 + (a.order-b.order)
+		else if(fB > fA) return -1 +  + (a.order-b.order)
+		else return 0;
+	}
+	
+	function getFolder(path) {
+		var folderSeparator = path.indexOf("\\") > -1 ? "\\" : "/";
+		var folders = path.split(folderSeparator);
+		if(folders.length >= 2) { // foo/bar.txt
+			return folders[folders.length-2];
+		}
+		else {
+			return null;
+		}
+	}
+	
 	function orderTabLeft() {
+		
+		//orderFilesByFolder();
 		
 		console.log("Orderleft");
 		
 		editor.currentFile.order-=1.5;
-
+		/*
+		var currentFileFolder = getFolder(editor.currentFile.path)
+		var folder;
+		if(currentFileFolder) {
+			for(var filePath in editor.files) {
+				folder = getFolder(filePath);
+				if(folder && folder == currentFileFolder) editor.files[filePath].order--;
+			}
+		}
+		else {
+			editor.currentFile.order--;
+		}
+		*/
 		buildTabs(); // sorts again
 		
 		return false;
@@ -54,9 +135,21 @@
 	
 	function orderTabRight() {
 		console.log("Orderright");
-
+		
 		editor.currentFile.order+=1.5;
-
+		/*
+		var currentFileFolder = getFolder(editor.currentFile.path)
+		var folder;
+		if(currentFileFolder) {
+			for(var filePath in editor.files) {
+				folder = getFolder(filePath);
+				if(folder && folder == currentFileFolder) editor.files[filePath].order++;
+			}
+		}
+		else {
+			editor.currentFile.order++;
+		}
+		*/
 		buildTabs(); // sorts again
 		
 		return false;
@@ -372,27 +465,27 @@
 editor.openFile("dirB/File3", 'File3', function(file) {
 			editor.openFile("dirB/File4", 'File4', function(file) {
 				editor.openFile("dirB/File5", 'File5', function(file) {
-					var list;
-					
+							var list;
+							
 							editor.currentFile = editor.files["dirB/File5"];
-					
-					console.log("order=" + editor.currentFile.order);
-					
-					editor.currentFile.order-=1.5;
-					list = editor.sortFileList();
-							if(list[3].path != "dirB/File5") throw new Error("dirB/File5 should be fourh! list=" + JSON.stringify( list.map((file)=>file.path) ));
-					
-					editor.currentFile.order-=1.5;
-					list = editor.sortFileList();
-							if(list[2].path != "dirB/File5") throw new Error("dirB/File5 should be third! list=" + JSON.stringify(list));
+							
+							console.log("order=" + editor.currentFile.order);
 							
 							editor.currentFile.order-=1.5;
 							list = editor.sortFileList();
-							if(list[1].path != "dirB/File5") throw new Error("dirB/File5 should be second! list=" + JSON.stringify(list));
+							if(list[3].path != "dirB/File5") throw new Error("dirB/File5 should be fourh! list=" + JSON.stringify( list.map(function(file){return file.path}) )  );
+					
+					editor.currentFile.order-=1.5;
+					list = editor.sortFileList();
+							if(list[2].path != "dirB/File5") throw new Error("dirB/File5 should be third! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
 							
 							editor.currentFile.order-=1.5;
 							list = editor.sortFileList();
-							if(list[0].path != "dirB/File5") throw new Error("dirB/File5 should be first! list=" + JSON.stringify(list));
+							if(list[1].path != "dirB/File5") throw new Error("dirB/File5 should be second! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
+							
+							editor.currentFile.order-=1.5;
+							list = editor.sortFileList();
+							if(list[0].path != "dirB/File5") throw new Error("dirB/File5 should be first! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
 							
 					// Close test files
 					for(var path in editor.files) {
