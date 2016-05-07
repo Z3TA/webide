@@ -14,7 +14,12 @@ Use hg mv to move/rename files!
 
 What I'm working on:
 
-Integrate cmsJZ!?
+Designing FTP + SFTP support ...
+
+Keycombo to bring up "FTP" control, where you enter server and credentials + working dir (in case you have "admin" view of all dirs)
+
+
+
 
 BUGS
 ====

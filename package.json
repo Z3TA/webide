@@ -16,9 +16,8 @@
 	"version": "1.0.0",
 	"author" : "Johan Zetterberg <zeta@zetafiles.org>", 
 	"dependencies": {
-		//"nodehun" : ">=2.0.8",
-		//"ws" : "^1.0.1"
-	},
+		"ftp" : "^0.3.10"
+		},
 	"repository": {
 		"type": "Mercurial",
 		"url": "http://hg.webtigerteam.com/JZedit/"
