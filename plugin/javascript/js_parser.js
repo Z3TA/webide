@@ -117,6 +117,7 @@
 		file.fileExtension == "js" || 
 		file.fileExtension == "php" || 
 		file.fileExtension == "asp" || 
+		file.fileExtension == "vbs" || 
 		file.fileExtension == "json" || 
 		file.fileExtension == "css" || 
 		file.fileExtension == "htm" || 
@@ -333,6 +334,9 @@
 		
 		
 		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php") xmlMode = true; // Start in xml mode
+		
+		
+		if(file.fileExtension == "vbs") vbScript = true;
 		
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
