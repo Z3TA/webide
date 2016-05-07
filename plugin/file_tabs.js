@@ -489,7 +489,7 @@ editor.openFile("dirB/File3", 'File3', function(file) {
 							
 					// Close test files
 					for(var path in editor.files) {
-						//editor.closeFile(path);
+						editor.closeFile(path);
 					}
 					
 					callback(true);
@@ -500,7 +500,7 @@ editor.openFile("dirB/File3", 'File3', function(file) {
 		});
 		});
 		
-	}, 1);
+	});
 	
 	
 })();

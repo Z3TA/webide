@@ -15,16 +15,15 @@ Use hg mv to move/rename files!
 What I'm working on:
 
 
+
 BUGS
 ====
 
-Linux: keydown for left arrow (37) + ALT+CTRL. No keyDown event!!!
-keyDown: 17 =  lastKeyDown=65 combo={"shift":false,"alt":false,"ctrl":true,"sum":2}
-editor.js:2893 keyDown: 18 =  lastKeyDown=17 combo={"shift":false,"alt":true,"ctrl":true,"sum":6}
-reopen_files.js:499 openFiles.length=9
-editor.js:3041 keyUp: 37 = % combo={"shift":false,"alt":true,"ctrl":true,"sum":6}
-editor.js:3041 keyUp: 18 =  combo={"shift":false,"alt":false,"ctrl":true,"sum":2}
-editor.js:3041 keyUp: 17 =  combo={"shift":false,"alt":false,"ctrl":false,"sum":0}
+parser error:
+document.url = document.url.replace(/\\/g, "/");
+
+document.url = document.url.replace(/\s/g, ""); // Remove white space
+
 
 when selecing 0 in "editor.keyBindings.push({charCode: 33, combo: 0, fun: pageUp});" using shift + keyboard arrows
 Error when running key bound function:Error: Selected box i=0 is not selected! box[0]={"char":"3","index":76,"selected":false,"highlighted":false,"hasCharacter":true,"wave":false,"circle":false,"color":"rgb(0,0,0)","quote":false,"comment":false}
