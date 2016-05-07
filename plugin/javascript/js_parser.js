@@ -115,6 +115,8 @@
 		
 		if( file.fileExtension == "" || 
 		file.fileExtension == "js" || 
+		file.fileExtension == "php" || 
+		file.fileExtension == "asp" || 
 		file.fileExtension == "json" || 
 		file.fileExtension == "css" || 
 		file.fileExtension == "htm" || 
@@ -224,8 +226,7 @@
 	function parseJavaScript(file) {
 
 		/*
-			Todo:
-			 ES6 (fuck you) support!?
+			Todo: ES6  support!?
 		*/
 		
 		console.time("parseJavaScript");
@@ -315,11 +316,23 @@
 			textLength = text.length,
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1),
-		vbScript = false;
+		vbScript = false,
+		ASP = false,
+		PHP = false;
 			
 		// -----
 		
-		if(file.fileExtension == "htm" || file.fileExtension == "html") xmlMode = true; // Start in xml mode
+		
+		// ### vbScript variables
+		var firstLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(0) : file.lineBreak;
+		var insideCondition = false;
+		var afterThen = false;
+		var thisRowIndentation = 0;
+		var nextRowIndentation = false;
+		var afterIf = false;
+		
+		
+		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php") xmlMode = true; // Start in xml mode
 		
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
@@ -767,7 +780,7 @@
 			char = text[charIndex];
 			
 			column++;
-
+			
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
 				// A new line without , exits variable declaration
 				insideVariableDeclaration[codeBlockDepth] = false;
@@ -777,6 +790,7 @@
 			
 			
 			if(char == lastLineBreakCharacter) {
+												
 				lineNumber++;
 				row++;
 				column = 0;
@@ -788,33 +802,13 @@
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
 			}
-
-
 			
-
-			/*
-				### ASP script tags
-				<%
-				...
-				%>
-				
-			*/
-			if(!insideLineComment && !insideDblQuote) {
-				if(pastChar[0] == "<" && char == "%" && file.fileExtension == "asp") { // <%
-					// Is it vbScript?
-					//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
-					vbScript = true;
-				}
-				else if(pastChar[0] == "%" && char == ">" && vbScript) { // %>
-					vbScript = false;
-				}
-			}
 			
 			// ### Quotes and comments ...
 			
 			/*
-			kjjkj
-			
+				kjjkj
+				
 			*/
 			
 			//console.log("insideLineComment="+ insideLineComment);
@@ -836,8 +830,8 @@
 			}
 			
 			if(!xmlMode) {
-			
-			
+				
+				
 				/*
 					### RegExp strings
 					
@@ -853,8 +847,8 @@
 				else if(insideRegExp && char == "/" && lastChar != backSlash) {
 					insideRegExp = false;
 				}
-			
-			
+				
+				
 				// ### Comments: //
 				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp) {
 					insideLineComment = true;
@@ -867,7 +861,7 @@
 					//console.log("Found line comment: " +  text.substring(commentStart, i))
 					return;
 				}
-			
+				
 				// ### Comments: /*   */
 				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment) {
 					insideBlockComment = true;
@@ -887,7 +881,7 @@
 					
 					return;
 				}
-			
+				
 				// ### Quotes: double
 				// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
@@ -905,9 +899,9 @@
 						//console.log("insideDblQuote!");
 					}
 				}
-			
+				
 				// ### Quotes: single
-				else if(char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+				else if(!vbScript && char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 					if(insideSingleQuote) {
 						insideSingleQuote = false;
 						quotes.push(new Quote(quoteStart, i));
@@ -920,12 +914,67 @@
 					}
 				}
 				
+				// ### Single quote is a comment in vbScript
+				else if(vbScript && char == "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment) {
+					insideLineComment = true;
+					commentStart = i-1;
+				}
+				else if(vbScript && char == "\n" && insideLineComment) {
+					insideLineComment = false;
+					comments.push(new Comment(commentStart, i));
+				}
+				
+				
 			}
 			
 			insideQuote = insideDblQuote || insideSingleQuote;
 			insideComment = insideLineComment || insideBlockComment || insideHTMLComment;
 			
 			//console.log("char(" + i + ")=" + char + "  " + insideQuote + " " + insideComment);
+			
+			
+			if(!insideComment && !insideQuote) {
+				
+				
+				// ### PHP script tags <?php ?>
+				if(file.fileExtension == "php") {
+					if(pastChar[3] == "<" &&  pastChar[2] == "?" &&  pastChar[1] == "p" &&  pastChar[0] == "h" && char == "p") { // <?php
+						PHP = true;
+						xmlMode = false;
+						insideXmlTag = false;
+					}
+					else if(pastChar[0] == "?" && char == ">" && PHP) { // ?>
+						PHP = false;
+						xmlMode = true;
+					}
+				}
+				
+				/*
+					### ASP script tags
+					<%
+					...
+					%>
+					
+				*/
+				if(file.fileExtension == "asp") {
+					if(pastChar[0] == "<" && char == "%") { // <%
+						ASP = true;
+						// Is it vbScript?
+						//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
+						vbScript = true;
+						xmlMode = false;
+						insideXmlTag = false;
+					}
+					else if(pastChar[0] == "%" && char == ">" && ASP) { // %>
+						ASP = false;
+						vbScript = false;
+						xmlMode = true;
+					}
+				}
+			}
+			
+			
+			
 			
 			if(!insideComment) {
 				/*
@@ -1042,7 +1091,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insideComment && !xmlMode) {
+			if(!insideQuote && !insideComment && !xmlMode && !ASP && !PHP) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
@@ -1381,6 +1430,153 @@
 						//console.log("1130: Did we find a JSON? (line:" + lineNumber + ")")
 						
 					}
+				}
+				
+			}
+			else if(vbScript) {
+				// ## Parse vbScript
+				// note: If it's ASP and JavaScript is should be all good
+				
+				
+				
+				if(!insideDblQuote && !insideLineComment) {
+					
+					// ### Collect vbScript words
+					
+					if(char == "\n" || char == "\r" || char == " " || char == "\t" || char == ":" || char == ",") {
+										
+						// ### bvScript Variable declarations
+						if(insideVariableDeclaration && char == firstLineBreakCharacter) {
+							insideVariableDeclaration = false;
+							if(word) globalVariables[word] = new Variable();
+						}
+						else if(word == "dim") {
+							insideVariableDeclaration = true;
+							word = "";
+						}
+						else if(word) {
+							
+							if(insideVariableDeclaration) globalVariables[word] = new Variable();
+							
+							// ### IF .. THEN .. ELSE ..
+							else if(word == "if" && lastWord == "end") { // END IF
+								thisRowIndentation--;
+							}
+							else if(word == "if") {
+								afterIf = true; // Inside single line if maybe!?
+								insideCondition = true;
+								nextRowIndentation = true; 
+							}
+							else if(word == "then" && afterIf) {
+								afterThen = true; // If a word comes next; it's a single line if-statement
+							}
+							else if(afterThen) {
+								afterThen = false;
+								// This is a single line if-statement!
+								nextRowIndentation = false; // Cancel out the indentation
+								//console.log("afterThen yo!");
+							}
+							else if(word == "else") {
+								thisRowIndentation--;
+								nextRowIndentation = true; 
+							}
+							else if(word == "elseif") {
+								insideCondition = true;
+								thisRowIndentation--;
+								nextRowIndentation = true
+							}
+							
+							// ### DO ... LOOP
+							else if(word == "do") {
+								nextRowIndentation = true;
+								insideCondition = true;
+							}
+							else if(word == "loop") {
+								thisRowIndentation--;
+								insideCondition = true;
+							}
+							
+							// ### FOR ... NEXT
+							else if(word == "for") {
+								//console.log("for: nextRowIndentation=" + nextRowIndentation);
+								nextRowIndentation = true;
+							}
+							else if(word == "next") {
+								thisRowIndentation--;
+							}
+							
+							// ### CLASS ... END CLASS
+							else if(word == "class" && lastWord == "end") {
+								thisRowIndentation--;
+							}
+							else if(word == "class") {
+								nextRowIndentation = true;
+							}
+							
+							// ### WHILE ... WEND
+							else if(word == "while") {
+								nextRowIndentation = true;
+								insideCondition = true;
+							}
+							else if(word == "wend") {
+								thisRowIndentation--;
+							}
+							
+							// ### SELECT CASE ... END SELECT
+							else if(word == "select" && lastWord == "end") {
+								thisRowIndentation--;
+							}
+							else if(word == "case" && lastWord == "select") {
+								nextRowIndentation = true;
+							}
+							
+							//console.log("line=" + (row+1) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
+							
+							lastWord = word;
+							word = "";
+						}
+						
+					}
+					else {
+						
+						word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
+						
+					}
+				}
+				
+				// ### vbScript Line break
+				if(char == lastLineBreakCharacter) {
+					
+					insideCondition = false;
+					
+					//console.log("--- new line=" + (row+2) + " thisRowIndentation=" + thisRowIndentation + " ---");
+					file.grid[row-1].indentation += Math.max(0, thisRowIndentation);
+					
+					if(nextRowIndentation) {
+						thisRowIndentation++;
+						nextRowIndentation = false;
+					}
+				
+				}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			}
+			else if(PHP) {
+				// ## Parse PHP
+				
+				// PHP looks like C/JavaScript, so we can reuse some functons (for now)
+				if(char == "{") {
+					codeBlockL();
+				}
+				else if(char == "}") {
+					codeBlockR();
 				}
 				
 			}
