@@ -1478,7 +1478,7 @@
 								nextRowIndentation = false; // Cancel out the indentation
 								//console.log("afterThen yo!");
 							}
-							else if(word == "else") {
+							else if(word == "else" && lastWord != "case") {
 								thisRowIndentation--;
 								nextRowIndentation = true; 
 							}
@@ -1524,6 +1524,11 @@
 								thisRowIndentation--;
 							}
 							
+							/*
+								Note: We will not support VB, just VBS!
+								VB for example allows "end while" while you can only end with "wend" in VBS
+							*/
+							
 							// ### SELECT CASE ... END SELECT
 							else if(word == "select" && lastWord == "end") {
 								thisRowIndentation--;
@@ -1539,6 +1544,25 @@
 								thisRowIndentation--;
 							}
 							
+							
+							// ### FUNCTION ... END FUNCTION
+							else if(word == "function" && lastWord == "end") {
+								thisRowIndentation--;
+							}							
+							else if(word == "function") {
+								nextRowIndentation = true;
+							}
+
+							
+							// ### SUB ... END SUB
+							else if(word == "sub" && lastWord == "end") {
+								thisRowIndentation--;
+							}
+							else if(word == "sub") {
+								nextRowIndentation = true;
+							}
+
+														
 							//console.log("line=" + (row) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
 							
 							lastWord = word;
