@@ -112,7 +112,8 @@
 		file.fileExtension == "js" || 
 		file.fileExtension == "php" || 
 		file.fileExtension == "asp" || 
-		file.fileExtension == "vbs" || 
+		file.fileExtension == "vbs" ||  // Visual Basic Script
+		file.fileExtension == "vb" ||   // Visual Basic
 		file.fileExtension == "json" || 
 		file.fileExtension == "css" || 
 		file.fileExtension == "htm" || 
@@ -311,7 +312,7 @@
 		xmlModeBeforeScript = false,
 			textLength = text.length,
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
-		lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1),
+		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
 		ASP = false,
 		PHP = false;
@@ -331,7 +332,7 @@
 		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php") xmlMode = true; // Start in xml mode
 		
 		
-		if(file.fileExtension == "vbs") vbScript = true;
+		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
 		
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
@@ -1090,7 +1091,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insideComment && !xmlMode && !ASP && !PHP) {
+			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
@@ -1436,26 +1437,29 @@
 				// ## Parse vbScript
 				// note: If it's ASP and JavaScript is should be all good
 				
-				
+				//console.log("char=" + char.replace("\r", "<R>").replace("\n", "<N>") + " word=" + word + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " LLC=" + (char == lastLineBreakCharacter) + " FLC=" + (char == firstLineBreakCharacter) + " firstLineBreakCharacter=" + firstLineBreakCharacter.replace("\r", "<R>").replace("\n", "<N>") + " insideVariableDeclaration[codeBlockDepth]=" + insideVariableDeclaration[codeBlockDepth]);
 				
 				if(!insideDblQuote && !insideLineComment) {
 					
 					// ### Collect vbScript words
 					
 					if(char == "\n" || char == "\r" || char == " " || char == "\t" || char == ":" || char == ",") {
-										
-						// ### bvScript Variable declarations
-						if(insideVariableDeclaration && char == firstLineBreakCharacter) {
-							insideVariableDeclaration = false;
+						
+						// ### vbScript Variable declarations
+						if(insideVariableDeclaration[codeBlockDepth] && char == firstLineBreakCharacter) {
+							
+							insideVariableDeclaration[codeBlockDepth] = false;
 							if(word) globalVariables[word] = new Variable();
+							//console.log("New variable found=" + word);
 						}
 						else if(word == "dim") {
-							insideVariableDeclaration = true;
+							insideVariableDeclaration[codeBlockDepth] = true;
 							word = "";
+							//console.log("DIM");
 						}
 						else if(word) {
 							
-							if(insideVariableDeclaration) globalVariables[word] = new Variable();
+							if(insideVariableDeclaration[codeBlockDepth]) globalVariables[word] = new Variable();
 							
 							// ### IF .. THEN .. ELSE ..
 							else if(word == "if" && lastWord == "end") { // END IF
@@ -1529,7 +1533,7 @@
 								nextRowIndentation = true;
 							}
 							
-							//console.log("line=" + (row+1) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
+							//console.log("line=" + (row) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
 							
 							lastWord = word;
 							word = "";
@@ -1540,6 +1544,8 @@
 						
 						word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
 						
+						//console.log("word++" + char);
+						
 					}
 				}
 				
@@ -1548,7 +1554,7 @@
 					
 					insideCondition = false;
 					
-					//console.log("--- new line=" + (row+2) + " thisRowIndentation=" + thisRowIndentation + " ---");
+					//console.log("--- new line=" + (row) + " thisRowIndentation=" + thisRowIndentation + " ---");
 					file.grid[row-1].indentation += Math.max(0, thisRowIndentation);
 					
 					if(nextRowIndentation) {
@@ -1557,12 +1563,6 @@
 					}
 				
 				}
-				
-				
-				
-				
-				
-				
 				
 				
 				
@@ -1579,6 +1579,7 @@
 				}
 				
 			}
+			
 		}
 		
 		
