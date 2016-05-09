@@ -24,6 +24,11 @@ Keycombo to bring up "FTP" control, where you enter server and credentials + wor
 BUGS
 ====
 
+Getting a tag ending when autocompletion something that is no available: ex:
+proc</editor.tests.length;> in editor.js
+
+Don't get auto completion for function arguments!
+
 Indentation in the source files is fubar
 
 parser error:
@@ -158,6 +163,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
+Annoying: When clicking Ctrl+O to open a file and it takes long time for the open the file explorer. Then hits Ctrl+O again several times in frustration.
+Then have to wait until all of them have loaded.
 
 
 Warn if a new line starts with (, [, /, +, ++, or --. 

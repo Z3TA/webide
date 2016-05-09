@@ -2095,6 +2095,33 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
+	editor.connect = function(protocol, serverAddress, user, passw, key) {
+		
+		if(protocol == undefined) throw new Error("No protocol defined!");
+		
+		protocol = protocol.toLowerCase();
+		
+		if(protocol == "ftp") {
+			var Client = require('ftp');
+			var c = new Client();
+			c.on('ready', function() {
+				c.list(function(err, list) {
+					if (err) throw err;
+					console.dir(list);
+					c.end();
+				});
+			});
+			// connect to localhost:21 as anonymous
+			c.connect({host: serverAddress, user: user, password: passw});
+			
+		}
+		else {
+			throw new Error("Protocol not supported: " + protocol);
+}
+		
+}
+	
+	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
 			
