@@ -859,7 +859,6 @@
 					insideLineComment = false;
 					comments.push(new Comment(commentStart, i));
 					//console.log("Found line comment: " +  text.substring(commentStart, i))
-					return;
 				}
 				
 				// ### Comments: /*   */
@@ -1531,6 +1530,13 @@
 							}
 							else if(word == "case" && lastWord == "select") {
 								nextRowIndentation = true;
+							}
+							
+							// ### CASE
+							else if(word == "case") {
+								nextRowIndentation = true;
+								//if(haveCase) thisRowIndentation--;
+								thisRowIndentation--;
 							}
 							
 							//console.log("line=" + (row) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);

@@ -27,7 +27,42 @@
 		
 	*/
 	
-
+	editor.addTest(function vbScriptSelectCase(callback) {
+		editor.openFile("vbscriptselectcaseindentation.vb", "select case foo\ncase 1\nbar(1)\ncase 2\nbar(2)\nend select\n", function(file) {
+			// Also indentate each case in a select case
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 0) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
+	editor.addTest(function vbScriptComments(callback) {
+		editor.openFile("vbscriptcomments.vb", "if foo then\n' comment\ncall bar\nend if\n", function(file) {
+			// There was a bug where a comment in VB scrwed up the indentation ...
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
+	
 	editor.addTest(function htmlTag(callback) {
 		editor.openFile("html", '<html>\n<head>\n<script type="text/javascript">\nfoo = 1;\n</script>\n</head>\n', function(file) {
 // Test if the parser switch to thml mode when a the <html tag is found

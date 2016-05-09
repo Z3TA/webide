@@ -24,6 +24,8 @@ Keycombo to bring up "FTP" control, where you enter server and credentials + wor
 BUGS
 ====
 
+Indentation in the source files is fubar
+
 parser error:
 document.url = document.url.replace(/\\/g, "/");
 
