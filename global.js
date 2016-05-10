@@ -333,7 +333,7 @@ function spacePad(str, padLength) {
 }
 
 function makePathAbsolute(path) {
-	if(path.match(/^.*:\/\//) == null) { // Don't have to make it absolute if it starts with a protocol
+	if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
 		var fspath = require("path");
 		if(!fspath.isAbsolute(path)) {
 			let absolutePath = fspath.resolve(path);

@@ -10,7 +10,7 @@ Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 Write tests (first)!
 Use hg mv to move/rename files!
-
+note: The error should be the first argument in callbacks!
 
 What I'm working on:
 

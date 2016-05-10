@@ -169,7 +169,7 @@ editor.plugin({
 			// Check if the file size and if it exist
 			editor.getFileSizeOnDisk(path, gotFileSize);
 
-			function gotFileSize(fileSizeOnDisk, err) {
+			function gotFileSize(err, fileSizeOnDisk) {
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 

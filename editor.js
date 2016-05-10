@@ -287,7 +287,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
-			editor.getFileSizeOnDisk(path, function gotFileSize(fileSizeInBytes, err) {
+			editor.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 				
 				if(err) {
 					
@@ -425,28 +425,57 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(!callback) throw new Error("Callback not defined!");
 		
-		if(runtime=="browser") {
-			var xhr = new XMLHttpRequest();
-			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
-			xhr.onreadystatechange = function() {
-				if (this.readyState == this.DONE) {
-					callback(parseInt(xhr.getResponseHeader("Content-Length")));
-				}
-			};
-			xhr.send();
+		// Check path for protocol
+		var url = require("url");
+		var parse = url.parse(path);
+		
+		if(parse.protocol == "ftp:") {
+			
+			if(editor.connections.hasOwnProperty(parse.hostname)) {
+				
+				var c = editor.connections[parse.hostname];
+				
+				// Asume the FTP server as support for RFC 3659 "size"
+				c.size(path, function gotFtpFileSize(err, size) {
+					if(err) {
+						callback(err);
+					}
+					else {
+						callback(null, size);
+					}
+				});
+			}
+			else {
+				throw new Error("No connection open to " + parse.hostname + " !");
+}
 		}
 		else {
-			var fs = require("fs");
 			
-			fs.stat(path, checkSize);
+			// It's a normal file path
 			
-			function checkSize(err, stats) {
-				
-				if(err) callback(-1, err)
-				else callback(stats["size"]);
-				
+			if(runtime=="browser") {
+				var xhr = new XMLHttpRequest();
+				xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
+				xhr.onreadystatechange = function() {
+					if (this.readyState == this.DONE) {
+						callback(null, parseInt(xhr.getResponseHeader("Content-Length")));
+					}
+				};
+				xhr.send();
 			}
-		}
+			else {
+				var fs = require("fs");
+				
+				fs.stat(path, checkSize);
+				
+				function checkSize(err, stats) {
+					
+					if(err) callback(err)
+					else callback(null, stats["size"]);
+					
+				}
+			}
+}
 	}
 	
 	editor.doesFileExist = function(path, callback) {
@@ -455,7 +484,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		editor.getFileSizeOnDisk(path, gotSize);
 		
-		function gotSize(size, err) {
+		function gotSize(err, size) {
 			
 			if(err) {
 				if(err.code === 'ENOENT') {
