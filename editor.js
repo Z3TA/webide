@@ -2103,23 +2103,117 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(protocol == "ftp") {
 			var Client = require('ftp');
-			var c = new Client();
+			var c = editor.connections[serverAddress] = new Client();
 			c.on('ready', function() {
-				c.list(function(err, list) {
-					if (err) throw err;
-					console.dir(list);
-					c.end();
+				c.pwd(function(err, dir) {
+					if(err) throw err;
+					editor.workingDirectory = dir;
 				});
+				
 			});
-			// connect to localhost:21 as anonymous
 			c.connect({host: serverAddress, user: user, password: passw});
 			
 		}
 		else {
 			throw new Error("Protocol not supported: " + protocol);
+		}
+		
+	}
+	
+	editor.listFiles = function(pathToFolder, callback) {
+		// Returns all files in a directory
+		
+		if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
+		if(callback == undefined) throw new Error("Need to specity a callback!");
+		
+		/*
+			Try to get the file list in the same format regardless of protocol!
+			
+			type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+			path - string - Full path to file
+			size - float - The size of the entry in bytes.
+			date - Date - The last modified date of the entry.
+			
+			
+		*/
+		
+		var path = require("path");
+		var url = require('url');
+		var parse = url.parse(pathToFolder);
+		
+		if(parse.protocol == "ftp:") {
+			
+			if(editor.connections.hasOwnProperty(parse.hostname)) {
+				
+				var c = editor.connections[parse.hostname];
+				
+				c.list(function readdirFtp(err, folderItems) {
+					if (err) {
+						callback(err);
+					}
+					else {
+						
+						var list = [];
+						for(var i=0; i<folderItems.length; i++) {
+							list.push({type: folderItems[i].type, path: path.join(pathToFolder, folderItems[i].name), size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+						}
+						
+}
+					});
+			}
+			else {
+				callback(new Error("Not connected to " + parse.hostname + "!"));
+			}
+		}
+		else {
+			// Asume it's a normal system file path
+			var fs = require("fs");
+			fs.readdir(pathToFolder, function readdir(err, folderItems) {
+				if(err) {
+					callback(err);
+				}
+				else {
+					var filePath;
+					var list = [];
+					var statCounter = 0;
+					for(var i=0; i<folderItems.length; i++) {
+						
+						stat(path.join(pathToFolder, folderItems[i]));
+						
+					}
+				}
+				
+				function stat(filePath) {
+					fs.stat(filePath, function stat(err, stats) {
+						if(err) callback(err);
+						
+						//console.log("stat: " + stats);
+						
+						var type = "";
+						
+						if(stats.isFile()) {
+							type = "-";
+						}
+						else if(stats.isDirectory()) {
+							type = "d";
+						}
+						
+						list.push({type: type, path: filePath, size: stats.size, date: stats.mtime});
+						
+						statCounter++;
+						
+						if(statCounter==folderItems.length) callback(null, list);
+						
+					});
+				}
+				
+				
+			});
+			
+			
 }
 		
-}
+		}
 	
 	
 	function removeFrom(list, fun) {

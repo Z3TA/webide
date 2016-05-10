@@ -494,7 +494,9 @@ Test if inlining functions in jsParser makes it faster.
 
 
 Feature
--------
+=======
+
+A scrollbar! With text in it, but still thin.
 
 Mark unused variables!
 
@@ -684,6 +686,8 @@ When ctrl+z, move the caret to before the text being removed. For every action, 
 plugin idea: Translate code comments from one language to another. (as a preRender, do not change source)
 
 Printing text (on printer)
+
+Sort paragraphs by column. Ctrl + 1-9, auto detect date
 
 
 
