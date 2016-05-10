@@ -14,7 +14,7 @@
 				
 				if(err) throw err;
 				
-				console.log("fileList=" + JSON.stringify(fileList, null, 2));
+				//console.log("fileList=" + JSON.stringify(fileList, null, 2));
 				
 				// Get the length of the longest path
 				var maxLen = 0;

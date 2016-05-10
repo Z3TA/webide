@@ -139,13 +139,16 @@
 		var totalFiles = 0;
 		var filesSearched = 0;
 		var ext = ["html", "htm", "css", "txt", "md", "js", "", "bat", "sh"];
+		var recursions = 0;
+		var maxRecursion = 10;
+		
 		
 		if (firstRun) {
 			searchDir(searchPath);
 			firstRun = false;
 		} 
 		else {
-			console.log("Searcing files array! length=" + files.length);
+			console.log("Searching files array! length=" + files.length);
 			for (var i=0; i<files.length; i++) {
 				console.log("look: " + files[i]);
 				if(files[i].indexOf(searchString) != -1) {
@@ -156,31 +159,29 @@
 		}
 		
 		function searchDir(currentDirPath) {
-			var filePath;
 			var stat;
-			var fs = require("fs");
-			var path = require("path");
 			
 			console.log("Searching: " + currentDirPath);
 			
-			var folderItems = fs.readdirSync(currentDirPath);
+			console.log("recursions=" + recursions + " maxRecursion=" + maxRecursion);
 			
-			//folderItems.filter(function(file) { return file.substr(-5) === '.html'; })
-			for(var i=0; i<folderItems.length; i++) {
+			if(++recursions > maxRecursion) return;
+			
+			editor.listFiles(currentDirPath, function searchit(err, folderItems) {
 				
-				filePath = path.join(currentDirPath, folderItems[i]);
-				stat = fs.statSync(filePath);
+				if(err) throw err;
 				
-				console.log("What is: " + filePath);
+				console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
 				
-				if (stat.isFile()) {
-					searchFile(filePath, stat);
+				for(var i=0; i<folderItems.length; i++) {
+					if (folderItems[i].type=="-") {
+						searchFile(folderItems[i].path);
+					}
+					else if (folderItems[i].type=="d" && searchSubfolders) {
+						searchDir(folderItems[i].path);
+					}
 				}
-				else if (stat.isDirectory() && searchSubfolders) {
-					searchDir(filePath);
-				}
-				
-			}
+			});
 			
 		}
 		

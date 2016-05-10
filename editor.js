@@ -66,7 +66,7 @@ editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
-
+editor.connections = {}  // Store connections to remote servers (FTP, SSH)
 
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
@@ -282,12 +282,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(text == undefined) {
 			
 			if(runtime!="browser") {
-				var fspath = require("path");
-				if(!fspath.isAbsolute(path)) {
-					let absolutePath = fspath.resolve(path);
-					console.warn("Making path absolute: " + path + " ==> " + absolutePath);
-					path = absolutePath; // Make the path absolute
-				}
+				path = makePathAbsolute(path);
 			}
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
@@ -2105,9 +2100,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var Client = require('ftp');
 			var c = editor.connections[serverAddress] = new Client();
 			c.on('ready', function() {
+				console.log("Connected to FTP server on " + serverAddress + " !");
 				c.pwd(function(err, dir) {
 					if(err) throw err;
-					editor.workingDirectory = dir;
+					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
+					console.log("editor.workingDirectory=" + editor.workingDirectory);
 				});
 				
 			});
@@ -2147,19 +2144,22 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				var c = editor.connections[parse.hostname];
 				
-				c.list(function readdirFtp(err, folderItems) {
-					if (err) {
-						callback(err);
-					}
-					else {
+				if(pathToFolder != editor.workingDirectory) {
+					// First change folder
+					c.cwd(parse.pathname, function changedDir(err) {
 						
-						var list = [];
-						for(var i=0; i<folderItems.length; i++) {
-							list.push({type: folderItems[i].type, path: path.join(pathToFolder, folderItems[i].name), size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+						if(err) {
+							callback(err);
+						}
+						else {
+							ftpListFiles(c)
 						}
 						
-}
 					});
+				}
+				else {
+					ftpListFiles(c);
+				}
 			}
 			else {
 				callback(new Error("Not connected to " + parse.hostname + "!"));
@@ -2211,7 +2211,28 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			});
 			
 			
-}
+		}
+		
+		function ftpListFiles(c) {
+			
+			c.list(function readdirFtp(err, folderItems) {
+				if (err) {
+					callback(err);
+				}
+				else {
+					
+					var list = [];
+					var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
+					var path = "";
+					for(var i=0; i<folderItems.length; i++) {
+						path = slash ? pathToFolder + "/" + folderItems[i].name : pathToFolder + folderItems[i].name;
+						list.push({type: folderItems[i].type, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+					}
+					
+					callback(null, list);
+				}
+			});
+		}
 		
 		}
 	

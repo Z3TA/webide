@@ -42,7 +42,7 @@ if(runtime == "browser") {
 			
 			return arr;
 			
-})()
+		})()
 		
 	};
 }
@@ -318,8 +318,8 @@ function httpPost(urlStr, form, callback) {
 	
 	
 }
-	
-	
+
+
 function spacePad(str, padLength) {
 	
 	if(padLength == undefined) padLength = 42;
@@ -331,8 +331,18 @@ function spacePad(str, padLength) {
 	for(var i=0; i<left; i++) padding += " ";
 	return str + padding;
 }
-	
-	
+
+function makePathAbsolute(path) {
+	if(path.match(/^.*:\/\//) == null) { // Don't have to make it absolute if it starts with a protocol
+		var fspath = require("path");
+		if(!fspath.isAbsolute(path)) {
+			let absolutePath = fspath.resolve(path);
+			console.warn("Making path absolute: " + path + " ==> " + absolutePath);
+			path = absolutePath; // Make the path absolute
+		}
+	}
+	return path;
+}
 		
 	
 	
