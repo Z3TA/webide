@@ -32,7 +32,7 @@ editor.settings = {
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!
 		font: "Consolas, DejaVu Sans Mono, Liberation Mono, monospace",
 		highlightMatchFont: "bold 15px Consolas, DejaVu Sans Mono, Liberation Mono, monospace",
-		highlightMatchFontColor: "rgb(31, 119, 32)",
+		highlightMatchFontColor: "rgb(200, 119, 32)",
 		highlightMissMatchFontColor: "rgb(255, 159, 0)",
 		highlightMatchBackground: "rgb(255, 255, 230)",
 		textColor: "rgb(0,0,0)", // Should be in rgb(0,0,0) format because some functions like to convert and make darker/lighter/transparent
