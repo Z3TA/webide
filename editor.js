@@ -296,6 +296,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						alert("File not found: " + path);
 						
 					}
+					else {
+						throw err;
+					}
 					fileOpenError(err);
 				}
 				else {
@@ -425,45 +428,48 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		if(!callback) throw new Error("Callback not defined!");
 		
-		// Check path for protocol
-		var url = require("url");
-		var parse = url.parse(path);
-		
-		if(parse.protocol == "ftp:") {
-			
-			if(editor.connections.hasOwnProperty(parse.hostname)) {
-				
-				var c = editor.connections[parse.hostname];
-				
-				// Asume the FTP server as support for RFC 3659 "size"
-				c.size(path, function gotFtpFileSize(err, size) {
-					if(err) {
-						callback(err);
-					}
-					else {
-						callback(null, size);
-					}
-				});
-			}
-			else {
-				throw new Error("No connection open to " + parse.hostname + " !");
-}
+		if(runtime=="browser") {
+			var xhr = new XMLHttpRequest();
+			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
+			xhr.onreadystatechange = function() {
+				if (this.readyState == this.DONE) {
+					callback(null, parseInt(xhr.getResponseHeader("Content-Length")));
+				}
+			};
+			xhr.send();
 		}
 		else {
 			
-			// It's a normal file path
+			// Check path for protocol
+			var url = require("url");
+			var parse = url.parse(path);
 			
-			if(runtime=="browser") {
-				var xhr = new XMLHttpRequest();
-				xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
-				xhr.onreadystatechange = function() {
-					if (this.readyState == this.DONE) {
-						callback(null, parseInt(xhr.getResponseHeader("Content-Length")));
-					}
-				};
-				xhr.send();
+			if(parse.protocol == "ftp:") {
+				
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
+					
+					var c = editor.connections[parse.hostname];
+					
+					console.log("Getting file size from FTP server: " + parse.pathname);
+					
+					// Asume the FTP server as support for RFC 3659 "size"
+					c.size(parse.pathname, function gotFtpFileSize(err, size) {
+						if(err) {
+							callback(err);
+						}
+						else {
+							callback(null, size);
+						}
+					});
+				}
+				else {
+					alert("No connection open to " + parse.hostname + " !");
+				}
 			}
 			else {
+				
+				// It's a normal file path
+				
 				var fs = require("fs");
 				
 				fs.stat(path, checkSize);
@@ -474,9 +480,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					else callback(null, stats["size"]);
 					
 				}
+				
 			}
+		}
 }
-	}
 	
 	editor.doesFileExist = function(path, callback) {
 		// An easier method then getFileSizeOnDisk to check if a file exist on disk (add support for other protocols later!?)
@@ -619,43 +626,129 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		// todo: Rename this function, or refactor, because we can also run in the browser!
 		
+		console.log("Reading file: " + path);
+		
+		var fileContent = "";
+		var stream;
+		
+		if(!callback) {
+			throw new Error("No callback defined!");
+		}
+		
 		if(runtime == "nw.js") {
 			var fs = require("fs");
 			
 			console.log("Reading file from disk: " + path);
 			console.log(getStack("Read from disk"));
 			
-			if(!callback) {
-				throw new Error("No callback defined!");
-			}
+			// Check path for protocol
+			var url = require("url");
+			var parse = url.parse(path);
 			
-			if(returnBuffer) {
-				// If no encoding is specified in fs.readFile, then the raw buffer is returned.
+			if(parse.protocol == "ftp:") {
 				
-				fs.readFile(path, function(err, buffer) {
-					if (err) throw err;
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
-					callback(path, buffer);
+					var c = editor.connections[parse.hostname];
 					
-				});
+					console.log("Getting file from FTP server: " + parse.pathname);
+					
+					c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
+						
+						if(err) throw err;
+						
+						console.log("Reading file from FTP ...");
+						
+						console.log(fileReadStream);
+						
+						stream = fileReadStream;
+						
+						stream.setEncoding('utf8');
+						stream.on('readable', readStream);
+						stream.on("end", streamEnded);
+						stream.on("error", streamError);
+						stream.on("close", streamClose);
+						
+					});
+					
+				}
+				else {
+					alert("No connection open to " + parse.hostname + " !");
+				}
 			}
 			else {
-				
-				if(encoding == undefined) encoding = "utf8";
-				fs.readFile(path, encoding, function(err, string) {
-					if (err) throw err;
+				if(returnBuffer) {
+					// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 					
-					callback(path, string);
+					fs.readFile(path, function(err, buffer) {
+						if (err) throw err;
+						
+						callback(path, buffer);
+						
+					});
+				}
+				else {
 					
-				});
+					if(encoding == undefined) encoding = "utf8";
+					fs.readFile(path, encoding, function(err, string) {
+						if (err) throw err;
+						
+						callback(path, string);
+						
+					});
+				}
 			}
-			
 		}
 		else if(runtime == "browser") {
 			getFile(path, function(string, url) {
 				callback(url, string);
 			});
 		}
+		else {
+			throw new Error("Unknown runtime=" + runtime);
+		}
+		
+		// Functions to handle NodeJS ReadableStream's
+		function streamClose() {
+			console.log("Stream closed! path=" + path);
+		}
+		
+		function streamError(err) {
+			console.log("Stream error! path=" + path);
+			throw err;
+		}
+		
+		function streamEnded() {
+			console.log("Stream ended! path=" + path);
+			
+			callback(path, fileContent);
+			
+		}
+		
+		function readStream() {
+			// Called each time there is something comming down the stream
+			
+			var chunk;
+			var str = "";
+			var StringDecoder = require('string_decoder').StringDecoder;
+			var decoder = new StringDecoder('utf8');
+			
+			//var chunkSize = 512; // How many bytes to recive in each chunk
+			
+			console.log("Reading stream ... isPaused=" + stream.isPaused());
+			
+			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
+				
+				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
+				str = decoder.write(chunk);
+				
+				fileContent += str;
+				
+				console.log("Got chunk! str.length=" + str.length + "");
+				
+			}
+		}
+		
 		
 	}
 	

@@ -3056,7 +3056,8 @@
 		
 			options can include start and end values !!!
 			https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
-		
+			
+			todo: Support protocols like FTP ... Or open all files as streams!??!?
 		*/
 		var file = this;
 		

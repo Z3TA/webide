@@ -14,6 +14,11 @@ note: The error should be the first argument in callbacks!
 
 What I'm working on:
 
+Trying to get FTP stream to work!
+
+hmm ... Should all files be opened as streams? ReadableStream 
+
+
 Designing FTP + SFTP support ...
 
 Keycombo to bring up "FTP" control, where you enter server and credentials + working dir (in case you have "admin" view of all dirs)
