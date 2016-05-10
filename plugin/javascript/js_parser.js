@@ -304,6 +304,7 @@
 			willBeJSON = false,
 			willBeJSONValue = false,
 			insideRegExp = false,
+			regExpStart = 0,
 			column = 0,
 			eq = "=",
 			colon = ":",
@@ -842,12 +843,14 @@
 				*/
 				if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag) {
 					insideRegExp = true;
+					regExpStart = i;
 					//console.log("RegExp: line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "/" && lastChar != backSlash) {
 					insideRegExp = false;
+					//console.log("Exit regexp: line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp);
+					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
 				}
-				
 				
 				// ### Comments: //
 				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp) {

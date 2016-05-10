@@ -26,6 +26,18 @@
 		
 		
 	*/
+	editor.addTest(function jsRegExpVsLineComment(callback) {
+		editor.openFile("jsRegExpVsLineComment.js", "if(path.match(/^.*:\\/\\//g) == null)\n", function(file) {
+			
+			if(file.parsed.comments.length > 0) throw new Error("Did not expect any comments!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	
 	editor.addTest(function vbScriptSelectCase(callback) {
 		editor.openFile("vbscriptselectcaseindentation.vb", "select case foo\ncase 1\nbar(1)\ncase 2\nbar(2)\nend select\n", function(file) {
@@ -44,7 +56,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function vbScriptComments(callback) {
 		editor.openFile("vbscriptcomments.vb", "if foo then\n' comment\ncall bar\nend if\n", function(file) {

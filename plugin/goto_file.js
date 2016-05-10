@@ -140,7 +140,7 @@
 		var filesSearched = 0;
 		var ext = ["html", "htm", "css", "txt", "md", "js", "", "bat", "sh"];
 		var recursions = 0;
-		var maxRecursion = 10;
+		var maxRecursion = 10000;
 		
 		
 		if (firstRun) {
