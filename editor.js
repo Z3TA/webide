@@ -2258,11 +2258,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
-	editor.connect = function(protocol, serverAddress, user, passw, key) {
+	editor.connect = function(protocol, serverAddress, user, passw, workingDir, key) {
 		
 		if(protocol == undefined) throw new Error("No protocol defined!");
 		
 		protocol = protocol.toLowerCase();
+		
+		console.log("protocol=" + protocol);
 		
 		if(protocol == "ftp") {
 			var Client = require('ftp');
@@ -2277,11 +2279,88 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 			});
 			c.connect({host: serverAddress, user: user, password: passw});
+		}
+		
+		// note: SSH (shell) not yet supported. Use SFTP instead!
+		else if(protocol == "ssh") {
+			
+			var Client = require('ssh2').Client;
+			
+			var c = editor.connections[serverAddress] = new Client();
+			c.on('ready', function() {
+				console.log('Client :: ready');
+				
+				sshGetWorkingDir(c, function gotSshWorkingDir(dir) {
+					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
+					console.log("editor.workingDirectory=" + editor.workingDirectory);
+				});
+				
+				
+			}).connect({
+				host: serverAddress,
+				port: 22,
+				username: user,
+				password: passw
+			});
+			
+		}
+		else if(protocol == "sftp") {
+			
+			var Client = require('ssh2').Client;
+			
+			var c = new Client();
+			c.on('ready', function() {
+				console.log('Client :: ready');
+				
+				// meh, no built in pwd support in the ssh.sftp module.
+				sshGetWorkingDir(c, function gotSshWorkingDir(dir) {
+					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
+					console.log("editor.workingDirectory=" + editor.workingDirectory);
+					
+					// Initiate "SFTP mode"
+					c.sftp(function(err, sftp) {
+						if (err) throw err;
+						
+						editor.connections[serverAddress] = sftp;
+						
+						console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
+						
+					});
+					});
+				}).connect({
+				host: serverAddress,
+				port: 22,
+				username: user,
+				password: passw
+			});
 			
 		}
 		else {
 			throw new Error("Protocol not supported: " + protocol);
 		}
+		
+		function sshGetWorkingDir(c, cb) {
+			c.exec('pwd', function(err, stream) {
+				if (err) throw err;
+				var dir = "";
+				stream.on('close', function(code, signal) {
+					//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
+					
+					// Chop off the newline character
+					dir = dir.substring(0, dir.length-1);
+					
+					cb(dir);
+					
+					//c.end();
+				}).on('data', function(data) {
+					//console.log('STDOUT: ' + data);
+					dir += data;
+				}).stderr.on('data', function(data) {
+					console.warn('STDERR: ' + data);
+				});
+			});
+		}
+		
 		
 	}
 	
@@ -2307,7 +2386,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var parse = url.parse(pathToFolder);
 		
 		if(parse.protocol == "ftp:") {
-			
+			// ### List files using FTP protocol
 			if(editor.connections.hasOwnProperty(parse.hostname)) {
 				
 				var c = editor.connections[parse.hostname];
@@ -2330,11 +2409,48 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 			}
 			else {
-				callback(new Error("Not connected to " + parse.hostname + "!"));
+				callback(new Error("Not connected to " + parse.hostname + " !"));
 			}
 		}
+		else if(parse.protocol == "sftp:") {
+			// ### List file using SFTP protocol
+			if(editor.connections.hasOwnProperty(parse.hostname)) {
+				
+				var c = editor.connections[parse.hostname];
+				
+				// SFTP can list files in any folder. Se we do not have to make sure the path is the same as the working directory (like with ftp)
+				c.readdir(parse.pathname, function sftpReadDir(err, folderItems) {
+					
+					console.log("Reading folder: " + parse.pathname + " ...");
+					
+					if(err) {
+						callback(err);
+					}
+					else {
+						
+						console.log(JSON.stringify(folderItems, null, 2));
+						
+						var list = [];
+						var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
+						var path = "";
+						for(var i=0; i<folderItems.length; i++) {
+							path = slash ? pathToFolder + "/" + folderItems[i].filename : pathToFolder + folderItems[i].filename;
+							console.log("path=" + path);
+							list.push({type: folderItems[i].longname.substr(0, 1), path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
+						}
+						
+						callback(null, list);
+						
+					}
+					
+				});
+			}
+			else {
+				alert("Not connected to SFTP on " + parse.hostname + " !");
+			}
+}
 		else {
-			// Asume it's a normal system file path
+			// ### List files using "normal" file system
 			var fs = require("fs");
 			fs.readdir(pathToFolder, function readdir(err, folderItems) {
 				if(err) {
@@ -2539,7 +2655,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Starting the editor ...");
 		
-		editor.connect("ftp", "192.168.1.77", "test", "test");
+		editor.connect("sftp", "192.168.1.91", "test", "test");
 		
 		// Get the commit ID
 		var versionPath = require("dirname") + "/version.inc";

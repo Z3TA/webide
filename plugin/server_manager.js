@@ -73,7 +73,10 @@
 	
 	
 	function connect() {
-		editor.connect("FTP", "192.168.1.77", "test", "test");
+		//editor.connect("FTP", "192.168.1.77", "test", "test");
+		//editor.connect("SSH", "192.168.1.91", "test", "test");
+		
+		editor.connect("SFTP", "192.168.1.91", "test", "test");
 	}
 
 })();
