@@ -483,7 +483,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 			}
 		}
-}
+	}
 	
 	editor.doesFileExist = function(path, callback) {
 		// An easier method then getFileSizeOnDisk to check if a file exist on disk (add support for other protocols later!?)
@@ -669,6 +669,16 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						stream.on("error", streamError);
 						stream.on("close", streamClose);
 						
+						// Hmm it seems the FTP module uses "old" streams:
+						var StringDecoder = require('string_decoder').StringDecoder;
+						var decoder = new StringDecoder('utf8');
+						var str;
+						stream.on('data', function(data) {
+							str = decoder.write(data);
+							fileContent += str;
+							console.log('loaded part of the file');
+						});
+						
 					});
 					
 				}
@@ -792,25 +802,61 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		function saveToDisk(file) {
-			var fs = require("fs");
-			fs.writeFile(path, file.text, function(err) {
-				console.log("Attempting saving to disk: " + path + " ...");
+			
+			// Check path for protocol
+			var url = require("url");
+			var parse = url.parse(path);
+			
+			if(parse.protocol == "ftp:") {
 				
-				if(err) {
-					alert("Unable to save file! " + err.message + "\n" + path);
-					console.warn("Unable to save " + path + "!");
-					throw err;
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
+					
+					var c = editor.connections[parse.hostname];
+					
+					var input = new Buffer(file.text, "utf-8");
+					var destPath = parse.pathname;
+					var useCompression = false;
+					
+					c.put(input, destPath, useCompression, function putFtpDone(err) {
+						if(err) throw err;
+						
+						doneSaving();
+						
+					});
+					
 				}
 				else {
-					console.log("The file was successfully saved: " + path + "");
-					
-					file.saved(); // Call functions that listen for save events
-					
-					if(callback) callback();
+					alert("No connection to " + parse.hostname + " !");
 				}
+			}
+			else {
 				
-			});
-		}
+				// Asume local file-system
+				
+				var fs = require("fs");
+				fs.writeFile(path, file.text, function(err) {
+					console.log("Attempting saving to disk: " + path + " ...");
+					
+					if(err) {
+						alert("Unable to save file! " + err.message + "\n" + path);
+						console.warn("Unable to save " + path + "!");
+						throw err;
+					}
+					else {
+						console.log("The file was successfully saved: " + path + "");
+						doneSaving();
+						}
+					
+				});
+			}
+			
+			function doneSaving() {
+				file.saved(); // Call functions that listen for save events
+				
+				if(callback) callback();
+}
+			
+}
 	}
 	
 	
@@ -2492,6 +2538,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//var fs = require("fs");
 		
 		console.log("Starting the editor ...");
+		
+		editor.connect("ftp", "192.168.1.77", "test", "test");
 		
 		// Get the commit ID
 		var versionPath = require("dirname") + "/version.inc";
