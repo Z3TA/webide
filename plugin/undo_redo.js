@@ -86,6 +86,9 @@
 			
 			return false; // Prevent default
 		}
+		else {
+			return true;
+}
 		
 	}
 	
@@ -114,7 +117,9 @@
 			
 			return false; // Prevent default
 		}
-			
+		else {
+			return true;
+		}
 			
 	}
 	

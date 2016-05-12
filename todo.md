@@ -14,9 +14,9 @@ note: The error should be the first argument in callbacks!
 
 What I'm working on:
 
-Trying to get FTP stream to work!
+SFTP support
 
-hmm ... Should all files be opened as streams? ReadableStream 
+hmm ... Should all files be opened as streams!? ReadableStream 
 
 
 Designing FTP + SFTP support ...
