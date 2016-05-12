@@ -4,12 +4,12 @@
 	
 	var serverManager;
 	
-	var default = {
+	var defaultServer = {
 		protocol: "SSH",
 		host: "192.168.1.91",
 		user: "test",
 		pw: "test"
-}
+};
 	
 	editor.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
@@ -62,11 +62,11 @@
 		
 		var FTP = document.createElement("option");
 		FTP.text = "FTP";
-		if(default.protocol=="FTP") FTP.setAttribute("selected", "true");
+		if(defaultServer.protocol=="FTP") FTP.setAttribute("selected", "true");
 		
 		var SFTP = document.createElement("option");
 		SFTP.text = "SFTP";
-		if(default.protocol=="SFTP") SFTP.setAttribute("selected", "true");
+		if(defaultServer.protocol=="SFTP") SFTP.setAttribute("selected", "true");
 		
 		selectProtocol.appendChild(FTP);
 		selectProtocol.appendChild(SFTP);
@@ -77,21 +77,21 @@
 		inputHost.setAttribute("type", "text");
 		inputHost.setAttribute("id", "inputHost");
 		inputHost.setAttribute("class", "inputtext");
-		inputHost.setAttribute("value", default.host);
-		inputHost.setAttribute("size", "12");
+		inputHost.setAttribute("value", defaultServer.host);
+		inputHost.setAttribute("size", "14");
 		
 		var inputUser = document.createElement("input");
 		inputUser.setAttribute("type", "text");
 		inputUser.setAttribute("id", "inputUser");
 		inputUser.setAttribute("class", "inputtext");
-		inputUser.setAttribute("value", default.user);
+		inputUser.setAttribute("value", defaultServer.user);
 		inputUser.setAttribute("size", "12");
 		
 		var inputPw = document.createElement("input");
 		inputPw.setAttribute("type", "password");
 		inputPw.setAttribute("id", "inputPw");
 		inputPw.setAttribute("class", "inputtext");
-		inputPw.setAttribute("value", default.pw);
+		inputPw.setAttribute("value", defaultServer.pw);
 		inputPw.setAttribute("size", "12");
 		
 		var buttonConnect = document.createElement("input");
@@ -101,7 +101,7 @@
 		buttonConnect.setAttribute("value", "Connect");
 		
 		buttonConnect.addEventListener("click", function() {
-			connect(protocol, hostName, login, pw);
+			connect(selectProtocol.options[selectProtocol.selectedIndex].text, inputHost.value, inputUser.value, inputPw.value);
 		}, false);
 		
 		
@@ -112,6 +112,9 @@
 		serverManager.appendChild(inputHost);
 		
 		serverManager.appendChild(labelUser);
+		serverManager.appendChild(inputUser);
+		
+		serverManager.appendChild(labelPw);
 		serverManager.appendChild(inputPw);
 		
 		serverManager.appendChild(buttonConnect);
@@ -121,6 +124,9 @@
 	}
 	
 	function show() {
+		
+		console.log("Show server manager");
+		
 		// Steal focus from the file
 		editor.input = false;
 		serverManager.style.display = "block";

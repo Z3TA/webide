@@ -125,7 +125,7 @@ label {
 	text-shadow: 0px -1px 0px #1f2020;
 }
 
-input[type=text] {
+input[type=text], input[type=password], select.select {
 	border-radius: 2px;
 	border: 1px inset #4a4a4a;
 

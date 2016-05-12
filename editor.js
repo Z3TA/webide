@@ -2748,8 +2748,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Starting the editor ...");
 		
-		editor.connect("sftp", "192.168.1.91", "test", "test");
-		
 		// Get the commit ID
 		var versionPath = require("dirname") + "/version.inc";
 		editor.doesFileExist(versionPath, function(exists) {
