@@ -29,6 +29,16 @@ Keycombo to bring up "FTP" control, where you enter server and credentials + wor
 BUGS
 ====
 
+Parsting string:
+var str = 'ab\'cd'
+
+
+Uncaught Error: parentCodeBlock.indentation=-4:
+[{"foo":"1"},{"foo":"2"},{"foo":"3"}]
+foo|1|2|3^^^@$0|1]|$0|2]|$0|3]]
+{[\1 \a
+
+
 Getting a tag ending when autocompletion something that is no available: ex:
 proc</editor.tests.length;> in editor.js
 
@@ -500,6 +510,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 =======
+
+A scrollbar, for quick indication of how large a file is, and for faster scrolling.
 
 A scrollbar! With text in it, but still thin.
 

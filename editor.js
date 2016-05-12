@@ -463,7 +463,29 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					});
 				}
 				else {
-					alert("No connection open to " + parse.hostname + " !");
+					callback(new Error("Failed to get file size for: " + path + "\nNo connection open to FTP on " + parse.hostname + " !"));
+				}
+			}
+			else if(parse.protocol == "sftp:") {
+				
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
+					
+					var c = editor.connections[parse.hostname];
+					
+					console.log("Getting file size from SFTP server: " + parse.pathname);
+					
+					c.stat(parse.pathname, function gotSftpFileSize(err, stat) {
+						
+						if(err) {
+							callback(err);
+						}
+						else {
+							callback(null, stat.size);
+						}
+					});
+				}
+				else {
+					callback(new Error("Failed to get file size for: " + path + "\nNo connection open to SFTP on " + parse.hostname + " !"));
 				}
 			}
 			else {
@@ -622,6 +644,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		return content;
 	}
 	
+	editor.readFile = function(path, callback) {
+		/* 
+			Returns a readable stream ...
+			
+			We should probably use streams everywhere! So that opening small and large files use the same method.
+		
+		*/
+}
+	
 	
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		// todo: Rename this function, or refactor, because we can also run in the browser!
@@ -683,9 +714,36 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 				}
 				else {
-					alert("No connection open to " + parse.hostname + " !");
+					alert("No connection open to FTP on " + parse.hostname + " !");
 				}
 			}
+			else if(parse.protocol == "sftp:") {
+				
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
+					
+					var c = editor.connections[parse.hostname];
+					
+					console.log("Getting file from SFTP server: " + parse.pathname);
+					
+					var options = {
+						encoding: "utf8"
+}
+					// Could also use sftp.createReadStream
+					c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
+						
+						if(err) throw err;
+						
+						callback(path, buffer.toString("utf8"));
+						
+						
+					});
+					
+				}
+				else {
+					alert("No connection open to SFTP on " + parse.hostname + " !");
+				}
+			}
+			
 			else {
 				if(returnBuffer) {
 					// If no encoding is specified in fs.readFile, then the raw buffer is returned.
@@ -818,7 +876,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					var useCompression = false;
 					
 					c.put(input, destPath, useCompression, function putFtpDone(err) {
-						if(err) throw err;
+						if(err) {
+							alert("Failed to save file: " + file.path + "\n" + err.message);
+							throw err;
+						}
 						
 						doneSaving();
 						
@@ -826,7 +887,32 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 				}
 				else {
-					alert("No connection to " + parse.hostname + " !");
+					alert("Failed to save file: " + file.path + "\nNo connection to FTP on " + parse.hostname + " !");
+				}
+			}
+			if(parse.protocol == "sftp:") {
+				
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
+					
+					var c = editor.connections[parse.hostname];
+					
+					var input = new Buffer(file.text, "utf-8");
+					var destPath = parse.pathname;
+					var options = {encoding: 'utf8'};
+					// Could also use sftp.createWriteStream
+					c.writeFile(destPath, input, options, function sftpWrite(err) {
+						if(err) {
+							alert("Failed to save file: " + file.path + "\n" + err.message);
+							throw err;
+						}
+						console.log("Saved " + destPath + " on SFTP " + parse.hostname);
+						doneSaving();
+						
+					});
+					
+				}
+				else {
+					alert("Failed to save file: " + file.path + "\nNo connection to SFTP on " + parse.hostname + "");
 				}
 			}
 			else {
@@ -2284,54 +2370,26 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// note: SSH (shell) not yet supported. Use SFTP instead!
 		else if(protocol == "ssh") {
 			
-			var Client = require('ssh2').Client;
-			
-			var c = editor.connections[serverAddress] = new Client();
-			c.on('ready', function() {
-				console.log('Client :: ready');
-				
-				sshGetWorkingDir(c, function gotSshWorkingDir(dir) {
-					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
-					console.log("editor.workingDirectory=" + editor.workingDirectory);
-				});
-				
-				
-			}).connect({
-				host: serverAddress,
-				port: 22,
-				username: user,
-				password: passw
-			});
+			sshConnect(function sshConnected(c) {
+				editor.connections[serverAddress] = c;
+});
 			
 		}
 		else if(protocol == "sftp") {
 			
-			var Client = require('ssh2').Client;
-			
-			var c = new Client();
-			c.on('ready', function() {
-				console.log('Client :: ready');
-				
-				// meh, no built in pwd support in the ssh.sftp module.
-				sshGetWorkingDir(c, function gotSshWorkingDir(dir) {
-					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
-					console.log("editor.workingDirectory=" + editor.workingDirectory);
-					
-					// Initiate "SFTP mode"
-					c.sftp(function(err, sftp) {
-						if (err) throw err;
-						
+			sshConnect(function sshConnected(c) {
+				// Initiate "SFTP mode"
+				c.sftp(function(err, sftp) {
+					if (err) {
+						alert("Unable to run SFTP on " + serverAddress + "\n" + err.message);
+						throw err;
+					}
+					else {
 						editor.connections[serverAddress] = sftp;
 						
 						console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
-						
-					});
-					});
-				}).connect({
-				host: serverAddress,
-				port: 22,
-				username: user,
-				password: passw
+					}
+				});
 			});
 			
 		}
@@ -2339,27 +2397,53 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			throw new Error("Protocol not supported: " + protocol);
 		}
 		
-		function sshGetWorkingDir(c, cb) {
-			c.exec('pwd', function(err, stream) {
-				if (err) throw err;
-				var dir = "";
-				stream.on('close', function(code, signal) {
-					//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
-					
-					// Chop off the newline character
-					dir = dir.substring(0, dir.length-1);
-					
-					cb(dir);
-					
-					//c.end();
-				}).on('data', function(data) {
-					//console.log('STDOUT: ' + data);
-					dir += data;
-				}).stderr.on('data', function(data) {
-					console.warn('STDERR: ' + data);
+		
+		function sshConnect(cb) {
+			// Connects to a SSH server and sets the working directory, returns the "connection" in the callback
+			
+			var Client = require('ssh2').Client;
+			
+			var c = new Client();
+			c.on('ready', function() {
+				console.log('Client :: ready');
+				
+				c.exec('pwd', function(err, stream) {
+					if (err) throw err;
+					var dir = "";
+					stream.on('close', function(code, signal) {
+						//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
+						
+						// Chop off the newline character
+						dir = dir.substring(0, dir.length-1);
+						
+						editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
+						console.log("editor.workingDirectory=" + editor.workingDirectory);
+						
+						cb(c);
+						
+						//c.end();
+					}).on('data', function(data) {
+						//console.log('STDOUT: ' + data);
+						dir += data;
+					}).stderr.on('data', function(data) {
+						alert("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
+						console.warn('STDERR: ' + data);
+					});
 				});
+				
+			}).on('error', function(err) {
+				alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
+				throw err;
+				
+			}).connect({
+				host: serverAddress,
+				port: 22,
+				username: user,
+				password: passw
 			});
 		}
+		
+		
 		
 		
 	}
