@@ -2493,7 +2493,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				}
 			}
 			else {
-				callback(new Error("Not connected to " + parse.hostname + " !"));
+				callback(new Error("Unable to read " + parse.pathname + " on " + parse.hostname + "\nNot connected to FTP on " + parse.hostname + " !"));
 			}
 		}
 		else if(parse.protocol == "sftp:") {
@@ -2502,8 +2502,13 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				var c = editor.connections[parse.hostname];
 				
-				// SFTP can list files in any folder. Se we do not have to make sure the path is the same as the working directory (like with ftp)
-				c.readdir(parse.pathname, function sftpReadDir(err, folderItems) {
+				console.log("Initiating folder read on SFTP " + parse.hostname + ":" + parse.pathname);
+				
+				// SFTP can list files in any folder. So we do not have to make sure the path is the same as the working directory (like with ftp)
+				// hmm, it seems we can only do readdir once on each folder
+				var b = c.readdir(parse.pathname, function sftpReadDir(err, folderItems) {
+					
+					getStack("XXX");
 					
 					console.log("Reading folder: " + parse.pathname + " ...");
 					
@@ -2511,6 +2516,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						callback(err);
 					}
 					else {
+						
 						
 						console.log(JSON.stringify(folderItems, null, 2));
 						
@@ -2528,9 +2534,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					}
 					
 				});
+				
+				console.log("b=" + b);
+				
 			}
 			else {
-				alert("Not connected to SFTP on " + parse.hostname + " !");
+				callback(new Error("Unable to read " + parse.pathname + " on " + parse.hostname + "\nNot connected to SFTP on " + parse.hostname + " !"));
 			}
 }
 		else {
