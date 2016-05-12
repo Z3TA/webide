@@ -21,10 +21,18 @@ connection manager for ftp/ssh/sftp
 
 
 
+todo: file search btw chunks + replace in files
 
 
 BUGS
 ====
+
+vbScript parser:
+<%
+Function SaveReferer()
+ON ERROR RESUME NEXT
+%>
+
 
 
 bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.
