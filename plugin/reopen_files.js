@@ -174,12 +174,10 @@ editor.plugin({
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 
 				if(err) {
-					if(err.code === 'ENOENT') {
+						//if(err.code === 'ENOENT') {
 						notFound = true;
-					}
-					else {
-						throw err;
-					}
+						//}
+					console.warn(err.message);
 				}
 
 				lastFileState = loadState(path);
@@ -192,7 +190,7 @@ editor.plugin({
 					if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 						// Only ask if we actually have the last state, otherwise just ignore that it's gone.
 						// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
-						if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path);
+							if(lastFileState.isSaved != false) loadLastState = confirm("File not found! (" + err.message + ") Load last saved state? path=: " + path);
 					}
 					// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
 					else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
