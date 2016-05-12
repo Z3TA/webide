@@ -11,17 +11,14 @@ Always use F5 to reload! Or exit functions might not fire!
 Write tests (first)!
 Use hg mv to move/rename files!
 note: The error should be the first argument in callbacks!
+note: Have to close the app and reopen it to reload NodeJS module source!
+note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state. 
+Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-SFTP support
+connection manager for ftp/ssh/sftp
 
-hmm ... Should all files be opened as streams!? ReadableStream 
-
-
-Designing FTP + SFTP support ...
-
-Keycombo to bring up "FTP" control, where you enter server and credentials + working dir (in case you have "admin" view of all dirs)
 
 
 
@@ -29,7 +26,16 @@ Keycombo to bring up "FTP" control, where you enter server and credentials + wor
 BUGS
 ====
 
-Parsting string:
+
+bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.
+
+
+Parsing error:
+var baseUrl = require("dirname").replace(/\\/g, "/");
+console.log("baseUrl=" + baseUrl);
+
+
+Parsing string:
 var str = 'ab\'cd'
 
 
@@ -511,6 +517,8 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 =======
 
+Plugin for exacuting shell commands (both on local and remote/ssh) and get the result from stdout to a file
+
 A scrollbar, for quick indication of how large a file is, and for faster scrolling.
 
 A scrollbar! With text in it, but still thin.
@@ -710,6 +718,9 @@ Sort paragraphs by column. Ctrl + 1-9, auto detect date
 
 Need though
 -----------
+
+hmm ... Should all files be opened as streams!? ReadableStream 
+
 Switch SCM from Mercurial to Git because hg lost file changes!?
 
 Moving back to browser for a while, just to fix compatiblity issues. Then move back to nw.js. To make sure it works in the browser too.

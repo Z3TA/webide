@@ -12,7 +12,8 @@
 	var selectedChild = 0;
 	var firstRun = true;
 	var files = [];
-	
+	var inputFolder;
+	 
 	window.addEventListener("load", gotoFile_init, false);
 
 	function gotoFile_init() {
@@ -22,6 +23,7 @@
 		inputGoto = document.getElementById("inputGoto");
 		gotoButton = document.getElementById("buttonGoto");
 		gotoList = document.getElementById("gotoList");
+		inputFolder = document.getElementById("inputFolder");
 		
 		// Sanity check
 		if(!footer) {
@@ -62,10 +64,21 @@
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
 		
+		inputFolder = document.createElement("input");
+		inputFolder.setAttribute("type", "text");
+		inputFolder.setAttribute("id", "inputFolder");
+		inputFolder.setAttribute("class", "inputtext");
+		inputFolder.setAttribute("value", editor.workingDirectory);
+		inputFolder.setAttribute("size", editor.workingDirectory.length + 3);
+		
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
-		labelGoto.appendChild(document.createTextNode("Goto file/content:")); // Language settings!?
-
+		labelGoto.appendChild(document.createTextNode("File (search):")); // Language settings!?
+		
+		var labelFolder = document.createElement("label");
+		labelFolder.setAttribute("for", "inputFolder");
+		labelFolder.appendChild(document.createTextNode(" in directory:")); // Language settings!?
+		
 		gotoButton = document.createElement("input");
 		gotoButton.setAttribute("type", "button");
 		gotoButton.setAttribute("class", "button");
@@ -88,8 +101,13 @@
 		
 		
 		gotoDiv.appendChild(gotoList);
+		
 		gotoDiv.appendChild(labelGoto);
 		gotoDiv.appendChild(inputGoto);
+		
+		gotoDiv.appendChild(labelFolder);
+		gotoDiv.appendChild(inputFolder);
+		
 		gotoDiv.appendChild(gotoButton);
 		gotoDiv.appendChild(cancelButton);
 		
@@ -101,6 +119,8 @@
 		cancelButton.addEventListener("click", hide_gotoInput, false);
 		
 		inputGoto.addEventListener("keyup", typing, false);
+		
+		inputFolder.addEventListener("keyup", chandingDir, false);
 		
 		gotoInputIsVisible = true;
 		
@@ -123,6 +143,9 @@
 		
 		}
 	
+	function chandingDir() {
+		files.length = 0; // Reset file cache
+	}
 	
 	function search(searchString) {
 		/*
@@ -132,7 +155,7 @@
 		*/
 		
 		
-		var searchPath = editor.workingDirectory;
+		var searchPath = inputFolder.value; //editor.workingDirectory;
 		var maxResults = 20;
 		var matchesFound = 0;
 		var searchSubfolders = true;
@@ -142,8 +165,7 @@
 		var recursions = 0;
 		var maxRecursion = 10000;
 		
-		
-		if (firstRun) {
+		if (firstRun || files.length == 0) {
 			searchDir(searchPath);
 			firstRun = false;
 		} 
@@ -169,8 +191,12 @@
 			
 			editor.listFiles(currentDirPath, function searchit(err, folderItems) {
 				
-				if(err) throw err;
-				
+				if(err) {
+					
+					alert("Error reading folder: " + currentDirPath + "\n" + err.message);
+					return;
+					//throw err;
+				}
 				console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
 				
 				for(var i=0; i<folderItems.length; i++) {
@@ -419,7 +445,7 @@
 	
 	function gotoFile() {
 		
-		if(gotoInputIsVisible) {
+		if(gotoInputIsVisible && !editor.input) {
 			
 			var listItems = gotoList.childNodes;
 			var selectedItem;
@@ -441,8 +467,12 @@
 				
 				editor.openFile(path, undefined, function(file) {
 					
-					console.log("Going to line " + lineNr);
+					//console.log("Going to line " + lineNr);
 					editor.renderNeeded();
+					
+					// Set the working directory to this files's folder
+					editor.workingDirectory = getDirectoryFromPath(path);
+					firstRun = true; // Make it not use cached file's list
 					
 				});
 				
