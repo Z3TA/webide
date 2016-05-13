@@ -192,6 +192,12 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
+Having to delete the line braks when removing large text chunks (spanning many rows) is annoying!
+
+Detect misspelled properties!!!
+
+The quote auto inserted is annoying when quoting from right to left "<-second "<-first
+
 Annoying: When clicking Ctrl+O to open a file and it takes long time for the open the file explorer. Then hits Ctrl+O again several times in frustration.
 Then have to wait until all of them have loaded.
 

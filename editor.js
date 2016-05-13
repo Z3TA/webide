@@ -67,7 +67,7 @@ editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 editor.connections = {}  // Store connections to remote servers (FTP, SSH)
-
+editor.disconnect = {}   // Create a disconnnect function for each connection, can be called by running editor.disconnect[serverName](callback);
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -2361,6 +2361,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					if(err) throw err;
 					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
 					console.log("editor.workingDirectory=" + editor.workingDirectory);
+					
+					// Create disconnect function
+					editor.disconnect[serverAddress] = function() {
+						c.end();
+						delete editor.connections[serverAddress];
+						delete editor.disconnect[serverAddress];
+						};
+					
 					callback(null, editor.workingDirectory);
 				});
 				
@@ -2390,6 +2398,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				else {
 					
 					editor.connections[serverAddress] = c;
+					
+					// Create disconnect function
+					editor.disconnect[serverAddress] = function() {
+						c.end();
+						delete editor.connections[serverAddress];
+						delete editor.disconnect[serverAddress];
+					};
+					
 					callback(null, editor.workingDirectory);
 				}
 			});
@@ -2403,6 +2419,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					// Initiate "SFTP mode"
 					c.sftp(function(err, sftp) {
 						if (err) {
+							c.end();
 							callback(err);
 							//alert("Unable to run SFTP on " + serverAddress + "\n" + err.message);
 							//throw err;
@@ -2410,6 +2427,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						else {
 							editor.connections[serverAddress] = sftp;
 							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
+							
+							// Create disconnect function
+							editor.disconnect[serverAddress] = function() {
+								c.end();
+								delete editor.connections[serverAddress];
+								delete editor.disconnect[serverAddress];
+							};
+							
 							callback(null, editor.workingDirectory);
 						}
 					});
