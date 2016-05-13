@@ -17,8 +17,7 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-connection manager for ftp/ssh/sftp
-
+Integrating cmsjz
 
 
 todo: file search btw chunks + replace in files
