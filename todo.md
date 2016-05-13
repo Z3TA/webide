@@ -525,6 +525,8 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 =======
 
+Argyment helper/autocompleter for callback function. foo(function(what, arguments) {...}); // Who is an async function
+
 Plugin for exacuting shell commands (both on local and remote/ssh) and get the result from stdout to a file
 
 A scrollbar, for quick indication of how large a file is, and for faster scrolling.

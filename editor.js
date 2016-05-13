@@ -2344,7 +2344,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 	}
 	
-	editor.connect = function(protocol, serverAddress, user, passw, workingDir, key) {
+	editor.connect = function(callback, protocol, serverAddress, user, passw, keyPath, workingDir) {
 		
 		if(protocol == undefined) throw new Error("No protocol defined!");
 		
@@ -2361,38 +2361,61 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					if(err) throw err;
 					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
 					console.log("editor.workingDirectory=" + editor.workingDirectory);
+					callback(null, editor.workingDirectory);
 				});
 				
 			});
+			
+			c.on('error', function(err) {
+				callback(err);
+				/*
+					if(err.message == "Login incorrect.") {
+					alert("Problem connecting to FTP on " + serverAddress + "\n" + err.message + "\nProbably wrong username/password!");
+					}
+					else {
+					alert("Problem connecting to FTP on " + serverAddress + "\n" + err.message);
+					}
+					console.error(err);
+				*/
+			});
+			
 			c.connect({host: serverAddress, user: user, password: passw});
 		}
 		
 		// note: SSH (shell) not yet supported. Use SFTP instead!
 		else if(protocol == "ssh") {
 			
-			sshConnect(function sshConnected(c) {
-				editor.connections[serverAddress] = c;
-});
+			sshConnect(function sshConnected(err, c) {
+				if(err) callback(err);
+				else {
+					
+					editor.connections[serverAddress] = c;
+					callback(null, editor.workingDirectory);
+				}
+			});
 			
 		}
 		else if(protocol == "sftp") {
 			
-			sshConnect(function sshConnected(c) {
-				// Initiate "SFTP mode"
-				c.sftp(function(err, sftp) {
-					if (err) {
-						alert("Unable to run SFTP on " + serverAddress + "\n" + err.message);
-						throw err;
-					}
-					else {
-						editor.connections[serverAddress] = sftp;
-						
-						console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
-					}
-				});
+			sshConnect(function sshConnected(err, c) {
+				if(err) callback(err);
+				else {
+					// Initiate "SFTP mode"
+					c.sftp(function(err, sftp) {
+						if (err) {
+							callback(err);
+							//alert("Unable to run SFTP on " + serverAddress + "\n" + err.message);
+							//throw err;
+						}
+						else {
+							editor.connections[serverAddress] = sftp;
+							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
+							callback(null, editor.workingDirectory);
+						}
+					});
+				}
 			});
-			
-		}
+			}
 		else {
 			throw new Error("Protocol not supported: " + protocol);
 		}
@@ -2401,48 +2424,76 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		function sshConnect(cb) {
 			// Connects to a SSH server and sets the working directory, returns the "connection" in the callback
 			
-			var Client = require('ssh2').Client;
-			
-			var c = new Client();
-			c.on('ready', function() {
-				console.log('Client :: ready');
-				
-				c.exec('pwd', function(err, stream) {
-					if (err) throw err;
-					var dir = "";
-					stream.on('close', function(code, signal) {
-						//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
-						
-						// Chop off the newline character
-						dir = dir.substring(0, dir.length-1);
-						
-						editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
-						console.log("editor.workingDirectory=" + editor.workingDirectory);
-						
-						cb(c);
-						
-						//c.end();
-					}).on('data', function(data) {
-						//console.log('STDOUT: ' + data);
-						dir += data;
-					}).stderr.on('data', function(data) {
-						alert("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
-						console.warn('STDERR: ' + data);
-					});
-				});
-				
-			}).on('error', function(err) {
-				alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
-				throw err;
-				
-			}).connect({
+			var auth = {
 				host: serverAddress,
 				port: 22,
 				username: user,
-				password: passw
-			});
+				}
+			
+			if(keyPath) {
+				// Connect using key
+				editor.readFromDisk(keyPath, function readKey(path, keyStr) { // Read key
+					auth.passphrase = passw;
+					auth.privateKey = keyStr;
+					try {
+						connect();
+					}
+					catch(err) {
+						cb(err);
+						//alert("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
+					}
+				});
+			}
+			else {
+				// Connect using password
+				auth.password = passw;
+				connect();
+			}
+			
+			function connect() {
+				var Client = require('ssh2').Client;
+				
+				var c = new Client();
+				c.on('ready', function() {
+					console.log('Client :: ready');
+					
+					c.exec('pwd', function(err, stream) {
+						if (err) throw err;
+						var dir = "";
+						stream.on('close', function(code, signal) {
+							//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
+							
+							// Chop off the newline character
+							dir = dir.substring(0, dir.length-1);
+							
+							editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
+							console.log("editor.workingDirectory=" + editor.workingDirectory);
+							
+							cb(null, c);
+							
+							//c.end();
+						}).on('data', function(data) {
+							//console.log('STDOUT: ' + data);
+							dir += data;
+						}).stderr.on('data', function(data) {
+							cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
+							//alert("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
+							console.warn('STDERR: ' + data);
+						});
+					});
+					
+				}).on('error', function(err) {
+					cb(err);
+					if(err.message == "All configured authentication methods failed") {
+						alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
+					}
+					else {
+						alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
+					}
+					console.error(err);
+				}).connect(auth);
+			}
 		}
-		
 		
 		
 		
@@ -2458,7 +2509,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			Try to get the file list in the same format regardless of protocol!
 			
 			type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
-			path - string - Full path to file
+			name - string - File or folder name
+			path - string - Full path to file/folder
 			size - float - The size of the entry in bytes.
 			date - Date - The last modified date of the entry.
 			
@@ -2508,7 +2560,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				// hmm, it seems we can only do readdir once on each folder
 				var b = c.readdir(parse.pathname, function sftpReadDir(err, folderItems) {
 					
-					getStack("XXX");
+					//getStack("XXX");
 					
 					console.log("Reading folder: " + parse.pathname + " ...");
 					
@@ -2517,16 +2569,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					}
 					else {
 						
-						
-						console.log(JSON.stringify(folderItems, null, 2));
+						//console.log(JSON.stringify(folderItems, null, 2));
 						
 						var list = [];
 						var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
 						var path = "";
 						for(var i=0; i<folderItems.length; i++) {
 							path = slash ? pathToFolder + "/" + folderItems[i].filename : pathToFolder + folderItems[i].filename;
-							console.log("path=" + path);
-							list.push({type: folderItems[i].longname.substr(0, 1), path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
+							//console.log("path=" + path);
+							list.push({type: folderItems[i].longname.substr(0, 1), name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
 						}
 						
 						callback(null, list);
@@ -2535,7 +2586,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 				});
 				
-				console.log("b=" + b);
+				//console.log("b=" + b);
 				
 			}
 			else {
@@ -2553,14 +2604,22 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					var filePath;
 					var list = [];
 					var statCounter = 0;
-					for(var i=0; i<folderItems.length; i++) {
-						
-						stat(path.join(pathToFolder, folderItems[i]));
-						
+					if(folderItems.length == 0) {
+						// It's an emty folder
+						callback(null, list);
 					}
-				}
+					else {
+						for(var i=0; i<folderItems.length; i++) {
+							
+							stat(folderItems[i], path.join(pathToFolder, folderItems[i]));
+							
+						}
+					}
+}
 				
-				function stat(filePath) {
+				function stat(fileName, filePath) {
+					console.log("Making stat: " + filePath + "");
+					
 					fs.stat(filePath, function stat(err, stats) {
 						if(err) callback(err);
 						
@@ -2575,9 +2634,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 							type = "d";
 						}
 						
-						list.push({type: type, path: filePath, size: stats.size, date: stats.mtime});
+						list.push({type: type, name: fileName, path: filePath, size: stats.size, date: stats.mtime});
 						
 						statCounter++;
+						
+						console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
 						
 						if(statCounter==folderItems.length) callback(null, list);
 						

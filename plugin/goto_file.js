@@ -13,7 +13,11 @@
 	var firstRun = true;
 	var files = [];
 	var inputFolder;
-	 
+	var isSearching = false;
+	var searchTimer;
+	var dirsToSearch = [];
+	var dirsSearched = [];
+	
 	window.addEventListener("load", gotoFile_init, false);
 
 	function gotoFile_init() {
@@ -137,10 +141,29 @@
 		
 		var text = inputGoto.value
 		
-		if(text.length > 0) search(text);
+		if(text.length > 0) {
+			trySearch();
+		}
+		else {
+			editor.resizeNeeded();;
+		}
 		
-		editor.resizeNeeded();
-		
+		function trySearch() {
+			if(!isSearching) search(text);
+			else {
+				clearTimeout(searchTimer);
+				var numLeft = (dirsToSearch.length - dirsSearched.length);
+				
+				console.log("Waiting for current search to finish before searching again ... (" + numLeft + " left)");
+				
+				if(numLeft == 1) {
+					for(var i=0; i<dirsToSearch.length; i++) {
+						if(dirsSearched.indexOf(dirsToSearch[i]) == -1) console.log(dirsToSearch[i]);
+					}
+					searchTimer = setTimeout(trySearch, 1500);
+				}
+}
+}
 		}
 	
 	function chandingDir() {
@@ -153,139 +176,141 @@
 			
 			First time, search all dirs, then search files array
 		*/
-		
-		
+		var allDoneCalls = 0;
 		var searchPath = inputFolder.value; //editor.workingDirectory;
 		var maxResults = 20;
 		var matchesFound = 0;
 		var searchSubfolders = true;
 		var totalFiles = 0;
 		var filesSearched = 0;
-		var ext = ["html", "htm", "css", "txt", "md", "js", "", "bat", "sh"];
+		//var ext = ["html", "htm", "css", "txt", "md", "js", "", "bat", "sh"];
 		var recursions = 0;
 		var maxRecursion = 10000;
+		var ignorePaths = [];
+		
+		dirsToSearch.length = 0;
+		dirsSearched.length = 0;
 		
 		if (firstRun || files.length == 0) {
+			isSearching = true;
+			console.log("First run.");
 			searchDir(searchPath);
 			firstRun = false;
 		} 
 		else {
 			console.log("Searching files array! length=" + files.length);
 			for (var i=0; i<files.length; i++) {
-				console.log("look: " + files[i]);
-				if(files[i].indexOf(searchString) != -1) {
-					appendResult(files[i]);
-					if(matchesFound >= maxResults) break; // matchesFound is incremented in appendResult
+				searchFile(files[i]);
+				if(matchesFound >= maxResults) break; // matchesFound is incremented in appendResult
 				}
-			}
+			if(matchesFound == 0) editor.resizeNeeded();
+			allDone();
 		}
 		
 		function searchDir(currentDirPath) {
-			var stat;
 			
-			console.log("Searching: " + currentDirPath);
+			dirsToSearch.push(currentDirPath);
 			
-			console.log("recursions=" + recursions + " maxRecursion=" + maxRecursion);
+			console.log("S directory: " + currentDirPath);
 			
-			if(++recursions > maxRecursion) return;
+			if(++recursions > maxRecursion) {
+				console.warn("recursions=" + recursions + " maxRecursion=" + maxRecursion);
+				dirsSearched.push(currentDirPath);
+				console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
+				if(dirsSearched.length == dirsToSearch.length) {
+					allDone();
+				}
+				else {
+					ignorePaths.push(currentDirPath);
+				}
+				return;
+			}
 			
-			editor.listFiles(currentDirPath, function searchit(err, folderItems) {
+			// Check if it's in a path we should ignore
+			var searchIt = true;
+			for(var j=0; j<ignorePaths.length; j++) {
+				if(currentDirPath.indexOf(ignorePaths[j]) != -1) {
+					console.log("Ignoring path=" + currentDirPath + "\nIt's in: " + ignorePaths[j]);
+					searchIt = false;
+					break;
+				}
+			}
+			if(searchIt) {
 				
-				if(err) {
+				editor.listFiles(currentDirPath, function searchit(err, folderItems) {
 					
-					alert("Error reading folder: " + currentDirPath + "\n" + err.message);
-					return;
-					//throw err;
-				}
-				console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
+					console.log("F directory: " + currentDirPath);
+					
+					dirsSearched.push(currentDirPath);
+					
+					if(err) {
+						console.warn("Error reading folder: " + currentDirPath + "\n" + err.message);
+					}
+					else {
+						//console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
+						
+						for(var i=0; i<folderItems.length; i++) {
+							if (folderItems[i].type=="-") {
+								files.push(folderItems[i].path); // Cache file
+								searchFile(folderItems[i].path);
+							}
+							else if (folderItems[i].type=="d" && searchSubfolders) {
+								if(folderItems[i].name != "temp" && folderItems[i].name != "tmp" && folderItems[i].name.substr(0,1) != ".") { // Do not search in dot files or temp/tmp folders
+									searchDir(folderItems[i].path);
+								}
+							}
+						}
+					}
+					
+					
+					console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
+					if(dirsSearched.length == dirsToSearch.length) { allDone(); };
+					
+				});
 				
-				for(var i=0; i<folderItems.length; i++) {
-					if (folderItems[i].type=="-") {
-						searchFile(folderItems[i].path);
-					}
-					else if (folderItems[i].type=="d" && searchSubfolders) {
-						searchDir(folderItems[i].path);
-					}
-				}
-			});
-			
+			}
+			else {
+				dirsSearched.push(currentDirPath);
+				
+				console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
+if(dirsSearched.length == dirsToSearch.length) { allDone();};
+			}
 		}
 		
 		function searchFile(filePath) {
 			
-			var fileExt = getFileExtension(filePath);
-			var checkit = fileExt == ""; // Always check files with no extension
-			
-			console.log("fileExt=" + fileExt);
-			
-			for(var i=0; i<ext.length; i++) {
-				if(ext[i] == fileExt) {
-					console.log("checkit!");
-					checkit = true; 
-					break;
-				}
-			}
-			
-			if(!checkit) return;
-			
-			files.push(filePath);
-			
 			if(matchesFound < maxResults) {
-			if(filePath.indexOf(searchString) != -1) {
-				appendResult(filePath);
-			}
-			
-			totalFiles++;
-			}
-		}
-		
-		function readFile(filePath) {
-			var fs = require("fs");
-			fs.readFile(filePath, 'utf-8', function(err, contents) {
-				
-				if(err) throw err;
-				
-				console.log("Searching " + filePath);
-				
-				inspectFile(filePath, contents);
-			});
-		}
-		
-		function inspectFile(filePath, contents) {
-			
-			try {
-				if (contents.indexOf(searchString) != -1) {
-					
-					appendResult(filePath, contents);
-					
+				var re = new RegExp(searchString, "ig");
+				var matchArr = filePath.match(re);
+				if(matchArr != null) {
+					appendResult(filePath, matchArr);
 				}
+				
+				totalFiles++;
 			}
-			catch(e) {
-				console.log(e);
-				console.log("filePath=" + filePath);
-				console.log("contents=" + contents);
-			}
-			
-			if(filesSearched++ == totalFiles) {
-				allDone();
-			}
-			
 		}
 		
 		function allDone() {
+			isSearching = false;
 			console.log("Done searching " + totalFiles + " files for '" + searchString + "'");
+			
+			if(++allDoneCalls > 1) throw new Error("allDone() called more then once!");
+			
 			}
 		
-		function appendResult(filePath, lineNr) {
+		function appendResult(filePath, matchArr) {
 			
-			if(lineNr == undefined) lineNr = 0;
+			//if(lineNr == undefined) lineNr = 0;
 			
-			var html = filePath.replace(searchString, "<b>" + searchString + "</b>");
+			var html = filePath;
+			for (var i=0; i<matchArr.length; i++) {
+				html = html.replace(matchArr[i], "<b>" + matchArr[i] + "</b>");
+			}
 			
 			var li = document.createElement("li");
 			li.innerHTML = html;
 			li.setAttribute("path", filePath);
-			li.setAttribute("lineNr", lineNr);
+			//li.setAttribute("lineNr", lineNr);
 			
 			//gotoList.appendChild(li);
 			
