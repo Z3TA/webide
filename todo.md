@@ -193,6 +193,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
+A plus in the tabs to create/open a new file
+
 When auto completing a new function() {} check if it's a lambda or function, to set the caret in the right position.
 
 The undo/redo function needs to be rewritten!

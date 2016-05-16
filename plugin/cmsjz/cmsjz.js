@@ -9,16 +9,23 @@
 	var selectSite;
 	var selectedSite;
 	var editView;
-	var controlVeiw;
+	var controlView;
+	
+	
+	var inputSiteName;
+	var inputSourceFolder;
+	var inputPreviewFolder;
+	var inputPublishFolder;
+	var inputTemplate;
 	
 	
 	var path = require("path");
 	var demoSite = {
 		name: "My simple blog",
-		source: path.join(require("dirname") + "/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-		previw: path.join(require("dirname") + "/demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname") + "/demo/public/"),  // Compiled files for live deployment is sent to this folder
-		template: path.join(require("dirname") + "/demo/template.htm")  // A template for new pages/posts
+		source: path.join(require("dirname") + "/plugin/cmsjz/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
+		preview: path.join(require("dirname") + "/plugin/cmsjz/demo/preview/"), // Compiles files for review is saved here
+		publish: path.join(require("dirname") + "/plugin/cmsjz/demo/public/"),  // Compiled files for live deployment is sent to this folder
+		template: path.join(require("dirname") + "/plugin/cmsjz/demo/template.htm")  // A template for new pages/posts
 	}
 	
 	// Add plugin to editor
@@ -33,12 +40,12 @@
 		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
-		sites = window.localStorage.ssg_sites ? JSON.parse(window.localStorage.ssg_sites) ? [demoSite];
+		sites = window.localStorage.cmsjz_sites ? JSON.parse(window.localStorage.cmsjz_sites) : [demoSite];
 		
 		var keyF9 = 120;
 		var keyEscape = 27;
 		
-		editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL + SHIFT});
+		editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
 		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hide, charCode: keyEscape, combo: 0});
 		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: preview, charCode: keyF9, combo: 0});
 		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
@@ -65,7 +72,7 @@
 		editView.style.display="none";
 		
 		manager.appendChild(editView);
-		manager.appendChild(controlVeiw);
+		manager.appendChild(controlView);
 		
 		footer.appendChild(manager);
 		
@@ -75,7 +82,7 @@
 	function buildControl() {
 		var footer = document.getElementById("footer");
 		
-		controlVeiw = document.createElement("div");
+		controlView = document.createElement("div");
 		
 		selectSite = document.createElement("select");
 		selectSite.setAttribute("id", "selectSite");
@@ -83,7 +90,7 @@
 		
 		if(sites.length > 0) {
 			selectedSite = sites[0];
-			selectSite.forEach(addSiteOption);
+			sites.forEach(addSiteOption);
 		}
 		
 		var labelSite = document.createElement("label");
@@ -96,22 +103,31 @@
 		buttonSetWorkingDirectory.setAttribute("class", "button");
 		buttonSetWorkingDirectory.setAttribute("value", "Set working directory");
 		buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
-		buttonEdit.addEventListener("click", function() {
+		buttonSetWorkingDirectory.addEventListener("click", function() {
 			editor.workingDirectory = selectedSite.source;
+			hide();
+		}, false);
+		
+		var buttonNewPage = document.createElement("input");
+		buttonNewPage.setAttribute("type", "button");
+		buttonNewPage.setAttribute("class", "button");
+		buttonNewPage.setAttribute("value", "New Page");
+		buttonNewPage.addEventListener("click", function() {
+			preview(selectedSite);
 		}, false);
 		
 		var buttonPreview = document.createElement("input");
 		buttonPreview.setAttribute("type", "button");
 		buttonPreview.setAttribute("class", "button");
 		buttonPreview.setAttribute("value", "Preview");
-		buttonEdit.addEventListener("click", function() {
+		buttonPreview.addEventListener("click", function() {
 			preview(selectedSite);
 		}, false);
 		
 		var buttonPublish = document.createElement("input");
 		buttonPublish.setAttribute("type", "button");
 		buttonPublish.setAttribute("class", "button");
-		buttonPublish.setAttribute("value", "Preview");
+		buttonPublish.setAttribute("value", "Publish");
 		buttonPublish.addEventListener("click", function() {
 			publish(selectedSite);
 		}, false);
@@ -119,7 +135,7 @@
 		var buttonSettings = document.createElement("input");
 		buttonSettings.setAttribute("type", "button");
 		buttonSettings.setAttribute("class", "button");
-		buttonSettings.setAttribute("value", "Preview");
+		buttonSettings.setAttribute("value", "Settings");
 		buttonSettings.addEventListener("click", editSiteSettings, false);
 		
 		var buttonCancel = document.createElement("input");
@@ -132,15 +148,268 @@
 			hide();
 		}, false);
 		
+		
+		controlView.appendChild(labelSite); // Includes selectSite
+		controlView.appendChild(buttonSetWorkingDirectory);
+		controlView.appendChild(buttonPreview);
+		controlView.appendChild(buttonPublish);
+		controlView.appendChild(buttonSettings);
+		controlView.appendChild(buttonCancel);
+		
 		function editSiteSettings() {
+			
+			if(!selectedSite) throw new Error("No selected site");
+			
 			editView.style.display="block";
-			connectionView.style.display="none"; // Hide this div
+			controlView.style.display="none"; // Hide this div
+			
+			inputSiteName.value = selectedSite.name;
+			inputSourceFolder.value = selectedSite.source;
+			inputPreviewFolder.value = selectedSite.preview;
+			inputPublishFolder.value = selectedSite.publish;
+			inputTemplate.value = selectedSite.template;
+			
 			editor.resizeNeeded();
 		}
 		
 	}
 	
 	function buildEdit() {
+		
+		var td, tr;
+		
+		editView = document.createElement("table");
+		
+		// Labels
+		
+		var labelName = document.createElement("label");
+		labelName.setAttribute("for", "inputSiteName");
+		labelName.appendChild(document.createTextNode("Alias:")); // Language settings!?
+		
+		var labelSource = document.createElement("label");
+		labelSource.setAttribute("for", "inputSourceFolder");
+		labelSource.appendChild(document.createTextNode("Source files:")); // Language settings!?
+		
+		var labelPreview = document.createElement("label");
+		labelPreview.setAttribute("for", "inputPreviewFolder");
+		labelPreview.appendChild(document.createTextNode("Preview directory:")); // Language settings!?
+		
+		var labelPublish = document.createElement("label");
+		labelPublish.setAttribute("for", "inputPublishFolder");
+		labelPublish.appendChild(document.createTextNode("Publish directory:")); // Language settings!?
+		
+		var labelTemplate = document.createElement("label");
+		labelTemplate.setAttribute("for", "inputTemplate");
+		labelTemplate.appendChild(document.createTextNode("Template file:")); // Language settings!?
+		
+		
+		// Inputs
+		
+		inputSiteName = document.createElement("input");
+		inputSiteName.setAttribute("type", "text");
+		inputSiteName.setAttribute("id", "inputSiteName");
+		inputSiteName.setAttribute("class", "inputtext");
+		inputSiteName.setAttribute("size", "51");
+		
+		inputSourceFolder = document.createElement("input");
+		inputSourceFolder.setAttribute("type", "text");
+		inputSourceFolder.setAttribute("id", "inputSourceFolder");
+		inputSourceFolder.setAttribute("class", "inputtext path");
+		inputSourceFolder.setAttribute("title", "Folder where the source files are located");
+		inputSourceFolder.setAttribute("size", "51");
+		
+		inputPreviewFolder = document.createElement("input");
+		inputPreviewFolder.setAttribute("type", "text");
+		inputPreviewFolder.setAttribute("id", "inputPreviewFolder");
+		inputPreviewFolder.setAttribute("class", "inputtext path");
+		inputPreviewFolder.setAttribute("size", "51");
+		
+		inputPublishFolder = document.createElement("input");
+		inputPublishFolder.setAttribute("type", "text");
+		inputPublishFolder.setAttribute("id", "inputPublishFolder");
+		inputPublishFolder.setAttribute("class", "inputtext path");
+		inputPublishFolder.setAttribute("size", "51");
+		
+		inputTemplate = document.createElement("input");
+		inputTemplate.setAttribute("type", "text");
+		inputTemplate.setAttribute("id", "inputTemplate");
+		inputTemplate.setAttribute("class", "inputtext path");
+		inputTemplate.setAttribute("size", "51");
+		inputTemplate.setAttribute("title", "Template file for new page/post on this site");
+		
+		
+		// Buttons
+		
+		var buttonSave = document.createElement("input");
+		buttonSave.setAttribute("type", "button");
+		buttonSave.setAttribute("class", "button");
+		buttonSave.setAttribute("id", "buttonSave");
+		buttonSave.setAttribute("value", "Save");
+		buttonSave.addEventListener("click", saveSiteSettings, false);
+		
+		var buttonSaveAs = document.createElement("input");
+		buttonSaveAs.setAttribute("type", "button");
+		buttonSaveAs.setAttribute("class", "button");
+		buttonSaveAs.setAttribute("value", "Save as new");
+		buttonSaveAs.addEventListener("click", saveNewSite, false);
+		
+		var buttonDelete = document.createElement("input");
+		buttonDelete.setAttribute("type", "button");
+		buttonDelete.setAttribute("class", "button");
+		buttonDelete.setAttribute("value", "Delete");
+		buttonDelete.addEventListener("click", deleteSite, false);
+		
+		var buttonCancel = document.createElement("input");
+		buttonCancel.setAttribute("type", "button");
+		buttonCancel.setAttribute("class", "button");
+		buttonCancel.setAttribute("value", "Cancel");
+		buttonCancel.addEventListener("click", cancelEdit, false);
+		
+		
+		// Name
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelName);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputSiteName);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Source
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelSource);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputSourceFolder);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Preview
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelPreview);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputPreviewFolder);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Publish
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelPublish);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputPublishFolder);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Template
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelTemplate);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputTemplate);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Buttons
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("colspan", "2");
+		td.appendChild(buttonSave);
+		td.appendChild(buttonSaveAs);
+		td.appendChild(buttonDelete);
+		td.appendChild(buttonCancel);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+			
+		function saveNewSite() {
+			
+			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			
+			// Make sure the name/alias is not in use
+			for (var i=0; i<.length; i++) {
+				
+			}
+			
+			var index = sites.push() - 1;
+			
+			selectedSite = sites[index];
+			
+			var selectedIndex = addSiteOption(selectedSite, index); // Add new option
+			
+			selectSite.selectedIndex = selectedIndex;// Select the new option
+			
+			window.localStorage.cmsjz_sites = JSON.stringify(sites);
+			
+			editView.style.display = "none"; // Hide the edit view
+			controlView.style.display = "block"; // Show the connection view
+			editor.resizeNeeded();
+			
+		}
+		
+		
+		function cancelEdit() {
+			// Reset the values
+			inputSiteName.value = selectedSite.name;
+			inputSourceFolder.value = selectedSite.source;
+			inputPreviewFolder.value = selectedSite.preview;
+			inputPublishFolder.value = selectedSite.publish;
+			inputTemplate.value = selectedSite.template;
+			
+			editView.style.display = "none"; // Hide the edit view
+			controlView.style.display = "block"; // Show the connection view
+			editor.resizeNeeded();
+			
+		}
+		
+		function saveSiteSettings() {
+			
+			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			
+			if(selectedSite.name != inputSiteName.value) {
+				selectSite.options[selectSite.selectedIndex].text = inputSiteName.value;
+			}
+			
+			selectedSite.name = inputSiteName.value;
+			selectedSite.source = inputSourceFolder.value;
+			selectedSite.preview = inputPreviewFolder.value;
+			selectedSite.publish = inputPublishFolder.value;
+			selectedSite.template = inputTemplate.value;
+			
+			window.localStorage.cmsjz_sites = JSON.stringify(sites);
+			
+			editView.style.display = "none";
+			controlView.style.display = "block";
+			editor.resizeNeeded();
+			
+		}
+		
+		
+		function deleteSite() {
+			
+		}
 		
 	}
 	
@@ -171,7 +440,7 @@
 	function hide() {
 		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
 		
-		serverManager.style.display = "none";
+		manager.style.display = "none";
 		editor.resizeNeeded();
 		
 		return false;

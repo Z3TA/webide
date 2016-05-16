@@ -135,7 +135,7 @@ input[type=text], input[type=password], select.select {
 	margin: 4px;
 	font-size: 12px;
 	font-family: Verdana;
-}
+	}
 
 input[type=checkbox] {
 	text-align: absmiddle;

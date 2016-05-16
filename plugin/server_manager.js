@@ -377,11 +377,11 @@
 		
 		function cancelEdit() {
 			// Reset the values
-			inputEditPw.vlaue = selectedConnection.pw;
+			inputEditPw.value = selectedConnection.pw;
 			inputHost.value = selectedConnection.host;
-			inputUser = selectedConnection.user;
-			inputKey = selectedConnection.key;
-			inputName = selectedConnection.name;
+			inputUser.value = selectedConnection.user;
+			inputKey.value = selectedConnection.key;
+			inputName.value = selectedConnection.name;
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
@@ -438,7 +438,7 @@
 			editor.input = true;
 		}
 		
-		serverManager.style.display = "none";
+		if(serverManager) serverManager.style.display = "none";
 		editor.resizeNeeded();
 		
 		return false;
