@@ -191,6 +191,13 @@ A file (that was opened, but never closed) was removed from editor.files!!
 Polishing
 =========
 
+When auto completing a new function() {} check if it's a lambda or function, to set the caret in the right position.
+
+The undo/redo function needs to be rewritten!
+
+Show loading/streaming animation when opening a big file. And show the file after the first chunk!
+(don't wait for the full file to load).
+
 Having to delete the line braks when removing large text chunks (spanning many rows) is annoying!
 
 Detect misspelled properties!!!

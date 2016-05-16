@@ -16,7 +16,7 @@
 		var lbLength = file.lineBreak.length;
 		
 			if("function".substr(0, wordLength) == word) {
-			options.push(["function () {" + file.lineBreak + file.lineBreak + "}", 3 + lbLength*2]);
+			options.push(["function () {" + file.lineBreak + file.lineBreak + "}", 7]);
 		}
 		else if("for".substr(0, wordLength) == word) {
 			options.push(["for (var i=0; i<.length; i++) {" + file.lineBreak + file.lineBreak + "}", 14 + lbLength*2]);
