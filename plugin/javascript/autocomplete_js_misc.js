@@ -19,13 +19,13 @@
 			options.push(["function () {" + file.lineBreak + file.lineBreak + "}", 7]);
 		}
 		else if("for".substr(0, wordLength) == word) {
-			options.push(["for (var i=0; i<.length; i++) {" + file.lineBreak + file.lineBreak + "}", 14 + lbLength*2]);
+			options.push(["for (var i=0; i<.length; i++) {" + file.lineBreak + file.lineBreak + "}", 18]);
 		}
 		else if("switch".substr(0, wordLength) == word) {
-			options.push(["switch() {" + file.lineBreak + "case :    ; break" + file.lineBreak + "}", 19 + lbLength*2]);
+			options.push(["switch() {" + file.lineBreak + "case :    ; break" + file.lineBreak + "}", 23]);
 		}
 		else if("if".substr(0, wordLength) == word) {
-			options.push(["if () {" + file.lineBreak + file.lineBreak + "}", 2 + lbLength*2]);
+			options.push(["if () {" + file.lineBreak + file.lineBreak + "}", 6]);
 		}
 		
 		return options;
