@@ -539,6 +539,8 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 =======
 
+Button (F5) to execute the current script in NodeJS and show the output
+
 Argyment helper/autocompleter for callback function. foo(function(what, arguments) {...}); // Who is an async function
 
 Plugin for exacuting shell commands (both on local and remote/ssh) and get the result from stdout to a file
