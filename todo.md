@@ -26,6 +26,8 @@ todo: file search btw chunks + replace in files
 BUGS
 ====
 
+Code inside <style> tags in .htm files are not indented!
+
 vbScript parser:
 <%
 Function SaveReferer()
