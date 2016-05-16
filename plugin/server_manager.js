@@ -48,7 +48,7 @@
 		
 		remoteConnections = window.localStorage.remoteConnections ? JSON.parse(window.localStorage.remoteConnections) : [defaultServer];
 		
-		build();
+		//build();
 		
 		editor.bindKey({desc: "Show the FTP/SSH server manager", fun: show, charCode: charP, combo: CTRL + SHIFT});
 		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hide, charCode: charEscape, combo: 0});
@@ -421,6 +421,9 @@
 		
 		// Steal focus from the file
 		editor.input = false;
+		
+		if(!serverManager) build(); // Build the GUI if it's not already built
+		
 		serverManager.style.display = "block";
 		
 		editor.resizeNeeded();
