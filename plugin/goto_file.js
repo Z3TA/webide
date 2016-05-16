@@ -495,9 +495,14 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 					//console.log("Going to line " + lineNr);
 					editor.renderNeeded();
 					
-					// Set the working directory to this files's folder
-					editor.workingDirectory = getDirectoryFromPath(path);
-					firstRun = true; // Make it not use cached file's list
+					var dir = getDirectoryFromPath(path);
+					
+					if(dir.indexOf(editor.workingDirectory) == -1) {
+						// Set the working directory to this files's folder
+						editor.workingDirectory = dir;
+						firstRun = true; // Make it not use cached file's list
+}
+					
 					
 				});
 				
