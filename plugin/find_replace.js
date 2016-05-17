@@ -644,7 +644,7 @@
 	// ## Todo: Write tests
 	/*
 	editor.addTest(function test_searchAndReplace(callback) {
-		editor.openFile("searchAndReplace.txt", "abcX1XdefX2XghiX2X", function(file) {
+		editor.openFile("searchAndReplace.txt", "abcX1XdefX2XghiX2X", function(err, file) {
 			
 			
 				

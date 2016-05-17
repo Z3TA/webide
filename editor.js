@@ -241,7 +241,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					editor.showFile(file);
 				}
 				
-				if(callback) callback(file);
+				if(callback) callback(null, file);
 				return;
 			}
 			else {
@@ -310,7 +310,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						let notFromDisk = false;
 						let tooBig = true;
 						let text = "";
-						load(path, text, notFromDisk, tooBig);
+						load(null, path, text, notFromDisk, tooBig);
 					}
 					else {
 						editor.readFromDisk(path, load);
@@ -328,12 +328,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 			}
 			else {
-				load(path, text, true);
+				load(null, path, text, true);
 			}
 			
 		}
 		
-		function load(path, text, notFromDisk, tooBig) {
+		function load(err, path, text, notFromDisk, tooBig) {
 			console.log("Loading file to editor: " + path);
 			
 			if(editor.files.hasOwnProperty(path)) throw new Error("File is already opened!");
@@ -376,7 +376,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.showFile(file);
 				editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
 				
-				callCallbacks(file);
+				callCallbacks(err, file);
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
@@ -384,15 +384,14 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.renderNeeded();
 				
 			}
-			
-		}
+			}
 		
 		function fileOpenError(err) {
 			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 			
 			console.warn(err.message);
 			
-			callCallbacks(file, err);
+			callCallbacks(err, file);
 			
 			console.warn("Error when opening file path=" + path + " message: " + err.message);
 			
@@ -400,11 +399,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		
-		function callCallbacks(file, err) {
+		function callCallbacks(err, file) {
 			if(err) console.warn(err.message);
 			
 			if(callback) {
-				callback(file, err); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
+				callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
 			else if(file) {
 				console.log("No callback for file.path=" + file.path);
@@ -413,7 +412,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			if(fileOpenExtraCallbacks.hasOwnProperty(path)) {
 				// Call the other callbacks that are also waiting for the file to be opened
 				for(var i=0; i<fileOpenExtraCallbacks[path].length; i++) {
-					fileOpenExtraCallbacks[path][i](file, err);
+					fileOpenExtraCallbacks[path][i](err, file);
 				}
 				// Then remove them
 				delete fileOpenExtraCallbacks[path]
@@ -731,9 +730,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					// Could also use sftp.createReadStream
 					c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
 						
-						if(err) throw err;
+						if(err) console.warn(err.message);
 						
-						callback(path, buffer.toString("utf8"));
+						callback(err, path, buffer.toString("utf8"));
 						
 						
 					});
@@ -749,9 +748,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 					
 					fs.readFile(path, function(err, buffer) {
-						if (err) throw err;
+						if(err) console.warn(err.message);
 						
-						callback(path, buffer);
+						callback(err, path, buffer);
 						
 					});
 				}
@@ -759,9 +758,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 					if(encoding == undefined) encoding = "utf8";
 					fs.readFile(path, encoding, function(err, string) {
-						if (err) throw err;
+						if(err) console.warn(err.message);
 						
-						callback(path, string);
+						callback(err, path, string);
 						
 					});
 				}
@@ -769,7 +768,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		else if(runtime == "browser") {
 			getFile(path, function(string, url) {
-				callback(url, string);
+				callback(null, url, string);
 			});
 		}
 		else {
@@ -789,7 +788,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		function streamEnded() {
 			console.log("Stream ended! path=" + path);
 			
-			callback(path, fileContent);
+			callback(null, path, fileContent);
 			
 		}
 		
@@ -816,9 +815,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 			}
 		}
-		
-		
-	}
+		}
 	
 	
 	editor.saveFile = function(file, path, callback) {
@@ -856,10 +853,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 		}
 		else {
-			saveToDisk(file);
+			saveToDisk(null, file);
 		}
 		
-		function saveToDisk(file) {
+		function saveToDisk(err, file) {
 			
 			// Check path for protocol
 			var url = require("url");
@@ -2457,7 +2454,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			if(keyPath) {
 				// Connect using key
-				editor.readFromDisk(keyPath, function readKey(path, keyStr) { // Read key
+				editor.readFromDisk(keyPath, function readKey(err, path, keyStr) { // Read key
 					auth.passphrase = passw;
 					auth.privateKey = keyStr;
 					try {
@@ -2838,7 +2835,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var versionPath = require("dirname") + "/version.inc";
 		editor.doesFileExist(versionPath, function(exists) {
 			if(exists) {
-				editor.readFromDisk("version.inc", function(string) {
+				editor.readFromDisk("version.inc", function(err, path, string) {
 					editor.version = parseInt(string);
 				});
 			}
@@ -3008,7 +3005,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var filesToOpen = 2;
 		var filesOpened = 0;
 		for(var i=0; i<filesToOpen; i++) {
-			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened() {
+			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened(err, file) {
 				if(++filesOpened == filesToOpen) doTheTests();
 			});
 		}
@@ -3083,7 +3080,7 @@ alert("Testing: " + editor.tests[0].text);
 				if(fails === 0) testResults.push("All " + finished + " tests passed!")
 				else testResults.push(fails + " of " + finished + " test failed:");
 				
-				editor.openFile("testresults", testResults.join("\n"), function(file) {
+				editor.openFile("testresults", testResults.join("\n"), function(err, file) {
 					file.parse = false;
 				});
 				

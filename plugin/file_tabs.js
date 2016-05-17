@@ -460,11 +460,11 @@ for(var i=0; i<list.length; i++) {
 		}
 		
 		// Open test files
-		editor.openFile("dirA/File1", 'File1', function(file) {
-			editor.openFile("dirA/File2", 'File2', function(file) {
-editor.openFile("dirB/File3", 'File3', function(file) {
-			editor.openFile("dirB/File4", 'File4', function(file) {
-				editor.openFile("dirB/File5", 'File5', function(file) {
+		editor.openFile("dirA/File1", 'File1', function(err, file) {
+			editor.openFile("dirA/File2", 'File2', function(err, file) {
+				editor.openFile("dirB/File3", 'File3', function(err, file) {
+					editor.openFile("dirB/File4", 'File4', function(err, file) {
+						editor.openFile("dirB/File5", 'File5', function(err, file) {
 							var list;
 							
 							editor.currentFile = editor.files["dirB/File5"];

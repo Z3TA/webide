@@ -8,7 +8,7 @@
 	
 	function showFiles() {
 		
-		editor.openFile("file-list.txt", "", function(file) {
+		editor.openFile("file-list.txt", "", function(err, file) {
 			
 			editor.listFiles(editor.workingDirectory, function(err, fileList) {
 				

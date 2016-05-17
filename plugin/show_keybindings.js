@@ -18,7 +18,7 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 	
 	arr.sort();
 	
-	editor.openFile("keybindings.txt", spacePad("Keyboard combination", padLength) + "Function Name\n" + "==========================================\n" + arr.join("\n"), function gotFile(file) {});
+		editor.openFile("keybindings.txt", spacePad("Keyboard combination", padLength) + "Function Name\n" + "==========================================\n" + arr.join("\n"), function gotFile(err, file) {});
 	
 	return false;
 	

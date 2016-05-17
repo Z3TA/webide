@@ -268,7 +268,7 @@ return;
 					
 					var errorReportFilePath = "bug_report.txt"; // The editor will add a counter to double files
 					
-					editor.openFile(errorReportFilePath, reportTemplate(errorReport), function errorReportOpened(file, err) {
+					editor.openFile(errorReportFilePath, reportTemplate(errorReport), function errorReportOpened(err, file) {
 						
 						if(err) GUI.showDevTools();
 						

@@ -224,9 +224,12 @@ editor.plugin({
 			}
 			
 			
-			function fileReopened(file, err) {
+			function fileReopened(err, file) {
 
-				console.log("Got (Reopening) file from editor path=" + path);
+				console.log("Got (Reopening) file from editor path=" + path + "");
+				
+				if(err) console.log("err.path=" + err.path);
+				if(file) console.log("file.path=" + file.path);
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				

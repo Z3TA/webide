@@ -23,7 +23,7 @@
 			//path = "new file " + (newFileCounter++);
 		//}
 		
-		editor.openFile(path, content, function(file) {
+		editor.openFile(path, content, function(err, file) {
 			// Mark the file as NOT saved, because its a NEW file
 			file.isSaved = false;
 			file.savedAs = false;

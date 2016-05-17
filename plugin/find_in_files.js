@@ -114,7 +114,7 @@
 			console.log("line=" + lineNr);
 			console.log("path=" + path);
 			
-			editor.openFile(path, undefined, function highlightGoto(file) {
+			editor.openFile(path, undefined, function highlightGoto(err, file) {
 				
 				// Scroll to and place the caret on the line
 				file.gotoLine(lineNr, function afterScrolled() {
@@ -512,7 +512,7 @@
 		
 		// File extension (.tmp) so that it's not formatted by the JS parser
 		
-		editor.openFile(reportFilePath, content, function(file) {
+		editor.openFile(reportFilePath, content, function(err, file) {
 			
 			reportFile = file;
 			

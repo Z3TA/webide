@@ -490,7 +490,12 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 				
 				console.log("Opening " + path);
 				
-				editor.openFile(path, undefined, function(file) {
+				editor.openFile(path, undefined, function(err, file) {
+					
+					if(err) {
+						alert(err.message);
+						return;
+}
 					
 					//console.log("Going to line " + lineNr);
 					editor.renderNeeded();

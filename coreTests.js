@@ -27,7 +27,7 @@
 		
 	*/
 	editor.addTest(function jsRegExpVsLineComment(callback) {
-		editor.openFile("jsRegExpVsLineComment.js", "if(path.match(/^.*:\\/\\//g) == null)\n", function(file) {
+		editor.openFile("jsRegExpVsLineComment.js", "if(path.match(/^.*:\\/\\//g) == null)\n", function(err, file) {
 			
 			if(file.parsed.comments.length > 0) throw new Error("Did not expect any comments!");
 			
@@ -40,7 +40,7 @@
 	
 	
 	editor.addTest(function vbScriptSelectCase(callback) {
-		editor.openFile("vbscriptselectcaseindentation.vb", "select case foo\ncase 1\nbar(1)\ncase 2\nbar(2)\nend select\n", function(file) {
+		editor.openFile("vbscriptselectcaseindentation.vb", "select case foo\ncase 1\nbar(1)\ncase 2\nbar(2)\nend select\n", function(err, file) {
 			// Also indentate each case in a select case
 			var grid = file.grid;
 			
@@ -59,7 +59,7 @@
 	});
 	
 	editor.addTest(function vbScriptComments(callback) {
-		editor.openFile("vbscriptcomments.vb", "if foo then\n' comment\ncall bar\nend if\n", function(file) {
+		editor.openFile("vbscriptcomments.vb", "if foo then\n' comment\ncall bar\nend if\n", function(err, file) {
 			// There was a bug where a comment in VB scrwed up the indentation ...
 			var grid = file.grid;
 			
@@ -76,7 +76,7 @@
 	});
 	
 	editor.addTest(function htmlTag(callback) {
-		editor.openFile("html", '<html>\n<head>\n<script type="text/javascript">\nfoo = 1;\n</script>\n</head>\n', function(file) {
+		editor.openFile("html", '<html>\n<head>\n<script type="text/javascript">\nfoo = 1;\n</script>\n</head>\n', function(err, file) {
 // Test if the parser switch to thml mode when a the <html tag is found
 var grid = file.grid;
 
@@ -96,7 +96,7 @@ callback(true);
 
 	
 	editor.addTest(function parseXML(callback) {
-		editor.openFile("parseXML.xml", '<foo>\n<bar></bar>\n</foo>\n', function(file) {
+		editor.openFile("parseXML.xml", '<foo>\n<bar></bar>\n</foo>\n', function(err, file) {
 			
 			var grid = file.grid;
 			
@@ -113,7 +113,7 @@ callback(true);
 	});
 	
 	editor.addTest(function preHtml(callback) {
-		editor.openFile("preHtml.htm", '<pre></pre>\n<div>\nfoo\n</div>\n', function(file) {
+		editor.openFile("preHtml.htm", '<pre></pre>\n<div>\nfoo\n</div>\n', function(err, file) {
 
 		var grid = file.grid;
 
@@ -130,7 +130,7 @@ callback(true);
 	});
 
 	editor.addTest(function indentArrInJson(callback) {
-		editor.openFile("indent_arr_in_json.js", '{\nlabel: "foo",\ndatasets: [\n{\nname: "Adam"\n},\n{\nname: "Eve"\n}\n]\n};\n', function(file) {
+		editor.openFile("indent_arr_in_json.js", '{\nlabel: "foo",\ndatasets: [\n{\nname: "Adam"\n},\n{\nname: "Eve"\n}\n]\n};\n', function(err, file) {
 			
 			var grid = file.grid;
 			
@@ -154,7 +154,7 @@ callback(true);
 	});
 	
 	editor.addTest(function indentVarObj(callback) {
-		editor.openFile("indent_var_obj.js", 'var data = {\nobj1: {\nname: "Adam"\n},\nobj2: {\nname: "Eve"\n}\n};\n', function(file) {
+		editor.openFile("indent_var_obj.js", 'var data = {\nobj1: {\nname: "Adam"\n},\nobj2: {\nname: "Eve"\n}\n};\n', function(err, file) {
 			
 			var grid = file.grid;
 			
@@ -175,7 +175,7 @@ callback(true);
 	});
 	
 	editor.addTest(function noRegExpInHtmlComment(callback) {
-		editor.openFile("noRegExpInHtmlComment.htm", '<img src="foo"/><!-- comment -->', function(file) {
+		editor.openFile("noRegExpInHtmlComment.htm", '<img src="foo"/><!-- comment -->', function(err, file) {
 			// .htm and .html files start with xmlMode on
 			var grid = file.grid;
 
@@ -189,7 +189,7 @@ callback(true);
 	});
 	
 	editor.addTest(function scriptTagInHtmlMode(callback) {
-		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n<!-- foo -->\n</div>\n', function(file) {
+		editor.openFile("scriptTagInHtmlMode.htm", '<div class="foo">\n<script type="text/javascript">\nif((1+1) <= b) {\nfoo ="<div></div>";\n}\n</script>\n<!-- foo -->\n</div>\n', function(err, file) {
 			// .htm and .html files start with xmlMode on
 			var grid = file.grid;
 			
@@ -212,7 +212,7 @@ callback(true);
 	});
 	
 	editor.addTest(function htmlWithIfAndArrow(callback) {
-		editor.openFile("htmlWithIfAndArrow.js", "if((1+1) <= b) {\nfoo ='<div></div>';\n}\n", function(file) {
+		editor.openFile("htmlWithIfAndArrow.js", "if((1+1) <= b) {\nfoo ='<div></div>';\n}\n", function(err, file) {
 			
 			var grid = file.grid;
 			
@@ -230,7 +230,7 @@ callback(true);
 
 
 	editor.addTest(function findJsFunctions(callback) {
-		editor.openFile("functionInCallArgument.js", "foo(function bar() {});\nmeh\nfoo(function () {});\nfunction baz() {}", function(file) {
+		editor.openFile("functionInCallArgument.js", "foo(function bar() {});\nmeh\nfoo(function () {});\nfunction baz() {}", function(err, file) {
 			
 			if(!file.parsed) throw new Error("The file was not parsed!");
 			if(!file.parsed.language=="JavaScript") throw new Error("The file was not parsed as JavaScript!");
@@ -246,7 +246,7 @@ callback(true);
 	});
 	
 	editor.addTest(function indentCurlyBrackets(callback) {
-		editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}\n}\n", function(file) {
+		editor.openFile("indent_curly.js", "{{\n{\n{\n{\nvar foo = {};\n}\n}\n}\n}\n}\n", function(err, file) {
 			
 			var grid = file.grid;
 			
@@ -270,7 +270,7 @@ callback(true);
 	});
 	
 	editor.addTest(function indentHTML(callback) {
-		editor.openFile("indent_html.htm", "<div>\n<div></div>\n\n</div>\n", function(file) {
+		editor.openFile("indent_html.htm", "<div>\n<div></div>\n\n</div>\n", function(err, file) {
 			
 			var grid = file.grid;
 			
@@ -288,7 +288,7 @@ callback(true);
 	});
 	
 	editor.addTest(function parseRegExp(callback) {
-			editor.openFile("regexp.js", "{\n/*\nblock comment\n*/\n'foo'.match(/\"/g);\n}", function(file) {
+		editor.openFile("regexp.js", "{\n/*\nblock comment\n*/\n'foo'.match(/\"/g);\n}", function(err, file) {
 				
 				// note: block comments are indented
 				
@@ -311,7 +311,7 @@ callback(true);
 	
 	/*
 	editor.addTest(function indentVarDeclarations(callback) {
-			editor.openFile("indent_var.js", "{\nvar foo,\nbar;\nvar baz = {\nban:ana\n}\nvar bus = {};\n\n}\n", function(file) {
+		editor.openFile("indent_var.js", "{\nvar foo,\nbar;\nvar baz = {\nban:ana\n}\nvar bus = {};\n\n}\n", function(err, file) {
 				
 				var grid = file.grid;
 				
@@ -367,7 +367,7 @@ callback(true);
 	*/
 	
 	editor.addTest(function test_moveCaretToIndex(callback) {
-			editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(file) {
+		editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(err, file) {
 				
 				for(var i=0; i<file.text.length; i++) {
 					file.moveCaretToIndex(i);
@@ -381,7 +381,7 @@ callback(true);
 		});
 	
 	editor.addTest(function testTabAtBeginning(callback) {
-			editor.openFile("file_starts_with_tab", "\tfoo\nbar\nbaz", function(file) {
+		editor.openFile("file_starts_with_tab", "\tfoo\nbar\nbaz", function(err, file) {
 				editor.closeFile(file.path);
 				
 				editor.openFile("file_starts_with_space", "   foo\nbar\nbaz", function(file) {
@@ -394,7 +394,7 @@ callback(true);
 		});
 
 	editor.addTest(function selectText(callback) {
-			editor.openFile("testing_select", "", function(file) {
+		editor.openFile("testing_select", "", function(err, file) {
 				file.write("abc def ghi");
 				
 				file.select([file.grid[0][4], file.grid[0][5], file.grid[0][6]]); // select def
@@ -412,7 +412,7 @@ callback(true);
 		});
 	
 	editor.addTest(function fileWrite(callback) {
-			editor.openFile("testing_write", "Line1\nLine2\nLine3\n", function(file) {
+		editor.openFile("testing_write", "Line1\nLine2\nLine3\n", function(err, file) {
 				file.write("Hello");
 				file.write(" world!\nYou are great!");
 				
@@ -424,7 +424,7 @@ callback(true);
 	
 	editor.addTest(function fileWriteLine(callback) {
 			
-			editor.openFile("testing_writeLine", "", function(file) {
+		editor.openFile("testing_writeLine", "", function(err, file) {
 				file.writeLine("Hello world!");
 				file.writeLine("Hello again!");
 				

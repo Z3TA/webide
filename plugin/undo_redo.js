@@ -189,7 +189,8 @@
 		
 		if(file.savedAs) {
 		// Check if this is the current version on the disk:
-			editor.readFromDisk(file.path, function compare(path, string) {
+			editor.readFromDisk(file.path, function compare(err, path, string) {
+				if(err) throw err;
 			if(file.text == string) {
 				// It's saved
 					file.saved(); // Doesn't actually save on disk. Only calls event listeners and sets state to saved.

@@ -66,8 +66,8 @@
 		
 		manager = document.createElement("div");
 		
-		buildControl();
 		buildEdit();
+		buildControl();
 		
 		editView.style.display="none";
 		
@@ -492,7 +492,7 @@
 			
 		});
 		
-		editor.
+		//editor.
 		
 		return false;
 	}

@@ -38,8 +38,13 @@
 				// The text on the row is a file path! Open that file.
 				var content = editor.readFileSync(filePath);
 				
-				editor.openFile(filePath, content, function(file) {  // path, content, callback
-				
+				editor.openFile(filePath, content, function(err, file) {  // path, content, callback
+					
+					if(err) {
+						alert(err.message);
+						return;
+}
+					
 					// Mark the file as saved, because we just opened it
 					file.isSaved = true;
 					file.savedAs = true;
@@ -70,7 +75,7 @@
 			
 			console.log("File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
-			editor.openFile(filePath, content, function after_open_file(file, err) {  // path, content, callback
+			editor.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
 			
 				if(err) throw err;
 			

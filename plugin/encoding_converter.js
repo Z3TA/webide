@@ -36,7 +36,7 @@
 				editor.readFromDisk(file.path, fileRead, false, "binary");
 			}
 
-			function fileRead(path, buffer) {
+			function fileRead(err, path, buffer) {
 				// Todo: Detect the right encoding ... (probably impossibe)
 				var text = decodeBytes(buffer, "cp1252"); // or cp1251
 				
