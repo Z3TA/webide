@@ -27,6 +27,19 @@
 		
 	*/
 	
+	editor.addTest(function jsDivisionVsRegExp(callback) {
+		editor.openFile("jsDivisionVsRegExp.js", 'foo = 1 / 2;\nbar = "string"\n', function(err, file) {
+			
+			//console.log("file.parsed=" + JSON.stringify(file.parsed));
+			
+			if(file.parsed.quotes.length == 0) throw new Error("Expected a quote!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	
 	editor.addTest(function jsExitRegExpBackslash(callback) {

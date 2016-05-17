@@ -306,6 +306,7 @@
 			insideRegExp = false,
 			regExpStart = 0,
 			column = 0,
+			lnw = "", // Last Not Whitespace character
 			eq = "=",
 			colon = ":",
 			pastChar = [],
@@ -777,6 +778,9 @@
 			llChar = lastChar;
 			lastChar = char;
 			
+			
+			if(char != " " && char != "\t" && char != "\r" && char != "\n") lnw = char; // Last non whitespace character
+			
 			//char = text.charAt(charIndex);
 			char = text[charIndex];
 			
@@ -840,8 +844,16 @@
 					
 					RegExp or block comment!? RegExp can not start with *!
 					
+					RegExp or division!?  
+					For example, (, [, {, ;, and all of the binary operators can only be followed by a regexp. 
+					Likewise, ), ], }, identifiers, and string/number literals can only be followed by a division sign.
+					http://stackoverflow.com/questions/4726295/division-regexp-conflict-while-tokenizing-javascript
+					
 				*/
-				if(char == "/" && !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag) {
+				if(char == "/" 
+				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="") 
+				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag) {
+					
 					insideRegExp = true;
 					regExpStart = i;
 					//console.log("RegExp: line=" + lineNumber + " column=" + column);
