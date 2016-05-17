@@ -49,7 +49,7 @@
 		
 		editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
 		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hide, charCode: keyEscape, combo: 0});
-		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewPage, charCode: keyF9, combo: 0});
+		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewButtonClick, charCode: keyF9, combo: 0});
 		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
 		
 		build();
@@ -501,27 +501,42 @@
 		return false;
 	}
 	
+	function previewButtonClick(file, combo, character, charCode, keyPushDirection, targetElementClass) {
+		if(!selectedSite) alert("No site selected!");
+		else previewPage(selectedSite);
+	}
+	
 	function previewPage(site) {
 		
 		compile(site.source, site.preview, function buildDone() {
-			
 			var path = require('path');
 			
-			if(editor.currentFile.path.indexOf(site.source) != -1) {
-				
-				var url = path.join(site.preview, editor.currentFile.name);
-				try {
-					preview.src = url
-				}
-				catch(e) {
-					console.warn(err.message);
-					alert("Unable to load: " + url);
-				}
-				
-			}
+			if(!editor.currentFile) preview.src = path.join(site.preview, "index.htm");
 			else {
-				preview.src = path.join(site.preview, "index.htm");
+				var fileName = editor.currentFile.name;
+				var fileType = editor.currentFile.fileExtension;
+				
+			
+				if(editor.currentFile.path.indexOf(site.source) != -1 // Inside source path?
+				&& (fileType == "htm" || fileType=="html" || fileType=="md") // Right file type
+				&& fileName != "header" && fileName != "footer") { 
+					
+					var url = path.join(site.preview, editor.currentFile.name);
+					try {
+						preview.src = url
+					}
+					catch(e) {
+						console.warn(err.message);
+						alert("Unable to load: " + url);
+					}
+					
+				}
+				else {
+					preview.src = path.join(site.preview, "index.htm");
+				}
 			}
+			
+			
 			
 			preview.setAttribute("width", Math.floor(editor.view.canvasWidth / 2));
 			preview.setAttribute("height", Math.floor(editor.view.canvasHeight));
@@ -562,7 +577,7 @@
 		var buildScript = path.join(require("dirname"), "./plugin/cmsjz/build.js");
 		
 		//console.log("buildScript=" + buildScript);
-		
+		console.log("source=" + source);
 		var workingDir = path.join(source, "../");
 		//console.log("workingDir=" + workingDir);
 		var node_modules = path.join(source, "../node_modules/"); // Node runtime wont check node_modules folder, so we'll have to explicity set it in NODE_PATH enviroment variable
