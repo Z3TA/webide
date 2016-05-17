@@ -290,15 +290,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			editor.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 				
 				if(err) {
-					
-					if(err.code == "ENOENT") {
-						console.warn("File not found: " + path);
-						alert("File not found: " + path);
-						
-					}
-					else {
-						throw err;
-					}
+					console.warn(err.message);
 					fileOpenError(err);
 				}
 				else {
