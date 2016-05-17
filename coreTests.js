@@ -384,7 +384,7 @@ callback(true);
 		editor.openFile("file_starts_with_tab", "\tfoo\nbar\nbaz", function(err, file) {
 				editor.closeFile(file.path);
 				
-				editor.openFile("file_starts_with_space", "   foo\nbar\nbaz", function(file) {
+				editor.openFile("file_starts_with_space", "   foo\nbar\nbaz", function(err, file) {
 					editor.closeFile(file.path);
 					
 					callback(true);
