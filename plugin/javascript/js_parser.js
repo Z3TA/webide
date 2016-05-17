@@ -846,7 +846,7 @@
 					regExpStart = i;
 					//console.log("RegExp: line=" + lineNumber + " column=" + column);
 				}
-				else if(insideRegExp && char == "/" && lastChar != backSlash) {
+				else if(insideRegExp && char == "/" && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {
 					insideRegExp = false;
 					//console.log("Exit regexp: line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)

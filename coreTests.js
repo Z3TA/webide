@@ -26,6 +26,23 @@
 		
 		
 	*/
+	
+	
+	
+	editor.addTest(function jsExitRegExpBackslash(callback) {
+		editor.openFile("jsExitRegExpBackslash.js", 'url.replace(/\\\\/g, "/");\nurl.replace(/\\s/g, "");\n', function(err, file) {
+			
+			//console.log("file.parsed=" + JSON.stringify(file.parsed));
+			
+			if(file.parsed.quotes[0].end != 21) throw new Error("Unexpected long quote!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
+	
 	editor.addTest(function jsRegExpVsLineComment(callback) {
 		editor.openFile("jsRegExpVsLineComment.js", "if(path.match(/^.*:\\/\\//g) == null)\n", function(err, file) {
 			
@@ -36,7 +53,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function vbScriptSelectCase(callback) {
