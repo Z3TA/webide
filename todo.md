@@ -21,7 +21,7 @@ Integrating cmsjz
 
 
 todo: Add osx/mac runtime
-todo: file search btw chunks + replace in files
+
 
 
 BUGS
@@ -205,6 +205,8 @@ A file (that was opened, but never closed) was removed from editor.files!!
 
 Polishing
 =========
+
+file search btw chunks + replace in files
 
 A plus in the tabs to create/open a new file
 
