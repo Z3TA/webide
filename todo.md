@@ -20,6 +20,7 @@ What I'm working on:
 Integrating cmsjz
 
 
+todo: Add osx/mac runtime
 todo: file search btw chunks + replace in files
 
 
@@ -540,6 +541,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 =======
+
+Show another part of the file so you can copy back and forth, without navigating.
 
 Button (F5) to execute the current script in NodeJS and show the output
 

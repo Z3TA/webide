@@ -87,11 +87,11 @@
 		selectSite = document.createElement("select");
 		selectSite.setAttribute("id", "selectSite");
 		selectSite.setAttribute("class", "select");
+		selectSite.addEventListener("change", changeSelectSite, false);
 		
 		if(sites.length > 0) {
-			selectedSite = sites[0];
 			sites.forEach(addSiteOption);
-		}
+			}
 		
 		var labelSite = document.createElement("label");
 		labelSite.setAttribute("for", "selectSite");
@@ -104,6 +104,7 @@
 		buttonSetWorkingDirectory.setAttribute("value", "Set working directory");
 		buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
 		buttonSetWorkingDirectory.addEventListener("click", function() {
+			if(!selectedSite) throw new Error("No site selected!");
 			editor.workingDirectory = selectedSite.source;
 			hide();
 		}, false);
@@ -113,7 +114,7 @@
 		buttonNewPage.setAttribute("class", "button");
 		buttonNewPage.setAttribute("value", "New Page");
 		buttonNewPage.addEventListener("click", function() {
-			preview(selectedSite);
+			newPage(selectedSite);
 		}, false);
 		
 		var buttonPreview = document.createElement("input");
@@ -156,6 +157,8 @@
 		controlView.appendChild(buttonSettings);
 		controlView.appendChild(buttonCancel);
 		
+		if(sites.length > 0) changeSelectSite(); // Select the one currently selected
+		
 		function editSiteSettings() {
 			
 			if(!selectedSite) throw new Error("No selected site");
@@ -163,13 +166,19 @@
 			editView.style.display="block";
 			controlView.style.display="none"; // Hide this div
 			
+			editor.resizeNeeded();
+		}
+		
+		function changeSelectSite() {
+			var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
+			selectedSite = sites[selectedSiteIndex];
+			
 			inputSiteName.value = selectedSite.name;
 			inputSourceFolder.value = selectedSite.source;
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
 			inputTemplate.value = selectedSite.template;
 			
-			editor.resizeNeeded();
 		}
 		
 	}
@@ -349,11 +358,21 @@
 			if(!window.localStorage) throw new Error("window.localStorage not available!");
 			
 			// Make sure the name/alias is not in use
-			for (var i=0; i<.length; i++) {
-				
+			var name = inputSiteName.value;
+			for (var i=0; i<sites.length; i++) {
+				if(sites[i].name == name) {
+					alert(name + " alias already used!");
+					return;
+				}
 			}
 			
-			var index = sites.push() - 1;
+			var index = sites.push({
+				name: name,
+				source: inputSourceFolder.value,
+				preview: inputPreviewFolder.value,
+				publish: inputPublishFolder.value,
+				template:  inputTemplate.value
+			}) - 1;
 			
 			selectedSite = sites[index];
 			
@@ -361,7 +380,7 @@
 			
 			selectSite.selectedIndex = selectedIndex;// Select the new option
 			
-			window.localStorage.cmsjz_sites = JSON.stringify(sites);
+			window.localStorage.cmsjz_sites = JSON.stringify(sites); // Save all sites in local-storage
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -371,6 +390,9 @@
 		
 		
 		function cancelEdit() {
+			
+			if(!selectedSite) throw new Error("No site selected!");
+			
 			// Reset the values
 			inputSiteName.value = selectedSite.name;
 			inputSourceFolder.value = selectedSite.source;
@@ -387,6 +409,7 @@
 		function saveSiteSettings() {
 			
 			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			if(!selectedSite) throw new Error("No site selected!");
 			
 			if(selectedSite.name != inputSiteName.value) {
 				selectSite.options[selectSite.selectedIndex].text = inputSiteName.value;
@@ -408,6 +431,13 @@
 		
 		
 		function deleteSite() {
+			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			
+			selectSite.remove(selectSite.selectedIndex);
+			
+			// Does it fire onChange events? 
+			
+			
 			
 		}
 		
@@ -419,7 +449,7 @@
 		
 		var option = document.createElement("option");
 		option.text = site.name;
-		option.id = site.index;
+		option.id = index;
 		selectSite.appendChild(option);
 		
 		return selectSite.options.length -1;
@@ -446,12 +476,23 @@
 		return false;
 	}
 	
-	function preview() {
+	function preview(site) {
 		
 		return false;
 	}
 	
-	function publish() {
+	function publish(site) {
+		
+		return false;
+	}
+	
+	function newPage(site) {
+		
+		editor.readFromDisk(path, function fileRead(err, str) {
+			
+		});
+		
+		editor.
 		
 		return false;
 	}
