@@ -1,7 +1,5 @@
 (function() {
-	
 	"use strict";
-	
 	
 	
 	var sites;
@@ -17,6 +15,10 @@
 	var inputPreviewFolder;
 	var inputPublishFolder;
 	var inputTemplate;
+	
+	
+	var previewView;
+	var preview;
 	
 	
 	var path = require("path");
@@ -47,7 +49,7 @@
 		
 		editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
 		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hide, charCode: keyEscape, combo: 0});
-		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: preview, charCode: keyF9, combo: 0});
+		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewPage, charCode: keyF9, combo: 0});
 		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
 		
 		build();
@@ -68,6 +70,7 @@
 		
 		buildEdit();
 		buildControl();
+		buildPreview();
 		
 		editView.style.display="none";
 		
@@ -76,11 +79,12 @@
 		
 		footer.appendChild(manager);
 		
+		
+		
 		console.log("done building server manager");
 	}
 	
 	function buildControl() {
-		var footer = document.getElementById("footer");
 		
 		controlView = document.createElement("div");
 		
@@ -91,7 +95,7 @@
 		
 		if(sites.length > 0) {
 			sites.forEach(addSiteOption);
-			}
+		}
 		
 		var labelSite = document.createElement("label");
 		labelSite.setAttribute("for", "selectSite");
@@ -122,7 +126,7 @@
 		buttonPreview.setAttribute("class", "button");
 		buttonPreview.setAttribute("value", "Preview");
 		buttonPreview.addEventListener("click", function() {
-			preview(selectedSite);
+			previewPage(selectedSite);
 		}, false);
 		
 		var buttonPublish = document.createElement("input");
@@ -152,10 +156,12 @@
 		
 		controlView.appendChild(labelSite); // Includes selectSite
 		controlView.appendChild(buttonSetWorkingDirectory);
+		controlView.appendChild(buttonNewPage);
 		controlView.appendChild(buttonPreview);
 		controlView.appendChild(buttonPublish);
 		controlView.appendChild(buttonSettings);
 		controlView.appendChild(buttonCancel);
+		
 		
 		if(sites.length > 0) changeSelectSite(); // Select the one currently selected
 		
@@ -352,7 +358,7 @@
 		
 		editView.appendChild(tr);
 		
-			
+		
 		function saveNewSite() {
 			
 			if(!window.localStorage) throw new Error("window.localStorage not available!");
@@ -443,6 +449,23 @@
 		
 	}
 	
+	function buildPreview() {
+		
+		var rightColumn = document.getElementById("rightColumn");
+		
+		previewView = document.createElement("div");
+		previewView.setAttribute("style", "display: none;"); 
+		
+		preview = document.createElement("iframe");
+		preview.setAttribute("width", "500");
+		preview.setAttribute("height", "100%"); 
+		
+		previewView.appendChild(preview);
+		
+		rightColumn.appendChild(previewView);
+		
+	}
+	
 	function addSiteOption(site, index) {
 		
 		if(!selectSite) throw new Error("selectSite not yet created!");
@@ -453,7 +476,7 @@
 		selectSite.appendChild(option);
 		
 		return selectSite.options.length -1;
-		}
+	}
 	
 	function show() {
 		editor.input = false; // Steal focus from the file
@@ -471,14 +494,42 @@
 		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
 		
 		manager.style.display = "none";
+		previewView.style.display="none";
+		
 		editor.resizeNeeded();
 		
 		return false;
 	}
 	
-	function preview(site) {
+	function previewPage(site) {
+		
+		compile(site.source, site.preview, function buildDone() {
+			
+			var path = require('path')
+			
+			if(editor.currentFile.path.indexOf(site.source) == -1) {
+				
+				var url = path.join(site.preview + editor.currentFile.name);
+				try {
+					preview.src = url
+				}
+				catch(e) {
+					console.warn(err.message);
+					alert("Unable to load: " + url);
+				}
+				
+			}
+			else {
+				preview.src = path.join(site.preview + "index.htm");
+			}
+			
+			previewView.style.display="block";
+			editor.resizeNeeded();
+			
+		});
 		
 		return false;
+		
 	}
 	
 	function publish(site) {
@@ -488,13 +539,37 @@
 	
 	function newPage(site) {
 		
-		editor.readFromDisk(path, function fileRead(err, str) {
+		editor.readFromDisk(site.template, function fileRead(err, path, text) {
+			
+			if(err) alert(err.message);
+			else {
+				editor.openFile("newPage.htm", text);
+			}
 			
 		});
 		
-		//editor.
-		
 		return false;
 	}
-
+	
+	function compile(source, destination, callback) {
+		var childProcess = require("child_process");
+		var path = require("path");
+		
+		var worker = childProcess.fork("build.js", [source, destination], {
+			cwd: source
+		});
+		
+		worker.on('message', function worker_message(data) {
+			console.log("cmsjz: " + data);
+		});
+		worker.on('error', function worker_error(code) {
+			console.warn("cmsjz: " + code);
+		});
+		worker.on('exit', function worker_exit(code) {
+			console.log("cmsjz: Done!");
+			callback();
+});
+	}
+	
+	
 })();

@@ -1,0 +1,8 @@
+{
+  "name": "my-demo-site",
+  "version": "1.0.0",
+  "description": "It's a good idea to have a package.json to keep track of dependencies",
+  "dependencies": {
+    "moment": "^2.13.0"
+  }
+  }

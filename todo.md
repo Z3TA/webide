@@ -27,6 +27,20 @@ todo: file search btw chunks + replace in files
 BUGS
 ====
 
+Parsing error:
+document.url = document.url.replace(/\\/g, "/");
+document.url = document.url.replace(/\s/g, ""); // Remove white space
+
+
+
+Indentation in HTML:
+<ul class="blog">
+<%
+%>
+</ul>
+
+
+
 Code inside <style> tags in .htm files are not indented!
 
 vbScript parser:
