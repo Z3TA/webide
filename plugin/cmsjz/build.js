@@ -71,6 +71,9 @@ Deoply using rsync, scp, ftp etc.
 	
 */
 
+//process.send("Hello!");
+log("moo");
+
 "use strict";
 
 console.time("total time")
@@ -91,6 +94,12 @@ var ALLDOCUMENTS = [];
 
 var DONOTCHANGE = ["xml", "asp", "nodejs"]; // List of file types that should not change (before evaluated)
 
+
+
+function log(txt) {
+var fs = require("fs");
+fs.appendFileSync("build.log", txt + "\n");
+}
 
 function main() {
 	console.time("walk");
@@ -488,7 +497,7 @@ function compile(baseTree) {
 			document.root = ROOT;
 			document.console = console;
 			document.require = require;
-			document.all = ALLDOCUMENTS;
+document.all = ALLDOCUMENTS;
 			
 			
 			var fileType = getFileType(document.path);

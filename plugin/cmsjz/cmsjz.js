@@ -24,10 +24,10 @@
 	var path = require("path");
 	var demoSite = {
 		name: "My simple blog",
-		source: path.join(require("dirname") + "/plugin/cmsjz/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-		preview: path.join(require("dirname") + "/plugin/cmsjz/demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname") + "/plugin/cmsjz/demo/public/"),  // Compiled files for live deployment is sent to this folder
-		template: path.join(require("dirname") + "/plugin/cmsjz/demo/template.htm")  // A template for new pages/posts
+		source: path.join(require("dirname"), "/plugin/cmsjz/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
+		preview: path.join(require("dirname"), "/plugin/cmsjz/demo/preview/"), // Compiles files for review is saved here
+		publish: path.join(require("dirname"), "/plugin/cmsjz/demo/public/"),  // Compiled files for live deployment is sent to this folder
+		template: path.join(require("dirname"), "/plugin/cmsjz/demo/template.htm")  // A template for new pages/posts
 	}
 	
 	// Add plugin to editor
@@ -505,11 +505,11 @@
 		
 		compile(site.source, site.preview, function buildDone() {
 			
-			var path = require('path')
+			var path = require('path');
 			
-			if(editor.currentFile.path.indexOf(site.source) == -1) {
+			if(editor.currentFile.path.indexOf(site.source) != -1) {
 				
-				var url = path.join(site.preview + editor.currentFile.name);
+				var url = path.join(site.preview, editor.currentFile.name);
 				try {
 					preview.src = url
 				}
@@ -520,8 +520,11 @@
 				
 			}
 			else {
-				preview.src = path.join(site.preview + "index.htm");
+				preview.src = path.join(site.preview, "index.htm");
 			}
+			
+			preview.setAttribute("width", Math.floor(editor.view.canvasWidth / 2));
+			preview.setAttribute("height", Math.floor(editor.view.canvasHeight));
 			
 			previewView.style.display="block";
 			editor.resizeNeeded();
@@ -551,24 +554,35 @@
 		return false;
 	}
 	
+	
 	function compile(source, destination, callback) {
 		var childProcess = require("child_process");
-		var path = require("path");
+		var path = require('path');
 		
-		var worker = childProcess.fork("build.js", [source, destination], {
-			cwd: source
+		var buildScript = path.join(require("dirname"), "./plugin/cmsjz/build.js");
+		
+		//console.log("buildScript=" + buildScript);
+		
+		var workingDir = path.join(source, "../");
+		//console.log("workingDir=" + workingDir);
+		var node_modules = path.join(source, "../node_modules/"); // Node runtime wont check node_modules folder, so we'll have to explicity set it in NODE_PATH enviroment variable
+		//console.log("node_modules=" + node_modules);
+		
+		var worker = childProcess.fork(buildScript, [source, destination], {
+			cwd: workingDir,
+			env: {"NODE_PATH": node_modules} // Tell node runtime to check for modules in this folder
 		});
 		
 		worker.on('message', function worker_message(data) {
 			console.log("cmsjz: " + data);
 		});
 		worker.on('error', function worker_error(code) {
-			console.warn("cmsjz: " + code);
+			console.warn("cmsjz: Error code=" + code);
 		});
 		worker.on('exit', function worker_exit(code) {
-			console.log("cmsjz: Done!");
+			console.log("cmsjz: Exit! code=" + code);
 			callback();
-});
+		});
 	}
 	
 	

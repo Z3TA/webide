@@ -27,11 +27,9 @@ todo: file search btw chunks + replace in files
 BUGS
 ====
 
-Parsing error:
-document.url = document.url.replace(/\\/g, "/");
-document.url = document.url.replace(/\s/g, ""); // Remove white space
-
-
+Parse error:
+foo = 1 / 2;
+bar = "string"
 
 Indentation in HTML:
 <ul class="blog">
