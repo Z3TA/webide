@@ -27,6 +27,8 @@ todo: Add osx/mac runtime
 BUGS
 ====
 
+Goto file doesn't work if you type too fast!
+
 Parse error:
 foo = 1 / 2;
 bar = "string"

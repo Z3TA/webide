@@ -1,8 +1,8 @@
 /*
-
+	
 	This file contains all styling outside the canvas. 
 	For example the positioning of the head, footer, right column, left column and the main editor area.
-
+	
 	
 	
 	Designing tips
@@ -17,7 +17,7 @@
 /* 
 	To be on the safe side. All element, unless specified, should have no border boxing ...
 	Do it here so that we do not have to specify it on everything.
- */
+*/
 * {
 	padding: 0px;
 	border: 0px solid red;
@@ -33,7 +33,7 @@ body {
 	margin: 0px;
 	background-color:rgba(0,255,0,0); /* bgcolor will not show, change the wireframe background instead! */
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
-	}
+}
 
 
 .wireframe {
@@ -51,13 +51,13 @@ body {
 }
 
 .columns div {
-		/*border: 1px solid red; */
-		background-color: white;
-		background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
-
+	/*border: 1px solid red; */
+	background-color: white;
+	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+	
 }
 
- 
+
 .leftColumn {
 	float: left;
 	/* Needs to have width! */
@@ -75,7 +75,7 @@ body {
 
 .rightColumn {
 	float: right;
-
+	
 	background-color: orange;
 	/* Needs to have width! */
 	vertical-align: top;
@@ -93,9 +93,12 @@ body {
 	border-top: 2px solid #767676;
 	/* Needs to have height! */
 	box-shadow: inset 0px 4px 10px #888888;
+	padding-bottom: 6px;
+	padding-left: 4px;
+	padding-right: 4px;
 }
 .footer:empty { 
-    border: none; /* Hide the border if the footer is empty */
+	border: none; /* Hide the border if the footer is empty */
 }
 
 
@@ -107,6 +110,24 @@ body {
 
 
 /* ###### Standard settings ####### */
+
+.footer table {
+	margin: 0px;
+	padding: 0px;
+	border-spacing: 0px;
+	border-collapse: separate;
+	margin-bottom: -2px; /* adjust so the top/bottom margin will be the same like wihout a table */
+	margin-top: -2px;
+	
+}
+
+.footer td {
+	padding: 2px;
+	margin: 0px;
+}
+
+
+
 ul, li {
 	margin: 0px;
 	list-style-type: none;
@@ -123,6 +144,9 @@ li ul {
 label {
 	color: #f6f6f3;
 	text-shadow: 0px -1px 0px #1f2020;
+	font-size: 14px;
+	font-family: Verdana;
+	font-weight: bold;
 }
 
 input[type=text], input[type=password], select.select {

@@ -148,7 +148,7 @@
 			tr = document.createElement("tr"),
 			td = document.createElement("td");
 		
-		table.setAttribute("cellspacing", "5");
+		//table.setAttribute("cellspacing", "5");
 		
 		td = document.createElement("td");
 		td.setAttribute("align", "right");
