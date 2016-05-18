@@ -10,4 +10,4 @@ chmod +x JZedit.desktop
 
 # Start the editor
 #runtime/nwjs-v0.12.3-linux-x64/nw .
-runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text
+runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text --remote-debugging-port=57341
