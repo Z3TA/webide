@@ -17,7 +17,6 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Integrating cmsjz
 
 
 todo: Add osx/mac runtime
@@ -507,6 +506,8 @@ createBuffer in render takes a very long time > 500 ms on files with very long l
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Some times the editor is invisble in MS windows. Only the debugger window loads.
 
 ---
 When double clicking a world and started typing:
