@@ -124,7 +124,8 @@ window.localStorage.openedFiles = "";
 Error in Windows/OS: Restart the operating system
 
 
-
+index.htm, Line 1, Uncaught SyntaxError: Unexpected end of input
+possible cause: Somewhere parsing an empty JSON:
 
 
 

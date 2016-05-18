@@ -6,7 +6,9 @@
 	/*
 	
 		Renders the grid
-	
+		
+		note: fillText is about 3 times faster then putImageData or drawImage on Windows!
+		
 	*/
 	
 	// Sanity check

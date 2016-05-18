@@ -26,6 +26,8 @@ todo: Add osx/mac runtime
 BUGS
 ====
 
+README.txt is opened with folder in tabs: JZEdit/README.txt
+
 Goto file doesn't work if you type too fast!
 
 Parse error:
@@ -507,7 +509,12 @@ createBuffer in render takes a very long time > 500 ms on files with very long l
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+Sometimes it doesn't work to select text, or the selection is buggy.
+
+---
+
 Some times the editor is invisble in MS windows. Only the debugger window loads.
+Probably because of failing JSON.parse
 
 ---
 When double clicking a world and started typing:

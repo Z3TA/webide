@@ -56,8 +56,11 @@
 		// There seems to be no way to check whether a window was reopened, so let's
 		// check for dev tools - they can't be open on the app start, so if
 		// dev tools are open, LiveReload was used.
+		
+		if(!window.localStorage) throw new Error("window.localStorage not available!");
+		
 		if (!win.isDevToolsOpen()) {
-			winState = JSON.parse(window.localStorage.windowState || 'null');
+			winState = window.localStorage.windowState ? JSON.parse(window.localStorage.windowState) : null;
 
 			if (winState) {
 				currWinMode = winState.mode;
@@ -116,7 +119,7 @@
 
 	function saveWindowState() {
 		dumpWindowState();
-		   window.localStorage['windowState'] = JSON.stringify(winState);
+		if(winState) window.localStorage.windowState = JSON.stringify(winState);
 	}
 
 	win.on('maximize', function () {
