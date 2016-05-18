@@ -31,6 +31,9 @@ Mac OS X
 --------
 Not yet officially supported (let me borrow your Mac and I'll fix it)
 
+Make the osx_start.sh script executable:
+Via terminal: chmod u+x my_shell_script.sh
+
 
 
 Font settings and styling
