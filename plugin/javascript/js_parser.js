@@ -970,7 +970,7 @@
 					%>
 					
 				*/
-				if(file.fileExtension == "asp") {
+				if(file.fileExtension == "asp" || file.fileExtension == "html" || file.fileExtension == "htm" || file.fileExtension == "inc") {
 					if(pastChar[0] == "<" && char == "%") { // <%
 						ASP = true;
 						// Is it vbScript?

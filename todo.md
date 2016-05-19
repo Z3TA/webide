@@ -22,13 +22,6 @@ What I'm working on:
 BUGS
 ====
 
-README.txt is opened with folder in tabs: JZEdit/README.txt
-
-Goto file doesn't work if you type too fast!
-
-Parse error:
-foo = 1 / 2;
-bar = "string"
 
 Indentation in HTML:
 <ul class="blog">
@@ -199,7 +192,10 @@ Source indentation in html documents might be "off" if you remove or add div's.
 
 The caret is off in the magnification glass
 
-A file (that was opened, but never closed) was removed from editor.files!!
+README.txt is opened with folder in tabs: JZEdit/README.txt
+
+Goto file doesn't work if you type too fast!
+
 
 
 Polishing
