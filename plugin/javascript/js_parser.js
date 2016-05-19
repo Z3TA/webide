@@ -1642,6 +1642,8 @@
 				// ### vbScript Line break
 				if(char == lastLineBreakCharacter) {
 					
+					afterThen = false;
+					
 					insideCondition = false;
 					
 					//console.log("--- new line=" + (row) + " thisRowIndentation=" + thisRowIndentation + " ---");
