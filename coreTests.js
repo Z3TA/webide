@@ -28,7 +28,27 @@
 	*/
 
 	
+	
+	
+	
+	editor.addTest(function negativeIndentationBrackets(callback) {
+		
+		editor.openFile("negativeIndentationBrackets.js", "re = /]]]/i\n{\n\n}\n", function(err, file) {
+			
+			var grid = file.grid;
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
 
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function unclosedHtmlTagInQuote(callback) {
 		editor.openFile("unclosedHtmlTagInQuote.js", "html += '<html';\n// foo\n", function(err, file) {
 			

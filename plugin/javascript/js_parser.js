@@ -1138,7 +1138,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS) {
+			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS && !insideRegExp) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
