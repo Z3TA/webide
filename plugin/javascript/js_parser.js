@@ -394,7 +394,7 @@
 			
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
-			if(parentCodeBlock.indentation < 0) throw new Error("parentCodeBlock.indentation=" + parentCodeBlock.indentation);
+			if(parentCodeBlock.indentation < 0) throw new Error("Line:" + lineNumber + " parentCodeBlock.indentation=" + parentCodeBlock.indentation);
 			
 			codeBlock[codeBlockDepth] = {word: lastWord, indentation: parentCodeBlock.indentation+1, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
@@ -1025,7 +1025,7 @@
 					if(insideHTMLComment) throw new Error("WTF");
 				}
 				
-				else if(pastChar[3] == "<" && pastChar[2] == "h" && pastChar[1] == "t" && pastChar[0] == "m" && char == "l") {
+				else if(pastChar[3] == "<" && pastChar[2] == "h" && pastChar[1] == "t" && pastChar[0] == "m" && char == "l" && !insideQuote) {
 					xmlModeBeforeTag = true; // Turn on HTML mode if we find a html tag
 					insideXmlTag = true;
 					xmlTagStart = i-5;

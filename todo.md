@@ -22,9 +22,6 @@ What I'm working on:
 BUGS
 ====
 
-Parsing string:
-var str = 'ab\'cd'
-
 
 Uncaught Error: parentCodeBlock.indentation=-4:
 [{"foo":"1"},{"foo":"2"},{"foo":"3"}]
