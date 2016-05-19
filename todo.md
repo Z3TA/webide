@@ -17,16 +17,10 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-
+REM Comment in vbScript
 
 BUGS
 ====
-
-
-Uncaught Error: parentCodeBlock.indentation=-4:
-[{"foo":"1"},{"foo":"2"},{"foo":"3"}]
-foo|1|2|3^^^@$0|1]|$0|2]|$0|3]]
-{[\1 \a
 
 
 Getting a tag ending when autocompletion something that is no available: ex:
@@ -36,11 +30,6 @@ Don't get auto completion for function arguments!
 
 Indentation in the source files is fubar
 
-parser error:
-document.url = document.url.replace(/\\/g, "/");
-
-document.url = document.url.replace(/\s/g, ""); // Remove white space
-
 
 when selecing 0 in "editor.keyBindings.push({charCode: 33, combo: 0, fun: pageUp});" using shift + keyboard arrows
 Error when running key bound function:Error: Selected box i=0 is not selected! box[0]={"char":"3","index":76,"selected":false,"highlighted":false,"hasCharacter":true,"wave":false,"circle":false,"color":"rgb(0,0,0)","quote":false,"comment":false}
@@ -49,6 +38,7 @@ at File.select (File.js:1040)
 at Object.moveRight [as fun] (keyboard_arrows.js:116)
 at keyIsDown (editor.js:2948)
 
+End doesn't go to EOF/EOL
 
 Indent breaks in string concatenation!
 foo = "bar" +
@@ -56,9 +46,6 @@ baz;
 
 Adding a } should fix indentation of all lines below!
 
-regexp parse error:
-var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
-asdasd("fooo");
 
 bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.
 
@@ -66,8 +53,6 @@ Lots of errors (absolute paths when dragging the folder to nw.exe):
 Uncaught Error: ENOENT: no such file or directory, open 'C:\Users\Z\dev-repositories\js-editor\runtime\nwjs-v0.12.3-win-x64\version.inc'
 Uncaught Error: spell-check worker exit:0
 
-
-Editor not visible !??????
 
 Uncaught Error: getaddrinfo ENOENT localhost:57341
 
@@ -79,10 +64,6 @@ before fixing it.
 
 vb_parser: Lots of indention errors (double END IF ??) ex: castSpell.asp
 
-
-js_parser doesn't find functions inside arguments for function calls:
-foo(function bar() {
-});
 
 
 Doesn't find bug when the = is together in other if(data.type="temperaturehumidity") {

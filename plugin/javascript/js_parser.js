@@ -1488,6 +1488,14 @@
 				
 				//console.log("char=" + char.replace("\r", "<R>").replace("\n", "<N>") + " word=" + word + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " LLC=" + (char == lastLineBreakCharacter) + " FLC=" + (char == firstLineBreakCharacter) + " firstLineBreakCharacter=" + firstLineBreakCharacter.replace("\r", "<R>").replace("\n", "<N>") + " insideVariableDeclaration[codeBlockDepth]=" + insideVariableDeclaration[codeBlockDepth]);
 				
+				char = char.toLowerCase(); // vbScript is not case sensitive!
+				
+				if(char == "m" && lastChar == "e" && llChar == "r") {
+					insideLineComment = true;
+					commentStart = i+1;
+				}
+				
+				
 				if(!insideDblQuote && !insideLineComment) {
 					
 					// ### Collect vbScript words

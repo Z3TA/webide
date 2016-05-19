@@ -28,7 +28,17 @@
 	*/
 
 	
-	
+	editor.addTest(function remVbComment(callback) {
+		editor.openFile("remVbComment.asp", "<%\nREM foo\n%>\n ", function(err, file) {
+			
+			if(file.parsed.comments.length == 0) throw new Error("Expected a comment!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	
 	editor.addTest(function negativeIndentationBrackets(callback) {
@@ -47,12 +57,12 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function unclosedHtmlTagInQuote(callback) {
 		editor.openFile("unclosedHtmlTagInQuote.js", "html += '<html';\n// foo\n", function(err, file) {
 			
-			console.log("file.parsed=" + JSON.stringify(file.parsed));
+			//console.log("file.parsed=" + JSON.stringify(file.parsed));
 			
 			if(file.parsed.comments.length == 0) throw new Error("Expected a comment!");
 			
@@ -61,7 +71,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 
 	editor.addTest(function singleQuoteStringEscape(callback) {
 		editor.openFile("singleQuoteStringEscape.js", "var str = 'ab\\'cd';\n", function(err, file) {
