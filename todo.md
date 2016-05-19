@@ -22,7 +22,6 @@ What I'm working on:
 BUGS
 ====
 
-Code inside <style> tags in .htm files are not indented!
 
 vbScript parser:
 <%
@@ -187,7 +186,7 @@ README.txt is opened with folder in tabs: JZEdit/README.txt
 
 Goto file doesn't work if you type too fast!
 
-
+JS parser seems to have problems finding variable type with single quoted strings.
 
 Polishing
 =========
@@ -487,6 +486,7 @@ Try the editor on a super slow PC to see what needs further optimization.
 createBuffer in render takes a very long time > 500 ms on files with very long lines. 
 
 
+Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in C:\Users\Z\dev-repositories\test\JZedit-tests\parser
 
 
 Unable to repeat bugs (happens rarely)

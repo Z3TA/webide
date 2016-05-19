@@ -82,7 +82,8 @@
 			console.log("Parsing " + file.path);
 			
 			var js = parseJavaScript(file);
-
+			
+			
 			file.haveParsed(js); // Tell the file that it has been parsed so that functions depending on the parsed data can update
 			
 		}
@@ -336,6 +337,7 @@
 		var thisRowIndentation = 0;
 		var nextRowIndentation = false;
 		var afterIf = false;
+		var insideFor = 0;
 		
 		//console.log("file.fileExtension=" + file.fileExtension);
 		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php") xmlMode = true; // Start in xml mode
@@ -1548,9 +1550,11 @@
 							else if(word == "for") {
 								//console.log("for: nextRowIndentation=" + nextRowIndentation);
 								nextRowIndentation = true;
+								insideFor++;
 							}
-							else if(word == "next") {
+							else if(word == "next" && insideFor != 0) {
 								thisRowIndentation--;
+								insideFor--;
 							}
 							
 							// ### CLASS ... END CLASS
@@ -1935,6 +1939,5 @@
 		this.wordLength = wordLength;
 		this.selfEnding = selfEnding;
 	}
-	
 	
 })();

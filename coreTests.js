@@ -26,10 +26,26 @@
 		
 		
 	*/
-	
+
 	
 
-
+	editor.addTest(function aspOnErrorResumeNext(callback) {
+		editor.openFile("aspOnErrorResumeNext.htm", "<%\nON ERROR RESUME NEXT\nIF 1 = 2 THEN\n\nEND IF\n%>\n", function(err, file) {
+			
+			var grid = file.grid;
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 0) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function htmlStyleTag(callback) {
 		editor.openFile("htmlStyleTag.htm", '<style>\nbody {\n\n}\n</style>\n', function(err, file) {
 			
@@ -45,7 +61,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function aspTagInHtmlFile(callback) {
 		editor.openFile("aspTagInHtmlFile.htm", '<div>\n<%\nvar foo = "<b>bar</b>"\n%>\n</div>\n', function(err, file) {
