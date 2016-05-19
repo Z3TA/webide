@@ -926,9 +926,11 @@
 				// ### Quotes: single
 				else if(!vbScript && char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 					if(insideSingleQuote) {
-						insideSingleQuote = false;
-						quotes.push(new Quote(quoteStart, i));
-						return;
+						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
+							insideSingleQuote = false;
+							quotes.push(new Quote(quoteStart, i));
+							return;
+						}
 					}
 					else {
 						insideSingleQuote = true;

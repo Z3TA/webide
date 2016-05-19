@@ -22,23 +22,6 @@ What I'm working on:
 BUGS
 ====
 
-
-vbScript parser:
-<%
-Function SaveReferer()
-ON ERROR RESUME NEXT
-%>
-
-
-
-bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.
-
-
-Parsing error:
-var baseUrl = require("dirname").replace(/\\/g, "/");
-console.log("baseUrl=" + baseUrl);
-
-
 Parsing string:
 var str = 'ab\'cd'
 
@@ -79,6 +62,8 @@ Adding a } should fix indentation of all lines below!
 regexp parse error:
 var baseUrl = "file:///" + editor.workingDirectory.replace(/\\/g, "/");
 asdasd("fooo");
+
+bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.
 
 Lots of errors (absolute paths when dragging the folder to nw.exe):
 Uncaught Error: ENOENT: no such file or directory, open 'C:\Users\Z\dev-repositories\js-editor\runtime\nwjs-v0.12.3-win-x64\version.inc'
