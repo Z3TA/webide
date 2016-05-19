@@ -22,15 +22,6 @@ What I'm working on:
 BUGS
 ====
 
-
-Indentation in HTML:
-<ul class="blog">
-<%
-%>
-</ul>
-
-
-
 Code inside <style> tags in .htm files are not indented!
 
 vbScript parser:
@@ -563,6 +554,8 @@ Test if inlining functions in jsParser makes it faster.
 
 Feature
 =======
+
+Support for: http://editorconfig.org
 
 Show another part of the file so you can copy back and forth, without navigating.
 

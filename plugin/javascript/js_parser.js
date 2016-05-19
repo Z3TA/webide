@@ -253,6 +253,10 @@
 			subCount = 0, // Level of function scope depth
 			functions = {},
 			myFunction = [],
+			newFunc,
+			properties,
+			variable,
+			startIndex = 0,
 			functionId = -1,
 			insideObject = false,
 			comments = [],
@@ -262,6 +266,8 @@
 			commentStartIndentation = 0,
 			objCount = 0,
 			codeBlockDepth = 0,
+			codeBlockDepthTemp = 0,
+			rootWord = "",
 			row = 0,
 			lineNumber = 1,
 			word = "",
@@ -317,7 +323,8 @@
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
 		ASP = false,
-		PHP = false;
+		PHP = false,
+		CSS = false;
 			
 		// -----
 		
@@ -330,7 +337,7 @@
 		var nextRowIndentation = false;
 		var afterIf = false;
 		
-		
+		//console.log("file.fileExtension=" + file.fileExtension);
 		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php") xmlMode = true; // Start in xml mode
 		
 		
@@ -377,7 +384,7 @@
 				The character is always a {
 			*/
 			
-			let parentCodeBlock = codeBlock[codeBlockDepth];
+			var parentCodeBlock = codeBlock[codeBlockDepth];
 			
 			codeBlockDepth++;
 			codeBlockLeft++;
@@ -410,7 +417,7 @@
 			if(codeBlockDepth > 1) {
 				
 				// why only on codeBlockDepth 2 and higher???
-				let parentWord = parentCodeBlock.word;
+				var parentWord = parentCodeBlock.word;
 
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
 					codeBlock[codeBlockDepth].parent = parentCodeBlock;
@@ -493,7 +500,7 @@
 			}
 			else {
 				
-				let par = rightSide.indexOf("(");
+				var par = rightSide.indexOf("(");
 				
 				if(par > -1) {
 					// It's an Object object
@@ -822,7 +829,7 @@
 			
 			// ### Comments: <!-- -->
 			//if(char == "-" && lastChar == "-" && llChar == "!") console.log("lllChar=" + lllChar + " insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
-			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) { // <!--
+			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
 				xmlMode = xmlModeBeforeTag;
@@ -852,7 +859,7 @@
 				*/
 				if(char == "/" 
 				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="") 
-				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag) {
+				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag && !CSS) {
 					
 					insideRegExp = true;
 					regExpStart = i;
@@ -865,7 +872,7 @@
 				}
 				
 				// ### Comments: //
-				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp) {
+				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp && !CSS) {
 					insideLineComment = true;
 					commentStart = i-1;
 					//console.log("insideLineComment!");
@@ -1019,6 +1026,15 @@
 					insideXmlTag = true;
 					xmlTagStart = i-5;
 				}
+				// Exit out of style
+				else if(CSS && pastChar[5] == "<" && pastChar[4] == "/" && pastChar[3] == "s" && pastChar[2] == "t" && pastChar[1] == "y" && pastChar[0] == "l" && char == "e") {
+					insideXmlTag = true;
+					xmlTagSelfEnding = false;
+					xmlTagStart = i-6;
+					insideXmlTagEnding = true;
+					insideRegExp = false;
+					// CSS=false is set below ... (scroll down)
+				}
 				// Exit out of script
 				else if(insideScriptTag && pastChar[6] == "<" && pastChar[5] == "/" && pastChar[4] == "s" && pastChar[3] == "c" && pastChar[2] == "r" && pastChar[1] == "i" && pastChar[0] == "p" && char == "t") {
 					insideXmlTag = true;
@@ -1067,6 +1083,19 @@
 							insideScriptTag = true;
 						}
 					}
+					else if(xmlTag.toLowerCase() == "style") {
+						
+						if(insideXmlTagEnding) { // Tag end
+							CSS = false;
+							xmlMode = xmlModeBeforeScript;
+						}
+						else { // Tag start
+							CSS = true;
+							xmlModeBeforeScript = xmlMode; // Reuse this varibale :P 
+							xmlMode = false;
+						}
+
+					}
 					
 					if(tagBreak.indexOf(xmlTag) > -1) {
 						
@@ -1096,7 +1125,7 @@
 				
 			}
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + "  xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;
@@ -1105,7 +1134,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP) {
+			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
@@ -1367,14 +1396,14 @@
 						*/
 						//afterPointer[codeBlockDepth] = false; // only endpointer should end it!?
 						
-						let newFunc = new Func(functionName, functionArguments, i, lineNumber);
+						newFunc = new Func(functionName, functionArguments, i, lineNumber);
 						
 						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???
 						
-						let properties = functionName.split(".");
+						properties = functionName.split(".");
 						
 
 						//console.log("subCount=" + subCount);
@@ -1395,8 +1424,8 @@
 								if(myFunction[subCount-1].variables.hasOwnProperty(properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
 									// Change the variable type to Method
-									let variable = myFunction[subCount-1].variables[properties[0]];
-									let startIndex = 1;
+									variable = myFunction[subCount-1].variables[properties[0]];
+									startIndex = 1;
 									variable = traverseVariableTree(properties, variable, startIndex);
 									
 									variable.type = "Method";
@@ -1423,8 +1452,8 @@
 									// Change the variable type to Method
 									if(functions[properties[0]].variables.hasOwnProperty(properties[1])) {
 										
-										let variable = functions[properties[0]].variables[properties[1]];
-										let startIndex = 2;
+										variable = functions[properties[0]].variables[properties[1]];
+										startIndex = 2;
 										variable = traverseVariableTree(properties, variable, startIndex);
 										
 										variable.type = "Method";
@@ -1627,6 +1656,18 @@
 				
 			}
 			
+			else if(CSS) {
+				// ## Parse CSS
+				
+				if(char == "{") {
+					codeBlockL();
+				}
+				else if(char == "}") {
+					codeBlockR();
+				}
+				
+			}
+			
 		}
 		
 		
@@ -1768,12 +1809,12 @@
 										// Check if the parent (word) exist in 
 										
 										
-										let codeBlockDepthTemp = codeBlockDepth;
+										codeBlockDepthTemp = codeBlockDepth;
 										
 										while(codeBlock[codeBlockDepthTemp].parent) {
 											codeBlockDepthTemp--;
 										}
-										let rootWord = codeBlock[codeBlockDepthTemp].word;
+										rootWord = codeBlock[codeBlockDepthTemp].word;
 										
 										//console.log("Inside function=" + insideFunctionBody[subCount].name + " word=" + word + " rootWord=" + rootWord + "");
 										
