@@ -1283,6 +1283,8 @@
 						
 						functionName = lastWord || word.replace("(", "");
 						
+						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
+						
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
 						insideFunctionArguments = true;

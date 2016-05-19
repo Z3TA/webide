@@ -52,7 +52,7 @@
 		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewButtonClick, charCode: keyF9, combo: 0});
 		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
 		
-		build();
+		//build();
 		
 	}
 	

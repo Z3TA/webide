@@ -27,6 +27,22 @@
 		
 	*/
 	
+	
+	
+	editor.addTest(function jsLongFunction(callback) {
+		editor.openFile("jsLongFunction.js", 'return foo ||\nfunction() {};\n', function(err, file) {
+			
+			//console.log("file.parsed=" + JSON.stringify(file.parsed));
+			
+			if(file.parsed.functions.hasOwnProperty("return foo ||")) throw new Error("Unexpected function!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function jsDivisionVsRegExp(callback) {
 		editor.openFile("jsDivisionVsRegExp.js", 'foo = 1 / 2;\nbar = "string"\n', function(err, file) {
 			
@@ -39,7 +55,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function jsExitRegExpBackslash(callback) {

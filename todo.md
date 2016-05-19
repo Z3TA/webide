@@ -19,10 +19,6 @@ What I'm working on:
 
 
 
-todo: Add osx/mac runtime
-
-
-
 BUGS
 ====
 
@@ -508,6 +504,12 @@ createBuffer in render takes a very long time > 500 ms on files with very long l
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+---
+
+Cut/paste turned the text backwards!
+
+---
 
 Sometimes it doesn't work to select text, or the selection is buggy.
 
