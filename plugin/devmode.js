@@ -61,7 +61,8 @@
 		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
 		
 		// Disable console.log
-		console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
+		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
+		console.log = console.warn = function() {}; // Perf mode
 		
 		require('nw.gui').Window.get().closeDevTools();
 		
