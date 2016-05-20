@@ -3,19 +3,19 @@
 	Debug using nodejs:
 	
 	
-### todo:
-
+	### todo:
+	
 	Ignore html in xmp
-
-	
-bugfix:
 	
 	
+	bugfix:
 	
-### planned updates:
-
+	
+	
+	### planned updates:
+	
 	Auto copy media (images etc) that have local sources (src=)
-
+	
 	Helper functions for Scripting templates?
 	
 	Look for media in css files,
@@ -24,53 +24,53 @@ bugfix:
 	Exclude "files" that is not used in any documents.
 	
 	Give warning for when media (img src="...) doesnt exist.
-
+	
 	Sort documents by date? in an array
 	
 	makePathsRelative after evaluation!!?
-
 	
-### ideas:
+	
+	### ideas:
 	Minify CSS
 	Losslessly image compressing ()
 	
 	inline critical (render-blocking) JavaScript and CSS
 	<script>
-      var cb = function() {
-        var l = document.createElement('link'); l.rel = 'stylesheet';
-        l.href = 'small.css';
-        var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h);
-      };
-      var raf = requestAnimationFrame || mozRequestAnimationFrame ||
-          webkitRequestAnimationFrame || msRequestAnimationFrame;
-      if (raf) raf(cb);
-      else window.addEventListener('load', cb);
-    </script>
+	var cb = function() {
+	var l = document.createElement('link'); l.rel = 'stylesheet';
+	l.href = 'small.css';
+	var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h);
+	};
+	var raf = requestAnimationFrame || mozRequestAnimationFrame ||
+	webkitRequestAnimationFrame || msRequestAnimationFrame;
+	if (raf) raf(cb);
+	else window.addEventListener('load', cb);
+	</script>
 	
-
-Notes to users
-==============
-
-All files should be encoded with utf8!
-
-When linking to css files and images etc in headers and footers, 
-all src and href paths needs to translate from root (have an / infront)
-
-
-Notes to developer
-==================
-
-The URL's will be the same as the file paths!
-Having different urls and file paths would get messy when it comes to 
-dependencies like css and images.
-
-When moving files between folders, the user has to make the old file into an 
-meta refresh. See: moved-file.htm
-
-Do not remove files from the deployment server! The user has to do this manually.
-Because when colaborating, everyones working directory might look different!
-
-Deoply using rsync, scp, ftp etc.
+	
+	Notes to users
+	==============
+	
+	All files should be encoded with utf8!
+	
+	When linking to css files and images etc in headers and footers, 
+	all src and href paths needs to translate from root (have an / infront)
+	
+	
+	Notes to developer
+	==================
+	
+	The URL's will be the same as the file paths!
+	Having different urls and file paths would get messy when it comes to 
+	dependencies like css and images.
+	
+	When moving files between folders, the user has to make the old file into an 
+	meta refresh. See: moved-file.htm
+	
+	Do not remove files from the deployment server! The user has to do this manually.
+	Because when colaborating, everyones working directory might look different!
+	
+	Deoply using rsync, scp, ftp etc.
 	
 */
 
@@ -100,8 +100,8 @@ var DONOTCHANGE = ["xml", "asp", "nodejs"]; // List of file types that should no
 
 
 function log(txt) {
-var fs = require("fs");
-fs.appendFileSync("build.log", txt + "\n");
+	var fs = require("fs");
+	fs.appendFileSync("build.log", txt + "\n");
 }
 
 function main() {
@@ -122,9 +122,9 @@ function main() {
 		console.time("evaulute");
 		evaluate(ROOT);
 		console.timeEnd("evaulute");
-
+		
 		//console.log("MEDIAFILES=" + MEDIAFILES);
-
+		
 		console.log("\nBuilding ...");
 		console.time("build");
 		
@@ -139,11 +139,11 @@ function main() {
 				console.log("Copied " + fileCount + " files!");
 				
 				// Static preview server (preview.js)
-
+				
 				// FTP upload is separate script! (deploy.js)
 				
 				console.timeEnd("total time");
-
+				
 				
 			});
 			
@@ -151,39 +151,39 @@ function main() {
 		});
 		
 	});
-		
+	
 }
 
 /*
-function saveURLs(callback) {
+	function saveURLs(callback) {
 	var filePath = PATH.resolve(BASEPATH, "url.json")
-
+	
 	FS.writeFile(filePath, JSON.stringify(URL, null, 2), "utf8", function(err) {
-		if(err) throw err;
-		
-		callback();
-		
+	if(err) throw err;
+	
+	callback();
+	
 	});
-}
-
-function getURLs(callback) {
+	}
+	
+	function getURLs(callback) {
 	
 	var filePath = PATH.resolve(BASEPATH, "url.json")
 	
 	FS.readFile(filePath, "utf8", function (err, data) {
-		if(err == null) {
-			URL = JSON.parse(data);
-			callback();
-		}
-		else if(err.code == "ENOENT") {
-			// File does not exist! We'll create it later.
-			callback();
-		}
-		else {
-			throw err;
-		}
+	if(err == null) {
+	URL = JSON.parse(data);
+	callback();
 	}
-}
+	else if(err.code == "ENOENT") {
+	// File does not exist! We'll create it later.
+	callback();
+	}
+	else {
+	throw err;
+	}
+	}
+	}
 */
 
 function copyOtherFiles(callback) {
@@ -201,9 +201,9 @@ function copyOtherFiles(callback) {
 	var pubFolder = PATH.resolve(PUBFOLDER, "");
 	
 	/*
-	console.log("basePath=" + basePath);
-	console.log("pubFolder=" + pubFolder);
-	console.log("OTHERFILES=" + OTHERFILES);
+		console.log("basePath=" + basePath);
+		console.log("pubFolder=" + pubFolder);
+		console.log("OTHERFILES=" + OTHERFILES);
 	*/
 	var filesToCopy = OTHERFILES.length;
 	var totalFiles = filesToCopy;
@@ -222,53 +222,53 @@ function copyOtherFiles(callback) {
 		});
 		
 		/*
-		// Asume som detective work has been done to figure out what files are used
-		if(fileInUse(src)) {
+			// Asume som detective work has been done to figure out what files are used
+			if(fileInUse(src)) {
 			console.log("Copying file=" + path);
 			FS.copy(OTHERFILES[i], path, function (err) {
-				if (err) throw err;
-				
-				if(--filesToCopy == 0) callback();
-				console.log("filesToCopy=" + filesToCopy);
-				
+			if (err) throw err;
+			
+			if(--filesToCopy == 0) callback();
+			console.log("filesToCopy=" + filesToCopy);
+			
 			});
-		}
-		else {
+			}
+			else {
 			
 			console.log("Not used: " + src);
 			FS.unlink(path, function (err, path) {
-				if(err == null) {
-					console.log("Deleted file=" + path);
-				}
-				else if(err.code == "ENOENT") {
-				}
-				else {
-					throw err;
-				}
-				
-				if(--filesToCopy == 0) callback();
+			if(err == null) {
+			console.log("Deleted file=" + path);
+			}
+			else if(err.code == "ENOENT") {
+			}
+			else {
+			throw err;
+			}
+			
+			if(--filesToCopy == 0) callback();
 			});
 			
 			//console.log("filesToCopy=" + filesToCopy);
-		}
+			}
 		*/
 	}
 	
 	//console.log("filesToCopy=" + filesToCopy);
 	
 	/*
-	for(var i=0; i<OTHERFILES.length; i++) {
+		for(var i=0; i<OTHERFILES.length; i++) {
 		path = OTHERFILES[i].replace(basePath, pubFolder);
 		
 		copyFile(OTHERFILES[i], path, function(err, path) { // source, target, cb
-			if(err) throw err;
-			
-			console.log("copied file=" + path);
-			if(++filesCopied == OTHERFILES.length) {
-				callback();
-			}
+		if(err) throw err;
+		
+		console.log("copied file=" + path);
+		if(++filesCopied == OTHERFILES.length) {
+		callback();
+		}
 		}); 
-	}
+		}
 	*/
 	
 }
@@ -287,7 +287,7 @@ function build(baseTree, baseFolder, callback) {
 	
 	buildeDir(baseFolder, baseTree);
 	
-
+	
 	function buildeDir(path, branch) {
 		var folderExist = false;
 		
@@ -307,7 +307,7 @@ function build(baseTree, baseFolder, callback) {
 			console.log("Created dir=" + path);
 		}
 		//console.log("Building dir=" + path + " folderExist=" + folderExist);
-
+		
 		var filePath = "";
 		
 		for(var fileName in branch.documents) {
@@ -328,7 +328,7 @@ function build(baseTree, baseFolder, callback) {
 		
 		function buildFile(fileName, filePath) {
 			
-
+			
 			var fileExist = false;
 			var fileChanged = false;
 			
@@ -373,7 +373,7 @@ function build(baseTree, baseFolder, callback) {
 				
 			});
 			
-
+			
 			
 		}
 	}
@@ -414,7 +414,7 @@ function evaluate(baseTree) {
 			console.log("Evaluating file=" + document.path);
 			
 			var depth = findDepth(document);
-
+			
 			var code = document.html; // Copied
 			
 			document.html = ""; // Reset
@@ -436,7 +436,7 @@ function findDepth(document) {
 	var depth = 0;
 	
 	while(true) {
-	
+		
 		if(!tree.parent) break;
 		
 		depth++;
@@ -452,15 +452,15 @@ function findDepth(document) {
 function compile(baseTree) {
 	
 	var basePath = PATH.resolve(BASEPATH, "");
-
+	
 	//console.log("baseTree.folders=" + baseTree.folders);
 	
 	compileDir(baseTree, null);
 	
 	/*
-	for(var path in baseTree.folders) {
+		for(var path in baseTree.folders) {
 		compileDir(baseTree.folders[path], baseTree)
-	}
+		}
 	*/
 	
 	function compileDir(branch, parentBranch) {
@@ -480,13 +480,13 @@ function compile(baseTree) {
 		
 		function compileFile(document) {
 			/* 
-			
+				
 				Take content from the header and footer and put it together to one document
 				
 			*/
 			
 			
-		
+			
 			console.log("Compiling file=" + document.path);
 			
 			document.url = document.path.replace(basePath, "");
@@ -500,7 +500,7 @@ function compile(baseTree) {
 			document.root = ROOT;
 			document.console = console;
 			document.require = require;
-document.all = ALLDOCUMENTS;
+			document.all = ALLDOCUMENTS;
 			
 			
 			var fileType = getFileType(document.path);
@@ -511,7 +511,7 @@ document.all = ALLDOCUMENTS;
 			
 			
 			var html = "";
-
+			
 			/* 
 				Include all headers and footers all the way into the stem!
 				Make an array with all headers and footers starting from the stem to the current document
@@ -566,9 +566,9 @@ document.all = ALLDOCUMENTS;
 				body = headers[i].body + body;
 				
 				bodyScripts = mergeUnique(bodyScripts, headers[i].bodyScripts);
-
+				
 			}
-
+			
 			
 			
 			for(var i=0; i<footers.length; i++) {
@@ -578,9 +578,9 @@ document.all = ALLDOCUMENTS;
 				body = body + footers[i].body; 
 				
 				bodyScripts = mergeUnique(bodyScripts, footers[i].bodyScripts);
-
+				
 			}
-
+			
 			
 			// Build the HTML
 			html += '<!DOCTYPE html>\n';
@@ -633,26 +633,26 @@ document.all = ALLDOCUMENTS;
 			html += '</body>';
 			
 			
-
+			
 			html = makePathsRelative(html, depth);
 			
-
+			
 			
 			document.html = html;
 			
 		}
-	
+		
 	}
-
+	
 }
 
 
 function makePathsRelative(html, depth) {
 	// Look for href and src that starts with / (root) and make them relative!
-		
-		
-
-		
+	
+	
+	
+	
 	var relative = "";
 	for(var i=0; i<depth; i++) {
 		relative = relative + "../";
@@ -660,7 +660,7 @@ function makePathsRelative(html, depth) {
 	
 	// Replace href="" with href="index.htm" (Possible bug if linking to itself)
 	html = html.replace(/href.?=.?("|')\/["']/igm, "href=$1" + relative + "index.htm$1");
-
+	
 	
 	html = html.replace(/src.?=.?("|')\//igm, "src=$1"+relative);
 	html = html.replace(/href.?=.?("|')\//igm, "href=$1"+relative);
@@ -673,7 +673,7 @@ function makePathsRelative(html, depth) {
 	var str, arr;
 	while ((arr = re.exec(html)) !== null) {
 		//console.log("Found: " + JSON.stringify(arr));
-
+		
 		str = arr[0];
 		//console.log(str);
 		if(str.indexOf("://") == -1) {
@@ -687,30 +687,30 @@ function makePathsRelative(html, depth) {
 }
 
 /*
-
-var walk = function(dir, done) {
-  var results = [];
-  fs.readdir(dir, function(err, list) {
-    if (err) return done(err);
-    var pending = list.length;
-    if (!pending) return done(null, results);
-    list.forEach(function(file) {
-      file = path.resolve(dir, file);
-      fs.stat(file, function(err, stat) {
-        if (stat && stat.isDirectory()) {
-          walk(file, function(err, res) {
-            results = results.concat(res);
-            if (!--pending) done(null, results);
-          });
-        } else {
-          results.push(file);
-          if (!--pending) done(null, results);
-        }
-      });
-    });
-  });
-};
-
+	
+	var walk = function(dir, done) {
+	var results = [];
+	fs.readdir(dir, function(err, list) {
+	if (err) return done(err);
+	var pending = list.length;
+	if (!pending) return done(null, results);
+	list.forEach(function(file) {
+	file = path.resolve(dir, file);
+	fs.stat(file, function(err, stat) {
+	if (stat && stat.isDirectory()) {
+	walk(file, function(err, res) {
+	results = results.concat(res);
+	if (!--pending) done(null, results);
+	});
+	} else {
+	results.push(file);
+	if (!--pending) done(null, results);
+	}
+	});
+	});
+	});
+	};
+	
 */
 
 function findFiles(dir, parentBranch, done) {
@@ -722,7 +722,7 @@ function findFiles(dir, parentBranch, done) {
 	var wait_Document = 0;
 	
 	walk(dir, parentBranch, done);
-
+	
 	function walk(dir, parentBranch, done) {
 		
 		// Get last part of the dir
@@ -753,7 +753,7 @@ function findFiles(dir, parentBranch, done) {
 		
 		FS.readdir(dir, function(err, list) {
 			if (err) throw err;
-			 
+			
 			branch.documents = {};
 			
 			
@@ -762,13 +762,13 @@ function findFiles(dir, parentBranch, done) {
 				if(fileName.substring(0, 1) == "_") return; // Ignore files starting with _
 				
 				var filePath = PATH.resolve(dir, fileName);
-
+				
 				wait_stat++;
 				
 				var fileType = "";
 				
 				FS.stat(filePath, function(err, file) {
-
+					
 					if(err) throw err;
 					if(!file) throw new Error("Stat error!?");
 					
@@ -829,7 +829,7 @@ function findFiles(dir, parentBranch, done) {
 					}
 					
 				});
-
+				
 			});
 			
 			wait_readdir--;
@@ -844,7 +844,7 @@ function findFiles(dir, parentBranch, done) {
 				done();
 			}
 		}
-
+		
 	}
 }
 
@@ -925,18 +925,18 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				
 				// or ascii
 				data = iconv.decode(data, "ascii");
-
+				
 				data = data.toString("utf8");
 				/*
-				if(iconv.encodingExists(enc)) {
+					if(iconv.encodingExists(enc)) {
 					data = iconv.decode(data, enc);
 					//data = iconv.encode(data, "utf8");
 					data = data.toString("utf8");
 					//console.log("data=" + data);
-				}
-				else {
+					}
+					else {
 					throw new Error("Unable to decode " + enc);
-				}
+					}
 				*/
 				
 			}
@@ -944,7 +944,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				data = data.toString("utf8");
 			}
 			
-
+			document.original = data;
 			
 			if(fileType == "md") {
 				
@@ -996,9 +996,9 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		
 		
 		// Note: find and document.findReplace returns an array!
-
+		
 		document.stylesheets = find(document.html, "<link(?=[^>]*rel\\s*=\\s*(\"|')\\s*stylesheet\\s*\\1)\\s+[^>]*href\\s*=\\s*(\"|')([^>\\2]*?)\\2.*(>.*</link>|>)\\s{0,}", 3);
-
+		
 		
 		document.bodyOnloads = find(document.html, "<body.*onload=[\"'](.*?)[\"']", 1);
 		
@@ -1012,18 +1012,18 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		//console.log("abstract=" + abstract);
 		//console.log("description=" + description);
 		//console.log("lead=" + document.lead);
-	
-
+		
+		
 		
 		if(DONOTCHANGE.indexOf(fileType) != -1) {
 			// Do NOT remove anything from the document, but collect some info
 			
 			// Find title, but do not remove it
 			arrTitle = find(document.html, "<title>(.*?)</title>\\s{0,}", 1);
-
+			
 			// Find meta keywords, but do not replace them
 			arrKeywords = find(document.html, "<meta(?=[^>]*name\\s*=\\s*(\"|')\\s*keywords\\s*\\1)\\s+[^>]*content\\s*=\\s*(\"|')([^>\\2]*?)\\2.*(>.*</meta>|>)\\s{0,}", 3);
-
+			
 			
 		}
 		else {
@@ -1048,23 +1048,23 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				//if(!isHeaderOrFooter)
 				
 				arrLanguage = find(document.html, "<html.*lang=[\"'](.*?)[\"']", 1);
-
+				
 				arrDate = find(document.html, "<meta(?=[^>]*name\\s*=\\s*(\"|')\\s*created\\s*\\1)\\s+[^>]*content\\s*=\\s*(\"|')([^>\\2]*?)\\2.*(>.*</meta>|>)\\s{0,}", 3);
 				
 				arrDescription = find(document.html, "<meta(?=[^>]*name\\s*=\\s*(\"|')\\s*description\\s*\\1)\\s+[^>]*content\\s*=\\s*(\"|')([^>\\2]*?)\\2.*(>.*</meta>|>)\\s{0,}", 3);
-
+				
 				
 				
 				// Find and remove the title
 				arrTitle = document.findReplace("<title>(.*?)</title>\\s{0,}", 1, "");
-
-
+				
+				
 				// Find meta keywords and replace them
 				arrKeywords = document.findReplace("<meta(?=[^>]*name\\s*=\\s*(\"|')\\s*keywords\\s*\\1)\\s+[^>]*content\\s*=\\s*(\"|')([^>\\2]*?)\\2.*(>.*</meta>|>)\\s{0,}", 3);
 				
 				// Find and remove author info
 				arrAuthor = document.findReplace("<meta(?=[^>]*name\\s*=\\s*(\"|')\\s*author\\s*\\1)\\s+[^>]*content\\s*=\\s*(\"|')([^>\\2]*?)\\2.*(>.*</meta>|>)\\s{0,}", 3);
-
+				
 				
 				// Remove charset info (we will convert everything to utf-8)
 				// <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -1087,12 +1087,12 @@ function Document(fileName, filePath, evaluate, fileRead) {
 					//console.log("document.originalCharset=" + document.originalCharset);
 				}
 				
-
+				
 				
 				// Compute this both first (for searchPart) and last (so that stuff get replaced)
 				document.head = contentOfHtmlTag(document.html, "head");
 				document.body = contentOfHtmlTag(document.html, "body");
-
+				
 				document.headScripts = document.findReplace("<script.*?src=[\"|'](.*?)[\"|'].*(>.*</script>|>)\\s{0,}", 1, "", document.head);
 				document.bodyScripts = document.findReplace("<script.*?src=[\"|'](.*?)[\"|'].*(>.*</script>|>)\\s{0,}", 1, "", document.body);
 				
@@ -1104,7 +1104,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				
 				
 			}	
-
+			
 		}
 		
 		
@@ -1143,7 +1143,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 			}
 			
 		}
-
+		
 		if(arrTitle.length > 0) {
 			if(arrTitle.length > 1) {
 				console.log("WARNING: More then one title in file=" + filePath);
@@ -1171,18 +1171,18 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		if(arrAuthor.length > 0) {
 			document.author = arrAuthor[0];
 		}
-
+		
 		if(arrLanguage.length > 0) {
 			document.language = arrLanguage[0].trim();
 		}
 		
 		if(arrDate.length > 0) document.created = new Date(arrDate[0]);
 		
-
+		
 		
 		
 		if(!document.body && !document.head) document.body = document.html;
-
+		
 		// Strip HTML from title
 		document.title = document.title.replace(/<[^>]*>/g, "");
 		
@@ -1217,6 +1217,7 @@ Document.prototype.evaluate = function(str) {
 	var context = new vm.createContext(document);
 	var script;
 	var initCode = '"use strict";var document = this;';
+	var scriptCount = 0;
 	
 	script = new vm.Script(initCode);
 	script.runInContext(context);
@@ -1226,13 +1227,14 @@ Document.prototype.evaluate = function(str) {
 	}
 	
 	document.write(buffer.join("")); // Write whats left in the buffer
-
+	
 	
 	function checkChar(charIndex) {
 		char = str[i];
 		
 		//console.log("char=" + char);
 		//log("char=" + char + " lastChar=" + lastChar);
+		
 		if(char == "S" && lastChar == "J" && lastChar2 == "?" && lastChar3 == "<") {
 			codeStart = i+1;
 			insideCode = true;
@@ -1251,13 +1253,19 @@ Document.prototype.evaluate = function(str) {
 			//log("code=" + code);
 			
 			insideCode = false;
+			scriptCount++;
 			
 			//buffer.pop(); // Remove the % from the buffer
 			
 			if(code.substring(0, 1) == "=") {
 				
-				script = new vm.Script(code.substring(1));
-				document.write(script.runInContext(context));
+				try {
+					script = new vm.Script(code.substring(1));
+					document.write(script.runInContext(context));
+				}
+				catch(err) {
+					if(err) parseError(document, scriptCount, err);
+				}
 				
 				//document.write(eval(code.substring(1)));
 			}
@@ -1270,7 +1278,7 @@ Document.prototype.evaluate = function(str) {
 					script.runInContext(context);
 				}
 				catch(err) {
-					if(err) log(err.message);
+					if(err) parseError(document, scriptCount, err);
 				}
 				//eval(code);
 				//(1, eval)(code);
@@ -1316,7 +1324,7 @@ Document.prototype.findReplace = function(reString, group, replaceWith, searchPa
 		//console.log("Did not find " + reString + "");
 		//result.push("");
 	}
-
+	
 	for(var i=0; i<replace.length; i++) {
 		document.html = replaceAll(document.html, replace[i], replaceWith); // Remove it
 		//console.log("Replaced " + replace[i]);
@@ -1333,14 +1341,14 @@ function contentOfHtmlTag(text, tag, nr) {
 	//console.log("Finding content of tag: " + tag);
 	
 	if(nr == undefined) nr = 1;
-
+	
 	var originalText = text;
 	
 	// Ignore the case
 	text = text.toLowerCase();
 	tag = tag.toLowerCase();
 	
-
+	
 	
 	var xmpStart = -1;
 	var xmpEnd = -1;
@@ -1360,10 +1368,10 @@ function contentOfHtmlTag(text, tag, nr) {
 	} while(xmpStart != -1)
 	
 	//console.log("xmpTags=" + JSON.stringify(xmpTags));
-
+	
 	// Find tagStart, nr, not inside xml tags
 	do {
-	
+		
 		tagStart = text.indexOf("<" + tag, tagStart+1);
 		
 		//console.log("tagStart=" + tagStart);
@@ -1393,7 +1401,7 @@ function contentOfHtmlTag(text, tag, nr) {
 	var tagEnd = tagStart;
 	//console.log("Finding end ...");
 	do {
-	
+		
 		tagEnd = text.indexOf("</" + tag, tagEnd+1);
 		
 		//console.log("tagEnd=" + tagEnd);
@@ -1414,7 +1422,7 @@ function contentOfHtmlTag(text, tag, nr) {
 	
 	// Return the content of the html tag
 	return originalText.substring(tagStart, tagEnd);
-
+	
 }
 
 
@@ -1514,9 +1522,9 @@ function mustBePath(path, def) {
 	if(!path) return def;
 	
 	// Make sure it ends with / or \
-		
+	
 	var endsWidth = path.substring(path.length-1);
-		
+	
 	if(endsWidth == "/" || endsWidth == "\\") {
 		return path;
 	}
@@ -1530,7 +1538,7 @@ function fileInUse(src) {
 	// Check if the file is used anywhere
 	
 	src = replaceAll(src, "\\", "/").trim();
-
+	
 	//console.log("check=" + src);
 	
 	if (src=="favicon.ico") return true;
@@ -1552,7 +1560,7 @@ function findMedia(txt, lookFor, group) {
 	}
 	
 	var files = find(txt, lookFor, group);
-
+	
 	for(var i=0; i<files.length; i++) {
 		if(files[i] != "") {
 			files[i] = files[i].trim();
@@ -1566,7 +1574,7 @@ function findMedia(txt, lookFor, group) {
 }
 
 function escapeRegExp(str) {
-    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
 
 function replaceAll(str, find, replace) {
@@ -1589,7 +1597,7 @@ Folder.prototype.latest = function(limit) {
 	var folder = this;
 	
 	var documents = folder.documents;
-		
+	
 	
 	// Make an array
 	var arr = Object.keys(documents);
@@ -1615,7 +1623,7 @@ Folder.prototype.latest = function(limit) {
 
 
 /*
-function copyFile(source, target, cb) {
+	function copyFile(source, target, cb) {
 	// Not used!
 	var cbCalled = false;
 	var rdOpen = false;
@@ -1625,47 +1633,113 @@ function copyFile(source, target, cb) {
 	console.log("target=" + target);
 	
 	// Make sure the target path exist!
-
+	
 	
 	var rd = FS.createReadStream(source);
 	rd.on("error", function(err) {
-		console.log("read error!");
-		done(err);
+	console.log("read error!");
+	done(err);
 	});
 	rd.on("open", function() {
-		rdOpen = true;
-		console.log("readStream open file=" + source);
-		
-		if(rdOpen && wrOpen) startPipe();
+	rdOpen = true;
+	console.log("readStream open file=" + source);
+	
+	if(rdOpen && wrOpen) startPipe();
 	});
 	
 	var wr = FS.createWriteStream(target, { flags: 'w'});
 	wr.on("error", function(err) {
-		console.log("write error!");
-		done(err);
+	console.log("write error!");
+	done(err);
 	});
 	wr.on("close", function(ex) {
-		done();
+	done();
 	});
 	wr.on("open", function() {
-		wrOpen = true;
-		console.log("writeStream open file=" + target);
-		if(rdOpen && wrOpen) startPipe();
+	wrOpen = true;
+	console.log("writeStream open file=" + target);
+	if(rdOpen && wrOpen) startPipe();
 	});
 	
 	function startPipe() {
-		rd.pipe(wr);
+	rd.pipe(wr);
 	}
-
+	
 	function done(err) {
-		if (!cbCalled) {
-			cb(err, source + " -> " + target);
-			cbCalled = true;
-		}
+	if (!cbCalled) {
+	cb(err, source + " -> " + target);
+	cbCalled = true;
 	}
-}
+	}
+	}
 */
 
+function parseError(doc, scriptCount, err) {
+	var arr = err.stack.match(/at evalmachine.<anonymous>:(\d):(\d)/);
+	
+	if(err == null) return;
+	
+	//log(doc.original);
+	
+	//log(JSON.stringify(arr, null, 2));
+	
+	var filePath = doc.path;
+	
+	var workingDir = process.cwd();
+	
+	log("workingDir=" + workingDir);
+	
+	filePath = filePath.replace(workingDir, "");
+	
+	var line = parseInt(arr[1]);
+	var column = parseInt(arr[2]);
+	
+	var msg = err.message.replace('evalmachine.<anonymous>:' + line, "");
+	
+	// Figure out the line in the original file
+	var str = doc.original;
+	var startIndex = 0;
+	for(var i=0; i<scriptCount; i++) {
+		startIndex = str.indexOf("<?JS", startIndex) + 1;
+		//log("startIndex=" + startIndex);
+		}
+	var upUntil = str.substr(0, startIndex);
+	var lines = occurrences(upUntil, "\n");
+	
+	line += lines + 2;
+	
+	//var errMessage = "" + msg + "\nLine:" + line + " column: " + column + " of script nr: " + scriptCount + " of file: " + filePath;
+	
+	var errMessage = "Line:" + line + ": " + filePath + ": " + msg + "";
+	
+	//log(errMessage);
+	process.send(errMessage);
+	
+}
+
+function occurrences(string, subString, allowOverlapping) {
+	/** Function count the occurrences of substring in a string;
+		* @param {String} string   Required. The string;
+		* @param {String} subString    Required. The string to search for;
+		* @param {Boolean} allowOverlapping    Optional. Default: false;
+	*/
+	string+=""; subString+="";
+	if(subString.length<=0) return string.length+1;
+	
+	var n=0, pos=0;
+	var step=(allowOverlapping)?(1):(subString.length);
+	
+	while(true){
+		pos=string.indexOf(subString,pos);
+		if(pos>=0){
+			//console.log(n + " " + pos + " " + subString);
+			n++;
+			pos+=step;
+		}
+		else break;
+	}
+	return(n);
+}
 
 main(); // We have this at the bottom because prototype doesn't hoist.
 

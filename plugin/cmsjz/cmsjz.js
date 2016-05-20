@@ -603,7 +603,7 @@
 		});
 		
 		worker.on('message', function worker_message(data) {
-			console.log("cmsjz: " + data);
+			alert(data);
 		});
 		worker.on('error', function worker_error(code) {
 			console.warn("cmsjz: Error code=" + code);
