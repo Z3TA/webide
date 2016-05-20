@@ -20,7 +20,7 @@
 <h2>Articles and blog posts</h2>
 
 <ul class="blog">
-	<%
+	<?JS
 	
 	var blogEntries = document.folder.folders["blog"].latest().documents;
 	
@@ -38,7 +38,7 @@
 		document.write('</li>\n');
 	}
 	
-	%>
+	?>
 	</ul>
 	
 	<p>&nbsp;</p>

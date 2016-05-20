@@ -122,6 +122,9 @@
 		file.fileExtension == "java") {
 			return true;
 		}
+		else if(file.fileExtension == "xml" && (file.text.indexOf("<?JS") != -1)) {
+			return true;
+		}
 		else {
 			console.warn(file.name + " will not be parsed by the JavaScript parser!");
 			return false;
@@ -325,7 +328,8 @@
 		vbScript = false,
 		ASP = false,
 		PHP = false,
-		CSS = false;
+		CSS = false,
+		SSJS = false;
 			
 		// -----
 		
@@ -340,7 +344,7 @@
 		var insideFor = 0;
 		
 		//console.log("file.fileExtension=" + file.fileExtension);
-		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php") xmlMode = true; // Start in xml mode
+		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php" || file.fileExtension == "xml") xmlMode = true; // Start in xml mode
 		
 		
 		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
@@ -996,6 +1000,22 @@
 						xmlMode = true;
 					}
 				}
+				
+				// ### Server side JS script tag
+				if(file.fileExtension == "xml" || file.fileExtension == "html" || file.fileExtension == "htm") {
+					if(pastChar[2] == "<" &&  pastChar[1] == "?" &&  pastChar[0] == "J" && char == "S") { // <?JS
+						SSJS = true;
+						xmlMode = false;
+						insideXmlTag = false;
+					}
+					else if(pastChar[0] == "?" && char == ">" && SSJS) { // ?>
+						SSJS = false;
+						xmlMode = true;
+					}
+				}
+				
+				
+				
 			}
 			
 			

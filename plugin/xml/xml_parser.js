@@ -124,7 +124,7 @@
 			pastChar[0] = char;
 			char = text.charAt(charIndex);
 			
-			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
+			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
 			
 			/*
 				<![CDATA[ " and end with the string " ]]>
@@ -310,6 +310,11 @@
 	}
 	
 	function isXML(file) {
+		
+		if(file.parsed.language) {
+			console.warn("File has already been parsed: " + file.path);
+			return false;
+		}
 		
 		if(file.fileExtension == "xml") return true;
 		
