@@ -505,6 +505,8 @@
 	function previewButtonClick(file, combo, character, charCode, keyPushDirection, targetElementClass) {
 		if(!selectedSite) alert("No site selected!");
 		else previewPage(selectedSite);
+		
+		return false;
 	}
 	
 	function previewPage(site) {
