@@ -31,7 +31,7 @@
 		
 		blog = blogEntries[file];
 		
-		document.write('<li>\n');
+		document.write('\n<li>\n');
 		document.write('\t<i class="datum">' + moment(blog.created).format("Do MMM YYYY") + '</i>\n');
 		document.write('\t<a href="' + blog.url + '">' + blog.title + '</a>\n');
 		document.write('\t<blockquote>' + blog.lead + '</blockquote>\n');
@@ -39,7 +39,8 @@
 	}
 	
 	?>
-	</ul>
+	
+</ul>
 	
 	<p>&nbsp;</p>
 	
