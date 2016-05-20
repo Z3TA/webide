@@ -107,6 +107,9 @@
 		}
 	
 	function highlightCurrentFunction(file, cursor) {
+		
+		if(!file.parsed) return;
+		
 		if(file.parsed.functions) {
 			
 			// Deselect all
@@ -138,6 +141,8 @@
 	}
 
 	function initFunctionList(file) {
+		
+		if(!file.parsed) return;
 		
 		if(!file.parsed.functions) {
 			console.warn("No functions in file.parsed!");
@@ -240,6 +245,8 @@
 	
 	
 	function loadFunctionList(file) {
+		
+		if(!file.parsed) return;
 		
 		console.log("Load functionlist for file.path=" + file.path);
 		

@@ -26,6 +26,8 @@
 	function applyJScolors(buffer, file) {
 		// This is a preRender function! It must return the buffer!
 		
+		if(!file.parsed) return buffer;
+		
 		//file.debugGrid();
 		
 		if(buffer.length === 0) return buffer;

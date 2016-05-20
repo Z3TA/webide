@@ -33,13 +33,17 @@
 			
 			if(isXML(file)) {
 				
-				console.log("File is vb-script: " + file.path + " ...");
+				console.log("File is XML: " + file.path + " ...");
 				
-				file.haveParsed(parseXML(file)); // Tell the file that it has been parsed so that functions depending on the parsed data can update
+				var xml = parseXML(file);
+				
+				console.log("xml=" + JSON.stringify(xml));
+				
+				file.haveParsed(xml); // Tell the file that it has been parsed so that functions depending on the parsed data can update
 				
 			}
 			else {
-				console.log("File NOT vb-script: " + file.path);
+				console.log("File NOT XML: " + file.path);
 			}
 			
 		}
@@ -165,12 +169,12 @@
 				else if(char === "'" && !insideDblQuote && !insideComment) {
 					if(insideSingleQuote) {
 						insideSingleQuote = false;
-						quotes.push(new Quote(quoteStart, i));
+						quotes.push(new Quote(singleQuoteStart, charIndex));
 						return;
 					}
 					else {
 						insideSingleQuote = true;
-						quoteStart = i;
+						singleQuoteStart = charIndex;
 						//console.log("insideSingleQuote!");
 					}
 				}
@@ -273,6 +277,10 @@
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
 		console.timeEnd("parseXML");
+		
+		console.log("quotes:" + JSON.stringify(quotes, null, 2));
+		console.log("comments:" + JSON.stringify(comments, null, 2));
+		console.log("xmlTags:" + JSON.stringify(xmlTags, null, 2));
 		
 		return {language: "XML", quotes: quotes, comments: comments, xmlTags: xmlTags};
 		

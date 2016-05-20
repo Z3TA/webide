@@ -30,6 +30,8 @@
 		
 		// todo: Only do this for files parsed by jsParser! (or we will fuck up files parsed by other parsers. unless ... we are very strict on what a parser should return)
 		
+		if(!file.parsed) return;
+		
 		if(!file.parsed.blockMatch) return;
 		
 		var rowIndentation = 0;
