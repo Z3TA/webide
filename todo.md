@@ -389,7 +389,7 @@ Optimization
 
 Typing in editor.js is really slow because of the JS parser. Only parse if special characters are entered!? Optimize the parser function.
 
-
+applyJScolors slow on long lines, ex: sockjs one liner
 
 Optimize file.insertText, when inserting at EOF. sugg: file.addToGrid(text)
 
