@@ -17,12 +17,19 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-CMSJZ plugin
+Documentation for the static site generator
 
 
 
 BUGS
 ====
+
+parse error:
+var myRe = /<\?JS.*?>/g;
+{
+
+}
+
 
 When selecting this using keyboard, then copy/past it gets scrabled:
 <%
