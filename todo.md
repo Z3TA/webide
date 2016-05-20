@@ -23,6 +23,11 @@ Fixing parsing errors in vbScript.
 BUGS
 ====
 
+When selecting this using keyboard, then copy/past it gets scrabled:
+<%
+str = "<table>"
+%>
+
 
 Getting a tag ending when autocompletion something that is no available: ex:
 proc</editor.tests.length;> in editor.js

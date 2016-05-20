@@ -1101,7 +1101,7 @@
 
 					}
 					
-					if(tagBreak.indexOf(xmlTag) > -1) {
+					if(tagBreak.indexOf(xmlTag) > -1 && !insideQuote) {
 						
 						//console.log("tag=" + tag + " lastXmlTag=" + lastXmlTag);
 						
