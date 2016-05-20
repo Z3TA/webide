@@ -1,15 +1,11 @@
 
-
-
-
-
 html {
 	margin: 0px;
 	padding: 0px;
 }
 
 body {
-	font-family: Times;
+	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
 	font-size: 100.1%;
 	margin: 0px;
 	padding: 0px;
@@ -49,7 +45,6 @@ h1 {
 	margin-top: 2em;
 	margin-bottom: 0.5em;
 	font-weight: bold;
-	font-family: Inder;
 	color: #C27238;
 
 }
@@ -60,7 +55,6 @@ h2 {
 	margin-top: 2.2em;
 	margin-bottom: 0.5em;
 	font-weight: normal;
-	font-family: Inder;
 	color: #768CC2;
 
 }
@@ -86,7 +80,6 @@ abstract {
 	font-size: 1.5em;
 	display: block;
 	padding: 1em;
-	font-family: Inder;
 	z-index: 1;
 }
 
@@ -210,8 +203,7 @@ a.blog h2 {
 }
 
 form {
-	font-family: arial;
-}
+	}
 
 form fieldset {
 	border: 1px groove #AFE9AE;
@@ -284,7 +276,7 @@ img {
 
 
 table th {
-	font-family: Play, Inder, Times;
+	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
 	padding: 0.5em;
 	text-align: left;
 	background-color: #5B57AD;
@@ -294,7 +286,7 @@ table th {
 }
 
 table td {
-	font-family: Play, Inder, Times;
+	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
 	padding: 0.5em;
 	
 	background-color: #F5F5F0;
