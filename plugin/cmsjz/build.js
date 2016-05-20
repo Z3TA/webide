@@ -1,5 +1,8 @@
 /*
-
+	
+	Debug using nodejs:
+	
+	
 ### todo:
 
 	Ignore html in xmp
@@ -381,7 +384,7 @@ function build(baseTree, baseFolder, callback) {
 function evaluate(baseTree) {
 	
 	/*
-		Runs JavaScript within <% and %>
+		Runs JavaScript within <?JS and ?>
 		
 		Finds media files?
 	*/
@@ -1203,6 +1206,8 @@ Document.prototype.evaluate = function(str) {
 	
 	var char = "";
 	var lastChar = "";
+	var lastChar2 = "";
+	var lastChar3 = "";
 	var codeStart = -1;
 	var codeEnd = -1;
 	var code = "";
@@ -1227,19 +1232,24 @@ Document.prototype.evaluate = function(str) {
 		char = str[i];
 		
 		//console.log("char=" + char);
-		
-		if(char == "%" && lastChar == "<") {
+		//log("char=" + char + " lastChar=" + lastChar);
+		if(char == "S" && lastChar == "J" && lastChar2 == "?" && lastChar3 == "<") {
 			codeStart = i+1;
 			insideCode = true;
 			
+			buffer.pop(); // Remove J
+			buffer.pop(); // Remove ?
 			buffer.pop(); // Remove the < from the buffer
 			
 			document.write(buffer.join("")); // Write the buffer
 			buffer.length = 0; // Reset buffer
 		}
-		else if(char == ">" && lastChar == "%") {
+		else if(char == ">" && lastChar == "?" && codeStart != -1) {
 			codeEnd = i-1;
 			code = str.substring(codeStart, codeEnd).trim();
+			
+			//log("code=" + code);
+			
 			insideCode = false;
 			
 			//buffer.pop(); // Remove the % from the buffer
@@ -1255,9 +1265,13 @@ Document.prototype.evaluate = function(str) {
 				// Remove "use strict" or variables wont work cross eval's
 				//code = code.replace(/["']use strict["']\;/gi, ""); 
 				
-				script = new vm.Script(code);
-				script.runInContext(context);
-				
+				try {
+					script = new vm.Script(code);
+					script.runInContext(context);
+				}
+				catch(err) {
+					if(err) log(err.message);
+				}
 				//eval(code);
 				//(1, eval)(code);
 			}
@@ -1268,6 +1282,8 @@ Document.prototype.evaluate = function(str) {
 			}
 		}
 		
+		lastChar3 = lastChar2;
+		lastChar2 = lastChar;
 		lastChar = char;
 	}
 }
