@@ -17,7 +17,8 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Fixing parsing errors in vbScript.
+CMSJZ plugin
+
 
 
 BUGS

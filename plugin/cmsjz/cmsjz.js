@@ -517,7 +517,7 @@
 				var fileName = editor.currentFile.name;
 				var fileType = editor.currentFile.fileExtension;
 				
-			
+				
 				if(editor.currentFile.path.indexOf(site.source) != -1 // Inside source path?
 				&& (fileType == "htm" || fileType=="html" || fileType=="md") // Right file type
 				&& fileName != "header" && fileName != "footer") { 
@@ -551,8 +551,19 @@
 		
 	}
 	
-	function publish(site) {
-		
+	function publish() {
+		if(selectedSite) publishSite(selectedSite)
+		else {
+			show();
+			alert("Select site to publish!");
+		}
+		return false;
+	}
+	
+	function publishSite(site) {
+		compile(site.source, site.publish, function buildDone() {
+			alert(site.name + " published to " + site.publish);
+});
 		return false;
 	}
 	

@@ -72,7 +72,7 @@ Deoply using rsync, scp, ftp etc.
 */
 
 //process.send("Hello!");
-log("moo");
+//log("moo");
 
 "use strict";
 
