@@ -28,6 +28,18 @@
 	*/
 
 	
+	editor.addTest(function objHasOwnProperty(callback) {
+		editor.openFile("objHasOwnProperty.js", 'function foo() {\nvar obj = {"hasOwnProperty": "1", "bar": 2}\n}\n;', function(err, file) {
+			
+			// If it doesn't work it will probably throw an error eslewhere
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function vbScriptNestedIfs(callback) {
 		editor.openFile("vbScriptNestedIfs.asp", "<%\nIF 1=1 THEN\nIF 2=2 THEN\n\nEND IF\nEND IF\n%>\n ", function(err, file) {
 			
@@ -44,7 +56,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function remVbComment(callback) {
 		editor.openFile("remVbComment.asp", "<%\nREM foo\n%>\n ", function(err, file) {

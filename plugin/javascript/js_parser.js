@@ -686,7 +686,7 @@
 				var startIndex = 1;
 				
 				if(insideFunctionBody[subCount]) {
-					if(func.variables.hasOwnProperty(variableName)) {
+					if(Object.hasOwnProperty.call(func.variables, variableName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
 						variable = func.variables[variableName];
 						//console.log("Variable= '" + variableName + "' listed in function=" + func.name + " variables! Yey!");
 					}
@@ -700,15 +700,15 @@
 				else {
 					
 					// Look for global variables
-					if(globalVariables.hasOwnProperty(variableName)) {
+					if(Object.hasOwnProperty.call(globalVariables, variableName)) {
 						variable = globalVariables[variableName];
 					}
 					// Look for function names
-					else if(functions.hasOwnProperty(variableName)) {
+					else if(Object.hasOwnProperty.call(functions, variableName)) {
 						//console.log("hmm? " + variableName + " is a function!");
 						
 						if(properties.length > 1) {
-							if(!functions[properties[0]].variables.hasOwnProperty(properties[1])) {
+							if(!Object.hasOwnProperty.call(functions[properties[0]].variables, properties[1])) {
 								functions[properties[0]].variables[properties[1]] = new Variable();
 							}
 							variable = functions[properties[0]].variables[properties[1]];
@@ -761,7 +761,7 @@
 		function traverseVariableTree(properties, variable, startindex) {
 			// Go though a object dot notation (foo.bar.baz) add keys if they do not exist and return the final variable
 			for(var i=startindex; i<properties.length; i++) {
-				if(!variable.keys.hasOwnProperty(properties[i])) {
+				if(!Object.hasOwnProperty.call(variable.keys, properties[i])) {
 					variable.keys[properties[i]] = new Variable();
 				}
 				variable = variable.keys[properties[i]];
@@ -1425,7 +1425,7 @@
 							R[subCount] = 0;
 							
 							if(properties.length > 1) {
-								if(myFunction[subCount-1].variables.hasOwnProperty(properties[0])) {
+								if(Object.hasOwnProperty.call(myFunction[subCount-1].variables, properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
 									// Change the variable type to Method
 									variable = myFunction[subCount-1].variables[properties[0]];
@@ -1444,17 +1444,17 @@
 							myFunction[subCount] = functions[functionName];
 							
 							// Remove from global variables
-							if(globalVariables.hasOwnProperty(functionName)) {
+							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
 								delete globalVariables[functionName];
 							}
 							
 
 							if(properties.length > 1) {
-								if(functions.hasOwnProperty(properties[0])) {
+								if(Object.hasOwnProperty.call(functions, properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
 									// This is run after variables has been added.
 									// Change the variable type to Method
-									if(functions[properties[0]].variables.hasOwnProperty(properties[1])) {
+									if(Object.hasOwnProperty.call(functions[properties[0]].variables, properties[1])) {
 										
 										variable = functions[properties[0]].variables[properties[1]];
 										startIndex = 2;
@@ -1835,7 +1835,7 @@
 										//console.log("Inside function=" + insideFunctionBody[subCount].name + " word=" + word + " rootWord=" + rootWord + "");
 										
 										
-										if(!myFunction[subCount].variables.hasOwnProperty(rootWord)) {
+										if(!Object.hasOwnProperty.call(myFunction[subCount].variables, rootWord)) {
 											myFunction[subCount].variables[word] = new Variable("");
 											//console.log("Added variable=" + word + " to function=" + myFunction[subCount].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
 										}
