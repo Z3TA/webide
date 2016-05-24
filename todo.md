@@ -19,7 +19,7 @@ What I'm working on:
 
 Documentation for the static site generator
 
-
+todo: First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting
 
 BUGS
 ====
