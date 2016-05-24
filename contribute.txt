@@ -8,8 +8,8 @@ Send any changes to zeta@zetafiles.org, with a note:
 Get the source code
 -------------------
 Install developer dependencies:
-Mercurial SCM: https://www.mercurial-scm.org
- NodeJS and NPM: https://nodejs.org/
+Mercurial SCM: https://www.mercurial-scm.org (try "hg --version" in command-prompt/terminal to see if it exists)
+ NodeJS and NPM: https://nodejs.org/ (try "node -v" in command-prompt/terminal to see if it exists)
 
 Clone the project: 
 cd my-projects (where you want to place the files)
@@ -34,11 +34,15 @@ $ hg pull
 $ hg ci -m "my changes"
 
 # See latest changeset(s)
-$ hg log 
+$ hg log -l 10
 
+# Export the changeset(s)
 $ hg export 3 > change3.diff 
 $ hg export 4 > change4.diff 
 # replace 3, 4, etc with the actual changeset
+
+# Or export changesets 123 to 150 together
+$ hg export 123:150 > changes.txt
 
 
 

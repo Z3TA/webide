@@ -11,6 +11,7 @@ See contribute.txt on how to send your changes.
 Available for Linux, Windows (and soon Mac OS X)
 
 
+
 Windows
 -------
 Double click (run) start.bat
@@ -33,6 +34,37 @@ Not yet officially supported (let me borrow your Mac and I'll fix it)
 
 Make the osx_start.sh script executable:
 Via terminal: chmod u+x my_shell_script.sh
+
+
+
+Updates
+=======
+
+New stable releases will be notified on the web page, via e-mail (opt-in) and RSS.
+
+Mercurial (hg) is used for version control. You should already have cloned from the repository:
+hg clone http://hg.webtigerteam.com/JZedit
+
+Before updating it's a good idea to note the current changeset:
+hg log --limit 1
+
+If something breaks, you can go back to the last working changeset:
+hg up ###
+
+A new release usually means new feature(s). Each release will be followed up with a few weeks of only bug fixes.
+To update the editor, or get the latest bug fixes, type the following command in your command-prompt/terminal: 
+hg pull && hg up stable
+
+There's (currently) no maintenance on old releases after a new release.
+
+
+
+Reporting bugs
+==============
+
+Open a new file, and write down instructions on how to repeat the bug. 
+Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
+
 
 
 
@@ -94,7 +126,7 @@ cabextract ppviewer.cab
 font-manager
 
 Font-manager is a GUI tool:
-Click on the "cog wheels" icon (Manage Fonts) bottom left, to get a meny with "Install Fonts".
+Click on the "cog wheels" icon (Manage Fonts) bottom left, to get a menu with "Install Fonts".
 Select CONSOLA from the temp-folder you extracted the cab files in.
 
 
