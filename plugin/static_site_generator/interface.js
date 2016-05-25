@@ -24,10 +24,10 @@
 	var path = require("path");
 	var demoSite = {
 		name: "Demo site",
-		source: path.join(require("dirname"), "/plugin/cmsjz/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-		preview: path.join(require("dirname"), "/plugin/cmsjz/demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname"), "/plugin/cmsjz/demo/public/"),  // Compiled files for live deployment is sent to this folder
-		template: path.join(require("dirname"), "/plugin/cmsjz/demo/template.htm")  // A template for new pages/posts
+		source: path.join(require("dirname"), "/plugin/static_site_generator/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
+		preview: path.join(require("dirname"), "/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
+		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder
+		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm")  // A template for new pages/posts
 	}
 	
 	// Add plugin to editor
@@ -588,7 +588,7 @@
 		var childProcess = require("child_process");
 		var path = require('path');
 		
-		var buildScript = path.join(require("dirname"), "./plugin/cmsjz/build.js");
+		var buildScript = path.join(require("dirname"), "./plugin/static_site_generator/build.js");
 		
 		//console.log("buildScript=" + buildScript);
 		console.log("source=" + source);
@@ -606,10 +606,10 @@
 			alert(data);
 		});
 		worker.on('error', function worker_error(code) {
-			console.warn("cmsjz: Error code=" + code);
+			console.warn("SSG: Error code=" + code);
 		});
 		worker.on('exit', function worker_exit(code) {
-			console.log("cmsjz: Exit! code=" + code);
+			console.log("SSG: Exit! code=" + code);
 			callback();
 		});
 	}

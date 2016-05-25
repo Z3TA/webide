@@ -1,4 +1,4 @@
 error.log
-plugin/cmsjz/demo/build.log
-plugin/cmsjz/demo/preview/*
-plugin/cmsjz/demo/public/*
+plugin/static_site_generator/demo/build.log
+plugin/static_site_generator/demo/preview/*
+plugin/static_site_generator/demo/public/*
