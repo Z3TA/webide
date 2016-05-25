@@ -17,8 +17,6 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Instruction for updating the editor in README.txt
-
 Documentation for the static site generator
 
 todo: First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting
