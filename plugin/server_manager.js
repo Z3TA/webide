@@ -187,7 +187,7 @@
 		
 		function connectToConnection() {
 			connect(selectedConnection.protocol, selectedConnection.host, selectedConnection.user, inputPw.value, selectedConnection.key);
-			buttonDisconnect.style.display="block"; // Show the disconnect button
+			buttonDisconnect.style.display="inline"; // Show the disconnect button
 			
 			editor.resizeNeeded();
 		}
@@ -319,27 +319,34 @@
 		inputEditPw.setAttribute("value", selectedConnection.pw);
 		inputEditPw.setAttribute("size", "12");
 		
+		var buttonBrowseKey = document.createElement("input");
+		buttonBrowseKey.setAttribute("type", "button");
+		buttonBrowseKey.setAttribute("class", "button half");
+		buttonBrowseKey.setAttribute("value", "Browse");
+		buttonBrowseKey.addEventListener("click", browseKey, false);
+		
+		
 		var buttonSave = document.createElement("input");
 		buttonSave.setAttribute("type", "button");
 		buttonSave.setAttribute("class", "button");
 		buttonSave.setAttribute("id", "buttonSave");
 		buttonSave.setAttribute("value", "Save");
 		buttonSave.addEventListener("click", saveConnection, false);
-		console.log("buttonSave");
+		
 		
 		var buttonSaveAs = document.createElement("input");
 		buttonSaveAs.setAttribute("type", "button");
 		buttonSaveAs.setAttribute("class", "button");
 		buttonSaveAs.setAttribute("value", "Save as new");
 		buttonSaveAs.addEventListener("click", saveNewConnection, false);
-		console.log("buttonSaveAs");
+		
 		
 		var buttonCancel = document.createElement("input");
 		buttonCancel.setAttribute("type", "button");
 		buttonCancel.setAttribute("class", "button");
 		buttonCancel.setAttribute("value", "Cancel");
 		buttonCancel.addEventListener("click", cancelEdit, false);
-		console.log("buttonCancel");
+		
 		
 		editView.appendChild(labelName);
 		editView.appendChild(inputName);
@@ -360,7 +367,7 @@
 		
 		editView.appendChild(labelKey);
 		editView.appendChild(inputKey);
-		
+		editView.appendChild(buttonBrowseKey);
 		
 		
 		editView.appendChild(labelPw);
@@ -393,7 +400,7 @@
 				key: inputKey.value,
 				name: inputName.value,
 				protocol: selectProtocol.options[selectProtocol.selectedIndex].text
-}) - 1;
+			}) - 1;
 			
 			selectedConnection = remoteConnections[index];
 			
@@ -455,6 +462,16 @@
 			
 		}
 		
+		function browseKey() {
+			var defaultPath = "";
+			
+			if(editor.currentFile) defaultPath = getDirectoryFromPath(editor.currentFile.path)
+			else defaultPath = editor.workingDirectory;
+			
+			editor.fileOpenDialog(defaultPath, function selectKey(path) {
+				inputKey.value = path;
+});
+}
 		
 	}
 	
@@ -497,8 +514,11 @@
 		editor.connect(whenConnected, protocol, hostName, login, pw, key);
 		
 		function whenConnected(err, workingDir) {
-			if(err) alert(err.message)
-			else alert("Connected to " + protocol + " on " + hostName + "!");
+			if(err) {
+				buttonDisconnect.style.display="none"; // Hide disconnect button
+				alert(err.message)
+			}
+else alert("Connected to " + protocol + " on " + hostName + "!");
 }
 		
 	}
