@@ -370,7 +370,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
-			editor.resizeNedded();
+			editor.resizeNeeded();
 			
 		}
 		
@@ -385,7 +385,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
-			editor.resizeNedded();
+			editor.resizeNeeded();
 			
 		}
 		
@@ -407,7 +407,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
-			editor.resizeNedded();
+			editor.resizeNeeded();
 			
 		}
 		
