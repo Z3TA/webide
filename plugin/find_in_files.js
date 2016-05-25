@@ -253,7 +253,7 @@
 		}
 		
 		div = document.createElement("div");
-		 
+		
 		div.setAttribute("id", "findInFile");
 		div.setAttribute("class", "findInFile");
 		
@@ -272,7 +272,7 @@
 		inputReplace.setAttribute("id", "inputReplace");
 		inputReplace.setAttribute("class", "inputtext replace");
 		inputReplace.setAttribute("size", size);
-
+		
 		inputInDir = document.createElement("input");
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
@@ -281,7 +281,7 @@
 		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);
-
+		
 		inputFileFilter = document.createElement("input");
 		inputFileFilter.setAttribute("type", "text");
 		inputFileFilter.setAttribute("id", "inputFileFilter");
@@ -293,49 +293,55 @@
 		var labelFind = document.createElement("label");
 		labelFind.setAttribute("for", "inputFind");
 		labelFind.appendChild(document.createTextNode("Find:")); // Language settings!?
-
+		
 		var labelReplace = document.createElement("label");
 		labelReplace.setAttribute("for", "inputReplace");
 		labelReplace.appendChild(document.createTextNode("Replace with:")); // Language settings!?
-
+		
 		var labelInDir = document.createElement("label");
 		labelInDir.setAttribute("for", "inputInDir");
 		labelInDir.appendChild(document.createTextNode("In directory:")); // Language settings!?
-
+		
 		var labelFileFilter = document.createElement("label");
 		labelFileFilter.setAttribute("for", "inputFileFilter");
 		labelFileFilter.appendChild(document.createTextNode("File filter (regex):")); // Language settings!?
-
+		
 		var buttonFindInFiles = document.createElement("input");
 		buttonFindInFiles.setAttribute("type", "button");
 		buttonFindInFiles.setAttribute("class", "button");
 		buttonFindInFiles.setAttribute("id", "buttonFindInFiles");
 		buttonFindInFiles.setAttribute("value", "Search in files");
-
+		
 		var buttonReplaceInFiles = document.createElement("input");
 		buttonReplaceInFiles.setAttribute("type", "button");
 		buttonReplaceInFiles.setAttribute("class", "button");
 		buttonReplaceInFiles.setAttribute("id", "buttonReplaceInFiles");
 		buttonReplaceInFiles.setAttribute("value", "Replace in files");
-
+		
+		var buttonBrowseFolder = document.createElement("input");
+		buttonBrowseFolder.setAttribute("type", "button");
+		buttonBrowseFolder.setAttribute("class", "button");
+		buttonBrowseFolder.setAttribute("value", "Browse folder");
+		
+		
 		var labelRegexOption = document.createElement("label");
 		labelRegexOption.setAttribute("for", "regexOption");
 		labelRegexOption.appendChild(document.createTextNode("Use regex")); // Language settings!?
-
+		
 		var labelCaseSensitive = document.createElement("label");
 		labelCaseSensitive.setAttribute("for", "optionCaseSensitive");
 		labelCaseSensitive.appendChild(document.createTextNode("Case-sensitive")); // Language settings!?
-
+		
 		
 		var labelSubFolderOption = document.createElement("label");
 		labelSubFolderOption.setAttribute("for", "subfolderOption");
 		labelSubFolderOption.appendChild(document.createTextNode("Search subfolders")); // Language settings!?
-
+		
 		regexOption = document.createElement("input");
 		regexOption.setAttribute("type", "checkbox");
 		regexOption.setAttribute("id", "regexOption");
 		regexOption.setAttribute("class", "option regex");
-
+		
 		optionCaseSensitive = document.createElement("input");
 		optionCaseSensitive.setAttribute("type", "checkbox");
 		optionCaseSensitive.setAttribute("id", "optionCaseSensitive");
@@ -345,12 +351,13 @@
 		subfolderOption.setAttribute("type", "checkbox");
 		subfolderOption.setAttribute("id", "subfolderOption");
 		subfolderOption.setAttribute("class", "option subfolder");
-
+		
+		
 		
 		
 		var table = document.createElement("table"),
-			tr = document.createElement("tr"),
-			td = document.createElement("td");
+		tr = document.createElement("tr"),
+		td = document.createElement("td");
 		
 		table.setAttribute("cellspacing", "5");
 		
@@ -367,7 +374,7 @@
 		td = document.createElement("td");
 		td.appendChild(buttonFindInFiles);
 		tr.appendChild(td);
-
+		
 		td = document.createElement("td");
 		td.appendChild(regexOption);
 		td.appendChild(labelRegexOption);
@@ -400,7 +407,7 @@
 		table.appendChild(tr);
 		
 		
-
+		
 		// ### In dir
 		tr = document.createElement("tr"),
 		
@@ -411,6 +418,10 @@
 		
 		td = document.createElement("td");
 		td.appendChild(inputInDir);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(buttonBrowseFolder);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
@@ -436,7 +447,7 @@
 		
 		
 		// wow, adding dom elements is really tedious!
-
+		
 		
 		div.appendChild(table);
 		
@@ -456,7 +467,17 @@
 		buttonReplaceInFiles.addEventListener("click", function() {
 			alert("Not yet implemented!");
 		}, false);
-		
+		buttonBrowseFolder.addEventListener("click", function browseFolder() {
+			var defaultPath = "";
+			
+			if(editor.currentFile) defaultPath = getDirectoryFromPath(editor.currentFile.path)
+			else defaultPath = editor.workingDirectory;
+			
+			editor.directoryDialog(defaultPath, function selectKey(path) {
+				inputInDir.value = path;
+			});
+			
+}, false);
 		
 		divVisible = true;
 		

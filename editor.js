@@ -154,6 +154,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	
 	if(dirname != editor.workingDirectory) console.warn("Working directory is not the current directory=" + dirname + " editor.workingDirectory=" + editor.workingDirectory);
 	
+	var directoryDialogCallback = undefined; 
+	var directoryDialogHtmlElement;
+	
 	editor.sortFileList = function() {
 		
 		// Sorts editor.files by file.order and returns an array of the files
@@ -974,7 +977,6 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	editor.fileOpenDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS file select dialog window.
-			If a file is selected, it's opened (readSingleFile).
 			File path is then passed to the callback function.
 		*/
 		
@@ -996,11 +998,20 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
 			}
 			editor.setFileOpenPath(defaultPath);
-			
-			// If we want to choose a while directory,  fileOpen.setAttribute webkitdirectory
-		}
+			}
 		
 		fileOpen.click(); // Bring up the OS path selector window
+	}
+	
+	editor.directoryDialog = function(defaultPath, callback) {
+		
+		console.log("Bringing up the directory dialog ...");
+		
+		directoryDialogCallback = callback;
+		
+		if(defaultPath) directoryDialogHtmlElement.setAttribute("nwworkingdir", defaultPath);
+		
+		directoryDialogHtmlElement.click(); // Bring up the OS path selector window
 	}
 	
 	editor.renderNeeded = function() {
@@ -2854,7 +2865,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				var exec = require('child_process').exec;
 				var child = exec('hg log -l 1', function(error, stdout, stderr) {
 					if(!error) {
-
+						
 						var myRegexp = /changeset:\s*(\d*):/g;
 						var match = myRegexp.exec(stdout);
 						
@@ -2899,6 +2910,34 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		// Handle file open dialog
 		fileOpenHtmlElement = document.getElementById("fileInput");
 		fileOpenHtmlElement.addEventListener('change', readSingleFile, false);
+		
+		// Handle directory dialog
+		directoryDialogHtmlElement = document.getElementById("directoryInput");
+		directoryDialogHtmlElement.addEventListener('change', function directorySelected(e) {
+			
+			console.log("Directory selected ...");
+			
+			if(directoryDialogCallback == undefined) {
+				throw new Error("There is no listener for the open directory dialog!");
+			}
+			
+			var file = e.target.files[0];
+			if (!file) {
+				throw new Error("No file selected from the open-file dialog.");
+				return;
+			}
+			
+			var fileName = file.name;
+			var filePath = file.path;
+			
+			console.log("Calling directory-dialog callback: " + getFunctionName(directoryDialogCallback) + " ...");
+			directoryDialogCallback(filePath);
+			directoryDialogCallback = undefined;
+			
+			directoryDialogHtmlElement.value = null; // Reset the value so we can select the same directory again!
+			
+			
+}, false);
 		
 		// cleanup
 		/*
