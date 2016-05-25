@@ -140,7 +140,7 @@
 		var buttonSettings = document.createElement("input");
 		buttonSettings.setAttribute("type", "button");
 		buttonSettings.setAttribute("class", "button");
-		buttonSettings.setAttribute("value", "Settings");
+		buttonSettings.setAttribute("value", "Settings / new");
 		buttonSettings.addEventListener("click", editSiteSettings, false);
 		
 		var buttonCancel = document.createElement("input");
