@@ -376,7 +376,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				editor.renderNeeded();
 				
 			}
-			}
+		}
 		
 		function fileOpenError(err) {
 			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
@@ -640,9 +640,22 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			Returns a readable stream ...
 			
 			We should probably use streams everywhere! So that opening small and large files use the same method.
-		
+			
 		*/
+	}
+	
+	
+	editor.copyFolder(source, destination) {
+		/*
+			Copies a folder and files in source location to destination.
+			Source and destination can be local filesystem, FTP or SFTP (SSH)
+			*/
+		
+		
+		
+		
 }
+	
 	
 	
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {

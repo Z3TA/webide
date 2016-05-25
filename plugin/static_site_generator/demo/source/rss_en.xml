@@ -12,27 +12,25 @@
 		
 			var moment = require("moment");
 			var blog;
-			var blogEntries = document.folder.folders["blog"].latest().documents;
+			var blogEntries = document.folder.folders["blog"].latest();
 
-			for(var file in blogEntries) {
-				
-				blog = blogEntries[file];
-
-				document.write('\n\t\t<item>\n');
-				
+blogEntries.forEach(function (blog) {
+	
+	document.write('\n\t\t<item>\n');
+	
 	document.write('\t\t\t<title>' + blog.title + '</title>\n');
-				document.write('\t\t\t<description>' + blog.lead.replace(/<[^>]*>/g, " ") + '</description>\n');
+	document.write('\t\t\t<description>' + blog.lead.replace(/<[^>]*>/g, " ") + '</description>\n');
 	// NEED TO CHANGE URL HERE TOO:
 	//document.write('\t\t\t<guid>http://webtigerteam.com/johan/' + blog.url + '</guid>\n');
-				document.write('\t\t\t<pubDate>' + moment(blog.created).format("ddd, D MMM YYYY HH:mm:ss ZZ") + '</pubDate>\n');
-				
-				document.write('\t\t</item>\n');
+	document.write('\t\t\t<pubDate>' + moment(blog.created).format("ddd, D MMM YYYY HH:mm:ss ZZ") + '</pubDate>\n');
+	
+	document.write('\t\t</item>\n');
+	
+});
 
-			}
-		
-		?>
-		
-	</channel>
+?>
+
+</channel>
 </rss>
 
 

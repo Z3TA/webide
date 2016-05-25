@@ -602,8 +602,15 @@
 			env: {"NODE_PATH": node_modules} // Tell node runtime to check for modules in this folder
 		});
 		
+		/*
+		worker.stdout.on('data', function(data) {
+			console.log("SSG stdout: " + data);  
+		});
+		*/
+		
 		worker.on('message', function worker_message(data) {
 			alert(data);
+			//console.log("SSG:" + data);
 		});
 		worker.on('error', function worker_error(code) {
 			console.warn("SSG: Error code=" + code);

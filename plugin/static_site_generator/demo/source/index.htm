@@ -27,6 +27,7 @@
 	blogEntries.forEach(makeLink);
 	
 	function makeLink(blog) {
+		
 		document.write('\n<li>\n');
 		document.write('\t<i class="datum">' + moment(blog.created).format("Do MMM YYYY") + '</i>\n');
 		document.write('\t<a href="' + blog.url + '">' + blog.title + '</a>\n');

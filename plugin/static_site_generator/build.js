@@ -1611,9 +1611,14 @@ Folder.prototype.latest = function(limit) {
 		if(limit < arr.length) arr.length = limit;
 	}
 	
+	arr = arr.map(function (f) {
+		//process.send("f=" + f + " title=" + documents[f].title);
+		return documents[f];
+	});
+	
 	return arr;
 	
-	
+	/*
 	var obj = {};
 	
 	for(var i=0; i<limit; i++) {
@@ -1621,7 +1626,7 @@ Folder.prototype.latest = function(limit) {
 	}
 	
 	return new Folder(obj);
-	
+	*/
 }
 
 
