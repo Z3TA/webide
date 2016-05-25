@@ -1,29 +1,39 @@
 Static Site Generator for JZedit
 ================================
 
+Make web pages in HTML, Markdown or place a Microsoft Word file in the site folder, and it will be compiled to a html web page!
+
 See demo/ folder for an example site.
 
-Select site: Ctrl + F9
-
+Show interface: Ctrl + F9
 Preview site: F9
+Publish site: Ctrl + Shift + F9
 
 Scripting
 ---------
 
-Files named: index.htm, index.html, default.htm, default.html, *.xml, *.nodejs
-Will be seached for <?JS ?> tags for eval.
+Files named: index.htm, index.html, default.htm, default.html, *.xml, or *.nodejs will be seached for <?JS ?> tags for evaluation/compiling.
 
 Write to the document using: document.write("string")
 
-Data about the document can be found in the document object. Examples: documet.*
-title, language, keywords, lead, created, changed, url, folder, root, alert, all
+NodeJS modules can be accessed via: require("Module name or path")
+
+Data about the document can be found in the document.* object:
+
+document.title =   The title tag, or the first H1 tag if no title exist.
+document.language, 
+document.keywords, 
+document.created,
+document.changed, 
+document.url, 
 
 document.all    Array of all pages on the site
 document.alert  Sends an alert to the editor, used for debugging <!-- implement!
 document.root   
 document.folder
-document.lead   Takes data from eaither meta description or abstract html tag.
+document.lead   The content of the <abstract> tag, or <meta description> if no abstract tag is found. Or the first paragraph if neither is found.
 
-NodeJS modules can be accessed via: require("Module name or path")
 
+
+You can have multiple body-onloads, title, meta keyword, and script tags, for example in both header.htm and the some_new_page.htm. Then they will be uniquely merged. 
 
