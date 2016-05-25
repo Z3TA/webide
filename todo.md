@@ -21,8 +21,13 @@ Documentation for the static site generator
 
 todo: First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting
 
+
+
 BUGS
 ====
+
+When disconneting from FTP/SFTP all remote files should be closed!?
+
 
 parse error:
 var myRe = /<\?JS.*?>/g;
