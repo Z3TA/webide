@@ -48,4 +48,10 @@ Each branch in the tree like object, has a documents, and folders object.
 The folder objects have a .latest() method that returns an array of all documents in the folder sorted by document.created.
 
 
+Collaborating
+=============
+
+When working with many developers, you should use version control like Git or Mercurial.
+Share the root folder in a repository. (the "demo" folder in the included example).
+
 
