@@ -23,7 +23,7 @@
 	
 	var path = require("path");
 	var demoSite = {
-		name: "My simple blog",
+		name: "Demo site",
 		source: path.join(require("dirname"), "/plugin/cmsjz/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
 		preview: path.join(require("dirname"), "/plugin/cmsjz/demo/preview/"), // Compiles files for review is saved here
 		publish: path.join(require("dirname"), "/plugin/cmsjz/demo/public/"),  // Compiled files for live deployment is sent to this folder
