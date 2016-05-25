@@ -45,10 +45,7 @@ document.folder   = A tree like object of the current folder
 
 Each branch in the tree like object, has a documents, and folders object.
 
-
-
-
-
+The folder objects have a .latest() method that returns an array of all documents in the folder sorted by document.created.
 
 
 

@@ -1593,7 +1593,7 @@ function Folder(documents) {
 }
 
 Folder.prototype.latest = function(limit) {
-	// Returns an object of the latest (limit) documents ordered by document.created
+	// Returns an array of all documents in the folder ordered by document.created
 	var folder = this;
 	
 	var documents = folder.documents;
@@ -1607,9 +1607,12 @@ Folder.prototype.latest = function(limit) {
 		return documents[b].created - documents[a].created;
 	});
 	
-	if(limit == undefined) limit = arr.length;
+	if(limit != undefined) {
+		if(limit < arr.length) arr.length = limit;
+	}
 	
-	if(limit > arr.length) limit = arr.length;
+	return arr;
+	
 	
 	var obj = {};
 	
