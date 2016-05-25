@@ -2368,6 +2368,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						c.end();
 						delete editor.connections[serverAddress];
 						delete editor.disconnect[serverAddress];
+						
+						console.log("Dissconnected from FTP on " + serverAddress + "");
 						};
 					
 					callback(null, editor.workingDirectory);
@@ -2405,6 +2407,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						c.end();
 						delete editor.connections[serverAddress];
 						delete editor.disconnect[serverAddress];
+						
+						console.log("Dissconnected from SSH on " + serverAddress + "");
 					};
 					
 					callback(null, editor.workingDirectory);
@@ -2434,6 +2438,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 								c.end();
 								delete editor.connections[serverAddress];
 								delete editor.disconnect[serverAddress];
+								
+								console.log("Dissconnected from SFTP on " + serverAddress + "");
 							};
 							
 							callback(null, editor.workingDirectory);
