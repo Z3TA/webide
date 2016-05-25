@@ -26,6 +26,7 @@
 	var inputUser;
 	var inputKey;
 	var inputName;
+	var inputEditPw;
 	
 	var selectConnection;
 	
@@ -87,7 +88,7 @@
 		
 		var option = document.createElement("option");
 		option.text = connection.name;
-		option.id = connection.index;
+		option.id = index;
 		selectConnection.appendChild(option);
 		
 		return selectConnection.options.length -1;
@@ -114,7 +115,6 @@
 		if(!selectConnection) throw new Error("You are insane!");
 		
 		if(remoteConnections.length > 0) {
-			selectedConnection = remoteConnections[0];
 			remoteConnections.forEach(addConnectionOption);
 		}
 		
@@ -173,6 +173,8 @@
 		connectionView.appendChild(buttonDisconnect)
 		connectionView.appendChild(buttonCancel)
 		
+		if(remoteConnections.length > 0) changeSelectConnection(); // Select the one currently selected
+		
 		console.log("done building connection view");
 		
 		
@@ -204,15 +206,32 @@
 		
 		function changeSelectConnection() {
 			var selectedConnectionIndex = selectConnection.options[selectConnection.selectedIndex].id;
+			
 			selectedConnection = remoteConnections[selectedConnectionIndex];
 			
+			if(!selectedConnection) throw new Error("No selectedConnection! selectedConnectionIndex=" + selectedConnectionIndex + " selectConnection.selectedIndex=" + selectConnection.selectedIndex);
+			
 			inputPw.value = selectedConnection.pw;
-			inputEditPw.vlaue = selectedConnection.pw;
-			selectProtocol.selectedIndex = 0;
+			inputEditPw.value = selectedConnection.pw;
 			inputHost.value = selectedConnection.host;
-			inputUser = selectedConnection.user;
-			inputKey = selectedConnection.key;
-			inputName = selectedConnection.name;
+			inputUser.value = selectedConnection.user;
+			inputKey.value = selectedConnection.key;
+			inputName.value = selectedConnection.name;
+			
+			// Select the right protocol in the selectProtocol selection box
+			if(selectedConnection.protocol == "FTP") selectProtocol.selectedIndex = 0
+			else if(selectedConnection.protocol == "SFTP") selectProtocol.selectedIndex = 1
+			else throw new Error("Unknown protocol: " + selectedConnection.protocol);
+			
+			/*
+			for (var i = 0; i < selectProtocol.options.length; i++) {
+				if (selectProtocol.options[i].text === selectedConnection.protocol) {
+					selectProtocol.selectedIndex = i;
+					break;
+				}
+			}
+			
+			*/
 			
 		}
 	}
@@ -291,9 +310,9 @@
 		inputKey.setAttribute("id", "inputKey");
 		inputKey.setAttribute("class", "inputtext");
 		inputKey.setAttribute("value", selectedConnection.key);
-		inputKey.setAttribute("size", Math.min(30, selectedConnection.key.length+1));
+		inputKey.setAttribute("size", Math.max(30, selectedConnection.key.length+1));
 		
-		var inputEditPw = document.createElement("input");
+		inputEditPw = document.createElement("input");
 		inputEditPw.setAttribute("type", "password");
 		inputEditPw.setAttribute("id", "inputPw");
 		inputEditPw.setAttribute("class", "inputtext");
@@ -358,7 +377,23 @@
 			
 			if(!window.localStorage) throw new Error("window.localStorage not available!");
 			
-			var index = remoteConnections.push() - 1;
+			// Make sure the name/alias is not in use
+			var name = inputName.value;
+			for (var i=0; i<remoteConnections.length; i++) {
+				if(remoteConnections[i].name == name) {
+					alert(name + " alias already used!");
+					return;
+				}
+			}
+			
+			var index = remoteConnections.push({
+				pw: inputEditPw.value,
+				host: inputHost.value,
+				user: inputUser.value,
+				key: inputKey.value,
+				name: inputName.value,
+				protocol: selectProtocol.options[selectProtocol.selectedIndex].text
+}) - 1;
 			
 			selectedConnection = remoteConnections[index];
 			
@@ -377,6 +412,11 @@
 		
 		function cancelEdit() {
 			// Reset the values
+			
+			if(!selectedConnection) throw new Error("No selectedConnection!");
+			
+			console.log(typeof inputEditPw);
+			
 			inputEditPw.value = selectedConnection.pw;
 			inputHost.value = selectedConnection.host;
 			inputUser.value = selectedConnection.user;
@@ -393,9 +433,13 @@
 			
 			if(!window.localStorage) throw new Error("window.localStorage not available!");
 			
+			if(!selectedConnection) throw new Error("No selectedConnection!");
+			
 			if(selectedConnection.name != inputName.value) {
 				selectConnection.options[selectConnection.selectedIndex].text = inputName.value;
 			}
+			
+			selectedConnection.protocol = selectProtocol.options[selectProtocol.selectedIndex].text;
 			
 			selectedConnection.name = inputName.value;
 			selectedConnection.host = inputHost.value;
