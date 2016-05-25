@@ -645,16 +645,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	}
 	
 	
-	editor.copyFolder(source, destination) {
+	editor.copyFolder = function(source, destination) {
 		/*
 			Copies a folder and files in source location to destination.
 			Source and destination can be local filesystem, FTP or SFTP (SSH)
-			*/
+		*/
 		
 		
 		
-		
-}
+	}
 	
 	
 	
