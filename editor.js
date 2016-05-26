@@ -14,7 +14,7 @@ editor.supportedFiles = ["js", "htm", "html", "php", "asp", "vbs", "xml", "json"
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 editor.settings = {
-	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
+	devMode: false,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these XML tags
