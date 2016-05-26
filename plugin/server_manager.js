@@ -27,6 +27,7 @@
 	var inputKey;
 	var inputName;
 	var inputEditPw;
+	var inputPw;
 	var buttonDisconnect;
 	
 	var selectConnection;
@@ -45,6 +46,7 @@
 		
 		var charP = 80;
 		var charEscape = 27;
+		var charEnter = 13;
 		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
@@ -54,8 +56,18 @@
 		
 		editor.bindKey({desc: "Show the FTP/SSH server manager", fun: show, charCode: charP, combo: CTRL + SHIFT});
 		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hide, charCode: charEscape, combo: 0});
+		editor.bindKey({desc: "Connect to remove server in server manager", fun: enter, charCode: charEnter, combo: 0});
 		
-		
+	}
+	
+	
+	function enter() {
+		// Only connect if the password box has focus
+		if(document.activeElement == inputPw) {
+			connectToConnection();
+			return false;
+		}
+		else return true;
 	}
 	
 	function unload() {
@@ -119,7 +131,7 @@
 			remoteConnections.forEach(addConnectionOption);
 		}
 		
-		var inputPw = document.createElement("input");
+		inputPw = document.createElement("input");
 		inputPw.setAttribute("type", "password");
 		inputPw.setAttribute("id", "inputPw");
 		inputPw.setAttribute("class", "inputtext");
@@ -183,13 +195,6 @@
 			// Edit the selected connection
 			editView.style.display="block";
 			connectionView.style.display="none"; // Hide this div
-			editor.resizeNeeded();
-		}
-		
-		function connectToConnection() {
-			connect(selectedConnection.protocol, selectedConnection.host, selectedConnection.user, inputPw.value, selectedConnection.key);
-			buttonDisconnect.style.display="inline"; // Show the disconnect button
-			
 			editor.resizeNeeded();
 		}
 		
@@ -507,6 +512,12 @@
 		
 	}
 	
+	function connectToConnection() {
+		connect(selectedConnection.protocol, selectedConnection.host, selectedConnection.user, inputPw.value, selectedConnection.key);
+		buttonDisconnect.style.display="inline"; // Show the disconnect button
+		
+		editor.resizeNeeded();
+	}
 	
 	function connect(protocol, hostName, login, pw, key) {
 		//editor.connect("FTP", "192.168.1.77", "test", "test");
@@ -524,7 +535,10 @@
 				else alert(err.message);
 				console.log("Connection error: " + err.message);
 			}
-else alert("Connected to " + protocol + " on " + hostName + "!");
+			else {
+				alert("Connected to " + protocol + " on " + hostName + "!");
+				hide();
+}
 }
 		
 	}
