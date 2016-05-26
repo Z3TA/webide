@@ -44,13 +44,9 @@
 		file.isSaved = false;
 		file.savedAs = false;
 		
-		file.fileExtension = getFileExtension(path);
-		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
+		file.setFileExtension();
+		
 		file.lastChange = new Date();
-		
-		file.parse = true; // Always parse new files by default
-		
-		if(file.fileExtension == "txt" || file.fileExtension == "md") file.mode = "text";
 		
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
@@ -110,6 +106,17 @@
 		}
 		
 		return text;
+	}
+	
+	File.prototype.setFileExtension = function() {
+		// Set or update the file extension
+		var file = this;
+		
+		file.fileExtension = getFileExtension(file.path);
+		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
+		if(editor.supportedFiles.indexOf(file.fileExtension) != -1) file.mode = "code"
+		else file.mode = "text";
+		file.parse = true; // Always parse new files by default
 	}
 	
 	File.prototype.rowText = function(row) {
@@ -432,13 +439,13 @@
 		}
 		
 		var file = this,
-			row = 0,
-			col = 0,
-			grid = file.grid,
-			lastRow,
-			expect,
-			box,
-			lineBreakCharacters;
+		row = 0,
+		col = 0,
+		grid = file.grid,
+		lastRow,
+		expect,
+		box,
+		lineBreakCharacters;
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
@@ -543,7 +550,7 @@
 		}
 		
 		var file = this,
-			char;
+		char;
 		
 		if(caret == undefined) {
 			//console.warn("No caret specified, checking file.caret ...");
@@ -616,7 +623,7 @@
 					throw new Error("Character \"" + file.grid[caret.row][caret.col].char + "\" on file.grid[" + caret.row + "][" + caret.col + "] is not the same as character \"" + file.text.charAt(caret.index) + "\" in file.text on caret.index=" + caret.index + "");
 				}
 			}
-
+			
 			if(caret.index==file.text.length) {
 				throw new Error("Caret should be on EOF! caret.index=" + caret.index + " file.text.length=" + file.text.length + "");
 			}
@@ -809,7 +816,7 @@
 		
 		// Save row and col
 		var row = caret.row,
-			col = caret.col;
+		col = caret.col;
 		
 		// Place the caret at the end of the inserted text
 		var newCaret = file.createCaret(index + text.length); //  + 
@@ -852,9 +859,9 @@
 		}
 		
 		var grid = file.grid,
-			row = caret.row,
-			col = caret.col,
-			index = caret.index;
+		row = caret.row,
+		col = caret.col,
+		index = caret.index;
 		
 		
 		if(character == undefined) {
@@ -1079,7 +1086,7 @@
 		var removedText = file.text.substring(firstIndex, lastIndex+1);
 		
 		file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
-				
+		
 		file.grid = file.createGrid();
 		
 		// Create dummy caret to get row and col for the change event
@@ -1206,17 +1213,17 @@
 			}
 			
 			file.sanityCheck();
-		
+			
 		}
 		
 		// Deselect all 
 		selection.length = 0;
 		
 		console.timeEnd("deleteSelection");
-
+		
 		editor.renderNeeded();
 		file.change("deletedSelection", text, firstIndex, firstRow, firstCol);
-
+		
 		
 		
 		function isContinuous(selection) {
@@ -1251,11 +1258,11 @@
 	
 	File.prototype.getSelectedText = function() {
 		var file = this,
-			text = "",
-			selected = file.selected,
-			index = -1,
-			box,
-			missed = "";
+		text = "",
+		selected = file.selected,
+		index = -1,
+		box,
+		missed = "";
 		
 		//console.log("SEL:" + JSON.stringify(selected, null, 2));
 		
@@ -1302,15 +1309,15 @@
 		
 		
 		var row = caret.row,
-			col = caret.col,
-			totalCharactersAdded = file.lineBreak.length,
-			grid = file.grid,
-			index = caret.index,
-			currentRow = grid[row],
-			box,
-			tabCharacters = "",
-			newRow,
-			movedCharacters = 0;
+		col = caret.col,
+		totalCharactersAdded = file.lineBreak.length,
+		grid = file.grid,
+		index = caret.index,
+		currentRow = grid[row],
+		box,
+		tabCharacters = "",
+		newRow,
+		movedCharacters = 0;
 		
 		//console.log("Inserting line break at index=" + index);
 		
@@ -1716,13 +1723,13 @@
 		//console.log("Deleting character at " + JSON.stringify(caret) + " ...");
 		
 		var grid = file.grid,
-			row = caret.row,
-			col = caret.col,
-			index = caret.index,
-			thisRow = grid[row],
-			rowBelow = row < grid.length ? grid[row+1] : undefined,
-			character = caret.eof ? undefined : file.text.charAt(index),
-			indexDecrementor = 1, // How many characters to remove
+		row = caret.row,
+		col = caret.col,
+		index = caret.index,
+		thisRow = grid[row],
+		rowBelow = row < grid.length ? grid[row+1] : undefined,
+		character = caret.eof ? undefined : file.text.charAt(index),
+		indexDecrementor = 1, // How many characters to remove
 		box;
 		
 		
@@ -1800,7 +1807,7 @@
 			*/
 		}
 		
-	
+		
 		if(character == "{" || character == "}") renderNotNeeded = false;
 		
 		// Remove the character(s) from the text string
@@ -1860,8 +1867,8 @@
 	
 	File.prototype.moveCaretToIndex = function(index, caret) {
 		var file = this,
-			grid = file.grid,
-			gridIndex;
+		grid = file.grid,
+		gridIndex;
 		
 		if(index == undefined) {
 			throw new Error("index is undefined!");
@@ -2010,7 +2017,7 @@
 		return caret;
 		
 	}
-
+	
 	File.prototype.moveCaretToEnd = function(caret, cb) {
 		var file = this;
 		// Moves the caret to the end of the file
@@ -2026,7 +2033,7 @@
 			if(file.totalRows == -1) throw new Error("totalRows not yet found! Wait ...?");
 			
 			var partStartRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
-		
+			
 			if(partStartRow < 0) throw new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!");
 			
 			file.loadFilePart(partStartRow, function loadPartDone() {
@@ -2060,11 +2067,11 @@
 		}
 		
 	}
-
+	
 	
 	File.prototype.getIndexFromRowCol = function(row, col) {
 		var file = this,
-			grid = file.grid;
+		grid = file.grid;
 		
 		//console.log("getIndexFromRowCol!")
 		
@@ -2132,8 +2139,8 @@
 		// Returns an array of "boxes" (that you can apply styles on)
 		
 		var file = this,
-			grid = file.grid,
-			boxes;
+		grid = file.grid,
+		boxes;
 		
 		//file.sanityCheck();
 		
@@ -2160,7 +2167,7 @@
 		
 		function getBoxes(grid, start, end) {
 			var gridRow,
-				boxes = [];
+			boxes = [];
 			
 			for(var row=grid.length-1; row>=0; row--) {
 				
@@ -2220,26 +2227,26 @@
 			Tabs Not after a line break will be displayed as white space.
 			
 		*/
-
+		
 		console.time("createGrid");
 		
 		var file = this,
-			text = file.text,
-			grid = [],
-			totalCharacters = text.length,
-			row = 0,
-			col = 0,
-			char = "",
-			lastChar = "",
-			charBeforeThat = "",
-			inWord = false,
-			word,
-			lineNumber = 1,
-			tabulation = true,
-			j = 0,
-			codeBlockDepth = 0,
-			codeBlockStartCharacter = "{",
-			codeBlockEndCharacter = "}";
+		text = file.text,
+		grid = [],
+		totalCharacters = text.length,
+		row = 0,
+		col = 0,
+		char = "",
+		lastChar = "",
+		charBeforeThat = "",
+		inWord = false,
+		word,
+		lineNumber = 1,
+		tabulation = (file.mode=="code"),
+		j = 0,
+		codeBlockDepth = 0,
+		codeBlockStartCharacter = "{",
+		codeBlockEndCharacter = "}";
 		
 		console.log("Creating grid (text.length=" + text.length + ") ...");	
 		
@@ -2320,7 +2327,8 @@
 				grid[row].owned = false; // Wheter we can "do whatever we want" with this line, like messing with the indentation
 				
 				col = 0;
-				tabulation = true;
+				
+				if(file.mode == "code") tabulation = true;
 			}
 			else if((char == "\t" || char == " ") && tabulation) {
 				/*
@@ -2370,10 +2378,10 @@
 		
 		
 		var file = this,
-			grid = this.grid,
-			text = this.text,
-			str = "",
-			letters = stringToCharCodes(text).join(", ");
+		grid = this.grid,
+		text = this.text,
+		str = "",
+		letters = stringToCharCodes(text).join(", ");
 		
 		//console.log(JSON.stringify(grid, null, 4));
 		
@@ -2409,7 +2417,7 @@
 			//console.log("str=" + str + " " + typeof str);
 			
 			var cellWidth = 7,
-				width = cellWidth - str.length;
+			width = cellWidth - str.length;
 			
 			//console.log("width=" + width);
 			for(var i=0; i<width; i++) {
@@ -2540,8 +2548,8 @@
 	File.prototype.scrollToCaret = function(caret, callback) {
 		var file = this;
 		/*
-		note: Caret is bound to the grid! And caret.index is the index in file.text
-		This function only scrolls the grid (not the whole file)
+			note: Caret is bound to the grid! And caret.index is the index in file.text
+			This function only scrolls the grid (not the whole file)
 		*/
 		
 		if(caret == undefined) caret = file.caret;
@@ -2575,7 +2583,7 @@
 		
 		
 		if(caret.row >= file.grid.length) throw new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length);
-
+		
 		
 		// Left & Right
 		var delta = 0;
@@ -2584,7 +2592,7 @@
 		//console.log("caret.col=" + caret.col + " > editor.view.endingColumn=" + editor.view.endingColumn + " ? " + (caret.col > editor.view.endingColumn));
 		//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
 		
-
+		
 		
 		var indentationWidth = file.grid[caret.row].indentation * editor.settings.tabSpace;
 		var columnEnd = editor.view.endingColumn - indentationWidth;
@@ -2606,7 +2614,7 @@
 		
 		//console.log("delta=" + delta);
 		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
-
+		
 		
 		file.scrollTo(startColumn, startRow);
 		
@@ -2633,6 +2641,17 @@
 		
 	}
 	
+	File.prototype.savedAs = function(path) {
+		// Saves the file in another path
+		
+		var file = this;
+		
+		editor.saveFile(file, path);
+		
+		file.setFileExtension();
+		
+		editor.renderNeeded();
+	}
 	
 	File.prototype.highlightText = function(text, startAt, stopAt) {
 		var file = this;

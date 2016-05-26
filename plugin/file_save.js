@@ -38,14 +38,8 @@
 			
 			if(path) {
 				
-				editor.saveFile(file, path);
+				file.saveAs(path);
 				
-				// Update file extension
-				file.fileExtension = path.substr((~-path.lastIndexOf(".") >>> 0) + 2);
-				
-				file.parsed = {}; // Remove parsed data
-				
-				editor.renderNeeded();
 			}
 			// else: user clicked cancel!?
 			

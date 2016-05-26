@@ -17,9 +17,14 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
+Plain text mode for unsupported files.
+
+Adding my blog to the SSG.
+Improving the SSG interface.
+
 Documentation for the static site generator
 
-todo: First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting
+todo: First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting!?
 
 
 
