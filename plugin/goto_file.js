@@ -2,7 +2,7 @@
 (function() {
 	
 	"use strict";
-
+	
 	var gotoDiv;
 	var footer;
 	var gotoInputIsVisible = false;
@@ -17,9 +17,10 @@
 	var searchTimer;
 	var dirsToSearch = [];
 	var dirsSearched = [];
+	var searchRetries = 0;
 	
 	window.addEventListener("load", gotoFile_init, false);
-
+	
 	function gotoFile_init() {
 		
 		footer = document.getElementById("footer");
@@ -58,11 +59,11 @@
 	}
 	
 	function build_gotoInput() {
-			
+		
 		gotoDiv = document.createElement("div");
 		gotoDiv.setAttribute("id", "gotoDiv");
 		gotoDiv.setAttribute("class", "gotoFile");
-	
+		
 		inputGoto = document.createElement("input");
 		inputGoto.setAttribute("type", "text");
 		inputGoto.setAttribute("id", "inputGoto");
@@ -88,13 +89,13 @@
 		gotoButton.setAttribute("class", "button");
 		gotoButton.setAttribute("id", "gotoButton");
 		gotoButton.setAttribute("value", "Go!");
-
+		
 		var cancelButton = document.createElement("input");
 		cancelButton.setAttribute("type", "button");
 		cancelButton.setAttribute("class", "button");
 		cancelButton.setAttribute("id", "cancelButton");
 		cancelButton.setAttribute("value", "cancel");
-
+		
 		gotoList = document.createElement("ul");
 		gotoList.setAttribute("id", "gotoList");
 		
@@ -117,7 +118,7 @@
 		
 		
 		footer.appendChild(gotoDiv);
-	
+		
 		gotoButton.addEventListener("click", gotoFile, false);
 		
 		cancelButton.addEventListener("click", hide_gotoInput, false);
@@ -129,7 +130,7 @@
 		gotoInputIsVisible = true;
 		
 		console.log("built gotoInput!");
-
+		
 	}
 	
 	function typing() {
@@ -151,20 +152,44 @@
 		function trySearch() {
 			if(!isSearching) search(text);
 			else {
-				clearTimeout(searchTimer);
+				
+				var waitingFor = "";
+				
+				clearTimeout(searchTimer); // Clear any queued up searches
+				
 				var numLeft = (dirsToSearch.length - dirsSearched.length);
 				
 				console.log("Waiting for current search to finish before searching again ... (" + numLeft + " left)");
 				
 				if(numLeft == 1) {
+					// Find out the offender
 					for(var i=0; i<dirsToSearch.length; i++) {
-						if(dirsSearched.indexOf(dirsToSearch[i]) == -1) console.log(dirsToSearch[i]);
+						if(dirsSearched.indexOf(dirsToSearch[i]) == -1) {
+							console.log(dirsToSearch[i]);
+							waitingFor = dirsToSearch[i];
+						}
 					}
-					searchTimer = setTimeout(trySearch, 1500);
 				}
-}
-}
+				
+				var maxSearchRetries = 5;
+				
+				if(++searchRetries > maxSearchRetries) { 
+					// Give up and reset the current search. And tell the user
+					isSearching = false;
+					dirsSearched.length = 0;
+					dirsToSearch.length = 0;
+					searchRetries = 0;
+					firstRun = true;
+					
+					if(waitingFor) alert("Gave up search in " + waitingFor)
+					else alert("Too much latency! Gave up searching. (" + numLeft + " folders left to search)");
+				}
+				else searchTimer = setTimeout(trySearch, 300);
+				
+			}
 		}
+	}
+		
 	
 	function chandingDir() {
 		files.length = 0; // Reset file cache
