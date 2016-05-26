@@ -517,7 +517,12 @@
 		function whenConnected(err, workingDir) {
 			if(err) {
 				buttonDisconnect.style.display="none"; // Hide disconnect button
-				alert(err.message)
+				
+				if(err.message.indexOf("Expected 0x2:") != -1) {
+					alert(err.message + "\nProbably wrong key password")
+				}
+				else alert(err.message);
+				console.log("Connection error: " + err.message);
 			}
 else alert("Connected to " + protocol + " on " + hostName + "!");
 }
