@@ -27,6 +27,7 @@
 	var inputKey;
 	var inputName;
 	var inputEditPw;
+	var buttonDisconnect;
 	
 	var selectConnection;
 	
@@ -137,7 +138,7 @@
 		buttonEdit.setAttribute("id", "buttonEdit");
 		buttonEdit.setAttribute("value", "Edit");
 		
-		var buttonDisconnect = document.createElement("input");
+		buttonDisconnect = document.createElement("input");
 		buttonDisconnect.setAttribute("type", "button");
 		buttonDisconnect.setAttribute("class", "button");
 		buttonDisconnect.setAttribute("id", "buttonCancel");
