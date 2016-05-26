@@ -184,7 +184,7 @@
 					if(waitingFor) alert("Gave up search in " + waitingFor)
 					else alert("Too much latency! Gave up searching. (" + numLeft + " folders left to search)");
 				}
-				else searchTimer = setTimeout(trySearch, 300);
+				else searchTimer = setTimeout(trySearch, 500);
 				
 			}
 		}

@@ -31,11 +31,6 @@ todo: First time users, prompt for a username, to setup ftp/hosting etc of free 
 BUGS
 ====
 
-When goto-files on remote server and the connection is closed. Forever loop:
-Waiting for current search to finish before searching again ... (1 left)
-goto_file.js:161 sftp://192.168.1.77/home/zeta
-
-
 When disconneting from FTP/SFTP all remote files should be closed!?
 
 
