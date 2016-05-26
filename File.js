@@ -2641,7 +2641,7 @@
 		
 	}
 	
-	File.prototype.savedAs = function(path) {
+	File.prototype.saveAs = function(path) {
 		// Saves the file in another path
 		
 		var file = this;

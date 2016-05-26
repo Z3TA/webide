@@ -534,9 +534,7 @@ Opening files with inconsistent line breaks.
 
 Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
 
-Test if inlining functions in jsParser makes it faster.
-
-
+Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 
 
 
