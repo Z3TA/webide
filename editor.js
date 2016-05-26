@@ -2375,7 +2375,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					console.log("editor.workingDirectory=" + editor.workingDirectory);
 					
 					// Create disconnect function
-					editor.disconnect[serverAddress] = function() {
+					editor.disconnect[serverAddress] = function disconnectFTP() {
 						c.end();
 						delete editor.connections[serverAddress];
 						delete editor.disconnect[serverAddress];
@@ -2414,7 +2414,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					editor.connections[serverAddress] = c;
 					
 					// Create disconnect function
-					editor.disconnect[serverAddress] = function() {
+					editor.disconnect[serverAddress] = function disconnectSSH() {
 						c.end();
 						delete editor.connections[serverAddress];
 						delete editor.disconnect[serverAddress];
@@ -2445,7 +2445,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
 							
 							// Create disconnect function
-							editor.disconnect[serverAddress] = function() {
+							editor.disconnect[serverAddress] = function disconnectSFTP() {
 								c.end();
 								delete editor.connections[serverAddress];
 								delete editor.disconnect[serverAddress];
