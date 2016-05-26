@@ -17,7 +17,7 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Plain text mode for unsupported files.
+Setting up repositories ...
 
 Adding my blog to the SSG.
 Improving the SSG interface.
@@ -30,6 +30,8 @@ todo: First time users, prompt for a username, to setup ftp/hosting etc of free 
 
 BUGS
 ====
+
+SFTP seems to disconnect without any error notifications
 
 When disconneting from FTP/SFTP all remote files should be closed!?
 
