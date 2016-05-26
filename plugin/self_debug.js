@@ -228,12 +228,13 @@ return;
 			
 			log(errorReport);
 			
-			var alertMsg = parseText(msg.text);
+			var alertMsg = parseText(msg.text) + "\nIt is not safe to contine from here! The editor needs to restart.";
 			
 			//console.log("alertMsg=" + alertMsg);
 			
 			if(editor.settings.devMode) {
 				// If the developer tools are open, we don't need to open a bug report template file
+				alert(alertMsg);
 				GUI.showDevTools();
 			}
 			else {
