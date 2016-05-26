@@ -909,7 +909,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					c.writeFile(destPath, input, options, function sftpWrite(err) {
 						if(err) {
 							alert("Failed to save file: " + file.path + "\n" + err.message);
-							throw err;
+							//throw err;
 						}
 						console.log("Saved " + destPath + " on SFTP " + parse.hostname);
 						doneSaving();

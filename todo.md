@@ -544,6 +544,8 @@ Test if inlining functions in jsParser makes it faster.
 Feature
 =======
 
+Parser for nginx config files.
+
 Support for: http://editorconfig.org
 
 Show another part of the file so you can copy back and forth, without navigating.
