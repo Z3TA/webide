@@ -103,7 +103,11 @@ editor.plugin({
 					compareAndDone();
 					return;
 				}
-				else throw err;
+					else console.warn(err.message);
+					
+					// We should aready got a confirm box about this ...
+					return;
+					
 			}
 			console.log("we now have it open: file.path=" + file.path);
 			
