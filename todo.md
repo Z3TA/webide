@@ -17,15 +17,16 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Setting up repositories ...
 
+todo: init johan_blog (see Mercurial feautre)
 Adding my blog to the SSG.
 Improving the SSG interface.
 
 Documentation for the static site generator
 
-todo: First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting!?
+todo? First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting!?
 
+todo: Ctrl + W to close tabs. Keep keyboard commands consistent with the browser!!
 
 
 BUGS
@@ -545,6 +546,14 @@ Feature
 =======
 
 Mercurial plugin. Automatic remote repository creation. 
+How to init an already existing repo with a emty remote repo
+cd to/dir
+hg init
+hg add **
+hg ci -m "first commit"
+echo [paths] > .hg/hgrc
+echo default = http://webtigerteam.com/repo/foo1 >> .hg/hgrc
+hg push
 
 File-watcher: After tabbing between the program and other program, check if the files have changed, using hash?
 
