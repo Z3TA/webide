@@ -180,6 +180,8 @@ JS parser seems to have problems finding variable type with single quoted string
 Polishing
 =========
 
+Create dirs and new file on remote servers.
+
 file search btw chunks + replace in files
 
 A plus in the tabs to create/open a new file
@@ -541,6 +543,10 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 
 Feature
 =======
+
+Mercurial plugin. Automatic remote repository creation. 
+
+File-watcher: After tabbing between the program and other program, check if the files have changed, using hash?
 
 Parser for nginx config files.
 

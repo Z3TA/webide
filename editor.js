@@ -2535,7 +2535,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					else {
 						alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
 					}
-					console.error(err);
+					
 				}).on('end', function(msg) {
 					alert("Disconnected from SSH on " + serverAddress + "\n" + msg);
 				}).connect(auth);
