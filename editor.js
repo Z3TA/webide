@@ -2393,6 +2393,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			});
 			
 			c.on('error', function(err) {
+				alert(err.message);
 				callback(err);
 				/*
 					if(err.message == "Login incorrect.") {

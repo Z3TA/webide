@@ -23,8 +23,6 @@ What I'm working on:
 BUGS
 ====
 
-SFTP seems to disconnect without any error notifications
-
 When disconneting from FTP/SFTP all remote files should be closed!?
 
 
@@ -171,6 +169,8 @@ JS parser seems to have problems finding variable type with single quoted string
 
 Polishing
 =========
+
+editor.addMenuItem should take a third argument that is called every time the context meny is shown, that has to return true for the item to be visible.
 
 Create dirs and new file on remote servers.
 
