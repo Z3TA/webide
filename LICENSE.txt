@@ -4,6 +4,10 @@ Copyright (c) Johan Zetterberg, All rights reserved!
 The software is provided "as is" without any warranty. Use at your own risk!
 Under no circumstance should I be hold responsible for any damages that this software might cause.
 
+The editor has three different licenses: Personal license, witch is free, and Professional or Enterprise
+license that are available for a montly subscription fee.
+
+
 Personal license
 ----------------
 You are free to use this software for personal (non business) work, 
