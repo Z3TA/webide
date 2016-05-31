@@ -545,6 +545,8 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 Feature
 =======
 
+Quickly reload a single file from disk.
+
 Mercurial plugin. Automatic remote repository creation. 
 How to init an already existing repo with a emty remote repo
 cd to/dir
