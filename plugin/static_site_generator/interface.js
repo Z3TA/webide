@@ -521,12 +521,12 @@
 	function hide() {
 		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
 		
-		if(manager) { // Only need to hide if the object is created!
-			manager.style.display = "none";
-			previewView.style.display="none";
-			
-			editor.resizeNeeded();
-		}
+		// Only need to hide if the object is created!
+		if(manager) manager.style.display = "none";
+		if(previewView) previewView.style.display="none";
+		
+		if(manager || previewView) editor.resizeNeeded();
+		
 		return false;
 	}
 	
