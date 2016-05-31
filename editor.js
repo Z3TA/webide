@@ -305,6 +305,11 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					console.log("fileSizeInBytes=" + fileSizeInBytes);
 					
 					if(fileSizeInBytes > editor.settings.bigFileSize) {
+						alert("Opening big fies is not yet supported!");
+						
+						fileOpenError(new Error("File too big: " + path));
+						return;
+						
 						console.warn("File larger then " + editor.settings.bigFileSize + " bytes. It will be opened as a stream!");
 						let notFromDisk = false;
 						let tooBig = true;

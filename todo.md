@@ -17,15 +17,11 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-
+Fixing bugs and writing down all issues I find.
 
 
 BUGS (and issues)
 =================
-
-Can't open Big files from FTP/SFTP because of the stream.
-
-When disconneting from FTP/SFTP all remote files should be closed!?
 
 Do not auto complete html tags inside .js files! (only in .htm(l) files!)
 
@@ -175,8 +171,13 @@ Goto file doesn't work if you type too fast!
 
 JS parser seems to have problems finding variable type with single quoted strings.
 
+Can't open Big files from FTP/SFTP because of the stream.
+
+
 Polishing
 =========
+
+It's unclear what to do after connecting to a remote server. Like: how do I open a file, or create a new one?
 
 editor.addMenuItem should take a third argument that is called every time the context meny is shown, that has to return true for the item to be visible.
 
