@@ -17,7 +17,7 @@
 	
 	
 	var previewView;
-	var preview;
+	var previewIframe;
 	
 	
 	if(runtime == "browser") {
@@ -484,11 +484,11 @@
 		previewView = document.createElement("div");
 		previewView.setAttribute("style", "display: none;"); 
 		
-		preview = document.createElement("iframe");
-		preview.setAttribute("width", "500");
-		preview.setAttribute("height", "100%"); 
+		previewIframe = document.createElement("iframe");
+		previewIframe.setAttribute("width", "500");
+		previewIframe.setAttribute("height", "100%"); 
 		
-		previewView.appendChild(preview);
+		previewView.appendChild(previewIframe);
 		
 		rightColumn.appendChild(previewView);
 		
@@ -539,10 +539,18 @@
 	
 	function previewPage(site) {
 		
+		console.log("Previewing " + site.name);
+		
+		var errorOccured = false;
+		
+		if(!previewView) buildPreview();
+		
+		previewView.style.display="block";
+		
 		compile(site.source, site.preview, function buildDone() {
 			var path = require('path');
 			
-			if(!editor.currentFile) preview.src = path.join(site.preview, "index.htm");
+			if(!editor.currentFile) previewIframe.src = path.join(site.preview, "index.htm");
 			else {
 				var fileName = editor.currentFile.name;
 				var fileType = editor.currentFile.fileExtension;
@@ -552,28 +560,35 @@
 				&& (fileType == "htm" || fileType=="html" || fileType=="md") // Right file type
 				&& fileName != "header" && fileName != "footer") { 
 					
-					var url = path.join(site.preview, editor.currentFile.name);
+					//var url = path.join(site.preview, editor.currentFile.name);
+					
+					var url = editor.currentFile.path.replace(site.source, site.preview);
+					
 					try {
-						preview.src = url
+						previewIframe.src = url
 					}
 					catch(err) {
+						errorOccured = true;
 						console.warn(err.message);
-						alert("Unable to load: " + url);
+						alert("Unable to load: " + url + "\n" + err.message);
 					}
 					
 				}
 				else {
-					preview.src = path.join(site.preview, "index.htm");
+					previewIframe.src = path.join(site.preview, "index.htm");
 				}
 			}
 			
+			if(!errorOccured) {
+				
+				previewIframe.setAttribute("width", Math.floor(editor.view.canvasWidth / 2));
+				previewIframe.setAttribute("height", Math.floor(editor.view.canvasHeight));
+				
+				previewIframe.style.display="block";
+				editor.resizeNeeded();
+			}
 			
-			
-			preview.setAttribute("width", Math.floor(editor.view.canvasWidth / 2));
-			preview.setAttribute("height", Math.floor(editor.view.canvasHeight));
-			
-			previewView.style.display="block";
-			editor.resizeNeeded();
+			//alert("Done! errorOccured=" + errorOccured + " previewIframe with: " + previewIframe.getAttribute("width"));
 			
 		});
 		
@@ -613,6 +628,9 @@
 	
 	
 	function compile(source, destination, callback) {
+		
+		console.log("Compiling: " + source);
+		
 		var childProcess = require("child_process");
 		var path = require('path');
 		
@@ -642,6 +660,7 @@
 		});
 		worker.on('error', function worker_error(code) {
 			console.warn("SSG: Error code=" + code);
+			alert("SSG worker error code=" + code);
 		});
 		worker.on('exit', function worker_exit(code) {
 			console.log("SSG: Exit! code=" + code);
