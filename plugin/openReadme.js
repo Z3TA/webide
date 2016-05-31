@@ -16,12 +16,20 @@
 			
 			if(Object.keys(editor.files).length === 0) {
 				
+				if(runtime == "browser") {
+					editor.openFile("README.txt");
+				}
 				
-				var path = require("dirname") + "/README.txt";
-				
-				editor.openFile(path);
+				else {
+					
+					var path = require("path");
+					var dirname = require("dirname");
+					
+					var filePath = path.join(dirname + "/README.txt");
+					
+					editor.openFile(path);
+				}
 			}
-			
 		}, timer);
 		
 	}

@@ -1,7 +1,6 @@
 (function() {
 	"use strict";
 	
-	
 	var sites;
 	var manager;
 	var selectSite;
@@ -19,6 +18,12 @@
 	
 	var previewView;
 	var preview;
+	
+	
+	if(runtime == "browser") {
+		console.warn("Static site generation not yet supported in the browser!");
+		return;
+	}
 	
 	
 	var path = require("path");

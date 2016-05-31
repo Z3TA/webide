@@ -10,6 +10,11 @@
 	var toggleDevmodeMenuItem;
 	var toggleDevmodeMenuItemPosition = 0;
 	
+	if(runtime == "browser") {
+		console.warn("Developer mode not supported in the browser!");
+		return;
+	}
+	
 	editor.on("start", init);
 	
 	function init() {

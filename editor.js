@@ -148,13 +148,15 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		Feel free to add more editor API methods below. Do not extend the editor object elsewhere!!
 	*/
 	
-	var dirname = require("dirname"); // The path to this file (where the editor is "installed")
-	editor.workingDirectory = process.cwd();
-	
-	console.log("dirname=" + dirname);
-	console.log("workingDirectory=" + editor.workingDirectory);
-	
-	if(dirname != editor.workingDirectory) console.warn("Working directory is not the current directory=" + dirname + " editor.workingDirectory=" + editor.workingDirectory);
+	if(runtime!="browser") {
+		var dirname = require("dirname"); // The path to this file (where the editor is "installed")
+		editor.workingDirectory = process.cwd();
+		
+		console.log("dirname=" + dirname);
+		console.log("workingDirectory=" + editor.workingDirectory);
+		
+		if(dirname != editor.workingDirectory) console.warn("Working directory is not the current directory=" + dirname + " editor.workingDirectory=" + editor.workingDirectory);
+	}
 	
 	var directoryDialogCallback = undefined; 
 	var directoryDialogHtmlElement;
@@ -2856,31 +2858,35 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Starting the editor ...");
 		
-		// Get the commit ID
-		var versionPath = require("dirname") + "/version.inc";
-		editor.doesFileExist(versionPath, function(exists) {
-			if(exists) {
-				editor.readFromDisk("version.inc", function(err, path, string) {
-					editor.version = parseInt(string);
-				});
-			}
-			else {
-				// Mercurial maybe
-				var exec = require('child_process').exec;
-				var child = exec('hg log -l 1', function(error, stdout, stderr) {
-					if(!error) {
-						
-						var myRegexp = /changeset:\s*(\d*):/g;
-						var match = myRegexp.exec(stdout);
-						
-						editor.version = match[1];
-					}
-					else {
-						editor.version = -1;
-					}
-				});
-			}
-		});
+		
+		if(runtime != "browser") {
+			
+			// Get the commit ID
+			var versionPath = require("dirname") + "/version.inc";
+			editor.doesFileExist(versionPath, function(exists) {
+				if(exists) {
+					editor.readFromDisk("version.inc", function(err, path, string) {
+						editor.version = parseInt(string);
+					});
+				}
+				else {
+					// Mercurial maybe
+					var exec = require('child_process').exec;
+					var child = exec('hg log -l 1', function(error, stdout, stderr) {
+						if(!error) {
+							
+							var myRegexp = /changeset:\s*(\d*):/g;
+							var match = myRegexp.exec(stdout);
+							
+							editor.version = match[1];
+						}
+						else {
+							editor.version = -1;
+						}
+					});
+				}
+			});
+}
 		
 		canvas = document.getElementById("canvas");
 		
