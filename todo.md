@@ -17,6 +17,8 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
+Testing fix: Do not auto complete html tags inside .js files!
+
 Fixing bugs and writing down all issues I find.
 
 
@@ -24,6 +26,8 @@ BUGS (and issues)
 =================
 
 Do not auto complete html tags inside .js files! (only in .htm(l) files!)
+
+Inlude global scope in auto completer: ALl script tags in a html files. Save in background parsed
 
 Add function arguments to the variable auto completer.
 

@@ -12,7 +12,11 @@
 		
 		var options = [];
 		var charIndex = file.caret.index;
-			
+		var insideQuote = areWeInsideQuote(file, charIndex);
+		
+		if(!(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "xml" || insideQuote)) return;
+		
+		
 		// Found nothing to complete. Maybe we want to close last opened xml tag!?
 		var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
 		
@@ -22,6 +26,20 @@
 		
 		return options;
 	}
+	
+	function areWeInsideQuote(file, i) {
+		if(!file.parsed) return false;
+		
+		var quotes = file.parsed.quotes;
+		
+		if(!quotes) return false;
+		
+		for(var i=0; i<quotes.length; i++) {
+			if(quotes[i].start > i) return false
+			else if(quotes[i].end > i && quotes[i].start < i) return true;
+		}
+		}
+	
 	
 	function findLastOpenXmlTag(text, charIndex) {
 		var textUpUntilChar = text.substr(0, charIndex);
