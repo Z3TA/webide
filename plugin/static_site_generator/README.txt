@@ -1,21 +1,24 @@
-Static Site Generator for JZedit
-================================
-
-See demo/ folder for an example site.
-
-To make a new page or "blog post", create a new .htm file and place it in the demo/source/ folder.
+Static Site Generator (SSG) for JZedit
+======================================
 
 Show interface: Ctrl + F9
 Preview site: F9
 Publish site: Ctrl + Shift + F9
 
-When linking to css files and images etc in headers and footers,
-all src and href paths needs to translate from root (have an / infront) !
+See example site in demo/ folder.
+
+To make a new page or blog entry: 
+Create a new .htm file and place it in the demo/source/ folder.
+Or click the "New Page" button in the interface to use a template.
+
+
+When linking to .css files, images etc, all src and href paths needs to translate from root (have an / infront) !
+They will then be converted ro relative paths by the SSG.
 
 Files named *.htm, *.html, *.docx, *.md will be converted to HTML and have header(s) and footer(s) inserted.
-All other files like images *.js and *.css will be copied as is. 
+All other files like images .js and .css files will be copied as is.
 
-Multiple body-onloads, title, meta keyword, and script tags, will be uniquely merged. 
+Multiple body-onloads, title, meta keyword, and script tags, will be uniquely merged.
 
 
 Scripting
@@ -26,10 +29,9 @@ will be seached for <?JS ?> tags for evaluation/compiling.
 
 Write to the document using: document.write("string")
 
-NodeJS modules can be accessed via: require("Module name or path")
-Node modules have to be installed in the parent of the source folder. 
+NodeJS modules can be used with "require", and have to be installed in the parent of the source folder. 
 
-Data about the document can be found in the document.* object:
+Data about the document can be found in the document object:
 
 document.title    = Document title taken from title tag, H1 tag, or first paragraph. 
 document.lead     = Lead/intro taken from abstract, meta description or first paragraph.
@@ -43,15 +45,15 @@ document.all      = An array of all pages on the site
 document.root     = A tree like object of the whole site
 document.folder   = A tree like object of the current folder
 
-Each branch in the tree like object, has a documents, and folders object.
+Each branch in the tree like object has a documents, and folders object.
 
-The folder objects have a .latest() method that returns an array of all documents in the folder sorted by document.created.
+The folder objects have a .latest(n) method that returns an array of all documents in the folder sorted by document.created.
 
 
 Collaborating
 =============
 
 When working with many developers, you should use version control like Git or Mercurial.
-Share the root folder in a repository. (the "demo" folder in the included example).
+Share the root folder in a repository (the "demo" folder in the included example).
 
 
