@@ -25,6 +25,14 @@
 		after accessing string like an array (char = text.charAt(charIndex); vs char = text[charIndex];): 21-31ms (no improvement)
 		
 		Hmm, parsing the same file now takes 40-60ms. What did I do?
+		Addded a bunch of checks ... Lets add some flags to skip some parts, to see where the sacrification is
+		
+		Measure by typing inside File.js
+		parseJavaScript: 50.770ms
+		
+		Replace pastChar with natives instead of arrays:
+		parseJavaScript: 18-32 ms
+		
 		
 		
 		
@@ -322,9 +330,15 @@
 			column = 0,
 			lnw = "", // Last Not Whitespace character
 			eq = "=",
-			colon = ":",
-			pastChar = [],
-		xmlMode = false,
+		colon = ":",
+		pastChar0 = "",
+		pastChar1 = "",
+		pastChar2 = "",
+		pastChar3 = "",
+		pastChar4 = "",
+		pastChar5 = "",
+		pastChar6 = "",
+			xmlMode = false,
 		xmlModeBeforeScript = false,
 			textLength = text.length,
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
@@ -782,14 +796,14 @@
 			var backSlash = String.fromCharCode(92); // this: \
 			
 			// Save a history of the last characters
-			pastChar[6] = pastChar[5];
-			pastChar[5] = pastChar[4];
-			pastChar[4] = pastChar[3];
-			pastChar[3] = pastChar[2];
-			pastChar[2] = pastChar[1];
-			pastChar[1] = pastChar[0];
+			pastChar6 = pastChar5;
+			pastChar5 = pastChar4;
+			pastChar4 = pastChar3;
+			pastChar3 = pastChar2;
+			pastChar2 = pastChar1;
+			pastChar1 = pastChar0;
 			
-			pastChar[0] = char;
+			pastChar0 = char;
 			
 			lllChar = llChar;
 			llChar = lastChar;
@@ -803,11 +817,11 @@
 			
 			column++;
 			
-			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") ) {
+			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") ) {
 				// A new line without , exits variable declaration
 				insideVariableDeclaration[codeBlockDepth] = false;
 				foundVariableInVariableDeclaration = false;
-				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar[0] == "," || pastChar[1] == "," || pastChar[2] == ",") );
+				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
 			}
 			
 			
@@ -971,12 +985,12 @@
 				
 				// ### PHP script tags <?php ?>
 				if(file.fileExtension == "php") {
-					if(pastChar[3] == "<" &&  pastChar[2] == "?" &&  pastChar[1] == "p" &&  pastChar[0] == "h" && char == "p") { // <?php
+					if(pastChar3 == "<" &&  pastChar2 == "?" &&  pastChar1 == "p" &&  pastChar0 == "h" && char == "p") { // <?php
 						PHP = true;
 						xmlMode = false;
 						insideXmlTag = false;
 					}
-					else if(pastChar[0] == "?" && char == ">" && PHP) { // ?>
+					else if(pastChar0 == "?" && char == ">" && PHP) { // ?>
 						PHP = false;
 						xmlMode = true;
 					}
@@ -990,7 +1004,7 @@
 					
 				*/
 				if(file.fileExtension == "asp" || file.fileExtension == "html" || file.fileExtension == "htm" || file.fileExtension == "inc") {
-					if(pastChar[0] == "<" && char == "%") { // <%
+					if(pastChar0 == "<" && char == "%") { // <%
 						ASP = true;
 						// Is it vbScript?
 						//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
@@ -998,7 +1012,7 @@
 						xmlMode = false;
 						insideXmlTag = false;
 					}
-					else if(pastChar[0] == "%" && char == ">" && ASP) { // %>
+					else if(pastChar0 == "%" && char == ">" && ASP) { // %>
 						ASP = false;
 						vbScript = false;
 						xmlMode = true;
@@ -1007,12 +1021,12 @@
 				
 				// ### Server side JS script tag
 				if(file.fileExtension == "xml" || file.fileExtension == "html" || file.fileExtension == "htm") {
-					if(pastChar[2] == "<" &&  pastChar[1] == "?" &&  pastChar[0] == "J" && char == "S") { // <?JS
+					if(pastChar2 == "<" &&  pastChar1 == "?" &&  pastChar0 == "J" && char == "S") { // <?JS
 						SSJS = true;
 						xmlMode = false;
 						insideXmlTag = false;
 					}
-					else if(pastChar[0] == "?" && char == ">" && SSJS) { // ?>
+					else if(pastChar0 == "?" && char == ">" && SSJS) { // ?>
 						SSJS = false;
 						xmlMode = true;
 					}
@@ -1034,7 +1048,7 @@
 					
 					PS: We are Not inside an HTML comment until the parser finds the last - in <!--
 				*/
-				if(insideXmlTag && pastChar[0] == "<" && char == "/") {
+				if(insideXmlTag && pastChar0 == "<" && char == "/") {
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
@@ -1049,13 +1063,13 @@
 					if(insideHTMLComment) throw new Error("WTF");
 				}
 				
-				else if(pastChar[3] == "<" && pastChar[2] == "h" && pastChar[1] == "t" && pastChar[0] == "m" && char == "l" && !insideQuote) {
+				else if(pastChar3 == "<" && pastChar2 == "h" && pastChar1 == "t" && pastChar0 == "m" && char == "l" && !insideQuote) {
 					xmlModeBeforeTag = true; // Turn on HTML mode if we find a html tag
 					insideXmlTag = true;
 					xmlTagStart = i-5;
 				}
 				// Exit out of style
-				else if(CSS && pastChar[5] == "<" && pastChar[4] == "/" && pastChar[3] == "s" && pastChar[2] == "t" && pastChar[1] == "y" && pastChar[0] == "l" && char == "e") {
+				else if(CSS && pastChar5 == "<" && pastChar4 == "/" && pastChar3 == "s" && pastChar2 == "t" && pastChar1 == "y" && pastChar0 == "l" && char == "e") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-6;
@@ -1064,7 +1078,7 @@
 					// CSS=false is set below ... (scroll down)
 				}
 				// Exit out of script
-				else if(insideScriptTag && pastChar[6] == "<" && pastChar[5] == "/" && pastChar[4] == "s" && pastChar[3] == "c" && pastChar[2] == "r" && pastChar[1] == "i" && pastChar[0] == "p" && char == "t") {
+				else if(insideScriptTag && pastChar6 == "<" && pastChar5 == "/" && pastChar4 == "s" && pastChar3 == "c" && pastChar2 == "r" && pastChar1 == "i" && pastChar0 == "p" && char == "t") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-7;
@@ -1072,7 +1086,7 @@
 					insideRegExp = false;
 				}
 				// Exit out of pre
-				else if(insideScriptTag && pastChar[3] == "<" && pastChar[2] == "/" && pastChar[1] == "p" && pastChar[0] == "r" && char == "e") {
+				else if(insideScriptTag && pastChar3 == "<" && pastChar2 == "/" && pastChar1 == "p" && pastChar0 == "r" && char == "e") {
 					insideXmlTag = true;
 					xmlTagSelfEnding = false;
 					xmlTagStart = i-4;
@@ -1083,7 +1097,7 @@
 					xmlTagWordLength = i - xmlTagStart;
 				}
 				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) {
-					if(pastChar[0] == "/") {
+					if(pastChar0 == "/") {
 						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
 					
@@ -1762,18 +1776,18 @@
 				return;
 			}
 			/*
-				if(pastChar[2] == "v" && pastChar[1] == "a" && pastChar[0] == "r") {
+				if(pastChar2 == "v" && pastChar1 == "a" && pastChar0 == "r") {
 
 				}
-				else if(pastChar[1] == "i" && pastChar[0] == "f") {
+				else if(pastChar1 == "i" && pastChar0 == "f") {
 					word = "";
 					return;
 				}
-				else if(pastChar[3] == "e" && pastChar[2] == "l" && pastChar[1] == "s" && pastChar[0] == "e") {
+				else if(pastChar3 == "e" && pastChar2 == "l" && pastChar1 == "s" && pastChar0 == "e") {
 					word = "";
 					return;
 				}
-				else if(pastChar[2] == "n" && pastChar[1] == "e" && pastChar[0] == "w") {
+				else if(pastChar2 == "n" && pastChar1 == "e" && pastChar0 == "w") {
 					word = "";
 					return;
 				}
