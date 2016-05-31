@@ -20,10 +20,18 @@ What I'm working on:
 
 
 
-BUGS
-====
+BUGS (and issues)
+=================
+
+Can't open Big files from FTP/SFTP because of the stream.
 
 When disconneting from FTP/SFTP all remote files should be closed!?
+
+Do not auto complete html tags inside .js files! (only in .htm(l) files!)
+
+Add function arguments to the variable auto completer.
+
+Typing in editor.js is slow
 
 
 parse error:

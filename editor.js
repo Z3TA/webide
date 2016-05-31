@@ -14,7 +14,7 @@ editor.supportedFiles = ["js", "htm", "html", "php", "asp", "vbs", "xml", "json"
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 editor.settings = {
-	devMode: false,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these XML tags
@@ -737,7 +737,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 					var options = {
 						encoding: "utf8"
-}
+					}
 					// Could also use sftp.createReadStream
 					c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
 						
@@ -826,7 +826,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 			}
 		}
-		}
+	}
 	
 	
 	editor.saveFile = function(file, path, callback) {
@@ -939,7 +939,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					else {
 						console.log("The file was successfully saved: " + path + "");
 						doneSaving();
-						}
+					}
 					
 				});
 			}
@@ -948,9 +948,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				file.saved(); // Call functions that listen for save events
 				
 				if(callback) callback();
-}
+			}
 			
-}
+		}
 	}
 	
 	
@@ -1002,7 +1002,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
 			}
 			editor.setFileOpenPath(defaultPath);
-			}
+		}
 		
 		fileOpen.click(); // Bring up the OS path selector window
 	}
@@ -2385,7 +2385,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 						delete editor.disconnect[serverAddress];
 						
 						console.log("Dissconnected from FTP on " + serverAddress + "");
-						};
+					};
 					
 					callback(null, editor.workingDirectory);
 				});
@@ -2406,6 +2406,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				*/
 			});
 			
+			c.on('close', function(hadErr) {
+				alert("Connection to FTP on " + serverAddress + " closed.");
+				
+				connectionClosed("ftp", serverAddress);
+				
+			});
 			c.connect({host: serverAddress, user: user, password: passw});
 		}
 		
@@ -2463,7 +2469,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					});
 				}
 			});
-			}
+		}
 		else {
 			throw new Error("Protocol not supported: " + protocol);
 		}
@@ -2476,7 +2482,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				host: serverAddress,
 				port: 22,
 				username: user,
-				}
+			}
 			
 			if(keyPath) {
 				// Connect using key
@@ -2541,6 +2547,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 				}).on('end', function(msg) {
 					alert("Disconnected from SSH on " + serverAddress + "\n" + msg);
+					
+					connectionClosed("ssh", serverAddress);
+					
 				}).connect(auth);
 			}
 		}
@@ -2642,7 +2651,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			else {
 				callback(new Error("Unable to read " + parse.pathname + " on " + parse.hostname + "\nNot connected to SFTP on " + parse.hostname + " !"));
 			}
-}
+		}
 		else {
 			// ### List files using "normal" file system
 			var fs = require("fs");
@@ -2665,7 +2674,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 							
 						}
 					}
-}
+				}
 				
 				function stat(fileName, filePath) {
 					console.log("Making stat: " + filePath + "");
@@ -2714,7 +2723,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					var path = "";
 					for(var i=0; i<folderItems.length; i++) {
 						path = slash ? pathToFolder + "/" + folderItems[i].name : pathToFolder + folderItems[i].name;
-						list.push({type: folderItems[i].type, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+						list.push({type: folderItems[i].type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
 					}
 					
 					callback(null, list);
@@ -2722,8 +2731,39 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			});
 		}
 		
-		}
+	}
 	
+	function connectionClosed(protocol, serverAddress) {
+		
+		var connectedFiles = filesOnServer();
+		
+		if(connectedFiles.length > 0) {
+			if(confirm("Close all opened files on " + serverAddress + " ?")) {
+				
+				connectedFiles.forEach(function(path) {
+					editor.closeFile(path);
+				});
+				
+			}
+		}
+		
+		function filesOnServer() {
+			// Returns an array of currently opened files connected to this server
+			var list = [];
+			for(var path in editor.files) {
+				console.log("path=" + path);
+				if(protocol == "ftp") { // protocol is always lower case!
+					if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
+				}
+				else if(protocol == "ssh") {
+					if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
+				}
+			}
+			
+			return list;
+		}
+		
+}
 	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
