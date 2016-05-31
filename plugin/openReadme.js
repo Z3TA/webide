@@ -27,7 +27,7 @@
 					
 					var filePath = path.join(dirname + "/README.txt");
 					
-					editor.openFile(path);
+					editor.openFile(filePath);
 				}
 			}
 		}, timer);
