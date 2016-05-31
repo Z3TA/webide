@@ -24,6 +24,10 @@
 		
 		after accessing string like an array (char = text.charAt(charIndex); vs char = text[charIndex];): 21-31ms (no improvement)
 		
+		Hmm, parsing the same file now takes 40-60ms. What did I do?
+		
+		
+		
 		
 		
 		About var declarations: They will not be indented, witch will encurage you to write:
