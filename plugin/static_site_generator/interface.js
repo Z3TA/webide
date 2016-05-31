@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	var sites;
+	var sites; // Array of sites
 	var manager;
 	var selectSite;
 	var selectedSite;
@@ -62,10 +62,27 @@
 		editor.addMenuItem("Static site generator", function() {
 			show();
 			editor.hideMenu();
-});
+		});
 		
+		editor.on("fileShow", fileChanged);
 		
 	}
+	
+	function fileChanged(file) {
+		
+		// Change site when you change file
+		// Check if the file belongs to a site
+		
+		var filePath = file.path;
+		
+		for (var i=0; i<sites.length; i++) {
+			if(filePath.indexOf(sites[i].source) != -1) {
+				selectedSite = sites[i];
+				break;
+}
+		}
+		}
+	
 	
 	function unload() {
 		// Cleaning up, for example when disabling a plugin
@@ -539,7 +556,7 @@
 					try {
 						preview.src = url
 					}
-					catch(e) {
+					catch(err) {
 						console.warn(err.message);
 						alert("Unable to load: " + url);
 					}
