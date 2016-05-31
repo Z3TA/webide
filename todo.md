@@ -18,9 +18,6 @@ Editor should always be restart after a "throw" is detected!
 What I'm working on:
 
 
-todo? First time users, prompt for a username, to setup ftp/hosting etc of free webspace and nodejs server hosting!?
-
-todo: Ctrl + W to close tabs. Keep keyboard commands consistent with the browser!!
 
 
 BUGS
