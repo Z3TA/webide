@@ -545,6 +545,9 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 Feature
 =======
 
+When copying in something like "editor.addMenuItem("Copy file path", function copyFilePath() {" the editor should also add }); if there is a global {} missmatch.
+
+
 Quickly reload a single file from disk.
 
 Mercurial plugin. Automatic remote repository creation. 

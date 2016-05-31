@@ -54,6 +54,12 @@
 		
 		//build();
 		
+		editor.addMenuItem("Static site generator", function() {
+			show();
+			editor.hideMenu();
+});
+		
+		
 	}
 	
 	function unload() {

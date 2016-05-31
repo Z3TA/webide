@@ -58,6 +58,11 @@
 		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hide, charCode: charEscape, combo: 0});
 		editor.bindKey({desc: "Connect to remove server in server manager", fun: enter, charCode: charEnter, combo: 0});
 		
+		editor.addMenuItem("Remote connections", function() {
+			show();
+			editor.hideMenu();
+		});
+		
 	}
 	
 	
