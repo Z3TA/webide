@@ -1026,7 +1026,7 @@
 		while(deselect.length > 0) {
 			remove = deselect.pop();
 			box.splice(box.indexOf(remove), 1);
-			selection.splice(box.indexOf(remove), 1);
+			selection.splice(selection.indexOf(remove), 1);
 		}
 		//console.log("deselect.length=" + deselect.length + " box.length=" + box.length + " selection.length=" + selection.length);
 		
