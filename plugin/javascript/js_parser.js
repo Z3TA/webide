@@ -1058,7 +1058,7 @@
 				else if(pastChar3 == "<" && pastChar2 == "h" && pastChar1 == "t" && pastChar0 == "m" && char == "l" && !insideQuote) {
 					xmlModeBeforeTag = true; // Turn on HTML mode if we find a html tag
 					insideXmlTag = true;
-					xmlTagStart = i-5;
+					xmlTagStart = i-4;
 				}
 				// Exit out of style
 				else if(CSS && pastChar5 == "<" && pastChar4 == "/" && pastChar3 == "s" && pastChar2 == "t" && pastChar1 == "y" && pastChar0 == "l" && char == "e") {
