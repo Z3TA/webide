@@ -25,9 +25,8 @@ Fixing bugs and writing down all issues I find.
 BUGS (and issues)
 =================
 
-Do not auto complete html tags inside .js files! (only in .htm(l) files!)
 
-The goto file highlights the one at the bottom, but selects one a bit up
+When selecting text to copy, using the mouse, sometimes the last character drops out
 
 Inlude global scope in auto completer: ALl script tags in a html files. Save in background parsed
 

@@ -99,10 +99,9 @@
 		gotoList = document.createElement("ul");
 		gotoList.setAttribute("id", "gotoList");
 		
-		var li = document.createElement("li");
-		li.appendChild(document.createTextNode("test 123"));
-		
-		gotoList.appendChild(li);
+		//var li = document.createElement("li");
+		//li.appendChild(document.createTextNode("test 123"));
+		//gotoList.appendChild(li);
 		
 		
 		gotoDiv.appendChild(gotoList);
@@ -135,23 +134,27 @@
 	
 	function typing() {
 		
-		// Clear the list
-		while(gotoList.firstChild){
-			gotoList.removeChild(gotoList.firstChild);
-		}
-		
 		var text = inputGoto.value
 		
 		if(text.length > 0) {
 			trySearch();
 		}
 		else {
-			editor.resizeNeeded();;
+			editor.resizeNeeded();
 		}
 		
 		function trySearch() {
-			if(!isSearching) search(text);
-			else {
+			// Clear the list
+			while(gotoList.firstChild){
+				gotoList.removeChild(gotoList.firstChild);
+			}
+			editor.resizeNeeded();
+			
+			if(!isSearching) {
+				searchRetries = 0;
+				search(text);
+			}
+else {
 				
 				var waitingFor = "";
 				
