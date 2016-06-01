@@ -17,7 +17,8 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Testing fix: Do not auto complete html tags inside .js files!
+Streams!
+
 
 Fixing bugs and writing down all issues I find.
 
@@ -25,7 +26,11 @@ Fixing bugs and writing down all issues I find.
 BUGS (and issues)
 =================
 
-Can we search in file on a FTP?
+Can we search in file on a FTP? Nope!
+
+implement editor.findFilesContaining(txt, path) ?
+
+Replace all file IO with streams !?
 
 Inlude global scope in auto completer: All script tags in a html files. Save in background parsed
 

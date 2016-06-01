@@ -52,7 +52,7 @@ editor.settings = {
 	drawGridBox: false,
 	scrollStep: 3,
 	defaultLineBreakCharacter: "\n", // Can be many, like CR & LF, \n == LF, \r == CR
-	bigFileSize: 400000, // Bytes, all files larger then this will be opened as streams
+	bigFileSize: 400000, //  Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
@@ -305,10 +305,9 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					console.log("fileSizeInBytes=" + fileSizeInBytes);
 					
 					if(fileSizeInBytes > editor.settings.bigFileSize) {
-						alert("Opening big fies is not yet supported!");
-						
-						fileOpenError(new Error("File too big: " + path));
-						return;
+						//alert("Opening big fies is not yet supported!");
+						//fileOpenError(new Error("File too big: " + path));
+						//return;
 						
 						console.warn("File larger then " + editor.settings.bigFileSize + " bytes. It will be opened as a stream!");
 						let notFromDisk = false;
@@ -1064,6 +1063,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
 		
 		if(editor.currentFile) {
+			
+			console.log("render file=" + editor.currentFile.path);
 			
 			if(!editor.currentFile.render) {
 				console.warn("File render flag set to '" + editor.currentFile.render + "'");

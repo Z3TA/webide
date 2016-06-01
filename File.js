@@ -2033,7 +2033,10 @@
 			
 			if(caret != file.caret) throw new Error("Can not place virtual caret, only file.caret if the file is big!");
 			
-			if(file.totalRows == -1) throw new Error("totalRows not yet found! Wait ...?");
+			if(file.totalRows == -1) {
+				alert("Please wait for the stream to finish");
+				//throw new Error("totalRows not yet found! Wait ...?");
+			}
 			
 			var partStartRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
 			
@@ -3099,44 +3102,41 @@
 		var startLinebreaks = -1;
 		var countRows = false; // If set to true, only count line breaks
 		var flush = false;
-		var byteCounter = 0;
+		var totalBytes = 0;
 		var gotFishAlready = false;
+		var callbackCalled = false;
 		
-		var options = {}
+		var options = {};
 		
-		/*
-		Why wont this work!??? AAAaaaAAAaaaAAAA!
+		// Start from a position in the file instead of loading the whole file ...
 		if(partStartRow > 0 && file.byteRow.length > 0) {
 			// Figure out where we should start
 			// Can be optimized by binary search if needed
-
+			var index = 0;
 			for(var i=0; i<file.byteRow.length; i++) {
-				if(file.byteRow[i][0] > partStartRow) {
+				if(file.byteRow[i].row > partStartRow) {
 					
-					//if(file.byteRow[i][0] == partStartRow) {
-					//	options.start = file.byteRow[i][1];
-					//	totalLineBreaks = file.byteRow[i][0];
-					//	byteCounter = file.byteRow[i][1];
-					//}
-					
-					
+					index = i-1;
 					
 					if(i>1) {
-						options.start = file.byteRow[i-1][1];
-						totalLineBreaks = file.byteRow[i-1][0];
-						byteCounter = file.byteRow[i-1][1];
-						console.log("seek i=" + i);
+						options.start = file.byteRow[index].byte;
+						totalLineBreaks = file.byteRow[index].row;
+						totalBytes = file.byteRow[index].byte;
+						console.log("seek i=" + index);
+						
+						console.log("Starting seek at byte=" + totalBytes + " row=" + totalLineBreaks);
+						
 					}
 					// else: start from the beginning
 					break;
 				}
 			}
 		}
-		*/
+		
 		
 		var fs = require("fs");
 		var stream = fs.createReadStream(file.path, options);
-		stream.setEncoding('utf8');
+		//stream.setEncoding('utf8'); // OMG this caused the seek bug
 		
 		console.log("loadFilePart Catching stream .... options=" + JSON.stringify(options) + " partStartRow=" + partStartRow + " file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows + " file.path=" + file.path);
 		
@@ -3174,14 +3174,15 @@
 			// Called each time there is someting comming down the stream
 			
 			var chunk;
-			var lineBreaks = 0;
+			var lineBreaksInThisChunk = 0;
 			var str = "";
 			var StringDecoder = require('string_decoder').StringDecoder;
 			var decoder = new StringDecoder('utf8');
-			//var chunkSize = 512; // How many bytes to recive in each chunk
+			var chunkSize = 512; // How many bytes to recive in each chunk
 			
 			//console.log("Reading stream ... isPaused=" + stream.isPaused());
 			
+			//while (null !== (chunk = stream.read(chunkSize)) && !stream.isPaused() ) {
 			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
 				
 
@@ -3189,45 +3190,44 @@
 					console.log("Flushing the toilet ....");
 				}
 				else {
-
+					
 					// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
+
 					str = decoder.write(chunk);
 					
+					//console.log("str=" + str);
 					
 					// Only add to the string after we got enough line breaks ...
 					if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(str);
-					lineBreaks = occurrences(str, file.lineBreak, false);
+					lineBreaksInThisChunk = occurrences(str, file.lineBreak, false);
 					
 					if(file.lineBreak.length > 1) {
 						// Account for lost linebreaks due to breaks in the middle between CR and LF
-						if(str.charAt(0) == file.lineBreak.charAt(1)) lineBreaks++;
+						if(str.charAt(0) == file.lineBreak.charAt(1)) lineBreaksInThisChunk++;
 					}
 					
 					if(countRows) {
-						file.byteRow.push([ totalLineBreaks, byteCounter ]);
+						file.byteRow.push({row: totalLineBreaks, byte: totalBytes});
+						//console.log("file.byteRow.push row=" + totalLineBreaks + " byte=" + totalBytes);
 					}
 					
-					byteCounter += parseInt(chunk.length);
-					//byteCounter+= chunkSize;
-					
-					totalLineBreaks += lineBreaks;
+					totalBytes += parseInt(chunk.length);
+					totalLineBreaks += lineBreaksInThisChunk;
 					
 
-					
-					
 					
 					if(totalLineBreaks >= partStartRow && !countRows) {
 						// Start saving characters
 						// The rows above partStartRow will be chopped off when the stream is finished
 						if(startLinebreaks == -1) {
-							startLinebreaks = totalLineBreaks - lineBreaks; // Accumulated linebreaks when we started capturing text
-							console.log("set startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " totalLineBreaks=" + totalLineBreaks + " lineBreaks=" + lineBreaks);
+							startLinebreaks = totalLineBreaks - lineBreaksInThisChunk; // Accumulated linebreaks when we started capturing text
+							//console.log("set startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " totalLineBreaks=" + totalLineBreaks + " lineBreaksInThisChunk=" + lineBreaksInThisChunk);
 						}
 						text = text + str;
 					}
 					
 
-					console.log("Got chunk! totalLineBreaks=" + totalLineBreaks + " byteCounter=" + byteCounter + " chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaks=" + lineBreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
+					console.log("Got chunk! totalLineBreaks=" + totalLineBreaks + " totalBytes=" + totalBytes + " chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaksInThisChunk=" + lineBreaksInThisChunk + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
 
 
 					
@@ -3253,7 +3253,7 @@
 			
 			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
 			console.log("Calling callback name=" + getFunctionName(callback));
-			if(callback) callback();
+			if(callback && !callbackCalled) callback();
 		}
 		
 		function streamEnded() {
@@ -3263,6 +3263,7 @@
 				file.totalRows = totalLineBreaks;
 				console.log("file.byteRow.length=" + file.byteRow.length);
 				console.log("file.totalRows=" + file.totalRows + " totalLineBreaks=" + totalLineBreaks);
+				console.log(JSON.stringify(file.byteRow, null, 2));
 			}
 			else if(!flush && !gotFishAlready) {
 				gotFish(true);
@@ -3379,7 +3380,14 @@
 			
 				
 				
-				editor.renderNeeded();
+				//editor.renderNeeded();
+				
+				// Make the file show up right away instead of waiting for the line count
+				if(callback && !callbackCalled) callback();
+				
+				// Force render!?
+				//editor.shouldRender = true;
+				//editor.render();
 				
 				if(endReached) {
 					file.tail = true;
@@ -3399,6 +3407,9 @@
 				if(file.totalRows == -1) {
 					// Continue to load the file to find out how many rows it has
 					countRows = true;
+					
+					console.log("Starting to count rows ... totalLineBreaks=" + totalLineBreaks + " totalBytes=" + totalBytes);
+					console.log("file.byteRow.length=" + file.byteRow.length);
 					
 					// hmm ... Is streamEnded called before gotFish!?
 					if(endReached) {
