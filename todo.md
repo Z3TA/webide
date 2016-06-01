@@ -27,6 +27,8 @@ BUGS (and issues)
 
 Do not auto complete html tags inside .js files! (only in .htm(l) files!)
 
+The goto file highlights the one at the bottom, but selects one a bit up
+
 Inlude global scope in auto completer: ALl script tags in a html files. Save in background parsed
 
 Add function arguments to the variable auto completer.

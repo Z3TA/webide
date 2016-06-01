@@ -14,11 +14,14 @@
 		var charIndex = file.caret.index;
 		var insideQuote = areWeInsideQuote(file, charIndex);
 		
-		if(!(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "xml" || insideQuote)) return;
-		
+		if(!(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "xml" || insideQuote)) {
+			console.log("Not autocompleting tags because its not a html file or inside a quote");
+			return;
+		}
 		
 		// Found nothing to complete. Maybe we want to close last opened xml tag!?
-		var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
+		//var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
+		var lastOpenXmlTag = findLastOpenXmlTag2(file, charIndex);
 		
 		if(lastOpenXmlTag.length > 0 && lastOpenXmlTag != "<") {
 			options.push(word + "</" + lastOpenXmlTag + ">");
@@ -38,7 +41,45 @@
 			if(quotes[i].start > i) return false
 			else if(quotes[i].end > i && quotes[i].start < i) return true;
 		}
+	}
+	
+	function findLastOpenXmlTag2(file, charIndex) {
+		// Use parsed data
+		
+		if(!file.parsed) return "";
+		
+		var tags = file.parsed.xmlTags;
+		
+		if(!tags) return "";
+		
+		var text = file.text;
+		
+		var openTags = [];
+		var tag = "";
+		var slash = -1;
+		var j = 0;
+		for (var i=0; i<tags.length; i++) {
+			tag = text.substr(tags[i].start, tags[i].wordLength);
+			slash = tag.indexOf("/");
+			if(slash != -1) {
+				// Ending tag
+				tag = tag.substr(slash+1); // Remove the slash
+				console.log("Ending tag: *" + tag + "*");
+				openTags.splice(openTags.lastIndexOf(tag), 1);
+			}
+			else if(!tags[i].selfEnding) {
+				tag = tag.substr(1); // Remove the left arrow
+				console.log("Opening tag: *" + tag + "*");
+				openTags.push(tag);
+			}
+			
 		}
+		
+		if(openTags.length > 0) {
+			return openTags[openTags.length-1];
+		}
+		else return "";
+}
 	
 	
 	function findLastOpenXmlTag(text, charIndex) {
