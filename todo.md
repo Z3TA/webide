@@ -17,7 +17,7 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Streams!
+Should files be opened as streams!!?
 
 
 Fixing bugs and writing down all issues I find.
