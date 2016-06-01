@@ -25,11 +25,9 @@ Fixing bugs and writing down all issues I find.
 BUGS (and issues)
 =================
 
-When selecting using keyboard arrows and shift. Selecting from right to left, and then going back, doesn't deselect.
+Can we search in file on a FTP?
 
-When selecting text to copy, using the mouse, sometimes the last character drops out
-
-Inlude global scope in auto completer: ALl script tags in a html files. Save in background parsed
+Inlude global scope in auto completer: All script tags in a html files. Save in background parsed
 
 Add function arguments to the variable auto completer.
 
@@ -489,6 +487,8 @@ Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in 
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+When selecting text to copy, using the mouse, sometimes the last character drops out
 
 ---
 

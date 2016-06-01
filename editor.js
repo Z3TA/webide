@@ -878,6 +878,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var url = require("url");
 			var parse = url.parse(path);
 			
+			console.log("protocol: " + parse.protocol);
+			
 			if(parse.protocol == "ftp:") {
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
@@ -903,7 +905,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					alert("Failed to save file: " + file.path + "\nNo connection to FTP on " + parse.hostname + " !");
 				}
 			}
-			if(parse.protocol == "sftp:") {
+			else if(parse.protocol == "sftp:") {
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
@@ -934,7 +936,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				var fs = require("fs");
 				fs.writeFile(path, file.text, function(err) {
-					console.log("Attempting saving to disk: " + path + " ...");
+					console.log("Attempting saving to local file system: " + path + " ...");
 					
 					if(err) {
 						alert("Unable to save file! " + err.message + "\n" + path);
@@ -950,6 +952,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			}
 			
 			function doneSaving() {
+				console.log("Successfully saved " + file.path);
+				
 				file.saved(); // Call functions that listen for save events
 				
 				if(callback) callback();
