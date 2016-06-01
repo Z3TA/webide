@@ -3,15 +3,18 @@
 	
 	"use strict";
 	
-	editor.keyBindings.push({charCode: 39, fun: moveRight, dir: "down"});
-	//editor.keyBindings.push({charCode: 39, fun: moveRightAndSelect, combo: 1});
+	var key_LEFT = 37;
+	var key_RIGHT = 39;
+	var key_UP = 38;
+	var key_DOWN = 40;
 	
-	editor.keyBindings.push({charCode: 37, fun: keyboard_arrows_moveLeft});
-	editor.keyBindings.push({charCode: 38, fun: keyboard_arrows_moveUp});
-	editor.keyBindings.push({charCode: 40, fun: keyboard_arrows_moveDown});
+	editor.keyBindings.push({charCode: key_RIGHT, fun: keyboard_arrows_moveRight, dir: "down"});
+	editor.keyBindings.push({charCode: key_LEFT, fun: keyboard_arrows_moveLeft});
+	editor.keyBindings.push({charCode: key_UP, fun: keyboard_arrows_moveUp});
+	editor.keyBindings.push({charCode: key_DOWN, fun: keyboard_arrows_moveDown});
 	
 	var selectStart, selectEnd;
-
+	
 	
 	function isWhiteSpace(char) {
 		return (char == " " || char == "\n" || char == "\r");
@@ -22,11 +25,11 @@
 		
 		if(!editor.input) return true;
 		if(!file) return true;
-
+		
 		file.removeHighlights();
-
+		
 		console.log("Move caret left!");
-
+		
 		var caret = file.caret;
 		var caretIndex = caret.index;
 		var stepStart = caretIndex;
@@ -34,9 +37,9 @@
 		var spacesFound = 0;
 		
 		/*
-		var shift = (combo==1 || combo==3 || combo==5 || combo == 7); // shift: 1, 3, 5, 7
-		var ctrl = (combo==2 || combo==3 || combo==6 || combo==7); // ctrl: 2, 3, 6, 7
-		var alt = (combo==4 || combo==5 || combo==6 || combo==7); // alt: 4, 5, 6, 7
+			var shift = (combo==1 || combo==3 || combo==5 || combo == 7); // shift: 1, 3, 5, 7
+			var ctrl = (combo==2 || combo==3 || combo==6 || combo==7); // ctrl: 2, 3, 6, 7
+			var alt = (combo==4 || combo==5 || combo==6 || combo==7); // alt: 4, 5, 6, 7
 		*/
 		
 		if(combo.alt) return true; // Do nothing if alt key is down
@@ -60,7 +63,7 @@
 		if(!combo.shift) file.deselect();
 		
 		for(var i=stepStart; i<=stepStop; i++) {
-
+			
 			file.moveCaretLeft(caret);
 			
 			if(combo.shift) {
@@ -71,15 +74,15 @@
 		}
 		
 		file.scrollToCaret(caret);
-
+		
 		editor.renderNeeded();
 		
 		return false;
-
+		
 	}
 	
-	function moveRight(file, combo) {
-
+	function keyboard_arrows_moveRight(file, combo) {
+		
 		if(!editor.input) return true;
 		if(!file) return true;
 		
@@ -95,7 +98,7 @@
 		var stepStart = caretIndex;
 		var stepStop = caretIndex;
 		
-
+		
 		if(combo.alt) return true; // Do nothing if alt key is down
 		
 		if(combo.ctrl) {
@@ -119,7 +122,7 @@
 			
 			file.moveCaretRight(caret);
 		}
-
+		
 		file.scrollToCaret(caret);
 		
 		editor.renderNeeded();
@@ -127,10 +130,6 @@
 		file.checkCaret();
 		
 		return false;
-		
-	}
-	
-	function moveRightAndSelect(file) {
 		
 	}
 	

@@ -25,6 +25,7 @@ Fixing bugs and writing down all issues I find.
 BUGS (and issues)
 =================
 
+When selecting using keyboard arrows and shift. Selecting from right to left, and then going back, doesn't deselect.
 
 When selecting text to copy, using the mouse, sometimes the last character drops out
 
