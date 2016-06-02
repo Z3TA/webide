@@ -832,6 +832,19 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 	}
 	
+	editor.writeStream = function(file) {
+		/* 
+			Writes the content of a file to a destination FS/FTP/SFTP
+			
+			1. Creates a read stream with a start postion 
+			2. Creates a write stream with a start postion
+			3. Reads from readStream until the file buffer is found (content in file.text) while sending to the writeStream
+			4. Reads from the file buffer (file.text) while draining the readStream, and sends to the writeStream
+			5. When the end of the file buffer has been reached. The rest is read from the readStream into the writeStream
+			
+		*/
+}
+	
 	
 	editor.saveFile = function(file, path, callback) {
 		/*

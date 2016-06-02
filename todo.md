@@ -15,6 +15,9 @@ note: Have to close the app and reopen it to reload NodeJS module source!
 note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state. 
 Editor should always be restart after a "throw" is detected!
 
+About reading and writing as streams: ftp
+
+
 What I'm working on:
 
 Should files be opened as streams!!?
