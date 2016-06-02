@@ -15,18 +15,53 @@ note: Have to close the app and reopen it to reload NodeJS module source!
 note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state. 
 Editor should always be restart after a "throw" is detected!
 
-About reading and writing as streams: ftp
+
+
+
+
 
 
 What I'm working on:
 
+Thinking about how to optimze the parser ...
+
+Time how long it takes to parse ... putcharacter takes ca 2ms, 
+
+We want to stay under 60Hz sync. So max 16ms to render a key stroke.
+
+putCharacterCore: 5.245ms
+js_parser.js:382 parseJavaScript: 54.781ms
+functionlist.js:371 buildFunctionList: 5.237ms
+File.js:947 putCharacter: 69.360ms
+editor.js:1160 render: 4.497ms
+
+That gives us 16-5-3=8ms left for parsing and other operations, probably less. 
+We'll need to add optimizations everywhere, but the parser is the one currently taking up the majority of time.
+
+Optimization strategies:
+
+Refactor the parser for easier optimization. Put code behind the same if's together if(char=="f" etc.
+
+Save the parser state at the caret, and next time, start the parse from there.
+
+Do not parse when inside a quote or comment
+
+If tha file is larger then 2k lines, only look for indentation: { or } characters.
+
+
+
+
+Should the parser only parse indentation? And use Esprima, or Tern for auto-completion etc!? 
+
+
+
+Move jsParser to its own child process (worker) ?
+Then we would have to send changes or the whole file to the parser on every key stroke.
+
+
 Should files be opened as streams!!?
+Would probably have to save remote files to a temporary location
 
-
-Fixing bugs and writing down all issues I find.
-
-todo: npm install replacestream
-edit package.json
 
 
 BUGS (and issues)
@@ -566,6 +601,8 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 
 Feature
 =======
+
+Feature to go to the creation/defenition a the function you are calling, then a shortcut to go back to where you was, even if it was in another file!
 
 When copying in something like "editor.addMenuItem("Copy file path", function copyFilePath() {" the editor should also add }); if there is a global {} missmatch.
 
