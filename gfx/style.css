@@ -32,7 +32,8 @@ html {
 body {
 	margin: 0px;
 	background-color:rgba(0,255,0,0); /* bgcolor will not show, change the wireframe background instead! */
-	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+		height: 100%; /* We need height 100% here for height 100% to work in child elements */
+	font-family: Arial;
 }
 
 

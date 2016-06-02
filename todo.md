@@ -602,6 +602,8 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 Feature
 =======
 
+Nightmode/eye rest. High contrast makes the eys work hard! Make a "night mode" for those long coding nights.
+
 Feature to go to the creation/defenition a the function you are calling, then a shortcut to go back to where you was, even if it was in another file!
 
 When copying in something like "editor.addMenuItem("Copy file path", function copyFilePath() {" the editor should also add }); if there is a global {} missmatch.

@@ -77,7 +77,9 @@ Make style changes in settings_overload.js instead of editor.js
 
 For the optimal text experience, try different system/OS font settings like hinting etc.
 
-Some of the most popular open source programming fonts can be found in gfx/font 
+Ex: Turn off anti-alias in Windows: Control Panel > Performance Options Visual Effects. Uncheck "Smooth edges of screen fonts"
+
+You can find 'DejaVu Sans Mono' and 'Liberation Mono' in gfx/font, witch should look good both with and without anti-alias. 
 (You need to install them to your system for them to work in the editor!)
 
 
@@ -101,10 +103,12 @@ Turn off "LCD Text" / sub-pixel-antialas
 Start the program with --disable-lcd-text. (See start.bat / start.sh)
 And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
+Or turn it off in your OS!
+
 
 What I think looks best (default settings)
 ------------------------------------------
-Consolas 15px on Windows!
+Consolas 15px on Windows! (with sub-pixel-anti-alias)
 DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
 
 
