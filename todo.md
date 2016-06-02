@@ -427,6 +427,9 @@ When searching in a file marked as big, do a whole file search from disk.
 Optimization
 ============
 
+Long lines takes super long to render because of colorization.
+
+
 Typing in editor.js is really slow because of the JS parser. Only parse if special characters are entered!? Optimize the parser function.
 
 applyJScolors slow on long lines, ex: sockjs one liner

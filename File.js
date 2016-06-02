@@ -891,7 +891,7 @@
 		console.log("Inserting character: " + character);
 		
 		console.time("putCharacter");
-		
+		console.time("putCharacterCore");
 		// Insert the character in the text string
 		file.text = file.text.substr(0, index) + character + file.text.substring(index+editor.settings.insert, file.text.length);
 		
@@ -939,6 +939,7 @@
 			
 		}
 		
+		console.timeEnd("putCharacterCore");
 		
 		// Call file edit listeners
 		file.change("insert", character, index, row, col) // change, text, index, row, col
