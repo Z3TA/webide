@@ -22,9 +22,14 @@ Should files be opened as streams!!?
 
 Fixing bugs and writing down all issues I find.
 
+todo: npm install replacestream
+edit package.json
+
 
 BUGS (and issues)
 =================
+
+When deleting rows, it doesn't scroll up
 
 Can we search in file on a FTP? Nope!
 
