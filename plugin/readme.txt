@@ -76,6 +76,24 @@ Note: Function bound to keys need to return true or false! When returning false,
 CTRL,SHIFT,ALT is global flags (see global.js)
 
 
+
+
+
+NodeJS modules
+--------------
+Dependencies need to be installed for io.js v1.2.0
+Use npm -v 2.14.12 or node-gyp rebuild --target=1.2.0
+
+package.json contain only the core dependencies. 
+Create your own separate node_modules folder with your plugin.
+
+Node modules need to be "pure" JavaScript, without build dependencies (like python or a c++ compiler).
+If they need to be compiled, you have to compile for all platforms. See the spellcheck module as an example.
+
+All dependencies should be included in the repository, so users don't have to npm install!
+
+
+
 Performance tips
 ----------------
 It's important that your plugin doesn't make the editor slower. But "optimization is the root of all evil"!

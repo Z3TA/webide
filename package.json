@@ -15,17 +15,6 @@
 	"description": "A text/code editor for JavaScript made in JavaScript",
 	"version": "1.0.0",
 	"author" : "Johan Zetterberg <zeta@zetafiles.org>", 
-	/*
-		Important:
-		Dependencies need to be installed for io.js v1.2.0
-		Use npm -v 2.14.12 or node-gyp rebuild --target=1.2.0
-		
-		This is the core dependencies. If you make a plugin, create your own separate node_modules folder!
-		Node modules need to be "pure" JavaScript, without build dependencies (like python or a c++ compiler).
-		If they need to be compiled, you have to compile for all platforms. See the spellcheck module as an example.
-		
-		All dependencies are included in the repository, no need for npm install!
-*/
 	"dependencies": {
 		"ftp" : "^0.3.10",
 		"ssh2" : "^0.5.0",
