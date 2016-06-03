@@ -44,18 +44,13 @@ Refactor the parser for easier optimization. Put code behind the same if's toget
 
 Save the parser state at the caret, and next time, start the parse from there.
 
-Do not parse when inside a quote or comment
+Do not parse when inside a quote or comment, just update locations.
 
-If tha file is larger then 2k lines, only look for indentation: { or } characters.
-
-
+If the file is larger then 2k lines, only look for indentation: { or } characters.
 
 
 Should the parser only parse indentation? And use Esprima, or Tern for auto-completion etc!? 
-
-
-
-Move jsParser to its own child process (worker) ?
+Or move jsParser to its own child process (worker) ?
 Then we would have to send changes or the whole file to the parser on every key stroke.
 
 
