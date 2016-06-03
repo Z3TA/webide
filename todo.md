@@ -41,12 +41,30 @@ We'll need to add optimizations everywhere, but the parser is the one currently 
 Optimization strategies:
 
 Refactor the parser for easier optimization. Put code behind the same if's together if(char=="f" etc.
+Spend 7 hours on it and wasn't able to make it any faster or cleaner. Also tried many optimization aproaches witch had no effect.
+* Eliminating if's by grouping the same if's together under one instead of many (no speed increase)
+* v8 optimizeOnNextCall and warm up calls (no speed increase)
+* else if chains instead if single if's (no speed increase)
+* Switches instead if if's (actually ran slower!)
+* Function inlining and outlining (no speed increase)
+* Inlining function inside a for loop (actually slower!)
+* Turn text into an array (slower!)
+* Replacing variables with direct text lookups text[i-x] (slower!)
 
-Save the parser state at the caret, and next time, start the parse from there.
+
+Optimization strategies: Plan B:
+
+Save the parser state at the caret, and next time, start the parse from there?
 
 Do not parse when inside a quote or comment, just update locations.
 
+Only reparse the function body!? The function the cursor is in, and update that function in the full document. And just update the locations for everything below it.
+
 If the file is larger then 2k lines, only look for indentation: { or } characters.
+
+Move the parser to it's own process and parse files as a stream (for lower memory consumption).
+Pipe to the parser the first time the file is opened. After that just send changes (the current function body) on stdin (as a stream)
+!! If he file already has parsed. The editor could just keep a small part of the file (stream) loaded and still be aware of the whole file (auto completion, function list etc)
 
 
 Should the parser only parse indentation? And use Esprima, or Tern for auto-completion etc!? 
@@ -61,6 +79,12 @@ Would probably have to save remote files to a temporary location
 
 BUGS (and issues)
 =================
+
+When selecting and cutting large text:
+Uncaught Error: file.startRow=1807 grid.length=884 file.partStartRow=0File.js:456 File.checkGrid
+
+
+
 
 When deleting rows, it doesn't scroll up
 
