@@ -82,6 +82,8 @@ Would probably have to save remote files to a temporary location
 BUGS (and issues)
 =================
 
+When selecting text using keyboard up/down arrows the text gets scrambled
+
 Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
 
 Indention bug:

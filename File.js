@@ -861,7 +861,7 @@
 			}
 		}
 
-		file.debugGrid();
+		//file.debugGrid();
 		
 		// Save row and col
 		var row = caret.row,
@@ -893,6 +893,7 @@
 		/*
 			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
+
 			
 		*/
 		var file = this;
@@ -2441,7 +2442,7 @@
 		str = "",
 		letters = stringToCharCodes(text).join(", ");
 		
-		console.log(JSON.stringify(grid, null, 4));
+		//console.log(JSON.stringify(grid, null, 4));
 		
 		//console.log("letters:" + letters);
 		
