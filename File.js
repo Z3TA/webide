@@ -614,7 +614,7 @@
 				char = file.text.charAt(caret.index);
 				if(char != "\r" && char != "\n") {
 					file.debugGrid();
-					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = true and not caret.eof=true\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + "");
+					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = " + caret.eol + "(true) and not caret.eof=true(" + caret.eof + ")\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + "");
 				}
 			}
 		}
@@ -733,35 +733,7 @@
 		
 		var lastGridRow = grid[grid.length-1];
 		
-		
-		var rowIndex = grid.push([]) - 1; // Push returns the new Array.length
-		var gridRow = grid[rowIndex];
-		
-		gridRow.lineNumber = rowIndex+1;
-		gridRow.indentation = 0;
-		gridRow.indentationCharacters = "";
-		gridRow.startIndex = textIndex;
-		gridRow.owned = true;
-		
-		var char = "";
-		var tabulation = file.mode != "text";
-		
-		for(var i=0; i<text.length; i++) {
-			char = text.charAt(i);
-			
-			if((char == "\t" || char == " ") && tabulation) {
-				gridRow.indentationCharacters += char;
-				gridRow.startIndex++;
-			}
-			else {
-				tabulation = false;
-				
-				gridRow.push(new Box(char, textIndex));
-				
-			}
-			
-			textIndex++;
-		}
+		insertGridRow(file, textIndex, text);
 		
 		file.text += file.lineBreak + text;
 		
@@ -780,7 +752,11 @@
 		
 	}
 	
+	
 	File.prototype.insertText = function(text, caret) {
+		
+		// todo: Make it not re-create the grid!
+		
 		var file = this;
 		
 		if(caret == undefined) {
@@ -813,12 +789,79 @@
 			Update the grid ...
 			It's probably faster to re-create the grid then to insert all characters one by one.
 			
-			Streaming content into a file via file.insertText is terrible slow though.
-			We should be able to optemize if caret.eof!
 			
 		*/
-		file.grid = file.createGrid();
+		//file.grid = file.createGrid();
 		
+		
+		text = text.replace(/\r/g, "");
+		text = text.replace(/\n/g, file.lineBreak);
+		var textRows = text.split(file.lineBreak);
+		
+		// Insert the first row on the same row as the caret
+		var gridRow = file.grid[caret.row];
+		
+		// Take the remaining and save in temp array
+		var remain = gridRow.splice(caret.col, gridRow.length-caret.col);
+		
+		//console.log("remain=" + JSON.stringify(remain, null, 2));
+		
+		var textIndex = index;
+		//console.log("1. textIndex=" + textIndex);
+		
+		// Add the first text row
+		for (var i=0; i<textRows[0].length; i++) {
+			gridRow.push(new Box(textRows[0].charAt(i), textIndex));
+			textIndex++;
+		}
+		//console.log("2. textIndex=" + textIndex);
+		
+		
+		var gridRowIndex = caret.row;
+		
+		// Insert the rest of the rows into the grid
+		for (var i=1; i<textRows.length; i++) {
+			gridRowIndex++;
+			textIndex += file.lineBreak.length;
+			insertGridRow(file, textIndex, textRows[i], gridRowIndex);
+			textIndex += textRows[i].length;
+		}
+		//console.log("3. textIndex=" + textIndex);
+		
+		// Update box index of the remaining
+		for (var i=0; i<remain.length; i++) {
+			remain[i].index = textIndex;
+			textIndex++;
+		}
+		
+		//console.log("4. textIndex=" + textIndex);
+		
+		// Insert the remaining at the last inserted row
+		
+		gridRow = file.grid[gridRowIndex];
+		
+		//console.log("caret.row=" + caret.row + " textRows.length=" + textRows.length + " file.grid.length=" + file.grid.length);
+		
+		//console.log("gridRow=" + JSON.stringify(gridRow));
+		for(var i=0; i<remain.length; i++) {
+			gridRow.push(remain[i]);
+		}
+		
+		
+		// Update the box index and row startIndex of the rest of the grid
+		var incIndex = text.length;
+		var incLines = textRows.length-1; 
+
+		for(var i=gridRowIndex+1; i<file.grid.length; i++) {
+			file.grid[i].startIndex += incIndex;
+			file.grid[i].lineNumber += incLines;
+			// ... and all columns
+			for(var j=0; j<file.grid[i].length; j++) {
+				file.grid[i][j].index += incIndex;
+			}
+		}
+
+		file.debugGrid();
 		
 		// Save row and col
 		var row = caret.row,
@@ -830,7 +873,7 @@
 		
 		console.timeEnd("insertText");
 		
-		//file.debugGrid();
+		
 		file.sanityCheck();
 		
 		file.change("text", text, index, row, col);
@@ -934,6 +977,7 @@
 					grid[i][j].index++;
 				}
 			}
+			
 			
 			//console.log("Done fixing grid indexes");
 			
@@ -2397,7 +2441,7 @@
 		str = "",
 		letters = stringToCharCodes(text).join(", ");
 		
-		//console.log(JSON.stringify(grid, null, 4));
+		console.log(JSON.stringify(grid, null, 4));
 		
 		//console.log("letters:" + letters);
 		
@@ -2791,9 +2835,9 @@
 			if(partStartRow < 0) partStartRow = 0;
 			
 			file.loadFilePart(partStartRow, function placeCaretAfterLoadingPart() {
-
+				
 				var gridRow = fileRow - file.partStartRow; // This is the line we want to go to, translated to the new file part
-
+				
 				file.caret = file.createCaret(undefined, gridRow); // index, row, col
 				file.scrollToCaret();
 				
@@ -2806,7 +2850,7 @@
 		else {
 			throw new Error("fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length);
 		}
-
+		
 	}
 	
 	File.prototype.scrollToLine = function(line) {
@@ -2816,7 +2860,7 @@
 			Does not move the caret!
 			
 		*/
-			console.log("Scrolling to line=" + line + " ...");
+		console.log("Scrolling to line=" + line + " ...");
 		
 		var file = this;
 		
@@ -2879,7 +2923,7 @@
 		if((x == undefined || x == startColumn) && (y == undefined || y == startRow)) {
 			console.warn("No need to scroll! x=" + x + " y=" + y + " startRow=" + startRow + " startColumn=" + startColumn + "");
 			return;
-}
+		}
 		
 		console.log("scrollTo: x=" + x + " y=" + y);
 		
@@ -2971,16 +3015,16 @@
 			// Adjust position
 			
 			var diff = oldPartStartRow - file.partStartRow;
-
+			
 			console.log("streamLoaded scroll y=" + y + " file.partStartRow=" + file.partStartRow + " oldPartStartRow=" + oldPartStartRow + " diff=" + diff + " file.startRow=" + file.startRow);
 			
 			y = y + diff;
-
+			
 			//if(diff < 0) {console.log("We scrolled up y--");y--;}
 			
 			
 			console.log("y=" + y);
-
+			
 			if(y < low) throw new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  );
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
@@ -3077,7 +3121,7 @@
 		return !(gridRow < startRow || gridRow > endRow);
 	}
 	
-
+	
 	
 	File.prototype.loadFilePart = function loadFilePart(partStartRow, callback) {
 		/*
@@ -3086,7 +3130,7 @@
 			We can't simply restart the stream.
 			
 			Each time we load a part, we have to make a new stream			
-		
+			
 			options can include start and end values !!!
 			https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
 			
@@ -3157,7 +3201,7 @@
 			throw new Error("The file is already busy streaming! isPaused=" + stream.isPaused() + "");
 			return;
 		}
-
+		
 		
 		file.isStreaming = true;
 		file.render = false;
@@ -3169,14 +3213,14 @@
 		stream.on("close", streamClose);
 		
 		
-
+		
 		
 		function streamError(err) {
 			console.log("Stream error!");
 			throw err;
 		}
 		
-
+		
 		
 		function readStream() {
 			// Called each time there is someting comming down the stream
@@ -3193,14 +3237,14 @@
 			//while (null !== (chunk = stream.read(chunkSize)) && !stream.isPaused() ) {
 			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
 				
-
+				
 				if(flush) {
 					console.log("Flushing the toilet ....");
 				}
 				else {
 					
 					// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
-
+					
 					str = decoder.write(chunk);
 					
 					//console.log("str=" + str);
@@ -3222,7 +3266,7 @@
 					totalBytes += parseInt(chunk.length);
 					totalLineBreaks += lineBreaksInThisChunk;
 					
-
+					
 					
 					if(totalLineBreaks >= partStartRow && !countRows) {
 						// Start saving characters
@@ -3234,10 +3278,10 @@
 						text = text + str;
 					}
 					
-
+					
 					console.log("Got chunk! totalLineBreaks=" + totalLineBreaks + " totalBytes=" + totalBytes + " chunk.length=" + chunk.length + " str.length=" + str.length + " text.length=" + text.length + " lineBreaksInThisChunk=" + lineBreaksInThisChunk + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " countRows=" + countRows);
-
-
+					
+					
 					
 					if( startLinebreaks != -1 && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows && !countRows) {
 						console.log("gotFish: startLinebreaks=" + startLinebreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " countRows=" + countRows);
@@ -3246,7 +3290,7 @@
 				}
 			}
 		}
-
+		
 		function streamClose() {
 			console.log("Stream closed! flush=" + flush + " file.path=" + file.path);
 			// Tidy up ?
@@ -3295,12 +3339,12 @@
 				file.render = true; // Let the editor render the file again
 				
 				console.log("L=" + (partStartRow+1) + " text.length=" + text.length);
-
+				
 				if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
 				
 				if(partStartRow > 0) {
 					// Make the text start at partStartRow
-
+					
 					var linesToCut = partStartRow - startLinebreaks;
 					if(linesToCut < 0) linesToCut = partStartRow;
 					//console.log("startLinebreaks=" + startLinebreaks + " partStartRow=" + partStartRow + " linesToCut=" + linesToCut);
@@ -3329,7 +3373,7 @@
 				//file.debugGrid();
 				
 				file.indentation = determineIndentationConvention(file.text, file.lineBreak);
-
+				
 				file.grid = file.createGrid();
 				
 				console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
@@ -3375,17 +3419,17 @@
 					file.caret.eol = true;
 					file.caret.eof = true;
 				}
-
+				
 				file.fixCaret();
 				
 				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
-
+				
 				
 				
 				
 				file.partStartRow = partStartRow;
 				
-			
+				
 				
 				
 				//editor.renderNeeded();
@@ -3409,7 +3453,7 @@
 					file.head = false;
 					file.tail = false;
 				}
-
+				
 				
 				console.log("file.totalRows=" + file.totalRows);
 				if(file.totalRows == -1) {
@@ -3446,16 +3490,52 @@
 				
 				
 			} 
-
-		
+			
+			
 		}
 		
 	}
 	
 	
+	// Private functions ...
 	
-	
-	
+	function insertGridRow(file, textIndex, text, rowIndex) {
+		
+		var grid = file.grid;
+		
+		if(rowIndex == undefined) rowIndex = grid.push([]) - 1 // Push returns the new Array.length
+		else {
+			grid.splice(rowIndex, 0, []);
+		}
+		
+		var gridRow = grid[rowIndex];
+		
+		gridRow.lineNumber = rowIndex+1;
+		gridRow.indentation = 0;
+		gridRow.indentationCharacters = "";
+		gridRow.startIndex = textIndex;
+		gridRow.owned = true;
+		
+		var char = "";
+		var tabulation = file.mode != "text";
+		
+		for(var i=0; i<text.length; i++) {
+			char = text.charAt(i);
+			
+			if((char == "\t" || char == " ") && tabulation) {
+				gridRow.indentationCharacters += char;
+				gridRow.startIndex++;
+			}
+			else {
+				tabulation = false;
+				
+				gridRow.push(new Box(char, textIndex));
+				
+			}
+			
+			textIndex++;
+		}
+	}
 	
 	
 	
