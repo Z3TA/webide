@@ -23,6 +23,8 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
+Implementing parser optimization: parse only the function the cursor is in
+
 Thinking about how to optimze the parser ...
 
 Time how long it takes to parse ... putcharacter takes ca 2ms, 
@@ -56,7 +58,7 @@ Optimization strategies: Plan B:
 
 Save the parser state at the caret, and next time, start the parse from there?
 
-Do not parse when inside a quote or comment, just update locations.
+Do not parse when inside a quote or comment, just update locations. Unless quote end or comment end character is entered
 
 Only reparse the function body!? The function the cursor is in, and update that function in the full document. And just update the locations for everything below it.
 
@@ -80,10 +82,18 @@ Would probably have to save remote files to a temporary location
 BUGS (and issues)
 =================
 
+Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
+
+Indention bug:
+// Update the function
+var firstFunction = js.functions[firstValueInObjectList(js.functions)];
+f.variables = firstFunction].variables;
+
+
 When selecting and cutting large text:
 Uncaught Error: file.startRow=1807 grid.length=884 file.partStartRow=0File.js:456 File.checkGrid
 
-
+When having only one paragraph and Ctlr W: Did not find start of paragraph
 
 
 When deleting rows, it doesn't scroll up
