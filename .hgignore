@@ -1,3 +1,4 @@
+.git/*
 error.log
 plugin/static_site_generator/demo/build.log
 plugin/static_site_generator/demo/preview/*
