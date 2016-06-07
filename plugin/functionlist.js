@@ -1,7 +1,7 @@
 (function() {
 	/*
 		Shows a function list in the left column.
-				
+		
 	*/
 	
 	"use strict";
@@ -15,6 +15,8 @@
 	var elements = {}; // name: Mapper to the option element
 	var captureKeyboard = false;
 	var charBuffer = "";
+	var domModel = [];
+	var lastDomModel = [];
 	
 	editor.on("start", functionListMain);
 	
@@ -22,12 +24,13 @@
 		
 		//console.log("Initiating functionlist");
 		
-		editor.on("fileParse", initFunctionList);
-
+		editor.on("fileParse", updateFunctionList);
+		
 		editor.on("fileHide", hideFunctionList); // The files hide/show when tabbing between them
-		editor.on("fileShow", loadFunctionList);
 		editor.on("fileClose", hideFunctionList);
 		
+		editor.on("fileShow", loadFunctionList);
+				
 		editor.on("moveCaret", highlightCurrentFunction);
 		
 		editor.on("keyDown", searchFunctionList); // Enable searching in the function list
@@ -37,7 +40,7 @@
 		var keyRight = 39;
 		
 		editor.keyBindings.push({charCode: keyEscape, fun: pressEscape});
-
+		
 		editor.keyBindings.push({charCode: keyLeft, fun: leftOrRight});
 		editor.keyBindings.push({charCode: keyRight, fun: leftOrRight});
 		
@@ -81,20 +84,20 @@
 			var matches = searchFunctions(charBuffer, file.parsed.functions);
 			
 			if(matches.length > 0) {
-			
-			console.log("functions found (" + charBuffer + ") =" + JSON.stringify(matches));
 				
-			for (var i=0; i < matches.length; i++) {
-				elements[matches[i]].selected = true;
-			}
+				console.log("functions found (" + charBuffer + ") =" + JSON.stringify(matches));
+				
+				for (var i=0; i < matches.length; i++) {
+					elements[matches[i]].selected = true;
+				}
 				
 				// todo: Make sure the options found are visible on the screen.
 				
-					
+				
 				
 				return false; // Prevent default (chromium selectbox goto firstletter)
-			
-			
+				
+				
 				
 				
 			}
@@ -104,7 +107,7 @@
 		}
 		
 		return true; // Do the default (the chromium way)
-		}
+	}
 	
 	function highlightCurrentFunction(file, cursor) {
 		
@@ -139,44 +142,103 @@
 		}
 		return true;
 	}
-
-	function initFunctionList(file) {
+	
+	function updateFunctionList(file) {
 		
 		if(!file.parsed) return;
 		
 		if(!file.parsed.functions) {
 			console.warn("No functions in file.parsed!");
 			hideFunctionList(file);
-		}
-		else if(Object.keys(file.parsed.functions).length == 0) {
-			console.warn("Zero functions in file.parsed!");
-
-			hideFunctionList(file);
-		}
-		else {
-			
-			lastLengthOfLongestFunction = lengthOfLongestFunction;
-			
-			loadFunctionList(file); // lengthOfLongestFunction is recalculated here
-			
-			
-			// Find the function we are in and highlight it
-			var currentFunctionName = findCurrentFunction(file.parsed.functions, file.caret.index);
-			if(currentFunctionName) elements[currentFunctionName].selected = true;
-
-			//console.log("lengthOfLongestFunction=" + lengthOfLongestFunction);
-			
-			if(firstLoad || (lengthOfLongestFunction != lastLengthOfLongestFunction && (lengthOfLongestFunction <= functionlistMaxCharacters && lastLengthOfLongestFunction != 0))) {
-				editor.resizeNeeded(); // Fixed bug of function list not starting at 100% height. PS: The file hides/show when resizing! So I had to make this extra function to prevent loop
-				editor.renderNeeded();
-
-				if(firstLoad) firstLoad = false;
-			}
-
-
+			return;
 		}
 		
-
+		var objKeys = Object.keys(file.parsed.functions)
+		
+		if(objKeys.length == 0) {
+			console.warn("Zero functions in file.parsed!");
+			hideFunctionList(file);
+			return;
+		}
+		
+		console.time("updateFunctionList");
+		
+		lastDomModel = domModel;
+		
+		domModel = makeDomModel(file.parsed.functions);
+		
+		var remakeFromScratch = true;
+		
+		// value, title, id
+		// Optimization: Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
+		var functionName = "";
+		var oldName = "";
+		if(domModel.length == lastDomModel.length) {
+			for(var i=0; i<domModel.length; i++) {
+				functionName = domModel[i].name;
+				oldName = lastDomModel[i].name;
+				if(functionName != lastDomModel[i].name) {
+					if(domModel[i].lineNumber == lastDomModel[i].lineNumber && domModel[i].arguments == lastDomModel[i].arguments) {
+						// It did probably change name, so update it
+						remakeFromScratch = false;
+						
+						console.log("oldName=" + oldName);
+						console.log("elements[" + oldName + "]=" + elements[oldName]);
+						
+						elements[oldName].setAttribute("id", functionName);
+						elements[oldName].removeChild( elements[oldName].firstChild ); // Remove the name
+						elements[oldName].appendChild(document.createTextNode(spaces(domModel[i].level) + functionName)); // Add the name again
+						
+						var option = elements[oldName];
+						elements[functionName] = option
+						delete elements[oldName];
+						
+						
+					}
+					else {
+						// Both name AND line number changed at the same time. It's safest to remake the whole list
+						remakeFromScratch = true;
+						break;
+					};
+				}
+				else {
+					// Name is the same
+					remakeFromScratch = false;
+										
+					// Check if arguments have changed and in that case update the arguments
+					if(domModel[i].arguments != lastDomModel[i].arguments) {
+						elements[functionName].setAttribute("title", domModel[i].arguments);
+					}
+					
+					// Check if the line number changed and update it if it did
+					if(domModel[i].lineNumber != lastDomModel[i].lineNumber) {
+						elements[functionName].setAttribute("value", domModel[i].lineNumber);						
+					}
+					
+				}
+			}			
+		}
+		
+		
+		lastLengthOfLongestFunction = lengthOfLongestFunction;
+		
+		if(remakeFromScratch) loadFunctionList(file); // lengthOfLongestFunction is recalculated here
+		
+		
+		// Find the function we are in and highlight it
+		var currentFunctionName = findCurrentFunction(file.parsed.functions, file.caret.index);
+		if(currentFunctionName) elements[currentFunctionName].selected = true;
+		
+		//console.log("lengthOfLongestFunction=" + lengthOfLongestFunction);
+		
+		if(firstLoad || (lengthOfLongestFunction != lastLengthOfLongestFunction && (lengthOfLongestFunction <= functionlistMaxCharacters && lastLengthOfLongestFunction != 0))) {
+			editor.resizeNeeded(); // Fixed bug of function list not starting at 100% height. PS: The file hides/show when resizing! So I had to make this extra function to prevent loop
+			editor.renderNeeded();
+			
+			if(firstLoad) firstLoad = false;
+		}
+		
+		console.timeEnd("updateFunctionList");
 	}
 	
 	
@@ -232,15 +294,15 @@
 			
 			if(Object.keys(func.subFunctions).length > 0) {
 				let result = searchFunctions(str, func.subFunctions);
-					
-				if(result.length > 0) matches = matches.concat(result);
-				}
 				
+				if(result.length > 0) matches = matches.concat(result);
+			}
+			
 		}
 		
 		return matches;
 		
-		}
+	}
 	
 	
 	
@@ -252,7 +314,10 @@
 		
 		if(file.parsed.functions) {
 			if(Object.keys(file.parsed.functions).length > 0) {
-				buildFunctionList(file.parsed.functions);
+				
+				domModel = makeDomModel(file.parsed.functions);
+				
+				buildFunctionList(domModel);
 			}
 			else {
 				console.log("Hiding the function list because there are no functions parsed for file.path=" + file.path);
@@ -273,8 +338,8 @@
 		
 		if(functionListWrap) {
 			if(functionListWrap.style.display != "none") {
-			functionListWrap.style.display="none";
-			editor.resizeNeeded();
+				functionListWrap.style.display="none";
+				editor.resizeNeeded();
 				console.log("Functionlist is now hidden");
 				console.log(getStack("why hide?"));
 			}
@@ -295,44 +360,41 @@
 		}
 	}
 	
-	function buildFunctionList(functions) {
+	function buildFunctionList(domModel) {
 		/*
+			Builds the function list from scratch using domModel
+			
 			We choose a select box so that you can change function by typing a letter on the keyboard
-		
+			
 		*/
 		
 		console.time("buildFunctionList");
 		
 		functionListWrap = document.getElementById("functionListWrap");
-
+		
 		functionListSelect = document.getElementById("functionList");
-		
 
-		
 		var leftColumn = document.getElementById("leftColumn");
-		var ul;
-		var li;
-		var functionCount = 0;
-			
+		
 		if(!functionListWrap) {
-			 functionListWrap = document.createElement("div");
-			 
-			 functionListWrap.setAttribute("id", "functionListWrap");
-			 functionListWrap.setAttribute("class", "wrap functionListWrap");
-			 
-			 leftColumn.appendChild(functionListWrap);
+			functionListWrap = document.createElement("div");
+			
+			functionListWrap.setAttribute("id", "functionListWrap");
+			functionListWrap.setAttribute("class", "wrap functionListWrap");
+			
+			leftColumn.appendChild(functionListWrap);
 		}
 		else {
 			showFunctionList();
 		}
 		
 		if(!functionListSelect) {
-			 functionListSelect = document.createElement("select");
-			 
-			 functionListSelect.setAttribute("id", "functionList");
-			 functionListSelect.setAttribute("class", "functionList");
-			 functionListSelect.setAttribute("multiple", "multiple");
-			 
+			functionListSelect = document.createElement("select");
+			
+			functionListSelect.setAttribute("id", "functionList");
+			functionListSelect.setAttribute("class", "functionList");
+			functionListSelect.setAttribute("multiple", "multiple");
+			
 			functionListSelect.onchange = function(e) {
 				editor.currentFile.scrollToLine(this.value);
 			}
@@ -349,42 +411,46 @@
 			}
 			
 			functionListWrap.appendChild(functionListSelect);
-			 
+			
 		}
 		
 		// Empty the list
 		while(functionListSelect.firstChild ){
-		  functionListSelect.removeChild( functionListSelect.firstChild );
+			functionListSelect.removeChild( functionListSelect.firstChild );
 		}
 		elements = {}; // can this leak?
+				
 		
 		// Fill the list
-		for(var functionName in functions) {
-			buildList(functions[functionName], 0); // Second argument is level of spaces
-		}
+		domModel.forEach(addOption);
+
+
 		
 		// Adjust the height
-		functionListSelect.setAttribute("size", functionCount);		
+		functionListSelect.setAttribute("size", domModel.length);		
 		
 		// Why isn't the width pushing out width of the parent!?
-
+		
 		console.timeEnd("buildFunctionList");
 		
 		
-		function buildList(func, level) {
+		function addOption(func, thisIndex, array) {
 			
 			var functionName = func.name;
 			
-			if(functionName != "" || Object.keys(func.subFunctions).length > 0) { // Dont show anonynous functions unless it has subfunctions
+			var lastIndex = array.length-1;
+			var hasSubFunctions = thisIndex == lastIndex ? false : array[thisIndex+1].level > func.level;
+			
+			if(functionName != "" || hasSubFunctions) { // Dont show anonynous functions unless it has subfunctions
 				var option = document.createElement("option");
 				
 				lengthOfLongestFunction = Math.max(lengthOfLongestFunction, functionName.length);
 				
 				if(functionName == "") {
-					option.appendChild(document.createTextNode(spaces(level) + "function"));
+					option.appendChild(document.createTextNode(spaces(func.level) + "function"));
 				}
 				else {
-					option.appendChild(document.createTextNode(spaces(level) + functionName));
+					option.appendChild(document.createTextNode(spaces(func.level) + functionName));
 				}
 				option.setAttribute("value", func.lineNumber);
 				
@@ -399,7 +465,7 @@
 					//editor.currentFile.scrollToLine(func.lineNumber);
 					
 					// We need to keep the functionlist focused to allow typing in it
-
+					
 				}
 				
 				option.setAttribute("id", func.name);
@@ -408,32 +474,41 @@
 				
 				functionListSelect.appendChild(option);
 				
-				functionCount++;
-			}
-			
-			level = level + 1;
-			
-			// Sub functions
-			for(var subFunctionName in func.subFunctions) {
-				buildList(func.subFunctions[subFunctionName], level)
-			}
-			
 
-			
-			function spaces(level) {
-				var str = [];
-				var nrOfSpacesPerLevel = 2;
-				for(var i=0; i<level*nrOfSpacesPerLevel; i++) {
-					str.push("\u00A0"); // space or &nbsp; doesn't work, so we use unicode
-				}
-				//console.log(level + " spaces");
-				return str.join("");
-				
 			}
-			
 		}
-
+	}
+	
+	function spaces(level) {
+		var str = [];
+		var nrOfSpacesPerLevel = 2;
+		for(var i=0; i<level*nrOfSpacesPerLevel; i++) {
+			str.push("\u00A0"); // space or &nbsp; doesn't work, so we use unicode
+		}
+		//console.log(level + " spaces");
+		return str.join("");
 		
+	}
+	
+	
+	function makeDomModel(functions) {
+		// Returns an array of the parsed functions
+		
+		var domModel = [];
+				
+		add(functions, 0);
+		
+		function add(functions, level) {
+			var f;
+			for(var name in functions) {
+				f = functions[name];
+				domModel.push({name: f.name, lineNumber: f.lineNumber , arguments: f.arguments, level: level});
+				
+				add(f.subFunctions, level+1);
+			}
+		}
+		
+		return domModel;
 	}
 	
 	

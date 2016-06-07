@@ -23,7 +23,7 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Implementing parser optimization: parse only the function the cursor is in
+Optimizing buildFunctionList.
 
 Thinking about how to optimze the parser ...
 
@@ -81,6 +81,8 @@ Would probably have to save remote files to a temporary location
 
 BUGS (and issues)
 =================
+
+Bug in fun-optimized parser when creating a new function.
 
 When selecting text using keyboard up/down arrows the text gets scrambled
 
