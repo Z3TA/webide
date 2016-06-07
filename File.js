@@ -116,8 +116,11 @@
 		var file = this;
 		
 		file.fileExtension = getFileExtension(file.path);
+		
+		console.log("fileExtension=" + file.fileExtension);
+		
 		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
-		if(editor.supportedFiles.indexOf(file.fileExtension) != -1) file.mode = "code"
+		if(editor.supportedFiles.indexOf(file.fileExtension) != -1 || file.fileExtension = "") file.mode = "code"
 		else file.mode = "text";
 		file.parse = true; // Always parse new files by default
 	}
@@ -2255,7 +2258,7 @@
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 		
-		console.log("Creating grid (text.length=" + text.length + ") ...");	
+		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " ...");	
 		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;
