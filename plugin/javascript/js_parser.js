@@ -198,7 +198,7 @@
 						var parseStartRow = f.lineNumber-1;
 						var baseIndentation = file.grid[parseStartRow].indentation;
 						
-						console.log("baseIndentation=" + baseIndentation);
+						console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength);
 						
 						var newParse = parseJavaScript(file, parseStart, parseEnd, baseIndentation, parseStartRow);
 						// The parser will find the first function and only parse that
