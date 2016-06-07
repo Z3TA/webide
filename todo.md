@@ -23,7 +23,8 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
-Optimizing buildFunctionList.
+gotta run! But nothing atm, I just did some optimizations. Should probably fix bugs
+
 
 Thinking about how to optimze the parser ...
 
