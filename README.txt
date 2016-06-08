@@ -2,6 +2,12 @@
 JZeditor
 ========
 
+Ctrl + P, or Ctrl + O to open a file ... Ctrl + hmm dunno yet to show a list of all commands.
+
+
+
+---
+
 This is a text/code editor that specialize in JavaScript, CSS and HTML.
 
 See LICENCE.txt to know what you are allowed to do with it.

@@ -16,63 +16,16 @@ note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to 
 Editor should always be restart after a "throw" is detected!
 
 
-
-
-
-
-
 What I'm working on:
 
-gotta run! But nothing atm, I just did some optimizations. Should probably fix bugs
+I just did some optimizations. Should probably fix bugs
+
+Refactoring so all keyboard commands / key bindings gets registered. 
+List of available commands. 
+
+editor.bindKey() instead of editor.keyBindings.push()
 
 
-Thinking about how to optimze the parser ...
-
-Time how long it takes to parse ... putcharacter takes ca 2ms, 
-
-We want to stay under 60Hz sync. So max 16ms to render a key stroke.
-
-putCharacterCore: 5.245ms
-js_parser.js:382 parseJavaScript: 54.781ms
-functionlist.js:371 buildFunctionList: 5.237ms
-File.js:947 putCharacter: 69.360ms
-editor.js:1160 render: 4.497ms
-
-That gives us 16-5-3=8ms left for parsing and other operations, probably less. 
-We'll need to add optimizations everywhere, but the parser is the one currently taking up the majority of time.
-
-Optimization strategies:
-
-Refactor the parser for easier optimization. Put code behind the same if's together if(char=="f" etc.
-Spend 7 hours on it and wasn't able to make it any faster or cleaner. Also tried many optimization aproaches witch had no effect.
-* Eliminating if's by grouping the same if's together under one instead of many (no speed increase)
-* v8 optimizeOnNextCall and warm up calls (no speed increase)
-* else if chains instead if single if's (no speed increase)
-* Switches instead if if's (actually ran slower!)
-* Function inlining and outlining (no speed increase)
-* Inlining function inside a for loop (actually slower!)
-* Turn text into an array (slower!)
-* Replacing variables with direct text lookups text[i-x] (slower!)
-
-
-Optimization strategies: Plan B:
-
-Save the parser state at the caret, and next time, start the parse from there?
-
-Do not parse when inside a quote or comment, just update locations. Unless quote end or comment end character is entered
-
-Only reparse the function body!? The function the cursor is in, and update that function in the full document. And just update the locations for everything below it.
-
-If the file is larger then 2k lines, only look for indentation: { or } characters.
-
-Move the parser to it's own process and parse files as a stream (for lower memory consumption).
-Pipe to the parser the first time the file is opened. After that just send changes (the current function body) on stdin (as a stream)
-!! If he file already has parsed. The editor could just keep a small part of the file (stream) loaded and still be aware of the whole file (auto completion, function list etc)
-
-
-Should the parser only parse indentation? And use Esprima, or Tern for auto-completion etc!? 
-Or move jsParser to its own child process (worker) ?
-Then we would have to send changes or the whole file to the parser on every key stroke.
 
 
 Should files be opened as streams!!?
@@ -82,6 +35,8 @@ Would probably have to save remote files to a temporary location
 
 BUGS (and issues)
 =================
+
+When auto completing HTML tags, I get </hr> and </br>
 
 Bug in fun-optimized parser when creating a new function.
 
