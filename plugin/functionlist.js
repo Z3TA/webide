@@ -176,6 +176,7 @@
 		if(domModel.length == lastDomModel.length) {
 			for(var i=0; i<domModel.length; i++) {
 				functionName = domModel[i].name;
+				//console.log("functionName=" + functionName);
 				oldName = lastDomModel[i].name;
 				if(functionName != lastDomModel[i].name) {
 					if(domModel[i].lineNumber == lastDomModel[i].lineNumber && domModel[i].arguments == lastDomModel[i].arguments) {
@@ -201,7 +202,7 @@
 						break;
 					};
 				}
-				else {
+				else if(functionName.length > 0) {
 					// Name is the same
 					remakeFromScratch = false;
 										

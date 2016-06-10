@@ -18,6 +18,8 @@ Editor should always be restart after a "throw" is detected!
 
 What I'm working on:
 
+server integrations
+
 I just did some optimizations. Should probably fix bugs
 
 Refactoring so all keyboard commands / key bindings gets registered. 
@@ -217,6 +219,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 
 Polishing
 =========
+
+When opening files via Ctrl + P, show a loader that says how many files have bee looked at and how many files left.
 
 It's unclear what to do after connecting to a remote server. Like: how do I open a file, or create a new one?
 
