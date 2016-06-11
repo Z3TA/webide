@@ -2435,7 +2435,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				connectionClosed("ftp", serverAddress);
 				
 			});
-			c.connect({host: serverAddress, user: user, password: passw});
+			c.connect({host: serverAddress, user: user, password: passw, secure: true}); // todo: Add option for secure!
 		}
 		
 		// note: SSH (shell) not yet supported. Use SFTP instead!
