@@ -198,7 +198,7 @@
 						var parseStartRow = f.lineNumber-1;
 						var baseIndentation = file.grid[parseStartRow].indentation;
 						
-						console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength);
+						console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 						
 						var newParse = parseJavaScript(file, parseStart, parseEnd, baseIndentation, parseStartRow);
 						// The parser will find the first function and only parse that
@@ -210,40 +210,59 @@
 						// Remove all quotes in the function, then add them again, and increment index of all below
 						for(var i=0; i<oldParse.quotes.length; i++) {
 							if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
-								if(spliceStart < 0) spliceStart = i;
 								spliceLen++;
-							} 
-							else if(spliceLen) break;
+								continue;
+							}
+							else if(oldParse.quotes[i].start > parseEnd) {
+								spliceStart++;
+								break;
+							}
+							else if(spliceLen > 0) {
+								break;
+							}
+							else {
+								spliceStart = i;
+							}
 						}
+
+						console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
 						
-						oldParse.quotes.splice(spliceStart, spliceLen);
-						
+						if(spliceLen) oldParse.quotes.splice(spliceStart, spliceLen);
 
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
 							oldParse.quotes[i].start += charactersLength;
 							oldParse.quotes[i].end += charactersLength;
 						}
-
 						
 						for(var i=0; i<newParse.quotes.length; i++) {
 							oldParse.quotes.push(newParse.quotes[i]);
 						}
 						oldParse.quotes.sort(sortyByStart);
 						
-
+						
 						// Remove all comments in the function, then add them again, and increment index of all below
 						spliceStart = -1;
 						spliceLen = 0;
 						for(var i=0; i<oldParse.comments.length; i++) {
 							if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
-								if(spliceStart < 0) spliceStart = i;
 								spliceLen++;
-							} 
-							else if(spliceLen) break;
+								continue;
+							}
+							else if(oldParse.comments[i].start > parseEnd) {
+								spliceStart++;
+								break;
+							}
+							else if(spliceLen > 0) {
+								break;
+							}
+							else {
+								spliceStart = i;
+							}
 						}
 						
-						oldParse.comments.splice(spliceStart, spliceLen);
+						if(spliceLen) oldParse.comments.splice(spliceStart, spliceLen);
 						
+						console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
 
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.comments.length; i++) {
 							oldParse.comments[i].start += charactersLength;
@@ -261,13 +280,22 @@
 						spliceLen = 0;
 						for(var i=0; i<oldParse.xmlTags.length; i++) {
 							if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
-								if(spliceStart < 0) spliceStart = i;
 								spliceLen++;
-							} 
-							else if(spliceLen) break;
+								continue;
+							}
+							else if(oldParse.xmlTags[i].start > parseEnd) {
+								spliceStart++;
+								break;
+							}
+							else if(spliceLen > 0) {
+								break;
+							}
+							else {
+								spliceStart = i;
+							}
 						}
 						
-						oldParse.xmlTags.splice(spliceStart, spliceLen);
+						if(spliceLen) oldParse.xmlTags.splice(spliceStart, spliceLen);
 						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.xmlTags.length; i++) {
 							oldParse.xmlTags[i].start += charactersLength;
