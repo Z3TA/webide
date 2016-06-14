@@ -2,6 +2,15 @@
 	
 	"use strict";
 	
+	/*
+		
+		SFTP = "FTP" via SSL
+		FTPS = FTP over SSL/TLS
+
+
+*/
+	
+	
 	console.log("Hello from server_manager.js");
 	
 	var serverManager;
@@ -232,6 +241,7 @@
 			// Select the right protocol in the selectProtocol selection box
 			if(selectedConnection.protocol == "FTP") selectProtocol.selectedIndex = 0
 			else if(selectedConnection.protocol == "SFTP") selectProtocol.selectedIndex = 1
+			else if(selectedConnection.protocol == "FTPS") selectProtocol.selectedIndex = 2
 			else throw new Error("Unknown protocol: " + selectedConnection.protocol);
 			
 			/*
@@ -290,8 +300,13 @@
 		SFTP.text = "SFTP";
 		if(selectedConnection.protocol=="SFTP") SFTP.setAttribute("selected", "true");
 		
+		var FTPS = document.createElement("option");
+		FTPS.text = "FTPS";
+		if(selectedConnection.protocol=="FTPS") FTPS.setAttribute("selected", "true");
+		
 		selectProtocol.appendChild(FTP);
 		selectProtocol.appendChild(SFTP);
+		selectProtocol.appendChild(FTPS);
 		// PS. Create a createOption function if you add more options
 		
 		

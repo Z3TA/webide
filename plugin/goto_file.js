@@ -251,6 +251,7 @@ else {
 				else {
 					ignorePaths.push(currentDirPath);
 				}
+				alert("Too deep. Ignoring " + currentDirPath);
 				return;
 			}
 			
@@ -272,7 +273,8 @@ else {
 					dirsSearched.push(currentDirPath);
 					
 					if(err) {
-						console.warn("Error reading folder: " + currentDirPath + "\n" + err.message);
+						console.warn(getStack("Error reading folder: " + currentDirPath + "\n" + err.message));
+						alert("Error reading folder: " + currentDirPath + "\n" + err.message);
 					}
 					else {
 						//console.log("folderItems=" + JSON.stringify(folderItems, null, 2));

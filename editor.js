@@ -446,7 +446,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var url = require("url");
 			var parse = url.parse(path);
 			
-			if(parse.protocol == "ftp:") {
+			if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
@@ -690,7 +690,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			var url = require("url");
 			var parse = url.parse(path);
 			
-			if(parse.protocol == "ftp:") {
+			if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
@@ -2391,7 +2391,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("protocol=" + protocol);
 		
-		if(protocol == "ftp") {
+		if(protocol == "ftp" || protocol == "ftps") {
 			var Client = require('ftp');
 			var c = editor.connections[serverAddress] = new Client();
 			c.on('ready', function() {
@@ -2435,7 +2435,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				connectionClosed("ftp", serverAddress);
 				
 			});
-			c.connect({host: serverAddress, user: user, password: passw, secure: true}); // todo: Add option for secure!
+			
+			var options = {host: serverAddress, user: user, password: passw};
+			
+			if(protocol == "ftps") options.secure = true;
+			
+			c.connect(options);
 		}
 		
 		// note: SSH (shell) not yet supported. Use SFTP instead!
@@ -2603,7 +2608,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		var url = require('url');
 		var parse = url.parse(pathToFolder);
 		
-		if(parse.protocol == "ftp:") {
+		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 			// ### List files using FTP protocol
 			if(editor.connections.hasOwnProperty(parse.hostname)) {
 				
@@ -2611,6 +2616,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 				
 				if(pathToFolder != editor.workingDirectory) {
 					// First change folder
+					console.log("Sending cwd '" + parse.pathname + "' to " + parse.protocol + parse.hostname);
 					c.cwd(parse.pathname, function changedDir(err) {
 						
 						if(err) {
@@ -2734,6 +2740,8 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		}
 		
 		function ftpListFiles(c) {
+			
+			console.log("Listing files in '" + parse.pathname + "' on " + parse.protocol + parse.hostname);
 			
 			c.list(function readdirFtp(err, folderItems) {
 				if (err) {

@@ -225,6 +225,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 Polishing
 =========
 
+In server manager, sort connection list by last connected to.
+
 When opening files via Ctrl + P, show a loader that says how many files have bee looked at and how many files left.
 
 It's unclear what to do after connecting to a remote server. Like: how do I open a file, or create a new one?
