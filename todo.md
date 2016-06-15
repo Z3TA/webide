@@ -19,10 +19,6 @@ Editor should always be restart after a "throw" is detected!
 What I'm working on:
 --------------------
 
-FTPS (ftp over TLS)
-
-Seems to need a signed cert on the server ... (PS. I stopped vsftpd, gotta run!!! )
-
 server integrations
 
 I just did some optimizations. Should probably fix bugs

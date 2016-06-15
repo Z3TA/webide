@@ -452,11 +452,12 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 					
 					var c = editor.connections[parse.hostname];
 					
-					console.log("Getting file size from FTP server: " + parse.pathname);
+					console.log("Getting file size from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
 					
-					// Asume the FTP server as support for RFC 3659 "size"
+					// Asume the FTP server has support for RFC 3659 "size"
 					c.size(parse.pathname, function gotFtpFileSize(err, size) {
 						if(err) {
+							console.warn(err.message);
 							callback(err);
 						}
 						else {
@@ -2438,8 +2439,29 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			var options = {host: serverAddress, user: user, password: passw};
 			
-			if(protocol == "ftps") options.secure = true;
-			
+			if(protocol == "ftps") {
+				options.secure = true;
+				
+				// Some times the cert is lost!? So we need to override checkServerIdentity to return undefined instead of throwing an error: Cannot read property 'CN' of undefined
+				// https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
+				
+				options.secureOptions = {
+					checkServerIdentity: function(servername, cert) {
+						console.log("Checking server identity for servername=" + servername);
+						
+						if(Object.keys(cert).length == 0) console.warn("No cert attached!");
+						else {
+							// Do some checking?
+							//console.log(JSON.stringify(cert));
+							}
+						
+						return undefined;
+						
+					}
+}
+				
+				
+			}
 			c.connect(options);
 		}
 		
@@ -2745,6 +2767,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 			
 			c.list(function readdirFtp(err, folderItems) {
 				if (err) {
+					console.warn(err.message);
 					callback(err);
 				}
 				else {
