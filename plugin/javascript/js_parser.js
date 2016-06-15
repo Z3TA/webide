@@ -231,7 +231,7 @@
 						
 						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
-							console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
+							console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
 							oldParse.quotes[i].start += charactersLength;
 							oldParse.quotes[i].end += charactersLength;
 						}
