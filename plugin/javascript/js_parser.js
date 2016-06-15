@@ -1662,7 +1662,7 @@
 						*/
 						//afterPointer[codeBlockDepth] = false; // only endpointer should end it!?
 						
-						newFunc = new Func(functionName, functionArguments, i, lineNumber, codeBlockLeft, codeBlockRight);
+						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
 						
 						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
