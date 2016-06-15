@@ -204,7 +204,7 @@
 						// The parser will find the first function and only parse that
 						
 						
-						var spliceStart = -1;
+						var spliceStart = 0;
 						var spliceLen = 0;
 						
 						// Remove all quotes in the function, then add them again, and increment index of all below
@@ -241,7 +241,7 @@
 						
 						
 						// Remove all comments in the function, then add them again, and increment index of all below
-						spliceStart = -1;
+						spliceStart = 0;
 						spliceLen = 0;
 						for(var i=0; i<oldParse.comments.length; i++) {
 							if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
@@ -276,7 +276,7 @@
 						
 						
 						// Remove all xmlTags in the function, then add them again, and increment index of all below
-						spliceStart = -1;
+						spliceStart = 0;
 						spliceLen = 0;
 						for(var i=0; i<oldParse.xmlTags.length; i++) {
 							if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
