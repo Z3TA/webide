@@ -211,31 +211,34 @@
 						for(var i=0; i<oldParse.quotes.length; i++) {
 							if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
 								spliceLen++;
+								console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
+								if(spliceStart==0) spliceStart = i;
 								continue;
-							}
-							else if(oldParse.quotes[i].start > parseEnd) {
-								spliceStart++;
-								break;
 							}
 							else if(spliceLen > 0) {
 								break;
 							}
-							else {
+							else if(oldParse.quotes[i].start > parseEnd) {
 								spliceStart = i;
+								break;
 							}
-						}
-
+							
+							}
+						
 						console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
 						
 						if(spliceLen) oldParse.quotes.splice(spliceStart, spliceLen);
-
+						
+						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
+							console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
 							oldParse.quotes[i].start += charactersLength;
 							oldParse.quotes[i].end += charactersLength;
 						}
 						
 						for(var i=0; i<newParse.quotes.length; i++) {
 							oldParse.quotes.push(newParse.quotes[i]);
+							console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
 						}
 						oldParse.quotes.sort(sortyByStart);
 						
@@ -246,29 +249,28 @@
 						for(var i=0; i<oldParse.comments.length; i++) {
 							if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
 								spliceLen++;
+								//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
+								if(spliceStart==0) spliceStart = i;
 								continue;
-							}
-							else if(oldParse.comments[i].start > parseEnd) {
-								spliceStart++;
-								break;
 							}
 							else if(spliceLen > 0) {
 								break;
 							}
-							else {
+							else if(oldParse.comments[i].start > parseEnd) {
 								spliceStart = i;
+								break;
 							}
 						}
 						
 						if(spliceLen) oldParse.comments.splice(spliceStart, spliceLen);
 						
 						console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
-
+						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.comments.length; i++) {
 							oldParse.comments[i].start += charactersLength;
 							oldParse.comments[i].end += charactersLength;
 						}
-
+						
 						for(var i=0; i<newParse.comments.length; i++) {
 							oldParse.comments.push(newParse.comments[i]);
 						}
@@ -281,17 +283,16 @@
 						for(var i=0; i<oldParse.xmlTags.length; i++) {
 							if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
 								spliceLen++;
+								//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
+								if(spliceStart==0) spliceStart = i;
 								continue;
-							}
-							else if(oldParse.xmlTags[i].start > parseEnd) {
-								spliceStart++;
-								break;
 							}
 							else if(spliceLen > 0) {
 								break;
 							}
-							else {
+							else if(oldParse.xmlTags[i].start > parseEnd) {
 								spliceStart = i;
+								break;
 							}
 						}
 						
@@ -301,7 +302,7 @@
 							oldParse.xmlTags[i].start += charactersLength;
 							oldParse.xmlTags[i].end += charactersLength;
 						}
-
+						
 						for(var i=0; i<newParse.xmlTags.length; i++) {
 							oldParse.xmlTags.push(newParse.xmlTags[i]);
 						}
@@ -324,7 +325,19 @@
 						f.end = ff.end;
 						
 						console.timeEnd("parseOnlyFunctionOptimizer");
+						
+						if(editor.devMode) {
 							
+							// Make a full parse and compare to see if there is any bugs
+							
+							var fullParse = parseJavaScript(file);
+							
+							if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
+							if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
+							
+}
+						
+						
 						file.haveParsed(oldParse);
 					
 						return;
