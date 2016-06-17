@@ -39,6 +39,28 @@ Would probably have to save remote files to a temporary location
 BUGS (and issues)
 =================
 
+---
+fs.writeFile("account.json", JSON.stringify(regr, null, 2), function (err) {
+if (err) throw err;
+console.log("account.json created");
+
+if(callback) callback();
+
+});
+---
+Creates a function named (regr, null, 2)
+Also when changing the function name into something, there will be a error sometimes.
+
+
+Parsing code into an emty (sub) function.
+
+
+Ignore case doesn't work in the search function "en del res" don't find "En del resultat"
+
+When I close a file that is not saved (Ctrl-Q) and get a confirm box, the functions returns void? instead of false
+
+Gets into a constant loop when replacing \\n with \n
+
 When auto completing HTML tags, I get </hr> and </br>
 
 Bug in fun-optimized parser when creating a new function.
