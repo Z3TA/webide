@@ -39,6 +39,16 @@ Would probably have to save remote files to a temporary location
 BUGS (and issues)
 =================
 
+ASP " escaping with double "" quote parsing error:
+Response.Write "<td>" & character("eturns") & " &nbsp; <a href=""javaScript:transfer(true, "& character("id") &");"" title=""Transfer sponsored turns to this character""><img src="""& imgSrc &"images/tocity.gif"" border=""0""></a> <a href=""javaScript:transfer(false, "& character("id") &");"" title=""Remove sponsored turns from this character""><img src="""& imgSrc &"images/toarmy.gif"" border=""0""></a></td>"
+Response.Write "<td>" & character("turns") & "</td>"
+
+
+<% ASP code %> with if's nested deep with html is funky
+
+
+HTML comment surrounding the code inside a <script> tag in a htm file.
+
 ---
 fs.writeFile("account.json", JSON.stringify(regr, null, 2), function (err) {
 if (err) throw err;

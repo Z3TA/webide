@@ -200,9 +200,12 @@
 						
 						console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 						
+						//console.log(file.text.substring(parseStart, parseEnd));
+						
 						var newParse = parseJavaScript(file, parseStart, parseEnd, baseIndentation, parseStartRow);
 						// The parser will find the first function and only parse that
 						
+						//console.log("newParse=" + JSON.stringify(newParse));
 						
 						var spliceStart = 0;
 						var spliceLen = 0;
@@ -211,7 +214,7 @@
 						for(var i=0; i<oldParse.quotes.length; i++) {
 							if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
 								spliceLen++;
-								console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
+								//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
 								if(spliceStart==0) spliceStart = i;
 								continue;
 							}
@@ -222,7 +225,6 @@
 								spliceStart = i;
 								break;
 							}
-							
 							}
 						
 						console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
@@ -231,14 +233,14 @@
 						
 						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
-							console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
+							//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
 							oldParse.quotes[i].start += charactersLength;
 							oldParse.quotes[i].end += charactersLength;
 						}
 						
 						for(var i=0; i<newParse.quotes.length; i++) {
 							oldParse.quotes.push(newParse.quotes[i]);
-							console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
+							//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
 						}
 						oldParse.quotes.sort(sortyByStart);
 						
@@ -450,6 +452,7 @@
 			for(var id in obj) {
 				return id;
 			}
+			console.log(JSON.stringify(obj));
 			throw new Error("Object list is emty! " + JSON.stringify(obj));
 		}
 		
@@ -586,7 +589,12 @@
 		var insideFor = 0;
 		
 		//console.log("file.fileExtension=" + file.fileExtension);
-		if(file.fileExtension == "htm" || file.fileExtension == "html" || file.fileExtension == "asp" || file.fileExtension == "php" || file.fileExtension == "xml") xmlMode = true; // Start in xml mode
+		if((file.fileExtension == "htm" || 
+		file.fileExtension == "html" || 
+		file.fileExtension == "asp" || 
+		file.fileExtension == "php" || 
+		file.fileExtension == "xml") 
+		&& parseStart == undefined) xmlMode = true; // Start in xml mode
 		
 		
 		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
