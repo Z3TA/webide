@@ -253,6 +253,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 Polishing
 =========
 
+Possible to stop searches that take long time
+
 Make better file-open, directory picker, and file-saveAs dialogs with support for remote FS (FTP/SSH).
 
 In server manager, sort connection list by last connected to.
