@@ -1,38 +1,36 @@
-Feature freeze!
-
-Prio: 
-
-1) Bug/issue fixing and refactoring
-2) Polishing
-3) Optimization (toggle devMode off when testing!)
-
-Try do debug without console.log!
-Always use F5 to reload! Or exit functions might not fire!
-Write tests (first)!
-Use hg mv to move/rename files!
-note: The error should be the first argument in callbacks!
-note: Have to close the app and reopen it to reload NodeJS module source!
-note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state. 
-Editor should always be restart after a "throw" is detected!
-
-
-What I'm working on:
---------------------
-
-server integrations
-
-I just did some optimizations. Should probably fix bugs
+What I'm working on
+-------------------
 
 Refactoring so all keyboard commands / key bindings gets registered. 
 List of available commands. 
 
 editor.bindKey() instead of editor.keyBindings.push()
 
+Feature freeze!
+
+Prio:
+
+1) Bug/issue fixing and refactoring
+2) Polishing
+3) Optimization (toggle devMode off when testing!)
 
 
-
+What I'm thinking
+-----------------
 Should files be opened as streams!!?
 Would probably have to save remote files to a temporary location
+
+
+Lessons learned
+---------------
+Try do debug without console.log!
+Always use F5 to reload! Or exit functions might not fire!
+Write tests (first)!
+Use hg mv to move/rename files!
+note: The error should be the first argument in callbacks!
+note: Have to close the app and reopen it to reload NodeJS module source!
+note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.
+Editor should always be restart after a "throw" is detected!
 
 
 
@@ -252,6 +250,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 
 Polishing
 =========
+
+jzcms.json settings file for the static site generator. Inlcude ftp and target folders.
 
 Possible to stop searches that take long time
 
@@ -633,6 +633,8 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 
 Feature
 =======
+
+deploy, start/stop and debug nodeJS in the editor
 
 Nightmode/eye rest. High contrast makes the eys work hard! Make a "night mode" for those long coding nights.
 
