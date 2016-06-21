@@ -850,7 +850,7 @@ editor.lastKeyPressed = "";
 			5. When the end of the file buffer has been reached. The rest is read from the readStream into the writeStream
 			
 		*/
-}
+	}
 	
 	
 	editor.saveFile = function(file, path, callback) {
@@ -2459,12 +2459,12 @@ editor.lastKeyPressed = "";
 						else {
 							// Do some checking?
 							//console.log(JSON.stringify(cert));
-							}
+						}
 						
 						return undefined;
 						
 					}
-}
+				}
 				
 				
 			}
@@ -2823,7 +2823,7 @@ editor.lastKeyPressed = "";
 			return list;
 		}
 		
-}
+	}
 	
 	function removeFrom(list, fun) {
 		for(var i=0; i<list.length; i++) {
@@ -2894,7 +2894,7 @@ editor.lastKeyPressed = "";
 	window.ondrop = function(e) { e.preventDefault(); return false };
 	
 	window.addEventListener("dblclick", dblclick);
-		
+	
 	
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function() {
@@ -2931,7 +2931,7 @@ editor.lastKeyPressed = "";
 	window.addEventListener("touchstart", mouseDown, false);
 	window.addEventListener("touchend", mouseUp, false);
 	window.addEventListener("touchmove", mouseMove, false);
-	 
+	
 	
 	//window.addEventListener("touchcancel", mouseUp, false);
 	//window.addEventListener("touchleave", mouseUp, false);
@@ -2991,7 +2991,7 @@ editor.lastKeyPressed = "";
 					});
 				}
 			});
-}
+		}
 		
 		canvas = document.getElementById("canvas");
 		
@@ -3052,7 +3052,7 @@ editor.lastKeyPressed = "";
 			directoryDialogHtmlElement.value = null; // Reset the value so we can select the same directory again!
 			
 			
-}, false);
+		}, false);
 		
 		// cleanup
 		/*
@@ -3101,7 +3101,7 @@ editor.lastKeyPressed = "";
 		for(var i=0; i<editor.eventListeners.start.length; i++) {
 			editor.eventListeners.start[i].fun(); // Call function
 		}
-
+		
 		
 		// Sort and load plugins
 		editor.plugins.sort(function(a, b) {
@@ -3129,25 +3129,25 @@ editor.lastKeyPressed = "";
 		//if(editor.devMode == true) editor.openFile(testfile);
 		
 		/*
-		// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
-		//setTimeout(display, 500);
-		//display();
-		
-		
-		// Prevent the void from ruling the earth the first 500ms
-		editor.resizeNeeded();
-		editor.resize();
-		editor.renderNeeded();
-		editor.render();
-		
-		
-		function display() {
-
+			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
+			//setTimeout(display, 500);
+			//display();
+			
+			
+			// Prevent the void from ruling the earth the first 500ms
+			editor.resizeNeeded();
+			editor.resize();
+			editor.renderNeeded();
+			editor.render();
+			
+			
+			function display() {
+			
 			editor.resizeNeeded();
 			editor.resize(); // Will also force a render
-
 			
-		}
+			
+			}
 		*/
 		
 	}
@@ -3174,7 +3174,7 @@ editor.lastKeyPressed = "";
 			});
 		}
 		
-					
+		
 		function doTheTests() {
 			var fails = 0;
 			var result;
@@ -3184,11 +3184,11 @@ editor.lastKeyPressed = "";
 			var testsCompleted = []; // Prevent same test to make several callbacks
 			var allDone = false; // Prevent calling allTestsDone twice
 			var testsToRun = testFirstTest ? 1 : editor.tests.length;
-
-if(testsToRun == 1) {
-alert("Testing: " + editor.tests[0].text);
-}
-
+			
+			if(testsToRun == 1) {
+				alert("Testing: " + editor.tests[0].text);
+			}
+			
 			for(var i=0; i<testsToRun; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
 				asyncInitTest(editor.tests[i]);
@@ -3232,7 +3232,7 @@ alert("Testing: " + editor.tests[0].text);
 					console.log("finished=" + finished + " started=" + started + "")
 					
 					if(result !== true) testFail(test.text, result);
-				
+					
 					if(finished == started) allTestsDone();
 				}
 			}
@@ -3268,7 +3268,7 @@ alert("Testing: " + editor.tests[0].text);
 		}
 		
 		return false;
-
+		
 	}
 	
 	function mainLoop() {
@@ -3303,26 +3303,26 @@ alert("Testing: " + editor.tests[0].text);
 			filePath = fileName; // filePath is undefined in the browser
 			
 			// Read the file
-				var reader = new FileReader();
-				
-				reader.onload = function(e) {
+			var reader = new FileReader();
+			
+			reader.onload = function(e) {
 				fileContent = e.target.result;
 				callCallback();
-				};
-				reader.readAsText(file);
+			};
+			reader.readAsText(file);
 			
 		}
 		else {
 			callCallback();
-			}
+		}
 		
 		function callCallback() {
-		console.log("Calling file-dialog callback: " + getFunctionName(editor.fileOpenCallback) + " ...");
+			console.log("Calling file-dialog callback: " + getFunctionName(editor.fileOpenCallback) + " ...");
 			editor.fileOpenCallback(filePath, fileContent);
-		editor.fileOpenCallback = undefined;
-		
-		fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
-}
+			editor.fileOpenCallback = undefined;
+			
+			fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
+		}
 	}
 	
 	
@@ -3443,8 +3443,8 @@ alert("Testing: " + editor.tests[0].text);
 	
 	function paste(e) {
 		var text = e.clipboardData.getData('text'),
-			ret,
-			textChanged = false;
+		ret,
+		textChanged = false;
 		
 		console.log("PASTE!" + text);
 		
@@ -3518,24 +3518,24 @@ alert("Testing: " + editor.tests[0].text);
 		var charCode = e.charCode || e.keyCode || e.which;
 		var character = String.fromCharCode(charCode); 
 		
-
+		
 		/*
-		if(character == benchmarkCharacter) {
+			if(character == benchmarkCharacter) {
 			
 			//process.nextTick(function() {
-				// Test optimization
-				var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
-				var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-				//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-				ctx.fillStyle = "rgb(0,0,0)";
-				ctx.fillText(benchmarkCharacter, left, top);
-				tempTest++;
-				return;
-				//ctx.fillText(character, 0, 0);
-				// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
+			// Test optimization
+			var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
+			var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+			//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+			ctx.fillStyle = "rgb(0,0,0)";
+			ctx.fillText(benchmarkCharacter, left, top);
+			tempTest++;
+			return;
+			//ctx.fillText(character, 0, 0);
+			// Conclusion: you can't even see the character, because the render is so fast! It did nothing!
 			//});
-
-		}
+			
+			}
 		*/
 		
 		
@@ -3562,16 +3562,16 @@ alert("Testing: " + editor.tests[0].text);
 				
 				if(editor.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
 					// Makes characters appear on the screen faster ...
-				
+					
 					/*
-					var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
-					//var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-					var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-					ctx.fillStyle = "rgb(0,0,0)";
-					ctx.fillText(character, left, top);
-					tempTest++;
+						var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
+						//var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+						var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+						ctx.fillStyle = "rgb(0,0,0)";
+						ctx.fillText(character, left, top);
+						tempTest++;
 					*/
-
+					
 					// Always use the default color. It's impossible to guess what color to use without parsing! Set renderColumnOptimization to false if this is too annoying
 					
 					// What will happen if we clear the canvas before? No impact on performace!
@@ -3592,16 +3592,16 @@ alert("Testing: " + editor.tests[0].text);
 					
 					// We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
 					//setTimeout(function waitforrender() {
-						
-						file.putCharacter(character, undefined, true);
-						
+					
+					file.putCharacter(character, undefined, true);
+					
 					//}, 22);
 					
 				}
 				else {
 					file.putCharacter(character);
 				}
-
+				
 				
 			}
 			
@@ -3616,7 +3616,7 @@ alert("Testing: " + editor.tests[0].text);
 		if(editor.shouldResize) editor.resize();
 		if(editor.shouldRender) editor.render();
 	}
-
+	
 	
 	function keyIsDown(e) {
 		/*
@@ -3639,10 +3639,10 @@ alert("Testing: " + editor.tests[0].text);
 		var targetElementClass = e.target.className;
 		
 		/*
-		var backspaceCharCode = 8;
-		if(charCode == backspaceCharCode) {
+			var backspaceCharCode = 8;
+			if(charCode == backspaceCharCode) {
 			tempTest--;
-
+			
 			var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
 			//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
 			var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
@@ -3651,7 +3651,7 @@ alert("Testing: " + editor.tests[0].text);
 			ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
 			return;
 			
-		}
+			}
 		*/
 		
 		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo));
@@ -3867,7 +3867,7 @@ alert("Testing: " + editor.tests[0].text);
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "up");
 				
 				// There is no browser actions bound to keyUp events (only keydown). So we don't have to care about preventing default
-					
+				
 				if(funReturn === false) {
 					preventDefault = true;
 					console.log("Default action will be prevented!");
@@ -3893,10 +3893,12 @@ alert("Testing: " + editor.tests[0].text);
 		
 		e = e || windows.event;
 		
-		// Mouse position is on the current object (Canvas) 
-		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX,
-		mouseY = e.offsetY==undefined?e.layerY:e.offsetY,
-		caret,
+		var mouse = getMousePosition(e);
+		var mouseX = mouse.x;
+		var mouseY = mouse.y;
+		
+		
+		var caret,
 		button = e.button,
 		click,
 		target = e.target,
@@ -3907,18 +3909,7 @@ alert("Testing: " + editor.tests[0].text);
 		
 		//objInfo(target);
 		
-		if(mouseX == undefined || mouseY == undefined) {
-			
-			mouseX = editor.mouseX;
-			mouseY = editor.mouseY;
-			
-			console.warn("Unable to find mouse position on mouseDown event, using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
-			
-			if(mouseX == undefined || mouseY == undefined) {
-				console.warn("Mouse position is unknown!");
-				return;
-			}
-			}
+		if(button == undefined) button = 0; // For like touch events
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -3931,7 +3922,7 @@ alert("Testing: " + editor.tests[0].text);
 			caret = editor.mousePositionToCaret(mouseX, mouseY);
 			
 			
-			if(editor.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+			if(editor.currentFile && (button == 0)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				// Give focus
 				editor.input = true;
 				
@@ -4020,29 +4011,21 @@ alert("Testing: " + editor.tests[0].text);
 		
 		//e.preventDefault(); // Commented this because I couln't click on selected text inside html input 
 		
-		// Mouse position is on the current object (Canvas) 
-		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX,
-			mouseY = e.offsetY==undefined?e.layerY:e.offsetY,
-			caret,
-			button = e.button,
-			click,
-			target = e.target,
-			keyboardCombo = getCombo(e),
-			mouseDirection = "up";
+		// Mouse position is on the current object (Canvas)
+		var mouse = getMousePosition(e);
+		var mouseX = mouse.x;
+		var mouseY = mouse.y;
 		
+		var caret,
+		button = e.button,
+		click,
+		target = e.target,
+		keyboardCombo = getCombo(e),
+		mouseDirection = "up";
+		
+		if(button == undefined) button = 0; // For like touch events
+
 		console.log("Mouse up on class " + target.className + "!");
-		
-		if(mouseX == undefined || mouseY == undefined) {
-			mouseX = editor.mouseX;
-			mouseY = editor.mouseY;
-			
-			console.warn("Unable to find mouse position on mouseUp event, using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
-			
-			if(mouseX == undefined || mouseY == undefined) {
-				console.warn("Mouse position is unknown!");
-				return;
-			}
-		}
 		
 		if(target.className == "fileCanvas") {
 			
@@ -4079,33 +4062,67 @@ alert("Testing: " + editor.tests[0].text);
 		
 	}
 	
-	function mouseMove(e) {
+	function getMousePosition(e) {
 		
-		e = e || window.event;
-		
-		//e.preventDefault();
 		// Mouse position is on the current object (Canvas) 
 		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX;
 		var mouseY = e.offsetY==undefined?e.layerY:e.offsetY;
 		
-		var target = e.target;
-		
+		/*
 		if(e.page) console.log("e.page.x=" + e.page.x);
+		if(e.changedTouches) console.log("e.changedTouches[" + (e.changedTouches.length-1) + "]=" + e.changedTouches[e.changedTouches.length-1].pageX);
 		console.log("e.x=" + e.x);
 		console.log("e.offsetX=" + e.offsetX);
 		console.log("e.layerX=" + e.layerX);
-		
+		*/
 		
 		// Mouse position is on the whole page
 		if(isNumeric(e.clientX) && isNumeric(e.clientY)) {
 			editor.mouseX = parseInt(e.clientX);
 			editor.mouseY = parseInt(e.clientY);
 		}
+		else if(e.changedTouches) {
+			mouseX = Math.round(e.changedTouches[e.changedTouches.length-1].pageX); // pageX
+			mouseY = Math.round(e.changedTouches[e.changedTouches.length-1].pageY);
+			
+			// Touch events only have pageX with is the whole page. We only want the position on the canvas!
+			var rect = canvas.getBoundingClientRect();
+			//console.log(rect.top, rect.right, rect.bottom, rect.left);
+			
+			mouseX = mouseX - rect.left;
+			mouseY = mouseY - rect.top;
+			
+		}
 		else {
-			console.warn("e.clientX=" + e.clientX + " and e.clientY=" + e.clientY + " is not numeric values!");
-			return;
+			mouseX = editor.mouseX;
+			mouseY = editor.mouseY;
+			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
+			
 		}
 		
+		console.log("mouseX=" + mouseX);
+		console.log("mouseY=" + mouseY);
+		
+		if(mouseX == undefined || mouseY == undefined || isNaN(mouseX) || isNaN(mouseY)) {
+			throw new Error("Mouse position is unknown!");
+		}
+		else {
+			return {x: mouseX, y: mouseY};
+}
+		
+}
+	
+	function mouseMove(e) {
+		
+		e = e || window.event;
+		
+		//e.preventDefault();
+		
+		var mouse = getMousePosition(e);
+		var mouseX = mouse.x;
+		var mouseY = mouse.y;
+		
+		var target = e.target;
 		
 		//console.log("mouseY=" + mouseY);
 		
