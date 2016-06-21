@@ -114,6 +114,8 @@ editor.currentFile = undefined; // A File object
 
 editor.input = false; // Wheter inputs should go to the current file in focus or to some other element like an html input box.
 
+editor.fileOpenCallback = undefined;
+editor.lastKeyPressed = "";
 
 (function() { // Non global editor code ...
 	
@@ -1012,7 +1014,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Bringing up the file open dialog ...");
 		
-		global.fileOpenCallback = callback;
+		editor.fileOpenCallback = callback;
 		
 		var fileOpen = document.getElementById("fileInput");
 		
@@ -1326,7 +1328,7 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		if(!editor.shouldResize) return; // Don't resize if it's not needed.
 		editor.shouldResize = false; // Prevent this function from running again
 		
-		//if(global.lastKeyPressed=="a") throw new Error("why resize now?");
+		//if(editor.lastKeyPressed=="a") throw new Error("why resize now?");
 		
 		console.log("Resizing ... e=" + e + " editor.shouldRender=" + editor.shouldRender + "");
 		
@@ -2919,20 +2921,24 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
 	
 	
-	
 	/*
-		Add your own key listeners by pushing to editor.eventListeners.mouseClick
+		Add your own key listeners with editor.on("eventName", callbackFunction);
 		Your function should return false to prevent default action.
 	*/
-	window.addEventListener("click", mouseclick, false);
-	window.addEventListener("mousedown", mouseDown, false);
-	window.addEventListener("mouseup", mouseUp, false);
+	
+	
 	// Capture mobile events
-	//window.addEventListener("touchstart", mouseDown, false);
-	//window.addEventListener("touchend", mouseUp, false);
+	window.addEventListener("touchstart", mouseDown, false);
+	window.addEventListener("touchend", mouseUp, false);
+	window.addEventListener("touchmove", mouseMove, false);
+	 
+	
 	//window.addEventListener("touchcancel", mouseUp, false);
 	//window.addEventListener("touchleave", mouseUp, false);
 	
+	window.addEventListener("click", mouseclick, false);
+	window.addEventListener("mousedown", mouseDown, false);
+	window.addEventListener("mouseup", mouseUp, false);
 	
 	window.addEventListener("mousemove", mouseMove, false);
 	
@@ -3278,7 +3284,7 @@ alert("Testing: " + editor.tests[0].text);
 		
 		console.log("Reading single file ...");
 		
-		if(global.fileOpenCallback == undefined) {
+		if(editor.fileOpenCallback == undefined) {
 			throw new Error("There is no listener for the open file dialog!");
 		}
 		
@@ -3311,9 +3317,9 @@ alert("Testing: " + editor.tests[0].text);
 			}
 		
 		function callCallback() {
-		console.log("Calling file-dialog callback: " + getFunctionName(global.fileOpenCallback) + " ...");
-			global.fileOpenCallback(filePath, fileContent);
-		global.fileOpenCallback = undefined;
+		console.log("Calling file-dialog callback: " + getFunctionName(editor.fileOpenCallback) + " ...");
+			editor.fileOpenCallback(filePath, fileContent);
+		editor.fileOpenCallback = undefined;
 		
 		fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
 }
@@ -3546,7 +3552,7 @@ alert("Testing: " + editor.tests[0].text);
 		
 		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
 		
-		global.lastKeyPressed = character;
+		editor.lastKeyPressed = character;
 		
 		var file = editor.currentFile
 		
@@ -3902,9 +3908,17 @@ alert("Testing: " + editor.tests[0].text);
 		//objInfo(target);
 		
 		if(mouseX == undefined || mouseY == undefined) {
-			console.warn("Unable to find mouse position");
-			return;
-}
+			
+			mouseX = editor.mouseX;
+			mouseY = editor.mouseY;
+			
+			console.warn("Unable to find mouse position on mouseDown event, using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
+			
+			if(mouseX == undefined || mouseY == undefined) {
+				console.warn("Mouse position is unknown!");
+				return;
+			}
+			}
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -4019,8 +4033,15 @@ alert("Testing: " + editor.tests[0].text);
 		console.log("Mouse up on class " + target.className + "!");
 		
 		if(mouseX == undefined || mouseY == undefined) {
-			console.warn("Unable to find mouse position");
-			return;
+			mouseX = editor.mouseX;
+			mouseY = editor.mouseY;
+			
+			console.warn("Unable to find mouse position on mouseUp event, using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
+			
+			if(mouseX == undefined || mouseY == undefined) {
+				console.warn("Mouse position is unknown!");
+				return;
+			}
 		}
 		
 		if(target.className == "fileCanvas") {
@@ -4069,9 +4090,22 @@ alert("Testing: " + editor.tests[0].text);
 		
 		var target = e.target;
 		
+		if(e.page) console.log("e.page.x=" + e.page.x);
+		console.log("e.x=" + e.x);
+		console.log("e.offsetX=" + e.offsetX);
+		console.log("e.layerX=" + e.layerX);
+		
+		
 		// Mouse position is on the whole page
-		editor.mouseX = parseInt(e.clientX);
-		editor.mouseY = parseInt(e.clientY);
+		if(isNumeric(e.clientX) && isNumeric(e.clientY)) {
+			editor.mouseX = parseInt(e.clientX);
+			editor.mouseY = parseInt(e.clientY);
+		}
+		else {
+			console.warn("e.clientX=" + e.clientX + " and e.clientY=" + e.clientY + " is not numeric values!");
+			return;
+		}
+		
 		
 		//console.log("mouseY=" + mouseY);
 		
@@ -4243,7 +4277,7 @@ alert("Testing: " + editor.tests[0].text);
 					
 				}
 				else {
-					throw new Error("Error when opening" + url + "\n" + xmlHttp.responseText);
+					throw new Error("Error when opening url=" + url + "\nxmlHttp.responseText=" + xmlHttp.responseText);
 				}
 				
 			}

@@ -9,8 +9,6 @@
 
 "use strict";
 
-var global = {}; // Used to store objects that should be available everywhere, besides the variables in this file (global.js), editor.js and File.js
-
 var runtime = (function is_nwjs() {
 	try{
 		return (typeof require('nw.gui') !== "undefined");
@@ -62,6 +60,10 @@ const ALT = 4;
 
 
 // Global functions ...
+
+function isNumeric(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 function getFile(url, callback) {
 	
