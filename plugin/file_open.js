@@ -73,6 +73,9 @@
 		console.log("Telling the editor to open the file dialog window ...");
 		editor.fileOpenDialog(defaultPath, function after_dialog_open_file(filePath, content) {
 			
+			//console.log("filePath=" + filePath);
+			//console.log("content=" + content);
+			
 			console.log("File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
 			editor.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback

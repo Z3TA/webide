@@ -217,6 +217,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 		
 		console.log("Opening file: " + path + " typeof text=" + typeof text);
 		
+		// Just so that we are consistent
+		if(text === null) throw new Error("text is null! It should be undefined for the file to open from disk"); // note: null == undefined = true
+		
+		
 		if(typeof text === "function") throw new Error("The callback should be in the third argument. Second argument is for file content");
 		
 		
@@ -2924,10 +2928,10 @@ editor.input = false; // Wheter inputs should go to the current file in focus or
 	window.addEventListener("mousedown", mouseDown, false);
 	window.addEventListener("mouseup", mouseUp, false);
 	// Capture mobile events
-	window.addEventListener("touchstart", mouseDown, false);
-	window.addEventListener("touchend", mouseUp, false);
-	window.addEventListener("touchcancel", mouseUp, false);
-	window.addEventListener("touchleave", mouseUp, false);
+	//window.addEventListener("touchstart", mouseDown, false);
+	//window.addEventListener("touchend", mouseUp, false);
+	//window.addEventListener("touchcancel", mouseUp, false);
+	//window.addEventListener("touchleave", mouseUp, false);
 	
 	
 	window.addEventListener("mousemove", mouseMove, false);
@@ -3286,35 +3290,33 @@ alert("Testing: " + editor.tests[0].text);
 		
 		var fileName = file.name;
 		var filePath = file.path;
+		var fileContent = undefined;
 		
+		if(runtime == "browser") {
+			
+			filePath = fileName; // filePath is undefined in the browser
+			
+			// Read the file
+				var reader = new FileReader();
+				
+				reader.onload = function(e) {
+				fileContent = e.target.result;
+				callCallback();
+				};
+				reader.readAsText(file);
+			
+		}
+		else {
+			callCallback();
+			}
+		
+		function callCallback() {
 		console.log("Calling file-dialog callback: " + getFunctionName(global.fileOpenCallback) + " ...");
-		global.fileOpenCallback(filePath);
+			global.fileOpenCallback(filePath, fileContent);
 		global.fileOpenCallback = undefined;
 		
 		fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
-		
-		
-		/*
-		
-		var reader = new FileReader();
-		
-		reader.onload = function(e) {
-			var data = e.target.result;
-			global.fileOpenCallback(filePath, data);
-			
-			console.log("File loaded.");
-			
-			editor.renderNeeded();
-			
-			global.fileOpenCallback = undefined;
-			
-			// Reset the value so that we can open the same file again
-			var fileOpen = document.getElementById("fileInput");
-			fileOpen.value = "";
-			
-		};
-		reader.readAsText(file);
-		*/
+}
 	}
 	
 	
@@ -3887,18 +3889,22 @@ alert("Testing: " + editor.tests[0].text);
 		
 		// Mouse position is on the current object (Canvas) 
 		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX,
-			mouseY = e.offsetY==undefined?e.layerY:e.offsetY,
-			caret,
-			button = e.button,
-			click,
-			target = e.target,
-			mouseDirection = "down",
-			preventDefault = false,
-			keyboardCombo = getCombo(e),
-			funReturn;
+		mouseY = e.offsetY==undefined?e.layerY:e.offsetY,
+		caret,
+		button = e.button,
+		click,
+		target = e.target,
+		mouseDirection = "down",
+		preventDefault = false,
+		keyboardCombo = getCombo(e),
+		funReturn;
 		
 		//objInfo(target);
 		
+		if(mouseX == undefined || mouseY == undefined) {
+			console.warn("Unable to find mouse position");
+			return;
+}
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -4010,8 +4016,12 @@ alert("Testing: " + editor.tests[0].text);
 			keyboardCombo = getCombo(e),
 			mouseDirection = "up";
 		
-		
 		console.log("Mouse up on class " + target.className + "!");
+		
+		if(mouseX == undefined || mouseY == undefined) {
+			console.warn("Unable to find mouse position");
+			return;
+		}
 		
 		if(target.className == "fileCanvas") {
 			
@@ -4233,7 +4243,7 @@ alert("Testing: " + editor.tests[0].text);
 					
 				}
 				else {
-					console.err("Error when opening" + url + "\n" + xmlHttp.responseText);
+					throw new Error("Error when opening" + url + "\n" + xmlHttp.responseText);
 				}
 				
 			}

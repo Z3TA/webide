@@ -9,6 +9,8 @@
 
 "use strict";
 
+var global = {}; // Used to store objects that should be available everywhere, besides the variables in this file (global.js), editor.js and File.js
+
 var runtime = (function is_nwjs() {
 	try{
 		return (typeof require('nw.gui') !== "undefined");
@@ -234,13 +236,59 @@ function getDirectoryFromPath(path) {
 }
 
 function isFilePath(filePath) {
-	var fs = require("fs");
-	try {
-		var stat = fs.lstatSync(filePath);
-		return stat.isFile();
+	if(runtime == "browser") {
+		if(linuxPathValidation(filePath) || linuxPathValidation(filePath)) return true
+		else return false;
 	}
-	catch(e) {
-		return false;
+	else {
+		var fs = require("fs");
+		try {
+			var stat = fs.lstatSync(filePath);
+			return stat.isFile();
+		}
+		catch(e) {
+			return false;
+		}
+	}
+	
+	function linuxPathValidation(contPathLinux) {
+		for(var k=0;k<contPathLinux.length;k++){
+			if(contPathLinux.charAt(k).match(/^[\\]$/) ){
+				return false;
+			}
+		}
+		if(contPathLinux.charAt(0) != "/")
+		{
+			return false;
+		}
+		if(contPathLinux.charAt(0) == "/" && contPathLinux.charAt(1) == "/")
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	function windowsPathValidation(contwinpath)
+	{
+		if((contwinpath.charAt(0) != "\\" || contwinpath.charAt(1) != "\\") || (contwinpath.charAt(0) != "/" || contwinpath.charAt(1) != "/"))
+		{
+			if(!contwinpath.charAt(0).match(/^[a-zA-Z]/))
+			{
+				return false;
+			}
+			if(!contwinpath.charAt(1).match(/^[:]/) || !contwinpath.charAt(2).match(/^[\/\\]/))
+			{
+				return false;
+			}
+			
+		}
+}
+	
+	function UrlExists(url) {
+		var http = new XMLHttpRequest();
+		http.open('HEAD', url, false);
+		http.send();
+		return http.status!=404;
 	}
 }
 
