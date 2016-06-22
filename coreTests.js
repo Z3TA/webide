@@ -28,6 +28,21 @@
 	*/
 	
 	
+	
+
+	editor.addTest(function htmlCommentInScriptTag(callback) {
+		editor.openFile("htmlCommentInScriptTag.htm", '<script>\n<!-- Hello! -->\n</script>', function(err, file) {
+			
+			if(file.parsed.comments.length != 0) throw new Error("Did not expect any comment!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+
+	
 	editor.addTest(function vbSingleIfThen(callback) {
 		editor.openFile("vbSingleIfThen.asp", '<%\nIF foo THEN bar = 1\n%>\n', function(err, file) {
 			
@@ -41,7 +56,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function vbScripTagsIndention(callback) {

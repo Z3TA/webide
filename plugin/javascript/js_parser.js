@@ -1082,15 +1082,15 @@
 			
 			// We can not have /* after a lineComment, it will do nothing
 			
-			// ### Comments: <!-- -->
+			// ### HTML Comments: <!-- -->
 			//if(char == "-" && lastChar == "-" && llChar == "!") console.log("lllChar=" + lllChar + " insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
-			if(char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
+			if(!insideScriptTag && char == "-" && lastChar == "-" && llChar == "!" && lllChar == "<" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !CSS) { // <!--
 				insideHTMLComment = true;
 				insideXmlTag = false;
 				xmlMode = xmlModeBeforeTag;
 				commentStart = i-4;
 			}
-			else if(char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
+			else if(!insideScriptTag && char == ">" && lastChar == "-" && llChar == "-" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && insideHTMLComment && !insideRegExp) { // -->
 				insideHTMLComment = false;
 				comments.push(new Comment(commentStart, i));
 				//console.warn("Found HTML comment! line=" + lineNumber + " ");
