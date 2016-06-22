@@ -1591,6 +1591,8 @@
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
 						
+						if(variableName == "Anonymous function") functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
+						
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
 						insideFunctionArguments = true;

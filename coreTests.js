@@ -29,6 +29,27 @@
 	
 	
 	
+	
+	
+	editor.addTest(function jsFunctionArgAnonymous(callback) {
+		editor.openFile("jsFunctionArgAnonymous.js", 'foo(bar(), function() {});\nbar(function() {});', function(err, file) {
+			
+			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
+			
+			var n = 0;
+			
+			for(var name in file.parsed.functions) {
+				n++;
+				if(name != "") throw new Error("Function " + n + " should be anonymous! name=" + name + "");
+			}
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 
 	editor.addTest(function htmlCommentInScriptTag(callback) {
 		editor.openFile("htmlCommentInScriptTag.htm", '<script>\n<!-- Hello! -->\n</script>', function(err, file) {
@@ -40,7 +61,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 
 	
 	editor.addTest(function vbSingleIfThen(callback) {
