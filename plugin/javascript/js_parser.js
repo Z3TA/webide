@@ -1773,7 +1773,7 @@
 				
 				char = char.toLowerCase(); // vbScript is not case sensitive!
 				
-				if(char == "m" && lastChar == "e" && llChar == "r") {
+				if(!insideDblQuote && char == "m" && lastChar == "e" && llChar == "r") {
 					insideLineComment = true;
 					commentStart = i+1;
 				}

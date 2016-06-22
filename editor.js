@@ -4100,8 +4100,8 @@ editor.lastKeyPressed = "";
 			
 		}
 		
-		console.log("mouseX=" + mouseX);
-		console.log("mouseY=" + mouseY);
+		//console.log("mouseX=" + mouseX);
+		//console.log("mouseY=" + mouseY);
 		
 		if(mouseX == undefined || mouseY == undefined || isNaN(mouseX) || isNaN(mouseY)) {
 			throw new Error("Mouse position is unknown!");

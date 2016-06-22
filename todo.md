@@ -1,11 +1,3 @@
-What I'm working on
--------------------
-
-Refactoring so all keyboard commands / key bindings gets registered. 
-List of available commands. 
-
-editor.bindKey() instead of editor.keyBindings.push()
-
 Feature freeze!
 
 Prio:
@@ -13,6 +5,18 @@ Prio:
 1) Bug/issue fixing and refactoring
 2) Polishing
 3) Optimization (toggle devMode off when testing!)
+
+
+What I'm working on
+-------------------
+
+
+
+
+
+
+
+
 
 
 What I'm thinking
@@ -487,7 +491,10 @@ readstream -> writestream to a temp file, up until the chunk loaded in the edito
 When searching in a file marked as big, do a whole file search from disk.
 
 
+Refactoring so all keyboard commands / key bindings gets registered.
+List of available commands.
 
+editor.bindKey() instead of editor.keyBindings.push()
 
 
 

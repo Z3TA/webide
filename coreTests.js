@@ -28,8 +28,21 @@
 	*/
 
 	
-
-
+	
+	
+	editor.addTest(function vbScripRemInQuote(callback) {
+		editor.openFile("vbScripRemInQuote.asp", '<%\n"vbScrip REM in quote"\nnext line\n%>', function(err, file) {
+			
+			//console.log("file.parsed.quotes=" + file.parsed.quotes);
+			
+			if(file.parsed.comments.length != 0) throw new Error("Did not expect any comment!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	editor.addTest(function vbScriptTableInStringIndent(callback) {
 		editor.openFile("vbScriptTableInStringIndent.asp", '<%\nstr = "<table>"\n%>\n', function(err, file) {
@@ -44,7 +57,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function objHasOwnProperty(callback) {
 		editor.openFile("objHasOwnProperty.js", 'function foo() {\nvar obj = {"hasOwnProperty": "1", "bar": 2}\n}\n;', function(err, file) {
