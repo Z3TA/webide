@@ -1162,7 +1162,7 @@
 				// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 					if(insideDblQuote) {
-						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {				
+						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash || vbScript)) {				
 							insideDblQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							word = text.substring(quoteStart, i+1);

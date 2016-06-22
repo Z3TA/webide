@@ -11,9 +11,6 @@ What I'm working on
 -------------------
 
 
-Do not escape strings with \ in vb quotes
-
-
 
 
 
