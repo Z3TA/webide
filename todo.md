@@ -38,26 +38,7 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
-
-<% ASP code %> with if's nested deep with html is funky
-
-
-HTML comment surrounding the code inside a <script> tag in a htm file.
-
----
-fs.writeFile("account.json", JSON.stringify(regr, null, 2), function (err) {
-if (err) throw err;
-console.log("account.json created");
-
-if(callback) callback();
-
-});
----
-Creates a function named (regr, null, 2)
-Also when changing the function name into something, there will be a error sometimes.
-
-
-Parsing code into an emty (sub) function.
+Pasting code into an emty (sub) function.
 
 
 Ignore case doesn't work in the search function "en del res" don't find "En del resultat"
