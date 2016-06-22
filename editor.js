@@ -4076,12 +4076,12 @@ editor.lastKeyPressed = "";
 		console.log("e.layerX=" + e.layerX);
 		*/
 		
-		// Mouse position is on the whole page
 		if(isNumeric(e.clientX) && isNumeric(e.clientY)) {
 			editor.mouseX = parseInt(e.clientX);
 			editor.mouseY = parseInt(e.clientY);
 		}
 		else if(e.changedTouches) {
+			
 			mouseX = Math.round(e.changedTouches[e.changedTouches.length-1].pageX); // pageX
 			mouseY = Math.round(e.changedTouches[e.changedTouches.length-1].pageY);
 			
