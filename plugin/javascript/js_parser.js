@@ -480,6 +480,7 @@
 		if(parseStartRow == undefined) parseStartRow = 0;
 		
 		var text = file.text,
+		originalBaseIndentation = baseIndentation,
 		insideDblQuote = false,
 			insideSingleQuote = false,
 			insideFunctionDeclaration = false,
@@ -581,12 +582,12 @@
 		
 		// ### vbScript variables
 		var firstLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(0) : file.lineBreak;
-		var insideCondition = false;
-		var afterThen = false;
-		var thisRowIndentation = 0;
-		var nextRowIndentation = false;
+		var vb_insideCondition = false;
+		var vb_afterThen = false;
+		var vb_thisRowIndentation = 0;
+		var vb_nextRowIndentation = false;
 		var afterIf = false;
-		var insideFor = 0;
+		var vb_insideFor = 0;
 		
 		//console.log("file.fileExtension=" + file.fileExtension);
 		if((file.fileExtension == "htm" || 
@@ -1070,21 +1071,6 @@
 			}
 			
 			
-			if(char == lastLineBreakCharacter) {
-												
-				lineNumber++;
-				row++;
-				column = 0;
-				
-				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
-				
-				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
-				
-				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
-				//console.log("Row " + row);
-			}
-			
-			
 			// ### Quotes and comments ...
 			
 			/*
@@ -1256,11 +1242,15 @@
 						vbScript = true;
 						xmlMode = false;
 						insideXmlTag = false;
+						
+						//console.log("ASP start here line=" + lineNumber);
 					}
 					else if(pastChar0 == "%" && char == ">" && ASP) { // %>
 						ASP = false;
 						vbScript = false;
 						xmlMode = true;
+						
+						//console.log("ASP Ends here line=" + lineNumber);
 					}
 				}
 				
@@ -1783,7 +1773,7 @@
 					
 					// ### Collect vbScript words
 					
-					if(char == "\n" || char == "\r" || char == " " || char == "\t" || char == ":" || char == ",") {
+					if(char == "\r" || char == "\n" || char == "%" || char == " " || char == "\t" || char == ":" || char == ",") {
 						
 						// ### vbScript Variable declarations
 						if(insideVariableDeclaration[codeBlockDepth] && char == firstLineBreakCharacter) {
@@ -1803,68 +1793,68 @@
 							
 							// ### IF .. THEN .. ELSE ..
 							else if(word == "if" && lastWord == "end") { // END IF
-								thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}
 							else if(word == "if") {
 								afterIf = true; // Inside single line if maybe!?
-								insideCondition = true;
-								nextRowIndentation = true; 
+								vb_insideCondition = true;
+								vb_nextRowIndentation = 1; 
 							}
 							else if(word == "then" && afterIf) {
-								afterThen = true; // If a word comes next; it's a single line if-statement
+								vb_afterThen = true; // If a word comes next; it's a single line if-statement
 							}
-							else if(afterThen) {
-								afterThen = false;
+							else if(vb_afterThen) {
+								vb_afterThen = false;
 								// This is a single line if-statement!
-								nextRowIndentation = false; // Cancel out the indentation
-								//console.log("afterThen yo!");
+								vb_nextRowIndentation = 1; // Cancel out the indentation
+								//console.log("vb_afterThen yo!");
 							}
 							else if(word == "else" && lastWord != "case") {
-								thisRowIndentation--;
-								nextRowIndentation = true; 
+								vb_thisRowIndentation--;
+								vb_nextRowIndentation = 1; 
 							}
 							else if(word == "elseif") {
-								insideCondition = true;
-								thisRowIndentation--;
-								nextRowIndentation = true
+								vb_insideCondition = true;
+								vb_thisRowIndentation--;
+								vb_nextRowIndentation = 1
 							}
 							
 							// ### DO ... LOOP
 							else if(word == "do") {
-								nextRowIndentation = true;
-								insideCondition = true;
+								vb_nextRowIndentation = 1;
+								vb_insideCondition = true;
 							}
 							else if(word == "loop") {
-								thisRowIndentation--;
-								insideCondition = true;
+								vb_thisRowIndentation--;
+								vb_insideCondition = true;
 							}
 							
 							// ### FOR ... NEXT
 							else if(word == "for") {
-								//console.log("for: nextRowIndentation=" + nextRowIndentation);
-								nextRowIndentation = true;
-								insideFor++;
+								//console.log("for: vb_nextRowIndentation=" + vb_nextRowIndentation);
+								vb_nextRowIndentation = 1;
+								vb_insideFor++;
 							}
-							else if(word == "next" && insideFor != 0) {
-								thisRowIndentation--;
-								insideFor--;
+							else if(word == "next" && vb_insideFor != 0) {
+								vb_thisRowIndentation--;
+								vb_insideFor--;
 							}
 							
 							// ### CLASS ... END CLASS
 							else if(word == "class" && lastWord == "end") {
-								thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}
 							else if(word == "class") {
-								nextRowIndentation = true;
+								vb_nextRowIndentation = 1;
 							}
 							
 							// ### WHILE ... WEND
 							else if(word == "while") {
-								nextRowIndentation = true;
-								insideCondition = true;
+								vb_nextRowIndentation = 1;
+								vb_insideCondition = true;
 							}
 							else if(word == "wend") {
-								thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}
 							
 							/*
@@ -1874,39 +1864,39 @@
 							
 							// ### SELECT CASE ... END SELECT
 							else if(word == "select" && lastWord == "end") {
-								thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}
 							else if(word == "case" && lastWord == "select") {
-								nextRowIndentation = true;
+								vb_nextRowIndentation = 1;
 							}
 							
 							// ### CASE
 							else if(word == "case") {
-								nextRowIndentation = true;
-								//if(haveCase) thisRowIndentation--;
-								thisRowIndentation--;
+								vb_nextRowIndentation = 1;
+								//if(haveCase) vb_thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}
 							
 							
 							// ### FUNCTION ... END FUNCTION
 							else if(word == "function" && lastWord == "end") {
-								thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}							
 							else if(word == "function") {
-								nextRowIndentation = true;
+								vb_nextRowIndentation = 1;
 							}
 
 							
 							// ### SUB ... END SUB
 							else if(word == "sub" && lastWord == "end") {
-								thisRowIndentation--;
+								vb_thisRowIndentation--;
 							}
 							else if(word == "sub") {
-								nextRowIndentation = true;
+								vb_nextRowIndentation = 1;
 							}
 
 														
-							//console.log("line=" + (row) + " word=" + word + " thisRowIndentation=" + thisRowIndentation + " nextRowIndentation=" + nextRowIndentation);
+							console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
 							
 							lastWord = word;
 							word = "";
@@ -1921,25 +1911,6 @@
 						
 					}
 				}
-				
-				// ### vbScript Line break
-				if(char == lastLineBreakCharacter) {
-					
-					afterThen = false;
-					
-					insideCondition = false;
-					
-					//console.log("--- new line=" + (row) + " thisRowIndentation=" + thisRowIndentation + " ---");
-					file.grid[row-1].indentation += Math.max(0, thisRowIndentation);
-
-					if(nextRowIndentation) {
-						thisRowIndentation++;
-						nextRowIndentation = false;
-					}
-				
-				}
-				
-				
 				
 			}
 			else if(PHP) {
@@ -1966,6 +1937,48 @@
 				}
 				
 			}
+			
+			
+			if(char == lastLineBreakCharacter) {
+				// ## Line breaks
+				
+
+					
+				// Set indentation on CURRENT row
+				
+				//console.log("Adding indentation to line=" + lineNumber + " : " + vb_thisRowIndentation);
+
+				
+				vb_afterThen = false;
+				
+				vb_insideCondition = false;
+				
+				//console.log("--- new line=" + (row) + " vb_thisRowIndentation=" + vb_thisRowIndentation + " ---");
+				file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
+
+				if(vb_nextRowIndentation == 1) {
+					vb_thisRowIndentation++;
+					vb_nextRowIndentation = 0;
+				}
+				
+				// Sets indentation on NEXT row
+				
+				lineNumber++;
+				row++;
+				column = 0;
+				
+				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
+				
+				//console.log("Setting indentation on line=" + lineNumber + " : " + Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation));
+				
+				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
+				
+				
+				
+				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
+				//console.log("Row " + row);
+			}
+			
 			
 		}
 		

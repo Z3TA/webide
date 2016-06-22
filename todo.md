@@ -11,7 +11,7 @@ What I'm working on
 -------------------
 
 
-
+Do not escape strings with \ in vb quotes
 
 
 
@@ -40,10 +40,6 @@ Editor should always be restart after a "throw" is detected!
 
 BUGS (and issues)
 =================
-
-ASP " escaping with double "" quote parsing error:
-Response.Write "<td>" & character("eturns") & " &nbsp; <a href=""javaScript:transfer(true, "& character("id") &");"" title=""Transfer sponsored turns to this character""><img src="""& imgSrc &"images/tocity.gif"" border=""0""></a> <a href=""javaScript:transfer(false, "& character("id") &");"" title=""Remove sponsored turns from this character""><img src="""& imgSrc &"images/toarmy.gif"" border=""0""></a></td>"
-Response.Write "<td>" & character("turns") & "</td>"
 
 
 <% ASP code %> with if's nested deep with html is funky

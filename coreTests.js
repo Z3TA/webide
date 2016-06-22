@@ -26,9 +26,46 @@
 		
 		
 	*/
+	
+	
+	
+	
+	
+	editor.addTest(function vbScripTagsIndention(callback) {
+		editor.openFile("vbScripTagsIndention.asp", '<%\nIF b THEN\nIF a THEN\n%>\nhi\n<%\nEND IF\nEND IF\nIF b THEN\nIF a THEN %>\nhi\n<% END IF\nEND IF%>\n<div>\n<%\nIF a THEN\n%>\nfoo\n<%\nEND IF\n%>\n</div>\n', function(err, file) {
+			
+			var grid = file.grid;
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 2) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 2) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 2) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
+			if(grid[7].indentation != 0) throw new Error("grid[7].indentation=" + grid[7].indentation);
+			
+			if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
+			if(grid[9].indentation != 1) throw new Error("grid[9].indentation=" + grid[9].indentation);
+			if(grid[10].indentation != 2) throw new Error("grid[10].indentation=" + grid[10].indentation);
+			if(grid[11].indentation != 1) throw new Error("grid[11].indentation=" + grid[11].indentation);
+			if(grid[12].indentation != 0) throw new Error("grid[12].indentation=" + grid[12].indentation);
+			
+			if(grid[13].indentation != 0) throw new Error("grid[13].indentation=" + grid[13].indentation);
+			if(grid[14].indentation != 1) throw new Error("grid[14].indentation=" + grid[14].indentation);
+			if(grid[15].indentation != 1) throw new Error("grid[15].indentation=" + grid[15].indentation);
+			if(grid[16].indentation != 2) throw new Error("grid[16].indentation=" + grid[16].indentation);
+			if(grid[17].indentation != 2) throw new Error("grid[17].indentation=" + grid[17].indentation);
+			if(grid[18].indentation != 2) throw new Error("grid[18].indentation=" + grid[18].indentation);
+			if(grid[19].indentation != 1) throw new Error("grid[19].indentation=" + grid[19].indentation);
+			if(grid[20].indentation != 1) throw new Error("grid[20].indentation=" + grid[20].indentation);
+			if(grid[21].indentation != 0) throw new Error("grid[21].indentation=" + grid[21].indentation);
 
-	
-	
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	editor.addTest(function vbScripRemInQuote(callback) {
 		editor.openFile("vbScripRemInQuote.asp", '<%\n"vbScrip REM in quote"\nnext line\n%>', function(err, file) {
@@ -42,7 +79,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function vbScriptTableInStringIndent(callback) {
 		editor.openFile("vbScriptTableInStringIndent.asp", '<%\nstr = "<table>"\n%>\n', function(err, file) {
