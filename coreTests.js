@@ -28,7 +28,20 @@
 	*/
 	
 	
-	
+	editor.addTest(function vbSingleIfThen(callback) {
+		editor.openFile("vbSingleIfThen.asp", '<%\nIF foo THEN bar = 1\n%>\n', function(err, file) {
+			
+			var grid = file.grid;
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	
 	editor.addTest(function vbScripTagsIndention(callback) {
@@ -65,7 +78,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function vbScripRemInQuote(callback) {
 		editor.openFile("vbScripRemInQuote.asp", '<%\n"vbScrip REM in quote"\nnext line\n%>', function(err, file) {

@@ -586,7 +586,7 @@
 		var vb_afterThen = false;
 		var vb_thisRowIndentation = 0;
 		var vb_nextRowIndentation = false;
-		var afterIf = false;
+		var vb_afterIf = false;
 		var vb_insideFor = 0;
 		
 		//console.log("file.fileExtension=" + file.fileExtension);
@@ -1796,17 +1796,17 @@
 								vb_thisRowIndentation--;
 							}
 							else if(word == "if") {
-								afterIf = true; // Inside single line if maybe!?
+								vb_afterIf = true; // Inside single line if maybe!?
 								vb_insideCondition = true;
 								vb_nextRowIndentation = 1; 
 							}
-							else if(word == "then" && afterIf) {
+							else if(word == "then" && vb_afterIf) {
 								vb_afterThen = true; // If a word comes next; it's a single line if-statement
 							}
 							else if(vb_afterThen) {
 								vb_afterThen = false;
 								// This is a single line if-statement!
-								vb_nextRowIndentation = 1; // Cancel out the indentation
+								vb_nextRowIndentation = 0; // Cancel out the indentation
 								//console.log("vb_afterThen yo!");
 							}
 							else if(word == "else" && lastWord != "case") {
