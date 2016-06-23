@@ -35,16 +35,18 @@
 			
 			var functions = Object.keys(file.parsed.functions);
 			
-			if(functions[i].name != "foo") throw new Error("First function name should be foo");
-			if(functions[i].name != "bar.foo") throw new Error("First function name should be bar.foo");
-			if(functions[i].name != "foo.prototype.bar") throw new Error("First function name should be foo.prototype.bar");
+			console.log("functions=" + JSON.stringify(functions));
+			
+			if(functions[0] != "foo") throw new Error("First function name should be foo, not " + functions[0]);
+			if(functions[1] != "bar.foo") throw new Error("First function name should be bar.foo");
+			if(functions[2] != "foo.prototype.bar") throw new Error("First function name should be foo.prototype.bar");
 			
 			editor.closeFile(file.path);
 			
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function jsFunctionArgAnonymous(callback) {
@@ -64,7 +66,7 @@
 			callback(true);
 			
 		});
-	});
+	}, 1);
 	
 
 	editor.addTest(function htmlCommentInScriptTag(callback) {
