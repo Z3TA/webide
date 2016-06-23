@@ -267,7 +267,6 @@
 			editor.renderNeeded();
 
 		}
-			
 		
 		console.timeEnd("updateFunctionList");
 	}
