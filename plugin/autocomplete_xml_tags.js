@@ -56,14 +56,17 @@
 		
 		var openTags = [];
 		var tag = "";
-		var slash = -1;
+		var slashPos = -1;
 		var j = 0;
 		for (var i=0; i<tags.length; i++) {
+			
+			if(tags[i].start >= charIndex) break;
+			
 			tag = text.substr(tags[i].start, tags[i].wordLength);
-			slash = tag.indexOf("/");
-			if(slash != -1) {
+			slashPos = tag.indexOf("/");
+			if(slashPos != -1) {
 				// Ending tag
-				tag = tag.substr(slash+1); // Remove the slash
+				tag = tag.substr(slashPos+1); // Remove the slash
 				console.log("Ending tag: *" + tag + "*");
 				openTags.splice(openTags.lastIndexOf(tag), 1);
 			}
