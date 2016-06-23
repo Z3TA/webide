@@ -173,27 +173,33 @@
 		// Optimization: Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
 		var functionName = "";
 		var oldName = "";
-		if(domModel.length == lastDomModel.length) {
+		if(domModel.length == lastDomModel.length && lastDomModel.length > 0) {
 			for(var i=0; i<domModel.length; i++) {
 				functionName = domModel[i].name;
 				//console.log("functionName=" + functionName);
 				oldName = lastDomModel[i].name;
-				if(functionName != lastDomModel[i].name) {
+				if(functionName != oldName) {
 					if(domModel[i].lineNumber == lastDomModel[i].lineNumber && domModel[i].arguments == lastDomModel[i].arguments) {
 						// It did probably change name, so update it
-						remakeFromScratch = false;
 						
 						console.log("oldName=" + oldName);
 						console.log("elements[" + oldName + "]=" + elements[oldName]);
 						
-						elements[oldName].setAttribute("id", functionName);
-						elements[oldName].removeChild( elements[oldName].firstChild ); // Remove the name
-						elements[oldName].appendChild(document.createTextNode(spaces(domModel[i].level) + functionName)); // Add the name again
-						
-						var option = elements[oldName];
-						elements[functionName] = option
-						delete elements[oldName];
-						
+						if(elements[oldName]) {
+							
+							elements[oldName].setAttribute("id", functionName);
+							elements[oldName].removeChild( elements[oldName].firstChild ); // Remove the name
+							elements[oldName].appendChild(document.createTextNode(spaces(domModel[i].level) + functionName)); // Add the name again
+							
+							var option = elements[oldName];
+							elements[functionName] = option
+							delete elements[oldName];
+							
+							remakeFromScratch = false;
+						}
+						else {
+							console.warn("Could not find old function element oldName=" + oldName);
+}
 						
 					}
 					else {
