@@ -8,7 +8,6 @@
 	
 	var functionListWrap;
 	var functionListSelect;
-	var firstLoad = true;
 	var lengthOfLongestFunction = 0;
 	var lastLengthOfLongestFunction = 0;
 	var functionlistMaxCharacters = 36;
@@ -24,12 +23,12 @@
 		
 		//console.log("Initiating functionlist");
 		
-		editor.on("fileParse", updateFunctionList);
+		editor.on("fileParse", updateFunctionList); // Update existing function list if it already exist
 		
 		editor.on("fileHide", hideFunctionList); // The files hide/show when tabbing between them
 		editor.on("fileClose", hideFunctionList);
 		
-		editor.on("fileShow", loadFunctionList);
+		editor.on("fileShow", loadFunctionList); // Build the function list (when switching to this file)
 				
 		editor.on("moveCaret", highlightCurrentFunction);
 		
@@ -145,6 +144,8 @@
 	
 	function updateFunctionList(file) {
 		
+		if(editor.currentFile != file) return;
+		
 		if(!file.parsed) return;
 		
 		if(!file.parsed.functions) {
@@ -169,6 +170,7 @@
 		
 		var remakeFromScratch = true;
 		
+		
 		// value, title, id
 		// Optimization: Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
 		var functionName = "";
@@ -176,6 +178,7 @@
 		if(domModel.length == lastDomModel.length && lastDomModel.length > 0) {
 			for(var i=0; i<domModel.length; i++) {
 				functionName = domModel[i].name;
+				
 				//console.log("functionName=" + functionName);
 				oldName = lastDomModel[i].name;
 				if(functionName != oldName) {
@@ -199,7 +202,7 @@
 						}
 						else {
 							console.warn("Could not find old function element oldName=" + oldName);
-}
+						}
 						
 					}
 					else {
@@ -211,7 +214,7 @@
 				else if(functionName.length > 0) {
 					// Name is the same
 					remakeFromScratch = false;
-										
+					
 					// Check if arguments have changed and in that case update the arguments
 					if(domModel[i].arguments != lastDomModel[i].arguments) {
 						elements[functionName].setAttribute("title", domModel[i].arguments);
@@ -223,27 +226,36 @@
 					}
 					
 				}
-			}			
+			}
 		}
 		
-		
-		lastLengthOfLongestFunction = lengthOfLongestFunction;
-		
-		if(remakeFromScratch) loadFunctionList(file); // lengthOfLongestFunction is recalculated here
-		
+		if(remakeFromScratch) {
+			loadFunctionList(file);
+		}
 		
 		// Find the function we are in and highlight it
 		var currentFunctionName = findCurrentFunction(file.parsed.functions, file.caret.index);
 		if(currentFunctionName) elements[currentFunctionName].selected = true;
 		
-		//console.log("lengthOfLongestFunction=" + lengthOfLongestFunction);
 		
-		if(firstLoad || (lengthOfLongestFunction != lastLengthOfLongestFunction && (lengthOfLongestFunction <= functionlistMaxCharacters && lastLengthOfLongestFunction != 0))) {
-			editor.resizeNeeded(); // Fixed bug of function list not starting at 100% height. PS: The file hides/show when resizing! So I had to make this extra function to prevent loop
-			editor.renderNeeded();
-			
-			if(firstLoad) firstLoad = false;
+		// Always re-compute lengthOfLongestFunction to see if the function lists need to be resized (There's only one DOM function list. Shared with all open files)
+		var lengthOfLongestFunction = domModel.reduce(function(x, y) {return x.name.length + y.name.length});;
+		var lastLengthOfLongestFunction = lastDomModel ? lastDomModel.reduce(function(x, y) {return x.name.length + y.name.length}) : 0;
+		
+		if(lengthOfLongestFunction > functionlistMaxCharacters) {
+			console.warn("There is a very long function name! The function list will not show all of it.");
+			lengthOfLongestFunction = functionlistMaxCharacters;
 		}
+		
+		//console.log("lengthOfLongestFunction=" + lengthOfLongestFunction + " lastLengthOfLongestFunction=" + lastLengthOfLongestFunction);
+		
+		if(lengthOfLongestFunction > lastLengthOfLongestFunction) {
+			
+			editor.resizeNeeded();
+			editor.renderNeeded();
+
+		}
+			
 		
 		console.timeEnd("updateFunctionList");
 	}
@@ -323,6 +335,8 @@
 			if(Object.keys(file.parsed.functions).length > 0) {
 				
 				domModel = makeDomModel(file.parsed.functions);
+				
+				lastDomModel.length = 0; // Reset it because we are building a new
 				
 				buildFunctionList(domModel);
 			}
@@ -438,20 +452,22 @@
 		
 		// Why isn't the width pushing out width of the parent!?
 		
-		console.timeEnd("buildFunctionList");
+		editor.resizeNeeded();
 		
+		console.timeEnd("buildFunctionList");
+				
 		
 		function addOption(func, thisIndex, array) {
 			
 			var functionName = func.name;
+			
+			console.log("build " + functionName);
 			
 			var lastIndex = array.length-1;
 			var hasSubFunctions = thisIndex == lastIndex ? false : array[thisIndex+1].level > func.level;
 			
 			if(functionName != "" || hasSubFunctions) { // Dont show anonynous functions unless it has subfunctions
 				var option = document.createElement("option");
-				
-				lengthOfLongestFunction = Math.max(lengthOfLongestFunction, functionName.length);
 				
 				if(functionName == "") {
 					option.appendChild(document.createTextNode(spaces(func.level) + "function"));

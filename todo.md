@@ -38,6 +38,8 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
+The code sometimes "jumps" when editing in a subfunction.
+
 Doesn't find foo.bar dot functions or prototype functions.
 
 
