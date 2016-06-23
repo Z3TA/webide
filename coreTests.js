@@ -28,7 +28,23 @@
 	*/
 	
 	
-	
+	editor.addTest(function findPrototypeFunc(callback) {
+		editor.openFile("findPrototypeFunc.js", 'function foo() {};\nbar.foo = function() {};\nfoo.prototype.bar = function() {}\n', function(err, file) {
+			
+			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
+			
+			var functions = Object.keys(file.parsed.functions);
+			
+			if(functions[i].name != "foo") throw new Error("First function name should be foo");
+			if(functions[i].name != "bar.foo") throw new Error("First function name should be bar.foo");
+			if(functions[i].name != "foo.prototype.bar") throw new Error("First function name should be foo.prototype.bar");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	
 	editor.addTest(function jsFunctionArgAnonymous(callback) {
@@ -48,7 +64,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 
 	editor.addTest(function htmlCommentInScriptTag(callback) {

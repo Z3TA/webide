@@ -10,7 +10,7 @@ Prio:
 What I'm working on
 -------------------
 
-
+resize function list when increaseing function name.
 
 
 
@@ -37,6 +37,9 @@ Editor should always be restart after a "throw" is detected!
 
 BUGS (and issues)
 =================
+
+Doesn't find foo.bar dot functions or prototype functions.
+
 
 Pasting code into an emty (sub) function.
 
@@ -228,6 +231,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 
 Polishing
 =========
+
+Ctrl? click on a function name to go to it's definition.
 
 jzcms.json settings file for the static site generator. Inlcude ftp and target folders.
 
