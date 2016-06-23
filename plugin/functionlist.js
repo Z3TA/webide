@@ -168,6 +168,8 @@
 		
 		domModel = makeDomModel(file.parsed.functions);
 		
+		if(domModel.length == 0) throw new Error("Did not expect domModel.length to be zero!");
+		
 		var remakeFromScratch = true;
 		
 		
@@ -230,6 +232,7 @@
 		}
 		
 		if(remakeFromScratch) {
+			console.log("Creating the DOM for the function list from scratch!");
 			loadFunctionList(file);
 		}
 		
@@ -238,9 +241,18 @@
 		if(currentFunctionName) elements[currentFunctionName].selected = true;
 		
 		
+		//console.log("domModel=" + JSON.stringify(domModel));
+		
 		// Always re-compute lengthOfLongestFunction to see if the function lists need to be resized (There's only one DOM function list. Shared with all open files)
-		var lengthOfLongestFunction = domModel.reduce(function(x, y) {return x.name.length + y.name.length});;
-		var lastLengthOfLongestFunction = lastDomModel ? lastDomModel.reduce(function(x, y) {return x.name.length + y.name.length}) : 0;
+		var lengthOfLongestFunction = 0;
+		for(var i=0; i<domModel.length; i++) {
+			if(domModel[i].name.length > lengthOfLongestFunction) lengthOfLongestFunction = domModel[i].name.length;
+		}
+	
+		var lastLengthOfLongestFunction = 0;
+		for(var i=0; i<lastDomModel.length; i++) {
+			if(lastDomModel[i].name.length > lastLengthOfLongestFunction) lastLengthOfLongestFunction = lastDomModel[i].name.length;
+		}
 		
 		if(lengthOfLongestFunction > functionlistMaxCharacters) {
 			console.warn("There is a very long function name! The function list will not show all of it.");

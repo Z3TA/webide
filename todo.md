@@ -10,7 +10,7 @@ Prio:
 What I'm working on
 -------------------
 
-resize function list when increaseing function name.
+debug auto-complete html tag function
 
 
 
