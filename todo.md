@@ -10,7 +10,7 @@ Prio:
 What I'm working on
 -------------------
 
-debug auto-complete html tag function
+
 
 
 
@@ -38,13 +38,15 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
+Gor weird errors when pasting in code from: http://visual-utopia.com/terrain.asp?map=9
+View source and paste in that too, colors where way off!
+
+When parsing text into a document, change the line delimiters to the ones used by the file. cr lf or only lf
+
+
 The code sometimes "jumps" when editing in a subfunction.
 
-Doesn't find foo.bar dot functions or prototype functions.
-
-
 Pasting code into an emty (sub) function.
-
 
 Ignore case doesn't work in the search function "en del res" don't find "En del resultat"
 
@@ -616,6 +618,7 @@ Opening another file shewed the div's so that preview dropped down and canvas ha
 
 Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 
+bug: ssg preview doesn't hide when pressing escape.
 
 
 

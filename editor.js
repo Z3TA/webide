@@ -3730,7 +3730,7 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		if(gotError) throw new Error("Got an error while running keyBindings! See console warnings.");
+		if(gotError) throw gotError;
 		
 		
 		if(editor.currentFile) {
