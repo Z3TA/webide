@@ -68,12 +68,16 @@
 				// Ending tag
 				tag = tag.substr(slashPos+1); // Remove the slash
 				console.log("Ending tag: *" + tag + "*");
-				openTags.splice(openTags.lastIndexOf(tag), 1);
+				var index = openTags.lastIndexOf(tag);
+				if(index != -1) openTags.splice(index, 1);
 			}
 			else if(!tags[i].selfEnding) {
 				tag = tag.substr(1); // Remove the left arrow
-				console.log("Opening tag: *" + tag + "*");
-				openTags.push(tag);
+				
+				if(tag != "br") {
+					console.log("Opening tag: *" + tag + "*");
+					openTags.push(tag);
+}
 			}
 			
 		}
