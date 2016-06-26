@@ -38,12 +38,6 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
-renaming subfunction
-
-The code sometimes "jumps" when editing in a subfunction.
-
-Pasting code into an emty (sub) function.
-
 Ignore case doesn't work in the search function "en del res" don't find "En del resultat"
 
 When I close a file that is not saved (Ctrl-Q) and get a confirm box, the functions returns void? instead of false
@@ -618,6 +612,9 @@ Test if inlining functions in jsParser makes it faster. IT DID NOT!!
 
 bug: ssg preview doesn't hide when pressing escape.
 
+The code sometimes "jumps" when editing in a subfunction.
+
+Pasting code into an emty (sub) function sometimes does weird things
 
 
 Feature
