@@ -38,11 +38,7 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
-Gor weird errors when pasting in code from: http://visual-utopia.com/terrain.asp?map=9
-View source and paste in that too, colors where way off!
-
-When parsing text into a document, change the line delimiters to the ones used by the file. cr lf or only lf
-
+renaming subfunction
 
 The code sometimes "jumps" when editing in a subfunction.
 

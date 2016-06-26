@@ -11,11 +11,9 @@
 	var lengthOfLongestFunction = 0;
 	var lastLengthOfLongestFunction = 0;
 	var functionlistMaxCharacters = 36;
-	var elements = {}; // name: Mapper to the option element
 	var captureKeyboard = false;
 	var charBuffer = "";
 	var domModel = [];
-	var lastDomModel = [];
 	
 	editor.on("start", functionListMain);
 	
@@ -70,34 +68,27 @@
 		}
 		
 		if(charBuffer.length > 1) {
-			// Find the function in the functionlist
-			var currentFunctionName; //  = searchFunctions(charBuffer, file.parsed.functions);
-			var matchFound = false;
 			
 			// Clear all selected
 			for (var i=0; i<functionListSelect.options.length; i++) {
 				if(functionListSelect.options[i].selected) functionListSelect.options[i].selected = false;
 			}
 			
+			var found = false;
 			
-			var matches = searchFunctions(charBuffer, file.parsed.functions);
-			
-			if(matches.length > 0) {
-				
-				console.log("functions found (" + charBuffer + ") =" + JSON.stringify(matches));
-				
-				for (var i=0; i < matches.length; i++) {
-					elements[matches[i]].selected = true;
+			// Find the function and select them
+			for(var i=0; i<domModel.length; i++) {
+				if(domModel[i].name.indexOf(charBuffer)) {
+					found = true;
+					domModel[i].option.selected = true;
 				}
+			}
+			
+			if(found) {
 				
 				// todo: Make sure the options found are visible on the screen.
 				
-				
-				
 				return false; // Prevent default (chromium selectbox goto firstletter)
-				
-				
-				
 				
 			}
 			else {
@@ -108,29 +99,25 @@
 		return true; // Do the default (the chromium way)
 	}
 	
-	function highlightCurrentFunction(file, cursor) {
+	function highlightCurrentFunction(file, caret) {
 		
-		if(!file.parsed) return;
+		// Selects the option for the function the file care is currently in
 		
-		if(file.parsed.functions) {
-			
-			// Deselect all
-			for(var name in elements) {
-				elements[name].selected = false;
+		var parent = {};
+		for(var i=0; i<domModel.length; i++) {
+			if(domModel[i].option && domModel[i].start <= caret.index && domModel[i].end >= caret.index) {
+				domModel[i].option.selected = true;
+				
+				// Make sure parent is deselected
+				if(parent.option) parent.option.selected = false;
 			}
-			
-			var currentFunctionName = findCurrentFunction(file.parsed.functions, cursor.index);
-			
-			//console.log("currentFunctionName=" + currentFunctionName + "");
-			
-			if(currentFunctionName) elements[currentFunctionName].selected = true;
-			
-			
+			else if(domModel[i].option) {
+				domModel[i].option.selected = false;
+			}
+			parent = domModel[i];
 		}
-		
 	}
-	
-	
+		
 	
 	function pressEscape(file, combo, character, charCode, pushDirection) {
 		// Remove focus from the select box
@@ -144,6 +131,8 @@
 	
 	function updateFunctionList(file) {
 		
+		// (Optimization) Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
+
 		if(editor.currentFile != file) return;
 		
 		if(!file.parsed) return;
@@ -164,46 +153,40 @@
 		
 		console.time("updateFunctionList");
 		
-		lastDomModel = domModel;
+		var updatedDomModel = makeDomModel(file.parsed.functions);
 		
-		domModel = makeDomModel(file.parsed.functions);
+		if(updatedDomModel.length == 0) throw new Error("Did not expect updatedDomModel.length to be zero!");
 		
-		if(domModel.length == 0) throw new Error("Did not expect domModel.length to be zero!");
-		
+		// Always re-compute lengthOfLongestFunction to see if the function lists need to be resized (There's only one DOM function list. Shared with all open files)
+		var lastLengthOfLongestFunction = 0;
+		var lengthOfLongestFunction = 0;
+
 		var remakeFromScratch = true;
-		
-		
-		// value, title, id
-		// Optimization: Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
 		var functionName = "";
 		var oldName = "";
-		if(domModel.length == lastDomModel.length && lastDomModel.length > 0) {
-			for(var i=0; i<domModel.length; i++) {
-				functionName = domModel[i].name;
+		if(updatedDomModel.length == domModel.length && domModel.length > 0) {
+			for(var i=0; i<updatedDomModel.length; i++) {
+				
+				functionName = updatedDomModel[i].name;
 				
 				//console.log("functionName=" + functionName);
-				oldName = lastDomModel[i].name;
+				oldName = domModel[i].name;
 				if(functionName != oldName) {
-					if(domModel[i].lineNumber == lastDomModel[i].lineNumber && domModel[i].arguments == lastDomModel[i].arguments) {
+					if(updatedDomModel[i].lineNumber == domModel[i].lineNumber && updatedDomModel[i].arguments == domModel[i].arguments) {
 						// It did probably change name, so update it
 						
 						console.log("oldName=" + oldName);
-						console.log("elements[" + oldName + "]=" + elements[oldName]);
 						
-						if(elements[oldName]) {
+						if(domModel[i].option) {
 							
-							elements[oldName].setAttribute("id", functionName);
-							elements[oldName].removeChild( elements[oldName].firstChild ); // Remove the name
-							elements[oldName].appendChild(document.createTextNode(spaces(domModel[i].level) + functionName)); // Add the name again
-							
-							var option = elements[oldName];
-							elements[functionName] = option
-							delete elements[oldName];
+							domModel[i].option.setAttribute("id", functionName);
+							domModel[i].option.removeChild( domModel[i].option.firstChild ); // Remove the name
+							domModel[i].option.appendChild(document.createTextNode(spaces(updatedDomModel[i].level) + functionName)); // Add the name again
 							
 							remakeFromScratch = false;
 						}
 						else {
-							console.warn("Could not find old function element oldName=" + oldName);
+							console.warn("No option asociated with last dom model");
 						}
 						
 					}
@@ -218,15 +201,33 @@
 					remakeFromScratch = false;
 					
 					// Check if arguments have changed and in that case update the arguments
-					if(domModel[i].arguments != lastDomModel[i].arguments) {
-						elements[functionName].setAttribute("title", domModel[i].arguments);
+					if(updatedDomModel[i].arguments != domModel[i].arguments) {
+						domModel[i].option.setAttribute("title", updatedDomModel[i].arguments);
 					}
 					
 					// Check if the line number changed and update it if it did
-					if(domModel[i].lineNumber != lastDomModel[i].lineNumber) {
-						elements[functionName].setAttribute("value", domModel[i].lineNumber);						
+					if(updatedDomModel[i].lineNumber != domModel[i].lineNumber) {
+						domModel[i].option.setAttribute("value", updatedDomModel[i].lineNumber);						
 					}
 					
+				}
+				
+				if(remakeFromScratch) {
+					break;
+				}
+				else {
+					
+					// Update longest function name
+					if(updatedDomModel[i].name.length > lengthOfLongestFunction) lengthOfLongestFunction = updatedDomModel[i].name.length;
+					if(domModel[i].name.length > lastLengthOfLongestFunction) lastLengthOfLongestFunction = domModel[i].name.length;
+					
+					// Update domModel data
+					domModel[i].name = updatedDomModel[i].name;
+					domModel[i].lineNumber = updatedDomModel[i].lineNumber;
+					domModel[i].arguments = updatedDomModel[i].arguments;
+					domModel[i].level = updatedDomModel[i].level;
+					domModel[i].start = updatedDomModel[i].start;
+					domModel[i].end = updatedDomModel[i].end;
 				}
 			}
 		}
@@ -235,24 +236,11 @@
 			console.log("Creating the DOM for the function list from scratch!");
 			loadFunctionList(file);
 		}
+
 		
 		// Find the function we are in and highlight it
-		var currentFunctionName = findCurrentFunction(file.parsed.functions, file.caret.index);
-		if(currentFunctionName) elements[currentFunctionName].selected = true;
-		
-		
-		//console.log("domModel=" + JSON.stringify(domModel));
-		
-		// Always re-compute lengthOfLongestFunction to see if the function lists need to be resized (There's only one DOM function list. Shared with all open files)
-		var lengthOfLongestFunction = 0;
-		for(var i=0; i<domModel.length; i++) {
-			if(domModel[i].name.length > lengthOfLongestFunction) lengthOfLongestFunction = domModel[i].name.length;
-		}
-	
-		var lastLengthOfLongestFunction = 0;
-		for(var i=0; i<lastDomModel.length; i++) {
-			if(lastDomModel[i].name.length > lastLengthOfLongestFunction) lastLengthOfLongestFunction = lastDomModel[i].name.length;
-		}
+		highlightCurrentFunction(file, file.caret);
+
 		
 		if(lengthOfLongestFunction > functionlistMaxCharacters) {
 			console.warn("There is a very long function name! The function list will not show all of it.");
@@ -273,6 +261,9 @@
 	
 	
 	function findCurrentFunction(functions, charIndex) {
+
+
+
 		var func;
 		var element;
 		
@@ -304,7 +295,7 @@
 	
 	function searchFunctions(str, functions) {
 		/* 
-			Return an array of matched function names.
+			Searches the parsed function list and return an array of matched function names.
 			
 			Hmm, this is a weird function ...
 			The tree can have an endless depth, so we have to reach sub-functions recursivley
@@ -346,8 +337,6 @@
 			if(Object.keys(file.parsed.functions).length > 0) {
 				
 				domModel = makeDomModel(file.parsed.functions);
-				
-				lastDomModel.length = 0; // Reset it because we are building a new
 				
 				buildFunctionList(domModel);
 			}
@@ -450,8 +439,7 @@
 		while(functionListSelect.firstChild ){
 			functionListSelect.removeChild( functionListSelect.firstChild );
 		}
-		elements = {}; // can this leak?
-				
+		
 		
 		// Fill the list
 		domModel.forEach(addOption);
@@ -502,9 +490,9 @@
 					
 				}
 				
-				option.setAttribute("id", func.name);
+				//option.setAttribute("id", func.name);
 				
-				elements[functionName] = option;
+				func.option = option;
 				
 				functionListSelect.appendChild(option);
 				
@@ -536,7 +524,7 @@
 			var f;
 			for(var name in functions) {
 				f = functions[name];
-				domModel.push({name: f.name, lineNumber: f.lineNumber , arguments: f.arguments, level: level});
+				domModel.push({name: f.name, lineNumber: f.lineNumber , arguments: f.arguments, level: level, start: f.start, end: f.end});
 				
 				add(f.subFunctions, level+1);
 			}
