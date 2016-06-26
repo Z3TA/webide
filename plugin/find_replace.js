@@ -371,6 +371,7 @@
 		if(dontLoop == undefined) dontLoop = false;
 		if(direction == undefined) direction = "right";
 		
+		console.log("search: useRegex=" + useRegex + " ignoreCase=" + ignoreCase);
 		
 		if(useRegex) {
 			
@@ -452,7 +453,9 @@
 			if(direction=="left") {
 				//console.log("searching left");
 				let begin = start-1;
-				start = text.lastIndexOf(str, begin);
+				
+				if(ignoreCase) start = text.toLowerCase().lastIndexOf(str.toLowerCase(), begin)
+				else start = text.lastIndexOf(str, begin);
 				//console.log("start=" + start + " begin=" + begin);
 				
 				if( (start == -1 || begin == -1) && !dontLoop) {
@@ -473,12 +476,14 @@
 					solution: reset lastSearchStrLength when the caret is moved, and set it again after the selection
 				*/
 				
-				start = text.indexOf(str, start);
+				if(ignoreCase) start = text.toLowerCase().indexOf(str.toLowerCase(), start)
+				else start = text.indexOf(str, start);
 				
 				if(start == -1 && !dontLoop) {
 					// Try again from the top
 					console.log("Trying again from the start");
-					start = text.indexOf(str);
+					if(ignoreCase) start = text.toLowerCase().indexOf(str.toLowerCase())
+					else start = text.indexOf(str);
 				}
 			}
 			
