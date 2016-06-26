@@ -61,6 +61,14 @@ const ALT = 4;
 
 // Global functions ...
 
+function lbChars(txt) {
+	// Shows white space
+	txt = txt.replace(/\r/g, "CR");
+	txt = txt.replace(/\n/g, "LF");
+	txt = txt.replace(/\t/g, "TAB");
+	return txt;
+}
+
 function isNumeric(n) {
 	return !isNaN(parseFloat(n)) && isFinite(n);
 }

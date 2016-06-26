@@ -236,6 +236,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 Polishing
 =========
 
+SSG, auto scroll down to where you was when previewing. (when you update and "refresh").
+
 Ctrl? click on a function name to go to it's definition.
 
 jzcms.json settings file for the static site generator. Inlcude ftp and target folders.

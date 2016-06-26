@@ -3446,9 +3446,9 @@ editor.lastKeyPressed = "";
 		ret,
 		textChanged = false;
 		
-		console.log("PASTE!" + text);
+		//console.log("PASTE!" + text);
 		
-		if(editor.input) {
+		if(editor.input && editor.currentFile) {
 			
 			e.preventDefault();
 			
@@ -3459,7 +3459,7 @@ editor.lastKeyPressed = "";
 				
 				ret = fun(editor.currentFile, e.clipboardData);
 				
-				//console.log("Paste listener: " + getFunctionName(fun) + " returned:\n" + ret);
+				if(editor.devMode) console.log("Paste listener: " + getFunctionName(fun) + " returned:\n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {

@@ -7,7 +7,11 @@
 		
 		var text = clipboard.getData('text');
 		
-		console.log("clipboard text=" + text);
+		// Fix lonely carrige-returns (without a line-feed)
+		//console.log("lineBreak=" + editor.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));
+		text = text.replace(/\r/g, "");
+		
+		//console.log("clipboard text=" + lbChars(text));
 		
 		var lines = text.split("\n");
 		
@@ -40,7 +44,7 @@
 		
 		text = lines.join(file.lineBreak);
 		
-		console.log("text=" + text);
+		//console.log("text=" + lbChars(text));
 
 		
 		return text;

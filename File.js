@@ -521,7 +521,8 @@
 			for(var col=0; col<grid[row].length; col++) {
 				// Check if character on the grid and on file.text is the same
 				if(grid[row][col].char != file.text.charAt(grid[row][col].index)) {
-					throw new Error("grid[" + row + "][" + col + "].char=" + grid[row][col].char + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + file.text.charAt(grid[row][col].index + ""));
+					file.debugGrid();
+					throw new Error("grid[" + row + "][" + col + "].char=" + lbChars(grid[row][col].char) + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + lbChars(file.text.charAt(grid[row][col].index)));
 				}
 				// Make sure there is no line break character in the middle of the text
 				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
@@ -776,7 +777,7 @@
 		
 		file.sanityCheck();
 		
-		console.log("Inserting '" + text + "' (text.length=" + text.length + ") on " + JSON.stringify(caret) + " (file.text.length=" + file.text.length + ")");
+		//console.log("Inserting '" + text + "' (text.length=" + text.length + ") on " + JSON.stringify(caret) + " (file.text.length=" + file.text.length + ")");
 		
 		console.time("insertText");
 		
