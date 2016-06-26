@@ -12,7 +12,7 @@
 	var lastLengthOfLongestFunction = 0;
 	var functionlistMaxCharacters = 36;
 	var captureKeyboard = false;
-	var charBuffer = "";
+	var searchString = "";
 	var domModel = [];
 	
 	editor.on("start", functionListMain);
@@ -61,13 +61,13 @@
 	
 	function searchFunctionList(file, char, combo) {
 		if(captureKeyboard && !editor.input) {
-			charBuffer += char;
+			searchString += char;
 		}
 		else {
 			return true; // Do the default
 		}
 		
-		if(charBuffer.length > 1) {
+		if(searchString.length > 1) {
 			
 			// Clear all selected
 			for (var i=0; i<functionListSelect.options.length; i++) {
@@ -76,9 +76,9 @@
 			
 			var found = false;
 			
-			// Find the function and select them
+			// Find the functions that match searchString and select them
 			for(var i=0; i<domModel.length; i++) {
-				if(domModel[i].name.indexOf(charBuffer)) {
+				if(domModel[i].name.toLowerCase().indexOf(searchString.toLowerCase()) != -1) {
 					found = true;
 					domModel[i].option.selected = true;
 				}
@@ -92,7 +92,7 @@
 				
 			}
 			else {
-				charBuffer = ""; // Clear the buffer if there is no match
+				searchString = ""; // Clear the buffer if there is no match
 			}
 		}
 		
@@ -421,14 +421,14 @@
 			}
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
-				charBuffer = "";
+				searchString = "";
 			}
 			functionListSelect.onblur = function(e) {
 				captureKeyboard = false;
 			}
 			functionListSelect.onclick = function() {
 				// Reset search for function string
-				charBuffer = "";
+				searchString = "";
 			}
 			
 			functionListWrap.appendChild(functionListSelect);

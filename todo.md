@@ -38,8 +38,6 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
-Ignore case doesn't work in the search function "en del res" don't find "En del resultat"
-
 When I close a file that is not saved (Ctrl-Q) and get a confirm box, the functions returns void? instead of false
 
 Gets into a constant loop when replacing \\n with \n
