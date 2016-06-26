@@ -10,7 +10,7 @@ Prio:
 What I'm working on
 -------------------
 
-
+Replacing confirm and alert boxes with DOM divs.
 
 
 
@@ -37,6 +37,7 @@ Editor should always be restart after a "throw" is detected!
 
 BUGS (and issues)
 =================
+confirm box registers a keyPress if it was called on a keydown event
 
 When I close a file that is not saved (Ctrl-Q) and get a confirm box, the functions returns void? instead of false
 
