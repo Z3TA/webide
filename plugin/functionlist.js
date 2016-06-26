@@ -81,6 +81,7 @@
 				if(domModel[i].name.toLowerCase().indexOf(searchString.toLowerCase()) != -1) {
 					found = true;
 					domModel[i].option.selected = true;
+					editor.currentFile.scrollToLine(domModel[i].lineNumber);
 				}
 			}
 			
