@@ -133,7 +133,7 @@
 	function updateFunctionList(file) {
 		
 		// (Optimization) Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
-
+		
 		if(editor.currentFile != file) return;
 		
 		if(!file.parsed) return;
@@ -161,7 +161,7 @@
 		// Always re-compute lengthOfLongestFunction to see if the function lists need to be resized (There's only one DOM function list. Shared with all open files)
 		var lastLengthOfLongestFunction = 0;
 		var lengthOfLongestFunction = 0;
-
+		
 		var remakeFromScratch = true;
 		var functionName = "";
 		var oldName = "";
@@ -192,7 +192,7 @@
 						
 					}
 					else {
-						// Both name AND line number changed at the same time. It's safest to remake the whole list
+						console.log("Both name AND line number changed at the same time. It's safest to remake the whole list");
 						remakeFromScratch = true;
 						break;
 					};
@@ -213,25 +213,23 @@
 					
 				}
 				
-				if(remakeFromScratch) {
-					break;
-				}
-				else {
-					
-					// Update longest function name
-					if(updatedDomModel[i].name.length > lengthOfLongestFunction) lengthOfLongestFunction = updatedDomModel[i].name.length;
-					if(domModel[i].name.length > lastLengthOfLongestFunction) lastLengthOfLongestFunction = domModel[i].name.length;
-					
-					// Update domModel data
-					domModel[i].name = updatedDomModel[i].name;
-					domModel[i].lineNumber = updatedDomModel[i].lineNumber;
-					domModel[i].arguments = updatedDomModel[i].arguments;
-					domModel[i].level = updatedDomModel[i].level;
-					domModel[i].start = updatedDomModel[i].start;
-					domModel[i].end = updatedDomModel[i].end;
-				}
+				// Update longest function name
+				if(updatedDomModel[i].name.length > lengthOfLongestFunction) lengthOfLongestFunction = updatedDomModel[i].name.length;
+				if(domModel[i].name.length > lastLengthOfLongestFunction) lastLengthOfLongestFunction = domModel[i].name.length;
+				
+				// Update domModel data
+				domModel[i].name = updatedDomModel[i].name;
+				domModel[i].lineNumber = updatedDomModel[i].lineNumber;
+				domModel[i].arguments = updatedDomModel[i].arguments;
+				domModel[i].level = updatedDomModel[i].level;
+				domModel[i].start = updatedDomModel[i].start;
+				domModel[i].end = updatedDomModel[i].end;
+				
 			}
 		}
+		else {
+			console.log("updatedDomModel.length=" + updatedDomModel.length + " domModel.length=" + domModel.length + "");
+}
 		
 		if(remakeFromScratch) {
 			console.log("Creating the DOM for the function list from scratch!");

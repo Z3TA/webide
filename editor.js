@@ -3716,6 +3716,8 @@ editor.lastKeyPressed = "";
 						console.warn("Error when running key bound function:" + err.stack);
 					}
 					
+					console.log(getFunctionName(binding.fun) + " returned " + funReturn);
+					
 					if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 						preventDefault = true;
 						console.log("Default action will be prevented!");
