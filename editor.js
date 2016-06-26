@@ -3730,7 +3730,8 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		if(gotError) throw gotError;
+		// Throwing the actual error here doesn't give a call stack! So just make a general error
+		if(gotError) throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
 		
 		
 		if(editor.currentFile) {
