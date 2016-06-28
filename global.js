@@ -63,13 +63,28 @@ const ALT = 4;
 
 
 
-function Dialog(msg) {
+function Dialog(msg, icon) {
 	
 	var body = document.getElementById("body");
 	
 	var message = document.createElement("div");
 	message.setAttribute("class", "message");
 	message.innerHTML = msg; // Support HTML
+	
+	var img;
+	
+	if(icon == "warning" ) {
+		img = document.createElement("img");
+		img.setAttribute("src", "gfx/warning.svg");
+	}
+	else if(icon == "error") {
+		img = document.createElement("img");
+		img.setAttribute("src", "gfx/error.svg");
+	}
+	else if(icon) {
+		throw new Error("Dialog icon not supported: " + icon);
+	}
+	
 	
 	this.div = document.createElement("div");
 	
@@ -84,6 +99,29 @@ function Dialog(msg) {
 	
 	body.appendChild(div);
 	
+	if(img) {
+		//alert(icon);
+		// If an icon is used adjust it's size
+		var messageHeight = parseInt(message.offsetHeight);
+		console.log("messageHeight=" + messageHeight);
+		img.setAttribute("height", Math.round(messageHeight / 2));
+		
+		if(message.childNodes.length == 1) {
+			img.style.verticalAlign = "middle";
+			img.style.float = "none";
+			img.style.display = "inline-block";
+			}
+		else {
+			img.style.float = "left";
+}
+		
+		message.insertBefore(img, message.firstChild);
+	}
+	
+	
+	
+	
+	
 	// Get the computed size of the box
 	var divHeight = parseInt(div.offsetHeight);
 	var divWidth = parseInt(div.offsetWidth);
@@ -96,6 +134,8 @@ function Dialog(msg) {
 	
 	div.style.top = Math.round(windowHeight / 2 - divHeight/2 - sligtlyUp) + "px";
 	div.style.left = Math.round(windowWidth / 2 - divWidth/2) + "px";
+	
+	
 	
 	
 	// Give the focus to the box
@@ -126,8 +166,8 @@ Dialog.prototype.close = function() {
 	}, 500); // Not too fast, make sure the user has released the space bar
 }
 
-function alertBox(msg) {
-	var dialog = new Dialog(msg);
+function alertBox(msg, icon) {
+	var dialog = new Dialog(msg, icon);
 	
 	var button = document.createElement("button");
 		button.setAttribute("class", "alert");
