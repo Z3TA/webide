@@ -1973,6 +1973,8 @@
 				
 				//console.log("Setting indentation on line=" + lineNumber + " : " + Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation));
 				
+				if(!file.grid[row]) throw new Error("Grid row=" + row + " does not exist!");
+				
 				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
 				
 				
