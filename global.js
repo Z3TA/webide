@@ -183,6 +183,10 @@ function alertBox(msg, icon) {
 
 window.alert = alertBox; // Override the native alert box
 
+/*
+	Example reason why you want to use custom confirm box:
+	* Native confirm box registers a keyPress if it was called on a keydown event
+*/
 function confirmBox(msg, options, callback) {
 	
 	var dialog = new Dialog(msg);
