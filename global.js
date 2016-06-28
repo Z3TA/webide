@@ -180,6 +180,9 @@ function alertBox(msg, icon) {
 	
 }
 
+
+window.alert = alertBox; // Override the native alert box
+
 function confirmBox(msg, options, callback) {
 	
 	var dialog = new Dialog(msg);
