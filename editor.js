@@ -10,7 +10,7 @@ var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
 
-editor.supportedFiles = ["js", "htm", "html", "php", "asp", "vbs", "xml", "json"]; // List of file exntensions of supported files. Extensions not in this list will be loaded in plain text mode.
+editor.supportedFiles = ["js", "htm", "html", "php", "asp", "vbs", "xml", "json", "css"]; // List of file exntensions of supported files. Extensions not in this list will be loaded in plain text mode.
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 editor.settings = {
