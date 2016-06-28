@@ -187,7 +187,9 @@
 							remakeFromScratch = false;
 						}
 						else {
-							console.warn("No option asociated with last dom model");
+							console.warn("No option asociated with function " + functionName);
+							remakeFromScratch = true;
+							break;
 						}
 						
 					}
@@ -200,6 +202,13 @@
 				else if(functionName.length > 0) {
 					// Name is the same
 					remakeFromScratch = false;
+					
+					if(!domModel[i].option) {
+						// Probably cause: Function was copied (same name, so only one option was created) and then renamed
+						console.warn("No option asociated with function " + functionName);
+						remakeFromScratch = true;
+						break;
+}
 					
 					// Check if arguments have changed and in that case update the arguments
 					if(updatedDomModel[i].arguments != domModel[i].arguments) {
