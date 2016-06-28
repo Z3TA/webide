@@ -35,6 +35,8 @@ Editor should always be restart after a "throw" is detected!
 BUGS (and issues)
 =================
 
+Somtimes the colors gets fubar when writing code in a function.
+
 Gets into a constant loop when replacing \\n with \n
 
 When auto completing HTML tags, I get </hr> and </br>
