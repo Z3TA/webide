@@ -1,0 +1,13 @@
+{
+ 	"ecmaVersion": 5,
+	 "libs": ["browser"],
+  "plugins": {
+    "node": {},
+    "complete_strings": {}
+  },
+  "loadEagerly": [
+    "**/*.js",
+    "File.js",
+    "editor.js"
+  ]
+}
