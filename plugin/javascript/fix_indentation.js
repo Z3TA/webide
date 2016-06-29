@@ -22,11 +22,11 @@
 		*/
 		
 		var runOrder = 110; // Make sure this runs after the parser
-		editor.on("fileChange", onEdit, runOrder);
+		editor.on("fileChange", fixIndentationOnChange, runOrder);
 		
 	}
 	
-	function onEdit(file, type, character, index, row, col) {
+	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
 		// todo: Only do this for files parsed by jsParser! (or we will fuck up files parsed by other parsers. unless ... we are very strict on what a parser should return)
 		

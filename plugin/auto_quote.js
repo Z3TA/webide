@@ -10,11 +10,11 @@
 	
 	function autoQuoteMain() {
 	
-		editor.on("fileChange", onEdit);
+		editor.on("fileChange", auto_quote_on_file_change);
 
 	}
 
-	function onEdit(file, type, character, index, row, col) {
+	function auto_quote_on_file_change(file, type, character, index, row, col) {
 		
 		if(!file.parsed) return;
 		

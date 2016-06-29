@@ -23,9 +23,9 @@
 	function xmlParserInit() {
 		
 		editor.on("fileOpen", onFileOpen);
-		editor.on("fileChange", onEdit, 100);
+		editor.on("fileChange", parseXmlMaybe, 100);
 		
-		function onEdit(file, type, character, index, row, col) {
+		function parseXmlMaybe(file, type, character, index, row, col) {
 			onFileOpen(file); //  optimization is evil
 		}
 		

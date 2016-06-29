@@ -16,7 +16,7 @@
 		
 		editor.renderFunctions.push(indention_render);
 		
-		editor.on("fileChange", edit);
+		editor.on("fileChange", renderIndentationOnChange);
 		
 		var charCode = 73; // I
 		
@@ -32,7 +32,7 @@
 		return false; // false prevents default (browser) action
 	}
 	
-	function edit(file, change, text, index, row, col) {
+	function renderIndentationOnChange(file, change, text, index, row, col) {
 		if(change == "insert") {
 			if(text == "{") {
 				lastInsertCBLRow[file.path] = row;

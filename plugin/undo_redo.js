@@ -38,7 +38,7 @@
 
 	}
 	
-	editor.on("fileChange", function(file, change, text, index, row, col) {
+	editor.on("fileChange", function undo_redo_fileChange(file, change, text, index, row, col) {
 		
 		if(change != "undo-redo") {
 			
