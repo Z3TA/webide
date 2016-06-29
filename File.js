@@ -18,6 +18,11 @@
 		
 		if(!isString(path)) throw new Error("path is not a string!");
 		
+		file.changed = false; // If the file has changed from last save
+		file.isSaved = false;
+		file.savedAs = false;
+		file.lastChange = new Date();
+		
 		file.text = text;
 		file.path = path;
 		file.isBig = bigFile ? true : false;
@@ -26,6 +31,19 @@
 		file.name = getFilenameFromPath(path);
 		file.mode = "code"; // text, code, or other, ...
 		file.lineBreak = determineLineBreakCharacters(text);
+		
+		if(navigator.platform.indexOf("Win") != -1 && file.lineBreak != "\r\n") {
+			var yes = "Yes, convert to CRLF";
+			var no = "No. Keep " + lbChars(file.lineBreak);
+			confirmBox("Do you want to convert the linbreaks from " + lbChars(file.lineBreak) + " to CRLF (Windows default) ?<br>" + file.path, [yes, no], function(answer) {
+				if(answer == yes) {
+					console.log("Converting line breaks to Windows default!");
+					var oldText = file.text.replace(/\r/g, ""); // Remove all CR just in case
+					file.reload(oldText.replace(/\n/g, "\r\n"));
+					}
+			});
+		}
+		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
 		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
@@ -43,13 +61,8 @@
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
 		
-		file.changed = false; // If the file has changed from last save
-		file.isSaved = false;
-		file.savedAs = false;
-		
 		file.setFileExtension();
 		
-		file.lastChange = new Date();
 		
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
@@ -74,8 +87,6 @@
 			
 		}
 		else {
-			
-			if(file.lineBreak == "") file.lineBreak = editor.settings.defaultLineBreakCharacter; 
 			
 			if(callback) setTimeout(callback, 0); // Make it async
 			
@@ -438,7 +449,13 @@
 	
 	
 	File.prototype.checkGrid = function() {
-		// Sanity check for the grid to detect possible bugs
+		/* 
+			Sanity check for the grid to detect possible bugs
+			
+			Having the file representated in both a text string and grid array 
+			and then cross checking them for errors does find a lot of bugs!
+			
+		*/
 		
 		if(editor.settings.devMode == false) {
 			return;

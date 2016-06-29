@@ -332,7 +332,8 @@ function determineLineBreakCharacters(text) {
 	
 	if(text.length == 0) {
 		console.warn("Can't determine line breaks without any text!");
-		return "";
+		if(navigator.platform.indexOf("Win") != -1) return "\r\n"
+		else return "\n";
 	}
 	
 	var nr = occurrences(text, "\n\r", true),

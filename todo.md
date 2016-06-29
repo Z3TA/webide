@@ -13,6 +13,7 @@ What I'm working on
 
 
 
+
 What I'm thinking
 -----------------
 Should files be opened as streams!!?
