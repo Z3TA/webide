@@ -3517,6 +3517,11 @@ editor.lastKeyPressed = "";
 		
 		var charCode = e.charCode || e.keyCode || e.which;
 		var character = String.fromCharCode(charCode); 
+		var combo = getCombo(e);
+		var file = editor.currentFile;
+		
+		
+		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
 		
 		
 		/*
@@ -3550,11 +3555,12 @@ editor.lastKeyPressed = "";
 		 }
 		*/
 		
-		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
+		
+		
 		
 		editor.lastKeyPressed = character;
 		
-		var file = editor.currentFile
+		
 		
 		if(file) {
 			if(editor.input) {
@@ -3809,6 +3815,8 @@ editor.lastKeyPressed = "";
 		
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
+		/*
+		
 		if(editor.currentFile) {
 			// Handle the special tidle key: Puts a ~ ^ or " over a character
 			// Is it only the swedish keyboard layout that does this!?
@@ -3857,6 +3865,9 @@ editor.lastKeyPressed = "";
 		//console.log("a tildeActive=" + tildeActive);
 		//console.log("a tildeAltActive=" + tildeAltActive);
 		//console.log("a tildeShiftActive=" + tildeShiftActive);
+		
+		
+		*/
 		
 		// Check key bindings
 		for(var i=0, binding; i<editor.keyBindings.length; i++) {
