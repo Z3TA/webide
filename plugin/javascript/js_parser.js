@@ -156,7 +156,6 @@
 				var oldParse = file.parsed;
 				//var insideComment = false;
 				
-				
 				//var char = characters.toLowerCase();
 				var lastChar = file.text.length > caretIndex ? file.text.charAt(caretIndex-1) : "";
 				//console.log(JSON.stringify(comments));
@@ -198,11 +197,21 @@
 						var parseStartRow = f.lineNumber-1;
 						var baseIndentation = file.grid[parseStartRow].indentation;
 						
+						//if(charactersLength < 0) parseEnd++;
+						
+						console.log("characters=" + lbChars(characters));
 						console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 						
+						console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
+						
+						if(file.text.charAt(parseEnd-1) != "}") {
+							file.debugGrid();
+							throw new Error("Expected parseEnd-1=" + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd)) + " to be an }");
+						}
+
 						//console.log(file.text.substring(parseStart, parseEnd));
 						
-						var newParse = parseJavaScript(file, parseStart, parseEnd, baseIndentation, parseStartRow);
+						var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow});
 						// The parser will find the first function and only parse that
 						
 						//console.log("newParse=" + JSON.stringify(newParse));
@@ -225,7 +234,7 @@
 								spliceStart = i;
 								break;
 							}
-							}
+						}
 						
 						console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
 						
@@ -318,26 +327,47 @@
 						// Curly brackets inside a function always match!
 						oldParse.blockMatch = (((oldParse.codeBlockLeft - newParse.codeBlockLeft) - (oldParse.codeBlockRight - newParse.codeBlockRight)) === 0);
 						
-						// Update the function.
+						
 						//  f is a ref to the old function in oldParse
+						if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
+						
 						var ff = newParse.functions[firstValueInObjectList(newParse.functions)]; // Ref to the same function in new parse
 						
+						if(ff.end < 0) throw new Error("New parse of function " + ff.name + " did not get an ending! end=" + ff.end);	
+						
+						
+						// Update the start, end, endRow, and lineNumber of all functions below the one just parsed
+						// Have to go though all functions (recursive) because we can't asume our named array is sorted
+						var endRowDiff = ff.endRow - f.endRow;
+						updateThingsFunctions(oldParse.functions, f.end, endRowDiff, charactersLength);
+						
+						// Update the parsed function.
 						f.variables = ff.variables;
 						f.subFunctions = ff.subFunctions;
 						f.end = ff.end;
+						f.endRow = ff.endRow;
+
 						
 						console.timeEnd("parseOnlyFunctionOptimizer");
 						
-						if(editor.devMode) {
+						if(editor.settings.devMode) {
 							
-							// Make a full parse and compare to see if there is any bugs
+							// Make a full parse and compare to see if there are any bugs
 							
-							var fullParse = parseJavaScript(file);
+							var fullParse = parseJavaScript(file, {noIndention: true});
 							
 							if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
 							if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
+							if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
 							
-}
+							if(Object.keys(fullParse.functions).length != Object.keys(oldParse.functions).length) throw new Error("fullParse.functions=" + Object.keys(fullParse.functions).length + " oldParse.functions=" + Object.keys(oldParse.functions).length + " ");
+							if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " ");
+							
+							if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
+							
+							// Deep compare
+							
+						}
 						
 						
 						file.haveParsed(oldParse);
@@ -355,7 +385,15 @@
 			// Parse the while file
 			console.log("Parsing whole file");
 			var newParse = parseJavaScript(file);
+			
+			if(editor.settings.devMode) {
+				console.log("Checking checkFunctionStartEnd");
+				checkFunctionStartEnd(file, newParse.functions);
+			}
+			
 			file.haveParsed(newParse);
+			
+			
 			
 		}
 		else {
@@ -433,6 +471,39 @@
 			}
 		*/
 		
+		function updateThingsFunctions(functions, oldEnd, endRowDiff, charactersLength) {
+			
+			var func;
+			for(var fname in functions) {
+				
+				func = functions[fname];
+								
+				if(func.start > oldEnd) {
+					
+					console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
+					
+					func.start += charactersLength;
+					func.end += charactersLength;
+					func.lineNumber += endRowDiff;
+					func.endRow += endRowDiff;
+					
+					// Make sure the function starts with an { and ends with an }
+					if(file.text.charAt(func.start) != "{") {
+						file.debugGrid();
+						throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+					}
+					
+					if(file.text.charAt(func.end) != "}") {
+						file.debugGrid();
+						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+					}
+					
+					updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Update subfunctions
+
+				}
+			}
+		}
+		
 		function insideFunction(functions, caretIndex, parent) {
 			// Check if inside a function
 			// Returns the function, or false
@@ -463,18 +534,47 @@
 	}
 	
 	
+	function checkFunctionStartEnd(file, functions) {
+		// Check all functions to make sure they start and end with { and }
+		var func;
+		for(var fname in functions) {
+			func = functions[fname];
+			
+			// Make sure the function starts with an { and ends with an }
+			if(file.text.charAt(func.start) != "{") {
+				file.debugGrid();
+				throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+			}
+			
+			if(file.text.charAt(func.end) != "}") {
+				file.debugGrid();
+				throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+			}
+			
+			console.log(func.name + " OK");
+						
+			checkFunctionStartEnd(file, func.subFunctions); // Check subfunctions
+
+		}
+		
+	}
+	
 
 	function isNumeric(n) {
 		return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 	
-	function parseJavaScript(file, parseStart, parseEnd, baseIndentation, parseStartRow) {
-
-		/*
-			Todo: ES6  support!?
-		*/
+	function parseJavaScript(file, options) {
 		
 		console.time("parseJavaScript");
+		
+		if(options == undefined) options = {};
+		
+		var parseStart = options.start;
+		var parseEnd = options.end;
+		var baseIndentation = options.baseIndentation;
+		var parseStartRow = options.startRow;
+		var indentate = options.noIndention ? false : true;
 		
 		if(baseIndentation == undefined) baseIndentation = 0;
 		if(parseStartRow == undefined) parseStartRow = 0;
@@ -719,7 +819,7 @@
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
 			//console.log()
 			
-			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow) {
+			if(file.grid[row].indentation > 0 && codeBlockLeftRow != codeBlockRightRow && indentate) {
 				file.grid[row].indentation--;
 			}
 		}
@@ -1150,7 +1250,7 @@
 					insideBlockComment = false;
 					comments.push(new Comment(commentStart, i));
 					//console.log("Found block comment: " + text.substring(commentStart, i));
-					if(file.grid[row].indentation > 0) {
+					if(file.grid[row].indentation > 0 && indentate) {
 						// Set same indentation as the start of the comment
 						file.grid[row].indentation = commentStartIndentation;
 					}
@@ -1381,7 +1481,7 @@
 						if(insideXmlTagEnding) {
 							// It's a ending tag </tag>
 							openXmlTags--;
-							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0) file.grid[row].indentation--;
+							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0 && indentate) file.grid[row].indentation--;
 						}
 						else {
 							// It's a tag opening
@@ -1502,7 +1602,7 @@
 				
 					codeBlock[codeBlockDepth].indentation--;
 					
-					if(file.grid[row].indentation > 0 && arrayStartRow != row) file.grid[row].indentation--;				
+					if(file.grid[row].indentation > 0 && arrayStartRow != row && indentate) file.grid[row].indentation--;				
 					
 				}
 				else if(char == "}") {
@@ -1539,7 +1639,7 @@
 							insideFunctionBody[subCount] = false;
 							
 							myFunction[subCount].end = i;
-							
+							myFunction[subCount].endRow = row;
 
 							
 							if(subCount > 0) {
@@ -1956,7 +2056,7 @@
 				vb_insideCondition = false;
 				
 				//console.log("--- new line=" + (row) + " vb_thisRowIndentation=" + vb_thisRowIndentation + " ---");
-				file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
+				if(indentate) file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
 
 				if(vb_nextRowIndentation == 1) {
 					vb_thisRowIndentation++;
@@ -1975,7 +2075,7 @@
 				
 				if(!file.grid[row]) throw new Error("Grid row=" + row + " does not exist!");
 				
-				file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
+				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
 				
 				
 				
@@ -2202,6 +2302,7 @@
 		func.subFunctions = {};
 		func.variables = {};
 		func.lineNumber = lineNumber;
+		func.endRow = -1;
 		
 		func.prototype = {}; // Variables. (Methods will also be added as a variable here for consistency, it will also exist as a function)
 		

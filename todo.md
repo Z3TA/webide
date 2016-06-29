@@ -10,8 +10,11 @@ Prio:
 What I'm working on
 -------------------
 
+Parsing errors. Parse only function optimizer
 
+problem with auto complete (quotes) updating and srewing up
 
+Abort the parser if a new line is reached and there is an open quote!?
 
 
 What I'm thinking
@@ -615,6 +618,8 @@ Pasting code into an emty (sub) function sometimes does weird things
 
 Feature
 =======
+
+shift button to move without moving the cursor.
 
 deploy, start/stop and debug nodeJS in the editor
 

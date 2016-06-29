@@ -260,10 +260,14 @@ function promptBox(msg, isPassword, callback) {
 
 
 function lbChars(txt) {
-	// Shows white space
+	// Shows white space. Useful for debugging
 	txt = txt.replace(/\r/g, "CR");
 	txt = txt.replace(/\n/g, "LF");
 	txt = txt.replace(/\t/g, "TAB");
+	txt = txt.replace(/ /g, "SPACE");
+	txt = txt.replace(/\f/g, "FORMFEED");
+	txt = txt.replace(/\v/g, "VTAB");
+	txt = txt.replace(/\s/g, "OTHERWHITESPACE");
 	return txt;
 }
 

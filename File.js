@@ -10,6 +10,7 @@
 
 (function() { // Allows private variables
 	
+	
 	// Note: No var infront. Expose this object to global scope!
 	File = function File(text, path, fileIndex, bigFile, callback) { 
 		var file = this;
@@ -22,6 +23,8 @@
 		file.isSaved = false;
 		file.savedAs = false;
 		file.lastChange = new Date();
+		
+		file.recursiveFileChange = false; // Keep track and abort recursive update/change events
 		
 		file.text = text;
 		file.path = path;
@@ -2464,7 +2467,11 @@
 		
 		//console.log("letters:" + letters);
 		
-		console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+		//console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+		
+		for(var i=0; i<text.length; i++) {
+			console.log(i + "=" + text[i] + " ");
+		}
 		
 		for(var row=0; row<grid.length; row++) {
 			for(var col=0; col<grid[row].length; col++) {
@@ -2569,11 +2576,18 @@
 		
 		file.lastChange = new Date();
 		
-		// Call file edit listeners
+		/*
+			Call file edit listeners ...
+			
+			Problem: A edit listener can make another change, witch makes it unessesary to run the remaining (with old state)
+			Solution: file.recursiveFileChange variable. Abort if it's true
+		*/
+		file.recursiveFileChange = false;
 		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
 			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
+			if(file.recursiveFileChange) break;
 		}
-		
+		file.recursiveFileChange = true;
 		
 	}
 	
