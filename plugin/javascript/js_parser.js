@@ -80,7 +80,7 @@
 	function jsParserMain() {
 	
 		editor.on("fileOpen", onFileOpen); // Why did I remove this???
-		editor.on("fileChange", onEdit, 100);
+		editor.on("fileChange", parseJsOnChange, 100);
 
 	}
 
@@ -144,7 +144,7 @@
 	}
 
 	
-	function onEdit(file, type, characters, caretIndex, row, col) {
+	function parseJsOnChange(file, type, characters, caretIndex, row, col) {
 		/*
 			type: "delete", "linebreak", "insert", "text", deleteTextRange, deletedSelection, reload, 
 		*/
