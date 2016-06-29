@@ -65,6 +65,8 @@ const ALT = 4;
 
 function Dialog(msg, icon) {
 	
+	msg = msg.replace(/\n/g, "<br>");
+	
 	var body = document.getElementById("body");
 	
 	var message = document.createElement("div");
