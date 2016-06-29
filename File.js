@@ -24,7 +24,7 @@
 		file.savedAs = false;
 		file.lastChange = new Date();
 		
-		file.recursiveFileChange = false; // Keep track and abort recursive update/change events
+		file.isCallingChangeEventListeners = false; // Prevent fileChange event listeners from changing the file
 		
 		file.text = text;
 		file.path = path;
@@ -2566,6 +2566,10 @@
 		*/
 		var file = this;
 		
+		if(file.isCallingChangeEventListeners) {
+			throw new Error("fileChange event listeners are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
+		}
+		
 		file.changed = true;
 		
 		if(file.isBig) {
@@ -2580,15 +2584,18 @@
 			Call file edit listeners ...
 			
 			Problem: A edit listener can make another change, witch makes it unessesary to run the remaining (with old state)
-			Solution: file.recursiveFileChange variable. Abort if it's true
+			Not a solution: file.recursiveFileChange variable. Abort if it's true (It will not work because all changeEvent listeners must run IN ORDER to give them a chanse to track file changes)
+			Solution: Throw an error if the file is changed while for-looping the event listeners
+			Possible other solution: queue up recursive changes and run them afterwards, so that event listeners are called in the same order as changes where made
+			
 		*/
-		file.recursiveFileChange = false;
-		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
-			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
-			if(file.recursiveFileChange) break;
-		}
-		file.recursiveFileChange = true;
+		file.isCallingChangeEventListeners = true;
 		
+		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
+			console.log("Calling fileChange event listener: " + getFunctionName(editor.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
+			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
+		}
+		file.isCallingChangeEventListeners = false;
 	}
 	
 	File.prototype.fixCaret = function(caret) {

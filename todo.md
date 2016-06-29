@@ -10,9 +10,24 @@ Prio:
 What I'm working on
 -------------------
 
+
+Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
+
+Return false to prevent the character to be inserted into the document (default action)
+
+
+What's weird is that Ctrl+I does not trigger keyPress event, but Ctrl+U does (21). Why??
+
+
+Use this control key standard?
+https://en.wikipedia.org/wiki/Control_key
+
 Parsing errors. Parse only function optimizer
 
 problem with auto complete (quotes) updating and srewing up
+
+After the auto quote, two characters has actually been inserted.
+
 
 Abort the parser if a new line is reached and there is an open quote!?
 
