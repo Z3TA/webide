@@ -9,7 +9,7 @@
 	var newFileCounter = 1;
 	
 	// Bind to ctrl + N
-	editor.keyBindings.push({charCode: 78, combo: CTRL, fun: createNewFile});
+	editor.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: createNewFile});
 
 
 	

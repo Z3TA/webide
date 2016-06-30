@@ -3,10 +3,10 @@
 	
 	"use strict";
 	
-	editor.keyBindings.push({charCode: 33, combo: 0, fun: pageUp});
-	editor.keyBindings.push({charCode: 34, combo: 0, fun: pageDown});
-	editor.keyBindings.push({charCode: 35, combo: 0, fun: end});
-	editor.keyBindings.push({charCode: 36, combo: 0, fun: home});
+	editor.bindKey({desc: 'Moves the caret one "page" up', charCode: 33, combo: 0, fun: pageUp});
+	editor.bindKey({desc: 'Moves the caret one "page" down', charCode: 34, combo: 0, fun: pageDown});
+	editor.bindKey({desc: 'Moves the caret to the end of file', charCode: 35, combo: 0, fun: end});
+	editor.bindKey({desc: 'Moves the caret to the beginning of file', charCode: 36, combo: 0, fun: home});
 	
 	
 	function pageUp(file, combo, character, charCode, pushDirection) {

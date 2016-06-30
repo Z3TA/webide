@@ -33,7 +33,8 @@
 		
 		hide_gotoInput();
 		
-		editor.keyBindings.push({charCode: 71, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		editor.bindKey({desc: "Goto line ...", charCode: 71, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		
 		editor.keyBindings.push({charCode: 27, fun: hide_gotoInput}); // Escape
 		editor.keyBindings.push({charCode: 13, fun: gotoLine}); // Enter
 

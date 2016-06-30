@@ -30,14 +30,14 @@
 		var key_pageUP = 33;
 		var key_pageDown = 34;
 		
-		editor.keyBindings.push({charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
+		editor.bindKey({desc: "Switch tab to last active tab", charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 		
-		editor.keyBindings.push({charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
-		editor.keyBindings.push({charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
+		editor.bindKey({desc: "Move current tab to the left", charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
+		editor.bindKey({desc: "Move current tab to the right", charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
 		// todo: implement tab drag and drop to change order
 		
-		editor.keyBindings.push({charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
-		editor.keyBindings.push({charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
+		editor.bindKey({desc: "Switch tab to the tab to the left", charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
+		editor.bindKey({desc: "Switch tab to the tab to the right", charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
 		
 		
 		

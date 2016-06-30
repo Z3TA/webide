@@ -1,7 +1,8 @@
 
 (function() {
 	
-	editor.keyBindings.push({
+	editor.bindKey({
+		desc: "Makes a line break"
 		charCode: 13, 
 		fun: keyboard_enter,
 	});

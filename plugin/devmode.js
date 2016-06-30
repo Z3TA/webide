@@ -24,13 +24,13 @@
 		var keyE = 69;
 		
 		// For convenience we can press F5 to reload while developing on the app itself
-		editor.keyBindings.push({charCode: keyF5, fun: reloadEditor});
+		editor.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
 		
 		// Switch devMode on or off by hitting Ctrl + Alt + D
-		editor.keyBindings.push({charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
+		editor.bindKey({desc: "Toggle devMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
 		
 		// Test how the editor handles errors
-		editor.keyBindings.push({charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
+		editor.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 		
 		editor.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 		

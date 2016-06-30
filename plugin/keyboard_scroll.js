@@ -4,11 +4,11 @@
 	
 	var delta = 5;
 		
-	editor.keyBindings.push({charCode: 39, combo: ALT, fun: right});
-	editor.keyBindings.push({charCode: 37, combo: ALT, fun: left});
+	editor.bindKey({desc: "Scroll to the right", charCode: 39, combo: ALT, fun: right});
+	editor.bindKey({desc: "Scroll to the left", charCode: 37, combo: ALT, fun: left});
 	
-	editor.keyBindings.push({charCode: 38, combo: ALT, fun: up});
-	editor.keyBindings.push({charCode: 40, combo: ALT, fun: down});
+	editor.bindKey({desc: "Scroll up", charCode: 38, combo: ALT, fun: up});
+	editor.bindKey({desc: "Scroll down", charCode: 40, combo: ALT, fun: down});
 
 	
 	function right(file) {

@@ -20,7 +20,7 @@
 		
 		var charCode = 73; // I
 		
-		editor.keyBindings.push({charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
+		editor.bindKey({desc: "Toggle indentation guides", charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
 		
 	}
 	

@@ -6,10 +6,7 @@
 	editor.on("start", keyboard_backspace);
 	
 	function keyboard_backspace() {
-		editor.keyBindings.push({
-			charCode: 8, 
-			fun: backSpace
-		});
+		editor.bindKey({desc: "Moves the caret left and deletes one character. Or deletes all selected characters.", charCode: 8, fun: backSpace});
 	}
 	
 	function backSpace(file, combo, character, charCode, keyPush) {

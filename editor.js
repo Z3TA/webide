@@ -62,7 +62,6 @@ editor.settings = {
 editor.shouldRender = false;   // Internal flag, use editor.renderNeeded() to re-render!
 editor.shouldResize = false;   // Internal flag, use editor.resizeNeeded() to re-size!
 editor.fileIndex = -1;   // Keep track on opened files (for undo/redo)
-editor.keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events, more info in docs.
 editor.files = {};       // List of all opened files with the path as key
 editor.mouseX = 0;       // Current mouse position
 editor.mouseY = 0;
@@ -125,6 +124,8 @@ editor.lastKeyPressed = "";
 	
 	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
 	
+	
+	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
 	var executeOnNextInteraction = [];
 	
@@ -2270,8 +2271,8 @@ editor.lastKeyPressed = "";
 		if(typeof funName == "function") funName = getFunctionName(funName); // Convert to string
 		
 		var f, character, combo = "";
-		for(var i=0; i<editor.keyBindings.length; i++) {
-			f = editor.keyBindings[i]
+		for(var i=0; i<keyBindings.length; i++) {
+			f = keyBindings[i]
 			if(getFunctionName(f.fun) == funName) {
 				
 				if(f.charCode) {
@@ -2312,13 +2313,13 @@ editor.lastKeyPressed = "";
 		// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
 		var funName = getFunctionName(b.fun);
 		if(funName == "") throw new Error("Key binding function can not be anonymous!")
-		for(var i=0; i<editor.keyBindings.length; i++) {
-			if(getFunctionName(editor.keyBindings[i].fun) == funName) {
+		for(var i=0; i<keyBindings.length; i++) {
+			if(getFunctionName(keyBindings[i].fun) == funName) {
 				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe name!")
 			}
 		}
 	
-		editor.keyBindings.push(b);
+		keyBindings.push(b);
 		
 	}
 	
@@ -2327,8 +2328,8 @@ editor.lastKeyPressed = "";
 		if(isNaN(charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		
 		var f, rebound = false;
-		for(var i=0; i<editor.keyBindings.length; i++) {
-			f = editor.keyBindings[i]
+		for(var i=0; i<keyBindings.length; i++) {
+			f = keyBindings[i]
 			if(getFunctionName(f.fun) == funName) {
 				
 				if(rebound) console.warn("Double rebound of " + funName);
@@ -2351,11 +2352,11 @@ editor.lastKeyPressed = "";
 		
 		
 		var f;
-		for(var i=0; i<editor.keyBindings.length; i++) {
-			f = editor.keyBindings[i]
+		for(var i=0; i<keyBindings.length; i++) {
+			f = keyBindings[i]
 			if(getFunctionName(f.fun) == funName) {
 				
-				editor.keyBindings.splice(i, 1);
+				keyBindings.splice(i, 1);
 				
 				console.log("Ubound " + funName);
 				
@@ -2950,7 +2951,7 @@ editor.lastKeyPressed = "";
 	
 	
 	/*
-		Add your own key listeners by pushing to editor.keyBindings
+		Add your own key listeners via editor.bindKey()
 		Your function should return false to prevent default action.
 	*/
 	window.addEventListener("keydown",keyIsDown,false);  // captures 
@@ -3045,10 +3046,10 @@ editor.lastKeyPressed = "";
 		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
 		
-		editor.keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
+		keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
 		var keyT = 84;
-		editor.keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
+		keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");
@@ -3733,7 +3734,7 @@ editor.lastKeyPressed = "";
 		// PS. Alt Gr = Ctrl+Alt
 		// AltGr is the same as hitting Ctrl+ Alt
 		
-		// You probably want to push to editor.keyBindings instead of using eventListeners.keyDown!
+		// You probably want to use bindKey instead of eventListeners.keyDown!
 		console.log("Calling keyDown listeners (" + editor.eventListeners.keyDown.length + ") ...");
 		for(var i=0; i<editor.eventListeners.keyDown.length; i++) {
 			funReturn = editor.eventListeners.keyDown[i].fun(editor.currentFile, character, combo); // Call function
@@ -3745,9 +3746,9 @@ editor.lastKeyPressed = "";
 		}
 		
 		// Check key bindings
-		for(var i=0, binding; i<editor.keyBindings.length; i++) {
+		for(var i=0, binding; i<keyBindings.length; i++) {
 			
-			binding = editor.keyBindings[i];
+			binding = keyBindings[i];
 			
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 				
@@ -3920,9 +3921,9 @@ editor.lastKeyPressed = "";
 		*/
 		
 		// Check key bindings
-		for(var i=0, binding; i<editor.keyBindings.length; i++) {
+		for(var i=0, binding; i<keyBindings.length; i++) {
 			
-			binding = editor.keyBindings[i];
+			binding = keyBindings[i];
 			
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				

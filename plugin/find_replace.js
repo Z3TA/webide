@@ -20,7 +20,7 @@
 		console.log("find_replace.js loaded!");
 		
 		// Bind to ctrl + F
-		editor.keyBindings.push({charCode: 70, combo: CTRL, fun: findReplace}); // Ctrl + F
+		editor.bindKey({desc: "Find or replace in current file", charCode: 70, combo: CTRL, fun: findReplace}); // Ctrl + F
 		
 		// Pressing enter should do a search if the search window is open
 		editor.keyBindings.push({charCode: 13, fun: pressEnter});

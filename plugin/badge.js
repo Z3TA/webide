@@ -3,7 +3,7 @@
 	
 	var key_B = 66;
 	
-	editor.keyBindings.push({charCode: key_B, combo: CTRL, fun: badgeMe});
+	editor.bindKey({desc: "Show a message in window taskbar icon", charCode: key_B, combo: CTRL, fun: badgeMe});
 	
 	function badgeMe() {
 		var GUI = require('nw.gui').Window.get();

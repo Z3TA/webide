@@ -3,7 +3,8 @@
 	
 	"use strict";
 		
-	editor.keyBindings.push({
+	editor.bindKey({
+		desc: "Select all text",
 		charCode: 65,
 		combo: CTRL,
 		fun: selectAll

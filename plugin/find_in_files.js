@@ -22,13 +22,15 @@
 		var keyEscape = 27;
 		
 		// Pressing Ctrl + shift + F should hide or show the search window
-		editor.keyBindings.push({charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
+		editor.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
 
 		// Pressing enter should do a search if the search window is open
-		editor.keyBindings.push({charCode: keyEnter, fun: pressEnter});
+		// todo: Make this internal to this plugin GUI to not clutter keyBindings
+		editor.bindKey({desc: "Makes a search if the search in file GUI is visible and have focus", charCode: keyEnter, fun: pressEnter});
 
 		// Pressing escape should clear and hide the search window
-		editor.keyBindings.push({charCode: keyEscape, fun: pressEscape});
+		// todo: Make this internal to this plugin GUI to not clutter keyBindings
+		editor.bindKey({charCode: keyEscape, fun: pressEscape});
 		
 		
 		

@@ -13,10 +13,12 @@
 	
 	function undor_redo_init() {
 		
-		editor.keyBindings.push({charCode: 89, fun: redo, combo: CTRL});
+		editor.bindKey({desc: "Redo change", charCode: 89, fun: redo, combo: CTRL});
 		
-		editor.keyBindings.push({charCode: 90, fun: undo, combo: CTRL});
+		editor.bindKey({desc: "Undo change", charCode: 90, fun: undo, combo: CTRL});
 		
+		
+		// todo: Move to fileChange event listener
 		// When to save state !??
 		editor.keyBindings.push({charCode: 46, fun: saveState}); // Delete
 		editor.keyBindings.push({charCode: 8, fun: saveState}); // Backspace

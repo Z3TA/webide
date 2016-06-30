@@ -8,12 +8,13 @@
 	var key_UP = 38;
 	var key_DOWN = 40;
 	
-	editor.keyBindings.push({charCode: key_RIGHT, fun: keyboard_arrows_moveRight, dir: "down"});
-	editor.keyBindings.push({charCode: key_LEFT, fun: keyboard_arrows_moveLeft});
-	editor.keyBindings.push({charCode: key_UP, fun: keyboard_arrows_moveUp});
-	editor.keyBindings.push({charCode: key_DOWN, fun: keyboard_arrows_moveDown});
+	editor.bindKey({desc: "Moves the caret to the right, steps words with Ctrl, and selects with Shift combo", charCode: key_RIGHT, fun: keyboard_arrows_moveRight, dir: "down"});
+	editor.bindKey({desc: "Moves the caret to the left, steps words with Ctrl, and selects with Shift combo", charCode: key_LEFT, fun: keyboard_arrows_moveLeft});
+	editor.bindKey({desc: "Moves the caret up, and selects with Shift combo", charCode: key_UP, fun: keyboard_arrows_moveUp});
+	editor.bindKey({desc: "Moves the caret down, and selects with Shift combo", charCode: key_DOWN, fun: keyboard_arrows_moveDown});
 	
 	var selectStart, selectEnd;
+	
 	
 	
 	function isWhiteSpace(char) {

@@ -11,10 +11,10 @@
 	function main() {
 		
 		// Bind to ctrl + O
-		editor.keyBindings.push({charCode: 79, combo: CTRL, fun: openFile});
+		editor.bindKey({desc: "Open file using native file select dialog", charCode: 79, combo: CTRL, fun: openFile});
 
 		// Add items to the canvas context meny
-		editor.addMenuItem("Open file (Ctrl+O)", openFile);
+		editor.addMenuItem("Open file ...", openFile);
 		
 	}
 

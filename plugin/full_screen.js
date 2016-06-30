@@ -9,7 +9,7 @@
 	var keyF11 = 122;
 	
 	
-	editor.keyBindings.push({charCode: keyF11, fun: toggleTullScreen});
+	editor.bindKey({desc: "Toggle full screen mode", charCode: keyF11, fun: toggleTullScreen});
 	
 	function toggleTullScreen() {
 		

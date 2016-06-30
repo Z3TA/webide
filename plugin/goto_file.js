@@ -50,7 +50,8 @@
 		var keyUp = 38;
 		var keyDown = 40;
 		
-		editor.keyBindings.push({charCode: charP, combo: CTRL, fun: show_gotoInput}); // ctrl + R
+		editor.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoInput}); // ctrl + R
+		
 		editor.keyBindings.push({charCode: charEscape, fun: hide_gotoInput}); // Escape
 		editor.keyBindings.push({charCode: charEnter, fun: gotoFile}); // Enter
 		editor.keyBindings.push({charCode: keyUp, fun: moveUp});

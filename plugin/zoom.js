@@ -22,11 +22,11 @@
 		o_font = editor.settings.style.font;
 		o_scrollStep = editor.settings.scrollStep;
 		
-		editor.keyBindings.push({charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
+		editor.bindKey({desc: "Toggle zoom", charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 		
-		editor.keyBindings.push({charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
+		editor.bindKey({desc: "Scroll And move the caret up", charCode: charCodeUp, combo: ALT + CTRL, fun: scrollUp});
 		
-		editor.keyBindings.push({charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
+		editor.bindKey({desc: "Scroll And move the caret down", charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
 		
 		editor.renderFunctions.push(showMarkdownHeadings);
 	}

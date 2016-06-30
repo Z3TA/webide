@@ -4,7 +4,8 @@
 	editor.on("start", keyboard_delete);
 	
 	function keyboard_delete() {
-		editor.keyBindings.push({
+		editor.bindKey({
+			desc: "Deletes the one character right of the caret. Or deletes all selected text."
 			charCode: 46, 
 			fun: keydel
 		});

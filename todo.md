@@ -10,6 +10,8 @@ Prio:
 What I'm working on
 -------------------
 
+Refactor GUI's to not all use editor listeners for enter, escape etc. Bake it into the plugin GUI's!
+
 Refactoring editor.on("start") => editor.plugin and editor.keyBindings.push => editor.bindKey
 
 Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.

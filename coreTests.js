@@ -755,39 +755,4 @@ callback(true);
 			
 	});
 	
-	/*
-	editor.addTest(function keyBindingsReturnTrueOrFalse(callback) {
-		
-			var binding;
-			var funReturn;
-			var combo = {shift: false, alt: false, ctrl: false, sum: 0};
-			var character = "T";
-			var charCode = 116; // small case t
-			var targetElementClass = "fileCanvas";
-			
-			for(var i=0, binding; i<editor.keyBindings.length; i++) {
-				binding = editor.keyBindings[i];
-				
-				
-				if(getFunctionName(binding.fun) != "runTests_5616458984153156") { // Prevent endless loop
-				
-					console.log("Testing " + getFunctionName(binding.fun));
-					
-					funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
-					
-					if(funReturn !== true && funReturn !== false) {
-						
-						throw new Error("Function: " + getFunctionName(binding.fun) + " returned " + funReturn);
-						// This is not very helpful. But how can we get the source file and line number of the function!?
-						// If we create a new Error here, the stack will only point here, and not to the function
-					}
-				}
-			}
-			
-			callback(true);
-
-	});
-	
-	*/
-	
 })();

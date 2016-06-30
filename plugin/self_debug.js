@@ -474,7 +474,7 @@ return;
 	
 	function main() {
 		var key_S = 83;
-		editor.keyBindings.push({charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		editor.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
 		
 		restart();
 	}
