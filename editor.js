@@ -2303,6 +2303,12 @@ editor.lastKeyPressed = "";
 		
 	}
 	
+	editor.keyBindings = function() {
+		// Returns a list of key bindings
+		return keyBindings;
+		
+	}
+	
 	editor.bindKey = function(b) {
 		
 		if(isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");

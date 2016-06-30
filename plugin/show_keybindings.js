@@ -2,10 +2,11 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 	"use strict";
 	
 	var padLength = 29;
+	var keyBindings = editor.keyBindings();
 	
 	var b, arr = [], fName, str;
-	for(var i=0; i<editor.keyBindings.length; i++) {
-		b = editor.keyBindings[i];
+	for(var i=0; i<keyBindings.length; i++) {
+		b = keyBindings[i];
 		
 		fName = getFunctionName(b.fun);
 		
@@ -14,7 +15,7 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 			if(b.desc) str = str + " (" + b.desc + ")";
 			arr.push(str);
 		}
-		}
+	}
 	
 	arr.sort();
 	
