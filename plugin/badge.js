@@ -1,5 +1,11 @@
 (function() {
-"use strict";
+	"use strict";
+	
+	/*
+	
+		Idea: Connect it to a bug tracker and show live updates of how many bugs there are
+	
+	*/
 	
 	var key_B = 66;
 	
