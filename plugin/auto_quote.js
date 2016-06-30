@@ -5,38 +5,45 @@
 	var singleQuote = "'";
 	var dblQuote = '"';
 	
-		
-	editor.on("start", autoQuoteMain);
+	editor.plugin({
+		desc: "Auto insert quote characters when typing a quote",
+		load: autoQuoteMain,
+		unload: autoQuoteUnload,
+	});
+	
 	
 	function autoQuoteMain() {
-	
-		editor.on("fileChange", auto_quote_on_file_change);
 
+		editor.on("keyPressed", auto_quote_on_keyPressed);
+		
 	}
 
-	function auto_quote_on_file_change(file, type, character, index, row, col) {
+	function autoQuoteUnload() {
+		editor.removeEventListener()
+	}
+	
+	function auto_quote_on_keyPressed(file, character, combo) {
 		
-		if(!file.parsed) return;
+		if(!file.parsed) return true;
 		
 		// Only auto-insert quotes when we are coding, not when writing text!
-		if(Object.keys(file.parsed).length == 0) return;
+		if(Object.keys(file.parsed).length == 0) return true;
 		
 		//console.log(JSON.stringify(file.parsed));
 		
-		if(type=="insert") {
-			
-			if(character == singleQuote || character == dblQuote) autoQuote(file, type, character, index, row, col);
-			
-		}
-		
-		
+		if(character == singleQuote || character == dblQuote) return autoQuote(file, character, combo)
+		else return true;
 	}
 	
 	
-	function autoQuote(file, type, character, index, row, col) {
+	function autoQuote(file, character, combo) {
 		// character is a single or double quote ...
 		
-		if(file.parsed.language=="VbScript" && character == "'") return; // ' Are used to make comments in vbScript
+		var index = file.caret.index;
+		var row = file.caret.row;
+		var col = file.caret.col;
+		
+		if(file.parsed.language=="VbScript" && character == "'") return true; // ' Are used to make comments in vbScript
 		
 		var lastCharacter = "";
 		var nextCharacter = "";
@@ -56,7 +63,7 @@
 			var insideTag = isInside(file.text, index, "<", ">");
 			var insideScript = isInside(file.text, index, "<script", "</script>");
 			
-			if(!insideTag && !insideScript) return;
+			if(!insideTag && !insideScript) return true;
 			
 		}
 		
@@ -66,7 +73,7 @@
 		var insideLineComment = isInside(file.text, index, "//", file.lineBreak);
 		
 		// Don't auto quote inside comments
-		if(insideHtmlComment || insideBlockComment || insideLineComment) return; 
+		if(insideHtmlComment || insideBlockComment || insideLineComment) return true; 
 		
 		
 		// todo: test if we get an error if at the beginning or end!
@@ -122,31 +129,38 @@
 			
 			if(inQuote && !openQuote) {
 				if(file.parsed.language=="JavaScript") {
-					file.insertText(" +  + " + quote);
+					file.insertText(quote + " +  + " + quote);
 					file.moveCaretLeft(file.caret, 4);
 					editor.renderNeeded();
+					return false;
 				}
 				else if(file.parsed.language=="VbScript") {
-					file.insertText(" &  & " + quote);
+					file.insertText(quote + " &  & " + quote);
 					file.moveCaretLeft(file.caret, 4);
 					editor.renderNeeded();
+					return false;
 				}
 				else if(file.parsed.language=="PHP") {
-					file.insertText(" .  . " + quote);
+					file.insertText(quote + " .  . " + quote);
 					file.moveCaretLeft(file.caret, 4);
 					editor.renderNeeded();
+					return false;
 				}
 			}
 			else if(   !xor    && !(quote == singleQuote && insideDbl)) {
 				// Insert one quote character
 				file.putCharacter(quote);
+				file.putCharacter(quote);
 				file.moveCaretLeft();
 				editor.renderNeeded();
+				return false;
 			}
 		}
 		
+		// This might become annoying
 		if(lastCharacter == quote && nextCharacter == quote) {
-			file.deleteCharacter();
+			//file.deleteCharacter();
+			return false;
 		}
 	}
 	

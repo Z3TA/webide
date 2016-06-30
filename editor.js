@@ -92,6 +92,7 @@ editor.eventListeners = { // Use editor.on to add listeners to these events:
 	keyDown: [],
 	moveCaret: [],
 	autoComplete: [],
+	keyPressed: []
 };
 
 editor.renderFunctions = [];
@@ -3519,9 +3520,22 @@ editor.lastKeyPressed = "";
 		var character = String.fromCharCode(charCode); 
 		var combo = getCombo(e);
 		var file = editor.currentFile;
+		var preventDefault = false;
+		
+		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
 		
 		
-		console.log("keyPress: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
+		console.log("Calling keyPressed listeners (" + editor.eventListeners.keyPressed.length + ") ...");
+		for(var i=0; i<editor.eventListeners.keyPressed.length; i++) {
+			funReturn = editor.eventListeners.keyPressed[i].fun(file, character, combo); // Call function
+			
+			if(funReturn !== true && funReturn !== false) throw new Error("keyPressed event listener: " + getFunctionName(editor.eventListeners.keyPressed[i].fun) + " did not return true or false!");
+			
+			if(funReturn === false && !preventDefault) {
+				preventDefault = true;
+				if(file && editor.input) console.log(getFunctionName(editor.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
+			}
+		}
 		
 		
 		/*
@@ -3559,11 +3573,10 @@ editor.lastKeyPressed = "";
 		
 		
 		editor.lastKeyPressed = character;
-		
-		
+				
 		
 		if(file) {
-			if(editor.input) {
+			if(editor.input && !preventDefault) {
 				// Put character at current caret position:
 				
 				if(editor.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
