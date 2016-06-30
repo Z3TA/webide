@@ -149,8 +149,7 @@
 			}
 			else if(   !xor    && !(quote == singleQuote && insideDbl)) {
 				// Insert one quote character
-				file.putCharacter(quote);
-				file.putCharacter(quote);
+				file.insertText(quote + quote);
 				file.moveCaretLeft();
 				editor.renderNeeded();
 				return false;
