@@ -407,8 +407,8 @@ function isString(text) {
 	
 	var objectString = "[object String]";
 	var string = "string";
-	var typeOf = typeof content;
-	var instanceofString = (content instanceof String);
+	var typeOf = typeof text;
+	var instanceofString = (text instanceof String);
 	var objectToString = Object.prototype.toString.call(text);
 	
 	
