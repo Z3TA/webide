@@ -10,33 +10,26 @@ Prio:
 What I'm working on
 -------------------
 
-Refactor GUI's to not all use editor listeners for enter, escape etc. Bake it into the plugin GUI's!
-
-Refactoring editor.on("start") => editor.plugin and editor.keyBindings.push => editor.bindKey
-
-Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
-
-Return false to prevent the character to be inserted into the document (default action)
-
-
-What's weird is that Ctrl+I does not trigger keyPress event, but Ctrl+U does (21). Why??
-
-
-Use this control key standard?
-https://en.wikipedia.org/wiki/Control_key
+Hide cenvert file dialog when the file is closed!?
 
 Parsing errors. Parse only function optimizer
 
-problem with auto complete (quotes) updating and srewing up
-
-After the auto quote, two characters has actually been inserted.
-
+problem with quotes
 
 Abort the parser if a new line is reached and there is an open quote!?
 
 
 What I'm thinking
 -----------------
+
+Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
+Return false to prevent the character to be inserted into the document (default action)
+
+What's weird is that Ctrl+I does not trigger keyPress event, but Ctrl+U does (21). Why??
+
+Use this control key standard?
+https://en.wikipedia.org/wiki/Control_key
+
 Should files be opened as streams!!?
 Would probably have to save remote files to a temporary location
 

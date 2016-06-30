@@ -216,7 +216,7 @@
 						
 						//console.log("newParse=" + JSON.stringify(newParse));
 						
-						var spliceStart = 0;
+						var spliceStart = -1;
 						var spliceLen = 0;
 						
 						// Remove all quotes in the function, then add them again, and increment index of all below
@@ -224,7 +224,7 @@
 							if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
 								spliceLen++;
 								//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
-								if(spliceStart==0) spliceStart = i;
+								if(spliceStart==-1) spliceStart = i;
 								continue;
 							}
 							else if(spliceLen > 0) {
@@ -238,7 +238,7 @@
 						
 						console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
 						
-						if(spliceLen) oldParse.quotes.splice(spliceStart, spliceLen);
+						if(spliceLen && spliceStart != -1) oldParse.quotes.splice(spliceStart, spliceLen);
 						
 						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
@@ -255,13 +255,13 @@
 						
 						
 						// Remove all comments in the function, then add them again, and increment index of all below
-						spliceStart = 0;
+						spliceStart = -1;
 						spliceLen = 0;
 						for(var i=0; i<oldParse.comments.length; i++) {
 							if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
 								spliceLen++;
 								//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
-								if(spliceStart==0) spliceStart = i;
+								if(spliceStart==-1) spliceStart = i;
 								continue;
 							}
 							else if(spliceLen > 0) {
@@ -273,7 +273,7 @@
 							}
 						}
 						
-						if(spliceLen) oldParse.comments.splice(spliceStart, spliceLen);
+						if(spliceLen && spliceStart != -1) oldParse.comments.splice(spliceStart, spliceLen);
 						
 						console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
 						
@@ -289,13 +289,13 @@
 						
 						
 						// Remove all xmlTags in the function, then add them again, and increment index of all below
-						spliceStart = 0;
+						spliceStart = -1;
 						spliceLen = 0;
 						for(var i=0; i<oldParse.xmlTags.length; i++) {
 							if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
 								spliceLen++;
 								//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
-								if(spliceStart==0) spliceStart = i;
+								if(spliceStart==-1) spliceStart = i;
 								continue;
 							}
 							else if(spliceLen > 0) {
@@ -307,7 +307,7 @@
 							}
 						}
 						
-						if(spliceLen) oldParse.xmlTags.splice(spliceStart, spliceLen);
+						if(spliceLen && spliceStart != -1) oldParse.xmlTags.splice(spliceStart, spliceLen);
 						
 						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.xmlTags.length; i++) {
 							oldParse.xmlTags[i].start += charactersLength;
@@ -2050,6 +2050,12 @@
 				
 				//console.log("Adding indentation to line=" + lineNumber + " : " + vb_thisRowIndentation);
 
+				// If we are still inside a quote, and the line break was not preceded with a backslash: ignore the quote
+				if((insideSingleQuote || insideDblQuote) && lnw != "\\") {
+					console.warn("Line " + lineNumber + ": Unclosed quote!");
+					insideDblQuote = false;
+					insideSingleQuote = false;
+				}
 				
 				vb_afterThen = false;
 				
