@@ -22,12 +22,6 @@
 		// Bind to ctrl + F
 		editor.bindKey({desc: "Find or replace in current file", charCode: 70, combo: CTRL, fun: findReplace}); // Ctrl + F
 		
-		// Pressing enter should do a search if the search window is open
-		editor.keyBindings.push({charCode: 13, fun: pressEnter});
-		
-		// Pressing escape should clear and hide the search window
-		editor.keyBindings.push({charCode: 27, fun: pressEscape});
-		
 		editor.on("moveCaret", function resetLastSearchStrLength(file, caret) {
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
 		});
@@ -209,30 +203,62 @@
 		
 		footer.appendChild(div);
 		
-		
+
 		// Add event listeners
+		
 		inputFind.addEventListener("focus", function() {
 			inputFindGotFocus = true;
 		}, false);
+		
 		inputFind.addEventListener("blur", function() {
 			inputFindGotFocus = false;
 		}, false);
+		
 		findButtonLeft.addEventListener("click", function() {
 			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "left", ignoreCaseOption.checked); // str, file, useRegex, keepSelection, dontLoop, direction
 		}, false);
+		
 		findButtonRight.addEventListener("click", function() {
 			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
 		}, false);
+		
 		findAllButton.addEventListener("click", function() {
 			findAll(inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
+		
 		replaceButton.addEventListener("click", function() {
 			replace(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
+		
 		replaceAllButton.addEventListener("click", function() {
 			replaceAll(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
+		inputFind.addEventListener("keyup", function(event) {
+			var keyEnter = 13;
+			var keyEscape = 27;
+			
+			event.preventDefault();
+			
+			if (event.keyCode == keyEnter) {
+				findButtonRight.click();
+			}
+			else if(event.keyCode == keyEscape) {
+				pressEscape();
+			}
+		}, false);
+		
+		inputReplace.addEventListener("keyup", function(event) {
+			var keyEnter = 13;
+			var keyEscape = 27;
+			
+			if (event.keyCode == keyEnter) {
+				replaceButton.click();
+			}
+			else if(event.keyCode == keyEscape) {
+				pressEscape();
+			}
+		}, false);
 		
 		searchVisible = true;
 		

@@ -65,6 +65,12 @@ const ALT = 4;
 
 function Dialog(msg, icon) {
 	
+	if(msg == undefined) throw new Error("Dialog without a message!");
+	
+	msg = msg.toString(); // Convert numbers etc to string so we can use the replace method
+	
+	//console.log("Dialog msg=" + msg);
+	
 	msg = msg.replace(/\n/g, "<br>");
 	
 	var body = document.getElementById("body");

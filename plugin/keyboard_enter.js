@@ -2,7 +2,7 @@
 (function() {
 	
 	editor.bindKey({
-		desc: "Makes a line break"
+		desc: "Makes a line break",
 		charCode: 13, 
 		fun: keyboard_enter,
 	});

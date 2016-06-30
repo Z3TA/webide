@@ -32,30 +32,16 @@
 		
 		editor.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
-		var keyEscape = 27;
-		var keyLeft = 37;
-		var keyRight = 39;
-		
-		editor.keyBindings.push({charCode: keyEscape, fun: pressEscape});
-		
-		editor.keyBindings.push({charCode: keyLeft, fun: leftOrRight});
-		editor.keyBindings.push({charCode: keyRight, fun: leftOrRight});
-		
 	}
 	
-	function leftOrRight(file, combo, character, charCode, charDirection, className) {
+	function leftOrRight() {
 		// If we are inside the function list, pressing left or right should go back to the caret
-		if(className == "functionList") {
-			
-			functionListSelect.blur();
-			
-			file.scrollToCaret();
-			
-			editor.input = true;
-			
-			return false;
-		}
-		else return true;
+
+		functionListSelect.blur();
+		
+		editor.currentFile.scrollToCaret();
+		
+		editor.input = true;
 		
 	}
 	
@@ -120,7 +106,7 @@
 	}
 		
 	
-	function pressEscape(file, combo, character, charCode, pushDirection) {
+	function pressEscape() {
 		// Remove focus from the select box
 		if(functionListSelect) {
 			functionListSelect.blur();
@@ -440,6 +426,21 @@
 			}
 			
 			functionListWrap.appendChild(functionListSelect);
+			
+			functionListSelect.addEventListener("keyup", function(event) {
+				var keyEscape = 27;
+				var keyLeft = 37;
+				var keyRight = 39;
+				
+				event.preventDefault();
+				
+				if (event.keyCode == keyEscape) {
+					pressEscape();
+				}
+				else if(event.keyCode == keyLeft || event.keyCode == keyRight) {
+					leftOrRight();
+				}
+			}, false);
 			
 		}
 		

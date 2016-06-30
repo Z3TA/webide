@@ -34,10 +34,7 @@
 		hide_gotoInput();
 		
 		editor.bindKey({desc: "Goto line ...", charCode: 71, combo: CTRL, fun: show_gotoInput}); // ctrl + G
-		
-		editor.keyBindings.push({charCode: 27, fun: hide_gotoInput}); // Escape
-		editor.keyBindings.push({charCode: 13, fun: gotoLine}); // Enter
-
+	
 	}
 	
 	function build_gotoInput() {
@@ -74,6 +71,17 @@
 		gotoDiv.appendChild(cancelButton);
 		
 		footer.appendChild(gotoDiv);
+	
+	
+		inputGoto.addEventListener("keyup", function(event) {
+			event.preventDefault();
+			if (event.keyCode == 13) {
+				gotoLine(); // When pressing enter
+			}
+			else if(event.keyCode == 27) {
+				hide_gotoInput(); // When pressing escape
+			}
+		});
 	
 		gotoButton.addEventListener("click", gotoLine, false);
 		

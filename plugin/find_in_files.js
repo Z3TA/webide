@@ -24,15 +24,6 @@
 		// Pressing Ctrl + shift + F should hide or show the search window
 		editor.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
 
-		// Pressing enter should do a search if the search window is open
-		// todo: Make this internal to this plugin GUI to not clutter keyBindings
-		editor.bindKey({desc: "Makes a search if the search in file GUI is visible and have focus", charCode: keyEnter, fun: pressEnter});
-
-		// Pressing escape should clear and hide the search window
-		// todo: Make this internal to this plugin GUI to not clutter keyBindings
-		editor.bindKey({charCode: keyEscape, fun: pressEscape});
-		
-		
 		
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
@@ -462,6 +453,19 @@
 		}, false);
 		inputFind.addEventListener("blur", function() {
 			inputFindGotFocus = false;
+		}, false);
+		inputFind.addEventListener("keyup", function(event) {
+			var keyEnter = 13;
+			var keyEscape = 27;
+			
+			event.preventDefault();
+			
+			if (event.keyCode == keyEnter) {
+				buttonFindInFiles.click();
+			}
+			else if(event.keyCode == keyEscape) {
+				pressEscape();
+			}
 		}, false);
 		buttonFindInFiles.addEventListener("click", function() {
 			searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked);

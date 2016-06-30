@@ -45,18 +45,8 @@
 		hide_gotoInput();
 		
 		var charP = 80;
-		var charEscape = 27;
-		var charEnter = 13;
-		var keyUp = 38;
-		var keyDown = 40;
-		
-		editor.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoInput}); // ctrl + R
-		
-		editor.keyBindings.push({charCode: charEscape, fun: hide_gotoInput}); // Escape
-		editor.keyBindings.push({charCode: charEnter, fun: gotoFile}); // Enter
-		editor.keyBindings.push({charCode: keyUp, fun: moveUp});
-		editor.keyBindings.push({charCode: keyDown, fun: gotoFile_moveDown});
-		
+		editor.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + R
+
 	}
 	
 	function build_gotoInput() {
@@ -133,7 +123,36 @@
 		
 	}
 	
-	function typing() {
+	function typing(event) {
+		
+		
+		console.log("event.keyCode=" + event.keyCode);
+		
+		var keyUp = 38;
+		var keyDown = 40;
+		var charEscape = 27;
+		var charEnter = 13;
+		
+		event.preventDefault();
+
+		if (event.keyCode == charEnter) {
+			gotoFile();
+			return;
+		}
+		else if(event.keyCode == charEscape) {
+			hide_gotoInput();
+			return;
+		}
+		else if(event.keyCode == keyUp) {
+			moveUp();
+			inputGoto.focus();
+			return;
+		}
+		else if(event.keyCode == keyDown) {
+			gotoFile_moveDown();
+			inputGoto.focus();
+			return;
+		}
 		
 		var text = inputGoto.value
 		
@@ -155,7 +174,7 @@
 				searchRetries = 0;
 				search(text);
 			}
-else {
+		else {
 				
 				var waitingFor = "";
 				
@@ -362,7 +381,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	
 	
 	
-	function show_gotoInput(file, combo) {
+	function show_gotoFileInput(file, combo) {
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 
@@ -442,6 +461,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	}
 	
 	function moveUp() {
+		
+		console.log("Moving up ...");
 		
 		if(!gotoList) return true;
 		

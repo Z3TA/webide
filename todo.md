@@ -52,7 +52,7 @@ note: Have to close the app and reopen it to reload NodeJS module source!
 note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.
 Editor should always be restart after a "throw" is detected!
 Throw errors instead of just returning the void! (ex: if(foo == bad) return;) => throw new Error("foo is bad!")
-
+Plugins GUI's should use their own event handlers for the GUI instead of cluttering keyBindings
 
 BUGS (and issues)
 =================
@@ -874,6 +874,8 @@ Sort paragraphs by column. Ctrl + 1-9, auto detect date
 Code drag and drop
 
 When renaming a html tag, also rename the sibmling. <pre|<--renaming> lalala </pre><-- also rename this
+
+Support screen readers. It should be possible to use the editor with eyes closed.
 
 
 Need though
