@@ -808,13 +808,8 @@
 		
 		/* 
 			Update the grid ...
-			It's probably faster to re-create the grid then to insert all characters one by one.
-			
-			
 		*/
-		//file.grid = file.createGrid();
-		
-		
+
 		text = text.replace(/\r/g, "");
 		text = text.replace(/\n/g, file.lineBreak);
 		var textRows = text.split(file.lineBreak);
