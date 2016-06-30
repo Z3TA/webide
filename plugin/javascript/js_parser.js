@@ -154,241 +154,257 @@
 			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange")) { // If the file was parsed before
 				
 				var oldParse = file.parsed;
-				//var insideComment = false;
 				
-				//var char = characters.toLowerCase();
-				var lastChar = file.text.length > caretIndex ? file.text.charAt(caretIndex-1) : "";
-				//console.log(JSON.stringify(comments));
-				
-				/*
-					if(char != "\n" && (char != "/" && lastChar != "*") {
-					// Check if we are inside a comment
-					for (var i=0; i<comments.length; i++) {
-					if(comments[i].end > caretIndex && comments[i].start < caretIndex) {
-					insideComment = true;
-					break;
-					}
-					}
-					}
-				*/
-				
-				var charactersLength = characters.length;
-				
-				if(type == "delete" || type == "deleteTextRange") charactersLength = -charactersLength;
-				
-				var functions = oldParse.functions;
-				//console.log(JSON.stringify(functions));
-				
-				var f = insideFunction(functions, caretIndex, false);
-				var maxFunctionBodySize = Math.round(file.text.length * 0.8);
-				
-				
-				if(f) { // Parse only that function
-					console.log("Inside " + f.name);
-					if((f.end - f.start) < maxFunctionBodySize) { // If the function is not the majority of the file
-						
-						console.time("parseOnlyFunctionOptimizer");
-						
-						console.log("Parsing only f=" + f.name + "");
-						
-						// The start property is at the { after function
-						var parseStart = file.text.lastIndexOf("function", f.start);
-						var parseEnd = f.end + charactersLength + 1;
-						var parseStartRow = f.lineNumber-1;
-						var baseIndentation = file.grid[parseStartRow].indentation;
-						
-						//if(charactersLength < 0) parseEnd++;
-						
-						console.log("characters=" + lbChars(characters));
-						console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
-						
-						console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
-						
-						if(file.text.charAt(parseEnd-1) != "}") {
-							file.debugGrid();
-							throw new Error("Expected parseEnd-1=" + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd)) + " to be an }");
-						}
-
-						//console.log(file.text.substring(parseStart, parseEnd));
-						
-						var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow});
-						// The parser will find the first function and only parse that
-						
-						//console.log("newParse=" + JSON.stringify(newParse));
-						
-						var spliceStart = -1;
-						var spliceLen = 0;
-						
-						// Remove all quotes in the function, then add them again, and increment index of all below
-						for(var i=0; i<oldParse.quotes.length; i++) {
-							if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
-								spliceLen++;
-								//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
-								if(spliceStart==-1) spliceStart = i;
-								continue;
-							}
-							else if(spliceLen > 0) {
-								break;
-							}
-							else if(oldParse.quotes[i].start > parseEnd) {
-								spliceStart = i;
-								break;
-							}
-						}
-						
-						console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
-						
-						if(spliceLen && spliceStart != -1) oldParse.quotes.splice(spliceStart, spliceLen);
-						
-						
-						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
-							//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
-							oldParse.quotes[i].start += charactersLength;
-							oldParse.quotes[i].end += charactersLength;
-						}
-						
-						for(var i=0; i<newParse.quotes.length; i++) {
-							oldParse.quotes.push(newParse.quotes[i]);
-							//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
-						}
-						oldParse.quotes.sort(sortyByStart);
-						
-						
-						// Remove all comments in the function, then add them again, and increment index of all below
-						spliceStart = -1;
-						spliceLen = 0;
-						for(var i=0; i<oldParse.comments.length; i++) {
-							if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
-								spliceLen++;
-								//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
-								if(spliceStart==-1) spliceStart = i;
-								continue;
-							}
-							else if(spliceLen > 0) {
-								break;
-							}
-							else if(oldParse.comments[i].start > parseEnd) {
-								spliceStart = i;
-								break;
-							}
-						}
-						
-						if(spliceLen && spliceStart != -1) oldParse.comments.splice(spliceStart, spliceLen);
-						
-						console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
-						
-						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.comments.length; i++) {
-							oldParse.comments[i].start += charactersLength;
-							oldParse.comments[i].end += charactersLength;
-						}
-						
-						for(var i=0; i<newParse.comments.length; i++) {
-							oldParse.comments.push(newParse.comments[i]);
-						}
-						oldParse.comments.sort(sortyByStart);
-						
-						
-						// Remove all xmlTags in the function, then add them again, and increment index of all below
-						spliceStart = -1;
-						spliceLen = 0;
-						for(var i=0; i<oldParse.xmlTags.length; i++) {
-							if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
-								spliceLen++;
-								//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
-								if(spliceStart==-1) spliceStart = i;
-								continue;
-							}
-							else if(spliceLen > 0) {
-								break;
-							}
-							else if(oldParse.xmlTags[i].start > parseEnd) {
-								spliceStart = i;
-								break;
-							}
-						}
-						
-						if(spliceLen && spliceStart != -1) oldParse.xmlTags.splice(spliceStart, spliceLen);
-						
-						for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.xmlTags.length; i++) {
-							oldParse.xmlTags[i].start += charactersLength;
-							oldParse.xmlTags[i].end += charactersLength;
-						}
-						
-						for(var i=0; i<newParse.xmlTags.length; i++) {
-							oldParse.xmlTags.push(newParse.xmlTags[i]);
-						}
-						oldParse.xmlTags.sort(sortyByStart);
-						
-						
-						
-						console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
-						
-						// Update blockMatch
-						// Curly brackets inside a function always match!
-						oldParse.blockMatch = (((oldParse.codeBlockLeft - newParse.codeBlockLeft) - (oldParse.codeBlockRight - newParse.codeBlockRight)) === 0);
-						
-						
-						//  f is a ref to the old function in oldParse
-						if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
-						
-						var ff = newParse.functions[firstValueInObjectList(newParse.functions)]; // Ref to the same function in new parse
-						
-						if(ff.end < 0) throw new Error("New parse of function " + ff.name + " did not get an ending! end=" + ff.end);	
-						
-						
-						// Update the start, end, endRow, and lineNumber of all functions below the one just parsed
-						// Have to go though all functions (recursive) because we can't asume our named array is sorted
-						var endRowDiff = ff.endRow - f.endRow;
-						updateThingsFunctions(oldParse.functions, f.end, endRowDiff, charactersLength);
-						
-						// Update the parsed function.
-						f.variables = ff.variables;
-						f.subFunctions = ff.subFunctions;
-						f.end = ff.end;
-						f.endRow = ff.endRow;
-
-						
-						console.timeEnd("parseOnlyFunctionOptimizer");
-						
-						if(editor.settings.devMode) {
-							
-							// Make a full parse and compare to see if there are any bugs
-							
-							var fullParse = parseJavaScript(file, {noIndention: true});
-							
-							if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
-							if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
-							if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
-							
-							if(Object.keys(fullParse.functions).length != Object.keys(oldParse.functions).length) throw new Error("fullParse.functions=" + Object.keys(fullParse.functions).length + " oldParse.functions=" + Object.keys(oldParse.functions).length + " ");
-							if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " ");
-							
-							if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
-							
-							// Deep compare
-							
-						}
-						
-						
-						file.haveParsed(oldParse);
+				if(oldParse.blockMatch) {
+					//var insideComment = false;
 					
-						return;
+					//var char = characters.toLowerCase();
+					var lastChar = file.text.length > caretIndex ? file.text.charAt(caretIndex-1) : "";
+					//console.log(JSON.stringify(comments));
+					
+					/*
+						if(char != "\n" && (char != "/" && lastChar != "*") {
+						// Check if we are inside a comment
+						for (var i=0; i<comments.length; i++) {
+						if(comments[i].end > caretIndex && comments[i].start < caretIndex) {
+						insideComment = true;
+						break;
+						}
+						}
+						}
+					*/
+					
+					var charactersLength = characters.length;
+					
+					if(type == "delete" || type == "deleteTextRange") charactersLength = -charactersLength;
+					
+					var functions = oldParse.functions;
+					//console.log(JSON.stringify(functions));
+					
+					var f = insideFunction(functions, caretIndex, false);
+					var maxFunctionBodySize = Math.round(file.text.length * 0.8);
+					
+					
+					if(f) { // Parse only that function
+						console.log("Inside " + f.name);
+						if((f.end - f.start) < maxFunctionBodySize) { // If the function is not the majority of the file
+							
+							console.time("parseOnlyFunctionOptimizer");
+							
+							console.log("Parsing only f=" + f.name + "");
+							
+							// The start property is at the { after function
+							var parseStart = file.text.lastIndexOf("function", f.start);
+							var parseEnd = f.end + charactersLength + 1;
+							var parseStartRow = f.lineNumber-1;
+							var baseIndentation = file.grid[parseStartRow].indentation;
+							
+							//if(charactersLength < 0) parseEnd++;
+							
+							console.log("characters=" + lbChars(characters));
+							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
+							
+							console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
+							
+							if(file.text.charAt(parseEnd-1) != "}") {
+								file.debugGrid();
+								throw new Error("Expected parseEnd-1=" + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd)) + " to be an }");
+							}
+
+							//console.log(file.text.substring(parseStart, parseEnd));
+							
+							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow});
+							// The parser will find the first function and only parse that
+							
+							//console.log("newParse=" + JSON.stringify(newParse));
+							
+							var spliceStart = -1;
+							var spliceLen = 0;
+							
+							// Remove all quotes in the function, then add them again, and increment index of all below
+							for(var i=0; i<oldParse.quotes.length; i++) {
+								if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
+									spliceLen++;
+									//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
+									if(spliceStart==-1) spliceStart = i;
+									continue;
+								}
+								else if(spliceLen > 0) {
+									break;
+								}
+								else if(oldParse.quotes[i].start > parseEnd) {
+									spliceStart = i;
+									break;
+								}
+							}
+							
+							console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
+							
+							if(spliceLen && spliceStart != -1) oldParse.quotes.splice(spliceStart, spliceLen);
+							
+							
+							for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
+								//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
+								oldParse.quotes[i].start += charactersLength;
+								oldParse.quotes[i].end += charactersLength;
+							}
+							
+							for(var i=0; i<newParse.quotes.length; i++) {
+								oldParse.quotes.push(newParse.quotes[i]);
+								//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
+							}
+							oldParse.quotes.sort(sortyByStart);
+							
+							
+							// Remove all comments in the function, then add them again, and increment index of all below
+							spliceStart = -1;
+							spliceLen = 0;
+							for(var i=0; i<oldParse.comments.length; i++) {
+								if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
+									spliceLen++;
+									//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
+									if(spliceStart==-1) spliceStart = i;
+									continue;
+								}
+								else if(spliceLen > 0) {
+									break;
+								}
+								else if(oldParse.comments[i].start > parseEnd) {
+									spliceStart = i;
+									break;
+								}
+							}
+							
+							if(spliceLen && spliceStart != -1) oldParse.comments.splice(spliceStart, spliceLen);
+							
+							console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
+							
+							for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.comments.length; i++) {
+								oldParse.comments[i].start += charactersLength;
+								oldParse.comments[i].end += charactersLength;
+							}
+							
+							for(var i=0; i<newParse.comments.length; i++) {
+								oldParse.comments.push(newParse.comments[i]);
+							}
+							oldParse.comments.sort(sortyByStart);
+							
+							
+							// Remove all xmlTags in the function, then add them again, and increment index of all below
+							spliceStart = -1;
+							spliceLen = 0;
+							for(var i=0; i<oldParse.xmlTags.length; i++) {
+								if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
+									spliceLen++;
+									//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
+									if(spliceStart==-1) spliceStart = i;
+									continue;
+								}
+								else if(spliceLen > 0) {
+									break;
+								}
+								else if(oldParse.xmlTags[i].start > parseEnd) {
+									spliceStart = i;
+									break;
+								}
+							}
+							
+							if(spliceLen && spliceStart != -1) oldParse.xmlTags.splice(spliceStart, spliceLen);
+							
+							for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.xmlTags.length; i++) {
+								oldParse.xmlTags[i].start += charactersLength;
+								oldParse.xmlTags[i].end += charactersLength;
+							}
+							
+							for(var i=0; i<newParse.xmlTags.length; i++) {
+								oldParse.xmlTags.push(newParse.xmlTags[i]);
+							}
+							oldParse.xmlTags.sort(sortyByStart);
+							
+							
+							
+							console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
+							
+							// Update blockMatch
+							// Curly brackets inside a function always match!
+							oldParse.blockMatch = (((oldParse.codeBlockLeft - newParse.codeBlockLeft) - (oldParse.codeBlockRight - newParse.codeBlockRight)) === 0);
+							
+							
+							//  f is a ref to the old function in oldParse
+							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
+							
+							var ff = newParse.functions[firstValueInObjectList(newParse.functions)]; // Ref to the same function in new parse
+							
+							if(ff.end < 0) {
+								// The parsed function did not get an ending.
+								if(newParse.blockMatch) throw new Error("New parse of function " + ff.name + " did not get an ending! end=" + ff.end);	
+								else {
+									// Give it a temporary/virtual ending
+									// Next parse should be a full parse due to the block missmatch (could probably skip the full parse because of block missmatch if we need to optimize)
+									
+									ff.end = parseEnd;
+								}
+							}
+							
+							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed
+							// Have to go though all functions (recursive) because we can't asume our named array is sorted
+							var endRowDiff = ff.endRow - f.endRow;
+							updateThingsFunctions(oldParse.functions, f.end, endRowDiff, charactersLength);
+							
+							// Update the parsed function.
+							f.variables = ff.variables;
+							f.subFunctions = ff.subFunctions;
+							f.end = ff.end;
+							f.endRow = ff.endRow;
+
+							
+							console.timeEnd("parseOnlyFunctionOptimizer");
+							
+							if(editor.settings.devMode) {
+								
+								// Make a full parse and compare to see if there are any bugs
+								
+								var fullParse = parseJavaScript(file, {noIndention: true});
+								
+								if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
+								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
+								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
+								
+								if(Object.keys(fullParse.functions).length != Object.keys(oldParse.functions).length) throw new Error("fullParse.functions=" + Object.keys(fullParse.functions).length + " oldParse.functions=" + Object.keys(oldParse.functions).length + " ");
+								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " ");
+								
+								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
+								
+								// Deep compare
+								
+							}
+							
+							
+							file.haveParsed(oldParse);
+						
+							return;
+						}
 					}
-				}
-				else {
-					console.log("Not inside any function!");
+					else {
+						console.log("Not inside any function!");
+					}
 				}
 			}
-			
-			
 			
 			// Parse the while file
 			console.log("Parsing whole file");
 			var newParse = parseJavaScript(file);
 			
-			if(editor.settings.devMode) {
+			// Sanity check (we had some problems with functions having bad start and end, witch need to be correct for the "parse only current function" optimizer)
+			if(editor.settings.devMode && newParse.blockMatch) {
 				console.log("Checking checkFunctionStartEnd");
-				checkFunctionStartEnd(file, newParse.functions);
+				try {
+					checkFunctionStartEnd(file, newParse.functions);
+				}
+				catch(err) {
+					console.log(JSON.stringify(newParse));
+					throw err;
+				}
 			}
 			
 			file.haveParsed(newParse);

@@ -10,6 +10,8 @@ Prio:
 What I'm working on
 -------------------
 
+Annoying that all self generated files (with \n line breaks) wants to be converted.
+
 Hide cenvert file dialog when the file is closed!?
 
 Parsing errors. Parse only function optimizer
