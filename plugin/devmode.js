@@ -83,7 +83,9 @@
 		
 		showDevTools();
 		
-		toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
+		if(toggleDevmodeMenuItem) {
+			toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
+		}
 		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
 		
 		console.log = consoleLogOriginal;

@@ -33,12 +33,19 @@
 	editor.on("start", mouse_select_init);
 	
 	function mouse_select_init() {
-		editor.addEvent("mouseClick", {fun: mouseSelect, dir: "down", targetClass:"fileCanvas", button: 0});
-		editor.addEvent("mouseClick", {fun: mouseSelect, dir: "up", targetClass:"fileCanvas", button: 0});
+		editor.addEvent("mouseClick", {fun: mouseSelectDown, dir: "down", targetClass:"fileCanvas", button: 0});
+		editor.addEvent("mouseClick", {fun: mouseSelectUp, dir: "up", targetClass:"fileCanvas", button: 0});
 		
-		editor.on("mouseMove", mouseMove);
+		editor.on("mouseMove", mouseSelectMouseMove);
 	}
-		
+	
+	function mouseSelectDown() {
+		mouseSelect.apply(this, arguments);
+	}
+	
+	function mouseSelectUp() {
+		mouseSelect.apply(this, arguments);
+	}
 	
 	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo) {
 		
@@ -491,7 +498,7 @@
 		
 	}
 	
-	function mouseMove(x, y, target) {
+	function mouseSelectMouseMove(x, y, target) {
 		if(target.className == "fileCanvas") {
 			mouseX = x;
 			mouseY = y;

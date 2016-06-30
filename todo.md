@@ -10,6 +10,7 @@ Prio:
 What I'm working on
 -------------------
 
+Refactoring editor.on("start") => editor.plugin and editor.keyBindings.push => editor.bindKey
 
 Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
 
@@ -48,7 +49,7 @@ note: The error should be the first argument in callbacks!
 note: Have to close the app and reopen it to reload NodeJS module source!
 note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.
 Editor should always be restart after a "throw" is detected!
-
+Throw errors instead of just returning the void! (ex: if(foo == bad) return;) => throw new Error("foo is bad!")
 
 
 BUGS (and issues)
@@ -633,6 +634,8 @@ Pasting code into an emty (sub) function sometimes does weird things
 
 Feature
 =======
+
+how a fat red circle around variables that are not defined anywhere!?
 
 shift button to move without moving the cursor.
 

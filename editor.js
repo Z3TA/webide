@@ -1561,6 +1561,23 @@ editor.lastKeyPressed = "";
 			throw new Error("There needs to be a function!");
 		}
 		
+		/*
+			Check if the function name is unique (if there's already an event listener for this event with the same function name)
+			Having unique function names will make it easier to debug
+		*/
+		var funName = getFunctionName(options.fun);
+		if(funName == "") throw new Error("Please give the event listener function a name! (You can also name lamda function: ex: foo(function lamda() {})")
+		for(var i=0; i<editor.eventListeners[eventName].length; i++) {
+			if(editor.eventListeners[eventName][i].fun != undefined) {
+				if(funName == getFunctionName(editor.eventListeners[eventName][i].fun)) {
+					throw new Error("There is already a function named " + funName + " for the " + eventName + " event. Please give your function another name!");
+				}
+			}
+			else {
+				console.warn("Undefined callback in event listener:" + JSON.stringify(editor.eventListeners[eventName][i]));
+			}
+		}
+		
 		var index = editor.eventListeners[eventName].push(options);
 		
 		// Sort the events so they fire in order (lowest order nr will execute first)
@@ -1581,8 +1598,6 @@ editor.lastKeyPressed = "";
 	
 	editor.removeEvent = function(eventName, fun) {
 		/*
-			Make sure you use an unique function name.
-			
 			Note to myself: Some events have objects and others just have the function!!
 			
 		*/
@@ -1630,8 +1645,8 @@ editor.lastKeyPressed = "";
 	
 	editor.removeMenuItem = function(menuElement) {
 		
-		if(!menuElement) return;
-		if(!menuElement.tagName) return; // It's node a Node
+		if(!menuElement) throw new Error("editor.removeMenuItem was called without argument menuElement");
+		if(!menuElement.tagName) throw new Error("editor.removeMenuItem argument menuElement is not a HTML node!");
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -2294,6 +2309,15 @@ editor.lastKeyPressed = "";
 		
 		if(!b.desc) getStack("Key binding should have a description!");
 		
+		// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
+		var funName = getFunctionName(b.fun);
+		if(funName == "") throw new Error("Key binding function can not be anonymous!")
+		for(var i=0; i<editor.keyBindings.length; i++) {
+			if(getFunctionName(editor.keyBindings[i].fun) == funName) {
+				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe name!")
+			}
+		}
+	
 		editor.keyBindings.push(b);
 		
 	}
@@ -2318,6 +2342,14 @@ editor.lastKeyPressed = "";
 	}
 	
 	editor.unbindKey = function(funName) {
+		
+		if(typeof funName === "function") {
+			// Convert it to string
+			funName = getFunctionName(funName);
+		}
+		
+		
+		
 		var f;
 		for(var i=0; i<editor.keyBindings.length; i++) {
 			f = editor.keyBindings[i]
@@ -2335,6 +2367,10 @@ editor.lastKeyPressed = "";
 	}
 	
 	editor.plugin = function(p) {
+		/*
+			If you have made an plugin. Use editor.plugin(desc, load, unload) instead of editor.on("start") !
+			Plugins will load when the editor has started. Right after eventListeners.start.
+		*/
 		
 		if((typeof p.load !== "function")) throw new Error("The plugin needs to have a load method!");
 		

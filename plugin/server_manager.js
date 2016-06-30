@@ -63,19 +63,19 @@
 		
 		//build();
 		
-		editor.bindKey({desc: "Show the FTP/SSH server manager", fun: show, charCode: charP, combo: CTRL + SHIFT});
-		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hide, charCode: charEscape, combo: 0});
-		editor.bindKey({desc: "Connect to remove server in server manager", fun: enter, charCode: charEnter, combo: 0});
+		editor.bindKey({desc: "Show the FTP/SSH server manager", fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
+		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
+		editor.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 		
 		editor.addMenuItem("Remote connections", function() {
-			show();
+			showServerManger();
 			editor.hideMenu();
 		});
 		
 	}
 	
 	
-	function enter() {
+	function serverManagerEnter() {
 		// Only connect if the password box has focus
 		if(document.activeElement == inputPw) {
 			connectToConnection();
@@ -178,7 +178,7 @@
 		buttonCancel.setAttribute("value", "Cancel");
 		
 		buttonCancel.addEventListener("click", function() {
-			hide(); // Hide the whole connection manager
+			hideServerManger(); // Hide the whole connection manager
 		}, false);
 		
 		buttonEdit.addEventListener("click", editConnection, false);
@@ -502,7 +502,7 @@
 	}
 	
 	
-	function show() {
+	function showServerManger() {
 		
 		console.log("Show server manager");
 		
@@ -519,7 +519,7 @@
 		
 	}
 	
-	function hide() {
+	function hideServerManger() {
 		// Bring back focus to the current file
 		if(editor.currentFile) {
 			editor.input = true;
@@ -557,7 +557,7 @@
 			}
 			else {
 				alert("Connected to " + protocol + " on " + hostName + "!");
-				hide();
+				hideServerManger();
 }
 }
 		

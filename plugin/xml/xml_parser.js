@@ -22,14 +22,14 @@
 	
 	function xmlParserInit() {
 		
-		editor.on("fileOpen", onFileOpen);
+		editor.on("fileOpen", parseXmlOnFileOpen);
 		editor.on("fileChange", parseXmlMaybe, 100);
 		
 		function parseXmlMaybe(file, type, character, index, row, col) {
-			onFileOpen(file); //  optimization is evil
+			parseXmlOnFileOpen(file); //  optimization is evil
 		}
 		
-		function onFileOpen(file) {
+		function parseXmlOnFileOpen(file) {
 			
 			if(isXML(file)) {
 				

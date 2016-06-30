@@ -6,19 +6,30 @@
 		A renderer should Only depend on the buffer! Not the text nor the grid!
 	*/
 	
-	editor.on("start", init);
+	var xMatcher = []; // For unloading
 	
-	function init() {
+	editor.plugin({
+		desc: "Highlight matching parentheses and angel brackets",
+		load: loadXmath,
+		unload: unloadXmatch,
+	});
+	
+	function loadXmath() {
 		
 		highLightX("(", ")");
 		highLightX("{", "}");
 		
 	}
 	
+	function unloadXmatch() {
+		editor.renderFunctions.splice(xMatcher[1], 1);
+		editor.renderFunctions.splice(xMatcher[0], 1);
+	}
+	
 	function highLightX(a, b) {
-		editor.renderFunctions.push(function xmatch(ctx, buffer, file, startRow) {
+		xMatcher.push(editor.renderFunctions.push(function xmatch(ctx, buffer, file, startRow) {
 			highlightMatch(ctx, buffer, file, a, b, startRow);
-		});
+		}) - 1);
 	}
 	
 	function highlightMatch(ctx, buffer, file, lP, rP, startRow) {

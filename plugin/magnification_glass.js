@@ -1,5 +1,12 @@
 
 (function() {
+
+	/*
+		
+		All current magnification tools seems to make things blurry. We can do better!
+		Todo: Have the magnifier re-render the text so that it gets big and CRISP!
+	
+	*/
 	
 	var mouseX = 0,
 		mouseY = 0,
@@ -7,16 +14,29 @@
 		magnification = 1.75,
 		renderIndex = -1,
 		mouseMoveIndex = -1,
+		magnificationMenuItem,
 		active = false;
 	
 
-	// Wait for the program to load the user interface, then Add to the context menu
-	editor.on("start", function() {
-		
-		editor.addMenuItem("Toggle magnification glass", showOrHideGlass);
-		
+	editor.plugin({
+		desc: "Magnification glass.",
+		load: loadMagnificationGlass,
+		unload: unloadMagnificationGlass,
 	});
 	
+
+	function loadMagnificationGlass() {
+		
+		magnificationMenuItem = editor.addMenuItem("Toggle magnification glass", showOrHideGlass);
+		
+	}
+	
+	function unloadMagnificationGlass() {
+		
+		if(active) removeFromListeners();
+		
+		editor.removeMenuItem(magnificationMenuItem);
+	}
 
 	
 	function showOrHideGlass() {

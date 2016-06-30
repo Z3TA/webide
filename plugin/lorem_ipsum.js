@@ -1,13 +1,19 @@
 (function() {
 	"use strict";
 	
-
-	editor.on("start", main);
+	editor.plugin({
+		desc: "Lorem ipsum generator",
+		load: loadLoremIpsum,
+		unload: unloadLoremIpsum,
+	});
 	
-	function main() {
+	function loadLoremIpsum() {
 		// Bind to ctrl + L
-		editor.keyBindings.push({charCode: 76, combo: CTRL, fun: lorem});
-		
+		editor.bindKey({desc: "Insert lorem ipsum", charCode: 76, combo: CTRL, fun: lorem});
+	}
+	
+	function unloadLoremIpsum() {
+		editor.unbindKey(lorem);
 	}
 	
 	function lorem(file, combo, character, charCode, keyDirection) {

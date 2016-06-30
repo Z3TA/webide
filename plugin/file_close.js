@@ -2,16 +2,16 @@
 	
 	"use strict";
 	
-	editor.on("start", main);
+	editor.on("start", closeFileKeyCombo);
 	
-	function main() {
+	function closeFileKeyCombo() {
 		
 		var charQ = 81;
 		var charW = 119;
 		
 		// Should we be consistent with how browsers work? Ctrl+Q seems more initutive and Ctrl + W is already used by the Word-Wrapper.
 		
-		editor.keyBindings.push({charCode: charQ, combo: CTRL, fun: closeFile});
+		editor.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL, fun: closeFile});
 		
 		editor.addMenuItem("Close file (Ctrl+Q)", closeFile);
 		
