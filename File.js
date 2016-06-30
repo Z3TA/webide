@@ -24,7 +24,7 @@
 		file.savedAs = false;
 		file.lastChange = new Date();
 		
-		file.isCallingChangeEventListeners = false; // Prevent fileChange event listeners from changing the file
+		file.isCallingChangeEventListeners = undefined; // Prevent fileChange event listeners from changing the file. Will point to the offending function
 		
 		file.text = text;
 		file.path = path;
@@ -2562,7 +2562,7 @@
 		var file = this;
 		
 		if(file.isCallingChangeEventListeners) {
-			throw new Error("fileChange event listeners are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
+			throw new Error("fileChange event listeners (" + getFunctionName(file.isCallingChangeEventListeners) + ") are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
 		}
 		
 		file.changed = true;
@@ -2584,13 +2584,13 @@
 			Possible other solution: queue up recursive changes and run them afterwards, so that event listeners are called in the same order as changes where made
 			
 		*/
-		file.isCallingChangeEventListeners = true;
 		
 		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
+			file.isCallingChangeEventListeners = editor.eventListeners.fileChange[i].fun;
 			console.log("Calling fileChange event listener: " + getFunctionName(editor.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
 			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
 		}
-		file.isCallingChangeEventListeners = false;
+		file.isCallingChangeEventListeners = undefined;
 	}
 	
 	File.prototype.fixCaret = function(caret) {
