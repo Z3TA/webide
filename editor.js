@@ -3557,6 +3557,7 @@ editor.lastKeyPressed = "";
 		var combo = getCombo(e);
 		var file = editor.currentFile;
 		var preventDefault = false;
+		var funReturn = true;
 		
 		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
 		
