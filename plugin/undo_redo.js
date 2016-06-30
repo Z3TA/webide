@@ -18,10 +18,7 @@
 		editor.bindKey({desc: "Undo change", charCode: 90, fun: undo, combo: CTRL});
 		
 		
-		// todo: Move to fileChange event listener
 		// When to save state !??
-		editor.keyBindings.push({charCode: 46, fun: saveState}); // Delete
-		editor.keyBindings.push({charCode: 8, fun: saveState}); // Backspace
 
 		editor.on("paste", saveState); // Before pasting text
 		
@@ -43,6 +40,10 @@
 	editor.on("fileChange", function undo_redo_fileChange(file, change, text, index, row, col) {
 		
 		if(change != "undo-redo") {
+			
+			if(change == "delete" || change == "linebreak") {
+				saveState(file);
+			}
 			
 			// Make the current state the last state (delete future states) when something is changed
 			if(versionIndex.hasOwnProperty(file.path)) {
