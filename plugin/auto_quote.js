@@ -161,6 +161,8 @@
 			//file.deleteCharacter();
 			return false;
 		}
+		
+		return true; // If we get this far, default behaviour will be to insert the quote
 	}
 	
 	function getRowText(file, row) {
