@@ -695,6 +695,7 @@
 			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
+		language = "JavaScript", // Update the language to vbScript, PHP depending on ... ?
 		ASP = false,
 		PHP = false,
 		CSS = false,
@@ -756,7 +757,7 @@
 		
 		
 		return {
-			language: "JavaScript", 
+			language: language, 
 			functions: functions, 
 			quotes: quotes,
 			comments: comments, 
@@ -1341,6 +1342,7 @@
 				if(file.fileExtension == "php") {
 					if(pastChar3 == "<" &&  pastChar2 == "?" &&  pastChar1 == "p" &&  pastChar0 == "h" && char == "p") { // <?php
 						PHP = true;
+						language = "PHP";
 						xmlMode = false;
 						insideXmlTag = false;
 					}
@@ -1362,7 +1364,9 @@
 						ASP = true;
 						// Is it vbScript?
 						//if(file.text.match(/^end if$|^end sub$|^end function$|^end class$|^dim /im) != null) return true;
+						// It's also possible to write classic ASP in JavaScript, but asume it's vbScript for now
 						vbScript = true;
+						language = "VBScript";
 						xmlMode = false;
 						insideXmlTag = false;
 						

@@ -136,7 +136,7 @@
 					editor.renderNeeded();
 					return false;
 				}
-				else if(file.parsed.language=="VbScript") {
+				else if(file.parsed.language=="VBScript") {
 					file.insertText(quote + " &  & " + quote);
 					file.moveCaretLeft(file.caret, 4);
 					editor.renderNeeded();
