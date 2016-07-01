@@ -10,10 +10,6 @@ Prio:
 What I'm working on
 -------------------
 
-Annoying that all self generated files (with \n line breaks) wants to be converted.
-
-Hide convert file dialog when the file is closed!?
-
 
 
 
@@ -49,6 +45,18 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 
 BUGS (and issues)
 =================
+
+When deleting lots of text:
+Error: file.startRow=1038 grid.length=899 file.partStartRow=0
+at File.checkGrid (File.js:469)
+at File.createCaret (File.js:213)
+at File.deleteTextRange (File.js:1151)
+at File.deleteSelection (File.js:1230)
+at Object.keydel [as fun] (keyboard_delete.js:22)
+at keyIsDown (editor.js:3776)
+
+
+When writing a slash / infront of a (the only) function, the function list is hidden.
 
 Selecting text using keyboard arrows from bttom up scrables the selection.
 
@@ -227,6 +235,8 @@ JS parser seems to have problems finding variable type with single quoted string
 
 Can't open Big files from FTP/SFTP because of the stream.
 
+When the editor touches (redoes) all whitespace, like when removing a } somwhere.
+The SCM system goes heywack ... a lot of updates here and there and stupid commits.
 
 Polishing
 =========
@@ -557,6 +567,8 @@ Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in 
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+When copying in code into a function, colors, quotes, comments will be off (by line)?
 
 When selecting text to copy, using the mouse, sometimes the last character drops out
 

@@ -1,3 +1,5 @@
+// This file can be deleted
+
 editor.on("start", testDialogs);
 
 function testDialogs() {
