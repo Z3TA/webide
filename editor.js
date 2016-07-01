@@ -585,9 +585,7 @@ editor.lastKeyPressed = "";
 			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
-			
-			// Close all open dialogs asociated to this file
-			file.closeDialogs();
+
 			
 			// Make sure lastFile is not the file being closed
 			if(editor.lastFile == file) {

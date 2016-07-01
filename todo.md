@@ -50,6 +50,8 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 BUGS (and issues)
 =================
 
+Selecting text using keyboard arrows from bttom up scrables the selection.
+
 Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
 
 Ctrl + P to open files can lag, so "todo" first blink with results for "todo", then overwrites with results for "to".
