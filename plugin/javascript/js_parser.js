@@ -1187,12 +1187,7 @@
 			
 			column++;
 			
-			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") ) {
-				// A new line without , exits variable declaration
-				insideVariableDeclaration[codeBlockDepth] = false;
-				foundVariableInVariableDeclaration = false;
-				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
-			}
+
 			
 			
 			// ### Quotes and comments ...
@@ -1890,7 +1885,7 @@
 				
 				//console.log("char=" + char.replace("\r", "<R>").replace("\n", "<N>") + " word=" + word + " insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " LLC=" + (char == lastLineBreakCharacter) + " FLC=" + (char == firstLineBreakCharacter) + " firstLineBreakCharacter=" + firstLineBreakCharacter.replace("\r", "<R>").replace("\n", "<N>") + " insideVariableDeclaration[codeBlockDepth]=" + insideVariableDeclaration[codeBlockDepth]);
 				
-				char = char.toLowerCase(); // vbScript is not case sensitive!
+				//char = char.toLowerCase(); // vbScript is not case sensitive!
 				
 				if(!insideDblQuote && char == "m" && lastChar == "e" && llChar == "r") {
 					insideLineComment = true;
@@ -1909,7 +1904,7 @@
 							
 							insideVariableDeclaration[codeBlockDepth] = false;
 							if(word) globalVariables[word] = new Variable();
-							//console.log("New variable found=" + word);
+							//console.log("LLBS New variable found=" + word + " line=" + lineNumber + " column=" + column);
 						}
 						else if(word == "dim") {
 							insideVariableDeclaration[codeBlockDepth] = true;
@@ -1918,7 +1913,10 @@
 						}
 						else if(word) {
 							
-							if(insideVariableDeclaration[codeBlockDepth]) globalVariables[word] = new Variable();
+							if(insideVariableDeclaration[codeBlockDepth]) {
+								globalVariables[word] = new Variable();
+								//console.log("New variable found=" + word + " line=" + lineNumber + " column=" + column);
+							}
 							
 							// ### IF .. THEN .. ELSE ..
 							else if(word == "if" && lastWord == "end") { // END IF
@@ -2025,7 +2023,7 @@
 							}
 
 														
-							console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
+							//console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
 							
 							lastWord = word;
 							word = "";
@@ -2034,7 +2032,8 @@
 					}
 					else {
 						
-						word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
+						if(insideVariableDeclaration[codeBlockDepth]) word += char // Keep case (for auto completion of variable names)
+						else word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
 						
 						//console.log("word++" + char);
 						
@@ -2067,6 +2066,14 @@
 				
 			}
 			
+			
+			
+			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") ) {
+				// A new line without , exits variable declaration
+				insideVariableDeclaration[codeBlockDepth] = false;
+				foundVariableInVariableDeclaration = false;
+				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
+			}
 			
 			if(char == lastLineBreakCharacter) {
 				// ## Line breaks
