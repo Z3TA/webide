@@ -46,15 +46,9 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 BUGS (and issues)
 =================
 
-When deleting lots of text:
-Error: file.startRow=1038 grid.length=899 file.partStartRow=0
-at File.checkGrid (File.js:469)
-at File.createCaret (File.js:213)
-at File.deleteTextRange (File.js:1151)
-at File.deleteSelection (File.js:1230)
-at Object.keydel [as fun] (keyboard_delete.js:22)
-at keyIsDown (editor.js:3776)
+Function list selects the first function and the other were in child-function
 
+Escape key doesnt hide search in files.
 
 When writing a slash / infront of a (the only) function, the function list is hidden.
 

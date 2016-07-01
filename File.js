@@ -1141,18 +1141,24 @@
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
 		
+		console.time("deleteTextRange");
+		
 		var removedText = file.text.substring(firstIndex, lastIndex+1);
 		
 		file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
 		
 		file.grid = file.createGrid();
-		
+				
 		// Create dummy caret to get row and col for the change event
 		var dummyCaret = file.createCaret(firstIndex);
 		
 		if(file.caret.index >= firstIndex) {
 			file.fixCaret(file.caret);
 		}
+		
+		file.scrollToCaret(); // Should fix file.startRow
+		
+		console.timeEnd("deleteTextRange");
 		
 		file.sanityCheck();
 		
