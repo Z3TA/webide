@@ -46,6 +46,21 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 BUGS (and issues)
 =================
 
+Typing in anonymous functions offsets colors (parse only the function -optimizer)
+// Two queries running concurrent
+var foo = db.query("SELECT 2 + 2 AS answer"); // foo is a Promise
+db.query("SELECT 1 + 1 AS answer").then(function(bar) { // We'll need bar for next query, ...
+var baz = db.query("SELECT * FROM foo WHERE x = ?", [bar[0].answer]);
+// Now when we have baz, we can do the final UPDATE, but for that we also need foo (witch should be finished by now)
+foo.then(function(foo) {
+db.query("UPDATE foo SET y = ?, z = ?", [baz[0].answer, foo[0].answer]).then function() {
+db.close();asda<!-- type here
+});
+});
+});
+
+If there is no quotes/comments in the parsed function, ALL quotes/comments will have their start/end positions updated.
+
 Function list selects the first function and the other were in child-function
 
 Escape key doesnt hide search in files.

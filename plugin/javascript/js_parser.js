@@ -240,21 +240,33 @@
 							
 							console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
 							
-							if(spliceLen && spliceStart != -1) oldParse.quotes.splice(spliceStart, spliceLen);
-							
-							
-							for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.quotes.length; i++) {
-								//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
-								oldParse.quotes[i].start += charactersLength;
-								oldParse.quotes[i].end += charactersLength;
+							if(spliceLen && spliceStart != -1) {
+								
+								oldParse.quotes.splice(spliceStart, spliceLen);
+
+								for(var i=spliceStart; i<oldParse.quotes.length; i++) {
+									//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
+									oldParse.quotes[i].start += charactersLength;
+									oldParse.quotes[i].end += charactersLength;
+								}
+								
+								for(var i=0; i<newParse.quotes.length; i++) {
+									oldParse.quotes.push(newParse.quotes[i]);
+									//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
+								}
+								oldParse.quotes.sort(sortyByStart);
 							}
-							
-							for(var i=0; i<newParse.quotes.length; i++) {
-								oldParse.quotes.push(newParse.quotes[i]);
-								//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
+							else {
+								// No quotes in the function. Update all quotes After the function
+								for(var i=0; i<oldParse.quotes.length; i++) {
+									if(oldParse.quotes[i].start > f.end) {
+										//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
+										oldParse.quotes[i].start += charactersLength;
+										oldParse.quotes[i].end += charactersLength;
+									}
+								}								
 							}
-							oldParse.quotes.sort(sortyByStart);
-							
+
 							
 							// Remove all comments in the function, then add them again, and increment index of all below
 							spliceStart = -1;
@@ -275,19 +287,32 @@
 								}
 							}
 							
-							if(spliceLen && spliceStart != -1) oldParse.comments.splice(spliceStart, spliceLen);
-							
 							console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
 							
-							for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.comments.length; i++) {
-								oldParse.comments[i].start += charactersLength;
-								oldParse.comments[i].end += charactersLength;
+							if(spliceLen && spliceStart != -1) {
+								
+								oldParse.comments.splice(spliceStart, spliceLen)
+
+								for(var i=spliceStart; i<oldParse.comments.length; i++) {
+									oldParse.comments[i].start += charactersLength;
+									oldParse.comments[i].end += charactersLength;
+								}
+								
+								for(var i=0; i<newParse.comments.length; i++) {
+									oldParse.comments.push(newParse.comments[i]);
+								}
+								oldParse.comments.sort(sortyByStart);
 							}
-							
-							for(var i=0; i<newParse.comments.length; i++) {
-								oldParse.comments.push(newParse.comments[i]);
+							else {
+								// No comments in the function. Update all comments After the function
+								for(var i=0; i<oldParse.comments.length; i++) {
+									if(oldParse.comments[i].start > f.end) {
+										//console.log("inc quote " + i + " : " + file.text.substring(oldParse.comments[i].start+charactersLength, oldParse.comments[i].end+charactersLength));
+										oldParse.comments[i].start += charactersLength;
+										oldParse.comments[i].end += charactersLength;
+									}
+								}								
 							}
-							oldParse.comments.sort(sortyByStart);
 							
 							
 							// Remove all xmlTags in the function, then add them again, and increment index of all below
@@ -309,18 +334,30 @@
 								}
 							}
 							
-							if(spliceLen && spliceStart != -1) oldParse.xmlTags.splice(spliceStart, spliceLen);
+							if(spliceLen && spliceStart != -1) {
+								
+								oldParse.xmlTags.splice(spliceStart, spliceLen);
 							
-							for(var i=(spliceStart == -1 ? 0: spliceStart); i<oldParse.xmlTags.length; i++) {
-								oldParse.xmlTags[i].start += charactersLength;
-								oldParse.xmlTags[i].end += charactersLength;
+								for(var i=spliceStart; i<oldParse.xmlTags.length; i++) {
+									oldParse.xmlTags[i].start += charactersLength;
+									oldParse.xmlTags[i].end += charactersLength;
+								}
+								
+								for(var i=0; i<newParse.xmlTags.length; i++) {
+									oldParse.xmlTags.push(newParse.xmlTags[i]);
+								}
+								oldParse.xmlTags.sort(sortyByStart);
 							}
-							
-							for(var i=0; i<newParse.xmlTags.length; i++) {
-								oldParse.xmlTags.push(newParse.xmlTags[i]);
+							else {
+								// No xmlTags in the function. Update all xmlTags After the function
+								for(var i=0; i<oldParse.xmlTags.length; i++) {
+									if(oldParse.xmlTags[i].start > f.end) {
+										//console.log("inc quote " + i + " : " + file.text.substring(oldParse.xmlTags[i].start+charactersLength, oldParse.xmlTags[i].end+charactersLength));
+										oldParse.xmlTags[i].start += charactersLength;
+										oldParse.xmlTags[i].end += charactersLength;
+									}
+								}								
 							}
-							oldParse.xmlTags.sort(sortyByStart);
-							
 							
 							
 							console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
