@@ -1900,11 +1900,11 @@
 					if(char == "\r" || char == "\n" || char == "%" || char == " " || char == "\t" || char == ":" || char == ",") {
 						
 						// ### vbScript Variable declarations
-						if(insideVariableDeclaration[codeBlockDepth] && char == firstLineBreakCharacter) {
-							
+						if(insideVariableDeclaration[codeBlockDepth] && (char == firstLineBreakCharacter || char == ":")) {
+							variableName = word || lastWord;
 							insideVariableDeclaration[codeBlockDepth] = false;
-							if(word) globalVariables[word] = new Variable();
-							//console.log("LLBS New variable found=" + word + " line=" + lineNumber + " column=" + column);
+							if(variableName) globalVariables[variableName] = new Variable();
+							console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 						}
 						else if(word == "dim") {
 							insideVariableDeclaration[codeBlockDepth] = true;
@@ -1914,8 +1914,9 @@
 						else if(word) {
 							
 							if(insideVariableDeclaration[codeBlockDepth]) {
-								globalVariables[word] = new Variable();
-								//console.log("New variable found=" + word + " line=" + lineNumber + " column=" + column);
+								variableName = word || lastWord;
+								if(variableName) globalVariables[variableName] = new Variable();
+								//console.log("New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 							}
 							
 							// ### IF .. THEN .. ELSE ..
@@ -2025,7 +2026,7 @@
 														
 							//console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
 							
-							lastWord = word;
+							lastWord = word || lastWord; // Prevent lastWord to change to emty
 							word = "";
 						}
 						
