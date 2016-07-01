@@ -186,6 +186,7 @@ function alertBox(msg, icon) {
 	
 	dialog.div.appendChild(button);
 	
+	return dialog;
 }
 
 
@@ -203,8 +204,10 @@ function confirmBox(msg, options, callback) {
 		makeButton(i);
 	}
 	
+	return dialog;
+	
 	function makeButton(i) {
-var txt = options[i];
+		var txt = options[i];
 		var button = document.createElement("button");
 		button.setAttribute("class", "confirm");
 		
@@ -244,8 +247,8 @@ function promptBox(msg, isPassword, callback) {
 	cancel.appendChild(document.createTextNode("Cancel")); // Language?
 	
 	cancel.addEventListener("click", function() {callback(null); dialog.close()}, false);
-	
-	
+
+		
 	input.addEventListener("keyup", function(event) {
 		event.preventDefault();
 		var enterKey = 13;
@@ -261,6 +264,7 @@ function promptBox(msg, isPassword, callback) {
 	dialog.div.appendChild(cancel);
 	dialog.div.appendChild(ok);
 	
+	return dialog;
 }
 
 
@@ -344,8 +348,7 @@ function determineLineBreakCharacters(text) {
 	
 	if(text.length == 0) {
 		console.warn("Can't determine line breaks without any text!");
-		if(navigator.platform.indexOf("Win") != -1) return "\r\n"
-		else return "\n";
+		return editor.settings.defaultLineBreakCharacter;
 	}
 	
 	var nr = occurrences(text, "\n\r", true),

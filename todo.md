@@ -12,13 +12,9 @@ What I'm working on
 
 Annoying that all self generated files (with \n line breaks) wants to be converted.
 
-Hide cenvert file dialog when the file is closed!?
+Hide convert file dialog when the file is closed!?
 
-Parsing errors. Parse only function optimizer
 
-problem with quotes
-
-Abort the parser if a new line is reached and there is an open quote!?
 
 
 What I'm thinking
@@ -31,6 +27,8 @@ What's weird is that Ctrl+I does not trigger keyPress event, but Ctrl+U does (21
 
 Use this control key standard?
 https://en.wikipedia.org/wiki/Control_key
+
+Replace all file IO with streams !?
 
 Should files be opened as streams!!?
 Would probably have to save remote files to a temporary location
@@ -52,17 +50,18 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 BUGS (and issues)
 =================
 
-Somtimes the colors gets fubar when writing code in a function.
+Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
+
+Ctrl + P to open files can lag, so "todo" first blink with results for "todo", then overwrites with results for "to".
 
 Gets into a constant loop when replacing \\n with \n
 
-When auto completing HTML tags, I get </hr> and </br>
-
-Bug in fun-optimized parser when creating a new function.
-
 When selecting text using keyboard up/down arrows the text gets scrambled
 
-Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
+When selecting this using keyboard, then copy/past it gets scrabled:
+<%
+str = "<table>"
+%>
 
 Indention bug:
 // Update the function
@@ -82,8 +81,6 @@ Can we search in file on a FTP? Nope!
 
 implement editor.findFilesContaining(txt, path) ?
 
-Replace all file IO with streams !?
-
 Inlude global scope in auto completer: All script tags in a html files. Save in background parsed
 
 Add function arguments to the variable auto completer.
@@ -98,18 +95,14 @@ var myRe = /<\?JS.*?>/g;
 }
 
 
-When selecting this using keyboard, then copy/past it gets scrabled:
-<%
-str = "<table>"
-%>
-
-
 Getting a tag ending when autocompletion something that is no available: ex:
 proc</editor.tests.length;> in editor.js
 
-Don't get auto completion for function arguments!
+Missing auto completion for function arguments!
 
 Indentation in the source files is fubar
+
+Adding a } should fix indentation of all lines below!
 
 
 when selecing 0 in "editor.keyBindings.push({charCode: 33, combo: 0, fun: pageUp});" using shift + keyboard arrows
@@ -124,8 +117,6 @@ End doesn't go to EOF/EOL
 Indent breaks in string concatenation!
 foo = "bar" +
 baz;
-
-Adding a } should fix indentation of all lines below!
 
 
 bug: tab plugin: Files get placed in the same "folder" if their parent dir is the same as another parent dir even though the rest of the path is different.

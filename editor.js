@@ -51,7 +51,7 @@ editor.settings = {
 	canBreakBefore: "}]\t",
 	drawGridBox: false,
 	scrollStep: 3,
-	defaultLineBreakCharacter: "\n", // Can be many, like CR & LF, \n == LF, \r == CR
+	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
 	bigFileSize: 400000, //  Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
@@ -585,6 +585,9 @@ editor.lastKeyPressed = "";
 			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
+			
+			// Close all open dialogs asociated to this file
+			file.closeDialogs();
 			
 			// Make sure lastFile is not the file being closed
 			if(editor.lastFile == file) {

@@ -45,7 +45,7 @@ return;
 	var padLength = 42;
 	var fullPad = ""; for(var i=0; i<padLength; i++) fullPad += " "; // A string with padLength spaces
 	
-	var newLine = "\n";
+	var newLine = editor.settings.defaultLineBreakCharacter;
 	
 	var client;
 	

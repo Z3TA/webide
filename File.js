@@ -34,17 +34,19 @@
 		file.name = getFilenameFromPath(path);
 		file.mode = "code"; // text, code, or other, ...
 		file.lineBreak = determineLineBreakCharacters(text);
+		file.dialogs = []; // Keep track of open dialogs so we can (auto) close them, for example when the file is closed
 		
 		if(navigator.platform.indexOf("Win") != -1 && file.lineBreak != "\r\n") {
 			var yes = "Yes, convert to CRLF";
 			var no = "No. Keep " + lbChars(file.lineBreak);
-			confirmBox("Do you want to convert the linbreaks from " + lbChars(file.lineBreak) + " to CRLF (Windows default) ?<br>" + file.path, [yes, no], function(answer) {
+			var dialog = file.dialogs.push(confirmBox("Do you want to convert the linbreaks from " + lbChars(file.lineBreak) + " to CRLF (Windows default) ?<br>" + file.path, [yes, no], function(answer) {
+				file.dialogs.splice(dialog, 1);
 				if(answer == yes) {
 					console.log("Converting line breaks to Windows default!");
 					var oldText = file.text.replace(/\r/g, ""); // Remove all CR just in case
 					file.reload(oldText.replace(/\n/g, "\r\n"));
 					}
-			});
+			})) - 1;
 		}
 		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
@@ -123,6 +125,17 @@
 		}
 		
 		return text;
+	}
+	
+	
+	File.prototype.closeDialogs = function() {
+		// Close all open dialogs created by the file
+		var file = this;
+		
+		for(var i=0; i<file.dialogs.length; i++) {
+			file.dialogs[i].close();
+		}
+		
 	}
 	
 	File.prototype.setFileExtension = function() {
