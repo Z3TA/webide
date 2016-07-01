@@ -53,7 +53,7 @@
 		}
 		
 		if(index < file.text.length) {
-			var nextCharacter = file.text.charAt(index+1);
+			nextCharacter = file.text.charAt(index);
 		}
 		
 		var isXml = (file.fileExtension == "htm" || file.fileExtension == "html");
@@ -121,13 +121,15 @@
 		console.log("insideDbl=" + insideDbl);
 		console.log("insideSingle=" + insideSingle);
 		console.log("openQuote=" + openQuote);
-		
+		console.log("lastCharacter=" + lastCharacter);
+		console.log("nextCharacter=" + nextCharacter);
 		console.log("xor=" + xor);
-		
+		console.log("file.parsed.language=" + file.parsed.language);
 		
 		if(lastCharacter != "\\" && lastCharacter != quote && nextCharacter != quote) {
 			
 			if(inQuote && !openQuote) {
+				
 				if(file.parsed.language=="JavaScript") {
 					file.insertText(quote + " +  + " + quote);
 					file.moveCaretLeft(file.caret, 4);
