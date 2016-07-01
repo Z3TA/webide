@@ -327,6 +327,13 @@
 							
 							// Update blockMatch
 							// Curly brackets inside a function always match!
+							console.log("oldParse.codeBlockLeft=" + oldParse.codeBlockLeft);
+							console.log("newParse.codeBlockLeft=" + newParse.codeBlockLeft);
+							console.log("oldParse.codeBlockRight=" + oldParse.codeBlockRight);
+							console.log("newParse.codeBlockRight=" + newParse.codeBlockRight);
+							console.log("oldParse.blockMatch=" + oldParse.blockMatch);
+							console.log("newParse.blockMatch=" + newParse.blockMatch);
+							
 							oldParse.blockMatch = (((oldParse.codeBlockLeft - newParse.codeBlockLeft) - (oldParse.codeBlockRight - newParse.codeBlockRight)) === 0);
 							
 							
@@ -373,7 +380,7 @@
 								if(Object.keys(fullParse.functions).length != Object.keys(oldParse.functions).length) throw new Error("fullParse.functions=" + Object.keys(fullParse.functions).length + " oldParse.functions=" + Object.keys(oldParse.functions).length + " ");
 								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " ");
 								
-								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
+								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
 								
 								// Deep compare
 								
@@ -2071,6 +2078,12 @@
 					console.warn("Line " + lineNumber + ": Unclosed quote!");
 					insideDblQuote = false;
 					insideSingleQuote = false;
+				}
+				
+				// We can not have multi line regexp
+				if(insideRegExp) {
+					console.warn("Line " + lineNumber + ": Lonely slash!"); // NodeJS says: Invalid regular expression: missing /
+					insideRegExp = false;
 				}
 				
 				vb_afterThen = false;
