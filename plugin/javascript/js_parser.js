@@ -191,6 +191,8 @@
 							
 							console.time("parseOnlyFunctionOptimizer");
 							
+							console.log("change type=" + type);
+							
 							console.log("Parsing only f=" + f.name + "");
 							
 							// The start property is at the { after function
@@ -249,15 +251,9 @@
 									oldParse.quotes[i].start += charactersLength;
 									oldParse.quotes[i].end += charactersLength;
 								}
-								
-								for(var i=0; i<newParse.quotes.length; i++) {
-									oldParse.quotes.push(newParse.quotes[i]);
-									//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
-								}
-								oldParse.quotes.sort(sortyByStart);
 							}
 							else {
-								// No quotes in the function. Update all quotes After the function
+								// The function had no quotes last time it was parsed (some might been added in the new parse). Update all quotes After the function
 								for(var i=0; i<oldParse.quotes.length; i++) {
 									if(oldParse.quotes[i].start > f.end) {
 										//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
@@ -266,7 +262,14 @@
 									}
 								}								
 							}
-
+							if(newParse.quotes.length > 0) {
+								// Can we splice instead? So we dont have to sort!?
+								for(var i=0; i<newParse.quotes.length; i++) {
+									oldParse.quotes.push(newParse.quotes[i]);
+									//console.log("add quote : " + file.text.substring(newParse.quotes[i].start, newParse.quotes[i].end))
+								}
+								oldParse.quotes.sort(sortyByStart);
+							}
 							
 							// Remove all comments in the function, then add them again, and increment index of all below
 							spliceStart = -1;
@@ -297,14 +300,9 @@
 									oldParse.comments[i].start += charactersLength;
 									oldParse.comments[i].end += charactersLength;
 								}
-								
-								for(var i=0; i<newParse.comments.length; i++) {
-									oldParse.comments.push(newParse.comments[i]);
-								}
-								oldParse.comments.sort(sortyByStart);
+
 							}
 							else {
-								// No comments in the function. Update all comments After the function
 								for(var i=0; i<oldParse.comments.length; i++) {
 									if(oldParse.comments[i].start > f.end) {
 										//console.log("inc quote " + i + " : " + file.text.substring(oldParse.comments[i].start+charactersLength, oldParse.comments[i].end+charactersLength));
@@ -313,7 +311,12 @@
 									}
 								}								
 							}
-							
+							if(newParse.comments.length > 0) {
+								for(var i=0; i<newParse.comments.length; i++) {
+									oldParse.comments.push(newParse.comments[i]);
+								}
+								oldParse.comments.sort(sortyByStart);
+							}
 							
 							// Remove all xmlTags in the function, then add them again, and increment index of all below
 							spliceStart = -1;
@@ -342,11 +345,6 @@
 									oldParse.xmlTags[i].start += charactersLength;
 									oldParse.xmlTags[i].end += charactersLength;
 								}
-								
-								for(var i=0; i<newParse.xmlTags.length; i++) {
-									oldParse.xmlTags.push(newParse.xmlTags[i]);
-								}
-								oldParse.xmlTags.sort(sortyByStart);
 							}
 							else {
 								// No xmlTags in the function. Update all xmlTags After the function
@@ -358,8 +356,12 @@
 									}
 								}								
 							}
-							
-							
+							if(newParse.xmlTags.length > 0) {
+								for(var i=0; i<newParse.xmlTags.length; i++) {
+									oldParse.xmlTags.push(newParse.xmlTags[i]);
+								}
+								oldParse.xmlTags.sort(sortyByStart);
+							}
 							console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
 							
 							// Update blockMatch
