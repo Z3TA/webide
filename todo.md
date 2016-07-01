@@ -50,8 +50,6 @@ Function list selects the first function and the other were in child-function
 
 Escape key doesnt hide search in files.
 
-When writing a slash / infront of a (the only) function, the function list is hidden.
-
 Selecting text using keyboard arrows from bttom up scrables the selection.
 
 Auto completion, or copying in, and parseOnlyFunction optimizer: x characters entered while asuming only one.
@@ -630,6 +628,8 @@ Pasting code into an emty (sub) function sometimes does weird things
 
 Feature
 =======
+
+Show red circles where the parser detects a syntax error!? Like unfinished quote or regexp
 
 how a fat red circle around variables that are not defined anywhere!?
 
