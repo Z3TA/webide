@@ -86,7 +86,6 @@
 
 	
 	function onFileOpen(file) {
-		
 		//console.log("jsParser.js");
 		
 		if(shouldParse(file)) {
@@ -151,7 +150,9 @@
 		
 		if(shouldParse(file)) { // If the file should be parsed or not
 			
-			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange")) { // If the file was parsed before
+			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deletedSelection" || type == "deleteCharacter")) { // If the file was parsed before
+				
+				console.log("type=" + type + " characters=" + characters);
 				
 				var oldParse = file.parsed;
 				
@@ -176,14 +177,15 @@
 					
 					var charactersLength = characters.length;
 					
-					if(type == "delete" || type == "deleteTextRange") charactersLength = -charactersLength;
+					if(type == "delete" || type == "deleteTextRange" || type == "deletedSelection" || type == "deleteCharacter") {
+						charactersLength = -charactersLength;
+					}
 					
 					var functions = oldParse.functions;
 					//console.log(JSON.stringify(functions));
 					
-					var f = insideFunction(functions, caretIndex, false);
+					var f = insideFunction(functions, caretIndex, false, charactersLength);
 					var maxFunctionBodySize = Math.round(file.text.length * 0.8);
-					
 					
 					if(f) { // Parse only that function
 						console.log("Inside " + f.name);
@@ -200,6 +202,8 @@
 							var parseEnd = f.end + charactersLength + 1;
 							var parseStartRow = f.lineNumber-1;
 							var baseIndentation = file.grid[parseStartRow].indentation;
+							var oldStart = f.start;
+							var oldEnd = f.end;
 							
 							//if(charactersLength < 0) parseEnd++;
 							
@@ -212,7 +216,7 @@
 								file.debugGrid();
 								throw new Error("Expected parseEnd-1=" + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd)) + " to be an }");
 							}
-
+							
 							//console.log(file.text.substring(parseStart, parseEnd));
 							
 							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow});
@@ -223,9 +227,10 @@
 							var spliceStart = -1;
 							var spliceLen = 0;
 							
+							
 							// Remove all quotes in the function, then add them again, and increment index of all below
 							for(var i=0; i<oldParse.quotes.length; i++) {
-								if(oldParse.quotes[i].start > parseStart && oldParse.quotes[i].end < parseEnd) {
+								if(oldParse.quotes[i].start > oldStart && oldParse.quotes[i].end < oldEnd) {
 									spliceLen++;
 									//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
 									if(spliceStart==-1) spliceStart = i;
@@ -234,7 +239,7 @@
 								else if(spliceLen > 0) {
 									break;
 								}
-								else if(oldParse.quotes[i].start > parseEnd) {
+								else if(oldParse.quotes[i].start > oldEnd) {
 									spliceStart = i;
 									break;
 								}
@@ -245,7 +250,7 @@
 							if(spliceLen && spliceStart != -1) {
 								
 								oldParse.quotes.splice(spliceStart, spliceLen);
-
+								
 								for(var i=spliceStart; i<oldParse.quotes.length; i++) {
 									//console.log("inc quote " + i + " : " + file.text.substring(oldParse.quotes[i].start+charactersLength, oldParse.quotes[i].end+charactersLength));
 									oldParse.quotes[i].start += charactersLength;
@@ -262,6 +267,7 @@
 									}
 								}								
 							}
+							console.log("newParse.quotes.length=" + newParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length);
 							if(newParse.quotes.length > 0) {
 								// Can we splice instead? So we dont have to sort!?
 								for(var i=0; i<newParse.quotes.length; i++) {
@@ -275,7 +281,7 @@
 							spliceStart = -1;
 							spliceLen = 0;
 							for(var i=0; i<oldParse.comments.length; i++) {
-								if(oldParse.comments[i].start > parseStart && oldParse.comments[i].end < parseEnd) {
+								if(oldParse.comments[i].start > oldStart && oldParse.comments[i].end < oldEnd) {
 									spliceLen++;
 									//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
 									if(spliceStart==-1) spliceStart = i;
@@ -284,7 +290,7 @@
 								else if(spliceLen > 0) {
 									break;
 								}
-								else if(oldParse.comments[i].start > parseEnd) {
+								else if(oldParse.comments[i].start > oldEnd) {
 									spliceStart = i;
 									break;
 								}
@@ -295,12 +301,12 @@
 							if(spliceLen && spliceStart != -1) {
 								
 								oldParse.comments.splice(spliceStart, spliceLen)
-
+								
 								for(var i=spliceStart; i<oldParse.comments.length; i++) {
 									oldParse.comments[i].start += charactersLength;
 									oldParse.comments[i].end += charactersLength;
 								}
-
+								
 							}
 							else {
 								for(var i=0; i<oldParse.comments.length; i++) {
@@ -309,8 +315,10 @@
 										oldParse.comments[i].start += charactersLength;
 										oldParse.comments[i].end += charactersLength;
 									}
-								}								
+								}
 							}
+							console.log("newParse.comments.length=" + newParse.comments.length);
+							console.log("oldParse.comments.length=" + oldParse.comments.length);
 							if(newParse.comments.length > 0) {
 								for(var i=0; i<newParse.comments.length; i++) {
 									oldParse.comments.push(newParse.comments[i]);
@@ -322,7 +330,7 @@
 							spliceStart = -1;
 							spliceLen = 0;
 							for(var i=0; i<oldParse.xmlTags.length; i++) {
-								if(oldParse.xmlTags[i].start > parseStart && oldParse.xmlTags[i].end < parseEnd) {
+								if(oldParse.xmlTags[i].start > oldStart && oldParse.xmlTags[i].end < oldEnd) {
 									spliceLen++;
 									//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
 									if(spliceStart==-1) spliceStart = i;
@@ -331,7 +339,7 @@
 								else if(spliceLen > 0) {
 									break;
 								}
-								else if(oldParse.xmlTags[i].start > parseEnd) {
+								else if(oldParse.xmlTags[i].start > oldEnd) {
 									spliceStart = i;
 									break;
 								}
@@ -340,7 +348,7 @@
 							if(spliceLen && spliceStart != -1) {
 								
 								oldParse.xmlTags.splice(spliceStart, spliceLen);
-							
+								
 								for(var i=spliceStart; i<oldParse.xmlTags.length; i++) {
 									oldParse.xmlTags[i].start += charactersLength;
 									oldParse.xmlTags[i].end += charactersLength;
@@ -402,7 +410,7 @@
 							f.subFunctions = ff.subFunctions;
 							f.end = ff.end;
 							f.endRow = ff.endRow;
-
+							
 							
 							console.timeEnd("parseOnlyFunctionOptimizer");
 							
@@ -427,14 +435,23 @@
 							
 							
 							file.haveParsed(oldParse);
-						
+							
 							return;
+						}
+						else {
+							console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize);
 						}
 					}
 					else {
 						console.log("Not inside any function!");
 					}
 				}
+				else {
+					console.log("oldParse.blockMatch=" + oldParse.blockMatch);
+				}
+			}
+			else {
+				console.log((file.parsed ? "file was parsed before" : "file was NOT parsed before") + " type=" + type);
 			}
 			
 			// Parse the while file
@@ -566,17 +583,20 @@
 			}
 		}
 		
-		function insideFunction(functions, caretIndex, parent) {
+		function insideFunction(functions, caretIndex, parent, charactersLength) {
 			// Check if inside a function
 			// Returns the function, or false
 			var f, s;
 			for(var name in functions) {
 				f = functions[name];
 				if(f.start < caretIndex && f.end >= caretIndex) {
-					console.log("Found function=" + f.name);
-					// Check sub functions
-					return insideFunction(f.subFunctions, caretIndex, f);
+					// Deleted text are now allowed to be larger then the function body
+					if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
+						console.log("Found function=" + f.name);
+						// Check sub functions
+						return insideFunction(f.subFunctions, caretIndex, f, charactersLength);
 					}
+				}
 			}
 			return parent;
 		}

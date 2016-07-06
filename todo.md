@@ -46,6 +46,8 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 BUGS (and issues)
 =================
 
+Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
+
 Uncaught Error: fullParse.quotes.length=1 oldParse.quotes.length=0 
 
 There's something wrong with the parser, see async_await.js
@@ -632,6 +634,8 @@ Pasting code into an emty (sub) function sometimes does weird things
 
 Feature
 =======
+
+Reopen last closed file (from this session)
 
 Show red circles where the parser detects a syntax error!? Like unfinished quote or regexp
 
