@@ -55,6 +55,12 @@ var vuid = '<% =strCookie_VUID %>';
 var haveMovedArmy = <% IF haveMovedArmy THEN %>true<% ELSE %>false<% END IF %>;
 
 
+Search in file bug? 
+Can't find "cheat.txt" in \\192.168.1.80\domains\visual-utopia.com\ 
+"But none of them math the file filter!"
++ the gui wont go away when pressing escape!
+
+The indentation helper (render_indentation.js) doesn't work with parsing-only-the-function-optimization because lastRow.indentation is not affected!
 
 
 Always the wrong path when saving a file. Need to be smarter!
