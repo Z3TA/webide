@@ -46,6 +46,26 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 BUGS (and issues)
 =================
 
+Weird formatting in vbScript with IF ELSE END IF on the same line:
+var loggedIn = <% IF loggedIn THEN %>true<% ELSE %>false<% END IF %>;
+var popups = <% IF popups THEN %>true<% ELSE %>false<% END IF %>;
+var openpage = '<% =openpage %>';
+var showNews = <% IF showPersonalNews = 0 THEN %>false<% ELSE %>true<% END IF %>;
+var vuid = '<% =strCookie_VUID %>';
+var haveMovedArmy = <% IF haveMovedArmy THEN %>true<% ELSE %>false<% END IF %>;
+
+
+
+
+Always the wrong path when saving a file. Need to be smarter!
+
+Pressing enter in saveas doesnt save.
+
+Search GUI doesnt hide when pressing Escape unless it has focus
+
+ASP-file: <body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0"><iframe id="iframe" width="100%" height="100%" src="beta.htm?vuid=<% =strCookie_VUID %>" border="0" frameborder="0" marginheight="0" marginwidth="0"></iframe></body>
+bad color on strC
+
 Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
 
 Uncaught Error: fullParse.quotes.length=1 oldParse.quotes.length=0 

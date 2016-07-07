@@ -414,7 +414,7 @@
 							
 							console.timeEnd("parseOnlyFunctionOptimizer");
 							
-							if(editor.settings.devMode) {
+							if(editor.settings.devMode && newParse.blockMatch) {
 								
 								// Make a full parse and compare to see if there are any bugs
 								
