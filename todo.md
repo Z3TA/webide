@@ -3,13 +3,17 @@ Feature freeze!
 Prio:
 
 1) Bug/issue fixing and refactoring
-2) Polishing
+2) Polishing of existing features
 3) Optimization (toggle devMode off when testing!)
+4) New features
+
 
 
 What I'm working on
 -------------------
+editor.mock(what, options)
 
+keyDown, keyUp, => if return true, also run keyPressed
 
 
 
@@ -39,12 +43,35 @@ Use hg mv to move/rename files!
 note: The error should be the first argument in callbacks!
 note: Have to close the app and reopen it to reload NodeJS module source!
 note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.
+Close/restart the program if there is an error!
 Editor should always be restart after a "throw" is detected!
 Throw errors instead of just returning the void! (ex: if(foo == bad) return;) => throw new Error("foo is bad!")
 Plugins GUI's should use their own event handlers for the GUI instead of cluttering keyBindings
 
+
+When discovering a bug
+----------------------
+Find out how to repeat the bug
+Write down how to manually repeat it, make test files, file bug report
+You will most likely find additional bugs while doing this. Write them down too!
+Priotize for witch one of the bugs to fix.
+Write a test case before fixing it ...
+Write code that automaticly repeats the bug
+Write mock tools (editor.mock) if needed
+Run the test
+Refactor the entire program if needed to allow testing
+Run the test
+Refactor the entire program if needed to fix the bug
+Run the tests
+Fix the bug (like five years later after fixing all isses that comes up just for fixing this tiny bug <g>)
+Run the test
+
+
 BUGS (and issues)
 =================
+
+Parsing error when removing if-block (C:\Users\Z\dev-repositories\test\JZedit-tests\delblock.js)
+
 
 Weird formatting in vbScript with IF ELSE END IF on the same line:
 var loggedIn = <% IF loggedIn THEN %>true<% ELSE %>false<% END IF %>;
@@ -262,6 +289,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 When the editor touches (redoes) all whitespace, like when removing a } somwhere.
 The SCM system goes heywack ... a lot of updates here and there and stupid commits.
 
+
+
 Polishing
 =========
 
@@ -473,7 +502,7 @@ The tabs steal focus from the code ... make them lighter!? Or change the coding 
 
 automatically scroll down to the function, when you type in the function list (when there are MAAAAAny funtions)
 
-No color on high-light, just bold! paren + m�sving
+No color on high-light, just bold! paren + måsving
 
 Har to see what tab is opened. Make it yellow!
 
@@ -589,6 +618,7 @@ createBuffer in render takes a very long time > 500 ms on files with very long l
 Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in C:\Users\Z\dev-repositories\test\JZedit-tests\parser
 
 
+
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
@@ -660,6 +690,35 @@ Pasting code into an emty (sub) function sometimes does weird things
 
 Feature
 =======
+
+Bugs have higher prio! Fix bugs and issues before implementing new features! The above lists should be empty before reaching this far.
+
+When implementing a new feature
+-------------------------------
+Priotize the feature list to make sure you are implementing the most critical feature.
+Design it in your head
+If possible, make it as an independent plugin (should only depend on editor.js, File.js and global.js. It should not depend on other plugins)
+Write a prototype
+If you discover any bugs or issues elsewhere, sorry, bugs and issues has higher prio then new features!
+Iterate on the feature
+Refactor the whole program if needed to make the fature work great
+Run the tests
+Iterate on the feature
+Write tests that confirms that the feautre works
+Run the tests
+Make mock tools and new testing tools if needed
+Run the tests
+Refactor the entire program if needed to allow testing
+Run the tests
+If there's a bug, see "When discovering a bug"
+Run the tests
+Polish the feature
+Measure performance
+Optimize if needed
+
+
+Feature list (Not ordered/priotized)
+------------------------------------
 
 Reopen last closed file (from this session)
 
