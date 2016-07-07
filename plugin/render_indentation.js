@@ -104,7 +104,7 @@
 			
 			ctx.stroke();
 			
-			if(problem) {
+			if(problem != -1) {
 				ctx.strokeStyle = "rgb(214, 133, 52)";
 				ctx.lineWidth=2;
 				ctx.beginPath();
