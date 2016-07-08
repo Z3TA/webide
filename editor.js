@@ -3199,6 +3199,12 @@ editor.lastKeyPressed = "";
 	
 	function runTests_5616458984153156() { // Random numbers to make sure it's unique
 		
+		/*
+			Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
+			Then run the tests there. And open any bad files here for debugging!?
+		
+		*/
+		
 		// Prepare for tests ...
 		
 		// Close all files
