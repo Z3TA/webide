@@ -20,6 +20,11 @@ keyDown, keyUp, => if return true, also run keyPressed
 What I'm thinking
 -----------------
 
+Save state every X minute and track all actions. Then when there is a error, a test for that bug is automatically created, loading the state and replaying the actions.
+Ask to fully restart the editor.
+
+When "debugging" Open up a editor clone, with --remote-debugging-port and run the tests there, so they can be debugged with breakpoints (do not self debug).
+
 Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
 Return false to prevent the character to be inserted into the document (default action)
 
