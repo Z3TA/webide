@@ -75,6 +75,13 @@ Run the test
 BUGS (and issues)
 =================
 
+Error when editing a function: 
+function keyPressed(e)m{ inserting the m between ) and {
+
+When creating a new function. All functions below it will appear as subfunctions in the function-list.
+
+Ctrl+Q to close a file doesn't seem to work any longer
+
 Parsing error when removing if-block (C:\Users\Z\dev-repositories\test\JZedit-tests\delblock.js)
 
 

@@ -585,7 +585,7 @@ editor.lastKeyPressed = "";
 			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
 				editor.eventListeners.fileClose[i].fun(file); // Call function
 			}
-
+			
 			
 			// Make sure lastFile is not the file being closed
 			if(editor.lastFile == file) {
@@ -2325,7 +2325,7 @@ editor.lastKeyPressed = "";
 				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe name!")
 			}
 		}
-	
+		
 		keyBindings.push(b);
 		
 	}
@@ -2838,6 +2838,31 @@ editor.lastKeyPressed = "";
 		
 	}
 	
+	editor.mock = function mock(mock, options) {
+		
+		// Simulate ... 
+		
+		if(mock == "keyDown") {
+			if(!options.charCode) throw new Error("options need to contain charCode");
+			if(!options.target.className && !options.target) throw new Error("options need to contain target.className (or just target)");
+			
+			if(!options.target.className) options.target = {className: options.target}; // Shorter to write
+			
+			// Also specify options.shiftKey, otions.altKey and options.ctrlKey witch can be true
+			
+			var retDown = keyIsDown(options);
+			keyIsUp(options);
+			
+			if(retDown === true) {
+				// Default action was not prevented
+				keyPressed(options);
+			}
+			
+			return retDown;
+}
+		
+}
+	
 	function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
@@ -2871,6 +2896,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	function removeFrom(list, fun) {
+		// Removes an object from an array of objects
 		for(var i=0; i<list.length; i++) {
 			
 			//console.log(getFunctionName(fun) + " = " + getFunctionName(list[i]) + " ? " + (list[i] == fun));
@@ -3561,7 +3587,7 @@ editor.lastKeyPressed = "";
 	*/
 	
 	
-	function keyPressed(e){
+	function keyPressed(e) {
 		e = e || window.event; 
 		
 		//e.preventDefault();
