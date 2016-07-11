@@ -10,6 +10,47 @@
 		
 	*/
 	
+	var files = {};
+	var fileState = {};
+	
+	editor.on("fileOpen", selfDebugFileOpen);
+	editor.on("fileClose", selfDebugFileClose);
+	editor.on("interaction", selfDebugInteraction);
+	//editor.on("fileChange", selfDebugFileChange);
+	
+	
+	function selfDebugFileOpen(file) {
+		files[file] = {text: file.text, caret: {index: file.caret.index, row: file.caret.row, col: file.caret.col}, actions: []}; // Save state
+	}
+	
+	function selfDebugFileClose(file) {
+		// Delete state
+		delete files[file];
+		delete fileState[file];
+	}
+	
+	function selfDebugFileChange(file, change) {
+		if(!fileState[file]) fileState[file] = [];
+		
+		fileState[file].push(file.text)
+	}
+	
+	
+	function selfDebugInteraction(interaction, options) {
+		var file = editor.currentFile;
+		
+		if(file) {
+			
+			if(files[file]) {
+				
+				
+				
+				if(interaction == "keyDown") files[file].actions.push({interaction: interaction, options: options, fileState: fileState[file]});
+			}
+			
+}
+	}
+	
 	window.onerror = function(message, source, lineno, colno, error) {
 		
 		var yes = "Yes, Close the editor";

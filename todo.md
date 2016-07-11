@@ -11,9 +11,9 @@ Prio:
 
 What I'm working on
 -------------------
-editor.mock(what, options)
 
-keyDown, keyUp, => if return true, also run keyPressed
+self_debug.js collect user actions to replay bugs for automatic testing.
+
 
 
 
@@ -74,6 +74,8 @@ Run the test
 
 BUGS (and issues)
 =================
+
+Something is causeing the function end to be off
 
 Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
 

@@ -1853,7 +1853,7 @@ editor.lastKeyPressed = "";
 		executeOnNextInteraction.push(func);
 	}
 	
-	editor.interact = function(interaction) {
+	editor.interact = function(interaction, options) {
 		// This function will be called on every interaction
 		
 		var func;
@@ -2842,7 +2842,7 @@ editor.lastKeyPressed = "";
 		
 		// Simulate ... 
 		
-		if(mock == "keyPress") {
+		if(mock == "keyDown") {
 			if(!options.charCode) throw new Error("options need to contain charCode");
 			if(!options.target.className && !options.target) throw new Error("options need to contain target.className (or just target)");
 			
@@ -2968,10 +2968,13 @@ editor.lastKeyPressed = "";
 	
 	
 	window.addEventListener("load", main, false);
-	window.addEventListener("resize", function() {
+	window.addEventListener("resize", function(e) {
 		console.log("EVENT RESIZE!");
 		editor.resizeNeeded();
 		editor.renderNeeded();
+		
+		editor.interact("resize", e);
+		
 	}, false);
 	
 	
@@ -3453,7 +3456,7 @@ editor.lastKeyPressed = "";
 			}
 		*/
 		
-		editor.interact("fileDrop");
+		editor.interact("fileDrop", e);
 		
 		return false;
 	};
@@ -3485,7 +3488,7 @@ editor.lastKeyPressed = "";
 		
 		// else: Do the default action (enable copying outside the canvas)
 		
-		editor.interact("copy");
+		editor.interact("copy", e);
 		
 	}
 	
@@ -3514,7 +3517,7 @@ editor.lastKeyPressed = "";
 		
 		// else: Do the default action (enable cutting outside the canvas)
 		
-		editor.interact("cut");
+		editor.interact("cut", e);
 	}
 	
 	
@@ -3560,7 +3563,7 @@ editor.lastKeyPressed = "";
 		
 		// else: Do the default action (enable pasting outside the canvas)
 		
-		editor.interact("paste");
+		editor.interact("paste", e);
 		
 	}
 	
@@ -3703,10 +3706,10 @@ editor.lastKeyPressed = "";
 			
 		}
 		
-		editor.interact("keyPressed");
+		editor.interact("keyPressed", e);
 		
 	}
-	
+	""
 	function resizeAndRender() {
 		
 		if(editor.shouldResize) editor.resize();
@@ -3837,7 +3840,7 @@ editor.lastKeyPressed = "";
 			editor.currentFile.checkCaret();
 		}
 		
-		editor.interact("keyDown");
+		editor.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: e.shiftKey, altKey: e.altKey, ctrlKey: e.ctrlKey});
 		
 		
 		if(combo.sum > 0 && !captured) {
@@ -3985,7 +3988,7 @@ editor.lastKeyPressed = "";
 		}
 		
 		
-		editor.interact("keyUp");
+		editor.interact("keyUp", e);
 		
 		//return false;
 		
@@ -4098,7 +4101,7 @@ editor.lastKeyPressed = "";
 		}
 		
 		
-		editor.interact("mouseDown");
+		editor.interact("mouseDown", e);
 		
 		if(preventDefault) {
 			e.preventDefault(); // To prevent the annoying menus
@@ -4159,7 +4162,7 @@ editor.lastKeyPressed = "";
 		//console.log("mouseUp, editor.shouldRender=" + editor.shouldRender);
 		
 		
-		editor.interact("mouseUp");
+		editor.interact("mouseUp", e);
 		
 		return false;
 		//return true;
@@ -4244,7 +4247,7 @@ editor.lastKeyPressed = "";
 		
 		//console.log("editor.input=" + editor.input);
 		
-		editor.interact("mouseMove");
+		editor.interact("mouseMove", e);
 		
 		//return false;
 		
@@ -4258,7 +4261,9 @@ editor.lastKeyPressed = "";
 		*/
 		console.log("mouseClick, editor.shouldRender=" + editor.shouldRender + ", editor.shouldResize=" + editor.shouldResize);
 		
-		editor.interact("mouseClick");
+		editor.interact("mouseClick", e);
+		
+		return true;
 		
 	}
 	
@@ -4332,7 +4337,7 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		editor.interact("dblclick");
+		editor.interact("dblclick", e);
 		
 		if(preventDefault) {
 			e.preventDefault(); // To prevent the annoying menus
@@ -4371,7 +4376,7 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		editor.interact("mouseScroll");
+		editor.interact("mouseScroll", e);
 		
 	}
 	
