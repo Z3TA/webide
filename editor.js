@@ -2842,7 +2842,7 @@ editor.lastKeyPressed = "";
 		
 		// Simulate ... 
 		
-		if(mock == "keyDown") {
+		if(mock == "keyPress") {
 			if(!options.charCode) throw new Error("options need to contain charCode");
 			if(!options.target.className && !options.target) throw new Error("options need to contain target.className (or just target)");
 			
@@ -3750,7 +3750,7 @@ editor.lastKeyPressed = "";
 			}
 		*/
 		
-		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo));
+		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass);
 		
 		lastKeyDown = charCode;
 		
@@ -3863,7 +3863,7 @@ editor.lastKeyPressed = "";
 		
 		if(preventDefault) {
 			console.log("Preventing default browser action!");
-			e.preventDefault();
+			if(e.preventDefault) e.preventDefault();
 			return false;
 		}
 		else {

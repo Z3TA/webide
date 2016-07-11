@@ -75,6 +75,8 @@ Run the test
 BUGS (and issues)
 =================
 
+Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
+
 Error when editing a function: 
 function keyPressed(e)m{ inserting the m between ) and {
 

@@ -14,7 +14,18 @@
 		
 		var yes = "Yes, Close the editor";
 		var no = "No, keep running";
-		confirmBox("" + source + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [yes, no], function (answer) {
+		var createTestRestart = "Create a test case and restart";
+		var createTestKeepRunning = "Create a test case and keep running";
+		confirmBox("" + source + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [yes, no, createTestRestart, createTestKeepRunning], function (answer) {
+			
+			if(answer == createTestRestart || answer == createTestKeepRunning) {
+				
+				// Create a test case for automated testing
+				
+				
+				if(answer == createTestRestart) answer = yes;
+				
+}
 			
 			if(answer == yes) {
 				process.exit(1); // Exit code=1 should make the batch/bash script restart the editor

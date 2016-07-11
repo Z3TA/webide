@@ -1,10 +1,16 @@
 // This file can be deleted
 
-//editor.on("start", testDialogs);
+editor.on("start", mock);
 
 var charCode_D = 68;
 
-editor.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
+//editor.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
+
+function mock() {
+	
+	editor.mock("keyPress", {charCode: charCode_D, target: "canvas", shiftKey: true, ctrlKey: true});
+	
+}
 
 function testDialogs() {
 	
