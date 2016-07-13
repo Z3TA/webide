@@ -12,19 +12,18 @@ Prio:
 What I'm working on
 -------------------
 
-Making test loader
+Refactor file.deleteSelection
+
+deletedSelection reports wrong text witch screws up the parser optimizer
+
+
+
+
+todo:
 
 Refactor calls to file.x to be explicit about renderNeeded or not to allow optimization and remove "renderNotNeeded" options
 
-Refactor file.deleteCharacter
-
-Refactor file.deleteSelection
-
-deletedSelection reports wrong 
-
-
 self_debug.js collect user actions to replay bugs for automatic testing.
-
 
 
 
