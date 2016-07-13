@@ -8,6 +8,11 @@
 		This plugin will record all editor inputs and save state. 
 		When an error is detected. An automatic test case will be created
 		
+		At might require several steps to put the editor in a bad state.
+		Record all steps from when the file? or editor? was opened. 
+		
+		Most state bugs will probably be isolated to the file that's being worked on!?
+		
 	*/
 	
 	var files = {};

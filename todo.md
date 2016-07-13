@@ -12,6 +12,9 @@ Prio:
 What I'm working on
 -------------------
 
+deletedSelection reports wrong 
+
+
 self_debug.js collect user actions to replay bugs for automatic testing.
 
 
