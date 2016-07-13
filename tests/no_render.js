@@ -1,4 +1,6 @@
+
 editor.addTest(function doNotCallRender(testCallback) {
+	
 	/*
 
 		To allow optimizations. File.x low level functions should not call editor.render or editor.renderNeeded
@@ -29,10 +31,16 @@ editor.addTest(function doNotCallRender(testCallback) {
 		
 		if(renderCalled) throw new Error("file.deleteCharacter told the editor to render");
 		
+		
+		editor.render = renderOriginal;
+		editor.renderNeeded = renderNeededOriginal;
+		
 		editor.closeFile(file.path);
 		
-		callback(true);
+		
+		
+		testCallback(true);
 		
 	});
 	
-}	
+}, 1);

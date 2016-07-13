@@ -66,7 +66,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 
 	editor.addTest(function htmlCommentInScriptTag(callback) {

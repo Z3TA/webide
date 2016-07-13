@@ -624,7 +624,7 @@ editor.lastKeyPressed = "";
 			
 			
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
-				if(editor.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor!");
+				if(editor.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path);
 			}, 10);
 			
 			if(switchTo) {
@@ -3086,15 +3086,39 @@ editor.lastKeyPressed = "";
 		keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
 		
-		if(file.devMode) {
+		if(editor.settings.devMode) {
 			
 			console.log("Loading tests ...");
+			var walk = require('walk');
+			var head = document.getElementsByTagName("head")[0];
+			var dirname = require("dirname");
+			var path = require("path");
+			var root = path.join(dirname, "tests/"); // Path folder test files
+			var walker  = walk.walk(root, { followLinks: false });
 			
+			console.log("root:" + root);
 			
-        var fileref=document.createElement('script')
-        fileref.setAttribute("type","text/javascript")
-        fileref.setAttribute("src", filename)		
-			
+			walker.on('file', function(folder, stat, next) {
+
+				var filename = path.join(folder, stat.name);
+				var ext = getFileExtension(filename);
+				
+				if(ext == "js") {
+					var fileref=document.createElement('script');
+					
+					fileref.setAttribute("type","text/javascript");
+					fileref.setAttribute("src", filename);
+					head.appendChild(fileref);
+					
+					console.log("Loading test: " + filename);
+				}
+				next();
+				
+			});
+
+			walker.on('end', function() {
+				console.log("All test files loaded");
+			});
 		
 			console.log("Binding 'run tests' to Ctrl + Shift + T");
 			var keyT = 84;
