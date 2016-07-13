@@ -216,10 +216,12 @@
 				
 				// Delete the word
 				for(var i=0; i<word.length; i++) {
-					file.deleteCharacter(undefined, false); // false = Do not call file.change events
+					file.deleteCharacter();
 				}
-								
+				
 				file.insertText(suggestion);
+				
+				editor.renderNeeded();
 				
 			}
 			
@@ -237,7 +239,7 @@
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
 
-		// possible change: text (insertText), insert (putCharacter), deletedSelection, line break, delete, undo-redo
+		// possible change: text (insertText), insert (putCharacter), deleteCharacter, line break, delete, undo-redo
 		
 		//console.log("change=" + change);
 		
@@ -267,8 +269,9 @@
 			
 			// Do not run spellcheck if a line break was inserted ... Why?
 			//if(change=="linebreak") return;
-			if(change=="deletedSelection") return;
 			if(change=="undo-redo") return;
+			
+			if(chnage == "deleteCharacter") return;
 			
 
 			// clear text decoration from current line

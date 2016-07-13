@@ -12,6 +12,14 @@ Prio:
 What I'm working on
 -------------------
 
+Making test loader
+
+Refactor calls to file.x to be explicit about renderNeeded or not to allow optimization and remove "renderNotNeeded" options
+
+Refactor file.deleteCharacter
+
+Refactor file.deleteSelection
+
 deletedSelection reports wrong 
 
 

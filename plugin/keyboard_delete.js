@@ -23,7 +23,7 @@
 				
 			}
 			else {
-				file.deleteCharacter(file.caret, undefined);
+				file.deleteCharacter(file.caret);
 			}
 				
 			return false; // Prevent default

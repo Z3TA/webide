@@ -23,6 +23,7 @@
 			if(file.selected.length > 0) {
 				renderNotNeeded = false;
 				file.deleteSelection();
+				editor.renderNeeded();
 			}
 			
 
@@ -38,8 +39,8 @@
 				
 				// Move the caret to the left, then delete that character
 				file.moveCaretLeft();
-				file.deleteCharacter(undefined, undefined, renderNotNeeded);
-				
+				file.deleteCharacter();
+				editor.renderNeeded();
 			}
 			
 			/*

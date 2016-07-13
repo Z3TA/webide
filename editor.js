@@ -56,6 +56,7 @@ editor.settings = {
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
+	clearColumnOptimization: false, // When deleting a character, clears only the character
 	insert: false
 };
 
@@ -1279,7 +1280,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	editor.clearColumn = function(row, col) {
-		// For optimization: Clears a box (screen area)
+		// For optimization: Clears a box (screen area) instead of doing a full re-render
 		
 		var file = editor.currentFile;
 		
@@ -2141,7 +2142,7 @@ editor.lastKeyPressed = "";
 				console.warn("Deleting word=" + word + " to autocomple wholeWord=" + wholeWord);
 				for(var i=0; i<word.length; i++) {
 					file.moveCaretLeft();
-					file.deleteCharacter(undefined, undefined, false); // false = Do not renderRow
+					file.deleteCharacter();
 				}
 				var insert = wholeWord;
 			}
@@ -3084,8 +3085,23 @@ editor.lastKeyPressed = "";
 		
 		keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
-		var keyT = 84;
-		keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
+		
+		if(file.devMode) {
+			
+			console.log("Loading tests ...");
+			
+			
+        var fileref=document.createElement('script')
+        fileref.setAttribute("type","text/javascript")
+        fileref.setAttribute("src", filename)		
+			
+		
+			console.log("Binding 'run tests' to Ctrl + Shift + T");
+			var keyT = 84;
+			keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
+			
+		}
+		
 		
 		// Handle file save dialog
 		var fileSaveAs = document.getElementById("fileSaveAs");

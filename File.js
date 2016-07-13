@@ -1193,7 +1193,6 @@
 		var box;
 		var row = 0;
 		
-		var bubbleUp = false;
 		
 		if(selection == undefined) {
 			selection = file.selected;
@@ -1272,7 +1271,7 @@
 				box.selected = false;
 				
 				// Delete character
-				file.deleteCharacter(file.caret, bubbleUp);
+				file.deleteCharacter(file.caret);
 				
 			}
 			
@@ -1769,7 +1768,7 @@
 		
 	}
 	
-	File.prototype.deleteCharacter = function(caret, bubble, renderNotNeeded) {
+	File.prototype.deleteCharacter = function(caret) {
 		/*
 			Removes the character the caret is on.
 			Behaves like delete in most editors.	
@@ -1778,7 +1777,6 @@
 		
 		var file = this;
 		
-		if(bubble == undefined) bubble = true;
 		if(caret == undefined) caret = file.caret;
 		
 		file.sanityCheck();
@@ -1849,8 +1847,6 @@
 			
 			//console.log("Row " + (row+1) + " removed");
 			
-			renderNotNeeded = false;
-			
 		}
 		else {
 			
@@ -1870,9 +1866,6 @@
 				}
 			*/
 		}
-		
-		
-		if(character == "{" || character == "}") renderNotNeeded = false;
 		
 		// Remove the character(s) from the text string
 		file.text = file.text.substr(0, index) + file.text.substring(index+indexDecrementor, file.text.length);
@@ -1909,9 +1902,8 @@
 		}
 		
 		// Call file edit listeners
-		if(bubble) {
-			file.change("delete", character, index, row, col) // change, text, index, row, col
-		}
+		file.change("delete", character, index, row, col) // change, text, index, row, col
+
 		
 		
 		console.timeEnd("deleteCharacter");
@@ -1921,8 +1913,6 @@
 		file.sanityCheck();
 		
 		file.scrollToCaret();
-		
-		if(!renderNotNeeded) editor.renderNeeded();
 		
 		return caret;
 		
