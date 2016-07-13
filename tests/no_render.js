@@ -43,4 +43,4 @@ editor.addTest(function doNotCallRender(testCallback) {
 		
 	});
 	
-}, 1);
+});

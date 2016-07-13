@@ -4,7 +4,7 @@
 	/*
 		
 		This file has all the tests for the editor core.
-		All (other) tests that has to do with a plugin, should be located together with the plugin file(s).
+		All (other) tests that has to do with a plugin, should be placed in the tests/ folder or added in the plugin itself.
 		
 		Ctrl+Shift+T first times runs the first test, second time, runs all tests. 
 		Pass an integer or true as second argument to editor.addTest() to run that test first!
@@ -20,7 +20,7 @@
 		editor.addTest(testFunction, runFirst)
 		
 		The name of the test function should be unique and describing. Use comments for extra documentation.
-		The testFunction has to accept a callback as first argument and call in with bool true. Ex: callback(true)
+		The testFunction has to accept a callback as first argument and call it with bool true. Ex: callback(true)
 		If the test function detects any errors, just throw new Error("whats wrong") and the test will fail. 
 		
 		
@@ -196,6 +196,8 @@
 	editor.addTest(function remVbComment(callback) {
 		editor.openFile("remVbComment.asp", "<%\nREM foo\n%>\n ", function(err, file) {
 			
+			if(!file.parsed) throw new Error("File was not parsed!");
+			
 			if(file.parsed.comments.length == 0) throw new Error("Expected a comment!");
 			
 			editor.closeFile(file.path);
@@ -203,7 +205,7 @@
 			callback(true);
 			
 		});
-	});
+	}, 1);
 	
 	
 	editor.addTest(function negativeIndentationBrackets(callback) {

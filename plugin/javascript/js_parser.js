@@ -150,7 +150,7 @@
 		
 		if(shouldParse(file)) { // If the file should be parsed or not
 			
-			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deletedSelection" || type == "deleteCharacter")) { // If the file was parsed before
+			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deleteCharacter")) { // If the file was parsed before
 				
 				console.log("type=" + type + " characters=" + characters);
 				
@@ -1946,7 +1946,7 @@
 				
 				//char = char.toLowerCase(); // vbScript is not case sensitive!
 				
-				if(!insideDblQuote && char == "m" && lastChar == "e" && llChar == "r") {
+				if(!insideDblQuote && char.toLowerCase() == "m" && lastChar.toLowerCase() == "e" && llChar.toLowerCase() == "r") {
 					insideLineComment = true;
 					commentStart = i+1;
 				}
@@ -2083,7 +2083,7 @@
 							}
 
 														
-							//console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
+							console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
 							
 							lastWord = word || lastWord; // Prevent lastWord to change to emty
 							word = "";
