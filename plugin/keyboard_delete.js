@@ -25,7 +25,9 @@
 			else {
 				file.deleteCharacter(file.caret);
 			}
-				
+			
+			editor.renderNeeded();
+			
 			return false; // Prevent default
 				
 		}
