@@ -271,7 +271,7 @@
 			//if(change=="linebreak") return;
 			if(change=="undo-redo") return;
 			
-			if(chnage == "deleteCharacter") return;
+			if(change == "deleteCharacter") return;
 			
 
 			// clear text decoration from current line
