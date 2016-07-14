@@ -85,6 +85,10 @@ Run the test
 BUGS (and issues)
 =================
 
+When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
+
+When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
+
 Something is causeing the function end to be off
 
 Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
