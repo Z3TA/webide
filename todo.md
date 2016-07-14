@@ -85,6 +85,8 @@ Run the test
 BUGS (and issues)
 =================
 
+spellchecker: Red waves doesn't go away when changing the word.
+
 When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
 
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
