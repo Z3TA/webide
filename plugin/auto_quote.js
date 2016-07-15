@@ -24,6 +24,8 @@
 	
 	function auto_quote_on_keyPressed(file, character, combo) {
 		
+		if(!file) return true;
+		if(!editor.input) return true;
 		if(!file.parsed) return true;
 		
 		// Only auto-insert quotes when we are coding, not when writing text!
