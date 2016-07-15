@@ -898,6 +898,8 @@
 	File.prototype.putCharacter = function(character, caret) {
 		/*
 			
+			The caller needs to explicitly call editor.renderNeeded()
+			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
 
 			
@@ -1751,6 +1753,7 @@
 			Removes the character the caret is on.
 			Behaves like delete in most editors.	
 			
+			The caller needs to explicitly call editor.renderNeeded()
 		*/
 		
 		var file = this;

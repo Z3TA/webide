@@ -12,11 +12,11 @@ Prio:
 What I'm working on
 -------------------
 
+
+
 todo:
 
-Refactor calls to file.x to be explicit about renderNeeded or not to allow optimization and remove "renderNotNeeded" options
 
-self_debug.js collect user actions to replay bugs for automatic testing.
 
 
 
