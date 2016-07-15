@@ -895,7 +895,7 @@
 	
 	
 	
-	File.prototype.putCharacter = function(character, caret, renderNotNeeded) {
+	File.prototype.putCharacter = function(character, caret) {
 		/*
 			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
@@ -1001,8 +1001,6 @@
 		console.timeEnd("putCharacter");
 		
 		file.sanityCheck();
-		
-		if(!renderNotNeeded) editor.renderNeeded();
 		
 	}
 	

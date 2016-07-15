@@ -2157,6 +2157,7 @@ editor.lastKeyPressed = "";
 				for(var i=wordLength; i<word.length; i++) {
 				file.putCharacter(word.charAt(i));
 				}
+				editor.renderNeeded();
 			*/
 			
 			//console.log("wordLength=" + wordLength);
@@ -3732,13 +3733,15 @@ editor.lastKeyPressed = "";
 					// We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
 					//setTimeout(function waitforrender() {
 					
-					file.putCharacter(character, undefined, true);
+					file.putCharacter(character);
+					// No render needed!
 					
 					//}, 22);
 					
 				}
 				else {
 					file.putCharacter(character);
+					editor.renderNeeded();
 				}
 				
 				
@@ -3966,9 +3969,11 @@ editor.lastKeyPressed = "";
 				}
 				else if(tildeAltActive) {
 					editor.currentFile.putCharacter("~");
+					editor.renderNeeded();
 				}
 				else if(tildeShiftActive) {
 					editor.currentFile.putCharacter("^");
+					editor.renderNeeded();
 				}
 			}
 		}

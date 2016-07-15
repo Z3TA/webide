@@ -98,38 +98,6 @@
 		}
 
 		
-		function completeWord(optionValue) {
-			
-			
-			var word = optionValue[0];
-			var wholeWord = optionValue[1];
-			var moveCaret = optionValue[2];
-			var insert = wholeWord.substring(word.length);
-			
-			console.log("Completing word=" + word + " wholeWord=" + wholeWord + " moveCaret=" + moveCaret + " insert=" + insert + "");
-			
-			
-			/* Use insertText for non-single letters ...
-			for(var i=wordLength; i<word.length; i++) {
-				file.putCharacter(word.charAt(i));
-			}
-			*/
-			
-			//console.log("wordLength=" + wordLength);
-			//console.log("word.length=" + word.length);
-			//console.log("insert=" + insert);
-			
-			file.insertText(insert);
-			
-			//console.log("moveCaret="+ moveCaret);
-			
-			if(moveCaret) file.moveCaretLeft(file.caret, moveCaret);
-	
-			
-			editor.renderNeeded();
-			
-		}
-		
 		function findFunctions(functions) {
 			// Find out if we are inside functions, then check those functions for variables and name of sub-functions.
 			
