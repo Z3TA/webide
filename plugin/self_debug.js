@@ -59,10 +59,10 @@
 	window.onerror = function(message, source, lineno, colno, error) {
 		
 		var yes = "Yes, Close the editor";
-		var no = "No, keep running";
 		var createTestRestart = "Create a test case and restart";
 		var createTestKeepRunning = "Create a test case and keep running";
-		confirmBox("" + source + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [yes, no, createTestRestart, createTestKeepRunning], function (answer) {
+		var no = "No, keep running";
+		confirmBox("" + source + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [yes, createTestRestart, createTestKeepRunning, no], function (answer) {
 			
 			if(answer == createTestRestart || answer == createTestKeepRunning) {
 				
