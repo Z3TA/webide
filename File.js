@@ -1147,8 +1147,8 @@
 		
 		file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
 		
-		file.grid = file.createGrid();
-				
+		file.grid = file.createGrid(); // will probably have to rewrite for performance
+		
 		// Create dummy caret to get row and col for the change event
 		var dummyCaret = file.createCaret(firstIndex);
 		
@@ -1156,7 +1156,14 @@
 			file.fixCaret(file.caret);
 		}
 		
-		file.scrollToCaret(); // Should fix file.startRow
+		/*
+		console.log("file.startRow=" + file.startRow);
+		console.log("file.grid.length=" + file.grid.length);
+		console.log("editor.view.visibleRows=" + editor.view.visibleRows);
+		console.log(file.startRow + " >= " + ((file.grid.length - editor.view.visibleRows / 2) | 0) + " = " + (file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) );
+		*/
+		
+		if(file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) file.scrollToCaret(); // Should fix file.startRow (bitwise or | truncate floating point numbers)
 		
 		console.timeEnd("deleteTextRange");
 		
@@ -1214,9 +1221,6 @@
 			firstCol = file.caret.col;
 			
 			//console.log("after selection removed, text.length=" + text.length);
-			
-			// Reset the view
-			file.scrollTo(undefined, file.caret.row-1);
 			
 			optimized = true;
 		}

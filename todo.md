@@ -28,13 +28,19 @@ Ask to fully restart the editor.
 
 When "debugging" Open up a editor clone, with --remote-debugging-port and run the tests there, so they can be debugged with breakpoints (do not self debug).
 
+---
+
 Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
+Because keyboard layouts are different. 
 Return false to prevent the character to be inserted into the document (default action)
 
 What's weird is that Ctrl+I does not trigger keyPress event, but Ctrl+U does (21). Why??
+This means we wouln't be able to bind anything on Ctrl+U (and more combos) as it never fires the keyPress event.
 
 Use this control key standard?
 https://en.wikipedia.org/wiki/Control_key
+
+---
 
 Replace all file IO with streams !?
 
@@ -63,20 +69,21 @@ Find out how to repeat the bug
 Write down how to manually repeat it, make test files, file bug report
 You will most likely find additional bugs while doing this. Write them down too!
 Priotize for witch one of the bugs to fix.
-Write a test case before fixing it ...
-Write code that automaticly repeats the bug
+Write a test case before fixing it (Write code that automaticly repeats the bug) ...
 Write mock tools (editor.mock) if needed
-Run the test
+Run the test (and make sure it fails)
 Refactor the entire program if needed to allow testing
 Run the test
 Refactor the entire program if needed to fix the bug
-Run the tests
+Run the tests 
 Fix the bug (like five years later after fixing all isses that comes up just for fixing this tiny bug <g>)
-Run the test
+Run the tests (and make sure there are no errors)
 
 
 BUGS (and issues)
 =================
+
+When deleting a selection (one word) the editor scrolls/jumps to that line.
 
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
 
