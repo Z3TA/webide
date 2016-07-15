@@ -1173,18 +1173,6 @@
 		/*
 			Deletes the selected text ...
 			
-			This is slow because the file is reparsed on each "edit".
-			
-			Deleting from a 53283 byte file with 1k lines:
-			Before optimization: deleteSelection: 2741.412ms
-			After disabling parse: deleteSelection: 2271.171ms
-			After removing file.debugGrid(): deleteSelection: 101.272ms
-			After devMode: false: deleteSelection: 47.054ms
-			
-			Deleting everything: deleteSelection: 5316.839ms
-			Deleting 100 rows: deleteSelection: 1001.039ms
-			
-			Deleting 100 rows After "reload" optimization: deleteSelection: 7.688ms
 		*/
 		
 		console.time("deleteSelection");
@@ -1198,7 +1186,7 @@
 			selection = file.selected;
 		}
 		
-		file.checkSelection();
+		file.checkSelection(); // Sanity check
 		
 		if(selection.length == 0) {
 			console.warn("Nothing is selected!");
@@ -1211,45 +1199,36 @@
 		
 		var firstBox = selection[0];
 		var firstIndex = firstBox.index;
-		
-		
-		// Get the selected text into a string
-		var chars = [];
-		for(var i=0; i<selection.length; i++) {
-			chars.push(selection[i].char);
-		}
-		var text = chars.join("");
 		var optimized = false;
-		
-		/*
-			Optimization if needed ...
-		*/
-		if(selection.length > 1000) {
+
 			
-			if(isContinuous(selection)) {
-				var lastIndex = selection[selection.length-1].index;
-				
-				// Place the caret where the selection was
-				file.caret = file.moveCaretToIndex(firstIndex);
-				
-				file.deleteTextRange(firstIndex, lastIndex);
-				
-				firstRow = file.caret.row;
-				firstCol = file.caret.col;
-				
-				//console.log("after selection removed, text.length=" + text.length);
-				
-				// Reset the view
-				file.scrollTo(undefined, file.caret.row-1);
-				
-				optimized = true;
-			}
-			else {
-				console.warn("Selection is not continuous!");
-			}
+		if(isContinuous(selection)) {
+			var lastIndex = selection[selection.length-1].index;
+			
+			// Place the caret where the selection was
+			file.caret = file.moveCaretToIndex(firstIndex);
+			
+			file.deleteTextRange(firstIndex, lastIndex);
+			
+			firstRow = file.caret.row;
+			firstCol = file.caret.col;
+			
+			//console.log("after selection removed, text.length=" + text.length);
+			
+			// Reset the view
+			file.scrollTo(undefined, file.caret.row-1);
+			
+			optimized = true;
 		}
 		
 		if(!optimized) {
+			
+			console.warn("There are multiple selections"); 
+			// Although not possible atm but probably will in the future
+			
+			// We'll have to delete the characters one by one ...
+			// Witch will be very slow because file.deleteCharacter calls file.change witch updates stuff (like parsing the file)
+			// We can optimze by having isContinuous return an index, call file.deleteTextRange, then repeat for every continous string
 			
 			file.caret = file.moveCaretToIndex(firstBox.index);
 			
@@ -1285,7 +1264,8 @@
 		console.timeEnd("deleteSelection");
 		
 		editor.renderNeeded();
-		file.change("deletedSelection", text, firstIndex, firstRow, firstCol);
+		
+		// file.change is called either by file.deleteTextRange or file.deleteCharacter
 		
 		
 		

@@ -145,7 +145,7 @@
 	
 	function parseJsOnChange(file, type, characters, caretIndex, row, col) {
 		/*
-			type: "delete", "linebreak", "insert", "text", deleteTextRange, deletedSelection, reload, 
+			type: "delete", "linebreak", "insert", "text", deleteTextRange, deleteCharacter, reload, 
 		*/
 		
 		if(shouldParse(file)) { // If the file should be parsed or not
@@ -177,7 +177,7 @@
 					
 					var charactersLength = characters.length;
 					
-					if(type == "delete" || type == "deleteTextRange" || type == "deletedSelection" || type == "deleteCharacter") {
+					if(type == "delete" || type == "deleteTextRange" || type == "deleteCharacter") {
 						charactersLength = -charactersLength;
 					}
 					

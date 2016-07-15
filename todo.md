@@ -12,13 +12,6 @@ Prio:
 What I'm working on
 -------------------
 
-Refactor file.deleteSelection
-
-deletedSelection reports wrong text witch screws up the parser optimizer
-
-
-
-
 todo:
 
 Refactor calls to file.x to be explicit about renderNeeded or not to allow optimization and remove "renderNotNeeded" options
@@ -85,13 +78,14 @@ Run the test
 BUGS (and issues)
 =================
 
-spellchecker: Red waves doesn't go away when changing the word.
-
-When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
-
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
 
 Something is causeing the function end to be off
+
+
+spellchecker: Red waves doesn't go away when changing the word.
+
+When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
 
 Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
 
