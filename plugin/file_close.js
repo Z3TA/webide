@@ -35,6 +35,10 @@
 					if(answer == yes) editor.closeFile(editor.currentFile.path);
 				});
 			}
+			else {
+				// Close it right away if it's saved
+				editor.closeFile(editor.currentFile.path);
+			}
 			
 		}
 		else {
