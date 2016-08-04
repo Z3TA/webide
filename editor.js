@@ -3087,7 +3087,7 @@ editor.lastKeyPressed = "";
 		keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
 		
 		
-		if(editor.settings.devMode) {
+		if(editor.settings.devMode && runtime != "browser") {
 			
 			console.log("Loading tests ...");
 			var walk = require('walk');
@@ -4511,4 +4511,4 @@ editor.lastKeyPressed = "";
 		
 		
 		
-	})();
+})();
