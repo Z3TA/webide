@@ -103,15 +103,40 @@
 				winState.deltaHeight = deltaHeight;
 			}
 		}
+		
+		checkWindowSate();
 	}
 
+	function checkWindowSate() {
+		if(winState.x < 0 || winState.y < 0) throw new Error("Windows state error: " + JSON.stringify(winState));
+
+		if(winState.width < 100 || winState.height < 100) throw new Error("Windows state width/height too low: " + JSON.stringify(winState));
+		
+	}
+	
 	function restoreWindowState() {
+		
+		try {
+			checkWindowSate();
+		}
+		catch(e) {
+			console.warn("The window state was reset from " + JSON.stringify(winState));
+			
+			winState.x = 0;
+			winState.y = 0;
+			winState.width = 800;
+			winState.height = 600;
+			
+		}
+		
 		// deltaHeight already saved, so just restore it and adjust window height
 		if (deltaHeight !== 'disabled' && typeof winState.deltaHeight !== 'undefined') {
 			deltaHeight = winState.deltaHeight
 			winState.height = winState.height - deltaHeight
 		}
-
+		
+		console.log("winState=" + JSON.stringify(winState));
+		
 		win.resizeTo(winState.width, winState.height);
 		win.moveTo(winState.x, winState.y);
 		editor.resizeNeeded();
