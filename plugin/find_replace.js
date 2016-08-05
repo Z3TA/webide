@@ -26,7 +26,7 @@
 		
 		editor.bindKey({desc: "Find or replace in current file", charCode: char_F, combo: CTRL, fun: findReplace});
 		
-		editor.bindKey({desc: "Hide the gind/replace GUI", charCode: char_Esc, fun: pressEscape});
+		editor.bindKey({desc: "Hide the find/replace GUI", charCode: char_Esc, fun: hideFindReplaceGui});
 		
 		editor.on("moveCaret", function resetLastSearchStrLength(file, caret) {
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
@@ -249,11 +249,6 @@
 			if (event.keyCode == keyEnter) {
 				findButtonRight.click();
 			}
-/*
-			else if(event.keyCode == keyEscape) {
-				pressEscape();
-			}
-*/
 		}, false);
 		
 		inputReplace.addEventListener("keyup", function(event) {
@@ -262,9 +257,6 @@
 			
 			if (event.keyCode == keyEnter) {
 				replaceButton.click();
-			}
-			else if(event.keyCode == keyEscape) {
-				pressEscape();
 			}
 		}, false);
 		
@@ -347,7 +339,7 @@
 	}
 	
 	
-	function pressEscape() {
+	function hideFindReplaceGui() {
 		
 		hide_search();
 		

@@ -32,6 +32,8 @@
 		
 		editor.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
+		//editor.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
+
 	}
 	
 	function leftOrRight() {
@@ -106,7 +108,7 @@
 	}
 		
 	
-	function pressEscape() {
+	function blurFunctionList() {
 		// Remove focus from the select box
 		if(functionListSelect) {
 			functionListSelect.blur();
@@ -435,7 +437,7 @@
 				event.preventDefault();
 				
 				if (event.keyCode == keyEscape) {
-					pressEscape();
+					blurFunctionList();
 				}
 				else if(event.keyCode == keyLeft || event.keyCode == keyRight) {
 					leftOrRight();

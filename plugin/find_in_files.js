@@ -23,7 +23,9 @@
 		
 		// Pressing Ctrl + shift + F should hide or show the search window
 		editor.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
-
+		
+		editor.bindKey({desc: "Hide the find in files GUI", charCode: keyEscape, fun: hideFindInFilesGui});
+		
 		
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
@@ -205,7 +207,7 @@
 		return true;
 	}
 	
-	function pressEscape() {
+	function hideFindInFilesGui() {
 		
 		if(divVisible) {
 			hide_find_in_files();
@@ -462,9 +464,6 @@
 			
 			if (event.keyCode == keyEnter) {
 				buttonFindInFiles.click();
-			}
-			else if(event.keyCode == keyEscape) {
-				pressEscape();
 			}
 		}, false);
 		buttonFindInFiles.addEventListener("click", function() {
