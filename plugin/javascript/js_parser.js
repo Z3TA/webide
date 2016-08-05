@@ -198,12 +198,18 @@
 							console.log("Parsing only f=" + f.name + "");
 							
 							// The start property is at the { after function
-							var parseStart = file.text.lastIndexOf("function", f.start);
+							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : ""), f.start);
 							var parseEnd = f.end + charactersLength + 1;
 							var parseStartRow = f.lineNumber-1;
 							var baseIndentation = file.grid[parseStartRow].indentation;
 							var oldStart = f.start;
 							var oldEnd = f.end;
+							
+							if(parseStart == -1) throw new Error("Unable to find start of function=" + f.name + " parseStart=" + parseStart);
+
+							// function names can include the string "function" ex: function function_function ( )  {
+							
+							
 							
 							//if(charactersLength < 0) parseEnd++;
 							
@@ -386,6 +392,8 @@
 							
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
+							
+							if(Object.keys(newParse.functions).length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions));
 							
 							var ff = newParse.functions[firstValueInObjectList(newParse.functions)]; // Ref to the same function in new parse
 							

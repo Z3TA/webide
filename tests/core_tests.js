@@ -24,9 +24,46 @@
 		If the test function detects any errors, just throw new Error("whats wrong") and the test will fail. 
 		
 		
+		todo: The JS parser should have its own test file
 		
 	*/
 	
+	editor.addTest(function functionInFunctionname(callback) {
+		// Testing if the parser optimizer can handle functions where the function name contains the string "function"
+		var done = 0;
+		
+		editor.openFile("functionInFunctionname1.js", 'function functionInFunctionname() {\n\n};', function(err, file) {
+			file.moveCaret(undefined, 1); // Move the caret into the function
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Should throw error: Parsed code contains no function! from js_parser
+			
+			// Press delete to undo, to prevent warning dialog about unsaved
+			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			
+			editor.closeFile(file.path);
+			
+			if(++done == 3) callback(true);
+			
+		});
+		// hmm. what about many function declarations on the same line? 
+		editor.openFile("functionInFunctionname2.js", 'function foo() {function bar() {\n\n}};', function(err, file) {
+			file.moveCaret(undefined, 1); // Move the caret into the function
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			editor.closeFile(file.path);
+			if(++done == 3) callback(true);
+		});
+		
+		// or somefunction(function() {}}
+		editor.openFile("functionInFunctionname3.js", 'function somefunction(function() {\n\n});', function(err, file) {
+			file.moveCaret(undefined, 1); // Move the caret into the function
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			editor.closeFile(file.path);
+			if(++done == 3) callback(true);
+		});
+
+	});
 	
 	editor.addTest(function findPrototypeFunc(callback) {
 		editor.openFile("findPrototypeFunc.js", 'function foo() {};\nbar.foo = function() {};\nfoo.prototype.bar = function() {}\n', function(err, file) {
