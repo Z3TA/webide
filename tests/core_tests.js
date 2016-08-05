@@ -28,6 +28,34 @@
 		
 	*/
 	
+	
+	
+	
+
+	editor.addTest(function secondSubfunction(callback) {
+		editor.openFile("secondSubfunction.js", 'function baz() {\nfunction foo() {\nabc\n}\nfunction bar() {\n\n}\n}\n', function(err, file) {
+			
+			// Testing if the parser optimizer can handle editing bar, then typing into baz
+			
+			// Add a letter to the foo function
+			var char_D = 68;
+			file.moveCaret(undefined, 2, 3);
+			editor.mock("keyDown", {charCode: char_D, target: "canvas"});
+			
+			// Add a letter to the bar function
+			var char_A = 65;
+			file.moveCaret(undefined, 5);
+			editor.mock("keyDown", {charCode: char_A, target: "canvas"});
+			
+			// If something wrong, and error should be thrown here from js_parser.js
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
+	
 	editor.addTest(function functionInFunctionname(callback) {
 		// Testing if the parser optimizer can handle functions where the function name contains the string "function"
 		var done = 0;

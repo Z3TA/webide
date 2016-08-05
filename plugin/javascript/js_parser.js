@@ -562,9 +562,10 @@
 			
 			var func;
 			for(var fname in functions) {
-				
 				func = functions[fname];
-								
+				
+				console.log("updateThingsFunctions fname=" + fname + " func.start=" + func.start + " > oldEnd=" + oldEnd + " ? func.end=" + func.end);
+				
 				if(func.start > oldEnd) {
 					
 					console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
@@ -585,9 +586,10 @@
 						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
 					}
 					
-					updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Update subfunctions
-
 				}
+				
+				if(oldEnd > func.start && oldEnd < func.end) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
+				
 			}
 		}
 		
