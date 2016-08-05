@@ -20,7 +20,13 @@
 		console.log("find_replace.js loaded!");
 		
 		// Bind to ctrl + F
-		editor.bindKey({desc: "Find or replace in current file", charCode: 70, combo: CTRL, fun: findReplace}); // Ctrl + F
+		
+		var char_F = 70;
+		var char_Esc = 27;
+		
+		editor.bindKey({desc: "Find or replace in current file", charCode: char_F, combo: CTRL, fun: findReplace});
+		
+		editor.bindKey({desc: "Hide the gind/replace GUI", charCode: char_Esc, fun: pressEscape});
 		
 		editor.on("moveCaret", function resetLastSearchStrLength(file, caret) {
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
@@ -243,9 +249,11 @@
 			if (event.keyCode == keyEnter) {
 				findButtonRight.click();
 			}
+/*
 			else if(event.keyCode == keyEscape) {
 				pressEscape();
 			}
+*/
 		}, false);
 		
 		inputReplace.addEventListener("keyup", function(event) {
