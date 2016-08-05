@@ -2861,7 +2861,7 @@ editor.lastKeyPressed = "";
 			}
 			
 			return retDown;
-}
+	}
 		
 }
 	
