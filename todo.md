@@ -4,6 +4,15 @@ Prio:
 
 1) Bug/issue fixing and refactoring
 2) Polishing of existing features
+
+Work on the SSG integration.
+Control buttons on the preview to resize the preview window.
+
+Partial generation (generate only the page being worked on).
+Better preview. WYSIWYG editing.
+FTP-publishing
+Auto preview SSG site when saving?
+
 3) Optimization (toggle devMode off when testing!)
 4) New features
 
@@ -13,10 +22,14 @@ What I'm working on
 -------------------
 
 
+Undoing commit 692 for Escape
+
+Adding controls for resizing the preview in SSG: small, medium, large
+
 
 todo:
 
-
+More functions to the SSG
 
 
 
@@ -65,11 +78,13 @@ Plugins GUI's should use their own event handlers for the GUI instead of clutter
 
 When discovering a bug
 ----------------------
+Write down what you are working on ... because we are going to enter several levels of bugception and you will totally have forgotten what you worked on when you investigate the bug of the bug of the bug of the bug
 Find out how to repeat the bug
-Write down how to manually repeat it, make test files, file bug report
+Write bug traps, like if(f>99) throw new Error("Found bug X, state=" + state)
+Write down how to manually repeat it, make example files, file bug report
 You will most likely find additional bugs while doing this. Write them down too!
 Priotize for witch one of the bugs to fix.
-Write a test case before fixing it (Write code that automaticly repeats the bug) ...
+Write a test case before fixing it (Write code that automaticly repeats the bug) ... And document in the test file /tests/mybug.js about the bug or why the test is needed
 Write mock tools (editor.mock) if needed
 Run the test (and make sure it fails)
 Refactor the entire program if needed to allow testing
@@ -83,7 +98,11 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-When deleting a selection (one word) the editor scrolls/jumps to that line.
+When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
+
+Doesn't get the right indentation on block end character
+
+ssg/build.js line 619 color error
 
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
 
@@ -753,6 +772,9 @@ Optimize if needed
 Feature list (Not ordered/priotized)
 ------------------------------------
 
+Mercurial integration: Mark lines that have changed since last commit (green bar in the left margin!?)
+
+
 Reopen last closed file (from this session)
 
 Show red circles where the parser detects a syntax error!? Like unfinished quote or regexp
@@ -997,6 +1019,13 @@ When renaming a html tag, also rename the sibmling. <pre|<--renaming> lalala </p
 
 Support screen readers. It should be possible to use the editor with eyes closed.
 
+Spellcheck single word. For when the spell-checker is disabled.
+
+Peek definition. when you want to peek a few lines of a method or type
+
+auto-completes based on other words in open windows (or other files in the open project).
+
+
 
 Need though
 -----------
@@ -1013,6 +1042,18 @@ Spellchecker can be run as a service.
 About trying other runtimes, like native rendering. We should stick with "browser" because getting something to render natively, like openGL is too damn complicated.
 
 How should updating work!? Stable branch=double work!?
+
+
+
+Common JS errors
+================
+
+Forgot to close lamda function. Ex:
+
+functionCall(function callback() {
+
+} <!-- forgot parenthesis here
+
 
 
 
