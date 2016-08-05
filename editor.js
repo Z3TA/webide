@@ -3850,13 +3850,7 @@ editor.lastKeyPressed = "";
 					
 					if(!editor.currentFile) console.warn("No file open!");
 					
-					try {
-						funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
-					} 
-					catch(err) {
-						gotError = err;
-						console.warn("Error when running key bound function:" + err.stack);
-					}
+					funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 					
 					console.log(getFunctionName(binding.fun) + " returned " + funReturn);
 					
@@ -3875,8 +3869,8 @@ editor.lastKeyPressed = "";
 		}
 		
 		// Throwing the actual error here doesn't give a call stack! meh ... Need to see the console.warning to see the call stack
-		if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
-		
+		//if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
+		// Otimally we would want all key bound functions to run before throwing the error, but it's too annoying to not see the call stack in the error
 		
 		if(editor.currentFile) {
 			editor.currentFile.checkGrid();
