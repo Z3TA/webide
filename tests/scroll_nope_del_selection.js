@@ -41,4 +41,4 @@ editor.addTest(function doNotScrollWhenDeletingSelection(testCallback) {
 		
 	});
 	
-}, 1);
+});
