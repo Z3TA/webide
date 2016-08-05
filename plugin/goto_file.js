@@ -19,6 +19,12 @@
 	var dirsSearched = [];
 	var searchRetries = 0;
 	
+	var keyUp = 38;
+	var keyDown = 40;
+	var charEscape = 27;
+	var charEnter = 13;
+	var charP = 80;
+	
 	window.addEventListener("load", gotoFile_init, false);
 	
 	function gotoFile_init() {
@@ -42,11 +48,13 @@
 		
 		//build_gotoInput();
 		
-		hide_gotoInput();
+		hide_gotoFileInput();
 		
-		var charP = 80;
 		editor.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + R
-
+		
+		editor.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
+		
+		
 	}
 	
 	function build_gotoInput() {
@@ -111,7 +119,7 @@
 		
 		gotoButton.addEventListener("click", gotoFile, false);
 		
-		cancelButton.addEventListener("click", hide_gotoInput, false);
+		cancelButton.addEventListener("click", hide_gotoFileInput, false);
 		
 		inputGoto.addEventListener("keyup", typing, false);
 		
@@ -125,13 +133,7 @@
 	
 	function typing(event) {
 		
-		
 		console.log("event.keyCode=" + event.keyCode);
-		
-		var keyUp = 38;
-		var keyDown = 40;
-		var charEscape = 27;
-		var charEnter = 13;
 		
 		event.preventDefault();
 
@@ -140,7 +142,7 @@
 			return;
 		}
 		else if(event.keyCode == charEscape) {
-			hide_gotoInput();
+			hide_gotoFileInput();
 			return;
 		}
 		else if(event.keyCode == keyUp) {
@@ -428,7 +430,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 		return false; // Return false to prevent default
 	}
 
-	function hide_gotoInput() {
+	function hide_gotoFileInput() {
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
 		
@@ -577,7 +579,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 				file.scrollToCaret();
 			*/
 			
-				hide_gotoInput();
+			hide_gotoFileInput();
 			
 			return false; // Return false to prevent default (typing a linebreak character)
 			

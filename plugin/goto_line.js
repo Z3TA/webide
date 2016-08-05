@@ -8,6 +8,8 @@
 	var gotoInputIsVisible = false;
 	var inputGoto;
 	var gotoButton;
+	var key_Esc = 27;
+	var key_G = 71;
 	
 	window.addEventListener("load", goto_init, false);
 
@@ -31,10 +33,10 @@
 		
 		//build_gotoInput();
 		
-		hide_gotoInput();
+		hide_gotoLineInput();
 		
-		editor.bindKey({desc: "Goto line ...", charCode: 71, combo: CTRL, fun: show_gotoInput}); // ctrl + G
-	
+		editor.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		editor.bindKey({desc: "Hite the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
 	}
 	
 	function build_gotoInput() {
@@ -78,14 +80,14 @@
 			if (event.keyCode == 13) {
 				gotoLine(); // When pressing enter
 			}
-			else if(event.keyCode == 27) {
-				hide_gotoInput(); // When pressing escape
+			else if(event.keyCode == key_Esc) {
+				hide_gotoLineInput(); // When pressing escape
 			}
 		});
 	
 		gotoButton.addEventListener("click", gotoLine, false);
 		
-		cancelButton.addEventListener("click", hide_gotoInput, false);
+		cancelButton.addEventListener("click", hide_gotoLineInput, false);
 		
 		gotoInputIsVisible = true;
 		
@@ -136,7 +138,7 @@
 
 	}
 
-	function hide_gotoInput() {
+	function hide_gotoLineInput() {
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
 		
@@ -195,7 +197,7 @@
 				
 				file.gotoLine(line);
 				
-				hide_gotoInput();
+				hide_gotoLineInput();
 				
 			}
 		
