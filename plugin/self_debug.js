@@ -18,9 +18,9 @@
 	var files = {};
 	var fileState = {};
 	
-	editor.on("fileOpen", selfDebugFileOpen);
-	editor.on("fileClose", selfDebugFileClose);
-	editor.on("interaction", selfDebugInteraction);
+	//editor.on("fileOpen", selfDebugFileOpen);
+	//editor.on("fileClose", selfDebugFileClose);
+	//editor.on("interaction", selfDebugInteraction);
 	//editor.on("fileChange", selfDebugFileChange);
 	
 	
