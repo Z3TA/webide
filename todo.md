@@ -98,6 +98,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+When selecting something and pressing " character, the selection is not deleted.
+
+After deliting a large chunk of text: File.js:469 Uncaught Error: file.startRow=120 grid.length=41 file.partStartRow=0
+
 When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
 
 Doesn't get the right indentation on block end character

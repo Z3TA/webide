@@ -28,10 +28,24 @@
 		
 	*/
 	
+	editor.addTest(function fooeqfunction(callback) {
+		// Testing if the parser optimizer can handle foo = function() 
+		
+		editor.openFile("fooeqfunction.js", 'foo = function () {\n\n};', function(err, file) {
+			file.moveCaret(undefined, 1); // Move the caret into the function
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Should throw Error: Unable to find start of function=foo 
+			
+			// Press delete to undo, to prevent warning dialog about unsaved
+			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
-	
-	
-
 	editor.addTest(function secondSubfunction(callback) {
 		editor.openFile("secondSubfunction.js", 'function baz() {\nfunction foo() {\nabc\n}\nfunction bar() {\n\n}\n}\n', function(err, file) {
 			
