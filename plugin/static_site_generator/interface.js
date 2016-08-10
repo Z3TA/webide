@@ -15,10 +15,9 @@
 	var inputPublishFolder;
 	var inputTemplate;
 	
-	
-	var previewView;
-	var previewIframe;
-	
+	// Load native UI library
+	var gui = require('nw.gui');
+	var previewWin;
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -79,9 +78,9 @@
 			if(filePath.indexOf(sites[i].source) != -1) {
 				selectedSite = sites[i];
 				break;
-}
+			}
 		}
-		}
+	}
 	
 	
 	function unload() {
@@ -98,7 +97,6 @@
 		
 		buildEdit();
 		buildControl();
-		buildPreview();
 		
 		editView.style.display="none";
 		
@@ -111,6 +109,7 @@
 		
 		console.log("done building server manager");
 	}
+	
 	
 	function buildControl() {
 		
@@ -130,14 +129,45 @@
 		labelSite.appendChild(document.createTextNode("Site:")); // Language settings!?
 		labelSite.appendChild(selectSite);
 		
-		var buttonSetWorkingDirectory = document.createElement("input");
-		buttonSetWorkingDirectory.setAttribute("type", "button");
-		buttonSetWorkingDirectory.setAttribute("class", "button");
-		buttonSetWorkingDirectory.setAttribute("value", "Set working directory");
-		buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
-		buttonSetWorkingDirectory.addEventListener("click", function() {
+		/*
+			var buttonSetWorkingDirectory = document.createElement("input");
+			buttonSetWorkingDirectory.setAttribute("type", "button");
+			buttonSetWorkingDirectory.setAttribute("class", "button");
+			buttonSetWorkingDirectory.setAttribute("value", "Set working directory");
+			buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
+			buttonSetWorkingDirectory.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			editor.workingDirectory = selectedSite.source;
+			hide();
+			}, false);
+		*/
+		
+		var buttonOpenEdit = document.createElement("input");
+		buttonOpenEdit.setAttribute("type", "button");
+		buttonOpenEdit.setAttribute("class", "button");
+		buttonOpenEdit.setAttribute("value", "Open/edit file/page");
+		buttonOpenEdit.setAttribute("title", "Select a file from the source code folder");
+		buttonOpenEdit.addEventListener("click", function() {
+			if(!selectedSite) throw new Error("No site selected!");
+			
+			editor.workingDirectory = selectedSite.source;
+			
+			editor.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
+				
+				editor.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
+					
+					if(err) throw err;
+					
+					// Mark the file as saved, because we just opened it
+					file.isSaved = true;
+					file.savedAs = true;
+					file.changed = false;
+					
+					editor.renderNeeded();
+					
+				});
+			});
+			
 			hide();
 		}, false);
 		
@@ -183,7 +213,7 @@
 		
 		
 		controlView.appendChild(labelSite); // Includes selectSite
-		controlView.appendChild(buttonSetWorkingDirectory);
+		controlView.appendChild(buttonOpenEdit);
 		controlView.appendChild(buttonNewPage);
 		controlView.appendChild(buttonPreview);
 		controlView.appendChild(buttonPublish);
@@ -477,23 +507,6 @@
 		
 	}
 	
-	function buildPreview() {
-		
-		var rightColumn = document.getElementById("rightColumn");
-		
-		previewView = document.createElement("div");
-		previewView.setAttribute("style", "display: none;"); 
-		
-		previewIframe = document.createElement("iframe");
-		previewIframe.setAttribute("width", "500");
-		previewIframe.setAttribute("height", "100%"); 
-		
-		previewView.appendChild(previewIframe);
-		
-		rightColumn.appendChild(previewView);
-		
-	}
-	
 	function addSiteOption(site, index) {
 		
 		if(!selectSite) throw new Error("selectSite not yet created!");
@@ -522,11 +535,17 @@
 		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
 		
 		// Only need to hide if the object is created!
-		if(manager) manager.style.display = "none";
-		if(previewView) previewView.style.display="none";
-		
-		if(manager || previewView) editor.resizeNeeded();
-		
+		if(manager) {
+			manager.style.display = "none";
+			editor.resizeNeeded();
+		}
+		if(!previewWin) {
+			try {
+				previewWin.close();
+			}
+			catch(e) {
+}
+}
 		return false;
 	}
 	
@@ -543,10 +562,6 @@
 		
 		var errorOccured = false;
 		
-		if(!previewView) buildPreview();
-		
-		previewView.style.display="block";
-		
 		compile(site.source, site.preview, function buildDone() {
 			var path = require('path');
 			
@@ -562,38 +577,48 @@
 					
 					//var url = path.join(site.preview, editor.currentFile.name);
 					
-					var url = editor.currentFile.path.replace(site.source, site.preview);
+					// url needs to have / instead of \ for path delimiter
+					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
-					try {
-						previewIframe.src = url
+					if(!previewWin || !previewWin.window) {
+						previewWin = gui.Window.open(url) // Create a new window and get it
+						// And listen to new window's focus event
+						previewWin.on('focus', previewWinFocus);
 					}
-					catch(err) {
-						errorOccured = true;
-						console.warn(err.message);
-						alert("Unable to load: " + url + "\n" + err.message);
+					else {
+						if(previewWin.window.location == url || previewWin.window.location == "swappedout://") {
+							var scrollTop = previewWin.window.scrollTop; // Get the scroll position
+							console.log("scrollTop=" + scrollTop);
+							if(previewWin.window.location == url) previewWin.reload()
+							else previewWin.window.location = url;
+							previewWin.window.scrollTop = scrollTop; // Set the scroll position again
+							
+						}
+						else {
+							console.log("url=" + url + " != " + previewWin.window.location);
+							previewWin.window.location = url;
+							
+						}
+						
+						previewWin.focus();
+						
 					}
+					
+					// If 404 !?
+					//previewIframe.src = path.join(site.preview, "index.htm");
 					
 				}
-				else {
-					previewIframe.src = path.join(site.preview, "index.htm");
-				}
+				
 			}
 			
-			if(!errorOccured) {
-				
-				previewIframe.setAttribute("width", Math.floor(editor.view.canvasWidth / 2));
-				previewIframe.setAttribute("height", Math.floor(editor.view.canvasHeight));
-				
-				previewIframe.style.display="block";
-				editor.resizeNeeded();
-			}
-			
-			//alert("Done! errorOccured=" + errorOccured + " previewIframe with: " + previewIframe.getAttribute("width"));
-			
+			return false;
 		});
-		
-		return false;
-		
+		}
+
+	
+	function previewWinFocus() {
+		console.log('previe window is focused');
+		editor.input = false;
 	}
 	
 	function publish() {

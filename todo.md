@@ -21,10 +21,7 @@ Auto preview SSG site when saving?
 What I'm working on
 -------------------
 
-
-Undoing commit 692 for Escape
-
-Adding controls for resizing the preview in SSG: small, medium, large
+Focus preview window on refresh
 
 
 todo:
@@ -775,6 +772,8 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+Reopen/refresh file from disk.
 
 Mercurial integration: Mark lines that have changed since last commit (green bar in the left margin!?)
 
