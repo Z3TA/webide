@@ -17,7 +17,7 @@ editor.settings = {
 	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
-	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select"], // Intendent after these XML tags
+	indentAfterTags: ["div", "ul", "ol", "head", "script", "style", "table", "tr", "form", "select", "frameset"], // Intendent after these XML tags
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
 	caret: {
 		width: 1,
