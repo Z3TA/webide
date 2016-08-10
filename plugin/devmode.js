@@ -156,7 +156,7 @@
 				}
 				
 				if(ret !== true) {
-					throw error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+					throw new Error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 				}
 				else {
 					/*
