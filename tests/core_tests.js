@@ -44,7 +44,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function secondSubfunction(callback) {
 		editor.openFile("secondSubfunction.js", 'function baz() {\nfunction foo() {\nabc\n}\nfunction bar() {\n\n}\n}\n', function(err, file) {

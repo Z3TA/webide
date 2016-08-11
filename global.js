@@ -61,7 +61,105 @@ const ALT = 4;
 
 // Global functions ...
 
+function textDiff(originalText, editedText, ignoreRows) {
+	
+	console.log("running textDiff");
+	
+	var lbOriginalText = determineLineBreakCharacters(originalText);
+	var lbEditedText = determineLineBreakCharacters(editedText);
+	
+	if(lbOriginalText != lbEditedText) console.warn("textDiff: Different line-break conventions!");
+	
+	var originalRow = originalText.split(lbOriginalText);
+	var editedRow = editedText.split(lbEditedText);
+	
+	if(ignoreRows) {
+		// Remove the ignoreRows from editedRows
+		ignoreRows.sort(function(a, b) {return a - b;}); // Make sure ignoreRows is ordered to prevent bugs with splice
+		
+		for(var i=ignoreRows.length-1; i>-1; i--) {
+			console.log("ignore row=" + ignoreRows[i] + " : " + editedRow[ignoreRows[i]]);
+			editedRow.splice(ignoreRows[i], 1);
+		}
+		}
+	
+	var diffRows = [];
+	
+	/*
+		problems: One or many rows can be moved
+		
+	*/
+	
+	var removed = [];
+	var inserted = [];
+	
+	var index = -1;
+	for(var i=0, j=0; i<originalRow.length && j<editedRow.length; i++) {
+		j++;
+		// We don't care about white space
+		originalRow[i] = originalRow[i].trim();
+		editedRow[i] = editedRow[i].trim();
+		
+		if(originalRow[i] != editedRow[i]) {
+			// The edited row doesn't match the original row
+			
+			if(editedRow.indexOf(originalRow[i]) == -1) { 
+				// The original row doesn't exist in the edited text, so it has been removed
+				removed.push([originalRow[i], i]);
+				console.log("---- " + originalRow[i]);
+				
+				// Check if the original text contains the edited row
+				index = originalRow.indexOf(editedRow[i]);
+				if(index == -1) {
+					// The edited row doesn't exit in original, so it was inserted
+					inserted.push([editedRow[i], i]);
+					console.log("++++ " + editedRow[i]);
+				}
+				else {
+					// The edited row exist in the original, so it must have been moved there
+					
+				}
+				
+			}
+			else {
+				// The original row was either moved there or text where added above
+				index = originalRow.indexOf(editedRow[i]);
+				if(index == -1) {
+					// The edited row doesn't exit in original, so it was inserted
+					inserted.push([editedRow[i], i]);
+					console.log("++++ " + editedRow[i]);
+				}
+				else {
+					// The edited row exist in the original, so it must have been moved there
+					
+				}
+			}
+			
+		}
+		else {
+			console.log(originalRow[i]);
+		}
+		
+	}
+	
+	return {inserted: inserted, removed: removed};
+	
+}
 
+function textDiffCol(originalText, editedText) {
+	// Returns the column for when original and edited texts depart
+	
+	originalText = originalText.trim();
+	editedText = editedText.trim();
+	
+	for (var i=0; i<originalText.length; i++) {
+		if(originalText[i] != editedText[i]) {
+			return i;
+		}
+	}
+	
+	return -1;
+}
 
 function Dialog(msg, icon) {
 	

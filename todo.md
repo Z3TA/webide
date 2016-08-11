@@ -21,7 +21,10 @@ Auto preview SSG site when saving?
 What I'm working on
 -------------------
 
-Focus preview window on refresh
+textDiff - making tests
+
+
+Update the source code when editing in the preview SSG
 
 
 todo:
@@ -94,6 +97,10 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
+
+When selecting right to left and then deleting the text sometimes gives textrange end < start
 
 When selecting something and pressing " character, the selection is not deleted.
 
@@ -772,6 +779,8 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+When pasting in a if or for statement without matching curly-brackets, insert the missing bracket if the global matched brackets is ok.
 
 Reopen/refresh file from disk.
 

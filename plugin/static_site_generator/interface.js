@@ -18,6 +18,8 @@
 	// Load native UI library
 	var gui = require('nw.gui');
 	var previewWin;
+	var sourceFile; // Source file that is being previewed
+	var ignoreRows = []; // Ignore these diff lines when updating from edits in the preview
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -64,6 +66,11 @@
 		});
 		
 		editor.on("fileShow", fileChanged);
+		
+		editor.on("exit", function SSG_cleanup() {
+			closePreview();
+			return true;
+		});
 		
 	}
 	
@@ -539,13 +546,8 @@
 			manager.style.display = "none";
 			editor.resizeNeeded();
 		}
-		if(!previewWin) {
-			try {
-				previewWin.close();
-			}
-			catch(e) {
-}
-}
+		if(previewWin) closePreview() ;
+		
 		return false;
 	}
 	
@@ -565,25 +567,52 @@
 		compile(site.source, site.preview, function buildDone() {
 			var path = require('path');
 			
-			if(!editor.currentFile) previewIframe.src = path.join(site.preview, "index.htm");
-			else {
+			if(editor.currentFile) {
 				var fileName = editor.currentFile.name;
 				var fileType = editor.currentFile.fileExtension;
 				
-				
 				if(editor.currentFile.path.indexOf(site.source) != -1 // Inside source path?
-				&& (fileType == "htm" || fileType=="html" || fileType=="md") // Right file type
+				&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
 				&& fileName != "header" && fileName != "footer") { 
+					
+					// Save the src file so we edit the right file
+					sourceFile = editor.currentFile;
 					
 					//var url = path.join(site.preview, editor.currentFile.name);
 					
 					// url needs to have / instead of \ for path delimiter
 					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
-					if(!previewWin || !previewWin.window) {
-						previewWin = gui.Window.open(url) // Create a new window and get it
-						// And listen to new window's focus event
+					if(!previewWin) {
+						//closePreview(); // Just in case
+						
+						previewWin = gui.Window.open(url);
+						
 						previewWin.on('focus', previewWinFocus);
+						
+						previewWin.on("loaded", function previewWinLoaded() {
+							
+							console.log("PreviewWin loaded!");
+							
+							//var body = previewWin.window.getElementsByTagName("body")[0];
+							var body = previewWin.window.document.body;
+							
+							body.contentEditable = "true";
+							
+							previewWin.window.addEventListener("input", previewInput);
+							
+							// Find stuff that should be ignored when comparing edits in preview
+							var srcHTML = getSourceCodeBody();
+							ignoreRows.length = 0;
+							if(srcHTML) {
+								var diff = textDiff(srcHTML, body.innerHTML);
+								for (var i=0; i<diff.inserted.length; i++) {
+									ignoreRows.push(diff.inserted[i][1]);
+								}
+							}
+							
+						});
+						
 					}
 					else {
 						if(previewWin.window.location == url || previewWin.window.location == "swappedout://") {
@@ -608,17 +637,150 @@
 					//previewIframe.src = path.join(site.preview, "index.htm");
 					
 				}
+				else {
+					alert("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
+				}
 				
 			}
 			
 			return false;
 		});
-		}
-
+	}
+	
 	
 	function previewWinFocus() {
-		console.log('previe window is focused');
+		console.log('preview window is focused');
 		editor.input = false;
+	}
+	
+	function previewInput(target, type, bubbles, cancelable) {
+		console.log("previewInput!");
+		
+		if(!sourceFile) throw new Error("sourceFile is gone!")
+		if(!editor.files.hasOwnProperty(sourceFile.path)) alert("The source for the file being previewed is not opened!")
+		if(sourceFile != editor.currentFile) alert("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
+		else {
+			//console.log("target=" + objInfo(target));
+			console.log("type=" + type);
+			
+			// Compare the source codes
+			var srcHTML = getSourceCodeBody();
+			
+			if(srcHTML) {
+				// Compare the source with the editable preview
+				var prewHTML = previewWin.window.document.body.innerHTML;
+				
+				var diff = textDiff(srcHTML, prewHTML, ignoreRows);
+				
+				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
+				
+				var tmpCaret = {index: srcStartIndex};
+				sourceFile.fixCaret(tmpCaret);
+				
+				var startRow = tmpCaret.row;
+				
+				var replacedLine = false;
+				var linesToBeRemoved = [];
+				var row = -1;
+				var col = -1;
+				var text = "";
+				
+				//console.log("ignoreRows=" + JSON.stringify(ignoreRows));
+				
+				console.log("diff.removed=" + JSON.stringify(diff.removed));
+				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
+				
+				for(var i=0; i<diff.removed.length; i++) {
+					
+					// Remove the text on the line
+					row = diff.removed[i][1] + startRow;
+					sourceFile.removeAllTextOnRow(row); 
+					
+					// Is there a line that will replace it?
+					replacedLine = false;
+					for(var j=0; j<diff.inserted.length; j++) {
+						if(diff.inserted[j][1] == diff.removed[i][1]) {
+							
+							// Insert the replacing line
+							text = diff.inserted[j][0];
+							sourceFile.insertTextOnRow(text, row);
+							
+							// textLineDiff
+							col= textDiffCol(diff.removed[i][0], diff.inserted[j][0]);
+							
+							// Move the file caret to the column where the actual change happened
+							sourceFile.caret.row = row;
+							sourceFile.caret.col = col+1;
+							sourceFile.fixCaret();
+							
+							replacedLine= true;
+							diff.inserted.splice(j, 1);
+							break;
+						}
+					}
+					
+					if(!replacedLine) {
+						linesToBeRemoved.push(diff.removed[i][1]);
+					}
+					
+				}
+				
+				// Add lines left to be inserted before removing removed lines (backwards)
+				
+				for(var i=diff.inserted.length-1; i>-1; i--) {
+					
+					
+					// Insert the line
+					row = diff.inserted[i][1] + startRow;
+					text = diff.inserted[i][0];
+					sourceFile.insertTextRow(text, row);
+					
+					// Increment linesToBeRemoved and ignoreRows below this line
+					for(var j=0; j<linesToBeRemoved.length; j++) {
+						if(linesToBeRemoved[j] == diff.inserted[i][1]) throw new Error("Insert on a line the is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
+						
+						if(linesToBeRemoved[j] > diff.inserted[i][1]) linesToBeRemoved[j]++;
+					}
+					for(var j=0; j<ignoreRows.length; j++) {
+						if(ignoreRows[j] > diff.inserted[i][1]) ignoreRows[j]++;
+					}
+					
+				}
+				
+				// Remove lines to be removed (backwards)
+				for(var i=linesToBeRemoved.length-1; i>-1; i--) {
+					sourceFile.removeRow(linesToBeRemoved[i] + startRow);
+					
+					// Decrement ignoreRows below this line
+					for(var j=0; j<ignoreRows.length; j++) {
+						if(ignoreRows[j] > linesToBeRemoved[i]) ignoreRows[j]++;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+	}
+	
+	function closePreview() {
+		// Close the preview window
+		try {
+			previewWin.close();
+			previewWin = undefined;
+		}
+		catch(e) {
+		}
+	}
+	
+	function getSourceCodeBody() {
+		// Returns the body of the source HTML code
+		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
+		
+		if(srcMatchBody == null) alert("Could not find &lt;body element in source file=" + sourceFile.path);
+		else return srcMatchBody[0];
 	}
 	
 	function publish() {

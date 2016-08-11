@@ -35,7 +35,7 @@
 		file.mode = "code"; // text, code, or other, ...
 		file.lineBreak = determineLineBreakCharacters(text);
 		
-
+		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
 		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
@@ -764,6 +764,114 @@
 	}
 	
 	
+	File.prototype.insertTextOnRow = function(text, row) {
+		// Inserts text at the first column at row
+		
+		var file = this;
+		var grid = file.grid;
+		
+		if(text == undefined) throw new Error("Argument text is undefined!");
+		if(text.length == 0) throw new Error("Argument text has zero length!");
+		if(row == undefined) throw new Error("Argument row is undefined!");
+		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
+		if(row < 0) throw new Error("row=" + row + " is below zero!");
+		
+		var startIndex = grid[row].startIndex;
+		
+		file.moveCaretToIndex(startIndex);
+		
+		file.insertText(text);
+		
+	}
+	
+	File.prototype.insertTextRow = function(text, row) {
+		// Inserts a new row of text at row
+		
+		var file = this;
+		var grid = file.grid;
+		
+		if(text == undefined) throw new Error("Argument text is undefined!");
+		if(text.length == 0) throw new Error("Argument text has zero length!");
+		if(row == undefined) throw new Error("Argument row is undefined!");
+		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
+		if(row < 0) throw new Error("row=" + row + " is below zero!");
+		
+		var startIndex = grid[row].startIndex;
+		
+		file.moveCaretToIndex(startIndex);
+		
+		file.insertText(text + file.lineBreak);
+		
+	}
+	
+	File.prototype.removeText = function(text, firstIndex) {
+		// Removes the text, starting at firstIndex
+		// Similar to deleteTextRange, but it figures out the range itself
+		
+		var file = this;
+		
+		if(firstIndex == undefined) firstIndex = -1;
+		
+		firstIndex= file.text.indexOf(text, firstIndex);
+		
+		if(firstIndex == -1) throw new Error("Text not found in file: " + file.path + ": " + text);
+		
+		var lastIndex = firstIndex + text.length - 1;
+		
+		file.deleteTextRange(firstIndex, lastIndex);
+		
+	}
+	
+	File.prototype.removeRow = function(row) {
+		// Removes all text on that row, plus the line break
+		var file = this;
+		var grid = file.grid;
+		
+		if(row == undefined) throw new Error("Argument row is undefined!");
+		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
+		if(row < 0) throw new Error("row=" + row + " is below zero!");
+		
+		var firstIndex = grid[row].startIndex - grid[row].indentationCharacters.length;
+		var lastIndex = -1;
+		
+		
+		if(row < (grid.length-1)) {
+			lastIndex= grid[row+1].startIndex-1;
+		}
+		else {
+			lastIndex= file.text.length-1;
+		}
+		
+		
+		file.deleteTextRange(firstIndex, lastIndex);
+		
+	}
+	
+	File.prototype.removeAllTextOnRow = function(row) {
+		// Removes all text on that row, but keep the line-break
+		var file = this;
+		var grid = file.grid;
+		
+		if(row == undefined) throw new Error("Argument row is undefined!");
+		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
+		if(row < 0) throw new Error("row=" + row + " is below zero!");
+		
+		var firstIndex = grid[row].startIndex - grid[row].indentationCharacters.length;
+		var lastIndex = -1;
+		
+		if(grid[row].length > 0) {
+			lastIndex= grid[row][grid[row].length-1].index;
+		}
+		else {
+			lastIndex = firstIndex + grid[row].indentationCharacters.length - 1;
+		}
+		
+		file.deleteTextRange(firstIndex, lastIndex);
+		
+	}
+	
+	
+	
 	File.prototype.insertText = function(text, caret) {
 		
 		// todo: Make it not re-create the grid!
@@ -799,7 +907,7 @@
 		/* 
 			Update the grid ...
 		*/
-
+		
 		text = text.replace(/\r/g, "");
 		text = text.replace(/\n/g, file.lineBreak);
 		var textRows = text.split(file.lineBreak);
@@ -857,7 +965,7 @@
 		// Update the box index and row startIndex of the rest of the grid
 		var incIndex = text.length;
 		var incLines = textRows.length-1; 
-
+		
 		for(var i=gridRowIndex+1; i<file.grid.length; i++) {
 			file.grid[i].startIndex += incIndex;
 			file.grid[i].lineNumber += incLines;
@@ -866,7 +974,7 @@
 				file.grid[i][j].index += incIndex;
 			}
 		}
-
+		
 		//file.debugGrid();
 		
 		// Save row and col
@@ -901,7 +1009,7 @@
 			The caller needs to explicitly call editor.renderNeeded()
 			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
-
+			
 			
 		*/
 		var file = this;
@@ -1157,10 +1265,10 @@
 		}
 		
 		/*
-		console.log("file.startRow=" + file.startRow);
-		console.log("file.grid.length=" + file.grid.length);
-		console.log("editor.view.visibleRows=" + editor.view.visibleRows);
-		console.log(file.startRow + " >= " + ((file.grid.length - editor.view.visibleRows / 2) | 0) + " = " + (file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) );
+			console.log("file.startRow=" + file.startRow);
+			console.log("file.grid.length=" + file.grid.length);
+			console.log("editor.view.visibleRows=" + editor.view.visibleRows);
+			console.log(file.startRow + " >= " + ((file.grid.length - editor.view.visibleRows / 2) | 0) + " = " + (file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) );
 		*/
 		
 		if(file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) file.scrollToCaret(); // Should fix file.startRow (bitwise or | truncate floating point numbers)
@@ -1207,8 +1315,8 @@
 		var firstBox = selection[0];
 		var firstIndex = firstBox.index;
 		var optimized = false;
-
-			
+		
+		
 		if(isContinuous(selection)) {
 			var lastIndex = selection[selection.length-1].index;
 			
@@ -1888,7 +1996,7 @@
 		
 		// Call file edit listeners
 		file.change("delete", character, index, row, col) // change, text, index, row, col
-
+		
 		
 		
 		console.timeEnd("deleteCharacter");
@@ -1902,7 +2010,6 @@
 		return caret;
 		
 	}
-	
 	
 	File.prototype.moveCaretToIndex = function(index, caret) {
 		var file = this,
@@ -2571,8 +2678,15 @@
 		
 		var file = this;
 		
+		if(caret == undefined) caret = file.caret
+		else {
+			if(!caret.hasOwnProperty("index")) caret.index = 0;
+			if(!caret.hasOwnProperty("row")) caret.row = 0;
+			if(!caret.hasOwnProperty("col")) caret.col = 0;
+			if(!caret.hasOwnProperty("eof")) caret.eof = false;
+			if(!caret.hasOwnProperty("eol")) caret.eol = false;
+}
 		
-		if(caret == undefined) caret = file.caret;
 		
 		if(caret.row < 0) caret.row = 0;
 		else if(caret.row >= file.grid.length) {
