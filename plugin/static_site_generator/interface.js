@@ -607,7 +607,7 @@
 							if(srcHTML) {
 								var diff = textDiff(srcHTML, body.innerHTML);
 								for (var i=0; i<diff.inserted.length; i++) {
-									ignoreRows.push(diff.inserted[i][1]);
+									ignoreRows.push(diff.inserted[i].row);
 								}
 							}
 							
@@ -693,20 +693,20 @@
 				for(var i=0; i<diff.removed.length; i++) {
 					
 					// Remove the text on the line
-					row = diff.removed[i][1] + startRow;
+					row = diff.removed[i].row + startRow;
 					sourceFile.removeAllTextOnRow(row); 
 					
 					// Is there a line that will replace it?
 					replacedLine = false;
 					for(var j=0; j<diff.inserted.length; j++) {
-						if(diff.inserted[j][1] == diff.removed[i][1]) {
+						if(diff.inserted[j].row == diff.removed[i].row) {
 							
 							// Insert the replacing line
-							text = diff.inserted[j][0];
+							text = diff.inserted[j].text;
 							sourceFile.insertTextOnRow(text, row);
 							
 							// textLineDiff
-							col= textDiffCol(diff.removed[i][0], diff.inserted[j][0]);
+							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
 							
 							// Move the file caret to the column where the actual change happened
 							sourceFile.caret.row = row;
@@ -720,7 +720,7 @@
 					}
 					
 					if(!replacedLine) {
-						linesToBeRemoved.push(diff.removed[i][1]);
+						linesToBeRemoved.push(diff.removed[i].row);
 					}
 					
 				}
@@ -731,18 +731,18 @@
 					
 					
 					// Insert the line
-					row = diff.inserted[i][1] + startRow;
-					text = diff.inserted[i][0];
+					row = diff.inserted[i].row + startRow;
+					text = diff.inserted[i].text;
 					sourceFile.insertTextRow(text, row);
 					
 					// Increment linesToBeRemoved and ignoreRows below this line
 					for(var j=0; j<linesToBeRemoved.length; j++) {
-						if(linesToBeRemoved[j] == diff.inserted[i][1]) throw new Error("Insert on a line the is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
+						if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line the is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
 						
-						if(linesToBeRemoved[j] > diff.inserted[i][1]) linesToBeRemoved[j]++;
+						if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
 					}
 					for(var j=0; j<ignoreRows.length; j++) {
-						if(ignoreRows[j] > diff.inserted[i][1]) ignoreRows[j]++;
+						if(ignoreRows[j] > diff.inserted[i].row) ignoreRows[j]++;
 					}
 					
 				}

@@ -23,6 +23,8 @@ What I'm working on
 
 textDiff - making tests
 
+textDiff was much harder then I first thought!
+ex: two removed lines + two edited lines, how to detect that? This can happen for example when deleting a chunk of text.
 
 Update the source code when editing in the preview SSG
 
@@ -31,6 +33,8 @@ todo:
 
 More functions to the SSG
 
+
+file_save.js connectToConnection(); erm???
 
 
 What I'm thinking
@@ -97,6 +101,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
 
 Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
 
@@ -779,6 +785,8 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+Git integration: stage for commit, commit, push 
 
 When pasting in a if or for statement without matching curly-brackets, insert the missing bracket if the global matched brackets is ok.
 

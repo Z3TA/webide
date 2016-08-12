@@ -62,6 +62,11 @@ const ALT = 4;
 // Global functions ...
 
 function textDiff(originalText, editedText, ignoreRows) {
+	/*
+		Asumes only *one change* has been made
+		
+		
+	*/
 	
 	console.log("running textDiff");
 	
@@ -81,65 +86,140 @@ function textDiff(originalText, editedText, ignoreRows) {
 			console.log("ignore row=" + ignoreRows[i] + " : " + editedRow[ignoreRows[i]]);
 			editedRow.splice(ignoreRows[i], 1);
 		}
-		}
-	
-	var diffRows = [];
-	
-	/*
-		problems: One or many rows can be moved
-		
-	*/
+	}
 	
 	var removed = [];
 	var inserted = [];
 	
-	var index = -1;
-	for(var i=0, j=0; i<originalRow.length && j<editedRow.length; i++) {
-		j++;
-		// We don't care about white space
-		originalRow[i] = originalRow[i].trim();
-		editedRow[i] = editedRow[i].trim();
+	var index = editedText.indexOf(originalText);
+	
+	console.log("index=" + index);
+	
+	if(editedRow.length > originalRow.length && index != -1) {
+		// The edited text contains the original text
 		
-		if(originalRow[i] != editedRow[i]) {
-			// The edited row doesn't match the original row
-			
-			if(editedRow.indexOf(originalRow[i]) == -1) { 
-				// The original row doesn't exist in the edited text, so it has been removed
-				removed.push([originalRow[i], i]);
-				console.log("---- " + originalRow[i]);
+		// Lines have been added above and/or under the original text
+		
+		// At what line do it match?
+		var startMatchRow = occurrences(editedText.substr(0, index), lbEditedText);
+		
+		console.log("startMatchRow=" + startMatchRow);
+		
+		for (var i=0; i<startMatchRow; i++) {
+			inserted.push({text: editedRow[i].trim(), row: i});
+			console.log("++++ " + editedRow[i]);
+		}
+		
+		// At what line does the match end?
+		var endMatchRow = editedRow.length - occurrences(editedText.substr(index + originalText.length), lbEditedText);
+		
+		console.log("endMatchRow=" + endMatchRow);
+		
+		if(editor.settings.devMode) {
+			// console print the lines between for debug
+			for (var i=startMatchRow; i<endMatchRow; i++) {
+				console.log(editedRow[i]);
+			}
+		}
+		
+		for (var i=endMatchRow; i<editedRow.length; i++) {
+			inserted.push({text: editedRow[i].trim(), row: i});
+			console.log("++++ " + editedRow[i]);
+		}
+		
+	}
+	
+	else if(originalRow.length > editedRow.length) {
+		// Lines have been removed. Find the removed lines ...
+		// Asume the removed lines are after each other (not at random)
+		
+
+		
+		var removedLinesToFind = originalRow.length - editedRow.length;
+		var nextStepEdited = editedRow.slice(0); // Copy the edited text for next iteration
+		var foundRemovedLines = false;
+		
+		for (var i=0; i < (originalRow.length - removedLinesToFind); i++) {
+			if(originalRow[i] != editedRow[i]) {
+				// We should have found the removed lines
 				
-				// Check if the original text contains the edited row
-				index = originalRow.indexOf(editedRow[i]);
-				if(index == -1) {
-					// The edited row doesn't exit in original, so it was inserted
-					inserted.push([editedRow[i], i]);
-					console.log("++++ " + editedRow[i]);
+				// Problem: Half a line might have changed!
+				// Solution?
+				
+				for (var j=i; j< (i+removedLinesToFind); j++) {
+					removed.push({text: originalRow[j].trim(), row: j});
+					console.log("---- " + originalRow[j]);
+					nextStepEdited.splice(j, 0, originalRow[j]); // Add original text to next step
+				}
+				foundRemovedLines = true;
+				break;
+			}
+		}
+		
+		if(!foundRemovedLines) throw new Error("Did not find the removed lines!");
+		
+		// Run again to see if there are more diff
+		
+		var diff = textDiff(originalRow.join(lbOriginalText), nextStepEdited.join(lbEditedText));
+		
+		removed.concat(diff.removed);
+		
+		removed.sort(function (a, b) {
+			return a.row - b.row;
+		});
+		
+	}
+	
+	else {
+		// Find lines that diff.
+		
+		for(var i=0, j=0; i<originalRow.length && j<editedRow.length; i++) {
+			j++;
+			// We don't care about white space
+			originalRow[i] = originalRow[i].trim();
+			editedRow[i] = editedRow[i].trim();
+			
+			if(originalRow[i] != editedRow[i]) {
+				// The edited row doesn't match the original row
+				
+				if(editedRow.indexOf(originalRow[i]) == -1) { 
+					// The original row doesn't exist in the edited text, so it has been removed
+					removed.push({text: originalRow[i], row: i});
+					console.log("---- " + originalRow[i]);
+					
+					// Check if the original text contains the edited row
+					index = originalRow.indexOf(editedRow[i]);
+					if(index == -1) {
+						// The edited row doesn't exit in original, so it was inserted
+						inserted.push({text: editedRow[i], row: i});
+						console.log("++++ " + editedRow[i]);
+					}
+					else {
+						// The edited row exist in the original, so it must have been moved there
+						
+					}
+					
 				}
 				else {
-					// The edited row exist in the original, so it must have been moved there
-					
+					// The original row was either moved there or text where added above
+					index = originalRow.indexOf(editedRow[i]);
+					if(index == -1) {
+						// The edited row doesn't exit in original, so it was inserted
+						inserted.push({text: editedRow[i], row: i});
+						console.log("++++ " + editedRow[i]);
+					}
+					else {
+						// The edited row exist in the original, so it must have been moved there
+						
+					}
 				}
 				
 			}
 			else {
-				// The original row was either moved there or text where added above
-				index = originalRow.indexOf(editedRow[i]);
-				if(index == -1) {
-					// The edited row doesn't exit in original, so it was inserted
-					inserted.push([editedRow[i], i]);
-					console.log("++++ " + editedRow[i]);
-				}
-				else {
-					// The edited row exist in the original, so it must have been moved there
-					
-				}
+				console.log(originalRow[i]);
 			}
 			
 		}
-		else {
-			console.log(originalRow[i]);
-		}
-		
 	}
 	
 	return {inserted: inserted, removed: removed};
