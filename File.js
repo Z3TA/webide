@@ -2821,6 +2821,12 @@
 		
 	}
 	
+	// Prevent setting file.saved = true
+	Object.defineProperty(File.prototype, "saved", {
+		value: File.prototype.saved,
+		writable: false
+	});
+	
 	File.prototype.saveAs = function(path) {
 		// Saves the file in another path
 		
