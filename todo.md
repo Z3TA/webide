@@ -32,7 +32,8 @@ Update the source code when editing in the preview SSG
 todo:
 
 More functions to the SSG
-
+When clicking on "Preview" in the GUI with no file open, show the index page.
+Publish ... upload to (s)ftp.
 
 file_save.js connectToConnection(); erm???
 
@@ -102,7 +103,7 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
+Unable to save file to FTP
 
 Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
 
@@ -785,6 +786,8 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
 
 Git integration: stage for commit, commit, push 
 
