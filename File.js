@@ -2355,6 +2355,8 @@
 		
 		file.text = text;
 		
+		file.lineBreak = determineLineBreakCharacters(text);
+		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);
 		
