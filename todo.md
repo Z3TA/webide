@@ -361,6 +361,8 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 Polishing
 =========
 
+Don't add an extra " when the " match on that line. Ex: foo = "<--   jajaja "  not: "" jajaj"
+
 SSG, auto scroll down to where you was when previewing. (when you update and "refresh").
 
 Ctrl? click on a function name to go to it's definition.
