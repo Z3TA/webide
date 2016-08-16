@@ -185,7 +185,11 @@ for(var i=0; i<list.length; i++) {
 	function tabFileSave(file) {
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
-		if(!el) throw new Error("Saving '" + file.path + "', but it doesn't exist in file tabs!");
+		if(!el) {
+			// Most likely the file was closed before the "finish saving" event listeners was called
+			console.warn("Saving '" + file.path + "', but it doesn't exist in file tabs!");
+			return true;
+		}
 		
 		// What will happen when the file is saved:
 		el.style.fontWeight = "normal";
