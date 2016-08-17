@@ -9,9 +9,9 @@
 		versionIndex = {}; // Keeps track of current index in the state array
 	
 	
-	editor.on("start", undor_redo_init, 0); // High prio! Run before keyboard_delete and backspace! Set order low
+	editor.on("start", undo_redo_init, 0); // High prio! Run before keyboard_delete and backspace! Set order low
 	
-	function undor_redo_init() {
+	function undo_redo_init() {
 		
 		editor.bindKey({desc: "Redo change", charCode: 89, fun: redo, combo: CTRL});
 		
@@ -41,7 +41,7 @@
 		
 		if(change != "undo-redo") {
 			
-			if(change == "delete" || change == "linebreak") {
+			if(change == "delete" || change == "linebreak" || change == "deleteTextRange" || change == "deleteSelection" || change == "text") {
 				saveState(file);
 			}
 			
