@@ -674,10 +674,15 @@
 				
 				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
 				
-				var tmpCaret = {index: srcStartIndex};
-				sourceFile.fixCaret(tmpCaret);
+				if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
 				
+				console.log("srcStartIndex=" + srcStartIndex);
+				
+				var tmpCaret = sourceFile.createCaret(srcStartIndex);
+								
 				var startRow = tmpCaret.row;
+				
+				console.log("startRow=" + startRow);
 				
 				var replacedLine = false;
 				var linesToBeRemoved = [];
@@ -692,9 +697,11 @@
 				
 				for(var i=0; i<diff.removed.length; i++) {
 					
-					// Remove the text on the line
+					// Remove the text on the line, but do not remove the line (yet)
 					row = diff.removed[i].row + startRow;
 					sourceFile.removeAllTextOnRow(row); 
+					
+					console.log("Removed all text on row=" + row);
 					
 					// Is there a line that will replace it?
 					replacedLine = false;
@@ -704,6 +711,8 @@
 							// Insert the replacing line
 							text = diff.inserted[j].text;
 							sourceFile.insertTextOnRow(text, row);
+							
+							console.log("Inserting (replacing) row=" + row + " text=" + text);
 							
 							// textLineDiff
 							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
@@ -779,8 +788,8 @@
 		// Returns the body of the source HTML code
 		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
 		
-		if(srcMatchBody == null) alert("Could not find &lt;body element in source file=" + sourceFile.path);
-		else return srcMatchBody[0];
+		if(srcMatchBody == null) alert("Could not find &lt;body element in source file<br>" + sourceFile.path);
+		else return srcMatchBody[1];
 	}
 	
 	function publish() {
