@@ -63,6 +63,113 @@ const ALT = 4;
 
 function textDiff(originalText, editedText, ignoreRows) {
 	/*
+		return {inserted: inserted, removed: removed};
+		
+		{text: text, row: row}
+		
+		Problems: 
+		* Text might have been both deleted and inserted
+		
+		Strategy: Find the inserts and removals needed to turn originalText into editedText
+		
+		Solution: Use a node module :P
+	*/
+	
+	var lb = /\r\n|\n/;
+	var lbOriginalText = originalText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
+	var lbEditedText = editedText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
+	
+	if(ignoreRows) {
+		// Remove the ignoreRows
+		var editedRow = editedText.split(lbEditedText);
+		ignoreRows.sort(function(a, b) {return a - b;}); // Make sure ignoreRows is ordered to prevent bugs with splice
+		
+		for(var i=0; i<ignoreRows.length; i++) {
+			console.log("ignore row=" + ignoreRows[i] + " : " + editedRow[ignoreRows[i]]);
+			editedRow.splice(ignoreRows[i], 1);
+		}
+		editedText = editedRow.join(lbEditedText);
+	}
+	
+	var extraLbAdded = false;
+	if(originalText.substr(originalText.length - lbOriginalText.length) != lbOriginalText) {
+		originalText += lbOriginalText;
+		extraLbAdded = true;
+		
+		if(editedText.substr(editedText.length - lbEditedText.length) != lbEditedText) editedText += lbEditedText + lbEditedText; // Add two line-breaks
+		else editedText += lbEditedText; // or add only one if it already head one
+	}
+	
+	var jsdiff = require('diff');
+	var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
+	var totalLineBreaks = 0;
+	var removed = [];
+	var inserted = [];
+	var line;
+	var lineBreakCount = 0;
+	var removedLines = 0; // Removed lines can be replaced with inserts
+	var insertedIndex = -1;
+	
+	console.log("diff=" + JSON.stringify(diff, null, 2));
+	
+	for (var i=0; i<diff.length; i++) {
+		line = diff[i].value.split(lb);
+		if(line[line.length-1] != "") throw new Error("Line does not end with a new-line character diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
+		lineBreakCount = 0;
+		for (var j=0; j<line.length; j++) {
+			
+			if(diff[i].added) {
+				// if(line[j].length > 0) 
+				console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
+				if(j < (line.length-1)) {
+					insertedIndex = inserted.push({text: line[j], row: totalLineBreaks + lineBreakCount}) - 1;
+					if(removedLines > 0) {
+						inserted[insertedIndex].row -= removedLines;
+						removedLines--;
+					}
+					//console.log("++++ " + line[j]);
+				}
+			}
+			else if(diff[i].removed) {
+				
+				if(line[j].length > 0) removed.push({text: line[j], row: totalLineBreaks + lineBreakCount});
+				if(line.length > 1) {
+					lineBreakCount++;
+					removedLines++;
+				}
+				//if(line.length > 1) console.log("---- " + line[j]);
+				
+			}
+			else {
+				
+				if(line.length > 1 && j > 0) lineBreakCount++;
+				//if(line.length > 1) console.log("? " + line[j]);
+				removedLines = 0;
+				
+			}
+			//console.log("lineBreakCount=" + lineBreakCount);
+		}
+		
+		totalLineBreaks += lineBreakCount;
+		//console.log("totalLineBreaks=" + totalLineBreaks);
+	}
+	
+	console.log("extraLbAdded=" + extraLbAdded);
+	if(extraLbAdded) inserted.pop();
+	
+	console.log("inserted=" + JSON.stringify(inserted, null, 2));
+	console.log("removed=" + JSON.stringify(removed, null, 2));
+	
+	console.log("originalText=" + debugWhiteSpace(originalText));
+	console.log("editedText=" + debugWhiteSpace(editedText));
+	
+	return {inserted: inserted, removed: removed};
+	
+}
+
+
+function textDiff2(originalText, editedText, ignoreRows) {
+	/*
 		Asumes only *one change* has been made
 		
 		
@@ -133,32 +240,39 @@ function textDiff(originalText, editedText, ignoreRows) {
 		// Lines have been removed. Find the removed lines ...
 		// Asume the removed lines are after each other (not at random)
 		
-
+		
 		
 		var removedLinesToFind = originalRow.length - editedRow.length;
 		var nextStepEdited = editedRow.slice(0); // Copy the edited text for next iteration
 		var foundRemovedLines = false;
 		
-		for (var i=0; i < (originalRow.length - removedLinesToFind); i++) {
+		for (var i=0; i < (originalRow.length - removedLinesToFind + 2); i++) {
 			if(originalRow[i] != editedRow[i]) {
-				// We should have found the removed lines
-				
-				// Problem: Half a line might have changed!
-				// Solution?
-				
-				for (var j=i; j< (i+removedLinesToFind); j++) {
-					removed.push({text: originalRow[j].trim(), row: j});
-					console.log("---- " + originalRow[j]);
-					nextStepEdited.splice(j, 0, originalRow[j]); // Add original text to next step
+				// We have found an edited line or removed line
+				// Asume text have only been deleted, not edited
+				if(originalRow[i].indexOf(editedRow[i]) <= 0) { // "foobar".indexOf("") == 0
+					// Part of the row has been deleted
+					removed.push({text: originalRow[i].trim(), row: j});
+					inserted.push({text: editedRow[i].trim(), row: j});
+					console.log("---- " + originalRow[i]);
+					console.log("++++ " + editedRow[i]);
 				}
-				foundRemovedLines = true;
-				break;
+				else if(!foundRemovedLines) {
+					// Deleted rows has been found
+					for (var j=i; j< (i+removedLinesToFind); j++) {
+						removed.push({text: originalRow[j].trim(), row: j});
+						console.log("---- " + originalRow[j]);
+						nextStepEdited.splice(j, 0, originalRow[j]); // Add original text to next step
+					}
+					foundRemovedLines = true;
+					break;
+				}
+				else throw new Error("Unexpected row=" + i + " original=" + originalRow[i] + " edited=" + editedRow[i]);
 			}
 		}
-		
 		if(!foundRemovedLines) throw new Error("Did not find the removed lines!");
 		
-		// Run again to see if there are more diff
+		// Run again to see if there are more diff ?
 		
 		var diff = textDiff(originalRow.join(lbOriginalText), nextStepEdited.join(lbEditedText));
 		
