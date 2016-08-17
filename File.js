@@ -863,7 +863,7 @@
 			lastIndex= grid[row][grid[row].length-1].index;
 		}
 		else {
-			lastIndex = firstIndex + grid[row].indentationCharacters.length - 1;
+			lastIndex = firstIndex + grid[row].indentationCharacters.length - (grid[row].indentationCharacters.length > 0 ? 1 : 0);
 		}
 		
 		file.deleteTextRange(firstIndex, lastIndex);
