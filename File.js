@@ -776,9 +776,14 @@
 		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
-		var startIndex = grid[row].startIndex;
+		file.checkGrid();
 		
-		file.moveCaretToIndex(startIndex);
+		//console.log("insertTextOnRow row=" + row);
+				
+		//var startIndex = grid[row].startIndex;
+		//file.moveCaretToIndex(startIndex);
+		
+		file.moveCaret(undefined, row, 0);
 		
 		file.insertText(text);
 		
