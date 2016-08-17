@@ -794,16 +794,25 @@
 		
 		var file = this;
 		var grid = file.grid;
-		
+
 		if(text == undefined) throw new Error("Argument text is undefined!");
-		if(text.length == 0) throw new Error("Argument text has zero length!");
 		if(row == undefined) throw new Error("Argument row is undefined!");
-		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
+
+		if(row >= grid.length) {
+			console.warn("row=" + row + " is above grid.length=" + grid.length + " text will be inserted at EOL");
+			file.writeLine(text);
+			return true;
+		}
+		
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
-		var startIndex = grid[row].startIndex;
-		
-		file.moveCaretToIndex(startIndex);
+		file.moveCaret(undefined, row, 0);
+
+		if(text.length == 0) {
+			// Only insert a line-break
+			file.insertLineBreak();
+			return true;
+		}
 		
 		file.insertText(text + file.lineBreak);
 		
