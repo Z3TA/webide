@@ -2682,14 +2682,13 @@
 		
 		if(caret == undefined) caret = file.caret
 		else {
-			if(!caret.hasOwnProperty("index")) caret.index = 0;
-			if(!caret.hasOwnProperty("row")) caret.row = 0;
-			if(!caret.hasOwnProperty("col")) caret.col = 0;
-			if(!caret.hasOwnProperty("eof")) caret.eof = false;
-			if(!caret.hasOwnProperty("eol")) caret.eol = false;
-}
-		
-		
+			if(!caret.hasOwnProperty("index")) throw new Error("caret has no index property! You probably want to use file.createCaret() instead."); // caret.index = 0;
+			if(!caret.hasOwnProperty("row"))  throw new Error("caret has no row property! You probably want to use file.createCaret() instead."); // caret.row = 0;
+			if(!caret.hasOwnProperty("col"))  throw new Error("caret has no col property! You probably want to use file.createCaret() instead."); // caret.col = 0;
+			if(!caret.hasOwnProperty("eof"))  throw new Error("caret has no eof property! You probably want to use file.createCaret() instead."); // caret.eof = false;
+			if(!caret.hasOwnProperty("eol"))  throw new Error("caret has no eol property! You probably want to use file.createCaret() instead."); // caret.eol = false;
+		}
+				
 		if(caret.row < 0) caret.row = 0;
 		else if(caret.row >= file.grid.length) {
 			caret.row = file.grid.length-1;
