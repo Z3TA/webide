@@ -19,7 +19,8 @@
 	var gui = require('nw.gui');
 	var previewWin;
 	var sourceFile; // Source file that is being previewed
-	var ignoreRows = []; // Ignore these diff lines when updating from edits in the preview
+	var headerRows = 0;
+	var footerRows = 0;
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -564,7 +565,7 @@
 		
 		var errorOccured = false;
 		
-		compile(site.source, site.preview, function buildDone() {
+		compile(site.source, site.preview, function compiled_static() {
 			var path = require('path');
 			
 			if(editor.currentFile) {
@@ -583,7 +584,19 @@
 					// url needs to have / instead of \ for path delimiter
 					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
-					if(!previewWin) {
+					var previewWinOpen = false;
+					
+					if(previewWin) {
+						previewWinOpen = true;
+						try {
+							var foo = previewWin.window.location;
+						}
+						catch(e) {
+							previewWinOpen = false;
+						}
+					}
+					
+					if(!previewWinOpen) {
 						//closePreview(); // Just in case
 						
 						previewWin = gui.Window.open(url);
@@ -602,12 +615,18 @@
 							previewWin.window.addEventListener("input", previewInput);
 							
 							// Find stuff that should be ignored when comparing edits in preview
+							headerRows = 0;
+							footerRows = 0;
 							var srcHTML = getSourceCodeBody();
-							ignoreRows.length = 0;
 							if(srcHTML) {
 								var diff = textDiff(srcHTML, body.innerHTML);
+								var row = -1;
 								for (var i=0; i<diff.inserted.length; i++) {
-									ignoreRows.push(diff.inserted[i].row);
+									if(row == -1) row = diff.inserted[i].row;
+									
+									if(row < diff.inserted[i].row) footerRows++
+									else headerRows++;
+									
 								}
 							}
 							
@@ -670,7 +689,7 @@
 				// Compare the source with the editable preview
 				var prewHTML = previewWin.window.document.body.innerHTML;
 				
-				var diff = textDiff(srcHTML, prewHTML, ignoreRows);
+				var diff = textDiff(srcHTML, prewHTML, headerRows, footerRows);
 				
 				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
 				
@@ -689,14 +708,12 @@
 				var row = -1;
 				var col = -1;
 				var text = "";
-				
-				//console.log("ignoreRows=" + JSON.stringify(ignoreRows));
-				
+
 				console.log("diff.removed=" + JSON.stringify(diff.removed));
 				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
 				
 				for(var i=0; i<diff.removed.length; i++) {
-					
+					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 					// Remove the text on the line, but do not remove the line (yet)
 					row = diff.removed[i].row + startRow;
 					sourceFile.removeAllTextOnRow(row); 
@@ -705,7 +722,8 @@
 					
 					// Is there a line that will replace it?
 					replacedLine = false;
-					for(var j=0; j<diff.inserted.length; j++) {
+					for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
+						console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
 						if(diff.inserted[j].row == diff.removed[i].row) {
 							
 							// Insert the replacing line
@@ -717,14 +735,17 @@
 							// textLineDiff
 							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
 							
+							if(diff.inserted[j].text.length > diff.removed[i].text.length) col++;
+							
 							// Move the file caret to the column where the actual change happened
 							sourceFile.caret.row = row;
-							sourceFile.caret.col = col+1;
+							sourceFile.caret.col = col;
+							
 							sourceFile.fixCaret();
 							
 							replacedLine= true;
 							diff.inserted.splice(j, 1);
-							break;
+							//j--;
 						}
 					}
 					
@@ -732,26 +753,23 @@
 						linesToBeRemoved.push(diff.removed[i].row);
 					}
 					
+					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 				}
 				
 				// Add lines left to be inserted before removing removed lines (backwards)
 				
 				for(var i=diff.inserted.length-1; i>-1; i--) {
 					
-					
 					// Insert the line
 					row = diff.inserted[i].row + startRow;
 					text = diff.inserted[i].text;
 					sourceFile.insertTextRow(text, row);
 					
-					// Increment linesToBeRemoved and ignoreRows below this line
+					// Increment linesToBeRemoved 
 					for(var j=0; j<linesToBeRemoved.length; j++) {
-						if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line the is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
+						if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
 						
 						if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
-					}
-					for(var j=0; j<ignoreRows.length; j++) {
-						if(ignoreRows[j] > diff.inserted[i].row) ignoreRows[j]++;
 					}
 					
 				}
@@ -759,12 +777,6 @@
 				// Remove lines to be removed (backwards)
 				for(var i=linesToBeRemoved.length-1; i>-1; i--) {
 					sourceFile.removeRow(linesToBeRemoved[i] + startRow);
-					
-					// Decrement ignoreRows below this line
-					for(var j=0; j<ignoreRows.length; j++) {
-						if(ignoreRows[j] > linesToBeRemoved[i]) ignoreRows[j]++;
-					}
-					
 				}
 				
 			}

@@ -61,7 +61,7 @@ const ALT = 4;
 
 // Global functions ...
 
-function textDiff(originalText, editedText, ignoreRows) {
+function textDiff(originalText, editedText, headerRows, footerRows) {
 	/*
 		return {inserted: inserted, removed: removed};
 		
@@ -79,16 +79,18 @@ function textDiff(originalText, editedText, ignoreRows) {
 	var lbOriginalText = originalText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
 	var lbEditedText = editedText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
 	
-	if(ignoreRows) {
-		// Remove the ignoreRows
+	if(headerRows == undefined) headerRows = 0;
+	if(footerRows == undefined) footerRows = 0;
+	
+	if(headerRows > 0 || footerRows > 0) {
 		var editedRow = editedText.split(lbEditedText);
-		ignoreRows.sort(function(a, b) {return a - b;}); // Make sure ignoreRows is ordered to prevent bugs with splice
-		
-		for(var i=0; i<ignoreRows.length; i++) {
-			console.log("ignore row=" + ignoreRows[i] + " : " + editedRow[ignoreRows[i]]);
-			editedRow.splice(ignoreRows[i], 1);
-		}
+			
+		if(headerRows > 0) editedRow.splice(0, headerRows);
+			
+		if(footerRows > 0)  editedRow.splice(editedRow.length - footerRows - 1, footerRows);
+			
 		editedText = editedRow.join(lbEditedText);
+
 	}
 	
 	var extraLbAdded = false;
@@ -109,6 +111,7 @@ function textDiff(originalText, editedText, ignoreRows) {
 	var lineBreakCount = 0;
 	var removedLines = 0; // Removed lines can be replaced with inserts
 	var insertedIndex = -1;
+	var row = -1;
 	
 	console.log("diff=" + JSON.stringify(diff, null, 2));
 	
@@ -122,11 +125,15 @@ function textDiff(originalText, editedText, ignoreRows) {
 				// if(line[j].length > 0) 
 				console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
 				if(j < (line.length-1)) {
-					insertedIndex = inserted.push({text: line[j], row: totalLineBreaks + lineBreakCount}) - 1;
+										
 					if(removedLines > 0) {
-						inserted[insertedIndex].row -= removedLines;
-						removedLines--;
+						// If lines above where removed, reset lineBreakCount and insert from there
+						lineBreakCount -= removedLines;
+						removedLines = 0;
 					}
+					
+					inserted.push({text: line[j], row: totalLineBreaks + lineBreakCount});
+					
 					//console.log("++++ " + line[j]);
 				}
 			}

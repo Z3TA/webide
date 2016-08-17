@@ -21,10 +21,7 @@ Auto preview SSG site when saving?
 What I'm working on
 -------------------
 
-textDiff - making tests
-
-textDiff was much harder then I first thought!
-ex: two removed lines + two edited lines, how to detect that? This can happen for example when deleting a chunk of text.
+about.htm in the SSG removing paragraphs 2-5, then Ctrl-Z. Debugging
 
 Update the source code when editing in the preview SSG
 
@@ -102,6 +99,12 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+After failing gotofile once, it seems to fail all the time after (aborting, too much latency)
+
+Select default (root) folder in connection manager!
+
+Remote connection manager. Cant edit password.
 
 Unable to save file to FTP
 
@@ -360,6 +363,8 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 
 Polishing
 =========
+
+Tab and shift+tab to manage indentation in non-intepreted files
 
 Don't add an extra " when the " match on that line. Ex: foo = "<--   jajaja "  not: "" jajaj"
 
