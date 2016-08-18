@@ -21,16 +21,22 @@ Auto preview SSG site when saving?
 What I'm working on
 -------------------
 
-about.htm in the SSG removing paragraphs 2-5, then Ctrl-Z. Debugging
+Refactoring editor.saveFile and file.saveAs to handle saveAs's
+how to repeat: create new file, hit Ctrl+S, pase path: C:\Users\Z\dev-repositories\jzedit\test\jsfunoptbrackmiss.js, hit Enter
+Should show a message about the folder not exist.
 
-Update the source code when editing in the preview SSG
+Also check other saveAs functions!! (the file wants to recheck file extension!)
+
+... Dilemma: Spend 30 minutes document wtf you are doing or hope you fix it in five minutes. When you know you have to run in 30 minutes and will not be back in days and will probably have forgotten what you where doing and why
+
+Make the SSG build script send the files to the editor for saving
 
 
 todo:
 
 More functions to the SSG
-When clicking on "Preview" in the GUI with no file open, show the index page.
 Publish ... upload to (s)ftp.
+Pasting in images ... convert place image in src dir
 
 file_save.js connectToConnection(); erm???
 
@@ -100,6 +106,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
+repeat: 
+
 After failing gotofile once, it seems to fail all the time after (aborting, too much latency)
 
 Select default (root) folder in connection manager!
@@ -107,8 +116,6 @@ Select default (root) folder in connection manager!
 Remote connection manager. Cant edit password.
 
 Unable to save file to FTP
-
-Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
 
 When selecting right to left and then deleting the text sometimes gives textrange end < start
 

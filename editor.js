@@ -889,24 +889,28 @@ editor.lastKeyPressed = "";
 			
 			editor.closeFile(file.path, true); // true = do not switch to another file
 			
-			editor.openFile(path, text, saveToDisk); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
+			editor.openFile(path, text, saveIt); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
 			
 		}
 		else {
 			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
 		
-		function saveIt(err, file, doneSaving) { // intermediate function via ditor.openFile
+		function saveIt(err, file) { // intermediate function via ditor.openFile
 			if(err) throw err;
 			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
-		
-		function doneSaving() {
+
+		function doneSaving(err, path) {
+			
+			if(path != file.path && !err) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path);
+			
 			console.log("Successfully saved " + file.path);
 			
 			file.saved(); // Call functions that listen for save events
 			
-			if(callback) callback();
+			if(callback) callback(err, path)
+			else if(err) throw err;
 		}
 		
 	}
@@ -917,12 +921,15 @@ editor.lastKeyPressed = "";
 		
 		// Only works with text files !
 		
+		if(!doneSaving) throw new Error("saveToDisk called wihtout a callback function!");
 		
 		// Check path for protocol
 		var url = require("url");
 		var parse = url.parse(path);
 		
 		console.log("protocol: " + parse.protocol);
+		
+		// todo!!? support ftpS
 		
 		if(parse.protocol == "ftp:") {
 			
@@ -936,17 +943,17 @@ editor.lastKeyPressed = "";
 				
 				c.put(input, destPath, useCompression, function putFtpDone(err) {
 					if(err) {
-						alert("Failed to save to path= " + path + "\n" + err.message);
-						throw err;
+						console.warn("Failed to save to path= " + path + "\n" + err.message);
+						doneSaving(err);
 					}
 					
-					doneSaving();
+					doneSaving(null, path);
 					
 				});
 				
 			}
 			else {
-				alert("Failed to save to path=" + path + "\nNo connection to FTP on " + parse.hostname + " !");
+				doneSaving(new Error("Failed to save to path=" + path + "\nNo connection to FTP on " + parse.hostname + " !"));
 			}
 		}
 		else if(parse.protocol == "sftp:") {
@@ -961,17 +968,17 @@ editor.lastKeyPressed = "";
 				// Could also use sftp.createWriteStream
 				c.writeFile(destPath, input, options, function sftpWrite(err) {
 					if(err) {
-						alert("Failed to save to path= " + path + "\n" + err.message);
-						//throw err;
+						console.warn("Failed to save to path= " + path + "\n" + err.message);
+						doneSaving(err);
 					}
 					console.log("Saved " + destPath + " on SFTP " + parse.hostname);
-					doneSaving();
+					doneSaving(null, path);
 					
 				});
 				
 			}
 			else {
-				alert("Failed to save to path=" + path + "\nNo connection to SFTP on " + parse.hostname + "");
+				doneSaving(new Error("Failed to save to path=" + path + "\nNo connection to SFTP on " + parse.hostname + ""));
 			}
 		}
 		else {
@@ -983,13 +990,13 @@ editor.lastKeyPressed = "";
 				console.log("Attempting saving to local file system: " + path + " ...");
 				
 				if(err) {
-					alert("Unable to save file! " + err.message + "\n" + path);
+					//alert("Unable to save file! " + err.message + "\n" + path);
 					console.warn("Unable to save " + path + "!");
-					throw err;
+					doneSaving(err);
 				}
 				else {
 					console.log("The file was successfully saved: " + path + "");
-					doneSaving();
+					doneSaving(null, path);
 				}
 				});
 		}

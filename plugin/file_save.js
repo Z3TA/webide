@@ -86,22 +86,21 @@
 		// todo: inputPath.keyUp, if it's not a slash, auto suggest the path by checking existing paths
 		// Or just make a better file dialog, like the native one, but with support for remote paths!!?
 		
-		function saveFileInPath() {
-			var file = editor.currentFile;
-			
-			if(!file) {
-				alert("Can not save without a file!")
-				return;
-			}
-			
-			if(!inputPath) throw new Error("Is the save dialog visible?");
-			
-			file.saveAs(inputPath.value);
-			
-			hideSaveDialog();
-			
+	}
+	
+	function saveFileInPath() {
+		var file = editor.currentFile;
+		
+		if(!file) {
+			alert("Can not save without a file!")
+			return;
 		}
 		
+		if(!inputPath) throw new Error("Is the save dialog visible?");
+		
+		file.saveAs(inputPath.value);
+		
+		hideSaveDialog();
 		
 	}
 	
@@ -161,7 +160,7 @@
 	function enter() {
 		// Only save if the inputPath input text is focused
 		if(document.activeElement == inputPath) {
-			connectToConnection();
+			saveFileInPath();
 			return false;
 		}
 		else return true;
