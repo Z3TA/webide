@@ -18,6 +18,7 @@
 	// Load native UI library
 	var gui = require('nw.gui');
 	var previewWin;
+	var editContent = false;
 	var sourceFile; // Source file that is being previewed
 	var headerRows = 0;
 	var footerRows = 0;
@@ -568,19 +569,8 @@
 		compile(site.source, site.preview, function compiled_static() {
 			var path = require('path');
 			
-			var previewWinOpen = false;
 			var previewWinOpened = false;
-			
-			if(previewWin) {
-				previewWinOpen = true;
-				try {
-					var foo = previewWin.window.location;
-				}
-				catch(e) {
-					previewWinOpen = false;
-				}
-			}
-			
+
 			if(editor.currentFile) {
 				var fileName = editor.currentFile.name;
 				var fileType = editor.currentFile.fileExtension;
@@ -592,76 +582,17 @@
 					// Save the src file so we edit the right file
 					sourceFile = editor.currentFile;
 					
+					editContent = true;
+					
 					//var url = path.join(site.preview, editor.currentFile.name);
 					
 					// url needs to have / instead of \ for path delimiter
 					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
+					openPreviewWin(url)
 					
-					
-					if(!previewWinOpen) {
-						//closePreview(); // Just in case
-						
-						previewWin = gui.Window.open(url);
-						
-						previewWinOpened = true;
-						
-						previewWin.on('focus', previewWinFocus);
-						
-						previewWin.on('focus', previewWinUnFocus);
-						
-						previewWin.on("loaded", function previewWinLoaded() {
-							
-							console.log("PreviewWin loaded!");
-							
-							//var body = previewWin.window.getElementsByTagName("body")[0];
-							var body = previewWin.window.document.body;
-							
-							body.contentEditable = "true";
-							
-							previewWin.window.addEventListener("input", previewInput);
-							
-							// Find stuff that should be ignored when comparing edits in preview
-							headerRows = 0;
-							footerRows = 0;
-							var srcHTML = getSourceCodeBody();
-							if(srcHTML) {
-								var diff = textDiff(srcHTML, body.innerHTML);
-								var row = -1;
-								for (var i=0; i<diff.inserted.length; i++) {
-									if(row == -1) row = diff.inserted[i].row;
-									
-									if(row < diff.inserted[i].row) footerRows++
-									else headerRows++;
-									
-								}
-							}
-							
-						});
-						
-					}
-					else {
-						if(previewWin.window.location == url || previewWin.window.location == "swappedout://") {
-							var scrollTop = previewWin.window.scrollTop; // Get the scroll position
-							console.log("scrollTop=" + scrollTop);
-							if(previewWin.window.location == url) previewWin.reload()
-							else previewWin.window.location = url;
-							previewWin.window.scrollTop = scrollTop; // Set the scroll position again
-							
-						}
-						else {
-							console.log("url=" + url + " != " + previewWin.window.location);
-							previewWin.window.location = url;
-							
-						}
-						
-						previewWin.focus();
-						
-					}
-					
-					// If 404 !?
-					//previewIframe.src = path.join(site.preview, "index.htm");
-					
+					previewWinOpened = true;
+
 				}
 				else {
 					console.log("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
@@ -669,8 +600,10 @@
 			}
 			
 			if(!previewWinOpened) {
-				// Open the index page (if one exist)
+				// Open the index page
 				var url = "file:///" + site.preview.replace(/\\/g, "/");
+				
+				editContent = false;
 				
 				editor.listFiles(site.preview, function(err, list) {
 					
@@ -688,24 +621,99 @@
 					if(page) {
 						if(url.substr(url.length-1) != "/") url += "/";
 						url += page;
-}
+					}
 					
-					if(!previewWinOpen) {
-						previewWin = gui.Window.open(url);
-					}
-					else {
-						previewWin.window.location = url;
-						previewWin.focus();
-					}
+					openPreviewWin(url);
 					
 				});
-				
-				
-				
-}
+			}
 			
 			return false;
 		});
+	}
+	
+	function openPreviewWin(url) {
+		
+		var previewWinOpen = false;
+		
+		if(previewWin) {
+			previewWinOpen = true;
+			try {
+				var foo = previewWin.window.location;
+			}
+			catch(e) {
+				previewWinOpen = false;
+			}
+		}
+		
+		if(!previewWinOpen) {
+			//closePreview(); // Just in case
+			
+			previewWin = gui.Window.open(url);
+			
+			previewWin.on('focus', previewWinFocus);
+			previewWin.on('focus', previewWinUnFocus);
+			previewWin.on("loaded", previewWinLoaded);
+			
+		}
+		else {
+			
+			if(previewWin.window.location == url || previewWin.window.location == "swappedout://") {
+				var scrollTop = previewWin.window.scrollTop; // Get the scroll position
+				console.log("scrollTop=" + scrollTop);
+				if(previewWin.window.location == url) previewWin.reload()
+				else previewWin.window.location = url;
+				previewWin.window.scrollTop = scrollTop; // Set the scroll position again
+			}
+			else {
+				console.log("url=" + url + " != " + previewWin.window.location);
+				previewWin.window.location = url;
+			}
+			
+			previewWin.focus();
+			
+		}
+		
+		// If 404 !?
+		//previewIframe.src = path.join(site.preview, "index.htm");
+		
+	}
+	
+	function previewWinLoaded() {
+		
+		previewWin.focus();
+		
+		console.log("PreviewWin loaded!");
+		
+		
+		headerRows = 0;
+		footerRows = 0;
+		if(editContent) {
+		
+			//var body = previewWin.window.getElementsByTagName("body")[0];
+			var body = previewWin.window.document.body;
+			
+			body.contentEditable = "true";
+			
+			previewWin.window.addEventListener("input", previewInput);
+			
+			// Find stuff that should be ignored when comparing edits in preview
+
+			var srcHTML = getSourceCodeBody();
+			if(srcHTML) {
+				var diff = textDiff(srcHTML, body.innerHTML);
+				var row = -1;
+				for (var i=0; i<diff.inserted.length; i++) {
+					if(row == -1) row = diff.inserted[i].row;
+					
+					if(row < diff.inserted[i].row) footerRows++
+					else headerRows++;
+				}
+			}
+		}
+		else {
+			previewWin.window.removeEventListener("input", previewInput);
+		}
 	}
 	
 	
