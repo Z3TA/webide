@@ -568,6 +568,19 @@
 		compile(site.source, site.preview, function compiled_static() {
 			var path = require('path');
 			
+			var previewWinOpen = false;
+			var previewWinOpened = false;
+			
+			if(previewWin) {
+				previewWinOpen = true;
+				try {
+					var foo = previewWin.window.location;
+				}
+				catch(e) {
+					previewWinOpen = false;
+				}
+			}
+			
 			if(editor.currentFile) {
 				var fileName = editor.currentFile.name;
 				var fileType = editor.currentFile.fileExtension;
@@ -584,22 +597,14 @@
 					// url needs to have / instead of \ for path delimiter
 					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
-					var previewWinOpen = false;
 					
-					if(previewWin) {
-						previewWinOpen = true;
-						try {
-							var foo = previewWin.window.location;
-						}
-						catch(e) {
-							previewWinOpen = false;
-						}
-					}
 					
 					if(!previewWinOpen) {
 						//closePreview(); // Just in case
 						
 						previewWin = gui.Window.open(url);
+						
+						previewWinOpened = true;
 						
 						previewWin.on('focus', previewWinFocus);
 						
@@ -659,10 +664,45 @@
 					
 				}
 				else {
-					alert("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
+					console.log("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
 				}
-				
 			}
+			
+			if(!previewWinOpened) {
+				// Open the index page (if one exist)
+				var url = "file:///" + site.preview.replace(/\\/g, "/");
+				
+				editor.listFiles(site.preview, function(err, list) {
+					
+					if(err) throw err;
+					
+					var page = "";
+					
+					for (var i=0; i<list.length; i++) {
+						if(list[i].name.match(/\index\.html?/i) != null) {
+							page = list[i].name;
+							break;
+						}
+					}
+					
+					if(page) {
+						if(url.substr(url.length-1) != "/") url += "/";
+						url += page;
+}
+					
+					if(!previewWinOpen) {
+						previewWin = gui.Window.open(url);
+					}
+					else {
+						previewWin.window.location = url;
+						previewWin.focus();
+					}
+					
+				});
+				
+				
+				
+}
 			
 			return false;
 		});
