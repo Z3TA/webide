@@ -14,38 +14,18 @@
 	
 	### planned updates:
 	
-	Auto copy media (images etc) that have local sources (src=)
-	
-	Helper functions for Scripting templates?
-	
-	Look for media in css files,
+	Look for media in css files, (backgrounds etc)
 	
 	Look for <link href
 	Exclude "files" that is not used in any documents.
 	
 	Give warning for when media (img src="...) doesnt exist.
 	
-	Sort documents by date? in an array
-	
-	makePathsRelative after evaluation!!?
 	
 	
 	### ideas:
 	Minify CSS
 	Losslessly image compressing ()
-	
-	inline critical (render-blocking) JavaScript and CSS
-	<script>
-	var cb = function() {
-	var l = document.createElement('link'); l.rel = 'stylesheet';
-	l.href = 'small.css';
-	var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h);
-	};
-	var raf = requestAnimationFrame || mozRequestAnimationFrame ||
-	webkitRequestAnimationFrame || msRequestAnimationFrame;
-	if (raf) raf(cb);
-	else window.addEventListener('load', cb);
-	</script>
 	
 	
 	Notes to users
@@ -85,7 +65,7 @@ var FS = require("fs-extra");
 var PATH = require('path');
 
 var BASEPATH = mustBePath(process.argv[2], "."); // Path to files that should be processed
-var PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/poblication folder 
+var PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder 
 
 var MEDIAFILES = []; // Files mentioned in source code
 
@@ -212,14 +192,7 @@ function copyOtherFiles(callback) {
 		path = OTHERFILES[i].replace(basePath, pubFolder);
 		src = path.replace(pubFolder, "");
 		
-		//console.log("Copying file=" + path);
-		FS.copy(OTHERFILES[i], path, function (err) {
-			if (err) throw err;
-			
-			if(--filesToCopy == 0) callback(totalFiles);
-			//console.log("filesToCopy=" + filesToCopy);
-			
-		});
+		process.send({type: "copy", from: OTHERFILES[i], to: path});
 		
 		/*
 			// Asume som detective work has been done to figure out what files are used
@@ -271,6 +244,7 @@ function copyOtherFiles(callback) {
 		}
 	*/
 	
+	callback(totalFiles);
 }
 
 
@@ -278,35 +252,13 @@ function build(baseTree, baseFolder, callback) {
 	
 	var filesToWrite = 0;
 	
-	// Make the baseFolder and ignore error if it already exists
-	try {
-		FS.mkdirSync(baseFolder);
-	} catch(e) {
-		if ( e.code != 'EEXIST' ) throw e;
-	}
+	buildeDir(baseFolder, baseTree); // Recursive
 	
-	buildeDir(baseFolder, baseTree);
-	
+	callback();
 	
 	function buildeDir(path, branch) {
-		var folderExist = false;
 		
-		
-		try {
-			FS.mkdirSync(path);
-		} catch(e) {
-			if ( e.code == 'EEXIST' ) {
-				folderExist = true;
-			}
-			else {
-				throw e;
-			}
-		}
-		
-		if(!folderExist) {
-			console.log("Created dir=" + path);
-		}
-		//console.log("Building dir=" + path + " folderExist=" + folderExist);
+		process.send({type: "debug", data: "Building dir=" + path + ""});
 		
 		var filePath = "";
 		
@@ -320,11 +272,9 @@ function build(baseTree, baseFolder, callback) {
 				buildeDir(path + "/" + subFolder, branch.folders[subFolder])
 			}
 			else {
-				console.log("Subfolder " + subFolder + " has no documents!");
-			}
+				process.send({type: "debug", data: "Subfolder " + subFolder + " has no documents!"});
+				}
 		}
-		
-		
 		
 		function buildFile(fileName, filePath) {
 			
@@ -334,46 +284,9 @@ function build(baseTree, baseFolder, callback) {
 			
 			var document = branch.documents[fileName];
 			
+			process.send({type: "file", path: filePath, data: document.html});
 			
 			filesToWrite++;
-			
-			// Compare with the old version
-			FS.readFile(filePath, "utf8", function (err, data) {
-				if(err == null) {
-					fileExist = true;
-					if(data != document.html) fileChanged = true;
-				}
-				else if(err.code == "ENOENT") {
-					fileExist = false;
-					fileChanged = false;
-				}
-				else {
-					throw err;
-				}
-				
-				if(!fileExist || fileChanged) {
-					
-					
-					FS.writeFile(filePath, document.html, "utf8", function() {
-						
-						console.log("Built file=" + filePath);
-						if(--filesToWrite == 0) callback();				
-						
-					});
-				}
-				else if(!fileChanged) {
-					console.log("Not modified file=" + filePath);
-					filesToWrite--;
-				}
-				else {
-					throw new Error("Unexpected error!");
-				}
-				
-				if(filesToWrite == 0) callback();
-				
-			});
-			
-			
 			
 		}
 	}

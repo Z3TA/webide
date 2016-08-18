@@ -567,10 +567,11 @@
 		var errorOccured = false;
 		
 		compile(site.source, site.preview, function compiled_static() {
+			
 			var path = require('path');
 			
 			var previewWinOpened = false;
-
+			
 			if(editor.currentFile) {
 				var fileName = editor.currentFile.name;
 				var fileType = editor.currentFile.fileExtension;
@@ -599,7 +600,7 @@
 					openPreviewWin(url)
 					
 					previewWinOpened = true;
-
+					
 				}
 				else {
 					console.log("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
@@ -692,11 +693,11 @@
 		
 		console.log("PreviewWin loaded!");
 		
-	
+		
 		headerRows = 0;
 		footerRows = 0;
 		if(editContent) {
-		
+			
 			//var body = previewWin.window.getElementsByTagName("body")[0];
 			var body = previewWin.window.document.body;
 			
@@ -705,7 +706,7 @@
 			previewWin.window.addEventListener("input", previewInput);
 			
 			// Find stuff that should be ignored when comparing edits in preview
-
+			
 			var srcHTML = getSourceCodeBody();
 			if(srcHTML) {
 				var diff = textDiff(srcHTML, body.innerHTML);
@@ -759,7 +760,7 @@
 				console.log("srcStartIndex=" + srcStartIndex);
 				
 				var tmpCaret = sourceFile.createCaret(srcStartIndex);
-								
+				
 				var startRow = tmpCaret.row;
 				
 				console.log("startRow=" + startRow);
@@ -769,7 +770,7 @@
 				var row = -1;
 				var col = -1;
 				var text = "";
-
+				
 				console.log("diff.removed=" + JSON.stringify(diff.removed));
 				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
 				
@@ -882,7 +883,7 @@
 	function publishSite(site) {
 		compile(site.source, site.publish, function buildDone() {
 			alert(site.name + " published to " + site.publish);
-});
+		});
 		return false;
 	}
 	
@@ -903,44 +904,89 @@
 	
 	function compile(source, destination, callback) {
 		
-		console.log("Compiling: " + source);
+		var url = require("url");
+		var parse = url.parse(destination);
 		
-		var childProcess = require("child_process");
-		var path = require('path');
+		console.log("protocol: " + parse.protocol);
 		
-		var buildScript = path.join(require("dirname"), "./plugin/static_site_generator/build.js");
+		console.log("source=" + JSON.stringify(url.parse(source), null, 2));
+		console.log("destination=" + JSON.stringify(url.parse(destination), null, 2));
 		
-		//console.log("buildScript=" + buildScript);
-		console.log("source=" + source);
-		var workingDir = path.join(source, "../");
-		//console.log("workingDir=" + workingDir);
-		var node_modules = path.join(source, "../node_modules/"); // Node runtime wont check node_modules folder, so we'll have to explicity set it in NODE_PATH enviroment variable
-		//console.log("node_modules=" + node_modules);
+		if(editor.remoteProtocols.indexOf(parse.protocol) != -1) {
+			// We will need to connect to the remote location before uploading files
+			var serverAddress = parse.host;
+			var auth = parse.auth, user, passw, keyPath;
+			if(auth) {
+				auth = auth.split(":");
+				if(auth.length == 2) {
+					user = auth[0];
+					passw = auth[1];
+				}
+			}
+			var workingDir = parse.path;
+			
+			editor.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
+		}
+		else {
+			// Asume local file-system
+			fsReady(null, editor.workingDirectory);
+		}
 		
-		var worker = childProcess.fork(buildScript, [source, destination], {
-			cwd: workingDir,
-			env: {"NODE_PATH": node_modules} // Tell node runtime to check for modules in this folder
-		});
-		
-		/*
-		worker.stdout.on('data', function(data) {
-			console.log("SSG stdout: " + data);  
-		});
-		*/
-		
-		worker.on('message', function worker_message(data) {
-			alert(data);
-			//console.log("SSG:" + data);
-		});
-		worker.on('error', function worker_error(code) {
-			console.warn("SSG: Error code=" + code);
-			alert("SSG worker error code=" + code);
-		});
-		worker.on('exit', function worker_exit(code) {
-			console.log("SSG: Exit! code=" + code);
-			callback();
-		});
+		function fsReady(err, workingDir) {
+			
+			if(err) {
+				alert(err.message);
+				return true;
+			};
+			
+			console.log("Compiling: " + source);
+			
+			var childProcess = require("child_process");
+			var path = require('path');
+			
+			var buildScript = path.join(require("dirname"), "./plugin/static_site_generator/build.js");
+			
+			//console.log("buildScript=" + buildScript);
+			console.log("source=" + source);
+			var workingDir = path.join(source, "../");
+			//console.log("workingDir=" + workingDir);
+			var node_modules = path.join(source, "../node_modules/"); // Node runtime wont check node_modules folder, so we'll have to explicity set it in NODE_PATH enviroment variable
+			//console.log("node_modules=" + node_modules);
+			
+			var fs = require("fs");
+			
+			var worker = childProcess.fork(buildScript, [source, destination], {
+				cwd: workingDir,
+				env: {"NODE_PATH": node_modules}, // Tell node runtime to check for modules in this folder
+			});
+			
+			// PS. It's impossible to caputre stdout and stderr from the fork. You'll have to use process.send() to send message back here
+			
+			worker.on('message', function worker_message(data) {
+				//alert(data);
+				console.log("SSG: " + JSON.stringify(data));
+				
+				if(data.type == "file") {
+					editor.saveToDisk(data.path, data.text, fileSaved);
+				}
+				
+			});
+			worker.on('error', function worker_error(code) {
+				console.warn("SSG: Error code=" + code);
+				alert("SSG worker error code=" + code);
+			});
+			worker.on('exit', function worker_exit(code) {
+				console.log("SSG: Exit! code=" + code);
+				if(code != 0) throw new Error("The process exited with code=" + code + "! (It means something went wrong)");
+				callback(code);
+			});
+			
+			function fileSaved(path) {
+				if(--fileToSave) allFilesSaved();
+}
+			
+
+		}
 	}
-	
 	
 })();
