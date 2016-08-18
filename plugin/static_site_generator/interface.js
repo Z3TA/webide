@@ -603,6 +603,8 @@
 						
 						previewWin.on('focus', previewWinFocus);
 						
+						previewWin.on('focus', previewWinUnFocus);
+						
 						previewWin.on("loaded", function previewWinLoaded() {
 							
 							console.log("PreviewWin loaded!");
@@ -672,6 +674,10 @@
 		editor.input = false;
 	}
 	
+	function previewWinUnFocus() {
+		if(editor.currentFile) editor.input = true;
+	}
+	
 	function previewInput(target, type, bubbles, cancelable) {
 		console.log("previewInput!");
 		
@@ -716,6 +722,9 @@
 					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 					// Remove the text on the line, but do not remove the line (yet)
 					row = diff.removed[i].row + startRow;
+					
+					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim());
+					
 					sourceFile.removeAllTextOnRow(row); 
 					
 					console.log("Removed all text on row=" + row);
@@ -728,7 +737,9 @@
 							
 							// Insert the replacing line
 							text = diff.inserted[j].text;
-							sourceFile.insertTextOnRow(text, row);
+							
+							if(!replacedLine) sourceFile.insertTextOnRow(text, row)
+							else sourceFile.insertTextRow(text, row);
 							
 							console.log("Inserting (replacing) row=" + row + " text=" + text);
 							
