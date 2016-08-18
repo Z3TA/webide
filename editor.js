@@ -70,6 +70,7 @@ editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 editor.connections = {}  // Store connections to remote servers (FTP, SSH)
 editor.disconnect = {}   // Create a disconnnect function for each connection, can be called by running editor.disconnect[serverName](callback);
+editor.remoteProtocols = ["ftp:", "ftps:", "sftp:"]; // Supported remote connections
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -892,99 +893,107 @@ editor.lastKeyPressed = "";
 			
 		}
 		else {
-			saveToDisk(null, file);
+			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
 		
-		function saveToDisk(err, file) {
-			
-			// Check path for protocol
-			var url = require("url");
-			var parse = url.parse(path);
-			
-			console.log("protocol: " + parse.protocol);
-			
-			if(parse.protocol == "ftp:") {
-				
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
-					
-					var c = editor.connections[parse.hostname];
-					
-					var input = new Buffer(file.text, "utf-8");
-					var destPath = parse.pathname;
-					var useCompression = false;
-					
-					c.put(input, destPath, useCompression, function putFtpDone(err) {
-						if(err) {
-							alert("Failed to save file: " + file.path + "\n" + err.message);
-							throw err;
-						}
-						
-						doneSaving();
-						
-					});
-					
-				}
-				else {
-					alert("Failed to save file: " + file.path + "\nNo connection to FTP on " + parse.hostname + " !");
-				}
-			}
-			else if(parse.protocol == "sftp:") {
-				
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
-					
-					var c = editor.connections[parse.hostname];
-					
-					var input = new Buffer(file.text, "utf-8");
-					var destPath = parse.pathname;
-					var options = {encoding: 'utf8'};
-					// Could also use sftp.createWriteStream
-					c.writeFile(destPath, input, options, function sftpWrite(err) {
-						if(err) {
-							alert("Failed to save file: " + file.path + "\n" + err.message);
-							//throw err;
-						}
-						console.log("Saved " + destPath + " on SFTP " + parse.hostname);
-						doneSaving();
-						
-					});
-					
-				}
-				else {
-					alert("Failed to save file: " + file.path + "\nNo connection to SFTP on " + parse.hostname + "");
-				}
-			}
-			else {
-				
-				// Asume local file-system
-				
-				var fs = require("fs");
-				fs.writeFile(path, file.text, function(err) {
-					console.log("Attempting saving to local file system: " + path + " ...");
-					
-					if(err) {
-						alert("Unable to save file! " + err.message + "\n" + path);
-						console.warn("Unable to save " + path + "!");
-						throw err;
-					}
-					else {
-						console.log("The file was successfully saved: " + path + "");
-						doneSaving();
-					}
-					
-				});
-			}
-			
-			function doneSaving() {
-				console.log("Successfully saved " + file.path);
-				
-				file.saved(); // Call functions that listen for save events
-				
-				if(callback) callback();
-			}
-			
+		function saveIt(err, file, doneSaving) { // intermediate function via ditor.openFile
+			if(err) throw err;
+			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
+		
+		function doneSaving() {
+			console.log("Successfully saved " + file.path);
+			
+			file.saved(); // Call functions that listen for save events
+			
+			if(callback) callback();
+		}
+		
 	}
 	
+	
+	editor.saveToDisk = function(path, text, doneSaving) {
+		// You probably want to use editor.saveFile instead!
+		
+		// Only works with text files !
+		
+		
+		// Check path for protocol
+		var url = require("url");
+		var parse = url.parse(path);
+		
+		console.log("protocol: " + parse.protocol);
+		
+		if(parse.protocol == "ftp:") {
+			
+			if(editor.connections.hasOwnProperty(parse.hostname)) {
+				
+				var c = editor.connections[parse.hostname];
+				
+				var input = new Buffer(text, "utf-8");
+				var destPath = parse.pathname;
+				var useCompression = false;
+				
+				c.put(input, destPath, useCompression, function putFtpDone(err) {
+					if(err) {
+						alert("Failed to save to path= " + path + "\n" + err.message);
+						throw err;
+					}
+					
+					doneSaving();
+					
+				});
+				
+			}
+			else {
+				alert("Failed to save to path=" + path + "\nNo connection to FTP on " + parse.hostname + " !");
+			}
+		}
+		else if(parse.protocol == "sftp:") {
+			
+			if(editor.connections.hasOwnProperty(parse.hostname)) {
+				
+				var c = editor.connections[parse.hostname];
+				
+				var input = new Buffer(text, "utf-8");
+				var destPath = parse.pathname;
+				var options = {encoding: 'utf8'};
+				// Could also use sftp.createWriteStream
+				c.writeFile(destPath, input, options, function sftpWrite(err) {
+					if(err) {
+						alert("Failed to save to path= " + path + "\n" + err.message);
+						//throw err;
+					}
+					console.log("Saved " + destPath + " on SFTP " + parse.hostname);
+					doneSaving();
+					
+				});
+				
+			}
+			else {
+				alert("Failed to save to path=" + path + "\nNo connection to SFTP on " + parse.hostname + "");
+			}
+		}
+		else {
+			
+			// Asume local file-system
+			
+			var fs = require("fs");
+			fs.writeFile(path, text, function(err) {
+				console.log("Attempting saving to local file system: " + path + " ...");
+				
+				if(err) {
+					alert("Unable to save file! " + err.message + "\n" + path);
+					console.warn("Unable to save " + path + "!");
+					throw err;
+				}
+				else {
+					console.log("The file was successfully saved: " + path + "");
+					doneSaving();
+				}
+				});
+		}
+		}
 	
 	editor.fileSaveDialog = function(defaultPath, callback) {
 		/*
@@ -2444,6 +2453,8 @@ editor.lastKeyPressed = "";
 		protocol = protocol.toLowerCase();
 		
 		console.log("protocol=" + protocol);
+		
+		if(editor.remoteProtocols.indexOf(protocol) == -1) throw new Error("Protocol=" + protocol + " not supported!"); 
 		
 		if(protocol == "ftp" || protocol == "ftps") {
 			var Client = require('ftp');
