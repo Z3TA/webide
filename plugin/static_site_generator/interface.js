@@ -582,7 +582,14 @@
 					// Save the src file so we edit the right file
 					sourceFile = editor.currentFile;
 					
-					editContent = true;
+					if(!sourceFile.isSaved) {
+						alert("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+						editContent = false;
+					}
+					else {
+						editContent = true;
+					} 
+					
 					
 					//var url = path.join(site.preview, editor.currentFile.name);
 					
@@ -685,7 +692,7 @@
 		
 		console.log("PreviewWin loaded!");
 		
-		
+	
 		headerRows = 0;
 		footerRows = 0;
 		if(editContent) {
