@@ -98,11 +98,21 @@
 		
 		if(!inputPath) throw new Error("Is the save dialog visible?");
 		
-		file.saveAs(inputPath.value);
+		editor.saveFile(file, inputPath.value, function fileSaved(err, path) {
+			if(err) {
+				// Most likely cause is that the folder does not exist!
+				
+				if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
+				else alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
+				
+			}
+		});
 		
 		hideSaveDialog();
 		
 	}
+	
+	
 	
 	function browsePath() {
 		var defaultPath = "";
@@ -114,7 +124,8 @@
 			
 			if(path) {
 				// Save the file right away
-				editor.currentFile.saveAs(path);
+				editor.saveFile(editor.currentFile, path);
+				
 				hideSaveDialog();
 				
 				}

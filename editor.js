@@ -870,11 +870,6 @@ editor.lastKeyPressed = "";
 			throw new Error("No file open when save was called");
 		}
 		
-		
-		// Do not specify path for saving in old path!
-		
-		if(editor.files.hasOwnProperty(path)) throw new Error("There is already a file open with path=" + path);
-		
 		if(path == undefined) {
 			path = file.path;
 		}
@@ -882,35 +877,44 @@ editor.lastKeyPressed = "";
 		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
 		if(file.path != path) {
-			
+			if(editor.files.hasOwnProperty(path)) {
+				var err = new Error("There is already a file open with path=" + path);
+				if(callback) callback(err, path);
+				else throw err;
+			}
 			console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
 			
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
 			editor.closeFile(file.path, true); // true = do not switch to another file
 			
-			editor.openFile(path, text, saveIt); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
+			editor.openFile(path, text, savedAs); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
 			
 		}
 		else {
 			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
 		
-		function saveIt(err, file) { // intermediate function via ditor.openFile
+		function savedAs(err, newFile) { // intermediate function via ditor.openFile
 			if(err) throw err;
+			
+			file = newFile;
+			
 			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
 
 		function doneSaving(err, path) {
 			
-			if(path != file.path && !err) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path);
+			if(!err) {
+				if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
+				
+				console.log("Successfully saved " + file.path);
+				file.saved(); // Call functions that listen for save events
+			}
 			
-			console.log("Successfully saved " + file.path);
-			
-			file.saved(); // Call functions that listen for save events
-			
-			if(callback) callback(err, path)
+			if(callback) callback(err, path);
 			else if(err) throw err;
+		
 		}
 		
 	}
@@ -918,10 +922,11 @@ editor.lastKeyPressed = "";
 	
 	editor.saveToDisk = function(path, text, doneSaving) {
 		// You probably want to use editor.saveFile instead!
+		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
 		// Only works with text files !
 		
-		if(!doneSaving) throw new Error("saveToDisk called wihtout a callback function!");
+		if(!doneSaving) throw new Error("saveToDisk called without a callback function!");
 		
 		// Check path for protocol
 		var url = require("url");

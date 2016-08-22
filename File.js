@@ -2840,18 +2840,6 @@
 		writable: false
 	});
 	
-	File.prototype.saveAs = function(path) {
-		// Saves the file in another path
-		
-		var file = this;
-		
-		editor.saveFile(file, path);
-		
-		file.setFileExtension();
-		
-		editor.renderNeeded();
-	}
-	
 	File.prototype.highlightText = function(text, startAt, stopAt) {
 		var file = this;
 		
