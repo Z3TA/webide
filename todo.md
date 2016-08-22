@@ -6,12 +6,12 @@ Prio:
 2) Polishing of existing features
 
 Work on the SSG integration.
-Control buttons on the preview to resize the preview window.
 
 Partial generation (generate only the page being worked on).
 Better preview. WYSIWYG editing.
 FTP-publishing
 Auto preview SSG site when saving?
+meta publish date, publish only after this date
 
 3) Optimization (toggle devMode off when testing!)
 4) New features
@@ -21,15 +21,10 @@ Auto preview SSG site when saving?
 What I'm working on
 -------------------
 
-Refactoring editor.saveFile and file.saveAs to handle saveAs's
-how to repeat: create new file, hit Ctrl+S, pase path: C:\Users\Z\dev-repositories\jzedit\test\jsfunoptbrackmiss.js, hit Enter
-Should show a message about the folder not exist.
+Making a editor.copy method
 
-Also check other saveAs functions!! (the file wants to recheck file extension!)
+Handling files/ copy commands sent from the SSG build worker
 
-... Dilemma: Spend 30 minutes document wtf you are doing or hope you fix it in five minutes. When you know you have to run in 30 minutes and will not be back in days and will probably have forgotten what you where doing and why
-
-Make the SSG build script send the files to the editor for saving
 
 
 todo:

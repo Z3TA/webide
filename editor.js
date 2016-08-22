@@ -920,13 +920,15 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.saveToDisk = function(path, text, doneSaving) {
+	editor.saveToDisk = function(path, text, doneSaving, inputBuffer, encoding) {
 		// You probably want to use editor.saveFile instead!
 		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
 		// Only works with text files !
 		
 		if(!doneSaving) throw new Error("saveToDisk called without a callback function!");
+		
+		if(encoding == undefined) encoding = "utf-8";
 		
 		// Check path for protocol
 		var url = require("url");
@@ -942,7 +944,7 @@ editor.lastKeyPressed = "";
 				
 				var c = editor.connections[parse.hostname];
 				
-				var input = new Buffer(text, "utf-8");
+				var input = inputBuffer ? text : new Buffer(text, encoding);
 				var destPath = parse.pathname;
 				var useCompression = false;
 				
@@ -967,9 +969,9 @@ editor.lastKeyPressed = "";
 				
 				var c = editor.connections[parse.hostname];
 				
-				var input = new Buffer(text, "utf-8");
+				var input = inputBuffer ? text : new Buffer(text, encoding);
 				var destPath = parse.pathname;
-				var options = {encoding: 'utf8'};
+				var options = {encoding: encoding};
 				// Could also use sftp.createWriteStream
 				c.writeFile(destPath, input, options, function sftpWrite(err) {
 					if(err) {
@@ -991,7 +993,7 @@ editor.lastKeyPressed = "";
 			// Asume local file-system
 			
 			var fs = require("fs");
-			fs.writeFile(path, text, function(err) {
+			fs.writeFile(path, text, encoding, function(err) {
 				console.log("Attempting saving to local file system: " + path + " ...");
 				
 				if(err) {
@@ -1005,7 +1007,37 @@ editor.lastKeyPressed = "";
 				}
 				});
 		}
-		}
+	}
+	
+	editor.copyFile = function(from, to, callback) {
+		// Copies a file from one location to another location, can be local file-system or a remote connection
+		
+		var pat
+		
+		var returnBuffer = true;
+		var encoding = "binary";
+		var inputBuffer = true;
+		
+		editor.readFromDisk(from, function(err, path, buffer) {
+			
+			if(err) {
+				console.warn("Copy failed! Unable to read file: " + err.message);
+				callback(err);
+			}
+			else {
+				editor.saveToDisk(to, buffer, function(err, path) {
+					
+					if(err) console.warn("Copy failed! Unable to write file: " + err.message);
+					
+					callback(err, path);
+										
+					
+				}, inputBuffer, encoding);
+			}
+			
+		}, returnBuffer, encoding)
+		
+	}
 	
 	editor.fileSaveDialog = function(defaultPath, callback) {
 		/*

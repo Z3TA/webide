@@ -955,6 +955,9 @@
 			
 			var fs = require("fs");
 			
+			var filesToSave = 0;
+			var doneCompiling = false;
+			
 			var worker = childProcess.fork(buildScript, [source, destination], {
 				cwd: workingDir,
 				env: {"NODE_PATH": node_modules}, // Tell node runtime to check for modules in this folder
@@ -967,8 +970,19 @@
 				console.log("SSG: " + JSON.stringify(data));
 				
 				if(data.type == "file") {
+					filesToSave++;
 					editor.saveToDisk(data.path, data.text, fileSaved);
 				}
+				else if(data.type == "copy") {
+					
+				}
+				else if(data.type == "error") {
+					alert(data.msg);
+				}
+				else if(data.type == "debug") {
+					console.log(data.msg);
+				}
+				else throw new Error("Unknown message from worker: " + JSON.stringify(data));
 				
 			});
 			worker.on('error', function worker_error(code) {
@@ -978,12 +992,24 @@
 			worker.on('exit', function worker_exit(code) {
 				console.log("SSG: Exit! code=" + code);
 				if(code != 0) throw new Error("The process exited with code=" + code + "! (It means something went wrong)");
-				callback(code);
+				doneCompiling();
+				checkDone()
 			});
 			
-			function fileSaved(path) {
-				if(--fileToSave) allFilesSaved();
-}
+			function fileSaved(err, path) {
+				if(err) throw err;
+				filesToSave--;
+				if(filesToSave == 0) checkDone();
+			}
+			
+			function checkDone() {
+				if(filesToSave == 0 && doneCompiling) {
+					
+					
+					
+					callback(code);
+				}
+			}
 			
 
 		}

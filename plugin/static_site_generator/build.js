@@ -258,7 +258,7 @@ function build(baseTree, baseFolder, callback) {
 	
 	function buildeDir(path, branch) {
 		
-		process.send({type: "debug", data: "Building dir=" + path + ""});
+		process.send({type: "debug", msg: "Building dir=" + path + ""});
 		
 		var filePath = "";
 		
@@ -272,7 +272,7 @@ function build(baseTree, baseFolder, callback) {
 				buildeDir(path + "/" + subFolder, branch.folders[subFolder])
 			}
 			else {
-				process.send({type: "debug", data: "Subfolder " + subFolder + " has no documents!"});
+				process.send({type: "debug", msg: "Subfolder " + subFolder + " has no documents!"});
 				}
 		}
 		
@@ -284,7 +284,7 @@ function build(baseTree, baseFolder, callback) {
 			
 			var document = branch.documents[fileName];
 			
-			process.send({type: "file", path: filePath, data: document.html});
+			process.send({type: "file", path: filePath, text: document.html});
 			
 			filesToWrite++;
 			
@@ -1634,7 +1634,7 @@ function parseError(doc, scriptCount, err) {
 	var errMessage = "Line:" + line + ": " + filePath + ": " + msg + "";
 	
 	//log(errMessage);
-	process.send(errMessage);
+	process.send({type: "error", msg: errMessage});
 	
 }
 
