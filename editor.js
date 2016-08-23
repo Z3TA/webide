@@ -1012,8 +1012,6 @@ editor.lastKeyPressed = "";
 	editor.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection
 		
-		var pat
-		
 		var returnBuffer = true;
 		var encoding = "binary";
 		var inputBuffer = true;
@@ -3143,7 +3141,7 @@ editor.lastKeyPressed = "";
 		
 		
 		if(editor.settings.devMode && runtime != "browser") {
-			
+			// ## Load tests
 			console.log("Loading tests ...");
 			var walk = require('walk');
 			var head = document.getElementsByTagName("head")[0];
@@ -3155,18 +3153,19 @@ editor.lastKeyPressed = "";
 			console.log("root:" + root);
 			
 			walker.on('file', function(folder, stat, next) {
-
-				var filename = path.join(folder, stat.name);
-				var ext = getFileExtension(filename);
 				
-				if(ext == "js") {
+				var filePath = path.join(folder, stat.name);
+				var filename = getFilenameFromPath(filePath);
+				var ext = getFileExtension(filePath);
+				
+				if(ext == "js" && filename.substr(0,1) != "_") { // Only load .js files and ignore file-names starting with underscore _
 					var fileref=document.createElement('script');
 					
 					fileref.setAttribute("type","text/javascript");
-					fileref.setAttribute("src", filename);
+					fileref.setAttribute("src", filePath);
 					head.appendChild(fileref);
 					
-					console.log("Loading test: " + filename);
+					console.log("Loading test: " + filePath);
 				}
 				next();
 				
