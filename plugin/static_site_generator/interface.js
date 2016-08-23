@@ -957,6 +957,7 @@
 			
 			var filesToSave = 0;
 			var doneCompiling = false;
+			var workerExitCode = -1;
 			
 			var worker = childProcess.fork(buildScript, [source, destination], {
 				cwd: workingDir,
@@ -974,7 +975,8 @@
 					editor.saveToDisk(data.path, data.text, fileSaved);
 				}
 				else if(data.type == "copy") {
-					
+					filesToSave++;
+					editor.copyFile(data.from, data.to, fileSaved);
 				}
 				else if(data.type == "error") {
 					alert(data.msg);
@@ -992,8 +994,9 @@
 			worker.on('exit', function worker_exit(code) {
 				console.log("SSG: Exit! code=" + code);
 				if(code != 0) throw new Error("The process exited with code=" + code + "! (It means something went wrong)");
-				doneCompiling();
-				checkDone()
+				doneCompiling = true;
+				workerExitCode= code;
+				checkDone();
 			});
 			
 			function fileSaved(err, path) {
@@ -1002,13 +1005,12 @@
 				if(filesToSave == 0) checkDone();
 			}
 			
-			function checkDone() {
+			function checkDone(exitCode) {
 				if(filesToSave == 0 && doneCompiling) {
 					
-					
-					
-					callback(code);
+					callback(workerExitCode);
 				}
+				else console.log("filesToSave=" + filesToSave + " exitCode=" + exitCode);
 			}
 			
 

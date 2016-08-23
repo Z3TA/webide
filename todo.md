@@ -13,6 +13,9 @@ FTP-publishing
 Auto preview SSG site when saving?
 meta publish date, publish only after this date
 
+Work on improving the bug finding system, like undefined methods and properties.
+Follow <script includes and nodeJS require's
+
 3) Optimization (toggle devMode off when testing!)
 4) New features
 
@@ -20,11 +23,6 @@ meta publish date, publish only after this date
 
 What I'm working on
 -------------------
-
-Making a editor.copy method
-
-Handling files/ copy commands sent from the SSG build worker
-
 
 
 todo:
