@@ -2,22 +2,18 @@ Contributing
 ============
 
 Send any changes to zeta@zetafiles.org, with a note:
-"I transfer all copyright for this code to you, including but not limited to the right to sell, and distribute."
+"I give you full irrevocable copyright for this code, including but not limited to the right to sell, and distribute."
 
 
 Get the source code
 -------------------
-Install developer dependencies:
-Mercurial SCM: https://www.mercurial-scm.org (try "hg --version" in command-prompt/terminal to see if it exists)
- NodeJS and NPM: https://nodejs.org/ (try "node -v" in command-prompt/terminal to see if it exists)
+Install Mercurial SCM: https://www.mercurial-scm.org (try "hg --version" in command-prompt/terminal to see if it exists)
 
 Clone the project: 
 cd my-projects (where you want to place the files)
 hg clone http://hg.webtigerteam.com/JZedit/
 
-Install nodeJS modules:
-cd JZedit
-npm install
+
 
 
 

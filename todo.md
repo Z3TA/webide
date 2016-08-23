@@ -27,9 +27,10 @@ What I'm working on
 
 todo:
 
-More functions to the SSG
+More functions to the SSG ...
 Publish ... upload to (s)ftp.
-Pasting in images ... convert place image in src dir
+Writing in the editor updates the preview, replace old file.text with new on file change! 
+Pasting or dragging in images ... convert place image in src dir
 
 file_save.js connectToConnection(); erm???
 

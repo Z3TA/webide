@@ -2,51 +2,59 @@
 Guidelines for writing a plugin/extension or new feature
 ========================================================
 
-A plugin that is just a key binding:
-editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() { ... }});
+If you add a new feature to the editor, you should make it into a plugin ...
 
-While more advanced plugins should call:
-editor.plugin({desc: "Open up the files from last session", order: 999, load: function reopenFiles() { ... }});
+Make a .js file in the plugin directory. Or a new folder if you need many files or node modules.
 
+Encapsulate your plugin into a self calling function to avoid littering the global scope: (function() { ... })();
 
-
-If you add a new feature to the editor, you should make it into a plugin: A .js file in the plugin directory.
 
 Run the editor in devMode: Ctrl + D. Or add "editor.settings.devMode = true" in settings_overload.js
 
-Keep your plugin completely separated/standalone from the other plugins.
+Keep your plugin completely separated/standalone from the other plugins!
 Only complex/intervene with the core files (editor.js or File.js).
 
-Make a new folder if your plugin uses many files.
+Do not modify file.text directly. Instead add an abstraction layer method to File.js witch properly call file event listeners.
+Also feel free to add new methods and functions in editor.js and global.js
 
-Add automatic tests using editor.tests.push({text:"description": fun: function yourTestFunction() {}});
-And write "bug traps" like: if(foo != bar) console.error(new Error("Expected foo=" + foo + " to equal bar=" + bar)); 
+
+Testing
+-------
+Add automatic tests using: editor.addTest(function nameOfYourTest(callback) { .... })
+Your test function should trow errors, or call the callback function with argument false, or true if the test succeeded.
+
+Place the test file(s) in the tests/ folder. (they will be loaded automatically)
+
+Encapsulate your test code into a self calling function to avoid littering the global scope: (function() { ... })();
+
+Tips: Write "bug traps" and sanity checks like: if(foo != bar) throw new Error("Expected foo=" + foo + " to equal bar=" + bar); 
 
 Do manual testing and run the automatic tests:  Ctrl+Shift+T
 
-Give name to your functions, even the anonymous ones! Some times the function name will be the only clue when tracking bugs and performance issues.
 
 
 Naming files
 ------------
 All file names should be in small caps! (to avoid plugins made in non-case-sensitive environment stops working in case-sensitive environments).
-Name Files using _ instead of white spaces or camelCasing.
+Name files using _ (underscore, instead of white spaces or camelCasing).
 
 
 
 Initiation / starting point
 ---------------------------
-Initiate your plugin using editor.on("start", nameOfTheCallbackFunction)
+A plugin that is just a key binding:
+editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() { ... }});
 
-The name of the callback function should be descriptive to ease debugging.
-You can also make the function start after another function by passing a number (order) 
-as a third argument to editor.on("start", nameOfTheCallbackFunction, order);
+While more advanced plugins should call:
+editor.plugin({desc: "Open up the files from last session", order: 999, load: function reopenFiles() { ... }, unload: unloadReopenFiles});
+
+The name of the "fun" function should be descriptive to ease debugging.
 
 
 CSS / stylesheet
 ----------------
-Insert your CSS code in gfx/style.css. It will easier to do themes if all CSS is located at the same place.
-Use /* ## My section */ to make it easier to find (using the zoom plugin: Alt+Z).
+Insert your CSS code in gfx/style.css. (It will easier to do themes if all CSS is located at the same place.)
+Use /* ## My section */ to make it easier to find (tip: use the zoom plugin: Alt+Z for quick navigating).
 
 
 Debugging
@@ -73,7 +81,7 @@ See editor.js: function keyIsDown
 
 Note: Function bound to keys need to return true or false! When returning false, the default (chromium) behavior is prevented.
 
-CTRL,SHIFT,ALT is global flags (see global.js)
+CTRL,SHIFT,ALT are global variables (see global.js)
 
 
 
@@ -110,9 +118,9 @@ Easy improvements:
 * Declaring with let or const: 50% overhead, use var instead!
 * Loops: Avoid them
 
-* Child processes: There is a huge overhead cost, but it can be worth it if all other optimizations fail. See spellchecker for examples.
+* Child processes: They have a huge overhead cost, but it can be worth it if all other optimizations fail. See spellchecker for examples.
 
-* Render early & hide lag: When the user hits a button, it shouldn't take more then a millisecond before they can see a result.
+* Render early and hide lag: When the user hits a button, it shouldn't take more then a millisecond before they can see a result.
 
 
 Making a parser
@@ -122,8 +130,8 @@ Making a parser
 
 
 
-Bricked the editor
-------------------
+Ooops "Bricked" the editor
+--------------------------
 
 1. Open up package.json in another editor
 2. Change view: true and toolbar: true
@@ -132,7 +140,7 @@ Then you can open the Chromium debugger and see what's wrong.
 
 Possible errors ...
 
-The is a loop somewhere, ex: while(true) that never breaks:
+There is a loop somewhere, ex: while(true) that never breaks:
 Check the last changed code.
 
 Trying to load files on the network:
