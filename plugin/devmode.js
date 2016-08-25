@@ -134,10 +134,10 @@
 				// Call exit listeners before reloading
 				for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 				
-				func = editor.eventListeners.exit[i].fun;
-				name = getFunctionName(func);
+					func = editor.eventListeners.exit[i].fun;
+					name = getFunctionName(func);
 					
-				if(typeof func != "function") {
+					if(typeof func != "function") {
 						
 						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
 						//console.warn(objInfo(f));
@@ -146,7 +146,7 @@
 						
 					}
 					else {
-					ret = func();
+						ret = func();
 					}
 					
 					
