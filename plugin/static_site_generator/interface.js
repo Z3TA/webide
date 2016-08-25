@@ -906,13 +906,13 @@
 		
 		var url = require("url");
 		var parse = url.parse(destination);
-		
-		console.log("protocol: " + parse.protocol);
+		var protocol = parse.protocol.replace(/:/g, "").toLowerCase();
+		console.log("protocol: " + protocol);
 		
 		console.log("source=" + JSON.stringify(url.parse(source), null, 2));
 		console.log("destination=" + JSON.stringify(url.parse(destination), null, 2));
 		
-		if(editor.remoteProtocols.indexOf(parse.protocol) != -1) {
+		if(editor.remoteProtocols.indexOf(protocol) != -1) {
 			// We will need to connect to the remote location before uploading files
 			var serverAddress = parse.host;
 			var auth = parse.auth, user, passw, keyPath;
@@ -958,6 +958,10 @@
 			var filesToSave = 0;
 			var doneCompiling = false;
 			var workerExitCode = -1;
+
+			var foldersExist = [];
+			var folderAboutToBeCreated = [];
+			var waitingList = [];
 			
 			var worker = childProcess.fork(buildScript, [source, destination], {
 				cwd: workingDir,
@@ -972,17 +976,17 @@
 				
 				if(data.type == "file") {
 					filesToSave++;
-					editor.saveToDisk(data.path, data.text, fileSaved);
+					createFile(data.path, data.text)
 				}
 				else if(data.type == "copy") {
 					filesToSave++;
-					editor.copyFile(data.from, data.to, fileSaved);
-				}
-				else if(data.type == "error") {
-					alert(data.msg);
+					copyFile(data.from, data.to)
 				}
 				else if(data.type == "debug") {
 					console.log(data.msg);
+				}
+				else if(data.type == "error") {
+					alert(data.stack);
 				}
 				else throw new Error("Unknown message from worker: " + JSON.stringify(data));
 				
@@ -994,14 +998,85 @@
 			worker.on('exit', function worker_exit(code) {
 				console.log("SSG: Exit! code=" + code);
 				if(code != 0) throw new Error("The process exited with code=" + code + "! (It means something went wrong)");
-				doneCompiling = true;
-				workerExitCode= code;
-				checkDone();
+				else {
+					doneCompiling = true;
+					workerExitCode= code;
+					checkDone();
+				}
 			});
 			
-			function fileSaved(err, path) {
-				if(err) throw err;
+			function createFile(filePath, text) {
+				
+				var folder = getDirectoryFromPath(filePath);
+
+				if(foldersExist.indexOf(folder) != -1) {
+					console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
+					editor.saveToDisk(filePath, text, fileCreated);
+				}
+				else {
+					waitingList.push(function() { createFile(filePath, text) });
+					
+					if(folderAboutToBeCreated.indexOf(folder) == -1) createPath(folder);
+				}
+								
+				function fileCreated(err, path) {
+					if(err) throw err;
+					else {
+						fileSaved(filePath);
+						runWaitingList();
+					}
+				}
+			}
+			
+			function copyFile(from, to) {
+				
+				var folder = getDirectoryFromPath(to);
+				
+				if(foldersExist.indexOf(folder) != -1) {
+					editor.copyFile(from, to, fileCopied);
+				}
+				else {
+					waitingList.push(function() { copyFile(from, to) });
+					
+					if(folderAboutToBeCreated.indexOf(folder) == -1) createPath(folder);
+				}
+
+				function fileCopied(err, path) {
+					if(err) throw err;
+					else {
+						fileSaved(to);
+						runWaitingList();
+					}
+				}
+			}
+			
+			function createPath(folder, createPathCallback) {
+				console.log("Creating path=" + folder);
+				folderAboutToBeCreated.push(folder);
+				editor.createPath(folder, function(err) {
+					if(err) throw err;
+					else {
+						folderAboutToBeCreated.splice(folderAboutToBeCreated.indexOf(folder, 1));
+						foldersExist.push(folder);
+						
+						//createPathCallback();
+						
+						runWaitingList();
+					}
+				});	
+			}
+			
+			function runWaitingList() {
+				console.log("Items in waiting list: waitingList.length=" + waitingList.length);
+				if(waitingList.length > 0) waitingList.shift()();
+			}
+			
+			function fileSaved(path) {
+				console.log("Saved file path=" + path);
 				filesToSave--;
+				
+				console.log("Files left to be saved: filesToSave=" + filesToSave);
+				
 				if(filesToSave == 0) checkDone();
 			}
 			

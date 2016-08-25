@@ -61,9 +61,14 @@
 
 console.time("total time")
 
+process.on('uncaughtException', function(err) {
+	error(err);
+});
+
 var FS = require("fs-extra");
 var PATH = require('path');
 
+// These paths needs to be absolute!
 var BASEPATH = mustBePath(process.argv[2], "."); // Path to files that should be processed
 var PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder 
 
@@ -89,34 +94,34 @@ function main() {
 	findFiles(BASEPATH, ROOT, function() {
 		console.timeEnd("walk");
 		
-		//console.log(JSON.stringify(ROOT, null, 2));
+		//log(JSON.stringify(ROOT, null, 2));
 		
 		//process.exit();
 		
-		console.log("\nCompiling files ...");
+		log("\nCompiling files ...");
 		console.time("compile");
 		compile(ROOT);
 		console.timeEnd("compile");
 		
-		console.log("\nEvaluating ...");
+		log("\nEvaluating ...");
 		console.time("evaulute");
 		evaluate(ROOT);
 		console.timeEnd("evaulute");
 		
-		//console.log("MEDIAFILES=" + MEDIAFILES);
+		//log("MEDIAFILES=" + MEDIAFILES);
 		
-		console.log("\nBuilding ...");
+		log("\nBuilding ...");
 		console.time("build");
 		
 		build(ROOT, PUBFOLDER, function() {
 			
 			console.timeEnd("build");
 			
-			console.log("\nCopying media files ...")
+			log("\nCopying media files ...")
 			console.time("copy");
 			copyOtherFiles(function(fileCount) {
 				console.timeEnd("copy");
-				console.log("Copied " + fileCount + " files!");
+				log("Copied " + fileCount + " files!");
 				
 				// Static preview server (preview.js)
 				
@@ -136,10 +141,10 @@ function main() {
 
 /*
 	function saveURLs(callback) {
-	var filePath = PATH.resolve(BASEPATH, "url.json")
+	var filePath = resolvePath(BASEPATH, "url.json")
 	
 	FS.writeFile(filePath, JSON.stringify(URL, null, 2), "utf8", function(err) {
-	if(err) throw err;
+	if(err) error(err);
 	
 	callback();
 	
@@ -148,7 +153,7 @@ function main() {
 	
 	function getURLs(callback) {
 	
-	var filePath = PATH.resolve(BASEPATH, "url.json")
+	var filePath = resolvePath(BASEPATH, "url.json")
 	
 	FS.readFile(filePath, "utf8", function (err, data) {
 	if(err == null) {
@@ -160,7 +165,7 @@ function main() {
 	callback();
 	}
 	else {
-	throw err;
+	error(err);
 	}
 	}
 	}
@@ -177,66 +182,72 @@ function copyOtherFiles(callback) {
 	var path = "";
 	var src = "";
 	
-	var basePath = PATH.resolve(BASEPATH, "");
-	var pubFolder = PATH.resolve(PUBFOLDER, "");
+	var basePath = BASEPATH;
+	var pubFolder = PUBFOLDER;
 	
-	/*
-		console.log("basePath=" + basePath);
-		console.log("pubFolder=" + pubFolder);
-		console.log("OTHERFILES=" + OTHERFILES);
-	*/
+	
+	log("basePath=" + basePath);
+	log("pubFolder=" + pubFolder);
+	log("PUBFOLDER=" + PUBFOLDER);
+	//log("OTHERFILES=" + OTHERFILES);
+	
 	var filesToCopy = OTHERFILES.length;
 	var totalFiles = filesToCopy;
 	
 	for(var i=0; i<filesToCopy; i++) {
+		log("copyFile=" + OTHERFILES[i]);
 		path = OTHERFILES[i].replace(basePath, pubFolder);
-		src = path.replace(pubFolder, "");
+		//src = path.replace(pubFolder, "");
+		
+		// Fix for when the folder delimiters are different between pubFolder and basePath
+		if(pubFolder.indexOf("/") != -1 && basePath.indexOf("\\") != -1) path = path.replace(/\\/g, "/");
+		if(pubFolder.indexOf("\\") != -1 && basePath.indexOf("/") != -1) path = path.replace(/\//g, "\\");
 		
 		process.send({type: "copy", from: OTHERFILES[i], to: path});
 		
 		/*
 			// Asume som detective work has been done to figure out what files are used
 			if(fileInUse(src)) {
-			console.log("Copying file=" + path);
+			log("Copying file=" + path);
 			FS.copy(OTHERFILES[i], path, function (err) {
-			if (err) throw err;
+			if (err) error(err);
 			
 			if(--filesToCopy == 0) callback();
-			console.log("filesToCopy=" + filesToCopy);
+			log("filesToCopy=" + filesToCopy);
 			
 			});
 			}
 			else {
 			
-			console.log("Not used: " + src);
+			log("Not used: " + src);
 			FS.unlink(path, function (err, path) {
 			if(err == null) {
-			console.log("Deleted file=" + path);
+			log("Deleted file=" + path);
 			}
 			else if(err.code == "ENOENT") {
 			}
 			else {
-			throw err;
+			 error(err);
 			}
 			
 			if(--filesToCopy == 0) callback();
 			});
 			
-			//console.log("filesToCopy=" + filesToCopy);
+			//log("filesToCopy=" + filesToCopy);
 			}
 		*/
 	}
 	
-	//console.log("filesToCopy=" + filesToCopy);
+	//log("filesToCopy=" + filesToCopy);
 	
 	/*
 		for(var i=0; i<OTHERFILES.length; i++) {
 		path = OTHERFILES[i].replace(basePath, pubFolder);
 		
 		copyFile(OTHERFILES[i], path, function(err, path) { // source, target, cb
-		if(err) throw err;
+		if(err) error(err);
 		
-		console.log("copied file=" + path);
+		log("copied file=" + path);
 		if(++filesCopied == OTHERFILES.length) {
 		callback();
 		}
@@ -263,7 +274,7 @@ function build(baseTree, baseFolder, callback) {
 		var filePath = "";
 		
 		for(var fileName in branch.documents) {
-			filePath = PATH.resolve(path, fileName);
+			filePath = resolvePath(path, fileName);
 			buildFile(fileName, filePath);	
 		}
 		
@@ -273,7 +284,7 @@ function build(baseTree, baseFolder, callback) {
 			}
 			else {
 				process.send({type: "debug", msg: "Subfolder " + subFolder + " has no documents!"});
-				}
+			}
 		}
 		
 		function buildFile(fileName, filePath) {
@@ -324,7 +335,7 @@ function evaluate(baseTree) {
 		
 		function evalFile(document) {
 			
-			console.log("Evaluating file=" + document.path);
+			log("Evaluating file=" + document.path);
 			
 			var depth = findDepth(document);
 			
@@ -336,8 +347,8 @@ function evaluate(baseTree) {
 			
 			document.html = makePathsRelative(document.html, depth);
 			
-			//console.log(code);
-			//console.log(document.html)
+			//log(code);
+			//log(document.html)
 			
 		}
 	}
@@ -364,9 +375,9 @@ function findDepth(document) {
 
 function compile(baseTree) {
 	
-	var basePath = PATH.resolve(BASEPATH, "");
+	var basePath = BASEPATH;
 	
-	//console.log("baseTree.folders=" + baseTree.folders);
+	//log("baseTree.folders=" + baseTree.folders);
 	
 	compileDir(baseTree, null);
 	
@@ -387,7 +398,7 @@ function compile(baseTree) {
 		}
 		
 		for(var dirName in branch.folders) {
-			//console.log("subCompiling dir=" + dirName);
+			//log("subCompiling dir=" + dirName);
 			compileDir(branch.folders[dirName], branch);
 		}
 		
@@ -400,7 +411,7 @@ function compile(baseTree) {
 			
 			
 			
-			console.log("Compiling file=" + document.path);
+			log("Compiling file=" + document.path);
 			
 			document.url = document.path.replace(basePath, "");
 			
@@ -449,8 +460,8 @@ function compile(baseTree) {
 				
 			}
 			
-			//console.log("headers=" + headers.length);
-			//console.log("footers=" + footers.length);
+			//log("headers=" + headers.length);
+			//log("footers=" + footers.length);
 			
 			var language = document.language; // String
 			var keywords = document.keywords; // Array of words
@@ -585,10 +596,10 @@ function makePathsRelative(html, depth) {
 	var re = new RegExp("href.?=.?(\"|')(.*\\/)(\"|')", "img");
 	var str, arr;
 	while ((arr = re.exec(html)) !== null) {
-		//console.log("Found: " + JSON.stringify(arr));
+		//log("Found: " + JSON.stringify(arr));
 		
 		str = arr[0];
-		//console.log(str);
+		//log(str);
 		if(str.indexOf("://") == -1) {
 			html = html.replace(str, "href=" + arr[1] + arr[2] + "index.htm" + arr[1]);
 		}
@@ -640,7 +651,7 @@ function findFiles(dir, parentBranch, done) {
 		
 		// Get last part of the dir
 		
-		console.log("walking dir=" + dir);
+		log("walking dir=" + dir);
 		
 		var folderName = dir.substring( Math.max(dir.lastIndexOf("/"), dir.lastIndexOf("\\")) );
 		
@@ -665,7 +676,7 @@ function findFiles(dir, parentBranch, done) {
 		wait_readdir++;
 		
 		FS.readdir(dir, function(err, list) {
-			if (err) throw err;
+			if (err) error(err);
 			
 			branch.documents = {};
 			
@@ -674,7 +685,7 @@ function findFiles(dir, parentBranch, done) {
 				
 				if(fileName.substring(0, 1) == "_") return; // Ignore files starting with _
 				
-				var filePath = PATH.resolve(dir, fileName);
+				var filePath = resolvePath(dir, fileName);
 				
 				wait_stat++;
 				
@@ -682,8 +693,8 @@ function findFiles(dir, parentBranch, done) {
 				
 				FS.stat(filePath, function(err, file) {
 					
-					if(err) throw err;
-					if(!file) throw new Error("Stat error!?");
+					if(err) error(err);
+					if(!file) error(new Error("Stat error!?"));
 					
 					if (file.isDirectory()) {
 						walk(filePath, branch, done);
@@ -701,7 +712,7 @@ function findFiles(dir, parentBranch, done) {
 							branch.footer = new Document(fileName, filePath, false, documentCreated);
 						}
 						else if(fileType == "htm" || fileType == "html" || fileType == "xml" || fileType == "nodejs" || fileType == "docx" || fileType == "md") {
-							//console.log("file=" + filePath + "\n");
+							//log("file=" + filePath + "\n");
 							
 							fileName = changeFileType(fileName, "docx", "htm");
 							fileName = changeFileType(fileName, "md", "htm");
@@ -720,13 +731,13 @@ function findFiles(dir, parentBranch, done) {
 							
 							OTHERFILES.push(filePath);
 							
-							//console.log("Unsupported file type=" + fileType);
+							//log("Unsupported file type=" + fileType);
 							wait_Document--;
 						}
 						
 					}
 					else {
-						throw new Error("Unsupported file: " + filePath);
+						error(new Error("Unsupported file: " + filePath));
 					}
 					
 					wait_stat--;
@@ -734,7 +745,7 @@ function findFiles(dir, parentBranch, done) {
 					
 					function documentCreated(filePath) {
 						
-						console.log("Read file=" + filePath);
+						log("Read file=" + filePath);
 						
 						wait_Document--;
 						checkComplete();
@@ -751,7 +762,7 @@ function findFiles(dir, parentBranch, done) {
 		});
 		
 		function checkComplete() {
-			//console.log("  wait_readdir=" + wait_readdir + " wait_stat=" + wait_stat + " wait_Document=" + wait_Document + "");
+			//log("  wait_readdir=" + wait_readdir + " wait_stat=" + wait_stat + " wait_Document=" + wait_Document + "");
 			
 			if(wait_readdir == 0 && wait_stat == 0 && wait_Document == 0) {
 				done();
@@ -796,7 +807,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 	});
 	
 	if(fileType == "docx") {
-		console.log("Convert to HTML file=" + filePath);
+		log("Convert to HTML file=" + filePath);
 		document.path = changeFileType(document.path, "docx", "htm");
 		
 		var options = {
@@ -820,7 +831,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 	else {
 		FS.readFile(filePath, function (err, data) {
 			
-			if (err) throw err;
+			if (err) error(err);
 			
 			var marked = require('marked');
 			var jschardet = require("jschardet");
@@ -829,11 +840,11 @@ function Document(fileName, filePath, evaluate, fileRead) {
 			// Detect encoding
 			var  enc = jschardet.detect(data);
 			
-			//console.log("enc=" + JSON.stringify(enc) + " path=" + filePath);
+			//log("enc=" + JSON.stringify(enc) + " path=" + filePath);
 			
 			if(enc.encoding.toLowerCase() != "utf-8" && enc.confidence == 1) {
 				// Convert to utf-8
-				console.log("WARNING: Converting (" + enc.encoding + " ?) to UTF8 file=" + filePath);
+				log("WARNING: Converting (" + enc.encoding + " ?) to UTF8 file=" + filePath);
 				//data = iconv.decode(data, "windows-1252"); // If we're on windows it will almost always be this
 				
 				// or ascii
@@ -845,10 +856,10 @@ function Document(fileName, filePath, evaluate, fileRead) {
 					data = iconv.decode(data, enc);
 					//data = iconv.encode(data, "utf8");
 					data = data.toString("utf8");
-					//console.log("data=" + data);
+					//log("data=" + data);
 					}
 					else {
-					throw new Error("Unable to decode " + enc);
+					error(new Error("Unable to decode " + enc));
 					}
 				*/
 				
@@ -878,7 +889,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 					metaData = null;
 				}
 				
-				console.log("metaEnds=" + metaEnds);
+				log("metaEnds=" + metaEnds);
 				
 				data = marked(data); // Convert markdown to html
 				
@@ -922,9 +933,9 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		
 		if(document.lead == "" && arrDescription.length > 0) document.lead = arrDescription[0];
 		
-		//console.log("abstract=" + abstract);
-		//console.log("description=" + description);
-		//console.log("lead=" + document.lead);
+		//log("abstract=" + abstract);
+		//log("description=" + description);
+		//log("lead=" + document.lead);
 		
 		
 		
@@ -987,17 +998,17 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				var metaCharset = document.findReplace("<meta charset\\s*=\\s*['\"](.*)['\"].*>\\s{0,}", 1);
 				
 				if(contentType.length > 0) {
-					//console.log("contentType=" + contentType[0]);
+					//log("contentType=" + contentType[0]);
 					var charset = find(contentType[0].trim() + ";", "charset\\s*?=\\s*?(.*);", 1); // meh, it doesn't seem to be possible to stop at $ xor ;
 					if(charset.length > 0) {
 						document.originalCharset = charset[0].replace(";", "").trim();
-						//console.log("document.originalCharset=" + document.originalCharset);
+						//log("document.originalCharset=" + document.originalCharset);
 					}
 				}
 				if(metaCharset.length > 0) {
-					//console.log("metaCharset=" + metaCharset[0]);
+					//log("metaCharset=" + metaCharset[0]);
 					if(document.originalCharset == "") document.originalCharset = metaCharset[0];
-					//console.log("document.originalCharset=" + document.originalCharset);
+					//log("document.originalCharset=" + document.originalCharset);
 				}
 				
 				
@@ -1036,7 +1047,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 			// Take first heading as title
 			arrTitle = find(document.html, "<h(\\d)>(.*)</h\\1>", 2);
 			if(arrTitle.length > 0) {
-				console.log("WARNING: Using H-tag as title in file=" + filePath);
+				log("WARNING: Using H-tag as title in file=" + filePath);
 				arrTitle.length = 1; // Dont complain about multible titles
 			}
 			
@@ -1044,13 +1055,13 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				// We are getting desparate, use the first paragraph
 				arrTitle = [contentOfHtmlTag(document.html, "p")];
 				if(arrTitle[0].length > 0) {
-					console.log("WARNING: Using first paragraph as title in file=" + filePath);
+					log("WARNING: Using first paragraph as title in file=" + filePath);
 				}
 				
 				if(documentLeadFirstParagraph) {
 					// Change the lead to the second paragraph, because we are using the first p as title
 					document.lead = contentOfHtmlTag(document.html, "p", 2);
-					console.log("WARNING: Using second paragraph as lead in file=" + filePath);
+					log("WARNING: Using second paragraph as lead in file=" + filePath);
 				}
 				
 			}
@@ -1059,25 +1070,25 @@ function Document(fileName, filePath, evaluate, fileRead) {
 		
 		if(arrTitle.length > 0) {
 			if(arrTitle.length > 1) {
-				console.log("WARNING: More then one title in file=" + filePath);
+				log("WARNING: More then one title in file=" + filePath);
 			}
 			document.title = arrTitle[0]; // Turn into string
 		}
 		else {
-			console.log("WARNING: No title in file=" + filePath);
+			log("WARNING: No title in file=" + filePath);
 			document.title = "";
 		}
-		//console.log("title=" + document.title);
+		//log("title=" + document.title);
 		
 		
 		if(arrKeywords.length > 0) {
 			if(arrKeywords.length > 1) {
-				console.log("WARNING: Many meta keywords in file=" + filePath);
+				log("WARNING: Many meta keywords in file=" + filePath);
 			}
 			document.keywords = toUniqueArray(arrKeywords[0]);;
 		}
 		else {
-			console.log("WARNING: No meta keywords exist in file=" + filePath);
+			log("WARNING: No meta keywords exist in file=" + filePath);
 			document.keywords = [];
 		}
 		
@@ -1110,7 +1121,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 
 Document.prototype.write = function(data) {
 	var document = this;
-	//console.log("Writing data=" + data);
+	//log("Writing data=" + data);
 	document.html += data;
 }
 
@@ -1145,7 +1156,7 @@ Document.prototype.evaluate = function(str) {
 	function checkChar(charIndex) {
 		char = str[i];
 		
-		//console.log("char=" + char);
+		//log("char=" + char);
 		//log("char=" + char + " lastChar=" + lastChar);
 		
 		if(char == "S" && lastChar == "J" && lastChar2 == "?" && lastChar3 == "<") {
@@ -1228,19 +1239,19 @@ Document.prototype.findReplace = function(reString, group, replaceWith, searchPa
 	var replace = [];
 	
 	while ((arr = re.exec(searchInStr)) !== null) {
-		//console.log("Found: " + JSON.stringify(arr));
+		//log("Found: " + JSON.stringify(arr));
 		replace.push(arr[0]);
 		result.push(arr[group]);
 	}
 	
 	if(result.length == 0) {
-		//console.log("Did not find " + reString + "");
+		//log("Did not find " + reString + "");
 		//result.push("");
 	}
 	
 	for(var i=0; i<replace.length; i++) {
 		document.html = replaceAll(document.html, replace[i], replaceWith); // Remove it
-		//console.log("Replaced " + replace[i]);
+		//log("Replaced " + replace[i]);
 	}
 	
 	return result;
@@ -1251,7 +1262,7 @@ Document.prototype.findReplace = function(reString, group, replaceWith, searchPa
 
 function contentOfHtmlTag(text, tag, nr) {
 	
-	//console.log("Finding content of tag: " + tag);
+	//log("Finding content of tag: " + tag);
 	
 	if(nr == undefined) nr = 1;
 	
@@ -1280,14 +1291,14 @@ function contentOfHtmlTag(text, tag, nr) {
 		
 	} while(xmpStart != -1)
 	
-	//console.log("xmpTags=" + JSON.stringify(xmpTags));
+	//log("xmpTags=" + JSON.stringify(xmpTags));
 	
 	// Find tagStart, nr, not inside xml tags
 	do {
 		
 		tagStart = text.indexOf("<" + tag, tagStart+1);
 		
-		//console.log("tagStart=" + tagStart);
+		//log("tagStart=" + tagStart);
 		
 		insideXmp = false;
 		
@@ -1301,7 +1312,7 @@ function contentOfHtmlTag(text, tag, nr) {
 	} while (count < nr && tagStart != -1);
 	
 	if(tagStart == -1) {
-		//console.log("Did not find enough occurencies of " + tag + "");
+		//log("Did not find enough occurencies of " + tag + "");
 		return "";
 	}
 	
@@ -1312,12 +1323,12 @@ function contentOfHtmlTag(text, tag, nr) {
 	
 	// Find tag end (cant be inside xmp)
 	var tagEnd = tagStart;
-	//console.log("Finding end ...");
+	//log("Finding end ...");
 	do {
 		
 		tagEnd = text.indexOf("</" + tag, tagEnd+1);
 		
-		//console.log("tagEnd=" + tagEnd);
+		//log("tagEnd=" + tagEnd);
 		
 		insideXmp = false;
 		
@@ -1331,7 +1342,7 @@ function contentOfHtmlTag(text, tag, nr) {
 		
 	} while (insideXmp && tagEnd != -1);
 	
-	if(tagEnd == -1) throw new Error("Could not find tag ending </" + tag + "");
+	if(tagEnd == -1) error(new Error("Could not find tag ending </" + tag + ""));
 	
 	// Return the content of the html tag
 	return originalText.substring(tagStart, tagEnd);
@@ -1349,12 +1360,12 @@ function find(text, reString, group) {
 	var result = [];
 	
 	while ((arr = re.exec(text)) !== null) {
-		//console.log("Found: " + JSON.stringify(arr));
+		//log("Found: " + JSON.stringify(arr));
 		result.push(arr[group]);
 	}
 	
 	if(result.length == 0) {
-		//console.log("Did not find " + reString + "");
+		//log("Did not find " + reString + "");
 		//result.push("");
 	}
 	
@@ -1425,14 +1436,14 @@ function mergeUnique(org, arr) {
 		}
 	}
 	
-	//console.log("array=" + JSON.stringify(org));
+	//log("array=" + JSON.stringify(org));
 	
 	return org;
 }
 
 
-function mustBePath(path, def) {
-	if(!path) return def;
+function mustBePath(path) {
+	if(!path) error(new Error("Path=" + path));
 	
 	// Make sure it ends with / or \
 	
@@ -1442,8 +1453,7 @@ function mustBePath(path, def) {
 		return path;
 	}
 	else {
-		console.log("Path must end with a slash! path=" + path);
-		process.exit();
+		error(new Error("Path must end with a slash! path=" + path));
 	}
 }
 
@@ -1452,7 +1462,7 @@ function fileInUse(src) {
 	
 	src = replaceAll(src, "\\", "/").trim();
 	
-	//console.log("check=" + src);
+	//log("check=" + src);
 	
 	if (src=="favicon.ico") return true;
 	
@@ -1491,7 +1501,7 @@ function escapeRegExp(str) {
 }
 
 function replaceAll(str, find, replace) {
-	//console.log("find=" + find);
+	//log("find=" + find);
 	return str.replace(new RegExp(escapeRegExp(find), 'gim'), replace);
 }
 
@@ -1532,13 +1542,13 @@ Folder.prototype.latest = function(limit) {
 	return arr;
 	
 	/*
-	var obj = {};
-	
-	for(var i=0; i<limit; i++) {
+		var obj = {};
+		
+		for(var i=0; i<limit; i++) {
 		obj[arr[i]] = documents[arr[i]];
-	}
-	
-	return new Folder(obj);
+		}
+		
+		return new Folder(obj);
 	*/
 }
 
@@ -1550,27 +1560,27 @@ Folder.prototype.latest = function(limit) {
 	var rdOpen = false;
 	var wrOpen = false;
 	
-	console.log("source=" + source);
-	console.log("target=" + target);
+	log("source=" + source);
+	log("target=" + target);
 	
 	// Make sure the target path exist!
 	
 	
 	var rd = FS.createReadStream(source);
 	rd.on("error", function(err) {
-	console.log("read error!");
+	log("read error!");
 	done(err);
 	});
 	rd.on("open", function() {
 	rdOpen = true;
-	console.log("readStream open file=" + source);
+	log("readStream open file=" + source);
 	
 	if(rdOpen && wrOpen) startPipe();
 	});
 	
 	var wr = FS.createWriteStream(target, { flags: 'w'});
 	wr.on("error", function(err) {
-	console.log("write error!");
+	log("write error!");
 	done(err);
 	});
 	wr.on("close", function(ex) {
@@ -1578,7 +1588,7 @@ Folder.prototype.latest = function(limit) {
 	});
 	wr.on("open", function() {
 	wrOpen = true;
-	console.log("writeStream open file=" + target);
+	log("writeStream open file=" + target);
 	if(rdOpen && wrOpen) startPipe();
 	});
 	
@@ -1623,7 +1633,7 @@ function parseError(doc, scriptCount, err) {
 	for(var i=0; i<scriptCount; i++) {
 		startIndex = str.indexOf("<?JS", startIndex) + 1;
 		//log("startIndex=" + startIndex);
-		}
+	}
 	var upUntil = str.substr(0, startIndex);
 	var lines = occurrences(upUntil, "\n");
 	
@@ -1653,13 +1663,41 @@ function occurrences(string, subString, allowOverlapping) {
 	while(true){
 		pos=string.indexOf(subString,pos);
 		if(pos>=0){
-			//console.log(n + " " + pos + " " + subString);
+			//log(n + " " + pos + " " + subString);
 			n++;
 			pos+=step;
 		}
 		else break;
 	}
 	return(n);
+}
+
+function log(str) {
+	process.send({type: "debug", msg: str});
+}
+
+function resolvePath(dir, file) {
+	
+	if(!dir) error(new Error("Not a directory=" + dir));
+	
+	var delimiter = dir.substring(dir.length-1);
+	
+	if(delimiter != "/" && delimiter != "\\") {
+		if(dir.indexOf("/") != -1) delimiter = "/";
+		if(dir.indexOf("\\") != -1) delimiter = "\\";
+		
+		dir += delimiter;
+		
+		//error(new Error("Directory path must end with a slash! dir=" + dir));
+	}
+	
+	return dir + file;
+	
+}
+
+function error(err) {
+	process.send({type: "error", stack: err.stack});
+	process.exit(1);
 }
 
 main(); // We have this at the bottom because prototype doesn't hoist.

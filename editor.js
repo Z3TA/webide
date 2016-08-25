@@ -70,7 +70,7 @@ editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 editor.connections = {}  // Store connections to remote servers (FTP, SSH)
 editor.disconnect = {}   // Create a disconnnect function for each connection, can be called by running editor.disconnect[serverName](callback);
-editor.remoteProtocols = ["ftp:", "ftps:", "sftp:"]; // Supported remote connections
+editor.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -146,6 +146,9 @@ editor.lastKeyPressed = "";
 	var fileOpenExtraCallbacks = {};
 	
 	var testFirstTest = true;
+	
+	var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
+	var ftpBusy = false;
 	
 	/*
 		Editor functionality (accessible from global scope) By having this code here, we can use private variables
@@ -695,8 +698,8 @@ editor.lastKeyPressed = "";
 		if(runtime == "nw.js") {
 			var fs = require("fs");
 			
-			console.log("Reading file from disk: " + path);
-			console.log(getStack("Read from disk"));
+			console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
+			//console.log(getStack("Read from disk"));
 			
 			// Check path for protocol
 			var url = require("url");
@@ -902,7 +905,7 @@ editor.lastKeyPressed = "";
 			
 			editor.saveToDisk(file.path, file.text, doneSaving);
 		}
-
+		
 		function doneSaving(err, path) {
 			
 			if(!err) {
@@ -914,78 +917,70 @@ editor.lastKeyPressed = "";
 			
 			if(callback) callback(err, path);
 			else if(err) throw err;
-		
+			
 		}
 		
 	}
 	
 	
-	editor.saveToDisk = function(path, text, doneSaving, inputBuffer, encoding) {
+	editor.saveToDisk = function(path, text, saveToDiskCallback, inputBuffer, encoding) {
 		// You probably want to use editor.saveFile instead!
 		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
 		// Only works with text files !
 		
-		if(!doneSaving) throw new Error("saveToDisk called without a callback function!");
+		if(!saveToDiskCallback) throw new Error("saveToDisk called without a callback function!");
 		
 		if(encoding == undefined) encoding = "utf-8";
 		
 		// Check path for protocol
 		var url = require("url");
 		var parse = url.parse(path);
+		var hostname = parse.hostname;
+		var protocol = parse.protocol;
+		var pathname = parse.pathname;
 		
-		console.log("protocol: " + parse.protocol);
+		console.log("Saving to disk ... protocol: " + protocol + " hostname=" + hostname + " pathname=" + pathname);
 		
 		// todo!!? support ftpS
 		
-		if(parse.protocol == "ftp:") {
+		if(protocol == "ftp:") {
 			
-			if(editor.connections.hasOwnProperty(parse.hostname)) {
-				
-				var c = editor.connections[parse.hostname];
-				
-				var input = inputBuffer ? text : new Buffer(text, encoding);
-				var destPath = parse.pathname;
-				var useCompression = false;
-				
-				c.put(input, destPath, useCompression, function putFtpDone(err) {
-					if(err) {
-						console.warn("Failed to save to path= " + path + "\n" + err.message);
-						doneSaving(err);
-					}
-					
-					doneSaving(null, path);
-					
-				});
-				
+			if(ftpBusy) {
+				console.log("FTP is busy. Queuing upload of pathname=" + pathname + " ...");
+				ftpQueue.push(function() { uploadFTP(pathname, text); });
 			}
 			else {
-				doneSaving(new Error("Failed to save to path=" + path + "\nNo connection to FTP on " + parse.hostname + " !"));
+				ftpBusy = true;
+				console.log("FTP is ready. Uploading pathname=" + pathname + " ...");
+				uploadFTP(pathname, text);
 			}
 		}
-		else if(parse.protocol == "sftp:") {
+		else if(protocol == "sftp:") {
 			
-			if(editor.connections.hasOwnProperty(parse.hostname)) {
+			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[parse.hostname];
+				var c = editor.connections[hostname];
 				
 				var input = inputBuffer ? text : new Buffer(text, encoding);
-				var destPath = parse.pathname;
+				var destPath = pathname;
 				var options = {encoding: encoding};
 				// Could also use sftp.createWriteStream
 				c.writeFile(destPath, input, options, function sftpWrite(err) {
 					if(err) {
 						console.warn("Failed to save to path= " + path + "\n" + err.message);
-						doneSaving(err);
+						saveToDiskCallback(err);
 					}
-					console.log("Saved " + destPath + " on SFTP " + parse.hostname);
-					doneSaving(null, path);
+					else {
+						console.log("Saved " + destPath + " on SFTP " + hostname);
+						saveToDiskCallback(null, path);
+					}
 					
 				});
 				
 			}
 			else {
-				doneSaving(new Error("Failed to save to path=" + path + "\nNo connection to SFTP on " + parse.hostname + ""));
+				saveToDiskCallback(new Error("Failed to save to path=" + path + "\nNo connection to SFTP on " + hostname + ""));
 			}
 		}
 		else {
@@ -999,14 +994,53 @@ editor.lastKeyPressed = "";
 				if(err) {
 					//alert("Unable to save file! " + err.message + "\n" + path);
 					console.warn("Unable to save " + path + "!");
-					doneSaving(err);
+					saveToDiskCallback(err);
 				}
 				else {
 					console.log("The file was successfully saved: " + path + "");
-					doneSaving(null, path);
+					saveToDiskCallback(null, path);
 				}
-				});
+			});
 		}
+		
+		
+		function uploadFTP(pathname, text) {
+			console.log("Uploading to FTP ... pathname=" + pathname);
+			
+			if(editor.connections.hasOwnProperty(hostname)) {
+				
+				var c = editor.connections[hostname];
+				
+				var input = inputBuffer ? text : new Buffer(text, encoding);
+				var useCompression = false;
+				
+				c.put(input, pathname, useCompression, putFtpDone);
+
+			}
+			else {
+				saveToDiskCallback(new Error("Failed to save to path=" + path + "\nNo connection to FTP on " + hostname + " !"));
+				runFtpQueue();
+			}
+			
+			function putFtpDone(err) {
+				if(err) {
+					console.warn("Failed to save pathname= " + pathname + "\n" + err.message);
+					saveToDiskCallback(err);
+					runFtpQueue();
+				}
+				else {
+					
+					console.log("Successfully saved pathname=" + pathname + "");
+
+					saveToDiskCallback(null, path);
+					
+					runFtpQueue();
+				}
+				
+			}
+			
+		}
+
 	}
 	
 	editor.copyFile = function(from, to, callback) {
@@ -1028,7 +1062,7 @@ editor.lastKeyPressed = "";
 					if(err) console.warn("Copy failed! Unable to write file: " + err.message);
 					
 					callback(err, path);
-										
+					
 					
 				}, inputBuffer, encoding);
 			}
@@ -2492,6 +2526,11 @@ editor.lastKeyPressed = "";
 		
 		if(protocol == undefined) throw new Error("No protocol defined!");
 		
+		if(protocol.indexOf(":") != -1) {
+			console.warn("Removing : (colon) from protocol=" + protocol);
+			protocol = protocol.replace(/:/g, "");
+		}
+		
 		protocol = protocol.toLowerCase();
 		
 		console.log("protocol=" + protocol);
@@ -2565,9 +2604,8 @@ editor.lastKeyPressed = "";
 						
 					}
 				}
-				
-				
 			}
+			console.log("Connecting to " + options.host + " ...");
 			c.connect(options);
 		}
 		
@@ -2714,11 +2752,11 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.listFiles = function(pathToFolder, callback) {
+	editor.listFiles = function(pathToFolder, listFilesCallback) {
 		// Returns all files in a directory
 		
 		if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
-		if(callback == undefined) throw new Error("Need to specity a callback!");
+		if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
 		
 		/*
 			Try to get the file list in the same format regardless of protocol!
@@ -2732,56 +2770,43 @@ editor.lastKeyPressed = "";
 			
 		*/
 		
-		var path = require("path");
 		var url = require('url');
 		var parse = url.parse(pathToFolder);
+		var protocol = parse.protocol;
+		var hostname = parse.hostname;
+		var pathname = parse.pathname;
 		
-		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+		if(protocol == "ftp:" || protocol == "ftps:") {
 			// ### List files using FTP protocol
-			if(editor.connections.hasOwnProperty(parse.hostname)) {
-				
-				var c = editor.connections[parse.hostname];
-				
-				if(pathToFolder != editor.workingDirectory) {
-					// First change folder
-					console.log("Sending cwd '" + parse.pathname + "' to " + parse.protocol + parse.hostname);
-					c.cwd(parse.pathname, function changedDir(err) {
-						
-						if(err) {
-							callback(err);
-						}
-						else {
-							ftpListFiles(c)
-						}
-						
-					});
-				}
-				else {
-					ftpListFiles(c);
-				}
+			
+			if(ftpBusy) {
+				console.log("FTP is busy. Queuing file-list of pathname=" + pathname + " ...");
+				ftpQueue.push(function() { listFilesFTP(pathname); });
 			}
 			else {
-				callback(new Error("Unable to read " + parse.pathname + " on " + parse.hostname + "\nNot connected to FTP on " + parse.hostname + " !"));
+				ftpBusy = true;
+				console.log("FTP is ready. Listing files in pathname=" + pathname + " ...");
+				listFilesFTP(pathname);
 			}
 		}
-		else if(parse.protocol == "sftp:") {
+		else if(protocol == "sftp:") {
 			// ### List file using SFTP protocol
-			if(editor.connections.hasOwnProperty(parse.hostname)) {
+			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[parse.hostname];
+				var c = editor.connections[hostname];
 				
-				console.log("Initiating folder read on SFTP " + parse.hostname + ":" + parse.pathname);
+				console.log("Initiating folder read on SFTP " + hostname + ":" + pathname);
 				
 				// SFTP can list files in any folder. So we do not have to make sure the path is the same as the working directory (like with ftp)
 				// hmm, it seems we can only do readdir once on each folder
-				var b = c.readdir(parse.pathname, function sftpReadDir(err, folderItems) {
+				var b = c.readdir(pathname, function sftpReadDir(err, folderItems) {
 					
 					//getStack("XXX");
 					
-					console.log("Reading folder: " + parse.pathname + " ...");
+					console.log("Reading folder: " + pathname + " ...");
 					
 					if(err) {
-						callback(err);
+						listFilesCallback(err);
 					}
 					else {
 						
@@ -2796,7 +2821,7 @@ editor.lastKeyPressed = "";
 							list.push({type: folderItems[i].longname.substr(0, 1), name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
 						}
 						
-						callback(null, list);
+						listFilesCallback(null, list);
 						
 					}
 					
@@ -2806,15 +2831,16 @@ editor.lastKeyPressed = "";
 				
 			}
 			else {
-				callback(new Error("Unable to read " + parse.pathname + " on " + parse.hostname + "\nNot connected to SFTP on " + parse.hostname + " !"));
+				listFilesCallback(new Error("Unable to read " + pathname + " on " + hostname + "\nNot connected to SFTP on " + hostname + " !"));
 			}
 		}
 		else {
 			// ### List files using "normal" file system
 			var fs = require("fs");
+			console.log("Reading directory=" + pathToFolder);
 			fs.readdir(pathToFolder, function readdir(err, folderItems) {
 				if(err) {
-					callback(err);
+					listFilesCallback(err);
 				}
 				else {
 					var filePath;
@@ -2822,9 +2848,11 @@ editor.lastKeyPressed = "";
 					var statCounter = 0;
 					if(folderItems.length == 0) {
 						// It's an emty folder
-						callback(null, list);
+						listFilesCallback(null, list);
 					}
 					else {
+						var path = require("path");
+						
 						for(var i=0; i<folderItems.length; i++) {
 							
 							stat(folderItems[i], path.join(pathToFolder, folderItems[i]));
@@ -2837,26 +2865,27 @@ editor.lastKeyPressed = "";
 					console.log("Making stat: " + filePath + "");
 					
 					fs.stat(filePath, function stat(err, stats) {
-						if(err) callback(err);
-						
-						//console.log("stat: " + stats);
-						
-						var type = "";
-						
-						if(stats.isFile()) {
-							type = "-";
+						if(err) listFilesCallback(err);
+						else {
+							//console.log("stat: " + stats);
+							
+							var type = "";
+							
+							if(stats.isFile()) {
+								type = "-";
+							}
+							else if(stats.isDirectory()) {
+								type = "d";
+							}
+							
+							list.push({type: type, name: fileName, path: filePath, size: stats.size, date: stats.mtime});
+							
+							statCounter++;
+							
+							console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
+							
+							if(statCounter==folderItems.length) listFilesCallback(null, list);
 						}
-						else if(stats.isDirectory()) {
-							type = "d";
-						}
-						
-						list.push({type: type, name: fileName, path: filePath, size: stats.size, date: stats.mtime});
-						
-						statCounter++;
-						
-						console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
-						
-						if(statCounter==folderItems.length) callback(null, list);
 						
 					});
 				}
@@ -2867,33 +2896,224 @@ editor.lastKeyPressed = "";
 			
 		}
 		
-		function ftpListFiles(c) {
+		
+		function listFilesFTP(pathname) {
 			
-			console.log("Listing files in '" + parse.pathname + "' on " + parse.protocol + parse.hostname);
-			
-			c.list(function readdirFtp(err, folderItems) {
-				if (err) {
-					console.warn(err.message);
-					callback(err);
+			if(editor.connections.hasOwnProperty(hostname)) {
+				
+				var c = editor.connections[hostname];
+				
+				if(pathToFolder != editor.workingDirectory) {
+					// First change folder
+					console.log("Sending cwd '" + pathname + "' to " + protocol + hostname);
+					c.cwd(pathname, function changedDir(err) {
+						
+						if(err) {
+							listFilesCallback(err);
+							runFtpQueue();
+						}
+						else {
+							ftpListFiles(c);
+						}
+						
+					});
 				}
 				else {
-					
-					var list = [];
-					var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
-					var path = "";
-					for(var i=0; i<folderItems.length; i++) {
-						path = slash ? pathToFolder + "/" + folderItems[i].name : pathToFolder + folderItems[i].name;
-						list.push({type: folderItems[i].type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
-					}
-					
-					callback(null, list);
+					ftpListFiles(c);
 				}
-			});
+			}
+			else {
+				listFilesCallback(new Error("Unable to read " + pathname + " on " + hostname + "\nNot connected to FTP on " + hostname + " !"));
+				runFtpQueue();
+			}
+			
+			function ftpListFiles(c) {
+				
+				console.log("Listing files in '" + parse.pathname + "' on " + parse.protocol + parse.hostname);
+				
+				c.list(function readdirFtp(err, folderItems) {
+					if (err) {
+						console.warn(err.message);
+						listFilesCallback(err);
+						runFtpQueue();
+					}
+					else {
+						
+						var list = [];
+						var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
+						var path = "";
+						for(var i=0; i<folderItems.length; i++) {
+							path = slash ? pathToFolder + "/" + folderItems[i].name : pathToFolder + folderItems[i].name;
+							list.push({type: folderItems[i].type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+						}
+						
+						listFilesCallback(null, list);
+						
+						runFtpQueue();
+						
+					}
+				});
+			}
 		}
+	}
+	
+	function runFtpQueue() {
+		
+		console.log(ftpQueue.length + " items left in the FTP queue");
+		
+		if(ftpQueue.length > 0) {
+			console.log("Executing next item in the ftp queue ...");
+			ftpQueue.shift()();
+		}
+		else ftpBusy = false;
 		
 	}
 	
-	editor.mock = function mock(mock, options) {
+	editor.createPath = function(pathToCreate, createPathCallback) {
+		/*
+			Traverse the path and try to creates the directories, then check if the full path exists
+
+		*/
+		var url = require('url');
+		var parse = url.parse(pathToCreate);
+		var protocol = parse.protocol.replace(/:/g, "").toLowerCase();
+		var delimiter = getPathDelimiter(pathToCreate);
+		var lastChar = pathToCreate.substring(pathToCreate.length-1);
+		var hostname = parse.hostname;
+		var create = getFolders(pathToCreate);
+		var errors = [];
+		var fullPath = create[create.length-1];
+		
+		console.log("hostname=" + hostname + " pathToCreate=" + pathToCreate + " parse=" + JSON.stringify(parse));
+		
+		// Execute mkdir in order !
+		
+		executeMkdir(create.shift());
+		
+		function executeMkdir(folder) {
+			// This is a recursive function!
+			createPathSomewhere(folder, function(err, path) {
+				if(err) errors.push(err.message + " path=" + path);
+				
+				if(create.length > 0) executeMkdir(create.shift());
+				else done();
+				
+			});
+		}
+
+		function done() {
+			// Check if the full path exists
+			editor.listFiles(pathToCreate, listFileResult);
+			
+			function listFileResult(err, list) {
+				
+				if(err) {
+					console.warn("List failed! " + err.message + " pathToCreate=" + pathToCreate);
+					var errorMsg = "Failed to create path=" + pathToCreate + "\n" + err.message;
+					for(var i=0; i<errors.length; i++) {
+						errorMsg += "\n" + errors[i];
+					}
+				
+					createPathCallback(new Error(errorMsg));
+				}
+				else createPathCallback(null, fullPath)
+				
+			}
+		}
+		
+		function createPathSomewhere(path, createPathSomewhereCallback) {
+			
+			// ## mkdir ...
+			
+			console.log("mkdir " + path);
+			
+			if(path.indexOf("//") != -1) {
+				path = path.replace(/\/\/+/g, "/"); // Remove double slashes
+				console.warn("Sanitizing path=" + path + " pathToCreate=" + pathToCreate);
+			}
+			
+			if(protocol == "ftp" || protocol == "ftps") {
+				// ### Create a directory using FTP protocol
+				
+				if(ftpBusy) {
+					console.log("FTP is busy. Queuing mkdir of path=" + path + " ...");
+					ftpQueue.push(function() { createPathFTP(path); });
+				}
+				else {
+					ftpBusy = true;
+					console.log("FTP is ready. Creating path=" + path + " ...");
+					createPathFTP(path);
+				}
+					
+				
+			}
+			else if(parse.protocol == "sftp:") {
+				// ### Create a directory using SFTP protocol
+				if(editor.connections.hasOwnProperty(parse.hostname)) {
+					
+					var c = editor.connections[parse.hostname];
+					
+					var b = c.mkdir(path, function (err, folderItems) {
+						
+						//getStack("XXX");
+						
+						if(err) createPathSomewhereCallback(err, path);
+						else createPathSomewhereCallback(null, path);
+						
+						
+					});
+					
+					// b = false : If you should wait for the continue event before sending any more traffic.
+					
+					//console.log("b=" + b);
+					
+				}
+				else {
+					createPathCallback(new Error("Unable to create " + path + " on " + hostname + "\nNot connected to SFTP on " + hostname + " !"));
+				}
+			}
+			else {
+				// ### Create a directory using "normal" file system
+				var fs = require("fs");
+				
+				fs.mkdir(path, function(err) {
+					if(err) createPathSomewhereCallback(err, path);
+					else createPathSomewhereCallback(null, path);
+				});
+			}
+
+			
+			function createPathFTP(path) {
+				
+				console.log("Creating FTP path=" + path)
+				
+				if(editor.connections.hasOwnProperty(hostname)) {
+
+					var c = editor.connections[hostname];
+					
+					// ftp mkdir
+					c.mkdir(path, function(err) {
+						
+						console.log("Done creating FTP path=" + path);
+						
+						if(err) createPathSomewhereCallback(err, path);
+						else createPathSomewhereCallback(null, path);
+						
+						runFtpQueue();
+						
+					});
+					
+				}
+				else {
+					createPathCallback(new Error("Unable to create path=" + path + " on " + hostname + "\nNot connected to FTP on " + hostname + " !"));
+					runFtpQueue();
+				}
+			}
+			
+		}
+	}
+	
+	editor.mock = function(mock, options) {
 		
 		// Simulate ... 
 		
@@ -2914,9 +3134,9 @@ editor.lastKeyPressed = "";
 			}
 			
 			return retDown;
-	}
+		}
 		
-}
+	}
 	
 	function connectionClosed(protocol, serverAddress) {
 		
@@ -2979,11 +3199,8 @@ editor.lastKeyPressed = "";
 			
 			var ret = true;
 			var name = "";
-			var GUI = require('nw.gui').Window.get();
 			
 			console.log("Closing the editor ...");
-			
-			GUI.leaveKioskMode();
 			
 			if(!window.localStorage) {
 				console.warn("window.localStorage=" + window.localStorage);
@@ -3010,6 +3227,22 @@ editor.lastKeyPressed = "";
 			}
 			
 		});
+		
+		// Use event listeners for these so that they also fire when "reloading" the editor
+		editor.eventListeners.exit.push({fun: function exitKioskMode() {
+			var GUI = require('nw.gui').Window.get();
+			GUI.leaveKioskMode();
+			return true;
+		}});
+		
+		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
+			for(var conn in editor.disconnect) {
+				editor.disconnect[conn]();
+			}
+			return true;			
+		}});
+		
+		
 	}
 	
 	// Move Event listeners ...
@@ -3419,8 +3652,9 @@ editor.lastKeyPressed = "";
 				if(fails === 0) testResults.push("All " + finished + " tests passed!")
 				else testResults.push(fails + " of " + finished + " test failed:");
 				
-				editor.openFile("testresults", testResults.join("\n"), function(err, file) {
-					file.parse = false;
+				editor.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
+					//file.parse = false;
+					//file.mode = "text";
 				});
 				
 				testFirstTest = false; // Run only the first test the first time, and all tests after that.

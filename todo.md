@@ -7,14 +7,6 @@ Prio:
 
 Work on the SSG integration.
 
-Partial generation (generate only the page being worked on).
-Better preview. WYSIWYG editing.
-FTP-publishing
-Auto preview SSG site when saving?
-meta publish date, publish only after this date
-
-Work on improving the bug finding system, like undefined methods and properties.
-Follow <script includes and nodeJS require's
 
 3) Optimization (toggle devMode off when testing!)
 4) New features
@@ -24,19 +16,49 @@ Follow <script includes and nodeJS require's
 What I'm working on
 -------------------
 
+Keep getting Uncaught Error: read ECONNRESET when I try to Publish on the SSG
+
+editor.createPath 
+
+SSG handle path not existing when saving file
+
 
 todo:
 
 More functions to the SSG ...
+
 Publish ... upload to (s)ftp.
 Writing in the editor updates the preview, replace old file.text with new on file change! 
 Pasting or dragging in images ... convert place image in src dir
 
-file_save.js connectToConnection(); erm???
+Partial generation (generate only the page being worked on).
+
+
+meta publish date, publish only after this date
+
+
+Close open remote connection when closing or reloading the editor
 
 
 What I'm thinking
 -----------------
+
+Work on improving the bug finding system, like undefined methods and properties.
+Follow <script includes and nodeJS require's
+
+misspelled / undefined property: If the property have never been seen before but match another property with only 1 character off, show the off letter with red background.
+
+dumb auto-completion
+
+auto-complete function arguments in local function and parents
+
+Flow integration !? https://flowtype.org/assets/flow.js
+https://flowtype.org/try/
+ej=yf}ej.registerFile=ig(function(a,b){return CU(a.toString(),b.toString())});ej.setLibs=ig(aDb);ej.check=ig(aDc);ej.checkContent=ig(aDd);ej.jsOfOcamlVersion=Hm.toString();ej.flowVersion="0.31.0";ej.typeAtPos=ig(aDi);Du(0);return}}(function(){return this}()));
+
+Make a Tern and Eslint plugin too ? Only use the pure JS file, not the whole NPM projekt, run in worker process.
+
+---
 
 Save state every X minute and track all actions. Then when there is a error, a test for that bug is automatically created, loading the state and replaying the actions.
 Ask to fully restart the editor.
@@ -99,6 +121,15 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Syntax coloring in vu/mobile/forum.asp
+
+Function list lists wrong function name: rightName = function wrongName() { ...
+
+Error when writing /" inside an function Ex:
+if(dir.indexOf(/"
+
+When selecting from right to left PLUS one (emty?) line , then pressing delete we get an error (inside a function)
 
 Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
 repeat: 
