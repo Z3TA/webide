@@ -226,7 +226,7 @@
 							
 							if(file.text.charAt(parseEnd-1) != "}") {
 								file.debugGrid();
-								throw new Error("Expected parseEnd-1=" + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd)) + " to be an }");
+								throw new Error("Expected parseEnd-1 = " + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd-1)) + " to be an }");
 							}
 							
 							//console.log(file.text.substring(parseStart, parseEnd));
@@ -414,16 +414,17 @@
 								}
 							}
 							
-							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed
-							// Have to go though all functions (recursive) because we can't asume our named array is sorted
-							var endRowDiff = ff.endRow - f.endRow;
-							updateThingsFunctions(oldParse.functions, f.end, endRowDiff, charactersLength);
 							
 							// Update the parsed function.
 							f.variables = ff.variables;
 							f.subFunctions = ff.subFunctions;
 							f.end = ff.end;
 							f.endRow = ff.endRow;
+							
+							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed, or parents of it.
+							// Have to go though all functions (recursive) because we can't asume our named array is sorted
+							var endRowDiff = ff.endRow - f.endRow;
+							updateThingsFunctions(oldParse.functions, f.end, endRowDiff, charactersLength);
 							
 							
 							console.timeEnd("parseOnlyFunctionOptimizer");
@@ -565,37 +566,48 @@
 		*/
 		
 		function updateThingsFunctions(functions, oldEnd, endRowDiff, charactersLength) {
+			// Will update start or end positions of all functions below oldEnd or parent functions
 			
 			var func;
+			
+			var isBelow = false;
+			var isParent = false;
+			
 			for(var fname in functions) {
 				func = functions[fname];
 				
-				console.log("updateThingsFunctions fname=" + fname + " func.start=" + func.start + " > oldEnd=" + oldEnd + " ? func.end=" + func.end);
+				isBelow = (func.start > oldEnd);
+				isParent = (func.end > oldEnd && func.start < oldEnd);
 				
-				if(func.start > oldEnd) {
-					
+				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
+				
+				if(isBelow) {
 					console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
 					
 					func.start += charactersLength;
 					func.end += charactersLength;
 					func.lineNumber += endRowDiff;
 					func.endRow += endRowDiff;
+				}
+				else if(isParent) {
+					console.log("func " + func.name + " end=" + func.end + " below old end=" + oldEnd + " and start=" + func.start + " before");
 					
-					// Make sure the function starts with an { and ends with an }
-					if(file.text.charAt(func.start) != "{") {
-						file.debugGrid();
-						throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
-					}
-					
-					if(file.text.charAt(func.end) != "}") {
-						file.debugGrid();
-						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
-					}
-					
+					func.end += charactersLength;
+					func.endRow += endRowDiff;
 				}
 				
-				if(oldEnd > func.start && oldEnd < func.end) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
 				
+				// Make sure the function starts with an { and ends with an }
+				if(file.text.charAt(func.start) != "{") {
+					file.debugGrid();
+					throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+				}
+				
+				if(file.text.charAt(func.end) != "}") {
+					file.debugGrid();
+					throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+				}
+
 			}
 		}
 		

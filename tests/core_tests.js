@@ -28,6 +28,35 @@
 		
 	*/
 	
+	
+	editor.addTest(function functionEndWithRIghtBracket(callback) {
+		// The end of a function should always be a right angel bracket = }
+		// When using the parser optimizer that only parsers the actual function that changed, the functions start/end indexs will be off
+		// The error occurs when editing a child function, then editing the parent function
+		
+		editor.openFile("functionEndWithRIghtBracket.js", 'function foo() {\nfunction bar() {\n\n}\n\n}\n', function(err, file) {
+			
+
+			file.moveCaret(undefined, 2); // Move the caret into the function
+			file.insertLineBreak();
+			file.moveCaret(undefined, 5);
+			file.insertLineBreak();
+
+			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
+			
+			// Make sure foo ends with a }
+			var end = file.parsed.functions["foo"].end;
+			var char = file.text.charAt(end);
+			if(char != "}") throw new Error("Expected end of function foo to be right angel bracket, not a char=" + lbChars(char));
+			
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
+	
 	editor.addTest(function fooeqfunction(callback) {
 		// Testing if the parser optimizer can handle foo = function() 
 		

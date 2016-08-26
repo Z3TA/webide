@@ -4,10 +4,6 @@ Prio:
 
 1) Bug/issue fixing and refactoring
 2) Polishing of existing features
-
-Work on the SSG integration.
-
-
 3) Optimization (toggle devMode off when testing!)
 4) New features
 
@@ -16,34 +12,37 @@ Work on the SSG integration.
 What I'm working on
 -------------------
 
-Keep getting Uncaught Error: read ECONNRESET when I try to Publish on the SSG
-
-editor.createPath 
-
-SSG handle path not existing when saving file
-
 
 todo:
 
-More functions to the SSG ...
-
-Publish ... upload to (s)ftp.
-Writing in the editor updates the preview, replace old file.text with new on file change! 
-Pasting or dragging in images ... convert place image in src dir
-
-Partial generation (generate only the page being worked on).
+* Fix bugs!
+* Add features that makes it easier to fix bugs !?
+* Fix bugs!
+* Test existing features and write automatic tests
+* Fix bugs!
 
 
-meta publish date, publish only after this date
 
-
-Close open remote connection when closing or reloading the editor
 
 
 What I'm thinking
 -----------------
 
-Work on improving the bug finding system, like undefined methods and properties.
+The static site generator has prio, but bugs have even more prio! 
+
+* Writing in the editor updates the preview, replace old file.text with new on file change!
+* Pasting or dragging in images ... convert place image in src dir
+* Partial generation (generate only the page being worked on).
+* meta publish date, publish only after this date
+
+---
+
+Helping functions, that I need, or find it annoying without, have prio, but bugs have more prio!?
+Maybe it's faster to fix the bug if I have those functions working thoug!?
+
+---
+
+Work on improving the bug finding system, like undefined methods and properties, have prio! But bugs have more prio!?
 Follow <script includes and nodeJS require's
 
 misspelled / undefined property: If the property have never been seen before but match another property with only 1 character off, show the off letter with red background.
@@ -130,9 +129,6 @@ Error when writing /" inside an function Ex:
 if(dir.indexOf(/"
 
 When selecting from right to left PLUS one (emty?) line , then pressing delete we get an error (inside a function)
-
-Sometimes (when making an inline function?) it complains about function start/end missmatch brackets
-repeat: 
 
 After failing gotofile once, it seems to fail all the time after (aborting, too much latency)
 
