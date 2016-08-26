@@ -2082,6 +2082,8 @@ editor.lastKeyPressed = "";
 			
 		*/
 		
+		if(!file) file = editor.currentFile;
+		
 		if(!editor.input) return true;
 		
 		var wordDelimiters = " ()[]{}+-/<>\r\n!";

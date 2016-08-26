@@ -28,7 +28,35 @@
 		
 	*/
 	
+
 	
+	editor.addTest(function parseOnlyFunctionAutocompleteInsert(callback) {
+		// The end of a function should always be a right angel bracket = }
+		// Seems to be a problem when we use auto-complete, caused by the changes for test:functionEndWithRIghtBracket
+		
+		editor.openFile("autoInsertFunc.js", 'function a() {\nfunction b() {\nfunction c() {\n\n}\nfunc\n}\n}\n', function(err, file) {
+
+			//file.debugGrid();
+			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
+			
+			file.moveCaret(undefined, 3); // Move the caret into the function
+			file.insertLineBreak();
+			file.moveCaret(undefined, 6, 5);
+			editor.autoComplete();
+			
+			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
+			checkFunction(file, file.parsed.functions["a"]);
+			checkFunction(file, file.parsed.functions["a"].subFunctions["b"]);
+			checkFunction(file, file.parsed.functions["a"].subFunctions["b"].subFunctions["c"]);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+		
+	});
+
 	editor.addTest(function functionEndWithRIghtBracket(callback) {
 		// The end of a function should always be a right angel bracket = }
 		// When using the parser optimizer that only parsers the actual function that changed, the functions start/end indexs will be off
@@ -36,7 +64,6 @@
 		
 		editor.openFile("functionEndWithRIghtBracket.js", 'function foo() {\nfunction bar() {\n\n}\n\n}\n', function(err, file) {
 			
-
 			file.moveCaret(undefined, 2); // Move the caret into the function
 			file.insertLineBreak();
 			file.moveCaret(undefined, 5);
@@ -44,11 +71,8 @@
 
 			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
 			
-			// Make sure foo ends with a }
-			var end = file.parsed.functions["foo"].end;
-			var char = file.text.charAt(end);
-			if(char != "}") throw new Error("Expected end of function foo to be right angel bracket, not a char=" + lbChars(char));
-			
+			checkFunction(file, file.parsed.functions["foo"]);
+			checkFunction(file, file.parsed.functions["foo"].subFunctions["bar"]);
 			
 			editor.closeFile(file.path);
 			
@@ -864,5 +888,20 @@ callback(true);
 				});
 			
 	});
+	
+	
+	function checkFunction(file, func) {
+		// Make sure the function starts with an { and ends with an }
+		if(file.text.charAt(func.start) != "{") {
+			file.debugGrid();
+			throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+		}
+		
+		if(file.text.charAt(func.end) != "}") {
+			file.debugGrid();
+			throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+		}
+	}
+	
 	
 })();

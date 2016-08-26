@@ -121,6 +121,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+When auto-completing, the parser thinks only one character was added, but only to self calling function. See C:\Users\Z\dev-repositories\jzedit\tests\_jsfunoptbrackmiss3.js
+
 Syntax coloring in vu/mobile/forum.asp
 
 Function list lists wrong function name: rightName = function wrongName() { ...

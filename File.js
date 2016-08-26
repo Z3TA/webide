@@ -2559,7 +2559,7 @@
 		//console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 		
 		for(var i=0; i<text.length; i++) {
-			console.log(i + "=" + text[i] + " ");
+			console.log(i + "=" + lbChars(text[i]));
 		}
 		
 		for(var row=0; row<grid.length; row++) {

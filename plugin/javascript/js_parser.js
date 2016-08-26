@@ -181,6 +181,8 @@
 						charactersLength = -charactersLength;
 					}
 					
+					console.log("charactersLength=" + charactersLength);
+					
 					var functions = oldParse.functions;
 					//console.log(JSON.stringify(functions));
 					
@@ -222,7 +224,9 @@
 							console.log("characters=" + lbChars(characters));
 							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 							
-							console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
+							//console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
+							
+							console.log("Gonna parse text=\n" + lbChars(file.text.substring(parseStart, parseEnd)));
 							
 							if(file.text.charAt(parseEnd-1) != "}") {
 								file.debugGrid();
@@ -415,17 +419,21 @@
 							}
 							
 							
+							// Save old values
+							var oldEnd = f.end;
+							var endRowDiff = ff.endRow - f.endRow;
+
+							
+							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed, or parents of it.
+							// Have to go though all functions (recursive) because we can't asume our named array is sorted
+							
+							updateThingsFunctions(oldParse.functions, oldEnd, endRowDiff, charactersLength);
+							
 							// Update the parsed function.
 							f.variables = ff.variables;
 							f.subFunctions = ff.subFunctions;
 							f.end = ff.end;
 							f.endRow = ff.endRow;
-							
-							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed, or parents of it.
-							// Have to go though all functions (recursive) because we can't asume our named array is sorted
-							var endRowDiff = ff.endRow - f.endRow;
-							updateThingsFunctions(oldParse.functions, f.end, endRowDiff, charactersLength);
-							
 							
 							console.timeEnd("parseOnlyFunctionOptimizer");
 							
@@ -579,6 +587,8 @@
 				isBelow = (func.start > oldEnd);
 				isParent = (func.end > oldEnd && func.start < oldEnd);
 				
+				console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
+				
 				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
 				
 				if(isBelow) {
@@ -590,24 +600,25 @@
 					func.endRow += endRowDiff;
 				}
 				else if(isParent) {
-					console.log("func " + func.name + " end=" + func.end + " below old end=" + oldEnd + " and start=" + func.start + " before");
+					console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
 					
 					func.end += charactersLength;
 					func.endRow += endRowDiff;
 				}
 				
-				
-				// Make sure the function starts with an { and ends with an }
-				if(file.text.charAt(func.start) != "{") {
-					file.debugGrid();
-					throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+				if(isBelow || isParent) {
+					console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + lbChars(file.text.charAt(func.end)) + ")");
+					// Make sure the function starts with an { and ends with an }
+					if(file.text.charAt(func.start) != "{") {
+						file.debugGrid();
+						throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+					}
+					
+					if(file.text.charAt(func.end) != "}") {
+						file.debugGrid();
+						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+					}
 				}
-				
-				if(file.text.charAt(func.end) != "}") {
-					file.debugGrid();
-					throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
-				}
-
 			}
 		}
 		
