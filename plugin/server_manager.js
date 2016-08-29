@@ -480,6 +480,8 @@
 			selectedConnection.key = inputKey.value;
 			selectedConnection.pw = inputEditPw.value;
 			
+			if(inputPw) inputPw.value = inputEditPw.value;
+			
 			window.localStorage.remoteConnections = JSON.stringify(remoteConnections);
 			
 			editView.style.display = "none"; // Hide the edit view

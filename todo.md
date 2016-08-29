@@ -121,12 +121,6 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-After failing gotofile once, it seems to fail all the time after (aborting, too much latency)
-
-Select default (root) folder in connection manager!
-
-Remote connection manager. Cant edit password.
-
 Unable to save file to FTP
 
 When selecting right to left and then deleting the text sometimes gives textrange end < start
@@ -385,6 +379,8 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+After failing gotofile once, it seems to fail all the time after (aborting, too much latency) possible fixed when the ftp queue was implemented.
+
 Error when writing /" inside an function Ex:
 if(dir.indexOf(/"
 
@@ -472,6 +468,8 @@ Low prio bugs
 
 Polishing
 =========
+
+Select default (root) folder in connection manager!
 
 When trying to make double quotes in vbScript "<foo bar=""baz"">" ... Maybe have to press Alt when making a " to auto insert the extra " + + " ? 
 
