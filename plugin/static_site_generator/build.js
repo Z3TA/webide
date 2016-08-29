@@ -419,6 +419,9 @@ function compile(baseTree) {
 			
 			document.url = document.url.replace(/\s/g, ""); // Remove white space
 			
+			// Make sure url starts with a slash
+			if(document.url.substr(0, 1) != "/") document.url = "/" + document.url;
+			
 			// Circular references to ease access
 			document.folder = branch;
 			document.root = ROOT;
