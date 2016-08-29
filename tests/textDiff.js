@@ -50,7 +50,7 @@ editor.addTest(function testTextDiff(callback) {
 	if(diff.inserted.length != 2) throw new Error("Expected 2 lines to be inserted, not " + diff.inserted.length + ". diff=" + JSON.stringify(diff, null, 2));
 	
 	if(! ((diff.inserted[0].text == "EF" && diff.inserted[0].row == 1) &&
-	(diff.inserted[1].text == "OP" && diff.inserted[1].row == 2)) ) throw new Error("Unexpected diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
+	(diff.inserted[1].text == "OP" && diff.inserted[1].row == 1)) ) throw new Error("Unexpected diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 	
 	if(diff.removed.length != 3) throw new Error("Expected 3 lines to be removed, not " + diff.removed.length + ". diff=" + JSON.stringify(diff, null, 2));
 	
