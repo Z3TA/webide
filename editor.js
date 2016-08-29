@@ -942,9 +942,7 @@ editor.lastKeyPressed = "";
 		
 		console.log("Saving to disk ... protocol: " + protocol + " hostname=" + hostname + " pathname=" + pathname);
 		
-		// todo!!? support ftpS
-		
-		if(protocol == "ftp:") {
+		if(protocol == "ftp:" || protocol == "ftps:") {
 			
 			if(ftpBusy) {
 				console.log("FTP is busy. Queuing upload of pathname=" + pathname + " ...");
