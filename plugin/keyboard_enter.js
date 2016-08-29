@@ -11,7 +11,7 @@
 		
 		console.log("Pushed Enter");
 		
-		if(editor.input) {
+		if(editor.input && file) {
 			
 			file.insertLineBreak();
 			

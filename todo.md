@@ -121,6 +121,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+editor.js line 3350? on Linux cant read .l of null. Also can't load the spellcheck worker.
+
 After deliting a large chunk of text: File.js:469 Uncaught Error: file.startRow=120 grid.length=41 file.partStartRow=0
 
 When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
