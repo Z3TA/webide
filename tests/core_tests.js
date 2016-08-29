@@ -30,6 +30,23 @@
 	
 
 	
+
+	editor.addTest(function vbHtmlTagParser(callback) {
+		
+		editor.openFile("vbHtmlTagParser.asp", '<%\n"<"\nfoo\n"<div id=""foo"">"\n%>', function(err, file) {
+
+			console.log("file.parsed.xmlTags=" + JSON.stringify(file.parsed.xmlTags, null, 2));
+			
+			if(file.parsed.xmlTags.length != 1) throw new Error("Expecte only one xml tag. file.parsed.xmlTags=" + JSON.stringify(file.parsed.xmlTags, null, 2))
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+		
+	}, 1);
+	
 	editor.addTest(function parseOnlyFunctionAutocompleteInsert(callback) {
 		// The end of a function should always be a right angel bracket = }
 		// Seems to be a problem when we use auto-complete, caused by the changes for test:functionEndWithRIghtBracket

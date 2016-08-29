@@ -772,6 +772,7 @@
 			openXmlTags = 0,
 			xmlTagLastOpenRow = -1,
 			xmlModeBeforeTag = false,
+			xmlTagInsideQuote = false,
 			insideScriptTag = false,
 			llChar = "",
 			lllChar = "",
@@ -1509,6 +1510,9 @@
 				}
 				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || insideQuote)) {
 					insideXmlTag = true;
+					
+					if(insideQuote) xmlTagInsideQuote = true;
+					
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
 					if(!insideXmlTagEnding) {
@@ -2172,6 +2176,9 @@
 				insideVariableDeclaration[codeBlockDepth] = false;
 				foundVariableInVariableDeclaration = false;
 				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
+				
+				if(insideXmlTag && xmlTagInsideQuote && !insideQuote) insideXmlTag = false;
+				
 			}
 			
 			if(char == lastLineBreakCharacter) {
