@@ -45,7 +45,7 @@
 		var row = file.caret.row;
 		var col = file.caret.col;
 		
-		if(file.parsed.language=="VbScript" && character == "'") return true; // ' Are used to make comments in vbScript
+		if(file.parsed.language=="VbScript" && character == "'") return true; // Single quotes ' Are used to make comments in vbScript
 		
 		var lastCharacter = "";
 		var nextCharacter = "";
@@ -132,6 +132,8 @@
 			
 			if(inQuote && !openQuote) {
 				
+				file.deleteSelection();
+				
 				if(file.parsed.language=="JavaScript") {
 					file.insertText(quote + " +  + " + quote);
 					file.moveCaretLeft(file.caret, 4);
@@ -150,9 +152,16 @@
 					editor.renderNeeded();
 					return false;
 				}
+				else {
+					throw new Error("I dont know what to do with the quote");
+				}
 			}
 			else if(   !xor    && !(quote == singleQuote && insideDbl)) {
+				
 				// Insert one quote character
+				
+				file.deleteSelection();
+				
 				file.insertText(quote + quote);
 				file.moveCaretLeft();
 				editor.renderNeeded();
