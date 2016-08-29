@@ -1334,6 +1334,13 @@
 		if(isContinuous(selection)) {
 			var lastIndex = selection[selection.length-1].index;
 			
+			// The text might have been selected right to left
+			if(lastIndex < firstIndex) {
+				var tmpIndex = firstIndex;
+				firstIndex = lastIndex;
+				lastIndex = tmpIndex;
+			}
+			
 			// Place the caret where the selection was
 			file.caret = file.moveCaretToIndex(firstIndex);
 			
@@ -1398,10 +1405,6 @@
 		function isContinuous(selection) {
 			var index = 0;
 			var lastIndex = selection[0].index;
-			var sp = " ";
-			var tab = "\t";
-			var lf = "\n";
-			var cr = "\r";
 			var char = "";
 			for(var i=0; i<selection.length; i++) {
 				index = selection[i].index;
@@ -1410,7 +1413,7 @@
 					for(var j=lastIndex+1; j<index; j++) {
 						char = file.text.charAt(j);
 						//console.log("char=" + char);
-						if(!(char == sp || char == tab || char == lf || char == cr )) {
+						if(!(char == " " || char == "\t" || char == "\n" || char == "\r" )) {
 							// It has a non-whitespace character inbetween selections.
 							// So the selection is not continuous.
 							//console.log("Char: '" + char + "' is not a white-space character!");

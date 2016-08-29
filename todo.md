@@ -121,11 +121,6 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Error when writing /" inside an function Ex:
-if(dir.indexOf(/"
-
-When selecting from right to left PLUS one (emty?) line , then pressing delete we get an error (inside a function)
-
 After failing gotofile once, it seems to fail all the time after (aborting, too much latency)
 
 Select default (root) folder in connection manager!
@@ -389,6 +384,10 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+Error when writing /" inside an function Ex:
+if(dir.indexOf(/"
+
 
 When copying in code into a function, colors, quotes, comments will be off (by line)?
 

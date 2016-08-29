@@ -29,6 +29,20 @@
 	*/
 	
 
+	editor.addTest(function selectUpAndDelete(callback) {
+		editor.openFile("selectUpAndDelete.js", 'abc\n', function(err, file) {
+			
+			file.moveCaret(undefined, 0, 3); // Move the caret into the function
+			
+			editor.mock("keyDown", {charCode: 38, shiftKey: true, target: "canvas"}); // Simulate shift + Up
+			editor.mock("keyDown", {charCode: 46, target: "canvas"}); // Simulate delete
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	
 	editor.addTest(function rightWrongFunctionName(callback) {
@@ -45,7 +59,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 
 	editor.addTest(function vbHtmlTagParser(callback) {
