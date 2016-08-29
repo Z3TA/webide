@@ -916,9 +916,6 @@
 					codeBlock[codeBlockDepth].parent = parentCodeBlock;
 				}
 			}
-
-			
-			
 		}
 		
 		function codeBlockR() {
@@ -1670,6 +1667,7 @@
 				if(char == ";") {
 					insideVariableDeclaration[codeBlockDepth] = false;
 					foundVariableInVariableDeclaration = false;
+					variableName = "";
 					
 					//console.log("Found character=; ending pointer ...");
 					
@@ -1808,10 +1806,11 @@
 						
 						// Figure out the name of the function
 						
-						//console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth]);
+						console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
-						functionName = lastWord || word.replace("(", "");
+						if(variableName != "" && lastWord != "") functionName = variableName;
+						else functionName = lastWord || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
 						
@@ -2175,6 +2174,8 @@
 				// A new line without , exits variable declaration
 				insideVariableDeclaration[codeBlockDepth] = false;
 				foundVariableInVariableDeclaration = false;
+				variableName = "";
+				
 				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
 				
 				if(insideXmlTag && xmlTagInsideQuote && !insideQuote) insideXmlTag = false;
@@ -2281,7 +2282,8 @@
 				// Anonymous function
 				//console.log("anon function line=" + lineNumber + "");
 				insideFunctionDeclaration = true;
-				variableName = "Anonymous function";
+				//variableName = "Anonymous function";
+				variableName = "";
 				word = "";
 				return;
 			}

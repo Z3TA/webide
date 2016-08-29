@@ -30,6 +30,23 @@
 	
 
 	
+	
+	editor.addTest(function rightWrongFunctionName(callback) {
+		editor.openFile("rightWrongFunctionName.js", 'rightName = function wrongName() {};\nvar foo = bar\nfunction baz() {}', function(err, file) {
+			
+			var keys = Object.keys(file.parsed.functions);
+			
+			if(keys[0] != "rightName") throw new Error("Expected the function name to be: 'rightName'. Not '" + keys[0] + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
+			
+			if(keys[1] != "baz") throw new Error("Expected the second function name to be: 'baz'. Not '" + keys[1] + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
+
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 
 	editor.addTest(function vbHtmlTagParser(callback) {
 		
@@ -44,8 +61,7 @@
 			callback(true);
 			
 		});
-		
-	}, 1);
+	});
 	
 	editor.addTest(function parseOnlyFunctionAutocompleteInsert(callback) {
 		// The end of a function should always be a right angel bracket = }

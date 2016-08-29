@@ -121,12 +121,6 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-When auto-completing, the parser thinks only one character was added, but only to self calling function. See C:\Users\Z\dev-repositories\jzedit\tests\_jsfunoptbrackmiss3.js
-
-Syntax coloring in vu/mobile/forum.asp
-
-Function list lists wrong function name: rightName = function wrongName() { ...
-
 Error when writing /" inside an function Ex:
 if(dir.indexOf(/"
 
@@ -391,8 +385,96 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 
 
 
+
+
+Unable to repeat bugs (happens rarely)
+---------------------------------------
+
+When copying in code into a function, colors, quotes, comments will be off (by line)?
+
+When selecting text to copy, using the mouse, sometimes the last character drops out
+
+---
+
+Cut/paste turned the text backwards!
+
+---
+
+Sometimes it doesn't work to select text, or the selection is buggy.
+
+---
+
+Some times the editor is invisble in MS windows. Only the debugger window loads.
+Probably because of failing JSON.parse
+
+---
+When double clicking a world and started typing:
+Index is undefined. Stuff will go wrong!
+---
+
+
+Text disappears from some lines when the spellchecker is running.
+
+---
+when closing:
+Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
+file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
+---
+
+Pressing enter mess up the colors
+
+Somtimes keys with shift or alt-gr doesn't work! native
+
+Sometimes you get an error when closing the editor, that one of the file we want to save state for is not in global.files.
+
+When reloading using F5:
+node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
+use location.reload() instead!?
+
+Somtimes when closing the editor. The file path is already removed from global.files!
+
+Sometimes get error about file not being open, when closing a bunch of files: file_tabs.js:618 
+
+Editor sometimes fails to save!!! When? there's an error / something crash?
+
+Sometimes when undoing (ctrl+Z) the caret is placed on a non existing grid column!
+
+Black screen when opening file
+
+Ctrl+X not working
+
+Opening files with inconsistent line breaks.
+
+Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
+
+Test if inlining functions in jsParser makes it faster. IT DID NOT!!
+
+bug: ssg preview doesn't hide when pressing escape.
+
+The code sometimes "jumps" when editing in a subfunction.
+
+Pasting code into an emty (sub) function sometimes does weird things
+
+
+
+
+
+Low prio bugs
+-------------
+
+
+
+
+
+
+
+
+
+
 Polishing
 =========
+
+When trying to make double quotes in vbScript "<foo bar=""baz"">" ... Maybe have to press Alt when making a " to auto insert the extra " + + " ? 
 
 Tab and shift+tab to manage indentation in non-intepreted files
 
@@ -722,74 +804,6 @@ createBuffer in render takes a very long time > 500 ms on files with very long l
 Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in C:\Users\Z\dev-repositories\test\JZedit-tests\parser
 
 
-
-Unable to repeat bugs (happens rarely)
----------------------------------------
-
-When copying in code into a function, colors, quotes, comments will be off (by line)?
-
-When selecting text to copy, using the mouse, sometimes the last character drops out
-
----
-
-Cut/paste turned the text backwards!
-
----
-
-Sometimes it doesn't work to select text, or the selection is buggy.
-
----
-
-Some times the editor is invisble in MS windows. Only the debugger window loads.
-Probably because of failing JSON.parse
-
----
-When double clicking a world and started typing:
-Index is undefined. Stuff will go wrong!
----
-
-
-Text disappears from some lines when the spellchecker is running.
-
----
-when closing:
-Error: File='C:\Users\Z\dev-repositories\js-editor\plugin\javascript\jsParser.js' not open! global.files=["C:\\Users\\Z\\dev-repositories\\js-editor\\todo.md","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\find_replace.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_select.js","C:\\Users\\Z\\dev-repositories\\js-editor\\File.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\html.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\mouse_place_caret.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\A.js","C:\\Users\\Z\\dev-repositories\\js-editor\\test\\test.js","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_text.js","C:\\Users\\Z\\dev-repositories\\js-editor\\settings.js","C:\\Users\\Z\\dev-repositories\\js-editor\\index.htm","C:\\Users\\Z\\dev-repositories\\js-editor\\plugin\\render_indentation.js","C:\\Users\\Z\\dev-repositories\\js-editor\\editor.js"]
-file_tabs.js:636 Uncaught TypeError: Cannot read property 'isSaved' of undefined
----
-
-Pressing enter mess up the colors
-
-Somtimes keys with shift or alt-gr doesn't work! native
-
-Sometimes you get an error when closing the editor, that one of the file we want to save state for is not in global.files.
-
-When reloading using F5:
-node) warning: possible EventEmitter memory leak detected. 11 close listeners added. Use emitter.setMaxListeners() to increase limit.
-use location.reload() instead!?
-
-Somtimes when closing the editor. The file path is already removed from global.files!
-
-Sometimes get error about file not being open, when closing a bunch of files: file_tabs.js:618 
-
-Editor sometimes fails to save!!! When? there's an error / something crash?
-
-Sometimes when undoing (ctrl+Z) the caret is placed on a non existing grid column!
-
-Black screen when opening file
-
-Ctrl+X not working
-
-Opening files with inconsistent line breaks.
-
-Opening another file shewed the div's so that preview dropped down and canvas halved. When!???
-
-Test if inlining functions in jsParser makes it faster. IT DID NOT!!
-
-bug: ssg preview doesn't hide when pressing escape.
-
-The code sometimes "jumps" when editing in a subfunction.
-
-Pasting code into an emty (sub) function sometimes does weird things
 
 
 Feature
