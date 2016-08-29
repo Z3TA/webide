@@ -906,7 +906,10 @@
 		
 		var url = require("url");
 		var parse = url.parse(destination);
-		var protocol = parse.protocol.replace(/:/g, "").toLowerCase();
+		var protocol = parse.protocol;
+		
+		if(protocol) protocol = protocol.replace(/:/g, "").toLowerCase();
+		
 		console.log("protocol: " + protocol);
 		
 		console.log("source=" + JSON.stringify(url.parse(source), null, 2));

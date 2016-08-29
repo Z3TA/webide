@@ -2978,13 +2978,15 @@ editor.lastKeyPressed = "";
 		*/
 		var url = require('url');
 		var parse = url.parse(pathToCreate);
-		var protocol = parse.protocol.replace(/:/g, "").toLowerCase();
+		var protocol = parse.protocol;
 		var delimiter = getPathDelimiter(pathToCreate);
 		var lastChar = pathToCreate.substring(pathToCreate.length-1);
 		var hostname = parse.hostname;
 		var create = getFolders(pathToCreate);
 		var errors = [];
 		var fullPath = create[create.length-1];
+		
+		if(protocol) protocol = protocol.replace(/:/g, "").toLowerCase();
 		
 		console.log("hostname=" + hostname + " pathToCreate=" + pathToCreate + " parse=" + JSON.stringify(parse));
 		
