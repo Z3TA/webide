@@ -468,6 +468,10 @@ Low prio bugs
 Polishing
 =========
 
+Temporary show total lines in file while scrolling and where in the file you are. Ex: Page 2/100, of 15231 LOC
+Page up/down should move depedning on the amount of visible rows in the editor!
+
+
 Select default (root) folder in connection manager!
 
 When trying to make double quotes in vbScript "<foo bar=""baz"">" ... Maybe have to press Alt when making a " to auto insert the extra " + + " ? 
