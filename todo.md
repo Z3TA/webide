@@ -456,7 +456,7 @@ Pasting code into an emty (sub) function sometimes does weird things
 Low prio bugs
 -------------
 
-
+When loading the spellchecker on Linux it complains about libstdc++.so.6 version GLIBCXX_3.4.21 not found. Should update the runtime and use builtin spellcker!
 
 
 
@@ -467,6 +467,8 @@ Low prio bugs
 
 Polishing
 =========
+
+Need a way to open file on touch (preferably a plus sign on the tabs list, like in browsers)
 
 Temporary show total lines in file while scrolling and where in the file you are. Ex: Page 2/100, of 15231 LOC
 Page up/down should move depedning on the amount of visible rows in the editor!
