@@ -121,38 +121,30 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Opening a large file via xFTPx tries to open (due to big file) stream on local filesystem.
-Streaming strategy from FTP: Save a local copy to disk while streaming, then use that for lookups, (and edit it wile making changes btw stream chunks)
-
-editor.js line 3350? on Linux cant read .l of null. Also can't load the spellcheck worker.
+Doesn't get the right indentation on block end character
 
 After deliting a large chunk of text: File.js:469 Uncaught Error: file.startRow=120 grid.length=41 file.partStartRow=0
 
-When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
-
-Doesn't get the right indentation on block end character
-
-ssg/build.js line 619 color error
-
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
 
-Something is causeing the function end to be off
-
+Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
 
 spellchecker: Red waves doesn't go away when changing the word.
 
-When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
-
 Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
+
+When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
 
 Error when editing a function: 
 function keyPressed(e)m{ inserting the m between ) and {
 
 When creating a new function. All functions below it will appear as subfunctions in the function-list.
 
-Ctrl+Q to close a file doesn't seem to work any longer
-
 Parsing error when removing if-block (C:\Users\Z\dev-repositories\test\JZedit-tests\delblock.js)
+
+
+Opening a large file via xFTPx tries to open (due to big file) stream on local filesystem.
+Streaming strategy from FTP: Save a local copy to disk while streaming, then use that for lookups, (and edit it wile making changes btw stream chunks)
 
 
 Weird formatting in vbScript with IF ELSE END IF on the same line:
@@ -174,14 +166,8 @@ The indentation helper (render_indentation.js) doesn't work with parsing-only-th
 
 Always the wrong path when saving a file. Need to be smarter!
 
-Pressing enter in saveas doesnt save.
-
-Search GUI doesnt hide when pressing Escape unless it has focus
-
 ASP-file: <body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0"><iframe id="iframe" width="100%" height="100%" src="beta.htm?vuid=<% =strCookie_VUID %>" border="0" frameborder="0" marginheight="0" marginwidth="0"></iframe></body>
 bad color on strC
-
-Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
 
 Uncaught Error: fullParse.quotes.length=1 oldParse.quotes.length=0 
 
@@ -377,6 +363,8 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
 
 After failing gotofile once, it seems to fail all the time after (aborting, too much latency) possible fixed when the ftp queue was implemented.
 
