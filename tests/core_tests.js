@@ -28,6 +28,25 @@
 		
 	*/
 	
+	editor.addTest(function test_fixIndentation(callback) {
+		editor.openFile("oldindentation.js", 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {
+			
+			file.moveCaret(undefined, 5);
+			
+			file.insertText("else if(1==3) {");
+			
+			file.insertLineBreak();
+			
+			file.putCharacter("}");
+			
+			if(file.grid[6].indentationCharacters == "") throw new Error("Expected a tab (indentation character) on line 7");
+			
+			editor.closeFile(file.path);
+
+			callback(true);
+			
+		});
+	}, 1);
 
 	editor.addTest(function selectUpAndDelete(callback) {
 		editor.openFile("selectUpAndDelete.js", 'abc\n', function(err, file) {
@@ -42,8 +61,7 @@
 			callback(true);
 			
 		});
-	}, 1);
-	
+	});
 	
 	editor.addTest(function rightWrongFunctionName(callback) {
 		editor.openFile("rightWrongFunctionName.js", 'rightName = function wrongName() {};\nvar foo = bar\nfunction baz() {}', function(err, file) {
@@ -61,7 +79,6 @@
 		});
 	});
 	
-
 	editor.addTest(function vbHtmlTagParser(callback) {
 		
 		editor.openFile("vbHtmlTagParser.asp", '<%\n"<"\nfoo\n"<div id=""foo"">"\n%>', function(err, file) {
