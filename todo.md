@@ -842,6 +842,8 @@ Optimize if needed
 Feature list (Not ordered/priotized)
 ------------------------------------
 
+Cancel or resume subscription from within the editor
+
 Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
 
 Git integration: stage for commit, commit, push 
