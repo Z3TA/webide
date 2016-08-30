@@ -2,9 +2,18 @@
 	
 	"use strict";
 	
-	editor.on("start", fixIndentationMain);
+	editor.plugin({
+		desc: "Adds or removes indentation characters in the source file so that your colleges with inferior editors doesn’t complain.",
+		load: fixIndentationMain,
+		unload: unloadFixIndentationPlugin,
+	});
 	
-	var somethingChanged = false;
+	var somethingChanged = false; // Call a file.parsed event if we change anything ...
+	
+	
+	function unloadFixIndentationPlugin() {
+		editor.removeEvent("fileChange", fixIndentationOnChange);
+	}
 	
 	function fixIndentationMain() {
 		
@@ -28,22 +37,20 @@
 	
 	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
-		// todo: Only do this for files parsed by jsParser! (or we will fuck up files parsed by other parsers. unless ... we are very strict on what a parser should return)
-		
-		if(!file.parsed) return;
-		
-		if(!file.parsed.blockMatch) return;
-		
-		var rowIndentation = 0;
+		// Only fix indentation if the parser has parsed the blocks so we know how much indentation to use
+		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return;
 		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
-			var newLine = row+1; 
-			fixIndentation(file, row); // The line we where on when pressing Enter
-			fixIndentation(file, newLine); // The new line
-			file.grid[newLine].owned = true;
-			
+			var newRow = row+1; 
+			file.grid[newRow].owned = true;
+			if(file.grid.length <= 2 && newRow > 0) {
+				file.grid[row].owned = true; // Also take ownership of the start row
+				fixIndentation(file, row); // The line the user was on when pressing Enter
+			}
+			fixIndentation(file, newRow); // The new line just inserted 
 			//file.grid[row+1].unshift(new Box("*"));
+			return;
 		}
 		else if(type=="text") {
 			// A bunch of text was inserted. We own this text so it's safe to fix indentation ...
@@ -51,50 +58,72 @@
 				file.grid[i].owned = true; // Take ownership because a bunch of text was inserted.
 				fixIndentation(file, i);
 			}
+			return;
 		}
 		else if(type=="insert") {
-			// A character was inserted. Check if we "own" this line and in that case, fix indentation
-			// optimization tip: Only do this when chars that affect indentation is inserted
-			if(file.grid[row].owned) fixIndentation(file, row);
+			// A character was inserted.
+			if(file.grid[row].length == 1) file.grid[row].owned = true; // We put the first char on this line, so we now own it
+			if(file.grid[row].owned) fixIndentation(file, row); // Fix indentation on the row if we own it
+		}
+		else if(type != "delete") return; // For all other type of modifications, do nothing
+		
+		if(character.length != 1) throw new Error("Expected character=" + character + " length to be 1. type=" + type + " ");
+		
+		if(!file.parsed.blockMatch) return;
+		
+		if(insideParsedObject(file.caret.index, file.parsed.quotes) || insideParsedObject(file.caret.index, file.parsed.comments)) return;
+		
+		// Note: It might not be a JavaScript file! It can also be a vbScript file, so we can not depend on matching angel brackets
+		
+		// Check if the row above or below has a different indentation, then fix all rows in that block
+		
+		var rowBefore = 0;
+		var rowAfter = 0;
+		var currentRow = file.grid[row].indentation;
+		
+		if(row == 0 && file.grid.length > 0) {
+			rowBefore = rowAfter = file.grid[row+1].indentation;
+		}
+		else if(row == (file.grid.length-1)) {
+			rowBefore = rowAfter = file.grid[row-1].indentation;
+			}
+		else {
+			 rowBefore = file.grid[row-1].indentation;
+			 rowAfter = file.grid[row+1].indentation
 		}
 		
-		
-		var lastCharacter = character.trim();
-		if(lastCharacter.length > 1) lastCharacter = lastCharacter.substr(lastCharacter.length-1, 1);
-		
-		console.log("lastCharacter=" + lastCharacter + " file.grid.length=" + file.grid.length + " row=" + row + " type=" + type);
-		
-		if(lastCharacter == "{" && file.grid.length > row+1) {
+		var rowIndentation = 0;
+		if(rowAfter > currentRow && file.grid.length > row+1) {
 			// Take ownership and fix indentation until this code block ends
-			var indentation = file.grid[row+1].indentation;
+			var indentation = file.grid[row].indentation;
 			
 			for (var i=row+1; i<file.grid.length; i++) {
 				rowIndentation = file.grid[i].indentation;
 				
 				console.log("indentation=" + indentation + " rowIndentation=" + rowIndentation);
 				
-				if(rowIndentation < indentation) break;
-				
 				file.grid[i].owned = true;
 				fixIndentation(file, i);
+				
+				if(rowIndentation == indentation) break;
 				
 			}
 		}
-		else if( lastCharacter == "}" && row > 0 && file.grid.length > (row+1) ) {
-			var indentation = file.grid[row+1].indentation;
+		else if(rowBefore < currentRow && row > 0 && file.grid.length > (row+1) ) {
+			// Fix indentation until the code block above ends
+			var indentation = file.grid[row].indentation;
 			for (var i=row-1; i>-1; i--) {
 				rowIndentation = file.grid[i].indentation;
-				
-				if(rowIndentation < indentation) break;
 				
 				file.grid[i].owned = true;
 				fixIndentation(file, i);
 				
+				if(rowIndentation == indentation) break;
 			}
 			
 		}
 		
-		if(somethingChanged) file.haveParsed(file.parsed); // Call events depening on the parsed data
+		if(somethingChanged) file.haveParsed(file.parsed); // Call events depending on the parsed data
 		
 		somethingChanged = false;
 		
@@ -105,15 +134,15 @@
 		console.log("Fixing indentation on row=" + row);
 		
 		var grid = file.grid,
-			gridRow = grid[row],
-			currentIndentationCharacters = gridRow.indentationCharacters,
-			defaultIndentationCharacters = file.indentation,
-			shouldHaveIndentationCharacters = "",
-			indentation = gridRow.indentation,
-			charactersToRemove = 0,
-			charactersToAdd = 0,
-			totalCharactersAdded = 0,
-			index = gridRow.startIndex;
+		gridRow = grid[row],
+		currentIndentationCharacters = gridRow.indentationCharacters,
+		defaultIndentationCharacters = file.indentation,
+		shouldHaveIndentationCharacters = "",
+		indentation = gridRow.indentation,
+		charactersToRemove = 0,
+		charactersToAdd = 0,
+		totalCharactersAdded = 0,
+		index = gridRow.startIndex;
 		
 		for(var i=0; i<indentation; i++) {
 			shouldHaveIndentationCharacters += defaultIndentationCharacters;

@@ -12,6 +12,15 @@ Prio:
 What I'm working on
 -------------------
 
+Working on fix_indentation.js so that the source file looks good.
+problems: knowing what rows to check
+
+if(1==1) {
+    fi(2==2) { <-- What rows to fix? (what if it's deleted)
+	} <-- What rows to fix? (what if it's deleted)
+}
+
+
 
 todo:
 
@@ -122,6 +131,8 @@ BUGS (and issues)
 =================
 
 Doesn't get the right indentation on block end character
+
+After clicking on "new page" in SSG, the working dir should change to the SSG source dir!
 
 After deliting a large chunk of text: File.js:469 Uncaught Error: file.startRow=120 grid.length=41 file.partStartRow=0
 
