@@ -1,6 +1,8 @@
 
 var fs = require("fs"); // Load it first so that we can write any errors to a log file
 
+var logName = "spellcheck-worker-debug.log";
+
 // Need to be before any errors
 process.on('uncaughtException', function (err) {
 	// prevent infinite recursion
@@ -159,7 +161,7 @@ function readFromDisk(path, callback, returnBuffer) {
 
 
 function log(txt) {
-	fs.appendFileSync("worker-debug.log", txt + "\n");
+	fs.appendFileSync(logName, txt + "\n");
 }
 
 
