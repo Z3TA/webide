@@ -3348,11 +3348,11 @@ editor.lastKeyPressed = "";
 							var myRegexp = /changeset:\s*(\d*):/g;
 							var match = myRegexp.exec(stdout);
 							
-							if(match == null) {
+							if(!match) {
 								console.log("Unable to find latest HG commit id! stdout=" + stdout);
 								editor.version = -1;
 							}
-else editor.version = match[1];
+							else editor.version = match[1];
 						}
 						else {
 							editor.version = -1;
