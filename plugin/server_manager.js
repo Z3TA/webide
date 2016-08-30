@@ -6,9 +6,9 @@
 		
 		SFTP = "FTP" via SSL
 		FTPS = FTP over SSL/TLS
-
-
-*/
+		
+		
+	*/
 	
 	
 	console.log("Hello from server_manager.js");
@@ -81,8 +81,11 @@
 			connectToConnection();
 			return false;
 		}
-		else return true;
+		else {
+			console.log("document.activeElement=" + document.activeElement);
+			return true;
 	}
+}
 	
 	function unload() {
 		// Cleaning up, for example when disabling a plugin
