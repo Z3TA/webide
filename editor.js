@@ -3348,7 +3348,7 @@ editor.lastKeyPressed = "";
 							var myRegexp = /changeset:\s*(\d*):/g;
 							var match = myRegexp.exec(stdout);
 							
-							if(match.length == 0) {
+							if(match == null) {
 								console.log("Unable to find latest HG commit id! stdout=" + stdout);
 								editor.version = -1;
 							}
