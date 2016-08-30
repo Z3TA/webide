@@ -964,6 +964,7 @@ editor.lastKeyPressed = "";
 				var destPath = pathname;
 				var options = {encoding: encoding};
 				// Could also use sftp.createWriteStream
+				console.log("Waiting for SFTP ...");
 				c.writeFile(destPath, input, options, function sftpWrite(err) {
 					if(err) {
 						console.warn("Failed to save to path= " + path + "\n" + err.message);
@@ -2740,7 +2741,7 @@ editor.lastKeyPressed = "";
 					}
 					
 				}).on('end', function(msg) {
-					alert("Disconnected from SSH on " + serverAddress + "\n" + msg);
+					alert("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
 					
 					connectionClosed("ssh", serverAddress);
 					
