@@ -61,6 +61,101 @@ const ALT = 4;
 
 // Global functions ...
 
+function indexToRowCol(index, file) {
+	// Returns the row and col on the grid from index
+	
+	if(index > file.text.length) return null;
+	
+	var grid = file.grid;
+	var row = 0;
+	var col = 0;
+	
+	for (var i=0; i<grid.length; i++) {
+		if(grid[i].startIndex > index) {
+			
+			row = i-1;
+			col = Math.abs(index -= grid[i].startIndex);
+			
+			return {row: row, col: col};
+			
+		}
+	}
+	
+	return null;
+	
+}
+
+
+function insideParsedObject(index, parsedObj) {
+	
+	if(!parsedObj) throw new Error("Can not determine if we are inside parsedObj=" + parsedObj + "!");
+	
+	if(parsedObj.length == 0) return false;
+	
+	if(index < parsedObj[0].start) return false;
+	if(index > parsedObj[parsedObj.length-1].end) return false;
+	
+	for(var i=0; i<parsedObj.length; i++) {
+		if(parsedObj[i].start <=index && parsedObj[i].end >= index) return true;
+	}
+	
+	return false;
+}
+
+function matchingAngelBracket(index, file, toMatch) {
+	// test: matchingAngelBracket(67, editor.currentFile)
+	
+	var bracket = toMatch || file.text.charAt(index);
+	
+	if(bracket != "{" && bracket != "}") throw new Error("Character=" + lbChars(bracket) + " on index=" + index + " is not an angel bracket!");
+	
+	var char = "";
+	var leftCount = 0;
+	var rightCount = 0;
+	if(bracket == "{") {
+		// Go to the right, look for }
+		console.log("Looking for } ...");
+		leftCount = 1;
+		for (var i=index+1; i<file.text.length; i++) {
+			char = file.text.charAt(i);
+			if(char == "}") {
+				if(!insideQuoteOrComment(i)) rightCount++;
+				
+				if(rightCount == leftCount) return i;
+			}
+			else if(char == "{") {
+				if(!insideQuoteOrComment(i)) leftCount++;
+			}
+		}
+	}
+	else {
+		// Go to the left, look for {
+		console.log("Looking for { ...");
+		rightCount= 1;
+		for (var i=index-1; i>-1; i--) {
+			char = file.text.charAt(i);
+			if(char == "{") {
+				if(!insideQuoteOrComment(i)) leftCount++;
+				
+				if(rightCount == leftCount) return i;
+			}
+			else if(char == "}") {
+				if(!insideQuoteOrComment(i)) rightCount++;
+			}
+		}
+	}
+	
+	return null; // No matching angel bracket found
+	
+	function insideQuoteOrComment(i) {
+		if(insideParsedObject(i, file.parsed.quotes)) return true;
+		else if(insideParsedObject(i, file.parsed.comments)) return true;
+		else return false;
+	}
+	
+}
+
+
 
 function getFolders(fullPath) {
 	/* 
