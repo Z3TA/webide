@@ -121,6 +121,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Opening a large file via xFTPx tries to open (due to big file) stream on local filesystem.
+Streaming strategy from FTP: Save a local copy to disk while streaming, then use that for lookups, (and edit it wile making changes btw stream chunks)
+
 editor.js line 3350? on Linux cant read .l of null. Also can't load the spellcheck worker.
 
 After deliting a large chunk of text: File.js:469 Uncaught Error: file.startRow=120 grid.length=41 file.partStartRow=0
