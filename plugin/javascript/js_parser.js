@@ -1722,7 +1722,7 @@
 					
 					insideArray[codeBlockDepth] = false;
 				
-					codeBlock[codeBlockDepth].indentation--;
+					if(codeBlock[codeBlockDepth].indentation > 0) codeBlock[codeBlockDepth].indentation--;
 					
 					if(file.grid[row].indentation > 0 && arrayStartRow != row && indentate) file.grid[row].indentation--;				
 					

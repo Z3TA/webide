@@ -28,6 +28,19 @@
 		
 	*/
 	
+	editor.addTest(function parentCodeBlockIndentation(callback) {
+		editor.openFile("parentCodeBlockIndentation.js", ']\n{', function(err, file) {
+			
+			if(file.grid[0].indentation != 0) throw new Error("Expected 0 indentation on line 1");
+			if(file.grid[1].indentation != 0) throw new Error("Expected 0 indentation on line 2");
+			
+			editor.closeFile(file.path);
+
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function test_fixIndentation(callback) {
 		editor.openFile("oldindentation.js", 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {
 			
@@ -46,7 +59,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 
 	editor.addTest(function selectUpAndDelete(callback) {
 		editor.openFile("selectUpAndDelete.js", 'abc\n', function(err, file) {
