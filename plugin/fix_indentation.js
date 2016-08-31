@@ -10,6 +10,7 @@
 	
 	var somethingChanged = false; // Call a file.parsed event if we change anything ...
 	
+	var indentationBefore;
 	
 	function unloadFixIndentationPlugin() {
 		editor.removeEvent("fileChange", fixIndentationOnChange);
@@ -30,15 +31,61 @@
 			
 		*/
 		
-		var runOrder = 110; // Make sure this runs after the parser
-		editor.on("fileChange", fixIndentationOnChange, runOrder);
+		var runOrderOfParser = 100; 
+		
+		// Make sure this runs after the parser
+		editor.on("fileChange", fixIndentationOnChange, runOrderOfParser+20);
+		
+		// Make sure this runs before the parser
+		editor.on("fileChange", checkIndentationOnBeforeParser, runOrderOfParser-20);
 		
 	}
+	
+	function checkIndentationOnBeforeParser(file, type, character, index, row, col) {
+		
+		// Check the indentation of the surrounding rows BEFORE the parsed kicks in a updates the indentation
+		
+		indentationBefore = indentationAround(file, row);
+		
+	}
+	
+	function indentationAround(file, row) {
+		
+		var above = -1;
+		var below = -1;
+		var current = file.grid[row].indentation;
+		
+		if(file.grid.length == 0) {
+			throw new Error("The grid length can not be zero!");
+		}
+		else if(file.grid.length == 1) {
+			above = current;
+			below = current;
+		}
+		else if(row == 0) {
+			above = current;
+			below = file.grid[row+1].indentation;
+		}
+		else if(row == (file.grid.length-1)) {
+			above = file.grid[row-1].indentation;
+			below = current;
+		}
+		else {
+			 above = file.grid[row-1].indentation;
+			 below = file.grid[row+1].indentation
+		}
+		
+		if(above == -1) throw new Error("Failed to get indentation of row above (" + (row-1) + ")");
+		if(below == -1) throw new Error("Failed to get indentation of row below (" + (row+1) + ")");
+		
+		return {above: above, below: below, current: current};
+	}
+	
 	
 	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
 		// Only fix indentation if the parser has parsed the blocks so we know how much indentation to use
-		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return;
+		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return done();
 		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
@@ -50,7 +97,7 @@
 			}
 			fixIndentation(file, newRow); // The new line just inserted 
 			//file.grid[row+1].unshift(new Box("*"));
-			return;
+			return done();
 		}
 		else if(type=="text") {
 			// A bunch of text was inserted. We own this text so it's safe to fix indentation ...
@@ -58,74 +105,64 @@
 				file.grid[i].owned = true; // Take ownership because a bunch of text was inserted.
 				fixIndentation(file, i);
 			}
-			return;
+			return done();
 		}
 		else if(type=="insert") {
 			// A character was inserted.
 			if(file.grid[row].length == 1) file.grid[row].owned = true; // We put the first char on this line, so we now own it
 			if(file.grid[row].owned) fixIndentation(file, row); // Fix indentation on the row if we own it
 		}
-		else if(type != "delete") return; // For all other type of modifications, do nothing
-		
-		if(character.length != 1) throw new Error("Expected character=" + character + " length to be 1. type=" + type + " ");
-		
-		if(!file.parsed.blockMatch) return;
-		
-		if(insideParsedObject(file.caret.index, file.parsed.quotes) || insideParsedObject(file.caret.index, file.parsed.comments)) return;
+
+		if(!file.parsed.blockMatch) return done();
 		
 		// Note: It might not be a JavaScript file! It can also be a vbScript file, so we can not depend on matching angel brackets
 		
-		// Check if the row above or below has a different indentation, then fix all rows in that block
+		// Check if the row above or below has a different indentation comparing to before the parse, then fix all rows in that block
+
+		var indentation = indentationAround(file, row);
 		
-		var rowBefore = 0;
-		var rowAfter = 0;
-		var currentRow = file.grid[row].indentation;
+		if(indentationBefore.below == indentation.below && indentationBefore.above == indentation.above) return done();
 		
-		if(row == 0 && file.grid.length > 0) {
-			rowBefore = rowAfter = file.grid[row+1].indentation;
-		}
-		else if(row == (file.grid.length-1)) {
-			rowBefore = rowAfter = file.grid[row-1].indentation;
-			}
-		else {
-			 rowBefore = file.grid[row-1].indentation;
-			 rowAfter = file.grid[row+1].indentation
-		}
+		if(insideParsedObject(file.caret.index, file.parsed.quotes) || insideParsedObject(file.caret.index, file.parsed.comments)) return done();
 		
 		var rowIndentation = 0;
-		if(rowAfter > currentRow && file.grid.length > row+1) {
-			// Take ownership and fix indentation until this code block ends
-			var indentation = file.grid[row].indentation;
+		if(indentation.below != indentationBefore.below && file.grid.length > (row+1)) {
+			// Take ownership and fix indentation until the code block below ends
+			var currentIndentation = file.grid[row].indentation;
 			
 			for (var i=row+1; i<file.grid.length; i++) {
 				rowIndentation = file.grid[i].indentation;
 				
-				console.log("indentation=" + indentation + " rowIndentation=" + rowIndentation);
+				//console.log("currentIndentation=" + currentIndentation + " rowIndentation=" + rowIndentation);
 				
 				file.grid[i].owned = true;
 				fixIndentation(file, i);
 				
-				if(rowIndentation == indentation) break;
+				if(rowIndentation == currentIndentation) break;
 				
 			}
 		}
-		else if(rowBefore < currentRow && row > 0 && file.grid.length > (row+1) ) {
+		else if(indentation.above != indentationBefore.above && row > 0) {
 			// Fix indentation until the code block above ends
-			var indentation = file.grid[row].indentation;
+			var currentIndentation = file.grid[row].indentation;
 			for (var i=row-1; i>-1; i--) {
 				rowIndentation = file.grid[i].indentation;
 				
 				file.grid[i].owned = true;
 				fixIndentation(file, i);
 				
-				if(rowIndentation == indentation) break;
+				if(rowIndentation == currentIndentation) break;
 			}
-			
 		}
 		
-		if(somethingChanged) file.haveParsed(file.parsed); // Call events depending on the parsed data
+		return done();
 		
-		somethingChanged = false;
+		function done() {
+			var ret = !somethingChanged;
+			if(somethingChanged) file.haveParsed(file.parsed); // Call events depending on the parsed data
+			somethingChanged = false;
+			return ret;
+		}
 		
 	}
 	
