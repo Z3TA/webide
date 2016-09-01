@@ -126,8 +126,6 @@ BUGS (and issues)
 
 After clicking on "new page" in SSG, the working dir should change to the SSG source dir!
 
-After deliting a large chunk of text: File.js:469 Uncaught Error: file.startRow=120 grid.length=41 file.partStartRow=0
-
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
 
 Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
@@ -832,6 +830,9 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+HTML helper, shadowing in attributes. ex: <form ... show: action, method
+<wanderman> is there any plugin for atom that ,help learning html ? like poping up usage of attributes of elements
 
 Cancel or resume subscription from within the editor
 

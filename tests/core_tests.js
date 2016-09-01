@@ -29,9 +29,36 @@
 	*/
 	
 	
-	
+	editor.addTest(function updateStartRow(callback) {
+		// Make sure the editor corrects the file.startRow after deleting a bunch of rows
+		editor.openFile("deleteabunch.txt", '0', function(err, file) {
+			
+			var height = Math.round(editor.view.visibleRows * 2);
+			
+			for (var i=1; i<height; i++) {
+				file.writeLine(i.toString());
+			}
+			
+			for (var i=Math.round(editor.view.visibleRows/1.5); i<file.grid.length; i++) {
+				file.select(file.grid[i]);
+			}
+			
+			file.moveCaretToEnd(undefined, function(caret) {
+				file.scrollToCaret();
+				file.deleteSelection();
+				
+				if(file.startRow > file.grid.length) throw new Error("File view out of range!");
+				
+				callback(true);
+				
+				editor.closeFile(file.path);
+			});
+			
+		});
+	}, 1);
 	
 	editor.addTest(function regexBracket(callback) {
+		// bug: a slash inside a regex's bracket ended the regex, and in turn made the right ] deindent the row
 		editor.openFile("regexBracket.js", '{\n\nfoo.replace(/[/]/, "")\n\n}', function(err, file) {
 			
 			if(file.grid[2].indentation != 1) throw new Error("Expected line 3 to be indented");
@@ -41,7 +68,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function parentCodeBlockIndentation(callback) {
@@ -51,7 +78,7 @@
 			if(file.grid[1].indentation != 0) throw new Error("Expected 0 indentation on line 2");
 			
 			editor.closeFile(file.path);
-
+			
 			callback(true);
 			
 		});
@@ -71,12 +98,12 @@
 			if(file.grid[6].indentationCharacters == "") throw new Error("Expected a tab (indentation character) on line 7");
 			
 			editor.closeFile(file.path);
-
+			
 			callback(true);
 			
 		});
 	});
-
+	
 	editor.addTest(function selectUpAndDelete(callback) {
 		editor.openFile("selectUpAndDelete.js", 'abc\n', function(err, file) {
 			
@@ -100,7 +127,7 @@
 			if(keys[0] != "rightName") throw new Error("Expected the function name to be: 'rightName'. Not '" + keys[0] + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
 			
 			if(keys[1] != "baz") throw new Error("Expected the second function name to be: 'baz'. Not '" + keys[1] + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
-
+			
 			editor.closeFile(file.path);
 			
 			callback(true);
@@ -111,7 +138,7 @@
 	editor.addTest(function vbHtmlTagParser(callback) {
 		
 		editor.openFile("vbHtmlTagParser.asp", '<%\n"<"\nfoo\n"<div id=""foo"">"\n%>', function(err, file) {
-
+			
 			console.log("file.parsed.xmlTags=" + JSON.stringify(file.parsed.xmlTags, null, 2));
 			
 			if(file.parsed.xmlTags.length != 1) throw new Error("Expecte only one xml tag. file.parsed.xmlTags=" + JSON.stringify(file.parsed.xmlTags, null, 2))
@@ -128,7 +155,7 @@
 		// Seems to be a problem when we use auto-complete, caused by the changes for test:functionEndWithRIghtBracket
 		
 		editor.openFile("autoInsertFunc.js", 'function a() {\nfunction b() {\nfunction c() {\n\n}\nfunc\n}\n}\n', function(err, file) {
-
+			
 			//file.debugGrid();
 			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
 			
@@ -149,7 +176,7 @@
 		});
 		
 	});
-
+	
 	editor.addTest(function functionEndWithRIghtBracket(callback) {
 		// The end of a function should always be a right angel bracket = }
 		// When using the parser optimizer that only parsers the actual function that changed, the functions start/end indexs will be off
@@ -161,7 +188,7 @@
 			file.insertLineBreak();
 			file.moveCaret(undefined, 5);
 			file.insertLineBreak();
-
+			
 			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
 			
 			checkFunction(file, file.parsed.functions["foo"]);
@@ -250,7 +277,7 @@
 			editor.closeFile(file.path);
 			if(++done == 3) callback(true);
 		});
-
+		
 	});
 	
 	editor.addTest(function findPrototypeFunc(callback) {

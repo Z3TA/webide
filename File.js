@@ -1271,22 +1271,21 @@
 		
 		file.grid = file.createGrid(); // will probably have to rewrite for performance
 		
+		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
+		
+		//console.log("file.startRow=" + file.startRow + " file.grid.length=" + file.grid.length + " editor.view.visibleRows=" + editor.view.visibleRows + " file.caret.row=" + file.caret.row);
+		
+		// Update the view if it's below 
+		if(  file.startRow >= (file.grid.length - editor.view.visibleRows / 2)  ) file.scrollToCaret();
+
+		
 		// Create dummy caret to get row and col for the change event
 		var dummyCaret = file.createCaret(firstIndex);
 		
 		if(file.caret.index >= firstIndex) {
 			file.fixCaret(file.caret);
 		}
-		
-		/*
-			console.log("file.startRow=" + file.startRow);
-			console.log("file.grid.length=" + file.grid.length);
-			console.log("editor.view.visibleRows=" + editor.view.visibleRows);
-			console.log(file.startRow + " >= " + ((file.grid.length - editor.view.visibleRows / 2) | 0) + " = " + (file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) );
-		*/
-		
-		if(file.startRow >= ((file.grid.length - editor.view.visibleRows / 2) | 0)) file.scrollToCaret(); // Should fix file.startRow (bitwise or | truncate floating point numbers)
-		
+
 		console.timeEnd("deleteTextRange");
 		
 		file.sanityCheck();
