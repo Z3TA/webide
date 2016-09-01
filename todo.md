@@ -124,8 +124,6 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Parsing error when removing if-block (C:\Users\Z\dev-repositories\test\JZedit-tests\delblock.js)
-
 When creating a new function. All functions below it will appear as subfunctions in the function-list.
 
 When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
