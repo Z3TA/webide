@@ -28,6 +28,22 @@
 		
 	*/
 	
+	
+	
+	
+	editor.addTest(function regexBracket(callback) {
+		editor.openFile("regexBracket.js", '{\n\nfoo.replace(/[/]/, "")\n\n}', function(err, file) {
+			
+			if(file.grid[2].indentation != 1) throw new Error("Expected line 3 to be indented");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
+	
 	editor.addTest(function parentCodeBlockIndentation(callback) {
 		editor.openFile("parentCodeBlockIndentation.js", ']\n{', function(err, file) {
 			
@@ -39,7 +55,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function test_fixIndentation(callback) {
 		editor.openFile("oldindentation.js", 'if(1==1) {\n\n\tif(1==2) {\n\t\tconsole.log("omg!);\n\t}\n\n}\n', function(err, file) {

@@ -779,6 +779,7 @@
 			willBeJSON = false,
 			insideRegExp = false,
 			regExpStart = 0,
+			insideRegExpBracket = false,
 			column = 0,
 			lnw = "", // Last Not Whitespace character
 			pastChar0 = "",
@@ -1319,6 +1320,8 @@
 					
 					Anything between / and / not escaped by \
 					
+					note: / insde a bracket doesn't have to be escaped!
+					
 					RegExp or block comment!? RegExp can not start with *!
 					
 					RegExp or division!?  
@@ -1335,7 +1338,13 @@
 					regExpStart = i;
 					//console.log("RegExp: line=" + lineNumber + " column=" + column);
 				}
-				else if(insideRegExp && char == "/" && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {
+				else if(insideRegExp && char == "[" && lastChar != "\\") {
+					insideRegExpBracket = true;
+				}
+				else if(insideRegExp && char == "]" && lastChar != "\\") {
+					insideRegExpBracket = false;
+				}
+				else if(insideRegExp && char == "/" && !insideRegExpBracket && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {
 					insideRegExp = false;
 					//console.log("Exit regexp: line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
@@ -1623,7 +1632,7 @@
 				
 			}
 			
-			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment);
+			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 			
 			if(codeBlockLeft == codeBlockRight) {
 				insideCodeBlock = false;
@@ -1721,7 +1730,7 @@
 					word = text.substring(arrayStart[codeBlockDepth], i+1);
 					
 					insideArray[codeBlockDepth] = false;
-				
+					
 					if(codeBlock[codeBlockDepth].indentation > 0) codeBlock[codeBlockDepth].indentation--;
 					
 					if(file.grid[row].indentation > 0 && arrayStartRow != row && indentate) file.grid[row].indentation--;				
