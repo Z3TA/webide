@@ -2219,7 +2219,9 @@
 			console.log("file Not a stream or it's at the end.");
 			
 			caret.row = file.grid.length-1;
-			caret.col = file.grid[caret.row].length-1;
+			caret.col = file.grid[caret.row].length;
+			caret.eol = true;
+			caret.eof = true;
 			
 			file.fixCaret(caret);
 			
