@@ -124,8 +124,6 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
-
 Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
 
 spellchecker: Red waves doesn't go away when changing the word.
