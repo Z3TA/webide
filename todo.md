@@ -124,8 +124,6 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-After clicking on "new page" in SSG, the working dir should change to the SSG source dir!
-
 When deleting a selection, then undo, then delete part of it again: Error: file.startRow=33 grid.length=13
 
 Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?

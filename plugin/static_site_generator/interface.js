@@ -889,6 +889,8 @@
 	
 	function newPage(site) {
 		
+		editor.workingDirectory = site.source;
+		
 		editor.readFromDisk(site.template, function fileRead(err, path, text) {
 			
 			if(err) alert(err.message);
