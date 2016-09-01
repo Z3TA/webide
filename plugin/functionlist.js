@@ -122,6 +122,8 @@
 		
 		// (Optimization) Updating the DOM is expensive, find out if it really needs updating, or only update parts of it
 		
+		//console.log("updateFunctionList called");
+		
 		if(editor.currentFile != file) return;
 		
 		if(!file.parsed) return;
@@ -169,8 +171,8 @@
 						if(domModel[i].option) {
 							
 							domModel[i].option.setAttribute("id", functionName);
-							domModel[i].option.removeChild( domModel[i].option.firstChild ); // Remove the name
-							domModel[i].option.appendChild(document.createTextNode(spaces(updatedDomModel[i].level) + functionName)); // Add the name again
+							
+							updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName))
 							
 							remakeFromScratch = false;
 						}
@@ -189,6 +191,9 @@
 				}
 				else if(functionName.length > 0) {
 					// Name is the same
+					
+					//console.log("Nameisthesame level old=" + domModel[i].level + " new=" + updatedDomModel[i].level);
+					
 					remakeFromScratch = false;
 					
 					if(!domModel[i].option) {
@@ -196,7 +201,7 @@
 						console.warn("No option asociated with function " + functionName);
 						remakeFromScratch = true;
 						break;
-}
+					}
 					
 					// Check if arguments have changed and in that case update the arguments
 					if(updatedDomModel[i].arguments != domModel[i].arguments) {
@@ -205,9 +210,14 @@
 					
 					// Check if the line number changed and update it if it did
 					if(updatedDomModel[i].lineNumber != domModel[i].lineNumber) {
-						domModel[i].option.setAttribute("value", updatedDomModel[i].lineNumber);						
+						domModel[i].option.setAttribute("value", updatedDomModel[i].lineNumber);
 					}
 					
+					// Check if the level has changed and in that case update the indentation
+					if(updatedDomModel[i].level != domModel[i].level) {
+						updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName))
+					}
+						
 				}
 				
 				// Update longest function name
@@ -226,7 +236,7 @@
 		}
 		else {
 			console.log("updatedDomModel.length=" + updatedDomModel.length + " domModel.length=" + domModel.length + "");
-}
+		}
 		
 		if(remakeFromScratch) {
 			console.log("Creating the DOM for the function list from scratch!");
@@ -253,6 +263,13 @@
 		}
 		
 		console.timeEnd("updateFunctionList");
+		
+		function updateName(option, newName) {
+			// Can't just set attribute name, need to remove the element and add it again! 
+			option.removeChild( domModel[i].option.firstChild ); // Remove the name
+			option.appendChild(document.createTextNode(newName); // Add the name again
+		}
+		
 	}
 	
 	
@@ -543,6 +560,29 @@
 		
 		return domModel;
 	}
+	
+	editor.addTest(function test_removeAddSubfunctionIndentation(callback) {
+			editor.openFile("test_removeAddSubfunctionIndentation.js", 'function foo() {\n\nfunction bar() {\n}\n}', function(err, file) {
+			
+			file.moveCaretToIndex(file.text.length);
+			file.moveCaretLeft();
+			file.deleteCharacter();
+			
+			file.moveCaretToIndex(16);
+			file.putCharacter("}");
+			
+			var fname = functionListSelect.options[1].text;
+			
+			//alert(lbChars(fname.charAt(0)));
+			
+			if(fname.charAt(0).match(/\s/) !== null) throw new Error("Second item in the function list should not be indented after moving the subfunction out");
+			
+			callback(true);
+			
+			editor.closeFile(file.path);
+			
+		});
+	}, 1);
 	
 	
 })();

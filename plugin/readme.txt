@@ -24,8 +24,8 @@ Add automatic tests using: editor.addTest(function nameOfYourTest(callback) { ..
 Your test function should trow errors, or call the callback function with argument false, or true if the test succeeded.
 
 Place the test file(s) in the tests/ folder. (they will be loaded automatically)
-
 Encapsulate your test code into a self calling function to avoid littering the global scope: (function() { ... })();
+Or put "editor.addTest" in the plugin's code so it can access private variables.
 
 Tips: Write "bug traps" and sanity checks like: if(foo != bar) throw new Error("Expected foo=" + foo + " to equal bar=" + bar); 
 

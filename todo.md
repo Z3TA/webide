@@ -126,11 +126,6 @@ BUGS (and issues)
 
 fixIndentation is still not fixing the last }); !!
 
-When making some function into subfunctions by removing the } from the first function and inserting it at the end,
-the subfunction doesn't get indented (spaces) in the function list, but it's fixed when you tab away and back.
-
-When creating a new function. All functions below it will appear as subfunctions in the function-list.
-
 When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
 
 Error when editing a function:

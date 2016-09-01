@@ -45,7 +45,7 @@
 				
 			});
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function updateStartRow(callback) {
 		// Make sure the editor corrects the file.startRow after deleting a bunch of rows
