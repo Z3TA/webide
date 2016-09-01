@@ -124,20 +124,18 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
-
-spellchecker: Red waves doesn't go away when changing the word.
-
-Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
-
-When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
-
-Error when editing a function: 
-function keyPressed(e)m{ inserting the m between ) and {
+Parsing error when removing if-block (C:\Users\Z\dev-repositories\test\JZedit-tests\delblock.js)
 
 When creating a new function. All functions below it will appear as subfunctions in the function-list.
 
-Parsing error when removing if-block (C:\Users\Z\dev-repositories\test\JZedit-tests\delblock.js)
+When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug
+
+Error when editing a function:
+function keyPressed(e)m{ inserting the m between ) and {
+
+Bracket /curly matching match against string or regexp!
+
+Typing inside a function doesn't warn about if(foo=bar) one eq in if statement
 
 
 Opening a large file via xFTPx tries to open (due to big file) stream on local filesystem.
@@ -155,7 +153,7 @@ var haveMovedArmy = <% IF haveMovedArmy THEN %>true<% ELSE %>false<% END IF %>;
 
 Search in file bug? 
 Can't find "cheat.txt" in \\192.168.1.80\domains\visual-utopia.com\ 
-"But none of them math the file filter!"
+"But none of them match the file filter!"
 + the gui wont go away when pressing escape!
 
 The indentation helper (render_indentation.js) doesn't work with parsing-only-the-function-optimization because lastRow.indentation is not affected!
@@ -443,7 +441,7 @@ Low prio bugs
 
 When loading the spellchecker on Linux it complains about libstdc++.so.6 version GLIBCXX_3.4.21 not found. Should update the runtime and use builtin spellcker!
 
-
+spellchecker: Red waves doesn't go away when changing the word.
 
 
 
@@ -792,6 +790,7 @@ createBuffer in render takes a very long time > 500 ms on files with very long l
 
 Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in C:\Users\Z\dev-repositories\test\JZedit-tests\parser
 
+Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
 
 
 
