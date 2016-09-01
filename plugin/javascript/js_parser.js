@@ -145,6 +145,8 @@
 	
 	function parseJsOnChange(file, type, characters, caretIndex, row, col) {
 		/*
+			### Parse only function optimizer
+			
 			type: "delete", "linebreak", "insert", "text", deleteTextRange, deleteCharacter, reload, 
 		*/
 		
@@ -191,7 +193,7 @@
 					
 					if(f) { // Parse only that function
 						console.log("Inside " + f.name);
-						if((f.end - f.start) < maxFunctionBodySize) { // If the function is not the majority of the file
+						if((f.end - f.start) < maxFunctionBodySize && file.text.charAt(f.end + charactersLength) == "}") { // If the function is not the majority of the file
 							
 							console.time("parseOnlyFunctionOptimizer");
 							
@@ -462,7 +464,7 @@
 							return;
 						}
 						else {
-							console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize);
+							console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize + " file.text.charAt(" + (f.end + charactersLength) + ")=" + lbChars(file.text.charAt(f.end + charactersLength)));
 						}
 					}
 					else {

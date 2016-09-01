@@ -29,6 +29,24 @@
 	*/
 	
 	
+	
+	editor.addTest(function deleteLastCurly(callback) {
+		// We should do a full parse if the ending bracket is missing !? ...
+		editor.openFile("deleteLastCurly.js", 'function foo() {\nfunction bar() {\n}\n}', function(err, file) {
+			
+			file.moveCaretToEnd(undefined, function(caret) {
+				
+				file.moveCaretLeft();
+				file.deleteCharacter();
+				
+				callback(true);
+				
+				editor.closeFile(file.path);
+				
+			});
+		});
+	}, 1);
+	
 	editor.addTest(function updateStartRow(callback) {
 		// Make sure the editor corrects the file.startRow after deleting a bunch of rows
 		editor.openFile("deleteabunch.txt", '0', function(err, file) {
@@ -55,7 +73,7 @@
 			});
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function regexBracket(callback) {
 		// bug: a slash inside a regex's bracket ended the regex, and in turn made the right ] deindent the row
