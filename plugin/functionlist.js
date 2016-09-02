@@ -582,7 +582,7 @@
 			editor.closeFile(file.path);
 			
 		});
-	}, 1);
+	});
 	
 	
 })();

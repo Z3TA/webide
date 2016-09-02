@@ -30,6 +30,28 @@
 	
 	
 	
+	
+	editor.addTest(function parserGlobalFunctionOnlyfunctionOpt(callback) {
+		// bug: Parser thought g1 vas the function name and deleted it from globalVariables
+		editor.openFile("parserGlobalFunctionOnlyfunctionOpt.js", 'var g1 = "";\n\nfunction foo() {\ng1 = ""\n}\n\nfunction bar() {\nif(g1 == "")\n}\n', function(err, file) {
+			
+			file.moveCaret(undefined, 3, 7);
+			file.putCharacter(";");
+			
+			// Make sure global variable g1 was found
+			if(!file.parsed.globalVariables.hasOwnProperty("g1")) throw new Error("Global variable g1 does not exist in file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
+			
+			// Make sure function foo and bar was found
+			if(!file.parsed.functions.hasOwnProperty("foo")) throw new Error("Did not find function foo");
+			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Did not find function bar");
+			
+			callback(true);
+				
+			editor.closeFile(file.path);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function deleteLastCurly(callback) {
 		// We should do a full parse if the ending bracket is missing !? ...
 		editor.openFile("deleteLastCurly.js", 'function foo() {\nfunction bar() {\n}\n}', function(err, file) {

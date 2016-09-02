@@ -388,7 +388,13 @@
 								}
 								oldParse.xmlTags.sort(sortyByStart);
 							}
-							console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
+							
+							// Update or add any global variables
+							for(var varName in newParse.globalVariables) {
+								oldParse[varName] = newParse.globalVariables[varname];
+							}
+							
+							//console.log("globalVariables=" + JSON.stringify(newParse.globalVariables));						
 							
 							// Update blockMatch
 							// Curly brackets inside a function always match!
@@ -450,7 +456,7 @@
 								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
 								
 								if(Object.keys(fullParse.functions).length != Object.keys(oldParse.functions).length) throw new Error("fullParse.functions=" + Object.keys(fullParse.functions).length + " oldParse.functions=" + Object.keys(oldParse.functions).length + " ");
-								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " ");
+								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse=" + JSON.stringify(fullParse.globalVariables, null, 2));
 								
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
 								
@@ -1817,10 +1823,10 @@
 						
 						// Figure out the name of the function
 						
-						console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+						//console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
-						if(variableName != "" && lastWord != "") functionName = variableName;
+						if(functionName == "" && variableName != "") functionName = variableName;
 						else functionName = lastWord || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
@@ -1954,6 +1960,7 @@
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
+								//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 								delete globalVariables[functionName];
 							}
 							
