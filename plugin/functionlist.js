@@ -172,7 +172,7 @@
 							
 							domModel[i].option.setAttribute("id", functionName);
 							
-							updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName))
+							updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName);
 							
 							remakeFromScratch = false;
 						}
@@ -215,7 +215,7 @@
 					
 					// Check if the level has changed and in that case update the indentation
 					if(updatedDomModel[i].level != domModel[i].level) {
-						updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName))
+						updateName(domModel[i].option, spaces(updatedDomModel[i].level) + functionName);
 					}
 						
 				}
@@ -267,7 +267,7 @@
 		function updateName(option, newName) {
 			// Can't just set attribute name, need to remove the element and add it again! 
 			option.removeChild( domModel[i].option.firstChild ); // Remove the name
-			option.appendChild(document.createTextNode(newName); // Add the name again
+			option.appendChild(document.createTextNode(newName)); // Add the name again
 		}
 		
 	}
