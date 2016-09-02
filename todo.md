@@ -824,6 +824,11 @@ Optimize if needed
 Feature list (Not ordered/priotized)
 ------------------------------------
 
+Version control manager: select: git|mercurila (auto detect)
+this file: commit msg: Commit, push, pull (special color), Move, Add/remove, select: branch, merge updates from branch  
+title tags for explanations
+
+
 HTML helper, shadowing in attributes. ex: <form ... show: action, method
 <wanderman> is there any plugin for atom that ,help learning html ? like poping up usage of attributes of elements
 
