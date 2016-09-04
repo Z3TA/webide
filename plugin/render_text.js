@@ -78,7 +78,7 @@
 			colStop = Math.min(editor.view.endingColumn-indentationWidth, editor.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
 			
 			
-			left = editor.settings.leftMargin + indentationWidth; // - file.startColumn * editor.settings.gridWidth
+			left = editor.settings.leftMargin + indentationWidth * editor.settings.gridWidth; // - file.startColumn * editor.settings.gridWidth
 			
 			for(var col = colStart; col < colStop; col++) {
 				
