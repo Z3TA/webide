@@ -3495,7 +3495,7 @@
 					
 					//stream.unshift(cutText); // Put the cut text back into the stream
 					
-					text = text.substr(0, cutAt);				
+					text = text.substr(0, cutAt);
 					
 				}
 				
