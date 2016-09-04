@@ -28,7 +28,7 @@ editor.settings = {
 	topMargin: 10,
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
-	gridWidth: 8.5, // 8.5, 7.8
+	gridWidth: 8.25, // Needs to be the same as font's character width!
 	sub_pixel_antialias: true, // For the main text area (canvas) only. If set to false, you want to start the editor with --disable-lcd-text
 	style: {
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!
@@ -49,7 +49,6 @@ editor.settings = {
 	wordDelimiters: "(){}[]/*-+\\,'\" \n",
 	canBreakAfter: " \n,{}[];",
 	canBreakBefore: "}]\t",
-	drawGridBox: false,
 	scrollStep: 3,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
 	bigFileSize: 400000, //  Bytes, all files larger then this will be opened as streams

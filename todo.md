@@ -124,6 +124,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+When saving a hgrc file save-as it got no name in the file-tabs
+
 fixIndentation is still not fixing the last }); !!
 
 When removing the name from a lamda function it's still in the function-list but blank name. Possible state bug

@@ -38,7 +38,7 @@
 			bufferRowCol,
 			x = 0,
 			y = 0,
-			char = "",
+			characters = "",
 			oldStyle = editor.settings.style.textColor;
 		
 
@@ -51,11 +51,11 @@
 		/*
 			Optimization:
 			
-			Addin colStart & colStop had no effect!
-			Commenting some if's had no effect!
-			Commenting (not setting) ctx.fillStyle made it faster 30% faster! textRender: 9.792ms
-			ctx.fillStyle behind if, textRender: 8.727ms, even faster!
-			
+			* Addin colStart & colStop had no effect!
+			* Commenting some if's had no effect!
+			* Commenting (not setting) ctx.fillStyle made it faster 30% faster! textRender: 9.792ms
+			* ctx.fillStyle behind if, textRender: 8.727ms, even faster!
+			* Calling ctx.fillTex in chunks: Alot faster! (5-6 times faster)
 			
 			*/
 		
@@ -77,41 +77,43 @@
 			colStart = Math.max(0, file.startColumn - indentationWidth)
 			colStop = Math.min(editor.view.endingColumn-indentationWidth, editor.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
 			
+			
+			left = editor.settings.leftMargin + indentationWidth; // - file.startColumn * editor.settings.gridWidth
+			
 			for(var col = colStart; col < colStop; col++) {
 				
 				
-				left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
+				//left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
 				
 				
 				if(isNaN(left)) throw new Error("left is NaN");
 				if(isNaN(top)) throw new Error("top is NaN");
 				
-				if(editor.settings.drawGridBox) {
-					ctx.beginPath();
-					ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);
-					ctx.stroke();
-				}
-				
-				
 				bufferRowCol = buffer[row][col];
 				
 				if(bufferRowCol.hasCharacter) {
 					
-					char = bufferRowCol.char;
-					
 					if(oldStyle != bufferRowCol.color) {
+												
+						ctx.fillText(characters, left, top);
+						
+						left += characters.length * editor.settings.gridWidth;
+						
+						characters = "";
 						ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb 
 					}
 					//console.log(bufferRowCol.char + " " + bufferRowCol.color + " top=" + top + " left=" + left + "");
 					
-					ctx.fillText(char, left, top);
+					characters += bufferRowCol.char;
+					
+					
 					//ctx.fillText(String.fromCharCode(bufferRowCol.char.charCodeAt(0)), left, top);
 					
 					//console.log(bufferRowCol.char.charCodeAt(0));
 					
 					//ctx.fillText(String.fromCharCode(229), left, top);
 					
-					// You need to save at UTF8 for åäö character to work
+					// You need to save as UTF8 for åäö character to work
 					
 					
 					if(bufferRowCol.wave) {
@@ -149,9 +151,20 @@
 					
 					
 				}
+				else {
+					// Should never happen / depricated
+					throw new Error("Box doesn't have a character!");
+					
+				}
 				
 			}
 			
+			if(characters != "") {
+				
+				ctx.fillText(characters, left, top);
+				
+				characters = "";
+			}
 			
 		}
 		
