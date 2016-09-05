@@ -124,6 +124,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Ask for password in SSG if no credentials are provided, or add field, "when asked for login/pw use..."
+
 Unable to make a tilde ~ character in linux
 
 When saving a hgrc file save-as it got no name in the file-tabs
