@@ -63,6 +63,6 @@ if(process.platform == "linux") {
 	editor.settings.style.highlightMatchFont = "bold 13px DejaVu Sans Mono";
 	editor.settings.style.fontSize = 13;
 	editor.settings.gridHeight = 22;
-	editor.settings.gridWidth = 7.8;
+	editor.settings.gridWidth = 7.83;
 	
 }
