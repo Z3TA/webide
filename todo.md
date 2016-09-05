@@ -124,6 +124,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Unable to make a tilde ~ character in linux
+
 When saving a hgrc file save-as it got no name in the file-tabs
 
 fixIndentation is still not fixing the last }); !!

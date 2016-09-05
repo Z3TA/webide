@@ -34,7 +34,11 @@
 		parseJavaScript: 18-32 ms
 		
 		
-		
+		Try next: Loading and saving to memory is expensive, use bitvise operation to avoid memory access when reading a variable:
+		read: https://reaktor.com/blog/javascript-performance-fundamentals-make-bluebird-fast/
+		inside A=1: inside & 1 != 0
+		set inside A=1 to true: inside = inside | 1         OR
+		set insde A=1 to false: inside = inside & (~1)      AND NOT
 		
 		
 		
