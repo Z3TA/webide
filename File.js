@@ -3006,7 +3006,7 @@
 			throw new Error("line=" + line + " is not a number!");
 		}
 		else if(line < 1) {
-			throw new Error("Can't scroll to line=" + line + " because it's below 1!");
+			throw new Error("Can't scroll to line=" + line + " because it's below 1! line=" + line);
 		}
 		else if(line > file.grid.length) {
 			throw new Error("Can't scroll to line=" + line + " because it's above file.grid.length=" + file.grid.length + "");
