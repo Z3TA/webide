@@ -62,7 +62,7 @@
 	
 	function disableDevMode() {
 		
-		toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
+		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
 		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
 		
 		// Disable console.log
