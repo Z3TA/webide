@@ -78,23 +78,21 @@
 			colStop = Math.min(editor.view.endingColumn-indentationWidth, editor.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
 			
 			
-			left = editor.settings.leftMargin + indentationWidth * editor.settings.gridWidth; // - file.startColumn * editor.settings.gridWidth
+			left = editor.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * editor.settings.gridWidth;
 			
+			if(isNaN(left)) throw new Error("left is NaN");
+			if(isNaN(top)) throw new Error("top is NaN");
+
 			for(var col = colStart; col < colStop; col++) {
 				
-				
 				//left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
-				
-				
-				if(isNaN(left)) throw new Error("left is NaN");
-				if(isNaN(top)) throw new Error("top is NaN");
 				
 				bufferRowCol = buffer[row][col];
 				
 				if(bufferRowCol.hasCharacter) {
 					
 					if(oldStyle != bufferRowCol.color) {
-												
+						
 						ctx.fillText(characters, left, top);
 						
 						left += characters.length * editor.settings.gridWidth;
@@ -124,21 +122,21 @@
 						//ctx.moveTo(left, top + editor.settings.gridHeight);
 						//ctx.lineTo(left + editor.settings.gridWidth, top + editor.settings.gridHeight);
 						
-						x = left-1;
+						x = left + (characters.length-1) * editor.settings.gridWidth - 1;
 						y = top + editor.settings.gridHeight - 3 + Math.sin(x);
 						
 						ctx.moveTo(x, y);
 						
-						for(var x = x, y = y; x < left + editor.settings.gridWidth; x++, y+=Math.sin(x+1)) {
+						for(var x = x, y = y; x < (left + (characters.length-1) * editor.settings.gridWidth + editor.settings.gridWidth); x++, y+=Math.sin(x+1)) {
 							ctx.lineTo(x, y);
 						}
 						
 						ctx.stroke();
-											
+						
 					}
 					else if(bufferRowCol.circle) {
 						// ### Circle
-						var x = left + editor.settings.gridWidth / 2;
+						var x = left + (characters.length-1) * editor.settings.gridWidth + editor.settings.gridWidth / 2;
 						var y = top + editor.settings.gridHeight / 2;
 						
 						ctx.strokeStyle="rgba(255,0,0,0.6)";
@@ -148,8 +146,7 @@
 						ctx.stroke();
 						
 					}
-					
-					
+
 				}
 				else {
 					// Should never happen / depricated
