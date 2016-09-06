@@ -124,6 +124,24 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Selecting a chunk of text from buttom up scrambles the text ... Adds the same text but backwards ...
+Cutting text seems to parse the file/text many times!!?
+
+var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
+'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
+'\n' +
+'Date:' + (new Date()) + '\n' +
+'Commit: ' + editor.version + '\n' +
+'Platform: ' + process.platform + '\n' +
+'Arguments: ' + require('nw.gui').App.argv + '\n' +
+'\n' +
+error.stack + '\n' +
+'\n' +
+'How to repeat:\n' +
+'\n' +
+'Hit Ctrl + Shift + S to send this report over HTTPS. (If you save this file for sending later, keep "bugreport" in the file name or you wont be able to send)';
+
+
 Ask for password in SSG if no credentials are provided, or add field, "when asked for login/pw use..."
 
 Unable to make a tilde ~ character in linux
