@@ -3140,6 +3140,10 @@ editor.lastKeyPressed = "";
 		
 	}
 	
+	editor.isBlanc = function (x, y, width, height) {
+		// todo: for debugging. Returns true if the screen area is the same as the background
+	}
+	
 	function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
