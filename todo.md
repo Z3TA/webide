@@ -814,7 +814,9 @@ Using native variable instead of array for pastChar: Faster 20-25%!!! Tested in 
 
 Need to update deleteSelection so it only generates one change instead of using deletecharacter ... ?
 
-
+Run for loops in parallel: 
+#pragma omp parallel
+#pragma omp for
 
 Feature
 =======
