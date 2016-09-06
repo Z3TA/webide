@@ -193,6 +193,8 @@
 					//console.log(JSON.stringify(functions));
 					
 					var f = insideFunction(functions, caretIndex, false, charactersLength);
+					
+					// This optimization has about 15% overhead in large files. So skip it if the function size is larger then 80% of the file
 					var maxFunctionBodySize = Math.round(file.text.length * 0.8);
 					
 					if(f) { // Parse only that function
@@ -452,8 +454,9 @@
 							if(editor.settings.devMode && newParse.blockMatch) {
 								
 								// Make a full parse and compare to see if there are any bugs
-								
+								console.time("fullParse");
 								var fullParse = parseJavaScript(file, {noIndention: true});
+								console.timeEnd("fullParse");
 								
 								if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
