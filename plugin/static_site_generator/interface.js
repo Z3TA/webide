@@ -284,6 +284,14 @@
 		labelTemplate.setAttribute("for", "inputTemplate");
 		labelTemplate.appendChild(document.createTextNode("Template file:")); // Language settings!?
 		
+		var labelAuthUser = document.createElement("label");
+		labelAuthUser.setAttribute("for", "authUser");
+		labelAuthUser.appendChild(document.createTextNode("Username:")); // Language settings!?
+
+		var labelAuthPw = document.createElement("label");
+		labelAuthPw.setAttribute("for", "authPw");
+		labelAuthPw.appendChild(document.createTextNode("Password:")); // Language settings!?
+
 		
 		// Inputs
 		
