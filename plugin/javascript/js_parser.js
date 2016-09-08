@@ -158,7 +158,7 @@
 			
 			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deleteCharacter")) { // If the file was parsed before
 				
-				console.log("type=" + type + " characters=" + characters);
+				//console.log("type=" + type + " characters=" + characters);
 				
 				var oldParse = file.parsed;
 				
@@ -187,7 +187,7 @@
 						charactersLength = -charactersLength;
 					}
 					
-					console.log("charactersLength=" + charactersLength);
+					//console.log("charactersLength=" + charactersLength);
 					
 					var functions = oldParse.functions;
 					//console.log(JSON.stringify(functions));
@@ -198,14 +198,14 @@
 					var maxFunctionBodySize = Math.round(file.text.length * 0.8);
 					
 					if(f) { // Parse only that function
-						console.log("Inside " + f.name);
+						//console.log("Inside " + f.name);
 						if((f.end - f.start) < maxFunctionBodySize && file.text.charAt(f.end + charactersLength) == "}") { // If the function is not the majority of the file
 							
 							console.time("parseOnlyFunctionOptimizer");
 							
-							console.log("change type=" + type);
+							//console.log("change type=" + type);
 							
-							console.log("Parsing only f=" + f.name + "");
+							//console.log("Parsing only f=" + f.name + "");
 							
 							// The start property is at the { after function
 							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : ""), f.start);
@@ -229,12 +229,12 @@
 							
 							//if(charactersLength < 0) parseEnd++;
 							
-							console.log("characters=" + lbChars(characters));
-							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
+							//console.log("characters=" + lbChars(characters));
+							//console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 							
 							//console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
 							
-							console.log("Gonna parse text=\n" + lbChars(file.text.substring(parseStart, parseEnd)));
+							//console.log("Gonna parse text=\n" + lbChars(file.text.substring(parseStart, parseEnd)));
 							
 							if(file.text.charAt(parseEnd-1) != "}") {
 								file.debugGrid();
@@ -269,7 +269,7 @@
 								}
 							}
 							
-							console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
+							//console.log("quotes: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.quotes.length);
 							
 							if(spliceLen && spliceStart != -1) {
 								
@@ -291,7 +291,7 @@
 									}
 								}								
 							}
-							console.log("newParse.quotes.length=" + newParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length);
+							//console.log("newParse.quotes.length=" + newParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length);
 							if(newParse.quotes.length > 0) {
 								// Can we splice instead? So we dont have to sort!?
 								for(var i=0; i<newParse.quotes.length; i++) {
@@ -320,7 +320,7 @@
 								}
 							}
 							
-							console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
+							//console.log("comments: spliceStart=" + spliceStart + " spliceLen=" + spliceLen + " length=" + oldParse.comments.length);
 							
 							if(spliceLen && spliceStart != -1) {
 								
@@ -341,8 +341,8 @@
 									}
 								}
 							}
-							console.log("newParse.comments.length=" + newParse.comments.length);
-							console.log("oldParse.comments.length=" + oldParse.comments.length);
+							//console.log("newParse.comments.length=" + newParse.comments.length);
+							//console.log("oldParse.comments.length=" + oldParse.comments.length);
 							if(newParse.comments.length > 0) {
 								for(var i=0; i<newParse.comments.length; i++) {
 									oldParse.comments.push(newParse.comments[i]);
@@ -404,12 +404,12 @@
 							
 							// Update blockMatch
 							// Curly brackets inside a function always match!
-							console.log("oldParse.codeBlockLeft=" + oldParse.codeBlockLeft);
-							console.log("newParse.codeBlockLeft=" + newParse.codeBlockLeft);
-							console.log("oldParse.codeBlockRight=" + oldParse.codeBlockRight);
-							console.log("newParse.codeBlockRight=" + newParse.codeBlockRight);
-							console.log("oldParse.blockMatch=" + oldParse.blockMatch);
-							console.log("newParse.blockMatch=" + newParse.blockMatch);
+							//console.log("oldParse.codeBlockLeft=" + oldParse.codeBlockLeft);
+							//console.log("newParse.codeBlockLeft=" + newParse.codeBlockLeft);
+							//console.log("oldParse.codeBlockRight=" + oldParse.codeBlockRight);
+							//console.log("newParse.codeBlockRight=" + newParse.codeBlockRight);
+							//console.log("oldParse.blockMatch=" + oldParse.blockMatch);
+							//console.log("newParse.blockMatch=" + newParse.blockMatch);
 							
 							oldParse.blockMatch = (((oldParse.codeBlockLeft - newParse.codeBlockLeft) - (oldParse.codeBlockRight - newParse.codeBlockRight)) === 0);
 							
@@ -454,9 +454,8 @@
 							if(editor.settings.devMode && newParse.blockMatch) {
 								
 								// Make a full parse and compare to see if there are any bugs
-								console.time("fullParse");
+								console.log("fullParse to check for errors:");
 								var fullParse = parseJavaScript(file, {noIndention: true});
-								console.timeEnd("fullParse");
 								
 								if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
@@ -602,12 +601,12 @@
 				isBelow = (func.start > oldEnd);
 				isParent = (func.end > oldEnd && func.start < oldEnd);
 				
-				console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
+				//console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
 				
 				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
 				
 				if(isBelow) {
-					console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
+					//console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
 					
 					func.start += charactersLength;
 					func.end += charactersLength;
@@ -615,14 +614,14 @@
 					func.endRow += endRowDiff;
 				}
 				else if(isParent) {
-					console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
+					//console.log("func " + func.name + " end=" + func.end + " below oldEnd=" + oldEnd + " and start=" + func.start + " before. Adding " + charactersLength + " to end.");
 					
 					func.end += charactersLength;
 					func.endRow += endRowDiff;
 				}
 				
 				if(isBelow || isParent) {
-					console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + lbChars(file.text.charAt(func.end)) + ")");
+					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();
@@ -646,7 +645,7 @@
 				if(f.start < caretIndex && f.end >= caretIndex) {
 					// Deleted text are now allowed to be larger then the function body
 					if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
-						console.log("Found function=" + f.name);
+						//console.log("Found function=" + f.name);
 						// Check sub functions
 						return insideFunction(f.subFunctions, caretIndex, f, charactersLength);
 					}
@@ -2149,8 +2148,8 @@
 								vb_nextRowIndentation = 1;
 							}
 
-														
-							console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
+							
+							//console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
 							
 							lastWord = word || lastWord; // Prevent lastWord to change to emty
 							word = "";
