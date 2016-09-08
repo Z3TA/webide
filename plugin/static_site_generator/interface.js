@@ -14,6 +14,8 @@
 	var inputPreviewFolder;
 	var inputPublishFolder;
 	var inputTemplate;
+	var inputAuthUser;
+	var inputAuthPw;
 	
 	// Load native UI library
 	var gui = require('nw.gui');
@@ -35,7 +37,9 @@
 		source: path.join(require("dirname"), "/plugin/static_site_generator/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
 		preview: path.join(require("dirname"), "/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
 		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder
-		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm")  // A template for new pages/posts
+		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
+		user: "test",
+		pw: "test"
 	}
 	
 	// Add plugin to editor
@@ -251,6 +255,8 @@
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
 			inputTemplate.value = selectedSite.template;
+			inputAuthUser.value = selectedSite.user;
+			inputAuthPw.value = selectedSite.pw;
 			
 		}
 		
@@ -278,18 +284,22 @@
 		
 		var labelPublish = document.createElement("label");
 		labelPublish.setAttribute("for", "inputPublishFolder");
-		labelPublish.appendChild(document.createTextNode("Publish directory:")); // Language settings!?
+		labelPublish.appendChild(document.createTextNode("Publish URL:")); // Language settings!?
 		
 		var labelTemplate = document.createElement("label");
 		labelTemplate.setAttribute("for", "inputTemplate");
 		labelTemplate.appendChild(document.createTextNode("Template file:")); // Language settings!?
 		
+		var labelAuth = document.createElement("label");
+		labelAuth.setAttribute("for", "inputAuthUser");
+		labelAuth.appendChild(document.createTextNode("Auth:")); // Language settings!?
+		
 		var labelAuthUser = document.createElement("label");
-		labelAuthUser.setAttribute("for", "authUser");
+		labelAuthUser.setAttribute("for", "inputAuthUser");
 		labelAuthUser.appendChild(document.createTextNode("Username:")); // Language settings!?
 
 		var labelAuthPw = document.createElement("label");
-		labelAuthPw.setAttribute("for", "authPw");
+		labelAuthPw.setAttribute("for", "inputAuthPw");
 		labelAuthPw.appendChild(document.createTextNode("Password:")); // Language settings!?
 
 		
@@ -299,33 +309,48 @@
 		inputSiteName.setAttribute("type", "text");
 		inputSiteName.setAttribute("id", "inputSiteName");
 		inputSiteName.setAttribute("class", "inputtext");
-		inputSiteName.setAttribute("size", "51");
+		inputSiteName.setAttribute("size", "30");
 		
 		inputSourceFolder = document.createElement("input");
 		inputSourceFolder.setAttribute("type", "text");
 		inputSourceFolder.setAttribute("id", "inputSourceFolder");
 		inputSourceFolder.setAttribute("class", "inputtext path");
 		inputSourceFolder.setAttribute("title", "Folder where the source files are located");
-		inputSourceFolder.setAttribute("size", "51");
+		inputSourceFolder.setAttribute("size", "69");
 		
 		inputPreviewFolder = document.createElement("input");
 		inputPreviewFolder.setAttribute("type", "text");
 		inputPreviewFolder.setAttribute("id", "inputPreviewFolder");
 		inputPreviewFolder.setAttribute("class", "inputtext path");
-		inputPreviewFolder.setAttribute("size", "51");
+		inputPreviewFolder.setAttribute("size", "69");
 		
 		inputPublishFolder = document.createElement("input");
 		inputPublishFolder.setAttribute("type", "text");
 		inputPublishFolder.setAttribute("id", "inputPublishFolder");
 		inputPublishFolder.setAttribute("class", "inputtext path");
-		inputPublishFolder.setAttribute("size", "51");
+		inputPublishFolder.setAttribute("size", "69");
+		inputPublishFolder.setAttribute("title", "A file system path or an URL to FTP/FTPS/FTPS");
 		
 		inputTemplate = document.createElement("input");
 		inputTemplate.setAttribute("type", "text");
 		inputTemplate.setAttribute("id", "inputTemplate");
 		inputTemplate.setAttribute("class", "inputtext path");
-		inputTemplate.setAttribute("size", "51");
+		inputTemplate.setAttribute("size", "69");
 		inputTemplate.setAttribute("title", "Template file for new page/post on this site");
+		
+		inputAuthUser = document.createElement("input");
+		inputAuthUser.setAttribute("type", "text");
+		inputAuthUser.setAttribute("id", "inputAuthUser");
+		inputAuthUser.setAttribute("class", "inputtext");
+		inputAuthUser.setAttribute("size", "20");
+		inputAuthUser.setAttribute("title", "Username if needed for the publish URL");
+		
+		inputAuthPw = document.createElement("input");
+		inputAuthPw.setAttribute("type", "password");
+		inputAuthPw.setAttribute("id", "inputAuthPw");
+		inputAuthPw.setAttribute("class", "inputtext");
+		inputAuthPw.setAttribute("size", "20");
+		inputAuthPw.setAttribute("title", "Password if needed for the publish URL")
 		
 		
 		// Buttons
@@ -356,6 +381,8 @@
 		buttonCancel.addEventListener("click", cancelEdit, false);
 		
 		
+		//editView.setAttribute("style", "border: 3px solid red;");
+		
 		// Name
 		tr = document.createElement("tr");
 		td = document.createElement("td");
@@ -364,6 +391,7 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
+		td.setAttribute("colspan", "3");
 		td.appendChild(inputSiteName);
 		tr.appendChild(td);
 		
@@ -377,6 +405,7 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
+		td.setAttribute("colspan", "3");
 		td.appendChild(inputSourceFolder);
 		tr.appendChild(td);
 		
@@ -390,20 +419,8 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
+		td.setAttribute("colspan", "3");
 		td.appendChild(inputPreviewFolder);
-		tr.appendChild(td);
-		
-		editView.appendChild(tr);
-		
-		// Publish
-		tr = document.createElement("tr");
-		td = document.createElement("td");
-		td.setAttribute("align", "right");
-		td.appendChild(labelPublish);
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		td.appendChild(inputPublishFolder);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
@@ -416,10 +433,44 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
+		td.setAttribute("colspan", "3");
 		td.appendChild(inputTemplate);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
+		
+		// Publish
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelPublish);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.setAttribute("colspan", "3");
+		td.appendChild(inputPublishFolder);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Auth
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelAuth);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(labelAuthUser);
+		td.appendChild(inputAuthUser);
+		
+		td.appendChild(labelAuthPw);
+		td.appendChild(inputAuthPw);
+		
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
 		
 		// Buttons
 		tr = document.createElement("tr");
@@ -480,6 +531,8 @@
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
 			inputTemplate.value = selectedSite.template;
+			inputAuthUser.value = selectedSite.user;
+			inputAuthPw.value = selectedSite.pw;
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -501,6 +554,8 @@
 			selectedSite.preview = inputPreviewFolder.value;
 			selectedSite.publish = inputPublishFolder.value;
 			selectedSite.template = inputTemplate.value;
+			selectedSite.user = inputAuthUser.value;
+			selectedSite.pw = inputAuthPw.value;
 			
 			window.localStorage.cmsjz_sites = JSON.stringify(sites);
 			
@@ -936,6 +991,11 @@
 					passw = auth[1];
 				}
 			}
+			else if(selectedSite.user.length > 0) {
+				user = selectedSite.user;
+				passw = selectedSite.pw;
+			}
+			
 			var workingDir = parse.path;
 			
 			editor.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
