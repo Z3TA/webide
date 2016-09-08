@@ -628,6 +628,10 @@ function Dialog(msg, icon) {
 	
 	var body = document.getElementById("body");
 	
+	if(!body) {
+		console.warn("Dialog created before html body is available");
+		}
+	
 	var message = document.createElement("div");
 	message.setAttribute("class", "message");
 	message.innerHTML = msg; // Support HTML
