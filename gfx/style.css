@@ -160,7 +160,7 @@ input[type=text], input[type=password], select.select {
 	margin: 4px;
 	font-size: 12px;
 	font-family: Verdana;
-}
+	 }
 
 input[type=checkbox] {
 	text-align: absmiddle;
@@ -190,6 +190,9 @@ input[type=text].error {
 	background-color: #f88a99;
 }
 
+td input[type=text] {
+	max-width: calc(100% - 16px);
+}
 
 
 /* ############### File Tabs ############## */
@@ -614,7 +617,6 @@ div.gotoFile li b {
 }
 
 
-	
 
 
 
