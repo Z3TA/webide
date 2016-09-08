@@ -27,11 +27,13 @@ Double click (run) start.bat
 
 Linux:
 ------
-Make JZedit.desktop and start.sh executable:
-Via terminal: chmod +x JZedit.desktop start.sh; ./start.sh
+Make jzedit.desktop and start.sh executable:
+Via terminal: chmod +x jzedit.desktop start.sh
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
 
-"install": Double click on JZedit.desktop, then: Right click on the icon on the Launcher (left side), select "Lock to Launcher"
+"install": Double click on jzedit.desktop, then: Right click on the icon on the Launcher (left side), select "Lock to Launcher"
+
+Or run it via ./start.sh
 
 
 Mac OS X

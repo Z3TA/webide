@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=JZedit
+Name=jzedit
 Comment=Run the editor
 Exec=bash -c '_PWD="$PWD"; cd "`echo $0 | sed s/jzedit.desktop$//`"; ./start.sh run; cd "_PWD"' %k
 Icon=/home/zeta/dev/jzedit/gfx/bean3.png
