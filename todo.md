@@ -1,11 +1,11 @@
-Feature freeze!
 
 Prio:
 
-1) Bug/issue fixing and refactoring
-2) Polishing of existing features
-3) Optimization (toggle devMode off when testing!)
-4) New features
+1) Beta release
+2) Bug/issue fixing and refactoring
+3) Polishing of existing features
+4) Optimization (toggle devMode off when testing!)
+5) New features
 
 
 
@@ -15,8 +15,10 @@ What I'm working on
 
 
 
-
 todo:
+
+NodeJS deploy
+Mercurial integration
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -849,6 +851,10 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+real-time collaboration 
+
+Class auto completion in HTML documents. Get the class list from the CSS files.
 
 Version control manager: select: git|mercurila (auto detect)
 this file: commit msg: Commit, push, pull (special color), Move, Add/remove, select: branch, merge updates from branch  
