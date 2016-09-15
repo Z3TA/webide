@@ -128,6 +128,28 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+
+---
+
+First functions name gets window.onload while second function name becomes winResize (not consitant)
+
+<script>
+var w, h;
+
+window.onload = function winLoad() {
+w = document.getElementById("width");
+h = document.getElementById("height");
+}
+
+window.resize = function winResize() {
+w.innerHTML = window.screen.availWidth;
+h.innerHTML = window.screen.availHeight;
+}
+
+</script>
+
+---
+
 Selecting a chunk of text from buttom up scrambles the text ... Adds the same text but backwards ...
 Cutting text seems to parse the file/text many times!!?
 
@@ -476,6 +498,10 @@ spellchecker: Red waves doesn't go away when changing the word.
 
 Polishing
 =========
+
+SSG: Upload/publish to two locations at once.
+
+There should be a "waiting for disk?" message while files are opening from last session.
 
 It should be possible to scroll using touch (hold down finger and move it)
 
