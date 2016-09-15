@@ -21,6 +21,5 @@ if "%1" == "restart" (
 ) else (
   REM start will run the program and exit (hides the cmd window)
   REM start %NW_PATH% %EDITOR_PATH% --disable-lcd-text --remote-debugging-port=57341
-  REM start %NW_PATH% %EDITOR_PATH%
-  start %NW_PATH% %EDITOR_PATH% --remote-debugging-port=57341
+  start %NW_PATH% %EDITOR_PATH%
 )

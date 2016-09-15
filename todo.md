@@ -14,6 +14,8 @@ What I'm working on
 
 Mercurial v. 3.7.1 ?
 
+Ubuntu: Mercurial Distributed SCM (version 3.7.3)
+
 https://blog.retep.org/2012/01/10/installing-latest-mercurial-when-ubuntu-or-linux-mint-repos-dont-have-it/
 
 

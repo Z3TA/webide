@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Update the path to the icon
-mv JZedit.desktop JZedit.desktop-bak
-sed -e "s,Icon=.*,Icon=$PWD/gfx/bean3.png,g" JZedit.desktop-bak > JZedit.desktop
-rm JZedit.desktop-bak
+mv jzedit.desktop jzedit.desktop-bak
+sed -e "s,Icon=.*,Icon=$PWD/gfx/bean3.png,g" jzedit.desktop-bak > jzedit.desktop
+rm jzedit.desktop-bak
 
 # Make it runable again
-chmod +x JZedit.desktop
+chmod +x jzedit.desktop
 
 # Start the editor
-#runtime/nwjs-v0.12.3-linux-x64/nw .
-runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text --remote-debugging-port=57341
+#runtime/nwjs-v0.12.3-linux-x64/nw . --remote-debugging-port=57341
+runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text
