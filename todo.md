@@ -12,7 +12,7 @@ Prio:
 What I'm working on
 -------------------
 
-
+package script for demo build
 
 
 todo:
@@ -32,6 +32,9 @@ demo build! minify JS
 
 What I'm thinking
 -----------------
+
+Keyboard shortcuts are very hard to remember and not very friendly for first time users ... Do we need a menu or tool bar ?
+idea: (yet another keyboard shortcut LOL) Ctrl + Up down, brings up the same menu as when right clicking (need to make it look better) and add most important "shortcuts" there!
 
 WYSIWYG editor in the static site generator plugin. People seem alergic to HTML :(
 Tidy up results from contenteditable before applying the changes.

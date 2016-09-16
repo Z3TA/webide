@@ -1,3 +1,7 @@
+#
+# Creates packages for different OS's
+#
+
 # Get the current version
 node changeset.js
 commit=$(cat version.inc)
