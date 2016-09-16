@@ -12,20 +12,13 @@ Prio:
 What I'm working on
 -------------------
 
-Mercurial ...
 
-Windows v. 3.7.1 ?
-Ubuntu: Mercurial Distributed SCM (version 3.7.3)
-Server (repo):   2.8.2
-
-https://blog.retep.org/2012/01/10/installing-latest-mercurial-when-ubuntu-or-linux-mint-repos-dont-have-it/
 
 
 todo:
 
 demo build! minify JS
 
-Mercurial integration
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -41,11 +34,7 @@ What I'm thinking
 -----------------
 
 WYSIWYG editor in the static site generator plugin. People seem alergic to HTML :(
-
-ProseMirror  ? 
-
 Tidy up results from contenteditable before applying the changes.
-
 
 
 The static site generator has prio, but bugs have even more prio! 
@@ -140,6 +129,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+SFTP (Waiting for SFTP editor.js line 966) stops working after trying to write to a file without write access.
 
 The Ctrl+P quick open doesn't always show the results from the word typed. Like "todo" showing results for "to"
 
