@@ -11,7 +11,7 @@ Install Mercurial SCM: https://www.mercurial-scm.org (try "hg --version" in comm
 
 Clone the project: 
 cd my-projects (where you want to place the files)
-hg clone http://hg.webtigerteam.com/JZedit/
+hg clone https://hg.webtigerteam.com/repo/jzedit/
 
 
 
@@ -21,12 +21,12 @@ hg clone http://hg.webtigerteam.com/JZedit/
 Mercurial commands:
 -------------------
 # Clone the repository/folder
-$ hg clone http://hg.webtigerteam.com/JZedit/ JZedit-new-feature
+$ hg clone https://hg.webtigerteam.com/repo/jzedit/ JZedit-new-feature
 
 # Make sure you are up to date
 $ hg pull
 
-# Make changes and commit them...
+# Make changes and commit
 $ hg ci -m "my changes"
 
 # See latest changeset(s)
