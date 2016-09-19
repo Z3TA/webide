@@ -12,12 +12,6 @@ Prio:
 What I'm working on
 -------------------
 
-accidently made updates to release.sh (check if I updated others too) in stable branch.
-Need to do all work in default branch DAMNIT!
-
-need to get the accidental updates from stable into default.
-
-...
 
 package script for demo build
 

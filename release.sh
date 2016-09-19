@@ -1,7 +1,3 @@
-#
-# Creates packages for different OS's
-#
-
 # Get the current version
 node changeset.js
 commit=$(cat version.inc)
@@ -28,7 +24,14 @@ hg clone . temp/release/linux/
 rm -rf temp/release/linux/.hg/
 rm -rf temp/release/linux/release.sh
 rm -rf temp/release/linux/todo.md
-rm -rf temp/release/linux/update_version_hook.py
+rm -rf temp/release/linux/testfile.txt
+rm -rf temp/release/linux/.hgignore
+
+
+# Minify .js files
+# npm install uglify-js -g
+find temp/release/linux/ -name '*.js' | xargs uglifyjs
+
 
 # Copy over version.inc
 cp version.inc temp/release/linux/
@@ -43,17 +46,18 @@ rm -rf temp/release/linux/runtime/nwjs-v0.12.3-win-x64/
 rm -rf temp/release/linux/plugin/spellcheck/nodehun_windows.node
 rm -rf temp/release/linux/start.bat
 rm -rf temp/release/linux/create_shortcut.vbs
-
+rm -rf temp/release/linux/osx_start.sh
 
 # Clean up the Windows release
 rm -rf temp/release/windows/runtime/nwjs-v0.12.3-linux-x64
 rm -rf temp/release/windows/plugin/spellcheck/nodehun_linux.node
 rm -rf temp/release/windows/start.sh
 rm -rf temp/release/windows/JZedit.desktop
+rm -rf temp/release/linux/osx_start.sh
 
 # zip and remove the Windows release
-#zip -r temp/release/$name-v$version$beta-c$commit-win-x64.zip temp/release/windows
-#rm -rf temp/release/windows/
+zip -9 -y -r -q temp/release/$name-v$version$beta-c$commit-win-x64.zip temp/release/windows
+rm -rf temp/release/windows/
 
 
 # Create a tarball and compress it for the Linux release
