@@ -3,8 +3,8 @@
 	
 	You are looking at a "native" text/code editor (that also runs in the browser)
 	
-	Available for Windows: http://webtigerteam.com/editor/release/jzedit-v1_beta-c424-windows-x64.zip
-	and Linux: http://webtigerteam.com/editor/release/jzedit-v1_beta-c424-linux-x64.tar.gz
+	Available for Windows: https://www.webtigerteam.com/editor/release/jzedit-v1_beta-c424-windows-x64.zip
+	and Linux: https://www.webtigerteam.com/editor/release/jzedit-v1_beta-c424-linux-x64.tar.gz
 	
 	Main Features:
 */
@@ -13,14 +13,14 @@
 function Person(name) {
 	this.name = name;
 }
-Person.prototype.greet() {
+Person.prototype.greet = function () {
 	console.log("Hello " + this.name + "!");
 }
 
 var myPerson = new Person("World");
 
 // Auto completion
-myPerson.gr
+myPerson.g
 
 // Detects common errors 
 if(myPerson.name = "Jon") 
@@ -45,7 +45,7 @@ editor.bindKey({charCode: 104, combo: CTRL, fun:
 });
 
 
-// The editor is asynchronous, and event based. Most events can be captured by: 
+// The editor is asynchronous, and event based. Most events can be captured
 editor.on("fileParse", function myCallback(file) {
 	alert("This file is a " + file.parsed.language + " file!")
 });

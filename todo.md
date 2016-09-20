@@ -134,6 +134,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Auto complete object prototype doesn't work (about.js)
+
 SFTP (Waiting for SFTP editor.js line 966) stops working after trying to write to a file without write access.
 
 The Ctrl+P quick open doesn't always show the results from the word typed. Like "todo" showing results for "to"
