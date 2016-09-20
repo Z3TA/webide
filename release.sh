@@ -4,7 +4,7 @@ commit=$(cat version.inc)
 version=1
 beta=_beta
 name=jzedit
-echo $name-v$version$beta-c$commit
+echo $name-v$version$beta-$commit
 
 
 # Delete old files if they exists
@@ -55,13 +55,13 @@ rm -rf temp/release/windows/start.sh
 rm -rf temp/release/windows/JZedit.desktop
 rm -rf temp/release/linux/osx_start.sh
 
-# zip and remove the Windows release
-zip -9 -y -r -q temp/release/$name-v$version$beta-c$commit-win-x64.zip temp/release/windows
+# zip and remove the Windows release (can't be run under Windows git bash)
+zip -9 -y -r -q temp/release/$name-v$version$beta-$commit-win-x64.zip temp/release/windows
 rm -rf temp/release/windows/
 
 
 # Create a tarball and compress it for the Linux release
-tar -zcf temp/release/$name-v$version$beta-c$commit-linux-x64.tar.gz temp/release/linux
+tar -zcf temp/release/$name-v$version$beta-$commit-linux-x64.tar.gz temp/release/linux
 rm -rf temp/release/linux/
 
 # Remove files no longer needed
