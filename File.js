@@ -518,7 +518,7 @@
 						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex);
+					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
 				}
 			}
 			
