@@ -1,3 +1,5 @@
+# todo: update editor.js and set devMode: false, and package.json toolbar: false
+
 # Get the current version
 node changeset.js
 commit=$(cat version.inc)

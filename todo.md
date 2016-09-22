@@ -34,6 +34,20 @@ demo build! minify JS, uglify (npm install uglify-js -g) seems like a good minif
 What I'm thinking
 -----------------
 
+SCM integration (both Mercurial and Git, auto-detect) ex:
+file.isCommited
+file.blame(row) 
+
+ex: Before pushing a site to FTP, checks if the changes have been commited and pushed (updated and merged) before going live.
+
+---
+
+A WYSIWYG mode for HTML pages so that you dont even have to know HTML 
+(but someone has to setup the SSG and scripts, witch is OK! People are ok with paying someone a one time to setup things, design, etc,
+but dont want to pay everytime they are updating, or working on the homepage)
+
+---
+
 Keyboard shortcuts are very hard to remember and not very friendly for first time users ... Do we need a menu or tool bar ?
 idea: (yet another keyboard shortcut LOL) Ctrl + Up down, brings up the same menu as when right clicking (need to make it look better) and add most important "shortcuts" there!
 
@@ -133,6 +147,15 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+
+When disconnecting from a ftp server after reloading (f5) the program:
+Calling showSpellSuggestion ...
+server_manager.js:221 Uncaught TypeError: undefined is not a functionserver_manager.js:221 disconnectConnection
+
+
+Error reading folder: ftps://192.168.1.77/dokument/mapp med mellanslag och Ã¥Ã¤Ã¶
+Failed to change directory.
 
 Auto complete object prototype doesn't work (about.js)
 
@@ -503,6 +526,14 @@ When loading the spellchecker on Linux it complains about libstdc++.so.6 version
 spellchecker: Red waves doesn't go away when changing the word.
 
 
+
+
+HTML WYSIWYG
+------------
+Icons for the most common semantic tags.
+contenteditable updates needs to be beutified, and non sematic tags removed/changed. (span, font)
+Option to switch between raw html, wysiwyg and a wysiwyg (called semantics?) that shows the tag in transparent gray, plus a thin border
+Links: When selecting a link, show a list of current files, plus a box for url.
 
 
 
