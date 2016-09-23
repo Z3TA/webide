@@ -8,6 +8,8 @@ The editor has three different licenses: Personal license, witch is free, and Pr
 license that are available for a montly subscription fee.
 
 
+
+
 Personal license
 ----------------
 You are free to use this software for personal (non business) work, 
@@ -29,5 +31,17 @@ You are allowed to make changes to the software, without having to submit it, or
 You are allowed to make up to ten copies of this software for use within your company or organisation.
 You are Not allowed to distribute any updates (for example bug fixes, new features, or derivative work) outside of your organisation.
 
+
+
+Ideology
+========
+
+Keep good code quality and avoid drama like hostile forks with dubious marketing claiming their version is much better then the original.
+
+Keep in mind that I take on the job to maintain your code and make sure it works in future versions. 
+
+Free subscription: Any notability contributors will get a free subscription period, or a discount.
+
+I hope I will be able to hire someone or myself, that are able to make a living on maintaning the software. 
 
 

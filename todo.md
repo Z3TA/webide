@@ -16,10 +16,15 @@ What I'm working on
 package script for demo build
 
 
+
 todo:
 
 demo build! minify JS, uglify (npm install uglify-js -g) seems like a good minifier
 
+
+WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
+
+file list ( handy when connected to remote server)
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -148,6 +153,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Editor taking long to start when accessing network drives, show message about files being accessed !?
+
+---
 
 When disconnecting from a ftp server after reloading (f5) the program:
 Calling showSpellSuggestion ...
@@ -1197,6 +1205,7 @@ Peek definition. when you want to peek a few lines of a method or type
 
 auto-completes based on other words in open windows (or other files in the open project).
 
+Self hosted cloud editor. Work in the browser.
 
 
 Need though
