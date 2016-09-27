@@ -788,7 +788,7 @@
 			xmlTagLastOpenRow = -1,
 			xmlModeBeforeTag = false,
 			xmlTagInsideQuote = false,
-			insideScriptTag = false,
+		insideScriptTag = false,
 			llChar = "",
 			lllChar = "",
 			willBeJSON = false,
@@ -1532,7 +1532,9 @@
 				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || insideQuote)) {
 					insideXmlTag = true;
 					
-					if(insideQuote) xmlTagInsideQuote = true;
+					if(insideQuote) {
+						xmlTagInsideQuote = true;
+						}
 					
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
@@ -1616,7 +1618,7 @@
 							xmlModeBeforeScript = xmlMode; // Reuse this varibale :P 
 							xmlMode = false;
 						}
-
+						
 					}
 					
 					if(tagBreak.indexOf(xmlTag) > -1 && !insideQuote) {
@@ -2201,9 +2203,9 @@
 				foundVariableInVariableDeclaration = false;
 				variableName = "";
 				
-				//console.log("pastChar=" + JSON.stringify(pastChar) + " char=" + char + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
+				//console.log("pastChar0=" + JSON.stringify(pastChar0) + " char=" + lbChars(char) + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
 				
-				if(insideXmlTag && xmlTagInsideQuote && !insideQuote) insideXmlTag = false;
+				
 				
 			}
 			
@@ -2255,6 +2257,7 @@
 				
 				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
 				
+				if(insideXmlTag && xmlTagInsideQuote && !insideQuote) insideXmlTag = false;
 				
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);

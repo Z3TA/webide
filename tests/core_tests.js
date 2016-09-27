@@ -29,7 +29,19 @@
 	*/
 	
 	
-	
+	editor.addTest(function closingXmlTag(callback) {
+		editor.openFile("closingXmlTag.js", "html += '<body';\nhtml += '>';\n", function(err, file) {
+			// problem: The color for xml tags spilled over to the next line
+			//console.log("file.parsed.xmlTags=" + JSON.stringify(file.parsed.xmlTags, null, 2));
+			
+			if(file.parsed.xmlTags.length > 0) throw new Error("Did not expect XML tag");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
 	
 	editor.addTest(function parserGlobalFunctionOnlyfunctionOpt(callback) {
 		// bug: Parser thought g1 vas the function name and deleted it from globalVariables
@@ -50,7 +62,7 @@
 			editor.closeFile(file.path);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function deleteLastCurly(callback) {
 		// We should do a full parse if the ending bracket is missing !? ...
