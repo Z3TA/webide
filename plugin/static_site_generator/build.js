@@ -471,8 +471,13 @@ function compile(baseTree) {
 			var bodyOnloads = document.bodyOnloads; // Array of script sources
 			var headScripts = document.headScripts; // Array
 			var head = document.head; // String with title, keywords, etc removed
-			var body = document.body; 
+			var mainHtml = "<main>\n" + document.body + "\n</main>\n"; 
 			var bodyScripts = document.bodyScripts;
+			var headerHtml = "";
+			var footerHtml = "";
+			
+			// Error: End tag header seen, but there were open elements.
+			// We can not open a div in header and close it in footer, so don't boother with the header and footer semantic elements
 			
 			for(var i=0; i<headers.length; i++) {
 				
@@ -490,19 +495,18 @@ function compile(baseTree) {
 				head = head + headers[i].head; // The document head comes first, then the stem and out 
 				
 				// We want stem first
-				body = headers[i].body + body;
+				headerHtml = headers[i].body + headerHtml;
 				
 				bodyScripts = mergeUnique(bodyScripts, headers[i].bodyScripts);
 				
 			}
 			
 			
-			
 			for(var i=0; i<footers.length; i++) {
 				// No head data in the footers.
 				
 				// We want stem last
-				body = body + footers[i].body; 
+				footerHtml = footerHtml + footers[i].body; 
 				
 				bodyScripts = mergeUnique(bodyScripts, footers[i].bodyScripts);
 				
@@ -550,7 +554,7 @@ function compile(baseTree) {
 			html += '>\n';
 			
 			// Add the bodies
-			html += body;
+			html += headerHtml + mainHtml + footerHtml;
 			
 			// Add body scripts
 			for(var i=0; i<bodyScripts.length; i++) {

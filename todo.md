@@ -12,16 +12,15 @@ Prio:
 What I'm working on
 -------------------
 
-
-package script for demo build
-
+Working on the SSG wysiwyg mode!
 
 
 todo:
 
-
+remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
 
 WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
+support colaboration editing (many ppl edit at the same time), look on LAN for others with the same file open
 
 file list ( handy when connected to remote server)
 
@@ -153,6 +152,12 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+When selecting text then pressing left or right arrow, the caret should jump over the selected text (that will be unselected)
+
+Unable to make a tilde character ~ (and other special characters) in Linux. 
+
+The list you get with quick open (Ctrl + P) is hard to read with sun glare on the screen.
 
 Doesn't line break long sentences in dialog box (but we dont want to break file-paths without spaces)
 
