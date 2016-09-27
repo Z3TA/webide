@@ -24,6 +24,7 @@ Double click (run) start.bat
 
 "install": Double click (run) create_shortcut.vbs, it will place a shortcut to start.bat on your desktop.
 
+If you want the editor to auto "restart", add restart after target in the shortcut, like this: C:\Users\Z\dev-repositories\jzedit\start.bat restart
 
 Linux:
 ------

@@ -33,6 +33,8 @@ file list ( handy when connected to remote server)
 * Fix bugs!
 
 
+Try the editor on OSX.
+Compile nodehun for osx
 
 
 

@@ -10,7 +10,9 @@ echo Argument1: %1
 if "%1" == "restart" (
   REM When restart is the first argument, the editor will restart on errorlevel 1
   :restart
-  %NW_PATH% %EDITOR_PATH% --remote-debugging-port=57341
+  REM %NW_PATH% %EDITOR_PATH% --remote-debugging-port=57341
+  REM Can not use start command if we want to catch errorlevel
+  %NW_PATH% %EDITOR_PATH%
   echo exit with errorlevel=%errorlevel%
   if errorlevel == 1 (
     echo Restarting the editor ...

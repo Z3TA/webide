@@ -173,7 +173,9 @@
 		'\n' +
 		'How to repeat:\n' + 
 		'\n' + 
-		'Hit Ctrl + Shift + S to send this report over HTTPS. (If you save this file for sending later, keep "bugreport" in the file name or you wont be able to send)';
+		'\n' + 
+		'Hit Ctrl + Shift + S to send this report over HTTPS. (this only works if "bugreport" is in the file-name)\n' + 
+		'Or e-mail the bug report with your favorite email client (to the e-mail address at the top)\n';
 		
 		return message;
 	}
