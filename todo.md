@@ -155,6 +155,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Doesn't line break long sentences in dialog box (but we dont want to break file-paths without spaces)
+
+Scrolling error when quickly closing down files ...
+
 Editor taking long to start when accessing network drives, show message about files being accessed !?
 
 ---
