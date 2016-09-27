@@ -19,7 +19,6 @@ package script for demo build
 
 todo:
 
-demo build! minify JS, uglify (npm install uglify-js -g) seems like a good minifier
 
 
 WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
