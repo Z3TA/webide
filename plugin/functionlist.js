@@ -15,8 +15,14 @@
 	var searchString = "";
 	var domModel = [];
 	
-	editor.on("start", functionListMain);
-	
+		
+	editor.plugin({
+		desc: "Show list of JS functions in left column",
+		load: functionListMain,
+		unload: unload,
+		order: 200
+	});
+
 	function functionListMain() {
 		
 		//console.log("Initiating functionlist");
@@ -36,6 +42,10 @@
 
 	}
 	
+	function unload() {
+
+	}
+
 	function leftOrRight() {
 		// If we are inside the function list, pressing left or right should go back to the caret
 

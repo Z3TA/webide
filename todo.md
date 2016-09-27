@@ -12,10 +12,14 @@ Prio:
 What I'm working on
 -------------------
 
-Working on the SSG wysiwyg mode!
+div in leftcolumn makes canvas dissappear below
+
+file explorer
 
 
 todo:
+
+make it handle many items in the left column
 
 remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
 
