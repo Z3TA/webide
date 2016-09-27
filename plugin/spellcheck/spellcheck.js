@@ -44,14 +44,13 @@
 	var numWorkers = 1; // How many workers to use (one for every cpu core!?)
 	var worker = [];
 	var workersReady = 0;
+	var menuItem;
 	
 	editor.on("start", spellCheckerMain);
 	
 	function spellCheckerMain() {
 		
-		
-		editor.addMenuItem("Toggle spell-checker", toggleSpellCheck); // Add items to the canvas context meny
-
+		menuItem = editor.addMenuItem("Toggle spellchecker " + (editor.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
 		
 		for(var i=0; i<numWorkers; i++) {
 			loadWorker(useLanguages);
@@ -82,7 +81,10 @@
 		editor.settings.enableSpellchecker = editor.settings.enableSpellchecker ? false : true;
 		console.log("editor.settings.enableSpellchecker=" + editor.settings.enableSpellchecker);
 		
+		menuItem.innerHTML = "Toggle spellchecker " + (editor.settings.enableSpellchecker ? "off":"on");
+		
 		if(editor.settings.enableSpellchecker) {
+			
 			// Begin spell-checking all opened files
 			
 			let change = "toggleSpellcheckerOn"
@@ -98,6 +100,7 @@
 			}
 			
 		}
+		
 		editor.hideMenu();
 		}
 
