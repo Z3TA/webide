@@ -77,8 +77,8 @@ rm -rf temp/release/osx/start.bat
 rm -rf temp/release/osx/create_shortcut.vbs
 
 # zip and remove the Windows release (can't be run under Windows git bash)
-#zip -9 -y -r -q temp/release/$name-v$version$beta-$commit-win-x64.zip temp/release/windows
-#rm -rf temp/release/windows/
+zip -9 -y -r -q temp/release/$name-v$version$beta-$commit-win-x64.zip temp/release/windows
+rm -rf temp/release/windows/
 
 
 # Create a tarball and compress it for the Linux release
