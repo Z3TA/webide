@@ -13,18 +13,25 @@
 	
 	function load() {
 		
-		console.log("Initiating fileExplorer");
+		console.log("Initiating file explorer");
+		
+		editor.on("changeWorkingDir", exploreDir);
 		
 		leftColumn = document.getElementById("leftColumn");
 		
-		buildList(editor.workingDirectory, null, function() {
-			
-		});
+		buildList(editor.workingDirectory);
 		
 	}
 	
 	function unload() {
 		leftColumn.removeChild(fileExplorer);
+	}
+	
+	function exploreDir(dir) {
+		
+		while(fileExplorer.firstChild) fileExplorer.removeChild(fileExplorer.firstChild); // Emty list
+		
+		buildList(dir);
 	}
 	
 	function buildList(dir, parent, callback) {

@@ -92,7 +92,8 @@ editor.eventListeners = { // Use editor.on to add listeners to these events:
 	keyDown: [],
 	moveCaret: [],
 	autoComplete: [],
-	keyPressed: []
+	keyPressed: [],
+	changeWorkingDir: []
 };
 
 editor.renderFunctions = [];
@@ -168,6 +169,21 @@ editor.lastKeyPressed = "";
 	
 	var directoryDialogCallback = undefined; 
 	var directoryDialogHtmlElement;
+	
+	
+	editor.changeWorkingDir = function(workingDir) {
+		
+		// Check if the dir exists ?
+		
+		editor.workingDirectory = workingDir;
+		
+		console.log("Calling changeWorkingDir listeners (" + editor.eventListeners.changeWorkingDir.length + ") workingDir=" + workingDir);
+		for(var i=0; i<editor.eventListeners.changeWorkingDir.length; i++) {
+			//console.log("function " + getFunctionName(editor.eventListeners.changeWorkingDir[i].fun));
+			editor.eventListeners.changeWorkingDir[i].fun(workingDir); // Call function
+		}
+		
+	}
 	
 	editor.sortFileList = function() {
 		
@@ -2586,8 +2602,7 @@ editor.lastKeyPressed = "";
 				console.log("Connected to FTP server on " + serverAddress + " !");
 				c.pwd(function(err, dir) {
 					if(err) throw err;
-					editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
-					console.log("editor.workingDirectory=" + editor.workingDirectory);
+					editor.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 					
 					// Create disconnect function
 					editor.disconnect[serverAddress] = function disconnectFTP() {
@@ -2654,7 +2669,7 @@ editor.lastKeyPressed = "";
 		// note: SSH (shell) not yet supported. Use SFTP instead!
 		else if(protocol == "ssh") {
 			
-			sshConnect(function sshConnected(err, c) {
+			sshConnect(function sshConnected(err, c, workingDir) {
 				if(err) callback(err);
 				else {
 					
@@ -2669,6 +2684,8 @@ editor.lastKeyPressed = "";
 						console.log("Dissconnected from SSH on " + serverAddress + "");
 					};
 					
+					editor.changeWorkingDir(workingDir);
+					
 					callback(null, editor.workingDirectory);
 				}
 			});
@@ -2676,7 +2693,7 @@ editor.lastKeyPressed = "";
 		}
 		else if(protocol == "sftp") {
 			
-			sshConnect(function sshConnected(err, c) {
+			sshConnect(function sshConnected(err, c, workingDir) {
 				if(err) callback(err);
 				else {
 					// Initiate "SFTP mode"
@@ -2689,6 +2706,8 @@ editor.lastKeyPressed = "";
 						}
 						else {
 							editor.connections[serverAddress] = sftp;
+							editor.changeWorkingDir(workingDir);
+							
 							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
 							
 							// Create disconnect function
@@ -2756,10 +2775,9 @@ editor.lastKeyPressed = "";
 							// Chop off the newline character
 							dir = dir.substring(0, dir.length-1);
 							
-							editor.workingDirectory = protocol + "://" + serverAddress + dir.replace("\\", "/");
-							console.log("editor.workingDirectory=" + editor.workingDirectory);
+							var workingDir = protocol + "://" + serverAddress + dir.replace("\\", "/");
 							
-							cb(null, c);
+							cb(null, c, workingDir);
 							
 							//c.end();
 						}).on('data', function(data) {
