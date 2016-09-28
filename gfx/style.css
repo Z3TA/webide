@@ -542,7 +542,7 @@ div.gotoFile li b {
 	background-image: linear-gradient(to bottom, #7688bd, #4e64a3);
 }
 
-
+/* ### Dialogs */
 .dialog {
 	z-index: 100;
 	text-align: center;
@@ -559,8 +559,8 @@ div.gotoFile li b {
 	box-shadow: 0px 4px 20px #000000;
 	color: #1f2122;
 	background-image: linear-gradient(to bottom, #dde1e9 0%, #fafafa 100%), linear-gradient(to bottom, #3acfd5 0%, #3a4ed5 100%);
-	/* max-width: 408px; */
-	min-width: 408px;
+	max-width: 408px;
+	word-wrap: break-word;
 }
 
 .dialog .message {
@@ -617,22 +617,98 @@ div.gotoFile li b {
 	font-family: Verdana;
 }
 
-.fileExplorer {
-	max-width: 50%;
-	max-height: 50%;
-	overflow: hidden;
-	padding: 0px;
-	border: 1px solid blue;
-}
+
+/* ############### File explorer ############### */
+
+	.fileExplorer {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	color: black;
+	/* Can not have padding, or the canvas will fall down */
+	}
 .fileExplorer ul {
-	padding: 0px;
-	margin: 0px;
+	background-color: white;
 }
 .fileExplorer li {
-	padding: 0px;
-	margin: 0px;
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	cursor: default;
+	user-select: none;
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none;   /* Chrome/Safari/Opera */
 }
 
+.fileExplorer li.folder {
+	}
+
+.fileExplorer li.file {
+	}
+
+.fileExplorer .box {
+	font-family: monospace;
+	display: inline-block;
+	border: 1px solid black;
+	font-size: 12px;
+	width: 8px;
+	height: 8px;
+	line-height: 10px; /* the same as your div height */
+	text-align: center;
+	vertical-align: middle;
+	margin-right: 2px;
+	margin-bottom: 2px;
+	outline: 0;
+}
+
+
+
+/* ###### Tree list */
+.tree,
+.tree ul {
+	margin:0 0 0 6px; /* indentation */
+	padding:0;
+	list-style:none;
+	position:relative;
+}
+
+.tree ul {margin-left:3px} /* (indentation/2) */
+
+.tree:before,
+.tree ul:before {
+	content:"";
+	display:block;
+	width:0;
+	position:absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	border-left:1px dotted #999999;
+}
+
+.tree li {
+	margin:0;
+	padding:0 6px; /* indentation + .5em */
+	line-height:14px; /* default list item's `line-height` */
+	position:relative;
+}
+
+.tree li:before {
+	content:"";
+	display:block;
+	width: 4px; /* same with indentation */
+	height:0;
+	border-top:1px dotted #999999;
+	margin-top:-1px; /* border top width */
+	position:absolute;
+	top:6px; /* (line-height/2) */
+	left:0;
+}
+
+.tree li:last-child:before {
+	background:white; /* same with body background */
+	height:auto;
+	top:7px; /* (line-height/2) */
+	bottom:0;
+}
 
 
 
