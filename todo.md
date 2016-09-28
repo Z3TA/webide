@@ -12,16 +12,14 @@ Prio:
 What I'm working on
 -------------------
 
-div in leftcolumn makes canvas dissappear below
+make file explorer load before functionlist ? why is it not working?
 
 file explorer
 
 
 todo:
 
-make it handle many items in the left column
-
-remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
+ssg: remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
 
 WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
 support colaboration editing (many ppl edit at the same time), look on LAN for others with the same file open

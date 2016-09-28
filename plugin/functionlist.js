@@ -25,7 +25,7 @@
 
 	function functionListMain() {
 		
-		//console.log("Initiating functionlist");
+		console.log("Initiating functionlist");
 		
 		editor.on("fileParse", updateFunctionList); // Update existing function list if it already exist
 		
