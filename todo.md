@@ -12,12 +12,18 @@ Prio:
 What I'm working on
 -------------------
 
+start file explorer from root, open all folder until workin dir
+
 make file explorer load before functionlist ? why is it not working?
 
 file explorer
 
 
 todo:
+
+add key auth for ssg to support sftp
+write a blog post from Linux (test if sftp works)
+
 
 ssg: remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
 

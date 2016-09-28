@@ -1,4 +1,10 @@
 (function() {
+	/*
+		
+		todo: Select box: Make it possible to switch beteen local and remote file-systems (show local + any connected systems)
+		
+		
+	*/
 	
 	var fileExplorer;
 	var leftColumn;	
@@ -31,10 +37,15 @@
 		
 		while(fileExplorer.firstChild) fileExplorer.removeChild(fileExplorer.firstChild); // Emty list
 		
+		// We want to start from the root, then work our way towards the actual dir
+		
+		
 		buildList(dir);
 	}
 	
-	function buildList(dir, parent, callback) {
+	function buildList(dir, parent, findDir, callback) {
+		
+		var dirFound = null;
 		
 		if(!fileExplorer) {
 			
@@ -66,7 +77,7 @@
 			editor.resizeNeeded();
 			editor.resize();
 			
-			if(callback) callback();
+			if(callback) callback(dirFound);
 		});
 		
 		function showItem(item) {
@@ -80,6 +91,8 @@
 			
 			li.setAttribute("class", type); // 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			li.setAttribute("path", item.path);
+			
+			if(item.path == findDir || item.name == findDir) dirFound = li;
 			
 			if(type == "folder") {
 				
