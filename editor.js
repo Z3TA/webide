@@ -1525,14 +1525,20 @@ editor.lastKeyPressed = "";
 		leftColumn.style.height = editor.view.canvasHeight + "px";
 		rightColumn.style.height = editor.view.canvasHeight + "px";
 		
+		shareHeight(leftColumn.childNodes, contentHeight);
+		shareHeight(rightColumn.childNodes, contentHeight);
+		
+		
 		
 		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
-		var wrappers = document.getElementsByClassName("wrap");
+		
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
 		//console.log("leftColumnPadding=" + leftColumnPadding);
 		var columnPadding = parseInt(leftColumnPadding);
+		var wrappers = document.getElementsByClassName("wrap");
 		for (var i = 0; i < wrappers.length; i++) {
-			wrappers[i].style.height = (contentHeight) + "px"; // - (columnPadding * 2 + 2) + "px";
+			//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth) 
+			// We always need to set with or the canvas will drop down below
 			wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
 		//console.log("columnPadding=" + columnPadding);
@@ -1593,21 +1599,57 @@ editor.lastKeyPressed = "";
 		
 		console.timeEnd("resize");
 		
+		editor.renderNeeded();
+		editor.render(); // Always render (right away to brevent black background blink) after a resize
+		
+		//editor.renderNeeded(); // Always render after a resize (but nor right away!?
+		
+		function shareHeight(elements, maxTotalHeight) {
+			
+			// If there are many elements in leftColumn or rightColumn, they have to share the height
+			
+			var devidedHeight = Math.floor(maxTotalHeight / elements.length);
+			var computedStyle;
+			var totalHeight = 0;
+			var maxTotalHeight = contentHeight;
+			
+			for (var i = 0; i < elements.length; i++) {
+				computedStyle = window.getComputedStyle(elements[i], null);
+				totalHeight += parseInt(computedStyle.height);
+			}
+			
+			var height = 0;
+			var newHeight = 0;
+			var availableHeight = maxTotalHeight - totalHeight;;
+			if(availableHeight < 0) {
+				// One or more elements need to shrink
+				for (var i = 0; i < elements.length; i++) {
+					computedStyle = window.getComputedStyle(elements[i], null);
+					height = parseInt(computedStyle.height);
+					
+					newHeight = Math.min(maxTotalHeight, Math.max(devidedHeight, height + availableHeight));
+						if(newHeight > height) continue; // Break the iteration
+					
+					elements[i].style.height = (newHeight) + "px";
+					
+						// Compute new total height
+						totalHeight = totalHeight - height + newHeight;
+						availableHeight = maxTotalHeight - totalHeight;
+						
+				}
+			}
+		}
+		
 		function showCanvasNodes() {
 			for(var i=0; i<canvasNodes.length; i++) {
 				// Do not show hidden fileCanvas's
-				if(canvasNodes[i].getAttribute("class") != "fileCanvas") { 
+				if(canvasNodes[i].getAttribute("class") != "fileCanvas") {
 					//console.log("canvasNodes[" + i + "].getAttribute('class')=" + canvasNodes[i].getAttribute("class"));
 					canvasNodes[i].style.display = "block";
 				}
 			}
 			editor.renderNeeded();
 		}
-		
-		editor.renderNeeded();
-		editor.render(); // Always render (right away to brevent black background blink) after a resize
-		
-		//editor.renderNeeded(); // Always render after a resize (but nor right away!?
 		
 	}
 	
