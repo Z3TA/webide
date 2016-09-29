@@ -31,7 +31,7 @@ html {
 
 body {
 	margin: 0px;
-	background-color:rgba(0,255,0,0); /* bgcolor will not show, change the wireframe background instead! */
+	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
 	font-family: Arial;
 }
@@ -53,32 +53,33 @@ body {
 
 .columns div {
 	/*border: 1px solid red; */
-	background-color: white;
 	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
-	
+	background-color: blue;
 }
 
-
 .leftColumn {
+	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
 	float: left;
-	/* Needs to have width! */
 	vertical-align: top;
-	/* Can not have height! */
+	background-color: blue;
+	padding: 0px;
+	margin: 0px;
+	border: 0px solid blue;
 }
 
 .centerColumn { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
 	overflow:hidden;
-	background-color: #FFFFFF; /* background will only show when there is little text, or flash a little when reloading the page */
+	background-color: red; /* background will only show when there is little text, or flash a little when reloading the page */
 	vertical-align: top;
 	float: left;
 	overflow: auto!important;
 }
 
 .rightColumn {
+	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
 	float: right;
-	
+	border: 0px solid red;
 	background-color: orange;
-	/* Needs to have width! */
 	vertical-align: top;
 }
 
@@ -89,17 +90,22 @@ body {
 }
 
 .footer {
+	/* Needs to have height! */
 	clear: both;
 	background: linear-gradient(#595959, #555555);
-	border-top: 2px solid #767676;
-	/* Needs to have height! */
 	box-shadow: inset 0px 4px 10px #888888;
+	
+	
+	border-top: 2px solid #767676;
+	
 	padding-bottom: 6px;
 	padding-left: 4px;
 	padding-right: 4px;
+	 
 }
 .footer:empty { 
 	border: none; /* Hide the border if the footer is empty */
+	padding: 0px;
 }
 
 
@@ -107,7 +113,12 @@ body {
 	background-color: #682c35;
 }
 
-
+/* Add the wrap class to widgets living in the left or right column! */
+.wrap {
+	overflow: auto!important;
+	overflow-y: scroll!important; /* So that you never need the x-scroll */
+	white-space: nowrap;
+}
 
 
 /* ###### Standard settings ####### */
@@ -117,8 +128,8 @@ body {
 	padding: 0px;
 	border-spacing: 0px;
 	border-collapse: separate;
-	margin-bottom: -2px; /* adjust so the top/bottom margin will be the same like wihout a table */
-	margin-top: -2px;
+	/*margin-bottom: -2px;  adjust so the top/bottom margin will be the same like wihout a table */
+	/*margin-top: -2px; */
 	
 }
 
@@ -217,7 +228,7 @@ td input[type=text] {
 	margin-left: 2px;
 	margin-right: 2px;
 	margin-top: 3px;
-	margin-bottom: -3px;
+	/* margin-bottom: -3px; */
 	padding: 6px;
 	padding-bottom: 5px;
 	font-size: 12px;
@@ -241,7 +252,7 @@ td input[type=text] {
 	
 	margin-top: 3px;
 	margin-bottom: 0px;
-	margin-left: -1px;
+	/*margin-left: -1px;*/
 	padding-left: 2px;
 	
 	padding-top: 4px;
@@ -350,19 +361,17 @@ td input[type=text] {
 
 /* ############### Function List ############### */
 
-.functionList {
+select.functionList {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 12px;
 	color: black;
 	outline: 0;
+	width: 100%;
 	padding-right: 21px; /* Just in case there is a scrollbar, so that the scrollbar doesnt hide the text */
+	overflow-x: hidden!important;
 }
 
-.wrap {
-	overflow: auto!important;
-	overflow-y: scroll!important; /* So that you never need the x-scroll */
-	white-space: nowrap;
-}
+
 
 
 
@@ -623,20 +632,17 @@ div.gotoFile li b {
 	.fileExplorer {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 12px;
-	color: black;
 	/* Can not have padding, or the canvas will fall down */
 	}
 .fileExplorer ul {
-	background-color: white;
+	background-color: white; /* #e8e8e8 */
+	color: black;
 }
 .fileExplorer li {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 12px;
 	cursor: default;
-	user-select: none;
-	-webkit-touch-callout: none; /* iOS Safari */
-	-webkit-user-select: none;   /* Chrome/Safari/Opera */
-}
+	}
 
 .fileExplorer li.folder {
 	}
@@ -662,13 +668,15 @@ div.gotoFile li b {
 
 
 /* ###### Tree list */
-.tree,
-.tree ul {
-	margin:0 0 0 6px; /* indentation */
-	padding:0;
-	list-style:none;
+.tree, .tree ul {
 	position:relative;
+	padding:0;
+	margin: 0;
 }
+.tree ul {
+	margin-left: 6px; /* indentation */ 
+	list-style:none;
+	}
 
 .tree ul {margin-left:3px} /* (indentation/2) */
 
@@ -686,7 +694,7 @@ div.gotoFile li b {
 
 .tree li {
 	margin:0;
-	padding:0 6px; /* indentation + .5em */
+	padding-left: 6px; /* indentation + .5em */
 	line-height:14px; /* default list item's `line-height` */
 	position:relative;
 }
@@ -697,16 +705,16 @@ div.gotoFile li b {
 	width: 4px; /* same with indentation */
 	height:0;
 	border-top:1px dotted #999999;
-	margin-top:-1px; /* border top width */
+	margin-top: 0px; /* border top width */
 	position:absolute;
-	top:6px; /* (line-height/2) */
+	top:7px; /* (line-height/2) */
 	left:0;
 }
 
 .tree li:last-child:before {
 	background:white; /* same with body background */
 	height:auto;
-	top:7px; /* (line-height/2) */
+	top: 7px; /* (line-height/2) */
 	bottom:0;
 }
 

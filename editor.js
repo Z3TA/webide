@@ -1551,12 +1551,26 @@ editor.lastKeyPressed = "";
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
 		//console.log("leftColumnPadding=" + leftColumnPadding);
 		var columnPadding = parseInt(leftColumnPadding);
-		var wrappers = document.getElementsByClassName("wrap");
-		for (var i = 0; i < wrappers.length; i++) {
+		var leftWrappers = leftColumn.getElementsByClassName("wrap");
+		for (var i = 0; i < leftWrappers.length; i++) {
 			//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth) 
 			// We always need to set with or the canvas will drop down below
-			wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+			leftWrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
 		}
+		var rightWrappers = rightColumn.getElementsByClassName("wrap");
+		for (var i = 0; i < rightWrappers.length; i++) {
+			rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+		}
+		
+		/*
+			var wrappers = document.getElementsByClassName("wrap");
+			for (var i = 0; i < wrappers.length; i++) {
+			//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth)
+			// We always need to set with or the canvas will drop down below
+			wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+			}
+		*/
+		
 		//console.log("columnPadding=" + columnPadding);
 		
 		
@@ -3048,6 +3062,8 @@ editor.lastKeyPressed = "";
 		
 		console.log("hostname=" + hostname + " pathToCreate=" + pathToCreate + " parse=" + JSON.stringify(parse));
 		
+		create.shift(); // Don't bother with the root
+		
 		// Execute mkdir in order !
 		
 		executeMkdir(create.shift());
@@ -3587,8 +3603,13 @@ editor.lastKeyPressed = "";
 				return 0;
 			}
 		});
-		console.log("Loading plugin (" + editor.eventListeners.start.length + ")");
+		
+		console.log("plugins: ");
+		editor.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
+		
+		console.log("Loading plugins (length=" + editor.eventListeners.start.length + ")");
 		for(var i=0; i<editor.plugins.length; i++) {
+			console.log("plugin: " + editor.plugins[i].desc);
 			editor.plugins[i].load(editor); // Call function (and pass global objects!?)
 		}
 		
