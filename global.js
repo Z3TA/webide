@@ -162,9 +162,10 @@ function getFolders(fullPath) {
 		Returns each folder in the path. Can take an url or a local filesystem path
 		
 		Examples:
-		ftp://hostname/folder1/folder2
-		C:\\Windows\system32
-		C://Windows/system32
+		ftp://hostname/folder1/folder2 => ["/", "/folder1", "/folder1/folder2"]
+		C:\\Windows\system32           => ["C:\\", "C:\\Windows", "C:\\Windows\system32"]
+		C://Windows/system32           => (throws an error; use C:\ instead)
+		/tank/foo/bar                  => ["/", "/tank", "/tank/foo", "/tank/foo/bar"]
 		
 	*/
 	
@@ -225,6 +226,8 @@ function getFolders(fullPath) {
 			urls.push(fullFolder);
 		}
 		
+		urls.unshift("/"); // Add root
+		
 		return urls;
 		
 	}
@@ -269,6 +272,8 @@ function getFolders(fullPath) {
 				if(i<folders.length) fullFolder += "\\";
 			}
 			
+			paths.unshift(driveLetter + ":\\"); // Add root (drive letter)
+			
 			return paths;
 			
 		}
@@ -289,6 +294,8 @@ function getFolders(fullPath) {
 				fullFolder += "/" + folders[i];
 				paths.push(fullFolder);
 			}
+			
+			paths.unshift("/"); // Add root folder
 			
 			return paths;
 			
