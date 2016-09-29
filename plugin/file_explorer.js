@@ -1,60 +1,200 @@
 (function() {
 	/*
 		
-		todo: Select box: Make it possible to switch beteen local and remote file-systems (show local + any connected systems)
+		todo: Select box: Make it possible to switch beteen local and remote file-systems (show local + any connected file-systems)
 		
+		todo: File watcher, update the list when file change names, or are created/removed
+		
+		todo: Only show the file explorer explicity. The screen cant have too much information or the brain will get burnt out
+		
+		todo: rescroll list after resize event ?
 		
 	*/
 	
 	var fileExplorer;
-	var leftColumn;	
-	
+	var leftColumn, rightColumn;	
+	var visible = false;
+	var menuItem;
+	var defaultScroll = 0;
 	
 	editor.plugin({
-		desc: "File explorer window in left column",
+		desc: "File explorer window widget",
 		load: load,
 		unload: unload,
-		order: 100
+		order: 500 // functionList: 200, (a higher number makes it start sooner)
 	});
 	
 	function load() {
 		
 		console.log("Initiating file explorer");
 		
-		editor.on("changeWorkingDir", exploreDir);
+		var key_E = 69;
+		
+		editor.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
+		
+		// editor.on("changeWorkingDir", exploreDir);
+		
+		menuItem = editor.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
 		
 		leftColumn = document.getElementById("leftColumn");
+		rightColumn = document.getElementById("rightColumn");
 		
-		buildList(editor.workingDirectory);
+		fileExplorer = document.createElement("div");
+		fileExplorer.setAttribute("class", "wrap fileExplorer");
+		fileExplorer.setAttribute("id", "fileExplorer");
+		
+		rightColumn.appendChild(fileExplorer);
+		
+		//exploreDir(editor.workingDirectory);
 		
 	}
 	
 	function unload() {
-		leftColumn.removeChild(fileExplorer);
+		rightColumn.removeChild(fileExplorer);
 	}
 	
-	function exploreDir(dir) {
+	function toggleFileExplorer() {
 		
-		while(fileExplorer.firstChild) fileExplorer.removeChild(fileExplorer.firstChild); // Emty list
+		visible = visible ? false : true; // Switch
+		
+		menuItem.innerHTML = "Toggle file explorer " + (visible ? "off":"on");
+		
+		if(visible) {
+			exploreDir(editor.workingDirectory)
+			fileExplorer.style.display="block";
+			
+		}
+		else {
+			fileExplorer.style.display="none";
+			editor.resizeNeeded();
+			
+		}
+		return false;
+	}
+	
+	function scroll() {
+		// Make it center/middle ?? Whole project folder should be visible
+		
+		fileExplorer.scrollTop = defaultScroll;
+		console.log("Scrolled down on file explorer: defaultScroll=" + defaultScroll);
+	}
+	
+	function exploreDir(fullPath) {
+		
+		if(fileExplorer) while(fileExplorer.firstChild) fileExplorer.removeChild(fileExplorer.firstChild); // Emty list
 		
 		// We want to start from the root, then work our way towards the actual dir
+		var folders = getFolders(fullPath);
 		
+		// Recursive 
+		lookUpPath(folders, 0);
 		
-		buildList(dir);
+		function lookUpPath(folders, index, parent) {
+			var dir = folders[index];
+			var findDir = index < (folders.length-1) ? folders[index+1] : null;
+			
+			buildList(dir, parent, findDir, function(parent) {
+				
+				index++;
+				
+				if(index < folders.length) lookUpPath(folders, index, parent);
+				else scrollDownToDir(fullPath);
+				
+			});
+		}
+		
+		function scrollDownToDir(targetPath) {
+			// Shroll down the fire explorer div so we can see the folder we are interested in
+			// Go though all elements in the list and measure the height until we find target path, then scroll down the height
+			
+			while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
+			
+			//console.log("targetPath=" + targetPath);
+			
+			var totalHeight = 0;
+			var measuredElements = 0;
+			var defaultHeight = 14;
+			
+			measure(fileExplorer);
+			
+			function measure(el) {
+				//console.log("measuring el=" + el);
+				
+				var childNodes = el.childNodes;
+				if(!childNodes) return false;
+				
+				var elClass;
+				var path;
+				var computedStyle;
+				var found = false;
+				
+				for (var i=0; i<childNodes.length; i++) {
+					
+					if(childNodes[i].nodeType != 1) continue; // Only bother with HTML elements, not text nodes
+					
+					//console.log("checking childNodes[" + i + "]=" + childNodes[i] + " nodeType=" + childNodes[i].nodeType);
+					
+						//console.log(childNodes[i]);
+						
+						elClass = childNodes[i].getAttribute("class");
+						
+					path = childNodes[i].getAttribute("path");
+					
+					//console.log(targetPath + " == " + path + " ? " + (targetPath == path));
+					
+					if(path == targetPath) {
+						defaultScroll = totalHeight;
+						setTimeout(scroll, 100);
+						return true; 
+					}
+					
+					if(elClass == "folder open") {
+						
+						totalHeight += (measuredElements > 0 ? Math.round(totalHeight / ++measuredElements) : defaultHeight);
+						//console.log("totalHeight=" + totalHeight);
+					}
+					
+					if(elClass == "tree" || elClass == "folder open") found = measure(childNodes[i])
+						else {
+							
+						if(path == null) continue; // Only measure elements that have path in their attribute
+						
+						if(elClass != "folder open") {
+								computedStyle = window.getComputedStyle(childNodes[i], null);
+								
+								totalHeight += parseInt(computedStyle.height);
+							measuredElements++;
+							
+								//console.log("totalHeight=" + totalHeight);
+							}
+						}
+					
+					if(found) return true;
+					}
+				return false; // Not found
+			}
+			
+		}
+		
 	}
 	
 	function buildList(dir, parent, findDir, callback) {
 		
+		console.log("Building file explorer tree for dir=" + dir);
+		
 		var dirFound = null;
 		
-		if(!fileExplorer) {
-			
-			fileExplorer = document.createElement("div");
-			fileExplorer.setAttribute("class", "wrap fileExplorer");
-			leftColumn.appendChild(fileExplorer);
-		}
-		
 		if(!parent) parent = fileExplorer;
+		else {
+			// Make the parent folder appear open
+			
+			// let (aka block scope) only solves a symtom of the bigger problem: Using varaibles from parent or global scope (dont't do that) and function scope is probably what you want (not block scope)
+			parent.setAttribute("class", "folder open");
+			var childNodes = parent.childNodes;
+			var box = childNodes[0];
+			box.removeChild(box.firstChild);
+			box.appendChild(document.createTextNode("-"));
+		}
 		
 		// Clean the parent node
 		//while (parent.firstChild) parent.removeChild(parent.firstChild);
@@ -85,16 +225,18 @@
 			var li = document.createElement("li");
 			var type = "";
 			
+			// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			if(item.type == "d") type = "folder";
 			else if(item.type == "-") type = "file";
 			else if(item.type == "l") type = "link";
 			
-			li.setAttribute("class", type); // 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			li.setAttribute("path", item.path);
 			
 			if(item.path == findDir || item.name == findDir) dirFound = li;
 			
 			if(type == "folder") {
+				
+				li.setAttribute("class", "folder closed"); 
 				
 				li.addEventListener("click", function(e) {
 					openOrCloseFolder(li);
@@ -114,6 +256,7 @@
 				li.appendChild(box);
 			}
 			else {
+				li.setAttribute("class", "file"); 
 				
 				li.addEventListener("click", function() {
 					openFile(li);
@@ -128,7 +271,7 @@
 			
 			li.appendChild(document.createTextNode(item.name));
 			
-			console.log("item.name=" + item.name);
+			//console.log("item.name=" + item.name);
 			
 			ul.appendChild(li);
 			
@@ -145,24 +288,6 @@
 		compareFunction(a, b) must always return the same value when given a specific pair of elements a and b as its two arguments. If inconsistent results are returned then the sort order is undefined.
 		
 	*/
-	function sortByType(a, b) {
-		if(a.type == b.type) return 0;
-			else if(a.type == "d") return -1;
-		else if(b.type == "d") return 1;
-		else return 0;
-	}
-	
-	function sortByName(a, b) {
-		var nameA = a.name.toLowerCase();
-		var nameB = b.name.toLowerCase();
-		
-		console.log(nameA + " > " + nameB + " ? " + (nameA > nameB));
-		
-		if(nameA < nameB) return -1;
-		else if(nameA > nameB) return 1;
-		else return 0;
-		
-	}
 	
 	function sortByNameAndType(a, b) {
 		if(a.type == b.type) {
@@ -182,18 +307,18 @@
 	
 	function openOrCloseFolder(item) {
 		
-		console.log(item);
+		//console.log(item);
 		
 		var childNodes = item.childNodes;
 		var box = childNodes[0];
 		var path = item.getAttribute("path");
 		
-		console.log("path=" + path);
+		//console.log("path=" + path);
 		
 		if(childNodes.length > 2) {
 			// The folder is open, close it
 			
-			console.log("Closing folder: " + path);
+			console.log("Closing file explorer folder: " + path);
 			
 			for (var i=2; i<childNodes.length; i++) {
 				item.removeChild(childNodes[i]);
@@ -208,7 +333,7 @@
 		}
 		else {
 			
-			console.log("Opening folder: " + path);
+			console.log("Opening file explorer folder: " + path);
 			
 			buildList(path, item, function() {
 				

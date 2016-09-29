@@ -12,11 +12,7 @@ Prio:
 What I'm working on
 -------------------
 
-start file explorer from root, open all folder until workin dir
-
-make file explorer load before functionlist ? why is it not working?
-
-file explorer
+bug: file explorer scrolls up when clicking on it
 
 
 todo:
@@ -46,6 +42,10 @@ Compile nodehun for osx
 
 What I'm thinking
 -----------------
+
+The design needs work. Can't show too much on the screen or it will be too slow to work (brain will be overloaded with info)
+
+Should file explorer be above function list? Because function list is not always visible
 
 SCM integration (both Mercurial and Git, auto-detect) ex:
 file.isCommited
@@ -947,6 +947,10 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+Smooth scrolling, like in the browser, animated scrolling.
+
+Letter annimation and (happy) popping sound when you type, double kill, megakill etc bonus when you write a lot in one go
 
 real-time collaboration 
 
