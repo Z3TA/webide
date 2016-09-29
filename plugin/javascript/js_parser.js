@@ -2227,7 +2227,7 @@
 				
 				// We can not have multi line regexp
 				if(insideRegExp) {
-					console.warn("Line " + lineNumber + ": Lonely slash!"); // NodeJS says: Invalid regular expression: missing /
+					console.warn("Line " + lineNumber + ": Lonely slash! path=" + file.path); // NodeJS says: Invalid regular expression: missing /
 					insideRegExp = false;
 				}
 				
