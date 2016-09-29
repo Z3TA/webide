@@ -14,8 +14,9 @@
 	var captureKeyboard = false;
 	var searchString = "";
 	var domModel = [];
+	var leftColumn;
+	var rightColumn;
 	
-		
 	editor.plugin({
 		desc: "Show list of JS functions in left column",
 		load: functionListMain,
@@ -40,12 +41,25 @@
 		
 		//editor.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
 
+		functionListWrap = document.createElement("div");
+		
+		functionListWrap.setAttribute("id", "functionListWrap");
+		functionListWrap.setAttribute("class", "wrap functionListWrap");
+		
+		leftColumn = document.getElementById("leftColumn");
+		rightColumn = document.getElementById("rightColumn");
+		
+		leftColumn.appendChild(functionListWrap); // Placing it in right column because it is not always visible (prevents text placement to move)
+		
+		
 	}
 	
 	function unload() {
-
+		leftColumn.removeChild(functionListWrap);
+		
+		// todo: Also remove events
 	}
-
+	
 	function leftOrRight() {
 		// If we are inside the function list, pressing left or right should go back to the caret
 
@@ -418,19 +432,7 @@
 		
 		functionListSelect = document.getElementById("functionList");
 
-		var leftColumn = document.getElementById("leftColumn");
-		
-		if(!functionListWrap) {
-			functionListWrap = document.createElement("div");
-			
-			functionListWrap.setAttribute("id", "functionListWrap");
-			functionListWrap.setAttribute("class", "wrap functionListWrap");
-			
-			leftColumn.appendChild(functionListWrap);
-		}
-		else {
-			showFunctionList();
-		}
+		showFunctionList();
 		
 		if(!functionListSelect) {
 			functionListSelect = document.createElement("select");
