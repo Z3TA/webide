@@ -23,6 +23,10 @@
 	border: 0px solid red;
 	margin: 0px;
 	/*-webkit-font-smoothing: none;*/
+	
+	user-select: none;
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none;   /* Chrome/Safari/Opera */
 }
 
 html {
