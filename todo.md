@@ -15,10 +15,7 @@ What I'm working on
 
 
 
-
 todo:
-
-add key auth for ssg to support sftp
 
 write a blog post from Linux (test if sftp works)
 

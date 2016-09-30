@@ -1703,7 +1703,7 @@ function resolvePath(dir, file) {
 }
 
 function error(err) {
-	process.send({type: "error", stack: err.stack});
+	process.send({type: "error", stack: err.stack, code: err.code});
 	process.exit(1);
 }
 

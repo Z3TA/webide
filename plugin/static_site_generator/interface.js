@@ -1100,7 +1100,10 @@
 					console.log(data.msg);
 				}
 				else if(data.type == "error") {
-					alert(data.stack);
+					console.log(data);
+					if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) alertBox("Encoding problem when opening file ...\n" + data.stack);
+					else if(data.code == "ENOENT") alertBox("Problem occured when opening file...\n" + data.stack);
+					else alertBox(data.stack);
 				}
 				else throw new Error("Unknown message from worker: " + JSON.stringify(data));
 				
