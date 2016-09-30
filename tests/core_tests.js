@@ -28,6 +28,30 @@
 		
 	*/
 	
+	editor.addTest(function commentOnLastLine(callback) {
+		editor.openFile("commentOnLastLine.js", "// comment", function(err, file) {
+			
+			if(file.parsed.comments.length == 0) throw new Error("Expected a coment");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
+	
+	editor.addTest(function exitRegExp(callback) {
+		editor.openFile("exitRegExp.js", "foo.match(/^[\\/\\\\]/))\n// moo\n", function(err, file) {
+			
+			if(file.parsed.comments.length == 0) throw new Error("Did not exit RegExp");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	
 	editor.addTest(function closingXmlTag(callback) {
 		editor.openFile("closingXmlTag.js", "html += '<body';\nhtml += '>';\n", function(err, file) {

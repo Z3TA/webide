@@ -1309,6 +1309,7 @@
 				
 			*/
 			
+			//console.log("char=" + char);
 			//console.log("insideLineComment="+ insideLineComment);
 			
 			// We can not have /* after a lineComment, it will do nothing
@@ -1345,6 +1346,7 @@
 					http://stackoverflow.com/questions/4726295/division-regexp-conflict-while-tokenizing-javascript
 					
 				*/
+								
 				if(char == "/" 
 				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="") 
 				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag && !CSS) {
@@ -1356,7 +1358,7 @@
 				else if(insideRegExp && char == "[" && lastChar != "\\") {
 					insideRegExpBracket = true;
 				}
-				else if(insideRegExp && char == "]" && lastChar != "\\") {
+				else if(insideRegExp && char == "]" && (lastChar != "\\" || (lastChar == "\\" && llChar == "\\" ))) {
 					insideRegExpBracket = false;
 				}
 				else if(insideRegExp && char == "/" && !insideRegExpBracket && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {

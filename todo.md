@@ -2,10 +2,11 @@
 Prio:
 
 1) Beta release
-2) Bug/issue fixing and refactoring
-3) Polishing of existing features
-4) Optimization (toggle devMode off when testing!)
-5) New features
+2) Make it simple to update a home page
+3) Bug/issue fixing and refactoring
+4) Polishing of existing features
+5) Optimization (toggle devMode off when testing!)
+6) New features
 
 
 
@@ -17,20 +18,18 @@ What I'm working on
 
 todo:
 
-bug: Comments not showing as comments (green color) in global.js line: 1097
-
-support port in url's (connection manager, etc)
-
 add key auth for ssg to support sftp
+
 write a blog post from Linux (test if sftp works)
 
+Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
 
 ssg: remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
 
 WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
 support colaboration editing (many ppl edit at the same time), look on LAN for others with the same file open
 
-file list ( handy when connected to remote server)
+support port in url's (connection manager, etc)
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -164,6 +163,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Can't use the remote connection after we got an error. For example access denied after attempting to save a file. (need to re-connect)
 
 When selecting text then pressing left or right arrow, the caret should jump over the selected text (that will be unselected)
 
