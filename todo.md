@@ -12,7 +12,7 @@ Prio:
 What I'm working on
 -------------------
 
-Always add a trailing slash on folders path
+
 
 
 todo:

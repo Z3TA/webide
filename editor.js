@@ -158,8 +158,8 @@ editor.lastKeyPressed = "";
 	*/
 	
 	if(runtime!="browser") {
-		var dirname = require("dirname"); // The path to this file (where the editor is "installed")
-		editor.workingDirectory = process.cwd();
+		var dirname = trailingSlash(require("dirname")); // The folder path to this file (where the editor is "installed")
+		editor.workingDirectory = trailingSlash(process.cwd());
 		
 		console.log("dirname=" + dirname);
 		console.log("workingDirectory=" + editor.workingDirectory);
@@ -175,7 +175,7 @@ editor.lastKeyPressed = "";
 		
 		// Check if the dir exists ?
 		
-		editor.workingDirectory = workingDir;
+		editor.workingDirectory = trailingSlash(workingDir);;
 		
 		console.log("Calling changeWorkingDir listeners (" + editor.eventListeners.changeWorkingDir.length + ") workingDir=" + workingDir);
 		for(var i=0; i<editor.eventListeners.changeWorkingDir.length; i++) {
@@ -1106,7 +1106,7 @@ editor.lastKeyPressed = "";
 	editor.setFileOpenPath = function(defaultPath) {
 		// path needs to be a directory
 		var fileOpen = document.getElementById("fileInput");
-		fileOpen.setAttribute("nwworkingdir", defaultPath);
+		fileOpen.setAttribute("nwworkingdir", trailingSlash(defaultPath));
 	}
 	
 	editor.fileOpenDialog = function(defaultPath, callback) {
@@ -2430,7 +2430,7 @@ editor.lastKeyPressed = "";
 			
 		}
 		
-		return path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")));
+		return trailingSlash(path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"))));
 	}
 	
 	editor.getKeyFor = function(funName) {
@@ -2797,7 +2797,7 @@ editor.lastKeyPressed = "";
 							// Chop off the newline character
 							dir = dir.substring(0, dir.length-1);
 							
-							var workingDir = protocol + "://" + serverAddress + dir.replace("\\", "/");
+							var workingDir = trailingSlash(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 							
 							cb(null, c, workingDir);
 							
@@ -2836,6 +2836,8 @@ editor.lastKeyPressed = "";
 	
 	editor.listFiles = function(pathToFolder, listFilesCallback) {
 		// Returns all files in a directory
+		
+		pathToFolder = trailingSlash(pathToFolder);
 		
 		if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
 		if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
@@ -2895,12 +2897,17 @@ editor.lastKeyPressed = "";
 						//console.log(JSON.stringify(folderItems, null, 2));
 						
 						var list = [];
-						var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
 						var path = "";
+						var type = "";
+						
 						for(var i=0; i<folderItems.length; i++) {
-							path = slash ? pathToFolder + "/" + folderItems[i].filename : pathToFolder + folderItems[i].filename;
+							path = pathToFolder + folderItems[i].filename; // Asume pathToFolder has a trailing slash
+							type = folderItems[i].longname.substr(0, 1);
+							
+							if(type == "d") path = trailingSlash(path);
+							
 							//console.log("path=" + path);
-							list.push({type: folderItems[i].longname.substr(0, 1), name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
+							list.push({type: type, name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
 						}
 						
 						listFilesCallback(null, list);
@@ -2958,7 +2965,7 @@ editor.lastKeyPressed = "";
 							}
 							else if(stats.isDirectory()) {
 								type = "d";
-								filePath += "/"; // Add trailing slash to indicate that it's a folder 
+								filePath = trailingSlash(filePath);
 							}
 							
 							list.push({type: type, name: fileName, path: filePath, size: stats.size, date: stats.mtime});
@@ -3023,11 +3030,16 @@ editor.lastKeyPressed = "";
 					else {
 						
 						var list = [];
-						var slash = (pathToFolder.substr(pathToFolder.length-1, 1) != "/");
 						var path = "";
+						var type = "";
 						for(var i=0; i<folderItems.length; i++) {
-							path = slash ? pathToFolder + "/" + folderItems[i].name : pathToFolder + folderItems[i].name;
-							list.push({type: folderItems[i].type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+							path = pathToFolder + folderItems[i].name;
+							type = folderItems[i].type;
+							
+							if(type == "d") path = trailingSlash(path);
+							
+							// todo: parse date ?
+							list.push({type: type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
 						}
 						
 						listFilesCallback(null, list);
@@ -3057,6 +3069,9 @@ editor.lastKeyPressed = "";
 			Traverse the path and try to creates the directories, then check if the full path exists
 			
 		*/
+		
+		pathToCreate = trailingSlash(pathToCreate);
+		
 		var url = require('url');
 		var parse = url.parse(pathToCreate);
 		var protocol = parse.protocol;
