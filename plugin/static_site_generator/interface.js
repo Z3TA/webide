@@ -1101,7 +1101,7 @@
 				}
 				else if(data.type == "error") {
 					console.log(data);
-					if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) alertBox("Encoding problem when opening file ...\n" + data.stack);
+					if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) alertBox("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
 					else if(data.code == "ENOENT") alertBox("Problem occured when opening file...\n" + data.stack);
 					else alertBox(data.stack);
 				}
