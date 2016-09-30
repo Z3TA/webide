@@ -645,7 +645,7 @@ div.gotoFile li b {
 .fileExplorer li {
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 12px;
-	cursor: default;
+	cursor: pointer;
 	}
 
 .fileExplorer li.folder {
@@ -653,6 +653,10 @@ div.gotoFile li b {
 
 .fileExplorer li.file {
 	}
+
+.fileExplorer li a:hover {
+	text-decoration: underline;
+}
 
 .fileExplorer .box {
 	font-family: monospace;
