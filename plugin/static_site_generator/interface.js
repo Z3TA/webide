@@ -16,6 +16,7 @@
 	var inputTemplate;
 	var inputAuthUser;
 	var inputAuthPw;
+	var inputAuthKey;
 	
 	// Load native UI library
 	var gui = require('nw.gui');
@@ -38,8 +39,9 @@
 		preview: path.join(require("dirname"), "/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
 		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder
 		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
-		user: "test",
-		pw: "test"
+		user: "",
+		pw: "",
+		key: ""
 	}
 	
 	// Add plugin to editor
@@ -257,7 +259,7 @@
 			inputTemplate.value = selectedSite.template;
 			inputAuthUser.value = selectedSite.user;
 			inputAuthPw.value = selectedSite.pw;
-			
+			inputAuthKey.value = selectedSite.key;
 		}
 		
 	}
@@ -290,18 +292,17 @@
 		labelTemplate.setAttribute("for", "inputTemplate");
 		labelTemplate.appendChild(document.createTextNode("Template file:")); // Language settings!?
 		
-		var labelAuth = document.createElement("label");
-		labelAuth.setAttribute("for", "inputAuthUser");
-		labelAuth.appendChild(document.createTextNode("Auth:")); // Language settings!?
-		
 		var labelAuthUser = document.createElement("label");
 		labelAuthUser.setAttribute("for", "inputAuthUser");
 		labelAuthUser.appendChild(document.createTextNode("Username:")); // Language settings!?
-
+		
 		var labelAuthPw = document.createElement("label");
 		labelAuthPw.setAttribute("for", "inputAuthPw");
 		labelAuthPw.appendChild(document.createTextNode("Password:")); // Language settings!?
-
+		
+		var labelAuthKey = document.createElement("label");
+		labelAuthKey.setAttribute("for", "inputAuthKey");
+		labelAuthKey.appendChild(document.createTextNode("Key:")); // Language settings!?
 		
 		// Inputs
 		
@@ -352,6 +353,12 @@
 		inputAuthPw.setAttribute("size", "20");
 		inputAuthPw.setAttribute("title", "Password if needed for the publish URL")
 		
+		inputAuthKey = document.createElement("input");
+		inputAuthKey.setAttribute("type", "text");
+		inputAuthKey.setAttribute("id", "inputAuthKey");
+		inputAuthKey.setAttribute("class", "inputtext");
+		inputAuthKey.setAttribute("size", "40");
+		inputAuthKey.setAttribute("title", "SSH Key")
 		
 		// Buttons
 		
@@ -380,6 +387,11 @@
 		buttonCancel.setAttribute("value", "Cancel");
 		buttonCancel.addEventListener("click", cancelEdit, false);
 		
+		var buttonBrowseKey = document.createElement("input");
+		buttonBrowseKey.setAttribute("type", "button");
+		buttonBrowseKey.setAttribute("class", "button half");
+		buttonBrowseKey.setAttribute("value", "Browse");
+		buttonBrowseKey.addEventListener("click", browseKey, false);
 		
 		//editView.setAttribute("style", "border: 3px solid red;");
 		
@@ -405,7 +417,6 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.setAttribute("colspan", "3");
 		td.appendChild(inputSourceFolder);
 		tr.appendChild(td);
 		
@@ -419,7 +430,6 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.setAttribute("colspan", "3");
 		td.appendChild(inputPreviewFolder);
 		tr.appendChild(td);
 		
@@ -433,7 +443,6 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.setAttribute("colspan", "3");
 		td.appendChild(inputTemplate);
 		tr.appendChild(td);
 		
@@ -447,29 +456,52 @@
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.setAttribute("colspan", "3");
 		td.appendChild(inputPublishFolder);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
 		
-		// Auth
+		
+		// Auth username
 		tr = document.createElement("tr");
 		td = document.createElement("td");
 		td.setAttribute("align", "right");
-		td.appendChild(labelAuth);
+		td.appendChild(labelAuthUser);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(labelAuthUser);
 		td.appendChild(inputAuthUser);
-		
-		td.appendChild(labelAuthPw);
-		td.appendChild(inputAuthPw);
-		
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
+		
+		// Auth password
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelAuthPw);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputAuthPw);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Auth key
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelAuthKey);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputAuthKey);
+		td.appendChild(buttonBrowseKey);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
 		
 		
 		// Buttons
@@ -520,6 +552,11 @@
 			
 		}
 		
+		function browseKey() {
+			editor.fileOpenDialog(undefined, function selectKey(path) {
+				inputAuthKey.value = path;
+			});
+		}
 		
 		function cancelEdit() {
 			
@@ -533,6 +570,8 @@
 			inputTemplate.value = selectedSite.template;
 			inputAuthUser.value = selectedSite.user;
 			inputAuthPw.value = selectedSite.pw;
+			inputAuthKey.value = selectedSite.key;
+			
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -556,6 +595,7 @@
 			selectedSite.template = inputTemplate.value;
 			selectedSite.user = inputAuthUser.value;
 			selectedSite.pw = inputAuthPw.value;
+			selectedSite.key = inputAuthKey.value;
 			
 			window.localStorage.cmsjz_sites = JSON.stringify(sites);
 			
@@ -983,7 +1023,7 @@
 		if(editor.remoteProtocols.indexOf(protocol) != -1) {
 			// We will need to connect to the remote location before uploading files
 			var serverAddress = parse.host;
-			var auth = parse.auth, user, passw, keyPath;
+			var auth = parse.auth, user, passw;
 			if(auth) {
 				auth = auth.split(":");
 				if(auth.length == 2) {
@@ -995,6 +1035,7 @@
 				user = selectedSite.user;
 				passw = selectedSite.pw;
 			}
+			var keyPath = selectedSite.key;
 			
 			var workingDir = parse.path;
 			

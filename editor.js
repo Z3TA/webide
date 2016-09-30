@@ -1123,7 +1123,8 @@ editor.lastKeyPressed = "";
 		
 		//if(defaultPath == undefined) defaultPath = editor.workingDirectory;
 		
-		if(defaultPath) {
+		if(!defaultPath) defaultPath = editor.getDir();
+		else {
 			
 			var lastChar = defaultPath.substr(defaultPath.length-1);
 			
@@ -2417,6 +2418,7 @@ editor.lastKeyPressed = "";
 	editor.getDir = function (path) {
 		/*
 			Returns the directory of a file path
+			If no path is specified it uses current file or working directory
 		*/
 		
 		console.log("getDir path=" + path);
