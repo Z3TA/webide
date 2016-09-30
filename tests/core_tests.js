@@ -41,7 +41,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function parserGlobalFunctionOnlyfunctionOpt(callback) {
 		// bug: Parser thought g1 vas the function name and deleted it from globalVariables

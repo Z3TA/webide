@@ -1437,12 +1437,7 @@ editor.lastKeyPressed = "";
 		
 		console.time("resize");
 		
-		// Remove the wrapper styles so they get dynamic
-		var wrappers = document.getElementsByClassName("wrap");
-		for (var i = 0; i < wrappers.length; i++) {
-			wrappers[i].style.height = "auto";
-			wrappers[i].style.width = "auto";
-		}
+		
 		
 		
 		// Resize listeners (before)
@@ -1458,9 +1453,15 @@ editor.lastKeyPressed = "";
 			}
 		*/
 		
-		
-		
-		
+		// Remove the wrapper styles so they get dynamic
+		var wrappers = document.getElementsByClassName("wrap");
+		for (var i = 0; i < wrappers.length; i++) {
+			wrappers[i].setAttribute("savedScrollTop", wrappers[i].scrollTop); // Save scrolling position
+			wrappers[i].setAttribute("savedScrollLeft", wrappers[i].scrollLeft);
+			
+			wrappers[i].style.height = "auto";
+			wrappers[i].style.width = "auto";
+			}
 		
 		
 		// Save focus for the current file and give back focus after ther resize
@@ -1560,6 +1561,13 @@ editor.lastKeyPressed = "";
 		var rightWrappers = rightColumn.getElementsByClassName("wrap");
 		for (var i = 0; i < rightWrappers.length; i++) {
 			rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+		}
+		
+		// Restore scrolling of the wrappers
+		for (var i = 0; i < wrappers.length; i++) {
+			console.log("Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
+			wrappers[i].scrollTop = wrappers[i].getAttribute("savedScrollTop");
+			wrappers[i].scrollLeft = wrappers[i].getAttribute("savedScrollLeft");
 		}
 		
 		/*
@@ -2930,7 +2938,7 @@ editor.lastKeyPressed = "";
 						for(var i=0; i<folderItems.length; i++) {
 							
 							stat(folderItems[i], path.join(pathToFolder, folderItems[i]));
-							
+							// We do not know if it's a folder or file yet, folderItems is just an array of strings, we have to wait for stat
 						}
 					}
 				}
@@ -2950,6 +2958,7 @@ editor.lastKeyPressed = "";
 							}
 							else if(stats.isDirectory()) {
 								type = "d";
+								filePath += "/"; // Add trailing slash to indicate that it's a folder 
 							}
 							
 							list.push({type: type, name: fileName, path: filePath, size: stats.size, date: stats.mtime});
@@ -3046,7 +3055,7 @@ editor.lastKeyPressed = "";
 	editor.createPath = function(pathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists
-
+			
 		*/
 		var url = require('url');
 		var parse = url.parse(pathToCreate);
@@ -3078,7 +3087,7 @@ editor.lastKeyPressed = "";
 				
 			});
 		}
-
+		
 		function done() {
 			// Check if the full path exists
 			editor.listFiles(pathToCreate, listFileResult);
@@ -3091,7 +3100,7 @@ editor.lastKeyPressed = "";
 					for(var i=0; i<errors.length; i++) {
 						errorMsg += "\n" + errors[i];
 					}
-				
+					
 					createPathCallback(new Error(errorMsg));
 				}
 				else createPathCallback(null, fullPath)
@@ -3122,7 +3131,7 @@ editor.lastKeyPressed = "";
 					console.log("FTP is ready. Creating path=" + path + " ...");
 					createPathFTP(path);
 				}
-					
+				
 				
 			}
 			else if(parse.protocol == "sftp:") {
@@ -3159,14 +3168,14 @@ editor.lastKeyPressed = "";
 					else createPathSomewhereCallback(null, path);
 				});
 			}
-
+			
 			
 			function createPathFTP(path) {
 				
 				console.log("Creating FTP path=" + path)
 				
 				if(editor.connections.hasOwnProperty(hostname)) {
-
+					
 					var c = editor.connections[hostname];
 					
 					// ftp mkdir
@@ -3312,16 +3321,16 @@ editor.lastKeyPressed = "";
 		
 		// Use event listeners for these so that they also fire when "reloading" the editor
 		editor.eventListeners.exit.push({fun: function exitKioskMode() {
-			var GUI = require('nw.gui').Window.get();
-			GUI.leaveKioskMode();
-			return true;
+				var GUI = require('nw.gui').Window.get();
+				GUI.leaveKioskMode();
+				return true;
 		}});
 		
 		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
-			for(var conn in editor.disconnect) {
-				editor.disconnect[conn]();
-			}
-			return true;			
+				for(var conn in editor.disconnect) {
+					editor.disconnect[conn]();
+				}
+				return true;			
 		}});
 		
 		

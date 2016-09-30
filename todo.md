@@ -12,10 +12,14 @@ Prio:
 What I'm working on
 -------------------
 
-bug: file explorer scrolls up when clicking on it
+Always add a trailing slash on folders path
 
 
 todo:
+
+bug: Comments not showing as comments (green color) in global.js line: 1097
+
+support port in url's (connection manager, etc)
 
 add key auth for ssg to support sftp
 write a blog post from Linux (test if sftp works)

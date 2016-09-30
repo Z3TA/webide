@@ -32,6 +32,9 @@
 		
 		editor.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
 		
+		//editor.on("beforeResize", saveScrollPosition);
+		//editor.on("afterResize", restoreScrollPosition);
+		
 		// editor.on("changeWorkingDir", exploreDir);
 		
 		menuItem = editor.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
@@ -42,6 +45,10 @@
 		fileExplorer = document.createElement("div");
 		fileExplorer.setAttribute("class", "wrap fileExplorer");
 		fileExplorer.setAttribute("id", "fileExplorer");
+		
+		fileExplorer.addEventListener("scroll", function() {
+			console.log(getStack("You scrolled"));
+		});
 		
 		rightColumn.appendChild(fileExplorer);
 		
@@ -84,7 +91,7 @@
 		if(fileExplorer) while(fileExplorer.firstChild) fileExplorer.removeChild(fileExplorer.firstChild); // Emty list
 		
 		// We want to start from the root, then work our way towards the actual dir
-		var folders = getFolders(fullPath);
+		var folders = getFolders(fullPath, true);
 		
 		// Recursive 
 		lookUpPath(folders, 0);
@@ -107,7 +114,7 @@
 			// Shroll down the fire explorer div so we can see the folder we are interested in
 			// Go though all elements in the list and measure the height until we find target path, then scroll down the height
 			
-			while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
+			//while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
 			
 			//console.log("targetPath=" + targetPath);
 			
@@ -140,7 +147,7 @@
 						
 					path = childNodes[i].getAttribute("path");
 					
-					//console.log(targetPath + " == " + path + " ? " + (targetPath == path));
+					console.log(targetPath + " == " + path + " ? " + (targetPath == path));
 					
 					if(path == targetPath) {
 						defaultScroll = totalHeight;
@@ -215,7 +222,7 @@
 			parent.appendChild(ul);
 			
 			editor.resizeNeeded();
-			editor.resize();
+			//editor.resize();
 			
 			if(callback) callback(dirFound);
 		});
@@ -328,7 +335,7 @@
 			box.appendChild(document.createTextNode("+"));
 			
 			editor.resizeNeeded();
-			editor.resize();
+			//editor.resize();
 			
 		}
 		else {
