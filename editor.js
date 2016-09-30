@@ -2419,13 +2419,15 @@ editor.lastKeyPressed = "";
 			Returns the directory of a file path
 		*/
 		
+		console.log("getDir path=" + path);
+		
 		if(path == undefined) {
 			if(editor.currentFile) {
 				path = editor.currentFile.path;
 			}
 			else {
 				console.warn("No file open!");
-				return process.cwd(); // Return (editor) working dir
+				return trailingSlash(process.cwd()); // Return (editor) working dir
 			}
 			
 		}
