@@ -5,6 +5,8 @@
 	
 	Hide File from global scope!? Then it would have to be merged with editor.js
 	
+	All file paths should handle URL's ex: ftp://hostname:21/folder1/folder2
+	Always add a trailing slash after folder paths
 */
 
 "use strict";
@@ -156,16 +158,15 @@ function matchingAngelBracket(index, file, toMatch) {
 }
 
 
-
-function getFolders(fullPath) {
+function getFolders(fullPath, includeHostInfo) {
 	/* 
 		Returns each folder in the path. Can take an url or a local filesystem path
 		
 		Examples:
-		ftp://hostname/folder1/folder2 => ["/", "/folder1", "/folder1/folder2"]
-		C:\\Windows\system32           => ["C:\\", "C:\\Windows", "C:\\Windows\system32"]
+		ftp://hostname/folder1/folder2 => ["ftp://hostname/", "ftp://hostname/folder1/", "ftp://hostname/folder1/folder2/"]
+		C:\\\\Windows\\system32        => ["C:\\", "C:\\Windows\", "C:\\Windows\system32\"]
 		C://Windows/system32           => (throws an error; use C:\ instead)
-		/tank/foo/bar                  => ["/", "/tank", "/tank/foo", "/tank/foo/bar"]
+		/tank/foo/bar                  => ["/", "/tank/", "/tank/foo/", "/tank/foo/bar/"]
 		
 	*/
 	
@@ -204,7 +205,7 @@ function getFolders(fullPath) {
 		// Now it's definitely a URL!
 		
 		var path = fullPath.substr(protocol.length + 3); // Remote protocol part and the ://
-		var hostname = path.substr(0, path.indexOf("/"));
+		var hostname = path.substr(0, path.indexOf("/")); // Also include port nr if specified (hostname:port)
 		
 		if(hostname.length == 0) throw new Error("URL has no hostname! fullPath=" + fullPath);
 		
@@ -219,14 +220,14 @@ function getFolders(fullPath) {
 		var folders = path.split("/");
 		
 		var urls = [];
-		var fullFolder = "";
+		var fullFolder = includeHostInfo ? protocol + "://" + hostname + "/" : "/";
+		
+		urls.push(fullFolder); // Add root
 		
 		for(var i=0; i<folders.length; i++) {
-			fullFolder += "/" + folders[i];
+			fullFolder += folders[i] + "/";
 			urls.push(fullFolder);
 		}
-		
-		urls.unshift("/"); // Add root
 		
 		return urls;
 		
@@ -262,17 +263,16 @@ function getFolders(fullPath) {
 			var folders = path.split("\\");
 			
 			var paths = [];
-			var fullFolder = "";
-			
 			var slashes = startingBackslash ? "\\\\" : "\\";
+			var fullFolder = driveLetter + ":" + slashes;
+			
+			paths.push(fullFolder); // Add root (drive letter)
 			
 			for(var i=0; i<folders.length; i++) {
-				fullFolder += folders[i];
-				paths.push(driveLetter + ":" + slashes + fullFolder);
-				if(i<folders.length) fullFolder += "\\";
+				fullFolder += folders[i] + "\\";
+				paths.push( fullFolder );
+				//(i<folders.length) fullFolder += ;
 			}
-			
-			paths.unshift(driveLetter + ":\\"); // Add root (drive letter)
 			
 			return paths;
 			
@@ -288,14 +288,14 @@ function getFolders(fullPath) {
 			var folders = path.split("/");
 			
 			var paths = [];
-			var fullFolder = "";
+			var fullFolder = "/";
+			
+			paths.push("/"); // Add root folder
 			
 			for(var i=0; i<folders.length; i++) {
-				fullFolder += "/" + folders[i];
+				fullFolder += folders[i] + "/";
 				paths.push(fullFolder);
 			}
-			
-			paths.unshift("/"); // Add root folder
 			
 			return paths;
 			
@@ -754,7 +754,7 @@ function alertBox(msg, icon) {
 }
 
 
-window.alert = alertBox; // Override the native alert box
+//window.alert = alertBox; // Override the native alert box
 
 /*
 	Example reason why you want to use custom confirm box:
@@ -1095,6 +1095,7 @@ function isFolderPath(path) {
 
 function getStack(msg) {
 	// Used in debugging, to get a stack trace of function being called
+	// ex: console.log(getStack("foo"));
 	
 	if(msg == undefined) msg = "";
 	
