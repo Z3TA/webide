@@ -13,11 +13,12 @@ Prio:
 What I'm working on
 -------------------
 
+brainstorm: Making it so that updating a web page with SSG doesn't require HTML and is super easy ...
+Teach people to use a computer to more then a type writer ... Goal: teach some basic coding/scripting
 
+webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
 todo:
-
-write a blog post from Linux (test if sftp works)
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
 
