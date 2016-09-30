@@ -38,7 +38,7 @@
 			callback(true);
 			
 		});
-	});
+	}, 1);
 	
 	editor.addTest(function exitRegExp(callback) {
 		editor.openFile("exitRegExp.js", "foo.match(/^[\\/\\\\]/))\n// moo\n", function(err, file) {
@@ -50,7 +50,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function closingXmlTag(callback) {

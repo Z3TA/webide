@@ -862,6 +862,10 @@
 			checkCharacter(i)
 		}
 		
+		
+		if(insideLineComment) comments.push(new Comment(commentStart, i)); // Find comment on last line
+		
+		
 		console.timeEnd("parseJavaScript");
 		
 		
