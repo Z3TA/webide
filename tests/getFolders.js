@@ -24,5 +24,5 @@ editor.addTest(function getFoldersTest(callback) {
 	
 	callback(true);
 
-}, 1);
+});
 	

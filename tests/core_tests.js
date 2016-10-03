@@ -26,7 +26,37 @@
 		
 		todo: The JS parser should have its own test file
 		
+		
+		
 	*/
+	
+	editor.addTest(function styleTagFuncEnd(callback) {
+		editor.openFile("styleTagFuncEnd.js", '\nfunction foo() {\nvar bar = "<style>";\n}\n', function(err, file) {
+			
+			file.moveCaret(undefined, 0);
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Should throw Error: Unable to find end of function=foo
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
+	editor.addTest(function styleTagFuncEnd2(callback) {
+		editor.openFile("styleTagFuncEnd2.js", '\nfunction foo() {\nvar windowContent = "<style>"white-space: pre-wrap;"" +  + "<<title>" + editor.currentFile.path + "</title><pre>" + editor.currentFile.text + "</pre>";\n}\n', function(err, file) {
+			
+			file.moveCaret(undefined, 0);
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Should throw Error: Unable to find end of function=foo
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
 	
 	editor.addTest(function commentOnLastLine(callback) {
 		editor.openFile("commentOnLastLine.js", "// comment", function(err, file) {
@@ -38,7 +68,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function exitRegExp(callback) {
 		editor.openFile("exitRegExp.js", "foo.match(/^[\\/\\\\]/))\n// moo\n", function(err, file) {
