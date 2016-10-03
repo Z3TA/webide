@@ -14,7 +14,7 @@
 		-->
 		
 	
-	<!-- Core API/PPI  (Plugin Programming Interface). The editor wont work without these -->
+	<!-- Core API (Application programming interface) / PPI (Plugin programming interface). The editor wont work without these -->
 	<script type="text/javascript" src="global.js"></script>
 	<script type="text/javascript" src="editor.js"></script>
 	<script type="text/javascript" src="File.js"></script>
@@ -23,7 +23,7 @@
 	<script type="text/javascript" src="settings_overload.js"></script> <!-- Make your custom setting changes in here -->
 	
 	
-	<!-- Place plugins here: (note that the order *should* not matter, use editor.on("start, function, order) instead!! -->
+	<!-- Place plugins here: (note that the order *should* not matter, use editor.plugin({... order: 100}), or editor.on("start", function, order) instead!! -->
 	
 
 	<script type="text/javascript" src="plugin/self_debug.js"></script>
@@ -120,6 +120,8 @@
 	<script type="text/javascript" src="plugin/file_explorer.js"></script>
 	
 	<script type="text/javascript" src="plugin/css_refresh.js"></script>
+	
+	<script type="text/javascript" src="plugin/print_text.js"></script>
 	
 	<!--<script type="text/javascript" src="plugin/speech_synthesis.js"></script>-->
 	
