@@ -673,6 +673,11 @@ div.gotoFile li b {
 	outline: 0;
 }
 
+.fileExplorer select {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	width: 100%;
+	}
 
 
 /* ###### Tree list */

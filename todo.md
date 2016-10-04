@@ -13,30 +13,13 @@ Prio:
 What I'm working on
 -------------------
 
-Fixing weird error for style tag
-
-print function:
-print plain text file: "white-space: pre-wrap;" on pre tag
-
-
 brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
 and is super easy ...
-Teach people to use a computer to more then a type writer ... Goal: teach some basic coding/scripting
+Teach people to use a computer for more then a type writer ... Goal: teach some basic coding/scripting
 
 webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
 todo:
-
-Print support! Need to be able to print text files.
-
-switch btw local and remote system in the file-explorer
-
-file explorer:
-if the working folder fits in screen height, center it
-search box in file explorer, where you type the name, and pressing enter opens that folder and scrolls.
-like writing a path in bash. cd /ta -> no -> lets -> with auto complete
-
-
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
 
@@ -590,6 +573,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+Connection manager: Show last used connection as default
+
 SSG: Upload/publish to two locations at once.
 
 There should be a "waiting for disk?" message while files are opening from last session.
@@ -855,6 +840,8 @@ List of available commands.
 
 editor.bindKey() instead of editor.keyBindings.push()
 
+-search box in file explorer, where you type the name, and pressing enter opens that folder and scrolls.
+-like writing a path in bash. cd /ta -> no -> lets -> with auto complete
 
 
 Optimization

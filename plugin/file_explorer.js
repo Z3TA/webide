@@ -11,11 +11,13 @@
 		
 	*/
 	
-	var fileExplorer;
+	var fileExplorerFolders;
+	var fileExplorerWrap;
 	var leftColumn, rightColumn;	
 	var visible = false;
 	var menuItem;
 	var defaultScroll = 0;
+	var fsSelect;
 	
 	editor.plugin({
 		desc: "File explorer window widget",
@@ -42,22 +44,35 @@
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
 		
-		fileExplorer = document.createElement("div");
-		fileExplorer.setAttribute("class", "wrap fileExplorer");
-		fileExplorer.setAttribute("id", "fileExplorer");
+		fileExplorerWrap = document.createElement("div");
+		fileExplorerWrap.setAttribute("class", "wrap fileExplorer");
+		fileExplorerWrap.setAttribute("id", "fileExplorer");
 		
+		fileExplorerFolders = document.createElement("div");
+		fileExplorerFolders.setAttribute("id", "fileExplorerFolders");
+		
+		fsSelect = document.createElement("select");
+		fsSelect.setAttribute("id", "fsSelect");
+		fsSelect.onchange = changeFs;
+		
+		/*
 		fileExplorer.addEventListener("scroll", function() {
 			console.log(getStack("You scrolled"));
 		});
+		*/
 		
-		rightColumn.appendChild(fileExplorer);
+		fileExplorerWrap.appendChild(fsSelect);
+		fileExplorerWrap.appendChild(fileExplorerFolders);
+		rightColumn.appendChild(fileExplorerWrap);
 		
 		//exploreDir(editor.workingDirectory);
+		
+		toggleFileExplorer();
 		
 	}
 	
 	function unload() {
-		rightColumn.removeChild(fileExplorer);
+		rightColumn.removeChild(fileExplorerWrap);
 	}
 	
 	function toggleFileExplorer() {
@@ -68,11 +83,11 @@
 		
 		if(visible) {
 			exploreDir(editor.workingDirectory)
-			fileExplorer.style.display="block";
+			fileExplorerWrap.style.display="block";
 			
 		}
 		else {
-			fileExplorer.style.display="none";
+			fileExplorerWrap.style.display="none";
 			editor.resizeNeeded();
 			
 		}
@@ -82,13 +97,31 @@
 	function scroll() {
 		// Make it center/middle ?? Whole project folder should be visible
 		
-		fileExplorer.scrollTop = defaultScroll;
+		fileExplorerFolders.scrollTop = defaultScroll;
 		console.log("Scrolled down on file explorer: defaultScroll=" + defaultScroll);
 	}
 	
 	function exploreDir(fullPath) {
 		
-		if(fileExplorer) while(fileExplorer.firstChild) fileExplorer.removeChild(fileExplorer.firstChild); // Emty list
+		while(fileExplorerFolders.firstChild) fileExplorerFolders.removeChild(fileExplorerFolders.firstChild); // Emty list
+		
+		while(fsSelect.firstChild) fsSelect.removeChild(fsSelect.firstChild); // Emty select options
+		
+		// Make a list of connected file-systems
+		var option = document.createElement("option");
+		option.appendChild(document.createTextNode("Local file-system"));
+		option.setAttribute("id", "local");
+		fsSelect.appendChild(option);
+		
+		var connName = "";
+		for(var conn in editor.connections) {
+			option = document.createElement("option");
+			connName = editor.connections[conn].protocol + "://" + conn
+			option.appendChild(document.createTextNode(connName));
+			option.setAttribute("id", conn);
+			if(fullPath.indexOf(connName) != -1) option.setAttribute("selected", "true");
+			fsSelect.appendChild(option);
+			}
 		
 		// We want to start from the root, then work our way towards the actual dir
 		var folders = getFolders(fullPath, true);
@@ -122,7 +155,7 @@
 			var measuredElements = 0;
 			var defaultHeight = 14;
 			
-			measure(fileExplorer);
+			measure(fileExplorerFolders);
 			
 			function measure(el) {
 				//console.log("measuring el=" + el);
@@ -191,7 +224,7 @@
 		
 		var dirFound = null;
 		
-		if(!parent) parent = fileExplorer;
+		if(!parent) parent = fileExplorerFolders;
 		else {
 			// Make the parent folder appear open
 			
@@ -356,6 +389,30 @@
 		
 		var filePath = item.getAttribute("path");
 		editor.openFile(filePath);
+	}
+	
+	function changeFs(event) {
+		
+		var sel = event.target;
+		var host = sel.options[sel.selectedIndex].id;
+		
+		// Remember open folders ? 
+		
+		//alert("host=" + host);
+		
+		if(host=="local") {
+			var root = getFolders(process.cwd())[0];
+			exploreDir(root);
+		}
+		else {
+			if(editor.connections.hasOwnProperty(host)) {
+				var url = editor.connections[host].protocol;
+				if(!url) throw new Error("url=" + url);
+				url += "://" + host + "/";
+				exploreDir(url);
+			}
+			else throw new Error("Not connected to " + host);
+		}
 	}
 	
 })();

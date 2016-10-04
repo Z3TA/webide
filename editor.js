@@ -68,7 +68,6 @@ editor.mouseY = 0;
 editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 editor.connections = {}  // Store connections to remote servers (FTP, SSH)
-editor.disconnect = {}   // Create a disconnnect function for each connection, can be called by running editor.disconnect[serverName](callback);
 editor.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
@@ -478,7 +477,7 @@ editor.lastKeyPressed = "";
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
-					var c = editor.connections[parse.hostname];
+					var c = editor.connections[parse.hostname].client;
 					
 					console.log("Getting file size from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
 					
@@ -501,7 +500,7 @@ editor.lastKeyPressed = "";
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
-					var c = editor.connections[parse.hostname];
+					var c = editor.connections[parse.hostname].client;
 					
 					console.log("Getting file size from SFTP server: " + parse.pathname);
 					
@@ -724,7 +723,7 @@ editor.lastKeyPressed = "";
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
-					var c = editor.connections[parse.hostname];
+					var c = editor.connections[parse.hostname].client;
 					
 					console.log("Getting file from FTP server: " + parse.pathname);
 					
@@ -765,7 +764,7 @@ editor.lastKeyPressed = "";
 				
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
-					var c = editor.connections[parse.hostname];
+					var c = editor.connections[parse.hostname].client;
 					
 					console.log("Getting file from SFTP server: " + parse.pathname);
 					
@@ -973,7 +972,7 @@ editor.lastKeyPressed = "";
 			
 			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[hostname];
+				var c = editor.connections[hostname].client;
 				
 				var input = inputBuffer ? text : new Buffer(text, encoding);
 				var destPath = pathname;
@@ -1023,7 +1022,7 @@ editor.lastKeyPressed = "";
 			
 			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[hostname];
+				var c = editor.connections[hostname].client;
 				
 				var input = inputBuffer ? text : new Buffer(text, encoding);
 				var useCompression = false;
@@ -2623,7 +2622,7 @@ editor.lastKeyPressed = "";
 		
 		if(protocol == "ftp" || protocol == "ftps") {
 			var Client = require('ftp');
-			var c = editor.connections[serverAddress] = new Client();
+			var c = editor.connections[serverAddress] = {client: new Client(), protocol: protocol};
 			c.on('ready', function() {
 				console.log("Connected to FTP server on " + serverAddress + " !");
 				c.pwd(function(err, dir) {
@@ -2631,10 +2630,9 @@ editor.lastKeyPressed = "";
 					editor.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 					
 					// Create disconnect function
-					editor.disconnect[serverAddress] = function disconnectFTP() {
+					editor.connections[serverAddress].close = function disconnectFTP() {
 						c.end();
 						delete editor.connections[serverAddress];
-						delete editor.disconnect[serverAddress];
 						
 						console.log("Dissconnected from FTP on " + serverAddress + "");
 					};
@@ -2699,13 +2697,12 @@ editor.lastKeyPressed = "";
 				if(err) callback(err);
 				else {
 					
-					editor.connections[serverAddress] = c;
+					editor.connections[serverAddress] = {client: c, protocol: protocol};
 					
 					// Create disconnect function
-					editor.disconnect[serverAddress] = function disconnectSSH() {
+					editor.connections[serverAddress].close = function disconnectSSH() {
 						c.end();
 						delete editor.connections[serverAddress];
-						delete editor.disconnect[serverAddress];
 						
 						console.log("Dissconnected from SSH on " + serverAddress + "");
 					};
@@ -2731,16 +2728,15 @@ editor.lastKeyPressed = "";
 							//throw err;
 						}
 						else {
-							editor.connections[serverAddress] = sftp;
+							editor.connections[serverAddress] = {client: sftp, protocol: protocol};
 							editor.changeWorkingDir(workingDir);
 							
 							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
 							
 							// Create disconnect function
-							editor.disconnect[serverAddress] = function disconnectSFTP() {
+							editor.connections[serverAddress].close = function disconnectSFTP() {
 								c.end();
 								delete editor.connections[serverAddress];
-								delete editor.disconnect[serverAddress];
 								
 								console.log("Dissconnected from SFTP on " + serverAddress + "");
 							};
@@ -2881,7 +2877,7 @@ editor.lastKeyPressed = "";
 			// ### List file using SFTP protocol
 			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[hostname];
+				var c = editor.connections[hostname].client;
 				
 				console.log("Initiating folder read on SFTP " + hostname + ":" + pathname);
 				
@@ -2995,7 +2991,7 @@ editor.lastKeyPressed = "";
 			
 			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[hostname];
+				var c = editor.connections[hostname].client;
 				
 				if(pathToFolder != editor.workingDirectory) {
 					// First change folder
@@ -3157,7 +3153,7 @@ editor.lastKeyPressed = "";
 				// ### Create a directory using SFTP protocol
 				if(editor.connections.hasOwnProperty(parse.hostname)) {
 					
-					var c = editor.connections[parse.hostname];
+					var c = editor.connections[parse.hostname].client;
 					
 					var b = c.mkdir(path, function (err, folderItems) {
 						
@@ -3195,7 +3191,7 @@ editor.lastKeyPressed = "";
 				
 				if(editor.connections.hasOwnProperty(hostname)) {
 					
-					var c = editor.connections[hostname];
+					var c = editor.connections[hostname].client;
 					
 					// ftp mkdir
 					c.mkdir(path, function(err) {
@@ -3346,8 +3342,8 @@ editor.lastKeyPressed = "";
 		}});
 		
 		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
-				for(var conn in editor.disconnect) {
-					editor.disconnect[conn]();
+			for(var conn in editor.connections) {
+				editor.connections[conn].close();
 				}
 				return true;			
 		}});
