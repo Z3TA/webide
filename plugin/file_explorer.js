@@ -1,13 +1,10 @@
 (function() {
 	/*
+		Only show the file explorer explicity. The screen cant have too much information or the brain will get burnt out
 		
-		todo: Select box: Make it possible to switch beteen local and remote file-systems (show local + any connected file-systems)
+		todo: Append a list for each connection plus local system, so you can browse all at once
 		
 		todo: File watcher, update the list when file change names, or are created/removed
-		
-		todo: Only show the file explorer explicity. The screen cant have too much information or the brain will get burnt out
-		
-		todo: rescroll list after resize event ?
 		
 	*/
 	
@@ -67,7 +64,7 @@
 		
 		//exploreDir(editor.workingDirectory);
 		
-		toggleFileExplorer();
+		toggleFileExplorer(visible);
 		
 	}
 	
@@ -75,9 +72,12 @@
 		rightColumn.removeChild(fileExplorerWrap);
 	}
 	
-	function toggleFileExplorer() {
+	function toggleFileExplorer(toState) {
 		
-		visible = visible ? false : true; // Switch
+		//alertBox("toState=" + toState);
+		
+		if(typeof toState == "boolean") visible = toState;
+		else visible = visible ? false : true; // Switch
 		
 		menuItem.innerHTML = "Toggle file explorer " + (visible ? "off":"on");
 		
