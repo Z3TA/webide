@@ -1,7 +1,7 @@
 
 Prio:
 
-1) Beta release
+1) Beta release, get USER FEEDBACK
 2) Make it simple to update a home page
 3) Bug/issue fixing and refactoring
 4) Polishing of existing features
@@ -31,7 +31,16 @@ Print support! Need to be able to print text files.
 
 switch btw local and remote system in the file-explorer
 
+file explorer:
+if the working folder fits in screen height, center it
+search box in file explorer, where you type the name, and pressing enter opens that folder and scrolls.
+like writing a path in bash. cd /ta -> no -> lets -> with auto complete
+
+
+
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
+
+ssg: To actually be able to edit you have to click the WYSIWYG button, annoying when you are in edit mode if you want to test
 
 ssg: remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
 

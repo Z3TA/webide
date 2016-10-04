@@ -1613,7 +1613,7 @@
 							insideScriptTag = true;
 						}
 					}
-					else if(xmlTag.toLowerCase() == "style") {
+					else if(xmlTag.toLowerCase() == "style" && !insideQuote) {
 						
 						if(insideXmlTagEnding) { // Tag end
 							CSS = false;
