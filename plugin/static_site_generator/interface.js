@@ -17,14 +17,18 @@
 	var inputAuthUser;
 	var inputAuthPw;
 	var inputAuthKey;
+	var buttonWysiwyg;
 	
-	// Load native UI library
-	var gui = require('nw.gui');
+	var gui = require('nw.gui'); // Load native UI library
+	
 	var previewWin;
-	var editContent = false;
+	var wysiwygEnabled = false; 
+	var notEditableReason = "";
+	var editable = false;
 	var sourceFile; // Source file that is being previewed
 	var headerRows = 0;
 	var footerRows = 0;
+	
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -202,6 +206,14 @@
 			previewPage(selectedSite);
 		}, false);
 		
+		buttonWysiwyg= document.createElement("input");
+		buttonWysiwyg.setAttribute("type", "button");
+		buttonWysiwyg.setAttribute("class", "button");
+		buttonWysiwyg.setAttribute("value", "WYSIWYG");
+		buttonWysiwyg.addEventListener("click", function() {
+			wysiwyg(selectedSite);
+		}, false);
+		
 		var buttonPublish = document.createElement("input");
 		buttonPublish.setAttribute("type", "button");
 		buttonPublish.setAttribute("class", "button");
@@ -231,6 +243,7 @@
 		controlView.appendChild(buttonOpenEdit);
 		controlView.appendChild(buttonNewPage);
 		controlView.appendChild(buttonPreview);
+		controlView.appendChild(buttonWysiwyg);
 		controlView.appendChild(buttonPublish);
 		controlView.appendChild(buttonSettings);
 		controlView.appendChild(buttonCancel);
@@ -663,7 +676,7 @@
 		return false;
 	}
 	
-	function previewPage(site) {
+	function previewPage(site, callback) {
 		
 		console.log("Previewing " + site.name);
 		
@@ -687,12 +700,12 @@
 					sourceFile = editor.currentFile;
 					
 					if(!sourceFile.isSaved) {
-						alert("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
-						editContent = false;
+						editable = false;
+						notEditableReason = "The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!";
 					}
 					else {
-						editContent = true;
-					} 
+						editable = true;
+					}
 					
 					
 					//var url = path.join(site.preview, editor.currentFile.name);
@@ -700,7 +713,7 @@
 					// url needs to have / instead of \ for path delimiter
 					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
-					openPreviewWin(url)
+					openPreviewWin(url, callback)
 					
 					previewWinOpened = true;
 					
@@ -714,7 +727,8 @@
 				// Open the index page
 				var url = "file:///" + site.preview.replace(/\\/g, "/");
 				
-				editContent = false;
+				notEditableReason = "No file open";
+				editable = false;
 				
 				editor.listFiles(site.preview, function(err, list) {
 					
@@ -734,7 +748,7 @@
 						url += page;
 					}
 					
-					openPreviewWin(url);
+					openPreviewWin(url, callback);
 					
 				});
 			}
@@ -743,7 +757,7 @@
 		});
 	}
 	
-	function openPreviewWin(url) {
+	function openPreviewWin(url, callback) {
 		
 		var previewWinOpen = false;
 		
@@ -760,7 +774,7 @@
 		if(!previewWinOpen) {
 			//closePreview(); // Just in case
 			
-			previewWin = gui.Window.open(url);
+			previewWin = gui.Window.open(url, {toolbar:true}); // Show the toolbar so you can see the URL, and open dev tools
 			
 			previewWin.on('focus', previewWinFocus);
 			previewWin.on('focus', previewWinUnFocus);
@@ -788,57 +802,31 @@
 		// If 404 !?
 		//previewIframe.src = path.join(site.preview, "index.htm");
 		
-	}
-	
-	function previewWinLoaded() {
-		
-		previewWin.focus();
-		
-		console.log("PreviewWin loaded!");
-		
-		
-		headerRows = 0;
-		footerRows = 0;
-		if(editContent) {
+		function previewWinLoaded() {
 			
-			//var body = previewWin.window.getElementsByTagName("body")[0];
-			var body = previewWin.window.document.body;
+			previewWin.focus();
 			
-			body.contentEditable = "true";
+			console.log("PreviewWin loaded!");
 			
-			previewWin.window.addEventListener("input", previewInput);
-			
-			// Find stuff that should be ignored when comparing edits in preview
-			
-			var srcHTML = getSourceCodeBody();
-			if(srcHTML) {
-				var diff = textDiff(srcHTML, body.innerHTML);
-				var row = -1;
-				for (var i=0; i<diff.inserted.length; i++) {
-					if(row == -1) row = diff.inserted[i].row;
-					
-					if(row < diff.inserted[i].row) footerRows++
-					else headerRows++;
-				}
-			}
+			if(callback) callback(previewWin);
 		}
-		else {
-			previewWin.window.removeEventListener("input", previewInput);
+		
+		
+		function previewWinFocus() {
+			console.log('preview window is focused');
+			editor.input = false;
 		}
+		
+		function previewWinUnFocus() {
+			if(editor.currentFile) editor.input = true;
+		}
+		
 	}
 	
 	
-	function previewWinFocus() {
-		console.log('preview window is focused');
-		editor.input = false;
-	}
 	
-	function previewWinUnFocus() {
-		if(editor.currentFile) editor.input = true;
-	}
-	
-	function previewInput(target, type, bubbles, cancelable) {
-		console.log("previewInput!");
+	function contentEdit(target, type, bubbles, cancelable) {
+		console.log("contentEdit!");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
 		if(!editor.files.hasOwnProperty(sourceFile.path)) alert("The source for the file being previewed is not opened!")
@@ -848,7 +836,7 @@
 			console.log("type=" + type);
 			
 			// Compare the source codes
-			var srcHTML = getSourceCodeBody();
+			var srcHTML = getSourceCodeBody(sourceFile);
 			
 			if(srcHTML) {
 				// Compare the source with the editable preview
@@ -966,7 +954,7 @@
 		}
 	}
 	
-	function getSourceCodeBody() {
+	function getSourceCodeBody(sourceFile) {
 		// Returns the body of the source HTML code
 		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
 		
@@ -1208,5 +1196,81 @@
 
 		}
 	}
+	
+	function wysiwyg(site) {
+		
+		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
+		
+		if(wysiwygEnabled) {
+			if(previewWin) enableContentEdit(previewWin);
+			else previewPage(site, enableContentEdit);
+		}
+		else {
+			if(previewWin) disableContentEdit(previewWin);
+		}
+		
+		function enableContentEdit(previewWin) {
+			/*
+				1. 
+				2. Open the file if it's not already open (then make sure it's saved, and that the preview is from the last save)
+				3. Make the page editable and insert toolbar
+			*/
+			
+			// Get the URL of the page/file in preview
+			var url = previewWin.window.location.href;
+			
+			
+			
+			
+			// Change buttonWysiwyg state to "active"
+			buttonWysiwyg.style.fontWeight="bold";
+			
+			
+			headerRows = 0;
+			footerRows = 0;
+			
+			if(editable) {
+				
+				//var body = previewWin.window.getElementsByTagName("body")[0];
+				var body = previewWin.window.document.body;
+				
+				body.contentEditable = "true";
+				
+				previewWin.window.addEventListener("input", contentEdit);
+				
+				// Find stuff that should be ignored when comparing edits in preview
+				
+				var srcHTML = getSourceCodeBody(sourceFile);
+				if(srcHTML) {
+					var diff = textDiff(srcHTML, body.innerHTML);
+					var row = -1;
+					for (var i=0; i<diff.inserted.length; i++) {
+						if(row == -1) row = diff.inserted[i].row;
+						
+						if(row < diff.inserted[i].row) footerRows++
+						else headerRows++;
+					}
+				}
+			}
+			else {
+				disableContentEdit(previewWin);
+				
+				alertBox(notEditableReason);
+			}
+		}
+		
+		function disableContentEdit(previewWin) {
+			
+			// Change buttonWysiwyg state to "normal"
+			buttonWysiwyg.style.fontWeight="normal";
+			
+			var body = previewWin.window.document.body;
+			body.contentEditable = "false";
+			previewWin.window.removeEventListener("input", contentEdit);
+			
+		}
+		
+	}
+	
 	
 })();

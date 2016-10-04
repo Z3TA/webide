@@ -13,6 +13,10 @@ Prio:
 What I'm working on
 -------------------
 
+WYSIWYG button on SSG panel. 
+
+
+
 brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
 and is super easy ...
 Teach people to use a computer for more then a type writer ... Goal: teach some basic coding/scripting
@@ -30,7 +34,9 @@ ssg: remove new span and div tags entered from contenteditable. Add white space 
 WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
 support colaboration editing (many ppl edit at the same time), look on LAN for others with the same file open
 
-support port in url's (connection manager, etc)
+
+
+Guide for new users! 
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -842,6 +848,9 @@ editor.bindKey() instead of editor.keyBindings.push()
 
 -search box in file explorer, where you type the name, and pressing enter opens that folder and scrolls.
 -like writing a path in bash. cd /ta -> no -> lets -> with auto complete
+
+support port in url's (connection manager, etc)
+
 
 
 Optimization
