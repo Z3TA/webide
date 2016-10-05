@@ -29,6 +29,7 @@
 	var headerRows = 0;
 	var footerRows = 0;
 	
+	var menuItem;
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -58,6 +59,8 @@
 	function load() {
 		// Called when the module is loaded
 		
+		//alert("loading");
+		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
 		sites = window.localStorage.cmsjz_sites ? JSON.parse(window.localStorage.cmsjz_sites) : [demoSite];
@@ -65,24 +68,50 @@
 		var keyF9 = 120;
 		var keyEscape = 27;
 		
-		editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
-		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hide, charCode: keyEscape, combo: 0});
-		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewButtonClick, charCode: keyF9, combo: 0});
-		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
+		editor.bindKey({desc: "Show the manager for the static site generator", fun: showSSG, charCode: keyF9, combo: CTRL});
+		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hideSSG, charCode: keyEscape, combo: 0});
+		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewSSG, charCode: keyF9, combo: 0});
+		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publishSSG, charCode: keyF9, combo: CTRL + SHIFT});
 		
 		//build();
 		
-		editor.addMenuItem("Static site generator", function() {
-			show();
+		menuItem = editor.addMenuItem("Static site generator", function() {
+			showSSG();
 			editor.hideMenu();
 		});
 		
 		editor.on("fileShow", fileChanged);
 		
-		editor.on("exit", function SSG_cleanup() {
-			closePreview();
-			return true;
-		});
+		editor.on("exit", SSG_cleanup);
+		
+	}
+	
+	function SSG_cleanup() {
+		closePreview();
+		return true;
+	}
+	
+	function unload() {
+		// Cleaning up, for example when disabling a plugin
+		
+		//alert("UNloading");
+		
+		SSG_cleanup(); // closePreview();
+		
+		editor.removeEvent("fileShow", fileChanged);
+		editor.removeEvent("exit", SSG_cleanup);
+		
+		editor.removeMenuItem(menuItem);
+		
+		editor.unbindKey(hideSSG);
+		editor.unbindKey(previewSSG);
+		editor.unbindKey(publishSSG);
+		editor.unbindKey(showSSG);
+		
+		if(manager) {
+		var footer = document.getElementById("footer");
+		footer.removeChild(manager);
+		}
 		
 	}
 	
@@ -102,9 +131,7 @@
 	}
 	
 	
-	function unload() {
-		// Cleaning up, for example when disabling a plugin
-	}
+	
 	
 	function build() {
 		
@@ -157,7 +184,7 @@
 			buttonSetWorkingDirectory.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			editor.workingDirectory = selectedSite.source;
-			hide();
+			hideSSG();
 			}, false);
 		*/
 		
@@ -187,7 +214,7 @@
 				});
 			});
 			
-			hide();
+			hideSSG();
 		}, false);
 		
 		var buttonNewPage = document.createElement("input");
@@ -219,7 +246,7 @@
 		buttonPublish.setAttribute("class", "button");
 		buttonPublish.setAttribute("value", "Publish");
 		buttonPublish.addEventListener("click", function() {
-			publish(selectedSite);
+			publishSSG(selectedSite);
 		}, false);
 		
 		var buttonSettings = document.createElement("input");
@@ -235,7 +262,7 @@
 		buttonCancel.setAttribute("value", "Cancel");
 		
 		buttonCancel.addEventListener("click", function() {
-			hide();
+			hideSSG();
 		}, false);
 		
 		
@@ -644,7 +671,7 @@
 		return selectSite.options.length -1;
 	}
 	
-	function show() {
+	function showSSG() {
 		editor.input = false; // Steal focus from the file
 		
 		if(!manager) build(); // Build the GUI if it's not already built
@@ -656,7 +683,7 @@
 		return false;
 	}
 	
-	function hide() {
+	function hideSSG() {
 		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
 		
 		// Only need to hide if the object is created!
@@ -669,7 +696,7 @@
 		return false;
 	}
 	
-	function previewButtonClick(file, combo, character, charCode, keyPushDirection, targetElementClass) {
+	function previewSSG(file, combo, character, charCode, keyPushDirection, targetElementClass) {
 		if(!selectedSite) alert("No site selected!");
 		else previewPage(selectedSite);
 		
@@ -696,19 +723,7 @@
 				&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
 				&& fileName != "header" && fileName != "footer") { 
 					
-					// Save the src file so we edit the right file
-					sourceFile = editor.currentFile;
-					
-					if(!sourceFile.isSaved) {
-						editable = false;
-						notEditableReason = "The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!";
-					}
-					else {
-						editable = true;
-					}
-					
-					
-					//var url = path.join(site.preview, editor.currentFile.name);
+					// Preview the current file opened in the editor !
 					
 					// url needs to have / instead of \ for path delimiter
 					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
@@ -840,104 +855,105 @@
 			
 			if(srcHTML) {
 				// Compare the source with the editable preview
-				var prewHTML = previewWin.window.document.body.innerHTML;
-				
-				var diff = textDiff(srcHTML, prewHTML, headerRows, footerRows);
-				
-				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
-				
-				if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
-				
-				console.log("srcStartIndex=" + srcStartIndex);
-				
-				var tmpCaret = sourceFile.createCaret(srcStartIndex);
-				
-				var startRow = tmpCaret.row;
-				
-				console.log("startRow=" + startRow);
-				
-				var replacedLine = false;
-				var linesToBeRemoved = [];
-				var row = -1;
-				var col = -1;
-				var text = "";
-				
-				console.log("diff.removed=" + JSON.stringify(diff.removed));
-				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
-				
-				for(var i=0; i<diff.removed.length; i++) {
-					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
-					// Remove the text on the line, but do not remove the line (yet)
-					row = diff.removed[i].row + startRow;
+				var main = previewWin.window.document.getElementsByTagName("main")[0];
+				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
 					
-					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim());
+					var diff = textDiff(srcHTML, prewHTML, headerRows, footerRows);
 					
-					sourceFile.removeAllTextOnRow(row); 
+					var srcStartIndex = sourceFile.text.indexOf(srcHTML);
 					
-					console.log("Removed all text on row=" + row);
+					if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
 					
-					// Is there a line that will replace it?
-					replacedLine = false;
-					for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
-						console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
-						if(diff.inserted[j].row == diff.removed[i].row) {
-							
-							// Insert the replacing line
-							text = diff.inserted[j].text;
-							
-							if(!replacedLine) sourceFile.insertTextOnRow(text, row)
-							else sourceFile.insertTextRow(text, row);
-							
-							console.log("Inserting (replacing) row=" + row + " text=" + text);
-							
-							// textLineDiff
-							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
-							
-							if(diff.inserted[j].text.length > diff.removed[i].text.length) col++;
-							
-							// Move the file caret to the column where the actual change happened
-							sourceFile.caret.row = row;
-							sourceFile.caret.col = col;
-							
-							sourceFile.fixCaret();
-							
-							replacedLine= true;
-							diff.inserted.splice(j, 1);
-							//j--;
-						}
-					}
+					console.log("srcStartIndex=" + srcStartIndex);
 					
-					if(!replacedLine) {
-						linesToBeRemoved.push(diff.removed[i].row);
-					}
+					var tmpCaret = sourceFile.createCaret(srcStartIndex);
 					
-					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
-				}
-				
-				// Add lines left to be inserted before removing removed lines (backwards)
-				
-				for(var i=diff.inserted.length-1; i>-1; i--) {
+					var startRow = tmpCaret.row;
 					
-					// Insert the line
-					row = diff.inserted[i].row + startRow;
-					text = diff.inserted[i].text;
-					sourceFile.insertTextRow(text, row);
+					console.log("startRow=" + startRow);
 					
-					// Increment linesToBeRemoved 
-					for(var j=0; j<linesToBeRemoved.length; j++) {
-						if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
+					var replacedLine = false;
+					var linesToBeRemoved = [];
+					var row = -1;
+					var col = -1;
+					var text = "";
+					
+					console.log("diff.removed=" + JSON.stringify(diff.removed));
+					console.log("diff.inserted=" + JSON.stringify(diff.inserted));
+					
+					for(var i=0; i<diff.removed.length; i++) {
+						console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
+						// Remove the text on the line, but do not remove the line (yet)
+						row = diff.removed[i].row + startRow;
 						
-						if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
+						if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim());
+						
+						sourceFile.removeAllTextOnRow(row); 
+						
+						console.log("Removed all text on row=" + row);
+						
+						// Is there a line that will replace it?
+						replacedLine = false;
+						for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
+							console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
+							if(diff.inserted[j].row == diff.removed[i].row) {
+								
+								// Insert the replacing line
+								text = diff.inserted[j].text;
+								
+								if(!replacedLine) sourceFile.insertTextOnRow(text, row)
+								else sourceFile.insertTextRow(text, row);
+								
+								console.log("Inserting (replacing) row=" + row + " text=" + text);
+								
+								// textLineDiff
+								col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
+								
+								if(diff.inserted[j].text.length > diff.removed[i].text.length) col++;
+								
+								// Move the file caret to the column where the actual change happened
+								sourceFile.caret.row = row;
+								sourceFile.caret.col = col;
+								
+								sourceFile.fixCaret();
+								
+								replacedLine= true;
+								diff.inserted.splice(j, 1);
+								//j--;
+							}
+						}
+						
+						if(!replacedLine) {
+							linesToBeRemoved.push(diff.removed[i].row);
+						}
+						
+						console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
+					}
+					
+					// Add lines left to be inserted before removing removed lines (backwards)
+					
+					for(var i=diff.inserted.length-1; i>-1; i--) {
+						
+						// Insert the line
+						row = diff.inserted[i].row + startRow;
+						text = diff.inserted[i].text;
+						sourceFile.insertTextRow(text, row);
+						
+						// Increment linesToBeRemoved 
+						for(var j=0; j<linesToBeRemoved.length; j++) {
+							if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
+							
+							if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
+						}
+						
+					}
+					
+					// Remove lines to be removed (backwards)
+					for(var i=linesToBeRemoved.length-1; i>-1; i--) {
+						sourceFile.removeRow(linesToBeRemoved[i] + startRow);
 					}
 					
 				}
-				
-				// Remove lines to be removed (backwards)
-				for(var i=linesToBeRemoved.length-1; i>-1; i--) {
-					sourceFile.removeRow(linesToBeRemoved[i] + startRow);
-				}
-				
-			}
 			
 		}
 		
@@ -962,10 +978,10 @@
 		else return srcMatchBody[1];
 	}
 	
-	function publish() {
+	function publishSSG() {
 		if(selectedSite) publishSite(selectedSite)
 		else {
-			show();
+			showSSG();
 			alert("Select site to publish!");
 		}
 		return false;
@@ -1210,31 +1226,101 @@
 		}
 		
 		function enableContentEdit(previewWin) {
-			/*
-				1. 
-				2. Open the file if it's not already open (then make sure it's saved, and that the preview is from the last save)
-				3. Make the page editable and insert toolbar
-			*/
 			
-			// Get the URL of the page/file in preview
+			// 1.  Get the URL of the page/file in preview
 			var url = previewWin.window.location.href;
+			var systemPathDelimiter = getPathDelimiter(process.cwd());
+			var sourceFilePath = url.replace("file://", "").replace(/\//g, systemPathDelimiter).replace(site.preview, site.source);
 			
+			//console.log("url=" + url);
+			//console.log("sourceFilePath=" + sourceFilePath);
 			
+			if(sourceFilePath.match(/index\.htm./i)) {
+				alertBox("Unable to edit index file in WYSIWYG mode");
+				return;
+			}
 			
+			// 2. Open the file in the editor if it's not already open
+			if(editor.files.hasOwnProperty(sourceFilePath)) {
+				sourceFile = editor.files[sourceFilePath];
+				editor.showFile(sourceFile); // Make sure it's the current one open
+				
+				makeItEditable(null, sourceFile);
+			}
+			else {
+				editor.openFile(sourceFilePath, undefined, makeItEditable);
+			}
 			
-			// Change buttonWysiwyg state to "active"
-			buttonWysiwyg.style.fontWeight="bold";
-			
-			
-			headerRows = 0;
-			footerRows = 0;
-			
-			if(editable) {
+			function makeItEditable(err, file) {
+				
+				if(err) throw err;
+				
+				sourceFile = file;
+				
+				// make sure it's saved, and that the preview is from the last save
+				if(!sourceFile.isSaved) {
+					alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+					return;
+				}
 				
 				//var body = previewWin.window.getElementsByTagName("body")[0];
 				var body = previewWin.window.document.body;
+				var mainElements = previewWin.window.document.getElementsByTagName("main");
+				var contentEditor = previewWin.window.document;
 				
-				body.contentEditable = "true";
+				if(mainElements.length > 1) {
+					alertBox("Document contains more then one &lt;main&gt; element!");
+					return;
+				}
+				if(mainElements.length == 0) {
+					alertBox("Document has no &lt;main&gt; element!");
+					return;
+				}
+				
+				var main = mainElements[0];
+				
+				// ### Insert toolbar
+				var aShowDefaultUI = true;
+				
+				var toolbar = document.createElement("div");
+				toolbar.setAttribute("id", "toolbar");
+				toolbar.setAttribute("class", "wysiwygtoolbar");
+				
+				var buttonH1 = document.createElement("button");
+				buttonH1.appendChild(document.createTextNode("Huvudrubrik"));
+				buttonH1.onclick = function insertH1() {
+					contentEditor.execCommand("heading", aShowDefaultUI, "h1");
+				}
+				toolbar.appendChild(buttonH1);
+				
+				var buttonItalic = document.createElement("button");
+				buttonItalic.appendChild(document.createTextNode("kursiv"));
+				buttonItalic.onclick = function makeItalic() {
+					contentEditor.execCommand("italic", aShowDefaultUI);
+				}
+				toolbar.appendChild(buttonItalic);
+				
+				var buttonBold = document.createElement("button");
+				buttonBold.appendChild(document.createTextNode("fetstil"));
+				buttonBold.onclick = function makeBold() {
+					contentEditor.execCommand("bold", aShowDefaultUI);
+				}
+				toolbar.appendChild(buttonBold);
+				
+				body.insertBefore(toolbar, body.firstChild); // Insert the toolbar at the top
+				
+				
+				// Change buttonWysiwyg state to "active"
+				buttonWysiwyg.style.fontWeight="bold";
+				
+				
+				headerRows = 0;
+				footerRows = 0;
+				
+				
+				
+				
+				main.contentEditable = "true";
 				
 				previewWin.window.addEventListener("input", contentEdit);
 				
@@ -1242,7 +1328,7 @@
 				
 				var srcHTML = getSourceCodeBody(sourceFile);
 				if(srcHTML) {
-					var diff = textDiff(srcHTML, body.innerHTML);
+					var diff = textDiff(srcHTML, main.innerHTML);
 					var row = -1;
 					for (var i=0; i<diff.inserted.length; i++) {
 						if(row == -1) row = diff.inserted[i].row;
@@ -1252,12 +1338,7 @@
 					}
 				}
 			}
-			else {
-				disableContentEdit(previewWin);
-				
-				alertBox(notEditableReason);
-			}
-		}
+				}
 		
 		function disableContentEdit(previewWin) {
 			

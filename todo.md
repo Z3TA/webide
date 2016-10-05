@@ -13,8 +13,7 @@ Prio:
 What I'm working on
 -------------------
 
-WYSIWYG button on SSG panel. 
-
+insert h1 in ssg wysiwyg
 
 
 brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
@@ -24,6 +23,8 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
 todo:
+
+ssg: show the ssg buttons whenever a file from a registered project is opened
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
 
@@ -578,6 +579,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing
 =========
+
+Auto scroll to found functions when typing in the function list
 
 Connection manager: Show last used connection as default
 
