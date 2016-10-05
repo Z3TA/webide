@@ -149,6 +149,8 @@ editor.lastKeyPressed = "";
 	var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
 	var ftpBusy = false;
 	
+	var windowLoaded = false;
+	
 	/*
 		Editor functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -1818,7 +1820,8 @@ editor.lastKeyPressed = "";
 		
 		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
 		
-		menu.removeChild(menuElement);
+		if(menuElement.parent == menu) menu.removeChild(menuElement);
+		else console.warn("menuElement not part of menu! menuElement=" + menuElement.innerHTML);
 		
 		return positionIndex; // So we can insert another node at this position
 		
@@ -2492,7 +2495,7 @@ editor.lastKeyPressed = "";
 		if(funName == "") throw new Error("Key binding function can not be anonymous!")
 		for(var i=0; i<keyBindings.length; i++) {
 			if(getFunctionName(keyBindings[i].fun) == funName) {
-				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe name!")
+				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
 			}
 		}
 		
@@ -2526,8 +2529,6 @@ editor.lastKeyPressed = "";
 			funName = getFunctionName(funName);
 		}
 		
-		
-		
 		var f;
 		for(var i=0; i<keyBindings.length; i++) {
 			f = keyBindings[i]
@@ -2540,6 +2541,8 @@ editor.lastKeyPressed = "";
 				return editor.unbindKey(funName);
 			}
 		}
+		
+		console.warn("Failed to unbind funName=" + funName);
 		
 		return null;
 	}
@@ -2556,6 +2559,12 @@ editor.lastKeyPressed = "";
 		if(!p.desc) getStack("The plugin should have a description!");
 		
 		p.loaded = false;
+		
+		if(editor.settings.devMode && windowLoaded) {
+			//alert("Gonna reload unload and load " + getFunctionName(p.load));
+			editor.disablePlugin(getFunctionName(p.load)); // Unload plugin before loading it 
+			p.load(); // Load the plugin right away if the editor has already started. 
+		}
 		
 		editor.plugins.push(p);
 		
@@ -3666,6 +3675,8 @@ editor.lastKeyPressed = "";
 			
 			}
 		*/
+		
+		windowLoaded = true;
 		
 	}
 	

@@ -1,0 +1,85 @@
+(function() {
+	"use strict";
+
+	/*
+		(Re)loads the current file / plugin 
+		
+		editor.plugin({desc: "Allows hot loading of plugins", load: loadHotloader, unload: unloadHotloader});
+		
+		first time it unloads and loads twice !??
+		
+	*/
+	
+	//alert("hotload");
+	
+	editor.plugin({
+		desc: "Allows hot loading of plugins",
+		load: loadHotloader,
+		unload: unloadHotloader,
+	});
+	
+	
+	function loadHotloader() {
+		//alert("load");
+		var keyF7 = 118;
+		
+		editor.bindKey({desc: "Reload current script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
+		
+	}
+	
+	
+	function unloadHotloader() {
+		//alert("unload");
+		editor.unbindKey(reloadCurrentScript);
+	}
+
+	function reloadCurrentScript() {
+		
+		var head = document.getElementsByTagName("head")[0];
+		var scripts = head.getElementsByTagName("script");
+		var currentFile = editor.currentFile;
+		
+		if(!currentFile) throw new Error("No current file");
+		
+		var currentScript = "file://" + editor.currentFile.path.replace(/\\/g, "/");
+		
+		for(var i=0; i < scripts.length; i++) {
+			
+			//console.log(scripts[i].src + " == " + currentScript + " (" + (scripts[i].src == currentScript) + ")");
+			
+			var parent = scripts[i].parentNode;
+			
+			if(parent == head && scripts[i].src == currentScript) append(scripts[i]);
+		}
+		
+		return false;
+		
+		function append(script) {
+			
+			console.log("Reloading script: " + currentScript);
+			
+			// We want to unload all plugins (asume keybindings are unloaded by the plugins unload function)
+			//var code = currentFile.text;
+			
+			//var loadFunctionName = code.match(/editor\.plugin\s*\(\s*{[^}]*[^un]load\s*:\s*([\S]*)[,]?/);
+		
+			//if(!loadFunctionName) alertBox("Unable to fund plugin load function. The code will Not be hot reloaded");
+			//else {
+			
+			//loadFunctionName = loadFunctionName[0]; // First group match in the regexp
+				
+			//editor.disablePlugin(loadFunctionName);
+					
+					head.removeChild(script);
+					
+					script = document.createElement("script");
+					script.src = currentScript;
+					script.type = "text/javascript";
+					
+					head.appendChild(script);
+			//}
+		}
+		
+	}
+	
+})();
