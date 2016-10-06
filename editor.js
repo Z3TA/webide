@@ -2631,16 +2631,17 @@ editor.lastKeyPressed = "";
 		
 		if(protocol == "ftp" || protocol == "ftps") {
 			var Client = require('ftp');
-			var c = editor.connections[serverAddress] = {client: new Client(), protocol: protocol};
-			c.on('ready', function() {
+			editor.connections[serverAddress] = {client: new Client(), protocol: protocol};
+			var ftpClient = editor.connections[serverAddress].client;
+			ftpClient.on('ready', function() {
 				console.log("Connected to FTP server on " + serverAddress + " !");
-				c.pwd(function(err, dir) {
+				ftpClient.pwd(function(err, dir) {
 					if(err) throw err;
 					editor.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 					
 					// Create disconnect function
 					editor.connections[serverAddress].close = function disconnectFTP() {
-						c.end();
+						ftpClient.end();
 						delete editor.connections[serverAddress];
 						
 						console.log("Dissconnected from FTP on " + serverAddress + "");
@@ -2651,7 +2652,7 @@ editor.lastKeyPressed = "";
 				
 			});
 			
-			c.on('error', function(err) {
+			ftpClient.on('error', function(err) {
 				alert(err.message);
 				callback(err);
 				/*
@@ -2665,7 +2666,7 @@ editor.lastKeyPressed = "";
 				*/
 			});
 			
-			c.on('close', function(hadErr) {
+			ftpClient.on('close', function(hadErr) {
 				alert("Connection to FTP on " + serverAddress + " closed.");
 				
 				connectionClosed("ftp", serverAddress);
@@ -2696,21 +2697,21 @@ editor.lastKeyPressed = "";
 				}
 			}
 			console.log("Connecting to " + options.host + " ...");
-			c.connect(options);
+			ftpClient.connect(options);
 		}
 		
 		// note: SSH (shell) not yet supported. Use SFTP instead!
 		else if(protocol == "ssh") {
 			
-			sshConnect(function sshConnected(err, c, workingDir) {
+			sshConnect(function sshConnected(err, sshClient, workingDir) {
 				if(err) callback(err);
 				else {
 					
-					editor.connections[serverAddress] = {client: c, protocol: protocol};
+					editor.connections[serverAddress] = {client: sshClient, protocol: protocol};
 					
 					// Create disconnect function
 					editor.connections[serverAddress].close = function disconnectSSH() {
-						c.end();
+						sshClient.end();
 						delete editor.connections[serverAddress];
 						
 						console.log("Dissconnected from SSH on " + serverAddress + "");
@@ -2725,26 +2726,26 @@ editor.lastKeyPressed = "";
 		}
 		else if(protocol == "sftp") {
 			
-			sshConnect(function sshConnected(err, c, workingDir) {
+			sshConnect(function sshConnected(err, sshCLient, workingDir) {
 				if(err) callback(err);
 				else {
 					// Initiate "SFTP mode"
-					c.sftp(function(err, sftp) {
+					sshCLient.sftp(function(err, sftpClient) {
 						if (err) {
-							c.end();
+							sshCLient.end();
 							callback(err);
 							//alert("Unable to run SFTP on " + serverAddress + "\n" + err.message);
 							//throw err;
 						}
 						else {
-							editor.connections[serverAddress] = {client: sftp, protocol: protocol};
+							editor.connections[serverAddress] = {client: sftpClient, protocol: protocol};
 							editor.changeWorkingDir(workingDir);
 							
 							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
 							
 							// Create disconnect function
 							editor.connections[serverAddress].close = function disconnectSFTP() {
-								c.end();
+								sshClient.end();
 								delete editor.connections[serverAddress];
 								
 								console.log("Dissconnected from SFTP on " + serverAddress + "");
@@ -3352,9 +3353,9 @@ editor.lastKeyPressed = "";
 		
 		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
 			for(var conn in editor.connections) {
-				editor.connections[conn].close();
-				}
-				return true;			
+				editor.connections[conn].client.close();
+			}
+			return true;			
 		}});
 		
 		

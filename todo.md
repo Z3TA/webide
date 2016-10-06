@@ -13,6 +13,12 @@ Prio:
 What I'm working on
 -------------------
 
+todo: colorpicker: tool to measure distance from click1 to click 2, increase pixel size (not blur) when zooming in
+
+fixing bugs with ftp save
+
+bug: file explorer doesnt clean list? content is listed twice
+
 insert h1 in ssg wysiwyg
 
 
@@ -171,6 +177,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+FTP opened folder from both ftp:// and ftp:/// then I had two different versions of the same file. And lost all changes
 
 Can't use the remote connection after we got an error. For example access denied after attempting to save a file. (need to re-connect)
 
@@ -579,6 +587,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing
 =========
+
+autocomplete: Do not make variable suggestion when in HTML mode (only html tags)
 
 Auto scroll to found functions when typing in the function list
 
