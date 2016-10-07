@@ -316,7 +316,10 @@
 			return false;
 		}
 		
-		if(file.fileExtension == "xml") return true;
+		if(file.fileExtension == "xml" ||
+		file.fileExtension == "svg") {
+			return true;
+		}
 		
 		if(file.text.match(/^<\?xml.*\?>$ /i) != null) return true;
 		
