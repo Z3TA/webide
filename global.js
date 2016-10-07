@@ -212,7 +212,7 @@ function getFolders(fullPath, includeHostInfo) {
 	var lastChar = fullPath.substr(fullPath.length-1);
 	
 	if(lastChar != "/" && lastChar != "\\") {
-		// Check if the path contains a file, and remote it
+		// Check if the path contains a file, and remove it
 		console.log("lastChar=" + lastChar + " fullPath=" + fullPath);
 		var delimiter = getPathDelimiter(fullPath);
 		var filePart = fullPath.substr(fullPath.lastIndexOf(delimiter));
@@ -261,9 +261,12 @@ function getFolders(fullPath, includeHostInfo) {
 		
 		urls.push(fullFolder); // Add root
 		
-		for(var i=0; i<folders.length; i++) {
-			fullFolder += folders[i] + "/";
-			urls.push(fullFolder);
+		//console.log("foldersAA=" + JSON.stringify(folders));
+			for(var i=0; i<folders.length; i++) {
+			if( folders[i] !== "") {
+				fullFolder += folders[i] + "/";
+				urls.push(fullFolder);
+			}
 		}
 		
 		return urls;

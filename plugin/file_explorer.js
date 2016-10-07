@@ -104,6 +104,8 @@
 		
 		function exploreDir(fullPath) {
 			
+		//console.log("Exploring fullPath=" + fullPath);
+		
 			while(fileExplorerFolders.firstChild) fileExplorerFolders.removeChild(fileExplorerFolders.firstChild); // Emty list
 			
 			while(fsSelect.firstChild) fsSelect.removeChild(fsSelect.firstChild); // Emty select options
@@ -125,8 +127,11 @@
 			}
 			
 			// We want to start from the root, then work our way towards the actual dir
-			var folders = getFolders(fullPath, true);
 			
+		var folders = getFolders(fullPath, true);
+			
+		//console.log("fullPath=" + fullPath + " folders=" + JSON.stringify(folders));
+		
 			// Recursive 
 			lookUpPath(folders, 0);
 			
