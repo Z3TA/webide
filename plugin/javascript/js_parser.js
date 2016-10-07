@@ -209,8 +209,8 @@
 							//console.log("Parsing only f=" + f.name + "");
 							
 							// The start property is at the { after function
-							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : ""), f.start);
 							var parseEnd = f.end + charactersLength + 1;
+							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : ""), f.start); // Search backwards in file.text starting from f.start
 							var parseStartRow = f.lineNumber-1;
 							var baseIndentation = file.grid[parseStartRow].indentation;
 							var oldStart = f.start;
@@ -218,7 +218,7 @@
 							
 							if(parseStart == -1) {
 								// Fix for: foo = function() and foo = function foo()
-								parseStart = file.text.lastIndexOf(f.name + " = function");
+								parseStart = file.text.lastIndexOf(f.name + " = function", f.start);
 								// note: Should probably use regexp to find foo      =function (lots of, or no white space)
 							}
 							
@@ -418,7 +418,7 @@
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
 							
-							if(Object.keys(newParse.functions).length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions));
+						if(Object.keys(newParse.functions).length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
 							
 							var ff = newParse.functions[firstValueInObjectList(newParse.functions)]; // Ref to the same function in new parse
 							

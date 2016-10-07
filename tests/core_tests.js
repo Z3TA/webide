@@ -30,6 +30,21 @@
 		
 	*/
 	
+	editor.addTest(function twoFunctionsSameName(callback) {
+		// bug: parser start parsing from the second function, thus cant find the function
+		editor.openFile("twoFunctionsSameName.js", 'foo = function() {\n\n}\nfunction bar() {\nfoo = function() {}\n}\n', function(err, file) {
+			
+			file.moveCaret(undefined, 1);
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Should throw an error if in dev mode: "Parsed code contains no function! "
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function styleTagFuncEnd(callback) {
 		// bug: parser switched to CSS mode and couln't find end of function, soluton: no CSS mode inside quotes 
 		editor.openFile("styleTagFuncEnd.js", '\nfunction foo() {\nvar bar = "<style>";\n}\n', function(err, file) {
@@ -43,7 +58,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function commentOnLastLine(callback) {
 		editor.openFile("commentOnLastLine.js", "// comment", function(err, file) {
