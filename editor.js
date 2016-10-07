@@ -2932,6 +2932,8 @@ editor.lastKeyPressed = "";
 						
 						for(var i=0; i<folderItems.length; i++) {
 							
+							// Check item name for encoding problems �
+							
 							stat(folderItems[i], path.join(pathToFolder, folderItems[i]));
 							// We do not know if it's a folder or file yet, folderItems is just an array of strings, we have to wait for stat
 						}
@@ -3002,25 +3004,25 @@ editor.lastKeyPressed = "";
 			
 			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[hostname].client;
+				var ftpClient = editor.connections[hostname].client;
 				
 				if(pathToFolder != editor.workingDirectory) {
 					// First change folder
 					console.log("Sending cwd '" + pathname + "' to " + protocol + hostname);
-					c.cwd(pathname, function changedDir(err) {
+					ftpClient.cwd(pathname, function changedDir(err) {
 						
 						if(err) {
 							listFilesCallback(err);
 							runFtpQueue();
 						}
 						else {
-							ftpListFiles(c);
+							ftpListFiles(ftpClient);
 						}
 						
 					});
 				}
 				else {
-					ftpListFiles(c);
+					ftpListFiles(ftpClient);
 				}
 			}
 			else {
@@ -3028,11 +3030,11 @@ editor.lastKeyPressed = "";
 				runFtpQueue();
 			}
 			
-			function ftpListFiles(c) {
+			function ftpListFiles(ftpClient) {
 				
 				console.log("Listing files in '" + parse.pathname + "' on " + parse.protocol + parse.hostname);
 				
-				c.list(function readdirFtp(err, folderItems) {
+				ftpClient.list(function readdirFtp(err, folderItems) {
 					if (err) {
 						console.warn(err.message);
 						listFilesCallback(err);
