@@ -2,9 +2,8 @@
 	/*
 		Only show the file explorer explicity. The screen cant have too much information or the brain will get burnt out
 		
-		todo: Append a list for each connection plus local system, so you can browse all at once
-		
 		todo: File watcher, update the list when file change names, or are created/removed
+		(currently you can refresh the file lists by hiding and then showing it)
 		
 	*/
 	
@@ -314,8 +313,11 @@
 					
 				}
 				
-				li.appendChild(document.createTextNode(item.name));
-				
+			var displayName = item.name;
+			if(displayName.length > 40) displayName = displayName.substr(0, 37) + "...";
+			
+			li.appendChild(document.createTextNode(displayName));
+			
 				//console.log("item.name=" + item.name);
 				
 				ul.appendChild(li);
