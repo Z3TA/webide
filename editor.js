@@ -2942,11 +2942,15 @@ editor.lastKeyPressed = "";
 					console.log("Making stat: " + filePath + "");
 					
 					fs.stat(filePath, function stat(err, stats) {
-						if(err) listFilesCallback(err);
-						else {
-							//console.log("stat: " + stats);
-							
-							var type = "";
+						
+						var type = "";
+						var size;
+						var mtime;
+						var problem = "";
+						
+						if(stats) {
+							size = stats.size;
+							mtime = stats.mtime;
 							
 							if(stats.isFile()) {
 								type = "-";
@@ -2955,15 +2959,34 @@ editor.lastKeyPressed = "";
 								type = "d";
 								filePath = trailingSlash(filePath);
 							}
-							
-							list.push({type: type, name: fileName, path: filePath, size: stats.size, date: stats.mtime});
-							
-							statCounter++;
-							
-							console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
-							
-							if(statCounter==folderItems.length) listFilesCallback(null, list);
 						}
+						
+						if(err) {
+							
+							/*
+								EPERM = operation not permitted
+								EBUSY = resource busy or locked
+							*/
+							
+							if(err.code == "EPERM" || err.code == "EBUSY") {
+								problem = err.code;
+								type = "*"
+							}
+							else return listFilesCallback(err);
+						}
+						
+						//console.log("stat: " + stats);
+						
+						
+						
+						list.push({type: type, name: fileName, path: filePath, size: size, date: mtime, problem: problem});
+						
+						statCounter++;
+						
+						console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
+						
+						if(statCounter==folderItems.length) listFilesCallback(null, list);
+						
 						
 					});
 				}
