@@ -218,10 +218,10 @@
 		function disconnectConnection() {
 			// Close the connection
 			
-			if(editor.disconnect.hasOwnProperty(selectedConnection.host)) {
-			editor.disconnect[selectedConnection.host]();
-			
-			editor.workingDirectory = process.cwd(); // Change working directory (back) to the one from where we opened the editor
+			if(editor.connections.hasOwnProperty(selectedConnection.host)) {
+				editor.connections[selectedConnection.host].close();
+				
+				editor.workingDirectory = trailingSlash(process.cwd()); // Change working directory (back) to the one from where we opened the editor
 			}
 			else console.warn("Not connected to " + selectedConnection.host);
 			
