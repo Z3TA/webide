@@ -1124,7 +1124,7 @@ editor.lastKeyPressed = "";
 		
 		//if(defaultPath == undefined) defaultPath = editor.workingDirectory;
 		
-		if(!defaultPath) defaultPath = editor.getDir();
+		if(!defaultPath) defaultPath = getDirectoryFromPath(undefined);
 		else {
 			
 			var lastChar = defaultPath.substr(defaultPath.length-1);
@@ -2402,7 +2402,7 @@ editor.lastKeyPressed = "";
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 		if(file.savedAs) {
 			editor.setFileSavePath(file.path);
-			editor.setFileOpenPath(editor.getDir(file.path));
+			editor.setFileOpenPath(getDirectoryFromPath(file.path));
 		}
 		
 		editor.input = focus;
@@ -2415,28 +2415,6 @@ editor.lastKeyPressed = "";
 		editor.renderNeeded();
 		
 		
-	}
-	
-	editor.getDir = function (path) {
-		/*
-			Returns the directory of a file path
-			If no path is specified it uses current file or working directory
-		*/
-		
-		console.log("getDir path=" + path);
-		
-		if(path == undefined) {
-			if(editor.currentFile) {
-				path = editor.currentFile.path;
-			}
-			else {
-				console.warn("No file open!");
-				return trailingSlash(process.cwd()); // Return (editor) working dir
-			}
-			
-		}
-		
-		return trailingSlash(path.substring(0, Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"))));
 	}
 	
 	editor.getKeyFor = function(funName) {

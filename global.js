@@ -168,6 +168,33 @@ function trailingSlash(folderPath) {
 	return folderPath;
 }
 
+function getDirectoryFromPath(path) {
+	/*
+		Returns the directory of a file path
+		If no path is specified it uses current file or working directory
+		
+		todo: replace editor.getDir
+	*/
+	
+	console.log("getDir path=" + path);
+	
+	if(path == undefined) {
+		if(editor.currentFile) path = editor.currentFile.path;
+		else return trailingSlash(editor.workingDirectory); // (editor) working dir
+	}
+	
+	if(!path) throw new Error("Unable to get directory from path=" + path);
+	
+	var lastSlash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
+	
+	if(lastSlash == -1) {
+		console.warn("Unable to get directory of path=" + path + ". Using editor.workingDirectory!");
+		return trailingSlash(editor.workingDirectory);
+	}
+	
+	return trailingSlash(path.substring(0, lastSlash));
+}
+
 function getFolders(fullPath, includeHostInfo) {
 	/* 
 		Returns each folder in the path. Can take an url or a local filesystem path
@@ -1018,92 +1045,94 @@ function getFilenameFromPath(path) {
 	}
 }
 
-function getDirectoryFromPath(path) {
+/*
+	function getDirectoryFromPath(path) {
 	var backSlashIndex = path.lastIndexOf("\\");
 	var slashIndex = path.lastIndexOf("/")
 	
 	if(backSlashIndex > slashIndex) {
-		path = path.substring(0,backSlashIndex+1);
+	path = path.substring(0,backSlashIndex+1);
 	}
 	else {
-		path = path.substring(0,slashIndex+1);
+	path = path.substring(0,slashIndex+1);
 	}
 	return path;
-}
+	}
+*/
 
 function isFilePath(filePath) {
 	if(runtime == "browser") {
-		if(linuxPathValidation(filePath) || linuxPathValidation(filePath)) return true
-		else return false;
+	if(linuxPathValidation(filePath) || linuxPathValidation(filePath)) return true
+	else return false;
 	}
 	else {
-		var fs = require("fs");
-		try {
-			var stat = fs.lstatSync(filePath);
-			return stat.isFile();
-		}
-		catch(e) {
-			return false;
-		}
+	var fs = require("fs");
+	try {
+	var stat = fs.lstatSync(filePath);
+	return stat.isFile();
+	}
+	catch(e) {
+	return false;
+	}
 	}
 	
 	function linuxPathValidation(contPathLinux) {
-		for(var k=0;k<contPathLinux.length;k++){
-			if(contPathLinux.charAt(k).match(/^[\\]$/) ){
-				return false;
-			}
-		}
-		if(contPathLinux.charAt(0) != "/")
-		{
-			return false;
-		}
-		if(contPathLinux.charAt(0) == "/" && contPathLinux.charAt(1) == "/")
-		{
-			return false;
-		}
-		return true;
+	for(var k=0;k<contPathLinux.length;k++){
+	if(contPathLinux.charAt(k).match(/^[\\]$/) ){
+	return false;
+	}
+	}
+	if(contPathLinux.charAt(0) != "/")
+	{
+	return false;
+	}
+	if(contPathLinux.charAt(0) == "/" && contPathLinux.charAt(1) == "/")
+	{
+	return false;
+	}
+	return true;
 	}
 	
 	function windowsPathValidation(contwinpath)
 	{
-		if((contwinpath.charAt(0) != "\\" || contwinpath.charAt(1) != "\\") || (contwinpath.charAt(0) != "/" || contwinpath.charAt(1) != "/"))
-		{
-			if(!contwinpath.charAt(0).match(/^[a-zA-Z]/))
-			{
-				return false;
-			}
-			if(!contwinpath.charAt(1).match(/^[:]/) || !contwinpath.charAt(2).match(/^[\/\\]/))
-			{
-				return false;
-			}
-			
-		}
+	if((contwinpath.charAt(0) != "\\" || contwinpath.charAt(1) != "\\") || (contwinpath.charAt(0) != "/" || contwinpath.charAt(1) != "/"))
+	{
+	if(!contwinpath.charAt(0).match(/^[a-zA-Z]/))
+	{
+	return false;
+	}
+	if(!contwinpath.charAt(1).match(/^[:]/) || !contwinpath.charAt(2).match(/^[\/\\]/))
+	{
+	return false;
+	}
+	
+	}
 	}
 	
 	function UrlExists(url) {
-		var http = new XMLHttpRequest();
-		http.open('HEAD', url, false);
-		http.send();
-		return http.status!=404;
+	var http = new XMLHttpRequest();
+	http.open('HEAD', url, false);
+	http.send();
+	return http.status!=404;
 	}
-}
-
-function getFileExtension(filePath) {
+	}
+	
+	function getFileExtension(filePath) {
 	return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
-}
-
-function isFolderPath(path) {
+	}
+	
+	function isFolderPath(path) {
 	var fs = require("fs");
 	try {
-		var stat = fs.lstatSync(path);
-		return stat.isDirectory();
+	var stat = fs.lstatSync(path);
+	return stat.isDirectory();
 	}
 	catch(e) {
-		return false;
+	return false;
 	}
-}
-
-function getStack(msg) {
+	}
+	
+	function getStack(msg) {
 	// Used in debugging, to get a stack trace of function being called
 	// ex: console.log(getStack("foo"));
 	
@@ -1116,10 +1145,10 @@ function getStack(msg) {
 	str = str.substr(str.indexOf("\n")+5, str.length);
 	
 	return msg + ": " + str;
-}
-
-
-function httpPost(urlStr, form, callback) {
+	}
+	
+	
+	function httpPost(urlStr, form, callback) {
 	var querystring = require('querystring');
 	var http = require('http');
 	var url = require("url");
@@ -1131,41 +1160,41 @@ function httpPost(urlStr, form, callback) {
 	
 	// An object of options to indicate where to post to
 	var post_options = {
-		host: urlObj.hostname,
-		port: urlObj.port ? urlObj.port : '80',
-		path: urlObj.path, // path comtains querystring (search)
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'Content-Length': Buffer.byteLength(post_data)
-		}
+	host: urlObj.hostname,
+	port: urlObj.port ? urlObj.port : '80',
+	path: urlObj.path, // path comtains querystring (search)
+	method: 'POST',
+	headers: {
+	'Content-Type': 'application/x-www-form-urlencoded',
+	'Content-Length': Buffer.byteLength(post_data)
+	}
 	};
 	
 	// Set up the request
 	var dataStr = "";
 	var post_req = http.request(post_options, function(res) {
-		res.setEncoding('utf8');
-		res.on('data', function (chunk) {
-			dataStr += chunk;
-			console.log('Response: ' + chunk);
-		});
-		res.on('end', function () {
-			callback(dataStr, null);
-		});
+	res.setEncoding('utf8');
+	res.on('data', function (chunk) {
+	dataStr += chunk;
+	console.log('Response: ' + chunk);
+	});
+	res.on('end', function () {
+	callback(dataStr, null);
+	});
 	});
 	post_req.on('error', function(e) {
-		console.log(`problem with request: ${e.message}`);
-		callback(null, e);
+	console.log(`problem with request: ${e.message}`);
+	callback(null, e);
 	});
 	// post the data
 	post_req.write(post_data);
 	post_req.end();
 	
 	
-}
-
-
-function spacePad(str, padLength) {
+	}
+	
+	
+	function spacePad(str, padLength) {
 	
 	if(padLength == undefined) padLength = 42;
 	
@@ -1175,39 +1204,39 @@ function spacePad(str, padLength) {
 	var padding = "";
 	for(var i=0; i<left; i++) padding += " ";
 	return str + padding;
-}
-
-function makePathAbsolute(path) {
+	}
+	
+	function makePathAbsolute(path) {
 	if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
-		var fspath = require("path");
-		if(!fspath.isAbsolute(path)) {
-			let absolutePath = fspath.resolve(path);
-			console.warn("Making path absolute: " + path + " ==> " + absolutePath);
-			path = absolutePath; // Make the path absolute
-		}
+	var fspath = require("path");
+	if(!fspath.isAbsolute(path)) {
+	let absolutePath = fspath.resolve(path);
+	console.warn("Making path absolute: " + path + " ==> " + absolutePath);
+	path = absolutePath; // Make the path absolute
+	}
 	}
 	return path;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// names of known key codes (0-255)
-var getKeyboardMapping = [
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// names of known key codes (0-255)
+	var getKeyboardMapping = [
 	"", // [0]
 	"", // [1]
 	"", // [2]
@@ -1464,10 +1493,11 @@ var getKeyboardMapping = [
 	"PA1", // [253]
 	"WIN_OEM_CLEAR", // [254]
 	"" // [255]
-];
-
-
-
-// Simuleate key-strokes
-
-
+	];
+	
+	
+	
+	// Simuleate key-strokes
+	
+	
+	

@@ -66,7 +66,7 @@
 		
 		// Build the input stuff ...
 		
-		var size = editor.getDir().length;
+		var size = getDirectoryFromPath(undefined).length;
 		
 		inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");

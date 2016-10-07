@@ -253,7 +253,7 @@
 		div.setAttribute("class", "findInFile");
 		
 		
-		var size = editor.getDir().length;
+		var size = getDirectoryFromPath(undefined).length;
 		
 		var inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
@@ -272,7 +272,7 @@
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
-		inputInDir.value = editor.getDir(); // The directory of the current file being open
+		inputInDir.value = getDirectoryFromPath(undefined); // The directory of the current file being open
 		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);
