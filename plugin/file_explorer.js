@@ -98,7 +98,7 @@
 		function scroll() {
 			// Make it center/middle ?? Whole project folder should be visible
 			
-			fileExplorerFolders.scrollTop = defaultScroll;
+		fileExplorerWrap.scrollTop = defaultScroll;
 		
 		console.log("Scrolled down on file explorer: defaultScroll=" + defaultScroll);
 		}
