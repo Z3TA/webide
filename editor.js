@@ -1024,13 +1024,13 @@ editor.lastKeyPressed = "";
 			
 			if(editor.connections.hasOwnProperty(hostname)) {
 				
-				var c = editor.connections[hostname].client;
+				var ftpClient = editor.connections[hostname].client;
 				
 				var input = inputBuffer ? text : new Buffer(text, encoding);
 				var useCompression = false;
 				
-				c.put(input, pathname, useCompression, putFtpDone);
-
+				ftpClient.put(input, pathname, useCompression, putFtpDone);
+				
 			}
 			else {
 				saveToDiskCallback(new Error("Failed to save to path=" + path + "\nNo connection to FTP on " + hostname + " !"));
