@@ -3354,11 +3354,10 @@ editor.lastKeyPressed = "";
 		
 		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
 			for(var conn in editor.connections) {
-				editor.connections[conn].client.close();
+				editor.connections[conn].close();
 			}
 			return true;			
 		}});
-		
 		
 	}
 	
