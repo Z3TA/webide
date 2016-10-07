@@ -654,6 +654,10 @@ div.gotoFile li b {
 .fileExplorer li.file {
 	}
 
+.fileExplorer li.problem {
+	color: brown;
+}
+
 .fileExplorer li a:hover {
 	text-decoration: underline;
 }
