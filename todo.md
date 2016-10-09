@@ -30,6 +30,8 @@ webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
 todo:
 
+ssg bug: preview doesn't scroll down to last position
+
 ssg: show the ssg buttons whenever a file from a registered project is opened
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
