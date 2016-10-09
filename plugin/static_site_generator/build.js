@@ -72,6 +72,11 @@ var PATH = require('path');
 var BASEPATH = mustBePath(process.argv[2], "."); // Path to files that should be processed
 var PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder 
 
+// todo: Allow more flags
+var PUBLISH = process.argv[4];
+
+log("PUBLISH=" + PUBLISH);
+
 var MEDIAFILES = []; // Files mentioned in source code
 
 var ROOT = {}; // The tree stem
@@ -690,7 +695,8 @@ function findFiles(dir, parentBranch, done) {
 			
 			list.forEach(function(fileName) {
 				
-				if(fileName.substring(0, 1) == "_") return; // Ignore files starting with _
+				// Ignore files starting with _ when publishing, or files starting with __ (two underscores) alltogehter (dont even include them in preview)
+				if((fileName.substr(0, 1) == "_" && PUBLISH) || (fileName.substr(0, 1) == "_" && fileName.substr(1, 1) == "_")) return; 
 				
 				var filePath = resolvePath(dir, fileName);
 				

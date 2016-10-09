@@ -709,7 +709,7 @@
 		
 		var errorOccured = false;
 		
-		compile(site.source, site.preview, function compiled_static() {
+		compile(site.source, site.preview, false, function compiled_static() {
 			
 			var path = require('path');
 			
@@ -988,7 +988,7 @@
 	}
 	
 	function publishSite(site) {
-		compile(site.source, site.publish, function buildDone() {
+		compile(site.source, site.publish, true, function buildDone() {
 			alert(site.name + " published to " + site.publish);
 		});
 		return false;
@@ -1011,7 +1011,7 @@
 	}
 	
 	
-	function compile(source, destination, callback) {
+	function compile(source, destination, publish, callback) {
 		
 		var url = require("url");
 		var parse = url.parse(destination);
@@ -1081,7 +1081,11 @@
 			var folderAboutToBeCreated = [];
 			var waitingList = [];
 			
-			var worker = childProcess.fork(buildScript, [source, destination], {
+			var args = [source, destination];
+			
+			if(publish) args.push( "-publish");
+			
+			var worker = childProcess.fork(buildScript, args, {
 				cwd: workingDir,
 				env: {"NODE_PATH": node_modules}, // Tell node runtime to check for modules in this folder
 			});
