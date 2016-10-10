@@ -180,6 +180,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Wrap plugin seems broken. Try it in react_vs_vanilla_js.htm
+
 FTP opened folder from both ftp:// and ftp:/// then I had two different versions of the same file. And lost all changes
 
 Can't use the remote connection after we got an error. For example access denied after attempting to save a file. (need to re-connect)
