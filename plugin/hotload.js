@@ -41,18 +41,27 @@
 		
 		if(!currentFile) throw new Error("No current file");
 		
-		var currentScript = "file://" + editor.currentFile.path.replace(/\\/g, "/");
+		// Fun fact: In Windows there are three slashes in file:/// but in Linux it's only two!
+		var currentScript = editor.currentFile.path.replace(/\\/g, "/");
+		
+		var reloaded = false;
 		
 		for(var i=0; i < scripts.length; i++) {
 			
-			//console.log(scripts[i].src + " == " + currentScript + " (" + (scripts[i].src == currentScript) + ")");
+			console.log(scripts[i].src + " == " + currentScript + " (" + (scripts[i].src == currentScript) + ")");
 			
 			var parent = scripts[i].parentNode;
 			
-			if(parent == head && scripts[i].src == currentScript) append(scripts[i]);
-		}
+			if(parent == head && scripts[i].src.indexOf(currentScript) != -1) {
+				append(scripts[i]);
+				reloaded = true;
+			}
+			}
+		
+		if(!reloaded) alertBox("Failed to reload: " + currentScript);
 		
 		return false;
+		
 		
 		function append(script) {
 			
@@ -73,10 +82,13 @@
 					head.removeChild(script);
 					
 					script = document.createElement("script");
-					script.src = currentScript;
+			script.src = "file://" + currentScript;
 					script.type = "text/javascript";
 					
 					head.appendChild(script);
+			
+			alertBox("Refreshed: " + currentScript);
+			
 			//}
 		}
 		

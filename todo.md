@@ -13,12 +13,6 @@ Prio:
 What I'm working on
 -------------------
 
-todo: colorpicker: tool to measure distance from click1 to click 2, increase pixel size (not blur) when zooming in
-
-fixing bugs with ftp save
-
-bug: file explorer doesnt clean list? content is listed twice
-
 insert h1 in ssg wysiwyg
 
 

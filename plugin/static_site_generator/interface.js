@@ -1234,10 +1234,16 @@
 			// 1.  Get the URL of the page/file in preview
 			var url = previewWin.window.location.href;
 			var systemPathDelimiter = getPathDelimiter(process.cwd());
-			var sourceFilePath = url.replace("file://", "").replace(/\//g, systemPathDelimiter).replace(site.preview, site.source);
+			var sourceFilePath = url.replace("file://", "");
+			while(sourceFilePath.substr(0,1) == "/") sourceFilePath = sourceFilePath.substr(1); // In Windows there are three slashes in file:/// but in Linux it's only two!
+			sourceFilePath = sourceFilePath.replace(/\//g, systemPathDelimiter);
+			sourceFilePath = sourceFilePath.replace(site.preview, site.source);
 			
-			//console.log("url=" + url);
-			//console.log("sourceFilePath=" + sourceFilePath);
+			console.log("url=" + url);
+			console.log("sourceFilePath=" + sourceFilePath);
+			console.log("site.preview=" + site.preview);
+			console.log("site.source=" + site.source);
+			
 			
 			if(sourceFilePath.match(/index\.htm./i)) {
 				alertBox("Unable to edit index file in WYSIWYG mode");
