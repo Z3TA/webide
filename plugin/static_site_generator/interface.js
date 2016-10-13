@@ -30,6 +30,8 @@
 	var footerRows = 0;
 	var ignoreTransform;
 	
+	var scrollTop = 0;
+	
 	var menuItem;
 	
 	if(runtime == "browser") {
@@ -60,7 +62,7 @@
 	function load() {
 		// Called when the module is loaded
 		
-		//alert("loading");
+		//alertBox("loading");
 		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
@@ -95,7 +97,7 @@
 	function unload() {
 		// Cleaning up, for example when disabling a plugin
 		
-		//alert("UNloading");
+		//alertBox("UNloading");
 		
 		SSG_cleanup(); // closePreview();
 		
@@ -566,7 +568,7 @@
 			var name = inputSiteName.value;
 			for (var i=0; i<sites.length; i++) {
 				if(sites[i].name == name) {
-					alert(name + " alias already used!");
+					alertBox(name + " alias already used!");
 					return;
 				}
 			}
@@ -698,7 +700,7 @@
 	}
 	
 	function previewSSG(file, combo, character, charCode, keyPushDirection, targetElementClass) {
-		if(!selectedSite) alert("No site selected!");
+		if(!selectedSite) alertBox("No site selected!");
 		else previewPage(selectedSite);
 		
 		return false;
@@ -799,16 +801,24 @@
 		}
 		else {
 			
-			if(previewWin.window.location == url || previewWin.window.location == "swappedout://") {
-				var scrollTop = previewWin.window.scrollTop; // Get the scroll position
+			// Handle inconsitent file:// and file:/// (sometimes it has two slashes and sometimes three)
+			var previewLocation = previewWin.window.location.href;
+			previewLocation = previewLocation.replace("file://", "");
+			while(previewLocation.substr(0,1) == "/") previewLocation = previewLocation.substr(1);
+			url = url.replace("file://", "");
+			while(url.substr(0,1) == "/") url = url.substr(1);
+			
+			//alertBox("previewLocation=" + previewLocation + "\nurl=" + url);
+			
+			if(previewLocation == url || previewWin.window.location == "swappedout://") {
+				scrollTop = previewWin.window.scrollTop; // Get the scroll position
 				console.log("scrollTop=" + scrollTop);
-				if(previewWin.window.location == url) previewWin.reload()
-				else previewWin.window.location = url;
-				previewWin.window.scrollTop = scrollTop; // Set the scroll position again
-			}
+				if(previewLocation == url) previewWin.reload();
+				else previewWin.window.location = "file://" + url;
+				}
 			else {
-				alertBox("url=" + url + " != " + previewWin.window.location);
-				previewWin.window.location = url;
+				alertBox("url=" + url + " != " + previewLocation);
+				previewWin.window.location = "file://" + url;
 			}
 			
 			previewWin.focus();
@@ -823,6 +833,8 @@
 			previewWin.focus();
 			
 			console.log("PreviewWin loaded!");
+			
+			previewWin.window.scrollTop = scrollTop; // Set the scroll position again
 			
 			if(callback) callback(previewWin);
 		}
@@ -842,11 +854,12 @@
 	
 	
 	function contentEdit(target, type, bubbles, cancelable) {
+		// Called every time the contenteditable is updates
 		console.log("contentEdit!");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
-		if(!editor.files.hasOwnProperty(sourceFile.path)) alert("The source for the file being previewed is not opened!")
-		if(sourceFile != editor.currentFile) alert("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
+		if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
+		if(sourceFile != editor.currentFile) alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
 		else {
 			//console.log("target=" + objInfo(target));
 			console.log("type=" + type);
@@ -855,37 +868,49 @@
 			var srcHTML = getSourceCodeBody(sourceFile);
 			
 			if(srcHTML) {
-				// Compare the source with the editable preview
 				var main = previewWin.window.document.getElementsByTagName("main")[0];
 				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
 					
+				// Sanitize the contentediable data
+				var sanitized = prewHTML;
+				
+				sanitized = sanitized.replace(/<\/p><p>/gi, "</p>" + sourceFile.lineBreak + "<p>");
+				
+				if(sanitized != prewHTML) {
+					// Using innerHTML desont seem to trigger contentEdit event. So no need to return
+					// problem: Using innerHTML messes up the cursor in contentEditable
+					main.innerHTML = sanitized;
+					prewHTML = sanitized;
+					}
+				
+				// Compare the source with the editable preview
 				var diff = textDiff(srcHTML, prewHTML, ignoreTransform);
 				
-					var srcStartIndex = sourceFile.text.indexOf(srcHTML);
-					
-					if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
-					
-					console.log("srcStartIndex=" + srcStartIndex);
-					
-					var tmpCaret = sourceFile.createCaret(srcStartIndex);
-					
-					var startRow = tmpCaret.row;
-					
-					console.log("startRow=" + startRow);
-					
-					var replacedLine = false;
-					var linesToBeRemoved = [];
-					var row = -1;
-					var col = -1;
-					var text = "";
-					
-					console.log("diff.removed=" + JSON.stringify(diff.removed));
-					console.log("diff.inserted=" + JSON.stringify(diff.inserted));
-					
+				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
+				
+				if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
+				
+				console.log("srcStartIndex=" + srcStartIndex);
+				
+				var tmpCaret = sourceFile.createCaret(srcStartIndex);
+				
+				var startRow = tmpCaret.row;
+				
+				console.log("startRow=" + startRow);
+				
+				var replacedLine = false;
+				var linesToBeRemoved = [];
+				var row = -1;
+				var col = -1;
+				var text = "";
+				
+				console.log("diff.removed=" + JSON.stringify(diff.removed));
+				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
+				
 				// Apply the transformation to the source code ...
 				
-					for(var i=0; i<diff.removed.length; i++) {
-						console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
+				for(var i=0; i<diff.removed.length; i++) {
+					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 						// Remove the text on the line, but do not remove the line (yet)
 						row = diff.removed[i].row + startRow;
 						
@@ -992,14 +1017,14 @@
 		if(selectedSite) publishSite(selectedSite)
 		else {
 			showSSG();
-			alert("Select site to publish!");
+			alertBox("Select site to publish!");
 		}
 		return false;
 	}
 	
 	function publishSite(site) {
 		compile(site.source, site.publish, true, function buildDone() {
-			alert(site.name + " published to " + site.publish);
+			alertBox(site.name + " published to " + site.publish);
 		});
 		return false;
 	}
@@ -1010,7 +1035,7 @@
 		
 		editor.readFromDisk(site.template, function fileRead(err, path, text) {
 			
-			if(err) alert(err.message);
+			if(err) alertBox(err.message);
 			else {
 				editor.openFile("newPage.htm", text);
 			}
@@ -1063,7 +1088,7 @@
 		function fsReady(err, workingDir) {
 			
 			if(err) {
-				alert(err.message);
+				alertBox(err.message);
 				return true;
 			};
 			
@@ -1103,7 +1128,7 @@
 			// PS. It's impossible to caputre stdout and stderr from the fork. You'll have to use process.send() to send message back here
 			
 			worker.on('message', function worker_message(data) {
-				//alert(data);
+				//alertBox(data);
 				console.log("SSG: " + JSON.stringify(data));
 				
 				if(data.type == "file") {
@@ -1128,7 +1153,7 @@
 			});
 			worker.on('error', function worker_error(code) {
 				console.warn("SSG: Error code=" + code);
-				alert("SSG worker error code=" + code);
+				alertBox("SSG worker error code=" + code);
 			});
 			worker.on('exit', function worker_exit(code) {
 				console.log("SSG: Exit! code=" + code);
