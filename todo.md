@@ -13,6 +13,8 @@ Prio:
 What I'm working on
 -------------------
 
+Thinking about using Prosemirror for WYSIWYG editing, uhh .... you cant get HTML out of prosemirror
+
 sanitize contentediable output
 
 insert bold/h1 in ssg wysiwyg

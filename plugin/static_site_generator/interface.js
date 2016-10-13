@@ -8,7 +8,6 @@
 	var editView;
 	var controlView;
 	
-	
 	var inputSiteName;
 	var inputSourceFolder;
 	var inputPreviewFolder;
