@@ -70,6 +70,11 @@
 		
 		function unload() {
 			rightColumn.removeChild(fileExplorerWrap);
+		
+		editor.removeMenuItem(menuItem);
+		
+		editor.unbindKey(toggleFileExplorer);
+		
 		}
 		
 		function toggleFileExplorer(toState) {
@@ -226,7 +231,7 @@
 		
 		function buildList(dir, parent, findDir, callback) {
 			
-			console.log("Building file explorer tree for dir=" + dir);
+		console.log("Building file explorer tree for dir=" + dir + "in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
 			
 			var dirFound = null;
 			
@@ -268,6 +273,8 @@
 			
 			function showItem(item) {
 				
+			console.log("item.type=" + item.type + " item.name=" + item.name);
+			
 				var li = document.createElement("li");
 				var type = "";
 				
