@@ -43,7 +43,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function styleTagFuncEnd(callback) {
 		// bug: parser switched to CSS mode and couln't find end of function, soluton: no CSS mode inside quotes 

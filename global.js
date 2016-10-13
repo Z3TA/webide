@@ -362,7 +362,7 @@ function getPathDelimiter(path) {
 }
 
 
-function textDiff(originalText, editedText, headerRows, footerRows) {
+function textDiff(originalText, editedText, ignoreTransform) {
 	/*
 		return {inserted: inserted, removed: removed};
 		
@@ -380,27 +380,42 @@ function textDiff(originalText, editedText, headerRows, footerRows) {
 	var lbOriginalText = originalText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
 	var lbEditedText = editedText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
 	
-	if(headerRows == undefined) headerRows = 0;
-	if(footerRows == undefined) footerRows = 0;
+	var editedRow = editedText.split(lbEditedText);
+	var originalRow = originalText.split(lbOriginalText);
 	
-	if(headerRows > 0 || footerRows > 0) {
-		var editedRow = editedText.split(lbEditedText);
-			
-		if(headerRows > 0) editedRow.splice(0, headerRows);
-			
-		if(footerRows > 0)  editedRow.splice(editedRow.length - footerRows - 1, footerRows);
-			
-		editedText = editedRow.join(lbEditedText);
-
+	if(ignoreTransform) {
+		for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
+			editedRow.splice(ignoreTransform.inserted[i].row, 1);
+			console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
+		}
+		for(var i=ignoreTransform.removed.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
+			originalRow.splice(ignoreTransform.removed[i].row, 1);
+			console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
+		}
+		}
+	
+	// Trim white space from all lines
+	for (var i=0; i<editedRow.length; i++) {
+		editedRow[i] = editedRow[i].trim();
+	}
+	for (var i=0; i<originalRow.length; i++) {
+		originalRow[i] = originalRow[i].trim();
 	}
 	
+	editedText = editedRow.join(lbEditedText);
+	originalText = originalRow.join(lbOriginalText);
+	
+	
 	var extraLbAdded = false;
-	if(originalText.substr(originalText.length - lbOriginalText.length) != lbOriginalText) {
+	var lastCharactersOriginalText = originalText.substr(originalText.length - lbOriginalText.length);
+	if(lastCharactersOriginalText != lbOriginalText) { 
+		// original text doesn't end with a line break!
+		console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + lbChars(lastCharactersOriginalText));
 		originalText += lbOriginalText;
 		extraLbAdded = true;
 		
 		if(editedText.substr(editedText.length - lbEditedText.length) != lbEditedText) editedText += lbEditedText + lbEditedText; // Add two line-breaks
-		else editedText += lbEditedText; // or add only one if it already head one
+		else editedText += lbEditedText; // or add only one if it already had one
 	}
 	
 	var jsdiff = require('diff');
@@ -426,7 +441,7 @@ function textDiff(originalText, editedText, headerRows, footerRows) {
 				// if(line[j].length > 0) 
 				console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
 				if(j < (line.length-1)) {
-										
+					
 					if(removedLines > 0) {
 						// If lines above where removed, reset lineBreakCount and insert from there
 						lineBreakCount -= removedLines;

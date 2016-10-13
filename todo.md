@@ -13,8 +13,9 @@ Prio:
 What I'm working on
 -------------------
 
-insert h1 in ssg wysiwyg
+sanitize contentediable output
 
+insert bold/h1 in ssg wysiwyg
 
 brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
 and is super easy ...
@@ -173,6 +174,11 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+file explorer: After saving a file "save as" on ftp connection. Updating the file explorer only show the folder the file was saved in under root dir, and you cant open any files
+
+file:///C:/Users/Z/dev-repositories/jzedit/editor.js:2726
+Uncaught ReferenceError: sshClient is not defined
 
 Wrap plugin seems broken. Try it in react_vs_vanilla_js.htm
 
@@ -945,6 +951,10 @@ Need to update deleteSelection so it only generates one change instead of using 
 Run for loops in parallel: 
 #pragma omp parallel
 #pragma omp for
+
+
+Battery benchmark optimization. Detect if the computer is running on battery and make stuff more energy efficient (disable resource hungry features)
+
 
 Feature
 =======

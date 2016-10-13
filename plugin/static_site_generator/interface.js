@@ -28,6 +28,7 @@
 	var sourceFile; // Source file that is being previewed
 	var headerRows = 0;
 	var footerRows = 0;
+	var ignoreTransform;
 	
 	var menuItem;
 	
@@ -726,7 +727,7 @@
 					// Preview the current file opened in the editor !
 					
 					// url needs to have / instead of \ for path delimiter
-					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
+					var url = "file://" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
 					openPreviewWin(url, callback)
 					
@@ -740,7 +741,7 @@
 			
 			if(!previewWinOpened) {
 				// Open the index page
-				var url = "file:///" + site.preview.replace(/\\/g, "/");
+				var url = "file://" + site.preview.replace(/\\/g, "/");
 				
 				notEditableReason = "No file open";
 				editable = false;
@@ -806,7 +807,7 @@
 				previewWin.window.scrollTop = scrollTop; // Set the scroll position again
 			}
 			else {
-				console.log("url=" + url + " != " + previewWin.window.location);
+				alertBox("url=" + url + " != " + previewWin.window.location);
 				previewWin.window.location = url;
 			}
 			
@@ -858,8 +859,8 @@
 				var main = previewWin.window.document.getElementsByTagName("main")[0];
 				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
 					
-					var diff = textDiff(srcHTML, prewHTML, headerRows, footerRows);
-					
+				var diff = textDiff(srcHTML, prewHTML, ignoreTransform);
+				
 					var srcStartIndex = sourceFile.text.indexOf(srcHTML);
 					
 					if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
@@ -881,14 +882,18 @@
 					console.log("diff.removed=" + JSON.stringify(diff.removed));
 					console.log("diff.inserted=" + JSON.stringify(diff.inserted));
 					
+				// Apply the transformation to the source code ...
+				
 					for(var i=0; i<diff.removed.length; i++) {
 						console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 						// Remove the text on the line, but do not remove the line (yet)
 						row = diff.removed[i].row + startRow;
 						
-						if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim());
-						
-						sourceFile.removeAllTextOnRow(row); 
+						if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
+						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim());
+					}
+					
+					sourceFile.removeAllTextOnRow(row); 
 						
 						console.log("Removed all text on row=" + row);
 						
@@ -929,7 +934,7 @@
 						
 						console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 					}
-					
+				
 					// Add lines left to be inserted before removing removed lines (backwards)
 					
 					for(var i=diff.inserted.length-1; i>-1; i--) {
@@ -953,7 +958,12 @@
 						sourceFile.removeRow(linesToBeRemoved[i] + startRow);
 					}
 					
-				}
+				// after the transformation: Update what should be ignored again
+				var srcHTML = getSourceCodeBody(sourceFile);
+				var prewHTML = main.innerHTML;
+				ignoreTransform = textDiff(srcHTML, main.innerHTML);
+				
+			}
 			
 		}
 		
@@ -974,7 +984,7 @@
 		// Returns the body of the source HTML code
 		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
 		
-		if(srcMatchBody == null) alert("Could not find &lt;body element in source file<br>" + sourceFile.path);
+		if(srcMatchBody == null) alertBox("Could not find &lt;body element in source file<br>" + sourceFile.path);
 		else return srcMatchBody[1];
 	}
 	
@@ -1338,7 +1348,12 @@
 				
 				var srcHTML = getSourceCodeBody(sourceFile);
 				if(srcHTML) {
-					var diff = textDiff(srcHTML, main.innerHTML);
+					// problem: scripts found in <body> are placed after <main>
+					// also: Extra stuff might be added to <main>
+					// solution: ignoreTransform needs to be recalculated after each transformation
+					ignoreTransform = textDiff(srcHTML, main.innerHTML);
+					
+					/*
 					var row = -1;
 					for (var i=0; i<diff.inserted.length; i++) {
 						if(row == -1) row = diff.inserted[i].row;
@@ -1346,7 +1361,12 @@
 						if(row < diff.inserted[i].row) footerRows++
 						else headerRows++;
 					}
+					*/
+					
 				}
+				
+				previewWin.focus();
+				
 			}
 				}
 		
