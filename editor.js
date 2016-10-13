@@ -334,7 +334,7 @@ editor.lastKeyPressed = "";
 					console.log("fileSizeInBytes=" + fileSizeInBytes);
 					
 					if(fileSizeInBytes > editor.settings.bigFileSize) {
-						//alert("Opening big fies is not yet supported!");
+						//alertBox("Opening big fies is not yet supported!");
 						//fileOpenError(new Error("File too big: " + path));
 						//return;
 						
@@ -759,7 +759,7 @@ editor.lastKeyPressed = "";
 					
 				}
 				else {
-					alert("No connection open to FTP on " + parse.hostname + " !");
+					alertBox("No connection open to FTP on " + parse.hostname + " !");
 				}
 			}
 			else if(parse.protocol == "sftp:") {
@@ -785,7 +785,7 @@ editor.lastKeyPressed = "";
 					
 				}
 				else {
-					alert("No connection open to SFTP on " + parse.hostname + " !");
+					alertBox("No connection open to SFTP on " + parse.hostname + " !");
 				}
 			}
 			
@@ -1007,7 +1007,7 @@ editor.lastKeyPressed = "";
 				console.log("Attempting saving to local file system: " + path + " ...");
 				
 				if(err) {
-					//alert("Unable to save file! " + err.message + "\n" + path);
+					//alertBox("Unable to save file! " + err.message + "\n" + path);
 					console.warn("Unable to save " + path + "!");
 					saveToDiskCallback(err);
 				}
@@ -2539,7 +2539,7 @@ editor.lastKeyPressed = "";
 		p.loaded = false;
 		
 		if(editor.settings.devMode && windowLoaded) {
-			//alert("Gonna reload unload and load " + getFunctionName(p.load));
+			//alertBox("Gonna reload unload and load " + getFunctionName(p.load));
 			editor.disablePlugin(getFunctionName(p.load)); // Unload plugin before loading it 
 			p.load(); // Load the plugin right away if the editor has already started. 
 		}
@@ -2631,21 +2631,21 @@ editor.lastKeyPressed = "";
 			});
 			
 			ftpClient.on('error', function(err) {
-				alert(err.message);
+				alertBox(err.message);
 				callback(err);
 				/*
 					if(err.message == "Login incorrect.") {
-					alert("Problem connecting to FTP on " + serverAddress + "\n" + err.message + "\nProbably wrong username/password!");
+					alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message + "\nProbably wrong username/password!");
 					}
 					else {
-					alert("Problem connecting to FTP on " + serverAddress + "\n" + err.message);
+					alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message);
 					}
 					console.error(err);
 				*/
 			});
 			
 			ftpClient.on('close', function(hadErr) {
-				alert("Connection to FTP on " + serverAddress + " closed.");
+				alertBox("Connection to FTP on " + serverAddress + " closed.");
 				
 				connectionClosed("ftp", serverAddress);
 				
@@ -2712,7 +2712,7 @@ editor.lastKeyPressed = "";
 						if (err) {
 							sshCLient.end();
 							callback(err);
-							//alert("Unable to run SFTP on " + serverAddress + "\n" + err.message);
+							//alertBox("Unable to run SFTP on " + serverAddress + "\n" + err.message);
 							//throw err;
 						}
 						else {
@@ -2759,7 +2759,7 @@ editor.lastKeyPressed = "";
 					}
 					catch(err) {
 						cb(err);
-						//alert("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
+						//alertBox("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
 					}
 				});
 			}
@@ -2795,7 +2795,7 @@ editor.lastKeyPressed = "";
 							dir += data;
 						}).stderr.on('data', function(data) {
 							cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
-							//alert("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
+							//alertBox("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
 							console.warn('STDERR: ' + data);
 						});
 					});
@@ -2803,14 +2803,14 @@ editor.lastKeyPressed = "";
 				}).on('error', function(err) {
 					cb(err);
 					if(err.message == "All configured authentication methods failed") {
-						alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
+						alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
 					}
 					else {
-						alert("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
+						alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
 					}
 					
 				}).on('end', function(msg) {
-					alert("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
+					alertBox("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
 					
 					connectionClosed("ssh", serverAddress);
 					
@@ -3697,7 +3697,7 @@ editor.lastKeyPressed = "";
 		for(var path in editor.files) {
 			if(editor.files[path].saved) editor.closeFile(path)
 			else {
-				alert("Please save or close file before running tests: " + path);
+				alertBox("Please save or close file before running tests: " + path);
 				return;
 			}
 		}
@@ -3723,7 +3723,7 @@ editor.lastKeyPressed = "";
 			var testsToRun = testFirstTest ? 1 : editor.tests.length;
 			
 			if(testsToRun == 1) {
-				alert("Testing: " + editor.tests[0].text);
+				alertBox("Testing: " + editor.tests[0].text);
 			}
 			
 			for(var i=0; i<testsToRun; i++) {
