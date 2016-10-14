@@ -2704,13 +2704,13 @@ editor.lastKeyPressed = "";
 		}
 		else if(protocol == "sftp") {
 			
-			sshConnect(function sshConnected(err, sshCLient, workingDir) {
+			sshConnect(function sshConnected(err, sshClient, workingDir) {
 				if(err) callback(err);
 				else {
 					// Initiate "SFTP mode"
-					sshCLient.sftp(function(err, sftpClient) {
+					sshClient.sftp(function(err, sftpClient) {
 						if (err) {
-							sshCLient.end();
+							sshClient.end();
 							callback(err);
 							//alertBox("Unable to run SFTP on " + serverAddress + "\n" + err.message);
 							//throw err;
