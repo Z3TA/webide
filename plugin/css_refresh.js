@@ -28,7 +28,7 @@
 				links[i].href = links[i].href  + "?date=" + new Date().getMilliseconds();
 			}
 		}
-		console.log("CSS refreshed");
+		//alertBox("CSS refreshed");
 		return false;
 	}
 	
