@@ -1256,6 +1256,33 @@
 		
 	}
 	
+	File.prototype.replaceText = function(oldText, newText) {
+		var file = this;
+		
+		var index = file.text.indexOf(oldText);
+		
+		if(index == -1) throw new Error("File (" + file.path + ") does not contain oldText=" + oldText);
+		
+		var newIndex = index + newText.length;
+		
+		file.text = file.text.replace(oldText, newText);
+		
+		file.grid = file.createGrid(); // will probably have to rewrite for performance
+		
+		var dummyCaret = file.createCaret(newIndex);
+		
+		file.fixCaret(file.caret);
+		
+		file.scrollToCaret(dummyCaret);
+		
+		file.sanityCheck();
+		
+		editor.renderNeeded();
+		
+		file.change("replaceText", newText, index, dummyCaret.row, dummyCaret.col);
+		
+	}
+	
 	File.prototype.deleteTextRange = function(firstIndex, lastIndex) {
 		var file = this;
 		

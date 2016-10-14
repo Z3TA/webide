@@ -28,10 +28,11 @@
 	var headerRows = 0;
 	var footerRows = 0;
 	var ignoreTransform;
-	
+	var contentEdited = false;
 	var scrollTop = 0;
-	
 	var menuItem;
+	var ignoreFileChange = false;
+	
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -82,9 +83,11 @@
 			editor.hideMenu();
 		});
 		
-		editor.on("fileShow", fileChanged);
+		editor.on("fileShow", fileShow);
 		
 		editor.on("exit", SSG_cleanup);
+		
+		editor.on("fileChange", fileChange);
 		
 	}
 	
@@ -100,8 +103,9 @@
 		
 		SSG_cleanup(); // closePreview();
 		
-		editor.removeEvent("fileShow", fileChanged);
+		editor.removeEvent("fileShow", fileShow);
 		editor.removeEvent("exit", SSG_cleanup);
+		editor.removeEvent("fileChange", fileChange);
 		
 		editor.removeMenuItem(menuItem);
 		
@@ -113,11 +117,12 @@
 		if(manager) {
 		var footer = document.getElementById("footer");
 		footer.removeChild(manager);
+			editor.resizeNeeded();
 		}
 		
 	}
 	
-	function fileChanged(file) {
+	function fileShow(file) {
 		
 		// Change site when you change file
 		// Check if the file belongs to a site
@@ -132,7 +137,20 @@
 		}
 	}
 	
-	
+	function fileChange(file, type, characters, caretIndex, row, col) {
+		if(file == sourceFile && previewWin && !ignoreFileChange) {
+			
+			var main = previewWin.window.document.getElementsByTagName("main")[0];
+			
+			//var prewHTML = main.innerHTML;
+			var srcHTML = getSourceCodeBody(sourceFile);
+			
+			main.innerHTML = srcHTML;
+				
+			ignoreTransform = textDiff(srcHTML, main.innerHTML);
+				
+			}
+		}
 	
 	
 	function build() {
@@ -794,7 +812,7 @@
 			previewWin = gui.Window.open(url, {toolbar:true}); // Show the toolbar so you can see the URL, and open dev tools
 			
 			previewWin.on('focus', previewWinFocus);
-			previewWin.on('focus', previewWinUnFocus);
+			previewWin.on('blur', previewWinBlur);
 			previewWin.on("loaded", previewWinLoaded);
 			
 		}
@@ -842,9 +860,37 @@
 		function previewWinFocus() {
 			console.log('preview window is focused');
 			editor.input = false;
+			ignoreFileChange = true;
 		}
 		
-		function previewWinUnFocus() {
+		function previewWinBlur() {
+			
+			if(contentEdited) {
+				// The source code has been edited via contenteditable to we have to sanitize it it.
+				
+				var srcHTML = getSourceCodeBody(sourceFile);
+				var sanitized = srcHTML;
+				
+				sanitized = sanitized.replace(/<\/p><p>/gi, "</p>" + sourceFile.lineBreak + "<p>");
+				
+				if(sanitized != srcHTML) {
+					
+					var main = previewWin.window.document.getElementsByTagName("main")[0];
+					// Problem: contenteditable will lose the caret when the html is updated, hopefully it will not bother too much
+					main.innerHTML = sanitized;
+					
+					sourceFile.replaceText(srcHTML, sanitized);
+					
+					ignoreTransform = textDiff(sanitized, main.innerHTML);
+					
+					alertBox("Sanitized carbage from WYSIWYG");
+					
+				}
+				
+			}
+			
+			ignoreFileChange = false;
+			
 			if(editor.currentFile) editor.input = true;
 		}
 		
@@ -857,9 +903,14 @@
 		console.log("contentEdit!");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
-		if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
-		if(sourceFile != editor.currentFile) alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
+		else if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
 		else {
+			
+			if(sourceFile != editor.currentFile) {
+				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
+				editor.showFile(sourceFile, false);
+			}
+			
 			//console.log("target=" + objInfo(target));
 			console.log("type=" + type);
 			
@@ -869,18 +920,10 @@
 			if(srcHTML) {
 				var main = previewWin.window.document.getElementsByTagName("main")[0];
 				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
-					
-				// Sanitize the contentediable data
-				var sanitized = prewHTML;
 				
-				sanitized = sanitized.replace(/<\/p><p>/gi, "</p>" + sourceFile.lineBreak + "<p>");
-				
-				if(sanitized != prewHTML) {
-					// Using innerHTML desont seem to trigger contentEdit event. So no need to return
-					// problem: Using innerHTML messes up the cursor in contentEditable
-					main.innerHTML = sanitized;
-					prewHTML = sanitized;
-					}
+				// problem: Contenteditable produce mangled/garbled HTML code. 
+				// solution: Beautify the code whenever it lose foucs
+				contentEdited = true;
 				
 				// Compare the source with the editable preview
 				var diff = textDiff(srcHTML, prewHTML, ignoreTransform);
@@ -1179,7 +1222,10 @@
 				}
 								
 				function fileCreated(err, path) {
-					if(err) throw err;
+					if(err) {
+						alertBox("<b>" + err.message + "</b><br> Attempting to save: " + filePath);
+						throw err;
+					}
 					else {
 						fileSaved(filePath);
 						runWaitingList();
@@ -1271,6 +1317,7 @@
 			var sourceFilePath = url.replace("file://", "");
 			while(sourceFilePath.substr(0,1) == "/") sourceFilePath = sourceFilePath.substr(1); // In Windows there are three slashes in file:/// but in Linux it's only two!
 			sourceFilePath = sourceFilePath.replace(/\//g, systemPathDelimiter);
+			if(site.source.substr(0,1) == "/") sourceFilePath = "/" + sourceFilePath; // Add the root slash
 			sourceFilePath = sourceFilePath.replace(site.preview, site.source);
 			
 			console.log("url=" + url);
@@ -1358,11 +1405,7 @@
 				buttonWysiwyg.style.fontWeight="bold";
 				
 				
-				headerRows = 0;
-				footerRows = 0;
-				
-				
-				
+				contentEdited = false;
 				
 				main.contentEditable = "true";
 				

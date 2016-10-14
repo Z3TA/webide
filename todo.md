@@ -13,10 +13,6 @@ Prio:
 What I'm working on
 -------------------
 
-Thinking about using Prosemirror for WYSIWYG editing, uhh .... you cant get HTML out of prosemirror
-
-sanitize contentediable output
-
 insert bold/h1 in ssg wysiwyg
 
 brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
@@ -594,6 +590,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+List-box in goto-file. Where local and remote systems are listen. Where working dir's are opened in a tree.
+
 autocomplete: Do not make variable suggestion when in HTML mode (only html tags)
 
 Auto scroll to found functions when typing in the function list
@@ -989,6 +987,10 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+Web app hot code reloading ... 
+problem: when you are debugging something you have to repeat stuff to get into the same state as the bug, you want to go back one step in state, then replay the next step to se if the bug got fixed
+solution: retry using the same state, use setScriptSource in chromium debugger to hot swap functions
 
 Smooth scrolling, like in the browser, animated scrolling.
 
