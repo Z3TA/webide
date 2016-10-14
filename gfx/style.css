@@ -186,7 +186,7 @@ input[type=button] {
 	min-width: 120px;
 	background-color: #414141;
 	background: linear-gradient(#545657, #434343, #454545);
-	cursor: pointer;
+	cursor: default;
 	text-shadow: 0px -1px 0px #1f2020;
 	padding: 4px;
 	margin: 4px;
@@ -421,6 +421,7 @@ div.gotoFile li.selected {
 	
 	background-color: Highlight;
 	color: HighlightText;
+	
 }
 
 div.gotoFile li b {
@@ -606,7 +607,7 @@ div.gotoFile li b {
 	min-width: 90px;
 	background-color: #414141;
 	background: linear-gradient(#545657, #434343, #454545);
-	cursor: pointer;
+	cursor: default;
 	text-shadow: 0px -1px 0px #1f2020;
 	padding: 4px;
 	margin: 4px;
