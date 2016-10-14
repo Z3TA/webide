@@ -871,7 +871,14 @@
 				var srcHTML = getSourceCodeBody(sourceFile);
 				var sanitized = srcHTML;
 				
-				sanitized = sanitized.replace(/<\/p><p>/gi, "</p>" + sourceFile.lineBreak + "<p>");
+				// Line breaks between p tags
+				sanitized = sanitized.replace(/><p/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<p");
+				sanitized = sanitized.replace(/<\/p></gi, "</p>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
+				
+				// Line breaks between h# tags
+				sanitized = sanitized.replace(/><h/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<h");
+				sanitized = sanitized.replace(/<\/h(.)></gi, "</h$1>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
+				
 				
 				if(sanitized != srcHTML) {
 					
@@ -1348,12 +1355,7 @@
 				
 				sourceFile = file;
 				
-				// make sure it's saved, and that the preview is from the last save
-				if(!sourceFile.isSaved) {
-					alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
-					return;
-				}
-				
+				var srcHTML = getSourceCodeBody(sourceFile);
 				//var body = previewWin.window.getElementsByTagName("body")[0];
 				var body = previewWin.window.document.body;
 				var mainElements = previewWin.window.document.getElementsByTagName("main");
@@ -1370,22 +1372,47 @@
 				
 				var main = mainElements[0];
 				
+				// make sure it's saved, and that the preview is from the last save
+				if(!sourceFile.isSaved ) {
+					var diff = textDiff(srcHTML, main.innerHTML);
+					if(diff.inserted.length > 0 || diff.removed.length > 0) {
+					alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+					return;
+					}
+				}
+				
 				// ### Insert toolbar
 				var aShowDefaultUI = true;
+				
+				var buttonStyle = `border-radius: 3px;
+				border: 1px solid rgba(19, 19, 19, 0.5);
+				box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
+				color: #f6f6f3;
+				min-width: 120px;
+				background-color: #414141;
+				background: linear-gradient(#545657, #434343, #454545);
+				cursor: default;
+				text-shadow: 0px -1px 0px #1f2020;
+				padding: 4px;
+				margin: 4px;`;
 				
 				var toolbar = document.createElement("div");
 				toolbar.setAttribute("id", "toolbar");
 				toolbar.setAttribute("class", "wysiwygtoolbar");
+				toolbar.setAttribute("style", "position: fixed; top: 0px; left: 0px; width: 100%; padding: 5px; background: linear-gradient(#595959, #555555); box-shadow: outset 0px 4px 10px #888888; border-bottom: 2px solid #767676; ");
 				
 				var buttonH1 = document.createElement("button");
 				buttonH1.appendChild(document.createTextNode("Huvudrubrik"));
+				buttonH1.setAttribute("style", buttonStyle);
 				buttonH1.onclick = function insertH1() {
-					contentEditor.execCommand("heading", aShowDefaultUI, "h1");
+					//contentEditor.execCommand("heading", aShowDefaultUI, "h1");
+					contentEditor.execCommand('formatBlock', false, '<h1>');
 				}
 				toolbar.appendChild(buttonH1);
 				
 				var buttonItalic = document.createElement("button");
 				buttonItalic.appendChild(document.createTextNode("kursiv"));
+				buttonItalic.setAttribute("style", buttonStyle);
 				buttonItalic.onclick = function makeItalic() {
 					contentEditor.execCommand("italic", aShowDefaultUI);
 				}
@@ -1393,6 +1420,7 @@
 				
 				var buttonBold = document.createElement("button");
 				buttonBold.appendChild(document.createTextNode("fetstil"));
+				buttonBold.setAttribute("style", buttonStyle);
 				buttonBold.onclick = function makeBold() {
 					contentEditor.execCommand("bold", aShowDefaultUI);
 				}
@@ -1400,9 +1428,11 @@
 				
 				body.insertBefore(toolbar, body.firstChild); // Insert the toolbar at the top
 				
+				body.setAttribute("style", "padding-top: 60px; transition: transform 0.4s ease;"); // Make sure the toolbar doesn't cover layout
 				
 				// Change buttonWysiwyg state to "active"
 				buttonWysiwyg.style.fontWeight="bold";
+				
 				
 				
 				contentEdited = false;
@@ -1412,30 +1442,18 @@
 				previewWin.window.addEventListener("input", contentEdit);
 				
 				// Find stuff that should be ignored when comparing edits in preview
-				
-				var srcHTML = getSourceCodeBody(sourceFile);
 				if(srcHTML) {
 					// problem: scripts found in <body> are placed after <main>
 					// also: Extra stuff might be added to <main>
 					// solution: ignoreTransform needs to be recalculated after each transformation
 					ignoreTransform = textDiff(srcHTML, main.innerHTML);
 					
-					/*
-					var row = -1;
-					for (var i=0; i<diff.inserted.length; i++) {
-						if(row == -1) row = diff.inserted[i].row;
-						
-						if(row < diff.inserted[i].row) footerRows++
-						else headerRows++;
-					}
-					*/
-					
 				}
 				
 				previewWin.focus();
 				
 			}
-				}
+		}
 		
 		function disableContentEdit(previewWin) {
 			

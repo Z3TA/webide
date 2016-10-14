@@ -13,28 +13,21 @@ Prio:
 What I'm working on
 -------------------
 
-insert bold/h1 in ssg wysiwyg
+webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
+
+
 
 brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
 and is super easy ...
 Teach people to use a computer for more then a type writer ... Goal: teach some basic coding/scripting
 
-webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
+
 
 todo:
-
-ssg bug: preview doesn't scroll down to last position
 
 ssg: show the ssg buttons whenever a file from a registered project is opened
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
-
-ssg: To actually be able to edit you have to click the WYSIWYG button, annoying when you are in edit mode if you want to test
-
-ssg: remove new span and div tags entered from contenteditable. Add white space line breaks in source when hitting enter in contenteditable.
-
-WYSIWYG button. Edit HTML page (SSG) in "What you see is what you get" mode.
-support colaboration editing (many ppl edit at the same time), look on LAN for others with the same file open
 
 
 
