@@ -160,10 +160,9 @@ li ul {
 label {
 	color: #f6f6f3;
 	text-shadow: 0px -1px 0px #1f2020;
-	font-size: 14px;
-	font-family: Verdana;
-	font-weight: bold;
-}
+	font-weight: normal;
+	font-family: caption;
+	}
 
 input[type=text], input[type=password], select.select {
 	border-radius: 2px;
@@ -173,9 +172,7 @@ input[type=text], input[type=password], select.select {
 	box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
 	padding: 3px;
 	margin: 4px;
-	font-size: 12px;
-	font-family: Verdana;
-	 }
+	}
 
 input[type=checkbox] {
 	text-align: absmiddle;
@@ -193,8 +190,6 @@ input[type=button] {
 	text-shadow: 0px -1px 0px #1f2020;
 	padding: 4px;
 	margin: 4px;
-	font-size: 12px;
-	font-family: Verdana;
 }
 
 input[type=button].half {
@@ -400,27 +395,37 @@ div.fileList {
 /* ########### gotoFIle ################## */
 div.gotoFile {
 	color: #f6f6f3;
-	text-shadow: 0px -1px 0px #1f2020;
+	/*text-shadow: 0px -1px 0px #1f2020;*/
 	margin-top: 4px;
-	font-family: Verdana;
-	font-size: 12px;
-}
+	}
 
 div.gotoFile li {
+	font-size: 13px;
+	padding: 2px;
 	padding-top: 2px;
 	padding-bottom: 2px;
 	background-color: #2b2c27;
 	color: #838383;
-	border-top: 1px solid #32342e;
-	border-bottom: 1px solid #151513;
+	
+	background-color: Menu;
+	color: MenuText;
+	
+	font-family: menu;
+	
+	/*border-top: 1px solid #32342e;
+	border-bottom: 1px solid #151513;*/
 }
 
 div.gotoFile li.selected {
 	background-color: #3c3f37;
+	
+	background-color: Highlight;
+	color: HighlightText;
 }
 
 div.gotoFile li b {
 	color: #fffdf7;
+	color: InfoText;
 }
 
 
@@ -488,7 +493,6 @@ div.gotoFile li b {
 
 /* ### Stying for the context menus */
 
-
 .menu {
 	display: block;
 	visibility: hidden;
@@ -519,8 +523,6 @@ div.gotoFile li b {
 	
 	box-shadow: 0 1px 10px ThreeDShadow;
 }
-
-
 
 .menu li {
 	font-size: 13px;
