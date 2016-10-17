@@ -3,21 +3,29 @@
 	
 	"use strict";
 	
-	window.addEventListener("load", main, false);
-
 	var fileInput;
-		
+	var menu;
 	
-	function main() {
-		
+	editor.plugin({
+		desc: "Open file dialog using Ctrl+O or via context menu",
+		load: load,
+		unload: unload,
+	});
+	
+	function load() {
 		// Bind to ctrl + O
 		editor.bindKey({desc: "Open file using native file select dialog", charCode: 79, combo: CTRL, fun: openFile});
-
-		// Add items to the canvas context meny
-		editor.addMenuItem("Open file ...", openFile);
 		
+		// Add items to the canvas context meny
+		menu = editor.addMenuItem("Open file ...", openFile);
 	}
-
+	
+	function unload() {
+		editor.unbindKey(openFile);
+		
+		editor.removeMenuItem(menu);
+	}
+	
 	function openFile() {
 		
 		editor.hideMenu();
@@ -69,6 +77,9 @@
 			// No current file opened. Use working dir!?
 			//defaultPath = editor.workingDirectory;
 		}
+		
+		//alertBox(defaultPath);
+		// It doesn't seem we can set default path in Linux !
 		
 		console.log("Telling the editor to open the file dialog window ...");
 		editor.fileOpenDialog(defaultPath, function after_dialog_open_file(filePath, content) {

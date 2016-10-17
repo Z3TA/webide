@@ -9,6 +9,7 @@
 	var saveDialog;
 	var inputPath;
 	var inputPathMinSize = 50;
+	var menu;
 	
 	// Add plugin to editor
 	editor.plugin({
@@ -32,12 +33,20 @@
 		editor.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
 		
 		// Add items to the canvas context meny
-		editor.addMenuItem("Save as ...", saveAs);
+		menu = editor.addMenuItem("Save as ...", saveAs);
 		
 	}
 	
 	function unload() {
 		// Cleaning up, for example when disabling a plugin
+		
+		editor.unbindKey(saveCurrentFile);
+		editor.unbindKey(hideSaveDialog);
+		editor.unbindKey(enter);
+		
+		editor.removeMenuItem(menu);
+		
+		hideSaveDialog();
 	}
 	
 	
@@ -117,8 +126,10 @@
 	function browsePath() {
 		var defaultPath = "";
 		
-		if(editor.currentFile) defaultPath = editor.currentFile.path
+		if(editor.currentFile.path.match(/\/|\\/)) defaultPath = editor.currentFile.path
 		else defaultPath = editor.workingDirectory;
+		
+		//alertBox(defaultPath);
 		
 		editor.fileSaveDialog(defaultPath, function(path) {
 			
