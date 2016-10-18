@@ -13,6 +13,10 @@ Prio:
 What I'm working on
 -------------------
 
+investigating bug: Uncaught Error: Text on row=23 doesn't match! 
+when removing rows that has been removed ...
+/home/zeta/dev/jzedit/plugin/static_site_generator/interface.js:975 Uncaught Error: Text on 
+
 webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
 
@@ -980,6 +984,8 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+Gamification/Animations: Animate for example parenthesis/bracket highlightning so they are easier to see and looks cooler.
 
 Web app hot code reloading ... 
 problem: when you are debugging something you have to repeat stuff to get into the same state as the bug, you want to go back one step in state, then replay the next step to se if the bug got fixed

@@ -32,7 +32,7 @@
 	var scrollTop = 0;
 	var menuItem;
 	var ignoreFileChange = false;
-	
+	var updatePreviewOnChange;
 	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
@@ -71,10 +71,12 @@
 		var keyF9 = 120;
 		var keyEscape = 27;
 		
-		editor.bindKey({desc: "Show the manager for the static site generator", fun: showSSG, charCode: keyF9, combo: CTRL});
+		editor.bindKey({desc: "Show the manager for the static site generator", fun: showSSG, charCode: keyF9, combo: 0});
 		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hideSSG, charCode: keyEscape, combo: 0});
-		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewSSG, charCode: keyF9, combo: 0});
-		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publishSSG, charCode: keyF9, combo: CTRL + SHIFT});
+		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewSSG, charCode: keyF9, combo: CTRL});
+		editor.bindKey({desc: "WYSIWYG editor for current site in the static site generator", fun: wysiwygSSG, charCode: keyF9, combo: CTRL + SHIFT});
+		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publishSSG, charCode: keyF9, combo: CTRL + ALT});
+		
 		
 		//build();
 		
@@ -113,6 +115,7 @@
 		editor.unbindKey(previewSSG);
 		editor.unbindKey(publishSSG);
 		editor.unbindKey(showSSG);
+		editor.unbindKey(wysiwygSSG);
 		
 		if(manager) {
 		var footer = document.getElementById("footer");
@@ -140,6 +143,13 @@
 	function fileChange(file, type, characters, caretIndex, row, col) {
 		if(file == sourceFile && previewWin && !ignoreFileChange) {
 			
+			console.log("Updating HTML preview ...");
+			
+			//if(updatePreviewOnChange) clearTimeout(updatePreviewOnChange);
+			
+			// Delay updating so that we do not render broken tags etc and save some battery
+			//updatePreviewOnChange = setTimeout(function() {
+			
 			var main = previewWin.window.document.getElementsByTagName("main")[0];
 			
 			//var prewHTML = main.innerHTML;
@@ -147,10 +157,12 @@
 			
 			main.innerHTML = srcHTML;
 				
-			ignoreTransform = textDiff(srcHTML, main.innerHTML);
-				
-			}
+				//ignoreTransform = textDiff(srcHTML, main.innerHTML);
+			
+			//}, 3000);
+			
 		}
+	}
 	
 	
 	function build() {
@@ -253,13 +265,11 @@
 			previewPage(selectedSite);
 		}, false);
 		
-		buttonWysiwyg= document.createElement("input");
+		buttonWysiwyg = document.createElement("input");
 		buttonWysiwyg.setAttribute("type", "button");
 		buttonWysiwyg.setAttribute("class", "button");
 		buttonWysiwyg.setAttribute("value", "WYSIWYG");
-		buttonWysiwyg.addEventListener("click", function() {
-			wysiwyg(selectedSite);
-		}, false);
+		buttonWysiwyg.addEventListener("click", wysiwygSSG, false);
 		
 		var buttonPublish = document.createElement("input");
 		buttonPublish.setAttribute("type", "button");
@@ -888,7 +898,7 @@
 					
 					sourceFile.replaceText(srcHTML, sanitized);
 					
-					ignoreTransform = textDiff(sanitized, main.innerHTML);
+					//ignoreTransform = textDiff(sanitized, main.innerHTML);
 					
 					alertBox("Sanitized carbage from WYSIWYG");
 					
@@ -964,12 +974,12 @@
 						row = diff.removed[i].row + startRow;
 						
 						if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
-						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim());
+						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + srcHTML + "\n\nprewHTML=" + prewHTML);
 					}
 					
-					sourceFile.removeAllTextOnRow(row); 
+					sourceFile.removeAllTextOnRow(row);
 						
-						console.log("Removed all text on row=" + row);
+					console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
 						
 						// Is there a line that will replace it?
 						replacedLine = false;
@@ -1035,7 +1045,7 @@
 				// after the transformation: Update what should be ignored again
 				var srcHTML = getSourceCodeBody(sourceFile);
 				var prewHTML = main.innerHTML;
-				ignoreTransform = textDiff(srcHTML, main.innerHTML);
+				//ignoreTransform = textDiff(srcHTML, main.innerHTML);
 				
 			}
 			
@@ -1304,7 +1314,28 @@
 		}
 	}
 	
-	function wysiwyg(site) {
+	function computeIgnoreTransform(srcHTML, rawMainHtml) {
+		ignoreTransform = textDiff(srcHTML, rawMainHtml);
+		
+		// Make sure there are no errors
+		var lbSrc = occurrences(srcHTML, "\n");
+		var lbMain = occurrences(rawMainHtml, "\n");
+		
+		if( (lbSrc + ignoreTransform.removed.length) != (lbMain - ignoreTransform.inserted.length) ) {
+			throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + ignoreTransform.removed.length + " inserted=" + ignoreTransform.inserted.length + "  diff=" + JSON.stringify(ignoreTransform, null, 2));
+		}
+		
+	}
+	
+	function wysiwygSSG() {
+		var site;
+		
+		if(selectedSite) site = selectedSite; 
+		else {
+			showSSG();
+			alertBox("Select site to edit!");
+			return false;
+		}
 		
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
 		
@@ -1316,10 +1347,15 @@
 			if(previewWin) disableContentEdit(previewWin);
 		}
 		
+		return false;
+		
 		function enableContentEdit(previewWin) {
 			
-			// 1.  Get the URL of the page/file in preview
+			// Get the URL of the page/file in preview
 			var url = previewWin.window.location.href;
+			var previePath = url;
+			var rawMainHtml = "";
+			var srcHTML = "";
 			var systemPathDelimiter = getPathDelimiter(process.cwd());
 			var sourceFilePath = url.replace("file://", "");
 			while(sourceFilePath.substr(0,1) == "/") sourceFilePath = sourceFilePath.substr(1); // In Windows there are three slashes in file:/// but in Linux it's only two!
@@ -1332,13 +1368,30 @@
 			console.log("site.preview=" + site.preview);
 			console.log("site.source=" + site.source);
 			
-			
 			if(sourceFilePath.match(/index\.htm./i)) {
 				alertBox("Unable to edit index file in WYSIWYG mode");
 				return;
 			}
 			
-			// 2. Open the file in the editor if it's not already open
+			// Get the source code for the compiled page in review, in order to compute ignoreTransform
+			editor.readFromDisk(previePath, function gotPreviewSource(err, path, txt) {
+				
+				if(err) throw err;
+				
+				var matchMain = txt.match(/<main.*>([\s\S]*)<\/main>/i);
+				
+				if(matchMain == null) {
+					alertBox("Could not find &lt;main element in preview source file\n" + path);
+					rawMainHtml = "";
+				}
+				else rawMainHtml = matchMain[1];
+				
+				if(srcHTML && rawMainHtml) computeIgnoreTransform(srcHTML, rawMainHtml);
+				
+			});
+			
+			
+			// Open the file in the editor if it's not already open
 			if(editor.files.hasOwnProperty(sourceFilePath)) {
 				sourceFile = editor.files[sourceFilePath];
 				editor.showFile(sourceFile); // Make sure it's the current one open
@@ -1355,7 +1408,7 @@
 				
 				sourceFile = file;
 				
-				var srcHTML = getSourceCodeBody(sourceFile);
+				srcHTML = getSourceCodeBody(sourceFile);
 				//var body = previewWin.window.getElementsByTagName("body")[0];
 				var body = previewWin.window.document.body;
 				var mainElements = previewWin.window.document.getElementsByTagName("main");
@@ -1376,8 +1429,8 @@
 				if(!sourceFile.isSaved ) {
 					var diff = textDiff(srcHTML, main.innerHTML);
 					if(diff.inserted.length > 0 || diff.removed.length > 0) {
-					alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
-					return;
+						alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+						return;
 					}
 				}
 				
@@ -1452,7 +1505,7 @@
 				
 				
 				// Change buttonWysiwyg state to "active"
-				buttonWysiwyg.style.fontWeight="bold";
+				if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="bold";
 				
 				
 				
@@ -1464,10 +1517,16 @@
 				
 				// Find stuff that should be ignored when comparing edits in preview
 				if(srcHTML) {
-					// problem: scripts found in <body> are placed after <main>
-					// also: Extra stuff might be added to <main>
-					// solution: ignoreTransform needs to be recalculated after each transformation
-					ignoreTransform = textDiff(srcHTML, main.innerHTML);
+					/*
+					problem: scripts found in <body> are placed after <main>
+					also: Extra stuff might be added to <main>
+					solution: ignoreTransform needs to be recalculated after each transformation
+					
+						problem2: contenteditable does not use the original HTML code, it changes it! For example adding <tbody> in tables ... resulting in ignoreTransform ignoring important updates
+						solution2: Only compare the raw HTML when computing ignoreTransform! Then clean up the contenteditable content when pasting it into the source
+					*/
+					
+					if(srcHTML && rawMainHtml) computeIgnoreTransform(rawMainHtml);
 					
 				}
 				
@@ -1476,10 +1535,11 @@
 			}
 		}
 		
+		
 		function disableContentEdit(previewWin) {
 			
 			// Change buttonWysiwyg state to "normal"
-			buttonWysiwyg.style.fontWeight="normal";
+			if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="normal";
 			
 			var body = previewWin.window.document.body;
 			body.contentEditable = "false";

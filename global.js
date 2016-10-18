@@ -433,7 +433,10 @@ function textDiff(originalText, editedText, ignoreTransform) {
 	
 	for (var i=0; i<diff.length; i++) {
 		line = diff[i].value.split(lb);
-		if(line[line.length-1] != "") throw new Error("Line does not end with a new-line character diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
+		if(line[line.length-1] != "") {
+			throw new Error("Line does not end with a new-line character! diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
+			//line.push("");
+		}
 		lineBreakCount = 0;
 		for (var j=0; j<line.length; j++) {
 			

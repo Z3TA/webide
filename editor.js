@@ -790,6 +790,11 @@ editor.lastKeyPressed = "";
 			}
 			
 			else {
+				
+				// Asume local file system
+				
+				if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
+				
 				if(returnBuffer) {
 					// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 					
@@ -2576,14 +2581,21 @@ editor.lastKeyPressed = "";
 	
 	editor.addTest = function(fun, order) {
 		
-		var funName = getFunctionName(fun)
+		var funName = getFunctionName(fun);
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
 		
 		if(order == undefined) order = 0;
 		
 		for(var i=0; i<editor.tests.length; i++) {
-			if(editor.tests[i].text == funName) throw new Error("The test function name=" + funName + " is already used!");
+			if(editor.tests[i].text == funName) {
+				if(windowLoaded) {
+					console.log("Overloading test function name=" + funName + " !");
+					editor.tests.splice(i, 1);
+					break;
+				}
+				else throw new Error("Test function name=" + funName + " already exist!");
+			}
 			if(order > 0 && editor.tests[i].order > order) throw new Error("Remove order from test '" + editor.tests[i].text + "' if you want " + funName + " to run first!");
 		}
 		

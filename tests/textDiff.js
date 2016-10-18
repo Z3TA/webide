@@ -71,6 +71,36 @@ editor.addTest(function testTextDiff(callback) {
 	(diff.inserted[2].text == "" && diff.inserted[1].row == 2)) ) throw new Error("Unexpected diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 	
 	
+	
+	diff = textDiff(`
+	<table>
+	  <tr>
+	    <th>Header1</th>
+	    <th>Header2</th>
+	  </tr>
+	  <tr>
+	    <td>Col1</td>
+	    <td>Col2</td>
+	  </tr>
+	</table>
+	`, `
+	<table>
+	  <tbody><tr>
+	    <th>Header1</th>
+	    <th>Header2</th>
+	  </tr>
+	  <tr>
+	    <td>Col12</td>
+	    <td>Col2</td>
+	  </tr>
+	</tbody></table>
+	`);
+	
+	if(diff.inserted.length != 3) throw new Error("Expected 3 lines to be inserted, not " + diff.inserted.length + ". diff=" + JSON.stringify(diff, null, 2));
+	if(diff.removed.length != 3) throw new Error("Expected 3 lines to be removed, not " + diff.removed.length + ". diff=" + JSON.stringify(diff, null, 2));
+	
+	console.log(JSON.stringify(diff, null, 2));
+	
 	callback(true);
 	
 }, 1);
