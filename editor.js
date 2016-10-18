@@ -1821,7 +1821,7 @@ editor.lastKeyPressed = "";
 		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
 		
 		if(menuElement.parent == menu) menu.removeChild(menuElement);
-		else console.warn("menuElement not part of menu! menuElement=" + menuElement.innerHTML);
+		else console.warn("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML);
 		
 		return positionIndex; // So we can insert another node at this position
 		
@@ -2514,15 +2514,15 @@ editor.lastKeyPressed = "";
 				
 				keyBindings.splice(i, 1);
 				
-				console.log("Ubound " + funName);
-				
-				return editor.unbindKey(funName);
+				console.log("unbindKey " + funName);
+				return true;
+				//return editor.unbindKey(funName);
 			}
 		}
 		
-		console.warn("Failed to unbind funName=" + funName);
+		console.warn("Failed to unbindKey funName=" + funName);
 		
-		return null;
+		return false;
 	}
 	
 	editor.plugin = function(p) {
@@ -2533,27 +2533,31 @@ editor.lastKeyPressed = "";
 		
 		if((typeof p.load !== "function")) throw new Error("The plugin needs to have a load method!");
 		
-		if((typeof p.unload !== "function")) getStack("The plugin should have a unload method!");
-		if(!p.desc) getStack("The plugin should have a description!");
+		if((typeof p.unload !== "function")) throw new Error("The plugin should have a unload method!");
+		if(!p.desc) throw new Error("The plugin should have a description!");
 		
 		p.loaded = false;
 		
 		if(editor.settings.devMode && windowLoaded) {
 			//alertBox("Gonna reload unload and load " + getFunctionName(p.load));
-			editor.disablePlugin(getFunctionName(p.load)); // Unload plugin before loading it 
+			editor.disablePlugin(p.desc); // Unload plugin before loading it 
 			p.load(); // Load the plugin right away if the editor has already started. 
+		}
+		
+		for(var i=0; i<editor.plugins.length; i++) {
+			if(editor.plugins[i].desc == p.desc) throw new Error("A plugin with the same description is already loaded: " + p.desc);
 		}
 		
 		editor.plugins.push(p);
 		
 	}
 	
-	editor.disablePlugin = function(loadFunName) {
+	editor.disablePlugin = function(desc) {
 		
 		var f;
 		for(var i=0; i<editor.plugins.length; i++) {
-			f = editor.plugins[i]
-			if(getFunctionName(f.load) == loadFunName) {
+			f = editor.plugins[i];
+			if(f.desc == desc) {
 				
 				if(f.loaded && !f.unload) throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
 				
@@ -2561,13 +2565,13 @@ editor.lastKeyPressed = "";
 				
 				editor.plugins.splice(i, 1);
 				
-				console.log("Plugin " + loadFunName + " disabled");
+				console.log("Plugin disabled: " + desc);
 				
-				return editor.disablePlugin(loadFunName);
+				return true;
 			}
 		}
 		
-		return null;
+		return false;
 	}
 	
 	editor.addTest = function(fun, order) {

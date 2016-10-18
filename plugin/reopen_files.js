@@ -5,6 +5,9 @@
 editor.plugin({
 	desc: "Open up the files from last session", 
 	order: 999, // Load after the parser and other stuff that has fileOpen event listener
+	unload: function unloadReopenFilesPlugin() {
+		
+	},
 	load: function reopenFiles() {
 	/*
 		1. Open up the files from last time, when opening the editor.

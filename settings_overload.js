@@ -57,10 +57,9 @@ if(process.platform == "linux") {
 		editor.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
 	*/
 	
-	
 	editor.settings.sub_pixel_antialias = false;
 	editor.settings.style.font = "DejaVu Sans Mono";
-	editor.settings.style.highlightMatchFont = "bold 13px DejaVu Sans Mono";
+	editor.settings.style.highlightMatchFont = "bold 14px DejaVu Sans Mono";
 	editor.settings.style.fontSize = 13;
 	editor.settings.gridHeight = 22;
 	editor.settings.gridWidth = 7.83;
