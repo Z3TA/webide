@@ -889,6 +889,15 @@
 				sanitized = sanitized.replace(/><h/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<h");
 				sanitized = sanitized.replace(/<\/h(.)></gi, "</h$1>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
 				
+				// Line breaks between div tags
+				sanitized = sanitized.replace(/><div/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<div");
+				sanitized = sanitized.replace(/<\/div></gi, "</div>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
+				
+				// Line breaks between tbody
+				sanitized = sanitized.replace(/><tbody/gi, ">" + sourceFile.lineBreak + "<tbody");
+				sanitized = sanitized.replace(/<\/tbody></gi, "</tbody>" + sourceFile.lineBreak + "<");
+				
+				
 				
 				if(sanitized != srcHTML) {
 					
@@ -951,35 +960,35 @@
 				*/
 				
 				var ignored = 0;
-				if(ignoreTransform && 1==2) {
+				if(ignoreTransform) {
 					if(ignoreTransform.inserted.length > 0) {
-					for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
-						for(var j=0; j<diff.inserted.length; j++) {
-							if(diff.inserted[j].text == ignoreTransform.inserted[i].text) {
-								//if(diff.inserted[j].text != ignoreTransform.inserted[i].text) throw new Error("ignoreTransform edited text on row=" + diff.inserted[j].text + " doesn't match! diff=" + diff.inserted[j].text + " ignore=" + ignoreTransform.inserted[i].text);
-								diff.inserted.splice(j, 1);
-								console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
-								ignored++;
-								break;
+						for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
+							for(var j=0; j<diff.inserted.length; j++) {
+								if(diff.inserted[j].text == ignoreTransform.inserted[i].text) {
+									//if(diff.inserted[j].text != ignoreTransform.inserted[i].text) throw new Error("ignoreTransform edited text on row=" + diff.inserted[j].text + " doesn't match! diff=" + diff.inserted[j].text + " ignore=" + ignoreTransform.inserted[i].text);
+									diff.inserted.splice(j, 1);
+									console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
+									ignored++;
+									break;
+								}
 							}
 						}
-						}
-					if(ignored != (ignoreTransform.inserted.length-1)) throw new Error("Only ignored " + ignored + " out of " + (gnoreTransform.inserted.length-1) + " ignoreTransform.inserted=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
+						if(ignored != (ignoreTransform.inserted.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.inserted.length-1) + " ignoreTransform.inserted=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 					}
 					
 					if(ignoreTransform.removed.length > 0) {
 						ignored = 0;
-					for(var i=ignoreTransform.removed.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
-						for(var j=0; j<diff.removed.length; j++) {
-							if(diff.removed[j].text == ignoreTransform.removed[i].text) {
-								//if(diff.removed[j].text != ignoreTransform.removed[i].text) throw new Error("ignoreTransform original text on row=" + diff.removed[j].text + " doesn't match! diff=" + diff.removed[j].text + " ignore=" + ignoreTransform.removed[i].text);
-								diff.removed.splice(j, 1);
-								console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
-								break;
+						for(var i=ignoreTransform.removed.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
+							for(var j=0; j<diff.removed.length; j++) {
+								if(diff.removed[j].text == ignoreTransform.removed[i].text) {
+									//if(diff.removed[j].text != ignoreTransform.removed[i].text) throw new Error("ignoreTransform original text on row=" + diff.removed[j].text + " doesn't match! diff=" + diff.removed[j].text + " ignore=" + ignoreTransform.removed[i].text);
+									diff.removed.splice(j, 1);
+									console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
+									break;
+								}
 							}
 						}
-					}
-					if(ignored != (ignoreTransform.removed.length-1)) throw new Error("Only ignored " + ignored + " out of " + (ignoreTransform.removed.length-1) + " ignoreTransform.removed=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.removed=" + JSON.stringify(diff.inserted, null, 2));
+						if(ignored != (ignoreTransform.removed.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.removed.length-1) + " ignoreTransform.removed=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.removed=" + JSON.stringify(diff.inserted, null, 2));
 					}
 				}
 				
