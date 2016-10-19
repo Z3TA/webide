@@ -404,15 +404,15 @@ function textDiff(originalText, editedText, ignoreTransform) {
 		originalRow[i] = originalRow[i].trim();
 	}
 	
-	if(editedRow[editedRow.length-1] != "") throw new Error("Edited text must end with a line break to make it easier to diff! editedText=" + lbChars(editedText));
-	if(originalRow[originalRow.length-1] != "") throw new Error("Original text must end with a line break to make it easier to diff! originalText=" + lbChars(originalText));
+	//if(editedRow[editedRow.length-1] != "") throw new Error("Edited text must end with a line break to make it easier to diff! editedText=" + lbChars(editedText));
+	//if(originalRow[originalRow.length-1] != "") throw new Error("Original text must end with a line break to make it easier to diff! originalText=" + lbChars(originalText));
 	
-		//while(editedRow[0] == "" && originalRow[0] != "") editedRow.shift();
-		
-		
-		editedText = editedRow.join(lbEditedText);
+	// Add an ending line-break if one doesn't exist
+	if(editedRow[editedRow.length-1] != "") editedRow.push("");
+	if(originalRow[originalRow.length-1] != "") originalRow.push(""); 
+	
+	editedText = editedRow.join(lbEditedText);
 		originalText = originalRow.join(lbOriginalText);
-		
 		
 		var extraLbAdded = false;
 		var lastCharactersOriginalText = originalText.substr(originalText.length - lbOriginalText.length);
