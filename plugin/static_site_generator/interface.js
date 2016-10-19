@@ -945,6 +945,45 @@
 				// Compare the source with the editable preview
 				var diff = textDiff(srcHTML, prewHTML, ignoreTransform);
 				
+				/*
+					Problem: When ignoreTransform removes a diff ...
+					
+				*/
+				
+				var ignored = 0;
+				if(ignoreTransform && 1==2) {
+					if(ignoreTransform.inserted.length > 0) {
+					for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
+						for(var j=0; j<diff.inserted.length; j++) {
+							if(diff.inserted[j].text == ignoreTransform.inserted[i].text) {
+								//if(diff.inserted[j].text != ignoreTransform.inserted[i].text) throw new Error("ignoreTransform edited text on row=" + diff.inserted[j].text + " doesn't match! diff=" + diff.inserted[j].text + " ignore=" + ignoreTransform.inserted[i].text);
+								diff.inserted.splice(j, 1);
+								console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
+								ignored++;
+								break;
+							}
+						}
+						}
+					if(ignored != (ignoreTransform.inserted.length-1)) throw new Error("Only ignored " + ignored + " out of " + (gnoreTransform.inserted.length-1) + " ignoreTransform.inserted=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
+					}
+					
+					if(ignoreTransform.removed.length > 0) {
+						ignored = 0;
+					for(var i=ignoreTransform.removed.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
+						for(var j=0; j<diff.removed.length; j++) {
+							if(diff.removed[j].text == ignoreTransform.removed[i].text) {
+								//if(diff.removed[j].text != ignoreTransform.removed[i].text) throw new Error("ignoreTransform original text on row=" + diff.removed[j].text + " doesn't match! diff=" + diff.removed[j].text + " ignore=" + ignoreTransform.removed[i].text);
+								diff.removed.splice(j, 1);
+								console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
+								break;
+							}
+						}
+					}
+					if(ignored != (ignoreTransform.removed.length-1)) throw new Error("Only ignored " + ignored + " out of " + (ignoreTransform.removed.length-1) + " ignoreTransform.removed=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.removed=" + JSON.stringify(diff.inserted, null, 2));
+					}
+				}
+				
+				
 				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
 				
 				if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
@@ -955,7 +994,7 @@
 				
 				var startRow = tmpCaret.row;
 				
-				console.log("startRow=" + startRow);
+				console.log("source startRow=" + startRow);
 				
 				var replacedLine = false;
 				var linesToBeRemoved = [];
@@ -967,26 +1006,30 @@
 				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
 				
 				// Apply the transformation to the source code ...
-				
+				var removedText = "";
 				for(var i=0; i<diff.removed.length; i++) {
 					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
-						// Remove the text on the line, but do not remove the line (yet)
-						row = diff.removed[i].row + startRow;
-						
-						if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
+					// Remove the text on the line, but do not remove the line (yet)
+					row = diff.removed[i].row + startRow;
+					
+					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
 						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + srcHTML + "\n\nprewHTML=" + prewHTML);
 					}
 					
-					sourceFile.removeAllTextOnRow(row);
-						
+					removedText = sourceFile.removeAllTextOnRow(row);
+					
+					if(removedText.match(/\n|\r\n/)) throw new Error("Did not expect a new line character to be removed! removedText=" + lbChars(removedText));
+					
+					if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + lbChars(removedText) + " = removedText\n" + lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
+					
 					console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
-						
-						// Is there a line that will replace it?
-						replacedLine = false;
-						for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
-							console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
-							if(diff.inserted[j].row == diff.removed[i].row) {
-								
+					
+					// Is there a line that will replace it?
+					replacedLine = false;
+					for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
+						console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
+						if(diff.inserted[j].row == diff.removed[i].row) {
+							
 								// Insert the replacing line
 								text = diff.inserted[j].text;
 								
@@ -1047,6 +1090,8 @@
 				var prewHTML = main.innerHTML;
 				//ignoreTransform = textDiff(srcHTML, main.innerHTML);
 				
+				//alert("Transformed source document!");
+				
 			}
 			
 		}
@@ -1068,7 +1113,10 @@
 		// Returns the body of the source HTML code
 		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
 		
-		if(srcMatchBody == null) alertBox("Could not find &lt;body element in source file<br>" + sourceFile.path);
+		if(srcMatchBody == null) {
+			console.warn("Could not find &lt;body element in source file<br>" + sourceFile.path);
+			return sourceFile.text;
+		}
 		else return srcMatchBody[1];
 	}
 	
@@ -1315,14 +1363,20 @@
 	}
 	
 	function computeIgnoreTransform(srcHTML, rawMainHtml) {
+		
+		// Make sure they end with a line break
+		
+		
 		ignoreTransform = textDiff(srcHTML, rawMainHtml);
 		
 		// Make sure there are no errors
 		var lbSrc = occurrences(srcHTML, "\n");
 		var lbMain = occurrences(rawMainHtml, "\n");
+		var removed = ignoreTransform.removed.length;
+		var inserted = ignoreTransform.inserted.length;
 		
-		if( (lbSrc + ignoreTransform.removed.length) != (lbMain - ignoreTransform.inserted.length) ) {
-			throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + ignoreTransform.removed.length + " inserted=" + ignoreTransform.inserted.length + "  diff=" + JSON.stringify(ignoreTransform, null, 2));
+		if( (lbSrc - removed) != (lbMain - inserted) ) {
+			throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(ignoreTransform, null, 2));
 		}
 		
 	}

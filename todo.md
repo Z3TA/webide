@@ -13,9 +13,6 @@ Prio:
 What I'm working on
 -------------------
 
-investigating bug: Uncaught Error: Text on row=23 doesn't match! 
-when removing rows that has been removed ...
-/home/zeta/dev/jzedit/plugin/static_site_generator/interface.js:975 Uncaught Error: Text on 
 
 webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
@@ -169,6 +166,10 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Goto file. Old results sometimes overwrite newever results like fo overwrites foo
+
+When making a block comment /* and there is already a block comment below, it might "merge" two functions. And then when inserting the ending */ the parser complains that it found unexpected extra function.
 
 file explorer: After saving a file "save as" on ftp connection. Updating the file explorer only show the folder the file was saved in under root dir, and you cant open any files
 

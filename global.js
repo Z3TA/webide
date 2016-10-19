@@ -383,6 +383,7 @@ function textDiff(originalText, editedText, ignoreTransform) {
 	var editedRow = editedText.split(lbEditedText);
 	var originalRow = originalText.split(lbOriginalText);
 	
+	/*
 	if(ignoreTransform) {
 		for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
 			editedRow.splice(ignoreTransform.inserted[i].row, 1);
@@ -393,6 +394,7 @@ function textDiff(originalText, editedText, ignoreTransform) {
 			console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
 		}
 		}
+		*/
 	
 	// Trim white space from all lines
 	for (var i=0; i<editedRow.length; i++) {
@@ -402,82 +404,97 @@ function textDiff(originalText, editedText, ignoreTransform) {
 		originalRow[i] = originalRow[i].trim();
 	}
 	
-	editedText = editedRow.join(lbEditedText);
-	originalText = originalRow.join(lbOriginalText);
+	if(editedRow[editedRow.length-1] != "") throw new Error("Edited text must end with a line break to make it easier to diff! editedText=" + lbChars(editedText));
+	if(originalRow[originalRow.length-1] != "") throw new Error("Original text must end with a line break to make it easier to diff! originalText=" + lbChars(originalText));
 	
-	
-	var extraLbAdded = false;
-	var lastCharactersOriginalText = originalText.substr(originalText.length - lbOriginalText.length);
-	if(lastCharactersOriginalText != lbOriginalText) { 
-		// original text doesn't end with a line break!
-		console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + lbChars(lastCharactersOriginalText));
-		originalText += lbOriginalText;
-		extraLbAdded = true;
+		//while(editedRow[0] == "" && originalRow[0] != "") editedRow.shift();
 		
-		if(editedText.substr(editedText.length - lbEditedText.length) != lbEditedText) editedText += lbEditedText + lbEditedText; // Add two line-breaks
-		else editedText += lbEditedText; // or add only one if it already had one
-	}
-	
-	var jsdiff = require('diff');
-	var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
-	var totalLineBreaks = 0;
-	var removed = [];
-	var inserted = [];
-	var line;
-	var lineBreakCount = 0;
-	var removedLines = 0; // Removed lines can be replaced with inserts
-	var insertedIndex = -1;
-	var row = -1;
-	
-	console.log("diff=" + JSON.stringify(diff, null, 2));
-	
-	for (var i=0; i<diff.length; i++) {
-		line = diff[i].value.split(lb);
-		if(line[line.length-1] != "") {
-			throw new Error("Line does not end with a new-line character! diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
-			//line.push("");
-		}
-		lineBreakCount = 0;
-		for (var j=0; j<line.length; j++) {
+		
+		editedText = editedRow.join(lbEditedText);
+		originalText = originalRow.join(lbOriginalText);
+		
+		
+		var extraLbAdded = false;
+		var lastCharactersOriginalText = originalText.substr(originalText.length - lbOriginalText.length);
+		if(lastCharactersOriginalText != lbOriginalText) { 
+			// original text doesn't end with a line break!
+			// Each line must end with a line break, even the last line.
+			console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + lbChars(lastCharactersOriginalText));
+			//originalText += lbOriginalText;
+			//extraLbAdded = true;
 			
-			if(diff[i].added) {
-				// if(line[j].length > 0) 
-				console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
-				if(j < (line.length-1)) {
+		// Because an extra linebreak was added to the original text, we also need to add one (or two) to the edited text to not mess up the diff
+			//if(editedText.substr(editedText.length - lbEditedText.length) != lbEditedText) editedText += lbEditedText + lbEditedText; // Add two line-breaks
+			//else editedText += lbEditedText; // or add only one if it already had one
+		}
+		
+		var jsdiff = require('diff');
+		var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
+		var totalLineBreaks = 0;
+		var removed = [];
+		var inserted = [];
+		var line;
+		var lineBreakCount = 0;
+		var removedLines = 0; // Removed lines can be replaced with inserts
+		var row = 0;
+	
+		console.log("diff=" + JSON.stringify(diff, null, 2));
+		
+		for (var i=0; i<diff.length; i++) {
+			line = diff[i].value.split(lb);
+			
+		if(line.length < 2 || line[line.length-1] != "") throw new Error("Line does not end with a new-line character! diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
+			
+			lineBreakCount = 0;
+		
+		for (var j=0; j<line.length-1; j++) { // line always end with a line break
+			// removed always comes before added
+				if(diff[i].added) {
+					// if(line[j].length > 0) 
+					console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
 					
-					if(removedLines > 0) {
-						// If lines above where removed, reset lineBreakCount and insert from there
-						lineBreakCount -= removedLines;
-						removedLines = 0;
+						if(removedLines > 0) {
+					// If lines where removed, added lines will replace them
+					lineBreakCount -= removedLines;
+					removedLines = 0;
 					}
-					
-					inserted.push({text: line[j], row: totalLineBreaks + lineBreakCount});
-					
-					//console.log("++++ " + line[j]);
-				}
+				
+				row = totalLineBreaks + lineBreakCount;
+				
+				inserted.push({text: line[j], row: row});
+				
+				console.log("++++ " + line[j] + " (row=" + row + ")");
+				
+				if(lineBreakCount < 0) lineBreakCount++; // Keep replacing lines that have been removed
+				
 			}
 			else if(diff[i].removed) {
 				
-				if(line[j].length > 0) removed.push({text: line[j], row: totalLineBreaks + lineBreakCount});
-				if(line.length > 1) {
-					lineBreakCount++;
-					removedLines++;
-				}
-				//if(line.length > 1) console.log("---- " + line[j]);
+				row = totalLineBreaks + lineBreakCount;
+				
+				removed.push({text: line[j], row: row});
+				
+				console.log("---- " + line[j] + "(row=" + row + ")");
+				
+				removedLines++;
+				lineBreakCount++;
 				
 			}
 			else {
 				
-				if(line.length > 1 && j > 0) lineBreakCount++;
-				//if(line.length > 1) console.log("? " + line[j]);
+				row = totalLineBreaks + lineBreakCount;
+				
+				console.log("" + line[j] + "(row=" + row + ")");
+				
+				lineBreakCount++;
 				removedLines = 0;
 				
 			}
-			//console.log("lineBreakCount=" + lineBreakCount);
+			console.log("lineBreakCount=" + lineBreakCount);
 		}
 		
-		totalLineBreaks += lineBreakCount;
-		//console.log("totalLineBreaks=" + totalLineBreaks);
+		totalLineBreaks = totalLineBreaks + lineBreakCount;
+		console.log("totalLineBreaks=" + totalLineBreaks);
 	}
 	
 	console.log("extraLbAdded=" + extraLbAdded);

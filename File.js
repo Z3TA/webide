@@ -880,7 +880,7 @@
 			lastIndex = firstIndex + grid[row].indentationCharacters.length - (grid[row].indentationCharacters.length > 0 ? 1 : 0);
 		}
 		
-		file.deleteTextRange(firstIndex, lastIndex);
+		return file.deleteTextRange(firstIndex, lastIndex);
 		
 	}
 	
