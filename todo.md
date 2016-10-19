@@ -26,6 +26,10 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 
 todo:
 
+cleaning up pasting from Ms-word.
+
+Fixing performence problems in wysiwyg (pasgin a word document took a lot of time, also typing in wysiwyg afterwards)
+
 ssg: show the ssg buttons whenever a file from a registered project is opened
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
