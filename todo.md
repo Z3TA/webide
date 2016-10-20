@@ -27,6 +27,10 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 
 todo:
 
+Control what happends when you press enter.
+Use native selection API to place cursor in wysiwyg
+
+
 cleaning up pasting from Ms-word.
 
 Fixing performence problems in wysiwyg (pasting a word document took a lot of time, also typing in wysiwyg afterwards was slow)
