@@ -136,4 +136,4 @@ editor.addTest(function testTextDiff(callback) {
 		
 		callback(true);
 		
-	}, 1);
+	});

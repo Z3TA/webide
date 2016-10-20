@@ -2235,6 +2235,7 @@
 				if(insideRegExp) {
 					console.warn("Line " + lineNumber + ": Lonely slash! path=" + file.path); // NodeJS says: Invalid regular expression: missing /
 					insideRegExp = false;
+					insideRegExpBracket = false;
 				}
 				
 				vb_afterThen = false;

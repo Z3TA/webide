@@ -30,6 +30,20 @@
 		
 	*/
 	
+	
+	
+	editor.addTest(function unfinishedRegexp(callback) {
+		editor.openFile("unfinishedRegexp.js", "foo = foo.replace(/[\n// comment", function(err, file) {
+			
+			if(file.parsed.comments.length == 0) throw new Error("Expected a coment");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function twoFunctionsSameName(callback) {
 		// bug: parser start parsing from the second function, thus cant find the function
 		editor.openFile("twoFunctionsSameName.js", 'foo = function() {\n\n}\nfunction bar() {\nfoo = function() {}\n}\n', function(err, file) {
