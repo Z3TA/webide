@@ -13,6 +13,7 @@ Prio:
 What I'm working on
 -------------------
 
+Tidying up office word doc pasted into the wysiwyg ...
 
 webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
 
@@ -28,7 +29,7 @@ todo:
 
 cleaning up pasting from Ms-word.
 
-Fixing performence problems in wysiwyg (pasgin a word document took a lot of time, also typing in wysiwyg afterwards)
+Fixing performence problems in wysiwyg (pasting a word document took a lot of time, also typing in wysiwyg afterwards was slow)
 
 ssg: show the ssg buttons whenever a file from a registered project is opened
 
@@ -170,6 +171,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+When double clicking on a word, then pasting something to replace it, a space on the right is deleted!
 
 Goto file. Old results sometimes overwrite newever results like fo overwrites foo
 
@@ -592,6 +595,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+Icons in the contect menu so things get easier to find!
+
+Auto complete HTML tags inside JS strings.
+
 List-box in goto-file. Where local and remote systems are listen. Where working dir's are opened in a tree.
 
 autocomplete: Do not make variable suggestion when in HTML mode (only html tags)
@@ -989,6 +996,8 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+proper touchscreen support. So I can drag my code around.
 
 Gamification/Animations: Animate for example parenthesis/bracket highlightning so they are easier to see and looks cooler.
 

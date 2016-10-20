@@ -63,6 +63,100 @@ const ALT = 4;
 
 // Global functions ...
 
+
+function wordWrapHtml(html) {
+	// Inserts line breaks so that the text is readable in raw source code
+	
+	
+	
+	function wordWrapText(text, width) {
+		/*
+			This function can be polished a lot!
+			
+			example:
+			- Use code language context: Break after + or _
+			- When in English/latin context: More likely to break after a punctuation
+			- Avoid having lonely words
+			
+		*/
+		
+		if(text.match(/<br>/i) != null) {
+			// Always break after <br>
+			var arr = text.split(/<br>/i);
+			text = "";
+			if(arr.length > 1) {
+				for(var i=0; i<arr.length-1; i++) {
+					text += wordWrapText(arr[i], width) + "<br>" + file.lineBreak;
+				}
+			}
+			text += wordWrapText(arr[arr.length-1], width);
+			return text;
+		}
+		
+		text = text.replace(new RegExp(file.lineBreak, 'g'), " "); // Replace all line breaks with spaces
+		text = text.replace(/\s{2,}/g, ' '); // Remove multiple spaces
+		text = text.trim(); // Remove white space at the edges
+		
+		if(text.length <= width) {
+			console.log("text.length=" + text.length + " <= width=" + width);
+			return text;
+		}
+		
+		var words = text.split(space);
+		var rows = []; // Array of strings
+		var rowNr = 0;
+		var lineLength = words[0].length + 1;
+		var lc = ""; // Last character of last word
+		var breakAnyway = false;
+		rows.push([]); // First row, each row is a array of strings (the words)
+		rows[rowNr].push(words[0]); // Add the first word to the first row
+		for(var i=1; i<words.length; i++) { // Start with the second word (so we can check the word before)
+			
+			if(lineLength > (width*.8)) {
+				lc = words[i-1].charAt(words[i-1].length-1);
+				if(lc == "." || lc == ":" || lc == "," || lc == ";" || lc == "!" || lc == "?") {
+					breakAnyway = true;
+				}
+				else {
+					breakAnyway = false;
+				}
+			}
+			else {
+				breakAnyway = false;
+			}
+			
+			lineLength += words[i].length;
+			
+			if((lineLength > width || breakAnyway) && rows[rowNr].length != 0) {
+				
+				//if(breakAnyway) rows[rowNr].push("YAYA!");
+				
+				rowNr = rows.push([]) - 1;
+				lineLength = words[i].length;
+				breakAnyway = false;
+				
+			}
+			rows[rowNr].push(words[i]);
+			lineLength++; // Account for the space
+		}
+		
+		// Join the words with a space between
+		for(var i=0; i<rows.length; i++) {
+			rows[i] = rows[i].join(space);
+		}
+		
+		// Join the rows with line breaks in between
+		text = rows.join(file.lineBreak);
+		
+		
+		
+		return text;
+	}
+	
+}
+
+
+
 function indexToRowCol(index, file) {
 	// Returns the row and col on the grid from index
 	

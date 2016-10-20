@@ -879,25 +879,7 @@
 				// The source code has been edited via contenteditable to we have to sanitize it it.
 				
 				var srcHTML = getSourceCodeBody(sourceFile);
-				var sanitized = srcHTML;
-				
-				// Line breaks between p tags
-				sanitized = sanitized.replace(/><p/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<p");
-				sanitized = sanitized.replace(/<\/p></gi, "</p>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
-				
-				// Line breaks between h# tags
-				sanitized = sanitized.replace(/><h/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<h");
-				sanitized = sanitized.replace(/<\/h(.)></gi, "</h$1>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
-				
-				// Line breaks between div tags
-				sanitized = sanitized.replace(/><div/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<div");
-				sanitized = sanitized.replace(/<\/div></gi, "</div>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
-				
-				// Line breaks between tbody
-				sanitized = sanitized.replace(/><tbody/gi, ">" + sourceFile.lineBreak + "<tbody");
-				sanitized = sanitized.replace(/<\/tbody></gi, "</tbody>" + sourceFile.lineBreak + "<");
-				
-				
+				var sanitized = insertLineBreaks(srcHTML);
 				
 				if(sanitized != srcHTML) {
 					
@@ -923,10 +905,129 @@
 	}
 	
 	
+	function sanitizeOfficeDoc(html) {
+		
+		console.log("Before sanitizeOfficeDoc:" + html);
+		
+		html = html.replace(/\n|\r\n/ig, " "); // Prevent line breaks in the middle of html tag
+		
+		// Remove <o:p></o:p>
+		html = html.replace(/<o:p>/ig, "");
+		html = html.replace(/<\/o:p>/ig, "");
+		
+		// Remove style attributes
+		html = html.replace(/ style="[^"]+"/ig, "");
+		
+		// Remove class attributes
+		html = html.replace(/ class="[^"]+"/ig, "");
+		
+		// Remove onmouseover and onmouseout attributes
+		
+		
+		// Get rid of span elements
+		html = html.replace(/<span>/ig, "");
+		html = html.replace(/<\/span>/ig, "");
+		
+		// Remove emty p elements
+		html = html.replace(/<p>\s*<\/p>/gi, "");
+		
+		// Remove space between tags
+		html = html.replace(/>\s*</gi, "><");
+		
+		// Remove space before tags
+		html = html.replace(/\s*</gi, "<");
+		
+		// Remove all attributes from td elements
+		html = html.replace(/<td[^>]*>/ig, "<td>");
+		
+		// Remove all attributes from p elements
+		html = html.replace(/<p[^>]*>/ig, "<p>");
+		
+		// Remove p inside td
+		html = html.replace(/<td><p>(.*?)<\/p><\/td>/gi, "<td>$1</td>");
+		
+		// Remove br inside td
+		html = html.replace(/<td><br><\/td>/gi, "<td></td>");
+		
+		// Fix multible spaces
+		html = html.replace(/\s\s+/g, " ");
+		
+		// Remove emty html elements
+		html = html.replace(/<(.*?)><\/\1>/g, "");
+		
+		// Remove <del> elements
+		html = html.replace(/<del[^>]*>.*?<\/del>/g, "");
+		
+		
+		//console.log("After sanitizeOfficeDoc:" + html);
+		
+		return html;
+	}
+	
+	function fixMessups(html) {
+		// Fix messed up headings: <h1><span style="font-size: 3em;">Fakta om APL</span><br></h1>
+		html = html.replace(/<h1><span style="font-size: 3em;">(.*)<\/span><br><\/h1>/ig, "<h1>$1</h1>");
+		// Maybe this should be done before ? when detected ?
+		
+		return html;
+		
+	}
+	
+	function insertLineBreaks(html) {
+		
+		// Add line breaks so the source code gets easier to read
+		
+		console.time("insertLineBreaks");
+		
+		// Remove space between tags
+		html = html.replace(/>\s*</gi, "><");
+		
+		// Remove space before tags
+		html = html.replace(/\s*</gi, "<");
+		
+		
+		// Line breaks between p tags
+		html = html.replace(/>\s*<p/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<p");
+		html = html.replace(/<\/p>\s*</gi, "</p>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
+		
+		// Line breaks between h# tags
+		html = html.replace(/>\s*<h/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<h");
+		html = html.replace(/<\/h(.)>\s*</gi, "</h$1>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
+		
+		// Line breaks between div tags
+		html = html.replace(/>\s*<div/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<div");
+		html = html.replace(/<\/div>\s*</gi, "</div>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
+		
+		// Line breaks between tbody
+		html = html.replace(/>\s*<tbody/gi, ">" + sourceFile.lineBreak + "<tbody");
+		html = html.replace(/<\/tbody>\s*</gi, "</tbody>" + sourceFile.lineBreak + "<");
+		
+		// Line breaks between tr
+		html = html.replace(/>\s*<tr/gi, ">" + sourceFile.lineBreak + "<tr");
+		html = html.replace(/<\/tr>\s*</gi, "</tr>" + sourceFile.lineBreak + "<");
+		
+		// Line breaks between td
+		html = html.replace(/>\s*<td/gi, ">" + sourceFile.lineBreak + "<td");
+		html = html.replace(/<\/td>\s*</gi, "</td>" + sourceFile.lineBreak + "<");
+		
+		// Line breaks between th
+		html = html.replace(/>\s*<th/gi, ">" + sourceFile.lineBreak + "<th");
+		html = html.replace(/<\/th>\s*</gi, "</th>" + sourceFile.lineBreak + "<");
+		
+		
+		// Word-wrap p elements
+		//html = html.replace(/<p.*>(.*)<\/p>/ig, "<p>" + wordWrapText("$1") + "</p>");
+		
+		console.timeEnd("insertLineBreaks");
+		
+		return html;
+		
+	}
+	
 	
 	function contentEdit(target, type, bubbles, cancelable) {
 		// Called every time the contenteditable is updates
-		console.log("contentEdit!");
+		console.time("contentEdit");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
 		else if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
@@ -1105,7 +1206,7 @@
 			
 		}
 		
-		
+		console.timeEnd("contentEdit");
 	}
 	
 	function closePreview() {
@@ -1578,6 +1679,9 @@
 				
 				previewWin.window.addEventListener("input", contentEdit);
 				
+				main.addEventListener("paste", contentPaste);
+				
+				
 				// Find stuff that should be ignored when comparing edits in preview
 				if(srcHTML) {
 					/*
@@ -1594,6 +1698,22 @@
 				}
 				
 				previewWin.focus();
+				
+				function contentPaste(e) {
+					var html = e.clipboardData.getData('text/html');
+					
+					e.preventDefault();
+					
+					var cleaned = html;
+					
+					cleaned = sanitizeOfficeDoc(cleaned);
+					
+					cleaned = insertLineBreaks(cleaned);
+					
+					
+					contentEditor.execCommand("insertHTML", aShowDefaultUI, cleaned);
+					
+				}
 				
 			}
 		}
