@@ -1050,7 +1050,7 @@
 								// textLineDiff
 								col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
 								
-								if(diff.inserted[j].text.length > diff.removed[i].text.length) col++;
+							if(diff.inserted[j].text.length > diff.removed[i].text.length) col += (diff.inserted[j].text.length - diff.removed[i].text.length);
 								
 								// Move the file caret to the column where the actual change happened
 								sourceFile.caret.row = row;
