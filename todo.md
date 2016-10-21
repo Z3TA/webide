@@ -176,6 +176,19 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Indentation error: 
+
+[PR_PUNCTUATION,  /^[=<>\/]+/],
+['lang-js',       /^on\w+\s*=\s*\"([^\"]+)\"/i],
+['lang-js',       /^on\w+\s*=\s*\'([^\']+)\'/i],
+['lang-js',       /^on\w+\s*=\s*([^\"\'>\s]+)/i],
+['lang-css',      /^style\s*=\s*\"([^\"]+)\"/i],
+['lang-css',      /^style\s*=\s*\'([^\']+)\'/i],
+['lang-css',      /^style\s*=\s*([^\"\'>\s]+)/i]
+]),
+['in.tag']);
+
+
 When double clicking on a word, then pasting something to replace it, a space on the right is deleted!
 
 Goto file. Old results sometimes overwrite newever results like fo overwrites foo
