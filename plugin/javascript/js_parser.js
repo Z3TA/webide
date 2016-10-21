@@ -467,7 +467,19 @@
 								
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
 								
-								// Deep compare
+								
+								// Sanity check (we had some problems with functions having bad start and end, witch need to be correct for the "parse only current function" optimizer)
+								if(editor.settings.devMode && newParse.blockMatch) {
+									console.log("Checking checkFunctionStartEnd");
+									try {
+										checkFunctionStartEnd(file, newParse.functions);
+									}
+									catch(err) {
+										console.log(JSON.stringify(newParse));
+										throw err;
+									}
+								}
+								
 								
 							}
 							
@@ -492,21 +504,11 @@
 				console.log((file.parsed ? "file was parsed before" : "file was NOT parsed before") + " type=" + type);
 			}
 			
-			// Parse the while file
+			// Parse the whole file
 			console.log("Parsing whole file");
 			var newParse = parseJavaScript(file);
 			
-			// Sanity check (we had some problems with functions having bad start and end, witch need to be correct for the "parse only current function" optimizer)
-			if(editor.settings.devMode && newParse.blockMatch) {
-				console.log("Checking checkFunctionStartEnd");
-				try {
-					checkFunctionStartEnd(file, newParse.functions);
-				}
-				catch(err) {
-					console.log(JSON.stringify(newParse));
-					throw err;
-				}
-			}
+			
 			
 			file.haveParsed(newParse);
 			
@@ -688,14 +690,14 @@
 			}
 			
 			console.log(func.name + " OK");
-						
+			
 			checkFunctionStartEnd(file, func.subFunctions); // Check subfunctions
-
+			
 		}
 		
 	}
 	
-
+	
 	function isNumeric(n) {
 		return !isNaN(parseFloat(n)) && isFinite(n);
 	}
@@ -718,96 +720,96 @@
 		var text = file.text,
 		originalBaseIndentation = baseIndentation,
 		insideDblQuote = false,
-			insideSingleQuote = false,
-			insideFunctionDeclaration = false,
-			insideFunctionArguments = false,
-			afterPointer = [],
-			variableStart = 0,
-			variableEnd = 0,
-			variableName = "",
-			functionName = "",
-			char = "",
-			functionArgumentsStart = 0,
-			functionArguments = "",
-			insideFunctionBody = [],
-			insideQuote = false,
-			lastChar = "",
-			insideLineComment = false,
-			insideBlockComment = false,
-			insideHTMLComment = false,
-			L = [], // {
-			R = [], // }
-			subCount = 0, // Level of function scope depth
-			functions = {},
-			myFunction = [],
-			newFunc,
-			properties,
-			variable,
-			startIndex = 0,
-			comments = [],
-			quotes = [],
-			quoteStart = 0,
-			commentStart = 0,
-			commentStartIndentation = 0,
-			codeBlockDepth = 0,
-			codeBlockDepthTemp = 0,
-			rootWord = "",
-			row = parseStartRow,
-			lineNumber = 1,
-			word = "",
-			words = [],
-			lastWord = "",
-			insideVariableDeclaration = [],
-			lastVariableDeclarationLine = 0,
-			globalVariables = {},
-			codeBlock = [{word: "", indentation: 0, line: 0}],
-			codeBlockRight = 0,
-			codeBlockLeft = 0,
-			insideCodeBlock = false,
-			insideXmlTag = false,
-			insideXmlTagEnding = false,
-			xmlTag = "",
-			lastXmlTag = "",
-			tagBreak = editor.settings.indentAfterTags,
-			codeBlockLeftRow = -1,
-			codeBlockRightRow = -2,
-			insideArray = [],
-			arrayStart = [],
-			arrayStartRow = 0,
-			arrayItemCount = [],
-			insideParenthesis = [],
-			parenthesisStart = [],
-			leftSide = "",
-			rightSide = "",
-			insideComment = false,
-			xmlTagStart = -1, 
-			xmlTags = [],
-			xmlTagWordLength = 0,
-			xmlTagSelfEnding = false,
-			openXmlTags = 0,
-			xmlTagLastOpenRow = -1,
-			xmlModeBeforeTag = false,
-			xmlTagInsideQuote = false,
+		insideSingleQuote = false,
+		insideFunctionDeclaration = false,
+		insideFunctionArguments = false,
+		afterPointer = [],
+		variableStart = 0,
+		variableEnd = 0,
+		variableName = "",
+		functionName = "",
+		char = "",
+		functionArgumentsStart = 0,
+		functionArguments = "",
+		insideFunctionBody = [],
+		insideQuote = false,
+		lastChar = "",
+		insideLineComment = false,
+		insideBlockComment = false,
+		insideHTMLComment = false,
+		L = [], // {
+		R = [], // }
+		subCount = 0, // Level of function scope depth
+		functions = {},
+		myFunction = [],
+		newFunc,
+		properties,
+		variable,
+		startIndex = 0,
+		comments = [],
+		quotes = [],
+		quoteStart = 0,
+		commentStart = 0,
+		commentStartIndentation = 0,
+		codeBlockDepth = 0,
+		codeBlockDepthTemp = 0,
+		rootWord = "",
+		row = parseStartRow,
+		lineNumber = 1,
+		word = "",
+		words = [],
+		lastWord = "",
+		insideVariableDeclaration = [],
+		lastVariableDeclarationLine = 0,
+		globalVariables = {},
+		codeBlock = [{word: "", indentation: 0, line: 0}],
+		codeBlockRight = 0,
+		codeBlockLeft = 0,
+		insideCodeBlock = false,
+		insideXmlTag = false,
+		insideXmlTagEnding = false,
+		xmlTag = "",
+		lastXmlTag = "",
+		tagBreak = editor.settings.indentAfterTags,
+		codeBlockLeftRow = -1,
+		codeBlockRightRow = -2,
+		insideArray = [],
+		arrayStart = [],
+		arrayStartRow = 0,
+		arrayItemCount = [],
+		insideParenthesis = [],
+		parenthesisStart = [],
+		leftSide = "",
+		rightSide = "",
+		insideComment = false,
+		xmlTagStart = -1, 
+		xmlTags = [],
+		xmlTagWordLength = 0,
+		xmlTagSelfEnding = false,
+		openXmlTags = 0,
+		xmlTagLastOpenRow = -1,
+		xmlModeBeforeTag = false,
+		xmlTagInsideQuote = false,
 		insideScriptTag = false,
-			llChar = "",
-			lllChar = "",
-			willBeJSON = false,
-			insideRegExp = false,
-			regExpStart = 0,
-			insideRegExpBracket = false,
-			column = 0,
-			lnw = "", // Last Not Whitespace character
-			pastChar0 = "",
+		llChar = "",
+		lllChar = "",
+		willBeJSON = false,
+		insideRegExp = false,
+		regExpStart = 0,
+		insideRegExpBracket = false,
+		column = 0,
+		lnw = "", // Last Not Whitespace character
+		pastChar0 = "",
 		pastChar1 = "",
 		pastChar2 = "",
 		pastChar3 = "",
 		pastChar4 = "",
 		pastChar5 = "",
 		pastChar6 = "",
-			xmlMode = false,
+		xmlMode = false,
 		xmlModeBeforeScript = false,
-			textLength = text.length,
-			foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
+		textLength = text.length,
+		foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
 		language = "JavaScript", // Update the language to vbScript, PHP depending on ... ?
@@ -815,7 +817,7 @@
 		PHP = false,
 		CSS = false,
 		SSJS = false;
-			
+		
 		// -----
 		
 		
@@ -845,7 +847,7 @@
 		insideFunctionBody[subCount] = false;
 		L[subCount] = 1; // { Asume open
 		R[subCount] = 0; // }
-
+		
 		
 		insideVariableDeclaration[0] = false;
 		
@@ -917,10 +919,10 @@
 			
 			
 			/*
-			if(codeBlockDepth > 0) {
+				if(codeBlockDepth > 0) {
 				// We went deeper ... Inheret the afterPointer value from parent
 				afterPointer[codeBlockDepth] = afterPointer[codeBlockDepth-1];
-			}
+				}
 			*/
 			
 			if(codeBlockDepth == 0) throw new Error("codeBlockDepth can not be zero")
@@ -931,7 +933,7 @@
 				
 				// why only on codeBlockDepth 2 and higher???
 				var parentWord = parentCodeBlock.word;
-
+				
 				if(parentWord != "if" && parentWord != "for" && parentWord.charAt(0) !== "(") {
 					codeBlock[codeBlockDepth].parent = parentCodeBlock;
 				}
@@ -970,7 +972,7 @@
 				Lets make a guess on what type of variable this is.
 				
 				Sets the .type of the variable
-			
+				
 			*/
 			
 			var type = "unknown";
@@ -1019,7 +1021,7 @@
 				else {
 					//console.log("Dunno what " + rightSide + " is!??");
 				}
-
+				
 				
 			}
 			
@@ -1044,12 +1046,12 @@
 					JSON example:
 					
 					var foo = {
-						bar: [
-							55,
-							{
-								a1: 1, a2: 2
-							}
-						]
+					bar: [
+					55,
+					{
+					a1: 1, a2: 2
+					}
+					]
 					}
 				*/
 				
@@ -1069,7 +1071,7 @@
 				
 				while(d>0) {
 					if(afterPointer[d] != ":") break;
-				
+					
 					if(insideArray[d-1]) {
 						leftSide = insideArray[d-1] + "." + arrayItemCount[d-1] + "." + leftSide; // leftSide=arr.0.foo
 					}
@@ -1077,80 +1079,80 @@
 						leftSide = codeBlock[d].word + "." + leftSide; // leftSide=bar.foo
 					}
 					
-
+					
 					d--;
 					//console.log("while leftSide=" + leftSide);
 					//console.log("afterPointer[" + d + "]=" + afterPointer[d]);
 				}
-			
+				
 				
 				/*
 					
-				while(!insideArray[d] && afterPointer[d] == ":") {
+					while(!insideArray[d] && afterPointer[d] == ":") {
 					if(leftSide) {
-						leftSide = codeBlock[d].word + "." + leftSide;
+					leftSide = codeBlock[d].word + "." + leftSide;
 					}
 					else {
-						leftSide = codeBlock[d].word;
+					leftSide = codeBlock[d].word;
 					}
 					d--;
 					console.log("while leftSide=" + leftSide);
 					console.log("d=" + d);
-				}
-				console.log("d=" + d);
-
-				if(insideArray[d]) {
+					}
+					console.log("d=" + d);
+					
+					if(insideArray[d]) {
 					// The array name contains the full path
 					leftSide = insideArray[d] + "." + arrayItemCount[d];
-				}
-				if(insideArray[d-1]) {
+					}
+					if(insideArray[d-1]) {
 					// The array name contains the full path
 					leftSide = insideArray[d-1] + "." + arrayItemCount[d-1] + "." + lastWord;
-				}
-				else {
+					}
+					else {
 					leftSide = leftSide + "." + lastWord;
-				}
-				
-				
-
+					}
+					
+					
+					
 				*/
-
+				
 				
 				/*
-				// Dig into that JSON tree
-				var  d = codeBlockDepth;
-
-				
-				while(afterPointer[d] == ":") {
+					// Dig into that JSON tree
+					var  d = codeBlockDepth;
+					
+					
+					while(afterPointer[d] == ":") {
 					if(insideArray[d]) {
-						leftSide = leftSide + "." + arrayItemCount[d];
+					leftSide = leftSide + "." + arrayItemCount[d];
 					}
 					
 					else {
-						
-						if(leftSide) {
-							if(insideArray[d-1]) {
-								leftSide = leftSide + "." + arrayItemCount[d-1];
-							}
-							else {
-								leftSide = codeBlock[d].word + "." + leftSide;	
-							}
-						}
-						else {
-							if(insideArray[d-1]) {
-								leftSide = codeBlock[d-1].word + "." + insideArray[d-1] + "." + arrayItemCount[d-1];
-							}
-							else {
-								leftSide = codeBlock[d].word;
-							}
-						}								
+					
+					if(leftSide) {
+					if(insideArray[d-1]) {
+					leftSide = leftSide + "." + arrayItemCount[d-1];
+					}
+					else {
+					leftSide = codeBlock[d].word + "." + leftSide;	
+					}
+					}
+					else {
+					if(insideArray[d-1]) {
+					leftSide = codeBlock[d-1].word + "." + insideArray[d-1] + "." + arrayItemCount[d-1];
+					}
+					else {
+					leftSide = codeBlock[d].word;
+					}
+					}								
 					}
 					d--;
 					console.log("leftSide=" + leftSide + " codeBlock[" + d + "].word=" + codeBlock[d].word + "");
-				}
-				
-				leftSide += "." + lastWord;
-				
+					}
+					
+					leftSide += "." + lastWord;
+					
 				*/
 			}
 			else if(pointerCharacter == "=") {
@@ -1163,7 +1165,7 @@
 			}
 			
 			//console.log("findLeftSide return leftSide=" + leftSide);
-
+			
 			return leftSide;
 		}
 		
@@ -1203,7 +1205,7 @@
 						// or an if statement: if*(foo) bar* = baz
 						//console.log("varibale='" + variableName + "' does not exist in function=" + func.name + " rightSide=" + rightSide + " (line=" + lineNumber + ")");
 					}
-						
+					
 				}
 				else {
 					
