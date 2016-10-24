@@ -178,7 +178,29 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Cant make tidle char: ~
+Unable to find start of function :
+
+<div id="log"></div>
+
+<script>
+
+function read(file) {
+var promise = new Promise( function (resolve, reject) {
+
+});
+
+/
+
+
+}
+
+</script>
+
+---
+
+Paranthesis matching doesn't work when there are parantheses in strings
+
+Cant make tidle char: ~ (Linux)
 
 Indentation error: 
 
