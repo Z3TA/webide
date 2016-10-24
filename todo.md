@@ -58,6 +58,8 @@ Compile nodehun for osx
 What I'm thinking
 -----------------
 
+At first use, a login screen that fetch login credentials to ftp + mercurial repo and clones the remote repo, plus sets up a web page.
+
 The design needs work. Can't show too much on the screen or it will be too slow to work (brain will be overloaded with info)
 
 Should file explorer be above function list? Because function list is not always visible
@@ -175,6 +177,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Cant make tidle char: ~
 
 Indentation error: 
 
