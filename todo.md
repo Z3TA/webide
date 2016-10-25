@@ -178,6 +178,22 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Word wrapping plugin doesn't seem to work in new files ...
+
+---
+
+Got eternal spam "error reding dir" from goto_file
+
+---
+
+xml tag color error: .asp
+
+<h2>Image-pack</h2>
+<form action="account.asp<% =S %>" method="post" name="imagepack">
+
+
+---
+
 Unable to find start of function :
 
 <div id="log"></div>
