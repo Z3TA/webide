@@ -1056,6 +1056,8 @@ Optimize if needed
 Feature list (Not ordered/priotized)
 ------------------------------------
 
+Samba support, load files etc from samba shares: https://www.npmjs.com/package/smb2
+
 proper touchscreen support. So I can drag my code around.
 
 Gamification/Animations: Animate for example parenthesis/bracket highlightning so they are easier to see and looks cooler.
