@@ -30,7 +30,23 @@
 		
 	*/
 	
-	
+	editor.addTest(function wrongFunctionAnonymous(callback) {
+		editor.openFile("wrongFunctionAnonymous.js", "function foo() {\nbar = setTimeout(function() {\nbaz = setTimeout(function() {\n\n}, 0);\n}, 0);\n}\n", function(err, file) {
+			
+			//console.log(file.parsed.functions["foo"].subFunctions[""].subFunctions);
+			
+			if(file.parsed.functions["foo"].subFunctions[""].subFunctions.hasOwnProperty("baz")) throw new Error("Expected an anonymous function instead of baz");
+		
+		file.moveCaret(undefined, 3);
+		editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+		// Might throw Error: Unable to find end of function=baz
+		
+		editor.closeFile(file.path);
+		
+		callback(true);
+		
+	});
+	}, 1);
 	
 	editor.addTest(function unfinishedRegexp(callback) {
 		editor.openFile("unfinishedRegexp.js", "foo = foo.replace(/[\n// comment", function(err, file) {
@@ -42,7 +58,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function twoFunctionsSameName(callback) {
 		// bug: parser start parsing from the second function, thus cant find the function

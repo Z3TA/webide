@@ -1833,9 +1833,6 @@
 				}
 				else if(char == "(") {
 					
-					insideParenthesis[codeBlockDepth] = "(";
-					parenthesisStart[codeBlockDepth] = i;
-					
 					if(insideFunctionDeclaration) {
 						
 						// Figure out the name of the function
@@ -1843,12 +1840,15 @@
 						//console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
-						if(functionName == "" && variableName != "") functionName = variableName;
+						if( String(insideParenthesis[codeBlockDepth]).replace(/\s/g, "") == "(function(" ) functionName = ""; // prevent anonymous function to get a (the wrong) name
+						else if(functionName == "" && variableName != "") functionName = variableName;
 						else functionName = lastWord || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
 						
 						if(functionName.indexOf("(") != -1) functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
+						
+						
 						
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
@@ -1859,6 +1859,10 @@
 						functionArgumentsStart = i+1;
 
 					}
+					
+					insideParenthesis[codeBlockDepth] = "(";
+					parenthesisStart[codeBlockDepth] = i;
+					
 					/*
 					if(words[words.length-1] == "function") {
 						
