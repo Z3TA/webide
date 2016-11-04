@@ -27,6 +27,8 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 
 todo:
 
+Feature to replace spaces used for indentation (convert indentation to spaces 2/4), because the code dont fit in my code examples on my blog
+
 Control what happends when you press enter.
 Use native selection API to place cursor in wysiwyg
 
@@ -177,6 +179,9 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Dont find error: if(err.code="ENOENT"  (one equal sign)
+
 
 Word wrapping plugin doesn't seem to work in new files ...
 
@@ -654,6 +659,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+Annoying when double quotes are inserted when you do not like double quotes: example foo =  (here)    ";
+
+Put all features under (native) menus so they can be found, for example using the Ubuntu "Alt" HUD for searching the app menu ...
+Could use it as a commander, ex: open recent file: .... open file: (list all files in current files's folder)
+http://support.system76.com/articles/ubuntu-basics/
+
 Icons in the contect menu so things get easier to find!
 
 Auto complete HTML tags inside JS strings.
@@ -1055,6 +1066,15 @@ Optimize if needed
 
 Feature list (Not ordered/priotized)
 ------------------------------------
+
+When running a program and it crashes, auto goto that line (get file/line from the stack trace)
+When running a program, profile it (trace dumps) and use the logs in the editor to show relations, hot code, types, etc
+
+Hold down key to temporary see things (terminal based editors cant do that)
+
+Remotely run programs (ex sudo apt-get update, chmod 775 somefile.txt chown Z:adm folder/ -R, nodejs myscript.js) get output in the editor.
+
+Pipe to the editor and stream the text.
 
 Samba support, load files etc from samba shares: https://www.npmjs.com/package/smb2
 
