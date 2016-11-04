@@ -79,15 +79,23 @@
 
 	"use strict";
 	
-	editor.on("start", jsParserMain);
-	
-	function jsParserMain() {
-	
+	editor.plugin({
+		desc: "Parse JavaScript etc",
+		order: 100,
+		load:function jsParserMain() {
+			
 		editor.on("fileOpen", onFileOpen); // Why did I remove this???
 		editor.on("fileChange", parseJsOnChange, 100);
 
-	}
-
+	},
+		unload: function unloadJsParser() {
+			
+			editor.removeEvent("fileOpen", onFileOpen);
+			editor.removeEvent("fileChange", parseJsOnChange);
+			
+		}
+	});
+	
 	
 	function onFileOpen(file) {
 		//console.log("jsParser.js");
