@@ -1107,14 +1107,14 @@ editor.lastKeyPressed = "";
 			
 			if(err) {
 				console.warn("Copy failed! Unable to read file: " + err.message);
-				callback(err);
+				callback(err, to);
 			}
 			else {
 				editor.saveToDisk(to, buffer, function(err, path) {
 					
-					if(err) console.warn("Copy failed! Unable to write file: " + err.message);
+					if(err) console.warn("Copy failed! Unable to write file path=" + to + ": " + err.message);
 					
-					callback(err, path);
+					callback(err, to);
 					
 					
 				}, inputBuffer, encoding);
