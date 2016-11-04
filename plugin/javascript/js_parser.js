@@ -1845,10 +1845,18 @@
 						
 						// Figure out the name of the function
 						
-						//console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+						console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
-						if( String(insideParenthesis[codeBlockDepth]).replace(/\s/g, "") == "(function(" ) functionName = ""; // prevent anonymous function to get a (the wrong) name
+						
+						// insideParenthesis[0]=(functionbar(
+						var match = String(insideParenthesis[codeBlockDepth]).match(/function(.*)\(/);
+						//if( String(insideParenthesis[codeBlockDepth]).replace(/\s/g, "") == "(function(" ) functionName = ""; // prevent anonymous function to get a (the wrong) name
+						
+						if(match) {
+							if(match[1]) functionName = match[1];
+							else functionName = "";
+						}
 						else if(functionName == "" && variableName != "") functionName = variableName;
 						else functionName = lastWord || word.replace("(", "");
 						
@@ -1857,7 +1865,7 @@
 						if(functionName.indexOf("(") != -1) functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
 						
 						
-						
+												
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
 						insideFunctionArguments = true;
@@ -1946,7 +1954,7 @@
 						
 						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
 						
-						//console.log("functionName=" + functionName + " type=" + typeof functionName);
+						console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???

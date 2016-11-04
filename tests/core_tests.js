@@ -30,6 +30,26 @@
 		
 	*/
 	
+	editor.addTest(function funcCallWithFuncInArg(callback) {
+		editor.openFile("funcCallWithFuncInArg.js", "foo = setTimeout(function bar() {\n\n}, 1000);\n", function(err, file) {
+			
+			//console.log(file.parsed.functions);
+			
+			if(file.parsed.functions.hasOwnProperty("foo")) throw new Error("Expected function name to be bar instead of foo");
+			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Expected function bar");
+			
+			file.moveCaret(undefined, 1);
+			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Might throw Error: Unable to find end of function=foo
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
+	
 	editor.addTest(function wrongFunctionAnonymous(callback) {
 		editor.openFile("wrongFunctionAnonymous.js", "function foo() {\nbar = setTimeout(function() {\nbaz = setTimeout(function() {\n\n}, 0);\n}, 0);\n}\n", function(err, file) {
 			
@@ -46,7 +66,7 @@
 		callback(true);
 		
 	});
-	}, 1);
+	});
 	
 	editor.addTest(function unfinishedRegexp(callback) {
 		editor.openFile("unfinishedRegexp.js", "foo = foo.replace(/[\n// comment", function(err, file) {
