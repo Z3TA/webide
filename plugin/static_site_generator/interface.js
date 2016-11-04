@@ -1422,7 +1422,9 @@
 				}
 
 				function fileCopied(err, path) {
-					if(err) throw err;
+					if(err) {
+						alertBox("Unable to copy file (" + err.message + ")\n" + path);
+					}
 					else {
 						fileSaved(to);
 						runWaitingList();
