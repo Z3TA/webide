@@ -33,15 +33,3 @@ You are Not allowed to distribute any updates (for example bug fixes, new featur
 
 
 
-Ideology
-========
-
-Keep good code quality and avoid drama like hostile forks with dubious marketing claiming their version is much better then the original.
-
-Keep in mind that I take on the job to maintain your code and make sure it works in future versions. 
-
-Free subscription: Any notability contributors will get a free subscription period, or a discount.
-
-I hope I will be able to hire someone or myself, that are able to make a living on maintaning the software. 
-
-
