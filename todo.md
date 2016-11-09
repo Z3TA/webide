@@ -27,10 +27,14 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 
 todo:
 
+Improve the file explorer:
+Two panes, one for folders (with local fs and all remote fs as root's) and one for files (current selected folder). 
+Icons! Delete, rename, create new files and folders. Move files using copy/pasting (even between different remote locations). Inspiration from Windows Explorer 
+
+
 Feature to replace spaces used for indentation (convert indentation to spaces 2/4), because the code dont fit in my code examples on my blog
 
-Control what happends when you press enter.
-Use native selection API to place cursor in wysiwyg
+SSG/wysiwyg: Control what happends when you press enter. Use native selection API to place cursor in wysiwyg
 
 
 cleaning up pasting from Ms-word.
