@@ -49,7 +49,7 @@ Via terminal: chmod u+x my_shell_script.sh
 Updates
 =======
 
-New stable releases will be notified on the web page, via e-mail (opt-in) and RSS.
+New releases will be notified on the web page, via e-mail (opt-in) and RSS.
 
 Mercurial (hg) is used for version control. You should already have cloned from the repository:
 hg clone http://hg.webtigerteam.com/JZedit
@@ -62,7 +62,7 @@ hg up ###
 
 A new release usually means new feature(s). Each release will be followed up with a few weeks of only bug fixes.
 To update the editor, or get the latest bug fixes, type the following command in your command-prompt/terminal: 
-hg pull && hg up stable
+hg pull && hg up
 
 There's (currently) no maintenance on old releases after a new release.
 
@@ -71,7 +71,8 @@ There's (currently) no maintenance on old releases after a new release.
 Reporting bugs
 ==============
 
-Open a new file, and write down instructions on how to repeat the bug. 
+Open a new file, and write down instructions on how to repeat the bug.
+Save the file, uncluding "bugreport" in the file name (without the quotes)
 Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
 
 
@@ -102,7 +103,7 @@ Unless you have set global.settings.sub_pixel_antialias = false (then it will al
 
 "LCD Text" / sub-pixel-antialas
 --------------------------------
-This is the default on most systems/OS. But some people might see "rainbows".
+This is the default on most operating systems. But some people might see "rainbows".
 If you take a screen-shot and zoom in, you will notice the text edges has red, green or blue colors!
 This works because each pixel on LCD monitors has a red, green and blue line!
 
@@ -112,43 +113,12 @@ Turn off "LCD Text" / sub-pixel-antialas
 Start the program with --disable-lcd-text. (See start.bat / start.sh)
 And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
-Or turn it off in your OS!
+Or turn it off in your operating system!
 
 
 What I think looks best (default settings)
 ------------------------------------------
 Consolas 15px on Windows! (with sub-pixel-anti-alias)
 DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
-
-
-
-Where can I get Consolas font on Linux?
----------------------------------------
-Is only distributed in Windows and some windows applications. 
-
-Type these commands in a terminal window:
-
-sudo apt-get install cabextract
-sudo apt-get install font-manager
-mkdir temp
-cd temp
-wget http://download.microsoft.com/download/E/6/7/E675FFFC-2A6D-4AB0-B3EB-27C9F8C8F696/PowerPointViewer.exe
-cabextract -L -F ppviewer.cab PowerPointViewer.exe
-cabextract ppviewer.cab
-
-font-manager
-
-Font-manager is a GUI tool:
-Click on the "cog wheels" icon (Manage Fonts) bottom left, to get a menu with "Install Fonts".
-Select CONSOLA from the temp-folder you extracted the cab files in.
-
-
-
-
-
-
-
-
-
 
 
