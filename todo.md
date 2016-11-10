@@ -27,6 +27,8 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 
 todo:
 
+See total lines in bottom right corder when scrolling so you know where in the file your are.
+
 Improve the file explorer:
 Two panes, one for folders (with local fs and all remote fs as root's) and one for files (current selected folder). 
 Icons! Delete, rename, create new files and folders. Move files using copy/pasting (even between different remote locations). Inspiration from Windows Explorer 
