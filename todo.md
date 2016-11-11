@@ -186,6 +186,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+File was marked as saved, but did not have the latest content because it was changed by another program.
+
+
 Dont find error: if(err.code="ENOENT"  (one equal sign)
 
 
