@@ -668,6 +668,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+Annoying when making a block quote and cant see where to end it. Sugg: show a green line from the start of the unclosed block scope to the cursor
+
 Annoying when double quotes are inserted when you do not like double quotes: example foo =  (here)    ";
 
 Put all features under (native) menus so they can be found, for example using the Ubuntu "Alt" HUD for searching the app menu ...
