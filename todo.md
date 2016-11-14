@@ -27,6 +27,8 @@ Teach people to use a computer for more then a type writer ... Goal: teach some 
 
 todo:
 
+Mercurial integration
+
 See total lines in bottom right corder when scrolling so you know where in the file your are.
 
 Improve the file explorer:
