@@ -2,6 +2,8 @@
 	
 	/*
 
+		warning: There be dragons!
+		
 		This file parses javascript and returns an object with the following objects:
 			functions
 			quotes
@@ -10,6 +12,7 @@
 			blockMatch = true|false (if there are as many { as there are }
 			xmlTags
 		
+		It also updates the indentation property on the grid rows!!
 	
 		Goals: 
 			Intelli:
@@ -765,6 +768,7 @@
 		row = parseStartRow,
 		lineNumber = 1,
 		word = "",
+		llWord = "",
 		words = [],
 		lastWord = "",
 		insideVariableDeclaration = [],
@@ -814,6 +818,9 @@
 		pastChar4 = "",
 		pastChar5 = "",
 		pastChar6 = "",
+		pastChar7 = "",
+		pastChar8 = "",
+		pastChar9 = "",
 		xmlMode = false,
 		xmlModeBeforeScript = false,
 		textLength = text.length,
@@ -1292,6 +1299,8 @@
 			var backSlash = String.fromCharCode(92); // this: \
 			
 			// Save a history of the last characters
+			//pastChar8 = pastChar7;
+			//pastChar7 = pastChar6;
 			pastChar6 = pastChar5;
 			pastChar5 = pastChar4;
 			pastChar4 = pastChar3;
@@ -1845,7 +1854,7 @@
 						
 						// Figure out the name of the function
 						
-						console.log("function!? line=" + lineNumber + " char=" + i + " word=" + word + " lastWord=" + lastWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+						console.log("function!? line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 						// Sometimes you have var infront of function. 
 						
 						
@@ -1858,7 +1867,8 @@
 							else functionName = "";
 						}
 						else if(functionName == "" && variableName != "") functionName = variableName;
-						else functionName = lastWord || word.replace("(", "");
+						else if(functionName == "" && variableName == "" && functionName == "" && lastWord == "function") functionName = ""; // Anonymous!
+						else functionName = (lastWord=="function" ? llWord : lastWord) || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
 						
@@ -2333,6 +2343,8 @@
 				// Detects: function foo() ...
 				insideFunctionDeclaration = true;
 				word = "";
+				llWord = lastWord;
+				lastWord = "function";
 				return;
 			}
 			else if(char == "(" && word == "function") {
@@ -2342,6 +2354,8 @@
 				//variableName = "Anonymous function";
 				variableName = "";
 				word = "";
+				llWord = lastWord;
+				lastWord = "function";
 				return;
 			}
 			else if(char == " " && word == "new") {

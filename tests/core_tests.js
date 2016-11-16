@@ -3,6 +3,8 @@
 	
 	/*
 		
+		todo: Make an own file for js_parser!
+		
 		This file has all the tests for the editor core.
 		All (other) tests that has to do with a plugin, should be placed in the tests/ folder or added in the plugin itself.
 		
@@ -30,9 +32,23 @@
 		
 	*/
 	
+	editor.addTest(function wrongFuncNameAnonFunctionCallback(callback) {
+		editor.openFile("wrongFuncNameAnonFunctionCallback.js", 'webshot(site.address, snapshotPath(site), options, function(err) {\n\nif(err) {\nlog("Problem taking snapshot of " + site.address);\nthrow err;\n}\n}', function(err, file) {
+			
+			//console.log(file.parsed.functions);
+			
+			if(file.parsed.functions.hasOwnProperty("options")) throw new Error("Expected anonymous function instead of function name=options !");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	
 	editor.addTest(function wrongFuncNameWithPre(callback) {
-		editor.openFile("funcCallWithFuncInArg.htm", '<pre class="meh">\nfunction foo() {\n}\n</pre>\n<pre>\nfunction bar() {\n}\n</pre>', function(err, file) {
+		editor.openFile("wrongFuncNameWithPre.htm", '<pre class="meh">\nfunction foo() {\n}\n</pre>\n<pre>\nfunction bar() {\n}\n</pre>', function(err, file) {
 			
 			//console.log(file.parsed.functions);
 			
@@ -44,7 +60,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function funcCallWithFuncInArg(callback) {
@@ -1200,3 +1216,4 @@ callback(true);
 	
 	
 })();
+
