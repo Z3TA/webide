@@ -1556,7 +1556,7 @@
 					xmlTagStart = i;
 					if(!insideXmlTagEnding) {
 						xmlModeBeforeTag = xmlMode; // xmlMode when the tag starts
-						xmlMode = false;
+						xmlMode = false; // Why end xmlMode inside tags !?? 
 					}
 					if(insideHTMLComment) throw new Error("WTF");
 				}
@@ -1674,7 +1674,7 @@
 				insideCodeBlock = true;
 			}
 
-			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS && !insideRegExp) {
+			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS && !insideRegExp && !insideXmlTag) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				

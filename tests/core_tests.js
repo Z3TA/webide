@@ -30,6 +30,23 @@
 		
 	*/
 	
+	
+	editor.addTest(function wrongFuncNameWithPre(callback) {
+		editor.openFile("funcCallWithFuncInArg.htm", '<pre class="meh">\nfunction foo() {\n}\n</pre>\n<pre>\nfunction bar() {\n}\n</pre>', function(err, file) {
+			
+			//console.log(file.parsed.functions);
+			
+			if(!file.parsed.functions.hasOwnProperty("foo")) throw new Error("Expected function foo");
+			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Expected function bar");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
+	
 	editor.addTest(function funcCallWithFuncInArg(callback) {
 		editor.openFile("funcCallWithFuncInArg.js", "foo = setTimeout(function bar() {\n\n}, 1000);\n", function(err, file) {
 			
@@ -47,7 +64,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function wrongFunctionAnonymous(callback) {
