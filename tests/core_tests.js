@@ -28,9 +28,21 @@
 		
 		todo: The JS parser should have its own test file
 		
-		
-		
 	*/
+	
+	editor.addTest(function wrongFuncNameAnonFunctionCallbackNextToParanthesis(callback) {
+		editor.openFile("wrongFuncNameAnonFunctionCallbackNextToParanthesis.js", 'function foo() {\n\n}\n\nbar(paranthesis(arg), wrongName, function(err) {\n\n}\n', function(err, file) {
+			
+			//console.log(file.parsed.functions);
+			
+			if(file.parsed.functions.hasOwnProperty("wrongName")) throw new Error("Expected anonymous function instead of function name=wrongName !");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
 	
 	editor.addTest(function wrongFuncNameAnonFunctionCallback(callback) {
 		editor.openFile("wrongFuncNameAnonFunctionCallback.js", 'webshot(site.address, snapshotPath(site), options, function(err) {\n\nif(err) {\nlog("Problem taking snapshot of " + site.address);\nthrow err;\n}\n}', function(err, file) {
@@ -44,7 +56,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function wrongFuncNameWithPre(callback) {

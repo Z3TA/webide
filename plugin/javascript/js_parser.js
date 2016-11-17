@@ -1826,6 +1826,8 @@
 								R[subCount] = L[subCount]-1;
 							}
 							
+							variableName = "";
+							
 						}
 						
 						
@@ -1866,8 +1868,8 @@
 							if(match[1]) functionName = match[1];
 							else functionName = "";
 						}
-						else if(functionName == "" && variableName != "") functionName = variableName;
-						else if(functionName == "" && variableName == "" && functionName == "" && lastWord == "function") functionName = ""; // Anonymous!
+						else if(variableName != "") functionName = variableName;
+						else if(lastWord == "function") functionName = ""; // Anonymous!
 						else functionName = (lastWord=="function" ? llWord : lastWord) || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
@@ -2352,7 +2354,7 @@
 				//console.log("anon function line=" + lineNumber + "");
 				insideFunctionDeclaration = true;
 				//variableName = "Anonymous function";
-				variableName = "";
+				//variableName = "";
 				word = "";
 				llWord = lastWord;
 				lastWord = "function";
