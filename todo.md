@@ -188,6 +188,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Warns about single = in if ... ignore regexp!
+if (lines[t].search(/TTL=[0-9]+/i) > 0) {
+
+
 File was marked as saved, but did not have the latest content because it was changed by another program.
 
 
