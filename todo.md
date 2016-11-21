@@ -188,6 +188,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+When making a /* block comment inside a function with sub functions, when closing the blog comment, you get an error message about missing functions
+
+
 Warns about single = in if ... ignore regexp!
 if (lines[t].search(/TTL=[0-9]+/i) > 0) {
 
