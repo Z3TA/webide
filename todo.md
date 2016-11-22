@@ -1087,6 +1087,8 @@ Optimize if needed
 Feature list (Not ordered/priotized)
 ------------------------------------
 
+Open a console/command-line/shell/ (remote or local) in a new tab (kinda lika a file) and send commands by entering text at EOF (Ctrl+J)
+
 When running a program and it crashes, auto goto that line (get file/line from the stack trace)
 When running a program, profile it (trace dumps) and use the logs in the editor to show relations, hot code, types, etc
 
@@ -1392,6 +1394,10 @@ Need though
 -----------
 
 hmm ... Should all files be opened as streams!? ReadableStream 
+
+Give string variables and number variables different colors ? green (like "string") for string variables and blue for numbers.
+
+Put a weight ? on variables depending on scope? Like larger size for each level down in the scope.
 
 Switch SCM from Mercurial to Git because hg lost file changes!?
 
