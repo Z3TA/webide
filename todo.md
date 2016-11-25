@@ -2,7 +2,7 @@
 Prio:
 
 1) Beta release, get USER FEEDBACK
-2) Make it simple to update a home page
+2) Focus on onboarding process. Make it easy to go from downloading the program to uploading a web page.
 3) Bug/issue fixing and refactoring
 4) Polishing of existing features
 5) Optimization (toggle devMode off when testing!)
@@ -13,19 +13,22 @@ Prio:
 What I'm working on
 -------------------
 
-Tidying up office word doc pasted into the wysiwyg ...
 
-webpage wysiwyg; Toolbar with semantic elements header, table row, table cell
+Only use WYSIWYG for simple text editing. No buttons and stuff!
+Update the mouse cursor inside contenteditable using select selections.
 
 
 
-brainstorm: Making it so that updating a web page with SSG doesn't require web dev knowelage (coding HTML) 
-and is super easy ...
-Teach people to use a computer for more then a type writer ... Goal: teach some basic coding/scripting
+
+
+
+
 
 
 
 todo:
+
+Fix white-space in source file (context menu option)
 
 Mercurial integration
 
@@ -67,6 +70,11 @@ Compile nodehun for osx
 
 What I'm thinking
 -----------------
+
+Remove the WYSIWYG, but make it possible to see changes "live" while editing the page (despite the SSG) !?
+
+Is it possible to teach people to write HTML ? "Learn HTML and Make web pages like a pro"
+
 
 At first use, a login screen that fetch login credentials to ftp + mercurial repo and clones the remote repo, plus sets up a web page.
 
@@ -187,6 +195,15 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+When saving as or reloading a file, all white space are hidden! ... 
+.....text
+(save as)
+text (white space hidden)
+
+
+Sanitizing the WYSIWYG does bad things ...
+If you had the WYSIWYG open and doing a preview, it sanitizes when switching back!
 
 When making a /* block comment inside a function with sub functions, when closing the blog comment, you get an error message about missing functions
 
