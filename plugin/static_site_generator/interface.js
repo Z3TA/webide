@@ -28,10 +28,9 @@
 	var headerRows = 0;
 	var footerRows = 0;
 	var ignoreTransform;
-	var contentEdited = false;
 	var scrollTop = 0;
 	var menuItem;
-	var ignoreFileChange = false;
+	var ignoreFileChange = false; // Whether to update the preview/WYSIWYG when there is a change in the HTML source code (editor)
 	var updatePreviewOnChange;
 	
 	if(runtime == "browser") {
@@ -875,28 +874,6 @@
 		
 		function previewWinBlur() {
 			
-			if(contentEdited) {
-				// The source code has been edited via contenteditable so we have to sanitize it it.
-				
-				var srcHTML = getSourceCodeBody(sourceFile);
-				var sanitized = insertLineBreaks(srcHTML);
-				
-				if(sanitized != srcHTML) {
-					
-					var main = previewWin.window.document.getElementsByTagName("main")[0];
-					// Problem: contenteditable will lose the caret when the html is updated, hopefully it will not bother too much
-					main.innerHTML = sanitized;
-					
-					sourceFile.replaceText(srcHTML, sanitized);
-					
-					//ignoreTransform = textDiff(sanitized, main.innerHTML);
-					
-					alertBox("Sanitized carbage from WYSIWYG");
-					
-				}
-				
-			}
-			
 			ignoreFileChange = false;
 			
 			if(editor.currentFile) editor.input = true;
@@ -1052,13 +1029,72 @@
 				problem 1: Contenteditable produce mangled/garbled HTML code. 
 				Contenteditbale change stuff all over the place, for example inserts <tbody> in tables
 				
-					solution: Beautify the code whenever it lose foucs
+					solution: Beautify the code!
 				
 					problem 2: The beautifier touches even more stuff, amplifying the nr 1 problem
 					solution 2: insert stuff like <tbody> *before* going into WYSIWYG mode
 					
 				*/
-				contentEdited = true;
+				
+				var sanitized = insertLineBreaks(prewHTML);
+				
+				if(sanitized != prewHTML) {
+					
+					/*
+					Problem: contenteditable will lose the caret when the html is updated, 
+					this is verry annoying when typing as the cursor jumps
+						
+						solution: Set the caret again using the selection API 
+						problem2: Getting the caret is close to impossible and setting it is even harder
+						
+						 document.elementFromPoint(x, y);
+						
+						
+						
+					
+					*/
+					
+					var doc = previewWin.window.document;
+					
+					console.log("get position");
+					if(doc.getSelection()) {
+						if(doc.getSelection().anchorNode) {
+							var node = document.getSelection().anchorNode;
+							var position = node.getBoundingClientRect();
+							console.log("position=" + JSON.stringify(position, null, 2));
+						} else console.warn("no anchorNode");
+						
+						if(doc.getSelection().baseNode) {
+							var node = doc.getSelection().baseNode.parentNode;
+							var position = node.getBoundingClientRect();
+							console.log("position=" + JSON.stringify(position, null, 2));
+						}
+						else console.log("no baseNode");
+					}
+					else console.log("no selection");
+					
+					
+					function getSelectionStart() {
+						if(
+						
+						return (node.nodeType == 3 ? node.parentNode : node);
+					}
+					
+					
+					
+					main.innerHTML = sanitized;
+					
+					prewHTML = main.innerHTML
+					
+					
+					//sourceFile.replaceText(srcHTML, sanitized);
+					
+					//ignoreTransform = textDiff(sanitized, main.innerHTML);
+					
+					alertBox("Sanitized garbage from WYSIWYG");
+					
+				}
+				
 				
 				// Compare the source with the editable preview
 				var diff = textDiff(srcHTML, prewHTML, ignoreTransform);
@@ -1681,9 +1717,6 @@
 				// Change buttonWysiwyg state to "active"
 				if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="bold";
 				
-				
-				
-				contentEdited = false;
 				
 				main.contentEditable = "true";
 				

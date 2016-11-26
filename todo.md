@@ -13,6 +13,8 @@ Prio:
 What I'm working on
 -------------------
 
+Trying to get and set the cursor in contenteditable
+
 
 Only use WYSIWYG for simple text editing. No buttons and stuff!
 Update the mouse cursor inside contenteditable using select selections.
@@ -27,6 +29,11 @@ Update the mouse cursor inside contenteditable using select selections.
 
 
 todo:
+
+automatically bring up the SSG widget when opening a file the is managed by the SSG, and select that site
+
+show all editor windows when showing one of them! Like ex you have the preview open, then alt tab away, then alt tab back to 
+the editor, you still want to see the preview window!
 
 When in preview or WYSIWYG mode, set up the editors and preview/wysiwyg windows besides each other so you see both
 test this in windows managers ...
