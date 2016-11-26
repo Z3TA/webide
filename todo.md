@@ -28,6 +28,11 @@ Update the mouse cursor inside contenteditable using select selections.
 
 todo:
 
+When in preview or WYSIWYG mode, set up the editors and preview/wysiwyg windows besides each other so you see both
+test this in windows managers ...
+Use iframe instead !? No because we want to easily resize the windows to see how it looks in different sizes.
+
+
 Fix white-space in source file (context menu option)
 
 Mercurial integration
@@ -71,7 +76,10 @@ Compile nodehun for osx
 What I'm thinking
 -----------------
 
-Remove the WYSIWYG, but make it possible to see changes "live" while editing the page (despite the SSG) !?
+Make it so you can only edit pure text in WYSIWYG, encurage editing in HTML! Update the view in real time as you time in the HTML editor.
+Offer a HTML helper widget that inserts code: paragraph, image, link, table, header, etc
+Allow copy/pasting in the WYSIWYG put sanitize it.
+
 
 Is it possible to teach people to write HTML ? "Learn HTML and Make web pages like a pro"
 

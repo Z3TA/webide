@@ -876,7 +876,7 @@
 		function previewWinBlur() {
 			
 			if(contentEdited) {
-				// The source code has been edited via contenteditable to we have to sanitize it it.
+				// The source code has been edited via contenteditable so we have to sanitize it it.
 				
 				var srcHTML = getSourceCodeBody(sourceFile);
 				var sanitized = insertLineBreaks(srcHTML);
@@ -1026,7 +1026,7 @@
 	
 	
 	function contentEdit(target, type, bubbles, cancelable) {
-		// Called every time the contenteditable is updates
+		// Called every time the contenteditable is updated
 		console.time("contentEdit");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
@@ -1048,8 +1048,16 @@
 				var main = previewWin.window.document.getElementsByTagName("main")[0];
 				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
 				
-				// problem: Contenteditable produce mangled/garbled HTML code. 
-				// solution: Beautify the code whenever it lose foucs
+				/*
+				problem 1: Contenteditable produce mangled/garbled HTML code. 
+				Contenteditbale change stuff all over the place, for example inserts <tbody> in tables
+				
+					solution: Beautify the code whenever it lose foucs
+				
+					problem 2: The beautifier touches even more stuff, amplifying the nr 1 problem
+					solution 2: insert stuff like <tbody> *before* going into WYSIWYG mode
+					
+				*/
 				contentEdited = true;
 				
 				// Compare the source with the editable preview
