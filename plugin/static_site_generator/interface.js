@@ -1045,53 +1045,23 @@
 					this is verry annoying when typing as the cursor jumps
 						
 						solution: Set the caret again using the selection API 
-						problem2: Getting the caret is close to impossible and setting it is even harder
-						
-						 document.elementFromPoint(x, y);
-						
-						
-						
+						*/
 					
-					*/
-					
-					var doc = previewWin.window.document;
-					
-					console.log("get position");
-					if(doc.getSelection()) {
-						if(doc.getSelection().anchorNode) {
-							var node = document.getSelection().anchorNode;
-							var position = node.getBoundingClientRect();
-							console.log("position=" + JSON.stringify(position, null, 2));
-						} else console.warn("no anchorNode");
-						
-						if(doc.getSelection().baseNode) {
-							var node = doc.getSelection().baseNode.parentNode;
-							var position = node.getBoundingClientRect();
-							console.log("position=" + JSON.stringify(position, null, 2));
-						}
-						else console.log("no baseNode");
-					}
-					else console.log("no selection");
-					
-					
-					function getSelectionStart() {
-						if(
-						
-						return (node.nodeType == 3 ? node.parentNode : node);
-					}
-					
-					
+					var caretPosition = getCaretPosition(previewWin);
 					
 					main.innerHTML = sanitized;
 					
-					prewHTML = main.innerHTML
+					prewHTML = main.innerHTML;
 					
+					console.log("caretPosition: " + JSON.stringify(caretPosition));
+					
+					placeCaret(previewWin, caretPosition.x, caretPosition.y, caretPosition.char);
 					
 					//sourceFile.replaceText(srcHTML, sanitized);
 					
 					//ignoreTransform = textDiff(sanitized, main.innerHTML);
 					
-					alertBox("Sanitized garbage from WYSIWYG");
+					console.log("Sanitized garbage from WYSIWYG");
 					
 				}
 				
@@ -1252,6 +1222,66 @@
 		
 		console.timeEnd("contentEdit");
 	}
+	
+	function getCaretPosition(previewWin) {
+		// Returns the (parent) element center x,y coordinate and position in the text node
+		
+		var doc = previewWin.window.document;
+		
+		var selection = doc.getSelection();
+		if(selection) {
+			/*
+				anchorNode/baseNode: Where selection starts
+				focusNode/extentNode: Where selection ends
+			*/
+			
+			var baseNode = doc.getSelection().baseNode
+			
+			if(baseNode) {
+				var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
+				var pos = parentNode.getBoundingClientRect();
+				
+				if (selection.rangeCount) {
+					var selRange = selection.getRangeAt(0);
+					var testRange = selRange.cloneRange();
+					
+					testRange.selectNodeContents(baseNode);
+					testRange.setEnd(selRange.startContainer, selRange.startOffset);
+					var caretPos = testRange.toString().length;
+					
+				} else throw new Error("no selection.rangeCount");
+				
+				return {x: Math.round(pos.left + pos.width / 2), y: Math.round(pos.top + pos.height / 2), char: caretPos};
+				
+			}
+			else throw new Error("no baseNode");
+		}
+		else throw new Error("Unable to get selection");
+		
+		
+	}
+	
+	function placeCaret(previewWin, x, y, charPos) {
+		
+		var doc = previewWin.window.document;
+		var win = previewWin.window;
+		
+		var element = doc.elementFromPoint(x, y);
+		
+		var childNode = element.childNodes[0]; // The text node
+		
+		//console.log(childNode);
+		
+		var range = doc.createRange();
+		var sel = win.getSelection();
+		
+		range.setStart(childNode, charPos);
+		range.collapse(true);
+		sel.removeAllRanges();
+		sel.addRange(range);
+		
+	}
+	
 	
 	function closePreview() {
 		// Close the preview window

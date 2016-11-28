@@ -13,22 +13,18 @@ Prio:
 What I'm working on
 -------------------
 
-Trying to get and set the cursor in contenteditable
+debugging get/set caret position in WYSIWYG when you press enter to create a new paragraph
 
 
 Only use WYSIWYG for simple text editing. No buttons and stuff!
-Update the mouse cursor inside contenteditable using select selections.
-
-
-
-
-
 
 
 
 
 
 todo:
+
+inplement flashBox that flash a unfocused message that fadews out and dissappears (or dissappears when you click close)
 
 automatically bring up the SSG widget when opening a file the is managed by the SSG, and select that site
 
@@ -210,6 +206,12 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Pushing WYSIWYG didnt work (needed to select a page first)
+
+
+Auto complete function arguments inside <script> inserts </script>
+
 
 When saving as or reloading a file, all white space are hidden! ... 
 .....text
