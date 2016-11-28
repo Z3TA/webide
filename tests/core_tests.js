@@ -30,6 +30,18 @@
 		
 	*/
 	
+	editor.addTest(function thisOutsideFunction(callback) {
+		editor.openFile("thisOutsideFunction.js", 'var bar = this;\nfunction foo() {\n}\n', function(err, file) {
+			
+			// Did throw an error ...
+						
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	}, 1);
+	
 	editor.addTest(function wrongFuncNameAnonFunctionCallbackNextToParanthesis(callback) {
 		editor.openFile("wrongFuncNameAnonFunctionCallbackNextToParanthesis.js", 'function foo() {\n\n}\n\nbar(paranthesis(arg), wrongName, function(err) {\n\n}\n', function(err, file) {
 			

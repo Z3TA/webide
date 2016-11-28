@@ -1257,8 +1257,8 @@
 					
 					variable.type = getVariableType(rightSide);
 					if(variable.type == "this") {
-						if(subCount > -1) {
-							variable.value = myFunction[subCount].name; // We could point directly att the functon, but we want to avoid too much dublication
+						if(subCount > 0) {
+							variable.value = myFunction[subCount-1].name; // We could point directly att the functon, but we want to avoid too much dublication
 						}
 						else {
 							variable.value = "window"; // "this" is the global scope
