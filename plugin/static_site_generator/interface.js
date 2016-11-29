@@ -936,6 +936,8 @@
 			
 			previewWin.window.scrollTop = scrollTop; // Set the scroll position again
 			
+			previewWin.window.onbeforeunload = captureNavigation;
+			
 			if(callback) callback(previewWin);
 		}
 		
@@ -951,6 +953,14 @@
 			ignoreFileChange = false;
 			
 			if(editor.currentFile) editor.input = true;
+		}
+		
+		
+		function captureNavigation() {
+			//alertBox("unload!");
+			
+			if(wysiwygEnabled) wysiwygSSG(); // Disable editing when navigating away (clickon on a link)
+			
 		}
 		
 	}
@@ -1686,7 +1696,15 @@
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
 		
 		if(wysiwygEnabled) {
-			if(previewWin) enableContentEdit(previewWin);
+			var win;
+			try {
+				win = previewWin.window;
+			}
+			catch(e) {
+				console.warn(e.message);
+				}
+			
+			if(win) enableContentEdit(previewWin);
 			else previewPage(site, enableContentEdit);
 		}
 		else {
@@ -1904,13 +1922,31 @@
 			// Change buttonWysiwyg state to "normal"
 			if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="normal";
 			
-			var body = previewWin.window.document.body;
-			body.contentEditable = "false";
-			previewWin.window.removeEventListener("input", contentEdit);
-			
+			if(!previewWin) console.log("previewWin not available");
+			else {
+				
+				var win;
+				
+				// Requesting the window when it's closed will result in an error
+				try {
+				win = previewWin.window;
+				}
+				catch(e) {
+					console.log(e.message);
+					}
+				
+				if(!win) console.log("previewWin.window not available"); 
+				else {
+					
+				//var body = previewWin.window.document.body;
+				var main = previewWin.window.document.getElementsByTagName("main")[0];
+				main.contentEditable = "false";
+				
+				previewWin.window.removeEventListener("input", contentEdit);
+				}
+			}
+			}
 		}
-		
-	}
 	
 	
 })();
