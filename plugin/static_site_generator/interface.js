@@ -149,14 +149,88 @@
 			// Delay updating so that we do not render broken tags etc and save some battery
 			//updatePreviewOnChange = setTimeout(function() {
 			
-			var main = previewWin.window.document.getElementsByTagName("main")[0];
+			var doc = previewWin.window.document;
+			
+			var main = doc.getElementsByTagName("main")[0];
 			
 			//var prewHTML = main.innerHTML;
 			var srcHTML = getSourceCodeBody(sourceFile);
 			
 			main.innerHTML = srcHTML;
 				
-				//ignoreTransform = textDiff(srcHTML, main.innerHTML);
+			// Using innerHTML makes the caret dissappear. Place it again ...
+			// Find out the tag and if we are near text, find the tag in wysiwyg
+			
+			var index = file.caret.index;
+			
+			var leftChar = index > 0 ? file.text.charAt(index-1) : "";
+			var rightChar = index < file.text.length ? file.text.charAt(index) : "";
+			
+			var regexText = /[^\r\n<>"']/;
+			
+			console.log("Attempting to place caret on WYSIWYG ...");
+			if(leftChar.match(regexText) ==  null && rightChar.match(regexText) == null) console.log("No text next to file.caret. leftChar=" + leftChar + " rightChar=" + rightChar + "");
+			else {
+				
+				var leftLeftTag = file.text.lastIndexOf("<", index-1);
+				if(leftLeftTag == -1) console.log("No left <tag found left of the file.caret");
+				else {
+					
+					var firstSpaceAfterLeftTag = file.text.indexOf(" ", leftLeftTag);
+					var firstRightTagAfterLeftTag = file.text.indexOf(">", leftLeftTag);
+					
+					if(firstRightTagAfterLeftTag == -1) console.log("No right> tag found after left tag, left of file.caret");
+					else {
+						
+						console.log("leftLeftTag=" + leftLeftTag + " (" + file.text.substring(leftLeftTag, index) + ")");
+						console.log("firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag + " (" + file.text.substring(leftLeftTag, firstRightTagAfterLeftTag+1) + ")");
+						
+						if(firstSpaceAfterLeftTag != -1 && firstSpaceAfterLeftTag < firstRightTagAfterLeftTag) var elementName = file.text.substring(leftLeftTag+1, firstSpaceAfterLeftTag);
+						else if(firstRightTagAfterLeftTag != -1) var elementName = file.text.substring(leftLeftTag+1, firstRightTagAfterLeftTag);
+						else throw new Error("firstSpaceAfterLeftTag=" + firstSpaceAfterLeftTag + " firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag);
+						
+						console.log("elementName=" + elementName);
+						
+						var rightLeftTag = file.text.indexOf("<", index);
+						if(rightLeftTag == -1) console.log("No <left tag on the right side of the file.caret");
+						else {
+							var text = file.text.substring(firstRightTagAfterLeftTag+1, rightLeftTag);
+							
+							console.log("rightLeftTag=" + rightLeftTag + " (" + file.text.substring(index, rightLeftTag) + ")");
+							
+							console.log("text=" + text);
+							
+							var charPosInText = index - firstRightTagAfterLeftTag - 1;
+							
+							console.log("debug charPos: " + text.substr(0, charPosInText) + "|" + text.substr(charPosInText));
+							
+							var elements = doc.getElementsByTagName(elementName);
+							
+							var node;
+							for(var i=0; i<elements.length; i++) {
+								if(elements[i].textContent == text) {
+									node = elements[i];
+									break;
+								}
+							}
+							if(!node) console.log("Unable to find element " + elementName + " containing text:" + text);
+							else {
+								var textNode = node.childNodes[0];
+								
+								console.log("Placing caret in node:");
+								console.log(textNode);
+								
+								placeCaretOnTextNode(previewWin, textNode, charPosInText);
+								
+							}
+							}
+					}
+				}
+			}
+			
+			
+			
+			//ignoreTransform = textDiff(srcHTML, main.innerHTML);
 			
 			//}, 3000);
 			
@@ -841,7 +915,7 @@
 				console.log("scrollTop=" + scrollTop);
 				if(previewLocation == url) previewWin.reload();
 				else previewWin.window.location = "file://" + url;
-				}
+			}
 			else {
 				alertBox("url=" + url + " != " + previewLocation);
 				previewWin.window.location = "file://" + url;
@@ -1026,11 +1100,11 @@
 				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
 				
 				/*
-				problem 1: Contenteditable produce mangled/garbled HTML code. 
-				Contenteditbale change stuff all over the place, for example inserts <tbody> in tables
-				
+					problem 1: Contenteditable produce mangled/garbled HTML code. 
+					Contenteditbale change stuff all over the place, for example inserts <tbody> in tables
+					
 					solution: Beautify the code!
-				
+					
 					problem 2: The beautifier touches even more stuff, amplifying the nr 1 problem
 					solution 2: insert stuff like <tbody> *before* going into WYSIWYG mode
 					
@@ -1041,11 +1115,11 @@
 				if(sanitized != prewHTML) {
 					
 					/*
-					Problem: contenteditable will lose the caret when the html is updated, 
-					this is verry annoying when typing as the cursor jumps
+						Problem: contenteditable will lose the caret when the html is updated, 
+						this is verry annoying when typing as the cursor jumps
 						
 						solution: Set the caret again using the selection API 
-						*/
+					*/
 					
 					var caretPosition = getCaretPosition(previewWin);
 					
@@ -1238,8 +1312,25 @@
 			var baseNode = doc.getSelection().baseNode
 			
 			if(baseNode) {
-				var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
-				var pos = parentNode.getBoundingClientRect();
+				
+				if(baseNode.nodeType == Node.TEXT_NODE) {
+					// Measure the parent node (can't measure text nodes)
+					var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
+					var pos = parentNode.getBoundingClientRect();
+					console.log("parentNode:");
+					console.log(parentNode);
+					console.log("parentNode nodeType=" + parentNode.nodeType);
+				}
+				else if(baseNode.nodeType == Node.ELEMENT_NODE) {
+					// The node probably don't have any text yet
+					var pos = baseNode.getBoundingClientRect();
+					console.log("baseNode:");
+					console.log(baseNode);
+				}
+				else {
+					console.log(baseNode);
+					throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
+				}
 				
 				if (selection.rangeCount) {
 					var selRange = selection.getRangeAt(0);
@@ -1251,37 +1342,52 @@
 					
 				} else throw new Error("no selection.rangeCount");
 				
-				return {x: Math.round(pos.left + pos.width / 2), y: Math.round(pos.top + pos.height / 2), char: caretPos};
+				// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
+				return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos};
 				
 			}
 			else throw new Error("no baseNode");
 		}
 		else throw new Error("Unable to get selection");
 		
-		
 	}
 	
 	function placeCaret(previewWin, x, y, charPos) {
 		
 		var doc = previewWin.window.document;
-		var win = previewWin.window;
-		
 		var element = doc.elementFromPoint(x, y);
-		
 		var childNode = element.childNodes[0]; // The text node
 		
-		//console.log(childNode);
+		return placeCaretOnTextNode(previewWin, childNode, charPos);
+		
+	}
+	
+	function placeCaretOnTextNode(previewWin, node, charPos) {
+		
+		console.log("placing caret on index " + charPos + " on:");
+		console.log(node);
+		
+		var doc = previewWin.window.document;
+		var win = previewWin.window;
 		
 		var range = doc.createRange();
 		var sel = win.getSelection();
 		
-		range.setStart(childNode, charPos);
+		try {
+		range.setStart(node, charPos);
+		}
+		catch(e) {
+			console.warn(e.message);
+			return false;
+		}
+		
 		range.collapse(true);
 		sel.removeAllRanges();
 		sel.addRange(range);
 		
+		return true;
+		
 	}
-	
 	
 	function closePreview() {
 		// Close the preview window
@@ -1762,11 +1868,12 @@
 					also: Extra stuff might be added to <main>
 					solution: ignoreTransform needs to be recalculated after each transformation
 					
-						problem2: contenteditable does not use the original HTML code, it changes it! For example adding <tbody> in tables ... resulting in ignoreTransform ignoring important updates
+						problem2: contenteditable does not use the original HTML code, it changes it! For example adding <tbody> in tables ... 
+						resulting in ignoreTransform ignoring important updates
 						solution2: Only compare the raw HTML when computing ignoreTransform! Then clean up the contenteditable content when pasting it into the source
 					*/
 					
-					if(srcHTML && rawMainHtml) computeIgnoreTransform(rawMainHtml);
+					if(srcHTML && rawMainHtml) computeIgnoreTransform(rawMainHtml, srcHTML);
 					
 				}
 				

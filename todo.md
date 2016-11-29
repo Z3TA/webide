@@ -13,7 +13,7 @@ Prio:
 What I'm working on
 -------------------
 
-debugging get/set caret position in WYSIWYG when you press enter to create a new paragraph
+Place WYSIWYG caret after edit in editor
 
 
 Only use WYSIWYG for simple text editing. No buttons and stuff!
@@ -23,6 +23,8 @@ Only use WYSIWYG for simple text editing. No buttons and stuff!
 
 
 todo:
+
+remember last WYSIWYG window position and size
 
 inplement flashBox that flash a unfocused message that fadews out and dissappears (or dissappears when you click close)
 
@@ -1118,8 +1120,12 @@ Measure performance
 Optimize if needed
 
 
-Feature list (Not ordered/priotized)
+Feature list (Not ordered/prioritized)
 ------------------------------------
+
+"timelog": Puts whatever is on the same line as the cursor into a time log.
+dagbok. kan användas för fakturering, time management mm.
+
 
 Open a console/command-line/shell/ (remote or local) in a new tab (kinda lika a file) and send commands by entering text at EOF (Ctrl+J)
 
