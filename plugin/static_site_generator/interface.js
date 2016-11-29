@@ -102,13 +102,13 @@
 		
 		//alertBox("UNloading");
 		
+		editor.removeMenuItem(menuItem);
+		
 		SSG_cleanup(); // closePreview();
 		
 		editor.removeEvent("fileShow", fileShow);
 		editor.removeEvent("exit", SSG_cleanup);
 		editor.removeEvent("fileChange", fileChange);
-		
-		editor.removeMenuItem(menuItem);
 		
 		editor.unbindKey(hideSSG);
 		editor.unbindKey(previewSSG);
@@ -1038,6 +1038,11 @@
 		
 		// Add line breaks so the source code gets easier to read
 		
+		// Make sure the line breaks at the beginning stays there, or there will be errors in the text transformation!
+		
+		
+		console.log("inserting (sanitizing) line breaks. sourceFile.lineBreak=" + lbChars(sourceFile.lineBreak));
+		
 		console.time("insertLineBreaks");
 		
 		// Remove space between tags
@@ -1123,6 +1128,10 @@
 				var sanitized = insertLineBreaks(prewHTML);
 				
 				if(sanitized != prewHTML) {
+					
+					console.log("prewHTML=\n" + debugWhiteSpace(prewHTML) + "\n");
+					
+					console.log("sanitized=\n" + debugWhiteSpace(sanitized) + "\n");
 					
 					/*
 						Problem: contenteditable will lose the caret when the html is updated, 
@@ -1210,8 +1219,8 @@
 				var col = -1;
 				var text = "";
 				
-				console.log("diff.removed=" + JSON.stringify(diff.removed));
-				console.log("diff.inserted=" + JSON.stringify(diff.inserted));
+				console.log("diff.removed=" + JSON.stringify(diff.removed, null, 2));
+				console.log("diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 				
 				// Apply the transformation to the source code ...
 				var removedText = "";
@@ -1221,7 +1230,7 @@
 					row = diff.removed[i].row + startRow;
 					
 					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
-						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + srcHTML + "\n\nprewHTML=" + prewHTML);
+						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + lbChars(srcHTML) + "\n\nprewHTML=" + lbChars(prewHTML));
 					}
 					
 					removedText = sourceFile.removeAllTextOnRow(row);
@@ -1279,23 +1288,26 @@
 						text = diff.inserted[i].text;
 						sourceFile.insertTextRow(text, row);
 						
-						// Increment linesToBeRemoved 
+					console.log("Inserted text on row=" + row + " text=" + text);
+					
+						// Increment rows in linesToBeRemoved because this insert pushed them down
 						for(var j=0; j<linesToBeRemoved.length; j++) {
 							if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
 							
 							if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
 						}
-						
-					}
+						}
 					
 					// Remove lines to be removed (backwards)
 					for(var i=linesToBeRemoved.length-1; i>-1; i--) {
-						sourceFile.removeRow(linesToBeRemoved[i] + startRow);
+					row = linesToBeRemoved[i] + startRow;
+					text = sourceFile.removeRow(row);
+					console.log("Removed row=" + row + " text=" + text);
 					}
 					
-				// after the transformation: Update what should be ignored again
-				var srcHTML = getSourceCodeBody(sourceFile);
-				var prewHTML = main.innerHTML;
+				// after the transformation: Update what should be ignored again? nope
+				//var srcHTML = getSourceCodeBody(sourceFile);
+				//var prewHTML = main.innerHTML;
 				//ignoreTransform = textDiff(srcHTML, main.innerHTML);
 				
 				//alert("Transformed source document!");
@@ -1669,6 +1681,8 @@
 		// Make sure they end with a line break
 		
 		
+		
+		
 		ignoreTransform = textDiff(srcHTML, rawMainHtml);
 		
 		// Make sure there are no errors
@@ -1794,6 +1808,7 @@
 					var diff = textDiff(srcHTML, main.innerHTML);
 					if(diff.inserted.length > 0 || diff.removed.length > 0) {
 						alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+						disableContentEdit();
 						return;
 					}
 				}
@@ -1879,22 +1894,6 @@
 				main.addEventListener("paste", contentPaste);
 				
 				
-				// Find stuff that should be ignored when comparing edits in preview
-				if(srcHTML) {
-					/*
-					problem: scripts found in <body> are placed after <main>
-					also: Extra stuff might be added to <main>
-					solution: ignoreTransform needs to be recalculated after each transformation
-					
-						problem2: contenteditable does not use the original HTML code, it changes it! For example adding <tbody> in tables ... 
-						resulting in ignoreTransform ignoring important updates
-						solution2: Only compare the raw HTML when computing ignoreTransform! Then clean up the contenteditable content when pasting it into the source
-					*/
-					
-					if(srcHTML && rawMainHtml) computeIgnoreTransform(rawMainHtml, srcHTML);
-					
-				}
-				
 				previewWin.focus();
 				
 				function contentPaste(e) {
@@ -1918,6 +1917,8 @@
 		
 		
 		function disableContentEdit(previewWin) {
+			
+			wysiwygEnabled = false;
 			
 			// Change buttonWysiwyg state to "normal"
 			if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="normal";

@@ -13,7 +13,12 @@ Prio:
 What I'm working on
 -------------------
 
-Place WYSIWYG caret after edit in editor
+bug: sanitized removed new lines at the beginning because of H1 tag
+
+Debugging text transformation from wysiwyg to the editor.
+... The file is reparsed for every change! 
+Why am I doing this complex transformation insted of just a full replace !?
+probably because most of the time it's only one character changed (while typing)
 
 
 Only use WYSIWYG for simple text editing. No buttons and stuff!
@@ -23,6 +28,8 @@ Only use WYSIWYG for simple text editing. No buttons and stuff!
 
 
 todo:
+
+Make removeAllTextOnRow not creategrid?
 
 remember last WYSIWYG window position and size
 

@@ -857,7 +857,7 @@
 		}
 		
 		
-		file.deleteTextRange(firstIndex, lastIndex);
+		return file.deleteTextRange(firstIndex, lastIndex);
 		
 	}
 	
