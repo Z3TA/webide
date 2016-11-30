@@ -1041,6 +1041,9 @@
 		// Make sure the line breaks at the beginning stays there, or there will be errors in the text transformation!
 		
 		
+		var lbBefore = checkStartingLineBreaks();
+		
+		
 		console.log("inserting (sanitizing) line breaks. sourceFile.lineBreak=" + lbChars(sourceFile.lineBreak));
 		
 		console.time("insertLineBreaks");
@@ -1084,15 +1087,51 @@
 		// Word-wrap p elements
 		//html = html.replace(/<p.*>(.*)<\/p>/ig, "<p>" + wordWrapText("$1") + "</p>");
 		
+		var lbAfter = checkStartingLineBreaks();
+		
+		if(lbBefore > lbAfter) {
+			var add = lbBefore - lbAfter;
+			console.log("Gonna add=" + add + " line breaks ...");
+			for(var i=0; i<add; i++) {
+				html = sourceFile.lineBreak + html;
+				console.log("line break added");
+			}
+		}
+		else if(lbBefore < lbAfter) {
+			var remove = lbAfter - lbBefore;
+			console.log("Gonna remove=" + remove + " line breaks ...");
+			var start = 0;
+			for(var i=0; i<remove; i++) {
+				start = html.indexOf(sourceFile.lineBreak, start) + 1;
+				}
+			var removed = html.substr(0, start-1);
+			html = html.substr(start);
+			
+			console.log("Removed " + occurencies(removed, sourceFile.lineBreak) + " line breaks");
+			}
+		
 		console.timeEnd("insertLineBreaks");
 		
 		return html;
+		
+		function checkStartingLineBreaks() {
+			var firstCharInLineBreak = sourceFile.lineBreak.charAt(0);
+			var lbCount = 0;
+			var char = "";
+			for(var i=0; i < html.length; i++) {
+				char = html.charAt(i);
+				if(char == firstCharInLineBreak) lbCount++;
+				else if(char != "\r" && char != "\n" && char != "\t" && char != " ") break; // Not a white space
+			}
+			return lbCount;
+		}
 		
 	}
 	
 	
 	function contentEdit(target, type, bubbles, cancelable) {
 		// Called every time the contenteditable is updated
+		// If nothing happends, check the debug/console for the wysiwyg window!
 		console.time("contentEdit");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
@@ -1110,7 +1149,8 @@
 			// Compare the source codes
 			var srcHTML = getSourceCodeBody(sourceFile);
 			
-			if(srcHTML) {
+			if(!srcHTML) throw new Error("Unable to get source HTML from file.path=" + sourceFile.path); 
+			else {
 				var main = previewWin.window.document.getElementsByTagName("main")[0];
 				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
 				
@@ -1127,7 +1167,8 @@
 				
 				var sanitized = insertLineBreaks(prewHTML);
 				
-				if(sanitized != prewHTML) {
+				if(sanitized == prewHTML) console.log("No white space sanitiaztion needed"); 
+				else {
 					
 					console.log("prewHTML=\n" + debugWhiteSpace(prewHTML) + "\n");
 					
@@ -1168,7 +1209,8 @@
 				*/
 				
 				var ignored = 0;
-				if(ignoreTransform) {
+				if(!ignoreTransform) console.log("Nothing in ignoreTransform");
+				else {
 					if(ignoreTransform.inserted.length > 0) {
 						for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
 							for(var j=0; j<diff.inserted.length; j++) {

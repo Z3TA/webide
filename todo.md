@@ -13,8 +13,6 @@ Prio:
 What I'm working on
 -------------------
 
-bug: sanitized removed new lines at the beginning because of H1 tag
-
 Debugging text transformation from wysiwyg to the editor.
 ... The file is reparsed for every change! 
 Why am I doing this complex transformation insted of just a full replace !?
