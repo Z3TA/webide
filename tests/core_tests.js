@@ -28,19 +28,29 @@
 		
 		todo: The JS parser should have its own test file
 		
-	*/
+		*/
+	
+	
+	editor.addTest(function htmlForLoop(callback) {
+		editor.openFile("htmlForLoop.js", 'for(var i=0; i<html.length; i++) {\n\n}\n', function(err, file) {
+			
+			if(file.grid[1].indenttation != 1) throw new Error("Expected 1 indentation on row 1. indenttation=" + file.grid[1].indenttation);
+			
+				editor.closeFile(file.path);
+				callback(true);
+				
+			});
+	}, 1);
+	
 	
 	editor.addTest(function thisOutsideFunction(callback) {
 		editor.openFile("thisOutsideFunction.js", 'var bar = this;\nfunction foo() {\n}\n', function(err, file) {
-			
 			// Did throw an error ...
 						
 			editor.closeFile(file.path);
-			
 			callback(true);
-			
-		});
-	}, 1);
+			 });
+	});
 	
 	editor.addTest(function wrongFuncNameAnonFunctionCallbackNextToParanthesis(callback) {
 		editor.openFile("wrongFuncNameAnonFunctionCallbackNextToParanthesis.js", 'function foo() {\n\n}\n\nbar(paranthesis(arg), wrongName, function(err) {\n\n}\n', function(err, file) {

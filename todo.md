@@ -29,6 +29,8 @@ Only use WYSIWYG for simple text editing. No buttons and stuff!
 
 todo:
 
+fix test: htmlForLoop
+
 Make removeAllTextOnRow not creategrid?
 
 remember last WYSIWYG window position and size
