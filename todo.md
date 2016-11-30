@@ -13,19 +13,19 @@ Prio:
 What I'm working on
 -------------------
 
-Debugging text transformation from wysiwyg to the editor.
-... The file is reparsed for every change! 
-Why am I doing this complex transformation insted of just a full replace !?
-probably because most of the time it's only one character changed (while typing)
 
 
-Only use WYSIWYG for simple text editing. No buttons and stuff!
 
 
 
 
 
 todo:
+
+Debug deleting large chunks in WYSIWYG doesn't remove all from source.
+
+Debug writing in editor inserts stuff from the ignore.
+
 
 fix test: htmlForLoop
 
@@ -91,6 +91,12 @@ What I'm thinking
 Make it so you can only edit pure text in WYSIWYG, encurage editing in HTML! Update the view in real time as you time in the HTML editor.
 Offer a HTML helper widget that inserts code: paragraph, image, link, table, header, etc
 Allow copy/pasting in the WYSIWYG put sanitize it.
+
+
+Debugging text transformation from wysiwyg to the editor.
+... The file is reparsed for every change!
+Why am I doing this complex transformation insted of just a full replace !?
+probably because most of the time it's only one character changed (while typing)
 
 
 Is it possible to teach people to write HTML ? "Learn HTML and Make web pages like a pro"
@@ -215,6 +221,13 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Selecting using keyboard from bottom up, does not select all characters. And text is crazy when copy pasting
+<tr>
+<td>Row1</td>
+<td>Still row 222!!!</td>
+</tr>
+
 
 Pushing WYSIWYG didnt work (needed to select a page first)
 

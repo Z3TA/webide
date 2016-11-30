@@ -1855,6 +1855,8 @@
 					}
 				}
 				
+				
+				/*
 				// ### Insert toolbar
 				var aShowDefaultUI = true;
 				
@@ -1912,13 +1914,11 @@
 				
 				// createLink, unlink
 				
-				
-				
-				
 				body.insertBefore(toolbar, body.firstChild); // Insert the toolbar at the top
 				
 				body.setAttribute("style", "padding-top: 60px; transition: transform 0.4s ease;"); // Make sure the toolbar doesn't cover layout
 				
+				*/
 				
 				contentEditor.execCommand("enableInlineTableEditing");
 				contentEditor.execCommand("enableObjectResizing");
