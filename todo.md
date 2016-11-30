@@ -13,6 +13,10 @@ Prio:
 What I'm working on
 -------------------
 
+Possible to use editor stdin and pipes, like using it as a default editor to open files.
+jzedit, .... trying to figure out why it doesnt write to "file" stdin. editor.js line 3779
+
+
 bug: sanitized removed new lines at the beginning because of H1 tag
 
 Debugging text transformation from wysiwyg to the editor.
@@ -719,6 +723,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing
 =========
+
+Allow indentation micromanaging (space) inside block comments and <pre> (they currently do not show after the file is reloaded)
 
 Annoying when making a block quote and cant see where to end it. Sugg: show a green line from the start of the unclosed block scope to the cursor
 

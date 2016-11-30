@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+/*
+	This is a wrapper for nw and the jzedit package,
+	to allow passing files to STDIN / pipe
+	
+	You need nodejs to run this! (https://nodejs.org/)
+	
+	Installation:
+	
+	* Make sure this file is executable: chmod +x jzedit
+	
+	* Edit PATH to where jzedit is located 
+	
+	* Copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
+	
+	Or add the jzedit location to .profile or .bashrc : 
+	export PATH=$PATH:/path/to/jzedit
+	
+*/
+
+var PATH = "/home/zeta/dev/jzedit"; // Path to the jzedit folder (including package.json)
+
+var RUNTIME = "nwjs-v0.12.3-linux-x64/nw"; // Change this to your OS
+
+var NW_ARG = [PATH, "--disable-lcd-text"]; 
+
+var PORT = 13379; // TCP port to use
+
+console.log("Hi");
+
+console.log(process.argv);
+
+function main() {
+
+	// What if jzedit is already running !? 
+	
+	
+	var env = process.env;
+env.ARGS = JSON.stringify(process.argv);
+	env.STDIN_PORT = process.env.STDIN_PORT || PORT;
+	
+var spawn = require('child_process').spawn;
+
+	var nw = spawn( PATH + "/runtime/" + RUNTIME, NW_ARG , { env: env } );
+
+	
+	nw.on("error", function nwError(err) {
+		throw err;
+	});
+	
+	nw.on("close", function nwClose(code) {
+		console.log("nw closed. code=" + code);
+	});
+
+	nw.stdout.on("data", function nwStdout(data) {
+		//console.log("nwStdout: " + data);
+	});
+
+	nw.stderr.on("data", function nwStderr(data) {
+		console.log(data);
+	});
+	
+	
+	var net = require('net');
+	
+	var server = net.createServer(function (clientConnection) {
+		
+		clientConnection.on("end", clientClosed);
+		clientConnection.on("data", clientData);
+		
+		// When jzedit connects, pipe stdin
+		process.stdin.pipe(clientConnection);
+		
+		function clientClosed() {
+			console.log("jzedit disconnected!");
+		}
+		
+		function clientData(data) {
+			console.log("data: " + data);
+		}
+		
+	});
+	
+	server.on("error", serverError);
+	
+	server.listen(env.STDIN_PORT);
+	
+	function serverError(err) {
+		throw err;
+	}
+	
+	
+}
+
+main();

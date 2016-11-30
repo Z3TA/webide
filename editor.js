@@ -89,7 +89,8 @@ editor.settings = {
 	autoCompleteKey: 9, // Tab
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
 	clearColumnOptimization: false, // When deleting a character, clears only the character
-	insert: false
+	insert: false,
+	stdInPort: 13379
 };
 
 editor.shouldRender = false;   // Internal flag, use editor.renderNeeded() to re-render!
@@ -3698,7 +3699,41 @@ editor.lastKeyPressed = "";
 			editor.plugins[i].load(editor); // Call function (and pass global objects!?)
 		}
 		
+		/*
+			NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
+			We will have to use a wrapper and send the data via a socket
+			
+		*/
 		
+		var net = require("net");
+		var env = process.env;
+		var stdInFile;
+		var strBuffer = "";
+		var StringDecoder = require('string_decoder').StringDecoder;
+		var decoder = new StringDecoder('utf8');
+		var stdInFileName = "stdin";
+		
+		var client = net.createConnection({port: env.STDIN_PORT || editor.settings.stdInPort}, function() {
+			//alertBox("Connected to STDIN ...");
+			
+			if(!stdInFile) {
+			if(editor.files.hasOwnProperty(stdInFileName)) stdInFile = editor.files[stdInFileName];
+			else {
+			editor.openFile(stdInFileName, "", function stdinFileOpen(err, file) {
+					if(err) throw err;
+					stdInFile = file;
+				});
+			}
+			}
+			
+		});
+		
+		client.on("error", function stdSocketError(err) {
+			console.warn(err.message);
+		});
+		
+		client.on("data", stdIn);
+		client.on("end", stdEnd);
 		
 		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
@@ -3730,6 +3765,44 @@ editor.lastKeyPressed = "";
 		
 		windowLoaded = true;
 		
+		function stdIn(data) {
+			
+			var str = decoder.write(data);
+			
+			if(stdInFile) {
+				if(strBuffer.length > 0) {
+					// Collected data from before stdInFile was opened
+					strBuffer += str; 
+					//stdInFile.write(JSON.stringify(env, null, 2) + "\n");
+					stdInFile.write(strBuffer);
+					strBuffer = "";
+				} else stdInFile.write(str);
+				
+			}
+			else strBuffer += str;
+			
+			//alertBox("STDIN: data.length=" + data.length + " strBuffer.length=" + strBuffer.length + " str.length=" + str.length + " data: " + data + "");
+		}
+		
+		function stdEnd(endData) {
+			
+			if(stdInFile) {
+				if(strBuffer.length > 0) {
+					// Collected data from before stdInFile was opened
+					//stdInFile.write(JSON.stringify(env, null, 2) + "\n");
+					stdInFile.write(strBuffer);
+					strBuffer = "";
+				}
+				}
+			else {
+				// Wait for stdInFile ...
+				console.log("Waiting for stdInFile ...");
+				setTimeout(stdEnd, 100);
+			}
+			
+			alertBox("STDIN: END: " + endData);
+		}
+		
 	}
 	
 	function runTests_5616458984153156() { // Random numbers to make sure it's unique
@@ -3737,7 +3810,7 @@ editor.lastKeyPressed = "";
 		/*
 			Todo: Start another instance of the editor with the chromium debug console enabled and connect to it. 
 			Then run the tests there. And open any bad files here for debugging!?
-		
+			
 		*/
 		
 		// Prepare for tests ...

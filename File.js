@@ -666,6 +666,8 @@
 	File.prototype.write = function(text) {
 		// Writes text at EOF
 		
+		if(!isString(text)) throw new Error("text is not a string! text=" + text);
+		
 		if(text.length == 0) {
 			console.warn("No text in write argument!");
 			return;
