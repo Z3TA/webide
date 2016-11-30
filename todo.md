@@ -13,10 +13,6 @@ Prio:
 What I'm working on
 -------------------
 
-Possible to use editor stdin and pipes, like using it as a default editor to open files.
-jzedit, .... trying to figure out why it doesnt write to "file" stdin. editor.js line 3779
-
-
 bug: sanitized removed new lines at the beginning because of H1 tag
 
 Debugging text transformation from wysiwyg to the editor.
@@ -1136,9 +1132,12 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+A communication channel, where a "wrapper" can tell the editor to open a file ... 
+In some programs you can define a editor for editing files. Git for example. Make it possible to use jzedit for that!
+See jzedit file
+
 "timelog": Puts whatever is on the same line as the cursor into a time log.
 dagbok. kan användas för fakturering, time management mm.
-
 
 Open a console/command-line/shell/ (remote or local) in a new tab (kinda lika a file) and send commands by entering text at EOF (Ctrl+J)
 
@@ -1266,8 +1265,6 @@ auto paste in snippets from stack exchange, Ctrl+H, write question, select resul
 vi keybindings
 
 column selection
-
-Pipe to other program: Sends the text to stdin of another program.
 
 File cloning/file views: Have the same file open in two tabs, but with different file positions, caret, selections and highlights
 

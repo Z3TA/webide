@@ -9,7 +9,7 @@
 	
 	* Make sure this file is executable: chmod +x jzedit
 	
-	* Edit PATH to where jzedit is located 
+	* Edit variable PATH in the code below to where jzedit is located 
 	
 	* Copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
 	
@@ -18,11 +18,11 @@
 	
 */
 
-var PATH = "/home/zeta/dev/jzedit"; // Path to the jzedit folder (including package.json)
+var PATH = "/home/zeta/dev/jzedit"; // Path to the jzedit folder (where package.json is located)
 
 var RUNTIME = "nwjs-v0.12.3-linux-x64/nw"; // Change this to your OS
 
-var NW_ARG = [PATH, "--disable-lcd-text"]; 
+var NW_ARG = [PATH, "--disable-lcd-text"];
 
 var PORT = 13379; // TCP port to use
 
@@ -32,8 +32,11 @@ console.log(process.argv);
 
 function main() {
 
-	// What if jzedit is already running !? 
-	
+	/*
+		What if jzedit is already running !? 
+		Check localhost for jzedit com port on tcp
+		if it's alive, tell the editor to open the file path in arg 2
+		*/
 	
 	var env = process.env;
 env.ARGS = JSON.stringify(process.argv);
