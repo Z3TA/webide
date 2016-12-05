@@ -26,6 +26,7 @@ Debug deleting large chunks in WYSIWYG doesn't remove all from source.
 
 Debug writing in editor inserts stuff from the ignore.
 
+finish test and fix it: remInVbVar
 
 fix test: htmlForLoop
 
@@ -87,6 +88,10 @@ Compile nodehun for osx
 
 What I'm thinking
 -----------------
+
+Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
+
+Getting likes or upvotes are very addicting ... 
 
 Make it so you can only edit pure text in WYSIWYG, encurage editing in HTML! Update the view in real time as you time in the HTML editor.
 Offer a HTML helper widget that inserts code: paragraph, image, link, table, header, etc
@@ -221,6 +226,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Saving a file (on remote) seems to recreate it and reset permissions!?? on windows share
 
 Selecting using keyboard from bottom up, does not select all characters. And text is crazy when copy pasting
 <tr>
