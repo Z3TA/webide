@@ -892,7 +892,7 @@
 		if(!previewWinOpen) {
 			//closePreview(); // Just in case
 			
-			previewWin = gui.Window.open(url, {toolbar:true}); // Show the toolbar so you can see the URL, and open dev tools
+			previewWin = gui.Window.open(url, {toolbar:true, frame:true}); // Show the toolbar so you can see the URL, and open dev tools
 			
 			previewWin.on('focus', previewWinFocus);
 			previewWin.on('blur', previewWinBlur);
