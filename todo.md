@@ -222,6 +222,28 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Clicking Ctrl+O many times will bring up many dialogs! Clicking cancel on one of them seems to cancel all, even the first one.
+
+Can't open "package.json" via Ctrl+P when there are no files open.
+
+---
+Indentation: (create new file and cipy this in)
+
+/tank/logs/log/mysql.log rwk,
+/tank/logs/log/mysql.err rwk,
+
+/tank/mysql/mysql/ r,
+/tank/mysql/mysql/** rwk,
+
+/tank/mysql/ r,
+/tank/mysql/** rwk,
+---
+
+
+
+Saved as, then more files loaded and I saved as on another file, not the file I wanted to save as!
+
+
 Selecting using keyboard from bottom up, does not select all characters. And text is crazy when copy pasting
 <tr>
 <td>Row1</td>
@@ -1292,6 +1314,7 @@ Profile idea: The editor will come with everyones profile: keyBindings, plugins,
 It should be easy to quickly get your own custom settings when installing the program on a new machine.
 Maybe give each user their own mercurial repository!?
 
+---
 
 Multiple cursors! Ctrl+Shift + up/down, or Ctrl+Shift + mouse click creates another cursors. 
 Useful when you want to format stuff that look the same, ex. if you want to make many var's into one long line var
@@ -1299,6 +1322,11 @@ var foo=1, ... place bar and baz here
 var bar = 2;
 var baz = 3;
 
+Ctrl-F <search query> SelectAll <edit with multiple cursors>
+
+Select a multiple lines of an object/hash/dict, break into multiple cursors, rewrite line (copying and pasting as needed, it works that out as well) to change to variable declarations, or to add a comma, or to... whatever.
+
+---
 
 Undo/redo for caret/scrolling. shift+backspace: Go back to where we where before
 Ctrl+G when caret on a function name, goes to that function. Go to function declaration.
