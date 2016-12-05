@@ -31,12 +31,12 @@
 		*/
 	
 	editor.addTest(function remInVbVar(callback) {
-		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n", function(err, file) {
+		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n', function(err, file) {
 			
-		console.log(file.parsed.comments);
-		
-		
-		
+			console.log(file.parsed.comments);
+			
+			// todo: check for error
+			
 			editor.closeFile(file.path);
 			callback(true);
 			

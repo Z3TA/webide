@@ -22,15 +22,13 @@ What I'm working on
 
 todo:
 
-Debug deleting large chunks in WYSIWYG doesn't remove all from source.
-
-Debug writing in editor inserts stuff from the ignore.
-
 finish test and fix it: remInVbVar
 
 fix test: htmlForLoop
 
-Make removeAllTextOnRow not creategrid?
+Debug deleting large chunks in WYSIWYG doesn't remove all from source.
+
+Debug writing in editor inserts stuff from the ignore (transform).
 
 remember last WYSIWYG window position and size
 
@@ -102,6 +100,9 @@ Debugging text transformation from wysiwyg to the editor.
 ... The file is reparsed for every change!
 Why am I doing this complex transformation insted of just a full replace !?
 probably because most of the time it's only one character changed (while typing)
+
+Make removeAllTextOnRow not re-create the grid ?
+problem: If there are many changes in the wysiwyg editor, each change is re-parsed, can it be optemized?
 
 
 Is it possible to teach people to write HTML ? "Learn HTML and Make web pages like a pro"
