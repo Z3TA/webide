@@ -824,7 +824,7 @@
 				
 				if(editor.currentFile.path.indexOf(site.source) != -1 // Inside source path?
 				&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
-				&& fileName != "header" && fileName != "footer") { 
+				&& fileName != "header.htm" && fileName != "footer.htm") { 
 					
 					// Preview the current file opened in the editor !
 					
