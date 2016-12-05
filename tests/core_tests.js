@@ -30,6 +30,19 @@
 		
 		*/
 	
+	editor.addTest(function remInVbVar(callback) {
+		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n", function(err, file) {
+			
+		console.log(file.parsed.comments);
+		
+		
+		
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	});
+	
 	
 	editor.addTest(function htmlForLoop(callback) {
 		editor.openFile("htmlForLoop.js", 'for(var i=0; i<html.length; i++) {\n\n}\n', function(err, file) {
@@ -41,7 +54,6 @@
 				
 			});
 	}, 1);
-	
 	
 	editor.addTest(function thisOutsideFunction(callback) {
 		editor.openFile("thisOutsideFunction.js", 'var bar = this;\nfunction foo() {\n}\n', function(err, file) {
