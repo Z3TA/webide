@@ -26,6 +26,8 @@ finish test and fix it: remInVbVar
 
 fix test: htmlForLoop
 
+Find PHP <? ... ?> in .php files
+
 Debug deleting large chunks in WYSIWYG doesn't remove all from source.
 
 Debug writing in editor inserts stuff from the ignore (transform).
