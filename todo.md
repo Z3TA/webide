@@ -13,12 +13,28 @@ Prio:
 What I'm working on
 -------------------
 
+test jzedit_download, think about bootstrap.url
+
+Designers or server providers can link to the download page with a bootstrap querystring in the URL:
+https://www.webtigerteam.com/editor/download?version=1234&os=linux&bootstrapurl=https://jzedit.zetafiles.org?token=aoisud0a89sdu809asud0aus09d0as9d09asd
+
+This will create bootstrap.url in the editor directory.
+
+The content of bootstrap.url must be a valid JSON file. 
+
+If bootstrap.url is found by the editor, on a 200 OK, it will download and parse the content of that address and save it in localstorage
+
+The content can be accessed from editor.bootstrap. And plugins can use that info for auto configurations.
+
+Updating ? End users can use built versions, while developers can use the repo/latest dev. 
 
 
 
 
 
 todo:
+
+SSG, able to set a site as default and show that first.
 
 Debug deleting large chunks in WYSIWYG doesn't remove all from source.
 
