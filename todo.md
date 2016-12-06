@@ -18,15 +18,7 @@ What I'm working on
 
 
 
-
-
 todo:
-
-finish test and fix it: remInVbVar
-
-fix test: htmlForLoop
-
-Find PHP <? ... ?> in .php files
 
 Debug deleting large chunks in WYSIWYG doesn't remove all from source.
 
@@ -1174,6 +1166,8 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 ------------------------------------
+
+PHP scripting with the static site generator: <?php ...php code here... ?>
 
 A communication channel, where a "wrapper" can tell the editor to open a file ... 
 In some programs you can define a editor for editing files. Git for example. Make it possible to use jzedit for that!
