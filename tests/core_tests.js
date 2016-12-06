@@ -33,15 +33,17 @@
 	editor.addTest(function remInVbVar(callback) {
 		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n', function(err, file) {
 			
-			console.log(file.parsed.comments);
+			// console.log("file.parsed.comments=" + JSON.stringify(file.parsed.comments, null, 2));
 			
-			// todo: check for error
+			var comment = file.parsed.comments[0];
+			
+			if(comment) throw new Error("Did not expect a comment at " + JSON.stringify(comment));
 			
 			editor.closeFile(file.path);
 			callback(true);
 			
 		});
-	});
+	}, 1);
 	
 	
 	editor.addTest(function htmlForLoop(callback) {
@@ -53,7 +55,7 @@
 				callback(true);
 				
 			});
-	}, 1);
+	});
 	
 	editor.addTest(function thisOutsideFunction(callback) {
 		editor.openFile("thisOutsideFunction.js", 'var bar = this;\nfunction foo() {\n}\n', function(err, file) {

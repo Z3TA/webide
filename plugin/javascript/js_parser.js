@@ -159,6 +159,10 @@
 	}
 
 	
+	function isWhiteSpace(char) {
+		return char == "" || char == " " || char == "\t" || char == "\r" || char == "\n";
+	}
+	
 	function parseJsOnChange(file, type, characters, caretIndex, row, col) {
 		/*
 			### Parse only function optimizer
@@ -2059,10 +2063,12 @@
 				
 				//char = char.toLowerCase(); // vbScript is not case sensitive!
 				
-				if(!insideDblQuote && char.toLowerCase() == "m" && lastChar.toLowerCase() == "e" && llChar.toLowerCase() == "r") {
+				if(!insideDblQuote && (char == " " || char == "\t") && pastChar0.toLowerCase() == "m" && pastChar1.toLowerCase() == "e" && pastChar2.toLowerCase() == "r" && isWhiteSpace(pastChar3)) {
 					insideLineComment = true;
-					commentStart = i+1;
+					commentStart = i;
 				}
+				// else console.log("char=" + char + " pastChar0=" + pastChar0 + " pastChar1=" + pastChar1 + " pastChar2=" + pastChar2 + " pastChar3=" + pastChar3);					
+				
 				
 				
 				if(!insideDblQuote && !insideLineComment) {
