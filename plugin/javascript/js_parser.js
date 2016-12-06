@@ -853,6 +853,7 @@
 		file.fileExtension == "xml") 
 		&& parseStart == undefined) xmlMode = true; // Start in xml mode
 		
+		if(file.text.substr(0,100).match(/(<!DOCTYPE html)|(<html.*>)/i)) xmlMode = true;
 		
 		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
 		
@@ -1570,11 +1571,14 @@
 					if(insideHTMLComment) throw new Error("WTF");
 				}
 				
+				/*
 				else if(pastChar3 == "<" && pastChar2 == "h" && pastChar1 == "t" && pastChar0 == "m" && char == "l" && !insideQuote) {
 					xmlModeBeforeTag = true; // Turn on HTML mode if we find a html tag
 					insideXmlTag = true;
 					xmlTagStart = i-4;
 				}
+				*/
+				
 				// Exit out of style
 				else if(CSS && pastChar5 == "<" && pastChar4 == "/" && pastChar3 == "s" && pastChar2 == "t" && pastChar1 == "y" && pastChar0 == "l" && char == "e") {
 					insideXmlTag = true;
