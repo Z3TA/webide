@@ -13,6 +13,8 @@ Prio:
 What I'm working on
 -------------------
 
+make a bootstrap service for beta testers
+
 test jzedit_download, think about bootstrap.url
 
 Designers or server providers can link to the download page with a bootstrap querystring in the URL:
@@ -30,6 +32,10 @@ Updating ? End users can use built versions, while developers can use the repo/l
 
 
 
+Make as much as possible work in the browser.
+Fix fonts!!
+
+Make a server for functionality not supported by the browser!?
 
 
 todo:

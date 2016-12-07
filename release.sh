@@ -9,9 +9,8 @@ echo $name-v$version$beta-$commit
 
 
 echo "Delete old files if they exists"
-rm -rf temp/release/linux/
-rm -rf temp/release/windows/
-rm -rf temp/release/osx/
+rm -rf temp/release/
+
 
 echo "Create the temporary directory if it doesn't exist"
 mkdir -p temp/release/linux
@@ -76,8 +75,8 @@ rm -rf temp/release/osx/start.bat
 rm -rf temp/release/osx/create_shortcut.vbs
 
 #echo "zip and remove the Windows release (cant be run under Windows git bash)"
-#cd temp/release/
-#mv windows $name-v$version$beta-$commit
+cd temp/release/
+mv windows $name-v$version$beta-$commit-win-x64
 #zip -9 -y -r -q $name-v$version$beta-$commit-win-x64.zip $name-v$version$beta-$commit
 #cd ..
 #cd ..
@@ -86,7 +85,7 @@ rm -rf temp/release/osx/create_shortcut.vbs
 
 #echo "Create a tarball and compress it for the Linux release"
 #cd temp/release/
-#mv linux $name-v$version$beta-$commit
+mv linux $name-v$version$beta-$commit-linux-x64
 #tar -zcf $name-v$version$beta-$commit-linux-x64.tar.gz $name-v$version$beta-$commit
 #cd ..
 #cd ..
@@ -94,10 +93,10 @@ rm -rf temp/release/osx/create_shortcut.vbs
 
 #echo "Create a tarball and compress it for OSX"
 #cd temp/release/
-#mv osx $name-v$version$beta-$commit
+mv osx $name-v$version$beta-$commit-osx-x64
 #tar -zcf $name-v$version$beta-$commit-osx-x64.tar.gz $name-v$version$beta-$commit
-#cd ..
-#cd ..
+cd ..
+cd ..
 #rm -rf temp/release/$name-v$version$beta-$commit
 
 
