@@ -9,6 +9,19 @@
 
 // 1l0Oo[]{}.,
 
+if(runtime=="browser") {
+	// We better use a web safe font ...
+	
+	editor.settings.sub_pixel_antialias = true;
+	editor.settings.style.font = "Courier";
+	editor.settings.style.highlightMatchFont = "bold 15px Courier";
+	editor.settings.style.fontSize = 20;
+	editor.settings.gridHeight = 23;
+	editor.settings.gridWidth = 8.25;
+	
+}
+else if(process.platform == "windows") {
+
 /*
 	Windows with "Smooth edges of screen fonts" turned off.
 	These font's look good:
@@ -21,11 +34,19 @@
 	* Courier New 16-17px
 	* Liberation Mono 12px
 	
+		otherwise Consolas is the best ;)
+		
 */
-
-
-
-if(process.platform == "linux") {
+	
+	editor.settings.sub_pixel_antialias = true;
+	editor.settings.style.font = "Consolas";
+	editor.settings.style.highlightMatchFont = "bold 15px Consolas";
+	editor.settings.style.fontSize = 15;
+	editor.settings.gridHeight = 23;
+	editor.settings.gridWidth = 8.25;
+	
+}
+else if(process.platform == "linux") {
 	
 	/*
 		
@@ -65,3 +86,4 @@ if(process.platform == "linux") {
 	editor.settings.gridWidth = 7.83;
 	
 }
+

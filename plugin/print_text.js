@@ -5,6 +5,11 @@
 	
 	"use strict";
 
+	if(runtime == "browser") {
+		console.warn("Printer functionality not yet available in the browser!");
+		return;
+	}
+	
 var gui = require('nw.gui');
 	var menuItem;
 	

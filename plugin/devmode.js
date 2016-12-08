@@ -12,7 +12,7 @@
 	
 	if(runtime == "browser") {
 		console.warn("Developer mode not supported in the browser!");
-		return;
+		//return;
 	}
 	
 	editor.on("start", init);
@@ -69,7 +69,10 @@
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
 		console.log = console.warn = function() {}; // Perf mode
 		
+		try {
 		require('nw.gui').Window.get().closeDevTools();
+		}
+		catch(e) {}; // We are in the browser
 		
 		/*
 			The console.error(new Error("custom error")) way of *handling* errors has been depricated in favor for the self_debug.js plugin.

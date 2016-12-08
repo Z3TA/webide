@@ -253,6 +253,7 @@ function matchingAngelBracket(index, file, toMatch) {
 
 function trailingSlash(folderPath) {
 	// Makes sure the folder has a trailing slash
+	console.log("Get training slash for folderPath=" + folderPath);
 	var delimiter = getPathDelimiter(folderPath);
 	var lastCharacter = folderPath.substr(folderPath.length-1, 1);
 	if(lastCharacter != delimiter) {
@@ -282,7 +283,7 @@ function getDirectoryFromPath(path) {
 	var lastSlash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
 	
 	if(lastSlash == -1) {
-		console.warn("Unable to get directory of path=" + path + ". Using editor.workingDirectory!");
+		console.warn("Unable to get directory of path=" + path + ". Using editor.workingDirectory=" + editor.workingDirectory);
 		return trailingSlash(editor.workingDirectory);
 	}
 	
@@ -806,6 +807,7 @@ function Dialog(msg, icon) {
 	
 	if(!body) {
 		console.warn("Dialog created before html body is available");
+		return;
 		}
 	
 	var message = document.createElement("div");

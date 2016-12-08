@@ -1,6 +1,11 @@
 (function() {
 	"use strict";
 	
+	if(runtime == "browser") {
+		console.warn("Static site generator not supported in the browser!");
+		return;
+	}
+	
 	var sites; // Array of sites
 	var manager;
 	var selectSite;

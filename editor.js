@@ -9,6 +9,7 @@ var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
+ 
 
 // List of file exntensions of supported files. Extensions not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
@@ -192,9 +193,11 @@ editor.lastKeyPressed = "";
 		Feel free to add more editor API methods below. Do not extend the editor object elsewhere!!
 	*/
 	
+	editor.workingDirectory = trailingSlash(process.cwd());
+	
 	if(runtime!="browser") {
+		// Check if the working directory is the same as the editor (hmm, why?)
 		var dirname = trailingSlash(require("dirname")); // The folder path to this file (where the editor is "installed")
-		editor.workingDirectory = trailingSlash(process.cwd());
 		
 		console.log("dirname=" + dirname);
 		console.log("workingDirectory=" + editor.workingDirectory);
@@ -3705,6 +3708,9 @@ editor.lastKeyPressed = "";
 			
 		*/
 		
+		
+		if(runtime != "browser") {
+			// Enable unix pipes to the editor (via a tcp socket from a nodejs script)
 		var net = require("net");
 		var env = process.env;
 		var stdInFile;
@@ -3734,7 +3740,7 @@ editor.lastKeyPressed = "";
 		
 		client.on("data", stdIn);
 		client.on("end", stdEnd);
-		
+		}
 		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		

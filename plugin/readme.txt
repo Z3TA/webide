@@ -156,9 +156,18 @@ possible cause: Somewhere parsing an empty JSON:
 
 
 
+bootstrap.url
+=============
+Designers or server providers can link to the download page with a bootstrap querystring in the URL:
+https://www.webtigerteam.com/editor/download?version=1234&os=linux&bootstrapurl=https://jzedit.zetafiles.org?token=aoisud0a89sdu809asud0aus09d0as9d09asd
 
+This will create bootstrap.url in the editor directory.
 
+The content of bootstrap.url must be a valid JSON file.
 
+If bootstrap.url is found by the editor, on a 200 OK, it will download and parse the content of that address and save it in localstorage
+
+The content can be accessed from editor.bootstrap. And plugins can use that info for auto configurations.
 
 
 

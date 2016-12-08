@@ -61,6 +61,8 @@
 		//console.log("Gonna create the grid for file.path=" + file.path);	
 		file.grid = file.createGrid();
 		
+		file.checkGrid();
+		
 		// A splitted emty string will always become one item in an array. So if the file is empty: file.grid.length=1
 		file.totalRows = file.grid.length-1; // Only big files use this, and big files (currently) can't be edited, so we don't have to track and update this (yet)
 		if(file.isBig) file.totalRows = -1; // Leaving it to loadFilePart() to find totalRows
@@ -2483,8 +2485,6 @@
 		
 		//console.log("grid created");
 		
-		
-		
 		return grid;
 		
 		// Optimizations are the root of all evil!!!
@@ -2561,8 +2561,6 @@
 				
 			}
 		}
-		
-		file.checkGrid();
 		
 	}
 	
