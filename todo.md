@@ -18,14 +18,11 @@ What I'm working on
 
 todo:
 
-Make as much as possible work in the browser.
-Fix fonts!!
-
-Make a server for functionality not supported by the browser!?
-
 make a bootstrap service for beta testers
 
 test jzedit_download, think about bootstrap.url
+
+fix wrong indentation in file source!
 
 
 SSG, able to set a site as default and show that first.

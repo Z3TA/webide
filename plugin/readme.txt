@@ -159,7 +159,7 @@ possible cause: Somewhere parsing an empty JSON:
 bootstrap.url
 =============
 Designers or server providers can link to the download page with a bootstrap querystring in the URL:
-https://www.webtigerteam.com/editor/download?version=1234&os=linux&bootstrapurl=https://jzedit.zetafiles.org?token=aoisud0a89sdu809asud0aus09d0as9d09asd
+https://www.webtigerteam.com/editor/download?version=1234&os=linux&bootstrapurl=https://www.webtigerteam.com/editor/bootstrap.json?token=betatester
 
 This will create bootstrap.url in the editor directory.
 

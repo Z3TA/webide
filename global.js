@@ -20,7 +20,7 @@ var runtime = (function is_nwjs() {
 })() ? "nw.js" : "browser";
 
 
-
+var __dirname;
 if(runtime == "browser") {
 	//alert("runtime=" + runtime);
 	var process = {
@@ -47,6 +47,12 @@ if(runtime == "browser") {
 		})()
 		
 	};
+	__dirname = getDirectoryFromPath(document.location.href).replace(/(\/|\\)$/, ""); 
+	// __dirname in nodejs doesn't have a trailing slash, 
+	// but in the editor we want all directories to have a trailing slash, except __dirname
+}
+else {
+	__dirname = require("dirname");
 }
 
 
@@ -1327,8 +1333,41 @@ function isFilePath(filePath) {
 	
 	}
 	
+function httpGet(url, callback) {
+	var xmlHttp = new XMLHttpRequest();
+	var timeoutTimer;
+	var timeoutTimeMs = 3000;
 	
-	function spacePad(str, padLength) {
+	//console.log("url=" + url);
+	
+	xmlHttp.onreadystatechange = function httpReadyStateChange() {
+		if(xmlHttp.readyState == 4) {
+			clearTimeout(timeoutTimer);
+			if(xmlHttp.status == 200) callback(null, xmlHttp.responseText);
+			else {
+				var err = new Error(xmlHttp.responseText + " xmlHttp.status=" + xmlHttp.status + " xmlHttp.readyState=" + xmlHttp.readyState);
+				err.CODE = xmlHttp.status;
+				callback(err);
+			}
+			}
+		//else console.log("xmlHttp.readyState=" + xmlHttp.readyState);
+	}
+	
+	xmlHttp.open("GET", url, true); // true for asynchronous
+	xmlHttp.send(null);
+	
+	timeoutTimer = setTimeout(timeout, timeoutTimeMs);
+	
+	function timeout() {
+		var err = new Error("HTTP request timed out. xmlHttp.readyState=" + xmlHttp.readyState);
+		xmlHttp.onreadystatechange = null;
+		xmlHttp.abort();
+		callback(err);
+	}
+}
+
+
+function spacePad(str, padLength) {
 	
 	if(padLength == undefined) padLength = 42;
 	
@@ -1338,13 +1377,13 @@ function isFilePath(filePath) {
 	var padding = "";
 	for(var i=0; i<left; i++) padding += " ";
 	return str + padding;
-	}
-	
-	function makePathAbsolute(path) {
+}
+
+function makePathAbsolute(path) {
 	if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
-	var fspath = require("path");
-	if(!fspath.isAbsolute(path)) {
-	let absolutePath = fspath.resolve(path);
+		var fspath = require("path");
+		if(!fspath.isAbsolute(path)) {
+			let absolutePath = fspath.resolve(path);
 	console.warn("Making path absolute: " + path + " ==> " + absolutePath);
 	path = absolutePath; // Make the path absolute
 	}

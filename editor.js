@@ -104,6 +104,7 @@ editor.info = [];        // Talk bubbles. See editor.addInfo()
 editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
 editor.connections = {}  // Store connections to remote servers (FTP, SSH)
 editor.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
+editor.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
@@ -127,7 +128,8 @@ editor.eventListeners = { // Use editor.on to add listeners to these events:
 	moveCaret: [],
 	autoComplete: [],
 	keyPressed: [],
-	changeWorkingDir: []
+	changeWorkingDir: [],
+	bootstrap: []
 };
 
 editor.renderFunctions = [];
@@ -197,12 +199,11 @@ editor.lastKeyPressed = "";
 	
 	if(runtime!="browser") {
 		// Check if the working directory is the same as the editor (hmm, why?)
-		var dirname = trailingSlash(require("dirname")); // The folder path to this file (where the editor is "installed")
 		
-		console.log("dirname=" + dirname);
+		console.log("__dirname=" + __dirname);
 		console.log("workingDirectory=" + editor.workingDirectory);
 		
-		if(dirname != editor.workingDirectory) console.warn("Working directory is not the current directory=" + dirname + " editor.workingDirectory=" + editor.workingDirectory);
+		if(__dirname != editor.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " editor.workingDirectory=" + editor.workingDirectory);
 	}
 	
 	var directoryDialogCallback = undefined; 
@@ -3500,7 +3501,7 @@ editor.lastKeyPressed = "";
 		if(runtime != "browser") {
 			
 			// Get the commit ID
-			var versionPath = require("dirname") + "/version.inc";
+			var versionPath = __dirname + "/version.inc";
 			editor.doesFileExist(versionPath, function(exists) {
 				if(exists) {
 					editor.readFromDisk("version.inc", function(err, path, string) {
@@ -3553,9 +3554,8 @@ editor.lastKeyPressed = "";
 			console.log("Loading tests ...");
 			var walk = require('walk');
 			var head = document.getElementsByTagName("head")[0];
-			var dirname = require("dirname");
 			var path = require("path");
-			var root = path.join(dirname, "tests/"); // Path folder test files
+			var root = path.join(__dirname, "tests/"); // Path folder test files
 			var walker  = walk.walk(root, { followLinks: false });
 			
 			console.log("root:" + root);
@@ -3702,16 +3702,12 @@ editor.lastKeyPressed = "";
 			editor.plugins[i].load(editor); // Call function (and pass global objects!?)
 		}
 		
-		/*
-			NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
-			We will have to use a wrapper and send the data via a socket
-			
-		*/
-		
-		
 		if(runtime != "browser") {
-			// Enable unix pipes to the editor (via a tcp socket from a nodejs script)
-		var net = require("net");
+			/*
+				NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
+				We will have to use a wrapper and send the data via a socket
+				*/
+			var net = require("net");
 		var env = process.env;
 		var stdInFile;
 		var strBuffer = "";
@@ -3741,6 +3737,36 @@ editor.lastKeyPressed = "";
 		client.on("data", stdIn);
 		client.on("end", stdEnd);
 		}
+		
+		
+		editor.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
+			if(err) {
+				console.warn("bootstrap: " +err.message);
+				return;
+			}
+			
+			httpGet(url, function(err, data) {
+				if(err) {
+					console.warn("bootstrap: " + err.message);
+					return;
+				}
+				
+				try {
+				var json = JSON.parse(data);
+				}
+				catch(err) {
+					console.warn("bootstrap: Not valid JSON: " + data);
+				}
+				
+				if(json) {
+					editor.bootstrap = json;
+					editor.fireEvent("bootstrap", json);
+				}
+				
+			});
+			
+			
+		});
 		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		

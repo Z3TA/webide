@@ -95,6 +95,10 @@
 		
 		editor.on("fileChange", fileChange);
 		
+		editor.on("bootstrap", bootstrap);
+		
+		bootstrap();
+		
 	}
 	
 	function SSG_cleanup() {
@@ -114,6 +118,7 @@
 		editor.removeEvent("fileShow", fileShow);
 		editor.removeEvent("exit", SSG_cleanup);
 		editor.removeEvent("fileChange", fileChange);
+		editor.removeEvent("bootstrap", bootstrap);
 		
 		editor.unbindKey(hideSSG);
 		editor.unbindKey(previewSSG);
@@ -125,6 +130,16 @@
 		var footer = document.getElementById("footer");
 		footer.removeChild(manager);
 			editor.resizeNeeded();
+		}
+		
+	}
+	
+	function bootstrap(json) {
+		
+		if(editor.bootstrap)  {
+			
+			alert(editor.bootstrap);
+			
 		}
 		
 	}
