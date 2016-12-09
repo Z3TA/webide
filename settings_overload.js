@@ -9,15 +9,18 @@
 
 // 1l0Oo[]{}.,
 
+console.log("process.platform=" + process.platform);
+console.log("runtime=" + runtime);
+
 if(runtime=="browser") {
 	// We better use a web safe font ...
 	
 	editor.settings.sub_pixel_antialias = true;
-	editor.settings.style.font = "Courier";
-	editor.settings.style.highlightMatchFont = "bold 15px Courier";
-	editor.settings.style.fontSize = 20;
+	editor.settings.style.font = "Courier New";
+	editor.settings.style.highlightMatchFont = "bold 15px Courier New";
+	editor.settings.style.fontSize = 15;
 	editor.settings.gridHeight = 23;
-	editor.settings.gridWidth = 8.25;
+	editor.settings.gridWidth = 9;
 	
 }
 else if(process.platform == "windows") {
