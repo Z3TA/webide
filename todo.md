@@ -1,8 +1,18 @@
 
 Prio:
 
-1) Beta release, get USER FEEDBACK
-2) Focus on onboarding process. Make it easy to go from downloading the program to uploading a web page.
+1) Make it possible for a non-dev to make web documents
+
+When a SSG source file is opened, automatically bring up the WYSIWYG
+(find a good place to place the windows)
+Also bring up the SSG widget/toolbar and show/indicate that Preview and WYSIWYG is activated
+(clicking the buttons will deactivate preview/WYSIWYG and close it)
+
+Translate to other lanugages (Swedish) lang.js file with all phrases, calling STR("phrase") gives the right phrase.
+
+
+2) Beta release?, get USER FEEDBACK!
+
 3) Bug/issue fixing and refactoring
 4) Polishing of existing features
 5) Optimization (toggle devMode off when testing!)
@@ -13,10 +23,7 @@ Prio:
 What I'm working on
 -------------------
 
-
-
-
-
+Windows placement, find available space ...
 
 
 
@@ -1224,6 +1231,9 @@ Class auto completion in HTML documents. Get the class list from the CSS files.
 Version control manager: select: git|mercurila (auto detect)
 this file: commit msg: Commit, push, pull (special color), Move, Add/remove, select: branch, merge updates from branch  
 title tags for explanations
+* Built in colaboration tool (git/mercurial). Everytime you save, it checks if a .hg or .git folder exists, then prompts for a commit, with "commit" and "commit and push" button
+* Auto pull often, check for uncommited changes.
+* Make tool to handle merge conflic
 
 
 HTML helper, shadowing in attributes. ex: <form ... show: action, method
