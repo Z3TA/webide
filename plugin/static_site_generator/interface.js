@@ -138,7 +138,7 @@
 		
 		if(editor.bootstrap)  {
 			
-			alert(editor.bootstrap);
+			//alertBox(editor.bootstrap.greeting);
 			
 		}
 		

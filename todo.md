@@ -16,6 +16,11 @@ What I'm working on
 
 
 
+
+
+
+
+
 todo:
 
 make a bootstrap service for beta testers
@@ -87,6 +92,10 @@ Compile nodehun for osx
 
 What I'm thinking
 -----------------
+
+Sometimes there are requirements like "must work on the web", so users are not allowed to download an executable like nw.js 
+Should we skip nw.js and use a NodeJS server instead, and open the GUI in a web browser !?
+
 
 Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
 
