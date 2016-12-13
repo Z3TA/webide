@@ -39,6 +39,8 @@ fix wrong indentation in file source!
 
 SSG, able to set a site as default and show that first.
 
+SSG problem: WYSIWYG with files that contain <?JS code ?>
+
 Debug deleting large chunks in WYSIWYG doesn't remove all from source.
 
 Debug writing in editor inserts stuff from the ignore (transform).

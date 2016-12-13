@@ -22,6 +22,7 @@
 	var inputAuthPw;
 	var inputAuthKey;
 	var buttonWysiwyg;
+	var buttonPreview;
 	
 	var gui = require('nw.gui'); // Load native UI library
 	
@@ -350,7 +351,7 @@
 			newPage(selectedSite);
 		}, false);
 		
-		var buttonPreview = document.createElement("input");
+		buttonPreview = document.createElement("input");
 		buttonPreview.setAttribute("type", "button");
 		buttonPreview.setAttribute("class", "button");
 		buttonPreview.setAttribute("value", "Preview");
@@ -814,7 +815,15 @@
 			manager.style.display = "none";
 			editor.resizeNeeded();
 		}
-		if(previewWin) closePreview() ;
+		
+		if(previewWin) {
+			closePreview() ;
+		
+		if(buttonWysiwyg) {
+			buttonWysiwyg.setAttribute("class", "button");
+			buttonPreview.setAttribute("class", "button");
+		}
+		}
 		
 		return false;
 	}
@@ -912,11 +921,35 @@
 		if(!previewWinOpen) {
 			//closePreview(); // Just in case
 			
-			previewWin = gui.Window.open(url, {toolbar:true, frame:true}); // Show the toolbar so you can see the URL, and open dev tools
+			// Decide window width, height and placement ...
+			var windowPadding = 0;
+			var unityLeftThingy = 10;
+			var previeWidth = Math.round(screen.width / 3.5) - windowPadding * 2;
+			var previewHeight = screen.height - windowPadding * 2;
+			var posX = screen.width - previeWidth - windowPadding;
+			var posY = windowPadding;
+			
+			
+			// Resize the editor
+			var mainWindow = gui.Window.get();
+			
+			mainWindow.moveTo(0, 0);
+			mainWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+			
+			// Save original editor window width/height and position !?
+			
+			// Show the toolbar so you can see the URL, and open dev tools
+			previewWin = gui.Window.open(url, {toolbar:true, frame:true, width: previeWidth, height: previewHeight}); 
+			
+			
+			previewWin.moveTo(posX, posY);
 			
 			previewWin.on('focus', previewWinFocus);
 			previewWin.on('blur', previewWinBlur);
 			previewWin.on("loaded", previewWinLoaded);
+			
+			
+			
 			
 		}
 		else {
@@ -1946,8 +1979,10 @@
 				
 				
 				// Change buttonWysiwyg state to "active"
-				if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="bold";
-				
+				if(buttonWysiwyg) {
+					buttonWysiwyg.setAttribute("class", "button active");
+					buttonPreview.setAttribute("class", "button active");
+				}
 				
 				main.contentEditable = "true";
 				
@@ -1983,7 +2018,10 @@
 			wysiwygEnabled = false;
 			
 			// Change buttonWysiwyg state to "normal"
-			if(buttonWysiwyg) buttonWysiwyg.style.fontWeight="normal";
+			if(buttonWysiwyg) {
+				buttonWysiwyg.setAttribute("class", "button");
+				buttonPreview.setAttribute("class", "button");
+			}
 			
 			if(!previewWin) console.log("previewWin not available");
 			else {

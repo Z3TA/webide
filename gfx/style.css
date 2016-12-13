@@ -9,6 +9,8 @@
 	--------------
 	The coding area should be the "happy place" (most colorful and most contrast)
 	
+	Press F6 to reload CSS while working on the editior
+	
 	
 */
 
@@ -177,6 +179,10 @@ input[type=text], input[type=password], select.select {
 input[type=checkbox] {
 	text-align: absmiddle;
 }
+
+.button.active {
+	font-weight: bold;
+	}
 
 input[type=button] {
 	border-radius: 3px;
