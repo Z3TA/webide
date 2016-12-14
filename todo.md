@@ -247,6 +247,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Was gonna edit a legacy ASP file, but got warning about char encoding, asked to convert to utf8, but was too afraid to convert.
+
+String colors off in svg: ftps://192.168.1.77/hemsida/gfx/ikon/pdf.svg (making new lines to edit viewBox
+
 Saving a file (on remote) seems to recreate it and reset permissions!?? on windows share
 
 Clicking Ctrl+O many times will bring up many dialogs! Clicking cancel on one of them seems to cancel all, even the first one.
