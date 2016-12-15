@@ -973,9 +973,8 @@ editor.lastKeyPressed = "";
 				console.log("Successfully saved " + file.path);
 				file.saved(); // Call functions that listen for save events
 			}
-			
-			if(callback) callback(err, path);
-			else if(err) throw err;
+			else if(callback) callback(err, path);
+			else throw err;
 			
 		}
 		
@@ -2686,7 +2685,9 @@ editor.lastKeyPressed = "";
 			
 			ftpClient.on('error', function(err) {
 				alertBox(err.message);
-				callback(err);
+				callback(err); // Should we callback here ?? Can happend several hours after the connection was initiated!
+				connectionClosed("ftp", serverAddress);
+				
 				/*
 					if(err.message == "Login incorrect.") {
 					alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message + "\nProbably wrong username/password!");
@@ -2862,6 +2863,7 @@ editor.lastKeyPressed = "";
 					else {
 						alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
 					}
+					connectionClosed("ssh", serverAddress);
 					
 				}).on('end', function(msg) {
 					alertBox("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);

@@ -247,7 +247,16 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-går inte att spara fil efter ftp timeout/disconnect -> reconnect
+Unable to find start of function:
+editor.eventListeners.exit.push({fun: function closeOpenConnections() {
+for(var conn in editor.connections) {
+editor.connections[conn].close();
+}
+return true;
+}});
+
+
+Can't save remote file after ftp timeout/disconnect -> reconnect 
 
 auto scroll down when text dissappears typing at the bottom but not eof
 
