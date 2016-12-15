@@ -4150,7 +4150,7 @@ editor.lastKeyPressed = "";
 			
 			e.preventDefault();
 			
-			console.log("Calling parse listeners (" + editor.eventListeners.paste.length + ") ...");
+			console.log("Calling paste listeners (" + editor.eventListeners.paste.length + ") ...");
 			for(var i=0, fun; i<editor.eventListeners.paste.length; i++) {
 				
 				fun = editor.eventListeners.paste[i].fun;
