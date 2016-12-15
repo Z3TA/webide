@@ -3286,7 +3286,7 @@ editor.lastKeyPressed = "";
 		
 		// Simulate ... 
 		
-		if(mock == "keyDown") {
+		if(mock == "keydown") {
 			if(!options.charCode) throw new Error("options need to contain charCode");
 			if(!options.target.className && !options.target) throw new Error("options need to contain target.className (or just target)");
 			
@@ -3303,6 +3303,12 @@ editor.lastKeyPressed = "";
 			}
 			
 			return retDown;
+		}
+		else if(mock == "keypress") {
+			if(!options.charCode) throw new Error("options need to contain charCode");
+			
+			keyPressed(options);
+			
 		}
 		
 	}

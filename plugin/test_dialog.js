@@ -10,7 +10,7 @@ editor.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL 
 
 function mock() {
 	
-		editor.mock("keyDown", {charCode: charCode_D, target: "canvas", shiftKey: true, ctrlKey: true});
+		editor.mock("keydown", {charCode: charCode_D, target: "canvas", shiftKey: true, ctrlKey: true});
 	
 }
 

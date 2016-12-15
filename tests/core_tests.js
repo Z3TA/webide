@@ -32,20 +32,7 @@
 		
 		*/
 	
-	editor.addTest(function classic_asp_concat(callback) {
-		editor.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
-			
-			var index = 31;
-			file.moveCaret(index);
-			
-			var och = 38; // &
-			//editor.mock("keyDown", {charCode: och, target: "canvas"}); // Simulate & (concat)
-			
-			//editor.closeFile(file.path);
-			callback(true);
-			
-		});
-	}, 1);
+
 	
 	editor.addTest(function remInVbVar(callback) {
 		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n', function(err, file) {
@@ -137,7 +124,7 @@
 			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Expected function bar");
 			
 			file.moveCaret(undefined, 1);
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 			// Might throw Error: Unable to find end of function=foo
 			
 			editor.closeFile(file.path);
@@ -156,8 +143,8 @@
 			if(file.parsed.functions["foo"].subFunctions[""].subFunctions.hasOwnProperty("baz")) throw new Error("Expected an anonymous function instead of baz");
 		
 		file.moveCaret(undefined, 3);
-		editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-		// Might throw Error: Unable to find end of function=baz
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			// Might throw Error: Unable to find end of function=baz
 		
 		editor.closeFile(file.path);
 		
@@ -183,7 +170,7 @@
 		editor.openFile("twoFunctionsSameName.js", 'foo = function() {\n\n}\nfunction bar() {\nfoo = function() {}\n}\n', function(err, file) {
 			
 			file.moveCaret(undefined, 1);
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 			// Should throw an error if in dev mode: "Parsed code contains no function! "
 			
 			editor.closeFile(file.path);
@@ -198,7 +185,7 @@
 		editor.openFile("styleTagFuncEnd.js", '\nfunction foo() {\nvar bar = "<style>";\n}\n', function(err, file) {
 			
 			file.moveCaret(undefined, 0);
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 			// Should throw Error: Unable to find end of function=foo
 			
 			editor.closeFile(file.path);
@@ -365,8 +352,8 @@
 			
 			file.moveCaret(undefined, 0, 3); // Move the caret into the function
 			
-			editor.mock("keyDown", {charCode: 38, shiftKey: true, target: "canvas"}); // Simulate shift + Up
-			editor.mock("keyDown", {charCode: 46, target: "canvas"}); // Simulate delete
+			editor.mock("keydown", {charCode: 38, shiftKey: true, target: "canvas"}); // Simulate shift + Up
+			editor.mock("keydown", {charCode: 46, target: "canvas"}); // Simulate delete
 			
 			editor.closeFile(file.path);
 			
@@ -462,11 +449,11 @@
 		
 		editor.openFile("fooeqfunction.js", 'foo = function () {\n\n};', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 			// Should throw Error: Unable to find start of function=foo 
 			
 			// Press delete to undo, to prevent warning dialog about unsaved
-			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 8, target: "canvas"});
 			
 			editor.closeFile(file.path);
 			
@@ -483,12 +470,12 @@
 			// Add a letter to the foo function
 			var char_D = 68;
 			file.moveCaret(undefined, 2, 3);
-			editor.mock("keyDown", {charCode: char_D, target: "canvas"});
+			editor.mock("keydown", {charCode: char_D, target: "canvas"});
 			
 			// Add a letter to the bar function
 			var char_A = 65;
 			file.moveCaret(undefined, 5);
-			editor.mock("keyDown", {charCode: char_A, target: "canvas"});
+			editor.mock("keydown", {charCode: char_A, target: "canvas"});
 			
 			// If something wrong, and error should be thrown here from js_parser.js
 			
@@ -505,11 +492,11 @@
 		
 		editor.openFile("functionInFunctionname1.js", 'function functionInFunctionname() {\n\n};', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 			// Should throw error: Parsed code contains no function! from js_parser
 			
 			// Press delete to undo, to prevent warning dialog about unsaved
-			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 8, target: "canvas"});
 			
 			editor.closeFile(file.path);
 			
@@ -519,8 +506,8 @@
 		// hmm. what about many function declarations on the same line? 
 		editor.openFile("functionInFunctionname2.js", 'function foo() {function bar() {\n\n}};', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 8, target: "canvas"});
 			editor.closeFile(file.path);
 			if(++done == 3) callback(true);
 		});
@@ -528,8 +515,8 @@
 		// or somefunction(function() {}}
 		editor.openFile("functionInFunctionname3.js", 'function somefunction(function() {\n\n});', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keyDown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-			editor.mock("keyDown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 8, target: "canvas"});
 			editor.closeFile(file.path);
 			if(++done == 3) callback(true);
 		});
@@ -1252,18 +1239,7 @@ callback(true);
 			});
 		});
 	
-	editor.addTest(function fileWriteLine(callback) {
-			
-		editor.openFile("testing_writeLine", "", function(err, file) {
-				file.writeLine("Hello world!");
-				file.writeLine("Hello again!");
-				
-				editor.closeFile(file.path);
-				
-				callback(true);
-				});
-			
-	});
+	
 	
 	
 	function checkFunction(file, func) {

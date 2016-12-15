@@ -178,16 +178,19 @@
 		
 		if(caret == undefined) caret = file.caret;
 		
-		if(index != undefined) caret.index = index;
-		if(row != undefined) caret.row = row;
-		if(col != undefined) caret.col = col;
+		if(index != undefined && row == undefined && col == undefined) return file.moveCaretToIndex(index, caret);
+		else {
+				
+			if(index != undefined) caret.index = index;
+			if(row != undefined) caret.row = row;
+			if(col != undefined) caret.col = col;
 		
-		file.fixCaret(caret);
+			file.fixCaret(caret);
+				
+			if(caret == file.caret) editor.fireEvent("moveCaret", file, file.caret);
 		
-		if(caret == file.caret) editor.fireEvent("moveCaret", file, file.caret);
-		
-		return caret;
-		
+			return caret;
+		}
 	}
 	
 	
@@ -903,8 +906,8 @@
 		if(text == undefined) {
 			throw new Error("No text to insert! text is undefined!");
 		}
-		else if(typeof text != "string") {
-			throw new Error("text need to be a string!\n" + text);
+		else if(!isString(text)) {
+			throw new Error("text=" + text + " need to be a string!\n" + text);
 		}
 		else if(text.length === 0) {
 			console.warn("No text to insert! (text.length=" + text.length + ")");
