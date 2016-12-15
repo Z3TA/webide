@@ -247,17 +247,11 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-file.moveCaret(index) doesn't move the caret! (problem in fixcaret ?)
-
-Some way to mock keyPressed, not only keydown.
-
-Response.Write "<button onclick=   ... and Response.Write "quote: ""meh| end quote"
-annoying " & & "
-
-
 går inte att spara fil efter ftp timeout/disconnect -> reconnect
 
 auto scroll down when text dissappears typing at the bottom but not eof
+
+scrabled text when selecting from bottom up, then copy/cut/pasting
 
 Was gonna edit a legacy ASP file, but got warning about char encoding, asked to convert to utf8, but was too afraid to convert.
 

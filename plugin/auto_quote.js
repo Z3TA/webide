@@ -45,7 +45,24 @@
 		var row = file.caret.row;
 		var col = file.caret.col;
 		
-		if(file.parsed.language=="VbScript" && character == "'") return true; // Single quotes ' Are used to make comments in vbScript
+		console.log("file.parsed.languag=" + file.parsed.languag);
+		
+		if(file.parsed.language=="VBScript") {
+			
+			if(character == "'") return true; // Single quotes ' Are used to make comments in vbScript
+			
+			var insideTag = isInside(file.text, index, "<", ">");
+			var insideASP = isInside(file.text, index, "<%", "%>");
+			
+			if(insideASP && insideTag) {
+				file.insertText('""');
+				editor.renderNeeded();
+				return false;
+			}
+			else {
+				console.log("insideASP=" + insideASP + " insideTag=" + insideTag);
+			}
+		}
 		
 		var lastCharacter = "";
 		var nextCharacter = "";
@@ -66,7 +83,6 @@
 			var insideScript = isInside(file.text, index, "<script", "</script>");
 			
 			if(!insideTag && !insideScript) return true;
-			
 		}
 		
 		
@@ -255,6 +271,38 @@
 		
 		
 	}
+	
+	
+	/*
+	 *  When do we want to do " &  & " ? and when not ?
+	 * 
+	 * not: "<span class="
+	 * not: "<span class=""foo"">"
+	 * 
+	 * do: "<span class=""foo" & bar & "
+	 * do: " hello <b>" & name & "</b>."
+	 * 
+	 * 
+	 */
+	
+	
+	editor.addTest(function classic_asp_concat(callback) {
+		editor.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
+			
+			var index = 31;
+			file.moveCaret(index);
+			
+			var quote = 34; // "
+			editor.mock("keypress", {charCode: quote}); // Simulate "
+			
+			if(file.text != '<% Response.Write "<span class="" </span>" %>') throw new Error("Did not expect a concatenation");
+			
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
+	
 	
 	
 })();
