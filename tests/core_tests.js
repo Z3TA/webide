@@ -28,7 +28,24 @@
 		
 		todo: The JS parser should have its own test file
 		
+		
+		
 		*/
+	
+	editor.addTest(function classic_asp_concat(callback) {
+		editor.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
+			
+			var index = 31;
+			file.moveCaret(index);
+			
+			var och = 38; // &
+			//editor.mock("keyDown", {charCode: och, target: "canvas"}); // Simulate & (concat)
+			
+			//editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
 	
 	editor.addTest(function remInVbVar(callback) {
 		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n', function(err, file) {
@@ -43,7 +60,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function htmlForLoop(callback) {
