@@ -683,7 +683,7 @@ editor.lastKeyPressed = "";
 			
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
 				if(editor.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path);
-			}, 10);
+			}, 100);
 			
 			if(switchTo) {
 				editor.showFile(switchTo);
