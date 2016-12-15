@@ -32,7 +32,38 @@
 		
 		*/
 	
+	editor.addTest(function scrambledTextSelecting(callback) {
+		
+		var text = 'abcdefg\n1234567\n\n';
+		
+		editor.openFile("scrambledTextSelecting.js", text, function(err, file) {
+			
+			var row = 2;
+			var col = 0;
+			
+			file.moveCaret(undefined, row, col);
+			
+			var key_UP = 38;
+			var key_X = 88;
+			var key_V = 86;
+			
+			editor.mock("keydown", {charCode: key_UP, target: "canvas", shiftKey: true}); // shift + Arrow up
+			editor.mock("keydown", {charCode: key_UP, target: "canvas", shiftKey: true}); // shift + Arrow up
+			
+			// Hmm these seems to be async ...	Try to make sure we cut/paste in the right file
+			editor.showFile(file);
+			document.execCommand("cut");
+			editor.showFile(file);
+			document.execCommand("paste");
 
+			if(file.text.trim() != text.trim()) throw new Error("Unexpected text=" + file.text);
+			
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
+	
 	
 	editor.addTest(function remInVbVar(callback) {
 		editor.openFile("remInVbVar.asp", '<%\nstrRemoteIP = Request.ServerVariables("HTTP_X_REAL_IP")\n%>\n', function(err, file) {

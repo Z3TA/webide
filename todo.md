@@ -251,8 +251,6 @@ går inte att spara fil efter ftp timeout/disconnect -> reconnect
 
 auto scroll down when text dissappears typing at the bottom but not eof
 
-scrabled text when selecting from bottom up, then copy/cut/pasting
-
 Was gonna edit a legacy ASP file, but got warning about char encoding, asked to convert to utf8, but was too afraid to convert.
 
 String colors off in svg: ftps://192.168.1.77/hemsida/gfx/ikon/pdf.svg (making new lines to edit viewBox

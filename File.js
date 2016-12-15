@@ -1217,11 +1217,13 @@
 		if(box.length > 0) {
 			// Insert the new boxes on the left or right side
 			if(direction == "left") {
-				for(var i=0; i<box.length; i++) {
+				//selection = box.concat(selection);
+				for(var i=box.length-1; i>=0; i--) {
 					selection.unshift(box[i]);
 				}
 			}
 			else {
+				//selection = selection.concat(box);
 				for(var i=0; i<box.length; i++) {
 					selection.push(box[i]);
 				}
