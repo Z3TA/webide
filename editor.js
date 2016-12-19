@@ -2661,6 +2661,12 @@ editor.lastKeyPressed = "";
 		if(editor.remoteProtocols.indexOf(protocol) == -1) throw new Error("Protocol=" + protocol + " not supported!"); 
 		
 		if(protocol == "ftp" || protocol == "ftps") {
+			
+			if(ftpQueue.length > 0) {
+				console.warn("Removing " + ftpQueue.length + " items from the FTP queue");
+				ftpQueue.length = 0;
+			}
+			
 			var Client = require('ftp');
 			editor.connections[serverAddress] = {client: new Client(), protocol: protocol};
 			var ftpClient = editor.connections[serverAddress].client;
