@@ -13,7 +13,7 @@ editor.addTest(function funInHtmlDoc(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 	
 	

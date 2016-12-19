@@ -2130,7 +2130,7 @@
 							}
 							
 							// ### DO ... LOOP
-							else if(word == "do") {
+							else if(word == "do" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 								vb_insideCondition = true;
 							}
@@ -2140,7 +2140,7 @@
 							}
 							
 							// ### FOR ... NEXT
-							else if(word == "for") {
+							else if(word == "for" && lastWord != "exit") {
 								//console.log("for: vb_nextRowIndentation=" + vb_nextRowIndentation);
 								vb_nextRowIndentation = 1;
 								vb_insideFor++;
@@ -2192,7 +2192,7 @@
 							else if(word == "function" && lastWord == "end") {
 								vb_thisRowIndentation--;
 							}							
-							else if(word == "function") {
+							else if(word == "function" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 							}
 
@@ -2201,7 +2201,7 @@
 							else if(word == "sub" && lastWord == "end") {
 								vb_thisRowIndentation--;
 							}
-							else if(word == "sub") {
+							else if(word == "sub" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 							}
 

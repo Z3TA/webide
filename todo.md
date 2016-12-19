@@ -30,6 +30,8 @@ Windows placement, find available space ...
 
 todo:
 
+Home key should go to start of line, while Ctrl + Home should go to the top
+
 make a bootstrap service for beta testers
 
 test jzedit_download, think about bootstrap.url
