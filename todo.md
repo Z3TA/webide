@@ -23,6 +23,11 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
+ foo bar baz (doubel click on foo, then copy and paste) in a "js" file
+
+try what happends if you select a text and press del/backspace, should only the selection get deleted, with no further action ?
+
+
 Windows placement, find available space ...
 
 

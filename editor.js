@@ -3290,7 +3290,7 @@ editor.lastKeyPressed = "";
 		
 		if(mock == "keydown") {
 			if(!options.charCode) throw new Error("options need to contain charCode");
-			if(!options.target.className && !options.target) throw new Error("options need to contain target.className (or just target)");
+			if(!options.target.className && !options.target) options.target = "fileCanvas";
 			
 			if(!options.target.className) options.target = {className: options.target}; // Shorter to write
 			
@@ -3312,7 +3312,41 @@ editor.lastKeyPressed = "";
 			keyPressed(options);
 			
 		}
-		
+		else if(mock == "copy") {
+			var e = {
+				clipboardData:  {
+					setData: function setData(format, data) { return true; }
+				},
+				preventDefault: function preventDefault() { return true; }
+			};
+			
+			return copy(e);
+		}
+		else if(mock == "paste") {
+			var e = {
+				clipboardData:  {
+					getData: function getData(what) { return options.data; }
+				},
+				preventDefault: function preventDefault() { return true; }
+			};
+			paste(e);
+		}
+		else if(mock == "doubleClick") {
+			if(!options.hasOwnProperty("x")) throw new Error("x coordinate required in options!");
+			if(!options.hasOwnProperty("y")) throw new Error("y coordinate required in options!");
+			if(!options.hasOwnProperty("target")) options.target = "fileCanvas";
+			if(!options.hasOwnProperty("button")) options.button = 0; // 0=Left mouse button, 2=Right mouse button, 1=Center?
+			
+			if(!options.target.className) options.target = {className: options.target}; // Shorter to write
+			
+			var e = {clientX: options.x, offsetX: options.x, clientY: options.y, offsetY: options.y, target: options.target, button: options.button}
+			console.log(e);
+			
+			mouseDown(e);
+			mouseUp(e);
+			mouseDown(e);
+			mouseUp(e);
+		}
 	}
 	
 	editor.isBlanc = function (x, y, width, height) {
@@ -4110,6 +4144,8 @@ editor.lastKeyPressed = "";
 		
 		editor.interact("copy", e);
 		
+		return textToPutOnClipboard;
+		
 	}
 	
 	function cut(e) {
@@ -4146,7 +4182,7 @@ editor.lastKeyPressed = "";
 		ret,
 		textChanged = false;
 		
-		//console.log("PASTE!" + text);
+		console.log("PASTE: " + lbChars(text));
 		
 		if(editor.input && editor.currentFile) {
 			

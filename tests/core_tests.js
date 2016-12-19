@@ -30,7 +30,31 @@
 		
 		
 		
-		*/
+	*/
+	
+	
+	editor.addTest(function dblClickRemovedSpace(callback) {
+		// Double clicking on the first word (start of row) and then copy, then paste, will remove the space
+		// The space is lost becasue File.deleteSelection recreates the grid, and the space is treated as a indentation character!
+		editor.openFile("dblClickRemovedSpace.js", 'foo bar', function(err, file) {
+			
+			
+			// Make a rowColToCord(row, col) function ??
+			editor.mock("doubleClick", {x: 1 + editor.settings.leftMargin, y: 1 + editor.settings.topMargin});
+			
+			var data = editor.mock("copy"); 
+			editor.mock("paste", {data: data}); 
+			editor.mock("paste", {data: data}); 
+			
+			
+			if(file.text != "foofoo bar") throw new Error("Unexpected behaviour");
+			
+			//editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
+	
 	
 	editor.addTest(function scrambledTextSelecting(callback) {
 		
@@ -47,8 +71,8 @@
 			var key_X = 88;
 			var key_V = 86;
 			
-			editor.mock("keydown", {charCode: key_UP, target: "canvas", shiftKey: true}); // shift + Arrow up
-			editor.mock("keydown", {charCode: key_UP, target: "canvas", shiftKey: true}); // shift + Arrow up
+			editor.mock("keydown", {charCode: key_UP, shiftKey: true}); // shift + Arrow up
+			editor.mock("keydown", {charCode: key_UP, shiftKey: true}); // shift + Arrow up
 			
 			// Hmm these seems to be async ...	Try to make sure we cut/paste in the right file
 			editor.showFile(file);
@@ -155,7 +179,7 @@
 			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Expected function bar");
 			
 			file.moveCaret(undefined, 1);
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Might throw Error: Unable to find end of function=foo
 			
 			editor.closeFile(file.path);
@@ -174,7 +198,7 @@
 			if(file.parsed.functions["foo"].subFunctions[""].subFunctions.hasOwnProperty("baz")) throw new Error("Expected an anonymous function instead of baz");
 		
 		file.moveCaret(undefined, 3);
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Might throw Error: Unable to find end of function=baz
 		
 		editor.closeFile(file.path);
@@ -201,7 +225,7 @@
 		editor.openFile("twoFunctionsSameName.js", 'foo = function() {\n\n}\nfunction bar() {\nfoo = function() {}\n}\n', function(err, file) {
 			
 			file.moveCaret(undefined, 1);
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Should throw an error if in dev mode: "Parsed code contains no function! "
 			
 			editor.closeFile(file.path);
@@ -216,7 +240,7 @@
 		editor.openFile("styleTagFuncEnd.js", '\nfunction foo() {\nvar bar = "<style>";\n}\n', function(err, file) {
 			
 			file.moveCaret(undefined, 0);
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Should throw Error: Unable to find end of function=foo
 			
 			editor.closeFile(file.path);
@@ -383,8 +407,8 @@
 			
 			file.moveCaret(undefined, 0, 3); // Move the caret into the function
 			
-			editor.mock("keydown", {charCode: 38, shiftKey: true, target: "canvas"}); // Simulate shift + Up
-			editor.mock("keydown", {charCode: 46, target: "canvas"}); // Simulate delete
+			editor.mock("keydown", {charCode: 38, shiftKey: true}); // Simulate shift + Up
+			editor.mock("keydown", {charCode: 46}); // Simulate delete
 			
 			editor.closeFile(file.path);
 			
@@ -480,11 +504,11 @@
 		
 		editor.openFile("fooeqfunction.js", 'foo = function () {\n\n};', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Should throw Error: Unable to find start of function=foo 
 			
 			// Press delete to undo, to prevent warning dialog about unsaved
-			editor.mock("keydown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 8});
 			
 			editor.closeFile(file.path);
 			
@@ -501,12 +525,12 @@
 			// Add a letter to the foo function
 			var char_D = 68;
 			file.moveCaret(undefined, 2, 3);
-			editor.mock("keydown", {charCode: char_D, target: "canvas"});
+			editor.mock("keydown", {charCode: char_D});
 			
 			// Add a letter to the bar function
 			var char_A = 65;
 			file.moveCaret(undefined, 5);
-			editor.mock("keydown", {charCode: char_A, target: "canvas"});
+			editor.mock("keydown", {charCode: char_A});
 			
 			// If something wrong, and error should be thrown here from js_parser.js
 			
@@ -523,11 +547,11 @@
 		
 		editor.openFile("functionInFunctionname1.js", 'function functionInFunctionname() {\n\n};', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Should throw error: Parsed code contains no function! from js_parser
 			
 			// Press delete to undo, to prevent warning dialog about unsaved
-			editor.mock("keydown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 8});
 			
 			editor.closeFile(file.path);
 			
@@ -537,8 +561,8 @@
 		// hmm. what about many function declarations on the same line? 
 		editor.openFile("functionInFunctionname2.js", 'function foo() {function bar() {\n\n}};', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-			editor.mock("keydown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 8});
 			editor.closeFile(file.path);
 			if(++done == 3) callback(true);
 		});
@@ -546,8 +570,8 @@
 		// or somefunction(function() {}}
 		editor.openFile("functionInFunctionname3.js", 'function somefunction(function() {\n\n});', function(err, file) {
 			file.moveCaret(undefined, 1); // Move the caret into the function
-			editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-			editor.mock("keydown", {charCode: 8, target: "canvas"});
+			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
+			editor.mock("keydown", {charCode: 8});
 			editor.closeFile(file.path);
 			if(++done == 3) callback(true);
 		});

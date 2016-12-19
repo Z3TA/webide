@@ -11,6 +11,6 @@ editor.addTest(function vbExitForIndent(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 

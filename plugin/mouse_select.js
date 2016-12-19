@@ -528,7 +528,7 @@
 	}
 	
 	function findWord(index, text) {
-		// Returns an object with the star and end index of the word
+		// Returns an object with the start and end index of the word
 		
 		var word = "",
 			start = index-1,
@@ -568,7 +568,8 @@
 		end = i;
 		*/
 		
-		console.log(" DAS WORD YO word=" + word);
+		console.log(" DAS WORD YO word=" + lbChars(word));
+		console.log("world length: " + (end-start));
 		
 		return {start: start, end: end, word: word};
 		
