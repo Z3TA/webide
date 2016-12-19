@@ -247,6 +247,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+"Scrolling bug", when scrolled to the right, then opening another document (using file explorer)
+
 Unable to find start of function:
 editor.eventListeners.exit.push({fun: function closeOpenConnections() {
 for(var conn in editor.connections) {

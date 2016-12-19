@@ -62,7 +62,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function remInVbVar(callback) {

@@ -259,7 +259,7 @@
 							
 							//console.log(file.text.substring(parseStart, parseEnd));
 							
-							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow});
+							var newParse = parseJavaScript(file, {start: parseStart, end: parseEnd, baseIndentation: baseIndentation, startRow: parseStartRow, jsMode: true});
 							// The parser will find the first function and only parse that
 							
 							//console.log("newParse=" + JSON.stringify(newParse));
@@ -849,15 +849,19 @@
 		var vb_afterIf = false;
 		var vb_insideFor = 0;
 		
-		//console.log("file.fileExtension=" + file.fileExtension);
-		if((file.fileExtension == "htm" || 
-		file.fileExtension == "html" || 
-		file.fileExtension == "asp" || 
-		file.fileExtension == "php" || 
-		file.fileExtension == "xml") 
-		&& parseStart == undefined) xmlMode = true; // Start in xml mode
 		
-		if(file.text.substr(0,100).match(/(<!DOCTYPE html)|(<html.*>)/i)) xmlMode = true;
+		if(options.jsMode) xmlMode = false;
+		else {
+			//console.log("file.fileExtension=" + file.fileExtension);
+			if(file.fileExtension == "htm" || 
+			file.fileExtension == "html" || 
+			file.fileExtension == "asp" || 
+			file.fileExtension == "php" || 
+			file.fileExtension == "xml") xmlMode = true; // Start in xml mode
+
+			if(file.text.substr(0,100).match(/(<!DOCTYPE html)|(<html.*>)/i)) xmlMode = true;
+		}
+
 		
 		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
 		
