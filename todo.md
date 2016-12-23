@@ -23,6 +23,8 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
+Remaking deleteTextRange without createGrid
+
  foo bar baz (doubel click on foo, then copy and paste) in a "js" file
 
 try what happends if you select a text and press del/backspace, should only the selection get deleted, with no further action ?
@@ -1105,6 +1107,8 @@ support port in url's (connection manager, etc)
 
 Optimization
 ============
+
+Double clicking on a common word in a large files (grid in File.js) takes a lot of time to highlight the words
 
 Long lines takes super long to render because of colorization.
 

@@ -1305,7 +1305,128 @@
 		
 		file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
 		
-		file.grid = file.createGrid(); // will probably have to rewrite for performance
+		/* 
+			Update the grid ...
+			It's possible the text range starts/stops inside indentation characters.
+			
+		*/
+		
+			var grid = file.grid;
+		var gridRow;
+		var startRow = 0;
+		var endRow = 0;
+		var deletionLength = lastIndex - firstIndex;
+		var reCreateGrid = true; // Change to false when ready
+		
+		if(!reCreateGrid) {
+		rowLoop: for(var row=0; row<file.grid.length; row++) {
+				gridRow = grid[row];
+				
+				if(gridRow.startIndex >= firstIndex) {
+					// Begin removing boxes ...
+					
+					if(gridRow.startIndex == firstIndex) {
+						
+						if(lastIndex <= (gridRow.startIndex + gridRow.length)) {
+							// Only delete part of the row
+							var colEnd = gridRow.startIndex + gridRow.length - lastIndex;
+							
+							if(colEnd != (lastIndex - firstIndex)) throw new Error("Expected same range: colEnd=" + colEnd + " lastIndex=" + lastIndex + " firstIndex=" + firstIndex + " (lastIndex - firstIndex)=" + (lastIndex - firstIndex))
+							
+							for(var col=0; col<colEnd; col++) gridRow.shift();
+							
+							gridRow.startIndex -= colEnd;
+							
+							// Fix index on the remaining boxes on this row
+							for(var col=colEnd; col<gridRow.length; col++) gridRow[col].index -= colEnd;
+							
+							// Fix index on the remaining rows
+							fixIndexOnRemainingRows(row+1, colEnd);
+							
+							break rowLoop;
+						}
+						else {
+							// Delete entire row
+							gridRow.length = 0;
+							gridRow.indentationCharacters = "";
+						}
+					}
+					else if((gridRow.startIndex - gridRow.indentationCharacters.length) <= firstIndex) {
+						// firstIndex is in the indentationCharacters on this row ...
+						
+						if(lastIndex >= (gridRow.startIndex + gridRow.length)) {
+							// Delete entire row
+							gridRow.length = 0;
+							gridRow.indentationCharacters = "";
+						}
+						else {
+							// lastIndex is on this row
+							
+							// Remove indentation characters
+							gridRow.indentationCharacters = gridRow.indentationCharacters.substr(firstIndex - gridRow.startIndex);
+							
+							if(lastIndex <= (gridRow.startIndex - gridRow.indentationCharacters.length) ) break rowLoop; // lastIndex was in the indentation characters
+							
+							var colEnd = gridRow.startIndex + gridRow.length - lastIndex;
+							
+							for(var col=0; col<colEnd; col++) gridRow.shift();
+							
+							gridRow.startIndex -= colEnd;
+							
+							// Fix index on the remaining boxes on this row
+							for(var col=colEnd; col<gridRow.length; col++) gridRow[col].index -= colEnd;
+							
+							// Fix index on the remaining rows
+							fixIndexOnRemainingRows(row+1, colEnd);
+							
+							break rowLoop;
+						}
+						
+					}
+					else {
+						// firstIndex is on row before, but not in it's indentation characters, and not on the first column
+						
+						gridRow = grid[row-1];
+						
+						var colStart = firstIndex - gridRow.startIndex;
+						var colEnd = gridRow.startIndex + gridRow.length - lastIndex;
+						
+						if(colEnd >= 0) {
+							// lastIndex is on this gridRow
+							
+							for(var col=colStart; col<colEnd; col++) gridRow.splice(col, 1);
+							
+							// Fix index on the remaining boxes on this row
+							for(var col=colEnd; col<gridRow.length; col++) gridRow[col].index -= colEnd;
+							
+							// Fix index on the remaining rows
+							fixIndexOnRemainingRows(row+1, colEnd);
+							
+							break rowLoop;
+							
+							
+						}
+						else {
+							// Delete from firstIndex the rest of the gridRow
+							for(var col=colStart; col<gridRow.length; col++) gridRow.pop();
+							
+						}
+						}
+					}
+				else if(gridRow.startIndex >= firstIndex) {
+					
+				}
+				else {
+					// Delete the row
+					gridRow.indentationCharacters = "";
+					gridRow.length = 0;
+					}
+				
+				
+			} // rowLoop
+			
+		}
+		else file.grid = file.createGrid(); // will probably have to rewrite for performance
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
 		
@@ -1313,7 +1434,7 @@
 		
 		// Update the view if it's below 
 		if(  file.startRow >= (file.grid.length - editor.view.visibleRows / 2)  ) file.scrollToCaret();
-
+		
 		
 		// Create dummy caret to get row and col for the change event
 		var dummyCaret = file.createCaret(firstIndex);
@@ -1321,7 +1442,7 @@
 		if(file.caret.index >= firstIndex) {
 			file.fixCaret(file.caret);
 		}
-
+		
 		console.timeEnd("deleteTextRange");
 		
 		file.sanityCheck();
@@ -1331,6 +1452,18 @@
 		file.change("deleteTextRange", removedText, firstIndex, dummyCaret.row, dummyCaret.col);
 		
 		return removedText;
+		
+		
+		function fixIndexOnRemainingRows(startRow, indexDecrementor) {
+			for(var i=startRow; i<grid.length; i++) {
+				grid[i].startIndex -= indexDecrementor;
+				// ... and all columns
+				for(var j=0; j<grid[i].length; j++) {
+					grid[i][j].index -= indexDecrementor;
+				}
+			}
+		}
+		
 	}
 	
 	File.prototype.deleteSelection = function(selection) {
