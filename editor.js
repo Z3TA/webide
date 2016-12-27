@@ -3296,7 +3296,7 @@ editor.lastKeyPressed = "";
 		
 		if(mock == "keydown") {
 			if(!options.charCode) throw new Error("options need to contain charCode");
-			if(!options.target.className && !options.target) options.target = "fileCanvas";
+			if(!options.target) options.target = "fileCanvas";
 			
 			if(!options.target.className) options.target = {className: options.target}; // Shorter to write
 			

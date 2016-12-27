@@ -237,10 +237,14 @@
 								// note: Should probably use regexp to find foo      =function (lots of, or no white space)
 							}
 							
-							if(parseStart == -1) throw new Error("Unable to find start of function=" + f.name + " parseStart=" + parseStart);
+							// Find foo: function foo()
+							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start);
+							
+							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
 
 							// function names can include the string "function" ex: function function_function ( )  {
 							
+							// Make a full parse instead of throwing an error when not in dev mode !?
 							
 							
 							//if(charactersLength < 0) parseEnd++;
@@ -2603,14 +2607,25 @@
 		return re.lastIndex - res[0].length;
 	};
 	
-	function reLastIndexOf(reIn, str, startIndex) {
-		var src = /\$$/.test(reIn.source) && !/\\\$$/.test(reIn.source) ? reIn.source : reIn.source + '(?![\\S\\s]*' + reIn.source + ')';
-		var re = new RegExp(src, 'g' + (reIn.ignoreCase ? 'i' : '') + (reIn.multiLine ? 'm' : ''));
-		re.lastIndex = startIndex || 0;
-		var res = re.exec(str);
-		if(!res) return -1;
-		return re.lastIndex - res[0].length;
-	};
+	
+	// http://stackoverflow.com/questions/273789/is-there-a-version-of-javascripts-string-indexof-that-allows-for-regular-expr
+	function reLastIndexOf(regex, str, startpos) {
+		regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+		if(typeof (startpos) == "undefined") {
+			startpos = this.length;
+		} else if(startpos < 0) {
+			startpos = 0;
+		}
+		var stringToWorkWith = str.substring(0, startpos + 1);
+		var lastIndexOf = -1;
+		var nextStop = 0;
+		var result;
+		while((result = regex.exec(stringToWorkWith)) != null) {
+			lastIndexOf = result.index;
+			regex.lastIndex = ++nextStop;
+		}
+		return lastIndexOf;
+	}
 	
 	
 })();
