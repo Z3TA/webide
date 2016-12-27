@@ -37,7 +37,7 @@
 	}
 	
 	function bugReportUnload() {
-		
+		editor.unbindKey(sendBugReport);
 	}
 	
 	function sendBugReport() {
@@ -115,7 +115,12 @@
 		var createTestKeepRunning = "Create a test case and keep running";
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
-		confirmBox("" + source + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [
+		
+		source = source.replace("file://", "");
+		
+		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {file.gotoLine(' + lineno + ');})">' + source + "</a>";
+		
+		confirmBox("" + sourceLink + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
 			

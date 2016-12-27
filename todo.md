@@ -808,6 +808,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+Autocomplete html tags inside strings (only look at the same line for opened tags)
+
 Make the editor scroll down when you press enter and cant see the line (it does scroll down when you start to type)
 When pressing enter, make you see a few more lines ? Like when scrolling using the mouse ? Test the feel in windows notepad (pasting stuff into lists)
 
