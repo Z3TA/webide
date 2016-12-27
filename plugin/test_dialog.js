@@ -4,19 +4,42 @@
 
 //editor.on("start", mock);
 
-var charCode_D = 68;
+	// Add plugin to editor
+	editor.plugin({
+		desc: "Test stuff",
+		load: function() {
+			var charCode_D = 68;
 
 editor.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
-
-function mock() {
+			
+		},
+		unload: function() {
+		
+			editor.unbindKey(testDialogs);
+			
+		},
+	});
 	
+	
+	
+	
+	function mock() {
+		
 		editor.mock("keydown", {charCode: charCode_D, target: "canvas", shiftKey: true, ctrlKey: true});
 	
 }
 
 function testDialogs() {
 	
-	alertBox("This is a dialog window with a warning triangle", "warning");
+		var file = editor.currentFile;
+		var index = file.caret.index;
+		var foo = file.rowFromIndex(index);
+		
+		alertBox(JSON.stringify(foo));
+		
+		
+		
+	//alertBox("This is a dialog window with a warning triangle", "warning");
 	
 	//alertBox("Anim cupidatat consectetur non ut id est irure excepteur laboris pariatur magna enim ut duis aute sint cillum.<br>Tempor reprehenderit ex ea mollit Lorem duis ut laboris occaecat voluptate et irure tempor incididunt in ipsum exercitation consequat ipsum cillum eiusmod dolore labore qui.", "error");
 	

@@ -2,7 +2,7 @@
 	The Global File interface. 
 	Feel free to add additional methods to this object here! Don't extend it elsewhere!
 	
-	
+	Can not be hotloaded
 	
 */
 
@@ -612,6 +612,18 @@
 			throw new Error("Caret col is NaN!");
 		}
 		
+		
+		if(file.grid.length == 0) {
+			console.warn("The grid is zero");
+			
+			if(caret.row !== 0) throw new Error("wow must be 0 when there's no grid");
+			if(caret.col !== 0) throw new Error("col must be 0 when there's no grid");
+			if(caret.eof !== true) throw new Error("eof must be true when there's no grid");
+			if(caret.eol !== true) throw new Error("eol must be true when there's no grid");
+			if(caret.index !== 0) throw new Error("index must be 0 when there's no grid");
+			return; // No more checking is needed if theres no grid
+		}
+		
 		if(caret.row >= file.grid.length) throw new Error("caret.row=" + caret.row + " >= file.grid.length=" + file.grid.length);
 		
 		if(caret.eof) {
@@ -630,7 +642,7 @@
 				char = file.text.charAt(caret.index);
 				if(char != "\r" && char != "\n") {
 					file.debugGrid();
-					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = " + caret.eol + "(true) and not caret.eof=true(" + caret.eof + ")\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + "");
+					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = " + caret.eol + "(true) and not caret.eof=true(" + caret.eof + ")\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + " caret.row=" + caret.row + " caret.col=" + caret.col + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length);
 				}
 			}
 		}
@@ -642,6 +654,7 @@
 					throw new Error("file.grid[" + caret.row + "][" + caret.col + "]=" + file.grid[caret.row][caret.col] + " when caret.eol=" + caret.eol + " grid.length=" + file.grid.length + " in file.path=" + file.path);
 				}
 				else if(file.grid[caret.row][caret.col].char != file.text.charAt(caret.index)) {
+					file.debugGrid();
 					throw new Error("Character \"" + file.grid[caret.row][caret.col].char + "\" on file.grid[" + caret.row + "][" + caret.col + "] is not the same as character \"" + file.text.charAt(caret.index) + "\" in file.text on caret.index=" + caret.index + "");
 				}
 			}
@@ -1299,6 +1312,17 @@
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
 		
+		var grid = file.grid;
+		var deletionLength = lastIndex - firstIndex;
+		
+		deletionLength++; // same index is still one char
+		console.log("deletionLength=" + deletionLength);
+		
+
+		
+		file.debugGrid();
+		
+		
 		console.time("deleteTextRange");
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1);
@@ -1307,126 +1331,116 @@
 		
 		/* 
 			Update the grid ...
-			It's possible the text range starts/stops inside indentation characters.
+			It's possible the text range starts/stops inside indentation characters and line breaks !?
 			
 		*/
 		
-			var grid = file.grid;
-		var gridRow;
-		var startRow = 0;
-		var endRow = 0;
-		var deletionLength = lastIndex - firstIndex;
-		var reCreateGrid = true; // Change to false when ready
+		
+		
+		var reCreateGrid = false; // Change to false when ready
 		
 		if(!reCreateGrid) {
-		rowLoop: for(var row=0; row<file.grid.length; row++) {
-				gridRow = grid[row];
-				
-				if(gridRow.startIndex >= firstIndex) {
-					// Begin removing boxes ...
+			
+			
+			var first = file.rowFromIndex(firstIndex);
+			var last = file.rowFromIndex(lastIndex);
+			
+			var count = 0;
+			
+			var lineNumberDecrementor = last.row - first.row;
+			
+			console.log("first=" + JSON.stringify(first));
+			console.log("last=" + JSON.stringify(last));
+			
+			if(first.row == last.row) {
+				grid[first.row].owned = true;
+				if(first.col != undefined && last.col != undefined) {
 					
-					if(gridRow.startIndex == firstIndex) {
-						
-						if(lastIndex <= (gridRow.startIndex + gridRow.length)) {
-							// Only delete part of the row
-							var colEnd = gridRow.startIndex + gridRow.length - lastIndex;
-							
-							if(colEnd != (lastIndex - firstIndex)) throw new Error("Expected same range: colEnd=" + colEnd + " lastIndex=" + lastIndex + " firstIndex=" + firstIndex + " (lastIndex - firstIndex)=" + (lastIndex - firstIndex))
-							
-							for(var col=0; col<colEnd; col++) gridRow.shift();
-							
-							gridRow.startIndex -= colEnd;
-							
-							// Fix index on the remaining boxes on this row
-							for(var col=colEnd; col<gridRow.length; col++) gridRow[col].index -= colEnd;
-							
-							// Fix index on the remaining rows
-							fixIndexOnRemainingRows(row+1, colEnd);
-							
-							break rowLoop;
-						}
-						else {
-							// Delete entire row
-							gridRow.length = 0;
-							gridRow.indentationCharacters = "";
-						}
-					}
-					else if((gridRow.startIndex - gridRow.indentationCharacters.length) <= firstIndex) {
-						// firstIndex is in the indentationCharacters on this row ...
-						
-						if(lastIndex >= (gridRow.startIndex + gridRow.length)) {
-							// Delete entire row
-							gridRow.length = 0;
-							gridRow.indentationCharacters = "";
-						}
-						else {
-							// lastIndex is on this row
-							
-							// Remove indentation characters
-							gridRow.indentationCharacters = gridRow.indentationCharacters.substr(firstIndex - gridRow.startIndex);
-							
-							if(lastIndex <= (gridRow.startIndex - gridRow.indentationCharacters.length) ) break rowLoop; // lastIndex was in the indentation characters
-							
-							var colEnd = gridRow.startIndex + gridRow.length - lastIndex;
-							
-							for(var col=0; col<colEnd; col++) gridRow.shift();
-							
-							gridRow.startIndex -= colEnd;
-							
-							// Fix index on the remaining boxes on this row
-							for(var col=colEnd; col<gridRow.length; col++) gridRow[col].index -= colEnd;
-							
-							// Fix index on the remaining rows
-							fixIndexOnRemainingRows(row+1, colEnd);
-							
-							break rowLoop;
-						}
-						
-					}
-					else {
-						// firstIndex is on row before, but not in it's indentation characters, and not on the first column
-						
-						gridRow = grid[row-1];
-						
-						var colStart = firstIndex - gridRow.startIndex;
-						var colEnd = gridRow.startIndex + gridRow.length - lastIndex;
-						
-						if(colEnd >= 0) {
-							// lastIndex is on this gridRow
-							
-							for(var col=colStart; col<colEnd; col++) gridRow.splice(col, 1);
-							
-							// Fix index on the remaining boxes on this row
-							for(var col=colEnd; col<gridRow.length; col++) gridRow[col].index -= colEnd;
-							
-							// Fix index on the remaining rows
-							fixIndexOnRemainingRows(row+1, colEnd);
-							
-							break rowLoop;
-							
-							
-						}
-						else {
-							// Delete from firstIndex the rest of the gridRow
-							for(var col=colStart; col<gridRow.length; col++) gridRow.pop();
-							
-						}
-						}
-					}
-				else if(gridRow.startIndex >= firstIndex) {
+					// Update index of remaining columns on first row
+					for(var col=last.col; col < grid[first.row].length; col++) grid[first.row][col].index -= deletionLength;
+					
+					// Delete columns to be deleted from first row
+					for(var col=first.col; col<=last.col; col++) grid[first.row].splice(first.col, 1); // Remove same index
+					
 					
 				}
-				else {
-					// Delete the row
-					gridRow.indentationCharacters = "";
-					gridRow.length = 0;
+				
+				// Update indexes on all rows below
+				fixIndexOnRemainingRows(first.row+1, deletionLength);
+			}
+			else if(first.row < last.row) {
+				
+				lineNumberDecrementor++;
+				
+				if(first.col != undefined) {
+					// Delete columns on first row
+					
+					count = grid[first.row].length - first.col;
+					
+					while(count--) {
+						console.log("pop:" + grid[first.row].pop());
 					}
+				}
 				
+				if(last.col != undefined) {
+					// Delete columns on last col
+					for(var col=0; col<=last.col; col++) grid[last.row].shift();
+				}
+
 				
-			} // rowLoop
+				// Delete all rows between first row and last row
+				for(var row = first.row+1; row < last.row; row++) grid.splice(first.row+1, 1);
+				
+
+				if(grid[first.row].length > 0 || grid[first.row+1].length > 0) {
+					// Merge first row and last row!!
+					//grid[first.row].concat(grid[first.row+1]);
+					alertBox("grid[" + (first.row+1) + "].length=" + grid[first.row+1].length);
+					for(var col=0; col<grid[first.row+1].length; col++) {
+						
+						grid[first.row+1][col].index -= deletionLength; // Update index of the (to be) added columns
+						
+						grid[first.row].push(grid[first.row+1][col]); // Add the columns
+						
+					}
+					// Remove merged row
+					grid.splice(first.row+1, 1);
+				}
+				
+				// Remove first and last row if they are emty
+				if(grid[first.row].length == 0) grid.splice(first.row, 1);
+				if(grid[first.row].length == 0) {
+					grid.splice(first.row, 1);
+					// Make sure the line break characters are removed
+					if(file.text.substr(firstIndex, file.lineBreak.length) == file.lineBreak) {
+						file.text = file.text.substr(0, firstIndex) + file.text.substring(firstIndex+file.lineBreak.length, file.text.length);
+						deletionLength += file.lineBreak.length;
+					}
+					// Update indexes on all rows below
+					fixIndexOnRemainingRows(first.row, deletionLength, lineNumberDecrementor);
+				}
+				else if(grid.length > 0) {
+					// Update indexes on all rows below
+					fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
+				}
+				else {
+					// The grid only have one row and it's emty
+					grid[0].startIndex = 0;
+					grid[0].lineNumber = 1;
+					grid[0].indentation = 0;
+					grid[0].owned = true;
+				}
+								
+				
+			}
+			else throw new Error("first.row=" + first.row + " last.row=" + last.row);
 			
 		}
 		else file.grid = file.createGrid(); // will probably have to rewrite for performance
+		
+		file.debugGrid();
+		
+		console.log("HORSES!");
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
 		
@@ -1454,9 +1468,10 @@
 		return removedText;
 		
 		
-		function fixIndexOnRemainingRows(startRow, indexDecrementor) {
+		function fixIndexOnRemainingRows(startRow, indexDecrementor, lineNumberDecrementor) {
 			for(var i=startRow; i<grid.length; i++) {
 				grid[i].startIndex -= indexDecrementor;
+				grid[i].lineNumber -= lineNumberDecrementor;
 				// ... and all columns
 				for(var j=0; j<grid[i].length; j++) {
 					grid[i][j].index -= indexDecrementor;
@@ -2411,6 +2426,8 @@
 		
 		//console.log("getIndexFromRowCol!")
 		
+		if(grid.length == 0) return 0;
+		
 		if(row == undefined) throw new Error("row is undefined!");
 		if(col == undefined) throw new Error("col is undefined!");
 		
@@ -2721,7 +2738,7 @@
 		str = "",
 		letters = stringToCharCodes(text).join(", ");
 		
-		//console.log(JSON.stringify(grid, null, 4));
+		console.log(JSON.stringify(grid, null, 4));
 		
 		//console.log("letters:" + letters);
 		
@@ -2874,29 +2891,36 @@
 				
 		if(caret.row < 0) caret.row = 0;
 		else if(caret.row >= file.grid.length) {
-			caret.row = file.grid.length-1;
+			if(file.grid.length == 0) caret.row = 0;
+			else caret.row = file.grid.length-1;
 		}
 		
-		if(caret.col < 0) caret.col = 0;
-		else if(caret.col > file.grid[caret.row].length) {
-			caret.col = file.grid[caret.row].length;
-		}
-		
-		if(caret.col == file.grid[caret.row].length) {
+		if(file.grid.length == 0) {
+			caret.col = 0;
 			caret.eol = true;
+			caret.eof = true;
+		}
+		else {
+			if(caret.col < 0) caret.col = 0;
+			else if(caret.col > file.grid[caret.row].length) {
+				caret.col = file.grid[caret.row].length;
+			}
 			
-			if(caret.row == file.grid.length-1) {
-				caret.eof = true;
+			if(caret.col == file.grid[caret.row].length) {
+				caret.eol = true;
+				
+				if(caret.row == file.grid.length-1) {
+					caret.eof = true;
+				}
+				else {
+					caret.eof = false;
+				}
 			}
 			else {
+				caret.eol = false;
 				caret.eof = false;
 			}
 		}
-		else {
-			caret.eol = false;
-			caret.eof = false;
-		}
-		
 		caret.index = file.getIndexFromRowCol(caret.row, caret.col);
 		
 		file.checkCaret(caret);
@@ -3835,6 +3859,82 @@
 		}
 	}
 	
+	File.prototype.rowFromIndex = function rowFromIndex(index) {
+		/*
+			Returns the row and col, and indentation position of index in the grid
+			
+			Optimize with binary search ?
+		*/
+		var file = this;
+		var grid = file.grid;
+		var gridRow;
+		
+		for(var row=0; row<grid.length; row++) {
+			if(grid[row].startIndex > index) break;
+		}
+		
+		// Index can be in the indentation characters or on the row above, or at the line break (on last row)
+		
+		var insideIndentationCharacter = undefined;
+		var column = undefined;
+		var lbChar = undefined;
+		
+		var gridRow;
+		
+		
+		if(row == grid.length && row > 0) {
+			// End of file, can't be inside indentation characters
+			row--;
+			gridRow = grid[row];
+		}
+		else if(row > 0) {
+			
+			gridRow = grid[row];
+			
+			// Check if inside indentation characters
+			if( (gridRow.startIndex - gridRow.indentationCharacters.length) <= index) {
+				insideIndentationCharacter = gridRow.startIndex - index;
+				return {row: row, indentChar: insideIndentationCharacter};
+			}
+			
+			row--;
+			gridRow = grid[row];
+			
+		}
+		else {
+			throw new Error("Index=" + index + " outside file.text.length=" + file.text.length);
+		}
+		
+		
+		
+		var gridRow = grid[row];
+		
+		console.log("gridRow.startIndex=" + gridRow.startIndex);
+		console.log("gridRow.indentationCharacters.length=" + gridRow.indentationCharacters.length);
+		console.log("index=" + index);
+		
+		console.log("gridRow.length=" + gridRow.length);
+		
+		for(var col=0; col<gridRow.length; col++) {
+			if(gridRow[col].index == index) break;
+		}
+		
+		console.log("col=" + col);
+		
+		if(col == gridRow.length || gridRow.length == 0) {
+			lbChar = gridRow.startIndex + gridRow.length - index;
+			return {row: row, lbChar: lbChar};
+		}
+		else {
+			column = col;
+		}
+		
+		return {row: row, col: column};
+		
+	}
+	
+	
+	
 	
 	
 	
@@ -3870,7 +3970,7 @@
 	
 	Box.prototype.clone = function() {
 		var box = this,
-			newBox = new Box(box.char, box.index);
+		newBox = new Box(box.char, box.index);
 		
 		//newBox.color = box.color;
 		newBox.selected = box.selected;
@@ -3882,8 +3982,8 @@
 			we are not cloning circle, quote or comment because those are set by pre-renders 
 			(only used in the javascript plugin, and added to the Box template to prevent "hidden classes".
 			. We probably will have to refactor how this work. )
-		
-		color will not be cloned, and have to be applied by preRender functions
+			
+			color will not be cloned, and have to be applied by preRender functions
 		*/
 		return newBox;
 	}
@@ -3898,19 +3998,19 @@
 		console.log("Determining what line indention convention to use ...");
 		
 		var maxCheckLength = 500,
-			char = "",
-			lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
-			voteTabs = 0,
-			voteSpaces = 0,
-			spaceCount = [],
-			codeBlockStartCharacter = "{",
-			codeBlockEndCharacter = "}",
-			codeBlockDepth = 0,
-			returnString = "",
-			lastChar = "",
-			identation = false,
-			spaces = 0,
-			tabs = 0;
+		char = "",
+		lastLineBreakCharacter = lineBreak.charAt(lineBreak.length-1),
+		voteTabs = 0,
+		voteSpaces = 0,
+		spaceCount = [],
+		codeBlockStartCharacter = "{",
+		codeBlockEndCharacter = "}",
+		codeBlockDepth = 0,
+		returnString = "",
+		lastChar = "",
+		identation = false,
+		spaces = 0,
+		tabs = 0;
 		
 		
 		
@@ -4013,8 +4113,5 @@
 		}
 		
 	}
-	
-
-	
 	
 })();

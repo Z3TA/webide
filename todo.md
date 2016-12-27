@@ -23,6 +23,8 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
+Fixing stuff when the grid is emty ... should the grid ever be emty ??
+
 Remaking deleteTextRange without createGrid
 
  foo bar baz (doubel click on foo, then copy and paste) in a "js" file
