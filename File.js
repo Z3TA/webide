@@ -221,23 +221,28 @@
 		if(grid.length == 0) {
 			// The file has no rows! But it can still have text, like white space
 			// Caret can only be at index=file.text.length, row=0, col=0
-			if(index == undefined && row == undefined && col == undefined) {
-				caret.index = file.text.length;
-				caret.row = 0;
-				caret.col = 0;
-				caret.eol = true;
-				caret.eof = true;
-			}
-			else if(index != undefined) {
+			
+			// Make sure I know what I'm doing ...
+			if(index != undefined) {
 				// Index must be file.text.length
 				if(index != file.text.length) throw new Error("Index needs to be text.length=" + file.text.length + " when grid.length=" + grid.length);
 			}
-			else if(row != undefined) {
+			
+			if(row != undefined) {
 				if(row !== 0) throw new Error("row=" + row + " must be 0 when grid.length=" + grid.length);
 			}
-			else if(col != undefined) {
+			
+			if(col != undefined) {
 				if(col !== 0) throw new Error("col=" + col + " must be 0 when grid.length=" + grid.length);
 			}
+			
+			caret.index = file.text.length;
+			caret.row = 0;
+			caret.col = 0;
+			caret.eol = true;
+			caret.eof = true;
+			
+			return caret;
 		}
 		else if(index == undefined && row == undefined && col == undefined) {
 			// We got nothing 
@@ -360,22 +365,28 @@
 		if(caret.index == undefined) {
 			throw new Error("caret.index=" + caret.index + " is undefined!");
 		}
+		
 		if(caret.row == undefined) {
 			throw new Error("caret.row=" + caret.row + " is undefined!");
 		}
+		
 		if(caret.col == undefined) {
 			throw new Error("caret.col=" + caret.col + " is undefined!");
 		}
+		
 		if(grid.length < caret.row) {
 			throw new Error("Row " + caret.row + " is higher then last row=" + grid.length + "");
 		}
-		else if(caret.row < 0) {
-			throw new Error("Caret row=" + caret.row + " must be higher then zero!");
-		}
-		else if(grid[caret.row].length < caret.col) {
+		
+		if(grid[caret.row].length < caret.col) {
 			throw new Error("Caret col=" + caret.col + " is higher then available columns on row " + caret.row + ", witch is " + grid[row].length + "");
 		}
-		else if(caret.col < 0) {
+
+		if(caret.row < 0) {
+			throw new Error("Caret row=" + caret.row + " must be higher then zero!");
+		}
+		
+		if(caret.col < 0) {
 			throw new Error("Caret col=" + caret.col + " must be higher then zero!");
 		}
 		
@@ -459,20 +470,22 @@
 			return;
 		}
 		
-		var file = this,
-		row = 0,
-		col = 0,
-		grid = file.grid,
-		lastRow,
-		expect,
-		box,
-		lineBreakCharacters;
+		var file = this;
+		var row = 0;
+		var col = 0;
+		var grid = file.grid;
+		var lastRow;
+		var expect;
+		var box;
+		var lineBreakCharacters;
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
 		if(file.startRow < 0) throw new Error("file.startRow=" + file.startRow + " editor.view.visibleRows=" + editor.view.visibleRows + "");
-		if(file.startRow >= (grid.length + file.partStartRow)) throw new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
 		
+		if(file.partStartRow > 0) {
+			if(file.startRow >= (grid.length + file.partStartRow)) throw new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
+		}
 		
 		for(var row=0; row<grid.length; row++) {
 			
@@ -1366,11 +1379,9 @@
 				}
 				
 				// Update indexes on all rows below
-				fixIndexOnRemainingRows(first.row+1, deletionLength);
+				fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
 			}
 			else if(first.row < last.row) {
-				
-				lineNumberDecrementor++;
 				
 				if(first.col != undefined) {
 					// Delete columns on first row
@@ -1394,8 +1405,7 @@
 
 				if(grid[first.row].length > 0 || grid[first.row+1].length > 0) {
 					// Merge first row and last row!!
-					//grid[first.row].concat(grid[first.row+1]);
-					alertBox("grid[" + (first.row+1) + "].length=" + grid[first.row+1].length);
+					//console.log("grid[" + (first.row+1) + "].length=" + grid[first.row+1].length);
 					for(var col=0; col<grid[first.row+1].length; col++) {
 						
 						grid[first.row+1][col].index -= deletionLength; // Update index of the (to be) added columns
@@ -1415,6 +1425,7 @@
 					if(file.text.substr(firstIndex, file.lineBreak.length) == file.lineBreak) {
 						file.text = file.text.substr(0, firstIndex) + file.text.substring(firstIndex+file.lineBreak.length, file.text.length);
 						deletionLength += file.lineBreak.length;
+						lineNumberDecrementor++;
 					}
 					// Update indexes on all rows below
 					fixIndexOnRemainingRows(first.row, deletionLength, lineNumberDecrementor);
@@ -1423,24 +1434,22 @@
 					// Update indexes on all rows below
 					fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
 				}
-				else {
-					// The grid only have one row and it's emty
-					grid[0].startIndex = 0;
-					grid[0].lineNumber = 1;
-					grid[0].indentation = 0;
-					grid[0].owned = true;
-				}
-								
 				
+				if(grid.length == 0) {
+				
+					if(file.text !== "") throw new Error("The grid is empty but text=" + lbChars(text));
+					
+					file.grid = file.createGrid();
+				}
+
 			}
 			else throw new Error("first.row=" + first.row + " last.row=" + last.row);
 			
 		}
 		else file.grid = file.createGrid(); // will probably have to rewrite for performance
 		
-		file.debugGrid();
+		//file.debugGrid();
 		
-		console.log("HORSES!");
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
 		
@@ -1469,6 +1478,7 @@
 		
 		
 		function fixIndexOnRemainingRows(startRow, indexDecrementor, lineNumberDecrementor) {
+			console.log("fixIndexOnRemainingRows: startRow=" + startRow + " indexDecrementor=" + indexDecrementor + " lineNumberDecrementor=" + lineNumberDecrementor);
 			for(var i=startRow; i<grid.length; i++) {
 				grid[i].startIndex -= indexDecrementor;
 				grid[i].lineNumber -= lineNumberDecrementor;
@@ -2967,6 +2977,12 @@
 		
 		if(startRow < 0) startRow = 0;
 		
+		
+		if(file.grid.length == 0) {
+			console.warn("The grid is zero");
+			if(caret.row != 0) throw new Error("Can't scroll to caret.row=" + caret.row + " because zero grid");
+			return file.scrollTo(0, 0);
+		}
 		
 		if(caret.row >= file.grid.length) throw new Error("Can't scroll to caret.row=" + caret.row + " because file.grid.length=" + file.grid.length);
 		

@@ -49,7 +49,7 @@
 			
 			if(file.text != "foofoo bar") throw new Error("Unexpected behaviour");
 			
-			//editor.closeFile(file.path);
+			editor.closeFile(file.path);
 			callback(true);
 			
 		});
