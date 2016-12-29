@@ -208,11 +208,6 @@
 			inputPath.value = editor.workingDirectory;
 		}
 		
-		// Check the input and att a slash
-		var lastCharOfPath = inputPath.value.substring(inputPath.value.length-1);
-		if(inputPath.value.indexOf("\\") && lastCharOfPath != "\\") inputPath.value += "\\"
-		else if(inputPath.value.indexOf("/") && lastCharOfPath != "/") inputPath.value += "/";
-		
 		var size = Math.max(inputPathMinSize, inputPath.value.length + 10)
 		
 		console.log("size=" + size);

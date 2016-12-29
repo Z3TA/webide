@@ -25,6 +25,7 @@ What I'm working on
 
 
 
+
 todo:
 
 Windows placement (like when opending the SSG preview), find available space ... and place the windows besides each other
@@ -217,9 +218,7 @@ Write tests (first)!
 Use hg mv to move/rename files!
 note: The error should be the first argument in callbacks!
 note: Have to close the app and reopen it to reload NodeJS module source!
-note: Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.
-Close/restart the program if there is an error!
-Editor should always be restart after a "throw" is detected!
+note: Always restart after a (thrown) error! (Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.)
 Throw errors instead of just returning the void! (ex: if(foo == bad) return;) => throw new Error("foo is bad!")
 Plugins GUI's should use their own event handlers for the GUI instead of cluttering keyBindings
 
@@ -800,6 +799,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing
 =========
+
+function list för asp and php !? (use https://github.com/felixfbecker/php-language-server and try VS Code Language Server Protocol)
 
 Easy way to rebind keys: settings_overload.js rebind(what, new combo)
 
