@@ -33,6 +33,33 @@
 	*/
 	
 	
+	editor.addTest(function testDeleteTextRange(callback) {
+		// Testing File.deleteTextRange()
+		editor.openFile("testDeleteTextRange.js", 'foo bar', function(err, file) {
+			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
+			file.deleteTextRange(2,4);
+			
+			file.text = "abc\ndef\nghi\njkl\n";
+			file.grid = file.createGrid();
+			file.deleteTextRange(1,13);
+			
+			file.text = "{\n    abc\n    def\n}\n";
+			file.grid = file.createGrid();
+			file.deleteTextRange(1,17);
+			
+			return;
+			
+			file.text = "{\n    abc\n    def\n}gfi\n";
+			file.grid = file.createGrid();
+			file.deleteTextRange(7,20);
+			
+			//editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
+	
+	
 	editor.addTest(function dblClickRemovedSpace(callback) {
 		// Double clicking on the first word (start of row) and then copy, then paste, will remove the space
 		// The space is lost becasue File.deleteSelection recreates the grid, and the space is treated as a indentation character!
@@ -53,7 +80,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function scrambledTextSelecting(callback) {
