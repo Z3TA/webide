@@ -80,9 +80,6 @@ editor.settings = {
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting
 	},
-	wordDelimiters: "(){}[]/*-+\\,'\" \n",
-	canBreakAfter: " \n,{}[];",
-	canBreakBefore: "}]\t",
 	scrollStep: 3,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
 	bigFileSize: 400000, //  Bytes, all files larger then this will be opened as streams
