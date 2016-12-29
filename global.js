@@ -867,10 +867,6 @@ function Dialog(msg, icon) {
 		message.insertBefore(img, message.firstChild);
 	}
 	
-	
-	
-	
-	
 	// Get the computed size of the box
 	var divHeight = parseInt(div.offsetHeight);
 	var divWidth = parseInt(div.offsetWidth);
@@ -885,12 +881,13 @@ function Dialog(msg, icon) {
 	div.style.left = Math.round(windowWidth / 2 - divWidth/2) + "px";
 	
 	
-	
-	
 	// Give the focus to the box
 	editor.input = false;
 	
-	setTimeout(focusDefault, 100); // Give the program time to add buttons etc to the dialog
+	// Give the program time to add buttons etc to the dialog
+	// Also avoid accidently closing the dialog (while typing spaces)
+	var dialogDelay = 2000;
+	setTimeout(focusDefault, dialogDelay); 
 	
 	function focusDefault() {
 		// Give focus to the element with attribute focus:true

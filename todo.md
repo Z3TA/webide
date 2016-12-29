@@ -245,6 +245,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+ftp choke Ctrl+P error
+
 Unable to open big remote files (over FTP) (because big files only support disk streams) (should everything be streams?) 
 
 
@@ -799,6 +801,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing
 =========
+
+delete (and rename) files via file explorer
 
 function list för asp and php !? (use https://github.com/felixfbecker/php-language-server and try VS Code Language Server Protocol)
 
