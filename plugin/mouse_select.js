@@ -577,17 +577,17 @@
 			
 			console.log(letter);
 			
-			var nonLetters = [" ", "\n", "\r", "\t", "'", '"', "+", "-", "/", "*", "=", "(", ")", "[", "]", ",", ".", "<", ">", ";", "{", "}", ":", "!"];
-			
-			for(var i=0; i<nonLetters.length; i++) {
-				if(letter == nonLetters[i]) {
-					return false;
+			var nonLetters = [" ", "\n", "\r", "\t", "'", '"', "+", "-", "/", "*", "=", "(", ")", "[", "]", ",", ".", "<", ">", ";", "{", "}", ":", "!", "\\"];
+				
+				for(var i=0; i<nonLetters.length; i++) {
+					if(letter == nonLetters[i]) {
+						return false;
+					}
 				}
+				
+				return true;
+				
 			}
-			
-			return true;
-			
-		}
 		
 	}
 
