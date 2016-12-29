@@ -1417,13 +1417,17 @@
 				// Remove first and last row if they are emty
 				if(grid[first.row].length == 0) grid.splice(first.row, 1);
 				if(grid[first.row].length == 0) {
-					grid.splice(first.row, 1);
-					// Make sure the line break characters are removed
+					
+					
+					// Make sure the line break characters and indentation characters are removed
 					if(file.text.substr(firstIndex, file.lineBreak.length) == file.lineBreak) {
-						file.text = file.text.substr(0, firstIndex) + file.text.substring(firstIndex+file.lineBreak.length, file.text.length);
-						deletionLength += file.lineBreak.length;
+						file.text = file.text.substr(0, firstIndex - grid[first.row].indentationCharacters.length) + file.text.substring(firstIndex + file.lineBreak.length, file.text.length);
+						deletionLength += file.lineBreak.length + grid[first.row].indentationCharacters.length;
 						lineNumberDecrementor++;
 					}
+					
+					grid.splice(first.row, 1);
+					
 					// Update indexes on all rows below
 					fixIndexOnRemainingRows(first.row, deletionLength, lineNumberDecrementor);
 				}
