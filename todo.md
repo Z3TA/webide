@@ -24,16 +24,8 @@ What I'm working on
 -------------------
 
 
-Check why a connection didnt have a close method:
-TypeError: undefined is not a function: editor.connections[conn].close();
-
-
-
-
 
 todo:
-
-Home key should go to start of line, while Ctrl + Home should go to the top
 
 Windows placement (like when opending the SSG preview), find available space ... and place the windows besides each other
 

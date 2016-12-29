@@ -187,8 +187,9 @@
 		
 			file.fixCaret(caret);
 				
-			if(caret == file.caret) editor.fireEvent("moveCaret", file, file.caret);
-		
+			if(caret == file.caret) {
+				editor.fireEvent("moveCaret", file, file.caret);
+				}
 			return caret;
 		}
 	}

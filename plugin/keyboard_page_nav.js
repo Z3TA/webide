@@ -5,8 +5,12 @@
 	
 	editor.bindKey({desc: 'Moves the caret one "page" up', charCode: 33, combo: 0, fun: pageUp});
 	editor.bindKey({desc: 'Moves the caret one "page" down', charCode: 34, combo: 0, fun: pageDown});
-	editor.bindKey({desc: 'Moves the caret to the end of file', charCode: 35, combo: 0, fun: end});
-	editor.bindKey({desc: 'Moves the caret to the beginning of file', charCode: 36, combo: 0, fun: home});
+	
+	editor.bindKey({desc: 'Moves the caret to the end of file', charCode: 35, combo: CTRL, fun: end});
+	editor.bindKey({desc: 'Moves the caret to the beginning of file', charCode: 36, combo: CTRL, fun: home});
+	
+	editor.bindKey({desc: 'Moves the caret to the end of the line', charCode: 35, combo: 0, fun: endOfLine});
+	editor.bindKey({desc: 'Moves the caret to the beginning of the line', charCode: 36, combo: 0, fun: startOfLine});
 	
 	
 	function pageUp(file, combo, character, charCode, pushDirection) {
@@ -76,6 +80,36 @@
 			// Move caret to the top
 			file.gotoLine(1);
 		}
+		
+		return false;
+	}
+	
+	function endOfLine(file, combo) {
+		
+		var caret = file.caret;
+		
+		var index = undefined;
+		var row = caret.row;
+		var col = file.grid[caret.row].length;
+		
+			file.moveCaret(index, row, col, caret);
+		
+		editor.renderNeeded();
+		
+		return false;
+		}
+	
+	function startOfLine(file, combo) {
+		
+		var caret = file.caret;
+		
+		var index = undefined;
+		var row = caret.row;
+		var col = 0;
+		
+		file.moveCaret(index, row, col, caret);
+		
+		editor.renderNeeded();
 		
 		return false;
 	}
