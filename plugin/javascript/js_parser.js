@@ -231,26 +231,32 @@
 							var oldStart = f.start;
 							var oldEnd = f.end;
 							
-							if(parseStart == -1) {
+							
+							// I do not trust reLastIndexOf ...
+								
 								// Fix for: foo = function() and foo = function foo()
-								parseStart = file.text.lastIndexOf(f.name + " = function", f.start);
-								// note: Should probably use regexp to find foo      =function (lots of, or no white space)
-							}
+							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " = function", f.start);
+							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + "=function", f.start);
 							
-							// Find foo: function foo()
-							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start);
+								
+								
+								// Find foo: function foo()
+								if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + ": function", f.start);
+								if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
 							
-							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
-
-							// function names can include the string "function" ex: function function_function ( )  {
+							//console.time("hmm"); // These used to be slow
+								if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
+							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
+							//console.timeEnd("hmm");
+								
+								if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
+								// function names can include the string "function" ex: function function_function ( )  {
+								// Make a full parse instead of throwing an error when not in dev mode !?
 							
-							// Make a full parse instead of throwing an error when not in dev mode !?
 							
-							
-							//if(charactersLength < 0) parseEnd++;
 							
 							//console.log("characters=" + lbChars(characters));
-							//console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
+							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 							
 							//console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
 							
@@ -723,6 +729,8 @@
 	
 	function parseJavaScript(file, options) {
 		
+		console.log("parseJavaScript: options=" + JSON.stringify(options));
+		
 		console.time("parseJavaScript");
 		
 		if(options == undefined) options = {};
@@ -732,23 +740,27 @@
 		var baseIndentation = options.baseIndentation;
 		var parseStartRow = options.startRow;
 		var indentate = options.noIndention ? false : true;
+		var text = file.text;
+		var textLength = text.length;
 		
 		if(baseIndentation == undefined) baseIndentation = 0;
 		if(parseStartRow == undefined) parseStartRow = 0;
 		
-		var text = file.text,
-		originalBaseIndentation = baseIndentation,
+		if(parseStart == undefined) parseStart = 0;
+		if(parseEnd == undefined) parseEnd = textLength;
+		
+		var originalBaseIndentation = baseIndentation,
 		insideDblQuote = false,
 		insideSingleQuote = false,
 		insideFunctionDeclaration = false,
 		insideFunctionArguments = false,
 		afterPointer = [],
-		variableStart = 0,
+		variableStart = parseStart,
 		variableEnd = 0,
 		variableName = "",
 		functionName = "",
 		char = "",
-		functionArgumentsStart = 0,
+		functionArgumentsStart = parseStart,
 		functionArguments = "",
 		insideFunctionBody = [],
 		insideQuote = false,
@@ -764,17 +776,17 @@
 		newFunc,
 		properties,
 		variable,
-		startIndex = 0,
+		startIndex = parseStart,
 		comments = [],
 		quotes = [],
-		quoteStart = 0,
-		commentStart = 0,
+		quoteStart = parseStart,
+		commentStart = parseStart,
 		commentStartIndentation = 0,
 		codeBlockDepth = 0,
 		codeBlockDepthTemp = 0,
 		rootWord = "",
 		row = parseStartRow,
-		lineNumber = 1,
+		lineNumber = 1, // ParseonlyfunctionOptimizer will update linebumber
 		word = "",
 		llWord = "",
 		words = [],
@@ -815,7 +827,7 @@
 		lllChar = "",
 		willBeJSON = false,
 		insideRegExp = false,
-		regExpStart = 0,
+		regExpStart = parseStart,
 		insideRegExpBracket = false,
 		column = 0,
 		lnw = "", // Last Not Whitespace character
@@ -831,7 +843,6 @@
 		pastChar9 = "",
 		xmlMode = false,
 		xmlModeBeforeScript = false,
-		textLength = text.length,
 		foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
@@ -839,7 +850,7 @@
 		ASP = false,
 		PHP = false,
 		CSS = false,
-		SSJS = false;
+		SSJS = false; // Server Side JavaScript
 		
 		// -----
 		
@@ -883,8 +894,6 @@
 		insideArray[0] = false;
 		
 		
-		if(parseStart == undefined) parseStart = 0;
-		if(parseEnd == undefined) parseEnd = textLength;
 		
 		// Look for function(a, b, c) { ... } not inside ' or "
 		
@@ -2608,24 +2617,23 @@
 	};
 	
 	
-	// http://stackoverflow.com/questions/273789/is-there-a-version-of-javascripts-string-indexof-that-allows-for-regular-expr
-	function reLastIndexOf(regex, str, startpos) {
-		regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
-		if(typeof (startpos) == "undefined") {
-			startpos = this.length;
-		} else if(startpos < 0) {
-			startpos = 0;
-		}
-		var stringToWorkWith = str.substring(0, startpos + 1);
-		var lastIndexOf = -1;
-		var nextStop = 0;
-		var result;
-		while((result = regex.exec(stringToWorkWith)) != null) {
-			lastIndexOf = result.index;
-			regex.lastIndex = ++nextStop;
-		}
-		return lastIndexOf;
-	}
-	
+    function reLastIndexOf(regex, str, startpos) {
+        
+        regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+        if(typeof (startpos) == "undefined") {
+            startpos = this.length;
+        } else if(startpos < 0) {
+            startpos = 0;
+        }
+        var stringToWorkWith = str.substring(0, startpos + 1);
+        var lastIndexOf = -1;
+        var nextStop = 0;
+        var result;
+        while((result = regex.exec(stringToWorkWith)) != null) {
+            lastIndexOf = result.index;
+            //regex.lastIndex = ++nextStop;
+        }
+        return lastIndexOf;
+    }
 	
 })();

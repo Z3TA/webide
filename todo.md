@@ -25,23 +25,21 @@ What I'm working on
 
 Check why parseOnlyFunctionOptimizer: 2939.462ms when editing on line 3461 in editor.js
 
+problem on line 242:
+if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start);
+
 Check why a connection didnt have a close method:
 TypeError: undefined is not a function: editor.connections[conn].close();
 
 
-try what happends if you select a text and press del/backspace, should only the selection get deleted, with no further action ?
 
-
-Windows placement, find available space ...
-
-
-
-Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
 
 
 todo:
 
 Home key should go to start of line, while Ctrl + Home should go to the top
+
+Windows placement (like when opending the SSG preview), find available space ... and place the windows besides each other
 
 make a bootstrap service for beta testers
 
@@ -96,7 +94,7 @@ ssg: show the ssg buttons whenever a file from a registered project is opened
 
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
 
-
+Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
 
 Guide for new users! 
 
@@ -814,6 +812,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing
 =========
+
+Easy way to rebind keys: settings_overload.js rebind(what, new combo)
 
 Reconnect FTP when there is a timeout disconnection.
 
