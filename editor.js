@@ -3126,19 +3126,7 @@ editor.lastKeyPressed = "";
 			}
 		}
 	}
-	
-	function runFtpQueue() {
-		
-		console.log(ftpQueue.length + " items left in the FTP queue");
-		
-		if(ftpQueue.length > 0) {
-			console.log("Executing next item in the ftp queue ...");
-			ftpQueue.shift()();
-		}
-		else ftpBusy = false;
-		
-	}
-	
+	
 	editor.createPath = function(pathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists
@@ -3359,6 +3347,18 @@ editor.lastKeyPressed = "";
 		// todo: for debugging. Returns true if the screen area is the same as the background
 	}
 	
+	function runFtpQueue() {
+		
+		console.log(ftpQueue.length + " items left in the FTP queue");
+		
+		if(ftpQueue.length > 0) {
+			console.log("Executing next item in the ftp queue ...");
+			ftpQueue.shift()();
+		}
+		else ftpBusy = false;
+		
+	}
+	
 	function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
@@ -3458,7 +3458,8 @@ editor.lastKeyPressed = "";
 		
 		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
 			for(var conn in editor.connections) {
-				editor.connections[conn].close();
+				if(editor.connections[conn].close) editor.connections[conn].close();
+				else throw new Error("Connection: conn=" + conn + " did not have a close() method. Connection already closed!?");
 			}
 			return true;			
 		}});

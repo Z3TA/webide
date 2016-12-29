@@ -23,10 +23,6 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
-Check why parseOnlyFunctionOptimizer: 2939.462ms when editing on line 3461 in editor.js
-
-problem on line 242:
-if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start);
 
 Check why a connection didnt have a close method:
 TypeError: undefined is not a function: editor.connections[conn].close();
