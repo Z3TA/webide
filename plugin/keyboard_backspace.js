@@ -13,10 +13,10 @@
 		
 		if(editor.input) {
 			
-			var caret = file.caret,
-				leftIndex = caret.index - 1,
-				char,
-				grid = file.grid;
+			var caret = file.caret;
+			var leftIndex = caret.index - 1;
+			var char;
+				var grid = file.grid;
 			
 			var renderNotNeeded = editor.settings.clearColumnOptimization;
 			
@@ -24,9 +24,8 @@
 				renderNotNeeded = false;
 				file.deleteSelection();
 				editor.renderNeeded();
+				return true; // Only delete the selection
 			}
-			
-
 			
 			if(caret.index > 0) {
 				

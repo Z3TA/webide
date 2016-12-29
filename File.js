@@ -1331,10 +1331,7 @@
 		deletionLength++; // same index is still one char
 		console.log("deletionLength=" + deletionLength);
 		
-
-		
-		file.debugGrid();
-		
+		//file.debugGrid();
 		
 		console.time("deleteTextRange");
 		
@@ -2736,6 +2733,8 @@
 			
 			
 		*/
+		
+		alertBox(getStack("debugGrid"));
 		
 		if(!editor.settings.devMode) {
 			return;

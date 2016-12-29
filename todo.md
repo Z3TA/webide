@@ -23,11 +23,11 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
-Fixing stuff when the grid is emty ... should the grid ever be emty ??
+Check why parseOnlyFunctionOptimizer: 2939.462ms when editing on line 3461 in editor.js
 
-Remaking deleteTextRange without createGrid
+Check why a connection didnt have a close method:
+TypeError: undefined is not a function: editor.connections[conn].close();
 
- foo bar baz (doubel click on foo, then copy and paste) in a "js" file
 
 try what happends if you select a text and press del/backspace, should only the selection get deleted, with no further action ?
 
@@ -35,6 +35,8 @@ try what happends if you select a text and press del/backspace, should only the 
 Windows placement, find available space ...
 
 
+
+Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
 
 
 todo:
@@ -257,6 +259,9 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Unable to open big remote files (over FTP) (because big files only support disk streams) (should everything be streams?) 
+
 
 "Scrolling bug", when scrolled to the right, then opening another document (using file explorer)
 
@@ -810,6 +815,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing
 =========
 
+Reconnect FTP when there is a timeout disconnection.
+
 Autocomplete html tags inside strings (only look at the same line for opened tags)
 
 Make the editor scroll down when you press enter and cant see the line (it does scroll down when you start to type)
@@ -1111,6 +1118,18 @@ support port in url's (connection manager, etc)
 
 Optimization
 ============
+
+parseOnlyFunctionOptimizer: 2939.462ms when editing on line 3461 in editor.js
+
+editor.eventListeners.exit.push({fun: function closeOpenConnections() {
+for(var conn in editor.connections) {
+if(editor.connections[conn].close) editor.connections[conn].close();
+}
+return true;
+}});
+
+
+variableName and llWord in js_parser.js can sometimes hold large textes (check editor.js) witch might slow down parsing
 
 Double clicking on a common word in a large files (grid in File.js) takes a lot of time to highlight the words
 
