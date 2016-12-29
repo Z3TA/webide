@@ -259,7 +259,7 @@ function matchingAngelBracket(index, file, toMatch) {
 
 function trailingSlash(folderPath) {
 	// Makes sure the folder has a trailing slash
-	console.log("Get training slash for folderPath=" + folderPath);
+	console.log("Get trailing slash for folderPath=" + folderPath);
 	var delimiter = getPathDelimiter(folderPath);
 	var lastCharacter = folderPath.substr(folderPath.length-1, 1);
 	if(lastCharacter != delimiter) {
