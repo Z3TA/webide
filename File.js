@@ -8,10 +8,12 @@
 
 "use strict";
 
-(function() { // Allows private variables
+var File; // File object is global
+
+(function() { // Encapsulate so that we do not bleed out to global scope
 	
 	
-	// Note: No var infront. Expose this object to global scope!
+	// Note: No var infront. Expose File object to global scope!
 	File = function File(text, path, fileIndex, bigFile, callback) { 
 		var file = this;
 		
@@ -537,7 +539,7 @@
 						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
+					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) (" + lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
 				}
 			}
 			
@@ -1338,15 +1340,15 @@
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1);
 		
-		file.text = file.text.substr(0, firstIndex) + file.text.substring(lastIndex+1, file.text.length);
-		
+		file.text = deletePart(file.text, firstIndex, lastIndex);
+				
 		/* 
 			Update the grid ...
 			It's possible the text range starts/stops inside indentation characters and line breaks !?
 			
 		*/
 		
-		
+		var cursorIndex = firstIndex; // Where the deletion started
 		
 		var reCreateGrid = false; // Change to false when ready
 		
@@ -1360,8 +1362,30 @@
 			
 			var lineNumberDecrementor = last.row - first.row;
 			
+			var checkSpaceFrom = firstIndex;
+			
 			console.log("first=" + JSON.stringify(first));
 			console.log("last=" + JSON.stringify(last));
+			
+			if(first.col === 0 || first.col === undefined) {
+				// Update indentation character count on first row
+				
+				console.log("indentationCharacters on row=" + first.row + ": " + lbChars(grid[first.row].indentationCharacters) + "");
+
+				
+				if(first.row > 0) {
+					var lastLineBreak = file.text.lastIndexOf(file.lineBreak, firstIndex-1);
+					if( (firstIndex - lastLineBreak) > 0) grid[first.row].indentationCharacters = file.text.substring(lastLineBreak + file.lineBreak.length, firstIndex);
+					else grid[first.row].indentationCharacters = "";
+				}
+				else if(first.row == 0) grid[first.row].indentationCharacters = file.text.substr(0, firstIndex);
+				
+				// Sanity check indentation characters
+				if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters) + " lastLineBreak=" + lastLineBreak + "");
+				
+				console.log("Updated indentationCharacters=" + lbChars(grid[first.row].indentationCharacters) + " on row=" + first.row + ". lastLineBreak=" + lastLineBreak + " firstIndex=" + firstIndex + " ");
+
+			}
 			
 			if(first.row == last.row) {
 				grid[first.row].owned = true;
@@ -1398,11 +1422,13 @@
 
 				
 				// Delete all rows between first row and last row
-				for(var row = first.row+1; row < last.row; row++) grid.splice(first.row+1, 1);
-				
+				for(var row = first.row+1; row < last.row; row++) {
+					console.log("DELETE AA ROW=" + row);
+					grid.splice(first.row+1, 1);
+				}
 
 				if(grid[first.row].length > 0 || grid[first.row+1].length > 0) {
-					// Merge first row and last row!!
+					// Merge first row and the row below it
 					//console.log("grid[" + (first.row+1) + "].length=" + grid[first.row+1].length);
 					for(var col=0; col<grid[first.row+1].length; col++) {
 						
@@ -1413,44 +1439,103 @@
 					}
 					// Remove merged row
 					grid.splice(first.row+1, 1);
-				}
-				
-				// Remove first and last row if they are emty
-				if(grid[first.row].length == 0) grid.splice(first.row, 1);
-				if(grid[first.row].length == 0) {
 					
+					// indentation characters of second row has already been removed, but not the ending linebreak !!!??
+					//file.text =  
 					
-					// Make sure the line break characters and indentation characters are removed
-					if(file.text.substr(firstIndex, file.lineBreak.length) == file.lineBreak) {
-						file.text = file.text.substr(0, firstIndex - grid[first.row].indentationCharacters.length) + file.text.substring(firstIndex + file.lineBreak.length, file.text.length);
-						deletionLength += file.lineBreak.length + grid[first.row].indentationCharacters.length;
-						lineNumberDecrementor++;
-					}
-					
-					grid.splice(first.row, 1);
-					
-					// Update indexes on all rows below
-					fixIndexOnRemainingRows(first.row, deletionLength, lineNumberDecrementor);
-				}
-				else if(grid.length > 0) {
-					// Update indexes on all rows below
 					fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
 				}
+				else {
+					// Both rows are emty
+					// Delete the first one
+					console.log("DELETE BB ROW=" + first.row);
+					grid.splice(first.row, 1);
+					
+					// The line break on the first one have already been removed.
+					// But the indentation characters might not have been removed!
+					
+					// Remove the indentation characters
+					var deleteExtra1 = 0;
+					if(first.row > 0) deleteExtra1 = firstIndex - file.text.lastIndexOf(file.lineBreak, firstIndex-1) - file.lineBreak.length; // from line break to firstIndex
+					else deleteExtra1 = firstIndex; // from beginning to firstIndex
+					
+					console.log("deleteExtra1=" + deleteExtra1);
+					if(deleteExtra1 > 0) {
+						file.text = deletePart(file.text, firstIndex-deleteExtra1, firstIndex-1);
+
+						deletionLength += deleteExtra1;
+						checkSpaceFrom -= deleteExtra1;
+						
+						if(cursorIndex > 0) cursorIndex -= deleteExtra1;
+					}
+
+					
+					// And the second one might have changed indentation characters
+					
+					if(first.row < (grid.length-1)) {
+						// Second one is not the last row of the file, so we can delete that one too
+						
+						console.log("DELETE CC ROW=" + first.row);
+						grid.splice(first.row, 1);
+						
+						// Remove the indentation characters And the line break
+						var deleteExtra2 = file.text.indexOf(file.lineBreak, checkSpaceFrom) - checkSpaceFrom + file.lineBreak.length;
+						
+						console.log("deleteExtra2=" + deleteExtra2);
+						
+						if(deleteExtra2 < 0) {
+							file.debugGrid();
+							throw new Error("Expected a line break after checkSpaceFrom=" + checkSpaceFrom);
+						}
+						else if(deleteExtra2 > 0) {
+							file.text = deletePart(file.text, checkSpaceFrom, checkSpaceFrom + deleteExtra2 - 1);
+							
+							deletionLength += deleteExtra2;
+							lineNumberDecrementor++;
+							
+							if(cursorIndex > 0) cursorIndex -= deleteExtra2;
+						}
+						
+						fixIndexOnRemainingRows(first.row, deletionLength, lineNumberDecrementor);
+						
+						
+					}
+					else {
+						// It's the last row of the file. The file needs that end row or it will go bonkers
+						
+						console.log("Last line break of the file yo!");
+						
+						// Update the indentation characters (the row is emty)
+						if(first.row > 0) {
+							grid[first.row].indentationCharacters = file.text.substr(file.text.lastIndexOf(file.lineBreak, file.text.length) + file.lineBreak.length);
+						}
+						else if(first.row == 0) throw new Error("Did not expect first.row=" + first.row + " to be zero");
+						
+						// Sanity check if indentation characters contain any character that is not a space or tab !?
+						if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters));
+						
+						grid[first.row].startIndex = file.text.length;
+						grid[first.row].lineNumber = grid.length;
+					}
+
+				}
 				
+			
 				if(grid.length == 0) {
-				
+					throw new Error("Grid length should never be zero!");
 					if(file.text !== "") throw new Error("The grid is empty but text=" + lbChars(text));
 					
 					file.grid = file.createGrid();
 				}
 
+
 			}
 			else throw new Error("first.row=" + first.row + " last.row=" + last.row);
 			
 		}
-		else file.grid = file.createGrid(); // will probably have to rewrite for performance
+		else file.grid = file.createGrid();
 		
-		//file.debugGrid();
+		file.debugGrid();
 		
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
@@ -1462,7 +1547,7 @@
 		
 		
 		// Create dummy caret to get row and col for the change event
-		var dummyCaret = file.createCaret(firstIndex);
+		var dummyCaret = file.createCaret(cursorIndex);
 		
 		if(file.caret.index >= firstIndex) {
 			file.fixCaret(file.caret);
@@ -1490,6 +1575,37 @@
 				}
 			}
 		}
+		
+		function deletePart(txt, start, end) {
+			// Also deletes the end character!
+			
+			if(editor.settings.devMode && txt.length < 100) visualizeTextRange(txt, start, end);
+
+			return txt.substring(0, start) + txt.substring(end+1);
+
+		}
+		
+		function visualizeTextRange(txt, start, end) {
+			
+			txt = txt.replace(/\n|\r/g, "#"); // Replace line feeds and carage returns with # to make them easier to count
+			
+			console.log("TextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
+			
+			function spaces(n) {
+				var str = "";
+				for(var i=0;i<n;i++) str += " ";
+				return str;
+			}
+			
+			function underline(n) {
+				var str = "";
+				for(var i=0;i<n;i++) str += "=";
+				return str;
+			}
+			
+		}
+		
+		
 		
 	}
 	
@@ -2739,7 +2855,7 @@
 			
 		*/
 		
-		alertBox(getStack("debugGrid"));
+		console.log(getStack("debugGrid"));
 		
 		if(!editor.settings.devMode) {
 			return;
@@ -2752,7 +2868,12 @@
 		str = "",
 		letters = stringToCharCodes(text).join(", ");
 		
-		console.log(JSON.stringify(grid, null, 4));
+		//console.log(JSON.stringify(grid, null, 4));
+		for(var row=0; row<grid.length; row++) {
+			console.log("row=" + row + ": startIndex=" + grid[row].startIndex + " indentation=" + grid[row].indentation + " indentationCharacters=" + lbChars(grid[row].indentationCharacters));
+			console.log(JSON.stringify(grid[row], null, 2));
+		}
+		
 		
 		//console.log("letters:" + letters);
 		

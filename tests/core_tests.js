@@ -35,26 +35,49 @@
 	
 	editor.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
-		editor.openFile("testDeleteTextRange.js", 'foo bar', function(err, file) {
+		editor.openFile("testDeleteTextRange.js", '', function(err, file) {
+	
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
-			file.deleteTextRange(2,4);
+
 			
-			file.text = "abc\ndef\nghi\njkl\n";
-			file.grid = file.createGrid();
-			file.deleteTextRange(1,13);
+			test("foo bar", 2,4);
 			
-			file.text = "{\n    abc\n    def\n}\n";
-			file.grid = file.createGrid();
-			file.deleteTextRange(1,17);
+			test("abc#def#ghi#jkl#", 1,13);
 			
-			return;
+			test("{#    abc#    def#}#", 6,16);
 			
-			file.text = "{\n    abc\n    def\n}gfi\n";
-			file.grid = file.createGrid();
-			file.deleteTextRange(7,20);
+			test("{#    abc#    def#}gfi#", 7,20);
 			
-			//editor.closeFile(file.path);
+			test("{ab#    cde#", 0,10);
+			
+			test("{#    {#    }#}", 12,14);
+			
+			//return;
+			
+			editor.closeFile(file.path);
 			callback(true);
+			
+			function test(txt, start, end) {
+				console.log("Testing deleteTextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
+				
+				file.text = txt.replace(/@#/g, "\r\n");
+				file.text = file.text.replace(/#/g, "\n");
+				file.grid = file.createGrid();
+				file.deleteTextRange(start,end);
+				
+				function spaces(n) {
+					var str = "";
+					for(var i=0;i<n;i++) str += " ";
+					return str;
+				}
+				
+				function underline(n) {
+					var str = "";
+					for(var i=0;i<n;i++) str += "=";
+					return str;
+				}
+				
+			}
 			
 		});
 	}, 1);
