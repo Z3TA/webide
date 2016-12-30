@@ -4153,8 +4153,6 @@ var File; // File object is global
 		spaces = 0,
 		tabs = 0;
 		
-		
-		
 		for(var i=0; i<text.length; i++) {
 			
 			lastChar = char;
@@ -4180,7 +4178,7 @@ var File; // File object is global
 			else {
 				// End of indentation
 				
-				if(identation) {
+				if(identation && codeBlockDepth) {
 					if(tabs > 0) {
 						voteTabs++;
 					}
@@ -4200,8 +4198,8 @@ var File; // File object is global
 			
 		}
 		
-		//console.log("voteTabs:" + voteTabs);
-		//console.log("voteSpaces:" + voteSpaces);
+		console.log("voteTabs:" + voteTabs);
+		console.log("voteSpaces:" + voteSpaces);
 		
 		
 		if(voteTabs >= voteSpaces) {
@@ -4225,6 +4223,7 @@ var File; // File object is global
 		
 		
 		function sortByFrequencyAndRemoveDuplicates(array) {
+			console.log("sorting array=" + JSON.stringify(array));
 			var frequency = {}, value;
 			
 			// compute frequencies of each value
@@ -4236,12 +4235,14 @@ var File; // File object is global
 				else {
 					frequency[value] = 1;
 				}
+				console.log(i);
 			}
 			
 			// make array from the frequency object to de-duplicate
 			var uniques = [];
 			for(value in frequency) {
 				uniques.push(value);
+				console.log(value);
 			}
 			
 			// sort the uniques array in descending order by frequency
