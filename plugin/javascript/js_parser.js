@@ -1497,10 +1497,10 @@
 			insideQuote = insideDblQuote || insideSingleQuote;
 			insideComment = insideLineComment || insideBlockComment || insideHTMLComment;
 			
-			//console.log("char(" + i + ")=" + char + "  " + insideQuote + " " + insideComment);
+			//console.log("char(" + i + ")=" + char + "  insideQuote=" + insideQuote + " insideComment=" + insideComment + " xmlMode=" + xmlMode );
 			
 			
-			//if(!insideComment && !insideQuote) {
+			if(!insideComment) {
 				
 				
 				// ### PHP script tags <?php ?>
@@ -1535,6 +1535,7 @@
 						
 						xmlMode = false;
 						insideXmlTag = false;
+						insideDblQuote = false;
 						
 						//console.log("ASP start here line=" + lineNumber);
 					}
@@ -1562,7 +1563,7 @@
 				
 				
 				
-			//}
+			}
 			
 			
 			
