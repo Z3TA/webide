@@ -749,6 +749,7 @@
 		if(parseStart == undefined) parseStart = 0;
 		if(parseEnd == undefined) parseEnd = textLength;
 		
+		
 		// Optimization to try: Putting all the bools into an int for less memory lookups
 		
 		var originalBaseIndentation = baseIndentation,
@@ -845,9 +846,6 @@
 		pastChar9 = "",
 		xmlMode = false,
 		xmlModeBeforeScript = false,
-		xmlModeBeforeLangTag = false,
-		insideXmlTagBeforeLangTag = false,
-		lastXmlTagStart = -1,
 		foundVariableInVariableDeclaration = false, // Why did I add this? Comments damnit!!!
 		lastLineBreakCharacter = file.lineBreak.length > 1 ? file.lineBreak.charAt(file.lineBreak.length-1) : file.lineBreak.charAt(0),
 		vbScript = false,
@@ -1535,15 +1533,6 @@
 						vbScript = true;
 						language = "VBScript";
 						
-						console.log("ASP: row=" + row + " xmlMode=" + xmlMode + " insideXmlTag=" + insideXmlTag + " i=" + i + " xmlTagStart=" + xmlTagStart + " lastXmlTagStart=" + lastXmlTagStart);
-						
-						xmlModeBeforeLangTag = xmlMode;
-						insideXmlTagBeforeLangTag = insideXmlTag;
-						
-						xmlTagStart = lastXmlTagStart;
-						
-						//if(xmlTagStart == -1) insideXmlTagBeforeLangTag = false;
-						
 						xmlMode = false;
 						insideXmlTag = false;
 						
@@ -1552,9 +1541,7 @@
 					else if(pastChar0 == "%" && char == ">" && ASP) { // %>
 						ASP = false;
 						vbScript = false;
-						
-						xmlMode = xmlModeBeforeLangTag;
-						insideXmlTag = insideXmlTagBeforeLangTag;
+						xmlMode = true;
 						
 						//console.log("ASP Ends here line=" + lineNumber);
 					}
@@ -1598,10 +1585,9 @@
 					
 					if(insideQuote) {
 						xmlTagInsideQuote = true;
-					}
+						}
 					
 					xmlTagSelfEnding = false;
-					lastXmlTagStart = xmlTagStart;
 					xmlTagStart = i;
 					if(!insideXmlTagEnding) {
 						xmlModeBeforeTag = xmlMode; // xmlMode when the tag starts
@@ -1646,7 +1632,7 @@
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
 				}
-				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) { //  && (language != "VBScript" || lastChar != "%")
+				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) {
 					if(pastChar0 == "/") {
 						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
@@ -1657,7 +1643,7 @@
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
 					
-					console.log("xmlTag=" + xmlTag + " language=" + language + " lastChar=" + lastChar);
+					//console.log("xmlTag=" + xmlTag);
 					
 					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
 						
