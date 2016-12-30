@@ -1,4 +1,19 @@
 
+editor.addTest(function aspVarInHtml(callback) {
+	// Parser can't find start of baz
+	editor.openFile("aspVarInHtml.asp", '<img src="<% =foo %>">', function(err, file) {
+		
+		if(file.parsed.xmlTags.length > 0) throw new Error("Did not expect an xml tag");
+		
+		console.log("aspVarInHtmlYOYO");
+		console.log(file.parsed);
+		
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 editor.addTest(function funInJson(callback) {
 	// Parser can't find start of baz
 	editor.openFile("funInJson.js", 'foo({\nbar: "123",\nbaz: function() {\n\n}\n});\n', function(err, file) {

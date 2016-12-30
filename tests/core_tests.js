@@ -80,7 +80,7 @@
 			}
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {
