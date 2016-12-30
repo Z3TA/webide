@@ -23,6 +23,8 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
+deleteTextRange left a tab that was unable to remove ...
+
 
 Something wrong with this ASP code: <img src="<% =foo %>"> (save as .asp)
 
