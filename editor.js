@@ -3903,6 +3903,7 @@ editor.lastKeyPressed = "";
 		}
 		
 		// Create some test files ...
+		/*
 		var filesToOpen = 2;
 		var filesOpened = 0;
 		for(var i=0; i<filesToOpen; i++) {
@@ -3910,6 +3911,8 @@ editor.lastKeyPressed = "";
 				if(++filesOpened == filesToOpen) doTheTests();
 			});
 		}
+		*/
+		doTheTests();
 		
 		
 		function doTheTests() {
