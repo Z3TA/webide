@@ -15,6 +15,7 @@
 	
 	var serverManager;
 	
+	
 	var defaultServer = {
 		name: "Default",
 		protocol: "SFTP",
@@ -38,7 +39,7 @@
 	var inputEditPw;
 	var inputPw;
 	var buttonDisconnect;
-	
+	var menuItem;
 	var selectConnection;
 	
 	
@@ -67,13 +68,29 @@
 		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
 		editor.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 		
-		editor.addMenuItem("Remote connections", function() {
+		menuItem = editor.addMenuItem("Remote connections", function() {
 			showServerManger();
 			editor.hideMenu();
 		});
 		
 	}
 	
+	function unload() {
+		// Cleaning up, for example when disabling a plugin
+		
+		editor.unbindKey(showServerManger);
+		editor.unbindKey(hideServerManger);
+		editor.unbindKey(serverManagerEnter);
+		
+		editor.removeMenuItem(menuItem);
+		
+		if(serverManager) {
+			var footer = document.getElementById("footer");
+			footer.removeChild(serverManager);
+			editor.resizeNeeded();
+		}
+		
+	}
 	
 	function serverManagerEnter() {
 		// Only connect if the password box has focus
@@ -87,9 +104,6 @@
 	}
 }
 	
-	function unload() {
-		// Cleaning up, for example when disabling a plugin
-	}
 	
 	function build() {
 		
@@ -520,6 +534,8 @@
 		if(!serverManager) build(); // Build the GUI if it's not already built
 		
 		serverManager.style.display = "block";
+		
+		inputPw.focus();
 		
 		editor.resizeNeeded();
 		
