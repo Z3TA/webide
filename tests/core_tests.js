@@ -45,6 +45,7 @@
 			test("abc#def#ghi#jkl#", 1,13);
 			
 			test("{#    abc#    def#}#", 6,16);
+			test("{#→→→→abc#→→→→def#}#", 6,16);
 			
 			test("{#    abc#    def#}gfi#", 7,20);
 			
@@ -62,6 +63,8 @@
 				
 				file.text = txt.replace(/@#/g, "\r\n");
 				file.text = file.text.replace(/#/g, "\n");
+				file.text = file.text.replace(/→/g, "\t");
+				
 				file.grid = file.createGrid();
 				file.deleteTextRange(start,end);
 				

@@ -1588,6 +1588,7 @@ var File; // File object is global
 		function visualizeTextRange(txt, start, end) {
 			
 			txt = txt.replace(/\n|\r/g, "#"); // Replace line feeds and carage returns with # to make them easier to count
+			txt = txt.replace(/t/g, "→");
 			
 			console.log("TextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
 			
