@@ -2689,6 +2689,7 @@ editor.lastKeyPressed = "";
 			ftpClient.on('error', function(err) {
 				alertBox(err.message);
 				callback(err); // Should we callback here ?? Can happend several hours after the connection was initiated!
+				
 				connectionClosed("ftp", serverAddress);
 				
 				/*
@@ -3370,23 +3371,26 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		function filesOnServer() {
-			// Returns an array of currently opened files connected to this server
-			var list = [];
-			for(var path in editor.files) {
-				console.log("path=" + path);
-				if(protocol == "ftp") { // protocol is always lower case!
-					if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
+		delete editor.connections[serverAddress]; // Remove the connection
+		
+		
+			function filesOnServer() {
+				// Returns an array of currently opened files connected to this server
+				var list = [];
+				for(var path in editor.files) {
+					console.log("path=" + path);
+					if(protocol == "ftp") { // protocol is always lower case!
+						if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
+					}
+					else if(protocol == "ssh") {
+						if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
+					}
 				}
-				else if(protocol == "ssh") {
-					if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
-				}
+				
+				return list;
 			}
 			
-			return list;
 		}
-		
-	}
 	
 	function removeFrom(list, fun) {
 		// Removes an object from an array of objects

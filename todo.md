@@ -23,9 +23,9 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
-Disconnect/delete remote connection when login fails ? ... repeat: connect with wrong pw, close the editor, will throw an error about no close method to connection.
 
-deleteTextRange left a tab that was unable to remove ... Make more test cases for deleteTextRange !
+
+
 
 
 
