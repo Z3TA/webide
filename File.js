@@ -1483,7 +1483,7 @@ var File; // File object is global
 					
 					// And the second one might have changed indentation characters
 					
-					if(first.row < (grid.length-1) && first.row > 0) {
+					if(first.row < (grid.length-1)) {
 						// Second one is not the last row of the file, so we can delete that one too
 						
 						console.log("DELETE CC ROW=" + first.row);
@@ -1512,7 +1512,7 @@ var File; // File object is global
 						
 					}
 					else {
-						// It's the last row of the file Or first.row is zero
+						// It's the last row of the file and it's emty
 						// The file needs at least one row or it will go bonkers
 	
 						
@@ -1529,23 +1529,17 @@ var File; // File object is global
 						
 						}
 						else if(first.row == 0) {
-							// It's the first row and it's emty
-														
-							if(grid.length > 2) {
+							// It's the only row and it's emty
+
+							if(grid.length > 1) {
 								file.debugGrid();
 								throw new Error("Did not expect file.grid.length=" + file.grid.length);
 							}
 							
-							if(grid.length == 2) {
-								if(grid[1].length != 0) throw new Error("Did not expect grid[1].length=" + grid[1].length);
-								grid.pop();
-							}
-
 							file.text = "";
 							file.grid[0].indentationCharacters = ""; 
 							file.grid[0].startIndex = 0;
 							file.grid[0].lineNumber = 1;
-
 							
 						}
 						

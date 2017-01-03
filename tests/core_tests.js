@@ -41,18 +41,18 @@
 		
 		callback(true);
 		
-	}, 1);
+	});
 		
 	
-	
-	
-	
+
 	editor.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
 		editor.openFile("testDeleteTextRange.js", '', function(err, file) {
 	
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
-
+			
+			test("abc#def##", 0,6);
+			
 			test("abcd#efghijk", 0,11);
 			
 			test("foo bar", 2,4);
@@ -102,7 +102,7 @@
 			}
 			
 		});
-	});
+	}, 1);
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {
