@@ -938,8 +938,8 @@
 			
 			// Save original editor window width/height and position !?
 			
-			// Show the toolbar so you can see the URL, and open dev tools
 			previewWin = gui.Window.open(url, {toolbar:true, frame:true, width: previeWidth, height: previewHeight}); 
+			// Show the toolbar so you can see the URL, and open dev tools
 			
 			
 			previewWin.moveTo(posX, posY);

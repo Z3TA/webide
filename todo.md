@@ -13,6 +13,11 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 
 2) Beta release?, get USER FEEDBACK!
 
+find beta tester
+setup ftp + webpage
+give download link with bootstrap.url token, that saves the ftp user/pw
+have a tutorial that shows how to publish to webpage and write new posts
+
 3) Bug/issue fixing and refactoring
 4) Polishing of existing features
 5) Optimization (toggle devMode off when testing!)
@@ -23,70 +28,20 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
+make a bootstrap service for beta testers
 
+Give beta users free web space to upload their web pages
 
+test jzedit_download, think about bootstrap.url
 
 
 todo:
 
-Windows placement (like when opending the SSG preview), find available space ... and place the windows besides each other
-
-make a bootstrap service for beta testers
-
-test jzedit_download, think about bootstrap.url
 
 fix wrong indentation in file source!
-
-
-SSG, able to set a site as default and show that first.
-
-SSG problem: WYSIWYG with files that contain <?JS code ?>
-
-Debug deleting large chunks in WYSIWYG doesn't remove all from source.
-
-Debug writing in editor inserts stuff from the ignore (transform).
-
-remember last WYSIWYG window position and size
-
-inplement flashBox that flash a unfocused message that fadews out and dissappears (or dissappears when you click close)
-
-automatically bring up the SSG widget when opening a file the is managed by the SSG, and select that site
-
-show all editor windows when showing one of them! Like ex you have the preview open, then alt tab away, then alt tab back to 
-the editor, you still want to see the preview window!
-
-When in preview or WYSIWYG mode, set up the editors and preview/wysiwyg windows besides each other so you see both
-test this in windows managers ...
-Use iframe instead !? No because we want to easily resize the windows to see how it looks in different sizes.
-
-
 Fix white-space in source file (context menu option)
-
-Mercurial integration
-
-See total lines in bottom right corder when scrolling so you know where in the file your are.
-
-Improve the file explorer:
-Two panes, one for folders (with local fs and all remote fs as root's) and one for files (current selected folder). 
-Icons! Delete, rename, create new files and folders. Move files using copy/pasting (even between different remote locations). Inspiration from Windows Explorer 
-
-
 Feature to replace spaces used for indentation (convert indentation to spaces 2/4), because the code dont fit in my code examples on my blog
 
-SSG/wysiwyg: Control what happends when you press enter. Use native selection API to place cursor in wysiwyg
-
-
-cleaning up pasting from Ms-word.
-
-Fixing performence problems in wysiwyg (pasting a word document took a lot of time, also typing in wysiwyg afterwards was slow)
-
-ssg: show the ssg buttons whenever a file from a registered project is opened
-
-Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
-
-Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
-
-Guide for new users! 
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -95,8 +50,6 @@ Guide for new users!
 * Fix bugs!
 
 
-Try the editor on OSX.
-Compile nodehun for osx
 
 
 
@@ -800,8 +753,39 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 
 
-Polishing
-=========
+Polishing (only existing features)
+==================================
+
+Refresh previw/WYSIWYG when editing CSS files
+
+SSG, able to set a site as default and show that first.
+
+SSG problem: WYSIWYG with files that contain <?JS code ?>
+Debug deleting large chunks in WYSIWYG doesn't remove all from source.
+Debug writing in editor inserts stuff from the ignore (transform).
+
+automatically bring up the SSG widget when opening a file the is managed by the SSG, and select that site
+
+show all editor windows when showing one of them! Like ex you have the preview open, then alt tab away, then alt tab back to
+the editor, you still want to see the preview window!
+
+Mercurial integration
+
+See total lines in bottom right corder when scrolling so you know where in the file your are.
+
+Improve the file explorer:
+Two panes, one for folders (with local fs and all remote fs as root's) and one for files (current selected folder).
+Icons! Delete, rename, create new files and folders. Move files using copy/pasting (even between different remote locations). Inspiration from Windows Explorer
+
+SSG/wysiwyg: Control what happends when you press enter. Use native selection API to place cursor in wysiwyg
+
+cleaning up pasting from Ms-word in SSG WYSIWYG
+
+ssg: show the ssg buttons whenever a file from a registered project is opened
+
+Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
+
+Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
 
 delete (and rename) files via file explorer
 
@@ -1113,7 +1097,7 @@ support port in url's (connection manager, etc)
 Optimization
 ============
 
-parseOnlyFunctionOptimizer: 2939.462ms when editing on line 3461 in editor.js
+Fixing performence problems in wysiwyg (pasting a word document took a lot of time, also typing in wysiwyg afterwards was slow)
 
 editor.eventListeners.exit.push({fun: function closeOpenConnections() {
 for(var conn in editor.connections) {
@@ -1241,6 +1225,13 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 ------------------------------------
+
+"Write any command" plugin that lets you pick any plugin/keycombo (from droplist) when you type in for example "find" shows "find in files", "etc"
+
+Try the editor on OSX.
+Compile nodehun for osx
+
+Auto complete ---- or === for ascii underlined headings
 
 PHP scripting with the static site generator: <?php ...php code here... ?>
 
