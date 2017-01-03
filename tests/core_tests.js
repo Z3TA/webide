@@ -39,6 +39,7 @@
 	
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
 
+			test("abcd#efghijk", 0,11);
 			
 			test("foo bar", 2,4);
 			
@@ -53,9 +54,11 @@
 			
 			test("{#    {#    }#}", 12,14);
 			
-			//return;
+			test("→abc#→def", 1,3);
 			
-			editor.closeFile(file.path);
+			test("→abc#→def", 1,8);
+			
+			//editor.closeFile(file.path);
 			callback(true);
 			
 			function test(txt, start, end) {
@@ -66,7 +69,9 @@
 				file.text = file.text.replace(/→/g, "\t");
 				
 				file.grid = file.createGrid();
-				file.deleteTextRange(start,end);
+				file.deleteTextRange(start,end); // will run sanity check
+				
+				file.putCharacter("z"); // will also check file.caret
 				
 				function spaces(n) {
 					var str = "";
@@ -83,7 +88,7 @@
 			}
 			
 		});
-	});
+	}, 1);
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {

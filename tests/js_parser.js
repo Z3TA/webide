@@ -12,7 +12,7 @@ editor.addTest(function aspVarInHtml(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 editor.addTest(function funInJson(callback) {
 	// Parser can't find start of baz

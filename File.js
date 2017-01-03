@@ -39,7 +39,7 @@ var File; // File object is global
 		
 		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
-		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
+		file.text = fixInconsistentLineBreaks(text, file.lineBreak); // Many functions count on the linebreak character being consistent
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
 		file.partStartRow = 0;
 		file.tail = false; // We are on the last part of the stream if true
@@ -481,6 +481,7 @@ var File; // File object is global
 		var expect;
 		var box;
 		var lineBreakCharacters;
+		var index = 0;
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
@@ -492,12 +493,22 @@ var File; // File object is global
 		
 		for(var row=0; row<grid.length; row++) {
 			
-			// Check Startindex
-			
+			// Make sure the properties exist
 			if(typeof grid[row].startIndex !== "number") throw new Error("startIndex of grid row=" + row + " is " + grid[row].startIndex + " (not a number)");
 			if(typeof grid[row].lineNumber !== "number") throw new Error("lineNumber of grid row=" + row + " is " + grid[row].lineNumber + " (not a number)");
 			if(typeof grid[row].indentation !== "number") throw new Error("indentation of grid row=" + row + " is " + grid[row].indentation + " (not a number)");
 			if(typeof grid[row].indentationCharacters !== "string") throw new Error("indentationCharacters of grid row=" + row + " is " + grid[row].indentationCharacters + " (not a string)");
+			
+			
+			// Check Startindex
+			
+			index += grid[row].indentationCharacters.length;
+			
+			if(grid[row].startIndex != index) {
+				file.debugGrid();
+				throw new Error("grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index);
+			}
+			index += grid[row].length + file.lineBreak.length;
 			
 			
 			if(grid[row].length > 0) {
@@ -1472,7 +1483,7 @@ var File; // File object is global
 					
 					// And the second one might have changed indentation characters
 					
-					if(first.row < (grid.length-1)) {
+					if(first.row < (grid.length-1) && first.row > 0) {
 						// Second one is not the last row of the file, so we can delete that one too
 						
 						console.log("DELETE CC ROW=" + first.row);
@@ -1485,7 +1496,7 @@ var File; // File object is global
 						
 						if(deleteExtra2 < 0) {
 							file.debugGrid();
-							throw new Error("Expected a line break after checkSpaceFrom=" + checkSpaceFrom);
+							throw new Error("Expected a line break after index checkSpaceFrom=" + checkSpaceFrom);
 						}
 						else if(deleteExtra2 > 0) {
 							file.text = deletePart(file.text, checkSpaceFrom, checkSpaceFrom + deleteExtra2 - 1);
@@ -1501,21 +1512,44 @@ var File; // File object is global
 						
 					}
 					else {
-						// It's the last row of the file. The file needs that end row or it will go bonkers
+						// It's the last row of the file Or first.row is zero
+						// The file needs at least one row or it will go bonkers
+	
 						
-						console.log("Last line break of the file yo!");
-						
-						// Update the indentation characters (the row is emty)
 						if(first.row > 0) {
+							// It's the end row
+							// Update the indentation characters (the row is emty)
 							grid[first.row].indentationCharacters = file.text.substr(file.text.lastIndexOf(file.lineBreak, file.text.length) + file.lineBreak.length);
+						
+							// Sanity check if indentation characters contain any character that is not a space or tab !?
+							if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters));
+							
+							grid[first.row].startIndex = file.text.length;
+							grid[first.row].lineNumber = grid.length;
+						
 						}
-						else if(first.row == 0) throw new Error("Did not expect first.row=" + first.row + " to be zero");
+						else if(first.row == 0) {
+							// It's the first row and it's emty
+														
+							if(grid.length > 2) {
+								file.debugGrid();
+								throw new Error("Did not expect file.grid.length=" + file.grid.length);
+							}
+							
+							if(grid.length == 2) {
+								if(grid[1].length != 0) throw new Error("Did not expect grid[1].length=" + grid[1].length);
+								grid.pop();
+							}
+
+							file.text = "";
+							file.grid[0].indentationCharacters = ""; 
+							file.grid[0].startIndex = 0;
+							file.grid[0].lineNumber = 1;
+
+							
+						}
 						
-						// Sanity check if indentation characters contain any character that is not a space or tab !?
-						if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters));
-						
-						grid[first.row].startIndex = file.text.length;
-						grid[first.row].lineNumber = grid.length;
+
 					}
 
 				}
