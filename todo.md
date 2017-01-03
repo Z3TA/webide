@@ -23,8 +23,6 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 What I'm working on
 -------------------
 
-When writing classic ASP, " sometimes creates "" while you want "step here"
-
 
 
 

@@ -1388,10 +1388,38 @@ function makePathAbsolute(path) {
 	return path;
 	}
 	
+function reIndexOf(reIn, str, startIndex) {
+	var re = new RegExp(reIn.source, 'g' + (reIn.ignoreCase ? 'i' : '') + (reIn.multiLine ? 'm' : ''));
+	re.lastIndex = startIndex || 0;
+	var res = re.exec(str);
+	if(!res) return -1;
+	return re.lastIndex - res[0].length;
+};
+
+
+function reLastIndexOf(regex, str, startpos) {
 	
+	regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+	if(typeof (startpos) == "undefined") {
+		startpos = str.length;
+	} else if(startpos < 0) {
+		startpos = 0;
+	}
+	var stringToWorkWith = str.substring(0, startpos + 1);
+	var lastIndexOf = -1;
+	var nextStop = 0;
+	var result;
+	while((result = regex.exec(stringToWorkWith)) != null) {
+		lastIndexOf = result.index;
+		regex.lastIndex = lastIndexOf+1;
+	}
+	return lastIndexOf;
+}
 	
-	
-	
+function assert(x, y) {
+	if(x !== y) throw new Error("Expected x = '" + x + "' = y = '" + y + "'");
+}
+
 	
 	
 	

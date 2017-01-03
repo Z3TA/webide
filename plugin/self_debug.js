@@ -118,7 +118,7 @@
 		
 		source = source.replace("file://", "");
 		
-		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {file.gotoLine(' + lineno + ');})">' + source + "</a>";
+		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {file.gotoLine(' + lineno + ');editor.renderNeeded();})">' + source + "</a>";
 		
 		confirmBox("" + sourceLink + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no

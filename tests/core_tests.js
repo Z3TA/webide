@@ -32,6 +32,20 @@
 		
 	*/
 	
+	editor.addTest(function test_reLastIndexOf(callback) {
+		
+		assert(reLastIndexOf(/a/, "abc"), 0);
+		assert(reLastIndexOf(/z/, "abc"), -1);
+		assert(reLastIndexOf(/a/, "abcabc"), 3);
+		assert(reLastIndexOf(/a/, "abcabc", 2), 0);
+		
+		callback(true);
+		
+	}, 1);
+		
+	
+	
+	
 	
 	editor.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
@@ -58,7 +72,7 @@
 			
 			test("→abc#→def", 1,8);
 			
-			//editor.closeFile(file.path);
+			editor.closeFile(file.path);
 			callback(true);
 			
 			function test(txt, start, end) {
@@ -88,7 +102,7 @@
 			}
 			
 		});
-	}, 1);
+	});
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {
@@ -129,6 +143,7 @@
 			var key_X = 88;
 			var key_V = 86;
 			
+			// Simulate select the text using the keyboard Up button
 			editor.mock("keydown", {charCode: key_UP, shiftKey: true}); // shift + Arrow up
 			editor.mock("keydown", {charCode: key_UP, shiftKey: true}); // shift + Arrow up
 			

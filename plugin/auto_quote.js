@@ -51,16 +51,15 @@
 			
 			if(character == "'") return true; // Single quotes ' Are used to make comments in vbScript
 			
-			var insideTag = isInside(file.text, index, "<", ">");
+			var insideTag = isInsideRe(file.text, index, "<[^%]", "[^%]>");
 			var insideASP = isInside(file.text, index, "<%", "%>");
+			
+			console.log("insideASP=" + insideASP + " insideTag=" + insideTag);
 			
 			if(insideASP && insideTag) {
 				file.insertText('""');
 				editor.renderNeeded();
 				return false;
-			}
-			else {
-				console.log("insideASP=" + insideASP + " insideTag=" + insideTag);
 			}
 		}
 		
@@ -224,6 +223,20 @@
 		if(before == -1) return false; // str1 doesn't exist before index
 		
 		var beforeEnded = text.indexOf(str2, before);
+		
+		return beforeEnded > index; // index is between str1 and str2, or not
+		
+	}
+	
+	function isInsideRe(text, index, re1, re2) {
+		var r1 = new RegExp(re1);
+		var r2 = new RegExp(re2);
+		
+		var before = reLastIndexOf(r1, text, index);
+		
+		if(before == -1) return false; // re1 doesn't exist before index
+		
+		var beforeEnded = reIndexOf(r2, text, before);
 		
 		return beforeEnded > index; // index is between str1 and str2, or not
 		
