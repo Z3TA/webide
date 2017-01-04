@@ -1551,6 +1551,9 @@ auto-completes based on other words in open windows (or other files in the open 
 
 Self hosted cloud editor. Work in the browser.
 
+Built in SQL query, with GUI for editing tables
+
+SQL auto completion: SELECT foo FROM table WHERE bar = ? (lookup mysql schema)
 
 Need though
 -----------
