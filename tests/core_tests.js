@@ -51,6 +51,11 @@
 	
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
 			
+			// Also make sure the deleted character are correct
+			editor.on("fileChange", change);
+			var charsAfter = ""; // Will update in change
+			var charactersDeleted = "";
+			
 			test("abc#def##", 0,6);
 			
 			test("abcd#efghijk", 0,11);
@@ -73,17 +78,29 @@
 			test("→abc#→def", 1,8);
 			
 			editor.closeFile(file.path);
+			
+			editor.removeEvent("fileChange", change);
+			
 			callback(true);
 			
 			function test(txt, start, end) {
+				
 				console.log("Testing deleteTextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
 				
 				file.text = txt.replace(/@#/g, "\r\n");
 				file.text = file.text.replace(/#/g, "\n");
 				file.text = file.text.replace(/→/g, "\t");
 				
+				var charsBefore = file.text;
+				
 				file.grid = file.createGrid();
 				file.deleteTextRange(start,end); // will run sanity check
+				
+				if(charsBefore.length - charactersDeleted.length != charsAfter.length) {
+					throw new Error(`Expected charsBefore=${charsBefore.length} - charactersDeleted=${charactersDeleted.length} = charsAfter=${charsAfter.length}\n
+					charsAfter=${lbChars(charsAfter)}\n
+					charactersDeleted=${lbChars(charactersDeleted)}`); 
+				}
 				
 				file.putCharacter("z"); // will also check file.caret
 				
@@ -101,7 +118,15 @@
 				
 			}
 			
+			function change(file, type, characters, caretIndex, row, col) {
+				if(type == "deleteTextRange") {
+					charsAfter = file.text;
+					charactersDeleted = characters;
+				}
+			}
+			
 		});
+			
 	}, 1);
 	
 	

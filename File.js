@@ -1352,7 +1352,7 @@ var File; // File object is global
 		var removedText = file.text.substring(firstIndex, lastIndex+1);
 		
 		file.text = deletePart(file.text, firstIndex, lastIndex);
-				
+		
 		/* 
 			Update the grid ...
 			It's possible the text range starts/stops inside indentation characters and line breaks !?
@@ -1361,7 +1361,7 @@ var File; // File object is global
 		
 		var cursorIndex = firstIndex; // Where the deletion started
 		
-		var reCreateGrid = false; // Change to false when ready
+		var reCreateGrid = false;
 		
 		if(!reCreateGrid) {
 			
@@ -1378,18 +1378,23 @@ var File; // File object is global
 			console.log("first=" + JSON.stringify(first));
 			console.log("last=" + JSON.stringify(last));
 			
-			if(first.col === 0 || first.col === undefined) {
-				// Update indentation character count on first row
+			if((first.col === 0 || first.col === undefined) && grid[first.row].indentationCharacters.length > 0 && firstIndex > 0 && firstIndex < grid[first.row].startIndex) {
+				// Update indentation characters on first row (firstIndex is inside indentation characters)
 				
 				console.log("indentationCharacters on row=" + first.row + ": " + lbChars(grid[first.row].indentationCharacters) + "");
-
 				
 				if(first.row > 0) {
 					var lastLineBreak = file.text.lastIndexOf(file.lineBreak, firstIndex-1);
-					if( (firstIndex - lastLineBreak) > 0) grid[first.row].indentationCharacters = file.text.substring(lastLineBreak + file.lineBreak.length, firstIndex);
-					else grid[first.row].indentationCharacters = "";
+					if( (firstIndex - lastLineBreak) > 0) {
+						grid[first.row].indentationCharacters = file.text.substring(lastLineBreak + file.lineBreak.length, firstIndex);
+					}
+					else {
+						grid[first.row].indentationCharacters = "";
+					}
 				}
-				else if(first.row == 0) grid[first.row].indentationCharacters = file.text.substr(0, firstIndex);
+				else if(first.row == 0) {
+					grid[first.row].indentationCharacters = file.text.substr(0, firstIndex); // firstIndex = length in substr
+				}
 				
 				// Sanity check indentation characters
 				if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters) + " lastLineBreak=" + lastLineBreak + "");
@@ -1452,7 +1457,6 @@ var File; // File object is global
 					grid.splice(first.row+1, 1);
 					
 					// indentation characters of second row has already been removed, but not the ending linebreak !!!??
-					//file.text =  
 					
 					fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
 				}
@@ -1461,7 +1465,7 @@ var File; // File object is global
 					// Delete the first one
 					console.log("DELETE BB ROW=" + first.row);
 					grid.splice(first.row, 1);
-					
+										
 					// The line break on the first one have already been removed.
 					// But the indentation characters might not have been removed!
 					
@@ -1472,14 +1476,20 @@ var File; // File object is global
 					
 					console.log("deleteExtra1=" + deleteExtra1);
 					if(deleteExtra1 > 0) {
+						
+						console.log( "extra removed text BB: " + lbChars(file.text.substring(firstIndex-deleteExtra1, firstIndex)) );
+						
+						removedText = file.text.substring(firstIndex-deleteExtra1, firstIndex) + removedText;
+
 						file.text = deletePart(file.text, firstIndex-deleteExtra1, firstIndex-1);
 
 						deletionLength += deleteExtra1;
 						checkSpaceFrom -= deleteExtra1;
 						
 						if(cursorIndex > 0) cursorIndex -= deleteExtra1;
+						
 					}
-
+					
 					
 					// And the second one might have changed indentation characters
 					
@@ -1499,6 +1509,11 @@ var File; // File object is global
 							throw new Error("Expected a line break after index checkSpaceFrom=" + checkSpaceFrom);
 						}
 						else if(deleteExtra2 > 0) {
+							
+							console.log("extra removed text CC: " + lbChars(file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2)));
+							
+							removedText = file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2) + removedText;
+							
 							file.text = deletePart(file.text, checkSpaceFrom, checkSpaceFrom + deleteExtra2 - 1);
 							
 							deletionLength += deleteExtra2;
@@ -1535,6 +1550,8 @@ var File; // File object is global
 								file.debugGrid();
 								throw new Error("Did not expect file.grid.length=" + file.grid.length);
 							}
+							
+							if(file.text.length != 0) throw new Error("Expected zero file text length");
 							
 							file.text = "";
 							file.grid[0].indentationCharacters = ""; 
