@@ -199,6 +199,12 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Annoying "" when adding " around json ...
+{
+""foo: "bar"
+}
+
+
 ftp choke Ctrl+P error
 
 Unable to open big remote files (over FTP) (because big files only support disk streams) (should everything be streams?) 
