@@ -1420,8 +1420,23 @@ function assert(x, y) {
 	if(x !== y) throw new Error("Expected x = '" + x + "' = y = '" + y + "'");
 }
 
+function indexOfZeroWidthCharacter(str) {
+	var zeroWidth = [
+		"\u200E", // LEFT-TO-RIGHT MARK 
+		"\u200F", // RIGHT-TO-LEFT MARK
+		"\u200B", // zero width space
+		"\u200C", // zero width non-joiner Unicode code point (https://en.wikipedia.org/wiki/Zero-width_non-joiner)
+		"\u200D", // zero width joiner Unicode code point
+		"\uFEFF"  // zero width no-break space Unicode code point 
+	];
 	
+	for(var i=0; i<zeroWidth.length; i++) {
+		if(str.indexOf(zeroWidth[i]) != -1) return str.indexOf(zeroWidth[i]);
+	}
 	
+	return -1;
+	}
+
 	
 	
 	

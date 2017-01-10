@@ -579,6 +579,7 @@ var File; // File object is global
 				if(box.selected === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a selected value!");
 				if(box.highlighted === undefined) throw new Error("grid[" + row + "][" + col + "] doesn't have a highlighted value!");
 				
+				if(box.char === "") throw new Error("grid[" + row + "][" + col + "].char is nothing!"); 
 			}
 			
 		}

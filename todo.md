@@ -199,6 +199,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Unicode characters that are not visible. for example: 5206 or 8206 "left-to-right mark" will cause the grid to show wrong
+
+
+
 Annoying "" when adding " around json ...
 {
 ""foo: "bar"
