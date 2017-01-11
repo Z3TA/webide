@@ -210,6 +210,9 @@ Annoying "" when adding " around json ...
 ""foo: "bar"
 }
 
+var in for() not found (when auto completing)
+function arguments not found when auto completing
+
 
 ftp choke Ctrl+P error
 

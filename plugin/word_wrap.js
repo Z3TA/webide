@@ -4,6 +4,8 @@ editor.bindKey({
 	fun: function wordWrap(file, combo, character, charCode, direction, targetElementClass) {
 		"use strict";
 		
+		alertBox("wordWrap text");
+		
 		var maxTextWidth = editor.view.visibleColumns;
 		var space = " ";
 		
@@ -46,6 +48,14 @@ editor.bindKey({
 			return true;
 		}
 		
+		var text = file.text.substring(startOfParagraph, endOfParagraph);
+		
+		// Make sure it's text or html and not code
+		if(text.indexOf("{") != -11) {
+			console.warn("Not word wrapping (not plain text) text=" + text);
+			return;
+		}
+		
 		var firstCharacter = file.text.charAt(startOfParagraph);
 		var secondCharacter = file.text.charAt(startOfParagraph+1);
 		
@@ -70,7 +80,8 @@ editor.bindKey({
 		
 		//console.log("file.caret=" + JSON.stringify(file.caret));
 		
-		var text = file.deleteTextRange(startOfParagraph, endOfParagraph);
+		file.deleteTextRange(startOfParagraph, endOfParagraph);
+		
 		var textLengthBefore = text.length;
 		
 		//file.debugGrid();
