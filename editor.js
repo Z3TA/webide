@@ -3124,7 +3124,8 @@ editor.lastKeyPressed = "";
 			}
 		}
 	}
-	
+	
+
 	editor.createPath = function(pathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists
@@ -5126,7 +5127,6 @@ editor.lastKeyPressed = "";
 			
 		img.src = url;
 	}
-		
 		
 		
 		

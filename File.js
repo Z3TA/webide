@@ -96,21 +96,36 @@ var File; // File object is global
 		if(lineBreak == "\r\n") {
 			console.log("Searching for lonely (LF) \\n characters ... ");
 			
-			var fixedILF = false;
-			var indexILF = text.indexOf("\n");
+			var fixed = false;
+			var index = text.indexOf("\n");
 			var rowCount = 0;
-			while(indexILF > -1) {
-				if(text.charAt(indexILF-1) != "\r") {
-					if(!fixedILF) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
-					text = text.substring(0, indexILF) + "\r" + text.substring(indexILF);
-					console.log("Inserted (CR) on index=" + indexILF);
-					fixedILF = true;
+			while(index > -1) {
+				if(text.charAt(index-1) != "\r") {
+					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					text = text.substring(0, index) + "\r" + text.substring(index);
+					console.log("Inserted (CR) on index=" + index);
+					fixed = true;
 				}
 				rowCount++;
-				indexILF = text.indexOf("\n", indexILF+1);
+				index = text.indexOf("\n", index+1);
 			}
 			
-			if(fixedILF) {
+			console.log("Searching for lonely (CR) \\r characters ... ");
+			index = text.indexOf("\r");
+			rowCount = 0;
+			while(index > -1) {
+				if(text.charAt(index+1) != "\n") {
+					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					text = text.substring(0, index+1) + "\n" + text.substring(index+1);
+					console.log("Inserted (LF) on index=" + (index+1));
+					fixed = true;
+				}
+				rowCount++;
+				index = text.indexOf("\r", index+2);
+			}
+			
+			
+			if(fixed) {
 				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
 			}
 		}
@@ -505,7 +520,7 @@ var File; // File object is global
 			index += grid[row].indentationCharacters.length;
 			
 			if(grid[row].startIndex != index) {
-				file.debugGrid();
+				//file.debugGrid();
 				throw new Error("grid[" + row + "].startIndex=" + grid[row].startIndex + " Expected startIndex=index=" + index);
 			}
 			index += grid[row].length + file.lineBreak.length;
