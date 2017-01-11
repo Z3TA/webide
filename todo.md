@@ -202,6 +202,8 @@ BUGS (and issues)
 Unicode characters that are not visible. for example: 5206 or 8206 "left-to-right mark" will cause the grid to show wrong
 
 
+Deleting lines that start with spaces, and then Ctrl+Z ...
+
 
 Annoying "" when adding " around json ...
 {
