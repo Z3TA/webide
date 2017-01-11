@@ -23,7 +23,7 @@
 	
 	console.log("Loaded textRenderer");
 	
-	function textRender(ctx, buffer, file, startRow) {
+	function textRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		
 		//console.time("textRender");
 		
@@ -91,7 +91,7 @@
 				
 				if(bufferRowCol.hasCharacter) {
 					
-					if(oldStyle != bufferRowCol.color) {
+					if(oldStyle != bufferRowCol.color || containZeroWidthCharacters) {
 						
 						ctx.fillText(characters, left, top);
 						

@@ -1249,8 +1249,11 @@ editor.lastKeyPressed = "";
 			grid = editor.currentFile.grid;
 			
 			
+			
+			
 			var funName = "";
 			
+			var startRow = 0; // Used for only rendering some rows for optimization. This functions renders all row, so startRow = 0
 			
 			// The reason why we clone the rows and not just push the pointer, is so that the coloring functions don't have to reset all the colors!
 			
@@ -1280,37 +1283,44 @@ editor.lastKeyPressed = "";
 			//console.timeEnd("preRenders");
 			
 			
-			//ctx.imageSmoothingEnabled = true;
+			// Find out if the buffer contains zero with characters ( might need optimization )
+			var startIndex = buffer[0].starIndex;
+			var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
+			var containZeroWidthCharacters = (indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+			//var containZeroWidthCharacters = true;
 			
-			//ctx.translate(0,0);
-			
-			ctx.fillStyle = editor.settings.style.bgColor;
-			
-			//ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			
-			/*
-				ctx.fillStyle = "#FF0000";
-				ctx.fillRect(0,0,150,75);
-				ctx.lineWidth = 1;
-			*/
-			
-			//console.time("renders");
-			for(var i=0; i<editor.renderFunctions.length; i++) {
-				//funName = getFunctionName(editor.renderFunctions[i]);
-				//console.time("render: " + funName);
-				editor.renderFunctions[i](ctx, buffer, editor.currentFile); // Call render
-				//console.timeEnd("render: " + funName);
+				
+				//ctx.imageSmoothingEnabled = true;
+				
+				//ctx.translate(0,0);
+				
+				ctx.fillStyle = editor.settings.style.bgColor;
+				
+				//ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				
+				/*
+					ctx.fillStyle = "#FF0000";
+					ctx.fillRect(0,0,150,75);
+					ctx.lineWidth = 1;
+				*/
+				
+				//console.time("renders");
+				for(var i=0; i<editor.renderFunctions.length; i++) {
+					//funName = getFunctionName(editor.renderFunctions[i]);
+					//console.time("render: " + funName);
+				editor.renderFunctions[i](ctx, buffer, editor.currentFile, startRow, containZeroWidthCharacters); // Call render
+					//console.timeEnd("render: " + funName);
+				}
+				//console.timeEnd("renders");
+				
+				
+				editor.renderCaret(file.caret);
+				
+				
+				console.timeEnd("render");
+				
 			}
-			//console.timeEnd("renders");
-			
-			
-			editor.renderCaret(file.caret);
-			
-			
-			console.timeEnd("render");
-			
-		}
 		else {
 			// Show some useful info for new users
 			
