@@ -1078,7 +1078,7 @@ editor.lastKeyPressed = "";
 			
 			function putFtpDone(err) {
 				if(err) {
-					console.warn("Failed to save pathname= " + pathname + "\n" + err.message);
+					console.warn("Failed to save pathname= " + pathname + "\n" + err);
 					saveToDiskCallback(err);
 					runFtpQueue();
 				}
@@ -3161,8 +3161,11 @@ editor.lastKeyPressed = "";
 		create.shift(); // Don't bother with the root
 		
 		// Execute mkdir in order !
-		
-		executeMkdir(create.shift());
+		if(create.length == 0) {
+			console.warn("No path to create! fullPath=" + fullPath);
+			createPathCallback(null, fullPath);
+		}
+		else executeMkdir(create.shift());
 		
 		function executeMkdir(folder) {
 			// This is a recursive function!
@@ -3802,7 +3805,7 @@ editor.lastKeyPressed = "";
 		
 		editor.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
 			if(err) {
-				console.warn("bootstrap: " +err.message);
+				console.warn("bootstrap: " + err.message);
 				return;
 			}
 			

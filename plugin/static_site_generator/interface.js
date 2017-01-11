@@ -137,11 +137,29 @@
 	
 	function bootstrap(json) {
 		
-		if(editor.bootstrap)  {
+		if(json) {
+			var domain = json.domain;
+			var ftpuser = json.ftpuser;
+			var ftppw = json.ftppw;
+			var site;
 			
-			//alertBox(editor.bootstrap.greeting);
+			for(var i=0; i<sites.length; i++) {
+				site = sites[i];
+				if(site.name == demoSite.name || site.name == domain) {
+					// Update the site
+					if(site.name == demoSite.name) site.name = domain;
+					site.user = ftpuser;
+					site.pw = ftppw;
+					if(site.publish.indexOf("/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
+					
+					window.localStorage.cmsjz_sites = JSON.stringify(sites); // Save all sites in local-storage
+					
+					break;
+				}
+			}
 			
-		}
+			}
+		
 		
 	}
 	
