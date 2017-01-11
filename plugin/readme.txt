@@ -100,6 +100,12 @@ If they need to be compiled, you have to compile for all platforms. See the spel
 
 All dependencies should be included in the repository, so users don't have to npm install!
 
+cd plugin
+mkdir yourplugin
+cd yourplugin
+mkdir node_modules
+npm install dependency
+
 
 
 Performance tips
@@ -133,7 +139,7 @@ Making a parser
 Ooops "Bricked" the editor
 --------------------------
 
-1. Open up package.json in another editor
+1. Open up /package.json in another editor
 2. Change view: true and toolbar: true
 3. Kill all running nw executable's and restart the editor.
 Then you can open the Chromium debugger and see what's wrong.
