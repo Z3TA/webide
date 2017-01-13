@@ -101,7 +101,22 @@
 		
 		bootstrap();
 		
-	}
+		// Open demo site if no file is open
+		var timer = 1000; // Milliseconds
+		setTimeout(function () {
+				
+			var openFiles = Object.keys(editor.files).length;
+			
+			if(openFiles === 0) {
+					
+					var filePath = path.join(require("dirname") + "/plugin/static_site_generator/demo/source/about.htm");
+						
+						editor.openFile(filePath);
+					
+			}
+		}, timer);
+		
+		}
 	
 	function SSG_cleanup() {
 		closePreview();
@@ -129,8 +144,8 @@
 		editor.unbindKey(wysiwygSSG);
 		
 		if(manager) {
-		var footer = document.getElementById("footer");
-		footer.removeChild(manager);
+			var footer = document.getElementById("footer");
+			footer.removeChild(manager);
 			editor.resizeNeeded();
 		}
 		
