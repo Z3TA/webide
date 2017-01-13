@@ -28,11 +28,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-make a bootstrap service for beta testers
-
-Give beta users free web space to upload their web pages
-
-test jzedit_download, think about bootstrap.url
+open in browser button in ssg publish alert
 
 
 todo:
