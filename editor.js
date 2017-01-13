@@ -3561,39 +3561,13 @@ editor.lastKeyPressed = "";
 		
 		console.log("Starting the editor ...");
 		
-		
-		if(runtime != "browser") {
+		getVersion(function(version) {
 			
-			// Get the commit ID
-			var versionPath = __dirname + "/version.inc";
-			editor.doesFileExist(versionPath, function(exists) {
-				if(exists) {
-					editor.readFromDisk("version.inc", function(err, path, string) {
-						editor.version = parseInt(string);
-					});
-				}
-				else {
-					// Mercurial maybe
-					var exec = require('child_process').exec;
-					var child = exec('hg log -l 1', function(error, stdout, stderr) {
-						if(!error) {
-							
-							var myRegexp = /changeset:\s*(\d*):/g;
-							var match = myRegexp.exec(stdout);
-							
-							if(!match) {
-								console.log("Unable to find latest HG commit id! stdout=" + stdout);
-								editor.version = -1;
-							}
-							else editor.version = match[1];
-						}
-						else {
-							editor.version = -1;
-						}
-					});
-				}
-			});
-		}
+			console.log("Editor version: " + version);
+			
+			bootstrap();
+			
+		});
 		
 		canvas = document.getElementById("canvas");
 		
@@ -3803,34 +3777,6 @@ editor.lastKeyPressed = "";
 		}
 		
 		
-		editor.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
-			if(err) {
-				console.warn("bootstrap: " + err.message);
-				return;
-			}
-			
-			httpGet(url, function(err, data) {
-				if(err) {
-					console.warn("bootstrap: " + err.message);
-					return;
-				}
-				
-				try {
-				var json = JSON.parse(data);
-				}
-				catch(err) {
-					console.warn("bootstrap: Not valid JSON: " + data);
-				}
-				
-				if(json) {
-					editor.bootstrap = json;
-					editor.fireEvent("bootstrap", json);
-				}
-				
-			});
-			
-			
-		});
 		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
@@ -5141,7 +5087,87 @@ editor.lastKeyPressed = "";
 		img.src = url;
 	}
 		
+	function bootstrap() {
+		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
 		
+		editor.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
+			if(err) {
+				console.warn("bootstrap: " + err.message);
+				return;
+			}
+			
+			// Append version to url so that the bootstrap provider knows what version of the editor you are using
+			if(url.indexOf("?") != -1) url = url + "&version=" + editor.version;
+			else url = url + "?version=" + editor.version;
+			
+			httpGet(url, function(err, data) {
+				if(err) {
+					console.warn("bootstrap: " + err.message);
+					return;
+				}
+				
+				try {
+					var json = JSON.parse(data);
+				}
+				catch(err) {
+					console.warn("bootstrap: Not valid JSON: " + data);
+				}
+				
+				if(json) {
+					editor.bootstrap = json;
+					editor.fireEvent("bootstrap", json);
+				}
+				
+			});
+			
+			
+		});
+	}
+	
+	function getVersion(callback) {
 		
+		editor.readFromDisk("version.inc", function(err, path, string) {
+			if(err) {
+				// Failed to read file 
+				
+				if(runtime != "browser") {
+					
+					// Try Mercurial
+					var exec = require('child_process').exec;
+					var child = exec('hg log -l 1', function(error, stdout, stderr) {
+						if(!error) {
+							
+							var myRegexp = /changeset:\s*(\d*):/g;
+							var match = myRegexp.exec(stdout);
+							
+							if(!match) {
+								console.log("Unable to find latest HG commit id! stdout=" + stdout);
+								editor.version = -1;
+								callback(editor.version);
+							}
+							else {
+								editor.version = match[1];
+								callback(editor.version);
+							}
+						}
+						else {
+							editor.version = -1;
+							callback(editor.version);
+						}
+					});
+					}
+				else {
+					editor.version = -1;
+					callback(editor.version);
+				}
+			}
+			else {
+				editor.version = parseInt(string);
+				callback(editor.version);
+			}
+		});
 		
+	}
+	
+	
 })();
