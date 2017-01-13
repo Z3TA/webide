@@ -11,7 +11,7 @@ var benchmarkCharacterCode = 190;
 var inputCount = 0;
  
 
-// List of file extensions of supported files. Extensions not in this list will be loaded in plain text mode.
+// List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
 editor.supportedFiles = [
 	"js",
