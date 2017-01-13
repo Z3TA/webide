@@ -99,6 +99,8 @@
 		
 		editor.on("bootstrap", bootstrap);
 		
+		editor.on("fileOpen", fileOpen);
+		
 		bootstrap();
 		
 		// Open demo site if no file is open
@@ -136,6 +138,7 @@
 		editor.removeEvent("exit", SSG_cleanup);
 		editor.removeEvent("fileChange", fileChange);
 		editor.removeEvent("bootstrap", bootstrap);
+		editor.removeEvent("fileOpen", fileOpen);
 		
 		editor.unbindKey(hideSSG);
 		editor.unbindKey(previewSSG);
@@ -193,6 +196,22 @@
 				break;
 			}
 		}
+	}
+	
+	function fileOpen(file) {
+		
+		var filePath = file.path;
+		
+		// Check all sites to see if the file belongs to any source
+		
+		for(var i=0; i<sites.length; i++) {
+			if(filePath.indexOf(sites[i].source) != -1) {
+				showSSG();
+				switchSite(i)
+				break;
+			}
+		}
+		
 	}
 	
 	function fileChange(file, type, characters, caretIndex, row, col) {
@@ -292,6 +311,33 @@
 			
 		}
 	}
+	
+	function switchSite(index) {
+		// Swtich to the site
+		
+		var site = sites[index];
+		
+		if(site) {
+			//alertBox("Switching to site=" + site.name);
+			
+			selectedSite = site;
+			selectSite.selectedIndex = index;
+			
+			/*
+			inputSiteName.value = selectedSite.name;
+			inputSourceFolder.value = selectedSite.source;
+			inputPreviewFolder.value = selectedSite.preview;
+			inputPublishFolder.value = selectedSite.publish;
+			inputTemplate.value = selectedSite.template;
+			inputAuthUser.value = selectedSite.user;
+			inputAuthPw.value = selectedSite.pw;
+			inputAuthKey.value = selectedSite.key;
+			*/
+			
+		}
+		else throw new Error("Failed to switch to site index=" + index);
+		
+		}
 	
 	
 	function build() {
@@ -448,6 +494,9 @@
 		}
 		
 		function changeSelectSite() {
+			
+			//alertBox("Fired changeSelectSite");
+			
 			var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 			selectedSite = sites[selectedSiteIndex];
 			

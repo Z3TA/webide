@@ -28,7 +28,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-
+When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 
 
 todo:
