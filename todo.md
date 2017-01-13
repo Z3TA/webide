@@ -28,7 +28,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-open in browser button in ssg publish alert
+
 
 
 todo:
@@ -766,6 +766,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Auto complete html tags inside strings. example:
+"<b>" + site.name + "</b> published to:<br>" + site.publish + "<br><i>" + site.url + "</i>"
 
 Refresh previw/WYSIWYG when editing CSS files
 

@@ -52,6 +52,7 @@
 		preview: path.join(require("dirname"), "/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
 		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder
 		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
+		url: "file://" + path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),
 		user: "",
 		pw: "",
 		key: ""
@@ -150,6 +151,7 @@
 					if(site.name == demoSite.name) site.name = domain;
 					site.user = ftpuser;
 					site.pw = ftppw;
+					site.url = "http://" + domain;
 					if(site.publish.indexOf("/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
 					
 					window.localStorage.cmsjz_sites = JSON.stringify(sites); // Save all sites in local-storage
@@ -1556,7 +1558,21 @@
 	
 	function publishSite(site) {
 		compile(site.source, site.publish, true, function buildDone() {
-			alertBox(site.name + " published to " + site.publish);
+			
+			if(site.url) {
+			var open_browser = "Open in browser";
+				confirmBox("<b>" + site.name + "</b> published to:<br>" + site.publish + "<br><i>" + site.url + "</i>", [open_browser, "OK"], function(answer) {
+				if(answer == open_browser) {
+						var open = require(require("dirname") + "/plugin/static_site_generator/node_modules/open");
+					open(site.url, function(err) {
+							if(err) throw err;
+							console.log("Browser closed");
+						});
+					}
+				});
+			}
+			else alertBox(site.name + " published to " + site.publish);
+			
 		});
 		return false;
 	}
@@ -1643,7 +1659,7 @@
 			var filesToSave = 0;
 			var doneCompiling = false;
 			var workerExitCode = -1;
-
+			
 			var foldersExist = [];
 			var folderAboutToBeCreated = [];
 			var waitingList = [];
@@ -1700,7 +1716,7 @@
 			function createFile(filePath, text) {
 				
 				var folder = getDirectoryFromPath(filePath);
-
+				
 				if(foldersExist.indexOf(folder) != -1) {
 					console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
 					editor.saveToDisk(filePath, text, fileCreated);
@@ -1710,7 +1726,7 @@
 					
 					if(folderAboutToBeCreated.indexOf(folder) == -1) createPath(folder);
 				}
-								
+				
 				function fileCreated(err, path) {
 					if(err) {
 						alertBox("<b>" + err.message + "</b><br> Attempting to save: " + filePath);

@@ -106,6 +106,9 @@ cd yourplugin
 mkdir node_modules
 npm install dependency
 
+Modules might need to be required using full path. Example:
+require(require("dirname") + "/plugin/static_site_generator/node_modules/open/");
+
 
 
 Performance tips
