@@ -5092,7 +5092,7 @@ editor.lastKeyPressed = "";
 		
 		editor.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
 			if(err) {
-				console.warn("bootstrap: " + err.message);
+				console.warn("bootstrap.url: " + err.message);
 				return;
 			}
 			
@@ -5102,7 +5102,7 @@ editor.lastKeyPressed = "";
 			
 			httpGet(url, function(err, data) {
 				if(err) {
-					console.warn("bootstrap: " + err.message);
+					console.warn("bootstrap get: " + err.message);
 					return;
 				}
 				
@@ -5110,7 +5110,7 @@ editor.lastKeyPressed = "";
 					var json = JSON.parse(data);
 				}
 				catch(err) {
-					console.warn("bootstrap: Not valid JSON: " + data);
+					console.warn("bootstrap parse: Not valid JSON: " + data);
 				}
 				
 				if(json) {
