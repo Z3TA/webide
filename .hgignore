@@ -1,5 +1,9 @@
 .git/*
 error.log
+spellcheck-worker-debug.log
+bootstrap.url
 plugin/static_site_generator/demo/build.log
 plugin/static_site_generator/demo/preview/*
 plugin/static_site_generator/demo/public/*
+npm/*
+tests/_*
