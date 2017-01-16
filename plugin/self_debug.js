@@ -117,6 +117,7 @@
 		var no = "Keep running";
 		
 		source = source.replace("file://", "");
+		source = source.replace("C:\\C:\\", "C:\\"); // Why is an extra C:\\ added to the path !?
 		
 		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');editor.renderNeeded();})">' + source + "</a>";
 		
