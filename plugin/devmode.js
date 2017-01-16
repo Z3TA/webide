@@ -69,6 +69,9 @@
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
 		console.log = console.warn = function() {}; // Perf mode
 		
+		// These are also an overhead
+		console.time = console.timeEnd = function() {};
+		
 		try {
 		require('nw.gui').Window.get().closeDevTools();
 		}
