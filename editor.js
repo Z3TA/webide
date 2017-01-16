@@ -1436,8 +1436,8 @@ editor.lastKeyPressed = "";
 		
 		var file = editor.currentFile;
 		
-		var top = editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight;
-		var left = editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth - 0.5; // -0.5 to clear sub pixels (caret)
+		var top = Math.floor(editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight);
+		var left = Math.floor(editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth); // -0.5 to clear sub pixels (caret)
 		
 		if(row == file.caret.row) {
 			ctx.fillStyle = editor.settings.style.currentLineColor;
