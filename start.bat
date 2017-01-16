@@ -4,6 +4,9 @@ SET NW_PATH=runtime\nwjs-v0.12.3-win-x64\nw.exe
 SET EDITOR_PATH=.
 SET CHROMIUM_OPTIONS=--disable-gpu-vsync
 
+REM It seems like switch --disable-gpu-vsync does not have any effect on node-webkit. 
+REM Interesting enough, it does not exists in http://src.chromium.org/svn/trunk/src/content/public/common/content_switches.cc. 
+
 REM Use REM to comment out
 
 echo Argument1: %1
