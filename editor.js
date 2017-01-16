@@ -1284,12 +1284,14 @@ editor.lastKeyPressed = "";
 			
 			
 			// Find out if the buffer contains zero with characters ( might need optimization )
-			var startIndex = buffer[0].starIndex;
+			if(buffer.length > 0) {
+			var startIndex = buffer[0].startIndex;
 			var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
 			var containZeroWidthCharacters = (indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
-			//var containZeroWidthCharacters = true;
 			
-				
+			}
+			else var containZeroWidthCharacters = false;
+			
 				//ctx.imageSmoothingEnabled = true;
 				
 				//ctx.translate(0,0);
