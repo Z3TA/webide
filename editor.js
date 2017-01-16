@@ -4309,7 +4309,8 @@ editor.lastKeyPressed = "";
 					editor.renderColumn(file.caret.row, file.caret.col, character);
 					
 					// Repaint the caret
-					editor.renderCaret(file.caret, 1); // 1 so that the caret will be rendered right 
+					
+					editor.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
 					
 					/*
 						Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
