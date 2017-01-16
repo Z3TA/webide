@@ -2930,6 +2930,12 @@ var File; // File object is global
 		str = "",
 		letters = stringToCharCodes(text).join(", ");
 		
+		var maxCharsToDebug = 500;
+		if(file.text.length > maxCharsToDebug) {
+			console.warn("File too big to debug");
+			return;
+		}
+		
 		//console.log(JSON.stringify(grid, null, 4));
 		for(var row=0; row<grid.length; row++) {
 			console.log("row=" + row + ": startIndex=" + grid[row].startIndex + " indentation=" + grid[row].indentation + " indentationCharacters=" + lbChars(grid[row].indentationCharacters));
