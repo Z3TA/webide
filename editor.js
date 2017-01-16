@@ -4309,7 +4309,6 @@ editor.lastKeyPressed = "";
 					editor.renderColumn(file.caret.row, file.caret.col, character);
 					
 					// Repaint the caret
-					
 					editor.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
 					
 					/*
@@ -4317,9 +4316,16 @@ editor.lastKeyPressed = "";
 						And sometimes it will not go down to 3-4ms ever! (stay at 17-18ms)
 						
 						note: Canvas size didn't have an impact when only writing one character
+					
+						Benchmark results are all over the place 2-20ms probably because of vsync or refresh syncing not in sync with the benchmark tool (Typometer)
+						
+						THIS OPTIMIZATION SEEMS TO HAVE VERY LITTLE EFFECT!
+						
+						
+						We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
+					
 					*/
 					
-					// We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
 					//setTimeout(function waitforrender() {
 					
 					file.putCharacter(character);
