@@ -5030,7 +5030,7 @@ editor.lastKeyPressed = "";
 					
 				}
 				else {
-					throw new Error("Error when opening url=" + url + "\nxmlHttp.responseText=" + xmlHttp.responseText);
+					throw new Error("Error when opening url=" + url + "\nxmlHttp.status=" + xmlHttp.status + "\nxmlHttp.responseText=" + xmlHttp.responseText);
 				}
 				
 			}
