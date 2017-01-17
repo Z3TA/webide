@@ -1871,10 +1871,12 @@ editor.lastKeyPressed = "";
 		
 		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
 		
-		if(menuElement.parent == menu) menu.removeChild(menuElement);
-		else console.warn("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML);
+		if(menuElement.parentNode == undefined) throw new Error("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
 		
-		return positionIndex; // So we can insert another node at this position
+		if(menuElement.parentNode == menu) menu.removeChild(menuElement);
+		else throw new Error("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML + "\nmenu.innerHTML=" + menu.innerHTML + "\nmenuElement.parent.innerHTML=" + menuElement.parent.innerHTML);
+		
+		return positionIndex; // So another node can be inserted at this position
 		
 		function getItemPosition(child) {
 			var i = 0;

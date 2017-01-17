@@ -28,6 +28,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+editor.removeMenuItem doesn't seem to work (after a refresh?)
+
+Keyboard command for enabling/disabling devMode
+
+ASP <% =foo %> inside script tag.
+
+
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 
 
