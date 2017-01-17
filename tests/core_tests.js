@@ -43,7 +43,6 @@
 		
 	});
 		
-	
 
 	editor.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
@@ -127,7 +126,7 @@
 			
 		});
 			
-	}, 1);
+	});
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {

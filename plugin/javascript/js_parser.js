@@ -77,7 +77,9 @@
 		What about indentation inside parentheses?
 		Have not decided yet, it's fairly uncommon to have line breaks inside a function call or function arguments,
 		and in that case you should probably make the argument's into an array instead.
-		
+		foo(
+		bar(
+		baz(done)));
 	*/
 
 	"use strict";
@@ -87,7 +89,7 @@
 		order: 100,
 		load:function jsParserMain() {
 			
-		editor.on("fileOpen", onFileOpen); // Why did I remove this???
+		editor.on("fileOpen", onFileOpen);
 		editor.on("fileChange", parseJsOnChange, 100);
 
 	},
@@ -754,6 +756,7 @@
 		
 		var originalBaseIndentation = baseIndentation,
 		insideDblQuote = false,
+		insideDblQuoteBeforeLangTag = false,
 		insideSingleQuote = false,
 		insideFunctionDeclaration = false,
 		insideFunctionArguments = false,
@@ -1378,6 +1381,7 @@
 			
 			if(!xmlMode) {
 				
+				if(char === '"') console.log("insideDblQuote? insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp); 
 				
 				/*
 					### RegExp strings
@@ -1386,7 +1390,7 @@
 					
 					note: / insde a bracket doesn't have to be escaped!
 					
-					RegExp or block comment!? RegExp can not start with *!
+					RegExp or block comment!? RegExp can not start with *
 					
 					RegExp or division!?  
 					For example, (, [, {, ;, and all of the binary operators can only be followed by a regexp. 
@@ -1451,17 +1455,19 @@
 				// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 					if(insideDblQuote) {
+						console.log("insideDblQuote? lastChar=" + lastChar + " llChar=" + llChar + " vbScript=" + vbScript);
 						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash || vbScript)) {				
 							insideDblQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							word = text.substring(quoteStart, i+1);
+							console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
 							return;
 						}
 					}
 					else {
 						insideDblQuote = true;
 						quoteStart = i;
-						//console.log("insideDblQuote!");
+						console.log("insideDblQuote! quoteStart=" + i);
 					}
 				}
 				
@@ -1535,6 +1541,14 @@
 						
 						xmlMode = false;
 						insideXmlTag = false;
+						
+						if(insideDblQuote) {
+						quotes.push(new Quote(quoteStart, i-2));
+						//word = text.substring(quoteStart, i+1);
+						console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
+						
+							insideDblQuoteBeforeLangTag = true;
+						}
 						insideDblQuote = false;
 						
 						//console.log("ASP start here line=" + lineNumber);
@@ -1542,7 +1556,15 @@
 					else if(pastChar0 == "%" && char == ">" && ASP) { // %>
 						ASP = false;
 						vbScript = false;
-						xmlMode = true;
+						
+						if(!insideScriptTag) xmlMode = true;
+						
+						if(insideDblQuoteBeforeLangTag) {
+							insideDblQuote = true;
+							quoteStart = i+1;
+							
+							insideDblQuoteBeforeLangTag = false;
+						}
 						
 						//console.log("ASP Ends here line=" + lineNumber);
 					}

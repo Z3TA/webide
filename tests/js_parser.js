@@ -1,12 +1,24 @@
 
-editor.addTest(function aspVarInHtml(callback) {
+
+editor.addTest(function aspVarInScript(callback) {
 	// Parser can't find start of baz
+	editor.openFile("aspVarInScript.asp", '<%\nIF foo THEN\n%>\n<script>\nalert("Hi <% =name %>");\n</script>\n<%\nEND IF\n%>\n', function(err, file) {
+		
+		// Last row should have zero indentation
+		if(file.grid[file.grid.length-1].indentation !== 0) throw new Error("Wrong indentation on last row!");
+		
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
+}, 1);
+
+editor.addTest(function aspVarInHtml(callback) {
 	editor.openFile("aspVarInHtml.asp", '<img src="<% =foo %>">', function(err, file) {
 		
-		if(file.parsed.xmlTags.length > 0) throw new Error("Did not expect an xml tag");
+		// Temp fix! Best case scenario would be if the xml tag worked
 		
-		console.log("aspVarInHtmlYOYO");
-		console.log(file.parsed);
+		if(file.parsed.xmlTags.length > 0) throw new Error("Did not expect an xml tag");
 		
 		editor.closeFile(file.path);
 		callback(true);
