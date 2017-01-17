@@ -104,6 +104,8 @@
 			Only use the Chrome dev tools when you are actually debugging! Turn devMode OFF when you are not debugging (watching the console)
 		*/
 		
+		alertBox("devMode OFF!");
+		
 	}
 	
 	function enableDevMode() {
@@ -120,6 +122,8 @@
 		
 		console.time = consoleTimeOriginal
 		console.timeEnd = consoleTimeEndOriginal
+		
+		//alertBox("devMode now active!");
 		
 	}
 	
