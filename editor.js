@@ -2578,8 +2578,8 @@ editor.lastKeyPressed = "";
 	
 	editor.plugin = function(p) {
 		/*
-			If you have made an plugin. Use editor.plugin(desc, load, unload) instead of editor.on("start") !
-			Plugins will load when the editor has started. Right after eventListeners.start.
+			If you have made a plugin. Use editor.plugin(desc, load, unload) instead of editor.on("start") !
+			Plugins will load when the editor has started. Right after "eventListeners.start"
 		*/
 		
 		if((typeof p.load !== "function")) throw new Error("The plugin needs to have a load method!");
@@ -2589,7 +2589,7 @@ editor.lastKeyPressed = "";
 		
 		p.loaded = false;
 		
-		if(editor.settings.devMode && windowLoaded) {
+		if(windowLoaded) { // && editor.settings.devMode
 			//alertBox("Gonna reload unload and load " + getFunctionName(p.load));
 			editor.disablePlugin(p.desc); // Unload plugin before loading it 
 			p.load(); // Load the plugin right away if the editor has already started. 
