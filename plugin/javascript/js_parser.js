@@ -1381,7 +1381,7 @@
 			
 			if(!xmlMode) {
 				
-				if(char === '"') console.log("insideDblQuote? insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp); 
+				//if(char === '"') console.log("insideDblQuote? insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp); 
 				
 				/*
 					### RegExp strings
@@ -1455,19 +1455,19 @@
 				// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
 				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
 					if(insideDblQuote) {
-						console.log("insideDblQuote? lastChar=" + lastChar + " llChar=" + llChar + " vbScript=" + vbScript);
+						//console.log("insideDblQuote? lastChar=" + lastChar + " llChar=" + llChar + " vbScript=" + vbScript);
 						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash || vbScript)) {				
 							insideDblQuote = false;
 							quotes.push(new Quote(quoteStart, i));
 							word = text.substring(quoteStart, i+1);
-							console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
+							//console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
 							return;
 						}
 					}
 					else {
 						insideDblQuote = true;
 						quoteStart = i;
-						console.log("insideDblQuote! quoteStart=" + i);
+						//console.log("insideDblQuote! quoteStart=" + i);
 					}
 				}
 				
@@ -1545,7 +1545,7 @@
 						if(insideDblQuote) {
 						quotes.push(new Quote(quoteStart, i-2));
 						//word = text.substring(quoteStart, i+1);
-						console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
+						//console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
 						
 							insideDblQuoteBeforeLangTag = true;
 						}
