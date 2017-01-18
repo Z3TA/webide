@@ -116,8 +116,10 @@
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
 		
-		source = source.replace("file://", "");
-		source = source.replace("C:\\C:\\", "C:\\"); // Why is an extra C:\\ added to the path !?
+		source = source.replace("file:///", ""); // Three slashes in windows
+		source = source.replace("file://", ""); // Two slashes in linux
+		
+		alertBox("source=" + source);
 		
 		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');editor.renderNeeded();})">' + source + "</a>";
 		
