@@ -770,6 +770,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Preserve indentation (spaces?) when commenting out code
+
 Auto complete html tags inside strings. example:
 "<b>" + site.name + "</b> published to:<br>" + site.publish + "<br><i>" + site.url + "</i>"
 
