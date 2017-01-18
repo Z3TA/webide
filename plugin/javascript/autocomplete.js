@@ -105,10 +105,11 @@
 			
 			console.log("functionCount=" + Object.keys(functions).length + " charIndex=" + charIndex);
 			
+			var func;
+			
 			for(var functionName in functions) {
 				
-				
-				let func = functions[functionName];
+				func = functions[functionName];
 				
 				console.log("checking function=" + functionName + " start=" + func.start + " end=" + func.end + "  ...");
 
