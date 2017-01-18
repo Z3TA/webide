@@ -28,7 +28,12 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-ASP <% =foo %> inside script tag.
+Thinking about anonymous functions ....
+They are not saved as the last anon function in the scope will overwrite it
+Make file.parsed.functions an array instead of named array !?
+
+
+Add support for arrow functions
 
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
