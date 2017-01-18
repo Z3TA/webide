@@ -198,6 +198,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Making a multi line JS comment at the top fucked up indentation on ALL lines, flattening them in source code. 
+
 Unicode characters that are not visible. for example: 5206 or 8206 "left-to-right mark" will cause the grid to show wrong
 
 
