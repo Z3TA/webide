@@ -149,7 +149,7 @@ var File; // File object is global
 	}
 	
 	File.prototype.rowText = function(row) {
-		// Returns the characters on that row
+		// Returns the characters on that row, including indentation characters!
 		var file = this;
 		
 		// No need to check row because it will throw an error anyway if it's "wrong". But it does give friendlier errors.

@@ -1417,7 +1417,10 @@ function reLastIndexOf(regex, str, startpos) {
 }
 	
 function assert(x, y) {
-	if(x !== y) throw new Error("Expected x = '" + x + "' = y = '" + y + "'");
+	if(x !== y) {
+		if(y === undefined && (x === true || x === false)) throw new Error("assert takes two arguments and throws an error if they are not equal. Example: assert(42, 42)");
+		throw new Error("Expected x = '" + x + "' = y = '" + y + "'");
+	}
 }
 
 function indexOfZeroWidthCharacter(str) {
