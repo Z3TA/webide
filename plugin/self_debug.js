@@ -119,8 +119,6 @@
 		source = source.replace("file:///", ""); // Three slashes in windows
 		source = source.replace("file://", ""); // Two slashes in linux
 		
-		alertBox("source=" + source);
-		
 		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');editor.renderNeeded();})">' + source + "</a>";
 		
 		confirmBox("" + sourceLink + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [
