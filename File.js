@@ -2793,7 +2793,7 @@ var File; // File object is global
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 		
-		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " ...");	
+		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + lbChars(file.lineBreak) + "...");	
 		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;

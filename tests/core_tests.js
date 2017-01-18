@@ -90,6 +90,8 @@
 				file.text = file.text.replace(/#/g, "\n");
 				file.text = file.text.replace(/→/g, "\t");
 				
+				file.lineBreak = determineLineBreakCharacters(file.text);
+				
 				var charsBefore = file.text;
 				
 				file.grid = file.createGrid();
@@ -126,7 +128,7 @@
 			
 		});
 			
-	});
+	}, 1);
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {
