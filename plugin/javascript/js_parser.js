@@ -776,7 +776,7 @@
 		insideHTMLComment = false,
 		L = [], // {
 		R = [], // }
-		subCount = 0, // Level of function scope depth
+		subFunctionDepth = 0, // Level of function scope depth
 		functions = {},
 		myFunction = [],
 		newFunc,
@@ -889,9 +889,9 @@
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
 		
-		insideFunctionBody[subCount] = false;
-		L[subCount] = 1; // { Asume open
-		R[subCount] = 0; // }
+		insideFunctionBody[subFunctionDepth] = false;
+		L[subFunctionDepth] = 1; // { Asume open
+		R[subFunctionDepth] = 0; // }
 		
 		
 		insideVariableDeclaration[0] = false;
@@ -1218,7 +1218,7 @@
 			// We have found a value for a variable!
 			
 			var variable;
-			var func = myFunction[subCount];
+			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
 			//console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
@@ -1238,7 +1238,7 @@
 				var variableName = properties[0];
 				var startIndex = 1;
 				
-				if(insideFunctionBody[subCount]) {
+				if(insideFunctionBody[subFunctionDepth]) {
 					if(Object.hasOwnProperty.call(func.variables, variableName)) { // LOL: Objects can have hasOwnProperty as key, and it will no longer work
 						variable = func.variables[variableName];
 						//console.log("Variable= '" + variableName + "' listed in function=" + func.name + " variables! Yey!");
@@ -1285,8 +1285,8 @@
 					
 					variable.type = getVariableType(rightSide);
 					if(variable.type == "this") {
-						if(subCount > 0) {
-							variable.value = myFunction[subCount-1].name; // We could point directly att the functon, but we want to avoid too much dublication
+						if(subFunctionDepth > 0) {
+							variable.value = myFunction[subFunctionDepth-1].name; // We could point directly att the functon, but we want to avoid too much dublication
 						}
 						else {
 							variable.value = "window"; // "this" is the global scope
@@ -1843,39 +1843,39 @@
 					
 					*/
 					
-					//console.log("} insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " line:" + lineNumber + "");
+					//console.log("} insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " line:" + lineNumber + "");
 
 					
-					if(insideFunctionBody[subCount]) {
-						R[subCount]++;
+					if(insideFunctionBody[subFunctionDepth]) {
+						R[subFunctionDepth]++;
 						
 						
 						
 						insideFunctionDeclaration = false;
 						
-						//console.log("R[" + subCount + "]++");
+						//console.log("R[" + subFunctionDepth + "]++");
 						
-						//console.log("L[" + subCount + "]=" + L[subCount] + ", R[" + subCount + "]=" + R[subCount] + " (line:" + lineNumber + ")");
+						//console.log("L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + ", R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
 
 						
-						if(L[subCount] === R[subCount]) {
+						if(L[subFunctionDepth] === R[subFunctionDepth]) {
 							// End of current function
-							//console.log("Reached end of function body for " + myFunction[subCount].name + " L[" + subCount + "]=" + L[subCount] + "  R[" + subCount + "]=" + R[subCount] + " (line:" + lineNumber + ")");
-							insideFunctionBody[subCount] = false;
+							//console.log("Reached end of function body for " + myFunction[subFunctionDepth].name + " L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + "  R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
+							insideFunctionBody[subFunctionDepth] = false;
 							
-							myFunction[subCount].end = i;
-							myFunction[subCount].endRow = row;
+							myFunction[subFunctionDepth].end = i;
+							myFunction[subFunctionDepth].endRow = row;
 
 							
-							if(subCount > 0) {
-								L[subCount] = -1;
-								R[subCount] = -1;
+							if(subFunctionDepth > 0) {
+								L[subFunctionDepth] = -1;
+								R[subFunctionDepth] = -1;
 								
-								subCount--;
-								R[subCount]++;
+								subFunctionDepth--;
+								R[subFunctionDepth]++;
 							}
 							else {
-								R[subCount] = L[subCount]-1;
+								R[subFunctionDepth] = L[subFunctionDepth]-1;
 							}
 							
 							variableName = "";
@@ -1928,7 +1928,7 @@
 						
 						if(functionName.indexOf("(") != -1) functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
 						
-						
+						//if(functionName.indexOf("=") != -1) functionName = "";
 												
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
@@ -1992,15 +1992,15 @@
 				
 				else if(char == "{") {
 					
-					//console.log("{ insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
+					//console.log("{ insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
 					
-					if(insideFunctionBody[subCount]) L[subCount]++;
+					if(insideFunctionBody[subFunctionDepth]) L[subFunctionDepth]++;
 					
 					if((insideFunctionDeclaration) && !insideFunctionArguments) {
 						
 						// We have found a new function !
 						
-						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 						
@@ -2026,25 +2026,25 @@
 						properties = functionName.split(".");
 						
 
-						//console.log("subCount=" + subCount);
+						//console.log("subFunctionDepth=" + subFunctionDepth);
 						
-						if(insideFunctionBody[subCount]) {
+						if(insideFunctionBody[subFunctionDepth]) {
 							//It's a sub-function
 							
-							myFunction[subCount].subFunctions[functionName] = newFunc;
+							myFunction[subFunctionDepth].subFunctions[functionName] = newFunc;
 							
-							myFunction[subCount+1] = myFunction[subCount].subFunctions[functionName];
+							myFunction[subFunctionDepth+1] = myFunction[subFunctionDepth].subFunctions[functionName];
 							
-							subCount++; // Functions within this function's body will be sub-functions
+							subFunctionDepth++; // Functions within this function's body will be sub-functions
 							
-							L[subCount] = 1;
-							R[subCount] = 0;
+							L[subFunctionDepth] = 1;
+							R[subFunctionDepth] = 0;
 							
 							if(properties.length > 1) {
-								if(Object.hasOwnProperty.call(myFunction[subCount-1].variables, properties[0])) {
+								if(Object.hasOwnProperty.call(myFunction[subFunctionDepth-1].variables, properties[0])) {
 									// This is a variable (method) for a function: foo.bar.baz = function()
 									// Change the variable type to Method
-									variable = myFunction[subCount-1].variables[properties[0]];
+									variable = myFunction[subFunctionDepth-1].variables[properties[0]];
 									startIndex = 1;
 									variable = traverseVariableTree(properties, variable, startIndex);
 									
@@ -2057,7 +2057,7 @@
 						else {
 							// a global function
 							functions[functionName] = newFunc;
-							myFunction[subCount] = functions[functionName];
+							myFunction[subFunctionDepth] = functions[functionName];
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
@@ -2085,10 +2085,10 @@
 						}
 						
 						
-						insideFunctionBody[subCount] = true;
+						insideFunctionBody[subFunctionDepth] = true;
 						insideFunctionDeclaration = false;
 						
-						//console.log("L[" + subCount + "]++");
+						//console.log("L[" + subFunctionDepth + "]++");
 						
 
 					}
@@ -2459,7 +2459,7 @@
 
 						words.push(word);
 						
-						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subCount + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
+						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
 						
 						if(afterPointer[codeBlockDepth]) {
 							// We are on the rights side of a pointer
@@ -2489,7 +2489,7 @@
 								
 								// We are inside a var declaration!
 								
-								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subCount + "]=" + insideFunctionBody[subCount] + "");
+								//console.log(word + " is a variable (declared with var)! insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "");
 								
 								
 								if(!insideCodeBlock) {
@@ -2501,7 +2501,7 @@
 								}
 								else {
 									// A local variable (inside a function or JSON??)
-									if(insideFunctionBody[subCount]) {
+									if(insideFunctionBody[subFunctionDepth]) {
 										
 										// Check if the parent (word) exist in 
 										
@@ -2513,18 +2513,18 @@
 										}
 										rootWord = codeBlock[codeBlockDepthTemp].word;
 										
-										//console.log("Inside function=" + insideFunctionBody[subCount].name + " word=" + word + " rootWord=" + rootWord + "");
+										//console.log("Inside function=" + insideFunctionBody[subFunctionDepth].name + " word=" + word + " rootWord=" + rootWord + "");
 										
 										
-										if(!Object.hasOwnProperty.call(myFunction[subCount].variables, rootWord)) {
-											myFunction[subCount].variables[word] = new Variable("");
-											//console.log("Added variable=" + word + " to function=" + myFunction[subCount].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
+										if(!Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, rootWord)) {
+											myFunction[subFunctionDepth].variables[word] = new Variable("");
+											//console.log("Added variable=" + word + " to function=" + myFunction[subFunctionDepth].name + " codeBlock[" + codeBlockDepth + "].word=" + codeBlock[codeBlockDepth].word + " parent.word=" + (codeBlock[codeBlockDepth].parent ? codeBlock[codeBlockDepth].parent.word : 'undefined') + " rootWord=" + rootWord + "");
 										}
 										else {
 											
 											//console.log("WTF happaned!??");
 											
-											//myFunction[subCount].variables[rootWord].type = new Variable("Object");
+											//myFunction[subFunctionDepth].variables[rootWord].type = new Variable("Object");
 										}
 										
 										
