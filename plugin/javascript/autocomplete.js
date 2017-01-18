@@ -117,6 +117,20 @@
 					// Cursor is inside this function!
 					
 					console.log("Inside " + func.name);
+					
+					// Give arguments
+					if(func.arguments.length > 0) {
+						var functionArguments = func.arguments.split(",");
+						for(var i=0; i<functionArguments.length; i++) {
+							functionArguments[i] = functionArguments[i].trim(); // Get rid of spaces
+							// todo: Handle default function argument values
+							// maybe: Search for calls of this function to figure out what Type of variable it is
+							if(functionArguments[i].indexOf(word) == 0) options.push(functionArguments[i]);
+						}
+						
+					}
+					
+					
 					searchVariables(func.variables, word, func.name); // check variables in this functions
 					
 					// check names of sub-functions
