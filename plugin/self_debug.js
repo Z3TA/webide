@@ -116,8 +116,9 @@
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
 		
-		source = source.replace("file:///", ""); // Three slashes in windows
-		source = source.replace("file://", ""); // Two slashes in linux
+		// If windows detects / it will add C:/ if linux does Not detect / will will add the working dir
+		if(editor.platform == "Windows") source = source.replace("file:///", ""); // Remove three slashes in windows
+		else source = source.replace("file://", ""); // Two slashes in linux (and other?)
 		
 		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');editor.renderNeeded();})">' + source + "</a>";
 		
