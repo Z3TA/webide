@@ -16,12 +16,19 @@
 		substring: {type: "Method", arguments: "start, end"}
 	};
 	
+	editor.plugin({
+		desc: "Autocomplete for JavaScript",
+		load: function load() {
+			editor.on("autoComplete", autoCompleteJS);
+		},
+		unload: function unload() {
+			editor.removeEvent("autoComplete", autoCompleteJS);
+		},
+	});
 	
-	editor.on("autoComplete", autoCompleteJS);
 	
 	
-	
-	function autoCompleteJS(file, word, wordLength, gotOptions) {
+	function autoCompleteJS(file, wordToComplete, wordLength, gotOptions) {
 		
 		var options = [];
 		var js = file.parsed;
@@ -50,7 +57,7 @@
 				console.warn("Found no function arguments for " + fc.name + "!");
 				editor.addInfo(file.caret.row, file.caret.col, "Nothing found");
 			}
-			else if(fc.argument.substring(0, word.length) == word && word.length > 0) {
+			else if(fc.argument.substring(0, wordToComplete.length) == wordToComplete && wordToComplete.length > 0) {
 				options.push([fc.argument, 0]);
 			}
 			else {
@@ -66,7 +73,7 @@
 			
 		
 			
-			if(js.globalVariables) searchVariables(js.globalVariables, word); // Check global variables
+			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete); // Check global variables
 
 			
 		}
@@ -125,17 +132,17 @@
 							functionArguments[i] = functionArguments[i].trim(); // Get rid of spaces
 							// todo: Handle default function argument values
 							// maybe: Search for calls of this function to figure out what Type of variable it is
-							if(functionArguments[i].indexOf(word) == 0) options.push(functionArguments[i]);
+							if(functionArguments[i].indexOf(wordToComplete) == 0) options.push(functionArguments[i]);
 						}
 						
 					}
 					
 					
-					searchVariables(func.variables, word, func.name); // check variables in this functions
+					searchVariables(func.variables, wordToComplete, func.name); // check variables in this functions
 					
 					// check names of sub-functions
 					for(var subFunctionName in func.subFunctions) {
-						if(subFunctionName) checkgetFunctionName(subFunctionName, word);
+						if(subFunctionName) checkgetFunctionName(subFunctionName, wordToComplete);
 					}
 					
 					// Search sub-functions (recursive)
@@ -146,7 +153,7 @@
 					console.log("Not inside function=" + func.name);
 				}
 				
-				checkgetFunctionName(func.name, word); // Check parent scope function-names
+				checkgetFunctionName(func.name, wordToComplete); // Check parent scope function-names
 				
 			}
 		}
@@ -248,35 +255,44 @@
 
 			
 			function pushVariable(word, variable, variableName) {
+				
+				var fullName = "";
+				
+				var lastIndexOfDot = wordToComplete.indexOf(".");
+				
+				if(lastIndexOfDot != -1) {
+					fullName = wordToComplete.substring(0, lastIndexOfDot) + "." + variableName;
+				}
+				else fullName = variableName;
+				
 				if(variable.type=="Array") {
-					options.push([variableName + "[]", 1]);
+					options.push([fullName + "[]", 1]);
 
 				}
 				else if(variable.type == "Method") {
-					options.push([variableName + "()", 1]);
+					options.push([fullName + "()", 1]);
 				}
 				else if(variable.hasOwnProperty("keys")) {
 					if(Object.keys(variable.keys).length > 0) {
 						// It's a json: Add a dot at the end
-						options.push([variableName + ".", 0]);
+						options.push([fullName + ".", 0]);
 					}
 					else {
-						options.push([variableName, 0]);
+						options.push([fullName, 0]);
 					}
 				}
 				else {
-					options.push([variableName, 0]);
+					options.push([fullName, 0]);
 				}
 
 			}
 			
 			function optionExist(variableName) {
 				for(var i=0; i<options.length; i++) {
-					if(options[i][1] == variableName) return true;
+					if(options[i][1].indexOf(variableName) != -1) return true;
 				}
 				return false;
-				
-			}
+				}
 			
 		}
 		
@@ -291,47 +307,47 @@
 			
 			*/
 			
-			// Looking for this.keyName in a function called functionName
+			// Looking for this.keyName... in a function called functionName
 			
 			// Look for subfunctions in functions we are currently in
-			for(var fName in js.functions) {
+			for(var i=0, func; i<js.functions.length; i++) {
 				
-				let func = js.functions[fName];
+				func = js.functions[i];
 				
 				if(func.start < charIndex && func.end > charIndex) {
 					// We are in this function. Check it's subfunctions
 					
-					for(var sfName in func.subFunctions) {
-						if(sfName == functionName) analyze(func.subFunctions[sfName]);
+					for(var j=0; j<func.subFunctions.length; i++) {
+						if(func.subFunctions[i] == functionName) analyze(func.subFunctions[i]);
 					}
 					
 				}
 				
 				// And analyze all global functions if it has the right name
-				if(fName == functionName) analyze(js.functions[fName]);
+				if(func.name == functionName) analyze(func);
 			}
 			
-			function analyze(objectCreator) {
+			function analyze(objectCreatorFunction) {
 				// Look for variables named "this" or variables with type "this"
 				
-				console.log("Analyzing " + objectCreator.name);
+				console.log("Analyzing " + objectCreatorFunction.name);
 				
-				if(objectCreator.variables.hasOwnProperty("this")) {
+				if(objectCreatorFunction.variables.hasOwnProperty("this")) {
 					// Search that one
-					searchVariables(objectCreator.variables["this"].keys, keyName);
+					searchVariables(objectCreatorFunction.variables["this"].keys, keyName);
 				}
 				
 				// Check if any of the variables is of type "this"
-				for(var variableName in objectCreator.variables) {
-					if(objectCreator.variables[variableName].type == "this") {
+				for(var variableName in objectCreatorFunction.variables) {
+					if(objectCreatorFunction.variables[variableName].type == "this") {
 						// Check its keys
-						searchVariables(objectCreator.variables[variableName].keys, keyName);
+						searchVariables(objectCreatorFunction.variables[variableName].keys, keyName);
 					}
 				}
 				
-				if(objectCreator.variables.hasOwnProperty("prototype")) {
+				if(objectCreatorFunction.variables.hasOwnProperty("prototype")) {
 					// Search the prototype
-					searchVariables(objectCreator.variables["prototype"].keys, keyName);
+					searchVariables(objectCreatorFunction.variables["prototype"].keys, keyName);
 				}
 				
 			}

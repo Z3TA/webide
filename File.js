@@ -3589,6 +3589,8 @@ var File; // File object is global
 	
 	
 	File.prototype.getWordOnCaret = function(caret, callback) {
+		// to be deprecated. Use wordAtCaret instead!
+		
 		var file = this;
 		
 		if(callback === undefined) {
@@ -3639,6 +3641,53 @@ var File; // File object is global
 			var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_";
 			return wordDelimiters.indexOf(char) == -1;
 		}
+		
+	}
+	
+	File.prototype.wordAtCaret = function(caret, wordDelimiters) {
+		// Returns {word: wholeWord, left: leftSide, right: rightSide} at caret
+		var file = this;
+		
+		if(caret === undefined) caret = file.caret;
+		if(wordDelimiters === undefined) wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_";
+		
+		var word = "";
+		var char = "";
+		
+		// First go left, and break on non-letter
+		for(var i=caret.index-1; i>-1; i--) {
+			char = file.text.charAt(i);
+			
+			if(wordDelimiters.indexOf(char) == -1) {
+				word = char + word;
+			}
+			else {
+				break;
+			}
+		}
+		var leftSide = file.text.substring(i+1, caret.index);
+		var start = i+1;
+		
+		// Then go right, and break on non-letter
+		for(var i=caret.index; i<file.text.length; i++) {
+			char = file.text.charAt(i);
+			
+			if(wordDelimiters.indexOf(char) == -1) {
+				word = word + char;
+			}
+			else {
+				break;
+			}
+		}
+		var rightSide = file.text.substring(caret.index, i+1);
+		var end = i-1;
+		
+		/*
+			console.log("start=" + start + "=" + file.text.charAt(start));
+			console.log("end=" + end + "=" + file.text.charAt(end));
+		*/
+		
+		return {word: word, left: leftSide, right: rightSide, start: start, end: end};
 		
 	}
 	

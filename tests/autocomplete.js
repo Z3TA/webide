@@ -3,6 +3,23 @@
 (function() {
 	"use strict";
 	
+	/*
+	editor.addTest(function autocompleteThisVariables(callback) {
+		editor.openFile("autocompleteThisVariables.js", 'function Person(name) {\nthis.name = name;\n}\nvar myPerson = new Person("World");\n\nmyPerson.na\n', function(err, file) {
+			
+			var index = 92;
+			
+			var atCaret = autoComplete(file, index);
+			
+			assert(atCaret.word, "name");
+			
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	}, 1);
+	*/
+	
 	editor.addTest(function autocompleteFunctionArguments(callback) {
 		editor.openFile("autocompleteFunctionArguments.js", 'function foo(abaCadabra, bubbelBabbel) {\n\n}\n', function(err, file) {
 			
@@ -27,10 +44,17 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
-	
-	
+	function autoComplete(file, index) {
+		
+		var key_tab = 9;
+		
+		file.moveCaretToIndex(index);
+		editor.mock("keydown", {charCode: key_tab}); // tab to autocomplete
+		
+		return file.wordAtCaret();
+	} 
 	
 })();
 
