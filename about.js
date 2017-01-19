@@ -3,9 +3,6 @@
 	
 	You are looking at a "native" text/code editor (that also runs in the browser)
 	
-	Available for Windows: https://www.webtigerteam.com/editor/release/jzedit-v1_beta-c424-windows-x64.zip
-	and Linux: https://www.webtigerteam.com/editor/release/jzedit-v1_beta-c424-linux-x64.tar.gz
-	
 	Main Features:
 */
 
