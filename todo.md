@@ -32,6 +32,7 @@ Thinking about anonymous functions ....
 They are not saved as the last anon function in the scope will overwrite it
 Make file.parsed.functions an array instead of named array !?
 
+search for Object.keys and funname fname
 
 Add support for arrow functions
 
@@ -202,6 +203,11 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+IF and END IF ASP vbScript on the same line gives wrong indentation: ex:
+<% IF MilitaryScienceCostGold <= gold AND totalStone >= MilitaryScienceCostStone AND totalTree >= MilitaryScienceCostTree THEN %> <form action="science.asp" method="post"></form><br><% END IF %>
+
+When scrolled to the right and switching tab will throw an error
 
 Making a multi line JS comment at the top fucked up indentation on ALL lines, flattening them in source code. 
 
@@ -776,6 +782,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Lazy autocomplete from other .js files ex: resources.gold
 
 Preserve indentation (spaces?) when commenting out code
 

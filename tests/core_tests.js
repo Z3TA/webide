@@ -229,7 +229,7 @@
 			
 			//console.log(file.parsed.functions);
 			
-			if(file.parsed.functions.hasOwnProperty("wrongName")) throw new Error("Expected anonymous function instead of function name=wrongName !");
+			if(existFunctionWithName(file.parsed.functions, "wrongName")) throw new Error("Expected anonymous function instead of function name=wrongName !");
 			
 			editor.closeFile(file.path);
 			
@@ -243,7 +243,7 @@
 			
 			//console.log(file.parsed.functions);
 			
-			if(file.parsed.functions.hasOwnProperty("options")) throw new Error("Expected anonymous function instead of function name=options !");
+			if(existFunctionWithName(file.parsed.functions, "options")) throw new Error("Expected anonymous function instead of function name=options !");
 			
 			editor.closeFile(file.path);
 			
@@ -258,8 +258,8 @@
 			
 			//console.log(file.parsed.functions);
 			
-			if(!file.parsed.functions.hasOwnProperty("foo")) throw new Error("Expected function foo");
-			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Expected function bar");
+			if(!existFunctionWithName(file.parsed.functions, "foo")) throw new Error("Expected function foo");
+			if(!existFunctionWithName(file.parsed.functions, "bar")) throw new Error("Expected function bar");
 			
 			editor.closeFile(file.path);
 			
@@ -274,8 +274,8 @@
 			
 			//console.log(file.parsed.functions);
 			
-			if(file.parsed.functions.hasOwnProperty("foo")) throw new Error("Expected function name to be bar instead of foo");
-			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Expected function bar");
+			if(existFunctionWithName(file.parsed.functions, "foo")) throw new Error("Expected function name to be bar instead of foo");
+			if(!existFunctionWithName(file.parsed.functions, "bar")) throw new Error("Expected function bar");
 			
 			file.moveCaret(undefined, 1);
 			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
@@ -291,10 +291,9 @@
 	
 	editor.addTest(function wrongFunctionAnonymous(callback) {
 		editor.openFile("wrongFunctionAnonymous.js", "function foo() {\nbar = setTimeout(function() {\nbaz = setTimeout(function() {\n\n}, 0);\n}, 0);\n}\n", function(err, file) {
-			
-			//console.log(file.parsed.functions["foo"].subFunctions[""].subFunctions);
-			
-			if(file.parsed.functions["foo"].subFunctions[""].subFunctions.hasOwnProperty("baz")) throw new Error("Expected an anonymous function instead of baz");
+		
+		
+		if(file.parsed.functions[0].subFunctions[0].subFunctions[0].name == "baz") throw new Error("Expected an anonymous function instead of baz");
 		
 		file.moveCaret(undefined, 3);
 			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
@@ -399,8 +398,8 @@
 			if(!file.parsed.globalVariables.hasOwnProperty("g1")) throw new Error("Global variable g1 does not exist in file.parsed.globalVariables=" + JSON.stringify(file.parsed.globalVariables, null, 2));
 			
 			// Make sure function foo and bar was found
-			if(!file.parsed.functions.hasOwnProperty("foo")) throw new Error("Did not find function foo");
-			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Did not find function bar");
+			if(!existFunctionWithName(file.parsed.functions, "foo")) throw new Error("Did not find function foo");
+			if(!existFunctionWithName(file.parsed.functions, "bar")) throw new Error("Did not find function bar");
 			
 			callback(true);
 				
@@ -521,9 +520,9 @@
 			
 			var keys = Object.keys(file.parsed.functions);
 			
-			if(keys[0] != "rightName") throw new Error("Expected the function name to be: 'rightName'. Not '" + keys[0] + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
+			if(file.parsed.functions[0].name != "rightName") throw new Error("Expected the function name to be: 'rightName'. Not '" + file.parsed.functions[0].name + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
 			
-			if(keys[1] != "baz") throw new Error("Expected the second function name to be: 'baz'. Not '" + keys[1] + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
+			if(file.parsed.functions[1].name != "baz") throw new Error("Expected the second function name to be: 'baz'. Not '" + file.parsed.functions[1].name + "'. file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2))
 			
 			editor.closeFile(file.path);
 			
@@ -562,9 +561,9 @@
 			editor.autoComplete();
 			
 			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
-			checkFunction(file, file.parsed.functions["a"]);
-			checkFunction(file, file.parsed.functions["a"].subFunctions["b"]);
-			checkFunction(file, file.parsed.functions["a"].subFunctions["b"].subFunctions["c"]);
+			checkFunction(file, file.parsed.functions[0]);
+			checkFunction(file, file.parsed.functions[0].subFunctions[0]);
+			checkFunction(file, file.parsed.functions[0].subFunctions[0].subFunctions[0]);
 			
 			editor.closeFile(file.path);
 			
@@ -588,8 +587,8 @@
 			
 			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
 			
-			checkFunction(file, file.parsed.functions["foo"]);
-			checkFunction(file, file.parsed.functions["foo"].subFunctions["bar"]);
+			checkFunction(file, file.parsed.functions[0]);
+			checkFunction(file, file.parsed.functions[0].subFunctions[0]);
 			
 			editor.closeFile(file.path);
 			
@@ -682,13 +681,13 @@
 			
 			//console.log("file.parsed.functions=" + JSON.stringify(file.parsed.functions, null, 2));
 			
-			var functions = Object.keys(file.parsed.functions);
+			var functions = file.parsed.functions;
 			
 			console.log("functions=" + JSON.stringify(functions));
 			
-			if(functions[0] != "foo") throw new Error("First function name should be foo, not " + functions[0]);
-			if(functions[1] != "bar.foo") throw new Error("First function name should be bar.foo");
-			if(functions[2] != "foo.prototype.bar") throw new Error("First function name should be foo.prototype.bar");
+			if(functions[0].name != "foo") throw new Error("First function name should be foo, not " + functions[0]);
+			if(functions[1].name != "bar.foo") throw new Error("First function name should be bar.foo");
+			if(functions[2].name != "foo.prototype.bar") throw new Error("First function name should be foo.prototype.bar");
 			
 			editor.closeFile(file.path);
 			
@@ -705,9 +704,9 @@
 			
 			var n = 0;
 			
-			for(var name in file.parsed.functions) {
+			for(var i=0; i<file.parsed.functions.length; i++) {
 				n++;
-				if(name != "") throw new Error("Function " + n + " should be anonymous! name=" + name + "");
+				if(file.parsed.functions[i].name != "") throw new Error("Function " + n + " should be anonymous! name=" + file.parsed.functions[i].name + "");
 			}
 			
 			editor.closeFile(file.path);
@@ -959,7 +958,8 @@
 			
 			//console.log("file.parsed=" + JSON.stringify(file.parsed));
 			
-			if(file.parsed.functions.hasOwnProperty("return foo ||")) throw new Error("Unexpected function!");
+			
+			if(file.parsed.functions[0].name != "") throw new Error("Function should be anonymous!");
 			
 			editor.closeFile(file.path);
 			
@@ -1205,9 +1205,9 @@ callback(true);
 			
 			if(!file.parsed) throw new Error("The file was not parsed!");
 			if(!file.parsed.language=="JavaScript") throw new Error("The file was not parsed as JavaScript!");
-			if(!file.parsed.functions.hasOwnProperty("bar")) throw new Error("Function bar was not found when parsing!");
-			if(file.parsed.functions.hasOwnProperty("meh")) throw new Error("The second function should be anonymous!");
-			if(!file.parsed.functions.hasOwnProperty("baz")) throw new Error("Function baz was not found when parsing!");
+			if(!existFunctionWithName(file.parsed.functions, "bar")) throw new Error("Function bar was not found when parsing!");
+			if(existFunctionWithName(file.parsed.functions, "meh")) throw new Error("The second function should be anonymous!");
+			if(!existFunctionWithName(file.parsed.functions, "baz")) throw new Error("Function baz was not found when parsing!");
 			
 			editor.closeFile(file.path);
 			
@@ -1394,7 +1394,12 @@ callback(true);
 		});
 	
 	
-	
+	function existFunctionWithName(functions, name) {
+		for(var i=0; i<functions.length; i++) {
+			if(functions[i].name == name) return true;
+		}
+		return false;
+	}
 	
 	function checkFunction(file, func) {
 		// Make sure the function starts with an { and ends with an }
@@ -1408,6 +1413,9 @@ callback(true);
 			throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
 		}
 	}
+	
+	
+	
 	
 	
 })();

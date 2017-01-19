@@ -445,9 +445,9 @@
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
 							
-						if(Object.keys(newParse.functions).length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
+							if(newParse.functions.length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
 							
-							var ff = newParse.functions[firstValueInObjectList(newParse.functions)]; // Ref to the same function in new parse
+							var ff = newParse.functions[0]; // Ref to the same function in new parse
 							
 							if(ff.end < 0) {
 								// The parsed function did not get an ending.
@@ -489,7 +489,7 @@
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
 								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
 								
-								if(Object.keys(fullParse.functions).length != Object.keys(oldParse.functions).length) throw new Error("fullParse.functions=" + Object.keys(fullParse.functions).length + " oldParse.functions=" + Object.keys(oldParse.functions).length + " ");
+								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
 								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse=" + JSON.stringify(fullParse.globalVariables, null, 2));
 								
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
@@ -625,8 +625,8 @@
 			var isBelow = false;
 			var isParent = false;
 			
-			for(var fname in functions) {
-				func = functions[fname];
+			for(var i; i<functions.length; i++) {
+				func = functions[i];
 				
 				isBelow = (func.start > oldEnd);
 				isParent = (func.end > oldEnd && func.start < oldEnd);
@@ -670,8 +670,9 @@
 			// Check if inside a function
 			// Returns the function, or false
 			var f, s;
-			for(var name in functions) {
-				f = functions[name];
+
+			for(var i=0; i<functions.length; i++) {
+				f = functions[i];
 				if(f.start < caretIndex && f.end >= caretIndex) {
 					// Deleted text are now allowed to be larger then the function body
 					if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
@@ -684,13 +685,6 @@
 			return parent;
 		}
 		
-		function firstValueInObjectList(obj) {
-			for(var id in obj) {
-				return id;
-			}
-			console.log(JSON.stringify(obj));
-			throw new Error("Object list is emty! " + JSON.stringify(obj));
-		}
 		
 		function sortyByStart(a, b) {
 			return a.start - b.start;
@@ -702,8 +696,8 @@
 	function checkFunctionStartEnd(file, functions) {
 		// Check all functions to make sure they start and end with { and }
 		var func;
-		for(var fname in functions) {
-			func = functions[fname];
+		for(var i=0; i<functions.length; i++) {
+			func = functions[i];
 			
 			// Make sure the function starts with an { and ends with an }
 			if(file.text.charAt(func.start) != "{") {
@@ -777,8 +771,11 @@
 		L = [], // {
 		R = [], // }
 		subFunctionDepth = 0, // Level of function scope depth
-		functions = {},
+		functions = [],
 		myFunction = [],
+		functionIndex = -1,
+		subFunctionIndex = -1,
+		theFunction,
 		newFunc,
 		properties,
 		variable,
@@ -1252,19 +1249,21 @@
 				}
 				else {
 					
+					
+					theFunction = getFunctionWithName(functions,variableName);
 					// Look for global variables
 					if(Object.hasOwnProperty.call(globalVariables, variableName)) {
 						variable = globalVariables[variableName];
 					}
 					// Look for function names
-					else if(Object.hasOwnProperty.call(functions, variableName)) {
+					else if(theFunction) {
 						//console.log("hmm? " + variableName + " is a function!");
 						
 						if(properties.length > 1) {
-							if(!Object.hasOwnProperty.call(functions[properties[0]].variables, properties[1])) {
-								functions[properties[0]].variables[properties[1]] = new Variable();
+							if(!Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
+								theFunction.variables[properties[1]] = new Variable();
 							}
-							variable = functions[properties[0]].variables[properties[1]];
+							variable =theFunction.variables[properties[1]];
 							startIndex = 2;
 						}
 
@@ -2031,9 +2030,10 @@
 						if(insideFunctionBody[subFunctionDepth]) {
 							//It's a sub-function
 							
-							myFunction[subFunctionDepth].subFunctions[functionName] = newFunc;
+							//myFunction[subFunctionDepth].subFunctions[functionName] = newFunc;
+							subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
 							
-							myFunction[subFunctionDepth+1] = myFunction[subFunctionDepth].subFunctions[functionName];
+							myFunction[subFunctionDepth+1] = myFunction[subFunctionDepth].subFunctions[subFunctionIndex];
 							
 							subFunctionDepth++; // Functions within this function's body will be sub-functions
 							
@@ -2056,8 +2056,8 @@
 						}
 						else {
 							// a global function
-							functions[functionName] = newFunc;
-							myFunction[subFunctionDepth] = functions[functionName];
+							functionIndex = functions.push(newFunc) - 1;
+							myFunction[subFunctionDepth] = functions[functionIndex];
 							
 							// Remove from global variables
 							if(Object.hasOwnProperty.call(globalVariables, functionName)) {
@@ -2067,13 +2067,15 @@
 							
 
 							if(properties.length > 1) {
-								if(Object.hasOwnProperty.call(functions, properties[0])) {
-									// This is a variable (method) for a function: foo.bar.baz = function()
+								theFunction = getFunctionWithName(functions, properties[0]);
+								if(theFunction) {
+								// This is a variable (method) for a function: foo.bar.baz = function()
 									// This is run after variables has been added.
 									// Change the variable type to Method
-									if(Object.hasOwnProperty.call(functions[properties[0]].variables, properties[1])) {
+									// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
+									if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
 										
-										variable = functions[properties[0]].variables[properties[1]];
+										variable = theFunction.variables[properties[1]];
 										startIndex = 2;
 										variable = traverseVariableTree(properties, variable, startIndex);
 										
@@ -2570,6 +2572,13 @@
 		}
 		
 		
+		function getFunctionWithName(functions, name) {
+			for(var i=0; i<functions.length; i++) {
+				if(functions[i].name == name) return functions[i];
+			}
+			return null;
+		}
+		
 	}
 	
 	
@@ -2580,7 +2589,7 @@
 		func.arguments = args || "";
 		func.start = start || -1;
 		func.end =-1;
-		func.subFunctions = {};
+		func.subFunctions = [];
 		func.variables = {};
 		func.lineNumber = lineNumber;
 		func.endRow = -1;
@@ -2619,7 +2628,7 @@
 	
 	function Variable(type, value) {
 		var variable = this;
-	
+		
 		variable.type = type;
 		variable.value = value;
 		variable.keys = {};
