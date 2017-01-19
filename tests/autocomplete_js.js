@@ -1,5 +1,3 @@
-
-
 (function() {
 	"use strict";
 	
@@ -20,20 +18,35 @@
 	}, 1);
 	*/
 	
-	editor.addTest(function autocompleteVariables(callback) {
-		editor.openFile("autocompleteVariables.js", 'function Person(name) {\nthis.name = name;\n}\nvar myPerson = new Person("World");\n\nmyPerson.na\n', function(err, file) {
+	editor.addTest(function autocompleteObjects(callback) {
+		editor.openFile("autocompleteObjects.js", 'var object = {foo: 1, bar: 2}\nobject.b', function(err, file) {
 			
-			var index = 92;
+			var index = 38;
 			
 			var atCaret = autoComplete(file, index);
 			
-			assert(atCaret.word, "name");
+			assert(atCaret.word, "object.bar");
 			
 			editor.closeFile(file.path);
 			callback(true);
 			
 		});
 	}, 1);
+	
+	editor.addTest(function autocompleteVariables(callback) {
+		editor.openFile("autocompleteVariables.js", 'var foobar = 1\nfoo', function(err, file) {
+			
+			var index = 18;
+			
+			var atCaret = autoComplete(file, index);
+			
+			assert(atCaret.word, "foobar");
+			
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
+	});
 	
 	editor.addTest(function autocompleteFunctionArguments(callback) {
 		editor.openFile("autocompleteFunctionArguments.js", 'function foo(abaCadabra, bubbelBabbel) {\n\n}\n', function(err, file) {
@@ -64,11 +77,12 @@
 	function autoComplete(file, index) {
 		
 		var key_tab = 9;
+		var wordDelimiters = " \t\r\n;:()"
 		
 		file.moveCaretToIndex(index);
 		editor.mock("keydown", {charCode: key_tab}); // tab to autocomplete
 		
-		return file.wordAtCaret();
+		return file.wordAtCaret(file.caret, wordDelimiters);
 	} 
 	
 })();

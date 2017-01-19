@@ -2219,6 +2219,7 @@ editor.lastKeyPressed = "";
 		
 		if(!file) file = editor.currentFile;
 		
+		if(!file) return true;
 		if(!editor.input) return true;
 		
 		var wordDelimiters = " ()[]{}+-/<>\r\n!";
