@@ -13,7 +13,29 @@
 	
 	});
 	}, 1);
+	
+	
 */
+
+editor.addTest(function functionVariableWidthSubfunction(callback) {
+	editor.openFile("functionVariableWidthSubfunction.js", 'foo = function() {\nfunction bar() {\na\n}\n}', function(err, file) {
+		
+		if(file.parsed.functions[0].name != "foo") throw new Error("Expected first function name to be foo, not " + file.parsed.functions[0].name);
+		if(file.parsed.functions[0].subFunctions[0].name != "bar") throw new Error("Expected sub-function name to be bar, not " + file.parsed.functions[0].subFunctions[0].name);
+		
+		file.moveCaret(undefined, 2, 1);
+		
+		file.putCharacter("b");
+		
+		if(file.parsed.functions[0].subFunctions[0].subFunctions.lenth != 0) throw new Error("Did not expect a second subfunction: " + file.parsed.functions[0].subFunctions[0].subFunctions[0].name);
+		if(file.grid[3].indentation != 1) throw new Error("Expected indentation on line 4 to be 1, not " + file.grid[3].indentation);
+		if(file.grid[4].indentation != 0) throw new Error("Expected indentation on line 5 to be 0, not " + file.grid[4].indentation);
+		
+		//editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
 
 	editor.addTest(function aspVarInScript(callback) {
 	// Parser can't find start of baz

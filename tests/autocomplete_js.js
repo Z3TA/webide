@@ -31,7 +31,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	editor.addTest(function autocompleteVariables(callback) {
 		editor.openFile("autocompleteVariables.js", 'var foobar = 1\nfoo', function(err, file) {

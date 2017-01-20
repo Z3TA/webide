@@ -42,6 +42,7 @@ When switching from a source file on one ssg site to another ssg site ... Select
 
 todo:
 
+Try some popular JS files like SockJS to see if it parses correctly
 
 fix wrong indentation in file source!
 Fix white-space in source file (context menu option)
