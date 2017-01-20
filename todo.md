@@ -38,7 +38,7 @@ Add support for arrow functions
 
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
-
+Auto opened SSG panel doesn't select the right site when clicking edit
 
 todo:
 
@@ -784,6 +784,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Confirmation when deleting SSG site
+
 Lazy autocomplete from other .js files ex: resources.gold
 
 Preserve indentation (spaces?) when commenting out code
@@ -1127,6 +1129,7 @@ editor.bindKey() instead of editor.keyBindings.push()
 
 support port in url's (connection manager, etc)
 
+Implement angel-wing/block variables (let, const) in the parser for smart auto-completion
 
 
 Optimization

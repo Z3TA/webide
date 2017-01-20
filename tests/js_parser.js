@@ -17,7 +17,7 @@
 */
 
 
-	editor.addTest(function varPointAtAnonFunction(callback) {
+editor.addTest(function varPointAtAnonFunction(callback) {
 	editor.openFile("varPointAtAnonFunction.js", 'var foo = function() {};', function(err, file) {
 		
 		// This is actually variable (foo) pointing to an anonymous function!!

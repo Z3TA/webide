@@ -1751,9 +1751,7 @@
 				// Read words ...
 				readWords(charIndex);
 				
-
 				
-		
 				
 				
 				// ### Code block indentation for JavaScript & CSS
