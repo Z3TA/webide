@@ -27,11 +27,11 @@ editor.addTest(function functionVariableWidthSubfunction(callback) {
 		
 		file.putCharacter("b");
 		
-		if(file.parsed.functions[0].subFunctions[0].subFunctions.lenth != 0) throw new Error("Did not expect a second subfunction: " + file.parsed.functions[0].subFunctions[0].subFunctions[0].name);
+		if(file.parsed.functions[0].subFunctions[0].subFunctions.length != 0) throw new Error("Did not expect a second subfunction: " + file.parsed.functions[0].subFunctions[0].subFunctions[0].name);
 		if(file.grid[3].indentation != 1) throw new Error("Expected indentation on line 4 to be 1, not " + file.grid[3].indentation);
 		if(file.grid[4].indentation != 0) throw new Error("Expected indentation on line 5 to be 0, not " + file.grid[4].indentation);
 		
-		//editor.closeFile(file.path);
+		editor.closeFile(file.path);
 		callback(true);
 		
 	});

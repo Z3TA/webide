@@ -2087,6 +2087,10 @@
 						}
 						
 						
+						// Prevent the function name from being reused
+						functionName = "";
+						variableName = "";
+						
 						insideFunctionBody[subFunctionDepth] = true;
 						insideFunctionDeclaration = false;
 						
