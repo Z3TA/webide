@@ -14,10 +14,29 @@
 	});
 	}, 1);
 	
-	
 */
 
-editor.addTest(function functionVariableWidthSubfunction(callback) {
+
+	editor.addTest(function varPointAtAnonFunction(callback) {
+	editor.openFile("varPointAtAnonFunction.js", 'var foo = function() {};', function(err, file) {
+		
+		// This is actually variable (foo) pointing to an anonymous function!!
+		// writing foo() will call the nonymous function though. 
+		// So for convenience we will give it the same name as the variable pointing to it
+		
+		// We don't however want "var" "let" etc included in the function name!
+		
+		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[0].name);
+		
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
+
+
+	editor.addTest(function functionVariableWidthSubfunction(callback) {
 	editor.openFile("functionVariableWidthSubfunction.js", 'foo = function() {\nfunction bar() {\na\n}\n}', function(err, file) {
 		
 		if(file.parsed.functions[0].name != "foo") throw new Error("Expected first function name to be foo, not " + file.parsed.functions[0].name);
@@ -35,7 +54,7 @@ editor.addTest(function functionVariableWidthSubfunction(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 	editor.addTest(function aspVarInScript(callback) {
 	// Parser can't find start of baz

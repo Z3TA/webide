@@ -2399,6 +2399,7 @@
 				insideVariableDeclaration[codeBlockDepth] = true;
 				lastVariableDeclarationLine = lineNumber;
 				word = "";
+				variableStart = i;
 				return;
 			}
 			else if(char == " " && word == "function") {
