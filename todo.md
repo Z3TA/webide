@@ -36,6 +36,8 @@ search for Object.keys and funname fname
 
 Add support for arrow functions
 
+Add support for ` template literals
+
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
@@ -783,6 +785,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Adding a quote at the start of a word should only insert a single quote not ""
 
 Confirmation when deleting SSG site
 
