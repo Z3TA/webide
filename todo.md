@@ -28,20 +28,15 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Add support for ` template literals
-
-
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
 
 todo:
 
-Try some popular JS files like SockJS to see if it parses correctly
-
 fix wrong indentation in file source!
 Fix white-space in source file (context menu option)
 Feature to replace spaces used for indentation (convert indentation to spaces 2/4), because the code dont fit in my code examples on my blog
-
+Preserve (manual) indentation inside block comments and pre tags !?
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -198,6 +193,11 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Color leak in unclosed tag withing string:
+'<h1>foo</h1 ' // space here to show leak
+'<h2>bar</h2>'
+
 
 IF and END IF ASP vbScript on the same line gives wrong indentation: ex:
 <% IF MilitaryScienceCostGold <= gold AND totalStone >= MilitaryScienceCostStone AND totalTree >= MilitaryScienceCostTree THEN %> <form action="science.asp" method="post"></form><br><% END IF %>
