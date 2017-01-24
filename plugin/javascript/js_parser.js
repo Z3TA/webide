@@ -1285,6 +1285,7 @@
 					insideLineComment = true;
 					commentStart = i-1;
 					//console.log("insideLineComment!");
+					if(insideArrowFunction) endArrowFunction(1);
 				}
 				else if(char == "\n" && insideLineComment) {
 					insideLineComment = false;
@@ -1783,7 +1784,11 @@
 				}
 				
 				else if(char == ">" && lastChar == "=") {
-
+					
+					// ## Found Arrow function
+					
+					if(insideArrowFunction) endArrowFunction(1);
+					
 					console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 					
 					insideArrowFunction = true;
@@ -1799,14 +1804,20 @@
 						}
 					}
 					
+					if(functionArguments.indexOf(">") != -1) functionArguments = functionArguments.replace(">", "").trim();
+					
 					insideFunctionDeclaration = true;
 					functionName = lastVariableName;
 										
 					arrowFunctionStart = i;
 					
+					afterPointer[codeBlockDepth] = false;
+					
 				}
 				
 				else if(char == "{") {
+					
+					// ### Found function maybe
 					
 					//console.log("{ insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
 					
@@ -2190,82 +2201,32 @@
 			
 		}
 		
-		function endArrowFunction() {
+		function endArrowFunction(indexMinus) {
 			
 			// Arrow functions without { angel wings } CAN have sub functions =)
+			// Don't bother trying to figure out the subfunctions though, just place them under the function function or global
 			
-			console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments);
-			
-			
-			
-			
-			if(insideFunctionBody[subFunctionDepth]) {
-				R[subFunctionDepth]++;
-				
-				insideFunctionDeclaration = false;
-				
-				//console.log("R[" + subFunctionDepth + "]++");
-				
-				//console.log("L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + ", R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
-
-				
-				if(L[subFunctionDepth] === R[subFunctionDepth]) {
-					// End of current function
-					//console.log("Reached end of function body for " + myFunction[subFunctionDepth].name + " L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + "  R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
-					insideFunctionBody[subFunctionDepth] = false;
-					
-					myFunction[subFunctionDepth].end = i;
-					myFunction[subFunctionDepth].endRow = row;
-
-					
-					if(subFunctionDepth > 0) {
-						L[subFunctionDepth] = -1;
-						R[subFunctionDepth] = -1;
-						
-						subFunctionDepth--;
-						R[subFunctionDepth]++;
-					}
-					else {
-						R[subFunctionDepth] = L[subFunctionDepth]-1;
-					}
-					
-					variableName = "";
-					
-				}
-				
-				
-			}
-			
-			
-			
-			
-			
+			console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments + " subFunctionDepth=" + subFunctionDepth);
 			
 			newFunc = new Func(functionName, functionArguments, arrowFunctionStart, lineNumber+parseStartRow);
-						
+			
 			newFunc.arrowFunction = true;
-			newFunc.end = i;
+			newFunc.end = indexMinus ? i - indexMinus : i;
 			newFunc.endRow = lineNumber+parseStartRow;
 			
 			properties = functionName.split(".");
 
 			//console.log("subFunctionDepth=" + subFunctionDepth);
 			
-			if(insideFunctionBody[subFunctionDepth]) {
+			if(insideFunctionBody[subFunctionDepth] && myFunction[subFunctionDepth]) {
 				//It's a sub-function
 				
 				subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
 				
-				myFunction[subFunctionDepth+1] = myFunction[subFunctionDepth].subFunctions[subFunctionIndex];
-				
-				subFunctionDepth++; // Functions within this function's body will be sub-functions
-				
-				L[subFunctionDepth] = 1;
-				R[subFunctionDepth] = 0;
-				
+								
 				if(properties.length > 1) {
-					if(Object.hasOwnProperty.call(myFunction[subFunctionDepth-1].variables, properties[0])) {
-						// This is a variable (method) for a function: foo.bar.baz = function()
+					if(Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, properties[0])) {
+						// This is a variable (method) for a function: foo.bar.baz = () => {}
 						// Change the variable type to Method
 						variable = myFunction[subFunctionDepth-1].variables[properties[0]];
 						startIndex = 1;
@@ -2280,31 +2241,32 @@
 			else {
 				// a global function
 				functionIndex = functions.push(newFunc) - 1;
-				myFunction[subFunctionDepth] = functions[functionIndex];
 				
-				// Remove from global variables
-				if(Object.hasOwnProperty.call(globalVariables, functionName)) {
-					//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
-					delete globalVariables[functionName];
-				}
+				if(functionName !== "") {
+					// Remove from global variables (for convenience!?)
+					if(Object.hasOwnProperty.call(globalVariables, functionName)) {
+						//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
+						delete globalVariables[functionName];
+					}
 				
 
-				if(properties.length > 1) {
-					theFunction = getFunctionWithName(functions, properties[0]);
-					if(theFunction) {
-						// This is a variable (method) for a function: foo.bar.baz = function()
-						// This is run after variables has been added.
-						// Change the variable type to Method
-						// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
-						if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
-							
-							variable = theFunction.variables[properties[1]];
-							startIndex = 2;
-							variable = traverseVariableTree(properties, variable, startIndex);
-							
-							variable.type = "Method";
+					if(properties.length > 1) {
+						theFunction = getFunctionWithName(functions, properties[0]);
+						if(theFunction) {
+							// This is a variable (method) for a function: foo.bar.baz = function()
+							// This is run after variables has been added.
+							// Change the variable type to Method
+							// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
+							if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
+								
+								variable = theFunction.variables[properties[1]];
+								startIndex = 2;
+								variable = traverseVariableTree(properties, variable, startIndex);
+								
+								variable.type = "Method";
+							}
+
 						}
-
 					}
 				}
 			}
@@ -2314,12 +2276,9 @@
 			variableName = "";
 			lastVariableName = "";
 			
-			insideFunctionBody[subFunctionDepth] = true;
 			insideFunctionDeclaration = false;
 			
 			insideArrowFunction = false;
-				
-			
 			
 		}
 		

@@ -1,8 +1,10 @@
 
-/*
+
 editor.addTest(function arrowFunctionBeforeFunction(callback) {
 	// Parser can't find start of baz
 	editor.openFile("arrowFunctionBeforeFunction.js", 'foo = bar => baz\nfunction test() {\n\n}\n', function(err, file) {
+		
+		if(file.parsed.functions.length != 2) throw new Error("Expected two functions!");
 		
 		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[0].name);
 		
@@ -19,7 +21,27 @@ editor.addTest(function arrowFunctionBeforeFunction(callback) {
 		
 	});
 }, 1);
-*/
+
+
+
+editor.addTest(function arrowFunctionsSubfunction(callback) {
+	editor.openFile("arrowFunctionsSubfunction.js", 'var foo = xxx => yyy => 42 // A function that returns a function that returns 42: ex: foo()() == 42', function(err, file) {
+		
+		// We will intentially not bother keeping track of subfunctions in subfunctions, just flatten all arrow functions to closest scope for now
+		
+		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name=foo, not name=" + file.parsed.functions[0].name);
+		if(file.parsed.functions[0].arguments != "xxx") throw new Error("Expected arrow function arguments to be xxx, not arguments=" + file.parsed.functions[0].arguments);
+		
+		if(file.parsed.functions[1].name != "") throw new Error("Expected anonymous function, not name=" + file.parsed.functions[1].name);
+		if(file.parsed.functions[1].arguments != "yyy") throw new Error("Expected arrow function arguments to be yyy, not arguments=" + file.parsed.functions[1].arguments);
+
+
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+});
+
 
 editor.addTest(function arrowFunctions(callback) {
 	editor.openFile("arrowFunctions.js", 'some(someArgument, arrowFunctionArgument => returnStatement)\nanother(arrowFunctionArgument => returnStatement)\nvar foo = (a, b) => a + b\nvar bar = x => ++x\narr.map(n => n-1)\n', function(err, file) {
@@ -40,7 +62,7 @@ editor.addTest(function arrowFunctions(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 
 
