@@ -506,9 +506,7 @@
 										throw err;
 									}
 								}
-								
-								
-							}
+								}
 							
 							
 							file.haveParsed(oldParse);
@@ -547,75 +545,6 @@
 		}
 		
 		
-		
-		
-		
-		
-		/*
-			We could probably do a ton of optimization on this function ... 
-			
-			
-			
-			var box = file.grid[row][col];
-			
-			if(characters.length > 1) {
-			// More then one characters was inserted or deleted
-			
-			}
-			else {
-			
-			var char = characters,
-			lastChar = index > 0 ? file.text.charAt(index-1) : "",
-			nextChar = index < file.text.length ? file.text.charAt(index+1) : "",
-			escaped = (lastChar == "\\"),
-			insideDoubleQuote = checkRange(js.quotes),
-			= 
-			
-			
-			if(char == "'") { // Ending/starting single quote if not inside double quote and not escaped
-			if(insideDoubleQuote())
-			}
-			else if(char == '"') { // Ending double quote maybe
-			
-			}
-			else if(char == "\\") { // Escaping 
-			
-			}
-			else if(char == "/") { // Comment maybe
-			
-			}
-			}
-			
-			
-			
-			if(type=="insert") {
-			
-			
-			// Check ranges and apply colors ...
-			
-			for(var i=0; i<js.quotes.length; i++) {
-			if(inRange(js.quotes[i])) {
-			box.color = editor.settings.style.quoteColor;
-			return; // We do not have to do anything else
-			};
-			}
-			
-			for(var i=0; i<js.comments.length; i++) {
-			if(inRange(js.comments[i])) {
-			box.color = editor.settings.style.commentColor;
-			return; // We do not have to do anything else
-			};
-			}
-			
-			
-			}
-			
-			
-			
-			function inRange(obj) {
-			return (index > obj.start && index < obj.end);
-			}
-		*/
 		
 		function updateThingsFunctions(functions, oldEnd, endRowDiff, charactersLength) {
 			// Will update start or end positions of all functions below oldEnd or parent functions
@@ -958,13 +887,6 @@
 			parenthesisStart[codeBlockDepth] = -1;
 			
 			
-			/*
-				if(codeBlockDepth > 0) {
-				// We went deeper ... Inheret the afterPointer value from parent
-				afterPointer[codeBlockDepth] = afterPointer[codeBlockDepth-1];
-				}
-			*/
-			
 			if(codeBlockDepth == 0) throw new Error("codeBlockDepth can not be zero")
 			
 			insideVariableDeclaration[codeBlockDepth] = false;
@@ -1126,74 +1048,6 @@
 				}
 				
 				
-				/*
-					
-					while(!insideArray[d] && afterPointer[d] == ":") {
-					if(leftSide) {
-					leftSide = codeBlock[d].word + "." + leftSide;
-					}
-					else {
-					leftSide = codeBlock[d].word;
-					}
-					d--;
-					console.log("while leftSide=" + leftSide);
-					console.log("d=" + d);
-					}
-					console.log("d=" + d);
-					
-					if(insideArray[d]) {
-					// The array name contains the full path
-					leftSide = insideArray[d] + "." + arrayItemCount[d];
-					}
-					if(insideArray[d-1]) {
-					// The array name contains the full path
-					leftSide = insideArray[d-1] + "." + arrayItemCount[d-1] + "." + lastWord;
-					}
-					else {
-					leftSide = leftSide + "." + lastWord;
-					}
-					
-					
-					
-				*/
-				
-				
-				/*
-					// Dig into that JSON tree
-					var  d = codeBlockDepth;
-					
-					
-					while(afterPointer[d] == ":") {
-					if(insideArray[d]) {
-					leftSide = leftSide + "." + arrayItemCount[d];
-					}
-					
-					else {
-					
-					if(leftSide) {
-					if(insideArray[d-1]) {
-					leftSide = leftSide + "." + arrayItemCount[d-1];
-					}
-					else {
-					leftSide = codeBlock[d].word + "." + leftSide;	
-					}
-					}
-					else {
-					if(insideArray[d-1]) {
-					leftSide = codeBlock[d-1].word + "." + insideArray[d-1] + "." + arrayItemCount[d-1];
-					}
-					else {
-					leftSide = codeBlock[d].word;
-					}
-					}								
-					}
-					d--;
-					console.log("leftSide=" + leftSide + " codeBlock[" + d + "].word=" + codeBlock[d].word + "");
-					}
-					
-					leftSide += "." + lastWord;
-					
-				*/
 			}
 			else if(pointerCharacter == "=") {
 				// Ex: x = y; (leftside=x)
@@ -1618,14 +1472,6 @@
 					if(insideHTMLComment) throw new Error("WTF");
 				}
 				
-				/*
-				else if(pastChar3 == "<" && pastChar2 == "h" && pastChar1 == "t" && pastChar0 == "m" && char == "l" && !insideQuote) {
-					xmlModeBeforeTag = true; // Turn on HTML mode if we find a html tag
-					insideXmlTag = true;
-					xmlTagStart = i-4;
-				}
-				*/
-				
 				// Exit out of style
 				else if(CSS && pastChar5 == "<" && pastChar4 == "/" && pastChar3 == "s" && pastChar2 == "t" && pastChar1 == "y" && pastChar0 == "l" && char == "e") {
 					insideXmlTag = true;
@@ -1739,7 +1585,6 @@
 				//console.log("char(" + i + ")=" + char + "");
 				
 				/*
-				5773
 				char == " " || char == "\t" || char == "\n" || 
 				*/
 				
@@ -1771,8 +1616,6 @@
 					
 					//console.log("Found character=; ending pointer ...");
 					
-					//endPointer();
-					
 				}
 				
 				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
@@ -1785,19 +1628,7 @@
 					
 					foundVariableInVariableDeclaration = false;
 					
-					/*
-					Only end pointer after a word!
-					console.log("ep char=" + char + "");
-					endPointer(); 
-					*/
-					
-
 				}
-				/*
-				else if(char == " " && lastWord == "var") {
-					insideVariableDeclaration[codeBlockDepth] = true;
-				}
-				*/
 				else if(char == "[") {
 					//console.log("array! word=" + word + " lastWord=" + lastWord);
 					
@@ -1828,25 +1659,12 @@
 					
 				}
 				else if(char == "}") {
-					/*
-						Problem:
-							How can we know if this is the end of a function body?
-							
-							function foo() {
-								
-								var bar = {};
-								
-							}
-					
-					*/
 					
 					//console.log("} insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " line:" + lineNumber + "");
 
 					
 					if(insideFunctionBody[subFunctionDepth]) {
 						R[subFunctionDepth]++;
-						
-						
 						
 						insideFunctionDeclaration = false;
 						
@@ -1940,38 +1758,6 @@
 					insideParenthesis[codeBlockDepth] = "(";
 					parenthesisStart[codeBlockDepth] = i;
 					
-					/*
-					if(words[words.length-1] == "function") {
-						
-						insideFunctionDeclaration = true;
-						console.log("insideFunctionDeclaration? (line:" + lineNumber + ")")
-
-						// Anonymous function?
-						//console.log("variableName=" + variableName);
-						//console.log("word-2=" + words[words.length-2]);
-						
-						// Sometimes you have var infront of function. 
-						
-						if(variableName.substr(0,3) == "var" || variableName.substr(0,3) == "let") {
-							functionName = variableName.substring(4, variableName.length);
-						}
-						else if(words[words.length-2] == variableName) {
-							functionName = variableName;
-						}
-						else {
-							functionName = "Anonymous function";
-						}
-						
-					}
-					else if(words[words.length-2] == "function") {
-						insideFunctionDeclaration = true;
-						willBeJSON = false; // Defenitly! ... function ... (we are here)
-						console.log("insideFunctionDeclaration! (line:" + lineNumber + ")")
-						functionName = words[words.length-1];
-						
-					}
-					*/
-					
 				}
 
 				else if(char == ")") {
@@ -2000,8 +1786,6 @@
 						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
-						
-						
 						
 						/*
 						json = {
@@ -2423,23 +2207,6 @@
 				word = "";
 				return;
 			}
-			/*
-				if(pastChar2 == "v" && pastChar1 == "a" && pastChar0 == "r") {
-
-				}
-				else if(pastChar1 == "i" && pastChar0 == "f") {
-					word = "";
-					return;
-				}
-				else if(pastChar3 == "e" && pastChar2 == "l" && pastChar1 == "s" && pastChar0 == "e") {
-					word = "";
-					return;
-				}
-				else if(pastChar2 == "n" && pastChar1 == "e" && pastChar0 == "w") {
-					word = "";
-					return;
-				}
-			*/
 			else if(charIndex == textLength || char == "=" || char == "(" || char == ")" || char == "\t" || char == "\r" || char == "\n" || char == "," || char == ";" || char == "{" || char == "}" || char == ":" || char == "," || char == "[" || char == "]") {
 
 				// char == " " || char == "+" || char == "-" || char == "/" || char == ">" || char == "<" ||
