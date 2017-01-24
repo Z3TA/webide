@@ -1,30 +1,40 @@
+
 /*
-	editor.addTest(function arrowFunctionBeforeFunction(callback) {
+editor.addTest(function arrowFunctionBeforeFunction(callback) {
 	// Parser can't find start of baz
-	editor.openFile("arrowFunctionBeforeFunction.js", 'foo = bar => baz\nfunction test() {\n\n}', function(err, file) {
-	
-	file.moveCaret(undefined, 2);
-	editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
-	// Uncaught Error: Unable to find start of function
-	// because it thinks "foo = bar" is the function name
-	
-	editor.closeFile(file.path);
-	callback(true);
-	
-	});
-	}, 1);
-	
-
-*/
-
-editor.addTest(function arrowFunctions(callback) {
-	editor.openFile("arrowFunctions.js", 'var foo = (a, b) => a + b\nvar bar = x => ++x\narr.map(n => n-1)\n', function(err, file) {
+	editor.openFile("arrowFunctionBeforeFunction.js", 'foo = bar => baz\nfunction test() {\n\n}\n', function(err, file) {
 		
 		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[0].name);
 		
-		if(file.parsed.functions[1].name != "bar") throw new Error("Expected function name to be bar, not " + file.parsed.functions[1].name);
+		if(file.parsed.functions[1].name != "test") throw new Error("Expected function name to be test, not " + file.parsed.functions[1].name);
+
 		
-		if(file.parsed.functions[2].name != "") throw new Error("Expected anonymous function, not " + file.parsed.functions[2].name);
+		file.moveCaret(undefined, 2);
+		editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+		// Uncaught Error: Unable to find start of function
+		// because it thinks "foo = bar" is the function name
+		
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+*/
+
+editor.addTest(function arrowFunctions(callback) {
+	editor.openFile("arrowFunctions.js", 'some(someArgument, arrowFunctionArgument => returnStatement)\nanother(arrowFunctionArgument => returnStatement)\nvar foo = (a, b) => a + b\nvar bar = x => ++x\narr.map(n => n-1)\n', function(err, file) {
+		
+		if(file.parsed.functions[0].name != "") throw new Error("Expected anonymous function, not " + file.parsed.functions[0].name);
+		if(file.parsed.functions[0].arguments != "arrowFunctionArgument") throw new Error("Expected arrow function arguments to be arrowFunctionArgument, not " + file.parsed.functions[1].arguments);
+		
+		if(file.parsed.functions[1].name != "") throw new Error("Expected anonymous function, not " + file.parsed.functions[1].name);
+		if(file.parsed.functions[1].arguments != "arrowFunctionArgument") throw new Error("Expected arrow function arguments to be arrowFunctionArgument, not " + file.parsed.functions[1].arguments);
+		
+		if(file.parsed.functions[2].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[2].name);
+		
+		if(file.parsed.functions[3].name != "bar") throw new Error("Expected function name to be bar, not " + file.parsed.functions[3].name);
+		
+		if(file.parsed.functions[4].name != "") throw new Error("Expected anonymous function on line 5, not name=" + file.parsed.functions[4].name);
 
 		editor.closeFile(file.path);
 		callback(true);

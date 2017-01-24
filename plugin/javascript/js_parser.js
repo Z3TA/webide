@@ -1783,9 +1783,7 @@
 				}
 				
 				else if(char == ">" && lastChar == "=") {
-					
-					
-					
+
 					console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 					
 					insideArrowFunction = true;
@@ -1793,11 +1791,17 @@
 					if(functionArguments.substring(0,1) == "(") {
 						functionArguments = functionArguments.substring(1, functionArguments.length-1); // Trim the parentheses
 					}
+					else if(functionArguments === "") {
+						// Arrow functions need at least one argument if there are no parentheses
+						if(word.indexOf("=>") != -1) {
+							functionArguments = word.substring(0, word.indexOf("=>"));
+							if(functionArguments.indexOf(",") != -1) functionArguments = functionArguments.substring(functionArguments.lastIndexOf(",")+1).trim();
+						}
+					}
 					
 					insideFunctionDeclaration = true;
-					if(insideVariableDeclaration[codeBlockDepth]) functionName = lastVariableName;
-					else functionName = "";
-					
+					functionName = lastVariableName;
+										
 					arrowFunctionStart = i;
 					
 				}
@@ -2190,7 +2194,52 @@
 			
 			// Arrow functions without { angel wings } CAN have sub functions =)
 			
-			console.log("End Arrow Function: word=" + word + " functionName=" + functionName + " functionArguments=" + functionArguments);
+			console.log("End Arrow Function: word=" + word + " char=" + char + " functionName=" + functionName + " functionArguments=" + functionArguments);
+			
+			
+			
+			
+			if(insideFunctionBody[subFunctionDepth]) {
+				R[subFunctionDepth]++;
+				
+				insideFunctionDeclaration = false;
+				
+				//console.log("R[" + subFunctionDepth + "]++");
+				
+				//console.log("L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + ", R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
+
+				
+				if(L[subFunctionDepth] === R[subFunctionDepth]) {
+					// End of current function
+					//console.log("Reached end of function body for " + myFunction[subFunctionDepth].name + " L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + "  R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
+					insideFunctionBody[subFunctionDepth] = false;
+					
+					myFunction[subFunctionDepth].end = i;
+					myFunction[subFunctionDepth].endRow = row;
+
+					
+					if(subFunctionDepth > 0) {
+						L[subFunctionDepth] = -1;
+						R[subFunctionDepth] = -1;
+						
+						subFunctionDepth--;
+						R[subFunctionDepth]++;
+					}
+					else {
+						R[subFunctionDepth] = L[subFunctionDepth]-1;
+					}
+					
+					variableName = "";
+					
+				}
+				
+				
+			}
+			
+			
+			
+			
+			
 			
 			newFunc = new Func(functionName, functionArguments, arrowFunctionStart, lineNumber+parseStartRow);
 						
@@ -2211,7 +2260,7 @@
 				
 				subFunctionDepth++; // Functions within this function's body will be sub-functions
 				
-				L[subFunctionDepth] = 0;
+				L[subFunctionDepth] = 1;
 				R[subFunctionDepth] = 0;
 				
 				if(properties.length > 1) {
@@ -2260,7 +2309,17 @@
 				}
 			}
 			
+			// Prevent the function name from being reused
+			functionName = "";
+			variableName = "";
+			lastVariableName = "";
+			
+			insideFunctionBody[subFunctionDepth] = true;
+			insideFunctionDeclaration = false;
+			
 			insideArrowFunction = false;
+				
+			
 			
 		}
 		
