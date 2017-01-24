@@ -686,6 +686,7 @@
 		insideDblQuote = false,
 		insideDblQuoteBeforeLangTag = false,
 		insideSingleQuote = false,
+		insideTemplateLiteral = false,
 		insideFunctionDeclaration = false,
 		insideFunctionArguments = false,
 		afterPointer = [],
@@ -1259,10 +1260,10 @@
 					http://stackoverflow.com/questions/4726295/division-regexp-conflict-while-tokenizing-javascript
 					
 				*/
-								
+				
 				if(char == "/" 
 				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="") 
-				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag && !CSS) {
+				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag && !CSS && !insideTemplateLiteral) {
 					
 					insideRegExp = true;
 					regExpStart = i;
@@ -1280,8 +1281,9 @@
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
 				}
 				
+				
 				// ### Comments: //
-				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp && !CSS) {
+				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp && !CSS && !insideTemplateLiteral) {
 					insideLineComment = true;
 					commentStart = i-1;
 					//console.log("insideLineComment!");
@@ -1293,8 +1295,9 @@
 					//console.log("Found line comment: " +  text.substring(commentStart, i))
 				}
 				
+				
 				// ### Comments: /*   */
-				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment) {
+				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment && !insideTemplateLiteral) {
 					insideBlockComment = true;
 					insideRegExp = false;
 					commentStart = i-1;
@@ -1315,7 +1318,7 @@
 				
 				// ### Quotes: double
 				// JavaScript can not escape quotes outside of strings! So no need for  && lastChar != "\\"
-				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+				else if(char === '"' && !insideLineComment && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideRegExp && !insideTemplateLiteral) {
 					if(insideDblQuote) {
 						//console.log("insideDblQuote? lastChar=" + lastChar + " llChar=" + llChar + " vbScript=" + vbScript);
 						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash || vbScript)) {				
@@ -1334,7 +1337,7 @@
 				}
 				
 				// ### Quotes: single
-				else if(!vbScript && char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+				else if(!vbScript && char === "'" && !insideDblQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp && !insideTemplateLiteral) {
 					if(insideSingleQuote) {
 						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
 							insideSingleQuote = false;
@@ -1360,9 +1363,25 @@
 				}
 				
 				
+				// ### Template literals
+				else if(char == "`" && !insideDblQuote && !insideSingleQuote && !insideLineComment && !insideBlockComment && !insideHTMLComment && !insideRegExp) {
+					if(insideTemplateLiteral) {
+						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
+							insideTemplateLiteral = false;
+							quotes.push(new Quote(quoteStart, i));
+							return;
+						}
+					}
+					else {
+						insideTemplateLiteral = true;
+						quoteStart = i;
+						//console.log("insideSingleQuote!");
+					}
+				}
+				
 			}
 			
-			insideQuote = insideDblQuote || insideSingleQuote;
+			insideQuote = insideDblQuote || insideSingleQuote || insideTemplateLiteral;
 			insideComment = insideLineComment || insideBlockComment || insideHTMLComment;
 			
 			//console.log("char(" + i + ")=" + char + "  insideQuote=" + insideQuote + " insideComment=" + insideComment + " xmlMode=" + xmlMode );

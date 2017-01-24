@@ -1,4 +1,15 @@
 
+editor.addTest(function templateLiterals(callback) {
+	editor.openFile("templateLiterals.js", 'var strTest = `string text ${expression} string text`\nvar strTopic = `<h1>Topic</h1>`', function(err, file) {
+		
+		if(file.parsed.quotes.length != 2) throw new Error("Did not find all template literals");
+		
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 
 editor.addTest(function arrowFunctionBeforeFunction(callback) {
 	// Parser can't find start of baz
@@ -20,8 +31,7 @@ editor.addTest(function arrowFunctionBeforeFunction(callback) {
 		callback(true);
 		
 	});
-}, 1);
-
+});
 
 
 editor.addTest(function arrowFunctionsSubfunction(callback) {
