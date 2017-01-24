@@ -211,9 +211,11 @@
 					//console.log(JSON.stringify(functions));
 					
 					var f = insideFunction(functions, caretIndex, false, charactersLength);
+					// We will not bother with arrow functions for now (will need slow regex to know where to begin parsing)
 					
 					// This optimization has about 15% overhead in large files. So skip it if the function size is larger then 80% of the file
 					var maxFunctionBodySize = Math.round(file.text.length * 0.8);
+										
 					
 					if(f) { // Parse only that function
 						//console.log("Inside " + f.name);
@@ -225,7 +227,9 @@
 							
 							//console.log("Parsing only f=" + f.name + "");
 							
+							
 							// The start property is at the { after function
+							// We need to start parsing at the function declaration so that the parser will find it
 							var parseEnd = f.end + charactersLength + 1;
 							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : ""), f.start); // Search backwards in file.text starting from f.start
 							var parseStartRow = f.lineNumber-1;
@@ -235,27 +239,28 @@
 							
 							
 							// I do not trust reLastIndexOf ...
-								
-								// Fix for: foo = function() and foo = function foo()
+							
+							
+							// Fix for: foo = function() and foo = function foo()
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " = function", f.start);
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + "=function", f.start);
 							
 								
 								
-								// Find foo: function foo()
-								if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + ": function", f.start);
-								if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
-							
+							// Find foo: function foo()
+							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + ": function", f.start);
+							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
+						
 							//console.time("hmm"); // These used to be slow
-								if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
+							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
 							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
 							//console.timeEnd("hmm");
 								
-								if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
-								// function names can include the string "function" ex: function function_function ( )  {
-								// Make a full parse instead of throwing an error when not in dev mode !?
-							
-							
+							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
+							// function names can include the string "function" ex: function function_function ( )  {
+							// Make a full parse instead of throwing an error when not in dev mode !?
+						
+						
 							
 							//console.log("characters=" + lbChars(characters));
 							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
@@ -602,7 +607,7 @@
 
 			for(var i=0; i<functions.length; i++) {
 				f = functions[i];
-				if(f.start < caretIndex && f.end >= caretIndex) {
+				if(!f.arrowFunction && f.start < caretIndex && f.end >= caretIndex) {
 					// Deleted text are now allowed to be larger then the function body
 					if(charactersLength > 0 || (charactersLength < 0 && (f.end-f.start) > Math.abs(charactersLength) )) {
 						//console.log("Found function=" + f.name);
@@ -687,11 +692,14 @@
 		variableStart = parseStart,
 		variableEnd = 0,
 		variableName = "",
+		lastVariableName = "",
 		functionName = "",
 		char = "",
 		functionArgumentsStart = parseStart,
 		functionArguments = "",
 		insideFunctionBody = [],
+		insideArrowFunction = false,
+		arrowFunctionStart = -1,
 		insideQuote = false,
 		lastChar = "",
 		insideLineComment = false,
@@ -1072,7 +1080,7 @@
 			var func = myFunction[subFunctionDepth];
 			var leftSide = findLeftSide(afterPointer[codeBlockDepth]);
 			
-			//console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
+			console.log("Got value for variable! leftSide=" + leftSide + " rightSide=" + rightSide + " afterPointer[codeBlockDepth:" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " (line:" + lineNumber + ")");
 			
 			if(insideArray[codeBlockDepth]) {
 				// Key is arrayItemCount[codeBlockDepth] !!!!
@@ -1614,8 +1622,7 @@
 					foundVariableInVariableDeclaration = false;
 					variableName = "";
 					
-					//console.log("Found character=; ending pointer ...");
-					
+					if(insideArrowFunction) endArrowFunction(); // Arrow functions without {angel wings} can't have ; inside it
 				}
 				
 				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
@@ -1703,11 +1710,12 @@
 				}
 				else if( (char == "=" || char == ":") && !insideParenthesis[codeBlockDepth]) {
 					
+					lastVariableName = variableName;
 					variableName = text.substring(variableStart, i).trim();  // Used to find name of function
 					
 					afterPointer[codeBlockDepth] = char;
 					
-					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
+					console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
 
 					// Figure out the left side (the variable name)
 					
@@ -1771,6 +1779,27 @@
 						
 						//console.log("arguments: " + functionArguments + "");
 					}
+					else if(insideArrowFunction) endArrowFunction();
+				}
+				
+				else if(char == ">" && lastChar == "=") {
+					
+					
+					
+					console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
+					
+					insideArrowFunction = true;
+					functionArguments = lastWord;
+					if(functionArguments.substring(0,1) == "(") {
+						functionArguments = functionArguments.substring(1, functionArguments.length-1); // Trim the parentheses
+					}
+					
+					insideFunctionDeclaration = true;
+					if(insideVariableDeclaration[codeBlockDepth]) functionName = lastVariableName;
+					else functionName = "";
+					
+					arrowFunctionStart = i;
+					
 				}
 				
 				else if(char == "{") {
@@ -1783,9 +1812,10 @@
 						
 						// We have found a new function !
 						
-						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
+											
 						
 						/*
 						json = {
@@ -1798,6 +1828,8 @@
 						//afterPointer[codeBlockDepth] = false; // only endpointer should end it!?
 						
 						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
+						
+						if(insideArrowFunction) newFunc.arrowFunction = true;
 						
 						console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
@@ -1875,6 +1907,8 @@
 						
 						insideFunctionBody[subFunctionDepth] = true;
 						insideFunctionDeclaration = false;
+						
+						insideArrowFunction = false;
 						
 						//console.log("L[" + subFunctionDepth + "]++");
 						
@@ -2078,6 +2112,8 @@
 			}
 			
 			
+			if(insideArrowFunction && (char == "\r" || char=="\n")) endArrowFunction();
+			
 			
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") ) {
 				// A new line without , exits variable declaration
@@ -2150,6 +2186,83 @@
 			
 		}
 		
+		function endArrowFunction() {
+			
+			// Arrow functions without { angel wings } CAN have sub functions =)
+			
+			console.log("End Arrow Function: word=" + word + " functionName=" + functionName + " functionArguments=" + functionArguments);
+			
+			newFunc = new Func(functionName, functionArguments, arrowFunctionStart, lineNumber+parseStartRow);
+						
+			newFunc.arrowFunction = true;
+			newFunc.end = i;
+			newFunc.endRow = lineNumber+parseStartRow;
+			
+			properties = functionName.split(".");
+
+			//console.log("subFunctionDepth=" + subFunctionDepth);
+			
+			if(insideFunctionBody[subFunctionDepth]) {
+				//It's a sub-function
+				
+				subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
+				
+				myFunction[subFunctionDepth+1] = myFunction[subFunctionDepth].subFunctions[subFunctionIndex];
+				
+				subFunctionDepth++; // Functions within this function's body will be sub-functions
+				
+				L[subFunctionDepth] = 0;
+				R[subFunctionDepth] = 0;
+				
+				if(properties.length > 1) {
+					if(Object.hasOwnProperty.call(myFunction[subFunctionDepth-1].variables, properties[0])) {
+						// This is a variable (method) for a function: foo.bar.baz = function()
+						// Change the variable type to Method
+						variable = myFunction[subFunctionDepth-1].variables[properties[0]];
+						startIndex = 1;
+						variable = traverseVariableTree(properties, variable, startIndex);
+						
+						variable.type = "Method";
+						
+					}
+				}
+				
+			}
+			else {
+				// a global function
+				functionIndex = functions.push(newFunc) - 1;
+				myFunction[subFunctionDepth] = functions[functionIndex];
+				
+				// Remove from global variables
+				if(Object.hasOwnProperty.call(globalVariables, functionName)) {
+					//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
+					delete globalVariables[functionName];
+				}
+				
+
+				if(properties.length > 1) {
+					theFunction = getFunctionWithName(functions, properties[0]);
+					if(theFunction) {
+						// This is a variable (method) for a function: foo.bar.baz = function()
+						// This is run after variables has been added.
+						// Change the variable type to Method
+						// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
+						if(Object.hasOwnProperty.call(theFunction.variables, properties[1])) {
+							
+							variable = theFunction.variables[properties[1]];
+							startIndex = 2;
+							variable = traverseVariableTree(properties, variable, startIndex);
+							
+							variable.type = "Method";
+						}
+
+					}
+				}
+			}
+			
+			insideArrowFunction = false;
+			
+		}
 		
 		function readWords(charIndex) {
 			// Collects the words to find variables
@@ -2363,7 +2476,7 @@
 		func.variables = {};
 		func.lineNumber = lineNumber;
 		func.endRow = -1;
-		
+		func.arrowFunction = false;
 		func.prototype = {}; // Variables. (Methods will also be added as a variable here for consistency, it will also exist as a function)
 		
 		/*

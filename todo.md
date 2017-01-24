@@ -28,14 +28,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Thinking about anonymous functions ....
-They are not saved as the last anon function in the scope will overwrite it
-Make file.parsed.functions an array instead of named array !?
-
-search for Object.keys and funname fname
-
-Add support for arrow functions
-
 Add support for ` template literals
 
 

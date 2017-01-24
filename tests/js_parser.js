@@ -14,7 +14,24 @@
 	});
 	}, 1);
 	
+
 */
+
+editor.addTest(function arrowFunctions(callback) {
+	editor.openFile("arrowFunctions.js", 'var foo = (a, b) => a + b\nvar bar = x => ++x\narr.map(n => n-1)\n', function(err, file) {
+		
+		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[0].name);
+		
+		if(file.parsed.functions[1].name != "bar") throw new Error("Expected function name to be bar, not " + file.parsed.functions[1].name);
+		
+		if(file.parsed.functions[2].name != "") throw new Error("Expected anonymous function, not " + file.parsed.functions[2].name);
+
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 
 
 editor.addTest(function varPointAtAnonFunction(callback) {
@@ -32,8 +49,7 @@ editor.addTest(function varPointAtAnonFunction(callback) {
 		callback(true);
 		
 	});
-}, 1);
-
+});
 
 
 	editor.addTest(function functionVariableWidthSubfunction(callback) {
