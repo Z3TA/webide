@@ -1348,7 +1348,7 @@
 					else {
 						insideSingleQuote = true;
 						quoteStart = i;
-						//console.log("insideSingleQuote!");
+						//console.log("insideSingleQuote! quoteStart=" + quoteStart);
 					}
 				}
 				
@@ -2531,19 +2531,14 @@
 		obj.childs = [];
 	}
 	
-	function Comment(start, end, text) {
-		var comment = this;
-		
-		comment.start = start || -1;
-		comment.end = end || -1;
-		//comment.text = text;
+	function Comment(start, end) {
+		this.start = start;
+		this.end = end;
 	}
 	
 	function Quote(start, end) {
-		var quote = this;
-		
-		quote.start = start || -1;
-		quote.end = end || -1;
+		this.start = start;
+		this.end = end;
 	}
 	
 	function Variable(type, value) {
