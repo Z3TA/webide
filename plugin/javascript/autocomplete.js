@@ -143,13 +143,12 @@
 					// Give arguments
 					if(func.arguments.length > 0) {
 						var functionArguments = func.arguments.split(",");
-						for(var i=0; i<functionArguments.length; i++) {
-							functionArguments[i] = functionArguments[i].trim(); // Get rid of spaces
+						for(var a=0; a<functionArguments.length; a++) {
+							functionArguments[a] = functionArguments[a].trim(); // Get rid of spaces
 							// todo: Handle default function argument values
 							// maybe: Search for calls of this function to figure out what Type of variable it is
-							if(functionArguments[i].indexOf(wordToComplete) == 0) options.push(functionArguments[i]);
+							if(functionArguments[a].indexOf(wordToComplete) == 0) options.push(functionArguments[a]);
 						}
-						
 					}
 					
 					
