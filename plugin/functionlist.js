@@ -299,19 +299,12 @@
 	
 	function findCurrentFunction(functions, charIndex) {
 
-
-
-		var func;
-		var element;
-		
-		for(var name in functions) {
-			func = functions[name];
-			
-			
+for(var func, element, i=0; i<functions.length; i++) {
+			func = functions[i];
 			
 			if(func.start <= charIndex && func.end >= charIndex) {
 				
-				if(Object.keys(func.subFunctions).length > 0) {
+				if(func.subFunctions.length > 0) {
 					let result = findCurrentFunction(func.subFunctions, charIndex);
 					if(result != null) {
 						return result; // The subfunction (recursive)
@@ -341,22 +334,24 @@
 		
 		var matches = [];
 		
-		for(var name in functions) {
+		for(var func, name, i=0; i<functions.length; i++) {
 			
-			if(name.search(new RegExp(escapeRegExp(str), "i")) != -1) {
-				matches.push(name);
-				//console.log(name);
-			}
+			func = functions[i];
 			
-			let func = functions[name];
+			name = func.name;
 			
-			if(Object.keys(func.subFunctions).length > 0) {
-				let result = searchFunctions(str, func.subFunctions);
+				if(name.search(new RegExp(escapeRegExp(str), "i")) != -1) {
+					matches.push(name);
+					//console.log(name);
+				}
 				
-				if(result.length > 0) matches = matches.concat(result);
+				if(func.subFunctions.length > 0) {
+					let result = searchFunctions(str, func.subFunctions);
+					
+					if(result.length > 0) matches = matches.concat(result);
+				}
+				
 			}
-			
-		}
 		
 		return matches;
 		
@@ -561,9 +556,8 @@
 		add(functions, 0);
 		
 		function add(functions, level) {
-			var f;
-			for(var name in functions) {
-				f = functions[name];
+			for(var f, i=0; i<functions.length; i++) {
+				f = functions[i];
 				domModel.push({name: f.name, lineNumber: f.lineNumber , arguments: f.arguments, level: level, start: f.start, end: f.end});
 				
 				add(f.subFunctions, level+1);

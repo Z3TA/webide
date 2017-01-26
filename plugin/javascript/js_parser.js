@@ -1879,7 +1879,6 @@
 						if(insideFunctionBody[subFunctionDepth]) {
 							//It's a sub-function
 							
-							//myFunction[subFunctionDepth].subFunctions[functionName] = newFunc;
 							subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
 							
 							myFunction[subFunctionDepth+1] = myFunction[subFunctionDepth].subFunctions[subFunctionIndex];

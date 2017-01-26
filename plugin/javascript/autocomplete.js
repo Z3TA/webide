@@ -78,6 +78,7 @@
 				editor.addInfo(file.caret.row, file.caret.col, fc.allArguments);
 			}
 		}
+		else console.log("Not inside function call!");
 		
 		if(wordLength > 0) {
 			
@@ -128,11 +129,11 @@
 			
 			var func;
 			
-			for(var functionName in functions) {
+			for(var i=0; i<functions.length; i++) {
 				
-				func = functions[functionName];
+				func = functions[i];
 				
-				console.log("checking function=" + functionName + " start=" + func.start + " end=" + func.end + "  ...");
+				console.log("checking function=" + func.name + " start=" + func.start + " end=" + func.end + "  ...");
 
 				if(func.start <= charIndex && func.end >= charIndex) {
 					// Cursor is inside this function!
@@ -155,8 +156,8 @@
 					searchVariables(func.variables, wordToComplete, func.name); // check variables in this functions
 					
 					// check names of sub-functions
-					for(var subFunctionName in func.subFunctions) {
-						if(subFunctionName) checkgetFunctionName(subFunctionName, wordToComplete);
+					for(var j=0; j<func.subFunctions.length; j++) {
+						if(func.subFunctions[i].name.length > 0) checkgetFunctionName(func.subFunctions[i].name, wordToComplete);
 					}
 					
 					// Search sub-functions (recursive)
@@ -341,7 +342,7 @@
 					// We are in this function. Check it's subfunctions
 					
 					for(var j=0; j<func.subFunctions.length; j++) {
-						if(func.subFunctions[i] == functionName) analyze(func.subFunctions[i]);
+						if(func.subFunctions[i].name == functionName) analyze(func.subFunctions[i]);
 					}
 					
 				}
@@ -426,12 +427,12 @@
 		if(!startOfFunctionName) {
 			startOfFunctionName = rowStartIndex;
 		}
-				
-		//console.log("startOfFunctionName=" + startOfFunctionName);
-		//console.log("endOfFunctionName=" + endOfFunctionName);
-		//console.log("startOfArguments=" + startOfArguments);
 		
-		if(startOfFunctionName && endOfFunctionName) {
+		console.log("startOfFunctionName=" + startOfFunctionName);
+		console.log("endOfFunctionName=" + endOfFunctionName);
+		console.log("startOfArguments=" + startOfArguments);
+		
+		if(startOfFunctionName != undefined && endOfFunctionName != undefined) {
 			// We have a function name!
 			
 			functionName = text.substring(startOfFunctionName, endOfFunctionName);
@@ -455,11 +456,11 @@
 			
 			functionArguments = text.substring(startOfArguments, index);
 			
-			//console.log("functionArguments=" + functionArguments);
+			console.log("functionArguments=" + functionArguments);
 			
 			argumentIndex = countLetter(",", functionArguments);
 			
-			//console.log("argumentIndex=" + argumentIndex);
+			console.log("argumentIndex=" + argumentIndex);
 			
 			
 			// Find the function in the function list
@@ -467,7 +468,11 @@
 			
 			var scope = getScope(charIndex, js.functions, js.globalVariables);
 			
-			var theFunction = scope.functions[property[0]];
+			console.log("scope=" + JSON.stringify(scope, null, 2));
+			
+			var theFunction = scope.functions[property[0]]; // scope.functions is a object literal!
+			
+			console.log("theFunction=" + JSON.stringify(theFunction, null, 2));
 			
 			if(!theFunction) {
 				// Check for "this".
@@ -509,10 +514,9 @@
 					let variable = js.globalVariables[vName];
 					if(variable.type == "unknown") {
 						let possibleFunctionName = variable.value;
-						if(js.functions.hasOwnProperty(possibleFunctionName)) {
-							theFunction = js.functions[possibleFunctionName];
-							break;
-						}
+						
+						theFunction = getFunctionWithName(js.functions, possibleFunctionName)
+
 					}
 				}
 
@@ -547,10 +551,11 @@
 
 				*/
 				for(var i=1; i<property.length; i++) {
-					if(theFunction.subFunctions.hasOwnProperty(property[i])) {
-						theFunction = js.functions.subFunctions[property[i]];
-					}
 					
+					theFunction = getFunctionWithName(js.functions.subFunctions, property[i]);
+					
+					if(theFunction) break;
+			
 					// Include the prototype!?
 				}
 			}
@@ -598,8 +603,9 @@
 	
 	function getScope(charIndex, functions, globalVariables) {
 		// Returns all variables and functions available in the current scope (where the character's at)
+		// As a flattened object literal
 		
-		var foundFunctions = [];
+		
 		var foundVariables = {};
 		var thisIs;
 		
@@ -610,12 +616,9 @@
 			}
 		}
 		
-		searchScope(functions, true); // Recursive finds all functions and push to foundFunctions
+		var foundFunctions = functionsScope(functions, charIndex);
 		
-		foundFunctions.sort(function(a, b) {
-			// Sort by position in the code (line number) ascending
-			return a.start - b.start;
-		});
+		console.log("foundFunctions=" + JSON.stringify(foundFunctions, null, 2));
 		
 		foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
 		
@@ -635,10 +638,12 @@
 
 		// Make foundFunctions into an object literal, now when the order doesn't matter
 		var foundFunctionsObj = {};
-		for(var i=0; i<foundFunctions.length; i++) {
-			let func = foundFunctions[i];
+		for(var i=0, func; i<foundFunctions.length; i++) {
+			func = foundFunctions[i];
 			foundFunctionsObj[func.name] = func;
 		}
+		
+		console.log("foundFunctionsObj=" + JSON.stringify(foundFunctionsObj, null, 2));
 		
 		return {functions: foundFunctionsObj, variables: foundVariables, thisIs: thisIs};
 		
@@ -646,8 +651,8 @@
 		function overWriteDublicates(foundFunctions) {
 			// Overwrite (remove) global functions with local functions if they have the same name
 			var functionIndex = {};
-			for(var i=0; i<foundFunctions.length; i++) {
-				let fName = foundFunctions[i].name;
+			for(var i=0, fName; i<foundFunctions.length; i++) {
+				fName = foundFunctions[i].name;
 				if(functionIndex.hasOwnProperty(fName)) {
 					foundFunctions.splice(functionIndex[fName], 1);
 					
@@ -663,45 +668,61 @@
 			return foundFunctions;
 		}
 		
-		function searchScope(functions, glob) {
-			// Glob means global function
+		function functionsScope(functions, charIndex) {
+			// Returns an array of all functions available (to be called) in the lexical scope (where caret's at)
 			
-			var index = -1;
+			var foundFunctions = [];
 			
-			for(var functionName in functions) {
-				/*
-					There is no guarantee that the functions will be checked in order!
-					So we have to turn the list into an array, and sort it by position		
+			searchScope(functions, true); // Recursive finds all functions and push to foundFunctions
+			
+			return foundFunctions;
+			/*
+			foundFunctions.sort(function(a, b) {
+				// Sort by position in the code (line number) ascending
+				return a.start - b.start;
+			});
+			*/
+			
+			function searchScope(functions) {
 				
-				*/
-				let func = functions[functionName];
+				for(var i=0, func, cursorInside; i<functions.length; i++) {
 
-				if( (func.start <= charIndex && func.end >= charIndex) || glob ) {
-					// Cursor is inside this function (or its a global function)!
+					func = functions[i];
+						
+					console.log("Look: name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
 					
-					// Add itself to functions (yes functions can call themselves)
-					//foundFunctions[func.name] = func;
-					foundFunctions.push(func);
+					cursorInside = (func.start <= charIndex && func.end >= charIndex);
 					
-					console.log("Scope fun=" + func.name);
-					
-					if(!glob) {
-						// Add local subfunctions
-						for(var subFunctionName in func.subFunctions) {
-							//foundFunctions[subFunctionName] = func.subFunctions[subFunctionName];
-							foundFunctions.push(func.subFunctions[subFunctionName]);
+					if( cursorInside) {
+						
+						// Add itself to functions (yes functions can call themselves)
+						if(func.name.length > 0) foundFunctions.push(func); // Don't add anonymous functions
+						
+						console.log("Function Scope name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
+						
+						
+						// Local subfunctions can be called from here!
+						for(var j=0; j<func.subFunctions.length; j++) {
+							console.log("local: " + func.subFunctions[j].name);
+							if(func.subFunctions[j].name.length > 0) foundFunctions.push(func.subFunctions[j]);
 						}
+						
+						
+						// Search sub-functions (recursive)
+						searchScope(func.subFunctions);
+						
 					}
 					
-					// Search sub-functions (recursive)
-					searchScope(func.subFunctions, false);
-					
 				}
-				
 			}
 		}
 	}
 	
-	
+	function getFunctionWithName(functions, name) {
+		for(var i=0; i<functions.length; i++) {
+			if(functions[i].name == name) return functions[i];
+		}
+		return null;
+	}
 	
 })();

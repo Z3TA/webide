@@ -231,9 +231,8 @@
 			// return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
 			
 			// Update functions
-			var fun;
-			for(var name in js.functions) {
-				fun = js.functions[name];
+			for(var fun, i=0; i<js.functions.length; i++) {
+				fun = js.functions[i];
 				if(fun.end >= index || fun.start >= index) {
 					updateFunction(fun);
 					somethingChanged = true;
@@ -297,8 +296,8 @@
 		function updateFunction(fun) {
 			if(index <= fun.start) fun.start += totalCharactersAdded;
 			if(index <= fun.end) fun.end += totalCharactersAdded;
-			for(var name in fun.subFunctions) {
-				updateFunction(fun.subFunctions[name]);
+			for(var i=0; i<fun.subFunctions.length; i++) {
+				updateFunction(fun.subFunctions[i]);
 			}
 		}
 		
