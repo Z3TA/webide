@@ -1489,10 +1489,11 @@
 					
 					if(insideQuote) {
 						xmlTagInsideQuote = true;
-						}
+					}
 					
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
+					xmlTagWordLength = 0;
 					if(!insideXmlTagEnding) {
 						xmlModeBeforeTag = xmlMode; // xmlMode when the tag starts
 						xmlMode = false; // Why end xmlMode inside tags !?? 

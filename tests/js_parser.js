@@ -1,4 +1,46 @@
 
+
+editor.addTest(function xmlUnlosedTagColorWeirdness(callback) {
+	editor.openFile("xmlUnlosedTagColorWeirdness.js", "'<h1>foo</h1 '\n'<h2>bar</h2>'", function(err, file) {
+		
+		var quotes = file.parsed.quotes;
+		
+		if(!(quotes[0].start == 0 && quotes[0].end == 13)) throw new Error("Expected first quote to start=0=" + quotes[0].start + " and end=13=" + quotes[0].end);
+		
+		if(!(quotes[1].start == 15 && quotes[1].end == 28)) throw new Error("Expected first quote to start=15=" + quotes[0].start + " and end=28=" + quotes[0].end);
+
+
+		var xmlTags = file.parsed.xmlTags;
+		
+		if(!(xmlTags[0].start == 1 && xmlTags[0].end == 4)) throw new Error("Expected first xml tag to start=1=" + xmlTags[0].start + " and end=4=" + xmlTags[0].end);
+
+		if(!(xmlTags[1].start == 16 && xmlTags[1].end == 19)) throw new Error("Expected second xml tag to start=16=" + xmlTags[1].start + " and end=19=" + xmlTags[1].end);
+		
+		if(!(xmlTags[2].start == 23 && xmlTags[2].end == 27)) throw new Error("Expected third xml tag to start=23=" + xmlTags[2].start + " and end=27=" + xmlTags[2].end);
+		
+		if(xmlTags[0].wordLength != 3) throw new Error("Unexpected wordLength=" + xmlTags[0].wordLength);
+		if(xmlTags[1].wordLength != 3) throw new Error("Unexpected wordLength=" + xmlTags[1].wordLength);
+		if(xmlTags[2].wordLength != 4) throw new Error("Unexpected wordLength=" + xmlTags[2].wordLength);
+		
+		// Run prerenders to see the colors
+		var buffer = file.grid;
+		for(var i=0; i<editor.preRenderFunctions.length; i++) {
+			//funName = getFunctionName(editor.preRenderFunctions[i]);
+			//console.time("prerender: " + funName);
+			buffer = editor.preRenderFunctions[i](buffer, file); // Call render
+			//console.timeEnd("prerender: " + funName);
+		}
+		
+		var quoteColor = buffer[0][0].color;
+		
+		if(buffer[1][5].color != quoteColor) throw new Error("Expected letter " + buffer[1][5].char + " on line 2 to have color " + quoteColor + " not " + buffer[1][5].color);
+		
+		editor.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 editor.addTest(function templateLiterals(callback) {
 	editor.openFile("templateLiterals.js", 'var strTest = `string text ${expression} string text`\nvar strTopic = `<h1>Topic</h1>`', function(err, file) {
 		
@@ -8,7 +50,7 @@ editor.addTest(function templateLiterals(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 
 editor.addTest(function arrowFunctionBeforeFunction(callback) {
