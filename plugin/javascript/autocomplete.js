@@ -16,6 +16,20 @@
 		substring: {type: "Method", arguments: "start, end"}
 	};
 	
+	
+	// todo: Check if we are browser or nodejs or other JS platform
+	var globalContextVariables = {
+
+		document: {
+			keys: {
+				getElementById: {type: "Method", arguments: "id"},
+				createElement: {type: "Method", arguments: "tagName"}
+			}
+		}
+
+	}
+	
+	
 	editor.plugin({
 		desc: "Autocomplete for JavaScript",
 		load: function load() {
@@ -71,7 +85,7 @@
 			
 			if(js.functions) findFunctions(js.functions);
 			
-		
+			searchVariables(globalContextVariables, wordToComplete);
 			
 			if(js.globalVariables) searchVariables(js.globalVariables, wordToComplete); // Check global variables
 
