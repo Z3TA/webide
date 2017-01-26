@@ -196,7 +196,7 @@
 						for(var key in variable.keys) {
 							console.log(key.substr(0, keyName.length) + " == " + keyName + " ? (key=" + key + ")");
 							if(key.substr(0, keyName.length) == keyName) {
-								if(!optionExist(key)) {
+								if(!optionExist(options, key)) {
 									pushVariable(keyName, variable.keys[key], key);
 								}
 								//options.push([keyName, key, 0]);
@@ -240,7 +240,7 @@
 						
 						let variable = variables[variableName];
 						
-						if(!optionExist(variableName)) {
+						if(!optionExist(options, variableName)) {
 							
 							pushVariable(word, variable, variableName);
 							
@@ -287,12 +287,21 @@
 
 			}
 			
-			function optionExist(variableName) {
+			function optionExist(options, variableName) {
+				// options can both be an array and a string
 				for(var i=0; i<options.length; i++) {
-					if(options[i][1].indexOf(variableName) != -1) return true;
+					
+					//console.log("optionExist options=" + JSON.stringify(options) + "");
+					if(typeof options[i]  == "object") {
+						//console.log("options[" + i + "]=" + JSON.stringify(options[i]) + "");
+						if(options[i][0].indexOf(variableName) != -1) return true;
+					}
+					else {
+						if(options[i].indexOf(variableName) != -1) return true;
+					}
 				}
 				return false;
-				}
+			}
 			
 		}
 		
