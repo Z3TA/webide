@@ -2464,14 +2464,16 @@ editor.lastKeyPressed = "";
 		
 		editor.input = focus;
 		
+		
 		console.log("Calling fileShow listeners (" + editor.eventListeners.fileShow.length + ") file.path=" + file.path);
 		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
 			editor.eventListeners.fileShow[i].fun(file); // Call function
 		}
 		
+		editor.resizeNeeded(); // Update the view
 		editor.renderNeeded();
 		
-		
+		editor.interact("showFile", window.event);
 	}
 	
 	editor.getKeyFor = function(funName) {
