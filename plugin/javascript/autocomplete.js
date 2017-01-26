@@ -157,7 +157,7 @@
 					
 					// check names of sub-functions
 					for(var j=0; j<func.subFunctions.length; j++) {
-						if(func.subFunctions[i].name.length > 0) checkgetFunctionName(func.subFunctions[i].name, wordToComplete);
+						if(func.subFunctions[j].name.length > 0) checkgetFunctionName(func.subFunctions[j].name, wordToComplete);
 					}
 					
 					// Search sub-functions (recursive)
