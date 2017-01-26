@@ -317,7 +317,7 @@
 				if(func.start < charIndex && func.end > charIndex) {
 					// We are in this function. Check it's subfunctions
 					
-					for(var j=0; j<func.subFunctions.length; i++) {
+					for(var j=0; j<func.subFunctions.length; j++) {
 						if(func.subFunctions[i] == functionName) analyze(func.subFunctions[i]);
 					}
 					
