@@ -4,8 +4,8 @@
 	"window": {
 		"title": "JZedit",
 		"show": true,
-		"icon": "gfx/bean3.png", 
-		"toolbar": true,
+		"icon": "gfx/jz64.png", 
+		"toolbar": false,
 		"frame": true,
 		"transparent": false,
 		"always-on-top": false
