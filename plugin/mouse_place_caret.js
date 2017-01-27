@@ -7,7 +7,8 @@
 	
 	"use strict";
 	
-	editor.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "up", targetClass:"fileCanvas", button: 0, combo: 0}); // Set dir to "up" so that the caret col and row doesnt change between down and up.
+	// Set dir to "up" so that the caret col and row doesn't change between down and up !??
+	editor.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "down", targetClass:"fileCanvas", button: 0, combo: 0}); 
 	
 	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button) {
 
