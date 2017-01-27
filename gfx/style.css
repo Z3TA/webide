@@ -93,7 +93,7 @@ body {
 
 .header {
 	/* Needs to have height! */
-	background: linear-gradient(to right, #edf0f3, #777777, #575757);
+	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
 	}
 
 .footer {
@@ -219,8 +219,7 @@ ul#tabList {
 	margin: 0;
 	padding: 0;
 	padding-left: 3px;
-	/*max-height: 40px;*/
-	background-color: blue;
+	
 	white-space:nowrap; /* Prevent tabs fallingn down*/
 	display: flex;
 	align-items: stretch; /* Default */
@@ -230,6 +229,7 @@ ul#tabList li.tabFolderItem {
 	border-radius: 10px 10px 0px 0px;
 	
 	border-top: 1px solid #d6d6d6;
+	border-bottom: 1px solid #d6d6d6;
 	
 	/*max-height: 35px;*/
 	/*-webkit-transform: perspective(100px) rotateX(30deg); */
@@ -243,7 +243,7 @@ ul#tabList li.tabFolderItem {
 	margin-bottom: 0px;
 	margin-left: 2px;
 	
-	padding-top: 4px;
+	padding-top: 3px;
 	padding-bottom: 0px;
 	padding-left: 0px;
 	
@@ -260,15 +260,15 @@ ul#tabList li.tabFolderItem {
 
 ul#tabList li.tabFolderItem.active {
 	color: #000000;
-	background-color: #414141;
-	background: linear-gradient(#d7dde6, #f6f6f6, #FFFFFF);
+	border-bottom: 1px solid #ffffff; /* same color as canvas */
+	background: linear-gradient(#d7dde6 10%, #f6f6f6 60%, #ffffff);
 	z-index: 2;
 	}
 
 
 ul#tabList ul.folderFileList {
 	
-	max-height: 25px;
+	max-height: 27px;
 	overflow: visible;
 	
 	display: flex;
@@ -289,7 +289,7 @@ ul#tabList li.tabFileItem {
 	border-top-right-radius: 25px 170px;
 	border-top-left-radius: 20px 90px;
 	
-	margin-top: 2px;
+	margin-top: 4px;
 	margin-right: -15px;
 	margin-bottom: 0px;
 	margin-left: -7px;
@@ -353,7 +353,8 @@ ul#tabList li.tabFileItem a {
 	}
 
 ul#tabList li.tabFileItem.active a {
-	border-bottom: 2px solid orange;
+	padding-bottom: 1px;
+	border-bottom: 1px solid orange;
 }
 
 /* Folder item with only one file in it */
@@ -363,7 +364,7 @@ ul#tabList li.tabFolderItem.single {
 	line-height: 0px;
 	
 	/* Complement for the lost height */
-	padding-top: 4px;
+	padding-top: 10px;
 	box-shadow: none;
 }
 /* Single file in folder list */
