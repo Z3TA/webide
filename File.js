@@ -2747,9 +2747,10 @@ var File; // File object is global
 		
 		if(text == undefined) throw new Error("No text!");
 		
-		file.text = text;
-		
 		file.lineBreak = determineLineBreakCharacters(text);
+		file.indentation = determineIndentationConvention(text, file.lineBreak);
+		
+		file.text = text;
 		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);

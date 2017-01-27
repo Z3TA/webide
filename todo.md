@@ -29,11 +29,11 @@ What I'm working on
 -------------------
 
 
+
 todo:
 
 fix wrong indentation in file source!
-Fix white-space in source file (context menu option)
-Feature to replace spaces used for indentation (convert indentation to spaces 2/4), because the code dont fit in my code examples on my blog
+
 Preserve (manual) indentation inside block comments and pre tags !?
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
@@ -194,6 +194,13 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Autocomplete should not complete the actual function arguments inside a function call, because it can be wrong! foo(aaaa, bbbb|) 
+
+{
+	foo: function() {};
+}
+foo() can not be called. Mark the function as not having a variable pointing to it!? ... to prevent auto completers from suggesting it
 
 Unable to delete SSG site
 
@@ -775,6 +782,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Ignore quotes when matching parentheses
 
 Adding a quote at the start of a word should only insert a single quote not ""
 
