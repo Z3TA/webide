@@ -2,7 +2,7 @@
 
 # Update the path to the icon
 mv jzedit.desktop jzedit.desktop-bak
-sed -e "s,Icon=.*,Icon=$PWD/gfx/bean3.png,g" jzedit.desktop-bak > jzedit.desktop
+sed -e "s,Icon=.*,Icon=$PWD/gfx/jz64.png,g" jzedit.desktop-bak > jzedit.desktop
 rm jzedit.desktop-bak
 
 # Make it runable again
