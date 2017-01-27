@@ -30,16 +30,14 @@
 
 html {
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
-	background-color: transparent;
-}
+	}
 
 body {
 	margin: 0px;
 	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
-	background-color: transparent;
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
 	font-family: Arial;
-}
+	}
 
 
 .wireframe {
@@ -63,7 +61,7 @@ body {
 	/*border: 1px solid red; */
 	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
 	background-color: blue;
-}
+	}
 
 .leftColumn {
 	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
@@ -94,9 +92,8 @@ body {
 
 .header {
 	/* Needs to have height! */
-	/*background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);*/
-	background-color: transparent;
-}
+	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+	}
 
 .footer {
 	/* Needs to have height! */
@@ -219,15 +216,11 @@ td input[type=text] {
 .tabList {
 	margin: 0px;
 	display: block;
-	border: 2px solid red;
 	line-height: 10px; /* Keep small to Prevent space under the list */
-	
-	
 	padding-left: 3px;
 	
 	/* Child's can not overlap (z-index) this! */
-	
-}
+	}
 
 .tabFileItem {
 	border-radius: 6px 6px 0px 0px;

@@ -6,8 +6,8 @@
 		"show": true,
 		"icon": "gfx/bean3.png", 
 		"toolbar": false,
-		"frame": false,
-		"transparent": true,
+		"frame": true,
+		"transparent": false,
 		"always-on-top": false
 	},
 	"private": true,
