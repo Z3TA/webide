@@ -320,13 +320,6 @@ for(var i=0; i<list.length; i++) {
 			showUnsavedStatus(tabFileItem)
 		}
 		
-		var tabFileText = document.createElement("a");
-		tabFileText.innerText = fileName;
-		
-		//tabFileItem.appendChild(document.createTextNode(fileName));
-		tabFileItem.appendChild(tabFileText);
-		tabFileItem.addEventListener("click", clickTab, true);
-
 		var closeFileButton = document.createElement("button");
 		closeFileButton.setAttribute("class", "closeFileTab");
 		closeFileButton.setAttribute("title", "Close "+ fileName);
@@ -337,6 +330,13 @@ for(var i=0; i<list.length; i++) {
 		
 		tabFileItem.appendChild(closeFileButton);
 		
+		
+		var tabFileText = document.createElement("a");
+		tabFileText.innerText = fileName;
+		
+		//tabFileItem.appendChild(document.createTextNode(fileName));
+		tabFileItem.appendChild(tabFileText);
+		tabFileItem.addEventListener("click", clickTab, true);
 		
 		
 		if(folders.length > 1) {

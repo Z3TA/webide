@@ -196,6 +196,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Zooming in a CSS files highlights all # as topics
+
 Autocomplete should not complete the actual function arguments inside a function call, because it can be wrong! foo(aaaa, bbbb|) 
 
 {
