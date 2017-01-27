@@ -22,9 +22,10 @@
 */
 * {
 	padding: 0px;
-	border: 0px solid red;
 	margin: 0px;
+	border: 0px solid red;
 	/*-webkit-font-smoothing: none;*/
+	/*border: 1px solid pink;*/
 	
 }
 
@@ -92,7 +93,7 @@ body {
 
 .header {
 	/* Needs to have height! */
-	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+	background: linear-gradient(to right, #edf0f3, #777777, #575757);
 	}
 
 .footer {
@@ -213,50 +214,34 @@ td input[type=text] {
 
 /* ############### File Tabs ############## */
 
-.tabList {
-	margin: 0px;
-	display: block;
-	line-height: 10px; /* Keep small to Prevent space under the list */
-	padding-left: 3px;
-	
-	/* Child's can not overlap (z-index) this! */
-	}
 
-.tabFileItem {
-	border-radius: 6px 6px 0px 0px;
-	border-top: 1px solid #d6d6d6;
-	display: inline-block;
-	margin-left: 2px;
-	margin-right: 2px;
-	margin-top: 3px;
-	/* margin-bottom: -3px; */
-	padding: 6px;
-	padding-bottom: 5px;
-	font-size: 12px;
-	cursor: pointer;
-	line-height: 12px;
-	background: linear-gradient(#f2f2f2, #ffffff);
-	border-bottom: 1px solid #d6d6d6;
-	box-shadow: 0px -1px 2px #eeeeee, inset 0px 1px 1px #ecebf0;
-	z-index: 3;
-	position: relative; /* need position for z-index to work! */
+ul#tabList {
+	margin: 0px;
+	padding-left: 3px;
+	max-height: 60px;
+	
+	
 }
 
-.tabFolderItem {
+ul#tabList li.tabFolderItem {
 	border-radius: 10px 10px 0px 0px;
-	border-top: 1px solid #d6d6d6;
-	border-bottom: 1px solid #d6d6d6;
 	border: 1px solid rgba(200,200,200,0.5);
+	border-top: 1px solid #d6d6d6;
+	
+	/*-webkit-transform: perspective(100px) rotateX(30deg); */
+	
 	font-size: 10px;
 	text-align: center;
 	line-height: 1px;
 	
 	margin-top: 3px;
 	margin-bottom: 0px;
-	/*margin-left: -1px;*/
-	padding-left: 2px;
+	margin-left: 2px;
 	
 	padding-top: 4px;
+	padding-bottom: 0px;
+	padding-left: 2px;
+	
 	color: #585565;
 	display: inline-block;
 	line-height: 6px;
@@ -264,17 +249,125 @@ td input[type=text] {
 	background: linear-gradient(#f2f2f2, #f6f6f6);
 	cursor: default;
 	
-	z-index: 2;
-	position: relative; /* need position for z-index to work! */
 }
 
-.folderFileList {
+
+ul#tabList li.tabFolderItem.active {
+	color: #000000;
+	background-color: #414141;
+	background: linear-gradient(#d7dde6, #f6f6f6, #FFFFFF);
+	z-index: 2;
+}
+
+
+ul#tabList ul.folderFileList {
 	margin: 0px;
 	line-height: 12px;
+	overflow: visible;
+	vertical-align: bottom;
 }
 
 
-.closeFileTab {
+
+/* ### File Item */
+ul#tabList li.tabFileItem {
+	display: inline-block;
+	border-top: 1px solid #d6d6d6;
+	
+	border-top-right-radius: 25px 170px;
+	border-top-left-radius: 20px 90px;
+	
+	margin-top: 5px;
+	margin-right: -10px;
+	margin-bottom: 0px;
+	margin-left: -10px;
+	
+	padding-top: 6px;
+	padding-right: 30px;
+	padding-bottom: 5px;
+	padding-left: 25px;
+	
+	font-size: 12px;
+	cursor: pointer;
+	line-height: 12px;
+	background: linear-gradient(#f2f2f2, #ffffff);
+	box-shadow: 0px -1px 2px #eeeeee, inset 0px 1px 1px #ecebf0;
+	
+	
+	/* Chrome like tabs */
+	
+	
+	height: 170px; /* sets the curve */
+	
+	position : relative;
+	box-shadow: 0 10px 20px rgba(0,0,0,.5);
+	max-width : 200px;
+}
+
+/* Chrome like tabs: http://codepen.io/jcblw/pen/DxAJF */
+ul#tabList > li.tabFileItem:before, ul#tabList > li.tabFileItem:after {
+	content : '';
+	background : transparent;
+	height: 20px;
+	width: 20px;
+	border-radius: 100%;
+	border-width: 10px;
+	top: 0px;
+	border-style : solid;
+	position : absolute;
+}
+ul#tabList li.tabFileItem:before {
+	border-color : transparent #ddd transparent transparent;
+	-webkit-transform : rotate(48deg);
+	left: -23px;
+}
+ul#tabList li.tabFileItem:after {
+	border-color : transparent transparent transparent #ddd;
+	-webkit-transform : rotate(-48deg);
+	right: -17px;
+}
+ul#tabList > li.tabFileItem.active:before{
+border-color : transparent #efefef transparent transparent;
+}
+
+ul.tabs > li.tabFileItem.active:after{
+border-color : transparent transparent transparent #efefef;
+}
+
+ul#tabList li.tabFileItem.active {
+	z-index: 3;
+}
+
+
+ul#tabList li.tabFileItem.active a {
+	border-bottom: 2px solid orange;
+}
+
+/* Folder item with only one file in it */
+ul#tabList li.tabFolderItem.single {
+	/* Hide the folder text */
+	font-size: 0px;
+	line-height: 0px;
+	
+	/* Complement for the lost height */
+	padding-top: 4px;
+	box-shadow: none;
+}
+/* Single file in folder list */
+ul#tabList li.tabFolderItem.single li.tabFileItem {
+	border: 0;
+	box-shadow: none;
+	background: none;
+	}
+ul#tabList li.tabFolderItem.single li.tabFileItem.active {
+	border: 0;
+	}
+
+
+
+
+/* ### Close tab button */
+ul#tabList button.closeFileTab {
 	display: none;
 	font-size: 12px;
 	font-weight: bold;
@@ -287,55 +380,20 @@ td input[type=text] {
 	background-color: rgba(0,0,0,0);
 }
 
-.closeFileTab:hover {
+ul#tabList button.closeFileTab:hover {
 	color: red;
 }
 
-.tabFileItem.active .closeFileTab {
+ul#tabList li.tabFileItem.active button.closeFileTab {
 	display: inline-block;
 }
 
 
-.folderFileList.active, .tabFileItem.active, .tabFolderItem.active {
-	border-bottom: 0px solid red;
-	background-color: none;
-}
 
-.tabFolderItem.active {
-	border-bottom: 0px solid black;
-	color: #000000;
-	min-width: 120px;
-	background-color: #414141;
-	background: linear-gradient(#d7dde6, #f6f6f6, #FFFFFF);
-	z-index: 99;
-	position: relative;  /* need position for z-index to work! */
-}
 
-.tabFolderItem.single {
-	font-size: 0px;
-	line-height: 0px;
-}
 
-.tabFolderItem.single .tabFileItem {
-	border: 0px solid black;
-	background: rgba(0,0,0,0);
-	box-shadow: none;
-	
-}
 
-.tabFileItem.active  {
-	box-shadow: 0px -2px 1px #eeeeee, inset 0px 1px 1px #ecebf0;
-	z-index: 99;
-	border-bottom: 1px solid #ffffff;
-	border-bottom: 1px solid orange;
-}
 
-.tabFolderItem.single .tabFileItem.active {
-	border: 0px solid black;
-	background: rgba(0,0,0,0);
-	box-shadow: none;
-	border-bottom: 1px solid orange;
-}
 
 
 

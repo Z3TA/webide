@@ -32,6 +32,11 @@ What I'm working on
 
 todo:
 
+Make it look good!
+Tabs like Firefox
+
+
+
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
 

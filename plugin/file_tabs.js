@@ -320,8 +320,11 @@ for(var i=0; i<list.length; i++) {
 			showUnsavedStatus(tabFileItem)
 		}
 		
+		var tabFileText = document.createElement("a");
+		tabFileText.innerText = fileName;
 		
-		tabFileItem.appendChild(document.createTextNode(fileName));
+		//tabFileItem.appendChild(document.createTextNode(fileName));
+		tabFileItem.appendChild(tabFileText);
 		tabFileItem.addEventListener("click", clickTab, true);
 
 		var closeFileButton = document.createElement("button");
