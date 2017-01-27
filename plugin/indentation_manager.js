@@ -18,7 +18,7 @@
 			
 			editor.on("fileShow", showIndentationConvention);
 			
-			showIndentationManager();
+			//showIndentationManager();
 			
 		},
 		unload: function unloadIndentationManager() {
@@ -62,7 +62,7 @@
 	
 	function showIndentationConvention(file) {
 		if(!file) {
-			console.warn"No file!");
+			console.warn("No file!");
 			return;
 		}
 		
