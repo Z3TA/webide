@@ -32,10 +32,6 @@ What I'm working on
 
 todo:
 
-fix wrong indentation in file source!
-
-Preserve (manual) indentation inside block comments and pre tags !?
-
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
 
@@ -1133,6 +1129,10 @@ editor.bindKey() instead of editor.keyBindings.push()
 support port in url's (connection manager, etc)
 
 Implement angel-wing/block variables (let, const) in the parser for smart auto-completion
+
+Figure out when indentation in the sourfe file goes bad and prevent it
+
+Preserve (manual) indentation inside block comments and pre tags !?
 
 
 Optimization
