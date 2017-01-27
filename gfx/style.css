@@ -30,11 +30,13 @@
 
 html {
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+	background-color: transparent;
 }
 
 body {
 	margin: 0px;
 	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
+	background-color: transparent;
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
 	font-family: Arial;
 }
@@ -92,7 +94,8 @@ body {
 
 .header {
 	/* Needs to have height! */
-	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+	/*background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);*/
+	background-color: transparent;
 }
 
 .footer {
@@ -216,7 +219,7 @@ td input[type=text] {
 .tabList {
 	margin: 0px;
 	display: block;
-	
+	border: 2px solid red;
 	line-height: 10px; /* Keep small to Prevent space under the list */
 	
 	

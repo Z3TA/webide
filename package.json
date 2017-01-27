@@ -5,9 +5,9 @@
 		"title": "JZedit",
 		"show": true,
 		"icon": "gfx/bean3.png", 
-		"toolbar": true,
-		"frame": true,
-		"transparent": false,
+		"toolbar": false,
+		"frame": false,
+		"transparent": true,
 		"always-on-top": false
 	},
 	"private": true,
