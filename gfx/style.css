@@ -11,6 +11,7 @@
 	
 	Press F6 to reload CSS while working on the editior
 	
+	Use Platform/theme system default colors: https://www.sitepoint.com/css-system-styles/
 	
 */
 
@@ -92,8 +93,10 @@ body {
 
 
 .header {
-	/* Needs to have height! */
+	/* Needs to have height!? */
+	
 	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+	
 	}
 
 .footer {
