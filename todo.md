@@ -28,6 +28,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+command descovery:
+
+When hitting ALT/command show a list of all commands, and when you type something narrows the list.
+All key combos must have an commandId.
+
+editor.addCommand();
+editor.removeCommand();
+
 
 
 todo:

@@ -1625,7 +1625,7 @@
 			
 			if(site.url) {
 			var open_browser = "Open in browser";
-				confirmBox("<b>" + site.name + "</b> published to:<br>" + site.publish + "<br><i>" + site.url + "</i>", [open_browser, "OK"], function(answer) {
+				confirmBox("<b>" + site.name + "</b> published to:<br><span class=\'nobreak\'>" + site.publish + "</span><br>URL:<i>" + site.url + "</i>", [open_browser, "OK"], function(answer) {
 				if(answer == open_browser) {
 						var open = require(require("dirname") + "/plugin/static_site_generator/node_modules/open");
 					open(site.url, function(err) {

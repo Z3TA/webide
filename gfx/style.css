@@ -133,6 +133,10 @@ body {
 
 /* ###### Standard settings ####### (Place high so they can be over-written by custom styling)*/
 
+span.nobreak {
+	
+}
+
 .footer table {
 	margin: 0px;
 	padding: 0px;
