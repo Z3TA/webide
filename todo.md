@@ -40,9 +40,7 @@ editor.removeCommand();
 
 todo:
 
-Make it look good!
-Tabs like Firefox
-
+auto complete function arguments in anonymous functions!
 
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
@@ -793,6 +791,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Reopen closed tab!!
 
 Ignore quotes when matching parentheses
 
