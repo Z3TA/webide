@@ -25,8 +25,7 @@ editor.supportedFiles = [
 	"xml", 
 	"json", 
 	"css", 
-	"nginx"
-]; 
+	]; 
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 editor.settings = {
