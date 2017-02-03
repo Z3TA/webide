@@ -202,6 +202,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+selecting a text then shift and mouse clicking pops one character on the right side
+
+Function list is not updated if you move BUILD.login = function buildLogin() {} the function is lifted out
+
 Zooming in a CSS files highlights all # as topics
 
 Autocomplete should not complete the actual function arguments inside a function call, because it can be wrong! foo(aaaa, bbbb|) 
@@ -792,6 +796,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Move the caret to the far right when selecting by double clicking
+
 Reopen closed tab!!
 
 Ignore quotes when matching parentheses
@@ -1281,6 +1287,10 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 ------------------------------------
+
+Ctrl + Click on a CSS class to go to the defenition (inside the CSS file, to the correct line)
+Ctrl + Click on a function call to go to the definition ...
+Ctrl + Click on a function to see everywhere it's used, ex: for chaning position of arguments
 
 "Write any command" plugin that lets you pick any plugin/keycombo (from droplist) when you type in for example "find" shows "find in files", "etc"
 
