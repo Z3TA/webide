@@ -3,6 +3,18 @@ Prio:
 
 1) Make it possible for a non-dev to make web documents
 
+Synka-knapp i SSG som uppdaterar från Mercurial
+Går inte att publicera om man inte har dokumenterat och synkat
+Går inte att synka om man inte har dokumenterat
+Efter att man sparat en fil i SSG kommer det upp en dokumentations-widget,
+där man skriver in varför ändringarna gjordes.
+(Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. Man kan klicka på filerna för att se diff)
+
+Översätt SSG till svenska!
+
+Guide för att infoga bild när man redigerar sida i SSG ("infoga bild" i SSG widget!?)
+
+
 When a SSG source file is opened, automatically bring up the WYSIWYG
 (find a good place to place the windows)
 Also bring up the SSG widget/toolbar and show/indicate that Preview and WYSIWYG is activated
@@ -28,7 +40,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-command descovery:
+command discovery:
 
 When hitting ALT/command show a list of all commands, and when you type something narrows the list.
 All key combos must have an commandId.
