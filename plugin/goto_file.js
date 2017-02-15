@@ -167,7 +167,7 @@
 		
 		function trySearch() {
 			// Clear the list
-			while(gotoList.firstChild){
+			while(gotoList.firstChild) {
 				gotoList.removeChild(gotoList.firstChild);
 			}
 			editor.resizeNeeded();
@@ -196,7 +196,8 @@
 					}
 				}
 				
-				var maxSearchRetries = 5;
+				var maxSearchRetries = 15;
+				// todo: add spinner animation!
 				
 				if(++searchRetries > maxSearchRetries) { 
 					// Give up and reset the current search. And tell the user
@@ -246,7 +247,7 @@
 			console.log("First run.");
 			searchDir(searchPath);
 			firstRun = false;
-		} 
+		}
 		else {
 			console.log("Searching files array! length=" + files.length);
 			for (var i=0; i<files.length; i++) {
