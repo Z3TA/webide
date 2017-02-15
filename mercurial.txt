@@ -1,0 +1,15 @@
+
+Mercurial 
+
+Mercurial is a free, distributed source control management tool.
+
+We currently support version 3.7.3 (the one in Ubuntu LTS)
+
+Download
+--------
+
+windows: https://www.mercurial-scm.org/release/windows/Mercurial-3.7.3-x64.exe
+linux: https://www.mercurial-scm.org/release/mercurial-3.7.3.tar.gz
+
+Follow the install instructions. Make sure hg is added to "PATH" !
+
