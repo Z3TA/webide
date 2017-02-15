@@ -10,8 +10,6 @@ Efter att man sparat en fil i SSG kommer det upp en dokumentations-widget,
 där man skriver in varför ändringarna gjordes.
 (Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. Man kan klicka på filerna för att se diff)
 
-Översätt SSG till svenska!
-
 Guide för att infoga bild när man redigerar sida i SSG ("infoga bild" i SSG widget!?)
 
 
@@ -40,17 +38,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-command discovery:
-
-When hitting ALT/command show a list of all commands, and when you type something narrows the list.
-All key combos must have an commandId.
-
-editor.addCommand();
-editor.removeCommand();
-
 
 
 todo:
+
 
 auto complete function arguments in anonymous functions!
 
