@@ -147,7 +147,6 @@
 		file.fileExtension == "css" || 
 		file.fileExtension == "htm" || 
 		file.fileExtension == "html" || 
-		file.fileExtension == "nginx" || // Uses angel-bracket blocks
 		file.fileExtension == "java") {
 			return true;
 		}
