@@ -2896,9 +2896,28 @@ editor.lastKeyPressed = "";
 				}).connect(auth);
 			}
 		}
-		
-		
-		
+		}
+	
+	editor.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
+		editor.listFiles(pathToParentFolder, function(err, list) {
+			
+			if(err) {
+				console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
+				folderExistInCallback(false);
+			}
+			else {
+			
+			for(var i=0; i<list.length; i++) {
+				if(list[i].type == "d" && list[i].name == folderName) {
+					folderExistInCallback(list[i].path);
+						return;
+				}
+					
+					folderExistInCallback(false);
+			}
+			}
+			
+		});
 	}
 	
 	editor.listFiles = function(pathToFolder, listFilesCallback) {

@@ -205,6 +205,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Annoying red circle in if-statement with regexp and single =
+
 selecting a text then shift and mouse clicking pops one character on the right side
 
 Function list is not updated if you move BUILD.login = function buildLogin() {} the function is lifted out

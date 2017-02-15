@@ -18,11 +18,14 @@
 	var inputPreviewFolder;
 	var inputPublishFolder;
 	var inputTemplate;
-	var inputAuthUser;
-	var inputAuthPw;
-	var inputAuthKey;
+	var inputPubAuthUser;
+	var inputPubAuthPw;
+	var inputPubAuthKey;
 	var buttonWysiwyg;
 	var buttonPreview;
+	var inputRepoAuthUser;
+	var inputRepoAuthPw;
+	var inputRepository;
 	
 	var gui = require('nw.gui'); // Load native UI library
 	
@@ -167,8 +170,8 @@
 				if(site.name == demoSite.name || site.name == domain) {
 					// Update the site
 					if(site.name == demoSite.name) site.name = domain;
-					site.user = ftpuser;
-					site.pw = ftppw;
+					site.pubUser = ftpuser;
+					site.pubPw = ftppw;
 					site.url = "http://" + domain;
 					if(site.publish.indexOf("/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
 					
@@ -323,17 +326,6 @@
 			selectedSite = site;
 			selectSite.selectedIndex = index;
 			
-			/*
-			inputSiteName.value = selectedSite.name;
-			inputSourceFolder.value = selectedSite.source;
-			inputPreviewFolder.value = selectedSite.preview;
-			inputPublishFolder.value = selectedSite.publish;
-			inputTemplate.value = selectedSite.template;
-			inputAuthUser.value = selectedSite.user;
-			inputAuthPw.value = selectedSite.pw;
-			inputAuthKey.value = selectedSite.key;
-			*/
-			
 		}
 		else throw new Error("Failed to switch to site index=" + index);
 		
@@ -446,6 +438,14 @@
 		buttonWysiwyg.setAttribute("value", "WYSIWYG");
 		buttonWysiwyg.addEventListener("click", wysiwygSSG, false);
 		
+		var buttonSync = document.createElement("input");
+		buttonSync.setAttribute("type", "button");
+		buttonSync.setAttribute("class", "button");
+		buttonSync.setAttribute("value", "Sync with Repo");
+		buttonSync.addEventListener("click", function() {
+			syncSSG(selectedSite);
+		}, false);
+		
 		var buttonPublish = document.createElement("input");
 		buttonPublish.setAttribute("type", "button");
 		buttonPublish.setAttribute("class", "button");
@@ -476,6 +476,7 @@
 		controlView.appendChild(buttonNewPage);
 		controlView.appendChild(buttonPreview);
 		controlView.appendChild(buttonWysiwyg);
+		controlView.appendChild(buttonSync);
 		controlView.appendChild(buttonPublish);
 		controlView.appendChild(buttonSettings);
 		controlView.appendChild(buttonCancel);
@@ -505,9 +506,12 @@
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
 			inputTemplate.value = selectedSite.template;
-			inputAuthUser.value = selectedSite.user;
-			inputAuthPw.value = selectedSite.pw;
-			inputAuthKey.value = selectedSite.key;
+			inputPubAuthUser.value = selectedSite.pubUser;
+			inputPubAuthPw.value = selectedSite.pubPw;
+			inputPubAuthKey.value = selectedSite.key;
+			inputRepoAuthUser.value = selectedSite.repoUser;
+			inputRepoAuthPw.value = selectedSite.repoPw;
+			inputRepository.value = selectedSite.repository;
 		}
 		
 	}
@@ -540,17 +544,29 @@
 		labelTemplate.setAttribute("for", "inputTemplate");
 		labelTemplate.appendChild(document.createTextNode("Template file:")); // Language settings!?
 		
-		var labelAuthUser = document.createElement("label");
-		labelAuthUser.setAttribute("for", "inputAuthUser");
-		labelAuthUser.appendChild(document.createTextNode("Username:")); // Language settings!?
+		var labelPubAuthUser = document.createElement("label");
+		labelPubAuthUser.setAttribute("for", "inputPubAuthUser");
+		labelPubAuthUser.appendChild(document.createTextNode("Pub Username:")); // Language settings!?
 		
-		var labelAuthPw = document.createElement("label");
-		labelAuthPw.setAttribute("for", "inputAuthPw");
-		labelAuthPw.appendChild(document.createTextNode("Password:")); // Language settings!?
+		var labelPubAuthPw = document.createElement("label");
+		labelPubAuthPw.setAttribute("for", "inputPubAuthPw");
+		labelPubAuthPw.appendChild(document.createTextNode("Pub Password:")); // Language settings!?
 		
-		var labelAuthKey = document.createElement("label");
-		labelAuthKey.setAttribute("for", "inputAuthKey");
-		labelAuthKey.appendChild(document.createTextNode("Key:")); // Language settings!?
+		var labelPubAuthKey = document.createElement("label");
+		labelPubAuthKey.setAttribute("for", "inputPubAuthKey");
+		labelPubAuthKey.appendChild(document.createTextNode("Pub Key:")); // Language settings!?
+		
+		var labelRepository = document.createElement("label");
+		labelRepository.setAttribute("for", "inputRepository");
+		labelRepository.appendChild(document.createTextNode("Repository:"));
+		
+		var labelRepoAuthUser = document.createElement("label");
+		labelRepoAuthUser.setAttribute("for", "repoAuthUser");
+		labelRepoAuthUser.appendChild(document.createTextNode("Repo Username:")); // Language settings!?
+		
+		var labelRepoAuthPw = document.createElement("label");
+		labelRepoAuthPw.setAttribute("for", "inputRepoAuthPw");
+		labelRepoAuthPw.appendChild(document.createTextNode("Repo Password:")); // Language settings!?
 		
 		// Inputs
 		
@@ -587,26 +603,48 @@
 		inputTemplate.setAttribute("size", "69");
 		inputTemplate.setAttribute("title", "Template file for new page/post on this site");
 		
-		inputAuthUser = document.createElement("input");
-		inputAuthUser.setAttribute("type", "text");
-		inputAuthUser.setAttribute("id", "inputAuthUser");
-		inputAuthUser.setAttribute("class", "inputtext");
-		inputAuthUser.setAttribute("size", "20");
-		inputAuthUser.setAttribute("title", "Username if needed for the publish URL");
+		inputPubAuthUser = document.createElement("input");
+		inputPubAuthUser.setAttribute("type", "text");
+		inputPubAuthUser.setAttribute("id", "inputPubAuthUser");
+		inputPubAuthUser.setAttribute("class", "inputtext");
+		inputPubAuthUser.setAttribute("size", "20");
+		inputPubAuthUser.setAttribute("title", "Username if needed for the publish URL");
 		
-		inputAuthPw = document.createElement("input");
-		inputAuthPw.setAttribute("type", "password");
-		inputAuthPw.setAttribute("id", "inputAuthPw");
-		inputAuthPw.setAttribute("class", "inputtext");
-		inputAuthPw.setAttribute("size", "20");
-		inputAuthPw.setAttribute("title", "Password if needed for the publish URL")
+		inputPubAuthPw = document.createElement("input");
+		inputPubAuthPw.setAttribute("type", "password");
+		inputPubAuthPw.setAttribute("id", "inputPubAuthPw");
+		inputPubAuthPw.setAttribute("class", "inputtext");
+		inputPubAuthPw.setAttribute("size", "20");
+		inputPubAuthPw.setAttribute("title", "Password if needed for the publish URL")
 		
-		inputAuthKey = document.createElement("input");
-		inputAuthKey.setAttribute("type", "text");
-		inputAuthKey.setAttribute("id", "inputAuthKey");
-		inputAuthKey.setAttribute("class", "inputtext");
-		inputAuthKey.setAttribute("size", "40");
-		inputAuthKey.setAttribute("title", "SSH Key")
+		inputPubAuthKey = document.createElement("input");
+		inputPubAuthKey.setAttribute("type", "text");
+		inputPubAuthKey.setAttribute("id", "inputPubAuthKey");
+		inputPubAuthKey.setAttribute("class", "inputtext");
+		inputPubAuthKey.setAttribute("size", "40");
+		inputPubAuthKey.setAttribute("title", "SSH Key")
+		
+		inputRepository = document.createElement("input");
+		inputRepository.setAttribute("type", "text");
+		inputRepository.setAttribute("id", "inputRepository");
+		inputRepository.setAttribute("class", "inputtext");
+		inputRepository.setAttribute("size", "40");
+		inputRepository.setAttribute("title", "Mercurial Repository")
+		
+		inputRepoAuthUser = document.createElement("input");
+		inputRepoAuthUser.setAttribute("type", "text");
+		inputRepoAuthUser.setAttribute("id", "inputRepoAuthUser");
+		inputRepoAuthUser.setAttribute("class", "inputtext");
+		inputRepoAuthUser.setAttribute("size", "20");
+		inputRepoAuthUser.setAttribute("title", "Username if needed for the publish URL");
+		
+		inputRepoAuthPw = document.createElement("input");
+		inputRepoAuthPw.setAttribute("type", "password");
+		inputRepoAuthPw.setAttribute("id", "inputRepoAuthPw");
+		inputRepoAuthPw.setAttribute("class", "inputtext");
+		inputRepoAuthPw.setAttribute("size", "20");
+		inputRepoAuthPw.setAttribute("title", "Password if needed for the publish URL")
+		
 		
 		// Buttons
 		
@@ -710,28 +748,28 @@
 		editView.appendChild(tr);
 		
 		
-		// Auth username
+		// Auth pub username
 		tr = document.createElement("tr");
 		td = document.createElement("td");
 		td.setAttribute("align", "right");
-		td.appendChild(labelAuthUser);
+		td.appendChild(labelPubAuthUser);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(inputAuthUser);
+		td.appendChild(inputPubAuthUser);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
 		
-		// Auth password
+		// Auth pub password
 		tr = document.createElement("tr");
 		td = document.createElement("td");
 		td.setAttribute("align", "right");
-		td.appendChild(labelAuthPw);
+		td.appendChild(labelPubAuthPw);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(inputAuthPw);
+		td.appendChild(inputPubAuthPw);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
@@ -740,16 +778,55 @@
 		tr = document.createElement("tr");
 		td = document.createElement("td");
 		td.setAttribute("align", "right");
-		td.appendChild(labelAuthKey);
+		td.appendChild(labelPubAuthKey);
 		tr.appendChild(td);
 		
 		td = document.createElement("td");
-		td.appendChild(inputAuthKey);
+		td.appendChild(inputPubAuthKey);
 		td.appendChild(buttonBrowseKey);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
 		
+		
+		// Repository
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelRepository);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputRepository);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Auth repo username
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelRepoAuthUser);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputRepoAuthUser);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		// Repo Auth password
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelRepoAuthPw);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputRepoAuthPw);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
 		
 		
 		// Buttons
@@ -802,7 +879,7 @@
 		
 		function browseKey() {
 			editor.fileOpenDialog(undefined, function selectKey(path) {
-				inputAuthKey.value = path;
+				inputPubAuthKey.value = path;
 			});
 		}
 		
@@ -816,10 +893,12 @@
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
 			inputTemplate.value = selectedSite.template;
-			inputAuthUser.value = selectedSite.user;
-			inputAuthPw.value = selectedSite.pw;
-			inputAuthKey.value = selectedSite.key;
-			
+			inputPubAuthUser.value = selectedSite.pubUser;
+			inputPubAuthPw.value = selectedSite.pubPw;
+			inputPubAuthKey.value = selectedSite.key;
+			inputRepository.value = selectedSite.repository;
+			inputRepoAuthUser.value = selectedSite.repoUser;
+			inputRepoAuthPw.value = selectedSite.repoPw;
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -841,9 +920,12 @@
 			selectedSite.preview = inputPreviewFolder.value;
 			selectedSite.publish = inputPublishFolder.value;
 			selectedSite.template = inputTemplate.value;
-			selectedSite.user = inputAuthUser.value;
-			selectedSite.pw = inputAuthPw.value;
-			selectedSite.key = inputAuthKey.value;
+			selectedSite.pubUser = inputPubAuthUser.value;
+			selectedSite.pubPw = inputPubAuthPw.value;
+			selectedSite.key = inputPubAuthKey.value;
+			selectedSite.repoUser = inputRepoAuthUser.value;
+			selectedSite.repoPw = inputRepoAuthPw.value;
+			selectedSite.repository = inputRepository.value;
 			
 			window.localStorage.cmsjz_sites = JSON.stringify(sites);
 			
@@ -1611,8 +1693,17 @@
 		else return srcMatchBody[1];
 	}
 	
+	function syncSSG() {
+		if(selectedSite) syncRepository(selectedSite);
+		else {
+			showSSG();
+			alertBox("Select site to sync!");
+		}
+		return false;
+	}
+	
 	function publishSSG() {
-		if(selectedSite) publishSite(selectedSite)
+		if(selectedSite) publishSite(selectedSite);
 		else {
 			showSSG();
 			alertBox("Select site to publish!");
@@ -1620,15 +1711,119 @@
 		return false;
 	}
 	
+	function syncRepository(site) {
+		/* selectedSite.source, selectedSite.repository, selectedSite.repoAuthUser, selectedSite.repoAuthPw
+		
+			1. Check if Mercurial is initiated in the source folder
+			2. Check for uncommited changes
+			3. Pull>Merge>Push
+			
+		*/
+		
+		editor.folderExistIn(site.source, ".hg", function(exist) {
+			if(exist) {
+				// Check if remote is the same as repository
+				var hgrcFile = exist + "hgrc";
+				console.log("hgrcFile=" + hgrcFile);
+				editor.editor.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
+					if(err) throw err; // All mercurial repos should have a hgrc!
+					
+					var pathPartStart = hgrcContent.indexOf("[paths]");
+					
+					if(pathPartStart == -1) {
+						// hgrc has no paths part, add [paths] and default repository
+						hgrcContent = "[paths]\ndefault = " + site.repository + "\n" + hgrcContent;
+						editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+							if(err) throw err; // Unexpected
+							doHgPull();
+						});
+					}
+					else {
+						var pathPartEnd = hgrcContent.indexOf("[", pathPartStart + 1);
+						var pathParth;
+						
+						if(pathPartEnd != -1) pathPart = hgrcContent.substring(pathPartStart + 7, pathPartEnd);
+						else pathPart = hgrcContent.substring(pathPartStart + 7);
+						
+						// Check if our repo is the default repo
+						var regex = new RegExp("default\s?=\s?(.*)$");
+						var repos = pathPart.match(regex);
+						
+						if(repos == null) {
+							// No default repo exist, add our repo as default
+							hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "default = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
+							editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+								if(err) throw err; // Unexpected
+								doHgPull();
+								});
+						}
+						else {
+							var defaultRepo = repos[1];
+							
+							if(defaultRepo.trim() != site.repository.trim()) {
+								
+								var changeDefault = "Change default";
+								var updateSettings = "Update settings";
+								var cancelSync = "Cancel Sync";
+								
+								confirmBox("The repository do not match with the default repository!<br>repository: " + site.repository + "<br>default: " + defaultRepo, [], function(answer) {
+									
+									if(answer == changeDefault) {
+										var fullString = repos[0];
+										hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
+										editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+											if(err) throw err; // Unexpected
+											doHgPull();
+											});
+									}
+									else if(answer == updateSettings) {
+										site.repository = defaultRepo.trim();
+										window.localStorage.cmsjz_sites = JSON.stringify(sites);
+										doHgPull();
+									}
+									//else if(answer == cancelSync) do nothing
+									});
+								}
+							else {
+								// All good, our repo is the default repo!
+								doHgPull();
+							}
+						}
+						}
+					});
+				}
+			else {
+				// Ask if user wants to init (using clone)
+				
+				var cloneInit = "Clone from repository";
+				var noThanks = "No, thanks"
+				confirmBox("The repository is not initiated. Do you want to (clone) init the repo ?<br>" + site.repository, [cloneInit, noThanks], function(answer) {
+					if(answer == cloneInit) doHgCloneInit();
+				});
+				
+			}
+		});
+		
+		
+		function doHgCloneInit() {
+			
+		}
+		
+		function doHgPull() {
+			
+		}
+		
+	}
+	
 	function publishSite(site) {
 		compile(site.source, site.publish, true, function buildDone() {
 			
 			if(site.url) {
-			var open_browser = "Open in browser";
+				var open_browser = "Open in browser";
 				confirmBox("<b>" + site.name + "</b> published to:<br><span class=\'nobreak\'>" + site.publish + "</span><br>URL:<i>" + site.url + "</i>", [open_browser, "OK"], function(answer) {
-				if(answer == open_browser) {
+					if(answer == open_browser) {
 						var open = require(require("dirname") + "/plugin/static_site_generator/node_modules/open");
-					open(site.url, function(err) {
+						open(site.url, function(err) {
 							if(err) throw err;
 							console.log("Browser closed");
 						});
@@ -1682,9 +1877,9 @@
 					passw = auth[1];
 				}
 			}
-			else if(selectedSite.user.length > 0) {
-				user = selectedSite.user;
-				passw = selectedSite.pw;
+			else if(selectedSite.pubUser.length > 0) {
+				user = selectedSite.pubUser;
+				passw = selectedSite.pubPw;
 			}
 			var keyPath = selectedSite.key;
 			
