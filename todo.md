@@ -1293,6 +1293,8 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+<img| auto completion, selects and image, and puts that in src, plus it's with and height attributes.
+
 Ctrl + Click on a CSS class to go to the defenition (inside the CSS file, to the correct line)
 Ctrl + Click on a function call to go to the definition ...
 Ctrl + Click on a function to see everywhere it's used, ex: for chaning position of arguments

@@ -2899,7 +2899,11 @@ editor.lastKeyPressed = "";
 		}
 	
 	editor.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
+		console.log("folderExistIn pathToParentFolder=" + pathToParentFolder);
+		
 		editor.listFiles(pathToParentFolder, function(err, list) {
+			
+			console.log("list=" + list);
 			
 			if(err) {
 				console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
@@ -2912,9 +2916,11 @@ editor.lastKeyPressed = "";
 					folderExistInCallback(list[i].path);
 						return;
 				}
-					
-					folderExistInCallback(false);
-			}
+					else console.log(list[i].type + " " + list[i].name + " != " + folderName);
+					}
+				// end of for loop reached, no folder found:
+				folderExistInCallback(false);
+				
 			}
 			
 		});

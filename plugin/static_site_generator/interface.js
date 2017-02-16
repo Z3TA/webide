@@ -14,6 +14,7 @@
 	var controlView;
 	
 	var inputSiteName;
+	var inputProjectFolder;
 	var inputSourceFolder;
 	var inputPreviewFolder;
 	var inputPublishFolder;
@@ -51,14 +52,18 @@
 	var path = require("path");
 	var demoSite = {
 		name: "Demo site",
+		projectFolder: path.join(require("dirname"), "/plugin/static_site_generator/demo/"),  // Project folder
 		source: path.join(require("dirname"), "/plugin/static_site_generator/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
 		preview: path.join(require("dirname"), "/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder
+		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
 		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
 		url: "file://" + path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),
-		user: "",
-		pw: "",
-		key: ""
+		pubUser: "",
+		pubPw: "",
+		key: "", // Publish key
+		repository: "",
+		repoUser: "",
+		repoPw: ""
 	}
 	
 	// Add plugin to editor
@@ -109,19 +114,19 @@
 		// Open demo site if no file is open
 		var timer = 1000; // Milliseconds
 		setTimeout(function () {
-				
+			
 			var openFiles = Object.keys(editor.files).length;
 			
 			if(openFiles === 0) {
-					
-					var filePath = path.join(require("dirname") + "/plugin/static_site_generator/demo/source/about.htm");
-						
-						editor.openFile(filePath);
-					
+				
+				var filePath = path.join(require("dirname") + "/plugin/static_site_generator/demo/source/about.htm");
+				
+				editor.openFile(filePath);
+				
 			}
 		}, timer);
 		
-		}
+	}
 	
 	function SSG_cleanup() {
 		closePreview();
@@ -181,7 +186,7 @@
 				}
 			}
 			
-			}
+		}
 		
 		
 	}
@@ -235,7 +240,7 @@
 			var srcHTML = getSourceCodeBody(sourceFile);
 			
 			main.innerHTML = srcHTML;
-				
+			
 			// Using innerHTML makes the caret dissappear. Place it again ...
 			// Find out the tag and if we are near text, find the tag in wysiwyg
 			
@@ -301,7 +306,7 @@
 								placeCaretOnTextNode(previewWin, textNode, charPosInText);
 								
 							}
-							}
+						}
 					}
 				}
 			}
@@ -316,7 +321,7 @@
 	}
 	
 	function switchSite(index) {
-		// Swtich to the site
+		// Switch to the site
 		
 		var site = sites[index];
 		
@@ -326,10 +331,12 @@
 			selectedSite = site;
 			selectSite.selectedIndex = index;
 			
+			window.localStorage.cmsjz_selectedSiteName = site.name;
+			
 		}
 		else throw new Error("Failed to switch to site index=" + index);
 		
-		}
+	}
 	
 	
 	function build() {
@@ -484,24 +491,16 @@
 		
 		if(sites.length > 0) changeSelectSite(); // Select the one currently selected
 		
-		function editSiteSettings() {
-			
-			if(!selectedSite) throw new Error("No selected site");
-			
-			editView.style.display="block";
-			controlView.style.display="none"; // Hide this div
-			
-			editor.resizeNeeded();
-		}
-		
 		function changeSelectSite() {
 			
 			//alertBox("Fired changeSelectSite");
 			
 			var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 			selectedSite = sites[selectedSiteIndex];
+			window.localStorage.cmsjz_selectedSiteName = selectedSite.name;
 			
 			inputSiteName.value = selectedSite.name;
+			inputProjectFolder.value = selectedSite.projectFolder;
 			inputSourceFolder.value = selectedSite.source;
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
@@ -516,6 +515,17 @@
 		
 	}
 	
+	
+	function editSiteSettings() {
+		
+		if(!selectedSite) throw new Error("No selected site");
+		
+		editView.style.display="block";
+		controlView.style.display="none"; // Hide this div
+		
+		editor.resizeNeeded();
+	}
+	
 	function buildEdit() {
 		
 		var td, tr;
@@ -527,6 +537,11 @@
 		var labelName = document.createElement("label");
 		labelName.setAttribute("for", "inputSiteName");
 		labelName.appendChild(document.createTextNode("Alias:")); // Language settings!?
+		
+		
+		var labelProjectFolder = document.createElement("label");
+		labelProjectFolder.setAttribute("for", "inputProjectFolder");
+		labelProjectFolder.appendChild(document.createTextNode("Project folder:"));
 		
 		var labelSource = document.createElement("label");
 		labelSource.setAttribute("for", "inputSourceFolder");
@@ -575,6 +590,13 @@
 		inputSiteName.setAttribute("id", "inputSiteName");
 		inputSiteName.setAttribute("class", "inputtext");
 		inputSiteName.setAttribute("size", "30");
+		
+		inputProjectFolder = document.createElement("input");
+		inputProjectFolder.setAttribute("type", "text");
+		inputProjectFolder.setAttribute("id", "inputProjectFolder");
+		inputProjectFolder.setAttribute("class", "inputtext path");
+		inputProjectFolder.setAttribute("title", "Project root folder");
+		inputProjectFolder.setAttribute("size", "69");
 		
 		inputSourceFolder = document.createElement("input");
 		inputSourceFolder.setAttribute("type", "text");
@@ -695,6 +717,20 @@
 		
 		editView.appendChild(tr);
 		
+		// Project
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelProjectFolder);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputProjectFolder);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
+		
+		
 		// Source
 		tr = document.createElement("tr");
 		td = document.createElement("td");
@@ -707,6 +743,7 @@
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);
+		
 		
 		// Preview
 		tr = document.createElement("tr");
@@ -857,13 +894,21 @@
 			
 			var index = sites.push({
 				name: name,
+				projectFolder: projectFolder.value,
 				source: inputSourceFolder.value,
 				preview: inputPreviewFolder.value,
 				publish: inputPublishFolder.value,
-				template:  inputTemplate.value
+				template:  inputTemplate.value,
+				pubUser: inputPubAuthUser.value,
+				pubPw: inputPubAuthPw.value,
+				key: inputPubAuthKey.value,
+				repository: inputRepository.value,
+				repoUser: inputRepoAuthUser.value,
+				repoPw: inputRepoAuthPw.value
 			}) - 1;
 			
 			selectedSite = sites[index];
+			window.localStorage.cmsjz_selectedSiteName = selectedSite.name;
 			
 			var selectedIndex = addSiteOption(selectedSite, index); // Add new option
 			
@@ -889,6 +934,7 @@
 			
 			// Reset the values
 			inputSiteName.value = selectedSite.name;
+			inputProjectFolder.value = selectedSite.projectFolder;
 			inputSourceFolder.value = selectedSite.source;
 			inputPreviewFolder.value = selectedSite.preview;
 			inputPublishFolder.value = selectedSite.publish;
@@ -913,9 +959,11 @@
 			
 			if(selectedSite.name != inputSiteName.value) {
 				selectSite.options[selectSite.selectedIndex].text = inputSiteName.value;
+				window.localStorage.cmsjz_selectedSiteName = inputSiteName.value
 			}
 			
 			selectedSite.name = inputSiteName.value;
+			selectedSite.projectFolder = inputProjectFolder.value;
 			selectedSite.source = inputSourceFolder.value;
 			selectedSite.preview = inputPreviewFolder.value;
 			selectedSite.publish = inputPublishFolder.value;
@@ -940,7 +988,7 @@
 			if(!window.localStorage) throw new Error("window.localStorage not available!");
 			
 			selectSite.remove(selectSite.selectedIndex);
-			
+			window.localStorage.cmsjz_selectedSiteName = "";
 			// Does it fire onChange events? 
 			
 			
@@ -957,6 +1005,14 @@
 		option.text = site.name;
 		option.id = index;
 		selectSite.appendChild(option);
+		
+		console.log("window.localStorage.cmsjz_selectedSiteName=" + window.localStorage.cmsjz_selectedSiteName + " site.name=" + site.name);
+		
+		if(window.localStorage.cmsjz_selectedSiteName == site.name) {
+			// Will this trigger change !? Yep, it seems to work!
+			selectSite.selectedIndex = index;
+			
+		}
 		
 		return selectSite.options.length -1;
 	}
@@ -984,11 +1040,11 @@
 		
 		if(previewWin) {
 			closePreview() ;
-		
-		if(buttonWysiwyg) {
-			buttonWysiwyg.setAttribute("class", "button");
-			buttonPreview.setAttribute("class", "button");
-		}
+			
+			if(buttonWysiwyg) {
+				buttonWysiwyg.setAttribute("class", "button");
+				buttonPreview.setAttribute("class", "button");
+			}
 		}
 		
 		return false;
@@ -1322,12 +1378,12 @@
 			var start = 0;
 			for(var i=0; i<remove; i++) {
 				start = html.indexOf(sourceFile.lineBreak, start) + 1;
-				}
+			}
 			var removed = html.substr(0, start-1);
 			html = html.substr(start);
 			
 			console.log("Removed " + occurencies(removed, sourceFile.lineBreak) + " line breaks");
-			}
+		}
 		
 		console.timeEnd("insertLineBreaks");
 		
@@ -1508,64 +1564,64 @@
 						console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
 						if(diff.inserted[j].row == diff.removed[i].row) {
 							
-								// Insert the replacing line
-								text = diff.inserted[j].text;
-								
-								if(!replacedLine) sourceFile.insertTextOnRow(text, row)
-								else sourceFile.insertTextRow(text, row);
-								
-								console.log("Inserting (replacing) row=" + row + " text=" + text);
-								
-								// textLineDiff
-								col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
-								
+							// Insert the replacing line
+							text = diff.inserted[j].text;
+							
+							if(!replacedLine) sourceFile.insertTextOnRow(text, row)
+							else sourceFile.insertTextRow(text, row);
+							
+							console.log("Inserting (replacing) row=" + row + " text=" + text);
+							
+							// textLineDiff
+							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
+							
 							if(diff.inserted[j].text.length > diff.removed[i].text.length) col += (diff.inserted[j].text.length - diff.removed[i].text.length);
-								
-								// Move the file caret to the column where the actual change happened
-								sourceFile.caret.row = row;
-								sourceFile.caret.col = col;
-								
-								sourceFile.fixCaret();
-								
-								replacedLine= true;
-								diff.inserted.splice(j, 1);
-								//j--;
-							}
+							
+							// Move the file caret to the column where the actual change happened
+							sourceFile.caret.row = row;
+							sourceFile.caret.col = col;
+							
+							sourceFile.fixCaret();
+							
+							replacedLine= true;
+							diff.inserted.splice(j, 1);
+							//j--;
 						}
-						
-						if(!replacedLine) {
-							linesToBeRemoved.push(diff.removed[i].row);
-						}
-						
-						console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 					}
-				
-					// Add lines left to be inserted before removing removed lines (backwards)
 					
-					for(var i=diff.inserted.length-1; i>-1; i--) {
-						
-						// Insert the line
-						row = diff.inserted[i].row + startRow;
-						text = diff.inserted[i].text;
-						sourceFile.insertTextRow(text, row);
-						
+					if(!replacedLine) {
+						linesToBeRemoved.push(diff.removed[i].row);
+					}
+					
+					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
+				}
+				
+				// Add lines left to be inserted before removing removed lines (backwards)
+				
+				for(var i=diff.inserted.length-1; i>-1; i--) {
+					
+					// Insert the line
+					row = diff.inserted[i].row + startRow;
+					text = diff.inserted[i].text;
+					sourceFile.insertTextRow(text, row);
+					
 					console.log("Inserted text on row=" + row + " text=" + text);
 					
-						// Increment rows in linesToBeRemoved because this insert pushed them down
-						for(var j=0; j<linesToBeRemoved.length; j++) {
-							if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
-							
-							if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
-						}
-						}
-					
-					// Remove lines to be removed (backwards)
-					for(var i=linesToBeRemoved.length-1; i>-1; i--) {
+					// Increment rows in linesToBeRemoved because this insert pushed them down
+					for(var j=0; j<linesToBeRemoved.length; j++) {
+						if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
+						
+						if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
+					}
+				}
+				
+				// Remove lines to be removed (backwards)
+				for(var i=linesToBeRemoved.length-1; i>-1; i--) {
 					row = linesToBeRemoved[i] + startRow;
 					text = sourceFile.removeRow(row);
 					console.log("Removed row=" + row + " text=" + text);
-					}
-					
+				}
+				
 				// after the transformation: Update what should be ignored again? nope
 				//var srcHTML = getSourceCodeBody(sourceFile);
 				//var prewHTML = main.innerHTML;
@@ -1657,7 +1713,7 @@
 		var sel = win.getSelection();
 		
 		try {
-		range.setStart(node, charPos);
+			range.setStart(node, charPos);
 		}
 		catch(e) {
 			console.warn(e.message);
@@ -1713,19 +1769,26 @@
 	
 	function syncRepository(site) {
 		/* selectedSite.source, selectedSite.repository, selectedSite.repoAuthUser, selectedSite.repoAuthPw
-		
+			
 			1. Check if Mercurial is initiated in the source folder
 			2. Check for uncommited changes
 			3. Pull>Merge>Push
 			
 		*/
 		
-		editor.folderExistIn(site.source, ".hg", function(exist) {
+		if(site.projectFolder == undefined || site.projectFolder == "undefined") {
+			alertBox("No project folder configured for site: " + site.name);
+			editSiteSettings();
+			return;
+		}
+		
+		
+		editor.folderExistIn(site.projectFolder, ".hg", function(exist) {
 			if(exist) {
 				// Check if remote is the same as repository
 				var hgrcFile = exist + "hgrc";
 				console.log("hgrcFile=" + hgrcFile);
-				editor.editor.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
+				editor.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
 					if(err) throw err; // All mercurial repos should have a hgrc!
 					
 					var pathPartStart = hgrcContent.indexOf("[paths]");
@@ -1740,7 +1803,7 @@
 					}
 					else {
 						var pathPartEnd = hgrcContent.indexOf("[", pathPartStart + 1);
-						var pathParth;
+						var pathPart;
 						
 						if(pathPartEnd != -1) pathPart = hgrcContent.substring(pathPartStart + 7, pathPartEnd);
 						else pathPart = hgrcContent.substring(pathPartStart + 7);
@@ -1755,7 +1818,7 @@
 							editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 								if(err) throw err; // Unexpected
 								doHgPull();
-								});
+							});
 						}
 						else {
 							var defaultRepo = repos[1];
@@ -1774,7 +1837,7 @@
 										editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 											if(err) throw err; // Unexpected
 											doHgPull();
-											});
+										});
 									}
 									else if(answer == updateSettings) {
 										site.repository = defaultRepo.trim();
@@ -1782,25 +1845,28 @@
 										doHgPull();
 									}
 									//else if(answer == cancelSync) do nothing
-									});
-								}
+								});
+							}
 							else {
 								// All good, our repo is the default repo!
 								doHgPull();
 							}
 						}
-						}
-					});
-				}
-			else {
-				// Ask if user wants to init (using clone)
+					}
+				});
+			}
+			else if(site.repository != undefined && site.repository != "undefined") {
+				// .hg folder don't exist. Ask if user wants to init (using clone)
 				
 				var cloneInit = "Clone from repository";
 				var noThanks = "No, thanks"
-				confirmBox("The repository is not initiated. Do you want to (clone) init the repo ?<br>" + site.repository, [cloneInit, noThanks], function(answer) {
+				confirmBox("The repository for " + site.name + " is not initiated.<br>Do you want to (clone) init the repo from repository:<br>" + site.repository, [cloneInit, noThanks], function(answer) {
 					if(answer == cloneInit) doHgCloneInit();
 				});
 				
+			}
+			else {
+				alertBox("No repository configured for site: " + site.name + "!");
 			}
 		});
 		
@@ -1814,6 +1880,7 @@
 		}
 		
 	}
+	
 	
 	function publishSite(site) {
 		compile(site.source, site.publish, true, function buildDone() {
@@ -2010,7 +2077,7 @@
 					
 					if(folderAboutToBeCreated.indexOf(folder) == -1) createPath(folder);
 				}
-
+				
 				function fileCopied(err, path) {
 					if(err) {
 						alertBox("Unable to copy file (" + err.message + ")\n" + path);
@@ -2060,7 +2127,7 @@
 				else console.log("filesToSave=" + filesToSave + " exitCode=" + exitCode);
 			}
 			
-
+			
 		}
 	}
 	
@@ -2104,7 +2171,7 @@
 			}
 			catch(e) {
 				console.warn(e.message);
-				}
+			}
 			
 			if(win) enableContentEdit(previewWin);
 			else previewPage(site, enableContentEdit);
@@ -2203,67 +2270,67 @@
 				
 				
 				/*
-				// ### Insert toolbar
-				var aShowDefaultUI = true;
-				
-				var buttonStyle = `border-radius: 3px;
-				border: 1px solid rgba(19, 19, 19, 0.5);
-				box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
-				color: #f6f6f3;
-				min-width: 120px;
-				background-color: #414141;
-				background: linear-gradient(#545657, #434343, #454545);
-				cursor: default;
-				text-shadow: 0px -1px 0px #1f2020;
-				padding: 4px;
-				margin: 4px;`;
-				
-				var toolbar = document.createElement("div");
-				toolbar.setAttribute("id", "toolbar");
-				toolbar.setAttribute("class", "wysiwygtoolbar");
-				toolbar.setAttribute("style", "position: fixed; top: 0px; left: 0px; width: 100%; padding: 5px; background: linear-gradient(#595959, #555555); box-shadow: outset 0px 4px 10px #888888; border-bottom: 2px solid #767676; ");
-				
-				var buttonH1 = document.createElement("button");
-				buttonH1.appendChild(document.createTextNode("Huvudrubrik"));
-				buttonH1.setAttribute("style", buttonStyle);
-				buttonH1.onclick = function insertH1() {
+					// ### Insert toolbar
+					var aShowDefaultUI = true;
+					
+					var buttonStyle = `border-radius: 3px;
+					border: 1px solid rgba(19, 19, 19, 0.5);
+					box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
+					color: #f6f6f3;
+					min-width: 120px;
+					background-color: #414141;
+					background: linear-gradient(#545657, #434343, #454545);
+					cursor: default;
+					text-shadow: 0px -1px 0px #1f2020;
+					padding: 4px;
+					margin: 4px;`;
+					
+					var toolbar = document.createElement("div");
+					toolbar.setAttribute("id", "toolbar");
+					toolbar.setAttribute("class", "wysiwygtoolbar");
+					toolbar.setAttribute("style", "position: fixed; top: 0px; left: 0px; width: 100%; padding: 5px; background: linear-gradient(#595959, #555555); box-shadow: outset 0px 4px 10px #888888; border-bottom: 2px solid #767676; ");
+					
+					var buttonH1 = document.createElement("button");
+					buttonH1.appendChild(document.createTextNode("Huvudrubrik"));
+					buttonH1.setAttribute("style", buttonStyle);
+					buttonH1.onclick = function insertH1() {
 					//contentEditor.execCommand("heading", aShowDefaultUI, "h1");
 					contentEditor.execCommand('formatBlock', false, '<h1>');
-				}
-				toolbar.appendChild(buttonH1);
-				
-				var buttonItalic = document.createElement("button");
-				buttonItalic.appendChild(document.createTextNode("kursiv"));
-				buttonItalic.setAttribute("style", buttonStyle);
-				buttonItalic.onclick = function makeItalic() {
+					}
+					toolbar.appendChild(buttonH1);
+					
+					var buttonItalic = document.createElement("button");
+					buttonItalic.appendChild(document.createTextNode("kursiv"));
+					buttonItalic.setAttribute("style", buttonStyle);
+					buttonItalic.onclick = function makeItalic() {
 					contentEditor.execCommand("italic", aShowDefaultUI);
-				}
-				toolbar.appendChild(buttonItalic);
-				
-				var buttonBold = document.createElement("button");
-				buttonBold.appendChild(document.createTextNode("fetstil"));
-				buttonBold.setAttribute("style", buttonStyle);
-				buttonBold.onclick = function makeBold() {
+					}
+					toolbar.appendChild(buttonItalic);
+					
+					var buttonBold = document.createElement("button");
+					buttonBold.appendChild(document.createTextNode("fetstil"));
+					buttonBold.setAttribute("style", buttonStyle);
+					buttonBold.onclick = function makeBold() {
 					contentEditor.execCommand("bold", aShowDefaultUI);
-				}
-				toolbar.appendChild(buttonBold);
-				
-				// insertImage
-				
-				// insertOrderedList
-				
-				// insertUnorderedList
-				
-				// justifyCenter, justifyLeft, justifyRight
-				
-				// subscript, superscript
-				
-				// createLink, unlink
-				
-				body.insertBefore(toolbar, body.firstChild); // Insert the toolbar at the top
-				
-				body.setAttribute("style", "padding-top: 60px; transition: transform 0.4s ease;"); // Make sure the toolbar doesn't cover layout
-				
+					}
+					toolbar.appendChild(buttonBold);
+					
+					// insertImage
+					
+					// insertOrderedList
+					
+					// insertUnorderedList
+					
+					// justifyCenter, justifyLeft, justifyRight
+					
+					// subscript, superscript
+					
+					// createLink, unlink
+					
+					body.insertBefore(toolbar, body.firstChild); // Insert the toolbar at the top
+					
+					body.setAttribute("style", "padding-top: 60px; transition: transform 0.4s ease;"); // Make sure the toolbar doesn't cover layout
+					
 				*/
 				
 				contentEditor.execCommand("enableInlineTableEditing");
@@ -2323,24 +2390,24 @@
 				
 				// Requesting the window when it's closed will result in an error
 				try {
-				win = previewWin.window;
+					win = previewWin.window;
 				}
 				catch(e) {
 					console.log(e.message);
-					}
+				}
 				
 				if(!win) console.log("previewWin.window not available"); 
 				else {
 					
-				//var body = previewWin.window.document.body;
-				var main = previewWin.window.document.getElementsByTagName("main")[0];
-				main.contentEditable = "false";
-				
-				previewWin.window.removeEventListener("input", contentEdit);
+					//var body = previewWin.window.document.body;
+					var main = previewWin.window.document.getElementsByTagName("main")[0];
+					main.contentEditable = "false";
+					
+					previewWin.window.removeEventListener("input", contentEdit);
 				}
 			}
-			}
 		}
+	}
 	
 	
 })();
