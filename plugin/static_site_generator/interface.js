@@ -43,6 +43,8 @@
 	var ignoreFileChange = false; // Whether to update the preview/WYSIWYG when there is a change in the HTML source code (editor)
 	var updatePreviewOnChange;
 	
+	var httpServer;
+	
 	if(runtime == "browser") {
 		console.warn("Static site generation not yet supported in the browser!");
 		return;
@@ -111,6 +113,12 @@
 		
 		bootstrap();
 		
+		// Start web server on localhost so we can "capture" quick edits ...
+		var http = require("http");
+		httpServer = http.createServer(httpRequest);
+		httpServer.listen("13377", "127.0.0.1"); // Lets hope the port is not in use ...
+		
+		
 		// Open demo site if no file is open
 		var timer = 1000; // Milliseconds
 		setTimeout(function () {
@@ -160,7 +168,79 @@
 			editor.resizeNeeded();
 		}
 		
+		httpServer.close();
+		
 	}
+	
+	function httpRequest(request, response) {
+		
+		var url = require("url");
+		
+		var addr = request.url;
+		var ip = request.headers["x-real-ip"] ? request.headers["x-real-ip"] : request.connection.remoteAddress;
+		var objUrl = url.parse(addr,true);
+		var query = objUrl.query;
+		var path = objUrl.pathname;
+		
+		var logMsg = "ip=" + ip + " site=" +  request.headers.host + " path=" + path + " " + JSON.stringify(query, null, 2);
+		
+		
+		if(request.method == 'POST') {
+			processPost(request, response, function() {
+				var data = request.post["json"];
+				var json;
+				try {
+					json = JSON.parse(data);
+				}
+				catch(err) {
+					alertBox("Unable to parse incoming request from HTTP:<br>Parse error: " + err.message + "data=" + data + "");
+				}
+				
+				// Open document, place file caret , etc ...
+				
+				response.writeHead(200, "OK", {'Content-Type': 'text/plain; charset=utf-8', 'Access-Control-Allow-Origin': "*"});
+				response.end(logMsg);
+				
+				alertBox(JSON.stringify(null, 2));
+				
+			});
+		}
+		else {
+			response.writeHead(200, "OK", {'Content-Type': 'text/plain; charset=utf-8', 'Access-Control-Allow-Origin': "*"});
+			response.end("Nu blev det fel. Vänligen prova igen. Gjorde du en HTTP POST!?");
+		}
+		
+		
+		
+		
+	}
+	
+	function processPost(request, response, callback) {
+		var queryData = "";
+		if(typeof callback !== 'function') return null;
+		
+		if(request.method == 'POST') {
+			request.on('data', function(data) {
+				queryData += data;
+				if(queryData.length > 1e6) {
+					queryData = "";
+					response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+					request.connection.destroy();
+				}
+			});
+			
+			request.on('end', function() {
+				request.post = querystring.parse(queryData);
+				callback();
+			});
+			
+		}
+		else {
+			response.writeHead(405, {'Content-Type': 'text/plain'});
+			response.end();
+		}
+	}
+	
 	
 	function bootstrap(json) {
 		
