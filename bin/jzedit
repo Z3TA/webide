@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+/*
+	This is a wrapper for nw and the jzedit package,
+	to allow passing files to STDIN / pipe
+	
+	You need nodejs to run this! (https://nodejs.org/)
+	
+	Installation:
+	* Make sure this file is executable: chmod +x jzedit
+	* Add this folder to PATH
+	   * Or copy this file to /usr/bin/: sudo cp jzedit /usr/bin/
+	   * Or add the jzedit location to .profile or .bashrc :  export PATH=$PATH:/path/to/bin/jzedit
+	
+*/
+
+var path = require("path");
+
+var JZEDIT_LOCATION = path.resolve(__dirname, "../"); // Path to the jzedit folder (where package.json is located)
+console.log("JZEDIT_LOCATION=" + JZEDIT_LOCATION);
+
+var RUNTIME;
+if(process.platform == "win32") {
+	RUNTIME = "nwjs-v0.12.3-win-x64/nw.exe"; // Change this to your OS
+}
+else if(process.platform == "linux") {
+	RUNTIME = "nwjs-v0.12.3-linux-x64/nw"; // Change this to your OS
+}
+else if(process.platform == "darwin") {
+	RUNTIME = "nwjs-v0.12.3-osx-x64/nwjc"; // Change this to your OS
+}
+else {
+	throw new Error("Unknown platform: " + process.platform);
+}
+console.log("RUNTIME=" + RUNTIME);
+
+
+var NW_ARG = [JZEDIT_LOCATION, "--disable-lcd-text"];
+
+
+
+var PORT = 13379; // TCP port to use
+
+console.log("Starting jzedit wrapper ...");
+
+//console.log("process.argv=" + process.argv);
+
+function main() {
+
+	/*
+		What if jzedit is already running !? 
+		Check localhost for jzedit com port on tcp
+		if it's alive, tell the editor to open the file path in arg 2
+		*/
+	
+	var env = process.env;
+env.ARGS = JSON.stringify(process.argv);
+	env.STDIN_PORT = process.env.STDIN_PORT || PORT;
+	
+var spawn = require('child_process').spawn;
+
+	var nw = spawn( JZEDIT_LOCATION + "/runtime/" + RUNTIME, NW_ARG , { env: env } );
+
+	
+	nw.on("error", function nwError(err) {
+		throw err;
+	});
+	
+	nw.on("close", function nwClose(code) {
+		console.log("nw closed. code=" + code);
+		if(code==0) console.log("jzedit is probably already running! (suggestion: kill it)");
+		server.close();
+	});
+
+	nw.stdout.on("data", function nwStdout(data) {
+		//console.log("nwStdout: " + data);
+	});
+
+	nw.stderr.on("data", function nwStderr(data) {
+		console.log(data);
+	});
+	
+	
+	var net = require('net');
+	
+	var server = net.createServer(clientConnects);
+	
+	server.on("error", serverError);
+	
+	server.listen(env.STDIN_PORT);
+	
+	function clientConnects(clientConnection) {
+		
+		console.log("Client (jzedit) connected!");
+		
+		clientConnection.on("end", clientClosed);
+		clientConnection.on("data", clientData);
+		
+		// When jzedit connects, pipe stdin
+		process.stdin.pipe(clientConnection);
+		
+		function clientClosed() {
+			console.log("jzedit disconnected!");
+		}
+		
+		function clientData(data) {
+			console.log("data: " + data);
+		}
+		
+	}
+	
+	function serverError(err) {
+		throw err;
+	}
+	
+	
+}
+
+main();
