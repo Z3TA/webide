@@ -20,6 +20,9 @@ Also bring up the SSG widget/toolbar and show/indicate that Preview and WYSIWYG 
 
 Translate to other lanugages (Swedish) lang.js file with all phrases, calling STR("phrase") gives the right phrase.
 
+idea: Firefox plugin, så att man kan höger-klicka på sidan och välja "ändra", då öppnas jzedit och den fil som ska ändras. 
+Markören flyttas även dit man klickade på webbsidan. Och sidan (i jzedit) öppnas i WYSIWYG förhanskranskning/edit mode.
+
 
 2) Beta release?, get USER FEEDBACK!
 
@@ -42,6 +45,10 @@ What I'm working on
 
 todo:
 
+ENOENT: no such file or directory, open 'C:\C:\Users\Z\de
+SSH interface.js 2211
+
+SSG resizes the editor so the Windows menu bar hides part of it. Need to detect if on windows? And not resize full height
 
 auto complete function arguments in anonymous functions!
 

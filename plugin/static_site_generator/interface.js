@@ -2207,6 +2207,8 @@
 			}
 			
 			// Get the source code for the compiled page in review, in order to compute ignoreTransform
+			
+			// ENOENT: no such file or directory, open 'C:\C:\Users\Z\de
 			editor.readFromDisk(previePath, function gotPreviewSource(err, path, txt) {
 				
 				if(err) throw err;

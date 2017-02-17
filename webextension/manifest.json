@@ -1,0 +1,37 @@
+{
+	
+	"manifest_version": 2,
+	"name": "JZedit",
+	"version": "1.0",
+	
+	"description": "Right click to edit web page, open's the web page in jzedit",
+	
+	"icons": {
+		"48": "icons/jz48.png",
+		"64": "icons/jz64.png"
+	},
+	
+	"background": {
+		"scripts": ["background.js"]
+	},
+	
+	"content_scripts": [
+		{
+			"matches": ["*://*.mozilla.org/*"],
+			"js": ["editwebpage.js"]
+		}
+	],
+	
+	"permissions": [
+		"contextMenus",
+		"activeTab"
+	],
+	
+	"applications": {
+		"gecko": {
+			"id": "zeta@zetafiles.org",
+			"strict_min_version": "42.0"
+		}
+	}
+	
+}
