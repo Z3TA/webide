@@ -808,6 +808,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Add icons to the file explorer and make it easier to navigate.
+Show git/mercurial status beside each file (New, Modified, Ignored)
+
 Move the caret to the far right when selecting by double clicking
 
 Reopen closed tab!!
@@ -1300,6 +1303,11 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+Mercurial SCM integration!
+Add file.hg.modified, etc to File object. Show hg status in file tabs and file explorer. Merge tool!
+
+Vim Style Key binding
+
 <img| auto completion, selects and image, and puts that in src, plus it's with and height attributes.
 
 Ctrl + Click on a CSS class to go to the defenition (inside the CSS file, to the correct line)
@@ -1617,7 +1625,7 @@ Printing text (on printer)
 
 Sort paragraphs by column. Ctrl + 1-9, auto detect date
 
-Code drag and drop
+Code drag and drop, drag and drop selected text.
 
 When renaming a html tag, also rename the sibmling. <pre|<--renaming> lalala </pre><-- also rename this
 
