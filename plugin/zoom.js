@@ -1,3 +1,8 @@
+/*
+	This replaces the "minimap"/enhanced scrollbar to save precious screen real estate. 
+	Strings starting with # or underlined text will show up bigger for fast navigation.
+*/
+
 (function() {
 	"use strict";
 	
