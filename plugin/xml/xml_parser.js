@@ -61,13 +61,16 @@
 		
 		var char = "";
 		// Native objects are faster then accessing elements in an array!
-		var pastChar0 = "";
-		var pastChar1 = "";
-		var pastChar2 = "";
-		var pastChar3 = "";
-		var pastChar4 = "";
-		var pastChar5 = "";
-		var pastChar6 = "";
+		var lastChar0 = "";
+		var lastChar1 = "";
+		var lastChar2 = "";
+		var lastChar3 = "";
+		var lastChar4 = "";
+		var lastChar5 = "";
+		var lastChar6 = "";
+		var lastChar7 = "";
+		
+		var insideCDATA = false;
 		
 		var insideDblQuote = false;
 		var doubleQuoteStart = 0;
@@ -113,16 +116,20 @@
 		
 		var docType = false;
 		
+		var angelBracketDepth = 0;
+		var lastRowAngelBracketDepth = 0;
+		
 		for(var charIndex=0; charIndex<text.length; charIndex++) {
 			
 			// Save a history of the last characters
-			pastChar6 = pastChar5;
-			pastChar5 = pastChar4;
-			pastChar4 = pastChar3;
-			pastChar3 = pastChar2;
-			pastChar2 = pastChar1;
-			pastChar1 = pastChar0;
-			pastChar0 = char;
+			lastChar7 = lastChar6;
+			lastChar6 = lastChar5;
+			lastChar5 = lastChar4;
+			lastChar4 = lastChar3;
+			lastChar3 = lastChar2;
+			lastChar2 = lastChar1;
+			lastChar1 = lastChar0;
+			lastChar0 = char;
 			char = text.charAt(charIndex);
 			
 			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
@@ -130,20 +137,28 @@
 			/*
 				<![CDATA[ " and end with the string " ]]>
 				
+				CDATA stands for Character Data and it means that the data in between these strings includes data that could be interpreted as XML markup, but should not be. 
+				
 				Processing instructions & Prolog and Document Type Declaration: <? ... ?>
 				
 			*/
 			
+			if(char == "[" && lastChar0 == "A" && lastChar1 == "T" && lastChar2 == "A" && lastChar3 == "D" && lastChar4 == "C" && lastChar5 == "[" && lastChar6 == "!" && lastChar7 == "<") {
+				insideCDATA = true;
+			}
+			else if(insideCDATA && char == ">" && lastChar0 == "]" && lastChar1 == "]") {
+				insideCDATA = false;
+			}
 			
 			
 			// ### Comments: <!-- -->
-			if(char == "-" && pastChar0 == "-" && pastChar1 == "!" && pastChar2 == "<" && !insideComment && !insideDblQuote && !insideComment) { // <!--
+			if(char == "-" && lastChar0 == "-" && lastChar1 == "!" && lastChar2 == "<" && !insideComment && !insideDblQuote && !insideComment) { // <!--
 				insideComment = true;
 				insideXmlTag = false;
 				xmlMode = tmpXmlMode;
 				commentStart = charIndex-4;
 			}
-			else if(char == ">" && pastChar0 == "-" && pastChar1 == "-" && !insideDblQuote && insideComment) { // -->
+			else if(char == ">" && lastChar0 == "-" && lastChar1 == "-" && !insideDblQuote && insideComment) { // -->
 				insideComment = false;
 				comments.push(new Comment(commentStart, charIndex));
 				//console.warn("Found HTML comment! line=" + lineNumber + " ");
@@ -183,6 +198,16 @@
 			}
 			
 			if(!insideComment && !insideSingleQuote && !insideDblQuote) {
+				
+				// ### Keep track of angel brackets
+				if(char == "{") {
+					angelBracketDepth++;
+				}
+				else if(char == "}") {
+					angelBracketDepth--;
+				}
+				
+				
 				/*
 					### Find xml-tags.
 					
@@ -190,7 +215,7 @@
 					
 				*/
 				
-				if(insideXmlTag && pastChar0 == "<" && char == "/") {
+				if(insideXmlTag && lastChar0 == "<" && char == "/") {
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
@@ -208,8 +233,8 @@
 					xmlTagWordLength = charIndex - xmlTagStart;
 				}
 				else if(char == ">" && insideXmlTag) {
-					if(pastChar0 == "/") {
-						xmlTagSelfEnding = true; // Se"\n" ending xml tag: <foo />
+					if(lastChar0 == "/") {
+						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
 					
 					
@@ -235,7 +260,7 @@
 							if(xmlTagLastOpenRow == row) nextRowIndentation = false;
 							
 						}
-						else if(pastChar0 != "?") {
+						else if(lastChar0 != "?") {
 							// It's a tag opening (ignore doc type declaration)
 							openXmlTags++;
 							xmlTagLastOpenRow = row;
@@ -250,9 +275,7 @@
 					insideXmlTag = false;
 					insideXmlTagEnding = false;
 					
-					
 				}
-				
 			}
 			
 			
@@ -261,15 +284,21 @@
 			// ### Line break
 			if(char == lastLineBreakCharacter) {
 				
+				if(lastRowAngelBracketDepth > angelBracketDepth) thisRowIndentation--;
+				
 				//console.log("--- new line=" + (row+2) + " thisRowIndentation=" + thisRowIndentation + " ---");
 				file.grid[row].indentation = Math.max(0, thisRowIndentation);
 				
 				row++;
 				
+				if(lastRowAngelBracketDepth < angelBracketDepth) thisRowIndentation++;
+				
 				if(nextRowIndentation) {
 					thisRowIndentation++;
 					nextRowIndentation = false;
 				}
+				
+				lastRowAngelBracketDepth = angelBracketDepth;
 				
 			}
 			
@@ -339,7 +368,7 @@
 		
 			if(file.grid[4].indentation != 4) throw new Error("Expected line five's indentation to be 4 levels, not " + file.grid[4].indentation);
 			
-				//editor.closeFile(file.path);
+				editor.closeFile(file.path);
 				callback(true);
 				
 			});
