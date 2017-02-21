@@ -26,7 +26,7 @@
 			var keyD = 68;
 			var keyE = 69;
 			
-			// For convenience we can press F5 to reload while developing on the app itself
+			// For convenience we can press F5 to reload while developing on the editor itself
 			editor.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
 			
 			// Switch devMode on or off by hitting Ctrl + Alt + D
@@ -156,7 +156,8 @@
 	
 	function reloadEditor() {
 		
-		if(confirm("Do you want to reload the editor ?")) { // All keyBindings that reload or exit the editor should have a confirmation box, or we will not get test results!
+		// All keyBindings that reload or exit the editor should have a confirmation box, or we will not get test results!
+		if(confirm("Do you want to reload the editor ?")) { 
 			
 			var func, name, ret = true;
 			
@@ -190,6 +191,13 @@
 				throw new Error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 			}
 			else {
+				
+				// Unload all plugins
+				for(var i=0; i<editor.plugins.length; i++) {
+					console.log("unloading plugin: " + editor.plugins[i].desc);
+					editor.plugins[i].unload(); // Call function (and pass global objects!?)
+				}
+				
 				/*
 					for(var file in editor.files) {
 					delete editor.files[file];

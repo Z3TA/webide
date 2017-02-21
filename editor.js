@@ -3515,7 +3515,7 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	// Move Event listeners ...
+	// More Event listeners ...
 	
 	
 	//window.addEventListener("drop", fileDrop, false);

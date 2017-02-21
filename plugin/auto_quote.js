@@ -19,7 +19,7 @@
 	}
 
 	function autoQuoteUnload() {
-		editor.removeEventListener()
+		editor.removeEvent("keyPressed", auto_quote_on_keyPressed);
 	}
 	
 	function auto_quote_on_keyPressed(file, character, combo) {
