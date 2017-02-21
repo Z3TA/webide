@@ -60,7 +60,14 @@
 		var text = file.text;
 		
 		var char = "";
-		var pastChar = new Array("", "", "", "", "", "", "");
+		// Native objects are faster then accessing elements in an array!
+		var pastChar0 = "";
+		var pastChar1 = "";
+		var pastChar2 = "";
+		var pastChar3 = "";
+		var pastChar4 = "";
+		var pastChar5 = "";
+		var pastChar6 = "";
 		
 		var insideDblQuote = false;
 		var doubleQuoteStart = 0;
@@ -76,19 +83,13 @@
 		var comments = [];
 		var insideComment = false;
 		
-		var LF="\n", CR="\r", C="c", D="d", E="e", F="f", H="h", I="i", L="l", M="m", N="n", O="o", P="p", R="r", S="s", T="t", W="w";
-		var space = " ", tab = "\t", comma = ",", colon = ":", percent = "%", leftArrow = "<", rightArrow = ">";
-		var singleQuote = "'";
-		var doubleQuote = '"';
-		var questionmark = "?";
-		
 		if(file.lineBreak.length == 2) {
 			var firstLineBreakCharacter = file.lineBreak.charAt(0);
 			var lastLineBreakCharacter = file.lineBreak.charAt(1);
 		}
-		else if(file.lineBreak == LF) {
-			var firstLineBreakCharacter = LF;
-			var lastLineBreakCharacter = LF;
+		else if(file.lineBreak == "\n") {
+			var firstLineBreakCharacter = "\n";
+			var lastLineBreakCharacter = "\n";
 		}
 		else throw new Error("No linebreaks!");
 		
@@ -115,13 +116,13 @@
 		for(var charIndex=0; charIndex<text.length; charIndex++) {
 			
 			// Save a history of the last characters
-			pastChar[6] = pastChar[5];
-			pastChar[5] = pastChar[4];
-			pastChar[4] = pastChar[3];
-			pastChar[3] = pastChar[2];
-			pastChar[2] = pastChar[1];
-			pastChar[1] = pastChar[0];
-			pastChar[0] = char;
+			pastChar6 = pastChar5;
+			pastChar5 = pastChar4;
+			pastChar4 = pastChar3;
+			pastChar3 = pastChar2;
+			pastChar2 = pastChar1;
+			pastChar1 = pastChar0;
+			pastChar0 = char;
 			char = text.charAt(charIndex);
 			
 			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
@@ -136,13 +137,13 @@
 			
 			
 			// ### Comments: <!-- -->
-			if(char == "-" && pastChar[0] == "-" && pastChar[1] == "!" && pastChar[2] == "<" && !insideComment && !insideDblQuote && !insideComment) { // <!--
+			if(char == "-" && pastChar0 == "-" && pastChar1 == "!" && pastChar2 == "<" && !insideComment && !insideDblQuote && !insideComment) { // <!--
 				insideComment = true;
 				insideXmlTag = false;
 				xmlMode = tmpXmlMode;
 				commentStart = charIndex-4;
 			}
-			else if(char == ">" && pastChar[0] == "-" && pastChar[1] == "-" && !insideDblQuote && insideComment) { // -->
+			else if(char == ">" && pastChar0 == "-" && pastChar1 == "-" && !insideDblQuote && insideComment) { // -->
 				insideComment = false;
 				comments.push(new Comment(commentStart, charIndex));
 				//console.warn("Found HTML comment! line=" + lineNumber + " ");
@@ -154,7 +155,7 @@
 					## Quotes
 					XML can have both single quote and double quote as quotes
 				*/
-				if(char == doubleQuote && !insideComment) {
+				if(char == '"' && !insideComment) {
 					if(insideDblQuote) {
 						insideDblQuote = false;
 						quotes.push(new Quote(doubleQuoteStart, charIndex));
@@ -189,7 +190,7 @@
 					
 				*/
 				
-				if(insideXmlTag && pastChar[0] == "<" && char == "/") {
+				if(insideXmlTag && pastChar0 == "<" && char == "/") {
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
@@ -207,8 +208,8 @@
 					xmlTagWordLength = charIndex - xmlTagStart;
 				}
 				else if(char == ">" && insideXmlTag) {
-					if(pastChar[0] == "/") {
-						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
+					if(pastChar0 == "/") {
+						xmlTagSelfEnding = true; // Se"\n" ending xml tag: <foo />
 					}
 					
 					
@@ -234,7 +235,7 @@
 							if(xmlTagLastOpenRow == row) nextRowIndentation = false;
 							
 						}
-						else if(pastChar[0] != "?") {
+						else if(pastChar0 != "?") {
 							// It's a tag opening (ignore doc type declaration)
 							openXmlTags++;
 							xmlTagLastOpenRow = row;
@@ -327,5 +328,21 @@
 	}
 	
 	
+	
+	/*
+		# Tests
+	*/
+	
+	
+	editor.addTest(function test_xml_CDATA(callback) {
+		editor.openFile("cdata.svg", '<svg>\n<defs>\n<style type="text/css"><![CDATA[\ntext {\nfont-size: 12px;\n}\n</style>\n</defs>\n</svg>\n', function(err, file) {
+		
+			if(file.grid[4].indentation != 4) throw new Error("Expected line five's indentation to be 4 levels, not " + file.grid[4].indentation);
+			
+				//editor.closeFile(file.path);
+				callback(true);
+				
+			});
+	}, 1);
 	
 })();

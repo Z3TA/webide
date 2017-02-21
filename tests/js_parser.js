@@ -39,7 +39,7 @@ editor.addTest(function xmlUnlosedTagColorWeirdness(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 editor.addTest(function templateLiterals(callback) {
 	editor.openFile("templateLiterals.js", 'var strTest = `string text ${expression} string text`\nvar strTopic = `<h1>Topic</h1>`', function(err, file) {
