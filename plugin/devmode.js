@@ -157,61 +157,66 @@
 	function reloadEditor() {
 		
 		// All keyBindings that reload or exit the editor should have a confirmation box, or we will not get test results!
-		if(confirm("Do you want to reload the editor ?")) { 
+		
+		var yes = "Yes, reload!";
+		var no = "No, dont reload";
+		confirmBox("Do you want to reload the editor ?", [yes, no], function (answer) {
 			
-			var func, name, ret = true;
-			
-			//editor.closeFile(testfile);
-			
-			// Call exit listeners before reloading
-			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
+			if(answer == yes) {
+				var func, name, ret = true;
 				
-				func = editor.eventListeners.exit[i].fun;
-				name = getFunctionName(func);
+				//editor.closeFile(testfile);
 				
-				if(typeof func != "function") {
+				// Call exit listeners before reloading
+				for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 					
-					console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
-					//console.warn(objInfo(f));
+					func = editor.eventListeners.exit[i].fun;
+					name = getFunctionName(func);
 					
-					throw  new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!");
+					if(typeof func != "function") {
+						
+						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
+						//console.warn(objInfo(f));
+						
+						throw  new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!");
+						
+					}
+					else {
+						ret = func();
+					}
 					
+					
+					console.log(name + " returned " + ret);
+					
+					if(ret !== true) break; // Not true means there's an error
+				}
+				
+				if(ret !== true) {
+					throw new Error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 				}
 				else {
-					ret = func();
-				}
-				
-				
-				console.log(name + " returned " + ret);
-				
-				if(ret !== true) break; // Not true means there's an error
-			}
-			
-			if(ret !== true) {
-				throw new Error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
-			}
-			else {
-				
-				// Unload all plugins
-				for(var i=0; i<editor.plugins.length; i++) {
-					console.log("unloading plugin: " + editor.plugins[i].desc);
-					editor.plugins[i].unload(); // Call function (and pass global objects!?)
-				}
-				
-				/*
-					for(var file in editor.files) {
-					delete editor.files[file];
+					
+					// Unload all plugins
+					for(var i=0; i<editor.plugins.length; i++) {
+						console.log("unloading plugin: " + editor.plugins[i].desc);
+						editor.plugins[i].unload(); // Call function (and pass global objects!?)
 					}
-				*/
-				
-				//document.location = "about:blank";
-				//document.location = "file:///" + require("dirname") + "/index.htm";
-				location.reload();
-				
-				// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
-				
+					
+					/*
+						for(var file in editor.files) {
+						delete editor.files[file];
+						}
+					*/
+					
+					//document.location = "about:blank";
+					//document.location = "file:///" + require("dirname") + "/index.htm";
+					location.reload();
+					
+					// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+					
+				}
 			}
-		}
+		});
 		
 		return false; // Don't want a browser refresh!
 		
