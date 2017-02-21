@@ -37,7 +37,7 @@
 				
 				var xml = parseXML(file);
 				
-				console.log("xml=" + JSON.stringify(xml));
+				//console.log("xml=" + JSON.stringify(xml));
 				
 				file.haveParsed(xml); // Tell the file that it has been parsed so that functions depending on the parsed data can update
 				
@@ -132,7 +132,7 @@
 			lastChar0 = char;
 			char = text.charAt(charIndex);
 			
-			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
+			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
 			
 			/*
 				<![CDATA[ " and end with the string " ]]>
@@ -308,9 +308,9 @@
 		
 		console.timeEnd("parseXML");
 		
-		console.log("quotes:" + JSON.stringify(quotes, null, 2));
-		console.log("comments:" + JSON.stringify(comments, null, 2));
-		console.log("xmlTags:" + JSON.stringify(xmlTags, null, 2));
+		//console.log("quotes:" + JSON.stringify(quotes, null, 2));
+		//console.log("comments:" + JSON.stringify(comments, null, 2));
+		//console.log("xmlTags:" + JSON.stringify(xmlTags, null, 2));
 		
 		return {language: "XML", quotes: quotes, comments: comments, xmlTags: xmlTags};
 		
@@ -341,8 +341,8 @@
 	
 	function isXML(file) {
 		
-		if(file.parsed.language) {
-			console.warn("File has already been parsed: " + file.path);
+		if(file.parsed.language && file.parsed.language != "XML") {
+			console.warn("File has already been parsed:  file.parsed.language=" + file.parsed.language + " file.path=" + file.path);
 			return false;
 		}
 		
