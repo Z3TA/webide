@@ -41,6 +41,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Fix annoying stuff with xml parser
+
+Fix word wrap function to work on html
 
 
 todo:
@@ -211,6 +214,12 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+colors keep getting off in svg (xml-parser) files.
+
+Save-as didn't update file.fileExtension !! saved as svg (wasn't parsed)
+
+Annoying when disconnecting from FTP, default working directory. What to set as default working director ??
 
 Annoying red circle in if-statement with regexp and single =
 
