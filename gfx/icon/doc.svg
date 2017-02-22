@@ -22,18 +22,24 @@ stroke: #7c7c7c;
 .paper {
 fill: url(#radialGradient);
 stroke: #b4b4b4;
+stroke-width: 0.5;
 }
 .stop1 { stop-color: #ffffff; }
 .stop2 { stop-color: #d0d0d0; }
 
 .shadow1 {
 stroke: #555555;
+opacity: 0.5;
+stroke-width: 0.5;
 }
 .shadow2 {
 stroke: #808080;
+opacity: 0.5;
 }
 .shadow3 {
 stroke: #b1b1b1;
+opacity: 0.5;
+
 }
 
 ]]></style>

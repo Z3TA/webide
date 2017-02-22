@@ -12,7 +12,7 @@
 font-size-adjust: 0.58;
 fill: #d6801f;
 font-family: Arial;
-font-size: 10px;
+font-size: 12px;
 }
 
 .faketext {
@@ -23,18 +23,22 @@ stroke: #7c7c7c;
 fill: #f4f4f4;
 fill: url(#radialGradient);
 stroke: #b4b4b4;
+stroke-width: 0.5;
 }
 .stop1 { stop-color: #ffffff; }
 .stop2 { stop-color: #d0d0d0; }
 
 .shadow1 {
 stroke: #555555;
+opacity: 0.25:
 }
 .shadow2 {
 stroke: #808080;
+opacity: 0.25:
 }
 .shadow3 {
 stroke: #b1b1b1;
+opacity: 0.25:
 }
 
 ]]></style>
@@ -52,6 +56,6 @@ M 5 24 L6 24 M7 24 L9 24 M9 24 L12 24 M13 24 L18 24"/>
 
 <line class="shadow2" x1="26" y1="2" x2="26" y2="30" />
 
-<text class="filetype" x="13" y="18" text-anchor="middle">JS</text>
+<text class="filetype" x="13" y="19" text-anchor="middle">JS</text>
 
 </svg>

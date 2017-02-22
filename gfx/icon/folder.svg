@@ -11,6 +11,7 @@
 .folder {
 fill: url(#radialGradient);
 stroke: #815f3f;
+stroke-width: 0.5;
 }
 .stop1 { stop-color: #fdf0c0; }
 .stop2 { stop-color: #f4bb74; }

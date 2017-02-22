@@ -726,17 +726,19 @@ div.gotoFile li b {
 
 	.fileExplorer {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 12px;
+	font-size: 13px;
+	box-sizing: border-box;
+	border-left: 2px solid #e8e8e8;
 	/* Can not have padding, or the canvas will fall down */
 	}
 .fileExplorer ul {
-	background-color: white; /* #e8e8e8 */
+	background-color: #fff; /* #e8e8e8 */
 	color: black;
 }
 .fileExplorer li {
-	font-family: Verdana, Geneva, sans-serif;
-	font-size: 12px;
-	cursor: pointer;
+	cursor: default;
+	margin-top: 4px;
+	margin-bottom: 4px;
 	}
 
 .fileExplorer li.folder {
@@ -749,28 +751,36 @@ div.gotoFile li b {
 	color: brown;
 }
 
+.fileExplorer li img {
+	vertical-align: middle;
+	margin-right: 4px;
+}
+
+.fileExplorer li.file img {
+	margin-left: 13px;
+}
+
 .fileExplorer li a:hover {
 	text-decoration: underline;
 }
 
 .fileExplorer .box {
-	font-family: monospace;
-	display: inline-block;
-	border: 1px solid black;
+	font-family: Verdana, Geneva, sans-serif, monospace;
 	font-size: 12px;
-	width: 8px;
-	height: 8px;
-	line-height: 10px; /* the same as your div height */
+	display: inline-block;
+	border: 0px solid black;
+	width: 12px;
+	height: 12px;
+	
 	text-align: center;
 	vertical-align: middle;
 	margin-right: 2px;
 	margin-bottom: 2px;
 	outline: 0;
+	color: #6e6e6e;
 }
 
 .fileExplorer select {
-	font-family: Verdana, Geneva, sans-serif;
-	font-size: 12px;
 	width: 100%;
 	}
 
@@ -782,11 +792,11 @@ div.gotoFile li b {
 	margin: 0;
 }
 .tree ul {
-	margin-left: 6px; /* indentation */ 
+	margin-left: 10px; /* indentation */ 
 	list-style:none;
 	}
 
-.tree ul {margin-left:3px} /* (indentation/2) */
+.tree ul {margin-left:5px} /* (indentation/2) */
 
 .tree:before,
 .tree ul:before {
@@ -797,12 +807,14 @@ div.gotoFile li b {
 	top:0;
 	bottom:0;
 	left:0;
-	border-left:1px dotted #999999;
+	/*border-left:1px dotted #999999;*/
 }
 
 .tree li {
 	margin:0;
-	padding-left: 6px; /* indentation + .5em */
+	margin-top: 4px;
+	margin-bottom: 4px;
+	padding-left: 12px; /* indentation + .5em */
 	line-height:14px; /* default list item's `line-height` */
 	position:relative;
 }
@@ -810,9 +822,9 @@ div.gotoFile li b {
 .tree li:before {
 	content:"";
 	display:block;
-	width: 4px; /* same with indentation */
+	width: 10px; /* same as indentation */
 	height:0;
-	border-top:1px dotted #999999;
+	/*border-top:1px dotted #999999;*/
 	margin-top: 0px; /* border top width */
 	position:absolute;
 	top:7px; /* (line-height/2) */

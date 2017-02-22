@@ -1,10 +1,13 @@
 (function() {
 	/*
-		Only show the file explorer explicity. The screen cant have too much information or the brain will get burnt out
+		Only show the file explorer explicity. The screen cant have too much information or the brain will get burnt out ...
 		
 		todo: File watcher, update the list when file change names, or are created/removed
 		(currently you can refresh the file lists by hiding and then showing it)
 		
+		▶
+		▼
+		►
 	*/
 	
 	var fileExplorerFolders;
@@ -239,12 +242,13 @@
 			else {
 				// Make the parent folder appear open
 				
-				// let (aka block scope) only solves a symtom of the bigger problem: Using varaibles from parent or global scope (dont't do that) and function scope is probably what you want (not block scope)
+				// let (aka block scope) only solves a symtom of the bigger problem: 
+			// Using varaibles from parent or global scope (dont't do that) and function scope is probably what you want (not block scope)
 				parent.setAttribute("class", "folder open");
 				var childNodes = parent.childNodes;
 				var box = childNodes[0];
 				box.removeChild(box.firstChild);
-				box.appendChild(document.createTextNode("-"));
+			box.appendChild(document.createTextNode("▼"));
 			}
 			
 			// Clean the parent node
@@ -276,8 +280,14 @@
 			console.log("item.type=" + item.type + " item.name=" + item.name);
 			
 				var li = document.createElement("li");
+			var icon = document.createElement("img");
 				var type = "";
-				
+			var filetype = getFileExtension(item.path);
+			
+			icon.setAttribute("width", "20");
+			icon.setAttribute("height", "20");
+			icon.setAttribute("onerror", "this.src='gfx/icon/doc.svg'");
+			
 				// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 				if(item.type == "d") type = "folder";
 				else if(item.type == "-") type = "file";
@@ -290,8 +300,11 @@
 				
 				if(type == "folder") {
 					
-					li.setAttribute("class", "folder closed"); 
+					li.setAttribute("class", "folder closed");
 					
+				icon.setAttribute("src", "gfx/icon/folder.svg");
+				
+				
 					li.addEventListener("click", function(e) {
 						openOrCloseFolder(li);
 						
@@ -305,7 +318,7 @@
 					var box = document.createElement("figure");
 					box.setAttribute("class", "closed box");
 					
-					box.appendChild(document.createTextNode("+"));
+				box.appendChild(document.createTextNode("►"));
 					li.appendChild(box);
 				
 				if(openFolders.indexOf(item.path) != -1) buildList(item.path, li);
@@ -313,6 +326,11 @@
 				}
 				else {
 					li.setAttribute("class", type); 
+				
+				icon.setAttribute("src", "gfx/icon/" + filetype + ".svg");
+				
+				icon.setAttribute("width", "22");
+				icon.setAttribute("height", "22");
 				
 					li.addEventListener("click", function() {
 						openFile(li);
@@ -327,6 +345,8 @@
 				
 			var displayName = item.name;
 			if(displayName.length > 40) displayName = displayName.substr(0, 37) + "...";
+			
+			li.appendChild(icon);
 			
 			li.appendChild(document.createTextNode(displayName));
 			
@@ -374,17 +394,20 @@
 			
 			//console.log("path=" + path);
 			
-			if(childNodes.length > 2) {
+		var elementsToCheck = 3;
+		
+		if(childNodes.length > elementsToCheck) {
 				// The folder is open, close it
 				
 				console.log("Closing file explorer folder: " + path);
 				
-				for (var i=2; i<childNodes.length; i++) {
+			for (var i=elementsToCheck; i<childNodes.length; i++) {
+				console.log("removeChild: " + childNodes[i]);
 					item.removeChild(childNodes[i]);
 				}
 				
 				box.removeChild(box.firstChild);
-				box.appendChild(document.createTextNode("+"));
+			box.appendChild(document.createTextNode("►"));
 				
 			openFolders.splice(openFolders.indexOf(path), 1);
 			
@@ -401,7 +424,7 @@
 				});
 				
 				box.removeChild(box.firstChild);
-				box.appendChild(document.createTextNode("-"));
+			box.appendChild(document.createTextNode("▼"));
 			
 			openFolders.push(path);
 			
