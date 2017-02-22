@@ -1,0 +1,57 @@
+<svg version="1.1" baseProfile="full" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<defs>
+
+<radialGradient id="radialGradient" fx="5%" fy="5%" r="100%">
+<stop class="stop1" offset="0%"/>
+<stop class="stop2" offset="100%"/>
+</radialGradient>
+
+<style type="text/css"><![CDATA[
+
+.filetype {
+font-size-adjust: 0.58;
+fill: green;
+font-family: Arial;
+font-size: 8px;
+font-weight: bold;
+}
+
+.faketext {
+stroke: #7c7c7c;
+}
+
+.paper {
+fill: url(#radialGradient);
+stroke: #b4b4b4;
+}
+.stop1 { stop-color: #ffffff; }
+.stop2 { stop-color: #d0d0d0; }
+
+.shadow1 {
+stroke: #555555;
+}
+.shadow2 {
+stroke: #808080;
+}
+.shadow3 {
+stroke: #b1b1b1;
+}
+
+]]></style>
+</defs>
+
+<rect class="paper" x="2" y="2" width="24" height="28" />
+
+<path class="faketext" d="M5 5 L8 5 M9 5 L14 5 M 15 5 L19 5 
+M 5 8 L10 8 M11 8 L13 8 M14 8 L22 8
+M 5 21 L8 21 M9 21 L15 21 M16 21 L20 21 M21 21 L23 21
+M 5 24 L6 24 M7 24 L9 24 M9 24 L12 24 M13 24 L18 24"/>
+
+<line class="shadow1" x1="2" y1="30" x2="26" y2="30" />
+<line class="shadow3" x1="2" y1="31" x2="26" y2="31" />
+
+<line class="shadow2" x1="26" y1="2" x2="26" y2="30" />
+
+<text class="filetype" x="13" y="18" text-anchor="middle">CSS</text>
+
+</svg>
