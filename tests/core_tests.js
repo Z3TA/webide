@@ -32,6 +32,16 @@
 		
 	*/
 	
+	editor.addTest(function testDeleteTextRangeWithLongText(callback) {
+		// Testing File.deleteTextRange()
+		editor.openFile("testDeleteTextRangeWithLongText.html", '', function(err, file) {
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
+	
 	editor.addTest(function test_reLastIndexOf(callback) {
 		
 		assert(reLastIndexOf(/a/, "abc"), 0);
@@ -42,12 +52,11 @@
 		callback(true);
 		
 	});
-		
-
+	
 	editor.addTest(function testDeleteTextRange(callback) {
 		// Testing File.deleteTextRange()
 		editor.openFile("testDeleteTextRange.js", '', function(err, file) {
-	
+			
 			// file.deleteTextRange calls file.sanityCheck witch will detect most errors!
 			
 			// Also make sure the deleted character are correct
@@ -83,6 +92,9 @@
 			callback(true);
 			
 			function test(txt, start, end) {
+				
+				// Also run the same tests but with CRLF instead of LF
+				//if(txt.indexOf("#") != -1 && txt.indexOf("@") == -1) test(txt.replace(/#/g, "@#"), start, end)
 				
 				console.log("Testing deleteTextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
 				
@@ -127,8 +139,8 @@
 			}
 			
 		});
-			
-	});
+		
+	}, 1);
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {
@@ -178,8 +190,8 @@
 			document.execCommand("cut");
 			editor.showFile(file);
 			document.execCommand("paste");
-
-			if(file.text.trim() != text.trim()) throw new Error("Unexpected text=" + file.text);
+			
+			if(file.text.trim() != text.trim()) throw new Error("Unexpected text=" + lbChars(file.text) + " != " + lbChars(text));
 			
 			editor.closeFile(file.path);
 			callback(true);
@@ -209,19 +221,19 @@
 			
 			if(file.grid[1].indentation != 1) throw new Error("Expected 1 indentation on row 1. indenttation=" + file.grid[1].indentation);
 			
-				editor.closeFile(file.path);
-				callback(true);
-				
-			});
+			editor.closeFile(file.path);
+			callback(true);
+			
+		});
 	});
 	
 	editor.addTest(function thisOutsideFunction(callback) {
 		editor.openFile("thisOutsideFunction.js", 'var bar = this;\nfunction foo() {\n}\n', function(err, file) {
 			// Did throw an error ...
-						
+			
 			editor.closeFile(file.path);
 			callback(true);
-			 });
+		});
 	});
 	
 	editor.addTest(function wrongFuncNameAnonFunctionCallbackNextToParanthesis(callback) {
@@ -291,19 +303,19 @@
 	
 	editor.addTest(function wrongFunctionAnonymous(callback) {
 		editor.openFile("wrongFunctionAnonymous.js", "function foo() {\nbar = setTimeout(function() {\nbaz = setTimeout(function() {\n\n}, 0);\n}, 0);\n}\n", function(err, file) {
-		
-		
-		if(file.parsed.functions[0].subFunctions[0].subFunctions[0].name == "baz") throw new Error("Expected an anonymous function instead of baz");
-		
-		file.moveCaret(undefined, 3);
+			
+			
+			if(file.parsed.functions[0].subFunctions[0].subFunctions[0].name == "baz") throw new Error("Expected an anonymous function instead of baz");
+			
+			file.moveCaret(undefined, 3);
 			editor.mock("keydown", {charCode: 13}); // Simulate Press enter
 			// Might throw Error: Unable to find end of function=baz
-		
-		editor.closeFile(file.path);
-		
-		callback(true);
-		
-	});
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
 	});
 	
 	editor.addTest(function unfinishedRegexp(callback) {
@@ -402,7 +414,7 @@
 			if(!existFunctionWithName(file.parsed.functions, "bar")) throw new Error("Did not find function bar");
 			
 			callback(true);
-				
+			
 			editor.closeFile(file.path);
 			
 		});
@@ -716,7 +728,7 @@
 		});
 	});
 	
-
+	
 	editor.addTest(function htmlCommentInScriptTag(callback) {
 		editor.openFile("htmlCommentInScriptTag.htm", '<script>\n<!-- Hello! -->\n</script>', function(err, file) {
 			
@@ -728,7 +740,7 @@
 			
 		});
 	});
-
+	
 	
 	editor.addTest(function vbSingleIfThen(callback) {
 		editor.openFile("vbSingleIfThen.asp", '<%\nIF foo THEN bar = 1\n%>\n', function(err, file) {
@@ -774,7 +786,7 @@
 			if(grid[19].indentation != 1) throw new Error("grid[19].indentation=" + grid[19].indentation);
 			if(grid[20].indentation != 1) throw new Error("grid[20].indentation=" + grid[20].indentation);
 			if(grid[21].indentation != 0) throw new Error("grid[21].indentation=" + grid[21].indentation);
-
+			
 			editor.closeFile(file.path);
 			
 			callback(true);
@@ -865,7 +877,7 @@
 			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
 			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
 			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
-
+			
 			
 			editor.closeFile(file.path);
 			
@@ -887,7 +899,7 @@
 			
 		});
 	});
-
+	
 	editor.addTest(function singleQuoteStringEscape(callback) {
 		editor.openFile("singleQuoteStringEscape.js", "var str = 'ab\\'cd';\n", function(err, file) {
 			
@@ -1048,23 +1060,23 @@
 	
 	editor.addTest(function htmlTag(callback) {
 		editor.openFile("html", '<html>\n<head>\n<script type="text/javascript">\nfoo = 1;\n</script>\n</head>\n', function(err, file) {
-// Test if the parser switch to thml mode when a the <html tag is found
-var grid = file.grid;
-
-if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
-if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
-if(grid[3].indentation != 2) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			// Test if the parser switch to thml mode when a the <html tag is found
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 2) throw new Error("grid[3].indentation=" + grid[3].indentation);
 			if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
 			if(grid[5].indentation != 0) throw new Error("grid[5].indentation=" + grid[5].indentation);
 			
-editor.closeFile(file.path);
-
-callback(true);
-
-});
-});
-
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
+	});
+	
 	
 	editor.addTest(function parseXML(callback) {
 		editor.openFile("parseXML.xml", '<foo>\n<bar></bar>\n</foo>\n', function(err, file) {
@@ -1085,21 +1097,21 @@ callback(true);
 	
 	editor.addTest(function preHtml(callback) {
 		editor.openFile("preHtml.htm", '<pre></pre>\n<div>\nfoo\n</div>\n', function(err, file) {
-
-		var grid = file.grid;
-
-		if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-		if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
-		if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
-		if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
-
-		editor.closeFile(file.path);
-
-		callback(true);
-
+			
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 0) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 1) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 0) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
 		});
 	});
-
+	
 	editor.addTest(function indentArrInJson(callback) {
 		editor.openFile("indent_arr_in_json.js", '{\nlabel: "foo",\ndatasets: [\n{\nname: "Adam"\n},\n{\nname: "Eve"\n}\n]\n};\n', function(err, file) {
 			
@@ -1116,7 +1128,7 @@ callback(true);
 			if(grid[8].indentation != 2) throw new Error("grid[8].indentation=" + grid[8].indentation);
 			if(grid[9].indentation != 1) throw new Error("grid[9].indentation=" + grid[9].indentation);
 			if(grid[10].indentation != 0) throw new Error("grid[10].indentation=" + grid[10].indentation);
-
+			
 			editor.closeFile(file.path);
 			
 			callback(true);
@@ -1149,7 +1161,7 @@ callback(true);
 		editor.openFile("noRegExpInHtmlComment.htm", '<img src="foo"/><!-- comment -->', function(err, file) {
 			// .htm and .html files start with xmlMode on
 			var grid = file.grid;
-
+			
 			if(file.parsed.comments.length == 0) throw new Error("Expected at leat one comment");
 			
 			editor.closeFile(file.path);
@@ -1172,7 +1184,7 @@ callback(true);
 			if(grid[5].indentation != 1) throw new Error("grid[5].indentation=" + grid[5].indentation);
 			if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
 			if(grid[7].indentation != 0) throw new Error("grid[7].indentation=" + grid[7].indentation); 
-
+			
 			if(file.parsed.comments.length == 0) throw new Error("Expected at leat one comment");
 			
 			editor.closeFile(file.path);
@@ -1191,15 +1203,15 @@ callback(true);
 			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
 			if(grid[2].indentation != 0) throw new Error("grid[2].indentation=" + grid[2].indentation);
 			if(grid[3].indentation != 0) throw new Error("grid[4].indentation=" + grid[4].indentation);
-
+			
 			editor.closeFile(file.path);
 			
 			callback(true);
 			
 		});
 	});
-
-
+	
+	
 	editor.addTest(function findJsFunctions(callback) {
 		editor.openFile("functionInCallArgument.js", "foo(function bar() {});\nmeh\nfoo(function () {});\nfunction baz() {}", function(err, file) {
 			
@@ -1260,138 +1272,138 @@ callback(true);
 	
 	editor.addTest(function parseRegExp(callback) {
 		editor.openFile("regexp.js", "{\n/*\nblock comment\n*/\n'foo'.match(/\"/g);\n}", function(err, file) {
-				
-				// note: block comments are indented
-				
-				var grid = file.grid;
-				
-				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
-				if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
-				if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
-				if(grid[5].indentation != 0) throw new Error("grid[5].indentation=" + grid[5].indentation);
-
-				editor.closeFile(file.path);
-				
-				callback(true);
-				
-			});
+			
+			// note: block comments are indented
+			
+			var grid = file.grid;
+			
+			if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+			if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+			if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+			if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
+			if(grid[4].indentation != 1) throw new Error("grid[4].indentation=" + grid[4].indentation);
+			if(grid[5].indentation != 0) throw new Error("grid[5].indentation=" + grid[5].indentation);
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
+		});
 		
 	});
 	
 	/*
-	editor.addTest(function indentVarDeclarations(callback) {
+		editor.addTest(function indentVarDeclarations(callback) {
 		editor.openFile("indent_var.js", "{\nvar foo,\nbar;\nvar baz = {\nban:ana\n}\nvar bus = {};\n\n}\n", function(err, file) {
-				
-				var grid = file.grid;
-				
-				if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
-				if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
-				if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
-				if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
-				if(grid[4].indentation != 3) throw new Error("grid[4].indentation=" + grid[4].indentation);
-				if(grid[5].indentation != 2) throw new Error("grid[5].indentation=" + grid[5].indentation);
-				if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
-				if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
-				if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
-
-				editor.closeFile(file.path);
-				
-				callback(true);
-				
-			});
 		
-	});
+		var grid = file.grid;
+		
+		if(grid[0].indentation != 0) throw new Error("grid[0].indentation=" + grid[0].indentation);
+		if(grid[1].indentation != 1) throw new Error("grid[1].indentation=" + grid[1].indentation);
+		if(grid[2].indentation != 2) throw new Error("grid[2].indentation=" + grid[2].indentation);
+		if(grid[3].indentation != 1) throw new Error("grid[3].indentation=" + grid[3].indentation);
+		if(grid[4].indentation != 3) throw new Error("grid[4].indentation=" + grid[4].indentation);
+		if(grid[5].indentation != 2) throw new Error("grid[5].indentation=" + grid[5].indentation);
+		if(grid[6].indentation != 1) throw new Error("grid[6].indentation=" + grid[6].indentation);
+		if(grid[7].indentation != 1) throw new Error("grid[7].indentation=" + grid[7].indentation); 
+		if(grid[8].indentation != 0) throw new Error("grid[8].indentation=" + grid[8].indentation);
+		
+		editor.closeFile(file.path);
+		
+		callback(true);
+		
+		});
+		
+		});
 	*/
 	
 	editor.addTest(function testKeyBindingFunctions(callback) {
-			
-			var key_X = 88;
-			var key_Y = 89;
-			
-			editor.bindKey({charCode: key_X, combo: CTRL, fun: testMethod, desc: "Just testing"});
-			
-			editor.rebindKey("testMethod", key_Y, CTRL);
-			
-			var key = editor.getKeyFor("testMethod");
-			var expect = "CTRL + Y";
-			
-			if(key != expect) throw new Error("editor.getKeyFor returned: " + key + " expected: " + expect);
-			
-			editor.unbindKey("testMethod");
-			
-			callback(true);
-			
-			function testMethod() {}
-			
+		
+		var key_X = 88;
+		var key_Y = 89;
+		
+		editor.bindKey({charCode: key_X, combo: CTRL, fun: testMethod, desc: "Just testing"});
+		
+		editor.rebindKey("testMethod", key_Y, CTRL);
+		
+		var key = editor.getKeyFor("testMethod");
+		var expect = "CTRL + Y";
+		
+		if(key != expect) throw new Error("editor.getKeyFor returned: " + key + " expected: " + expect);
+		
+		editor.unbindKey("testMethod");
+		
+		callback(true);
+		
+		function testMethod() {}
+		
 	});
 	
-/*
-	editor.addTest(function openFileWhileAnotherIsLoading(callback) {
-			
-			// Open file from the internet (via HTTP)
-			
-			// Directly load another file (also with latency?)
-			
-	});
+	/*
+		editor.addTest(function openFileWhileAnotherIsLoading(callback) {
+		
+		// Open file from the internet (via HTTP)
+		
+		// Directly load another file (also with latency?)
+		
+		});
 	*/
 	
 	editor.addTest(function test_moveCaretToIndex(callback) {
 		editor.openFile("test_moveCaretToIndex.js", "\n\t\n  if(a==b) {\n     c=d;\n  }\n", function(err, file) {
-				
-				for(var i=0; i<file.text.length; i++) {
-					file.moveCaretToIndex(i);
-				}
-				
-				editor.closeFile(file.path);
-				
-				callback(true);
-				
-			});
+			
+			for(var i=0; i<file.text.length; i++) {
+				file.moveCaretToIndex(i);
+			}
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+			
 		});
+	});
 	
 	editor.addTest(function testTabAtBeginning(callback) {
 		editor.openFile("file_starts_with_tab", "\tfoo\nbar\nbaz", function(err, file) {
-				editor.closeFile(file.path);
-				
-				editor.openFile("file_starts_with_space", "   foo\nbar\nbaz", function(err, file) {
-					editor.closeFile(file.path);
-					
-					callback(true);
-				});
-				
-			});
-		});
-
-	editor.addTest(function selectText(callback) {
-		editor.openFile("testing_select", "", function(err, file) {
-				file.write("abc def ghi");
-				
-				file.select([file.grid[0][4], file.grid[0][5], file.grid[0][6]]); // select def
-				
-				if(file.selected.length != 3) throw new Error("Expected file.selected.length=" + file.selected.length + " to be 3.");
-				
-				file.select([file.grid[0][0], file.grid[0][1], file.grid[0][2], file.grid[0][3], file.grid[0][4], file.grid[0][5], file.grid[0][6], file.grid[0][7], file.grid[0][8], file.grid[0][9], file.grid[0][10]]); // select all
-				
-				if(file.selected.length != 8) throw new Error("Expected file.selected.length=" + file.selected.length + " to be 8.");
-				
+			editor.closeFile(file.path);
+			
+			editor.openFile("file_starts_with_space", "   foo\nbar\nbaz", function(err, file) {
 				editor.closeFile(file.path);
 				
 				callback(true);
 			});
+			
 		});
+	});
+	
+	editor.addTest(function selectText(callback) {
+		editor.openFile("testing_select", "", function(err, file) {
+			file.write("abc def ghi");
+			
+			file.select([file.grid[0][4], file.grid[0][5], file.grid[0][6]]); // select def
+			
+			if(file.selected.length != 3) throw new Error("Expected file.selected.length=" + file.selected.length + " to be 3.");
+			
+			file.select([file.grid[0][0], file.grid[0][1], file.grid[0][2], file.grid[0][3], file.grid[0][4], file.grid[0][5], file.grid[0][6], file.grid[0][7], file.grid[0][8], file.grid[0][9], file.grid[0][10]]); // select all
+			
+			if(file.selected.length != 8) throw new Error("Expected file.selected.length=" + file.selected.length + " to be 8.");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+		});
+	});
 	
 	editor.addTest(function fileWrite(callback) {
 		editor.openFile("testing_write", "Line1\nLine2\nLine3\n", function(err, file) {
-				file.write("Hello");
-				file.write(" world!\nYou are great!");
-				
-				editor.closeFile(file.path);
-				
-				callback(true);
-			});
+			file.write("Hello");
+			file.write(" world!\nYou are great!");
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
 		});
+	});
 	
 	
 	function existFunctionWithName(functions, name) {
