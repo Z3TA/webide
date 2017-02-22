@@ -1,3 +1,7 @@
+'
+' This script will create a shortcut to the editor on the user desktop
+'
+
 Dim fso, shell, linkPath, shortCut, desktopPath
 
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -10,7 +14,7 @@ linkPath = fso.BuildPath(desktopPath, "JZedit.LNK") ' Place link on desktop
 Set shortCut = shell.CreateShortcut(linkPath)
 
 shortCut.TargetPath =  fso.BuildPath(workingPath, "start.bat")
-'  shortCut.Arguments = ""
+shortCut.Arguments = "restart"
 '  shortCut.Description = "JZedit"
 '  shortCut.HotKey = "ALT+CTRL+J"
 shortCut.IconLocation = fso.BuildPath(workingPath, "favicon.ico") '"C:\Program Files\MyApp\MyProgram.EXE, 2"
