@@ -1355,12 +1355,16 @@ var File; // File object is global
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
 		
+		// This function currently don't know how to handle removing text that starts or ends with a line break! (it would result in a bug, where not all lines are removed)
+		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") throw new Error("firstIndex=" + firstIndex + " can not be on a line break!");
+		if(file.text.charAt(lastIndex) == "\r" || file.text.charAt(lastIndex) == "\n") throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
+		
+		/*
 		if(firstIndex > 0) {
 			if(file.text.charAt(firstIndex-1) == "\r" && file.text.charAt(firstIndex) == "\n") throw new Error("firstIndex=" + firstIndex + " is between a CR and LF!");
 		}
-		if(lastIndex < file.text.length) {
-			if(file.text.charAt(lastIndex+1) == "\n" && file.text.charAt(lastIndex) == "\r") throw new Error("lastIndex=" + lastIndex + " is between a CR and LF!");
-		}
+		if(file.text.charAt(lastIndex) == "\r") throw new Error("lastIndex=" + lastIndex + " is between a CR and LF!");
+		*/
 		
 		var grid = file.grid;
 		var deletionLength = lastIndex - firstIndex;
@@ -1372,7 +1376,7 @@ var File; // File object is global
 		
 		console.time("deleteTextRange");
 		
-		var removedText = file.text.substring(firstIndex, lastIndex+1);
+		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
 		
 		file.text = deletePart(file.text, firstIndex, lastIndex);
 		
@@ -1450,7 +1454,8 @@ var File; // File object is global
 					count = grid[first.row].length - first.col;
 					
 					while(count--) {
-						console.log("pop:" + grid[first.row].pop());
+						if(editor.devMode) console.log("pop:" + JSON.stringify(grid[first.row].pop()));
+						else grid[first.row].pop();
 					}
 				}
 				
@@ -1656,7 +1661,7 @@ var File; // File object is global
 		function visualizeTextRange(txt, start, end) {
 			
 			txt = txt.replace(/\n|\r/g, "#"); // Replace line feeds and carage returns with # to make them easier to count
-			txt = txt.replace(/t/g, "→");
+			txt = txt.replace(/\t/g, "→");
 			
 			console.log("TextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
 			
@@ -2801,7 +2806,7 @@ var File; // File object is global
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 		
-		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + lbChars(file.lineBreak) + "...");	
+		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + lbChars(file.lineBreak) + " ...");	
 		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;

@@ -33,8 +33,18 @@
 	*/
 	
 	editor.addTest(function testDeleteTextRangeWithLongText(callback) {
-		// Testing File.deleteTextRange()
-		editor.openFile("testDeleteTextRangeWithLongText.html", '', function(err, file) {
+		editor.openFile("testDeleteTextRangeWithLongText.html", '<!DOCTYPE html>\r\n<div class="wrap1">\r\n\t<div class="content">\r\n\t\t\r\n\t\t<p>Esse proident dolore cupidatat in dolor reprehenderit irure nostrud eu.\r\n\t\tMollit voluptate pariatur cillum enim voluptate excepteur amet non.\r\n\t\tEnim duis irure dolore laborum quis mollit adipisicing labore excepteur fugiat dolor esse reprehenderit sunt excepteur.\r\n\t\tMollit ad laboris ad nulla dolor sint do nostrud exercitation dolore nostrud mollit.</p>\r\n\t\t\r\n\t</div>\r\n</div>\r\n', function(err, file) {
+			
+			var start = 62;
+			var stop = 429;
+			
+			stop -= 2; // The fix was to not allow deleteTextRange end to include a line break
+			
+			console.log("text=" + lbChars(file.text.substring(start, stop+1)));
+			
+			file.deleteTextRange(start,stop);
+			
+			// Uncaught Error: grid[3].startIndex=64 Expected startIndex=index=62
 			
 			editor.closeFile(file.path);
 			
@@ -63,6 +73,10 @@
 			editor.on("fileChange", change);
 			var charsAfter = ""; // Will update in change
 			var charactersDeleted = "";
+			
+			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18);
+			
+			test("{@#→abc@#→def@#}", 4,12);
 			
 			test("abc#def##", 0,6);
 			
@@ -140,7 +154,7 @@
 			
 		});
 		
-	}, 1);
+	});
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {
