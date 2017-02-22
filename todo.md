@@ -41,9 +41,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Fix annoying stuff with xml parser
+Debugging deleteTextRange, seems to be an bug with CrLf (windows) line breaks.
 
-Fix word wrap function to work on html
+Fixing word wrap function ...
 
 
 todo:
@@ -214,6 +214,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+linux ftp file names with åäö get scramled
 
 colors keep getting off in svg (xml-parser) files.
 
@@ -1178,6 +1180,8 @@ Implement angel-wing/block variables (let, const) in the parser for smart auto-c
 Figure out when indentation in the sourfe file goes bad and prevent it
 
 Preserve (manual) indentation inside block comments and pre tags !?
+
+Auto complete xml tags! (in xml/svg files)
 
 
 Optimization

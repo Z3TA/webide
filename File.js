@@ -1355,6 +1355,13 @@ var File; // File object is global
 		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
 		
+		if(firstIndex > 0) {
+			if(file.text.charAt(firstIndex-1) == "\r" && file.text.charAt(firstIndex) == "\n") throw new Error("firstIndex=" + firstIndex + " is between a CR and LF!");
+		}
+		if(lastIndex < file.text.length) {
+			if(file.text.charAt(lastIndex+1) == "\n" && file.text.charAt(lastIndex) == "\r") throw new Error("lastIndex=" + lastIndex + " is between a CR and LF!");
+		}
+		
 		var grid = file.grid;
 		var deletionLength = lastIndex - firstIndex;
 		
