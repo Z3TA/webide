@@ -1,10 +1,29 @@
-editor.bindKey({
-	charCode: 87, 
-	combo: CTRL, 
-	fun: function wordWrap(file, combo, character, charCode, direction, targetElementClass) {
+(function() {
+	"use strict";
+
+	// Add plugin to editor
+	editor.plugin({
+		desc: "Word wrap text to fit inside line length limit",
+		load: load,
+		unload: unload,
+	});
+	
+	function load() {
+		editor.bindKey({
+			charCode: 87,
+			combo: CTRL,
+			fun: wordWrap
+		});
+	}
+	
+	function unload() {
+		editor.unbindKey(wordWrap);
+	}
+
+	function wordWrap(file) {
 		"use strict";
 		
-		alertBox("wordWrap text");
+		//alertBox("wordWrap text");
 		
 		var maxTextWidth = editor.view.visibleColumns;
 		var space = " ";
@@ -13,59 +32,96 @@ editor.bindKey({
 		
 		if(!file) return true;
 		
+		console.log("file.lineBreak=" + lbChars(file.lineBreak));
+		
 		// Find the paragraph
 		var lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
 		var startOfParagraph = -1;
 		var endOfParagraph = -1;
 		// Search right for double line breaks
-		for(var i=Math.max(file.caret.index, 1); i<file.text.length; i++) {
-			if(file.text.charAt(i) == lastLineBreakCharacter) {
-				if(file.text.charAt(i-file.lineBreak.length) == lastLineBreakCharacter) {
-					// blablaRNRN or blablaNN
-					endOfParagraph = i - file.lineBreak.length * 2 - 0; // Do not select the line breaks
+		lbloop: for(var char, charInBtwLbs, i=Math.max(file.caret.index, 1); i<file.text.length; i++) {
+			char = file.text.charAt(i)
+			if(char == lastLineBreakCharacter) {
+				
+				// Two line breaks after each other is the end of a paragraph
+				if(charInBtwLbs.trim() == "") {
+					
 					break;
 				}
+				
+				charInBtwLbs = "";
+				
+				// endOfParagraph will be before the first of the two line breaks, due to the break
+				endOfParagraph = i - file.lineBreak.length; // Do not include the line break
+				
 			}
+			else charInBtwLbs += char;
 		}
 		
 		if(endOfParagraph == -1) {
-			console.log("Did not find end of paragraph");
-			return true;
+			alertBox("Did not find end of paragraph");
+			return false;
 		}
 		
 		// Search left to find two double breaks
-		for(var i=Math.max(file.caret.index, 1); i>1; i--) {
-			if(file.text.charAt(i) == lastLineBreakCharacter) {
-				if(file.text.charAt(i-file.lineBreak.length) == lastLineBreakCharacter) {
+		for(var char, charInBtwLbs, i=Math.max(file.caret.index, 1); i>1; i--) {
+			char = file.text.charAt(i)
+			if(char == lastLineBreakCharacter) {
+				
+				if(charInBtwLbs.trim() == "") {
 					startOfParagraph = i+1;
 					break;
 				}
-			}
+				charInBtwLbs = "";
+				
+		}
+			else charInBtwLbs += char;
 		}
 		
 		if(startOfParagraph == -1) {
-			console.log("Did not find start of paragraph");
-			return true;
+			alertBox("Did not find start of paragraph");
+			return false;
 		}
 		
-		var text = file.text.substring(startOfParagraph, endOfParagraph);
+		console.log("startOfParagraph=" + startOfParagraph);
+		console.log("endOfParagraph=" + endOfParagraph);
+		
+		var text = file.text.substring(startOfParagraph, endOfParagraph+1);
+		
+		text = text.trim();
 		
 		// Make sure it's text or html and not code
-		if(text.indexOf("{") != -11) {
-			console.warn("Not word wrapping (not plain text) text=" + text);
-			return;
+		if(text.indexOf("{") != -1) {
+			alertBox("Not word wrapping (not plain text) text=" + text);
+			return false;
 		}
 		
-		var firstCharacter = file.text.charAt(startOfParagraph);
-		var secondCharacter = file.text.charAt(startOfParagraph+1);
+		var firstCharacter = text.charAt(0);
+		var secondCharacter = text.charAt(1);
+		var lastCharacter = text.charAt(text.length-1);
 		
 		if(firstCharacter != "<" && secondCharacter != "p" && file.mode != "text") {
-			console.log("The word wrapper is currently only supported inside HTML paragraphs or in plain text files");
-			return true;
+			alertBox("The word wrapper is currently only supported inside HTML paragraphs or in plain text files");
+			console.log("firstCharacter=" + firstCharacter);
+			console.log("secondCharacter=" + secondCharacter);
+			console.log("file.mode=" + file.mode);
+			console.log("startOfParagraph=" + startOfParagraph);
+			console.log("endOfParagraph=" + endOfParagraph);
+			console.log("text=" + lbChars(text));
+			return false;
 		}
 		
-		//console.log( "First character: " + debugWhiteSpace(file.text.charAt(startOfParagraph)) );
-		//console.log( "Last character: " + debugWhiteSpace(file.text.charAt(endOfParagraph)) );
+		if(firstCharacter == "<") {
+			if(lastCharacter != ">") {
+				alertBox("Paragraph must have an ending tag!");
+				console.log("firstCharacter=" + firstCharacter);
+				console.log("lastCharacter=" + lastCharacter);
+				console.log("text=" + lbChars(text));
+				return false;
+			}
+		}
+		
+		console.log( "paragraph=text=: " + text);
 		
 		//return false;
 		
@@ -80,19 +136,37 @@ editor.bindKey({
 		
 		//console.log("file.caret=" + JSON.stringify(file.caret));
 		
+		//file.debugGrid();
+		file.checkGrid();
+		
 		file.deleteTextRange(startOfParagraph, endOfParagraph);
 		
 		var textLengthBefore = text.length;
+		
+		file.checkGrid();
 		
 		//file.debugGrid();
 		
 		text = wordWrapText(text, maxTextWidth - indentation * editor.settings.tabSpace);
 		var textLengthAfter = text.length;
 		
-		//console.log("text='" + debugWhiteSpace(text) + "'");
+		console.log("text='" + debugWhiteSpace(text) + "'");
+		
+		
+		// Sanity check: The text should still start and end with the same characters!
+		if(text.charAt(0) != firstCharacter) throw new Error("First character is not the same before and after! " + text.charAt(0) + " != " + firstCharacter);
+		if(text.charAt(text.length-1) != lastCharacter) throw new Error("Last character is not the same before and after! " + text.charAt(text.length-1) + " != " + lastCharacter);
+
+		
+		// deleteTextRange trims the line breaks, so insert them again!
+		file.insertLineBreak();
 		
 		file.insertText(text, file.caret);
 		
+		file.insertLineBreak();
+		
+		
+		// Find out where to move the caret ... it should stay at the same place in the text!
 		var textLengthDiff = textLengthBefore - textLengthAfter;
 		console.log("textLengthDiff=" + textLengthDiff);
 		// Place the caret where it was in the text
@@ -107,9 +181,13 @@ editor.bindKey({
 				file.moveCaretToIndex(i);
 				break;
 			}
-}
+		}
 		
 		if(file.startColumn > 0) file.scrollTo(0, file.startRow); // Scroll to the left
+		
+		editor.renderNeeded();
+		
+		//alertBox("Text word wrapped!");
 		
 		return false;
 		
@@ -226,7 +304,31 @@ editor.bindKey({
 			 
 			
 			return text;
-}
+		}
+		
 		
 	}
-})
+	
+	editor.addTest(function testWordWrapText(callback) {
+		
+		var before = '<!DOCTYPE html>\r\n<div class="wrap1">\r\n\t<div class="content">\r\n\t\t\r\n\t\t<p>Esse proident dolore cupidatat in dolor reprehenderit irure nostrud eu.\r\n\t\tMollit voluptate pariatur cillum enim voluptate excepteur amet non.\r\n\t\tEnim duis irure dolore laborum quis mollit adipisicing labore excepteur fugiat dolor esse reprehenderit sunt excepteur.\r\n\t\tMollit ad laboris ad nulla dolor sint do nostrud exercitation dolore nostrud mollit.</p>\r\n\t\t\r\n\t</div>\r\n</div>\r\n';
+		//var expectedAfter = '<!DOCTYPE html>\r\n<div class="wrap1">\r\n\t<div class="content">\r\n\t\t\r\n\t\t        \r\n\t\t\r\n\t</div>\r\n</div>\r\n';
+		
+		editor.openFile("testWordWrapText.html", before, function(err, file) {
+			
+			var row = 3, col = 0;
+			file.moveCaret(undefined, row, col);
+			
+			wordWrap(file);
+			
+			
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+		});
+	}, 1);
+	
+	
+	
+})();

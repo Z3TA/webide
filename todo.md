@@ -41,9 +41,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Debugging deleteTextRange, seems to be an bug with CrLf (windows) line breaks.
 
-Fixing word wrap function ...
 
 
 todo:
