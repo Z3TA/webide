@@ -36,6 +36,7 @@ editor.settings = {
 	"div", 
 	"ul", 
 	"ol", 
+		"li", 
 	"head", 
 	"script", 
 	"style", 
