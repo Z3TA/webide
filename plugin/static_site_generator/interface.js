@@ -2266,14 +2266,12 @@
 			
 			// Get the URL of the page/file in preview
 			var url = previewWin.window.location.href;
-			var previePath = url;
+			var previePath = localFilePath(url, site);
 			var rawMainHtml = "";
 			var srcHTML = "";
-			var systemPathDelimiter = getPathDelimiter(process.cwd());
-			var sourceFilePath = url.replace("file://", "");
-			while(sourceFilePath.substr(0,1) == "/") sourceFilePath = sourceFilePath.substr(1); // In Windows there are three slashes in file:/// but in Linux it's only two!
-			sourceFilePath = sourceFilePath.replace(/\//g, systemPathDelimiter);
-			if(site.source.substr(0,1) == "/") sourceFilePath = "/" + sourceFilePath; // Add the root slash
+			
+			var sourceFilePath = localFilePath(url, site);
+			
 			sourceFilePath = sourceFilePath.replace(site.preview, site.source);
 			
 			console.log("url=" + url);
@@ -2288,7 +2286,6 @@
 			
 			// Get the source code for the compiled page in review, in order to compute ignoreTransform
 			
-			// ENOENT: no such file or directory, open 'C:\C:\Users\Z\de
 			editor.readFromDisk(previePath, function gotPreviewSource(err, path, txt) {
 				
 				if(err) throw err;
@@ -2316,6 +2313,20 @@
 			else {
 				editor.openFile(sourceFilePath, undefined, makeItEditable);
 			}
+			
+			function localFilePath(path, site) {
+				console.log("fixPath path=" + path);
+				var systemPathDelimiter = getPathDelimiter(process.cwd());
+				
+				path = path.replace("file://", "");
+				
+				while(path.substr(0,1) == "/") path = path.substr(1); // In Windows there are three slashes in file:/// but in Linux it's only two!
+				path = path.replace(/\//g, systemPathDelimiter);
+				if(site.source.substr(0,1) == "/") path = "/" + path; // Add the root slash
+				
+				console.log("fixPath return path=" + path);
+				return path;
+				}
 			
 			function makeItEditable(err, file) {
 				
