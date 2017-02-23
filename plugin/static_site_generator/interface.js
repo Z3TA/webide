@@ -146,6 +146,8 @@
 		
 		//alertBox("UNloading");
 		
+		httpServer.close();
+		
 		editor.removeMenuItem(menuItem);
 		
 		SSG_cleanup(); // closePreview();
@@ -167,8 +169,6 @@
 			footer.removeChild(manager);
 			editor.resizeNeeded();
 		}
-		
-		httpServer.close();
 		
 	}
 	
