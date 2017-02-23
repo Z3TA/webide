@@ -1314,6 +1314,9 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+Static site generator: Make it possible to shedule publishing posts in the future using the <meta name="created" content="2016-03-22"> meta tag.
+
+
 Mercurial SCM integration!
 Add file.hg.modified, etc to File object. Show hg status in file tabs and file explorer. Merge tool!
 
