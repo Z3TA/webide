@@ -11,8 +11,8 @@
 .filetype {
 font-size-adjust: 0.58;
 fill: #5993ed;
-font-family: Arial;
-font-size: 10px;
+font-family: monospace, Arial;
+font-size: 15px;
 font-weight: bold;
 }
 
@@ -53,6 +53,6 @@ M 5 24 L6 24 M7 24 L9 24 M9 24 L12 24 M13 24 L18 24"/>
 
 <line class="shadow2" x1="26" y1="2" x2="26" y2="30" />
 
-<text class="filetype" x="13" y="18" text-anchor="middle">&lt; &gt;</text>
+<text class="filetype" x="13" y="19" text-anchor="middle">&lt;&gt;</text>
 
 </svg>

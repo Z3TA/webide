@@ -5,9 +5,9 @@
 		todo: File watcher, update the list when file change names, or are created/removed
 		(currently you can refresh the file lists by hiding and then showing it)
 		
-		▶
+		▶ (too big)
 		▼
-		►
+		► (use this)
 	*/
 	
 	var fileExplorerFolders;
@@ -284,8 +284,8 @@
 				var type = "";
 			var filetype = getFileExtension(item.path);
 			
-			icon.setAttribute("width", "20");
-			icon.setAttribute("height", "20");
+			icon.setAttribute("width", "22");
+			icon.setAttribute("height", "22");
 			icon.setAttribute("onerror", "this.src='gfx/icon/doc.svg'");
 			
 				// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
@@ -327,10 +327,17 @@
 				else {
 					li.setAttribute("class", type); 
 				
-				icon.setAttribute("src", "gfx/icon/" + filetype + ".svg");
+				var iconName = filetype;
+				if(iconName == "htm") iconName = "html";
 				
-				icon.setAttribute("width", "22");
-				icon.setAttribute("height", "22");
+				icon.setAttribute("src", "gfx/icon/" + iconName + ".svg");
+				
+				if(editor.supportedFiles.indexOf(filetype.toLowerCase()) == -1) {
+					icon.setAttribute("style", "opacity: 0.5;");
+				}
+				
+				//icon.setAttribute("width", "22");
+				//icon.setAttribute("height", "22");
 				
 					li.addEventListener("click", function() {
 						openFile(li);
