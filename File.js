@@ -4353,7 +4353,7 @@ var File; // File object is global
 		
 		
 		function sortByFrequencyAndRemoveDuplicates(array) {
-			console.log("sorting array=" + JSON.stringify(array));
+			//console.log("sorting array=" + JSON.stringify(array));
 			var frequency = {}, value;
 			
 			// compute frequencies of each value
@@ -4365,14 +4365,14 @@ var File; // File object is global
 				else {
 					frequency[value] = 1;
 				}
-				console.log(i);
+				//console.log(i);
 			}
 			
 			// make array from the frequency object to de-duplicate
 			var uniques = [];
 			for(value in frequency) {
 				uniques.push(value);
-				console.log(value);
+				//console.log(value);
 			}
 			
 			// sort the uniques array in descending order by frequency
