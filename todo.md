@@ -41,7 +41,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Make the file explorer look better ...
+Ability to WYSIWYG-edit normal web pages
 
 
 todo:

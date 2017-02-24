@@ -2753,7 +2753,7 @@ var File; // File object is global
 	}
 	
 	File.prototype.reload = function(text) {
-		// ex: Re-open the file in another encoding
+		// Used for example in reopening the file in another encoding
 		
 		var file = this;
 		
@@ -2766,6 +2766,8 @@ var File; // File object is global
 		
 		file.grid = file.createGrid(); 
 		file.caret = file.createCaret(0,0,0);
+		
+		file.checkGrid();
 		
 		editor.renderNeeded();
 		
