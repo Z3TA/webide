@@ -3150,7 +3150,13 @@ editor.lastKeyPressed = "";
 						var list = [];
 						var path = "";
 						var type = "";
+						
+						//console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
+						
 						for(var i=0; i<folderItems.length; i++) {
+							
+							//console.log("name=" + folderItems[i].name);
+							
 							path = pathToFolder + folderItems[i].name;
 							type = folderItems[i].type;
 							
