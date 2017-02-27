@@ -44,6 +44,7 @@ What I'm working on
 Ability to WYSIWYG-edit normal web pages
 
 
+
 todo:
 
 ENOENT: no such file or directory, open 'C:\C:\Users\Z\de
@@ -1313,6 +1314,15 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 ------------------------------------
+
+In plenty editors, doing left-alt (left option) and selecting text will take a slice of that text:
+Notice that only characters are selected, empty lines are ignored. Also, after selecting with left-alt, there should be multi-cursors at the end of each selection:
+https://github.com/atom/atom/issues/2306
+
+
+Show invisible characters when selecting text ?
+
+Select the code block when tripple clicking ?
 
 Static site generator: Make it possible to shedule publishing posts in the future using the <meta name="created" content="2016-03-22"> meta tag.
 
