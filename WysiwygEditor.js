@@ -3,82 +3,146 @@ var WysiwygEditor;
 (function() {
 	"use strict";
 
-	WysiwygEditor = function WysiwygEditor(file, bodyTag) {
+	var wysiwygEditorCounter = 0; // WysiwygEditor instances
+	
+	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTag) {
 	var wysiwygEditor = this;
 	
-		if(!file) throw new Error("file=" + file);
+		wysiwygEditorCounter++;
+		
+		if(!sourceFile) throw new Error("sourceFile=" + sourceFile);
 		
 		wysiwygEditor.bodyTag = bodyTag || "body";
 		
-		wysiwygEditor.sourceFile = file;
+		wysiwygEditor.ignoreTransform = null; // computeIgnoreTransform(srcHTML, rawMainHtml)
+		
+		wysiwygEditor.sourceFile = sourceFile;
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
 		
 	// Make sure file is a HTML file
-	if(!isHTML(file)) throw new Error("file (" + getFilenameFromPath(file.path) + ") is not a HTML file!");
+		if(!isHTML(sourceFile)) throw new Error("sourceFile (" + getFilenameFromPath(sourceFile.path) + ") is not a HTML file!");
 	
-	var previewWin = window.open("", "previewWin", "width=350,height=150");
-	//previewWin.document.write("Here's your popup!");
-	
+		// Decide window width, height and placement ...
+		var windowPadding = 0;
+		var unityLeftThingy = 10;
+		var previeWidth = Math.round(screen.width / 3.5) - windowPadding * 2;
+		var previewHeight = screen.height - windowPadding * 2;
+		var posX = screen.width - previeWidth - windowPadding;
+		var posY = windowPadding;
+		
+		
+		// Can not use require if using window.open! 
+		//var previewWin = window.open("", "previewWin", "width=" + previeWidth + ",height=" + previewHeight + "");
+		var gui = require('nw.gui'); // nw.js UI library
+		var url = "about:blank";
+		var previewWin = gui.Window.open(url, {toolbar:true, frame:true, width: previeWidth, height: previewHeight});
+		// Show the toolbar so you can see the URL, and open dev tools
+		
+		// KANSKE INTE BEHÖVER ANV'NDA NW.GUI '
+		
 		wysiwygEditor.previewWin = previewWin;
 		
-		// previewWin.document.innerHTML dont work!
-		previewWin.document.write(file.text);
+		// previewWin.document.innerHTML dont work with window.open!
 		
-		var body = previewWin.document.body;
-		
-		var prevBodyHtml = body.innerHTML;
-		var text = file.text;
-		
-		// Make sure the source code body and the pewview body is the same (tbody etc will be insterd!)
-		console.log("prevBodyHtml=" + prevBodyHtml);
-		
-		// Use the same line breaks
-		var lineBreak = determineLineBreakCharacters(prevBodyHtml);
-		var regCurrentLineBreaks = new RegExp(file.lineBreak, "g");
-		text = text.replace(regCurrentLineBreaks, lineBreak);
-		
-		console.log("file.lineBreak=" + lbChars(file.lineBreak));
-		console.log("lineBreak=" + lbChars(lineBreak));
-		
-		console.log("text=" + lbChars(text));
-		
-		text = file.text.replace(/<body(.*)>([\s\S]*)<\/body>/i, "<body$1>" + prevBodyHtml + "</body>");
-		
-		file.reload(text);
+		// nw.js gui is async! (can't acess previewWin.window right away)
+		previewWin.on("loaded", previewWinLoaded);
 		
 		
-		editor.on("fileChange", function wysiwygEditorSourceFileChange(file, type, characters, caretIndex, row, col) {
-			wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
-		});
-		
-		
-	body.setAttribute("contenteditable", "true");
 	
-		body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
-		body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
-		body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
-		
-		body.input = function(e) {wysiwygEditor.previewInput(e)};
-		
-	// Decide window width, height and placement ...
-	var windowPadding = 0;
-	var unityLeftThingy = 10;
-	var previeWidth = Math.round(screen.width / 3.5) - windowPadding * 2;
-	var previewHeight = screen.height - windowPadding * 2;
-	var posX = screen.width - previeWidth - windowPadding;
-	var posY = windowPadding;
-	
-	previewWin.moveTo(posX, posY);
-	previewWin.resizeTo(previeWidth, previewHeight);
-	
-	
-	
-	// Resize the editor
-		var editorCodeWindow = window; // gui.Window.get();
-	
-		editorCodeWindow.moveTo(0, 0);
-		editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
-	
+		function previewWinLoaded() {
+			//var doc = previewWin.document;
+			
+			var win = previewWin.window;
+			var doc = win.document; // previewWin.document is not available in nw.js gui
+			
+			// We need to dance to make sure source code and content-editable code is the same ...
+			
+			var text = sourceFile.text;
+			
+			console.log("(original) text=" + lbChars(text));
+			
+			// 1. Write the text to the content-editable
+			doc.write(text);
+			
+			// 2. Get the text from content-editable, (tbody, and other html "fixes" might have been inserted)
+			var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
+			var prewBodyHtml = body.innerHTML;
+			
+			console.log("(after write) prewBodyHtml=" + lbChars(prewBodyHtml));
+			
+			// 3. Use the contenteditable line break convention in the source file to make life easier
+			var lineBreak = determineLineBreakCharacters(prewBodyHtml);
+			if(lineBreak != sourceFile.lineBreak) {
+			var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
+			text = text.replace(regCurrentLineBreaks, lineBreak);
+				}
+			
+			// 4. Replace the the content of the body element with the content-editable code
+			text = setSourceCodeBody(text, prewBodyHtml);
+			
+			
+			sourceFile.reload(text);
+			
+			// 5. Finally make the body of the source file the body of the content-editable
+			var srcHTML = getSourceCodeBody(sourceFile);
+			body.innerHTML = srcHTML;
+			
+			// The source code and content-editable should now have the same line breaks!
+			
+			console.log("(after) srcHTML=" + lbChars(srcHTML));
+			
+			// The source code and content editable code should now be the same!
+			if(body.innerHTML != srcHTML) {
+				throw new Error("Source code does not match!\n \
+				body.innerHTML=" + lbChars(body.innerHTML) + "\n\n\
+				srcHTML=" + lbChars(srcHTML) + "\n\n\
+				diff=" + JSON.stringify(textDiff(body.innerHTML, srcHTML, null, 2)));
+			}
+			
+			sourceFile.checkGrid();
+			
+			body.setAttribute("contenteditable", "true");
+			
+			
+			body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
+			body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
+			body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
+			body.onpaste = function(e) {wysiwygEditor.previewPase(e)};
+			
+			// body.input doesn't work on nw.js gui, has to use window instead
+			//body.input = function(e) {wysiwygEditor.previewInput(e)};
+			body.oninput = function(e) {wysiwygEditor.previewInput(e)};
+			//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
+			
+			
+			// fileChange wants an uniqe function name ...
+			console.log("Unique function name for fileChange event:");
+			var name = "wysiwygEditor" + wysiwygEditorCounter;
+			var customAction = function(file, type, characters, caretIndex, row, col) {
+				wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
+			}
+			var func = new Function("action", "return function " + name + "(file, type, characters, caretIndex, row, col){ action(file, type, characters, caretIndex, row, col) };")(customAction);
+			editor.on("fileChange", func);
+				
+			// Remove the fileChange event listener when closing the content-editable window
+			previewWin.window.onbeforeunload = function() {
+				editor.removeEvent("fileChange", func);
+			};
+			
+				
+				previewWin.moveTo(posX, posY);
+				previewWin.resizeTo(previeWidth, previewHeight);
+				
+				
+				
+				// Resize the editor
+				var editorCodeWindow = window; // gui.Window.get();
+				
+				editorCodeWindow.moveTo(0, 0);
+				editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+				
+				previewWin.focus();
+			}
 	
 }
 
@@ -142,7 +206,7 @@ WysiwygEditor.prototype.getCaretPosition = function getCaretPosition() {
 		
 	}
 	
-WysiwygEditor.prototype.placeCaret = function placeCaret(previewWin, x, y, charPos) {
+	WysiwygEditor.prototype.placeCaret = function placeCaret(x, y, charPos) {
 	var wysiwygEditor = this;
 	var previewWin = wysiwygEditor.previewWin;
 	
@@ -150,7 +214,7 @@ WysiwygEditor.prototype.placeCaret = function placeCaret(previewWin, x, y, charP
 		var element = doc.elementFromPoint(x, y);
 		var childNode = element.childNodes[0]; // The text node
 		
-		return placeCaretOnTextNode(childNode, charPos);
+		return wysiwygEditor.placeCaretOnTextNode(childNode, charPos);
 		}
 	
 WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(node, charPos) {
@@ -196,6 +260,8 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 			
 			console.log("Update wysiwyg for file.path=" + file.path);
 			
+			// if type=reload need to redo dance
+			
 			//if(updatePreviewOnChange) clearTimeout(updatePreviewOnChange);
 			
 			// Delay updating so that we do not render broken tags etc and save some battery
@@ -207,13 +273,17 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 			
 			var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
 			
-			//var prevBodyHtml = body.innerHTML;
+			//var prewBodyHtml = body.innerHTML;
 			var srcHTML = getSourceCodeBody(sourceFile);
+			
+			// Can not change the file in a fileChange event or it would create an endless loop
+			// Witch means we can not sanitize on source code changes,
+			// witch also means we can not sanitize on content-editable canges!
 			
 			body.innerHTML = srcHTML;
 			
-			// Using innerHTML makes the caret dissappear. Place it again ...
-			// Find out the tag and if we are near text, find the tag in wysiwyg
+			// Setting innerHTML makes the caret disappear. Place it again ...
+			// Find out the tag and if we are near text, then find the tag in content-editable
 			
 			var index = file.caret.index;
 			
@@ -307,6 +377,26 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 		console.log(e.target);
 	}
 	
+	WysiwygEditor.prototype.previewPaste = function previewPaste(e) {
+		var wysiwygEditor = this;
+		
+		console.log("previewPaste!");
+		
+		var html = e.clipboardData.getData('text/html');
+		
+		e.preventDefault();
+		
+		var cleaned = html;
+		
+		cleaned = sanitizeOfficeDoc(cleaned);
+		
+		cleaned = sanitize(cleaned, wysiwygEditor.sourceFile.lineBreak);
+		
+		
+		contentEditor.execCommand("insertHTML", aShowDefaultUI, cleaned);
+		
+	}
+	
 	WysiwygEditor.prototype.previewInput = function previewInput(e) {
 		var wysiwygEditor = this;
 		
@@ -316,10 +406,14 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 		console.log("previewInput!");
 		
 		var sourceFile = wysiwygEditor.sourceFile;
+		var previewWin = wysiwygEditor.previewWin;
+		var ignoreTransform = wysiwygEditor.ignoreTransform;
 		
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile)
 		else if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
 		else {
+			
+			sourceFile.checkGrid();
 			
 			if(sourceFile != editor.currentFile) {
 				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
@@ -333,7 +427,7 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 			else {
 				
 				var body = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTag)[0];
-				var prevBodyHtml = body.innerHTML; //previewWin.window.document.body.innerHTML;
+				var prewBodyHtml = body.innerHTML; //previewWin.window.document.body.innerHTML;
 				
 				/*
 					problem 1: Contenteditable produce mangled/garbled HTML code.
@@ -346,43 +440,9 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 					
 				*/
 				
-				var sanitized = insertLineBreaks(prevBodyHtml);
-				
-				if(sanitized == prevBodyHtml) console.log("No white space sanitiaztion needed");
-				else {
-					
-					console.log("prevBodyHtml=\n" + debugWhiteSpace(prevBodyHtml) + "\n");
-					
-					console.log("sanitized=\n" + debugWhiteSpace(sanitized) + "\n");
-					
-					/*
-						Problem: contenteditable will lose the caret when the html is updated,
-						this is very annoying when typing as the cursor jumps
-						
-						solution: Set the caret again using the selection API
-					*/
-					
-					var caretPosition = wysiwygEditor.getCaretPosition();
-					
-					body.innerHTML = sanitized;
-					
-					prevBodyHtml = body.innerHTML;
-					
-					console.log("caretPosition: " + JSON.stringify(caretPosition));
-					
-					wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
-					
-					//sourceFile.replaceText(srcHTML, sanitized);
-					
-					//ignoreTransform = textDiff(sanitized, body.innerHTML);
-					
-					console.log("Sanitized garbage from WYSIWYG");
-					
-				}
-				
 				
 				// Compare the source with the editable preview
-				var diff = textDiff(srcHTML, prevBodyHtml, ignoreTransform);
+				var diff = textDiff(srcHTML, prewBodyHtml, ignoreTransform);
 				
 				/*
 					Problem: When ignoreTransform removes a diff ...
@@ -453,7 +513,7 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 					row = diff.removed[i].row + startRow;
 					
 					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
-						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + lbChars(srcHTML) + "\n\nprevBodyHtml=" + lbChars(prevBodyHtml));
+						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + lbChars(srcHTML) + "\n\nprewBodyHtml=" + lbChars(prewBodyHtml));
 					}
 					
 					removedText = sourceFile.removeAllTextOnRow(row);
@@ -530,7 +590,7 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 				
 				// after the transformation: Update what should be ignored again? nope
 				//var srcHTML = getSourceCodeBody(sourceFile);
-				//var prevBodyHtml = body.innerHTML;
+				//var prewBodyHtml = body.innerHTML;
 				//ignoreTransform = textDiff(srcHTML, body.innerHTML);
 				
 				//alert("Transformed source document!");
@@ -555,6 +615,9 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 		else return srcMatchBody[1];
 	}
 	
+	function setSourceCodeBody(text, bodyHtml) {
+		return text.replace(/<body(.*)>([\s\S]*)<\/body>/i, "<body$1>" + bodyHtml + "</body>");
+	}
 	
 	function isHTML(file) {
 		
@@ -570,5 +633,191 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 		else return false;
 	}
 	
+	function sanitizeOfficeDoc(html) {
+		
+		console.log("Before sanitizeOfficeDoc:" + html);
+		
+		html = html.replace(/\n|\r\n/ig, " "); // Prevent line breaks in the middle of html tag
+		
+		// Remove <o:p></o:p>
+		html = html.replace(/<o:p>/ig, "");
+		html = html.replace(/<\/o:p>/ig, "");
+		
+		// Remove style attributes
+		html = html.replace(/ style="[^"]+"/ig, "");
+		
+		// Remove class attributes
+		html = html.replace(/ class="[^"]+"/ig, "");
+		
+		// Remove onmouseover and onmouseout attributes
+		
+		
+		// Get rid of span elements
+		html = html.replace(/<span>/ig, "");
+		html = html.replace(/<\/span>/ig, "");
+		
+		// Remove emty p elements
+		html = html.replace(/<p>\s*<\/p>/gi, "");
+		
+		// Remove space between tags
+		html = html.replace(/>\s*</gi, "><");
+		
+		// Remove space before tags
+		html = html.replace(/\s*</gi, "<");
+		
+		// Remove all attributes from td elements
+		html = html.replace(/<td[^>]*>/ig, "<td>");
+		
+		// Remove all attributes from p elements
+		html = html.replace(/<p[^>]*>/ig, "<p>");
+		
+		// Remove p inside td
+		html = html.replace(/<td><p>(.*?)<\/p><\/td>/gi, "<td>$1</td>");
+		
+		// Remove br inside td
+		html = html.replace(/<td><br><\/td>/gi, "<td></td>");
+		
+		// Fix multible spaces
+		html = html.replace(/\s\s+/g, " ");
+		
+		// Remove emty html elements
+		html = html.replace(/<(.*?)><\/\1>/g, "");
+		
+		// Remove <del> elements
+		html = html.replace(/<del[^>]*>.*?<\/del>/g, "");
+		
+		
+		//console.log("After sanitizeOfficeDoc:" + html);
+		
+		return html;
+	}
+	
+	function sanitize(html, LB) {
+		// Can not change the file in a fileChange event or it would create an endless loop
+		// Witch means we can not sanitize on source code changes,
+		// witch also means we can not sanitize on content-editable canges!
+		
+		html = insertLineBreaks(html, LB)
+		
+		return html;
+	}
+	
+	function insertLineBreaks(html, LB) {
+		
+		// Add line breaks so the source code gets easier to read
+		
+		// Make sure the line breaks at the beginning stays there, or there will be errors in the text transformation!
+		
+		
+		var lbBefore = checkStartingLineBreaks();
+		
+		
+		console.log("inserting (sanitizing) line breaks. LB=" + lbChars(LB));
+		
+		console.time("insertLineBreaks");
+		
+		// Remove space between tags
+		html = html.replace(/>\s*</gi, "><");
+		
+		// Remove space before tags
+		html = html.replace(/\s*</gi, "<");
+		
+		
+		// Line breaks between p tags
+		html = html.replace(/>\s*<p/gi, ">" + LB + LB + "<p");
+		html = html.replace(/<\/p>\s*</gi, "</p>" + LB + LB + "<");
+		
+		// Line breaks between h# tags
+		html = html.replace(/>\s*<h/gi, ">" + LB + LB + "<h");
+		html = html.replace(/<\/h(.)>\s*</gi, "</h$1>" + LB + LB + "<");
+		
+		// Line breaks between div tags
+		html = html.replace(/>\s*<div/gi, ">" + LB + LB + "<div");
+		html = html.replace(/<\/div>\s*</gi, "</div>" + LB + LB + "<");
+		
+		// Line breaks between tbody
+		html = html.replace(/>\s*<tbody/gi, ">" + LB + "<tbody");
+		html = html.replace(/<\/tbody>\s*</gi, "</tbody>" + LB + "<");
+		
+		// Line breaks between tr
+		html = html.replace(/>\s*<tr/gi, ">" + LB + "<tr");
+		html = html.replace(/<\/tr>\s*</gi, "</tr>" + LB + "<");
+		
+		// Line breaks between td
+		html = html.replace(/>\s*<td/gi, ">" + LB + "<td");
+		html = html.replace(/<\/td>\s*</gi, "</td>" + LB + "<");
+		
+		// Line breaks between th
+		html = html.replace(/>\s*<th/gi, ">" + LB + "<th");
+		html = html.replace(/<\/th>\s*</gi, "</th>" + LB + "<");
+		
+		
+		// Word-wrap p elements
+		//html = html.replace(/<p.*>(.*)<\/p>/ig, "<p>" + wordWrapText("$1") + "</p>");
+		
+		var lbAfter = checkStartingLineBreaks();
+		
+		console.log("lbBefore=" + lbBefore + " lbAfter=" + lbAfter);
+		
+		if(lbBefore > lbAfter) {
+			var add = lbBefore - lbAfter;
+			console.log("Gonna add=" + add + " line breaks ...");
+			for(var i=0; i<add; i++) {
+				html = LB + html;
+				console.log("line break added");
+			}
+		}
+		else if(lbBefore < lbAfter) {
+			var remove = lbAfter - lbBefore;
+			console.log("Gonna remove=" + remove + " line breaks ...");
+			var start = 0;
+			for(var i=0; i<remove; i++) {
+				start = html.indexOf(LB, start) + 1;
+			}
+			var removed = html.substr(0, start-1);
+			html = html.substr(start);
+			
+			console.log("Removed " + occurencies(removed, LB) + " line breaks");
+		}
+		
+		console.timeEnd("insertLineBreaks");
+		
+		return html;
+		
+		function checkStartingLineBreaks() {
+			var lookForCharacter = "\n"; // Works both for LF and CRLF
+			var lbCount = 0;
+			var char = "";
+			for(var i=0; i < html.length; i++) {
+				char = html.charAt(i);
+				if(char == lookForCharacter) lbCount++;
+				else if(char != "\r" && char != "\n" && char != "\t" && char != " ") break; // Not a white space
+			}
+			return lbCount;
+		}
+		
+	}
+	
+	function computeIgnoreTransform(srcHTML, rawMainHtml) {
+		
+		// Make sure they end with a line break
+		
+		
+		
+		
+		ignoreTransform = textDiff(srcHTML, rawMainHtml);
+		
+		// Make sure there are no errors
+		var lbSrc = occurrences(srcHTML, "\n");
+		var lbMain = occurrences(rawMainHtml, "\n");
+		var removed = ignoreTransform.removed.length;
+		var inserted = ignoreTransform.inserted.length;
+		
+		if( (lbSrc - removed) != (lbMain - inserted) ) {
+			throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(ignoreTransform, null, 2));
+		}
+		
+		return ignoreTransform;
+	}
 	
 })();
