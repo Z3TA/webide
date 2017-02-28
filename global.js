@@ -463,7 +463,7 @@ function getPathDelimiter(path) {
 }
 
 
-function textDiff(originalText, editedText, ignoreTransform) {
+function textDiff(originalText, editedText) {
 	/*
 		return {inserted: inserted, removed: removed};
 		
