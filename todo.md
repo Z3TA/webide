@@ -41,8 +41,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Ability to WYSIWYG-edit normal web pages
+Investigate two versions of the same file, are they the same ? 
+C:\Users\Z\dev-repositories\jzedit\WysiwygEditor.js.ver1
+C:/Users/Z/dev-repositories/jzedit/WysiwygEditor.js.ver2
+C:/Users/Z/dev-repositories/jzedit/WysiwygEditor.js
 
+Ability to WYSIWYG-edit normal web pages
+problem: errors on content-editable window is not caught in the editor. So code is executed as usual ...
+Uncaught Error: firstIndex=300 can not be on a line break!File.js:1359 File.deleteTextRangeFile.js:946 File.removeAllTextOnRowWysiwygEditor.js:519 previewInputWysiwygEditor.js:114 body.oninput
 
 
 todo:
@@ -213,6 +219,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Somehow the same file was openec twice ... 
 
 linux ftp file names with åäö get scramled
 
@@ -817,6 +825,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Autocomplete global variables (in browser, from other files)
 
 Add icons to the file explorer and make it easier to navigate.
 Show git/mercurial status beside each file (New, Modified, Ignored)
