@@ -53,6 +53,12 @@ Uncaught Error: firstIndex=300 can not be on a line break!File.js:1359 File.dele
 
 todo:
 
+Web/home page widget, when you right click and select edit, it sends a signal to jzedit via websocket to localhost, 
+to open that page (lauch "editPage" event and let plugins figure out what to do) and start WYSIWYG mode, scroll
+down to where on the web page the user clicked.
+
+When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
+
 ENOENT: no such file or directory, open 'C:\C:\Users\Z\de
 SSH interface.js 2211
 
