@@ -909,18 +909,28 @@ var File; // File object is global
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
 		var firstIndex = grid[row].startIndex - grid[row].indentationCharacters.length;
-		var lastIndex = -1;
 		
-		
+		var lastIndex;
+				
 		if(row < (grid.length-1)) {
 			lastIndex= grid[row+1].startIndex-1;
 		}
 		else {
 			lastIndex= file.text.length-1;
 		}
+				
+		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
 		
+		file.text = deletePart(file.text, firstIndex, lastIndex);
 		
-		return file.deleteTextRange(firstIndex, lastIndex);
+		file.grid.splice(row, 1); // Remove the row
+		
+		var deletionLength = removedText.length;
+		var lineNumberDecrementor = 1;
+		
+		fixIndexOnRemainingRows(grid, row, deletionLength, lineNumberDecrementor);
+		
+		return removedText;
 		
 	}
 	
@@ -1358,7 +1368,7 @@ var File; // File object is global
 		// This function currently don't know how to handle removing text that starts or ends with a line break! (it would result in a bug, where not all lines are removed)
 		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") {
 			if(editor.settings.devMode && file.text.length < 100) visualizeTextRange(file.text, firstIndex, lastIndex);
-			throw new Error("firstIndex=" + firstIndex + " can not be on a line break!");
+			throw new Error("firstIndex=" + firstIndex + " can not be on a line break! You might want to use file.removeRow(row) instead.");
 		}
 		if(file.text.charAt(lastIndex) == "\r" || file.text.charAt(lastIndex) == "\n") throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
@@ -1454,7 +1464,7 @@ var File; // File object is global
 				}
 				
 				// Update indexes on all rows below
-				fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
+				fixIndexOnRemainingRows(grid, first.row+1, deletionLength, lineNumberDecrementor);
 			}
 			else if(first.row < last.row) {
 				
@@ -1496,7 +1506,7 @@ var File; // File object is global
 					
 					// indentation characters of second row has already been removed, but not the ending linebreak !!!??
 					
-					fixIndexOnRemainingRows(first.row+1, deletionLength, lineNumberDecrementor);
+					fixIndexOnRemainingRows(grid, first.row+1, deletionLength, lineNumberDecrementor);
 				}
 				else {
 					// Both rows are emty
@@ -1560,7 +1570,7 @@ var File; // File object is global
 							if(cursorIndex > 0) cursorIndex -= deleteExtra2;
 						}
 						
-						fixIndexOnRemainingRows(first.row, deletionLength, lineNumberDecrementor);
+						fixIndexOnRemainingRows(grid, first.row, deletionLength, lineNumberDecrementor);
 						
 						
 					}
@@ -1645,52 +1655,7 @@ var File; // File object is global
 		file.change("deleteTextRange", removedText, firstIndex, dummyCaret.row, dummyCaret.col);
 		
 		return removedText;
-		
-		
-		function fixIndexOnRemainingRows(startRow, indexDecrementor, lineNumberDecrementor) {
-			console.log("fixIndexOnRemainingRows: startRow=" + startRow + " indexDecrementor=" + indexDecrementor + " lineNumberDecrementor=" + lineNumberDecrementor);
-			for(var i=startRow; i<grid.length; i++) {
-				grid[i].startIndex -= indexDecrementor;
-				grid[i].lineNumber -= lineNumberDecrementor;
-				// ... and all columns
-				for(var j=0; j<grid[i].length; j++) {
-					grid[i][j].index -= indexDecrementor;
-				}
-			}
-		}
-		
-		function deletePart(txt, start, end) {
-			// Also deletes the end character!
-			
-			if(editor.settings.devMode && txt.length < 100) visualizeTextRange(txt, start, end);
 
-			return txt.substring(0, start) + txt.substring(end+1);
-
-		}
-		
-		function visualizeTextRange(txt, start, end) {
-			
-			txt = txt.replace(/\n|\r/g, "#"); // Replace line feeds and carage returns with # to make them easier to count
-			txt = txt.replace(/\t/g, "→");
-			
-			console.log("TextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
-			
-			function spaces(n) {
-				var str = "";
-				for(var i=0;i<n;i++) str += " ";
-				return str;
-			}
-			
-			function underline(n) {
-				var str = "";
-				for(var i=0;i<n;i++) str += "=";
-				return str;
-			}
-			
-		}
-		
-		
-		
 	}
 	
 	File.prototype.deleteSelection = function(selection) {
@@ -4398,4 +4363,46 @@ var File; // File object is global
 		
 	}
 	
+	function deletePart(txt, start, end) {
+		// Also deletes the end character!
+		// Returns txt with the range from start to end removed
+		
+		if(editor.settings.devMode && txt.length < 100) visualizeTextRange(txt, start, end);
+
+		return txt.substring(0, start) + txt.substring(end+1);
+	}
+	
+	function visualizeTextRange(txt, start, end) {
+		
+		txt = txt.replace(/\n|\r/g, "#"); // Replace line feeds and carage returns with # to make them easier to count
+		txt = txt.replace(/\t/g, "→");
+		
+		console.log("TextRange: start=" + start + " end=" + end + "\n" + txt + "\n" + spaces(start) + underline(end-start+1) + spaces(txt.length-end) + "\n");
+		
+		function spaces(n) {
+			var str = "";
+			for(var i=0;i<n;i++) str += " ";
+			return str;
+		}
+		
+		function underline(n) {
+			var str = "";
+			for(var i=0;i<n;i++) str += "=";
+			return str;
+		}
+		
+	}
+	
+	function fixIndexOnRemainingRows(grid, startRow, indexDecrementor, lineNumberDecrementor) {
+		console.log("fixIndexOnRemainingRows: startRow=" + startRow + " indexDecrementor=" + indexDecrementor + " lineNumberDecrementor=" + lineNumberDecrementor);
+		for(var i=startRow; i<grid.length; i++) {
+			grid[i].startIndex -= indexDecrementor;
+			grid[i].lineNumber -= lineNumberDecrementor;
+			// ... and all columns
+			for(var j=0; j<grid[i].length; j++) {
+				grid[i][j].index -= indexDecrementor;
+			}
+		}
+	}
+
 })();
