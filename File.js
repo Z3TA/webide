@@ -1356,7 +1356,10 @@ var File; // File object is global
 		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
 		
 		// This function currently don't know how to handle removing text that starts or ends with a line break! (it would result in a bug, where not all lines are removed)
-		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") throw new Error("firstIndex=" + firstIndex + " can not be on a line break!");
+		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") {
+			if(editor.settings.devMode && file.text.length < 100) visualizeTextRange(file.text, firstIndex, lastIndex);
+			throw new Error("firstIndex=" + firstIndex + " can not be on a line break!");
+		}
 		if(file.text.charAt(lastIndex) == "\r" || file.text.charAt(lastIndex) == "\n") throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		/*
@@ -1461,7 +1464,7 @@ var File; // File object is global
 					count = grid[first.row].length - first.col;
 					
 					while(count--) {
-						if(editor.devMode) console.log("pop:" + JSON.stringify(grid[first.row].pop()));
+						if(editor.settings.devMode) console.log("pop:" + JSON.stringify(grid[first.row].pop()));
 						else grid[first.row].pop();
 					}
 				}

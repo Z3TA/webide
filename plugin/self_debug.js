@@ -152,12 +152,12 @@
 				process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
-				if(editor.devMode) {
+				if(editor.settings.devMode) {
 					// Show the chrome dev tools
 					var gui = require('nw.gui').Window.get();
 					gui.showDevTools();
 				}
-}
+			}
 			
 		});
 		

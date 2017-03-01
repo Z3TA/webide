@@ -3822,7 +3822,7 @@ editor.lastKeyPressed = "";
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
 		// note to self: Just temorary, dont forget to remove:
-		//if(editor.devMode == true) editor.openFile(testfile);
+		//if(editor.settings.devMode == true) editor.openFile(testfile);
 		
 		/*
 			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
@@ -4207,7 +4207,7 @@ editor.lastKeyPressed = "";
 				
 				ret = fun(editor.currentFile, e.clipboardData);
 				
-				if(editor.devMode) console.log("Paste listener: " + getFunctionName(fun) + " returned:\n" + ret);
+				if(editor.settings.devMode) console.log("Paste listener: " + getFunctionName(fun) + " returned:\n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
