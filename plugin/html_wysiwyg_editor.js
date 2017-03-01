@@ -24,7 +24,7 @@
 	
 	function unload() {
 		editor.removeMenuItem(menuItem);
-		
+		wysiwygEditor.close();
 	}
 	
 	function createwysiWygEditor(file) {

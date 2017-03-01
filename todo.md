@@ -41,14 +41,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Investigate two versions of the same file, are they the same ? 
-C:\Users\Z\dev-repositories\jzedit\WysiwygEditor.js.ver1
-C:/Users/Z/dev-repositories/jzedit/WysiwygEditor.js.ver2
-C:/Users/Z/dev-repositories/jzedit/WysiwygEditor.js
+Ability to WYSIWYG-edit normal web pages:
+1. Currently working on sanitazing content editable 
+2. Fix caret placement after edit
 
-Ability to WYSIWYG-edit normal web pages
-problem: errors on content-editable window is not caught in the editor. So code is executed as usual ...
-Uncaught Error: firstIndex=300 can not be on a line break!File.js:1359 File.deleteTextRangeFile.js:946 File.removeAllTextOnRowWysiwygEditor.js:519 previewInputWysiwygEditor.js:114 body.oninput
 
 
 todo:

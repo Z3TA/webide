@@ -5,9 +5,11 @@ var WysiwygEditor;
 
 	var wysiwygEditorCounter = 0; // WysiwygEditor instances
 	
-	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTag) {
+	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTag, url) {
 	var wysiwygEditor = this;
 	
+		// todo: compute ignoreTransform if a url is specified ...
+		
 		wysiwygEditorCounter++;
 		
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile);
@@ -15,6 +17,8 @@ var WysiwygEditor;
 		wysiwygEditor.bodyTag = bodyTag || "body";
 		
 		wysiwygEditor.ignoreTransform = null; // computeIgnoreTransform(srcHTML, rawMainHtml)
+		
+		wysiwygEditor.ignoreSourceFileChange = true;
 		
 		wysiwygEditor.sourceFile = sourceFile;
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
@@ -34,8 +38,7 @@ var WysiwygEditor;
 		// Can not use require if using window.open! 
 		//var previewWin = window.open("", "previewWin", "width=" + previeWidth + ",height=" + previewHeight + "");
 		var gui = require('nw.gui'); // nw.js UI library
-		var url = "about:blank";
-		var previewWin = gui.Window.open(url, {toolbar:true, frame:true, width: previeWidth, height: previewHeight});
+		var previewWin = gui.Window.open(url ? url : "about:blank", {toolbar:true, frame:true, width: previeWidth, height: previewHeight});
 		// Show the toolbar so you can see the URL, and open dev tools
 		
 		// KANSKE INTE BEHÖVER ANV'NDA NW.GUI '
@@ -62,41 +65,44 @@ var WysiwygEditor;
 			console.log("(original) text=" + lbChars(text));
 			
 			// 1. Write the text to the content-editable
-			doc.write(text);
+			if(!url) doc.write(text);
 			
 			// 2. Get the text from content-editable, (tbody, and other html "fixes" might have been inserted)
 			var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
-			var prewBodyHtml = body.innerHTML;
+			var prewBodyHtml = getContentEditableBody(body);
 			
 			console.log("(after write) prewBodyHtml=" + lbChars(prewBodyHtml));
 			
 			// 3. Use the contenteditable line break convention in the source file to make life easier
-			var lineBreak = determineLineBreakCharacters(prewBodyHtml);
-			if(lineBreak != sourceFile.lineBreak) {
-			var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
-			text = text.replace(regCurrentLineBreaks, lineBreak);
-				}
+			wysiwygEditor.lineBreak = determineLineBreakCharacters(prewBodyHtml);
+			if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
+				var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
+				text = text.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
+				console.log("Replaced line breaks in source code: text=" + lbChars(text));
+			}
 			
 			// 4. Replace the the content of the body element with the content-editable code
 			text = setSourceCodeBody(text, prewBodyHtml);
 			
+			console.log("(after setting) text=" + lbChars(text));
 			
 			sourceFile.reload(text);
 			
 			// 5. Finally make the body of the source file the body of the content-editable
 			var srcHTML = getSourceCodeBody(sourceFile);
-			body.innerHTML = srcHTML;
+			setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
+
 			
 			// The source code and content-editable should now have the same line breaks!
 			
 			console.log("(after) srcHTML=" + lbChars(srcHTML));
 			
 			// The source code and content editable code should now be the same!
-			if(body.innerHTML != srcHTML) {
+			if(getContentEditableBody(body) != srcHTML) {
 				throw new Error("Source code does not match!\n \
-				body.innerHTML=" + lbChars(body.innerHTML) + "\n\n\
+				getContentEditableBody(body)=" + lbChars(getContentEditableBody(body)) + "\n\n\
 				srcHTML=" + lbChars(srcHTML) + "\n\n\
-				diff=" + JSON.stringify(textDiff(body.innerHTML, srcHTML, null, 2)));
+				diff=" + JSON.stringify(textDiff(getContentEditableBody(body), srcHTML, null, 2)));
 			}
 			
 			sourceFile.checkGrid();
@@ -123,12 +129,19 @@ var WysiwygEditor;
 			}
 			var func = new Function("action", "return function " + name + "(file, type, characters, caretIndex, row, col){ action(file, type, characters, caretIndex, row, col) };")(customAction);
 			editor.on("fileChange", func);
-				
+			
+			wysiwygEditor.ignoreSourceFileChange = false;
+			
 			// Remove the fileChange event listener when closing the content-editable window
 			previewWin.window.onbeforeunload = function() {
 				editor.removeEvent("fileChange", func);
 			};
 			
+			// Capture errors on the content-editable so that they do not go by unoticed
+			previewWin.window.onerror = function(err) {
+				alertBox(err.message ? err.message : "There was an error in the WYSIWYG editor!");
+				console.error(err);
+			};
 				
 				previewWin.moveTo(posX, posY);
 				previewWin.resizeTo(previeWidth, previewHeight);
@@ -249,6 +262,8 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 	WysiwygEditor.prototype.sourceFileChange = function sourceFileChange(file, type, characters, caretIndex, row, col) {
 		var wysiwygEditor = this;
 		
+		if(wysiwygEditor.ignoreSourceFileChange) return true;
+		
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
 		
 		var sourceFile = wysiwygEditor.sourceFile;
@@ -273,14 +288,13 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 			
 			var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
 			
-			//var prewBodyHtml = body.innerHTML;
 			var srcHTML = getSourceCodeBody(sourceFile);
 			
 			// Can not change the file in a fileChange event or it would create an endless loop
 			// Witch means we can not sanitize on source code changes,
-			// witch also means we can not sanitize on content-editable canges!
+			// witch also means we can not sanitize on content-editable changes!
 			
-			body.innerHTML = srcHTML;
+			setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
 			
 			// Setting innerHTML makes the caret disappear. Place it again ...
 			// Find out the tag and if we are near text, then find the tag in content-editable
@@ -354,7 +368,7 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 		} 
 		//else console.log("File is not the source file! sourceFile.path=" + sourceFile.path + " file.path=" + file.path);
 		
-		//ignoreTransform = textDiff(srcHTML, main.innerHTML);
+		
 		
 		//}, 3000);
 		
@@ -405,15 +419,20 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 		
 		console.log("previewInput!");
 		
+		
+		
 		var sourceFile = wysiwygEditor.sourceFile;
 		var previewWin = wysiwygEditor.previewWin;
 		var ignoreTransform = wysiwygEditor.ignoreTransform;
+
+		
+		sourceFile.checkGrid();
+		
+		//wysiwygEditor.ignoreSourceFileChange = true; // Ignore the change event, for the changes we will now make to the source file
 		
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile)
 		else if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
 		else {
-			
-			sourceFile.checkGrid();
 			
 			if(sourceFile != editor.currentFile) {
 				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
@@ -427,10 +446,11 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 			else {
 				
 				var body = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTag)[0];
-				var prewBodyHtml = body.innerHTML; //previewWin.window.document.body.innerHTML;
+				var prewBodyHtml = getContentEditableBody(body);
 				
 				/*
-					problem 1: Contenteditable produce mangled/garbled HTML code.
+
+					problem 1: Contenteditable produce mangled/garbled HTML code. 
 					Contenteditbale change stuff all over the place, for example inserts <tbody> in tables
 					
 					solution: Beautify the code!
@@ -440,9 +460,40 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 					
 				*/
 				
+				var sanitized = insertLineBreaks(prewBodyHtml);
+				
+				if(sanitized == prewBodyHtml) console.log("No white space sanitiaztion needed"); 
+				else {
+					
+					console.log("prewBodyHtml=\n" + debugWhiteSpace(prewBodyHtml) + "\n");
+					
+					console.log("sanitized=\n" + debugWhiteSpace(sanitized) + "\n");
+					
+					/*
+						Problem: contenteditable will lose the caret when the html is updated, 
+						this is verry annoying when typing as the cursor jumps
+						
+						solution: Set the caret again using the selection API 
+					*/
+					
+					var caretPosition = getCaretPosition(previewWin);
+					
+					setContentEditableBody(body, sanitized);
+					
+					prewBodyHtml = getContentEditableBody(body);
+
+					
+					console.log("caretPosition: " + JSON.stringify(caretPosition));
+					
+					wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
+					
+					console.log("Sanitized garbage from WYSIWYG");
+					
+				}
+				
 				
 				// Compare the source with the editable preview
-				var diff = textDiff(srcHTML, prewBodyHtml, ignoreTransform);
+				var diff = textDiff(srcHTML, prewBodyHtml);
 				
 				/*
 					Problem: When ignoreTransform removes a diff ...
@@ -494,7 +545,7 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 				
 				var startRow = tmpCaret.row;
 				
-				console.log("source startRow=" + startRow);
+				console.log("source startRow=" + startRow + " srcStartIndex=" + srcStartIndex + " tmpCaret=" + JSON.stringify(tmpCaret));
 				
 				var replacedLine = false;
 				var linesToBeRemoved = [];
@@ -513,7 +564,12 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 					row = diff.removed[i].row + startRow;
 					
 					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
-						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + lbChars(srcHTML) + "\n\nprewBodyHtml=" + lbChars(prewBodyHtml));
+						throw new Error("Text on row=" + row + " doesn't match text to be removed!\n\
+						source=" + sourceFile.rowText(row).trim() + "\n\
+						remove=" + diff.removed[i].text.trim() + "\n\
+						diff=" + JSON.stringify(diff, null, 2) + "\n\n\
+						srcHTML=" + lbChars(srcHTML) + "\n\n\
+						prewBodyHtml=" + lbChars(prewBodyHtml));
 					}
 					
 					removedText = sourceFile.removeAllTextOnRow(row);
@@ -588,36 +644,148 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 					console.log("Removed row=" + row + " text=" + text);
 				}
 				
-				// after the transformation: Update what should be ignored again? nope
-				//var srcHTML = getSourceCodeBody(sourceFile);
-				//var prewBodyHtml = body.innerHTML;
-				//ignoreTransform = textDiff(srcHTML, body.innerHTML);
-				
-				//alert("Transformed source document!");
-				
+				// after the transformation: Update what should be ignored again ? Nope
+
 			}
 			
 		}
 		
+		wysiwygEditor.ignoreSourceFileChange = false;
+		
 		console.timeEnd("contentEdit");
 		
+		sourceFile.checkGrid();
 		
+	}
+	
+	
+	WysiwygEditor.prototype.close = function close() {
+		// Clean up and close the window ...
+		
+		var wysiwygEditor = this;
+		
+		var previewWin = wysiwygEditor.previewWin;
+
+		/*
+			body.onmouseup = null;
+			body.onkeyup = null;
+			body.onselectionchange = null;
+			body.onpaste = null;
+			body.oninput = null;
+		*/
+		
+		previewWin.close();
+		
+		wysiwygEditor.ignoreSourceFileChange = true;
 	}
 	
 	function getSourceCodeBody(sourceFile) {
 		// Returns the body of the source HTML code
-		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
+		
+		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
+		// so there needs to be a break after <body> and before </body>
+		// the </body> ending tag must have at least one line break infront of it. And can have white space after it
+		
+		var srcMatchBody = sourceFile.text.match(/<body.*>[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i);
 		
 		if(srcMatchBody == null) {
-			console.warn("Could not find &lt;body element in source file<br>" + sourceFile.path);
+			throw new Error("Could not find body element in source file:" + sourceFile.path + "\n\
+			sourceFile.text=" + lbChars(sourceFile.text));
 			return sourceFile.text;
 		}
 		else return srcMatchBody[1];
 	}
 	
 	function setSourceCodeBody(text, bodyHtml) {
-		return text.replace(/<body(.*)>([\s\S]*)<\/body>/i, "<body$1>" + bodyHtml + "</body>");
+		if(text.match(/<body.*>[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i) === null) throw new Error("Unable code find body element when setting the code body.\n\
+		text=" + lbChars(text));
+		
+		// 1. body attributes
+		// 2. line break character(s) after body tag
+		// 3. body content
+		// 4. White-space (including line breaks) before body end  
+		
+		text = text.replace(/<body(.*)>(\n|\r\n)([\s\S]*)([\n|\r\n]\s*)<\/body>/i, "<body$1>$2" + bodyHtml + "$4</body>");
+		
+		// Sanity check!
+		if(text.match(/<body.*>[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i) === null) throw new Error("We are not sane!\n\
+		text=" + lbChars(text));
+		
+		return text;
 	}
+	
+	function getContentEditableBody(body) {
+		// Returns the innerHTML of body, where the first line break is removed, and also the last line break if there's any
+		// The line breaks needts to be trimmed for the diff to work (see function getSourceCodeBody)
+		
+		var prewHTML = body.innerHTML;
+		
+		prewHTML = removeHeadLineBreak(prewHTML);
+		prewHTML = removeTailLineBreak(prewHTML);
+		
+		// The content editable *some times* like to add another line break ... 
+		prewHTML = removeTailLineBreak(prewHTML);
+		
+		// The content editable also *some times* like to add a tailing tab
+		prewHTML = removeTailTab(prewHTML);
+		
+		
+		return prewHTML;	
+
+		
+		function removeHeadLineBreak(prewHTML) {
+			if(prewHTML.charAt(0) == "\r" && prewHTML.charAt(1) == "\n") {
+				prewHTML = prewHTML.substr(2); // Remove the CR+LF
+				console.log("Removed heading CRLF when retrieved content-editable body");
+			}
+			else if(prewHTML.charAt(0) == "\n") {
+				prewHTML = prewHTML.substr(1); // Remove the LF
+				console.log("Removed heading LF when retrieved content-editable body");
+			}
+			return prewHTML;
+		}
+		
+		function removeTailLineBreak(prewHTML) {
+			if(prewHTML.charAt(prewHTML.length-2) == "\r" && prewHTML.charAt(prewHTML.length-1) == "\n") {
+				prewHTML = prewHTML.substr(0, prewHTML.length-2); // Remove the CR+LF
+				console.log("Removed tailing CRLF when retrieved content-editable body");
+			}
+			else if(prewHTML.charAt(prewHTML.length-1) == "\n") {
+				prewHTML = prewHTML.substr(0, prewHTML.length - 1); // Remove the LF
+				console.log("Removed tailing LF when retrieved content-editable body");
+			}
+			else {
+				console.log("last char: " + lbChars(prewHTML.charAt(prewHTML.length-1)));
+			}
+			return prewHTML;
+		}
+		
+		function removeTailTab(prewHTML) {
+			if(prewHTML.charAt(prewHTML.length-1) == "\t") {
+				prewHTML = prewHTML.substr(0, prewHTML.length - 1); // Remove the tab
+				console.log("Removed tailing TAB when retrieved content-editable body");
+			}
+			else {
+				console.log("last char: " + lbChars(prewHTML.charAt(prewHTML.length-1)));
+			}
+			return prewHTML;
+		}
+
+	}
+	
+	function setContentEditableBody(body, srcHTML, lb) {
+		
+		body.innerHTML = srcHTML;
+		
+		// Do not need to pad the code with line breaks! 
+		// Only the source code need to have line breaks before body tags!
+		// The diff compres innerHTML with source code without the lines of the body elements
+		
+		//body.innerHTML = lb + srcHTML + lb;
+	}
+
+	
+
 	
 	function isHTML(file) {
 		
@@ -695,7 +863,7 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 	function sanitize(html, LB) {
 		// Can not change the file in a fileChange event or it would create an endless loop
 		// Witch means we can not sanitize on source code changes,
-		// witch also means we can not sanitize on content-editable canges!
+		// witch also means we can not sanitize on content-editable canges! WHY??!! It should work!
 		
 		html = insertLineBreaks(html, LB)
 		
@@ -703,6 +871,8 @@ WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(nod
 	}
 	
 	function insertLineBreaks(html, LB) {
+		
+		if(LB == undefined) throw new Error("Please specify line break character(s) to use!");
 		
 		// Add line breaks so the source code gets easier to read
 		
