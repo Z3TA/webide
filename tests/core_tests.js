@@ -74,6 +74,10 @@
 			var charsAfter = ""; // Will update in change
 			var charactersDeleted = "";
 			
+			test("<body>#<div>#→Hello World!#→</div>##</body>#", 13,25);
+			
+			test("<body>#<div>#→#→Hello World!#→#</div>#→#→</body>#→", 15,27);
+			
 			test("{@#→{@#→→abc@#→→def@#→}@#}", 9,18);
 			
 			test("{@#→abc@#→def@#}", 4,12);
@@ -154,7 +158,7 @@
 			
 		});
 		
-	});
+	}, 1);
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {

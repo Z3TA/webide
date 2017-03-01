@@ -1370,6 +1370,9 @@ var File; // File object is global
 		var deletionLength = lastIndex - firstIndex;
 		
 		deletionLength++; // same index is still one char
+		
+		console.log("++++++++ deleteTextRange ++++++++");
+		
 		console.log("deletionLength=" + deletionLength);
 		
 		//file.debugGrid();
@@ -1377,6 +1380,9 @@ var File; // File object is global
 		console.time("deleteTextRange");
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
+		
+		console.log("file.text=" + lbChars(file.text));
+		console.log("removedText=" + lbChars(removedText));
 		
 		file.text = deletePart(file.text, firstIndex, lastIndex);
 		
@@ -1423,6 +1429,8 @@ var File; // File object is global
 					grid[first.row].indentationCharacters = file.text.substr(0, firstIndex); // firstIndex = length in substr
 				}
 				
+				grid[first.row].startIndex = firstIndex;
+				
 				// Sanity check indentation characters
 				if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters) + " lastLineBreak=" + lastLineBreak + "");
 				
@@ -1432,15 +1440,14 @@ var File; // File object is global
 			
 			if(first.row == last.row) {
 				grid[first.row].owned = true;
-				if(first.col != undefined && last.col != undefined) {
+				if(last.col != undefined) {
 					
 					// Update index of remaining columns on first row
 					for(var col=last.col; col < grid[first.row].length; col++) grid[first.row][col].index -= deletionLength;
 					
 					// Delete columns to be deleted from first row
-					for(var col=first.col; col<=last.col; col++) grid[first.row].splice(first.col, 1); // Remove same index
-					
-					
+					for(var col=first.col || 0; col<=last.col; col++) grid[first.row].splice(first.col || 0, 1); // Remove same index
+										
 				}
 				
 				// Update indexes on all rows below
@@ -1608,7 +1615,7 @@ var File; // File object is global
 		}
 		else file.grid = file.createGrid();
 		
-		//file.debugGrid();
+		file.debugGrid();
 		
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
