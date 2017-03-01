@@ -4,32 +4,27 @@ Copyright (c) Johan Zetterberg, All rights reserved! Do NOT distribute!
 The software is provided "as is" without any warranty. Use at your own risk!
 Under no circumstance should the authors be hold responsible for any damages that this software might cause.
 
-The editor has three different licenses: Personal license, witch is free, and Professional or Enterprise
-license that are available for a montly subscription fee.
-
+The editor has two different licenses: A free Personal license, and Professional license witch is available for a monthly subscription fee
+or a one-off payment.
 
 
 
 Personal license
 ----------------
-You are free to use this software for personal (non business) work, 
-in condition that any updates (for example bug fixes, new features, or derivative work) 
-gets submitted to me, along with a note giving me full copyright permission. 
+With a Personal license You can use this software for non business.
+But You are Not allowed to make copies of the software or distribute any updates (for example bug fixes, new features, or derivative work).
+You can make changes to the software, but are not allowed to distribute them.
+You are however welcome to send patches (to the authors of this software), with a note granting full copyright permission.
 
 
 Professional license
 --------------------
-You are free to use this software for any work, including for profit or business work,
-in condition that any updates (for example bug fixes, new features, or derivative work)
-gets submitted to me, along with a note giving me full copyright permission.
+With a professional license You are free to use this software for any work, including for profit or business work.
+And you are allowed to make changes to the software, without having to submit it, or give away copyright permission.
 
+But you are Not allowed to make copies of the software or distribute any updates (for example bug fixes, new features, or derivative work) 
+except for *ten copies* for use within your company, organisation or sub-licenced to your customers.
 
-Enterprise license
-------------------
-You are free to use this software for any work, including for profit or business work.
-You are allowed to make changes to the software, without having to submit it, or giving me copyright permission.
-You are allowed to make up to ten copies of this software for use within your company or organisation.
-You are Not allowed to distribute any updates (for example bug fixes, new features, or derivative work) outside of your organisation.
-
+Although you do not have to, you are welcome to send patches (to the authors of this software), with a note granting full copyright permission.
 
 
