@@ -32,6 +32,21 @@
 		
 	*/
 	
+	editor.addTest(function testRemoveRow(callback) {
+		editor.openFile("testRemoveRow.html", '<div>\n\t<div>\n\t\tremove me\n\t</div>\n</div>\n', function(err, file) {
+			
+			var row = 2;
+			
+			file.removeRow(row);
+			
+			file.checkGrid();
+			
+			editor.closeFile(file.path);
+			
+			callback(true);
+		});
+	}, 1);
+	
 	editor.addTest(function testDeleteTextRangeWithLongText(callback) {
 		editor.openFile("testDeleteTextRangeWithLongText.html", '<!DOCTYPE html>\r\n<div class="wrap1">\r\n\t<div class="content">\r\n\t\t\r\n\t\t<p>Esse proident dolore cupidatat in dolor reprehenderit irure nostrud eu.\r\n\t\tMollit voluptate pariatur cillum enim voluptate excepteur amet non.\r\n\t\tEnim duis irure dolore laborum quis mollit adipisicing labore excepteur fugiat dolor esse reprehenderit sunt excepteur.\r\n\t\tMollit ad laboris ad nulla dolor sint do nostrud exercitation dolore nostrud mollit.</p>\r\n\t\t\r\n\t</div>\r\n</div>\r\n', function(err, file) {
 			
@@ -158,7 +173,7 @@
 			
 		});
 		
-	}, 1);
+	});
 	
 	
 	editor.addTest(function dblClickRemovedSpace(callback) {

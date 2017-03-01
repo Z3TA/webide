@@ -902,23 +902,29 @@ var File; // File object is global
 	File.prototype.removeRow = function(row) {
 		// Removes all text on that row, plus the line break
 		var file = this;
+		
+		console.log("++++++++++ removeRow row=" + row + " ++++++++++");
+		
 		var grid = file.grid;
 		
 		if(row == undefined) throw new Error("Argument row is undefined!");
 		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
+		
 		var firstIndex = grid[row].startIndex - grid[row].indentationCharacters.length;
+		
+		console.log("firstIndex=" + firstIndex + " grid[" + row + "].startIndex=" + grid[row].startIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length)
 		
 		var lastIndex;
 				
 		if(row < (grid.length-1)) {
-			lastIndex= grid[row+1].startIndex-1;
+			lastIndex= grid[row+1].startIndex - file.lineBreak-length - grid[row+1].indentationCharacters.length - 1;
 		}
 		else {
 			lastIndex= file.text.length-1;
 		}
-				
+		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
 		
 		file.text = deletePart(file.text, firstIndex, lastIndex);
@@ -929,6 +935,8 @@ var File; // File object is global
 		var lineNumberDecrementor = 1;
 		
 		fixIndexOnRemainingRows(grid, row, deletionLength, lineNumberDecrementor);
+		
+		file.checkGrid();
 		
 		return removedText;
 		
