@@ -2441,6 +2441,7 @@ var File; // File object is global
 		else if(index > file.text.length) {
 			throw new Error("Index can not be over file length=" + file.text.length + "");
 		}
+		else if(isNaN(index)) throw new Error("index=" + index + " is not a number!");
 		
 		if(caret == undefined || caret == file.caret) {
 			file.checkCaret(file.caret);
@@ -2574,7 +2575,11 @@ var File; // File object is global
 		
 		file.checkCaret(caret);
 		
-		if(caret == file.caret) editor.fireEvent("moveCaret", file, caret);
+		if(caret == file.caret) {
+			editor.fireEvent("moveCaret", file, caret);
+			file.scrollToCaret();
+			editor.renderNeeded();
+		}
 		
 		return caret;
 		

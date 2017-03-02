@@ -266,13 +266,68 @@ var WysiwygEditor;
 				} else throw new Error("no selection.rangeCount");
 				
 				// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
-				return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos};
+				return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos, text: parentNode ? parentNode.innerText : baseNode.innerText };
 				
 			}
 			else throw new Error("no baseNode");
 		}
 		else throw new Error("Unable to get selection");
 		
+	}
+	
+	WysiwygEditor.prototype.placeCaretInSourceCode = function placeCaretInSourceCode(elementFromContentEditable) {
+		var wysiwygEditor = this;
+		
+		// Attempt to place the caret in the source code
+		
+		var sourceFile = wysiwygEditor.sourceFile;
+		
+		var innerText = elementFromContentEditable.innerText;
+		if(innerText.length == 0) console.log("Element in content-editable does not contain text.");
+		else {
+
+			var caretPos = wysiwygEditor.getCaretPosition();
+						
+			var index = sourceFile.text.indexOf(innerText);
+			
+			if(index == -1 && caretPos.text != undefined) {
+				// Moving the caret using keyboard arrows always seem to return the body element as target.
+				// caretPos might have the right element!
+				if(caretPos.text.length > 0) innerText = caretPos.text;
+				index = sourceFile.text.indexOf(innerText);
+			}
+			
+			if(index == -1) {
+				// Probably because you clicked on the body element
+				console.log("Unable to find the string innerText='" + lbChars(innerText) + "' in the source file: " + sourceFile.path);
+			}
+			else {
+			
+				if(sourceFile.text.indexOf(innerText, index + 1) != -1) console.log("Source file contains more then one occurencies of innerText='" + innerText + "'");
+				else {
+					// The source file only contains one instance of the text string, it's safe to assume that's where the caret should be placed!
+					
+					console.log("index=" + index + " caretPos.char=" + caretPos.char + " ");
+					
+					index += caretPos.char;
+					
+					return sourceFile.moveCaretToIndex(index);
+					
+				}
+			}
+		}
+		
+		// Failed to get position based on text, try outerHTML
+		var outerHTML = elementFromContentEditable.outerHTML;
+		var index = sourceFile.text.indexOf(outerHTML);
+		
+		if(index == -1) console.log("Unable to find outerHTML='" + outerHTML + "' in the source file: " + sourceFile.path);
+		else {
+		
+			if(sourceFile.text.indexOf(outerHTML, index + 1) != -1) console.log("Source file contains more then one occurencies of outerHTML='" + outerHTML + "'");
+			else return sourceFile.moveCaretToIndex(index);
+
+		}
 	}
 	
 	WysiwygEditor.prototype.placeCaret = function placeCaret(x, y, charPos) {
@@ -435,18 +490,26 @@ var WysiwygEditor;
 	
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(e) {
+		var wysiwygEditor = this;
 		console.log("previewKeyup!");
-		console.log(e.target);
+		wysiwygEditor.placeCaretInSourceCode(e.target);
 	}
 	
 	WysiwygEditor.prototype.previewMouseup = function previewMouseup(e) {
+		var wysiwygEditor = this;
+		
 		console.log("previewMouseup!");
-		console.log(e.target);
+		
+		objInfo(e.target);
+		
+		wysiwygEditor.placeCaretInSourceCode(e.target);
+		
 	}
 	
 	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(e) {
+		var wysiwygEditor = this;
 		console.log("previewSelectionchange!");
-		console.log(e.target);
+		wysiwygEditor.placeCaretInSourceCode(e.target);
 	}
 	
 	WysiwygEditor.prototype.previewPaste = function previewPaste(e) {
@@ -464,7 +527,7 @@ var WysiwygEditor;
 		
 		cleaned = sanitize(cleaned, wysiwygEditor.sourceFile.lineBreak);
 		
-		
+		var aShowDefaultUI = true;
 		contentEditor.execCommand("insertHTML", aShowDefaultUI, cleaned);
 		
 	}
