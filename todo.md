@@ -42,8 +42,8 @@ What I'm working on
 -------------------
 
 Ability to WYSIWYG-edit normal web pages
-
-
+- Solution to when the user removes the line break before the </body> tag. (can not update the file inside the fileChange event listener)
+- Update the content-editable when editing outside the body tag (might have to redo dance?)
 
 
 todo:

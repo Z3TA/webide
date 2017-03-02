@@ -32,6 +32,13 @@ var WysiwygEditor;
 		// Make sure file is a HTML file
 		if(!isHTML(sourceFile)) throw new Error("sourceFile (" + getFilenameFromPath(sourceFile.path) + ") is not a HTML file!");
 		
+		
+		// Make sure the text contains body tags with space after <body> and before </body> (white space is allowed infront of </body>)
+		if(!sourceFile.text.match(/<body/i)) throw new Error("Source file contains no body tag! sourceFile.path:\n" + sourceFile.path);
+		if(!sourceFile.text.match(/<body.*>\s*[\n|\r\n]/i)) throw new Error("There is not line break after the body start tag in sourceFile.path:\n" + sourceFile.path);
+		if(!sourceFile.text.match(/[\n|\r\n]\s*<\/body>/i)) throw new Error("There is not line break before the body end tag in sourceFile.path:\n" + sourceFile.path);
+		
+		
 		wysiwygEditor.setStartRow();
 		
 		wysiwygEditor.open();
@@ -89,6 +96,7 @@ var WysiwygEditor;
 				var text = sourceFile.text;
 				
 				console.log("(original) text=" + lbChars(text));
+				
 				
 				// Write the text to the content-editable
 				if(!wysiwygEditor.url) doc.write(text);
@@ -803,6 +811,9 @@ var WysiwygEditor;
 		var win = gui.Window.get();
 		win.show();
 		
+		// Focus the content-edit window
+		wysiwygEditor.previewWin.focus();
+		
 		console.timeEnd("contentEdit");
 		
 		sourceFile.checkGrid();
@@ -844,18 +855,11 @@ var WysiwygEditor;
 		
 		var prewHTML = body.innerHTML;
 		
-		prewHTML = removeHeadLineBreak(prewHTML);
+		//prewHTML = removeHeadLineBreak(prewHTML);
 		
+		prewHTML = removeHeadWhiteSpaceAndAddLineBreak(prewHTML, wysiwygEditor.lineBreak);
 		prewHTML = removeTailWhiteSpaceAndAddLineBreak(prewHTML, wysiwygEditor.lineBreak);
-		
-		//prewHTML = removeTailLineBreak(prewHTML);
-		
-		// The content editable *some times* like to add another line break ... 
-		//prewHTML = removeTailLineBreak(prewHTML);
-		
-		// The content editable also *some times* like to add a tailing tab
-		//prewHTML = removeTailTab(prewHTML);
-		
+
 		
 		return prewHTML;	
 		
@@ -904,8 +908,8 @@ var WysiwygEditor;
 		// Returns the body of the source HTML code
 		
 		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
-		// so there needs to be a break after <body> and before </body>
-		// the </body> ending tag must have at least one line break infront of it. And can have white space after it
+		// so there needs to be a line-break after <body> and before </body>
+
 		
 		var wysiwygEditor = this;
 		
@@ -916,12 +920,18 @@ var WysiwygEditor;
 		var srcHTML;
 		
 		if(srcMatchBody == null) {
+			alertBox("Can not find body-tags with line breaks!");
+			
+			// just warn, then stop where getSourceCode() is called, and try to fix the problem
+			
 			throw new Error("Could not find body element in source file:" + sourceFile.path + "\nsourceFile.text=" + lbChars(sourceFile.text));
 		}
 
 		srcHTML = srcMatchBody[1];
 		
+		srcHTML = removeHeadWhiteSpaceAndAddLineBreak(srcHTML, wysiwygEditor.lineBreak);
 		srcHTML = removeTailWhiteSpaceAndAddLineBreak(srcHTML, wysiwygEditor.lineBreak);
+
 		
 		return srcHTML;
 		
@@ -964,10 +974,16 @@ var WysiwygEditor;
 		//body.innerHTML = lb + srcHTML + lb;
 	}
 	
+
+	
+	function removeHeadWhiteSpaceAndAddLineBreak(text, LB) {
+		if(!LB) throw new Error("Need to specify line-break character to use! LB=" + LB)
+		return text.replace(/^\s*/, LB);
+	}
 	
 	function removeTailWhiteSpaceAndAddLineBreak(text, LB) {
-		if(!LB) throw new Error("Need to specify line breack character to use! LB=" + LB)
-		return text.replace(/\s$/, LB);
+		if(!LB) throw new Error("Need to specify line-break character to use! LB=" + LB)
+		return text.replace(/\s*$/, LB);
 	}
 	
 	function isHTML(file) {
