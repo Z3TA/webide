@@ -168,12 +168,12 @@
 		/*
 			### Parse only function optimizer
 			
-			type: "delete", "linebreak", "insert", "text", deleteTextRange, deleteCharacter, reload, 
+			type: "delete", "linebreak", "insert", "text", deleteTextRange, deleteCharacter, reload, removeRow
 		*/
 		
 		if(shouldParse(file)) { // If the file should be parsed or not
 			
-			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deleteCharacter")) { // If the file was parsed before
+			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deleteCharacter" || type == "removeRow")) { // If the file was parsed before
 				
 				//console.log("type=" + type + " characters=" + characters);
 				
@@ -200,7 +200,7 @@
 					
 					var charactersLength = characters.length;
 					
-					if(type == "delete" || type == "deleteTextRange" || type == "deleteCharacter") {
+					if(type == "delete" || type == "deleteTextRange" || type == "deleteCharacter" || type == "removeRow") {
 						charactersLength = -charactersLength;
 					}
 					

@@ -936,7 +936,15 @@ var File; // File object is global
 		
 		fixIndexOnRemainingRows(grid, row, deletionLength, lineNumberDecrementor);
 		
-		file.checkGrid();
+		file.fixCaret();
+		
+		file.sanityCheck();
+		
+		editor.renderNeeded();
+		
+		var col = 0;
+		file.change("removeRow", removedText, firstIndex, row, col);
+		
 		
 		return removedText;
 		
@@ -951,6 +959,11 @@ var File; // File object is global
 		if(row >= grid.length) throw new Error("row=" + row + " is above grid.length=" + grid.length);
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
+		if(file.grid[row].length === 0) {
+			console.warn("The row=" + row + " do not contain any text!");
+			return "";
+		}
+		
 		var firstIndex = grid[row].startIndex - grid[row].indentationCharacters.length;
 		var lastIndex = -1;
 		
@@ -960,6 +973,14 @@ var File; // File object is global
 		else {
 			lastIndex = firstIndex + grid[row].indentationCharacters.length - (grid[row].indentationCharacters.length > 0 ? 1 : 0);
 		}
+		
+		// Sanity check:
+		var textToBeRemoved = file.text.substring(firstIndex, lastIndex+1);
+		if(textToBeRemoved.match(/[\n|\r\n]/)) {
+			file.debugGrid();
+			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
+		}
+		
 		
 		return file.deleteTextRange(firstIndex, lastIndex);
 		
@@ -1375,6 +1396,16 @@ var File; // File object is global
 		
 		// This function currently don't know how to handle removing text that starts or ends with a line break! (it would result in a bug, where not all lines are removed)
 		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") {
+			// note: Second argument in String.substring is "up to, but not including"
+			var removedText = file.text.substring(firstIndex, lastIndex+1);
+			if(removedText.match(/\s*/) && occurrences(removedText, file.lineBreak) === 1) {
+				// I'ts only white space, and only one row, so for convenience, we'll use file.removeRow(row) instead!
+				var gridRow = file.rowFromIndex(firstIndex);
+				if(gridRow.row === undefined) throw new Error("Did not expect gridRow.row to be undefined! gridRow=" + JSON.stringify(gridRow) + " firstIndex=" + firstIndex);
+				console.warn("Using file.removeRow() instead of file.deleteTextRange() to remove removedText=" + lbChars(removedText) + " on firstIndex=" + firstIndex);
+				return file.removeRow(gridRow.row);
+			}
+			
 			if(editor.settings.devMode && file.text.length < 100) visualizeTextRange(file.text, firstIndex, lastIndex);
 			throw new Error("firstIndex=" + firstIndex + " can not be on a line break! You might want to use file.removeRow(row) instead.");
 		}
@@ -3089,7 +3120,7 @@ var File; // File object is global
 			if(!caret.hasOwnProperty("eof"))  throw new Error("caret has no eof property! You probably want to use file.createCaret() instead."); // caret.eof = false;
 			if(!caret.hasOwnProperty("eol"))  throw new Error("caret has no eol property! You probably want to use file.createCaret() instead."); // caret.eol = false;
 		}
-				
+		
 		if(caret.row < 0) caret.row = 0;
 		else if(caret.row >= file.grid.length) {
 			if(file.grid.length == 0) caret.row = 0;

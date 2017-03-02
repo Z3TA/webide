@@ -1464,6 +1464,8 @@ editor.lastKeyPressed = "";
 		
 		var file = editor.currentFile;
 		
+		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
+		
 		// Math.floor to prevent sub pixels
 		var top = Math.floor(editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight);
 		var left = Math.floor(editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth);
