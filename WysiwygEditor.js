@@ -428,6 +428,8 @@ var WysiwygEditor;
 		
 		//}, 3000);
 		
+		previewWin.show();
+		
 		return true;
 	}
 	
@@ -696,6 +698,12 @@ var WysiwygEditor;
 		}
 		
 		wysiwygEditor.ignoreSourceFileChange = false;
+		
+		
+		// Show the editor window
+		var gui = require('nw.gui');
+		var win = gui.Window.get();
+		win.show();
 		
 		console.timeEnd("contentEdit");
 		
