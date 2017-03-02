@@ -1095,20 +1095,26 @@ function determineLineBreakCharacters(text) {
 	console.log("Line break? nr=" + nr + " rn=" + rn + "");
 	
 	if(rn > nr) {
+		console.log("Using CRLF");
 		return "\r\n";
 	}
 	else if(nr > rn) {
+		console.warn("Using LFCR");
 		return "\n\r";
 	}
 	else if(text.indexOf("\n") > -1) {
+		console.log("Using LF (text has LF but no CRLF or LFCR)");
 		return "\n";
 	}
 	else {
 		// Text has no line breaks. Use the default: (cr lf in windows)
+		console.warn("Text has no line breaks!");
 		if(navigator.platform.indexOf("Win") > -1) {
+			console.log("Using CRLF (Because it's Windows)");
 			return "\r\n";
 		}
 		else {
+			console.log("Using LF (Because it's Not Windows)");
 			return "\n";
 		}
 	}
