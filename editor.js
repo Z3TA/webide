@@ -278,6 +278,9 @@ editor.lastKeyPressed = "";
 		
 		console.log("Opening file: " + path + " typeof text=" + typeof text);
 		
+		// Convert path delimters !? 
+		
+		
 		// Just so that we are consistent
 		if(text === null) throw new Error("text is null! It should be undefined for the file to open from disk"); // note: null == undefined = true
 		

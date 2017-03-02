@@ -41,9 +41,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Ability to WYSIWYG-edit normal web pages:
-1. Currently working on sanitazing content editable 
-2. Fix caret placement after edit
+Ability to WYSIWYG-edit normal web pages
+
 
 
 
@@ -222,7 +221,10 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
-Somehow the same file was openec twice ... 
+Text is blurry in Windows when the function list is visible ...
+
+Somehow the same file was openec twice ...  It happends when files are opened with / as path delimiters in windows,
+so you have one file with "C:\folder\file.txt" and another "C:/folder/file.txt"
 
 linux ftp file names with åäö get scramled
 
