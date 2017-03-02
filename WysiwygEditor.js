@@ -1053,6 +1053,21 @@ var WysiwygEditor;
 		html = html.replace(/>\s*<div/gi, ">" + LB + LB + "<div");
 		html = html.replace(/<\/div>\s*</gi, "</div>" + LB + LB + "<");
 		
+		
+		// Add Line break before ending div tags
+		html = html.replace(/<\/div>/gi, LB + "</div>");
+		
+		// Then remove line breaks for divs that did not have a line breaks inside
+		html = html.replace(/<div(.*)>([^\n]+)\n<\/div>/gi, "<div$1>$2</div>");
+		
+		// Also remove the line break from divs that where emty
+		html = html.replace(/<div(.*)>([^\n]?)\n<\/div>/gi, "<div$1>$2</div>");
+		
+		// And remove double line breaks before </div> ending tag
+		html = html.replace(/\n\n<\/div>/gi, LB + "</div>");
+		
+		
+		
 		// Line breaks between tbody
 		html = html.replace(/>\s*<tbody/gi, ">" + LB + "<tbody");
 		html = html.replace(/<\/tbody>\s*</gi, "</tbody>" + LB + "<");
