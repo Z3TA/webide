@@ -8,6 +8,7 @@
 	"use strict";
 	
 	var menuItem;
+	var wysiwygEditor;
 	
 	editor.plugin({
 		desc: "WYSIWYG editor for HTML files",
@@ -24,13 +25,23 @@
 	
 	function unload() {
 		editor.removeMenuItem(menuItem);
-		wysiwygEditor.close();
+		if(wysiwygEditor) wysiwygEditor.close();
 	}
 	
 	function createwysiWygEditor(file) {
 		
-		var wysiwygEditor = new WysiwygEditor(file);
+		if(wysiwygEditor) {
+			if(wysiwygEditor.sourceFile == file) {
+				wysiwygEditor.open();
+				return;
+			}
+			else {
+				wysiwygEditor.close();
+			}
+		}
 		
+		wysiwygEditor = new WysiwygEditor(file);
+
 	}
 	
 	
