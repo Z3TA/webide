@@ -39,7 +39,7 @@
 		var startOfParagraph = -1;
 		var endOfParagraph = -1;
 		// Search right for double line breaks
-		lbloop: for(var char, charInBtwLbs, i=Math.max(file.caret.index, 1); i<file.text.length; i++) {
+		lbloop: for(var char, charInBtwLbs = "", i=Math.max(file.caret.index, 1); i<file.text.length; i++) {
 			char = file.text.charAt(i)
 			if(char == lastLineBreakCharacter) {
 				
@@ -64,7 +64,7 @@
 		}
 		
 		// Search left to find two double breaks
-		for(var char, charInBtwLbs, i=Math.max(file.caret.index, 1); i>1; i--) {
+		for(var char, charInBtwLbs = "", i=Math.max(file.caret.index, 1); i>1; i--) {
 			char = file.text.charAt(i)
 			if(char == lastLineBreakCharacter) {
 				
