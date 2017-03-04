@@ -83,6 +83,9 @@
 			return false;
 		}
 		
+		
+		
+		
 		console.log("startOfParagraph=" + startOfParagraph);
 		console.log("endOfParagraph=" + endOfParagraph);
 		
@@ -91,14 +94,22 @@
 		text = text.trim();
 		
 		// Make sure it's text or html and not code
-		if(text.indexOf("{") != -1) {
+		if(text.indexOf("{") != -1 || text.match(/<ul/i) ) {
 			alertBox("Not word wrapping (not plain text) text=" + text);
 			return false;
 		}
 		
+		// Todo: Make sure it doesn't contain HTML elements besides <p> and <br>
+		
 		var firstCharacter = text.charAt(0);
 		var secondCharacter = text.charAt(1);
 		var lastCharacter = text.charAt(text.length-1);
+		
+		console.log("firstCharacter=" + lbChars(firstCharacter));
+		console.log("secondCharacter=" + lbChars(secondCharacter));
+		console.log("lastCharacter=" + lbChars(lastCharacter));
+		
+		// todo: Allow it to start and end with tags besides p if the tags are the same
 		
 		if(firstCharacter != "<" && secondCharacter != "p" && file.mode != "text") {
 			alertBox("The word wrapper is currently only supported inside HTML paragraphs or in plain text files");
@@ -121,7 +132,7 @@
 			}
 		}
 		
-		console.log( "paragraph=text=: " + text);
+		console.log( "paragraph text=" + lbChars(text));
 		
 		//return false;
 		
@@ -142,6 +153,7 @@
 		file.deleteTextRange(startOfParagraph, endOfParagraph);
 		
 		var textLengthBefore = text.length;
+		var containedLineBreak = text.indexOf(file.lineBreak) != -1;
 		
 		file.checkGrid();
 		
@@ -158,12 +170,12 @@
 		if(text.charAt(text.length-1) != lastCharacter) throw new Error("Last character is not the same before and after! " + text.charAt(text.length-1) + " != " + lastCharacter);
 
 		
-		// deleteTextRange trims the line breaks, so insert them again!
-		file.insertLineBreak();
+		// deleteTextRange *might* trim the line breaks ...
+		//file.insertLineBreak();
 		
 		file.insertText(text, file.caret);
 		
-		file.insertLineBreak();
+		if(containedLineBreak) file.insertLineBreak();
 		
 		
 		// Find out where to move the caret ... it should stay at the same place in the text!
