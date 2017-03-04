@@ -1155,6 +1155,18 @@ var WysiwygEditor;
 		html = html.replace(/<\/th>\s*</gi, "</th>" + LB + "<");
 		
 		
+		// Line breaks between li
+		html = html.replace(/>\s*<li/gi, ">" + LB + "<li");
+		html = html.replace(/<\/li>\s*</gi, "</li>" + LB + "<");
+		
+		// Line breaks between ul and ol
+		html = html.replace(/>\s*<ul/gi, ">" + LB + "<ul");
+		html = html.replace(/<\/ul>\s*</gi, "</ul>" + LB + "<");
+
+		html = html.replace(/>\s*<ol/gi, ">" + LB + "<ol");
+		html = html.replace(/<\/ol>\s*</gi, "</ol>" + LB + "<");
+		
+		
 		// Word-wrap p elements
 		//html = html.replace(/<p.*>(.*)<\/p>/ig, "<p>" + wordWrapText("$1") + "</p>");
 		
