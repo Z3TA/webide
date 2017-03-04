@@ -32,7 +32,8 @@
 		
 		if(wysiwygEditor) {
 			if(wysiwygEditor.sourceFile == file) {
-				wysiwygEditor.open();
+				var dance = true;
+				wysiwygEditor.reload(dance);
 				return;
 			}
 			else {

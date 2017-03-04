@@ -42,7 +42,6 @@ What I'm working on
 -------------------
 
 Ability to WYSIWYG-edit normal web pages
-- Update the content-editable when editing outside the body tag (might have to redo dance?), like when adding css, etc
 
 
 todo:
@@ -66,6 +65,9 @@ auto complete function arguments in anonymous functions!
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
+
+Upgrade to latest nw.js, use the Chrome OS api's ... Add to Chrome OS app store.
+
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
