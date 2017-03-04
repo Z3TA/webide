@@ -69,7 +69,11 @@
 			if(char == lastLineBreakCharacter) {
 				
 				if(charInBtwLbs.trim() == "") {
-					startOfParagraph = i+1;
+					startOfParagraph = i + 1;
+					
+					// There might be yet another line break before the paragraph starts, seek to the first non white space character
+					while(file.text.charAt(startOfParagraph).match(/\s/) && startOfParagraph < file.text.length) startOfParagraph++;
+					
 					break;
 				}
 				charInBtwLbs = "";
