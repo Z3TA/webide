@@ -42,11 +42,13 @@ What I'm working on
 -------------------
 
 Ability to WYSIWYG-edit normal web pages
-- Solution to when the user removes the line break before the </body> tag. (can not update the file inside the fileChange event listener)
-- Update the content-editable when editing outside the body tag (might have to redo dance?)
+- Update the content-editable when editing outside the body tag (might have to redo dance?), like when adding css, etc
 
 
 todo:
+
+Functionality discovery: Add a search button in the upper right corder, clicking it is the same as clicking the keyboard function/ctrl button:
+It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
 
 Web/home page widget, when you right click and select edit, it sends a signal to jzedit via websocket to localhost, 
 to open that page (lauch "editPage" event and let plugins figure out what to do) and start WYSIWYG mode, scroll
@@ -220,6 +222,9 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Replacing a text with a text that contains the text to be replaced causes an endless loop when clicking Replace all.
+Example: getSourceCode => getSourceCodeBody
 
 Text is blurry in Windows when the function list is visible ...
 

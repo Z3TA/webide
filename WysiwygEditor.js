@@ -5,6 +5,8 @@ var WysiwygEditor;
 	
 	var wysiwygEditorCounter = 0; // WysiwygEditor instances
 	
+	var regexBody = /<body[^>]*>\s*[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i;
+	
 	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTag, url) {
 		var wysiwygEditor = this;
 		
@@ -32,11 +34,7 @@ var WysiwygEditor;
 		// Make sure file is a HTML file
 		if(!isHTML(sourceFile)) throw new Error("sourceFile (" + getFilenameFromPath(sourceFile.path) + ") is not a HTML file!");
 		
-		
-		// Make sure the text contains body tags with space after <body> and before </body> (white space is allowed infront of </body>)
-		if(!sourceFile.text.match(/<body/i)) throw new Error("Source file contains no body tag! sourceFile.path:\n" + sourceFile.path);
-		if(!sourceFile.text.match(/<body.*>\s*[\n|\r\n]/i)) throw new Error("There is not line break after the body start tag in sourceFile.path:\n" + sourceFile.path);
-		if(!sourceFile.text.match(/[\n|\r\n]\s*<\/body>/i)) throw new Error("There is not line break before the body end tag in sourceFile.path:\n" + sourceFile.path);
+		if(!wysiwygEditor.bodyExist()) return;
 		
 		
 		wysiwygEditor.setStartRow();
@@ -136,7 +134,7 @@ var WysiwygEditor;
 				sourceFile.reload(text);
 				
 				// Finally make the body of the source file the body of the content-editable
-				var srcHTML = wysiwygEditor.getSourceCode();
+				var srcHTML = wysiwygEditor.getSourceCodeBody();
 				setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
 				
 				
@@ -426,6 +424,7 @@ var WysiwygEditor;
 			
 			console.log("Update wysiwyg for file.path=" + file.path);
 			
+			if(!wysiwygEditor.bodyExist()) return;
 			
 			wysiwygEditor.setStartRow(); // In case more rows was added above the body tag
 			
@@ -442,7 +441,7 @@ var WysiwygEditor;
 			
 			var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
 			
-			var srcHTML = wysiwygEditor.getSourceCode();
+			var srcHTML = wysiwygEditor.getSourceCodeBody();
 			
 			// Can not change the file in a fileChange event or it would create an endless loop
 			// Witch means we can not sanitize on source code changes,
@@ -605,7 +604,7 @@ var WysiwygEditor;
 			}
 			
 			// Compare the source codes
-			var srcHTML = wysiwygEditor.getSourceCode();
+			var srcHTML = wysiwygEditor.getSourceCodeBody();
 			
 
 			
@@ -837,7 +836,7 @@ var WysiwygEditor;
 			body.oninput = null;
 		*/
 		
-		previewWin.close();
+		if(previewWin) previewWin.close();
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 	}
@@ -904,7 +903,7 @@ var WysiwygEditor;
 		
 	}
 	
-	WysiwygEditor.prototype.getSourceCode = function getSourceCode(sourceFile) {
+	WysiwygEditor.prototype.getSourceCodeBody = function getSourceCodeBody(sourceFile) {
 		// Returns the body of the source HTML code
 		
 		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
@@ -915,14 +914,14 @@ var WysiwygEditor;
 		
 		var sourceFile = wysiwygEditor.sourceFile;
 		
-		var srcMatchBody = sourceFile.text.match(/<body.*>[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i);
+		var srcMatchBody = sourceFile.text.match(regexBody);
 		
 		var srcHTML;
 		
 		if(srcMatchBody == null) {
 			alertBox("Can not find body-tags with line breaks!");
 			
-			// just warn, then stop where getSourceCode() is called, and try to fix the problem
+			// just warn, then stop where getSourceCodeBody() is called, and try to fix the problem
 			
 			throw new Error("Could not find body element in source file:" + sourceFile.path + "\nsourceFile.text=" + lbChars(sourceFile.text));
 		}
@@ -937,12 +936,46 @@ var WysiwygEditor;
 		
 	}
 	
+	WysiwygEditor.prototype.bodyExist = function checkBodyExist(close) {
+		var wysiwygEditor = this;
+		
+		if(close == undefined) close = true;
+		
+		var sourceFile = wysiwygEditor.sourceFile;
+		
+		// Make sure the text contains body tags with space after <body> and before </body> (white space is allowed infront of </body>)
+		if(!sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i)) {
+			return exit("The source needs to have a body tag for the WYSIWYG editor to work!");
+		}
+		
+		if(!sourceFile.text.match(/<body.*>/i)) throw new Error("Source file contains no body tag! sourceFile.path:\n" + sourceFile.path);
+		if(!sourceFile.text.match(/<\/body>/i)) throw new Error("Source file contains no end body tag! sourceFile.path:\n" + sourceFile.path);
+		
+		if(!sourceFile.text.match(/<body[^>]*>\s*[\n|\r\n]/i)) {
+			return exit("There needs to be a line break after the body start tag for the WYSIWYG editor to work!");
+			throw new Error("There is no line break after the body start tag in sourceFile.path:\n" + sourceFile.path);
+		}
+		if(!sourceFile.text.match(/[\n|\r\n]\s*<\/body>/i)) {
+			return exit("There needs to be a line break before the body end tag for the WYSIWYG editor to work!");
+			throw new Error("There is no line break before the body end tag in sourceFile.path:\n" + sourceFile.path);
+		}
+		
+		return true;
+		
+		function exit(msg) {
+			alertBox(msg);
+			if(close) wysiwygEditor.close();
+			return false;
+		}
+		
+	}
+	
 	function changeCodeInBody(code, html) {
 		
 		// There needs to be a line break directly after <body> and before </body> !
 		// This is to prevent having the body tags included in text diff
 		
-		if(html.match(/<body.*>[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i) === null) throw new Error("Unable to find body element when setting the code body.\n\
+		if(html.match(regexBody) === null) throw new Error("Unable to find body element when setting the code body.\n\
 		html=" + lbChars(html));
 		
 		// 1. body attributes
@@ -955,7 +988,7 @@ var WysiwygEditor;
 		// The white space before </body> is preserved to keep source file indentation characters
 		
 		// Sanity check!
-		if(html.match(/<body.*>[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i) === null) throw new Error("We are not sane!\n\
+		if(html.match(regexBody) === null) throw new Error("We are not sane!\n\
 		html=" + lbChars(html));
 		
 		return html;
