@@ -31,9 +31,6 @@ var WysiwygEditor;
 		wysiwygEditor.sourceFile = sourceFile;
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
 		
-		// Make sure file is a HTML file
-		if(!isHTML(sourceFile)) throw new Error("sourceFile (" + getFilenameFromPath(sourceFile.path) + ") is not a HTML file!");
-		
 		if(!wysiwygEditor.bodyExist()) return;
 		
 		
@@ -518,6 +515,8 @@ var WysiwygEditor;
 					}
 				}
 			}
+			
+			previewWin.show();
 		} 
 		//else console.log("File is not the source file! sourceFile.path=" + sourceFile.path + " file.path=" + file.path);
 		
@@ -525,7 +524,7 @@ var WysiwygEditor;
 		
 		//}, 3000);
 		
-		previewWin.show();
+		
 		
 		return true;
 	}
@@ -1019,19 +1018,6 @@ var WysiwygEditor;
 		return text.replace(/\s*$/, LB);
 	}
 	
-	function isHTML(file) {
-		
-		var type = getFileExtension(file.path);
-		
-		if(!file.text.match(/<body.*>([\s\S]*)<\/body>/i)) {
-			console.warn("Source document must have a <body> tag!");
-			return false;
-		}
-		
-		if(type.match(/htm|html/i)) return true;
-		else if(file.text.match(/<DOCTYPE HTML/i)) return true;
-		else return false;
-	}
 	
 	function sanitizeOfficeDoc(html) {
 		
