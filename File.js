@@ -3085,7 +3085,7 @@ var File; // File object is global
 		file.changed = true;
 		
 		if(file.isBig) {
-			alert("Big file support not yet implemented. Changes will not be saved!")
+			alertBox("Big file support not yet implemented. Changes will not be saved!")
 		}
 		
 		file.isSaved = false;
