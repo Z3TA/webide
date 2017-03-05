@@ -3841,6 +3841,8 @@ editor.lastKeyPressed = "";
 			// Menu test:
 			// https://github.com/nwjs/nw.js/wiki/Window-menu
 			// It says menubar should work in Linux ...
+			// confirmed: Meny at the top DOES NOT WORK in nw.js v0.12.3
+			/*
 			var menu = new gui.Menu({ type: 'menubar' });
 			
 			var menuA = new gui.MenuItem({ label: 'Item A' });
@@ -3858,6 +3860,7 @@ editor.lastKeyPressed = "";
 			menu.append(new gui.MenuItem({ label: 'Item C' }));
 			
 			gui.Window.get().menu = menu;
+			*/
 			
 		}
 		
