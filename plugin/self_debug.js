@@ -149,10 +149,11 @@
 			}
 			
 			if(answer == yes) {
-				process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
+				if(runtime == "browser") document.location = document.location.href;
+				else process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
-				if(editor.settings.devMode) {
+				if(editor.settings.devMode && runtime != "browser") {
 					// Show the chrome dev tools
 					var gui = require('nw.gui').Window.get();
 					gui.showDevTools();

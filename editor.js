@@ -858,8 +858,8 @@ editor.lastKeyPressed = "";
 			}
 		}
 		else if(runtime == "browser") {
-			getFile(path, function(string, url) {
-				callback(null, url, string);
+			getFile(path, function(err, string, url) {
+				callback(err, url, string);
 			});
 		}
 		else {
@@ -5123,11 +5123,11 @@ editor.lastKeyPressed = "";
 					
 					console.log("File loaded.");
 					
-					callback(xmlHttp.responseText, url);
+					callback(null, xmlHttp.responseText, url);
 					
 				}
 				else {
-					throw new Error("Error when opening url=" + url + "\nxmlHttp.status=" + xmlHttp.status + "\nxmlHttp.responseText=" + xmlHttp.responseText);
+					callback(new Error("Error when opening url=" + url + "\nxmlHttp.status=" + xmlHttp.status + "\nxmlHttp.responseText=" + xmlHttp.responseText));
 				}
 				
 			}
