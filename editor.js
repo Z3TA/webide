@@ -3837,6 +3837,10 @@ editor.lastKeyPressed = "";
 			console.log("Command arguments:" + commandArguments);
 			//alertBox("Command arguments:" + commandArguments);
 			
+			if(commandArguments.indexOf("--disable-lcd-text") != -1) {
+				editor.settings.sub_pixel_antialias = false;
+			}
+			
 			
 			// Menu test:
 			// https://github.com/nwjs/nw.js/wiki/Window-menu

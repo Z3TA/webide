@@ -15,7 +15,6 @@ console.log("runtime=" + runtime);
 if(runtime=="browser") {
 	// We better use a web safe font ...
 	
-	editor.settings.sub_pixel_antialias = true;
 	editor.settings.style.font = "Courier New";
 	editor.settings.style.highlightMatchFont = "bold 15px Courier New";
 	editor.settings.style.fontSize = 15;
@@ -41,7 +40,6 @@ else if(process.platform == "windows") {
 		
 */
 	
-	editor.settings.sub_pixel_antialias = true;
 	editor.settings.style.font = "Consolas";
 	editor.settings.style.highlightMatchFont = "bold 15px Consolas";
 	editor.settings.style.fontSize = 15;
@@ -72,7 +70,6 @@ else if(process.platform == "linux") {
 	
 	
 	/*
-		editor.settings.sub_pixel_antialias = false;
 		editor.settings.gridHeight = 17;
 		editor.settings.gridWidth = 8;
 		editor.settings.leftMargin = 30;
@@ -81,7 +78,6 @@ else if(process.platform == "linux") {
 		editor.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
 	*/
 	
-	editor.settings.sub_pixel_antialias = false;
 	editor.settings.style.font = "DejaVu Sans Mono";
 	editor.settings.style.highlightMatchFont = "bold 14px DejaVu Sans Mono";
 	editor.settings.style.fontSize = 13;
