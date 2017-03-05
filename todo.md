@@ -84,17 +84,23 @@ Upgrade to latest nw.js, use the Chrome OS api's ... Add to Chrome OS app store.
 What I'm thinking
 -----------------
 
-Sometimes there are requirements like "must work on the web", so users are not allowed to download an executable like nw.js 
+Sometimes there are requirements like "must work on the web" ... 
 Should we skip nw.js and use a NodeJS server instead, and open the GUI in a web browser !?
+Chrome has depricated Chrome apps, and the popular Chromebooks is designed to run web apps instead of native apps.
+
+Have a --server-only command argument, where you can connect to the editor via a web browser.
+
+"Self hosted cloud editor"
+
+Or does developers want to run their editor locally and NOT in a browser ?
 
 
 Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
 
 Getting likes or upvotes are very addicting ... 
 
-Make it so you can only edit pure text in WYSIWYG, encurage editing in HTML! Update the view in real time as you time in the HTML editor.
 Offer a HTML helper widget that inserts code: paragraph, image, link, table, header, etc
-Allow copy/pasting in the WYSIWYG put sanitize it.
+
 
 
 Debugging text transformation from wysiwyg to the editor.
