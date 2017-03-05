@@ -42,6 +42,8 @@ What I'm working on
 -------------------
 
 Ability to WYSIWYG-edit normal web pages
+testing ...
+Integrate with SSG ?
 
 
 todo:
