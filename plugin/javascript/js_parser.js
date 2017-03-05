@@ -1846,7 +1846,7 @@
 						
 						// We have found a new function !
 						
-						console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
+						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
 											
@@ -1865,7 +1865,7 @@
 						
 						if(insideArrowFunction) newFunc.arrowFunction = true;
 						
-						console.log("functionName=" + functionName + " type=" + typeof functionName);
+						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???
