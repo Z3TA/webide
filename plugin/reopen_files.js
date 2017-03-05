@@ -243,16 +243,18 @@ editor.plugin({
 				var loadFilePart = false;
 				
 				if(err) {
-					if(err.code == "ENOENT") {
-						// Trying to reopen a file that doesn't exist. The editor will only send this error if it tried to open from disk. 
-						// Remove from opened files
-						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
-						
-						callback(file, false, err);
-						
-						return;
-					}
-					else throw err;
+					
+					console.error(err.message);
+					console.log(err.stack);
+					alertBox("Unable to open file:\n" + path + "\nError: " + err.message);
+					
+					// Remove from opened files
+					window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+					
+					callback(file, false, err);
+					
+					return;
+					
 				}
 				
 				// Mark the file as saved, because we just opened it

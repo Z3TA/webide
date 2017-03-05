@@ -534,6 +534,7 @@ editor.lastKeyPressed = "";
 					});
 				}
 				else {
+					// Should we give an ENOENT here ?
 					callback(new Error("Failed to get file size for: " + path + "\nNo connection open to FTP on " + parse.hostname + " !"));
 				}
 			}
@@ -1870,7 +1871,7 @@ editor.lastKeyPressed = "";
 	
 	editor.removeMenuItem = function(menuElement) {
 		
-		if(!menuElement) throw new Error("editor.removeMenuItem was called without argument menuElement");
+		if(!menuElement) throw new Error("editor.removeMenuItem was called without argument menuElement=" + menuElement);
 		if(!menuElement.tagName) throw new Error("editor.removeMenuItem argument menuElement is not a HTML node!");
 		
 		var menu = document.getElementById("canvasContextmenu");
@@ -3783,7 +3784,15 @@ editor.lastKeyPressed = "";
 		console.log("Loading plugins (length=" + editor.eventListeners.start.length + ")");
 		for(var i=0; i<editor.plugins.length; i++) {
 			console.log("plugin: " + editor.plugins[i].desc);
-			editor.plugins[i].load(editor); // Call function (and pass global objects!?)
+			// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
+			try {
+				editor.plugins[i].load(editor); // Call function (and pass global objects!?)
+			}
+			catch(err) {
+				console.error(err.message);
+				console.log(err.stack);
+				alertBox('Failed to (fully) load plugin:\n<i>"' + editor.plugins[i].desc + '"<(i>\nError: ' + err.message);
+			}
 		}
 		
 		if(runtime != "browser") {
