@@ -3820,6 +3820,36 @@ editor.lastKeyPressed = "";
 		
 		client.on("data", stdIn);
 		client.on("end", stdEnd);
+			
+			
+			// Command arguments
+			var gui = require('nw.gui');
+			var commandArguments = gui.App.argv;
+			console.log("Command arguments:" + commandArguments);
+			//alertBox("Command arguments:" + commandArguments);
+			
+			
+			// Menu test:
+			// https://github.com/nwjs/nw.js/wiki/Window-menu
+			// It says menubar should work in Linux ...
+			var menu = new gui.Menu({ type: 'menubar' });
+			
+			var menuA = new gui.MenuItem({ label: 'Item A' });
+			
+			var submenu = new gui.Menu();
+			submenu.append(new gui.MenuItem({ label: 'Item 1' }));
+			submenu.append(new gui.MenuItem({ label: 'Item 2' }));
+			submenu.append(new gui.MenuItem({ label: 'Item 3' }));
+			
+			menuA.submenu = submenu;
+			
+			menu.append(menuA);
+			menu.append(new gui.MenuItem({ label: 'Item B' }));
+			menu.append(new gui.MenuItem({ type: 'separator' }));
+			menu.append(new gui.MenuItem({ label: 'Item C' }));
+			
+			gui.Window.get().menu = menu;
+			
 		}
 		
 		
