@@ -14,11 +14,9 @@
 	function toggleTullScreen() {
 		
 		if(runtime == "nw.js") { 
-			
 			var GUI = require('nw.gui').Window.get();
 			GUI.toggleKioskMode();
-			return false;
-		}
+			}
 		else {
 			// Asume browser
 			if ((document.fullScreenElement && document.fullScreenElement !== null) ||
@@ -40,6 +38,8 @@
 				}
 			}
 		}
+		
+		return false;
 	}
 	
 })();
