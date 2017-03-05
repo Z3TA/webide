@@ -4544,7 +4544,8 @@ editor.lastKeyPressed = "";
 						console.log("Default action will be prevented!");
 					}
 					else if(funReturn !== true) {
-						throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action, like typing in input boxes, tabbing between elements, etc. function called: " + getFunctionName(binding.fun));
+						throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
+						like typing in input boxes, tabbing between elements, etc. function called: " + getFunctionName(binding.fun));
 					}
 				}
 			}
