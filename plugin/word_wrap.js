@@ -338,6 +338,10 @@
 			wordWrap(file);
 			
 			
+			// todo: This test doesn't catch any errors!
+			// resize the window and wordwrap again, then compare
+			// and throw an error if they are the same (word wrap didn't succeed)
+			
 			
 			editor.closeFile(file.path);
 			
