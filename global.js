@@ -1446,9 +1446,35 @@ function indexOfZeroWidthCharacter(str) {
 	return -1;
 	}
 
+function loadCSS(url) {
+	var head  = document.getElementsByTagName('head')[0];
+	var link  = document.createElement('link');
+	//link.id   = cssId;
+	link.rel  = 'stylesheet';
+	link.type = 'text/css';
+	link.href = url;
+	link.media = 'all';
+	head.appendChild(link);
+}
+
+function checkBrowser() {
+	var c = navigator.userAgent.search("Chrome");
+	var f = navigator.userAgent.search("Firefox");
+	var m8 = navigator.userAgent.search("MSIE 8.0");
+	var m9 = navigator.userAgent.search("MSIE 9.0");
+	var browser = "Unknown";
 	
-	
-	
+	if (c > -1) {
+		browser = "Chrome";
+	} else if (f > -1) {
+		browser = "Firefox";
+	} else if (m9 > -1) {
+		browser ="MSIE 9.0";
+	} else if (m8 > -1) {
+		browser ="MSIE 8.0";
+	}
+	return browser;
+}
 	
 	
 	

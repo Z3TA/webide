@@ -13,17 +13,28 @@ console.log("process.platform=" + process.platform);
 console.log("runtime=" + runtime);
 
 if(runtime=="browser") {
-	// We better use a web safe font ...
 	
+	// We better use a web safe font ...
 	editor.settings.style.font = "Courier New";
 	editor.settings.style.highlightMatchFont = "bold 15px Courier New";
 	editor.settings.style.fontSize = 15;
 	editor.settings.gridHeight = 23;
 	editor.settings.gridWidth = 9;
 	
+	// Web safe fonts are ugly, try to load a nice font ...
+	// OMG! DIFFERENT BROWSERS HAVE DIFFERENT SPACINGS FOR THE SAME FONT
+	if(checkBrowser() != "Firefox") {
+		loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
+		editor.settings.style.font = "DejaVuSansMono";
+	editor.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
+	editor.settings.style.fontSize = 13;
+	editor.settings.gridHeight = 22;
+	editor.settings.gridWidth = 7.83;
+	}
+	
 }
 else if(process.platform == "windows") {
-
+	
 /*
 	Windows with "Smooth edges of screen fonts" turned off.
 	These font's look good:
