@@ -44,9 +44,8 @@
 			
 			if(isFilePath(filePath)) {
 				// The text on the row is a file path! Open that file.
-				var content = editor.readFileSync(filePath);
 				
-				editor.openFile(filePath, content, function(err, file) {  // path, content, callback
+				editor.openFile(filePath, undefined, function(err, file) {  // path, content, callback
 					
 					if(err) {
 						alert(err.message);
