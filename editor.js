@@ -896,8 +896,6 @@ editor.lastKeyPressed = "";
 			editor.resize();
 		}
 		
-		
-		
 		editor.shouldRender = false; // Flag (change to true whenever we need to render)
 		
 		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
@@ -1168,7 +1166,7 @@ editor.lastKeyPressed = "";
 		
 		console.time("resize");
 		
-		
+		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		
 		
 		// Resize listeners (before)
@@ -1330,8 +1328,8 @@ editor.lastKeyPressed = "";
 		canvas.style.width = editor.view.canvasWidth + "px";
 		canvas.style.height = editor.view.canvasHeight + "px";
 		
-		canvas.width  = editor.view.canvasWidth;
-		canvas.height = editor.view.canvasHeight;
+		canvas.width  = editor.view.canvasWidth * pixelRatio;
+		canvas.height = editor.view.canvasHeight * pixelRatio;
 		
 		if(editor.currentFile) {
 			// Fix horizontal column after resizing
@@ -3303,6 +3301,19 @@ editor.lastKeyPressed = "";
 		else {
 			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
+		
+		// Fix blurryness for screens with high pixel ratio
+		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+		if(pixelRatio !== 1) { 
+		ctx .scale(pixelRatio,pixelRatio);
+			
+			/*
+			editor.settings.style.fontSize = editor.settings.style.fontSize * pixelRatio;
+			editor.settings.gridHeight = editor.settings.gridHeight * pixelRatio;
+			editor.settings.gridWidth = editor.settings.gridWidth * pixelRatio;
+			*/
+		}
+		
 		
 		editor.canvasContext = ctx;
 		
