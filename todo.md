@@ -41,9 +41,11 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Ability to WYSIWYG-edit normal web pages
-testing ...
-Integrate with SSG ?
+Turn the editor into a web app.
+It should be able to run both via nw.js and a web browser.
+Make server.js
+Move everything that requires nw.js into server.js
+
 
 
 todo:
