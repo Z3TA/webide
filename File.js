@@ -17,9 +17,9 @@ var File; // File object is global
 	File = function File(text, path, fileIndex, bigFile, callback) { 
 		var file = this;
 		
-		if(!isString(text)) throw new Error("text is not a string!");
+		if(!isString(text)) throw new Error("text is not a string! text=" + text);
 		
-		if(!isString(path)) throw new Error("path is not a string!");
+		if(!isString(path)) throw new Error("path is not a string! path=" + path);
 		
 		file.changed = false; // If the file has changed from last save
 		file.isSaved = false;

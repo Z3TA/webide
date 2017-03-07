@@ -2377,4 +2377,3 @@ if (typeof define === 'function' && define.amd) {
 
 // [*] End of lib/all.js
 
-LOADED.push("SockJS");

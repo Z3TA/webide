@@ -6,9 +6,14 @@ editor.plugin({
 	desc: "Open up the files from last session", 
 	order: 999, // Load after the parser and other stuff that has fileOpen event listener
 	unload: function unloadReopenFilesPlugin() {
-		
+		editor.removeEvent("start", reopenFiles);
 	},
-	load: function reopenFiles() {
+	load: function loadReopenFilesPlugin() {
+		editor.on("start", reopenFiles);
+	}
+});
+
+function reopenFiles() {
 	/*
 		1. Open up the files from last time, when opening the editor.
 		
@@ -16,23 +21,23 @@ editor.plugin({
 		Offer to load the backup file if it's gone or empty, or unsaved.
 		
 		Note: window.localStorage only supports strings!!
-
+		
 		
 	*/
 	
 	"use strict";
-
+	
 	var fileDelimiter = ";"; // User to separate the file paths in the window.localStorage.openedFiles string
 	
 	var saveStateInterval = 5000;
-
+	
 	var saveStateIntervalTimer;
 	
 	var allFilesOpenedNeverCalled = true;
 	
 	var copyOfEditorFiles = [];
 	setInterval(insaneBugCatcher, 1000);
-
+	
 	
 	editor.on("fileOpen", addToOpenedFiles, 1);
 	
@@ -43,9 +48,9 @@ editor.plugin({
 	function reopenFilesMain() {
 		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
-				
+		
 		//window.localStorage.openedFiles = "";
-
+		
 		
 		// Reset localstorage
 		//for(var item in window.localStorage) {
@@ -77,8 +82,8 @@ editor.plugin({
 			for(var i=0; i<files.length; i++) {
 				console.log("gonna open files[" + i + "]=" + files[i]);
 				openFile(files[i], fileInListOpened);
-	}
-
+			}
+			
 			
 		}
 		else {
@@ -87,18 +92,18 @@ editor.plugin({
 		
 		// Just in case allFilesOpenedNeverCalled
 		/*
-		setTimeout(function checkIfallFilesOpenedWasCalled() {
+			setTimeout(function checkIfallFilesOpenedWasCalled() {
 			if(allFilesOpenedNeverCalled) {
-				
-				findBugs(true); // Compare opened files with window.localStorage.openedFiles
-
-				throw new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles + "\nopenedFiles=" + openedFiles);
+			
+			findBugs(true); // Compare opened files with window.localStorage.openedFiles
+			
+			throw new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles + "\nopenedFiles=" + openedFiles);
 			}
-		}, 5000);
+			}, 5000);
 		*/
 		
 		function fileInListOpened(file, wasCurrent, err) {
-		
+			
 			if(err) {
 				if(err.code === 'ENOENT') {
 					// File did not exist, and the user did not want to load the last state. 
@@ -106,11 +111,11 @@ editor.plugin({
 					compareAndDone();
 					return;
 				}
-					else console.warn(err.message);
-					
-					// We should aready got a confirm box about this ...
-					return;
-					
+				else console.warn(err.message);
+				
+				// We should aready got a confirm box about this ...
+				return;
+				
 			}
 			console.log("we now have it open: file.path=" + file.path);
 			
@@ -129,7 +134,7 @@ editor.plugin({
 				}
 			}
 		}
-
+		
 		function allFilesOpened() {
 			
 			allFilesOpenedNeverCalled = false;
@@ -139,7 +144,7 @@ editor.plugin({
 			findBugs(true); // true == also check if the list match editor.files
 			
 			console.log("setCurrent=" + setCurrent);
-		
+			
 			
 			if(setCurrent) {
 				// Make the file with last state "open" the current file
@@ -161,7 +166,7 @@ editor.plugin({
 		}
 		
 		
-
+		
 		
 		function openFile(path, callback) {
 			
@@ -175,18 +180,18 @@ editor.plugin({
 			
 			// Check if the file size and if it exist
 			editor.getFileSizeOnDisk(path, gotFileSize);
-
+			
 			function gotFileSize(err, fileSizeOnDisk) {
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
-
+				
 				if(err) {
-						//if(err.code === 'ENOENT') {
-						notFound = true;
-						//}
+					//if(err.code === 'ENOENT') {
+					notFound = true;
+					//}
 					console.warn(err.message);
 				}
-
+				
 				lastFileState = loadState(path);
 				
 				if(lastFileState) {
@@ -197,7 +202,7 @@ editor.plugin({
 					if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 						// Only ask if we actually have the last state, otherwise just ignore that it's gone.
 						// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
-							if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path + " (" + err.message + ")");
+						if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path + " (" + err.message + ")");
 					}
 					// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
 					else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
@@ -221,7 +226,7 @@ editor.plugin({
 						callback(path, false, err);
 						return; // Don't attempt to open the file
 					}
-
+					
 				}
 				
 				console.log("Reopening file path=" + path +" typeof content=" + typeof content);
@@ -232,7 +237,7 @@ editor.plugin({
 			
 			
 			function fileReopened(err, file) {
-
+				
 				console.log("Got (Reopening) file from editor path=" + path + "");
 				
 				if(err) console.log("err.path=" + err.path);
@@ -285,9 +290,9 @@ editor.plugin({
 					if(lastFileState.partStartRow == undefined) lastFileState.partStartRow = 0;
 					
 					if(lastFileState.partStartRow > 0) loadFilePart = true;
-
+					
 				}
-
+				
 				if(loadFilePart) {
 					
 					file.loadFilePart(lastFileState.partStartRow, function setStateAtReopen() {
@@ -303,11 +308,11 @@ editor.plugin({
 					setLastState();
 					callback(file, fileWasCurrentfile);
 				}
-
+				
 				function setLastState() {
 					
 					if(lastFileState) { // <-- This is needed because we can't check a property of a undefined variable
-
+						
 						if(lastFileState.startColumn != undefined && lastFileState.startRow != undefined) {
 							file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
 						}
@@ -321,7 +326,7 @@ editor.plugin({
 						}
 						
 						if(lastFileState.currentFile === true) fileWasCurrentfile = true;
-					
+						
 						if(lastFileState.caret !== undefined) {
 							// Set the caret as it was
 							console.log("Placing caret in file.path=" + file.path);
@@ -385,7 +390,7 @@ editor.plugin({
 			console.warn("File already in window.localStorage.openedFiles: " + file.path);
 		}
 		else {
-		
+			
 			console.log(getStack("Adding file to openedFiles path='" + file.path + "'"));
 			
 			console.log("List before=" + window.localStorage.openedFiles);	
@@ -424,7 +429,7 @@ editor.plugin({
 		}
 		
 		return true; // If we got this far, they are identical!
-	
+		
 	}
 	
 	function removeFromStringList(text, remove, delimiter) {
@@ -434,7 +439,7 @@ editor.plugin({
 		if(!isString(delimiter)) throw new Error("delimiter is not a string!");
 		
 		var array = text.split(delimiter); // Convert text to array
-
+		
 		// Splitting an empty string will result in an array with ONE item (an empty string)
 		if(array[0] == "") array.shift(); // Remove the first emty string
 		
@@ -454,7 +459,7 @@ editor.plugin({
 		return text;
 	}
 	
-
+	
 	
 	function removeFromOpenedFiles(file) {
 		
@@ -475,7 +480,7 @@ editor.plugin({
 		
 		
 		findBugs();
-
+		
 		
 		console.log("File removed from opened files: path=" + file.path);
 		
@@ -502,7 +507,7 @@ editor.plugin({
 			
 			
 			var openFiles = window.localStorage.openedFiles.split(fileDelimiter);
-
+			
 			
 			// note: "".split(fileDelimiter).length == 1 !!
 			if(window.localStorage.openedFiles != "") {
@@ -571,12 +576,12 @@ editor.plugin({
 		
 		if(file.text.length < 100000) {
 			// Always save the text, even if it's saved to disk. (it can be deleted, or disk space limit truncated it)
-		state.text = file.text;
+			state.text = file.text;
 		}
 		else {
 			console.warn("Not saving state for file because it has over " + sizeLimit + " characters file.path=" + path);
 		}
-			
+		
 		
 		window.localStorage["state_" + path] = JSON.stringify(state);
 		
@@ -593,7 +598,7 @@ editor.plugin({
 		// Checks the openedFiles string for errors:
 		
 		var text = window.localStorage.openedFiles;
-
+		
 		
 		var firstChar = text.charAt(0);
 		var lastChar = text.charAt(text.length-1);
@@ -626,47 +631,47 @@ editor.plugin({
 		}
 		
 		/*
-		// Sanity check
-		for(var path in editor.files) {
+			// Sanity check
+			for(var path in editor.files) {
 			if(window.localStorage.openedFiles.indexOf(path) == -1) {
-				throw new Error("editor.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles);
+			throw new Error("editor.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
-		}
-		var check = window.localStorage.openedFiles.split(fileDelimiter);
-		for(var i=0; i<check.length; i++) {
+			}
+			var check = window.localStorage.openedFiles.split(fileDelimiter);
+			for(var i=0; i<check.length; i++) {
 			if(!editor.files.hasOwnProperty(check[i])) {
-				throw new Error("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
+			throw new Error("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
-		}
-		
-		
-		return text;
-		
-		text = text.trim();
-		
-		// Remove double commas
-		while(text.indexOf(",,") > -1) {
+			}
+			
+			
+			return text;
+			
+			text = text.trim();
+			
+			// Remove double commas
+			while(text.indexOf(",,") > -1) {
 			console.warn("Removing double comma from: " + text);
 			text = text.replace(fileDelimiter + fileDelimiter, fileDelimiter);
-		}
-		
-		text = text.trim();
-		
-		// Remove leading commas
-		while(text.charAt(0) == fileDelimiter) {
+			}
+			
+			text = text.trim();
+			
+			// Remove leading commas
+			while(text.charAt(0) == fileDelimiter) {
 			console.warn("Removing leading comma from: " + text);
 			text = text.substring(1, text.length);
-		}
-		
-		// Remove trailing commas
-		while(text.charAt(text.length-1) == fileDelimiter) {
+			}
+			
+			// Remove trailing commas
+			while(text.charAt(text.length-1) == fileDelimiter) {
 			console.warn("Removing trailing comma from: " + text);
 			text = text.substring(1, text.length-1);
-		}
-		
-		
-		
-		return text;
+			}
+			
+			
+			
+			return text;
 		*/
 	}
 	
@@ -741,8 +746,8 @@ editor.plugin({
 		for(var path in editor.files) {
 			if(copyOfEditorFiles.indexOf(path) == -1) console.log("Added to editor.files:" + path);
 		}
-
+		
 		copyOfEditorFiles = Object.keys(editor.files);
 	} 	
 	
-}});
+}

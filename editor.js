@@ -9,7 +9,7 @@ var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
- 
+
 
 // List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
@@ -25,7 +25,7 @@ editor.supportedFiles = [
 	"xml", 
 	"json", 
 	"css", 
-	]; 
+]; 
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 editor.settings = {
@@ -33,25 +33,25 @@ editor.settings = {
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: [  // Intendent after these XML tags
-	"div", 
-	"ul", 
-	"ol", 
+		"div", 
+		"ul", 
+		"ol", 
 		"li", 
-	"head", 
-	"script", 
-	"style", 
-	"table", 
-	"tr", 
-	"td", 
-	"th", 
-	"form", 
-	"select", 
-	"frameset",
+		"head", 
+		"script", 
+		"style", 
+		"table", 
+		"tr", 
+		"td", 
+		"th", 
+		"form", 
+		"select", 
+		"frameset",
 		"svg",
 		"defs",
 		"marker",
 		"g"
-		],
+	],
 	tabSpace: 4, // How much indentation. Note that the editor does all the indentation for you!
 	caret: {
 		width: 1,
@@ -405,6 +405,9 @@ editor.lastKeyPressed = "";
 		}
 		
 		function load(err, path, text, notFromDisk, tooBig) {
+			
+			if(err) return callCallbacks(err);
+			
 			console.log("Loading file to editor: " + path);
 			
 			if(editor.files.hasOwnProperty(path)) throw new Error("File is already opened!");
@@ -740,172 +743,16 @@ editor.lastKeyPressed = "";
 	
 	
 	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
-		// todo: Rename this function, or refactor, because we can also run in the browser!
 		
 		console.log("Reading file: " + path);
 		
-		var fileContent = "";
-		var stream;
+		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
-		if(!callback) {
-			throw new Error("No callback defined!");
-		}
+		client.cmd("readFromDisk", json, function(err, json) {
+			if(err) callback(err);
+			else callback(null, json.path, json.data);
+		});
 		
-		if(runtime == "nw.js") {
-			var fs = require("fs");
-			
-			console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
-			//console.log(getStack("Read from disk"));
-			
-			// Check path for protocol
-			var url = require("url");
-			var parse = url.parse(path);
-			
-			if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
-				
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
-					
-					var c = editor.connections[parse.hostname].client;
-					
-					console.log("Getting file from FTP server: " + parse.pathname);
-					
-					c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
-						
-						if(err) throw err;
-						
-						console.log("Reading file from FTP ...");
-						
-						console.log(fileReadStream);
-						
-						stream = fileReadStream;
-						
-						stream.setEncoding('utf8');
-						stream.on('readable', readStream);
-						stream.on("end", streamEnded);
-						stream.on("error", streamError);
-						stream.on("close", streamClose);
-						
-						// Hmm it seems the FTP module uses "old" streams:
-						var StringDecoder = require('string_decoder').StringDecoder;
-						var decoder = new StringDecoder('utf8');
-						var str;
-						stream.on('data', function(data) {
-							str = decoder.write(data);
-							fileContent += str;
-							console.log('loaded part of the file');
-						});
-						
-					});
-					
-				}
-				else {
-					alertBox("No connection open to FTP on " + parse.hostname + " !");
-				}
-			}
-			else if(parse.protocol == "sftp:") {
-				
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
-					
-					var c = editor.connections[parse.hostname].client;
-					
-					console.log("Getting file from SFTP server: " + parse.pathname);
-					
-					var options = {
-						encoding: "utf8"
-					}
-					// Could also use sftp.createReadStream
-					c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
-						
-						if(err) console.warn(err.message);
-						
-						callback(err, path, buffer.toString("utf8"));
-						
-						
-					});
-					
-				}
-				else {
-					alertBox("No connection open to SFTP on " + parse.hostname + " !");
-				}
-			}
-			
-			else {
-				
-				// Asume local file system
-				
-				if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
-				
-				if(returnBuffer) {
-					// If no encoding is specified in fs.readFile, then the raw buffer is returned.
-					
-					fs.readFile(path, function(err, buffer) {
-						if(err) console.warn(err.message);
-						
-						callback(err, path, buffer);
-						
-					});
-				}
-				else {
-					
-					if(encoding == undefined) encoding = "utf8";
-					fs.readFile(path, encoding, function(err, string) {
-						if(err) console.warn(err.message);
-						
-						callback(err, path, string);
-						
-					});
-				}
-			}
-		}
-		else if(runtime == "browser") {
-			getFile(path, function(err, string, url) {
-				callback(err, url, string);
-			});
-		}
-		else {
-			throw new Error("Unknown runtime=" + runtime);
-		}
-		
-		// Functions to handle NodeJS ReadableStream's
-		function streamClose() {
-			console.log("Stream closed! path=" + path);
-		}
-		
-		function streamError(err) {
-			console.log("Stream error! path=" + path);
-			throw err;
-		}
-		
-		function streamEnded() {
-			console.log("Stream ended! path=" + path);
-			
-			callback(null, path, fileContent);
-			
-		}
-		
-		function readStream() {
-			// Called each time there is something comming down the stream
-			
-			var chunk;
-			var str = "";
-			var StringDecoder = require('string_decoder').StringDecoder;
-			var decoder = new StringDecoder('utf8');
-			
-			//var chunkSize = 512; // How many bytes to recive in each chunk
-			
-			console.log("Reading stream ... isPaused=" + stream.isPaused());
-			
-			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
-				
-				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
-				str = decoder.write(chunk);
-				
-				fileContent += str;
-				
-				console.log("Got chunk! str.length=" + str.length + "");
-				
-			}
-		}
 	}
 	
 	editor.writeStream = function(file) {
@@ -1090,7 +937,7 @@ editor.lastKeyPressed = "";
 				else {
 					
 					console.log("Successfully saved pathname=" + pathname + "");
-
+					
 					saveToDiskCallback(null, path);
 					
 					runFtpQueue();
@@ -1099,7 +946,7 @@ editor.lastKeyPressed = "";
 			}
 			
 		}
-
+		
 	}
 	
 	editor.copyFile = function(from, to, callback) {
@@ -1290,44 +1137,44 @@ editor.lastKeyPressed = "";
 			
 			// Find out if the buffer contains zero with characters ( might need optimization )
 			if(buffer.length > 0) {
-			var startIndex = buffer[0].startIndex;
-			var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
-			var containZeroWidthCharacters = (indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
-			
+				var startIndex = buffer[0].startIndex;
+				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
+				var containZeroWidthCharacters = (indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+				
 			}
 			else var containZeroWidthCharacters = false;
 			
-				//ctx.imageSmoothingEnabled = true;
-				
-				//ctx.translate(0,0);
-				
-				ctx.fillStyle = editor.settings.style.bgColor;
-				
-				//ctx.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
-				
-				/*
-					ctx.fillStyle = "#FF0000";
-					ctx.fillRect(0,0,150,75);
-					ctx.lineWidth = 1;
-				*/
-				
-				//console.time("renders");
-				for(var i=0; i<editor.renderFunctions.length; i++) {
-					//funName = getFunctionName(editor.renderFunctions[i]);
-					//console.time("render: " + funName);
+			//ctx.imageSmoothingEnabled = true;
+			
+			//ctx.translate(0,0);
+			
+			ctx.fillStyle = editor.settings.style.bgColor;
+			
+			//ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			/*
+				ctx.fillStyle = "#FF0000";
+				ctx.fillRect(0,0,150,75);
+				ctx.lineWidth = 1;
+			*/
+			
+			//console.time("renders");
+			for(var i=0; i<editor.renderFunctions.length; i++) {
+				//funName = getFunctionName(editor.renderFunctions[i]);
+				//console.time("render: " + funName);
 				editor.renderFunctions[i](ctx, buffer, editor.currentFile, startRow, containZeroWidthCharacters); // Call render
-					//console.timeEnd("render: " + funName);
-				}
-				//console.timeEnd("renders");
-				
-				
-				editor.renderCaret(file.caret);
-				
-				
-				console.timeEnd("render");
-				
+				//console.timeEnd("render: " + funName);
 			}
+			//console.timeEnd("renders");
+			
+			
+			editor.renderCaret(file.caret);
+			
+			
+			console.timeEnd("render");
+			
+		}
 		else {
 			// Show some useful info for new users
 			
@@ -1521,7 +1368,7 @@ editor.lastKeyPressed = "";
 			
 			wrappers[i].style.height = "auto";
 			wrappers[i].style.width = "auto";
-			}
+		}
 		
 		
 		// Save focus for the current file and give back focus after ther resize
@@ -1726,14 +1573,14 @@ editor.lastKeyPressed = "";
 					height = parseInt(computedStyle.height);
 					
 					newHeight = Math.min(maxTotalHeight, Math.max(devidedHeight, height + availableHeight));
-						if(newHeight > height) continue; // Break the iteration
+					if(newHeight > height) continue; // Break the iteration
 					
 					elements[i].style.height = (newHeight) + "px";
 					
-						// Compute new total height
-						totalHeight = totalHeight - height + newHeight;
-						availableHeight = maxTotalHeight - totalHeight;
-						
+					// Compute new total height
+					totalHeight = totalHeight - height + newHeight;
+					availableHeight = maxTotalHeight - totalHeight;
+					
 				}
 			}
 		}
@@ -2903,7 +2750,7 @@ editor.lastKeyPressed = "";
 				}).connect(auth);
 			}
 		}
-		}
+	}
 	
 	editor.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
 		console.log("folderExistIn pathToParentFolder=" + pathToParentFolder);
@@ -2917,14 +2764,14 @@ editor.lastKeyPressed = "";
 				folderExistInCallback(false);
 			}
 			else {
-			
-			for(var i=0; i<list.length; i++) {
-				if(list[i].type == "d" && list[i].name == folderName) {
-					folderExistInCallback(list[i].path);
+				
+				for(var i=0; i<list.length; i++) {
+					if(list[i].type == "d" && list[i].name == folderName) {
+						folderExistInCallback(list[i].path);
 						return;
-				}
-					else console.log(list[i].type + " " + list[i].name + " != " + folderName);
 					}
+					else console.log(list[i].type + " " + list[i].name + " != " + folderName);
+				}
 				// end of for loop reached, no folder found:
 				folderExistInCallback(false);
 				
@@ -3182,7 +3029,7 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-
+	
 	editor.createPath = function(pathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists
@@ -3435,23 +3282,23 @@ editor.lastKeyPressed = "";
 		delete editor.connections[serverAddress]; // Remove the connection
 		
 		
-			function filesOnServer() {
-				// Returns an array of currently opened files connected to this server
-				var list = [];
-				for(var path in editor.files) {
-					console.log("path=" + path);
-					if(protocol == "ftp") { // protocol is always lower case!
-						if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
-					}
-					else if(protocol == "ssh") {
-						if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
-					}
+		function filesOnServer() {
+			// Returns an array of currently opened files connected to this server
+			var list = [];
+			for(var path in editor.files) {
+				console.log("path=" + path);
+				if(protocol == "ftp") { // protocol is always lower case!
+					if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
 				}
-				
-				return list;
+				else if(protocol == "ssh") {
+					if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
+				}
 			}
 			
+			return list;
 		}
+		
+	}
 	
 	function removeFrom(list, fun) {
 		// Removes an object from an array of objects
@@ -3509,6 +3356,8 @@ editor.lastKeyPressed = "";
 				throw new Error("Something went wrong when closing the editor!");
 			}
 			
+			client.disconnect();
+			
 		});
 		
 		// Use event listeners for these so that they also fire when "reloading" the editor
@@ -3519,11 +3368,11 @@ editor.lastKeyPressed = "";
 		}});
 		
 		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
-			for(var conn in editor.connections) {
-				if(editor.connections[conn].close) editor.connections[conn].close();
-				else throw new Error("Connection: conn=" + conn + " did not have a close() method. Connection already closed!?");
-			}
-			return true;			
+				for(var conn in editor.connections) {
+					if(editor.connections[conn].close) editor.connections[conn].close();
+					else throw new Error("Connection: conn=" + conn + " did not have a close() method. Connection already closed!?");
+				}
+				return true;			
 		}});
 		
 	}
@@ -3608,6 +3457,11 @@ editor.lastKeyPressed = "";
 		
 		console.log("Starting the editor ...");
 		
+		
+		client.connect(connectedToServer);
+		
+	
+		
 		getVersion(function(version) {
 			
 			console.log("Editor version: " + version);
@@ -3663,11 +3517,11 @@ editor.lastKeyPressed = "";
 				next();
 				
 			});
-
+			
 			walker.on('end', function() {
 				console.log("All test files loaded");
 			});
-		
+			
 			console.log("Binding 'run tests' to Ctrl + Shift + T");
 			var keyT = 84;
 			keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
@@ -3759,10 +3613,7 @@ editor.lastKeyPressed = "";
 		
 		
 		
-		console.log("Calling start listeners (" + editor.eventListeners.start.length + ")");
-		for(var i=0; i<editor.eventListeners.start.length; i++) {
-			editor.eventListeners.start[i].fun(); // Call function
-		}
+
 		
 		
 		// Sort and load plugins
@@ -3799,36 +3650,36 @@ editor.lastKeyPressed = "";
 			/*
 				NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
 				We will have to use a wrapper and send the data via a socket
-				*/
+			*/
 			var net = require("net");
-		var env = process.env;
-		var stdInFile;
-		var strBuffer = "";
-		var StringDecoder = require('string_decoder').StringDecoder;
-		var decoder = new StringDecoder('utf8');
-		var stdInFileName = "stdin";
-		
-		var client = net.createConnection({port: env.STDIN_PORT || editor.settings.stdInPort}, function() {
-			//alertBox("Connected to STDIN ...");
+			var env = process.env;
+			var stdInFile;
+			var strBuffer = "";
+			var StringDecoder = require('string_decoder').StringDecoder;
+			var decoder = new StringDecoder('utf8');
+			var stdInFileName = "stdin";
 			
-			if(!stdInFile) {
-			if(editor.files.hasOwnProperty(stdInFileName)) stdInFile = editor.files[stdInFileName];
-			else {
-			editor.openFile(stdInFileName, "", function stdinFileOpen(err, file) {
-					if(err) throw err;
-					stdInFile = file;
-				});
-			}
-			}
+			var httpClient = net.createConnection({port: env.STDIN_PORT || editor.settings.stdInPort}, function() {
+				//alertBox("Connected to STDIN ...");
+				
+				if(!stdInFile) {
+					if(editor.files.hasOwnProperty(stdInFileName)) stdInFile = editor.files[stdInFileName];
+					else {
+						editor.openFile(stdInFileName, "", function stdinFileOpen(err, file) {
+							if(err) throw err;
+							stdInFile = file;
+						});
+					}
+				}
+				
+			});
 			
-		});
-		
-		client.on("error", function stdSocketError(err) {
-			console.warn(err.message);
-		});
-		
-		client.on("data", stdIn);
-		client.on("end", stdEnd);
+			httpClient.on("error", function stdSocketError(err) {
+				console.warn(err.message);
+			});
+			
+			httpClient.on("data", stdIn);
+			httpClient.on("end", stdEnd);
 			
 			
 			// Command arguments
@@ -3847,23 +3698,23 @@ editor.lastKeyPressed = "";
 			// It says menubar should work in Linux ...
 			// confirmed: Meny at the top DOES NOT WORK in nw.js v0.12.3
 			/*
-			var menu = new gui.Menu({ type: 'menubar' });
-			
-			var menuA = new gui.MenuItem({ label: 'Item A' });
-			
-			var submenu = new gui.Menu();
-			submenu.append(new gui.MenuItem({ label: 'Item 1' }));
-			submenu.append(new gui.MenuItem({ label: 'Item 2' }));
-			submenu.append(new gui.MenuItem({ label: 'Item 3' }));
-			
-			menuA.submenu = submenu;
-			
-			menu.append(menuA);
-			menu.append(new gui.MenuItem({ label: 'Item B' }));
-			menu.append(new gui.MenuItem({ type: 'separator' }));
-			menu.append(new gui.MenuItem({ label: 'Item C' }));
-			
-			gui.Window.get().menu = menu;
+				var menu = new gui.Menu({ type: 'menubar' });
+				
+				var menuA = new gui.MenuItem({ label: 'Item A' });
+				
+				var submenu = new gui.Menu();
+				submenu.append(new gui.MenuItem({ label: 'Item 1' }));
+				submenu.append(new gui.MenuItem({ label: 'Item 2' }));
+				submenu.append(new gui.MenuItem({ label: 'Item 3' }));
+				
+				menuA.submenu = submenu;
+				
+				menu.append(menuA);
+				menu.append(new gui.MenuItem({ label: 'Item B' }));
+				menu.append(new gui.MenuItem({ type: 'separator' }));
+				menu.append(new gui.MenuItem({ label: 'Item C' }));
+				
+				gui.Window.get().menu = menu;
 			*/
 			
 		}
@@ -3899,6 +3750,21 @@ editor.lastKeyPressed = "";
 		
 		windowLoaded = true;
 		
+		function connectedToServer(err) {
+			console.log("Got connect callback! err=" + err);
+			if(err) {
+				if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
+				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
+			}
+			
+			console.log("Calling start listeners (" + editor.eventListeners.start.length + ")");
+			for(var i=0; i<editor.eventListeners.start.length; i++) {
+				editor.eventListeners.start[i].fun(); // Call function
+			}
+			
+		}
+		
+		
 		function stdIn(data) {
 			
 			var str = decoder.write(data);
@@ -3927,7 +3793,7 @@ editor.lastKeyPressed = "";
 					stdInFile.write(strBuffer);
 					strBuffer = "";
 				}
-				}
+			}
 			else {
 				// Wait for stdInFile ...
 				console.log("Waiting for stdInFile ...");
@@ -3960,13 +3826,13 @@ editor.lastKeyPressed = "";
 		
 		// Create some test files ...
 		/*
-		var filesToOpen = 2;
-		var filesOpened = 0;
-		for(var i=0; i<filesToOpen; i++) {
+			var filesToOpen = 2;
+			var filesOpened = 0;
+			for(var i=0; i<filesToOpen; i++) {
 			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened(err, file) {
-				if(++filesOpened == filesToOpen) doTheTests();
+			if(++filesOpened == filesToOpen) doTheTests();
 			});
-		}
+			}
 		*/
 		doTheTests();
 		
@@ -4365,14 +4231,14 @@ editor.lastKeyPressed = "";
 			}
 			else if(e.which){ // Netscape/Firefox/Opera					
 			charCode = e.which;
-		 }
+			}
 		*/
 		
 		
 		
 		
 		editor.lastKeyPressed = character;
-				
+		
 		
 		if(file) {
 			if(editor.input && !preventDefault) {
@@ -4406,14 +4272,14 @@ editor.lastKeyPressed = "";
 						And sometimes it will not go down to 3-4ms ever! (stay at 17-18ms)
 						
 						note: Canvas size didn't have an impact when only writing one character
-					
+						
 						Benchmark results are all over the place 2-20ms probably because of vsync or refresh syncing not in sync with the benchmark tool (Typometer)
 						
 						THIS OPTIMIZATION SEEMS TO HAVE VERY LITTLE EFFECT!
 						
 						
 						We don't have to use setTimeout it seems. But sometimes it seems that the canvas wont render in the browser until the main thread is idle ...
-					
+						
 					*/
 					
 					//setTimeout(function waitforrender() {
@@ -4632,59 +4498,59 @@ editor.lastKeyPressed = "";
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
 		
 		/*
-		
-		if(editor.currentFile) {
+			
+			if(editor.currentFile) {
 			// Handle the special tidle key: Puts a ~ ^ or " over a character
 			// Is it only the swedish keyboard layout that does this!?
 			// OMG! This might become very messy
 			var spaceKey = 32;
 			if(charCode == spaceKey) {
-				//console.log("tildeActive=" + tildeActive);
-				//console.log("tildeAltActive=" + tildeAltActive);
-				//console.log("tildeShiftActive=" + tildeShiftActive);
-				
-				if(tildeActive) {
-					// Put two dots over the letter
-					
-				}
-				else if(tildeAltActive) {
-					editor.currentFile.putCharacter("~");
-					editor.renderNeeded();
-				}
-				else if(tildeShiftActive) {
-					editor.currentFile.putCharacter("^");
-					editor.renderNeeded();
-				}
+			//console.log("tildeActive=" + tildeActive);
+			//console.log("tildeAltActive=" + tildeAltActive);
+			//console.log("tildeShiftActive=" + tildeShiftActive);
+			
+			if(tildeActive) {
+			// Put two dots over the letter
+			
 			}
-		}
-		
-		
-		// Handle the tilde key: Puts a ~ ^ or " over a character
-		var altGr = 225;
-		var shiftKey = 16;
-		var tildeKey = 221;
-		
-		if(charCode == tildeKey) {
+			else if(tildeAltActive) {
+			editor.currentFile.putCharacter("~");
+			editor.renderNeeded();
+			}
+			else if(tildeShiftActive) {
+			editor.currentFile.putCharacter("^");
+			editor.renderNeeded();
+			}
+			}
+			}
+			
+			
+			// Handle the tilde key: Puts a ~ ^ or " over a character
+			var altGr = 225;
+			var shiftKey = 16;
+			var tildeKey = 221;
+			
+			if(charCode == tildeKey) {
 			if(lastKeyDown == shiftKey) {
-				tildeShiftActive = true;
+			tildeShiftActive = true;
 			}
 			else if(lastKeyDown == altGr) {
-				tildeAltActive = true;
+			tildeAltActive = true;
 			}
 			else {
-				tildeActive = true;
+			tildeActive = true;
 			}
-		}
-		else if(charCode != shiftKey) { // Prevent shift up to setting tildeShiftActive = false.
+			}
+			else if(charCode != shiftKey) { // Prevent shift up to setting tildeShiftActive = false.
 			tildeActive = false;
 			tildeShiftActive = false;
 			tildeAltActive = false;
-		}
-		//console.log("a tildeActive=" + tildeActive);
-		//console.log("a tildeAltActive=" + tildeAltActive);
-		//console.log("a tildeShiftActive=" + tildeShiftActive);
-		
-		
+			}
+			//console.log("a tildeActive=" + tildeActive);
+			//console.log("a tildeAltActive=" + tildeAltActive);
+			//console.log("a tildeShiftActive=" + tildeShiftActive);
+			
+			
 		*/
 		
 		// Check key bindings
@@ -4856,7 +4722,7 @@ editor.lastKeyPressed = "";
 		mouseDirection = "up";
 		
 		if(button == undefined) button = 0; // For like touch events
-
+		
 		console.log("Mouse up on class " + target.className + "!");
 		
 		if(target.className == "fileCanvas") {
@@ -4901,11 +4767,11 @@ editor.lastKeyPressed = "";
 		var mouseY = e.offsetY==undefined?e.layerY:e.offsetY;
 		
 		/*
-		if(e.page) console.log("e.page.x=" + e.page.x);
-		if(e.changedTouches) console.log("e.changedTouches[" + (e.changedTouches.length-1) + "]=" + e.changedTouches[e.changedTouches.length-1].pageX);
-		console.log("e.x=" + e.x);
-		console.log("e.offsetX=" + e.offsetX);
-		console.log("e.layerX=" + e.layerX);
+			if(e.page) console.log("e.page.x=" + e.page.x);
+			if(e.changedTouches) console.log("e.changedTouches[" + (e.changedTouches.length-1) + "]=" + e.changedTouches[e.changedTouches.length-1].pageX);
+			console.log("e.x=" + e.x);
+			console.log("e.offsetX=" + e.offsetX);
+			console.log("e.layerX=" + e.layerX);
 		*/
 		
 		if(isNumeric(e.clientX) && isNumeric(e.clientY)) {
@@ -4940,9 +4806,9 @@ editor.lastKeyPressed = "";
 		}
 		else {
 			return {x: mouseX, y: mouseY};
-}
+		}
 		
-}
+	}
 	
 	function mouseMove(e) {
 		
@@ -5023,7 +4889,7 @@ editor.lastKeyPressed = "";
 				
 				// Delete selection outside of the canvas
 				window.getSelection().removeAllRanges();
-
+				
 			}
 			
 		}
@@ -5068,7 +4934,7 @@ editor.lastKeyPressed = "";
 			e.preventDefault(); // To prevent the annoying menus
 			return false;
 		}
-
+		
 	}
 	
 	
@@ -5085,11 +4951,11 @@ editor.lastKeyPressed = "";
 		//console.log("wheelDelta=" + e.wheelDelta + " wheelDeltaY=" + e.wheelDeltaY + " deltaY=" + e.deltaY + " detail=" + e.detail );
 		
 		var delta = e.wheelDelta || -e.detail,
-			target = e.target,
-			tagName = target.tagName,
-			combo = getCombo(e),
-			dir = delta > 0 ? -1 : 1,
-			steps = Math.abs(delta);
+		target = e.target,
+		tagName = target.tagName,
+		combo = getCombo(e),
+		dir = delta > 0 ? -1 : 1,
+		steps = Math.abs(delta);
 		
 		
 		console.log("Scrolling on " + tagName);
@@ -5135,7 +5001,7 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-
+	
 	function htmlToImage(html, callback) {
 		
 		if(!callback) throw new Error("No callback function in htmlToImage");
@@ -5183,10 +5049,10 @@ editor.lastKeyPressed = "";
 			//console.log("Image yo!");
 			
 		}
-			
+		
 		img.src = url;
 	}
-		
+	
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
 		
@@ -5255,7 +5121,7 @@ editor.lastKeyPressed = "";
 							callback(editor.version);
 						}
 					});
-					}
+				}
 				else {
 					editor.version = -1;
 					callback(editor.version);

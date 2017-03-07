@@ -15,12 +15,15 @@
 		
 	
 	<!-- Core API (Application programming interface) / PPI (Plugin programming interface). The editor wont work without these -->
+	<script type="text/javascript" src="sockjs-0.3.4.js"></script> <!-- Latest version 1.1.1.js crashed JS engine on mobile -->
+	<script type="text/javascript" src="client.js"></script> <!-- For communicating with server.js -->
 	<script type="text/javascript" src="global.js"></script>
-	<script type="text/javascript" src="editor.js"></script>
 	<script type="text/javascript" src="File.js"></script>
+	<script type="text/javascript" src="editor.js"></script>
 
 	
 	<script type="text/javascript" src="settings_overload.js"></script> <!-- Make your custom setting changes in here -->
+	
 	
 	
 	<!-- Place plugins here: (note that the order *should* not matter, use editor.plugin({... order: 100}), or editor.on("start", function, order) instead!! -->
