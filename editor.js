@@ -1760,13 +1760,7 @@ editor.lastKeyPressed = "";
 	editor.interact = function(interaction, options) {
 		// This function will be called on every interaction
 		
-		var func;
-		
-		while(executeOnNextInteraction.length > 0) {
-			func = executeOnNextInteraction.shift();
-			
-			func(interaction); // Execute
-		}
+		nextInteractionFunctions();
 		
 		if(editor.eventListeners.interaction.length > 0) {
 			console.log("Calling interaction listeners (" + editor.eventListeners.interaction.length + ") ...");
@@ -1776,6 +1770,16 @@ editor.lastKeyPressed = "";
 		}
 		
 		resizeAndRender();
+		
+		function nextInteractionFunctions() {
+			for(var i=0, ret; i<executeOnNextInteraction.length; i++) {
+				ret = executeOnNextInteraction[i](interaction);
+				if(ret !== false) { // Keep running this function at every interaction until it doesn't return false
+					executeOnNextInteraction.splice(i, 1);
+					nextInteractionFunctions(); // Run again because of splice messing with the indexes
+				}
+			}
+		}
 		
 	}
 	
@@ -3289,7 +3293,6 @@ editor.lastKeyPressed = "";
 		
 		
 		client.connect(connectedToServer);
-		
 	
 		
 		getVersion(function(version) {
@@ -4965,5 +4968,29 @@ editor.lastKeyPressed = "";
 		
 	}
 	
+	
+	function fullScreen() {
+		alertBox("Attempting to go into full-screen ...")
+		if (
+			document.fullscreenEnabled || 
+			document.webkitFullscreenEnabled || 
+			document.mozFullScreenEnabled ||
+			document.msFullscreenEnabled
+		) {
+			var body = document.getElementById("body");
+			if (body.requestFullscreen) {
+			  body.requestFullscreen();
+			} else if (body.webkitrequestFullscreen) {
+			  body.webkitrequestFullscreen();
+			} else if (body.mozrequestFullscreen) {
+			  body.mozrequestFullscreen();
+			} else if (body.msrequestFullscreen) {
+			  body.msrequestFullscreen();
+			}
+		}
+		else {
+			alertBox("Full screen not supported in this browser");
+		}
+	}
 	
 })();
