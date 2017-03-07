@@ -1,0 +1,1 @@
+"%programfiles(x86)%\Mozilla Firefox\firefox.exe" -chrome "index.htm"
