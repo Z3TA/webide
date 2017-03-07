@@ -20,16 +20,20 @@ var client = {}; // Client object is global
 	var cache = {};
 	var connection;
 	
+	client.connected = false;
+	
 	client.connect = function(callback) {
 		
 		var apiUrl = "jzedit";
 		var port = "8099";
+		var host = "192.168.1.69";
 		
 		console.log("Connecting to jzedit server ...");
 		//connection = new SockJS(apiUrl);
-		connection = new SockJS('http://localhost:' + port + '/' + apiUrl, '', {debug: true});
+		connection = new SockJS('http://' + host + ':' + port + '/' + apiUrl, '', {debug: true});
 		connection.onopen = function serverConnected() {
 			console.log("connection open");
+			client.connected = true;
 			
 			client.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			
@@ -54,6 +58,8 @@ var client = {}; // Client object is global
 			var msg = e.data;
 			
 			console.log("Server: " + msg);
+			
+			client.connected = true;
 			
 			if(msg.length == 0) console.warn("Recieved emty messsage from server");
 			else {
@@ -95,6 +101,7 @@ var client = {}; // Client object is global
 		
 		connection.onclose = function serverDisconnected() {
 			console.log("connection closed");
+			client.connected = false;
 			
 			if(callback) {
 				var err = new Error("Connection closed");
@@ -110,6 +117,7 @@ var client = {}; // Client object is global
 	
 	client.disconnect = function disconnect() {
 		connection.close();
+		client.connected = false;
 	}
 	
 	client.cmd = function cmd(req, json, callback) {

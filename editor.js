@@ -501,7 +501,7 @@ editor.lastKeyPressed = "";
 		
 		if(!callback) throw new Error("Callback not defined!");
 		
-		if(runtime=="browser") {
+		if(!client.connected) {
 			var xhr = new XMLHttpRequest();
 			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
 			xhr.onreadystatechange = function() {
@@ -513,72 +513,13 @@ editor.lastKeyPressed = "";
 		}
 		else {
 			
-			// Check path for protocol
-			var url = require("url");
-			var parse = url.parse(path);
+			var json = {path: path};
 			
-			if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
-				
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
-					
-					var c = editor.connections[parse.hostname].client;
-					
-					console.log("Getting file size from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
-					
-					// Asume the FTP server has support for RFC 3659 "size"
-					c.size(parse.pathname, function gotFtpFileSize(err, size) {
-						if(err) {
-							console.warn(err.message);
-							callback(err);
-						}
-						else {
-							callback(null, size);
-						}
-					});
-				}
-				else {
-					// Should we give an ENOENT here ?
-					callback(new Error("Failed to get file size for: " + path + "\nNo connection open to FTP on " + parse.hostname + " !"));
-				}
-			}
-			else if(parse.protocol == "sftp:") {
-				
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
-					
-					var c = editor.connections[parse.hostname].client;
-					
-					console.log("Getting file size from SFTP server: " + parse.pathname);
-					
-					c.stat(parse.pathname, function gotSftpFileSize(err, stat) {
-						
-						if(err) {
-							callback(err);
-						}
-						else {
-							callback(null, stat.size);
-						}
-					});
-				}
-				else {
-					callback(new Error("Failed to get file size for: " + path + "\nNo connection open to SFTP on " + parse.hostname + " !"));
-				}
-			}
-			else {
-				
-				// It's a normal file path
-				
-				var fs = require("fs");
-				
-				fs.stat(path, checkSize);
-				
-				function checkSize(err, stats) {
-					
-					if(err) callback(err)
-					else callback(null, stats["size"]);
-					
-				}
-				
-			}
+			client.cmd("getFileSizeOnDisk", json, function (err, json) {
+				if(err) callback(err);
+				else callback(null, json.size);
+			});
+			
 		}
 	}
 	
@@ -705,21 +646,6 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.readFileSync = function(path) {
-		var fs = require("fs");
-		console.log("Reading file syncroniously from disk: " + path);
-		
-		try {
-			var content = fs.readFileSync(path, {encoding: "utf8"});
-		}
-		catch(err) {
-			console.warn("Failed to load " + path + "!\n" + err);
-			return undefined;
-		}
-		
-		return content;
-	}
-	
 	editor.readFile = function(path, callback) {
 		/* 
 			Returns a readable stream ...
@@ -838,114 +764,12 @@ editor.lastKeyPressed = "";
 		
 		if(!saveToDiskCallback) throw new Error("saveToDisk called without a callback function!");
 		
-		if(encoding == undefined) encoding = "utf-8";
+		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
 		
-		// Check path for protocol
-		var url = require("url");
-		var parse = url.parse(path);
-		var hostname = parse.hostname;
-		var protocol = parse.protocol;
-		var pathname = parse.pathname;
-		
-		console.log("Saving to disk ... protocol: " + protocol + " hostname=" + hostname + " pathname=" + pathname);
-		
-		if(protocol == "ftp:" || protocol == "ftps:") {
-			
-			if(ftpBusy) {
-				console.log("FTP is busy. Queuing upload of pathname=" + pathname + " ...");
-				ftpQueue.push(function() { uploadFTP(pathname, text); });
-			}
-			else {
-				ftpBusy = true;
-				console.log("FTP is ready. Uploading pathname=" + pathname + " ...");
-				uploadFTP(pathname, text);
-			}
-		}
-		else if(protocol == "sftp:") {
-			
-			if(editor.connections.hasOwnProperty(hostname)) {
-				
-				var c = editor.connections[hostname].client;
-				
-				var input = inputBuffer ? text : new Buffer(text, encoding);
-				var destPath = pathname;
-				var options = {encoding: encoding};
-				// Could also use sftp.createWriteStream
-				console.log("Waiting for SFTP ...");
-				c.writeFile(destPath, input, options, function sftpWrite(err) {
-					if(err) {
-						console.warn("Failed to save to path= " + path + "\n" + err.message);
-						saveToDiskCallback(err);
-					}
-					else {
-						console.log("Saved " + destPath + " on SFTP " + hostname);
-						saveToDiskCallback(null, path);
-					}
-					
-				});
-				
-			}
-			else {
-				saveToDiskCallback(new Error("Failed to save to path=" + path + "\nNo connection to SFTP on " + hostname + ""));
-			}
-		}
-		else {
-			
-			// Asume local file-system
-			
-			var fs = require("fs");
-			fs.writeFile(path, text, encoding, function(err) {
-				console.log("Attempting saving to local file system: " + path + " ...");
-				
-				if(err) {
-					//alertBox("Unable to save file! " + err.message + "\n" + path);
-					console.warn("Unable to save " + path + "!");
-					saveToDiskCallback(err);
-				}
-				else {
-					console.log("The file was successfully saved: " + path + "");
-					saveToDiskCallback(null, path);
-				}
-			});
-		}
-		
-		
-		function uploadFTP(pathname, text) {
-			console.log("Uploading to FTP ... pathname=" + pathname);
-			
-			if(editor.connections.hasOwnProperty(hostname)) {
-				
-				var ftpClient = editor.connections[hostname].client;
-				
-				var input = inputBuffer ? text : new Buffer(text, encoding);
-				var useCompression = false;
-				
-				ftpClient.put(input, pathname, useCompression, putFtpDone);
-				
-			}
-			else {
-				saveToDiskCallback(new Error("Failed to save to path=" + path + "\nNo connection to FTP on " + hostname + " !"));
-				runFtpQueue();
-			}
-			
-			function putFtpDone(err) {
-				if(err) {
-					console.warn("Failed to save pathname= " + pathname + "\n" + err);
-					saveToDiskCallback(err);
-					runFtpQueue();
-				}
-				else {
-					
-					console.log("Successfully saved pathname=" + pathname + "");
-					
-					saveToDiskCallback(null, path);
-					
-					runFtpQueue();
-				}
-				
-			}
-			
-		}
+		client.cmd("saveToDisk", json, function(err, json) {
+			if(err) saveToDiskCallback(err);
+			else saveToDiskCallback(null, json.path);
+		});
 		
 	}
 	

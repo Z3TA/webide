@@ -26,6 +26,8 @@ process.on("SIGINT", function sigInt() {
 log("Received SIGINT");
 
 httpServer.close();
+		
+		process.exit();
 
 });
 
@@ -103,7 +105,7 @@ function connection(connection) {
 			
 			if(!user) {
 				
-				console.log("json=" + json);
+				console.log("json=" + JSON.stringify(json));
 				
 				if(command != "identify") commandQueue.push(message); // The user is trying to send a command before authorized
 				else identify(json, IP, function(err, usr) {
