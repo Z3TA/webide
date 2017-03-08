@@ -60,6 +60,36 @@
 			}
 		});
 		
+	});
+	
+	
+	
+	editor.addTest(function testListFiles(callback) {
+		
+		var json = {pathToFolder: "bin/"};
+		
+		client.cmd("listFiles", json, function(err, json) {
+			if(err) throw err
+			else {
+				
+				// Make sure jzedit is in the list
+				var list = json.list;
+				var hasFile = false;
+				var lookForFileName = "jzedit";
+				
+				//console.log("list=" + JSON.stringify(list, null, 2));
+				
+				for(var i=0, file; i<list.length; i++) {
+					file = list[i];
+					if(file.name == lookForFileName) hasFile = true;
+				}
+				
+				if(!hasFile) throw new Error("Did not find lookForFileName=" + lookForFileName + " in list: " + JSON.stringify(list, null, 2));
+
+				callback(true);
+			}
+		});
+		
 	}, 1);
 	
 })();

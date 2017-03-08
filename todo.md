@@ -41,11 +41,11 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Turn the editor into a web app.
-It should be able to run both via nw.js and a web browser.
-Make server.js
+Turning the editor into a web app ...
+
 Move everything that requires nw.js into server.js
 
+fix working directory
 
 
 todo:

@@ -273,9 +273,9 @@ if(protocol == "ftp:" || protocol == "ftps:") {
 }
 else if(protocol == "sftp:") {
 	
-	if(editor.connections.hasOwnProperty(hostname)) {
+	if(user.connections.hasOwnProperty(hostname)) {
 		
-		var c = editor.connections[hostname].client;
+		var c = user.connections[hostname].client;
 		
 		var input = inputBuffer ? text : new Buffer(text, encoding);
 		var destPath = pathname;
@@ -323,9 +323,9 @@ else if(protocol == "sftp:") {
 	function uploadFTP(pathname, text) {
 		console.log("Uploading to FTP ... pathname=" + pathname);
 		
-		if(editor.connections.hasOwnProperty(hostname)) {
+		if(user.connections.hasOwnProperty(hostname)) {
 			
-			var ftpClient = editor.connections[hostname].client;
+			var ftpClient = user.connections[hostname].client;
 			
 			var input = inputBuffer ? text : new Buffer(text, encoding);
 			var useCompression = false;
@@ -358,6 +358,258 @@ else if(protocol == "sftp:") {
 	}
 }
 
+
+
+API.listFiles = function listFiles(user, json, listFilesCallback) {
+
+	var pathToFolder = json.pathToFolder;
+
+	if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
+	if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
+
+	//pathToFolder = trailingSlash(json.pathToFolder);
+	
+	
+	/*
+		Try to get the file list in the same format regardless of protocol!
+		
+		type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+		name - string - File or folder name
+		path - string - Full path to file/folder
+		size - float - The size of the entry in bytes.
+		date - Date - The last modified date of the entry.
+		
+		
+	*/
+	
+	var url = require('url');
+	var parse = url.parse(pathToFolder);
+	var protocol = parse.protocol;
+	var hostname = parse.hostname;
+	var pathname = parse.pathname;
+	
+	if(protocol == "ftp:" || protocol == "ftps:") {
+		// ### List files using FTP protocol
+		
+		if(ftpBusy) {
+			console.log("FTP is busy. Queuing file-list of pathname=" + pathname + " ...");
+			ftpQueue.push(function() { listFilesFTP(pathname); });
+		}
+		else {
+			ftpBusy = true;
+			console.log("FTP is ready. Listing files in pathname=" + pathname + " ...");
+			listFilesFTP(pathname);
+		}
+	}
+	else if(protocol == "sftp:") {
+		// ### List file using SFTP protocol
+		if(user.connections.hasOwnProperty(hostname)) {
+			
+			var c = user.connections[hostname].client;
+			
+			console.log("Initiating folder read on SFTP " + hostname + ":" + pathname);
+			
+			// SFTP can list files in any folder. So we do not have to make sure the path is the same as the working directory (like with ftp)
+			// hmm, it seems we can only do readdir once on each folder
+			var b = c.readdir(pathname, function sftpReadDir(err, folderItems) {
+				
+				//getStack("XXX");
+				
+				console.log("Reading folder: " + pathname + " ...");
+				
+				if(err) {
+					listFilesCallback(err);
+				}
+				else {
+					
+					//console.log(JSON.stringify(folderItems, null, 2));
+					
+					var list = [];
+					var path = "";
+					var type = "";
+					
+					for(var i=0; i<folderItems.length; i++) {
+						path = pathToFolder + folderItems[i].filename; // Asume pathToFolder has a trailing slash
+						type = folderItems[i].longname.substr(0, 1);
+						
+						if(type == "d") path = trailingSlash(path);
+						
+						//console.log("path=" + path);
+						list.push({type: type, name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
+					}
+					
+					listFilesCallback(null, {list: list});
+					
+				}
+				
+			});
+			
+			//console.log("b=" + b);
+			
+		}
+		else {
+			listFilesCallback(new Error("Unable to read " + pathname + " on " + hostname + "\nNot connected to SFTP on " + hostname + " !"));
+		}
+	}
+	else {
+		// ### List files using "normal" file system
+		var fs = require("fs");
+		console.log("Reading directory=" + pathToFolder);
+		fs.readdir(pathToFolder, function readdir(err, folderItems) {
+			if(err) {
+				listFilesCallback(err);
+			}
+			else {
+				var filePath;
+				var list = [];
+				var statCounter = 0;
+				if(folderItems.length == 0) {
+					// It's an emty folder
+					listFilesCallback(null, {list: list});
+				}
+				else {
+					var path = require("path");
+					
+					for(var i=0; i<folderItems.length; i++) {
+						
+						// Check item name for encoding problems �
+						
+						stat(folderItems[i], path.join(pathToFolder, folderItems[i]));
+						// We do not know if it's a folder or file yet, folderItems is just an array of strings, we have to wait for stat
+					}
+				}
+			}
+			
+			function stat(fileName, filePath) {
+				console.log("Making stat: " + filePath + "");
+				
+				fs.stat(filePath, function stat(err, stats) {
+					
+					var type = "";
+					var size;
+					var mtime;
+					var problem = "";
+					
+					if(stats) {
+						size = stats.size;
+						mtime = stats.mtime;
+						
+						if(stats.isFile()) {
+							type = "-";
+						}
+						else if(stats.isDirectory()) {
+							type = "d";
+							filePath = trailingSlash(filePath);
+						}
+					}
+					
+					if(err) {
+						
+						/*
+							EPERM = operation not permitted
+							EBUSY = resource busy or locked
+						*/
+						
+						if(err.code == "EPERM" || err.code == "EBUSY") {
+							problem = err.code;
+							type = "*"
+						}
+						else return listFilesCallback(err);
+					}
+					
+					//console.log("stat: " + stats);
+					
+					
+					
+					list.push({type: type, name: fileName, path: filePath, size: size, date: mtime, problem: problem});
+					
+					statCounter++;
+					
+					console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
+					
+					if(statCounter==folderItems.length) listFilesCallback(null, {list: list});
+					
+					
+				});
+			}
+			
+			
+		});
+		
+		
+	}
+	
+	
+	function listFilesFTP(pathname) {
+		
+		if(user.connections.hasOwnProperty(hostname)) {
+			
+			var ftpClient = user.connections[hostname].client;
+			
+			if(pathToFolder != user.workingDirectory) {
+				// First change folder
+				console.log("Sending cwd '" + pathname + "' to " + protocol + hostname);
+				ftpClient.cwd(pathname, function changedDir(err) {
+					
+					if(err) {
+						listFilesCallback(err);
+						runFtpQueue();
+					}
+					else {
+						ftpListFiles(ftpClient);
+					}
+					
+				});
+			}
+			else {
+				ftpListFiles(ftpClient);
+			}
+		}
+		else {
+			listFilesCallback(new Error("Unable to read " + pathname + " on " + hostname + "\nNot connected to FTP on " + hostname + " !"));
+			runFtpQueue();
+		}
+		
+		function ftpListFiles(ftpClient) {
+			
+			console.log("Listing files in '" + parse.pathname + "' on " + parse.protocol + parse.hostname);
+			
+			ftpClient.list(function readdirFtp(err, folderItems) {
+				if (err) {
+					console.warn(err.message);
+					listFilesCallback(err);
+					runFtpQueue();
+				}
+				else {
+					
+					var list = [];
+					var path = "";
+					var type = "";
+					
+					//console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
+					
+					for(var i=0; i<folderItems.length; i++) {
+						
+						//console.log("name=" + folderItems[i].name);
+						
+						path = pathToFolder + folderItems[i].name;
+						type = folderItems[i].type;
+						
+						if(type == "d") path = trailingSlash(path);
+						
+						// todo: parse date ?
+						list.push({type: type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
+					}
+					
+					listFilesCallback(null, {list: list});
+					
+					runFtpQueue();
+					
+				}
+			});
+		}
+	}
+}
 
 
 
