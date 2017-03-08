@@ -103,6 +103,7 @@ editor.connections = {}  // Store connections to remote servers (FTP, SSH)
 editor.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 editor.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
 editor.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(window.navigator) ? "Linux" : "Unknown");
+// http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
