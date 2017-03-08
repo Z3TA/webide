@@ -197,6 +197,7 @@ function identify(json, IP, callback) {
 			
 			function userOK(index, name) {
 				user = {id: index, name: name};
+				user.connections = {};
 			}
 			
 		});
