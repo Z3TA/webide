@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+console.log("hello world")
+
+function main() {
+        var env = process.env;
+	env.ARGS = JSON.stringify(process.argv);
+        //env.STDIN_PORT = process.env.STDIN_PORT || PORT;
+
+	var spawn = require('child_process').spawn;
+
+	//var command = "open safari ../index.htm";
+	var command = "open";
+	var args = [__dirname + "/../index.htm"];
+
+        var runtime = spawn(command , args , { env: env } );
+
+
+        runtime.on("error", function runtimeError(err) {
+                throw err;
+        });
+
+        runtime.on("close", function nwClose(code) {
+                console.log("closed. code=" + code);
+                if(code==0) console.log("runtime is probably already running! (suggestion: kill it)");
+                
+        });
+
+        runtime.stdout.on("data", function nwStdout(data) {
+                console.log("stdout: " + data);
+        });
+
+        runtime.stderr.on("data", function nwStderr(data) {
+                console.log("stderr: " + data.toString());
+        });
+
+}
+
+main();
