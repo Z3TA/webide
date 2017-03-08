@@ -45,7 +45,7 @@ Turning the editor into a web app ...
 
 Move everything that requires nw.js into server.js
 
-fix working directory
+Make it so global.js => util.js ?? can be used by both client and server
 
 
 todo:

@@ -611,7 +611,9 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	}
 }
 
-
-
+// todo: Some sort of suecurity where a working "jail" can be issued to each user
+API.workingDirectory = function workingDirectory(user, json, callback) {
+	callback(null, {path: process.cwd()});
+}
 
 module.exports = API;

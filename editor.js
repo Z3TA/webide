@@ -2629,7 +2629,6 @@ editor.lastKeyPressed = "";
 			else listFilesCallback(null, json.list);
 		});
 		
-		
 	}
 	
 	
@@ -3363,6 +3362,13 @@ editor.lastKeyPressed = "";
 			for(var i=0; i<editor.eventListeners.start.length; i++) {
 				editor.eventListeners.start[i].fun(); // Call function
 			}
+			
+			
+			// Use servers working directory
+			client.cmd("workingDirectory", null, function(err, json) {
+				if(err) throw err;
+				else editor.workingDirectory = json.path;
+			});
 			
 		}
 		
