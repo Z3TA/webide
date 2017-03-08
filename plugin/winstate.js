@@ -7,6 +7,11 @@
 		return;
 	}
 	
+	if(!window.localStorage) {
+		console.warn("window.localStorage not available! winstate.js plugin disabled.");
+		return false;
+	}
+	
 	'use strict';
 
 	/*

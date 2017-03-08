@@ -122,3 +122,11 @@ Consolas 15px on Windows! (with sub-pixel-anti-alias)
 DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
 
 
+
+
+Compiling dependencies for nw.js
+--------------------------------
+To build for the right modules version:
+node-gyp rebuild --target=1.2.0 --msvs_version=2015
+
+

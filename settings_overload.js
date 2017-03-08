@@ -9,7 +9,6 @@
 
 // 1l0Oo[]{}.,
 
-console.log("process.platform=" + process.platform);
 console.log("runtime=" + runtime);
 
 if(runtime=="browser") {

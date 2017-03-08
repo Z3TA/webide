@@ -9,6 +9,11 @@ editor.plugin({
 		editor.removeEvent("start", reopenFiles);
 	},
 	load: function loadReopenFilesPlugin() {
+		
+		if(!window.localStorage) {
+			console.warn("window.localStorage not available! reopen_files.js plugin disabled.");
+			return false;
+		}
 		editor.on("start", reopenFiles);
 	}
 });
@@ -46,8 +51,6 @@ function reopenFiles() {
 	reopenFilesMain();
 	
 	function reopenFilesMain() {
-		
-		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
 		//window.localStorage.openedFiles = "";
 		

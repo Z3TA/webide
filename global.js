@@ -324,7 +324,7 @@ function getFolders(fullPath, includeHostInfo) {
 			fullPath = fullPath.substr(0, fullPath.lastIndexOf(delimiter)+1); // Remove the file part
 		}
 		// else: asume the last part is a folder
-
+		
 	}
 	
 	var protocolIndex = fullPath.indexOf("://");
@@ -350,11 +350,11 @@ function getFolders(fullPath, includeHostInfo) {
 		path = path.substr(hostname.length); // Remove hostname part
 		
 		if(path.substr(0,1) != "/") throw new Error("Expected a slash after hostname=" + hostname + " fullPath=" + fullPath);
-	
+		
 		path = path.substr(1); // Remove first slash
 		
 		if(path.substr(path.length-1) == "/") path = path.substr(0, path.length-1); // Remove ending slash if one exist
-	
+		
 		var folders = path.split("/");
 		
 		var urls = [];
@@ -363,7 +363,7 @@ function getFolders(fullPath, includeHostInfo) {
 		urls.push(fullFolder); // Add root
 		
 		//console.log("foldersAA=" + JSON.stringify(folders));
-			for(var i=0; i<folders.length; i++) {
+		for(var i=0; i<folders.length; i++) {
 			if( folders[i] !== "") {
 				fullFolder += folders[i] + "/";
 				urls.push(fullFolder);
@@ -441,7 +441,7 @@ function getFolders(fullPath, includeHostInfo) {
 			return paths;
 			
 		}
-	
+		
 	}
 	
 }
@@ -485,17 +485,17 @@ function textDiff(originalText, editedText) {
 	var originalRow = originalText.split(lbOriginalText);
 	
 	/*
-	if(ignoreTransform) {
+		if(ignoreTransform) {
 		for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
-			editedRow.splice(ignoreTransform.inserted[i].row, 1);
-			console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
+		editedRow.splice(ignoreTransform.inserted[i].row, 1);
+		console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
 		}
 		for(var i=ignoreTransform.removed.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
-			originalRow.splice(ignoreTransform.removed[i].row, 1);
-			console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
+		originalRow.splice(ignoreTransform.removed[i].row, 1);
+		console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
 		}
 		}
-		*/
+	*/
 	
 	// Trim white space from all lines
 	for (var i=0; i<editedRow.length; i++) {
@@ -513,52 +513,52 @@ function textDiff(originalText, editedText) {
 	if(originalRow[originalRow.length-1] != "") originalRow.push(""); 
 	
 	editedText = editedRow.join(lbEditedText);
-		originalText = originalRow.join(lbOriginalText);
-		
-		var extraLbAdded = false;
-		var lastCharactersOriginalText = originalText.substr(originalText.length - lbOriginalText.length);
-		if(lastCharactersOriginalText != lbOriginalText) { 
-			// original text doesn't end with a line break!
-			// Each line must end with a line break, even the last line.
-			console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + lbChars(lastCharactersOriginalText));
-			//originalText += lbOriginalText;
-			//extraLbAdded = true;
-			
-		// Because an extra linebreak was added to the original text, we also need to add one (or two) to the edited text to not mess up the diff
-			//if(editedText.substr(editedText.length - lbEditedText.length) != lbEditedText) editedText += lbEditedText + lbEditedText; // Add two line-breaks
-			//else editedText += lbEditedText; // or add only one if it already had one
-		}
-		
-		var jsdiff = require('diff');
-		var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
-		var totalLineBreaks = 0;
-		var removed = [];
-		var inserted = [];
-		var line;
-		var lineBreakCount = 0;
-		var removedLines = 0; // Removed lines can be replaced with inserts
-		var row = 0;
+	originalText = originalRow.join(lbOriginalText);
 	
-		console.log("diff=" + JSON.stringify(diff, null, 2));
+	var extraLbAdded = false;
+	var lastCharactersOriginalText = originalText.substr(originalText.length - lbOriginalText.length);
+	if(lastCharactersOriginalText != lbOriginalText) { 
+		// original text doesn't end with a line break!
+		// Each line must end with a line break, even the last line.
+		console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + lbChars(lastCharactersOriginalText));
+		//originalText += lbOriginalText;
+		//extraLbAdded = true;
 		
-		for (var i=0; i<diff.length; i++) {
-			line = diff[i].value.split(lb);
-			
+		// Because an extra linebreak was added to the original text, we also need to add one (or two) to the edited text to not mess up the diff
+		//if(editedText.substr(editedText.length - lbEditedText.length) != lbEditedText) editedText += lbEditedText + lbEditedText; // Add two line-breaks
+		//else editedText += lbEditedText; // or add only one if it already had one
+	}
+	
+	var jsdiff = require('diff');
+	var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
+	var totalLineBreaks = 0;
+	var removed = [];
+	var inserted = [];
+	var line;
+	var lineBreakCount = 0;
+	var removedLines = 0; // Removed lines can be replaced with inserts
+	var row = 0;
+	
+	console.log("diff=" + JSON.stringify(diff, null, 2));
+	
+	for (var i=0; i<diff.length; i++) {
+		line = diff[i].value.split(lb);
+		
 		if(line.length < 2 || line[line.length-1] != "") throw new Error("Line does not end with a new-line character! diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
-			
-			lineBreakCount = 0;
+		
+		lineBreakCount = 0;
 		
 		for (var j=0; j<line.length-1; j++) { // line always end with a line break
 			// removed always comes before added
-				if(diff[i].added) {
-					// if(line[j].length > 0) 
-					console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
-					
-						if(removedLines > 0) {
+			if(diff[i].added) {
+				// if(line[j].length > 0) 
+				console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
+				
+				if(removedLines > 0) {
 					// If lines where removed, added lines will replace them
 					lineBreakCount -= removedLines;
 					removedLines = 0;
-					}
+				}
 				
 				row = totalLineBreaks + lineBreakCount;
 				
@@ -814,7 +814,7 @@ function Dialog(msg, icon) {
 	if(!body) {
 		console.warn("Dialog created before html body is available");
 		return;
-		}
+	}
 	
 	var message = document.createElement("div");
 	message.setAttribute("class", "message");
@@ -1122,9 +1122,9 @@ function determineLineBreakCharacters(text) {
 
 function occurrences(string, subString, allowOverlapping) {
 	/** Function count the occurrences of substring in a string;
-	 * @param {String} string   Required. The string;
-	 * @param {String} subString    Required. The string to search for;
-	 * @param {Boolean} allowOverlapping    Optional. Default: false;
+		* @param {String} string   Required. The string;
+		* @param {String} subString    Required. The string to search for;
+		* @param {Boolean} allowOverlapping    Optional. Default: false;
 	*/
 	string+=""; subString+="";
 	if(subString.length<=0) return string.length+1;
@@ -1205,77 +1205,77 @@ function getFilenameFromPath(path) {
 
 function isFilePath(filePath) {
 	if(runtime == "browser") {
-	if(linuxPathValidation(filePath) || linuxPathValidation(filePath)) return true
-	else return false;
+		if(linuxPathValidation(filePath) || linuxPathValidation(filePath)) return true
+		else return false;
 	}
 	else {
-	var fs = require("fs");
-	try {
-	var stat = fs.lstatSync(filePath);
-	return stat.isFile();
-	}
-	catch(e) {
-	return false;
-	}
+		var fs = require("fs");
+		try {
+			var stat = fs.lstatSync(filePath);
+			return stat.isFile();
+		}
+		catch(e) {
+			return false;
+		}
 	}
 	
 	function linuxPathValidation(contPathLinux) {
-	for(var k=0;k<contPathLinux.length;k++){
-	if(contPathLinux.charAt(k).match(/^[\\]$/) ){
-	return false;
-	}
-	}
-	if(contPathLinux.charAt(0) != "/")
-	{
-	return false;
-	}
-	if(contPathLinux.charAt(0) == "/" && contPathLinux.charAt(1) == "/")
-	{
-	return false;
-	}
-	return true;
+		for(var k=0;k<contPathLinux.length;k++){
+			if(contPathLinux.charAt(k).match(/^[\\]$/) ){
+				return false;
+			}
+		}
+		if(contPathLinux.charAt(0) != "/")
+		{
+			return false;
+		}
+		if(contPathLinux.charAt(0) == "/" && contPathLinux.charAt(1) == "/")
+		{
+			return false;
+		}
+		return true;
 	}
 	
 	function windowsPathValidation(contwinpath)
 	{
-	if((contwinpath.charAt(0) != "\\" || contwinpath.charAt(1) != "\\") || (contwinpath.charAt(0) != "/" || contwinpath.charAt(1) != "/"))
-	{
-	if(!contwinpath.charAt(0).match(/^[a-zA-Z]/))
-	{
-	return false;
-	}
-	if(!contwinpath.charAt(1).match(/^[:]/) || !contwinpath.charAt(2).match(/^[\/\\]/))
-	{
-	return false;
-	}
-	
-	}
+		if((contwinpath.charAt(0) != "\\" || contwinpath.charAt(1) != "\\") || (contwinpath.charAt(0) != "/" || contwinpath.charAt(1) != "/"))
+		{
+			if(!contwinpath.charAt(0).match(/^[a-zA-Z]/))
+			{
+				return false;
+			}
+			if(!contwinpath.charAt(1).match(/^[:]/) || !contwinpath.charAt(2).match(/^[\/\\]/))
+			{
+				return false;
+			}
+			
+		}
 	}
 	
 	function UrlExists(url) {
-	var http = new XMLHttpRequest();
-	http.open('HEAD', url, false);
-	http.send();
-	return http.status!=404;
+		var http = new XMLHttpRequest();
+		http.open('HEAD', url, false);
+		http.send();
+		return http.status!=404;
 	}
-	}
-	
-	function getFileExtension(filePath) {
+}
+
+function getFileExtension(filePath) {
 	return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
-	}
-	
-	function isFolderPath(path) {
+}
+
+function isFolderPath(path) {
 	var fs = require("fs");
 	try {
-	var stat = fs.lstatSync(path);
-	return stat.isDirectory();
+		var stat = fs.lstatSync(path);
+		return stat.isDirectory();
 	}
 	catch(e) {
-	return false;
+		return false;
 	}
-	}
-	
-	function getStack(msg) {
+}
+
+function getStack(msg) {
 	// Used in debugging, to get a stack trace of function being called
 	// ex: console.log(getStack("foo"));
 	
@@ -1283,15 +1283,19 @@ function isFilePath(filePath) {
 	
 	var str = new Error(msg).stack;
 	
+	if(str == undefined) str = "Unable to get call stack!"
+	else {
+	
 	// Remove first at (this function)
 	str = str.substr(str.indexOf("\n")+5, str.length);
 	str = str.substr(str.indexOf("\n")+5, str.length);
-	
-	return msg + ": " + str;
 	}
 	
-	
-	function httpPost(urlStr, form, callback) {
+	return msg + ": " + str;
+}
+
+
+function httpPost(urlStr, form, callback) {
 	var querystring = require('querystring');
 	var http = require('http');
 	var url = require("url");
@@ -1303,39 +1307,39 @@ function isFilePath(filePath) {
 	
 	// An object of options to indicate where to post to
 	var post_options = {
-	host: urlObj.hostname,
-	port: urlObj.port ? urlObj.port : '80',
-	path: urlObj.path, // path comtains querystring (search)
-	method: 'POST',
-	headers: {
-	'Content-Type': 'application/x-www-form-urlencoded',
-	'Content-Length': Buffer.byteLength(post_data)
-	}
+		host: urlObj.hostname,
+		port: urlObj.port ? urlObj.port : '80',
+		path: urlObj.path, // path comtains querystring (search)
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': Buffer.byteLength(post_data)
+		}
 	};
 	
 	// Set up the request
 	var dataStr = "";
 	var post_req = http.request(post_options, function(res) {
-	res.setEncoding('utf8');
-	res.on('data', function (chunk) {
-	dataStr += chunk;
-	console.log('Response: ' + chunk);
-	});
-	res.on('end', function () {
-	callback(dataStr, null);
-	});
+		res.setEncoding('utf8');
+		res.on('data', function (chunk) {
+			dataStr += chunk;
+			console.log('Response: ' + chunk);
+		});
+		res.on('end', function () {
+			callback(dataStr, null);
+		});
 	});
 	post_req.on('error', function(e) {
-	console.log(`problem with request: ${e.message}`);
-	callback(null, e);
+		console.log('problem with request: ' + e.message);
+		callback(null, e);
 	});
 	// post the data
 	post_req.write(post_data);
 	post_req.end();
 	
 	
-	}
-	
+}
+
 function httpGet(url, callback) {
 	var xmlHttp = new XMLHttpRequest();
 	var timeoutTimer;
@@ -1352,7 +1356,7 @@ function httpGet(url, callback) {
 				err.CODE = xmlHttp.status;
 				callback(err);
 			}
-			}
+		}
 		//else console.log("xmlHttp.readyState=" + xmlHttp.readyState);
 	}
 	
@@ -1387,13 +1391,13 @@ function makePathAbsolute(path) {
 		var fspath = require("path");
 		if(!fspath.isAbsolute(path)) {
 			let absolutePath = fspath.resolve(path);
-	console.warn("Making path absolute: " + path + " ==> " + absolutePath);
-	path = absolutePath; // Make the path absolute
-	}
+			console.warn("Making path absolute: " + path + " ==> " + absolutePath);
+			path = absolutePath; // Make the path absolute
+		}
 	}
 	return path;
-	}
-	
+}
+
 function reIndexOf(reIn, str, startIndex) {
 	var re = new RegExp(reIn.source, 'g' + (reIn.ignoreCase ? 'i' : '') + (reIn.multiLine ? 'm' : ''));
 	re.lastIndex = startIndex || 0;
@@ -1421,7 +1425,7 @@ function reLastIndexOf(regex, str, startpos) {
 	}
 	return lastIndexOf;
 }
-	
+
 function assert(x, y) {
 	if(x !== y) {
 		if(y === undefined && (x === true || x === false)) throw new Error("assert takes two arguments and throws an error if they are not equal. Example: assert(42, 42)");
@@ -1444,7 +1448,7 @@ function indexOfZeroWidthCharacter(str) {
 	}
 	
 	return -1;
-	}
+}
 
 function loadCSS(url) {
 	var head  = document.getElementsByTagName('head')[0];
@@ -1475,16 +1479,16 @@ function checkBrowser() {
 	}
 	return browser;
 }
-	
-	
-	
-	
-	
-	
-	
-	
-	// names of known key codes (0-255)
-	var getKeyboardMapping = [
+
+
+
+
+
+
+
+
+// names of known key codes (0-255)
+var getKeyboardMapping = [
 	"", // [0]
 	"", // [1]
 	"", // [2]
@@ -1741,11 +1745,11 @@ function checkBrowser() {
 	"PA1", // [253]
 	"WIN_OEM_CLEAR", // [254]
 	"" // [255]
-	];
-	
-	
-	
-	// Simuleate key-strokes
-	
-	
-	
+];
+
+
+
+// Simuleate key-strokes
+
+
+

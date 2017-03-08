@@ -54,11 +54,14 @@
 		
 		console.log("Loading server manager");
 		
+		if(!window.localStorage) {
+			console.warn("window.localStorage not available! server_manager.js plugin disabled.");
+			return false;
+		}
+		
 		var charP = 80;
 		var charEscape = 27;
 		var charEnter = 13;
-		
-		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
 		remoteConnections = window.localStorage.remoteConnections ? JSON.parse(window.localStorage.remoteConnections) : [defaultServer];
 		

@@ -102,7 +102,7 @@ editor.version = 0;      // Incremented on each commit. Loaded from version.inc 
 editor.connections = {}  // Store connections to remote servers (FTP, SSH)
 editor.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 editor.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
-editor.platform = /^win/.test(process.platform) ? "Windows" : (/^linux/.test(process.platform) ? "Linux" : "Unknown");
+editor.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(window.navigator) ? "Linux" : "Unknown");
 
 editor.eventListeners = { // Use editor.on to add listeners to these events:
 	fileClose: [], 
