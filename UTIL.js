@@ -10,6 +10,24 @@
 
 var UTIL = {
 
+	toSystemPathDelimiters: function toSystemPathDelimiters(path) {
+		
+		// Makes sure the path uses the right path delimiters ...
+		
+		var delimiter = UTIL.getPathDelimiter(EDITOR.workingDirectory);
+		
+		console.log("delimiter=" + delimiter);
+		console.log("path=" + path);
+				
+		path = path.replace(/\//g, delimiter);
+		path = path.replace(/\\/g, delimiter);
+		
+		console.log("path=" + path);
+		
+		return path;
+				
+	},
+
 	trailingSlash: function trailingSlash(folderPath) {
 		// Makes sure the folder has a trailing slash
 		console.log("Get trailing slash for folderPath=" + folderPath);

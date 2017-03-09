@@ -90,6 +90,26 @@
 			}
 		});
 		
+	});
+	
+	EDITOR.addTest(function testCreatePath(callback) {
+		
+		//alertBox(EDITOR.workingDirectory);
+		
+		var json = {pathToCreate: UTIL.toSystemPathDelimiters(EDITOR.workingDirectory + "/temp/foo/bar")};
+		
+		CLIENT.cmd("createPath", json, function(err, json) {
+			if(err) throw err
+			else {
+				
+				var fullPath = json.path;
+				
+				if(fullPath.indexOf("foo") == -1) throw new Error("Full path does not include foo");
+				
+				callback(true);
+			}
+		});
+		
 	}, 1);
 	
 })();

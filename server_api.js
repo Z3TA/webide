@@ -618,4 +618,167 @@ API.workingDirectory = function workingDirectory(user, json, callback) {
 	callback(null, {path: process.cwd()});
 }
 
+
+
+API.createPath = function(user, json, createPathCallback) {
+	/*
+		Traverse the path and try to creates the directories, then check if the full path exists
+		
+	*/
+	
+	var pathToCreate = json.pathToCreate;
+	
+	pathToCreate = UTIL.trailingSlash(pathToCreate);
+	
+	var url = require('url');
+	var parse = url.parse(pathToCreate);
+	var protocol = parse.protocol;
+	var delimiter = UTIL.getPathDelimiter(pathToCreate);
+	var lastChar = pathToCreate.substring(pathToCreate.length-1);
+	var hostname = parse.hostname;
+	var create = UTIL.getFolders(pathToCreate);
+	var errors = [];
+	var fullPath = create[create.length-1];
+	
+	if(protocol) protocol = protocol.replace(/:/g, "").toLowerCase();
+	
+	console.log("hostname=" + hostname + " pathToCreate=" + pathToCreate + " parse=" + JSON.stringify(parse));
+	
+	create.shift(); // Don't bother with the root
+	
+	// Execute mkdir in order !
+	if(create.length == 0) {
+		console.warn("No path to create! fullPath=" + fullPath);
+		createPathCallback(null, {path: fullPath});
+	}
+	else executeMkdir(create.shift());
+	
+	function executeMkdir(folder) {
+		// This is a recursive function!
+		createPathSomewhere(folder, function(err, path) {
+			if(err) errors.push(err.message + " path=" + path);
+			
+			if(create.length > 0) executeMkdir(create.shift());
+			else done();
+			
+		});
+	}
+	
+	function done() {
+		// Check if the full path exists
+		API.listFiles(user, {pathToFolder: pathToCreate}, listFileResult);
+		
+		function listFileResult(err, json) {
+			
+			if(err) {
+				console.warn("List failed! " + err.message + " pathToCreate=" + pathToCreate);
+				var errorMsg = "Failed to create path=" + pathToCreate + "\n" + err.message;
+				for(var i=0; i<errors.length; i++) {
+					errorMsg += "\n" + errors[i];
+				}
+				
+				createPathCallback(new Error(errorMsg));
+			}
+			else {
+				createPathCallback(null, {path: fullPath})
+			}
+		}
+	}
+	
+	function createPathSomewhere(path, createPathSomewhereCallback) {
+		
+		// ## mkdir ...
+		
+		console.log("mkdir " + path);
+		
+		if(path.indexOf("//") != -1) {
+			path = path.replace(/\/\/+/g, "/"); // Remove double slashes
+			console.warn("Sanitizing path=" + path + " pathToCreate=" + pathToCreate);
+		}
+		
+		if(protocol == "ftp" || protocol == "ftps") {
+			// ### Create a directory using FTP protocol
+			
+			if(ftpBusy) {
+				console.log("FTP is busy. Queuing mkdir of path=" + path + " ...");
+				ftpQueue.push(function() { createPathFTP(path); });
+			}
+			else {
+				ftpBusy = true;
+				console.log("FTP is ready. Creating path=" + path + " ...");
+				createPathFTP(path);
+			}
+			
+			
+		}
+		else if(parse.protocol == "sftp:") {
+			// ### Create a directory using SFTP protocol
+			if(user.connections.hasOwnProperty(parse.hostname)) {
+				
+				var c = user.connections[parse.hostname].client;
+				
+				var b = c.mkdir(path, function (err, folderItems) {
+					
+					//UTIL.getStack("XXX");
+					
+					if(err) createPathSomewhereCallback(err, path);
+					else createPathSomewhereCallback(null, path);
+					
+					
+				});
+				
+				// b = false : If you should wait for the continue event before sending any more traffic.
+				
+				//console.log("b=" + b);
+				
+			}
+			else {
+				createPathCallback(new Error("Unable to create " + path + " on " + hostname + "\nNot connected to SFTP on " + hostname + " !"));
+			}
+		}
+		else {
+			// ### Create a directory using "normal" file system
+			var fs = require("fs");
+			
+			fs.mkdir(path, function(err) {
+				if(err) createPathSomewhereCallback(err, path);
+				else createPathSomewhereCallback(null, path);
+			});
+		}
+		
+		
+		function createPathFTP(path) {
+			
+			console.log("Creating FTP path=" + path)
+			
+			if(user.connections.hasOwnProperty(hostname)) {
+				
+				var c = user.connections[hostname].client;
+				
+				// ftp mkdir
+				c.mkdir(path, function(err) {
+					
+					console.log("Done creating FTP path=" + path);
+					
+					if(err) createPathSomewhereCallback(err, path);
+					else createPathSomewhereCallback(null, path);
+					
+					runFtpQueue();
+					
+				});
+				
+			}
+			else {
+				createPathCallback(new Error("Unable to create path=" + path + " on " + hostname + "\nNot connected to FTP on " + hostname + " !"));
+				runFtpQueue();
+			}
+		}
+		
+	}
+}
+
+
+
+
+
 module.exports = API;
