@@ -182,9 +182,6 @@ EDITOR.lastKeyPressed = "";
 	
 	var testFirstTest = true;
 	
-	var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
-	var ftpBusy = false;
-	
 	var windowLoaded = false;
 	
 	/*
@@ -2615,237 +2612,13 @@ EDITOR.lastKeyPressed = "";
 		
 		if(protocol == undefined) throw new Error("No protocol defined!");
 		
-		if(protocol.indexOf(":") != -1) {
-			console.warn("Removing : (colon) from protocol=" + protocol);
-			protocol = protocol.replace(/:/g, "");
-		}
+		var json = {protocol: protocol, serverAddress: serverAddress, user: user, passw: passw, keyPath: keyPath, workingDir: workingDir};
 		
-		protocol = protocol.toLowerCase();
+		CLIENT.cmd("connect", json, function(err, json) {
+			if(err) callback(err);
+			else callback(null, json.workingDirectory);
+		});
 		
-		console.log("protocol=" + protocol);
-		
-		if(EDITOR.remoteProtocols.indexOf(protocol) == -1) throw new Error("Protocol=" + protocol + " not supported!"); 
-		
-		if(protocol == "ftp" || protocol == "ftps") {
-			
-			if(ftpQueue.length > 0) {
-				console.warn("Removing " + ftpQueue.length + " items from the FTP queue");
-				ftpQueue.length = 0;
-			}
-			
-			var Client = require('ftp');
-			EDITOR.connections[serverAddress] = {client: new Client(), protocol: protocol};
-			var ftpClient = EDITOR.connections[serverAddress].client;
-			ftpClient.on('ready', function() {
-				console.log("Connected to FTP server on " + serverAddress + " !");
-				ftpClient.pwd(function(err, dir) {
-					if(err) throw err;
-					EDITOR.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
-					
-					// Create disconnect function
-					EDITOR.connections[serverAddress].close = function disconnectFTP() {
-						ftpClient.end();
-						delete EDITOR.connections[serverAddress];
-						
-						console.log("Dissconnected from FTP on " + serverAddress + "");
-					};
-					
-					callback(null, EDITOR.workingDirectory);
-				});
-				
-			});
-			
-			ftpClient.on('error', function(err) {
-				alertBox(err.message);
-				callback(err); // Should we callback here ?? Can happend several hours after the connection was initiated!
-				
-				connectionClosed("ftp", serverAddress);
-				
-				/*
-					if(err.message == "Login incorrect.") {
-					alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message + "\nProbably wrong username/password!");
-					}
-					else {
-					alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message);
-					}
-					console.error(err);
-				*/
-			});
-			
-			ftpClient.on('close', function(hadErr) {
-				alertBox("Connection to FTP on " + serverAddress + " closed.");
-				
-				connectionClosed("ftp", serverAddress);
-				
-			});
-			
-			var options = {host: serverAddress, user: user, password: passw};
-			
-			if(protocol == "ftps") {
-				options.secure = true;
-				
-				// Some times the cert is lost!? So we need to override checkServerIdentity to return undefined instead of throwing an error: Cannot read property 'CN' of undefined
-				// https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
-				
-				options.secureOptions = {
-					checkServerIdentity: function(servername, cert) {
-						console.log("Checking server identity for servername=" + servername);
-						
-						if(Object.keys(cert).length == 0) console.warn("No cert attached!");
-						else {
-							// Do some checking?
-							//console.log(JSON.stringify(cert));
-						}
-						
-						return undefined;
-						
-					}
-				}
-			}
-			console.log("Connecting to " + options.host + " ...");
-			ftpClient.connect(options);
-		}
-		
-		// note: SSH (shell) not yet supported. Use SFTP instead!
-		else if(protocol == "ssh") {
-			
-			sshConnect(function sshConnected(err, sshClient, workingDir) {
-				if(err) callback(err);
-				else {
-					
-					EDITOR.connections[serverAddress] = {client: sshClient, protocol: protocol};
-					
-					// Create disconnect function
-					EDITOR.connections[serverAddress].close = function disconnectSSH() {
-						sshClient.end();
-						delete EDITOR.connections[serverAddress];
-						
-						console.log("Dissconnected from SSH on " + serverAddress + "");
-					};
-					
-					EDITOR.changeWorkingDir(workingDir);
-					
-					callback(null, EDITOR.workingDirectory);
-				}
-			});
-			
-		}
-		else if(protocol == "sftp") {
-			
-			sshConnect(function sshConnected(err, sshClient, workingDir) {
-				if(err) callback(err);
-				else {
-					// Initiate "SFTP mode"
-					sshClient.sftp(function(err, sftpClient) {
-						if (err) {
-							sshClient.end();
-							callback(err);
-							//alertBox("Unable to run SFTP on " + serverAddress + "\n" + err.message);
-							//throw err;
-						}
-						else {
-							EDITOR.connections[serverAddress] = {client: sftpClient, protocol: protocol};
-							EDITOR.changeWorkingDir(workingDir);
-							
-							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + EDITOR.workingDirectory);
-							
-							// Create disconnect function
-							EDITOR.connections[serverAddress].close = function disconnectSFTP() {
-								sshClient.end();
-								delete EDITOR.connections[serverAddress];
-								
-								console.log("Dissconnected from SFTP on " + serverAddress + "");
-							};
-							
-							callback(null, EDITOR.workingDirectory);
-						}
-					});
-				}
-			});
-		}
-		else {
-			throw new Error("Protocol not supported: " + protocol);
-		}
-		
-		
-		function sshConnect(cb) {
-			// Connects to a SSH server and sets the working directory, returns the "connection" in the callback
-			
-			var auth = {
-				host: serverAddress,
-				port: 22,
-				username: user,
-			}
-			
-			if(keyPath) {
-				// Connect using key
-				EDITOR.readFromDisk(keyPath, function readKey(err, path, keyStr) { // Read key
-					auth.passphrase = passw;
-					auth.privateKey = keyStr;
-					try {
-						connect();
-					}
-					catch(err) {
-						cb(err);
-						//alertBox("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
-					}
-				});
-			}
-			else {
-				// Connect using password
-				auth.password = passw;
-				connect();
-			}
-			
-			function connect() {
-				var Client = require('ssh2').Client;
-				
-				var c = new Client();
-				c.on('ready', function() {
-					console.log('Client :: ready');
-					
-					c.exec('pwd', function(err, stream) {
-						if (err) throw err;
-						var dir = "";
-						stream.on('close', function(code, signal) {
-							//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
-							
-							// Chop off the newline character
-							dir = dir.substring(0, dir.length-1);
-							
-							var workingDir = UTIL.trailingSlash(protocol + "://" + serverAddress + dir.replace("\\", "/"));
-							
-							cb(null, c, workingDir);
-							
-							//c.end();
-						}).on('data', function(data) {
-							//console.log('STDOUT: ' + data);
-							dir += data;
-						}).stderr.on('data', function(data) {
-							cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
-							//alertBox("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
-							console.warn('STDERR: ' + data);
-						});
-					});
-					
-				}).on('error', function(err) {
-					cb(err);
-					if(err.message == "All configured authentication methods failed") {
-						alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
-					}
-					else {
-						alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
-					}
-					connectionClosed("ssh", serverAddress);
-					
-				}).on('end', function(msg) {
-					alertBox("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
-					
-					connectionClosed("ssh", serverAddress);
-					
-				}).connect(auth);
-			}
-		}
 	}
 	
 	EDITOR.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
@@ -2977,17 +2750,7 @@ EDITOR.lastKeyPressed = "";
 		// todo: for debugging. Returns true if the screen area is the same as the background
 	}
 	
-	function runFtpQueue() {
-		
-		console.log(ftpQueue.length + " items left in the FTP queue");
-		
-		if(ftpQueue.length > 0) {
-			console.log("Executing next item in the ftp queue ...");
-			ftpQueue.shift()();
-		}
-		else ftpBusy = false;
-		
-	}
+
 	
 	function connectionClosed(protocol, serverAddress) {
 		

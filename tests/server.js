@@ -110,6 +110,23 @@
 			}
 		});
 		
+	});
+	
+	EDITOR.addTest(function testConnect(callback) {
+		
+		var connJson = {protocol: "ftp", serverAddress: "192.168.1.77", user: "test", passw: "test123"};
+		
+		CLIENT.cmd("connect", connJson, function(err, json) {
+			if(err) throw err;
+			
+			var url = connJson.protocol + "://" + connJson.serverAddress + "/";
+			var workingDirectory = json.workingDirectory;
+			
+			if(workingDirectory != url) throw new Error("Expected workingDirectory=" + workingDirectory + " to be url=" + url);
+			
+			callback(true);
+		});
+		
 	}, 1);
 	
 })();

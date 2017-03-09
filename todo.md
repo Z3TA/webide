@@ -50,6 +50,8 @@ Make it so global.js => util.js ?? can be used by both client and server
 
 todo:
 
+How to handle errors in server.js ?
+
 Functionality discovery: Add a search button in the upper right corder, clicking it is the same as clicking the keyboard function/ctrl button:
 It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
 

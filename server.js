@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+var UTIL = require("./UTIL.js");
+
 var GS = String.fromCharCode(29);
 var APC = String.fromCharCode(159);
 
@@ -9,23 +11,23 @@ function main() {
 
 	var port = 8099;
 
-var sockJs = require("sockjs");
-var wsServer = sockJs.createServer();
-wsServer.on("connection", connection);
+	var sockJs = require("sockjs");
+	var wsServer = sockJs.createServer();
+	wsServer.on("connection", connection);
 
-var http = require("http");
-var httpServer = http.createServer();
-httpServer.listen(port);
-	wsServer.installHandlers(httpServer, {prefix:'/jzedit'});
+	var http = require("http");
+	var httpServer = http.createServer();
+	httpServer.listen(port);
+		wsServer.installHandlers(httpServer, {prefix:'/jzedit'});
 
-process.on("exit", function () {
-log("Program exit\n\n");
-});
+	process.on("exit", function () {
+	log("Program exit\n\n");
+	});
 
-process.on("SIGINT", function sigInt() {
-log("Received SIGINT");
+	process.on("SIGINT", function sigInt() {
+	log("Received SIGINT");
 
-httpServer.close();
+	httpServer.close();
 		
 		process.exit();
 
@@ -117,6 +119,10 @@ function connection(connection) {
 					else {
 						user = usr;
 						
+						user.connected(connection);
+						
+						user.IP = IP;
+						
 						send({resp: {user: user.name}})
 						
 						for(var i=0; i<commandQueue.length; i++) {
@@ -196,8 +202,8 @@ function identify(json, IP, callback) {
 			else callback(new Error("Wrong username=" + json.username + " or password"));
 			
 			function userOK(index, name) {
-				user = {id: index, name: name};
-				user.connections = {};
+				user = new User(index, name);
+				
 			}
 			
 		});
@@ -232,6 +238,60 @@ function log(msg) {
 			else return n;
 		}
 	}
+}
+
+
+function User(id, name) {
+	var user = this;
+	
+	user.id = id;
+	user.name = name;
+	user.connections = {};
+	user.workingDirectory = UTIL.trailingSlash(process.cwd());
+	user.connection = null;
+	
+}
+
+User.prototype.connected = function connected(connection) {
+	var user = this;
+
+	user.connection = connection;
+}
+
+User.prototype.disconnected = function disconnected() {
+	var user = this;
+
+	user.connection = null;
+}
+
+User.prototype.send = function send(msg) {
+	var user = this;
+
+	if(!user.connection) {
+		console.warn("Unable to send msg. User name=" + user.name + " is not connected!");
+		return;
+	}
+	
+	var str = JSON.stringify(msg);
+	log(user.IP + " <= " + str);
+	connection.write(str);
+	
+}
+
+User.prototype.changeWorkingDir = function changeWorkingDir(path) {
+	var user = this;
+	
+	user.workingDirectory = path;
+}
+
+User.prototype.connectionClosed = function connectionClosed(protocol, serverAddress) {
+	var user = this;
+	
+	// Notify the client about closed connection
+	
+	
+	delete user.connections[serverAddress]; // Remove the connection
+	
 }
 
 
