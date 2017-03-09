@@ -6,7 +6,7 @@
 		
 		var json = {path: "README.txt", returnBuffer: false, encoding: "utf8"};
 		
-		client.cmd("readFromDisk", json, function(err, json) {
+		CLIENT.cmd("readFromDisk", json, function(err, json) {
 			if(err) throw err
 			else {
 				if(json.path.indexOf("README.txt") == -1) throw new Error("path=" + path);
@@ -22,7 +22,7 @@
 		
 		var json = {path: "README.txt"};
 		
-		client.cmd("getFileSizeOnDisk", json, function(err, json) {
+		CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
 			if(err) throw err
 			else {
 				if(json.size < 10) throw new Error("json.size=" + json.size);
@@ -40,14 +40,14 @@
 		
 		var json = {path: randomName, text: randomContent};
 		
-		client.cmd("saveToDisk", json, function(err, json) {
+		CLIENT.cmd("saveToDisk", json, function(err, json) {
 			if(err) throw err
 			else {
 				var path = json.path;
 				
 				// Open the file and check the content
 				
-				client.cmd("readFromDisk", json, function(err, json) {
+				CLIENT.cmd("readFromDisk", json, function(err, json) {
 					if(err) throw err
 					else {
 						if(json.path.indexOf(randomName) == -1) throw new Error("path=" + path);
@@ -68,7 +68,7 @@
 		
 		var json = {pathToFolder: "bin/"};
 		
-		client.cmd("listFiles", json, function(err, json) {
+		CLIENT.cmd("listFiles", json, function(err, json) {
 			if(err) throw err
 			else {
 				

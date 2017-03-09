@@ -813,6 +813,9 @@ var UTIL = {
 
 }
 
-if(module) {
-	if(module.export) module.export = UTIL;
+try {
+	module.exports = UTIL;
+}
+catch(err) {
+	// We are in a browser
 }

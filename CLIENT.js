@@ -1,18 +1,18 @@
 /*
-	This is the server.js "client".
+	This is the server.js "CLIENT".
 	
-	Use client.cmd(cmd, jsonData, callback) to send commands to the server.
+	Use CLIENT.cmd(cmd, jsonData, callback) to send commands to the server.
 	
 */
 
-var client = {}; // Client object is global
+var CLIENT = {}; // Client object is global
 
 
 (function() {
 	
 	"use strict";
 	
-	console.log("Hello from client.js");
+	console.log("Hello from CLIENT.js");
 	
 	var eventListeners = {};
 	var counter = 0;
@@ -20,9 +20,9 @@ var client = {}; // Client object is global
 	var cache = {};
 	var connection;
 	
-	client.connected = false;
+	CLIENT.connected = false;
 	
-	client.connect = function(callback) {
+	CLIENT.connect = function(callback) {
 		
 		var apiUrl = "jzedit";
 		var port = "8099";
@@ -33,22 +33,22 @@ var client = {}; // Client object is global
 		connection = new SockJS('http://' + host + ':' + port + '/' + apiUrl, '', {debug: true});
 		connection.onopen = function serverConnected() {
 			console.log("connection open");
-			client.connected = true;
+			CLIENT.connected = true;
 			
-			client.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
+			CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			
 			
 			callback(null); // Don't wait for login, just callback and say we successfully connected
 			callback = null; // Prevent calling the connect callback when connection is closed after a successful onopen
 			
-			client.fireEvent("connectionConnected");
+			CLIENT.fireEvent("connectionConnected");
 			
 			function loggedIn(err, resp) {
 				if(err) {
 					console.warn(err);
-					client.fireEvent("loginFail");
+					CLIENT.fireEvent("loginFail");
 				}
-				else client.fireEvent("loginSuccessful");
+				else CLIENT.fireEvent("loginSuccessful");
 			}
 			
 		}
@@ -59,7 +59,7 @@ var client = {}; // Client object is global
 			
 			console.log("Server: " + msg);
 			
-			client.connected = true;
+			CLIENT.connected = true;
 			
 			if(msg.length == 0) console.warn("Recieved emty messsage from server");
 			else {
@@ -76,7 +76,7 @@ var client = {}; // Client object is global
 					for(var method in json.resp) {
 						// Call event listeners
 						if(eventListeners.hasOwnProperty(method)) {
-							client.fireEvent(method, json.resp[method]);
+							CLIENT.fireEvent(method, json.resp[method]);
 						}
 					}
 				}
@@ -101,7 +101,7 @@ var client = {}; // Client object is global
 		
 		connection.onclose = function serverDisconnected() {
 			console.log("connection closed");
-			client.connected = false;
+			CLIENT.connected = false;
 			
 			if(callback) {
 				var err = new Error("Connection closed");
@@ -109,18 +109,18 @@ var client = {}; // Client object is global
 				callback(err);
 			}
 			
-			client.fireEvent("connectionLost");
+			CLIENT.fireEvent("connectionLost");
 			
 		}
 		
 	}
 	
-	client.disconnect = function disconnect() {
+	CLIENT.disconnect = function disconnect() {
 		connection.close();
-		client.connected = false;
+		CLIENT.connected = false;
 	}
 	
-	client.cmd = function cmd(req, json, callback) {
+	CLIENT.cmd = function cmd(req, json, callback) {
 		
 		// Second argument is either a callback function or a javascript object
 		if(typeof json == "function" && callback == undefined) {
@@ -129,7 +129,7 @@ var client = {}; // Client object is global
 		}
 		else if(typeof json != "object") throw new Error("Second argument json (if specified) must be an object!");
 		
-		console.log("client.cmd req=" + req);
+		console.log("CLIENT.cmd req=" + req);
 		
 		var GS = String.fromCharCode(29);
 		
@@ -156,7 +156,7 @@ var client = {}; // Client object is global
 	}
 	
 	
-	client.on = function addEventListener(ev, cb) {
+	CLIENT.on = function addEventListener(ev, cb) {
 		if(!eventListeners.hasOwnProperty(ev)) {
 			console.warn("Adding new event to event listeners: " + ev);
 			eventListeners[ev] = [];
@@ -166,7 +166,7 @@ var client = {}; // Client object is global
 		
 	}
 	
-	client.fireEvent = function fireEvent(ev, data) {
+	CLIENT.fireEvent = function fireEvent(ev, data) {
 		
 		if(!eventListeners.hasOwnProperty(ev)) console.warn("No registered event=" + ev)
 		else {
@@ -194,12 +194,12 @@ var client = {}; // Client object is global
 				err.code = "CONNECTION_CLOSED";
 				callback(err);
 			}
-			client.fireEvent("connectionLost");
+			CLIENT.fireEvent("connectionLost");
 			//serverMessage(formatText(currentChannel.name) + GS + formatText(nickName) + GS + formatText(text))
 		}
 		
 	}
 	
-	console.log("End of client.js");
+	console.log("End of CLIENT.js");
 	
 })();

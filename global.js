@@ -6,6 +6,7 @@
 	- editor (editor.js)
 	- File (File.js)
 	- Dialog, alertBox, confirmBox, promptBox (Dialog.js)
+	- SockJS (sockjs-0.3.4.js)
 
 */
 

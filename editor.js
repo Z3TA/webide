@@ -502,7 +502,7 @@ editor.lastKeyPressed = "";
 		
 		if(!callback) throw new Error("Callback not defined!");
 		
-		if(!client.connected) {
+		if(!CLIENT.connected) {
 			var xhr = new XMLHttpRequest();
 			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
 			xhr.onreadystatechange = function() {
@@ -516,7 +516,7 @@ editor.lastKeyPressed = "";
 			
 			var json = {path: path};
 			
-			client.cmd("getFileSizeOnDisk", json, function (err, json) {
+			CLIENT.cmd("getFileSizeOnDisk", json, function (err, json) {
 				if(err) callback(err);
 				else callback(null, json.size);
 			});
@@ -675,7 +675,7 @@ editor.lastKeyPressed = "";
 		
 		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
-		client.cmd("readFromDisk", json, function(err, json) {
+		CLIENT.cmd("readFromDisk", json, function(err, json) {
 			if(err) callback(err);
 			else callback(null, json.path, json.data);
 		});
@@ -767,7 +767,7 @@ editor.lastKeyPressed = "";
 		
 		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
 		
-		client.cmd("saveToDisk", json, function(err, json) {
+		CLIENT.cmd("saveToDisk", json, function(err, json) {
 			if(err) saveToDiskCallback(err);
 			else saveToDiskCallback(null, json.path);
 		});
@@ -2886,7 +2886,7 @@ editor.lastKeyPressed = "";
 
 		var json = {pathToFolder: pathToFolder};
 		
-		client.cmd("listFiles", json, function(err, json) {
+		CLIENT.cmd("listFiles", json, function(err, json) {
 			if(err) listFilesCallback(err);
 			else listFilesCallback(null, json.list);
 		});
@@ -3220,7 +3220,7 @@ editor.lastKeyPressed = "";
 				throw new Error("Something went wrong when closing the editor!");
 			}
 			
-			client.disconnect();
+			CLIENT.disconnect();
 			
 		});
 		
@@ -3322,7 +3322,7 @@ editor.lastKeyPressed = "";
 		console.log("Starting the editor ...");
 		
 		
-		client.connect(connectedToServer);
+		CLIENT.connect(connectedToServer);
 	
 		
 		getVersion(function(version) {
@@ -3627,7 +3627,7 @@ editor.lastKeyPressed = "";
 			
 			
 			// Use servers working directory
-			client.cmd("workingDirectory", null, function(err, json) {
+			CLIENT.cmd("workingDirectory", null, function(err, json) {
 				if(err) throw err;
 				else editor.workingDirectory = json.path;
 			});
