@@ -26,7 +26,7 @@ else if(process.platform == "linux") {
 	RUNTIME = "nwjs-v0.12.3-linux-x64/nw"; // Change this to your OS
 }
 else if(process.platform == "darwin") {
-	RUNTIME = "nwjs-v0.12.3-osx-x64/nwjc"; // Change this to your OS
+	RUNTIME = "nwjs-v0.12.3-osx-x64/nwjs.app"; // Change this to your OS
 }
 else {
 	throw new Error("Unknown platform: " + process.platform);
