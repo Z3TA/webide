@@ -22,23 +22,29 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connected = false;
 	
-	CLIENT.connect = function(callback) {
+	CLIENT.connect = function(server, callback) {
 		
-		var apiUrl = "jzedit";
-		var port = "8099";
-		var host = "192.168.1.69";
+		var defaultApi = "jzedit";
+		var defaultPort = "8099";
+		var defaultHost = "192.168.1.69";
+		
+		if(server == undefined) server = {api: defaultApi, port: defaultPort, host: defaultHost};
+		
+		var apiUrl = server.api || defaultApi;
+		var port = server.port || defaultPort;
+		var host = server.host || defaultHost;
 		
 		console.log("Connecting to jzedit server ...");
 		//connection = new SockJS(apiUrl);
 		connection = new SockJS('http://' + host + ':' + port + '/' + apiUrl, '', {debug: true});
 		connection.onopen = function serverConnected() {
-			console.log("connection open");
+			console.log("connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
 			
 			CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			
 			
-			callback(null); // Don't wait for login, just callback and say we successfully connected
+			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
 			callback = null; // Prevent calling the connect callback when connection is closed after a successful onopen
 			
 			CLIENT.fireEvent("connectionConnected");
@@ -110,6 +116,18 @@ var CLIENT = {}; // Client object is global
 			}
 			
 			CLIENT.fireEvent("connectionLost");
+			
+			
+			// Attempt to reconnect ...
+			
+			setTimeout(function reconnect() {
+				
+				if(CLIENT.connected) return;
+				
+				console.log("Reconnecting to server=" + JSON.stringify(server));
+				CLIENT.connect(server);
+				
+			}, 2000);
 			
 		}
 		
