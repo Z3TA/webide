@@ -91,7 +91,7 @@ function Dialog(msg, icon) {
 	
 	
 	// Give the focus to the box
-	editor.input = false;
+	EDITOR.input = false;
 	
 	// Give the program time to add buttons etc to the dialog
 	// Also avoid accidently closing the dialog (while typing spaces)
@@ -109,7 +109,7 @@ function Dialog(msg, icon) {
 			}
 		}
 		
-		editor.input = false;
+		EDITOR.input = false;
 	}
 }
 Dialog.prototype.close = function() {
@@ -117,7 +117,7 @@ Dialog.prototype.close = function() {
 	
 	// The editor watches for clicks outside the "editor" area (canvas), so wait until that is done before giving back input
 	setTimeout(function() {
-		editor.input = true;
+		EDITOR.input = true;
 	}, 500); // Not too fast, make sure the user has released the space bar
 }
 

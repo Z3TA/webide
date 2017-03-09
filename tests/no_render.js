@@ -1,9 +1,9 @@
 
-editor.addTest(function doNotCallRender(testCallback) {
+EDITOR.addTest(function doNotCallRender(testCallback) {
 	
 	/*
 
-		To allow optimizations. File.x low level functions should not call editor.render or editor.renderNeeded
+		To allow optimizations. File.x low level functions should not call EDITOR.render or EDITOR.renderNeeded
 
 	*/
 	
@@ -13,15 +13,15 @@ editor.addTest(function doNotCallRender(testCallback) {
 		renderCalled = true;
 	}
 
-	var renderOriginal = editor.render;
-	var renderNeededOriginal = editor.renderNeeded;
+	var renderOriginal = EDITOR.render;
+	var renderNeededOriginal = EDITOR.renderNeeded;
 	
-	editor.openFile("testDeleteCharacter.txt", 'hello world!', function(err, file) {
+	EDITOR.openFile("testDeleteCharacter.txt", 'hello world!', function(err, file) {
 		
 		if(err) throw err;
 		
-		editor.render = mockRender;
-		editor.renderNeeded = mockRender;
+		EDITOR.render = mockRender;
+		EDITOR.renderNeeded = mockRender;
 		
 		file.moveCaretRight();
 		
@@ -32,10 +32,10 @@ editor.addTest(function doNotCallRender(testCallback) {
 		if(renderCalled) throw new Error("file.deleteCharacter told the editor to render");
 		
 		
-		editor.render = renderOriginal;
-		editor.renderNeeded = renderNeededOriginal;
+		EDITOR.render = renderOriginal;
+		EDITOR.renderNeeded = renderNeededOriginal;
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		
 		
 		

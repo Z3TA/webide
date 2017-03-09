@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 
-	editor.on("fileOpen", checkEncoding);
+	EDITOR.on("fileOpen", checkEncoding);
 
 	function checkEncoding(file) {
 		/*
@@ -30,10 +30,10 @@
 		}
 		
 		function problemFound(i) {
-			editor.resizeNeeded(); // Just in case, to prevent weird look
-			editor.renderNeeded(); // Render so the user can make a better decision whether to convert or not
+			EDITOR.resizeNeeded(); // Just in case, to prevent weird look
+			EDITOR.renderNeeded(); // Render so the user can make a better decision whether to convert or not
 			if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + " ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
-				editor.readFromDisk(file.path, fileRead, false, "binary");
+				EDITOR.readFromDisk(file.path, fileRead, false, "binary");
 			}
 
 			function fileRead(err, path, buffer) {

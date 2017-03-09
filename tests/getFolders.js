@@ -1,4 +1,4 @@
-editor.addTest(function getFoldersTest(callback) {
+EDITOR.addTest(function getFoldersTest(callback) {
 	// Testing the global getFolders function 
 	
 	var ftpSite = UTIL.getFolders("ftp://user:pw@hostname:port/folder1/folder2/folder3", true);

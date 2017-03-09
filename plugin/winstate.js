@@ -144,7 +144,7 @@
 		
 		win.resizeTo(winState.width, winState.height);
 		win.moveTo(winState.x, winState.y);
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 	}
 
 	function saveWindowState() {
@@ -193,7 +193,7 @@
 				// set correct size
 				if (deltaHeight !== 0) {
 					win.resizeTo(winState.width, win.height - deltaHeight);
-					editor.resizeNeeded();
+					EDITOR.resizeNeeded();
 				}
 			}
 
@@ -205,9 +205,9 @@
 	
 	// Use editor events!
 	
-	editor.on("exit", winstateOnClose);
+	EDITOR.on("exit", winstateOnClose);
 	
-	editor.on("start", initWindowState);
+	EDITOR.on("start", initWindowState);
 	
 	function winstateOnClose() {
 		try {

@@ -2,7 +2,7 @@
 	"use strict";
 	
 	// Add plugin to editor
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Word wrap JavaScript to fit inside line length limit",
 		load: load,
 		unload: unload,
@@ -12,11 +12,11 @@
 		
 		var W = 87;
 		
-		editor.bindKey({desc: "Word wrap JavaScript", fun: wordWrapJs, charCode: W, combo: CTRL});
+		EDITOR.bindKey({desc: "Word wrap JavaScript", fun: wordWrapJs, charCode: W, combo: CTRL});
 	}
 	
 	function unload() {
-		editor.unbindKey(wordWrapJs);
+		EDITOR.unbindKey(wordWrapJs);
 	}
 	
 	
@@ -24,7 +24,7 @@
 		
 		//alertBox("wordWrapJs");
 		
-		var maxTextWidth = editor.view.visibleColumns;
+		var maxTextWidth = EDITOR.view.visibleColumns;
 		
 		// # Find the text to reformat
 		var index = file.caret.index;

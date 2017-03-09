@@ -4,7 +4,7 @@
 	
 	var order = 100;
 	
-	editor.on("autoComplete", autoCompleteXml, order);
+	EDITOR.on("autoComplete", autoCompleteXml, order);
 	
 	function autoCompleteXml(file, word, wordLength, gotOptions) {
 		

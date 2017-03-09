@@ -9,7 +9,7 @@
 	var newFileCounter = 1;
 	
 	// Bind to ctrl + N
-	editor.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: createNewFile});
+	EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: createNewFile});
 
 
 	
@@ -19,18 +19,18 @@
 			var path = "new file" // + (newFileCounter++);
 		
 		// Do not overwrite opened files!
-		//while(editor.files[path]) {
+		//while(EDITOR.files[path]) {
 			//path = "new file " + (newFileCounter++);
 		//}
 		
-		editor.openFile(path, content, function(err, file) {
+		EDITOR.openFile(path, content, function(err, file) {
 			// Mark the file as NOT saved, because its a NEW file
 			file.isSaved = false;
 			file.savedAs = false;
 		});
 				
-		editor.renderNeeded();
-		editor.resizeNeeded();
+		EDITOR.renderNeeded();
+		EDITOR.resizeNeeded();
 		
 		return false;
 		

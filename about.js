@@ -31,7 +31,7 @@ var data = {
 };
 
 // Easy to write plugins and add functionality using JavaScript
-editor.bindKey({charCode: 104, combo: CTRL, fun: 
+EDITOR.bindKey({charCode: 104, combo: CTRL, fun: 
 	function timeReport(file) {
 		var mysql = require('mysql'); // Supports NodeJS modules
 		var connection = mysql.createConnection({database : 'timeReports'});
@@ -43,7 +43,7 @@ editor.bindKey({charCode: 104, combo: CTRL, fun:
 
 
 // The editor is asynchronous, and event based. Most events can be captured
-editor.on("fileParse", function myCallback(file) {
+EDITOR.on("fileParse", function myCallback(file) {
 	alert("This file is a " + file.parsed.language + " file!")
 });
 

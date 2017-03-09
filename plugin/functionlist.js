@@ -17,7 +17,7 @@
 	var leftColumn;
 	var rightColumn;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Show list of JS functions in left column",
 		load: functionListMain,
 		unload: unload,
@@ -28,18 +28,18 @@
 		
 		console.log("Initiating functionlist");
 		
-		editor.on("fileParse", updateFunctionList); // Update existing function list if it already exist
+		EDITOR.on("fileParse", updateFunctionList); // Update existing function list if it already exist
 		
-		editor.on("fileHide", hideFunctionList); // The files hide/show when tabbing between them
-		editor.on("fileClose", hideFunctionList);
+		EDITOR.on("fileHide", hideFunctionList); // The files hide/show when tabbing between them
+		EDITOR.on("fileClose", hideFunctionList);
 		
-		editor.on("fileShow", loadFunctionList); // Build the function list (when switching to this file)
+		EDITOR.on("fileShow", loadFunctionList); // Build the function list (when switching to this file)
 				
-		editor.on("moveCaret", highlightCurrentFunction);
+		EDITOR.on("moveCaret", highlightCurrentFunction);
 		
-		editor.on("keyDown", searchFunctionList); // Enable searching in the function list
+		EDITOR.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
-		//editor.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
+		//EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
 
 		functionListWrap = document.createElement("div");
 		
@@ -65,14 +65,14 @@
 
 		functionListSelect.blur();
 		
-		editor.currentFile.scrollToCaret();
+		EDITOR.currentFile.scrollToCaret();
 		
-		editor.input = true;
+		EDITOR.input = true;
 		
 	}
 	
 	function searchFunctionList(file, char, combo) {
-		if(captureKeyboard && !editor.input) {
+		if(captureKeyboard && !EDITOR.input) {
 			searchString += char;
 		}
 		else {
@@ -93,7 +93,7 @@
 				if(domModel[i].name.toLowerCase().indexOf(searchString.toLowerCase()) != -1) {
 					found = true;
 					domModel[i].option.selected = true;
-					editor.currentFile.scrollToLine(domModel[i].lineNumber);
+					EDITOR.currentFile.scrollToLine(domModel[i].lineNumber);
 				}
 			}
 			
@@ -137,7 +137,7 @@
 		if(functionListSelect) {
 			functionListSelect.blur();
 			//file.canvas.focus(); // Do I need to focus elsewhere for blur to work!?
-			editor.input = true;
+			EDITOR.input = true;
 		}
 		return true;
 	}
@@ -148,7 +148,7 @@
 		
 		//console.log("updateFunctionList called");
 		
-		if(editor.currentFile != file) return;
+		if(EDITOR.currentFile != file) return;
 		
 		if(!file.parsed) return;
 		
@@ -281,8 +281,8 @@
 		
 		if(lengthOfLongestFunction > lastLengthOfLongestFunction) {
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 
 		}
 		
@@ -392,7 +392,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 		if(functionListWrap) {
 			if(functionListWrap.style.display != "none") {
 				functionListWrap.style.display="none";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 				console.log("Functionlist is now hidden");
 				console.log(UTIL.getStack("why hide?"));
 			}
@@ -404,7 +404,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 			
 			if(functionListWrap.style.display != "block") { // bugfix: editor resized at every key stroke because of fileParse event
 				functionListWrap.style.display="block";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 				console.log("Functionlist is now visible");
 			}
 			else {
@@ -437,7 +437,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 			functionListSelect.setAttribute("multiple", "multiple");
 			
 			functionListSelect.onchange = function(e) {
-				editor.currentFile.scrollToLine(this.value);
+				EDITOR.currentFile.scrollToLine(this.value);
 			}
 			functionListSelect.onfocus = function(e) {
 				captureKeyboard = true;
@@ -486,7 +486,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 		
 		// Why isn't the width pushing out width of the parent!?
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 		
 		console.timeEnd("buildFunctionList");
 				
@@ -519,7 +519,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 				}
 				
 				option.onclick = function() {
-					//editor.currentFile.scrollToLine(func.lineNumber);
+					//EDITOR.currentFile.scrollToLine(func.lineNumber);
 					
 					// We need to keep the functionlist focused to allow typing in it
 					
@@ -567,8 +567,8 @@ for(var func, element, i=0; i<functions.length; i++) {
 		return domModel;
 	}
 	
-	editor.addTest(function test_removeAddSubfunctionIndentation(callback) {
-			editor.openFile("test_removeAddSubfunctionIndentation.js", 'function foo() {\n\nfunction bar() {\n}\n}', function(err, file) {
+	EDITOR.addTest(function test_removeAddSubfunctionIndentation(callback) {
+			EDITOR.openFile("test_removeAddSubfunctionIndentation.js", 'function foo() {\n\nfunction bar() {\n}\n}', function(err, file) {
 			
 			file.moveCaretToIndex(file.text.length);
 			file.moveCaretLeft();
@@ -585,7 +585,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 			
 			callback(true);
 			
-			editor.closeFile(file.path);
+			EDITOR.closeFile(file.path);
 			
 		});
 	});

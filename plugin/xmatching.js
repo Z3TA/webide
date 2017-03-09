@@ -8,7 +8,7 @@
 	
 	var xMatcher = []; // For unloading
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Highlight matching parentheses and angel brackets",
 		load: loadXmath,
 		unload: unloadXmatch,
@@ -22,12 +22,12 @@
 	}
 	
 	function unloadXmatch() {
-		editor.renderFunctions.splice(xMatcher[1], 1);
-		editor.renderFunctions.splice(xMatcher[0], 1);
+		EDITOR.renderFunctions.splice(xMatcher[1], 1);
+		EDITOR.renderFunctions.splice(xMatcher[0], 1);
 	}
 	
 	function highLightX(a, b) {
-		xMatcher.push(editor.renderFunctions.push(function xmatch(ctx, buffer, file, startRow) {
+		xMatcher.push(EDITOR.renderFunctions.push(function xmatch(ctx, buffer, file, startRow) {
 			highlightMatch(ctx, buffer, file, a, b, startRow);
 		}) - 1);
 	}
@@ -114,41 +114,41 @@
 			
 			
 			var firstLocation = {
-				x: editor.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth,
-				y: editor.settings.topMargin + (leftPosition.row+startRow) * editor.settings.gridHeight
+				x: EDITOR.settings.leftMargin + (leftPosition.col + buffer[leftPosition.row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth,
+				y: EDITOR.settings.topMargin + (leftPosition.row+startRow) * EDITOR.settings.gridHeight
 			};
 			
 			
 			
 			var secondLocation = {
-				x: editor.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth,
-					y: editor.settings.topMargin + (rightPosition.row+startRow) * editor.settings.gridHeight
+				x: EDITOR.settings.leftMargin + (rightPosition.col + buffer[rightPosition.row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth,
+					y: EDITOR.settings.topMargin + (rightPosition.row+startRow) * EDITOR.settings.gridHeight
 			};
 					
 				
 			// Now when we got both positions, lets show something!
 			
-			//ctx.rect(firstLocation.x, firstLocation.y, editor.settings.gridWidth, editor.settings.gridHeight); // x,y,width,height
-			//ctx.rect(secondLocation.x, secondLocation.y, editor.settings.gridWidth, editor.settings.gridHeight); // x,y,width,height
+			//ctx.rect(firstLocation.x, firstLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight); // x,y,width,height
+			//ctx.rect(secondLocation.x, secondLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight); // x,y,width,height
 			
-			ctx.font=editor.settings.style.highlightMatchFont;
+			ctx.font=EDITOR.settings.style.highlightMatchFont;
 			
 			//console.log("ctx.font=" + ctx.font);
-			//console.log("editor.settings.style.highlightMatchFont=" + editor.settings.style.highlightMatchFont);
+			//console.log("EDITOR.settings.style.highlightMatchFont=" + EDITOR.settings.style.highlightMatchFont);
 			
 			// Clear boxes before painting in them
 			/*
-			ctx.fillStyle = editor.settings.style.highlightMatchBackground;
-			ctx.fillRect(firstLocation.x, firstLocation.y, editor.settings.gridWidth, editor.settings.gridHeight);
-			ctx.fillRect(secondLocation.x, secondLocation.y, editor.settings.gridWidth, editor.settings.gridHeight);
+			ctx.fillStyle = EDITOR.settings.style.highlightMatchBackground;
+			ctx.fillRect(firstLocation.x, firstLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+			ctx.fillRect(secondLocation.x, secondLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
 			*/
 			
 			// Render the things
 			if(leftEqualsRightCount === true) {
-				ctx.fillStyle=editor.settings.style.highlightMatchFontColor;
+				ctx.fillStyle=EDITOR.settings.style.highlightMatchFontColor;
 			}
 			else {
-			ctx.fillStyle=editor.settings.style.highlightMissMatchFontColor;
+			ctx.fillStyle=EDITOR.settings.style.highlightMissMatchFontColor;
 			}
 			
 			ctx.fillText(lP, firstLocation.x, firstLocation.y);
@@ -165,11 +165,11 @@
 			/*
 			var indentation = file.grid[file.caret.row].indentation;
 			
-			var x = editor.settings.leftMargin + (indentation * editor.settings.tabSpace) * editor.settings.gridWidth;
+			var x = EDITOR.settings.leftMargin + (indentation * EDITOR.settings.tabSpace) * EDITOR.settings.gridWidth;
 			
 			ctx.beginPath();
 			ctx.moveTo(x, 0);
-			ctx.lineTo(x, editor.view.canvasHeight);
+			ctx.lineTo(x, EDITOR.view.canvasHeight);
 			ctx.stroke();
 				*/
 		}

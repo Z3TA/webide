@@ -1,14 +1,14 @@
 
 (function() {
 
-	editor.on("paste", pasteFormat);
+	EDITOR.on("paste", pasteFormat);
 	
 	function pasteFormat(file, clipboard) {
 		
 		var text = clipboard.getData('text');
 		
 		// Fix lonely carrige-returns (without a line-feed)
-		//console.log("lineBreak=" + editor.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));
+		//console.log("lineBreak=" + EDITOR.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));
 		text = text.replace(/\r/g, "");
 		
 		//console.log("clipboard text=" + UTIL.lbChars(text));

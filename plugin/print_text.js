@@ -13,30 +13,30 @@
 var gui = require('nw.gui');
 	var menuItem;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Print plain text files",
 		load: load,
 		unload: unload,
 		});
 	
 	function load() {
-		menuItem = editor.addMenuItem("Print file ...", print_text_file);
+		menuItem = EDITOR.addMenuItem("Print file ...", print_text_file);
 	}
 	function unload() {
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 	}
 	
 	function print_text_file() {
 		
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
-		//var windowContent = editor.currentFile.text;
-		//var url = "file:///" + editor.currentFile.path;
+		//var windowContent = EDITOR.currentFile.text;
+		//var url = "file:///" + EDITOR.currentFile.path;
 		
 		// New document needs to be a HTML file (unless the url is opened) ...
-		var windowContent = '<title>' + editor.currentFile.path + '</title><pre style="white-space: pre-wrap;">' + editor.currentFile.text + '</pre>';
+		var windowContent = '<title>' + EDITOR.currentFile.path + '</title><pre style="white-space: pre-wrap;">' + EDITOR.currentFile.text + '</pre>';
 		
-		//var printWin = gui.Window.open(editor.currentFile.path);
+		//var printWin = gui.Window.open(EDITOR.currentFile.path);
 		
 		var printWin = window.open('text/plain');
 		printWin.document.write(windowContent);

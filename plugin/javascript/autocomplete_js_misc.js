@@ -4,7 +4,7 @@
 	
 	var order = 99;
 	
-	editor.on("autoComplete", autoCompleteJsMisc, order);
+	EDITOR.on("autoComplete", autoCompleteJsMisc, order);
 	
 	
 	function autoCompleteJsMisc(file, word, wordLength, gotOptions) {

@@ -30,13 +30,13 @@
 	}
 	
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Autocomplete for JavaScript",
 		load: function load() {
-			editor.on("autoComplete", autoCompleteJS);
+			EDITOR.on("autoComplete", autoCompleteJS);
 		},
 		unload: function unload() {
-			editor.removeEvent("autoComplete", autoCompleteJS);
+			EDITOR.removeEvent("autoComplete", autoCompleteJS);
 		},
 	});
 	
@@ -69,13 +69,13 @@
 			}
 			else if(fc.allArguments === "<b></b>") {
 				console.warn("Found no function arguments for " + fc.name + "!");
-				editor.addInfo(file.caret.row, file.caret.col, "Nothing found");
+				EDITOR.addInfo(file.caret.row, file.caret.col, "Nothing found");
 			}
 			else if(fc.argument.substring(0, wordToComplete.length) == wordToComplete && wordToComplete.length > 0) {
 				options.push([fc.argument, 0]);
 			}
 			else {
-				editor.addInfo(file.caret.row, file.caret.col, fc.allArguments);
+				EDITOR.addInfo(file.caret.row, file.caret.col, fc.allArguments);
 			}
 		}
 		else console.log("Not inside function call!");

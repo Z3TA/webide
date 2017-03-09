@@ -5,7 +5,7 @@
 	
 */
 
-//editor.settings.style.xmlTagColor = "rgb(255,0,0)";
+//EDITOR.settings.style.xmlTagColor = "rgb(255,0,0)";
 
 // 1l0Oo[]{}.,
 
@@ -14,21 +14,21 @@ console.log("runtime=" + runtime);
 if(runtime=="browser") {
 	
 	// We better use a web safe font ...
-	editor.settings.style.font = "Courier New";
-	editor.settings.style.highlightMatchFont = "bold 15px Courier New";
-	editor.settings.style.fontSize = 15;
-	editor.settings.gridHeight = 23;
-	editor.settings.gridWidth = 9;
+	EDITOR.settings.style.font = "Courier New";
+	EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New";
+	EDITOR.settings.style.fontSize = 15;
+	EDITOR.settings.gridHeight = 23;
+	EDITOR.settings.gridWidth = 9;
 	
 	// Web safe fonts are ugly, try to load a nice font ...
 	// OMG! DIFFERENT BROWSERS HAVE DIFFERENT SPACINGS FOR THE SAME FONT
 	if(UTIL.checkBrowser() != "Firefox") {
 		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
-		editor.settings.style.font = "DejaVuSansMono";
-	editor.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
-	editor.settings.style.fontSize = 13;
-	editor.settings.gridHeight = 22;
-	editor.settings.gridWidth = 7.83;
+		EDITOR.settings.style.font = "DejaVuSansMono";
+	EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
+	EDITOR.settings.style.fontSize = 13;
+	EDITOR.settings.gridHeight = 22;
+	EDITOR.settings.gridWidth = 7.83;
 	}
 	
 }
@@ -50,11 +50,11 @@ else if(process.platform == "windows") {
 		
 */
 	
-	editor.settings.style.font = "Consolas";
-	editor.settings.style.highlightMatchFont = "bold 15px Consolas";
-	editor.settings.style.fontSize = 15;
-	editor.settings.gridHeight = 23;
-	editor.settings.gridWidth = 8.25;
+	EDITOR.settings.style.font = "Consolas";
+	EDITOR.settings.style.highlightMatchFont = "bold 15px Consolas";
+	EDITOR.settings.style.fontSize = 15;
+	EDITOR.settings.gridHeight = 23;
+	EDITOR.settings.gridWidth = 8.25;
 	
 }
 else if(process.platform == "linux") {
@@ -80,19 +80,19 @@ else if(process.platform == "linux") {
 	
 	
 	/*
-		editor.settings.gridHeight = 17;
-		editor.settings.gridWidth = 8;
-		editor.settings.leftMargin = 30;
-		editor.settings.style.fontSize = 12;
-		editor.settings.style.font = "Liberation Mono";
-		editor.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
+		EDITOR.settings.gridHeight = 17;
+		EDITOR.settings.gridWidth = 8;
+		EDITOR.settings.leftMargin = 30;
+		EDITOR.settings.style.fontSize = 12;
+		EDITOR.settings.style.font = "Liberation Mono";
+		EDITOR.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
 	*/
 	
-	editor.settings.style.font = "DejaVu Sans Mono";
-	editor.settings.style.highlightMatchFont = "bold 14px DejaVu Sans Mono";
-	editor.settings.style.fontSize = 13;
-	editor.settings.gridHeight = 22;
-	editor.settings.gridWidth = 7.83;
+	EDITOR.settings.style.font = "DejaVu Sans Mono";
+	EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVu Sans Mono";
+	EDITOR.settings.style.fontSize = 13;
+	EDITOR.settings.gridHeight = 22;
+	EDITOR.settings.gridWidth = 7.83;
 	
 }
 

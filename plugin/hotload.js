@@ -4,7 +4,7 @@
 	/*
 		(Re)loads the current file / plugin 
 		
-		editor.plugin({desc: "Allows hot loading of plugins", load: loadHotloader, unload: unloadHotloader});
+		EDITOR.plugin({desc: "Allows hot loading of plugins", load: loadHotloader, unload: unloadHotloader});
 		
 		first time it unloads and loads twice !??
 		
@@ -12,7 +12,7 @@
 	
 	//alert("hotload");
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Allows hot loading of plugins",
 		load: loadHotloader,
 		unload: unloadHotloader,
@@ -23,26 +23,26 @@
 		//alert("load");
 		var keyF7 = 118;
 		
-		editor.bindKey({desc: "Reload current script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
+		EDITOR.bindKey({desc: "Reload current script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
 		
 	}
 	
 	
 	function unloadHotloader() {
 		//alert("unload");
-		editor.unbindKey(reloadCurrentScript);
+		EDITOR.unbindKey(reloadCurrentScript);
 	}
 
 	function reloadCurrentScript() {
 		
 		var head = document.getElementsByTagName("head")[0];
 		var scripts = head.getElementsByTagName("script");
-		var currentFile = editor.currentFile;
+		var currentFile = EDITOR.currentFile;
 		
 		if(!currentFile) throw new Error("No current file");
 		
 		// Fun fact: In Windows there are three slashes in file:/// but in Linux it's only two!
-		var currentScript = editor.currentFile.path.replace(/\\/g, "/");
+		var currentScript = EDITOR.currentFile.path.replace(/\\/g, "/");
 		
 		var reloaded = false;
 		
@@ -77,7 +77,7 @@
 			
 			//loadFunctionName = loadFunctionName[0]; // First group match in the regexp
 				
-			//editor.disablePlugin(loadFunctionName);
+			//EDITOR.disablePlugin(loadFunctionName);
 					
 					head.removeChild(script);
 					

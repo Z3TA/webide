@@ -9,7 +9,7 @@
 	
 	var key_B = 66;
 	
-	editor.bindKey({desc: "Show a message in window taskbar icon", charCode: key_B, combo: CTRL, fun: badgeMe});
+	EDITOR.bindKey({desc: "Show a message in window taskbar icon", charCode: key_B, combo: CTRL, fun: badgeMe});
 	
 	function badgeMe() {
 		var GUI = require('nw.gui').Window.get();

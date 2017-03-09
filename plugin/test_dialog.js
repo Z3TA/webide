@@ -2,20 +2,20 @@
 	
 // This file can be deleted
 
-//editor.on("start", mock);
+//EDITOR.on("start", mock);
 
 	// Add plugin to editor
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Test stuff",
 		load: function() {
 			var charCode_D = 68;
 
-editor.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
+EDITOR.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL + SHIFT, fun: testDialogs});
 			
 		},
 		unload: function() {
 		
-			editor.unbindKey(testDialogs);
+			EDITOR.unbindKey(testDialogs);
 			
 		},
 	});
@@ -25,7 +25,7 @@ editor.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: CTRL 
 	
 	function mock() {
 		
-		editor.mock("keydown", {charCode: charCode_D, target: "canvas", shiftKey: true, ctrlKey: true});
+		EDITOR.mock("keydown", {charCode: charCode_D, target: "canvas", shiftKey: true, ctrlKey: true});
 	
 }
 

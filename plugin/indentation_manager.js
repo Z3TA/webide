@@ -5,34 +5,34 @@
 	var indentationManager;
 	var fromWhat;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Set the indentation convention and fix all indentation errors",
 		load: function loadIndentationManager() {
 			
-			menuItem = editor.addMenuItem("Indentation ...", function() {
+			menuItem = EDITOR.addMenuItem("Indentation ...", function() {
 				showIndentationManager();
 			});
 			
 			var charEscape = 27;
-			editor.bindKey({desc: "Hide indentation manager", fun: hideIndentationManager, charCode: charEscape, combo: 0});
+			EDITOR.bindKey({desc: "Hide indentation manager", fun: hideIndentationManager, charCode: charEscape, combo: 0});
 			
-			editor.on("fileShow", showIndentationConvention);
+			EDITOR.on("fileShow", showIndentationConvention);
 			
 			//showIndentationManager();
 			
 		},
 		unload: function unloadIndentationManager() {
 			
-			editor.removeMenuItem(menuItem);
+			EDITOR.removeMenuItem(menuItem);
 			
-			editor.unbindKey(hideIndentationManager);
+			EDITOR.unbindKey(hideIndentationManager);
 			
-			editor.removeEvent("fileShow", showIndentationConvention);
+			EDITOR.removeEvent("fileShow", showIndentationConvention);
 			
 			if(indentationManager) {
 				var footer = document.getElementById("footer");
 				footer.removeChild(indentationManager);
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 			}
 			
 		},
@@ -41,12 +41,12 @@
 	function showIndentationManager() {
 		if(!indentationManager) buildIndentationManager();
 		
-		showIndentationConvention(editor.currentFile);
+		showIndentationConvention(EDITOR.currentFile);
 		
 		indentationManager.style.display = "block";
 		
-		editor.hideMenu();
-		editor.resizeNeeded();
+		EDITOR.hideMenu();
+		EDITOR.resizeNeeded();
 	}
 	
 	function hideIndentationManager() {
@@ -125,7 +125,7 @@
 		
 		console.log("num=" + num + " !!indentationCharacters=" + UTIL.lbChars(indentationCharacters));
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		var yes = "Save", no = "NO!";
 		
@@ -154,7 +154,7 @@
 		}
 		
 		file.reload(text);
-		showIndentationConvention(editor.currentFile);
+		showIndentationConvention(EDITOR.currentFile);
 	}
 	
 })();

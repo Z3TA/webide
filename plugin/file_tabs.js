@@ -14,54 +14,54 @@
 	//var fileList = []; // Temporary array copy of opened files!?
 	
 	
-	editor.on("start", file_tabs);
+	EDITOR.on("start", file_tabs);
 	
 	
 	function file_tabs() {
 		
 		buildTabs();
 		
-		editor.on("fileOpen", tabFileOpen, 2);
-		editor.on("fileClose", closeFile_tabs, 2);
-		editor.on("fileChange", tabFileChange);
-		editor.on("fileSave", tabFileSave);
-		editor.on("fileShow", tabFileShow);
+		EDITOR.on("fileOpen", tabFileOpen, 2);
+		EDITOR.on("fileClose", closeFile_tabs, 2);
+		EDITOR.on("fileChange", tabFileChange);
+		EDITOR.on("fileSave", tabFileSave);
+		EDITOR.on("fileShow", tabFileShow);
 		
 		var key_pageUP = 33;
 		var key_pageDown = 34;
 		
-		editor.bindKey({desc: "Switch tab to last active tab", charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
+		EDITOR.bindKey({desc: "Switch tab to last active tab", charCode: 9, combo: CTRL, fun: switchTab}); // Ctrl + tab
 		
-		editor.bindKey({desc: "Move current tab to the left", charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
-		editor.bindKey({desc: "Move current tab to the right", charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
+		EDITOR.bindKey({desc: "Move current tab to the left", charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
+		EDITOR.bindKey({desc: "Move current tab to the right", charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
 		// todo: implement tab drag and drop to change order
 		
-		editor.bindKey({desc: "Switch tab to the tab to the left", charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
-		editor.bindKey({desc: "Switch tab to the tab to the right", charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
+		EDITOR.bindKey({desc: "Switch tab to the tab to the left", charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
+		EDITOR.bindKey({desc: "Switch tab to the tab to the right", charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
 		
 		
 		
-		editor.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
+		EDITOR.resizeNeeded(); // Resize at least once after the editor has loaded, or we wont have data for screen with etc.
 		
 	}
 	
 	function switchTabLeft() {
-		var list = editor.sortFileList(); // Array sorted by file.order
+		var list = EDITOR.sortFileList(); // Array sorted by file.order
 		list.sort(sortListByFolder);
-		if(editor.currentFile.order == 0) {
-			editor.showFile(list[list.length-1]); // Show the last file
+		if(EDITOR.currentFile.order == 0) {
+			EDITOR.showFile(list[list.length-1]); // Show the last file
 		}
 		else if(list.length > 0) {
 			for(var i=0; i<list.length; i++) {
-				if(list[i] == editor.currentFile) break;
+				if(list[i] == EDITOR.currentFile) break;
 			}
-			editor.showFile(list[i-1]); // Show the file to the left
+			EDITOR.showFile(list[i-1]); // Show the file to the left
 		}
 		return false;
 	}
 	
 	function switchTabRight() {
-		var list = editor.sortFileList(); // Array sorted by file.order
+		var list = EDITOR.sortFileList(); // Array sorted by file.order
 		/*
 for(var i=0; i<list.length; i++) {
 			console.log(i + ": " + list[i].path);
@@ -69,16 +69,16 @@ for(var i=0; i<list.length; i++) {
 		console.log("efter");
 		*/
 		list.sort(sortListByFolder);
-		if(editor.currentFile.order == (list.length-1)) {
-			editor.showFile(list[0]); // Show the first file
+		if(EDITOR.currentFile.order == (list.length-1)) {
+			EDITOR.showFile(list[0]); // Show the first file
 		}
 		else if(list.length > 0) {
 			for(var i=0; i<list.length; i++) {
 				//console.log(i + ": " + list[i].path);
-				if(list[i] == editor.currentFile) break;
+				if(list[i] == EDITOR.currentFile) break;
 			}
 			console.log(" i=" + i + " / " + (list.length-1));
-			editor.showFile(list[i+1]); // Show the file to the right
+			EDITOR.showFile(list[i+1]); // Show the file to the right
 		}
 		return false;
 	}
@@ -113,18 +113,18 @@ for(var i=0; i<list.length; i++) {
 		
 		console.log("Orderleft");
 		
-		editor.currentFile.order-=1.5;
+		EDITOR.currentFile.order-=1.5;
 		/*
-		var currentFileFolder = getFolder(editor.currentFile.path)
+		var currentFileFolder = getFolder(EDITOR.currentFile.path)
 		var folder;
 		if(currentFileFolder) {
-			for(var filePath in editor.files) {
+			for(var filePath in EDITOR.files) {
 				folder = getFolder(filePath);
-				if(folder && folder == currentFileFolder) editor.files[filePath].order--;
+				if(folder && folder == currentFileFolder) EDITOR.files[filePath].order--;
 			}
 		}
 		else {
-			editor.currentFile.order--;
+			EDITOR.currentFile.order--;
 		}
 		*/
 		buildTabs(); // sorts again
@@ -136,18 +136,18 @@ for(var i=0; i<list.length; i++) {
 	function orderTabRight() {
 		console.log("Orderright");
 		
-		editor.currentFile.order+=1.5;
+		EDITOR.currentFile.order+=1.5;
 		/*
-		var currentFileFolder = getFolder(editor.currentFile.path)
+		var currentFileFolder = getFolder(EDITOR.currentFile.path)
 		var folder;
 		if(currentFileFolder) {
-			for(var filePath in editor.files) {
+			for(var filePath in EDITOR.files) {
 				folder = getFolder(filePath);
-				if(folder && folder == currentFileFolder) editor.files[filePath].order++;
+				if(folder && folder == currentFileFolder) EDITOR.files[filePath].order++;
 			}
 		}
 		else {
-			editor.currentFile.order++;
+			EDITOR.currentFile.order++;
 		}
 		*/
 		buildTabs(); // sorts again
@@ -160,9 +160,9 @@ for(var i=0; i<list.length; i++) {
 	function switchTab() {
 		// Open last file
 		
-		if(editor.lastFile == editor.currentFile) throw new Error("editor.lastFile = editor.currentFile = " + editor.currentFile.path);
+		if(EDITOR.lastFile == EDITOR.currentFile) throw new Error("EDITOR.lastFile = EDITOR.currentFile = " + EDITOR.currentFile.path);
 		
-		if(editor.lastFile) editor.showFile(editor.lastFile);
+		if(EDITOR.lastFile) EDITOR.showFile(EDITOR.lastFile);
 		else console.warn("No file to switch to!");
 		
 		return false;
@@ -220,28 +220,28 @@ for(var i=0; i<list.length; i++) {
 		
 		buildTabs(file);
 		
-		editor.renderNeeded();
-		editor.resizeNeeded();
+		EDITOR.renderNeeded();
+		EDITOR.resizeNeeded();
 		
 	}
 	
 	
 	function switchToFile(path) {
 		
-		if(!editor.files.hasOwnProperty(path)) {
+		if(!EDITOR.files.hasOwnProperty(path)) {
 			throw new Error("Trying to swith to a file that is not open! path=" + path);
 			return;
 		}
 		
 		console.log("Swithing to " + path);
 		
-		editor.showFile(editor.files[path]);
+		EDITOR.showFile(EDITOR.files[path]);
 		
 		/*
 		buildTabs();
 		
-		editor.resizeNeeded();
-		editor.renderNeeded();
+		EDITOR.resizeNeeded();
+		EDITOR.renderNeeded();
 */
 		console.log("Switched file to: " + path);
 
@@ -262,7 +262,7 @@ for(var i=0; i<list.length; i++) {
 			}
 		}
 		
-		var fileList = editor.sortFileList(); // An array of files sorted by file.order
+		var fileList = EDITOR.sortFileList(); // An array of files sorted by file.order
 		
 		if(excludeFile) {
 			if(fileList.indexOf(excludeFile) == -1) throw new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path);
@@ -299,7 +299,7 @@ for(var i=0; i<list.length; i++) {
 		var folderList;
 		var single = ""; // Single file in tabgroup
 		var tabFolderItem;
-		var active = editor.currentFile ? (editor.currentFile.path==path) : false;
+		var active = EDITOR.currentFile ? (EDITOR.currentFile.path==path) : false;
 		
 	
 		console.log("path=" + path + " active=" + active);
@@ -316,7 +316,7 @@ for(var i=0; i<list.length; i++) {
 		tabFileItem.setAttribute("id", "tabFileItem_" + path);
 		
 
-		if(editor.files[path].isSaved == false) {
+		if(EDITOR.files[path].isSaved == false) {
 			showUnsavedStatus(tabFileItem)
 		}
 		
@@ -412,13 +412,13 @@ for(var i=0; i<list.length; i++) {
 			
 			console.log("Closing tab for path=" + path);
 			
-			console.log("saved?" + editor.files[path].isSaved);
+			console.log("saved?" + EDITOR.files[path].isSaved);
 			console.log("e.ctrlKey?" + e.ctrlKey);
 			console.log("closeFileButton=" + closeFileButton);
 			console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
 			
 			
-			if(!editor.files[path].isSaved && !e.ctrlKey) {
+			if(!EDITOR.files[path].isSaved && !e.ctrlKey) {
 				
 				closeFileButton.setAttribute("title", "Ctrl click to close "+ fileName + " without saving");
 				
@@ -432,7 +432,7 @@ for(var i=0; i<list.length; i++) {
 				
 			}
 			else {
-				editor.closeFile(path);
+				EDITOR.closeFile(path);
 			}
 			
 			return false;
@@ -460,43 +460,43 @@ for(var i=0; i<list.length; i++) {
 	
 	// ## Tests
 	
-	editor.addTest(function changeFileTabOrder(callback) {
+	EDITOR.addTest(function changeFileTabOrder(callback) {
 		// Close all open files
-		for(var path in editor.files) {
-			editor.closeFile(path);
+		for(var path in EDITOR.files) {
+			EDITOR.closeFile(path);
 		}
 		
 		// Open test files
-		editor.openFile("dirA/File1", 'File1', function(err, file) {
-			editor.openFile("dirA/File2", 'File2', function(err, file) {
-				editor.openFile("dirB/File3", 'File3', function(err, file) {
-					editor.openFile("dirB/File4", 'File4', function(err, file) {
-						editor.openFile("dirB/File5", 'File5', function(err, file) {
+		EDITOR.openFile("dirA/File1", 'File1', function(err, file) {
+			EDITOR.openFile("dirA/File2", 'File2', function(err, file) {
+				EDITOR.openFile("dirB/File3", 'File3', function(err, file) {
+					EDITOR.openFile("dirB/File4", 'File4', function(err, file) {
+						EDITOR.openFile("dirB/File5", 'File5', function(err, file) {
 							var list;
 							
-							editor.currentFile = editor.files["dirB/File5"];
+							EDITOR.currentFile = EDITOR.files["dirB/File5"];
 							
-							console.log("order=" + editor.currentFile.order);
+							console.log("order=" + EDITOR.currentFile.order);
 							
-							editor.currentFile.order-=1.5;
-							list = editor.sortFileList();
+							EDITOR.currentFile.order-=1.5;
+							list = EDITOR.sortFileList();
 							if(list[3].path != "dirB/File5") throw new Error("dirB/File5 should be fourh! list=" + JSON.stringify( list.map(function(file){return file.path}) )  );
 					
-					editor.currentFile.order-=1.5;
-					list = editor.sortFileList();
+					EDITOR.currentFile.order-=1.5;
+					list = EDITOR.sortFileList();
 							if(list[2].path != "dirB/File5") throw new Error("dirB/File5 should be third! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
 							
-							editor.currentFile.order-=1.5;
-							list = editor.sortFileList();
+							EDITOR.currentFile.order-=1.5;
+							list = EDITOR.sortFileList();
 							if(list[1].path != "dirB/File5") throw new Error("dirB/File5 should be second! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
 							
-							editor.currentFile.order-=1.5;
-							list = editor.sortFileList();
+							EDITOR.currentFile.order-=1.5;
+							list = EDITOR.sortFileList();
 							if(list[0].path != "dirB/File5") throw new Error("dirB/File5 should be first! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
 							
 					// Close test files
-					for(var path in editor.files) {
-						editor.closeFile(path);
+					for(var path in EDITOR.files) {
+						EDITOR.closeFile(path);
 					}
 					
 					callback(true);

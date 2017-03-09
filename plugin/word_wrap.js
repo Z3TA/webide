@@ -2,14 +2,14 @@
 	"use strict";
 
 	// Add plugin to editor
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Word wrap text to fit inside line length limit",
 		load: load,
 		unload: unload,
 	});
 	
 	function load() {
-		editor.bindKey({
+		EDITOR.bindKey({
 			charCode: 87,
 			combo: CTRL,
 			fun: wordWrap
@@ -17,7 +17,7 @@
 	}
 	
 	function unload() {
-		editor.unbindKey(wordWrap);
+		EDITOR.unbindKey(wordWrap);
 	}
 
 	function wordWrap(file) {
@@ -25,7 +25,7 @@
 		
 		//alertBox("wordWrap text");
 		
-		var maxTextWidth = editor.view.visibleColumns;
+		var maxTextWidth = EDITOR.view.visibleColumns;
 		var space = " ";
 		
 		//maxTextWidth = 20;
@@ -163,7 +163,7 @@
 		
 		//file.debugGrid();
 		
-		text = wordWrapText(text, maxTextWidth - indentation * editor.settings.tabSpace);
+		text = wordWrapText(text, maxTextWidth - indentation * EDITOR.settings.tabSpace);
 		var textLengthAfter = text.length;
 		
 		console.log("text='" + UTIL.debugWhiteSpace(text) + "'");
@@ -201,7 +201,7 @@
 		
 		if(file.startColumn > 0) file.scrollTo(0, file.startRow); // Scroll to the left
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		//alertBox("Text word wrapped!");
 		
@@ -326,12 +326,12 @@
 	}
 	
 	/*
-	editor.addTest(function testWordWrapText(callback) {
+	EDITOR.addTest(function testWordWrapText(callback) {
 		
 		var before = '<!DOCTYPE html>\r\n<div class="wrap1">\r\n\t<div class="content">\r\n\t\t\r\n\t\t<p>Esse proident dolore cupidatat in dolor reprehenderit irure nostrud eu.\r\n\t\tMollit voluptate pariatur cillum enim voluptate excepteur amet non.\r\n\t\tEnim duis irure dolore laborum quis mollit adipisicing labore excepteur fugiat dolor esse reprehenderit sunt excepteur.\r\n\t\tMollit ad laboris ad nulla dolor sint do nostrud exercitation dolore nostrud mollit.</p>\r\n\t\t\r\n\t</div>\r\n</div>\r\n';
 		//var expectedAfter = '<!DOCTYPE html>\r\n<div class="wrap1">\r\n\t<div class="content">\r\n\t\t\r\n\t\t        \r\n\t\t\r\n\t</div>\r\n</div>\r\n';
 		
-		editor.openFile("testWordWrapText.html", before, function(err, file) {
+		EDITOR.openFile("testWordWrapText.html", before, function(err, file) {
 			
 			var row = 3, col = 0;
 			file.moveCaret(undefined, row, col);
@@ -344,7 +344,7 @@
 			// and throw an error if they are the same (word wrap didn't succeed)
 			
 			
-			editor.closeFile(file.path);
+			EDITOR.closeFile(file.path);
 			
 			callback(true);
 		});

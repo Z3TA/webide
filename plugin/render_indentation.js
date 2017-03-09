@@ -10,24 +10,24 @@
 	var lastInsertCBLLevel = {};
 	var force = false; // Toggle
 	
-	editor.on("start", indention_helper);
+	EDITOR.on("start", indention_helper);
 	
 	function indention_helper() {
 		
-		editor.renderFunctions.push(indention_render);
+		EDITOR.renderFunctions.push(indention_render);
 		
-		editor.on("fileChange", renderIndentationOnChange);
+		EDITOR.on("fileChange", renderIndentationOnChange);
 		
 		var charCode = 73; // I
 		
-		editor.bindKey({desc: "Toggle indentation guides", charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
+		EDITOR.bindKey({desc: "Toggle indentation guides", charCode: charCode, combo: CTRL, fun: toggleIndentationHelper});
 		
 	}
 	
 	function toggleIndentationHelper() {
 		force = force ? false : true;
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		return false; // false prevents default (browser) action
 	}
@@ -54,11 +54,11 @@
 		
 		if(buffer.length == 0) return; // Nothing to render
 		
-		var tabSpace = editor.settings.tabSpace;
-		var gridWidth = editor.settings.gridWidth;
-		var gridHeight = editor.settings.gridHeight;
-		var leftMargin = editor.settings.leftMargin;
-		var topMargin = editor.settings.topMargin;
+		var tabSpace = EDITOR.settings.tabSpace;
+		var gridWidth = EDITOR.settings.gridWidth;
+		var gridHeight = EDITOR.settings.gridHeight;
+		var leftMargin = EDITOR.settings.leftMargin;
+		var topMargin = EDITOR.settings.topMargin;
 		var problem = -1;
 		var problemRow = -1;
 		

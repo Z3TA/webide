@@ -7,16 +7,16 @@
 		
 	*/
 	
-	editor.addTest(function moveCaret(callback) {
+	EDITOR.addTest(function moveCaret(callback) {
 		
-		editor.openFile("moveCaret.js", "abcdefghijklmno", function(err, file) {
+		EDITOR.openFile("moveCaret.js", "abcdefghijklmno", function(err, file) {
 			
 			var index = 3;
 			file.moveCaret(index);
 			
 			if(file.caret.col != 3) throw new Error("Expected file.caret.col=" + file.caret.col + " to be 3");
 			
-			editor.closeFile(file.path);
+			EDITOR.closeFile(file.path);
 			callback(true);
 			
 		});
@@ -24,13 +24,13 @@
 	});
 	
 	
-	editor.addTest(function fileWriteLine(callback) {
+	EDITOR.addTest(function fileWriteLine(callback) {
 		
-		editor.openFile("testing_writeLine", "", function(err, file) {
+		EDITOR.openFile("testing_writeLine", "", function(err, file) {
 			file.writeLine("Hello world!");
 			file.writeLine("Hello again!");
 			
-			editor.closeFile(file.path);
+			EDITOR.closeFile(file.path);
 			
 			callback(true);
 		});

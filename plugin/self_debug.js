@@ -18,13 +18,13 @@
 	var files = {};
 	var fileState = {};
 	
-	//editor.on("fileOpen", selfDebugFileOpen);
-	//editor.on("fileClose", selfDebugFileClose);
-	//editor.on("interaction", selfDebugInteraction);
-	//editor.on("fileChange", selfDebugFileChange);
+	//EDITOR.on("fileOpen", selfDebugFileOpen);
+	//EDITOR.on("fileClose", selfDebugFileClose);
+	//EDITOR.on("interaction", selfDebugInteraction);
+	//EDITOR.on("fileChange", selfDebugFileChange);
 	
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Send bug reports",
 		load: bugReportLoad,
 		unload: bugReportUnload,
@@ -33,16 +33,16 @@
 	
 	function bugReportLoad() {
 		var key_S = 83;
-		editor.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
 	}
 	
 	function bugReportUnload() {
-		editor.unbindKey(sendBugReport);
+		EDITOR.unbindKey(sendBugReport);
 	}
 	
 	function sendBugReport() {
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(file) {
 			if(file.name.indexOf("bugreport") != -1) {
@@ -94,7 +94,7 @@
 	
 	
 	function selfDebugInteraction(interaction, options) {
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(file) {
 			
@@ -117,10 +117,10 @@
 		var no = "Keep running";
 		
 		// If windows detects / it will add C:/ if linux does Not detect / will will add the working dir
-		if(editor.platform == "Windows") source = source.replace("file:///", ""); // Remove three slashes in windows
+		if(EDITOR.platform == "Windows") source = source.replace("file:///", ""); // Remove three slashes in windows
 		else source = source.replace("file://", ""); // Two slashes in linux (and other?)
 		
-		var sourceLink = '<a href="JavaScript: editor.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');editor.renderNeeded();})">' + source + "</a>";
+		var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');EDITOR.renderNeeded();})">' + source + "</a>";
 		
 		confirmBox("" + sourceLink + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
@@ -136,7 +136,7 @@
 }
 			else if(answer == sendBugReport) {
 				var errorReportFilePath = "bugreport.txt";
-				editor.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error), function errorReportOpened(err, file) {
+				EDITOR.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error), function errorReportOpened(err, file) {
 					
 					if(err) GUI.showDevTools();
 					
@@ -153,7 +153,7 @@
 				else process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
-				if(editor.settings.devMode && runtime != "browser") {
+				if(EDITOR.settings.devMode && runtime != "browser") {
 					// Show the chrome dev tools
 					var gui = require('nw.gui').Window.get();
 					gui.showDevTools();
@@ -173,7 +173,7 @@
 		'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
-		'Commit: ' + editor.version + '\n' +
+		'Commit: ' + EDITOR.version + '\n' +
 		'Platform: ' + process.platform + '\n' +
 		'Arguments: ' + require('nw.gui').App.argv + '\n' +
 		'\n' +

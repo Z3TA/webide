@@ -3,7 +3,7 @@
 	
 	"use strict";
 		
-	editor.bindKey({
+	EDITOR.bindKey({
 		desc: "Select all text",
 		charCode: 65,
 		combo: CTRL,
@@ -14,7 +14,7 @@
 		
 		console.log("Ctrl + A = SELECT ALL");
 		
-		if(file && editor.input) {
+		if(file && EDITOR.input) {
 			// Select everything
 			
 			var everything = [],
@@ -28,7 +28,7 @@
 			
 			file.select(everything, "right");
 				
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 			return false; // Disable bubble
 

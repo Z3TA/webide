@@ -18,12 +18,12 @@
 		
 	*/
 	
-	editor.on("start", xmlParserInit, 100);
+	EDITOR.on("start", xmlParserInit, 100);
 	
 	function xmlParserInit() {
 		
-		editor.on("fileOpen", parseXmlOnFileOpen);
-		editor.on("fileChange", parseXmlMaybe, 100);
+		EDITOR.on("fileOpen", parseXmlOnFileOpen);
+		EDITOR.on("fileChange", parseXmlMaybe, 100);
 		
 		function parseXmlMaybe(file, type, character, index, row, col) {
 			parseXmlOnFileOpen(file); //  optimization is evil
@@ -363,12 +363,12 @@
 	*/
 	
 	
-	editor.addTest(function test_xml_CDATA(callback) {
-		editor.openFile("cdata.svg", '<svg>\n<defs>\n<style type="text/css"><![CDATA[\ntext {\nfont-size: 12px;\n}\n</style>\n</defs>\n</svg>\n', function(err, file) {
+	EDITOR.addTest(function test_xml_CDATA(callback) {
+		EDITOR.openFile("cdata.svg", '<svg>\n<defs>\n<style type="text/css"><![CDATA[\ntext {\nfont-size: 12px;\n}\n</style>\n</defs>\n</svg>\n', function(err, file) {
 		
 			if(file.grid[4].indentation != 4) throw new Error("Expected line five's indentation to be 4 levels, not " + file.grid[4].indentation);
 			
-				editor.closeFile(file.path);
+				EDITOR.closeFile(file.path);
 				callback(true);
 				
 			});

@@ -9,15 +9,15 @@
 	
 	var loadOrder = 999; // Load late
 	
-	editor.on("start", openReadme, loadOrder);
+	EDITOR.on("start", openReadme, loadOrder);
 	
 	function openReadme() {
 		setTimeout(function () {
 			
-			if(Object.keys(editor.files).length === 0) {
+			if(Object.keys(EDITOR.files).length === 0) {
 				
 				if(runtime == "browser") {
-					editor.openFile("README.txt");
+					EDITOR.openFile("README.txt");
 				}
 				
 				else {
@@ -27,7 +27,7 @@
 					
 					var filePath = path.join(dirname + "/README.txt");
 					
-					editor.openFile(filePath);
+					EDITOR.openFile(filePath);
 				}
 			}
 		}, timer);

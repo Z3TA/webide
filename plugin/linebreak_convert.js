@@ -4,7 +4,7 @@
 	
 	var menuItem;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Convert line break convention between Unix and Windows format (LF vs CRLF)",
 		load: load,
 		unload: unload,
@@ -12,16 +12,16 @@
 	
 	function load() {
 		
-		menuItem = editor.addMenuItem("Convert line-breaks", convertLinebreaks);
+		menuItem = EDITOR.addMenuItem("Convert line-breaks", convertLinebreaks);
 		
 	}
 	
 	function unload() {
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 	}
 	
 	function convertLinebreaks() {
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		var yes = "Yes, convert";
 		var no = "NO"
@@ -54,7 +54,7 @@
 			
 		}
 		
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
 	}
 	

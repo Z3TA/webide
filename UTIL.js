@@ -27,14 +27,14 @@ var UTIL = {
 			Returns the directory of a file path
 			If no path is specified it uses current file or working directory
 			
-			todo: replace editor.getDir
+			todo: replace EDITOR.getDir
 		*/
 		
 		console.log("getDir path=" + path);
 		
 		if(path == undefined) {
-			if(editor.currentFile) path = editor.currentFile.path;
-			else return UTIL.trailingSlash(editor.workingDirectory); // (editor) working dir
+			if(EDITOR.currentFile) path = EDITOR.currentFile.path;
+			else return UTIL.trailingSlash(EDITOR.workingDirectory); // (editor) working dir
 		}
 		
 		if(!path) throw new Error("Unable to get directory from path=" + path);
@@ -42,8 +42,8 @@ var UTIL = {
 		var lastSlash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
 		
 		if(lastSlash == -1) {
-			console.warn("Unable to get directory of path=" + path + ". Using editor.workingDirectory=" + editor.workingDirectory);
-			return UTIL.trailingSlash(editor.workingDirectory);
+			console.warn("Unable to get directory of path=" + path + ". Using EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+			return UTIL.trailingSlash(EDITOR.workingDirectory);
 		}
 		
 		return UTIL.trailingSlash(path.substring(0, lastSlash));
@@ -89,7 +89,7 @@ var UTIL = {
 			
 			console.log("protocol=" + protocol);
 			
-			if(editor.remoteProtocols.indexOf(protocol) == -1) {
+			if(EDITOR.remoteProtocols.indexOf(protocol) == -1) {
 				throw new Error("protocol=" + protocol + " is not a supported protocol! If it's a Windows path, use " + protocol + ":\\ instead!");
 			}
 			
@@ -432,7 +432,7 @@ var UTIL = {
 		
 		if(text.length == 0) {
 			console.warn("Can't determine line breaks without any text!");
-			return editor.settings.defaultLineBreakCharacter;
+			return EDITOR.settings.defaultLineBreakCharacter;
 		}
 		
 		var nr = UTIL.occurrences(text, "\n\r", true),

@@ -2,7 +2,7 @@
 	"use strict";
 	
 	
-	editor.addTest(function testReadFromDisk(callback) {
+	EDITOR.addTest(function testReadFromDisk(callback) {
 		
 		var json = {path: "README.txt", returnBuffer: false, encoding: "utf8"};
 		
@@ -18,7 +18,7 @@
 		
 	});
 	
-	editor.addTest(function testGetFileSizeOnDisk(callback) {
+	EDITOR.addTest(function testGetFileSizeOnDisk(callback) {
 		
 		var json = {path: "README.txt"};
 		
@@ -33,7 +33,7 @@
 		
 	});
 	
-	editor.addTest(function testSaveToDisk(callback) {
+	EDITOR.addTest(function testSaveToDisk(callback) {
 		
 		var randomName = "djdsalkjsdfjfdsj.txt";
 		var randomContent = "98sfd9sdf978sa98dijslsdfjfsdjl";
@@ -64,7 +64,7 @@
 	
 	
 	
-	editor.addTest(function testListFiles(callback) {
+	EDITOR.addTest(function testListFiles(callback) {
 		
 		var json = {pathToFolder: "bin/"};
 		

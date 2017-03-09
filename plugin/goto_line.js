@@ -35,8 +35,8 @@
 		
 		hide_gotoLineInput();
 		
-		editor.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: show_gotoInput}); // ctrl + G
-		editor.bindKey({desc: "Hite the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
+		EDITOR.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		EDITOR.bindKey({desc: "Hite the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
 	}
 	
 	function build_gotoInput() {
@@ -115,20 +115,20 @@
 			/* We need the footer to be this high
 			if(footerHeight < heightNeeded) {
 				//footer.style.height = footerHeight + heightNeeded + "px";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 			}
 			*/
 			
 			gotoInputIsVisible = true;
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 			
 		}
 
 		// Remove focus from the editor
-		if(editor.currentFile) {
-			editor.input = false;
+		if(EDITOR.currentFile) {
+			EDITOR.input = false;
 		}
 
 		inputGoto.focus();   // Add focus to the input
@@ -152,14 +152,14 @@
 			//footer.style.height = "0px"; // Hmm, can't be less then one px
 			
 			// Bring back focus to the current file
-			if(editor.currentFile) {
-				editor.input = true;
+			if(EDITOR.currentFile) {
+				EDITOR.input = true;
 			}
 			
 			gotoInputIsVisible = false;
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 			
 			return false;
 		}
@@ -173,7 +173,7 @@
 		if(gotoInputIsVisible) {
 			
 			var line = parseInt(inputGoto.value);
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			
 			if(!file) throw new Error("No current file!");
 			

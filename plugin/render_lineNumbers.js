@@ -9,12 +9,12 @@
 	
 	var leftMargin = 1;
 	
-	// Add new item for lineNumberColor to editor.settings if it's not already added
-	editor.settings.lineNumberColor = editor.settings.lineNumberColor ? editor.settings.lineNumberColor : "rgb(200,200,200)";
+	// Add new item for lineNumberColor to EDITOR.settings if it's not already added
+	EDITOR.settings.lineNumberColor = EDITOR.settings.lineNumberColor ? EDITOR.settings.lineNumberColor : "rgb(200,200,200)";
 	
 	
 	
-	editor.renderFunctions.push(paintLineNumbers); // lineNumbers function will be called on every frame render
+	EDITOR.renderFunctions.push(paintLineNumbers); // lineNumbers function will be called on every frame render
 	
 	
 	console.log("Loaded lineNumbers");
@@ -36,9 +36,9 @@
 		
 		if(startRow == undefined) startRow = 0;
 		
-		ctx.font=editor.settings.fontSize + "px " + editor.settings.font;
+		ctx.font=EDITOR.settings.fontSize + "px " + EDITOR.settings.font;
 		ctx.textBaseline = "top";
-		ctx.fillStyle = editor.settings.lineNumberColor;
+		ctx.fillStyle = EDITOR.settings.lineNumberColor;
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
@@ -50,14 +50,14 @@
 			
 			if(line > lastLine) {
 				lastLine = line;
-				ctx.fillText(line, leftMargin, editor.settings.topMargin + (row+startRow) * editor.settings.gridHeight);
+				ctx.fillText(line, leftMargin, EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight);
 				
 				/*
-				if(file.partStartRow > 0 && editor.settings.devMode) {
+				if(file.partStartRow > 0 && EDITOR.settings.devMode) {
 					ctx.save();
-					ctx.font = "10px " + editor.settings.style.font;
+					ctx.font = "10px " + EDITOR.settings.style.font;
 					ctx.fillStyle="rgb(0,0,255)";
-					ctx.fillText("" + (buffer[row].lineNumber-1), leftMargin+22, editor.settings.topMargin + (row+startRow) * editor.settings.gridHeight);
+					ctx.fillText("" + (buffer[row].lineNumber-1), leftMargin+22, EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight);
 					ctx.restore();
 				}
 				*/

@@ -1,7 +1,7 @@
 
 
-editor.addTest(function xmlUnlosedTagColorWeirdness(callback) {
-	editor.openFile("xmlUnlosedTagColorWeirdness.js", "'<h1>foo</h1 '\n'<h2>bar</h2>'", function(err, file) {
+EDITOR.addTest(function xmlUnlosedTagColorWeirdness(callback) {
+	EDITOR.openFile("xmlUnlosedTagColorWeirdness.js", "'<h1>foo</h1 '\n'<h2>bar</h2>'", function(err, file) {
 		
 		var quotes = file.parsed.quotes;
 		
@@ -24,10 +24,10 @@ editor.addTest(function xmlUnlosedTagColorWeirdness(callback) {
 		
 		// Run prerenders to see the colors
 		var buffer = file.grid;
-		for(var i=0; i<editor.preRenderFunctions.length; i++) {
-			//funName = UTIL.getFunctionName(editor.preRenderFunctions[i]);
+		for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
+			//funName = UTIL.getFunctionName(EDITOR.preRenderFunctions[i]);
 			//console.time("prerender: " + funName);
-			buffer = editor.preRenderFunctions[i](buffer, file); // Call render
+			buffer = EDITOR.preRenderFunctions[i](buffer, file); // Call render
 			//console.timeEnd("prerender: " + funName);
 		}
 		
@@ -35,27 +35,27 @@ editor.addTest(function xmlUnlosedTagColorWeirdness(callback) {
 		
 		if(buffer[1][5].color != quoteColor) throw new Error("Expected letter " + buffer[1][5].char + " on line 2 to have color " + quoteColor + " not " + buffer[1][5].color);
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
 
-editor.addTest(function templateLiterals(callback) {
-	editor.openFile("templateLiterals.js", 'var strTest = `string text ${expression} string text`\nvar strTopic = `<h1>Topic</h1>`', function(err, file) {
+EDITOR.addTest(function templateLiterals(callback) {
+	EDITOR.openFile("templateLiterals.js", 'var strTest = `string text ${expression} string text`\nvar strTopic = `<h1>Topic</h1>`', function(err, file) {
 		
 		if(file.parsed.quotes.length != 2) throw new Error("Did not find all template literals");
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
 
 
-editor.addTest(function arrowFunctionBeforeFunction(callback) {
+EDITOR.addTest(function arrowFunctionBeforeFunction(callback) {
 	// Parser can't find start of baz
-	editor.openFile("arrowFunctionBeforeFunction.js", 'foo = bar => baz\nfunction test() {\n\n}\n', function(err, file) {
+	EDITOR.openFile("arrowFunctionBeforeFunction.js", 'foo = bar => baz\nfunction test() {\n\n}\n', function(err, file) {
 		
 		if(file.parsed.functions.length != 2) throw new Error("Expected two functions!");
 		
@@ -65,19 +65,19 @@ editor.addTest(function arrowFunctionBeforeFunction(callback) {
 
 		
 		file.moveCaret(undefined, 2);
-		editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+		EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 		// Uncaught Error: Unable to find start of function
 		// because it thinks "foo = bar" is the function name
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
 
 
-editor.addTest(function arrowFunctionsSubfunction(callback) {
-	editor.openFile("arrowFunctionsSubfunction.js", 'var foo = xxx => yyy => 42 // A function that returns a function that returns 42: ex: foo()() == 42', function(err, file) {
+EDITOR.addTest(function arrowFunctionsSubfunction(callback) {
+	EDITOR.openFile("arrowFunctionsSubfunction.js", 'var foo = xxx => yyy => 42 // A function that returns a function that returns 42: ex: foo()() == 42', function(err, file) {
 		
 		// We will intentially not bother keeping track of subfunctions in subfunctions, just flatten all arrow functions to closest scope for now
 		
@@ -88,15 +88,15 @@ editor.addTest(function arrowFunctionsSubfunction(callback) {
 		if(file.parsed.functions[1].arguments != "yyy") throw new Error("Expected arrow function arguments to be yyy, not arguments=" + file.parsed.functions[1].arguments);
 
 
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
 
 
-editor.addTest(function arrowFunctions(callback) {
-	editor.openFile("arrowFunctions.js", 'some(someArgument, arrowFunctionArgument => returnStatement)\nanother(arrowFunctionArgument => returnStatement)\nvar foo = (a, b) => a + b\nvar bar = x => ++x\narr.map(n => n-1)\n', function(err, file) {
+EDITOR.addTest(function arrowFunctions(callback) {
+	EDITOR.openFile("arrowFunctions.js", 'some(someArgument, arrowFunctionArgument => returnStatement)\nanother(arrowFunctionArgument => returnStatement)\nvar foo = (a, b) => a + b\nvar bar = x => ++x\narr.map(n => n-1)\n', function(err, file) {
 		
 		if(file.parsed.functions[0].name != "") throw new Error("Expected anonymous function, not " + file.parsed.functions[0].name);
 		if(file.parsed.functions[0].arguments != "arrowFunctionArgument") throw new Error("Expected arrow function arguments to be arrowFunctionArgument, not " + file.parsed.functions[1].arguments);
@@ -110,7 +110,7 @@ editor.addTest(function arrowFunctions(callback) {
 		
 		if(file.parsed.functions[4].name != "") throw new Error("Expected anonymous function on line 5, not name=" + file.parsed.functions[4].name);
 
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
@@ -118,8 +118,8 @@ editor.addTest(function arrowFunctions(callback) {
 
 
 
-editor.addTest(function varPointAtAnonFunction(callback) {
-	editor.openFile("varPointAtAnonFunction.js", 'var foo = function() {};', function(err, file) {
+EDITOR.addTest(function varPointAtAnonFunction(callback) {
+	EDITOR.openFile("varPointAtAnonFunction.js", 'var foo = function() {};', function(err, file) {
 		
 		// This is actually variable (foo) pointing to an anonymous function!!
 		// writing foo() will call the nonymous function though. 
@@ -129,15 +129,15 @@ editor.addTest(function varPointAtAnonFunction(callback) {
 		
 		if(file.parsed.functions[0].name != "foo") throw new Error("Expected function name to be foo, not " + file.parsed.functions[0].name);
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
 
 
-	editor.addTest(function functionVariableWidthSubfunction(callback) {
-	editor.openFile("functionVariableWidthSubfunction.js", 'foo = function() {\nfunction bar() {\na\n}\n}', function(err, file) {
+	EDITOR.addTest(function functionVariableWidthSubfunction(callback) {
+	EDITOR.openFile("functionVariableWidthSubfunction.js", 'foo = function() {\nfunction bar() {\na\n}\n}', function(err, file) {
 		
 		if(file.parsed.functions[0].name != "foo") throw new Error("Expected first function name to be foo, not " + file.parsed.functions[0].name);
 		if(file.parsed.functions[0].subFunctions[0].name != "bar") throw new Error("Expected sub-function name to be bar, not " + file.parsed.functions[0].subFunctions[0].name);
@@ -150,66 +150,66 @@ editor.addTest(function varPointAtAnonFunction(callback) {
 		if(file.grid[3].indentation != 1) throw new Error("Expected indentation on line 4 to be 1, not " + file.grid[3].indentation);
 		if(file.grid[4].indentation != 0) throw new Error("Expected indentation on line 5 to be 0, not " + file.grid[4].indentation);
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		callback(true);
 		
 	});
 });
 
-	editor.addTest(function aspVarInScript(callback) {
+	EDITOR.addTest(function aspVarInScript(callback) {
 	// Parser can't find start of baz
-	editor.openFile("aspVarInScript.asp", '<%\nIF foo THEN\n%>\n<script>\nalert("Hi <% =name %>");\n</script>\n<%\nEND IF\n%>\n', function(err, file) {
+	EDITOR.openFile("aspVarInScript.asp", '<%\nIF foo THEN\n%>\n<script>\nalert("Hi <% =name %>");\n</script>\n<%\nEND IF\n%>\n', function(err, file) {
 	
 	// Last row should have zero indentation
 	if(file.grid[file.grid.length-1].indentation !== 0) throw new Error("Wrong indentation on last row!");
 	
-	editor.closeFile(file.path);
+	EDITOR.closeFile(file.path);
 	callback(true);
 	
 	});
 	});
 	
-	editor.addTest(function aspVarInHtml(callback) {
-	editor.openFile("aspVarInHtml.asp", '<img src="<% =foo %>">', function(err, file) {
+	EDITOR.addTest(function aspVarInHtml(callback) {
+	EDITOR.openFile("aspVarInHtml.asp", '<img src="<% =foo %>">', function(err, file) {
 	
 	// Temp fix! Best case scenario would be if the xml tag worked
 	
 	if(file.parsed.xmlTags.length > 0) throw new Error("Did not expect an xml tag");
 	
-	editor.closeFile(file.path);
+	EDITOR.closeFile(file.path);
 	callback(true);
 	
 	});
 	});
 	
-	editor.addTest(function funInJson(callback) {
+	EDITOR.addTest(function funInJson(callback) {
 	// Parser can't find start of baz
-	editor.openFile("funInJson.js", 'foo({\nbar: "123",\nbaz: function() {\n\n}\n});\n', function(err, file) {
+	EDITOR.openFile("funInJson.js", 'foo({\nbar: "123",\nbaz: function() {\n\n}\n});\n', function(err, file) {
 	
 	file.moveCaret(undefined, 3);
-	editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+	EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 	// Uncaught Error: Unable to find start of function=baz parseStart=-1 (when in dev mode)
 	
 	//console.log(file.parsed);
 	
-	editor.closeFile(file.path);
+	EDITOR.closeFile(file.path);
 	callback(true);
 	
 	});
 	});
 	
 	
-	editor.addTest(function funInHtmlDoc(callback) {
+	EDITOR.addTest(function funInHtmlDoc(callback) {
 	// The parser optimizer is unable to find foo() when only parsing foo
-	editor.openFile("funInHtmlDoc.htm", '<!DOCTYPE html>\n<script>\nfunction foo() {\n\n}\n</script>\n', function(err, file) {
+	EDITOR.openFile("funInHtmlDoc.htm", '<!DOCTYPE html>\n<script>\nfunction foo() {\n\n}\n</script>\n', function(err, file) {
 	
 	file.moveCaret(undefined, 3);
-	editor.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
+	EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 	// Might throw Error: Uncaught Error: Parsed code contains no function! 
 	
 	//console.log(file.parsed);
 	
-	editor.closeFile(file.path);
+	EDITOR.closeFile(file.path);
 	callback(true);
 	
 	});

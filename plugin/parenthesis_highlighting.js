@@ -5,7 +5,7 @@
 
 (function() {
 	
-	editor.renderFunctions.push(parenthesis_highlight);
+	EDITOR.renderFunctions.push(parenthesis_highlight);
 	
 	function parenthesis_highlight(ctx, buffer, file) {
 		
@@ -108,8 +108,8 @@
 			if(firstP < caret.index) col--;
 			
 			var firstLocation = {
-				x: editor.settings.leftMargin + (col + buffer[row].indentation * editor.settings.tabSpace) * editor.settings.gridWidth,
-				y: editor.settings.topMargin + row * editor.settings.gridHeight
+				x: EDITOR.settings.leftMargin + (col + buffer[row].indentation * EDITOR.settings.tabSpace) * EDITOR.settings.gridWidth,
+				y: EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight
 			}
 			
 			console.log("firstP=" + firstP + " on row=" + row);
@@ -153,8 +153,8 @@
 			col -= file.startColumn; // So that we get it right when scrolled horizontally
 			
 			var secondLocation = {
-				x: editor.settings.leftMargin + (col + buffer[row].indentation * editor.settings.tabSpace) * editor.settings.gridWidth,
-				y: editor.settings.topMargin + row * editor.settings.gridHeight
+				x: EDITOR.settings.leftMargin + (col + buffer[row].indentation * EDITOR.settings.tabSpace) * EDITOR.settings.gridWidth,
+				y: EDITOR.settings.topMargin + row * EDITOR.settings.gridHeight
 			}
 			
 			console.log("firstLocation=" + JSON.stringify(firstLocation) + " secondLocation=" + JSON.stringify(secondLocation));
@@ -162,15 +162,15 @@
 			
 			// Now when we got both positions, lets show something!
 			
-			ctx.fillStyle=editor.settings.style.highlightParenthesisFontColor;
+			ctx.fillStyle=EDITOR.settings.style.highlightParenthesisFontColor;
 			
-			//ctx.rect(firstLocation.x, firstLocation.y, editor.settings.gridWidth, editor.settings.gridHeight); // x,y,width,height
-			//ctx.rect(secondLocation.x, secondLocation.y, editor.settings.gridWidth, editor.settings.gridHeight); // x,y,width,height
+			//ctx.rect(firstLocation.x, firstLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight); // x,y,width,height
+			//ctx.rect(secondLocation.x, secondLocation.y, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight); // x,y,width,height
 			
-			ctx.font=editor.settings.style.highlightParenthesisFont;
+			ctx.font=EDITOR.settings.style.highlightParenthesisFont;
 			
 			console.log("ctx.font=" + ctx.font);
-			console.log("editor.settings.style.highlightParenthesisFont=" + editor.settings.style.highlightParenthesisFont);
+			console.log("EDITOR.settings.style.highlightParenthesisFont=" + EDITOR.settings.style.highlightParenthesisFont);
 			
 			if(firstP > secondP) { // right parenthesis first
 				ctx.fillText(rP, firstLocation.x, firstLocation.y);

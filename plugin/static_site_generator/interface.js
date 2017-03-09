@@ -69,7 +69,7 @@
 	}
 	
 	// Add plugin to editor
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Static site generator management interface",
 		load: load,
 		unload: unload,
@@ -87,29 +87,29 @@
 		var keyF9 = 120;
 		var keyEscape = 27;
 		
-		editor.bindKey({desc: "Show the manager for the static site generator", fun: showSSG, charCode: keyF9, combo: 0});
-		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hideSSG, charCode: keyEscape, combo: 0});
-		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewSSG, charCode: keyF9, combo: CTRL});
-		editor.bindKey({desc: "WYSIWYG editor for current site in the static site generator", fun: wysiwygSSG, charCode: keyF9, combo: CTRL + SHIFT});
-		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publishSSG, charCode: keyF9, combo: CTRL + ALT + SHIFT});
+		EDITOR.bindKey({desc: "Show the manager for the static site generator", fun: showSSG, charCode: keyF9, combo: 0});
+		EDITOR.bindKey({desc: "Hide the manager for the static site generator", fun: hideSSG, charCode: keyEscape, combo: 0});
+		EDITOR.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewSSG, charCode: keyF9, combo: CTRL});
+		EDITOR.bindKey({desc: "WYSIWYG editor for current site in the static site generator", fun: wysiwygSSG, charCode: keyF9, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publishSSG, charCode: keyF9, combo: CTRL + ALT + SHIFT});
 		
 		
 		//build();
 		
-		menuItem = editor.addMenuItem("Static site generator", function() {
+		menuItem = EDITOR.addMenuItem("Static site generator", function() {
 			showSSG();
-			editor.hideMenu();
+			EDITOR.hideMenu();
 		});
 		
-		editor.on("fileShow", fileShow);
+		EDITOR.on("fileShow", fileShow);
 		
-		editor.on("exit", SSG_cleanup);
+		EDITOR.on("exit", SSG_cleanup);
 		
-		editor.on("fileChange", fileChange);
+		EDITOR.on("fileChange", fileChange);
 		
-		editor.on("bootstrap", bootstrap);
+		EDITOR.on("bootstrap", bootstrap);
 		
-		editor.on("fileOpen", fileOpen);
+		EDITOR.on("fileOpen", fileOpen);
 		
 		bootstrap();
 		
@@ -123,13 +123,13 @@
 		var timer = 1000; // Milliseconds
 		setTimeout(function () {
 			
-			var openFiles = Object.keys(editor.files).length;
+			var openFiles = Object.keys(EDITOR.files).length;
 			
 			if(openFiles === 0) {
 				
 				var filePath = path.join(require("dirname") + "/plugin/static_site_generator/demo/source/about.htm");
 				
-				editor.openFile(filePath);
+				EDITOR.openFile(filePath);
 				
 			}
 		}, timer);
@@ -148,26 +148,26 @@
 		
 		httpServer.close();
 		
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 		
 		SSG_cleanup(); // closePreview();
 		
-		editor.removeEvent("fileShow", fileShow);
-		editor.removeEvent("exit", SSG_cleanup);
-		editor.removeEvent("fileChange", fileChange);
-		editor.removeEvent("bootstrap", bootstrap);
-		editor.removeEvent("fileOpen", fileOpen);
+		EDITOR.removeEvent("fileShow", fileShow);
+		EDITOR.removeEvent("exit", SSG_cleanup);
+		EDITOR.removeEvent("fileChange", fileChange);
+		EDITOR.removeEvent("bootstrap", bootstrap);
+		EDITOR.removeEvent("fileOpen", fileOpen);
 		
-		editor.unbindKey(hideSSG);
-		editor.unbindKey(previewSSG);
-		editor.unbindKey(publishSSG);
-		editor.unbindKey(showSSG);
-		editor.unbindKey(wysiwygSSG);
+		EDITOR.unbindKey(hideSSG);
+		EDITOR.unbindKey(previewSSG);
+		EDITOR.unbindKey(publishSSG);
+		EDITOR.unbindKey(showSSG);
+		EDITOR.unbindKey(wysiwygSSG);
 		
 		if(manager) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(manager);
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 	}
@@ -469,7 +469,7 @@
 			buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
 			buttonSetWorkingDirectory.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
-			editor.workingDirectory = selectedSite.source;
+			EDITOR.workingDirectory = selectedSite.source;
 			hideSSG();
 			}, false);
 		*/
@@ -482,11 +482,11 @@
 		buttonOpenEdit.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			
-			editor.workingDirectory = selectedSite.source;
+			EDITOR.workingDirectory = selectedSite.source;
 			
-			editor.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
+			EDITOR.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
 				
-				editor.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
+				EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
 					
 					if(err) throw err;
 					
@@ -495,7 +495,7 @@
 					file.savedAs = true;
 					file.changed = false;
 					
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 					
 				});
 			});
@@ -603,7 +603,7 @@
 		editView.style.display="block";
 		controlView.style.display="none"; // Hide this div
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 	}
 	
 	function buildEdit() {
@@ -998,12 +998,12 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
 		function browseKey() {
-			editor.fileOpenDialog(undefined, function selectKey(path) {
+			EDITOR.fileOpenDialog(undefined, function selectKey(path) {
 				inputPubAuthKey.value = path;
 			});
 		}
@@ -1028,7 +1028,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -1059,7 +1059,7 @@
 			
 			editView.style.display = "none";
 			controlView.style.display = "block";
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -1098,24 +1098,24 @@
 	}
 	
 	function showSSG() {
-		editor.input = false; // Steal focus from the file
+		EDITOR.input = false; // Steal focus from the file
 		
 		if(!manager) build(); // Build the GUI if it's not already built
 		
 		manager.style.display = "block";
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 		
 		return false;
 	}
 	
 	function hideSSG() {
-		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
+		if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
 		
 		// Only need to hide if the object is created!
 		if(manager) {
 			manager.style.display = "none";
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 		if(previewWin) {
@@ -1149,18 +1149,18 @@
 			
 			var previewWinOpened = false;
 			
-			if(editor.currentFile) {
-				var fileName = editor.currentFile.name;
-				var fileType = editor.currentFile.fileExtension;
+			if(EDITOR.currentFile) {
+				var fileName = EDITOR.currentFile.name;
+				var fileType = EDITOR.currentFile.fileExtension;
 				
-				if(editor.currentFile.path.indexOf(site.source) != -1 // Inside source path?
+				if(EDITOR.currentFile.path.indexOf(site.source) != -1 // Inside source path?
 				&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
 				&& fileName != "header.htm" && fileName != "footer.htm") { 
 					
 					// Preview the current file opened in the editor !
 					
 					// url needs to have / instead of \ for path delimiter
-					var url = "file://" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
+					var url = "file://" + EDITOR.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
 					openPreviewWin(url, callback)
 					
@@ -1168,7 +1168,7 @@
 					
 				}
 				else {
-					console.log("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
+					console.log("Not showing preview window because:\nEDITOR.currentFile.path=" + EDITOR.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
 				}
 			}
 			
@@ -1179,7 +1179,7 @@
 				notEditableReason = "No file open";
 				editable = false;
 				
-				editor.listFiles(site.preview, function(err, list) {
+				EDITOR.listFiles(site.preview, function(err, list) {
 					
 					if(err) throw err;
 					
@@ -1299,7 +1299,7 @@
 		
 		function previewWinFocus() {
 			console.log('preview window is focused');
-			editor.input = false;
+			EDITOR.input = false;
 			ignoreFileChange = true;
 		}
 		
@@ -1307,7 +1307,7 @@
 			
 			ignoreFileChange = false;
 			
-			if(editor.currentFile) editor.input = true;
+			if(EDITOR.currentFile) EDITOR.input = true;
 		}
 		
 		
@@ -1490,12 +1490,12 @@
 		console.time("contentEdit");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
-		else if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
+		else if(!EDITOR.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
 		else {
 			
-			if(sourceFile != editor.currentFile) {
-				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
-				editor.showFile(sourceFile, false);
+			if(sourceFile != EDITOR.currentFile) {
+				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " EDITOR.currentFile=" + EDITOR.currentFile.path)
+				EDITOR.showFile(sourceFile, false);
 			}
 			
 			//console.log("target=" + UTIL.objInfo(target));
@@ -1863,12 +1863,12 @@
 		}
 		
 		
-		editor.folderExistIn(site.projectFolder, ".hg", function(exist) {
+		EDITOR.folderExistIn(site.projectFolder, ".hg", function(exist) {
 			if(exist) {
 				// Check if remote is the same as repository
 				var hgrcFile = exist + "hgrc";
 				console.log("hgrcFile=" + hgrcFile);
-				editor.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
+				EDITOR.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
 					if(err) throw err; // All mercurial repos should have a hgrc!
 					
 					var pathPartStart = hgrcContent.indexOf("[paths]");
@@ -1876,7 +1876,7 @@
 					if(pathPartStart == -1) {
 						// hgrc has no paths part, add [paths] and default repository
 						hgrcContent = "[paths]\ndefault = " + site.repository + "\n" + hgrcContent;
-						editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+						EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 							if(err) throw err; // Unexpected
 							doHgPull();
 						});
@@ -1895,7 +1895,7 @@
 						if(repos == null) {
 							// No default repo exist, add our repo as default
 							hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "default = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
-							editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+							EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 								if(err) throw err; // Unexpected
 								doHgPull();
 							});
@@ -1914,7 +1914,7 @@
 									if(answer == changeDefault) {
 										var fullString = repos[0];
 										hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
-										editor.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+										EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 											if(err) throw err; // Unexpected
 											doHgPull();
 										});
@@ -1985,13 +1985,13 @@
 	
 	function newPage(site) {
 		
-		editor.workingDirectory = site.source;
+		EDITOR.workingDirectory = site.source;
 		
-		editor.readFromDisk(site.template, function fileRead(err, path, text) {
+		EDITOR.readFromDisk(site.template, function fileRead(err, path, text) {
 			
 			if(err) alertBox(err.message);
 			else {
-				editor.openFile("newPage.htm", text);
+				EDITOR.openFile("newPage.htm", text);
 			}
 			
 		});
@@ -2013,7 +2013,7 @@
 		console.log("source=" + JSON.stringify(url.parse(source), null, 2));
 		console.log("destination=" + JSON.stringify(url.parse(destination), null, 2));
 		
-		if(editor.remoteProtocols.indexOf(protocol) != -1) {
+		if(EDITOR.remoteProtocols.indexOf(protocol) != -1) {
 			// We will need to connect to the remote location before uploading files
 			var serverAddress = parse.host;
 			var auth = parse.auth, user, passw;
@@ -2032,11 +2032,11 @@
 			
 			var workingDir = parse.path;
 			
-			editor.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
+			EDITOR.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
 		}
 		else {
 			// Asume local file-system
-			fsReady(null, editor.workingDirectory);
+			fsReady(null, EDITOR.workingDirectory);
 		}
 		
 		function fsReady(err, workingDir) {
@@ -2125,7 +2125,7 @@
 				
 				if(foldersExist.indexOf(folder) != -1) {
 					console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
-					editor.saveToDisk(filePath, text, fileCreated);
+					EDITOR.saveToDisk(filePath, text, fileCreated);
 				}
 				else {
 					waitingList.push(function() { createFile(filePath, text) });
@@ -2150,7 +2150,7 @@
 				var folder = UTIL.getDirectoryFromPath(to);
 				
 				if(foldersExist.indexOf(folder) != -1) {
-					editor.copyFile(from, to, fileCopied);
+					EDITOR.copyFile(from, to, fileCopied);
 				}
 				else {
 					waitingList.push(function() { copyFile(from, to) });
@@ -2172,7 +2172,7 @@
 			function createPath(folder, createPathCallback) {
 				console.log("Creating path=" + folder);
 				folderAboutToBeCreated.push(folder);
-				editor.createPath(folder, function(err) {
+				EDITOR.createPath(folder, function(err) {
 					if(err) throw err;
 					else {
 						folderAboutToBeCreated.splice(folderAboutToBeCreated.indexOf(folder, 1));
@@ -2286,7 +2286,7 @@
 			
 			// Get the source code for the compiled page in review, in order to compute ignoreTransform
 			
-			editor.readFromDisk(previePath, function gotPreviewSource(err, path, txt) {
+			EDITOR.readFromDisk(previePath, function gotPreviewSource(err, path, txt) {
 				
 				if(err) throw err;
 				
@@ -2304,14 +2304,14 @@
 			
 			
 			// Open the file in the editor if it's not already open
-			if(editor.files.hasOwnProperty(sourceFilePath)) {
-				sourceFile = editor.files[sourceFilePath];
-				editor.showFile(sourceFile); // Make sure it's the current one open
+			if(EDITOR.files.hasOwnProperty(sourceFilePath)) {
+				sourceFile = EDITOR.files[sourceFilePath];
+				EDITOR.showFile(sourceFile); // Make sure it's the current one open
 				
 				makeItEditable(null, sourceFile);
 			}
 			else {
-				editor.openFile(sourceFilePath, undefined, makeItEditable);
+				EDITOR.openFile(sourceFilePath, undefined, makeItEditable);
 			}
 			
 			function localFilePath(path, site) {

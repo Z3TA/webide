@@ -3,8 +3,8 @@
 	/*
 		Prints talk bubbles
 		
-		Add "comments" with editor.addInfo(row, col, info);
-		Remove them with editor.removeAllInfo(row, col);
+		Add "comments" with EDITOR.addInfo(row, col, info);
+		Remove them with EDITOR.removeAllInfo(row, col);
 	
 	*/
 	
@@ -14,14 +14,14 @@
 	var adjustX = 1;    // Adjust so that the pig points at a Consolas dot.
 	var adjustY = 4;
 	
-	editor.on("start", infoBubbles);
+	EDITOR.on("start", infoBubbles);
 	
 	function infoBubbles() {
 		
 		// Extend editor (moved to core, because many plugins depend on this)
 		
 		// Add renderer
-		editor.renderFunctions.push(infoRender);
+		EDITOR.renderFunctions.push(infoRender);
 
 	}
 	
@@ -34,22 +34,22 @@
 		var textWidth = 0;
 		var textHeight = 0;
 		var radius = 10;
-		var gridHeight = editor.settings.gridHeight;
-		var gridWidth = editor.settings.gridWidth;
+		var gridHeight = EDITOR.settings.gridHeight;
+		var gridWidth = EDITOR.settings.gridWidth;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
-		var visibleRows = editor.view.visibleRows;
-		var comments = editor.info;
+		var visibleRows = EDITOR.view.visibleRows;
+		var comments = EDITOR.info;
 		var comment;
-		var topMargin = editor.settings.topMargin;
-		var leftMargin = editor.settings.leftMargin;
+		var topMargin = EDITOR.settings.topMargin;
+		var leftMargin = EDITOR.settings.leftMargin;
 		var indentation = 0;
 		var indentationWidth = 0;
-		var tabSpace = editor.settings.tabSpace;
+		var tabSpace = EDITOR.settings.tabSpace;
 		
 		//ctx.font="14px Arial";
 		
-		ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 
 		
 		for(var i=0; i<comments.length; i++) {
@@ -75,12 +75,12 @@
 			}
 			
 			// Draw the bubble
-			ctx.fillStyle=editor.settings.style.currentLineColor;
+			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
 			drawBubble(ctx, x, y, textWidth + textPadding*2, textHeight + textPadding*2, radius);
 
 			// Draw the text
 			/*
-			ctx.fillStyle=editor.settings.style.textColor;
+			ctx.fillStyle=EDITOR.settings.style.textColor;
 			for(var j=0; j<comment.text.length;j++) {
 				ctx.fillText(comment.text[j], x + textPadding, y + textPadding + j * gridHeight);
 			}

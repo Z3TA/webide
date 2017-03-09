@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Lorem ipsum generator",
 		load: loadLoremIpsum,
 		unload: unloadLoremIpsum,
@@ -9,16 +9,16 @@
 	
 	function loadLoremIpsum() {
 		// Bind to ctrl + L
-		editor.bindKey({desc: "Insert lorem ipsum", charCode: 76, combo: CTRL, fun: lorem});
+		EDITOR.bindKey({desc: "Insert lorem ipsum", charCode: 76, combo: CTRL, fun: lorem});
 	}
 	
 	function unloadLoremIpsum() {
-		editor.unbindKey(lorem);
+		EDITOR.unbindKey(lorem);
 	}
 	
 	function lorem(file, combo, character, charCode, keyDirection) {
 		var text = capitalizeFirstLetter(randomWord());
-		var visibleColumns = editor.view.visibleColumns;
+		var visibleColumns = EDITOR.view.visibleColumns;
 		var words = visibleColumns / 8;
 		var length = Math.ceil(words/4) + Math.floor(Math.random()*words);
 		

@@ -5,7 +5,7 @@
 	var singleQuote = "'";
 	var dblQuote = '"';
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Auto insert quote characters when typing a quote",
 		load: autoQuoteMain,
 		unload: autoQuoteUnload,
@@ -14,18 +14,18 @@
 	
 	function autoQuoteMain() {
 
-		editor.on("keyPressed", auto_quote_on_keyPressed);
+		EDITOR.on("keyPressed", auto_quote_on_keyPressed);
 		
 	}
 
 	function autoQuoteUnload() {
-		editor.removeEvent("keyPressed", auto_quote_on_keyPressed);
+		EDITOR.removeEvent("keyPressed", auto_quote_on_keyPressed);
 	}
 	
 	function auto_quote_on_keyPressed(file, character, combo) {
 		
 		if(!file) return true;
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		if(!file.parsed) return true;
 		
 		// Only auto-insert quotes when we are coding, not when writing text!
@@ -58,7 +58,7 @@
 			
 			if(insideASP && insideTag) {
 				file.insertText('""');
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 				return false;
 			}
 		}
@@ -152,19 +152,19 @@
 				if(file.parsed.language=="JavaScript") {
 					file.insertText(quote + " +  + " + quote);
 					file.moveCaretLeft(file.caret, 4);
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 					return false;
 				}
 				else if(file.parsed.language=="VBScript") {
 					file.insertText(quote + " &  & " + quote);
 					file.moveCaretLeft(file.caret, 4);
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 					return false;
 				}
 				else if(file.parsed.language=="PHP") {
 					file.insertText(quote + " .  . " + quote);
 					file.moveCaretLeft(file.caret, 4);
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 					return false;
 				}
 				else {
@@ -179,7 +179,7 @@
 				
 				file.insertText(quote + quote);
 				file.moveCaretLeft();
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 				return false;
 			}
 		}
@@ -299,18 +299,18 @@
 	 */
 	
 	
-	editor.addTest(function classic_asp_concat(callback) {
-		editor.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
+	EDITOR.addTest(function classic_asp_concat(callback) {
+		EDITOR.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
 			
 			var index = 31;
 			file.moveCaret(index);
 			
 			var quote = 34; // "
-			editor.mock("keypress", {charCode: quote}); // Simulate "
+			EDITOR.mock("keypress", {charCode: quote}); // Simulate "
 			
 			if(file.text != '<% Response.Write "<span class="" </span>" %>') throw new Error("Did not expect a concatenation");
 			
-			editor.closeFile(file.path);
+			EDITOR.closeFile(file.path);
 			callback(true);
 			
 		});

@@ -2,8 +2,8 @@
 
 //var testfile = "test/testfile.txt";
 
-// The editor object lives in global scope, so that it can be accessed everywhere.
-var editor = {};
+// The EDITOR object lives in global scope, so that it can be accessed everywhere.
+var EDITOR = {};
 
 var tempTest = 0;
 var benchmarkCharacter = ".";
@@ -13,7 +13,7 @@ var inputCount = 0;
 
 // List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
-editor.supportedFiles = [
+EDITOR.supportedFiles = [
 	"js",
 	"java", 
 	"htm", 
@@ -28,7 +28,7 @@ editor.supportedFiles = [
 ]; 
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
-editor.settings = {
+EDITOR.settings = {
 	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
@@ -91,21 +91,21 @@ editor.settings = {
 	stdInPort: 13379
 };
 
-editor.shouldRender = false;   // Internal flag, use editor.renderNeeded() to re-render!
-editor.shouldResize = false;   // Internal flag, use editor.resizeNeeded() to re-size!
-editor.fileIndex = -1;   // Keep track on opened files (for undo/redo)
-editor.files = {};       // List of all opened files with the path as key
-editor.mouseX = 0;       // Current mouse position
-editor.mouseY = 0;
-editor.info = [];        // Talk bubbles. See editor.addInfo()
-editor.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
-editor.connections = {}  // Store connections to remote servers (FTP, SSH)
-editor.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
-editor.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
-editor.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(window.navigator) ? "Linux" : "Unknown");
+EDITOR.shouldRender = false;   // Internal flag, use EDITOR.renderNeeded() to re-render!
+EDITOR.shouldResize = false;   // Internal flag, use EDITOR.resizeNeeded() to re-size!
+EDITOR.fileIndex = -1;   // Keep track on opened files (for undo/redo)
+EDITOR.files = {};       // List of all opened files with the path as key
+EDITOR.mouseX = 0;       // Current mouse position
+EDITOR.mouseY = 0;
+EDITOR.info = [];        // Talk bubbles. See EDITOR.addInfo()
+EDITOR.version = 0;      // Incremented on each commit. Loaded from version.inc when the editor loads
+EDITOR.connections = {}  // Store connections to remote servers (FTP, SSH)
+EDITOR.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
+EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
+EDITOR.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(window.navigator) ? "Linux" : "Unknown");
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
-editor.eventListeners = { // Use editor.on to add listeners to these events:
+EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	fileClose: [], 
 	fileOpen: [], 
 	fileHide: [],
@@ -131,12 +131,12 @@ editor.eventListeners = { // Use editor.on to add listeners to these events:
 	bootstrap: []
 };
 
-editor.renderFunctions = [];
-editor.preRenderFunctions = [];
+EDITOR.renderFunctions = [];
+EDITOR.preRenderFunctions = [];
 
-editor.plugins = [];
+EDITOR.plugins = [];
 
-editor.view = {
+EDITOR.view = {
 	visibleColumns: 0, 
 	visibleRows: 0, 
 	canvasWidth: 0,
@@ -145,19 +145,19 @@ editor.view = {
 	endingColumn: 0
 };
 
-editor.tests = []; // {description, fun}
+EDITOR.tests = []; // {description, fun}
 
-editor.currentFile = undefined; // A File object
+EDITOR.currentFile = undefined; // A File object
 
-editor.input = false; // Wheter inputs should go to the current file in focus or to some other element like an html input box.
+EDITOR.input = false; // Wheter inputs should go to the current file in focus or to some other element like an html input box.
 
-editor.fileOpenCallback = undefined;
-editor.lastKeyPressed = "";
+EDITOR.fileOpenCallback = undefined;
+EDITOR.lastKeyPressed = "";
 
 (function() { // Non global editor code ...
 	
 	// These variables and functions are private ...
-	// We only expose methods that are in the editor object.
+	// We only expose methods that are in the EDITOR object.
 	
 	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
 	
@@ -188,49 +188,49 @@ editor.lastKeyPressed = "";
 	var windowLoaded = false;
 	
 	/*
-		Editor functionality (accessible from global scope) By having this code here, we can use private variables
+		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
 		
-		To make it more fun to write plugins, the editor and File object should take care of the "low level" stuff and heavy lifting. 
-		Feel free to add more editor API methods below. Do not extend the editor object elsewhere!!
+		To make it more fun to write plugins, the EDITOR and File object should take care of the "low level" stuff and heavy lifting. 
+		Feel free to add more EDITOR methods below. Do not extend the EDITOR object elsewhere!!
 	*/
 	
-	editor.workingDirectory = UTIL.trailingSlash(process.cwd());
+	EDITOR.workingDirectory = UTIL.trailingSlash(process.cwd());
 	
 	if(runtime!="browser") {
 		// Check if the working directory is the same as the editor (hmm, why?)
 		
 		console.log("__dirname=" + __dirname);
-		console.log("workingDirectory=" + editor.workingDirectory);
+		console.log("workingDirectory=" + EDITOR.workingDirectory);
 		
-		if(__dirname != editor.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " editor.workingDirectory=" + editor.workingDirectory);
+		if(__dirname != EDITOR.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 	}
 	
 	var directoryDialogCallback = undefined; 
 	var directoryDialogHtmlElement;
 	
 	
-	editor.changeWorkingDir = function(workingDir) {
+	EDITOR.changeWorkingDir = function(workingDir) {
 		
 		// Check if the dir exists ?
 		
-		editor.workingDirectory = UTIL.trailingSlash(workingDir);;
+		EDITOR.workingDirectory = UTIL.trailingSlash(workingDir);;
 		
-		console.log("Calling changeWorkingDir listeners (" + editor.eventListeners.changeWorkingDir.length + ") workingDir=" + workingDir);
-		for(var i=0; i<editor.eventListeners.changeWorkingDir.length; i++) {
-			//console.log("function " + UTIL.getFunctionName(editor.eventListeners.changeWorkingDir[i].fun));
-			editor.eventListeners.changeWorkingDir[i].fun(workingDir); // Call function
+		console.log("Calling changeWorkingDir listeners (" + EDITOR.eventListeners.changeWorkingDir.length + ") workingDir=" + workingDir);
+		for(var i=0; i<EDITOR.eventListeners.changeWorkingDir.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.changeWorkingDir[i].fun));
+			EDITOR.eventListeners.changeWorkingDir[i].fun(workingDir); // Call function
 		}
 		
 	}
 	
-	editor.sortFileList = function() {
+	EDITOR.sortFileList = function() {
 		
-		// Sorts editor.files by file.order and returns an array of the files
+		// Sorts EDITOR.files by file.order and returns an array of the files
 		
 		var fileList = [];
 		
-		for(var path in editor.files) {
-			fileList.push(editor.files[path]);
+		for(var path in EDITOR.files) {
+			fileList.push(EDITOR.files[path]);
 		}
 		fileList.sort(sortOrder);
 		
@@ -263,14 +263,14 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.openFile = function(path, text, callback) {
+	EDITOR.openFile = function(path, text, callback) {
 		/*
 			Note: The caller of this function needs to handle file state, 
 			such as file.isSaved, file.savedAs and file.changed
 			Unless text==undefined, then it will be opened from disk and asumed saved.
 			
 			problem: The same file might be opened many times while we are waiting for it's data
-			solution1: (did not work due to plugins using the editor.files list to build stuff) Add temporary emty object to editor.files while opening the file.
+			solution1: (did not work due to plugins using the EDITOR.files list to build stuff) Add temporary emty object to EDITOR.files while opening the file.
 			solution2: A list of files that are beaing opened
 		*/
 		
@@ -290,7 +290,7 @@ editor.lastKeyPressed = "";
 		
 		
 		// Check if the file is already opened
-		if(editor.files.hasOwnProperty(path)) {
+		if(EDITOR.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
 			
 			/*
@@ -305,16 +305,16 @@ editor.lastKeyPressed = "";
 			
 			if(text == undefined) {
 				
-				var file = editor.files[path];
+				var file = EDITOR.files[path];
 				
-				if(!editor.currentFile) return fileOpenError(new Error("Internal error: No current file!")); // For sanity
+				if(!EDITOR.currentFile) return fileOpenError(new Error("Internal error: No current file!")); // For sanity
 				
-				if(editor.currentFile != file) {
+				if(EDITOR.currentFile != file) {
 					// Switch to it ...
 					
 					if(text != undefined && text != file.text) throw new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path);
 					
-					editor.showFile(file);
+					EDITOR.showFile(file);
 				}
 				
 				if(callback) callback(null, file);
@@ -331,7 +331,7 @@ editor.lastKeyPressed = "";
 					pathPart1 = pathPart2;
 					pathPart2 = "";
 				}
-				while(editor.files.hasOwnProperty(path)) {
+				while(EDITOR.files.hasOwnProperty(path)) {
 					path = pathPart1 + " (" + ++nr + ")" + pathPart2;
 				}
 			}
@@ -363,7 +363,7 @@ editor.lastKeyPressed = "";
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
-			editor.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
+			EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 				
 				if(err) {
 					console.warn(err.message);
@@ -373,19 +373,19 @@ editor.lastKeyPressed = "";
 					
 					console.log("fileSizeInBytes=" + fileSizeInBytes);
 					
-					if(fileSizeInBytes > editor.settings.bigFileSize) {
+					if(fileSizeInBytes > EDITOR.settings.bigFileSize) {
 						//alertBox("Opening big fies is not yet supported!");
 						//fileOpenError(new Error("File too big: " + path));
 						//return;
 						
-						console.warn("File larger then " + editor.settings.bigFileSize + " bytes. It will be opened as a stream!");
+						console.warn("File larger then " + EDITOR.settings.bigFileSize + " bytes. It will be opened as a stream!");
 						let notFromDisk = false;
 						let tooBig = true;
 						let text = "";
 						load(null, path, text, notFromDisk, tooBig);
 					}
 					else {
-						editor.readFromDisk(path, load);
+						EDITOR.readFromDisk(path, load);
 					}
 				}
 			});
@@ -411,10 +411,10 @@ editor.lastKeyPressed = "";
 			
 			console.log("Loading file to editor: " + path);
 			
-			if(editor.files.hasOwnProperty(path)) throw new Error("File is already opened!");
+			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened!");
 			
-			// Do not add file to editor.files until its fully loaded! And fileOpen events can be run sync
-			var newFile = new File(text, path, ++editor.fileIndex, tooBig, fileLoaded);
+			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
+			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
 			
 			if(!newFile.path) fileOpenError(new Error("Internal error: The file has no path!")); // For sanity
 			
@@ -431,32 +431,32 @@ editor.lastKeyPressed = "";
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
 				
-				editor.files[path] = newFile;
+				EDITOR.files[path] = newFile;
 				
-				file = editor.files[path];
+				file = EDITOR.files[path];
 				
-				if(!editor.files.hasOwnProperty(path)) throw new Error("File didn't enter editor.files"); // For sanity
+				if(!EDITOR.files.hasOwnProperty(path)) throw new Error("File didn't enter EDITOR.files"); // For sanity
 				
-				for(var p in editor.files) { // Make sure we are not insane
-					if(!editor.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
+				for(var p in EDITOR.files) { // Make sure we are not insane
+					if(!EDITOR.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 				}
 				
-				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") path=" + path);
-				for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
-					//console.log("function " + UTIL.getFunctionName(editor.eventListeners.fileOpen[i].fun));
-					editor.eventListeners.fileOpen[i].fun(file); // Call function
+				console.log("Calling fileOpen listeners (" + EDITOR.eventListeners.fileOpen.length + ") path=" + path);
+				for(var i=0; i<EDITOR.eventListeners.fileOpen.length; i++) {
+					//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.fileOpen[i].fun));
+					EDITOR.eventListeners.fileOpen[i].fun(file); // Call function
 				}
 				
 				// Switch to this file
-				editor.showFile(file);
-				editor.view.endingColumn = editor.view.visibleColumns; // Because file.startColumn = 0;
+				EDITOR.showFile(file);
+				EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				
 				callCallbacks(err, file);
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 				
 			}
 		}
@@ -497,7 +497,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.getFileSizeOnDisk = function(path, callback) {
+	EDITOR.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
 		if(!callback) throw new Error("Callback not defined!");
@@ -524,11 +524,11 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-	editor.doesFileExist = function(path, callback) {
+	EDITOR.doesFileExist = function(path, callback) {
 		// An easier method then getFileSizeOnDisk to check if a file exist on disk (add support for other protocols later!?)
 		// Be aware of racing conditions, it's often better to just open the file and see what happends
 		
-		editor.getFileSizeOnDisk(path, gotSize);
+		EDITOR.getFileSizeOnDisk(path, gotSize);
 		
 		function gotSize(err, size) {
 			
@@ -547,26 +547,26 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-	editor.lastChangedFile = function(excludeFileList) {
+	EDITOR.lastChangedFile = function(excludeFileList) {
 		// Returns the file that was last changed
 		
-		var files = Object.keys(editor.files);
+		var files = Object.keys(EDITOR.files);
 		
 		if(files.length == 0) return undefined;
 		
 		files.sort(function(a, b) {
-			return editor.files[a].lastChanged < editor.files[b].lastChanged;
+			return EDITOR.files[a].lastChanged < EDITOR.files[b].lastChanged;
 		});
 		
 		var index = 0;
-		var file = editor.files[files[index]];
+		var file = EDITOR.files[files[index]];
 		
 		if(excludeFileList) {
 			// Make sure the files in thist list doesn't get selected
 			index++;
 			while(file != undefined && excludeFileList.indexOf(file) != -1) {
 				if(index == files.length) file = undefined
-				else file = editor.files[files[index]];
+				else file = EDITOR.files[files[index]];
 				index++;
 			}
 		}
@@ -575,79 +575,79 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.closeFile = function(path, doNotSwitchFile) {
+	EDITOR.closeFile = function(path, doNotSwitchFile) {
 		
-		if(!editor.files.hasOwnProperty(path)) {
+		if(!EDITOR.files.hasOwnProperty(path)) {
 			throw new Error("Can't close file that is not open: " + path);
 		}
 		else {
 			
 			console.log("Closing file: path=" + path);
 			
-			var file = editor.files[path];
+			var file = EDITOR.files[path];
 			
 			// Call listeners (before we switch to another file, and before we delete the file content)
-			console.log("Calling fileClose listeners (" + editor.eventListeners.fileClose.length + ") ...");
-			for(var i=0; i<editor.eventListeners.fileClose.length; i++) {
-				editor.eventListeners.fileClose[i].fun(file); // Call function
+			console.log("Calling fileClose listeners (" + EDITOR.eventListeners.fileClose.length + ") ...");
+			for(var i=0; i<EDITOR.eventListeners.fileClose.length; i++) {
+				EDITOR.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
 			
 			// Make sure lastFile is not the file being closed
-			if(editor.lastFile == file) {
+			if(EDITOR.lastFile == file) {
 				console.warn("lastFile is the file being closed!");
-				editor.lastFile = editor.lastChangedFile([file]);
-				console.log("Changed lastfile to: " + editor.lastFile.path);
+				EDITOR.lastFile = EDITOR.lastChangedFile([file]);
+				console.log("Changed lastfile to: " + EDITOR.lastFile.path);
 			}
 			// Make sure lastFile is not currentFile
-			if(editor.lastFile == editor.currentFile && editor.lastFile != undefined) {
-				console.warn("lastFile is the currentFile:" + editor.currentFile.path);
-				editor.lastFile = editor.lastChangedFile([editor.currentFile, file]);
+			if(EDITOR.lastFile == EDITOR.currentFile && EDITOR.lastFile != undefined) {
+				console.warn("lastFile is the currentFile:" + EDITOR.currentFile.path);
+				EDITOR.lastFile = EDITOR.lastChangedFile([EDITOR.currentFile, file]);
 			}
 			
 			// Sanity check
-			if(editor.lastFile) {
-				if(!editor.files.hasOwnProperty(editor.lastFile.path)) {
-					throw new Error("editor.lastFile does not exist in editor.files! path=" + editor.lastFile.path + "\nWhen closing file.path=" + file.path);
+			if(EDITOR.lastFile) {
+				if(!EDITOR.files.hasOwnProperty(EDITOR.lastFile.path)) {
+					throw new Error("EDITOR.lastFile does not exist in EDITOR.files! path=" + EDITOR.lastFile.path + "\nWhen closing file.path=" + file.path);
 					return;
 				}
 			}
 			
 			var switchTo; // Have to check this before removing the file reference
-			if(editor.currentFile == file) {
+			if(EDITOR.currentFile == file) {
 				
-				editor.currentFile = undefined; // Closed, kinda
+				EDITOR.currentFile = undefined; // Closed, kinda
 				
 				if(!doNotSwitchFile) { // double negative => true
 					
 					// The file we are closing is the current file, and we are "allowed" to swith 
-					if(editor.lastFile) switchTo = editor.lastFile;
+					if(EDITOR.lastFile) switchTo = EDITOR.lastFile;
 				}
 			}
 			
-			delete editor.files[path]; // Remove all references to the file BEFORE switching to another file
+			delete EDITOR.files[path]; // Remove all references to the file BEFORE switching to another file
 			
 			
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
-				if(editor.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path);
+				if(EDITOR.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path);
 			}, 100);
 			
 			if(switchTo) {
-				editor.showFile(switchTo);
+				EDITOR.showFile(switchTo);
 				console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
 			}
 			
 			// Sanity check again. Make shure we didn't switch to the file being closed
-			if(editor.currentFile) {
-				if(editor.currentFile.path == path) {
-					throw new Error("The file being closed somehow ended up as editor.currentFile .!? path=" + path);
+			if(EDITOR.currentFile) {
+				if(EDITOR.currentFile.path == path) {
+					throw new Error("The file being closed somehow ended up as EDITOR.currentFile .!? path=" + path);
 				}
 			}
 		}
 	}
 	
 	
-	editor.readFile = function(path, callback) {
+	EDITOR.readFile = function(path, callback) {
 		/* 
 			Returns a readable stream ...
 			
@@ -657,7 +657,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.copyFolder = function(source, destination) {
+	EDITOR.copyFolder = function(source, destination) {
 		/*
 			Copies a folder and files in source location to destination.
 			Source and destination can be local filesystem, FTP or SFTP (SSH)
@@ -669,7 +669,7 @@ editor.lastKeyPressed = "";
 	
 	
 	
-	editor.readFromDisk = function(path, callback, returnBuffer, encoding) {
+	EDITOR.readFromDisk = function(path, callback, returnBuffer, encoding) {
 		
 		console.log("Reading file: " + path);
 		
@@ -682,7 +682,7 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.writeStream = function(file) {
+	EDITOR.writeStream = function(file) {
 		/* 
 			Writes the content of a file to a destination FS/FTP/SFTP
 			
@@ -696,13 +696,13 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.saveFile = function(file, path, callback) {
+	EDITOR.saveFile = function(file, path, callback) {
 		/*
 			This is the only save function.
 			It can handle "save-as". 
 		*/
 		
-		if(file == undefined) file = editor.currentFile;
+		if(file == undefined) file = EDITOR.currentFile;
 		
 		if(!file) {
 			throw new Error("No file open when save was called");
@@ -715,7 +715,7 @@ editor.lastKeyPressed = "";
 		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
 		if(file.path != path) {
-			if(editor.files.hasOwnProperty(path)) {
+			if(EDITOR.files.hasOwnProperty(path)) {
 				var err = new Error("There is already a file open with path=" + path);
 				if(callback) callback(err, path);
 				else throw err;
@@ -724,13 +724,13 @@ editor.lastKeyPressed = "";
 			
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
-			editor.closeFile(file.path, true); // true = do not switch to another file
+			EDITOR.closeFile(file.path, true); // true = do not switch to another file
 			
-			editor.openFile(path, text, savedAs); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
+			EDITOR.openFile(path, text, savedAs); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
 			
 		}
 		else {
-			editor.saveToDisk(file.path, file.text, doneSaving);
+			EDITOR.saveToDisk(file.path, file.text, doneSaving);
 		}
 		
 		function savedAs(err, newFile) { // intermediate function via ditor.openFile
@@ -738,7 +738,7 @@ editor.lastKeyPressed = "";
 			
 			file = newFile;
 			
-			editor.saveToDisk(file.path, file.text, doneSaving);
+			EDITOR.saveToDisk(file.path, file.text, doneSaving);
 		}
 		
 		function doneSaving(err, path) {
@@ -757,8 +757,8 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.saveToDisk = function(path, text, saveToDiskCallback, inputBuffer, encoding) {
-		// You probably want to use editor.saveFile instead!
+	EDITOR.saveToDisk = function(path, text, saveToDiskCallback, inputBuffer, encoding) {
+		// You probably want to use EDITOR.saveFile instead!
 		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
 		// Only works with text files !
@@ -774,21 +774,21 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.copyFile = function(from, to, callback) {
+	EDITOR.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection
 		
 		var returnBuffer = true;
 		var encoding = "binary";
 		var inputBuffer = true;
 		
-		editor.readFromDisk(from, function(err, path, buffer) {
+		EDITOR.readFromDisk(from, function(err, path, buffer) {
 			
 			if(err) {
 				console.warn("Copy failed! Unable to read file: " + err.message);
 				callback(err, to);
 			}
 			else {
-				editor.saveToDisk(to, buffer, function(err, path) {
+				EDITOR.saveToDisk(to, buffer, function(err, path) {
 					
 					if(err) console.warn("Copy failed! Unable to write file path=" + to + ": " + err.message);
 					
@@ -802,31 +802,31 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.fileSaveDialog = function(defaultPath, callback) {
+	EDITOR.fileSaveDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS save file dialog window and calls the callback with the path.
 		*/
-		editor.filesaveAsCallback = callback;
+		EDITOR.filesaveAsCallback = callback;
 		
 		var fileSaveAs = document.getElementById("fileSaveAs");
 		
-		if(defaultPath) editor.setFileSavePath(defaultPath);
+		if(defaultPath) EDITOR.setFileSavePath(defaultPath);
 		
 		fileSaveAs.click(); // Bring up the OS path selector window
 	}
 	
-	editor.setFileSavePath = function(defaultPath) {
+	EDITOR.setFileSavePath = function(defaultPath) {
 		var fileSaveAs = document.getElementById("fileSaveAs");
 		fileSaveAs.setAttribute("nwsaveas", defaultPath);
 	}
 	
-	editor.setFileOpenPath = function(defaultPath) {
+	EDITOR.setFileOpenPath = function(defaultPath) {
 		// path needs to be a directory
 		var fileOpen = document.getElementById("fileInput");
 		fileOpen.setAttribute("nwworkingdir", UTIL.trailingSlash(defaultPath));
 	}
 	
-	editor.fileOpenDialog = function(defaultPath, callback) {
+	EDITOR.fileOpenDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS file select dialog window.
 			File path is then passed to the callback function.
@@ -834,11 +834,11 @@ editor.lastKeyPressed = "";
 		
 		console.log("Bringing up the file open dialog ...");
 		
-		editor.fileOpenCallback = callback;
+		EDITOR.fileOpenCallback = callback;
 		
 		var fileOpen = document.getElementById("fileInput");
 		
-		//if(defaultPath == undefined) defaultPath = editor.workingDirectory;
+		//if(defaultPath == undefined) defaultPath = EDITOR.workingDirectory;
 		
 		if(!defaultPath) defaultPath = UTIL.getDirectoryFromPath(undefined);
 		else {
@@ -850,13 +850,13 @@ editor.lastKeyPressed = "";
 			if(! (lastChar == "/" || lastChar == "\\")) {
 				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
 			}
-			editor.setFileOpenPath(defaultPath);
+			EDITOR.setFileOpenPath(defaultPath);
 		}
 		
 		fileOpen.click(); // Bring up the OS path selector window
 	}
 	
-	editor.directoryDialog = function(defaultPath, callback) {
+	EDITOR.directoryDialog = function(defaultPath, callback) {
 		
 		console.log("Bringing up the directory dialog ...");
 		
@@ -867,34 +867,34 @@ editor.lastKeyPressed = "";
 		directoryDialogHtmlElement.click(); // Bring up the OS path selector window
 	}
 	
-	editor.renderNeeded = function() {
+	EDITOR.renderNeeded = function() {
 		// Tell the editor that it needs to render
 		
-		if(editor.settings.devMode && editor.shouldRender == false) {
+		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
 			console.log(UTIL.getStack("renderNeeded"));
 		}
-		editor.shouldRender = true;
+		EDITOR.shouldRender = true;
 	}
 	
-	editor.resizeNeeded = function() {
+	EDITOR.resizeNeeded = function() {
 		// Tell the editor that it needs to resize
-		if(editor.settings.devMode && editor.shouldResize == false) {
+		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
 			console.log(UTIL.getStack("resizeNeeded"));
 		}
-		editor.shouldResize = true;
+		EDITOR.shouldResize = true;
 	}
 	
-	editor.render = function() {
+	EDITOR.render = function() {
 		
-		if(!editor.shouldRender) {
+		if(!EDITOR.shouldRender) {
 			console.warn("Not rendering because it's not needed!");
 			return;
 		}
-		if(editor.shouldResize) {
+		if(EDITOR.shouldResize) {
 			console.warn("Resizing before rendering!");
-			editor.resize();
+			EDITOR.resize();
 		}
 		
 		// Fix blurryness for screens with high pixel ratio
@@ -905,19 +905,19 @@ editor.lastKeyPressed = "";
 		ctx.scale(pixelRatio,pixelRatio);
 		}
 		
-		editor.shouldRender = false; // Flag (change to true whenever we need to render)
+		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
 		
-		//console.log("rendering ... editor.shouldResize=" + editor.shouldResize + "");
+		//console.log("rendering ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
 		
-		if(editor.currentFile) {
+		if(EDITOR.currentFile) {
 			
-			console.log("render file=" + editor.currentFile.path);
+			console.log("render file=" + EDITOR.currentFile.path);
 			
-			if(!editor.currentFile.render) {
-				console.warn("File render flag set to '" + editor.currentFile.render + "'");
+			if(!EDITOR.currentFile.render) {
+				console.warn("File render flag set to '" + EDITOR.currentFile.render + "'");
 				
 				// Just paint the background
-				ctx.fillStyle = editor.settings.style.bgColor;
+				ctx.fillStyle = EDITOR.settings.style.bgColor;
 				
 				//ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -927,9 +927,9 @@ editor.lastKeyPressed = "";
 			
 			console.time("render");
 			
-			var file = editor.currentFile,
+			var file = EDITOR.currentFile,
 			buffer = [],
-			grid = editor.currentFile.grid;
+			grid = EDITOR.currentFile.grid;
 			
 			
 			
@@ -943,24 +943,24 @@ editor.lastKeyPressed = "";
 			// Create the buffer
 			//console.time("createBuffer");
 			var bufferStartRow = Math.max(0, file.startRow);
-			var bufferEndRow = Math.min(grid.length, file.startRow+editor.view.visibleRows);
+			var bufferEndRow = Math.min(grid.length, file.startRow+EDITOR.view.visibleRows);
 			for(var row = bufferStartRow; row < bufferEndRow; row++) {
 				buffer.push(file.cloneRow(row)); // Clone the row
 			}
 			//console.timeEnd("createBuffer");
 			
 			if(buffer.length == 0) {
-				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " editor.view.visibleRows=" + editor.view.visibleRows);
+				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 			}
 			
 			// Load on the fly functionality on the buffer
 			
 			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging performance issues.
 			//console.time("preRenders");
-			for(var i=0; i<editor.preRenderFunctions.length; i++) {
-				//funName = UTIL.getFunctionName(editor.preRenderFunctions[i]);
+			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
+				//funName = UTIL.getFunctionName(EDITOR.preRenderFunctions[i]);
 				//console.time("prerender: " + funName);
-				buffer = editor.preRenderFunctions[i](buffer, file); // Call render
+				buffer = EDITOR.preRenderFunctions[i](buffer, file); // Call render
 				//console.timeEnd("prerender: " + funName);
 			}
 			//console.timeEnd("preRenders");
@@ -979,7 +979,7 @@ editor.lastKeyPressed = "";
 			
 			//ctx.translate(0,0);
 			
-			ctx.fillStyle = editor.settings.style.bgColor;
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			
 			//ctx.clearRect(0, 0, canvas.width, canvas.height);
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -991,16 +991,16 @@ editor.lastKeyPressed = "";
 			*/
 			
 			//console.time("renders");
-			for(var i=0; i<editor.renderFunctions.length; i++) {
-				//funName = UTIL.getFunctionName(editor.renderFunctions[i]);
+			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
+				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
 				//console.time("render: " + funName);
-				editor.renderFunctions[i](ctx, buffer, editor.currentFile, startRow, containZeroWidthCharacters); // Call render
+				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, startRow, containZeroWidthCharacters); // Call render
 				//console.timeEnd("render: " + funName);
 			}
 			//console.timeEnd("renders");
 			
 			
-			editor.renderCaret(file.caret);
+			EDITOR.renderCaret(file.caret);
 			
 			
 			console.timeEnd("render");
@@ -1009,21 +1009,21 @@ editor.lastKeyPressed = "";
 		else {
 			// Show some useful info for new users
 			
-			var keyCombo = editor.getKeyFor("openFile");
+			var keyCombo = EDITOR.getKeyFor("openFile");
 			
-			ctx.fillStyle = editor.settings.style.bgColor;
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
-			ctx.fillStyle = editor.settings.style.textColor;
+			ctx.fillStyle = EDITOR.settings.style.textColor;
 			
-			ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
+			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			ctx.textBaseline = "top";
 			
 			var friendlyString = keyCombo +" to open a file";
 			// Place the string in the center
 			var textMeasure = ctx.measureText(friendlyString);
-			var left = editor.view.canvasWidth / 2 - textMeasure.width / 2;
-			var top =  editor.view.canvasHeight / 2 - 20;
+			var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
+			var top =  EDITOR.view.canvasHeight / 2 - 20;
 			
 			ctx.beginPath(); // Reset all the paths!
 			
@@ -1035,13 +1035,13 @@ editor.lastKeyPressed = "";
 		//console.log("rendering finish");
 	}
 	
-	editor.renderRow = function(gridRow) {
+	EDITOR.renderRow = function(gridRow) {
 		
-		console.log("rendering ROW ... editor.shouldResize=" + editor.shouldResize + "");
+		console.log("rendering ROW ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
 		
-		if(editor.currentFile) {
+		if(EDITOR.currentFile) {
 			
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			
 			if(gridRow == undefined) gridRow = file.caret.row;
 			if(file.grid.length <= gridRow) throw new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " ");
@@ -1064,18 +1064,18 @@ editor.lastKeyPressed = "";
 			// Load on the fly functionality on the buffer
 			// No prerender when rendering rows!?
 			
-			for(var i=0; i<editor.preRenderFunctions.length; i++) {
-				buffer = editor.preRenderFunctions[i](buffer, file);
+			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
+				buffer = EDITOR.preRenderFunctions[i](buffer, file);
 			}
 			
 			//console.log(JSON.stringify(buffer, null, 4));
 			
-			ctx.fillStyle = editor.settings.style.bgColor;
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			
-			var top = editor.settings.topMargin + screenRow * editor.settings.gridHeight;
+			var top = EDITOR.settings.topMargin + screenRow * EDITOR.settings.gridHeight;
 			
 			// Clear only that row
-			ctx.fillRect(0, top, canvas.width, editor.settings.gridHeight);
+			ctx.fillRect(0, top, canvas.width, EDITOR.settings.gridHeight);
 			
 			/*
 				ctx.fillStyle = "#FF0000";
@@ -1083,8 +1083,8 @@ editor.lastKeyPressed = "";
 				ctx.lineWidth = 1;
 			*/
 			
-			for(var i=0; i<editor.renderFunctions.length; i++) {
-				editor.renderFunctions[i](ctx, buffer, file, screenRow); // Call render
+			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
+				EDITOR.renderFunctions[i](ctx, buffer, file, screenRow); // Call render
 			}
 			
 			console.timeEnd("renderRow");
@@ -1097,15 +1097,15 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.renderColumn = function(row, col, character, textColor) {
+	EDITOR.renderColumn = function(row, col, character, textColor) {
 		// For optimization: Prints a character on the screen.
 		
-		if(textColor == undefined) textColor = editor.settings.style.textColor;
+		if(textColor == undefined) textColor = EDITOR.settings.style.textColor;
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
-		var top = editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight;
-		var left = editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth;
+		var top = EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight;
+		var left = EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth;
 		
 		ctx.fillStyle = textColor;
 		
@@ -1114,64 +1114,64 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.clearColumn = function(row, col) {
+	EDITOR.clearColumn = function(row, col) {
 		// For optimization: Clears a box (screen area) instead of doing a full re-render
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
-		var top = Math.floor(editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight);
-		var left = Math.floor(editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth); // -0.5 to clear sub pixels (caret)
+		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth); // -0.5 to clear sub pixels (caret)
 		
 		if(row == file.caret.row) {
-			ctx.fillStyle = editor.settings.style.currentLineColor;
+			ctx.fillStyle = EDITOR.settings.style.currentLineColor;
 		}
 		else {
-			ctx.fillStyle = editor.settings.style.bgColor;
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
 		}
 		
 		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
-		ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
+		ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
 		
 	}
 	
-	editor.renderCaret = function(caret, colPlus) {
+	EDITOR.renderCaret = function(caret, colPlus) {
 		
 		if(colPlus == undefined) colPlus = 0;
 		
 		var row = caret.row;
 		var col = caret.col + colPlus;
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
 		
 		// Math.floor to prevent sub pixels
-		var top = Math.floor(editor.settings.topMargin + (row - file.startRow) * editor.settings.gridHeight);
-		var left = Math.floor(editor.settings.leftMargin + (col + (file.grid[row].indentation * editor.settings.tabSpace) - file.startColumn) * editor.settings.gridWidth);
+		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
-		ctx.fillStyle = editor.settings.caret.color;
+		ctx.fillStyle = EDITOR.settings.caret.color;
 		
-		ctx.fillRect(left, top, editor.settings.caret.width, editor.settings.gridHeight);
+		ctx.fillRect(left, top, EDITOR.settings.caret.width, EDITOR.settings.gridHeight);
 		
 		// Show the "direction" of the caret
-		ctx.fillRect(left, top+editor.settings.gridHeight - editor.settings.caret.width, 4, editor.settings.caret.width);
+		ctx.fillRect(left, top+EDITOR.settings.gridHeight - EDITOR.settings.caret.width, 4, EDITOR.settings.caret.width);
 		
 	}
 	
 	
-	editor.resize = function(e) {
+	EDITOR.resize = function(e) {
 		/*
 			
 			Why does the resize clear the canvas's !???
 			
 		*/
 		
-		if(!editor.shouldResize) return; // Don't resize if it's not needed.
-		editor.shouldResize = false; // Prevent this function from running again
+		if(!EDITOR.shouldResize) return; // Don't resize if it's not needed.
+		EDITOR.shouldResize = false; // Prevent this function from running again
 		
-		//if(editor.lastKeyPressed=="a") throw new Error("why resize now?");
+		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
 		
-		console.log("Resizing ... e=" + e + " editor.shouldRender=" + editor.shouldRender + "");
+		console.log("Resizing ... e=" + e + " EDITOR.shouldRender=" + EDITOR.shouldRender + "");
 		
 		console.time("resize");
 		
@@ -1179,9 +1179,9 @@ editor.lastKeyPressed = "";
 		
 		
 		// Resize listeners (before)
-		console.log("Calling beforeResize listeners (" + editor.eventListeners.beforeResize.length + ") ...");
-		for(var i=0; i<editor.eventListeners.beforeResize.length; i++) {
-			editor.eventListeners.beforeResize[i].fun(editor.currentFile);
+		console.log("Calling beforeResize listeners (" + EDITOR.eventListeners.beforeResize.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.beforeResize.length; i++) {
+			EDITOR.eventListeners.beforeResize[i].fun(EDITOR.currentFile);
 		}
 		
 		/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
@@ -1203,7 +1203,7 @@ editor.lastKeyPressed = "";
 		
 		
 		// Save focus for the current file and give back focus after ther resize
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		
 		
@@ -1254,31 +1254,31 @@ editor.lastKeyPressed = "";
 			console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
 		*/
 		
-		editor.height = windowHeight;
-		editor.with = windowWidth;
+		EDITOR.height = windowHeight;
+		EDITOR.with = windowWidth;
 		
 		
 		//UTIL.objInfo(centerColumn);
 		
 		
-		//editor.view.canvasWidth = windowWidth - leftRightColumnWidth;
-		editor.view.canvasWidth = contentWidth;
-		editor.view.canvasHeight = contentHeight;
+		//EDITOR.view.canvasWidth = windowWidth - leftRightColumnWidth;
+		EDITOR.view.canvasWidth = contentWidth;
+		EDITOR.view.canvasHeight = contentHeight;
 		/*
-			editor.view.canvasWidth = (windowWidth - leftRightColumnWidth);
-			editor.view.canvasHeight = (windowHeight - headerFooterHeight);
+			EDITOR.view.canvasWidth = (windowWidth - leftRightColumnWidth);
+			EDITOR.view.canvasHeight = (windowHeight - headerFooterHeight);
 			
 			
-			content.style.width = editor.view.canvasWidth + "px";
-			content.style.height = editor.view.canvasHeight + "px";
+			content.style.width = EDITOR.view.canvasWidth + "px";
+			content.style.height = EDITOR.view.canvasHeight + "px";
 		*/
 		
-		console.log("canvasWidth=" + editor.view.canvasWidth);
-		console.log("canvasHeight=" + editor.view.canvasHeight);
+		console.log("canvasWidth=" + EDITOR.view.canvasWidth);
+		console.log("canvasHeight=" + EDITOR.view.canvasHeight);
 		
 		
-		leftColumn.style.height = editor.view.canvasHeight + "px";
-		rightColumn.style.height = editor.view.canvasHeight + "px";
+		leftColumn.style.height = EDITOR.view.canvasHeight + "px";
+		rightColumn.style.height = EDITOR.view.canvasHeight + "px";
 		
 		shareHeight(leftColumn.childNodes, contentHeight);
 		shareHeight(rightColumn.childNodes, contentHeight);
@@ -1321,49 +1321,49 @@ editor.lastKeyPressed = "";
 		
 		
 		// Calculate column width and row height
-		editor.view.visibleColumns = Math.ceil((editor.view.canvasWidth - editor.settings.leftMargin - editor.settings.rightMargin) / editor.settings.gridWidth);
+		EDITOR.view.visibleColumns = Math.ceil((EDITOR.view.canvasWidth - EDITOR.settings.leftMargin - EDITOR.settings.rightMargin) / EDITOR.settings.gridWidth);
 		
-		//console.log("(resize1) editor.view.visibleColumns=" + editor.view.visibleColumns);
-		//console.log("(resize1) editor.view.endingColumn=" + editor.view.endingColumn);
+		//console.log("(resize1) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("(resize1) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		// ceil (overflow)
-		editor.view.visibleRows = Math.ceil((editor.view.canvasHeight - editor.settings.topMargin - editor.settings.bottomMargin) / editor.settings.gridHeight);
+		EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
 		
-		//console.log("visibleRows=" + editor.view.visibleRows);
-		//console.log("topMargin=" + editor.settings.topMargin);
-		//console.log("bottomMargin=" + editor.settings.bottomMargin);
+		//console.log("visibleRows=" + EDITOR.view.visibleRows);
+		//console.log("topMargin=" + EDITOR.settings.topMargin);
+		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
 		
-		canvas.style.width = editor.view.canvasWidth + "px";
-		canvas.style.height = editor.view.canvasHeight + "px";
+		canvas.style.width = EDITOR.view.canvasWidth + "px";
+		canvas.style.height = EDITOR.view.canvasHeight + "px";
 		
-		canvas.width  = editor.view.canvasWidth * pixelRatio;
-		canvas.height = editor.view.canvasHeight * pixelRatio;
+		canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
+		canvas.height = EDITOR.view.canvasHeight * pixelRatio;
 		
-		if(editor.currentFile) {
+		if(EDITOR.currentFile) {
 			// Fix horizontal column after resizing
-			if(editor.view.endingColumn < editor.view.visibleColumns) {
-				editor.currentFile.startColumn = 0;
-				editor.view.endingColumn = editor.view.visibleColumns;
+			if(EDITOR.view.endingColumn < EDITOR.view.visibleColumns) {
+				EDITOR.currentFile.startColumn = 0;
+				EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			}
 			else {
-				editor.view.endingColumn = editor.currentFile.startColumn + editor.view.visibleColumns;
+				EDITOR.view.endingColumn = EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns;
 			}
 			
 		}
 		else {
-			console.warn("No current file! editor.currentFile=" + editor.currentFile);
-			editor.view.endingColumn = editor.view.visibleColumns;
+			console.warn("No current file! EDITOR.currentFile=" + EDITOR.currentFile);
+			EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			
 		}
 		
-		//console.log("(resize2) editor.view.visibleColumns=" + editor.view.visibleColumns);
-		//console.log("(resize2) editor.view.endingColumn=" + editor.view.endingColumn);
+		//console.log("(resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		// Resize listeners (after)
-		console.log("Calling afterResize listeners (" + editor.eventListeners.afterResize.length + ") ...");
-		for(var i=0; i<editor.eventListeners.afterResize.length; i++) {
-			editor.eventListeners.afterResize[i].fun(editor.currentFile);
+		console.log("Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.afterResize.length; i++) {
+			EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile);
 		}
 		
 		// Show the canvas nodes again
@@ -1375,10 +1375,10 @@ editor.lastKeyPressed = "";
 		
 		console.timeEnd("resize");
 		
-		editor.renderNeeded();
-		editor.render(); // Always render (right away to brevent black background blink) after a resize
+		EDITOR.renderNeeded();
+		EDITOR.render(); // Always render (right away to brevent black background blink) after a resize
 		
-		//editor.renderNeeded(); // Always render after a resize (but nor right away!?
+		//EDITOR.renderNeeded(); // Always render after a resize (but nor right away!?
 		
 		function shareHeight(elements, maxTotalHeight) {
 			
@@ -1424,33 +1424,33 @@ editor.lastKeyPressed = "";
 					canvasNodes[i].style.display = "block";
 				}
 			}
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 		}
 		
 	}
 	
-	editor.on = function(eventName, callback, order) {
+	EDITOR.on = function(eventName, callback, order) {
 		/*
 			lowest order nr will execute first!
 		*/
 		
-		if(typeof callback !== "function") throw new Error("The second argument needs to be a function! Did you mean editor.addEvent ?");
+		if(typeof callback !== "function") throw new Error("The second argument needs to be a function! Did you mean EDITOR.addEvent ?");
 		
-		return editor.addEvent(eventName, {fun: callback, order: order});
+		return EDITOR.addEvent(eventName, {fun: callback, order: order});
 	}
 	
-	editor.addEvent = function(eventName, options) {
+	EDITOR.addEvent = function(eventName, options) {
 		
-		if(!(eventName in editor.eventListeners)) {
-			throw "eventName=" + eventName + " does not exist in editor.eventListeners!";
+		if(!(eventName in EDITOR.eventListeners)) {
+			throw "eventName=" + eventName + " does not exist in EDITOR.eventListeners!";
 		}
 		
 		if(arguments.length > 2) {
-			console.warn("Pass additional arguments in the options (second argument)! Or use editor.on instead!");
+			console.warn("Pass additional arguments in the options (second argument)! Or use EDITOR.on instead!");
 		}
 		
 		if(!options.hasOwnProperty("fun")) {
-			console.warn(new Error("The second argument should be an object containing the property fun. You might want to use editor.on instead.").stack);
+			console.warn(new Error("The second argument should be an object containing the property fun. You might want to use EDITOR.on instead.").stack);
 			
 			if(typeof options === "function") {
 				options = {fun: options};
@@ -1471,21 +1471,21 @@ editor.lastKeyPressed = "";
 		*/
 		var funName = UTIL.getFunctionName(options.fun);
 		if(funName == "") throw new Error("Please give the event listener function a name! (You can also name lamda function: ex: foo(function lamda() {})")
-		for(var i=0; i<editor.eventListeners[eventName].length; i++) {
-			if(editor.eventListeners[eventName][i].fun != undefined) {
-				if(funName == UTIL.getFunctionName(editor.eventListeners[eventName][i].fun)) {
+		for(var i=0; i<EDITOR.eventListeners[eventName].length; i++) {
+			if(EDITOR.eventListeners[eventName][i].fun != undefined) {
+				if(funName == UTIL.getFunctionName(EDITOR.eventListeners[eventName][i].fun)) {
 					throw new Error("There is already a function named " + funName + " for the " + eventName + " event. Please give your function another name!");
 				}
 			}
 			else {
-				console.warn("Undefined callback in event listener:" + JSON.stringify(editor.eventListeners[eventName][i]));
+				console.warn("Undefined callback in event listener:" + JSON.stringify(EDITOR.eventListeners[eventName][i]));
 			}
 		}
 		
-		var index = editor.eventListeners[eventName].push(options);
+		var index = EDITOR.eventListeners[eventName].push(options);
 		
 		// Sort the events so they fire in order (lowest order nr will execute first)
-		editor.eventListeners[eventName].sort(function(a, b) {
+		EDITOR.eventListeners[eventName].sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
 			}
@@ -1500,13 +1500,13 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.removeEvent = function(eventName, fun) {
+	EDITOR.removeEvent = function(eventName, fun) {
 		/*
 			Note to myself: Some events have objects and others just have the function!!
 			
 		*/
 		var fname = UTIL.getFunctionName(fun);
-		var events = editor.eventListeners[eventName];
+		var events = EDITOR.eventListeners[eventName];
 		var found = 0;
 		
 		removeit(); // Removes them all (recursive)
@@ -1525,7 +1525,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.addMenuItem = function(htmlText, callback, position) {
+	EDITOR.addMenuItem = function(htmlText, callback, position) {
 		var menu = document.getElementById("canvasContextmenu");
 		
 		var menuElement = document.createElement("li");
@@ -1542,15 +1542,15 @@ editor.lastKeyPressed = "";
 			menu.appendChild(menuElement);
 		}
 		
-		// Don't forget to call editor.hideMenu() after the item has been clicked!
+		// Don't forget to call EDITOR.hideMenu() after the item has been clicked!
 		
 		return menuElement;
 	}
 	
-	editor.removeMenuItem = function(menuElement) {
+	EDITOR.removeMenuItem = function(menuElement) {
 		
-		if(!menuElement) throw new Error("editor.removeMenuItem was called without argument menuElement=" + menuElement);
-		if(!menuElement.tagName) throw new Error("editor.removeMenuItem argument menuElement is not a HTML node!");
+		if(!menuElement) throw new Error("EDITOR.removeMenuItem was called without argument menuElement=" + menuElement);
+		if(!menuElement.tagName) throw new Error("EDITOR.removeMenuItem argument menuElement is not a HTML node!");
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -1571,7 +1571,7 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.addTempMenuItem = function(htmlText, callback) {
+	EDITOR.addTempMenuItem = function(htmlText, callback) {
 		/*
 			These items are removed when the menu is hidden
 		*/
@@ -1597,7 +1597,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.hideMenu = function() {
+	EDITOR.hideMenu = function() {
 		// Hide the menu
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -1609,18 +1609,18 @@ editor.lastKeyPressed = "";
 			tempItems.removeChild(tempItems.firstChild);
 		}
 		
-		if(editor.currentFile) editor.input = true; // Give focus back for text entry
+		if(EDITOR.currentFile) EDITOR.input = true; // Give focus back for text entry
 		
 	}
 	
-	editor.showMenu = function(posX, posY) {
+	EDITOR.showMenu = function(posX, posY) {
 		var menu = document.getElementById("canvasContextmenu");
 		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 		var menuDownABit = 10;
 		
-		if(posX === editor.mouseX || posX === undefined) posX = editor.mouseX + notUpOnMenu;
+		if(posX === EDITOR.mouseX || posX === undefined) posX = EDITOR.mouseX + notUpOnMenu;
 		
-		if(posY === undefined) posY = editor.mouseY + menuDownABit;
+		if(posY === undefined) posY = EDITOR.mouseY + menuDownABit;
 		
 		// Make sure it fits on the screen!!
 		/*
@@ -1631,12 +1631,12 @@ editor.lastKeyPressed = "";
 		var offsetHeight = parseInt(menu.offsetHeight);
 		var offsetWidth = parseInt(menu.offsetWidth);
 		
-		if((posY+offsetHeight) > editor.height) posY = editor.height - offsetHeight;
-		if((posX+offsetWidth) > editor.with) posX = editor.with - offsetWidth;
+		if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
+		if((posX+offsetWidth) > EDITOR.with) posX = EDITOR.with - offsetWidth;
 		
-		if(posX <= editor.mouseX) {
+		if(posX <= EDITOR.mouseX) {
 			// Place the menu on the left side
-			posX = editor.mouseX - offsetWidth - notUpOnMenu;
+			posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
 		}
 		
 		menu.style.visibility = "visible";
@@ -1644,9 +1644,9 @@ editor.lastKeyPressed = "";
 		menu.style.left = posX + "px";
 	}
 	
-	editor.addInfo = function(row, col, txt) {
+	EDITOR.addInfo = function(row, col, txt) {
 		// Will display a talk bubble (plugin/render_info.js)
-		var info = editor.info;
+		var info = EDITOR.info;
 		
 		console.time("addInfo");
 		
@@ -1677,8 +1677,8 @@ editor.lastKeyPressed = "";
 			//console.log("imgArray=" + imgArray.length);
 			
 			// Remove all text at next editor interaction
-			editor.onNextInteraction(function() {
-				editor.removeAllInfo(row, col);
+			EDITOR.onNextInteraction(function() {
+				EDITOR.removeAllInfo(row, col);
 			});
 			
 			// Check if there's already info on that positioin
@@ -1706,8 +1706,8 @@ editor.lastKeyPressed = "";
 			
 			console.timeEnd("addInfo");
 			
-			editor.renderNeeded();
-			editor.render();
+			EDITOR.renderNeeded();
+			EDITOR.render();
 			
 		}
 		
@@ -1723,7 +1723,7 @@ editor.lastKeyPressed = "";
 				//console.log("imagesToMake=" + imagesToMake);
 				//console.log("imagesMade=" + imagesMade);
 				
-				//editor.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
+				//EDITOR.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
 				
 				
 				if(++imagesMade == imagesToMake) {
@@ -1736,9 +1736,9 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.removeAllInfo = function(row, col, txt) {
+	EDITOR.removeAllInfo = function(row, col, txt) {
 		// Find the item in the array, then splice it ...
-		var info = editor.info;
+		var info = EDITOR.info;
 		
 		for(var i=0; i<info.length; i++) {
 			if(info[i].row == row && info[i].col == col) {
@@ -1747,26 +1747,26 @@ editor.lastKeyPressed = "";
 				info.splice(i,1);
 				
 				// Call removeAllInfo again, just to make sure ALL is removed
-				editor.removeAllInfo(row, col);
+				EDITOR.removeAllInfo(row, col);
 				return; // Splice can be buggy if many rows are removed in a for-loop
 				
 			}
 		}
 	}
 	
-	editor.onNextInteraction = function(func) {
+	EDITOR.onNextInteraction = function(func) {
 		executeOnNextInteraction.push(func);
 	}
 	
-	editor.interact = function(interaction, options) {
+	EDITOR.interact = function(interaction, options) {
 		// This function will be called on every interaction
 		
 		nextInteractionFunctions();
 		
-		if(editor.eventListeners.interaction.length > 0) {
-			console.log("Calling interaction listeners (" + editor.eventListeners.interaction.length + ") ...");
-			for(var i=0; i<editor.eventListeners.interaction.length; i++) {
-				editor.eventListeners.interaction[i].fun(editor.currentFile); // Call function
+		if(EDITOR.eventListeners.interaction.length > 0) {
+			console.log("Calling interaction listeners (" + EDITOR.eventListeners.interaction.length + ") ...");
+			for(var i=0; i<EDITOR.eventListeners.interaction.length; i++) {
+				EDITOR.eventListeners.interaction[i].fun(EDITOR.currentFile); // Call function
 			}
 		}
 		
@@ -1784,18 +1784,18 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.fireEvent = function(eventName) {
+	EDITOR.fireEvent = function(eventName) {
 		
 		//throw new Error("todo: shift/splice arguments before sending them to listener");
 		
 		var eventListeners;
 		var func;
 		
-		if(eventName in editor.eventListeners) {
+		if(eventName in EDITOR.eventListeners) {
 			
-			eventListeners = editor.eventListeners[eventName];
+			eventListeners = EDITOR.eventListeners[eventName];
 			
-			console.log("Calling " + eventName + " listeners (" + editor.eventListeners[eventName].length + ") ...");
+			console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
 			for(var i=0; i<eventListeners.length; i++) {
 				func = eventListeners[i].fun;
 				
@@ -1807,7 +1807,7 @@ editor.lastKeyPressed = "";
 				
 			}
 			
-			// editor.eventListeners[eventName] // ?????
+			// EDITOR.eventListeners[eventName] // ?????
 		}
 		else {
 			throw new Error("Uknown event listener:" + eventName);
@@ -1815,21 +1815,21 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.addRender = function(fun) {
-		return editor.renderFunctions.push(fun) - 1;
+	EDITOR.addRender = function(fun) {
+		return EDITOR.renderFunctions.push(fun) - 1;
 	}
-	editor.removeRender = function(fun) {
-		return removeFrom(editor.renderFunctions, fun)
-	}
-	
-	editor.addPreRender = function(renderFunction) {
-		return editor.preRenderFunctions.push(fun) - 1;
-	}
-	editor.removePreRender = function(renderFunction) {
-		return removeFrom(editor.preRenderFunctions, fun);
+	EDITOR.removeRender = function(fun) {
+		return removeFrom(EDITOR.renderFunctions, fun)
 	}
 	
-	editor.mousePositionToCaret = function (mouseX, mouseY) {
+	EDITOR.addPreRender = function(renderFunction) {
+		return EDITOR.preRenderFunctions.push(fun) - 1;
+	}
+	EDITOR.removePreRender = function(renderFunction) {
+		return removeFrom(EDITOR.preRenderFunctions, fun);
+	}
+	
+	EDITOR.mousePositionToCaret = function (mouseX, mouseY) {
 		/*
 			Returns a caret on the file.grid
 			
@@ -1841,13 +1841,13 @@ editor.lastKeyPressed = "";
 			caret.index is always the index in file.text (it doesn't correspond to the position in a big file)
 			
 		*/
-		if(editor.currentFile) {
+		if(EDITOR.currentFile) {
 			
-			var file = editor.currentFile,
+			var file = EDITOR.currentFile,
 			grid = file.grid,
-			clickFeel = editor.settings.gridWidth / 2;
+			clickFeel = EDITOR.settings.gridWidth / 2;
 			
-			var mouseRow = Math.floor((mouseY - editor.settings.topMargin) / editor.settings.gridHeight) + file.startRow;
+			var mouseRow = Math.floor((mouseY - EDITOR.settings.topMargin) / EDITOR.settings.gridHeight) + file.startRow;
 			
 			//console.log("mouseRow=" + mouseRow);
 			
@@ -1869,7 +1869,7 @@ editor.lastKeyPressed = "";
 				
 				//console.log("indentation=" + gridRow.indentation);
 				
-				var mouseCol = Math.floor((mouseX - editor.settings.leftMargin - (gridRow.indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth + clickFeel) / editor.settings.gridWidth);
+				var mouseCol = Math.floor((mouseX - EDITOR.settings.leftMargin - (gridRow.indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth + clickFeel) / EDITOR.settings.gridWidth);
 				
 				//console.log("mouseCol=" + mouseCol);
 				
@@ -1892,10 +1892,10 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.autoComplete = function(file, combo, character, charCode, keyPushDirection) {
+	EDITOR.autoComplete = function(file, combo, character, charCode, keyPushDirection) {
 		/*
 			An abstraction that lets you have many auto-complete functions. 
-			Register using: editor.on("autoComplete", function)
+			Register using: EDITOR.on("autoComplete", function)
 			
 			The function should return an array with possible auto-complete options,
 			or optionally, an array of arrays where the second index is how many characters
@@ -1905,10 +1905,10 @@ editor.lastKeyPressed = "";
 			
 		*/
 		
-		if(!file) file = editor.currentFile;
+		if(!file) file = EDITOR.currentFile;
 		
 		if(!file) return true;
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		
 		var wordDelimiters = " ()[]{}+-/<>\r\n!";
 		var char = "";
@@ -1948,10 +1948,10 @@ editor.lastKeyPressed = "";
 		
 		var ret, fun, addWord, addMcl;
 		
-		console.log("Calling autoComplete listeners (" + editor.eventListeners.autoComplete.length + ") ...");
-		for(var i=0; i<editor.eventListeners.autoComplete.length; i++) {
+		console.log("Calling autoComplete listeners (" + EDITOR.eventListeners.autoComplete.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.autoComplete.length; i++) {
 			
-			fun = editor.eventListeners.autoComplete[i].fun;
+			fun = EDITOR.eventListeners.autoComplete[i].fun;
 			ret = fun(file, word, wordLength, options.length);
 			
 			console.log("function " + UTIL.getFunctionName(fun) + " returned: " + JSON.stringify(ret));
@@ -2016,7 +2016,7 @@ editor.lastKeyPressed = "";
 			
 			// Show info
 			for(var i=0; i<options.length; i++) {
-				editor.addInfo(file.caret.row, file.caret.col, options[i].replace(new RegExp(file.lineBreak,"g"), " "));
+				EDITOR.addInfo(file.caret.row, file.caret.col, options[i].replace(new RegExp(file.lineBreak,"g"), " "));
 			}
 			
 		}
@@ -2048,7 +2048,7 @@ editor.lastKeyPressed = "";
 					Removing the whole word is very annoying if that's Not what the user intended!
 					Can me make a smart decision somehow!?
 					
-					ex: User writes editor.curr| but there is not editor.curr.. BUT there's a currentFile
+					ex: User writes EDITOR.curr| but there is not EDITOR.curr.. BUT there's a currentFile
 					
 					
 				*/
@@ -2070,7 +2070,7 @@ editor.lastKeyPressed = "";
 				for(var i=wordLength; i<word.length; i++) {
 				file.putCharacter(word.charAt(i));
 				}
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 			*/
 			
 			//console.log("wordLength=" + wordLength);
@@ -2085,13 +2085,13 @@ editor.lastKeyPressed = "";
 			
 			// If not linebreak was inserted, render only row!? (check file.insertText and file.moveCaretLeft)
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 		}
 		
 	}
 	
-	editor.exit = function() {
+	EDITOR.exit = function() {
 		/* Close the editor
 			
 			Or just hide it?
@@ -2102,34 +2102,34 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.showFile = function(file, focus) {
+	EDITOR.showFile = function(file, focus) {
 		
-		console.log("Showing " + file.path + " (editor.focus=" + editor.input + " focus=" + focus + "");
+		console.log("Showing " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
 		
-		if(file == editor.currentFile) {
+		if(file == EDITOR.currentFile) {
 			console.warn("File already in view: " + file.path);
 			return false;
 		}
 		
-		if(!editor.files.hasOwnProperty(file.path)) throw new Error("Showing a file that is not open! file.path=" + file.path);
+		if(!EDITOR.files.hasOwnProperty(file.path)) throw new Error("Showing a file that is not open! file.path=" + file.path);
 		
-		if(editor.currentFile) {
+		if(EDITOR.currentFile) {
 			// Hide current file
 			
-			console.log("Calling fileHide listeners (" + editor.eventListeners.fileHide.length + ") editor.currentFile.path=" + editor.currentFile.path);
-			for(var i=0; i<editor.eventListeners.fileHide.length; i++) {
-				editor.eventListeners.fileHide[i].fun(editor.currentFile); // Call function
+			console.log("Calling fileHide listeners (" + EDITOR.eventListeners.fileHide.length + ") EDITOR.currentFile.path=" + EDITOR.currentFile.path);
+			for(var i=0; i<EDITOR.eventListeners.fileHide.length; i++) {
+				EDITOR.eventListeners.fileHide[i].fun(EDITOR.currentFile); // Call function
 			}
 			
-			if(editor.currentFile) editor.lastFile = editor.currentFile
-			else editor.lastFile = editor.lastChangedFile([file]);
+			if(EDITOR.currentFile) EDITOR.lastFile = EDITOR.currentFile
+			else EDITOR.lastFile = EDITOR.lastChangedFile([file]);
 			
 		}
 		
-		editor.currentFile = file;
+		EDITOR.currentFile = file;
 		
-		if(editor.currentFile == editor.lastFile) {
-			editor.lastFile = editor.lastChangedFile([editor.currentFile]);
+		if(EDITOR.currentFile == EDITOR.lastFile) {
+			EDITOR.lastFile = EDITOR.lastChangedFile([EDITOR.currentFile]);
 		}
 		
 		if(focus == undefined) focus = true;
@@ -2146,25 +2146,25 @@ editor.lastKeyPressed = "";
 		
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 		if(file.savedAs) {
-			editor.setFileSavePath(file.path);
-			editor.setFileOpenPath(UTIL.getDirectoryFromPath(file.path));
+			EDITOR.setFileSavePath(file.path);
+			EDITOR.setFileOpenPath(UTIL.getDirectoryFromPath(file.path));
 		}
 		
-		editor.input = focus;
+		EDITOR.input = focus;
 		
 		
-		console.log("Calling fileShow listeners (" + editor.eventListeners.fileShow.length + ") file.path=" + file.path);
-		for(var i=0; i<editor.eventListeners.fileShow.length; i++) {
-			editor.eventListeners.fileShow[i].fun(file); // Call function
+		console.log("Calling fileShow listeners (" + EDITOR.eventListeners.fileShow.length + ") file.path=" + file.path);
+		for(var i=0; i<EDITOR.eventListeners.fileShow.length; i++) {
+			EDITOR.eventListeners.fileShow[i].fun(file); // Call function
 		}
 		
-		editor.resizeNeeded(); // Update the view
-		editor.renderNeeded();
+		EDITOR.resizeNeeded(); // Update the view
+		EDITOR.renderNeeded();
 		
-		editor.interact("showFile", window.event);
+		EDITOR.interact("showFile", window.event);
 	}
 	
-	editor.getKeyFor = function(funName) {
+	EDITOR.getKeyFor = function(funName) {
 		// Returns a string representing the key combination for the keyBidning "fun" name.
 		
 		if(typeof funName == "function") funName = UTIL.getFunctionName(funName); // Convert to string
@@ -2463,13 +2463,13 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.keyBindings = function() {
+	EDITOR.keyBindings = function() {
 		// Returns a list of key bindings
 		return keyBindings;
 		
 	}
 	
-	editor.bindKey = function(b) {
+	EDITOR.bindKey = function(b) {
 		
 		if(isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
@@ -2489,7 +2489,7 @@ editor.lastKeyPressed = "";
 		
 	}
 	
-	editor.rebindKey = function(funName, charCode, combo) {
+	EDITOR.rebindKey = function(funName, charCode, combo) {
 		
 		if(isNaN(charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		
@@ -2503,12 +2503,12 @@ editor.lastKeyPressed = "";
 				f.charCode = charCode;
 				f.combo = combo;
 				rebound = true;
-				console.log("Rebound " + funName + " to " + editor.getKeyFor(funName) );
+				console.log("Rebound " + funName + " to " + EDITOR.getKeyFor(funName) );
 			}
 		}
 	}
 	
-	editor.unbindKey = function(funName) {
+	EDITOR.unbindKey = function(funName) {
 		
 		if(typeof funName === "function") {
 			// Convert it to string
@@ -2524,7 +2524,7 @@ editor.lastKeyPressed = "";
 				
 				console.log("unbindKey " + funName);
 				return true;
-				//return editor.unbindKey(funName);
+				//return EDITOR.unbindKey(funName);
 			}
 		}
 		
@@ -2533,9 +2533,9 @@ editor.lastKeyPressed = "";
 		return false;
 	}
 	
-	editor.plugin = function(p) {
+	EDITOR.plugin = function(p) {
 		/*
-			If you have made a plugin. Use editor.plugin(desc, load, unload) instead of editor.on("start") !
+			If you have made a plugin. Use EDITOR.plugin(desc, load, unload) instead of EDITOR.on("start") !
 			Plugins will load when the editor has started. Right after "eventListeners.start"
 		*/
 		
@@ -2546,32 +2546,32 @@ editor.lastKeyPressed = "";
 		
 		p.loaded = false;
 		
-		if(windowLoaded) { // && editor.settings.devMode
+		if(windowLoaded) { // && EDITOR.settings.devMode
 			//alertBox("Gonna reload unload and load " + UTIL.getFunctionName(p.load));
-			editor.disablePlugin(p.desc); // Unload plugin before loading it 
+			EDITOR.disablePlugin(p.desc); // Unload plugin before loading it 
 			p.load(); // Load the plugin right away if the editor has already started. 
 		}
 		
-		for(var i=0; i<editor.plugins.length; i++) {
-			if(editor.plugins[i].desc == p.desc) throw new Error("A plugin with the same description is already loaded: " + p.desc);
+		for(var i=0; i<EDITOR.plugins.length; i++) {
+			if(EDITOR.plugins[i].desc == p.desc) throw new Error("A plugin with the same description is already loaded: " + p.desc);
 		}
 		
-		editor.plugins.push(p);
+		EDITOR.plugins.push(p);
 		
 	}
 	
-	editor.disablePlugin = function(desc) {
+	EDITOR.disablePlugin = function(desc) {
 		
 		var f;
-		for(var i=0; i<editor.plugins.length; i++) {
-			f = editor.plugins[i];
+		for(var i=0; i<EDITOR.plugins.length; i++) {
+			f = EDITOR.plugins[i];
 			if(f.desc == desc) {
 				
 				if(f.loaded && !f.unload) throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
 				
 				if(f.unload) f.unload();
 				
-				editor.plugins.splice(i, 1);
+				EDITOR.plugins.splice(i, 1);
 				
 				console.log("Plugin disabled: " + desc);
 				
@@ -2582,7 +2582,7 @@ editor.lastKeyPressed = "";
 		return false;
 	}
 	
-	editor.addTest = function(fun, order) {
+	EDITOR.addTest = function(fun, order) {
 		
 		var funName = UTIL.getFunctionName(fun);
 		
@@ -2590,28 +2590,28 @@ editor.lastKeyPressed = "";
 		
 		if(order == undefined) order = 0;
 		
-		for(var i=0; i<editor.tests.length; i++) {
-			if(editor.tests[i].text == funName) {
+		for(var i=0; i<EDITOR.tests.length; i++) {
+			if(EDITOR.tests[i].text == funName) {
 				if(windowLoaded) {
 					console.log("Overloading test function name=" + funName + " !");
-					editor.tests.splice(i, 1);
+					EDITOR.tests.splice(i, 1);
 					break;
 				}
 				else throw new Error("Test function name=" + funName + " already exist!");
 			}
-			if(order > 0 && editor.tests[i].order > order) throw new Error("Remove order from test '" + editor.tests[i].text + "' if you want " + funName + " to run first!");
+			if(order > 0 && EDITOR.tests[i].order > order) throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you want " + funName + " to run first!");
 		}
 		
-		editor.tests.push({fun: fun, text: funName, order: order});
+		EDITOR.tests.push({fun: fun, text: funName, order: order});
 		
 		// Sort the tests by order
-		editor.tests.sort(function sortTests(a, b) {
+		EDITOR.tests.sort(function sortTests(a, b) {
 			return b.order - a.order;
 		});
 		
 	}
 	
-	editor.connect = function(callback, protocol, serverAddress, user, passw, keyPath, workingDir) {
+	EDITOR.connect = function(callback, protocol, serverAddress, user, passw, keyPath, workingDir) {
 		
 		if(protocol == undefined) throw new Error("No protocol defined!");
 		
@@ -2624,7 +2624,7 @@ editor.lastKeyPressed = "";
 		
 		console.log("protocol=" + protocol);
 		
-		if(editor.remoteProtocols.indexOf(protocol) == -1) throw new Error("Protocol=" + protocol + " not supported!"); 
+		if(EDITOR.remoteProtocols.indexOf(protocol) == -1) throw new Error("Protocol=" + protocol + " not supported!"); 
 		
 		if(protocol == "ftp" || protocol == "ftps") {
 			
@@ -2634,23 +2634,23 @@ editor.lastKeyPressed = "";
 			}
 			
 			var Client = require('ftp');
-			editor.connections[serverAddress] = {client: new Client(), protocol: protocol};
-			var ftpClient = editor.connections[serverAddress].client;
+			EDITOR.connections[serverAddress] = {client: new Client(), protocol: protocol};
+			var ftpClient = EDITOR.connections[serverAddress].client;
 			ftpClient.on('ready', function() {
 				console.log("Connected to FTP server on " + serverAddress + " !");
 				ftpClient.pwd(function(err, dir) {
 					if(err) throw err;
-					editor.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
+					EDITOR.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 					
 					// Create disconnect function
-					editor.connections[serverAddress].close = function disconnectFTP() {
+					EDITOR.connections[serverAddress].close = function disconnectFTP() {
 						ftpClient.end();
-						delete editor.connections[serverAddress];
+						delete EDITOR.connections[serverAddress];
 						
 						console.log("Dissconnected from FTP on " + serverAddress + "");
 					};
 					
-					callback(null, editor.workingDirectory);
+					callback(null, EDITOR.workingDirectory);
 				});
 				
 			});
@@ -2713,19 +2713,19 @@ editor.lastKeyPressed = "";
 				if(err) callback(err);
 				else {
 					
-					editor.connections[serverAddress] = {client: sshClient, protocol: protocol};
+					EDITOR.connections[serverAddress] = {client: sshClient, protocol: protocol};
 					
 					// Create disconnect function
-					editor.connections[serverAddress].close = function disconnectSSH() {
+					EDITOR.connections[serverAddress].close = function disconnectSSH() {
 						sshClient.end();
-						delete editor.connections[serverAddress];
+						delete EDITOR.connections[serverAddress];
 						
 						console.log("Dissconnected from SSH on " + serverAddress + "");
 					};
 					
-					editor.changeWorkingDir(workingDir);
+					EDITOR.changeWorkingDir(workingDir);
 					
-					callback(null, editor.workingDirectory);
+					callback(null, EDITOR.workingDirectory);
 				}
 			});
 			
@@ -2744,20 +2744,20 @@ editor.lastKeyPressed = "";
 							//throw err;
 						}
 						else {
-							editor.connections[serverAddress] = {client: sftpClient, protocol: protocol};
-							editor.changeWorkingDir(workingDir);
+							EDITOR.connections[serverAddress] = {client: sftpClient, protocol: protocol};
+							EDITOR.changeWorkingDir(workingDir);
 							
-							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + editor.workingDirectory);
+							console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + EDITOR.workingDirectory);
 							
 							// Create disconnect function
-							editor.connections[serverAddress].close = function disconnectSFTP() {
+							EDITOR.connections[serverAddress].close = function disconnectSFTP() {
 								sshClient.end();
-								delete editor.connections[serverAddress];
+								delete EDITOR.connections[serverAddress];
 								
 								console.log("Dissconnected from SFTP on " + serverAddress + "");
 							};
 							
-							callback(null, editor.workingDirectory);
+							callback(null, EDITOR.workingDirectory);
 						}
 					});
 				}
@@ -2779,7 +2779,7 @@ editor.lastKeyPressed = "";
 			
 			if(keyPath) {
 				// Connect using key
-				editor.readFromDisk(keyPath, function readKey(err, path, keyStr) { // Read key
+				EDITOR.readFromDisk(keyPath, function readKey(err, path, keyStr) { // Read key
 					auth.passphrase = passw;
 					auth.privateKey = keyStr;
 					try {
@@ -2848,10 +2848,10 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-	editor.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
+	EDITOR.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
 		console.log("folderExistIn pathToParentFolder=" + pathToParentFolder);
 		
-		editor.listFiles(pathToParentFolder, function(err, list) {
+		EDITOR.listFiles(pathToParentFolder, function(err, list) {
 			
 			console.log("list=" + list);
 			
@@ -2876,7 +2876,7 @@ editor.lastKeyPressed = "";
 		});
 	}
 	
-	editor.listFiles = function(pathToFolder, listFilesCallback) {
+	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
 		// Returns all files in a directory
 		
 		pathToFolder = UTIL.trailingSlash(pathToFolder);
@@ -2894,7 +2894,7 @@ editor.lastKeyPressed = "";
 	}
 	
 	
-	editor.createPath = function(pathToCreate, createPathCallback) {
+	EDITOR.createPath = function(pathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists
 			
@@ -2938,7 +2938,7 @@ editor.lastKeyPressed = "";
 		
 		function done() {
 			// Check if the full path exists
-			editor.listFiles(pathToCreate, listFileResult);
+			EDITOR.listFiles(pathToCreate, listFileResult);
 			
 			function listFileResult(err, list) {
 				
@@ -2984,9 +2984,9 @@ editor.lastKeyPressed = "";
 			}
 			else if(parse.protocol == "sftp:") {
 				// ### Create a directory using SFTP protocol
-				if(editor.connections.hasOwnProperty(parse.hostname)) {
+				if(EDITOR.connections.hasOwnProperty(parse.hostname)) {
 					
-					var c = editor.connections[parse.hostname].client;
+					var c = EDITOR.connections[parse.hostname].client;
 					
 					var b = c.mkdir(path, function (err, folderItems) {
 						
@@ -3022,9 +3022,9 @@ editor.lastKeyPressed = "";
 				
 				console.log("Creating FTP path=" + path)
 				
-				if(editor.connections.hasOwnProperty(hostname)) {
+				if(EDITOR.connections.hasOwnProperty(hostname)) {
 					
-					var c = editor.connections[hostname].client;
+					var c = EDITOR.connections[hostname].client;
 					
 					// ftp mkdir
 					c.mkdir(path, function(err) {
@@ -3048,7 +3048,7 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-	editor.mock = function(mock, options) {
+	EDITOR.mock = function(mock, options) {
 		
 		// Simulate ... 
 		
@@ -3113,7 +3113,7 @@ editor.lastKeyPressed = "";
 		}
 	}
 	
-	editor.isBlanc = function (x, y, width, height) {
+	EDITOR.isBlanc = function (x, y, width, height) {
 		// todo: for debugging. Returns true if the screen area is the same as the background
 	}
 	
@@ -3137,19 +3137,19 @@ editor.lastKeyPressed = "";
 			if(confirm("Close all opened files on " + serverAddress + " ?")) {
 				
 				connectedFiles.forEach(function(path) {
-					editor.closeFile(path);
+					EDITOR.closeFile(path);
 				});
 				
 			}
 		}
 		
-		delete editor.connections[serverAddress]; // Remove the connection
+		delete EDITOR.connections[serverAddress]; // Remove the connection
 		
 		
 		function filesOnServer() {
 			// Returns an array of currently opened files connected to this server
 			var list = [];
-			for(var path in editor.files) {
+			for(var path in EDITOR.files) {
 				console.log("path=" + path);
 				if(protocol == "ftp") { // protocol is always lower case!
 					if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
@@ -3189,7 +3189,7 @@ editor.lastKeyPressed = "";
 		win.on('close', function() {
 			//var editor = this;
 			
-			//editor.hide(); // Pretend to be closed already
+			//EDITOR.hide(); // Pretend to be closed already
 			
 			var ret = true;
 			var name = "";
@@ -3200,10 +3200,10 @@ editor.lastKeyPressed = "";
 				console.warn("window.localStorage=" + window.localStorage);
 			}
 			
-			console.log("Calling exit listeners (" + editor.eventListeners.exit.length + ")");
-			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
+			console.log("Calling exit listeners (" + EDITOR.eventListeners.exit.length + ")");
+			for(var i=0, f; i<EDITOR.eventListeners.exit.length; i++) {
 				
-				f = editor.eventListeners.exit[i].fun;
+				f = EDITOR.eventListeners.exit[i].fun;
 				name = UTIL.getFunctionName(f);
 				ret = f();
 				
@@ -3225,15 +3225,15 @@ editor.lastKeyPressed = "";
 		});
 		
 		// Use event listeners for these so that they also fire when "reloading" the editor
-		editor.eventListeners.exit.push({fun: function exitKioskMode() {
+		EDITOR.eventListeners.exit.push({fun: function exitKioskMode() {
 				var GUI = require('nw.gui').Window.get();
 				GUI.leaveKioskMode();
 				return true;
 		}});
 		
-		editor.eventListeners.exit.push({fun: function closeOpenConnections() {
-				for(var conn in editor.connections) {
-					if(editor.connections[conn].close) editor.connections[conn].close();
+		EDITOR.eventListeners.exit.push({fun: function closeOpenConnections() {
+				for(var conn in EDITOR.connections) {
+					if(EDITOR.connections[conn].close) EDITOR.connections[conn].close();
 					else throw new Error("Connection: conn=" + conn + " did not have a close() method. Connection already closed!?");
 				}
 				return true;			
@@ -3254,16 +3254,16 @@ editor.lastKeyPressed = "";
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function(e) {
 		console.log("EVENT RESIZE!");
-		editor.resizeNeeded();
-		editor.renderNeeded();
+		EDITOR.resizeNeeded();
+		EDITOR.renderNeeded();
 		
-		editor.interact("resize", e);
+		EDITOR.interact("resize", e);
 		
 	}, false);
 	
 	
 	/*
-		Add your own scroll listeners using editor.addEvent("scroll", yourFunction)
+		Add your own scroll listeners using EDITOR.addEvent("scroll", yourFunction)
 		Your function should return false to prevent default action.
 	*/
 	window.addEventListener("mousewheel",scrollWheel,false);
@@ -3271,7 +3271,7 @@ editor.lastKeyPressed = "";
 	
 	
 	/*
-		Add your own key listeners via editor.bindKey()
+		Add your own key listeners via EDITOR.bindKey()
 		Your function should return false to prevent default action.
 	*/
 	window.addEventListener("keydown",keyIsDown,false);  // captures 
@@ -3280,7 +3280,7 @@ editor.lastKeyPressed = "";
 	
 	
 	/*
-		Add your own key listeners with editor.on("eventName", callbackFunction);
+		Add your own key listeners with EDITOR.on("eventName", callbackFunction);
 		Your function should return false to prevent default action.
 	*/
 	
@@ -3335,23 +3335,23 @@ editor.lastKeyPressed = "";
 		
 		canvas = document.getElementById("canvas");
 		
-		if(editor.settings.sub_pixel_antialias == false) {
+		if(EDITOR.settings.sub_pixel_antialias == false) {
 			ctx = canvas.getContext("2d");
-			//console.warn("No sub_pixel_antialias! editor.settings.sub_pixel_antialias=" + editor.settings.sub_pixel_antialias);
+			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
 		}
 		else {
 			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
 		
-		editor.canvasContext = ctx;
+		EDITOR.canvasContext = ctx;
 		
-		editor.resizeNeeded(); // We must call the resize function at least once at editor startup.
-		
-		
-		keyBindings.push({charCode: editor.settings.autoCompleteKey, fun: editor.autoComplete, combo: 0});
+		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
 		
-		if(editor.settings.devMode && runtime != "browser") {
+		keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
+		
+		
+		if(EDITOR.settings.devMode && runtime != "browser") {
 			// ## Load tests
 			console.log("Loading tests ...");
 			var walk = require('walk');
@@ -3444,7 +3444,7 @@ editor.lastKeyPressed = "";
 		
 		
 		
-		//getFile("http://joha.nz/editor/editor.js", openFile);
+		//getFile("http://joha.nz/editor/EDITOR.js", openFile);
 		//getFile("http://joha.nz/editor/test.js", openFile);
 		//getFile("http://joha.nz/editor/index.htm", openFile);
 		//getFile("http://joha.nz/editor/40k.log", openFile);
@@ -3458,7 +3458,7 @@ editor.lastKeyPressed = "";
 		//console.log("main function loaded");
 		
 		// Sort the start events (some modules depeonds on others, and want to start after or before them)
-		editor.eventListeners.start.sort(function(a, b) {
+		EDITOR.eventListeners.start.sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
 			}
@@ -3470,8 +3470,8 @@ editor.lastKeyPressed = "";
 			}
 		});
 		
-		//for(var i=0; i<editor.eventListeners.start.length; i++) {
-		//console.log("startlistener:" + UTIL.getFunctionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
+		//for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
+		//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
 		//}
 		
 		
@@ -3480,7 +3480,7 @@ editor.lastKeyPressed = "";
 		
 		
 		// Sort and load plugins
-		editor.plugins.sort(function(a, b) {
+		EDITOR.plugins.sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
 			}
@@ -3493,19 +3493,19 @@ editor.lastKeyPressed = "";
 		});
 		
 		console.log("plugins: ");
-		editor.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
+		EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
 		
-		console.log("Loading plugins (length=" + editor.eventListeners.start.length + ")");
-		for(var i=0; i<editor.plugins.length; i++) {
-			console.log("plugin: " + editor.plugins[i].desc);
+		console.log("Loading plugins (length=" + EDITOR.eventListeners.start.length + ")");
+		for(var i=0; i<EDITOR.plugins.length; i++) {
+			console.log("plugin: " + EDITOR.plugins[i].desc);
 			// An error in any of the plugins will make all plugins after it to not load! So we have to use a try catch
 			try {
-				editor.plugins[i].load(editor); // Call function (and pass global objects!?)
+				EDITOR.plugins[i].load(EDITOR); // Call function (and pass global objects!?)
 			}
 			catch(err) {
 				console.error(err.message);
 				console.log(err.stack);
-				alertBox('Failed to (fully) load plugin:\n<i>"' + editor.plugins[i].desc + '"<(i>\nError: ' + err.message);
+				alertBox('Failed to (fully) load plugin:\n<i>"' + EDITOR.plugins[i].desc + '"<(i>\nError: ' + err.message);
 			}
 		}
 		
@@ -3522,13 +3522,13 @@ editor.lastKeyPressed = "";
 			var decoder = new StringDecoder('utf8');
 			var stdInFileName = "stdin";
 			
-			var httpClient = net.createConnection({port: env.STDIN_PORT || editor.settings.stdInPort}, function() {
+			var httpClient = net.createConnection({port: env.STDIN_PORT || EDITOR.settings.stdInPort}, function() {
 				//alertBox("Connected to STDIN ...");
 				
 				if(!stdInFile) {
-					if(editor.files.hasOwnProperty(stdInFileName)) stdInFile = editor.files[stdInFileName];
+					if(EDITOR.files.hasOwnProperty(stdInFileName)) stdInFile = EDITOR.files[stdInFileName];
 					else {
-						editor.openFile(stdInFileName, "", function stdinFileOpen(err, file) {
+						EDITOR.openFile(stdInFileName, "", function stdinFileOpen(err, file) {
 							if(err) throw err;
 							stdInFile = file;
 						});
@@ -3552,7 +3552,7 @@ editor.lastKeyPressed = "";
 			//alertBox("Command arguments:" + commandArguments);
 			
 			if(commandArguments.indexOf("--disable-lcd-text") != -1) {
-				editor.settings.sub_pixel_antialias = false;
+				EDITOR.settings.sub_pixel_antialias = false;
 			}
 			
 			
@@ -3587,7 +3587,7 @@ editor.lastKeyPressed = "";
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
 		// note to self: Just temorary, dont forget to remove:
-		//if(editor.settings.devMode == true) editor.openFile(testfile);
+		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
 		
 		/*
 			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
@@ -3596,16 +3596,16 @@ editor.lastKeyPressed = "";
 			
 			
 			// Prevent the void from ruling the earth the first 500ms
-			editor.resizeNeeded();
-			editor.resize();
-			editor.renderNeeded();
-			editor.render();
+			EDITOR.resizeNeeded();
+			EDITOR.resize();
+			EDITOR.renderNeeded();
+			EDITOR.render();
 			
 			
 			function display() {
 			
-			editor.resizeNeeded();
-			editor.resize(); // Will also force a render
+			EDITOR.resizeNeeded();
+			EDITOR.resize(); // Will also force a render
 			
 			
 			}
@@ -3620,16 +3620,16 @@ editor.lastKeyPressed = "";
 				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
 			}
 			
-			console.log("Calling start listeners (" + editor.eventListeners.start.length + ")");
-			for(var i=0; i<editor.eventListeners.start.length; i++) {
-				editor.eventListeners.start[i].fun(); // Call function
+			console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
+			for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
+				EDITOR.eventListeners.start[i].fun(); // Call function
 			}
 			
 			
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {
 				if(err) throw err;
-				else editor.workingDirectory = json.path;
+				else EDITOR.workingDirectory = json.path;
 			});
 			
 		}
@@ -3686,8 +3686,8 @@ editor.lastKeyPressed = "";
 		// Prepare for tests ...
 		
 		// Close all files
-		for(var path in editor.files) {
-			if(editor.files[path].saved) editor.closeFile(path)
+		for(var path in EDITOR.files) {
+			if(EDITOR.files[path].saved) EDITOR.closeFile(path)
 			else {
 				alertBox("Please save or close file before running tests: " + path);
 				return;
@@ -3699,7 +3699,7 @@ editor.lastKeyPressed = "";
 			var filesToOpen = 2;
 			var filesOpened = 0;
 			for(var i=0; i<filesToOpen; i++) {
-			editor.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened(err, file) {
+			EDITOR.openFile("testfile" + i, "This is test file nr " + i + " line 1\r\nThis is test file nr " + i + " line 2\r\nThis is test file nr " + i + " line 3\r\nThis is test file nr " + i + " line 4\r\nThis is test file nr " + i + " line 5", function fileOpened(err, file) {
 			if(++filesOpened == filesToOpen) doTheTests();
 			});
 			}
@@ -3715,15 +3715,15 @@ editor.lastKeyPressed = "";
 			var started = 0;
 			var testsCompleted = []; // Prevent same test to make several callbacks
 			var allDone = false; // Prevent calling allTestsDone twice
-			var testsToRun = testFirstTest ? 1 : editor.tests.length;
+			var testsToRun = testFirstTest ? 1 : EDITOR.tests.length;
 			
 			if(testsToRun == 1) {
-				alertBox("Testing: " + editor.tests[0].text);
+				alertBox("Testing: " + EDITOR.tests[0].text);
 			}
 			
 			for(var i=0; i<testsToRun; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
-				asyncInitTest(editor.tests[i]);
+				asyncInitTest(EDITOR.tests[i]);
 			}
 			
 			function asyncInitTest(test) {
@@ -3776,7 +3776,7 @@ editor.lastKeyPressed = "";
 				if(fails === 0) testResults.push("All " + finished + " tests passed!")
 				else testResults.push(fails + " of " + finished + " test failed:");
 				
-				editor.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
+				EDITOR.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
 					//file.parse = false;
 					//file.mode = "text";
 				});
@@ -3817,7 +3817,7 @@ editor.lastKeyPressed = "";
 		
 		console.log("Reading single file ...");
 		
-		if(editor.fileOpenCallback == undefined) {
+		if(EDITOR.fileOpenCallback == undefined) {
 			throw new Error("There is no listener for the open file dialog!");
 		}
 		
@@ -3850,9 +3850,9 @@ editor.lastKeyPressed = "";
 		}
 		
 		function callCallback() {
-			console.log("Calling file-dialog callback: " + UTIL.getFunctionName(editor.fileOpenCallback) + " ...");
-			editor.fileOpenCallback(filePath, fileContent);
-			editor.fileOpenCallback = undefined;
+			console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
+			EDITOR.fileOpenCallback(filePath, fileContent);
+			EDITOR.fileOpenCallback = undefined;
 			
 			fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
 		}
@@ -3862,22 +3862,22 @@ editor.lastKeyPressed = "";
 	function chooseSaveAsPath(e) {
 		var file = e.target.files[0];
 		
-		if(editor.filesaveAsCallback == undefined) {
+		if(EDITOR.filesaveAsCallback == undefined) {
 			throw new Error("There is no listener for the save file dialog!");
 		}
 		
 		if (!file) {
 			console.warn("No file selected!");
-			editor.filesaveAsCallback(undefined);
+			EDITOR.filesaveAsCallback(undefined);
 			return;
 		}
 		
 		var fileName = file.name;
 		var filePath = file.path;
 		
-		editor.filesaveAsCallback(filePath);
+		EDITOR.filesaveAsCallback(filePath);
 		
-		editor.filesaveAsCallback = undefined; // Prevent old callback from firing again
+		EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
 	}
 	
 	
@@ -3896,7 +3896,7 @@ editor.lastKeyPressed = "";
 			
 			console.log("Drop op: " + event.target);
 			
-			editor.openFile(filePath, content);
+			EDITOR.openFile(filePath, content);
 			
 		};
 		console.log(file);
@@ -3909,7 +3909,7 @@ editor.lastKeyPressed = "";
 			}
 		*/
 		
-		editor.interact("fileDrop", e);
+		EDITOR.interact("fileDrop", e);
 		
 		return false;
 	};
@@ -3920,11 +3920,11 @@ editor.lastKeyPressed = "";
 	
 	function copy(e) {
 		
-		if(editor.input) {
+		if(EDITOR.input) {
 			var textToPutOnClipboard = "";
 			
-			if(editor.currentFile) {
-				textToPutOnClipboard = editor.currentFile.getSelectedText();
+			if(EDITOR.currentFile) {
+				textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
 			}
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
@@ -3941,7 +3941,7 @@ editor.lastKeyPressed = "";
 		
 		// else: Do the default action (enable copying outside the canvas)
 		
-		editor.interact("copy", e);
+		EDITOR.interact("copy", e);
 		
 		return textToPutOnClipboard;
 		
@@ -3949,15 +3949,15 @@ editor.lastKeyPressed = "";
 	
 	function cut(e) {
 		
-		if(editor.input) {
+		if(EDITOR.input) {
 			
 			var textToPutOnClipboard = "";
 			
-			if(editor.currentFile) {
-				textToPutOnClipboard = editor.currentFile.getSelectedText();
+			if(EDITOR.currentFile) {
+				textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
 				
 				// Delete the selected text
-				editor.currentFile.deleteSelection();
+				EDITOR.currentFile.deleteSelection();
 			}
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
@@ -3972,7 +3972,7 @@ editor.lastKeyPressed = "";
 		
 		// else: Do the default action (enable cutting outside the canvas)
 		
-		editor.interact("cut", e);
+		EDITOR.interact("cut", e);
 	}
 	
 	
@@ -3983,18 +3983,18 @@ editor.lastKeyPressed = "";
 		
 		console.log("PASTE: " + UTIL.lbChars(text));
 		
-		if(editor.input && editor.currentFile) {
+		if(EDITOR.input && EDITOR.currentFile) {
 			
 			e.preventDefault();
 			
-			console.log("Calling paste listeners (" + editor.eventListeners.paste.length + ") ...");
-			for(var i=0, fun; i<editor.eventListeners.paste.length; i++) {
+			console.log("Calling paste listeners (" + EDITOR.eventListeners.paste.length + ") ...");
+			for(var i=0, fun; i<EDITOR.eventListeners.paste.length; i++) {
 				
-				fun = editor.eventListeners.paste[i].fun;
+				fun = EDITOR.eventListeners.paste[i].fun;
 				
-				ret = fun(editor.currentFile, e.clipboardData);
+				ret = fun(EDITOR.currentFile, e.clipboardData);
 				
-				if(editor.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned:\n" + ret);
+				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned:\n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
@@ -4006,8 +4006,8 @@ editor.lastKeyPressed = "";
 			}
 			
 			// Insert text at caret position
-			if(editor.currentFile) {
-				var file = editor.currentFile;
+			if(EDITOR.currentFile) {
+				var file = EDITOR.currentFile;
 				
 				// If there is a text selection. Delete the selection first!
 				file.deleteSelection();
@@ -4018,7 +4018,7 @@ editor.lastKeyPressed = "";
 		
 		// else: Do the default action (enable pasting outside the canvas)
 		
-		editor.interact("paste", e);
+		EDITOR.interact("paste", e);
 		
 	}
 	
@@ -4053,22 +4053,22 @@ editor.lastKeyPressed = "";
 		var charCode = e.charCode || e.keyCode || e.which;
 		var character = String.fromCharCode(charCode); 
 		var combo = getCombo(e);
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		var preventDefault = false;
 		var funReturn = true;
 		
-		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " editor.input=" + (editor.currentFile ? editor.input : "NoFileOpen editor.input=" + editor.input + "") + "");
+		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
 		
 		
-		console.log("Calling keyPressed listeners (" + editor.eventListeners.keyPressed.length + ") ...");
-		for(var i=0; i<editor.eventListeners.keyPressed.length; i++) {
-			funReturn = editor.eventListeners.keyPressed[i].fun(file, character, combo); // Call function
+		console.log("Calling keyPressed listeners (" + EDITOR.eventListeners.keyPressed.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.keyPressed.length; i++) {
+			funReturn = EDITOR.eventListeners.keyPressed[i].fun(file, character, combo); // Call function
 			
-			if(funReturn !== true && funReturn !== false) throw new Error("keyPressed event listener: " + UTIL.getFunctionName(editor.eventListeners.keyPressed[i].fun) + " did not return true or false!");
+			if(funReturn !== true && funReturn !== false) throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + " did not return true or false!");
 			
 			if(funReturn === false && !preventDefault) {
 				preventDefault = true;
-				if(file && editor.input) console.log(UTIL.getFunctionName(editor.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
+				if(file && EDITOR.input) console.log(UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
 			}
 		}
 		
@@ -4078,9 +4078,9 @@ editor.lastKeyPressed = "";
 			
 			//process.nextTick(function() {
 			// Test optimization
-			var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
-			var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-			//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+			var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
+			var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+			//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
 			ctx.fillStyle = "rgb(0,0,0)";
 			ctx.fillText(benchmarkCharacter, left, top);
 			tempTest++;
@@ -4107,20 +4107,20 @@ editor.lastKeyPressed = "";
 		
 		
 		
-		editor.lastKeyPressed = character;
+		EDITOR.lastKeyPressed = character;
 		
 		
 		if(file) {
-			if(editor.input && !preventDefault) {
+			if(EDITOR.input && !preventDefault) {
 				// Put character at current caret position:
 				
-				if(editor.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
+				if(EDITOR.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
 					// Makes characters appear on the screen faster ...
 					
 					/*
-						var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
-						//var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-						var left = editor.settings.leftMargin + (editor.currentFile.caret.col + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
+						var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
+						//var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+						var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
 						ctx.fillStyle = "rgb(0,0,0)";
 						ctx.fillText(character, left, top);
 						tempTest++;
@@ -4129,13 +4129,13 @@ editor.lastKeyPressed = "";
 					// Always use the default color. It's impossible to guess what color to use without parsing! Set renderColumnOptimization to false if this is too annoying
 					
 					// What will happen if we clear the canvas before? No impact on performace!
-					editor.clearColumn(file.caret.row, file.caret.col);
+					EDITOR.clearColumn(file.caret.row, file.caret.col);
 					
 					// There's a higher "chance" to get faster responses if this function is inlined
-					editor.renderColumn(file.caret.row, file.caret.col, character);
+					EDITOR.renderColumn(file.caret.row, file.caret.col, character);
 					
 					// Repaint the caret
-					editor.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
+					EDITOR.renderCaret(file.caret, 1); // colPlus=1 so that the caret will be rendered right
 					
 					/*
 						Problem: After ca 56-60 inputs, render times goes from 3-4ms to 17-18ms
@@ -4162,7 +4162,7 @@ editor.lastKeyPressed = "";
 				}
 				else {
 					file.putCharacter(character);
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 				}
 				
 				
@@ -4170,14 +4170,14 @@ editor.lastKeyPressed = "";
 			
 		}
 		
-		editor.interact("keyPressed", e);
+		EDITOR.interact("keyPressed", e);
 		
 	}
 	""
 	function resizeAndRender() {
 		
-		if(editor.shouldResize) editor.resize();
-		if(editor.shouldRender) editor.render();
+		if(EDITOR.shouldResize) EDITOR.resize();
+		if(EDITOR.shouldRender) EDITOR.render();
 	}
 	
 	
@@ -4206,12 +4206,12 @@ editor.lastKeyPressed = "";
 			if(charCode == backspaceCharCode) {
 			tempTest--;
 			
-			var top = editor.settings.topMargin + (editor.currentFile.caret.row - editor.currentFile.startRow) * editor.settings.gridHeight;
-			//var left = editor.settings.leftMargin + (editor.currentFile.caret.col + tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-			var left = editor.settings.leftMargin + (tempTest + (editor.currentFile.grid[editor.currentFile.caret.row].indentation * editor.settings.tabSpace) - editor.currentFile.startColumn) * editor.settings.gridWidth;
-			ctx.fillStyle = editor.settings.style.bgColor;
+			var top = EDITOR.settings.topMargin + (EDITOR.currentFile.caret.row - EDITOR.currentFile.startRow) * EDITOR.settings.gridHeight;
+			//var left = EDITOR.settings.leftMargin + (EDITOR.currentFile.caret.col + tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+			var left = EDITOR.settings.leftMargin + (tempTest + (EDITOR.currentFile.grid[EDITOR.currentFile.caret.row].indentation * EDITOR.settings.tabSpace) - EDITOR.currentFile.startColumn) * EDITOR.settings.gridWidth;
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			//ctx.fillStyle = "rgba(255,0,0, 0.5)";
-			ctx.fillRect(left, top, editor.settings.gridWidth, editor.settings.gridHeight);
+			ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
 			return;
 			
 			}
@@ -4241,9 +4241,9 @@ editor.lastKeyPressed = "";
 		// AltGr is the same as hitting Ctrl+ Alt
 		
 		// You probably want to use bindKey instead of eventListeners.keyDown!
-		console.log("Calling keyDown listeners (" + editor.eventListeners.keyDown.length + ") ...");
-		for(var i=0; i<editor.eventListeners.keyDown.length; i++) {
-			funReturn = editor.eventListeners.keyDown[i].fun(editor.currentFile, character, combo); // Call function
+		console.log("Calling keyDown listeners (" + EDITOR.eventListeners.keyDown.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.keyDown.length; i++) {
+			funReturn = EDITOR.eventListeners.keyDown[i].fun(EDITOR.currentFile, character, combo); // Call function
 			
 			if(funReturn === false) {
 				preventDefault = true;
@@ -4269,9 +4269,9 @@ editor.lastKeyPressed = "";
 					
 					captured = binding.fun;
 					
-					if(!editor.currentFile) console.warn("No file open!");
+					if(!EDITOR.currentFile) console.warn("No file open!");
 					
-					funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
+					funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "down", targetElementClass);
 					
 					console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
 					
@@ -4294,12 +4294,12 @@ editor.lastKeyPressed = "";
 		//if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
 		// Otimally we would want all key bound functions to run before throwing the error, but it's too annoying to not see the call stack in the error
 		
-		if(editor.currentFile) {
-			editor.currentFile.checkGrid();
-			editor.currentFile.checkCaret();
+		if(EDITOR.currentFile) {
+			EDITOR.currentFile.checkGrid();
+			EDITOR.currentFile.checkCaret();
 		}
 		
-		editor.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: e.shiftKey, altKey: e.altKey, ctrlKey: e.ctrlKey});
+		EDITOR.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: e.shiftKey, altKey: e.altKey, ctrlKey: e.ctrlKey});
 		
 		
 		if(combo.sum > 0 && !captured) {
@@ -4369,7 +4369,7 @@ editor.lastKeyPressed = "";
 		
 		/*
 			
-			if(editor.currentFile) {
+			if(EDITOR.currentFile) {
 			// Handle the special tidle key: Puts a ~ ^ or " over a character
 			// Is it only the swedish keyboard layout that does this!?
 			// OMG! This might become very messy
@@ -4384,12 +4384,12 @@ editor.lastKeyPressed = "";
 			
 			}
 			else if(tildeAltActive) {
-			editor.currentFile.putCharacter("~");
-			editor.renderNeeded();
+			EDITOR.currentFile.putCharacter("~");
+			EDITOR.renderNeeded();
 			}
 			else if(tildeShiftActive) {
-			editor.currentFile.putCharacter("^");
-			editor.renderNeeded();
+			EDITOR.currentFile.putCharacter("^");
+			EDITOR.renderNeeded();
 			}
 			}
 			}
@@ -4432,7 +4432,7 @@ editor.lastKeyPressed = "";
 				
 				//console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 				
-				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "up");
+				funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "up");
 				
 				// There is no browser actions bound to keyUp events (only keydown). So we don't have to care about preventing default
 				
@@ -4449,7 +4449,7 @@ editor.lastKeyPressed = "";
 		}
 		
 		
-		editor.interact("keyUp", e);
+		EDITOR.interact("keyUp", e);
 		
 		//return false;
 		
@@ -4485,14 +4485,14 @@ editor.lastKeyPressed = "";
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 			
-			editor.hideMenu();
+			EDITOR.hideMenu();
 			
-			caret = editor.mousePositionToCaret(mouseX, mouseY);
+			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
 			
-			if(editor.currentFile && (button == 0)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+			if(EDITOR.currentFile && (button == 0)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				// Give focus
-				editor.input = true;
+				EDITOR.input = true;
 				
 				// Remove focus from everything else
 				document.activeElement.blur();
@@ -4507,7 +4507,7 @@ editor.lastKeyPressed = "";
 					Meh, why doesn't this work!!!?
 					
 					
-					document.body.focus(); // editor.currentFile.canvas
+					document.body.focus(); // EDITOR.currentFile.canvas
 					
 					document.getElementById("leftColumn").focus();
 					
@@ -4518,27 +4518,27 @@ editor.lastKeyPressed = "";
 				
 				// No current file or not the left button.
 				
-				editor.showMenu();
+				EDITOR.showMenu();
 				
 			}
 			
 		}
 		else{
-			if(editor.currentFile) {
+			if(EDITOR.currentFile) {
 				// Remove focus
-				editor.input = false;
+				EDITOR.input = false;
 				
-				//editor.currentFile = undefined;
+				//EDITOR.currentFile = undefined;
 			}
 		}
 		
 		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 		
 		
-		console.log("Calling mouseClick (down) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
-		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
+		console.log("Calling mouseClick (down) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
 			
-			click = editor.eventListeners.mouseClick[i];
+			click = EDITOR.eventListeners.mouseClick[i];
 			
 			if((click.dir == "down" || click.dir == undefined) && 
 			(click.button == button || click.button == undefined) && 
@@ -4562,7 +4562,7 @@ editor.lastKeyPressed = "";
 		}
 		
 		
-		editor.interact("mouseDown", e);
+		EDITOR.interact("mouseDown", e);
 		
 		if(preventDefault) {
 			e.preventDefault(); // To prevent the annoying menus
@@ -4598,12 +4598,12 @@ editor.lastKeyPressed = "";
 		if(target.className == "fileCanvas") {
 			
 			// Only get a caret if the click is on the canvas 
-			caret = editor.mousePositionToCaret(mouseX, mouseY);
+			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 		}
 		
-		console.log("Calling mouseClick (up) listeners (" + editor.eventListeners.mouseClick.length + ") ...");
-		for(var i=0, binding; i<editor.eventListeners.mouseClick.length; i++) {
-			click = editor.eventListeners.mouseClick[i];
+		console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
+			click = EDITOR.eventListeners.mouseClick[i];
 			
 			// Make sure to define click.dir (to prevent double action)!
 			if((click.dir == "up" || click.dir == undefined) && 
@@ -4620,10 +4620,10 @@ editor.lastKeyPressed = "";
 		}
 		
 		
-		//console.log("mouseUp, editor.shouldRender=" + editor.shouldRender);
+		//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
 		
 		
-		editor.interact("mouseUp", e);
+		EDITOR.interact("mouseUp", e);
 		
 		return false;
 		//return true;
@@ -4645,8 +4645,8 @@ editor.lastKeyPressed = "";
 		*/
 		
 		if(UTIL.isNumeric(e.clientX) && UTIL.isNumeric(e.clientY)) {
-			editor.mouseX = parseInt(e.clientX);
-			editor.mouseY = parseInt(e.clientY);
+			EDITOR.mouseX = parseInt(e.clientX);
+			EDITOR.mouseY = parseInt(e.clientY);
 		}
 		else if(e.changedTouches) {
 			
@@ -4662,8 +4662,8 @@ editor.lastKeyPressed = "";
 			
 		}
 		else {
-			mouseX = editor.mouseX;
-			mouseY = editor.mouseY;
+			mouseX = EDITOR.mouseX;
+			mouseY = EDITOR.mouseY;
 			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
 			
 		}
@@ -4694,10 +4694,10 @@ editor.lastKeyPressed = "";
 		
 		//console.log("mouseY=" + mouseY);
 		
-		if(editor.eventListeners.mouseMove.length > 0) {
-			//console.log("Calling mouseMove listeners (" + editor.eventListeners.mouseMove.length + ") ...");
-			for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
-				fun = editor.eventListeners.mouseMove[i].fun;
+		if(EDITOR.eventListeners.mouseMove.length > 0) {
+			//console.log("Calling mouseMove listeners (" + EDITOR.eventListeners.mouseMove.length + ") ...");
+			for(var i=0, fun; i<EDITOR.eventListeners.mouseMove.length; i++) {
+				fun = EDITOR.eventListeners.mouseMove[i].fun;
 				
 				//console.log(UTIL.getFunctionName(fun));
 				
@@ -4706,9 +4706,9 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		//console.log("editor.input=" + editor.input);
+		//console.log("EDITOR.input=" + EDITOR.input);
 		
-		editor.interact("mouseMove", e);
+		EDITOR.interact("mouseMove", e);
 		
 		//return false;
 		
@@ -4716,13 +4716,13 @@ editor.lastKeyPressed = "";
 	
 	function mouseclick(e) {
 		/*
-			Check for the editor.shouldRender flag and render if true
+			Check for the EDITOR.shouldRender flag and render if true
 			
 			For events that are not bound to mouseUp or mouseDown
 		*/
-		console.log("mouseClick, editor.shouldRender=" + editor.shouldRender + ", editor.shouldResize=" + editor.shouldResize);
+		console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize);
 		
-		editor.interact("mouseClick", e);
+		EDITOR.interact("mouseClick", e);
 		
 		return true;
 		
@@ -4746,15 +4746,15 @@ editor.lastKeyPressed = "";
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 			
-			caret = editor.mousePositionToCaret(mouseX, mouseY);
+			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
-			if(editor.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+			if(EDITOR.currentFile && button == 0) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				
 				// Remove focus from everything else
 				document.activeElement.blur();
 				
 				// Give focus
-				editor.input = true;
+				EDITOR.input = true;
 				canvas.focus();
 				
 				// Delete selection outside of the canvas
@@ -4764,19 +4764,19 @@ editor.lastKeyPressed = "";
 			
 		}
 		else{
-			if(editor.currentFile) {
+			if(EDITOR.currentFile) {
 				// Remove focus
-				editor.input = false;
+				EDITOR.input = false;
 			}
 		}
 		
 		console.log("dblclick: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 		
 		
-		console.log("Calling dblclick listeners (" + editor.eventListeners.dblclick.length + ") ...");
-		for(var i=0, binding; i<editor.eventListeners.dblclick.length; i++) {
+		console.log("Calling dblclick listeners (" + EDITOR.eventListeners.dblclick.length + ") ...");
+		for(var i=0, binding; i<EDITOR.eventListeners.dblclick.length; i++) {
 			
-			click = editor.eventListeners.dblclick[i];
+			click = EDITOR.eventListeners.dblclick[i];
 			
 			if((click.button == button || click.button == undefined) && 
 			(click.targetClass == target.className || click.targetClass == undefined) && 
@@ -4798,7 +4798,7 @@ editor.lastKeyPressed = "";
 			}
 		}
 		
-		editor.interact("dblclick", e);
+		EDITOR.interact("dblclick", e);
 		
 		if(preventDefault) {
 			e.preventDefault(); // To prevent the annoying menus
@@ -4831,13 +4831,13 @@ editor.lastKeyPressed = "";
 		console.log("Scrolling on " + tagName);
 		
 		if(tagName == "CANVAS") {
-			console.log("Calling mouseScroll listeners (" + editor.eventListeners.mouseScroll.length + ") ...");
-			for(var i=0; i<editor.eventListeners.mouseScroll.length; i++) {
-				editor.eventListeners.mouseScroll[i].fun(dir, steps, combo);
+			console.log("Calling mouseScroll listeners (" + EDITOR.eventListeners.mouseScroll.length + ") ...");
+			for(var i=0; i<EDITOR.eventListeners.mouseScroll.length; i++) {
+				EDITOR.eventListeners.mouseScroll[i].fun(dir, steps, combo);
 			}
 		}
 		
-		editor.interact("mouseScroll", e);
+		EDITOR.interact("mouseScroll", e);
 		
 	}
 	
@@ -4892,8 +4892,8 @@ editor.lastKeyPressed = "";
 		*/
 		
 		// The svg seems to need a width and height beforehand, or it will use a default width of 100px
-		var width = editor.settings.gridWidth * html.length;
-		var height = editor.settings.gridHeight;
+		var width = EDITOR.settings.gridWidth * html.length;
+		var height = EDITOR.settings.gridHeight;
 		
 		//  width="' + width + '" height="' + height + '"
 		
@@ -4901,7 +4901,7 @@ editor.lastKeyPressed = "";
 		
 		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
 		'<foreignObject width="100%" height="100%">' +
-		'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + editor.settings.style.fontSize + 'px; font-family: ' + editor.settings.style.font + ';">' +
+		'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + EDITOR.settings.style.fontSize + 'px; font-family: ' + EDITOR.settings.style.font + ';">' +
 		html +
 		'</div>' +
 		'</foreignObject>' +
@@ -4926,15 +4926,15 @@ editor.lastKeyPressed = "";
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
 		
-		editor.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
+		EDITOR.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
 			if(err) {
 				console.warn("bootstrap.url: " + err.message);
 				return;
 			}
 			
 			// Append version to url so that the bootstrap provider knows what version of the editor you are using
-			if(url.indexOf("?") != -1) url = url + "&version=" + editor.version;
-			else url = url + "?version=" + editor.version;
+			if(url.indexOf("?") != -1) url = url + "&version=" + EDITOR.version;
+			else url = url + "?version=" + EDITOR.version;
 			
 			UTIL.httpGet(url, function(err, data) {
 				if(err) {
@@ -4950,8 +4950,8 @@ editor.lastKeyPressed = "";
 				}
 				
 				if(json) {
-					editor.bootstrap = json;
-					editor.fireEvent("bootstrap", json);
+					EDITOR.bootstrap = json;
+					EDITOR.fireEvent("bootstrap", json);
 				}
 				
 			});
@@ -4962,7 +4962,7 @@ editor.lastKeyPressed = "";
 	
 	function getVersion(callback) {
 		
-		editor.readFromDisk("version.inc", function(err, path, string) {
+		EDITOR.readFromDisk("version.inc", function(err, path, string) {
 			if(err) {
 				// Failed to read file 
 				
@@ -4978,28 +4978,28 @@ editor.lastKeyPressed = "";
 							
 							if(!match) {
 								console.log("Unable to find latest HG commit id! stdout=" + stdout);
-								editor.version = -1;
-								callback(editor.version);
+								EDITOR.version = -1;
+								callback(EDITOR.version);
 							}
 							else {
-								editor.version = match[1];
-								callback(editor.version);
+								EDITOR.version = match[1];
+								callback(EDITOR.version);
 							}
 						}
 						else {
-							editor.version = -1;
-							callback(editor.version);
+							EDITOR.version = -1;
+							callback(EDITOR.version);
 						}
 					});
 				}
 				else {
-					editor.version = -1;
-					callback(editor.version);
+					EDITOR.version = -1;
+					callback(EDITOR.version);
 				}
 			}
 			else {
-				editor.version = parseInt(string);
-				callback(editor.version);
+				EDITOR.version = parseInt(string);
+				callback(EDITOR.version);
 			}
 		});
 		

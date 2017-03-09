@@ -18,7 +18,7 @@
 		active = false;
 	
 
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Magnification glass.",
 		load: loadMagnificationGlass,
 		unload: unloadMagnificationGlass,
@@ -27,7 +27,7 @@
 
 	function loadMagnificationGlass() {
 		
-		magnificationMenuItem = editor.addMenuItem("Toggle magnification glass", showOrHideGlass);
+		magnificationMenuItem = EDITOR.addMenuItem("Toggle magnification glass", showOrHideGlass);
 		
 	}
 	
@@ -35,13 +35,13 @@
 		
 		if(active) removeFromListeners();
 		
-		editor.removeMenuItem(magnificationMenuItem);
+		EDITOR.removeMenuItem(magnificationMenuItem);
 	}
 
 	
 	function showOrHideGlass() {
 		
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
 		active = active ? false : true; // Alternate
 
@@ -52,7 +52,7 @@
 			removeFromListeners();
 		}
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		return false; // preventDefault;
 		
@@ -60,14 +60,14 @@
 	
 	
 	function addToListeners() {
-		mouseMoveIndex = editor.on("mouseMove", mouseMove);
-		renderIndex = editor.addRender(magnification_render);
+		mouseMoveIndex = EDITOR.on("mouseMove", mouseMove);
+		renderIndex = EDITOR.addRender(magnification_render);
 	}
 	
 	function removeFromListeners() {
-		editor.removeEvent("mouseMove", mouseMove);
+		EDITOR.removeEvent("mouseMove", mouseMove);
 		
-		var ja = editor.removeRender(magnification_render);
+		var ja = EDITOR.removeRender(magnification_render);
 		
 		if(!ja) throw new Error("meh");
 	}
@@ -79,7 +79,7 @@
 
 			mouseX = x;
 			mouseY = y;
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 
 		}
 		

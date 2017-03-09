@@ -43,7 +43,7 @@
 	var selectConnection;
 	
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Manage and connect to FTP/SSH servers.",
 		load: load,
 		unload: unload,
@@ -67,13 +67,13 @@
 		
 		//build();
 		
-		editor.bindKey({desc: "Show the FTP/SSH server manager", fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
-		editor.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
-		editor.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
+		EDITOR.bindKey({desc: "Show the FTP/SSH server manager", fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
+		EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 		
-		menuItem = editor.addMenuItem("Remote connections", function() {
+		menuItem = EDITOR.addMenuItem("Remote connections", function() {
 			showServerManger();
-			editor.hideMenu();
+			EDITOR.hideMenu();
 		});
 		
 	}
@@ -81,16 +81,16 @@
 	function unload() {
 		// Cleaning up, for example when disabling a plugin
 		
-		editor.unbindKey(showServerManger);
-		editor.unbindKey(hideServerManger);
-		editor.unbindKey(serverManagerEnter);
+		EDITOR.unbindKey(showServerManger);
+		EDITOR.unbindKey(hideServerManger);
+		EDITOR.unbindKey(serverManagerEnter);
 		
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 		
 		if(serverManager) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(serverManager);
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 	}
@@ -229,22 +229,22 @@
 			// Edit the selected connection
 			editView.style.display="block";
 			connectionView.style.display="none"; // Hide this div
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 		function disconnectConnection() {
 			// Close the connection
 			
-			if(editor.connections.hasOwnProperty(selectedConnection.host)) {
-				editor.connections[selectedConnection.host].close();
+			if(EDITOR.connections.hasOwnProperty(selectedConnection.host)) {
+				EDITOR.connections[selectedConnection.host].close();
 				
-				editor.workingDirectory = UTIL.trailingSlash(process.cwd()); // Change working directory (back) to the one from where we opened the editor
+				EDITOR.workingDirectory = UTIL.trailingSlash(process.cwd()); // Change working directory (back) to the one from where we opened the editor
 			}
 			else console.warn("Not connected to " + selectedConnection.host);
 			
 			buttonDisconnect.style.display="none"; // Hide the disconnect button
 			
-			//editor.resizeNeeded();
+			//EDITOR.resizeNeeded();
 		}
 		
 		function changeSelectConnection() {
@@ -461,7 +461,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -481,7 +481,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -509,17 +509,17 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
 		function browseKey() {
 			var defaultPath = "";
 			
-			if(editor.currentFile) defaultPath = UTIL.getDirectoryFromPath(editor.currentFile.path)
-			else defaultPath = editor.workingDirectory;
+			if(EDITOR.currentFile) defaultPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path)
+			else defaultPath = EDITOR.workingDirectory;
 			
-			editor.fileOpenDialog(defaultPath, function selectKey(path) {
+			EDITOR.fileOpenDialog(defaultPath, function selectKey(path) {
 				inputKey.value = path;
 });
 }
@@ -532,7 +532,7 @@
 		console.log("Show server manager");
 		
 		// Steal focus from the file
-		editor.input = false;
+		EDITOR.input = false;
 		
 		if(!serverManager) build(); // Build the GUI if it's not already built
 		
@@ -540,7 +540,7 @@
 		
 		inputPw.focus();
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 		
 		return false;
 		
@@ -548,12 +548,12 @@
 	
 	function hideServerManger() {
 		// Bring back focus to the current file
-		if(editor.currentFile) {
-			editor.input = true;
+		if(EDITOR.currentFile) {
+			EDITOR.input = true;
 		}
 		
 		if(serverManager) serverManager.style.display = "none";
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 		
 		return false;
 		
@@ -563,14 +563,14 @@
 		connect(selectedConnection.protocol, selectedConnection.host, selectedConnection.user, inputPw.value, selectedConnection.key);
 		buttonDisconnect.style.display="inline"; // Show the disconnect button
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 	}
 	
 	function connect(protocol, hostName, login, pw, key) {
-		//editor.connect("FTP", "192.168.1.77", "test", "test");
-		//editor.connect("SSH", "192.168.1.91", "test", "test");
+		//EDITOR.connect("FTP", "192.168.1.77", "test", "test");
+		//EDITOR.connect("SSH", "192.168.1.91", "test", "test");
 		
-		editor.connect(whenConnected, protocol, hostName, login, pw, key);
+		EDITOR.connect(whenConnected, protocol, hostName, login, pw, key);
 		
 		function whenConnected(err, workingDir) {
 			if(err) {

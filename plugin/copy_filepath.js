@@ -1,15 +1,15 @@
 (function() {
 	"use strict";
 	
-	editor.on("start", function editorStarted() {
+	EDITOR.on("start", function editorStarted() {
 		
-		//editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
+		//EDITOR.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
 		
-		editor.addMenuItem("Copy file path", function copyFilePath() {
+		EDITOR.addMenuItem("Copy file path", function copyFilePath() {
 			
 			// Puts the current file path into the clipboard
 			
-			if(editor.currentFile) {
+			if(EDITOR.currentFile) {
 				// Load native UI library
 				var gui = require('nw.gui');
 				
@@ -21,7 +21,7 @@
 				//console.log(text);
 				
 				// Or write something
-				clipboard.set(editor.currentFile.path, 'text');
+				clipboard.set(EDITOR.currentFile.path, 'text');
 				
 				// And clear it!
 				//clipboard.clear();
@@ -30,7 +30,7 @@
 				alert("No file open!");
 			}
 			
-			editor.hideMenu();
+			EDITOR.hideMenu();
 			
 			
 		});

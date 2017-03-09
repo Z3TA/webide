@@ -2,7 +2,7 @@
 	
 	"use strict";
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Adds or removes indentation characters in the source file so that your colleges with inferior editors doesn’t complain.",
 		load: fixIndentationMain,
 		unload: unloadFixIndentationPlugin,
@@ -13,7 +13,7 @@
 	var indentationBefore;
 	
 	function unloadFixIndentationPlugin() {
-		editor.removeEvent("fileChange", fixIndentationOnChange);
+		EDITOR.removeEvent("fileChange", fixIndentationOnChange);
 	}
 	
 	function fixIndentationMain() {
@@ -34,10 +34,10 @@
 		var runOrderOfParser = 100; 
 		
 		// Make sure this runs after the parser
-		editor.on("fileChange", fixIndentationOnChange, runOrderOfParser+20);
+		EDITOR.on("fileChange", fixIndentationOnChange, runOrderOfParser+20);
 		
 		// Make sure this runs before the parser
-		editor.on("fileChange", checkIndentationOnBeforeParser, runOrderOfParser-20);
+		EDITOR.on("fileChange", checkIndentationOnBeforeParser, runOrderOfParser-20);
 		
 	}
 	

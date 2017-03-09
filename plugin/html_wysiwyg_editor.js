@@ -10,21 +10,21 @@
 	var menuItem;
 	var wysiwygEditor;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "WYSIWYG editor for HTML files",
 		load: load,
 		unload: unload,
 	});
 	
 	function load() {
-		menuItem = editor.addMenuItem("WYSIWYG", function() {
-			createwysiWygEditor(editor.currentFile);
-			editor.hideMenu();
+		menuItem = EDITOR.addMenuItem("WYSIWYG", function() {
+			createwysiWygEditor(EDITOR.currentFile);
+			EDITOR.hideMenu();
 		});
 	}
 	
 	function unload() {
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 		if(wysiwygEditor) wysiwygEditor.close();
 	}
 	

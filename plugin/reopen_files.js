@@ -2,11 +2,11 @@
 // Reset from bricket state:
 //window.localStorage.openedFiles = "";
 
-editor.plugin({
+EDITOR.plugin({
 	desc: "Open up the files from last session", 
 	order: 999, // Load after the parser and other stuff that has fileOpen event listener
 	unload: function unloadReopenFilesPlugin() {
-		editor.removeEvent("start", reopenFiles);
+		EDITOR.removeEvent("start", reopenFiles);
 	},
 	load: function loadReopenFilesPlugin() {
 		
@@ -14,13 +14,13 @@ editor.plugin({
 			console.warn("window.localStorage not available! reopen_files.js plugin disabled.");
 			return false;
 		}
-		editor.on("start", reopenFiles);
+		EDITOR.on("start", reopenFiles);
 	}
 });
 
 function reopenFiles() {
 	/*
-		1. Open up the files from last time, when opening the editor.
+		1. Open up the files from last time, when opening the EDITOR.
 		
 		2. Save a backup on each file when it close, and on regular intervals (incase the editor crash)
 		Offer to load the backup file if it's gone or empty, or unsaved.
@@ -44,9 +44,9 @@ function reopenFiles() {
 	setInterval(insaneBugCatcher, 1000);
 	
 	
-	editor.on("fileOpen", addToOpenedFiles, 1);
+	EDITOR.on("fileOpen", addToOpenedFiles, 1);
 	
-	editor.on("fileClose", removeFromOpenedFiles, 1);
+	EDITOR.on("fileClose", removeFromOpenedFiles, 1);
 	
 	reopenFilesMain();
 	
@@ -128,11 +128,11 @@ function reopenFiles() {
 			compareAndDone();
 			
 			function compareAndDone() {
-				if(compareStringLists(Object.keys(editor.files).join(fileDelimiter), window.localStorage.openedFiles, fileDelimiter)) {
+				if(compareStringLists(Object.keys(EDITOR.files).join(fileDelimiter), window.localStorage.openedFiles, fileDelimiter)) {
 					allFilesOpened();
 				}
 				else {
-					console.log("openedFiles=" + Object.keys(editor.files).join(fileDelimiter));
+					console.log("openedFiles=" + Object.keys(EDITOR.files).join(fileDelimiter));
 					console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles)
 				}
 			}
@@ -144,7 +144,7 @@ function reopenFiles() {
 			
 			console.log("All files from last lession opened!");
 			
-			findBugs(true); // true == also check if the list match editor.files
+			findBugs(true); // true == also check if the list match EDITOR.files
 			
 			console.log("setCurrent=" + setCurrent);
 			
@@ -153,14 +153,14 @@ function reopenFiles() {
 				// Make the file with last state "open" the current file
 				
 				// Switch to this file
-				editor.showFile(editor.files[setCurrent])
+				EDITOR.showFile(EDITOR.files[setCurrent])
 				
 			}
 			
 			
 			
 			// Use editor close event
-			editor.on("exit", reopen_files_closeEditor);
+			EDITOR.on("exit", reopen_files_closeEditor);
 			
 			
 			// Save state on regular intervals in case the editor crashes (or refresh)
@@ -182,7 +182,7 @@ function reopenFiles() {
 			var lastFileState;
 			
 			// Check if the file size and if it exist
-			editor.getFileSizeOnDisk(path, gotFileSize);
+			EDITOR.getFileSizeOnDisk(path, gotFileSize);
 			
 			function gotFileSize(err, fileSizeOnDisk) {
 				
@@ -233,7 +233,7 @@ function reopenFiles() {
 				}
 				
 				console.log("Reopening file path=" + path +" typeof content=" + typeof content);
-				editor.openFile(path, content, fileReopened); 
+				EDITOR.openFile(path, content, fileReopened); 
 				
 				
 			}
@@ -501,7 +501,7 @@ function reopenFiles() {
 		else {
 			
 			try {
-				findBugs(true); // true == also check if the list match editor.files
+				findBugs(true); // true == also check if the list match EDITOR.files
 			}
 			catch(err) {
 				clearInterval(saveStateIntervalTimer);
@@ -520,7 +520,7 @@ function reopenFiles() {
 				}
 			}
 			
-			if(editor.currentFile) {
+			if(EDITOR.currentFile) {
 				// Make sure the last viewed file is the last file in the window.localStorage.openedFiles list! So that it opens lasts and will be in view when we reload.
 				//This caused the editor to open them in a weird order.
 				//Instead, add opened state to file state
@@ -540,7 +540,7 @@ function reopenFiles() {
 		if(path.length == 0) {
 			console.warn("Attempted to save state for a file without path!");
 			console.log(new Error("saveState").stack);
-			console.log("editor.files=" + Object.keys(editor.files).join(fileDelimiter));
+			console.log("EDITOR.files=" + Object.keys(EDITOR.files).join(fileDelimiter));
 			console.log("window.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			
 			return;
@@ -548,17 +548,17 @@ function reopenFiles() {
 		
 		var state = {};
 		
-		var file = editor.files[path];
+		var file = EDITOR.files[path];
 		
 		if(!file) {
 			// Possible reasons: it was renamed!? It should have been removed first!
-			//console.warn("File not in editor.files, was it renamed? open: " + file);
+			//console.warn("File not in EDITOR.files, was it renamed? open: " + file);
 			//return;
-			console.warn("File='" + path + "' not open! editor.files=" + JSON.stringify(Object.keys(editor.files)) + "");
+			console.warn("File='" + path + "' not open! EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + "");
 			return false;
 		}
 		
-		if(file == editor.currentFile) {
+		if(file == EDITOR.currentFile) {
 			state.currentFile = true;
 		}
 		else {
@@ -624,26 +624,26 @@ function reopenFiles() {
 		}
 		
 		if(checkMatch && array[0] != "") {
-			// Does the list match editor.files!?
+			// Does the list match EDITOR.files!?
 			for(var i=0; i<array.length; i++) {
-				if(!editor.files.hasOwnProperty(array[i])) throw  new Error("File does not exist in editor.files: path=" + array[i] + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files)));
+				if(!EDITOR.files.hasOwnProperty(array[i])) throw  new Error("File does not exist in EDITOR.files: path=" + array[i] + "\narray=" + JSON.stringify(array) + "\nEDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			}
-			for(var path in editor.files) {
-				if(array.indexOf(path) == -1) throw new Error("File does not exist in openedFiles list: path=" + path + "\narray=" + JSON.stringify(array) + "\neditor.files=" + JSON.stringify(Object.keys(editor.files)));
+			for(var path in EDITOR.files) {
+				if(array.indexOf(path) == -1) throw new Error("File does not exist in openedFiles list: path=" + path + "\narray=" + JSON.stringify(array) + "\nEDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			}
 		}
 		
 		/*
 			// Sanity check
-			for(var path in editor.files) {
+			for(var path in EDITOR.files) {
 			if(window.localStorage.openedFiles.indexOf(path) == -1) {
-			throw new Error("editor.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles);
+			throw new Error("EDITOR.files path=" + path + " not in window.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
 			}
 			var check = window.localStorage.openedFiles.split(fileDelimiter);
 			for(var i=0; i<check.length; i++) {
-			if(!editor.files.hasOwnProperty(check[i])) {
-			throw new Error("window.localStorage.openedFiles path=" + check[i] + " not in editor.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
+			if(!EDITOR.files.hasOwnProperty(check[i])) {
+			throw new Error("window.localStorage.openedFiles path=" + check[i] + " not in EDITOR.files!\nwindow.localStorage.openedFiles=" + window.localStorage.openedFiles);
 			}
 			}
 			
@@ -738,19 +738,19 @@ function reopenFiles() {
 	}
 	
 	function insaneBugCatcher() {
-		// bug: A file (that was opened, but never closed) was removed from editor.files!!
+		// bug: A file (that was opened, but never closed) was removed from EDITOR.files!!
 		
 		for(var i=0; i<copyOfEditorFiles.length; i++) {
-			if(!editor.files.hasOwnProperty(copyOfEditorFiles[i])) {
-				console.log("Removed from editor.files:" + copyOfEditorFiles[i]);
+			if(!EDITOR.files.hasOwnProperty(copyOfEditorFiles[i])) {
+				console.log("Removed from EDITOR.files:" + copyOfEditorFiles[i]);
 			}
 		}
 		
-		for(var path in editor.files) {
-			if(copyOfEditorFiles.indexOf(path) == -1) console.log("Added to editor.files:" + path);
+		for(var path in EDITOR.files) {
+			if(copyOfEditorFiles.indexOf(path) == -1) console.log("Added to EDITOR.files:" + path);
 		}
 		
-		copyOfEditorFiles = Object.keys(editor.files);
+		copyOfEditorFiles = Object.keys(EDITOR.files);
 	} 	
 	
 }

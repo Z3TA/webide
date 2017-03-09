@@ -392,8 +392,8 @@ var WysiwygEditor;
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(e) {
 		var wysiwygEditor = this;
-		console.log("previewKeyup! editor.input=" + editor.input);
-		if(!editor.input) wysiwygEditor.placeCaretInSourceCode(e.target);
+		console.log("previewKeyup! EDITOR.input=" + EDITOR.input);
+		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 	}
 	
 	WysiwygEditor.prototype.previewMouseup = function previewMouseup(e) {
@@ -403,14 +403,14 @@ var WysiwygEditor;
 		
 		UTIL.objInfo(e.target);
 		
-		if(!editor.input) wysiwygEditor.placeCaretInSourceCode(e.target);
+		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 		
 	}
 	
 	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(e) {
 		var wysiwygEditor = this;
 		console.log("previewSelectionchange!");
-		if(!editor.input) wysiwygEditor.placeCaretInSourceCode(e.target);
+		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 	}
 	
 	WysiwygEditor.prototype.previewPaste = function previewPaste(e) {
@@ -454,12 +454,12 @@ var WysiwygEditor;
 		wysiwygEditor.ignoreSourceFileChange = true; // Ignore the change event for the changes we will now make to the source file ...
 		
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile)
-		else if(!editor.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
+		else if(!EDITOR.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
 		else {
 			
-			if(sourceFile != editor.currentFile) {
-				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
-				editor.showFile(sourceFile, false);
+			if(sourceFile != EDITOR.currentFile) {
+				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " EDITOR.currentFile=" + EDITOR.currentFile.path)
+				EDITOR.showFile(sourceFile, false);
 			}
 			
 			// Compare the source codes
@@ -686,7 +686,7 @@ var WysiwygEditor;
 		var wysiwygEditor = this;
 		
 		
-		//editor.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
+		//EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 		
 		/*
 			body.onmouseup = null;
@@ -995,7 +995,7 @@ var WysiwygEditor;
 			// Remove the fileChange event listener when closing the content-editable window
 			previewWin.window.onbeforeunload = function() {
 				wysiwygEditor.ignoreSourceFileChange = true;
-				editor.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
+				EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 			};
 			
 			// Capture errors on the content-editable so that they do not go by unoticed
@@ -1016,9 +1016,9 @@ var WysiwygEditor;
 				}
 				var func = new Function("action", "return function " + name + "(file, type, characters, caretIndex, row, col){ action(file, type, characters, caretIndex, row, col) };")(customAction);
 				
-				if(wysiwygEditor.fileChangeEventListener) editor.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
+				if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 				
-				editor.on("fileChange", func);
+				EDITOR.on("fileChange", func);
 				
 				wysiwygEditor.fileChangeEventListener = func;
 				

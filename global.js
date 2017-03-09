@@ -3,7 +3,7 @@
 	This file contains global variables.
 	
 	Global functions:
-	- editor (editor.js)
+	- editor (EDITOR.js)
 	- File (File.js)
 	- Dialog, alertBox, confirmBox, promptBox (Dialog.js)
 	- SockJS (sockjs-0.3.4.js)

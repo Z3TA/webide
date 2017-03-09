@@ -1,7 +1,7 @@
 
 (function() {
 	
-	editor.bindKey({
+	EDITOR.bindKey({
 		desc: "Makes a line break",
 		charCode: 13, 
 		fun: keyboard_enter,
@@ -11,7 +11,7 @@
 		
 		console.log("Pushed Enter");
 		
-		if(editor.input && file) {
+		if(EDITOR.input && file) {
 			
 			file.insertLineBreak();
 			
@@ -19,7 +19,7 @@
 			file.startColumn = 0;
 			
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 			return false; // Prevent default
 		}

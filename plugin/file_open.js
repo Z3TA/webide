@@ -6,7 +6,7 @@
 	var fileInput;
 	var menu;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Open file dialog using Ctrl+O or via context menu",
 		load: load,
 		unload: unload,
@@ -14,26 +14,26 @@
 	
 	function load() {
 		// Bind to ctrl + O
-		editor.bindKey({desc: "Open file using native file select dialog", charCode: 79, combo: CTRL, fun: openFile});
+		EDITOR.bindKey({desc: "Open file using native file select dialog", charCode: 79, combo: CTRL, fun: openFile});
 		
 		// Add items to the canvas context meny
-		menu = editor.addMenuItem("Open file ...", openFile);
+		menu = EDITOR.addMenuItem("Open file ...", openFile);
 	}
 	
 	function unload() {
-		editor.unbindKey(openFile);
+		EDITOR.unbindKey(openFile);
 		
-		editor.removeMenuItem(menu);
+		EDITOR.removeMenuItem(menu);
 	}
 	
 	function openFile() {
 		
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
 		console.log("Opening file ...");
 		
 		var defaultPath = "";
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(file) {
 			// Check if the cursor is on a file path
@@ -45,7 +45,7 @@
 			if(UTIL.isFilePath(filePath)) {
 				// The text on the row is a file path! Open that file.
 				
-				editor.openFile(filePath, undefined, function(err, file) {  // path, content, callback
+				EDITOR.openFile(filePath, undefined, function(err, file) {  // path, content, callback
 					
 					if(err) {
 						alert(err.message);
@@ -57,8 +57,8 @@
 					file.savedAs = true;
 					file.changed = false;
 					
-					editor.renderNeeded();
-					//editor.render(); // It will be black!? if we render right away!
+					EDITOR.renderNeeded();
+					//EDITOR.render(); // It will be black!? if we render right away!
 					
 				});
 				
@@ -74,21 +74,21 @@
 		}
 		else {
 			// No current file opened. Use working dir!?
-			//defaultPath = editor.workingDirectory;
+			//defaultPath = EDITOR.workingDirectory;
 		}
 		
 		//alertBox(defaultPath);
 		// It doesn't seem we can set default path in Linux !
 		
 		console.log("Telling the editor to open the file dialog window ...");
-		editor.fileOpenDialog(defaultPath, function after_dialog_open_file(filePath, content) {
+		EDITOR.fileOpenDialog(defaultPath, function after_dialog_open_file(filePath, content) {
 			
 			//console.log("filePath=" + filePath);
 			//console.log("content=" + content);
 			
 			console.log("File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
-			editor.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
+			EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
 			
 				if(err) throw err;
 			
@@ -97,8 +97,8 @@
 				file.savedAs = true;
 				file.changed = false;
 				
-				editor.renderNeeded();
-				editor.render();
+				EDITOR.renderNeeded();
+				EDITOR.render();
 				console.log("File ready for editing");
 				
 			});

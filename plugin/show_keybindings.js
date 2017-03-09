@@ -1,8 +1,8 @@
-editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings", fun: function showKeyBindings() { // 75=K
+EDITOR.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings", fun: function showKeyBindings() { // 75=K
 	"use strict";
 	
 	var padLength = 29;
-	var keyBindings = editor.keyBindings();
+	var keyBindings = EDITOR.keyBindings();
 	
 	var b, arr = [], fName, str;
 	for(var i=0; i<keyBindings.length; i++) {
@@ -11,7 +11,7 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 		fName = UTIL.getFunctionName(b.fun);
 		
 		if(fName) {
-			str = UTIL.spacePad(editor.getKeyFor(fName), padLength) + fName;
+			str = UTIL.spacePad(EDITOR.getKeyFor(fName), padLength) + fName;
 			if(b.desc) str = str + " (" + b.desc + ")";
 			arr.push(str);
 		}
@@ -19,7 +19,7 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 	
 	arr.sort();
 	
-		editor.openFile("keybindings.txt", UTIL.spacePad("Keyboard combination", padLength) + "Function Name\n" + "==========================================\n" + arr.join("\n"), function gotFile(err, file) {});
+		EDITOR.openFile("keybindings.txt", UTIL.spacePad("Keyboard combination", padLength) + "Function Name\n" + "==========================================\n" + arr.join("\n"), function gotFile(err, file) {});
 	
 	return false;
 	

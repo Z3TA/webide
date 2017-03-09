@@ -4,7 +4,7 @@
 	
 	var key_T = 84;
 	
-	editor.bindKey({desc: "Test simulation of key strokes", charCode: key_T, combo: CTRL, fun: simulateKeys});
+	EDITOR.bindKey({desc: "Test simulation of key strokes", charCode: key_T, combo: CTRL, fun: simulateKeys});
 	
 	function simulateKeys() {
 		

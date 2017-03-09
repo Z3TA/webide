@@ -1,10 +1,10 @@
 
 (function() {
 
-	editor.on("start", keyboard_delete);
+	EDITOR.on("start", keyboard_delete);
 	
 	function keyboard_delete() {
-		editor.bindKey({
+		EDITOR.bindKey({
 			desc: "Deletes the one character right of the caret. Or deletes all selected text.",
 			charCode: 46, 
 			fun: keydel
@@ -13,7 +13,7 @@
 	
 	function keydel(file, combo, character, charCode, keyPush) {
 		
-		if(editor.input) {
+		if(EDITOR.input) {
 			
 			if(file.selected.length > 0) {
 				
@@ -26,7 +26,7 @@
 				file.deleteCharacter(file.caret);
 			}
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 			return false; // Prevent default
 				

@@ -5,7 +5,7 @@
 	
 */
 
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Enables refreshing the CSS",
 		load: load,
 		unload: unload,
@@ -13,11 +13,11 @@
 	
 	function load() {
 		var F6 = 117;
-		editor.bindKey({desc: "Refresh CSS", charCode: F6, fun: refreshCss, combo: 0});
+		EDITOR.bindKey({desc: "Refresh CSS", charCode: F6, fun: refreshCss, combo: 0});
 		}
 	
 	function unload() {
-		editor.unbindKey(refreshCss);
+		EDITOR.unbindKey(refreshCss);
 	}
 	
 	function refreshCss() {

@@ -19,7 +19,7 @@
 	var fsSelect;
 	var openFolders = [];
 	
-		editor.plugin({
+		EDITOR.plugin({
 			desc: "File explorer window widget",
 			load: load,
 			unload: unload,
@@ -32,14 +32,14 @@
 			
 			var key_E = 69;
 			
-			editor.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
+			EDITOR.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
 			
-			//editor.on("beforeResize", saveScrollPosition);
-			//editor.on("afterResize", restoreScrollPosition);
+			//EDITOR.on("beforeResize", saveScrollPosition);
+			//EDITOR.on("afterResize", restoreScrollPosition);
 			
-			// editor.on("changeWorkingDir", exploreDir);
+			// EDITOR.on("changeWorkingDir", exploreDir);
 			
-			menuItem = editor.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
+			menuItem = EDITOR.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
 			
 			leftColumn = document.getElementById("leftColumn");
 			rightColumn = document.getElementById("rightColumn");
@@ -65,7 +65,7 @@
 			fileExplorerWrap.appendChild(fileExplorerFolders);
 			rightColumn.appendChild(fileExplorerWrap);
 			
-			//exploreDir(editor.workingDirectory);
+			//exploreDir(EDITOR.workingDirectory);
 			
 			toggleFileExplorer(visible);
 			
@@ -74,9 +74,9 @@
 		function unload() {
 			rightColumn.removeChild(fileExplorerWrap);
 		
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 		
-		editor.unbindKey(toggleFileExplorer);
+		EDITOR.unbindKey(toggleFileExplorer);
 		
 		}
 		
@@ -90,13 +90,13 @@
 			menuItem.innerHTML = "Toggle file explorer " + (visible ? "off":"on");
 			
 			if(visible) {
-				exploreDir(editor.workingDirectory)
+				exploreDir(EDITOR.workingDirectory)
 				fileExplorerWrap.style.display="block";
 				
 			}
 			else {
 				fileExplorerWrap.style.display="none";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 				
 			}
 			return false;
@@ -125,9 +125,9 @@
 			fsSelect.appendChild(option);
 			
 			var connName = "";
-			for(var conn in editor.connections) {
+			for(var conn in EDITOR.connections) {
 				option = document.createElement("option");
-				connName = editor.connections[conn].protocol + "://" + conn
+				connName = EDITOR.connections[conn].protocol + "://" + conn
 				option.appendChild(document.createTextNode(connName));
 				option.setAttribute("id", conn);
 				if(fullPath.indexOf(connName) != -1) option.setAttribute("selected", "true");
@@ -259,7 +259,7 @@
 			ul.setAttribute("class", "tree");
 			
 			// List files in working dir, get name of parent folder
-			editor.listFiles(dir, function gotFileList(err, listItems) {
+			EDITOR.listFiles(dir, function gotFileList(err, listItems) {
 				
 				if(err) throw err;
 				
@@ -269,8 +269,8 @@
 				
 				parent.appendChild(ul);
 				
-				editor.resizeNeeded();
-				//editor.resize();
+				EDITOR.resizeNeeded();
+				//EDITOR.resize();
 				
 				if(callback) callback(dirFound);
 			});
@@ -332,7 +332,7 @@
 				
 				icon.setAttribute("src", "gfx/icon/" + iconName + ".svg");
 				
-				if(editor.supportedFiles.indexOf(filetype.toLowerCase()) == -1) {
+				if(EDITOR.supportedFiles.indexOf(filetype.toLowerCase()) == -1) {
 					icon.setAttribute("style", "opacity: 0.5;");
 				}
 				
@@ -418,8 +418,8 @@
 				
 			openFolders.splice(openFolders.indexOf(path), 1);
 			
-				editor.resizeNeeded();
-				//editor.resize();
+				EDITOR.resizeNeeded();
+				//EDITOR.resize();
 				
 			}
 			else {
@@ -442,7 +442,7 @@
 		function openFile(item) {
 			
 			var filePath = item.getAttribute("path");
-			editor.openFile(filePath);
+			EDITOR.openFile(filePath);
 		}
 		
 		function changeFs(event) {
@@ -459,8 +459,8 @@
 				exploreDir(root);
 			}
 			else {
-				if(editor.connections.hasOwnProperty(host)) {
-					var url = editor.connections[host].protocol;
+				if(EDITOR.connections.hasOwnProperty(host)) {
+					var url = EDITOR.connections[host].protocol;
 					if(!url) throw new Error("url=" + url);
 					url += "://" + host + "/";
 					exploreDir(url);

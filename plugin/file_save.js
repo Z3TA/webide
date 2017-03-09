@@ -12,7 +12,7 @@
 	var menu;
 	
 	// Add plugin to editor
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Choose file path for saving files",
 		load: load,
 		unload: unload,
@@ -26,25 +26,25 @@
 		var charEnter = 13;
 		
 		// Bind to ctrl + S
-		editor.bindKey({desc: "Save current file", charCode: char_S, combo: CTRL, fun: saveCurrentFile});
+		EDITOR.bindKey({desc: "Save current file", charCode: char_S, combo: CTRL, fun: saveCurrentFile});
 		
-		editor.bindKey({desc: "Hide save as dialog", fun: hideSaveDialog, charCode: charEscape, combo: 0});
+		EDITOR.bindKey({desc: "Hide save as dialog", fun: hideSaveDialog, charCode: charEscape, combo: 0});
 		
-		editor.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
+		EDITOR.bindKey({desc: "Save the file with the path in dialog", fun: enter, charCode: charEnter, combo: 0});
 		
 		// Add items to the canvas context meny
-		menu = editor.addMenuItem("Save as ...", saveAs);
+		menu = EDITOR.addMenuItem("Save as ...", saveAs);
 		
 	}
 	
 	function unload() {
 		// Cleaning up, for example when disabling a plugin
 		
-		editor.unbindKey(saveCurrentFile);
-		editor.unbindKey(hideSaveDialog);
-		editor.unbindKey(enter);
+		EDITOR.unbindKey(saveCurrentFile);
+		EDITOR.unbindKey(hideSaveDialog);
+		EDITOR.unbindKey(enter);
 		
-		editor.removeMenuItem(menu);
+		EDITOR.removeMenuItem(menu);
 		
 		hideSaveDialog();
 	}
@@ -62,7 +62,7 @@
 		inputPath = document.createElement("input");
 		inputPath.setAttribute("type", "text");
 		inputPath.setAttribute("class", "input text path");
-		inputPath.setAttribute("size", Math.max(inputPathMinSize, editor.workingDirectory.length)); // Update in show()
+		inputPath.setAttribute("size", Math.max(inputPathMinSize, EDITOR.workingDirectory.length)); // Update in show()
 		
 		var labelPath = document.createElement("label");
 		labelPath.setAttribute("for", "inputPath");
@@ -98,7 +98,7 @@
 	}
 	
 	function saveFileInPath() {
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(!file) {
 			alert("Can not save without a file!")
@@ -107,7 +107,7 @@
 		
 		if(!inputPath) throw new Error("Is the save dialog visible?");
 		
-		editor.saveFile(file, inputPath.value, function fileSaved(err, path) {
+		EDITOR.saveFile(file, inputPath.value, function fileSaved(err, path) {
 			if(err) {
 				// Most likely cause is that the folder does not exist!
 				
@@ -126,16 +126,16 @@
 	function browsePath() {
 		var defaultPath = "";
 		
-		if(editor.currentFile.path.match(/\/|\\/)) defaultPath = editor.currentFile.path
-		else defaultPath = editor.workingDirectory;
+		if(EDITOR.currentFile.path.match(/\/|\\/)) defaultPath = EDITOR.currentFile.path
+		else defaultPath = EDITOR.workingDirectory;
 		
 		//alertBox(defaultPath);
 		
-		editor.fileSaveDialog(defaultPath, function(path) {
+		EDITOR.fileSaveDialog(defaultPath, function(path) {
 			
 			if(path) {
 				// Save the file right away
-				editor.saveFile(editor.currentFile, path);
+				EDITOR.saveFile(EDITOR.currentFile, path);
 				
 				hideSaveDialog();
 				
@@ -152,27 +152,27 @@
 		
 		if(!saveDialog) buildSaveDialog();
 		
-		inputPath.setAttribute("size", Math.max(inputPathMinSize, inputPath.value + 5, editor.workingDirectory.length));
+		inputPath.setAttribute("size", Math.max(inputPathMinSize, inputPath.value + 5, EDITOR.workingDirectory.length));
 		
 		saveDialog.style.display = "block";
 		
-		editor.input = false;
+		EDITOR.input = false;
 		inputPath.focus();
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 		
 		return false;
 		}
 			
 	function hideSaveDialog() {
 		// Bring back focus to the current file
-		if(editor.currentFile) {
-			editor.input = true;
+		if(EDITOR.currentFile) {
+			EDITOR.input = true;
 		}
 		
 		if(saveDialog) {
 			saveDialog.style.display = "none";
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 		return false;
@@ -191,12 +191,12 @@
 	
 	function saveAs(e) {
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		var defaultPath;
 		
 		if(!file) throw new Error("No file open!?");
 		
-		editor.hideMenu(); // This will bring focus to the editor input
+		EDITOR.hideMenu(); // This will bring focus to the editor input
 		
 		showSaveDialog();
 		
@@ -205,7 +205,7 @@
 			inputPath.value = file.path;
 		}
 		else {
-			inputPath.value = editor.workingDirectory;
+			inputPath.value = EDITOR.workingDirectory;
 		}
 		
 		var size = Math.max(inputPathMinSize, inputPath.value.length + 10)
@@ -225,7 +225,7 @@
 			saveAs();
 		}
 		else {
-			editor.saveFile(file);
+			EDITOR.saveFile(file);
 		}
 		
 		return false;

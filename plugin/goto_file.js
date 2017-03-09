@@ -50,9 +50,9 @@
 		
 		hide_gotoFileInput();
 		
-		editor.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + R
+		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + R
 		
-		editor.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
+		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
 		
 		
 	}
@@ -72,8 +72,8 @@
 		inputFolder.setAttribute("type", "text");
 		inputFolder.setAttribute("id", "inputFolder");
 		inputFolder.setAttribute("class", "inputtext");
-		inputFolder.setAttribute("value", editor.workingDirectory);
-		inputFolder.setAttribute("size", editor.workingDirectory.length + 3);
+		inputFolder.setAttribute("value", EDITOR.workingDirectory);
+		inputFolder.setAttribute("size", EDITOR.workingDirectory.length + 3);
 		
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
@@ -162,7 +162,7 @@
 			trySearch();
 		}
 		else {
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 		function trySearch() {
@@ -170,7 +170,7 @@
 			while(gotoList.firstChild) {
 				gotoList.removeChild(gotoList.firstChild);
 			}
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 			if(!isSearching) {
 				searchRetries = 0;
@@ -228,7 +228,7 @@
 			First time, search all dirs, then search files array
 		*/
 		var allDoneCalls = 0;
-		var searchPath = inputFolder.value; //editor.workingDirectory;
+		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
 		var maxResults = 20;
 		var matchesFound = 0;
 		var searchSubfolders = true;
@@ -254,7 +254,7 @@
 				searchFile(files[i]);
 				if(matchesFound >= maxResults) break; // matchesFound is incremented in appendResult
 				}
-			if(matchesFound == 0) editor.resizeNeeded();
+			if(matchesFound == 0) EDITOR.resizeNeeded();
 			allDone();
 		}
 		
@@ -289,7 +289,7 @@
 			}
 			if(searchIt) {
 				
-				editor.listFiles(currentDirPath, function searchit(err, folderItems) {
+				EDITOR.listFiles(currentDirPath, function searchit(err, folderItems) {
 					
 					console.log("F directory: " + currentDirPath);
 					
@@ -377,7 +377,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 				li.setAttribute("class", "selected");
 			}
 			
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 	}
@@ -406,13 +406,13 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			/* We need the footer to be this high
 			if(footerHeight < heightNeeded) {
 				//footer.style.height = footerHeight + heightNeeded + "px";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 			}
 			*/
 			
 			// Remove focus from the editor
-			if(editor.currentFile) {
-				editor.input = false;
+			if(EDITOR.currentFile) {
+				EDITOR.input = false;
 			}
 			
 			
@@ -423,8 +423,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			
 			gotoInputIsVisible = true;
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 			
 		}
 		
@@ -445,8 +445,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			//footer.style.height = "0px"; // Hmm, can't be less then one px
 			
 			// Bring back focus to the current file
-			if(editor.currentFile) {
-				editor.input = true;
+			if(EDITOR.currentFile) {
+				EDITOR.input = true;
 			}
 			
 			gotoInputIsVisible = false;
@@ -454,8 +454,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			firstRun = true;
 			files.length = 0;
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 			
 			return false;
 		}
@@ -525,7 +525,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	
 	function gotoFile() {
 		
-		if(gotoInputIsVisible && !editor.input) {
+		if(gotoInputIsVisible && !EDITOR.input) {
 			
 			var listItems = gotoList.childNodes;
 			var selectedItem;
@@ -545,7 +545,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 				
 				console.log("Opening " + path);
 				
-				editor.openFile(path, undefined, function(err, file) {
+				EDITOR.openFile(path, undefined, function(err, file) {
 					
 					if(err) {
 						alert(err.message);
@@ -553,13 +553,13 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 }
 					
 					//console.log("Going to line " + lineNr);
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 					
 					var dir = UTIL.getDirectoryFromPath(path);
 					
-					if(dir.indexOf(editor.workingDirectory) == -1) {
+					if(dir.indexOf(EDITOR.workingDirectory) == -1) {
 						// Set the working directory to this files's folder
-						editor.workingDirectory = dir;
+						EDITOR.workingDirectory = dir;
 						firstRun = true; // Make it not use cached file's list
 }
 					

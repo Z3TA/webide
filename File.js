@@ -143,7 +143,7 @@ var File; // File object is global
 		console.log("fileExtension=" + file.fileExtension);
 		
 		file.parsed = {}; // After the file has been parsed, "file.parsed" property should hold the parsed data
-		if(editor.supportedFiles.indexOf(file.fileExtension) != -1 || file.fileExtension == "") file.mode = "code"
+		if(EDITOR.supportedFiles.indexOf(file.fileExtension) != -1 || file.fileExtension == "") file.mode = "code"
 		else file.mode = "text";
 		file.parse = true; // Always parse new files by default
 	}
@@ -205,7 +205,7 @@ var File; // File object is global
 			file.fixCaret(caret);
 				
 			if(caret == file.caret) {
-				editor.fireEvent("moveCaret", file, file.caret);
+				EDITOR.fireEvent("moveCaret", file, file.caret);
 				}
 			return caret;
 		}
@@ -484,7 +484,7 @@ var File; // File object is global
 			
 		*/
 		
-		if(editor.settings.devMode == false) {
+		if(EDITOR.settings.devMode == false) {
 			return;
 		}
 		
@@ -500,7 +500,7 @@ var File; // File object is global
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
-		if(file.startRow < 0) throw new Error("file.startRow=" + file.startRow + " editor.view.visibleRows=" + editor.view.visibleRows + "");
+		if(file.startRow < 0) throw new Error("file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + "");
 		
 		if(file.partStartRow > 0) {
 			if(file.startRow >= (grid.length + file.partStartRow)) throw new Error("file.startRow=" + file.startRow + " grid.length=" + grid.length + " file.partStartRow=" + file.partStartRow);
@@ -600,8 +600,8 @@ var File; // File object is global
 		}
 		
 		// Check if the scrolling is OK
-		if(editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
-			throw new Error("Scrolling bug: editor.view.endingColumn=" + editor.view.endingColumn + " file.startColumn=" + file.startColumn + " editor.view.visibleColumns=" + editor.view.visibleColumns + " path=" + file.path);
+		if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
+			throw new Error("Scrolling bug: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
 		}
 		
 		
@@ -610,7 +610,7 @@ var File; // File object is global
 	File.prototype.checkCaret = function(caret) {
 		// Sanity check to detect possible bugs
 		
-		if(editor.settings.devMode == false) {
+		if(EDITOR.settings.devMode == false) {
 			return;
 		}
 		
@@ -713,7 +713,7 @@ var File; // File object is global
 	File.prototype.sanityCheck = function() {
 		var file = this;
 		
-		if(editor.settings.devMode == false) {
+		if(EDITOR.settings.devMode == false) {
 			return;
 		}
 		
@@ -940,7 +940,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		var col = 0;
 		file.change("removeRow", removedText, firstIndex, row, col);
@@ -1109,7 +1109,7 @@ var File; // File object is global
 		file.change("text", text, index, row, col);
 		
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		
 		
@@ -1122,7 +1122,7 @@ var File; // File object is global
 	File.prototype.putCharacter = function(character, caret) {
 		/*
 			
-			The caller needs to explicitly call editor.renderNeeded()
+			The caller needs to explicitly call EDITOR.renderNeeded()
 			
 			Do not worry about Word-wrap here, we'll only word-wrap the buffer on the fly!
 			
@@ -1172,10 +1172,10 @@ var File; // File object is global
 		console.time("putCharacter");
 		console.time("putCharacterCore");
 		// Insert the character in the text string
-		file.text = file.text.substr(0, index) + character + file.text.substring(index+editor.settings.insert, file.text.length);
+		file.text = file.text.substr(0, index) + character + file.text.substring(index+EDITOR.settings.insert, file.text.length);
 		
 		// Update the grid
-		if(editor.settings.insert && !caret.eof && !caret.eol) {
+		if(EDITOR.settings.insert && !caret.eof && !caret.eol) {
 			// Overwrite current character
 			grid[row][col].char = character;
 		}
@@ -1238,7 +1238,7 @@ var File; // File object is global
 			
 		*/
 		
-		if(editor.settings.devMode == false) return; // Do not check in production
+		if(EDITOR.settings.devMode == false) return; // Do not check in production
 		
 		
 		var file = this;
@@ -1330,7 +1330,7 @@ var File; // File object is global
 		
 		file.checkSelection();
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 	}
 	
@@ -1356,7 +1356,7 @@ var File; // File object is global
 		
 		file.checkSelection();
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 	}
 	
@@ -1381,7 +1381,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		file.change("replaceText", newText, index, dummyCaret.row, dummyCaret.col);
 		
@@ -1406,7 +1406,7 @@ var File; // File object is global
 				return file.removeRow(gridRow.row);
 			}
 			
-			if(editor.settings.devMode && file.text.length < 100) visualizeTextRange(file.text, firstIndex, lastIndex);
+			if(EDITOR.settings.devMode && file.text.length < 100) visualizeTextRange(file.text, firstIndex, lastIndex);
 			throw new Error("firstIndex=" + firstIndex + " can not be on a line break! You might want to use file.removeRow(row) instead.");
 		}
 		if(file.text.charAt(lastIndex) == "\r" || file.text.charAt(lastIndex) == "\n") throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
@@ -1513,7 +1513,7 @@ var File; // File object is global
 					count = grid[first.row].length - first.col;
 					
 					while(count--) {
-						if(editor.settings.devMode) console.log("pop:" + JSON.stringify(grid[first.row].pop()));
+						if(EDITOR.settings.devMode) console.log("pop:" + JSON.stringify(grid[first.row].pop()));
 						else grid[first.row].pop();
 					}
 				}
@@ -1672,10 +1672,10 @@ var File; // File object is global
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof
 		
-		//console.log("file.startRow=" + file.startRow + " file.grid.length=" + file.grid.length + " editor.view.visibleRows=" + editor.view.visibleRows + " file.caret.row=" + file.caret.row);
+		//console.log("file.startRow=" + file.startRow + " file.grid.length=" + file.grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + " file.caret.row=" + file.caret.row);
 		
 		// Update the view if it's below 
-		if(  file.startRow >= (file.grid.length - editor.view.visibleRows / 2)  ) file.scrollToCaret();
+		if(  file.startRow >= (file.grid.length - EDITOR.view.visibleRows / 2)  ) file.scrollToCaret();
 		
 		
 		// Create dummy caret to get row and col for the change event
@@ -1689,7 +1689,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		file.change("deleteTextRange", removedText, firstIndex, dummyCaret.row, dummyCaret.col);
 		
@@ -1795,7 +1795,7 @@ var File; // File object is global
 		
 		console.timeEnd("deleteSelection");
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		// file.change is called either by file.deleteTextRange or file.deleteCharacter
 		
@@ -1985,16 +1985,16 @@ var File; // File object is global
 		}
 		
 		
-		//console.log("row=" + row + " " + file.startRow + " + " + editor.view.visibleRows + " = " + (file.startRow + editor.view.visibleRows) + "");
+		//console.log("row=" + row + " " + file.startRow + " + " + EDITOR.view.visibleRows + " = " + (file.startRow + EDITOR.view.visibleRows) + "");
 		
 		// Scroll down if we ended up under visible space
-		if(row >= file.startRow + editor.view.visibleRows - 1 ) {
+		if(row >= file.startRow + EDITOR.view.visibleRows - 1 ) {
 			file.startRow++;
 		}
 		
 		// Scroll all the way to the left
 		file.startColumn = 0;
-		editor.view.endingColumn = editor.view.visibleColumns;
+		EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 		
 		
 		// Call file edit listeners
@@ -2003,9 +2003,9 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		editor.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", file, caret);
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 	}
 	
@@ -2060,7 +2060,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		//if(caret == file.caret) editor.renderNeeded();
+		//if(caret == file.caret) EDITOR.renderNeeded();
 		
 	}
 	
@@ -2127,9 +2127,9 @@ var File; // File object is global
 			file.moveCaretLeft(caret, times);
 		}
 		
-		editor.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", file, caret);
 		
-		if(caret == file.caret) editor.renderNeeded();
+		if(caret == file.caret) EDITOR.renderNeeded();
 		
 		return caret;
 		
@@ -2152,7 +2152,7 @@ var File; // File object is global
 			
 			var	gridRow = file.grid[caret.row];
 			var gridRowLength = gridRow.length;
-			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * editor.settings.tabSpace;
+			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
 			
 			//console.log("indentationDiff=" + indentationDiff);
 			
@@ -2191,9 +2191,9 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		editor.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", file, caret);
 		
-		//if(caret == file.caret) editor.renderNeeded();
+		//if(caret == file.caret) EDITOR.renderNeeded();
 		
 		return caret;
 	}
@@ -2212,13 +2212,13 @@ var File; // File object is global
 			
 			caret.row++;
 			
-			if(caret.row >= file.startRow + editor.view.visibleRows) {
+			if(caret.row >= file.startRow + EDITOR.view.visibleRows) {
 				file.startRow++;
 			}
 			
 			var	gridRow = file.grid[caret.row];
 			var gridRowLength = gridRow.length;
-			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * editor.settings.tabSpace;
+			var indentationDiff = (rowBefore.indentation - gridRow.indentation) * EDITOR.settings.tabSpace;
 			
 			//console.log("indentationDiff=" + indentationDiff);
 			
@@ -2264,9 +2264,9 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		editor.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", file, caret);
 		
-		//if(caret == file.caret) editor.renderNeeded();
+		//if(caret == file.caret) EDITOR.renderNeeded();
 		
 		return caret;
 	}
@@ -2281,7 +2281,7 @@ var File; // File object is global
 			Removes the character the caret is on.
 			Behaves like delete in most editors.	
 			
-			The caller needs to explicitly call editor.renderNeeded()
+			The caller needs to explicitly call EDITOR.renderNeeded()
 		*/
 		
 		var file = this;
@@ -2393,7 +2393,7 @@ var File; // File object is global
 		// Update the caret index ??
 		//caret.index -= indexDecrementor;
 		
-		//if(renderRow) editor.renderRow(); // early paint (always change/update both the text, grid and cursor before rendering! Or some functionality like xmatching will not work properly.
+		//if(renderRow) EDITOR.renderRow(); // early paint (always change/update both the text, grid and cursor before rendering! Or some functionality like xmatching will not work properly.
 		
 		
 		// Decrement index of the rest of the columns on this row
@@ -2576,9 +2576,9 @@ var File; // File object is global
 		file.checkCaret(caret);
 		
 		if(caret == file.caret) {
-			editor.fireEvent("moveCaret", file, caret);
+			EDITOR.fireEvent("moveCaret", file, caret);
 			file.scrollToCaret();
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 		}
 		
 		return caret;
@@ -2602,9 +2602,9 @@ var File; // File object is global
 				//throw new Error("totalRows not yet found! Wait ...?");
 			}
 			
-			var partStartRow = file.totalRows - editor.settings.bigFileLoadRows + 1;
+			var partStartRow = file.totalRows - EDITOR.settings.bigFileLoadRows + 1;
 			
-			if(partStartRow < 0) throw new Error("The file has less then editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " rows!");
+			if(partStartRow < 0) throw new Error("The file has less then EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " rows!");
 			
 			file.loadFilePart(partStartRow, function loadPartDone() {
 				
@@ -2788,7 +2788,7 @@ var File; // File object is global
 		
 		file.checkGrid();
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		file.change("reload", text, 0, 0, 0); // Fire events
 		
@@ -2849,7 +2849,7 @@ var File; // File object is global
 		grid[0].indentationCharacters = "";
 		grid[0].startIndex = 0;
 		
-		//console.log("editor.view.visibleColumns=" + editor.view.visibleColumns);
+		//console.log("EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		
 		for(var i=0; i<totalCharacters; i++) {
 			addCharacterToGrid(i);
@@ -2953,7 +2953,7 @@ var File; // File object is global
 		
 		console.log(UTIL.getStack("debugGrid"));
 		
-		if(!editor.settings.devMode) {
+		if(!EDITOR.settings.devMode) {
 			return;
 		}
 		
@@ -3102,10 +3102,10 @@ var File; // File object is global
 			
 		*/
 		
-		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
-			file.isCallingChangeEventListeners = editor.eventListeners.fileChange[i].fun;
-			console.log("Calling fileChange event listener: " + UTIL.getFunctionName(editor.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
-			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
+		for(var i=0; i<EDITOR.eventListeners.fileChange.length; i++) {
+			file.isCallingChangeEventListeners = EDITOR.eventListeners.fileChange[i].fun;
+			console.log("Calling fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
+			EDITOR.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
 		}
 		file.isCallingChangeEventListeners = undefined;
 	}
@@ -3162,7 +3162,7 @@ var File; // File object is global
 		
 		file.checkCaret(caret);
 		
-		if(caret == file.caret) editor.fireEvent("moveCaret", file, caret);
+		if(caret == file.caret) EDITOR.fireEvent("moveCaret", file, caret);
 		
 		return caret;
 		
@@ -3179,27 +3179,27 @@ var File; // File object is global
 		
 		file.checkCaret(caret);
 		
-		console.log("scrolling to caret:" + JSON.stringify(caret) + " editor.view.visibleRows=" + editor.view.visibleRows);
+		console.log("scrolling to caret:" + JSON.stringify(caret) + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 		
 		
 		// Up and down ...
-		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows) + 1;
+		var maxStartRow = Math.max(0, file.grid.length - EDITOR.view.visibleRows) + 1;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
 		
-		//console.log("visibleRows=" + editor.view.visibleRows);
+		//console.log("visibleRows=" + EDITOR.view.visibleRows);
 		//console.log("caret.row=" + caret.row + " < file.startRow=" + file.startRow + " ? " + (caret.row < file.startRow))
-		//console.log("caret.row=" + caret.row + " > file.startRow=" + file.startRow + " + editor.view.visibleRows=" + editor.view.visibleRows + " (" + (file.startRow + editor.view.visibleRows) + ")? " + (caret.row > file.startRow + editor.view.visibleRows))
+		//console.log("caret.row=" + caret.row + " > file.startRow=" + file.startRow + " + EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + " (" + (file.startRow + EDITOR.view.visibleRows) + ")? " + (caret.row > file.startRow + EDITOR.view.visibleRows))
 		
 		if(caret.row < file.startRow) {
 			// Caret is above the visible space. 
 			startRow = caret.row;
 			
 		}
-		else if(caret.row >= (file.startRow + editor.view.visibleRows - 1)) {
+		else if(caret.row >= (file.startRow + EDITOR.view.visibleRows - 1)) {
 			// Caret is below the visible space
 			
-			startRow = caret.row - editor.view.visibleRows + 2;
+			startRow = caret.row - EDITOR.view.visibleRows + 2;
 		}
 		
 		if(startRow < 0) startRow = 0;
@@ -3218,36 +3218,36 @@ var File; // File object is global
 		var delta = 0;
 		var startColumn = file.startColumn;
 		
-		//console.log("caret.col=" + caret.col + " > editor.view.endingColumn=" + editor.view.endingColumn + " ? " + (caret.col > editor.view.endingColumn));
+		//console.log("caret.col=" + caret.col + " > EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " ? " + (caret.col > EDITOR.view.endingColumn));
 		//console.log("caret.col=" + caret.col + " < file.startColumn=" + file.startColumn + " ? " + (caret.col < file.startColumn));
 		
 		
 		
-		var indentationWidth = file.grid[caret.row].indentation * editor.settings.tabSpace;
-		var columnEnd = editor.view.endingColumn - indentationWidth;
+		var indentationWidth = file.grid[caret.row].indentation * EDITOR.settings.tabSpace;
+		var columnEnd = EDITOR.view.endingColumn - indentationWidth;
 		var columnStart = file.startColumn; // Intentional: Omitting indentation here
 		
 		if(caret.col > columnEnd) {
 			// Caret is after the visible space
 			delta = caret.col - columnEnd;
-			//editor.view.endingColumn += delta; // Do I need to do this!?
+			//EDITOR.view.endingColumn += delta; // Do I need to do this!?
 			startColumn += delta;
 		}
 		else if(caret.col < columnStart) {
 			// Caret is infront of the visible space
 			delta = columnStart - caret.col;
 			
-			//editor.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
+			//EDITOR.view.endingColumn -= delta;  // Do I need to do this!? or does file.scrollTo do it!?
 			startColumn -= delta;
 		}
 		
 		//console.log("delta=" + delta);
-		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
+		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		
 		file.scrollTo(startColumn, startRow);
 		
-		//editor.renderNeeded(); // Don't need to render until actually scrolled
+		//EDITOR.renderNeeded(); // Don't need to render until actually scrolled
 		
 		
 	}
@@ -3264,8 +3264,8 @@ var File; // File object is global
 		file.changed = false;
 		file.savedAs = true;
 		
-		for(var i=0; i<editor.eventListeners.fileSave.length; i++) {
-			editor.eventListeners.fileSave[i].fun(file);
+		for(var i=0; i<EDITOR.eventListeners.fileSave.length; i++) {
+			EDITOR.eventListeners.fileSave[i].fun(file);
 		}
 		
 	}
@@ -3344,8 +3344,8 @@ var File; // File object is global
 		
 		file.parsed = parseData; // After the file has been parsed, "file.parsed" property should hold the parsed data
 		
-		for(var i=0; i<editor.eventListeners.fileParse.length; i++) {
-			editor.eventListeners.fileParse[i].fun(file); // Call function
+		for(var i=0; i<EDITOR.eventListeners.fileParse.length; i++) {
+			EDITOR.eventListeners.fileParse[i].fun(file); // Call function
 		}
 		
 	}
@@ -3372,7 +3372,7 @@ var File; // File object is global
 			throw new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + "");
 		}
 		
-		//var maxFileRow = Math.max(0, Math.max(file.grid.length, (file.totalRows+1)) - editor.view.visibleRows);
+		//var maxFileRow = Math.max(0, Math.max(file.grid.length, (file.totalRows+1)) - EDITOR.view.visibleRows);
 		
 		var fileRow = line-1;
 		
@@ -3387,15 +3387,15 @@ var File; // File object is global
 			//file.scrollTo(undefined, Math.max(0, fileRow-topSpace));
 			file.scrollToCaret();
 			
-			editor.fireEvent("moveCaret", file, file.caret); // Always fire an event when we move the file caret!
+			EDITOR.fireEvent("moveCaret", file, file.caret); // Always fire an event when we move the file caret!
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 		}
 		else if(file.isBig) {
 			// It's a big file and we'll have to load another part of the file ...
 			var column = 0;
-			var partStartRow = Math.round(fileRow - editor.settings.bigFileLoadRows / 2);
+			var partStartRow = Math.round(fileRow - EDITOR.settings.bigFileLoadRows / 2);
 			
 			if(partStartRow < 0) partStartRow = 0;
 			
@@ -3406,7 +3406,7 @@ var File; // File object is global
 				file.caret = file.createCaret(undefined, gridRow); // index, row, col
 				file.scrollToCaret();
 				
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 				
 				if(callback) callback();
 				
@@ -3446,7 +3446,7 @@ var File; // File object is global
 		
 		//console.log("Line " + line);
 		
-		var maxStartRow = Math.max(0, file.grid.length - editor.view.visibleRows);
+		var maxStartRow = Math.max(0, file.grid.length - EDITOR.view.visibleRows);
 		
 		var startRow = line-2;
 		
@@ -3463,7 +3463,7 @@ var File; // File object is global
 		//console.log("file.startRow=" + file.startRow);
 		//console.log("maxStartRow=" +maxStartRow);
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 	}
 	
 	
@@ -3505,7 +3505,7 @@ var File; // File object is global
 				if(y < 0) throw new Error("y=" + y + " < 0");
 				if(y >= file.grid.length) throw new Error("y=" + y + " >= file.grid.length=" + file.grid.length);
 				
-				var high = Math.min((file.grid.length - editor.view.visibleRows), Math.floor(file.grid.length * .85 - editor.view.visibleRows));
+				var high = Math.min((file.grid.length - EDITOR.view.visibleRows), Math.floor(file.grid.length * .85 - EDITOR.view.visibleRows));
 				var low = Math.floor(file.grid.length * .15);
 				var middle = Math.floor(file.grid.length * .5);
 				var moveRows = Math.floor(file.grid.length * .25);
@@ -3530,7 +3530,7 @@ var File; // File object is global
 			}
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
-			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
+			var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows / 2);
 			
 			startRow = Math.min(y, maxY);
 			
@@ -3567,12 +3567,12 @@ var File; // File object is global
 			*/
 			
 			// Update endingcolumn and render?
-			if(editor.view.endingColumn != file.startColumn + editor.view.visibleColumns) {
-				editor.view.endingColumn = file.startColumn + editor.view.visibleColumns;
+			if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
+				EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
 				scrolled = true;
 			}
 			
-			if(scrolled) editor.renderNeeded();
+			if(scrolled) EDITOR.renderNeeded();
 			
 		}
 		
@@ -3590,10 +3590,10 @@ var File; // File object is global
 			
 			console.log("y=" + y);
 			
-			if(y < low) throw new Error("Increase editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " to at least " + ( editor.settings.bigFileLoadRows + (low-y) )  );
+			if(y < low) throw new Error("Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
-			var maxY = Math.floor(file.grid.length - editor.view.visibleRows / 2);
+			var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows / 2);
 			
 			startRow = Math.max(Math.min(y, maxY), 0);
 			
@@ -3730,7 +3730,7 @@ var File; // File object is global
 		
 		// Is the row visible?
 		var startRow = file.startRow;
-		var endRow = Math.min(file.grid.length, file.startRow+editor.view.visibleRows);
+		var endRow = Math.min(file.grid.length, file.startRow+EDITOR.view.visibleRows);
 		
 		return !(gridRow < startRow || gridRow > endRow);
 	}
@@ -3897,8 +3897,8 @@ var File; // File object is global
 					
 					
 					
-					if( startLinebreaks != -1 && (totalLineBreaks - partStartRow) > editor.settings.bigFileLoadRows && !countRows) {
-						console.log("gotFish: startLinebreaks=" + startLinebreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows + " countRows=" + countRows);
+					if( startLinebreaks != -1 && (totalLineBreaks - partStartRow) > EDITOR.settings.bigFileLoadRows && !countRows) {
+						console.log("gotFish: startLinebreaks=" + startLinebreaks + " totalLineBreaks=" + totalLineBreaks + " partStartRow=" + partStartRow + " EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " countRows=" + countRows);
 						gotFish(false);
 					}
 				}
@@ -3990,7 +3990,7 @@ var File; // File object is global
 				
 				file.grid = file.createGrid();
 				
-				console.log("Loaded " + file.grid.length + " rows! editor.settings.bigFileLoadRows=" + editor.settings.bigFileLoadRows);
+				console.log("Loaded " + file.grid.length + " rows! EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows);
 				
 				console.log("Fixing caret ... ");
 				console.log("file.caret.row=" + file.caret.row + " ");
@@ -4046,14 +4046,14 @@ var File; // File object is global
 				
 				
 				
-				//editor.renderNeeded();
+				//EDITOR.renderNeeded();
 				
 				// Make the file show up right away instead of waiting for the line count
 				if(callback && !callbackCalled) callback();
 				
 				// Force render!?
-				//editor.shouldRender = true;
-				//editor.render();
+				//EDITOR.shouldRender = true;
+				//EDITOR.render();
 				
 				if(endReached) {
 					file.tail = true;
@@ -4254,7 +4254,7 @@ var File; // File object is global
 		box.hasCharacter = (char != undefined);
 		box.wave = false;
 		box.circle = false;
-		box.color = editor.settings.style.textColor;
+		box.color = EDITOR.settings.style.textColor;
 		box.quote = false; // part of a quote
 		box.comment = false; // part of a comment
 	}
@@ -4411,7 +4411,7 @@ var File; // File object is global
 		// Also deletes the end character!
 		// Returns txt with the range from start to end removed
 		
-		if(editor.settings.devMode && txt.length < 100) visualizeTextRange(txt, start, end);
+		if(EDITOR.settings.devMode && txt.length < 100) visualizeTextRange(txt, start, end);
 
 		return txt.substring(0, start) + txt.substring(end+1);
 	}

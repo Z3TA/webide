@@ -8,7 +8,7 @@
 	
 	*/
 	
-	editor.renderFunctions.push(hintsRender);
+	EDITOR.renderFunctions.push(hintsRender);
 	
 	console.log("Loaded textRenderer");
 	
@@ -23,7 +23,7 @@
 		console.time("hintsRender");
 		
 		// Set text style
-		ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 		ctx.textBaseline = "top";
 		
 		var left = 0,

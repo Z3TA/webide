@@ -8,12 +8,12 @@
 	*/
 	
 	// Sanity check
-	if(!editor.settings.style.selectedTextBg) {
+	if(!EDITOR.settings.style.selectedTextBg) {
 		debug.warn("No selectedTextBg defined!");
 	}
 
 
-	editor.renderFunctions.push(selectionRender);
+	EDITOR.renderFunctions.push(selectionRender);
 	
 	console.log("Loaded selectionRender");
 	
@@ -33,32 +33,32 @@
 			top = 0,
 			indentation = 0;
 			
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
-		ctx.fillStyle=editor.settings.style.selectedTextBg;
+		ctx.fillStyle=EDITOR.settings.style.selectedTextBg;
 	
 		
 		for(var row = 0; row < buffer.length; row++) {
 			
 			indentation = buffer[row].indentation;
 			
-			top = editor.settings.topMargin + (row + startRow) * editor.settings.gridHeight;
+			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
 			
 			if(buffer[row].selected) { // The whole row is selected
-				ctx.rect(editor.settings.leftMargin, top,	editor.settings.gridWidth * buffer[row].length, editor.settings.gridHeight);
+				ctx.rect(EDITOR.settings.leftMargin, top,	EDITOR.settings.gridWidth * buffer[row].length, EDITOR.settings.gridHeight);
 			}
 			{
 				
 				for(var col = 0; col < buffer[row].length; col++) {
 					
 					
-					left = editor.settings.leftMargin + (col + indentation * editor.settings.tabSpace - file.startColumn) * editor.settings.gridWidth;
+					left = EDITOR.settings.leftMargin + (col + indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
 					
-					//if(isNaN(left)) throw new Error("left is NaN! editor.settings.leftMargin=" + editor.settings.leftMargin + " col=" + col + " indentation=" + indentation + " editor.settings.tabSpace=" + editor.settings.tabSpace + " file.startColumn=" + file.startColumn + " editor.settings.gridWidth=" + editor.settings.gridWidth + "");
+					//if(isNaN(left)) throw new Error("left is NaN! EDITOR.settings.leftMargin=" + EDITOR.settings.leftMargin + " col=" + col + " indentation=" + indentation + " EDITOR.settings.tabSpace=" + EDITOR.settings.tabSpace + " file.startColumn=" + file.startColumn + " EDITOR.settings.gridWidth=" + EDITOR.settings.gridWidth + "");
 					//if(isNaN(top)) throw new Error("top is NaN");
 					
 					if(buffer[row][col].selected) {
-						ctx.rect(left, top,	editor.settings.gridWidth, editor.settings.gridHeight);
+						ctx.rect(left, top,	EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
 					}
 					
 				}

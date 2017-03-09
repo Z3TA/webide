@@ -12,12 +12,12 @@
 	
 	/*
 		This has some core functionality, but it will most likely be the plugin that manage devMode
-		If more devMode manager plugins are added, some functionality needs to be added to editor.js
-		ex: editor.enableDevMode() editor.disableDevMode() editor.eventListeners.devMode
+		If more devMode manager plugins are added, some functionality needs to be added to EDITOR.js
+		ex: EDITOR.enableDevMode() EDITOR.disableDevMode() EDITOR.eventListeners.devMode
 		
 	*/
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Manages console logs, devTools and toggle devMode",
 		order: 10,
 		load:function devModeLoad() {
@@ -27,21 +27,21 @@
 			var keyE = 69;
 			
 			// For convenience we can press F5 to reload while developing on the editor itself
-			editor.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
+			EDITOR.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
 			
 			// Switch devMode on or off by hitting Ctrl + Alt + D
-			editor.bindKey({desc: "Toggle devMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
+			EDITOR.bindKey({desc: "Toggle devMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
 			
 			// Test how the editor handles errors
-			editor.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
+			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 			
-			showDevToolsMenuItem = editor.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
+			showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 			
 			
-			if(editor.settings.devMode == false) {
+			if(EDITOR.settings.devMode == false) {
 				disableDevMode();
 			}
-			else if(editor.settings.devMode == true) {
+			else if(EDITOR.settings.devMode == true) {
 				enableDevMode();
 			}
 			
@@ -54,12 +54,12 @@
 		},
 		unload: function unloadDevMode() {
 			
-			editor.removeMenuItem(toggleDevmodeMenuItem);
-			editor.removeMenuItem(showDevToolsMenuItem);
+			EDITOR.removeMenuItem(toggleDevmodeMenuItem);
+			EDITOR.removeMenuItem(showDevToolsMenuItem);
 			
-			editor.unbindKey(reloadEditor);
-			editor.unbindKey(toggleDevMode);
-			editor.unbindKey(testErrorHandler);
+			EDITOR.unbindKey(reloadEditor);
+			EDITOR.unbindKey(toggleDevMode);
+			EDITOR.unbindKey(testErrorHandler);
 			
 			console.log = consoleLogOriginal;
 			console.time = consoleTimeOriginal;
@@ -83,8 +83,8 @@
 	
 	function disableDevMode() {
 		
-		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
-		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
+		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
+		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
 		
 		// Disable console.log
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
@@ -113,9 +113,9 @@
 		showDevTools();
 		
 		if(toggleDevmodeMenuItem) {
-			toggleDevmodeMenuItemPosition = editor.removeMenuItem(toggleDevmodeMenuItem);
+			toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
 		}
-		toggleDevmodeMenuItem = editor.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
+		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
 		
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;
@@ -129,10 +129,10 @@
 	
 	function toggleDevMode() {
 		
-		editor.settings.devMode = editor.settings.devMode ? false : true;
-		console.warn("Toggling devMode = " + editor.settings.devMode);
+		EDITOR.settings.devMode = EDITOR.settings.devMode ? false : true;
+		console.warn("Toggling devMode = " + EDITOR.settings.devMode);
 		
-		if(editor.settings.devMode) {
+		if(EDITOR.settings.devMode) {
 			enableDevMode();
 			console.log("devMode enabled");
 		}
@@ -140,7 +140,7 @@
 			disableDevMode();
 			console.log("devMode disabled");
 		}
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
 		return false;
 		
@@ -150,7 +150,7 @@
 		if(runtime=="nw.js") {
 			require('nw.gui').Window.get().showDevTools();
 		}
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
 	}
 	
@@ -165,12 +165,12 @@
 			if(answer == yes) {
 				var func, name, ret = true;
 				
-				//editor.closeFile(testfile);
+				//EDITOR.closeFile(testfile);
 				
 				// Call exit listeners before reloading
-				for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
+				for(var i=0, f; i<EDITOR.eventListeners.exit.length; i++) {
 					
-					func = editor.eventListeners.exit[i].fun;
+					func = EDITOR.eventListeners.exit[i].fun;
 					name = UTIL.getFunctionName(func);
 					
 					if(typeof func != "function") {
@@ -178,7 +178,7 @@
 						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
 						//console.warn(UTIL.objInfo(f));
 						
-						throw  new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!");
+						throw  new Error("Index=" + i + " of EDITOR.eventListeners.exit has no valid function!");
 						
 					}
 					else {
@@ -192,19 +192,19 @@
 				}
 				
 				if(ret !== true) {
-					throw new Error("There was an error in " + name + " (editor.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+					throw new Error("There was an error in " + name + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 				}
 				else {
 					
 					// Unload all plugins
-					for(var i=0; i<editor.plugins.length; i++) {
-						console.log("unloading plugin: " + editor.plugins[i].desc);
-						editor.plugins[i].unload(); // Call function (and pass global objects!?)
+					for(var i=0; i<EDITOR.plugins.length; i++) {
+						console.log("unloading plugin: " + EDITOR.plugins[i].desc);
+						EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
 					}
 					
 					/*
-						for(var file in editor.files) {
-						delete editor.files[file];
+						for(var file in EDITOR.files) {
+						delete EDITOR.files[file];
 						}
 					*/
 					

@@ -1,11 +1,11 @@
-editor.addTest(function doNotScrollWhenDeletingSelection(testCallback) {
+EDITOR.addTest(function doNotScrollWhenDeletingSelection(testCallback) {
 	/*
 
-		Do not scroll/jump when deleting a selection unless file.startRow >= file.grid.length - editor.veiw.visibleRows / 2
+		Do not scroll/jump when deleting a selection unless file.startRow >= file.grid.length - EDITOR.veiw.visibleRows / 2
 
 	*/
 
-	editor.openFile("testDelSelectionScrolling.txt", '', function(err, file) {
+	EDITOR.openFile("testDelSelectionScrolling.txt", '', function(err, file) {
 		
 		if(err) throw err;
 		
@@ -35,7 +35,7 @@ editor.addTest(function doNotScrollWhenDeletingSelection(testCallback) {
 		if(file.startRow != startRow) throw new Error("The file scrolled when deleting selection.\nExpected startRow=" + startRow + " but file.startRow=" + file.startRow);
 		
 		
-		editor.closeFile(file.path);
+		EDITOR.closeFile(file.path);
 		
 		testCallback(true);
 		

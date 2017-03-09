@@ -12,9 +12,9 @@
 	}
 	
 
-	if(editor.settings.enableSpellchecker===undefined) {
+	if(EDITOR.settings.enableSpellchecker===undefined) {
 		// Add ourself to settings
-		editor.settings.enableSpellchecker = true;
+		EDITOR.settings.enableSpellchecker = true;
 	}
 	
 	/*
@@ -46,11 +46,11 @@
 	var workersReady = 0;
 	var menuItem;
 	
-	editor.on("start", spellCheckerMain);
+	EDITOR.on("start", spellCheckerMain);
 	
 	function spellCheckerMain() {
 		
-		menuItem = editor.addMenuItem("Toggle spellchecker " + (editor.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
+		menuItem = EDITOR.addMenuItem("Toggle spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
 		
 		for(var i=0; i<numWorkers; i++) {
 			loadWorker(useLanguages);
@@ -62,28 +62,28 @@
 		
 		console.log("All spell-check workers ready!");
 		
-		editor.on("fileChange", runSpellCheck);
+		EDITOR.on("fileChange", runSpellCheck);
 		
-		editor.on("fileOpen", spellCheckFile);
+		EDITOR.on("fileOpen", spellCheckFile);
 		
-		editor.on("mouseClick", showSpellSuggestion);
+		EDITOR.on("mouseClick", showSpellSuggestion);
 		
 		console.log("All workers ready!");
 		
 		// Spellcheck currently opened files
-		for(var file in editor.files) {
-			runSpellCheck(editor.files[file]);
+		for(var file in EDITOR.files) {
+			runSpellCheck(EDITOR.files[file]);
 		}
 		
 	}
 	
 	function toggleSpellCheck() {
-		editor.settings.enableSpellchecker = editor.settings.enableSpellchecker ? false : true;
-		console.log("editor.settings.enableSpellchecker=" + editor.settings.enableSpellchecker);
+		EDITOR.settings.enableSpellchecker = EDITOR.settings.enableSpellchecker ? false : true;
+		console.log("EDITOR.settings.enableSpellchecker=" + EDITOR.settings.enableSpellchecker);
 		
-		menuItem.innerHTML = "Toggle spellchecker " + (editor.settings.enableSpellchecker ? "off":"on");
+		menuItem.innerHTML = "Toggle spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on");
 		
-		if(editor.settings.enableSpellchecker) {
+		if(EDITOR.settings.enableSpellchecker) {
 			
 			// Begin spell-checking all opened files
 			
@@ -93,15 +93,15 @@
 			let row = 0;
 			let col = 0;
 			
-			if(editor.currentFile) runSpellCheck(editor.currentFile, change, text, index, row, col); // Start with the file in view
+			if(EDITOR.currentFile) runSpellCheck(EDITOR.currentFile, change, text, index, row, col); // Start with the file in view
 			
-			for(var path in editor.files) {
-				if(editor.currentFile != editor.files[path]) runSpellCheck(editor.files[path], change, text, index, row, col);
+			for(var path in EDITOR.files) {
+				if(EDITOR.currentFile != EDITOR.files[path]) runSpellCheck(EDITOR.files[path], change, text, index, row, col);
 			}
 			
 		}
 		
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		}
 
 	
@@ -157,7 +157,7 @@
 			wordsInQueue--;
 			//console.log("wordsInQueue=" + wordsInQueue);
 			if(wordsInQueue==0) {
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 			}
 			
 			
@@ -183,7 +183,7 @@
 
 		if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
 
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(file) {
 			file.getWordOnCaret(caret, wordOnCaret);
@@ -200,17 +200,17 @@
 			}
 			
 			if(suggestion) {
-				editor.addTempMenuItem(suggestion, replaceWord);
+				EDITOR.addTempMenuItem(suggestion, replaceWord);
 			}
 			/*
 			else {
-				editor.contextMenuAddTemp("No spelling suggestion for <i>" + word + "</i>");
+				EDITOR.contextMenuAddTemp("No spelling suggestion for <i>" + word + "</i>");
 			}
 			*/
 			
 			function replaceWord() {
 				
-				editor.hideMenu();
+				EDITOR.hideMenu();
 				
 				console.log("replacing " + word + " for " + suggestion);
 				
@@ -224,7 +224,7 @@
 				
 				file.insertText(suggestion);
 				
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 				
 			}
 			
@@ -237,7 +237,7 @@
 	
 	function runSpellCheck(file, change, text, index, row, col) {
 		
-		if(editor.settings.enableSpellchecker === false) return;
+		if(EDITOR.settings.enableSpellchecker === false) return;
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
@@ -295,7 +295,7 @@
 		isWaiting = false;
 		
 		// Run on visible rows
-		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+editor.view.visibleRows); row++) {
+		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+EDITOR.view.visibleRows); row++) {
 		
 		console.time("runSpellCheckTimer");
 
@@ -375,7 +375,7 @@
 	
 	function spellingError(filePath, origWord, row, col, textLength) {
 		
-		var file = editor.files[filePath];
+		var file = EDITOR.files[filePath];
 		
 		if(file === undefined) {
 			console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
@@ -410,11 +410,11 @@
 					
 				}
 				
-			if(file == editor.currentFile) {
+			if(file == EDITOR.currentFile) {
 				// We only need to render if the row is visible on the screen
 				if(file.rowVisible(row)) { 
-					editor.renderNeeded();
-				//editor.renderRow(row);
+					EDITOR.renderNeeded();
+				//EDITOR.renderRow(row);
 					}
 				}
 				

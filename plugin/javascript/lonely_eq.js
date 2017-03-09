@@ -16,10 +16,10 @@
 		
 	*/
 	
-	editor.on("start", main, 100); // Start after color.js
+	EDITOR.on("start", main, 100); // Start after color.js
 	
 	function main() {
-	editor.preRenderFunctions.push(lonelyEq);
+	EDITOR.preRenderFunctions.push(lonelyEq);
 	}
 	
 	function lonelyEq(buffer, file) {

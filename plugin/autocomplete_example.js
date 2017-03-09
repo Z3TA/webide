@@ -4,15 +4,15 @@
 	
 	var order = 1; // A higher order makes the function run after others, default is 1. 
 	
-	editor.on("autoComplete", autoCompleteExample, order);
+	EDITOR.on("autoComplete", autoCompleteExample, order);
 	
 	function autoCompleteExample(file, word, wordLength, gotOptions) {
 		
 		if(wordLength == 0) return; // Return early, unless we have super smart suggestions
 		
-		var myWords = ["editor.renderNeeded()", "editor.resizeNeeded()"]
-		var andMoveCaret = [['editor.on("")', 2], ['editor.closeFile()', 1]];
-		var camelSmart = [["rend", "editor.renderNeeded()"], ["rez", "editor.resizeNeeded()"]];
+		var myWords = ["EDITOR.renderNeeded()", "EDITOR.resizeNeeded()"]
+		var andMoveCaret = [['EDITOR.on("")', 2], ['EDITOR.closeFile()', 1]];
+		var camelSmart = [["rend", "EDITOR.renderNeeded()"], ["rez", "EDITOR.resizeNeeded()"]];
 		
 		var options = [];
 		

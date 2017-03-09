@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Will speak whats on the line",
 		load: load,
 		unload: unload,

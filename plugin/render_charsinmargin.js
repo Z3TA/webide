@@ -11,26 +11,26 @@
 	*/
 	
 	// Sanity check
-	if(!editor.settings.style.fontSize) {
+	if(!EDITOR.settings.style.fontSize) {
 		throw "No fontSize defined!";
 	}
-	if(!editor.settings.style.font) {
+	if(!EDITOR.settings.style.font) {
 		throw "No font defined!";
 	}
-	if(editor.settings.gridWidth <= 0) {
+	if(EDITOR.settings.gridWidth <= 0) {
 		throw "gridWidth too small!";
 	}
-	if(editor.settings.gridHeight <= 0) {
+	if(EDITOR.settings.gridHeight <= 0) {
 		throw "gridHeight too small!";
 	}
 	
 	
-	editor.renderFunctions.push(transparentMarginCharacters);
+	EDITOR.renderFunctions.push(transparentMarginCharacters);
 	
 	console.log("Loaded textRenderer");
 	
 	
-	var transparentChars = Math.floor(Math.min(editor.settings.leftMargin / editor.settings.gridWidth, editor.settings.rightMargin / editor.settings.gridWidth));
+	var transparentChars = Math.floor(Math.min(EDITOR.settings.leftMargin / EDITOR.settings.gridWidth, EDITOR.settings.rightMargin / EDITOR.settings.gridWidth));
 		
 	if(transparentChars <= 0) {
 		console.warn("No transarent chars will be rendered in the margin");
@@ -56,17 +56,17 @@
 			
 
 		//ctx.strokeStyle="rgba(0,255,0,0.5)";
-		ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 		ctx.textBaseline = "top";
 		
 		ctx.beginPath(); // Reset all the paths!
 		
 		for(var row = 0; row < buffer.length; row++) {
 
-			top = editor.settings.topMargin + (row+startRow) * editor.settings.gridHeight;
+			top = EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight;
 
 			indentation = buffer[row].indentation;
-			indentationWidth = indentation * editor.settings.tabSpace;
+			indentationWidth = indentation * EDITOR.settings.tabSpace;
 		
 			if(file.startColumn > 0) {
 				
@@ -74,7 +74,7 @@
 				transpLvl = transpLvlStep;
 				
 				for(var col = Math.max(0, file.startColumn - transparentChars - indentationWidth); col < Math.min(file.startColumn-indentationWidth, buffer[row].length-1); col++) {
-					left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
+					left = EDITOR.settings.leftMargin + (col + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 					
 					transpLvl += transpLvlStep;
 					
@@ -84,12 +84,12 @@
 			
 			transpLvl = 100-transpLvlStep;
 			
-			over = (editor.view.visibleColumns+file.startColumn-indentationWidth);
+			over = (EDITOR.view.visibleColumns+file.startColumn-indentationWidth);
 			
 			if(buffer[row].length > over) {
 				// Render text in the right margin
-				for(var col = Math.max(0, editor.view.visibleColumns+file.startColumn-indentationWidth); col <= Math.min(buffer[row].length-1, over+transparentChars); col++) {
-					left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
+				for(var col = Math.max(0, EDITOR.view.visibleColumns+file.startColumn-indentationWidth); col <= Math.min(buffer[row].length-1, over+transparentChars); col++) {
+					left = EDITOR.settings.leftMargin + (col + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 					
 					transpLvl -= transpLvlStep;
 					

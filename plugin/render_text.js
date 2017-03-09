@@ -12,14 +12,14 @@
 	*/
 	
 	// Sanity check
-	if(!editor.settings.style.fontSize) {
+	if(!EDITOR.settings.style.fontSize) {
 		debug.warn("No fontSize defined!");
 	}
-	if(!editor.settings.style.font) {
+	if(!EDITOR.settings.style.font) {
 		debug.warn("No font defined!");
 	}
 
-	editor.renderFunctions.push(textRender);
+	EDITOR.renderFunctions.push(textRender);
 	
 	console.log("Loaded textRenderer");
 	
@@ -27,7 +27,7 @@
 		
 		//console.time("textRender");
 		
-		//console.log("editor.view.endingColumn=" + editor.view.endingColumn);
+		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -39,11 +39,11 @@
 			x = 0,
 			y = 0,
 			characters = "",
-			oldStyle = editor.settings.style.textColor;
+			oldStyle = EDITOR.settings.style.textColor;
 		
 
 		ctx.strokeStyle="rgba(0,255,0,0.5)";
-		ctx.font=editor.settings.style.fontSize + "px " + editor.settings.style.font;
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 		ctx.textBaseline = "top";
 		ctx.fillStyle = oldStyle;
 		
@@ -65,27 +65,27 @@
 		for(var row = 0; row < buffer.length; row++) {
 			
 			indentation = buffer[row].indentation;
-			indentationWidth = indentation * editor.settings.tabSpace;
+			indentationWidth = indentation * EDITOR.settings.tabSpace;
 			
 			//console.log("indentation=" + indentation);
 			
-			top = editor.settings.topMargin + (row + startRow) * editor.settings.gridHeight;
+			top = EDITOR.settings.topMargin + (row + startRow) * EDITOR.settings.gridHeight;
 			
 			
 			//ctx.fillText(indentation, 15, top);
 			
 			colStart = Math.max(0, file.startColumn - indentationWidth)
-			colStop = Math.min(editor.view.endingColumn-indentationWidth, editor.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
+			colStop = Math.min(EDITOR.view.endingColumn-indentationWidth, EDITOR.view.visibleColumns+file.startColumn-indentationWidth, buffer[row].length);
 			
 			
-			left = editor.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * editor.settings.gridWidth;
+			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
 			if(isNaN(left)) throw new Error("left is NaN");
 			if(isNaN(top)) throw new Error("top is NaN");
 
 			for(var col = colStart; col < colStop; col++) {
 				
-				//left = editor.settings.leftMargin + (col + indentationWidth - file.startColumn) * editor.settings.gridWidth;
+				//left = EDITOR.settings.leftMargin + (col + indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 				
 				bufferRowCol = buffer[row][col];
 				
@@ -95,7 +95,7 @@
 						
 						ctx.fillText(characters, left, top);
 						
-						left += characters.length * editor.settings.gridWidth;
+						left += characters.length * EDITOR.settings.gridWidth;
 						
 						characters = "";
 						ctx.fillStyle = oldStyle = bufferRowCol.color; // for fillText rgb 
@@ -119,15 +119,15 @@
 						ctx.strokeStyle="rgba(255,0,0,0.5)";
 						
 						// simple line:
-						//ctx.moveTo(left, top + editor.settings.gridHeight);
-						//ctx.lineTo(left + editor.settings.gridWidth, top + editor.settings.gridHeight);
+						//ctx.moveTo(left, top + EDITOR.settings.gridHeight);
+						//ctx.lineTo(left + EDITOR.settings.gridWidth, top + EDITOR.settings.gridHeight);
 						
-						x = left + (characters.length-1) * editor.settings.gridWidth - 1;
-						y = top + editor.settings.gridHeight - 3 + Math.sin(x);
+						x = left + (characters.length-1) * EDITOR.settings.gridWidth - 1;
+						y = top + EDITOR.settings.gridHeight - 3 + Math.sin(x);
 						
 						ctx.moveTo(x, y);
 						
-						for(var x = x, y = y; x < (left + (characters.length-1) * editor.settings.gridWidth + editor.settings.gridWidth); x++, y+=Math.sin(x+1)) {
+						for(var x = x, y = y; x < (left + (characters.length-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth); x++, y+=Math.sin(x+1)) {
 							ctx.lineTo(x, y);
 						}
 						
@@ -136,13 +136,13 @@
 					}
 					else if(bufferRowCol.circle) {
 						// ### Circle
-						var x = left + (characters.length-1) * editor.settings.gridWidth + editor.settings.gridWidth / 2;
-						var y = top + editor.settings.gridHeight / 2;
+						var x = left + (characters.length-1) * EDITOR.settings.gridWidth + EDITOR.settings.gridWidth / 2;
+						var y = top + EDITOR.settings.gridHeight / 2;
 						
 						ctx.strokeStyle="rgba(255,0,0,0.6)";
 						ctx.lineWidth=4;
 						ctx.beginPath();
-						ctx.arc(x, y, editor.settings.gridWidth * 2.2, 0, 2*Math.PI);
+						ctx.arc(x, y, EDITOR.settings.gridWidth * 2.2, 0, 2*Math.PI);
 						ctx.stroke();
 						
 					}

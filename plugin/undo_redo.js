@@ -9,26 +9,26 @@
 		versionIndex = {}; // Keeps track of current index in the state array
 	
 	
-	editor.on("start", undo_redo_init, 0); // High prio! Run before keyboard_delete and backspace! Set order low
+	EDITOR.on("start", undo_redo_init, 0); // High prio! Run before keyboard_delete and backspace! Set order low
 	
 	function undo_redo_init() {
 		
-		editor.bindKey({desc: "Redo change", charCode: 89, fun: redo, combo: CTRL});
+		EDITOR.bindKey({desc: "Redo change", charCode: 89, fun: redo, combo: CTRL});
 		
-		editor.bindKey({desc: "Undo change", charCode: 90, fun: undo, combo: CTRL});
+		EDITOR.bindKey({desc: "Undo change", charCode: 90, fun: undo, combo: CTRL});
 		
 		
 		// When to save state !??
 
-		editor.on("paste", saveState); // Before pasting text
+		EDITOR.on("paste", saveState); // Before pasting text
 		
-		editor.on("fileOpen", saveState); // When loading a file
+		EDITOR.on("fileOpen", saveState); // When loading a file
 
 		
 		/* Save state every seconds!
 		setInterval(function() {
-			if(editor.currentFile) {
-				saveState(editor.currentFile);
+			if(EDITOR.currentFile) {
+				saveState(EDITOR.currentFile);
 			}
 		}, 1000);
 		*/
@@ -37,7 +37,7 @@
 
 	}
 	
-	editor.on("fileChange", function undo_redo_fileChange(file, change, text, index, row, col) {
+	EDITOR.on("fileChange", function undo_redo_fileChange(file, change, text, index, row, col) {
 		
 		if(change != "undo-redo") {
 			
@@ -58,7 +58,7 @@
 	
 	function undo(file) {
 		
-		if(editor.input) {
+		if(EDITOR.input) {
 			
 			console.log("UNDO");
 			
@@ -98,7 +98,7 @@
 	
 	function redo(file) {
 		
-		if(editor.input) {
+		if(EDITOR.input) {
 			
 			console.log("REDO");
 			
@@ -170,8 +170,8 @@
 			if(oldGrid[i] != newGrid[i]) {
 				console.log("First diff on line=" + i);
 				// Do not scroll if it's visible
-				if(i < file.startRow || i > (file.startRow + editor.view.visibleRows)) {
-					file.scrollTo(0, Math.round(i-editor.view.visibleRows/2));
+				if(i < file.startRow || i > (file.startRow + EDITOR.view.visibleRows)) {
+					file.scrollTo(0, Math.round(i-EDITOR.view.visibleRows/2));
 				}
 				break;
 			}
@@ -188,11 +188,11 @@
 		// Call file edit listeners
 		file.change("undo-redo", state.text, 0, 0, 0) // change, text, index, row, col
 
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		if(file.savedAs) {
 		// Check if this is the current version on the disk:
-			editor.readFromDisk(file.path, function compare(err, path, string) {
+			EDITOR.readFromDisk(file.path, function compare(err, path, string) {
 				if(err) throw err;
 			if(file.text == string) {
 				// It's saved
@@ -207,16 +207,16 @@
 	
 	function saveState(file) {
 		
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		
 		if(!file) return true;
 		
-		if(file.text.length > editor.settings.bigFileSize || file.isBig) {
-			console.warn("Not saving undor/redo state for file because it has more then " + editor.settings.bigFileSize + " characters! (or is a stream) file.path=" + file.path);
+		if(file.text.length > EDITOR.settings.bigFileSize || file.isBig) {
+			console.warn("Not saving undor/redo state for file because it has more then " + EDITOR.settings.bigFileSize + " characters! (or is a stream) file.path=" + file.path);
 			return true;
 		}
 		
-		if(editor.input) {
+		if(EDITOR.input) {
 			var state;
 			
 			//console.log("saveState:\n" + file.text);

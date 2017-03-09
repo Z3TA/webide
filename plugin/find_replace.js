@@ -13,7 +13,7 @@
 	var searchVisible = false;
 	var lastSearchStrLength = 0;
 	
-	editor.on("start", find_replace_main, 10);
+	EDITOR.on("start", find_replace_main, 10);
 	
 	function find_replace_main() {
 		
@@ -24,11 +24,11 @@
 		var char_F = 70;
 		var char_Esc = 27;
 		
-		editor.bindKey({desc: "Find or replace in current file", charCode: char_F, combo: CTRL, fun: findReplace});
+		EDITOR.bindKey({desc: "Find or replace in current file", charCode: char_F, combo: CTRL, fun: findReplace});
 		
-		editor.bindKey({desc: "Hide the find/replace GUI", charCode: char_Esc, fun: hideFindReplaceGui});
+		EDITOR.bindKey({desc: "Hide the find/replace GUI", charCode: char_Esc, fun: hideFindReplaceGui});
 		
-		editor.on("moveCaret", function resetLastSearchStrLength(file, caret) {
+		EDITOR.on("moveCaret", function resetLastSearchStrLength(file, caret) {
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
 		});
 		
@@ -221,23 +221,23 @@
 		}, false);
 		
 		findButtonLeft.addEventListener("click", function() {
-			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "left", ignoreCaseOption.checked); // str, file, useRegex, keepSelection, dontLoop, direction
+			find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "left", ignoreCaseOption.checked); // str, file, useRegex, keepSelection, dontLoop, direction
 		}, false);
 		
 		findButtonRight.addEventListener("click", function() {
-			find(inputFind.value, editor.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
+			find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
 		}, false);
 		
 		findAllButton.addEventListener("click", function() {
-			findAll(inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
+			findAll(inputFind.value, EDITOR.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
 		replaceButton.addEventListener("click", function() {
-			replace(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
+			replace(inputReplace.value, inputFind.value, EDITOR.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
 		replaceAllButton.addEventListener("click", function() {
-			replaceAll(inputReplace.value, inputFind.value, editor.currentFile, regexOption.checked, ignoreCaseOption.checked);
+			replaceAll(inputReplace.value, inputFind.value, EDITOR.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
 		inputFind.addEventListener("keyup", function(event) {
@@ -269,8 +269,8 @@
 		
 		// Only search if there is anything in the search field, and the search box has focus
 		if(searchVisible) {
-			if(inputFind.value.length > 0 && editor.input===false) {
-				find(inputFind.value, editor.currentFile, regexOption.checked);
+			if(inputFind.value.length > 0 && EDITOR.input===false) {
+				find(inputFind.value, EDITOR.currentFile, regexOption.checked);
 				return false;
 			}
 		}
@@ -293,15 +293,15 @@
 			//footer.style.border = ""
 			
 			// Bring back focus to the current file
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			if(file) {
-				editor.input = true;
+				EDITOR.input = true;
 			}
 			
 			searchVisible = false;
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 		}
 		
 	}
@@ -321,19 +321,19 @@
 			
 			if(footerHeight < heightNeeded) {
 				footer.style.height = footerHeight + heightNeeded + "px";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 			}
 			
 			// Remove focus from the editor when bringing up the search box.
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			if(file) {
-				editor.input = false;
+				EDITOR.input = false;
 			}
 			
-			console.log("Search visible! editor.input=" + editor.input);
+			console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 		}		
 		
 	}
@@ -364,7 +364,7 @@
 					inputFind.value = selectedText;
 					lastSearchEnd = file.selected[file.selected.length-1].index; // Begin search at the selected text
 					console.log("lastSearchEnd=" + lastSearchEnd);
-					editor.resize(); // Recalculate height so that the highlight dont show outside the screen
+					EDITOR.resize(); // Recalculate height so that the highlight dont show outside the screen
 					find(inputFind.value, file, regexOption.checked);
 				}
 			}
@@ -373,7 +373,7 @@
 				inputFind.focus();
 			}
 			
-			editor.input = false; // Remove focus from the file
+			EDITOR.input = false; // Remove focus from the file
 			
 			return false; // Prevent default (browser) action
 		}
@@ -546,7 +546,7 @@
 			
 			file.select(textRange);
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 			
 		}
@@ -567,7 +567,7 @@
 			
 		}
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 	}
 	
@@ -623,7 +623,7 @@
 				file.insertText(newString, file.caret);
 			}
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 		}
 		
 		return start;
@@ -643,7 +643,7 @@
 			console.log("start=" + start);
 		}
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 	}
 	
@@ -674,13 +674,13 @@
 	
 	// ## Todo: Write tests
 	/*
-	editor.addTest(function test_searchAndReplace(callback) {
-		editor.openFile("searchAndReplace.txt", "abcX1XdefX2XghiX2X", function(err, file) {
+	EDITOR.addTest(function test_searchAndReplace(callback) {
+		EDITOR.openFile("searchAndReplace.txt", "abcX1XdefX2XghiX2X", function(err, file) {
 			
 			
 				
 			
-			editor.closeFile(file.path);
+			EDITOR.closeFile(file.path);
 			
 			callback(true);
 			

@@ -3,7 +3,7 @@
 	
 */
 
-editor.addTest(function testTextDiff(callback) {
+EDITOR.addTest(function testTextDiff(callback) {
 	
 	// One line changed
 	var diff = UTIL.textDiff(

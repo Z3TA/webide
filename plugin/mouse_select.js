@@ -11,7 +11,7 @@
 		oldMouseY,
 		startIndex, 
 		endIndex,
-		distSelfSelect = editor.settings.gridWidth / 3,
+		distSelfSelect = EDITOR.settings.gridWidth / 3,
 		oldCaret,
 		oldCaretEol = false,
 		rightCaretEol = false,
@@ -30,13 +30,13 @@
 		clicksAfterEachOther = 0,
 		currentDirection;
 
-	editor.on("start", mouse_select_init);
+	EDITOR.on("start", mouse_select_init);
 	
 	function mouse_select_init() {
-		editor.addEvent("mouseClick", {fun: mouseSelectDown, dir: "down", targetClass:"fileCanvas", button: 0});
-		editor.addEvent("mouseClick", {fun: mouseSelectUp, dir: "up", targetClass:"fileCanvas", button: 0});
+		EDITOR.addEvent("mouseClick", {fun: mouseSelectDown, dir: "down", targetClass:"fileCanvas", button: 0});
+		EDITOR.addEvent("mouseClick", {fun: mouseSelectUp, dir: "up", targetClass:"fileCanvas", button: 0});
 		
-		editor.on("mouseMove", mouseSelectMouseMove);
+		EDITOR.on("mouseMove", mouseSelectMouseMove);
 	}
 	
 	function mouseSelectDown() {
@@ -56,9 +56,9 @@
 		
 		// Note that caret is a temporary position caret (not the current file.caret)!
 
-		if(editor.currentFile && caret) {
+		if(EDITOR.currentFile && caret) {
 			
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			
 			file.removeHighlights();
 			
@@ -103,7 +103,7 @@
 			
 				// Clicking in the left margin should select the whole line!? Or du we have to double click for that!?
 				/*
-				if(mouseX < editor.settings.leftMargin/2) {
+				if(mouseX < EDITOR.settings.leftMargin/2) {
 					selectWholeLine();
 					makeSelection(file, caret, false);
 				}
@@ -166,7 +166,7 @@
 					console.log("It's a double click!");
 					
 					// When you double click in the margin, the whole line should be selected
-					if(caret.col==0 && file.grid[caret.row].length > 0 && mouseX < editor.settings.leftMargin * 0.85) {
+					if(caret.col==0 && file.grid[caret.row].length > 0 && mouseX < EDITOR.settings.leftMargin * 0.85) {
 						selectWholeLine();
 						makeSelection(file, caret, false);
 						
@@ -211,7 +211,7 @@
 			}
 			
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 			return false;
 			
@@ -234,7 +234,7 @@
 		function mouseSelect_mouseMove() {
 			// Render
 			console.log("Moving ...");
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 		}
 		
 
@@ -375,13 +375,13 @@
 			lastSelectionEnd = end;
 			
 			console.log("Select text!");
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 
 		}
 		else if(Math.sqrt(  Math.pow(mouseX-oldMouseX, 2)  +  Math.pow(mouseY-oldMouseY, 2)  ) > distSelfSelect) {
 			// Select the current caret
 			file.select(file.grid[caret.row][caret.col]);
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 		}
 
 		
@@ -390,12 +390,12 @@
 	
 	function startSelecting(file, caret) {
 		/*
-		editor.addRender(select_render);
+		EDITOR.addRender(select_render);
 		
 		console.log("indentation=" + file.grid[caret.row].indentation);
 		
-		mouseStartX = (caret.col - file.startColumn + file.grid[caret.row].indentation * editor.settings.tabSpace ) * editor.settings.gridWidth + editor.settings.leftMargin;
-		mouseStartY = (caret.row - file.startRow + 1) * editor.settings.gridHeight + editor.settings.topMargin;
+		mouseStartX = (caret.col - file.startColumn + file.grid[caret.row].indentation * EDITOR.settings.tabSpace ) * EDITOR.settings.gridWidth + EDITOR.settings.leftMargin;
+		mouseStartY = (caret.row - file.startRow + 1) * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
 		
 
 		mouseStartX = mouseX;
@@ -410,12 +410,12 @@
 	function endSelecting() {
 		
 		isSelecting = false;
-		//editor.removeRender(select_render);
+		//EDITOR.removeRender(select_render);
 		
 	}
 	
 	function adjustToGridY(v) {
-		var g = editor.settings.gridHeight;
+		var g = EDITOR.settings.gridHeight;
 		
 		var av = Math.abs(v);
 		
@@ -429,7 +429,7 @@
 	}
 	
 	function adjustToGridX(v) {
-		var g = editor.settings.gridWidth;
+		var g = EDITOR.settings.gridWidth;
 		
 		var av = Math.abs(v);
 		
@@ -457,7 +457,7 @@
 		ctx.lineWidth=1;
 		//ctx.setLineDash([4,8]);
 		
-		var gh = editor.settings.gridHeight;
+		var gh = EDITOR.settings.gridHeight;
 		
 		if(1 == 1) {
 			ctx.strokeStyle="rgba(255,0,0, 1)";
@@ -505,11 +505,11 @@
 			//console.log("isSelecting=" + isSelecting);
 			
 			if(isSelecting) {
-				var file = editor.currentFile;
-				var caret = editor.mousePositionToCaret(mouseX, mouseY);
+				var file = EDITOR.currentFile;
+				var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 				
 				// Place the caret
-				editor.currentFile.caret = caret;
+				EDITOR.currentFile.caret = caret;
 				
 				endIndex = caret.index;
 				
@@ -518,7 +518,7 @@
 				
 				makeSelection(file, caret);
 				
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 			}
 		}
 		else {

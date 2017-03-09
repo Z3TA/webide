@@ -8,10 +8,10 @@
 	var key_UP = 38;
 	var key_DOWN = 40;
 	
-	editor.bindKey({desc: "Moves the caret to the right, steps words with Ctrl, and selects with Shift combo", charCode: key_RIGHT, fun: keyboard_arrows_moveRight, dir: "down"});
-	editor.bindKey({desc: "Moves the caret to the left, steps words with Ctrl, and selects with Shift combo", charCode: key_LEFT, fun: keyboard_arrows_moveLeft});
-	editor.bindKey({desc: "Moves the caret up, and selects with Shift combo", charCode: key_UP, fun: keyboard_arrows_moveUp});
-	editor.bindKey({desc: "Moves the caret down, and selects with Shift combo", charCode: key_DOWN, fun: keyboard_arrows_moveDown});
+	EDITOR.bindKey({desc: "Moves the caret to the right, steps words with Ctrl, and selects with Shift combo", charCode: key_RIGHT, fun: keyboard_arrows_moveRight, dir: "down"});
+	EDITOR.bindKey({desc: "Moves the caret to the left, steps words with Ctrl, and selects with Shift combo", charCode: key_LEFT, fun: keyboard_arrows_moveLeft});
+	EDITOR.bindKey({desc: "Moves the caret up, and selects with Shift combo", charCode: key_UP, fun: keyboard_arrows_moveUp});
+	EDITOR.bindKey({desc: "Moves the caret down, and selects with Shift combo", charCode: key_DOWN, fun: keyboard_arrows_moveDown});
 	
 	var selectStart, selectEnd;
 	
@@ -24,7 +24,7 @@
 	
 	function keyboard_arrows_moveLeft(file, combo, character, charCode, keyPush) {
 		
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		if(!file) return true;
 		
 		file.removeHighlights();
@@ -76,7 +76,7 @@
 		
 		file.scrollToCaret(caret);
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		return false;
 		
@@ -84,7 +84,7 @@
 	
 	function keyboard_arrows_moveRight(file, combo) {
 		
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		if(!file) return true;
 		
 		console.log("Moving caret right ...");
@@ -126,7 +126,7 @@
 		
 		file.scrollToCaret(caret);
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		file.checkCaret();
 		
@@ -137,7 +137,7 @@
 	
 	function keyboard_arrows_moveUp(file, combo) {
 		
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		if(!file) return true;
 
 		file.removeHighlights();
@@ -198,7 +198,7 @@
 		
 		file.scrollToCaret(caret);
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		return false;
 	
@@ -206,7 +206,7 @@
 	
 	function keyboard_arrows_moveDown(file, combo) {
 		
-		if(!editor.input) return true;
+		if(!EDITOR.input) return true;
 		if(!file) return true;
 
 		file.removeHighlights();
@@ -267,7 +267,7 @@
 		
 		file.caret = caret; // Set the new caret
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 		return false;
 		

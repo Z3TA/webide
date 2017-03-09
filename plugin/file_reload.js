@@ -4,7 +4,7 @@
 	
 	var menuItem;
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Adds option to reload the file from disk in the context menu",
 		load: load,
 		unload: unload
@@ -12,16 +12,16 @@
 	
 	function load() {
 		
-		menuItem = editor.addMenuItem("Relode from disk", reloadFile);
+		menuItem = EDITOR.addMenuItem("Relode from disk", reloadFile);
 		
 	}
 	
 	function unload() {
-		editor.removeMenuItem(menuItem);
+		EDITOR.removeMenuItem(menuItem);
 	}
 	
 	function reloadFile() {
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 if(!file) return true;
 
@@ -42,10 +42,10 @@ if(!file) return true;
 		}
 		else reload();
 		
-		editor.hideMenu();
+		EDITOR.hideMenu();
 		
 		function reload() {
-			editor.readFromDisk(file.path, function(err, path, text) {
+			EDITOR.readFromDisk(file.path, function(err, path, text) {
 				file.reload(text);
 				
 				file.saved(); // Because we reloaded from disk

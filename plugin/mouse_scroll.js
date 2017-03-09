@@ -4,9 +4,9 @@
 	
 	"use strict";
 
-	var originalTopMargin = editor.settings.topMargin;
+	var originalTopMargin = EDITOR.settings.topMargin;
 
-	editor.on("mouseScroll", onScroll);
+	EDITOR.on("mouseScroll", onScroll);
 	
 	
 	function onScroll(dir, steps, combo) {
@@ -18,13 +18,13 @@
 		
 		else {
 			
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			
 			if(file) {
 				
-				var maxStartRow = Math.max(0, editor.currentFile.grid.length - editor.view.visibleRows/2);
+				var maxStartRow = Math.max(0, EDITOR.currentFile.grid.length - EDITOR.view.visibleRows/2);
 				
-				var startRow = file.startRow + editor.settings.scrollStep * dir;
+				var startRow = file.startRow + EDITOR.settings.scrollStep * dir;
 				
 				
 				if(startRow > maxStartRow) {
@@ -34,21 +34,21 @@
 				console.log("file.startRow=" + file.startRow);
 				console.log("maxStartRow=" + maxStartRow);
 				console.log("startRow=" + startRow);
-				console.log("editor.settings.topMargin=" + editor.settings.topMargin);
+				console.log("EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
 				console.log("originalTopMargin=" + originalTopMargin);
 				
 				if(startRow < 0) {
 					// We are scrolling up above the first row, increase the top margin instead!
 					
 					// No! This is a ugly hack!
-					//editor.settings.topMargin += Math.abs(startRow) * editor.settings.gridHeight;
+					//EDITOR.settings.topMargin += Math.abs(startRow) * EDITOR.settings.gridHeight;
 					startRow = 0
 				}
-				else if(startRow > 0 && editor.settings.topMargin > originalTopMargin) {
+				else if(startRow > 0 && EDITOR.settings.topMargin > originalTopMargin) {
 					// We are scrolling down, and the top margin is larger then the original
-					editor.settings.topMargin -= Math.abs(startRow) * editor.settings.gridHeight;
+					EDITOR.settings.topMargin -= Math.abs(startRow) * EDITOR.settings.gridHeight;
 					startRow = 0;
-					if(editor.settings.topMargin < originalTopMargin) editor.settings.topMargin = originalTopMargin;
+					if(EDITOR.settings.topMargin < originalTopMargin) EDITOR.settings.topMargin = originalTopMargin;
 
 
 				}
@@ -56,20 +56,20 @@
 
 				
 				// Dont allow scrolling up higher then half of the visible space
-				var maxTopMargin = Math.floor((editor.view.visibleRows-2) * editor.settings.gridHeight / 2);
-				if(editor.settings.topMargin > maxTopMargin) editor.settings.topMargin = maxTopMargin;
+				var maxTopMargin = Math.floor((EDITOR.view.visibleRows-2) * EDITOR.settings.gridHeight / 2);
+				if(EDITOR.settings.topMargin > maxTopMargin) EDITOR.settings.topMargin = maxTopMargin;
 
 				
 				/*
 					bugfix: If we have scrolled up, then resize the window, the view will be off because of the new topMargin!!
 					So we have to reset the visibleRows (in case there was a resize).
 				*/
-				editor.view.visibleRows = Math.ceil((editor.view.canvasHeight - editor.settings.topMargin - editor.settings.bottomMargin) / editor.settings.gridHeight);
+				EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
 
 				
 				
 				console.log("... startRow=" +startRow);
-				console.log("editor.settings.topMargin=" +editor.settings.topMargin);
+				console.log("EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
 
 
 				file.scrollTo(undefined, startRow);
@@ -82,7 +82,7 @@
 			}
 		}
 		
-		editor.renderNeeded();
+		EDITOR.renderNeeded();
 		
 	}
 	

@@ -41,7 +41,7 @@
 	}
 	
 	// Add plugin to editor
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Static site generator management interface",
 		load: load,
 		unload: unload,
@@ -57,21 +57,21 @@
 		var keyF9 = 120;
 		var keyEscape = 27;
 		
-		editor.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
-		editor.bindKey({desc: "Hide the manager for the static site generator", fun: hide, charCode: keyEscape, combo: 0});
-		editor.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewButtonClick, charCode: keyF9, combo: 0});
-		editor.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: "Show the manager for the static site generator", fun: show, charCode: keyF9, combo: CTRL});
+		EDITOR.bindKey({desc: "Hide the manager for the static site generator", fun: hide, charCode: keyEscape, combo: 0});
+		EDITOR.bindKey({desc: "Compiles a preveiw for current site in the static site generator", fun: previewButtonClick, charCode: keyF9, combo: 0});
+		EDITOR.bindKey({desc: "Publish/live deployment of the static-site-generator site", fun: publish, charCode: keyF9, combo: CTRL + SHIFT});
 		
 		//build();
 		
-		editor.addMenuItem("Static site generator", function() {
+		EDITOR.addMenuItem("Static site generator", function() {
 			show();
-			editor.hideMenu();
+			EDITOR.hideMenu();
 		});
 		
-		editor.on("fileShow", fileChanged);
+		EDITOR.on("fileShow", fileChanged);
 		
-		editor.on("exit", function SSG_cleanup() {
+		EDITOR.on("exit", function SSG_cleanup() {
 			closePreview();
 			return true;
 		});
@@ -148,7 +148,7 @@
 			buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
 			buttonSetWorkingDirectory.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
-			editor.workingDirectory = selectedSite.source;
+			EDITOR.workingDirectory = selectedSite.source;
 			hide();
 			}, false);
 		*/
@@ -161,11 +161,11 @@
 		buttonOpenEdit.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			
-			editor.workingDirectory = selectedSite.source;
+			EDITOR.workingDirectory = selectedSite.source;
 			
-			editor.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
+			EDITOR.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
 				
-				editor.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
+				EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
 					
 					if(err) throw err;
 					
@@ -174,7 +174,7 @@
 					file.savedAs = true;
 					file.changed = false;
 					
-					editor.renderNeeded();
+					EDITOR.renderNeeded();
 					
 				});
 			});
@@ -241,7 +241,7 @@
 			editView.style.display="block";
 			controlView.style.display="none"; // Hide this div
 			
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		
 		function changeSelectSite() {
@@ -459,7 +459,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -477,7 +477,7 @@
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -500,7 +500,7 @@
 			
 			editView.style.display = "none";
 			controlView.style.display = "block";
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 			
 		}
 		
@@ -531,24 +531,24 @@
 	}
 	
 	function show() {
-		editor.input = false; // Steal focus from the file
+		EDITOR.input = false; // Steal focus from the file
 		
 		if(!manager) build(); // Build the GUI if it's not already built
 		
 		manager.style.display = "block";
 		
-		editor.resizeNeeded();
+		EDITOR.resizeNeeded();
 		
 		return false;
 	}
 	
 	function hide() {
-		if(editor.currentFile) editor.input = true; // Bring back focus to the current file
+		if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
 		
 		// Only need to hide if the object is created!
 		if(manager) {
 			manager.style.display = "none";
-			editor.resizeNeeded();
+			EDITOR.resizeNeeded();
 		}
 		if(previewWin) closePreview() ;
 		
@@ -574,16 +574,16 @@
 			
 			var previewWinOpened = false;
 			
-			if(editor.currentFile) {
-				var fileName = editor.currentFile.name;
-				var fileType = editor.currentFile.fileExtension;
+			if(EDITOR.currentFile) {
+				var fileName = EDITOR.currentFile.name;
+				var fileType = EDITOR.currentFile.fileExtension;
 				
-				if(editor.currentFile.path.indexOf(site.source) != -1 // Inside source path?
+				if(EDITOR.currentFile.path.indexOf(site.source) != -1 // Inside source path?
 				&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
 				&& fileName != "header" && fileName != "footer") {
 					
 					// Save the src file so we edit the right file
-					sourceFile = editor.currentFile;
+					sourceFile = EDITOR.currentFile;
 					
 					if(!sourceFile.isSaved) {
 						alert("The page (" + UTIL.getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
@@ -594,10 +594,10 @@
 					}
 					
 					
-					//var url = path.join(site.preview, editor.currentFile.name);
+					//var url = path.join(site.preview, EDITOR.currentFile.name);
 					
 					// url needs to have / instead of \ for path delimiter
-					var url = "file:///" + editor.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
+					var url = "file:///" + EDITOR.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
 					
 					openPreviewWin(url)
 					
@@ -605,7 +605,7 @@
 					
 				}
 				else {
-					console.log("Not showing preview window because:\neditor.currentFile.path=" + editor.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
+					console.log("Not showing preview window because:\nEDITOR.currentFile.path=" + EDITOR.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
 				}
 			}
 			
@@ -615,7 +615,7 @@
 				
 				editContent = false;
 				
-				editor.listFiles(site.preview, function(err, list) {
+				EDITOR.listFiles(site.preview, function(err, list) {
 					
 					if(err) throw err;
 					
@@ -729,19 +729,19 @@
 	
 	function previewWinFocus() {
 		console.log('preview window is focused');
-		editor.input = false;
+		EDITOR.input = false;
 	}
 	
 	function previewWinUnFocus() {
-		if(editor.currentFile) editor.input = true;
+		if(EDITOR.currentFile) EDITOR.input = true;
 	}
 	
 	function previewInput(target, type, bubbles, cancelable) {
 		console.log("previewInput!");
 		
 		if(!sourceFile) throw new Error("sourceFile is gone!")
-		if(!editor.files.hasOwnProperty(sourceFile.path)) alert("The source for the file being previewed is not opened!")
-		if(sourceFile != editor.currentFile) alert("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
+		if(!EDITOR.files.hasOwnProperty(sourceFile.path)) alert("The source for the file being previewed is not opened!")
+		if(sourceFile != EDITOR.currentFile) alert("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " EDITOR.currentFile=" + EDITOR.currentFile.path)
 		else {
 			//console.log("target=" + UTIL.objInfo(target));
 			console.log("type=" + type);
@@ -891,11 +891,11 @@
 	
 	function newPage(site) {
 		
-		editor.readFromDisk(site.template, function fileRead(err, path, text) {
+		EDITOR.readFromDisk(site.template, function fileRead(err, path, text) {
 			
 			if(err) alert(err.message);
 			else {
-				editor.openFile("newPage.htm", text);
+				EDITOR.openFile("newPage.htm", text);
 			}
 			
 		});
@@ -914,7 +914,7 @@
 		console.log("source=" + JSON.stringify(url.parse(source), null, 2));
 		console.log("destination=" + JSON.stringify(url.parse(destination), null, 2));
 		
-		if(editor.remoteProtocols.indexOf(parse.protocol) != -1) {
+		if(EDITOR.remoteProtocols.indexOf(parse.protocol) != -1) {
 			// We will need to connect to the remote location before uploading files
 			var serverAddress = parse.host;
 			var auth = parse.auth, user, passw, keyPath;
@@ -927,11 +927,11 @@
 			}
 			var workingDir = parse.path;
 			
-			editor.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
+			EDITOR.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
 		}
 		else {
 			// Asume local file-system
-			fsReady(null, editor.workingDirectory);
+			fsReady(null, EDITOR.workingDirectory);
 		}
 		
 		function fsReady(err, workingDir) {
@@ -972,11 +972,11 @@
 				
 				if(data.type == "file") {
 					filesToSave++;
-					editor.saveToDisk(data.path, data.text, fileSaved);
+					EDITOR.saveToDisk(data.path, data.text, fileSaved);
 				}
 				else if(data.type == "copy") {
 					filesToSave++;
-					editor.copyFile(data.from, data.to, fileSaved);
+					EDITOR.copyFile(data.from, data.to, fileSaved);
 				}
 				else if(data.type == "error") {
 					alert(data.msg);

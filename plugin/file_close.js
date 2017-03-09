@@ -2,7 +2,7 @@
 	
 	"use strict";
 	
-	editor.on("start", closeFileKeyCombo);
+	EDITOR.on("start", closeFileKeyCombo);
 	
 	function closeFileKeyCombo() {
 		
@@ -11,10 +11,10 @@
 		
 		// Should we be consistent with how browsers work? Ctrl+Q seems more initutive and Ctrl + W is already used by the Word-Wrapper.
 		
-		editor.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL, fun: closeFile});
-		editor.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
+		EDITOR.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL, fun: closeFile});
+		EDITOR.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
 		
-		editor.addMenuItem("Close file (Ctrl+Q)", closeFile);
+		EDITOR.addMenuItem("Close file (Ctrl+Q)", closeFile);
 		
 	}
 	
@@ -37,18 +37,18 @@
 				var no = "No, keep it open";
 				
 				confirmBox("All unsaved changes will be lost, are you sure you want to close this file?<br><b>" + file.path + "</b>", [yes, no], function(answer) {
-					if(answer == yes) editor.closeFile(editor.currentFile.path);
+					if(answer == yes) EDITOR.closeFile(EDITOR.currentFile.path);
 				});
 			}
 			else {
 				// Close it right away if it's saved
-				editor.closeFile(editor.currentFile.path);
+				EDITOR.closeFile(EDITOR.currentFile.path);
 			}
 			
 		}
 		else {
 			// Close the editor!?
-			editor.exit();
+			EDITOR.exit();
 		}
 		
 		return false;

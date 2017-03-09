@@ -11,7 +11,7 @@ return;
 		
 		Note: This is not a "full debugger". An app that debug itself is not a good idea.
 		A "full debugger" is on the todo list, but for debugging Other chromium apps, 
-		so you would have to use another instance of the editor, to debug the editor with the editor.
+		so you would have to use another instance of the editor, to debug the editor with the EDITOR.
 		A nodejs debugger is also on the todo-list (chromium and nodejs use different debug protocols)
 		
 		dependency:
@@ -45,7 +45,7 @@ return;
 	var padLength = 42;
 	var fullPad = ""; for(var i=0; i<padLength; i++) fullPad += " "; // A string with padLength spaces
 	
-	var newLine = editor.settings.defaultLineBreakCharacter;
+	var newLine = EDITOR.settings.defaultLineBreakCharacter;
 	
 	var client;
 	
@@ -232,7 +232,7 @@ return;
 			
 			//console.log("alertMsg=" + alertMsg);
 			
-			if(editor.settings.devMode) {
+			if(EDITOR.settings.devMode) {
 				// If the developer tools are open, we don't need to open a bug report template file
 				alert(alertMsg);
 				GUI.showDevTools();
@@ -269,7 +269,7 @@ return;
 					
 					var errorReportFilePath = "bug_report.txt"; // The editor will add a counter to double files
 					
-					editor.openFile(errorReportFilePath, reportTemplate(errorReport), function errorReportOpened(err, file) {
+					EDITOR.openFile(errorReportFilePath, reportTemplate(errorReport), function errorReportOpened(err, file) {
 						
 						if(err) GUI.showDevTools();
 						
@@ -391,7 +391,7 @@ return;
 	
 	function sendBugReport() {
 		
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(file) {
 			
@@ -460,7 +460,7 @@ return;
 		'Subject: JZedit bug report' + subject + '\n' +
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
-		'Commit: ' + editor.version + '\n' +
+		'Commit: ' + EDITOR.version + '\n' +
 		'Platform: ' + process.platform + '\n' +
 		'Arguments: ' + require('nw.gui').App.argv + '\n' +
 		'\n' +
@@ -474,7 +474,7 @@ return;
 	
 	function main() {
 		var key_S = 83;
-		editor.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
+		EDITOR.bindKey({desc: "Send bug report", charCode: key_S, fun: sendBugReport, combo: CTRL + SHIFT});
 		
 		restart();
 	}

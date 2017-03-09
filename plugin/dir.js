@@ -4,13 +4,13 @@
 	
 	var key_D = 68;
 	
-	editor.bindKey({desc: "Show a list of files in the work directory", fun: showFiles, charCode: key_D, combo: CTRL});
+	EDITOR.bindKey({desc: "Show a list of files in the work directory", fun: showFiles, charCode: key_D, combo: CTRL});
 	
 	function showFiles() {
 		
-		editor.openFile("file-list.txt", "", function(err, file) {
+		EDITOR.openFile("file-list.txt", "", function(err, file) {
 			
-			editor.listFiles(editor.workingDirectory, function(err, fileList) {
+			EDITOR.listFiles(EDITOR.workingDirectory, function(err, fileList) {
 				
 				if(err) throw err;
 				
@@ -28,7 +28,7 @@
 					file.writeLine(UTIL.spacePad(f.type, 4) + UTIL.spacePad(f.path, maxLen) + UTIL.spacePad(f.size.toString(), 15) + f.date);
 				});
 				
-				editor.renderNeeded();
+				EDITOR.renderNeeded();
 				
 });
 			

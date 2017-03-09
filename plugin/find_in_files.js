@@ -12,19 +12,19 @@
 	var maxTotalMatches = 500;
 	
 	var defaultSearchTerm = "";
-	var defaultSearchFolder = editor.workingDirectory;
+	var defaultSearchFolder = EDITOR.workingDirectory;
 	var defaultSearchFilter = "\.js$|\.htm$|\.html$|\.css$";
 	
-	editor.on("start", function find_in_files_main() {
+	EDITOR.on("start", function find_in_files_main() {
 		
 		var keyF = 70;
 		var keyEnter = 13;
 		var keyEscape = 27;
 		
 		// Pressing Ctrl + shift + F should hide or show the search window
-		editor.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
+		EDITOR.bindKey({desc: "Find in files ...", charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + F
 		
-		editor.bindKey({desc: "Hide the find in files GUI", charCode: keyEscape, fun: hideFindInFilesGui});
+		EDITOR.bindKey({desc: "Hide the find in files GUI", charCode: keyEscape, fun: hideFindInFilesGui});
 		
 		
 		// Point variables to the document object model
@@ -32,7 +32,7 @@
 
 		//buildDiv();
 		
-		editor.on("dblclick", fifdblclick);
+		EDITOR.on("dblclick", fifdblclick);
 		
 		
 	});
@@ -55,7 +55,7 @@
 	}
 	
 	function fifdblclick(mouseX, mouseY, caret, button, target, keyboardCombo) {
-		var file = editor.currentFile;
+		var file = EDITOR.currentFile;
 		
 		if(isSearchReport(file) && caret) {
 			
@@ -109,7 +109,7 @@
 			console.log("line=" + lineNr);
 			console.log("path=" + path);
 			
-			editor.openFile(path, undefined, function highlightGoto(err, file) {
+			EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
 				
 				// Scroll to and place the caret on the line
 				file.gotoLine(lineNr, function afterScrolled() {
@@ -157,19 +157,19 @@
 			
 			if(footerHeight < heightNeeded) {
 				footer.style.height = footerHeight + heightNeeded + "px";
-				editor.resizeNeeded();
+				EDITOR.resizeNeeded();
 			}
 			
 			// Remove focus from the editor when bringing up the search box.
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			if(file) {
-				editor.input = false;
+				EDITOR.input = false;
 			}
 			
-			console.log("Search visible! editor.input=" + editor.input);
+			console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 		}		
 		
 	}
@@ -190,7 +190,7 @@
 				inputFind.focus();
 			}
 			
-			editor.input = false; // Remove focus from the file
+			EDITOR.input = false; // Remove focus from the file
 			
 			return false; // Prevent default (browser) action
 		}
@@ -199,7 +199,7 @@
 	function pressEnter() {
 		// Only search if there is anything in the search field, and the search box has focus
 		if(divVisible && inputFindGotFocus) {
-			if(inputFind.value.length > 0 && editor.input===false) {
+			if(inputFind.value.length > 0 && EDITOR.input===false) {
 				searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked);
 				return false; // Prevent default
 			}
@@ -232,13 +232,13 @@
 			//footer.style.border = ""
 			
 			// Bring back focus to the current file
-			var file = editor.currentFile;
+			var file = EDITOR.currentFile;
 			if(file) {
-				editor.input = true;
+				EDITOR.input = true;
 			}
 
-			editor.resizeNeeded();
-			editor.renderNeeded();
+			EDITOR.resizeNeeded();
+			EDITOR.renderNeeded();
 		}
 	}
 	
@@ -475,10 +475,10 @@
 		buttonBrowseFolder.addEventListener("click", function browseFolder() {
 			var defaultPath = "";
 			
-			if(editor.currentFile) defaultPath = UTIL.getDirectoryFromPath(editor.currentFile.path)
-			else defaultPath = editor.workingDirectory;
+			if(EDITOR.currentFile) defaultPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path)
+			else defaultPath = EDITOR.workingDirectory;
 			
-			editor.directoryDialog(defaultPath, function selectKey(path) {
+			EDITOR.directoryDialog(defaultPath, function selectKey(path) {
 				inputInDir.value = path;
 			});
 			
@@ -532,13 +532,13 @@
 	
 		
 		// Do not overwrite opened files!
-		while(editor.files.hasOwnProperty(reportFilePath)) {
+		while(EDITOR.files.hasOwnProperty(reportFilePath)) {
 			reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
 		}
 		
 		// File extension (.tmp) so that it's not formatted by the JS parser
 		
-		editor.openFile(reportFilePath, content, function(err, file) {
+		EDITOR.openFile(reportFilePath, content, function(err, file) {
 			
 			reportFile = file;
 			
@@ -546,7 +546,7 @@
 			file.savedAs = false;
 			file.parse = false;
 			
-			editor.renderNeeded();
+			EDITOR.renderNeeded();
 			
 			reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match: " + searchString + "/" + flags);
 			//reportFile.insertLineBreak();

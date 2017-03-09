@@ -84,19 +84,19 @@
 
 	"use strict";
 	
-	editor.plugin({
+	EDITOR.plugin({
 		desc: "Parse JavaScript etc",
 		order: 100,
 		load:function jsParserMain() {
 			
-		editor.on("fileOpen", onFileOpen);
-		editor.on("fileChange", parseJsOnChange, 100);
+		EDITOR.on("fileOpen", onFileOpen);
+		EDITOR.on("fileChange", parseJsOnChange, 100);
 
 	},
 		unload: function unloadJsParser() {
 			
-			editor.removeEvent("fileOpen", onFileOpen);
-			editor.removeEvent("fileChange", parseJsOnChange);
+			EDITOR.removeEvent("fileOpen", onFileOpen);
+			EDITOR.removeEvent("fileChange", parseJsOnChange);
 			
 		}
 	});
@@ -483,7 +483,7 @@
 							
 							console.timeEnd("parseOnlyFunctionOptimizer");
 							
-							if(editor.settings.devMode && newParse.blockMatch) {
+							if(EDITOR.settings.devMode && newParse.blockMatch) {
 								
 								// Make a full parse and compare to see if there are any bugs
 								console.log("fullParse to check for errors:");
@@ -500,7 +500,7 @@
 								
 								
 								// Sanity check (we had some problems with functions having bad start and end, witch need to be correct for the "parse only current function" optimizer)
-								if(editor.settings.devMode && newParse.blockMatch) {
+								if(EDITOR.settings.devMode && newParse.blockMatch) {
 									console.log("Checking checkFunctionStartEnd");
 									try {
 										checkFunctionStartEnd(file, newParse.functions);
@@ -737,7 +737,7 @@
 		insideXmlTagEnding = false,
 		xmlTag = "",
 		lastXmlTag = "",
-		tagBreak = editor.settings.indentAfterTags,
+		tagBreak = EDITOR.settings.indentAfterTags,
 		codeBlockLeftRow = -1,
 		codeBlockRightRow = -2,
 		insideArray = [],
