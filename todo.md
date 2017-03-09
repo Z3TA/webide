@@ -49,6 +49,8 @@ Move everything that requires nw.js into server.js
 
 todo:
 
+Some sort of indication that you are disconnected to the server
+
 How to handle errors in server.js ?
 
 Functionality discovery: Add a search button in the upper right corder, clicking it is the same as clicking the keyboard function/ctrl button:
