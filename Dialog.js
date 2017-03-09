@@ -10,6 +10,8 @@
 
 function Dialog(msg, icon) {
 	
+	console.log("Creating dialog: msg=" + msg);
+	
 	if(msg == undefined) throw new Error("Dialog without a message!");
 	
 	msg = msg.toString(); // Convert numbers etc to string so we can use the replace method

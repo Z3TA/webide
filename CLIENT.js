@@ -84,6 +84,7 @@ var CLIENT = {}; // Client object is global
 						if(eventListeners.hasOwnProperty(method)) {
 							CLIENT.fireEvent(method, json.resp[method]);
 						}
+						console.warn("Unknown client method: " + method + " data=" + JSON.stringify(json.resp[method]));
 					}
 				}
 				
@@ -96,9 +97,9 @@ var CLIENT = {}; // Client object is global
 				}
 				else if(json.msg) {
 					console.warn(json.msg);
-					alert(json.msg);
+					alertBox(json.msg);
 				}
-				else {
+				else if(!json.resp) {
 					throw new Error("Unexpected server response: " + JSON.stringify(json, null, 2));
 				}
 				
@@ -185,6 +186,8 @@ var CLIENT = {}; // Client object is global
 	}
 	
 	CLIENT.fireEvent = function fireEvent(ev, data) {
+		
+		console.log("firing client event '" + ev + "' data=" + data);
 		
 		if(!eventListeners.hasOwnProperty(ev)) console.warn("No registered event=" + ev)
 		else {

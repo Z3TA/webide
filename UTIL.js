@@ -105,6 +105,8 @@ var UTIL = {
 			
 			var protocol = fullPath.substr(0, protocolIndex);
 			
+			if(protocol) protocol = protocol.toLowerCase();
+			
 			console.log("protocol=" + protocol);
 			
 			if(EDITOR.remoteProtocols.indexOf(protocol) == -1) {

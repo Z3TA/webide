@@ -125,6 +125,13 @@ function connection(connection) {
 						
 						send({resp: {user: user.name}})
 						
+						setTimeout(function() {
+							user.send({resp: {
+								test: {foo: 1, bar: 2}
+							}});
+							
+						}, 3000);
+						
 						for(var i=0; i<commandQueue.length; i++) {
 							handle(commandQueue[i]);
 						}
@@ -143,7 +150,8 @@ function connection(connection) {
 					if(err) {
 						log(err + err.stack);
 						
-						send({error: "API error (" + err.message + "): " + message});
+						send({error: "API error: " + err.message + ""});
+						//send({error: "API error (" + err.message + "): " + message});
 					}
 					else {
 						send({resp: answer});
@@ -266,15 +274,20 @@ User.prototype.disconnected = function disconnected() {
 
 User.prototype.send = function send(msg) {
 	var user = this;
-
-	if(!user.connection) {
-		console.warn("Unable to send msg. User name=" + user.name + " is not connected!");
-		return;
+	
+	if(!isObject(msg)) {
+		msg = {msg: msg};
 	}
 	
 	var str = JSON.stringify(msg);
+	
+	if(!user.connection) {
+		console.warn("Unable to send msg=" + str + ". User name=" + user.name + " is not connected!");
+		return;
+	}
+	
 	log(user.IP + " <= " + str);
-	connection.write(str);
+	user.connection.write(str);
 	
 }
 
@@ -288,11 +301,17 @@ User.prototype.connectionClosed = function connectionClosed(protocol, serverAddr
 	var user = this;
 	
 	// Notify the client about closed connection
-	
+	user.send({resp: {
+		connectionClosed: {protocol: protocol, serverAddress: serverAddress}
+	}});
 	
 	delete user.connections[serverAddress]; // Remove the connection
 	
 }
 
+
+function isObject(obj) {
+  return obj === Object(obj);
+}
 
 main();

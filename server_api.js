@@ -33,7 +33,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 		var parse = url.parse(path);
 		
 		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
-			
+		
 		if(user.connections.hasOwnProperty(parse.hostname)) {
 				
 			var c = user.connections[parse.hostname].client;
@@ -70,7 +70,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 				
 			}
 			else {
-				alertBox("No connection open to FTP on " + parse.hostname + " !");
+				user.send({msg: "No connection open to FTP on " + parse.hostname + " !"});
 			}
 		}
 		else if(parse.protocol == "sftp:") {
@@ -96,7 +96,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 				
 			}
 			else {
-				alertBox("No connection open to SFTP on " + parse.hostname + " !");
+				user.send({msg: "No connection open to SFTP on " + parse.hostname + " !"});
 			}
 		}
 		
@@ -314,7 +314,6 @@ else if(protocol == "sftp:") {
 			console.log("Attempting saving to local file system: " + path + " ...");
 			
 			if(err) {
-				//alertBox("Unable to save file! " + err.message + "\n" + path);
 				console.warn("Unable to save " + path + "!");
 				saveToDiskCallback(err);
 			}
@@ -836,26 +835,17 @@ API.connect = function(user, json, callback) {
 		});
 		
 		ftpClient.on('error', function(err) {
-			alertBox(err.message);
+			user.send(err.message);
 			callback(err); // Should we callback here ?? Can happend several hours after the connection was initiated!
 			
-			connectionClosed("ftp", serverAddress);
+			user.connectionClosed("ftp", serverAddress);
 			
-			/*
-				if(err.message == "Login incorrect.") {
-				alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message + "\nProbably wrong username/password!");
-				}
-				else {
-				alertBox("Problem connecting to FTP on " + serverAddress + "\n" + err.message);
-				}
-				console.error(err);
-			*/
 		});
 		
 		ftpClient.on('close', function(hadErr) {
-			alertBox("Connection to FTP on " + serverAddress + " closed.");
+			user.send("Connection to FTP on " + serverAddress + " closed.");
 			
-			connectionClosed("ftp", serverAddress);
+			user.connectionClosed("ftp", serverAddress);
 			
 		});
 		
@@ -920,8 +910,7 @@ API.connect = function(user, json, callback) {
 					if (err) {
 						sshClient.end();
 						callback(err);
-						//alertBox("Unable to run SFTP on " + serverAddress + "\n" + err.message);
-						//throw err;
+
 					}
 					else {
 						user.connections[serverAddress] = {client: sftpClient, protocol: protocol};
@@ -970,7 +959,7 @@ API.connect = function(user, json, callback) {
 				}
 				catch(err) {
 					cb(err);
-					//alertBox("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
+					//user.send("Problem connecting to SSH on " + serverAddress + ".\n" + err.message + "\nProbably wrong key passphrase");
 				}
 			});
 		}
@@ -1006,7 +995,7 @@ API.connect = function(user, json, callback) {
 						dir += data;
 					}).stderr.on('data', function(data) {
 						cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
-						//alertBox("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
+						//user.send("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
 						console.warn('STDERR: ' + data);
 					});
 				});
@@ -1014,17 +1003,17 @@ API.connect = function(user, json, callback) {
 			}).on('error', function(err) {
 				cb(err);
 				if(err.message == "All configured authentication methods failed") {
-					alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
+					user.send("Problem connecting to SSH on " + serverAddress + "\n" + err.message + "\nYou might need a key!");
 				}
 				else {
-					alertBox("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
+					user.send("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
 				}
-				connectionClosed("ssh", serverAddress);
+				user.connectionClosed("ssh", serverAddress);
 				
 			}).on('end', function(msg) {
-				alertBox("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
+				user.send("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
 				
-				connectionClosed("ssh", serverAddress);
+				user.connectionClosed("ssh", serverAddress);
 				
 			}).connect(auth);
 		}

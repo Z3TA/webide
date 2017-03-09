@@ -437,7 +437,7 @@
 			var name = inputName.value;
 			for (var i=0; i<remoteConnections.length; i++) {
 				if(remoteConnections[i].name == name) {
-					alert(name + " alias already used!");
+					alertBox(name + " alias already used!");
 					return;
 				}
 			}
@@ -577,13 +577,13 @@
 				buttonDisconnect.style.display="none"; // Hide disconnect button
 				
 				if(err.message.indexOf("Expected 0x2:") != -1) {
-					alert(err.message + "\nProbably wrong key password")
+					alertBox(err.message + "\nProbably wrong key password")
 				}
-				else alert(err.message);
+				else alertBox(err.message);
 				console.log("Connection error: " + err.message);
 			}
 			else {
-				alert("Connected to " + protocol + " on " + hostName + "!");
+				alertBox("Connected to " + protocol + " on " + hostName + "!");
 				hideServerManger();
 }
 }

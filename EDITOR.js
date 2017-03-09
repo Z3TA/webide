@@ -897,9 +897,9 @@ EDITOR.lastKeyPressed = "";
 		// Fix blurryness for screens with high pixel ratio
 		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		if(pixelRatio !== 1) {
-		ctx.restore();
-		ctx.save();
-		ctx.scale(pixelRatio,pixelRatio);
+			ctx.restore();
+			ctx.save();
+			ctx.scale(pixelRatio,pixelRatio);
 		}
 		
 		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
@@ -2616,7 +2616,11 @@ EDITOR.lastKeyPressed = "";
 		
 		CLIENT.cmd("connect", json, function(err, json) {
 			if(err) callback(err);
-			else callback(null, json.workingDirectory);
+			else {
+				
+				EDITOR.connections[serverAddress] = {protocol: protocol};
+				callback(null, json.workingDirectory);
+			}
 		});
 		
 	}
@@ -2656,7 +2660,7 @@ EDITOR.lastKeyPressed = "";
 		
 		if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
 		if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
-
+		
 		var json = {pathToFolder: pathToFolder};
 		
 		CLIENT.cmd("listFiles", json, function(err, json) {
@@ -2750,9 +2754,8 @@ EDITOR.lastKeyPressed = "";
 		// todo: for debugging. Returns true if the screen area is the same as the background
 	}
 	
-
 	
-	function connectionClosed(protocol, serverAddress) {
+	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
 		
@@ -2785,7 +2788,7 @@ EDITOR.lastKeyPressed = "";
 			return list;
 		}
 		
-	}
+	});
 	
 	function removeFrom(list, fun) {
 		// Removes an object from an array of objects
@@ -2944,7 +2947,7 @@ EDITOR.lastKeyPressed = "";
 		
 		
 		CLIENT.connect(undefined, connectedToServer);
-	
+		
 		
 		getVersion(function(version) {
 			
@@ -3013,7 +3016,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		window.onbeforeunload = confirmExit;
-
+		
 		
 		
 		// Handle file save dialog
@@ -3100,7 +3103,7 @@ EDITOR.lastKeyPressed = "";
 		
 		
 		
-
+		
 		
 		
 		// Sort and load plugins
@@ -3956,7 +3959,7 @@ EDITOR.lastKeyPressed = "";
 			
 			try {e.preventDefault();} catch(err) {console.warn(err.message);}
 			try {event.preventDefault();} catch(err) {console.warn(err.message);}
-
+			
 			return false;
 		}
 		else {
@@ -4640,20 +4643,20 @@ EDITOR.lastKeyPressed = "";
 	function fullScreen() {
 		alertBox("Attempting to go into full-screen ...")
 		if (
-			document.fullscreenEnabled || 
-			document.webkitFullscreenEnabled || 
-			document.mozFullScreenEnabled ||
-			document.msFullscreenEnabled
+		document.fullscreenEnabled || 
+		document.webkitFullscreenEnabled || 
+		document.mozFullScreenEnabled ||
+		document.msFullscreenEnabled
 		) {
 			var body = document.getElementById("body");
 			if (body.requestFullscreen) {
-			  body.requestFullscreen();
+				body.requestFullscreen();
 			} else if (body.webkitrequestFullscreen) {
-			  body.webkitrequestFullscreen();
+				body.webkitrequestFullscreen();
 			} else if (body.mozrequestFullscreen) {
-			  body.mozrequestFullscreen();
+				body.mozrequestFullscreen();
 			} else if (body.msrequestFullscreen) {
-			  body.msrequestFullscreen();
+				body.msrequestFullscreen();
 			}
 		}
 		else {
@@ -4664,5 +4667,5 @@ EDITOR.lastKeyPressed = "";
 	function confirmExit() {
 		return "Are you sure you want to close the editor ?";
 	}
-		
+	
 })();

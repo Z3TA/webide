@@ -13,7 +13,7 @@ This is a text/code editor that specialize in JavaScript, CSS and HTML.
 See LICENCE.txt to know what you are allowed to do with it.
 
 See contribute.txt on how to send your changes.
- 
+
 Available for Linux, Windows (and soon Mac OS X)
 
 
