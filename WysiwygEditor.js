@@ -180,7 +180,7 @@ var WysiwygEditor;
 			
 			if(index == -1) {
 				// Probably because you clicked on the body element
-				console.log("Unable to find the string innerText='" + lbChars(innerText) + "' in the source file: " + sourceFile.path);
+				console.log("Unable to find the string innerText='" + UTIL.lbChars(innerText) + "' in the source file: " + sourceFile.path);
 			}
 			else {
 			
@@ -401,7 +401,7 @@ var WysiwygEditor;
 		
 		console.log("previewMouseup!");
 		
-		objInfo(e.target);
+		UTIL.objInfo(e.target);
 		
 		if(!editor.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 		
@@ -487,9 +487,9 @@ var WysiwygEditor;
 			if(sanitized == prewBodyHtml) console.log("No white space sanitiaztion needed"); 
 			else {
 				
-				console.log("prewBodyHtml=\n" + debugWhiteSpace(prewBodyHtml) + "\n");
+				console.log("prewBodyHtml=\n" + UTIL.debugWhiteSpace(prewBodyHtml) + "\n");
 				
-				console.log("sanitized=\n" + debugWhiteSpace(sanitized) + "\n");
+				console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
 				
 				/*
 					Problem: contenteditable will lose the caret when the html is updated, 
@@ -514,7 +514,7 @@ var WysiwygEditor;
 			
 			
 			// Compare the source with the editable preview
-			var diff = textDiff(srcHTML, prewBodyHtml);
+			var diff = UTIL.textDiff(srcHTML, prewBodyHtml);
 			
 			/*
 				Problem: When ignoreTransform removes a diff ...
@@ -581,15 +581,15 @@ var WysiwygEditor;
 					source=" + sourceFile.rowText(row).trim() + "\n\
 					remove=" + diff.removed[i].text.trim() + "\n\
 					diff=" + JSON.stringify(diff, null, 2) + "\n\n\
-					srcHTML=" + lbChars(srcHTML) + "\n\n\
-					prewBodyHtml=" + lbChars(prewBodyHtml));
+					srcHTML=" + UTIL.lbChars(srcHTML) + "\n\n\
+					prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 				}
 				
 				removedText = sourceFile.removeAllTextOnRow(row);
 				
-				if(removedText.match(/\n|\r\n/)) throw new Error("Did not expect a new line character to be removed! removedText=" + lbChars(removedText));
+				if(removedText.match(/\n|\r\n/)) throw new Error("Did not expect a new line character to be removed! removedText=" + UTIL.lbChars(removedText));
 				
-				if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + lbChars(removedText) + " = removedText\n" + lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
+				if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + UTIL.lbChars(removedText) + " = removedText\n" + UTIL.lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
 				
 				console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
 				
@@ -608,7 +608,7 @@ var WysiwygEditor;
 						console.log("Inserting (replacing) row=" + row + " text=" + text);
 						
 						// textLineDiff
-						col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
+						col= UTIL.textDiffCol(diff.removed[i].text, diff.inserted[j].text);
 						
 						if(diff.inserted[j].text.length > diff.removed[i].text.length) col += (diff.inserted[j].text.length - diff.removed[i].text.length);
 						
@@ -746,7 +746,7 @@ var WysiwygEditor;
 				console.log("Removed tailing LF when retrieved content-editable body");
 			}
 			else {
-				console.log("last char: " + lbChars(prewHTML.charAt(prewHTML.length-1)));
+				console.log("last char: " + UTIL.lbChars(prewHTML.charAt(prewHTML.length-1)));
 			}
 			return prewHTML;
 		}
@@ -757,7 +757,7 @@ var WysiwygEditor;
 				console.log("Removed tailing TAB when retrieved content-editable body");
 			}
 			else {
-				console.log("last char: " + lbChars(prewHTML.charAt(prewHTML.length-1)));
+				console.log("last char: " + UTIL.lbChars(prewHTML.charAt(prewHTML.length-1)));
 			}
 			return prewHTML;
 		}
@@ -784,7 +784,7 @@ var WysiwygEditor;
 			
 			// just warn, then stop where getSourceCodeBody() is called, and try to fix the problem
 			
-			throw new Error("Could not find body element in source file:" + sourceFile.path + "\nsourceFile.text=" + lbChars(sourceFile.text));
+			throw new Error("Could not find body element in source file:" + sourceFile.path + "\nsourceFile.text=" + UTIL.lbChars(sourceFile.text));
 		}
 
 		srcHTML = srcMatchBody[1];
@@ -887,7 +887,7 @@ var WysiwygEditor;
 			//var doc = previewWin.document;
 			
 			// Remove this function from the loaded listener
-			//objInfo(previewWin);
+			//UTIL.objInfo(previewWin);
 			previewWin.removeListener("loaded", previewWinLoaded);
 			
 			var win = previewWin.window;
@@ -899,7 +899,7 @@ var WysiwygEditor;
 			
 			var html = sourceFile.text;
 			
-			console.log("Writing html=" + lbChars(html));
+			console.log("Writing html=" + UTIL.lbChars(html));
 			
 			
 			// Write the html to the content-editable
@@ -924,11 +924,11 @@ var WysiwygEditor;
 				
 				// Need to know line break convention before getting the content-editable code!
 				console.log("WYSIWYG determine line break convention:");
-				wysiwygEditor.lineBreak = determineLineBreakCharacters(body.innerHTML); 
+				wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML); 
 				
 				// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
 				var prewBodyHtml = wysiwygEditor.getContentEditableCode();
-				console.log("(after write) prewBodyHtml=" + lbChars(prewBodyHtml));
+				console.log("(after write) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 				
 				// Sanitize (add line break etc) to the content-editable code
 				var sanitazed = sanitize(prewBodyHtml, wysiwygEditor.lineBreak);
@@ -936,20 +936,20 @@ var WysiwygEditor;
 				if(sanitazed != prewBodyHtml) {
 					setContentEditableBody(body, sanitazed);
 					prewBodyHtml = wysiwygEditor.getContentEditableCode();
-					console.log("(after sanitation) prewBodyHtml=" + lbChars(prewBodyHtml));
+					console.log("(after sanitation) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 				}
 				
 				// Use the contenteditable line break convention in the source file to make life easier
 				if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
 					var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
 					html = html.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
-					console.log("Replaced line breaks in source code: html=" + lbChars(html));
+					console.log("Replaced line breaks in source code: html=" + UTIL.lbChars(html));
 				}
 				
 				// Replace the the content of the body element with the content-editable code
 				html = changeCodeInBody(prewBodyHtml, html);
 				
-				console.log("(after setting) html=" + lbChars(html));
+				console.log("(after setting) html=" + UTIL.lbChars(html));
 				
 				sourceFile.reload(html);
 				
@@ -960,14 +960,14 @@ var WysiwygEditor;
 				
 				// The source code and content-editable should now have the same line breaks!
 				
-				console.log("(after) srcHTML=" + lbChars(srcHTML));
+				console.log("(after) srcHTML=" + UTIL.lbChars(srcHTML));
 				
 				// The source code and content editable code should now be the same!
 				if(wysiwygEditor.getContentEditableCode() != srcHTML) {
 					throw new Error("Source code does not match!\n \
-					wysiwygEditor.getContentEditableCode()=" + lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
-					srcHTML=" + lbChars(srcHTML) + "\n\n\
-					diff=" + JSON.stringify(textDiff(wysiwygEditor.getContentEditableCode(), srcHTML, null, 2)));
+					wysiwygEditor.getContentEditableCode()=" + UTIL.lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
+					srcHTML=" + UTIL.lbChars(srcHTML) + "\n\n\
+					diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), srcHTML, null, 2)));
 				}
 				
 				sourceFile.checkGrid();
@@ -1034,7 +1034,7 @@ var WysiwygEditor;
 		// This is to prevent having the body tags included in text diff
 		
 		if(html.match(regexBody) === null) throw new Error("Unable to find body element when setting the code body.\n\
-		html=" + lbChars(html));
+		html=" + UTIL.lbChars(html));
 		
 		// 1. body attributes
 		// 2. line break character(s) after body tag
@@ -1047,7 +1047,7 @@ var WysiwygEditor;
 		
 		// Sanity check!
 		if(html.match(regexBody) === null) throw new Error("We are not sane!\n\
-		html=" + lbChars(html));
+		html=" + UTIL.lbChars(html));
 		
 		return html;
 	}
@@ -1159,7 +1159,7 @@ var WysiwygEditor;
 		var lbBefore = checkStartingLineBreaks();
 		
 		
-		console.log("inserting (sanitizing) line breaks. LB=" + lbChars(LB));
+		console.log("inserting (sanitizing) line breaks. LB=" + UTIL.lbChars(LB));
 		
 		console.time("insertLineBreaks");
 		
@@ -1279,11 +1279,11 @@ var WysiwygEditor;
 		
 		
 		
-		ignoreTransform = textDiff(srcHTML, rawMainHtml);
+		ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 		
 		// Make sure there are no errors
-		var lbSrc = occurrences(srcHTML, "\n");
-		var lbMain = occurrences(rawMainHtml, "\n");
+		var lbSrc = UTIL.occurrences(srcHTML, "\n");
+		var lbMain = UTIL.occurrences(rawMainHtml, "\n");
 		var removed = ignoreTransform.removed.length;
 		var inserted = ignoreTransform.inserted.length;
 		

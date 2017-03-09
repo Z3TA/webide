@@ -194,7 +194,7 @@ editor.lastKeyPressed = "";
 		Feel free to add more editor API methods below. Do not extend the editor object elsewhere!!
 	*/
 	
-	editor.workingDirectory = trailingSlash(process.cwd());
+	editor.workingDirectory = UTIL.trailingSlash(process.cwd());
 	
 	if(runtime!="browser") {
 		// Check if the working directory is the same as the editor (hmm, why?)
@@ -213,11 +213,11 @@ editor.lastKeyPressed = "";
 		
 		// Check if the dir exists ?
 		
-		editor.workingDirectory = trailingSlash(workingDir);;
+		editor.workingDirectory = UTIL.trailingSlash(workingDir);;
 		
 		console.log("Calling changeWorkingDir listeners (" + editor.eventListeners.changeWorkingDir.length + ") workingDir=" + workingDir);
 		for(var i=0; i<editor.eventListeners.changeWorkingDir.length; i++) {
-			//console.log("function " + getFunctionName(editor.eventListeners.changeWorkingDir[i].fun));
+			//console.log("function " + UTIL.getFunctionName(editor.eventListeners.changeWorkingDir[i].fun));
 			editor.eventListeners.changeWorkingDir[i].fun(workingDir); // Call function
 		}
 		
@@ -351,14 +351,14 @@ editor.lastKeyPressed = "";
 			*/
 		}
 		
-		if(!isString(path)) return fileOpenError(new Error("path is not a string: " + path));
+		if(!UTIL.isString(path)) return fileOpenError(new Error("path is not a string: " + path));
 		
 		openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
 		
 		if(text == undefined) {
 			
 			if(runtime!="browser") {
-				path = makePathAbsolute(path);
+				path = UTIL.makePathAbsolute(path);
 			}
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
@@ -394,7 +394,7 @@ editor.lastKeyPressed = "";
 		else {
 			
 			//console.log("text is NOT undefined! But is it a string?");
-			if(!isString(text)) {
+			if(!UTIL.isString(text)) {
 				console.log("text=" + text);
 				return fileOpenError(new Error("text is not a string!"));
 				
@@ -443,7 +443,7 @@ editor.lastKeyPressed = "";
 				
 				console.log("Calling fileOpen listeners (" + editor.eventListeners.fileOpen.length + ") path=" + path);
 				for(var i=0; i<editor.eventListeners.fileOpen.length; i++) {
-					//console.log("function " + getFunctionName(editor.eventListeners.fileOpen[i].fun));
+					//console.log("function " + UTIL.getFunctionName(editor.eventListeners.fileOpen[i].fun));
 					editor.eventListeners.fileOpen[i].fun(file); // Call function
 				}
 				
@@ -823,7 +823,7 @@ editor.lastKeyPressed = "";
 	editor.setFileOpenPath = function(defaultPath) {
 		// path needs to be a directory
 		var fileOpen = document.getElementById("fileInput");
-		fileOpen.setAttribute("nwworkingdir", trailingSlash(defaultPath));
+		fileOpen.setAttribute("nwworkingdir", UTIL.trailingSlash(defaultPath));
 	}
 	
 	editor.fileOpenDialog = function(defaultPath, callback) {
@@ -840,7 +840,7 @@ editor.lastKeyPressed = "";
 		
 		//if(defaultPath == undefined) defaultPath = editor.workingDirectory;
 		
-		if(!defaultPath) defaultPath = getDirectoryFromPath(undefined);
+		if(!defaultPath) defaultPath = UTIL.getDirectoryFromPath(undefined);
 		else {
 			
 			var lastChar = defaultPath.substr(defaultPath.length-1);
@@ -872,7 +872,7 @@ editor.lastKeyPressed = "";
 		
 		if(editor.settings.devMode && editor.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			console.log(getStack("renderNeeded"));
+			console.log(UTIL.getStack("renderNeeded"));
 		}
 		editor.shouldRender = true;
 	}
@@ -881,7 +881,7 @@ editor.lastKeyPressed = "";
 		// Tell the editor that it needs to resize
 		if(editor.settings.devMode && editor.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			console.log(getStack("resizeNeeded"));
+			console.log(UTIL.getStack("resizeNeeded"));
 		}
 		editor.shouldResize = true;
 	}
@@ -958,7 +958,7 @@ editor.lastKeyPressed = "";
 			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging performance issues.
 			//console.time("preRenders");
 			for(var i=0; i<editor.preRenderFunctions.length; i++) {
-				//funName = getFunctionName(editor.preRenderFunctions[i]);
+				//funName = UTIL.getFunctionName(editor.preRenderFunctions[i]);
 				//console.time("prerender: " + funName);
 				buffer = editor.preRenderFunctions[i](buffer, file); // Call render
 				//console.timeEnd("prerender: " + funName);
@@ -970,7 +970,7 @@ editor.lastKeyPressed = "";
 			if(buffer.length > 0) {
 				var startIndex = buffer[0].startIndex;
 				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
-				var containZeroWidthCharacters = (indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
 				
 			}
 			else var containZeroWidthCharacters = false;
@@ -992,7 +992,7 @@ editor.lastKeyPressed = "";
 			
 			//console.time("renders");
 			for(var i=0; i<editor.renderFunctions.length; i++) {
-				//funName = getFunctionName(editor.renderFunctions[i]);
+				//funName = UTIL.getFunctionName(editor.renderFunctions[i]);
 				//console.time("render: " + funName);
 				editor.renderFunctions[i](ctx, buffer, editor.currentFile, startRow, containZeroWidthCharacters); // Call render
 				//console.timeEnd("render: " + funName);
@@ -1258,7 +1258,7 @@ editor.lastKeyPressed = "";
 		editor.with = windowWidth;
 		
 		
-		//objInfo(centerColumn);
+		//UTIL.objInfo(centerColumn);
 		
 		
 		//editor.view.canvasWidth = windowWidth - leftRightColumnWidth;
@@ -1469,11 +1469,11 @@ editor.lastKeyPressed = "";
 			Check if the function name is unique (if there's already an event listener for this event with the same function name)
 			Having unique function names will make it easier to debug
 		*/
-		var funName = getFunctionName(options.fun);
+		var funName = UTIL.getFunctionName(options.fun);
 		if(funName == "") throw new Error("Please give the event listener function a name! (You can also name lamda function: ex: foo(function lamda() {})")
 		for(var i=0; i<editor.eventListeners[eventName].length; i++) {
 			if(editor.eventListeners[eventName][i].fun != undefined) {
-				if(funName == getFunctionName(editor.eventListeners[eventName][i].fun)) {
+				if(funName == UTIL.getFunctionName(editor.eventListeners[eventName][i].fun)) {
 					throw new Error("There is already a function named " + funName + " for the " + eventName + " event. Please give your function another name!");
 				}
 			}
@@ -1505,7 +1505,7 @@ editor.lastKeyPressed = "";
 			Note to myself: Some events have objects and others just have the function!!
 			
 		*/
-		var fname = getFunctionName(fun);
+		var fname = UTIL.getFunctionName(fun);
 		var events = editor.eventListeners[eventName];
 		var found = 0;
 		
@@ -1954,7 +1954,7 @@ editor.lastKeyPressed = "";
 			fun = editor.eventListeners.autoComplete[i].fun;
 			ret = fun(file, word, wordLength, options.length);
 			
-			console.log("function " + getFunctionName(fun) + " returned: " + JSON.stringify(ret));
+			console.log("function " + UTIL.getFunctionName(fun) + " returned: " + JSON.stringify(ret));
 			
 			if(ret) {
 				if(Array.isArray(ret)) {
@@ -1970,7 +1970,7 @@ editor.lastKeyPressed = "";
 						
 						console.log("addWord=" + addWord + " addMcl=" + addMcl);
 						
-						if(word.length > 0 && addWord.indexOf(word) != 0) throw new Error("Function " + getFunctionName(fun) + " returned '" + addWord + "' witch does not have word=" + word + " in it!") 
+						if(word.length > 0 && addWord.indexOf(word) != 0) throw new Error("Function " + UTIL.getFunctionName(fun) + " returned '" + addWord + "' witch does not have word=" + word + " in it!") 
 						
 						if(options.indexOf(addWord) == -1) {
 							options.push(addWord);
@@ -1979,7 +1979,7 @@ editor.lastKeyPressed = "";
 					}
 				}
 				else {
-					throw new Error(getFunctionName(fun) + " did not return an array");
+					throw new Error(UTIL.getFunctionName(fun) + " did not return an array");
 				}
 			}
 		}
@@ -2147,7 +2147,7 @@ editor.lastKeyPressed = "";
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)
 		if(file.savedAs) {
 			editor.setFileSavePath(file.path);
-			editor.setFileOpenPath(getDirectoryFromPath(file.path));
+			editor.setFileOpenPath(UTIL.getDirectoryFromPath(file.path));
 		}
 		
 		editor.input = focus;
@@ -2167,12 +2167,273 @@ editor.lastKeyPressed = "";
 	editor.getKeyFor = function(funName) {
 		// Returns a string representing the key combination for the keyBidning "fun" name.
 		
-		if(typeof funName == "function") funName = getFunctionName(funName); // Convert to string
+		if(typeof funName == "function") funName = UTIL.getFunctionName(funName); // Convert to string
+		
+		// names of known key codes (0-255)
+		var getKeyboardMapping = [
+			"", // [0]
+			"", // [1]
+			"", // [2]
+			"CANCEL", // [3]
+			"", // [4]
+			"", // [5]
+			"HELP", // [6]
+			"", // [7]
+			"BACK_SPACE", // [8]
+			"TAB", // [9]
+			"", // [10]
+			"", // [11]
+			"CLEAR", // [12]
+			"ENTER", // [13]
+			"ENTER_SPECIAL", // [14]
+			"", // [15]
+			"SHIFT", // [16]
+			"CONTROL", // [17]
+			"ALT", // [18]
+			"PAUSE", // [19]
+			"CAPS_LOCK", // [20]
+			"KANA", // [21]
+			"EISU", // [22]
+			"JUNJA", // [23]
+			"FINAL", // [24]
+			"HANJA", // [25]
+			"", // [26]
+			"ESCAPE", // [27]
+			"CONVERT", // [28]
+			"NONCONVERT", // [29]
+			"ACCEPT", // [30]
+			"MODECHANGE", // [31]
+			"SPACE", // [32]
+			"PAGE_UP", // [33]
+			"PAGE_DOWN", // [34]
+			"END", // [35]
+			"HOME", // [36]
+			"LEFT", // [37]
+			"UP", // [38]
+			"RIGHT", // [39]
+			"DOWN", // [40]
+			"SELECT", // [41]
+			"PRINT", // [42]
+			"EXECUTE", // [43]
+			"PRINTSCREEN", // [44]
+			"INSERT", // [45]
+			"DELETE", // [46]
+			"", // [47]
+			"0", // [48]
+			"1", // [49]
+			"2", // [50]
+			"3", // [51]
+			"4", // [52]
+			"5", // [53]
+			"6", // [54]
+			"7", // [55]
+			"8", // [56]
+			"9", // [57]
+			"COLON", // [58]
+			"SEMICOLON", // [59]
+			"LESS_THAN", // [60]
+			"EQUALS", // [61]
+			"GREATER_THAN", // [62]
+			"QUESTION_MARK", // [63]
+			"AT", // [64]
+			"A", // [65]
+			"B", // [66]
+			"C", // [67]
+			"D", // [68]
+			"E", // [69]
+			"F", // [70]
+			"G", // [71]
+			"H", // [72]
+			"I", // [73]
+			"J", // [74]
+			"K", // [75]
+			"L", // [76]
+			"M", // [77]
+			"N", // [78]
+			"O", // [79]
+			"P", // [80]
+			"Q", // [81]
+			"R", // [82]
+			"S", // [83]
+			"T", // [84]
+			"U", // [85]
+			"V", // [86]
+			"W", // [87]
+			"X", // [88]
+			"Y", // [89]
+			"Z", // [90]
+			"OS_KEY", // [91] Windows Key (Windows) or Command Key (Mac)
+			"", // [92]
+			"CONTEXT_MENU", // [93]
+			"", // [94]
+			"SLEEP", // [95]
+			"NUMPAD0", // [96]
+			"NUMPAD1", // [97]
+			"NUMPAD2", // [98]
+			"NUMPAD3", // [99]
+			"NUMPAD4", // [100]
+			"NUMPAD5", // [101]
+			"NUMPAD6", // [102]
+			"NUMPAD7", // [103]
+			"NUMPAD8", // [104]
+			"NUMPAD9", // [105]
+			"MULTIPLY", // [106]
+			"ADD", // [107]
+			"SEPARATOR", // [108]
+			"SUBTRACT", // [109]
+			"DECIMAL", // [110]
+			"DIVIDE", // [111]
+			"F1", // [112]
+			"F2", // [113]
+			"F3", // [114]
+			"F4", // [115]
+			"F5", // [116]
+			"F6", // [117]
+			"F7", // [118]
+			"F8", // [119]
+			"F9", // [120]
+			"F10", // [121]
+			"F11", // [122]
+			"F12", // [123]
+			"F13", // [124]
+			"F14", // [125]
+			"F15", // [126]
+			"F16", // [127]
+			"F17", // [128]
+			"F18", // [129]
+			"F19", // [130]
+			"F20", // [131]
+			"F21", // [132]
+			"F22", // [133]
+			"F23", // [134]
+			"F24", // [135]
+			"", // [136]
+			"", // [137]
+			"", // [138]
+			"", // [139]
+			"", // [140]
+			"", // [141]
+			"", // [142]
+			"", // [143]
+			"NUM_LOCK", // [144]
+			"SCROLL_LOCK", // [145]
+			"WIN_OEM_FJ_JISHO", // [146]
+			"WIN_OEM_FJ_MASSHOU", // [147]
+			"WIN_OEM_FJ_TOUROKU", // [148]
+			"WIN_OEM_FJ_LOYA", // [149]
+			"WIN_OEM_FJ_ROYA", // [150]
+			"", // [151]
+			"", // [152]
+			"", // [153]
+			"", // [154]
+			"", // [155]
+			"", // [156]
+			"", // [157]
+			"", // [158]
+			"", // [159]
+			"CIRCUMFLEX", // [160]
+			"EXCLAMATION", // [161]
+			"DOUBLE_QUOTE", // [162]
+			"HASH", // [163]
+			"DOLLAR", // [164]
+			"PERCENT", // [165]
+			"AMPERSAND", // [166]
+			"UNDERSCORE", // [167]
+			"OPEN_PAREN", // [168]
+			"CLOSE_PAREN", // [169]
+			"ASTERISK", // [170]
+			"PLUS", // [171]
+			"PIPE", // [172]
+			"HYPHEN_MINUS", // [173]
+			"OPEN_CURLY_BRACKET", // [174]
+			"CLOSE_CURLY_BRACKET", // [175]
+			"TILDE", // [176]
+			"", // [177]
+			"", // [178]
+			"", // [179]
+			"", // [180]
+			"VOLUME_MUTE", // [181]
+			"VOLUME_DOWN", // [182]
+			"VOLUME_UP", // [183]
+			"", // [184]
+			"", // [185]
+			"SEMICOLON", // [186]
+			"EQUALS", // [187]
+			"COMMA", // [188]
+			"MINUS", // [189]
+			"PERIOD", // [190]
+			"SLASH", // [191]
+			"BACK_QUOTE", // [192]
+			"", // [193]
+			"", // [194]
+			"", // [195]
+			"", // [196]
+			"", // [197]
+			"", // [198]
+			"", // [199]
+			"", // [200]
+			"", // [201]
+			"", // [202]
+			"", // [203]
+			"", // [204]
+			"", // [205]
+			"", // [206]
+			"", // [207]
+			"", // [208]
+			"", // [209]
+			"", // [210]
+			"", // [211]
+			"", // [212]
+			"", // [213]
+			"", // [214]
+			"", // [215]
+			"", // [216]
+			"", // [217]
+			"", // [218]
+			"OPEN_BRACKET", // [219]
+			"BACK_SLASH", // [220]
+			"CLOSE_BRACKET", // [221]
+			"QUOTE", // [222]
+			"", // [223]
+			"META", // [224]
+			"ALTGR", // [225]
+			"", // [226]
+			"WIN_ICO_HELP", // [227]
+			"WIN_ICO_00", // [228]
+			"", // [229]
+			"WIN_ICO_CLEAR", // [230]
+			"", // [231]
+			"", // [232]
+			"WIN_OEM_RESET", // [233]
+			"WIN_OEM_JUMP", // [234]
+			"WIN_OEM_PA1", // [235]
+			"WIN_OEM_PA2", // [236]
+			"WIN_OEM_PA3", // [237]
+			"WIN_OEM_WSCTRL", // [238]
+			"WIN_OEM_CUSEL", // [239]
+			"WIN_OEM_ATTN", // [240]
+			"WIN_OEM_FINISH", // [241]
+			"WIN_OEM_COPY", // [242]
+			"WIN_OEM_AUTO", // [243]
+			"WIN_OEM_ENLW", // [244]
+			"WIN_OEM_BACKTAB", // [245]
+			"ATTN", // [246]
+			"CRSEL", // [247]
+			"EXSEL", // [248]
+			"EREOF", // [249]
+			"PLAY", // [250]
+			"ZOOM", // [251]
+			"", // [252]
+			"PA1", // [253]
+			"WIN_OEM_CLEAR", // [254]
+			"" // [255]
+		];
+		
 		
 		var f, character, combo = "";
 		for(var i=0; i<keyBindings.length; i++) {
 			f = keyBindings[i]
-			if(getFunctionName(f.fun) == funName) {
+			if(UTIL.getFunctionName(f.fun) == funName) {
 				
 				if(f.charCode) {
 					character = getKeyboardMapping[f.charCode];
@@ -2213,13 +2474,13 @@ editor.lastKeyPressed = "";
 		if(isNaN(b.charCode)) throw new Error("charCode=" + b.charCode + " needs to be a number!");
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
 		
-		if(!b.desc) getStack("Key binding should have a description!");
+		if(!b.desc) UTIL.getStack("Key binding should have a description!");
 		
 		// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
-		var funName = getFunctionName(b.fun);
+		var funName = UTIL.getFunctionName(b.fun);
 		if(funName == "") throw new Error("Key binding function can not be anonymous!")
 		for(var i=0; i<keyBindings.length; i++) {
-			if(getFunctionName(keyBindings[i].fun) == funName) {
+			if(UTIL.getFunctionName(keyBindings[i].fun) == funName) {
 				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
 			}
 		}
@@ -2235,7 +2496,7 @@ editor.lastKeyPressed = "";
 		var f, rebound = false;
 		for(var i=0; i<keyBindings.length; i++) {
 			f = keyBindings[i]
-			if(getFunctionName(f.fun) == funName) {
+			if(UTIL.getFunctionName(f.fun) == funName) {
 				
 				if(rebound) console.warn("Double rebound of " + funName);
 				
@@ -2251,13 +2512,13 @@ editor.lastKeyPressed = "";
 		
 		if(typeof funName === "function") {
 			// Convert it to string
-			funName = getFunctionName(funName);
+			funName = UTIL.getFunctionName(funName);
 		}
 		
 		var f;
 		for(var i=0; i<keyBindings.length; i++) {
 			f = keyBindings[i]
-			if(getFunctionName(f.fun) == funName) {
+			if(UTIL.getFunctionName(f.fun) == funName) {
 				
 				keyBindings.splice(i, 1);
 				
@@ -2286,7 +2547,7 @@ editor.lastKeyPressed = "";
 		p.loaded = false;
 		
 		if(windowLoaded) { // && editor.settings.devMode
-			//alertBox("Gonna reload unload and load " + getFunctionName(p.load));
+			//alertBox("Gonna reload unload and load " + UTIL.getFunctionName(p.load));
 			editor.disablePlugin(p.desc); // Unload plugin before loading it 
 			p.load(); // Load the plugin right away if the editor has already started. 
 		}
@@ -2323,7 +2584,7 @@ editor.lastKeyPressed = "";
 	
 	editor.addTest = function(fun, order) {
 		
-		var funName = getFunctionName(fun);
+		var funName = UTIL.getFunctionName(fun);
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
 		
@@ -2552,7 +2813,7 @@ editor.lastKeyPressed = "";
 							// Chop off the newline character
 							dir = dir.substring(0, dir.length-1);
 							
-							var workingDir = trailingSlash(protocol + "://" + serverAddress + dir.replace("\\", "/"));
+							var workingDir = UTIL.trailingSlash(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 							
 							cb(null, c, workingDir);
 							
@@ -2618,7 +2879,7 @@ editor.lastKeyPressed = "";
 	editor.listFiles = function(pathToFolder, listFilesCallback) {
 		// Returns all files in a directory
 		
-		pathToFolder = trailingSlash(pathToFolder);
+		pathToFolder = UTIL.trailingSlash(pathToFolder);
 		
 		if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
 		if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
@@ -2639,15 +2900,15 @@ editor.lastKeyPressed = "";
 			
 		*/
 		
-		pathToCreate = trailingSlash(pathToCreate);
+		pathToCreate = UTIL.trailingSlash(pathToCreate);
 		
 		var url = require('url');
 		var parse = url.parse(pathToCreate);
 		var protocol = parse.protocol;
-		var delimiter = getPathDelimiter(pathToCreate);
+		var delimiter = UTIL.getPathDelimiter(pathToCreate);
 		var lastChar = pathToCreate.substring(pathToCreate.length-1);
 		var hostname = parse.hostname;
-		var create = getFolders(pathToCreate);
+		var create = UTIL.getFolders(pathToCreate);
 		var errors = [];
 		var fullPath = create[create.length-1];
 		
@@ -2729,7 +2990,7 @@ editor.lastKeyPressed = "";
 					
 					var b = c.mkdir(path, function (err, folderItems) {
 						
-						//getStack("XXX");
+						//UTIL.getStack("XXX");
 						
 						if(err) createPathSomewhereCallback(err, path);
 						else createPathSomewhereCallback(null, path);
@@ -2907,7 +3168,7 @@ editor.lastKeyPressed = "";
 		// Removes an object from an array of objects
 		for(var i=0; i<list.length; i++) {
 			
-			//console.log(getFunctionName(fun) + " = " + getFunctionName(list[i]) + " ? " + (list[i] == fun));
+			//console.log(UTIL.getFunctionName(fun) + " = " + UTIL.getFunctionName(list[i]) + " ? " + (list[i] == fun));
 			
 			if(list[i] == fun) {
 				list.splice(i, 1);
@@ -2943,7 +3204,7 @@ editor.lastKeyPressed = "";
 			for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 				
 				f = editor.eventListeners.exit[i].fun;
-				name = getFunctionName(f);
+				name = UTIL.getFunctionName(f);
 				ret = f();
 				
 				console.log(name + " returned " + ret);
@@ -3104,8 +3365,8 @@ editor.lastKeyPressed = "";
 			walker.on('file', function(folder, stat, next) {
 				
 				var filePath = path.join(folder, stat.name);
-				var filename = getFilenameFromPath(filePath);
-				var ext = getFileExtension(filePath);
+				var filename = UTIL.getFilenameFromPath(filePath);
+				var ext = UTIL.getFileExtension(filePath);
 				
 				if(ext == "js" && filename.substr(0,1) != "_") { // Only load .js files and ignore file-names starting with underscore _
 					var fileref=document.createElement('script');
@@ -3163,7 +3424,7 @@ editor.lastKeyPressed = "";
 			var fileName = file.name;
 			var filePath = file.path;
 			
-			console.log("Calling directory-dialog callback: " + getFunctionName(directoryDialogCallback) + " ...");
+			console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
 			directoryDialogCallback(filePath);
 			directoryDialogCallback = undefined;
 			
@@ -3210,7 +3471,7 @@ editor.lastKeyPressed = "";
 		});
 		
 		//for(var i=0; i<editor.eventListeners.start.length; i++) {
-		//console.log("startlistener:" + getFunctionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
+		//console.log("startlistener:" + UTIL.getFunctionName(editor.eventListeners.start[i].fun) + " (order=" + editor.eventListeners.start[i].order + ")");
 		//}
 		
 		
@@ -3589,7 +3850,7 @@ editor.lastKeyPressed = "";
 		}
 		
 		function callCallback() {
-			console.log("Calling file-dialog callback: " + getFunctionName(editor.fileOpenCallback) + " ...");
+			console.log("Calling file-dialog callback: " + UTIL.getFunctionName(editor.fileOpenCallback) + " ...");
 			editor.fileOpenCallback(filePath, fileContent);
 			editor.fileOpenCallback = undefined;
 			
@@ -3644,7 +3905,7 @@ editor.lastKeyPressed = "";
 		/*
 			for (var i = 0; i < e.dataTransfer.files.length; ++i) {
 			console.log(e.dataTransfer.files[i].path + "\n" + e.dataTransfer.files[i].data);
-			objInfo(e.dataTransfer.files[i]);
+			UTIL.objInfo(e.dataTransfer.files[i]);
 			}
 		*/
 		
@@ -3720,7 +3981,7 @@ editor.lastKeyPressed = "";
 		ret,
 		textChanged = false;
 		
-		console.log("PASTE: " + lbChars(text));
+		console.log("PASTE: " + UTIL.lbChars(text));
 		
 		if(editor.input && editor.currentFile) {
 			
@@ -3733,7 +3994,7 @@ editor.lastKeyPressed = "";
 				
 				ret = fun(editor.currentFile, e.clipboardData);
 				
-				if(editor.settings.devMode) console.log("Paste listener: " + getFunctionName(fun) + " returned:\n" + ret);
+				if(editor.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned:\n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
@@ -3803,11 +4064,11 @@ editor.lastKeyPressed = "";
 		for(var i=0; i<editor.eventListeners.keyPressed.length; i++) {
 			funReturn = editor.eventListeners.keyPressed[i].fun(file, character, combo); // Call function
 			
-			if(funReturn !== true && funReturn !== false) throw new Error("keyPressed event listener: " + getFunctionName(editor.eventListeners.keyPressed[i].fun) + " did not return true or false!");
+			if(funReturn !== true && funReturn !== false) throw new Error("keyPressed event listener: " + UTIL.getFunctionName(editor.eventListeners.keyPressed[i].fun) + " did not return true or false!");
 			
 			if(funReturn === false && !preventDefault) {
 				preventDefault = true;
-				if(file && editor.input) console.log(getFunctionName(editor.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
+				if(file && editor.input) console.log(UTIL.getFunctionName(editor.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
 			}
 		}
 		
@@ -4002,9 +4263,9 @@ editor.lastKeyPressed = "";
 				}
 				else {
 					
-					//console.log("keyDown: Calling function: " + getFunctionName(binding.fun) + "...");
+					//console.log("keyDown: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 					
-					if(captured) console.warn("Key combo has already been captured by " + getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + getFunctionName(binding.fun));
+					if(captured) console.warn("Key combo has already been captured by " + UTIL.getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + UTIL.getFunctionName(binding.fun));
 					
 					captured = binding.fun;
 					
@@ -4012,7 +4273,7 @@ editor.lastKeyPressed = "";
 					
 					funReturn = binding.fun(editor.currentFile, combo, character, charCode, "down", targetElementClass);
 					
-					console.log(getFunctionName(binding.fun) + " returned " + funReturn);
+					console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
 					
 					if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 						preventDefault = true;
@@ -4020,12 +4281,12 @@ editor.lastKeyPressed = "";
 					}
 					else if(funReturn !== true) {
 						throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
-						like typing in input boxes, tabbing between elements, etc. function called: " + getFunctionName(binding.fun));
+						like typing in input boxes, tabbing between elements, etc. function called: " + UTIL.getFunctionName(binding.fun));
 					}
 				}
 			}
 			else {
-				//console.log("NOT calling function:" + getFunctionName(binding.fun) + " " + JSON.stringify(binding));
+				//console.log("NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
 			}
 		}
 		
@@ -4169,7 +4430,7 @@ editor.lastKeyPressed = "";
 			
 			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				
-				//console.log("keyUp: Calling function: " + getFunctionName(binding.fun) + "...");
+				//console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 				
 				funReturn = binding.fun(editor.currentFile, combo, character, charCode, "up");
 				
@@ -4214,7 +4475,7 @@ editor.lastKeyPressed = "";
 		keyboardCombo = getCombo(e),
 		funReturn;
 		
-		//objInfo(target);
+		//UTIL.objInfo(target);
 		
 		if(button == undefined) button = 0; // For like touch events
 		
@@ -4286,7 +4547,7 @@ editor.lastKeyPressed = "";
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				//console.log("Calling " + getFunctionName(click.fun) + " ...");
+				//console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
 				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				
@@ -4352,7 +4613,7 @@ editor.lastKeyPressed = "";
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				console.log("Calling " + getFunctionName(click.fun) + " ...");
+				console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
 				
 				click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo); // Call it
 			}
@@ -4383,7 +4644,7 @@ editor.lastKeyPressed = "";
 			console.log("e.layerX=" + e.layerX);
 		*/
 		
-		if(isNumeric(e.clientX) && isNumeric(e.clientY)) {
+		if(UTIL.isNumeric(e.clientX) && UTIL.isNumeric(e.clientY)) {
 			editor.mouseX = parseInt(e.clientX);
 			editor.mouseY = parseInt(e.clientY);
 		}
@@ -4438,7 +4699,7 @@ editor.lastKeyPressed = "";
 			for(var i=0, fun; i<editor.eventListeners.mouseMove.length; i++) {
 				fun = editor.eventListeners.mouseMove[i].fun;
 				
-				//console.log(getFunctionName(fun));
+				//console.log(UTIL.getFunctionName(fun));
 				
 				fun(mouseX, mouseY, target); // Call it
 				
@@ -4523,7 +4784,7 @@ editor.lastKeyPressed = "";
 			(click.targetTag == target.tagName || click.targetTag == undefined)
 			) {
 				
-				//console.log("Calling " + getFunctionName(click.fun) + " ...");
+				//console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
 				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				
@@ -4675,7 +4936,7 @@ editor.lastKeyPressed = "";
 			if(url.indexOf("?") != -1) url = url + "&version=" + editor.version;
 			else url = url + "?version=" + editor.version;
 			
-			httpGet(url, function(err, data) {
+			UTIL.httpGet(url, function(err, data) {
 				if(err) {
 					console.warn("bootstrap get: " + err.message);
 					return;

@@ -372,11 +372,6 @@
 		}
 	}
 	
-
-	
-	function isNumeric(n) {
-	  return !isNaN(parseFloat(n)) && isFinite(n);
-	}
 	
 	function spellingError(filePath, origWord, row, col, textLength) {
 		
@@ -455,7 +450,7 @@
 		
 		//console.log("spell-checking:" + word);
 		 
-		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
+		if(htmlTags.indexOf(word) != -1 || jsKeywords.indexOf(word) != -1 || UTIL.isNumeric(word) || programmersAbbr.indexOf(word) != -1 || fileExtensions.indexOf(word) != -1) {
 			//doSomething(file.path, true, word, row, col); // It's spelled correct
 			}
 		else if(cache.hasOwnProperty(word)) {

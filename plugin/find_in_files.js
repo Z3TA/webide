@@ -253,7 +253,7 @@
 		div.setAttribute("class", "findInFile");
 		
 		
-		var size = getDirectoryFromPath(undefined).length;
+		var size = UTIL.getDirectoryFromPath(undefined).length;
 		
 		var inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
@@ -272,7 +272,7 @@
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
-		inputInDir.value = getDirectoryFromPath(undefined); // The directory of the current file being open
+		inputInDir.value = UTIL.getDirectoryFromPath(undefined); // The directory of the current file being open
 		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
 		
 		inputInDir.setAttribute("size", size);
@@ -475,7 +475,7 @@
 		buttonBrowseFolder.addEventListener("click", function browseFolder() {
 			var defaultPath = "";
 			
-			if(editor.currentFile) defaultPath = getDirectoryFromPath(editor.currentFile.path)
+			if(editor.currentFile) defaultPath = UTIL.getDirectoryFromPath(editor.currentFile.path)
 			else defaultPath = editor.workingDirectory;
 			
 			editor.directoryDialog(defaultPath, function selectKey(path) {
@@ -508,7 +508,7 @@
 		var matches = [];
 		var flags = "g"; // Always make a global search!
 		
-		if(isFolderPath(searchPath)) {
+		if(UTIL.isFolderPath(searchPath)) {
 			inputInDir.setAttribute("class", "inputtext indir");
 		}
 		else {
@@ -524,7 +524,7 @@
 		
 		if(!useRegEx) {
 			// Convert to a regexp
-			searchString = escapeRegExp(searchString);
+			searchString = UTIL.escapeRegExp(searchString);
 			
 		}
 
@@ -726,7 +726,7 @@
 					// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 					str = decoder.write(chunk);
 					
-					if(!lineBreakCharacters) lineBreakCharacters = determineLineBreakCharacters(str);
+					if(!lineBreakCharacters) lineBreakCharacters = UTIL.determineLineBreakCharacters(str);
 				
 					// Map each line to a character index
 					totalRows += lineIndex.length;

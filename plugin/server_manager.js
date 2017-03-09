@@ -238,7 +238,7 @@
 			if(editor.connections.hasOwnProperty(selectedConnection.host)) {
 				editor.connections[selectedConnection.host].close();
 				
-				editor.workingDirectory = trailingSlash(process.cwd()); // Change working directory (back) to the one from where we opened the editor
+				editor.workingDirectory = UTIL.trailingSlash(process.cwd()); // Change working directory (back) to the one from where we opened the editor
 			}
 			else console.warn("Not connected to " + selectedConnection.host);
 			
@@ -516,7 +516,7 @@
 		function browseKey() {
 			var defaultPath = "";
 			
-			if(editor.currentFile) defaultPath = getDirectoryFromPath(editor.currentFile.path)
+			if(editor.currentFile) defaultPath = UTIL.getDirectoryFromPath(editor.currentFile.path)
 			else defaultPath = editor.workingDirectory;
 			
 			editor.fileOpenDialog(defaultPath, function selectKey(path) {

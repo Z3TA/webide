@@ -303,4 +303,21 @@
 		
 	}
 	
+	function insideParsedObject(index, parsedObj) {
+	
+		if(!parsedObj) throw new Error("Can not determine if we are inside parsedObj=" + parsedObj + "!");
+		
+		if(parsedObj.length == 0) return false;
+		
+		if(index < parsedObj[0].start) return false;
+		if(index > parsedObj[parsedObj.length-1].end) return false;
+		
+		for(var i=0; i<parsedObj.length; i++) {
+			if(parsedObj[i].start <=index && parsedObj[i].end >= index) return true;
+		}
+		
+		return false;
+	}
+	
+	
 })();

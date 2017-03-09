@@ -232,11 +232,11 @@
 		var r1 = new RegExp(re1);
 		var r2 = new RegExp(re2);
 		
-		var before = reLastIndexOf(r1, text, index);
+		var before = UTIL.reLastIndexOf(r1, text, index);
 		
 		if(before == -1) return false; // re1 doesn't exist before index
 		
-		var beforeEnded = reIndexOf(r2, text, before);
+		var beforeEnded = UTIL.reIndexOf(r2, text, before);
 		
 		return beforeEnded > index; // index is between str1 and str2, or not
 		

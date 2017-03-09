@@ -55,7 +55,7 @@
 			
 			stop -= 2; // The fix was to not allow deleteTextRange end to include a line break
 			
-			console.log("text=" + lbChars(file.text.substring(start, stop+1)));
+			console.log("text=" + UTIL.lbChars(file.text.substring(start, stop+1)));
 			
 			file.deleteTextRange(start,stop);
 			
@@ -69,10 +69,10 @@
 	
 	editor.addTest(function test_reLastIndexOf(callback) {
 		
-		assert(reLastIndexOf(/a/, "abc"), 0);
-		assert(reLastIndexOf(/z/, "abc"), -1);
-		assert(reLastIndexOf(/a/, "abcabc"), 3);
-		assert(reLastIndexOf(/a/, "abcabc", 2), 0);
+		UTIL.assert(UTIL.reLastIndexOf(/a/, "abc"), 0);
+		UTIL.assert(UTIL.reLastIndexOf(/z/, "abc"), -1);
+		UTIL.assert(UTIL.reLastIndexOf(/a/, "abcabc"), 3);
+		UTIL.assert(UTIL.reLastIndexOf(/a/, "abcabc", 2), 0);
 		
 		callback(true);
 		
@@ -135,7 +135,7 @@
 				file.text = file.text.replace(/#/g, "\n");
 				file.text = file.text.replace(/→/g, "\t");
 				
-				file.lineBreak = determineLineBreakCharacters(file.text);
+				file.lineBreak = UTIL.determineLineBreakCharacters(file.text);
 				
 				var charsBefore = file.text;
 				
@@ -144,8 +144,8 @@
 				
 				if(charsBefore.length - charactersDeleted.length != charsAfter.length) {
 					throw new Error(`Expected charsBefore=${charsBefore.length} - charactersDeleted=${charactersDeleted.length} = charsAfter=${charsAfter.length}\n
-					charsAfter=${lbChars(charsAfter)}\n
-					charactersDeleted=${lbChars(charactersDeleted)}`); 
+					charsAfter=${UTIL.lbChars(charsAfter)}\n
+					charactersDeleted=${UTIL.lbChars(charactersDeleted)}`); 
 				}
 				
 				file.putCharacter("z"); // will also check file.caret
@@ -224,7 +224,7 @@
 			editor.showFile(file);
 			document.execCommand("paste");
 			
-			if(file.text.trim() != text.trim()) throw new Error("Unexpected text=" + lbChars(file.text) + " != " + lbChars(text));
+			if(file.text.trim() != text.trim()) throw new Error("Unexpected text=" + UTIL.lbChars(file.text) + " != " + UTIL.lbChars(text));
 			
 			editor.closeFile(file.path);
 			callback(true);
@@ -1450,12 +1450,12 @@
 		// Make sure the function starts with an { and ends with an }
 		if(file.text.charAt(func.start) != "{") {
 			file.debugGrid();
-			throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+			throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {");
 		}
 		
 		if(file.text.charAt(func.end) != "}") {
 			file.debugGrid();
-			throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+			throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }");
 		}
 	}
 	

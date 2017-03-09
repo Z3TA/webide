@@ -97,7 +97,7 @@
 		return options; // disable default action
 		
 		
-		function checkgetFunctionName(functionName, word) {
+		function checkFunctionName(functionName, word) {
 			console.log("Checking if word=" + word + " mathes function name=" + functionName + "");
 			//if(typeof functionName != "string") return; // It can be an anonymous function
 			//console.warn(functionName + "(" + typeof functionName + ")");
@@ -156,7 +156,7 @@
 					
 					// check names of sub-functions
 					for(var j=0; j<func.subFunctions.length; j++) {
-						if(func.subFunctions[j].name.length > 0) checkgetFunctionName(func.subFunctions[j].name, wordToComplete);
+						if(func.subFunctions[j].name.length > 0) checkFunctionName(func.subFunctions[j].name, wordToComplete);
 					}
 					
 					// Search sub-functions (recursive)
@@ -167,7 +167,7 @@
 					console.log("Not inside function=" + func.name);
 				}
 				
-				checkgetFunctionName(func.name, wordToComplete); // Check parent scope function-names
+				checkFunctionName(func.name, wordToComplete); // Check parent scope function-names
 				
 			}
 		}

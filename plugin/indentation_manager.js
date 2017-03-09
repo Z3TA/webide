@@ -66,7 +66,7 @@
 			return;
 		}
 		
-		if(fromWhat) fromWhat.innerText = lbChars(file.indentation);
+		if(fromWhat) fromWhat.innerText = UTIL.lbChars(file.indentation);
 		
 	}
 	
@@ -123,7 +123,7 @@
 		if(num == 1) indentationCharacters = "\t";
 		else for(var i=0; i<num; i++) indentationCharacters += char;
 		
-		console.log("num=" + num + " !!indentationCharacters=" + lbChars(indentationCharacters));
+		console.log("num=" + num + " !!indentationCharacters=" + UTIL.lbChars(indentationCharacters));
 		
 		var file = editor.currentFile;
 		
@@ -142,14 +142,14 @@
 			shouldHaveIndentationCharacters = "";
 			for(var i=0; i<grid[row].indentation; i++) shouldHaveIndentationCharacters += indentationCharacters;
 			
-			//console.log("row=" + row + " shouldHaveIndentationCharacters=" + lbChars(shouldHaveIndentationCharacters) + " currentIndentationCharacters=" + lbChars(currentIndentationCharacters));
+			//console.log("row=" + row + " shouldHaveIndentationCharacters=" + UTIL.lbChars(shouldHaveIndentationCharacters) + " currentIndentationCharacters=" + UTIL.lbChars(currentIndentationCharacters));
 			
 			if(shouldHaveIndentationCharacters != currentIndentationCharacters) {
 				
 				// Remove and add
 				text = text.substr(0, grid[row].startIndex-currentIndentationCharacters.length) + shouldHaveIndentationCharacters + text.substring(grid[row].startIndex, text.length);
 				
-				//console.log("text=" + lbChars(text));
+				//console.log("text=" + UTIL.lbChars(text));
 			}
 		}
 		

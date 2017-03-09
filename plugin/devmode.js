@@ -171,12 +171,12 @@
 				for(var i=0, f; i<editor.eventListeners.exit.length; i++) {
 					
 					func = editor.eventListeners.exit[i].fun;
-					name = getFunctionName(func);
+					name = UTIL.getFunctionName(func);
 					
 					if(typeof func != "function") {
 						
 						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
-						//console.warn(objInfo(f));
+						//console.warn(UTIL.objInfo(f));
 						
 						throw  new Error("Index=" + i + " of editor.eventListeners.exit has no valid function!");
 						

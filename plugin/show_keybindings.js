@@ -8,10 +8,10 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 	for(var i=0; i<keyBindings.length; i++) {
 		b = keyBindings[i];
 		
-		fName = getFunctionName(b.fun);
+		fName = UTIL.getFunctionName(b.fun);
 		
 		if(fName) {
-			str = spacePad(editor.getKeyFor(fName), padLength) + fName;
+			str = UTIL.spacePad(editor.getKeyFor(fName), padLength) + fName;
 			if(b.desc) str = str + " (" + b.desc + ")";
 			arr.push(str);
 		}
@@ -19,7 +19,7 @@ editor.bindKey({charCode: 75, combo: SHIFT + CTRL, desc: "Show all keyBindings",
 	
 	arr.sort();
 	
-		editor.openFile("keybindings.txt", spacePad("Keyboard combination", padLength) + "Function Name\n" + "==========================================\n" + arr.join("\n"), function gotFile(err, file) {});
+		editor.openFile("keybindings.txt", UTIL.spacePad("Keyboard combination", padLength) + "Function Name\n" + "==========================================\n" + arr.join("\n"), function gotFile(err, file) {});
 	
 	return false;
 	

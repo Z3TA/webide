@@ -289,7 +289,7 @@ return;
 		}
 		else {
 			// Keep a list of the 100 latest message
-			messageLog.push(spacePad(shortenUrl(msg.url) + ":" + msg.line, padLength) + parseText(msg.text));
+			messageLog.push(UTIL.spacePad(shortenUrl(msg.url) + ":" + msg.line, padLength) + parseText(msg.text));
 			
 			if(messageLog.length > maxLogLength) messageLog.shift();
 		}
@@ -364,7 +364,7 @@ return;
 				
 				str += fullPad + "@ " + functionName + " (" + url + ":" + stack[i].lineNumber + ")" + newLine;
 				
-				//str += spacePad(url + ":" + stack[i].lineNumber, padLength) + functionName + "\n";
+				//str += UTIL.spacePad(url + ":" + stack[i].lineNumber, padLength) + functionName + "\n";
 				
 			}
 			
@@ -399,7 +399,7 @@ return;
 				
 				var message = file.text;
 				
-				httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
+				UTIL.httpPost("http://webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
 					if(err) {
 						alert("Problem sending bug report:  " + err.message);
 						throw err;

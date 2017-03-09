@@ -22,8 +22,8 @@ if(runtime=="browser") {
 	
 	// Web safe fonts are ugly, try to load a nice font ...
 	// OMG! DIFFERENT BROWSERS HAVE DIFFERENT SPACINGS FOR THE SAME FONT
-	if(checkBrowser() != "Firefox") {
-		loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
+	if(UTIL.checkBrowser() != "Firefox") {
+		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 		editor.settings.style.font = "DejaVuSansMono";
 	editor.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
 	editor.settings.style.fontSize = 13;

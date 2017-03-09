@@ -9,7 +9,7 @@
 			
 			var atCaret = autoComplete(file, index);
 			
-			assert(atCaret.word, "name");
+			UTIL.assert(atCaret.word, "name");
 			
 			editor.closeFile(file.path);
 			callback(true);
@@ -25,7 +25,7 @@
 			
 			var atCaret = autoComplete(file, index);
 			
-			assert(atCaret.word, "object.bar");
+			UTIL.assert(atCaret.word, "object.bar");
 			
 			editor.closeFile(file.path);
 			callback(true);
@@ -40,7 +40,7 @@
 			
 			var atCaret = autoComplete(file, index);
 			
-			assert(atCaret.word, "foobar");
+			UTIL.assert(atCaret.word, "foobar");
 			
 			editor.closeFile(file.path);
 			callback(true);
@@ -66,7 +66,7 @@
 			
 			var textOnRow = file.rowText(file.caret.row).trim();
 			
-			assert(textOnRow, firstArg);
+			UTIL.assert(textOnRow, firstArg);
 			
 			editor.closeFile(file.path);
 			callback(true);

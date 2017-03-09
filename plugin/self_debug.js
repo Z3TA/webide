@@ -55,7 +55,7 @@
 				
 				var message = file.text;
 				
-					httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
+					UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
 					if(err) {
 						alert("Problem sending bug report:  " + err.message);
 						throw err;

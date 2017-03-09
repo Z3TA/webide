@@ -57,7 +57,7 @@
 			
 			/*
 				fileExplorer.addEventListener("scroll", function() {
-				console.log(getStack("You scrolled"));
+				console.log(UTIL.getStack("You scrolled"));
 				});
 			*/
 			
@@ -136,7 +136,7 @@
 			
 			// We want to start from the root, then work our way towards the actual dir
 			
-		var folders = getFolders(fullPath, true);
+		var folders = UTIL.getFolders(fullPath, true);
 			
 		//console.log("fullPath=" + fullPath + " folders=" + JSON.stringify(folders));
 		
@@ -282,7 +282,7 @@
 				var li = document.createElement("li");
 			var icon = document.createElement("img");
 				var type = "";
-			var filetype = getFileExtension(item.path);
+			var filetype = UTIL.getFileExtension(item.path);
 			
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
@@ -455,7 +455,7 @@
 			//alert("host=" + host);
 			
 			if(host=="local") {
-				var root = getFolders(process.cwd())[0];
+				var root = UTIL.getFolders(process.cwd())[0];
 				exploreDir(root);
 			}
 			else {

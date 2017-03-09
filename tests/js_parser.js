@@ -25,7 +25,7 @@ editor.addTest(function xmlUnlosedTagColorWeirdness(callback) {
 		// Run prerenders to see the colors
 		var buffer = file.grid;
 		for(var i=0; i<editor.preRenderFunctions.length; i++) {
-			//funName = getFunctionName(editor.preRenderFunctions[i]);
+			//funName = UTIL.getFunctionName(editor.preRenderFunctions[i]);
 			//console.time("prerender: " + funName);
 			buffer = editor.preRenderFunctions[i](buffer, file); // Call render
 			//console.timeEnd("prerender: " + funName);

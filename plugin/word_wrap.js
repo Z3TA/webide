@@ -32,7 +32,7 @@
 		
 		if(!file) return true;
 		
-		console.log("file.lineBreak=" + lbChars(file.lineBreak));
+		console.log("file.lineBreak=" + UTIL.lbChars(file.lineBreak));
 		
 		// Find the paragraph
 		var lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
@@ -109,9 +109,9 @@
 		var secondCharacter = text.charAt(1);
 		var lastCharacter = text.charAt(text.length-1);
 		
-		console.log("firstCharacter=" + lbChars(firstCharacter));
-		console.log("secondCharacter=" + lbChars(secondCharacter));
-		console.log("lastCharacter=" + lbChars(lastCharacter));
+		console.log("firstCharacter=" + UTIL.lbChars(firstCharacter));
+		console.log("secondCharacter=" + UTIL.lbChars(secondCharacter));
+		console.log("lastCharacter=" + UTIL.lbChars(lastCharacter));
 		
 		// todo: Allow it to start and end with tags besides p if the tags are the same
 		
@@ -122,7 +122,7 @@
 			console.log("file.mode=" + file.mode);
 			console.log("startOfParagraph=" + startOfParagraph);
 			console.log("endOfParagraph=" + endOfParagraph);
-			console.log("text=" + lbChars(text));
+			console.log("text=" + UTIL.lbChars(text));
 			return false;
 		}
 		
@@ -131,12 +131,12 @@
 				alertBox("Paragraph must have an ending tag!");
 				console.log("firstCharacter=" + firstCharacter);
 				console.log("lastCharacter=" + lastCharacter);
-				console.log("text=" + lbChars(text));
+				console.log("text=" + UTIL.lbChars(text));
 				return false;
 			}
 		}
 		
-		console.log( "paragraph text=" + lbChars(text));
+		console.log( "paragraph text=" + UTIL.lbChars(text));
 		
 		//return false;
 		
@@ -166,7 +166,7 @@
 		text = wordWrapText(text, maxTextWidth - indentation * editor.settings.tabSpace);
 		var textLengthAfter = text.length;
 		
-		console.log("text='" + debugWhiteSpace(text) + "'");
+		console.log("text='" + UTIL.debugWhiteSpace(text) + "'");
 		
 		
 		// Sanity check: The text should still start and end with the same characters!

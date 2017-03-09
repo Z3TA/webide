@@ -586,7 +586,7 @@
 					sourceFile = editor.currentFile;
 					
 					if(!sourceFile.isSaved) {
-						alert("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+						alert("The page (" + UTIL.getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
 						editContent = false;
 					}
 					else {
@@ -711,7 +711,7 @@
 			
 			var srcHTML = getSourceCodeBody();
 			if(srcHTML) {
-				var diff = textDiff(srcHTML, body.innerHTML);
+				var diff = UTIL.textDiff(srcHTML, body.innerHTML);
 				var row = -1;
 				for (var i=0; i<diff.inserted.length; i++) {
 					if(row == -1) row = diff.inserted[i].row;
@@ -743,7 +743,7 @@
 		if(!editor.files.hasOwnProperty(sourceFile.path)) alert("The source for the file being previewed is not opened!")
 		if(sourceFile != editor.currentFile) alert("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " editor.currentFile=" + editor.currentFile.path)
 		else {
-			//console.log("target=" + objInfo(target));
+			//console.log("target=" + UTIL.objInfo(target));
 			console.log("type=" + type);
 			
 			// Compare the source codes
@@ -753,7 +753,7 @@
 				// Compare the source with the editable preview
 				var prewHTML = previewWin.window.document.body.innerHTML;
 				
-				var diff = textDiff(srcHTML, prewHTML, headerRows, footerRows);
+				var diff = UTIL.textDiff(srcHTML, prewHTML, headerRows, footerRows);
 				
 				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
 				
@@ -802,7 +802,7 @@
 							console.log("Inserting (replacing) row=" + row + " text=" + text);
 							
 							// textLineDiff
-							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
+							col= UTIL.textDiffCol(diff.removed[i].text, diff.inserted[j].text);
 							
 							if(diff.inserted[j].text.length > diff.removed[i].text.length) col++;
 							

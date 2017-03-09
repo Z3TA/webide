@@ -291,8 +291,8 @@
 		// Now make sure the "m�svingar" {} matches
 		
 		var text = file.text.substring(startIndex, endIndex);
-		var vL = occurrences(text, "{");
-		var vR = occurrences(text, "}");
+		var vL = UTIL.occurrences(text, "{");
+		var vR = UTIL.occurrences(text, "}");
 		
 		console.log("vL=" + vL + " vR=" + vR + "");
 		
@@ -568,7 +568,7 @@
 		end = i;
 		*/
 		
-		console.log(" DAS WORD YO word=" + lbChars(word));
+		console.log(" DAS WORD YO word=" + UTIL.lbChars(word));
 		console.log("world length: " + (end-start));
 		
 		return {start: start, end: end, word: word};

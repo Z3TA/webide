@@ -1648,7 +1648,7 @@ function parseError(doc, scriptCount, err) {
 		//log("startIndex=" + startIndex);
 	}
 	var upUntil = str.substr(0, startIndex);
-	var lines = occurrences(upUntil, "\n");
+	var lines = UTIL.occurrences(upUntil, "\n");
 	
 	line += lines + 2;
 	
@@ -1661,7 +1661,7 @@ function parseError(doc, scriptCount, err) {
 	
 }
 
-function occurrences(string, subString, allowOverlapping) {
+function UTIL.occurrences(string, subString, allowOverlapping) {
 	/** Function count the occurrences of substring in a string;
 		* @param {String} string   Required. The string;
 		* @param {String} subString    Required. The string to search for;

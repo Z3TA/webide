@@ -251,7 +251,7 @@ for(var i=0; i<list.length; i++) {
 
 	function buildTabs(excludeFile) {
 		
-		console.log(getStack("Building tabs ..."));
+		console.log(UTIL.getStack("Building tabs ..."));
 		
 		var tabList = document.getElementById("tabList");
 		

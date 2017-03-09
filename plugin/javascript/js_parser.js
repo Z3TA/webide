@@ -251,8 +251,8 @@
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
 						
 							//console.time("hmm"); // These used to be slow
-							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
-							if(parseStart == -1) parseStart = reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
+							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
+							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
 							//console.timeEnd("hmm");
 								
 							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
@@ -261,16 +261,16 @@
 						
 						
 							
-							//console.log("characters=" + lbChars(characters));
+							//console.log("characters=" + UTIL.lbChars(characters));
 							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 							
 							//console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
 							
-							//console.log("Gonna parse text=\n" + lbChars(file.text.substring(parseStart, parseEnd)));
+							//console.log("Gonna parse text=\n" + UTIL.lbChars(file.text.substring(parseStart, parseEnd)));
 							
 							if(file.text.charAt(parseEnd-1) != "}") {
 								file.debugGrid();
-								throw new Error("Expected parseEnd-1 = " + (parseEnd-1) + " character=" + lbChars(file.text.charAt(parseEnd-1)) + " to be an }");
+								throw new Error("Expected parseEnd-1 = " + (parseEnd-1) + " character=" + UTIL.lbChars(file.text.charAt(parseEnd-1)) + " to be an }");
 							}
 							
 							//console.log(file.text.substring(parseStart, parseEnd));
@@ -518,7 +518,7 @@
 							return;
 						}
 						else {
-							console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize + " file.text.charAt(" + (f.end + charactersLength) + ")=" + lbChars(file.text.charAt(f.end + charactersLength)));
+							console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize + " file.text.charAt(" + (f.end + charactersLength) + ")=" + UTIL.lbChars(file.text.charAt(f.end + charactersLength)));
 						}
 					}
 					else {
@@ -584,16 +584,16 @@
 				}
 				
 				if(isBelow || isParent) {
-					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + lbChars(file.text.charAt(func.end)) + ")");
+					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
 					if(file.text.charAt(func.start) != "{") {
 						file.debugGrid();
-						throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+						throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {");
 					}
 					
 					if(file.text.charAt(func.end) != "}") {
 						file.debugGrid();
-						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+						throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }");
 					}
 				}
 			}
@@ -635,12 +635,12 @@
 			// Make sure the function starts with an { and ends with an }
 			if(file.text.charAt(func.start) != "{") {
 				file.debugGrid();
-				throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + lbChars(file.text.charAt(func.start)) + " to be a {");
+				throw new Error("Expected func.name=" + func.name + " start=" + func.start + " character=" + UTIL.lbChars(file.text.charAt(func.start)) + " to be a {");
 			}
 			
 			if(file.text.charAt(func.end) != "}") {
 				file.debugGrid();
-				throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + lbChars(file.text.charAt(func.end)) + " to be a }");
+				throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }");
 			}
 			
 			console.log(func.name + " OK");
@@ -649,11 +649,6 @@
 			
 		}
 		
-	}
-	
-	
-	function isNumeric(n) {
-		return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 	
 	function parseJavaScript(file, options) {
@@ -977,7 +972,7 @@
 			else if(rightSide.indexOf("*") > -1 || rightSide.indexOf("-") > -1 || rightSide.indexOf("+") > -1 || rightSide.indexOf("/") > -1 || rightSide.indexOf("%") > -1) {
 				type = "Number";
 			}
-			else if(isNumeric(rightSide)) {
+			else if(UTIL.isNumeric(rightSide)) {
 				type = "Number";
 			}
 			else {
@@ -2154,7 +2149,7 @@
 				foundVariableInVariableDeclaration = false;
 				variableName = "";
 				
-				//console.log("pastChar0=" + JSON.stringify(pastChar0) + " char=" + lbChars(char) + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
+				//console.log("pastChar0=" + JSON.stringify(pastChar0) + " char=" + UTIL.lbChars(char) + " ? " +  (pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") );
 				
 				
 				

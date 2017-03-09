@@ -393,7 +393,7 @@
 			
 			
 			
-			//ignoreTransform = textDiff(srcHTML, main.innerHTML);
+			//ignoreTransform = UTIL.textDiff(srcHTML, main.innerHTML);
 			
 			//}, 3000);
 			
@@ -1399,7 +1399,7 @@
 		var lbBefore = checkStartingLineBreaks();
 		
 		
-		console.log("inserting (sanitizing) line breaks. sourceFile.lineBreak=" + lbChars(sourceFile.lineBreak));
+		console.log("inserting (sanitizing) line breaks. sourceFile.lineBreak=" + UTIL.lbChars(sourceFile.lineBreak));
 		
 		console.time("insertLineBreaks");
 		
@@ -1498,7 +1498,7 @@
 				editor.showFile(sourceFile, false);
 			}
 			
-			//console.log("target=" + objInfo(target));
+			//console.log("target=" + UTIL.objInfo(target));
 			console.log("type=" + type);
 			
 			// Compare the source codes
@@ -1525,9 +1525,9 @@
 				if(sanitized == prewHTML) console.log("No white space sanitiaztion needed"); 
 				else {
 					
-					console.log("prewHTML=\n" + debugWhiteSpace(prewHTML) + "\n");
+					console.log("prewHTML=\n" + UTIL.debugWhiteSpace(prewHTML) + "\n");
 					
-					console.log("sanitized=\n" + debugWhiteSpace(sanitized) + "\n");
+					console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
 					
 					/*
 						Problem: contenteditable will lose the caret when the html is updated, 
@@ -1548,7 +1548,7 @@
 					
 					//sourceFile.replaceText(srcHTML, sanitized);
 					
-					//ignoreTransform = textDiff(sanitized, main.innerHTML);
+					//ignoreTransform = UTIL.textDiff(sanitized, main.innerHTML);
 					
 					console.log("Sanitized garbage from WYSIWYG");
 					
@@ -1556,7 +1556,7 @@
 				
 				
 				// Compare the source with the editable preview
-				var diff = textDiff(srcHTML, prewHTML, ignoreTransform);
+				var diff = UTIL.textDiff(srcHTML, prewHTML, ignoreTransform);
 				
 				/*
 					Problem: When ignoreTransform removes a diff ...
@@ -1627,14 +1627,14 @@
 					row = diff.removed[i].row + startRow;
 					
 					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
-						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + lbChars(srcHTML) + "\n\nprewHTML=" + lbChars(prewHTML));
+						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + UTIL.lbChars(srcHTML) + "\n\nprewHTML=" + UTIL.lbChars(prewHTML));
 					}
 					
 					removedText = sourceFile.removeAllTextOnRow(row);
 					
-					if(removedText.match(/\n|\r\n/)) throw new Error("Did not expect a new line character to be removed! removedText=" + lbChars(removedText));
+					if(removedText.match(/\n|\r\n/)) throw new Error("Did not expect a new line character to be removed! removedText=" + UTIL.lbChars(removedText));
 					
-					if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + lbChars(removedText) + " = removedText\n" + lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
+					if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + UTIL.lbChars(removedText) + " = removedText\n" + UTIL.lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
 					
 					console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
 					
@@ -1653,7 +1653,7 @@
 							console.log("Inserting (replacing) row=" + row + " text=" + text);
 							
 							// textLineDiff
-							col= textDiffCol(diff.removed[i].text, diff.inserted[j].text);
+							col= UTIL.textDiffCol(diff.removed[i].text, diff.inserted[j].text);
 							
 							if(diff.inserted[j].text.length > diff.removed[i].text.length) col += (diff.inserted[j].text.length - diff.removed[i].text.length);
 							
@@ -1705,7 +1705,7 @@
 				// after the transformation: Update what should be ignored again? nope
 				//var srcHTML = getSourceCodeBody(sourceFile);
 				//var prewHTML = main.innerHTML;
-				//ignoreTransform = textDiff(srcHTML, main.innerHTML);
+				//ignoreTransform = UTIL.textDiff(srcHTML, main.innerHTML);
 				
 				//alert("Transformed source document!");
 				
@@ -2121,7 +2121,7 @@
 			
 			function createFile(filePath, text) {
 				
-				var folder = getDirectoryFromPath(filePath);
+				var folder = UTIL.getDirectoryFromPath(filePath);
 				
 				if(foldersExist.indexOf(folder) != -1) {
 					console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
@@ -2147,7 +2147,7 @@
 			
 			function copyFile(from, to) {
 				
-				var folder = getDirectoryFromPath(to);
+				var folder = UTIL.getDirectoryFromPath(to);
 				
 				if(foldersExist.indexOf(folder) != -1) {
 					editor.copyFile(from, to, fileCopied);
@@ -2218,11 +2218,11 @@
 		
 		
 		
-		ignoreTransform = textDiff(srcHTML, rawMainHtml);
+		ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 		
 		// Make sure there are no errors
-		var lbSrc = occurrences(srcHTML, "\n");
-		var lbMain = occurrences(rawMainHtml, "\n");
+		var lbSrc = UTIL.occurrences(srcHTML, "\n");
+		var lbMain = UTIL.occurrences(rawMainHtml, "\n");
 		var removed = ignoreTransform.removed.length;
 		var inserted = ignoreTransform.inserted.length;
 		
@@ -2316,7 +2316,7 @@
 			
 			function localFilePath(path, site) {
 				console.log("fixPath path=" + path);
-				var systemPathDelimiter = getPathDelimiter(process.cwd());
+				var systemPathDelimiter = UTIL.getPathDelimiter(process.cwd());
 				
 				path = path.replace("file://", "");
 				
@@ -2353,9 +2353,9 @@
 				
 				// make sure it's saved, and that the preview is from the last save
 				if(!sourceFile.isSaved ) {
-					var diff = textDiff(srcHTML, main.innerHTML);
+					var diff = UTIL.textDiff(srcHTML, main.innerHTML);
 					if(diff.inserted.length > 0 || diff.removed.length > 0) {
-						alertBox("The page (" + getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
+						alertBox("The page (" + UTIL.getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
 						disableContentEdit();
 						return;
 					}

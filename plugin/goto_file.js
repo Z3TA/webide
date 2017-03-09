@@ -296,7 +296,7 @@
 					dirsSearched.push(currentDirPath);
 					
 					if(err) {
-						console.warn(getStack("Error reading folder: " + currentDirPath + "\n" + err.message));
+						console.warn(UTIL.getStack("Error reading folder: " + currentDirPath + "\n" + err.message));
 						alert("Error reading folder: " + currentDirPath + "\n" + err.message);
 					}
 					else {
@@ -555,7 +555,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 					//console.log("Going to line " + lineNr);
 					editor.renderNeeded();
 					
-					var dir = getDirectoryFromPath(path);
+					var dir = UTIL.getDirectoryFromPath(path);
 					
 					if(dir.indexOf(editor.workingDirectory) == -1) {
 						// Set the working directory to this files's folder

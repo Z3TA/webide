@@ -1,6 +1,8 @@
 
 "use strict";
 
+var UTIL = require("./UTIL.js")
+
 var API = {};
 
 
@@ -20,7 +22,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 	var fs = require("fs");
 		
 		console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
-		//console.log(getStack("Read from disk"));
+		//console.log(UTIL.getStack("Read from disk"));
 		
 		// Check path for protocol
 		var url = require("url");
@@ -367,7 +369,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
 	if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
 
-	//pathToFolder = trailingSlash(json.pathToFolder);
+	//pathToFolder = UTIL.trailingSlash(json.pathToFolder);
 	
 	
 	/*
@@ -413,7 +415,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 			// hmm, it seems we can only do readdir once on each folder
 			var b = c.readdir(pathname, function sftpReadDir(err, folderItems) {
 				
-				//getStack("XXX");
+				//UTIL.getStack("XXX");
 				
 				console.log("Reading folder: " + pathname + " ...");
 				
@@ -432,7 +434,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						path = pathToFolder + folderItems[i].filename; // Asume pathToFolder has a trailing slash
 						type = folderItems[i].longname.substr(0, 1);
 						
-						if(type == "d") path = trailingSlash(path);
+						if(type == "d") path = UTIL.trailingSlash(path);
 						
 						//console.log("path=" + path);
 						list.push({type: type, name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
@@ -499,7 +501,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						}
 						else if(stats.isDirectory()) {
 							type = "d";
-							filePath = trailingSlash(filePath);
+							filePath = UTIL.trailingSlash(filePath);
 						}
 					}
 					
@@ -595,7 +597,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						path = pathToFolder + folderItems[i].name;
 						type = folderItems[i].type;
 						
-						if(type == "d") path = trailingSlash(path);
+						if(type == "d") path = UTIL.trailingSlash(path);
 						
 						// todo: parse date ?
 						list.push({type: type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});

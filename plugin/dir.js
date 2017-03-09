@@ -25,7 +25,7 @@
 				maxLen += 2;
 				
 				fileList.forEach(function(f) {
-					file.writeLine(spacePad(f.type, 4) + spacePad(f.path, maxLen) + spacePad(f.size.toString(), 15) + f.date);
+					file.writeLine(UTIL.spacePad(f.type, 4) + UTIL.spacePad(f.path, maxLen) + UTIL.spacePad(f.size.toString(), 15) + f.date);
 				});
 				
 				editor.renderNeeded();

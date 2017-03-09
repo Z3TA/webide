@@ -11,7 +11,7 @@
 		//console.log("lineBreak=" + editor.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));
 		text = text.replace(/\r/g, "");
 		
-		//console.log("clipboard text=" + lbChars(text));
+		//console.log("clipboard text=" + UTIL.lbChars(text));
 		
 		var lines = text.split("\n");
 		
@@ -44,7 +44,7 @@
 		
 		text = lines.join(file.lineBreak);
 		
-		//console.log("text=" + lbChars(text));
+		//console.log("text=" + UTIL.lbChars(text));
 
 		
 		return text;

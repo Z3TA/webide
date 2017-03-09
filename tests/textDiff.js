@@ -6,7 +6,7 @@
 editor.addTest(function testTextDiff(callback) {
 	
 	// One line changed
-	var diff = textDiff(
+	var diff = UTIL.textDiff(
 	"hello world\nthis is line two\nthis is line three\n", 
 	"hello world\nthis is line two and it has changed\nthis is line three\n");
 	
@@ -20,7 +20,7 @@ editor.addTest(function testTextDiff(callback) {
 	
 	
 	// Stuff added before and after the original text
-	diff = textDiff("a\nb\nc\nd\n", "1\n2\n3\na\nb\nc\nd\n4\n5\n6\n");
+	diff = UTIL.textDiff("a\nb\nc\nd\n", "1\n2\n3\na\nb\nc\nd\n4\n5\n6\n");
 	
 	if(diff.inserted.length != 6) throw new Error("Expected 6 insertions, not " + diff.inserted.length + ". diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 	if(diff.removed.length != 0) throw new Error("Expected 0 removed lines, not " + diff.removed.length + ". diff.removed=" + JSON.stringify(diff.removed, null, 2));
@@ -35,7 +35,7 @@ editor.addTest(function testTextDiff(callback) {
 	
 	// Some lines have been removed in the middle
 	
-	diff = textDiff("A\nB\nC\nD\n", "A\nD\n");
+	diff = UTIL.textDiff("A\nB\nC\nD\n", "A\nD\n");
 	
 	if(diff.inserted.length > 0) throw new Error("Did not expect any inserted lines. diff=" + JSON.stringify(diff, null, 2));
 	
@@ -48,7 +48,7 @@ editor.addTest(function testTextDiff(callback) {
 	
 	// Inserts and removed lines (make sure the row nr is right)
 	
-	diff = textDiff(`
+	diff = UTIL.textDiff(`
 	<p>Hello world</p>
 	<table>
 	<tr>
@@ -92,7 +92,7 @@ editor.addTest(function testTextDiff(callback) {
 	
 	// Lines have been removed and some lines changed (ex: select + delete)
 	
-	diff = textDiff("ABCD\nEFGH\nIJKL\nMNOP\nQRST\n", "ABCD\nEF\nOP\nQRST\n");
+	diff = UTIL.textDiff("ABCD\nEFGH\nIJKL\nMNOP\nQRST\n", "ABCD\nEF\nOP\nQRST\n");
 	
 	if(diff.inserted.length != 2) throw new Error("Expected 2 lines to be inserted, not " + diff.inserted.length + ". diff=" + JSON.stringify(diff, null, 2));
 	
@@ -109,7 +109,7 @@ editor.addTest(function testTextDiff(callback) {
 	
 	// Find added emty lines
 	
-	diff = textDiff("LineA\nLineB\nLineC\nLineD\n", "LineA\nLineB\n\n\n\nLineC\nLineD\n");
+	diff = UTIL.textDiff("LineA\nLineB\nLineC\nLineD\n", "LineA\nLineB\n\n\n\nLineC\nLineD\n");
 	
 	if(diff.inserted.length != 3) throw new Error("Expected 3 lines to be inserted, not " + diff.inserted.length + ". diff=" + JSON.stringify(diff, null, 2));
 	if(diff.removed.length != 0) throw new Error("Expected 0 lines to be removed, not " + diff.removed.length + ". diff=" + JSON.stringify(diff, null, 2));
@@ -121,7 +121,7 @@ editor.addTest(function testTextDiff(callback) {
 	
 	
 	// Remove more then we add
-	diff = textDiff("a\nb\nc\nd\ne\n", "a\nXXX\ne\n");
+	diff = UTIL.textDiff("a\nb\nc\nd\ne\n", "a\nXXX\ne\n");
 	
 	if(diff.inserted.length != 1) throw new Error("Expected 1 line to be inserted, not " + diff.inserted.length + ". diff=" + JSON.stringify(diff, null, 2));
 	if(diff.removed.length != 3) throw new Error("Expected 3 lines to be removed, not " + diff.removed.length + ". diff=" + JSON.stringify(diff, null, 2));

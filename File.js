@@ -17,9 +17,9 @@ var File; // File object is global
 	File = function File(text, path, fileIndex, bigFile, callback) { 
 		var file = this;
 		
-		if(!isString(text)) throw new Error("text is not a string! text=" + text);
+		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
-		if(!isString(path)) throw new Error("path is not a string! path=" + path);
+		if(!UTIL.isString(path)) throw new Error("path is not a string! path=" + path);
 		
 		file.changed = false; // If the file has changed from last save
 		file.isSaved = false;
@@ -33,9 +33,9 @@ var File; // File object is global
 		file.isBig = bigFile ? true : false;
 		file.index = fileIndex;
 		file.order = fileIndex; // For ordering files, in for example a tab list
-		file.name = getFilenameFromPath(path);
+		file.name = UTIL.getFilenameFromPath(path);
 		file.mode = "code"; // text, code, or other, ...
-		file.lineBreak = determineLineBreakCharacters(text);
+		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		
 		
 		//console.log("file.lineBreak=" + file.lineBreak.replace(/\r/g, "CR").replace(/\n/g, "LF"));
@@ -138,7 +138,7 @@ var File; // File object is global
 		// Set or update the file extension
 		var file = this;
 		
-		file.fileExtension = getFileExtension(file.path);
+		file.fileExtension = UTIL.getFileExtension(file.path);
 		
 		console.log("fileExtension=" + file.fileExtension);
 		
@@ -377,7 +377,7 @@ var File; // File object is global
 		
 		
 		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
-		console.log(getStack("creating caret"));
+		console.log(UTIL.getStack("creating caret"));
 		
 		// Sanity check if we got it right
 		if(caret.index == undefined) {
@@ -565,7 +565,7 @@ var File; // File object is global
 						expect += lineBreakCharacters.charCodeAt(lbCharNr) + "==" + file.lineBreak.charCodeAt(lbCharNr) + " "
 					}
 					file.debugGrid();
-					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) (" + lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
+					throw new Error("Expected the last " + file.lineBreak.length + " characters(s) (" + UTIL.lbChars(lineBreakCharacters) + ") on Line " + (row) + " to be a line-break: (" + expect + ") grid[" + row + "].startIndex=" +  grid[row].startIndex + " in file=" + file.path);
 				}
 			}
 			
@@ -579,7 +579,7 @@ var File; // File object is global
 				// Check if character on the grid and on file.text is the same
 				if(grid[row][col].char != file.text.charAt(grid[row][col].index)) {
 					file.debugGrid();
-					throw new Error("grid[" + row + "][" + col + "].char=" + lbChars(grid[row][col].char) + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + lbChars(file.text.charAt(grid[row][col].index)));
+					throw new Error("grid[" + row + "][" + col + "].char=" + UTIL.lbChars(grid[row][col].char) + " is not the same as file.text.charAt(" + grid[row][col].index + ")=" + UTIL.lbChars(file.text.charAt(grid[row][col].index)));
 				}
 				// Make sure there is no line break character in the middle of the text
 				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
@@ -727,7 +727,7 @@ var File; // File object is global
 	File.prototype.write = function(text) {
 		// Writes text at EOF
 		
-		if(!isString(text)) throw new Error("text is not a string! text=" + text);
+		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
 		if(text.length == 0) {
 			console.warn("No text in write argument!");
@@ -978,7 +978,7 @@ var File; // File object is global
 		var textToBeRemoved = file.text.substring(firstIndex, lastIndex+1);
 		if(textToBeRemoved.match(/[\n|\r\n]/)) {
 			file.debugGrid();
-			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
+			throw new Error("Insane: The range contains a line break! textToBeRemoved=" + UTIL.lbChars(textToBeRemoved) + " firstIndex=" + firstIndex + " lastIndex=" + lastIndex + " grid[" + row + "].indentationCharacters.length=" + grid[row].indentationCharacters.length);
 		}
 		
 		
@@ -1001,7 +1001,7 @@ var File; // File object is global
 		if(text == undefined) {
 			throw new Error("No text to insert! text is undefined!");
 		}
-		else if(!isString(text)) {
+		else if(!UTIL.isString(text)) {
 			throw new Error("text=" + text + " need to be a string!\n" + text);
 		}
 		else if(text.length === 0) {
@@ -1398,11 +1398,11 @@ var File; // File object is global
 		if(file.text.charAt(firstIndex) == "\r" || file.text.charAt(firstIndex) == "\n") {
 			// note: Second argument in String.substring is "up to, but not including"
 			var removedText = file.text.substring(firstIndex, lastIndex+1);
-			if(removedText.match(/\s*/) && occurrences(removedText, file.lineBreak) === 1) {
+			if(removedText.match(/\s*/) && UTIL.occurrences(removedText, file.lineBreak) === 1) {
 				// I'ts only white space, and only one row, so for convenience, we'll use file.removeRow(row) instead!
 				var gridRow = file.rowFromIndex(firstIndex);
 				if(gridRow.row === undefined) throw new Error("Did not expect gridRow.row to be undefined! gridRow=" + JSON.stringify(gridRow) + " firstIndex=" + firstIndex);
-				console.warn("Using file.removeRow() instead of file.deleteTextRange() to remove removedText=" + lbChars(removedText) + " on firstIndex=" + firstIndex);
+				console.warn("Using file.removeRow() instead of file.deleteTextRange() to remove removedText=" + UTIL.lbChars(removedText) + " on firstIndex=" + firstIndex);
 				return file.removeRow(gridRow.row);
 			}
 			
@@ -1433,8 +1433,8 @@ var File; // File object is global
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
 		
-		console.log("file.text=" + lbChars(file.text));
-		console.log("removedText=" + lbChars(removedText));
+		console.log("file.text=" + UTIL.lbChars(file.text));
+		console.log("removedText=" + UTIL.lbChars(removedText));
 		
 		file.text = deletePart(file.text, firstIndex, lastIndex);
 		
@@ -1466,7 +1466,7 @@ var File; // File object is global
 			if((first.col === 0 || first.col === undefined) && grid[first.row].indentationCharacters.length > 0 && firstIndex > 0 && firstIndex < grid[first.row].startIndex) {
 				// Update indentation characters on first row (firstIndex is inside indentation characters)
 				
-				console.log("indentationCharacters on row=" + first.row + ": " + lbChars(grid[first.row].indentationCharacters) + "");
+				console.log("indentationCharacters on row=" + first.row + ": " + UTIL.lbChars(grid[first.row].indentationCharacters) + "");
 				
 				if(first.row > 0) {
 					var lastLineBreak = file.text.lastIndexOf(file.lineBreak, firstIndex-1);
@@ -1484,9 +1484,9 @@ var File; // File object is global
 				grid[first.row].startIndex = firstIndex;
 				
 				// Sanity check indentation characters
-				if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters) + " lastLineBreak=" + lastLineBreak + "");
+				if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + UTIL.lbChars(grid[first.row].indentationCharacters) + " lastLineBreak=" + lastLineBreak + "");
 				
-				console.log("Updated indentationCharacters=" + lbChars(grid[first.row].indentationCharacters) + " on row=" + first.row + ". lastLineBreak=" + lastLineBreak + " firstIndex=" + firstIndex + " ");
+				console.log("Updated indentationCharacters=" + UTIL.lbChars(grid[first.row].indentationCharacters) + " on row=" + first.row + ". lastLineBreak=" + lastLineBreak + " firstIndex=" + firstIndex + " ");
 
 			}
 			
@@ -1564,7 +1564,7 @@ var File; // File object is global
 					console.log("deleteExtra1=" + deleteExtra1);
 					if(deleteExtra1 > 0) {
 						
-						console.log( "extra removed text BB: " + lbChars(file.text.substring(firstIndex-deleteExtra1, firstIndex)) );
+						console.log( "extra removed text BB: " + UTIL.lbChars(file.text.substring(firstIndex-deleteExtra1, firstIndex)) );
 						
 						removedText = file.text.substring(firstIndex-deleteExtra1, firstIndex) + removedText;
 
@@ -1597,7 +1597,7 @@ var File; // File object is global
 						}
 						else if(deleteExtra2 > 0) {
 							
-							console.log("extra removed text CC: " + lbChars(file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2)));
+							console.log("extra removed text CC: " + UTIL.lbChars(file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2)));
 							
 							removedText = file.text.substring(checkSpaceFrom, checkSpaceFrom + deleteExtra2) + removedText;
 							
@@ -1624,7 +1624,7 @@ var File; // File object is global
 							grid[first.row].indentationCharacters = file.text.substr(file.text.lastIndexOf(file.lineBreak, file.text.length) + file.lineBreak.length);
 						
 							// Sanity check if indentation characters contain any character that is not a space or tab !?
-							if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + lbChars(grid[first.row].indentationCharacters));
+							if(grid[first.row].indentationCharacters.replace(/ /g, "").replace(/\t/g, "").length > 0) throw new Error("Unexpected indentation characters: " + UTIL.lbChars(grid[first.row].indentationCharacters));
 							
 							grid[first.row].startIndex = file.text.length;
 							grid[first.row].lineNumber = grid.length;
@@ -1655,7 +1655,7 @@ var File; // File object is global
 			
 				if(grid.length == 0) {
 					throw new Error("Grid length should never be zero!");
-					if(file.text !== "") throw new Error("The grid is empty but text=" + lbChars(text));
+					if(file.text !== "") throw new Error("The grid is empty but text=" + UTIL.lbChars(text));
 					
 					file.grid = file.createGrid();
 				}
@@ -2779,7 +2779,7 @@ var File; // File object is global
 		if(text == undefined) throw new Error("No text!");
 		
 		
-		file.lineBreak = determineLineBreakCharacters(text);
+		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		file.indentation = determineIndentationConvention(text, file.lineBreak);
 		file.text = fixInconsistentLineBreaks(text, file.lineBreak);
 		
@@ -2827,7 +2827,7 @@ var File; // File object is global
 		codeBlockStartCharacter = "{",
 		codeBlockEndCharacter = "}";
 		
-		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + lbChars(file.lineBreak) + " ...");	
+		console.log("Creating grid (text.length=" + text.length + ") mode=" + file.mode + " file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " ...");	
 		
 		var lastLinebreakCharacter = "";
 		var lineBreakCharacters = file.lineBreak.length;
@@ -2951,7 +2951,7 @@ var File; // File object is global
 			
 		*/
 		
-		console.log(getStack("debugGrid"));
+		console.log(UTIL.getStack("debugGrid"));
 		
 		if(!editor.settings.devMode) {
 			return;
@@ -2972,7 +2972,7 @@ var File; // File object is global
 		
 		//console.log(JSON.stringify(grid, null, 4));
 		for(var row=0; row<grid.length; row++) {
-			console.log("row=" + row + ": startIndex=" + grid[row].startIndex + " indentation=" + grid[row].indentation + " indentationCharacters=" + lbChars(grid[row].indentationCharacters));
+			console.log("row=" + row + ": startIndex=" + grid[row].startIndex + " indentation=" + grid[row].indentation + " indentationCharacters=" + UTIL.lbChars(grid[row].indentationCharacters));
 			console.log(JSON.stringify(grid[row], null, 2));
 		}
 		
@@ -2982,7 +2982,7 @@ var File; // File object is global
 		//console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 		
 		for(var i=0; i<text.length; i++) {
-			console.log(i + "=" + lbChars(text[i]));
+			console.log(i + "=" + UTIL.lbChars(text[i]));
 		}
 		
 		for(var row=0; row<grid.length; row++) {
@@ -3079,7 +3079,7 @@ var File; // File object is global
 		var file = this;
 		
 		if(file.isCallingChangeEventListeners) {
-			throw new Error("fileChange event listeners (" + getFunctionName(file.isCallingChangeEventListeners) + ") are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
+			throw new Error("fileChange event listeners (" + UTIL.getFunctionName(file.isCallingChangeEventListeners) + ") are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
 		}
 		
 		file.changed = true;
@@ -3104,7 +3104,7 @@ var File; // File object is global
 		
 		for(var i=0; i<editor.eventListeners.fileChange.length; i++) {
 			file.isCallingChangeEventListeners = editor.eventListeners.fileChange[i].fun;
-			console.log("Calling fileChange event listener: " + getFunctionName(editor.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
+			console.log("Calling fileChange event listener: " + UTIL.getFunctionName(editor.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
 			editor.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
 		}
 		file.isCallingChangeEventListeners = undefined;
@@ -3353,7 +3353,7 @@ var File; // File object is global
 	File.prototype.gotoLine = function(line, callback) {
 		// Goes to a line in a file. Loads part of a file if necessary (big files)
 		
-		console.log(getStack("Going to line=" + line + " ..."));
+		console.log(UTIL.getStack("Going to line=" + line + " ..."));
 		
 		var file = this;
 		
@@ -3512,7 +3512,7 @@ var File; // File object is global
 				
 				if(high < low) throw new Error("high=" + high + " < low=" + low + ". file.grid.length=" + file.grid.length + " path=" + file.path);
 				
-				//console.log(getStack("scrollTo"));
+				//console.log(UTIL.getStack("scrollTo"));
 				
 				console.log("Scrolling in big file: file.isStreaming=" + file.isStreaming + " file.totalRows=" + file.totalRows + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
 				
@@ -3864,8 +3864,8 @@ var File; // File object is global
 					//console.log("str=" + str);
 					
 					// Only add to the string after we got enough line breaks ...
-					if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(str);
-					lineBreaksInThisChunk = occurrences(str, file.lineBreak, false);
+					if(!file.lineBreak) file.lineBreak = UTIL.determineLineBreakCharacters(str);
+					lineBreaksInThisChunk = UTIL.occurrences(str, file.lineBreak, false);
 					
 					if(file.lineBreak.length > 1) {
 						// Account for lost linebreaks due to breaks in the middle between CR and LF
@@ -3918,7 +3918,7 @@ var File; // File object is global
 			if(file.totalRows == -1) throw new Error("Stream closed before we got file.totalRows!");
 			
 			// Always wait with the callback until the stream has closed, so that we don't start doing stuff with the file while it's streaming.
-			console.log("Calling callback name=" + getFunctionName(callback));
+			console.log("Calling callback name=" + UTIL.getFunctionName(callback));
 			if(callback && !callbackCalled) callback();
 		}
 		
@@ -3954,7 +3954,7 @@ var File; // File object is global
 				
 				console.log("L=" + (partStartRow+1) + " text.length=" + text.length);
 				
-				if(!file.lineBreak) file.lineBreak = determineLineBreakCharacters(text);
+				if(!file.lineBreak) file.lineBreak = UTIL.determineLineBreakCharacters(text);
 				
 				if(partStartRow > 0) {
 					// Make the text start at partStartRow

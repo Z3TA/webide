@@ -363,9 +363,9 @@ function reopenFiles() {
 	
 	function addToStringList(text, add, delimiter) {
 		
-		if(!isString(text)) throw new Error("text is not a string!");
-		if(!isString(add)) throw new Error("add is not a string!");
-		if(!isString(delimiter)) throw new Error("delimiter is not a string!");
+		if(!UTIL.isString(text)) throw new Error("text is not a string!");
+		if(!UTIL.isString(add)) throw new Error("add is not a string!");
+		if(!UTIL.isString(delimiter)) throw new Error("delimiter is not a string!");
 		
 		var array = text.split(delimiter); // Convert string to array
 		
@@ -394,7 +394,7 @@ function reopenFiles() {
 		}
 		else {
 			
-			console.log(getStack("Adding file to openedFiles path='" + file.path + "'"));
+			console.log(UTIL.getStack("Adding file to openedFiles path='" + file.path + "'"));
 			
 			console.log("List before=" + window.localStorage.openedFiles);	
 			window.localStorage.openedFiles = addToStringList(window.localStorage.openedFiles, file.path, fileDelimiter);
@@ -437,9 +437,9 @@ function reopenFiles() {
 	
 	function removeFromStringList(text, remove, delimiter) {
 		
-		if(!isString(text)) throw new Error("text is not a string!");
-		if(!isString(remove)) throw new Error("remove is not a string!");
-		if(!isString(delimiter)) throw new Error("delimiter is not a string!");
+		if(!UTIL.isString(text)) throw new Error("text is not a string!");
+		if(!UTIL.isString(remove)) throw new Error("remove is not a string!");
+		if(!UTIL.isString(delimiter)) throw new Error("delimiter is not a string!");
 		
 		var array = text.split(delimiter); // Convert text to array
 		
@@ -470,7 +470,7 @@ function reopenFiles() {
 			throw new Error("Argument need to be a file object!");
 		}
 		
-		console.log(getStack("Removing file from openedFiles path='" + file.path + "'"));
+		console.log(UTIL.getStack("Removing file from openedFiles path='" + file.path + "'"));
 		
 		console.log("List before=" + window.localStorage.openedFiles);	
 		window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, file.path, fileDelimiter);

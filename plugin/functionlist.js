@@ -340,7 +340,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 			
 			name = func.name;
 			
-				if(name.search(new RegExp(escapeRegExp(str), "i")) != -1) {
+				if(name.search(new RegExp(UTIL.escapeRegExp(str), "i")) != -1) {
 					matches.push(name);
 					//console.log(name);
 				}
@@ -394,7 +394,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 				functionListWrap.style.display="none";
 				editor.resizeNeeded();
 				console.log("Functionlist is now hidden");
-				console.log(getStack("why hide?"));
+				console.log(UTIL.getStack("why hide?"));
 			}
 		}
 	}
@@ -579,7 +579,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 			
 			var fname = functionListSelect.options[1].text;
 			
-			//alert(lbChars(fname.charAt(0)));
+			//alert(UTIL.lbChars(fname.charAt(0)));
 			
 			if(fname.charAt(0).match(/\s/) !== null) throw new Error("Second item in the function list should not be indented after moving the subfunction out");
 			
