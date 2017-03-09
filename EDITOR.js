@@ -3317,12 +3317,10 @@ EDITOR.lastKeyPressed = "";
 	
 	function main() {
 		
-		//var fs = require("fs");
-		
 		console.log("Starting the editor ...");
 		
 		
-		CLIENT.connect(connectedToServer);
+		CLIENT.connect(undefined, connectedToServer);
 	
 		
 		getVersion(function(version) {
@@ -3390,6 +3388,9 @@ EDITOR.lastKeyPressed = "";
 			keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
 			
 		}
+		
+		window.onbeforeunload = confirmExit;
+
 		
 		
 		// Handle file save dialog
@@ -4324,8 +4325,15 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		if(preventDefault) {
+			//alert("Preventing default browser action!");
 			console.log("Preventing default browser action!");
-			if(e.preventDefault) e.preventDefault();
+			
+			try {e.stopPropagation();} catch(err) {console.warn(err.message);}
+			try {window.event.cancelBubble = true;} catch(err) {console.warn(err.message);}
+			
+			try {e.preventDefault();} catch(err) {console.warn(err.message);}
+			try {event.preventDefault();} catch(err) {console.warn(err.message);}
+
 			return false;
 		}
 		else {
@@ -5030,4 +5038,8 @@ EDITOR.lastKeyPressed = "";
 		}
 	}
 	
+	function confirmExit() {
+		return "Are you sure you want to close the editor ?";
+	}
+		
 })();
