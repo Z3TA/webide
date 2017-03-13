@@ -110,6 +110,8 @@
 	
 	window.onerror = function(message, source, lineno, colno, error) {
 		
+		console.warn("Error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
+		
 		var yes = "Close/restart editor";
 		var createTestRestart = "Create a test case and restart";
 		var createTestKeepRunning = "Create a test case and keep running";

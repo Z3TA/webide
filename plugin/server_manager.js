@@ -239,7 +239,7 @@
 				
 				EDITOR.disconnect(selectedConnection.protocol, selectedConnection.host, function(err) {
 					if(err) throw err;
-					});
+				});
 				
 			}
 			else console.warn("Not connected to " + selectedConnection.host);

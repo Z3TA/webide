@@ -2656,20 +2656,24 @@ EDITOR.lastKeyPressed = "";
 		
 	}
 	
-	EDITOR.disconnect = function(callback, protocol, serverAddress) {
+	EDITOR.disconnect = function(protocol, serverAddress, callback) {
 		
-		if(protocol == undefined) throw new Error("No protocol defined!");
+		if(protocol == undefined) throw new Error("Expected protocol! protocol=" + protocol);
+		if(serverAddress == undefined) throw new Error("Expected serverAddress! serverAddress=" + serverAddress);
 		
 		var json = {protocol: protocol, serverAddress: serverAddress};
 		
 		CLIENT.cmd("disconnect", json, function(err, json) {
-			if(err) callback(err);
+			if(err) {
+				if(callback) callback(err);
+				else throw err;
+			}
 			else {
 				
 				setWorkingDirectory(json.workingDirectory);
 				
 				delete EDITOR.connections[serverAddress];
-				callback(null);
+				if(callback) callback(null);
 			}
 		});
 		

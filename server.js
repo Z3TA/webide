@@ -309,7 +309,7 @@ User.prototype.connectionClosed = function connectionClosed(protocol, serverAddr
 		connectionClosed: {protocol: protocol, serverAddress: serverAddress}
 	}});
 	
-	delete user.clientConnections[serverAddress]; // Remove the connection
+	delete user.remoteConnections[serverAddress]; // Remove the connection
 	
 }
 
