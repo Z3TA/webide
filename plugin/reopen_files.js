@@ -188,6 +188,8 @@ function reopenFiles() {
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
+				console.log("Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				
 				if(err) {
 					//if(err.code === 'ENOENT') {
 					notFound = true;
@@ -205,35 +207,70 @@ function reopenFiles() {
 					if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 						// Only ask if we actually have the last state, otherwise just ignore that it's gone.
 						// Don't ask if lastFileState.isSaved === false, because it will be loaded anyway if thats right.
-						if(lastFileState.isSaved != false) loadLastState = confirm("File not found! Load last saved state? path=: " + path + " (" + err.message + ")");
+						if(lastFileState.isSaved != false) {
+							
+							var strDoNothing = "Don't open it";
+							var strLoadLastState = "Load last saved state";
+							
+							confirmBox("File not found:\n" + path, [strDoNothing, strLoadLastState], function(answer) {
+								
+								if(answer == strLoadLastState) loadLastState = true;
+								open();
+								
+							});
+							
+							//loadLastState = confirm("File not found! Load last saved state?\npath=: " + path + "\n(" + err.message + ")");
+						}
+						else open();
 					}
 					// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
 					else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
-						loadLastState = confirm("File on disk is empty! Load last saved state instead? path=: " + path + "");
-					}
-					
-					if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved. Because it was "Not found" or "Emty on disk"
-					
-					if( loadLastState || lastFileState.isSaved === false ) {
-						// Open from temp
-						console.warn("Loading last saved state for file path=" + path);
-						content = lastFileState.text;
 						
+						var strItShouldBeEmty = "It should be emty";
+						var strLoadLastState = "Load last saved state";
+						
+						confirmBox("File on disk is empty!", [strItShouldBeEmty, strLoadLastState], function(answer) {
+							
+							if(answer == strLoadLastState) loadLastState = true;
+							open();
+							
+						});
+						
+						//loadLastState = confirm("File on disk is empty! Load last saved state instead? path=: " + path + "");
 					}
-					else if(notFound) {
-						// The file was not found and the user didn't want to load last state
-						// Do not open it! Remove from openedFiles
-						window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
-						// Should we remove the state!?
-						window.localStorage.removeItem("state_" + path);
-						callback(path, false, err);
-						return; // Don't attempt to open the file
-					}
+					else open();
+					
 					
 				}
+				else open();
 				
-				console.log("Reopening file path=" + path +" typeof content=" + typeof content);
-				EDITOR.openFile(path, content, fileReopened); 
+				
+				
+				function open() {
+					
+					if(lastFileState) {
+					
+						if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved. Because it was "Not found" or "Emty on disk"
+						
+						if( loadLastState || lastFileState.isSaved === false ) {
+							// Open from temp
+							console.warn("Loading last saved state for file path=" + path);
+							content = lastFileState.text;
+							
+						}
+						else if(notFound) {
+							// The file was not found and the user didn't want to load last state
+							// Do not open it! Remove from openedFiles
+							window.localStorage.openedFiles = removeFromStringList(window.localStorage.openedFiles, path, fileDelimiter);
+							// Should we remove the state!?
+							window.localStorage.removeItem("state_" + path);
+							callback(path, false, err);
+							return; // Don't attempt to open the file
+						}
+					}
+					console.log("Reopening file path=" + path +" typeof content=" + typeof content);
+					EDITOR.openFile(path, content, fileReopened); 
+				}
 				
 				
 			}
