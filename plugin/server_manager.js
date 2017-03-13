@@ -236,9 +236,11 @@
 			// Close the connection
 			
 			if(EDITOR.connections.hasOwnProperty(selectedConnection.host)) {
-				EDITOR.connections[selectedConnection.host].close();
 				
-				EDITOR.workingDirectory = UTIL.trailingSlash(process.cwd()); // Change working directory (back) to the one from where we opened the editor
+				EDITOR.disconnect(selectedConnection.protocol, selectedConnection.host, function(err) {
+					if(err) throw err;
+					});
+				
 			}
 			else console.warn("Not connected to " + selectedConnection.host);
 			

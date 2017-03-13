@@ -830,13 +830,17 @@ API.connect = function(user, json, callback) {
 				};
 				
 				callback(null, {workingDirectory: user.workingDirectory});
+				callback = null; // Don't callback again when the connection timeouts
+				
 			});
 			
 		});
 		
 		ftpClient.on('error', function(err) {
+			
+			if(callback) callback(err);
+			
 			user.send(err.message);
-			callback(err); // Should we callback here ?? Can happend several hours after the connection was initiated!
 			
 			user.connectionClosed("ftp", serverAddress);
 			
@@ -896,6 +900,7 @@ API.connect = function(user, json, callback) {
 				user.changeWorkingDir(workingDir);
 				
 				callback(null, {workingDirectory: user.workingDirectory});
+				callback = null; // Don't callback again when the connection timeouts
 			}
 		});
 		
@@ -927,6 +932,7 @@ API.connect = function(user, json, callback) {
 						};
 						
 						callback(null, {workingDirectory: user.workingDirectory});
+						callback = null; // Don't callback again when the connection timeouts
 					}
 				});
 			}
@@ -1020,6 +1026,37 @@ API.connect = function(user, json, callback) {
 	}
 }
 
+API.disconnect = function(user, json, callback) {
+	
+	var protocol = json.protocol;
+	var serverAddress = json.serverAddress;
+	
+	if(!user.connections.hasOwnProperty(serverAddress)) return callback(new Error("Unknown connection: serverAddress=" + serverAddress));
+	
+	user.changeWorkingDir(user.defaultWorkingDirectory);
+	
+	user.connections[serverAddress].close();
+	
+	callback(null, {workingDirectory: user.workingDirectory});
+	
+}
+
+API.setWorkingDirectory = function(user, json, callback) {
+	var path = json.path;
+	
+	var fs = require("fs");
+	fs.stat(path, function (err, stats){
+		if (err) return callback(err);
+		
+		if (!stats.isDirectory()) callback(new Error('Not a directory: path=' + path));
+		else {
+			path = user.changeWorkingDir(path);
+			
+			callback(null, {workingDirectory:path});
+		}
+	});
+	
+}
 
 
 

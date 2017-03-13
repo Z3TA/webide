@@ -184,6 +184,9 @@ EDITOR.lastKeyPressed = "";
 	
 	var windowLoaded = false;
 	
+	var directoryDialogCallback = undefined;
+	var directoryDialogHtmlElement;
+	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -191,7 +194,20 @@ EDITOR.lastKeyPressed = "";
 		Feel free to add more EDITOR methods below. Do not extend the EDITOR object elsewhere!!
 	*/
 	
-	EDITOR.workingDirectory = UTIL.trailingSlash(process.cwd());
+	
+	
+	// # Working Directory
+	var workingDirectory; // Private variable
+	if(!Object.defineProperty) console.warn("Object.defineProperty not available!");
+	else {
+		Object.defineProperty(EDITOR, 'workingDirectory', {
+			get: function() { return workingDirectory; },
+			set: function(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
+			enumerable: true
+		});
+	}
+	
+	setWorkingDirectory(UTIL.trailingSlash(process.cwd()));
 	
 	if(runtime!="browser") {
 		// Check if the working directory is the same as the editor (hmm, why?)
@@ -202,21 +218,33 @@ EDITOR.lastKeyPressed = "";
 		if(__dirname != EDITOR.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 	}
 	
-	var directoryDialogCallback = undefined; 
-	var directoryDialogHtmlElement;
-	
+	function setWorkingDirectory(workingDir) {
+		
+		// Private function to internally change working directory and calling event listeners that listen for workingDirectory changes.
+		
+		workingDirectory = UTIL.trailingSlash(workingDir);
+		
+		console.log("Calling changeWorkingDir listeners (" + EDITOR.eventListeners.changeWorkingDir.length + ") workingDirectory=" + workingDirectory);
+		for(var i=0; i<EDITOR.eventListeners.changeWorkingDir.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.changeWorkingDir[i].fun));
+			EDITOR.eventListeners.changeWorkingDir[i].fun(workingDirectory); // Call function
+		}
+		
+		return workingDirectory;
+	}
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
 		
-		// Check if the dir exists ?
+		// Update internally (on client)
+		var workingDirectory = setWorkingDirectory(workingDir);
 		
-		EDITOR.workingDirectory = UTIL.trailingSlash(workingDir);;
+		var json = {path: workingDirectory};
 		
-		console.log("Calling changeWorkingDir listeners (" + EDITOR.eventListeners.changeWorkingDir.length + ") workingDir=" + workingDir);
-		for(var i=0; i<EDITOR.eventListeners.changeWorkingDir.length; i++) {
-			//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.changeWorkingDir[i].fun));
-			EDITOR.eventListeners.changeWorkingDir[i].fun(workingDir); // Call function
-		}
+		// Update the server
+		// The server will check if the directory exists
+		CLIENT.cmd("setWorkingDirectory", json, function(err, json) {
+			if(err) throw err;
+			});
 		
 	}
 	
@@ -2618,8 +2646,30 @@ EDITOR.lastKeyPressed = "";
 			if(err) callback(err);
 			else {
 				
+				setWorkingDirectory(json.workingDirectory);
+				
 				EDITOR.connections[serverAddress] = {protocol: protocol};
 				callback(null, json.workingDirectory);
+				
+			}
+		});
+		
+	}
+	
+	EDITOR.disconnect = function(callback, protocol, serverAddress) {
+		
+		if(protocol == undefined) throw new Error("No protocol defined!");
+		
+		var json = {protocol: protocol, serverAddress: serverAddress};
+		
+		CLIENT.cmd("disconnect", json, function(err, json) {
+			if(err) callback(err);
+			else {
+				
+				setWorkingDirectory(json.workingDirectory);
+				
+				delete EDITOR.connections[serverAddress];
+				callback(null);
 			}
 		});
 		
@@ -2858,11 +2908,10 @@ EDITOR.lastKeyPressed = "";
 		}});
 		
 		EDITOR.eventListeners.exit.push({fun: function closeOpenConnections() {
-				for(var conn in EDITOR.connections) {
-					if(EDITOR.connections[conn].close) EDITOR.connections[conn].close();
-					else throw new Error("Connection: conn=" + conn + " did not have a close() method. Connection already closed!?");
-				}
-				return true;			
+			
+			for(var serverAddress in EDITOR.connections) CLIENT.cmd("disconnect", {serverAddress: serverAddress});
+			
+			return true;			
 		}});
 		
 	}
@@ -3256,7 +3305,7 @@ EDITOR.lastKeyPressed = "";
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {
 				if(err) throw err;
-				else EDITOR.workingDirectory = json.path;
+				else setWorkingDirectory(json.path);
 			});
 			
 		}
@@ -4667,5 +4716,7 @@ EDITOR.lastKeyPressed = "";
 	function confirmExit() {
 		return "Are you sure you want to close the editor ?";
 	}
+	
+	
 	
 })();

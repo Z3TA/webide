@@ -469,7 +469,7 @@
 			buttonSetWorkingDirectory.setAttribute("title", "Sets the editors working directory to the source directory of the selected site.");
 			buttonSetWorkingDirectory.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
-			EDITOR.workingDirectory = selectedSite.source;
+			EDITOR.changeWorkingDir(selectedSite.source);
 			hideSSG();
 			}, false);
 		*/
@@ -482,7 +482,7 @@
 		buttonOpenEdit.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			
-			EDITOR.workingDirectory = selectedSite.source;
+			EDITOR.changeWorkingDir(selectedSite.source);
 			
 			EDITOR.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
 				
@@ -1985,7 +1985,7 @@
 	
 	function newPage(site) {
 		
-		EDITOR.workingDirectory = site.source;
+		EDITOR.changeWorkingDir(site.source);
 		
 		EDITOR.readFromDisk(site.template, function fileRead(err, path, text) {
 			

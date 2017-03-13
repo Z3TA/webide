@@ -559,7 +559,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 					
 					if(dir.indexOf(EDITOR.workingDirectory) == -1) {
 						// Set the working directory to this files's folder
-						EDITOR.workingDirectory = dir;
+						EDITOR.changeWorkingDir(dir);
 						firstRun = true; // Make it not use cached file's list
 }
 					

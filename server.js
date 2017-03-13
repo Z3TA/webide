@@ -254,9 +254,11 @@ function User(id, name) {
 	
 	user.id = id;
 	user.name = name;
-	user.connections = {};
-	user.workingDirectory = UTIL.trailingSlash(process.cwd());
-	user.connection = null;
+	user.remoteConnections = {};
+	user.cconnection = null;
+	
+	user.defaultWorkingDirectory = UTIL.trailingSlash(process.cwd());
+	user.workingDirectory = user.defaultWorkingDirectory;
 	
 }
 
@@ -295,6 +297,8 @@ User.prototype.changeWorkingDir = function changeWorkingDir(path) {
 	var user = this;
 	
 	user.workingDirectory = path;
+	
+	return user.workingDirectory;
 }
 
 User.prototype.connectionClosed = function connectionClosed(protocol, serverAddress) {
