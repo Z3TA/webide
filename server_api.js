@@ -34,9 +34,9 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 		
 		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 		
-		if(user.connections.hasOwnProperty(parse.hostname)) {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
-			var c = user.connections[parse.hostname].client;
+			var c = user.remoteConnections[parse.hostname].client;
 				
 				console.log("Getting file from FTP server: " + parse.pathname);
 				
@@ -75,9 +75,9 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 		}
 		else if(parse.protocol == "sftp:") {
 			
-		if(user.connections.hasOwnProperty(parse.hostname)) {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
-			var c = user.connections[parse.hostname].client;
+			var c = user.remoteConnections[parse.hostname].client;
 				
 				console.log("Getting file from SFTP server: " + parse.pathname);
 				
@@ -183,9 +183,9 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	
 	if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 		
-		if(user.connections.hasOwnProperty(parse.hostname)) {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 			
-			var c = user.connections[parse.hostname].client;
+			var c = user.remoteConnections[parse.hostname].client;
 			
 			console.log("Getting file size from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
 			
@@ -207,9 +207,9 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	}
 	else if(parse.protocol == "sftp:") {
 		
-		if(user.connections.hasOwnProperty(parse.hostname)) {
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 			
-			var c = user.connections[parse.hostname].client;
+			var c = user.remoteConnections[parse.hostname].client;
 			
 			console.log("Getting file size from SFTP server: " + parse.pathname);
 			
@@ -279,9 +279,9 @@ if(protocol == "ftp:" || protocol == "ftps:") {
 }
 else if(protocol == "sftp:") {
 	
-	if(user.connections.hasOwnProperty(hostname)) {
+	if(user.remoteConnections.hasOwnProperty(hostname)) {
 		
-		var c = user.connections[hostname].client;
+		var c = user.remoteConnections[hostname].client;
 		
 		var input = inputBuffer ? text : new Buffer(text, encoding);
 		var destPath = pathname;
@@ -328,9 +328,9 @@ else if(protocol == "sftp:") {
 	function uploadFTP(pathname, text) {
 		console.log("Uploading to FTP ... pathname=" + pathname);
 		
-		if(user.connections.hasOwnProperty(hostname)) {
+		if(user.remoteConnections.hasOwnProperty(hostname)) {
 			
-			var ftpClient = user.connections[hostname].client;
+			var ftpClient = user.remoteConnections[hostname].client;
 			
 			var input = inputBuffer ? text : new Buffer(text, encoding);
 			var useCompression = false;
@@ -408,9 +408,9 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	}
 	else if(protocol == "sftp:") {
 		// ### List file using SFTP protocol
-		if(user.connections.hasOwnProperty(hostname)) {
+		if(user.remoteConnections.hasOwnProperty(hostname)) {
 			
-			var c = user.connections[hostname].client;
+			var c = user.remoteConnections[hostname].client;
 			
 			console.log("Initiating folder read on SFTP " + hostname + ":" + pathname);
 			
@@ -547,9 +547,9 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	
 	function listFilesFTP(pathname) {
 		
-		if(user.connections.hasOwnProperty(hostname)) {
+		if(user.remoteConnections.hasOwnProperty(hostname)) {
 			
-			var ftpClient = user.connections[hostname].client;
+			var ftpClient = user.remoteConnections[hostname].client;
 			
 			if(pathToFolder != user.workingDirectory) {
 				// First change folder
@@ -716,9 +716,9 @@ API.createPath = function(user, json, createPathCallback) {
 		}
 		else if(parse.protocol == "sftp:") {
 			// ### Create a directory using SFTP protocol
-			if(user.connections.hasOwnProperty(parse.hostname)) {
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
-				var c = user.connections[parse.hostname].client;
+				var c = user.remoteConnections[parse.hostname].client;
 				
 				var b = c.mkdir(path, function (err, folderItems) {
 					
@@ -754,9 +754,9 @@ API.createPath = function(user, json, createPathCallback) {
 			
 			console.log("Creating FTP path=" + path)
 			
-			if(user.connections.hasOwnProperty(hostname)) {
+			if(user.remoteConnections.hasOwnProperty(hostname)) {
 				
-				var c = user.connections[hostname].client;
+				var c = user.remoteConnections[hostname].client;
 				
 				// ftp mkdir
 				c.mkdir(path, function(err) {
@@ -813,8 +813,8 @@ API.connect = function(user, json, callback) {
 		}
 		
 		var Client = require('ftp');
-		user.connections[serverAddress] = {client: new Client(), protocol: protocol};
-		var ftpClient = user.connections[serverAddress].client;
+		user.remoteConnections[serverAddress] = {client: new Client(), protocol: protocol};
+		var ftpClient = user.remoteConnections[serverAddress].client;
 		ftpClient.on('ready', function() {
 			console.log("Connected to FTP server on " + serverAddress + " !");
 			ftpClient.pwd(function(err, dir) {
@@ -822,9 +822,9 @@ API.connect = function(user, json, callback) {
 				user.changeWorkingDir(protocol + "://" + serverAddress + dir.replace("\\", "/"));
 				
 				// Create disconnect function
-				user.connections[serverAddress].close = function disconnectFTP() {
+				user.remoteConnections[serverAddress].close = function disconnectFTP() {
 					ftpClient.end();
-					delete user.connections[serverAddress];
+					delete user.remoteConnections[serverAddress];
 					
 					console.log("Dissconnected from FTP on " + serverAddress + "");
 				};
@@ -887,12 +887,12 @@ API.connect = function(user, json, callback) {
 			if(err) callback(err);
 			else {
 				
-				user.connections[serverAddress] = {client: sshClient, protocol: protocol};
+				user.remoteConnections[serverAddress] = {client: sshClient, protocol: protocol};
 				
 				// Create disconnect function
-				user.connections[serverAddress].close = function disconnectSSH() {
+				user.remoteConnections[serverAddress].close = function disconnectSSH() {
 					sshClient.end();
-					delete user.connections[serverAddress];
+					delete user.remoteConnections[serverAddress];
 					
 					console.log("Dissconnected from SSH on " + serverAddress + "");
 				};
@@ -918,15 +918,15 @@ API.connect = function(user, json, callback) {
 
 					}
 					else {
-						user.connections[serverAddress] = {client: sftpClient, protocol: protocol};
+						user.remoteConnections[serverAddress] = {client: sftpClient, protocol: protocol};
 						user.changeWorkingDir(workingDir);
 						
 						console.log("Connected to SFTP on " + serverAddress + " . Working directory is: " + user.workingDirectory);
 						
 						// Create disconnect function
-						user.connections[serverAddress].close = function disconnectSFTP() {
+						user.remoteConnections[serverAddress].close = function disconnectSFTP() {
 							sshClient.end();
-							delete user.connections[serverAddress];
+							delete user.remoteConnections[serverAddress];
 							
 							console.log("Dissconnected from SFTP on " + serverAddress + "");
 						};
@@ -1031,11 +1031,11 @@ API.disconnect = function(user, json, callback) {
 	var protocol = json.protocol;
 	var serverAddress = json.serverAddress;
 	
-	if(!user.connections.hasOwnProperty(serverAddress)) return callback(new Error("Unknown connection: serverAddress=" + serverAddress));
+	if(!user.remoteConnections.hasOwnProperty(serverAddress)) return callback(new Error("Unknown connection: serverAddress=" + serverAddress));
 	
 	user.changeWorkingDir(user.defaultWorkingDirectory);
 	
-	user.connections[serverAddress].close();
+	user.remoteConnections[serverAddress].close();
 	
 	callback(null, {workingDirectory: user.workingDirectory});
 	

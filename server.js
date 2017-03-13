@@ -255,7 +255,7 @@ function User(id, name) {
 	user.id = id;
 	user.name = name;
 	user.remoteConnections = {};
-	user.cconnection = null;
+	user.clientConnection = null;
 	
 	user.defaultWorkingDirectory = UTIL.trailingSlash(process.cwd());
 	user.workingDirectory = user.defaultWorkingDirectory;
@@ -265,13 +265,13 @@ function User(id, name) {
 User.prototype.connected = function connected(connection) {
 	var user = this;
 
-	user.connection = connection;
+	user.clientConnection = connection;
 }
 
 User.prototype.disconnected = function disconnected() {
 	var user = this;
 
-	user.connection = null;
+	user.clientConnection = null;
 }
 
 User.prototype.send = function send(msg) {
@@ -283,13 +283,13 @@ User.prototype.send = function send(msg) {
 	
 	var str = JSON.stringify(msg);
 	
-	if(!user.connection) {
+	if(!user.clientConnection) {
 		console.warn("Unable to send msg=" + str + ". User name=" + user.name + " is not connected!");
 		return;
 	}
 	
 	log(user.IP + " <= " + str);
-	user.connection.write(str);
+	user.clientConnection.write(str);
 	
 }
 
@@ -309,7 +309,7 @@ User.prototype.connectionClosed = function connectionClosed(protocol, serverAddr
 		connectionClosed: {protocol: protocol, serverAddress: serverAddress}
 	}});
 	
-	delete user.connections[serverAddress]; // Remove the connection
+	delete user.clientConnections[serverAddress]; // Remove the connection
 	
 }
 
