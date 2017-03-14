@@ -22,7 +22,13 @@ EDITOR.addTest(function getFoldersTest(callback) {
 	unixPath[1] == "/var/" &&
 	unixPath[2] == "/var/log/")) throw new Error("unixPath=" + JSON.stringify(unixPath));
 	
+	
+	var rootFolder = UTIL.getFolders("/");
+	if(rootFolder.length != 1) throw new Error("Only expected one folder!");
+	if(rootFolder[0] != "/") throw new Error("Expected root folder to be a slash");
+
+	
 	callback(true);
 
-});
+}, 1);
 	

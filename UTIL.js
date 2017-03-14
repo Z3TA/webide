@@ -81,6 +81,8 @@ var UTIL = {
 		
 		fullPath = fullPath.trim(); // Remove white space before and after
 		
+		if(fullPath == "/") return ["/"];
+		
 		var lastChar = fullPath.substr(fullPath.length-1);
 		
 		if(lastChar != "/" && lastChar != "\\") {
