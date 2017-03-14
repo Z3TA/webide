@@ -221,7 +221,14 @@ var UTIL = {
 	getPathDelimiter: function getPathDelimiter(path) {
 		// Returns the delimiter character used for separating directories in a file-path or url
 		
-		if(!path) throw new Error("Not a valid path=" + path);
+		// Use working directory if there's no path
+		if(!path && EDITOR.workingDirectory) path = EDITOR.workingDirectory;
+		
+	
+		if(!path) {
+			console.warn("Unable to determine path delimiter. Slash / will be used! path=" + path);
+			return "/";
+		}
 		
 		var lastChar = path.substring(path.length-1);
 		

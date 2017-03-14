@@ -7,6 +7,9 @@ var APC = String.fromCharCode(159);
 
 var API = require("./server_api.js");
 
+var remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
+
+
 function main() {
 
 	var port = 8099;
@@ -189,28 +192,24 @@ function identify(json, IP, callback) {
 	if(json.hasOwnProperty("username") && json.hasOwnProperty("password")) {
 		var fs = require("fs");
 		
-		fs.readFile("users.htpassw", "utf8", function(err, data) {
+		fs.readFile("users.pw", "utf8", function(err, data) {
 			if(err) throw err;
-			
-			// todo: use proper htpassw formatting
-			
-			// todo: use system users ? fork prosess and run under that user !?
 			
 			var row = data.split(/\r|\r\n/);
 			
 			var user;
 			
 			for(var i=0, test; i<row.length; i++) {
-				test = row[i].split(":");
-				if(test[0] == json.username && test[1] == json.password) userOK(i, test[0]);
+				test = row[i].split("|");
+				if(test[0] == json.username && test[1] == json.password) userOK(i, test[0], test[2]);
 				// Check all to prevent timing attack
 			}
 			
 			if(user) callback(null, user);
 			else callback(new Error("Wrong username=" + json.username + " or password"));
 			
-			function userOK(index, name) {
-				user = new User(index, name);
+			function userOK(index, name, dir) {
+				user = new User(index, name, dir);
 				
 			}
 			
@@ -249,7 +248,7 @@ function log(msg) {
 }
 
 
-function User(id, name) {
+function User(id, name, rootPath) {
 	var user = this;
 	
 	user.id = id;
@@ -257,7 +256,16 @@ function User(id, name) {
 	user.remoteConnections = {};
 	user.clientConnection = null;
 	
-	user.defaultWorkingDirectory = UTIL.trailingSlash(process.cwd());
+	if(rootPath) { // Use "true" path
+		var path = require("path");
+		rootPath = path.resolve(rootPath);
+		rootPath = UTIL.trailingSlash(rootPath);
+	}
+	
+	user.rootPath = rootPath;
+	
+	if(user.rootPath) user.defaultWorkingDirectory = "/";
+	else user.defaultWorkingDirectory = UTIL.trailingSlash(process.cwd());
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
 }
@@ -313,9 +321,80 @@ User.prototype.connectionClosed = function connectionClosed(protocol, serverAddr
 	
 }
 
+User.prototype.translatePath = function translatePath(pathToFileOrDir) {
+	var user = this;
+
+	// Translates a virtual path to a real file-system path
+	
+	if(user.rootPath) {
+		var url = require("url");
+		var path = require("path");
+		
+		var parse = url.parse(pathToFileOrDir);
+		
+		if(remoteProtocols.indexOf(parse.protocol) != -1) return pathToFileOrDir;
+		
+		// else: The protocol is not allowed or its a local path
+		
+		
+		var lastCharOfPath = pathToFileOrDir.charAt(pathToFileOrDir.length-1);
+		
+		var isDirectory = (lastCharOfPath == "/" || lastCharOfPath == "\\");
+
+		
+		parse = path.parse(pathToFileOrDir);
+		
+		var pathToFileOrDirWithoutRoot = pathToFileOrDir.replace(parse.root, "");
+		
+		var translatedPath = path.join(user.rootPath, pathToFileOrDirWithoutRoot);
+		
+		translatedPath = path.resolve(translatedPath);
+		
+		if(translatedPath == path.resolve("users.pw")) {
+			console.warn("User name=" + user.name + " is accessing users.pw");
+		}
+		
+		if(isDirectory) translatedPath = UTIL.trailingSlash(translatedPath);
+		
+		console.log("translatedPath=" + translatedPath);
+		
+		// Make sure virutal path is in user.rootPath
+		if(translatedPath.indexOf(user.rootPath) != 0) {
+			console.warn("translatedPath=" + translatedPath + " does not contain user.rootPath=" + user.rootPath);
+			return new Error("Unable to access path=" + pathToFileOrDir);
+		}
+		else return translatedPath;
+		
+	}
+	else return pathToFileOrDir; 
+}
+
+User.prototype.toVirtualPath = function toVirtualPath(realPath) {
+	var user = this;
+	
+	if(realPath.indexOf(user.rootPath) != 0) {
+		throw new Error("realPath=" + realPath + " does not contain user.rootPath=" + user.rootPath);
+	}
+	
+	var virtualPath = realPath.replace(user.rootPath, "");
+	
+	// Always use slashes for virtual paths
+	virtualPath = virtualPath.replace(/\\/g, "/");
+	
+	// Add a root slash if it doesn't start with a slash
+	if(virtualPath.charAt(0) != "/" ) virtualPath = "/" + virtualPath;
+
+	
+	console.log("virtualPath=" + virtualPath);
+	
+	return virtualPath;
+	
+}
+
+
 
 function isObject(obj) {
-  return obj === Object(obj);
+	return obj === Object(obj);
 }
 
 main();

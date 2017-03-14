@@ -12,7 +12,9 @@ var API = {};
 
 API.readFromDisk = function readFromDisk(user, json, callback) {
 	
-	var path = json.path;
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
+	
 	var returnBuffer = json.returnBuffer;
 	var encoding = json.encoding;
 	
@@ -22,6 +24,8 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 	if(!callback) {
 		throw new Error("No callback defined!");
 	}
+
+	
 	
 	var fs = require("fs");
 		
@@ -112,7 +116,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 				fs.readFile(path, function(err, buffer) {
 					if(err) console.warn(err.message);
 					
-				callback(err, {path: path, data: buffer});
+				callback(err, {path: user.toVirtualPath(path), data: buffer});
 				
 				});
 			}
@@ -122,7 +126,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 				fs.readFile(path, encoding, function(err, string) {
 					if(err) console.warn(err.message);
 					
-				callback(err, {path: path, data: string});
+				callback(err, {path: user.toVirtualPath(path), data: string});
 				
 				});
 			}
@@ -175,7 +179,8 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	
-	var path = json.path;
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
 	
 	// Check path for protocol
 	var url = require("url");
@@ -249,7 +254,9 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 
 API.saveToDisk = function saveToDisk(user, json, saveToDiskCallback) {
 
-	var path = json.path;
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return saveToDiskCallback(path);
+	
 	var inputBuffer = json.inputBuffer;
 	var encoding = json.encoding;
 	var text = json.text;
@@ -319,7 +326,7 @@ else if(protocol == "sftp:") {
 			}
 			else {
 				console.log("The file was successfully saved: " + path + "");
-				saveToDiskCallback(null, {path: path});
+				saveToDiskCallback(null, {path: user.toVirtualPath(path)});
 			}
 		});
 	}
@@ -366,13 +373,16 @@ else if(protocol == "sftp:") {
 
 
 API.listFiles = function listFiles(user, json, listFilesCallback) {
-
-	var pathToFolder = json.pathToFolder;
-
-	if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
 	if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
 
-	//pathToFolder = UTIL.trailingSlash(json.pathToFolder);
+	var pathToFolder = json.pathToFolder;
+	
+	if(!pathToFolder) return listFilesCallback(new Error("No pathToFolder defined!"));
+
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	
+	pathToFolder = user.translatePath(pathToFolder);
+	if(pathToFolder instanceof Error) return listFilesCallback(pathToFolder);
 	
 	
 	/*
@@ -526,7 +536,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					
 					
-					list.push({type: type, name: fileName, path: filePath, size: size, date: mtime, problem: problem});
+					list.push({type: type, name: fileName, path: user.toVirtualPath(filePath), size: size, date: mtime, problem: problem});
 					
 					statCounter++;
 					
@@ -629,7 +639,8 @@ API.createPath = function(user, json, createPathCallback) {
 		
 	*/
 	
-	var pathToCreate = json.pathToCreate;
+	var pathToCreate = user.translatePath(json.pathToCreate);
+	if(pathToCreate instanceof Error) return createPathCallback(pathToCreate);
 	
 	pathToCreate = UTIL.trailingSlash(pathToCreate);
 	
@@ -1042,7 +1053,9 @@ API.disconnect = function(user, json, callback) {
 }
 
 API.setWorkingDirectory = function(user, json, callback) {
-	var path = json.path;
+
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
 	
 	var fs = require("fs");
 	fs.stat(path, function (err, stats){
@@ -1055,7 +1068,6 @@ API.setWorkingDirectory = function(user, json, callback) {
 			callback(null, {workingDirectory:path});
 		}
 	});
-	
 }
 
 

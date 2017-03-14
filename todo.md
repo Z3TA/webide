@@ -55,7 +55,7 @@ Save localstorage on server instead of client.
 
 How to handle errors in server.js ?
 
-chroot (optional) users
+
 colaboration
 mercurial/git integration
 
