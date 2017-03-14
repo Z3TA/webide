@@ -19,313 +19,313 @@
 	var fsSelect;
 	var openFolders = [];
 	
-		EDITOR.plugin({
-			desc: "File explorer window widget",
-			load: load,
-			unload: unload,
-			order: 500 // functionList: 200, (a higher number makes it start sooner)
-		});
+	EDITOR.plugin({
+		desc: "File explorer window widget",
+		load: load,
+		unload: unload,
+		order: 500 // functionList: 200, (a higher number makes it start sooner)
+	});
+	
+	function load() {
 		
-		function load() {
-			
-			console.log("Initiating file explorer");
-			
-			var key_E = 69;
-			
-			EDITOR.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
-			
-			//EDITOR.on("beforeResize", saveScrollPosition);
-			//EDITOR.on("afterResize", restoreScrollPosition);
-			
-			// EDITOR.on("changeWorkingDir", exploreDir);
-			
-			menuItem = EDITOR.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
-			
-			leftColumn = document.getElementById("leftColumn");
-			rightColumn = document.getElementById("rightColumn");
-			
-			fileExplorerWrap = document.createElement("div");
-			fileExplorerWrap.setAttribute("class", "wrap fileExplorer");
-			fileExplorerWrap.setAttribute("id", "fileExplorer");
-			
-			fileExplorerFolders = document.createElement("div");
-			fileExplorerFolders.setAttribute("id", "fileExplorerFolders");
-			
-			fsSelect = document.createElement("select");
-			fsSelect.setAttribute("id", "fsSelect");
-			fsSelect.onchange = changeFs;
-			
-			/*
-				fileExplorer.addEventListener("scroll", function() {
-				console.log(UTIL.getStack("You scrolled"));
-				});
-			*/
-			
-			fileExplorerWrap.appendChild(fsSelect);
-			fileExplorerWrap.appendChild(fileExplorerFolders);
-			rightColumn.appendChild(fileExplorerWrap);
-			
-			//exploreDir(EDITOR.workingDirectory);
-			
-			toggleFileExplorer(visible);
-			
-		}
+		console.log("Initiating file explorer");
 		
-		function unload() {
-			rightColumn.removeChild(fileExplorerWrap);
+		var key_E = 69;
+		
+		EDITOR.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
+		
+		//EDITOR.on("beforeResize", saveScrollPosition);
+		//EDITOR.on("afterResize", restoreScrollPosition);
+		
+		// EDITOR.on("changeWorkingDir", exploreDir);
+		
+		menuItem = EDITOR.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
+		
+		leftColumn = document.getElementById("leftColumn");
+		rightColumn = document.getElementById("rightColumn");
+		
+		fileExplorerWrap = document.createElement("div");
+		fileExplorerWrap.setAttribute("class", "wrap fileExplorer");
+		fileExplorerWrap.setAttribute("id", "fileExplorer");
+		
+		fileExplorerFolders = document.createElement("div");
+		fileExplorerFolders.setAttribute("id", "fileExplorerFolders");
+		
+		fsSelect = document.createElement("select");
+		fsSelect.setAttribute("id", "fsSelect");
+		fsSelect.onchange = changeFs;
+		
+		/*
+			fileExplorer.addEventListener("scroll", function() {
+			console.log(UTIL.getStack("You scrolled"));
+			});
+		*/
+		
+		fileExplorerWrap.appendChild(fsSelect);
+		fileExplorerWrap.appendChild(fileExplorerFolders);
+		rightColumn.appendChild(fileExplorerWrap);
+		
+		//exploreDir(EDITOR.workingDirectory);
+		
+		toggleFileExplorer(visible);
+		
+	}
+	
+	function unload() {
+		rightColumn.removeChild(fileExplorerWrap);
 		
 		EDITOR.removeMenuItem(menuItem);
 		
 		EDITOR.unbindKey(toggleFileExplorer);
 		
-		}
+	}
+	
+	function toggleFileExplorer(toState) {
 		
-		function toggleFileExplorer(toState) {
-			
-			//alertBox("toState=" + toState);
-			
-			if(typeof toState == "boolean") visible = toState;
-			else visible = visible ? false : true; // Switch
-			
-			menuItem.innerHTML = "Toggle file explorer " + (visible ? "off":"on");
-			
-			if(visible) {
-				exploreDir(EDITOR.workingDirectory)
-				fileExplorerWrap.style.display="block";
-				
-			}
-			else {
-				fileExplorerWrap.style.display="none";
-				EDITOR.resizeNeeded();
-				
-			}
-			return false;
-		}
+		//alertBox("toState=" + toState);
 		
-		function scroll() {
-			// Make it center/middle ?? Whole project folder should be visible
+		if(typeof toState == "boolean") visible = toState;
+		else visible = visible ? false : true; // Switch
+		
+		menuItem.innerHTML = "Toggle file explorer " + (visible ? "off":"on");
+		
+		if(visible) {
+			exploreDir(EDITOR.workingDirectory)
+			fileExplorerWrap.style.display="block";
 			
+		}
+		else {
+			fileExplorerWrap.style.display="none";
+			EDITOR.resizeNeeded();
+			
+		}
+		return false;
+	}
+	
+	function scroll() {
+		// Make it center/middle ?? Whole project folder should be visible
+		
 		fileExplorerWrap.scrollTop = defaultScroll;
 		
 		console.log("Scrolled down on file explorer: defaultScroll=" + defaultScroll);
-		}
+	}
+	
+	function exploreDir(fullPath) {
 		
-		function exploreDir(fullPath) {
-			
 		//console.log("Exploring fullPath=" + fullPath);
 		
-			while(fileExplorerFolders.firstChild) fileExplorerFolders.removeChild(fileExplorerFolders.firstChild); // Emty list
-			
-			while(fsSelect.firstChild) fsSelect.removeChild(fsSelect.firstChild); // Emty select options
-			
-			// Make a list of connected file-systems
-			var option = document.createElement("option");
-			option.appendChild(document.createTextNode("Local file-system"));
-			option.setAttribute("id", "local");
+		while(fileExplorerFolders.firstChild) fileExplorerFolders.removeChild(fileExplorerFolders.firstChild); // Emty list
+		
+		while(fsSelect.firstChild) fsSelect.removeChild(fsSelect.firstChild); // Emty select options
+		
+		// Make a list of connected file-systems
+		var option = document.createElement("option");
+		option.appendChild(document.createTextNode("Local file-system"));
+		option.setAttribute("id", "local");
+		fsSelect.appendChild(option);
+		
+		var connName = "";
+		for(var conn in EDITOR.connections) {
+			option = document.createElement("option");
+			connName = EDITOR.connections[conn].protocol + "://" + conn
+			option.appendChild(document.createTextNode(connName));
+			option.setAttribute("id", conn);
+			if(fullPath.indexOf(connName) != -1) option.setAttribute("selected", "true");
 			fsSelect.appendChild(option);
-			
-			var connName = "";
-			for(var conn in EDITOR.connections) {
-				option = document.createElement("option");
-				connName = EDITOR.connections[conn].protocol + "://" + conn
-				option.appendChild(document.createTextNode(connName));
-				option.setAttribute("id", conn);
-				if(fullPath.indexOf(connName) != -1) option.setAttribute("selected", "true");
-				fsSelect.appendChild(option);
-			}
-			
-			// We want to start from the root, then work our way towards the actual dir
-			
+		}
+		
+		// We want to start from the root, then work our way towards the actual dir
+		
 		var folders = UTIL.getFolders(fullPath, true);
-			
+		
 		//console.log("fullPath=" + fullPath + " folders=" + JSON.stringify(folders));
 		
-			// Recursive 
-			lookUpPath(folders, 0);
+		// Recursive 
+		lookUpPath(folders, 0);
+		
+		function lookUpPath(folders, index, parent) {
+			var dir = folders[index];
+			var findDir = index < (folders.length-1) ? folders[index+1] : null;
 			
-			function lookUpPath(folders, index, parent) {
-				var dir = folders[index];
-				var findDir = index < (folders.length-1) ? folders[index+1] : null;
+			buildList(dir, parent, findDir, function(parent) {
 				
-				buildList(dir, parent, findDir, function(parent) {
-					
-					index++;
-					
-					if(index < folders.length) lookUpPath(folders, index, parent);
-					else scrollDownToDir(fullPath);
-					
-				});
-			}
+				index++;
+				
+				if(index < folders.length) lookUpPath(folders, index, parent);
+				else scrollDownToDir(fullPath);
+				
+			});
+		}
+		
+		function scrollDownToDir(targetPath) {
+			// Shroll down the fire explorer div so we can see the folder we are interested in
+			// Go though all elements in the list and measure the height until we find target path, then scroll down the height
 			
-			function scrollDownToDir(targetPath) {
-				// Shroll down the fire explorer div so we can see the folder we are interested in
-				// Go though all elements in the list and measure the height until we find target path, then scroll down the height
+			//while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
+			
+			//console.log("targetPath=" + targetPath);
+			
+			var totalHeight = 0;
+			var measuredElements = 0;
+			var defaultHeight = 14;
+			
+			measure(fileExplorerFolders);
+			
+			function measure(el) {
+				//console.log("measuring el=" + el);
 				
-				//while(targetPath.substr(targetPath.length-1) == "/") targetPath = targetPath.substr(0, targetPath.length-1); // Remove trailing slashes
+				var childNodes = el.childNodes;
+				if(!childNodes) return false;
 				
-				//console.log("targetPath=" + targetPath);
+				var elClass;
+				var path;
+				var computedStyle;
+				var found = false;
 				
-				var totalHeight = 0;
-				var measuredElements = 0;
-				var defaultHeight = 14;
-				
-				measure(fileExplorerFolders);
-				
-				function measure(el) {
-					//console.log("measuring el=" + el);
+				for (var i=0; i<childNodes.length; i++) {
 					
-					var childNodes = el.childNodes;
-					if(!childNodes) return false;
+					if(childNodes[i].nodeType != 1) continue; // Only bother with HTML elements, not text nodes
 					
-					var elClass;
-					var path;
-					var computedStyle;
-					var found = false;
+					//console.log("checking childNodes[" + i + "]=" + childNodes[i] + " nodeType=" + childNodes[i].nodeType);
 					
-					for (var i=0; i<childNodes.length; i++) {
+					//console.log(childNodes[i]);
+					
+					elClass = childNodes[i].getAttribute("class");
+					
+					path = childNodes[i].getAttribute("path");
+					
+					console.log(targetPath + " == " + path + " ? " + (targetPath == path));
+					
+					if(path == targetPath) {
+						defaultScroll = totalHeight;
+						setTimeout(scroll, 100);
+						return true; 
+					}
+					
+					if(elClass == "folder open") {
 						
-						if(childNodes[i].nodeType != 1) continue; // Only bother with HTML elements, not text nodes
+						totalHeight += (measuredElements > 0 ? Math.round(totalHeight / ++measuredElements) : defaultHeight);
+						//console.log("totalHeight=" + totalHeight);
+					}
+					
+					if(elClass == "tree" || elClass == "folder open") found = measure(childNodes[i])
+					else {
 						
-						//console.log("checking childNodes[" + i + "]=" + childNodes[i] + " nodeType=" + childNodes[i].nodeType);
+						if(path == null) continue; // Only measure elements that have path in their attribute
 						
-						//console.log(childNodes[i]);
-						
-						elClass = childNodes[i].getAttribute("class");
-						
-						path = childNodes[i].getAttribute("path");
-						
-						console.log(targetPath + " == " + path + " ? " + (targetPath == path));
-						
-						if(path == targetPath) {
-							defaultScroll = totalHeight;
-							setTimeout(scroll, 100);
-							return true; 
-						}
-						
-						if(elClass == "folder open") {
+						if(elClass != "folder open") {
+							computedStyle = window.getComputedStyle(childNodes[i], null);
 							
-							totalHeight += (measuredElements > 0 ? Math.round(totalHeight / ++measuredElements) : defaultHeight);
+							totalHeight += parseInt(computedStyle.height);
+							measuredElements++;
+							
 							//console.log("totalHeight=" + totalHeight);
 						}
-						
-						if(elClass == "tree" || elClass == "folder open") found = measure(childNodes[i])
-						else {
-							
-							if(path == null) continue; // Only measure elements that have path in their attribute
-							
-							if(elClass != "folder open") {
-								computedStyle = window.getComputedStyle(childNodes[i], null);
-								
-								totalHeight += parseInt(computedStyle.height);
-								measuredElements++;
-								
-								//console.log("totalHeight=" + totalHeight);
-							}
-						}
-						
-						if(found) return true;
 					}
-					return false; // Not found
+					
+					if(found) return true;
 				}
-				
+				return false; // Not found
 			}
 			
 		}
 		
-		function buildList(dir, parent, findDir, callback) {
-			
+	}
+	
+	function buildList(dir, parent, findDir, callback) {
+		
 		console.log("Building file explorer tree for dir=" + dir + "in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
+		
+		var dirFound = null;
+		
+		if(!parent) parent = fileExplorerFolders;
+		else {
+			// Make the parent folder appear open
 			
-			var dirFound = null;
-			
-			if(!parent) parent = fileExplorerFolders;
-			else {
-				// Make the parent folder appear open
-				
-				// let (aka block scope) only solves a symtom of the bigger problem: 
+			// let (aka block scope) only solves a symtom of the bigger problem: 
 			// Using varaibles from parent or global scope (dont't do that) and function scope is probably what you want (not block scope)
-				parent.setAttribute("class", "folder open");
-				var childNodes = parent.childNodes;
-				var box = childNodes[0];
-				box.removeChild(box.firstChild);
+			parent.setAttribute("class", "folder open");
+			var childNodes = parent.childNodes;
+			var box = childNodes[0];
+			box.removeChild(box.firstChild);
 			box.appendChild(document.createTextNode("▼"));
-			}
+		}
+		
+		// Clean the parent node
+		//while (parent.firstChild) parent.removeChild(parent.firstChild);
+		
+		
+		var ul = document.createElement("ul");
+		ul.setAttribute("class", "tree");
+		
+		// List files in working dir, get name of parent folder
+		EDITOR.listFiles(dir, function gotFileList(err, listItems) {
 			
-			// Clean the parent node
-			//while (parent.firstChild) parent.removeChild(parent.firstChild);
+			if(err) throw err;
 			
+			listItems.sort(sortByNameAndType);
 			
-			var ul = document.createElement("ul");
-			ul.setAttribute("class", "tree");
+			listItems.forEach(showItem);
 			
-			// List files in working dir, get name of parent folder
-			EDITOR.listFiles(dir, function gotFileList(err, listItems) {
-				
-				if(err) throw err;
-				
-				listItems.sort(sortByNameAndType);
-				
-				listItems.forEach(showItem);
-				
-				parent.appendChild(ul);
-				
-				EDITOR.resizeNeeded();
-				//EDITOR.resize();
-				
-				if(callback) callback(dirFound);
-			});
+			parent.appendChild(ul);
 			
-			function showItem(item) {
-				
+			EDITOR.resizeNeeded();
+			//EDITOR.resize();
+			
+			if(callback) callback(dirFound);
+		});
+		
+		function showItem(item) {
+			
 			console.log("item.type=" + item.type + " item.name=" + item.name);
 			
-				var li = document.createElement("li");
+			var li = document.createElement("li");
 			var icon = document.createElement("img");
-				var type = "";
+			var type = "";
 			var filetype = UTIL.getFileExtension(item.path);
 			
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
 			icon.setAttribute("onerror", "this.src='gfx/icon/doc.svg'");
 			
-				// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
-				if(item.type == "d") type = "folder";
-				else if(item.type == "-") type = "file";
-				else if(item.type == "l") type = "link";
+			// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+			if(item.type == "d") type = "folder";
+			else if(item.type == "-") type = "file";
+			else if(item.type == "l") type = "link";
 			else if(item.type == "*") type = "problem";
 			
 			li.setAttribute("path", item.path);
+			
+			if(item.path == findDir || item.name == findDir) dirFound = li;
+			
+			if(type == "folder") {
 				
-				if(item.path == findDir || item.name == findDir) dirFound = li;
+				li.setAttribute("class", "folder closed");
 				
-				if(type == "folder") {
-					
-					li.setAttribute("class", "folder closed");
-					
 				icon.setAttribute("src", "gfx/icon/folder.svg");
 				
 				
-					li.addEventListener("click", function(e) {
-						openOrCloseFolder(li);
-						
-						// Try to stop event from propagating down though parents
-						e = window.event || e; 
-						e.stopPropagation();
-						return false; 
-						
-					}, false);
+				li.addEventListener("click", function(e) {
+					openOrCloseFolder(li);
 					
-					var box = document.createElement("figure");
-					box.setAttribute("class", "closed box");
+					// Try to stop event from propagating down though parents
+					e = window.event || e; 
+					e.stopPropagation();
+					return false; 
 					
+				}, false);
+				
+				var box = document.createElement("figure");
+				box.setAttribute("class", "closed box");
+				
 				box.appendChild(document.createTextNode("►"));
-					li.appendChild(box);
+				li.appendChild(box);
 				
 				if(openFolders.indexOf(item.path) != -1) buildList(item.path, li);
 				
-				}
-				else {
-					li.setAttribute("class", type); 
+			}
+			else {
+				li.setAttribute("class", type); 
 				
 				var iconName = filetype;
 				if(iconName == "htm") iconName = "html";
@@ -339,17 +339,17 @@
 				//icon.setAttribute("width", "22");
 				//icon.setAttribute("height", "22");
 				
-					li.addEventListener("click", function() {
-						openFile(li);
-						
-						e = window.event || e;
-						e.stopPropagation();
-						return false;
-						
-					}, false);
+				li.addEventListener("click", function() {
+					openFile(li);
 					
-				}
+					e = window.event || e;
+					e.stopPropagation();
+					return false;
+					
+				}, false);
 				
+			}
+			
 			var displayName = item.name;
 			if(displayName.length > 40) displayName = displayName.substr(0, 37) + "...";
 			
@@ -357,9 +357,9 @@
 			
 			li.appendChild(document.createTextNode(displayName));
 			
-				//console.log("item.name=" + item.name);
-				
-				ul.appendChild(li);
+			//console.log("item.name=" + item.name);
+			
+			ul.appendChild(li);
 			
 		}
 		
@@ -378,95 +378,95 @@
 	function sortByNameAndType(a, b) {
 		if(a.type == b.type) {
 			// Both are the same type, sort alpabetically
-				//var aName = a.name.toLowerCase(); // Ignore capitals
-				//var bName = b.name.toLowerCase();
-				var aName = a.name;
-				var bName = b.name;
-				if(aName < bName) return -1;
-				else if(aName > bName) return 1;
-				else return 0;
-			}
-			else if(a.type == "d") return -1;
-			else if(b.type == "d") return 1;
+			//var aName = a.name.toLowerCase(); // Ignore capitals
+			//var bName = b.name.toLowerCase();
+			var aName = a.name;
+			var bName = b.name;
+			if(aName < bName) return -1;
+			else if(aName > bName) return 1;
 			else return 0;
 		}
+		else if(a.type == "d") return -1;
+		else if(b.type == "d") return 1;
+		else return 0;
+	}
+	
+	function openOrCloseFolder(item) {
 		
-		function openOrCloseFolder(item) {
-			
-			//console.log(item);
-			
-			var childNodes = item.childNodes;
-			var box = childNodes[0];
-			var path = item.getAttribute("path");
-			
-			//console.log("path=" + path);
-			
+		//console.log(item);
+		
+		var childNodes = item.childNodes;
+		var box = childNodes[0];
+		var path = item.getAttribute("path");
+		
+		//console.log("path=" + path);
+		
 		var elementsToCheck = 3;
 		
 		if(childNodes.length > elementsToCheck) {
-				// The folder is open, close it
-				
-				console.log("Closing file explorer folder: " + path);
-				
+			// The folder is open, close it
+			
+			console.log("Closing file explorer folder: " + path);
+			
 			for (var i=elementsToCheck; i<childNodes.length; i++) {
 				console.log("removeChild: " + childNodes[i]);
-					item.removeChild(childNodes[i]);
-				}
-				
-				box.removeChild(box.firstChild);
+				item.removeChild(childNodes[i]);
+			}
+			
+			box.removeChild(box.firstChild);
 			box.appendChild(document.createTextNode("►"));
-				
+			
 			openFolders.splice(openFolders.indexOf(path), 1);
 			
-				EDITOR.resizeNeeded();
-				//EDITOR.resize();
+			EDITOR.resizeNeeded();
+			//EDITOR.resize();
+			
+		}
+		else {
+			
+			console.log("Opening file explorer folder: " + path);
+			
+			buildList(path, item, function() {
 				
-			}
-			else {
-				
-				console.log("Opening file explorer folder: " + path);
-				
-				buildList(path, item, function() {
-					
-				});
-				
-				box.removeChild(box.firstChild);
+			});
+			
+			box.removeChild(box.firstChild);
 			box.appendChild(document.createTextNode("▼"));
 			
 			openFolders.push(path);
 			
-			}
-			
 		}
 		
-		function openFile(item) {
-			
-			var filePath = item.getAttribute("path");
-			EDITOR.openFile(filePath);
-		}
+	}
+	
+	function openFile(item) {
 		
-		function changeFs(event) {
-			
-			var sel = event.target;
-			var host = sel.options[sel.selectedIndex].id;
-			
-			// Remember open folders ? 
-			
-			//alert("host=" + host);
-			
-			if(host=="local") {
-				var root = UTIL.getFolders(process.cwd())[0];
-				exploreDir(root);
-			}
-			else {
-				if(EDITOR.connections.hasOwnProperty(host)) {
-					var url = EDITOR.connections[host].protocol;
-					if(!url) throw new Error("url=" + url);
-					url += "://" + host + "/";
-					exploreDir(url);
-				}
-				else throw new Error("Not connected to " + host);
-			}
-		}
+		var filePath = item.getAttribute("path");
+		EDITOR.openFile(filePath);
+	}
+	
+	function changeFs(event) {
 		
-	})();
+		var sel = event.target;
+		var host = sel.options[sel.selectedIndex].id;
+		
+		// Remember open folders ? 
+		
+		//alert("host=" + host);
+		
+		if(host=="local") {
+			var root = UTIL.getFolders(process.cwd())[0];
+			exploreDir(root);
+		}
+		else {
+			if(EDITOR.connections.hasOwnProperty(host)) {
+				var url = EDITOR.connections[host].protocol;
+				if(!url) throw new Error("url=" + url);
+				url += "://" + host + "/";
+				exploreDir(url);
+			}
+			else throw new Error("Not connected to " + host);
+		}
+	}
+	
+})();

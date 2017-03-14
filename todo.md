@@ -244,6 +244,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Fire explorer shows two files when there's only one single file in the root folder.
+
+
 Replacing a text with a text that contains the text to be replaced causes an endless loop when clicking Replace all.
 Example: getSourceCode => getSourceCodeBody
 
