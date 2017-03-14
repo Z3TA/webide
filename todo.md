@@ -49,6 +49,11 @@ Move everything that requires nw.js into server.js
 
 todo:
 
+Run node script: F3? ... see console logs in the editor ... debugging!
+run isolated ... linux namespaces / containers ?
+
+Login splash screen. Where you type username/password and can pick server/port
+
 Some sort of indication that you are disconnected to the server
 
 Save localstorage on server instead of client.
