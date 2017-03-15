@@ -309,7 +309,7 @@ var UTIL = {
 			//else editedText += lbEditedText; // or add only one if it already had one
 		}
 		
-		var jsdiff = require('diff');
+		var jsdiff = JsDiff ? JsDiff : require('diff');
 		var diff = jsdiff.diffTrimmedLines(originalText, editedText); // diffLines or diffChars
 		var totalLineBreaks = 0;
 		var removed = [];

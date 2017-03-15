@@ -41,22 +41,20 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Make WYSIWYG editor work in Browser.
+
 Turning the editor into a web app ...
 
 Move everything that requires nw.js into server.js
 
+SSG and WYSIWYG + Mercurial Repo
 
 
 todo:
 
-Run node script: F3? ... see console logs in the editor ... debugging!
-run isolated ... linux namespaces / containers ?
-
 Login splash screen. Where you type username/password and can pick server/port
 
 Some sort of indication that you are disconnected to the server
-
-Save localstorage on server instead of client.
 
 How to handle errors in server.js ?
 
@@ -1359,6 +1357,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 ------------------------------------
+
+Run node script: F3? ... see console logs in the editor ... debugging!
+run isolated ... linux namespaces / containers ?
 
 In plenty editors, doing left-alt (left option) and selecting text will take a slice of that text:
 Notice that only characters are selected, empty lines are ignored. Also, after selecting with left-alt, there should be multi-cursors at the end of each selection:
