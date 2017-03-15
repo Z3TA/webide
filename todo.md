@@ -8,7 +8,8 @@ Går inte att publicera om man inte har dokumenterat och synkat
 Går inte att synka om man inte har dokumenterat
 Efter att man sparat en fil i SSG kommer det upp en dokumentations-widget,
 där man skriver in varför ändringarna gjordes.
-(Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. Man kan klicka på filerna för att se diff)
+(Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. 
+Man kan klicka på filerna för att se diff)
 
 Guide för att infoga bild när man redigerar sida i SSG ("infoga bild" i SSG widget!?)
 
@@ -41,9 +42,16 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Thinking about the best way to implement Mercurial or Git integration ...
+
+Make Mercurial into a separate plugin ?
+
+
+
+
 Make WYSIWYG editor work in Browser.
 
-buf fix: When pressing enter in content-editable, it loses focus
+buf fix: When pressing enter in content-editable, it loses focus in Firefox
 
 
 Turning the editor into a web app ...
