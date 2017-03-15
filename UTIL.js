@@ -242,7 +242,14 @@ var UTIL = {
 		}
 	},
 
-
+	escapeHtml: function escapeHtml(html) {
+		
+		html = html.replace(/</g, "&lt;");
+		html = html.replace(/>/g, "&gt;");
+		
+		return html;
+	},	
+	
 	textDiff: function textDiff(originalText, editedText) {
 		/*
 			return {inserted: inserted, removed: removed};

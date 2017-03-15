@@ -1667,7 +1667,7 @@ var File; // File object is global
 		}
 		else file.grid = file.createGrid();
 		
-		file.debugGrid();
+		//file.debugGrid();
 		
 		
 		file.fixCaret(); // The text the file caret was on might have been deleted, so the caret might be on a different position with eol and eof

@@ -43,6 +43,9 @@ What I'm working on
 
 Make WYSIWYG editor work in Browser.
 
+buf fix: When pressing enter in content-editable, it loses focus
+
+
 Turning the editor into a web app ...
 
 Move everything that requires nw.js into server.js

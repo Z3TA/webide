@@ -381,8 +381,7 @@ var WysiwygEditor;
 			
 			if(runtime == "nw.js") previewWin.show();
 			else {
-				previewWin.focus();
-				previewWin.blur();
+				// It's probably opened in another tab ...
 			}
 		} 
 		//else console.log("File is not the source file! sourceFile.path=" + sourceFile.path + " file.path=" + file.path);
@@ -469,10 +468,9 @@ var WysiwygEditor;
 				EDITOR.showFile(sourceFile, false);
 			}
 			
-			// Compare the source codes
-			var srcHTML = wysiwygEditor.getSourceCodeBody();
+			// Compare the source codes ...
 			
-
+			var srcHTML = wysiwygEditor.getSourceCodeBody();
 			
 			var body = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTag)[0];
 			var prewBodyHtml = wysiwygEditor.getContentEditableCode();
@@ -585,11 +583,11 @@ var WysiwygEditor;
 				
 				if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
 					throw new Error("Text on row=" + row + " doesn't match text to be removed!\n\
-					source=" + sourceFile.rowText(row).trim() + "\n\
-					remove=" + diff.removed[i].text.trim() + "\n\
+					source=" + UTIL.escapeHtml(sourceFile.rowText(row).trim()) + "\n\
+					remove=" + UTIL.escapeHtml(diff.removed[i].text.trim()) + "\n\
 					diff=" + JSON.stringify(diff, null, 2) + "\n\n\
-					srcHTML=" + UTIL.lbChars(srcHTML) + "\n\n\
-					prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+					srcHTML=" + UTIL.lbChars(UTIL.escapeHtml(srcHTML)) + "\n\n\
+					prewBodyHtml=" + UTIL.lbChars(UTIL.escapeHtml(prewBodyHtml)));
 				}
 				
 				removedText = sourceFile.removeAllTextOnRow(row);
@@ -671,18 +669,20 @@ var WysiwygEditor;
 		wysiwygEditor.ignoreSourceFileChange = false;
 		
 		
-		// Show the editor window
+		
 		if(runtime == "nw.js") {
+			// Show the editor window
 			var gui = require('nw.gui');
 			var win = gui.Window.get();
 			win.show();
+			
+			// Focus the content-edit window
+			wysiwygEditor.previewWin.focus();
 		}
 		else {
-			window.focus();
+			// We don't want to take away focus from the content-editable
 		}
-		
-		// Focus the content-edit window
-		wysiwygEditor.previewWin.focus();
+
 		
 		console.timeEnd("contentEdit");
 		
@@ -864,7 +864,7 @@ var WysiwygEditor;
 		}
 		
 		
-		if(gotError) {
+		if(gotError || previewWin == null || previewWin.closed) {
 			// The window have probably been closed! Or never opened. Lets create a new window
 			
 			// Can not use require if using window.open!?
@@ -1183,6 +1183,18 @@ var WysiwygEditor;
 		return html;
 	}
 	
+	EDITOR.addTest(function testInsertLineBreaks(callback) {
+		// bug: Adding a space in the content-editable moves it cursor to the top
+		var str1 = "\n<p>abc <br></p>\n";
+		
+		var str2 = insertLineBreaks(str1, "\n");
+		
+		if(str1 != str2) throw new Error("Trimmed white space where it should not!\nstr1=" + UTIL.lbChars(str1) + "\nstr2=" + UTIL.lbChars(str2));
+		
+		callback(true);
+		
+	}, 1);
+	
 	function insertLineBreaks(html, LB) {
 		
 		if(LB == undefined) throw new Error("Please specify line break character(s) to use!");
@@ -1203,7 +1215,8 @@ var WysiwygEditor;
 		html = html.replace(/>\s*</gi, "><");
 		
 		// Remove space before tags
-		html = html.replace(/\s*</gi, "<");
+		// problem: Some browsers (Firefox) adds a <br> when pusing space ... <p>abc <br> ... witch we dont want to trim
+		//html = html.replace(/\s*</gi, "<");
 		
 		
 		// Line breaks between p tags
