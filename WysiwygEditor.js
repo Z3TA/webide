@@ -113,7 +113,10 @@ var WysiwygEditor;
 				focusNode/extentNode: Where selection ends
 			*/
 			
-			var baseNode = doc.getSelection().baseNode
+			var baseNode = selection.baseNode ? selection.baseNode : selection.anchorNode
+			
+			console.log("selection:");
+			console.log(selection);
 			
 			if(baseNode) {
 				
@@ -376,7 +379,11 @@ var WysiwygEditor;
 				}
 			}
 			
-			previewWin.show();
+			if(runtime == "nw.js") previewWin.show();
+			else {
+				previewWin.focus();
+				previewWin.blur();
+			}
 		} 
 		//else console.log("File is not the source file! sourceFile.path=" + sourceFile.path + " file.path=" + file.path);
 		
@@ -665,9 +672,14 @@ var WysiwygEditor;
 		
 		
 		// Show the editor window
-		var gui = require('nw.gui');
-		var win = gui.Window.get();
-		win.show();
+		if(runtime == "nw.js") {
+			var gui = require('nw.gui');
+			var win = gui.Window.get();
+			win.show();
+		}
+		else {
+			window.focus();
+		}
 		
 		// Focus the content-edit window
 		wysiwygEditor.previewWin.focus();
@@ -856,12 +868,15 @@ var WysiwygEditor;
 			// The window have probably been closed! Or never opened. Lets create a new window
 			
 			// Can not use require if using window.open!?
-			//var previewWin = window.open("", "previewWin", "width=" + previeWidth + ",height=" + previewHeight + "");
-			var gui = require('nw.gui'); // nw.js UI library
-			var previewWin = gui.Window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", {toolbar:true, frame:true});
-			// Show the toolbar so you can see the URL, and open dev tools
-			
-			// Maybe we should use the browser window object instead !?
+			if(runtime == "nw.js") {
+				var gui = require('nw.gui'); // nw.js UI library
+				var previewWin = gui.Window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", {toolbar:true, frame:true});
+				// Show the toolbar so you can see the URL, and open dev tools
+			}
+			else {
+				// Use the browser window object instead !
+				var previewWin = window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", "previewWin", "", false); // 
+			}
 			
 			wysiwygEditor.previewWin = previewWin;
 			
@@ -874,26 +889,39 @@ var WysiwygEditor;
 			// The window is still there ...
 			// We must re to prevent double html bodies
 			
-			var win = previewWin.window;
-			var doc = win.document; // previewWin.document is not available in nw.js gui
-			
+			if(runtime == "nw.js") {
+				var win = previewWin.window;
+				var doc = win.document; // previewWin.document is not available in nw.js gui
+			}
+			else {
+				var doc = previewWin.document;
+			}
 			doc.location = "about:blank";
 		}
 		
-		// nw.js gui is async! (can't acess previewWin.window right away)
-		previewWin.on("loaded", previewWinLoaded);
+		
+		if(runtime == "nw.js") {
+			// nw.js gui is async! (can't acess previewWin.window right away)
+			previewWin.on("loaded", previewWinLoaded);
+		}
+		else previewWinLoaded(); // Browser window is sync
+		
 		
 		function previewWinLoaded() {
 			//var doc = previewWin.document;
 			
-			// Remove this function from the loaded listener
-			//UTIL.objInfo(previewWin);
-			previewWin.removeListener("loaded", previewWinLoaded);
-			
-			var win = previewWin.window;
-			var doc = win.document; // previewWin.document is not available in nw.js gui
-			
-			
+			if(runtime == "nw.js") {
+				// Remove this function from the loaded listener
+				//UTIL.objInfo(previewWin);
+				previewWin.removeListener("loaded", previewWinLoaded);
+				
+				var win = previewWin.window;
+				var doc = win.document; // previewWin.document is not available in nw.js gui
+
+			}
+			else {
+				var doc = previewWin.document;
+			}
 		
 			var sourceFile = wysiwygEditor.sourceFile;
 			
@@ -901,9 +929,17 @@ var WysiwygEditor;
 			
 			console.log("Writing html=" + UTIL.lbChars(html));
 			
+			console.log(doc.innerHTML);
 			
 			// Write the html to the content-editable
-			if(!wysiwygEditor.url) doc.write(html);
+			if(!wysiwygEditor.url) {
+				if(runtime == "nw.js") doc.write(html);
+				else {
+					previewWin.document.open();
+					previewWin.document.write(html);
+					previewWin.document.close();
+				}
+			}
 			
 			var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
 			
