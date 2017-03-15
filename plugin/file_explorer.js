@@ -9,6 +9,8 @@
 		▼
 		► (use this)
 	*/
+
+	"use strict;"
 	
 	var fileExplorerFolders;
 	var fileExplorerWrap;
@@ -339,7 +341,7 @@
 				//icon.setAttribute("width", "22");
 				//icon.setAttribute("height", "22");
 				
-				li.addEventListener("click", function() {
+				li.addEventListener("click", function(e) {
 					openFile(li);
 					
 					e = window.event || e;
