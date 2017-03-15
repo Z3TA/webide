@@ -55,17 +55,17 @@
 				
 				var message = file.text;
 				
-					UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (respStr, err) {
+					UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: message, namn: 'JZEdit' }, function (err, respStr) {
 					if(err) {
-						alert("Problem sending bug report:  " + err.message);
+						alertBox("Problem sending bug report:  " + err.message);
 						throw err;
 					}
 					else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
-						alert("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
+						alertBox("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
 						console.log("respStr=" + respStr);
 					}
 					else {
-						alert("Bug report sent!");
+						alertBox("Bug report sent!");
 					}
 					});
 				}
@@ -171,13 +171,15 @@
 	function reportTemplate(message, source, lineno, colno, error) {
 		// Create a template used to report bugs
 		
+		var editorArgs = runtime == "nw.js" ? require('nw.gui').App.argv : "Browser url:" + document.location.href;
+		
 		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
 		'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
 		'\n' +
 		'Date:' + (new Date()) + '\n' +
 		'Commit: ' + EDITOR.version + '\n' +
 		'Platform: ' + process.platform + '\n' +
-		'Arguments: ' + require('nw.gui').App.argv + '\n' +
+		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
 		error.stack + '\n' +
 		'\n' +

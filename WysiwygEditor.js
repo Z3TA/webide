@@ -7,6 +7,8 @@ var WysiwygEditor;
 	
 	var regexBody = /<body[^>]*>\s*[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i;
 	
+	var previewInputFired = false;
+	
 	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTag, url) {
 		var wysiwygEditor = this;
 		
@@ -400,6 +402,11 @@ var WysiwygEditor;
 		var wysiwygEditor = this;
 		console.log("previewKeyup! EDITOR.input=" + EDITOR.input);
 		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
+		
+		// Internet Explorer doesn't fire change events on content-editable
+		if(!previewInputFired) wysiwygEditor.previewInput();
+		
+		return true;
 	}
 	
 	WysiwygEditor.prototype.previewMouseup = function previewMouseup(e) {
@@ -407,7 +414,7 @@ var WysiwygEditor;
 		
 		console.log("previewMouseup!");
 		
-		UTIL.objInfo(e.target);
+		//UTIL.objInfo(e.target);
 		
 		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 		
@@ -447,7 +454,7 @@ var WysiwygEditor;
 		
 		console.log("previewInput!");
 		
-		
+		previewInputFired = true;
 		
 		var sourceFile = wysiwygEditor.sourceFile;
 		var previewWin = wysiwygEditor.previewWin;
@@ -675,14 +682,14 @@ var WysiwygEditor;
 			var gui = require('nw.gui');
 			var win = gui.Window.get();
 			win.show();
-			
-			// Focus the content-edit window
-			wysiwygEditor.previewWin.focus();
 		}
 		else {
 			// We don't want to take away focus from the content-editable
 		}
 
+		// Focus the content-edit window
+		wysiwygEditor.previewWin.focus();
+		EDITOR.input = false;
 		
 		console.timeEnd("contentEdit");
 		

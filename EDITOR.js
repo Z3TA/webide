@@ -3853,7 +3853,7 @@ EDITOR.lastKeyPressed = "";
 		EDITOR.interact("keyPressed", e);
 		
 	}
-	""
+	
 	function resizeAndRender() {
 		
 		if(EDITOR.shouldResize) EDITOR.resize();
@@ -4182,7 +4182,7 @@ EDITOR.lastKeyPressed = "";
 				EDITOR.input = true;
 				
 				// Remove focus from everything else
-				document.activeElement.blur();
+				try{ document.activeElement.blur(); } catch(err) {console.log("Unable to blur: " + err.message);};
 				canvas.focus();
 				
 				// Delete selection outside of the canvas

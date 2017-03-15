@@ -663,47 +663,46 @@ var UTIL = {
 	},
 
 
-	httpPost: function httpPost(urlStr, form, callback) {
-		var querystring = require('querystring');
-		var http = require('http');
-		var url = require("url");
+	httpPost: function httpPost(url, form, callback) {
 		
-		var urlObj = url.parse(urlStr);
+		var xmlHttp = new XMLHttpRequest();
+		var timeoutTimer;
+		var timeoutTimeMs = 3000;
 		
-		// Build the post string from an object
-		var post_data = querystring.stringify(form);
+		var formData = "";
 		
-		// An object of options to indicate where to post to
-		var post_options = {
-			host: urlObj.hostname,
-			port: urlObj.port ? urlObj.port : '80',
-			path: urlObj.path, // path comtains querystring (search)
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Content-Length': Buffer.byteLength(post_data)
+		for(var name in form) {
+			formData += name + "=" + encodeURIComponent(form[name]) + "&";
+		}
+		if(formData.length == 0) throw new Error("Form contains no data!");
+		formData = formData.substring(0, formData.length); // Remove last &
+		
+		//console.log("url=" + url);
+		
+		xmlHttp.onreadystatechange = function httpReadyStateChange() {
+			if(xmlHttp.readyState == 4) {
+				clearTimeout(timeoutTimer);
+				if(xmlHttp.status == 200) callback(null, xmlHttp.responseText);
+				else {
+					var err = new Error(xmlHttp.responseText + " xmlHttp.status=" + xmlHttp.status + " xmlHttp.readyState=" + xmlHttp.readyState);
+					err.CODE = xmlHttp.status;
+					callback(err);
+				}
 			}
-		};
+			//else console.log("xmlHttp.readyState=" + xmlHttp.readyState);
+		}
 		
-		// Set up the request
-		var dataStr = "";
-		var post_req = http.request(post_options, function(res) {
-			res.setEncoding('utf8');
-			res.on('data', function (chunk) {
-				dataStr += chunk;
-				console.log('Response: ' + chunk);
-			});
-			res.on('end', function () {
-				callback(dataStr, null);
-			});
-		});
-		post_req.on('error', function(e) {
-			console.log('problem with request: ' + e.message);
-			callback(null, e);
-		});
-		// post the data
-		post_req.write(post_data);
-		post_req.end();
+		xmlHttp.open("POST", url, true); // true for asynchronous
+		xmlHttp.send(formData);
+		
+		timeoutTimer = setTimeout(timeout, timeoutTimeMs);
+		
+		function timeout() {
+			var err = new Error("HTTP POST request timed out. xmlHttp.readyState=" + xmlHttp.readyState);
+			xmlHttp.onreadystatechange = null;
+			xmlHttp.abort();
+			callback(err);
+		}
 		
 	},
 
