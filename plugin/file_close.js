@@ -24,9 +24,13 @@
 		return false;
 	}
 	
-	function closeFile(file, combo) {
+	function closeFile() {
+		
+		var file = EDITOR.currentFile;
 		
 		if(file) {
+			
+			console.log(file);
 			
 			var close = true;
 			
