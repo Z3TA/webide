@@ -1200,7 +1200,7 @@ var WysiwygEditor;
 		
 		callback(true);
 		
-	}, 1);
+	});
 	
 	function insertLineBreaks(html, LB) {
 		

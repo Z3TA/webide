@@ -1203,6 +1203,55 @@ API.hgcommit = function hgcommit(user, json, callback) {
 }
 
 
+API.storageGetAll = function storageGetAll(user, json, callback) {
+	
+	if(user.storage) {
+		callback(null, {storage: JSON.stringify(user.storage)});		
+	}
+	else {
+		
+		user.loadStorage(function(err, data) {
+			if(err) callback(err);
+			else callback(null, {storage: data});
+		});
+
+	}
+
+}
+
+
+API.storageSet = function storageSet(user, json, callback) {
+	
+	var itemName = json.item;
+	var value = json.value;
+	
+	if(itemName == undefined) return callback(new Error("item=" + itemName + " can not be null or undefined!"));
+	if(value === undefined) return callback(new Error("value must be defined!"));
+	
+	user.storage[itemName] = value;
+	
+	user.saveStorage(function(err) {
+		if(err) callback(err);
+		else callback(null, {saved: itemName});
+	});
+	
+}
+
+API.storageRemove = function storageRemove(user, json, callback) {
+	
+	var itemName = json.item;
+	
+	if(itemName == undefined) return callback(new Error("item=" + itemName + " can not be null or undefined!"));
+	
+	delete user.storage[itemName];
+	
+	user.saveStorage(function(err) {
+		if(err) callback(err);
+		else callback(null, {removed: itemName});
+	});
+	
+}
+
 function runFtpQueue() {
 	
 	console.log(ftpQueue.length + " items left in the FTP queue");

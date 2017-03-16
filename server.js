@@ -255,6 +255,7 @@ function User(id, name, rootPath) {
 	user.name = name;
 	user.remoteConnections = {};
 	user.clientConnection = null;
+	user.storage = null;
 	
 	if(rootPath) { // Use "true" path
 		var path = require("path");
@@ -267,6 +268,8 @@ function User(id, name, rootPath) {
 	if(user.rootPath) user.defaultWorkingDirectory = "/";
 	else user.defaultWorkingDirectory = UTIL.trailingSlash(process.cwd());
 	user.workingDirectory = user.defaultWorkingDirectory;
+	
+	user.storageFile = user.translatePath(user.defaultWorkingDirectory) + ".localStorage";
 	
 }
 
@@ -391,6 +394,67 @@ User.prototype.toVirtualPath = function toVirtualPath(realPath) {
 	
 }
 
+
+User.prototype.loadStorage = function loadStorage(callback) {
+	var user = this;
+	
+	// callback storage as a object
+
+	var fs = require("fs");
+	var storageFile = user.storageFile;
+	
+	console.log("Reading storage file for user=" + user.name + " in location: " + storageFile);
+	fs.readFile(storageFile, "utf8", function(err, data) {
+		if(err) {
+			if(err.code == "ENOENT") {
+				
+				user.storage = {};
+				console.log("Creating storage file for user=" + user.name + " in location: " + storageFile);
+				fs.writeFile(storageFile, "{}", function(err) {
+					if(err) {
+						callback(new Error("Unable to retrieve storage! Error: " + err.message));
+						throw err;
+					}
+					else callback(null, user.storage);
+					
+				}); 
+				
+			}
+			else {
+				callback(new Error("Unable to retrieve storage! Error: " + err.message));
+				throw err;
+			}
+		}
+		else {
+			try {
+				user.storage = JSON.parse(data);
+			}
+			catch(err) {
+				callback(new Error("Unable to retrieve storage! Error: " + err.message));
+				throw new Error("Unable to parse storage data for user=" + user.name + "\nstorageFile: " + storageFile + "\nParse error: " + err.message);
+			}
+			
+			return callback(null, user.storage);
+		
+		}			
+		
+	});
+}
+
+User.prototype.saveStorage = function saveStorage(callback) {
+	var user = this;
+	
+	var fs = require("fs");
+	
+	fs.writeFile(user.storageFile, JSON.stringify(user.storage, null, 2), function(err) {
+		if(err) {
+			callback(new Error("Unable to save storage! Error: " + err.message));
+			throw err;
+		}
+		callback(null, {storage: JSON.stringify(user.storage)});
+		
+	}); 
+}
 
 
 function isObject(obj) {

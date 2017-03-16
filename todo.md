@@ -42,16 +42,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Thinking about the best way to implement Mercurial or Git integration ...
+Server storage instead of local storage.
 
-Make Mercurial into a separate plugin ?
-
-
+Implementing Mercurial support
 
 
-Make WYSIWYG editor work in Browser.
-
-buf fix: When pressing enter in content-editable, it loses focus in Firefox
+Make WYSIWYG editor work in Browser ...
+bug fix: When pressing enter in content-editable, it loses focus in Firefox
 
 
 Turning the editor into a web app ...
@@ -62,6 +59,10 @@ SSG and WYSIWYG + Mercurial Repo
 
 
 todo:
+
+Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
+
+Show virtual paths on server errors like "unable to open file".
 
 Login splash screen. Where you type username/password and can pick server/port
 

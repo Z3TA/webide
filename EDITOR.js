@@ -128,7 +128,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	autoComplete: [],
 	keyPressed: [],
 	changeWorkingDir: [],
-	bootstrap: []
+	bootstrap: [],
+	storageReady: [] // When server storage is ready to be used
 };
 
 EDITOR.renderFunctions = [];
@@ -232,6 +233,49 @@ EDITOR.lastKeyPressed = "";
 		
 		return workingDirectory;
 	}
+	
+	
+	// # Server Storage (to replace localStorage)
+	var _serverStorage = null; // Will be populated once the data is recived from the server
+	
+	EDITOR.storage = {
+		setItem: function(id, val, callback) {
+			CLIENT.cmd("storageSet", {item: id, value: String(val)}, function(err, json) {
+				if(callback) callback(err, json);
+				if(err) throw err;
+			});
+			return _serverStorage[id] = String(val); 
+		},
+		getItem: function(id) {
+			if(!this.ready()) throw new Error('Storage is not yet ready. Use EDITOR.on("storageReady", yourFunction)'); 
+			
+			return _serverStorage.hasOwnProperty(id) ? _serverStorage[id] : undefined; 
+		},
+		
+		removeItem: function(id, callback) {
+			CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
+				if(callback) callback(err, json);
+				if(err) throw err;
+			});
+			
+			return delete _serverStorage[id];
+		},
+		clear: function() {
+			throw new Error("Use EDITOR.storage.removeItem() instead!");
+			//CLIENT.cmd("storageClear", function(err) {if(err) throw err;});
+			return _serverStorage = {}; 
+		},
+		ready: function() {
+			if(_serverStorage === null) return false;
+			else if(_serverStorage instanceof Object) return true;
+			else {
+				//console.log("instanceof " + (instanceof _serverStorage));
+				throw new Error("_serverStorage=" + _serverStorage + " typeof " + (typeof _serverStorage));
+
+			}
+		}
+	};	
+	
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
 		
@@ -3311,6 +3355,21 @@ EDITOR.lastKeyPressed = "";
 				if(err) throw err;
 				else setWorkingDirectory(json.path);
 			});
+			
+			// Populate localStorage
+			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
+				if(err) throw err;
+
+				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
+				
+				_serverStorage = json.storage;
+				
+				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
+					EDITOR.eventListeners.storageReady[i](_serverStorage);
+				}
+				
+			});
+			
 			
 		}
 		
