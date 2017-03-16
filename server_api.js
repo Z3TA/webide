@@ -633,7 +633,7 @@ API.workingDirectory = function workingDirectory(user, json, callback) {
 
 
 
-API.createPath = function(user, json, createPathCallback) {
+API.createPath = function createPath(user, json, createPathCallback) {
 	/*
 		Traverse the path and try to creates the directories, then check if the full path exists
 		
@@ -792,7 +792,7 @@ API.createPath = function(user, json, createPathCallback) {
 }
 
 
-API.connect = function(user, json, callback) {
+API.connect = function connect(user, json, callback) {
 	
 	var protocol = json.protocol;
 	var serverAddress = json.serverAddress;
@@ -1037,7 +1037,7 @@ API.connect = function(user, json, callback) {
 	}
 }
 
-API.disconnect = function(user, json, callback) {
+API.disconnect = function disconnect(user, json, callback) {
 	
 	var protocol = json.protocol;
 	var serverAddress = json.serverAddress;
@@ -1052,7 +1052,7 @@ API.disconnect = function(user, json, callback) {
 	
 }
 
-API.setWorkingDirectory = function(user, json, callback) {
+API.setWorkingDirectory = function setWorkingDirectory(user, json, callback) {
 
 	var path = user.translatePath(json.path);
 	if(path instanceof Error) return callback(path);
@@ -1071,6 +1071,136 @@ API.setWorkingDirectory = function(user, json, callback) {
 }
 
 
+API.hgstatus = function hgstatus(user, json, callback) {
+	// show changed files in the working directory
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+		
+	directory = user.translatePath(directory);
+	
+	if(directory instanceof Error) return callback(directory);
+	
+	exec("hg status", { cwd: directory }, function (err, stdout, stderr) {
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			var modified = [];
+			var untracked = [];
+			
+			var files;
+			
+			if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
+			else files = stdout.split("\n");
+			
+			for(var attr, path, i=0; i<files.length; i++) {
+				attr = files[i].substring(0, files[i].indexOf(" "));
+				path = files[i].substring(attr.length + 1);
+				
+				if(attr == "?") untracked.push(path);
+				else if(attr == "M") modified.push(path);
+				else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nstdout=" + stdout);
+			}
+			
+			callback(null, {modified: modified, untracked: untracked});
+			
+		}
+	});
+}
+
+
+API.hgadd = function hgadd(user, json, callback) {
+	// add the specified files on the next commit
+	
+	var directory = json.directory;
+	var files = json.files;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(files == undefined) return callback(new Error("No files defined"));
+
+	
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	var fileString = "";
+	for(var i=0, localPath; i<files.length; i++) {
+		localPath = user.translatePath(files[i]);
+		if(localPath instanceof Error) return callback(localPath);
+		fileString += ' "' + localPath + '"';
+	}
+	
+	
+	exec("hg add" + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			if(stdout != "") callback(stdout);
+			else callback(null, {files: files});
+			
+		}
+	});
+}
+
+API.hginit = function hginit(user, json, callback) {
+	// create a new repository in the given directory
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	exec("hg init", { cwd: localDirectory }, function (err, stdout, stderr) {
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			if(stdout != "") callback(stdout);
+			else callback(null, {directory: directory});
+			
+		}
+	});
+}
+
+
+API.hgcommit = function hgcommit(user, json, callback) {
+	// commit the specified files or all outstanding changes
+	
+	var directory = json.directory;
+	var files = json.files;
+	var message = json.message;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(files == undefined) return callback(new Error("No files defined"));
+	if(message == undefined) return callback(new Error("No message defined"));
+
+	
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	var fileString = "";
+	for(var i=0, localPath; i<files.length; i++) {
+		localPath = user.translatePath(files[i]);
+		if(localPath instanceof Error) return callback(localPath);
+		fileString += ' "' + localPath + '"';
+	}
+	
+	
+	exec('hg commit -m "' + message + '"' + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			if(stdout != "") callback(stdout);
+			else callback(null, {directory: directory});
+			
+		}
+	});
+}
 
 
 function runFtpQueue() {
