@@ -366,7 +366,7 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 		else return translatedPath;
 		
 	}
-	else return pathToFileOrDir; 
+	else return pathToFileOrDir;
 }
 
 User.prototype.toVirtualPath = function toVirtualPath(realPath) {
