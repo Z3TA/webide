@@ -246,10 +246,17 @@ EDITOR.lastKeyPressed = "";
 			});
 			return _serverStorage[id] = String(val); 
 		},
-		getItem: function(id) {
+		getItem: function(id, trap) {
 			if(!this.ready()) throw new Error('Storage is not yet ready. Use EDITOR.on("storageReady", yourFunction)'); 
 			
-			return _serverStorage.hasOwnProperty(id) ? _serverStorage[id] : undefined; 
+			if(trap !== undefined) throw new Error("getItem only takes one argument, did you mean to use setItem ?"); // Error check
+			
+			if(!_serverStorage.hasOwnProperty(id)) {
+				console.warn("Can not find id=" + id + " in EDITOR.storage!");
+				return null;
+			}
+			else return _serverStorage[id];
+
 		},
 		
 		removeItem: function(id, callback) {
@@ -2920,8 +2927,8 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log("Closing the editor ...");
 			
-			if(!window.localStorage) {
-				console.warn("window.localStorage=" + window.localStorage);
+			if(!EDITOR.storage.ready()) {
+				console.warn("EDITOR.storage not ready!");
 			}
 			
 			console.log("Calling exit listeners (" + EDITOR.eventListeners.exit.length + ")");
@@ -3344,10 +3351,7 @@ EDITOR.lastKeyPressed = "";
 				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
 			}
 			
-			console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
-			for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
-				EDITOR.eventListeners.start[i].fun(); // Call function
-			}
+
 			
 			
 			// Use servers working directory
@@ -3356,13 +3360,19 @@ EDITOR.lastKeyPressed = "";
 				else setWorkingDirectory(json.path);
 			});
 			
-			// Populate localStorage
+			// ### Populate EDITOR.storage (_serverStorage)
 			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
 				if(err) throw err;
 
 				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
 				
 				_serverStorage = json.storage;
+				
+				// Many plugins depend on the storage being available ...
+				console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
+				for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
+					EDITOR.eventListeners.start[i].fun(); // Call function
+				}
 				
 				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
 					EDITOR.eventListeners.storageReady[i](_serverStorage);

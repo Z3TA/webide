@@ -44,6 +44,8 @@ What I'm working on
 
 Server storage instead of local storage.
 
+Server storage fallback to localStorage when server goes offline, then sync when it comes online agian !?
+
 Implementing Mercurial support
 
 
