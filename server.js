@@ -7,6 +7,15 @@ var APC = String.fromCharCode(159);
 
 var API = require("./server_api.js");
 
+/*
+
+API.foo = require("server_plugin/foo.js");
+API.bar = require("server_plugin/bar.js"); 
+
+todo: Make it possible to call server method foo.baz so you can group many server api's under the same namespace
+
+*/
+
 var remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 

@@ -62,6 +62,8 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
+Make start.sh and start.bat etc check if server is running and start the server if it's not running.
+
 Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
 
 Show virtual paths on server errors like "unable to open file".
@@ -73,7 +75,10 @@ Some sort of indication that you are disconnected to the server
 How to handle errors in server.js ?
 
 
-colaboration
+colaboration: When two or more people are logged into the *same user* 
+and opens *the same file* the editor goes into colaboration mode, that lets you see each others changes live.
+Press xxx to follow someone else's cursor.
+
 mercurial/git integration
 
 Functionality discovery: Add a search button in the upper right corder, clicking it is the same as clicking the keyboard function/ctrl button:
