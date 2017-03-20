@@ -1,5 +1,10 @@
 @echo off
 
+REM Start the server if it's not already running
+SET NODE=node
+start %NODE% server.js
+
+
 SET NW_PATH=runtime\nwjs-v0.12.3-win-x64\nw.exe
 SET EDITOR_PATH=.
 
