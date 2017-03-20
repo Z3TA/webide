@@ -54,7 +54,11 @@ var CLIENT = {}; // Client object is global
 					console.warn(err);
 					CLIENT.fireEvent("loginFail");
 				}
-				else CLIENT.fireEvent("loginSuccessful");
+				else {
+					if(!resp.cId) throw new Error("Got no client id from server!");
+					CLIENT.connectionId = resp.cId;
+					CLIENT.fireEvent("loginSuccessful");
+				}
 			}
 			
 		}
@@ -77,14 +81,16 @@ var CLIENT = {}; // Client object is global
 					return;
 				}
 				
+				if(json.error) console.warn("Server ERROR: " + json.error);
 				
-				if(json.resp) {
-					for(var method in json.resp) {
+				if((json.resp || json.event) && !json.error) {
+					var resp = json.resp || json.event;
+					for(var method in resp) {
 						// Call event listeners
 						if(eventListeners.hasOwnProperty(method)) {
-							CLIENT.fireEvent(method, json.resp[method]);
+							CLIENT.fireEvent(method, resp[method]);
 						}
-						console.warn("Unknown client method: " + method + " data=" + JSON.stringify(json.resp[method]));
+						console.warn("Unknown client method: '" + method + "' data=" + JSON.stringify(resp[method]));
 					}
 				}
 				
@@ -100,7 +106,14 @@ var CLIENT = {}; // Client object is global
 					alertBox(json.msg);
 				}
 				else if(!json.resp) {
-					throw new Error("Unexpected server response: " + JSON.stringify(json, null, 2));
+					
+					for(var method in json) {
+						if(eventListeners.hasOwnProperty(method)) {
+							CLIENT.fireEvent(method, json[method]);
+						}
+						else throw new Error("Unexpected server response (method=" + method + "): " + JSON.stringify(json, null, 2));
+					}
+
 				}
 				
 			}

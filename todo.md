@@ -42,6 +42,12 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
+where each change will be mirrored to the other client.
+
+Find a way to ignore mirror events from yourself: Send from connectionId in mirror to server!
+
+
 Server storage instead of local storage.
 
 Server storage fallback to localStorage when server goes offline, then sync when it comes online agian !?
@@ -73,6 +79,10 @@ Login splash screen. Where you type username/password and can pick server/port
 Some sort of indication that you are disconnected to the server
 
 How to handle errors in server.js ?
+
+
+
+
 
 
 colaboration: When two or more people are logged into the *same user* 

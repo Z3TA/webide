@@ -16,8 +16,9 @@ todo: Make it possible to call server method foo.baz so you can group many serve
 
 */
 
-var remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
+var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
+var CONNECTED_USERS = {};
 
 function main() {
 
@@ -51,6 +52,7 @@ function main() {
 function connection(connection) {
 	
 	var user = null;
+	var userConnectionId = -1;
 	var IP = connection.remoteAddress;
 	var protocol = connection.protocol;
 	var agent = connection.headers["user-agent"];
@@ -131,18 +133,20 @@ function connection(connection) {
 					else {
 						user = usr;
 						
-						user.connected(connection);
+						userConnectionId = user.connected(connection);
 						
 						user.IP = IP;
 						
-						send({resp: {user: user.name}})
+						send({resp: {user: user.name, cId: userConnectionId}})
 						
+						/*
 						setTimeout(function() {
 							user.send({resp: {
 								test: {foo: 1, bar: 2}
 							}});
 							
 						}, 3000);
+						*/
 						
 						for(var i=0; i<commandQueue.length; i++) {
 							handle(commandQueue[i]);
@@ -168,7 +172,7 @@ function connection(connection) {
 					else {
 						send({resp: answer});
 					}
-				});
+				}, userConnectionId);
 				
 			}
 			
@@ -189,6 +193,13 @@ function connection(connection) {
 		
 		log("Closed " + protocol + " from " + IP);
 		
+		if(user) {
+			
+			var connections = user.disconnected(userConnectionId);
+			
+			if(connections === 0) delete CONNECTED_USERS[user.name];
+		}
+
 	});
 	
 }
@@ -218,8 +229,12 @@ function identify(json, IP, callback) {
 			else callback(new Error("Wrong username=" + json.username + " or password"));
 			
 			function userOK(index, name, dir) {
-				user = new User(index, name, dir);
 				
+				if(!CONNECTED_USERS.hasOwnProperty(name)) {
+					CONNECTED_USERS[name] = new User(index, name, dir);
+				}
+				
+				user = CONNECTED_USERS[name];
 			}
 			
 		});
@@ -260,11 +275,14 @@ function log(msg) {
 function User(id, name, rootPath) {
 	var user = this;
 	
+	log("Creating NEW user session! name=" + name);
+	
 	user.id = id;
 	user.name = name;
 	user.remoteConnections = {};
-	user.clientConnection = null;
+	user.clientConnections = {}; // A user can be connected from many places
 	user.storage = null;
+	user.connectionId = 0;
 	
 	if(rootPath) { // Use "true" path
 		var path = require("path");
@@ -285,13 +303,32 @@ function User(id, name, rootPath) {
 User.prototype.connected = function connected(connection) {
 	var user = this;
 
-	user.clientConnection = connection;
+	user.connectionId++;
+	
+	user.clientConnections[user.connectionId] = connection;
+	
+	log("Connected connectionId=" + user.connectionId + " to user.name=" + user.name);
+	
+	return user.connectionId;
 }
 
-User.prototype.disconnected = function disconnected() {
+User.prototype.disconnected = function disconnected(connectionId) {
 	var user = this;
+	
+	delete user.clientConnections[connectionId];
+	
+	var connections = Object.keys(user.clientConnections).length;
+	
+	if(connections === 0) user.teardown();
+	
+	return connections;
+	
+}
 
-	user.clientConnection = null;
+User.prototype.teardown = function teardown(msg) {
+	var user = this;
+	
+	// Disconnect from remote servers etc ...
 }
 
 User.prototype.send = function send(msg) {
@@ -303,15 +340,20 @@ User.prototype.send = function send(msg) {
 	
 	var str = JSON.stringify(msg);
 	
-	if(!user.clientConnection) {
-		console.warn("Unable to send msg=" + str + ". User name=" + user.name + " is not connected!");
-		return;
+	var msgSent = false;
+	
+	for(var connectionId in user.clientConnections) {
+		log(user.name + " (" + connectionId + ") <= " + str);
+		user.clientConnections[connectionId].write(str);
+		msgSent = true;
 	}
 	
-	log(user.IP + " <= " + str);
-	user.clientConnection.write(str);
+	if(!msgSent) {
+		console.warn("No user.name=" + user.name + " clients connected! Unable to send msg:\n" + JSON.stringify(msg, null, 2) );
+	}
 	
 }
+
 
 User.prototype.changeWorkingDir = function changeWorkingDir(path) {
 	var user = this;
@@ -321,7 +363,7 @@ User.prototype.changeWorkingDir = function changeWorkingDir(path) {
 	return user.workingDirectory;
 }
 
-User.prototype.connectionClosed = function connectionClosed(protocol, serverAddress) {
+User.prototype.remoteConnectionClosed = function remoteConnectionClosed(protocol, serverAddress) {
 	var user = this;
 	
 	// Notify the client about closed connection
@@ -344,7 +386,7 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 		
 		var parse = url.parse(pathToFileOrDir);
 		
-		if(remoteProtocols.indexOf(parse.protocol) != -1) return pathToFileOrDir;
+		if(REMOTE_PROTOCOLS.indexOf(parse.protocol) != -1) return pathToFileOrDir;
 		
 		// else: The protocol is not allowed or its a local path
 		

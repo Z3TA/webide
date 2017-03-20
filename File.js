@@ -165,6 +165,8 @@ var File; // File object is global
 	
 	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {
+		var file = this;
+		
 		/*
 			Takes all properties from newCaret and gives it to oldCaret
 			Can be used to mutate, clone, or copy the caret object
@@ -176,7 +178,7 @@ var File; // File object is global
 			throw new Error("Caret (first argument) need to be an object! (but not necessarily a caret)");
 		}
 		
-		var file = this;
+		console.log("File:mutateCaret");
 		
 		file.checkCaret(newCaret);
 		
@@ -193,6 +195,8 @@ var File; // File object is global
 	File.prototype.moveCaret = function(index, row, col, caret) {
 		var file = this;
 		
+		console.log("File:moveCaret");
+		
 		if(caret == undefined) caret = file.caret;
 		
 		if(index != undefined && row == undefined && col == undefined) return file.moveCaretToIndex(index, caret);
@@ -203,17 +207,20 @@ var File; // File object is global
 			if(col != undefined) caret.col = col;
 		
 			file.fixCaret(caret);
-				
+
 			if(caret == file.caret) {
 				EDITOR.fireEvent("moveCaret", file, file.caret);
-				}
+				EDITOR.renderNeeded();
+			}
 			return caret;
 		}
+
 	}
 	
 	
-	
 	File.prototype.createCaret = function(index, row, col) {
+		var file = this;
+		
 		/*
 			Returns a valid caret position
 			
@@ -228,7 +235,8 @@ var File; // File object is global
 			
 		*/
 		
-		var file = this;
+		console.log("File:createCaret");
+		
 		var grid = file.grid;
 		var caret = {index: index, row: row, col: col, eol: false, eof: false};
 		
@@ -2012,6 +2020,8 @@ var File; // File object is global
 	File.prototype.moveCaretRight = function(caret) {
 		var file = this;
 		
+		console.log("File:moveCaretRight");
+		
 		if(caret == undefined) caret = file.caret;
 		
 		file.checkCaret(caret);
@@ -2062,6 +2072,15 @@ var File; // File object is global
 		
 		//if(caret == file.caret) EDITOR.renderNeeded();
 		
+		if(caret == file.caret && EDITOR.collaborationMode) {
+			CLIENT.cmd("mirror", {
+				object: "FILE", 
+				path: file.path, 
+				method: "moveCaret", 
+				args: [file.caret.index, file.caret.row, file.caret.col],
+			});
+		}
+		
 	}
 	
 	
@@ -2072,6 +2091,8 @@ var File; // File object is global
 			
 		*/
 		var file = this;
+		
+		console.log("File:moveCaretLeft");
 		
 		if(caret == undefined) {
 			caret = file.caret;
@@ -2139,6 +2160,8 @@ var File; // File object is global
 	File.prototype.moveCaretUp = function(caret) {
 		var file = this;
 		
+		console.log("File:moveCaretUp");
+		
 		if(caret == undefined) caret = file.caret;
 		file.checkCaret(caret);
 		
@@ -2200,6 +2223,8 @@ var File; // File object is global
 	
 	File.prototype.moveCaretDown = function(caret) {
 		var file = this;
+		
+		console.log("File:moveCaretDown");
 		
 		if(caret == undefined) caret = file.caret;
 		file.checkCaret(caret);
@@ -2428,9 +2453,11 @@ var File; // File object is global
 	}
 	
 	File.prototype.moveCaretToIndex = function(index, caret) {
-		var file = this,
-		grid = file.grid,
-		gridIndex;
+		var file = this;
+		var grid = file.grid;
+		var gridIndex;
+		
+		console.log("File:moveCaretToIndex");
 		
 		if(index == undefined) {
 			throw new Error("index is undefined!");
@@ -2588,6 +2615,8 @@ var File; // File object is global
 	File.prototype.moveCaretToEnd = function(caret, cb) {
 		var file = this;
 		// Moves the caret to the end of the file
+		
+		console.log("File:moveCaretToEnd");
 		
 		if(caret == undefined) caret = file.caret;
 		
@@ -3111,11 +3140,13 @@ var File; // File object is global
 	}
 	
 	File.prototype.fixCaret = function(caret) {
+		var file = this;
+		
 		/*
 			Moves the caret to a possible position 
 		*/
 		
-		var file = this;
+		console.log("File:moveCaretToEnd");
 		
 		if(caret == undefined) caret = file.caret
 		else {

@@ -853,14 +853,14 @@ API.connect = function connect(user, json, callback) {
 			
 			user.send(err.message);
 			
-			user.connectionClosed("ftp", serverAddress);
+			user.remoteConnectionClosed("ftp", serverAddress);
 			
 		});
 		
 		ftpClient.on('close', function(hadErr) {
 			user.send("Connection to FTP on " + serverAddress + " closed.");
 			
-			user.connectionClosed("ftp", serverAddress);
+			user.remoteConnectionClosed("ftp", serverAddress);
 			
 		});
 		
@@ -1025,12 +1025,12 @@ API.connect = function connect(user, json, callback) {
 				else {
 					user.send("Problem connecting to SSH on " + serverAddress + "\n" + err.message);
 				}
-				user.connectionClosed("ssh", serverAddress);
+				user.remoteConnectionClosed("ssh", serverAddress);
 				
 			}).on('end', function(msg) {
 				user.send("Disconnected from SSH on " + serverAddress + "\nMessage: " + msg);
 				
-				user.connectionClosed("ssh", serverAddress);
+				user.remoteConnectionClosed("ssh", serverAddress);
 				
 			}).connect(auth);
 		}
@@ -1038,6 +1038,7 @@ API.connect = function connect(user, json, callback) {
 }
 
 API.disconnect = function disconnect(user, json, callback) {
+	// Disconnect remove connection
 	
 	var protocol = json.protocol;
 	var serverAddress = json.serverAddress;
@@ -1206,7 +1207,7 @@ API.hgcommit = function hgcommit(user, json, callback) {
 API.storageGetAll = function storageGetAll(user, json, callback) {
 	
 	if(user.storage) {
-		callback(null, {storage: JSON.stringify(user.storage)});		
+		callback(null, {storage: user.storage});		
 	}
 	else {
 		
@@ -1249,6 +1250,20 @@ API.storageRemove = function storageRemove(user, json, callback) {
 		if(err) callback(err);
 		else callback(null, {removed: itemName});
 	});
+	
+}
+
+
+API.mirror = function mirror(user, json, callback, userConnectionId) {
+	
+	if(json.object == undefined) return callback(new Error("object=" + object + " can not be null or undefined!"));
+	if(json.method == undefined) return callback(new Error("method=" + method + " can not be null or undefined!"));
+	
+	json.cId = userConnectionId;
+	
+	user.send({mirror: json});
+	
+	//callback(null, json);
 	
 }
 

@@ -105,6 +105,10 @@ EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.
 EDITOR.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(window.navigator) ? "Linux" : "Unknown");
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
+
+EDITOR.collaborationMode = true;
+
+
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	fileClose: [], 
 	fileOpen: [], 
@@ -3049,6 +3053,35 @@ EDITOR.lastKeyPressed = "";
 		
 		console.log("Starting the editor ...");
 		
+		CLIENT.on("mirror", function clientMirror(json) {
+			
+			var clientConnectionId = json.cId;
+			
+			console.log("MIRROR: clientConnectionId=" + clientConnectionId + " CLIENT.connectionId=" + CLIENT.connectionId + " json=" + JSON.stringify(json, null, 2));
+			
+			if(clientConnectionId == CLIENT.connectionId) {
+				console.log("Returned mirror event from ourself: " + json.object + "." + json.method);
+				return;
+			}
+			
+			if(json.object == "FILE") {
+				if(!EDITOR.files.hasOwnProperty(json.path)) {
+					throw new Error("Receved mirror event for file that is not opened! path=" + json.path);
+				}
+				else {
+					var thisArg = EDITOR.files[json.path];
+					var argsArray = json.args;
+					console.log("Calling File." + json.method + "(" + argsArray.join(", ") + ")");
+					EDITOR.files[json.path][json.method].apply(thisArg, argsArray);
+					
+				}
+			}
+			
+			
+			
+		});
+		
+		
 		
 		CLIENT.connect(undefined, connectedToServer);
 		
@@ -3365,6 +3398,8 @@ EDITOR.lastKeyPressed = "";
 				if(err) throw err;
 
 				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
+				
+				if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
 				
 				_serverStorage = json.storage;
 				
