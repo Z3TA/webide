@@ -1229,12 +1229,21 @@ API.storageSet = function storageSet(user, json, callback) {
 	if(itemName == undefined) return callback(new Error("item=" + itemName + " can not be null or undefined!"));
 	if(value === undefined) return callback(new Error("value must be defined!"));
 	
-	user.storage[itemName] = value;
+	if(!user.storage) {
+		user.loadStorage(function(err, data) {
+			if(err) callback(err);
+			else save();
+		});
+	}
+	else save();
 	
-	user.saveStorage(function(err) {
-		if(err) callback(err);
-		else callback(null, {saved: itemName});
-	});
+	function save() {
+		user.storage[itemName] = value;
+		user.saveStorage(function(err) {
+			if(err) callback(err);
+			else callback(null, {saved: itemName});
+		});
+	}
 	
 }
 
