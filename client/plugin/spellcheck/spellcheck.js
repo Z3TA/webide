@@ -108,7 +108,13 @@
 	function loadWorker(languages) {
 		var childProcess = require("child_process");
 		
-		var id = worker.push(childProcess.fork("./plugin/spellcheck/spellcheck_worker.js", [languages.join(";")])) -1;
+		var path = require("path");
+		
+		var pathToWorker = path.join(require("dirname"), "/client/plugin/spellcheck/spellcheck_worker.js");
+		
+		console.log("pathToWorker=" + pathToWorker);
+		
+		var id = worker.push(childProcess.fork(pathToWorker, [languages.join(";")])) -1;
 		
 		console.log("spell-check worker " + id + "/" + worker.length + " loaded!");
 
@@ -123,7 +129,7 @@
 
 	function worker_message(data) {
 		
-		//console.log("spell-check worker data:" + data);
+		console.log("spell-check worker data:" + data);
 		
 		if(data == "ready!") {
 			workersReady++;
@@ -171,7 +177,7 @@
 	}
 
 	function worker_exit(code) {
-		throw new Error("spell-check worker exit:" + code + "\nCheck spellcheck-worker-debug.log");
+		throw new Error("spell-check worker exit:" + code + "\nSee spellcheck-worker-debug.log");
 	}
 		
 	function spellCheckFile(file) {

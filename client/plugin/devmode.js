@@ -209,7 +209,7 @@
 					*/
 					
 					//document.location = "about:blank";
-					//document.location = "file:///" + require("dirname") + "/index.htm";
+					//document.location = "file:///" + require("dirname") + "/client/index.htm";
 					window.onbeforeunload = null;
 					location.reload();
 					

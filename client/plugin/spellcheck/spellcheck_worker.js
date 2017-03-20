@@ -1,7 +1,26 @@
+/*
 
-var fs = require("fs"); // Load it first so that we can write any errors to a log file
+How to debug:
 
+(download io.js v1.2.0: https://iojs.org/download/release/v1.2.0/)
+
+iojs spellcheck_worker.js en_US
+
+Then check spellcheck-worker-debug.log
+
+*/
+
+// Load it first so that we can write any errors to a log file
+var fs = require("fs"); 
 var logName = "spellcheck-worker-debug.log";
+
+
+if(process.send) process.send("Starting spellecheck worker ...");
+else console.log("Starting spellecheck worker ...");
+log("hmm");
+
+
+
 
 // Need to be before any errors
 process.on('uncaughtException', function (err) {
@@ -15,7 +34,10 @@ process.on('uncaughtException', function (err) {
 var isWin = /^win/.test(process.platform);
 var isLinux = /^linux/.test(process.platform);
 
-var dir = require("dirname") + "/plugin/spellcheck/";
+var path = require("path");
+var dir = path.join(require("dirname"), "/client/plugin/spellcheck/");
+
+log("dir=" + dir);
 
 if(isWin) {
 	var Nodehun = require(dir + 'nodehun_windows.node');
@@ -86,7 +108,7 @@ function loadDictionary(lang) {
 		
 		dict.push(new Nodehun(affBuffer,dictBuffer));
 		
-		//log("Dictionary " + lang + " loaded");
+		log("Dictionary " + lang + " loaded");
 		
 		if(++languagesLoaded == useLanguages.length) {
 			allDictionariesLoaded();
@@ -96,10 +118,11 @@ function loadDictionary(lang) {
 }
 
 function allDictionariesLoaded() {
-	//log("All dictionaries loaded");
+	log("All dictionaries loaded");
 	numDictionaries = dict.length;
-	process.send("ready!");
-	//log("Worker ready");
+	if(process.send) process.send("ready!");
+
+	log("Worker ready");
 }
 
 
@@ -162,13 +185,17 @@ function readFromDisk(path, callback, returnBuffer) {
 
 function log(txt) {
 	fs.appendFileSync(logName, txt + "\n");
+	console.log(txt);
 }
 
 
 function logExit(err) {
 	// Functions are hoisted!
-	log(err);
-	log(err.stack);
+	try {log(err);} catch(e) {}
+	try {log(err.stack);} catch(e) {}
+	try {process.send("ERROR:" + err.message + "\n" + err.stack);} catch(e) {}
+	
+	
 	var fail = 1;
 	process.exit(fail);
 }

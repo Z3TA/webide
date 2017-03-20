@@ -3210,23 +3210,6 @@ EDITOR.lastKeyPressed = "";
 			
 		}, false);
 		
-		// cleanup
-		/*
-			var content = document.getElementById("content");
-			while (content.firstChild) {
-			content.removeChild(content.firstChild);
-			}
-		*/
-		
-		
-		
-		
-		//getFile("http://joha.nz/editor/EDITOR.js", openFile);
-		//getFile("http://joha.nz/editor/test.js", openFile);
-		//getFile("http://joha.nz/editor/index.htm", openFile);
-		//getFile("http://joha.nz/editor/40k.log", openFile);
-		
-		//window.focus(); // Does nothing!
 		
 		var body = document.getElementById('body');
 		body.ondrop = fileDrop;

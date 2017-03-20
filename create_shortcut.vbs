@@ -17,7 +17,7 @@ shortCut.TargetPath =  fso.BuildPath(workingPath, "start.bat")
 shortCut.Arguments = "restart"
 '  shortCut.Description = "JZedit"
 '  shortCut.HotKey = "ALT+CTRL+J"
-shortCut.IconLocation = fso.BuildPath(workingPath, "favicon.ico") '"C:\Program Files\MyApp\MyProgram.EXE, 2"
+shortCut.IconLocation = fso.BuildPath(workingPath + "\client", "favicon.ico") '"C:\Program Files\MyApp\MyProgram.EXE, 2"
 '  shortCut.WindowStyle = "1"
 shortCut.WorkingDirectory = workingPath
 shortCut.Save

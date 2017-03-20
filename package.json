@@ -1,6 +1,6 @@
 {
 	"name": "JZedit",
-	"main": "index.htm",
+	"main": "client/index.htm",
 	"window": {
 		"title": "JZedit",
 		"show": true,

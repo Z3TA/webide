@@ -54,12 +54,12 @@
 	var path = require("path");
 	var demoSite = {
 		name: "Demo site",
-		projectFolder: path.join(require("dirname"), "/plugin/static_site_generator/demo/"),  // Project folder
-		source: path.join(require("dirname"), "/plugin/static_site_generator/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-		preview: path.join(require("dirname"), "/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-		template: path.join(require("dirname"), "/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
-		url: "file://" + path.join(require("dirname"), "/plugin/static_site_generator/demo/public/"),
+		projectFolder: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/"),  // Project folder
+		source: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
+		preview: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
+		publish: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
+		template: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
+		url: "file://" + path.join(require("dirname"), "/client/plugin/static_site_generator/demo/public/"),
 		pubUser: "",
 		pubPw: "",
 		key: "", // Publish key
@@ -127,7 +127,7 @@
 			
 			if(openFiles === 0) {
 				
-				var filePath = path.join(require("dirname") + "/plugin/static_site_generator/demo/source/about.htm");
+				var filePath = path.join(require("dirname") + "/client/plugin/static_site_generator/demo/source/about.htm");
 				
 				EDITOR.openFile(filePath);
 				
@@ -258,7 +258,7 @@
 					site.pubUser = ftpuser;
 					site.pubPw = ftppw;
 					site.url = "http://" + domain;
-					if(site.publish.indexOf("/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
+					if(site.publish.indexOf("/client/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
 					
 					window.localStorage.cmsjz_sites = JSON.stringify(sites); // Save all sites in local-storage
 					
@@ -1969,7 +1969,7 @@
 				var open_browser = "Open in browser";
 				confirmBox("<b>" + site.name + "</b> published to:<br><span class=\'nobreak\'>" + site.publish + "</span><br>URL:<i>" + site.url + "</i>", [open_browser, "OK"], function(answer) {
 					if(answer == open_browser) {
-						var open = require(require("dirname") + "/plugin/static_site_generator/node_modules/open");
+						var open = require(require("dirname") + "/client/plugin/static_site_generator/node_modules/open");
 						open(site.url, function(err) {
 							if(err) throw err;
 							console.log("Browser closed");
@@ -2051,7 +2051,7 @@
 			var childProcess = require("child_process");
 			var path = require('path');
 			
-			var buildScript = path.join(require("dirname"), "./plugin/static_site_generator/build.js");
+			var buildScript = path.join(require("dirname"), "./client/plugin/static_site_generator/build.js");
 			
 			//console.log("buildScript=" + buildScript);
 			console.log("source=" + source);
