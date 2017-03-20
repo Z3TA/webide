@@ -3060,7 +3060,7 @@ EDITOR.lastKeyPressed = "";
 			console.log("MIRROR: clientConnectionId=" + clientConnectionId + " CLIENT.connectionId=" + CLIENT.connectionId + " json=" + JSON.stringify(json, null, 2));
 			
 			if(clientConnectionId == CLIENT.connectionId) {
-				console.log("Ignoring mirror event from ourself: " + json.object + "." + json.method);
+				console.log("Returned mirror event from ourself: " + json.object + "." + json.method);
 				return;
 			}
 			
@@ -3081,19 +3081,6 @@ EDITOR.lastKeyPressed = "";
 			
 		});
 		
-		
-		EDITOR.on("moveCaret", function mirrorCaretMovement(file, caret) {
-			
-			if(caret == file.caret && EDITOR.collaborationMode) {
-				CLIENT.cmd("mirror", {
-					object: "FILE", 
-					path: file.path, 
-					method: "moveCaret", 
-					args: [file.caret.index, file.caret.row, file.caret.col],
-				});
-			}
-			
-		});
 		
 		
 		CLIENT.connect(undefined, connectedToServer);
