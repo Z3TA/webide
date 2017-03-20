@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	
+	<link rel="stylesheet" type="text/css" href="gfx/style.css">
+	
+	<!-- Core API (Application programming interface) / PPI (Plugin programming interface). The editor wont work without these -->
+	<script type="text/javascript" src="sockjs-0.3.4.js"></script> <!-- Latest version 1.1.1.js crashed JS engine on mobile -->
+	<script type="text/javascript" src="CLIENT.js"></script> <!-- For communicating with server.js -->
+	<script type="text/javascript" src="UTIL.js"></script>
+	<script type="text/javascript" src="global.js"></script>
+	<script type="text/javascript" src="Dialog.js"></script>
+	<script type="text/javascript" src="File.js"></script>
+	<script type="text/javascript" src="EDITOR.js"></script>
+
+	<script type="text/javascript" src="JsDiff.js"></script>
+	
+	<script type="text/javascript" src="settings_overload.js"></script> <!-- Make your custom setting changes in here -->
+	
+	
+	
+	<!-- Place plugins here: (note that the order *should* not matter, use EDITOR.plugin({... order: 100}), or EDITOR.on("start", function, order) !! -->
+	
+
+	<script type="text/javascript" src="plugin/self_debug.js"></script>
+	
+	<script type="text/javascript" src="plugin/winstate.js"></script>
+
+	<script type="text/javascript" src="plugin/spellcheck/spellcheck.js"></script>
+	
+	<script type="text/javascript" src="plugin/undo_redo.js"></script>
+	<script type="text/javascript" src="plugin/render_highlight-line.js"></script>
+	<script type="text/javascript" src="plugin/render_text_selection.js"></script>
+	<script type="text/javascript" src="plugin/render_highlight.js"></script>
+	<script type="text/javascript" src="plugin/render_text.js"></script>
+	<script type="text/javascript" src="plugin/render_charsinmargin.js"></script>
+	<script type="text/javascript" src="plugin/render_lineNumbers.js"></script>
+	<script type="text/javascript" src="plugin/render_info.js"></script>
+	<script type="text/javascript" src="plugin/render_indentation.js"></script>
+	
+	<script type="text/javascript" src="plugin/keyboard_arrows.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_enter.js"></script>
+
+	<script type="text/javascript" src="plugin/keyboard_delete.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_backspace.js"></script>
+
+	<script type="text/javascript" src="plugin/select_all.js"></script>
+	
+	<script type="text/javascript" src="plugin/mouse_place_caret.js"></script>
+	<script type="text/javascript" src="plugin/mouse_select.js"></script>
+
+	<script type="text/javascript" src="plugin/mouse_scroll.js"></script>
+	<script type="text/javascript" src="plugin/find_replace.js"></script>
+	<script type="text/javascript" src="plugin/find_in_files.js"></script>
+	<script type="text/javascript" src="plugin/file_open.js"></script>
+	<!--<script type="text/javascript" src="plugin/magnification_glass.js"></script>-->
+<script type="text/javascript" src="plugin/keyboard_scroll.js"></script>
+	<script type="text/javascript" src="plugin/document_preview.js"></script>
+	
+	<script type="text/javascript" src="plugin/file_tabs.js"></script>
+	<script type="text/javascript" src="plugin/file_new.js"></script>
+	<script type="text/javascript" src="plugin/file_save.js"></script>
+	<script type="text/javascript" src="plugin/keyboard_page_nav.js"></script>
+	<script type="text/javascript" src="plugin/paste_format.js"></script>
+	<script type="text/javascript" src="plugin/devmode.js"></script>
+	<script type="text/javascript" src="plugin/goto_line.js"></script>
+	
+	<script type="text/javascript" src="plugin/javascript/js_parser.js"></script>
+	<script type="text/javascript" src="plugin/javascript/autocomplete.js"></script>
+	<script type="text/javascript" src="plugin/javascript/autocomplete_js_misc.js"></script>
+	<script type="text/javascript" src="plugin/javascript/lonely_eq.js"></script>
+	
+
+<script type="text/javascript" src="plugin/fix_indentation.js"></script>
+	<script type="text/javascript" src="plugin/colors.js"></script>
+	<script type="text/javascript" src="plugin/functionlist.js"></script>
+	<script type="text/javascript" src="plugin/auto_quote.js"></script>
+
+	
+	<script type="text/javascript" src="plugin/xmatching.js"></script>
+
+	<script type="text/javascript" src="plugin/lorem_ipsum.js"></script>
+	<script type="text/javascript" src="plugin/encoding_converter.js"></script>
+	
+	<script type="text/javascript" src="plugin/zoom.js"></script>
+	
+	<script type="text/javascript" src="plugin/goto_file.js"></script>
+	
+	<script type="text/javascript" src="plugin/autocomplete_example.js"></script>
+	<script type="text/javascript" src="plugin/autocomplete_xml_tags.js"></script>
+	
+	<script type="text/javascript" src="plugin/file_close.js"></script>
+	
+	<script type="text/javascript" src="plugin/reopen_files.js"></script>
+	<script type="text/javascript" src="plugin/openReadme.js"></script>
+	
+	<script type="text/javascript" src="plugin/full_screen.js"></script>
+	<script type="text/javascript" src="plugin/badge.js"></script>
+	<script type="text/javascript" src="plugin/show_keybindings.js"></script>
+
+	<script type="text/javascript" src="plugin/word_wrap.js"></script>
+
+	<script type="text/javascript" src="plugin/xml/xml_parser.js"></script>
+	
+	<script type="text/javascript" src="plugin/server_manager.js"></script>
+	<script type="text/javascript" src="plugin/dir.js"></script>
+	
+	<script type="text/javascript" src="plugin/static_site_generator/interface.js"></script>
+	
+	<script type="text/javascript" src="plugin/copy_filepath.js"></script>
+	
+	<script type="text/javascript" src="plugin/linebreak_convert.js"></script>
+	
+	<script type="text/javascript" src="plugin/file_reload.js"></script>
+	
+	<script type="text/javascript" src="plugin/file_explorer.js"></script>
+	
+	<script type="text/javascript" src="plugin/css_refresh.js"></script>
+	
+	<script type="text/javascript" src="plugin/print_text.js"></script>
+	
+	<script type="text/javascript" src="plugin/hotload.js"></script>
+	
+	<script type="text/javascript" src="plugin/indentation_manager.js"></script>
+	
+	<!--<script type="text/javascript" src="plugin/speech_synthesis.js"></script>-->
+	
+	<script type="text/javascript" src="WysiwygEditor.js"></script>
+	<script type="text/javascript" src="plugin/html_wysiwyg_editor.js"></script>
+	
+	
+	<!-- These are just for testing -->
+	
+	<script type="text/javascript" src="plugin/test_dialog.js"></script>
+	<!--<script type="text/javascript" src="plugin/test_key_sim.js"></script>
+	<script type="text/javascript" src="plugin/test_exit.js"></script> 
+	-->
+	
+	
+	<meta name="description" content="Code/text editor for programmers specializing in JavaScript and Node.JS">
+	<meta name="keywords" content="code editor, text editor, javascript editor, node editor, node.js editor, nodejs editor">
+	<meta name="viewport" content="width=device-width, initial-scale=0.8">
+	<meta http-equiv="content-language" content="en">
+	
+	<!-- Caching is very annoying when you are developing on the editor -->
+	<meta http-equiv="cache-control" content="max-age=0" />
+	<meta http-equiv="cache-control" content="no-cache" />
+	<meta http-equiv="expires" content="0" />
+	<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+	<meta http-equiv="pragma" content="no-cache" />
+	
+</head>
+
+
+<body id="body" ondragstart="return false" draggable="false"
+        ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"  
+        ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"  
+        ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
+	<div class="wireframe rows">
+		
+		
+		<div id="header" class="header" draggable="false"></div>
+		
+		<div id="columns" class="columns">
+			<div id="leftColumn" class="leftColumn"></div>
+			<div id="content" class="content centerColumn">
+				<canvas id="canvas" class="fileCanvas">
+			</div>
+			<div id="rightColumn" class="rightColumn"></div>
+			
+		</div>
+		
+		<div id="footer" class="footer"></div>
+
+	</div>
+	
+	<input style="display:none;" id="fileInput" type="file" />
+	
+	<input style="display:none;" id="fileSaveAs" type="file" nwsaveas /> <!-- Used for both save and saveAs -->
+
+<input style="display:none;" id="directoryInput" type="file" nwdirectory /> <!--- Used for selecting a directory -->
+
+	<ul id="canvasContextmenu" class="menu" style="display: block; position: absolute;">
+		<div id="canvasContextmenuTemp"></div>
+	<!--<li>First item</li>
+		<li class="sep">Separator</li>
+		<li>Second item</li>-->
+	</ul>
+	
+</body>
+</html>

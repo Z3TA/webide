@@ -1,0 +1,880 @@
+/*
+	
+	This file contains all styling outside the canvas. 
+	For example the positioning of the head, footer, right column, left column and the main editor area.
+	
+	
+	
+	Designing tips
+	--------------
+	The coding area should be the "happy place" (most colorful and most contrast)
+	
+	Press F6 to reload CSS while working on the editior
+	
+	
+*/
+
+
+
+/* 
+	To be on the safe side. All element, unless specified, should have no border boxing ...
+	Do it here so that we do not have to specify it on everything.
+*/
+* {
+	padding: 0px;
+	margin: 0px;
+	border: 0px solid red;
+	/*-webkit-font-smoothing: none;*/
+	/*border: 1px solid pink;*/
+	
+}
+
+html {
+	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+	}
+
+body {
+	margin: 0px;
+	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
+	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+	font-family: Arial;
+	}
+
+
+.wireframe {
+	user-select: none;
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none;   /* Chrome/Safari/Opera */
+}
+
+
+/* Only the file canvas should have the fileCanvas class! */
+.fileCanvas { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
+	cursor: text;
+}
+
+
+.columns {
+	/* background-color: yellow; */
+	}
+
+.columns div {
+	/*border: 1px solid red; */
+	background: linear-gradient(to right, #edf0f3, #e8e8e8, #e8e9e9);
+	background-color: blue;
+	}
+
+.leftColumn {
+	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
+	float: left;
+	vertical-align: top;
+	background-color: blue;
+	padding: 0px;
+	margin: 0px;
+	border: 0px solid blue;
+}
+
+.centerColumn { /* CAN NOT HAVE BORDER, PADDING or MARGIN */
+	overflow:hidden;
+	background-color: red; /* background will only show when there is little text, or flash a little when reloading the page */
+	vertical-align: top;
+	float: left;
+	overflow: auto!important;
+}
+
+.rightColumn {
+	/* Can not have height. With is set by JavaScript in editor.js editor.resize() */
+	float: right;
+	border: 0px solid red;
+	background-color: orange;
+	vertical-align: top;
+}
+
+
+.header {
+	/* Needs to have height! */
+	background: linear-gradient(to right, #edf0f3, #777777, #575757);
+	}
+
+.footer {
+	/* Needs to have height! */
+	clear: both;
+	background: linear-gradient(#595959, #555555);
+	box-shadow: inset 0px 4px 10px #888888;
+	
+	
+	border-top: 2px solid #767676;
+	
+	padding-bottom: 6px;
+	padding-left: 4px;
+	padding-right: 4px;
+	 
+}
+.footer:empty { 
+	border: none; /* Hide the border if the footer is empty */
+	padding: 0px;
+}
+
+
+.sizer {
+	background-color: #682c35;
+}
+
+/* Add the wrap class to widgets living in the left or right column! */
+.wrap {
+	overflow: auto!important;
+	overflow-y: scroll!important; /* So that you never need the x-scroll */
+	white-space: nowrap;
+}
+
+
+/* ###### Standard settings ####### */
+
+.footer table {
+	margin: 0px;
+	padding: 0px;
+	border-spacing: 0px;
+	border-collapse: separate;
+	/*margin-bottom: -2px;  adjust so the top/bottom margin will be the same like wihout a table */
+	/*margin-top: -2px; */
+	
+}
+
+.footer td {
+	padding: 2px;
+	margin: 0px;
+}
+
+
+
+ul, li {
+	margin: 0px;
+	list-style-type: none;
+}
+
+ul {
+	margin-top: 2px;
+}
+
+li ul {
+	margin-left: 1em;
+}
+
+label, span, p {
+	color: #f6f6f3;
+	text-shadow: 0px -1px 0px #1f2020;
+	font-weight: normal;
+	font-family: caption;
+	}
+
+input[type=text], input[type=password], select.select {
+	border-radius: 2px;
+	border: 1px inset #4a4a4a;
+	
+	background-color: #e6e6e6;
+	box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
+	padding: 3px;
+	margin: 4px;
+	}
+
+input[type=checkbox] {
+	text-align: absmiddle;
+}
+
+.button.active {
+	font-weight: bold;
+	}
+
+input[type=button], button.button {
+	border-radius: 3px;
+	border: 1px solid rgba(19, 19, 19, 0.5);
+	box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
+	color: #f6f6f3;
+	min-width: 120px;
+	background-color: #414141;
+	background: linear-gradient(#545657, #434343, #454545);
+	cursor: default;
+	text-shadow: 0px -1px 0px #1f2020;
+	padding: 4px;
+	margin: 4px;
+}
+
+input[type=button].half {
+	min-width: 55px;
+}
+
+input[type=text].error {
+	background-color: #f88a99;
+}
+
+td input[type=text] {
+	max-width: calc(100% - 16px);
+}
+
+
+/* ############### File Tabs ############## */
+
+
+ul#tabList {
+	margin: 0px;
+	padding-left: 3px;
+	/*max-height: 60px;*/
+	background : #2BA6CB;
+}
+
+ul#tabList li.tabFolderItem {
+	
+	border: 1px solid rgba(200,200,200,0.5);
+	border-top: 1px solid #d6d6d6;
+	
+	/*-webkit-transform: perspective(100px) rotateX(30deg); */
+	
+	font-size: 10px;
+	text-align: center;
+	line-height: 1px;
+	
+	color: #585565;
+	display: inline-block;
+	line-height: 6px;
+	
+	cursor: default;
+	
+	/* Chrome like tabs */
+	
+	background: linear-gradient(#f2f2f2, #ffffff);
+	box-shadow: 0px -1px 2px #eeeeee, inset 0px 1px 1px #ecebf0;
+	
+	border-top-right-radius: 25px 170px;
+	border-top-left-radius: 20px 90px;
+	
+	margin-top: 5px;
+	margin-right: -10px;
+	margin-bottom: 0px;
+	margin-left: -10px;
+	
+	padding-top: 6px;
+	padding-right: 30px;
+	padding-bottom: 5px;
+	padding-left: 25px;
+	height: 170px; /* sets the curve */
+	
+	position : relative;
+	
+	max-width : 200px;
+	
+	
+	margin : 5px -10px 0;
+	border-top-right-radius: 25px 170px;
+	border-top-left-radius: 20px 90px;
+	
+	height: 170px;
+	background: #ddd;
+	position : relative;
+	box-shadow: 0 10px 20px rgba(0,0,0,.5);
+	max-width : 200px;
+	
+	
+}
+
+
+/* Chrome like tabs: http://codepen.io/jcblw/pen/DxAJF */
+ul#tabList > li.tabFolderItem:before, ul#tabList > li.tabFolderItem:after {
+	content : '';
+	background : transparent;
+	height: 20px;
+	width: 20px;
+	border-radius: 100%;
+	border-width: 10px;
+	top: 0px;
+	border-style : solid;
+	position : absolute;
+}
+ul#tabList li.tabFolderItem:before {
+	border-color : transparent #ddd transparent transparent;
+	-webkit-transform : rotate(48deg);
+	left: -23px;
+}
+ul#tabList li.tabFolderItem:after {
+	border-color : transparent transparent transparent #ddd;
+	-webkit-transform : rotate(-48deg);
+	right: -17px;
+}
+ul#tabList > li.tabFolderItem.active:before {
+	border-color : transparent #efefef transparent transparent;
+}
+ul.tabs > li.tabFolderItem.active:after {
+	border-color : transparent transparent transparent #efefef;
+}
+
+
+
+
+ul#tabList li.tabFolderItem.active {
+	color: #000000;
+	background: #efefef;
+	/*
+	background-color: #414141;
+	background: linear-gradient(#d7dde6, #f6f6f6, #FFFFFF);
+	*/
+	z-index: 2;
+}
+
+
+ul#tabList ul.folderFileList {
+	margin: 0px;
+	line-height: 12px;
+	overflow: visible;
+	vertical-align: bottom;
+}
+
+
+
+/* ### File Item */
+ul#tabList li.tabFileItem {
+	display: inline-block;
+	border-top: 1px solid #d6d6d6;
+	
+	border-top-right-radius: 25px 170px;
+	border-top-left-radius: 20px 90px;
+	
+	margin-top: 5px;
+	margin-right: -10px;
+	margin-bottom: 0px;
+	margin-left: -10px;
+	
+	padding-top: 6px;
+	padding-right: 30px;
+	padding-bottom: 5px;
+	padding-left: 25px;
+	
+	font-size: 12px;
+	cursor: pointer;
+	line-height: 12px;
+	background: linear-gradient(#f2f2f2, #ffffff);
+	box-shadow: 0px -1px 2px #eeeeee, inset 0px 1px 1px #ecebf0;
+	
+	margin : 5px -10px 0;
+	border-top-right-radius: 25px 170px;
+	border-top-left-radius: 20px 90px;
+	
+	height: 170px;
+	background: #ddd;
+	position : relative;
+	box-shadow: 0 10px 20px rgba(0,0,0,.5);
+	max-width : 200px;
+}
+
+/* Chrome like tabs: http://codepen.io/jcblw/pen/DxAJF */
+ul#tabList > li.tabFileItem:before, ul#tabList > li.tabFileItem:after {
+	content : '';
+	background : transparent;
+	height: 20px;
+	width: 20px;
+	border-radius: 100%;
+	border-width: 10px;
+	top: 0px;
+	border-style : solid;
+	position : absolute;
+}
+ul#tabList li.tabFileItem:before {
+	border-color : transparent #ddd transparent transparent;
+	-webkit-transform : rotate(48deg);
+	left: -23px;
+}
+ul#tabList li.tabFileItem:after {
+	border-color : transparent transparent transparent #ddd;
+	-webkit-transform : rotate(-48deg);
+	right: -17px;
+}
+ul#tabList > li.tabFileItem.active:before {
+	border-color : transparent #efefef transparent transparent;
+}
+ul.tabs > li.tabFileItem.active:after {
+	border-color : transparent transparent transparent #efefef;
+}
+
+
+ul#tabList li.tabFileItem.active {
+	z-index: 3;
+}
+
+
+ul#tabList li.tabFileItem.active a {
+	border-bottom: 2px solid orange;
+}
+
+/* Folder item with only one file in it */
+ul#tabList li.tabFolderItem.single {
+	/* Hide the folder text */
+	font-size: 0px;
+	line-height: 0px;
+	
+	/* Complement for the lost height */
+	padding-top: 4px;
+	box-shadow: none;
+}
+/* Single file in folder list */
+ul#tabList li.tabFolderItem.single li.tabFileItem {
+	border: 0;
+	box-shadow: none;
+	background: none;
+	}
+ul#tabList li.tabFolderItem.single li.tabFileItem.active {
+	border: 0;
+	}
+
+
+
+
+/* ### Close tab button */
+ul#tabList button.closeFileTab {
+	display: none;
+	font-size: 12px;
+	font-weight: bold;
+	vertical-align: text-top;
+	margin-left: 2px;
+	margin-right: 2px;
+	border-radius: 40%;
+	width: 12px;
+	height: 12px;
+	background-color: rgba(0,0,0,0);
+}
+
+ul#tabList button.closeFileTab:hover {
+	color: red;
+}
+
+ul#tabList li.tabFileItem.active button.closeFileTab {
+	display: inline-block;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ###### Document Preview ####### */
+.documentPreviewDiv {
+	border: 0px solid blue;
+	margin: 0px;
+	
+}
+
+.documentPreviewCanvas {
+	
+}
+
+
+
+
+
+
+
+/* ############### Function List ############### */
+
+select.functionList {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	color: black;
+	outline: 0;
+	width: 100%;
+	padding-right: 21px; /* Just in case there is a scrollbar, so that the scrollbar doesnt hide the text */
+	overflow-x: hidden!important;
+}
+
+
+
+
+
+
+/* ############### Search box ############### */
+
+
+
+
+
+/* ############### File List ############### */
+div.fileList {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	color: black;
+	background-color: blue;
+	border: 2px solid red;
+}
+
+
+
+/* ########### gotoFIle ################## */
+div.gotoFile {
+	color: #f6f6f3;
+	/*text-shadow: 0px -1px 0px #1f2020;*/
+	margin-top: 4px;
+	}
+
+div.gotoFile li {
+	font-size: 13px;
+	padding: 2px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	background-color: #2b2c27;
+	color: #838383;
+	
+	background-color: Menu;
+	color: MenuText;
+	
+	font-family: menu;
+	
+	/*border-top: 1px solid #32342e;
+	border-bottom: 1px solid #151513;*/
+}
+
+div.gotoFile li.selected {
+	background-color: #3c3f37;
+	
+	background-color: Highlight;
+	color: HighlightText;
+	
+}
+
+div.gotoFile li b {
+	color: #fffdf7;
+	color: InfoText;
+}
+
+
+.blink {
+	-webkit-animation-name: blinker; /* Chrome, Safari, Opera */
+	-webkit-animation-duration: 1s; /* Chrome, Safari, Opera */
+	-webkit-animation-timing-function: steps;
+	-webkit-animation-iteration-count: infinite;
+	
+}
+
+
+@-webkit-keyframes blinker {
+	
+	from {
+		
+		color: yellow;
+	}
+	to {
+		
+		color: red;
+		
+	}
+}
+
+
+
+
+/*
+	We CAN NOT have margin, padding or border on the .centerDiv or .fileCanvas !!!
+	It kinda works with box-sizing: border-box; But then the text get screwed.
+	
+	It's however OK to have it on the surrounding boxes.
+*/
+.centerDiv, .fileCanvas {
+	margin: 0px!important; 
+	padding: 0px!important; 
+	border: 0px solid black!important; 
+}
+
+
+
+/*
+	Having overflow on any element will totally screw out the layout!
+*/
+* {
+	overflow: hidden;
+}
+
+
+/* Add this class to elements that should not be selectable (text) */
+.noselect {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+
+
+
+
+
+/* ### Stying for the context menus */
+
+.menu {
+	display: block;
+	visibility: hidden;
+	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
+	position: absloute;
+	top: 100px;
+	left: 100px;
+	z-index: 10;
+	background-color: rgba(217, 227, 250, 0.75);
+	background-color: Menu;
+	border: 1px solid;
+	border-color: #777 #6c6c6c #666;
+	border-radius: 3px;
+	/*
+		-webkit-transition: 0.2s ease-out;
+		-moz-transition: 0.2s ease-out;
+		-o-transition: 0.2s ease-out;
+		transition: 0.2s ease-out;
+		-webkit-transition-property: opacity, padding, visibility;
+		-moz-transition-property: opacity, padding, visibility;
+		-o-transition-property: opacity, padding, visibility;
+		transition-property: opacity, padding, visibility;
+	*/
+	
+	background-image: linear-gradient(to bottom, #eef3fe, #d9e3fa);
+	background-image: linear-gradient(to bottom, #eef3fe, #d9e3fa);
+	
+	
+	box-shadow: 0 1px 10px ThreeDShadow;
+}
+
+.menu li {
+	font-size: 13px;
+	color: #838ca2;
+	color: #313a4f;
+	
+	color: MenuText;
+	background-color: Menu;
+	/*text-shadow: 0 1px white;*/
+	cursor: default;
+	display: block;
+	position: relative;
+	padding: 5px 20px 5px 12px;
+	
+	text-decoration: none;
+	border: 1px solid transparent;
+	
+}
+
+.menu li.sep {
+	margin-top: 4px;
+	padding-top: 4px;
+	border-top: 1px solid #b4bbce;
+	-webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.6);
+	box-shadow: inset 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.menu li:hover {
+	color: white;
+	color: HighlightText;
+	/*text-shadow: 0 1px rgba(0, 0, 0, 0.3);*/
+	background: #5a70b0;
+	background-color: Highlight;
+	border-color: #5a70b0 #495d98 #42558a;
+	/* background-image: linear-gradient(to bottom, #7688bd, #4e64a3); */
+}
+
+
+
+/* ### Dialogs */
+.dialog {
+	z-index: 100;
+	text-align: center;
+	font-family: Verdana;
+	background: linear-gradient(#595959, #555555);
+	border-top: 2px solid #767676;
+	box-shadow: inset 0px 4px 10px #888888;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 4px;
+	padding-right: 4px;
+	border-radius: 7px;
+	border: 16px solid #3a3b44;
+	box-shadow: 0px 4px 20px #000000;
+	color: #1f2122;
+	background-image: linear-gradient(to bottom, #dde1e9 0%, #fafafa 100%), linear-gradient(to bottom, #3acfd5 0%, #3a4ed5 100%);
+	max-width: 408px;
+	word-wrap: break-word;
+}
+
+.dialog .message {
+	min-width: 360px;
+	min-height: 32px;
+	max-height: 400px;
+	font-family: Segoe UI, sans-serif;
+	font-size: 15px;
+	text-align: left;
+	padding: 20px;
+}
+
+.dialog img {
+	float: left;
+	margin: 10px;
+	}
+
+.dialog button {
+	border-radius: 3px;
+	border: 1px solid rgba(19, 19, 19, 0.5);
+	box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
+	color: #f6f6f3;
+	min-width: 90px;
+	background-color: #414141;
+	background: linear-gradient(#545657, #434343, #454545);
+	cursor: default;
+	text-shadow: 0px -1px 0px #1f2020;
+	padding: 4px;
+	margin: 4px;
+	font-size: 12px;
+}
+
+.dialog button.alert {
+	float: right;
+}
+
+.dialog button.confirm {
+	min-width: 45%;
+	}
+
+.dialog button.prompt {
+	float: right;
+}
+
+.dialog .input {
+	width: 90%;
+	border-radius: 2px;
+	border: 1px inset #4a4a4a;
+	background-color: #e6e6e6;
+	box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
+	padding: 3px;
+	margin-bottom: 10px;
+	font-size: 15px;
+	font-family: Verdana;
+}
+
+
+/* ############### File explorer ############### */
+
+	.fileExplorer {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	/* Can not have padding, or the canvas will fall down */
+	}
+.fileExplorer ul {
+	background-color: white; /* #e8e8e8 */
+	color: black;
+}
+.fileExplorer li {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	cursor: pointer;
+	}
+
+.fileExplorer li.folder {
+	}
+
+.fileExplorer li.file {
+	}
+
+.fileExplorer li.problem {
+	color: brown;
+}
+
+.fileExplorer li a:hover {
+	text-decoration: underline;
+}
+
+.fileExplorer .box {
+	font-family: monospace;
+	display: inline-block;
+	border: 1px solid black;
+	font-size: 12px;
+	width: 8px;
+	height: 8px;
+	line-height: 10px; /* the same as your div height */
+	text-align: center;
+	vertical-align: middle;
+	margin-right: 2px;
+	margin-bottom: 2px;
+	outline: 0;
+}
+
+.fileExplorer select {
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+	width: 100%;
+	}
+
+
+/* ###### Tree list */
+.tree, .tree ul {
+	position:relative;
+	padding:0;
+	margin: 0;
+}
+.tree ul {
+	margin-left: 6px; /* indentation */ 
+	list-style:none;
+	}
+
+.tree ul {margin-left:3px} /* (indentation/2) */
+
+.tree:before,
+.tree ul:before {
+	content:"";
+	display:block;
+	width:0;
+	position:absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	border-left:1px dotted #999999;
+}
+
+.tree li {
+	margin:0;
+	padding-left: 6px; /* indentation + .5em */
+	line-height:14px; /* default list item's `line-height` */
+	position:relative;
+}
+
+.tree li:before {
+	content:"";
+	display:block;
+	width: 4px; /* same with indentation */
+	height:0;
+	border-top:1px dotted #999999;
+	margin-top: 0px; /* border top width */
+	position:absolute;
+	top:7px; /* (line-height/2) */
+	left:0;
+}
+
+.tree li:last-child:before {
+	background:white; /* same with body background */
+	height:auto;
+	top: 7px; /* (line-height/2) */
+	bottom:0;
+}
+
+
+
+
+
+/*
+* {
+	 So that we only have to do this once 
+	padding: 0px!important;
+	margin: 0px!important;
+	border: 0px solid #ff8059!important;
+	border-spacing: 0px!important;
+	overflow: auto!important;
+}
+
+*/
