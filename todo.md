@@ -45,7 +45,7 @@ What I'm working on
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
 where each change will be mirrored to the other client.
 
-Find a way to ignore mirror events from yourself: Send from connectionId in mirror to server!
+Fix problem with endless mirror loops
 
 
 Server storage instead of local storage.
