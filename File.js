@@ -199,9 +199,14 @@ var File; // File object is global
 		
 		if(caret == undefined) caret = file.caret;
 		
+		if(caret.index == index && caret.row == row && caret.col == col) {
+			console.warn("Caret already at " + JSON.stringify(file.caret));
+			return;
+		}
+		
 		if(index != undefined && row == undefined && col == undefined) return file.moveCaretToIndex(index, caret);
 		else {
-				
+
 			if(index != undefined) caret.index = index;
 			if(row != undefined) caret.row = row;
 			if(col != undefined) caret.col = col;
@@ -2070,17 +2075,10 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
+		EDITOR.fireEvent("moveCaret", file, caret);
+		
 		//if(caret == file.caret) EDITOR.renderNeeded();
-		
-		if(caret == file.caret && EDITOR.collaborationMode) {
-			CLIENT.cmd("mirror", {
-				object: "FILE", 
-				path: file.path, 
-				method: "moveCaret", 
-				args: [file.caret.index, file.caret.row, file.caret.col],
-			});
-		}
-		
+
 	}
 	
 	
