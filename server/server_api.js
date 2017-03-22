@@ -1060,8 +1060,10 @@ API.setWorkingDirectory = function setWorkingDirectory(user, json, callback) {
 	
 	var fs = require("fs");
 	fs.stat(path, function (err, stats){
-		if (err) return callback(err);
-		
+		if (err) {
+			console.log("Error when running stat on path=" + path);
+			return callback(err);
+		}
 		if (!stats.isDirectory()) callback(new Error('Not a directory: path=' + path));
 		else {
 			path = user.changeWorkingDir(path);

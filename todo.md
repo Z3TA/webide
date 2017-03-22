@@ -281,6 +281,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Don't remove spaces/tabs from copied text when working with text mode files!!
+
 Replacing a text with a text that contains the text to be replaced causes an endless loop when clicking Replace all.
 Example: getSourceCode => getSourceCodeBody
 

@@ -164,7 +164,9 @@ function connection(connection) {
 				
 				funToRun(user, json, function(err, answer) {
 					if(err) {
-						log(err + err.stack);
+						log(err);
+						log(err.stack);
+						console.trace("Stack ...")
 						
 						send({error: "API error: " + err.message + ""});
 						//send({error: "API error (" + err.message + "): " + message});
@@ -389,6 +391,8 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 	var user = this;
 
 	// Translates a virtual path to a real file-system path
+
+	console.log(user.name + " translatePath=" + pathToFileOrDir);
 	
 	if(user.rootPath) {
 		var url = require("url");
@@ -437,13 +441,21 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 		else return translatedPath;
 		
 	}
-	else return pathToFileOrDir;
+	else {
+		console.log("No need to translate (no rootPath)");
+		return pathToFileOrDir;
+	}
 }
 
 User.prototype.toVirtualPath = function toVirtualPath(realPath) {
 	var user = this;
 	
-	if(!user.rootPath) return realPath;
+	console.log(user.name + " toVirtualPath=" + realPath);
+	
+	if(!user.rootPath) {
+		console.log("No need to translate (no rootPath)");
+		return realPath;
+	}
 	
 	if(realPath.indexOf(user.rootPath) != 0) {
 		throw new Error("realPath=" + realPath + " does not contain user.rootPath=" + user.rootPath);
