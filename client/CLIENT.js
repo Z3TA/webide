@@ -41,7 +41,8 @@ var CLIENT = {}; // Client object is global
 			console.log("connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
 			
-			CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
+			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
+			CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
 			
 			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
@@ -53,6 +54,7 @@ var CLIENT = {}; // Client object is global
 				if(err) {
 					console.warn(err);
 					CLIENT.fireEvent("loginFail");
+					alertBox(err.message);
 				}
 				else {
 					if(!resp.cId) throw new Error("Got no client id from server!");
@@ -96,7 +98,7 @@ var CLIENT = {}; // Client object is global
 				
 				if(json.id) {
 					if(callbackWaitList.hasOwnProperty(json.id)) {
-						callbackWaitList[json.id](json.error ? new Error("Server " + json.error) : null, json.resp);
+						callbackWaitList[json.id](json.error ? new Error("Server: " + json.error) : null, json.resp);
 						delete callbackWaitList[json.id];
 					}
 					else throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + callbackWaitList);

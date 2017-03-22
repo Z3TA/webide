@@ -127,6 +127,11 @@ Upgrade to latest nw.js, use the Chrome OS api's ... Add to Chrome OS app store.
 What I'm thinking
 -----------------
 
+If the user data is stored in the cloud, it needs to be accessible at all times!
+So there needs to be a server sync api, so all data is syncted across 2-3 mirrors.
+
+SSH keys when connecting to remote servers ... where to store them ?
+
 Sometimes there are requirements like "must work on the web" ... 
 Should we skip nw.js and use a NodeJS server instead, and open the GUI in a web browser !?
 Chrome has depricated Chrome apps, and the popular Chromebooks is designed to run web apps instead of native apps.

@@ -220,8 +220,9 @@ function identify(json, IP, callback) {
 			var user;
 			
 			for(var i=0, test; i<row.length; i++) {
-				test = row[i].split("|");
+				test = row[i].trim().split("|");
 				if(test[0] == json.username && test[1] == json.password) userOK(i, test[0], test[2]);
+				else console.log("Not " + test[0]);
 				// Check all to prevent timing attack
 			}
 			
@@ -293,10 +294,19 @@ function User(id, name, rootPath) {
 	user.rootPath = rootPath;
 	
 	if(user.rootPath) user.defaultWorkingDirectory = "/";
-	else user.defaultWorkingDirectory = UTIL.trailingSlash(process.cwd());
+	else {
+		var path = require("path");
+		var editorDir = path.resolve("./../");
+		
+		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
+	
+	}
+	
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
 	user.storageFile = user.translatePath(user.defaultWorkingDirectory) + ".localStorage";
+	
+	console.log(user.name + " workingDirectory=" + user.workingDirectory);
 	
 }
 
@@ -386,7 +396,14 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 		
 		var parse = url.parse(pathToFileOrDir);
 		
-		if(REMOTE_PROTOCOLS.indexOf(parse.protocol) != -1) return pathToFileOrDir;
+		console.log(parse);
+		
+		var protocol = parse.protocol ? parse.protocol.toLowerCase() : "LOCAL:";
+		protocol = protocol.substring(0, protocol.length-1); // Remove colon: 
+		
+		console.log("protocol=" + protocol + " indexOf [" + REMOTE_PROTOCOLS.join(",") + "] = " + REMOTE_PROTOCOLS.indexOf(protocol));
+		
+		if(REMOTE_PROTOCOLS.indexOf(protocol) != -1) return pathToFileOrDir;
 		
 		// else: The protocol is not allowed or its a local path
 		
@@ -425,6 +442,8 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 
 User.prototype.toVirtualPath = function toVirtualPath(realPath) {
 	var user = this;
+	
+	if(!user.rootPath) return realPath;
 	
 	if(realPath.indexOf(user.rootPath) != 0) {
 		throw new Error("realPath=" + realPath + " does not contain user.rootPath=" + user.rootPath);
