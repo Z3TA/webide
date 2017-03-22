@@ -1054,10 +1054,19 @@ API.disconnect = function disconnect(user, json, callback) {
 }
 
 API.setWorkingDirectory = function setWorkingDirectory(user, json, callback) {
-
+	
+	/*
+		Working directory can be on a remote file-system!
+	  
+	*/
+	
+	
 	var path = user.translatePath(json.path);
 	if(path instanceof Error) return callback(path);
 	
+	callback(null, {workingDirectory:path});
+	
+	/*
 	var fs = require("fs");
 	fs.stat(path, function (err, stats){
 		if (err) {
@@ -1071,6 +1080,7 @@ API.setWorkingDirectory = function setWorkingDirectory(user, json, callback) {
 			callback(null, {workingDirectory:path});
 		}
 	});
+	*/
 }
 
 
