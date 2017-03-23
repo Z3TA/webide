@@ -42,8 +42,7 @@ var CLIENT = {}; // Client object is global
 			CLIENT.connected = true;
 			
 			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
-			CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
-			
+			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
 			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
 			callback = null; // Prevent calling the connect callback when connection is closed after a successful onopen
@@ -59,7 +58,7 @@ var CLIENT = {}; // Client object is global
 				else {
 					if(!resp.cId) throw new Error("Got no client id from server!");
 					CLIENT.connectionId = resp.cId;
-					CLIENT.fireEvent("loginSuccessful");
+					CLIENT.fireEvent("loginSuccess");
 				}
 			}
 			
@@ -85,14 +84,14 @@ var CLIENT = {}; // Client object is global
 				
 				if(json.error) console.warn("Server ERROR: " + json.error);
 				
-				if((json.resp || json.event) && !json.error) {
+				if((json.resp || json.event)) {
 					var resp = json.resp || json.event;
 					for(var method in resp) {
 						// Call event listeners
 						if(eventListeners.hasOwnProperty(method)) {
 							CLIENT.fireEvent(method, resp[method]);
 						}
-						console.warn("Unknown client method: '" + method + "' data=" + JSON.stringify(resp[method]));
+						else console.warn("No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
 					}
 				}
 				
@@ -216,11 +215,38 @@ var CLIENT = {}; // Client object is global
 	}
 	
 	
+	CLIENT.removeEvent = function(eventName, fun) {
+		/*
+			Note to myself: Some events have objects and others just have the function!!
+			
+		*/
+		var fname = UTIL.getFunctionName(fun);
+		var events = eventListeners[eventName];
+		var found = 0;
+		
+		removeit(); // Removes them all (recursive)
+		
+		function removeit() {
+			for(var i=0; i<events.length; i++) {
+				if(events[i].fun == fun) {
+					events.splice(i, 1);
+					found++;
+					removeit();
+					break;
+				}
+			}
+		}
+		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
+	}
+
+	
 	function connSend(msg, callback) {
 		var websockOpen = 1;
 		
 		if(connection.readyState==websockOpen) {
-			console.log("Sending: " + msg);
+			if(msg.length > 100) console.log("Sending: " + msg.length + " characters to server ...");
+			else console.log("Sending: " + msg + " to server ...");
+			
 			connection.send(msg);
 			if(callback) callback(null);
 		}

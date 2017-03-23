@@ -192,6 +192,8 @@ EDITOR.lastKeyPressed = "";
 	var directoryDialogCallback = undefined;
 	var directoryDialogHtmlElement;
 	
+	var widgetElementIdCounter = 0;
+	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -1585,6 +1587,9 @@ EDITOR.lastKeyPressed = "";
 			Note to myself: Some events have objects and others just have the function!!
 			
 		*/
+		
+		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) throw new Error("Unknown editor event: " + eventName);
+		
 		var fname = UTIL.getFunctionName(fun);
 		var events = EDITOR.eventListeners[eventName];
 		var found = 0;
@@ -2863,6 +2868,167 @@ EDITOR.lastKeyPressed = "";
 		// todo: for debugging. Returns true if the screen area is the same as the background
 	}
 	
+	EDITOR.createWidget = function(buildFunction, parentNode, id) {
+		
+		// Some boilderplate/abstraction for creating HTML form widget, 
+		
+		var widget = {mainElement: null};
+		
+		// When this function is created, DOM does not exist!
+		
+		widget.build = function buildWidget() {
+			
+			// But when this function is called, the DOM will exist!
+			
+			var build;
+			
+			if(buildFunction == undefined) build = document.createElement("div");
+			else build = buildFunction(widget); // Example use: return widget.create(...);
+			
+			if(! (build instanceof HTMLElement)) throw new Error("Widget build function must return a HTML element!");
+			
+			if(build.parentNode) throw new Error("Widget build function should not append itself to another element!");
+			
+			widget.mainElement = build;
+			
+			if(parentNode == undefined) parentNode = document.getElementById("footer");
+		
+			if(!parentNode) throw new Error("parentNode=" + parentNode);
+			
+			parentNode.appendChild(widget.mainElement);
+			
+		}
+		
+		widget.show = function showWidget() {
+			
+			console.log("Showing widget ...");
+			
+			EDITOR.input = false; // Steal focus from the file
+			
+			if(!widget.mainElement) widget.build(); // Build the GUI if it's not already built
+			
+			widget.mainElement.style.display = "block";
+			
+			EDITOR.resizeNeeded();
+			
+			return false;
+		}
+		
+		widget.hide = function showWidget() {
+			
+			console.log("Hiding widget ...");
+			
+			if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
+			
+			// Only need to hide if the object is created!
+			if(widget.mainElement) {
+				widget.mainElement.style.display = "none";
+				EDITOR.resizeNeeded();
+			}
+			
+			return false;
+		}
+		
+		widget.unload = function unloadWidget() {
+			
+			if(widget.mainElement) {
+				widget.hide();
+				parentNode.removeChild(widget.mainElement);
+			}
+			
+			return widget.mainElement;
+	}
+		
+		widget.create = function(grid) {
+			// Add input elements in a grid, witch is a multi dimentional array or rows and columns
+			
+			// each item can have {type=(input,button), class=(half), label=(text on button or input label)
+			
+			var mainElement = document.createElement("div");
+			
+			var table = document.createElement("table");
+			
+			var tr, td, item, element;
+			for(var row=0; row<grid.length; row++) {
+				tr = document.createElement("tr");
+				for(var col=0; col<grid[row].length; col++) {
+					
+					element = makeItem(grid[row][col]);
+					
+					if(Array.isArray(element)) {
+						// Element contain many things, for example a label and a input field
+						for(var el=0; el<element.length; el++) {
+							td = document.createElement("td");
+							
+							if(element[el].nodeName == "LABEL") td.setAttribute("align", "right");
+							
+								td.appendChild(element[el]);
+								tr.appendChild(td);
+							}
+					}
+					else {
+						td = document.createElement("td");
+						td.appendChild(element);
+						tr.appendChild(td);
+						}
+					}
+				table.appendChild(tr);
+			}
+			
+			return mainElement;
+			
+			function makeItem(item) {
+				var element;
+				
+				if(item.type == undefined) item.type = "input";
+				
+				if(item.type == "input" || item.type == "text") {
+					if(item.label == undefined) throw new Error("text input's must have a label!");
+					element = [];
+					
+					var id = "widgetIdXYZ-0" + (++widgetElementIdCounter); // Must be unique
+					
+					var label = document.createElement("input");
+					label.setAttribute("for", id); // Must be the id for click auto focus to work
+					label.appendChild(document.createTextNode(item.label));
+					element.push(label);
+					
+					var classy = item.class ? item.class + " inputtext" : "inputtext";
+					
+					var input = document.createElement("input");
+					input.setAttribute("type", "text");
+					input.setAttribute("id", id);
+					input.setAttribute("class", classy);
+					if(item.title) input.setAttribute("title", item.title);
+					if(item.size) input.setAttribute("size", item.size);
+					if(item.value) input.setAttribute("value", item.value);
+					element.push(input);
+						
+					}
+				else if(item.type == "button") {
+					if(item.label == undefined) throw new Error("Button must have a label!");
+					element = document.createElement("input");
+					// Icon support ?
+					
+					var classy = item.class ? item.class + " button" : "button";
+					
+					element.setAttribute("type", "button");
+					element.setAttribute("class", classy);
+					element.setAttribute("value", item.label);
+					if(item.title) element.setAttribute("title", item.title);
+					
+				}
+				
+				
+				return element;
+			}
+			
+			
+		}
+		
+		
+		return widget;
+	}
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
@@ -2967,10 +3133,10 @@ EDITOR.lastKeyPressed = "";
 		}});
 		
 		EDITOR.eventListeners.exit.push({fun: function closeOpenConnections() {
-			
-			for(var serverAddress in EDITOR.connections) CLIENT.cmd("disconnect", {serverAddress: serverAddress});
-			
-			return true;			
+				
+				for(var serverAddress in EDITOR.connections) CLIENT.cmd("disconnect", {serverAddress: serverAddress});
+				
+				return true;			
 		}});
 		
 	}

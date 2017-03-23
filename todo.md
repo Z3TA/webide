@@ -42,6 +42,11 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Server login dialog/plugin
+Ctrl+P doesn't seem to work ? (nothing happends when hitting enter)
+and tabs are gone ...
+
+
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
 where each change will be mirrored to the other client.
 
@@ -280,6 +285,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Search in file on remote fs doesn't work!
 
 Don't remove spaces/tabs from copied text when working with text mode files!!
 
@@ -894,6 +901,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+An error that might give some headache is when you misspell a variable when declaring it using var foo,
+then get an error that foo is undefined ... Warn when a declared variable is not used!
+
+It's a common error to forget a parentheses in for example nested if's. 
+Warn or auto insert missing parentheses !?
 
 Autocomplete global variables (in browser, from other files)
 

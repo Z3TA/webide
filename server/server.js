@@ -127,7 +127,7 @@ function connection(connection) {
 				else identify(json, IP, function(err, usr) {
 					if(err) {
 						log(err);
-						send({error: err.message});
+						send({error: err.message, resp: {loginFail: err.message}});
 						//connection.close();
 					}
 					else {
@@ -137,7 +137,7 @@ function connection(connection) {
 						
 						user.IP = IP;
 						
-						send({resp: {user: user.name, cId: userConnectionId}})
+						send({resp: {loginSuccess: user.name, user: user.name, cId: userConnectionId}})
 						
 						/*
 						setTimeout(function() {
