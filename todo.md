@@ -125,9 +125,6 @@ Add to Chrome OS app store ...
 
 How to handle errors in server.js ?
 
-If the user data is stored in the cloud, it needs to be accessible at all times!
-So there needs to be a server sync api, so all data is syncted across 2-3 mirrors.
-
 SSH keys when connecting to remote servers ... where to store them ?
 
 Sometimes there are requirements like "must work on the web" ... 
