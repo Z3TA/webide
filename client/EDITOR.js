@@ -3223,6 +3223,9 @@ EDITOR.lastKeyPressed = "";
 			
 			var clientConnectionId = json.cId;
 			
+			if(clientConnectionId == undefined) throw new Error("Did not get clientConnectionId from mirror event!");
+			if(CLIENT.connectionId == undefined) throw new Error("We do not have CLIENT.connectionId!");
+			
 			console.log("MIRROR: clientConnectionId=" + clientConnectionId + " CLIENT.connectionId=" + CLIENT.connectionId + " json=" + JSON.stringify(json, null, 2));
 			
 			if(clientConnectionId == CLIENT.connectionId) {
@@ -3258,6 +3261,8 @@ EDITOR.lastKeyPressed = "";
 					args: [file.caret.index, file.caret.row, file.caret.col],
 				});
 			}
+			
+			return true;
 			
 		});
 		
@@ -3383,7 +3388,15 @@ EDITOR.lastKeyPressed = "";
 		
 		//console.log("main function loaded");
 		
-		// Sort the start events (some modules depeonds on others, and want to start after or before them)
+		/*		
+		// Sort and load the start events
+		// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
+		// The order of things should not matter!
+		// Some event listeners has high or low prio though ...
+		// Ex: some plugins only want to parse the file if no other parser have yet parsed it
+		// or some autocomplete functions only want to run if no other autocompletion has been found.
+		*/
+		
 		EDITOR.eventListeners.start.sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
@@ -3400,7 +3413,10 @@ EDITOR.lastKeyPressed = "";
 		//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
 		//}
 		
-		
+		console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
+		for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
+			EDITOR.eventListeners.start[i].fun(); // Call function
+		}
 		
 		
 		
@@ -3546,8 +3562,6 @@ EDITOR.lastKeyPressed = "";
 				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
 			}
 			
-
-			
 			
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {
@@ -3566,13 +3580,12 @@ EDITOR.lastKeyPressed = "";
 				_serverStorage = json.storage;
 				
 				// Many plugins depend on the storage being available ...
-				console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
-				for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
-					EDITOR.eventListeners.start[i].fun(); // Call function
-				}
+				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
+
 				
 				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
-					EDITOR.eventListeners.storageReady[i](_serverStorage);
+					fun = EDITOR.eventListeners.storageReady[i].fun;
+					fun(_serverStorage);
 				}
 				
 			});

@@ -42,11 +42,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Server login dialog/plugin
-Ctrl+P doesn't seem to work ? (nothing happends when hitting enter)
-and tabs are gone ...
-
-
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
 where each change will be mirrored to the other client.
 

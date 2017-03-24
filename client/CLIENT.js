@@ -26,7 +26,7 @@ var CLIENT = {}; // Client object is global
 		
 		var defaultApi = "jzedit";
 		var defaultPort = "8099";
-		var defaultHost = "192.168.1.69";
+		var defaultHost = "localhost";
 		
 		if(server == undefined) server = {api: defaultApi, port: defaultPort, host: defaultHost};
 		
@@ -40,7 +40,7 @@ var CLIENT = {}; // Client object is global
 		connection.onopen = function serverConnected() {
 			console.log("connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
-			
+			CLIENT.host = server.host;
 			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
@@ -52,16 +52,14 @@ var CLIENT = {}; // Client object is global
 			function loggedIn(err, resp) {
 				if(err) {
 					console.warn(err);
-					CLIENT.fireEvent("loginFail");
 					alertBox(err.message);
 				}
 				else {
-					if(!resp.cId) throw new Error("Got no client id from server!");
-					CLIENT.connectionId = resp.cId;
-					CLIENT.fireEvent("loginSuccess");
+					if(!resp.loginSuccess) throw new Error("Did not get loginSuccess!");
+					if(!resp.loginSuccess.cId) throw new Error("Got no client id from server!");
+					// CLIENT.connectionId is set further down: CLIENT.on("loginSuccess", )
 				}
 			}
-			
 		}
 		
 		connection.onmessage = function serverMessage(e) {
@@ -123,6 +121,7 @@ var CLIENT = {}; // Client object is global
 		connection.onclose = function serverDisconnected() {
 			console.log("connection closed");
 			CLIENT.connected = false;
+			server.host = null;
 			
 			if(callback) {
 				var err = new Error("Connection closed");
@@ -149,6 +148,7 @@ var CLIENT = {}; // Client object is global
 	}
 	
 	CLIENT.disconnect = function disconnect() {
+		console.log("Disconnecting from editor server host=" + CLIENT.host);
 		connection.close();
 		CLIENT.connected = false;
 	}
@@ -239,6 +239,11 @@ var CLIENT = {}; // Client object is global
 		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 
+	CLIENT.on("loginSuccess", function(json) {
+		if(!json.cId) throw new Error("Did not get cId from loginSuccess event!");
+		CLIENT.connectionId = json.cId;
+	});
+	
 	
 	function connSend(msg, callback) {
 		var websockOpen = 1;

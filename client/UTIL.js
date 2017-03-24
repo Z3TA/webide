@@ -844,6 +844,17 @@ var UTIL = {
 			browser ="MSIE 8.0";
 		}
 		return browser;
+	},
+	
+	removeFileColonSlashSlash: function(path) {
+		path = path.replace("file://", "");
+		if(path.match(/^\/.*:[\/\\]/)) {
+			// It's a Windows path, remove all starting slashes
+			while(path.charAt(0) == "/") path = path.substr(1);
+		}
+		
+		return path;
+		
 	}
 
 }

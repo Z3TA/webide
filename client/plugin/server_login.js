@@ -112,26 +112,37 @@
 		
 		connectButton.onclick = function connectToServer() {
 			
-			if(CLIENT.connected) CLIENT.disconnect();
-			
 			var server = {host: host.value};
 			
-			CLIENT.connect(server, function connectionOpen(err) {
-				if(err) alertBox("Problem connecting to JZedit server on " + JSON.stringify(server));
-				else {
-					
-					CLIENT.cmd("identify", {username: user.value, password: pw.value}, function loggedIn(err, resp) {
-						if(err) {
-							console.error(err);
-							alertBox("Unable to login to JZedit server on " + JSON.stringify(server) + "\nError: " + err.message);
-						}
-						else {
-							alertBox("Successfully logged in to " + JSON.stringify(server) + "\n" + JSON.stringify(resp));
-						}
-						});
-					
+			if(CLIENT.connected) {
+				if(CLIENT.host != server.host) {
+					console.log("CLIENT.host=" + CLIENT.host + " != server.host=" + server.host);
+					CLIENT.disconnect();
 				}
-			});
+				else identify();
+			}
+			
+			if(!CLIENT.connected) {
+				CLIENT.connect(server, function connectionOpen(err) {
+					if(err) alertBox("Problem connecting to JZedit server on " + JSON.stringify(server));
+					else identify()
+				});
+			}
+			
+			function identify() {
+				
+				CLIENT.cmd("identify", {username: user.value, password: pw.value}, function loggedIn(err, resp) {
+					if(err) {
+						console.error(err);
+						alertBox("Unable to login to JZedit server on " + JSON.stringify(server) + "\nError: " + err.message);
+					}
+					else {
+						alertBox("Successfully logged in to " + JSON.stringify(server) + "\n" + JSON.stringify(resp));
+					}
+				});
+					
+			}
+			
 		}
 		
 		return main;

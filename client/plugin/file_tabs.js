@@ -19,6 +19,8 @@
 	
 	function file_tabs() {
 		
+		console.log("Loading file_tabs ...");
+		
 		buildTabs();
 		
 		EDITOR.on("fileOpen", tabFileOpen, 2);

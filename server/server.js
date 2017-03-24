@@ -119,11 +119,16 @@ function connection(connection) {
 				}
 			}
 			
+			console.log("The command queue has " + commandQueue.length + " items.");
+			
 			if(!user) {
 				
 				console.log("json=" + JSON.stringify(json));
 				
-				if(command != "identify") commandQueue.push(message); // The user is trying to send a command before authorized
+				if(command != "identify") {
+					console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
+					commandQueue.push(message);
+				}
 				else identify(json, IP, function(err, usr) {
 					if(err) {
 						log(err);
@@ -137,7 +142,7 @@ function connection(connection) {
 						
 						user.IP = IP;
 						
-						send({resp: {loginSuccess: user.name, user: user.name, cId: userConnectionId}})
+						send({resp: {loginSuccess: {user: user.name, cId: userConnectionId}}});
 						
 						/*
 						setTimeout(function() {
@@ -148,10 +153,12 @@ function connection(connection) {
 						}, 3000);
 						*/
 						
+						console.log("Running " + commandQueue.length + " commands from the command queue ...");
 						for(var i=0; i<commandQueue.length; i++) {
 							handle(commandQueue[i]);
 						}
 						commandQueue.length = 0;
+						
 					}
 				});
 				
@@ -394,6 +401,8 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 
 	console.log(user.name + " translatePath=" + pathToFileOrDir);
 	
+	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
+
 	if(user.rootPath) {
 		var url = require("url");
 		var path = require("path");

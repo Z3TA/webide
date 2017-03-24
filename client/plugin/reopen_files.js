@@ -8,11 +8,11 @@ EDITOR.plugin({
 	desc: "Open up the files from last session", 
 	order: 999, // Load after the parser and other stuff that has fileOpen event listener
 	unload: function unloadReopenFilesPlugin() {
-		EDITOR.removeEvent("start", reopenFiles);
+		EDITOR.removeEvent("storageReady", reopenFiles);
 	},
 	load: function loadReopenFilesPlugin() {
 		
-		EDITOR.on("start", reopenFiles);
+		EDITOR.on("storageReady", reopenFiles);
 		
 	}
 });
