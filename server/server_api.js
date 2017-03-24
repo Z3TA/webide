@@ -240,12 +240,12 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 		
 		fs.stat(path, checkSize);
 		
-		function checkSize(err, stats) {
-			
-			if(err) callback(err)
-			else callback(null, {size: stats["size"]});
-			
-		}
+	}
+
+	function checkSize(err, stats) {
+		
+		if(err) callback(err);
+		else callback(null, {size: stats["size"]});
 		
 	}
 }

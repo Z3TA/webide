@@ -24,23 +24,23 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connect = function(server, callback) {
 		
-		var defaultApi = "jzedit";
-		var defaultPort = "8099";
-		var defaultHost = "localhost";
+		var defaultURL = "http://localhost:8099/jzedit";
+
+		if(server == undefined) server = {url: defaultURL};
 		
-		if(server == undefined) server = {api: defaultApi, port: defaultPort, host: defaultHost};
+		var url = server.url || defaultURL; // 'http://' + host + ':' + port + pathName + apiUrl
 		
-		var apiUrl = server.api || defaultApi;
-		var port = server.port || defaultPort;
-		var host = server.host || defaultHost;
-		
-		console.log("Connecting to jzedit server ...");
+		console.log("Connecting to jzedit server: url=" + url);
 		//connection = new SockJS(apiUrl);
-		connection = new SockJS('http://' + host + ':' + port + '/' + apiUrl, '', {debug: true});
+		
+		var sockJsReservedQuirk = '';
+		var sockJsOptions = {debug: true};
+		
+		connection = new SockJS(url, sockJsReservedQuirk, sockJsOptions); 
 		connection.onopen = function serverConnected() {
 			console.log("connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
-			CLIENT.host = server.host;
+			CLIENT.url = url;
 			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
@@ -121,7 +121,7 @@ var CLIENT = {}; // Client object is global
 		connection.onclose = function serverDisconnected() {
 			console.log("connection closed");
 			CLIENT.connected = false;
-			server.host = null;
+			CLIENT.url = null;
 			
 			if(callback) {
 				var err = new Error("Connection closed");
@@ -148,7 +148,7 @@ var CLIENT = {}; // Client object is global
 	}
 	
 	CLIENT.disconnect = function disconnect() {
-		console.log("Disconnecting from editor server host=" + CLIENT.host);
+		console.log("Disconnecting from editor server url=" + CLIENT.url);
 		connection.close();
 		CLIENT.connected = false;
 	}

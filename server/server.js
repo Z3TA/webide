@@ -93,7 +93,8 @@ function connection(connection) {
 	
 	connection.on("data", function(message) {
 		
-		log(IP + " => " + message);
+		if(message.length > 100) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
+		else log(IP + " => " + message);
 		
 		handle(message);
 		
@@ -123,7 +124,7 @@ function connection(connection) {
 			
 			if(!user) {
 				
-				console.log("json=" + JSON.stringify(json));
+				//console.log("json=" + JSON.stringify(json));
 				
 				if(command != "identify") {
 					console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
@@ -190,7 +191,10 @@ function connection(connection) {
 				answer.id = id;
 				
 				var str = JSON.stringify(answer);
-				log(IP + " <= " + str);
+				
+				if(str.length > 100) log(IP + " <= " + str.substr(0,100) + " ... (" + str.length + " characters)");
+				else log(IP + " => " + str);
+				
 				connection.write(str);
 			}
 		}

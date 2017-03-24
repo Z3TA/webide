@@ -60,20 +60,20 @@
 		
 		var main = document.createElement("div");
 		
-		// ### host
-		var labelHost = document.createElement("label");
-		labelHost.setAttribute("for", "serverLoginHost");
-		labelHost.appendChild(document.createTextNode("Hostname/IP: "));
-		main.appendChild(labelHost);
-		
-		var host = document.createElement("input");
-		host.setAttribute("type", "text");
-		host.setAttribute("id", "serverLoginHost");
-		host.setAttribute("class", "inputtext hostname");
-		host.setAttribute("title", "domain/host name or IP-address to a JZedit server");
-		host.setAttribute("size", "15");
-		host.setAttribute("value", "localhost");
-		main.appendChild(host);
+		// ### Url
+		var labelUrl = document.createElement("label");
+		labelUrl.setAttribute("for", "serverLoginUrl");
+		labelUrl.appendChild(document.createTextNode("URL: "));
+		main.appendChild(labelUrl);
+
+		var url = document.createElement("input");
+		url.setAttribute("type", "text");
+		url.setAttribute("id", "serverLoginUrl");
+		url.setAttribute("class", "inputtext url");
+		url.setAttribute("title", "URL to JZedit server");
+		url.setAttribute("size", "30");
+		url.setAttribute("value", "http://localhost:8099/jzedit");
+		main.appendChild(url);
 		
 		// ### user
 		var labelUser = document.createElement("label");
@@ -112,10 +112,10 @@
 		
 		connectButton.onclick = function connectToServer() {
 			
-			var server = {host: host.value};
+			var server = {url: url.value};
 			
 			if(CLIENT.connected) {
-				if(CLIENT.host != server.host) {
+				if(CLIENT.url != server.url) {
 					console.log("CLIENT.host=" + CLIENT.host + " != server.host=" + server.host);
 					CLIENT.disconnect();
 				}

@@ -756,7 +756,7 @@ var UTIL = {
 		if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
 			var fspath = require("path");
 			if(!fspath.isAbsolute(path)) {
-				let absolutePath = fspath.resolve(path);
+				var absolutePath = fspath.resolve(path);
 				console.warn("Making path absolute: " + path + " ==> " + absolutePath);
 				path = absolutePath; // Make the path absolute
 			}
