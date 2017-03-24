@@ -7,4 +7,5 @@ plugin/static_site_generator/demo/preview/*
 plugin/static_site_generator/demo/public/*
 npm/*
 tests/_*
+temp/*
 .localStorage
