@@ -42,6 +42,12 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+
+Server login dialog/plugin
+Ctrl+P doesn't seem to work ? (nothing happends when hitting enter)
+and tabs are gone ...
+
+
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
 where each change will be mirrored to the other client.
 
@@ -68,21 +74,11 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
-Make start.sh and start.bat etc check if server is running and start the server if it's not running.
-
 Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
 
 Show virtual paths on server errors like "unable to open file".
 
-Login splash screen. Where you type username/password and can pick server/port
-
 Some sort of indication that you are disconnected to the server
-
-How to handle errors in server.js ?
-
-
-
-
 
 
 colaboration: When two or more people are logged into the *same user* 
@@ -91,7 +87,7 @@ Press xxx to follow someone else's cursor.
 
 mercurial/git integration
 
-Functionality discovery: Add a search button in the upper right corder, clicking it is the same as clicking the keyboard function/ctrl button:
+Functionality discovery: Add a search-class-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
 It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
 
 Web/home page widget, when you right click and select edit, it sends a signal to jzedit via websocket to localhost, 
@@ -111,8 +107,6 @@ auto complete function arguments in anonymous functions!
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
 
-Upgrade to latest nw.js, use the Chrome OS api's ... Add to Chrome OS app store.
-
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -126,6 +120,10 @@ Upgrade to latest nw.js, use the Chrome OS api's ... Add to Chrome OS app store.
 
 What I'm thinking
 -----------------
+
+Add to Chrome OS app store ...
+
+How to handle errors in server.js ?
 
 If the user data is stored in the cloud, it needs to be accessible at all times!
 So there needs to be a server sync api, so all data is syncted across 2-3 mirrors.
