@@ -18,7 +18,7 @@ var CLIENT = {}; // Client object is global
 	var counter = 0;
 	var callbackWaitList = {};
 	var cache = {};
-	var connection;
+	var connection = {readyState: 0};
 	
 	CLIENT.connected = false;
 	

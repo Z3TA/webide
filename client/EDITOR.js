@@ -3267,9 +3267,6 @@ EDITOR.lastKeyPressed = "";
 		});
 		
 		
-		CLIENT.connect(undefined, connectedToServer);
-		
-		
 		getVersion(function(version) {
 			
 			console.log("Editor version: " + version);
@@ -3554,14 +3551,8 @@ EDITOR.lastKeyPressed = "";
 		*/
 		
 		windowLoaded = true;
-		
-		function connectedToServer(err) {
-			console.log("Got connect callback! err=" + err);
-			if(err) {
-				if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
-				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
-			}
-			
+
+		CLIENT.on("loginSuccess", function loggedInToServer() {
 			
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {
@@ -3589,9 +3580,17 @@ EDITOR.lastKeyPressed = "";
 				}
 				
 			});
-			
-			
-		}
+		});
+
+		CLIENT.connect(undefined, function connectedToServer(err) {
+			console.log("Got connect callback! err=" + err);
+			if(err) {
+				if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
+				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
+			}
+
+		});
+
 		
 		
 		function stdIn(data) {
