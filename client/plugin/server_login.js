@@ -118,10 +118,36 @@
 		connectButton.setAttribute("type", "button");
 		connectButton.setAttribute("class", "button");
 		connectButton.setAttribute("value", "Connect");
+		connectButton.onclick = connectToServer;
 		main.appendChild(connectButton);
 		
-		connectButton.onclick = connectToServer;
 		
+		// ### Default url checkbox
+		var checkDefUrl = document.createElement("input");
+		checkDefUrl.setAttribute("type", "checkbox");
+		checkDefUrl.onclick = checkDefaultUrl;
+		checkDefUrl.checked = (url.value == defaultUrl);
+		checkDefUrl.setAttribute("id", "checkDefUrl");
+		main.appendChild(checkDefUrl);
+		
+
+		var labelCheckDefUrl = document.createElement("label");
+		labelCheckDefUrl.setAttribute("for", "checkDefUrl");
+		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
+		main.appendChild(labelCheckDefUrl);
+
+		
+		
+		function checkDefaultUrl(e) {
+			var checkBox = e.target;
+			
+			if(checkBox.checked) {
+				
+				if(url.value != defaultUrl) url.value = defaultUrl;
+				
+			}
+			
+		}
 		
 		function saveUrl(e) {
 			
