@@ -24,6 +24,10 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 idea: Firefox plugin, så att man kan höger-klicka på sidan och välja "ändra", då öppnas jzedit och den fil som ska ändras. 
 Markören flyttas även dit man klickade på webbsidan. Och sidan (i jzedit) öppnas i WYSIWYG förhanskranskning/edit mode.
 
+Pasting or dragging in images ... convert place image in src dir
+
+Meta publish date, publish only after this date. Make server auto publish!?
+
 
 2) Beta release?, get USER FEEDBACK!
 
@@ -127,42 +131,11 @@ How to handle errors in server.js ?
 
 SSH keys when connecting to remote servers ... where to store them ?
 
-Sometimes there are requirements like "must work on the web" ... 
-Should we skip nw.js and use a NodeJS server instead, and open the GUI in a web browser !?
-Chrome has depricated Chrome apps, and the popular Chromebooks is designed to run web apps instead of native apps.
-
-Have a --server-only command argument, where you can connect to the editor via a web browser.
-
-"Self hosted cloud editor"
-
-Or does developers want to run their editor locally and NOT in a browser ?
-
-
 Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
 
 Getting likes or upvotes are very addicting ... 
 
-Offer a HTML helper widget that inserts code: paragraph, image, link, table, header, etc
-
-
-
-Debugging text transformation from wysiwyg to the editor.
-... The file is reparsed for every change!
-Why am I doing this complex transformation insted of just a full replace !?
-probably because most of the time it's only one character changed (while typing)
-
-Make removeAllTextOnRow not re-create the grid ?
-problem: If there are many changes in the wysiwyg editor, each change is re-parsed, can it be optemized?
-
-
 Is it possible to teach people to write HTML ? "Learn HTML and Make web pages like a pro"
-
-
-At first use, a login screen that fetch login credentials to ftp + mercurial repo and clones the remote repo, plus sets up a web page.
-
-The design needs work. Can't show too much on the screen or it will be too slow to work (brain will be overloaded with info)
-
-Should file explorer be above function list? Because function list is not always visible
 
 SCM integration (both Mercurial and Git, auto-detect) ex:
 file.isCommited
@@ -170,43 +143,17 @@ file.blame(row)
 
 ex: Before pushing a site to FTP, checks if the changes have been commited and pushed (updated and merged) before going live.
 
----
-
-A WYSIWYG mode for HTML pages so that you dont even have to know HTML 
-(but someone has to setup the SSG and scripts, witch is OK! People are ok with paying someone a one time to setup things, design, etc,
-but dont want to pay everytime they are updating, or working on the homepage)
-
----
-
 Keyboard shortcuts are very hard to remember and not very friendly for first time users ... Do we need a menu or tool bar ?
 idea: (yet another keyboard shortcut LOL) Ctrl + Up down, brings up the same menu as when right clicking (need to make it look better) and add most important "shortcuts" there!
 
-WYSIWYG editor in the static site generator plugin. People seem alergic to HTML :(
-Tidy up results from contenteditable before applying the changes.
 
-
-The static site generator has prio, but bugs have even more prio! 
-
-* Writing in the editor updates the preview, replace old file.text with new on file change!
-* Pasting or dragging in images ... convert place image in src dir
-* Partial generation (generate only the page being worked on).
-* meta publish date, publish only after this date
-
----
-
-Helping functions, that I need, or find it annoying without, have prio, but bugs have more prio!?
+Helping functions / abstractions, that I need, or find it annoying without, have prio, but bugs have more prio!?
 Maybe it's faster to fix the bug if I have those functions working thoug!?
-
----
 
 Work on improving the bug finding system, like undefined methods and properties, have prio! But bugs have more prio!?
 Follow <script includes and nodeJS require's
 
 misspelled / undefined property: If the property have never been seen before but match another property with only 1 character off, show the off letter with red background.
-
-dumb auto-completion
-
-auto-complete function arguments in local function and parents
 
 Flow integration !? https://flowtype.org/assets/flow.js
 https://flowtype.org/try/
@@ -216,14 +163,16 @@ Make a Tern and Eslint plugin too ? Only use the pure JS file, not the whole NPM
 
 ---
 
-Save state every X minute and track all actions. Then when there is a error, a test for that bug is automatically created, loading the state and replaying the actions.
-Ask to fully restart the editor.
+Save state every X minute and track all actions. Then when there is a error, a test for that bug is automatically created, 
+loading the state and replaying the actions. Ask to fully restart the editor.
 
-When "debugging" Open up a editor clone, with --remote-debugging-port and run the tests there, so they can be debugged with breakpoints (do not self debug).
+When "debugging" Open up a editor clone, with --remote-debugging-port and run the tests there, 
+so they can be debugged with breakpoints (do not self debug).
 
 ---
 
-Bind to the actual character/key/control-character instead of keyboard combination !??? Like ô instead of the combo to make that character.
+Bind to the actual character/key/control-character instead of keyboard combination !??? 
+Like ô instead of the combo to make that character.
 Because keyboard layouts are different. 
 Return false to prevent the character to be inserted into the document (default action)
 
