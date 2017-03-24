@@ -124,6 +124,8 @@ Auto opened SSG panel doesn't select the right site when clicking edit
 What I'm thinking
 -----------------
 
+Is node.exe (osx package) a signed binary ? Can OSX users start it !??
+
 Add to Chrome OS app store ...
 
 How to handle errors in server.js ?
