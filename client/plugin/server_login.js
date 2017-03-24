@@ -66,13 +66,23 @@
 		labelUrl.appendChild(document.createTextNode("URL: "));
 		main.appendChild(labelUrl);
 
+		var defaultUrl = "http://localhost:8099/jzedit";
+		var urlValue;
+		
+		if(localStorage) {
+			urlValue = localStorage.getItem("editorServerUrl");
+		}
+		
+		if(!urlValue) urlValue = defaultUrl;
+
 		var url = document.createElement("input");
 		url.setAttribute("type", "text");
 		url.setAttribute("id", "serverLoginUrl");
 		url.setAttribute("class", "inputtext url");
 		url.setAttribute("title", "URL to JZedit server");
 		url.setAttribute("size", "30");
-		url.setAttribute("value", "http://localhost:8099/jzedit");
+		url.setAttribute("value", urlValue);
+		url.onchange = saveUrl;
 		main.appendChild(url);
 		
 		// ### user
@@ -110,7 +120,23 @@
 		connectButton.setAttribute("value", "Connect");
 		main.appendChild(connectButton);
 		
-		connectButton.onclick = function connectToServer() {
+		connectButton.onclick = connectToServer;
+		
+		
+		function saveUrl(e) {
+			
+			var inputUrl = e.target;
+			var url = inputUrl.value;
+			
+			if(!localStorage) console.warn("No localstorage available! Server url will not be remembered.");
+			else {
+				localStorage.setItem("editorServerUrl", url);
+			}
+
+		}
+		
+		
+		function connectToServer(e) {
 			
 			var server = {url: url.value};
 			

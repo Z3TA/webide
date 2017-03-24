@@ -13,6 +13,11 @@
 		
 		if(EDITOR.input) {
 			
+			if(!file) {
+				console.warn("No file! Keyboard backspace will do default (browser) action");
+				return true;
+			}
+			
 			var caret = file.caret;
 			var leftIndex = caret.index - 1;
 			var char;
