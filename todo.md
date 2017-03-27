@@ -124,6 +124,9 @@ Auto opened SSG panel doesn't select the right site when clicking edit
 What I'm thinking
 -----------------
 
+Discovery: "tip of the day". "Open a file" Ctrl + O
+Keep stats on how many times a key-combo has been used, then show tips about the less used ones.
+
 Is node.exe (osx package) a signed binary ? Can OSX users start it !??
 
 Add to Chrome OS app store ...
