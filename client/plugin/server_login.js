@@ -170,11 +170,12 @@
 			var server = {url: url.value};
 			
 			if(CLIENT.connected) {
-				if(CLIENT.url != server.url) {
-					console.log("CLIENT.host=" + CLIENT.host + " != server.host=" + server.host);
+				if(CLIENT.url != server.url || EDITOR.user != user.value) {
+					console.log("CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user=" + EDITOR.user + " user.value=" + user.value);
 					CLIENT.disconnect();
 				}
-				else identify();
+				else if(EDITOR.user != user.value) identify();
+				else alertBox("Already logged in as user=" + EDITOR.user + " on \n" + CLIENT.url);
 			}
 			
 			if(!CLIENT.connected) {

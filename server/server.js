@@ -541,7 +541,21 @@ User.prototype.saveStorage = function saveStorage(callback) {
 	
 	var fs = require("fs");
 	
-	fs.writeFile(user.storageFile, JSON.stringify(user.storage, null, 2), function(err) {
+	var storageString = JSON.stringify(user.storage, null, 2);
+	
+	// Sanity check
+	try {
+		JSON.parse(storageString);
+	}
+	catch(err) {
+		console.warn("Was about to write currupted JSON ...")
+		console.log(storageString);
+		throw err;
+	}
+	
+	// The storage might change while the waiting for the file system!
+	
+	fs.writeFile(user.storageFile, storageString, function(err) {
 		if(err) {
 			callback(new Error("Unable to save storage! Error: " + err.message));
 			throw err;

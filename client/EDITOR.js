@@ -3593,7 +3593,11 @@ EDITOR.lastKeyPressed = "";
 
 		});
 
-		
+		CLIENT.on("connectionLost", function() {
+			
+			EDITOR.user = null;
+			
+		});
 		
 		function stdIn(data) {
 			
@@ -4493,15 +4497,9 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		else{
-			if(EDITOR.currentFile) {
+			
+			EDITOR.input = false;
 
-				// Don't hide the meny here! Or we wont be able to click on it
-				
-				// Remove focus
-				EDITOR.input = false;
-				
-				//EDITOR.currentFile = undefined;
-			}
 		}
 		
 		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
@@ -4692,7 +4690,7 @@ EDITOR.lastKeyPressed = "";
 			
 			For events that are not bound to mouseUp or mouseDown
 		*/
-		console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize);
+		console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.input=" + EDITOR.input);
 		
 		EDITOR.interact("mouseClick", e);
 		

@@ -229,6 +229,8 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+users .localStorage file is sometimes currupted ... } is inserted instead of a ,
+
 Search in file on remote fs doesn't work!
 
 Don't remove spaces/tabs from copied text when working with text mode files!!

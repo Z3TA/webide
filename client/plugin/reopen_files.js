@@ -1,58 +1,132 @@
-
-// Reset from bricket state:
-// EDITOR.storage.removeItem("openedFiles")
-
-"use strict";
-
-EDITOR.plugin({
-	desc: "Open up the files from last session", 
-	order: 999, // Load after the parser and other stuff that has fileOpen event listener
-	unload: function unloadReopenFilesPlugin() {
-		EDITOR.removeEvent("storageReady", reopenFiles);
-	},
-	load: function loadReopenFilesPlugin() {
+(function() {"use strict";
 		
-		EDITOR.on("storageReady", reopenFiles);
-		
-	}
-});
 
-function reopenFiles() {
 	/*
 		1. Open up the files from last time, when opening the EDITOR.
 		
 		2. Save a backup on each file when it close, and on regular intervals (incase the editor crash)
 		Offer to load the backup file if it's gone or empty, or unsaved.
 		
+		
+		Reset from bricket state:
+		EDITOR.storage.removeItem("openedFiles")
+	
 	*/
-	
-	if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
-	
+
 	var fileDelimiter = ";"; // Used to separate the file paths in the openedFiles string
-	
+
 	var saveStateInterval = 5000;
-	
+
 	var saveStateIntervalTimer;
-	
+
 	var allFilesOpenedNeverCalled = true;
-	
+
 	var copyOfEditorFiles = [];
-	setInterval(insaneBugCatcher, 1000);
+	var insaneBugCatcherInterval;
+
+	var firstRun = true;
 	
+	var serverUrl, serverUser;
 	
-	EDITOR.on("fileOpen", addToOpenedFiles, 1);
+	EDITOR.plugin({
+		desc: "Open up the files from last session", 
+		order: 999, // Load after the parser and other stuff that has fileOpen event listener
+		load: function loadReopenFilesPlugin() {
+			
+			EDITOR.on("storageReady", reopenFiles);
+			/*
+				problem: storageReady can be called many times, for example if the user re-login (as another user)
+				
+				We can't (re)open files from disk when running in the browser, unless connected to the server.
+				So we need to be connected to the editor server for this plugin to work.
+				
+				Solution: Close all unsaved files when connected to a different url or user
+			*/
+			
+			
+		},
+		unload: function unloadReopenFilesPlugin() {
+			
+			EDITOR.removeEvent("storageReady", reopenFiles);
+		
+			clearInterval(insaneBugCatcherInterval);
+			
+			EDITOR.removeEvent("fileOpen", reopenFiles);
+			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
+			
+			EDITOR.removeEvent("exit", reopen_files_closeEditor);
+			clearInterval(saveStateIntervalTimer);
+			
+		}
+		
+	});
 	
-	EDITOR.on("fileClose", removeFromOpenedFiles, 1);
+
 	
-	reopenFilesMain();
+	function reopenFiles() {
+
+		if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
+		
+		console.log("serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
+		
+		if(serverUrl != CLIENT.url || serverUser != EDITOR.user) {
+			
+			EDITOR.removeEvent("exit", reopen_files_closeEditor);
+			clearInterval(saveStateIntervalTimer);
+			clearInterval(insaneBugCatcherInterval);
+
+			for(var file in EDITOR.files) {
+				if(file.isSaved) EDITOR.closeFile(file);
+			}
+		}
+		
+		serverUrl = CLIENT.url;
+		serverUser = CLIENT.user;
+		
+		if(firstRun) {
+			
+			EDITOR.on("fileOpen", addToOpenedFiles, 1);
+			
+			EDITOR.on("fileClose", removeFromOpenedFiles, 1);
+		}
+		
+		firstRun = false;
+		
+		reopenFilesMain(function allFilesHaveReopened() {
+			
+			// Save state when exiting the editor
+			EDITOR.on("exit", reopen_files_closeEditor);
+			
+			// Save state on regular intervals in case the editor crashes (or refresh)
+			saveStateIntervalTimer = setInterval(reopen_files_closeEditor, saveStateInterval);
+			
+			// Catch bugs
+			insaneBugCatcherInterval = setInterval(insaneBugCatcher, 1000);
+			
+		});
+
+		
+
+	}
+
 	
-	function reopenFilesMain() {
+	function reopenFilesMain(reopenFilesCallback) {
 		
 		if(EDITOR.storage.getItem("openedFiles") == null) {
 			EDITOR.storage.setItem("openedFiles", "");
 		}
+		/*
 		
-		// This is a fresh reload, so try to recover from old bugs.
+			What might have happaned:
+				* User closed the editor
+				* User logged in as another user or on another url
+				* The editor had a spectacular crash
+
+			so try to recover the last session ...
+		
+		
+		*/
+		
 		// 1. Remove dublicate entries
 		EDITOR.storage.setItem("openedFiles", removeDublicates(EDITOR.storage.getItem("openedFiles")));
 		
@@ -144,15 +218,8 @@ function reopenFiles() {
 				EDITOR.showFile(EDITOR.files[setCurrent])
 				
 			}
-			
-			
-			
-			// Use editor close event
-			EDITOR.on("exit", reopen_files_closeEditor);
-			
-			
-			// Save state on regular intervals in case the editor crashes (or refresh)
-			saveStateIntervalTimer = setInterval(reopen_files_closeEditor, saveStateInterval);
+
+			reopenFilesCallback();
 			
 		}
 		
@@ -778,4 +845,4 @@ function reopenFiles() {
 		copyOfEditorFiles = Object.keys(EDITOR.files);
 	} 	
 	
-}
+})();
