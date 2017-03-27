@@ -58,13 +58,14 @@
 		]);
 		*/
 		
-		var main = document.createElement("div");
+		var form = document.createElement("form");
+		form.onsubmit = connectToServer;
 		
 		// ### Url
 		var labelUrl = document.createElement("label");
 		labelUrl.setAttribute("for", "serverLoginUrl");
 		labelUrl.appendChild(document.createTextNode("URL: "));
-		main.appendChild(labelUrl);
+		form.appendChild(labelUrl);
 
 		var defaultUrl = "http://localhost:8099/jzedit";
 		var urlValue;
@@ -82,14 +83,14 @@
 		url.setAttribute("title", "URL to JZedit server");
 		url.setAttribute("size", "30");
 		url.setAttribute("value", urlValue);
-		url.onchange = saveUrl;
-		main.appendChild(url);
+		url.onchange = save;
+		form.appendChild(url);
 		
 		// ### user
 		var labelUser = document.createElement("label");
 		labelUser.setAttribute("for", "serverLoginUser");
 		labelUser.appendChild(document.createTextNode("Username: "));
-		main.appendChild(labelUser);
+		form.appendChild(labelUser);
 		
 		var user = document.createElement("input");
 		user.setAttribute("type", "text");
@@ -97,13 +98,14 @@
 		user.setAttribute("class", "inputtext username");
 		user.setAttribute("size", "10");
 		user.setAttribute("value", "admin");
-		main.appendChild(user);
+		user.onchange = save;
+		form.appendChild(user);
 		
 		// ### password
 		var labelPw = document.createElement("label");
 		labelPw.setAttribute("for", "serverLoginPw");
 		labelPw.appendChild(document.createTextNode("Username: "));
-		main.appendChild(labelPw);
+		form.appendChild(labelPw);
 		
 		var pw = document.createElement("input");
 		pw.setAttribute("type", "password");
@@ -111,15 +113,15 @@
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
 		pw.setAttribute("value", "admin");
-		main.appendChild(pw);
+		form.appendChild(pw);
 		
 		// ### Connect button
 		var connectButton = document.createElement("input");
-		connectButton.setAttribute("type", "button");
+		connectButton.setAttribute("type", "submit");
 		connectButton.setAttribute("class", "button");
 		connectButton.setAttribute("value", "Connect");
-		connectButton.onclick = connectToServer;
-		main.appendChild(connectButton);
+		//connectButton.onclick = connectToServer;
+		form.appendChild(connectButton);
 		
 		
 		// ### Default url checkbox
@@ -128,14 +130,15 @@
 		checkDefUrl.onclick = checkDefaultUrl;
 		checkDefUrl.checked = (url.value == defaultUrl);
 		checkDefUrl.setAttribute("id", "checkDefUrl");
-		main.appendChild(checkDefUrl);
+		form.appendChild(checkDefUrl);
 		
 
 		var labelCheckDefUrl = document.createElement("label");
 		labelCheckDefUrl.setAttribute("for", "checkDefUrl");
 		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
-		main.appendChild(labelCheckDefUrl);
+		form.appendChild(labelCheckDefUrl);
 
+		return form;
 		
 		
 		function checkDefaultUrl(e) {
@@ -146,17 +149,17 @@
 				if(url.value != defaultUrl) url.value = defaultUrl;
 				
 			}
-			
 		}
 		
-		function saveUrl(e) {
+		function save(e) {
 			
-			var inputUrl = e.target;
-			var url = inputUrl.value;
+			var urlValue = url.value;
+			var userValue = user.value;
 			
 			if(!localStorage) console.warn("No localstorage available! Server url will not be remembered.");
 			else {
-				localStorage.setItem("editorServerUrl", url);
+				if(urlValue && localStorage.getItem("editorServerUrl") != urlValue) localStorage.setItem("editorServerUrl", urlValue);
+				if(userValue && localStorage.getItem("editorServerUser") != userValue) localStorage.setItem("editorServerUser", userValue);
 			}
 
 		}
@@ -181,6 +184,8 @@
 				});
 			}
 			
+			return false; // Don't navigate away (on form submit)
+			
 			function identify() {
 				
 				CLIENT.cmd("identify", {username: user.value, password: pw.value}, function loggedIn(err, resp) {
@@ -189,7 +194,7 @@
 						alertBox("Unable to login to JZedit server on " + JSON.stringify(server) + "\nError: " + err.message);
 					}
 					else {
-						alertBox("Successfully logged in to " + JSON.stringify(server) + "\n" + JSON.stringify(resp));
+						alertBox("Successfully logged in to:\n" + server.url + "\nUser:" + resp.loginSuccess.user);
 					}
 				});
 					
@@ -197,7 +202,7 @@
 			
 		}
 		
-		return main;
+		
 		
 	}
 	
