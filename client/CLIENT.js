@@ -41,7 +41,7 @@ var CLIENT = {}; // Client object is global
 			console.log("connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
 			CLIENT.url = url;
-			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
+			CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
 			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected

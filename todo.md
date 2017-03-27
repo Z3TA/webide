@@ -21,9 +21,6 @@ Also bring up the SSG widget/toolbar and show/indicate that Preview and WYSIWYG 
 
 Translate to other lanugages (Swedish) lang.js file with all phrases, calling STR("phrase") gives the right phrase.
 
-idea: Firefox plugin, så att man kan höger-klicka på sidan och välja "ändra", då öppnas jzedit och den fil som ska ändras. 
-Markören flyttas även dit man klickade på webbsidan. Och sidan (i jzedit) öppnas i WYSIWYG förhanskranskning/edit mode.
-
 Pasting or dragging in images ... convert place image in src dir
 
 Meta publish date, publish only after this date. Make server auto publish!?
@@ -45,6 +42,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 
 What I'm working on
 -------------------
+
+Replace localStorage with EDITOR.storage in SSG
+
+Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
+Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
+and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.
+
+Replace the SSG WYSIWYG editor with the new WysiwygEditor.js
 
 Make WYSIWYG editor work in the browser
 

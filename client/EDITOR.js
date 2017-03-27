@@ -3444,7 +3444,7 @@ EDITOR.lastKeyPressed = "";
 			catch(err) {
 				console.error(err.message);
 				console.log(err.stack);
-				alertBox('Failed to (fully) load plugin:\n<i>"' + EDITOR.plugins[i].desc + '"<(i>\nError: ' + err.message);
+				alertBox('Failed to (fully) load plugin:\n<i>"' + EDITOR.plugins[i].desc + '"</i>\nError: ' + err.message);
 			}
 		}
 		

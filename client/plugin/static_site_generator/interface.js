@@ -10,8 +10,8 @@
 	var manager;
 	var selectSite;
 	var selectedSite;
-	var editView;
-	var controlView;
+	var editView; // Edit site settings
+	var controlView; // Stardard interface view
 	
 	var inputSiteName;
 	var inputProjectFolder;
@@ -35,20 +35,13 @@
 	var notEditableReason = "";
 	var editable = false;
 	var sourceFile; // Source file that is being previewed
-	var headerRows = 0;
-	var footerRows = 0;
 	var ignoreTransform;
 	var scrollTop = 0;
 	var menuItem;
-	var ignoreFileChange = false; // Whether to update the preview/WYSIWYG when there is a change in the HTML source code (editor)
+	var ignoreFileChange = false; // Whether to update the preview when there is a change in the HTML source code (editor)
 	var updatePreviewOnChange;
 	
 	var httpServer;
-	
-	if(runtime == "browser") {
-		console.warn("Static site generation not yet supported in the browser!");
-		return;
-	}
 	
 	
 	var path = require("path");
@@ -80,9 +73,9 @@
 		
 		//alertBox("loading");
 		
-		if(!window.localStorage) throw new Error("window.localStorage not available!");
+		if(!EDITOR.storage.ready()) throw new Error("storage not ready!");
 		
-		sites = window.localStorage.cmsjz_sites ? JSON.parse(window.localStorage.cmsjz_sites) : [demoSite];
+		sites = EDITOR.storage.getItem("cmsjz_sites") ? JSON.parse(EDITOR.storage.getItem("cmsjz_sites")) : [demoSite];
 		
 		var keyF9 = 120;
 		var keyEscape = 27;
@@ -260,7 +253,7 @@
 					site.url = "http://" + domain;
 					if(site.publish.indexOf("/client/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
 					
-					window.localStorage.cmsjz_sites = JSON.stringify(sites); // Save all sites in local-storage
+					EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites)); // Save all sites in local-storage
 					
 					break;
 				}
@@ -411,7 +404,7 @@
 			selectedSite = site;
 			selectSite.selectedIndex = index;
 			
-			window.localStorage.cmsjz_selectedSiteName = site.name;
+			EDITOR.storage.setItem("cmsjz_selectedSiteName", site.name);
 			
 		}
 		else throw new Error("Failed to switch to site index=" + index);
@@ -577,7 +570,7 @@
 			
 			var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 			selectedSite = sites[selectedSiteIndex];
-			window.localStorage.cmsjz_selectedSiteName = selectedSite.name;
+			EDITOR.storage.setItem(cmsjz_selectedSiteName, selectedSite.name);
 			
 			inputSiteName.value = selectedSite.name;
 			inputProjectFolder.value = selectedSite.projectFolder;
@@ -961,7 +954,7 @@
 		
 		function saveNewSite() {
 			
-			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not available ready!");
 			
 			// Make sure the name/alias is not in use
 			var name = inputSiteName.value;
@@ -988,13 +981,13 @@
 			}) - 1;
 			
 			selectedSite = sites[index];
-			window.localStorage.cmsjz_selectedSiteName = selectedSite.name;
+			EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
 			
 			var selectedIndex = addSiteOption(selectedSite, index); // Add new option
 			
 			selectSite.selectedIndex = selectedIndex;// Select the new option
 			
-			window.localStorage.cmsjz_sites = JSON.stringify(sites); // Save all sites in local-storage
+			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites)); // Save all sites in local-storage
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -1034,12 +1027,12 @@
 		
 		function saveSiteSettings() {
 			
-			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not ready!");
 			if(!selectedSite) throw new Error("No site selected!");
 			
 			if(selectedSite.name != inputSiteName.value) {
 				selectSite.options[selectSite.selectedIndex].text = inputSiteName.value;
-				window.localStorage.cmsjz_selectedSiteName = inputSiteName.value
+				EDITOR.storage.setItem("cmsjz_selectedSiteName", inputSiteName.value);
 			}
 			
 			selectedSite.name = inputSiteName.value;
@@ -1055,7 +1048,7 @@
 			selectedSite.repoPw = inputRepoAuthPw.value;
 			selectedSite.repository = inputRepository.value;
 			
-			window.localStorage.cmsjz_sites = JSON.stringify(sites);
+			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
 			
 			editView.style.display = "none";
 			controlView.style.display = "block";
@@ -1065,10 +1058,10 @@
 		
 		
 		function deleteSite() {
-			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not ready!");
 			
 			selectSite.remove(selectSite.selectedIndex);
-			window.localStorage.cmsjz_selectedSiteName = "";
+			EDITOR.storage.setItem("cmsjz_selectedSiteName", "");
 			// Does it fire onChange events? 
 			
 			
@@ -1086,9 +1079,9 @@
 		option.id = index;
 		selectSite.appendChild(option);
 		
-		console.log("window.localStorage.cmsjz_selectedSiteName=" + window.localStorage.cmsjz_selectedSiteName + " site.name=" + site.name);
+		console.log("EDITOR.storage.getItem('cmsjz_selectedSiteName')=" + EDITOR.storage.getItem('cmsjz_selectedSiteName') + " site.name=" + site.name);
 		
-		if(window.localStorage.cmsjz_selectedSiteName == site.name) {
+		if(EDITOR.storage.getItem("cmsjz_selectedSiteName") == site.name) {
 			// Will this trigger change !? Yep, it seems to work!
 			selectSite.selectedIndex = index;
 			
@@ -1921,7 +1914,7 @@
 									}
 									else if(answer == updateSettings) {
 										site.repository = defaultRepo.trim();
-										window.localStorage.cmsjz_sites = JSON.stringify(sites);
+										EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
 										doHgPull();
 									}
 									//else if(answer == cancelSync) do nothing
@@ -2053,7 +2046,7 @@
 			
 			var buildScript = path.join(require("dirname"), "./client/plugin/static_site_generator/build.js");
 			
-			//console.log("buildScript=" + buildScript);
+			console.log("buildScript=" + buildScript);
 			console.log("source=" + source);
 			var workingDir = path.join(source, "../");
 			//console.log("workingDir=" + workingDir);
