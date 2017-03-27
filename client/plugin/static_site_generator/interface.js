@@ -54,12 +54,12 @@
 	var path = require("path");
 	var demoSite = {
 		name: "Demo site",
-		projectFolder: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/"),  // Project folder
-		source: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-		preview: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-		template: path.join(require("dirname"), "/client/plugin/static_site_generator/demo/template.htm"),  // A template for new pages/posts
-		url: "file://" + path.join(require("dirname"), "/client/plugin/static_site_generator/demo/public/"),
+		projectFolder: path.join(require("dirname"), "/userdirs/demo/static_site_demo/"),  // Project folder
+		source: path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/"),  // Source files (when colaborating; use a source control management tool!)
+		preview: path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/"), // Compiles files for review is saved here
+		publish: path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
+		template: path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm"),  // A template for new pages/posts
+		url: "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),
 		pubUser: "",
 		pubPw: "",
 		key: "", // Publish key
@@ -118,7 +118,7 @@
 		httpServer = http.createServer(httpRequest);
 		httpServer.listen("13377", "127.0.0.1"); // Lets hope the port is not in use ...
 		
-		
+		if(EDITOR.user == "demo") {
 		// Open demo site if no file is open
 		var timer = 1000; // Milliseconds
 		setTimeout(function () {
@@ -127,13 +127,13 @@
 			
 			if(openFiles === 0) {
 				
-				var filePath = path.join(require("dirname") + "/client/plugin/static_site_generator/demo/source/about.htm");
+				var filePath = path.join(require("dirname") + "/userdirs/demo/static_site_demo/source/about.htm");
 				
 				EDITOR.openFile(filePath);
 				
 			}
 		}, timer);
-		
+		}
 	}
 	
 	function SSG_cleanup() {

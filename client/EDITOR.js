@@ -3552,7 +3552,9 @@ EDITOR.lastKeyPressed = "";
 		
 		windowLoaded = true;
 
-		CLIENT.on("loginSuccess", function loggedInToServer() {
+		CLIENT.on("loginSuccess", function loggedInToServer(login) {
+			
+			EDITOR.user = login.user;
 			
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {

@@ -46,7 +46,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Move SSG examples to demo user dir
+Make WYSIWYG editor work in the browser
+
+Make the SSG work in the browser
 
 
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
