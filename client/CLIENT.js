@@ -89,7 +89,7 @@ var CLIENT = {}; // Client object is global
 						if(eventListeners.hasOwnProperty(method)) {
 							CLIENT.fireEvent(method, resp[method]);
 						}
-						else console.warn("No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
+						//else console.log("No event listeners for method/event: '" + method + "' data=" + JSON.stringify(resp[method]));
 					}
 				}
 				
