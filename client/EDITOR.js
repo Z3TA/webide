@@ -493,7 +493,7 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log("Loading file to editor: " + path);
 			
-			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened!");
+			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened:\n" + path);
 			
 			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
 			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
