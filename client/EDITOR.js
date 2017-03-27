@@ -4492,10 +4492,11 @@ EDITOR.lastKeyPressed = "";
 		}
 		else{
 			if(EDITOR.currentFile) {
+
+				// Don't hide the meny here! Or we wont be able to click on it
+				
 				// Remove focus
 				EDITOR.input = false;
-				
-				EDITOR.hideMenu();
 				
 				//EDITOR.currentFile = undefined;
 			}
