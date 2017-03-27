@@ -69,12 +69,20 @@
 
 		var defaultUrl = "http://localhost:8099/jzedit";
 		var urlValue;
+		var userValue;
+		var pwValue;
 		
 		if(localStorage) {
 			urlValue = localStorage.getItem("editorServerUrl");
+			userValue = localStorage.getItem("editorServerUser");
+			pwValue = localStorage.getItem("editorServerPw");
 		}
 		
 		if(!urlValue) urlValue = defaultUrl;
+		if(!userValue) {
+			userValue = "admin";
+			pwValue = "admin";
+		}
 
 		var url = document.createElement("input");
 		url.setAttribute("type", "text");
@@ -97,7 +105,7 @@
 		user.setAttribute("id", "serverLoginUser");
 		user.setAttribute("class", "inputtext username");
 		user.setAttribute("size", "10");
-		user.setAttribute("value", "admin");
+		user.setAttribute("value", userValue);
 		user.onchange = save;
 		form.appendChild(user);
 		
@@ -112,7 +120,7 @@
 		pw.setAttribute("id", "serverLoginPw");
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
-		pw.setAttribute("value", "admin");
+		pw.setAttribute("value", pwValue);
 		form.appendChild(pw);
 		
 		// ### Connect button
@@ -159,7 +167,11 @@
 			if(!localStorage) console.warn("No localstorage available! Server url will not be remembered.");
 			else {
 				if(urlValue && localStorage.getItem("editorServerUrl") != urlValue) localStorage.setItem("editorServerUrl", urlValue);
-				if(userValue && localStorage.getItem("editorServerUser") != userValue) localStorage.setItem("editorServerUser", userValue);
+				if(userValue && localStorage.getItem("editorServerUser") != userValue) {
+					localStorage.setItem("editorServerUser", userValue);
+					
+					// Should we store the password !?
+				}
 			}
 
 		}
@@ -192,7 +204,7 @@
 				CLIENT.cmd("identify", {username: user.value, password: pw.value}, function loggedIn(err, resp) {
 					if(err) {
 						console.error(err);
-						alertBox("Unable to login to JZedit server on " + JSON.stringify(server) + "\nError: " + err.message);
+						alertBox("Unable to login: " + err.message + "\nURL: " + server.url);
 					}
 					else {
 						alertBox("Successfully logged in to:\n" + server.url + "\nUser:" + resp.loginSuccess.user);
