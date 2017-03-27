@@ -25,9 +25,13 @@
 	var charEnter = 13;
 	var charP = 80;
 	
-	window.addEventListener("load", gotoFile_init, false);
+	EDITOR.plugin({
+		desc: "Open any file ...",
+		load: gotoFile_load,
+		unload: gotoFile_unload
+	});
 	
-	function gotoFile_init() {
+	function gotoFile_load() {
 		
 		footer = document.getElementById("footer");
 		gotoDiv = document.getElementById("goto");
@@ -54,7 +58,11 @@
 		
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
 		
-		
+	}
+	
+	function gotoFile_unload() {
+		EDITOR.unbindKey(show_gotoFileInput);
+		EDITOR.unbindKey(hide_gotoFileInput);
 	}
 	
 	function build_gotoInput() {
@@ -524,6 +532,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	}
 	
 	function gotoFile() {
+		
+		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
 		
 		if(gotoInputIsVisible && !EDITOR.input) {
 			
