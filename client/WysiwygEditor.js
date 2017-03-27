@@ -270,122 +270,117 @@ var WysiwygEditor;
 		if(!file) throw new Error("file=" + file);
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile);
 		
-		if(file == sourceFile) {
+		if(file != sourceFile) return true;
+		
+		if(!wysiwygEditor.bodyExist()) return true;
+		
+		var previewWin = wysiwygEditor.previewWin;
+		var doc = previewWin.window.document;
+		
+		wysiwygEditor.setStartRow(); // In case more rows was added above the body tag
+		
+		if(row < wysiwygEditor.startRow) {
+			// Edited above the body. Reload everything
+			var dance = false;
+			wysiwygEditor.reload(dance);
+			return;
+		}
+		
+		console.log("Update wysiwyg for file.path=" + file.path);
+		
+		// if type=reload need to redo dance
+		
+		//if(updatePreviewOnChange) clearTimeout(updatePreviewOnChange);
+		
+		// Delay updating so that we do not render broken tags etc and save some battery
+		//updatePreviewOnChange = setTimeout(function() {
+		
+		
+		var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
+		
+		var srcHTML = wysiwygEditor.getSourceCodeBody();
+		
+		// Can not change the file in a fileChange event or it would create an endless loop
+		// Witch means we can not sanitize on source code changes,
+		// witch also means we can not sanitize on content-editable changes!
+		
+		setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
+		
+		// Setting innerHTML makes the caret disappear. Place it again ...
+		// Find out the tag and if we are near text, then find the tag in content-editable
+		
+		var index = file.caret.index;
+		
+		var leftChar = index > 0 ? file.text.charAt(index-1) : "";
+		var rightChar = index < file.text.length ? file.text.charAt(index) : "";
+		
+		var regexText = /[^\r\n<>"']/;
+		
+		console.log("Attempting to place caret on WYSIWYG ...");
+		if(leftChar.match(regexText) ==  null && rightChar.match(regexText) == null) console.log("No text next to file.caret. leftChar=" + leftChar + " rightChar=" + rightChar + "");
+		else {
 			
-			
-			
-			if(!wysiwygEditor.bodyExist()) return;
-			
-			var previewWin = wysiwygEditor.previewWin;
-			var doc = previewWin.window.document;
-			
-			if(row < wysiwygEditor.startRow) {
-				// Edited above the body. Reload everything
-				var dance = false;
-				wysiwygEditor.reload(dance);
-				return;
-			}
-			
-			
-			wysiwygEditor.setStartRow(); // In case more rows was added above the body tag
-			
-			
-			
-			console.log("Update wysiwyg for file.path=" + file.path);
-			
-			// if type=reload need to redo dance
-			
-			//if(updatePreviewOnChange) clearTimeout(updatePreviewOnChange);
-			
-			// Delay updating so that we do not render broken tags etc and save some battery
-			//updatePreviewOnChange = setTimeout(function() {
-			
-			
-			var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
-			
-			var srcHTML = wysiwygEditor.getSourceCodeBody();
-			
-			// Can not change the file in a fileChange event or it would create an endless loop
-			// Witch means we can not sanitize on source code changes,
-			// witch also means we can not sanitize on content-editable changes!
-			
-			setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
-			
-			// Setting innerHTML makes the caret disappear. Place it again ...
-			// Find out the tag and if we are near text, then find the tag in content-editable
-			
-			var index = file.caret.index;
-			
-			var leftChar = index > 0 ? file.text.charAt(index-1) : "";
-			var rightChar = index < file.text.length ? file.text.charAt(index) : "";
-			
-			var regexText = /[^\r\n<>"']/;
-			
-			console.log("Attempting to place caret on WYSIWYG ...");
-			if(leftChar.match(regexText) ==  null && rightChar.match(regexText) == null) console.log("No text next to file.caret. leftChar=" + leftChar + " rightChar=" + rightChar + "");
+			var leftLeftTag = file.text.lastIndexOf("<", index-1);
+			if(leftLeftTag == -1) console.log("No left <tag found left of the file.caret");
 			else {
 				
-				var leftLeftTag = file.text.lastIndexOf("<", index-1);
-				if(leftLeftTag == -1) console.log("No left <tag found left of the file.caret");
+				var firstSpaceAfterLeftTag = file.text.indexOf(" ", leftLeftTag);
+				var firstRightTagAfterLeftTag = file.text.indexOf(">", leftLeftTag);
+				
+				if(firstRightTagAfterLeftTag == -1) console.log("No right> tag found after left tag, left of file.caret");
 				else {
 					
-					var firstSpaceAfterLeftTag = file.text.indexOf(" ", leftLeftTag);
-					var firstRightTagAfterLeftTag = file.text.indexOf(">", leftLeftTag);
+					console.log("leftLeftTag=" + leftLeftTag + " (" + file.text.substring(leftLeftTag, index) + ")");
+					console.log("firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag + " (" + file.text.substring(leftLeftTag, firstRightTagAfterLeftTag+1) + ")");
 					
-					if(firstRightTagAfterLeftTag == -1) console.log("No right> tag found after left tag, left of file.caret");
+					if(firstSpaceAfterLeftTag != -1 && firstSpaceAfterLeftTag < firstRightTagAfterLeftTag) var elementName = file.text.substring(leftLeftTag+1, firstSpaceAfterLeftTag);
+					else if(firstRightTagAfterLeftTag != -1) var elementName = file.text.substring(leftLeftTag+1, firstRightTagAfterLeftTag);
+					else throw new Error("firstSpaceAfterLeftTag=" + firstSpaceAfterLeftTag + " firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag);
+					
+					console.log("elementName=" + elementName);
+					
+					var rightLeftTag = file.text.indexOf("<", index);
+					if(rightLeftTag == -1) console.log("No <left tag on the right side of the file.caret");
 					else {
+						var text = file.text.substring(firstRightTagAfterLeftTag+1, rightLeftTag);
 						
-						console.log("leftLeftTag=" + leftLeftTag + " (" + file.text.substring(leftLeftTag, index) + ")");
-						console.log("firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag + " (" + file.text.substring(leftLeftTag, firstRightTagAfterLeftTag+1) + ")");
+						console.log("rightLeftTag=" + rightLeftTag + " (" + file.text.substring(index, rightLeftTag) + ")");
 						
-						if(firstSpaceAfterLeftTag != -1 && firstSpaceAfterLeftTag < firstRightTagAfterLeftTag) var elementName = file.text.substring(leftLeftTag+1, firstSpaceAfterLeftTag);
-						else if(firstRightTagAfterLeftTag != -1) var elementName = file.text.substring(leftLeftTag+1, firstRightTagAfterLeftTag);
-						else throw new Error("firstSpaceAfterLeftTag=" + firstSpaceAfterLeftTag + " firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag);
+						console.log("text=" + text);
 						
-						console.log("elementName=" + elementName);
+						var charPosInText = index - firstRightTagAfterLeftTag - 1;
 						
-						var rightLeftTag = file.text.indexOf("<", index);
-						if(rightLeftTag == -1) console.log("No <left tag on the right side of the file.caret");
+						console.log("debug charPos: " + text.substr(0, charPosInText) + "|" + text.substr(charPosInText));
+						
+						var elements = doc.getElementsByTagName(elementName);
+						
+						var node;
+						for(var i=0; i<elements.length; i++) {
+							if(elements[i].textContent == text) {
+								node = elements[i];
+								break;
+							}
+						}
+						if(!node) console.log("Unable to find element " + elementName + " containing text:" + text);
 						else {
-							var text = file.text.substring(firstRightTagAfterLeftTag+1, rightLeftTag);
+							var textNode = node.childNodes[0];
 							
-							console.log("rightLeftTag=" + rightLeftTag + " (" + file.text.substring(index, rightLeftTag) + ")");
+							console.log("Placing caret in node:");
+							console.log(textNode);
 							
-							console.log("text=" + text);
+							wysiwygEditor.placeCaretOnTextNode(textNode, charPosInText);
 							
-							var charPosInText = index - firstRightTagAfterLeftTag - 1;
-							
-							console.log("debug charPos: " + text.substr(0, charPosInText) + "|" + text.substr(charPosInText));
-							
-							var elements = doc.getElementsByTagName(elementName);
-							
-							var node;
-							for(var i=0; i<elements.length; i++) {
-								if(elements[i].textContent == text) {
-									node = elements[i];
-									break;
-								}
-							}
-							if(!node) console.log("Unable to find element " + elementName + " containing text:" + text);
-							else {
-								var textNode = node.childNodes[0];
-								
-								console.log("Placing caret in node:");
-								console.log(textNode);
-								
-								wysiwygEditor.placeCaretOnTextNode(textNode, charPosInText);
-								
-							}
 						}
 					}
 				}
 			}
-			
-			if(runtime == "nw.js") previewWin.show();
-			else {
-				// It's probably opened in another tab ...
-			}
-		} 
+		}
+		
+		if(runtime == "nw.js") previewWin.show();
+		else {
+			// It's probably opened in another tab ...
+		}
+
 		//else console.log("File is not the source file! sourceFile.path=" + sourceFile.path + " file.path=" + file.path);
 		
 		
@@ -589,6 +584,9 @@ var WysiwygEditor;
 				row = diff.removed[i].row + startRow;
 				
 				if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
+					
+					for(var row = 0; row<sourceFile.grid.length; row++) console.log(row + ": " + sourceFile.rowText(row));
+					
 					throw new Error("Text on row=" + row + " doesn't match text to be removed!\n\
 					source=" + UTIL.escapeHtml(sourceFile.rowText(row).trim()) + "\n\
 					remove=" + UTIL.escapeHtml(diff.removed[i].text.trim()) + "\n\
@@ -1043,7 +1041,7 @@ var WysiwygEditor;
 			
 			// Capture errors on the content-editable so that they do not go by unoticed
 			previewWin.window.onerror = function(err) {
-				alertBox(err.message ? err.message : "There was an error in the WYSIWYG editor!");
+				alertBox(err.message ? err.message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
 				console.error(err);
 			};
 			
