@@ -4483,6 +4483,8 @@ EDITOR.lastKeyPressed = "";
 				
 				// No current file or not the left button.
 				
+				EDITOR.input = false;
+				
 				EDITOR.showMenu();
 				
 			}
@@ -4492,6 +4494,8 @@ EDITOR.lastKeyPressed = "";
 			if(EDITOR.currentFile) {
 				// Remove focus
 				EDITOR.input = false;
+				
+				EDITOR.hideMenu();
 				
 				//EDITOR.currentFile = undefined;
 			}

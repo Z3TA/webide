@@ -46,8 +46,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Ctrl+P doesn't seem to work ? (nothing happends when hitting enter)
-
 Move SSG examples to demo user dir
 
 
