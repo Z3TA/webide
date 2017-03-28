@@ -1319,6 +1319,22 @@ API.mirror = function mirror(user, json, callback, userConnectionId) {
 	
 }
 
+
+
+API.serve = function serve(user, json, callback) {
+	
+	// Serve a folder via HTTP
+	
+	var folder = user.translatePath(json.folder);
+	
+	createHttpEndpoint(folder, function(err, url) {
+		callback(err, {url: url});
+	});
+	
+}
+
+
+
 function runFtpQueue() {
 	
 	console.log(ftpQueue.length + " items left in the FTP queue");
@@ -1330,6 +1346,155 @@ function runFtpQueue() {
 	else ftpBusy = false;
 	
 }
+
+var httpEndpoints = {};
+var httpServer;
+
+var mimeMap = {
+	css: "text/css",
+	doc: "application/msword",
+	exe: "application/octet-stream",
+	gif: "image/gif",
+	gz: "application/x-gzip",
+	html: "text/html",
+	htm: "text/html",	
+	jpg: "image/jpeg",
+	js: "application/x-javascript",
+	midi: "audio/x-midi",
+	mp3: "audio/mpeg"
+	mpeg: "video/mpeg",
+	ogg: "audio/vorbis",
+	pdf: "application/pdf",
+	png: "image/png",
+	ppt: "application/vnd.ms-powerpoint",
+	svg: "image/svg+xml",
+	"tar.gz": "application/x-tar",
+	tgz: "application/x-tar",
+	txt: "text/plain",
+	wav: "audio/wav",
+	xls: "application/vnd.ms-excel",
+	xml: "application/xml",
+	zip: "application/x-compressed-zip"
+}
+
+function createHttpEndpoint(folder, callback) {
+	
+	for(var dir in httpEndpoints) {
+		if(httpEndpoints[dir] == folder) {
+			return callback(null, makeUrl(dir));
+		}
+	}
+	
+	
+	var dir = randomString(10);
+	
+	httpEndpoints[dir] = folder;
+	
+	var url = makeUrl(dir);
+	
+	if(httpServer) callback(null, url);
+	else {
+		
+		var http = require('http');
+		
+		httpServer = http.createServer(handleRequest);
+
+		var port = 8080;
+		httpServer.listen(port, function(err){
+			
+			if(err) return callback(err);
+			else {
+
+				callback(err, url);
+
+				console.log("HTTP server listening on: %s", url);
+			}
+		});
+	}
+	
+	
+	function handleRequest(request, response){
+		
+		var reqUrl = require('url').parse(request.url);
+		
+		var urlPath = reqUrl.path;
+		
+		var dirs = path.split("/");
+		
+		var firstDir = dirs[0];
+		
+		if(!httpEndpoints.hasOwnProperty(firstDir)) {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Unknown endpoint: " + firstDir);
+			return;
+		}
+
+		
+		var path = require("path");
+
+		var localFolder = httpEndpoints[firstDir];
+		
+		urlPath = urlPath.replace(firstDir + "/", "");
+		
+		var filePath = path.join(localFolder, urlPath);
+		
+		if(filePath.indexOf(folder) != 0) {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Bad path: " + urlPath);
+			return;
+		}
+
+		
+		var fileExtension = UTIL.getFileExtension(urlPath);
+		
+		if(!mimeMap.hasOwnProperty(fileExtension)) {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Bad file type: " + fileExtension);
+			return;
+		}
+		
+		var fs = require("fs");
+		
+		var stat = fs.stat(filePath, function(err, stats) {
+			
+			if(err) {
+				response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+				response.end(err.message);
+			}
+			else {
+				response.writeHead(200, {
+					'Content-Type': mimeMap[fileExtension],
+					'Content-Length': stat.size
+				});
+				
+				var readStream = fs.createReadStream(filePath);
+				readStream.pipe(response);
+				
+			}
+			
+		});
+
+
+	}
+	
+	
+	function makeUrl(dir) {
+		return "http://" + httpServer.address.address + ":" + httpServer.address.port + "/" + dir + "/";
+	}
+	
+	function randomString(letters) {
+		
+		if(letters == undefined) letters = 5;
+		
+		var text = "";
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+		for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+		return text;
+	}
+}
+
 
 
 module.exports = API;

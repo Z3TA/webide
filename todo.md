@@ -47,6 +47,11 @@ Should the SSG work on the client or on the server ... ?
 
 SSG build process must run on the server because of eval machine etc
 
+How to preview a SSG generated web page that is stored on the server !?
+
+server "serve" api, that shares a folder via http
+
+
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
 Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
 and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.
