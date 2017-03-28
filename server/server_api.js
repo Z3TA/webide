@@ -711,6 +711,9 @@ API.createPath = function createPath(user, json, createPathCallback) {
 	
 	function done() {
 		// Check if the full path exists
+		
+		pathToCreate = user.toVirtualPath(pathToCreate); // API.listFiles wants a virtual path!
+		
 		API.listFiles(user, {pathToFolder: pathToCreate}, listFileResult);
 		
 		function listFileResult(err, json) {
@@ -1361,7 +1364,7 @@ var mimeMap = {
 	jpg: "image/jpeg",
 	js: "application/x-javascript",
 	midi: "audio/x-midi",
-	mp3: "audio/mpeg"
+	mp3: "audio/mpeg",
 	mpeg: "video/mpeg",
 	ogg: "audio/vorbis",
 	pdf: "application/pdf",

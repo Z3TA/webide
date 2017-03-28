@@ -4,12 +4,12 @@
 	
 	EDITOR.addTest(function testReadFromDisk(callback) {
 		
-		var json = {path: "README.txt", returnBuffer: false, encoding: "utf8"};
+		var json = {path: "test.txt", returnBuffer: false, encoding: "utf8"};
 		
 		CLIENT.cmd("readFromDisk", json, function(err, json) {
 			if(err) throw err
 			else {
-				if(json.path.indexOf("README.txt") == -1) throw new Error("path=" + path);
+				if(json.path.indexOf("test.txt") == -1) throw new Error("path=" + path);
 				if(json.data.length < 10) throw new Error("json.data.length=" + json.data.length);
 				
 				callback(true);
@@ -20,7 +20,7 @@
 	
 	EDITOR.addTest(function testGetFileSizeOnDisk(callback) {
 		
-		var json = {path: "README.txt"};
+		var json = {path: "test.txt"};
 		
 		CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
 			if(err) throw err
@@ -66,16 +66,16 @@
 	
 	EDITOR.addTest(function testListFiles(callback) {
 		
-		var json = {pathToFolder: "bin/"};
+		var json = {pathToFolder: "testfolder/"};
 		
 		CLIENT.cmd("listFiles", json, function(err, json) {
 			if(err) throw err
 			else {
 				
-				// Make sure jzedit is in the list
+				// Make sure testfile.txt is in the list
 				var list = json.list;
 				var hasFile = false;
-				var lookForFileName = "jzedit";
+				var lookForFileName = "testfile.txt";
 				
 				//console.log("list=" + JSON.stringify(list, null, 2));
 				
@@ -110,7 +110,7 @@
 			}
 		});
 		
-	});
+	}, 1);
 	
 	EDITOR.addTest(function testConnect(callback) {
 		
