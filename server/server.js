@@ -7,14 +7,11 @@ var APC = String.fromCharCode(159);
 
 var API = require("./server_api.js");
 
-/*
 
-API.foo = require("server_plugin/foo.js");
-API.bar = require("server_plugin/bar.js"); 
+// Server plugin API's
+API.SSG = require("./plugin/static_site_generator/ssg-api.js");
 
-todo: Make it possible to call server method foo.baz so you can group many server api's under the same namespace
 
-*/
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
@@ -166,23 +163,41 @@ function connection(connection) {
 			}
 			else {
 				
-				if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + message});
+				var commands = command.split(".");
 				
-				var funToRun = API[command];
+				var funToRun;
 				
-				funToRun(user, json, function(err, answer) {
-					if(err) {
-						log(err);
-						log(err.stack);
-						console.trace("Stack ...")
-						
-						send({error: "API error: " + err.message + ""});
-						//send({error: "API error (" + err.message + "): " + message});
-					}
-					else {
-						send({resp: answer});
-					}
-				}, userConnectionId);
+				if(commands.length > 1) {
+					// foo.bar.baz
+					funToRun = API;
+					for(var i=0; i<commands.length; i++) funToRun = funToRun[commands[i]];
+
+				}
+				else {
+					if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + message});
+					
+					funToRun = API[command];
+
+				}
+				
+				if (typeof funToRun !== "function") {
+					send({error: "API error: Unknown command=" + command});
+				}
+				else {
+					funToRun(user, json, function(err, answer) {
+						if(err) {
+							log(err);
+							log(err.stack);
+							console.trace("Stack ...")
+							
+							send({error: "API error: " + err.message + ""});
+							//send({error: "API error (" + err.message + "): " + message});
+						}
+						else {
+							send({resp: answer});
+						}
+					}, userConnectionId);
+				}
 				
 			}
 			
@@ -463,7 +478,7 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 User.prototype.toVirtualPath = function toVirtualPath(realPath) {
 	var user = this;
 	
-	console.log(user.name + " toVirtualPath=" + realPath);
+	console.log(user.name + " toVirtualPath realPath=" + realPath);
 	
 	if(!user.rootPath) {
 		console.log("No need to translate (no rootPath)");

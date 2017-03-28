@@ -43,7 +43,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Replace localStorage with EDITOR.storage in SSG
+Should the SSG work on the client or on the server ... ?
+
+SSG build process must run on the server because of eval machine etc
 
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
 Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
@@ -231,8 +233,13 @@ Fix the bug (like five years later after fixing all isses that comes up just for
 Run the tests (and make sure there are no errors)
 
 
+
+
+
 BUGS (and issues)
 =================
+
+Move dialogs when resizing!
 
 users .localStorage file is sometimes currupted ... } is inserted instead of a ,
 

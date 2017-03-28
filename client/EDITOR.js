@@ -859,29 +859,11 @@ EDITOR.lastKeyPressed = "";
 	EDITOR.copyFile = function(from, to, callback) {
 		// Copies a file from one location to another location, can be local file-system or a remote connection
 		
-		var returnBuffer = true;
-		var encoding = "binary";
-		var inputBuffer = true;
-		
-		EDITOR.readFromDisk(from, function(err, path, buffer) {
-			
-			if(err) {
-				console.warn("Copy failed! Unable to read file: " + err.message);
-				callback(err, to);
-			}
-			else {
-				EDITOR.saveToDisk(to, buffer, function(err, path) {
-					
-					if(err) console.warn("Copy failed! Unable to write file path=" + to + ": " + err.message);
-					
-					callback(err, to);
-					
-					
-				}, inputBuffer, encoding);
-			}
-			
-		}, returnBuffer, encoding)
-		
+		CLIENT.cmd("copyFile", {from: from, to: to}, function(err, json) {
+			if(err) callback(err);
+			else callback(null, json.to);
+		});
+
 	}
 	
 	EDITOR.fileSaveDialog = function(defaultPath, callback) {

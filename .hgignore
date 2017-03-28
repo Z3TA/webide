@@ -2,9 +2,9 @@
 error.log
 spellcheck-worker-debug.log
 bootstrap.url
-plugin/static_site_generator/demo/build.log
-plugin/static_site_generator/demo/preview/*
-plugin/static_site_generator/demo/public/*
+userdirs/demo/static_site_demo/preview/*
+userdirs/demo/static_site_demo/public/*
+userdirs/demo/static_site_demo/build.log
 npm/*
 tests/_*
 temp/*

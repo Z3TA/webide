@@ -61,6 +61,16 @@
 		repoPw: ""
 	}
 	
+	if(EDITOR.user == "demo") {
+		// Virtual folder
+		demoSite.projectFolder = "/static_site_demo/";
+		demoSite.source = "/static_site_demo/source/";
+		demoSite.preview = "/static_site_demo/preview/";
+		demoSite.publish = "/static_site_demo/public/";
+		demoSite.template = "/static_site_demo/template.htm";
+		demoSite.projectFolder = "/static_site_demo/";
+	}
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
@@ -68,14 +78,17 @@
 		unload: unload,
 	});
 	
+	function getSites() {
+		sites = EDITOR.storage.getItem("cmsjz_sites") ? JSON.parse(EDITOR.storage.getItem("cmsjz_sites")) : [demoSite];
+	}
+	
 	function load() {
 		// Called when the module is loaded
 		
 		//alertBox("loading");
 		
-		if(!EDITOR.storage.ready()) throw new Error("storage not ready!");
+		EDITOR.on("storageReady", getSites);
 		
-		sites = EDITOR.storage.getItem("cmsjz_sites") ? JSON.parse(EDITOR.storage.getItem("cmsjz_sites")) : [demoSite];
 		
 		var keyF9 = 120;
 		var keyEscape = 27;
@@ -106,10 +119,8 @@
 		
 		bootstrap();
 		
-		// Start web server on localhost so we can "capture" quick edits ...
-		var http = require("http");
-		httpServer = http.createServer(httpRequest);
-		httpServer.listen("13377", "127.0.0.1"); // Lets hope the port is not in use ...
+
+		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 		if(EDITOR.user == "demo") {
 		// Open demo site if no file is open
@@ -139,8 +150,6 @@
 		
 		//alertBox("UNloading");
 		
-		httpServer.close();
-		
 		EDITOR.removeMenuItem(menuItem);
 		
 		SSG_cleanup(); // closePreview();
@@ -162,49 +171,6 @@
 			footer.removeChild(manager);
 			EDITOR.resizeNeeded();
 		}
-		
-	}
-	
-	function httpRequest(request, response) {
-		
-		var url = require("url");
-		
-		var addr = request.url;
-		var ip = request.headers["x-real-ip"] ? request.headers["x-real-ip"] : request.connection.remoteAddress;
-		var objUrl = url.parse(addr,true);
-		var query = objUrl.query;
-		var path = objUrl.pathname;
-		
-		var logMsg = "ip=" + ip + " site=" +  request.headers.host + " path=" + path + " " + JSON.stringify(query, null, 2);
-		
-		
-		if(request.method == 'POST') {
-			processPost(request, response, function() {
-				var data = request.post["json"];
-				var json;
-				try {
-					json = JSON.parse(data);
-				}
-				catch(err) {
-					alertBox("Unable to parse incoming request from HTTP:<br>Parse error: " + err.message + "data=" + data + "");
-				}
-				
-				// Open document, place file caret , etc ...
-				
-				response.writeHead(200, "OK", {'Content-Type': 'text/plain; charset=utf-8', 'Access-Control-Allow-Origin': "*"});
-				response.end(logMsg);
-				
-				alertBox(JSON.stringify(null, 2));
-				
-			});
-		}
-		else {
-			response.writeHead(200, "OK", {'Content-Type': 'text/plain; charset=utf-8', 'Access-Control-Allow-Origin': "*"});
-			response.end("Nu blev det fel. Vänligen prova igen. Gjorde du en HTTP POST!?");
-		}
-		
-		
-		
 		
 	}
 	
@@ -570,7 +536,7 @@
 			
 			var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 			selectedSite = sites[selectedSiteIndex];
-			EDITOR.storage.setItem(cmsjz_selectedSiteName, selectedSite.name);
+			EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
 			
 			inputSiteName.value = selectedSite.name;
 			inputProjectFolder.value = selectedSite.projectFolder;
@@ -1995,213 +1961,13 @@
 	
 	function compile(source, destination, publish, callback) {
 		
-		var url = require("url");
-		var parse = url.parse(destination);
-		var protocol = parse.protocol;
+		CLIENT.cmd("SSG.compile", {source: source, destination: destination, publish: publish}, function(err, json) {
+			
+			if(err) throw err;
+			else callback(json.ssgWorkerExitCode);
+
+		});
 		
-		if(protocol) protocol = protocol.replace(/:/g, "").toLowerCase();
-		
-		console.log("protocol: " + protocol);
-		
-		console.log("source=" + JSON.stringify(url.parse(source), null, 2));
-		console.log("destination=" + JSON.stringify(url.parse(destination), null, 2));
-		
-		if(EDITOR.remoteProtocols.indexOf(protocol) != -1) {
-			// We will need to connect to the remote location before uploading files
-			var serverAddress = parse.host;
-			var auth = parse.auth, user, passw;
-			if(auth) {
-				auth = auth.split(":");
-				if(auth.length == 2) {
-					user = auth[0];
-					passw = auth[1];
-				}
-			}
-			else if(selectedSite.pubUser.length > 0) {
-				user = selectedSite.pubUser;
-				passw = selectedSite.pubPw;
-			}
-			var keyPath = selectedSite.key;
-			
-			var workingDir = parse.path;
-			
-			EDITOR.connect(fsReady, protocol, serverAddress, user, passw, keyPath, workingDir);
-		}
-		else {
-			// Asume local file-system
-			fsReady(null, EDITOR.workingDirectory);
-		}
-		
-		function fsReady(err, workingDir) {
-			
-			if(err) {
-				alertBox(err.message);
-				return true;
-			};
-			
-			console.log("Compiling: " + source);
-			
-			var childProcess = require("child_process");
-			var path = require('path');
-			
-			var buildScript = path.join(require("dirname"), "./client/plugin/static_site_generator/build.js");
-			
-			console.log("buildScript=" + buildScript);
-			console.log("source=" + source);
-			var workingDir = path.join(source, "../");
-			//console.log("workingDir=" + workingDir);
-			var node_modules = path.join(source, "../node_modules/"); // Node runtime wont check node_modules folder, so we'll have to explicity set it in NODE_PATH enviroment variable
-			//console.log("node_modules=" + node_modules);
-			
-			var fs = require("fs");
-			
-			var filesToSave = 0;
-			var doneCompiling = false;
-			var workerExitCode = -1;
-			
-			var foldersExist = [];
-			var folderAboutToBeCreated = [];
-			var waitingList = [];
-			
-			var args = [source, destination];
-			
-			if(publish) args.push( "-publish");
-			
-			var worker = childProcess.fork(buildScript, args, {
-				cwd: workingDir,
-				env: {"NODE_PATH": node_modules}, // Tell node runtime to check for modules in this folder
-			});
-			
-			// PS. It's impossible to caputre stdout and stderr from the fork. You'll have to use process.send() to send message back here
-			
-			worker.on('message', function worker_message(data) {
-				//alertBox(data);
-				console.log("SSG: " + JSON.stringify(data));
-				
-				if(data.type == "file") {
-					filesToSave++;
-					createFile(data.path, data.text)
-				}
-				else if(data.type == "copy") {
-					filesToSave++;
-					copyFile(data.from, data.to)
-				}
-				else if(data.type == "debug") {
-					console.log(data.msg);
-				}
-				else if(data.type == "error") {
-					console.log(data);
-					if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) alertBox("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
-					else if(data.code == "ENOENT") alertBox("Problem occured when opening file...\n" + data.stack);
-					else alertBox(data.stack);
-				}
-				else throw new Error("Unknown message from worker: " + JSON.stringify(data));
-				
-			});
-			worker.on('error', function worker_error(code) {
-				console.warn("SSG: Error code=" + code);
-				alertBox("SSG worker error code=" + code);
-			});
-			worker.on('exit', function worker_exit(code) {
-				console.log("SSG: Exit! code=" + code);
-				if(code != 0) throw new Error("The process exited with code=" + code + "! (It means something went wrong)");
-				else {
-					doneCompiling = true;
-					workerExitCode= code;
-					checkDone();
-				}
-			});
-			
-			function createFile(filePath, text) {
-				
-				var folder = UTIL.getDirectoryFromPath(filePath);
-				
-				if(foldersExist.indexOf(folder) != -1) {
-					console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
-					EDITOR.saveToDisk(filePath, text, fileCreated);
-				}
-				else {
-					waitingList.push(function() { createFile(filePath, text) });
-					
-					if(folderAboutToBeCreated.indexOf(folder) == -1) createPath(folder);
-				}
-				
-				function fileCreated(err, path) {
-					if(err) {
-						alertBox("<b>" + err.message + "</b><br> Attempting to save: " + filePath);
-						throw err;
-					}
-					else {
-						fileSaved(filePath);
-						runWaitingList();
-					}
-				}
-			}
-			
-			function copyFile(from, to) {
-				
-				var folder = UTIL.getDirectoryFromPath(to);
-				
-				if(foldersExist.indexOf(folder) != -1) {
-					EDITOR.copyFile(from, to, fileCopied);
-				}
-				else {
-					waitingList.push(function() { copyFile(from, to) });
-					
-					if(folderAboutToBeCreated.indexOf(folder) == -1) createPath(folder);
-				}
-				
-				function fileCopied(err, path) {
-					if(err) {
-						alertBox("Unable to copy file (" + err.message + ")\n" + path);
-					}
-					else {
-						fileSaved(to);
-						runWaitingList();
-					}
-				}
-			}
-			
-			function createPath(folder, createPathCallback) {
-				console.log("Creating path=" + folder);
-				folderAboutToBeCreated.push(folder);
-				EDITOR.createPath(folder, function(err) {
-					if(err) throw err;
-					else {
-						folderAboutToBeCreated.splice(folderAboutToBeCreated.indexOf(folder, 1));
-						foldersExist.push(folder);
-						
-						//createPathCallback();
-						
-						runWaitingList();
-					}
-				});	
-			}
-			
-			function runWaitingList() {
-				console.log("Items in waiting list: waitingList.length=" + waitingList.length);
-				if(waitingList.length > 0) waitingList.shift()();
-			}
-			
-			function fileSaved(path) {
-				console.log("Saved file path=" + path);
-				filesToSave--;
-				
-				console.log("Files left to be saved: filesToSave=" + filesToSave);
-				
-				if(filesToSave == 0) checkDone();
-			}
-			
-			function checkDone(exitCode) {
-				if(filesToSave == 0 && doneCompiling) {
-					
-					callback(workerExitCode);
-				}
-				else console.log("filesToSave=" + filesToSave + " exitCode=" + exitCode);
-			}
-			
-			
-		}
 	}
 	
 	function computeIgnoreTransform(srcHTML, rawMainHtml) {

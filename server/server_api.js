@@ -175,6 +175,37 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 	}
 }
 
+API.copyFile = function copyFile(user, json, callback) {
+	
+	var source = user.translatePath(json.from);
+	var target = user.translatePath(json.to);
+	
+	var cbCalled = false;
+	
+	var fs = require("fs");
+	
+	var rd = fs.createReadStream(source);
+	rd.on("error", function(err) {
+		done(err);
+	});
+	
+	var wr = fs.createWriteStream(target);
+	wr.on("error", function(err) {
+		done(err);
+	});
+	wr.on("close", function(ex) {
+		done();
+	});
+	rd.pipe(wr);
+
+	function done(err) {
+		if (!cbCalled) {
+			callback(err, {to: target});
+			cbCalled = true;
+		}
+	}
+}
+
 
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {

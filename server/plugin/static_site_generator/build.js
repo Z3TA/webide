@@ -88,11 +88,12 @@ var ALLDOCUMENTS = [];
 var DONOTCHANGE = ["xml", "asp", "nodejs"]; // List of file types that should not change (before evaluated)
 
 
-
+/*
 function log(txt) {
 	var fs = require("fs");
 	fs.appendFileSync("build.log", txt + "\n");
 }
+*/
 
 function main() {
 	console.time("walk");
@@ -1648,7 +1649,7 @@ function parseError(doc, scriptCount, err) {
 		//log("startIndex=" + startIndex);
 	}
 	var upUntil = str.substr(0, startIndex);
-	var lines = UTIL.occurrences(upUntil, "\n");
+	var lines = occurrences(upUntil, "\n");
 	
 	line += lines + 2;
 	
@@ -1661,7 +1662,7 @@ function parseError(doc, scriptCount, err) {
 	
 }
 
-function UTIL.occurrences(string, subString, allowOverlapping) {
+function occurrences(string, subString, allowOverlapping) {
 	/** Function count the occurrences of substring in a string;
 		* @param {String} string   Required. The string;
 		* @param {String} subString    Required. The string to search for;
