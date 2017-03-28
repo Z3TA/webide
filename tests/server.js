@@ -110,7 +110,7 @@
 			}
 		});
 		
-	}, 1);
+	});
 	
 	EDITOR.addTest(function testConnect(callback) {
 		
@@ -128,5 +128,36 @@
 		});
 		
 	});
+	
+	
+	EDITOR.addTest(function testServe(callback) {
+		
+		var json = {folder: "/testfolder/"};
+		
+		CLIENT.cmd("serve", json, function(err, json) {
+			if(err) throw err
+			else {
+				
+				var url = json.url;
+				
+				if(!url) throw new Error("url expected!");
+				
+				// Launch http request
+				
+				UTIL.httpGet(url, function(err, text) {
+					
+					if(err) throw err;
+					
+					callback(true);
+					
+				});
+				
+				
+			}
+		});
+		
+	}, 1);
+	
+	
 	
 })();
