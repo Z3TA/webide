@@ -43,13 +43,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Should the SSG work on the client or on the server ... ?
+test serve api!
 
-SSG build process must run on the server because of eval machine etc
+server "serve" api, that shares a folder via http
 
 How to preview a SSG generated web page that is stored on the server !?
 
-server "serve" api, that shares a folder via http
+Should the SSG work on the client or on the server ... ?
+SSG build process must run on the server because of eval machine etc
 
 
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
@@ -65,6 +66,10 @@ Make the SSG work in the browser
 
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
 where each change will be mirrored to the other client.
+
+when someone logs in as you, you get the option to disallow it, or (default) enter colaboration mode
+when you log in as someone else, you get the option to kill the other session, or (default) enter colaboration mode
+
 
 Fix problem with endless mirror loops!
 
