@@ -1457,6 +1457,10 @@ function createHttpEndpoint(folder, user, callback) {
 		var filePath = path.join(localFolder, urlPath);
 		
 		if(filePath.indexOf(folder) != 0) {
+			console.log("filePath=" + filePath);
+			console.log("localFolder=" + localFolder);
+			console.log("urlPath=" + urlPath);
+			
 			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
 			response.end("Bad path: " + urlPath);
 			return;

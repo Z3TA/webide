@@ -855,6 +855,15 @@ var UTIL = {
 		
 		return path;
 		
+	},
+	
+	urlProtocol: function urlProtocol(url) {
+		var protocolIndex = url.indexOf("://");
+		
+		if(protocolIndex != -1) return fullPath.substr(0, protocolIndex).toLowerCase();
+	
+		else return "file"; // file://C:\Windows\blah
+		
 	}
 
 }

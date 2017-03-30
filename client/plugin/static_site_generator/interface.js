@@ -42,7 +42,7 @@
 	var updatePreviewOnChange;
 	
 	var httpServer;
-	
+	var previewBaseUrl;
 	
 	var path = require("path");
 	var demoSite = {
@@ -588,11 +588,11 @@
 		
 		var labelPreview = document.createElement("label");
 		labelPreview.setAttribute("for", "inputPreviewFolder");
-		labelPreview.appendChild(document.createTextNode("Preview directory:")); // Language settings!?
+		labelPreview.appendChild(document.createTextNode("Preview:")); // Language settings!?
 		
 		var labelPublish = document.createElement("label");
 		labelPublish.setAttribute("for", "inputPublishFolder");
-		labelPublish.appendChild(document.createTextNode("Publish URL:")); // Language settings!?
+		labelPublish.appendChild(document.createTextNode("Publish:")); // Language settings!?
 		
 		var labelTemplate = document.createElement("label");
 		labelTemplate.setAttribute("for", "inputTemplate");
@@ -649,13 +649,14 @@
 		inputPreviewFolder.setAttribute("id", "inputPreviewFolder");
 		inputPreviewFolder.setAttribute("class", "inputtext path");
 		inputPreviewFolder.setAttribute("size", "69");
+		inputPreviewFolder.setAttribute("title", "Where files for preview are sent: A file-system path or an URL to FTP/FTPS/FTPS");
 		
 		inputPublishFolder = document.createElement("input");
 		inputPublishFolder.setAttribute("type", "text");
 		inputPublishFolder.setAttribute("id", "inputPublishFolder");
 		inputPublishFolder.setAttribute("class", "inputtext path");
 		inputPublishFolder.setAttribute("size", "69");
-		inputPublishFolder.setAttribute("title", "A file system path or an URL to FTP/FTPS/FTPS");
+		inputPublishFolder.setAttribute("title", "Where files for publishing are sent: A file-system path or an URL to FTP/FTPS/FTPS");
 		
 		inputTemplate = document.createElement("input");
 		inputTemplate.setAttribute("type", "text");
@@ -1104,65 +1105,81 @@
 		
 		compile(site.source, site.preview, false, function compiled_static() {
 			
-			var path = require('path');
+			var protocol = UTIL.urlProtocol(site.preview);
 			
-			var previewWinOpened = false;
-			
-			if(EDITOR.currentFile) {
-				var fileName = EDITOR.currentFile.name;
-				var fileType = EDITOR.currentFile.fileExtension;
-				
-				if(EDITOR.currentFile.path.indexOf(site.source) != -1 // Inside source path?
-				&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
-				&& fileName != "header.htm" && fileName != "footer.htm") { 
-					
-					// Preview the current file opened in the editor !
-					
-					// url needs to have / instead of \ for path delimiter
-					var url = "file://" + EDITOR.currentFile.path.replace(site.source, site.preview).replace(/\\/g, "/");
-					
-					openPreviewWin(url, callback)
-					
-					previewWinOpened = true;
-					
-				}
-				else {
-					console.log("Not showing preview window because:\nEDITOR.currentFile.path=" + EDITOR.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
-				}
+			if(protocol != "file") {
+				alertBox("Preview uploaded to: " + site.preview);
+				return;
 			}
 			
-			if(!previewWinOpened) {
-				// Open the index page
-				var url = "file://" + site.preview.replace(/\\/g, "/");
+			CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
 				
-				notEditableReason = "No file open";
-				editable = false;
+				if(err) throw err;
 				
-				EDITOR.listFiles(site.preview, function(err, list) {
+				var url = json.url;
+				
+				previewBaseUrl = url;
+				
+				// Decide what file to request
+				
+				var previewWinOpened = false;
+				
+				if(EDITOR.currentFile) {
+					var fileName = EDITOR.currentFile.name;
+					var fileType = EDITOR.currentFile.fileExtension;
 					
-					if(err) throw err;
+					if(EDITOR.currentFile.path.indexOf(site.source) != -1 // Inside source path?
+					&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
+					&& fileName != "header.htm" && fileName != "footer.htm") { 
+						
+						// Preview the current file opened in the editor !
+						
+						// url needs to have / instead of \ for path delimiter
+						url += EDITOR.currentFile.path.replace(site.source, "").replace(/\\/g, "/");
+						
+						openPreviewWin(url, callback)
+						
+						previewWinOpened = true;
+						
+					}
+					else {
+						console.log("Not showing preview window because:\nEDITOR.currentFile.path=" + EDITOR.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
+					}
+				}
+				
+				if(!previewWinOpened) {
+					// Open the index page
 					
-					var page = "";
+					notEditableReason = "No file open";
+					editable = false;
 					
-					for (var i=0; i<list.length; i++) {
-						if(list[i].name.match(/\index\.html?/i) != null) {
-							page = list[i].name;
-							break;
+					EDITOR.listFiles(site.preview, function(err, list) {
+						
+						if(err) throw err;
+						
+						var page = "";
+						
+						for (var i=0; i<list.length; i++) {
+							if(list[i].name.match(/\index\.html?/i) != null) {
+								page = list[i].name;
+								break;
+							}
 						}
-					}
-					
-					if(page) {
-						if(url.substr(url.length-1) != "/") url += "/";
-						url += page;
-					}
-					
-					openPreviewWin(url, callback);
-					
-				});
-			}
-			
-			return false;
+						
+						if(page) {
+							if(url.substr(url.length-1) != "/") url += "/";
+							url += page;
+						}
+						else throw new Error("Unable to find index page in preview directory!");
+						
+						openPreviewWin(url, callback);
+						
+					});
+				}
+			});
 		});
+		
+		return false;
 	}
 	
 	function openPreviewWin(url, callback) {
@@ -2025,13 +2042,13 @@
 			
 			// Get the URL of the page/file in preview
 			var url = previewWin.window.location.href;
-			var previePath = localFilePath(url, site);
+			var previewPath = localFilePath(url, site);
 			var rawMainHtml = "";
 			var srcHTML = "";
-			
 			var sourceFilePath = localFilePath(url, site);
 			
-			sourceFilePath = sourceFilePath.replace(site.preview, site.source);
+			previewPath = previewPath.replace(previewBaseUrl, site.preview);
+			sourceFilePath = sourceFilePath.replace(previewBaseUrl, site.source);
 			
 			console.log("url=" + url);
 			console.log("sourceFilePath=" + sourceFilePath);
@@ -2045,7 +2062,7 @@
 			
 			// Get the source code for the compiled page in review, in order to compute ignoreTransform
 			
-			EDITOR.readFromDisk(previePath, function gotPreviewSource(err, path, txt) {
+			EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
 				
 				if(err) throw err;
 				
