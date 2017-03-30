@@ -1330,7 +1330,9 @@ API.serve = function serve(user, json, callback) {
 	
 	var folder = user.translatePath(json.folder);
 	
-	createHttpEndpoint(folder, function(err, url) {
+	console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+	createHttpEndpoint(folder, user, function(err, url) {
 		callback(err, {url: url});
 	});
 	
@@ -1380,7 +1382,7 @@ var mimeMap = {
 	zip: "application/x-compressed-zip"
 }
 
-function createHttpEndpoint(folder, callback) {
+function createHttpEndpoint(folder, user, callback) {
 	
 	for(var dir in httpEndpoints) {
 		if(httpEndpoints[dir] == folder) {
@@ -1393,9 +1395,7 @@ function createHttpEndpoint(folder, callback) {
 	
 	httpEndpoints[dir] = folder;
 	
-	var url = makeUrl(dir);
-	
-	if(httpServer) callback(null, url);
+	if(httpServer) callback(null, makeUrl(dir));
 	else {
 		
 		var http = require('http');
@@ -1407,7 +1407,9 @@ function createHttpEndpoint(folder, callback) {
 			
 			if(err) return callback(err);
 			else {
-
+				
+				var url = makeUrl(dir);
+				
 				callback(err, url);
 
 				console.log("HTTP server listening on: %s", url);
@@ -1418,17 +1420,22 @@ function createHttpEndpoint(folder, callback) {
 	
 	function handleRequest(request, response){
 		
+		
+		var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+		
 		var reqUrl = require('url').parse(request.url);
 		
 		var urlPath = reqUrl.path;
 		
-		var dirs = path.split("/");
+		console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath);
 		
-		var firstDir = dirs[0];
+		var dirs = urlPath.split("/");
+		
+		var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
 		
 		if(!httpEndpoints.hasOwnProperty(firstDir)) {
 			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Unknown endpoint: " + firstDir);
+			response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
 			return;
 		}
 
@@ -1438,6 +1445,14 @@ function createHttpEndpoint(folder, callback) {
 		var localFolder = httpEndpoints[firstDir];
 		
 		urlPath = urlPath.replace(firstDir + "/", "");
+		
+		
+		if(urlPath == "") {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("No file in url=: " + urlPath);
+			return;
+		}
+		
 		
 		var filePath = path.join(localFolder, urlPath);
 		
@@ -1450,9 +1465,9 @@ function createHttpEndpoint(folder, callback) {
 		
 		var fileExtension = UTIL.getFileExtension(urlPath);
 		
-		if(!mimeMap.hasOwnProperty(fileExtension)) {
+		if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
 			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Bad file type: " + fileExtension);
+			response.end("Bad file type: '" + fileExtension + "'");
 			return;
 		}
 		
@@ -1461,13 +1476,30 @@ function createHttpEndpoint(folder, callback) {
 		var stat = fs.stat(filePath, function(err, stats) {
 			
 			if(err) {
+				
 				response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-				response.end(err.message);
+				
+				if(err.code == "ENOENT") {
+					var virtualPath = user.toVirtualPath(filePath);
+					response.end("File not found: " + virtualPath);
+				}
+				else {
+					response.end(err.message);
+				}
+				
+				
+			}
+			else if(stats == undefined) throw new Error("No stats!");
+			else if(!stats.isFile()) {
+				
+				response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+				response.end("Not a file: " + filePath);
+				
 			}
 			else {
 				response.writeHead(200, {
 					'Content-Type': mimeMap[fileExtension],
-					'Content-Length': stat.size
+					'Content-Length': stats.size
 				});
 				
 				var readStream = fs.createReadStream(filePath);
@@ -1482,7 +1514,52 @@ function createHttpEndpoint(folder, callback) {
 	
 	
 	function makeUrl(dir) {
-		return "http://" + httpServer.address.address + ":" + httpServer.address.port + "/" + dir + "/";
+		
+		if(!httpServer) throw new Error("No httpServer available!");
+		if(!httpServer.address) {
+			console.log(httpServer);
+			throw new Error("httpServer has no address property!");
+		}
+		
+		var address = httpServer.address();
+		var port = address.port;
+		
+		
+		// Find servers IP
+		var ipList = [];
+		var os = require('os');
+		var ifaces = os.networkInterfaces();
+
+		Object.keys(ifaces).forEach(function (ifname) {
+		  var alias = 0;
+
+		  ifaces[ifname].forEach(function (iface) {
+			if ('IPv4' !== iface.family || iface.internal !== false) {
+			  // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+			  return;
+			}
+
+			if (alias >= 1) {
+			  // this single interface has multiple ipv4 addresses
+			  console.log(ifname + ':' + alias, iface.address);
+			} else {
+			  // this interface has only one ipv4 adress
+			  console.log(ifname, iface.address);
+			}
+			++alias;
+			
+			ipList.push(iface.address);
+			
+		  });
+		});
+		
+		
+		
+		//console.log(address);
+		console.log("ipList=" + JSON.stringify(ipList));
+		
+		
+		return "http://" + ipList[0] + ":" + port + "/" + dir + "/";
 	}
 	
 	function randomString(letters) {

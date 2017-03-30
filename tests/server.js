@@ -142,11 +142,18 @@
 				
 				if(!url) throw new Error("url expected!");
 				
+				var fileUrl = url + "testfile.txt";
+
+				
 				// Launch http request
 				
-				UTIL.httpGet(url, function(err, text) {
+				UTIL.httpGet(fileUrl, function(err, text) {
 					
 					if(err) throw err;
+					
+					if(text.length == 0) throw new Error("No text retrieved");
+					
+					console.log("text=" + text);
 					
 					callback(true);
 					

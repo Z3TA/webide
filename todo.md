@@ -43,11 +43,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-storing session, unsaved files, no longer seem to work!!!!?
 
-test serve api!
-
-server "serve" api, that shares a folder via http
 
 How to preview a SSG generated web page that is stored on the server !?
 
