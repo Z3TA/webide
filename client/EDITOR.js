@@ -751,13 +751,13 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	
-	EDITOR.readFromDisk = function(path, callback, returnBuffer, encoding) {
+	EDITOR.readFromDisk = function readFromDisk(path, callback, returnBuffer, encoding) {
 		
 		console.log("Reading file: " + path);
 		
 		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
-		CLIENT.cmd("readFromDisk", json, function(err, json) {
+		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
 			if(err) callback(err);
 			else callback(null, json.path, json.data);
 		});
