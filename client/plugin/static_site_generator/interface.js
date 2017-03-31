@@ -982,44 +982,23 @@
 		return false;
 	}
 	
-	function previewPage(site, callback) {
+	function previewPage(site, callback, edit, sourceFile) {
 		
 		console.log("Previewing " + site.name);
 		
 		var errorOccured = false;
 		
-		// Witch file should we preview ?
-
-		// Is any of the source files opened ?
-		var openedFilesArray = [];
-		
-		for(var file in EDITOR.files) openedFilesArray.push(EDITOR.files[file]);
-		
-		var sourceFilePath = filterFiles(openedFilesArray);
-		
-		if(sourceFilePath) {
-			if(!EDITOR.files.hasOwnProperty(sourceFile)) throw new Error("Does not exist in EDITOR.files: " + sourceFile);
-			compileIt(EDITOR.files[sourceFile]);
-		}
-		else {
-			// Open any of the source files
-			EDITOR.listFiles(site.source, function sourceFileList(err, list) {
-				var sourceFilePath = filterFiles(list);
-				
-				if(sourceFilePath) EDITOR.openFile(sourceFilePath, undefined, function(err, file) {
-					if(err) throw err;
-					compileIt(file);
-				});
-				else {
-					alertBox("Unable to pick a source file!");
-					compileIt(undefined);
-				}
-
+		if(sourceFile == undefined) {		
+			pickFileToPreview(site, function(err, file) {
+				if(err) throw err;
+				compileIt(file);
 			});
 		}
-		
+		else compileIt(sourceFile);
 		
 		function compileIt(sourceFile) {
+			
+			if(!sourceFile.isSaved) return alertBox("Save file before preview:\n" + sourceFile.path);
 			
 			compile(site.source, site.preview, false, function compiled_static() {
 				
@@ -1041,7 +1020,7 @@
 					if(sourceFile) {
 						url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 						
-						openPreviewWin(url, callback)
+						openPreviewWin();
 
 					}
 
@@ -1070,48 +1049,66 @@
 							}
 							else throw new Error("Unable to find index page in preview directory!");
 							
-							openPreviewWin(url, callback);
+							openPreviewWin();
 							
 						});
 					}
+					
+					function openPreviewWin() {
+						
+						if(edit) {
+							
+							// Get the source code for the compiled page in review, in order to compute ignoreTransform
+						
+							var previewPath = sourceFile.path.replace(site.source, site.preview);
+							
+							EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
+								
+								if(err) throw err;
+
+								var compiledSource = txt;
+								var compliedSourceBodyTag = "main";
+						
+								loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
+
+								// Change buttonWysiwyg state to "active"
+								if(buttonWysiwyg) {
+									buttonWysiwyg.setAttribute("class", "button active");
+									buttonPreview.setAttribute("class", "button active");
+								}
+								
+								
+							});
+
+						}
+						else loadWysiwygEditor();
+
+						
+						function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
+							
+							var bodyTag = "main";
+							var onlyPreview = (edit == false);
+							var whenOpened = callback;
+							
+							if(previewWin) previewWin.close();
+							
+							previewWin = new WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened, compiledSource, compliedSourceBodyTag);
+							
+						}
+
+
+					}
+					
 				});
 			});
 		}
 		
 		return false;
-		
-		function filterFiles(fileList) {
-			
-			if(Object.prototype.toString.call( fileList ) !== '[object Array]') throw new Error("fileList must be an array!");
-			
-			for(var i=0; i<fileList.length; i++) {
-				
-				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
-				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
-				
-				if(fileList[i].path.indexOf(site.source) == 0 // A source file
-				&& fileList[i].name.match(/html?$/i) // We only like HTML code! :P
-				&& !fileList[i].name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
-				) return fileList[i].path;
-			}
-			
-			return null;
-		}
+
 		
 	}
 	
-	function openPreviewWin(url, callback) {
-		
-		if(previewWin) previewWin.close();
 
-		var sourceFile = EDITOR.currentFile;
-		var bodyTag = "main";
-		var onlyPreview = true;
-		var whenOpened = callback;
-
-		previewWin = new WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened);
-
-	}
 
 	
 	
@@ -1322,72 +1319,102 @@
 		
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
 
-
-		var sourceFile;
-	
-		// Open the file in the editor if it's not already open
-		if(EDITOR.files.hasOwnProperty(sourceFilePath)) {
-			sourceFile = EDITOR.files[sourceFilePath];
-			EDITOR.showFile(sourceFile); // Make sure it's the current one open
+		if(!wysiwygEnabled && previewWin) return previewWin.disableEdit(function() {
+		
+			if(buttonWysiwyg) {
+				buttonWysiwyg.setAttribute("class", "button");
+				buttonPreview.setAttribute("class", "button active");
+			}
 			
-			makeItEditable(null, sourceFile);
+		});
+		
+
+
+		// Witch file/page should we edit ?
+		// If we are previewing a file, then pick the file in preview
+		if(previewWin) {
+			var url = previewWin.previewWin.window.location.href;
+			var sourceFilePath = url.replace(previewBaseUrl, site.source);
+			
+			// Open the file in the editor if it's not already open
+			if(EDITOR.files.hasOwnProperty(sourceFilePath)) {
+				var sourceFile = EDITOR.files[sourceFilePath];
+				EDITOR.showFile(sourceFile); // Make sure it's the current one open
+				
+				makeItEditable(null, sourceFile);
+			}
+			else {
+				EDITOR.openFile(sourceFilePath, undefined, makeItEditable);
+			}
 		}
-		else {
-			EDITOR.openFile(sourceFilePath, undefined, makeItEditable);
-		}
-	
+		else pickFileToPreview(site, makeItEditable);
+
 		
 		function makeItEditable(err, sourceFile) {
 			
 			if(err) throw err;
-				
-			// Get the source code for the compiled page in review, in order to compute ignoreTransform
 			
-			var url = previewWin.window.location.href;
-			var previewPath = localFilePath(url, site);
+			var edit = true;
+			var callback = null;
 			
-			EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
-				
-				if(err) throw err;
-				
-				
-				if(previewWin) previewWin.close();
+			previewPage(site, callback, edit, sourceFile);
 
-				
-				var bodyTag = "main";
-				var onlyPreview = true;
-				var whenOpened = null;
-				var compiledSource = txt;
-				var compliedSourceBodyTag = "main";
-
-				previewWin = WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened, compiledSource, compliedSourceBodyTag);
-
-				
-				// Change buttonWysiwyg state to "active"
-				if(buttonWysiwyg) {
-					buttonWysiwyg.setAttribute("class", "button active");
-					buttonPreview.setAttribute("class", "button active");
-				}
-				
-				
-			});
 			
 		}
-
-		
-		function localFilePath(path, site) {
-			
-			return path.replace(previewBaseUrl, site.preview);
-			
-
-		}
-		
-		
-		
 		
 	}
 	
 	
+	function pickFileToPreview(site, callback) {
+		
+		// Calls back with (err,file)
+		
+		// Is any of the source files opened ?
+		var openedFilesArray = [];
+		
+		for(var file in EDITOR.files) openedFilesArray.push(EDITOR.files[file]);
+		
+		var sourceFilePath = chooseFilePath(openedFilesArray);
+		
+		if(sourceFilePath) {
+			if(!EDITOR.files.hasOwnProperty(sourceFilePath)) throw new Error("Does not exist in EDITOR.files: " + sourceFilePath);
+			callback(null, EDITOR.files[sourceFilePath]);
+		}
+		else {
+			// Open any of the source files
+			EDITOR.listFiles(site.source, function sourceFileList(err, list) {
+				
+				if(err) return callback(err);
+				
+				var sourceFilePath = chooseFilePath(list);
+				
+				if(sourceFilePath) EDITOR.openFile(sourceFilePath, undefined, callback);
+				else {
+					callback(new Error("Unable to pick a source file to preview/edit!"));
+				}
+
+			});
+		}
+		
+		function chooseFilePath(fileList) {
+			
+			if(Object.prototype.toString.call( fileList ) !== '[object Array]') throw new Error("fileList must be an array!");
+			
+			for(var i=0; i<fileList.length; i++) {
+				
+				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
+				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
+				
+				if(fileList[i].path.indexOf(site.source) == 0 // A source file
+				&& fileList[i].name.match(/html?$/i) // We only like HTML code! :P
+				&& !fileList[i].name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
+				) return fileList[i].path;
+			}
+			
+			return null;
+		}
+		
+	}
 	
 	
 	

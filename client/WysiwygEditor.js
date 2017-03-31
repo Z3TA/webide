@@ -75,20 +75,30 @@ todo: Make sure the source file is saved!
 		wysiwygEditor.onlyPreview = (onlyPreview == true);
 		wysiwygEditor.whenOpened = whenOpened;
 		
+		wysiwygEditor.ignoreSourceFileChange = true;
+		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML); // lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
+		
 		if(compiledSource) {
 			
 			if(compliedSourceBodyTag == undefined) compliedSourceBodyTag = "main";
+
+			var srcHTML = wysiwygEditor.getSourceCodeBody();
+			var rawMainHtml = getSourceCodeBody(compiledSource, compliedSourceBodyTag);
+			wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 			
-			wysiwygEditor.ignoreTransform = computeIgnoreTransform(wysiwygEditor.getSourceCodeBody(), getSourceCodeBody(compiledSource, compliedSourceBodyTag));
+			// Make sure there are no errors
+			var lbSrc = UTIL.occurrences(srcHTML, "\n");
+			var lbMain = UTIL.occurrences(rawMainHtml, "\n");
+			var removed = wysiwygEditor.ignoreTransform.removed.length;
+			var inserted = wysiwygEditor.ignoreTransform.inserted.length;
+			
+			if( (lbSrc - removed) != (lbMain - inserted) ) {
+				throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+			}
+			
 		}
 		else wysiwygEditor.ignoreTransform = null;
-			
 		
-		
-		wysiwygEditor.ignoreSourceFileChange = true;
-		wysiwygEditor.lineBreak = "\n";
-		
-
 		wysiwygEditorCounter++;
 		
 
@@ -356,6 +366,8 @@ todo: Make sure the source file is saved!
 		
 		
 		var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
+		
+		if(!body) throw new Error("Unable to find bodyTag=" + wysiwygEditor.bodyTag + " element!");
 		
 		var srcHTML = wysiwygEditor.getSourceCodeBody();
 		
@@ -1023,7 +1035,7 @@ todo: Make sure the source file is saved!
 				console.warn("previewWin dont have a body tag!");
 				if(dance) wysiwygEditor.positionate();
 				
-				attachFileChangeListener();
+				attachFileChangeListener(wysiwygEditor);
 				
 				return callback();
 			}
@@ -1117,8 +1129,17 @@ todo: Make sure the source file is saved!
 		
 	}
 	
-	WysiwygEditor.prototype.enableEdit = function enableEdit() {
+	WysiwygEditor.prototype.enableEdit = function enableEdit(callback) {
 		var wysiwygEditor = this;
+		
+		
+		if(runtime == "nw.js") {
+			var win = wysiwygEditor.previewWin.window;
+			var doc = win.document; // previewWin.document is not available in nw.js gui
+		}
+		else {
+			var doc = wysiwygEditor.previewWin.document;
+		}
 		
 		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
 			
@@ -1146,12 +1167,22 @@ todo: Make sure the source file is saved!
 		//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
 		
 		wysiwygEditor.onlyPreview = false;
+		
+		if(callback) callback();
 	}
 	
-	WysiwygEditor.prototype.disableEdit = function enableEdit() {
+	WysiwygEditor.prototype.disableEdit = function enableEdit(callback) {
 		var wysiwygEditor = this;
 		
 		// Disable content editable, but keep the window open for preview
+		
+		if(runtime == "nw.js") {
+			var win = wysiwygEditor.previewWin.window;
+			var doc = win.document; // previewWin.document is not available in nw.js gui
+		}
+		else {
+			var doc = wysiwygEditor.previewWin.document;
+		}
 		
 		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
 			
@@ -1168,6 +1199,8 @@ todo: Make sure the source file is saved!
 		body.oninput = null;
 		
 		wysiwygEditor.onlyPreview = true;
+		
+		if(callback) callback();
 		
 	}
 	
@@ -1448,29 +1481,6 @@ todo: Make sure the source file is saved!
 		
 	}
 	
-	function computeIgnoreTransform(srcHTML, rawMainHtml) {
-		
-		// Make sure they end with a line break
-		
-		
-		
-		
-		ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
-		
-		// Make sure there are no errors
-		var lbSrc = UTIL.occurrences(srcHTML, "\n");
-		var lbMain = UTIL.occurrences(rawMainHtml, "\n");
-		var removed = ignoreTransform.removed.length;
-		var inserted = ignoreTransform.inserted.length;
-		
-		if( (lbSrc - removed) != (lbMain - inserted) ) {
-			throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(ignoreTransform, null, 2));
-		}
-		
-		return ignoreTransform;
-	}
-
-
 	
 	function fixMessups(html) {
 		// Fix messed up headings: <h1><span style="font-size: 3em;">Fakta om APL</span><br></h1>
