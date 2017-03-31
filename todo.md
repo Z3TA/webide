@@ -43,7 +43,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Stuff inside body, that goes away during compile time ... Ignore remove on those. 
+WysiwygEditor: Stuff inside body, that goes away during compile time ... Ignore remove on those. 
 
 
 Replace the SSG WYSIWYG editor with the new WysiwygEditor.js
