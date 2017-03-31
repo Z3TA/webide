@@ -43,15 +43,23 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
-Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
-and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.
+onlyPreview mode on WyiwygEditor.js
+
 
 Replace the SSG WYSIWYG editor with the new WysiwygEditor.js
 
 Make WYSIWYG editor work in the browser
 
 Make the SSG work in the browser
+
+
+Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
+Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
+and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.
+
+
+Remove bootstrap function, it's no longer needed as the editor can be run
+in a browser and has a server.
 
 
 colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 

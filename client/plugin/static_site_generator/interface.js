@@ -27,41 +27,39 @@
 	var inputRepoAuthUser;
 	var inputRepoAuthPw;
 	var inputRepository;
-	
-	var gui = require('nw.gui'); // Load native UI library
+	var inputUrl;
 	
 	var previewWin;
 	var wysiwygEnabled = false; 
 	var notEditableReason = "";
 	var editable = false;
-	var sourceFile; // Source file that is being previewed
-	var ignoreTransform;
-	var scrollTop = 0;
+
 	var menuItem;
-	var ignoreFileChange = false; // Whether to update the preview when there is a change in the HTML source code (editor)
-	var updatePreviewOnChange;
 	
-	var httpServer;
 	var previewBaseUrl;
 	
-	var path = require("path");
-	var demoSite = {
-		name: "Demo site",
-		projectFolder: path.join(require("dirname"), "/userdirs/demo/static_site_demo/"),  // Project folder
-		source: path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-		preview: path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/"), // Compiles files for review is saved here
-		publish: path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-		template: path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm"),  // A template for new pages/posts
-		url: "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),
-		pubUser: "",
-		pubPw: "",
-		key: "", // Publish key
-		repository: "",
-		repoUser: "",
-		repoPw: ""
+	var demoSite;
+
+	if(EDITOR.user == "admin" && runtime == "nw.js") {
+		var path = require("path");
+		
+		demoSite = {
+			name: "Demo site",
+			projectFolder: path.join(require("dirname"), "/userdirs/demo/static_site_demo/"),  // Project folder
+			source: path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/"),  // Source files (when colaborating; use a source control management tool!)
+			preview: path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/"), // Compiles files for review is saved here
+			publish: path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
+			template: path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm"),  // A template for new pages/posts
+			url: "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),
+			pubUser: "",
+			pubPw: "",
+			key: "", // Publish key
+			repository: "",
+			repoUser: "",
+			repoPw: ""
+		}
 	}
-	
-	if(EDITOR.user == "demo") {
+	else if(EDITOR.user == "demo") {
 		// Virtual folder
 		demoSite.projectFolder = "/static_site_demo/";
 		demoSite.source = "/static_site_demo/source/";
@@ -70,6 +68,7 @@
 		demoSite.template = "/static_site_demo/template.htm";
 		demoSite.projectFolder = "/static_site_demo/";
 	}
+
 	
 	// Add plugin to editor
 	EDITOR.plugin({
@@ -79,7 +78,15 @@
 	});
 	
 	function getSites() {
-		sites = EDITOR.storage.getItem("cmsjz_sites") ? JSON.parse(EDITOR.storage.getItem("cmsjz_sites")) : [demoSite];
+		
+		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
+		
+		if(storageSites) {
+			sites = JSON.parse(storageSites);
+		}
+		else if(demoSite) {
+			sites = [demoSite];
+		}
 	}
 	
 	function load() {
@@ -111,13 +118,7 @@
 		
 		EDITOR.on("exit", SSG_cleanup);
 		
-		EDITOR.on("fileChange", fileChange);
-		
-		EDITOR.on("bootstrap", bootstrap);
-		
 		EDITOR.on("fileOpen", fileOpen);
-		
-		bootstrap();
 		
 
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
@@ -156,8 +157,6 @@
 		
 		EDITOR.removeEvent("fileShow", fileShow);
 		EDITOR.removeEvent("exit", SSG_cleanup);
-		EDITOR.removeEvent("fileChange", fileChange);
-		EDITOR.removeEvent("bootstrap", bootstrap);
 		EDITOR.removeEvent("fileOpen", fileOpen);
 		
 		EDITOR.unbindKey(hideSSG);
@@ -201,35 +200,6 @@
 	}
 	
 	
-	function bootstrap(json) {
-		
-		if(json) {
-			var domain = json.domain;
-			var ftpuser = json.ftpuser;
-			var ftppw = json.ftppw;
-			var site;
-			
-			for(var i=0; i<sites.length; i++) {
-				site = sites[i];
-				if(site.name == demoSite.name || site.name == domain) {
-					// Update the site
-					if(site.name == demoSite.name) site.name = domain;
-					site.pubUser = ftpuser;
-					site.pubPw = ftppw;
-					site.url = "http://" + domain;
-					if(site.publish.indexOf("/client/plugin/static_site_generator/demo/public/") != -1) site.publish = "ftp://" + domain + "/www/" + domain + "/";
-					
-					EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites)); // Save all sites in local-storage
-					
-					break;
-				}
-			}
-			
-		}
-		
-		
-	}
-	
 	function fileShow(file) {
 		
 		// Change site when you change file
@@ -261,103 +231,6 @@
 		
 	}
 	
-	function fileChange(file, type, characters, caretIndex, row, col) {
-		if(file == sourceFile && previewWin && !ignoreFileChange) {
-			
-			console.log("Updating HTML preview ...");
-			
-			//if(updatePreviewOnChange) clearTimeout(updatePreviewOnChange);
-			
-			// Delay updating so that we do not render broken tags etc and save some battery
-			//updatePreviewOnChange = setTimeout(function() {
-			
-			var doc = previewWin.window.document;
-			
-			var main = doc.getElementsByTagName("main")[0];
-			
-			//var prewHTML = main.innerHTML;
-			var srcHTML = getSourceCodeBody(sourceFile);
-			
-			main.innerHTML = srcHTML;
-			
-			// Using innerHTML makes the caret dissappear. Place it again ...
-			// Find out the tag and if we are near text, find the tag in wysiwyg
-			
-			var index = file.caret.index;
-			
-			var leftChar = index > 0 ? file.text.charAt(index-1) : "";
-			var rightChar = index < file.text.length ? file.text.charAt(index) : "";
-			
-			var regexText = /[^\r\n<>"']/;
-			
-			console.log("Attempting to place caret on WYSIWYG ...");
-			if(leftChar.match(regexText) ==  null && rightChar.match(regexText) == null) console.log("No text next to file.caret. leftChar=" + leftChar + " rightChar=" + rightChar + "");
-			else {
-				
-				var leftLeftTag = file.text.lastIndexOf("<", index-1);
-				if(leftLeftTag == -1) console.log("No left <tag found left of the file.caret");
-				else {
-					
-					var firstSpaceAfterLeftTag = file.text.indexOf(" ", leftLeftTag);
-					var firstRightTagAfterLeftTag = file.text.indexOf(">", leftLeftTag);
-					
-					if(firstRightTagAfterLeftTag == -1) console.log("No right> tag found after left tag, left of file.caret");
-					else {
-						
-						console.log("leftLeftTag=" + leftLeftTag + " (" + file.text.substring(leftLeftTag, index) + ")");
-						console.log("firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag + " (" + file.text.substring(leftLeftTag, firstRightTagAfterLeftTag+1) + ")");
-						
-						if(firstSpaceAfterLeftTag != -1 && firstSpaceAfterLeftTag < firstRightTagAfterLeftTag) var elementName = file.text.substring(leftLeftTag+1, firstSpaceAfterLeftTag);
-						else if(firstRightTagAfterLeftTag != -1) var elementName = file.text.substring(leftLeftTag+1, firstRightTagAfterLeftTag);
-						else throw new Error("firstSpaceAfterLeftTag=" + firstSpaceAfterLeftTag + " firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag);
-						
-						console.log("elementName=" + elementName);
-						
-						var rightLeftTag = file.text.indexOf("<", index);
-						if(rightLeftTag == -1) console.log("No <left tag on the right side of the file.caret");
-						else {
-							var text = file.text.substring(firstRightTagAfterLeftTag+1, rightLeftTag);
-							
-							console.log("rightLeftTag=" + rightLeftTag + " (" + file.text.substring(index, rightLeftTag) + ")");
-							
-							console.log("text=" + text);
-							
-							var charPosInText = index - firstRightTagAfterLeftTag - 1;
-							
-							console.log("debug charPos: " + text.substr(0, charPosInText) + "|" + text.substr(charPosInText));
-							
-							var elements = doc.getElementsByTagName(elementName);
-							
-							var node;
-							for(var i=0; i<elements.length; i++) {
-								if(elements[i].textContent == text) {
-									node = elements[i];
-									break;
-								}
-							}
-							if(!node) console.log("Unable to find element " + elementName + " containing text:" + text);
-							else {
-								var textNode = node.childNodes[0];
-								
-								console.log("Placing caret in node:");
-								console.log(textNode);
-								
-								placeCaretOnTextNode(previewWin, textNode, charPosInText);
-								
-							}
-						}
-					}
-				}
-			}
-			
-			
-			
-			//ignoreTransform = UTIL.textDiff(srcHTML, main.innerHTML);
-			
-			//}, 3000);
-			
-		}
-	}
 	
 	function switchSite(index) {
 		// Switch to the site
@@ -550,6 +423,7 @@
 			inputRepoAuthUser.value = selectedSite.repoUser;
 			inputRepoAuthPw.value = selectedSite.repoPw;
 			inputRepository.value = selectedSite.repository;
+			inputUrl.value = selectedSite.url;
 		}
 		
 	}
@@ -706,6 +580,13 @@
 		inputRepoAuthPw.setAttribute("class", "inputtext");
 		inputRepoAuthPw.setAttribute("size", "20");
 		inputRepoAuthPw.setAttribute("title", "Password if needed for the publish URL")
+		
+		inputUrl = document.createElement("input");
+		inputUrl.setAttribute("type", "text");
+		inputUrl.setAttribute("id", "inputUrl");
+		inputUrl.setAttribute("class", "inputtext");
+		inputUrl.setAttribute("size", "50");
+		inputUrl.setAttribute("title", "Public URL where the published site can be accessed");
 		
 		
 		// Buttons
@@ -944,7 +825,8 @@
 				key: inputPubAuthKey.value,
 				repository: inputRepository.value,
 				repoUser: inputRepoAuthUser.value,
-				repoPw: inputRepoAuthPw.value
+				repoPw: inputRepoAuthPw.value,
+				url: inputUrl.value
 			}) - 1;
 			
 			selectedSite = sites[index];
@@ -985,6 +867,8 @@
 			inputRepository.value = selectedSite.repository;
 			inputRepoAuthUser.value = selectedSite.repoUser;
 			inputRepoAuthPw.value = selectedSite.repoPw;
+			inputUrl.value = selectedSite.url;
+			
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -1014,6 +898,7 @@
 			selectedSite.repoUser = inputRepoAuthUser.value;
 			selectedSite.repoPw = inputRepoAuthPw.value;
 			selectedSite.repository = inputRepository.value;
+			selectedSite.url = inputUrl.value;
 			
 			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
 			
@@ -1103,707 +988,143 @@
 		
 		var errorOccured = false;
 		
-		compile(site.source, site.preview, false, function compiled_static() {
+		// Witch file should we preview ?
+
+		// Is any of the source files opened ?
+		var openedFilesArray = [];
+		
+		for(var file in EDITOR.files) openedFilesArray.push(EDITOR.files[file]);
+		
+		var sourceFilePath = filterFiles(openedFilesArray);
+		
+		if(sourceFilePath) {
+			if(!EDITOR.files.hasOwnProperty(sourceFile)) throw new Error("Does not exist in EDITOR.files: " + sourceFile);
+			compileIt(EDITOR.files[sourceFile]);
+		}
+		else {
+			// Open any of the source files
+			EDITOR.listFiles(site.source, function sourceFileList(err, list) {
+				var sourceFilePath = filterFiles(list);
+				
+				if(sourceFilePath) EDITOR.openFile(sourceFilePath, undefined, function(err, file) {
+					if(err) throw err;
+					compileIt(file);
+				});
+				else {
+					alertBox("Unable to pick a source file!");
+					compileIt(undefined);
+				}
+
+			});
+		}
+		
+		
+		function compileIt(sourceFile) {
 			
-			var protocol = UTIL.urlProtocol(site.preview);
-			
-			if(protocol != "file") {
-				alertBox("Preview uploaded to: " + site.preview);
-				return;
-			}
-			
-			CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
+			compile(site.source, site.preview, false, function compiled_static() {
 				
-				if(err) throw err;
+				var protocol = UTIL.urlProtocol(site.preview);
 				
-				var url = json.url;
+				if(protocol != "file") {
+					alertBox("Preview uploaded to: " + site.preview);
+					return;
+				}
 				
-				previewBaseUrl = url;
-				
-				// Decide what file to request
-				
-				var previewWinOpened = false;
-				
-				if(EDITOR.currentFile) {
-					var fileName = EDITOR.currentFile.name;
-					var fileType = EDITOR.currentFile.fileExtension;
+				CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
 					
-					if(EDITOR.currentFile.path.indexOf(site.source) != -1 // Inside source path?
-					&& (fileType == "htm" || fileType=="html") // We only like HTML code! :P
-					&& fileName != "header.htm" && fileName != "footer.htm") { 
-						
-						// Preview the current file opened in the editor !
-						
-						// url needs to have / instead of \ for path delimiter
-						url += EDITOR.currentFile.path.replace(site.source, "").replace(/\\/g, "/");
+					if(err) throw err;
+					
+					var url = json.url;
+					
+					previewBaseUrl = url;
+					
+					if(sourceFile) {
+						url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 						
 						openPreviewWin(url, callback)
-						
-						previewWinOpened = true;
-						
+
 					}
+
 					else {
-						console.log("Not showing preview window because:\nEDITOR.currentFile.path=" + EDITOR.currentFile.path + "\nfileType=" + fileType + "fileName=" + fileName);
-					}
-				}
-				
-				if(!previewWinOpened) {
-					// Open the index page
-					
-					notEditableReason = "No file open";
-					editable = false;
-					
-					EDITOR.listFiles(site.preview, function(err, list) {
+						// Open the index page
 						
-						if(err) throw err;
+						notEditableReason = "No file open";
+						editable = false;
 						
-						var page = "";
-						
-						for (var i=0; i<list.length; i++) {
-							if(list[i].name.match(/\index\.html?/i) != null) {
-								page = list[i].name;
-								break;
+						EDITOR.listFiles(site.preview, function(err, list) {
+							
+							if(err) throw err;
+							
+							var page = "";
+							
+							for (var i=0; i<list.length; i++) {
+								if(list[i].name.match(/\index\.html?/i) != null) {
+									page = list[i].name;
+									break;
+								}
 							}
-						}
-						
-						if(page) {
-							if(url.substr(url.length-1) != "/") url += "/";
-							url += page;
-						}
-						else throw new Error("Unable to find index page in preview directory!");
-						
-						openPreviewWin(url, callback);
-						
-					});
-				}
+							
+							if(page) {
+								if(url.substr(url.length-1) != "/") url += "/";
+								url += page;
+							}
+							else throw new Error("Unable to find index page in preview directory!");
+							
+							openPreviewWin(url, callback);
+							
+						});
+					}
+				});
 			});
-		});
+		}
 		
 		return false;
+		
+		function filterFiles(fileList) {
+			
+			if(Object.prototype.toString.call( fileList ) !== '[object Array]') throw new Error("fileList must be an array!");
+			
+			for(var i=0; i<fileList.length; i++) {
+				
+				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
+				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
+				
+				if(fileList[i].path.indexOf(site.source) == 0 // A source file
+				&& fileList[i].name.match(/html?$/i) // We only like HTML code! :P
+				&& !fileList[i].name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
+				) return fileList[i].path;
+			}
+			
+			return null;
+		}
+		
 	}
 	
 	function openPreviewWin(url, callback) {
 		
-		var previewWinOpen = false;
-		
-		if(previewWin) {
-			previewWinOpen = true;
-			try {
-				var foo = previewWin.window.location;
-			}
-			catch(e) {
-				previewWinOpen = false;
-			}
-		}
-		
-		if(!previewWinOpen) {
-			//closePreview(); // Just in case
-			
-			// Decide window width, height and placement ...
-			var windowPadding = 0;
-			var unityLeftThingy = 10;
-			var previeWidth = Math.round(screen.width / 3.5) - windowPadding * 2;
-			var previewHeight = screen.height - windowPadding * 2;
-			var posX = screen.width - previeWidth - windowPadding;
-			var posY = windowPadding;
-			
-			
-			// Resize the editor
-			var mainWindow = gui.Window.get();
-			
-			mainWindow.moveTo(0, 0);
-			mainWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
-			
-			// Save original editor window width/height and position !?
-			
-			previewWin = gui.Window.open(url, {toolbar:true, frame:true, width: previeWidth, height: previewHeight}); 
-			// Show the toolbar so you can see the URL, and open dev tools
-			
-			
-			previewWin.moveTo(posX, posY);
-			
-			previewWin.on('focus', previewWinFocus);
-			previewWin.on('blur', previewWinBlur);
-			previewWin.on("loaded", previewWinLoaded);
-			
-			
-			
-			
-		}
-		else {
-			
-			// Handle inconsitent file:// and file:/// (sometimes it has two slashes and sometimes three)
-			var previewLocation = previewWin.window.location.href;
-			previewLocation = previewLocation.replace("file://", "");
-			while(previewLocation.substr(0,1) == "/") previewLocation = previewLocation.substr(1);
-			url = url.replace("file://", "");
-			while(url.substr(0,1) == "/") url = url.substr(1);
-			
-			//alertBox("previewLocation=" + previewLocation + "\nurl=" + url);
-			
-			if(previewLocation == url || previewWin.window.location == "swappedout://") {
-				scrollTop = previewWin.window.scrollTop; // Get the scroll position
-				console.log("scrollTop=" + scrollTop);
-				if(previewLocation == url) previewWin.reload();
-				else previewWin.window.location = "file://" + url;
-			}
-			else {
-				alertBox("url=" + url + " != " + previewLocation);
-				previewWin.window.location = "file://" + url;
-			}
-			
-			previewWin.focus();
-			
-		}
-		
-		// If 404 !?
-		//previewIframe.src = path.join(site.preview, "index.htm");
-		
-		function previewWinLoaded() {
-			
-			previewWin.focus();
-			
-			console.log("PreviewWin loaded!");
-			
-			previewWin.window.scrollTop = scrollTop; // Set the scroll position again
-			
-			previewWin.window.onbeforeunload = captureNavigation;
-			
-			if(callback) callback(previewWin);
-		}
-		
-		
-		function previewWinFocus() {
-			console.log('preview window is focused');
-			EDITOR.input = false;
-			ignoreFileChange = true;
-		}
-		
-		function previewWinBlur() {
-			
-			ignoreFileChange = false;
-			
-			if(EDITOR.currentFile) EDITOR.input = true;
-		}
-		
-		
-		function captureNavigation() {
-			//alertBox("unload!");
-			
-			if(wysiwygEnabled) wysiwygSSG(); // Disable editing when navigating away (clickon on a link)
-			
-		}
-		
+		if(previewWin) previewWin.close();
+
+		var sourceFile = EDITOR.currentFile;
+		var bodyTag = "main";
+		var onlyPreview = true;
+		var whenOpened = callback;
+
+		previewWin = new WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened);
+
 	}
+
 	
-	
-	function sanitizeOfficeDoc(html) {
-		
-		console.log("Before sanitizeOfficeDoc:" + html);
-		
-		html = html.replace(/\n|\r\n/ig, " "); // Prevent line breaks in the middle of html tag
-		
-		// Remove <o:p></o:p>
-		html = html.replace(/<o:p>/ig, "");
-		html = html.replace(/<\/o:p>/ig, "");
-		
-		// Remove style attributes
-		html = html.replace(/ style="[^"]+"/ig, "");
-		
-		// Remove class attributes
-		html = html.replace(/ class="[^"]+"/ig, "");
-		
-		// Remove onmouseover and onmouseout attributes
-		
-		
-		// Get rid of span elements
-		html = html.replace(/<span>/ig, "");
-		html = html.replace(/<\/span>/ig, "");
-		
-		// Remove emty p elements
-		html = html.replace(/<p>\s*<\/p>/gi, "");
-		
-		// Remove space between tags
-		html = html.replace(/>\s*</gi, "><");
-		
-		// Remove space before tags
-		html = html.replace(/\s*</gi, "<");
-		
-		// Remove all attributes from td elements
-		html = html.replace(/<td[^>]*>/ig, "<td>");
-		
-		// Remove all attributes from p elements
-		html = html.replace(/<p[^>]*>/ig, "<p>");
-		
-		// Remove p inside td
-		html = html.replace(/<td><p>(.*?)<\/p><\/td>/gi, "<td>$1</td>");
-		
-		// Remove br inside td
-		html = html.replace(/<td><br><\/td>/gi, "<td></td>");
-		
-		// Fix multible spaces
-		html = html.replace(/\s\s+/g, " ");
-		
-		// Remove emty html elements
-		html = html.replace(/<(.*?)><\/\1>/g, "");
-		
-		// Remove <del> elements
-		html = html.replace(/<del[^>]*>.*?<\/del>/g, "");
-		
-		
-		//console.log("After sanitizeOfficeDoc:" + html);
-		
-		return html;
-	}
-	
-	function fixMessups(html) {
-		// Fix messed up headings: <h1><span style="font-size: 3em;">Fakta om APL</span><br></h1>
-		html = html.replace(/<h1><span style="font-size: 3em;">(.*)<\/span><br><\/h1>/ig, "<h1>$1</h1>");
-		// Maybe this should be done before ? when detected ?
-		
-		return html;
-		
-	}
-	
-	function insertLineBreaks(html) {
-		
-		// Add line breaks so the source code gets easier to read
-		
-		// Make sure the line breaks at the beginning stays there, or there will be errors in the text transformation!
-		
-		
-		var lbBefore = checkStartingLineBreaks();
-		
-		
-		console.log("inserting (sanitizing) line breaks. sourceFile.lineBreak=" + UTIL.lbChars(sourceFile.lineBreak));
-		
-		console.time("insertLineBreaks");
-		
-		// Remove space between tags
-		html = html.replace(/>\s*</gi, "><");
-		
-		// Remove space before tags
-		html = html.replace(/\s*</gi, "<");
-		
-		
-		// Line breaks between p tags
-		html = html.replace(/>\s*<p/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<p");
-		html = html.replace(/<\/p>\s*</gi, "</p>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
-		
-		// Line breaks between h# tags
-		html = html.replace(/>\s*<h/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<h");
-		html = html.replace(/<\/h(.)>\s*</gi, "</h$1>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
-		
-		// Line breaks between div tags
-		html = html.replace(/>\s*<div/gi, ">" + sourceFile.lineBreak + sourceFile.lineBreak + "<div");
-		html = html.replace(/<\/div>\s*</gi, "</div>" + sourceFile.lineBreak + sourceFile.lineBreak + "<");
-		
-		// Line breaks between tbody
-		html = html.replace(/>\s*<tbody/gi, ">" + sourceFile.lineBreak + "<tbody");
-		html = html.replace(/<\/tbody>\s*</gi, "</tbody>" + sourceFile.lineBreak + "<");
-		
-		// Line breaks between tr
-		html = html.replace(/>\s*<tr/gi, ">" + sourceFile.lineBreak + "<tr");
-		html = html.replace(/<\/tr>\s*</gi, "</tr>" + sourceFile.lineBreak + "<");
-		
-		// Line breaks between td
-		html = html.replace(/>\s*<td/gi, ">" + sourceFile.lineBreak + "<td");
-		html = html.replace(/<\/td>\s*</gi, "</td>" + sourceFile.lineBreak + "<");
-		
-		// Line breaks between th
-		html = html.replace(/>\s*<th/gi, ">" + sourceFile.lineBreak + "<th");
-		html = html.replace(/<\/th>\s*</gi, "</th>" + sourceFile.lineBreak + "<");
-		
-		
-		// Word-wrap p elements
-		//html = html.replace(/<p.*>(.*)<\/p>/ig, "<p>" + wordWrapText("$1") + "</p>");
-		
-		var lbAfter = checkStartingLineBreaks();
-		
-		if(lbBefore > lbAfter) {
-			var add = lbBefore - lbAfter;
-			console.log("Gonna add=" + add + " line breaks ...");
-			for(var i=0; i<add; i++) {
-				html = sourceFile.lineBreak + html;
-				console.log("line break added");
-			}
-		}
-		else if(lbBefore < lbAfter) {
-			var remove = lbAfter - lbBefore;
-			console.log("Gonna remove=" + remove + " line breaks ...");
-			var start = 0;
-			for(var i=0; i<remove; i++) {
-				start = html.indexOf(sourceFile.lineBreak, start) + 1;
-			}
-			var removed = html.substr(0, start-1);
-			html = html.substr(start);
-			
-			console.log("Removed " + occurencies(removed, sourceFile.lineBreak) + " line breaks");
-		}
-		
-		console.timeEnd("insertLineBreaks");
-		
-		return html;
-		
-		function checkStartingLineBreaks() {
-			var firstCharInLineBreak = sourceFile.lineBreak.charAt(0);
-			var lbCount = 0;
-			var char = "";
-			for(var i=0; i < html.length; i++) {
-				char = html.charAt(i);
-				if(char == firstCharInLineBreak) lbCount++;
-				else if(char != "\r" && char != "\n" && char != "\t" && char != " ") break; // Not a white space
-			}
-			return lbCount;
-		}
-		
-	}
-	
-	
-	function contentEdit(target, type, bubbles, cancelable) {
-		// Called every time the contenteditable is updated
-		// If nothing happends, check the debug/console for the wysiwyg window!
-		console.time("contentEdit");
-		
-		if(!sourceFile) throw new Error("sourceFile is gone!")
-		else if(!EDITOR.files.hasOwnProperty(sourceFile.path)) alertBox("The source for the file being previewed is not opened!")
-		else {
-			
-			if(sourceFile != EDITOR.currentFile) {
-				// alertBox("The file in the editor is not the same as the file being previewed! sourceFile=" + sourceFile.path + " EDITOR.currentFile=" + EDITOR.currentFile.path)
-				EDITOR.showFile(sourceFile, false);
-			}
-			
-			//console.log("target=" + UTIL.objInfo(target));
-			console.log("type=" + type);
-			
-			// Compare the source codes
-			var srcHTML = getSourceCodeBody(sourceFile);
-			
-			if(!srcHTML) throw new Error("Unable to get source HTML from file.path=" + sourceFile.path); 
-			else {
-				var main = previewWin.window.document.getElementsByTagName("main")[0];
-				var prewHTML = main.innerHTML; //previewWin.window.document.body.innerHTML;
-				
-				/*
-					problem 1: Contenteditable produce mangled/garbled HTML code. 
-					Contenteditbale change stuff all over the place, for example inserts <tbody> in tables
-					
-					solution: Beautify the code!
-					
-					problem 2: The beautifier touches even more stuff, amplifying the nr 1 problem
-					solution 2: insert stuff like <tbody> *before* going into WYSIWYG mode
-					
-				*/
-				
-				var sanitized = insertLineBreaks(prewHTML);
-				
-				if(sanitized == prewHTML) console.log("No white space sanitiaztion needed"); 
-				else {
-					
-					console.log("prewHTML=\n" + UTIL.debugWhiteSpace(prewHTML) + "\n");
-					
-					console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
-					
-					/*
-						Problem: contenteditable will lose the caret when the html is updated, 
-						this is verry annoying when typing as the cursor jumps
-						
-						solution: Set the caret again using the selection API 
-					*/
-					
-					var caretPosition = getCaretPosition(previewWin);
-					
-					main.innerHTML = sanitized;
-					
-					prewHTML = main.innerHTML;
-					
-					console.log("caretPosition: " + JSON.stringify(caretPosition));
-					
-					placeCaret(previewWin, caretPosition.x, caretPosition.y, caretPosition.char);
-					
-					//sourceFile.replaceText(srcHTML, sanitized);
-					
-					//ignoreTransform = UTIL.textDiff(sanitized, main.innerHTML);
-					
-					console.log("Sanitized garbage from WYSIWYG");
-					
-				}
-				
-				
-				// Compare the source with the editable preview
-				var diff = UTIL.textDiff(srcHTML, prewHTML, ignoreTransform);
-				
-				/*
-					Problem: When ignoreTransform removes a diff ...
-					
-				*/
-				
-				var ignored = 0;
-				if(!ignoreTransform) console.log("Nothing in ignoreTransform");
-				else {
-					if(ignoreTransform.inserted.length > 0) {
-						for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
-							for(var j=0; j<diff.inserted.length; j++) {
-								if(diff.inserted[j].text == ignoreTransform.inserted[i].text) {
-									//if(diff.inserted[j].text != ignoreTransform.inserted[i].text) throw new Error("ignoreTransform edited text on row=" + diff.inserted[j].text + " doesn't match! diff=" + diff.inserted[j].text + " ignore=" + ignoreTransform.inserted[i].text);
-									diff.inserted.splice(j, 1);
-									console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
-									ignored++;
-									break;
-								}
-							}
-						}
-						if(ignored != (ignoreTransform.inserted.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.inserted.length-1) + " ignoreTransform.inserted=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
-					}
-					
-					if(ignoreTransform.removed.length > 0) {
-						ignored = 0;
-						for(var i=ignoreTransform.removed.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
-							for(var j=0; j<diff.removed.length; j++) {
-								if(diff.removed[j].text == ignoreTransform.removed[i].text) {
-									//if(diff.removed[j].text != ignoreTransform.removed[i].text) throw new Error("ignoreTransform original text on row=" + diff.removed[j].text + " doesn't match! diff=" + diff.removed[j].text + " ignore=" + ignoreTransform.removed[i].text);
-									diff.removed.splice(j, 1);
-									console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
-									break;
-								}
-							}
-						}
-						if(ignored != (ignoreTransform.removed.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.removed.length-1) + " ignoreTransform.removed=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.removed=" + JSON.stringify(diff.inserted, null, 2));
-					}
-				}
-				
-				
-				var srcStartIndex = sourceFile.text.indexOf(srcHTML);
-				
-				if(srcStartIndex == -1) throw new Error("The source file doesn't contain the source code ... sourceFile=" + sourceFile.path + " srcHTML=" + srcHTML);
-				
-				console.log("srcStartIndex=" + srcStartIndex);
-				
-				var tmpCaret = sourceFile.createCaret(srcStartIndex);
-				
-				var startRow = tmpCaret.row;
-				
-				console.log("source startRow=" + startRow);
-				
-				var replacedLine = false;
-				var linesToBeRemoved = [];
-				var row = -1;
-				var col = -1;
-				var text = "";
-				
-				console.log("diff.removed=" + JSON.stringify(diff.removed, null, 2));
-				console.log("diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
-				
-				// Apply the transformation to the source code ...
-				var removedText = "";
-				for(var i=0; i<diff.removed.length; i++) {
-					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
-					// Remove the text on the line, but do not remove the line (yet)
-					row = diff.removed[i].row + startRow;
-					
-					if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
-						throw new Error("Text on row=" + row + " doesn't match!\nsource=" + sourceFile.rowText(row).trim() + "\nremove=" + diff.removed[i].text.trim() + "\ndiff=" + JSON.stringify(diff, null, 2) + "\n\nsrcHTML=" + UTIL.lbChars(srcHTML) + "\n\nprewHTML=" + UTIL.lbChars(prewHTML));
-					}
-					
-					removedText = sourceFile.removeAllTextOnRow(row);
-					
-					if(removedText.match(/\n|\r\n/)) throw new Error("Did not expect a new line character to be removed! removedText=" + UTIL.lbChars(removedText));
-					
-					if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + UTIL.lbChars(removedText) + " = removedText\n" + UTIL.lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
-					
-					console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
-					
-					// Is there a line that will replace it?
-					replacedLine = false;
-					for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
-						console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
-						if(diff.inserted[j].row == diff.removed[i].row) {
-							
-							// Insert the replacing line
-							text = diff.inserted[j].text;
-							
-							if(!replacedLine) sourceFile.insertTextOnRow(text, row)
-							else sourceFile.insertTextRow(text, row);
-							
-							console.log("Inserting (replacing) row=" + row + " text=" + text);
-							
-							// textLineDiff
-							col= UTIL.textDiffCol(diff.removed[i].text, diff.inserted[j].text);
-							
-							if(diff.inserted[j].text.length > diff.removed[i].text.length) col += (diff.inserted[j].text.length - diff.removed[i].text.length);
-							
-							// Move the file caret to the column where the actual change happened
-							sourceFile.caret.row = row;
-							sourceFile.caret.col = col;
-							
-							sourceFile.fixCaret();
-							
-							replacedLine= true;
-							diff.inserted.splice(j, 1);
-							//j--;
-						}
-					}
-					
-					if(!replacedLine) {
-						linesToBeRemoved.push(diff.removed[i].row);
-					}
-					
-					console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
-				}
-				
-				// Add lines left to be inserted before removing removed lines (backwards)
-				
-				for(var i=diff.inserted.length-1; i>-1; i--) {
-					
-					// Insert the line
-					row = diff.inserted[i].row + startRow;
-					text = diff.inserted[i].text;
-					sourceFile.insertTextRow(text, row);
-					
-					console.log("Inserted text on row=" + row + " text=" + text);
-					
-					// Increment rows in linesToBeRemoved because this insert pushed them down
-					for(var j=0; j<linesToBeRemoved.length; j++) {
-						if(linesToBeRemoved[j] == diff.inserted[i].row) throw new Error("Insert on a line that is about the be removed! diff.inserted=" + JSON.stringify(diff.inserted) + " linesToBeRemoved=" + JSON.stringify(linesToBeRemoved));
-						
-						if(linesToBeRemoved[j] > diff.inserted[i].row) linesToBeRemoved[j]++;
-					}
-				}
-				
-				// Remove lines to be removed (backwards)
-				for(var i=linesToBeRemoved.length-1; i>-1; i--) {
-					row = linesToBeRemoved[i] + startRow;
-					text = sourceFile.removeRow(row);
-					console.log("Removed row=" + row + " text=" + text);
-				}
-				
-				// after the transformation: Update what should be ignored again? nope
-				//var srcHTML = getSourceCodeBody(sourceFile);
-				//var prewHTML = main.innerHTML;
-				//ignoreTransform = UTIL.textDiff(srcHTML, main.innerHTML);
-				
-				//alert("Transformed source document!");
-				
-			}
-			
-		}
-		
-		console.timeEnd("contentEdit");
-	}
-	
-	function getCaretPosition(previewWin) {
-		// Returns the (parent) element center x,y coordinate and position in the text node
-		
-		var doc = previewWin.window.document;
-		
-		var selection = doc.getSelection();
-		if(selection) {
-			/*
-				anchorNode/baseNode: Where selection starts
-				focusNode/extentNode: Where selection ends
-			*/
-			
-			var baseNode = doc.getSelection().baseNode
-			
-			if(baseNode) {
-				
-				if(baseNode.nodeType == Node.TEXT_NODE) {
-					// Measure the parent node (can't measure text nodes)
-					var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
-					var pos = parentNode.getBoundingClientRect();
-					console.log("parentNode:");
-					console.log(parentNode);
-					console.log("parentNode nodeType=" + parentNode.nodeType);
-				}
-				else if(baseNode.nodeType == Node.ELEMENT_NODE) {
-					// The node probably don't have any text yet
-					var pos = baseNode.getBoundingClientRect();
-					console.log("baseNode:");
-					console.log(baseNode);
-				}
-				else {
-					console.log(baseNode);
-					throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
-				}
-				
-				if (selection.rangeCount) {
-					var selRange = selection.getRangeAt(0);
-					var testRange = selRange.cloneRange();
-					
-					testRange.selectNodeContents(baseNode);
-					testRange.setEnd(selRange.startContainer, selRange.startOffset);
-					var caretPos = testRange.toString().length;
-					
-				} else throw new Error("no selection.rangeCount");
-				
-				// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
-				return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos};
-				
-			}
-			else throw new Error("no baseNode");
-		}
-		else throw new Error("Unable to get selection");
-		
-	}
-	
-	function placeCaret(previewWin, x, y, charPos) {
-		
-		var doc = previewWin.window.document;
-		var element = doc.elementFromPoint(x, y);
-		var childNode = element.childNodes[0]; // The text node
-		
-		return placeCaretOnTextNode(previewWin, childNode, charPos);
-		
-	}
-	
-	function placeCaretOnTextNode(previewWin, node, charPos) {
-		
-		console.log("placing caret on index " + charPos + " on:");
-		console.log(node);
-		
-		var doc = previewWin.window.document;
-		var win = previewWin.window;
-		
-		var range = doc.createRange();
-		var sel = win.getSelection();
-		
-		try {
-			range.setStart(node, charPos);
-		}
-		catch(e) {
-			console.warn(e.message);
-			return false;
-		}
-		
-		range.collapse(true);
-		sel.removeAllRanges();
-		sel.addRange(range);
-		
-		return true;
-		
-	}
 	
 	function closePreview() {
 		// Close the preview window
-		try {
+		
+		if(previewWin) {
 			previewWin.close();
 			previewWin = undefined;
 		}
-		catch(e) {
-		}
+		
 	}
 	
-	function getSourceCodeBody(sourceFile) {
-		// Returns the body of the source HTML code
-		var srcMatchBody = sourceFile.text.match(/<body.*>([\s\S]*)<\/body>/i);
-		
-		if(srcMatchBody == null) {
-			console.warn("Could not find &lt;body element in source file<br>" + sourceFile.path);
-			return sourceFile.text;
-		}
-		else return srcMatchBody[1];
-	}
 	
 	function syncSSG() {
 		if(selectedSite) syncRepository(selectedSite);
@@ -1987,26 +1308,7 @@
 		
 	}
 	
-	function computeIgnoreTransform(srcHTML, rawMainHtml) {
-		
-		// Make sure they end with a line break
-		
-		
-		
-		
-		ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
-		
-		// Make sure there are no errors
-		var lbSrc = UTIL.occurrences(srcHTML, "\n");
-		var lbMain = UTIL.occurrences(rawMainHtml, "\n");
-		var removed = ignoreTransform.removed.length;
-		var inserted = ignoreTransform.inserted.length;
-		
-		if( (lbSrc - removed) != (lbMain - inserted) ) {
-			throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(ignoreTransform, null, 2));
-		}
-		
-	}
+
 	
 	function wysiwygSSG() {
 		var site;
@@ -2019,193 +1321,47 @@
 		}
 		
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
-		
-		if(wysiwygEnabled) {
-			var win;
-			try {
-				win = previewWin.window;
-			}
-			catch(e) {
-				console.warn(e.message);
-			}
+
+
+		var sourceFile;
+	
+		// Open the file in the editor if it's not already open
+		if(EDITOR.files.hasOwnProperty(sourceFilePath)) {
+			sourceFile = EDITOR.files[sourceFilePath];
+			EDITOR.showFile(sourceFile); // Make sure it's the current one open
 			
-			if(win) enableContentEdit(previewWin);
-			else previewPage(site, enableContentEdit);
+			makeItEditable(null, sourceFile);
 		}
 		else {
-			if(previewWin) disableContentEdit(previewWin);
+			EDITOR.openFile(sourceFilePath, undefined, makeItEditable);
 		}
+	
 		
-		return false;
-		
-		function enableContentEdit(previewWin) {
+		function makeItEditable(err, sourceFile) {
 			
-			// Get the URL of the page/file in preview
+			if(err) throw err;
+				
+			// Get the source code for the compiled page in review, in order to compute ignoreTransform
+			
 			var url = previewWin.window.location.href;
 			var previewPath = localFilePath(url, site);
-			var rawMainHtml = "";
-			var srcHTML = "";
-			var sourceFilePath = localFilePath(url, site);
-			
-			previewPath = previewPath.replace(previewBaseUrl, site.preview);
-			sourceFilePath = sourceFilePath.replace(previewBaseUrl, site.source);
-			
-			console.log("url=" + url);
-			console.log("sourceFilePath=" + sourceFilePath);
-			console.log("site.preview=" + site.preview);
-			console.log("site.source=" + site.source);
-			
-			if(sourceFilePath.match(/index\.htm./i)) {
-				alertBox("Unable to edit index file in WYSIWYG mode");
-				return;
-			}
-			
-			// Get the source code for the compiled page in review, in order to compute ignoreTransform
 			
 			EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
 				
 				if(err) throw err;
 				
-				var matchMain = txt.match(/<main.*>([\s\S]*)<\/main>/i);
 				
-				if(matchMain == null) {
-					alertBox("Could not find &lt;main element in preview source file\n" + path);
-					rawMainHtml = "";
-				}
-				else rawMainHtml = matchMain[1];
+				if(previewWin) previewWin.close();
+
 				
-				if(srcHTML && rawMainHtml) computeIgnoreTransform(srcHTML, rawMainHtml);
-				
-			});
-			
-			
-			// Open the file in the editor if it's not already open
-			if(EDITOR.files.hasOwnProperty(sourceFilePath)) {
-				sourceFile = EDITOR.files[sourceFilePath];
-				EDITOR.showFile(sourceFile); // Make sure it's the current one open
-				
-				makeItEditable(null, sourceFile);
-			}
-			else {
-				EDITOR.openFile(sourceFilePath, undefined, makeItEditable);
-			}
-			
-			function localFilePath(path, site) {
-				console.log("fixPath path=" + path);
-				var systemPathDelimiter = UTIL.getPathDelimiter(process.cwd());
-				
-				path = path.replace("file://", "");
-				
-				while(path.substr(0,1) == "/") path = path.substr(1); // In Windows there are three slashes in file:/// but in Linux it's only two!
-				path = path.replace(/\//g, systemPathDelimiter);
-				if(site.source.substr(0,1) == "/") path = "/" + path; // Add the root slash
-				
-				console.log("fixPath return path=" + path);
-				return path;
-				}
-			
-			function makeItEditable(err, file) {
-				
-				if(err) throw err;
-				
-				sourceFile = file;
-				
-				srcHTML = getSourceCodeBody(sourceFile);
-				//var body = previewWin.window.getElementsByTagName("body")[0];
-				var body = previewWin.window.document.body;
-				var mainElements = previewWin.window.document.getElementsByTagName("main");
-				var contentEditor = previewWin.window.document;
-				
-				if(mainElements.length > 1) {
-					alertBox("Document contains more then one &lt;main&gt; element!");
-					return;
-				}
-				if(mainElements.length == 0) {
-					alertBox("Document has no &lt;main&gt; element!");
-					return;
-				}
-				
-				var main = mainElements[0];
-				
-				// make sure it's saved, and that the preview is from the last save
-				if(!sourceFile.isSaved ) {
-					var diff = UTIL.textDiff(srcHTML, main.innerHTML);
-					if(diff.inserted.length > 0 || diff.removed.length > 0) {
-						alertBox("The page (" + UTIL.getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
-						disableContentEdit();
-						return;
-					}
-				}
-				
-				
-				/*
-					// ### Insert toolbar
-					var aShowDefaultUI = true;
-					
-					var buttonStyle = `border-radius: 3px;
-					border: 1px solid rgba(19, 19, 19, 0.5);
-					box-shadow: 0px 2px 5px #505050, inset 0px 1px 1px #888888;
-					color: #f6f6f3;
-					min-width: 120px;
-					background-color: #414141;
-					background: linear-gradient(#545657, #434343, #454545);
-					cursor: default;
-					text-shadow: 0px -1px 0px #1f2020;
-					padding: 4px;
-					margin: 4px;`;
-					
-					var toolbar = document.createElement("div");
-					toolbar.setAttribute("id", "toolbar");
-					toolbar.setAttribute("class", "wysiwygtoolbar");
-					toolbar.setAttribute("style", "position: fixed; top: 0px; left: 0px; width: 100%; padding: 5px; background: linear-gradient(#595959, #555555); box-shadow: outset 0px 4px 10px #888888; border-bottom: 2px solid #767676; ");
-					
-					var buttonH1 = document.createElement("button");
-					buttonH1.appendChild(document.createTextNode("Huvudrubrik"));
-					buttonH1.setAttribute("style", buttonStyle);
-					buttonH1.onclick = function insertH1() {
-					//contentEditor.execCommand("heading", aShowDefaultUI, "h1");
-					contentEditor.execCommand('formatBlock', false, '<h1>');
-					}
-					toolbar.appendChild(buttonH1);
-					
-					var buttonItalic = document.createElement("button");
-					buttonItalic.appendChild(document.createTextNode("kursiv"));
-					buttonItalic.setAttribute("style", buttonStyle);
-					buttonItalic.onclick = function makeItalic() {
-					contentEditor.execCommand("italic", aShowDefaultUI);
-					}
-					toolbar.appendChild(buttonItalic);
-					
-					var buttonBold = document.createElement("button");
-					buttonBold.appendChild(document.createTextNode("fetstil"));
-					buttonBold.setAttribute("style", buttonStyle);
-					buttonBold.onclick = function makeBold() {
-					contentEditor.execCommand("bold", aShowDefaultUI);
-					}
-					toolbar.appendChild(buttonBold);
-					
-					// insertImage
-					
-					// insertOrderedList
-					
-					// insertUnorderedList
-					
-					// justifyCenter, justifyLeft, justifyRight
-					
-					// subscript, superscript
-					
-					// createLink, unlink
-					
-					body.insertBefore(toolbar, body.firstChild); // Insert the toolbar at the top
-					
-					body.setAttribute("style", "padding-top: 60px; transition: transform 0.4s ease;"); // Make sure the toolbar doesn't cover layout
-					
-				*/
-				
-				contentEditor.execCommand("enableInlineTableEditing");
-				contentEditor.execCommand("enableObjectResizing");
-				contentEditor.execCommand("insertBrOnReturn");
-				
+				var bodyTag = "main";
+				var onlyPreview = true;
+				var whenOpened = null;
+				var compiledSource = txt;
+				var compliedSourceBodyTag = "main";
+
+				previewWin = WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened, compiledSource, compliedSourceBodyTag);
+
 				
 				// Change buttonWysiwyg state to "active"
 				if(buttonWysiwyg) {
@@ -2213,70 +1369,27 @@
 					buttonPreview.setAttribute("class", "button active");
 				}
 				
-				main.contentEditable = "true";
 				
-				previewWin.window.addEventListener("input", contentEdit);
-				
-				main.addEventListener("paste", contentPaste);
-				
-				
-				previewWin.focus();
-				
-				function contentPaste(e) {
-					var html = e.clipboardData.getData('text/html');
-					
-					e.preventDefault();
-					
-					var cleaned = html;
-					
-					cleaned = sanitizeOfficeDoc(cleaned);
-					
-					cleaned = insertLineBreaks(cleaned);
-					
-					
-					contentEditor.execCommand("insertHTML", aShowDefaultUI, cleaned);
-					
-				}
-				
-			}
+			});
+			
+		}
+
+		
+		function localFilePath(path, site) {
+			
+			return path.replace(previewBaseUrl, site.preview);
+			
+
 		}
 		
 		
-		function disableContentEdit(previewWin) {
-			
-			wysiwygEnabled = false;
-			
-			// Change buttonWysiwyg state to "normal"
-			if(buttonWysiwyg) {
-				buttonWysiwyg.setAttribute("class", "button");
-				buttonPreview.setAttribute("class", "button");
-			}
-			
-			if(!previewWin) console.log("previewWin not available");
-			else {
-				
-				var win;
-				
-				// Requesting the window when it's closed will result in an error
-				try {
-					win = previewWin.window;
-				}
-				catch(e) {
-					console.log(e.message);
-				}
-				
-				if(!win) console.log("previewWin.window not available"); 
-				else {
-					
-					//var body = previewWin.window.document.body;
-					var main = previewWin.window.document.getElementsByTagName("main")[0];
-					main.contentEditable = "false";
-					
-					previewWin.window.removeEventListener("input", contentEdit);
-				}
-			}
-		}
+		
+		
 	}
+	
+	
+	
+	
 	
 	
 })();
