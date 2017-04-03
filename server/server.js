@@ -1,5 +1,32 @@
 #!/usr/bin/env node
 
+(function() {
+  // Make sure we are in the server directory
+  var dir = process.cwd();
+  var folders = dir.split(/\/|\\/);
+  var lastFolder = folders[folders.length-1];
+  
+  console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
+  
+  if(lastFolder == "jzedit") {
+    try {
+      process.chdir('./server');
+      console.log('New directory: ' + process.cwd());
+    }
+    catch (err) {
+      console.log('chdir: ' + err);
+    }
+  }
+  
+
+
+})();
+
+
+
+
+
+
 var UTIL = require("../client/UTIL.js");
 
 var GS = String.fromCharCode(29);
