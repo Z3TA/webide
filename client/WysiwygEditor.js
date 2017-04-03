@@ -78,7 +78,11 @@ todo: Make sure the source file is saved!
 		wysiwygEditor.ignoreSourceFileChange = true;
 		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML); // lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
 		
+		wysiwygEditor.isCompiled = false;
+		
 		if(compiledSource) {
+			
+			wysiwygEditor.isCompiled = true;
 			
 			if(compliedSourceBodyTag == undefined) compliedSourceBodyTag = "main";
 
@@ -95,6 +99,30 @@ todo: Make sure the source file is saved!
 			if( (lbSrc - removed) != (lbMain - inserted) ) {
 				throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 			}
+			
+			console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+			
+			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
+				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
+				for(var i=0; i< wysiwygEditor.ignoreTransform.inserted.length; i++) {
+					msg += "Line + " + (wysiwygEditor.ignoreTransform.inserted[i].row + 1) + ": ";
+					if(wysiwygEditor.ignoreTransform.inserted[i].text == "") msg += " Inserted New line\n"
+					else msg += "Inserted: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.inserted[i].text) + "\n";
+				}
+				alertBox(msg);
+				return wysiwygEditor.close();
+			}
+			else if(wysiwygEditor.ignoreTransform.removed.length > 0) {
+				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
+				for(var i=0; i< wysiwygEditor.ignoreTransform.removed.length; i++) {
+					msg += "Line " + (wysiwygEditor.ignoreTransform.removed[i].row + 1) + ": ";
+					if(wysiwygEditor.ignoreTransform.removed[i].text == "") msg += " Removed New line\n"
+					else msg += "Removed: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.removed[i].text) + "\n";
+				}
+				alertBox(msg);
+				return wysiwygEditor.close();
+			}
+			
 			
 		}
 		else wysiwygEditor.ignoreTransform = null;
@@ -335,7 +363,7 @@ todo: Make sure the source file is saved!
 	WysiwygEditor.prototype.sourceFileChange = function sourceFileChange(file, type, characters, caretIndex, row, col) {
 		var wysiwygEditor = this;
 		
-		console.log("WysiwygEditor.sourceFileChange ignoreSourceFileChange=" + wysiwygEditor.ignoreSourceFileChange + " row=" + row + " wysiwygEditor.startRow=" + wysiwygEditor.startRow);
+		console.log("WysiwygEditor.sourceFileChange type=" + type + " ignoreSourceFileChange=" + wysiwygEditor.ignoreSourceFileChange + " row=" + row + " wysiwygEditor.startRow=" + wysiwygEditor.startRow);
 		
 		if(wysiwygEditor.ignoreSourceFileChange) return true;
 		
@@ -348,15 +376,29 @@ todo: Make sure the source file is saved!
 		
 		if(file != sourceFile) return true;
 		
+		if(type == "reload" && wysiwygEditor.isCompiled) return wysiwygEditor.close();
+		
 		if(!wysiwygEditor.bodyExistInSource()) return true;
 		
 		var previewWin = wysiwygEditor.previewWin;
-		var doc = previewWin.window.document;
+		
+		try {
+			var doc = previewWin.window.document;
+		}
+		catch(err) {
+			console.error(err);
+			// Most likely the user has closed the preview window
+			wysiwygEditor.close();
+			return;
+		}
 		
 		wysiwygEditor.setStartRow(); // In case more rows was added above the body tag
 		
 		if(row < wysiwygEditor.startRow) {
-			// Edited above the body. Reload everything
+			// Edited above the body.
+			
+			if(wysiwygEditor.isCompiled) return wysiwygEditor.close();
+			
 			var dance = false;
 			wysiwygEditor.reload(dance);
 			return;
@@ -939,7 +981,11 @@ todo: Make sure the source file is saved!
 	
 	WysiwygEditor.prototype.reload = function reload(dance, callback) {
 		var wysiwygEditor = this;
-
+		
+		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ?");
+		
+		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) throw new Error("Can not reload a second time if the source code have been compiled");
+		
 		console.log("WysiwygEditor.reload dance=" + dance);
 		
 		// Reload with new HTML ...
@@ -1025,8 +1071,9 @@ todo: Make sure the source file is saved!
 			
 			console.log(doc.innerHTML);
 			
-			// Write the html to the content-editable
-			if(!wysiwygEditor.url) {
+			
+			if(!wysiwygEditor.url && !wysiwygEditor.isCompiled) {
+				// Write the html to the content-editable
 				if(runtime == "nw.js") doc.write(html);
 				else {
 					previewWin.document.open();
@@ -1035,11 +1082,24 @@ todo: Make sure the source file is saved!
 				}
 			}
 			
+			/*
+			var prewviewContent = doc.documentElement.outerHTML;
+			console.log("prewviewContent=" + prewviewContent);
+			if(prewviewContent != html && prewviewContent) {
+				
+				console.log("html=" + html);
+				console.log("prewviewContent=" + prewviewContent);
+				throw new Error("Failed to write HTML to preview window!");
+			}
+			*/
+			
 			var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
 			
 			if(bodyTags.length === 0) {
 				// The user probably have an open html tag above the body element
 				console.warn("previewWin dont have a body tag!");
+				
+				if(wysiwygEditor.isCompiled) throw new Error("Unable to find wysiwygEditor.bodyTag=" + wysiwygEditor.bodyTag + " in preview window !");
 				
 				attachFileChangeListener(wysiwygEditor);
 				
@@ -1052,6 +1112,8 @@ todo: Make sure the source file is saved!
 			
 			if(dance) {
 				// We need to dance to make sure source code and content-editable code is the same ...
+
+				var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
 				
 				// Need to know line break convention before getting the content-editable code!
 				console.log("WYSIWYG determine line break convention:");
@@ -1102,10 +1164,41 @@ todo: Make sure the source file is saved!
 				}
 				
 				sourceFile.checkGrid();
+				
+				// Problem: The source code and a "compiled" page might diff a lot
+				// Solution: .... ???
+				
+				var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, srcHTML);
+				console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
+				
+				// It's ok to add new lines, but not OK to add new content
+				
+				// Only index and xml pages can contain server code! So we do not need to worry about that
+				
+				
+				
 			}
 			
 			
-			if(!wysiwygEditor.onlyPreview) wysiwygEditor.enableEdit();
+			if(!wysiwygEditor.onlyPreview) {
+
+				
+				// Make body editable and attatch event listeners
+				
+				body.setAttribute("contenteditable", "true");
+				
+				body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
+				body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
+				body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
+				body.onpaste = function(e) {wysiwygEditor.previewPase(e)};
+				
+				// body.input doesn't work on nw.js gui, has to use window instead
+				//body.input = function(e) {wysiwygEditor.previewInput(e)};
+				body.oninput = function(e) {wysiwygEditor.previewInput(e)};
+				//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
+
+				
+			}
 			
 				
 			attachFileChangeListener(wysiwygEditor);
@@ -1122,10 +1215,12 @@ todo: Make sure the source file is saved!
 				console.error(err);
 			};
 			
-			
 			done();
 			
 			function done() {
+				
+				wysiwygEditor.hasLoaded = true;
+				
 				if(wysiwygEditor.whenOpened) wysiwygEditor.whenOpened();
 				wysiwygEditor.whenOpened = null;
 				
@@ -1139,56 +1234,36 @@ todo: Make sure the source file is saved!
 	WysiwygEditor.prototype.enableEdit = function enableEdit(callback) {
 		var wysiwygEditor = this;
 		
-		
-		if(runtime == "nw.js") {
-			var win = wysiwygEditor.previewWin.window;
-			var doc = win.document; // previewWin.document is not available in nw.js gui
-		}
-		else {
-			var doc = wysiwygEditor.previewWin.document;
-		}
-		
-		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
-			
-		if(bodyTags.length === 0) {
-			// The user probably have an open html tag above the body element
-			
-			throw new Error('No "body" tag found in preview window!');
-
-		}
-		
-		var body = bodyTags[0];
-		
-		// Make body editable and attatch event listeners
-		
-		body.setAttribute("contenteditable", "true");
-		
-		body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
-		body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
-		body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
-		body.onpaste = function(e) {wysiwygEditor.previewPase(e)};
-		
-		// body.input doesn't work on nw.js gui, has to use window instead
-		//body.input = function(e) {wysiwygEditor.previewInput(e)};
-		body.oninput = function(e) {wysiwygEditor.previewInput(e)};
-		//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
-		
 		wysiwygEditor.onlyPreview = false;
 		
-		if(callback) callback();
+		wysiwygEditor.reload(true, callback);
+
 	}
 	
 	WysiwygEditor.prototype.disableEdit = function enableEdit(callback) {
 		var wysiwygEditor = this;
 		
+		console.log("Disabling WYSIWYG editing of " + wysiwygEditor.sourceFile.path);
+		
 		// Disable content editable, but keep the window open for preview
 		
-		if(runtime == "nw.js") {
-			var win = wysiwygEditor.previewWin.window;
-			var doc = win.document; // previewWin.document is not available in nw.js gui
+		
+		wysiwygEditor.onlyPreview = true;
+		
+		try {
+			if(runtime == "nw.js") {
+				var win = wysiwygEditor.previewWin.window;
+				var doc = win.document; // previewWin.document is not available in nw.js gui
+			}
+			else {
+				var doc = wysiwygEditor.previewWin.document;
+			}
 		}
-		else {
-			var doc = wysiwygEditor.previewWin.document;
+		catch(err) {
+			console.error(err);
+			// The preview window has probably been closed.
+			// Don't bother about it
+			return callback();
 		}
 		
 		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
@@ -1205,7 +1280,7 @@ todo: Make sure the source file is saved!
 		body.onpaste = null;
 		body.oninput = null;
 		
-		wysiwygEditor.onlyPreview = true;
+		
 		
 		if(callback) callback();
 		
@@ -1511,7 +1586,7 @@ todo: Make sure the source file is saved!
 		// so there needs to be a line-break after <body> and before </body>
 
 		
-		var regexBody = new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/body>", "i");
+		var regexBody = new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
 
 		
 		var srcMatchBody = fileText.match(regexBody);

@@ -1070,13 +1070,6 @@
 								var compliedSourceBodyTag = "main";
 						
 								loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
-
-								// Change buttonWysiwyg state to "active"
-								if(buttonWysiwyg) {
-									buttonWysiwyg.setAttribute("class", "button active");
-									buttonPreview.setAttribute("class", "button active");
-								}
-								
 								
 							});
 
@@ -1333,8 +1326,20 @@
 		// Witch file/page should we edit ?
 		// If we are previewing a file, then pick the file in preview
 		if(previewWin) {
-			var url = previewWin.previewWin.window.location.href;
-			var sourceFilePath = url.replace(previewBaseUrl, site.source);
+			try {
+				var url = previewWin.previewWin.window.location.href;
+				var sourceFilePath = url.replace(previewBaseUrl, site.source);
+			}
+			catch(err) {
+				console.error(err);
+				// Unable to get the file currently being previewed.
+				// The preview window has probably been closed.
+				return pickFileToPreview(site, makeItEditable);
+				// The current previewWin will be closed, and another opeened, when calling previewPage
+			}
+			
+			console.log("sourceFilePath=" + sourceFilePath);
+			
 			
 			// Open the file in the editor if it's not already open
 			if(EDITOR.files.hasOwnProperty(sourceFilePath)) {
@@ -1355,11 +1360,20 @@
 			if(err) throw err;
 			
 			var edit = true;
-			var callback = null;
+			var callback = previewWinOpened;
 			
-			previewPage(site, callback, edit, sourceFile);
+			previewPage(site, previewWinOpened, edit, sourceFile);
+			
+		}
+		
+		function previewWinOpened() {
 
-			
+			// Change buttonWysiwyg state to "active"
+			if(buttonWysiwyg) {
+				buttonWysiwyg.setAttribute("class", "button active");
+				buttonPreview.setAttribute("class", "button active");
+			}
+
 		}
 		
 	}
@@ -1368,6 +1382,12 @@
 	function pickFileToPreview(site, callback) {
 		
 		// Calls back with (err,file)
+		
+		console.log("Picking suitable file to preview/edit on site.name=" + site.name + " ...");
+		
+		
+		if(like(EDITOR.currentFile)) return callback(null, EDITOR.currentFile);
+
 		
 		// Is any of the source files opened ?
 		var openedFilesArray = [];
@@ -1405,14 +1425,21 @@
 				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
 				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
 				
-				if(fileList[i].path.indexOf(site.source) == 0 // A source file
-				&& fileList[i].name.match(/html?$/i) // We only like HTML code! :P
-				&& !fileList[i].name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
-				) return fileList[i].path;
+				if(like(fileList[i])) return fileList[i].path;
+
 			}
 			
 			return null;
 		}
+		
+		function like(fileListItem) {
+			return (fileListItem.path.indexOf(site.source) == 0 // A source file
+				&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
+				&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
+			); 
+
+		}
+		
 		
 	}
 	
