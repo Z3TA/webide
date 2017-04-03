@@ -108,7 +108,14 @@ todo: Make sure the source file is saved!
 		wysiwygEditor.setStartRow();
 		
 		var dance = true;
-		wysiwygEditor.reload(dance);
+		
+		console.log("onlyPreview=" + onlyPreview);
+		
+		if(onlyPreview) dance = false;
+		
+		wysiwygEditor.reload(dance, function firstLoad() {
+			wysiwygEditor.positionate();
+		});
 		
 	}
 	
@@ -930,7 +937,7 @@ todo: Make sure the source file is saved!
 		
 	}
 	
-	WysiwygEditor.prototype.reload = function reload(dance) {
+	WysiwygEditor.prototype.reload = function reload(dance, callback) {
 		var wysiwygEditor = this;
 
 		console.log("WysiwygEditor.reload dance=" + dance);
@@ -1033,11 +1040,12 @@ todo: Make sure the source file is saved!
 			if(bodyTags.length === 0) {
 				// The user probably have an open html tag above the body element
 				console.warn("previewWin dont have a body tag!");
-				if(dance) wysiwygEditor.positionate();
 				
 				attachFileChangeListener(wysiwygEditor);
 				
-				return callback();
+				if(callback) callback();
+				
+				return done();
 			}
 			
 			var body = bodyTags[0];
@@ -1115,14 +1123,13 @@ todo: Make sure the source file is saved!
 			};
 			
 			
-			if(dance) wysiwygEditor.positionate();
+			done();
 			
-			
-			callback();
-			
-			function callback() {
+			function done() {
 				if(wysiwygEditor.whenOpened) wysiwygEditor.whenOpened();
 				wysiwygEditor.whenOpened = null;
+				
+				if(callback) callback();
 			}
 
 		}

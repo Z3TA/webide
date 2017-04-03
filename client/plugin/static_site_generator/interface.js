@@ -348,7 +348,7 @@
 		buttonPreview.setAttribute("class", "button");
 		buttonPreview.setAttribute("value", "Preview");
 		buttonPreview.addEventListener("click", function() {
-			previewPage(selectedSite);
+			previewPage(selectedSite, undefined, false);
 		}, false);
 		
 		buttonWysiwyg = document.createElement("input");
@@ -977,14 +977,14 @@
 	
 	function previewSSG(file, combo, character, charCode, keyPushDirection, targetElementClass) {
 		if(!selectedSite) alertBox("No site selected!");
-		else previewPage(selectedSite);
+		else previewPage(selectedSite, undefined, false);
 		
 		return false;
 	}
 	
 	function previewPage(site, callback, edit, sourceFile) {
 		
-		console.log("Previewing " + site.name);
+		console.log("Previewing " + site.name + ". edit=" + edit);
 		
 		var errorOccured = false;
 		
