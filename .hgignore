@@ -8,4 +8,4 @@ userdirs/demo/static_site_demo/build.log
 npm/*
 tests/_*
 temp/*
-.localStorage
+.editorStorage/*
