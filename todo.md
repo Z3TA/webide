@@ -91,6 +91,11 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
+Show inconsistent indentation. If the indentation characters are not corrent. Show them! (in red ?)
+tab tab ...
+So that I will know when someting goes wrong with indentation.
+Add the indentation widget to right click menu when clicking on a line that has bad indentation characters.
+
 Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
 
 Show virtual paths on server errors like "unable to open file".

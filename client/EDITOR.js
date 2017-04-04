@@ -448,7 +448,6 @@ EDITOR.lastKeyPressed = "";
 			EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 				
 				if(err) {
-					console.warn(err.message);
 					fileOpenError(err);
 				}
 				else {
@@ -557,7 +556,6 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		function callCallbacks(err, file) {
-			if(err) console.warn(err.message);
 			
 			if(callback) {
 				callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
@@ -598,7 +596,7 @@ EDITOR.lastKeyPressed = "";
 			
 			var json = {path: path};
 			
-			CLIENT.cmd("getFileSizeOnDisk", json, function (err, json) {
+			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
 				if(err) callback(err);
 				else callback(null, json.size);
 			});

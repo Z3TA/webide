@@ -12,7 +12,7 @@
 	EDITOR.on("start", openReadme, loadOrder);
 	
 	function openReadme() {
-		setTimeout(function () {
+		setTimeout(function openReadmeFileAfterSomeTime() {
 			
 			if(Object.keys(EDITOR.files).length === 0) {
 				
