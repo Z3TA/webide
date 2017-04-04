@@ -43,6 +43,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+WysiwygEditor.js: Some browsers block window.open, and it's not possible to get a reference to the opened window.
+The user can unblock it hough ... Open a file that will call back once it's opened.
+Abstract into EDITOR.openWindow !?
+
 Make the SSG work in the browser
 
 Make WYSIWYG editor work in the browser

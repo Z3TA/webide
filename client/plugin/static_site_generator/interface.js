@@ -33,39 +33,7 @@
 	
 	var previewBaseUrl;
 	
-	var demoSite = {
-		name: "Demo site",
-		pubUser: "",
-		pubPw: "",
-		key: "", // Publish key
-		repository: "",
-		repoUser: "",
-		repoPw: ""
-	}
 
-	if(EDITOR.user == "admin" && runtime == "nw.js") {
-		var path = require("path");
-		
-		demoSite.projectFolder = path.join(require("dirname"), "/userdirs/demo/static_site_demo/")  // Project folder
-		demoSite.source = path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/")  // Source files (when colaborating; use a source control management tool!)
-		demoSite.preview = path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/") // Compiles files for review is saved here
-		demoSite.publish = path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-		demoSite.template = path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm")  // A template for new pages/posts
-		demoSite.url = "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")
-
-	}
-	else if(EDITOR.user == "demo") {
-		// Virtual folder
-		
-		demoSite.projectFolder = "/static_site_demo/";
-		demoSite.source = "/static_site_demo/source/";
-		demoSite.preview = "/static_site_demo/preview/";
-		demoSite.publish = "/static_site_demo/public/";
-		demoSite.template = "/static_site_demo/template.htm";
-		demoSite.projectFolder = "/static_site_demo/";
-	}
-
-	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
@@ -76,6 +44,44 @@
 	function getSites() {
 		
 		console.log("Getting SSG sites ...");
+		
+		var demoSite = {
+			name: "Demo site",
+			pubUser: "",
+			pubPw: "",
+			key: "", // Publish key
+			repository: "",
+			repoUser: "",
+			repoPw: ""
+		}
+
+		if(EDITOR.user == "admin" && runtime == "nw.js") {
+			var path = require("path");
+			
+			demoSite.projectFolder = path.join(require("dirname"), "/userdirs/demo/static_site_demo/")  // Project folder
+			demoSite.source = path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/")  // Source files (when colaborating; use a source control management tool!)
+			demoSite.preview = path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/") // Compiles files for review is saved here
+			demoSite.publish = path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
+			demoSite.template = path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm")  // A template for new pages/posts
+			demoSite.url = "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")
+
+		}
+		else if(EDITOR.user == "demo") {
+			// Virtual folder
+			
+			demoSite.projectFolder = "/static_site_demo/";
+			demoSite.source = "/static_site_demo/source/";
+			demoSite.preview = "/static_site_demo/preview/";
+			demoSite.publish = "/static_site_demo/public/";
+			demoSite.template = "/static_site_demo/template.htm";
+			demoSite.projectFolder = "/static_site_demo/";
+		}
+		else {
+			console.warn("No demosite will be available! EDITOR.user=" + EDITOR.user + " runtime=" + runtime);
+			demoSite = null;
+		}
+		
+		
 		
 		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
 		
@@ -247,7 +253,7 @@
 		var site = sites[index];
 		
 		if(site) {
-			//alertBox("Switching to site=" + site.name);
+			console.log("Switching to site=" + site.name);
 			
 			selectedSite = site;
 			selectSite.selectedIndex = index;
@@ -1397,6 +1403,7 @@
 		
 		console.log("Picking suitable file to preview/edit on site.name=" + site.name + " ...");
 		
+		if(!site.source) throw new Error("Site name=" + site.name + " has no no source! site.source=" + site.source + " site=" + JSON.stringify(site));
 		
 		if(like(EDITOR.currentFile)) return callback(null, EDITOR.currentFile);
 
@@ -1434,6 +1441,9 @@
 			
 			for(var i=0; i<fileList.length; i++) {
 				
+				if(!fileList[i].hasOwnProperty("path")) throw new Error("fileList item " + i + " does not have a path property!nfileList=" + JSON.stringify(fileList));
+				if(!fileList[i].hasOwnProperty("name")) throw new Error("fileList item " + i + " does not have a name property!nfileList=" + JSON.stringify(fileList));
+				
 				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
 				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
 				
@@ -1445,8 +1455,10 @@
 		}
 		
 		function like(fileListItem) {
-			
+
 			console.log("Like ? " + fileListItem);
+		
+			if(!fileListItem) return false;
 			
 			return (fileListItem.path.indexOf(site.source) == 0 // A source file
 				&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P

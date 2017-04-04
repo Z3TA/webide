@@ -178,7 +178,8 @@ todo: Make sure the source file is saved!
 		}
 		catch(err) {
 			// Probably has been closed!
-			throw err;
+			console.warn("Unable to positionate the preview windows because it couln't be focused. Error: " + err.message);
+			return;
 		}
 	
 		// What to do if the previewWin has been killed ?
@@ -196,8 +197,6 @@ todo: Make sure the source file is saved!
 		
 		editorCodeWindow.moveTo(0, 0);
 		editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
-		
-		
 	
 	}
 	
@@ -1015,7 +1014,7 @@ todo: Make sure the source file is saved!
 			}
 			else {
 				// Use the browser window object instead !
-				var previewWin = window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", "previewWin", "", false); // 
+				var previewWin = window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", "previewWinYoYo", "", false); // 
 			}
 			
 			wysiwygEditor.previewWin = previewWin;
@@ -1044,11 +1043,43 @@ todo: Make sure the source file is saved!
 			// nw.js gui is async! (can't acess previewWin.window right away)
 			previewWin.on("loaded", previewWinLoaded);
 		}
-		else previewWinLoaded(); // Browser window is sync
+		else if(wysiwygEditor.previewWin) {
+			previewWinLoaded(); // Browser window is sync
+		}	
+		else {
+			// Might be blocked by a dialog or popup stopper ...
+			
+			var previewWindowAvailableTimer = setInterval(isPreviewWindowAvailable, 500);
+
+		}
+		
+		function isPreviewWindowAvailable() {
+			
+			console.log("Waiting for preview window to load ...");
+			
+			if(window["previewWinYoYo"]) {
+				previewWin = wysiwygEditor.previewWin = previewWinYoYo;
+				
+				clearInterval(previewWindowAvailableTimer);
+				previewWinLoaded();
+			}
+			
+			/*
+			wysiwygEditor.previewWin.window.onload = function(){
+				previewWinLoaded();
+			};
+			*/
+			
+		}
 		
 		
 		function previewWinLoaded() {
-			//var doc = previewWin.document;
+			
+			if(!previewWin) {
+				console.error(new Error("Preview window failed to load!"));
+				alertBox("Failed to load the preview Window. Try disabling any popup stopper!");
+				return callback();
+			}
 			
 			if(runtime == "nw.js") {
 				// Remove this function from the loaded listener
@@ -1062,7 +1093,7 @@ todo: Make sure the source file is saved!
 			else {
 				var doc = previewWin.document;
 			}
-		
+			
 			var sourceFile = wysiwygEditor.sourceFile;
 			
 			var html = sourceFile.text;

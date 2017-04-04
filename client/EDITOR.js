@@ -246,9 +246,13 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.storage = {
 		setItem: function(id, val, callback) {
+			var stack = UTIL.getStack("EDITOR.storage.setItem");
 			CLIENT.cmd("storageSet", {item: id, value: String(val)}, function(err, json) {
 				if(callback) callback(err, json);
-				if(err) throw err;
+				else if(err) {
+					console.log(stack);
+					console.warn(err.message);
+				}
 			});
 			return _serverStorage[id] = String(val); 
 		},
@@ -2754,6 +2758,8 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
 		// Returns all files in a directory
+		
+		if(pathToFolder == undefined) throw new Error("pathToFolder=" + pathToFolder);
 		
 		pathToFolder = UTIL.trailingSlash(pathToFolder);
 		
