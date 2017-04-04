@@ -590,7 +590,12 @@ EDITOR.lastKeyPressed = "";
 					callback(null, parseInt(xhr.getResponseHeader("Content-Length")));
 				}
 			};
-			xhr.send();
+			try {
+				xhr.send();
+			}
+			catch(err) {
+				callback(err);
+			}
 		}
 		else {
 			
