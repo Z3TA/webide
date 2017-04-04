@@ -1285,7 +1285,7 @@ API.storageSet = function storageSet(user, json, callback) {
 	
 	function save() {
 		user.storage[itemName] = value;
-		user.saveStorage(function(err) {
+		user.saveStorageItem(itemName, function(err) {
 			if(err) callback(err);
 			else callback(null, {saved: itemName});
 		});
@@ -1301,7 +1301,7 @@ API.storageRemove = function storageRemove(user, json, callback) {
 	
 	delete user.storage[itemName];
 	
-	user.saveStorage(function(err) {
+	user.removeStorageItem(itemName, function(err) {
 		if(err) callback(err);
 		else callback(null, {removed: itemName});
 	});

@@ -214,8 +214,9 @@ function connection(connection) {
 					funToRun(user, json, function(err, answer) {
 						if(err) {
 							log(err);
-							log(err.stack);
-							console.trace("Stack ...")
+							
+							if(!err.stack) console.trace("Stack ...")
+							else log(err.stack);
 							
 							send({error: "API error: " + err.message + ""});
 							//send({error: "API error (" + err.message + "): " + message});
@@ -339,6 +340,7 @@ function User(id, name, rootPath) {
 	user.clientConnections = {}; // A user can be connected from many places
 	user.storage = null;
 	user.connectionId = 0;
+	user.isSavingStorage = [];
 	
 	if(rootPath) { // Use "true" path
 		var path = require("path");
@@ -348,9 +350,11 @@ function User(id, name, rootPath) {
 	
 	user.rootPath = rootPath;
 	
+	var path = require("path");
+	
 	if(user.rootPath) user.defaultWorkingDirectory = "/";
 	else {
-		var path = require("path");
+		
 		var editorDir = path.resolve("./../");
 		
 		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
@@ -359,7 +363,7 @@ function User(id, name, rootPath) {
 	
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
-	user.storageFile = user.translatePath(user.defaultWorkingDirectory) + ".localStorage";
+	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".editorStorage" + path.sep) ;
 	
 	console.log(user.name + " workingDirectory=" + user.workingDirectory);
 	
@@ -538,75 +542,181 @@ User.prototype.loadStorage = function loadStorage(callback) {
 	// callback storage as a object
 
 	var fs = require("fs");
-	var storageFile = user.storageFile;
+	var filesRead = 0;
 	
-	console.log("Reading storage file for user=" + user.name + " in location: " + storageFile);
-	fs.readFile(storageFile, "utf8", function(err, data) {
+	log("Reading storage files for user=" + user.name + " in directory: " + user.storageDir);
+	
+	if(!user.storageDir.match(/\/|\\$/)) throw new Error("Does not end with a slash: user.storageDir=" + user.storageDir);
+	
+	if(user.isSavingStorage.length > 0) {
+		callback(new Error("Can not retrieve the storage while " + JSON.stringify(user.isSavingStorage) + " is being saved!"));
+		throw new Error("Can not read the storage when it's being saved! user.isSavingStorage=" + JSON.stringify(user.isSavingStorage));
+	}
+	
+	fs.readdir(user.storageDir, function readingStorageDir(err, files) {
+		
+		if(Object.prototype.toString.call( files ) !== '[object Array]') throw new Error("Expected files to be an Array!");
+
 		if(err) {
+			
 			if(err.code == "ENOENT") {
 				
-				user.storage = {};
-				console.log("Creating storage file for user=" + user.name + " in location: " + storageFile);
-				fs.writeFile(storageFile, "{}", function(err) {
+				console.log("Creating directory: " + user.storageDir)
+				fs.mkdir(user.storageDir, function createdStorageDir(err) {
 					if(err) {
-						callback(new Error("Unable to retrieve storage! Error: " + err.message));
+						callback(err);
 						throw err;
 					}
-					else callback(null, user.storage);
 					
-				}); 
-				
+					user.storage = {};
+					callback(null, user.storage);
+					
+					console.log("Directory created: " + user.storageDir)
+					
+				});
 			}
 			else {
-				callback(new Error("Unable to retrieve storage! Error: " + err.message));
+				callback(err);
+				console.warn("readdir err code=" + err.code);
 				throw err;
 			}
 		}
+		
+		user.storage = {};
+		
+		if(files.length > 0)  {
+			for(var i=0; i<files.length; i++) loadItem(files[i]);
+		}
 		else {
-			try {
-				user.storage = JSON.parse(data);
+			callback(null, user.storage);
+		}
+		
+		function loadItem(fileItemName) {
+			
+			var itemName = decodeURIComponent(fileItemName);
+			
+			console.log("Loading item=" + itemName);
+			fs.readFile(user.storageDir + fileItemName, "utf8", function readStorageFileItem(err, data) {
+				if(err) {
+					callback(err);
+					throw err;
+				}
+				
+				user.storage[itemName] = data;
+				
+				filesRead++;
+				
+				console.log("Done loading item=" + itemName + " (" + filesRead + " or " + files.length + ")");
+				
+				if(filesRead == files.length) callback(null, user.storage);
+				
+			});
+		}
+		
+	});
+
+
+}
+
+User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
+	var user = this;
+	
+	log("Saving storage item=" + itemName + " for user=" + user.name + " ...");
+	
+	var fs = require("fs");
+	
+	var storageString = user.storage[itemName];
+	
+	// The storage might change while waiting for the file system!!!
+	
+	if(user.isSavingStorage.indexOf(itemName) != -1) {
+		console.warn("USER " + user.name + " IS CURRENTLY SAVING itemName=" + itemName);
+		return callback(new Error("Please wait until " + itemName + " has been saved!"));
+	}
+	
+	user.isSavingStorage.push(itemName);
+	
+	var filePath = user.storageDir + encodeURIComponent(itemName);
+	
+	console.log("Creating backup of filePath=" + filePath);
+	fs.rename(filePath, filePath + ".backup", function backedUpStorage(err) {
+		
+		if(err) {
+			
+			if(err.code != "ENOENT") {
+				callback(new Error("Not possible to backup " + itemName + " when saving! Error: " + err.message));
+				throw err;
 			}
-			catch(err) {
-				callback(new Error("Unable to retrieve storage! Error: " + err.message));
-				throw new Error("Unable to parse storage data for user=" + user.name + "\nstorageFile: " + storageFile + "\nParse error: " + err.message);
+			// else: Just create the file if it doesn't exist
+		}
+		
+		console.log("Saving data to filePath=" + filePath);
+		fs.writeFile(filePath, storageString, function writeStorage(err) {
+			if(err) {
+				callback(new Error("Unable to save storage item=" + itemName + " ! Error: " + err.message));
+				throw err;
 			}
 			
-			return callback(null, user.storage);
-		
-		}			
-		
+			// Some times the file gets corrupt! No idea why. Check if it's corrupt ...
+			console.log("Reading to check for errors: filePath=" + filePath);
+			fs.readFile(filePath, "utf8", function checkCorrupt(err, data) {
+				if(err) throw err;
+				
+				if(data != storageString) {
+					
+					user.send({storageCorrupt: {data: data, storageString: storageString}});
+					
+					callback(new Error("The storage got corrupt when saving!"));
+					
+					throw new Error("Storage got corrupt when saving data for user=" + user.name + "\n\
+					user.storageDir: " + user.storageDir + "\n\
+					itemName: " + itemName + "\n\
+					filePath: " + filePath + "\n\
+					data: " + data + "\n\
+					storageString:" + storageString);
+					
+					// Attempt to save it again ??
+					
+				}
+				
+				var json = {};
+				json[itemName] = storageString;
+				
+				callback(null, json);
+				
+				user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
+				log("Done saving storage item=" + itemName + " for user=" + user.name);
+				
+			});
+
+		});
 	});
 }
 
-User.prototype.saveStorage = function saveStorage(callback) {
+
+User.prototype.removeStorageItem = function saveStorage(itemName, callback) {
 	var user = this;
 	
 	var fs = require("fs");
 	
-	var storageString = JSON.stringify(user.storage, null, 2);
+	var filePath = user.storageDir + itemName;
 	
-	// Sanity check
-	try {
-		JSON.parse(storageString);
-	}
-	catch(err) {
-		console.warn("Was about to write currupted JSON ...")
-		console.log(storageString);
-		throw err;
-	}
+	user.isSavingStorage.push(itemName);
 	
-	// The storage might change while the waiting for the file system!
-	
-	fs.writeFile(user.storageFile, storageString, function(err) {
+	fs.unlink(filePath, function storageItemFileDeleted(err) {
 		if(err) {
-			callback(new Error("Unable to save storage! Error: " + err.message));
+			callback(err);
 			throw err;
 		}
-		callback(null, {storage: JSON.stringify(user.storage)});
-		
-	}); 
+		else {
+			
+			user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
+			
+			callback(null);
+		}
+	});
+	
 }
-
 
 function isObject(obj) {
 	return obj === Object(obj);
