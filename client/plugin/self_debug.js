@@ -118,13 +118,26 @@
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
 		
+
+	
 		// If windows detects / it will add C:/ if linux does Not detect / will will add the working dir
 		if(EDITOR.platform == "Windows") source = source.replace("file:///", ""); // Remove three slashes in windows
 		else source = source.replace("file://", ""); // Two slashes in linux (and other?)
 		
-		var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');EDITOR.renderNeeded();})">' + source + "</a>";
+		var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {\
+		if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
+		EDITOR.renderNeeded();})">' + source + "</a>";
 		
-		confirmBox("" + sourceLink + ":<b>" + lineno + "</b><br>" + message + "<br><br>Close/restart the editor ?", [
+		var lineString = ":<b>" + lineno + "</b><br>";
+		
+		
+		if(!source) {
+			message = "There have been an error. Check the developer tools for more info!"
+			sourceLink = "";
+			lineString = "";
+		}
+		
+		confirmBox("" + sourceLink + lineString + message + "<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
 			
@@ -135,7 +148,7 @@
 				
 				if(answer == createTestRestart) answer = yes;
 				
-}
+			}
 			else if(answer == sendBugReport) {
 				var errorReportFilePath = "bugreport.txt";
 				EDITOR.openFile(errorReportFilePath, reportTemplate(message, source, lineno, colno, error), function errorReportOpened(err, file) {
@@ -171,7 +184,7 @@
 	function reportTemplate(message, source, lineno, colno, error) {
 		// Create a template used to report bugs
 		
-		var editorArgs = runtime == "nw.js" ? require('nw.gui').App.argv : "Browser url:" + document.location.href;
+		var editorArgs = runtime == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
 		
 		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
 		'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +
@@ -181,7 +194,7 @@
 		'Platform: ' + process.platform + '\n' +
 		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
-		error.stack + '\n' +
+		(error ? error.stack : "Error stack:") + '\n' +
 		'\n' +
 		'How to repeat:\n' + 
 		'\n' + 
