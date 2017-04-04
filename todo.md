@@ -43,14 +43,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Test the SSG WYSIWYG !
-
-Replace the SSG WYSIWYG editor with the new WysiwygEditor.js
+Make the SSG work in the browser
 
 Make WYSIWYG editor work in the browser
 
-Make the SSG work in the browser
+Test the SSG WYSIWYG !
 
+Replace the SSG WYSIWYG editor with the new WysiwygEditor.js
 
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
 Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window

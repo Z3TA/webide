@@ -1,11 +1,6 @@
 (function() {
 	"use strict";
 	
-	if(runtime == "browser") {
-		console.warn("Static site generator not supported in the browser!");
-		return;
-	}
-	
 	var sites; // Array of sites
 	var manager;
 	var selectSite;
@@ -38,29 +33,30 @@
 	
 	var previewBaseUrl;
 	
-	var demoSite;
+	var demoSite = {
+		name: "Demo site",
+		pubUser: "",
+		pubPw: "",
+		key: "", // Publish key
+		repository: "",
+		repoUser: "",
+		repoPw: ""
+	}
 
 	if(EDITOR.user == "admin" && runtime == "nw.js") {
 		var path = require("path");
 		
-		demoSite = {
-			name: "Demo site",
-			projectFolder: path.join(require("dirname"), "/userdirs/demo/static_site_demo/"),  // Project folder
-			source: path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/"),  // Source files (when colaborating; use a source control management tool!)
-			preview: path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/"), // Compiles files for review is saved here
-			publish: path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-			template: path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm"),  // A template for new pages/posts
-			url: "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/"),
-			pubUser: "",
-			pubPw: "",
-			key: "", // Publish key
-			repository: "",
-			repoUser: "",
-			repoPw: ""
-		}
+		demoSite.projectFolder = path.join(require("dirname"), "/userdirs/demo/static_site_demo/")  // Project folder
+		demoSite.source = path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/")  // Source files (when colaborating; use a source control management tool!)
+		demoSite.preview = path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/") // Compiles files for review is saved here
+		demoSite.publish = path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
+		demoSite.template = path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm")  // A template for new pages/posts
+		demoSite.url = "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")
+
 	}
 	else if(EDITOR.user == "demo") {
 		// Virtual folder
+		
 		demoSite.projectFolder = "/static_site_demo/";
 		demoSite.source = "/static_site_demo/source/";
 		demoSite.preview = "/static_site_demo/preview/";
@@ -79,6 +75,8 @@
 	
 	function getSites() {
 		
+		console.log("Getting SSG sites ...");
+		
 		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
 		
 		if(storageSites) {
@@ -87,6 +85,12 @@
 		else if(demoSite) {
 			sites = [demoSite];
 		}
+
+		if(!sites) throw new Error("Failed to get any sites from the static site generator!\n\
+		storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
+		demoSite=" + JSON.stringify(demoSite, null, 2) + "\n\
+		sites=" + JSON.stringify(sites, null, 2));
+		
 	}
 	
 	function load() {
@@ -202,15 +206,17 @@
 	
 	function fileShow(file) {
 		
-		// Change site when you change file
-		// Check if the file belongs to a site
-		
-		var filePath = file.path;
-		
-		for (var i=0; i<sites.length; i++) {
-			if(filePath.indexOf(sites[i].source) != -1) {
-				selectedSite = sites[i];
-				break;
+		if(sites) {
+			// Change site when you change file
+			// Check if the file belongs to a site
+			
+			var filePath = file.path;
+			
+			for (var i=0; i<sites.length; i++) {
+				if(filePath.indexOf(sites[i].source) != -1) {
+					selectedSite = sites[i];
+					break;
+				}
 			}
 		}
 	}
@@ -219,13 +225,16 @@
 		
 		var filePath = file.path;
 		
-		// Check all sites to see if the file belongs to any source
+		if(sites) {
 		
-		for(var i=0; i<sites.length; i++) {
-			if(filePath.indexOf(sites[i].source) != -1) {
-				showSSG();
-				switchSite(i)
-				break;
+			// Check all sites to see if the file belongs to any source
+			
+			for(var i=0; i<sites.length; i++) {
+				if(filePath.indexOf(sites[i].source) != -1) {
+					showSSG();
+					switchSite(i)
+					break;
+				}
 			}
 		}
 		
@@ -943,6 +952,9 @@
 	}
 	
 	function showSSG() {
+		
+		console.log("Showing the static site generator -interface")
+		
 		EDITOR.input = false; // Steal focus from the file
 		
 		if(!manager) build(); // Build the GUI if it's not already built
@@ -1433,6 +1445,9 @@
 		}
 		
 		function like(fileListItem) {
+			
+			console.log("Like ? " + fileListItem);
+			
 			return (fileListItem.path.indexOf(site.source) == 0 // A source file
 				&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
 				&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
