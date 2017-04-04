@@ -697,6 +697,11 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 User.prototype.removeStorageItem = function saveStorage(itemName, callback) {
 	var user = this;
 	
+	if(!user.storage.hasOwnProperty(itemName)) {
+		return callback(new Error("Item=" + itemName + " is already gone from the storage!"));
+		
+	}
+	
 	var fs = require("fs");
 	
 	var filePath = user.storageDir + itemName;
@@ -705,13 +710,27 @@ User.prototype.removeStorageItem = function saveStorage(itemName, callback) {
 	
 	fs.unlink(filePath, function storageItemFileDeleted(err) {
 		if(err) {
+			
 			callback(err);
 			throw err;
+			
+			/*
+			if(err.code == "ENOENT") {
+				console.warn(err.message);
+				
+				user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
+				callback(null);
+				
+			}
+			else {
+				callback(err);
+				throw err;
+			}
+			*/
 		}
 		else {
 			
 			user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
-			
 			callback(null);
 		}
 	});
