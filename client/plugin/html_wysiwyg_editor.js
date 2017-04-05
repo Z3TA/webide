@@ -31,14 +31,7 @@
 	function createwysiWygEditor(file) {
 		
 		if(wysiwygEditor) {
-			if(wysiwygEditor.sourceFile == file) {
-				var dance = true;
-				wysiwygEditor.reload(dance);
-				return;
-			}
-			else {
-				wysiwygEditor.close();
-			}
+			wysiwygEditor.close();
 		}
 		
 		wysiwygEditor = new WysiwygEditor(file);

@@ -857,12 +857,9 @@ function handleHttpRequest(request, response){
 	
 	
 	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+	var urlPath = UTIL.getPathFromUrl(request.url);
 	
-	var reqUrl = require('url').parse(request.url);
-	
-	var urlPath = reqUrl.path;
-	
-	console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath);
+	console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url);
 	
 	var dirs = urlPath.split("/");
 	
@@ -884,7 +881,7 @@ function handleHttpRequest(request, response){
 	else {
 		// Serve from the jzedit client folder
 		
-		if(urlPath == "/") urlPath = "/index.htm";
+		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 		
 		localFolder = path.resolve("../client/");
 		
@@ -899,7 +896,7 @@ function handleHttpRequest(request, response){
 	
 	if(urlPath == "") {
 		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("No file in url=: " + urlPath);
+		response.end("No file in url: " + urlPath);
 		return;
 	}
 	

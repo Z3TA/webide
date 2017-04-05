@@ -632,6 +632,18 @@ var UTIL = {
 		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
 	},
 
+	getPathFromUrl: function getPathFromUrl(url) {
+		
+		if(url.indexOf("://") != -1) url = url.substr(url.indexOf("://")+3);
+		
+		var filePath = url.substr(url.indexOf("/"));
+		
+		if(filePath.indexOf("?") != -1) filePath = filePath.substring(0, filePath.indexOf("?"));
+		if(filePath.indexOf("#") != -1) filePath = filePath.substring(0, filePath.indexOf("#"));
+		
+		return filePath;
+	},
+	
 	isFolderPath: function isFolderPath(path) {
 		var fs = require("fs");
 		try {

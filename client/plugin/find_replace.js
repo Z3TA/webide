@@ -375,8 +375,9 @@
 			
 			EDITOR.input = false; // Remove focus from the file
 			
-			return false; // Prevent default (browser) action
 		}
+		
+		return false; // Prevent default (browser) action
 		
 	}
 	

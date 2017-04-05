@@ -97,6 +97,43 @@
 		demoSite=" + JSON.stringify(demoSite, null, 2) + "\n\
 		sites=" + JSON.stringify(sites, null, 2));
 		
+		// quickedit.js ...
+		if(QueryString.editPage && QueryString.nodes) {
+			
+			var url = QueryString.editPage;
+			var nodes = QueryString.nodes.split(",");
+			
+			var site = isSite(url);
+			
+			if(site) {
+				
+				alertBox(site.name);
+				
+				var path = UTIL.getPathFromUrl(url);
+				
+				// Figure out wich file ...
+				
+				
+			}
+			else {
+				console.warn("Couln't determine what site the url belongs to: " + url);
+			}
+			
+			function isSite(url) {
+				// Figure out if the url belongs to any of our sites ...
+				for(var i=0, site; i<sites.length; i++) {
+					site = sites[i];
+					
+					if(url.indexOf(site.url) == 0) return site;
+					if(url.indexOf(site.publish) == 0) return site;
+					if(url.indexOf(site.preview) == 0) return site;
+					
+				}
+			}
+			
+		}
+		
+		
 	}
 	
 	function load() {
@@ -134,21 +171,22 @@
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 		if(EDITOR.user == "demo") {
-		// Open demo site if no file is open
-		var timer = 1000; // Milliseconds
-		setTimeout(function () {
-			
-			var openFiles = Object.keys(EDITOR.files).length;
-			
-			if(openFiles === 0) {
+			// Open demo site if no file is open
+			var timer = 1000; // Milliseconds
+			setTimeout(function () {
 				
-				var filePath = path.join(require("dirname") + "/userdirs/demo/static_site_demo/source/about.htm");
+				var openFiles = Object.keys(EDITOR.files).length;
 				
-				EDITOR.openFile(filePath);
-				
-			}
-		}, timer);
+				if(openFiles === 0) {
+					
+					var filePath = path.join(require("dirname") + "/userdirs/demo/static_site_demo/source/about.htm");
+					
+					EDITOR.openFile(filePath);
+					
+				}
+			}, timer);
 		}
+		
 	}
 	
 	function SSG_cleanup() {
@@ -182,33 +220,7 @@
 		}
 		
 	}
-	
-	function processPost(request, response, callback) {
-		var queryData = "";
-		if(typeof callback !== 'function') return null;
-		
-		if(request.method == 'POST') {
-			request.on('data', function(data) {
-				queryData += data;
-				if(queryData.length > 1e6) {
-					queryData = "";
-					response.writeHead(413, {'Content-Type': 'text/plain'}).end();
-					request.connection.destroy();
-				}
-			});
-			
-			request.on('end', function() {
-				request.post = querystring.parse(queryData);
-				callback();
-			});
-			
-		}
-		else {
-			response.writeHead(405, {'Content-Type': 'text/plain'});
-			response.end();
-		}
-	}
-	
+
 	
 	function fileShow(file) {
 		
@@ -483,6 +495,10 @@
 		labelPublish.setAttribute("for", "inputPublishFolder");
 		labelPublish.appendChild(document.createTextNode("Publish:")); // Language settings!?
 		
+		var labelUrl = document.createElement("label");
+		labelUrl.setAttribute("for", "inputUrl");
+		labelUrl.appendChild(document.createTextNode("URL:")); // Language settings!?
+		
 		var labelTemplate = document.createElement("label");
 		labelTemplate.setAttribute("for", "inputTemplate");
 		labelTemplate.appendChild(document.createTextNode("Template file:")); // Language settings!?
@@ -547,6 +563,13 @@
 		inputPublishFolder.setAttribute("size", "69");
 		inputPublishFolder.setAttribute("title", "Where files for publishing are sent: A file-system path or an URL to FTP/FTPS/FTPS");
 		
+		inputUrl = document.createElement("input");
+		inputUrl.setAttribute("type", "text");
+		inputUrl.setAttribute("id", "inputUrl");
+		inputUrl.setAttribute("class", "inputtext url");
+		inputUrl.setAttribute("size", "69");
+		inputUrl.setAttribute("title", "The URL of the web site when published");
+		
 		inputTemplate = document.createElement("input");
 		inputTemplate.setAttribute("type", "text");
 		inputTemplate.setAttribute("id", "inputTemplate");
@@ -595,14 +618,7 @@
 		inputRepoAuthPw.setAttribute("class", "inputtext");
 		inputRepoAuthPw.setAttribute("size", "20");
 		inputRepoAuthPw.setAttribute("title", "Password if needed for the publish URL")
-		
-		inputUrl = document.createElement("input");
-		inputUrl.setAttribute("type", "text");
-		inputUrl.setAttribute("id", "inputUrl");
-		inputUrl.setAttribute("class", "inputtext");
-		inputUrl.setAttribute("size", "50");
-		inputUrl.setAttribute("title", "Public URL where the published site can be accessed");
-		
+
 		
 		// Buttons
 		
@@ -720,6 +736,18 @@
 		
 		editView.appendChild(tr);
 		
+		// URL
+		tr = document.createElement("tr");
+		td = document.createElement("td");
+		td.setAttribute("align", "right");
+		td.appendChild(labelUrl);
+		tr.appendChild(td);
+		
+		td = document.createElement("td");
+		td.appendChild(inputUrl);
+		tr.appendChild(td);
+		
+		editView.appendChild(tr);
 		
 		// Auth pub username
 		tr = document.createElement("tr");
