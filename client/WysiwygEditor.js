@@ -57,11 +57,9 @@ todo: Make sure the source file is saved!
 	
 	var wysiwygEditorCounter = 0; // WysiwygEditor instances
 	
-	var regexBody = /<body[^>]*>\s*[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i;
-	
 	var previewInputFired = false;
 	
-	WysiwygEditor = function WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened, compiledSource, compliedSourceBodyTag) {
+	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTagSource, onlyPreview, newWindow, url, whenLoaded, compiledSource, bodyTagPreview) {
 		var wysiwygEditor = this;
 		
 		if(wysiwygEditor == undefined || wysiwygEditor == window) throw new Error("Call WysiwygEditor with the new keyword! Example: var foo = new WysiwygEditor()");
@@ -70,10 +68,20 @@ todo: Make sure the source file is saved!
 		wysiwygEditor.sourceFile = sourceFile;
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
 		
+		if(!newWindow) {
+			
+			// We need to create the window right away to prevent it being blocked ...
+			var newWindow = window.open(url ? url : "about:blank", "previewWinXYZ", "", false); // 
+			
+			if(!newWindow) throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass it as the fourth parameter!")
+		}
+		wysiwygEditor.previewWin = newWindow;
+		
 		wysiwygEditor.url = url;
-		wysiwygEditor.bodyTag = bodyTag || "body";
+		wysiwygEditor.bodyTagSource = bodyTagSource || "body";
+		wysiwygEditor.bodyTagPreview = bodyTagPreview || "body";
 		wysiwygEditor.onlyPreview = (onlyPreview == true);
-		wysiwygEditor.whenOpened = whenOpened;
+		wysiwygEditor.whenLoaded = whenLoaded;
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML); // lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
@@ -83,11 +91,9 @@ todo: Make sure the source file is saved!
 		if(compiledSource) {
 			
 			wysiwygEditor.isCompiled = true;
-			
-			if(compliedSourceBodyTag == undefined) compliedSourceBodyTag = "main";
 
 			var srcHTML = wysiwygEditor.getSourceCodeBody();
-			var rawMainHtml = getSourceCodeBody(compiledSource, compliedSourceBodyTag);
+			var rawMainHtml = getSourceCodeBody(compiledSource, wysiwygEditor.bodyTagPreview);
 			wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 			
 			// Make sure there are no errors
@@ -102,10 +108,12 @@ todo: Make sure the source file is saved!
 			
 			console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 			
+			wysiwygEditor.setStartRow();
+			
 			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
 				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
 				for(var i=0; i< wysiwygEditor.ignoreTransform.inserted.length; i++) {
-					msg += "Line + " + (wysiwygEditor.ignoreTransform.inserted[i].row + 1) + ": ";
+					msg += "Line " + (wysiwygEditor.ignoreTransform.inserted[i].row + 1 + wysiwygEditor.startRow) + ": ";
 					if(wysiwygEditor.ignoreTransform.inserted[i].text == "") msg += " Inserted New line\n"
 					else msg += "Inserted: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.inserted[i].text) + "\n";
 				}
@@ -115,14 +123,13 @@ todo: Make sure the source file is saved!
 			else if(wysiwygEditor.ignoreTransform.removed.length > 0) {
 				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
 				for(var i=0; i< wysiwygEditor.ignoreTransform.removed.length; i++) {
-					msg += "Line " + (wysiwygEditor.ignoreTransform.removed[i].row + 1) + ": ";
+					msg += "Line " + (wysiwygEditor.ignoreTransform.removed[i].row + 1 + wysiwygEditor.startRow) + ": ";
 					if(wysiwygEditor.ignoreTransform.removed[i].text == "") msg += " Removed New line\n"
 					else msg += "Removed: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.removed[i].text) + "\n";
 				}
 				alertBox(msg);
 				return wysiwygEditor.close();
 			}
-			
 			
 		}
 		else wysiwygEditor.ignoreTransform = null;
@@ -413,9 +420,9 @@ todo: Make sure the source file is saved!
 		//updatePreviewOnChange = setTimeout(function() {
 		
 		
-		var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
+		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 		
-		if(!body) throw new Error("Unable to find bodyTag=" + wysiwygEditor.bodyTag + " element!");
+		if(!body) throw new Error("Unable to find bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " element!");
 		
 		var srcHTML = wysiwygEditor.getSourceCodeBody();
 		
@@ -593,7 +600,7 @@ todo: Make sure the source file is saved!
 			
 			var srcHTML = wysiwygEditor.getSourceCodeBody();
 			
-			var body = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTag)[0];
+			var body = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 			var prewBodyHtml = wysiwygEditor.getContentEditableCode();
 			
 			/*
@@ -858,7 +865,7 @@ todo: Make sure the source file is saved!
 		
 		var win = wysiwygEditor.previewWin.window;
 		var doc = win.document; // previewWin.document is not available in nw.js gui
-		var body = doc.getElementsByTagName(wysiwygEditor.bodyTag)[0];
+		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 		
 		var prewHTML = body.innerHTML;
 		
@@ -922,16 +929,17 @@ todo: Make sure the source file is saved!
 		
 		var sourceFile = wysiwygEditor.sourceFile;
 		
-		var srcMatchBody = sourceFile.text.match(regexBody);
+		var srcMatchBody = sourceFile.text.match(regexBody(wysiwygEditor.bodyTagSource));
 		
 		var srcHTML;
 		
 		if(srcMatchBody == null) {
-			alertBox("Can not find body-tags with line breaks!");
+			//alertBox("Can not find body-tags with line breaks!");
 			
-			// just warn, then stop where getSourceCodeBody() is called, and try to fix the problem
+			// just warn, then stop where getSourceCodeBody() is called, and try to fix the problem !?
 			
-			throw new Error("Could not find body element in source file:" + sourceFile.path + "\nsourceFile.text=" + UTIL.lbChars(sourceFile.text));
+			console.log("sourceFile.text=" + UTIL.lbChars(sourceFile.text));
+			throw new Error("Could not find wysiwygEditor.bodyTagSource=" + wysiwygEditor.bodyTagSource + " element in source file:\n" + sourceFile.path + "");
 		}
 
 		srcHTML = srcMatchBody[1];
@@ -999,119 +1007,43 @@ todo: Make sure the source file is saved!
 			previewWin.blur();
 		}
 		catch(err) {
-			gotError = true; 
-		}
-		
-		
-		if(gotError || previewWin == null || previewWin.closed) {
-			// The window have probably been closed! Or never opened. Lets create a new window
-			
-			// Can not use require if using window.open!?
-			if(runtime == "nw.js") {
-				var gui = require('nw.gui'); // nw.js UI library
-				var previewWin = gui.Window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", {toolbar:true, frame:true});
-				// Show the toolbar so you can see the URL, and open dev tools
-			}
-			else {
-				// Use the browser window object instead !
-				var previewWin = window.open(wysiwygEditor.url ? wysiwygEditor.url : "about:blank", "previewWinYoYo", "", false); // 
-			}
-			
-			wysiwygEditor.previewWin = previewWin;
-			
-			// previewWin.document.innerHTML dont work with window.open!
-			
+
+			alertBox("The preview window has been closed!");
+			wysiwygEditor.close();
+			return callback();
 
 		}
+		
+		
+
+		var sourceFile = wysiwygEditor.sourceFile;
+		
+		
+		var html = sourceFile.text;
+		
+		previewWin.onload = previewWindowLoaded;
+		
+		if(wysiwygEditor.url) previewWin.location.href = wysiwygEditor.url;
 		else {
 			
-			// The window is still there ...
-			// We must re to prevent double html bodies
-			
-			if(runtime == "nw.js") {
-				var win = previewWin.window;
-				var doc = win.document; // previewWin.document is not available in nw.js gui
-			}
-			else {
-				var doc = previewWin.document;
-			}
-			doc.location = "about:blank";
-		}
-		
-		
-		if(runtime == "nw.js") {
-			// nw.js gui is async! (can't acess previewWin.window right away)
-			previewWin.on("loaded", previewWinLoaded);
-		}
-		else if(wysiwygEditor.previewWin) {
-			previewWinLoaded(); // Browser window is sync
-		}	
-		else {
-			// Might be blocked by a dialog or popup stopper ...
-			
-			var previewWindowAvailableTimer = setInterval(isPreviewWindowAvailable, 500);
-
-		}
-		
-		function isPreviewWindowAvailable() {
-			
-			console.log("Waiting for preview window to load ...");
-			
-			if(window["previewWinYoYo"]) {
-				previewWin = wysiwygEditor.previewWin = previewWinYoYo;
-				
-				clearInterval(previewWindowAvailableTimer);
-				previewWinLoaded();
-			}
-			
-			/*
-			wysiwygEditor.previewWin.window.onload = function(){
-				previewWinLoaded();
-			};
-			*/
-			
-		}
-		
-		
-		function previewWinLoaded() {
-			
-			if(!previewWin) {
-				console.error(new Error("Preview window failed to load!"));
-				alertBox("Failed to load the preview Window. Try disabling any popup stopper!");
-				return callback();
-			}
-			
-			if(runtime == "nw.js") {
-				// Remove this function from the loaded listener
-				//UTIL.objInfo(previewWin);
-				previewWin.removeListener("loaded", previewWinLoaded);
-				
-				var win = previewWin.window;
-				var doc = win.document; // previewWin.document is not available in nw.js gui
-
-			}
-			else {
-				var doc = previewWin.document;
-			}
-			
-			var sourceFile = wysiwygEditor.sourceFile;
-			
-			var html = sourceFile.text;
-			
+			previewWin.location.href = "about:blank";
+			// Write the html to the content-editable
 			console.log("Writing html=" + UTIL.lbChars(html));
+
+			previewWin.document.open();
+			previewWin.document.write(html);
+			previewWin.document.close();
+		}
+		
+		
+		function previewWindowLoaded() {
 			
-			console.log(doc.innerHTML);
+			// Get the doc again after location reload
+			var doc = previewWin.document;
 			
+			console.log(doc);
 			
-			if(!wysiwygEditor.url && !wysiwygEditor.isCompiled) {
-				// Write the html to the content-editable
-				if(runtime == "nw.js") doc.write(html);
-				else {
-					previewWin.document.open();
-					previewWin.document.write(html);
-					previewWin.document.close();
-				}
-			}
+			if(!doc) throw new Error("Unable to get preview window document!");
 			
 			/*
 			var prewviewContent = doc.documentElement.outerHTML;
@@ -1124,13 +1056,18 @@ todo: Make sure the source file is saved!
 			}
 			*/
 			
-			var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
+			var bodyTags = doc.getElementsByTagName(wysiwygEditor.previewBodyTag);
 			
 			if(bodyTags.length === 0) {
 				// The user probably have an open html tag above the body element
 				console.warn("previewWin dont have a body tag!");
 				
-				if(wysiwygEditor.isCompiled) throw new Error("Unable to find wysiwygEditor.bodyTag=" + wysiwygEditor.bodyTag + " in preview window !");
+				if(wysiwygEditor.isCompiled) {
+					
+					console.log("preview window html: " + doc.innerHTML);
+					
+					throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window !");
+				}
 				
 				attachFileChangeListener(wysiwygEditor);
 				
@@ -1231,7 +1168,7 @@ todo: Make sure the source file is saved!
 				
 			}
 			
-				
+			
 			attachFileChangeListener(wysiwygEditor);
 			
 			// Remove the fileChange event listener when closing the content-editable window
@@ -1252,8 +1189,8 @@ todo: Make sure the source file is saved!
 				
 				wysiwygEditor.hasLoaded = true;
 				
-				if(wysiwygEditor.whenOpened) wysiwygEditor.whenOpened();
-				wysiwygEditor.whenOpened = null;
+				if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded();
+				wysiwygEditor.whenLoaded = null;
 				
 				if(callback) callback();
 			}
@@ -1281,23 +1218,16 @@ todo: Make sure the source file is saved!
 		
 		wysiwygEditor.onlyPreview = true;
 		
-		try {
-			if(runtime == "nw.js") {
-				var win = wysiwygEditor.previewWin.window;
-				var doc = win.document; // previewWin.document is not available in nw.js gui
-			}
-			else {
-				var doc = wysiwygEditor.previewWin.document;
-			}
-		}
-		catch(err) {
+		var doc = wysiwygEditor.previewWin.document;
+		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+
+		if(!wysiwygEditor.previewWin || !doc || !bodyTags) {
 			console.error(err);
 			// The preview window has probably been closed.
 			// Don't bother about it
 			return callback();
 		}
 		
-		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTag);
 			
 		if(bodyTags.length === 0) throw new Error('No "body" tag found in preview window!');
 
@@ -1310,7 +1240,6 @@ todo: Make sure the source file is saved!
 		body.onselectionchange = null;
 		body.onpaste = null;
 		body.oninput = null;
-		
 		
 		
 		if(callback) callback();
@@ -1342,7 +1271,9 @@ todo: Make sure the source file is saved!
 		// There needs to be a line break directly after <body> and before </body> !
 		// This is to prevent having the body tags included in text diff
 		
-		if(html.match(regexBody) === null) throw new Error("Unable to find body element when setting the code body.\n\
+		var reg = regexBody(wysiwygEditor.bodyTagSource);
+		
+		if(html.match(reg) === null) throw new Error("Unable to find body element when setting the code body.\n\
 		html=" + UTIL.lbChars(html));
 		
 		// 1. body attributes
@@ -1355,7 +1286,7 @@ todo: Make sure the source file is saved!
 		// The white space before </body> is preserved to keep source file indentation characters
 		
 		// Sanity check!
-		if(html.match(regexBody) === null) throw new Error("We are not sane!\n\
+		if(html.match(reg) === null) throw new Error("We are not sane!\n\
 		html=" + UTIL.lbChars(html));
 		
 		return html;
@@ -1609,18 +1540,14 @@ todo: Make sure the source file is saved!
 		if(fileText == undefined) throw new Error("Need fileText");
 		if(bodyTag == undefined) {
 			bodyTag = "body";
-			console.log("Using bodyTag=" + bodyTag);
+			console.warn("Using bodyTag=" + bodyTag);
 		}
 		if(lineBreak == undefined) lineBreak = UTIL.determineLineBreakCharacters(fileText);
 		
 		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
 		// so there needs to be a line-break after <body> and before </body>
 
-		
-		var regexBody = new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
-
-		
-		var srcMatchBody = fileText.match(regexBody);
+		var srcMatchBody = fileText.match(regexBody(bodyTag));
 		
 		if(srcMatchBody == null) {
 			console.log(fileText);
@@ -1636,6 +1563,17 @@ todo: Make sure the source file is saved!
 		
 	}
 	
+	
+	function regexBody(bodyTag) {
+		//var body = /<body[^>]*>\s*[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i;
+		
+		if(bodyTag == undefined) throw new Error("No bodyTag=" + bodyTag + " defined!")
+		
+		console.log("Returning regexp for bodyTag=" + bodyTag);
+	
+		return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
+		
+	}
 	
 	
 	

@@ -17,9 +17,6 @@
       console.log('chdir: ' + err);
     }
   }
-  
-
-
 })();
 
 
@@ -44,36 +41,86 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 var CONNECTED_USERS = {};
 
-function main() {
+var HTTP_SERVER;
+var HTTP_PORT = getArg(["p", "port"]) || 80;
+//var WS_PORT = getArg(["wp", "websocket-port"]) || 8099;
 
-	var port = 8099;
-
-	var sockJs = require("sockjs");
-	var wsServer = sockJs.createServer();
-	wsServer.on("connection", connection);
-
-	var http = require("http");
-	var httpServer = http.createServer();
-	httpServer.listen(port);
-		wsServer.installHandlers(httpServer, {prefix:'/jzedit'});
-
-	process.on("exit", function () {
-	log("Program exit\n\n");
-	});
-
-	process.on("SIGINT", function sigInt() {
+process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
 
-	httpServer.close();
-		
-		process.exit();
+	HTTP_SERVER.close();
+	
+	process.exit();
 
 });
 
+process.on("exit", function () {
+	log("Program exit\n\n");
+});
+	
+function main() {
+	
+	var sockJs = require("sockjs");
+	var wsServer = sockJs.createServer();
+	wsServer.on("connection", sockJsConnection);
+
+	var http = require("http");
+	
+	HTTP_SERVER = http.createServer(handleHttpRequest);
+	HTTP_SERVER.listen(HTTP_PORT);
+
+	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
+
+	console.log("Editor server url: " + makeUrl());
+	
+	// Open client url in browser !?
+	
+}
+
+function getArg(word) {
+	
+	/*
+		Searches the process arguments for 
+		ex: word = ["p", "papa", "pap"];
+		
+		-p 123 
+		--papa 123 
+		--pap 123
+		--papa=123 
+		--pap=123
+	*/
+	
+	var args = process.argv.join(" ");
+	
+	if(typeof word == "string") {
+		word = [word];
+	}
+	
+	if(word.length == 0) throw new Error("Need at least one word to find an argument!");
+	
+	var regexStr = "(-" + word[0];
+	for(var i=1; i<word.length; i++) regexStr += "|--" + word[i] + "=?";
+	regexStr += ")\\s?([^-\\s]+)?"
+	
+	console.log("regexStr=" + regexStr);
+	
+	var argReg = new RegExp(regexStr, "i");
+	
+	var match = args.match(argReg);
+	console.log("match=" + JSON.stringify(match));
+	if(match !== null) {
+		console.log("match.length=" + match.length);
+		var value = match[match.length-1];
+		console.log("value=" + value);
+		if(value === undefined) return true;
+		else return value;
+	}
+	else return undefined;
+	
 }
 
 
-function connection(connection) {
+function sockJsConnection(connection) {
 	
 	var user = null;
 	var userConnectionId = -1;
@@ -740,5 +787,262 @@ User.prototype.removeStorageItem = function saveStorage(itemName, callback) {
 function isObject(obj) {
 	return obj === Object(obj);
 }
+
+
+API.serve = function serve(user, json, callback) {
+	
+	// Serve a folder via HTTP
+	
+	var folder = user.translatePath(json.folder);
+	
+	console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+	createHttpEndpoint(folder, user, function(err, url) {
+		callback(err, {url: url});
+	});
+	
+}
+
+
+
+var httpEndpoints = {};
+var httpServer;
+
+var mimeMap = {
+	css: "text/css",
+	doc: "application/msword",
+	exe: "application/octet-stream",
+	gif: "image/gif",
+	gz: "application/x-gzip",
+	html: "text/html",
+	htm: "text/html",	
+	jpg: "image/jpeg",
+	js: "application/x-javascript",
+	midi: "audio/x-midi",
+	mp3: "audio/mpeg",
+	mpeg: "video/mpeg",
+	ogg: "audio/vorbis",
+	pdf: "application/pdf",
+	png: "image/png",
+	ppt: "application/vnd.ms-powerpoint",
+	svg: "image/svg+xml",
+	"tar.gz": "application/x-tar",
+	tgz: "application/x-tar",
+	txt: "text/plain",
+	wav: "audio/wav",
+	xls: "application/vnd.ms-excel",
+	xml: "application/xml",
+	zip: "application/x-compressed-zip",
+	ico: "image/x-icon",
+	ttf: "application/octet-stream"
+}
+
+function createHttpEndpoint(folder, user, callback) {
+	
+	for(var dir in httpEndpoints) {
+		if(httpEndpoints[dir] == folder) {
+			return callback(null, makeUrl(dir));
+		}
+	}
+	
+	var dir = randomString(10);
+	
+	httpEndpoints[dir] = folder;
+	
+	callback(null, makeUrl(dir));
+}
+
+
+function handleHttpRequest(request, response){
+	
+	
+	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+	
+	var reqUrl = require('url').parse(request.url);
+	
+	var urlPath = reqUrl.path;
+	
+	console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath);
+	
+	var dirs = urlPath.split("/");
+	
+	var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
+	
+	var path = require("path");
+
+	var folder;
+	var localFolder;
+	
+	if(httpEndpoints.hasOwnProperty(firstDir)) {
+		
+		localFolder = httpEndpoints[firstDir];
+		urlPath = urlPath.replace(firstDir + "/", "");
+		
+		
+
+	}
+	else {
+		// Serve from the jzedit client folder
+		
+		if(urlPath == "/") urlPath = "/index.htm";
+		
+		localFolder = path.resolve("../client/");
+		
+		/*
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
+		return;
+		*/
+		
+	}
+
+	
+	if(urlPath == "") {
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("No file in url=: " + urlPath);
+		return;
+	}
+	
+	
+	var filePath = path.join(localFolder, urlPath);
+	
+	if(filePath.indexOf(localFolder) != 0) {
+		console.log("filePath=" + filePath);
+		console.log("localFolder=" + localFolder);
+		console.log("urlPath=" + urlPath);
+		
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Bad path: " + urlPath);
+		return;
+	}
+
+	
+	var fileExtension = UTIL.getFileExtension(urlPath);
+	
+	if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Bad file type: '" + fileExtension + "'");
+		
+		console.warn("Unknown mime type: fileExtension=" + fileExtension);
+		
+		return;
+	}
+	
+	var fs = require("fs");
+	
+	var stat = fs.stat(filePath, function(err, stats) {
+		
+		if(err) {
+			
+			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			
+			if(err.code == "ENOENT") {
+				//var virtualPath = user.toVirtualPath(filePath);
+				//response.end("File not found: " + virtualPath);
+				
+				response.end("File not found: " + filePath);
+				
+				console.warn("File not found: " + filePath);
+				
+			}
+			else {
+				response.end(err.message);
+			}
+			
+			
+		}
+		else if(stats == undefined) throw new Error("No stats!");
+		else if(!stats.isFile()) {
+			
+			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Not a file: " + filePath);
+			
+		}
+		else {
+			response.writeHead(200, {
+				'Content-Type': mimeMap[fileExtension],
+				'Content-Length': stats.size
+			});
+			
+			var readStream = fs.createReadStream(filePath);
+			readStream.pipe(response);
+			
+		}
+		
+	});
+
+
+}
+
+
+function makeUrl(dir) {
+	
+	if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
+	if(!HTTP_SERVER.address) {
+		console.log(HTTP_SERVER);
+		throw new Error("HTTP_SERVER has no address property!");
+	}
+	
+	var address = HTTP_SERVER.address();
+	var port = address.port;
+	
+	
+	// Find servers IP
+	var ipList = [];
+	var os = require('os');
+	var ifaces = os.networkInterfaces();
+
+	Object.keys(ifaces).forEach(function (ifname) {
+	  var alias = 0;
+
+	  ifaces[ifname].forEach(function (iface) {
+		if ('IPv4' !== iface.family || iface.internal !== false) {
+		  // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+		  return;
+		}
+
+		if (alias >= 1) {
+		  // this single interface has multiple ipv4 addresses
+		  console.log(ifname + ':' + alias, iface.address);
+		} else {
+		  // this interface has only one ipv4 adress
+		  console.log(ifname, iface.address);
+		}
+		++alias;
+		
+		ipList.push(iface.address);
+		
+	  });
+	});
+	
+	
+	
+	//console.log(address);
+	console.log("ipList=" + JSON.stringify(ipList));
+	
+	var url = "http://" + ipList[0];
+	
+	if(port != 80) url += ":" + port;
+	
+	url += "/";
+	
+	if(dir) url += dir + "/";
+	
+	
+	return url;
+}
+
+function randomString(letters) {
+	
+	if(letters == undefined) letters = 5;
+	
+	var text = "";
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+	return text;
+}
+
 
 main();

@@ -270,9 +270,16 @@ EDITOR.lastKeyPressed = "";
 		},
 		
 		removeItem: function(id, callback) {
+			
+			// Save the stack in case we get an error
+			var stack = UTIL.getStack("EDITOR.storage.removeItem");
+			
 			CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
 				if(callback) callback(err, json);
-				if(err) throw err;
+				if(err) {
+					console.log(stack);
+					throw err;
+				}
 			});
 			
 			return delete _serverStorage[id];
@@ -3021,6 +3028,30 @@ EDITOR.lastKeyPressed = "";
 		return widget;
 	}
 	
+	
+	EDITOR.createWindow = function(url, width, height, top, left) {
+		
+		
+		// Decide window width, height and placement ...
+		// Some browsers will not allow us to change these via script after the window have has been created.
+		var windowPadding = 0;
+		var unityLeftThingy = 10;
+		var previeWidth = width || Math.round(screen.width / 3.5) - windowPadding * 2;
+		var previewHeight = height || screen.height - windowPadding * 2;
+		var posX = left || screen.width - previeWidth - windowPadding;
+		var posY = top || windowPadding;
+		
+		//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
+		var theWindow = window.open(url ? url : "about:blank", "previewWindowXYZ", "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + "");
+		
+		theWindow.document.open();
+		theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
+		theWindow.document.close();
+		
+		return theWindow;
+	}
+	
+	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
@@ -3579,7 +3610,8 @@ EDITOR.lastKeyPressed = "";
 			console.log("Got connect callback! err=" + err);
 			if(err) {
 				if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
-				alertBox("Unable to connected to server!\nThe editor will have limited functionality.");
+				alertBox("Unable to connect to server ...\n\
+				The editor will have limited functionality !");
 			}
 
 		});

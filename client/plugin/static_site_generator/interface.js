@@ -1004,6 +1004,13 @@
 		
 		console.log("Previewing " + site.name + ". edit=" + edit);
 		
+		// We must create the window here, so that it get asociated with the button click
+		// Some browser will not let us change the window position, so we need to specify it here
+		// To prevent same origin plocy error, the editor must be server via http or https! (not file://)
+		
+		var newWindow = EDITOR.createWindow();
+		
+		
 		var errorOccured = false;
 		
 		if(sourceFile == undefined) {		
@@ -1097,13 +1104,13 @@
 						
 						function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
 							
-							var bodyTag = "main";
+							var bodyTag = "body";
 							var onlyPreview = (edit == false);
-							var whenOpened = callback;
+							var whenLoaded = callback;
 							
 							if(previewWin) previewWin.close();
 							
-							previewWin = new WysiwygEditor(sourceFile, url, bodyTag, onlyPreview, whenOpened, compiledSource, compliedSourceBodyTag);
+							previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
 							
 						}
 

@@ -24,7 +24,7 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connect = function(server, callback) {
 		
-		var defaultURL = "http://localhost:8099/jzedit";
+		var defaultURL = window.location.href.replace(/\/.*/i, "/jzedit") //"http://localhost:8099/jzedit";
 
 		if(server == undefined) server = {url: defaultURL};
 		
