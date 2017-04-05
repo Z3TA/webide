@@ -3028,7 +3028,7 @@ EDITOR.lastKeyPressed = "";
 		return widget;
 	}
 	
-	
+	EDITOR.openWindows = [];
 	EDITOR.createWindow = function(url, width, height, top, left) {
 		
 		
@@ -3041,12 +3041,16 @@ EDITOR.lastKeyPressed = "";
 		var posX = left || screen.width - previeWidth - windowPadding;
 		var posY = top || windowPadding;
 		
+		if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
+		
 		//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
-		var theWindow = window.open(url ? url : "about:blank", "previewWindowXYZ", "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + "");
+		var theWindow = window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1), "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + "");
 		
 		theWindow.document.open();
 		theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
 		theWindow.document.close();
+		
+		EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
 		
 		return theWindow;
 	}

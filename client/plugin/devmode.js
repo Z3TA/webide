@@ -204,6 +204,12 @@
 						EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
 					}
 					
+					// Close all open windows
+					for(var win in EDITOR.openedWindows) {
+						try{EDITOR.openWindows[win].close();}
+						catch(err) {};
+					}
+					
 					/*
 						for(var file in EDITOR.files) {
 						delete EDITOR.files[file];

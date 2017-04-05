@@ -62,6 +62,8 @@ todo: Make sure the source file is saved!
 	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTagSource, onlyPreview, newWindow, url, whenLoaded, compiledSource, bodyTagPreview) {
 		var wysiwygEditor = this;
 		
+		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path);
+
 		if(wysiwygEditor == undefined || wysiwygEditor == window) throw new Error("Call WysiwygEditor with the new keyword! Example: var foo = new WysiwygEditor()");
 		
 		if(!sourceFile) throw new Error("sourceFile=" + sourceFile);
@@ -70,8 +72,10 @@ todo: Make sure the source file is saved!
 		
 		if(!newWindow) {
 			
+			console.warn("Creating a new window ...");
+			
 			// We need to create the window right away to prevent it being blocked ...
-			var newWindow = window.open(url ? url : "about:blank", "previewWinXYZ", "", false); // 
+			var newWindow = EDITOR.createWindow(url);
 			
 			if(!newWindow) throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass it as the fourth parameter!")
 		}
@@ -144,8 +148,6 @@ todo: Make sure the source file is saved!
 		
 		var dance = true;
 		
-		console.log("onlyPreview=" + onlyPreview);
-		
 		if(onlyPreview) dance = false;
 		
 		wysiwygEditor.reload(dance, function firstLoad() {
@@ -162,7 +164,7 @@ todo: Make sure the source file is saved!
 		var srcMatchBody = sourceFile.text.match(/(<body.*>[\n|\r\n])/i);
 		if(srcMatchBody === null) throw new Error("Can not find body tag in source file=" + sourceFile.path + "\n(The body tag needs to be followed by a line break)");
 		var srcStartIndex = srcMatchBody.index + srcMatchBody[1].length;
-		console.log("srcStartIndex=" + srcStartIndex);
+		//console.log("srcStartIndex=" + srcStartIndex);
 		var tmpCaret = sourceFile.createCaret(srcStartIndex);
 		wysiwygEditor.startRow = tmpCaret.row;
 	}
@@ -185,26 +187,23 @@ todo: Make sure the source file is saved!
 		}
 		catch(err) {
 			// Probably has been closed!
-			console.warn("Unable to positionate the preview windows because it couln't be focused. Error: " + err.message);
+			throw new Error("Unable to positionate the preview windows because it couln't be focused. Error: " + err.message);
 			return;
 		}
 	
-		// What to do if the previewWin has been killed ?
-		console.log("previewWin ?" + previewWin ? "Yep" : "Nope");
-		console.log(previewWin);
-		
+		if(previewWin) {
 
+			previewWin.moveTo(posX, posY);
+			previewWin.resizeTo(previeWidth, previewHeight);
 		
-		previewWin.moveTo(posX, posY);
-		previewWin.resizeTo(previeWidth, previewHeight);
 		
-		
-		// Resize the editor
-		var editorCodeWindow = window; // gui.Window.get();
-		
-		editorCodeWindow.moveTo(0, 0);
-		editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
-	
+			// Resize the editor
+			var editorCodeWindow = window; // gui.Window.get();
+			
+			editorCodeWindow.moveTo(0, 0);
+			editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+		}
+		else console.warn("previewWin not available when positionateing!")
 	}
 	
 	
@@ -822,14 +821,15 @@ todo: Make sure the source file is saved!
 	}
 	
 	
-		
+	
 	WysiwygEditor.prototype.close = function close() {
 		// Clean up and close the window ...
 		
 		var wysiwygEditor = this;
 		
+		console.warn("Closing preview window!");
 		
-		//EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
+		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 		
 		/*
 			body.onmouseup = null;
@@ -842,6 +842,8 @@ todo: Make sure the source file is saved!
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
 		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
+		
+		if(wysiwygEditor.onClose) wysiwygEditor.onClose();
 		
 	}
 	
@@ -989,11 +991,12 @@ todo: Make sure the source file is saved!
 	WysiwygEditor.prototype.reload = function reload(dance, callback) {
 		var wysiwygEditor = this;
 		
+		console.warn("(re)loading preview window ... dance=" + dance);
+		
 		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ?");
 		
 		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) throw new Error("Can not reload a second time if the source code have been compiled");
 		
-		console.log("WysiwygEditor.reload dance=" + dance);
 		
 		// Reload with new HTML ...
 		
@@ -1021,29 +1024,60 @@ todo: Make sure the source file is saved!
 		
 		var html = sourceFile.text;
 		
-		previewWin.onload = previewWindowLoaded;
+		//previewWin.onload = previewWindowLoaded;
 		
-		if(wysiwygEditor.url) previewWin.location.href = wysiwygEditor.url;
-		else {
+		if(wysiwygEditor.url && previewWin.location.href != wysiwygEditor.url) {
+			previewWin.location.href = wysiwygEditor.url;
 			
-			previewWin.location.href = "about:blank";
+			// Can't seem to be able to set a onload event listener ...'
+			var checkLocationIntervalTime = 100;
+			setTimeout(checkLocation, checkLocationIntervalTime);
+			
+			//previewWin.addEventListener("load", previewWindowLoaded);
+		}
+		else if(!wysiwygEditor.url) {
+			
+			//previewWin.location.href = "about:blank";
 			// Write the html to the content-editable
 			console.log("Writing html=" + UTIL.lbChars(html));
 
 			previewWin.document.open();
 			previewWin.document.write(html);
 			previewWin.document.close();
+			
+			previewWindowLoaded();
+		}
+		
+		function checkLocation() {
+			
+			if(previewWin.location.href == wysiwygEditor.url) previewWindowLoaded();
+			else if(previewWin.location.href) {
+				console.log("previewWin.location.href=" + previewWin.location.href);
+				console.log("wysiwygEditor.url=" + wysiwygEditor.url);
+				setTimeout(checkLocation, checkLocationIntervalTime);
+			}
+			else {
+				console.log(previewWin);
+				throw new Error("Unable to get location from previewWin")
+			}
 		}
 		
 		
 		function previewWindowLoaded() {
 			
+			console.log("Preview window loaded!");
+			
 			// Get the doc again after location reload
 			var doc = previewWin.document;
+			var win = previewWin.window;
 			
 			console.log(doc);
+			console.log(win);
 			
+			if(!previewWin) throw new Error("Unable to get preview window!");
 			if(!doc) throw new Error("Unable to get preview window document!");
+			if(!win) throw new Error("Unable to get preview window window!");
+
 			
 			/*
 			var prewviewContent = doc.documentElement.outerHTML;
@@ -1056,7 +1090,7 @@ todo: Make sure the source file is saved!
 			}
 			*/
 			
-			var bodyTags = doc.getElementsByTagName(wysiwygEditor.previewBodyTag);
+			var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 			
 			if(bodyTags.length === 0) {
 				// The user probably have an open html tag above the body element
@@ -1108,7 +1142,7 @@ todo: Make sure the source file is saved!
 				}
 				
 				// Replace the the content of the body element with the content-editable code
-				html = changeCodeInBody(prewBodyHtml, html);
+				html = changeCodeInBody(prewBodyHtml, html, wysiwygEditor.bodyTagSource);
 				
 				console.log("(after setting) html=" + UTIL.lbChars(html));
 				
@@ -1164,17 +1198,16 @@ todo: Make sure the source file is saved!
 				//body.input = function(e) {wysiwygEditor.previewInput(e)};
 				body.oninput = function(e) {wysiwygEditor.previewInput(e)};
 				//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
-
-				
 			}
+			else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
 			
 			
 			attachFileChangeListener(wysiwygEditor);
 			
 			// Remove the fileChange event listener when closing the content-editable window
 			previewWin.window.onbeforeunload = function() {
-				wysiwygEditor.ignoreSourceFileChange = true;
-				EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
+				wysiwygEditor.close();
+				//return true; // Shows a "are you sure" message
 			};
 			
 			// Capture errors on the content-editable so that they do not go by unoticed
@@ -1192,7 +1225,11 @@ todo: Make sure the source file is saved!
 				if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded();
 				wysiwygEditor.whenLoaded = null;
 				
+				console.log("Done (re)loading preview window");
+				
 				if(callback) callback();
+				
+				if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
 			}
 
 		}
@@ -1221,15 +1258,11 @@ todo: Make sure the source file is saved!
 		var doc = wysiwygEditor.previewWin.document;
 		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 
-		if(!wysiwygEditor.previewWin || !doc || !bodyTags) {
-			console.error(err);
+		if(!doc || bodyTags.length === 0) {
 			// The preview window has probably been closed.
 			// Don't bother about it
 			return callback();
 		}
-		
-			
-		if(bodyTags.length === 0) throw new Error('No "body" tag found in preview window!');
 
 		var body = bodyTags[0];
 		
@@ -1266,14 +1299,14 @@ todo: Make sure the source file is saved!
 	}
 	
 	
-	function changeCodeInBody(code, html) {
+	function changeCodeInBody(newBodyCode, html, bodyTag) {
 		
-		// There needs to be a line break directly after <body> and before </body> !
+		// There need to be a line break directly after <body> and before </body> !
 		// This is to prevent having the body tags included in text diff
 		
-		var reg = regexBody(wysiwygEditor.bodyTagSource);
+		var regCheck = regexBody(bodyTag);
 		
-		if(html.match(reg) === null) throw new Error("Unable to find body element when setting the code body.\n\
+		if(html.match(regCheck) === null) throw new Error("Unable to find bodyTag=" + bodyTag + " element when setting the code body.\n\
 		html=" + UTIL.lbChars(html));
 		
 		// 1. body attributes
@@ -1281,12 +1314,16 @@ todo: Make sure the source file is saved!
 		// 3. body content
 		// 4. White-space (including line breaks) before body end  
 		
-		html = html.replace(/<body(.*)>(\n|\r\n)([\s\S]*)([\n|\r\n]\s*)<\/body>/i, "<body$1>$2" + code + "$4</body>");
+		// /<body(.*)>(\n|\r\n)([\s\S]*)([\n|\r\n]\s*)<\/body>/i
+		
+		var regReplace = new RegExp("<" + bodyTag + "(.*)>(\\n|\\r\\n)([\\s\\S]*)([\\n|\\r\\n]\\s*)<\/" + bodyTag + ">", "i"); 
+		
+		html = html.replace(regReplace, "<" + bodyTag + "$1>$2" + newBodyCode + "$4</" + bodyTag + ">");
 		
 		// The white space before </body> is preserved to keep source file indentation characters
 		
 		// Sanity check!
-		if(html.match(reg) === null) throw new Error("We are not sane!\n\
+		if(html.match(regCheck) === null) throw new Error("We are not sane!\n\
 		html=" + UTIL.lbChars(html));
 		
 		return html;

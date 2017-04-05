@@ -1004,14 +1004,12 @@
 		
 		console.log("Previewing " + site.name + ". edit=" + edit);
 		
-		// We must create the window here, so that it get asociated with the button click
-		// Some browser will not let us change the window position, so we need to specify it here
-		// To prevent same origin plocy error, the editor must be server via http or https! (not file://)
-		
+		/*
+			We must create the window here, so that it get asociated with the button click
+			Some browsers will not let us change the window position, so we need to specify it here also.
+			To prevent same origin plocy error, the editor must be server via http or https! (not file://)
+		*/
 		var newWindow = EDITOR.createWindow();
-		
-		
-		var errorOccured = false;
 		
 		if(sourceFile == undefined) {		
 			pickFileToPreview(site, function(err, file) {
@@ -1023,8 +1021,10 @@
 		
 		function compileIt(sourceFile) {
 			
-			if(!sourceFile.isSaved) return alertBox("Save file before preview:\n" + sourceFile.path);
-			
+			if(!sourceFile.isSaved) {
+				newWindow.close();
+				return alertBox("Save file before preview:\n" + sourceFile.path);
+			}
 			compile(site.source, site.preview, false, function compiled_static() {
 				
 				var protocol = UTIL.urlProtocol(site.preview);
@@ -1106,11 +1106,28 @@
 							
 							var bodyTag = "body";
 							var onlyPreview = (edit == false);
-							var whenLoaded = callback;
+							var whenLoaded = function previewLoaded() {
+								if(buttonPreview) {
+									buttonPreview.setAttribute("class", "button active");
+									if(edit) {
+										buttonWysiwyg.setAttribute("class", "button active");
+										wysiwygEnabled = true;
+									}
+								}
+								if(callback) callback();
+							}
 							
 							if(previewWin) previewWin.close();
 							
 							previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
+							
+							previewWin.onClose = function() {
+								if(buttonPreview) {
+									buttonPreview.setAttribute("class", "button");
+									buttonWysiwyg.setAttribute("class", "button");
+									wysiwygEnabled = false;
+								}
+							}
 							
 						}
 
@@ -1323,8 +1340,6 @@
 		
 	}
 	
-
-	
 	function wysiwygSSG() {
 		var site;
 		
@@ -1346,13 +1361,11 @@
 			
 		});
 		
-
-
 		// Witch file/page should we edit ?
 		// If we are previewing a file, then pick the file in preview
 		if(previewWin) {
 			try {
-				var url = previewWin.previewWin.window.location.href;
+				var url = previewWin.location.href;
 				var sourceFilePath = url.replace(previewBaseUrl, site.source);
 			}
 			catch(err) {
