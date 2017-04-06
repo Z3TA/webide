@@ -75,13 +75,14 @@
 		inputGoto.setAttribute("type", "text");
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
+		inputGoto.setAttribute("placeholder", "Filename");
 		
 		inputFolder = document.createElement("input");
 		inputFolder.setAttribute("type", "text");
 		inputFolder.setAttribute("id", "inputFolder");
 		inputFolder.setAttribute("class", "inputtext");
 		inputFolder.setAttribute("value", EDITOR.workingDirectory);
-		inputFolder.setAttribute("size", EDITOR.workingDirectory.length + 3);
+		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
 		
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
@@ -95,16 +96,18 @@
 		gotoButton.setAttribute("type", "button");
 		gotoButton.setAttribute("class", "button");
 		gotoButton.setAttribute("id", "gotoButton");
-		gotoButton.setAttribute("value", "Go!");
+		gotoButton.setAttribute("value", "Open");
+		gotoButton.setAttribute("title", "Press Enter to Open selected file");
 		
 		var cancelButton = document.createElement("input");
 		cancelButton.setAttribute("type", "button");
 		cancelButton.setAttribute("class", "button");
 		cancelButton.setAttribute("id", "cancelButton");
-		cancelButton.setAttribute("value", "cancel");
+		cancelButton.setAttribute("value", "Cancel");
 		
 		gotoList = document.createElement("ul");
 		gotoList.setAttribute("id", "gotoList");
+		gotoList.setAttribute("title", "Use keyboard up/down arrow to select a file from the list");
 		
 		//var li = document.createElement("li");
 		//li.appendChild(document.createTextNode("test 123"));
@@ -385,6 +388,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 				li.setAttribute("class", "selected");
 			}
 			
+			li.onclick = gotoFile;
+			
 			EDITOR.resizeNeeded();
 		}
 		
@@ -531,20 +536,28 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 		return false; // false: prevent default browser action
 	}
 	
-	function gotoFile() {
+	function gotoFile(e) {
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
 		
 		if(gotoInputIsVisible && !EDITOR.input) {
 			
-			var listItems = gotoList.childNodes;
 			var selectedItem;
 			
-			// Witch list item is selected?
-			for (var i=0; i<listItems.length; i++) {
-				if(listItems[i].getAttribute("class") == "selected") {
-					selectedItem = listItems[i];
-					break;
+			if(e) {
+				selectedItem = e.target;
+			}
+			
+			if(!selectedItem) {
+				var listItems = gotoList.childNodes;
+				
+				// Witch list item is selected?
+				
+				for (var i=0; i<listItems.length; i++) {
+					if(listItems[i].getAttribute("class") == "selected") {
+						selectedItem = listItems[i];
+						break;
+					}
 				}
 			}
 			

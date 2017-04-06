@@ -1087,9 +1087,7 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		else {
-			// Show some useful info for new users
-			
-			var keyCombo = EDITOR.getKeyFor("openFile");
+			// Show some useful info for new users ...
 			
 			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1099,15 +1097,26 @@ EDITOR.lastKeyPressed = "";
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			ctx.textBaseline = "top";
 			
-			var friendlyString = keyCombo +" to open a file";
-			// Place the string in the center
-			var textMeasure = ctx.measureText(friendlyString);
-			var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
-			var top =  EDITOR.view.canvasHeight / 2 - 20;
+			var keyCombo, friendlyString;
 			
-			ctx.beginPath(); // Reset all the paths!
+			if(EDITOR.user) {
+				keyCombo = EDITOR.getKeyFor("show_gotoFileInput");
+				friendlyString = "Press " + keyCombo +" to search/open a file";
+			}
+			else {
+				keyCombo = EDITOR.getKeyFor("openFile");
+				friendlyString = "Press " + keyCombo +" to open a file";
+			}
 			
-			ctx.fillText(friendlyString, left, top);
+			if(keyCombo) {
+				// Place the string in the center
+				var textMeasure = ctx.measureText(friendlyString);
+				var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
+				var top =  EDITOR.view.canvasHeight / 2 - 20;
+				
+				ctx.beginPath(); // Reset all the paths!
+				ctx.fillText(friendlyString, left, top);
+			}
 			
 			console.log("No file open");
 		}
@@ -3419,6 +3428,54 @@ EDITOR.lastKeyPressed = "";
 		body.ondrop = fileDrop;
 		
 		
+		
+		// Attatch CLIENT listeners before plugins and start events load
+		CLIENT.on("loginSuccess", function loggedInToServer(login) {
+			
+			EDITOR.user = login.user;
+			
+			console.log("Logged in as user: " + EDITOR.user);
+			
+			// Use servers working directory
+			CLIENT.cmd("workingDirectory", null, function(err, json) {
+				if(err) throw err;
+				else setWorkingDirectory(json.path);
+			});
+			
+			// ### Populate EDITOR.storage (_serverStorage)
+			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
+				if(err) throw err;
+
+				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
+				
+				if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
+				
+				_serverStorage = json.storage;
+				
+				// Many plugins depend on the storage being available ...
+				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
+
+				
+				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
+					fun = EDITOR.eventListeners.storageReady[i].fun;
+					fun(_serverStorage);
+				}
+				
+			});
+		});
+
+		CLIENT.on("connectionLost", function() {
+			
+			EDITOR.user = null;
+			
+		});
+		
+		
+		
+		
+		
+		
+		
 		//console.log("main function loaded");
 		
 		/*		
@@ -3588,58 +3645,7 @@ EDITOR.lastKeyPressed = "";
 		
 		windowLoaded = true;
 
-		CLIENT.on("loginSuccess", function loggedInToServer(login) {
-			
-			EDITOR.user = login.user;
-			
-			console.log("Logged in as user: " + EDITOR.user);
-			
-			// Use servers working directory
-			CLIENT.cmd("workingDirectory", null, function(err, json) {
-				if(err) throw err;
-				else setWorkingDirectory(json.path);
-			});
-			
-			// ### Populate EDITOR.storage (_serverStorage)
-			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
-				if(err) throw err;
 
-				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
-				
-				if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
-				
-				_serverStorage = json.storage;
-				
-				// Many plugins depend on the storage being available ...
-				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
-
-				
-				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
-					fun = EDITOR.eventListeners.storageReady[i].fun;
-					fun(_serverStorage);
-				}
-				
-			});
-		});
-
-		// Wait before start events and plugins have loaded before connecting to the server !
-		// Or plugins listening for events from the server, or loginSuccess etc will not fire.
-		CLIENT.connect(undefined, function connectedToServer(err) {
-			console.log("Got connect callback! err=" + err);
-			if(err) {
-				if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
-				alertBox("Unable to connect to server ...\n\
-				The editor will have limited functionality !");
-			}
-
-		});
-
-		
-		CLIENT.on("connectionLost", function() {
-			
-			EDITOR.user = null;
-			
-		});
 		
 		function stdIn(data) {
 			

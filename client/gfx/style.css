@@ -512,6 +512,11 @@ div.gotoFile li b {
 	color: InfoText;
 }
 
+div.gotoFile li:hover {
+	background-color: Highlight;
+	color: HighlightText;
+	cursor: pointer;
+}
 
 .blink {
 	-webkit-animation-name: blinker; /* Chrome, Safari, Opera */

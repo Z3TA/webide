@@ -7,33 +7,71 @@
 	EDITOR.plugin({
 		desc: "Server login dialog",
 		load: loadServerLogin,
-		unload: unloadServerLogin
+		unload: unloadServerLogin,
+		order: 999999 // We want to run after most other plugins, so the other plugins get can deal with server connections too
 	});
 	
+
 	function loadServerLogin() {
 
-		EDITOR.on("start", function serverLogin() {
-			
-			alertBox("Hello from server_log.js");
-			
-			// Tro connecting to last used server ...
-			CLIENT.connect(undefined, function connectedToServer(err) {
-				console.log("Got connect callback! err=" + err);
-				if(err) {
-					if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
-					alertBox("Unable to connect to server ...\n\
-					The editor will have limited functionality !");
-				}
-
-			});
-			
-			showLoginDialog();
-		});
+		// Wait before start events and plugins have loaded before connecting to the server !
+		// Or plugins listening for events from the server, or loginSuccess etc will not fire.
 		
+		var server = undefined;
+		
+		if(localStorage) {
+			var url = localStorage.getItem("editorServerUrl");
+			if(url) server = {url: url};
+		}
+
+		CLIENT.connect(server, function connectedToServer(err) {
+			console.log("Got connect callback! err=" + err);
+			if(err) {
+				if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
+				//alertBox("Unable to connect to server ...	The editor will have limited functionality !");
+				
+				showLoginDialog();
+			}
+			else {
+				if(localStorage) {
+					var userValue = localStorage.getItem("editorServerUser");
+					var pwValue = localStorage.getItem("editorServerPw");
+				}
+				
+				if(userValue && pwValue) {
+					console.log("Attempting to login to server url=" + url + " with user=" + userValue + " ...");
+					CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
+						
+						if(err) {
+							console.error(err);
+							showLoginDialog();
+						}
+						else {
+							hideLoginDialog();
+							console.log("Successfully logged into server url=" + url + " with user=" + resp.loginSuccess.user);
+						}
+						
+					});
+					
+				}
+				else showLoginDialog();
+				
+			}
+
+		});
+	
+	
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
 		CLIENT.on("connectionConnected", showLoginDialog);
-		CLIENT.on("connectionLost", showLoginDialog);
+		CLIENT.on("connectionLost", function serverLoginOnConnectionLost() {
+			
+			// The editor will try to connect to the default server when it starts
+			
+			
+			showLoginDialog();
+			
+		});
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
