@@ -43,6 +43,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Make a special start.js (node) script for OSX (that all OS's can use too!) !?
+Pass serverUrl as query string to client
+
+package your project for Npm, use the 'bin' field in package.json. Then on Windows, Npm will install a .cmd wrapper along side your script so users can execute it from the command-line
+Make a jzedit.js.cmd file so you can start it by typing jzedit.js in Windows. 
+
+Update server_login.js to use current url as default server url
+
 Editor server login ... What if you're connected to the server, but not logged in. Or want to connect to another server ?
 
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.

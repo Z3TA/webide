@@ -4,7 +4,11 @@ JZeditor
 
 Ctrl + P, or Ctrl + O to open a file ... Ctrl + hmm dunno yet to show a list of all commands.
 
+You need Node.JS to run the server: https://nodejs.org/
 
+node server/server.js --port=80
+
+Then navigate to http://localhost/ in your favorite browser. 
 
 ---
 

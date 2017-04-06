@@ -42,8 +42,10 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 var CONNECTED_USERS = {};
 
 var HTTP_SERVER;
-var HTTP_PORT = getArg(["p", "port"]) || 8099; // On some systems (Mac) you need evelated prevalige to listen to ports. below 1024
-//var WS_PORT = getArg(["wp", "websocket-port"]) || 8099;
+
+// On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
+// Use -p 8099 or --port 8099 as start arguments to listen to port 8099 instead of port 80
+var HTTP_PORT = getArg(["p", "port"]) || 80; 
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
