@@ -143,6 +143,7 @@
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
 		pw.setAttribute("value", pwValue);
+		pw.onchange = save;
 		form.appendChild(pw);
 		
 		// ### Connect button
@@ -185,15 +186,13 @@
 			
 			var urlValue = url.value;
 			var userValue = user.value;
+			var pwValue = pw.value;
 			
-			if(!localStorage) console.warn("No localstorage available! Server url will not be remembered.");
+			if(!localStorage) console.warn("No localstorage available! Server URL and credentials will not be remembered!");
 			else {
 				if(urlValue && localStorage.getItem("editorServerUrl") != urlValue) localStorage.setItem("editorServerUrl", urlValue);
-				if(userValue && localStorage.getItem("editorServerUser") != userValue) {
-					localStorage.setItem("editorServerUser", userValue);
-					
-					// Should we store the password !?
-				}
+				if(userValue && localStorage.getItem("editorServerUser") != userValue) localStorage.setItem("editorServerUser", userValue);
+				if(pwValue && localStorage.getItem("editorServerPw") != pwValue) localStorage.setItem("editorServerPw", pwValue);
 			}
 
 		}
