@@ -14,7 +14,7 @@ var CLIENT = {}; // Client object is global
 	
 	console.log("Hello from CLIENT.js");
 	
-	var eventListeners = {};
+	var eventListeners = {}; // Events are added on demand via CLIENT.on("someEvent"). It can be *anything* so that you can easaily add new server events
 	var counter = 0;
 	var callbackWaitList = {};
 	var cache = {};
@@ -24,8 +24,22 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connect = function(server, callback) {
 		
-		var defaultURL = window.location.href.replace(/\/.*/i, "/jzedit") //"http://localhost:8099/jzedit";
-
+		var currentLocation = window.location.href;
+		var protocol = (currentLocation.indexOf("://") != -1) ? currentLocation.substr(0, currentLocation.indexOf("://")) : undefined;
+		
+		console.log("protocol=" + protocol);
+		
+		var defaultURL = currentLocation;
+		if(defaultURL.indexOf("://") != -1) defaultURL = defaultURL.substr(defaultURL.indexOf("://")+3); // Remove protocol://
+		defaultURL = window.location.href.replace(/\/.*/, "/jzedit"); // Replace everything after hostname
+		
+		if(protocol.toLowerCase() == "file") {
+			defaultURL = "http://localhost/jzedit";
+			
+			if(runtime == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
+			
+		}
+		
 		if(server == undefined) server = {url: defaultURL};
 		
 		var url = server.url || defaultURL; // 'http://' + host + ':' + port + pathName + apiUrl
@@ -41,7 +55,8 @@ var CLIENT = {}; // Client object is global
 			console.log("connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
 			CLIENT.url = url;
-			CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
+			
+			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
 			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
@@ -203,7 +218,7 @@ var CLIENT = {}; // Client object is global
 		
 		console.log("firing client event '" + ev + "' data=" + data);
 		
-		if(!eventListeners.hasOwnProperty(ev)) console.warn("No registered event=" + ev)
+		if(!eventListeners.hasOwnProperty(ev)) console.warn("No registered event listener for ev=" + ev)
 		else {
 			// Call all event listeners
 			
@@ -220,18 +235,24 @@ var CLIENT = {}; // Client object is global
 			Note to myself: Some events have objects and others just have the function!!
 			
 		*/
+		
+		if(!eventListeners.hasOwnProperty(eventName)) {
+			console.warn("Unknown event: eventName=" + eventName);
+			return;
+		}
+		
 		var fname = UTIL.getFunctionName(fun);
 		var events = eventListeners[eventName];
 		var found = 0;
 		
-		removeit(); // Removes them all (recursive)
-		
-		function removeit() {
+		removeThem(); // Removes them all (recursive)
+			
+		function removeThem() {
 			for(var i=0; i<events.length; i++) {
 				if(events[i].fun == fun) {
 					events.splice(i, 1);
 					found++;
-					removeit();
+					removeThem();
 					break;
 				}
 			}

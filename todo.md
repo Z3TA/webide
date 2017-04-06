@@ -43,6 +43,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Editor server login ... What if you're connected to the server, but not logged in. Or want to connect to another server ?
+
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
 Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
 and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.

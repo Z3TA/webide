@@ -194,6 +194,8 @@ EDITOR.lastKeyPressed = "";
 	
 	var widgetElementIdCounter = 0;
 	
+	var calledStartListeners = false;
+	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -1575,7 +1577,10 @@ EDITOR.lastKeyPressed = "";
 			}
 		});
 		
-		
+		if(eventName == "start" && calledStartListeners) {
+			console.warn("Editor's start event has already been fired! " + funName + " will run right away!");
+			options.fun(); 
+		}
 	}
 	
 	EDITOR.removeEvent = function(eventName, fun) {
@@ -2916,15 +2921,20 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log("Hiding widget ...");
 			
+			var wasHidden = true;
+			
 			if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
 			
 			// Only need to hide if the object is created!
 			if(widget.mainElement) {
+				
+				if(!widget.mainElement.style.display != "none") wasHidden = false;
+				
 				widget.mainElement.style.display = "none";
 				EDITOR.resizeNeeded();
 			}
 			
-			return false;
+			return wasHidden;
 		}
 		
 		widget.unload = function unloadWidget() {
@@ -3440,7 +3450,7 @@ EDITOR.lastKeyPressed = "";
 		for(var i=0; i<EDITOR.eventListeners.start.length; i++) {
 			EDITOR.eventListeners.start[i].fun(); // Call function
 		}
-		
+		calledStartListeners = true;
 		
 		
 		
@@ -3457,8 +3467,8 @@ EDITOR.lastKeyPressed = "";
 			}
 		});
 		
-		console.log("plugins: ");
-		EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
+		//console.log("plugins: ");
+		//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
 		
 		console.log("Loading plugins (length=" + EDITOR.eventListeners.start.length + ")");
 		for(var i=0; i<EDITOR.plugins.length; i++) {
@@ -3582,6 +3592,8 @@ EDITOR.lastKeyPressed = "";
 			
 			EDITOR.user = login.user;
 			
+			console.log("Logged in as user: " + EDITOR.user);
+			
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {
 				if(err) throw err;
@@ -3610,6 +3622,8 @@ EDITOR.lastKeyPressed = "";
 			});
 		});
 
+		// Wait before start events and plugins have loaded before connecting to the server !
+		// Or plugins listening for events from the server, or loginSuccess etc will not fire.
 		CLIENT.connect(undefined, function connectedToServer(err) {
 			console.log("Got connect callback! err=" + err);
 			if(err) {
@@ -3620,6 +3634,7 @@ EDITOR.lastKeyPressed = "";
 
 		});
 
+		
 		CLIENT.on("connectionLost", function() {
 			
 			EDITOR.user = null;

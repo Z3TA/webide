@@ -12,13 +12,32 @@
 	
 	function loadServerLogin() {
 
-		EDITOR.on("start", showLoginDialog);
+		EDITOR.on("start", function serverLogin() {
+			
+			alertBox("Hello from server_log.js");
+			
+			// Tro connecting to last used server ...
+			CLIENT.connect(undefined, function connectedToServer(err) {
+				console.log("Got connect callback! err=" + err);
+				if(err) {
+					if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
+					alertBox("Unable to connect to server ...\n\
+					The editor will have limited functionality !");
+				}
+
+			});
+			
+			showLoginDialog();
+		});
 		
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
 		CLIENT.on("connectionConnected", showLoginDialog);
+		CLIENT.on("connectionLost", showLoginDialog);
 		
-		
+		var char_Esc = 27;
+		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
+
 		
 		menuItem = EDITOR.addMenuItem("Login to JZeidt server", function() {
 			showLoginDialog();
@@ -36,16 +55,19 @@
 		CLIENT.removeEvent("loginFail", showLoginDialog);
 		CLIENT.removeEvent("loginSuccess", hideLoginDialog);
 		CLIENT.removeEvent("connectionConnected", showLoginDialog);
+		CLIENT.removeEvent("connectionLost", showLoginDialog);
+		
+		EDITOR.unbindKey(hideLoginDialog);
 		
 		if(menuItem) EDITOR.removeMenuItem(menuItem);
 	}
 	
 	function showLoginDialog() {
-		serverLoginDialog.show();
-		}
+		return serverLoginDialog.show();
+	}
 	
 	function hideLoginDialog() {
-		serverLoginDialog.hide();
+		return serverLoginDialog.hide();
 	}
 	
 	function buildServerLoginDialog(widget) {
@@ -67,7 +89,7 @@
 		labelUrl.appendChild(document.createTextNode("URL: "));
 		form.appendChild(labelUrl);
 
-		var defaultUrl = "http://localhost:8099/jzedit";
+		var defaultUrl = "http://localhost/jzedit";
 		var urlValue;
 		var userValue;
 		var pwValue;
@@ -145,7 +167,7 @@
 		labelCheckDefUrl.setAttribute("for", "checkDefUrl");
 		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
 		form.appendChild(labelCheckDefUrl);
-
+		
 		return form;
 		
 		
