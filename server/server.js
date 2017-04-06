@@ -602,8 +602,6 @@ User.prototype.loadStorage = function loadStorage(callback) {
 	
 	fs.readdir(user.storageDir, function readingStorageDir(err, files) {
 		
-		if(Object.prototype.toString.call( files ) !== '[object Array]') throw new Error("Expected files to be an Array!");
-
 		if(err) {
 			
 			if(err.code == "ENOENT") {
@@ -628,14 +626,18 @@ User.prototype.loadStorage = function loadStorage(callback) {
 				throw err;
 			}
 		}
-		
-		user.storage = {};
-		
-		if(files.length > 0)  {
-			for(var i=0; i<files.length; i++) loadItem(files[i]);
-		}
 		else {
-			callback(null, user.storage);
+		
+			if(Object.prototype.toString.call( files ) !== '[object Array]') throw new Error("Expected files to be an Array! typeof=" + (typeof files) + " files=" + JSON.stringify(files));
+			
+			user.storage = {};
+			
+			if(files.length > 0)  {
+				for(var i=0; i<files.length; i++) loadItem(files[i]);
+			}
+			else {
+				callback(null, user.storage);
+			}
 		}
 		
 		function loadItem(fileItemName) {
@@ -731,7 +733,7 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 				
 				callback(null, json);
 				
-				user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
+				while(user.isSavingStorage.indexOf(itemName) != -1) user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
 				log("Done saving storage item=" + itemName + " for user=" + user.name);
 				
 			});
@@ -744,16 +746,9 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 User.prototype.removeStorageItem = function saveStorage(itemName, callback) {
 	var user = this;
 	
-	if(!user.storage.hasOwnProperty(itemName)) {
-		return callback(new Error("Item=" + itemName + " is already gone from the storage!"));
-		
-	}
-	
 	var fs = require("fs");
 	
-	var filePath = user.storageDir + itemName;
-	
-	user.isSavingStorage.push(itemName);
+	var filePath = user.storageDir + encodeURIComponent(itemName);
 	
 	fs.unlink(filePath, function storageItemFileDeleted(err) {
 		if(err) {
@@ -777,7 +772,6 @@ User.prototype.removeStorageItem = function saveStorage(itemName, callback) {
 		}
 		else {
 			
-			user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
 			callback(null);
 		}
 	});

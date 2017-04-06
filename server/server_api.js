@@ -1299,6 +1299,10 @@ API.storageRemove = function storageRemove(user, json, callback) {
 	
 	if(itemName == undefined) return callback(new Error("item=" + itemName + " can not be null or undefined!"));
 	
+	if(!user.storage.hasOwnProperty(itemName)) {
+		return callback(new Error("Item=" + itemName + " is already gone from the storage!"));
+	}
+	
 	delete user.storage[itemName];
 	
 	user.removeStorageItem(itemName, function(err) {
