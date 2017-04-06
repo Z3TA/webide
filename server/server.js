@@ -975,6 +975,9 @@ function makeUrl(dir) {
 	}
 	
 	var address = HTTP_SERVER.address();
+	
+	if(!address) throw new Error("address=" + address + " HTTP_SERVER.address=" + HTTP_SERVER.address);
+	
 	var port = address.port;
 	
 	
