@@ -42,7 +42,7 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 var CONNECTED_USERS = {};
 
 var HTTP_SERVER;
-var HTTP_PORT = getArg(["p", "port"]) || 80;
+var HTTP_PORT = getArg(["p", "port"]) || 8099; // On some systems (Mac) you need evelated prevalige to listen to ports. below 1024
 //var WS_PORT = getArg(["wp", "websocket-port"]) || 8099;
 
 process.on("SIGINT", function sigInt() {
@@ -976,9 +976,8 @@ function makeUrl(dir) {
 	
 	var address = HTTP_SERVER.address();
 	
-	if(!address) throw new Error("address=" + address + " HTTP_SERVER.address=" + HTTP_SERVER.address);
 	
-	var port = address.port;
+	var port = address ? address.port : HTTP_PORT;
 	
 	
 	// Find servers IP
