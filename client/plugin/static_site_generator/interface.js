@@ -153,10 +153,6 @@
 								console.log("element=" + JSON.stringify(element));
 								
 								if(index != -1) {
-									
-									// Wysiwyg!
-									
-									
 									/*
 										If the file was open when the editor last closed, the reopen_files.js plugin will place
 										the caret. So wait some time ...
@@ -164,6 +160,10 @@
 									setTimeout(function placeCaretAfterReopenFiles() {
 									file.moveCaret(index);
 									file.scrollToCaret();
+										
+										//  We can't open the WYSIWYG editor automatically, or it would be stopped by the popup-blocker
+										if(buttonWysiwyg) buttonWysiwyg.setAttribute("class", "button highlighted");
+										
 									}, 100);
 									
 								}
@@ -455,6 +455,7 @@
 		buttonWysiwyg.setAttribute("class", "button");
 		buttonWysiwyg.setAttribute("value", "WYSIWYG");
 		buttonWysiwyg.addEventListener("click", wysiwygSSG, false);
+		buttonWysiwyg.setAttribute("title", 'Edit the file in "What you see is what you get" mode');
 		
 		var buttonSync = document.createElement("input");
 		buttonSync.setAttribute("type", "button");
@@ -1111,6 +1112,7 @@
 		*/
 		var newWindow = EDITOR.createWindow();
 		
+		
 		if(sourceFile == undefined) {		
 			pickFileToPreview(site, function(err, file) {
 				if(err) throw err;
@@ -1139,6 +1141,10 @@
 					if(err) throw err;
 					
 					var url = json.url;
+					
+					// Replace the hostname with the hostname we are currently on to prevent cross origin errors
+					var host = UTIL.getLocation(url).host;
+					url = url.replace(host, window.location.host);
 					
 					previewBaseUrl = url;
 					
@@ -1444,7 +1450,9 @@
 			
 			if(buttonWysiwyg) {
 				buttonWysiwyg.setAttribute("class", "button");
-				buttonPreview.setAttribute("class", "button active");
+				
+				if(previewWin) buttonPreview.setAttribute("class", "button active");
+				else buttonPreview.setAttribute("class", "button");
 			}
 			
 		});

@@ -192,6 +192,7 @@ input[type=checkbox] {
 	font-weight: bold;
 	}
 
+
 input[type=button], button.button, input[type=submit] {
 	border-radius: 3px;
 	border: 1px solid rgba(19, 19, 19, 0.5);
@@ -208,6 +209,13 @@ input[type=button], button.button, input[type=submit] {
 
 input[type=button].half {
 	min-width: 55px;
+}
+
+.highlighted {
+	background-color: orange!important;
+	background: linear-gradient(#ffbf00, #a67b00, #bf9a30)!important;
+	border: 1px solid #ffbf00!important;
+	box-shadow: 0px 2px 5px #3d3324, inset 0px 1px 1px #f0ce5b!important;
 }
 
 input[type=text].error {
@@ -845,6 +853,19 @@ div.gotoFile li:hover {
 
 
 
+@keyframes flash
+{
+	0%{transform: scale( 1 );}
+	25%{transform: scale( 0.95 );}
+	50%{transform: scale( 1.07 );}
+	75%{transform: scale( 0.95 );}
+	100%{transform: scale( 1 );}
+	}
+
+.flash
+{
+	animation: flash 1s infinite;
+}
 
 
 /*
