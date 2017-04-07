@@ -3066,6 +3066,11 @@ EDITOR.lastKeyPressed = "";
 		var posX = left || screen.width - previeWidth - windowPadding;
 		var posY = top || windowPadding;
 		
+		// Self resize so that the created Window will be visible even if the main window is focused
+		window.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
+		// You can't resize a window or tab that wasn’t created by window.open.
+		// You can't resize a window or tab when it’s in a window with more than one tab.
+		
 		if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
 		
 		//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
