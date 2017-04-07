@@ -133,6 +133,8 @@ function sockJsConnection(connection) {
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
+	console.log(connection);
+	
 	if(IP == undefined) {
 		// Maybe because the user is connecting via HTTP instead of Websockets!?
 		IP = connection.headers["x-real-ip"];
@@ -855,7 +857,7 @@ function handleHttpRequest(request, response){
 	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
 	var urlPath = UTIL.getPathFromUrl(request.url);
 	
-	console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url);
+	console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host);
 	
 	var dirs = urlPath.split("/");
 	
@@ -870,8 +872,6 @@ function handleHttpRequest(request, response){
 		
 		localFolder = httpEndpoints[firstDir];
 		urlPath = urlPath.replace(firstDir + "/", "");
-		
-		
 
 	}
 	else {
@@ -888,7 +888,10 @@ function handleHttpRequest(request, response){
 		*/
 		
 	}
-
+	
+	console.log("localFolder=" + localFolder);
+	console.log("urlPath=" + urlPath);
+	
 	
 	if(urlPath == "") {
 		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});

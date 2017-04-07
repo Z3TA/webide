@@ -637,19 +637,21 @@ var UTIL = {
 		console.log("url=" + url);
 		
 		var protocolIndex = url.indexOf("://");
-		var protocol;
+		var protocol = "";
 		
 		if(protocolIndex != -1) {
 			protocol = url.substr(0, protocolIndex);
 			url = url.substr(url.indexOf("://")+3);
 		}
 		
-		//console.log("protocol=" + protocol);
-		//console.log("url=" + url);
+		console.log("protocol=" + protocol);
+		console.log("url=" + url);
 		
-		while(url.indexOf("/") == 0) url = url.substr(1); // Remove all starting slashes from ex: file:///C:\users\...
+		if(protocol) {
+			while(url.indexOf("/") == 0) url = url.substr(1); // Remove all starting slashes from ex: file:///C:\users\...
+		}
 		
-		//console.log("url=" + url);
+		console.log("url=" + url);
 		
 		var filePath;
 		
@@ -658,7 +660,7 @@ var UTIL = {
 		}
 		else filePath = url;
 		
-		//console.log("filePath=" + filePath);
+		console.log("filePath=" + filePath);
 		
 		if(filePath.indexOf("?") != -1) filePath = filePath.substring(0, filePath.indexOf("?"));
 		if(filePath.indexOf("#") != -1) filePath = filePath.substring(0, filePath.indexOf("#"));
@@ -898,8 +900,21 @@ var UTIL = {
 	
 		else return "file"; // file://C:\Windows\blah
 		
+	},
+	
+	getLocation: function getLocation(href) {
+		var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
+		return match && {
+			protocol: match[1],
+			host: match[2],
+			hostname: match[3],
+			port: match[4],
+			pathname: match[5],
+			search: match[6],
+			hash: match[7]
+		}
 	}
-
+	
 }
 
 try {
