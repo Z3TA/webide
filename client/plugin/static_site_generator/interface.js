@@ -28,17 +28,18 @@
 	var wysiwygEnabled = false; 
 	var notEditableReason = "";
 	var editable = false;
-
+	
 	var menuItem;
 	
 	var previewBaseUrl;
 	
-
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
 		load: load,
 		unload: unload,
+		order: 1100 // So that "quickedit" don't open the file before reopen_files.js plugin does
 	});
 	
 	function getSites() {
@@ -54,7 +55,7 @@
 			repoUser: "",
 			repoPw: ""
 		}
-
+		
 		if(EDITOR.user == "admin" && runtime == "nw.js") {
 			var path = require("path");
 			
@@ -64,7 +65,7 @@
 			demoSite.publish = path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
 			demoSite.template = path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm")  // A template for new pages/posts
 			demoSite.url = "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")
-
+			
 		}
 		else if(EDITOR.user == "demo") {
 			// Virtual folder
@@ -91,14 +92,14 @@
 		else if(demoSite) {
 			sites = [demoSite];
 		}
-
+		
 		if(!sites) throw new Error("Failed to get any sites from the static site generator!\n\
 		storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
 		demoSite=" + JSON.stringify(demoSite, null, 2) + "\n\
 		sites=" + JSON.stringify(sites, null, 2));
 		
 		// quickedit.js ...
-		if(QueryString.editPage && QueryString.nodes) {
+		if(QueryString.editPage) {
 			
 			var url = QueryString.editPage;
 			var nodes = QueryString.nodes.split(",");
@@ -106,10 +107,81 @@
 			var site = isSite(url);
 			
 			if(site) {
-				
-				alertBox(site.name);
-				
 				var path = UTIL.getPathFromUrl(url);
+				var dir = UTIL.getDirectoryFromPath(path);
+				
+				if(path.indexOf(site.publish) != -1) {
+					path = path.substr(path.indexOf(site.publish)); // Remove hostname and stuff
+					
+					path = path.replace(site.publish, site.source);
+					
+					EDITOR.openFile(path, undefined, function fileOpened(err, file) {
+						if(err) {
+							alertBox("Unable to open this file:\n" + path);
+						}
+						else {
+							// Find where to edit
+							if(QueryString.nodes) {
+								
+								var element = QueryString.nodes.split(",");
+								
+								element.reverse();
+								
+								var i = 0;
+								var index = -1;
+								
+								console.log("Finding where to put caret ...");
+								for(; i<element.length-1; i++) {
+									//console.log(element[i]);
+									if(element[i] == "main") {
+										element[i] = "body"; 
+										break;
+									}
+								}
+								
+								
+								
+								for(; i<element.length; i++) {
+									if(element[i] !== "") {
+										console.log(element[i]);
+										index = file.text.indexOf(element[i], index);
+									}
+								}
+								
+								console.log("i=" + i);
+								console.log("index=" + index + " (" + file.text.substr(index, 30) + " ...)");
+								console.log("element=" + JSON.stringify(element));
+								
+								if(index != -1) {
+									
+									// Wysiwyg!
+									
+									
+									/*
+										If the file was open when the editor last closed, the reopen_files.js plugin will place
+										the caret. So wait some time ...
+									*/
+									setTimeout(function placeCaretAfterReopenFiles() {
+									file.moveCaret(index);
+									file.scrollToCaret();
+									}, 100);
+									
+								}
+							}
+							
+						}
+						
+					});
+					
+				}
+				else {
+					alertBox("Unable to figure out witch file this is:\n" + path);
+					console.log("site.source=" + site.source);
+					console.log("site.publish=" + site.publish);
+					console.log("path=" + path);
+					
+				}
+				
 				
 				// Figure out wich file ...
 				
@@ -167,7 +239,7 @@
 		
 		EDITOR.on("fileOpen", fileOpen);
 		
-
+		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 		if(EDITOR.user == "demo") {
@@ -220,7 +292,7 @@
 		}
 		
 	}
-
+	
 	
 	function fileShow(file) {
 		
@@ -244,7 +316,7 @@
 		var filePath = file.path;
 		
 		if(sites) {
-		
+			
 			// Check all sites to see if the file belongs to any source
 			
 			for(var i=0; i<sites.length; i++) {
@@ -618,7 +690,7 @@
 		inputRepoAuthPw.setAttribute("class", "inputtext");
 		inputRepoAuthPw.setAttribute("size", "20");
 		inputRepoAuthPw.setAttribute("title", "Password if needed for the publish URL")
-
+		
 		
 		// Buttons
 		
@@ -1074,9 +1146,9 @@
 						url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 						
 						openPreviewWin();
-
+						
 					}
-
+					
 					else {
 						// Open the index page
 						
@@ -1112,23 +1184,23 @@
 						if(edit) {
 							
 							// Get the source code for the compiled page in review, in order to compute ignoreTransform
-						
+							
 							var previewPath = sourceFile.path.replace(site.source, site.preview);
 							
 							EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
 								
 								if(err) throw err;
-
+								
 								var compiledSource = txt;
 								var compliedSourceBodyTag = "main";
-						
+								
 								loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
 								
 							});
-
+							
 						}
 						else loadWysiwygEditor();
-
+						
 						
 						function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
 							
@@ -1158,8 +1230,8 @@
 							}
 							
 						}
-
-
+						
+						
 					}
 					
 				});
@@ -1167,12 +1239,12 @@
 		}
 		
 		return false;
-
+		
 		
 	}
 	
-
-
+	
+	
 	
 	
 	function closePreview() {
@@ -1322,19 +1394,7 @@
 	function publishSite(site) {
 		compile(site.source, site.publish, true, function buildDone() {
 			
-			if(site.url) {
-				var open_browser = "Open in browser";
-				confirmBox("<b>" + site.name + "</b> published to:<br><span class=\'nobreak\'>" + site.publish + "</span><br>URL:<i>" + site.url + "</i>", [open_browser, "OK"], function(answer) {
-					if(answer == open_browser) {
-						var open = require(require("dirname") + "/client/plugin/static_site_generator/node_modules/open");
-						open(site.url, function(err) {
-							if(err) throw err;
-							console.log("Browser closed");
-						});
-					}
-				});
-			}
-			else alertBox(site.name + " published to " + site.publish);
+			alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:<a href="' + site.url + '">' + site.url + '</a>' : ''));
 			
 		});
 		return false;
@@ -1363,7 +1423,7 @@
 			
 			if(err) throw err;
 			else callback(json.ssgWorkerExitCode);
-
+			
 		});
 		
 	}
@@ -1379,9 +1439,9 @@
 		}
 		
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
-
-		if(!wysiwygEnabled && previewWin) return previewWin.disableEdit(function() {
 		
+		if(!wysiwygEnabled && previewWin) return previewWin.disableEdit(function() {
+			
 			if(buttonWysiwyg) {
 				buttonWysiwyg.setAttribute("class", "button");
 				buttonPreview.setAttribute("class", "button active");
@@ -1419,7 +1479,7 @@
 			}
 		}
 		else pickFileToPreview(site, makeItEditable);
-
+		
 		
 		function makeItEditable(err, sourceFile) {
 			
@@ -1433,13 +1493,13 @@
 		}
 		
 		function previewWinOpened() {
-
+			
 			// Change buttonWysiwyg state to "active"
 			if(buttonWysiwyg) {
 				buttonWysiwyg.setAttribute("class", "button active");
 				buttonPreview.setAttribute("class", "button active");
 			}
-
+			
 		}
 		
 	}
@@ -1454,7 +1514,7 @@
 		if(!site.source) throw new Error("Site name=" + site.name + " has no no source! site.source=" + site.source + " site=" + JSON.stringify(site));
 		
 		if(like(EDITOR.currentFile)) return callback(null, EDITOR.currentFile);
-
+		
 		
 		// Is any of the source files opened ?
 		var openedFilesArray = [];
@@ -1479,7 +1539,7 @@
 				else {
 					callback(new Error("Unable to pick a source file to preview/edit!"));
 				}
-
+				
 			});
 		}
 		
@@ -1496,23 +1556,23 @@
 				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
 				
 				if(like(fileList[i])) return fileList[i].path;
-
+				
 			}
 			
 			return null;
 		}
 		
 		function like(fileListItem) {
-
+			
 			console.log("Like ? " + fileListItem);
-		
+			
 			if(!fileListItem) return false;
 			
 			return (fileListItem.path.indexOf(site.source) == 0 // A source file
-				&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
-				&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
+			&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
+			&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
 			); 
-
+			
 		}
 		
 		

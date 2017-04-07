@@ -31,8 +31,24 @@
 		
 		// Secret combo ...
 		if(e.which == leftButton && e.ctrlKey && e.altKey) {
+			
+			// What word did we click on ?
+			var sel = window.getSelection();
+			var range = sel.getRangeAt(0);
+			var node = sel.anchorNode;
+			while (range.toString().indexOf(' ') != 0) {
+				range.setStart(node, (range.startOffset - 1));
+			}
+			range.setStart(node, range.startOffset + 1);
+			do {
+				range.setEnd(node, range.endOffset + 1);
+				
+			} while (range.toString().indexOf(' ') == -1 && range.toString().trim() != '' && range.endOffset < node.length);
+			var word = range.toString().trim();
+			
+			// Get the "path" to the node we clicked on
 			var clickPath = [];
-			var nodes = [];
+			var nodes = [word];
 			
 			if(e.path) {
 				for(var el, i=0; i<e.path.length; i++) {
@@ -47,10 +63,12 @@
 						nodeName: e.path[i].nodeName,
 					});
 					
-					nodes.push(e.path[i].nodeName);
+					nodes.push(e.path[i].localName);
 					
 				}
 			}
+			
+			//nodes.push(word);
 			
 			var url = window.location.href;
 			
