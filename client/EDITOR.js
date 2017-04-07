@@ -437,7 +437,13 @@ EDITOR.lastKeyPressed = "";
 			// Add callback to the waiting list to be called once the file has been loaded
 			if(callback) {
 				if(!fileOpenExtraCallbacks.hasOwnProperty(path)) fileOpenExtraCallbacks[path] = [];
+				
+				if(fileOpenExtraCallbacks[path].indexOf(callback) != -1) throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in fileOpenExtraCallbacks for path=" + path);
+				
+				console.log("Pushing callback=" + UTIL.getFunctionName(callback) + " to fileOpenExtraCallbacks for path=" + path);
+				
 				fileOpenExtraCallbacks[path].push(callback);
+				return; // Don't do anything else
 			}
 			/*
 				var err = new Error("File is already in the queue to be opened, please wait!");			
