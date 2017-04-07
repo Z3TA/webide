@@ -43,38 +43,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Make a special start.js (node) script for OSX (that all OS's can use too!) !?
-Pass serverUrl as query string to client
-
-package your project for Npm, use the 'bin' field in package.json. Then on Windows, Npm will install a .cmd wrapper along side your script so users can execute it from the command-line
-Make a jzedit.js.cmd file so you can start it by typing jzedit.js in Windows. 
-
-Update server_login.js to use current url as default server url
-
-Editor server login ... What if you're connected to the server, but not logged in. Or want to connect to another server ?
-
 Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
 Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
 and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.
 
+Web/home page widget, when you right click and select edit, it sends a signal to jzedit via websocket to localhost,
+to open that page (lauch "editPage" event and let plugins figure out what to do) and start WYSIWYG mode, scroll
+down to where on the web page the user clicked.
 
-Remove bootstrap function, it's no longer needed as the editor can be run
-in a browser and has a server.
-
-
-colaboration: When you log in to a user that is already logged in you'll get into colaboration mode, 
-where each change will be mirrored to the other client.
-
-when someone logs in as you, you get the option to disallow it, or (default) enter colaboration mode
-when you log in as someone else, you get the option to kill the other session, or (default) enter colaboration mode
-
-
-Fix problem with endless mirror loops!
-
-
-Server storage instead of local storage.
-
-Server storage fallback to localStorage when server goes offline, then sync when it comes online agian !?
 
 Implementing Mercurial support
 
@@ -83,52 +59,22 @@ Make WYSIWYG editor work in Browser ...
 bug fix: When pressing enter in content-editable, it loses focus in Firefox
 
 
-Turning the editor into a web app ...
-
-Move everything that requires nw.js into server.js
-
 SSG and WYSIWYG + Mercurial Repo
 
 
 todo:
 
-Show inconsistent indentation. If the indentation characters are not corrent. Show them! (in red ?)
-tab tab ...
-So that I will know when someting goes wrong with indentation.
-Add the indentation widget to right click menu when clicking on a line that has bad indentation characters.
 
-Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
-
-Show virtual paths on server errors like "unable to open file".
-
-Some sort of indication that you are disconnected to the server
-
-
-colaboration: When two or more people are logged into the *same user* 
-and opens *the same file* the editor goes into colaboration mode, that lets you see each others changes live.
-Press xxx to follow someone else's cursor.
 
 mercurial/git integration
 
-Functionality discovery: Add a search-class-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
+Functionality discovery: Add a search-glass-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
 It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
-
-Web/home page widget, when you right click and select edit, it sends a signal to jzedit via websocket to localhost, 
-to open that page (lauch "editPage" event and let plugins figure out what to do) and start WYSIWYG mode, scroll
-down to where on the web page the user clicked.
 
 When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
 
-ENOENT: no such file or directory, open 'C:\C:\Users\Z\de
-SSH interface.js 2211
-
-SSG resizes the editor so the Windows menu bar hides part of it. Need to detect if on windows? And not resize full height
-
-auto complete function arguments in anonymous functions!
 
 
-When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
-Auto opened SSG panel doesn't select the right site when clicking edit
 
 
 * Fix bugs!
@@ -871,6 +817,54 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
+Auto opened SSG panel doesn't select the right site when clicking edit
+
+Make the SSG work in the browser with all bells and whistles (WYSIWYG, Mercurial)
+
+Show virtual paths on server errors like "unable to open file".
+
+Some sort of indication that you are disconnected to the server
+
+colaboration: When two or more people are logged into the *same user*
+and opens *the same file* the editor goes into colaboration mode, that lets you see each others changes live.
+Press xxx to follow someone else's cursor.
+
+Show inconsistent indentation. If the indentation characters are not corrent. Show them! (in red ?)
+tab tab ...
+So that I will know when someting goes wrong with indentation.
+Add the indentation widget to right click menu when clicking on a line that has bad indentation characters.
+
+Server storage instead of local storage.
+Server storage fallback to localStorage when server goes offline, then sync when it comes online agian !?
+
+Remove bootstrap function, it's no longer needed as the editor can be run
+in a browser and has a server.
+
+
+colaboration: When you log in to a user that is already logged in you'll get into colaboration mode,
+where each change will be mirrored to the other client.
+
+when someone logs in as you, you get the option to disallow it, or (default) enter colaboration mode
+when you log in as someone else, you get the option to kill the other session, or (default) enter colaboration mode
+
+Fix problem with endless mirror loops!
+
+Make a special start.js (node) script for OSX (that all OS's can use too!) !?
+Pass serverUrl as query string to client
+
+package your project for Npm, use the 'bin' field in package.json. Then on Windows, Npm will install a .cmd wrapper along side your script so users can execute it from the command-line
+Make a jzedit.js.cmd file so you can start it by typing jzedit.js in Windows.
+
+Update server_login.js to use current url as default server url
+
+Editor server login ... What if you're connected to the server, but not logged in. Or want to connect to another server ?
+
+
+Annoying line at the bottom (footer) of the editor
+
+Ask to disconnect from remote server when closing the last document open on that server.
 
 An error that might give some headache is when you misspell a variable when declaring it using var foo,
 then get an error that foo is undefined ... Warn when a declared variable is not used!
