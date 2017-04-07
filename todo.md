@@ -43,21 +43,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Replace the "quick edit" feature in SSG with a link href to the editor that instruct it to start the SSG plugin.
-Ex: when the user rights click on his we page, and selects "edit" (or "new post"), the editor is opened in another window
-and the editor loads the SSG plugin, opens the right site, page, and put it into WYSIWYG mode.
-
-Web/home page widget, when you right click and select edit, it sends a signal to jzedit via websocket to localhost,
-to open that page (lauch "editPage" event and let plugins figure out what to do) and start WYSIWYG mode, scroll
-down to where on the web page the user clicked.
-
-
 Implementing Mercurial support
-
-
-Make WYSIWYG editor work in Browser ...
-bug fix: When pressing enter in content-editable, it loses focus in Firefox
-
 
 SSG and WYSIWYG + Mercurial Repo
 
