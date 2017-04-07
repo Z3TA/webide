@@ -161,8 +161,11 @@
 									file.moveCaret(index);
 									file.scrollToCaret();
 										
+										EDITOR.showFile(file);
+										
 										//  We can't open the WYSIWYG editor automatically, or it would be stopped by the popup-blocker
-										if(buttonWysiwyg) buttonWysiwyg.setAttribute("class", "button highlighted");
+										
+										if(like(site, file) && buttonWysiwyg) buttonWysiwyg.setAttribute("class", "button highlighted");
 										
 									}, 100);
 									
@@ -1521,7 +1524,7 @@
 		
 		if(!site.source) throw new Error("Site name=" + site.name + " has no no source! site.source=" + site.source + " site=" + JSON.stringify(site));
 		
-		if(like(EDITOR.currentFile)) return callback(null, EDITOR.currentFile);
+		if(like(site, EDITOR.currentFile)) return callback(null, EDITOR.currentFile);
 		
 		
 		// Is any of the source files opened ?
@@ -1563,30 +1566,27 @@
 				if(!fileList[i].path) throw new Error("filePathList[" + i + "] Does not have a path property: " + JSON.stringify(filePathList[i]));
 				if(!fileList[i].name) throw new Error("filePathList[" + i + "] Does not have a name property: " + JSON.stringify(filePathList[i]));
 				
-				if(like(fileList[i])) return fileList[i].path;
+				if(like(site, fileList[i])) return fileList[i].path;
 				
 			}
 			
 			return null;
 		}
 		
-		function like(fileListItem) {
-			
-			console.log("Like ? " + fileListItem);
-			
-			if(!fileListItem) return false;
-			
-			return (fileListItem.path.indexOf(site.source) == 0 // A source file
-			&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
-			&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
-			); 
-			
-		}
-		
-		
 	}
 	
-	
+	function like(site, fileListItem) {
+		
+		console.log("Like ? " + fileListItem);
+		
+		if(!fileListItem) return false;
+		
+		return (fileListItem.path.indexOf(site.source) == 0 // A source file
+		&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
+		&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
+		);
+		
+	}
 	
 	
 })();
