@@ -634,9 +634,31 @@ var UTIL = {
 
 	getPathFromUrl: function getPathFromUrl(url) {
 		
-		if(url.indexOf("://") != -1) url = url.substr(url.indexOf("://")+3);
+		console.log("url=" + url);
 		
-		var filePath = url.substr(url.indexOf("/"));
+		var protocolIndex = url.indexOf("://");
+		var protocol;
+		
+		if(protocolIndex != -1) {
+			protocol = url.substr(0, protocolIndex);
+			url = url.substr(url.indexOf("://")+3);
+		}
+		
+		//console.log("protocol=" + protocol);
+		//console.log("url=" + url);
+		
+		while(url.indexOf("/") == 0) url = url.substr(1); // Remove all starting slashes from ex: file:///C:\users\...
+		
+		//console.log("url=" + url);
+		
+		var filePath;
+		
+		if(protocol.toLowerCase() != "file" && (url.indexOf("/") != -1)) {
+			filePath = url.substr(url.indexOf("/"));
+		}
+		else filePath = url;
+		
+		//console.log("filePath=" + filePath);
 		
 		if(filePath.indexOf("?") != -1) filePath = filePath.substring(0, filePath.indexOf("?"));
 		if(filePath.indexOf("#") != -1) filePath = filePath.substring(0, filePath.indexOf("#"));
