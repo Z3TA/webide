@@ -34,6 +34,12 @@
 	
 	function buildRepoCloneDialog(widget) {
 		
+		var testRepo = {
+			url: "https://hg.webtigerteam.com/repo/test",
+			user: "user",
+			pw: "pass"
+		}
+		
 		var form = document.createElement("form");
 		form.onsubmit = cloneRepo;
 		
@@ -82,7 +88,7 @@
 		repo.setAttribute("class", "inputtext url");
 		repo.setAttribute("title", "URL to remote repository");
 		repo.setAttribute("size", "30");
-		repo.setAttribute("value", "https://hg.webtigerteam.com/repo/demosite");
+		repo.setAttribute("value", testRepo.url);
 		form.appendChild(repo);
 		
 		
@@ -97,7 +103,7 @@
 		user.setAttribute("id", "repoLoginUser");
 		user.setAttribute("class", "inputtext username");
 		user.setAttribute("size", "10");
-		user.setAttribute("value", userValue);
+		user.setAttribute("value", testRepo.user);
 		form.appendChild(user);
 		
 		// ### password
@@ -111,7 +117,7 @@
 		pw.setAttribute("id", "repoLoginPw");
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
-		pw.setAttribute("value", pwValue);
+		pw.setAttribute("value", testRepo.pw);
 		form.appendChild(pw);
 		
 		
@@ -139,7 +145,7 @@
 		
 		function cloneRepo(e) {
 			
-			var command = "hgclone";
+			var command = "mercurial.clone";
 			
 			var commandOptions = {
 				local: localDir.value,
@@ -152,13 +158,17 @@
 			CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
 				
 				if(err) alertBox(err.message);
-				else alertBox("Successfully cloned!");
+				else {
+					
+					alertBox("Successfully cloned to:\n" + resp.path);
 				
-			});
+			};
 			
-		}
+		});
+		
+		return false; // Do not make HTTP get
 	}
-	
+	}
 	
 	
 	function showRepoCloneDialog() {

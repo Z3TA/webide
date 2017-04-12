@@ -43,6 +43,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+
+
+repo_clone.js client plugin
+
 Implementing Mercurial support
 
 SSG and WYSIWYG + Mercurial Repo

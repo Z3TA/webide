@@ -34,6 +34,7 @@ var API = require("./server_api.js");
 
 // Server plugin API's
 API.SSG = require("./plugin/static_site_generator/ssg-api.js");
+API.mercurial = require("./plugin/mercurial.js");
 
 
 
@@ -248,8 +249,10 @@ function sockJsConnection(connection) {
 				if(commands.length > 1) {
 					// foo.bar.baz
 					funToRun = API;
-					for(var i=0; i<commands.length; i++) funToRun = funToRun[commands[i]];
-
+					for(var i=0; i<commands.length; i++) {
+						if(funToRun.hasOwnProperty(commands[i])) funToRun = funToRun[commands[i]];
+						else return send({error: "Unknown command=" + command + ": " + message});
+					}
 				}
 				else {
 					if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + message});
