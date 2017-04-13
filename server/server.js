@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 
+var CONSOLE_LOG_ORIGINAL = console.log;
+
 (function() {
   // Make sure we are in the server directory
   var dir = process.cwd();
   var folders = dir.split(/\/|\\/);
   var lastFolder = folders[folders.length-1];
   
-  console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
+  //console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
   
   if(lastFolder == "jzedit") {
     try {
       process.chdir('./server');
-      console.log('New directory: ' + process.cwd());
+      //console.log('New directory: ' + process.cwd());
     }
     catch (err) {
       console.log('chdir: ' + err);
@@ -22,6 +24,7 @@
 
 
 
+var LOG_LEVEL = 7; // 0=emerg, 1=alert, 2=crit, 3=err, 4=warning, 5=notice, 6=info, 7=debug
 
 
 var UTIL = require("../client/UTIL.js");
@@ -58,7 +61,7 @@ process.on("SIGINT", function sigInt() {
 });
 
 process.on("exit", function () {
-	log("Program exit\n\n");
+	log("Program exit\n\n", 6, true);
 });
 	
 function main() {
@@ -70,11 +73,22 @@ function main() {
 	var http = require("http");
 	
 	HTTP_SERVER = http.createServer(handleHttpRequest);
+	
+	HTTP_SERVER.on("error", function(err) {
+		console.log("err.code=" + err.code);
+		if(err.code == "EACCES") {
+			log("Unable to create server on port=" + HTTP_PORT + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
+			process.exit();
+		}
+		else throw err;
+	});
+
 	HTTP_SERVER.listen(HTTP_PORT);
+
 
 	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
 
-	console.log("Editor server url: " + makeUrl());
+	log("Editor server url: " + makeUrl(), 6);
 	
 	// Open client url in browser !?
 	
@@ -105,16 +119,16 @@ function getArg(word) {
 	for(var i=1; i<word.length; i++) regexStr += "|--" + word[i] + "=?";
 	regexStr += ")\\s?([^-\\s]+)?"
 	
-	console.log("regexStr=" + regexStr);
+	//console.log("regexStr=" + regexStr);
 	
 	var argReg = new RegExp(regexStr, "i");
 	
 	var match = args.match(argReg);
-	console.log("match=" + JSON.stringify(match));
+	//console.log("match=" + JSON.stringify(match));
 	if(match !== null) {
-		console.log("match.length=" + match.length);
+		//console.log("match.length=" + match.length);
 		var value = match[match.length-1];
-		console.log("value=" + value);
+		//console.log("value=" + value);
 		if(value === undefined) return true;
 		else return value;
 	}
@@ -358,10 +372,95 @@ function identify(json, IP, callback) {
 }
 
 
-function log(msg) {
+function log(msg, lvl, noTrace) {
 	
-	console.log(myDate() + " " + msg);
-	
+	var USE_COLORS = true;
+
+	//var _emerg = 0;
+	//var _alert = 1;
+	//var _crit = 2;
+	//var _err = 3;
+	var _warning = 4;
+	var _notice = 5;
+	var _info = 6;
+	var _debug = 7;
+
+	if(lvl == undefined) lvl = _info;
+
+	if(lvl <= LOG_LEVEL) {
+		
+		var where = "";
+
+		if(!noTrace) {
+			var stack = (new Error().stack).split(/\r\n|\n/);
+			//CONSOLE_LOG_ORIGINAL("stack=" + stack);
+			var dir = process.cwd();
+			var dir2 = dir.replace(/server$/, "");
+			//CONSOLE_LOG_ORIGINAL("dir=" + dir);
+			//CONSOLE_LOG_ORIGINAL("dir2=" + dir2);
+			var row = stack[2];
+			if(row.indexOf("at Console.console.log") != -1) row = stack[3];
+			//CONSOLE_LOG_ORIGINAL("row=" + row);
+			var indexDir = row.indexOf(dir);
+			var indexDir2 = row.indexOf(dir2);
+			//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
+			//CONSOLE_LOG_ORIGINAL("indexDir2=" + indexDir2);
+
+			if(indexDir == -1) {
+				indexDir = indexDir2;
+				dir = dir2;
+			}
+
+			if(indexDir != -1) {
+				where = row.substring(indexDir + dir.length, row.length-4);
+			}
+			else {
+				where = row.replace(dir, "").replace(dir2, "").trim();
+			}
+
+			if(where.charAt(0) == "/") where = where.substr(1);
+
+			where = "(" + where + ")";
+
+			//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
+			
+		}
+
+
+		//CONSOLE_LOG_ORIGINAL("where=" + where);
+
+		var dateString = myDate() + " ";
+
+		if(msg.indexOf("\n") != -1) {
+			// Pad each line
+			var padding = " ".repeat(dateString.length);
+			msg = msg.replace(new RegExp("\\n", "g"), "\n" + padding);
+		}
+
+		var colorDim = "\x1b[2m";
+		var colorReset = "\x1b[0m"
+		var colorBlink = "\x1b[5m";
+		var colorUnderscore = "\x1b[4m";
+
+		var msgString = "";
+
+		if(USE_COLORS) {
+			msgString = colorDim + dateString;
+			if(lvl <= 6) msgString += colorReset;
+
+			if(lvl == _warning) msgString += colorBlink;
+			//else if(lvl == _notice) msgString += colorUnderscore;
+
+			msgString += msg + " " + colorDim + where;
+		}
+		else {
+			msgString = dateString + msg + " " + where;
+		}
+
+		CONSOLE_LOG_ORIGINAL(msgString);
+
+
+	}
 	function myDate() {
 		var d = new Date();
 		
@@ -380,6 +479,13 @@ function log(msg) {
 			else return n;
 		}
 	}
+}
+
+// Overload console.log 
+console.log = function() {
+	var msg = arguments[0];
+	for (i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 7);
 }
 
 
@@ -1004,10 +1110,10 @@ function makeUrl(dir) {
 
 		if (alias >= 1) {
 		  // this single interface has multiple ipv4 addresses
-		  console.log(ifname + ':' + alias, iface.address);
+		  log(ifname + ':' + alias, iface.address, 7);
 		} else {
 		  // this interface has only one ipv4 adress
-		  console.log(ifname, iface.address);
+		  log(ifname, iface.address, 7);
 		}
 		++alias;
 		
@@ -1019,7 +1125,7 @@ function makeUrl(dir) {
 	
 	
 	//console.log(address);
-	console.log("ipList=" + JSON.stringify(ipList));
+	//console.log("ipList=" + JSON.stringify(ipList));
 	
 	var url = "http://" + ipList[0];
 	
