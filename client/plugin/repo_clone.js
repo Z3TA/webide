@@ -61,25 +61,10 @@
 		form.appendChild(scm);
 		
 		
-		// ### Local directory
-		var labelLocalDir = document.createElement("label");
-		labelLocalDir.setAttribute("for", "localDir");
-		labelLocalDir.appendChild(document.createTextNode("Local directory: "));
-		form.appendChild(labelLocalDir);
-		
-		var localDir = document.createElement("input");
-		localDir.setAttribute("type", "text");
-		localDir.setAttribute("id", "localDir");
-		localDir.setAttribute("class", "inputtext dir");
-		localDir.setAttribute("title", "Path to repositories");
-		localDir.setAttribute("size", "30");
-		localDir.setAttribute("value", "/repo/");
-		form.appendChild(localDir);
-		
 		// ### Remote repository
 		var labelRepo = document.createElement("label");
 		labelRepo.setAttribute("for", "repo");
-		labelRepo.appendChild(document.createTextNode("Local directory: "));
+		labelRepo.appendChild(document.createTextNode("Repository: "));
 		form.appendChild(labelRepo);
 		
 		var repo = document.createElement("input");
@@ -90,7 +75,21 @@
 		repo.setAttribute("size", "30");
 		repo.setAttribute("value", testRepo.url);
 		form.appendChild(repo);
+
+		// ### Local directory
+		var labelLocalDir = document.createElement("label");
+		labelLocalDir.setAttribute("for", "localDir");
+		labelLocalDir.appendChild(document.createTextNode("Clone into: "));
+		form.appendChild(labelLocalDir);
 		
+		var localDir = document.createElement("input");
+		localDir.setAttribute("type", "text");
+		localDir.setAttribute("id", "localDir");
+		localDir.setAttribute("class", "inputtext dir");
+		localDir.setAttribute("title", "Path to repositories");
+		localDir.setAttribute("size", "30");
+		localDir.setAttribute("value", "/repo/test/");
+		form.appendChild(localDir);
 		
 		// ### user
 		var labelUser = document.createElement("label");

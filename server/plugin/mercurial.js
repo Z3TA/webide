@@ -24,12 +24,19 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	
 	var config = " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw;
 	
+	console.log("process.env.PATH=" + process.env.PATH);
+
+	/*
+		Using cwd in Linux will result in Error: spawn /bin/sh ENOENT !
+	*/
+
 	var exec = require('child_process').exec;
-	exec("hg clone " + remote + config, { cwd: localPath }, function (err, stdout, stderr) {
+	exec("hg clone " + remote + " " + localPath + config, function (err, stdout, stderr) {
+
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+
 		if(err) {
-			
-			console.log("stderr=" + stderr);
-			console.log("stdout=" + stdout);
 			
 			var destinationNotEmpty = stderr.match(/abort: destination '(.*)' is not empty/);
 			
@@ -39,9 +46,17 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			else callback(err);
 
 		}
-		else if(stderr) throw new Error("No error, but data in stderr=" + stderr);
+		else if(stderr) {
+
+			if(stderr.match(/: No such file or directory$/)) {
+				callback("Directory does not exist: " + local);
+			}			
+
+			else callback(stderr);
+		}
 		else {
 			
+			/*
 			var matchDir = stdout.match(/destination directory: (.*)/);
 			var dir;
 			
@@ -52,8 +67,9 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			if(!dir) throw new Error("stdout does not contain destination directory! stdout=" + stdout + " matchDir=" + JSON.stringify(matchDir, null, 2));
 			
 			var path = user.toVirtualPath(dir);
+			*/
 			
-			callback(null, {path: path});
+			callback(null, {path: local});
 			
 		}
 	});
