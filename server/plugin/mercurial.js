@@ -104,41 +104,63 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	directory = user.translatePath(directory);
+	var localDirectory = user.translatePath(directory);
 	
 	if(directory instanceof Error) return callback(directory);
 	
 	var exec = require('child_process').exec;
-	exec("hg status", { cwd: directory }, function (err, stdout, stderr) {
 
+	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
+	exec("hg root", { cwd: directory }, function (err, stdout, stderr) {
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
 
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
-			
-			var modified = [];
-			var untracked = [];
-			
-			var files;
-			
-			if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
-			else files = stdout.split("\n");
-			
-			for(var attr, path, i=0; i<files.length-1; i++) {
-				attr = files[i].substring(0, files[i].indexOf(" "));
-				path = files[i].substring(attr.length + 1);
-				
-				if(attr == "?") untracked.push(path);
-				else if(attr == "M") modified.push(path);
-				else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
-			}
-			
-			callback(null, {modified: modified, untracked: untracked});
-			
+			var rootDir = user.toVirtualPath(stdout);
+
+			if(rootDir instanceof Error) callback("Unable to find a mercurial reposity from directory=" + directory);
+			else {
+
+				exec("hg status", { cwd: directory }, function (err, stdout, stderr) {
+
+					console.log("stderr=" + stderr);
+					console.log("stdout=" + stdout);
+
+					if(err) callback(err);
+					else if(stderr) callback(stderr);
+					else {
+						
+						var modified = [];
+						var untracked = [];
+						
+						var files;
+						
+						if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
+						else files = stdout.split("\n");
+						
+						for(var attr, path, i=0; i<files.length-1; i++) {
+							attr = files[i].substring(0, files[i].indexOf(" "));
+							path = files[i].substring(attr.length + 1);
+							
+							if(attr == "?") untracked.push(path);
+							else if(attr == "M") modified.push(path);
+							else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
+						}
+						
+						callback(null, {modified: modified, untracked: untracked, rootDir: rootDir});
+						
+					}
+				});
+			} 
 		}
+
+		
+
 	});
+
+	
 }
 
 
