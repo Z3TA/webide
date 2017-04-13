@@ -148,7 +148,7 @@ function sockJsConnection(connection) {
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
-	console.log(connection);
+	//console.log(connection);
 	
 	if(IP == undefined) {
 		// Maybe because the user is connecting via HTTP instead of Websockets!?
@@ -431,33 +431,46 @@ function log(msg, lvl, noTrace) {
 
 		var dateString = myDate() + " ";
 
-		if(msg.indexOf("\n") != -1) {
-			// Pad each line
-			var padding = " ".repeat(dateString.length);
-			msg = msg.replace(new RegExp("\\n", "g"), "\n" + padding);
-		}
+		//CONSOLE_LOG_ORIGINAL("msg=" + msg);
 
-		var colorDim = "\x1b[2m";
-		var colorReset = "\x1b[0m"
-		var colorBlink = "\x1b[5m";
-		var colorUnderscore = "\x1b[4m";
-
-		var msgString = "";
-
-		if(USE_COLORS) {
-			msgString = colorDim + dateString;
-			if(lvl <= 6) msgString += colorReset;
-
-			if(lvl == _warning) msgString += colorBlink;
-			//else if(lvl == _notice) msgString += colorUnderscore;
-
-			msgString += msg + " " + colorDim + where;
+		if(typeof msg != "string") {
+			CONSOLE_LOG_ORIGINAL(where + ":");
+			CONSOLE_LOG_ORIGINAL(msg);
+			//throw new Error("Log message is not a stirng! msg:" + msg);
 		}
 		else {
-			msgString = dateString + msg + " " + where;
-		}
 
-		CONSOLE_LOG_ORIGINAL(msgString);
+
+			if(msg.indexOf("\n") != -1) {
+				// Pad each line
+				var padding = " ".repeat(dateString.length);
+				msg = msg.replace(new RegExp("\\n", "g"), "\n" + padding);
+			}
+
+			var colorDim = "\x1b[2m";
+			var colorReset = "\x1b[0m"
+			var colorBlink = "\x1b[5m";
+			var colorUnderscore = "\x1b[4m";
+
+			var msgString = "";
+
+			if(USE_COLORS) {
+				msgString = colorDim + dateString;
+				if(lvl <= 6) msgString += colorReset;
+
+				if(lvl == _warning) msgString += colorBlink;
+				//else if(lvl == _notice) msgString += colorUnderscore;
+
+				msgString += msg + " " + colorDim + where;
+
+				msgString += colorReset;
+			}
+			else {
+				msgString = dateString + msg + " " + where;
+			}
+
+			CONSOLE_LOG_ORIGINAL(msgString);
+		}
 
 
 	}
