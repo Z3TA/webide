@@ -43,8 +43,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-How to add files to version control ?
-How to annotate/commmit to version control ?
+Make a annotate/commit widget for version control where you can also add files to version control.
 
 Implementing Mercurial support
 

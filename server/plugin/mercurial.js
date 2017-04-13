@@ -110,6 +110,10 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	var exec = require('child_process').exec;
 	exec("hg status", { cwd: directory }, function (err, stdout, stderr) {
+
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
@@ -122,13 +126,13 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 			if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
 			else files = stdout.split("\n");
 			
-			for(var attr, path, i=0; i<files.length; i++) {
+			for(var attr, path, i=0; i<files.length-1; i++) {
 				attr = files[i].substring(0, files[i].indexOf(" "));
 				path = files[i].substring(attr.length + 1);
 				
 				if(attr == "?") untracked.push(path);
 				else if(attr == "M") modified.push(path);
-				else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nstdout=" + stdout);
+				else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
 			}
 			
 			callback(null, {modified: modified, untracked: untracked});
