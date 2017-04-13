@@ -133,11 +133,12 @@
 		var savePassword = document.createElement("input");
 		savePassword.setAttribute("type", "checkbox");
 		savePassword.setAttribute("id", "savePassword");
+		savePassword.setAttribute("title", "Save user and password under [auth] in hgrc");
 		form.appendChild(savePassword);
 		
 		var labelSavePassword = document.createElement("label");
 		labelSavePassword.setAttribute("for", "savePassword");
-		labelSavePassword.appendChild(document.createTextNode("Save password"));
+		labelSavePassword.appendChild(document.createTextNode("Save credentials"));
 		form.appendChild(labelSavePassword);
 		
 		return form;
@@ -151,7 +152,7 @@
 				remote: repo.value,
 				user: user.value,
 				pw: pw.value,
-				saveCredentials: savePassword.checked
+				save: savePassword.checked
 			}
 			
 			CLIENT.cmd(command, commandOptions, function cloned(err, resp) {

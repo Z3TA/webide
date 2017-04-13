@@ -13,7 +13,7 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	var remote = json.remote;
 	var hguser = json.user;
 	var pw = json.pw;
-	var saveCredentials = json.saveCredentials;
+	var save = json.save;
 	
 	if(!local) callback(new Error("A local directory need to be specified! local=" + local));
 	if(!remote) callback(new Error("A remote URL need to be specified! remote=" + remote));
@@ -68,8 +68,28 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			
 			var path = user.toVirtualPath(dir);
 			*/
-			
-			callback(null, {path: local});
+
+			if(save) {
+
+				var hgrc = localPath + ".hg/hgrc";
+				console.log("Saving credentials in hgrc: " + hgrc);
+				var fs = require('fs')
+				fs.readFile(hgrc, 'utf8', function (err,data) {
+				  if (err) throw err;
+
+				  var repoWithoutProtocol = remote.replace(/^.*:\/\//, "");
+
+				  data += "\n[auth]\nfoo.prefix = " + repoWithoutProtocol + "\nfoo.username = " + hguser + "\nfoo.password = " + pw + "\n";
+
+				  fs.writeFile(hgrc, data, 'utf8', function (err) {
+				     if (err) throw err;
+				     else done();
+				  });
+				});
+
+			} else done();
+
+			function done() {callback(null, {path: local});}
 			
 		}
 	});

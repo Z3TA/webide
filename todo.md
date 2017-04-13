@@ -43,9 +43,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-
-
-repo_clone.js client plugin
+How to add files to version control ?
+How to annotate/commmit to version control ?
 
 Implementing Mercurial support
 
