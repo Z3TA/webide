@@ -200,14 +200,17 @@
 		
 		showSaveDialog();
 		
-		// Set default path:
-		if(file.savedAs) {
-			inputPath.value = file.path;
-		}
-		else {
-			inputPath.value = EDITOR.workingDirectory;
-		}
 		
+		var path = "";
+
+		if(file.savedAs) path = file.path;
+		else if(EDITOR.lastFile) path = UTIL.getDirectoryFromPath(EDITOR.lastFile.path);
+
+		if(!path) path = EDITOR.workingDirectory;
+	
+		
+		inputPath.value = path;
+
 		var size = Math.max(inputPathMinSize, inputPath.value.length + 10)
 		
 		console.log("size=" + size);
