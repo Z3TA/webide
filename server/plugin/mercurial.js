@@ -111,19 +111,20 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	var exec = require('child_process').exec;
 
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
-	exec("hg root", { cwd: directory }, function (err, stdout, stderr) {
+
+	exec("hg root", { cwd: localDirectory }, function (err, stdout, stderr) {
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
 
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
-			var rootDir = user.toVirtualPath(stdout);
+			var rootDir = user.toVirtualPath(stdout.trim());
 
 			if(rootDir instanceof Error) callback("Unable to find a mercurial reposity from directory=" + directory);
 			else {
 
-				exec("hg status", { cwd: directory }, function (err, stdout, stderr) {
+				exec("hg status", { cwd: localDirectory }, function (err, stdout, stderr) {
 
 					console.log("stderr=" + stderr);
 					console.log("stdout=" + stdout);

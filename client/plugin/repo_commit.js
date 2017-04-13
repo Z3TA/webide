@@ -32,30 +32,41 @@
 	
 	function buildRepoCommitDialog(widget) {
 		
-		var div = document.createElement("div");
+		var table = document.createElement("table"); // One table to rule them all!
 		
-		
-		fileList = document.createElement("ul");
+		var tr = document.createElement("tr");
+		var td = document.createElement("td");
 
-		div.appendChild(fileList);
+		fileList = document.createElement("ul");
+		fileList.setAttribute("class", "fileList");
+
+		td = document.createElement("td");
+		td.appendChild(fileList);
+		tr.appendChild(td);
 
 
 		var comment = document.createElement("textarea");
-		comment.setAttribute("col", "20");
-		comment.setAttribute("row", "5");
+		comment.setAttribute("cols", "20");
+		comment.setAttribute("rows", "5");
 
-		div.appendChild(comment);
+		td = document.createElement("td");
+		td.appendChild(comment);
+		tr.appendChild(td);
 
 
 		// ### Commit button
 		var commitButton = document.createElement("button");
 		commitButton.setAttribute("class", "button");
-		commitButton.setAttribute("value", "Commit changes");
+		commitButton.appendChild(document.createTextNode("Commit changes"));
 		commitButton.onclick = commit;
-		div.appendChild(commitButton);
+
+		td = document.createElement("td");
+		td.appendChild(commitButton);
+		tr.appendChild(td);
 		
+		table.appendChild(tr);
 		
-		return div;
+		return table;
 		
 		function commit(e) {
 			
@@ -87,6 +98,8 @@
 	
 	function updateFileList() {
 
+		while(fileList.firstChild) fileList.removeChild(fileList.firstChild); // Emty file list
+
 		var commandOptions = {
 			directory: UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir
 		}
@@ -96,12 +109,34 @@
 			if(err) alertBox(err.message);
 			else {
 				
-				console.log(resp);
+				var modified = resp.modified;
+				var rootDir = resp.rootDir;
+				var untracked = resp.untracked;
 
+				for(var i=0; i<modified.length; i++) add(modified[i], true);
+				for(var i=0; i<untracked.length; i++) add(untracked[i], false);
+
+				console.log(resp);
 			
 			};
+
+			function add(filePath, checked) {
+				var fullPath = rootDir + filePath;
+				var li = document.createElement("li");
+				var checkbox = document.createElement("input");
+				checkbox.setAttribute("type", "checkbox");
+				checkbox.setAttribute("id", "checkbox_" + fullPath);
+
+				li.appendChild(checkbox);
+				li.appendChild(document.createTextNode(filePath));
+
+				fileList.appendChild(li);
+			}
+
 		
 		});
+
+
 	}
 	
 	function showrepoCommitDialog() {
