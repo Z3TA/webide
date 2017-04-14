@@ -813,7 +813,7 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 	
 	var filePath = user.storageDir + encodeURIComponent(itemName);
 	
-	console.log("Creating backup of filePath=" + filePath);
+	//console.log("Creating backup of filePath=" + filePath);
 	fs.rename(filePath, filePath + ".backup", function backedUpStorage(err) {
 		
 		if(err) {
@@ -825,7 +825,7 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 			// else: Just create the file if it doesn't exist
 		}
 		
-		console.log("Saving data to filePath=" + filePath);
+		//console.log("Saving data to filePath=" + filePath);
 		fs.writeFile(filePath, storageString, function writeStorage(err) {
 			if(err) {
 				callback(new Error("Unable to save storage item=" + itemName + " ! Error: " + err.message));
@@ -833,7 +833,7 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 			}
 			
 			// Some times the file gets corrupt! No idea why. Check if it's corrupt ...
-			console.log("Reading to check for errors: filePath=" + filePath);
+			//console.log("Reading to check for errors: filePath=" + filePath);
 			fs.readFile(filePath, "utf8", function checkCorrupt(err, data) {
 				if(err) throw err;
 				
@@ -860,7 +860,7 @@ User.prototype.saveStorageItem = function saveStorage(itemName, callback) {
 				callback(null, json);
 				
 				while(user.isSavingStorage.indexOf(itemName) != -1) user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
-				log("Done saving storage item=" + itemName + " for user=" + user.name);
+				log("Done saving storage item=" + itemName + " for user=" + user.name, 7);
 				
 			});
 

@@ -233,19 +233,31 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	if(files == undefined) return callback(new Error("No files defined"));
 	if(message == undefined) return callback(new Error("No message defined"));
 	
-	
+	if(Object.prototype.toString.call( files ) !== '[object Array]') return callback("Expected files to be an array of files");
+
+	//if(files.length == 0) return callback("No files specified for commit");
+
+
+	directory = UTIL.trailingSlash(directory);
+
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
-		localPath = user.translatePath(files[i]);
+		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return callback(localPath);
 		fileString += ' "' + localPath + '"';
 	}
 	
 	var exec = require('child_process').exec;
 	exec('hg commit -m "' + message + '"' + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+
+		if(stdout == "nothing changed") return callback("Nothing has been changed! Did you forget to add files ?");
+
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
