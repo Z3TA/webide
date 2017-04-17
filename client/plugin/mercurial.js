@@ -38,6 +38,9 @@
 		EDITOR.bindKey({desc: "Hide the commit widget", charCode: char_Esc, fun: hideRepoCommitDialog});
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideRepoCloneDialog});
 		
+		EDITOR.on("fileOpen", mercurialStatus);
+		
+		
 	}
 	
 	function unloadMercurial() {
@@ -47,6 +50,38 @@
 		
 		if(repoCloneMenuItem) EDITOR.removeMenuItem(repoCloneMenuItem);
 		EDITOR.unbindKey(hideRepoCloneDialog);
+	}
+	
+	
+	function mercurialStatus(file) {
+		
+		var dir = UTIL.getDirectoryFromPath(file.path);
+		
+		hgStatus(function (err, rootDir, modified, untracked) {
+			
+			if(err) return console.warn(err);
+			else {
+				
+				if(modified.length == 0) {
+					// Check for incoming changes ...
+					CLIENT.cmd("mercurial.incoming", {directory: rootDir}, function hgIncoming(err, resp) {
+						if(err) {
+							throw err;
+						}
+						else {
+						
+							// Check if the file just opening has changes ... "there are incoming changes from [remote]. Switch to latest ? All unsaved changes will be lost, option commit."
+							
+						
+						}
+					});
+					
+				}
+				
+			}
+			
+		}, dir);
+		
 	}
 	
 	
@@ -259,15 +294,14 @@
 
 		});
 
-
 	}
 	
-	function hgStatus(callback) {
+	function hgStatus(callback, mercurialRootDir) {
 		
 		if(!callback) throw new Error("No callback function!");
 		
 		var commandOptions = {
-			directory: UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir
+			directory: mercurialRootDir || UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir
 		}
 
 		CLIENT.cmd("mercurial.status", commandOptions, function hgstatus(err, resp) {
