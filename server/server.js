@@ -637,7 +637,7 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 		var protocol = parse.protocol ? parse.protocol.toLowerCase() : "LOCAL:";
 		protocol = protocol.substring(0, protocol.length-1); // Remove colon: 
 		
-		console.log("protocol=" + protocol + " indexOf [" + REMOTE_PROTOCOLS.join(",") + "] = " + REMOTE_PROTOCOLS.indexOf(protocol));
+		//console.log("protocol=" + protocol + " indexOf [" + REMOTE_PROTOCOLS.join(",") + "] = " + REMOTE_PROTOCOLS.indexOf(protocol));
 		
 		if(REMOTE_PROTOCOLS.indexOf(protocol) != -1) return pathToFileOrDir;
 		

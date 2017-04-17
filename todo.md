@@ -43,7 +43,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Make a annotate/commit widget for version control where you can also add files to version control.
+Mercurial pull !!!!?
+
+Mercurial push
 
 Implementing Mercurial support
 
@@ -77,6 +79,9 @@ When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file 
 
 What I'm thinking
 -----------------
+
+Discovery: Dashboard! When no file is open. Can also bring up the dash-board when clicking on a "settings/search" icon that's always visible in the top right corner.
+dashboards sell!
 
 Discovery: "tip of the day". "Open a file" Ctrl + O
 Keep stats on how many times a key-combo has been used, then show tips about the less used ones.

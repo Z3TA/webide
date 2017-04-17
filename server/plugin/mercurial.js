@@ -174,13 +174,14 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(files == undefined) return callback(new Error("No files defined"));
 	
+	directory = UTIL.trailingSlash(directory);
 	
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
-		localPath = user.translatePath(files[i]);
+		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return callback(localPath);
 		fileString += ' "' + localPath + '"';
 	}

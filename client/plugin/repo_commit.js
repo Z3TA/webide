@@ -19,19 +19,19 @@
 	
 	function loadrepoCommit() {
 		repoCommitMenuItem = EDITOR.addMenuItem("Commit", function() {
-			showrepoCommitDialog();
+			showRepoCommitDialog();
 			EDITOR.hideMenu();
 		});
 		
 		var char_Esc = 27;
-		EDITOR.bindKey({desc: "Hide the commit widget", charCode: char_Esc, fun: hiderepoCommitDialog});
+		EDITOR.bindKey({desc: "Hide the commit widget", charCode: char_Esc, fun: hideRepoCommitDialog});
 	}
 	
 	function unloadrepoCommit() {
 		
 		if(repoCommitMenuItem) EDITOR.removeMenuItem(repoCommitMenuItem);
 		
-		EDITOR.unbindKey(hiderepoCommitDialog);
+		EDITOR.unbindKey(hideRepoCommitDialog);
 	}
 	
 	function buildRepoCommitDialog(widget) {
@@ -119,8 +119,8 @@
 
 			if(nonTracked.length > 0) {
 				var yes = "Yes, Add them";
-				var no = "NO!"
-				confirmBox("Add the following files to be tracked by Mercurial ?\n" + nonTracked.join("\n"), [no, yes] function(answer) {
+				var no = "NO!";
+				confirmBox("Add the following files to be tracked by Mercurial ?\n" + nonTracked.join("\n"), [no, yes], function(answer) {
 
 					if(answer == no) return; // Do nothing ... Should we commit !?
 
@@ -135,7 +135,6 @@
 					
 					});
 				})
-
 			}
 			else readyToCommit(false);
 
@@ -153,7 +152,7 @@
 								else {
 									
 									alertBox("Successfully commited and pushed to " + resp.remote);
-
+									hideRepoCommitDialog();
 								
 								};
 							
@@ -162,6 +161,7 @@
 						}
 						else {
 							alertBox("Successfully commited! (don't forget to push)");
+							hideRepoCommitDialog();
 						}
 
 					};
@@ -194,12 +194,16 @@
 
 			//inputrootDir.value = rootDir;
 
+			if(modified.length == 0 && untracked.length == 0) {
+				alertBox("No changes detected! (noo need to commit)");
+				hideRepoCommitDialog();
+			}
+			
 			for(var i=0; i<modified.length; i++) insertFile(modified[i], true);
 			for(var i=0; i<untracked.length; i++) insertFile(untracked[i], false);
 
 			console.log(resp);
-			
-			
+
 
 			function insertFile(filePath, selected) {
 				var fullPath = rootDir + filePath;
@@ -210,7 +214,7 @@
 				if(selected) option.setAttribute("selected", "selected");
 
 				option.appendChild(document.createTextNode(filePath));
-				option.onclick = clickFile;
+				//option.onclick = clickFile;
 
 				fileSelect.appendChild(option);
 			}
@@ -242,7 +246,7 @@
 
 	}
 	
-	function showrepoCommitDialog() {
+	function showRepoCommitDialog() {
 		repoCommitDialog.show();
 
 		// Reset these values
@@ -254,7 +258,7 @@
 		return false;
 	}
 	
-	function hiderepoCommitDialog() {
+	function hideRepoCommitDialog() {
 		return repoCommitDialog.hide();
 	}
 	
