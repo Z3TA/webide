@@ -38,7 +38,7 @@
 		EDITOR.bindKey({desc: "Hide the commit widget", charCode: char_Esc, fun: hideRepoCommitDialog});
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideRepoCloneDialog});
 		
-		EDITOR.on("fileOpen", mercurialStatus);
+		//EDITOR.on("fileOpen", mercurialStatus);
 		
 		
 	}
