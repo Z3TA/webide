@@ -210,8 +210,8 @@ EDITOR.lastKeyPressed = "";
 	if(!Object.defineProperty) console.warn("Object.defineProperty not available!");
 	else {
 		Object.defineProperty(EDITOR, 'workingDirectory', {
-			get: function() { return workingDirectory; },
-			set: function(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
+			get: function getWorkingDirectory() { return workingDirectory; },
+			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
 			enumerable: true
 		});
 	}
@@ -247,7 +247,7 @@ EDITOR.lastKeyPressed = "";
 	var _serverStorage = null; // Will be populated once the data is recived from the server
 	
 	EDITOR.storage = {
-		setItem: function(id, val, callback) {
+		setItem: function storageSetItem(id, val, callback) {
 			var stack = UTIL.getStack("EDITOR.storage.setItem");
 			CLIENT.cmd("storageSet", {item: id, value: String(val)}, function(err, json) {
 				if(callback) callback(err, json);
@@ -258,7 +258,7 @@ EDITOR.lastKeyPressed = "";
 			});
 			return _serverStorage[id] = String(val); 
 		},
-		getItem: function(id, trap) {
+		getItem: function storageGetItem(id, trap) {
 			if(!this.ready()) throw new Error('Storage is not yet ready. Use EDITOR.on("storageReady", yourFunction)'); 
 			
 			if(trap !== undefined) throw new Error("getItem only takes one argument, did you mean to use setItem ?"); // Error check
@@ -271,7 +271,7 @@ EDITOR.lastKeyPressed = "";
 
 		},
 		
-		removeItem: function(id, callback) {
+		removeItem: function storageRemoveItem(id, callback) {
 			
 			// Save the stack in case we get an error
 			var stack = UTIL.getStack("EDITOR.storage.removeItem");
@@ -286,12 +286,12 @@ EDITOR.lastKeyPressed = "";
 			
 			return delete _serverStorage[id];
 		},
-		clear: function() {
+		clear: function storageClear() {
 			throw new Error("Use EDITOR.storage.removeItem() instead!");
 			//CLIENT.cmd("storageClear", function(err) {if(err) throw err;});
 			return _serverStorage = {}; 
 		},
-		ready: function() {
+		ready: function storageReady() {
 			if(_serverStorage === null) return false;
 			else if(_serverStorage instanceof Object) return true;
 			else {
