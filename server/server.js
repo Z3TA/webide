@@ -286,8 +286,8 @@ function sockJsConnection(connection) {
 							if(!err.stack) console.trace("Stack ...")
 							else log(err.stack);
 							
-							send({error: "API error: " + err.message + ""});
-							//send({error: "API error (" + err.message + "): " + message});
+							send({error: "API error: " + (err.message ? err.message : err) + ""});
+							
 						}
 						else {
 							send({resp: answer});
