@@ -1,3 +1,10 @@
+/*
+
+	Mercurial Distributed SCM (version 3.7.3)
+	(see https://mercurial-scm.org for more information)
+
+*/
+
 "use strict";
 
 var UTIL = require("../../client/UTIL.js");
@@ -270,5 +277,109 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	});
 }
 
+MERCURIAL.incoming = function hgincoming(user, json, callback) {
+	// add the specified files on the next commit
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	
+	directory = UTIL.trailingSlash(directory);
+	
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	var exec = require('child_process').exec;
+	exec("hg incoming --noninteractive --stat", { cwd: localDirectory }, function (err, stdout, stderr) {
+		console.log("stdout=" + stdout);
+		console.log("stderr=" + stderr);
+		
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			var matchRepoUrl = stdout.match(/comparing with (.*)/);
+			
+			if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
+			
+			var repoUrl = matchRepoUrl[2];
+			
+			console.log("repoUrl=" + repoUrl);
+			
+			if(stdout.match(/no changes found/)) {
+				callback(null, {changes: null});
+			}
+			else {
+				var searchingChangesStr = "searching for changes";
+				var indexSearchingChanges = stdout.indexOf(searchingChangesStr);
+				
+				if(indexSearchingChanges == -1) throw new Error("Can not find string '" + searchingChangesStr + "' in stdout=" + stdout);
+				
+				var strChanges = stdout.substr(indexSearchingChanges + searchingChangesStr.length);
+				
+				strChanges = strChanges.trim();
+				
+				var arrChanges = strChanges.split(/(\r\n|\n)\s*(\r\n|\n)/); // Two line breaks (can have spaces between)
+				
+				console.log("arrChanges.length=" + arrChanges.length);
+				
+				for(var i=0; i<arrChanges.length; i++) {
+					console.log("arrChanges[" + i + "]=" + arrChanges[i]);
+					while(arrChanges[i].match(/^(\r\n|\n)$/)) arrChanges.splice(i, 1); // Remove emty sets
+				}
+				console.log("arrChanges=" + JSON.stringify(arrChanges, null, 2));
+				
+				var objChanges = {};
+				var obj;
+							
+				
+				for(var i=0; i<arrChanges.length; i+=2) {
+					arrChanges[i] = arrChanges[i].split(/\r\n|\n/);
+					
+					for (var j=0; j<arrChanges[i].length; j++) {
+
+						var name = arrChanges[i][j].substr(0, arrChanges[i][j].indexOf(":"));
+						var value = arrChanges[i][j].substr(arrChanges[i][j].indexOf(":")+1).trim();
+						console.log("name=" + name);
+						console.log("value=" + value);
+						
+						if(name == "changeset") obj = objChanges[value] = {};
+						else obj[name] = value;
+					
+					}
+					
+					var matchStat = arrChanges[i+1].match(/ \d+ files changed, \d+ insertions\(\+\), \d+ deletions\(-\)$/);
+					
+					if(!matchStat) throw new Error("Did not find change stats! arrChanges=" + JSON.stringify(arrChanges, null, 2));
+					
+					obj["files"] = {};
+					var strStat = arrChanges[i+1].substring(0, matchStat.index).trim();
+
+					console.log("strStat=" + strStat);
+					var arrFiles = strStat.split(/\r\n|\n/);
+					console.log("arrFiles=" + JSON.stringify(arrFiles));
+					for(var f=0; f<arrFiles.length; f++) {
+						arrFiles[f] = arrFiles[f].split(" | ");
+
+						var fileName = arrFiles[f][0].trim();
+						var filePath = directory + fileName;
+						var changeCount = parseInt(arrFiles[f][1]);
+						
+						console.log("fileName=" + fileName);
+						console.log("changeCount=" + changeCount);
+						
+						obj["files"][filePath] = changeCount;
+						
+					}
+				}
+			
+				console.log("objChanges=" + JSON.stringify(objChanges, null, 2));
+				
+				callback(null, {changes: objChanges, repo: repoUrl});
+				
+			}
+		}
+	});
+}
 
 module.exports = MERCURIAL;

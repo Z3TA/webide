@@ -38,7 +38,7 @@
 		EDITOR.bindKey({desc: "Hide the commit widget", charCode: char_Esc, fun: hideRepoCommitDialog});
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideRepoCloneDialog});
 		
-		//EDITOR.on("fileOpen", mercurialStatus);
+		EDITOR.on("fileOpen", mercurialStatus);
 		
 		
 	}
@@ -57,21 +57,50 @@
 		
 		var dir = UTIL.getDirectoryFromPath(file.path);
 		
-		hgStatus(function (err, rootDir, modified, untracked) {
+		hgStatus(function (err, rootDir, localModified, untracked) {
 			
 			if(err) return console.warn(err);
 			else {
 				
-				if(modified.length == 0) {
+				// todo: run mercurial.incoming, auto update if there is no conflict. Try to resolve conflics if there are any
+				
+				if(localModified.length == 0) {
 					// Check for incoming changes ...
 					CLIENT.cmd("mercurial.incoming", {directory: rootDir}, function hgIncoming(err, resp) {
 						if(err) {
 							throw err;
 						}
 						else {
-						
-							// Check if the file just opening has changes ... "there are incoming changes from [remote]. Switch to latest ? All unsaved changes will be lost, option commit."
 							
+							var changes = resp.changes;
+							var repoUrl = resp.repo;
+							var ask = false;
+							
+							checkFiles: for(var i=0; i<changes.length; i++) {
+								var files = Object.keys(changes[i].files);
+								for(var j=0; j<files.length; j++) {
+									if(EDITOR.files.hasOwnProperty(files[j])) {
+										
+										ask = true;
+										
+										var update = "Update!";
+										var notYet = "Not yet";
+										
+										// todo: Unsaved open files !?
+										
+										confirmBox("There are changes to " + repoUrl + "\n" + changes[i].date + "\n" + changes[i].user + "\n" + changes[i].summary, [notYet, update], function(answer) {
+											
+											if(answer == update) pullAndUpdate(dir, true);
+											
+										})
+										
+										break checkFiles;
+									}
+								}
+								
+							}
+							
+							if(!ask) pullAndUpdate(dir, false);
 						
 						}
 					});
@@ -84,6 +113,11 @@
 		
 	}
 	
+	
+	function pullAndUpdate(dir, reloadFiles) {
+		
+		
+	}
 	
 	function buildRepoCommitDialog(widget) {
 		
@@ -449,13 +483,13 @@
 				else {
 					
 					alertBox("Successfully cloned to:\n" + resp.path);
+					
+				};
 				
-			};
+			});
 			
-		});
-		
-		return false; // Do not make HTTP get
-	}
+			return false; // Do not make HTTP get
+		}
 	}
 	
 	
