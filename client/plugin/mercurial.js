@@ -220,7 +220,8 @@
 	function buildRepoCommitDialog(widget) {
 		
 		var div = document.createElement("div");
-
+		div.setAttribute("class", "repoCommit");
+		
 		var table = document.createElement("table"); // One table to rule them all!
 		
 		var tr = document.createElement("tr");
@@ -228,7 +229,7 @@
 
 		fileSelect = document.createElement("select");
 		fileSelect.setAttribute("class", "file list");
-		fileSelect.setAttribute("size", "5");
+		fileSelect.setAttribute("size", "6");
 		fileSelect.setAttribute("title", "Select files");
 
 		td = document.createElement("td");
@@ -238,7 +239,7 @@
 
 		var textarea = document.createElement("textarea");
 		textarea.setAttribute("cols", "50");
-		textarea.setAttribute("rows", "5");
+		textarea.setAttribute("rows", "6");
 		textarea.setAttribute("placeholder", "Comments ...");
 
 		td = document.createElement("td");
@@ -266,6 +267,20 @@
 
 		td.appendChild(commitAndPushButton);
 
+		var br = document.createElement("br");
+		td.appendChild(br);
+		
+		// ### Cancel button
+		var cancelButton = document.createElement("button");
+		cancelButton.setAttribute("class", "button");
+		cancelButton.appendChild(document.createTextNode("Cancel"));
+		cancelButton.onclick = function cancel() {
+			hideRepoCommitDialog();
+		};
+
+		td.appendChild(cancelButton);
+		
+		
 		tr.appendChild(td);
 		
 
@@ -295,18 +310,29 @@
 			var nonTracked = []; // Check if some of the files are untracked, and ask if we should add them
 			var selectedFiles = fileSelect.options;
 			for(var i=0, filePath; i<selectedFiles.length; i++) {
-				filePath = selectedFiles[i].value;
-				opt.files.push(filePath);
-				if(untracked.indexOf(filePath) != -1) nonTracked.push(filePath);
+				if(selectedFiles[i].selected) {
+					filePath = selectedFiles[i].value;
+					opt.files.push(filePath);
+					if(untracked.indexOf(filePath) != -1) nonTracked.push(filePath);
+				}
 			}
 
 			if(nonTracked.length > 0) {
 				var yes = "Yes, Add them";
 				var no = "NO!";
 				confirmBox("Add the following files to be tracked by Mercurial ?\n" + nonTracked.join("\n"), [no, yes], function(answer) {
-
-					if(answer == no) return; // Do nothing ... Should we commit !?
-
+					
+					if(answer == no) {
+						
+						// Remove untracked files from files to be commited
+						while(nonTracked.length > 0) {
+							opt.files.splice(opt.files.indexOf(nonTracked[0]), 1);
+							nonTracked.splice(nonTracked.indexOf(nonTracked[0]), 1);
+						}
+						
+						return readyToCommit(false);
+					}
+					
 					CLIENT.cmd("mercurial.add", {directory: rootDir, files: nonTracked}, function commited(err, resp) {
 						
 						if(err) alertBox(err.message);
@@ -325,11 +351,22 @@
 			function readyToCommit(filesWhereAdded) {
 				CLIENT.cmd("mercurial.commit", opt, function commited(err, resp) {
 					
-					if(err) alertBox(err.message);
+					if(err) {
+
+						if(err.message.match(/created new head/)) {
+							// todo: We need to pull and merge before pushing!
+							alertBox("We need to pull and merge before pushing!");
+						}
+						else if(err.message.match(/cannot partially commit a merge/)) {
+							// todo:  'hg resolve -m [FILE]' !?!?
+							alertBox("We need to reslove the merge conflict manually.");
+						}
+						else alertBox(err.message);
+					}
 					else {
 						
 						if(alsoPush) {
-							CLIENT.cmd("mercurial.push", {}, function commited(err, resp) {
+							CLIENT.cmd("mercurial.push", {directory: rootDir}, function commited(err, resp) {
 								
 								if(err) alertBox(err.message);
 								else {

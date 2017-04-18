@@ -518,8 +518,54 @@ MERCURIAL.update = function hgupdate(user, json, callback) {
 }
 
 
-// Hg merge, 3 files updated, 0 files merged, 0 files removed, 0 files unresolved
 
-// Hg push, remote: added 2 changesets with 1 changes to 1 files
+MERCURIAL.push = function hgpush(user, json, callback) {
+	// Update pulled changes
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	
+	directory = UTIL.trailingSlash(directory);
+
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	var exec = require('child_process').exec;
+	exec('hg push --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
+
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+		
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			if(stdout.match(/no changes found/)) {
+				callback(null, {changesets: null});
+			}
+			else {
+				// added 2 changesets with 1 changes to 1 files
+				
+				var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
+				
+				if(!matchUpdate) return callback(stdout);
+				else {
+					var resp = {
+						changesets: matchUpdate[1],
+						changes: matchUpdate[2],
+						files: matchUpdate[3],
+					};
+					
+					callback(null, resp);
+				}
+
+			}
+		}
+	});
+}
+
+
+// Hg merge, 3 files updated, 0 files merged, 0 files removed, 0 files unresolved
 
 module.exports = MERCURIAL;
