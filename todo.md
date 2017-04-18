@@ -44,7 +44,8 @@ What I'm working on
 -------------------
 
 client/plugin/mercurial.js
-What to do when there are changes to files that also has remote changes
+pull & update
+todo: resolve/merge
 
 Mercurial pull !!!!?
 

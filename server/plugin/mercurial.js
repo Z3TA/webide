@@ -126,8 +126,18 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
-			var rootDir = user.toVirtualPath(stdout.trim());
-
+			
+			var mercurialRoot = stdout.trim();
+			
+			if(user.rootPath) {
+				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
+					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
+					return callback("Unable to find a mercurial reposity from directory=" + directory);
+				}
+			}
+			
+			var rootDir = user.toVirtualPath(mercurialRoot);
+			
 			if(rootDir instanceof Error) callback("Unable to find a mercurial reposity from directory=" + directory);
 			else {
 
@@ -278,7 +288,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 }
 
 MERCURIAL.incoming = function hgincoming(user, json, callback) {
-	// add the specified files on the next commit
+	// show list of changes from remote repo
 	
 	var directory = json.directory;
 	
@@ -290,11 +300,30 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
 	var exec = require('child_process').exec;
-	exec("hg incoming --noninteractive --stat", { cwd: localDirectory }, function (err, stdout, stderr) {
+	
+	var execOptions = {
+		encoding: 'utf8',
+		timeout: 3000,
+		maxBuffer: 200*1024,
+		killSignal: 'SIGTERM',
+		cwd: localDirectory,
+		env: null,
+	}
+	
+	
+	
+	exec("hg incoming --stat --noninteractive", execOptions, function (err, stdout, stderr) {
+		
+		console.log("localDirectory=" + localDirectory);
 		console.log("stdout=" + stdout);
 		console.log("stderr=" + stderr);
+		console.log("err=" + err);
 		
-		if(err) callback(err);
+		if(err) {
+			// It seems hg returns exit code 1 when there's nothhing to pull !?!?
+			if(!stdout.match(/(\r\n|\n)no changes found/)) return callback(err);
+			else return callback(null, {changes: null});
+		}
 		else if(stderr) callback(stderr);
 		else {
 			
@@ -381,5 +410,116 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 		}
 	});
 }
+
+
+MERCURIAL.pull = function hgpull(user, json, callback) {
+	// pull changes from remote repo
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	
+	directory = UTIL.trailingSlash(directory);
+
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	var exec = require('child_process').exec;
+	exec('hg pull --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
+
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+
+			// added 2 changesets with 1 changes to 1 files
+			
+			var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
+			var resp = {};
+			var fileCount = -1;
+			
+			if(matchPull) {
+				resp.changesets = parseInt(matchPull[1]);
+				resp.changes = parseInt(matchPull[2]);
+
+				fileCount = parseInt(matchPull[3]);
+			}
+			
+			// Get list of files that will be affected by a "hg update"
+			exec('hg status --rev tip', { cwd: localDirectory }, function (err, stdout, stderr) {
+				if(err) throw err;
+				else if(stderr) throw new Error("stderr=" + stderr);
+				else {
+					
+					var affectedFiles = stdout.split(/\n|\r\n/);
+					
+					for(var i=0; i<affectedFiles.length; i++) affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim(); // Remove M, A, R, etc and add directory
+					
+					if(fileCount != affectedFiles.length && fileCount > -1) throw new Error("fileCount=" + fileCount + " affectedFiles (" + affectedFiles.length + ") =" + JSON.stringify(affectedFiles));
+					
+					resp["files"] = affectedFiles;
+					
+					callback(null, resp);
+					
+				}
+				
+			});
+			
+		}
+	});
+}
+
+
+MERCURIAL.update = function hgupdate(user, json, callback) {
+	// Update pulled changes
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	
+	directory = UTIL.trailingSlash(directory);
+
+	var localDirectory = user.translatePath(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
+	
+	var exec = require('child_process').exec;
+	exec('hg update', { cwd: localDirectory }, function (err, stdout, stderr) {
+
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+		
+		// abort: not a linear update
+		
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+	
+			//if(stdout.match(/(\n|\r\n)no changes found/)) return callback(null, {changesets: 0});
+			
+			// 1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+			
+			var matchUpdate = stdout.match(/(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/);
+			
+			if(!matchUpdate) return callback(stdout);
+			
+			var resp = {
+				updated: matchUpdate[1],
+				merged: matchUpdate[2],
+				removed: matchUpdate[3],
+				unresolved: matchUpdate[4]
+			};
+			
+			callback(null, resp);
+			
+		}
+	});
+}
+
+
+// Hg merge, 3 files updated, 0 files merged, 0 files removed, 0 files unresolved
+
+// Hg push, remote: added 2 changesets with 1 changes to 1 files
 
 module.exports = MERCURIAL;
