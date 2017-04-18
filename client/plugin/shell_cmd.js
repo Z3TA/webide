@@ -58,7 +58,7 @@
 	
 	function runShellCommand(file, combo, character, charCode, direction, targetElementClass) {
 		
-		if(file == shellFile) {
+		if(file == shellFile && file) {
 			
 			// This will always run after keyboard_enter.js because this is a plugin, while keyboard_enter.js is just a key binding
 			// So we have to check the line above the carret because of the just inserted line break
