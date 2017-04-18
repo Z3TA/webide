@@ -412,7 +412,7 @@ function log(msg, lvl, noTrace) {
 			}
 
 			if(indexDir != -1) {
-				where = row.substring(indexDir + dir.length, row.length-4);
+				where = row.substring(indexDir + dir.length);
 			}
 			else {
 				where = row.replace(dir, "").replace(dir2, "").trim();
@@ -632,7 +632,7 @@ User.prototype.translatePath = function translatePath(pathToFileOrDir) {
 		
 		var parse = url.parse(pathToFileOrDir);
 		
-		console.log(parse);
+		//console.log(parse);
 		
 		var protocol = parse.protocol ? parse.protocol.toLowerCase() : "LOCAL:";
 		protocol = protocol.substring(0, protocol.length-1); // Remove colon: 
