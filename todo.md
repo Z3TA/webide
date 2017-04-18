@@ -43,6 +43,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+client/plugin/mercurial.js
+What to do when there are changes to files that also has remote changes
+
 Mercurial pull !!!!?
 
 Mercurial push

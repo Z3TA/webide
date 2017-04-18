@@ -75,29 +75,55 @@
 							var changes = resp.changes;
 							var repoUrl = resp.repo;
 							var ask = false;
+							var notSaved = [];
+							var remoteUpdated = [];
+							var untrackedUpdated = [];
 							
 							checkFiles: for(var i=0; i<changes.length; i++) {
 								var files = Object.keys(changes[i].files);
 								for(var j=0; j<files.length; j++) {
-									if(EDITOR.files.hasOwnProperty(files[j])) {
-										
+									
+									var filePath = files[j];
+									
+									if(EDITOR.files.hasOwnProperty(filePath)) {
+										//var changedFile = EDITOR.files[filePath];
 										ask = true;
-										
-										var update = "Update!";
-										var notYet = "Not yet";
-										
-										// todo: Unsaved open files !?
-										
-										confirmBox("There are changes to " + repoUrl + "\n" + changes[i].date + "\n" + changes[i].user + "\n" + changes[i].summary, [notYet, update], function(answer) {
-											
-											if(answer == update) pullAndUpdate(dir, true);
-											
-										})
-										
-										break checkFiles;
+										if(!changedFile.isSaved) notSaved.push(filePath);
 									}
+									
+									if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
+									
+									if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
+									
 								}
 								
+							}
+							
+							if(ask) {
+								
+								if(notSavedFile)
+								{
+									
+									var dontUpdate = "Do nothing";
+									var commit = "Save my changes and Commit";
+									var reverLocal = "Ignore my changes and Update"
+									
+								}
+								else {
+								
+									var update = "Update!";
+									var notYet = "Not yet";
+									
+									// todo: Unsaved open files !?
+									
+									confirmBox("There are changes to " + repoUrl + "\n" + changes[i].date + "\n" + changes[i].user + "\n" + changes[i].summary, [notYet, update], function(answer) {
+										
+										if(answer == update) pullAndUpdate(dir, true);
+										
+									})
+								}
+							
+
 							}
 							
 							if(!ask) pullAndUpdate(dir, false);
@@ -184,7 +210,7 @@
 		return div;
 		
 
-		function commit(e, alsoPush) {
+		function mercurialCommit(e, alsoPush) {
 
 			if(alsoPush == undefined) alsoPush = false;
 
@@ -259,7 +285,7 @@
 		}
 
 		function commitAndPush(e) {
-			commit(e, true);
+			mercurialCommit(e, true);
 		}
 
 	}
