@@ -78,22 +78,11 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 
 			if(save) {
 
-				var hgrc = localPath + ".hg/hgrc";
-				console.log("Saving credentials in hgrc: " + hgrc);
-				var fs = require('fs')
-				fs.readFile(hgrc, 'utf8', function (err,data) {
-				  if (err) throw err;
-
-				  var repoWithoutProtocol = remote.replace(/^.*:\/\//, "");
-
-				  data += "\n[auth]\nfoo.prefix = " + repoWithoutProtocol + "\nfoo.username = " + hguser + "\nfoo.password = " + pw + "\n";
-
-				  fs.writeFile(hgrc, data, 'utf8', function (err) {
-				     if (err) throw err;
-				     else done();
-				  });
+				saveCredentialsInHgrc(user, localPath, remote, hguser, pw, function hgrcSaved(err) {
+					if (err) throw err;
+					else done();
 				});
-
+				
 			} else done();
 
 			function done() {callback(null, {path: local});}
@@ -291,6 +280,9 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	// show list of changes from remote repo
 	
 	var directory = json.directory;
+	var hguser = json.user;
+	var pw = json.pw;
+	var save = json.save;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -301,6 +293,8 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	
 	var exec = require('child_process').exec;
 	
+	var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
+	
 	var execOptions = {
 		encoding: 'utf8',
 		timeout: 3000,
@@ -310,33 +304,38 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 		env: null,
 	}
 	
-	
-	
-	exec("hg incoming --stat --noninteractive", execOptions, function (err, stdout, stderr) {
+	exec("hg incoming --stat --noninteractive" + config, execOptions, function (err, stdout, stderr) {
 		
 		console.log("localDirectory=" + localDirectory);
 		console.log("stdout=" + stdout);
 		console.log("stderr=" + stderr);
 		console.log("err=" + err);
 		
-		if(err) {
-			// It seems hg returns exit code 1 when there's nothhing to pull !?!?
-			if(!stdout.match(/(\r\n|\n)no changes found/)) return callback(err);
-			else return callback(null, {changes: null});
-		}
-		else if(stderr) callback(stderr);
-		else {
-			
+		if(stdout) {
 			var matchRepoUrl = stdout.match(/comparing with (.*)/);
 			
 			if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
 			
-			var repoUrl = matchRepoUrl[2];
-			
+			var repoUrl = matchRepoUrl[1];
+
 			console.log("repoUrl=" + repoUrl);
-			
-			if(stdout.match(/no changes found/)) {
-				callback(null, {changes: null});
+
+			var noChanges = stdout.match(/(\r\n|\n)no changes found/);
+
+			console.log("noChanges=" + noChanges);
+
+		}
+
+		if(err) {
+			// It seems Mercurial "sometimes" returns exit code 1 when there's nothhing to pull !?!?
+			if(!noChanges) return callback(err);
+			else return callback(null, {changes: null, repo: repoUrl});
+		}
+		else if(stderr) callback(stderr);
+		else {
+
+			if(noChanges) {
+				callback(null, {changes: null, repo: repoUrl});
 			}
 			else {
 				var searchingChangesStr = "searching for changes";
@@ -407,6 +406,16 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 				callback(null, {changes: objChanges, repo: repoUrl});
 				
 			}
+			
+			if(save) {
+				
+				saveCredentialsInHgrc(user, directory, repoUrl, hguser, pw, function hgrcSaved(err) {
+					if (err) throw err;
+					console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+				});
+				
+			}
+			
 		}
 	});
 }
@@ -567,5 +576,63 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 
 
 // Hg merge, 3 files updated, 0 files merged, 0 files removed, 0 files unresolved
+
+
+
+
+
+
+function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
+
+	// directory does not have to be the root directory. 
+	
+	exec("hg root", { cwd: directory }, function (err, stdout, stderr) {
+		console.log("stderr=" + stderr);
+		console.log("stdout=" + stdout);
+		
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			var mercurialRoot = stdout.trim();
+			
+			if(user.rootPath) {
+				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
+					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
+					return callback("Unable to find a mercurial reposity from directory=" + directory);
+				}
+			}
+			
+			var rootDir = user.toVirtualPath(mercurialRoot);
+			
+			if(rootDir instanceof Error) callback("Unable to find a mercurial reposity from directory=" + directory);
+			else {
+	
+				var hgrc = mercurialRoot + ".hg/hgrc";
+				console.log("Saving credentials in hgrc: " + hgrc);
+				var fs = require('fs')
+				fs.readFile(hgrc, 'utf8', function (err,data) {
+					if (err) throw err;
+					
+					var repoWithoutProtocol = remote.replace(/^.*:\/\//, "");
+					
+					data += "\n[auth]\nfoo.prefix = " + repoWithoutProtocol + "\nfoo.username = " + hguser + "\nfoo.password = " + pw + "\n";
+					
+					fs.writeFile(hgrc, data, 'utf8', function (err) {
+						if (err) callback(err);
+						else callback(null);
+					});
+				});
+			}
+
+		}
+
+	});
+}
+
+
+
+
+
 
 module.exports = MERCURIAL;

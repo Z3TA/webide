@@ -68,6 +68,7 @@ It will bring a action command box, where you can select between all possible ke
 When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
 
 
+Add a watcher for every opened file and warn the user if the file changes by other programs.
 
 
 
