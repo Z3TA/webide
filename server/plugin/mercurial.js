@@ -568,12 +568,24 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
 		
+		if(stdout) {
+
+			var noChanges = stdout.match(/no changes found/);
+
+			var matchPush = stdout.match(/pushing to (.*)/);
+
+			var repoUrl = matchPush ? matchPush[1] : null;
+
+		}
+
+		console.log("repoUrl=" + repoUrl);
+
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
 			
-			if(stdout.match(/no changes found/)) {
-				callback(null, {changesets: null});
+			if(noChanges) {
+				callback(null, {changesets: null, remote: repoUrl});
 			}
 			else {
 				// added 2 changesets with 1 changes to 1 files
@@ -586,6 +598,7 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 						changesets: matchUpdate[1],
 						changes: matchUpdate[2],
 						files: matchUpdate[3],
+						remote: repoUrl
 					};
 					
 					callback(null, resp);
