@@ -85,6 +85,8 @@ Add a watcher for every opened file and warn the user if the file changes by oth
 What I'm thinking
 -----------------
 
+Use feature flag for stuff that are "in construction" so that the main branch is always working and can be pushed to production at any time.
+
 Discovery: Dashboard! When no file is open. Can also bring up the dash-board when clicking on a "settings/search" icon that's always visible in the top right corner.
 dashboards sell!
 
