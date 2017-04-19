@@ -26,9 +26,11 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	if(!remote) callback(new Error("A remote URL need to be specified! remote=" + remote));
 	
 	var localPath = user.translatePath(local);
-	
+
 	if(localPath instanceof Error) return callback(localPath);
 	
+	localPath = UTIL.trailingSlash(localPath);
+
 	var config = " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw;
 	
 	console.log("process.env.PATH=" + process.env.PATH);
@@ -102,8 +104,10 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	var localDirectory = user.translatePath(directory);
 	
-	if(directory instanceof Error) return callback(directory);
+	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var exec = require('child_process').exec;
 
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
@@ -185,6 +189,8 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
@@ -215,6 +221,8 @@ MERCURIAL.init = function hginit(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var exec = require('child_process').exec;
 	exec("hg init", { cwd: localDirectory }, function (err, stdout, stderr) {
 		if(err) callback(err);
@@ -250,6 +258,8 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
@@ -291,6 +301,8 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var exec = require('child_process').exec;
 	
 	var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
@@ -329,10 +341,11 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 		if(err) {
 			// It seems Mercurial "sometimes" returns exit code 1 when there's nothhing to pull !?!?
 			if(!noChanges) return callback(err);
-			else return callback(null, {changes: null, repo: repoUrl});
+			else callback(null, {changes: null, repo: repoUrl});
 		}
-		else if(stderr) callback(stderr);
+		else if(stderr) return callback(stderr);
 		else {
+
 
 			if(noChanges) {
 				callback(null, {changes: null, repo: repoUrl});
@@ -406,17 +419,20 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 				callback(null, {changes: objChanges, repo: repoUrl});
 				
 			}
-			
-			if(save) {
-				
-				saveCredentialsInHgrc(user, directory, repoUrl, hguser, pw, function hgrcSaved(err) {
-					if (err) throw err;
-					console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
-				});
-				
-			}
-			
+
 		}
+
+		// We have already returned if the credentials was wrong!
+		if(save) {
+			console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
+			saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
+				if (err) throw err;
+				console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+			});
+		}
+		else console.log("save=" + save);
+
+
 	});
 }
 
@@ -433,6 +449,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var exec = require('child_process').exec;
 	exec('hg pull --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
 
@@ -493,6 +511,8 @@ MERCURIAL.update = function hgupdate(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var exec = require('child_process').exec;
 	exec('hg update', { cwd: localDirectory }, function (err, stdout, stderr) {
 
@@ -540,6 +560,8 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 	var localDirectory = user.translatePath(directory);
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+
 	var exec = require('child_process').exec;
 	exec('hg push --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
 
@@ -584,8 +606,14 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 
 function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
 
-	// directory does not have to be the root directory. 
-	
+	// directory does not have to be the root directory. It has to be a local/real (non virtual) directory.
+
+	directory = UTIL.trailingSlash(directory);
+
+	console.log("saveCredentialsInHgrc: user.name=" + user.name + " directory=" + directory + " remote=" + remote + " hguser=" + hguser + " pw.length=" + pw.length);
+
+	var exec = require('child_process').exec;
+
 	exec("hg root", { cwd: directory }, function (err, stdout, stderr) {
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
@@ -594,7 +622,7 @@ function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
 		else if(stderr) callback(stderr);
 		else {
 			
-			var mercurialRoot = stdout.trim();
+			var mercurialRoot = UTIL.trailingSlash(stdout.trim());
 			
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {

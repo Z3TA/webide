@@ -81,8 +81,8 @@
 
 				if(authNeeded) {
 					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for checking incoming from " + repoUrl + ": ", function authorized(username, password) {
-						if(username != null) CLIENT.cmd("mercurial.incoming", {directory: rootDir, user: username, pw: password}, hgIncoming);
+					showAuthDialog("Need authorization for checking incoming from " + repoUrl + ": ", function authorized(username, password, save) {
+						if(username != null) CLIENT.cmd("mercurial.incoming", {directory: rootDir, user: username, pw: password, save: save}, hgIncoming);
 					}, "Check incoming");
 					return;
 				}
