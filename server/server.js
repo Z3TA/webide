@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var CONSOLE_LOG_ORIGINAL = console.log;
+var CONSOLE_WARN_ORIGINAL = console.warn;
 
 (function() {
   // Make sure we are in the server directory
@@ -469,7 +470,8 @@ function log(msg, lvl, noTrace) {
 				msgString = dateString + msg + " " + where;
 			}
 
-			CONSOLE_LOG_ORIGINAL(msgString);
+			if(lvl <= _warning) CONSOLE_WARN_ORIGINAL(msgString);
+			else CONSOLE_LOG_ORIGINAL(msgString);
 		}
 
 
@@ -501,6 +503,12 @@ console.log = function() {
 	log(msg, 7);
 }
 
+// Overload console.warn
+console.warn = function() {
+	var msg = arguments[0];
+	for (i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 4);
+}
 
 function User(id, name, rootPath) {
 	var user = this;
