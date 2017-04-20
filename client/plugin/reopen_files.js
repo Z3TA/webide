@@ -677,6 +677,9 @@
 			console.warn("Not saving state for file because it has over " + sizeLimit + " characters file.path=" + path);
 		}
 		
+		// Hash the state so that we do not spam the server !?
+		// Send only what actually changed !? Like moved cursor in a large document.
+		// Use browsers localStorage instead of server storage !?!?
 		
 		EDITOR.storage.setItem("state_" + path, JSON.stringify(state));
 		
