@@ -9,7 +9,7 @@
 		
 		
 		Reset from bricket state:
-		EDITOR.storage.removeItem("openedFiles")
+		window.localStorage.removeItem("openedFiles")
 	
 	*/
 
@@ -43,6 +43,15 @@
 				Solution: Close all unsaved files when connected to a different url or user
 			*/
 			
+			/*
+				Swithing back to using localStorage
+				* Too much spam to server
+				* Don't have to depend on the server
+				* Saves bandwith
+				
+				We still need to wait until we are connected to the server though (in order to get the files)
+			
+			*/
 			
 		},
 		unload: function unloadReopenFilesPlugin() {
@@ -65,7 +74,8 @@
 	
 	function reopenFiles() {
 
-		if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
+		//if(!window.localStorage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
+		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
 		console.log("serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
 		
@@ -112,8 +122,8 @@
 	
 	function reopenFilesMain(reopenFilesCallback) {
 		
-		if(EDITOR.storage.getItem("openedFiles") == null) {
-			EDITOR.storage.setItem("openedFiles", "");
+		if(window.localStorage.getItem("openedFiles") == null) {
+			window.localStorage.setItem("openedFiles", "");
 		}
 		/*
 		
@@ -128,19 +138,19 @@
 		*/
 		
 		// 1. Remove dublicate entries
-		EDITOR.storage.setItem("openedFiles", removeDublicates(EDITOR.storage.getItem("openedFiles")));
+		window.localStorage.setItem("openedFiles", removeDublicates(window.localStorage.getItem("openedFiles")));
 		
 		findBugs();
 		
 		
 		var setCurrent = "";
-		var files = EDITOR.storage.getItem("openedFiles").split(fileDelimiter);
+		var files = window.localStorage.getItem("openedFiles").split(fileDelimiter);
 		
 		console.log("files=" + JSON.stringify(files));
 		
 		//return;
 		
-		if(EDITOR.storage.getItem("openedFiles").length > 0) { // openedFiles is a string with path's separated by fileDelimiter
+		if(window.localStorage.getItem("openedFiles").length > 0) { // openedFiles is a string with path's separated by fileDelimiter
 			console.log("Opening " + files.length + " files ...");
 			
 			// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
@@ -160,9 +170,9 @@
 			setTimeout(function checkIfallFilesOpenedWasCalled() {
 			if(allFilesOpenedNeverCalled) {
 			
-			findBugs(true); // Compare opened files with EDITOR.storage.getItem("openedFiles")
+			findBugs(true); // Compare opened files with window.localStorage.getItem("openedFiles")
 			
-			throw new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nEDITOR.storage.getItem('openedFiles')=" + EDITOR.storage.getItem('openedFiles') + "\nopenedFiles=" + openedFiles);
+			throw new Error("There is a bug in reopen_files.js, because it failed to complete loading last state, or it is taking too long!\nwindow.localStorage.getItem('openedFiles')=" + window.localStorage.getItem('openedFiles') + "\nopenedFiles=" + openedFiles);
 			}
 			}, 5000);
 		*/
@@ -172,7 +182,7 @@
 			if(err) {
 				if(err.code === 'ENOENT') {
 					// File did not exist, and the user did not want to load the last state. 
-					// It has also been removed from EDITOR.storage.getItem("openedFiles")
+					// It has also been removed from window.localStorage.getItem("openedFiles")
 					compareAndDone();
 					return;
 				}
@@ -190,12 +200,12 @@
 			compareAndDone();
 			
 			function compareAndDone() {
-				if(compareStringLists(Object.keys(EDITOR.files).join(fileDelimiter), EDITOR.storage.getItem("openedFiles"), fileDelimiter)) {
+				if(compareStringLists(Object.keys(EDITOR.files).join(fileDelimiter), window.localStorage.getItem("openedFiles"), fileDelimiter)) {
 					allFilesOpened();
 				}
 				else {
 					console.log("openedFiles=" + Object.keys(EDITOR.files).join(fileDelimiter));
-					console.log("EDITOR.storage.getItem('openedFiles')=" + EDITOR.storage.getItem("openedFiles"));
+					console.log("window.localStorage.getItem('openedFiles')=" + window.localStorage.getItem("openedFiles"));
 				}
 			}
 		}
@@ -316,9 +326,9 @@
 						else if(notFound) {
 							// The file was not found and the user didn't want to load last state
 							// Do not open it! Remove from openedFiles
-							EDITOR.storage.setItem("openedFiles", removeFromStringList(EDITOR.storage.getItem("openedFiles"), path, fileDelimiter));
+							window.localStorage.setItem("openedFiles", removeFromStringList(window.localStorage.getItem("openedFiles"), path, fileDelimiter));
 							// Should we remove the state!?
-							EDITOR.storage.removeItem("state_" + path);
+							window.localStorage.removeItem("state_" + path);
 							callback(path, false, err);
 							return; // Don't attempt to open the file
 						}
@@ -349,7 +359,7 @@
 					alertBox("Unable to open file:\n" + path + "\nError: " + err.message);
 					
 					// Remove from opened files
-					EDITOR.storage.setItem("openedFiles", removeFromStringList(EDITOR.storage.getItem("openedFiles"), path, fileDelimiter));
+					window.localStorage.setItem("openedFiles", removeFromStringList(window.localStorage.getItem("openedFiles"), path, fileDelimiter));
 					
 					callback(file, false, err);
 					
@@ -366,13 +376,13 @@
 				if(path != file.path) {
 					
 					// Replace the path in opened files
-					EDITOR.storage.setItem("openedFiles", removeFromStringList(EDITOR.storage.getItem("openedFiles"), path, fileDelimiter));
-					EDITOR.storage.setItem("openedFiles", addToStringList(EDITOR.storage.getItem("openedFiles"), file.path, fileDelimiter));
+					window.localStorage.setItem("openedFiles", removeFromStringList(window.localStorage.getItem("openedFiles"), path, fileDelimiter));
+					window.localStorage.setItem("openedFiles", addToStringList(window.localStorage.getItem("openedFiles"), file.path, fileDelimiter));
 					
 					// Change the state holder item
-					let state = EDITOR.storage.getItem("state_" + file.path);
-					EDITOR.storage.removeItem("state_" + path);
-					EDITOR.storage.setItem("state_" + file.path, state);
+					let state = window.localStorage.getItem("state_" + file.path);
+					window.localStorage.removeItem("state_" + path);
+					window.localStorage.setItem("state_" + file.path, state);
 					
 					path = file.path;
 					
@@ -466,7 +476,7 @@
 		
 		array.push(add); // Add string to list
 		
-		text = array.join(delimiter); // Convert the array back to string (EDITOR.storage can only hold strings!?)
+		text = array.join(delimiter); // Convert the array back to string (window.localStorage can only hold strings!?)
 		
 		// Makse sure the added string is in the text
 		if(array.indexOf(add) == -1) throw new Error("The added string is not part of the array! add='" + add + "' text='" + text + "'");
@@ -481,16 +491,16 @@
 		
 		if(!file.path) throw new Error("Argument need to be a file object!");
 		
-		if(EDITOR.storage.getItem("openedFiles").split(fileDelimiter).indexOf(file.path) != -1) {
-			console.warn("File already in EDITOR.storage: " + file.path);
+		if(window.localStorage.getItem("openedFiles").split(fileDelimiter).indexOf(file.path) != -1) {
+			console.warn("File already in window.localStorage: " + file.path);
 		}
 		else {
 			
 			console.log(UTIL.getStack("Adding file to openedFiles path='" + file.path + "'"));
 			
-			console.log("List before=" + EDITOR.storage.getItem("openedFiles"));	
-			EDITOR.storage.setItem("openedFiles", addToStringList(EDITOR.storage.getItem("openedFiles"), file.path, fileDelimiter));
-			console.log("List after=" + EDITOR.storage.getItem("openedFiles"));	
+			console.log("List before=" + window.localStorage.getItem("openedFiles"));	
+			window.localStorage.setItem("openedFiles", addToStringList(window.localStorage.getItem("openedFiles"), file.path, fileDelimiter));
+			console.log("List after=" + window.localStorage.getItem("openedFiles"));	
 		}
 		
 		findBugs();
@@ -547,7 +557,7 @@
 		// Check to see if the string has been removed from the array to keep sanity
 		if(array.indexOf(remove) != -1) throw new Error("The string had more then one instance or was not removed. remove='" + remove + "' text='" + text + "'");
 		
-		text = array.join(delimiter); // Convert the array back to string (EDITOR.storage can only hold strings!?)
+		text = array.join(delimiter); // Convert the array back to string (window.localStorage can only hold strings!?)
 		
 		console.log("Removed from string: " + remove);
 		
@@ -564,14 +574,14 @@
 		
 		console.log(UTIL.getStack("Removing file from openedFiles path='" + file.path + "'"));
 		
-		console.log("List before=" + EDITOR.storage.getItem("openedFiles"));	
-		EDITOR.storage.setItem("openedFiles", removeFromStringList(EDITOR.storage.getItem("openedFiles"), file.path, fileDelimiter));
-		console.log("List after=" + EDITOR.storage.getItem("openedFiles"));
+		console.log("List before=" + window.localStorage.getItem("openedFiles"));	
+		window.localStorage.setItem("openedFiles", removeFromStringList(window.localStorage.getItem("openedFiles"), file.path, fileDelimiter));
+		console.log("List after=" + window.localStorage.getItem("openedFiles"));
 		
 		
 		
 		// Remove state
-		EDITOR.storage.removeItem("state_" + file.path);
+		window.localStorage.removeItem("state_" + file.path);
 		
 		
 		findBugs();
@@ -584,9 +594,10 @@
 	function reopen_files_closeEditor() {
 		// Save file state
 		
-		if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage is not ready! We can not save current session.");
+		//if(!window.localStorage.ready()) throw new Error("window.localStorage is not ready! We can not save current session.");
+		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
-		if(EDITOR.storage.getItem("openedFiles") == null) {
+		if(window.localStorage.getItem("openedFiles") == null) {
 			console.warn("No open files!?");
 			return true;
 		}
@@ -601,11 +612,11 @@
 			}
 			
 			
-			var openFiles = EDITOR.storage.getItem("openedFiles").split(fileDelimiter);
+			var openFiles = window.localStorage.getItem("openedFiles").split(fileDelimiter);
 			
 			
 			// note: "".split(fileDelimiter).length == 1 !!
-			if(EDITOR.storage.getItem("openedFiles") != "") {
+			if(window.localStorage.getItem("openedFiles") != "") {
 				console.log("openFiles.length=" + openFiles.length);
 				for(var i=0; i<openFiles.length; i++) {
 					saveSate(openFiles[i]);
@@ -613,7 +624,7 @@
 			}
 			
 			if(EDITOR.currentFile) {
-				// Make sure the last viewed file is the last file in the EDITOR.storage openedFiles list! So that it opens lasts and will be in view when we reload.
+				// Make sure the last viewed file is the last file in the window.localStorage openedFiles list! So that it opens lasts and will be in view when we reload.
 				//This caused the editor to open them in a weird order.
 				//Instead, add opened state to file state
 			}
@@ -633,7 +644,7 @@
 			console.warn("Attempted to save state for a file without path!");
 			console.log(new Error("saveState").stack);
 			console.log("EDITOR.files=" + Object.keys(EDITOR.files).join(fileDelimiter));
-			console.log("EDITOR.storage.getItem('openedFiles')=" + EDITOR.storage.getItem("openedFiles"));
+			console.log("window.localStorage.getItem('openedFiles')=" + window.localStorage.getItem("openedFiles"));
 			
 			return;
 		}
@@ -681,7 +692,7 @@
 		// Send only what actually changed !? Like moved cursor in a large document.
 		// Use browsers localStorage instead of server storage !?!?
 		
-		EDITOR.storage.setItem("state_" + path, JSON.stringify(state));
+		window.localStorage.setItem("state_" + path, JSON.stringify(state));
 		
 	}
 	
@@ -695,7 +706,7 @@
 	function findBugs(checkMatch) {
 		// Checks the openedFiles string for errors:
 		
-		var text = EDITOR.storage.getItem("openedFiles");
+		var text = window.localStorage.getItem("openedFiles");
 		
 		
 		var firstChar = text.charAt(0);
@@ -731,14 +742,14 @@
 		/*
 			// Sanity check
 			for(var path in EDITOR.files) {
-			if(EDITOR.storage.getItem("openedFiles").indexOf(path) == -1) {
-			throw new Error("EDITOR.files path=" + path + " not in EDITOR.storage.getItem('openedFiles')=" + EDITOR.storage.getItem("openedFiles"));
+			if(window.localStorage.getItem("openedFiles").indexOf(path) == -1) {
+			throw new Error("EDITOR.files path=" + path + " not in window.localStorage.getItem('openedFiles')=" + window.localStorage.getItem("openedFiles"));
 			}
 			}
-			var check = EDITOR.storage.getItem("openedFiles").split(fileDelimiter);
+			var check = window.localStorage.getItem("openedFiles").split(fileDelimiter);
 			for(var i=0; i<check.length; i++) {
 			if(!EDITOR.files.hasOwnProperty(check[i])) {
-			throw new Error("EDITOR.storage.getItem('openedFiles') path=" + check[i] + " not in EDITOR.files!\nEDITOR.storage.getItem('openedFiles')=" + EDITOR.storage.getItem("openedFiles"));
+			throw new Error("window.localStorage.getItem('openedFiles') path=" + check[i] + " not in EDITOR.files!\nwindow.localStorage.getItem('openedFiles')=" + window.localStorage.getItem("openedFiles"));
 			}
 			}
 			
@@ -779,7 +790,7 @@
 	
 	function getState(path, item) {
 		
-		var state = EDITOR.storage.getItem("state_" + path);
+		var state = window.localStorage.getItem("state_" + path);
 		
 		if(state === null) {
 			return undefined;
@@ -793,7 +804,7 @@
 	}
 	
 	function loadState(path) {
-		var state = EDITOR.storage.getItem("state_" + path);
+		var state = window.localStorage.getItem("state_" + path);
 		
 		if(state === null) {
 			console.log("No saved state available for " + path);
