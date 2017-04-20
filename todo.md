@@ -43,6 +43,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+testing pull && update
+
 client/plugin/mercurial.js
 pull & update
 todo: resolve/merge
@@ -58,7 +60,7 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
-
+bug in mercurial if hgrc contains [auth] with username put no password.
 
 mercurial/git integration
 

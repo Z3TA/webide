@@ -1,3 +1,9 @@
+/*
+	Mercurial
+	
+	
+*/
+
 (function() {
 	"use strict";
 	
@@ -37,7 +43,7 @@
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
 		
-		EDITOR.on("fileOpen", mercurialStatus);
+		EDITOR.on("fileOpen", mercurialDance);
 		
 		
 	}
@@ -50,133 +56,190 @@
 	}
 	
 	
-	function mercurialStatus(file) {
-		// Check incoming and pull often to prevent merge conflicts!
+	function mercurialDance(file) {
+		/*
+			Pull and Update often to prevent merge conflicts!
 		
-		var dir = UTIL.getDirectoryFromPath(file.path);
-		
-		hgStatus(function (err, rootDir, localModified, untracked) {
+			Strategy:
+			1. Just asume that a remote repo is used (no need to run hg paths)
+			2. Check if there are uncommited work on local working copy (hg status)
+			3. Pull updates from repository (hg pull)
+			4. Check what changed (hg status --rev tip   hg log foo.txt -r (hg --debug id -i):tip)
+			5. Is any of the changed files opened by the editor ?
 			
-			if(err) return console.warn(err);
-			else {
-				
-				console.log("localModified.length=" + localModified.length);
-				
-				console.log("Mercurial: Check for incoming changes ...");
-				CLIENT.cmd("mercurial.incoming", {directory: rootDir}, hgIncoming);
-				
-				
-			}
-		}, dir);
+			If any of them are not saved, don't interupt the user, do nothing more.
+			
+			If no file is unsaved, tell the user about the new update. Options: (Update) (Ignore for now)
+			
+			If the user clicks (Update)
+			6. Attemp Update, and Merge if needed. Tell the user if there are any Merge conflicts, otherwise reload the (changed) files opened in the editor
+			
+			If there are merge conflics:
+			 
+			
+			
+			
+			
+			
+			$ hg up
+			merging foo.txt
+			warning: conflicts while merging foo.txt! (edit, then use 'hg resolve --mark')
+			0 files updated, 0 files merged, 0 files removed, 1 files unresolved
+			use 'hg resolve' to retry unresolved file merges
+			
+			It should be safe to run "hg update" if you have uncomitted changes as Mercurial will attempt a merge!
+			
+			
+		*/
 		
+		var directory = UTIL.getDirectoryFromPath(file.path);
+		var localModified = [];
+		var untracked = [];
+		var rootDir = "";
 		
-		function hgIncoming(err, resp) {
-			if(err) {
+		// Check if there are ucommited work on the local working copy
+		hgStatus(function workingCopyStatus(err, r, m, u) {
 				
-				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
-				var authFailed = err.message.match(/abort: authorization failed/);
-
-				if(authNeeded) {
-					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for checking incoming from " + repoUrl + ": ", function authorized(username, password, save) {
-						if(username != null) CLIENT.cmd("mercurial.incoming", {directory: rootDir, user: username, pw: password, save: save}, hgIncoming);
-					}, "Check incoming");
-					return;
+				if(err) return console.warn(err);
+				else {
+					
+					console.log("localModified.length=" + localModified.length);
+					
+				rootDir = r
+				localModified = m;
+				untracked = u;
+				
+				console.log("Mercurial: Pulling from remote repository ...");
+				CLIENT.cmd("mercurial.pull", {directory: rootDir}, hgPull);
+					
+					
 				}
-				else if(authFailed) {
-					alertBox("Authorization filed!\nUnable to get remote status for file:\n" + file.path);
+			}, dir);
+			
+			
+		function hgPull(err, resp) {
+				if(err) {
+					
+					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+					var authFailed = err.message.match(/abort: authorization failed/);
+					
+					if(authNeeded) {
+						var repoUrl = authNeeded[1];
+					showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
+						if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
+					}, "Pull");
+						return;
+					}
+					else if(authFailed) {
+					alertBox("Authorization filed!\nUnable to Pull from " + repoUrl);
+					}
+					else throw err;
 				}
-				else throw err;
-			}
-			else {
-				
-				var changes = resp.changes;
-				var repoUrl = resp.repo;
-				var ask = false;
-				var notSaved = [];
-				var remoteUpdated = [];
-				var untrackedUpdated = [];
-				
-				if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
-
-				if(changes === null) {
-					alertBox("No incoming changes from " + repoUrl);
-					//console.log("Mercurial: No incoming changes detected!")
-					return; // No incoming changes
-				}
-				
-				console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
-				
-				checkFiles: for(var i=0; i<changes.length; i++) {
-					var files = Object.keys(changes[i].files);
-					for(var j=0; j<files.length; j++) {
-						
-						var filePath = files[j];
-						
-						if(EDITOR.files.hasOwnProperty(filePath)) {
-							// We only care about files opened by the editor
+				else {
+					
+					var changes = resp.changes;
+					var repoUrl = resp.repo;
+					var ask = false;
+					var notSaved = [];
+					var remoteUpdated = [];
+					var untrackedUpdated = [];
+					
+					if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+					
+					if(changes === null) {
+						alertBox("No incoming changes from " + repoUrl);
+						//console.log("Mercurial: No incoming changes detected!")
+						return; // No incoming changes
+					}
+					
+					console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
+					
+					checkFiles: for(var i=0; i<changes.length; i++) {
+						var files = Object.keys(changes[i].files);
+						for(var j=0; j<files.length; j++) {
 							
-							var changedFile = EDITOR.files[filePath];
+							var filePath = files[j];
 							
-							if(!changedFile.isSaved) notSaved.push(filePath);
-							
-							if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
-							
-							if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
-							
-							var msg = "File has been updated:\n"  + changedFile.path + "\n\
-							Repo: " + repoUrl + "\n\
-							Date: " + changes[i].date + "\n\
-							User: " + changes[i].user + "\n\n<i>" + changes[i].summary;
-							
-							var optUpdate = "Update file";
-							var optDoNothing = "Do nothing";
-							var optSaveCommit = "Save my changes and Commit";
-							var optRevertLocal = "Ignore my changes and Update"
-							
-							var options;
-							
-							if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
-							else options = [optDoNothing, optUpdate];
-							
-							ask = true;
-							
-							confirmBox(msg, options, function(answer) {
+							if(EDITOR.files.hasOwnProperty(filePath)) {
+								// We only care about files opened by the editor
 								
-								if(answer == optDoNothing) return;
-								else if(answer == optRevertLocal || answer == optUpdate) {
-									pullAndUpdate(dir, true);
-								}
-								else if(answer == optSaveCommit) {
-									EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
-										showRepoCommitDialog();
-									});
-								}
-								else throw new Error("Unknown answer=" + answer);
+								var changedFile = EDITOR.files[filePath];
 								
-							});
+								if(!changedFile.isSaved) notSaved.push(filePath);
+								
+								if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
+								
+								if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
+								
+								var msg = "File has been updated:\n"  + changedFile.path + "\n\
+								Repo: " + repoUrl + "\n\
+								Date: " + changes[i].date + "\n\
+							User: " + changes[i].user + "\n\n<i>" + changes[i].summary + "</i>"";
+								
+								var optUpdate = "Update file";
+								var optDoNothing = "Do nothing";
+								var optSaveCommit = "Save my changes and Commit";
+								var optRevertLocal = "Ignore my changes and Update"
+								
+								var options;
+								
+								if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
+								else options = [optDoNothing, optUpdate];
+								
+								ask = true;
+								
+								confirmBox(msg, options, function(answer) {
+									
+									if(answer == optDoNothing) return;
+									else if(answer == optRevertLocal || answer == optUpdate) {
+										pullAndUpdate(dir, true);
+									}
+									else if(answer == optSaveCommit) {
+										EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
+											showRepoCommitDialog();
+										});
+									}
+									else throw new Error("Unknown answer=" + answer);
+									
+								});
+							}
 						}
 					}
-				}
-				
-				if(!ask) {
-					console.log("Mercurial: No apparent conflict. Updating!")
-					pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
+					
+					if(!ask) {
+						console.log("Mercurial: No apparent conflict. Updating!")
+						pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
+					}
 				}
 			}
+			
+			
 		}
-		
-		
-	}
 	
 	
 	function pullAndUpdate(dir, reloadFiles) {
 		
 		console.log("Mercurial: Pull and Update ...");
 		
-		CLIENT.cmd("mercurial.pull", {directory: dir}, function hgPull(err, resp) {
+		CLIENT.cmd("mercurial.pull", {directory: dir}, hgPull);
+		
+		
+		function hgPull(err, resp) {
 			if(err) {
-				throw err;
+				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+				var authFailed = err.message.match(/abort: authorization failed/);
+				
+				if(authNeeded) {
+					var repoUrl = authNeeded[1];
+					showAuthDialog("Need authorization for pulling from " + repoUrl + ": ", function authorized(username, password, save) {
+						if(username != null) CLIENT.cmd("mercurial.pull", {directory: dir, user: username, pw: password, save: save}, hgPull);
+					}, "Pull");
+					return;
+				}
+				else if(authFailed) {
+					alertBox("Authorization filed!\nUnable to Pull changes from the repo!");
+				}
+				else throw err;
 			}
 			else {
 				
@@ -233,8 +296,8 @@
 				});
 				
 			}
-		});
 		
+	}
 	}
 	
 	function buildRepoCommitDialog(widget) {

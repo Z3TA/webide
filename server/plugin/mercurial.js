@@ -3,6 +3,26 @@
 	Mercurial Distributed SCM (version 3.7.3)
 	(see https://mercurial-scm.org for more information)
 
+	
+	Get current revision:
+	hg --debug id -i
+	
+	Get file changes from one revision to another revision
+	hg log foo.txt -r 15:tip
+	
+	Get heads (multible heads means a merge is needed)
+	hg heads --topo
+	
+	List files that need to merge:
+	hg resolve --list
+	
+	To detect possible merge conflicts:
+	hg clone B C && cd C && hg merge
+	
+	When cloning a repo you do not get uncommited changes!!
+	
+	
+	
 */
 
 "use strict";
@@ -133,6 +153,10 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 			
 			if(rootDir instanceof Error) callback("Unable to find a mercurial reposity from directory=" + directory);
 			else {
+
+				/*
+					First 
+				*/
 
 				exec("hg status", { cwd: localDirectory }, function (err, stdout, stderr) {
 
@@ -287,7 +311,12 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 }
 
 MERCURIAL.incoming = function hgincoming(user, json, callback) {
-	// show list of changes from remote repo
+	/*
+		
+		hg incoming does the same thing as hg pull, but destoys the changes
+		Consider doing a pull instead! Especially if you are likely to pull after running incoming!
+
+	*/
 	
 	var directory = json.directory;
 	var hguser = json.user;
@@ -441,6 +470,9 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	// pull changes from remote repo
 	
 	var directory = json.directory;
+	var hguser = json.user;
+	var pw = json.pw;
+	var saveUserPw = json.save;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -450,13 +482,30 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	if(localDirectory instanceof Error) return callback(localDirectory);
 	
 	localDirectory = UTIL.trailingSlash(localDirectory);
-
+	
+	var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
+	
 	var exec = require('child_process').exec;
-	exec('hg pull --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
+	exec('hg pull --noninteractive' + config, { cwd: localDirectory }, function (err, stdout, stderr) {
 
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
 
+		if(stdout) {
+			
+			var matchRepoUrl = stdout.match(/pulling from (.*)/);
+			
+			if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
+			
+			var repoUrl = matchRepoUrl[1];
+			
+			console.log("repoUrl=" + repoUrl);
+			
+			var noChanges = stdout.match(/(\r\n|\n)no changes found/);
+			
+			console.log("noChanges=" + noChanges);
+		}
+		
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
 		else {
@@ -464,7 +513,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 			// added 2 changesets with 1 changes to 1 files
 			
 			var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
-			var resp = {};
+			var resp = {repo: repoUrl};
 			var fileCount = -1;
 			
 			if(matchPull) {
@@ -474,13 +523,17 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				fileCount = parseInt(matchPull[3]);
 			}
 			
-			// Get list of files that will be affected by a "hg update"
+			// Get list of changed files / Files that will be affected by a "hg update"
 			exec('hg status --rev tip', { cwd: localDirectory }, function (err, stdout, stderr) {
+
+				console.log("stderr=" + stderr);
+				console.log("stdout=" + stdout);
+
 				if(err) throw err;
 				else if(stderr) throw new Error("stderr=" + stderr);
 				else {
 					
-					var affectedFiles = stdout.split(/\n|\r\n/);
+					var affectedFiles = stdout.trim().split(/\n|\r\n/);
 					
 					for(var i=0; i<affectedFiles.length; i++) affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim(); // Remove M, A, R, etc and add directory
 					
@@ -493,6 +546,15 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				}
 				
 			});
+			
+			if(saveUserPw) {
+				console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
+				saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
+					if (err) throw err;
+					console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+				});
+			}
+			
 			
 		}
 	});
