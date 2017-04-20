@@ -35,8 +35,7 @@
 		});
 		
 		var char_Esc = 27;
-		EDITOR.bindKey({desc: "Hide the commit widget", charCode: char_Esc, fun: hideRepoCommitDialog});
-		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideRepoCloneDialog});
+		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
 		
 		EDITOR.on("fileOpen", mercurialStatus);
 		
@@ -46,10 +45,8 @@
 	function unloadMercurial() {
 		
 		if(repoCommitMenuItem) EDITOR.removeMenuItem(repoCommitMenuItem);
-		EDITOR.unbindKey(hideRepoCommitDialog);
+		EDITOR.unbindKey(hideMercurialWidgets);
 		
-		if(repoCloneMenuItem) EDITOR.removeMenuItem(repoCloneMenuItem);
-		EDITOR.unbindKey(hideRepoCloneDialog);
 	}
 	
 	
@@ -673,6 +670,21 @@
 	
 	function hideRepoCommitDialog() {
 		return repoCommitDialog.hide();
+	}
+	
+	function hideMercurialWidgets() {
+		// Returning false prevents browser's default action. Only return false if we did something.
+		return !!( repoCommitDialog.hide() + hideRepoCloneDialog() + hideAuthDialog() );
+		}
+	
+	function hideAuthDialog() {
+		var authDialog = document.getElementById("repositoryAuthorizationDialog");
+		if(authDialog) {
+			var footer = document.getElementById("footer");
+			footer.removeChild(authDialog);
+			return false;
+		}
+		else return true;
 	}
 	
 	function showAuthDialog(message, callback, submitText) {
