@@ -735,6 +735,18 @@ div.gotoFile li:hover {
 }
 
 
+/* ############### Mercurial plugin widgets ############### */
+.repoCommit select {
+	overflow-y: scroll;
+}
+
+.repoCommit select, .repoCommit textarea {
+	padding-left: 2px;
+	height: 7em;
+}
+
+
+
 /* ############### File explorer ############### */
 
 	.fileExplorer {
