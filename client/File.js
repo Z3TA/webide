@@ -240,7 +240,7 @@ var File; // File object is global
 			
 		*/
 		
-		console.log("File:createCaret");
+		//console.log("File:createCaret");
 		
 		var grid = file.grid;
 		var caret = {index: index, row: row, col: col, eol: false, eof: false};
@@ -421,8 +421,8 @@ var File; // File object is global
 			throw new Error("Caret col=" + caret.col + " must be higher then zero!");
 		}
 		
-		console.log("grid[" + caret.row + "].length=" + grid[caret.row].length);
-		console.log("grid[" + caret.row + "].startIndex=" + grid[caret.row].startIndex);
+		//console.log("grid[" + caret.row + "].length=" + grid[caret.row].length);
+		//console.log("grid[" + caret.row + "].startIndex=" + grid[caret.row].startIndex);
 		
 		
 		// Check if we got eol & eof right ...
