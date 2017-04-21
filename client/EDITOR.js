@@ -106,7 +106,7 @@ EDITOR.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(win
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
 
-EDITOR.collaborationMode = true;
+EDITOR.collaborationMode = false;
 
 
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
