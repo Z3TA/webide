@@ -43,7 +43,29 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-What happens when there are unresolved files and you pull in more changes !?
+What happens when there are unresolved files and you pull in more changes ?
+$ hg up
+abort: outstanding merge conflicts
+
+$ hg resolve foo.txt
+merging foo.txt
+warning: conflicts while merging foo.txt! (edit, then use 'hg resolve --mark')
+
+$ hg resolve --mark foo.txt
+(no more unresolved files)
+
+$ hg up
+merging foo.txt
+warning: conflicts while merging foo.txt! (edit, then use 'hg resolve --mark')
+0 files updated, 0 files merged, 0 files removed, 1 files unresolved
+use 'hg resolve' to retry unresolved file merges
+
+$ hg resolve --mark foo.txt
+(no more unresolved files)
+
+$ hg resolve --list
+R foo.txt
+
 
 Strategy for updating/merging + merge conflicts
 
