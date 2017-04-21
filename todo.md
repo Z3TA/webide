@@ -43,6 +43,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+mercurial annotate
+
+Strategy for updating/merging + merge conflicts
+
 testing pull && update
 
 client/plugin/mercurial.js
