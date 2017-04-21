@@ -27,6 +27,8 @@
 	var annotations = {};
 	var doAnnotate = false;
 		
+	// todo: Reload annotations when the file on disk changes!! (like a reload), update, merge, etc
+	
 		EDITOR.plugin({
 			desc: "Mercurial SCM integration",
 			load: loadMercurial,

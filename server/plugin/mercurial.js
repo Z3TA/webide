@@ -713,7 +713,11 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 					
 					exec('hg log --rev ' + changeId, { cwd: rootDir }, hglog);
 				}
-				lineChangeset[line] = changeId;
+				if(lineChangeset.hasOwnProperty(line)) {
+					// Only overwrite if the change was done after the current change
+					if(lineChangeset[line] < changeId) lineChangeset[line] = changeId;
+				}
+				else lineChangeset[line] = changeId;
 			}
 			
 			function hglog(err, stdout, stderr) {
