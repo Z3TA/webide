@@ -43,7 +43,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-mercurial annotate
+What happens when there are unresolved files and you pull in more changes !?
 
 Strategy for updating/merging + merge conflicts
 

@@ -77,24 +77,24 @@
 				
 				Strategy:
 				1. Just asume that a remote repo is used (no need to run hg paths)
-				2. Check if there are uncommited work on local working copy (hg status)
-				3. Pull updates from repository (hg pull)
-				4. Check what changed (hg status --rev tip   hg log foo.txt -r (hg --debug id -i):tip)
-				5. Is any of the changed files opened by the editor ?
+			2. Pull updates from repository (hg pull)
+				3. Check what changed (hg status --rev tip   hg log foo.txt -r (hg --debug id -i):tip)
+				4. Is any of the changed files opened by the editor ?
 				
 				If any of them are not saved, don't interupt the user, do nothing more.
 				
 				If no file is unsaved, tell the user about the new update. Options: (Update) (Ignore for now)
 				
 				If the user clicks (Update)
-				6. Attemp Update, and Merge if needed. Tell the user if there are any Merge conflicts, otherwise reload the (changed) files opened in the editor
+			5. Attemp Update, and Merge if needed. Tell the user if there are any Merge conflicts, otherwise reload the (changed) files opened in the editor
 				
 				If there are merge conflics:
 			 
-				7. Open the unresolved files in the editor (hg resolve --list)
-				Show a merge Widget with options (Mark as resolved) 
+			6. Open the unresolved files in the editor (hg resolve --list) and scroll down to the first conflict marker
+			Show a merge Widget with a check box for each unresolved file and a button (Mark as resolved) 
 				And when putting the cursor on a line, show annotation (activate annotation hg annotate foo.txt -l)
 				
+			
 				
 				
 				$ hg up
