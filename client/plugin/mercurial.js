@@ -752,7 +752,6 @@
 		
 		EDITOR.on("moveCaret", showAnnotations);
 		
-		
 		EDITOR.hideMenu();
 	}
 			
@@ -764,7 +763,15 @@
 		if(annotations.hasOwnProperty(file.path)) show(annotations[file.path]);
 		else {
 				
-				CLIENT.cmd("mercurial.annotate", {file: file.path}, function updateAnnotation(err, resp) {
+			var filePath = file.path;
+			
+			var matchOrig = filePath.match(/(.*)\.orig$/);
+			
+			console.log("matchOrig=" + matchOrig);
+			
+			if(matchOrig) filePath = matchOrig[1];
+			
+			CLIENT.cmd("mercurial.annotate", {file: filePath}, function updateAnnotation(err, resp) {
 					
 					if(err) {
 						alertBox(err.message);
@@ -776,7 +783,7 @@
 						
 						annotations[file.path] = resp;
 						
-					show(resp);
+						show(resp);
 					}
 				});
 			}
@@ -806,70 +813,95 @@
 				
 				var line = caret.row + 1;
 				
-				console.log("Showing comments on line=" + line + " for file=" + file.path + "");
+			var workingCopy = file.text.indexOf("<<<<<<< working copy");
+			var split = file.text.indexOf("=======", workingCopy+21);
+			var destination = file.text.indexOf(">>>>>>> destination", split+7);
+			
+			if(workingCopy != -1) {
+				// Get the right annotation on the right line
+				// This needs more work! ...
 				
-				if(line != lastLine) {
-					if(lineChangeset.hasOwnProperty(line)) {
-						var changeId = lineChangeset[line];
-						if(!changesets.hasOwnProperty(changeId)) throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2));
-						var change = changesets[changeId];
-						annotationWidget.innerText = change.user + " - " + change.date + " - " + change.summary;
-						console.log("yep");
-						EDITOR.resizeNeeded();
-					}
-					else {
-						console.log("No changeset available for line=" + line);
-						hide();
-					}
-				} 
-				else {
-					console.log("line=" + line + " lastLine=" + lastLine);
+				var lineStart = 0;
+				var lineSplit = 0;
+				var lineEnd = 0;
+				
+				while(workingCopy != -1 && split != -1 && destination != -1) {
+					lineStart = file.rowFromIndex(workingCopy).row + 1;
+					lineSplit = file.rowFromIndex(split).row + 1;
+					lineEnd = file.rowFromIndex(destination).row + 1;
+					
+					if(line > lineEnd) line -= (lineSplit-lineStart + 2); // for user edits
+					else if(line < lineEnd && line > lineSplit) line -= (lineSplit - lineStart + 1); // conflicting commit
+					else if(line >= lineStart && line <= lineSplit) return hide(line); // Users current edits
+					else if(line == lineStart || line == lineSplit || line == lineEnd) return hide(line);
+					
+					console.log("line=" + line);
+					
+					workingCopy = file.text.indexOf("<<<<<<< working copy", destination+19);
+					split = file.text.indexOf("=======", workingCopy + 21);
+					destination = file.text.indexOf(">>>>>>> destination", split+7);
 				}
-				
-				annotation.lastLine = line;
 			}
 			
-			function hide() {
-				
-			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
-				
-				if(annotationWidget) {
-					
-					annotationWidget.innerText = "";
-					annotationWidget.style.display="none";
-					
+			console.log("Showing comments on line=" + line + " for file=" + file.path + "");
+			
+			if(lineChangeset.hasOwnProperty(line)) {
+					var changeId = lineChangeset[line];
+					if(!changesets.hasOwnProperty(changeId)) throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2));
+					var change = changesets[changeId];
+					annotationWidget.innerText = change.user + " - " + change.date + " - " + change.summary;
+				console.log("changesets=" + JSON.stringify(changesets, null, 2));
+				console.log("showing changeset changeId=" + changeId);
 					EDITOR.resizeNeeded();
 				}
+				else {
+					console.log("No changeset available for line=" + line);
+					hide();
+				}
+			
+			annotation.lastLine = line;
+		}
+		
+		function hide(line) {
+			
+			console.log("Hiding annotation. line=" + line + " real=" + (caret.row+1));
+			
+			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
+			
+			if(annotationWidget) {
 				
-				return true;
+				annotationWidget.innerText = "";
+				annotationWidget.style.display="none";
+				
+				EDITOR.resizeNeeded();
 			}
 			
-			return false;
+			return true;
 		}
+		
+		return false;
+	}
 	
-	function hideAnnotationWidget() {
+	function annotateOff() {
 		doAnnotate = false;
+		
+		var annotateMenuItemPosition = annotateMenuItem ? EDITOR.removeMenuItem(annotateMenuItem) : null;
+		annotateMenuItem = EDITOR.addMenuItem(showAnnotationsString, annotateOn, annotateMenuItemPosition);
+		
+		EDITOR.removeEvent("moveCaret", showAnnotations);
+		
+		EDITOR.hideMenu();
 		
 		var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 		if(annotationWidget) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(annotationWidget);
 			
-			
+			EDITOR.resizeNeeded();
 			
 			return false;
 		}
 		else return true;
-	}
-	
-	
-	function annotateOff() {
-		var annotateMenuItemPosition = annotateMenuItem ? EDITOR.removeMenuItem(annotateMenuItem) : null;
-		annotateMenuItem = EDITOR.addMenuItem(showAnnotationsString, annotateOn, annotateMenuItemPosition);
-		
-		hideAnnotationWidget();
-		
-		EDITOR.hideMenu();
 	}
 	
 	
