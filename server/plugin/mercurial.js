@@ -794,7 +794,7 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 					R foo.txt
 				*/
 				
-				var files = stdout.trim().split(/\n|\r\n);
+				var files = stdout.trim().split(/\n|\r\n/);
 				
 				for (var i=0, status, filePath; i<files.length; i++) {
 					status = files[i].substr(0,2).trim();
