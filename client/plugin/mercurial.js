@@ -84,6 +84,12 @@
 			If all files are resolved, and not changed (hg status): show commit widget
 			Open any unresolved file and show resolve widget
 			
+			2. Check for multible heads (hg heads --topo)
+			
+			If there are multible heads, ask the user if he/she wants to merge
+			If the merge was successful, continue ...
+			If the merge failed, goto 1.
+			
 			2. Pull updates from repository (hg pull)
 			3. Check what changed (hg status --rev tip   hg log foo.txt -r (hg --debug id -i):tip)
 			4. Is any of the changed files opened by the editor ?
@@ -113,6 +119,25 @@
 			use 'hg resolve' to retry unresolved file merges
 			
 			It should be safe to run "hg update" if you have uncomitted changes as Mercurial will attempt a merge!
+			
+			--------------------------------------------------------------------------------------------------------
+			
+			$ hg up
+			abort: not a linear update
+			(merge or update --check to force update)
+			
+			$ hg merge
+			merging baz.txt
+			warning: conflicts while merging baz.txt! (edit, then use 'hg resolve --mark')
+			1 files updated, 0 files merged, 0 files removed, 1 files unresolved
+			use 'hg resolve' to retry unresolved file merges or 'hg update -C .' to abandon
+			
+			$ hg resolve --list
+			U baz.txt
+			
+			$ hg resolve baz.txt --mark
+			(no more unresolved files)
+			
 			
 			
 		*/

@@ -10,7 +10,7 @@
 	Get file changes from one revision to another revision
 	hg log foo.txt -r 15:tip
 	
-	Get heads (multible heads means a merge is needed)
+	Get heads (multiple heads means a merge is needed)
 	hg heads --topo
 	
 	List files that need to merge:
@@ -765,8 +765,124 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 	});
 }
 
+MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
+	// Get all list of resolved and unresolved files
+	
+	var directory = json.directory;
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var exec = require('child_process').exec;
+		exec("hg resolve --list", { cwd: rootDir }, function (err, stdout, stderr) {
+			
+			console.log("hg resolve --list stderr=" + stderr);
+			console.log("hg resolve --list stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			var resolved = [];
+			var unresolved = [];
+			
+			stdout = stdout.trim();
+			
+			if(stdout != "") {
+			
+				/*
+					U baz.txt
+					R foo.txt
+				*/
+				
+				var files = stdout.trim().split(/\n|\r\n);
+				
+				for (var i=0, status, filePath; i<files.length; i++) {
+					status = files[i].substr(0,2).trim();
+					filePath = files[i].substring(2, files[i].length).trim();
+					
+					filePath = user.toVirtualPath(rootDir + filePath);
+					
+					if(status == "R") resolved.push(filePath);
+					else if(status == "U") unresolved.push(filePath);
+					}
+				}
+			
+			callback(null, {resolved: resolved, unresolved: unresolved});
+			
+		});
+	});
+}
 
+MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
+	// Mark an unresolved file as resolved
+	
+	var directory = json.directory;
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var exec = require('child_process').exec;
+		exec("hg resolve --list", { cwd: rootDir }, function (err, stdout, stderr) {
+			
+			console.log("hg resolve --list stderr=" + stderr);
+			console.log("hg resolve --list stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			
+			
+		});
+	});
+}
 
+MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
+	// Mark an resolved file as Not resolved
+	
+	var directory = json.directory;
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var exec = require('child_process').exec;
+		exec("hg resolve --list", { cwd: rootDir }, function (err, stdout, stderr) {
+			
+			console.log("hg resolve --list stderr=" + stderr);
+			console.log("hg resolve --list stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			
+			
+		});
+	});
+}
+
+MERCURIAL.heads = function hgheads(user, json, callback) {
+	// Cheks for multiple heads
+	
+	var directory = json.directory;
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var exec = require('child_process').exec;
+		exec("hg heads --topo", { cwd: rootDir }, function (err, stdout, stderr) {
+			
+			console.log("hg heads --topo stderr=" + stderr);
+			console.log("hg heads --topo stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			var heads = objectionize(stdout);
+			
+			callback(null, {heads: heads});
+			
+		});
+	});
+}
 
 // Hg merge, 3 files updated, 0 files merged, 0 files removed, 0 files unresolved
 
@@ -876,7 +992,53 @@ function checkDir(user, virtualPath, callback) {
 	});
 }
 
-
+function objectionize(str, changesets) {
+	/*
+		Turns a formatted string into an object
+		
+		if changesets is true, it returns an object where each changeset is the key,
+		otherwise it returns an array of objects
+		
+		*/
+	
+	str = str.trim();
+	
+	var arrObjects = str.split(/(\r\n|\n)\s*(\r\n|\n)/); // Two line breaks (can have spaces between)
+	
+	if(changesets) var objChanges = {};
+	
+	for(var i=0; i<arrObjects.length; i++) {
+		console.log("arrObjects[" + i + "]=" + arrObjects[i]);
+		while(arrObjects[i].match(/^(\r\n|\n)$/)) arrObjects.splice(i, 1); // Remove emty sets
+	}
+	console.log("arrObjects=" + JSON.stringify(arrObjects, null, 2));
+	
+	
+	for(var i=0, obj; i<arrObjects.length; i++) {
+		arrObjects[i] = arrObjects[i].split(/\r\n|\n/);
+		
+		obj = {};
+		
+		for (var j=0, name, value; j<arrObjects[i].length; j++) {
+			
+			name = arrObjects[i][j].substr(0, arrObjects[i][j].indexOf(":"));
+			value = arrObjects[i][j].substr(arrObjects[i][j].indexOf(":")+1).trim();
+			
+			console.log("name=" + name);
+			console.log("value=" + value);
+			
+			if(changesets && name == "changeset") obj = objChanges[value] = {};
+			else obj[name] = value;
+			}
+		
+		if(!changesets) arrObjects[i] = obj;
+		
+	}
+	
+	if(changesets) return objChanges;
+	else return arrObjects;
+		
+	}
 
 
 
