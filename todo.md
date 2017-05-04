@@ -3,6 +3,8 @@ Prio:
 
 1) Make it possible for a non-dev to make web documents
 
+Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
+
 Synka-knapp i SSG som uppdaterar från Mercurial
 Går inte att publicera om man inte har dokumenterat och synkat
 Går inte att synka om man inte har dokumenterat
@@ -227,6 +229,22 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Indentation error when editing a file that have angelbrackets starting below the functions, if's. eg:
+function foo()
+{
+  if(a) 
+  {...}
+}
+
+Auto complete in .htm document inside <script> tag eaither gives a html tag or it doesn't spell out when hitting tab.
+
+Auto completing inside <script> tag adds a script tag ... witch creates an error
+
+red circle in regexp:
+if(!queryData.match(/^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/)) {
+clientError("Data must be base64 encoded!");
+}
 
 Move dialogs when resizing!
 
@@ -847,6 +865,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Autocomplete on known variables. example:
+var inputSendTo = document.createElement("input");
+inputSendTo.set| -> setAttribute
 
 When switching from a source file on one ssg site to another ssg site ... Selected site should change, preview close, etc
 Auto opened SSG panel doesn't select the right site when clicking edit
