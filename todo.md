@@ -90,6 +90,8 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
+commit widget: Double clicking on a file in the list should open the file and show what changed (a diff !!???)
+
 bug in mercurial if hgrc contains [auth] with username put no password.
 
 mercurial/git integration
@@ -116,6 +118,9 @@ Add a watcher for every opened file and warn the user if the file changes by oth
 
 What I'm thinking
 -----------------
+
+Terminal emulator ? (node-pty, node-ansiparser). No! Everything should be handled via the GUI, do not introduce new concepts (like the terminal).
+Manage files via the file explorer plugin, launch nodejs scripts with nodejs plugin and stop with stop button, or debug stepper. Use mercurial/git plugins with GUI.
 
 Use feature flag for stuff that are "in construction" so that the main branch is always working and can be pushed to production at any time.
 
