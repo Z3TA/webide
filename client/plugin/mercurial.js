@@ -22,8 +22,8 @@
 	var pwValue = "demo";
 	
 	var annotateMenuItem;
-	var showAnnotationsString = "Show Comments";
-	var hideAnnotationsString = "Hide Comments";
+	var showAnnotationsString = "Show commit messages";
+	var hideAnnotationsString = "Hide commit messages";
 	var annotations = {};
 	var doAnnotate = false;
 	
