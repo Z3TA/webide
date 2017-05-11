@@ -342,6 +342,8 @@ function identify(json, IP, callback) {
 			
 			var row = data.split(/\r|\r\n/);
 			
+			console.log("Loaded users.pw (" + row.length + " users found)");
+			
 			var user;
 			
 			for(var i=0, test; i<row.length; i++) {
