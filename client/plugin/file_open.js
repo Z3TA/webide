@@ -14,10 +14,10 @@
 	
 	function load() {
 		// Bind to ctrl + O
-		EDITOR.bindKey({desc: "Open file using native file select dialog", charCode: 79, combo: CTRL, fun: openFile});
+		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: 79, combo: CTRL, fun: openFile});
 		
 		// Add items to the canvas context meny
-		menu = EDITOR.addMenuItem("Open file ...", openFile);
+		menu = EDITOR.addMenuItem("Open local file ...", openFile);
 	}
 	
 	function unload() {
