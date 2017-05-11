@@ -21,7 +21,8 @@
 			EDITOR.removeMenuItem(menuItem);
 			
 			EDITOR.unbindKey(createNewFile);
-		}
+		},
+		order: 1
 	});
 	
 	
