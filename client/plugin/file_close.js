@@ -2,7 +2,13 @@
 	
 	"use strict";
 	
-	EDITOR.on("start", closeFileKeyCombo);
+	var menuItem;
+	
+	EDITOR.plugin({
+		desc: 'Adds "Close file" and "Close the editor" key combos and a "Close file" context menu item',
+		load: closeFileKeyCombo,
+		unload: closeFileKeyComboUnload
+	});
 	
 	function closeFileKeyCombo() {
 		
@@ -12,10 +18,18 @@
 		// Should we be consistent with how browsers work? Ctrl+Q seems more initutive and Ctrl + W is already used by the Word-Wrapper.
 		
 		EDITOR.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL, fun: closeFile});
-		EDITOR.bindKey({desc: "Close current file", charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
+		EDITOR.bindKey({desc: "Close the editor", charCode: charQ, combo: CTRL + SHIFT, fun: closeEditor});
 		
-		EDITOR.addMenuItem("Close file (Ctrl+Q)", closeFile);
+		menuItem = EDITOR.addMenuItem("Close file (Ctrl+Q)", closeFile);
 		
+	}
+	
+	function closeFileKeyComboUnload() {
+		
+		EDITOR.unbindKey(closeFile);
+		EDITOR.unbindKey(closeEditor);
+		
+		EDITOR.removeMenuItem(menuItem);
 	}
 	
 	function closeEditor(file, combo) {
