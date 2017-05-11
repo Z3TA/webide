@@ -32,18 +32,14 @@ var data = {
 
 // Easy to write plugins and add functionality using JavaScript
 EDITOR.bindKey({charCode: 104, combo: CTRL, fun: 
-	function timeReport(file) {
-		var mysql = require('mysql'); // Supports NodeJS modules
-		var connection = mysql.createConnection({database : 'timeReports'});
-		connection.connect();
-		connection.query('INSERT INTO files SET ?', {file: file.path, user: 'me'});
-		connection.end();
-	}
-});
+	function helloWorld(file) {
+	alertBox("Hello world!");
+		}
+	});
 
 
 // The editor is asynchronous, and event based. Most events can be captured
 EDITOR.on("fileParse", function myCallback(file) {
-	alert("This file is a " + file.parsed.language + " file!")
+	alertBox("This file is a " + file.parsed.language + " file!")
 });
 
