@@ -126,8 +126,8 @@
 		labelUrl.setAttribute("for", "serverLoginUrl");
 		labelUrl.appendChild(document.createTextNode("URL: "));
 		form.appendChild(labelUrl);
-
-		var defaultUrl = "http://localhost/jzedit";
+		
+		var defaultUrl = window.location.protocol + "//" + window.location.host + "/jzedit"; // http://localhost/jzedit";
 		var urlValue;
 		var userValue;
 		var pwValue;
