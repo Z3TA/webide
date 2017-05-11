@@ -35,8 +35,7 @@
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 			
-			showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
-			
+			if(runtime == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 			
 			if(EDITOR.settings.devMode == false) {
 				disableDevMode();
@@ -55,7 +54,8 @@
 		unload: function unloadDevMode() {
 			
 			EDITOR.removeMenuItem(toggleDevmodeMenuItem);
-			EDITOR.removeMenuItem(showDevToolsMenuItem);
+			
+			if(showDevToolsMenuItem) EDITOR.removeMenuItem(showDevToolsMenuItem);
 			
 			EDITOR.unbindKey(reloadEditor);
 			EDITOR.unbindKey(toggleDevMode);
