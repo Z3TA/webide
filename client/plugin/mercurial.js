@@ -626,9 +626,54 @@
 		
 		var testRepo = {
 			url: "https://hg.webtigerteam.com/repo/test",
+			into: "/repo/test/",
 			user: "user",
 			pw: "pass"
 		}
+		
+		var defaultRepo = testRepo;
+		
+		/*
+			
+			Do not bother (yet) with adding a remote repo to an existing repo, 
+			or a folder with existing files (it's complicated)
+			
+			If there's already files inside the folder, but it's not an initiated repo
+			1) Make sure the remote repo is emty
+			2) Move the content of the folder to a temporary location
+			3) Clone the remote repo
+			4) Move the content back into the folder
+			
+			If there's already an initiated repo:
+			1) Make sure the remote repo is emty
+			2) Complicated stuff ...
+			
+			
+		if(EDITOR.currentFile) {
+			var currentFolderPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			
+			console.log("currentFolderPath=" + currentFolderPath);
+			console.log("EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+			
+			if(currentFolderPath != EDITOR.workingDirectory) {
+				var folders = currentFolderPath.split(UTIL.getPathDelimiter(currentFolderPath));
+				var lastFolder = folders[folders.length-1]; 
+				// folder /a/b/c/
+				if(lastFolder == "" && folders.length > 1) lastFolder = folders[folders.length-2];
+				
+				if(lastFolder != "") {
+					defaultRepo = {
+						url: UTIL.trailingSlash("https://hg.webtigerteam.com/repo/" + lastFolder),
+						into: UTIL.trailingSlash(currentFolderPath),
+						user: EDITOR.user,
+						pw: ""
+					}
+				}
+				
+			}
+		}
+		*/
+		
 		
 		var form = document.createElement("form");
 		form.onsubmit = cloneRepo;
@@ -663,7 +708,7 @@
 		repo.setAttribute("class", "inputtext url");
 		repo.setAttribute("title", "URL to remote repository");
 		repo.setAttribute("size", "30");
-		repo.setAttribute("value", testRepo.url);
+		repo.setAttribute("value", defaultRepo.url);
 		form.appendChild(repo);
 		
 		// ### Local directory
@@ -678,7 +723,7 @@
 		localDir.setAttribute("class", "inputtext dir");
 		localDir.setAttribute("title", "Path to repositories");
 		localDir.setAttribute("size", "30");
-		localDir.setAttribute("value", "/repo/test/");
+		localDir.setAttribute("value", defaultRepo.into);
 		form.appendChild(localDir);
 		
 		// ### user
@@ -692,7 +737,7 @@
 		user.setAttribute("id", "repoLoginUser");
 		user.setAttribute("class", "inputtext username");
 		user.setAttribute("size", "10");
-		user.setAttribute("value", testRepo.user);
+		user.setAttribute("value", defaultRepo.user);
 		form.appendChild(user);
 		
 		// ### password
@@ -706,7 +751,7 @@
 		pw.setAttribute("id", "repoLoginPw");
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
-		pw.setAttribute("value", testRepo.pw);
+		pw.setAttribute("value", defaultRepo.pw);
 		form.appendChild(pw);
 		
 		
@@ -751,6 +796,7 @@
 				else {
 					
 					alertBox("Successfully cloned to:\n" + resp.path);
+					hideRepoCloneDialog();
 					
 				};
 				
