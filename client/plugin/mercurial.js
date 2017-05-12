@@ -364,6 +364,7 @@
 		fileSelect.setAttribute("class", "file list");
 		fileSelect.setAttribute("size", "6");
 		fileSelect.setAttribute("title", "Select files");
+		fileSelect.setAttribute("multiple", "multiple");
 		
 		td = document.createElement("td");
 		td.appendChild(fileSelect);
