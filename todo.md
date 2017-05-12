@@ -99,6 +99,10 @@ mercurial/git integration
 Functionality discovery: Add a search-glass-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
 It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
 
+When pressing the Ctrl, Alt, Ctrl+Shift, or Alt+Shift, or Ctrl+Alt, or Ctrl+Alt+Shift key, after 500ms, show a HUD of all functions that are bound to those keys, and their combo Letter, example Ctrl+S for save: S: save
+The HUD dissaprears when you release the keys. 
+
+
 When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
 
 
@@ -234,6 +238,9 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+When you select from EOL, to the left, then extend the selection further to the left, the last (right) char is deselected!
+
 
 Indentation error when editing a file that have angelbrackets starting below the functions, if's. eg:
 function foo()
@@ -770,6 +777,10 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+The indentation "jumps"/is inconsistent when having breaks before {, [ or ( 
+
+Highlighted function in the function list, it sometimes to not highlight even though you are inside the function. But it does highlight if you move the cursors a few lines down into the function.
 
 When using Ctrl+P to open/search for files, example functionlist, it doesn't update on some characters and the screen look weird.
 
