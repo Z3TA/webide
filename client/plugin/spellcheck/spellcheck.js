@@ -10,6 +10,12 @@
 		console.warn("Spell-checking not yet supported in the browser!");
 		return;
 	}
+	if(runtime == "nw.js") {
+		if(!process.versions['node-webkit'].match(/^0\.12\.*/)) {
+			console.warn("Spellchecker not yet supported in nw.js later then 0.12.x");
+			return;
+		}
+	}
 	
 
 	if(EDITOR.settings.enableSpellchecker===undefined) {

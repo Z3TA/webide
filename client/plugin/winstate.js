@@ -64,7 +64,7 @@
 		
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
-		if (!win.isDevToolsOpen()) {
+		//if (!win.isDevToolsOpen()) {
 			winState = window.localStorage.windowState ? JSON.parse(window.localStorage.windowState) : null;
 
 			if (winState) {
@@ -80,9 +80,9 @@
 			}
 
 			win.show();
-		}
+		//}
 	}
-
+	
 	function dumpWindowState() {
 		if (!winState) {
 			winState = {};

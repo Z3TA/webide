@@ -127,7 +127,10 @@
 		labelUrl.appendChild(document.createTextNode("URL: "));
 		form.appendChild(labelUrl);
 		
-		var defaultUrl = window.location.protocol + "//" + window.location.host + "/jzedit"; // http://localhost/jzedit";
+		var defaultUrl = window.location.protocol + "//" + window.location.host + "/jzedit";
+		
+		if(defaultUrl.indexOf("chrome-extension") == 0) defaultUrl =  "http://localhost:8080/jzedit";
+		
 		var urlValue;
 		var userValue;
 		var pwValue;

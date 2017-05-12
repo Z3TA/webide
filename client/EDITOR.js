@@ -3370,7 +3370,7 @@ EDITOR.lastKeyPressed = "";
 					var fileref=document.createElement('script');
 					
 					fileref.setAttribute("type","text/javascript");
-					fileref.setAttribute("src", filePath);
+					fileref.setAttribute("src", "file://" + filePath);
 					head.appendChild(fileref);
 					
 					console.log("Loading test: " + filePath);
