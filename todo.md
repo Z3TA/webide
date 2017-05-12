@@ -90,6 +90,10 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
+Use system users as users, and /home/ as default user dirs ...
+The editor server should run in it's own VM ... A user can for example create a Mercurial hook that can run code on the server when commiting.
+
+
 commit widget: Double clicking on a file in the list should open the file and show what changed (a diff !!???)
 
 bug in mercurial if hgrc contains [auth] with username put no password.
