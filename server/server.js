@@ -89,6 +89,12 @@ function main() {
 		else throw err;
 	});
 
+	if(isIpV4(HTTP_IP)) {
+		if(!isPrivatev4IP(HTTP_IP)) log("NOT A PRIVATE IP=" + HTTP_IP, 4);
+	}
+	else log("Not a IPv4 address");
+
+
 	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
 
 
@@ -97,8 +103,23 @@ function main() {
 	log("Editor server url: " + makeUrl(), 6);
 	
 	// Open client url in browser !?
+
+
 	
 }
+
+function isIpV4(ip) {
+	if(ip.match(/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/)) return true;
+	else return false; 
+}
+
+function isPrivatev4IP(ip) {
+   var parts = ip.split('.');
+   return parts[0] === '10' || parts[0] === '127' ||
+	  (parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
+	  (parts[0] === '192' && parts[1] === '168');
+}
+
 
 function getArg(word) {
 	
@@ -459,14 +480,16 @@ function log(msg, lvl, noTrace) {
 			var colorReset = "\x1b[0m"
 			var colorBlink = "\x1b[5m";
 			var colorUnderscore = "\x1b[4m";
+			
 
 			var msgString = "";
 
 			if(USE_COLORS) {
 				msgString = colorDim + dateString;
+
 				if(lvl <= 6) msgString += colorReset;
 
-				if(lvl == _warning) msgString += colorBlink;
+				if(lvl == _warning) msgString += colorBlink + colorUnderscore;
 				//else if(lvl == _notice) msgString += colorUnderscore;
 
 				msgString += msg + " " + colorDim + where;
@@ -1155,8 +1178,7 @@ function makeUrl(dir) {
 		
 		ip = ipList[0];
 	}
-	
-	
+		
 	//console.log(address);
 	//console.log("ipList=" + JSON.stringify(ipList));
 	
