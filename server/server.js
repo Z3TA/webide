@@ -52,6 +52,11 @@ var HTTP_SERVER;
 // Use -p 8099 or --port 8099 as start arguments to listen to port 8099 instead of port 80
 var HTTP_PORT = getArg(["p", "port"]) || 80; 
 
+
+// Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
+var HTTP_IP = getArg(["ip"]) || "127.0.0.1";
+
+
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
 
@@ -78,13 +83,13 @@ function main() {
 	HTTP_SERVER.on("error", function(err) {
 		console.log("err.code=" + err.code);
 		if(err.code == "EACCES") {
-			log("Unable to create server on port=" + HTTP_PORT + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
+			log("Unable to create server on port=" + HTTP_PORT + " and ip=" + HTTP_IP + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
 			process.exit();
 		}
 		else throw err;
 	});
 
-	HTTP_SERVER.listen(HTTP_PORT);
+	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
 
 
 	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
@@ -1117,40 +1122,45 @@ function makeUrl(dir) {
 	var port = address ? address.port : HTTP_PORT;
 	
 	
-	// Find servers IP
-	var ipList = [];
-	var os = require('os');
-	var ifaces = os.networkInterfaces();
+	var ip = HTTP_IP;
+	if(ip == "0.0.0.0" || ip == "::") {
+		// Find servers IP
+		var ipList = [];
+		var os = require('os');
+		var ifaces = os.networkInterfaces();
+		log("Listening IP's:", 7);
+		Object.keys(ifaces).forEach(function (ifname) {
+		  var alias = 0;
 
-	Object.keys(ifaces).forEach(function (ifname) {
-	  var alias = 0;
+		  ifaces[ifname].forEach(function (iface) {
+			if ('IPv4' !== iface.family || iface.internal !== false) {
+			  // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+			  log(ifname + "=" + iface.address + " (internal)", 7);
+			  return;
+			}
 
-	  ifaces[ifname].forEach(function (iface) {
-		if ('IPv4' !== iface.family || iface.internal !== false) {
-		  // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-		  return;
-		}
-
-		if (alias >= 1) {
-		  // this single interface has multiple ipv4 addresses
-		  log(ifname + ':' + alias, iface.address, 7);
-		} else {
-		  // this interface has only one ipv4 adress
-		  log(ifname, iface.address, 7);
-		}
-		++alias;
+			if (alias >= 1) {
+			  // this single interface has multiple ipv4 addresses
+			  log(ifname + '=' + alias + ", " + iface.address, 7);
+			} else {
+			  // this interface has only one ipv4 adress
+			  log(ifname + "=" + iface.address, 7);
+			}
+			++alias;
+			
+			ipList.push(iface.address);
+			
+		  });
+		});
 		
-		ipList.push(iface.address);
-		
-	  });
-	});
-	
+		ip = ipList[0];
+	}
 	
 	
 	//console.log(address);
 	//console.log("ipList=" + JSON.stringify(ipList));
 	
-	var url = "http://" + ipList[0];
+	var url = "http://" + ip;
 	
 	if(port != 80) url += ":" + port;
 	
