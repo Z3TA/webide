@@ -95,6 +95,8 @@ SSG and WYSIWYG + Mercurial Repo
 
 todo:
 
+Make apparmor and systemd service profiles
+
 Use system users as users, and /home/ as default user dirs ...
 The editor server should run in it's own VM ... A user can for example create a Mercurial hook that can run code on the server when commiting.
 
