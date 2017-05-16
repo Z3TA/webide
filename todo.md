@@ -47,7 +47,7 @@ What I'm working on
 
 MAJOR REFACTOR OF SERVER to fork user workers so we can setuid for better security.
 
-testing: server.js seem to send the same question to user_worker.js over and over ...
+hmm ... We probably sholdn't run the web serving as root ...
 
 
 Working on Mercurial resolve, etc

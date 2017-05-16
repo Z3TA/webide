@@ -2,8 +2,20 @@
 
 "use strict";
 
-var CONSOLE_LOG_ORIGINAL = console.log;
-var CONSOLE_WARN_ORIGINAL = console.warn;
+
+var log; // Using small caps because it looks and feels better
+(function setLogginModule() { // Self calling function to not clutter script scope
+	// Set log module to show nice log messages
+	var logModule = require("./log.js");
+	logModule.setLogLevel(7);
+	log = logModule.log;
+
+	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout
+
+	if(logFile) logModule.setLogFile(logFile);
+
+})();
+
 
 (function() {
   // Make sure we are in the server directory
@@ -25,10 +37,20 @@ var CONSOLE_WARN_ORIGINAL = console.warn;
 })();
 
 
-var logModule = require("./log.js");
-logModule.setLogLevel(7);
-var log = logModule.log;
 
+var CURRENT_USER = "ROOT";
+
+var USERNAME = getArg(["u", "user", "username"]);
+var PASSWORD = getArg(["p", "pw", "password"]);
+
+if(USERNAME && !PASSWORD) {
+	// Ask for password ...
+}
+
+
+var SETUID = getArg(["setuid", "setuid"]) || "YES"; // If we should use UNIX user permissions when reading/writing files
+
+var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "./users.pw";
 
 var UTIL = require("../client/UTIL.js");
 
@@ -47,7 +69,7 @@ var HTTP_PORT = getArg(["p", "port"]) || 80;
 
 
 // Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
-var HTTP_IP = getArg(["ip"]) || "127.0.0.1";
+var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 
 
 
@@ -74,16 +96,20 @@ process.on("exit", function () {
 });
 
 function main() {
-	
-	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout
 
-	if(logFile) log.setLogFile(logFile);
 
+	// Get the current user (who runs this server)
 	var os = require("os");
+	var info = os.userInfo ? os.userInfo() : {username: "ROOT"};
+	CURRENT_USER = info.username;
 
-	var info = os.userInfo(); // username, uid, gid, shell, homedir
+	log("Server running as user=" + CURRENT_USER);
 
 	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
+
+
+
+
 
 	var sockJs = require("sockjs");
 	var wsServer = sockJs.createServer();
@@ -267,110 +293,202 @@ function sockJsConnection(connection) {
 					
 					// # Identify
 
-					var fs = require("fs");
-					
-					var username = json.username || "";
-					var password = json.password || "";
-
-					fs.readFile("users.pw", "utf8", function(err, data) {
-						if(err) throw err;
+					(function checkUser(username, password) {
 						
-						var row = data.trim().split(/\r|\r\n/);
-						
-						console.log("Loaded users.pw (" + row.length + " users found)");
-						
-						for(var i=0, test; i<row.length; i++) {
-							test = row[i].trim().split("|");
-							if(test[0] == username && test[1] == password) userOK(i, test[0], test[2]);
-							else console.log("Not " + test[0]);
-							// Check all to prevent timing attack
+						if(USERNAME) {
+							if(USERNAME == username && PASSWORD == password) userOK(0, USERNAME, true);
+							else wrongPw();
 						}
-						
-						if(!userWorker) return send({error: "Wrong username=" + username + " or password"});
+						else {
+
+							var fs = require("fs");
+							fs.readFile(PW_FILE, "utf8", function(err, data) {
+								if(err) throw err;
 								
-						function userOK(index, name, dir) {
+								var row = data.trim().split(/\r|\r\n/);
+								
+								console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
+								
+								// format: username|password|rootDir|uid|gid
+
+								for(var i=0, test, hasPw, hasUid, pUser, pPass, pRootDir, pUid, pGid; i<row.length; i++) {
+									test = row[i].trim().split("|");
+
+									pUser = test[0];
+									pPass = test[1];
+									pRootDir = test[2];
+									pUid = test[3];
+									pGid = test[4];
+
+									hasPw = pPass ? pPass.length > 0 : false;
+									hasUid = pUid ? pUid.length > 0 : false;
+
+									if(!hasUid && SETUID!="NO") throw new Error("user=" + pUser + " in " + PW_FILE + " has no uid! (uid=" + pUid + ")");
+
+									if(pUser == username && pPass == password) userOK(i, pUser, hasPw, pRootDir, pUid, pGid);
+									else console.log("Not " + pUser);
+									// Check all to prevent timing attack (no break or return)
+								}
+								
+								if(!userName) wrongPw();
+
+							});
+						}
+
+						function wrongPw() {
+							send({error: "Wrong username=" + username + " or password"});
+						}
+
+						function userOK(index, name, hasPassword, rootPath, uid, gid) {
 							
 							userName = name;
 
-							if(!USER_CONNECTIONS.hasOwnProperty(name)) {
-								USER_CONNECTIONS[name] = {
-									connections: [connection],
-									counter: 0
-								}
-								userConnectionId = 0;
-							}
-							else {
-								USER_CONNECTIONS[name].connections.push(connection);
-								userConnectionId = ++USER_CONNECTIONS[name].counter;
-							}
+							if(uid != undefined) {
 
-							var uid, gid;
-							userWorker = createUserWorker(name, uid, gid)
+								var fs = require("fs");
 
-							userWorker.send({identify: {id: index, name: name, rootPath: dir}});
-							
-							userWorker.on("message", function messageFromWorker(workerMessage, handle) {
-								console.log(name + " worker message: message=" + JSON.stringify(message) + " handle=" + handle);
+								fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
 
-								if(workerMessage.resp || workerMessage.error) send(workerMessage);
-								else if(workerMessage.message) {
-									for(var conn in USER_CONNECTIONS[name].connections) {
-										send(workerMessage.message, conn);
+								function gotMoreUserInfo(err, etcPasswd) {
+									
+									if(err) {
+										console.warn("Unable to read /etc/passwd !");
+										throw new Error("Unable to read /etc/passwd to check uid=" + uid + " matching");
 									}
-								}
-								else if(workerMessage.request) {
-									// For special functionality ...
+									else {
+										// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
+										var rows = etcPasswd.trim().split("\n");
 
-									var id = workerMessage.id;
-									var req = workerMessage.request;
+										for(var i=0, row; i<rows.length; i++) {
+											row = rows[i].trim().split(":");
+											if(foundUserIn(row)) return;
+										}
 
-									if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
-
-									if(req.createHttpEndpoint) {
-
-										createHttpEndpoint(req.createHttpEndpoint.folder, function(err, url) {
-											if(err) throw err;
-											workerResp(req, {url: url})
-
-										});
+										throw new Error("Unable to find user name=" + name + " or uid=" + uid + " in /etc/passwd");
 
 									}
-									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+
+									function foundUserIn(row) {
+										var pName = row[0];
+										var pUid = row[2];
+										var pGid = row[3];
+										var pDir = row[5];
+										var pShell = row[6];
+
+										var found = false;
+										if(pName == name) {
+											console.log("Found name=" + name + " in /etc/passwd");
+											if(pUid != uid) throw new Error("name=" + name + " does not match uid=" + uid + " with pUid=" + pUid);
+											found = true;
+										}
+										else if(pUid == uid) {
+											console.log("Found uid=" + uid + " in /etc/passwd");
+											if(pName != name) throw new Error("uid=" + uid + " does not match name=" + name + " with pName=" + pName);
+											found = true;
+										}
+
+										if(found) {
+											acceptUser(pDir, pShell);
+											return true;
+										}
+										else return false;
+									}
 
 								}
-								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
-								
-								function workerResp(req, resp) {
-									if(id == undefined) throw new Error("id=" + id);
-									userWorker.send({id: id, parentResponse: resp});
-								}
-
-							});
-							
-							/*
-							setTimeout(function() {
-								user.send({resp: {
-									test: {foo: 1, bar: 2}
-								}});
-								
-							}, 3000);
-							*/
-							
-							console.log("userConnectionId=" + userConnectionId);
-
-							send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
-
-							if(commandQueue.length > 0) {
-								console.log("Running " + commandQueue.length + " commands from the command queue ...");
-								for(var i=0; i<commandQueue.length; i++) {
-									handle(commandQueue[i]);
-								}
-								commandQueue.length = 0;
 							}
+							else acceptUser();
 
+							function acceptUser(homeDir, shell) {
+								
+
+								if(gid == undefined) gid = uid;
+
+								if(!USER_CONNECTIONS.hasOwnProperty(name)) {
+									USER_CONNECTIONS[name] = {
+										connections: [connection],
+										counter: 0
+									}
+									userConnectionId = 0;
+								}
+								else {
+									USER_CONNECTIONS[name].connections.push(connection);
+									userConnectionId = ++USER_CONNECTIONS[name].counter;
+								}
+
+								userWorker = createUserWorker(name, uid, gid)
+
+								var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
+
+								log("User name=" + name + " logged in! " + JSON.stringify(userInfo));
+
+								userWorker.send({identify: userInfo});
+								
+								userWorker.on("message", function messageFromWorker(workerMessage, handle) {
+									console.log(name + " worker message: message=" + JSON.stringify(message) + " handle=" + handle);
+
+									if(workerMessage.resp || workerMessage.error) send(workerMessage);
+									else if(workerMessage.message) {
+										for(var conn in USER_CONNECTIONS[name].connections) {
+											send(workerMessage.message, conn);
+										}
+									}
+									else if(workerMessage.request) {
+										// For special functionality ...
+
+										var id = workerMessage.id;
+										var req = workerMessage.request;
+
+										if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+
+										if(req.createHttpEndpoint) {
+
+											createHttpEndpoint(req.createHttpEndpoint.folder, function(err, url) {
+												if(err) throw err;
+												workerResp(req, {url: url})
+
+											});
+
+										}
+										else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+
+									}
+									else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
+									
+									function workerResp(req, resp) {
+										if(id == undefined) throw new Error("id=" + id);
+										userWorker.send({id: id, parentResponse: resp});
+									}
+
+								});
+								
+								/*
+								setTimeout(function() {
+									user.send({resp: {
+										test: {foo: 1, bar: 2}
+									}});
+									
+								}, 3000);
+								*/
+								
+								console.log("userConnectionId=" + userConnectionId);
+
+								send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
+
+								if(commandQueue.length > 0) {
+									console.log("Running " + commandQueue.length + " commands from the command queue ...");
+									for(var i=0; i<commandQueue.length; i++) {
+										handle(commandQueue[i]);
+									}
+									commandQueue.length = 0;
+								}
+
+								return true;
+							}
 						}
 
-					});
+					})(json.username, json.password);
+
+
 				}
 			}
 			else {
@@ -1103,22 +1221,21 @@ function createUserWorker(name, uid, gid) {
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
 
-	if(uid != undefined) options.uid = uid;
-	if(gid != undefined) options.gid = gid;
+	if(uid != undefined) options.uid = parseInt(uid);
+	if(gid != undefined) options.gid = parseInt(gid);
 
 	if(uid == undefined || uid == -1) {
-		var os = require("os");
-		var info = os.userInfo ? os.userInfo() : {username: "ROOT"};
-
-		log("No uid specified!\nUSER WILL RUN AS username=" + info.username, WARN);
+		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 	}
+
+	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
 
 	try {
 		var worker = childProcess.fork("user_worker.js", options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
-			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ". Try running the server with a privileged user.", NOTICE);
+			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
 			throw new Error("Unable to spawn worker! (" + err.message + ")");
 		}
 		else throw err;

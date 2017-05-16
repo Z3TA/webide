@@ -23,6 +23,12 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 var log = require("./log.js").log;
 
 
+// Set default file permissions
+var newmask = parseInt("0027", 8); // 0o027
+var oldmask = process.umask(newmask);
+console.log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8));
+
+
 var parentRequestCallback = {}; // id: callback function
 var parentRequestId = 0; // Counter (id) for parentRequestCallback
 
@@ -43,6 +49,7 @@ user.identify = function identify(info) {
 	user.id = info.id;
 	user.name = info.name;
 	user.rootPath = info.rootPath;
+	user.defaultWorkingDirectory = info.homeDir;
 
 	var path = require("path");
 
@@ -51,7 +58,7 @@ user.identify = function identify(info) {
 		user.rootPath = UTIL.trailingSlash(user.rootPath);
 		user.defaultWorkingDirectory = "/";
 	}
-	else {
+	else if(!user.defaultWorkingDirectory) {
 		var editorDir = path.resolve("./../");
 		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
 	}
