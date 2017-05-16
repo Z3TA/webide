@@ -28,7 +28,14 @@ function log(msg, lvl, noTrace) {
 		var where = "";
 
 		if(!noTrace) {
-			var stack = (new Error().stack).split(/\r\n|\n/);
+
+			try { // Too see possible function responsible for RangeError: Maximum call stack size exceeded
+				var stack = (new Error().stack).split(/\r\n|\n/);
+			}
+			catch(err) {
+				return CONSOLE_LOG_ORIGINAL(msg);
+			}
+
 			//CONSOLE_LOG_ORIGINAL("stack=" + stack);
 			var dir = process.cwd();
 			var dir2 = dir.replace(/server$/, "");
