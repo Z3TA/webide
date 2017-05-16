@@ -4,6 +4,8 @@
 
 */
 
+"use strict";
+
 var UTIL = require("../client/UTIL.js");
 
 var API = require("./server_api.js");
@@ -20,6 +22,10 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 var log = require("./log.js").log;
 
+
+var parentRequestCallback = {}; // id: callback function
+var parentRequestId = 0; // Counter (id) for parentRequestCallback
+
 var user = {};
 user.id = 0;
 user.name = "";
@@ -28,7 +34,7 @@ user.clientConnections = {}; // A user can be connected from many places
 user.storage = null;
 user.connectionId = 0;
 user.isSavingStorage = [];
-
+user.rootPath = undefined;
 
 user.identify = function identify(info) {
 
@@ -387,6 +393,16 @@ process.on('message', function commandMessage(message) {
 	else if(message.teardown) {
 		user.teardown();
 	}
+	else if(message.parentResponse) {
+		var id = message.id;
+		var resp = message.parentResponse;
+
+		if(parentRequestCallback.hasOwnProperty(id)) {
+			parentRequestCallback[id](null, resp);
+			delete parentRequestCallback[id];
+		}
+		else throw new Error("No callback saved for parentRequestCallback id=" + id);
+	}
 	else if(message.commands) {
 
 		var command = message.commands.command;
@@ -444,17 +460,44 @@ process.on('message', function commandMessage(message) {
 })
 
 
+
+// ## Special API's ...
+
+API.serve = function serve(user, json, callback) {
+	
+	// Serve a folder via HTTP
+	
+	var folder = user.translatePath(json.folder);
+	
+	console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+	parentRequest({createHttpEndpoint: {folder: folder}}, function(err, resp) {
+		callback(err, {url: resp.url});
+	});
+	
+}
+
+function parentRequest(req, callback) {
+
+	var id = ++parentRequestId;
+
+	process.send({id: id, request: req});
+	parentRequestCallback[id] = callback;
+}
+
+
+
 // Overload console.log 
 console.log = function() {
 	var msg = arguments[0];
-	for (i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(msg, 7);
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(user.name + ": " + msg, 7);
 }
 
 // Overload console.warn
 console.warn = function() {
 	var msg = arguments[0];
-	for (i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(msg, 4);
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(user.name + ": " + msg, 4);
 }
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+"use strict";
+
 var CONSOLE_LOG_ORIGINAL = console.log;
 var CONSOLE_WARN_ORIGINAL = console.warn;
 
@@ -202,14 +204,16 @@ function sockJsConnection(connection) {
 		if(IP.substring(ipLength - nginxIP.length) == "127.0.0.1") {
 			// From nginx
 			
-			console.log( JSON.stringify(connection.headers));
+			console.log("connection.headers=" + JSON.stringify(connection.headers));
 			
-			IP = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
-			
+			var xRealIp = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
+
+			if(xRealIp == undefined) {
+				log("Unable to get IP address from x-real-ip headers", INFO);
+			}
+
 		}
 	}
-	
-	if(IP == undefined) console.warn("Unable to get IP address from x-real-ip headers");
 	
 	log("Connection on " + protocol + " from " + IP);
 	
@@ -305,17 +309,42 @@ function sockJsConnection(connection) {
 
 							userWorker.send({identify: {id: index, name: name, rootPath: dir}});
 							
-							userWorker.on("message", function workerMessage(workerMessage, handle) {
+							userWorker.on("message", function messageFromWorker(workerMessage, handle) {
 								console.log(name + " worker message: message=" + JSON.stringify(message) + " handle=" + handle);
 
-								if(workerMessage.response || workerMessage.error) send(workerMessage);
+								if(workerMessage.resp || workerMessage.error) send(workerMessage);
 								else if(workerMessage.message) {
 									for(var conn in USER_CONNECTIONS[name].connections) {
 										send(workerMessage.message, conn);
 									}
 								}
+								else if(workerMessage.request) {
+									// For special functionality ...
+
+									var id = workerMessage.id;
+									var req = workerMessage.request;
+
+									if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+
+									if(req.createHttpEndpoint) {
+
+										createHttpEndpoint(req.createHttpEndpoint.folder, function(err, url) {
+											if(err) throw err;
+											workerResp(req, {url: url})
+
+										});
+
+									}
+									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+
+								}
 								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 								
+								function workerResp(req, resp) {
+									if(id == undefined) throw new Error("id=" + id);
+									userWorker.send({id: id, parentResponse: resp});
+								}
+
 							});
 							
 							/*
@@ -389,14 +418,14 @@ function sockJsConnection(connection) {
 // Overload console.log 
 console.log = function() {
 	var msg = arguments[0];
-	for (i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
 	log(msg, 7);
 }
 
 // Overload console.warn
 console.warn = function() {
 	var msg = arguments[0];
-	for (i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
 	log(msg, 4);
 }
 
@@ -815,7 +844,8 @@ API.serve = function serve(user, json, callback) {
 	
 	console.log("user.name=" + user.name + " serving folder=" + folder);
 	
-	createHttpEndpoint(folder, user, function(err, url) {
+	createHttpEndpoint(folder, function(err, url) {
+		if(err) throw err;
 		callback(err, {url: url});
 	});
 	
@@ -855,7 +885,7 @@ var mimeMap = {
 	ttf: "application/octet-stream"
 }
 
-function createHttpEndpoint(folder, user, callback) {
+function createHttpEndpoint(folder, callback) {
 	
 	for(var dir in httpEndpoints) {
 		if(httpEndpoints[dir] == folder) {

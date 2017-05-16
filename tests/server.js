@@ -147,7 +147,7 @@
 				
 				// Launch http request
 				
-				UTIL.httpGet(fileUrl, function(err, text) {
+				UTIL.httpGet(fileUrl, function httpGetResult(err, text) {
 					
 					if(err) throw err;
 					

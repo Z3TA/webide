@@ -747,7 +747,7 @@ var UTIL = {
 		var timeoutTimer;
 		var timeoutTimeMs = 3000;
 		
-		//console.log("url=" + url);
+		console.log("HTTP GET url=" + url);
 		
 		xmlHttp.onreadystatechange = function httpReadyStateChange() {
 			if(xmlHttp.readyState == 4) {
