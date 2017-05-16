@@ -261,7 +261,7 @@ var CLIENT = {}; // Client object is global
 	}
 
 	CLIENT.on("loginSuccess", function(json) {
-		if(!json.cId) throw new Error("Did not get cId from loginSuccess event!");
+		if(json.cId == undefined) throw new Error("Did not get cId from loginSuccess event!");
 		CLIENT.connectionId = json.cId;
 	});
 	

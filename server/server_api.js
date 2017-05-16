@@ -1183,12 +1183,11 @@ API.storageRemove = function storageRemove(user, json, callback) {
 }
 
 
-API.mirror = function mirror(user, json, callback, userConnectionId) {
+API.mirror = function mirror(user, json, callback) {
 	
 	if(json.object == undefined) return callback(new Error("object=" + object + " can not be null or undefined!"));
 	if(json.method == undefined) return callback(new Error("method=" + method + " can not be null or undefined!"));
-	
-	json.cId = userConnectionId;
+	if(json.cId == undefined) return callback(new Error("cId=" + cId + " can not be null or undefined!"));
 	
 	user.send({mirror: json});
 	

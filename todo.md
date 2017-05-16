@@ -45,7 +45,12 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Working on resolve, etc
+MAJOR REFACTOR OF SERVER to fork user workers so we can setuid for better security.
+
+testing: server.js seem to send the same question to user_worker.js over and over ...
+
+
+Working on Mercurial resolve, etc
 
 What happens when there are unresolved files and you pull in more changes ?
 $ hg up

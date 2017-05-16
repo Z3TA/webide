@@ -23,9 +23,9 @@ var CONSOLE_WARN_ORIGINAL = console.warn;
 })();
 
 
-
-
-var LOG_LEVEL = 7; // 0=emerg, 1=alert, 2=crit, 3=err, 4=warning, 5=notice, 6=info, 7=debug
+var logModule = require("./log.js");
+logModule.setLogLevel(7);
+var log = logModule.log;
 
 
 var UTIL = require("../client/UTIL.js");
@@ -33,18 +33,9 @@ var UTIL = require("../client/UTIL.js");
 var GS = String.fromCharCode(29);
 var APC = String.fromCharCode(159);
 
-var API = require("./server_api.js");
 
 
-// Server plugin API's
-API.SSG = require("./plugin/static_site_generator/ssg-api.js");
-API.mercurial = require("./plugin/mercurial.js");
-
-
-
-var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
-
-var CONNECTED_USERS = {};
+var USER_CONNECTIONS = {}; // username: {connections: [], counter: 0}
 
 var HTTP_SERVER;
 
@@ -55,6 +46,16 @@ var HTTP_PORT = getArg(["p", "port"]) || 80;
 
 // Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
 var HTTP_IP = getArg(["ip"]) || "127.0.0.1";
+
+
+
+
+
+// Log levels
+var WARN = 4;
+var NOTICE = 5;
+var INFO = 6;
+var DEBUG = 7;
 
 
 process.on("SIGINT", function sigInt() {
@@ -69,9 +70,19 @@ process.on("SIGINT", function sigInt() {
 process.on("exit", function () {
 	log("Program exit\n\n", 6, true);
 });
-	
+
 function main() {
 	
+	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout
+
+	if(logFile) log.setLogFile(logFile);
+
+	var os = require("os");
+
+	var info = os.userInfo(); // username, uid, gid, shell, homedir
+
+	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
+
 	var sockJs = require("sockjs");
 	var wsServer = sockJs.createServer();
 	wsServer.on("connection", sockJsConnection);
@@ -166,7 +177,8 @@ function getArg(word) {
 
 function sockJsConnection(connection) {
 	
-	var user = null;
+	var userWorker = null;
+	var userName = null;
 	var userConnectionId = -1;
 	var IP = connection.remoteAddress;
 	var protocol = connection.protocol;
@@ -239,7 +251,7 @@ function sockJsConnection(connection) {
 			
 			console.log("The command queue has " + commandQueue.length + " items.");
 			
-			if(!user) {
+			if(!userWorker) {
 				
 				//console.log("json=" + JSON.stringify(json));
 				
@@ -247,93 +259,107 @@ function sockJsConnection(connection) {
 					console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
 					commandQueue.push(message);
 				}
-				else identify(json, IP, function(err, usr) {
-					if(err) {
-						log(err);
-						send({error: err.message, resp: {loginFail: err.message}});
-						//connection.close();
-					}
-					else {
-						user = usr;
+				else {
+					
+					// # Identify
+
+					var fs = require("fs");
+					
+					var username = json.username || "";
+					var password = json.password || "";
+
+					fs.readFile("users.pw", "utf8", function(err, data) {
+						if(err) throw err;
 						
-						userConnectionId = user.connected(connection);
+						var row = data.trim().split(/\r|\r\n/);
 						
-						user.IP = IP;
+						console.log("Loaded users.pw (" + row.length + " users found)");
 						
-						send({resp: {loginSuccess: {user: user.name, cId: userConnectionId}}});
-						
-						/*
-						setTimeout(function() {
-							user.send({resp: {
-								test: {foo: 1, bar: 2}
-							}});
-							
-						}, 3000);
-						*/
-						
-						console.log("Running " + commandQueue.length + " commands from the command queue ...");
-						for(var i=0; i<commandQueue.length; i++) {
-							handle(commandQueue[i]);
+						for(var i=0, test; i<row.length; i++) {
+							test = row[i].trim().split("|");
+							if(test[0] == username && test[1] == password) userOK(i, test[0], test[2]);
+							else console.log("Not " + test[0]);
+							// Check all to prevent timing attack
 						}
-						commandQueue.length = 0;
 						
-					}
-				});
-				
+						if(!userWorker) return send({error: "Wrong username=" + username + " or password"});
+								
+						function userOK(index, name, dir) {
+							
+							userName = name;
+
+							if(!USER_CONNECTIONS.hasOwnProperty(name)) {
+								USER_CONNECTIONS[name] = {
+									connections: [connection],
+									counter: 0
+								}
+								userConnectionId = 0;
+							}
+							else {
+								USER_CONNECTIONS[name].connections.push(connection);
+								userConnectionId = ++USER_CONNECTIONS[name].counter;
+							}
+
+							var uid, gid;
+							userWorker = createUserWorker(name, uid, gid)
+
+							userWorker.send({identify: {id: index, name: name, rootPath: dir}});
+							
+							userWorker.on("message", function workerMessage(workerMessage, handle) {
+								console.log(name + " worker message: message=" + JSON.stringify(message) + " handle=" + handle);
+
+								if(workerMessage.response || workerMessage.error) send(workerMessage);
+								else if(workerMessage.message) {
+									for(var conn in USER_CONNECTIONS[name].connections) {
+										send(workerMessage.message, conn);
+									}
+								}
+								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
+								
+							});
+							
+							/*
+							setTimeout(function() {
+								user.send({resp: {
+									test: {foo: 1, bar: 2}
+								}});
+								
+							}, 3000);
+							*/
+							
+							console.log("userConnectionId=" + userConnectionId);
+
+							send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
+
+							if(commandQueue.length > 0) {
+								console.log("Running " + commandQueue.length + " commands from the command queue ...");
+								for(var i=0; i<commandQueue.length; i++) {
+									handle(commandQueue[i]);
+								}
+								commandQueue.length = 0;
+							}
+
+						}
+
+					});
+				}
 			}
 			else {
 				
-				var commands = command.split(".");
-				
-				var funToRun;
-				
-				if(commands.length > 1) {
-					// foo.bar.baz
-					funToRun = API;
-					for(var i=0; i<commands.length; i++) {
-						if(funToRun.hasOwnProperty(commands[i])) funToRun = funToRun[commands[i]];
-						else return send({error: "Unknown command=" + command + ": " + message});
-					}
-				}
-				else {
-					if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + message});
-					
-					funToRun = API[command];
-
-				}
-				
-				if (typeof funToRun !== "function") {
-					send({error: "API error: Unknown command=" + command});
-				}
-				else {
-					funToRun(user, json, function(err, answer) {
-						if(err) {
-							log(err);
-							
-							if(!err.stack) console.trace("Stack ...")
-							else log(err.stack);
-							
-							send({error: "API error: " + (err.message ? err.message : err) + ""});
-							
-						}
-						else {
-							send({resp: answer});
-						}
-					}, userConnectionId);
-				}
+				userWorker.send({commands: {command: command, json: json, id: id}});
 				
 			}
 			
-			function send(answer) {
+			function send(answer, conn) {
 				
-				answer.id = id;
-				
+				if(conn == undefined) conn = connection;
+
 				var str = JSON.stringify(answer);
 				
 				if(str.length > 100) log(IP + " <= " + str.substr(0,100) + " ... (" + str.length + " characters)");
 				else log(IP + " => " + str);
 				
-				connection.write(str);
+				conn.write(str);
 			}
 		}
 		
@@ -344,187 +370,21 @@ function sockJsConnection(connection) {
 		
 		log("Closed " + protocol + " from " + IP);
 		
-		if(user) {
+		if(userWorker) {
 			
-			var connections = user.disconnected(userConnectionId);
-			
-			if(connections === 0) delete CONNECTED_USERS[user.name];
+			USER_CONNECTIONS[userName].connections.splice(USER_CONNECTIONS[userName].connections.indexOf(connection), 1);
+
+			if(USER_CONNECTIONS[userName].connections.length === 0) {
+				userWorker.send({teardown: true}); // Worker should be exiting ...
+				delete USER_CONNECTIONS[userName];
+			}
+
 		}
 
 	});
 	
 }
 
-
-function identify(json, IP, callback) {
-	
-	// Do not put this into the API because it would be weird handling user id
-	
-	if(json.hasOwnProperty("username") && json.hasOwnProperty("password")) {
-		var fs = require("fs");
-		
-		fs.readFile("users.pw", "utf8", function(err, data) {
-			if(err) throw err;
-			
-			var row = data.split(/\r|\r\n/);
-			
-			console.log("Loaded users.pw (" + row.length + " users found)");
-			
-			var user;
-			
-			for(var i=0, test; i<row.length; i++) {
-				test = row[i].trim().split("|");
-				if(test[0] == json.username && test[1] == json.password) userOK(i, test[0], test[2]);
-				else console.log("Not " + test[0]);
-				// Check all to prevent timing attack
-			}
-			
-			if(user) callback(null, user);
-			else callback(new Error("Wrong username=" + json.username + " or password"));
-			
-			function userOK(index, name, dir) {
-				
-				if(!CONNECTED_USERS.hasOwnProperty(name)) {
-					CONNECTED_USERS[name] = new User(index, name, dir);
-				}
-				
-				user = CONNECTED_USERS[name];
-			}
-			
-		});
-		
-	}
-	else {
-		callback(new Error("Identify with username and password"));
-	}
-	
-}
-
-
-function log(msg, lvl, noTrace) {
-	
-	var USE_COLORS = true;
-
-	//var _emerg = 0;
-	//var _alert = 1;
-	//var _crit = 2;
-	//var _err = 3;
-	var _warning = 4;
-	var _notice = 5;
-	var _info = 6;
-	var _debug = 7;
-
-	if(lvl == undefined) lvl = _info;
-
-	if(lvl <= LOG_LEVEL) {
-		
-		var where = "";
-
-		if(!noTrace) {
-			var stack = (new Error().stack).split(/\r\n|\n/);
-			//CONSOLE_LOG_ORIGINAL("stack=" + stack);
-			var dir = process.cwd();
-			var dir2 = dir.replace(/server$/, "");
-			//CONSOLE_LOG_ORIGINAL("dir=" + dir);
-			//CONSOLE_LOG_ORIGINAL("dir2=" + dir2);
-			var row = stack[2];
-			if(row.indexOf("at Console.console.log") != -1) row = stack[3];
-			//CONSOLE_LOG_ORIGINAL("row=" + row);
-			var indexDir = row.indexOf(dir);
-			var indexDir2 = row.indexOf(dir2);
-			//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
-			//CONSOLE_LOG_ORIGINAL("indexDir2=" + indexDir2);
-
-			if(indexDir == -1) {
-				indexDir = indexDir2;
-				dir = dir2;
-			}
-
-			if(indexDir != -1) {
-				where = row.substring(indexDir + dir.length);
-			}
-			else {
-				where = row.replace(dir, "").replace(dir2, "").trim();
-			}
-
-			if(where.charAt(0) == "/") where = where.substr(1);
-
-			where = "(" + where + ")";
-
-			//CONSOLE_LOG_ORIGINAL("indexDir=" + indexDir);
-			
-		}
-
-
-		//CONSOLE_LOG_ORIGINAL("where=" + where);
-
-		var dateString = myDate() + " ";
-
-		//CONSOLE_LOG_ORIGINAL("msg=" + msg);
-
-		if(typeof msg != "string") {
-			CONSOLE_LOG_ORIGINAL(where + ":");
-			CONSOLE_LOG_ORIGINAL(msg);
-			//throw new Error("Log message is not a stirng! msg:" + msg);
-		}
-		else {
-
-
-			if(msg.indexOf("\n") != -1) {
-				// Pad each line
-				var padding = " ".repeat(dateString.length);
-				msg = msg.replace(new RegExp("\\n", "g"), "\n" + padding);
-			}
-
-			var colorDim = "\x1b[2m";
-			var colorReset = "\x1b[0m"
-			var colorBlink = "\x1b[5m";
-			var colorUnderscore = "\x1b[4m";
-			
-
-			var msgString = "";
-
-			if(USE_COLORS) {
-				msgString = colorDim + dateString;
-
-				if(lvl <= 6) msgString += colorReset;
-
-				if(lvl == _warning) msgString += colorBlink + colorUnderscore;
-				//else if(lvl == _notice) msgString += colorUnderscore;
-
-				msgString += msg + " " + colorDim + where;
-
-				msgString += colorReset;
-			}
-			else {
-				msgString = dateString + msg + " " + where;
-			}
-
-			if(lvl <= _warning) CONSOLE_WARN_ORIGINAL(msgString);
-			else CONSOLE_LOG_ORIGINAL(msgString);
-		}
-
-
-	}
-	function myDate() {
-		var d = new Date();
-		
-		var hour = addZero(d.getHours());
-		var minute = addZero(d.getMinutes());
-		var second = addZero(d.getSeconds());
-		
-		var day = addZero(d.getDate());
-		var month = addZero(1+d.getMonth());
-		var year = d.getFullYear();
-		
-		return year + "-" + month + "-" + day + " (" + hour + ":" + minute + ":" + second + ")";
-		
-		function addZero(n) {
-			if(n < 10) return "0" + n;
-			else return n;
-		}
-	}
-}
 
 // Overload console.log 
 console.log = function() {
@@ -946,7 +806,7 @@ function isObject(obj) {
 	return obj === Object(obj);
 }
 
-
+/*
 API.serve = function serve(user, json, callback) {
 	
 	// Serve a folder via HTTP
@@ -960,7 +820,7 @@ API.serve = function serve(user, json, callback) {
 	});
 	
 }
-
+*/
 
 
 var httpEndpoints = {};
@@ -1206,5 +1066,53 @@ function randomString(letters) {
 	return text;
 }
 
+function createUserWorker(name, uid, gid) {
+	var childProcess = require("child_process");
+
+
+	// You can have different group and user. Default is the user/group running the node process
+	var options = {};
+
+	if(uid != undefined) options.uid = uid;
+	if(gid != undefined) options.gid = gid;
+
+	if(uid == undefined || uid == -1) {
+		var os = require("os");
+		var info = os.userInfo ? os.userInfo() : {username: "ROOT"};
+
+		log("No uid specified!\nUSER WILL RUN AS username=" + info.username, WARN);
+	}
+
+	try {
+		var worker = childProcess.fork("user_worker.js", options);
+	}
+	catch(err) {
+		if(err.code == "EPERM") {
+			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ". Try running the server with a privileged user.", NOTICE);
+			throw new Error("Unable to spawn worker! (" + err.message + ")");
+		}
+		else throw err;
+	}
+
+	worker.on("close", function workerClose(code, signal) {
+		console.log(name + " worker close: code=" + code + " signal=" + signal);
+	});
+
+	worker.on("disconnect", function workerDisconnect() {
+		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+	});
+
+	worker.on("error", function workerClose(err) {
+		console.log(name + " worker error: err.message=" + err.message);
+	});
+
+	worker.on("exit", function workerExit(code, signal) {
+		console.log(name + " worker exit: code=" + code + " signal=" + signal);
+	});
+
+
+	return worker;
+
+}
 
 main();
