@@ -191,8 +191,8 @@ function getArg(word) {
 	
 	if(word.length == 0) throw new Error("Need at least one word to find an argument!");
 	
-	var regexStr = "(-" + word[0];
-	for(var i=1; i<word.length; i++) regexStr += "|--" + word[i] + "=?";
+	var regexStr = "( -" + word[0];
+	for(var i=1; i<word.length; i++) regexStr += "| --" + word[i] + "=";
 	regexStr += ")\\s?([^-\\s]+)?"
 	
 	//console.log("regexStr=" + regexStr);
