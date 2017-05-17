@@ -3,14 +3,23 @@
 "use strict";
 
 
+// Log levels
+var WARN = 4;
+var NOTICE = 5;
+var INFO = 6;
+var DEBUG = 7;
+
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
-	// Set log module to show nice log messages
+	// Enhanced console.log ...
 	var logModule = require("./log.js");
-	logModule.setLogLevel(7);
+
+	var logLevel = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
+
+	logModule.setLogLevel(logLevel);
 	log = logModule.log;
 
-	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout
+	var logFile = getArg(["lf", "logfile"]) || null; // default: Write to stdout, if specified write to a file
 
 	if(logFile) logModule.setLogFile(logFile);
 
@@ -41,14 +50,14 @@ var log; // Using small caps because it looks and feels better
 var CURRENT_USER = "ROOT";
 
 var USERNAME = getArg(["u", "user", "username"]);
-var PASSWORD = getArg(["p", "pw", "password"]);
+var PASSWORD = getArg(["pw", "pw", "password"]);
 
 if(USERNAME && !PASSWORD) {
 	// Ask for password ...
 }
 
 
-var SETUID = getArg(["setuid", "setuid"]) || "YES"; // If we should use UNIX user permissions when reading/writing files
+var NOUID = getArg(["nouid"]) || false; // Use -nouid to allow users without a uid specified
 
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "./users.pw";
 
@@ -75,11 +84,7 @@ var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 
 
 
-// Log levels
-var WARN = 4;
-var NOTICE = 5;
-var INFO = 6;
-var DEBUG = 7;
+
 
 
 process.on("SIGINT", function sigInt() {
@@ -296,11 +301,15 @@ function sockJsConnection(connection) {
 					(function checkUser(username, password) {
 						
 						if(USERNAME) {
+							console.log("Using USERNAME=" + USERNAME+ " from argument ...")
 							if(USERNAME == username && PASSWORD == password) userOK(0, USERNAME, true);
-							else wrongPw();
+							else {
+								console.log("'" + USERNAME + "' != '" + username + "' or '" + PASSWORD + "' != '" + password + "'");
+								wrongPw();
+							}
 						}
 						else {
-
+							console.log("Using PW_FILE=" + PW_FILE + " ...");
 							var fs = require("fs");
 							fs.readFile(PW_FILE, "utf8", function(err, data) {
 								if(err) throw err;
@@ -323,9 +332,13 @@ function sockJsConnection(connection) {
 									hasPw = pPass ? pPass.length > 0 : false;
 									hasUid = pUid ? pUid.length > 0 : false;
 
-									if(!hasUid && SETUID!="NO") throw new Error("user=" + pUser + " in " + PW_FILE + " has no uid! (uid=" + pUid + ")");
-
-									if(pUser == username && pPass == password) userOK(i, pUser, hasPw, pRootDir, pUid, pGid);
+									if(pUser == username && pPass == password) {
+										
+										if(!hasUid && !NOUID) {
+											throw new Error("user=" + pUser + " in " + PW_FILE + " has no uid! (uid=" + pUid + ")\nIngore this check by adding -nouid to the arguments.");
+										}
+										userOK(i, pUser, hasPw, pRootDir, pUid, pGid);
+									}
 									else console.log("Not " + pUser);
 									// Check all to prevent timing attack (no break or return)
 								}
@@ -336,7 +349,9 @@ function sockJsConnection(connection) {
 						}
 
 						function wrongPw() {
-							send({error: "Wrong username=" + username + " or password"});
+							var errorMsg = "Wrong username=" + username + " or password";
+							if(USERNAME) errorMsg += "(Username specified in server arguments)";
+							send({error: errorMsg});
 						}
 
 						function userOK(index, name, hasPassword, rootPath, uid, gid) {
@@ -396,7 +411,11 @@ function sockJsConnection(connection) {
 
 								}
 							}
-							else acceptUser();
+							else {
+								
+
+								acceptUser();
+							}
 
 							function acceptUser(homeDir, shell) {
 								
@@ -424,7 +443,7 @@ function sockJsConnection(connection) {
 								userWorker.send({identify: userInfo});
 								
 								userWorker.on("message", function messageFromWorker(workerMessage, handle) {
-									console.log(name + " worker message: message=" + JSON.stringify(message) + " handle=" + handle);
+									console.log("Worker message from " + name + ": " + shortString(workerMessage) + " handle=" + handle);
 
 									if(workerMessage.resp || workerMessage.error) send(workerMessage);
 									else if(workerMessage.message) {
@@ -501,18 +520,18 @@ function sockJsConnection(connection) {
 				
 				if(conn == undefined) conn = connection;
 
+				if(answer.id == undefined) answer.id = id;
+
 				var str = JSON.stringify(answer);
 				
-				if(str.length > 100) log(IP + " <= " + str.substr(0,100) + " ... (" + str.length + " characters)");
-				else log(IP + " => " + str);
+				log(IP + " => " + shortString(str));
 				
 				conn.write(str);
 			}
 		}
-		
-		
-		
+
 	});
+
 	connection.on("close", function() {
 		
 		log("Closed " + protocol + " from " + IP);
@@ -532,6 +551,16 @@ function sockJsConnection(connection) {
 	
 }
 
+
+function shortString(stringOrObject, limit) {
+	if(limit == undefined) limit = 100;
+
+	var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject; 
+
+	if(str.length > limit) str = str.substr(0,limit) + " ... (" + str.length + " characters)";
+	
+	return str;
+}
 
 // Overload console.log 
 console.log = function() {
@@ -1224,7 +1253,7 @@ function createUserWorker(name, uid, gid) {
 	if(uid != undefined) options.uid = parseInt(uid);
 	if(gid != undefined) options.gid = parseInt(gid);
 
-	if(uid == undefined || uid == -1) {
+	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 	}
 

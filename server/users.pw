@@ -1,2 +1,4 @@
-testuser|test|../userdirs/demo/|999|999
+admin|admin
+demo|demo|../userdirs/demo/
+testuser|test|/home/testuser|999|999
 testuser2|test|/home/testuser2|1001|1001
