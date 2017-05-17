@@ -35,13 +35,7 @@ else
 
 	echo Starting the server ...
 	cd server
-	serverArg="--loglevel=5 --username=admin --password=admin"
-
-	# Check if sudo/root
-	if [ "$EUID" -ne 0 ]
-	  # Not root, use a different port then 80
-	  then serverArg="$serverArg --port=8080"
-	fi
+	serverArg="--loglevel=5 --username=admin --password=admin --port=8099"
 
 	# Check if we should use nodejs or just node
 	if type nodejs >/dev/null

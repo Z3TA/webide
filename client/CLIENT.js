@@ -34,7 +34,7 @@ var CLIENT = {}; // Client object is global
 		defaultURL = window.location.href.replace(/\/.*/, "/jzedit"); // Replace everything after hostname
 		
 		if(protocol.toLowerCase() == "file") {
-			defaultURL = "http://localhost/jzedit";
+			defaultURL = "http://localhost:8099/jzedit";
 			
 			if(runtime == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
 			
