@@ -1,6 +1,9 @@
 (function() {
 	"use strict";
 	
+	var DEFAULT_USERNAME = "admin";
+	var DEFAULT_PASSWORD = "admin";
+
 	var serverLoginDialog = EDITOR.createWidget(buildServerLoginDialog);
 	var menuItem;
 	
@@ -34,8 +37,8 @@
 			}
 			else {
 				if(localStorage) {
-					var userValue = localStorage.getItem("editorServerUser");
-					var pwValue = localStorage.getItem("editorServerPw");
+					var userValue = localStorage.getItem("editorServerUser") || DEFAULT_USERNAME;
+					var pwValue = localStorage.getItem("editorServerPw") || DEFAULT_PASSWORD;
 				}
 				
 				if(userValue && pwValue) {
@@ -143,8 +146,8 @@
 		
 		if(!urlValue) urlValue = defaultUrl;
 		if(!userValue) {
-			userValue = "admin";
-			pwValue = "admin";
+			userValue = DEFAULT_USERNAME;
+			pwValue = DEFAULT_PASSWORD;
 		}
 
 		var url = document.createElement("input");

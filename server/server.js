@@ -75,12 +75,11 @@ var HTTP_SERVER;
 // On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
 // Use -p 8099 or --port 8099 as start arguments to listen to port 8099 instead of port 80
 var HTTP_PORT = getArg(["p", "port"]) || 80; 
+if(!isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
 
 // Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
 var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
-
-
 
 
 
@@ -106,7 +105,9 @@ function main() {
 	// Get the current user (who runs this server)
 	var os = require("os");
 	var info = os.userInfo ? os.userInfo() : {username: "ROOT"};
-	CURRENT_USER = info.username;
+	var env = process.env;
+
+	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
 
 	log("Server running as user=" + CURRENT_USER);
 
@@ -150,6 +151,10 @@ function main() {
 
 
 	
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 function isIpV4(ip) {
@@ -240,7 +245,7 @@ function sockJsConnection(connection) {
 			var xRealIp = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
 
 			if(xRealIp == undefined) {
-				log("Unable to get IP address from x-real-ip headers", INFO);
+				log("Unable to get IP address from x-real-ip headers", DEBUG);
 			}
 
 		}
@@ -1179,8 +1184,15 @@ function makeUrl(dir) {
 	var address = HTTP_SERVER.address();
 	
 	
-	var port = address ? address.port : HTTP_PORT;
-	
+	var port = HTTP_PORT;
+
+	if(address) { // Sanity check
+		if(address.port) {
+			if(address.port != HTTP_PORT) throw new Error("address.port=" + address.port + " is not the same as HTTP_PORT=" + HTTP_PORT);
+		}
+
+	}
+
 	
 	var ip = HTTP_IP;
 	if(ip == "0.0.0.0" || ip == "::") {

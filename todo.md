@@ -45,6 +45,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Check if server was started in start.sh before starting the client.
+
+
 MAJOR REFACTOR OF SERVER to fork user workers so we can setuid for better security.
 
 hmm ... We probably sholdn't run the web serving as root ...
