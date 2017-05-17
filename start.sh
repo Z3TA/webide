@@ -25,7 +25,7 @@ function startClient {
 
 
 # Check if the server is already running
-if (ps aux | grep nodej*s*.*server\.js > /dev/null) then
+if (ps aux | grep [n]odej*s*.*server\.js > /dev/null) then
 	echo Looks like the server is already running!
 
 	startClient
