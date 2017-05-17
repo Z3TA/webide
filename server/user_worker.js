@@ -20,13 +20,26 @@ API.mercurial = require("./plugin/mercurial.js");
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 
-var log = require("./log.js").log;
+var logModule = require("./log.js");
+var log = logModule.log;
+
+var getArg = require("./getArg.js");
+
+var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
+logModule.setLogLevel(LOGLEVEL);
+
+// Log levels
+var WARN = 4;
+var NOTICE = 5;
+var INFO = 6;
+var DEBUG = 7;
+
 
 
 // Set default file permissions
 var newmask = parseInt("0027", 8); // 0o027
 var oldmask = process.umask(newmask);
-console.log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8));
+log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
 
 
 var parentRequestCallback = {}; // id: callback function

@@ -2,6 +2,10 @@
 
 "use strict";
 
+var getArg = require("./getArg.js");
+
+var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
+
 
 // Log levels
 var WARN = 4;
@@ -14,9 +18,8 @@ var log; // Using small caps because it looks and feels better
 	// Enhanced console.log ...
 	var logModule = require("./log.js");
 
-	var logLevel = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
-	logModule.setLogLevel(logLevel);
+	logModule.setLogLevel(LOGLEVEL);
 	log = logModule.log;
 
 	var logFile = getArg(["lf", "logfile"]) || null; // default: Write to stdout, if specified write to a file
@@ -167,49 +170,6 @@ function isPrivatev4IP(ip) {
    return parts[0] === '10' || parts[0] === '127' ||
 	  (parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
 	  (parts[0] === '192' && parts[1] === '168');
-}
-
-
-function getArg(word) {
-	
-	/*
-		Searches the process arguments for 
-		ex: word = ["p", "papa", "pap"];
-		
-		-p 123 
-		--papa 123 
-		--pap 123
-		--papa=123 
-		--pap=123
-	*/
-	
-	var args = process.argv.join(" ");
-	
-	if(typeof word == "string") {
-		word = [word];
-	}
-	
-	if(word.length == 0) throw new Error("Need at least one word to find an argument!");
-	
-	var regexStr = "( -" + word[0];
-	for(var i=1; i<word.length; i++) regexStr += "| --" + word[i] + "=";
-	regexStr += ")\\s?([^-\\s]+)?"
-	
-	//console.log("regexStr=" + regexStr);
-	
-	var argReg = new RegExp(regexStr, "i");
-	
-	var match = args.match(argReg);
-	//console.log("match=" + JSON.stringify(match));
-	if(match !== null) {
-		//console.log("match.length=" + match.length);
-		var value = match[match.length-1];
-		//console.log("value=" + value);
-		if(value === undefined) return true;
-		else return value;
-	}
-	else return undefined;
-	
 }
 
 
@@ -1261,6 +1221,7 @@ function createUserWorker(name, uid, gid) {
 
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
+	var args = ["--loglevel=" + LOGLEVEL];
 
 	if(uid != undefined) options.uid = parseInt(uid);
 	if(gid != undefined) options.gid = parseInt(gid);
@@ -1272,7 +1233,7 @@ function createUserWorker(name, uid, gid) {
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
 
 	try {
-		var worker = childProcess.fork("user_worker.js", options);
+		var worker = childProcess.fork("user_worker.js", args, options);
 	}
 	catch(err) {
 		if(err.code == "EPERM") {
