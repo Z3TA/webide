@@ -35,7 +35,7 @@ else
 
 	echo Starting the server ...
 	cd server
-	serverArg="--loglevel=6 --username=admin --password=admin"
+	serverArg="--loglevel=5 --username=admin --password=admin"
 
 	# Check if sudo/root
 	if [ "$EUID" -ne 0 ]
