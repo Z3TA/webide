@@ -1,0 +1,62 @@
+Contributing
+============
+
+Send any changes to zeta@zetafiles.org, with a note:
+"I give you full irrevocable copyright for this code, including but not limited to the right to sell, and distribute."
+
+
+Get the source code
+-------------------
+Install Mercurial SCM: https://www.mercurial-scm.org (try "hg --version" in command-prompt/terminal to see if it exists)
+
+Clone the project: 
+cd my-projects (where you want to place the files)
+hg clone https://hg.webtigerteam.com/repo/jzedit/
+
+
+
+
+
+
+Mercurial commands:
+-------------------
+# Clone the repository/folder
+$ hg clone https://hg.webtigerteam.com/repo/jzedit/ JZedit-new-feature
+
+# Make sure you are up to date
+$ hg pull
+
+# Make changes and commit
+$ hg ci -m "my changes"
+
+# See latest changeset(s)
+$ hg log -l 10
+
+# Export the changeset(s)
+$ hg export 3 > change3.diff 
+$ hg export 4 > change4.diff 
+# replace 3, 4, etc with the actual changeset
+
+# Or export changesets 123 to 150 together
+$ hg export 123:150 > changes.txt
+
+
+
+Importing (notes to self)
+-------------------------
+
+Guide from: https://www.mercurial-scm.org/guide
+
+# First clone the repository/folder to have an integration sandbox
+
+$ hg clone project integration
+$ cd integration
+$ hg import change3.diff
+$ hg import change4.diff
+
+# Test changes ... If you like them, pull the changes into the main repository
+
+$ cd ../project
+$ hg pull ../integration
+ 
+
