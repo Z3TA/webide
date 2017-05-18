@@ -1,14 +1,12 @@
 
-JZeditor
-========
-
-Ctrl + P, or Ctrl + O to open a file ... Ctrl + hmm dunno yet to show a list of all commands.
+JZedit
+======
 
 You need Node.JS to run the server: https://nodejs.org/
 
-node server/server.js --port=80
+node server/server.js --port=8080 --user=admin --pw=admin
 
-Then navigate to http://localhost/ in your favorite browser. 
+Then navigate to http://127.0.0.1:8080/ in your favorite browser. 
 
 ---
 
@@ -43,32 +41,12 @@ Or run it via ./start.sh
 
 Mac OS X
 --------
-Not yet officially supported (let me borrow your Mac and I'll fix it)
+We do not yet have a developer licence for Mac OS X, meanwhile use the editor in Safari ...
 
-Make the osx_start.sh script executable:
-Via terminal: chmod u+x my_shell_script.sh
+node server/server.js --port=8080 --user=admin --pw=admin
 
+Type this address in the browser: http://127.0.0.1:8080/
 
-
-Updates
-=======
-
-New releases will be notified on the web page, via e-mail (opt-in) and RSS.
-
-Mercurial (hg) is used for version control. You should already have cloned from the repository:
-hg clone http://hg.webtigerteam.com/JZedit
-
-Before updating it's a good idea to note the current changeset:
-hg log --limit 1
-
-If something breaks, you can go back to the last working changeset:
-hg up ###
-
-A new release usually means new feature(s). Each release will be followed up with a few weeks of only bug fixes.
-To update the editor, or get the latest bug fixes, type the following command in your command-prompt/terminal: 
-hg pull && hg up
-
-There's (currently) no maintenance on old releases after a new release.
 
 
 
@@ -76,7 +54,7 @@ Reporting bugs
 ==============
 
 Open a new file, and write down instructions on how to repeat the bug.
-Save the file, uncluding "bugreport" in the file name (without the quotes)
+Save the file with "bugreport" in the file name (without the quotes)
 Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
 
 
@@ -91,45 +69,51 @@ Make style changes in settings_overload.js instead of editor.js
 
 For the optimal text experience, try different system/OS font settings like hinting etc.
 
-Ex: Turn off anti-alias in Windows: Control Panel > Performance Options Visual Effects. Uncheck "Smooth edges of screen fonts"
+Example: Turn off anti-alias in Windows: Control Panel > Performance Options Visual Effects. Uncheck "Smooth edges of screen fonts"
 
-You can find 'DejaVu Sans Mono' and 'Liberation Mono' in gfx/font, witch should look good both with and without anti-alias. 
-(You need to install them to your system for them to work in the editor!)
+You can find 'DejaVu Sans Mono' and 'Liberation Mono' in gfx/font, which should look good both with and without anti-alias. 
+(You might need to install them to your system for them to work in the editor!)
 
-
-Problems on Linux
------------------
-
-There's a bug in some versions of Chromium for Linux,
-that makes the editor sometimes renders with subpixel-antailas/LCD-text and sometimes not ...
-Unless you have set global.settings.sub_pixel_antialias = false (then it will always render without subpixel-antailas/LCD-text).
 
 
 "LCD Text" / sub-pixel-antialas
 --------------------------------
-This is the default on most operating systems. But some people might see "rainbows".
 If you take a screen-shot and zoom in, you will notice the text edges has red, green or blue colors!
-This works because each pixel on LCD monitors has a red, green and blue line!
+This creates an "anti-alias" effect because each pixel on LCD monitors has a red, green and blue line!
+
+"LCD Text" is the default on most operating systems. But some people might see "rainbows".
+It's also uneccesary with a high-res monitor.
 
 
 Turn off "LCD Text" / sub-pixel-antialas
 -----------------------------------------
-Start the program with --disable-lcd-text. (See start.bat / start.sh)
+Start the program with the argument --disable-lcd-text. (See start.bat / start.sh)
 And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
-Or turn it off in your operating system!
-
-
-What I think looks best (default settings)
-------------------------------------------
-Consolas 15px on Windows! (with sub-pixel-anti-alias)
-DejaVu Sans Mono 13px, or Liberation Mono 12px on Linux (Ubuntu).
+Or turn it off in your operating system! (It's already turned off if you have a Mac with "Retina" display)
 
 
 
+Running as a cloud editor (security hardening)
+==============================================
+You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
 
-Compiling dependencies for nw.js
---------------------------------
+If you choose to open up the editor to others, i'ts adviced to run the editor server.js in a "sandbox" enviroment,
+for example a Virtual Private Server. And create a system account for each user.
+
+Set user credentials in server/users.pw
+
+And Create an apparmor profile, see apparmor/makeprofile.sh
+
+
+
+
+
+
+
+
+Compiling dependencies for old nw.js
+------------------------------------
 To build for the right modules version:
 node-gyp rebuild --target=1.2.0 --msvs_version=2015
 
