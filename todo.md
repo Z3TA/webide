@@ -253,6 +253,9 @@ Run the tests (and make sure there are no errors)
 BUGS (and issues)
 =================
 
+Can't read binary ? (encoding_converter.js) needs test case!
+
+
 When you select from EOL, to the left, then extend the selection further to the left, the last (right) char is deselected!
 
 

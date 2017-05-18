@@ -38,6 +38,8 @@
 
 			function fileRead(err, path, buffer) {
 				// Todo: Detect the right encoding ... (probably impossibe)
+				if(err) throw err;
+				if(buffer == undefined) throw new Error("buffer=" + buffer + " path=" + path);
 				var text = decodeBytes(buffer, "cp1252"); // or cp1251
 				
 				file.reload(text);
