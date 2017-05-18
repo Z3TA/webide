@@ -1,0 +1,20 @@
+# Last Modified: Thu May 18 15:57:11 2017
+#include <tunables/global>
+
+/usr/bin/jzedit {
+  #include <abstractions/apache2-common>
+  #include <abstractions/base>
+  #include <abstractions/python>
+
+  capability setgid,
+  capability setuid,
+
+  /bin/dash rix,
+  /dev/tty rw,
+  /home/** rw,
+  /home/zeta/dev/jzedit** rix,
+  /usr/bin/hg rix,
+  /usr/bin/jzedit rix,
+  /usr/bin/python2.7 ix,
+
+}
