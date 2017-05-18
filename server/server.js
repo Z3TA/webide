@@ -18,7 +18,6 @@ var log; // Using small caps because it looks and feels better
 	// Enhanced console.log ...
 	var logModule = require("./log.js");
 
-
 	logModule.setLogLevel(LOGLEVEL);
 	log = logModule.log;
 
