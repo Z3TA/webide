@@ -45,7 +45,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Apparmor profile
+Trying to get universal start.js to work on Windows and Mac
 
 Working on Mercurial resolve, etc
 

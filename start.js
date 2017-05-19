@@ -143,27 +143,27 @@ function startClient(ip, port) {
 
 	tryPrograms.push(["safari", [url]]);
 
-	tryPrograms.push(["nw", ["."]]); // Any version of nw.js
+	//tryPrograms.push(["nw", ["."]]); // Any version of nw.js
 
 	tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
 
-	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
-	tryPrograms.push(["chrome", ["--app=" + url]]);
+	//tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
+	//tryPrograms.push(["chrome", ["--app=" + url]]);
 
 	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
 	//tryPrograms.push(["firefox", ["-chrome", url]]);
 	//tryPrograms.push(["firefox", ["-new-tab", url]]);
-	tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
+	//tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
 	
 
-	tryPrograms.push(["iexplore", ["-k", url]]);
+	//tryPrograms.push(["iexplore", ["-k", url]]);
 
 
 	// Safari doesn't support chromeless :(
 	//tryPrograms.push(["safari", ["-k", url]]);
 
 
-	tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
+	//tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
 
 
 
@@ -177,15 +177,26 @@ function startClient(ip, port) {
 	
 
 	function tryProgram(arr) {
-		var program = arr[0];
+		var programOriginal = arr[0];
 		var args = arr[1] || [];
-
+		var program;
+		
 		if(platform == "darwin") {
 			
-			args.unshift(program);
+			args.unshift(programOriginal);
 			args.unshift("-a");
 			program = "open";
 		}
+		else if(platform == "win32") {
+			
+			args.unshift(programOriginal);
+			args.unshift("start");
+			args.unshift("/c");
+			
+			program = "cmd";
+
+		}
+		else program = programOriginal;
 
 		attemptLaunch(program, args, function triedProgram(err) {
 			if(err) {
@@ -202,7 +213,7 @@ function startClient(ip, port) {
 				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
 				else tryProgram(tryPrograms[programIndex]);
 			}
-			else log("Successfully started program=" + program);
+			else log("Successfully started program=" + programOriginal);
 		});
 	}
 
@@ -234,7 +245,12 @@ function startClient(ip, port) {
 		if(cp.connected) return callback(null);
 
 		cp.on("close", function programClose(code, signal) {
-			callback(new Error(process + " close: code=" + code + " signal=" + signal));
+			log(process + " close: code=" + code + " signal=" + signal, DEBUG);
+			
+			code = parseInt(code);
+			if(code === 0) callback(null);
+			else callback(new Error(process + " close: code=" + code + " signal=" + signal));
+
 		});
 		
 		cp.on("disconnect", function programDisconnect() {
@@ -242,17 +258,17 @@ function startClient(ip, port) {
 		});
 		
 		cp.on("error", function programClose(err) {
+			log
 			callback(new Error(process + " error: err.message=" + err.message));
 		});
 		
 		cp.on("exit", function programExit(code, signal) {
-			callback(new Error(process + " exit: code=" + code + " signal=" + signal));
+			log(process + " exit: code=" + code + " signal=" + signal, DEBUG);
 		});
 
 		setTimeout(callback, 250);
 
 		function callback(err) {
-			if(err) log(err.message, DEBUG);
 			if(callbackFunction) callbackFunction(err);
 			callbackFunction = null; // Only callback once!
 		}
