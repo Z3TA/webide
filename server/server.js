@@ -189,7 +189,7 @@ function main() {
 		broadcastServer.bind(function() {
 			broadcastServer.setBroadcast(true);
 			// We must send at least one broadcast message to be able to receive messages!
-			for(var i=0; i<broadcastAddresses.length; i++) advertise(broadcastAddresses[i], broadcastServer);
+			for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
 		});
 
 		// Client
@@ -211,7 +211,14 @@ function main() {
 		});
 
 		broadcastClient.bind(broadcastPort);
-
+		
+		function setAdvertiseInterval(broadcastAddress) {
+			// We need to keep sending messages, or we will not receive any!
+			setInterval(function() {
+				advertise(broadcastAddress, broadcastServer);
+			}, 4500); // Need to send often (every 4500ms) to be able to receive messages
+		}
+		
 		function advertise(broadcastAddress) {
 			var message = new Buffer(serverAdvertiseMessage);
 			broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
