@@ -2,9 +2,18 @@
 
 REM Start the server if it's not already running
 SET NODE=node
-cd server
-start %NODE% server.js
-cd ..
+
+tasklist /FI "IMAGENAME eq node.exe" 2>NUL | find /I /N "node.exe">NUL
+if "%ERRORLEVEL%"=="0" (
+  echo Server is probably already running
+) else (
+  echo Starting server ...
+  cd server
+  start %NODE% server.js --username=admin --password=admin
+  cd ..
+)
+
+
 
 SET NW_PATH=runtime\nwjs-v0.12.3-win-x64\nw.exe
 SET EDITOR_PATH=.
@@ -16,10 +25,12 @@ REM Interesting enough, it does not exists in http://src.chromium.org/svn/trunk/
 
 REM Use REM to comment out
 
-echo Argument1: %1
+REM echo Argument1: %1
 
 if "%1" == "restart" (
+  echo Client will be restarted if it crashes
   REM When restart is the first argument, the editor will restart on errorlevel 1
+  REM We do however have to leave the cmd window open ...
   :restart
   REM %NW_PATH% %EDITOR_PATH% --remote-debugging-port=57341
   REM Can not use start command if we want to catch errorlevel
