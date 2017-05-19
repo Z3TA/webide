@@ -8,8 +8,23 @@
 
 	EDITOR.on("mouseScroll", onScroll);
 	
+	var lastScroll = new Date();
 	
 	function onScroll(dir, steps, combo) {
+		
+		var time = new Date();
+		
+		console.log("scroll dir=" + dir + " time=" + (time - lastScroll));
+		
+		if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
+			// It's annoying if we limit scroll speed on most systems
+			// But on Mac it's super fast, so it's more annoying because it's too fast.
+			console.log("skipped scroll dir!");
+			return; // Fix insane fast scrolling
+		}
+		
+		
+		lastScroll = time;
 		
 		if(combo.sum == CTRL) {
 			// Resize text
