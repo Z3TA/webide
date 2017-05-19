@@ -124,10 +124,10 @@ function broadcast() {
 			serverFound = true;
 			startClient(ip, port, proto);
 			
-			clearInterval(askForServerInterval);
+			//clearInterval(askForServerInterval);
 			
 			broadcastClient.close();
-			multicastServer.close();
+			broadcastServer.close();
 			
 		}
 		
@@ -264,8 +264,12 @@ function startClient(ip, port, proto) {
 	
 	log("Starting client ...");
 	
+	var portPart = "";
+	
+	if(port != undefined) portPart = ":" + port;
+	
 	if(proto == undefined) proto = "http";
-	var url = "http://" + ip + ":" + port + "/";
+	var url = "http://" + ip + portPart + "/";
 	
 	var uid, gid;
 
