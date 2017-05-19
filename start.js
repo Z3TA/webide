@@ -140,40 +140,42 @@ function startClient(ip, port) {
 	
 
 	var tryPrograms = [];
-
-	tryPrograms.push(["safari", [url]]);
-
-	//tryPrograms.push(["nw", ["."]]); // Any version of nw.js
-
+		
+	// Always try nw.js first!
+	tryPrograms.push(["nw", ["."]]); // Any version of nw.js
 	tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
-
-	//tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
-	//tryPrograms.push(["chrome", ["--app=" + url]]);
+	
+	// We prefare the chromium/chrome browser!
+	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
+	tryPrograms.push(["chrome", ["--app=" + url]]);
 
 	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
-	//tryPrograms.push(["firefox", ["-chrome", url]]);
-	//tryPrograms.push(["firefox", ["-new-tab", url]]);
-	//tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
+	//tryPrograms.push(["firefox", ["-new-tab", url]]); // We can open a url in a new tab though
+	tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
 	
+	if(platform == "win32") {
+		// Only try IE on Windows
+		tryPrograms.push(["iexplore", ["-k", url]]);
+	}
+	
+	if(platform == "darwin") {
+		// Only try Safari on Mac
+		// Unfortunately Safari doesn't support chromless
+		// We might be able to remote the chrome after it started though, by using osascript
 
-	//tryPrograms.push(["iexplore", ["-k", url]]);
+		tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
 
-
-	// Safari doesn't support chromeless :(
-	//tryPrograms.push(["safari", ["-k", url]]);
-
-
-	//tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
-
-
+		//tryPrograms.push(["safari", [url]]);
+	}
+	
 
 	var programIndex = 0;
 	var startTime = timeStamp();
 	var maxTime = 3; // Seconds
-
+	var programStarted = false;
+	
 	tryProgram(tryPrograms[programIndex]);
-	
-	
+
 	
 
 	function tryProgram(arr) {
@@ -190,8 +192,9 @@ function startClient(ip, port) {
 		else if(platform == "win32") {
 			
 			args.unshift(programOriginal);
+			args.unshift('""');
 			args.unshift("start");
-			args.unshift("/c");
+			args.unshift("/C"); // /C
 			
 			program = "cmd";
 
@@ -203,7 +206,7 @@ function startClient(ip, port) {
 
 				var time = timeStamp();
 
-				if(time - startTime > maxTime) {
+				if(time - startTime > maxTime && programStarted) {
 					log((time - startTime) + " seconds since start. Asuming exit");
 					return process.exit();
 				}
@@ -213,7 +216,10 @@ function startClient(ip, port) {
 				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
 				else tryProgram(tryPrograms[programIndex]);
 			}
-			else log("Successfully started program=" + programOriginal);
+			else {
+				log("Successfully started program=" + programOriginal);
+				programStarted = true;
+			}
 		});
 	}
 
@@ -239,35 +245,54 @@ function startClient(ip, port) {
 			if(err.code == "EPERM") {
 				if(uid != undefined) log("Unable to spawn process=" + process + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
 			}
-			return callback(new Error("Unable to spawn process! (" + err.message + ")"));
+			var msg = "Unable to spawn process! (" + err.message + ")";
+			log(msg, DEBUG)
+			return callback(new Error(msg));
 		}
 		
-		if(cp.connected) return callback(null);
-
+		if(cp.connected) {
+			log("Asuming process=" + process + " was successful because it's connected!", DEBUG);
+			return callback(null);
+		}
+		
 		cp.on("close", function programClose(code, signal) {
-			log(process + " close: code=" + code + " signal=" + signal, DEBUG);
+			var msg = process + " close: code=" + code + " signal=" + signal
+			log(msg, DEBUG);
 			
 			code = parseInt(code);
-			if(code === 0) callback(null);
-			else callback(new Error(process + " close: code=" + code + " signal=" + signal));
+			if(code === 0) {
+				log("Asuming process=" + process + " was successful because close code=" + code);
+				callback(null);
+			}
+			else callback(new Error(msg));
 
 		});
 		
 		cp.on("disconnect", function programDisconnect() {
-			callback(new Error(process + " disconnect: cp.connected=" + cp.connected));
+			var msg = process + " disconnect: cp.connected=" + cp.connected;
+			log(msg, DEBUG)
+			callback(new Error(msg));
 		});
 		
 		cp.on("error", function programClose(err) {
-			log
-			callback(new Error(process + " error: err.message=" + err.message));
+			var msg = process + " error: err.message=" + err.message
+			log(msg, DEBUG);
+			callback(new Error(msg));
 		});
 		
 		cp.on("exit", function programExit(code, signal) {
-			log(process + " exit: code=" + code + " signal=" + signal, DEBUG);
+			var msg = process + " exit: code=" + code + " signal=" + signal;
+			log(msg, DEBUG);
 		});
-
-		setTimeout(callback, 250);
-
+		
+		/*
+		var waitTime = 250;
+		setTimeout(function started() {
+			log("Asuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
+			callback(null);
+		}, waitTime);
+		*/
+		
 		function callback(err) {
 			if(callbackFunction) callbackFunction(err);
 			callbackFunction = null; // Only callback once!
