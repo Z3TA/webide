@@ -45,7 +45,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Trying to get universal start.js to work on Windows and Mac
+Dont start server if server is already running, on Windows
+
+Making the editor somewhat usable on Mac
 
 Working on Mercurial resolve, etc
 

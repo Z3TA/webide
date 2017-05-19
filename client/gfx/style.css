@@ -11,7 +11,7 @@
 	
 	Press F6 to reload CSS while working on the editior
 	
-	Use Platform/theme system default colors: https://www.sitepoint.com/css-system-styles/
+	Do Not use platform/theme default colors! (eg. color: Menu) Or we'll end up with white text on white background (OS X) 
 	
 */
 
@@ -498,8 +498,8 @@ div.gotoFile li {
 	background-color: #2b2c27;
 	color: #838383;
 	
-	background-color: Menu;
-	color: MenuText;
+	background-color: #f6f6f6;
+	color: black;
 	
 	font-family: menu;
 	
@@ -510,8 +510,8 @@ div.gotoFile li {
 div.gotoFile li.selected {
 	background-color: #3c3f37;
 	
-	background-color: Highlight;
-	color: HighlightText;
+	background-color: #b5d4ff;
+	color: #b5d4ffText;
 	
 }
 
@@ -521,8 +521,8 @@ div.gotoFile li b {
 }
 
 div.gotoFile li:hover {
-	background-color: Highlight;
-	color: HighlightText;
+	background-color: #b5d4ff;
+	color: black;
 	cursor: pointer;
 }
 
@@ -599,7 +599,6 @@ div.gotoFile li:hover {
 	left: 100px;
 	z-index: 10;
 	background-color: rgba(217, 227, 250, 0.75);
-	background-color: Menu;
 	border: 1px solid;
 	border-color: #777 #6c6c6c #666;
 	border-radius: 3px;
@@ -626,8 +625,8 @@ div.gotoFile li:hover {
 	color: #838ca2;
 	color: #313a4f;
 	
-	color: MenuText;
-	background-color: Menu;
+	color: black;
+	background-color: #f6f6f6;
 	/*text-shadow: 0 1px white;*/
 	cursor: default;
 	display: block;
@@ -649,10 +648,10 @@ div.gotoFile li:hover {
 
 .menu li:hover {
 	color: white;
-	color: HighlightText;
+	color: black;
 	/*text-shadow: 0 1px rgba(0, 0, 0, 0.3);*/
 	background: #5a70b0;
-	background-color: Highlight;
+	background-color: #b5d4ff;
 	border-color: #5a70b0 #495d98 #42558a;
 	/* background-image: linear-gradient(to bottom, #7688bd, #4e64a3); */
 }
