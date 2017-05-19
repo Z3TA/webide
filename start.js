@@ -11,44 +11,18 @@
 
 
 var log = require("./server/log.js").log;
+
+// Log levels
+var WARN = 4;
+var NOTICE = 5;
+var INFO = 6;
+var DEBUG = 7;
+
 var serverFound = false;
 	
 // Check if server is running on localhost
-checkServer("127.0.0.1", serverChecked);
+//checkServer("127.0.0.1", serverChecked);
 	
-
-
-function getIpv4Ips() {
-	var os = require('os');
-
-	var interfaces = os.networkInterfaces();
-	var addresses = [];
-	for (var k in interfaces) {
-	    for (var k2 in interfaces[k]) {
-	        var address = interfaces[k][k2];
-	        if (address.family === 'IPv4' && !address.internal) {
-	            addresses.push(address.address);
-	        }
-	    }
-	}
-}
-
-	
-function serverChecked(online, ip, port) {
-	log("server ip:" + ip + " is", online ? "ON" : "offline");
-
-	if(online) {
-		serverFound = true;
-
-		startClient(ip, port);
-
-	}
-
-}
-
-
-// Check if server is running on localhost
-checkServer("127.0.0.1", serverChecked);
 
 // Check if server is running on private subnet
 
@@ -58,9 +32,37 @@ checkServer("127.0.0.1", serverChecked);
 
 // If not running with sudo, use port 8099 instead of port 80 to prevent EACCESS error
 
+startClient("127.0.0.1", "8099");
+
 
 	
+function getIpv4Ips() {
+	var os = require('os');
+	
+	var interfaces = os.networkInterfaces();
+	var addresses = [];
+	for (var k in interfaces) {
+		for (var k2 in interfaces[k]) {
+			var address = interfaces[k][k2];
+			if (address.family === 'IPv4' && !address.internal) {
+				addresses.push(address.address);
+			}
+		}
+	}
+}
 
+
+function serverChecked(online, ip, port) {
+	log("server ip:" + ip + " is", online ? "ON" : "offline");
+	
+	if(online) {
+		serverFound = true;
+		
+		startClient(ip, port);
+		
+	}
+	
+}
 
 
 function checkServer(ip, callback) {
@@ -118,19 +120,135 @@ function checkServer(ip, callback) {
 		req.end();
 	}
 }
-	
+
+function timeStamp() {
+	return (new Date()).getTime()/1000|0; // Unix timestamp
+}
+
 function startClient(ip, port) {
 
-	// Attempt to start the client using nw.js
+	var url = "http://" + ip + ":" + port + "/";
+	
+	var uid, gid;
 
-		// Check for Chrome/Chromium
+	var nwRuntime = "";
+	var platform = process.platform;
+	if(platform == "darwin") nwRuntime = "./runtime/nwjs-v0.12.3-osx-x64/nwjc";
+	else if(platform == "win32")  nwRuntime = "./runtime/nwjs-v0.12.3-win-x64/nw.exe";
+	else if(platform == "linux")  nwRuntime = "./runtime/nwjs-v0.12.3-linux-x64/nw";
+	else log("platform=" + platform + " not yet supported by nw.js", INFO);
+	
+
+	var tryPrograms = [];
+
+
+	tryPrograms.push(["nw", ["."]]); // Any version of nw.js
+
+	tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
+
+	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
+	tryPrograms.push(["chrome", ["--app=" + url]]);
+
+	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
+	//tryPrograms.push(["firefox", ["-chrome", url]]);
+	//tryPrograms.push(["firefox", ["-new-tab", url]]);
+	tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
+	
+
+	tryPrograms.push(["iexplore", ["-k", url]]);
+
+
+	// Safari doesn't support chromeless :(
+	//tryPrograms.push(["safari", ["-k", url]]);
+
+
+	tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
+
+
+
+	var programIndex = 0;
+	var startTime = timeStamp();
+	var maxTime = 3; // Seconds
+
+	tryProgram(tryPrograms[programIndex]);
+	
+	
+	
+
+	function tryProgram(arr) {
+		var program = arr[0];
+		var args = arr[1];
+
+		attemptLaunch(program, args, function triedProgram(err) {
+			if(err) {
+
+				var time = timeStamp();
+
+				if(time - startTime > maxTime) {
+					log((time - startTime) + " seconds since start. Asuming exit");
+					return process.exit();
+				}
+
+				log("Failed to start program=" + program);
+				programIndex++;
+				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
+				else tryProgram(tryPrograms[programIndex]);
+			}
+			else log("Successfully started program=" + program);
+		});
+	}
+
+	
+	function attemptLaunch(process, args, callbackFunction) {
+
+		if(typeof callback != "function") throw new Error("No callback function!");
+
+		var childProcess = require("child_process");
 		
-		// Check for Firefox
+		// You can have different group and user. Default is the user/group running the node process
+		var options = {};
 		
-		// Check for IE/Edge
+		if(uid != undefined) options.uid = parseInt(uid);
+		if(gid != undefined) options.gid = parseInt(gid);
 		
-		// Check for Safari
+		log("Attemting to start process=" + process + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
 		
-	// Launch the client in any of the browsers detected
+		try {
+			var cp = childProcess.spawn(process, args, options);
+		}
+		catch(err) {
+			if(err.code == "EPERM") {
+				if(uid != undefined) log("Unable to spawn process=" + process + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
+			}
+			if(callback) callback(new Error("Unable to spawn process! (" + err.message + ")"));
+		}
+		
+		if(cp.connected) return callback(null);
+
+		cp.on("close", function programClose(code, signal) {
+			callback(new Error(process + " close: code=" + code + " signal=" + signal));
+		});
+		
+		cp.on("disconnect", function programDisconnect() {
+			callback(new Error(process + " disconnect: cp.connected=" + cp.connected));
+		});
+		
+		cp.on("error", function programClose(err) {
+			callback(new Error(process + " error: err.message=" + err.message));
+		});
+		
+		cp.on("exit", function programExit(code, signal) {
+			callback(new Error(process + " exit: code=" + code + " signal=" + signal));
+		});
+
+		setTimeout(callback, 250);
+
+		function callback(err) {
+			if(err) log(err.message, DEBUG);
+			if(callbackFunction) callbackFunction(err);
+			callbackFunction = null; // Only callback once!
+		}
+		
+	}
 }
 
