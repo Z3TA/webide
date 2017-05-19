@@ -41,6 +41,9 @@ function serverChecked(online, ip, port) {
 	
 	serversChecked++;
 	
+	log("serversChecked=" + serversChecked + " serversToCheck=" + serversToCheck + " serverFound=" + serverFound, DEBUG);
+	
+	
 	if(online) {
 		log("Found server running on ip=" + ip + " port=" + port, INFO);
 		
@@ -200,7 +203,6 @@ function checkServer(ip, callback) {
 			callback(true, ip, port);
 		}
 		else if(portsChecked == portsToCheck.length && !portFound) callback(false, ip);
-		else checkPort(portsToCheck[portsChecked], portChecked);
 	}
 
 	function checkPort(port, checkPortCallback) {

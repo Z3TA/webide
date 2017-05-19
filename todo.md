@@ -895,6 +895,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Autocomplete variables withing strings!
+
 Autocomplete on known variables. example:
 var inputSendTo = document.createElement("input");
 inputSendTo.set| -> setAttribute
