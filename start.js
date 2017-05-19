@@ -95,6 +95,8 @@ function multicast() {
 		// jzedit server url: http://127.0.0.1/
 		// jzedit server url: http://127.0.0.1:8099/
 		
+		message = message.toString("utf8");
+		
 		var matchUrl = message.match(/jzedit server url: (https?):\/\/(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}):?(\d*)?/);
 		
 		if(matchUrl) {
@@ -170,6 +172,8 @@ function getIpv4Ips() {
 
 function checkServer(ip, callback) {
 	
+	serversToCheck++;
+	
 	if(typeof callback != "function") throw new Error("callback=" + callback + " need to be a callback function!");
 	
 	if(serverFound) {
@@ -178,9 +182,6 @@ function checkServer(ip, callback) {
 	}
 
 	log("Checking for a jzedit server on ip=" + ip + " ...", DEBUG);
-
-	serversToCheck++;
-
 	
 	var http = require("http");
 
