@@ -45,9 +45,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Dont start server if server is already running, on Windows
-
-Making the editor somewhat usable on Mac
+Investigating why server don't get multicast messages from different ip on same subnet ...
 
 Working on Mercurial resolve, etc
 
