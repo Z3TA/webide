@@ -133,7 +133,7 @@ function startClient(ip, port) {
 
 	var nwRuntime = "";
 	var platform = process.platform;
-	if(platform == "darwin") nwRuntime = "./runtime/nwjs-v0.12.3-osx-x64/nwjc";
+	if(platform == "darwin") nwRuntime = "./runtime/nwjs-v0.12.3-osx-x64/nwjs.app/Contents/MacOS/nwjs";
 	else if(platform == "win32")  nwRuntime = "./runtime/nwjs-v0.12.3-win-x64/nw.exe";
 	else if(platform == "linux")  nwRuntime = "./runtime/nwjs-v0.12.3-linux-x64/nw";
 	else log("platform=" + platform + " not yet supported by nw.js", INFO);
@@ -163,9 +163,9 @@ function startClient(ip, port) {
 		// Unfortunately Safari doesn't support chromless
 		// We might be able to remote the chrome after it started though, by using osascript
 
-		tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
+		//tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
 
-		//tryPrograms.push(["safari", [url]]);
+		tryPrograms.push(["safari", [url]]);
 	}
 	
 
@@ -211,7 +211,7 @@ function startClient(ip, port) {
 					return process.exit();
 				}
 
-				log("Failed to start program=" + program);
+				log("Failed to start program=" + programOriginal);
 				programIndex++;
 				if(programIndex >= tryPrograms.length) throw new Error("Unable to start browser engine!");
 				else tryProgram(tryPrograms[programIndex]);
