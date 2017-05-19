@@ -181,13 +181,13 @@ function main() {
 		
 	});
 	
-	multicastClient.bind(multicastPort, function () {
+	multicastClient.bind(multicastPort, HTTP_IP, function () {
 		multicastClient.addMembership(multicastAddr);
 	});
 		
 	var multicastServer = dgram.createSocket("udp4");
 	
-	multicastServer.bind(multicastSrcPort, function () {
+	multicastServer.bind(multicastSrcPort, HTTP_IP, function () {
 		//setInterval(advertiseServer, 4000);
 	});
 	

@@ -81,6 +81,7 @@ function multicast() {
 	var multicastSrcPort = 6025;
 	var multicastPort = 6024;
 	var multicastAddr = "239.255.255.250";
+	var multicastIp = adresses[0];
 	var dgram = require('dgram');
 	
 	var askForServerInterval;
@@ -119,30 +120,17 @@ function multicast() {
 		
 	});
 	
-	log("Starting multicast client for listening on multicast messages ...");
-	try {
-		multicastClient.bind(multicastPort, function (err) {
-			if(err) log("Unable to listen for multicast messages (" + err.message + ")", WARN);
-			else multicastClient.addMembership(multicastAddr);
-		});
-	}
-	catch(err) {
-		log("Unable to listen for multicast messages (" + err.message + ")", WARN);
-	}
+	multicastClient.bind(multicastPort, multicastIp, function () {
+		multicastClient.addMembership(multicastAddr);
+	});
+
 	
 	var multicastServer = dgram.createSocket("udp4");
 	
-	log("Starting multicast server for sending multicast messages ...");
-	try {
-		multicastServer.bind(multicastSrcPort, function (err) {
-			if(err) log("Unable to send multicast messages (" + err.message + ")", WARN);
-			else askForServerInterval = setInterval(askForServer, 4000);
-		});
-	}
-	catch(err) {
-		log("Unable to send multicast messages (" + err.message + ")", WARN);
-	}
-	
+	multicastServer.bind(multicastSrcPort, multicastIp, function () {
+		askForServerInterval = setInterval(askForServer, 4000);
+	});
+
 	function askForServer() {
 		var lookForServerMessage = "Where can I find a jzedit server?"
 		var message = new Buffer(lookForServerMessage);
