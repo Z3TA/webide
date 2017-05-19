@@ -154,50 +154,79 @@ function main() {
 	// Open client url in browser !?
 
 	
-	
-	// Listen to and answer multicast messages
-	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
-	
-	var multicastSrcPort = 6025;
-	var multicastPort = 6024;
-	var multicastAddr = "239.255.255.250";
-	var dgram = require('dgram');
-	
-	var multicastClient = dgram.createSocket('udp4');
-	
-	multicastClient.on('listening', function () {
-		var address = multicastClient.address();
-		console.log('UDP Client listening on ' + address.address + ":" + address.port);
-	});
-	
-	multicastClient.on('message', function (message, rinfo) {
-		console.log('Message from: ' + rinfo.address + ':' + rinfo.port + ' - ' + message);
+	(function broadcast(myIp) {
+
+		// Listen to and answer broadcast messages
+		// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 		
-		var lookForServerMessage = "Where can I find a jzedit server?"
+		var broadcastAddresses = [];
 		
-		if(message == lookForServerMessage) {
-			advertiseServer();
+		var broadcastPort = 6024;
+		
+		if(myIp == "0.0.0.0") {
+			// We'll have to find all broadcast addresses ...
+			var os = require('os');
+			
+			var interfaces = os.networkInterfaces();
+			var addresses = [];
+			for (var k in interfaces) {
+				for (var k2 in interfaces[k]) {
+					var address = interfaces[k][k2];
+					if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
+						broadcastAddresses.push(broadcastAddress(address.address));
+					}
+				}
+			}
+		}
+		else broadcastAddresses.push(broadcastAddress(myIp));
+		
+		console.log("broadcastAddresses: ", broadcastAddresses);
+		
+		var dgram = require('dgram');
+		
+		// Server
+		var broadcastServer = dgram.createSocket("udp4");
+		broadcastServer.bind(function() {
+			broadcastServer.setBroadcast(true);
+			// We must send at least one broadcast message to be able to receive messages!
+			for(var i=0; i<broadcastAddresses.length; i++) advertise(broadcastAddresses[i], broadcastServer);
+		});
+
+		// Client
+		var broadcastClient = dgram.createSocket('udp4');
+
+		broadcastClient.on('listening', function () {
+			var address = broadcastClient.address();
+			console.log('UDP Client listening on ' + address.address + ":" + address.port);
+			broadcastClient.setBroadcast(true);
+		});
+
+		broadcastClient.on('message', function (message, rinfo) {
+			console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+			
+			var lookForServerMessage = "Where can I find a jzedit server?"
+		
+			if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
+			
+		});
+
+		broadcastClient.bind(broadcastPort);
+
+		function advertise(broadcastAddress) {
+			var message = new Buffer(serverAdvertiseMessage);
+			broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
+				console.log("Sent '" + message + "'");
+			});
 		}
 		
-	});
-	
-	multicastClient.bind(multicastPort, HTTP_IP, function () {
-		multicastClient.addMembership(multicastAddr);
-	});
-		
-	var multicastServer = dgram.createSocket("udp4");
-	
-	multicastServer.bind(multicastSrcPort, HTTP_IP, function () {
-		//setInterval(advertiseServer, 4000);
-	});
-	
-	function advertiseServer() {
-		var message = new Buffer(serverAdvertiseMessage);
-		multicastServer.send(message, 0, message.length, multicastPort, multicastAddr, function () {
-			console.log("Sent multicast message: '" + message + "'");
-		});
-	}
-	
+		function broadcastAddress(ip) {
+			// Asume 255.255.255.0 netmask
+			var arr = ip.split(".");
+			arr[3] = "255";
+			return arr.join(".");
+		}
+
+	})(HTTP_IP);
 
 	
 }

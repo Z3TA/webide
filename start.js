@@ -55,7 +55,7 @@ function serverChecked(online, ip, port) {
 		
 	}
 	else {
-		if(serversChecked == serversToCheck && !serverFound) multicast();
+		if(serversChecked == serversToCheck && !serverFound) broadcast();
 	}
 }
 
@@ -75,27 +75,40 @@ function startNewServer() {
 }
 
 
-function multicast() {
+function broadcast() {
 
-	// Send multicast message and ask for a server ...
-	var multicastSrcPort = 6025;
-	var multicastPort = 6024;
-	var multicastAddr = "239.255.255.250";
-	var multicastIp = adresses[0];
+	// Listen to and send broadcast messages asking for jzedit server
+	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
+	
+	var broadcastPort = 6024;
+	var myIps = getIpv4Ips();
+	var broadcastAddresses = myIps.map(broadcastAddress);
+	
+	console.log("broadcastAddresses: ", broadcastAddresses);
+	
 	var dgram = require('dgram');
 	
-	var askForServerInterval;
-	
-	var multicastClient = dgram.createSocket('udp4');
-	
-	multicastClient.on('listening', function listenOnMulticast () {
-		var address = multicastClient.address();
-		console.log('UDP Client listening on ' + address.address + ":" + address.port);
+	// Server
+	var broadcastServer = dgram.createSocket("udp4");
+	broadcastServer.bind(function() {
+		broadcastServer.setBroadcast(true);
+		// We must send at least one broadcast message to be able to receive messages!
+		for(var i=0; i<broadcastAddresses.length; i++) ask(broadcastAddresses[i]);
 	});
-	
-	multicastClient.on('message', function (message, rinfo) {
-		console.log('Message from: ' + rinfo.address + ':' + rinfo.port + ' - ' + message);
+
+	// Client
+	var broadcastClient = dgram.createSocket('udp4');
+
+	broadcastClient.on('listening', function () {
+		var address = broadcastClient.address();
+		console.log('UDP Client listening on ' + address.address + ":" + address.port);
+		broadcastClient.setBroadcast(true);
+	});
+
+	broadcastClient.on('message', function (message, rinfo) {
+		console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
 		
+
 		// jzedit server url: http://127.0.0.1/
 		// jzedit server url: http://127.0.0.1:8099/
 		
@@ -113,31 +126,32 @@ function multicast() {
 			
 			clearInterval(askForServerInterval);
 			
-			multicastClient.close();
+			broadcastClient.close();
 			multicastServer.close();
 			
 		}
 		
 	});
-	
-	multicastClient.bind(multicastPort, multicastIp, function () {
-		multicastClient.addMembership(multicastAddr);
-	});
 
-	
-	var multicastServer = dgram.createSocket("udp4");
-	
-	multicastServer.bind(multicastSrcPort, multicastIp, function () {
-		askForServerInterval = setInterval(askForServer, 4000);
-	});
+	broadcastClient.bind(broadcastPort);
 
-	function askForServer() {
+	function ask(broadcastAddress) {
 		var lookForServerMessage = "Where can I find a jzedit server?"
 		var message = new Buffer(lookForServerMessage);
-		multicastServer.send(message, 0, message.length, multicastPort, multicastAddr, function () {
-			console.log("Sent multicast message: '" + message + "'");
+		broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
+			console.log("Sent '" + message + "'");
 		});
 	}
+	
+	function broadcastAddress(ip) {
+		// Asume 255.255.255.0 netmask
+		var arr = ip.split(".");
+		arr[3] = "255";
+		return arr.join(".");
+	}
+
+
+
 	
 }
 
@@ -159,7 +173,12 @@ function getIpv4Ips() {
 	return addresses;
 }
 
-
+function isPrivatev4IP(ip) {
+   var parts = ip.split('.');
+   return parts[0] === '10' || parts[0] === '127' ||
+	  (parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
+	  (parts[0] === '192' && parts[1] === '168');
+}
 
 function checkServer(ip, callback) {
 	
