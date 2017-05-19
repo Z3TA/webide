@@ -141,6 +141,7 @@ function startClient(ip, port) {
 
 	var tryPrograms = [];
 
+	tryPrograms.push(["safari", [url]]);
 
 	tryPrograms.push(["nw", ["."]]); // Any version of nw.js
 
@@ -177,7 +178,14 @@ function startClient(ip, port) {
 
 	function tryProgram(arr) {
 		var program = arr[0];
-		var args = arr[1];
+		var args = arr[1] || [];
+
+		if(platform == "darwin") {
+			
+			args.unshift(program);
+			args.unshift("-a");
+			program = "open";
+		}
 
 		attemptLaunch(program, args, function triedProgram(err) {
 			if(err) {
@@ -220,7 +228,7 @@ function startClient(ip, port) {
 			if(err.code == "EPERM") {
 				if(uid != undefined) log("Unable to spawn process=" + process + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
 			}
-			if(callback) callback(new Error("Unable to spawn process! (" + err.message + ")"));
+			return callback(new Error("Unable to spawn process! (" + err.message + ")"));
 		}
 		
 		if(cp.connected) return callback(null);
