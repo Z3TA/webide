@@ -19,23 +19,136 @@ var INFO = 6;
 var DEBUG = 7;
 
 var serverFound = false;
+
+setTimeout(startNewServer, 3000);
+
+var serversChecked = 0;
+var serversToCheck = 0;
+
+var HTTP_REQUESTS = [];
+//return startClient("127.0.0.1", "8099");
+
+
+log("Check if server is running on localhost ...", INFO);
+checkServer("127.0.0.1", serverChecked);
+
+var adresses = getIpv4Ips();
+for(var i=0; i<adresses.length; i++) checkServer(adresses[i], serverChecked);
+
+
+function serverChecked(online, ip, port) {
+	//log("server ip:" + ip + " is", online ? "ON" : "offline");
 	
-// Check if server is running on localhost
-//checkServer("127.0.0.1", serverChecked);
+	serversChecked++;
 	
+	if(online) {
+		log("Found server running on ip=" + ip + " port=" + port, INFO);
+		
+		serverFound = true;
+		
+		//startClient(ip, port);
+		
+		for(var i=0; i<HTTP_REQUESTS.length; i++) HTTP_REQUESTS[i].abort();
+		
+	}
+	else {
+		if(serversChecked == serversToCheck && !serverFound) multicast();
+	}
+}
 
-// Check if server is running on private subnet
 
 
 
-// Start a local server if we did not find any
-
-// If not running with sudo, use port 8099 instead of port 80 to prevent EACCESS error
-
-startClient("127.0.0.1", "8099");
 
 
+function startNewServer() {
 	
+	if(serverFound) return;
+	
+	log("Starting new server ...");
+	
+	// If not running with sudo, use port 8099 instead of port 80 to prevent EACCESS error
+
+}
+
+
+function multicast() {
+
+	// Send multicast message and ask for a server ...
+	var multicastSrcPort = 6025;
+	var multicastPort = 6024;
+	var multicastAddr = "239.255.255.250";
+	var dgram = require('dgram');
+	
+	var askForServerInterval;
+	
+	var multicastClient = dgram.createSocket('udp4');
+	
+	multicastClient.on('listening', function listenOnMulticast () {
+		var address = multicastClient.address();
+		console.log('UDP Client listening on ' + address.address + ":" + address.port);
+	});
+	
+	multicastClient.on('message', function (message, rinfo) {
+		console.log('Message from: ' + rinfo.address + ':' + rinfo.port + ' - ' + message);
+		
+		// jzedit server url: http://127.0.0.1/
+		// jzedit server url: http://127.0.0.1:8099/
+		
+		var matchUrl = message.match(/jzedit server url: (https?):\/\/(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}):?(\d*)?/);
+		
+		if(matchUrl) {
+			var proto = matchUrl[1];
+			var ip = matchUrl[2];
+			var port = matchUrl[3];
+			
+			serverFound = true;
+			startClient(ip, port, proto);
+			
+			clearInterval(askForServerInterval);
+			
+			multicastClient.close();
+			multicastServer.close();
+			
+		}
+		
+	});
+	
+	log("Starting multicast client for listening on multicast messages ...");
+	try {
+		multicastClient.bind(multicastPort, function (err) {
+			if(err) log("Unable to listen for multicast messages (" + err.message + ")", WARN);
+			else multicastClient.addMembership(multicastAddr);
+		});
+	}
+	catch(err) {
+		log("Unable to listen for multicast messages (" + err.message + ")", WARN);
+	}
+	
+	var multicastServer = dgram.createSocket("udp4");
+	
+	log("Starting multicast server for sending multicast messages ...");
+	try {
+		multicastServer.bind(multicastSrcPort, function (err) {
+			if(err) log("Unable to send multicast messages (" + err.message + ")", WARN);
+			else askForServerInterval = setInterval(askForServer, 4000);
+		});
+	}
+	catch(err) {
+		log("Unable to send multicast messages (" + err.message + ")", WARN);
+	}
+	
+	function askForServer() {
+		var lookForServerMessage = "Where can I find a jzedit server?"
+		var message = new Buffer(lookForServerMessage);
+		multicastServer.send(message, 0, message.length, multicastPort, multicastAddr, function () {
+			console.log("Sent multicast message: '" + message + "'");
+		});
+	}
+	
+}
+
+
 function getIpv4Ips() {
 	var os = require('os');
 	
@@ -49,32 +162,35 @@ function getIpv4Ips() {
 			}
 		}
 	}
+	
+	return addresses;
 }
 
-
-function serverChecked(online, ip, port) {
-	log("server ip:" + ip + " is", online ? "ON" : "offline");
-	
-	if(online) {
-		serverFound = true;
-		
-		startClient(ip, port);
-		
-	}
-	
-}
 
 
 function checkServer(ip, callback) {
-	if(serverFound) return;
+	
+	if(typeof callback != "function") throw new Error("callback=" + callback + " need to be a callback function!");
+	
+	if(serverFound) {
+		//log("A server has already been found. Aborting checkServer", DEBUG);
+		return;
+	}
 
+	log("Checking for a jzedit server on ip=" + ip + " ...", DEBUG);
+
+	serversToCheck++;
+
+	
 	var http = require("http");
 
 	var portFound = false;
 	var portsChecked = 0;
 
 	var portsToCheck = [80, 8080, 8099];
-
+	
+	for(var i=0; i<portsToCheck.length; i++) checkPort(portsToCheck[i], portChecked);
+	
 	function portChecked(itsTheServer, port) {
 		portsChecked++;
 
@@ -83,12 +199,19 @@ function checkServer(ip, callback) {
 			callback(true, ip, port);
 		}
 		else if(portsChecked == portsToCheck.length && !portFound) callback(false, ip);
+		else checkPort(portsToCheck[portsChecked], portChecked);
 	}
 
 	function checkPort(port, checkPortCallback) {
+		
+		if(serverFound) {
+			//log("A server has already been found. Aborting checkServer checkPort", DEBUG);
+			return;
+		}
 
-		if(serverFound) return;
-
+		log("Checking port=" + port + " on ip=" + ip, DEBUG);
+		
+		
 		var options = {
 		  host: ip,
 		  port: port,
@@ -97,23 +220,25 @@ function checkServer(ip, callback) {
 		};
 
 		var req = http.request(options, function(res) {
-			log('STATUS: ' + res.statusCode, 7);
-			log('HEADERS: ' + JSON.stringify(res.headers), 7);
+			log('STATUS: ' + res.statusCode, DEBUG);
+			log('HEADERS: ' + JSON.stringify(res.headers), DEBUG);
 			res.setEncoding('utf8');
 			var body = "";
 			res.on('data', function (chunk) {
-				log('BODY: "' + chunk + '"', 7);
+				log('BODY: "' + chunk + '"', DEBUG);
 				body += chunk;
 			});
 			res.on("end", function(chunk) {
-				log('END: body="' + body + '"', 7);
+				log('END: body="' + body + '"', DEBUG);
 				if(body == "Welcome to SockJS!\n") checkPortCallback(true, port);
 				else checkPortCallback(false, port);
 			});
 		});
-
+		
+		HTTP_REQUESTS.push(req);
+		
 		req.on('error', function(e) {
-		  log('problem with request: ' + e.message, 7);
+		  if(!serverFound) log('problem with request: ' + e.message, DEBUG);
 		  checkPortCallback(false, port);
 		});
 
@@ -125,8 +250,11 @@ function timeStamp() {
 	return (new Date()).getTime()/1000|0; // Unix timestamp
 }
 
-function startClient(ip, port) {
-
+function startClient(ip, port, proto) {
+	
+	log("Starting client ...");
+	
+	if(proto == undefined) proto = "http";
 	var url = "http://" + ip + ":" + port + "/";
 	
 	var uid, gid;
