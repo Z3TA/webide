@@ -153,88 +153,88 @@ function main() {
 	
 	// Open client url in browser !?
 
-	
-	(function broadcast(myIp) {
+	if(HTTP_IP != "127.0.0.1") {
+		(function broadcast(myIp) {
 
-		// Listen to and answer broadcast messages
-		// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
-		
-		var broadcastAddresses = [];
-		
-		var broadcastPort = 6024;
-		
-		if(myIp == "0.0.0.0") {
-			// We'll have to find all broadcast addresses ...
-			var os = require('os');
+			// Listen to and answer broadcast messages
+			// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 			
-			var interfaces = os.networkInterfaces();
-			var addresses = [];
-			for (var k in interfaces) {
-				for (var k2 in interfaces[k]) {
-					var address = interfaces[k][k2];
-					if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
-						broadcastAddresses.push(broadcastAddress(address.address));
+			var broadcastAddresses = [];
+			
+			var broadcastPort = 6024;
+			
+			if(myIp == "0.0.0.0") {
+				// We'll have to find all broadcast addresses ...
+				var os = require('os');
+				
+				var interfaces = os.networkInterfaces();
+				var addresses = [];
+				for (var k in interfaces) {
+					for (var k2 in interfaces[k]) {
+						var address = interfaces[k][k2];
+						if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
+							broadcastAddresses.push(broadcastAddress(address.address));
+						}
 					}
 				}
 			}
-		}
-		else broadcastAddresses.push(broadcastAddress(myIp));
-		
-		console.log("broadcastAddresses: ", broadcastAddresses);
-		
-		var dgram = require('dgram');
-		
-		// Server
-		var broadcastServer = dgram.createSocket("udp4");
-		broadcastServer.bind(function() {
-			broadcastServer.setBroadcast(true);
-			// We must send at least one broadcast message to be able to receive messages!
-			for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
-		});
-
-		// Client
-		var broadcastClient = dgram.createSocket('udp4');
-
-		broadcastClient.on('listening', function () {
-			var address = broadcastClient.address();
-			console.log('UDP Client listening on ' + address.address + ":" + address.port);
-			broadcastClient.setBroadcast(true);
-		});
-
-		broadcastClient.on('message', function (message, rinfo) {
-			console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+			else broadcastAddresses.push(broadcastAddress(myIp));
 			
-			var lookForServerMessage = "Where can I find a jzedit server?"
-		
-			if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
+			console.log("broadcastAddresses: ", broadcastAddresses);
 			
-		});
-
-		broadcastClient.bind(broadcastPort);
-		
-		function setAdvertiseInterval(broadcastAddress) {
-			// We need to keep sending messages, or we will not receive any!
-			setInterval(function() {
-				advertise(broadcastAddress, broadcastServer);
-			}, 4500); // Need to send often (every 4500ms) to be able to receive messages
-		}
-		
-		function advertise(broadcastAddress) {
-			var message = new Buffer(serverAdvertiseMessage);
-			broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
-				console.log("Sent '" + message + "'");
+			var dgram = require('dgram');
+			
+			// Server
+			var broadcastServer = dgram.createSocket("udp4");
+			broadcastServer.bind(function() {
+				broadcastServer.setBroadcast(true);
+				// We must send at least one broadcast message to be able to receive messages!
+				for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
 			});
-		}
-		
-		function broadcastAddress(ip) {
-			// Asume 255.255.255.0 netmask
-			var arr = ip.split(".");
-			arr[3] = "255";
-			return arr.join(".");
-		}
 
-	})(HTTP_IP);
+			// Client
+			var broadcastClient = dgram.createSocket('udp4');
 
+			broadcastClient.on('listening', function () {
+				var address = broadcastClient.address();
+				console.log('UDP Client listening on ' + address.address + ":" + address.port);
+				broadcastClient.setBroadcast(true);
+			});
+
+			broadcastClient.on('message', function (message, rinfo) {
+				console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+				
+				var lookForServerMessage = "Where can I find a jzedit server?"
+			
+				if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
+				
+			});
+
+			broadcastClient.bind(broadcastPort);
+			
+			function setAdvertiseInterval(broadcastAddress) {
+				// We need to keep sending messages, or we will not receive any!
+				setInterval(function() {
+					advertise(broadcastAddress, broadcastServer);
+				}, 4500); // Need to send often (every 4500ms) to be able to receive messages
+			}
+			
+			function advertise(broadcastAddress) {
+				var message = new Buffer(serverAdvertiseMessage);
+				broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
+					console.log("Sent '" + message + "'");
+				});
+			}
+			
+			function broadcastAddress(ip) {
+				// Asume 255.255.255.0 netmask
+				var arr = ip.split(".");
+				arr[3] = "255";
+				return arr.join(".");
+			}
+
+		})(HTTP_IP);
+	}
 	
 }
 
