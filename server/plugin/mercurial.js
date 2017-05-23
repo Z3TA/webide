@@ -190,13 +190,8 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 				});
 			} 
 		}
-		
-		
-		
-	});
-	
-	
-}
+		});
+	}
 
 
 MERCURIAL.add = function hgadd(user, json, callback) {
@@ -208,17 +203,14 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(files == undefined) return callback(new Error("No files defined"));
 	
-	directory = UTIL.trailingSlash(directory);
-	
-	var localDirectory = user.translatePath(directory);
-	if(localDirectory instanceof Error) return callback(localDirectory);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
 	
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return callback(localPath);
+			if(localPath.indexOf(rootDir) return callback("File not in local repository: " + files[i]);
 		fileString += ' "' + localPath + '"';
 	}
 	
@@ -232,6 +224,7 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 			else callback(null, {files: files});
 			
 		}
+	});
 	});
 }
 
@@ -274,20 +267,14 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	
 	if(Object.prototype.toString.call( files ) !== '[object Array]') return callback("Expected files to be an array of files");
 	
-	//if(files.length == 0) return callback("No files specified for commit");
-	
-	
-	directory = UTIL.trailingSlash(directory);
-	
-	var localDirectory = user.translatePath(directory);
-	if(localDirectory instanceof Error) return callback(localDirectory);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
-	
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
+		
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return callback(localPath);
+			if(localPath.indexOf(rootDir) return callback("File not in local repository: " + files[i]);
 		fileString += ' "' + localPath + '"';
 	}
 	
@@ -308,6 +295,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 			
 		}
 	});
+	});
 }
 
 MERCURIAL.incoming = function hgincoming(user, json, callback) {
@@ -325,12 +313,8 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	directory = UTIL.trailingSlash(directory);
-	
-	var localDirectory = user.translatePath(directory);
-	if(localDirectory instanceof Error) return callback(localDirectory);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
 	
 	var exec = require('child_process').exec;
 	
@@ -463,6 +447,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 		
 		
 	});
+	});
 }
 
 
@@ -476,10 +461,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	directory = UTIL.trailingSlash(directory);
-	
-	var localDirectory = user.translatePath(directory);
-	if(localDirectory instanceof Error) return callback(localDirectory);
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
 	
 	localDirectory = UTIL.trailingSlash(localDirectory);
 	
@@ -558,6 +541,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 			
 		}
 	});
+	});
 }
 
 
@@ -568,18 +552,16 @@ MERCURIAL.update = function hgupdate(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	directory = UTIL.trailingSlash(directory);
-	
-	var localDirectory = user.translatePath(directory);
-	if(localDirectory instanceof Error) return callback(localDirectory);
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
 	
 	localDirectory = UTIL.trailingSlash(localDirectory);
 	
 	var exec = require('child_process').exec;
 	exec('hg update', { cwd: localDirectory }, function (err, stdout, stderr) {
 		
-		console.log("stderr=" + stderr);
-		console.log("stdout=" + stdout);
+		console.log("update stderr=" + stderr);
+		console.log("update stdout=" + stdout);
 		
 		// abort: not a linear update
 		
@@ -606,9 +588,61 @@ MERCURIAL.update = function hgupdate(user, json, callback) {
 			
 		}
 	});
+	});
 }
 
-
+MERCURIAL.merge = function hgmerge(user, json, callback) {
+	/*
+		Attempt to merge unresolved files ...
+	
+		$ hg merge
+		merging baz.txt
+		warning: conflicts while merging baz.txt! (edit, then use 'hg resolve --mark')
+		1 files updated, 0 files merged, 0 files removed, 1 files unresolved
+		use 'hg resolve' to retry unresolved file merges or 'hg update -C .' to abandon
+		
+	*/
+	
+	var directory = json.directory;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
+	
+	localDirectory = UTIL.trailingSlash(localDirectory);
+	
+	var exec = require('child_process').exec;
+	exec('hg merge', { cwd: localDirectory }, function (err, stdout, stderr) {
+		
+		console.log("merge stderr=" + stderr);
+		console.log("merge stdout=" + stdout);
+		
+		// abort: not a linear update
+		
+		if(err) callback(err);
+		else if(stderr) callback(stderr);
+		else {
+			
+			// 1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+			
+			var matchMerge = stdout.match(/(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/);
+			
+			if(!matchMerge) return callback(stdout);
+			
+			var resp = {
+				updated: matchMerge[1],
+				merged: matchMerge[2],
+				removed: matchMerge[3],
+				unresolved: matchMerge[4]
+			};
+			
+			callback(null, resp);
+			
+		}
+	});
+	});
+}
 
 MERCURIAL.push = function hgpush(user, json, callback) {
 	// Update pulled changes
@@ -617,10 +651,8 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	directory = UTIL.trailingSlash(directory);
-	
-	var localDirectory = user.translatePath(directory);
-	if(localDirectory instanceof Error) return callback(localDirectory);
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
 	
 	localDirectory = UTIL.trailingSlash(localDirectory);
 	
@@ -668,6 +700,7 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 				
 			}
 		}
+	});
 	});
 }
 
@@ -884,10 +917,49 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 	});
 }
 
-// Hg merge, 3 files updated, 0 files merged, 0 files removed, 0 files unresolved
+MERCURIAL.reponame = function reponame(user, json, callback) {
+	
+	var directory = json.directory;
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var exec = require('child_process').exec;
+		exec("hg path default", { cwd: rootDir }, function (err, stdout, stderr) {
+			
+			console.log("hg path default stderr=" + stderr);
+			console.log("hg path default stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			var folderName = getFolderName(directory);
+			
+			if(stdout.length > 0) {
+				folderName = getFolderName(stdout);
+			}
+			
+			var heads = objectionize(stdout);
+			
+			callback(null, {name: folderName});
+			
+		});
+	});
+}
 
 
-
+function getFolderName(path) {
+	var delimiter = UTIL.getPathDelimiter(path);
+	
+	var arr = path.split(delimiter);
+	
+	if(arr.length == 0) {
+		console.warn("path=" + path + " arr=" + JSON.stringify(arr));
+		return "";
+	}
+	else return arr[arr.length-1];
+	
+	}
 
 
 
@@ -973,6 +1045,8 @@ function checkDir(user, virtualPath, callback) {
 			
 			var mercurialRoot = stdout.trim();
 			
+				mercurialRoot = UTIL.trailingSlash(mercurialRoot);
+				
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
 					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
