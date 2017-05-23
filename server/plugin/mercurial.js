@@ -210,7 +210,7 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return callback(localPath);
-			if(localPath.indexOf(rootDir) return callback("File not in local repository: " + files[i]);
+		if(localPath.indexOf(rootDir) == -1) return callback("File not in local repository: " + files[i]);
 		fileString += ' "' + localPath + '"';
 	}
 	
@@ -274,7 +274,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return callback(localPath);
-			if(localPath.indexOf(rootDir) return callback("File not in local repository: " + files[i]);
+		if(localPath.indexOf(rootDir) == -1) return callback("File not in local repository: " + files[i]);
 		fileString += ' "' + localPath + '"';
 	}
 	
