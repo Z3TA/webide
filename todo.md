@@ -45,8 +45,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Investigating why server don't get multicast messages from different ip on same subnet ...
-
 Working on Mercurial resolve, etc
 
 What happens when there are unresolved files and you pull in more changes ?

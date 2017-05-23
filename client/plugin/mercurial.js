@@ -74,6 +74,9 @@
 	
 	
 	function mercurialDance(file) {
+		
+		return false; /// Flag!? query string == mercurial_dance
+		
 		/*
 			Pull and Update often to prevent merge conflicts!
 			
@@ -143,31 +146,177 @@
 		*/
 		
 		var fileDirectory = UTIL.getDirectoryFromPath(file.path);
-		var localModified = [];
-		var untracked = [];
-		var rootDir = "";
+		
+		
+		function checkForUnresolved() {
+		// 1. Check for unresolved files (hg resolve --list)
+			CLIENT.cmd("mercurial.resolvelist", {directory: fileDirectory}, function resolveList(err, resp) {
+			if(err) throw err;
+			
+				if(resp.resolved.length == 0 && resp.unresolved.length == 0) {
+					checkForMultibleHeads();
+				}
+				else if(resp.unresolved.length > 0) {
+					showResolveDialog(resp.unresolved);
+				}
+				else {
+					// All files are resolved
+					showRepoCommitDialog();
+				}
+				
+			});
+			}
+		
+		function checkForMultipleHeads() {
+			CLIENT.cmd("mercurial.heads", {directory: fileDirectory}, function resolveList(err, resp) {
+				if(err) throw err;
+				
+				if(resp.heads.length > 1) {
+				
+					var merge = "Merge";
+					var cancel = "Cancel";
+					
+					confirmBox("There are multiple heads in Mercurial. Do you want to merge them ?", [merge, cancel], function(answer) {
+						
+						if(answer == merge) {
+							CLIENT.cmd("mercurial.merge", {directory: fileDirectory}, function resolveList(err, resp) {
+								if(err) throw err;
+								
+								if(resp.unresolved == 0) {
+									alertBox("Merge successful! " + resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed, " + resp.unresolved + " files unresolved.");
+									pullFromRepo();
+								}
+								else checkForUnresolved();
+								
+							});
+						}
+						});
+					}
+				});
+		}
+		
+		function pullFromRepo() {
+			console.log("Mercurial: Pulling from remote repository ...");
+			
+			CLIENT.cmd("mercurial.pull", {directory: fileDirectory}, hgPull);
+			
+			function hgPull(err, resp) {
+				if(err) {
+					
+					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+					var authFailed = err.message.match(/abort: authorization failed/);
+					
+					if(authNeeded) {
+						var repoUrl = authNeeded[1];
+						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
+							if(username != null) CLIENT.cmd("mercurial.pull", {directory: fileDirectory, user: username, pw: password, save: save}, hgPull);
+						}, "Pull");
+						return;
+					}
+					else if(authFailed) {
+						alertBox("Authorization filed!\nUnable to Pull from " + repoUrl);
+					}
+					else throw err;
+				}
+				else {
+					
+					var changes = resp.changes;
+					var repoUrl = resp.repo;
+					var ask = false;
+					var notSaved = [];
+					
+					if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+					
+					if(changes === null) {
+						alertBox("No incoming changes from " + repoUrl);
+						//console.log("Mercurial: No incoming changes detected!")
+						return; // No incoming changes
+					}
+					
+					console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
+					
+					for(var i=0; i<changes.length; i++) {
+						var files = Object.keys(changes[i].files);
+						for(var j=0; j<files.length; j++) {
+							
+							var filePath = files[j];
+							
+							if(EDITOR.files.hasOwnProperty(filePath)) {
+								// We only care about files opened by the editor
+								
+								var changedFile = EDITOR.files[filePath];
+								
+								if(!changedFile.isSaved) notSaved.push(filePath);
+								
+							}
+						}
+					}
+					
+					if(notSaved.length == 0) {
+						// If no file is unsaved, tell the user about the new update. Options: (Update) (Ignore for now)
+						var update = "Update";
+						var ignore = "Ignore for now";
+						
+						confirmBox("There are incoming updates ... todo what to say here? ", [update, ignore], function(answer) {
+						});
+						
+						}
+					
+					// If any of them are not saved, don't interupt the user, do nothing more.
+					
+					if(!ask) {
+						console.log("Mercurial: No apparent conflict. Updating!")
+						pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
+					}
+				}
+			}
+			
+			
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		// Check if there are ucommited work on the local working copy
-		hgStatus(function workingCopyStatus(err, r, m, u) {
+		hgStatus(function workingCopyStatus(err, _rootDir, _modified, _untracked) {
 			
 			if(err) return console.warn(err);
 			else {
 				
 				console.log("localModified.length=" + localModified.length);
 				
-				rootDir = r
-				localModified = m;
-				untracked = u;
+				rootDir = _rootDir
+				localModified = _modified;
+				untracked = _untracked;
 				
-				console.log("Mercurial: Pulling from remote repository ...");
-				CLIENT.cmd("mercurial.pull", {directory: rootDir}, hgPull);
+				pullFromRepo();
+				
 				
 				
 			}
 		}, fileDirectory);
 		
 		
-		function hgPull(err, resp) {
+		
+		
+		function pullFromRepo() {
+			console.log("Mercurial: Pulling from remote repository ...");
+			
+			CLIENT.cmd("mercurial.pull", {directory: rootDir}, hgPull);
+			
+			function hgPull(err, resp) {
 			if(err) {
 				
 				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
@@ -176,7 +325,7 @@
 				if(authNeeded) {
 					var repoUrl = authNeeded[1];
 					showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
-						if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
+							if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
 					}, "Pull");
 					return;
 				}
@@ -348,6 +497,7 @@
 			}
 			
 		}
+	}
 	}
 	
 	function buildRepoCommitDialog(widget) {
@@ -814,6 +964,10 @@
 	
 	function hideRepoCloneDialog() {
 		return repoCloneDialog.hide();
+	}
+	
+	function showResolveDialog(unresolvedFiles) {
+		
 	}
 	
 	function annotateOn() {
