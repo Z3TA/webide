@@ -45,8 +45,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-idea: Use the editor on web pages, instead of a code high-lighter
-
 Working on Mercurial resolve, etc
 
 What happens when there are unresolved files and you pull in more changes ?
@@ -131,7 +129,7 @@ Add a watcher for every opened file and warn the user if the file changes by oth
 What I'm thinking
 -----------------
 
-Should make some tests for the server too, so that I don't push a broken editor.
+Offline experience !? If we can't connected to the server. Should it still be possible to use the editor !?
 
 Terminal emulator ? (node-pty, node-ansiparser). No! Everything should be handled via the GUI, do not introduce new concepts (like the terminal).
 Manage files via the file explorer plugin, launch nodejs scripts with nodejs plugin and stop with stop button, or debug stepper. Use mercurial/git plugins with GUI.
@@ -1433,8 +1431,9 @@ When implementing a new feature
 -------------------------------
 Priotize the feature list to make sure you are implementing the most critical feature.
 Design it in your head
-If possible, make it as an independent plugin (should only depend on editor.js, File.js and global.js. It should not depend on other plugins)
+If possible, make it as an independent plugin (should only depend on editor.js, File.js and UTIL.js. It should not depend on other plugins)
 Write a prototype
+Put it behind a feature flag, so that it will not load by default
 If you discover any bugs or issues elsewhere, sorry, bugs and issues has higher prio then new features!
 Iterate on the feature
 Refactor the whole program if needed to make the fature work great
@@ -1455,6 +1454,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 ------------------------------------
+
+Make it possible to include the editor in web pages. Replacing for example code-view divs and textareas. When having code examples on web pages.
+idea: Use the editor on web pages, instead of a code high-lighter
 
 Able to run shell commands on the ssh server you are connected to
 
