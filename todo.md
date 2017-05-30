@@ -129,6 +129,11 @@ Add a watcher for every opened file and warn the user if the file changes by oth
 What I'm thinking
 -----------------
 
+How do I "release" !?
+
+We should always be able/ready to "deply" or "release"! 
+Put whatever you're working on behind a feature flag. And make sure you have to broken anything before pushing.
+
 Offline experience !? If we can't connected to the server. Should it still be possible to use the editor !?
 
 Terminal emulator ? (node-pty, node-ansiparser). No! Everything should be handled via the GUI, do not introduce new concepts (like the terminal).
