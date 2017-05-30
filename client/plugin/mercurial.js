@@ -7,6 +7,10 @@
 (function() {
 	"use strict";
 	
+	// Hide behind feature flag
+	if(window.location.href.indexOf("-hg") == -1) return console.log("Append -hg in the url to try out the Mercurial plugin");
+	
+	
 	var repoCommitDialog = EDITOR.createWidget(buildRepoCommitDialog);
 	var repoCommitMenuItem;
 	var fileSelect;
@@ -26,6 +30,9 @@
 	var hideAnnotationsString = "Hide commit messages";
 	var annotations = {};
 	var doAnnotate = false;
+	
+	var resolveDialog = EDITOR.createWidget(buildResolveDialog);
+	var resolveFileList;
 	
 	// todo: Reload annotations when the file on disk changes!! (like a reload), update, merge, etc
 	
@@ -74,8 +81,6 @@
 	
 	
 	function mercurialDance(file) {
-		
-		return false; /// Flag!? query string == mercurial_dance
 		
 		/*
 			Pull and Update often to prevent merge conflicts!
@@ -147,6 +152,7 @@
 		
 		var fileDirectory = UTIL.getDirectoryFromPath(file.path);
 		
+		checkForUnresolved();
 		
 		function checkForUnresolved() {
 		// 1. Check for unresolved files (hg resolve --list)
@@ -157,7 +163,7 @@
 					checkForMultibleHeads();
 				}
 				else if(resp.unresolved.length > 0) {
-					showResolveDialog(resp.unresolved);
+					showResolveDialog(resp.resolved, resp.unresolved);
 				}
 				else {
 					// All files are resolved
@@ -773,6 +779,33 @@
 		
 	}
 	
+	function buildResolveDialog(widget) {
+		
+		var div = document.createElement("div");
+		
+		var text = document.createElement("span");
+		text.appendChild(document.createTextNode("Check files to marke them as resolved. Click on a file to open it."));
+		
+		resolveFileList = document.createElement("ul");
+		resolveFileList.setAttribute("class", "resolveList");
+		var commands = document.createElement("div");
+		
+		// ### Commands
+		var cancel = document.createElement("button");
+		cancel.appeendChild(document.createTextNode("Cancel"));
+		cancel.onclick = function() {
+			widget.hide();
+		}
+		
+		commands.appendChild(cancel);
+		
+		div.appendChild(resolveFileList);
+		div.appendChild(commands);
+		
+		return div;
+		
+	}
+	
 	function buildRepoCloneDialog(widget) {
 		
 		var testRepo = {
@@ -966,9 +999,75 @@
 		return repoCloneDialog.hide();
 	}
 	
-	function showResolveDialog(unresolvedFiles) {
+	function showResolveDialog(resolved, unresolved) {
 		
+		if(resolved == undefined) throw new Error("Expected list of resolved files");
+		if(unresolved == undefined) throw new Error("Expected list of unresolved files");
+		
+		// Update files
+		
+		while(resolveFileList.firstChild) resolveFileList.removeChild(resolveFileList.firstChild); // Emty list
+		
+		var files = resolved.concat(unresolved);
+		
+		// Sort alphabetically
+		files.sort(function(a, b){
+			if(a.firstname < b.firstname) return -1;
+			if(a.firstname > b.firstname) return 1;
+			return 0;
+		});
+		
+		for (var i=0; i<files.length; i++) createFileListItem(files[i]);
+		
+			return resolveDialog.show();
+			
+		function createFileListItem(file) {
+				
+			var li = document.createElement("li");
+			
+				var checkbox = document.createElement("input");
+				checkbox.setAttribute("type", "checkbox");
+			if(resolved.indexOf(file) != -1) checkbox.setAttribute("checked", "checked");
+			
+				checkbox.onclick = function fileCheck(e) {
+					if(!checkbox.checked) {
+						markResolved(file);
+						checkbox.checked = true;
+					}
+					else {
+						markUnResolved(file);
+						checkbox.checked = false;
+					}
+				}
+				
+				var a = document.createElement("a");
+				a.appendChild(document.createTextNode(file));
+				a.onclick = function clickFile(e) {
+					EDITOR.openFile(file);
+				}
+				
+				li.appendChild(checkbox);
+				li.appendChild(a);
+				
+				resolveFileList.appendChild(li);
+				
+			}
+			}
+	
+	function markResolved(file, callback) {
+		CLIENT.cmd("mercurial.resolvemark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
+			if(err) throw err;
+			if(callback) callback(null);
+			});
 	}
+	
+	function markUnResolved(file, callback) {
+		CLIENT.cmd("mercurial.resolveunmark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
+			if(err) throw err;
+			if(callback) callback(null);
+		});
+	}
+	
 	
 	function annotateOn() {
 		

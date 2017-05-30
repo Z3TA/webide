@@ -854,19 +854,34 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
-		var exec = require('child_process').exec;
-		exec("hg resolve --list", { cwd: rootDir }, function (err, stdout, stderr) {
+		var files = json.files;
+		if(files == undefined) {
+			if(json.file == undefined) return callback("Expected a file or files array");
+			files = [json.file];
+		}
+		
+		var fileString = makeFileString(user, files);
+		
+			var exec = require('child_process').exec;
+		exec("hg resolve --mark " + fileString, { cwd: rootDir }, function (err, stdout, stderr) {
+				
+			console.log("hg resolve --mark stderr=" + stderr);
+			console.log("hg resolve --mark stdout=" + stdout);
+				
+				if(err) return callback(err);
+				if(stderr) return callback(stderr);
+				
+			// What does Mercurial return !?
 			
-			console.log("hg resolve --list stderr=" + stderr);
-			console.log("hg resolve --list stdout=" + stdout);
+			var abort = stdout.match(/abort: resolve command not applicable when not merging/);
+			var noMore = stdout.match(/\(no more unresolved files\)/);
+			var resolveList = stdout.match(/^(U|R)\s);
 			
-			if(err) return callback(err);
-			if(stderr) return callback(stderr);
+			if(noMore || resolveList) return callback(null);
+			else return callback(stdout);
 			
-			
-			
+			});
 		});
-	});
 }
 
 MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
@@ -877,19 +892,34 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
+		var files = json.files;
+		if(files == undefined) {
+			if(json.file == undefined) return callback("Expected a file or files array");
+			files = [json.file];
+		}
+		
+		var fileString = makeFileString(user, files);
+		
 		var exec = require('child_process').exec;
-		exec("hg resolve --list", { cwd: rootDir }, function (err, stdout, stderr) {
+		exec("hg resolve --unmark " + fileString, { cwd: rootDir }, function (err, stdout, stderr) {
 			
-			console.log("hg resolve --list stderr=" + stderr);
-			console.log("hg resolve --list stdout=" + stdout);
+			console.log("hg resolve --unmark stderr=" + stderr);
+			console.log("hg resolve --unmark stdout=" + stdout);
 			
 			if(err) return callback(err);
 			if(stderr) return callback(stderr);
 			
+			// What does Mercurial return !?
 			
+			var abort = stdout.match(/abort: resolve command not applicable when not merging/);
+			var noMore = stdout.match(/\(no more unresolved files\)/);
+			var resolveList = stdout.match(/^(U|R)\s);
+			
+			if(noMore || resolveList) return callback(null);
+			else return callback(stdout);
 			
 		});
-	});
+});
 }
 
 MERCURIAL.heads = function hgheads(user, json, callback) {
@@ -961,6 +991,19 @@ function getFolderName(path) {
 	
 	}
 
+function makeFileString(user, files) {
+	// Returns a string of files for passing into hg command
+	
+	var fileString = "";
+	for(var i=0, localPath; i<files.length; i++) {
+		localPath = user.translatePath(directory + files[i]);
+		if(localPath instanceof Error) return callback(localPath);
+		if(localPath.indexOf(rootDir) == -1) return callback("File not in local repository: " + files[i]);
+		fileString += ' "' + localPath + '"';
+	}
+	
+	return fileString;
+}
 
 
 function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {

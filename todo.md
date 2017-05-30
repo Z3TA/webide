@@ -1455,6 +1455,14 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+When in debugger, animate "hot" functions with a text-fire effects. Only the "function" in function foo() { not the body }
+
+When in debugger/static analyser,Show dead code in a special color.
+
+Show variables not declared locally (in the function) with a different color. (scope colors). 
+The further away the scope is, the "brighter" the color is, so that it stands out.
+If the variable is declared in the parent of a subfunction, it just has slightly different color, but if it's for example from the global scope it stands out.
+
 Make it possible to include the editor in web pages. Replacing for example code-view divs and textareas. When having code examples on web pages.
 idea: Use the editor on web pages, instead of a code high-lighter
 

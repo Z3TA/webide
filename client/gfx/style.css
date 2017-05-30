@@ -744,6 +744,12 @@ div.gotoFile li:hover {
 	height: 7em;
 }
 
+ul.resolveList li {
+	margin: 0.5em;
+	border: 1px solid blue;
+	border-radius: 3px;
+}
+
 
 
 /* ############### File explorer ############### */
