@@ -13,7 +13,7 @@
 	"use strict";
 	
 	// Hide behind feature flag
-	if(window.location.href.indexOf("-hg") == -1) return console.log("Append -hg in the url to try out the Mercurial plugin");
+	//if(window.location.href.indexOf("-hg") == -1) return console.log("Append -hg in the url to try out the Mercurial plugin");
 	
 	
 	var repoCommitDialog = EDITOR.createWidget(buildCommitDialog);
@@ -66,8 +66,8 @@
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
 		
-		EDITOR.on("fileOpen", fileOpen);
-		EDITOR.on("commitTool", commitTool);
+		//EDITOR.on("fileOpen", mercurialFileOpen);
+		EDITOR.on("commitTool", mercurialCommitTool);
 		
 	}
 	
@@ -77,19 +77,19 @@
 		
 		EDITOR.unbindKey(hideMercurialWidgets);
 		
-		EDITOR.removeEvent("fileOpen", fileOpen);
+		//EDITOR.removeEvent("fileOpen", mercurialFileOpen);
 		
 		EDITOR.removeEvent("moveCaret", showAnnotations);
-		
-		
+		EDITOR.removeEvent("commitTool", mercurialCommitTool);
+		EDITOR.removeEvent("resolveTool", mercurialResolveTool);
 	}
 	
-	function commitTool(directory) {
+	function mercurialCommitTool(directory) {
 		// Does the directory has a initated Mercurial repo ?
 		CLIENT.cmd("mercurial.hasRepo", {directory: directory}, function hgstatus(err, resp) {
 			if(err) throw err;
 			
-			var rootDir = resp.rootDir;
+			var rootDir = resp.directory;
 			
 			if(rootDir == null) console.warn("No Mercurial repo found in directory=" + directory);
 			else showCommitDialog(rootDir);
@@ -97,7 +97,20 @@
 		});
 	}
 	
-	function fileOpen(file) {
+	function mercurialResolveTool(directory) {
+		// Does the directory has a initated Mercurial repo ?
+		CLIENT.cmd("mercurial.hasRepo", {directory: directory}, function hgstatus(err, resp) {
+			if(err) throw err;
+			
+			var rootDir = resp.directory;
+			
+			if(rootDir == null) console.warn("No Mercurial repo found in directory=" + directory);
+			else showResolveDialog(resolved, unresolved, rootDir);
+			
+		});
+	}
+	
+	function mercurialFileOpen(file) {
 		/*
 			When a file is opened, we want to check if there's an updated version in the remote repository ...
 			But it's not a good idea! See below:

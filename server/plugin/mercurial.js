@@ -42,8 +42,8 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	var pw = json.pw;
 	var save = json.save;
 	
-	if(!local) callback(new Error("A local directory need to be specified! local=" + local));
-	if(!remote) callback(new Error("A remote URL need to be specified! remote=" + remote));
+	if(!local) return callback(new Error("A local directory need to be specified! local=" + local));
+	if(!remote) return callback(new Error("A remote URL need to be specified! remote=" + remote));
 	
 	var localPath = user.translatePath(local);
 	
@@ -62,8 +62,8 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	var exec = require('child_process').exec;
 	exec("hg clone " + remote + " " + localPath + config, function (err, stdout, stderr) {
 		
-		console.log("stderr=" + stderr);
-		console.log("stdout=" + stdout);
+		console.log("hg clone stderr=" + stderr);
+		console.log("hg clone stdout=" + stdout);
 		
 		if(err) {
 			
@@ -133,8 +133,8 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
 	
 	exec("hg root", { cwd: localDirectory }, function (err, stdout, stderr) {
-		console.log("stderr=" + stderr);
-		console.log("stdout=" + stdout);
+		console.log("hg rootstderr=" + stderr);
+		console.log("hg root stdout=" + stdout);
 		
 		if(err) callback(err);
 		else if(stderr) callback(stderr);
@@ -467,8 +467,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	var exec = require('child_process').exec;
 	exec('hg pull --noninteractive' + config, { cwd: localDirectory }, function (err, stdout, stderr) {
 		
-		console.log("stderr=" + stderr);
-		console.log("stdout=" + stdout);
+			console.log("hg pull stderr=" + stderr);
+			console.log("hg pull stdout=" + stdout);
 		
 		if(stdout) {
 			
@@ -501,22 +501,39 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				
 				fileCount = parseInt(matchPull[3]);
 			}
-			
-			// Get list of changed files / Files that will be affected by a "hg update"
-			exec('hg status --rev tip', { cwd: localDirectory }, function (err, stdout, stderr) {
+				else if(noChanges) {
+					resp.changesets = 0;
+					resp.changes = 0;
+					fileCount = 0;
+				}
+				else throw new Error("Unexpected hg pull: stderr=" + stderr + " stdout=" + stdout);
 				
-				console.log("stderr=" + stderr);
-				console.log("stdout=" + stdout);
+			// Get list of changed files / Files that will be affected by a "hg update"
+			exec('hg status --rev tip', { cwd: localDirectory }, function (err, status_stdout, status_stderr) {
+				
+					console.log("hg status --rev tip stderr=" + status_stderr);
+					console.log("hg status --rev tip stdout=" + status_stdout);
 				
 				if(err) throw err;
-				else if(stderr) throw new Error("stderr=" + stderr);
+					else if(status_stderr) throw new Error("status_stderr=" + status_stderr);
 				else {
 					
-					var affectedFiles = stdout.trim().split(/\n|\r\n/);
+						var affectedFilesString = status_stdout.trim();
+						
+						console.log("affectedFilesString=" + affectedFilesString);
+						
+						if(affectedFilesString == "") {
+							var affectedFiles = []; // Emty array
+						}
+						else {
+							var affectedFiles = affectedFilesString.split(/\n|\r\n/);
 					
-					for(var i=0; i<affectedFiles.length; i++) affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim(); // Remove M, A, R, etc and add directory
-					
-					if(fileCount != affectedFiles.length && fileCount > -1) throw new Error("fileCount=" + fileCount + " affectedFiles (" + affectedFiles.length + ") =" + JSON.stringify(affectedFiles));
+					for(var i=0; i<affectedFiles.length; i++) {
+							affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim(); // Remove M, A, R, etc and add directory
+						}
+						}
+						
+						if(fileCount != affectedFiles.length) throw new Error("fileCount=" + fileCount + " affectedFiles (" + affectedFiles.length + ") =" + JSON.stringify(affectedFiles));
 					
 					resp["files"] = affectedFiles;
 					
@@ -655,6 +672,8 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 	var exec = require('child_process').exec;
 	exec('hg push --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
 		
+			// hg push seem to return errorcode (err) when no changes found
+			
 		console.log("stderr=" + stderr);
 		console.log("stdout=" + stdout);
 		
@@ -670,8 +689,13 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 		
 		console.log("repoUrl=" + repoUrl);
 		
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
+		if(err) {
+				if(noChanges) {
+					callback(null, {changesets: null, remote: repoUrl});
+				}
+				else callback(err);
+			}
+			else if(stderr) callback(stderr);
 		else {
 			
 			if(noChanges) {
@@ -983,12 +1007,11 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	var directory = json.directory;
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
-		var resp = {repo: null};
+		var resp = {directory: null};
 		
-		resp.repo = user.toVirtualPath(rootDir);
+		resp.directory = user.toVirtualPath(rootDir);
 		
-		if(err) return callback(null, resp: resp);
-		else return callback(null, resp: resp);
+		return callback(null, {resp: resp});
 		
 	});
 }

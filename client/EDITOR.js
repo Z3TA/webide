@@ -29,7 +29,7 @@ EDITOR.supportedFiles = [
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
-	devMode: false,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: [  // Intendent after these XML tags
@@ -134,7 +134,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	changeWorkingDir: [],
 	bootstrap: [],
 	storageReady: [], // When server storage is ready to be used
-	commitTool: []
+	commitTool: [],
+	resolveTool: [],
+	mergeTool: []
 };
 
 EDITOR.renderFunctions = [];
@@ -3086,11 +3088,25 @@ EDITOR.lastKeyPressed = "";
 		return theWindow;
 	}
 	
-	
+	// Tools for handling repositories (Mercurial, Git, etc)
 	EDITOR.commitTool = function commotTool(directory) {
 		console.log("Calling commitTool listeners (" + EDITOR.eventListeners.commitTool.length + ")");
 		for(var i=0, f; i<EDITOR.eventListeners.commitTool.length; i++) {
 			EDITOR.eventListeners.commitTool[i].fun(directory);
+		}
+	}
+	
+	EDITOR.resolveTool = function resolveTool(resolved, unresolved, directory) {
+		console.log("Calling resolveTool listeners (" + EDITOR.eventListeners.resolveTool.length + ")");
+		for(var i=0, f; i<EDITOR.eventListeners.resolveTool.length; i++) {
+			EDITOR.eventListeners.resolveTool[i].fun(resolved, unresolved, directory);
+		}
+	}
+	
+	EDITOR.mergeTool = function mergeTool(directory) {
+		console.log("Calling mergeTool listeners (" + EDITOR.eventListeners.mergeTool.length + ")");
+		for(var i=0, f; i<EDITOR.eventListeners.mergeTool.length; i++) {
+			EDITOR.eventListeners.mergeTool[i].fun(directory);
 		}
 	}
 	

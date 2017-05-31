@@ -158,8 +158,8 @@
 										the caret. So wait some time ...
 									*/
 									setTimeout(function placeCaretAfterReopenFiles() {
-									file.moveCaret(index);
-									file.scrollToCaret();
+										file.moveCaret(index);
+										file.scrollToCaret();
 										
 										EDITOR.showFile(file);
 										
@@ -934,7 +934,7 @@
 			
 			var index = sites.push({
 				name: name,
-				projectFolder: projectFolder.value,
+				projectFolder: inputProjectFolder.value,
 				source: inputSourceFolder.value,
 				preview: inputPreviewFolder.value,
 				publish: inputPublishFolder.value,
@@ -1316,7 +1316,7 @@
 						hgrcContent = "[paths]\ndefault = " + site.repository + "\n" + hgrcContent;
 						EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 							if(err) throw err; // Unexpected
-							doHgPull();
+							doHgSync();
 						});
 					}
 					else {
@@ -1335,7 +1335,7 @@
 							hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "default = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
 							EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 								if(err) throw err; // Unexpected
-								doHgPull();
+								doHgSync();
 							});
 						}
 						else {
@@ -1354,20 +1354,20 @@
 										hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
 										EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 											if(err) throw err; // Unexpected
-											doHgPull();
+											doHgSync();
 										});
 									}
 									else if(answer == updateSettings) {
 										site.repository = defaultRepo.trim();
 										EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
-										doHgPull();
+										doHgSync();
 									}
 									//else if(answer == cancelSync) do nothing
 								});
 							}
 							else {
 								// All good, our repo is the default repo!
-								doHgPull();
+								doHgSync();
 							}
 						}
 					}
@@ -1375,6 +1375,8 @@
 			}
 			else if(site.repository != undefined && site.repository != "undefined") {
 				// .hg folder don't exist. Ask if user wants to init (using clone)
+				
+				console.log("site.repository=" + site.repository);
 				
 				var cloneInit = "Clone from repository";
 				var noThanks = "No, thanks"
@@ -1393,7 +1395,7 @@
 			var command = "mercurial.clone";
 			
 			var commandOptions = {
-				local: selectedSite.source,
+				local: selectedSite.projectFolder,
 				remote: selectedSite.repository,
 				user: selectedSite.repoUser,
 				pw: selectedSite.repoPw,
@@ -1404,11 +1406,11 @@
 				if(err) alertBox(err.message);
 				else {
 					alertBox("Successfully cloned to:\n" + resp.path);
-					};
+				};
 			});
 		}
 		
-		function doHgPull() {
+		function doHgSync() {
 			
 			/*
 				1. Make sure all files opened by the editor and belongs to the repo - is saved
@@ -1423,20 +1425,22 @@
 				4. Check for multiple heads
 				Show merge tool if there are multiple heads, if the merge fails goto 3
 				
-				5. Pull updates from repository
+				5. Pull updates from remote repository
 				
 				6. Attempt update/merge
+				
+				7. Push to remote repository
 				
 			*/
 			
 			var unsavedFiles = [];
 			var rootPath = selectedSite.source;
 			
-			for (var file in EDITOR.files) {
-				if(file.path.indexOf(rootPath) != -1 && !file.isSaved) {
-					unsavedFiles.push(file);
-					}
+			for(var path in EDITOR.files) {
+				if(path.indexOf(rootPath) != -1 && !file.isSaved) {
+					unsavedFiles.push(EDITOR.files[path]);
 				}
+			}
 			
 			askToSaveFiles();
 			
@@ -1446,16 +1450,12 @@
 			}
 			
 			function askToSave(file) {
-			
+				
 				var save = "Save";
 				var saveAs = "Save backup";
 				var discard = "Discard unsaved changes";
 				var abort = "Abort sync";
 				var msg = "The following file is not saved:\n" + file.path;
-				
-				for(var file in unsavedFiles) msg += file.path.replace(rootPath, "") + "\n";
-				
-				msg = msg.substr(0, msg.length-1); // Remove last \n
 				
 				confirmBox(msg, [save, discard, abort], function (answer) {
 					if(answer == save) {
@@ -1486,25 +1486,188 @@
 			
 			function checkRepoStatus() {
 				
-				CLIENT.cmd("mercurial.status", {directory: selectedSite.source}, function hgstatus(err, resp) {
+				CLIENT.cmd("mercurial.status", {directory: selectedSite.projectFolder}, function hgstatus(err, resp) {
 					if(err) return alertBox(err.message);
 					
 					var modified = resp.modified;
 					var rootDir = UTIL.trailingSlash(resp.rootDir);
 					var untracked = resp.untracked;
-						
-					for (var i=0; i<modified.length; i++) {
-						if(EDITOR.files.hasOwnProperty(modified[i])) {
-							return EDITOR.commitTool(rootDir);
-						}
+					
+					if(modified.length > 0) {
+						alertBox("Commit changes before syncing!");
+						EDITOR.commitTool(rootDir);
 					}
+					else checkRepoUnresolved();
 					
 				});
 			}
 			
+			function checkRepoUnresolved() {
+				CLIENT.cmd("mercurial.resolvelist", {directory: selectedSite.projectFolder}, function resolveList(err, resp) {
+					if(err) throw err;
+					
+					if(resp.resolved.length == 0 && resp.unresolved.length == 0) {
+						checkRepoMultipleHeads();
+					}
+					else if(resp.unresolved.length > 0) {
+						alertBox("Resolve merge problems before syncing!");
+						EDITOR.resolveTool(selectedSite.projectFolder);
+					}
+					else if(resp.resolved.length > 0) {
+						alertBox("Commit resolved files before syncing!");
+						EDITOR.commitTool(selectedSite.projectFolder);
+					}
+					else throw new Error("resp.resolved=" + JSON.stringify(resp.resolved) + " resp.unresolved=" + JSON.stringify(resp.unresolved));
+					
+				});
+			}
+			
+			function checkRepoMultipleHeads() {
+				CLIENT.cmd("mercurial.heads", {directory: selectedSite.projectFolder}, function resolveList(err, resp) {
+					if(err) throw err;
+					
+					if(resp.heads.length == 1) {
+						pullFromRepo();
+					}
+					else {
+						
+						var merge = "Merge";
+						var cancel = "Cancel";
+						
+						confirmBox("There are multiple heads in the Mercurial repository. Do you want to merge them ?", [merge, cancel], function(answer) {
+							
+							if(answer == merge) {
+								CLIENT.cmd("mercurial.merge", {directory: selectedSite.projectFolder}, function resolveList(err, resp) {
+									if(err) throw err;
+									
+									if(resp.unresolved == 0) {
+										alertBox("Merge successful! " + resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed, " + resp.unresolved + " files unresolved.");
+										pullFromRepo();
+									}
+									else checkRepoUnresolved();
+									
+								});
+							}
+						});
+					}
+				});
+			}
+			
+			function pullFromRepo() {
+				CLIENT.cmd("mercurial.pull", {directory: selectedSite.projectFolder}, hgPull);
+				
+				function hgPull(err, resp) {
+					if(err) {
+						
+						var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+						var authFailed = err.message.match(/abort: authorization failed/);
+						
+						if(authNeeded) {
+							return CLIENT.cmd("mercurial.pull", {directory: selectedSite.projectFolder, user: selectedSite.repoUser, pw: selectedSite.repoPw, save: save}, hgPull);
+						}
+						else if(authFailed) {
+							var repoUrl = authNeeded[1];
+							return alertBox("Authorization failed!\nUnable to Pull from " + repoUrl);
+						}
+						else throw err;
+					}
+					else {
+						
+						var changes = resp.changes;
+						var repoUrl = resp.repo;
+						var ask = false;
+						var filesOpenedInEditorAndNotSaved = [];
+						var filesChanged = resp.files;
+						var filesOpenedInEditorThatChanged = [];
+						
+							if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+							
+						if(changes === 0) {
+							console.log("No incoming changes from " + repoUrl);
+								
+							pushToRepo();
+							
+								return; // No incoming changes
+							}
+							
+						for(var i=0; i<filesChanged.length; i++) {
+									
+							var filePath = filesChanged[i];
+									
+									if(EDITOR.files.hasOwnProperty(filePath)) {
+										// We only care about files opened by the editor
+										
+										var changedFile = EDITOR.files[filePath];
+										
+									filesOpenedInEditorThatChanged.push(changedFile);
+										
+									if(!changedFile.isSaved) filesOpenedInEditorAndNotSaved.push(filePath.replace(selectedSite.projectFolder, ""));
+										
+									}
+								}
+						
+						if(filesOpenedInEditorAndNotSaved.length != 0) {
+							console.warn("Files not saved (but we did check before): " + filesOpenedInEditorAndNotSaved.join("\n"));
+							alertBox("Can not update files that are not saved. Save the following files and then try again:\n" + filesOpenedInEditorAndNotSaved.join("\n"));
+							}
+							else {
+								CLIENT.cmd("mercurial.update", {directory: selectedSite.projectFolder}, function hgUpdated(err, resp) {
+									if(err) return alertBox(err.message);
+									
+									var whenAllFilesReloaded = null;
+									
+									var alertMsg = resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed and " + resp.unresolved + " files unresolved.";
+									
+									if(resp.unresolved > 0) {
+										alertMsg += "\nAutomatic file merge fialed. You have to manually resolve conflicts!";
+										whenAllFilesReloaded = function resolveFiles() {
+											alertBox(alertMsg);
+											EDITOR.resolveTool(resp.resolved, resp.unresolved, selectedSite.projectFolder);
+										}
+										
+									}
+									else {
+										alertMsg = "Update successful! " + alertMsg;
+										whenAllFilesReloaded = function push() {
+											//alertBox(alertMsg);
+											pushToRepo();
+										} 
+										
+									}
+									
+									var filesReloaded = 0;
+								for(var path in filesOpenedInEditorThatChanged) reloadFile(filesOpenedInEditorThatChanged[path]);
+									
+									function reloadFile(file) {
+										EDITOR.readFromDisk(file.path, fileRead);
+										
+										function fileRead(err, path, text) {
+											if(err) return alertBox("Unable to read file: " + file.path);
+											
+											file.reload(text);
+											
+											file.saved(); // Because we reloaded from disk
+											
+										if(++filesReloaded == filesOpenedInEditorThatChanged.length) whenAllFilesReloaded();
+										}
+									}
+								});
+							}
+						}
+				}
+			}
+			
+			function pushToRepo() {
+				CLIENT.cmd("mercurial.push", {directory: selectedSite.projectFolder}, function pushed(err, resp) {
+					
+					if(err) alertBox(err.message);
+					else alertBox("Sync complete!");
+					
+				});
+			}
+			
+			}
 		}
-		
-	}
 	
 	
 	function publishSite(site) {
@@ -1637,7 +1800,7 @@
 		// Is any of the source files opened ?
 		var openedFilesArray = [];
 		
-		for(var file in EDITOR.files) openedFilesArray.push(EDITOR.files[file]);
+		for(var path in EDITOR.files) openedFilesArray.push(EDITOR.files[path]);
 		
 		var sourceFilePath = chooseFilePath(openedFilesArray);
 		
