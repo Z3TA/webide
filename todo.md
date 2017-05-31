@@ -132,7 +132,7 @@ What I'm thinking
 How do I "release" !?
 
 We should always be able/ready to "deply" or "release"! 
-Put whatever you're working on behind a feature flag. And make sure you have to broken anything before pushing.
+Put whatever you're working on behind a feature flag. And make sure you have not broken anything before pushing.
 
 Offline experience !? If we can't connected to the server. Should it still be possible to use the editor !?
 
@@ -899,6 +899,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Better support for files that requires spaces ? Or add separate support for each format ? For example nginx config files. (auto indentation)
 
 Autocomplete variables withing strings!
 

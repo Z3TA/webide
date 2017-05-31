@@ -29,7 +29,7 @@ EDITOR.supportedFiles = [
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
-	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
+	devMode: false,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: [  // Intendent after these XML tags
@@ -133,7 +133,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	keyPressed: [],
 	changeWorkingDir: [],
 	bootstrap: [],
-	storageReady: [] // When server storage is ready to be used
+	storageReady: [], // When server storage is ready to be used
+	commitTool: []
 };
 
 EDITOR.renderFunctions = [];
@@ -3083,6 +3084,14 @@ EDITOR.lastKeyPressed = "";
 		EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
 		
 		return theWindow;
+	}
+	
+	
+	EDITOR.commitTool = function commotTool(directory) {
+		console.log("Calling commitTool listeners (" + EDITOR.eventListeners.commitTool.length + ")");
+		for(var i=0, f; i<EDITOR.eventListeners.commitTool.length; i++) {
+			EDITOR.eventListeners.commitTool[i].fun(directory);
+		}
 	}
 	
 	

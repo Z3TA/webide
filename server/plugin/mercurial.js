@@ -270,14 +270,10 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-	var fileString = "";
-	for(var i=0, localPath; i<files.length; i++) {
-		localPath = user.translatePath(directory + files[i]);
-		if(localPath instanceof Error) return callback(localPath);
-		if(localPath.indexOf(rootDir) == -1) return callback("File not in local repository: " + files[i]);
-		fileString += ' "' + localPath + '"';
-	}
-	
+		var fileString = makeFileString(user, files);
+		
+		if(fileString instanceof Error) return callback(fileString);
+		
 	var exec = require('child_process').exec;
 	exec('hg commit -m "' + message + '"' + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
 		
@@ -352,7 +348,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 		}
 		
 		if(err) {
-			// It seems Mercurial "sometimes" returns exit code 1 when there's nothhing to pull !?!?
+			// It seems Mercurial "sometimes" returns exit code 1 when there's nothing to pull !?!?
 			if(!noChanges) return callback(err);
 			else callback(null, {changes: null, repo: repoUrl});
 		}
@@ -692,7 +688,8 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 						changesets: matchUpdate[1],
 						changes: matchUpdate[2],
 						files: matchUpdate[3],
-						remote: repoUrl
+						remote: repoUrl,
+							directory: user.toVirtualPath(rootDir)
 					};
 					
 					callback(null, resp);
@@ -862,6 +859,8 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 		
 		var fileString = makeFileString(user, files);
 		
+		if(fileString instanceof Error) return callback(fileString);
+		
 			var exec = require('child_process').exec;
 		exec("hg resolve --mark " + fileString, { cwd: rootDir }, function (err, stdout, stderr) {
 				
@@ -875,9 +874,13 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 			
 			var abort = stdout.match(/abort: resolve command not applicable when not merging/);
 			var noMore = stdout.match(/\(no more unresolved files\)/);
-			var resolveList = stdout.match(/^(U|R)\s);
+			var resolveList = stdout.match(/^(U|R)\s/);
 			
-			if(noMore || resolveList) return callback(null);
+			var resp = {
+				allResolved: !!noMore
+			}
+			
+			if(noMore || resolveList) return callback(null, resp);
 			else return callback(stdout);
 			
 			});
@@ -900,6 +903,8 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 		
 		var fileString = makeFileString(user, files);
 		
+		if(fileString instanceof Error) return callback(fileString);
+		
 		var exec = require('child_process').exec;
 		exec("hg resolve --unmark " + fileString, { cwd: rootDir }, function (err, stdout, stderr) {
 			
@@ -913,7 +918,7 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 			
 			var abort = stdout.match(/abort: resolve command not applicable when not merging/);
 			var noMore = stdout.match(/\(no more unresolved files\)/);
-			var resolveList = stdout.match(/^(U|R)\s);
+			var resolveList = stdout.match(/^(U|R)\s/);
 			
 			if(noMore || resolveList) return callback(null);
 			else return callback(stdout);
@@ -963,13 +968,9 @@ MERCURIAL.reponame = function reponame(user, json, callback) {
 			if(err) return callback(err);
 			if(stderr) return callback(stderr);
 			
-			var folderName = getFolderName(directory);
+			if(stdout.length > 0) directory = UTIL.trailingSlash(stdout);
 			
-			if(stdout.length > 0) {
-				folderName = getFolderName(stdout);
-			}
-			
-			var heads = objectionize(stdout);
+			var folderName = UTIL.getFolderName(directory);
 			
 			callback(null, {name: folderName});
 			
@@ -977,28 +978,29 @@ MERCURIAL.reponame = function reponame(user, json, callback) {
 	});
 }
 
-
-function getFolderName(path) {
-	var delimiter = UTIL.getPathDelimiter(path);
+MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	
-	var arr = path.split(delimiter);
+	var directory = json.directory;
 	
-	if(arr.length == 0) {
-		console.warn("path=" + path + " arr=" + JSON.stringify(arr));
-		return "";
-	}
-	else return arr[arr.length-1];
-	
-	}
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		var resp = {repo: null};
+		
+		resp.repo = user.toVirtualPath(rootDir);
+		
+		if(err) return callback(null, resp: resp);
+		else return callback(null, resp: resp);
+		
+	});
+}
 
 function makeFileString(user, files) {
-	// Returns a string of files for passing into hg command
+	// Returns a string of files for passing into a hg command
 	
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
-		if(localPath instanceof Error) return callback(localPath);
-		if(localPath.indexOf(rootDir) == -1) return callback("File not in local repository: " + files[i]);
+		if(localPath instanceof Error) return localPath;
+		if(localPath.indexOf(rootDir) == -1) return new Error("File not in local repository: " + files[i]);
 		fileString += ' "' + localPath + '"';
 	}
 	

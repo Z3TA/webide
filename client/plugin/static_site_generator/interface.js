@@ -1347,7 +1347,7 @@
 								var updateSettings = "Update settings";
 								var cancelSync = "Cancel Sync";
 								
-								confirmBox("The repository do not match with the default repository!<br>repository: " + site.repository + "<br>default: " + defaultRepo, [], function(answer) {
+								confirmBox("The repository do not match with the default repository!<br>repository: " + site.repository + "<br>default: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
 									
 									if(answer == changeDefault) {
 										var fullString = repos[0];
@@ -1390,10 +1390,117 @@
 		
 		
 		function doHgCloneInit() {
+			var command = "mercurial.clone";
 			
+			var commandOptions = {
+				local: selectedSite.source,
+				remote: selectedSite.repository,
+				user: selectedSite.repoUser,
+				pw: selectedSite.repoPw,
+				save: true
+			}
+			
+			CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
+				if(err) alertBox(err.message);
+				else {
+					alertBox("Successfully cloned to:\n" + resp.path);
+					};
+			});
 		}
 		
 		function doHgPull() {
+			
+			/*
+				1. Make sure all files opened by the editor and belongs to the repo - is saved
+				Ask to save or discard (reload from disk) unsaved files. Then goto 2.
+				
+				2. Make sure there are no uncommited files in working rev.
+				Show commit tool if there are uncommited files
+				
+				3. Check for unresolved files in working rev.
+				Show resolve tool if there are unresolved files
+				
+				4. Check for multiple heads
+				Show merge tool if there are multiple heads, if the merge fails goto 3
+				
+				5. Pull updates from repository
+				
+				6. Attempt update/merge
+				
+			*/
+			
+			var unsavedFiles = [];
+			var rootPath = selectedSite.source;
+			
+			for (var file in EDITOR.files) {
+				if(file.path.indexOf(rootPath) != -1 && !file.isSaved) {
+					unsavedFiles.push(file);
+					}
+				}
+			
+			askToSaveFiles();
+			
+			function askToSaveFiles() {
+				if(unsavedFiles.length > 0) askToSave(unsavedFiles[0]);
+				else checkRepoStatus();
+			}
+			
+			function askToSave(file) {
+			
+				var save = "Save";
+				var saveAs = "Save backup";
+				var discard = "Discard unsaved changes";
+				var abort = "Abort sync";
+				var msg = "The following file is not saved:\n" + file.path;
+				
+				for(var file in unsavedFiles) msg += file.path.replace(rootPath, "") + "\n";
+				
+				msg = msg.substr(0, msg.length-1); // Remove last \n
+				
+				confirmBox(msg, [save, discard, abort], function (answer) {
+					if(answer == save) {
+						EDITOR.saveFile(file, file.path, function fileSaved(err, path) {
+							if(err) return alertBox("Unable to save file: " + file.path);
+							else {
+								unsavedFiles.splice(unsavedFiles.indexOf(file), 1);
+								askToSaveFiles();
+							}
+						});
+					}
+					else if(answer == discard) {
+						EDITOR.readFromDisk(file.path, function(err, path, text) {
+							if(err) return alertBox("Unable to read file: " + file.path);
+							
+							file.reload(text);
+							
+							file.saved(); // Because we reloaded from disk
+							
+							unsavedFiles.splice(unsavedFiles.indexOf(file), 1);
+							askToSaveFiles();
+							
+						});
+					}
+					
+				});
+			}
+			
+			function checkRepoStatus() {
+				
+				CLIENT.cmd("mercurial.status", {directory: selectedSite.source}, function hgstatus(err, resp) {
+					if(err) return alertBox(err.message);
+					
+					var modified = resp.modified;
+					var rootDir = UTIL.trailingSlash(resp.rootDir);
+					var untracked = resp.untracked;
+						
+					for (var i=0; i<modified.length; i++) {
+						if(EDITOR.files.hasOwnProperty(modified[i])) {
+							return EDITOR.commitTool(rootDir);
+						}
+					}
+					
+				});
+			}
 			
 		}
 		

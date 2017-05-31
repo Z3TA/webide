@@ -1,6 +1,11 @@
 /*
 	Mercurial
 	
+	There are many SCM workflows and we should not asume a special workflow is used,
+	so this plugin needs to be "general" and not du stuff on it's own.
+	
+	
+	
 	
 */
 
@@ -11,7 +16,7 @@
 	if(window.location.href.indexOf("-hg") == -1) return console.log("Append -hg in the url to try out the Mercurial plugin");
 	
 	
-	var repoCommitDialog = EDITOR.createWidget(buildRepoCommitDialog);
+	var repoCommitDialog = EDITOR.createWidget(buildCommitDialog);
 	var repoCommitMenuItem;
 	var fileSelect;
 	var inputrootDir;
@@ -19,7 +24,7 @@
 	var rootDir = null;
 	var untracked = [];
 	
-	var repoCloneDialog = EDITOR.createWidget(buildRepoCloneDialog);
+	var repoCloneDialog = EDITOR.createWidget(buildCloneDialog);
 	var repoCloneMenuItem;
 	
 	var userValue = "demo";
@@ -47,22 +52,22 @@
 		
 		// todo: Only show commit and annotate if the file belongs to a Mercurial SCM repo
 		repoCommitMenuItem = EDITOR.addMenuItem("Commit", function() {
-			showRepoCommitDialog();
+			showCommitDialog();
 			EDITOR.hideMenu();
 		});
 		
 		annotateMenuItem = EDITOR.addMenuItem(showAnnotationsString, annotateOn);
 		
 		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", function() {
-			showRepoCloneDialog();
+			showCloneDialog();
 			EDITOR.hideMenu();
 		});
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
 		
-		//EDITOR.on("fileOpen", mercurialDance);
-		
+		EDITOR.on("fileOpen", fileOpen);
+		EDITOR.on("commitTool", commitTool);
 		
 	}
 	
@@ -72,10 +77,44 @@
 		
 		EDITOR.unbindKey(hideMercurialWidgets);
 		
-		EDITOR.removeEvent("fileOpen", mercurialDance);
+		EDITOR.removeEvent("fileOpen", fileOpen);
 		
 		EDITOR.removeEvent("moveCaret", showAnnotations);
 		
+		
+	}
+	
+	function commitTool(directory) {
+		// Does the directory has a initated Mercurial repo ?
+		CLIENT.cmd("mercurial.hasRepo", {directory: directory}, function hgstatus(err, resp) {
+			if(err) throw err;
+			
+			var rootDir = resp.rootDir;
+			
+			if(rootDir == null) console.warn("No Mercurial repo found in directory=" + directory);
+			else showCommitDialog(rootDir);
+			
+		});
+	}
+	
+	function fileOpen(file) {
+		/*
+			When a file is opened, we want to check if there's an updated version in the remote repository ...
+			But it's not a good idea! See below:
+			
+			(P.S. hg incoming does the same thing as hg pull, but destoys the changes !)
+			
+			1. Check if the file opened belongs to a Mercurial repository
+			2. Check if any of the files opened by the editor and belongs to the repo, are all saved
+			3. Check if all files in the repo is commited
+			4. Check to make sure there are no unresolved files
+			5. Check to make sure there are no multiple heads
+			
+			6. Make sure a hg pull && hg update will succeeed. 
+			This part can be costly for a large repo, so we should not do this every time a file is opened.
+			
+			We also don't want to pull (and possible screw up) the local work unless the user wants to
+		*/
 		
 	}
 	
@@ -83,6 +122,7 @@
 	function mercurialDance(file) {
 		
 		/*
+			
 			Pull and Update often to prevent merge conflicts!
 			
 			Strategy:
@@ -100,7 +140,10 @@
 			
 			2. Pull updates from repository (hg pull)
 			3. Check what changed (hg status --rev tip   hg log foo.txt -r (hg --debug id -i):tip)
-			4. Is any of the changed files opened by the editor ?
+			
+			Is any of the changed files opened by the editor ?
+			
+			Is any of the changed files not commited !?
 			
 			If any of them are not saved, don't interupt the user, do nothing more.
 			
@@ -152,28 +195,28 @@
 		
 		var fileDirectory = UTIL.getDirectoryFromPath(file.path);
 		
-		checkForUnresolved();
+		checkForUnresolved(fileDirectory);
 		
-		function checkForUnresolved() {
+		function checkForUnresolved(fileDirectory) {
 		// 1. Check for unresolved files (hg resolve --list)
 			CLIENT.cmd("mercurial.resolvelist", {directory: fileDirectory}, function resolveList(err, resp) {
 			if(err) throw err;
 			
 				if(resp.resolved.length == 0 && resp.unresolved.length == 0) {
-					checkForMultibleHeads();
+					checkForMultipleHeads(fileDirectory);
 				}
 				else if(resp.unresolved.length > 0) {
-					showResolveDialog(resp.resolved, resp.unresolved);
+					showResolveDialog(resp.resolved, resp.unresolved, fileDirectory);
 				}
 				else {
 					// All files are resolved
-					showRepoCommitDialog();
+					showCommitDialog();
 				}
 				
 			});
 			}
 		
-		function checkForMultipleHeads() {
+		function checkForMultipleHeads(fileDirectory) {
 			CLIENT.cmd("mercurial.heads", {directory: fileDirectory}, function resolveList(err, resp) {
 				if(err) throw err;
 				
@@ -190,9 +233,9 @@
 								
 								if(resp.unresolved == 0) {
 									alertBox("Merge successful! " + resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed, " + resp.unresolved + " files unresolved.");
-									pullFromRepo();
+									pullFromRepo(fileDirectory);
 								}
-								else checkForUnresolved();
+								else checkForUnresolved(fileDirectory);
 								
 							});
 						}
@@ -263,7 +306,8 @@
 						var update = "Update";
 						var ignore = "Ignore for now";
 						
-						confirmBox("There are incoming updates ... todo what to say here? ", [update, ignore], function(answer) {
+						confirmBox("Do you want to update the working directory to the latest revision ?  change your working directory to reflect what you have pulled into your repository. Do you want to update/merge ? ", [update, ignore], function(answer) {
+						
 						});
 						
 						}
@@ -296,7 +340,7 @@
 		
 		
 		// Check if there are ucommited work on the local working copy
-		hgStatus(function workingCopyStatus(err, _rootDir, _modified, _untracked) {
+		hgStatus(directory, function workingCopyStatus(err, _rootDir, _modified, _untracked) {
 			
 			if(err) return console.warn(err);
 			else {
@@ -401,7 +445,7 @@
 								}
 								else if(answer == optSaveCommit) {
 									EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
-										showRepoCommitDialog();
+											showCommitDialog();
 									});
 								}
 								else throw new Error("Unknown answer=" + answer);
@@ -506,7 +550,7 @@
 	}
 	}
 	
-	function buildRepoCommitDialog(widget) {
+	function buildCommitDialog(widget) {
 		
 		var div = document.createElement("div");
 		div.setAttribute("class", "repoCommit");
@@ -565,7 +609,7 @@
 		cancelButton.setAttribute("class", "button");
 		cancelButton.appendChild(document.createTextNode("Cancel"));
 		cancelButton.onclick = function cancel() {
-			hideRepoCommitDialog();
+			hideCommitDialog();
 		};
 		
 		td.appendChild(cancelButton);
@@ -661,22 +705,25 @@
 								if(err) alertBox(err.message);
 								else {
 									alertBox("Successfully commited and pushed to " + resp.remote);
-									cimmitSuccessful();
+									commitSuccessful(resp.directory);
 								};
 							});
 						}
 						else {
 							alertBox("Successfully commited! (don't forget to push)");
-							cimmitSuccessful();
+							commitSuccessful(resp.directory);
 						}
 					};
 				});
 			}
 			
-			function cimmitSuccessful() {
+			function commitSuccessful(directory) {
+				
+				// Keep showing the commit dialog ...
+				// It's common to commit one file at a time
 				
 				textarea.value = "";
-				updateFileSelect(function(err) {
+				updateCommitFileSelect(directory, function(err) {
 					if(err) throw err;
 				});
 				
@@ -689,11 +736,11 @@
 		
 	}
 	
-	function updateFileSelect(callback) {
+	function updateCommitFileSelect(directory, callback) {
 		
 		while(fileSelect.firstChild) fileSelect.removeChild(fileSelect.firstChild); // Emty file list
 		
-		hgStatus(function hg_got_status(err, rootDir, modified, untracked) {
+		hgStatus(directory, function hg_got_status(err, rootDir, modified, untracked) {
 			
 			if(err) {
 				if(callback) callback(err);
@@ -707,7 +754,7 @@
 				
 				if(modified.length == 0 && untracked.length == 0) {
 					if(!callback) alertBox("No changes detected! (no need to commit)");
-					hideRepoCommitDialog();
+					hideCommitDialog();
 					return;
 				}
 				
@@ -755,12 +802,12 @@
 		
 	}
 	
-	function hgStatus(callback, mercurialRootDir) {
+	function hgStatus(directory, callback) {
 		
 		if(!callback) throw new Error("No callback function!");
 		
 		var commandOptions = {
-			directory: mercurialRootDir || UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir
+			directory: directory || UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir
 		}
 		
 		CLIENT.cmd("mercurial.status", commandOptions, function hgstatus(err, resp) {
@@ -806,7 +853,7 @@
 		
 	}
 	
-	function buildRepoCloneDialog(widget) {
+	function buildCloneDialog(widget) {
 		
 		var testRepo = {
 			url: "https://hg.webtigerteam.com/repo/test",
@@ -980,7 +1027,7 @@
 				else {
 					
 					alertBox("Successfully cloned to:\n" + resp.path);
-					hideRepoCloneDialog();
+					hideCloneDialog();
 					
 				};
 				
@@ -991,18 +1038,19 @@
 	}
 	
 	
-	function showRepoCloneDialog() {
+	function showCloneDialog() {
 		return repoCloneDialog.show();
 	}
 	
-	function hideRepoCloneDialog() {
+	function hideCloneDialog() {
 		return repoCloneDialog.hide();
 	}
 	
-	function showResolveDialog(resolved, unresolved) {
+	function showResolveDialog(resolved, unresolved, fileDirectory) {
 		
-		if(resolved == undefined) throw new Error("Expected list of resolved files");
-		if(unresolved == undefined) throw new Error("Expected list of unresolved files");
+		if(fileDirectory == undefined)  throw new Error("fileDirectory=" + fileDirectory);
+		if(resolved == undefined) throw new Error("resolved=" + resolved);
+		if(unresolved == undefined) throw new Error("unresolved=" + unresolved);
 		
 		// Update files
 		
@@ -1030,14 +1078,20 @@
 			if(resolved.indexOf(file) != -1) checkbox.setAttribute("checked", "checked");
 			
 				checkbox.onclick = function fileCheck(e) {
-					if(!checkbox.checked) {
-						markResolved(file);
-						checkbox.checked = true;
-					}
-					else {
-						markUnResolved(file);
-						checkbox.checked = false;
-					}
+					if(checkbox.checked) {
+					CLIENT.cmd("mercurial.resolvemark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
+						if(err) throw err;
+						if(resp.allResolved) {
+							resolveDialog.hide();
+							showCommitDialog();
+						}
+					});
+				}
+				else {
+					CLIENT.cmd("mercurial.resolveunmark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
+						if(err) throw err;
+						});
+						}
 				}
 				
 				var a = document.createElement("a");
@@ -1053,21 +1107,6 @@
 				
 			}
 			}
-	
-	function markResolved(file, callback) {
-		CLIENT.cmd("mercurial.resolvemark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
-			if(err) throw err;
-			if(callback) callback(null);
-			});
-	}
-	
-	function markUnResolved(file, callback) {
-		CLIENT.cmd("mercurial.resolveunmark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
-			if(err) throw err;
-			if(callback) callback(null);
-		});
-	}
-	
 	
 	function annotateOn() {
 		
@@ -1239,7 +1278,7 @@
 	}
 	
 	
-	function showRepoCommitDialog() {
+	function showCommitDialog(directory) {
 		repoCommitDialog.show();
 		
 		// Reset these values
@@ -1247,17 +1286,17 @@
 		rootDir = null;
 		untracked.length = 0;
 		
-		updateFileSelect();
+		updateCommitFileSelect(directory);
 		return false;
 	}
 	
-	function hideRepoCommitDialog() {
+	function hideCommitDialog() {
 		return repoCommitDialog.hide();
 	}
 	
 	function hideMercurialWidgets() {
 		// Returning false prevents browser's default action. Only return false if we did something.
-		return !!( repoCommitDialog.hide() + hideRepoCloneDialog() + hideAuthDialog() );
+		return !!( repoCommitDialog.hide() + hideCloneDialog() + hideAuthDialog() );
 	}
 	
 	function hideAuthDialog() {

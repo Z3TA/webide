@@ -67,6 +67,32 @@ var UTIL = {
 		return UTIL.trailingSlash(path.substring(0, lastSlash));
 	},
 
+	getFolderName: function getFolderName(path) {
+		/*
+			Returns the name of the last folder in a folder path
+		/foo/bar returns bar,
+		/foo/bar/baz returns bar
+			foo/bar returns foo
+		*/
+		
+		var delimiter = UTIL.getPathDelimiter(path);
+		
+		if(path.charAt(path.length) != delimiter) {
+			console.warn("The last character is not a delimiter=" + delimiter + " path=" + path);
+			path = path.substring(0, path.lastIndexOf(delimiter));
+		}
+		
+		console.log("path=" + path);
+		
+		var arr = path.split(delimiter);
+		
+		if(arr.length == 0) return ""
+		else if(arr.length == 1) {
+			return arr[0];
+		}
+		else return arr[arr.length-1];
+		},
+	
 	getFolders: function getFolders(fullPath, includeHostInfo) {
 		/* 
 			Returns each folder in the path. Can take an url or a local filesystem path
