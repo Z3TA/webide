@@ -45,7 +45,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Working on Mercurial resolve, etc
+SSG, make sure it's working! (then work on mercurial integration for the ssg)
+
+Testing the Mercurial integration/tools for the SSG
+
 
 What happens when there are unresolved files and you pull in more changes ?
 $ hg up
