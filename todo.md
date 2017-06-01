@@ -45,8 +45,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-SSG sync, fixing bug: it adds multiple "default = repo"
-
 SSG sync, ask about files not in the repo
 
 SSG, make sure it's working! (then work on mercurial integration for the ssg)

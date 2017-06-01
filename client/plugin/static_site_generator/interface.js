@@ -1325,12 +1325,15 @@
 						else pathPart = hgrcContent.substring(pathPartStart + 7);
 						
 						// Check if our repo is the default repo
-						var regex = new RegExp("default\s?=\s?(.*)$");
+						var regex = new RegExp("default\\s?=\\s?(.*)");
 						var repos = pathPart.match(regex);
 						
 						if(repos == null) {
 							// No default repo exist, add our repo as default
-							hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "default = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
+							hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "\ndefault = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
+							console.log("pathPart=" + pathPart);
+							console.log("reg: " + pathPart.match(regex) + " (" + regex + ")");
+							console.log("Saving hgrcContent:\n" + hgrcContent);
 							EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 								if(err) throw err; // Unexpected
 								doHgSync();
@@ -1345,7 +1348,7 @@
 								var updateSettings = "Update settings";
 								var cancelSync = "Cancel Sync";
 								
-								confirmBox("The repository do not match with the default repository!<br>repository: " + site.repository + "<br>default: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
+								confirmBox("Repository configured in the static site generator do not match with the default repository!<br>repository: " + site.repository + "<br>default: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
 									
 									if(answer == changeDefault) {
 										var fullString = repos[0];
@@ -1435,10 +1438,10 @@
 			var rootPath = selectedSite.source;
 			
 			for(var path in EDITOR.files) {
-				if(path.indexOf(rootPath) != -1 && !file.isSaved) {
+				if(path.indexOf(rootPath) != -1 && !EDITOR.files[path].isSaved) {
 					unsavedFiles.push(EDITOR.files[path]);
 				}
-			}
+				}
 			
 			askToSaveFiles();
 			
