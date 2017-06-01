@@ -612,11 +612,12 @@ var File; // File object is global
 			
 		}
 		
+		if(EDITOR.currentFile == file) {
 		// Check if the scrolling is OK
 		if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
-			throw new Error("Scrolling bug: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
+				throw new Error("Scrolling bug: EDITOR.currentFile.path=" + EDITOR.currentFile.path + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
 		}
-		
+		}
 		
 	}
 	
@@ -3521,8 +3522,8 @@ var File; // File object is global
 		
 		console.log("scrollTo: x=" + x + " y=" + y);
 		
-		
 		if(x != undefined) startColumn = parseInt(x);
+		
 		if(y != undefined) {
 			
 			y = parseInt(y);
@@ -3573,7 +3574,7 @@ var File; // File object is global
 		
 		function doTheScrolling(scrolled) {
 			
-			console.log("Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow );
+			console.log("Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow + " file.startColumn=" + file.startColumn + " startColumn=" + startColumn);
 			
 			if(file.startColumn != startColumn || file.startRow != startRow) {
 				file.startColumn = startColumn;
@@ -3600,6 +3601,8 @@ var File; // File object is global
 				EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
 				scrolled = true;
 			}
+			
+			console.log("scrolled=" + scrolled + " file.startColumn=" + file.startColumn + " file.startRow=" + file.startRow);
 			
 			if(scrolled) EDITOR.renderNeeded();
 			
