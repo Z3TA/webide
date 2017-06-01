@@ -488,44 +488,8 @@ function sockJsConnection(connection) {
 								log("User name=" + name + " logged in! " + JSON.stringify(userInfo));
 
 								userWorker.send({identify: userInfo});
-								
-								userWorker.on("message", function messageFromWorker(workerMessage, handle) {
-									console.log("Worker message from " + name + ": " + shortString(workerMessage) + " handle=" + handle);
-
-									if(workerMessage.resp || workerMessage.error) send(workerMessage);
-									else if(workerMessage.message) {
-										for(var conn in USER_CONNECTIONS[name].connections) {
-											send(workerMessage.message, conn);
-										}
-									}
-									else if(workerMessage.request) {
-										// For special functionality ...
-
-										var id = workerMessage.id;
-										var req = workerMessage.request;
-
-										if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
-
-										if(req.createHttpEndpoint) {
-
-											createHttpEndpoint(req.createHttpEndpoint.folder, function(err, url) {
-												if(err) throw err;
-												workerResp(req, {url: url})
-
-											});
-
-										}
-										else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
-
-									}
-									else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
-									
-									function workerResp(req, resp) {
-										if(id == undefined) throw new Error("id=" + id);
-										userWorker.send({id: id, parentResponse: resp});
-									}
-
-								});
+								userWorker.on("message", messageFromWorker);
+								userWorker.on("exit", workerExitHandler);
 								
 								/*
 								setTimeout(function() {
@@ -549,6 +513,67 @@ function sockJsConnection(connection) {
 								}
 
 								return true;
+								
+								function messageFromWorker(workerMessage, handle) {
+									console.log("Worker message from " + name + ": " + shortString(workerMessage) + " handle=" + handle);
+									
+									if(workerMessage.resp || workerMessage.error) send(workerMessage);
+									else if(workerMessage.message) {
+										for(var conn in USER_CONNECTIONS[name].connections) {
+											send(workerMessage.message, conn);
+										}
+									}
+									else if(workerMessage.request) {
+										// For special functionality ...
+										
+										var id = workerMessage.id;
+										var req = workerMessage.request;
+										
+										if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+										
+										if(req.createHttpEndpoint) {
+											
+											createHttpEndpoint(req.createHttpEndpoint.folder, function(err, url) {
+												if(err) throw err;
+												workerResp(req, {url: url})
+												
+											});
+											
+										}
+										else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+										
+									}
+									else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
+									
+									function workerResp(req, resp) {
+										if(id == undefined) throw new Error("id=" + id);
+										userWorker.send({id: id, parentResponse: resp});
+									}
+									
+								}
+								
+								function workerExitHandler(code, signal) {
+									console.log(name + " worker exit: code=" + code + " signal=" + signal);
+									
+									var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
+									
+									if(code !== 0) {
+										msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
+										
+										log("Recreating user worker process for " + name);
+										
+										userWorker = createUserWorker(name, uid, gid);
+										userWorker.send({identify: userInfo});
+										
+										userWorker.on("message", messageFromWorker);
+										userWorker.on("exit", workerExitHandler);
+										
+									}
+									
+									send({msg: msg, id: 0});
+									
+								}
+								
 							}
 						}
 
@@ -583,17 +608,20 @@ function sockJsConnection(connection) {
 		
 		log("Closed " + protocol + " from " + IP);
 		
+		
 		if(userWorker) {
 			
-			USER_CONNECTIONS[userName].connections.splice(USER_CONNECTIONS[userName].connections.indexOf(connection), 1);
-
-			if(USER_CONNECTIONS[userName].connections.length === 0) {
-				userWorker.send({teardown: true}); // Worker should be exiting ...
-				delete USER_CONNECTIONS[userName];
-			}
-
+			// Each connection has it's own worker process!
+			userWorker.send({teardown: true}); // Worker should be exiting ...
+			
+		// Users logged in with the same name can however send messages to each others ...
+		
+		USER_CONNECTIONS[userName].connections.splice(USER_CONNECTIONS[userName].connections.indexOf(connection), 1);
+		
+		if(USER_CONNECTIONS[userName].connections.length === 0) {
+			delete USER_CONNECTIONS[userName];
 		}
-
+		}
 	});
 	
 }
@@ -601,9 +629,9 @@ function sockJsConnection(connection) {
 
 function shortString(stringOrObject, limit) {
 	if(limit == undefined) limit = 100;
-
+	
 	var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject; 
-
+	
 	if(str.length > limit) str = str.substr(0,limit) + " ... (" + str.length + " characters)";
 	
 	return str;
@@ -629,7 +657,7 @@ function isObject(obj) {
 }
 
 /*
-API.serve = function serve(user, json, callback) {
+	API.serve = function serve(user, json, callback) {
 	
 	// Serve a folder via HTTP
 	
@@ -638,11 +666,11 @@ API.serve = function serve(user, json, callback) {
 	console.log("user.name=" + user.name + " serving folder=" + folder);
 	
 	createHttpEndpoint(folder, function(err, url) {
-		if(err) throw err;
-		callback(err, {url: url});
+	if(err) throw err;
+	callback(err, {url: url});
 	});
 	
-}
+	}
 */
 
 
