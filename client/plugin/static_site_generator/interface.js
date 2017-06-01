@@ -83,11 +83,15 @@
 		}
 		
 		
-		
 		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
 		
 		if(storageSites) {
-			sites = JSON.parse(storageSites);
+			try {
+				sites = JSON.parse(storageSites);
+			}
+			catch(err) {
+				throw new Error("Unable to parse sites from storage! " + err.message);
+			}
 		}
 		else if(demoSite) {
 			sites = [demoSite];
@@ -1118,8 +1122,11 @@
 		
 		if(sourceFile == undefined) {		
 			pickFileToPreview(site, function(err, file) {
-				if(err) throw err;
-				compileIt(file);
+				if(err) {
+					newWindow.close();
+					alertBox(err.message);
+				}
+				else compileIt(file);
 			});
 		}
 		else compileIt(sourceFile);
@@ -1157,7 +1164,6 @@
 						openPreviewWin();
 						
 					}
-					
 					else {
 						// Open the index page
 						
@@ -1237,23 +1243,15 @@
 									wysiwygEnabled = false;
 								}
 							}
-							
 						}
-						
-						
 					}
-					
 				});
 			});
 		}
 		
 		return false;
 		
-		
 	}
-	
-	
-	
 	
 	
 	function closePreview() {
@@ -1580,80 +1578,80 @@
 						var filesChanged = resp.files;
 						var filesOpenedInEditorThatChanged = [];
 						
-							if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
-							
+						if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+						
 						if(changes === 0) {
 							console.log("No incoming changes from " + repoUrl);
-								
+							
 							pushToRepo();
 							
-								return; // No incoming changes
-							}
-							
+							return; // No incoming changes
+						}
+						
 						for(var i=0; i<filesChanged.length; i++) {
-									
+							
 							var filePath = filesChanged[i];
-									
-									if(EDITOR.files.hasOwnProperty(filePath)) {
-										// We only care about files opened by the editor
-										
-										var changedFile = EDITOR.files[filePath];
-										
-									filesOpenedInEditorThatChanged.push(changedFile);
-										
-									if(!changedFile.isSaved) filesOpenedInEditorAndNotSaved.push(filePath.replace(selectedSite.projectFolder, ""));
-										
-									}
-								}
+							
+							if(EDITOR.files.hasOwnProperty(filePath)) {
+								// We only care about files opened by the editor
+								
+								var changedFile = EDITOR.files[filePath];
+								
+								filesOpenedInEditorThatChanged.push(changedFile);
+								
+								if(!changedFile.isSaved) filesOpenedInEditorAndNotSaved.push(filePath.replace(selectedSite.projectFolder, ""));
+								
+							}
+						}
 						
 						if(filesOpenedInEditorAndNotSaved.length != 0) {
 							console.warn("Files not saved (but we did check before): " + filesOpenedInEditorAndNotSaved.join("\n"));
 							alertBox("Can not update files that are not saved. Save the following files and then try again:\n" + filesOpenedInEditorAndNotSaved.join("\n"));
-							}
-							else {
-								CLIENT.cmd("mercurial.update", {directory: selectedSite.projectFolder}, function hgUpdated(err, resp) {
-									if(err) return alertBox(err.message);
-									
-									var whenAllFilesReloaded = null;
-									
-									var alertMsg = resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed and " + resp.unresolved + " files unresolved.";
-									
-									if(resp.unresolved > 0) {
-										alertMsg += "\nAutomatic file merge fialed. You have to manually resolve conflicts!";
-										whenAllFilesReloaded = function resolveFiles() {
-											alertBox(alertMsg);
-											EDITOR.resolveTool(resp.resolved, resp.unresolved, selectedSite.projectFolder);
-										}
-										
-									}
-									else {
-										alertMsg = "Update successful! " + alertMsg;
-										whenAllFilesReloaded = function push() {
-											//alertBox(alertMsg);
-											pushToRepo();
-										} 
-										
-									}
-									
-									var filesReloaded = 0;
-								for(var path in filesOpenedInEditorThatChanged) reloadFile(filesOpenedInEditorThatChanged[path]);
-									
-									function reloadFile(file) {
-										EDITOR.readFromDisk(file.path, fileRead);
-										
-										function fileRead(err, path, text) {
-											if(err) return alertBox("Unable to read file: " + file.path);
-											
-											file.reload(text);
-											
-											file.saved(); // Because we reloaded from disk
-											
-										if(++filesReloaded == filesOpenedInEditorThatChanged.length) whenAllFilesReloaded();
-										}
-									}
-								});
-							}
 						}
+						else {
+							CLIENT.cmd("mercurial.update", {directory: selectedSite.projectFolder}, function hgUpdated(err, resp) {
+								if(err) return alertBox(err.message);
+								
+								var whenAllFilesReloaded = null;
+								
+								var alertMsg = resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed and " + resp.unresolved + " files unresolved.";
+								
+								if(resp.unresolved > 0) {
+									alertMsg += "\nAutomatic file merge fialed. You have to manually resolve conflicts!";
+									whenAllFilesReloaded = function resolveFiles() {
+										alertBox(alertMsg);
+										EDITOR.resolveTool(resp.resolved, resp.unresolved, selectedSite.projectFolder);
+									}
+									
+								}
+								else {
+									alertMsg = "Update successful! " + alertMsg;
+									whenAllFilesReloaded = function push() {
+										//alertBox(alertMsg);
+										pushToRepo();
+									} 
+									
+								}
+								
+								var filesReloaded = 0;
+								for(var path in filesOpenedInEditorThatChanged) reloadFile(filesOpenedInEditorThatChanged[path]);
+								
+								function reloadFile(file) {
+									EDITOR.readFromDisk(file.path, fileRead);
+									
+									function fileRead(err, path, text) {
+										if(err) return alertBox("Unable to read file: " + file.path);
+										
+										file.reload(text);
+										
+										file.saved(); // Because we reloaded from disk
+										
+										if(++filesReloaded == filesOpenedInEditorThatChanged.length) whenAllFilesReloaded();
+									}
+								}
+							});
+						}
+					}
 				}
 			}
 			
@@ -1666,8 +1664,8 @@
 				});
 			}
 			
-			}
 		}
+	}
 	
 	
 	function publishSite(site) {

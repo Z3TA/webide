@@ -140,8 +140,11 @@ todo: Make sure the source file is saved!
 		wysiwygEditorCounter++;
 		
 
-		if(!wysiwygEditor.bodyExistInSource()) throw new Error("bodyTag=" + bodyTag + " does not exist in source code!");
-		
+		if(!wysiwygEditor.bodyExistInSource()) {
+			console.warn("bodyTag=" + wysiwygEditor.bodyTagSource + " does not exist in source code!");
+			wysiwygEditor.close();
+			return;
+		}
 		
 		wysiwygEditor.setStartRow();
 		
