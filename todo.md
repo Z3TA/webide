@@ -45,7 +45,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-SSG sync, ask about files not in the repo
+SSG sync, ask about files not in the version control (repo) when syncing (for example newly created files)
 
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
@@ -260,6 +260,8 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+Main window closed when printing ... and the printer printed a few hundred pages of byte code ...
 
 When connecting to a sftp, then disconnecting and disconnecting to another (newly created) sftp connection, it doesn't connect !? Make a time-out and notify the user!
 
