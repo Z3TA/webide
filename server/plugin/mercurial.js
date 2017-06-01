@@ -522,24 +522,25 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 						
 						console.log("affectedFilesString=" + affectedFilesString);
 						
-						if(affectedFilesString == "") {
-							var affectedFiles = []; // Emty array
+						var pulledFiles = [];
+						var affectedFiles = affectedFilesString.split(/\n|\r\n/);
+								
+								for(var i=0, prefix; i<affectedFiles.length; i++) {
+							prefix = affectedFiles[i].substr(0, affectedFiles[i].indexOf(" ")).trim();
+							
+							// Remove prefix (?, M, A, R, etc) and add directory
+							affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim();
+							
+							if(prefix != "?") pulledFiles.push(affectedFiles[i]); 
+								}
+							
+						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
+							
+						resp["files"] = pulledFiles;
+							
+							callback(null, resp);
+							
 						}
-						else {
-							var affectedFiles = affectedFilesString.split(/\n|\r\n/);
-					
-					for(var i=0; i<affectedFiles.length; i++) {
-							affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim(); // Remove M, A, R, etc and add directory
-						}
-						}
-						
-						if(fileCount != affectedFiles.length) throw new Error("fileCount=" + fileCount + " affectedFiles (" + affectedFiles.length + ") =" + JSON.stringify(affectedFiles));
-					
-					resp["files"] = affectedFiles;
-					
-					callback(null, resp);
-					
-				}
 				
 			});
 			
