@@ -458,7 +458,15 @@ process.on('message', function commandMessage(message) {
 					if(!err.stack) console.trace("Stack ...")
 					else console.log(err.stack);
 					
-					send({error: "API error: " + (err.message ? err.message : err) + ""});
+					var msg = {
+						error: "API error: " + (err.message ? err.message : err) + ""
+					}
+					
+					if(err.code) msg.errorCode = err.code;
+					
+					if(answer) msg.resp = answer;
+					
+					send(msg);
 					
 				}
 				else {

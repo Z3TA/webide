@@ -110,7 +110,15 @@ var CLIENT = {}; // Client object is global
 				
 				if(json.id) {
 					if(callbackWaitList.hasOwnProperty(json.id)) {
-						callbackWaitList[json.id](json.error ? new Error("Server: " + json.error) : null, json.resp);
+						
+						var err = null;
+						
+						if(json.error) {
+							err = new Error("Server: " + json.error);
+							if(json.errorCode) err.code = json.errorCode;
+						}
+						
+						callbackWaitList[json.id](err, json.resp);
 						delete callbackWaitList[json.id];
 					}
 					

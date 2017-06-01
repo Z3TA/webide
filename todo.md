@@ -45,6 +45,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Create file path when saving a file.
+
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
 Testing the Mercurial integration/tools for the SSG
@@ -136,6 +138,8 @@ How do I "release" !?
 
 We should always be able/ready to "deply" or "release"! 
 Put whatever you're working on behind a feature flag. And make sure you have not broken anything before pushing.
+
+"the integrations are the product" - integrate with other tools, for example Google drive
 
 Offline experience !? If we can't connected to the server. Should it still be possible to use the editor !?
 
@@ -902,6 +906,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
+Able to select files and folders in file explorer !?
 
 Better support for files that requires spaces ? Or add separate support for each format ? For example nginx config files. (auto indentation)
 
