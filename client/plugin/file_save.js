@@ -14,11 +14,11 @@
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Choose file path for saving files",
-		load: load,
-		unload: unload,
+		load: loadFileSaver,
+		unload: unloadFileSaver,
 	});
 	
-	function load() {
+	function loadFileSaver() {
 		// Called when the module is loaded
 		
 		var char_S = 83;
@@ -37,7 +37,7 @@
 		
 	}
 	
-	function unload() {
+	function unloadFileSaver() {
 		// Cleaning up, for example when disabling a plugin
 		
 		EDITOR.unbindKey(saveCurrentFile);
@@ -107,18 +107,51 @@
 		
 		if(!inputPath) throw new Error("Is the save dialog visible?");
 		
-		EDITOR.saveFile(file, inputPath.value, function fileSaved(err, path) {
-			if(err) {
-				// Most likely cause is that the folder does not exist!
-				
-				if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
-				else alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
-				
-			}
-		});
+		// First check if the folder exist
+		var fullPath = file.path;
+		var includeHostInfo = true;
+		var folderPaths = UTIL.getFolders(fullPath, includeHostInfo);
+		if(folderPaths.length > 1) {
+			var pathToParentFolder = folderPaths[folderPaths.length-2];
+			var pathToCreate = folderPaths[folderPaths.length-1];
+			var folderName = UTIL.getFolderName(pathToCreate);
+			EDITOR.folderExistIn(pathToParentFolder, folderName, function folderExistInCallback(folderPath) {
+				if(folderPath === false) {
+					
+					var create = "Create the path";
+					var dontSave = "Do not save the file";
+					var msg = "The path does not exist:\n" + pathToCreate;
+					confirmBox(msg, [create, dontSave], function (answer) {
+						if(answer == create) {
+							
+							EDITOR.createPath(pathToCreate, function createPathCallback(err, path) {
+								if(err) alertBox("Unable to create the path: " + pathToCreate + "\n" + err.message);
+								else save();
+							});
+						}
+					});
+					
+				}
+				else save();
+			});
+		}
+		else save();
 		
-		hideSaveDialog();
 		
+		function save() {
+			EDITOR.saveFile(file, inputPath.value, function fileSaved(err, path) {
+				if(err) {
+					// Most likely cause is that the folder does not exist!
+					
+					//if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
+					
+					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
+					
+				}
+			});
+			
+			hideSaveDialog();
+		}
 	}
 	
 	
@@ -139,7 +172,7 @@
 				
 				hideSaveDialog();
 				
-				}
+			}
 			// else: user clicked cancel!?
 			
 		});
@@ -162,8 +195,8 @@
 		EDITOR.resizeNeeded();
 		
 		return false;
-		}
-			
+	}
+	
 	function hideSaveDialog() {
 		// Bring back focus to the current file
 		if(EDITOR.currentFile) {
@@ -202,15 +235,15 @@
 		
 		
 		var path = "";
-
+		
 		if(file.savedAs) path = file.path;
 		else if(EDITOR.lastFile) path = UTIL.getDirectoryFromPath(EDITOR.lastFile.path);
-
+		
 		if(!path) path = EDITOR.workingDirectory;
-	
+		
 		
 		inputPath.value = path;
-
+		
 		var size = Math.max(inputPathMinSize, inputPath.value.length + 10)
 		
 		console.log("size=" + size);

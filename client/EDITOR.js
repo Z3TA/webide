@@ -2767,7 +2767,10 @@ EDITOR.lastKeyPressed = "";
 			
 			if(err) {
 				console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
+				
+				if(err.code != "ENOENT") alertBox("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
 				folderExistInCallback(false);
+				
 			}
 			else {
 				

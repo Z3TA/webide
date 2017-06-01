@@ -45,8 +45,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Create file path when saving a file.
-
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
 Testing the Mercurial integration/tools for the SSG
@@ -133,6 +131,8 @@ Add a watcher for every opened file and warn the user if the file changes by oth
 
 What I'm thinking
 -----------------
+
+Should there be white space indentation on emty lines !?
 
 How do I "release" !?
 
