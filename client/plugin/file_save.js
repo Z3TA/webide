@@ -108,7 +108,7 @@
 		if(!inputPath) throw new Error("Is the save dialog visible?");
 		
 		// First check if the folder exist
-		var fullPath = file.path;
+		var fullPath = inputPath.value;
 		var includeHostInfo = true;
 		var folderPaths = UTIL.getFolders(fullPath, includeHostInfo);
 		if(folderPaths.length > 1) {
