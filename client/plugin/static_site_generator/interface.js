@@ -1494,11 +1494,13 @@
 					var rootDir = UTIL.trailingSlash(resp.rootDir);
 					var untracked = resp.untracked;
 					
+					console.log("mercurial.status resp=" + JSON.stringify(resp));
+					
 					if(modified.length > 0) {
 						alertBox("Commit changes before syncing!");
 						EDITOR.commitTool(rootDir);
 					}
-					if(untracked.length > 0) {
+					else if(untracked.length > 0) {
 						alertBox("There are new files, what to do with them !?");
 						EDITOR.commitTool(rootDir);
 					}

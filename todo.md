@@ -45,6 +45,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Mercurial issue: What do you get from "hg status --rev tip" if one of your local files are changed but not commited !?
+(hg integrations does a "hg status --rev tip" after each pull to see what happaned)
+
+
 Commit tool: Show diff
 Also make it possible to commit only selected diffs
 (probably have to use something better then a select box for the file select)
