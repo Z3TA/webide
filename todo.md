@@ -137,6 +137,8 @@ Add a watcher for every opened file and warn the user if the file changes by oth
 What I'm thinking
 -----------------
 
+Should the tests be loaded when running in the browser !?
+
 Should there be white space indentation on emty lines !?
 
 How do I "release" !?
@@ -263,8 +265,6 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
-
-todo: Able to run tests in browser, a "run tests" item in the context menu if devMode is on.
 
 createCaret bug when index=file.text.length
 

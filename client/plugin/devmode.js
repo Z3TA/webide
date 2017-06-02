@@ -10,6 +10,9 @@
 	var toggleDevmodeMenuItem, showDevToolsMenuItem;
 	var toggleDevmodeMenuItemPosition = 0;
 	
+	var runTestsMenuItem;
+	
+	
 	/*
 		This has some core functionality, but it will most likely be the plugin that manage devMode
 		If more devMode manager plugins are added, some functionality needs to be added to EDITOR.js
@@ -88,6 +91,8 @@
 		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
 		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
 		
+		EDITOR.removeMenuItem(runTestsMenuItem);
+		
 		// Disable console.log
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
 		console.log = console.warn = function() {}; // Perf mode
@@ -118,6 +123,8 @@
 			toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
 		}
 		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
+		
+		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests);
 		
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;
@@ -229,8 +236,14 @@
 		
 		return false; // Don't want a browser refresh!
 		
-	};
+	}
 	
-	
+	function runTests() {
+		
+		EDITOR.hideMenu();
+		
+		EDITOR.runTests();
+		
+	}
 	
 })();

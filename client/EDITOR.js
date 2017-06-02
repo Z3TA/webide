@@ -3116,6 +3116,9 @@ EDITOR.lastKeyPressed = "";
 		}
 	}
 	
+	EDITOR.runTests = function runTests() {
+		runTests_5616458984153156();
+	}
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
@@ -3381,7 +3384,7 @@ EDITOR.lastKeyPressed = "";
 		
 		
 		if(EDITOR.settings.devMode && runtime != "browser") {
-			// ## Load tests
+			// ## Load all tests in the tests folder (tests can also exist outside the tests folder)
 			console.log("Loading tests ...");
 			var walk = require('walk');
 			var head = document.getElementsByTagName("head")[0];
