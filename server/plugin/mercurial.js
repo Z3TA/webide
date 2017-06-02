@@ -538,10 +538,10 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				else throw new Error("Unexpected hg pull: stderr=" + stderr + " stdout=" + stdout);
 				
 				// Get list of changed files / Files that will be affected by a "hg update"
-				exec('hg status --rev tip', { cwd: localDirectory }, function (err, status_stdout, status_stderr) {
+				exec('hg status --rev .:tip', { cwd: localDirectory }, function (err, status_stdout, status_stderr) {
 					
-					console.log("hg status --rev tip stderr=" + status_stderr);
-					console.log("hg status --rev tip stdout=" + status_stdout);
+					console.log("hg status --rev .:tip stderr=" + status_stderr);
+					console.log("hg status --rev .:tip stdout=" + status_stdout);
 					
 					if(err) throw err;
 					else if(status_stderr) throw new Error("status_stderr=" + status_stderr);
