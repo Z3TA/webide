@@ -46,6 +46,8 @@ What I'm working on
 -------------------
 
 Commit tool: Show diff
+Also make it possible to commit only selected diffs
+(probably have to use something better then a select box for the file select)
 
 Commit tool: option to move, ignore, revert.
 
@@ -265,8 +267,6 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
-
-createCaret bug when index=file.text.length
 
 Main window closed when printing ... and the printer printed a few hundred pages of byte code ...
 

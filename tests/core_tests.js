@@ -32,6 +32,27 @@
 		
 	*/
 	
+	EDITOR.addTest(function doesFileCaretUpdate(callback) {
+		
+		// bug: File.insertLineBreak(caret) with another caret then file.caret did not update the file caret.
+		
+		
+		EDITOR.openFile("doesFileCaretUpdate.txt", '', function(err, file) {
+			
+			file.write("foo\nbar", true);
+			
+			// I first thought the bug was in File.createCaret(), but it was actually in File.insertLineBreak() !
+			
+			// The sanity checks will throw if there's something wrong!
+
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+		
+		
+	}, 1);
+	
 	EDITOR.addTest(function testRemoveRow(callback) {
 		EDITOR.openFile("testRemoveRow.html", '<div>\n\t<div>\n\t\tremove me\n\t</div>\n</div>\n', function(err, file) {
 			

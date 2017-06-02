@@ -240,11 +240,12 @@ var File; // File object is global
 			
 		*/
 		
-		//console.log("File:createCaret");
 		
 		var grid = file.grid;
 		var caret = {index: index, row: row, col: col, eol: false, eof: false};
 		
+		console.log("File:createCaret index=" + index + " row=" + row + " col=" + col + " grid.length=" + grid.length);
+
 		if(index != undefined) {
 			if(index > 0) file.checkGrid(); // Check the grid for errors
 		}
@@ -273,7 +274,7 @@ var File; // File object is global
 			caret.eol = true;
 			caret.eof = true;
 			
-			return caret;
+			//return caret;
 		}
 		else if(index == undefined && row == undefined && col == undefined) {
 			// We got nothing 
@@ -389,7 +390,7 @@ var File; // File object is global
 		}
 		
 		
-		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + "");
+		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
 		console.log(UTIL.getStack("creating caret"));
 		
 		// Sanity check if we got it right
@@ -685,7 +686,7 @@ var File; // File object is global
 		
 		if(caret.eof) {
 			if(caret.row != (file.grid.length-1)) {
-				throw new Error("Caret on row " + caret.row + ". Expected it to be on row " + file.grid.length + " because caret.eof = true in file.path=" + file.path);
+				throw new Error("Caret on row " + caret.row + " (caret=" + JSON.stringify(caret) + "). Expected it to be on row " + (file.grid.length-1) + " because caret.eof = true in file.path=" + file.path);
 			}
 			else if(caret.eol != true) {
 				throw new Error("Caret should be on EOL when caret.eof = true\ncaret=" + JSON.stringify(caret) + "\n" + "file.text.length=" + file.text.length + "");
@@ -738,8 +739,8 @@ var File; // File object is global
 		
 	}
 	
-	File.prototype.write = function(text) {
-		// Writes text at EOF
+	File.prototype.write = function(text, addLineBreak) {
+		// Writes text at EOF (faster then insertText)
 		
 		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
@@ -761,7 +762,7 @@ var File; // File object is global
 				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
 				file.writeLine(rows[i]);
 			}
-			return;
+			return addLineBreakMaybe();
 		}
 		
 		var grid = file.grid;
@@ -790,6 +791,22 @@ var File; // File object is global
 			file.checkCaret();
 			
 			file.scrollToCaret();
+		}
+		
+		addLineBreakMaybe();
+		
+		function addLineBreakMaybe() {
+
+			if(file.text.length == 0) throw new Error("added text=" + text + " but file.text.length=" + file.text.length + " file.text=" + file.text);
+
+			if(addLineBreak) {
+				
+				file.debugGrid();
+
+				var caret = file.createCaret(file.text.length);
+				file.insertLineBreak(caret);
+
+			}
 		}
 	}
 	
@@ -1004,7 +1021,7 @@ var File; // File object is global
 	
 	File.prototype.insertText = function(text, caret) {
 		
-		// todo: Make it not re-create the grid!
+		// Inserts text on the position of the caret 
 		
 		var file = this;
 		
@@ -1884,25 +1901,24 @@ var File; // File object is global
 			caret = file.caret;
 		}
 		
-		file.sanityCheck();
+		
+		console.log("Inserting line break at caret=" + JSON.stringify(caret) + " grid.length=" + file.grid.length);
+		
+		//if(caret != file.caret) console.warn("caret=" + JSON.stringify(caret) + " is not file.caret=" + JSON.stringify(file.caret) + "");
+
+		file.sanityCheck(); // Sanity check in case someting is wrong
 		
 		
-		//console.log("Inserting lalaline breaka at " + JSON.stringify(caret));
-		
-		// Sanity check in case someting is wrong
-		file.sanityCheck();
-		
-		
-		var row = caret.row,
-		col = caret.col,
-		totalCharactersAdded = file.lineBreak.length,
-		grid = file.grid,
-		index = caret.index,
-		currentRow = grid[row],
-		box,
-		tabCharacters = "",
-		newRow,
-		movedCharacters = 0;
+		var row = caret.row;
+		var col = caret.col;
+		var totalCharactersAdded = file.lineBreak.length;
+		var grid = file.grid;
+		var index = caret.index;
+		var currentRow = grid[row];
+		var box;
+		var tabCharacters = "";
+		var newRow;
+		var movedCharacters = 0;
 		
 		//console.log("Inserting line break at index=" + index);
 		
@@ -1977,6 +1993,7 @@ var File; // File object is global
 			if(caret.index == file.text.length) {
 				caret.eof = true;
 			}
+			else caret.eof = false;
 		}
 		else {
 			caret.eol = false;
@@ -2010,12 +2027,15 @@ var File; // File object is global
 		file.startColumn = 0;
 		EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 		
+		file.checkCaret(caret);
+
+		if(caret != file.caret) file.fixCaret(file.caret);
 		
+		file.sanityCheck();
+
 		// Call file edit listeners
 		file.change("linebreak", file.lineBreak, index, row, col) // change, text, index, row, col
 		
-		
-		file.sanityCheck();
 		
 		EDITOR.fireEvent("moveCaret", file, caret);
 		
@@ -4482,3 +4502,4 @@ var File; // File object is global
 	}
 
 })();
+
