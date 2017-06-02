@@ -632,7 +632,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.doesFileExist = function(path, callback) {
-		// An easier method then getFileSizeOnDisk to check if a file exist on disk (add support for other protocols later!?)
+		// An easier method then getFileSizeOnDisk to check if a file exist on disk.
 		// Be aware of racing conditions, it's often better to just open the file and see what happends
 		
 		EDITOR.getFileSizeOnDisk(path, gotSize);
@@ -855,9 +855,12 @@ EDITOR.lastKeyPressed = "";
 				
 				console.log("Successfully saved " + file.path);
 				file.saved(); // Call functions that listen for save events
+				
 			}
-			else if(callback) callback(err, path);
-			else throw err;
+			
+			if(callback) callback(err, path);
+			
+			if(err && !callback) throw err;
 			
 		}
 		
