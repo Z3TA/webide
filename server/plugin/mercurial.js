@@ -548,10 +548,11 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 					else {
 						
 						var affectedFilesString = status_stdout.trim();
+						var pulledFiles = [];
 						
+						if(affectedFilesString != "") {
 						console.log("affectedFilesString=" + affectedFilesString);
 						
-						var pulledFiles = [];
 						var affectedFiles = affectedFilesString.split(/\n|\r\n/);
 						
 						for(var i=0, prefix; i<affectedFiles.length; i++) {
@@ -562,7 +563,9 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 							
 							if(prefix != "?") pulledFiles.push(affectedFiles[i]); 
 						}
+						}
 						
+						// Sanity check
 						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
 						
 						resp["files"] = pulledFiles;
