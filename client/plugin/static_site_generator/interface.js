@@ -1498,6 +1498,10 @@
 						alertBox("Commit changes before syncing!");
 						EDITOR.commitTool(rootDir);
 					}
+					if(untracked.length > 0) {
+						alertBox("There are new files, what to do with them !?");
+						EDITOR.commitTool(rootDir);
+					}
 					else checkRepoUnresolved();
 					
 				});

@@ -45,7 +45,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-SSG sync, ask about files not in the version control (repo) when syncing (for example newly created files)
+Commit tool: Able to see what changed
+Commit tool: option to move, ignore, revert.
 
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
