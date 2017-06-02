@@ -289,14 +289,16 @@
 						else open();
 					}
 					// scenario: File has been emptied because of no disk space (*cough* Linux *cough*)
-					else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0) {
+					else if(fileSizeOnDisk === 0 && lastFileState.text.length > 0 && lastFileState.isSaved) {
+						// note: It will always load from last state if last state was not saved!
 						
 						var strItShouldBeEmty = "It should be emty";
 						var strLoadLastState = "Load last saved state";
 						
-						confirmBox("File on disk is empty!", [strItShouldBeEmty, strLoadLastState], function(answer) {
+						confirmBox("File on disk is empty!\n" + path, [strItShouldBeEmty, strLoadLastState], function(answer) {
 							
 							if(answer == strLoadLastState) loadLastState = true;
+							else if(answer == strItShouldBeEmty) loadLastState = false;
 							open();
 							
 						});

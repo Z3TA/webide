@@ -45,8 +45,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Commit tool: Able to see what changed
+Commit tool: Show diff
+
 Commit tool: option to move, ignore, revert.
+
 
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
@@ -261,6 +263,10 @@ Run the tests (and make sure there are no errors)
 
 BUGS (and issues)
 =================
+
+todo: Able to run tests in browser, a "run tests" item in the context menu if devMode is on.
+
+createCaret bug when index=file.text.length
 
 Main window closed when printing ... and the printer printed a few hundred pages of byte code ...
 
