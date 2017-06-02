@@ -3,11 +3,12 @@ Prio:
 
 1) Make it possible for a non-dev to make web documents
 
+Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
+
 Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
 
-Synka-knapp i SSG som uppdaterar från Mercurial
 Går inte att publicera om man inte har dokumenterat och synkat
-Går inte att synka om man inte har dokumenterat
+
 Efter att man sparat en fil i SSG kommer det upp en dokumentations-widget,
 där man skriver in varför ändringarna gjordes.
 (Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. 
@@ -32,7 +33,6 @@ Meta publish date, publish only after this date. Make server auto publish!?
 
 find beta tester
 setup ftp + webpage
-give download link with bootstrap.url token, that saves the ftp user/pw
 have a tutorial that shows how to publish to webpage and write new posts
 
 3) Bug/issue fixing and refactoring
@@ -45,64 +45,19 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Mercurial issue: What do you get from "hg status --rev tip" if one of your local files are changed but not commited !?
-(hg integrations does a "hg status --rev tip" after each pull to see what happaned)
-
-
-Commit tool: Show diff
-Also make it possible to commit only selected diffs
-(probably have to use something better then a select box for the file select)
-
-Commit tool: option to move, ignore, revert.
-
-
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
 Testing the Mercurial integration/tools for the SSG
 
 
-What happens when there are unresolved files and you pull in more changes ?
-$ hg up
-abort: outstanding merge conflicts
-
-$ hg resolve foo.txt
-merging foo.txt
-warning: conflicts while merging foo.txt! (edit, then use 'hg resolve --mark')
-
-$ hg resolve --mark foo.txt
-(no more unresolved files)
-
-$ hg up
-merging foo.txt
-warning: conflicts while merging foo.txt! (edit, then use 'hg resolve --mark')
-0 files updated, 0 files merged, 0 files removed, 1 files unresolved
-use 'hg resolve' to retry unresolved file merges
-
-$ hg resolve --mark foo.txt
-(no more unresolved files)
-
-$ hg resolve --list
-R foo.txt
-
-
-Strategy for updating/merging + merge conflicts
-
-testing pull && update
-
-client/plugin/mercurial.js
-pull & update
-todo: resolve/merge
-
-Mercurial pull !!!!?
-
-Mercurial push
-
-Implementing Mercurial support
-
-SSG and WYSIWYG + Mercurial Repo
-
 
 todo:
+
+Commit tool: Show diff
+(Also make it possible to commit only selected diffs,
+probably have to use something better then a select box for the file select)
+
+Commit tool: option to move, and revert.
 
 Make apparmor and systemd service profiles
 
@@ -149,9 +104,6 @@ Should there be white space indentation on emty lines !?
 
 How do I "release" !?
 
-We should always be able/ready to "deply" or "release"! 
-Put whatever you're working on behind a feature flag. And make sure you have not broken anything before pushing.
-
 "the integrations are the product" - integrate with other tools, for example Google drive
 
 Offline experience !? If we can't connected to the server. Should it still be possible to use the editor !?
@@ -159,15 +111,13 @@ Offline experience !? If we can't connected to the server. Should it still be po
 Terminal emulator ? (node-pty, node-ansiparser). No! Everything should be handled via the GUI, do not introduce new concepts (like the terminal).
 Manage files via the file explorer plugin, launch nodejs scripts with nodejs plugin and stop with stop button, or debug stepper. Use mercurial/git plugins with GUI.
 
-Use feature flag for stuff that are "in construction" so that the main branch is always working and can be pushed to production at any time.
-
 Discovery: Dashboard! When no file is open. Can also bring up the dash-board when clicking on a "settings/search" icon that's always visible in the top right corner.
 dashboards sell!
 
 Discovery: "tip of the day". "Open a file" Ctrl + O
 Keep stats on how many times a key-combo has been used, then show tips about the less used ones.
 
-Is node.exe (osx package) a signed binary ? Can OSX users start it !??
+Is node.exe (osx package) a signed binary ? Can OSX users start it !?? Yep!
 
 Add to Chrome OS app store ...
 
@@ -175,27 +125,15 @@ How to handle errors in server.js ?
 
 SSH keys when connecting to remote servers ... where to store them ?
 
-Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
-
 Getting likes or upvotes are very addicting ... 
 
 Is it possible to teach people to write HTML ? "Learn HTML and Make web pages like a pro"
-
-SCM integration (both Mercurial and Git, auto-detect) ex:
-file.isCommited
-file.blame(row) 
-
-ex: Before pushing a site to FTP, checks if the changes have been commited and pushed (updated and merged) before going live.
-
-Keyboard shortcuts are very hard to remember and not very friendly for first time users ... Do we need a menu or tool bar ?
-idea: (yet another keyboard shortcut LOL) Ctrl + Up down, brings up the same menu as when right clicking (need to make it look better) and add most important "shortcuts" there!
-
 
 Helping functions / abstractions, that I need, or find it annoying without, have prio, but bugs have more prio!?
 Maybe it's faster to fix the bug if I have those functions working thoug!?
 
 Work on improving the bug finding system, like undefined methods and properties, have prio! But bugs have more prio!?
-Follow <script includes and nodeJS require's
+Make the static analyzer Follow <script includes and nodeJS require's
 
 misspelled / undefined property: If the property have never been seen before but match another property with only 1 character off, show the off letter with red background.
 
@@ -236,6 +174,7 @@ Would probably have to save remote files to a temporary location
 
 Lessons learned
 ---------------
+Use feature flag for stuff that are "in construction" so that the main branch is always working and can be pushed to production at any time.
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
 Write tests (first)!
@@ -244,7 +183,7 @@ note: The error should be the first argument in callbacks!
 note: Have to close the app and reopen it to reload NodeJS module source!
 note: Always restart after a (thrown) error! (Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.)
 Throw errors instead of just returning the void! (ex: if(foo == bad) return;) => throw new Error("foo is bad!")
-Plugins GUI's should use their own event handlers for the GUI instead of cluttering keyBindings
+Plugin's GUI's should use their own event handlers for the GUI instead of cluttering keyBindings
 
 
 When discovering a bug
@@ -266,7 +205,14 @@ Fix the bug (like five years later after fixing all isses that comes up just for
 Run the tests (and make sure there are no errors)
 
 
-
+When you break something
+------------------------
+Make a test case that checks if the thing you broke is working or not
+Write mock tools if needed
+Make sure the test case fails
+Fix what's broken
+Make sure the test case succeeds
+Run all tests! (to make sure you did not break anything else)
 
 
 BUGS (and issues)
