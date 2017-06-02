@@ -627,8 +627,20 @@
 		
 		td.appendChild(cancelButton);
 		
+		tr.appendChild(td);
+		
+		
+		td = document.createElement("td");
+		// ### Ignore button
+		var ignoreButton = document.createElement("button");
+		ignoreButton.setAttribute("class", "button");
+		ignoreButton.appendChild(document.createTextNode("Ignore ..."));
+		ignoreButton.onclick = mercurialIgnore;
+		
+		td.appendChild(ignoreButton);
 		
 		tr.appendChild(td);
+		
 		
 		
 		table.appendChild(tr);
@@ -642,6 +654,127 @@
 		*/
 		
 		return div;
+		
+		function mercurialIgnore(e) {
+			var tracked = []; // Check if some of the files are tracked, and ask if we should remove them
+			var ignore = [];
+			var selectedFiles = fileSelect.options;
+				for(var i=0, filePath; i<selectedFiles.length; i++) {
+					if(selectedFiles[i].selected) {
+						filePath = selectedFiles[i].value;
+					ignore.push(filePath);
+					if(untracked.indexOf(filePath) == -1) tracked.push(filePath);
+					}
+				}
+			
+			if(tracked.length > 0) {
+				var yes = "Yes, Forget them";
+				var no = "NO!";
+				confirmBox("Forget (stop tracking) the following files ?\n" + nonTracked.join("\n"), [no, yes], function(answer) {
+					
+					if(answer == no) {
+						
+						// Remove tracked files from files to be ignored
+						while(tracked.length > 0) {
+							ignore.splice(ignore.indexOf(tracked[0]), 1);
+							tracked.splice(tracked.indexOf(tracked[0]), 1);
+						}
+						
+						return ignoreFiles(false);
+					}
+					
+					CLIENT.cmd("mercurial.forget", {directory: rootDir, files: ignore}, function forgotten(err, resp) {
+						
+						if(err) alertBox(err.message);
+						else {
+							
+							ignoreFiles(true);
+							
+						};
+						
+					});
+				})
+			}
+			else ignoreFiles(false);
+			
+			function ignoreFiles(filesForgotten) {
+				
+				if(ignore.length === 0) return alertBox("No file is selected!");
+				
+				var ignoreFilePath = rootDir + ".hgignore";
+				var contentToAdd = "";
+				
+				for (var i=0; i<ignore.length; i++) {
+					contentToAdd += ignore[i] + "\n";
+				}
+				
+				if(contentToAdd == "") throw new Error("contentToAdd=" + contentToAdd + " ignore=" + JSON.stringify(ignore));
+				
+				// Check if .hgignore exist, or create it
+				if(EDITOR.files.hasOwnProperty(ignoreFilePath)) {
+					console.log(".hgigonore already open");
+					var file = EDITOR.files[ignoreFilePath];
+					file.write(contentToAdd, true);
+					saveFile(file);
+					}
+				else {
+				
+				EDITOR.doesFileExist(ignoreFilePath, function fileExist(exists) {
+					
+					if(exists) {
+							console.log(".hgigonore already exists");
+						EDITOR.openFile(ignoreFilePath, undefined, function fileOpened(err, file) {
+							if(err) return alertBox(err.message);
+							
+								file.write(contentToAdd, true);
+							
+							saveFile(file);
+						});
+					}
+					else {
+							console.log("Creating .hgigonore file");
+						EDITOR.openFile(ignoreFilePath, contentToAdd, function fileOpened(err, file) {
+							if(err) return alertBox(err.message);
+							
+								saveFile(file);
+							
+						});
+						
+					}
+					
+					
+				});
+				}
+				
+				function saveFile(file) {
+					console.log("Saving .hgignore file ...");
+					EDITOR.saveFile(file, ignoreFilePath, function fileSaved(err, filePath) {
+						if(err) return alertBox(err.message);
+						
+						var msg = "";
+						
+						if(filesForgotten) msg += "The files has been added to .hgignore. Don't forget to commit!";
+						
+						EDITOR.renderNeeded();
+						
+						console.log("Updating commitFileSelect ...");
+						updateCommitFileSelect(rootDir, function(err) {
+							if(err) throw err;
+							
+							console.log("commitFileSelect updated!");
+							
+							//if(untracked.indexOf(".hgignore") != -1) msg += " Don't forget to commit the .hgignore file!"
+							
+							if(msg) alertBox(msg);
+							
+						});
+						
+					});
+				}
+				
+			}
+			
+		}
 		
 		
 		function mercurialCommit(e, alsoPush) {
