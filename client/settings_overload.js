@@ -94,5 +94,16 @@ else if(process.platform == "linux") {
 	EDITOR.settings.gridHeight = 22;
 	EDITOR.settings.gridWidth = 7.83;
 	
+	// Ligature test
+	EDITOR.settings.style.font = "Hasklig"; // Looks very bold
+	EDITOR.settings.style.font = "Fira Code";
+	
+	/*
+		
+		if(a != b && b <= c && x != y) 
+		
+		<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
+		
+	*/
+	
 }
-
