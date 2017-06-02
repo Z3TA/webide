@@ -41,6 +41,10 @@ body {
 	font-family: Arial;
 	}
 
+canvas {
+	text-rendering: optimizeLegibility;
+	font-kerning : normal;
+}
 
 .wireframe {
 	user-select: none;

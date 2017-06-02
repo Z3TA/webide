@@ -1433,6 +1433,9 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+Idea: Group tabs into "projects", when you are in a project, all files opened will belong to that project. 
+If you switch project, it shows the files belonging to that project.
+
 When in debugger, animate "hot" functions with a text-fire effects. Only the "function" in function foo() { not the body }
 
 When in debugger/static analyser,Show dead code in a special color.
