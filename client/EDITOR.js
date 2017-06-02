@@ -3092,7 +3092,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	// Tools for handling repositories (Mercurial, Git, etc)
-	EDITOR.commitTool = function commotTool(directory) {
+	EDITOR.commitTool = function commitTool(directory) {
 		console.log("Calling commitTool listeners (" + EDITOR.eventListeners.commitTool.length + ")");
 		for(var i=0, f; i<EDITOR.eventListeners.commitTool.length; i++) {
 			EDITOR.eventListeners.commitTool[i].fun(directory);

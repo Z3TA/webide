@@ -1008,11 +1008,14 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	var directory = json.directory;
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		
+		if(err) return callback(err);
+		
 		var resp = {directory: null};
 		
 		resp.directory = user.toVirtualPath(rootDir);
 		
-		return callback(null, {resp: resp});
+		return callback(null, resp);
 		
 	});
 }
