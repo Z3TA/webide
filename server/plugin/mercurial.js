@@ -131,67 +131,71 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	var exec = require('child_process').exec;
 	
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
-	
-	exec("hg root", { cwd: localDirectory }, function (err, stdout, stderr) {
-		console.log("hg rootstderr=" + stderr);
-		console.log("hg root stdout=" + stdout);
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory, virtualRootDir) {
 		
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
-		else {
+		if(err) return callback(err);
+		
+		exec("hg status", { cwd: localDirectory }, function (err, stdout, stderr) {
 			
-			var mercurialRoot = stdout.trim();
+			console.log("hg status stderr=" + stderr);
+			console.log("hg status stdout=" + stdout);
 			
-			if(user.rootPath) {
-				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
-					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
-					return callback("Unable to find a mercurial reposity from directory=" + directory);
-				}
-			}
-			
-			var rootDir = user.toVirtualPath(mercurialRoot);
-			
-			if(rootDir instanceof Error) callback("Unable to find a mercurial reposity from directory=" + directory);
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
 			else {
 				
+				var modified = [];
+				var added = [];
+				var removed = [];
+				var missing = [];
+				var untracked = [];
+				
+				var files;
+				
+				if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
+				else files = stdout.split("\n");
+				
 				/*
-					First 
+					The codes used to show the status of files are:
+					
+					M = modified
+					A = added
+					R = removed
+					C = clean
+					! = missing (deleted by non-hg command, but still tracked)
+					? = not tracked
+					I = ignored
+					= origin of the previous file (with --copies)
+					
 				*/
 				
-				exec("hg status", { cwd: localDirectory }, function (err, stdout, stderr) {
+				for(var attr, path, i=0; i<files.length-1; i++) {
+					attr = files[i].substring(0, files[i].indexOf(" "));
+					path = files[i].substring(attr.length + 1);
 					
-					console.log("stderr=" + stderr);
-					console.log("stdout=" + stdout);
-					
-					if(err) callback(err);
-					else if(stderr) callback(stderr);
-					else {
-						
-						var modified = [];
-						var untracked = [];
-						
-						var files;
-						
-						if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
-						else files = stdout.split("\n");
-						
-						for(var attr, path, i=0; i<files.length-1; i++) {
-							attr = files[i].substring(0, files[i].indexOf(" "));
-							path = files[i].substring(attr.length + 1);
-							
-							if(attr == "?") untracked.push(path);
-							else if(attr == "M") modified.push(path);
-							else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
-						}
-						
-						callback(null, {modified: modified, untracked: untracked, rootDir: rootDir});
-						
-					}
-				});
-			} 
-		}
+					if(attr == "M") modified.push(path);
+					else if(attr == "A") added.push(path);
+					else if(attr == "R") removed.push(path);
+					else if(attr == "!") missing.push(path);
+					else if(attr == "?") untracked.push(path);
+					else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
+				}
+				
+				var resp = {
+					modified: modified,
+					added: added,
+					removed: removed,
+					missing: missing,
+					untracked: untracked, 
+					rootDir: virtualRootDir
+				}
+				
+				callback(null, resp);
+				
+			}
 		});
-	}
+	});
+}
 
 
 MERCURIAL.add = function hgadd(user, json, callback) {
@@ -205,26 +209,50 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-	
-	var fileString = "";
-	for(var i=0, localPath; i<files.length; i++) {
-		localPath = user.translatePath(directory + files[i]);
-		if(localPath instanceof Error) return callback(localPath);
-		if(localPath.indexOf(rootDir) == -1) return callback("File not in local repository: " + files[i]);
-		fileString += ' "' + localPath + '"';
-	}
-	
-	var exec = require('child_process').exec;
-	exec("hg add" + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
-		else {
-			
-			if(stdout != "") callback(stdout);
-			else callback(null, {files: files});
-			
-		}
+		
+		var fileString = makeFileString(user, files, directory, rootDir);
+		if(fileString instanceof Error) return callback(fileString);
+		
+		var exec = require('child_process').exec;
+		exec("hg add" + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				if(stdout != "") callback(stdout);
+				else callback(null, {files: files});
+				
+			}
+		});
 	});
+}
+
+MERCURIAL.forget = function hgforget(user, json, callback) {
+	// forget the specified files on the next commit
+	
+	var directory = json.directory;
+	var files = json.files;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(files == undefined) return callback(new Error("No files defined"));
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
+		
+		var fileString = makeFileString(user, files, rootDir);
+		if(fileString instanceof Error) return callback(fileString);
+		
+		var exec = require('child_process').exec;
+		exec("hg forget" + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				if(stdout != "") callback(stdout);
+				else callback(null, {files: files});
+				
+			}
+		});
 	});
 }
 
@@ -262,6 +290,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	var message = json.message;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(directory.charAt(directory.length-1) != "/" && directory.charAt(directory.length-1) != "\\") return callback(new Error("directory=" + directory + " needs to end with a path delimter!"));
 	if(files == undefined) return callback(new Error("No files defined"));
 	if(message == undefined) return callback(new Error("No message defined"));
 	
@@ -270,27 +299,27 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-		var fileString = makeFileString(user, files);
+		var fileString = makeFileString(user, files, directory, rootDir);
 		
 		if(fileString instanceof Error) return callback(fileString);
 		
-	var exec = require('child_process').exec;
-	exec('hg commit -m "' + message + '"' + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
-		
-		console.log("stderr=" + stderr);
-		console.log("stdout=" + stdout);
-		
-		if(stdout == "nothing changed") return callback("Nothing has been changed! Did you forget to add files ?");
-		
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
-		else {
+		var exec = require('child_process').exec;
+		exec('hg commit -m "' + message + '"' + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
 			
-			if(stdout != "") callback(stdout);
-			else callback(null, {directory: directory});
+			console.log("stderr=" + stderr);
+			console.log("stdout=" + stdout);
 			
-		}
-	});
+			if(stdout == "nothing changed") return callback("Nothing has been changed! Did you forget to add files ?");
+			
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				if(stdout != "") callback(stdout);
+				else callback(null, {directory: directory});
+				
+			}
+		});
 	});
 }
 
@@ -311,138 +340,138 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-	
-	var exec = require('child_process').exec;
-	
-	var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
-	
-	var execOptions = {
-		encoding: 'utf8',
-		timeout: 3000,
-		maxBuffer: 200*1024,
-		killSignal: 'SIGTERM',
-		cwd: localDirectory,
-		env: null,
-	}
-	
-	exec("hg incoming --stat --noninteractive" + config, execOptions, function (err, stdout, stderr) {
 		
-		console.log("localDirectory=" + localDirectory);
-		console.log("stdout=" + stdout);
-		console.log("stderr=" + stderr);
-		console.log("err=" + err);
+		var exec = require('child_process').exec;
 		
-		if(stdout) {
-			var matchRepoUrl = stdout.match(/comparing with (.*)/);
-			
-			if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
-			
-			var repoUrl = matchRepoUrl[1];
-			
-			console.log("repoUrl=" + repoUrl);
-			
-			var noChanges = stdout.match(/(\r\n|\n)no changes found/);
-			
-			console.log("noChanges=" + noChanges);
-			
+		var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
+		
+		var execOptions = {
+			encoding: 'utf8',
+			timeout: 3000,
+			maxBuffer: 200*1024,
+			killSignal: 'SIGTERM',
+			cwd: localDirectory,
+			env: null,
 		}
 		
-		if(err) {
-			// It seems Mercurial "sometimes" returns exit code 1 when there's nothing to pull !?!?
-			if(!noChanges) return callback(err);
-			else callback(null, {changes: null, repo: repoUrl});
-		}
-		else if(stderr) return callback(stderr);
-		else {
+		exec("hg incoming --stat --noninteractive" + config, execOptions, function (err, stdout, stderr) {
 			
+			console.log("localDirectory=" + localDirectory);
+			console.log("stdout=" + stdout);
+			console.log("stderr=" + stderr);
+			console.log("err=" + err);
 			
-			if(noChanges) {
-				callback(null, {changes: null, repo: repoUrl});
+			if(stdout) {
+				var matchRepoUrl = stdout.match(/comparing with (.*)/);
+				
+				if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
+				
+				var repoUrl = matchRepoUrl[1];
+				
+				console.log("repoUrl=" + repoUrl);
+				
+				var noChanges = stdout.match(/(\r\n|\n)no changes found/);
+				
+				console.log("noChanges=" + noChanges);
+				
 			}
+			
+			if(err) {
+				// It seems Mercurial "sometimes" returns exit code 1 when there's nothing to pull !?!?
+				if(!noChanges) return callback(err);
+				else callback(null, {changes: null, repo: repoUrl});
+			}
+			else if(stderr) return callback(stderr);
 			else {
-				var searchingChangesStr = "searching for changes";
-				var indexSearchingChanges = stdout.indexOf(searchingChangesStr);
 				
-				if(indexSearchingChanges == -1) throw new Error("Can not find string '" + searchingChangesStr + "' in stdout=" + stdout);
 				
-				var strChanges = stdout.substr(indexSearchingChanges + searchingChangesStr.length);
-				
-				strChanges = strChanges.trim();
-				
-				var arrChanges = strChanges.split(/(\r\n|\n)\s*(\r\n|\n)/); // Two line breaks (can have spaces between)
-				
-				console.log("arrChanges.length=" + arrChanges.length);
-				
-				for(var i=0; i<arrChanges.length; i++) {
-					console.log("arrChanges[" + i + "]=" + arrChanges[i]);
-					while(arrChanges[i].match(/^(\r\n|\n)$/)) arrChanges.splice(i, 1); // Remove emty sets
+				if(noChanges) {
+					callback(null, {changes: null, repo: repoUrl});
 				}
-				console.log("arrChanges=" + JSON.stringify(arrChanges, null, 2));
-				
-				var objChanges = {};
-				var obj;
-				
-				
-				for(var i=0; i<arrChanges.length; i+=2) {
-					arrChanges[i] = arrChanges[i].split(/\r\n|\n/);
+				else {
+					var searchingChangesStr = "searching for changes";
+					var indexSearchingChanges = stdout.indexOf(searchingChangesStr);
 					
-					for (var j=0; j<arrChanges[i].length; j++) {
+					if(indexSearchingChanges == -1) throw new Error("Can not find string '" + searchingChangesStr + "' in stdout=" + stdout);
+					
+					var strChanges = stdout.substr(indexSearchingChanges + searchingChangesStr.length);
+					
+					strChanges = strChanges.trim();
+					
+					var arrChanges = strChanges.split(/(\r\n|\n)\s*(\r\n|\n)/); // Two line breaks (can have spaces between)
+					
+					console.log("arrChanges.length=" + arrChanges.length);
+					
+					for(var i=0; i<arrChanges.length; i++) {
+						console.log("arrChanges[" + i + "]=" + arrChanges[i]);
+						while(arrChanges[i].match(/^(\r\n|\n)$/)) arrChanges.splice(i, 1); // Remove emty sets
+					}
+					console.log("arrChanges=" + JSON.stringify(arrChanges, null, 2));
+					
+					var objChanges = {};
+					var obj;
+					
+					
+					for(var i=0; i<arrChanges.length; i+=2) {
+						arrChanges[i] = arrChanges[i].split(/\r\n|\n/);
 						
-						var name = arrChanges[i][j].substr(0, arrChanges[i][j].indexOf(":"));
-						var value = arrChanges[i][j].substr(arrChanges[i][j].indexOf(":")+1).trim();
-						console.log("name=" + name);
-						console.log("value=" + value);
+						for (var j=0; j<arrChanges[i].length; j++) {
+							
+							var name = arrChanges[i][j].substr(0, arrChanges[i][j].indexOf(":"));
+							var value = arrChanges[i][j].substr(arrChanges[i][j].indexOf(":")+1).trim();
+							console.log("name=" + name);
+							console.log("value=" + value);
+							
+							if(name == "changeset") obj = objChanges[value] = {};
+							else obj[name] = value;
+							
+						}
 						
-						if(name == "changeset") obj = objChanges[value] = {};
-						else obj[name] = value;
+						var matchStat = arrChanges[i+1].match(/ \d+ files changed, \d+ insertions\(\+\), \d+ deletions\(-\)$/);
 						
+						if(!matchStat) throw new Error("Did not find change stats! arrChanges=" + JSON.stringify(arrChanges, null, 2));
+						
+						obj["files"] = {};
+						var strStat = arrChanges[i+1].substring(0, matchStat.index).trim();
+						
+						console.log("strStat=" + strStat);
+						var arrFiles = strStat.split(/\r\n|\n/);
+						console.log("arrFiles=" + JSON.stringify(arrFiles));
+						for(var f=0; f<arrFiles.length; f++) {
+							arrFiles[f] = arrFiles[f].split(" | ");
+							
+							var fileName = arrFiles[f][0].trim();
+							var filePath = directory + fileName;
+							var changeCount = parseInt(arrFiles[f][1]);
+							
+							console.log("fileName=" + fileName);
+							console.log("changeCount=" + changeCount);
+							
+							obj["files"][filePath] = changeCount;
+							
+						}
 					}
 					
-					var matchStat = arrChanges[i+1].match(/ \d+ files changed, \d+ insertions\(\+\), \d+ deletions\(-\)$/);
+					console.log("objChanges=" + JSON.stringify(objChanges, null, 2));
 					
-					if(!matchStat) throw new Error("Did not find change stats! arrChanges=" + JSON.stringify(arrChanges, null, 2));
+					callback(null, {changes: objChanges, repo: repoUrl});
 					
-					obj["files"] = {};
-					var strStat = arrChanges[i+1].substring(0, matchStat.index).trim();
-					
-					console.log("strStat=" + strStat);
-					var arrFiles = strStat.split(/\r\n|\n/);
-					console.log("arrFiles=" + JSON.stringify(arrFiles));
-					for(var f=0; f<arrFiles.length; f++) {
-						arrFiles[f] = arrFiles[f].split(" | ");
-						
-						var fileName = arrFiles[f][0].trim();
-						var filePath = directory + fileName;
-						var changeCount = parseInt(arrFiles[f][1]);
-						
-						console.log("fileName=" + fileName);
-						console.log("changeCount=" + changeCount);
-						
-						obj["files"][filePath] = changeCount;
-						
-					}
 				}
-				
-				console.log("objChanges=" + JSON.stringify(objChanges, null, 2));
-				
-				callback(null, {changes: objChanges, repo: repoUrl});
 				
 			}
 			
-		}
-		
-		// We have already returned if the credentials was wrong!
-		if(save) {
-			console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
-			saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
-				if (err) throw err;
-				console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
-			});
-		}
-		else console.log("save=" + save);
-		
-		
-	});
+			// We have already returned if the credentials was wrong!
+			if(save) {
+				console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
+				saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
+					if (err) throw err;
+					console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+				});
+			}
+			else console.log("save=" + save);
+			
+			
+		});
 	});
 }
 
@@ -459,48 +488,48 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
-	
-	var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
-	
-	var exec = require('child_process').exec;
-	exec('hg pull --noninteractive' + config, { cwd: localDirectory }, function (err, stdout, stderr) {
 		
+		localDirectory = UTIL.trailingSlash(localDirectory);
+		
+		var config = (hguser != undefined && pw != undefined) ? " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw : "";
+		
+		var exec = require('child_process').exec;
+		exec('hg pull --noninteractive' + config, { cwd: localDirectory }, function (err, stdout, stderr) {
+			
 			console.log("hg pull stderr=" + stderr);
 			console.log("hg pull stdout=" + stdout);
-		
-		if(stdout) {
 			
-			var matchRepoUrl = stdout.match(/pulling from (.*)/);
-			
-			if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
-			
-			var repoUrl = matchRepoUrl[1];
-			
-			console.log("repoUrl=" + repoUrl);
-			
-			var noChanges = stdout.match(/(\r\n|\n)no changes found/);
-			
-			console.log("noChanges=" + noChanges);
-		}
-		
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
-		else {
-			
-			// added 2 changesets with 1 changes to 1 files
-			
-			var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
-			var resp = {repo: repoUrl};
-			var fileCount = -1;
-			
-			if(matchPull) {
-				resp.changesets = parseInt(matchPull[1]);
-				resp.changes = parseInt(matchPull[2]);
+			if(stdout) {
 				
-				fileCount = parseInt(matchPull[3]);
+				var matchRepoUrl = stdout.match(/pulling from (.*)/);
+				
+				if(!matchRepoUrl) throw new Error("Can not find repo url string (matchRepoUrl=" + matchRepoUrl + ") in stdout=" + stdout);
+				
+				var repoUrl = matchRepoUrl[1];
+				
+				console.log("repoUrl=" + repoUrl);
+				
+				var noChanges = stdout.match(/(\r\n|\n)no changes found/);
+				
+				console.log("noChanges=" + noChanges);
 			}
+			
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				// added 2 changesets with 1 changes to 1 files
+				
+				var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
+				var resp = {repo: repoUrl};
+				var fileCount = -1;
+				
+				if(matchPull) {
+					resp.changesets = parseInt(matchPull[1]);
+					resp.changes = parseInt(matchPull[2]);
+					
+					fileCount = parseInt(matchPull[3]);
+				}
 				else if(noChanges) {
 					resp.changesets = 0;
 					resp.changes = 0;
@@ -508,53 +537,53 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				}
 				else throw new Error("Unexpected hg pull: stderr=" + stderr + " stdout=" + stdout);
 				
-			// Get list of changed files / Files that will be affected by a "hg update"
-			exec('hg status --rev tip', { cwd: localDirectory }, function (err, status_stdout, status_stderr) {
-				
+				// Get list of changed files / Files that will be affected by a "hg update"
+				exec('hg status --rev tip', { cwd: localDirectory }, function (err, status_stdout, status_stderr) {
+					
 					console.log("hg status --rev tip stderr=" + status_stderr);
 					console.log("hg status --rev tip stdout=" + status_stdout);
-				
-				if(err) throw err;
-					else if(status_stderr) throw new Error("status_stderr=" + status_stderr);
-				else {
 					
+					if(err) throw err;
+					else if(status_stderr) throw new Error("status_stderr=" + status_stderr);
+					else {
+						
 						var affectedFilesString = status_stdout.trim();
 						
 						console.log("affectedFilesString=" + affectedFilesString);
 						
 						var pulledFiles = [];
 						var affectedFiles = affectedFilesString.split(/\n|\r\n/);
-								
-								for(var i=0, prefix; i<affectedFiles.length; i++) {
+						
+						for(var i=0, prefix; i<affectedFiles.length; i++) {
 							prefix = affectedFiles[i].substr(0, affectedFiles[i].indexOf(" ")).trim();
 							
 							// Remove prefix (?, M, A, R, etc) and add directory
 							affectedFiles[i] = directory + affectedFiles[i].substr(affectedFiles[i].indexOf(" ")).trim();
 							
 							if(prefix != "?") pulledFiles.push(affectedFiles[i]); 
-								}
-							
-						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
-							
-						resp["files"] = pulledFiles;
-							
-							callback(null, resp);
-							
 						}
-				
-			});
-			
-			if(saveUserPw) {
-				console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
-				saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
-					if (err) throw err;
-					console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+						
+						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
+						
+						resp["files"] = pulledFiles;
+						
+						callback(null, resp);
+						
+					}
+					
 				});
+				
+				if(saveUserPw) {
+					console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
+					saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
+						if (err) throw err;
+						console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+					});
+				}
+				
+				
 			}
-			
-			
-		}
-	});
+		});
 	});
 }
 
@@ -568,47 +597,47 @@ MERCURIAL.update = function hgupdate(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
-	
-	var exec = require('child_process').exec;
-	exec('hg update', { cwd: localDirectory }, function (err, stdout, stderr) {
 		
-		console.log("update stderr=" + stderr);
-		console.log("update stdout=" + stdout);
+		localDirectory = UTIL.trailingSlash(localDirectory);
 		
-		// abort: not a linear update
-		
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
-		else {
+		var exec = require('child_process').exec;
+		exec('hg update', { cwd: localDirectory }, function (err, stdout, stderr) {
 			
-			//if(stdout.match(/(\n|\r\n)no changes found/)) return callback(null, {changesets: 0});
+			console.log("update stderr=" + stderr);
+			console.log("update stdout=" + stdout);
 			
-			// 1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+			// abort: not a linear update
 			
-			var matchUpdate = stdout.match(/(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/);
-			
-			if(!matchUpdate) return callback(stdout);
-			
-			var resp = {
-				updated: matchUpdate[1],
-				merged: matchUpdate[2],
-				removed: matchUpdate[3],
-				unresolved: matchUpdate[4]
-			};
-			
-			callback(null, resp);
-			
-		}
-	});
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				//if(stdout.match(/(\n|\r\n)no changes found/)) return callback(null, {changesets: 0});
+				
+				// 1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+				
+				var matchUpdate = stdout.match(/(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/);
+				
+				if(!matchUpdate) return callback(stdout);
+				
+				var resp = {
+					updated: matchUpdate[1],
+					merged: matchUpdate[2],
+					removed: matchUpdate[3],
+					unresolved: matchUpdate[4]
+				};
+				
+				callback(null, resp);
+				
+			}
+		});
 	});
 }
 
 MERCURIAL.merge = function hgmerge(user, json, callback) {
 	/*
 		Attempt to merge unresolved files ...
-	
+		
 		$ hg merge
 		merging baz.txt
 		warning: conflicts while merging baz.txt! (edit, then use 'hg resolve --mark')
@@ -623,38 +652,38 @@ MERCURIAL.merge = function hgmerge(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
-	
-	var exec = require('child_process').exec;
-	exec('hg merge', { cwd: localDirectory }, function (err, stdout, stderr) {
 		
-		console.log("merge stderr=" + stderr);
-		console.log("merge stdout=" + stdout);
+		localDirectory = UTIL.trailingSlash(localDirectory);
 		
-		// abort: not a linear update
-		
-		if(err) callback(err);
-		else if(stderr) callback(stderr);
-		else {
+		var exec = require('child_process').exec;
+		exec('hg merge', { cwd: localDirectory }, function (err, stdout, stderr) {
 			
-			// 1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+			console.log("merge stderr=" + stderr);
+			console.log("merge stdout=" + stdout);
 			
-			var matchMerge = stdout.match(/(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/);
+			// abort: not a linear update
 			
-			if(!matchMerge) return callback(stdout);
-			
-			var resp = {
-				updated: matchMerge[1],
-				merged: matchMerge[2],
-				removed: matchMerge[3],
-				unresolved: matchMerge[4]
-			};
-			
-			callback(null, resp);
-			
-		}
-	});
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				// 1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+				
+				var matchMerge = stdout.match(/(\d+) files updated, (\d+) files merged, (\d+) files removed, (\d+) files unresolved/);
+				
+				if(!matchMerge) return callback(stdout);
+				
+				var resp = {
+					updated: matchMerge[1],
+					merged: matchMerge[2],
+					removed: matchMerge[3],
+					unresolved: matchMerge[4]
+				};
+				
+				callback(null, resp);
+				
+			}
+		});
 	});
 }
 
@@ -667,62 +696,62 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-	
-	localDirectory = UTIL.trailingSlash(localDirectory);
-	
-	var exec = require('child_process').exec;
-	exec('hg push --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
 		
+		localDirectory = UTIL.trailingSlash(localDirectory);
+		
+		var exec = require('child_process').exec;
+		exec('hg push --noninteractive', { cwd: localDirectory }, function (err, stdout, stderr) {
+			
 			// hg push seem to return errorcode (err) when no changes found
 			
-		console.log("stderr=" + stderr);
-		console.log("stdout=" + stdout);
-		
-		if(stdout) {
+			console.log("stderr=" + stderr);
+			console.log("stdout=" + stdout);
 			
-			var noChanges = stdout.match(/no changes found/);
+			if(stdout) {
+				
+				var noChanges = stdout.match(/no changes found/);
+				
+				var matchPush = stdout.match(/pushing to (.*)/);
+				
+				var repoUrl = matchPush ? matchPush[1] : null;
+				
+			}
 			
-			var matchPush = stdout.match(/pushing to (.*)/);
+			console.log("repoUrl=" + repoUrl);
 			
-			var repoUrl = matchPush ? matchPush[1] : null;
-			
-		}
-		
-		console.log("repoUrl=" + repoUrl);
-		
-		if(err) {
+			if(err) {
 				if(noChanges) {
 					callback(null, {changesets: null, remote: repoUrl});
 				}
 				else callback(err);
 			}
 			else if(stderr) callback(stderr);
-		else {
-			
-			if(noChanges) {
-				callback(null, {changesets: null, remote: repoUrl});
-			}
 			else {
-				// added 2 changesets with 1 changes to 1 files
 				
-				var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
-				
-				if(!matchUpdate) return callback(stdout);
-				else {
-					var resp = {
-						changesets: matchUpdate[1],
-						changes: matchUpdate[2],
-						files: matchUpdate[3],
-						remote: repoUrl,
-							directory: user.toVirtualPath(rootDir)
-					};
-					
-					callback(null, resp);
+				if(noChanges) {
+					callback(null, {changesets: null, remote: repoUrl});
 				}
-				
+				else {
+					// added 2 changesets with 1 changes to 1 files
+					
+					var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
+					
+					if(!matchUpdate) return callback(stdout);
+					else {
+						var resp = {
+							changesets: matchUpdate[1],
+							changes: matchUpdate[2],
+							files: matchUpdate[3],
+							remote: repoUrl,
+							directory: user.toVirtualPath(rootDir)
+						};
+						
+						callback(null, resp);
+					}
+					
+				}
 			}
-		}
-	});
+		});
 	});
 }
 
@@ -843,7 +872,7 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 			stdout = stdout.trim();
 			
 			if(stdout != "") {
-			
+				
 				/*
 					U baz.txt
 					R foo.txt
@@ -859,8 +888,8 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 					
 					if(status == "R") resolved.push(filePath);
 					else if(status == "U") unresolved.push(filePath);
-					}
 				}
+			}
 			
 			callback(null, {resolved: resolved, unresolved: unresolved});
 			
@@ -882,19 +911,19 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 			files = [json.file];
 		}
 		
-		var fileString = makeFileString(user, files);
+		var fileString = makeFileString(user, files, directory, rootDir);
 		
 		if(fileString instanceof Error) return callback(fileString);
 		
-			var exec = require('child_process').exec;
+		var exec = require('child_process').exec;
 		exec("hg resolve --mark " + fileString, { cwd: rootDir }, function (err, stdout, stderr) {
-				
+			
 			console.log("hg resolve --mark stderr=" + stderr);
 			console.log("hg resolve --mark stdout=" + stdout);
-				
-				if(err) return callback(err);
-				if(stderr) return callback(stderr);
-				
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
 			// What does Mercurial return !?
 			
 			var abort = stdout.match(/abort: resolve command not applicable when not merging/);
@@ -908,8 +937,8 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 			if(noMore || resolveList) return callback(null, resp);
 			else return callback(stdout);
 			
-			});
 		});
+	});
 }
 
 MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
@@ -926,7 +955,7 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 			files = [json.file];
 		}
 		
-		var fileString = makeFileString(user, files);
+		var fileString = makeFileString(user, files, directory, rootDir);
 		
 		if(fileString instanceof Error) return callback(fileString);
 		
@@ -949,7 +978,7 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 			else return callback(stdout);
 			
 		});
-});
+	});
 }
 
 MERCURIAL.heads = function hgheads(user, json, callback) {
@@ -1020,7 +1049,7 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	});
 }
 
-function makeFileString(user, files) {
+function makeFileString(user, files, directory, rootDir) {
 	// Returns a string of files for passing into a hg command
 	
 	var fileString = "";
@@ -1107,7 +1136,7 @@ function checkDir(user, virtualPath, callback) {
 	var localDirectory = UTIL.getDirectoryFromPath(localPath);
 	
 	var exec = require('child_process').exec;
-	exec("hg root", { cwd: localDirectory }, function (err, stdout, stderr) {
+	exec("hg root", { cwd: localDirectory }, function hgroot(err, stdout, stderr) {
 		console.log("hg root stderr=" + stderr);
 		console.log("hg root stdout=" + stdout);
 		
@@ -1117,8 +1146,8 @@ function checkDir(user, virtualPath, callback) {
 			
 			var mercurialRoot = stdout.trim();
 			
-				mercurialRoot = UTIL.trailingSlash(mercurialRoot);
-				
+			mercurialRoot = UTIL.trailingSlash(mercurialRoot);
+			
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
 					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
@@ -1131,7 +1160,7 @@ function checkDir(user, virtualPath, callback) {
 			if(virtualRootDir instanceof Error) callback("Unable to find a mercurial reposity from path=" + virtualPath);
 			else {
 				
-				callback(null, mercurialRoot, localPath);
+				callback(null, mercurialRoot, localPath, virtualRootDir);
 				
 			}
 		}
@@ -1145,7 +1174,7 @@ function objectionize(str, changesets) {
 		if changesets is true, it returns an object where each changeset is the key,
 		otherwise it returns an array of objects
 		
-		*/
+	*/
 	
 	str = str.trim();
 	
@@ -1175,7 +1204,7 @@ function objectionize(str, changesets) {
 			
 			if(changesets && name == "changeset") obj = objChanges[value] = {};
 			else obj[name] = value;
-			}
+		}
 		
 		if(!changesets) arrObjects[i] = obj;
 		
@@ -1183,8 +1212,8 @@ function objectionize(str, changesets) {
 	
 	if(changesets) return objChanges;
 	else return arrObjects;
-		
-	}
+	
+}
 
 
 

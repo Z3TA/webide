@@ -596,7 +596,7 @@ function sockJsConnection(connection) {
 
 				var str = JSON.stringify(answer);
 				
-				log(IP + " => " + shortString(str));
+				log(IP + " <= " + shortString(str));
 				
 				conn.write(str);
 			}

@@ -20,9 +20,13 @@
 	var repoCommitMenuItem;
 	var fileSelect;
 	var inputrootDir;
+	
 	var modified = [];
-	var rootDir = null;
+	var added = [];
+	var removed = [];
+	var missing = [];
 	var untracked = [];
+	var rootDir = null;
 	
 	var repoCloneDialog = EDITOR.createWidget(buildCloneDialog);
 	var repoCloneMenuItem;
@@ -211,10 +215,10 @@
 		checkForUnresolved(fileDirectory);
 		
 		function checkForUnresolved(fileDirectory) {
-		// 1. Check for unresolved files (hg resolve --list)
+			// 1. Check for unresolved files (hg resolve --list)
 			CLIENT.cmd("mercurial.resolvelist", {directory: fileDirectory}, function resolveList(err, resp) {
-			if(err) throw err;
-			
+				if(err) throw err;
+				
 				if(resp.resolved.length == 0 && resp.unresolved.length == 0) {
 					checkForMultipleHeads(fileDirectory);
 				}
@@ -227,14 +231,14 @@
 				}
 				
 			});
-			}
+		}
 		
 		function checkForMultipleHeads(fileDirectory) {
 			CLIENT.cmd("mercurial.heads", {directory: fileDirectory}, function resolveList(err, resp) {
 				if(err) throw err;
 				
 				if(resp.heads.length > 1) {
-				
+					
 					var merge = "Merge";
 					var cancel = "Cancel";
 					
@@ -252,9 +256,9 @@
 								
 							});
 						}
-						});
-					}
-				});
+					});
+				}
+			});
 		}
 		
 		function pullFromRepo() {
@@ -320,10 +324,10 @@
 						var ignore = "Ignore for now";
 						
 						confirmBox("Do you want to update the working directory to the latest revision ?  change your working directory to reflect what you have pulled into your repository. Do you want to update/merge ? ", [update, ignore], function(answer) {
-						
+							
 						});
 						
-						}
+					}
 					
 					// If any of them are not saved, don't interupt the user, do nothing more.
 					
@@ -353,23 +357,6 @@
 		
 		
 		// Check if there are ucommited work on the local working copy
-		hgStatus(directory, function workingCopyStatus(err, _rootDir, _modified, _untracked) {
-			
-			if(err) return console.warn(err);
-			else {
-				
-				console.log("localModified.length=" + localModified.length);
-				
-				rootDir = _rootDir
-				localModified = _modified;
-				untracked = _untracked;
-				
-				pullFromRepo();
-				
-				
-				
-			}
-		}, fileDirectory);
 		
 		
 		
@@ -380,187 +367,187 @@
 			CLIENT.cmd("mercurial.pull", {directory: rootDir}, hgPull);
 			
 			function hgPull(err, resp) {
-			if(err) {
-				
-				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
-				var authFailed = err.message.match(/abort: authorization failed/);
-				
-				if(authNeeded) {
-					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
+				if(err) {
+					
+					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+					var authFailed = err.message.match(/abort: authorization failed/);
+					
+					if(authNeeded) {
+						var repoUrl = authNeeded[1];
+						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
 							if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
-					}, "Pull");
-					return;
+						}, "Pull");
+						return;
+					}
+					else if(authFailed) {
+						alertBox("Authorization filed!\nUnable to Pull from " + repoUrl);
+					}
+					else throw err;
 				}
-				else if(authFailed) {
-					alertBox("Authorization filed!\nUnable to Pull from " + repoUrl);
-				}
-				else throw err;
-			}
-			else {
-				
-				var changes = resp.changes;
-				var repoUrl = resp.repo;
-				var ask = false;
-				var notSaved = [];
-				var remoteUpdated = [];
-				var untrackedUpdated = [];
-				
-				if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
-				
-				if(changes === null) {
-					alertBox("No incoming changes from " + repoUrl);
-					//console.log("Mercurial: No incoming changes detected!")
-					return; // No incoming changes
-				}
-				
-				console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
-				
-				checkFiles: for(var i=0; i<changes.length; i++) {
-					var files = Object.keys(changes[i].files);
-					for(var j=0; j<files.length; j++) {
-						
-						var filePath = files[j];
-						
-						if(EDITOR.files.hasOwnProperty(filePath)) {
-							// We only care about files opened by the editor
+				else {
+					
+					var changes = resp.changes;
+					var repoUrl = resp.repo;
+					var ask = false;
+					var notSaved = [];
+					var remoteUpdated = [];
+					var untrackedUpdated = [];
+					
+					if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+					
+					if(changes === null) {
+						alertBox("No incoming changes from " + repoUrl);
+						//console.log("Mercurial: No incoming changes detected!")
+						return; // No incoming changes
+					}
+					
+					console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
+					
+					checkFiles: for(var i=0; i<changes.length; i++) {
+						var files = Object.keys(changes[i].files);
+						for(var j=0; j<files.length; j++) {
 							
-							var changedFile = EDITOR.files[filePath];
+							var filePath = files[j];
 							
-							if(!changedFile.isSaved) notSaved.push(filePath);
-							
-							if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
-							
-							if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
-							
-							var msg = "File has been updated:\n"  + changedFile.path + "\n\
-							Repo: " + repoUrl + "\n\
-							Date: " + changes[i].date + "\n\
-							User: " + changes[i].user + "\n\n<i>" + changes[i].summary + "</i>";
-							
-							var optUpdate = "Update file";
-							var optDoNothing = "Do nothing";
-							var optSaveCommit = "Save my changes and Commit";
-							var optRevertLocal = "Ignore my changes and Update"
-							
-							var options;
-							
-							if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
-							else options = [optDoNothing, optUpdate];
-							
-							ask = true;
-							
-							confirmBox(msg, options, function(answer) {
+							if(EDITOR.files.hasOwnProperty(filePath)) {
+								// We only care about files opened by the editor
 								
-								if(answer == optDoNothing) return;
-								else if(answer == optRevertLocal || answer == optUpdate) {
-									pullAndUpdate(dir, true);
-								}
-								else if(answer == optSaveCommit) {
-									EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
+								var changedFile = EDITOR.files[filePath];
+								
+								if(!changedFile.isSaved) notSaved.push(filePath);
+								
+								if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
+								
+								if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
+								
+								var msg = "File has been updated:\n"  + changedFile.path + "\n\
+								Repo: " + repoUrl + "\n\
+								Date: " + changes[i].date + "\n\
+								User: " + changes[i].user + "\n\n<i>" + changes[i].summary + "</i>";
+								
+								var optUpdate = "Update file";
+								var optDoNothing = "Do nothing";
+								var optSaveCommit = "Save my changes and Commit";
+								var optRevertLocal = "Ignore my changes and Update"
+								
+								var options;
+								
+								if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
+								else options = [optDoNothing, optUpdate];
+								
+								ask = true;
+								
+								confirmBox(msg, options, function(answer) {
+									
+									if(answer == optDoNothing) return;
+									else if(answer == optRevertLocal || answer == optUpdate) {
+										pullAndUpdate(dir, true);
+									}
+									else if(answer == optSaveCommit) {
+										EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
 											showCommitDialog();
-									});
+										});
+									}
+									else throw new Error("Unknown answer=" + answer);
+									
+								});
+							}
+						}
+					}
+					
+					if(!ask) {
+						console.log("Mercurial: No apparent conflict. Updating!")
+						pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
+					}
+				}
+			}
+			
+			
+		}
+		
+		
+		function pullAndUpdate(dir, reloadFiles) {
+			
+			console.log("Mercurial: Pull and Update ...");
+			
+			CLIENT.cmd("mercurial.pull", {directory: dir}, hgPull);
+			
+			
+			function hgPull(err, resp) {
+				if(err) {
+					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+					var authFailed = err.message.match(/abort: authorization failed/);
+					
+					if(authNeeded) {
+						var repoUrl = authNeeded[1];
+						showAuthDialog("Need authorization for pulling from " + repoUrl + ": ", function authorized(username, password, save) {
+							if(username != null) CLIENT.cmd("mercurial.pull", {directory: dir, user: username, pw: password, save: save}, hgPull);
+						}, "Pull");
+						return;
+					}
+					else if(authFailed) {
+						alertBox("Authorization filed!\nUnable to Pull changes from the repo!");
+					}
+					else throw err;
+				}
+				else {
+					
+					console.log("Mercurial: Pull resp=" + JSON.stringify(resp));
+					
+					var files = resp.files;
+					
+					CLIENT.cmd("mercurial.update", {directory: dir}, function hgUpdate(err, resp) {
+						if(err) {
+							throw err;
+						}
+						else {
+							
+							console.log("Mercurial: Update resp=" + JSON.stringify(resp));
+							
+							var totalFiles = resp.updated + resp.merged + resp.removed + resp.unresolved;
+							
+							if(totalFiles != files.length) throw new Error("totalFiles=" + totalFiles + " resp=" + JSON.stringify(resp) + " files=" + JSON.stringify(files));
+							
+							if(resp.unresolved > 0) alertBox("There are unresolved files ...");
+							
+							var filesToBeReloaded = 0;
+							
+							for(var i=0; i<files.length; i++) {
+								if(EDITOR.files.hasOwnProperty(files[i])) {
+									filesToBeReloaded++;
+									
+									var file = EDITOR.files[files[i]];
+									
+									reloadFile(file);
+									
 								}
-								else throw new Error("Unknown answer=" + answer);
+							}
+							if(filesToBeReloaded === 0) done(false);
+							
+						}
+						
+						function reloadFile(file) {
+							console.log("Mercurial: Reloading file=" + file.path);
+							EDITOR.readFromDisk(file.path, function(err, path, data) {
+								if(err) throw err;
+								
+								file.reload(data);
+								
+								if(--filesToBeReloaded === 0) done(true);
 								
 							});
 						}
-					}
-				}
-				
-				if(!ask) {
-					console.log("Mercurial: No apparent conflict. Updating!")
-					pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
-				}
-			}
-		}
-		
-		
-	}
-	
-	
-	function pullAndUpdate(dir, reloadFiles) {
-		
-		console.log("Mercurial: Pull and Update ...");
-		
-		CLIENT.cmd("mercurial.pull", {directory: dir}, hgPull);
-		
-		
-		function hgPull(err, resp) {
-			if(err) {
-				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
-				var authFailed = err.message.match(/abort: authorization failed/);
-				
-				if(authNeeded) {
-					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for pulling from " + repoUrl + ": ", function authorized(username, password, save) {
-						if(username != null) CLIENT.cmd("mercurial.pull", {directory: dir, user: username, pw: password, save: save}, hgPull);
-					}, "Pull");
-					return;
-				}
-				else if(authFailed) {
-					alertBox("Authorization filed!\nUnable to Pull changes from the repo!");
-				}
-				else throw err;
-			}
-			else {
-				
-				console.log("Mercurial: Pull resp=" + JSON.stringify(resp));
-				
-				var files = resp.files;
-				
-				CLIENT.cmd("mercurial.update", {directory: dir}, function hgUpdate(err, resp) {
-					if(err) {
-						throw err;
-					}
-					else {
 						
-						console.log("Mercurial: Update resp=" + JSON.stringify(resp));
-						
-						var totalFiles = resp.updated + resp.merged + resp.removed + resp.unresolved;
-						
-						if(totalFiles != files.length) throw new Error("totalFiles=" + totalFiles + " resp=" + JSON.stringify(resp) + " files=" + JSON.stringify(files));
-						
-						if(resp.unresolved > 0) alertBox("There are unresolved files ...");
-						
-						var filesToBeReloaded = 0;
-						
-						for(var i=0; i<files.length; i++) {
-							if(EDITOR.files.hasOwnProperty(files[i])) {
-								filesToBeReloaded++;
-								
-								var file = EDITOR.files[files[i]];
-								
-								reloadFile(file);
-								
-							}
+						function done(reloadedAnyFiles) {
+							if(reloadedAnyFiles) alertBox("Files updated!");
 						}
-						if(filesToBeReloaded === 0) done(false);
 						
-					}
+					});
 					
-					function reloadFile(file) {
-						console.log("Mercurial: Reloading file=" + file.path);
-						EDITOR.readFromDisk(file.path, function(err, path, data) {
-							if(err) throw err;
-							
-							file.reload(data);
-							
-							if(--filesToBeReloaded === 0) done(true);
-							
-						});
-					}
-					
-					function done(reloadedAnyFiles) {
-						if(reloadedAnyFiles) alertBox("Files updated!");
-					}
-					
-				});
+				}
 				
 			}
-			
 		}
-	}
 	}
 	
 	function buildCommitDialog(widget) {
@@ -659,13 +646,13 @@
 			var tracked = []; // Check if some of the files are tracked, and ask if we should remove them
 			var ignore = [];
 			var selectedFiles = fileSelect.options;
-				for(var i=0, filePath; i<selectedFiles.length; i++) {
-					if(selectedFiles[i].selected) {
-						filePath = selectedFiles[i].value;
+			for(var i=0, filePath; i<selectedFiles.length; i++) {
+				if(selectedFiles[i].selected) {
+					filePath = selectedFiles[i].value;
 					ignore.push(filePath);
 					if(untracked.indexOf(filePath) == -1) tracked.push(filePath);
-					}
 				}
+			}
 			
 			if(tracked.length > 0) {
 				var yes = "Yes, Forget them";
@@ -716,34 +703,34 @@
 					var file = EDITOR.files[ignoreFilePath];
 					file.write(contentToAdd, true);
 					saveFile(file);
-					}
+				}
 				else {
-				
-				EDITOR.doesFileExist(ignoreFilePath, function fileExist(exists) {
 					
-					if(exists) {
-							console.log(".hgigonore already exists");
-						EDITOR.openFile(ignoreFilePath, undefined, function fileOpened(err, file) {
-							if(err) return alertBox(err.message);
-							
-								file.write(contentToAdd, true);
-							
-							saveFile(file);
-						});
-					}
-					else {
-							console.log("Creating .hgigonore file");
-						EDITOR.openFile(ignoreFilePath, contentToAdd, function fileOpened(err, file) {
-							if(err) return alertBox(err.message);
-							
-								saveFile(file);
-							
-						});
+					EDITOR.doesFileExist(ignoreFilePath, function fileExist(exists) {
 						
-					}
-					
-					
-				});
+						if(exists) {
+							console.log(".hgigonore already exists");
+							EDITOR.openFile(ignoreFilePath, undefined, function fileOpened(err, file) {
+								if(err) return alertBox(err.message);
+								
+								file.write(contentToAdd, true);
+								
+								saveFile(file);
+							});
+						}
+						else {
+							console.log("Creating .hgigonore file");
+							EDITOR.openFile(ignoreFilePath, contentToAdd, function fileOpened(err, file) {
+								if(err) return alertBox(err.message);
+								
+								saveFile(file);
+								
+							});
+							
+						}
+						
+						
+					});
 				}
 				
 				function saveFile(file) {
@@ -886,26 +873,43 @@
 		
 		while(fileSelect.firstChild) fileSelect.removeChild(fileSelect.firstChild); // Emty file list
 		
-		hgStatus(directory, function hg_got_status(err, rootDir, modified, untracked) {
-			
+		CLIENT.cmd("mercurial.status", {directory: directory || UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir}, function hgstatus(err, resp) {
 			if(err) {
 				if(callback) callback(err);
 				else alertBox(err.message);
 			}
+			
 			else {
 				
-				if(callback) callback(null, rootDir, modified, untracked);
+				// Update the scope
+				modified = resp.modified;
+				added = resp.added;
+				removed = resp.removed;
+				missing = resp.missing;
+				untracked = resp.untracked;
+				rootDir = resp.rootDir;
+				
+				if(rootDir.charAt(rootDir.length-1) != "/" && rootDir.charAt(rootDir.length-1) != "\\") throw new Error("rootDir=" + rootDir + " does not end with a path delimter!");
+				
+				if(callback) callback(null, rootDir);
 				
 				//inputrootDir.value = rootDir;
 				
-				if(modified.length == 0 && untracked.length == 0) {
+				if(modified.length == 0 && added.length == 0 && removed.length == 0 && untracked.length == 0) {
 					if(!callback) alertBox("No changes detected! (no need to commit)");
+					// Ask to push !!?
 					hideCommitDialog();
 					return;
 				}
 				
 				for(var i=0; i<modified.length; i++) insertFile(modified[i], true);
+				for(var i=0; i<added.length; i++) insertFile(added[i], true);
+				for(var i=0; i<removed.length; i++) insertFile(removed[i], true);
 				for(var i=0; i<untracked.length; i++) insertFile(untracked[i], false);
+				
+				if(missing.length > 0) alertBox("The following files are missing:\n" + missing.join("\n"), "warning");
+				// Ask to untrack them !?
+				
 			}
 			
 			function insertFile(filePath, selected) {
@@ -948,29 +952,6 @@
 		
 	}
 	
-	function hgStatus(directory, callback) {
-		
-		if(!callback) throw new Error("No callback function!");
-		
-		var commandOptions = {
-			directory: directory || UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir
-		}
-		
-		CLIENT.cmd("mercurial.status", commandOptions, function hgstatus(err, resp) {
-			if(err) {
-				if(callback) return callback(err);
-				else throw err;
-			}
-			else {
-				modified = resp.modified;
-				rootDir = UTIL.trailingSlash(resp.rootDir);
-				untracked = resp.untracked;
-				
-				callback(null, rootDir, modified, untracked);
-			}
-		});
-		
-	}
 	
 	function buildResolveDialog(widget) {
 		
@@ -1026,29 +1007,29 @@
 			2) Complicated stuff ...
 			
 			
-		if(EDITOR.currentFile) {
+			if(EDITOR.currentFile) {
 			var currentFolderPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 			
 			console.log("currentFolderPath=" + currentFolderPath);
 			console.log("EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 			
 			if(currentFolderPath != EDITOR.workingDirectory) {
-				var folders = currentFolderPath.split(UTIL.getPathDelimiter(currentFolderPath));
-				var lastFolder = folders[folders.length-1]; 
-				// folder /a/b/c/
-				if(lastFolder == "" && folders.length > 1) lastFolder = folders[folders.length-2];
-				
-				if(lastFolder != "") {
-					defaultRepo = {
-						url: UTIL.trailingSlash("https://hg.webtigerteam.com/repo/" + lastFolder),
-						into: UTIL.trailingSlash(currentFolderPath),
-						user: EDITOR.user,
-						pw: ""
-					}
-				}
-				
+			var folders = currentFolderPath.split(UTIL.getPathDelimiter(currentFolderPath));
+			var lastFolder = folders[folders.length-1]; 
+			// folder /a/b/c/
+			if(lastFolder == "" && folders.length > 1) lastFolder = folders[folders.length-2];
+			
+			if(lastFolder != "") {
+			defaultRepo = {
+			url: UTIL.trailingSlash("https://hg.webtigerteam.com/repo/" + lastFolder),
+			into: UTIL.trailingSlash(currentFolderPath),
+			user: EDITOR.user,
+			pw: ""
 			}
-		}
+			}
+			
+			}
+			}
 		*/
 		
 		
@@ -1213,18 +1194,18 @@
 		
 		for (var i=0; i<files.length; i++) createFileListItem(files[i]);
 		
-			return resolveDialog.show();
-			
+		return resolveDialog.show();
+		
 		function createFileListItem(file) {
-				
+			
 			var li = document.createElement("li");
 			
-				var checkbox = document.createElement("input");
-				checkbox.setAttribute("type", "checkbox");
+			var checkbox = document.createElement("input");
+			checkbox.setAttribute("type", "checkbox");
 			if(resolved.indexOf(file) != -1) checkbox.setAttribute("checked", "checked");
 			
-				checkbox.onclick = function fileCheck(e) {
-					if(checkbox.checked) {
+			checkbox.onclick = function fileCheck(e) {
+				if(checkbox.checked) {
 					CLIENT.cmd("mercurial.resolvemark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
 						if(err) throw err;
 						if(resp.allResolved) {
@@ -1236,23 +1217,23 @@
 				else {
 					CLIENT.cmd("mercurial.resolveunmark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
 						if(err) throw err;
-						});
-						}
+					});
 				}
-				
-				var a = document.createElement("a");
-				a.appendChild(document.createTextNode(file));
-				a.onclick = function clickFile(e) {
-					EDITOR.openFile(file);
-				}
-				
-				li.appendChild(checkbox);
-				li.appendChild(a);
-				
-				resolveFileList.appendChild(li);
-				
 			}
+			
+			var a = document.createElement("a");
+			a.appendChild(document.createTextNode(file));
+			a.onclick = function clickFile(e) {
+				EDITOR.openFile(file);
 			}
+			
+			li.appendChild(checkbox);
+			li.appendChild(a);
+			
+			resolveFileList.appendChild(li);
+			
+		}
+	}
 	
 	function annotateOn() {
 		
