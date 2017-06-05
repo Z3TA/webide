@@ -1283,7 +1283,7 @@
 		return false;
 	}
 	
-	function syncRepository(site) {
+	function syncRepository(site, syncRepositoryCallback) {
 		/* selectedSite.source, selectedSite.repository, selectedSite.repoAuthUser, selectedSite.repoAuthPw
 			
 			1. Check if Mercurial is initiated in the source folder
@@ -1497,11 +1497,13 @@
 					console.log("mercurial.status resp=" + JSON.stringify(resp));
 					
 					if(modified.length > 0) {
-						alertBox("Commit changes before syncing!");
+						if(syncRepositoryCallback) syncRepositoryCallback("MODIFIED");
+						else alertBox("Commit changes before syncing!");
 						EDITOR.commitTool(rootDir);
 					}
 					else if(untracked.length > 0) {
-						alertBox("There are new files, what to do with them !?");
+						if(syncRepositoryCallback) syncRepositoryCallback("UNTRACKED");
+						else alertBox("There are new files. What to do with them !?");
 						EDITOR.commitTool(rootDir);
 					}
 					else checkRepoUnresolved();
@@ -1517,11 +1519,13 @@
 						checkRepoMultipleHeads();
 					}
 					else if(resp.unresolved.length > 0) {
-						alertBox("Resolve merge problems before syncing!");
+						if(syncRepositoryCallback) syncRepositoryCallback("UNRESOLVED");
+						else alertBox("Resolve merge problems before syncing!");
 						EDITOR.resolveTool(selectedSite.projectFolder);
 					}
 					else if(resp.resolved.length > 0) {
-						alertBox("Commit resolved files before syncing!");
+						if(syncRepositoryCallback) syncRepositoryCallback("COMMIT");
+						else alertBox("Commit resolved files before syncing!");
 						EDITOR.commitTool(selectedSite.projectFolder);
 					}
 					else throw new Error("resp.resolved=" + JSON.stringify(resp.resolved) + " resp.unresolved=" + JSON.stringify(resp.unresolved));
@@ -1574,7 +1578,9 @@
 						}
 						else if(authFailed) {
 							var repoUrl = authNeeded[1];
-							return alertBox("Authorization failed!\nUnable to Pull from " + repoUrl);
+							if(syncRepositoryCallback) syncRepositoryCallback("AUTH_FAILED");
+							else alertBox("Authorization failed!\nUnable to Pull from " + repoUrl);
+							return;
 						}
 						else throw err;
 					}
@@ -1628,7 +1634,8 @@
 								if(resp.unresolved > 0) {
 									alertMsg += "\nAutomatic file merge fialed. You have to manually resolve conflicts!";
 									whenAllFilesReloaded = function resolveFiles() {
-										alertBox(alertMsg);
+										if(syncRepositoryCallback) syncRepositoryCallback("UNRESOLVED");
+										else alertBox(alertMsg);
 										EDITOR.resolveTool(resp.resolved, resp.unresolved, selectedSite.projectFolder);
 									}
 									
@@ -1668,6 +1675,7 @@
 				CLIENT.cmd("mercurial.push", {directory: selectedSite.projectFolder}, function pushed(err, resp) {
 					
 					if(err) alertBox(err.message);
+					else if(syncRepositoryCallback) syncRepositoryCallback(null);
 					else alertBox("Sync complete!");
 					
 				});
@@ -1678,12 +1686,41 @@
 	
 	
 	function publishSite(site) {
-		compile(site.source, site.publish, true, function buildDone() {
-			
+		
+		if(site.repository) {
+			// First make sure it's synced
+			syncRepository(site, function repoSynced(em) {
+				if(em == null) publishIt();
+				else if(em == "UNRESOLVED") {
+					alertBox("You need to resolve SCM conflicts before publishing!");
+				}
+				else if(em == "AUTH_FAILED") {
+					alertBox("Unable to publish because wrong repository credentials!");
+				}
+				else if(em == "COMMIT") {
+					alertBox("You need to commit changes before publishing!");
+				}
+				else if(em == "UNTRACKED") {
+					alertBox("You need to deal with untracked files before publishing!");
+				}
+				else if(em == "MODIFIED") {
+					alertBox("You need to commit changes before publishing!");
+				}
+				else throw new Error("Unknown error messsage: " + em);
+			});
+		}
+		else publishIt();
+		
+		return false;
+		
+		function publishIt() {
+			compile(site.source, site.publish, true, function buildDone() {
+				
 			alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:<a href="' + site.url + '">' + site.url + '</a>' : ''));
 			
 		});
-		return false;
+		}
+		
 	}
 	
 	function newPage(site) {

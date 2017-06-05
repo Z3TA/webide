@@ -7,8 +7,6 @@ Making a new web page/post should be as easy as making a new comment on HN, or p
 
 Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
 
-Går inte att publicera om man inte har dokumenterat och synkat
-
 Efter att man sparat en fil i SSG kommer det upp en dokumentations-widget,
 där man skriver in varför ändringarna gjordes.
 (Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. 
