@@ -703,7 +703,9 @@ var mimeMap = {
 	xml: "application/xml",
 	zip: "application/x-compressed-zip",
 	ico: "image/x-icon",
-	ttf: "application/octet-stream"
+	ttf: "application/octet-stream",
+	woff2: "font/woff2",
+	woff: "application/font-woff"
 }
 
 function createHttpEndpoint(folder, callback) {

@@ -31,6 +31,23 @@ if(runtime=="browser") {
 	EDITOR.settings.gridWidth = 7.83;
 	}
 	
+	
+	/*
+		Ligature test
+		Ligatures are basically two letter as one. Fira code for example makes => into an arrow.
+		Confirmed to worke in: Chrome/Chromium, Firefox, 
+		
+		if(a != b && b <= c && x != y)
+		
+		<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
+		
+	*/
+	if(1==1) {
+		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
+		EDITOR.settings.style.font = "Fira Code";
+		}
+	
+	
 }
 else if(process.platform == "windows") {
 	
@@ -94,16 +111,4 @@ else if(process.platform == "linux") {
 	EDITOR.settings.gridHeight = 22;
 	EDITOR.settings.gridWidth = 7.83;
 	
-	// Ligature test
-	EDITOR.settings.style.font = "Hasklig"; // Looks very bold
-	EDITOR.settings.style.font = "Fira Code";
-	
-	/*
-		
-		if(a != b && b <= c && x != y) 
-		
-		<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
-		
-	*/
-	
-}
+	}
