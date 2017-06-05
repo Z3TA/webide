@@ -25,10 +25,10 @@ if(runtime=="browser") {
 	if(UTIL.checkBrowser() != "Firefox") {
 		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 		EDITOR.settings.style.font = "DejaVuSansMono";
-	EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
-	EDITOR.settings.style.fontSize = 13;
-	EDITOR.settings.gridHeight = 22;
-	EDITOR.settings.gridWidth = 7.83;
+		EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
+		EDITOR.settings.style.fontSize = 13;
+		EDITOR.settings.gridHeight = 22;
+		EDITOR.settings.gridWidth = 7.83;
 	}
 	
 	
@@ -45,27 +45,40 @@ if(runtime=="browser") {
 	if(1==1) {
 		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
 		EDITOR.settings.style.font = "Fira Code";
+		if(UTIL.checkBrowser() == "Firefox") {
+			EDITOR.settings.style.fontSize = 15;
+			EDITOR.settings.gridHeight = 23;
+			EDITOR.settings.gridWidth = 9;
+			EDITOR.settings.style.highlightMatchFont = "bold 15px Fira Code";
 		}
+		else {
+			EDITOR.settings.style.fontSize = 13;
+			EDITOR.settings.gridHeight = 22;
+			EDITOR.settings.gridWidth = 7.83;
+			EDITOR.settings.style.highlightMatchFont = "bold 14px Fira Code";
+		}
+		
+	}
 	
 	
 }
 else if(process.platform == "windows") {
 	
-/*
-	Windows with "Smooth edges of screen fonts" turned off.
-	These font's look good:
-	
-	* DejaVu Sans Mono 14px
-	* ProggyCleanTT <=16px (very small)
-	* Ubuntu Mono (many sizes look good!)
-	* Luculent 14px (many sizes look good!)
-	* Lucida Console 13px
-	* Courier New 16-17px
-	* Liberation Mono 12px
-	
+	/*
+		Windows with "Smooth edges of screen fonts" turned off.
+		These font's look good:
+		
+		* DejaVu Sans Mono 14px
+		* ProggyCleanTT <=16px (very small)
+		* Ubuntu Mono (many sizes look good!)
+		* Luculent 14px (many sizes look good!)
+		* Lucida Console 13px
+		* Courier New 16-17px
+		* Liberation Mono 12px
+		
 		otherwise Consolas is the best ;)
 		
-*/
+	*/
 	
 	EDITOR.settings.style.font = "Consolas";
 	EDITOR.settings.style.highlightMatchFont = "bold 15px Consolas";
@@ -111,4 +124,4 @@ else if(process.platform == "linux") {
 	EDITOR.settings.gridHeight = 22;
 	EDITOR.settings.gridWidth = 7.83;
 	
-	}
+}
