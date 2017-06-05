@@ -1221,9 +1221,14 @@
 					
 					var url = json.url;
 					
+					console.log("serve url=" + url);
+					
 					// Replace the hostname with the hostname we are currently on to prevent cross origin errors
 					var host = UTIL.getLocation(url).host;
+					
 					url = url.replace(host, window.location.host);
+					
+					console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
 					
 					previewBaseUrl = url;
 					

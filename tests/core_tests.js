@@ -32,6 +32,20 @@
 		
 	*/
 	
+	EDITOR.addTest(function UTIL_getLocation(callback) {
+		
+		var loc = UTIL.getLocation("http://hostname.com/page.htm");
+		if(loc.host != "hostname.com") throw new Error("loc=" + JSON.stringify(loc, null, 2));
+		
+		// bug: UTIL.getLocation() gives the wrong hostname if there's auth in the url
+		var loc = UTIL.getLocation("http://user:pass@hostname.com/page.htm");
+		if(loc.host != "hostname.com") throw new Error("loc=" + JSON.stringify(loc, null, 2));
+		
+		return callback(true);
+	
+	}, 1);
+	
+	
 	EDITOR.addTest(function doesFileCaretUpdate(callback) {
 		
 		// bug: File.insertLineBreak(caret) with another caret then file.caret did not update the file caret.
@@ -49,9 +63,7 @@
 			
 			callback(true);
 		});
-		
-		
-	}, 1);
+		});
 	
 	EDITOR.addTest(function testRemoveRow(callback) {
 		EDITOR.openFile("testRemoveRow.html", '<div>\n\t<div>\n\t\tremove me\n\t</div>\n</div>\n', function(err, file) {

@@ -710,17 +710,17 @@ var mimeMap = {
 
 function createHttpEndpoint(folder, callback) {
 	
-	for(var dir in httpEndpoints) {
-		if(httpEndpoints[dir] == folder) {
-			return callback(null, makeUrl(dir));
+	for(var endPoint in httpEndpoints) {
+		if(httpEndpoints[endPoint] == folder) {
+			return callback(null, makeUrl(endPoint));
 		}
 	}
 	
-	var dir = randomString(10);
+	var endPoint = randomString(10);
 	
-	httpEndpoints[dir] = folder;
+	httpEndpoints[endPoint] = folder;
 	
-	callback(null, makeUrl(dir));
+	callback(null, makeUrl(endPoint));
 }
 
 
@@ -741,110 +741,130 @@ function handleHttpRequest(request, response){
 	var folder;
 	var localFolder;
 	
-	if(httpEndpoints.hasOwnProperty(firstDir)) {
+	var authHeader = request.headers["authorization"] || "";
+	var authToken = authHeader.split(/\s+/).pop() || "";
+	var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
+	var authParts = authBuffer.split(/:/);
+	var username=authParts[0];
+	var password=authParts[1];
 		
-		localFolder = httpEndpoints[firstDir];
-		urlPath = urlPath.replace(firstDir + "/", "");
-
-	}
-	else {
-		// Serve from the jzedit client folder
+	/*
+		http "endpoints" needs to be served from / and pass same origin policy!
+		So we use auth username =)
+	*/
+	
+	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
+	
+	if(httpEndpoints.hasOwnProperty(username)) {
+			
+		localFolder = httpEndpoints[username];
+			//urlPath = urlPath.replace(firstDir + "/", "");
+			
+		responseHeaders['Cache-Control'] = 'no-cache';
 		
-		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+		console.log("Serving from httpEndpoints=" + username + " localFolder=" + localFolder + " " + localFolder);
 		
-		localFolder = path.resolve("../client/");
+		}
+		else {
 		
-		/*
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
-		return;
-		*/
+			if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+			
+			localFolder = path.resolve("../client/");
+			
+		console.log("Serving from the jzedit client folder: " + localFolder);
 		
-	}
-	
-	console.log("localFolder=" + localFolder);
-	console.log("urlPath=" + urlPath);
-	
-	
-	if(urlPath == "") {
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("No file in url: " + urlPath);
-		return;
-	}
-	
-	
-	var filePath = path.join(localFolder, urlPath);
-	
-	if(filePath.indexOf(localFolder) != 0) {
-		console.log("filePath=" + filePath);
+			/*
+				response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+				response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
+				return;
+			*/
+			
+		}
+		
 		console.log("localFolder=" + localFolder);
 		console.log("urlPath=" + urlPath);
 		
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("Bad path: " + urlPath);
-		return;
-	}
-
-	
-	var fileExtension = UTIL.getFileExtension(urlPath);
-	
-	if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("Bad file type: '" + fileExtension + "'");
 		
-		console.warn("Unknown mime type: fileExtension=" + fileExtension);
+		if(urlPath == "") {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("No file in url: " + urlPath);
+			return;
+		}
 		
-		return;
-	}
-	
-	var fs = require("fs");
-	
-	var stat = fs.stat(filePath, function(err, stats) {
 		
-		if(err) {
+		var filePath = path.join(localFolder, urlPath);
+		
+		if(filePath.indexOf(localFolder) != 0) {
+			console.log("filePath=" + filePath);
+			console.log("localFolder=" + localFolder);
+			console.log("urlPath=" + urlPath);
 			
-			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Bad path: " + urlPath);
+			return;
+		}
+		
+		
+		var fileExtension = UTIL.getFileExtension(urlPath);
+		
+		if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Bad file type: '" + fileExtension + "'");
 			
-			if(err.code == "ENOENT") {
-				//var virtualPath = user.toVirtualPath(filePath);
-				//response.end("File not found: " + virtualPath);
+			console.warn("Unknown mime type: fileExtension=" + fileExtension);
+			
+			return;
+		}
+		
+		var fs = require("fs");
+		
+		var stat = fs.stat(filePath, function(err, stats) {
+			
+			if(err) {
 				
-				response.end("File not found: " + filePath);
+			response.writeHead(404, "Error", responseHeaders);
 				
-				console.warn("File not found: " + filePath);
+				if(err.code == "ENOENT") {
+					//var virtualPath = user.toVirtualPath(filePath);
+					//response.end("File not found: " + virtualPath);
+					
+					response.end("File not found: " + filePath);
+					
+					console.warn("File not found: " + filePath);
+					
+				}
+				else {
+					response.end(err.message);
+				}
+				
+				
+			}
+			else if(stats == undefined) throw new Error("No stats!");
+			else if(!stats.isFile()) {
+				
+			response.writeHead(404, "Error", responseHeaders);
+				response.end("Not a file: " + filePath);
 				
 			}
 			else {
-				response.end(err.message);
+			
+			responseHeaders['Content-Type'] = mimeMap[fileExtension];
+			responseHeaders['Content-Length'] = stats.size;
+				
+				response.writeHead(200, responseHeaders);
+				
+				var readStream = fs.createReadStream(filePath);
+				readStream.pipe(response);
+				
 			}
 			
-			
-		}
-		else if(stats == undefined) throw new Error("No stats!");
-		else if(!stats.isFile()) {
-			
-			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Not a file: " + filePath);
-			
-		}
-		else {
-			response.writeHead(200, {
-				'Content-Type': mimeMap[fileExtension],
-				'Content-Length': stats.size
-			});
-			
-			var readStream = fs.createReadStream(filePath);
-			readStream.pipe(response);
-			
-		}
+		});
 		
-	});
+		
+	}
 
 
-}
-
-
-function makeUrl(dir) {
+function makeUrl(endPoint) {
 	
 	if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
 	if(!HTTP_SERVER.address) {
@@ -902,14 +922,15 @@ function makeUrl(dir) {
 	//console.log(address);
 	//console.log("ipList=" + JSON.stringify(ipList));
 	
-	var url = "http://" + ip;
+	var url = "http://";
+	
+	if(endPoint) url += endPoint + ":123@" 
+	
+	url += ip;
 	
 	if(port != 80) url += ":" + port;
 	
 	url += "/";
-	
-	if(dir) url += dir + "/";
-	
 	
 	return url;
 }

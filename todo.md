@@ -39,6 +39,9 @@ What I'm working on
 -------------------
 
 In the server "serve" it needs to serve from the root / not a folder, or the SSG will not work because all URL's in the SSG is relative to the root!
+but also same origin! We can use auth username as a hack!
+
+hmm WysiwygEditor.js doesn't seem to open the url with the auth part!?!? ....
 
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 

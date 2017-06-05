@@ -2,6 +2,10 @@ var WysiwygEditor;
 
 /*
 
+	Note: If a URL is used, it must pass "same origin" check!
+	https://en.wikipedia.org/wiki/Same-origin_policy
+	
+	
 todo:
 Remember scrolling position and capture navigation
 * 
@@ -61,7 +65,7 @@ todo: Make sure the source file is saved!
 	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTagSource, onlyPreview, newWindow, url, whenLoaded, compiledSource, bodyTagPreview) {
 		var wysiwygEditor = this;
 		
-		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path);
+		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path + " url=" + url);
 
 		if(wysiwygEditor == undefined || wysiwygEditor == window) throw new Error("Call WysiwygEditor with the new keyword! Example: var foo = new WysiwygEditor()");
 		
@@ -1052,17 +1056,27 @@ todo: Make sure the source file is saved!
 		
 		function checkLocation() {
 			
-			if(previewWin.location.href == wysiwygEditor.url) previewWindowLoaded();
-			else if(previewWin.location.href) {
-				console.log("previewWin.location.href=" + previewWin.location.href);
-				console.log("wysiwygEditor.url=" + wysiwygEditor.url);
-				setTimeout(checkLocation, checkLocationIntervalTime);
+			/*
+				previewWin.location.href=http://127.0.0.1:8080/testpage.htm
+				wysiwygEditor.url=http://b9u41v9BFM:123@127.0.0.1:8080/testpage.htm
+			*/
+			
+			var url = wysiwygEditor.url;
+			
+			var matchAuth = url.match(/^http(s)?:\/\/(.*:.*@)/);
+			
+			if(matchAuth) url = url.replace(matchAuth[2], "");
+			
+			if(previewWin.location.href == url) previewWindowLoaded();
+				else if(previewWin.location.href) {
+				console.log("previewWin.location.href=" + previewWin.location.href + "wysiwygEditor.url=" + wysiwygEditor.url + "url=" + url);
+					setTimeout(checkLocation, checkLocationIntervalTime);
+				}
+				else {
+					console.log(previewWin);
+					throw new Error("Unable to get location from previewWin")
+				}
 			}
-			else {
-				console.log(previewWin);
-				throw new Error("Unable to get location from previewWin")
-			}
-		}
 		
 		
 		function previewWindowLoaded() {

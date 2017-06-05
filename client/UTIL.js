@@ -928,7 +928,134 @@ var UTIL = {
 		
 	},
 	
-	getLocation: function getLocation(href) {
+	getLocation: function getLocation(url) {
+		
+		// From: https://github.com/PxyUp/uri-parse-lib
+		
+        var badCharater = [":", "@", "://"];
+
+		var firstSplit, lastSplit, parsing, urlObject, checkerBadCharater, protoArray;
+        
+		var urlObject = {
+            host: "",
+            port: "",
+            query: {},
+            pathname: "",
+            protocol: "",
+            user: "",
+            password: "",
+            href: url,
+            hash: ""
+        };
+			
+        var protoArray = ["http", "https", "ftp", "ssh", "irc", "sftp"];
+			
+        function firstSplit (str, splitter) {
+            var array;
+            if (str.indexOf(splitter) !== -1) {
+                array = [str.substring(0, str.indexOf(splitter)), str.substring(str.indexOf(splitter) + splitter.length)];
+                return array;
+            }
+            return ["", str];
+        }
+			
+        function lastSplit(str, splitter) {
+            var array;
+            if (str.lastIndexOf(splitter) !== -1) {
+                array = [str.substring(str.lastIndexOf(splitter) + splitter.length), str.substring(0, str.lastIndexOf(splitter))];
+                return array;
+            }
+            return ["", str];
+        }
+			
+        function checkerBadCharater(str) {
+            for (var index = 0; index < badCharater.length; index++) {
+                if (str.indexOf(badCharater[index]) != -1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+			
+        function parsing(uri, splitter, flag) {
+            if (flag == null) {
+                flag = false;
+            }
+            switch (splitter) {
+                case "#":
+                    if ((uri.lastIndexOf("#" + lastSplit(uri, splitter)[0]) == uri.length - lastSplit(uri, splitter)[0].length - splitter.length) && (checkerBadCharater(lastSplit(uri, splitter)[0]) == true)) {
+                        urlObject.hash = lastSplit(uri, splitter)[0];
+                        parsing(lastSplit(uri, splitter)[1], "@");
+                    } else {
+                        urlObject.hash = null;
+                        parsing(uri, "@");
+                    }
+                    break;
+                case "?":
+                    urlObject.query = {};
+                    lastSplit(uri, splitter)[0].split("&").forEach(function (elem) {
+                        var element;
+                        element = elem.split("=");
+                        if (element[0] !== "") {
+                            urlObject.query[element[0]] = element[1];
+                        }
+                    });
+                    parsing(lastSplit(uri, splitter)[1], "/");
+                    break;
+                case "/":
+                    if (firstSplit(uri, splitter)[0] === "") {
+                        parsing(firstSplit(uri, splitter)[1], ":", true);
+                        urlObject.pathname = "/" + firstSplit(uri, splitter)[0];
+                    } else {
+                        parsing(firstSplit(uri, splitter)[0], ":", true);
+                        urlObject.pathname = "/" + firstSplit(uri, splitter)[1];
+                    }
+                    break;
+                case "://":
+                    if (protoArray.indexOf(firstSplit(uri, splitter)[0].toLowerCase()) !== -1) {
+                        urlObject.protocol = firstSplit(uri, splitter)[0];
+                    } else {
+                        urlObject.protocol = null;
+                    }
+                    parsing(firstSplit(uri, splitter)[1], "#");
+                    break;
+                case "@":
+                    if (lastSplit(uri, splitter)[0] !== "") {
+                        parsing(lastSplit(uri, splitter)[1], ":");
+                        parsing(lastSplit(uri, splitter)[0], "?");
+                    } else {
+                        parsing(lastSplit(uri, splitter)[1], "?");
+                    }
+                    break;
+                case ":":
+                    if (flag) {
+                        if (firstSplit(uri, splitter)[0] === "") {
+                            urlObject.host = firstSplit(uri, splitter)[1];
+                        } else {
+                            urlObject.host = firstSplit(uri, splitter)[0];
+                            urlObject.port = firstSplit(uri, splitter)[1];
+                        }
+                    } else {
+                        if (firstSplit(uri, splitter)[0] === "") {
+                            urlObject.user = firstSplit(uri, splitter)[1];
+                        } else {
+                            urlObject.user = firstSplit(uri, splitter)[0];
+                            urlObject.password = firstSplit(uri, splitter)[1];
+                        }
+                    }
+                    break;
+            }
+        };
+        parsing(url, "://");
+        urlObject.origin = (urlObject.protocol !== "" ? urlObject.protocol + "://" : "") + urlObject.host + (urlObject.port !== "" ? ":" + urlObject.port : "");
+		
+		if(urlObject.port && urlObject.host) urlObject.host += ":" + urlObject.port; // host should include the port, to be the same as the browser's window.location.host
+		
+		
+		return urlObject;
+
+
+		/* Can not find user:name@ auth
 		var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
 		return match && {
 			protocol: match[1],
@@ -939,7 +1066,9 @@ var UTIL = {
 			search: match[6],
 			hash: match[7]
 		}
+		*/
 	},
+
 	byteLength: function byteLength(str) {
 		// returns the byte length of an utf8 string (1 byte is 8 bit)
 		var s = str.length;
