@@ -7,11 +7,6 @@ Making a new web page/post should be as easy as making a new comment on HN, or p
 
 Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
 
-Efter att man sparat en fil i SSG kommer det upp en dokumentations-widget,
-där man skriver in varför ändringarna gjordes.
-(Det kommer upp en blinkande knapp i SSG widgeten som heter "dokumentera", när man klickar får man en lista på filer som har ändras, plus en textruta för dokumentation. 
-Man kan klicka på filerna för att se diff)
-
 Guide för att infoga bild när man redigerar sida i SSG ("infoga bild" i SSG widget!?)
 
 
@@ -42,6 +37,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 
 What I'm working on
 -------------------
+
+In the server "serve" it needs to serve from the root / not a folder, or the SSG will not work because all URL's in the SSG is relative to the root!
 
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 

@@ -136,7 +136,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	storageReady: [], // When server storage is ready to be used
 	commitTool: [],
 	resolveTool: [],
-	mergeTool: []
+	mergeTool: [],
+	fileDrop: []
 };
 
 EDITOR.renderFunctions = [];
@@ -3233,10 +3234,13 @@ EDITOR.lastKeyPressed = "";
 	
 	// More Event listeners ...
 	
-	
-	//window.addEventListener("drop", fileDrop, false);
-	window.ondragover = function(e) { e.preventDefault(); return false };
-	window.ondrop = function(e) { e.preventDefault(); return false };
+	/*
+	window.addEventListener("drop", fileDrop, false);
+	window.ondrop = function(e) { e.preventDefault(); console.log("window.ondrop"); return false };
+	window.ondragdrop = function(e) { e.preventDefault(); console.log("window.ondragdrop"); return false };
+	window.ondragleave = function(e) { e.preventDefault(); console.log("window.ondragleave"); return false };
+	window.ondragover = function(e) { e.preventDefault(); console.log("window.ondragover"); return false };
+	*/
 	
 	window.addEventListener("dblclick", dblclick);
 	
@@ -3367,6 +3371,70 @@ EDITOR.lastKeyPressed = "";
 		
 		canvas = document.getElementById("canvas");
 		
+		// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
+		// Also make sure there are no drop or dragover events on window, document or parent elements!
+		
+		/*
+		canvas.addEventListener("drop", function(e) {
+		e.preventDefault();
+			console.log(e.target.className + " drop");
+			
+			console.log(e.dataTransfer.files[0]);
+			console.log(e.dataTransfer.files[0].name);
+			console.log(e.dataTransfer.files[0].size + " bytes");
+			
+			return false;
+		}, false);
+		
+		canvas.addEventListener("dragdrop", function(e) {
+		e.preventDefault();
+			console.log(e.target.className + " dragdrop");
+			return false;
+		}, false);
+		
+		canvas.addEventListener("dragenter", function(e) {
+		e.preventDefault();
+			console.log(e.target.className + " dragenter");
+			e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
+			console.log(e);
+			
+			return false;
+		}, false);
+		
+		canvas.addEventListener("dragleave", function(e) {
+		e.preventDefault();
+			console.log(e.target.className + " dragleave");
+			
+			return false;
+		}, false);
+		
+		
+		
+		document.addEventListener("dragstart", function(event) {
+			
+			console.log(e.target.className + " dragstart");
+			
+			// The dataTransfer.setData() method sets the data type and the value of the dragged data
+			event.dataTransfer.setData("Text", event.target.id);
+			
+			// Output some text when starting to drag the p element
+			document.getElementById("demo").innerHTML = "Started to drag the p element.";
+			
+			// Change the opacity of the draggable element
+			event.target.style.opacity = "0.4";
+		});
+		*/
+		
+		canvas.addEventListener("dragover", function(e) {
+			e.preventDefault();
+			console.log(e.target.className + " dragover");
+			
+			//e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
+			return false;
+		}, false);
+		
+		canvas.ondrop = fileDrop;
+		
 		if(EDITOR.settings.sub_pixel_antialias == false) {
 			ctx = canvas.getContext("2d");
 			//console.warn("No sub_pixel_antialias! EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
@@ -3470,7 +3538,6 @@ EDITOR.lastKeyPressed = "";
 		
 		
 		var body = document.getElementById('body');
-		body.ondrop = fileDrop;
 		
 		
 		
@@ -3941,30 +4008,77 @@ EDITOR.lastKeyPressed = "";
 	function fileDrop(e) {
 		e.preventDefault();
 		
-		console.log("DROP!");
+		console.log("fileDrop");
+		
+		console.log(e);
 		
 		var file = e.dataTransfer.files[0];
-		var reader = new FileReader();
+		var filePath = file.path || file.name;
 		
-		reader.onload = function (event) {
-			
-			var content = event.target.result;
-			var filePath = file.path;
-			
-			console.log("Drop op: " + event.target);
-			
-			EDITOR.openFile(filePath, content);
-			
-		};
-		console.log(file);
-		reader.readAsDataURL(file);
+		var fileType = file.type;
 		
-		/*
-			for (var i = 0; i < e.dataTransfer.files.length; ++i) {
-			console.log(e.dataTransfer.files[i].path + "\n" + e.dataTransfer.files[i].data);
-			UTIL.objInfo(e.dataTransfer.files[i]);
-			}
-		*/
+		// The default action is to open the file in the editor.
+		// But if the editor don't support the file, ask plugins what to do with it ...
+		if(notSupported(fileType)) {
+			
+			console.log("Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
+			for(var i=0; i<EDITOR.eventListeners.fileDrop.length; i++) {
+				EDITOR.eventListeners.fileDrop[i].fun(file);
+				}
+			
+		}
+		else readFile();
+		
+		function saveFileFunction(filePath, callback) {
+			var reader = new FileReader();
+			reader.onload = function (event) {
+				var data = event.target.result;
+				
+				// Specifying encoding:base64 will magically convert to binary! 
+				// We do have to remove the data:image/png metadata though!
+				data = data.replace("data:" + fileType + ";base64,", "");
+				EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+			};
+			reader.readAsDataURL(file); // For binary files (will be base64 encoded)
+			
+		}
+		
+		function notSupported(fileType) {
+			
+			return fileType && // Some files will have fileType=="" (most of them we want to open)
+			fileType.indexOf("text") == -1 && 
+			fileType.indexOf("javascript") == -1 && 
+			fileType.indexOf("xml") == -1 && 
+			fileType.indexOf("json") == -1;
+			
+		}
+		
+		
+		function readFile() {
+			
+			var reader = new FileReader();
+			
+			reader.onload = function (event) {
+				
+				var content = event.target.result;
+				
+				
+				console.log("Drop op: " + event.target);
+				
+				EDITOR.openFile(filePath, content);
+				
+			};
+			console.log(file);
+			//reader.readAsDataURL(file); // For binary files (will be base64 encoded)
+			reader.readAsText(file);
+			
+			/*
+				for (var i = 0; i < e.dataTransfer.files.length; ++i) {
+				console.log(e.dataTransfer.files[i].path + "\n" + e.dataTransfer.files[i].data);
+				UTIL.objInfo(e.dataTransfer.files[i]);
+				}
+			*/
+		}
 		
 		EDITOR.interact("fileDrop", e);
 		

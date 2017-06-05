@@ -246,6 +246,7 @@
 		
 		EDITOR.on("fileOpen", fileOpen);
 		
+		EDITOR.on("fileDrop", fileDrop);
 		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
@@ -285,6 +286,7 @@
 		EDITOR.removeEvent("fileShow", fileShow);
 		EDITOR.removeEvent("exit", SSG_cleanup);
 		EDITOR.removeEvent("fileOpen", fileOpen);
+		EDITOR.removeEvent("fileDrop", fileDrop);
 		
 		EDITOR.unbindKey(hideSSG);
 		EDITOR.unbindKey(previewSSG);
@@ -336,6 +338,73 @@
 		}
 		
 	}
+	
+	
+	function fileDrop(dataFile) {
+		// When a file is dropped into the editor
+		
+		var file = EDITOR.currentFile;
+		
+		// Check if the current file belongs to a SSG project:
+		for(var i=0; i<sites.length; i++) {
+			if(EDITOR.currentFile.path.indexOf(sites[i].source) != -1) {
+				handleFile(sites[i], dataFile);
+			}
+		}
+		
+		return false; // Returing false will show a message, returning true will not show the message (that a file was saved)
+		
+		function handleFile(site, dataFile) {
+			
+			var filePath = dataFile.path || dataFile.name;
+			var fileType = dataFile.type;
+			var isImage = (fileType.indexOf("image") != -1);
+			
+			var defaultPath;
+			if(filePath.match(/\/\\/)) defaultPath = filePath;
+			//else if(isImage) defaultPath = site.source + "gfx/" + filePath;
+			else defaultPath = site.source + filePath;
+			
+			var msg;
+			if(isImage) var msg = "Where to save the image ?"
+			else msg = "Where to save the file ?";
+			
+			promptBox(msg, false, defaultPath, function(filePath) {
+				if(filePath) {
+					saveFile(filePath, function fileSaved(err, path) {
+						if(err) return alertBox(err.message);
+						
+						var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
+						
+						if(isImage) {
+							// todo: Some sort of crop and resize tool
+							file.insertText('<img src="' + fileSrc + '">');
+						}
+						else {
+							var fileName = UTIL.getFilenameFromPath(filePath);
+							file.insertText('<a href="' + fileSrc + '">' + fileName + '</a>');
+						}
+						
+					});
+				}
+			});
+			
+			function saveFile(filePath, callback) {
+				var reader = new FileReader();
+				reader.onload = function (event) {
+					var data = event.target.result;
+					
+					// Specifying encoding:base64 will magically convert to binary!
+					// We do have to remove the data:image/png metadata though!
+					data = data.replace("data:" + fileType + ";base64,", "");
+					EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+				};
+				reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
+				
+			}
+			
+			}
+		}
 	
 	
 	function switchSite(index) {

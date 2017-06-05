@@ -172,7 +172,7 @@ function confirmBox(msg, options, callback) {
 	
 }
 
-function promptBox(msg, isPassword, callback) {
+function promptBox(msg, isPassword, defaultValue, callback) {
 	var dialog = new Dialog(msg);
 	
 	var input = document.createElement("input");
@@ -182,6 +182,8 @@ function promptBox(msg, isPassword, callback) {
 	
 	input.setAttribute("class", "input prompt");
 	input.setAttribute("focus", "true");
+	
+	if(defaultValue) input.setAttribute("value", defaultValue);
 	
 	var ok = document.createElement("button");
 	ok.setAttribute("class", "prompt");
