@@ -81,7 +81,7 @@ When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file 
 
 Add a watcher for every opened file and warn the user if the file changes by other programs.
 
-
+in reopenfiles.js check if the lst modified date on disk is newer ... !?
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
