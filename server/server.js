@@ -178,9 +178,11 @@ function main() {
 					}
 				}
 			}
-			else broadcastAddresses.push(broadcastAddress(myIp));
+			else if(isPrivatev4IP(myIp)) broadcastAddresses.push(broadcastAddress(myIp));
 			
 			console.log("broadcastAddresses: ", broadcastAddresses);
+			
+			if(broadcastAddresses.length > 0) {
 			
 			var dgram = require('dgram');
 			
@@ -211,6 +213,7 @@ function main() {
 			});
 
 			broadcastClient.bind(broadcastPort);
+			}
 			
 			function setAdvertiseInterval(broadcastAddress) {
 				// We need to keep sending messages, or we will not receive any!
