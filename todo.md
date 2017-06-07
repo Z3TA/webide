@@ -7,20 +7,6 @@ Making a new web page/post should be as easy as making a new comment on HN, or p
 
 Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
 
-Guide för att infoga bild när man redigerar sida i SSG ("infoga bild" i SSG widget!?)
-
-
-When a SSG source file is opened, automatically bring up the WYSIWYG
-(find a good place to place the windows)
-Also bring up the SSG widget/toolbar and show/indicate that Preview and WYSIWYG is activated
-(clicking the buttons will deactivate preview/WYSIWYG and close it)
-
-Translate to other lanugages (Swedish) lang.js file with all phrases, calling STR("phrase") gives the right phrase.
-
-Pasting or dragging in images ... convert place image in src dir
-
-Meta publish date, publish only after this date. Make server auto publish!?
-
 
 2) Beta release?, get USER FEEDBACK!
 
@@ -38,7 +24,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-SSG, make sure it's working! (then work on mercurial integration for the ssg)
+deploy! user signups!?
 
 Testing the Mercurial integration/tools for the SSG
 
@@ -46,45 +32,14 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
-
-Mac issues:
-Copy/paste don't work
-Make a copy/paste plugin, select between many clipboards
-Show /client/ in path on errors.
-able to scroll function list, auto scroll when typing and moving inside functions!
-
-
-Commit tool: Show diff
-(Also make it possible to commit only selected diffs,
-probably have to use something better then a select box for the file select)
-
-Commit tool: option to move, and revert.
-
 Make apparmor and systemd service profiles
 
 Use system users as users, and /home/ as default user dirs ...
 The editor server should run in it's own VM ... A user can for example create a Mercurial hook that can run code on the server when commiting.
 
 
-commit widget: Double clicking on a file in the list should open the file and show what changed (a diff !!???)
-
-bug in mercurial if hgrc contains [auth] with username put no password.
-
-mercurial/git integration
-
-Functionality discovery: Add a search-glass-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
-It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
-
-When pressing the Ctrl, Alt, Ctrl+Shift, or Alt+Shift, or Ctrl+Alt, or Ctrl+Alt+Shift key, after 500ms, show a HUD of all functions that are bound to those keys, and their combo Letter, example Ctrl+S for save: S: save
-The HUD dissaprears when you release the keys. 
 
 
-When editing in WYSIWYG mode, a short cut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
-
-
-Add a watcher for every opened file and warn the user if the file changes by other programs.
-
-in reopenfiles.js check if the lst modified date on disk is newer ... !?
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -98,6 +53,13 @@ in reopenfiles.js check if the lst modified date on disk is newer ... !?
 
 What I'm thinking
 -----------------
+
+How should jzedit be deployed !?
+Should each customer get their own VPS !?
+users vs customers ...
+
+containers and virtualization !? All you need right now is nodejs and a browser, so no need to use docker.
+
 
 Should the tests be loaded when running in the browser !?
 
@@ -218,6 +180,14 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Mac issues:
+Copy/paste don't work
+Make a copy/paste plugin, select between many clipboards
+Show /client/ in path on errors.
+able to scroll function list, auto scroll when typing and moving inside functions!
+
+bug in mercurial if hgrc contains [auth] with username put no password!?
 
 Warning about single = inside if statement doesn't ignore regExp! ex: if(wysiwygEditor.ignoreTransform.inserted[i].text.match(/src=/i))
 
@@ -870,6 +840,32 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Functionality discovery: Add a search-glass-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
+It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
+
+When pressing the Ctrl, Alt, Ctrl+Shift, or Alt+Shift, or Ctrl+Alt, or Ctrl+Alt+Shift key, after 500ms, show a HUD of all functions that are bound to those keys, and their combo Letter, example Ctrl+S for save: S: save
+The HUD dissaprears when you release the keys.
+
+
+When editing in WYSIWYG mode, a shortcut / keyboard combo to open the CSS file and scroll down (highligt) the right section.
+
+
+Add a watcher for every opened file and warn the user if the file changes by other programs.
+
+in reopenfiles.js check if the last modified date on disk is newer ... !?
+
+Commit tool: Show diff
+(Also make it possible to commit only selected diffs,
+probably have to use something better then a select box for the file select)
+
+commit widget: Double clicking on a file in the list should open the file and show what changed (a diff !!???)
+
+Commit tool: option to move, and revert.
+
+Translate to other lanugages (Swedish) lang.js file with all phrases, calling STR("phrase") gives the right phrase.
+
+SSG: Meta publish date, publish only after this date. Make server auto publish!?
 
 File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
 Able to select files and folders in file explorer !?

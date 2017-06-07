@@ -12,14 +12,26 @@ Create a new .htm file and place it in the demo/source/ folder.
 Or click the "New Page" button in the interface to use a template.
 
 
-When linking to .css files, images etc, all src and href paths needs to translate from root (have an / infront) !
-They will then be converted ro relative paths by the SSG.
+Uploading images
+================
+Drag and drop images into the editor
+
+
+How the static site generators build the pages
+==============================================
 
 Files named *.htm, *.html, *.docx, *.md will be converted to HTML and have header(s) and footer(s) inserted.
 All other files like images .js and .css files will be copied as is.
 
 Multiple body-onloads, title, meta keyword, and script tags, will be uniquely merged.
 
+
+Absolute vs Relative paths
+--------------------------
+When linking to .css files, images etc, all src and href attribute paths inside header and footer files needs to translate from root (have an / infront) !
+They will then be converted ro relative paths by the SSG.
+
+src and href attributes inside normal pages (not header or footer files) need to have relative paths!
 
 Scripting
 =========
@@ -55,5 +67,6 @@ Collaborating
 
 When working with many developers, you should use version control like Git or Mercurial.
 Share the root folder in a repository (the "demo" folder in the included example).
+
 
 
