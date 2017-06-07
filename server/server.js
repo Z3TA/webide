@@ -730,7 +730,7 @@ function handleHttpRequest(request, response){
 	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
 	var urlPath = UTIL.getPathFromUrl(request.url);
 	
-	console.log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host);
+	
 	
 	var dirs = urlPath.split("/");
 	
@@ -741,28 +741,31 @@ function handleHttpRequest(request, response){
 	var folder;
 	var localFolder;
 	
+	/*
 	var authHeader = request.headers["authorization"] || "";
 	var authToken = authHeader.split(/\s+/).pop() || "";
 	var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
 	var authParts = authBuffer.split(/:/);
 	var username=authParts[0];
 	var password=authParts[1];
-		
-	/*
-		http "endpoints" needs to be served from / and pass same origin policy!
-		So we use auth username =)
 	*/
+	
+	log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host);
+	
+	/*
+		http "endpoints" needs to pass same origin policy!
+		*/
 	
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
-	if(httpEndpoints.hasOwnProperty(username)) {
+	if(httpEndpoints.hasOwnProperty(firstDir)) {
 			
-		localFolder = httpEndpoints[username];
-			//urlPath = urlPath.replace(firstDir + "/", "");
+		localFolder = httpEndpoints[firstDir];
+			urlPath = urlPath.replace(firstDir + "/", "");
 			
 		responseHeaders['Cache-Control'] = 'no-cache';
 		
-		console.log("Serving from httpEndpoints=" + username + " localFolder=" + localFolder + " " + localFolder);
+		console.log("Serving from httpEndpoints=" + firstDir + " localFolder=" + localFolder + " " + localFolder);
 		
 		}
 		else {
@@ -924,13 +927,13 @@ function makeUrl(endPoint) {
 	
 	var url = "http://";
 	
-	if(endPoint) url += endPoint + ":123@" 
-	
 	url += ip;
 	
 	if(port != 80) url += ":" + port;
 	
 	url += "/";
+	
+	if(endPoint) url += endPoint + "/";
 	
 	return url;
 }

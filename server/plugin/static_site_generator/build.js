@@ -33,8 +33,13 @@
 	
 	All files should be encoded with utf8!
 	
-	When linking to css files and images etc in headers and footers, 
+	When linking to css files and images etc in headers and footers (header.htm and footer.htm), 
 	all src and href paths needs to translate from root (have an / infront)
+	They will then be converted to relative paths after being inserted to the page.
+	This is needed because files from several nested folders can be concatenated.
+	
+	Source/src's in the body (not header or footer) should however be relative!
+	
 	
 	
 	Notes to developer

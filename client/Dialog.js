@@ -10,7 +10,7 @@
 
 function Dialog(msg, icon) {
 	
-	console.log("Creating dialog: msg=" + msg);
+	console.warn("Creating dialog: msg=" + msg); // Using console.warn so we'll get callsite
 	
 	if(msg == undefined) throw new Error("Dialog without a message!");
 	

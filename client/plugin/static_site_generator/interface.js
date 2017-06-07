@@ -374,7 +374,16 @@
 					saveFile(filePath, function fileSaved(err, path) {
 						if(err) return alertBox(err.message);
 						
+						var currentFileName = UTIL.getFilenameFromPath(file.path);
+						
+						
+						
+						if(currentFileName.match(/^(header|footer).html?/)) {
 						var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
+						}
+						else {
+							var fileSrc = path.replace(site.source, ""); // File paths needs to be relative!
+						}
 						
 						if(isImage) {
 							// todo: Some sort of crop and resize tool
@@ -1200,13 +1209,34 @@
 		}
 		else compileIt(sourceFile);
 		
+		return false;
+		
 		function compileIt(sourceFile) {
+			
+			var matchAbsSrc = sourceFile.text.match(/(src|href)\s?=\s?['"]\//i);
 			
 			if(!sourceFile.isSaved) {
 				newWindow.close();
 				return alertBox("Save file before preview:\n" + sourceFile.path);
 			}
-			compile(site.source, site.preview, false, function compiled_static() {
+			else if(matchAbsSrc) {
+				newWindow.close();
+				console.log("matchAbsSrc=" + JSON.stringify(matchAbsSrc));
+				alertBox("Make any src or href attributes relative! (remove the slash from " + matchAbsSrc[0] + ")\n\nsrc and href in headers and footers needs to be absolute, but in the page/content they need to be relative.");
+				/* 
+					headers and footers need to have absolute href and src attributs because they will be concatenated from different folder depths
+					Having abslute paths makes it possible to make all paths relative once all headers and footers have been inserted into the page source.
+					The static site generator will concatenate every header.htm in this file hierarchy:
+					|--header.htm
+					|--folder1/
+					|----header.htm
+					|----folder2/
+					|------header.htm
+					|------page.htm
+				*/
+			}
+			else {
+				compile(site.source, site.preview, false, function compiled_static() {
 				
 				var protocol = UTIL.urlProtocol(site.preview);
 				
@@ -1322,10 +1352,8 @@
 				});
 			});
 		}
-		
-		return false;
-		
-	}
+		}
+		}
 	
 	
 	function closePreview() {

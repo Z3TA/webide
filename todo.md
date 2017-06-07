@@ -38,11 +38,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-In the server "serve" it needs to serve from the root / not a folder, or the SSG will not work because all URL's in the SSG is relative to the root!
-but also same origin! We can use auth username as a hack!
-
-hmm WysiwygEditor.js doesn't seem to open the url with the auth part!?!? ....
-
 SSG, make sure it's working! (then work on mercurial integration for the ssg)
 
 Testing the Mercurial integration/tools for the SSG
@@ -50,6 +45,14 @@ Testing the Mercurial integration/tools for the SSG
 
 
 todo:
+
+
+Mac issues:
+Copy/paste don't work
+Make a copy/paste plugin, select between many clipboards
+Show /client/ in path on errors.
+able to scroll function list, auto scroll when typing and moving inside functions!
+
 
 Commit tool: Show diff
 (Also make it possible to commit only selected diffs,
@@ -215,6 +218,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Warning about single = inside if statement doesn't ignore regExp! ex: if(wysiwygEditor.ignoreTransform.inserted[i].text.match(/src=/i))
 
 Main window closed when printing ... and the printer printed a few hundred pages of byte code ...
 
