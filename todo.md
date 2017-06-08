@@ -56,7 +56,7 @@ What I'm thinking
 
 The server don't need a container, but it's OK to run a isolated group of users in a VPS.
 
-How should jzedit be deployed !? scp to server, then restart the editor server process
+How should jzedit be deployed !? rsync to server, then restart the editor server process
 
 Users need a convenient way to deploy there work ...
 
