@@ -54,11 +54,14 @@ The editor server should run in it's own VM ... A user can for example create a 
 What I'm thinking
 -----------------
 
-How should jzedit be deployed !?
-Should each customer get their own VPS !?
-users vs customers ...
+The server don't need a container, but it's OK to run a isolated group of users in a VPS.
 
-containers and virtualization !? All you need right now is nodejs and a browser, so no need to use docker.
+How should jzedit be deployed !? scp to server, then restart the editor server process
+
+Users need a convenient way to deploy there work ...
+
+Should the editor's platform be a dev platform, or only an editor ? 
+We need to run the dev-app on the same server to get a debug channel, but the "production" server should not be the same as dev/editor server.
 
 
 Should the tests be loaded when running in the browser !?

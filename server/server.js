@@ -7,6 +7,9 @@ var getArg = require("./getArg.js");
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
 
+var var HTTP_ENDPOINTS = {};
+var HOME_DIR = getArg(["h", "homedir"]); // || "/home/"; 
+
 // Log levels
 var WARN = 4;
 var NOTICE = 5;
@@ -17,34 +20,34 @@ var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
 	// Enhanced console.log ...
 	var logModule = require("./log.js");
-
+	
 	logModule.setLogLevel(LOGLEVEL);
 	log = logModule.log;
-
+	
 	var logFile = getArg(["lf", "logfile"]) || null; // default: Write to stdout, if specified write to a file
-
+	
 	if(logFile) logModule.setLogFile(logFile);
-
+	
 })();
 
 
 (function() {
-  // Make sure we are in the server directory
-  var dir = process.cwd();
-  var folders = dir.split(/\/|\\/);
-  var lastFolder = folders[folders.length-1];
-  
-  //console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
-  
-  if(lastFolder == "jzedit") {
-    try {
-      process.chdir('./server');
-      //console.log('New directory: ' + process.cwd());
-    }
-    catch (err) {
-      console.log('chdir: ' + err);
-    }
-  }
+	// Make sure we are in the server directory
+	var dir = process.cwd();
+	var folders = dir.split(/\/|\\/);
+	var lastFolder = folders[folders.length-1];
+	
+	//console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
+	
+	if(lastFolder == "jzedit") {
+		try {
+			process.chdir('./server');
+			//console.log('New directory: ' + process.cwd());
+		}
+		catch (err) {
+			console.log('chdir: ' + err);
+		}
+	}
 })();
 
 
@@ -90,11 +93,11 @@ var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
-
+	
 	HTTP_SERVER.close();
 	
 	process.exit();
-
+	
 });
 
 process.on("exit", function () {
@@ -102,27 +105,27 @@ process.on("exit", function () {
 });
 
 function main() {
-
-
+	
+	
 	// Get the current user (who runs this server)
 	var os = require("os");
 	var info = os.userInfo ? os.userInfo() : {username: "ROOT"};
 	var env = process.env;
-
+	
 	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
-
+	
 	log("Server running as user=" + CURRENT_USER);
-
+	
 	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
-
-
-
-
-
+	
+	
+	
+	
+	
 	var sockJs = require("sockjs");
 	var wsServer = sockJs.createServer();
 	wsServer.on("connection", sockJsConnection);
-
+	
 	var http = require("http");
 	
 	HTTP_SERVER = http.createServer(handleHttpRequest);
@@ -135,27 +138,27 @@ function main() {
 		}
 		else throw err;
 	});
-
+	
 	if(isIpV4(HTTP_IP)) {
 		if(!isPrivatev4IP(HTTP_IP)) log("NOT A PRIVATE IP=" + HTTP_IP, 4);
 	}
 	else log("Not a IPv4 address");
-
-
+	
+	
 	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
-
-
+	
+	
 	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
-
+	
 	var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
 	
 	log(serverAdvertiseMessage, 6);
 	
 	// Open client url in browser !?
-
+	
 	if(HTTP_IP != "127.0.0.1") {
 		(function broadcast(myIp) {
-
+			
 			// Listen to and answer broadcast messages
 			// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 			
@@ -183,36 +186,36 @@ function main() {
 			console.log("broadcastAddresses: ", broadcastAddresses);
 			
 			if(broadcastAddresses.length > 0) {
-			
-			var dgram = require('dgram');
-			
-			// Server
-			var broadcastServer = dgram.createSocket("udp4");
-			broadcastServer.bind(function() {
-				broadcastServer.setBroadcast(true);
-				// We must send at least one broadcast message to be able to receive messages!
-				for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
-			});
-
-			// Client
-			var broadcastClient = dgram.createSocket('udp4');
-
-			broadcastClient.on('listening', function () {
-				var address = broadcastClient.address();
-				console.log('UDP Client listening on ' + address.address + ":" + address.port);
-				broadcastClient.setBroadcast(true);
-			});
-
-			broadcastClient.on('message', function (message, rinfo) {
-				console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
 				
-				var lookForServerMessage = "Where can I find a jzedit server?"
-			
-				if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
+				var dgram = require('dgram');
 				
-			});
-
-			broadcastClient.bind(broadcastPort);
+				// Server
+				var broadcastServer = dgram.createSocket("udp4");
+				broadcastServer.bind(function() {
+					broadcastServer.setBroadcast(true);
+					// We must send at least one broadcast message to be able to receive messages!
+					for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
+				});
+				
+				// Client
+				var broadcastClient = dgram.createSocket('udp4');
+				
+				broadcastClient.on('listening', function () {
+					var address = broadcastClient.address();
+					console.log('UDP Client listening on ' + address.address + ":" + address.port);
+					broadcastClient.setBroadcast(true);
+				});
+				
+				broadcastClient.on('message', function (message, rinfo) {
+					console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+					
+					var lookForServerMessage = "Where can I find a jzedit server?"
+					
+					if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
+					
+				});
+				
+				broadcastClient.bind(broadcastPort);
 			}
 			
 			function setAdvertiseInterval(broadcastAddress) {
@@ -235,14 +238,14 @@ function main() {
 				arr[3] = "255";
 				return arr.join(".");
 			}
-
+			
 		})(HTTP_IP);
 	}
 	
 }
 
 function isNumeric(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
+	return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 function isIpV4(ip) {
@@ -251,10 +254,10 @@ function isIpV4(ip) {
 }
 
 function isPrivatev4IP(ip) {
-   var parts = ip.split('.');
-   return parts[0] === '10' || parts[0] === '127' ||
-	  (parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
-	  (parts[0] === '192' && parts[1] === '168');
+	var parts = ip.split('.');
+	return parts[0] === '10' || parts[0] === '127' ||
+	(parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
+	(parts[0] === '192' && parts[1] === '168');
 }
 
 
@@ -288,11 +291,11 @@ function sockJsConnection(connection) {
 			console.log("connection.headers=" + JSON.stringify(connection.headers));
 			
 			var xRealIp = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
-
+			
 			if(xRealIp == undefined) {
 				log("Unable to get IP address from x-real-ip headers", DEBUG);
 			}
-
+			
 		}
 	}
 	
@@ -347,7 +350,7 @@ function sockJsConnection(connection) {
 				else {
 					
 					// # Identify
-
+					
 					(function checkUser(username, password) {
 						
 						if(USERNAME) {
@@ -369,19 +372,19 @@ function sockJsConnection(connection) {
 								console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
 								
 								// format: username|password|rootDir|uid|gid
-
+								
 								for(var i=0, test, hasPw, hasUid, pUser, pPass, pRootDir, pUid, pGid; i<row.length; i++) {
 									test = row[i].trim().split("|");
-
+									
 									pUser = test[0];
 									pPass = test[1];
 									pRootDir = test[2];
 									pUid = test[3];
 									pGid = test[4];
-
+									
 									hasPw = pPass ? pPass.length > 0 : false;
 									hasUid = pUid ? pUid.length > 0 : false;
-
+									
 									if(pUser == username && pPass == password) {
 										
 										if(!hasUid && !NOUID) {
@@ -394,26 +397,26 @@ function sockJsConnection(connection) {
 								}
 								
 								if(!userName) wrongPw();
-
+								
 							});
 						}
-
+						
 						function wrongPw() {
 							var errorMsg = "Wrong username=" + username + " or password";
 							if(USERNAME) errorMsg += "(Username specified in server arguments)";
 							send({error: errorMsg});
 						}
-
+						
 						function userOK(index, name, hasPassword, rootPath, uid, gid) {
 							
 							userName = name;
-
+							
 							if(uid != undefined) {
-
+								
 								var fs = require("fs");
-
+								
 								fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
-
+								
 								function gotMoreUserInfo(err, etcPasswd) {
 									
 									if(err) {
@@ -423,23 +426,23 @@ function sockJsConnection(connection) {
 									else {
 										// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
 										var rows = etcPasswd.trim().split("\n");
-
+										
 										for(var i=0, row; i<rows.length; i++) {
 											row = rows[i].trim().split(":");
 											if(foundUserIn(row)) return;
 										}
-
+										
 										throw new Error("Unable to find user name=" + name + " or uid=" + uid + " in /etc/passwd");
-
+										
 									}
-
+									
 									function foundUserIn(row) {
 										var pName = row[0];
 										var pUid = row[2];
 										var pGid = row[3];
 										var pDir = row[5];
 										var pShell = row[6];
-
+										
 										var found = false;
 										if(pName == name) {
 											console.log("Found name=" + name + " in /etc/passwd");
@@ -451,27 +454,27 @@ function sockJsConnection(connection) {
 											if(pName != name) throw new Error("uid=" + uid + " does not match name=" + name + " with pName=" + pName);
 											found = true;
 										}
-
+										
 										if(found) {
 											acceptUser(pDir, pShell);
 											return true;
 										}
 										else return false;
 									}
-
+									
 								}
 							}
 							else {
 								
-
+								
 								acceptUser();
 							}
-
+							
 							function acceptUser(homeDir, shell) {
 								
-
+								
 								if(gid == undefined) gid = uid;
-
+								
 								if(!USER_CONNECTIONS.hasOwnProperty(name)) {
 									USER_CONNECTIONS[name] = {
 										connections: [connection],
@@ -483,30 +486,30 @@ function sockJsConnection(connection) {
 									USER_CONNECTIONS[name].connections.push(connection);
 									userConnectionId = ++USER_CONNECTIONS[name].counter;
 								}
-
+								
 								userWorker = createUserWorker(name, uid, gid)
-
+								
 								var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
-
+								
 								log("User name=" + name + " logged in! " + JSON.stringify(userInfo));
-
+								
 								userWorker.send({identify: userInfo});
 								userWorker.on("message", messageFromWorker);
 								userWorker.on("exit", workerExitHandler);
 								
 								/*
-								setTimeout(function() {
+									setTimeout(function() {
 									user.send({resp: {
-										test: {foo: 1, bar: 2}
+									test: {foo: 1, bar: 2}
 									}});
 									
-								}, 3000);
+									}, 3000);
 								*/
 								
 								console.log("userConnectionId=" + userConnectionId);
-
+								
 								send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
-
+								
 								if(commandQueue.length > 0) {
 									console.log("Running " + commandQueue.length + " commands from the command queue ...");
 									for(var i=0; i<commandQueue.length; i++) {
@@ -514,7 +517,7 @@ function sockJsConnection(connection) {
 									}
 									commandQueue.length = 0;
 								}
-
+								
 								return true;
 								
 								function messageFromWorker(workerMessage, handle) {
@@ -579,10 +582,10 @@ function sockJsConnection(connection) {
 								
 							}
 						}
-
+						
 					})(json.username, json.password);
-
-
+					
+					
 				}
 			}
 			else {
@@ -594,9 +597,9 @@ function sockJsConnection(connection) {
 			function send(answer, conn) {
 				
 				if(conn == undefined) conn = connection;
-
+				
 				if(answer.id == undefined) answer.id = id;
-
+				
 				var str = JSON.stringify(answer);
 				
 				log(IP + " <= " + shortString(str));
@@ -604,9 +607,9 @@ function sockJsConnection(connection) {
 				conn.write(str);
 			}
 		}
-
+		
 	});
-
+	
 	connection.on("close", function() {
 		
 		log("Closed " + protocol + " from " + IP);
@@ -617,13 +620,13 @@ function sockJsConnection(connection) {
 			// Each connection has it's own worker process!
 			userWorker.send({teardown: true}); // Worker should be exiting ...
 			
-		// Users logged in with the same name can however send messages to each others ...
-		
-		USER_CONNECTIONS[userName].connections.splice(USER_CONNECTIONS[userName].connections.indexOf(connection), 1);
-		
-		if(USER_CONNECTIONS[userName].connections.length === 0) {
-			delete USER_CONNECTIONS[userName];
-		}
+			// Users logged in with the same name can however send messages to each others ...
+			
+			USER_CONNECTIONS[userName].connections.splice(USER_CONNECTIONS[userName].connections.indexOf(connection), 1);
+			
+			if(USER_CONNECTIONS[userName].connections.length === 0) {
+				delete USER_CONNECTIONS[userName];
+			}
 		}
 	});
 	
@@ -677,51 +680,22 @@ function isObject(obj) {
 */
 
 
-var httpEndpoints = {};
-var httpServer;
-
-var mimeMap = {
-	css: "text/css",
-	doc: "application/msword",
-	exe: "application/octet-stream",
-	gif: "image/gif",
-	gz: "application/x-gzip",
-	html: "text/html",
-	htm: "text/html",	
-	jpg: "image/jpeg",
-	js: "application/x-javascript",
-	midi: "audio/x-midi",
-	mp3: "audio/mpeg",
-	mpeg: "video/mpeg",
-	ogg: "audio/vorbis",
-	pdf: "application/pdf",
-	png: "image/png",
-	ppt: "application/vnd.ms-powerpoint",
-	svg: "image/svg+xml",
-	"tar.gz": "application/x-tar",
-	tgz: "application/x-tar",
-	txt: "text/plain",
-	wav: "audio/wav",
-	xls: "application/vnd.ms-excel",
-	xml: "application/xml",
-	zip: "application/x-compressed-zip",
-	ico: "image/x-icon",
-	ttf: "application/octet-stream",
-	woff2: "font/woff2",
-	woff: "application/font-woff"
-}
 
 function createHttpEndpoint(folder, callback) {
 	
-	for(var endPoint in httpEndpoints) {
-		if(httpEndpoints[endPoint] == folder) {
+	if(HOME_DIR) {
+		if(folder.indexOf(HOME_DIR) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR);
+	}
+	
+	for(var endPoint in HTTP_ENDPOINTS) {
+		if(HTTP_ENDPOINTS[endPoint] == folder) {
 			return callback(null, makeUrl(endPoint));
 		}
 	}
 	
 	var endPoint = randomString(10);
 	
-	httpEndpoints[endPoint] = folder;
+	HTTP_ENDPOINTS[endPoint] = folder;
 	
 	callback(null, makeUrl(endPoint));
 }
@@ -740,134 +714,140 @@ function handleHttpRequest(request, response){
 	var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
 	
 	var path = require("path");
-
+	
 	var folder;
 	var localFolder;
 	
 	/*
-	var authHeader = request.headers["authorization"] || "";
-	var authToken = authHeader.split(/\s+/).pop() || "";
-	var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
-	var authParts = authBuffer.split(/:/);
-	var username=authParts[0];
-	var password=authParts[1];
+		var authHeader = request.headers["authorization"] || "";
+		var authToken = authHeader.split(/\s+/).pop() || "";
+		var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
+		var authParts = authBuffer.split(/:/);
+		var username=authParts[0];
+		var password=authParts[1];
 	*/
 	
 	log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host);
 	
 	/*
 		http "endpoints" needs to pass same origin policy!
-		*/
+	*/
 	
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
-	if(httpEndpoints.hasOwnProperty(firstDir)) {
-			
-		localFolder = httpEndpoints[firstDir];
-			urlPath = urlPath.replace(firstDir + "/", "");
-			
+	if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
+		
+		localFolder = HTTP_ENDPOINTS[firstDir];
+		urlPath = urlPath.replace(firstDir + "/", "");
+		
 		responseHeaders['Cache-Control'] = 'no-cache';
 		
-		console.log("Serving from httpEndpoints=" + firstDir + " localFolder=" + localFolder + " " + localFolder);
+		console.log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + " " + localFolder);
 		
-		}
-		else {
+	}
+	else {
 		
-			if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
-			
-			localFolder = path.resolve("../client/");
-			
+		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+		
+		localFolder = path.resolve("../client/");
+		
 		console.log("Serving from the jzedit client folder: " + localFolder);
 		
-			/*
-				response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-				response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
-				return;
-			*/
-			
-		}
+		/*
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
+			return;
+		*/
 		
+	}
+	
+	console.log("localFolder=" + localFolder);
+	console.log("urlPath=" + urlPath);
+	
+	
+	if(urlPath == "") {
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("No file in url: " + urlPath);
+		return;
+	}
+	
+	
+	var filePath = path.join(localFolder, urlPath);
+	
+	
+	
+	if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath) || filePath.indexOf(PW_FILE) != -1) {
+		console.log("filePath=" + filePath);
 		console.log("localFolder=" + localFolder);
 		console.log("urlPath=" + urlPath);
 		
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Bad path: " + urlPath);
+		return;
+	}
+	
+	
+	
+	
+	var fileExtension = UTIL.getFileExtension(urlPath);
+	
+	var mimeMap = require("./mimeMap.js");
+	
+	if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Bad file type: '" + fileExtension + "'");
 		
-		if(urlPath == "") {
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("No file in url: " + urlPath);
-			return;
-		}
+		console.warn("Unknown mime type: fileExtension=" + fileExtension);
 		
+		return;
+	}
+	
+	var fs = require("fs");
+	
+	var stat = fs.stat(filePath, function(err, stats) {
 		
-		var filePath = path.join(localFolder, urlPath);
-		
-		if(filePath.indexOf(localFolder) != 0) {
-			console.log("filePath=" + filePath);
-			console.log("localFolder=" + localFolder);
-			console.log("urlPath=" + urlPath);
+		if(err) {
 			
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Bad path: " + urlPath);
-			return;
-		}
-		
-		
-		var fileExtension = UTIL.getFileExtension(urlPath);
-		
-		if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Bad file type: '" + fileExtension + "'");
-			
-			console.warn("Unknown mime type: fileExtension=" + fileExtension);
-			
-			return;
-		}
-		
-		var fs = require("fs");
-		
-		var stat = fs.stat(filePath, function(err, stats) {
-			
-			if(err) {
-				
 			response.writeHead(404, "Error", responseHeaders);
+			
+			if(err.code == "ENOENT") {
+				//var virtualPath = user.toVirtualPath(filePath);
+				//response.end("File not found: " + virtualPath);
 				
-				if(err.code == "ENOENT") {
-					//var virtualPath = user.toVirtualPath(filePath);
-					//response.end("File not found: " + virtualPath);
-					
-					response.end("File not found: " + filePath);
-					
-					console.warn("File not found: " + filePath);
-					
-				}
-				else {
-					response.end(err.message);
-				}
+				response.end("File not found: " + filePath);
 				
-				
-			}
-			else if(stats == undefined) throw new Error("No stats!");
-			else if(!stats.isFile()) {
-				
-			response.writeHead(404, "Error", responseHeaders);
-				response.end("Not a file: " + filePath);
+				console.warn("File not found: " + filePath);
 				
 			}
 			else {
+				response.end(err.message);
+			}
+			
+			
+		}
+		else if(stats == undefined) throw new Error("No stats!");
+		else if(!stats.isFile()) {
+			
+			response.writeHead(404, "Error", responseHeaders);
+			response.end("Not a file: " + filePath);
+			
+		}
+		else {
 			
 			responseHeaders['Content-Type'] = mimeMap[fileExtension];
 			responseHeaders['Content-Length'] = stats.size;
-				
-				response.writeHead(200, responseHeaders);
-				
-				var readStream = fs.createReadStream(filePath);
-				readStream.pipe(response);
-				
-			}
 			
-		});
+			response.writeHead(200, responseHeaders);
+			
+			var readStream = fs.createReadStream(filePath);
+			readStream.pipe(response);
+			
+		}
 		
-		
-	}
+	});
+	
+	
+}
 
 
 function makeUrl(endPoint) {
@@ -882,14 +862,14 @@ function makeUrl(endPoint) {
 	
 	
 	var port = HTTP_PORT;
-
+	
 	if(address) { // Sanity check
 		if(address.port) {
 			if(address.port != HTTP_PORT) throw new Error("address.port=" + address.port + " is not the same as HTTP_PORT=" + HTTP_PORT);
 		}
-
+		
 	}
-
+	
 	
 	var ip = HTTP_IP;
 	if(ip == "0.0.0.0" || ip == "::") {
@@ -899,32 +879,32 @@ function makeUrl(endPoint) {
 		var ifaces = os.networkInterfaces();
 		log("Listening IP's:", 7);
 		Object.keys(ifaces).forEach(function (ifname) {
-		  var alias = 0;
-
-		  ifaces[ifname].forEach(function (iface) {
-			if ('IPv4' !== iface.family || iface.internal !== false) {
-			  // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-			  log(ifname + "=" + iface.address + " (internal)", 7);
-			  return;
-			}
-
-			if (alias >= 1) {
-			  // this single interface has multiple ipv4 addresses
-			  log(ifname + '=' + alias + ", " + iface.address, 7);
-			} else {
-			  // this interface has only one ipv4 adress
-			  log(ifname + "=" + iface.address, 7);
-			}
-			++alias;
+			var alias = 0;
 			
-			ipList.push(iface.address);
-			
-		  });
+			ifaces[ifname].forEach(function (iface) {
+				if ('IPv4' !== iface.family || iface.internal !== false) {
+					// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+					log(ifname + "=" + iface.address + " (internal)", 7);
+					return;
+				}
+				
+				if (alias >= 1) {
+					// this single interface has multiple ipv4 addresses
+					log(ifname + '=' + alias + ", " + iface.address, 7);
+				} else {
+					// this interface has only one ipv4 adress
+					log(ifname + "=" + iface.address, 7);
+				}
+				++alias;
+				
+				ipList.push(iface.address);
+				
+			});
 		});
 		
 		ip = ipList[0];
 	}
-		
+	
 	//console.log(address);
 	//console.log("ipList=" + JSON.stringify(ipList));
 	
@@ -947,29 +927,29 @@ function randomString(letters) {
 	
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
+	
 	for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
-
+	
 	return text;
 }
 
 function createUserWorker(name, uid, gid) {
 	var childProcess = require("child_process");
-
-
+	
+	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
 	var args = ["--loglevel=" + LOGLEVEL];
-
+	
 	if(uid != undefined) options.uid = parseInt(uid);
 	if(gid != undefined) options.gid = parseInt(gid);
-
+	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 	}
-
+	
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
-
+	
 	try {
 		var worker = childProcess.fork("user_worker.js", args, options);
 	}
@@ -980,26 +960,26 @@ function createUserWorker(name, uid, gid) {
 		}
 		else throw err;
 	}
-
+	
 	worker.on("close", function workerClose(code, signal) {
 		console.log(name + " worker close: code=" + code + " signal=" + signal);
 	});
-
+	
 	worker.on("disconnect", function workerDisconnect() {
 		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
 	});
-
+	
 	worker.on("error", function workerClose(err) {
 		console.log(name + " worker error: err.message=" + err.message);
 	});
-
+	
 	worker.on("exit", function workerExit(code, signal) {
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
 	});
-
-
+	
+	
 	return worker;
-
+	
 }
 
 main();
