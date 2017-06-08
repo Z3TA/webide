@@ -1,0 +1,32 @@
+var mimeMap = {
+	css: "text/css",
+	doc: "application/msword",
+	exe: "application/octet-stream",
+	gif: "image/gif",
+	gz: "application/x-gzip",
+	html: "text/html",
+	htm: "text/html",
+	jpg: "image/jpeg",
+	js: "application/x-javascript",
+	midi: "audio/x-midi",
+	mp3: "audio/mpeg",
+	mpeg: "video/mpeg",
+	ogg: "audio/vorbis",
+	pdf: "application/pdf",
+	png: "image/png",
+	ppt: "application/vnd.ms-powerpoint",
+	svg: "image/svg+xml",
+	"tar.gz": "application/x-tar",
+	tgz: "application/x-tar",
+	txt: "text/plain",
+	wav: "audio/wav",
+	xls: "application/vnd.ms-excel",
+	xml: "application/xml",
+	zip: "application/x-compressed-zip",
+	ico: "image/x-icon",
+	ttf: "application/octet-stream",
+	woff2: "font/woff2",
+	woff: "application/font-woff"
+}
+
+module.exports = mimeMap;

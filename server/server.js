@@ -7,8 +7,11 @@ var getArg = require("./getArg.js");
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
 
-var var HTTP_ENDPOINTS = {};
+var HTTP_ENDPOINTS = {};
 var HOME_DIR = getArg(["h", "homedir"]); // || "/home/"; 
+
+
+var NO_PW_HASH = getArg(["nopwhash"]);
 
 // Log levels
 var WARN = 4;
@@ -371,7 +374,14 @@ function sockJsConnection(connection) {
 								
 								console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
 								
+								if(!NO_PW_HASH) {
+									var pwHash = require("./pwHash.js");
+									password = pwHash(password);
+								}
+								
 								// format: username|password|rootDir|uid|gid
+								
+								// note: usernames can not contain |
 								
 								for(var i=0, test, hasPw, hasUid, pUser, pPass, pRootDir, pUid, pGid; i<row.length; i++) {
 									test = row[i].trim().split("|");
