@@ -32,6 +32,10 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+Writing a adduser script
+
+Testing deployment on server
+
 Make apparmor and systemd service profiles
 
 Use system users as users, and /home/ as default user dirs ...
@@ -52,6 +56,12 @@ Use system users as users, and /home/ as default user dirs ...
 
 What I'm thinking
 -----------------
+
+The server should probably not run as root ...
+Open the http socket and start worker processes for each user, and then process.setuid(uid) !?
+
+var uid = parseInt(process.env.SUDO_UID); // If the server was started using sudo
+if (uid) process.setuid(uid);
 
 The server don't need a container, but it's OK to run a isolated group of users in a VPS.
 

@@ -103,6 +103,10 @@ If you choose to open up the editor to others, i'ts adviced to create a system a
 Set user credentials in server/users.pw
 Make sure server/users.pw is not readable (sudo chmod 770 server/users.pw && sudo chown root:root server/users.pw)
 
+Adding users in Linux:
+sudo addgroup --system jzedit_users
+sudo adduser --system --ingroup jzedit_users nameofuser
+
 And Create an apparmor profile, see apparmor/makeprofile.sh
 
 
