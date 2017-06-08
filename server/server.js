@@ -187,9 +187,9 @@ function main() {
 			}
 			else if(isPrivatev4IP(myIp)) broadcastAddresses.push(broadcastAddress(myIp));
 			
-			console.log("broadcastAddresses: ", broadcastAddresses);
-			
 			if(broadcastAddresses.length > 0) {
+				
+				console.log("broadcastAddresses: ", broadcastAddresses);
 				
 				var dgram = require('dgram');
 				

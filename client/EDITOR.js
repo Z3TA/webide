@@ -1657,7 +1657,7 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.removeMenuItem = function(menuElement) {
 		
-		if(!menuElement) throw new Error("EDITOR.removeMenuItem was called without argument menuElement=" + menuElement);
+		if(!menuElement) throw new Error("EDITOR.removeMenuItem was called with no function parameters! menuElement=" + menuElement);
 		if(!menuElement.tagName) throw new Error("EDITOR.removeMenuItem argument menuElement is not a HTML node!");
 		
 		var menu = document.getElementById("canvasContextmenu");

@@ -1,12 +1,99 @@
 #!/usr/bin/env node
 
-var username = process.argv[2];
-var groupName = "jzedit_users";
-
-function getGroupId(groupName) {
-	var fs = require("fs");
+/*
+	This is a useful script for those managing jzedit running as a cloud editor,
+	it will add users both as system users and into the server/users.pw file.
 	
-	var groupData = fs.readFileSync("/etc/group", "utf8");
+	Create the group:
+	sudo addgroup jzedit_users
+	
+	Make this script executable:
+	sudo chmod +x adduser.js
+	
+	Run this script (example: add user foouser with password foopw):
+	./adduser.js foouser foopw
+	
+	Remove a user:
+	sudo userdel -r -f nameOfUser
+	sudo nano server/users.pw
+	
+*/
+
+var getArg = require("./server/getArg.js");
+
+var username = process.argv[2];
+var password = process.argv[3];
+var groupName = process.argv[4] || "jzedit_users";
+
+var NO_PW_HASH = getArg(["nopwhash"]);
+	
+if(!username) throw new Error("No username specified!");
+	if(!password) throw new Error("No password specified!");
+	
+	var gid = getGroupId(groupName);
+	
+	//console.log("gid=" + gid);
+	
+	var childProcess = require('child_process');
+childProcess.exec('adduser --system --ingroup jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
+		if (err) throw err;
+		
+		if(stderr) throw new Error(stderr);
+		
+		/*
+			Format:
+			Adding system user `pelle' (UID 111) ...
+			Adding new user `pelle' (UID 111) with group `jzedit_users' ...
+			Creating home directory `/home/pelle' ...
+		*/
+		
+	console.log("stdout=" + stdout);
+	
+		var matchUid = stdout.match(/\(UID (\d*)\)/);
+	var matchHomeDir = stdout.match(/home directory `([^' ]*)'/);
+	
+		if(!matchUid) throw new Error("Unable to fund UID in stdout=" + stdout);
+		if(!matchHomeDir) throw new Error("Unable to fund UID in stdout=" + stdout);
+		
+	// Sanity check
+	var matchUserName = stdout.match(/new user `([^' ]*)'/);
+	if(!matchUserName) throw new Error("Could not match user name in stdout=" + stdout);
+	if(username != matchUserName[1]) throw new Error("The added user's username=" + matchUserName[1] + " is not the username=" + username + " we wanted! stdout=" + stdout);
+	
+		var uid = parseInt(matchUid[1]);
+		var homeDir = matchHomeDir[1];
+		
+		var fs = require("fs");
+		
+		var usersPwFile = "./server/users.pw";
+		var encoding = "utf8";
+		
+		
+		var usersPwString = fs.readFileSync(usersPwFile, encoding);
+		
+		if(NO_PW_HASH) {
+			var hashedPassword = password;
+		}
+		else {
+			var pwHash = require("./server/pwHash.js");
+			var hashedPassword = pwHash(password);
+		}
+		
+		usersPwString += username + "|" + hashedPassword + "|" + homeDir + "|" + uid + "|" + gid + "\n";
+		
+		fs.writeFileSync(usersPwFile, usersPwString, encoding);
+		
+	console.log("User with username=" + username + " and password=" + password + " successfully created!");
+		
+	});
+	
+	function getGroupId(groupName) {
+		var fs = require("fs");
+		
+		var groupData = fs.readFileSync("/etc/group", "utf8");
+		
+		//console.log("groupData=" + groupData);
+		
 		var groups = groupData.split(/\r|\n/);
 		
 		// format: jzedit_users:x:115:
@@ -17,12 +104,13 @@ function getGroupId(groupName) {
 			id = group[2];
 			
 			if(name == groupName) return parseInt(id);
-			}
+		}
 		
 		throw new Error("Unable to find id for groupName=" + groupName);
-}
-
-
-
-
-
+	}
+	
+	
+	
+	
+	
+	
