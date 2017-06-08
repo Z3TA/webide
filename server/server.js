@@ -6,6 +6,7 @@ var getArg = require("./getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
+var CRAZY = getArg(["crazy", "crazy"]);
 
 var HTTP_ENDPOINTS = {};
 var HOME_DIR = getArg(["h", "homedir"]); // || "/home/";
@@ -387,6 +388,9 @@ function sockJsConnection(connection) {
 									test = row[i].trim().split("|");
 									
 									pUser = test[0];
+									
+									if(pUser.charAt(0) == "#") continue; // Ignore users who's username starts with #
+									
 									pPass = test[1];
 									pRootDir = test[2];
 									pUid = test[3];
@@ -415,6 +419,8 @@ function sockJsConnection(connection) {
 							var errorMsg = "Wrong username=" + username + " or password";
 							if(USERNAME) errorMsg += "(Username specified in server arguments)";
 							send({error: errorMsg});
+							
+							log("username=" + username + " failed to login! Check if the password=" + password + " in server/users.pw match. If the passwords are not encrypted, start the server with argument -nopwhash", NOTICE);
 						}
 						
 						function userOK(index, name, hasPassword, rootPath, uid, gid) {
@@ -956,6 +962,10 @@ function createUserWorker(name, uid, gid) {
 	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
+		
+		if(process.getuid() == 0 && !CRAZY) {
+			throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+		}
 	}
 	
 	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);

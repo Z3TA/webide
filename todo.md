@@ -184,6 +184,8 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+Inserting [ characters is slow in large .js files and seem to screw up indentation!
+
 items in server-storage linger around, make sure reopenFiles.js et.al clear keys that are no longer needed.
 
 Mac issues:

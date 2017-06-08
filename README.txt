@@ -98,10 +98,10 @@ Running as a cloud editor (security hardening)
 ==============================================
 You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
 
-If you choose to open up the editor to others, i'ts adviced to run the editor server.js in a "sandbox" enviroment,
-for example a Virtual Private Server. And create a system account for each user.
+If you choose to open up the editor to others, i'ts adviced to create a system account for each user.
 
 Set user credentials in server/users.pw
+Make sure server/users.pw is not readable (sudo chmod 770 server/users.pw && sudo chown root:root server/users.pw)
 
 And Create an apparmor profile, see apparmor/makeprofile.sh
 

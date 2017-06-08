@@ -24,7 +24,7 @@ echo "Copy the files"
 hg clone . temp/release/linux/
 
 echo "Set devMode and toolbar to false"
-sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/editor.js
+sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
 echo "Clean up"
@@ -91,6 +91,7 @@ rm -rf temp/release/server/start.bat
 rm -rf temp/release/server/create_shortcut.vbs
 rm -rf temp/release/server/JZedit.desktop
 rm -rf temp/release/server/osx_start.sh
+rm -rf temp/release/server/start.js
 rm -rf temp/release/server/bin
 rm -rf temp/release/server/tests
 rm -rf temp/release/server/userdirs

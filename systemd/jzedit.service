@@ -1,0 +1,18 @@
+[Unit]
+Description=JZedit cloud editor
+After=network.target
+
+[Service]
+User=root
+
+# Change to the jzedit directory 
+WorkingDirectory=/srv/jzedit/
+
+# Change to node or nodejs if you are not using apparmor
+# Change port (to 8099) if you are using a web proxy (like nginx) infront
+ExecStart=/usr/bin/jzedit server/server.js --port 80
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
