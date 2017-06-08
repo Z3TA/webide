@@ -1454,6 +1454,11 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+A bug, feautre and security tracker where you can post bugs etc and vote.
+Each user got one 100 points vote, five 10 point votes and ten 1 point votes. And can only vote one time on each bug/feature.
+The features etc are then ordered (and pritoized?) depending on the points.
+Paying users get a bunch more 100 point and 10 point votes.
+
 Idea: Group tabs into "projects", when you are in a project, all files opened will belong to that project. 
 If you switch project, it shows the files belonging to that project.
 
