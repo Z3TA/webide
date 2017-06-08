@@ -8,7 +8,7 @@ var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower 
 
 
 var HTTP_ENDPOINTS = {};
-var HOME_DIR = getArg(["h", "homedir"]); // || "/home/"; 
+var HOME_DIR = getArg(["h", "homedir"]); // || "/home/";
 
 
 var NO_PW_HASH = getArg(["nopwhash"]);

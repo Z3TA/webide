@@ -1,6 +1,8 @@
+#!/bin/bash
 
-# Get the current version
+# Get the current version (generates version.inc)
 node changeset.js
+#commit=$(nodejs getCommitId.js)
 commit=$(cat version.inc)
 version=1
 beta=_beta
@@ -16,6 +18,7 @@ echo "Create the temporary directory if it doesn't exist"
 mkdir -p temp/release/linux
 mkdir -p temp/release/windows
 mkdir -p temp/release/osx
+mkdir -p temp/release/server
 
 echo "Copy the files"
 hg clone . temp/release/linux/
@@ -30,15 +33,16 @@ rm -rf temp/release/linux/release.sh
 rm -rf temp/release/linux/todo.md
 rm -rf temp/release/linux/testfile.txt
 rm -rf temp/release/linux/.hgignore
-
-
-# Minify .js files
-# (npm install uglify-js -g)
-# find temp/release/linux/ -name '*.js' | xargs uglifyjs
+rm -rf temp/release/linux/webextension
+rm -rf temp/release/linux/changeset.js
 
 
 echo "Copy over version.inc"
 cp version.inc temp/release/linux/
+
+# Minify .js files
+# (npm install uglify-js -g)
+# find temp/release/linux/ -name '*.js' | xargs uglifyjs
 
 
 echo "Make a Windows release"
@@ -47,11 +51,13 @@ cp -rf temp/release/linux/. temp/release/windows/
 echo "Make a OSX release"
 cp -rf temp/release/linux/. temp/release/osx/
 
+echo "Make a server release"
+cp -rf temp/release/linux/. temp/release/server/
 
 echo "Clean up the Linux release"
 rm -rf temp/release/linux/runtime/nwjs-v0.12.3-win-x64/
 rm -rf temp/release/linux/runtime/nwjs-v0.12.3-osx-x64/
-rm -rf temp/release/linux/plugin/spellcheck/nodehun_windows.node
+rm -rf temp/release/linux/client/plugin/spellcheck/nodehun_windows.node
 rm -rf temp/release/linux/start.bat
 rm -rf temp/release/linux/create_shortcut.vbs
 rm -rf temp/release/linux/osx_start.sh
@@ -59,7 +65,7 @@ rm -rf temp/release/linux/osx_start.sh
 echo "Clean up the Windows release"
 rm -rf temp/release/windows/runtime/nwjs-v0.12.3-linux-x64
 rm -rf temp/release/windows/runtime/nwjs-v0.12.3-osx-x64/
-rm -rf temp/release/windows/plugin/spellcheck/nodehun_linux.node
+rm -rf temp/release/windows/client/plugin/spellcheck/nodehun_linux.node
 rm -rf temp/release/windows/start.sh
 rm -rf temp/release/windows/JZedit.desktop
 rm -rf temp/release/windows/osx_start.sh
@@ -67,12 +73,27 @@ rm -rf temp/release/windows/osx_start.sh
 echo "Clean up the OSX release"
 rm -rf temp/release/osx/runtime/nwjs-v0.12.3-win-x64
 rm -rf temp/release/osx/runtime/nwjs-v0.12.3-linux-x64/
-rm -rf temp/release/osx/plugin/spellcheck/nodehun_linux.node
-rm -rf temp/release/osx/plugin/spellcheck/nodehun_windows.node
+rm -rf temp/release/osx/plugin/client/spellcheck/nodehun_linux.node
+rm -rf temp/release/osx/plugin/client/spellcheck/nodehun_windows.node
 rm -rf temp/release/osx/start.sh
 rm -rf temp/release/osx/JZedit.desktop
 rm -rf temp/release/osx/start.bat
 rm -rf temp/release/osx/create_shortcut.vbs
+
+
+echo "Clean up the server release"
+# CLient is meant to run in the browser
+rm -rf temp/release/server/runtime/
+rm -rf temp/release/server/plugin/client/spellcheck/nodehun_linux.node
+rm -rf temp/release/server/plugin/client/spellcheck/nodehun_windows.node
+rm -rf temp/release/server/start.sh
+rm -rf temp/release/server/start.bat
+rm -rf temp/release/server/create_shortcut.vbs
+rm -rf temp/release/server/JZedit.desktop
+rm -rf temp/release/server/osx_start.s
+rm -rf temp/release/server/bin
+rm -rf temp/release/server/tests
+rm -rf temp/release/server/userdirs
 
 #echo "zip and remove the Windows release (cant be run under Windows git bash)"
 cd temp/release/
