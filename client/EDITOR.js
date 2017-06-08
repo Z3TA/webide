@@ -5159,9 +5159,9 @@ EDITOR.lastKeyPressed = "";
 								callback(EDITOR.version);
 							}
 							else {
-								EDITOR.version = match[1];
+								EDITOR.version = parseInt(match[1]);
 								callback(EDITOR.version);
-							}
+								}
 						}
 						else {
 							EDITOR.version = -1;
