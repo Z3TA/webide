@@ -36,6 +36,8 @@ fix bug, when saving in /, it asks "The path does not exist: // ...
 
 When creating a user, copy "default" files to home dir, such as a demo static site ( -k skeleton_dir or /etc/skel)
 
+push hook to deploy on each push including rsync to cloud server
+
 Write a userdel script (userdel -r -f nameOfUser)
 
 Testing deployment on server
