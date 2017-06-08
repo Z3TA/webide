@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 
 /*
-	Starts the editor ...
+	Universal editor start script
 	
-	In Apple producs, we need to have a developer licence, 
-	or users will not be able to run our scripts or apps ...
-	Users can run Node-JS scripts if NodeJS is installed though!
+	First try to find a server on localhost
+	Then listen to editor broadcasts on the lan.
+	But if no server is found, start one on localhost
+	
+	Then try to run the client in nw.js
+	But if that fails launch the client in a browser: Chrome, Firefox, IE or Safari
 	
 */
 
+"use strict";
 
 var log = require("./server/log.js").log;
 
@@ -20,7 +24,7 @@ var DEBUG = 7;
 
 var serverFound = false;
 
-setTimeout(startNewServer, 3000);
+setTimeout(startNewServer, 1000); // 3000ms
 
 var serversChecked = 0;
 var serversToCheck = 0;
@@ -49,9 +53,9 @@ function serverChecked(online, ip, port) {
 		
 		serverFound = true;
 		
-		//startClient(ip, port);
+		startClient(ip, port);
+		abortHttpRequests();
 		
-		for(var i=0; i<HTTP_REQUESTS.length; i++) HTTP_REQUESTS[i].abort();
 		
 	}
 	else {
@@ -61,17 +65,51 @@ function serverChecked(online, ip, port) {
 
 
 
-
+function abortHttpRequests() {
+	for(var i=0; i<HTTP_REQUESTS.length; i++) HTTP_REQUESTS[i].abort();
+}
 
 
 function startNewServer() {
 	
 	if(serverFound) return;
 	
+	abortHttpRequests();
+
+	serverFound = true;
+
 	log("Starting new server ...");
 	
-	// If not running with sudo, use port 8099 instead of port 80 to prevent EACCESS error
+	var serverPort = "8099";
+	var serverIp = "127.0.0.1";
 
+	var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort];
+
+	var serverOptions = {
+		stdio: "inherit"
+	}
+
+	//var child = require('child_process').spawn("node", serverArg, serverOptions); 
+
+
+
+
+	/*
+	child.stdout.on('data', function(data) {
+	    console.log(data.toString()); 
+	});
+	*/
+
+	
+	attemptLaunch("node", serverArg, function(err) {
+		if(err) log("Unable to start server!");
+		else {
+			log("Server started!");
+			startClient(serverIp, serverPort);
+		}
+	}, serverOptions);
+	
+ 
 }
 
 
@@ -230,6 +268,10 @@ function checkServer(ip, callback) {
 		};
 
 		var req = http.request(options, function(res) {
+
+			if(serverFound) return;
+
+			log("Answer on port=" + port + " on ip=" + ip, INFO);
 			log('STATUS: ' + res.statusCode, DEBUG);
 			log('HEADERS: ' + JSON.stringify(res.headers), DEBUG);
 			res.setEncoding('utf8');
@@ -271,8 +313,6 @@ function startClient(ip, port, proto) {
 	if(proto == undefined) proto = "http";
 	var url = "http://" + ip + portPart + "/";
 	
-	var uid, gid;
-
 	var nwRuntime = "";
 	var platform = process.platform;
 	if(platform == "darwin") nwRuntime = "./runtime/nwjs-v0.12.3-osx-x64/nwjs.app/Contents/MacOS/nwjs";
@@ -364,82 +404,99 @@ function startClient(ip, port, proto) {
 			}
 		});
 	}
-
-	
-	function attemptLaunch(process, args, callbackFunction) {
-
-		if(typeof callback != "function") throw new Error("No callback function!");
-
-		var childProcess = require("child_process");
-		
-		// You can have different group and user. Default is the user/group running the node process
-		var options = {};
-		
-		if(uid != undefined) options.uid = parseInt(uid);
-		if(gid != undefined) options.gid = parseInt(gid);
-		
-		log("Attemting to start process=" + process + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
-		
-		try {
-			var cp = childProcess.spawn(process, args, options);
-		}
-		catch(err) {
-			if(err.code == "EPERM") {
-				if(uid != undefined) log("Unable to spawn process=" + process + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
-			}
-			var msg = "Unable to spawn process! (" + err.message + ")";
-			log(msg, DEBUG)
-			return callback(new Error(msg));
-		}
-		
-		if(cp.connected) {
-			log("Asuming process=" + process + " was successful because it's connected!", DEBUG);
-			return callback(null);
-		}
-		
-		cp.on("close", function programClose(code, signal) {
-			var msg = process + " close: code=" + code + " signal=" + signal
-			log(msg, DEBUG);
-			
-			code = parseInt(code);
-			if(code === 0) {
-				log("Asuming process=" + process + " was successful because close code=" + code);
-				callback(null);
-			}
-			else callback(new Error(msg));
-
-		});
-		
-		cp.on("disconnect", function programDisconnect() {
-			var msg = process + " disconnect: cp.connected=" + cp.connected;
-			log(msg, DEBUG)
-			callback(new Error(msg));
-		});
-		
-		cp.on("error", function programClose(err) {
-			var msg = process + " error: err.message=" + err.message
-			log(msg, DEBUG);
-			callback(new Error(msg));
-		});
-		
-		cp.on("exit", function programExit(code, signal) {
-			var msg = process + " exit: code=" + code + " signal=" + signal;
-			log(msg, DEBUG);
-		});
-		
-		/*
-		var waitTime = 250;
-		setTimeout(function started() {
-			log("Asuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
-			callback(null);
-		}, waitTime);
-		*/
-		
-		function callback(err) {
-			if(callbackFunction) callbackFunction(err);
-			callbackFunction = null; // Only callback once!
-		}
-		
-	}
 }
 
+function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
+
+	if(typeof callback != "function") throw new Error("No callback function!");
+
+	var childProcess = require("child_process");
+	
+	// You can have different group and user. Default is the user/group running the node process
+	var options = {};
+	
+	var gotStdoutData = false;
+
+	if(uid != undefined) options.uid = parseInt(uid);
+	if(gid != undefined) options.gid = parseInt(gid);
+	
+	log("Attemting to start process=" + process + " args=" + JSON.stringify(args) + " uid=" + uid + " gid=" + gid, DEBUG);
+	
+	try {
+		var cp = childProcess.spawn(process, args, options);
+	}
+	catch(err) {
+		if(err.code == "EPERM") {
+			if(uid != undefined) log("Unable to spawn process=" + process + " with uid=" + uid + " and gid=" + gid + ".\nTry running the script with a privileged (sudo) user.", NOTICE);
+		}
+		var msg = "Unable to spawn process! (" + err.message + ")";
+		log(msg, DEBUG)
+		return callback(new Error(msg));
+	}
+	
+	if(cp.connected) {
+		log("Asuming process=" + process + " was successful because it's connected!", DEBUG);
+		return callback(null);
+	}
+	
+	cp.on("close", function programClose(code, signal) {
+		var msg = process + " close: code=" + code + " signal=" + signal
+		log(msg, DEBUG);
+		
+		code = parseInt(code);
+		if(code === 0) {
+			log("Asuming process=" + process + " was successful because close code=" + code);
+			callback(null);
+		}
+		else callback(new Error(msg));
+
+	});
+	
+	cp.on("disconnect", function programDisconnect() {
+		var msg = process + " disconnect: cp.connected=" + cp.connected;
+		log(msg, DEBUG)
+		callback(new Error(msg));
+	});
+	
+	cp.on("error", function programClose(err) {
+		var msg = process + " error: err.message=" + err.message
+		log(msg, DEBUG);
+		callback(new Error(msg));
+	});
+	
+	cp.on("exit", function programExit(code, signal) {
+		var msg = process + " exit: code=" + code + " signal=" + signal;
+		log(msg, DEBUG);
+	});
+
+	cp.stdout.on("data", function programStdout(data) {
+		var msg = process + " stdout data: " + data;
+		log(msg, DEBUG);
+
+		if(!gotStdoutData) {
+			gotStdoutData = true;
+			log("Asuming process=" + process + " was successful because something was returned from stdout!", DEBUG);
+			callback(null);
+		}
+
+	});
+	
+	cp.stderr.on("data", function programStderr(data) {
+		var msg = process + " stderr data: " + data;
+		log(msg, DEBUG);
+	});
+
+	/*
+	var waitTime = 250;
+	setTimeout(function started() {
+		log("Asuming process=" + process + " successful because nothing happened within " + waitTime + "ms!");
+		callback(null);
+	}, waitTime);
+	*/
+	
+	function callback(err) {
+		if(callbackFunction) callbackFunction(err);
+		callbackFunction = null; // Only callback once!
+	}
+	
+}
