@@ -137,7 +137,7 @@ function main() {
 		console.log("err.code=" + err.code);
 		if(err.code == "EACCES") {
 			log("Unable to create server on port=" + HTTP_PORT + " and ip=" + HTTP_IP + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
-			process.exit();
+			process.exit(1);
 		}
 		else throw err;
 	});
