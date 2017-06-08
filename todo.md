@@ -184,6 +184,8 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+items in server-storage linger around, make sure reopenFiles.js et.al clear keys that are no longer needed.
+
 Mac issues:
 Copy/paste don't work
 Make a copy/paste plugin, select between many clipboards
