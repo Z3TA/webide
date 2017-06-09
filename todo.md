@@ -24,10 +24,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+testhook
+
 deploy! user signups!?
 
 Testing the Mercurial integration/tools for the SSG
 
+push hook to deploy on each push including rsync to cloud server
 
 
 todo:
@@ -36,7 +39,7 @@ fix bug, when saving in /, it asks "The path does not exist: // ...
 
 When creating a user, copy "default" files to home dir, such as a demo static site ( -k skeleton_dir or /etc/skel)
 
-push hook to deploy on each push including rsync to cloud server
+
 
 Write a userdel script (userdel -r -f nameOfUser)
 
