@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/bin/sh
+':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
 /*
 	This is a useful script for those managing jzedit running as a cloud editor,
@@ -48,7 +49,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 			Creating home directory `/home/pelle' ...
 		*/
 		
-	console.log("stdout=" + stdout);
+	//console.log("stdout=" + stdout);
 	
 		var matchUid = stdout.match(/\(UID (\d*)\)/);
 	var matchHomeDir = stdout.match(/home directory `([^' ]*)'/);
