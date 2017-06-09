@@ -37,7 +37,7 @@ var DEBUG = 7;
 
 
 // Set default file permissions
-var newmask = parseInt("0007", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
+var newmask = parseInt("0077", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 var oldmask = process.umask(newmask);
 log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
 
