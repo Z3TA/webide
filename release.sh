@@ -63,6 +63,8 @@ rm -rf temp/release/linux/client/plugin/spellcheck/nodehun_windows.node
 rm -rf temp/release/linux/start.bat
 rm -rf temp/release/linux/create_shortcut.vbs
 rm -rf temp/release/linux/osx_start.sh
+rm -rf temp/release/linux/etc/
+rm -rf temp/release/linux/adduser.js
 
 echo "Clean up the Windows release"
 rm -rf temp/release/windows/runtime/nwjs-v0.12.3-linux-x64
@@ -71,6 +73,8 @@ rm -rf temp/release/windows/client/plugin/spellcheck/nodehun_linux.node
 rm -rf temp/release/windows/start.sh
 rm -rf temp/release/windows/JZedit.desktop
 rm -rf temp/release/windows/osx_start.sh
+rm -rf temp/release/windows/etc/
+rm -rf temp/release/windows/adduser.js
 
 echo "Clean up the OSX release"
 rm -rf temp/release/osx/runtime/nwjs-v0.12.3-win-x64
@@ -81,7 +85,8 @@ rm -rf temp/release/osx/start.sh
 rm -rf temp/release/osx/JZedit.desktop
 rm -rf temp/release/osx/start.bat
 rm -rf temp/release/osx/create_shortcut.vbs
-
+rm -rf temp/release/osx/etc/
+rm -rf temp/release/osx/adduser.js
 
 echo "Clean up the server release"
 # CLient is meant to run in the browser

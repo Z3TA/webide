@@ -35,7 +35,7 @@ if(!username) throw new Error("No username specified!");
 	//console.log("gid=" + gid);
 	
 	var childProcess = require('child_process');
-childProcess.exec('adduser --system --ingroup jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
+childProcess.exec('adduser --system --ingroup -k etc/userdirs/ jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
 		if (err) throw err;
 		
 		if(stderr) throw new Error(stderr);
@@ -83,6 +83,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 		
 		fs.writeFileSync(usersPwFile, usersPwString, encoding);
 		
+	
 	console.log("User with username=" + username + " and password=" + password + " successfully created!");
 		
 	});
@@ -110,7 +111,52 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	}
 	
 	
+
+
+
+function copyFileSync( source, target ) {
 	
+	var fs = require('fs');
+	var path = require('path');
+	
+	var targetFile = target;
+	
+	//if target is a directory a new file with the same name will be created
+	if ( fs.existsSync( target ) ) {
+		if ( fs.lstatSync( target ).isDirectory() ) {
+			targetFile = path.join( target, path.basename( source ) );
+		}
+	}
+	
+	fs.writeFileSync(targetFile, fs.readFileSync(source));
+}
+
+function copyFolderRecursiveSync( source, target ) {
+	
+	var fs = require('fs');
+	var path = require('path');
+	
+	var files = [];
+	
+	//check if folder needs to be created or integrated
+	var targetFolder = path.join( target, path.basename( source ) );
+	if ( !fs.existsSync( targetFolder ) ) {
+		fs.mkdirSync( targetFolder );
+	}
+	
+	//copy
+	if ( fs.lstatSync( source ).isDirectory() ) {
+		files = fs.readdirSync( source );
+		files.forEach( function ( file ) {
+			var curSource = path.join( source, file );
+			if ( fs.lstatSync( curSource ).isDirectory() ) {
+				copyFolderRecursiveSync( curSource, targetFolder );
+			} else {
+				copyFileSync( curSource, targetFolder );
+			}
+		} );
+	}
+}
 	
 	
 	

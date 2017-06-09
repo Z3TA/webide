@@ -1,0 +1,53 @@
+
+# sudo cp etc/nginx/editor.webtigerteam.com.nginx /etc/nginx/sites-available/
+# sudo ln -s /etc/nginx/sites-available/editor.webtigerteam.com.nginx  /etc/nginx/sites-enabled/editor.webtigerteam.com
+
+server {
+  listen 80;
+  server_name  editor.webtigerteam.com;
+  charset utf-8;
+  
+  
+  location / {
+    
+    # Allow cross domain requests (always adds the header to all, even 400 errors!)
+    # Using always will create doublicates in 4xx errors
+    # So for 4xx errors, 5xx, and others, Access-Control-Allow-Origin * will have to be added manually
+    add_header Access-Control-Allow-Origin *;
+    
+    # Allow the browser to read the Content-Length header
+    add_header Access-Control-Expose-Headers "Content-Length";
+  
+    
+    # Dont cache!
+    expires 0;
+    
+    # Can not set proxy header inside if-statement
+    proxy_set_header        Host            $http_host;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    
+    proxy_pass http://127.0.0.1:8099;
+    
+  }
+  
+  location @badgateway {
+    add_header Access-Control-Allow-Origin * always;
+    default_type text/plain;
+    return 502 "Editor not online ... Dispatching code monkeys ...\n";
+  }
+  
+  error_page 502 @badgateway;
+  
+  
+  location /jzedit {
+    # Upgrade to websocket
+    
+    proxy_pass http://127.0.0.1:8099;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    
+    add_header 'Access-Control-Allow-Origin' '*';
+  }
+  
+}
