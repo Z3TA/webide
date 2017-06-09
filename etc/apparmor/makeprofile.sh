@@ -24,9 +24,10 @@ else
 fi
 
 # Create Apparmor profile
-if [ aa-genprof /usr/bin/jzedit ]
-then
-  echo "profile created"
+
+aa-genprof /usr/bin/jzedit
+if [ $? -eq 0 ]; then
+  echo "profile created!"
 else
   echo "You need to install apparmor-utils ..."
   echo apt-get update
@@ -36,15 +37,15 @@ fi
 
 # Enforce
 aa-enforce /usr/bin/jzedit
-
-
-# If the server crashes with EACCESS or similar error run:
-# sudo aa-complain /usr/bin/jzedit
-# restart the server, then
-# sudo aa-logprof
-
-# If you have problems, edit the profile manually
-# It's located in /etc/apparmor.d/usr.bin.jzedit
-# sudo service apparmor reload to apply the changes
-
-# See usr.bin.jzedit for example apparmor profile
+echo "profile enforced!"
+echo
+echo "If the server crashes with EACCESS or similar error run:"
+echo "sudo aa-complain /usr/bin/jzedit"
+echo "restart the server, then"
+echo "sudo aa-logprof"
+echo
+echo "If you have problems, edit the profile manually"
+echo "It's located in /etc/apparmor.d/usr.bin.jzedit"
+echo "sudo service apparmor reload to apply the changes"
+echo
+echo "See usr.bin.jzedit for example apparmor profile"
