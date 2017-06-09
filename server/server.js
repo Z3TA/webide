@@ -372,7 +372,11 @@ function sockJsConnection(connection) {
 							fs.readFile(PW_FILE, "utf8", function(err, data) {
 								if(err) throw err;
 								
-								var row = data.trim().split(/\r|\r\n/);
+								//console.log("data=" + data);
+								//console.log("data.trim()=" + data.trim());
+								//console.log("data.trim().split()=" + JSON.stringify(data.trim().split(/\n|\r\n/)));
+								
+								var row = data.trim().split(/\n|\r\n/);
 								
 								console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
 								
@@ -401,7 +405,7 @@ function sockJsConnection(connection) {
 									hasUid = pUid ? pUid.length > 0 : false;
 									
 									if(pUser == username && pPass == password) {
-										
+										console.log("username and passwords match user=" + pUser);
 										if(!hasUid && !NOUID) {
 											throw new Error("user=" + pUser + " in " + PW_FILE + " has no uid! (uid=" + pUid + ")\nIngore this check by adding -nouid to the arguments.");
 										}
@@ -421,12 +425,10 @@ function sockJsConnection(connection) {
 							if(USERNAME) errorMsg += "(Username specified in server arguments)";
 							send({error: errorMsg});
 							
-							log("username=" + username + " failed to login! Check if the password='" + password + "' in " + PW_FILE + " match. If the passwords are not encrypted, start the server with argument -nopwhash", NOTICE);
+							log("username=" + username + " failed to login! Check if the password='" + password + "' in " + PW_FILE + " match and the user exist. If the passwords are not hashed, start the server with argument -nopwhash", NOTICE);
 						}
 						
 						function userOK(index, name, hasPassword, rootPath, uid, gid) {
-							
-							console.log("User OK!");
 							
 							userName = name;
 							
