@@ -13,7 +13,6 @@ if type jzedit >/dev/null
 	    exit
 	fi
 
-	exit
 elif type nodejs >/dev/null
 	then ln /usr/bin/nodejs /usr/bin/jzedit
 
