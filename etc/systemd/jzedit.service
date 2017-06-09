@@ -1,3 +1,8 @@
+# sudo cp etc/systemd/jzedit.service /etc/systemd/system/jzedit.service
+# sudo systemctl enable jzedit   or   sudo systemctl daemon-reload
+# or sudo systemctl enable $(pwd)/etc/systemd/jzedit.service
+# sudo systemctl start jzedit
+
 [Unit]
 Description=JZedit cloud editor
 After=network.target
@@ -8,9 +13,11 @@ User=root
 # Change to the jzedit directory 
 WorkingDirectory=/srv/jzedit/
 
-# Change to node or nodejs if you are not using apparmor
-# Change port (to 8099) if you are using a web proxy (like nginx) infront
-ExecStart=/usr/bin/jzedit server/server.js --port 80
+# Change to node or nodejs if you are not using apparmor.
+# See etc/apparmor/usr.bin.jzedit for example apparmor profile (run makeprofile.sh to create one)
+# You can change the port to port 80 if you have no other http servers running
+# See etc/nginx/editor.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the editor server
+ExecStart=/usr/bin/jzedit server/server.js --port=8099
 
 Restart=always
 

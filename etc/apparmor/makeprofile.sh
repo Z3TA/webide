@@ -25,7 +25,15 @@ else
 fi
 
 # Create Apparmor profile
-aa-genprof /usr/bin/jzedit
+if [ aa-genprof /usr/bin/jzedit ]
+then
+  echo "profile created"
+else
+  echo "You need to install apparmor-utils ..."
+  echo apt-get update
+  echo apt-get install apparmor-utils
+  exit
+fi
 
 # Enforce
 aa-enforce /usr/bin/jzedit

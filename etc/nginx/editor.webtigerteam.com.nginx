@@ -1,6 +1,10 @@
 
 # sudo cp etc/nginx/editor.webtigerteam.com.nginx /etc/nginx/sites-available/
 # sudo ln -s /etc/nginx/sites-available/editor.webtigerteam.com.nginx  /etc/nginx/sites-enabled/editor.webtigerteam.com
+# or sudo ln -s $(pwd)/etc/nginx/editor.webtigerteam.com.nginx /etc/nginx/sites-enabled/editor.webtigerteam.com
+# service nginx reload
+#
+
 
 server {
   listen 80;
