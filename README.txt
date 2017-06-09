@@ -94,8 +94,8 @@ Or turn it off in your operating system! (It's already turned off if you have a 
 
 
 
-Running as a cloud editor (security hardening)
-==============================================
+Running as a cloud editor
+=========================
 You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
 
 If you choose to open up the editor to others, i'ts adviced to create a system account for each user.
@@ -108,7 +108,6 @@ sudo addgroup --system jzedit_users
 sudo adduser --system --ingroup jzedit_users nameofuser
 
 And Create an apparmor profile, see apparmor/makeprofile.sh
-
 
 
 

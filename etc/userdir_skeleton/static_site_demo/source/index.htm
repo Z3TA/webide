@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+	
+	<title>My homepage</title>
+	
+	<meta name="description" content="Page description">
+	
+</head>
+<body>
+
+<div role="banner">
+	<h1>Hello world!</h1>
+	
+	<p>This is my personal homepage and blog.<br>
+	Here I'll write about cool stuff.</p>
+	
+</div>
+
+<h2>Articles and blog posts</h2>
+
+<ul class="blog">
+	<?JS
+	
+	var moment = require("moment");
+	var blogEntries = document.folder.folders["blog"].latest();
+	
+	blogEntries.forEach(makeLink);
+	
+	function makeLink(blog) {
+		
+		document.write('\n<li>\n');
+		document.write('\t<i class="datum">' + moment(blog.created).format("Do MMM YYYY") + '</i>\n');
+		document.write('\t<a href="' + blog.url + '">' + blog.title + '</a>\n');
+		document.write('\t<blockquote>' + blog.lead + '</blockquote>\n');
+		document.write('</li>\n');
+	}
+	
+	?>
+	
+</ul>
+	
+	<p>&nbsp;</p>
+	
+	</body>
+	</html>
+	
