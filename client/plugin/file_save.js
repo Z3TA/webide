@@ -111,6 +111,9 @@
 		var fullPath = inputPath.value;
 		var includeHostInfo = true;
 		var folderPaths = UTIL.getFolders(fullPath, includeHostInfo);
+		
+		console.log("folderPaths=" + JSON.stringify(folderPaths));
+		
 		if(folderPaths.length > 1) {
 			var pathToParentFolder = folderPaths[folderPaths.length-2];
 			var pathToCreate = folderPaths[folderPaths.length-1];

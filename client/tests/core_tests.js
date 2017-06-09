@@ -32,6 +32,30 @@
 		
 	*/
 	
+	if(EDITOR.settings.devMode) {
+		
+		console.log("Binding 'run tests' to Ctrl + Shift + T");
+		var keyT = 84;
+		EDITOR.bindKey({desc: "Run tests", charCode: keyT, fun: EDITOR.runTests, combo: CTRL + SHIFT});
+		
+	}
+	
+	
+	EDITOR.addTest(function UTIL_getFolders(callback) {
+		
+		var fullPath = "/foo.txt";
+		var includeHostInfo = true;
+		var folderPaths = UTIL.getFolders(fullPath, includeHostInfo);
+		
+		// bug: it retuns ["/", "//"], we only want ["/"]
+		
+		if(folderPaths.length != 1) throw new Error("Only expected one item in folderPaths=" + JSON.stringify(folderPaths));
+		if(folderPaths[0] != "/") throw new Error("Expected first element to be a slash in folderPaths=" + JSON.stringify(folderPaths));
+		
+			return callback(true);
+			
+		}, 1);
+	
 	EDITOR.addTest(function UTIL_getLocation(callback) {
 		
 		var loc = UTIL.getLocation("http://hostname.com/page.htm");
@@ -43,7 +67,7 @@
 		
 		return callback(true);
 	
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function doesFileCaretUpdate(callback) {

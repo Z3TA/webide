@@ -650,7 +650,7 @@ function sockJsConnection(connection) {
 
 
 function shortString(stringOrObject, limit) {
-	if(limit == undefined) limit = 100;
+	if(limit == undefined) limit = 142;
 	
 	var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject; 
 	

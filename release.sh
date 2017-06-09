@@ -26,6 +26,8 @@ hg clone . temp/release/linux/
 echo "Set devMode and toolbar to false"
 sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
+echo "Remove tests"
+sed -i 's/(<!-- BEING TESTS -->).*(<!-- END TESTS -->)//' temp/release/linux/client/index.htm
 
 echo "Clean up"
 rm -rf temp/release/linux/.hg/

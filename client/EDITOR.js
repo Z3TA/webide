@@ -3451,46 +3451,6 @@ EDITOR.lastKeyPressed = "";
 		keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		
 		
-		if(EDITOR.settings.devMode && runtime != "browser") {
-			// ## Load all tests in the tests folder (tests can also exist outside the tests folder)
-			console.log("Loading tests ...");
-			var walk = require('walk');
-			var head = document.getElementsByTagName("head")[0];
-			var path = require("path");
-			var root = path.join(__dirname, "tests/"); // Path folder test files
-			var walker  = walk.walk(root, { followLinks: false });
-			
-			console.log("root:" + root);
-			
-			walker.on('file', function(folder, stat, next) {
-				
-				var filePath = path.join(folder, stat.name);
-				var filename = UTIL.getFilenameFromPath(filePath);
-				var ext = UTIL.getFileExtension(filePath);
-				
-				if(ext == "js" && filename.substr(0,1) != "_") { // Only load .js files and ignore file-names starting with underscore _
-					var fileref=document.createElement('script');
-					
-					fileref.setAttribute("type","text/javascript");
-					fileref.setAttribute("src", "file://" + filePath);
-					head.appendChild(fileref);
-					
-					console.log("Loading test: " + filePath);
-				}
-				next();
-				
-			});
-			
-			walker.on('end', function() {
-				console.log("All test files loaded");
-			});
-			
-			console.log("Binding 'run tests' to Ctrl + Shift + T");
-			var keyT = 84;
-			keyBindings.push({charCode: keyT, fun: runTests_5616458984153156, combo: CTRL + SHIFT});
-			
-		}
-		
 		window.onbeforeunload = confirmExit;
 		
 		

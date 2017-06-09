@@ -24,22 +24,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-testhook
-test
-test2
-test3
-test4
-test5
-test6
-test7
-test8
-test9
-
 deploy! user signups!?
 
 Testing the Mercurial integration/tools for the SSG
-
-push hook to deploy on each push including rsync to cloud server
 
 
 todo:
