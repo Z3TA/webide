@@ -26,7 +26,8 @@ var password = process.argv[3];
 var groupName = process.argv[4] || "jzedit_users";
 
 var NO_PW_HASH = getArg(["nopwhash"]);
-	
+var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "/etc/jzedit_users";
+
 if(!username) throw new Error("No username specified!");
 	if(!password) throw new Error("No password specified!");
 	
@@ -35,7 +36,7 @@ if(!username) throw new Error("No username specified!");
 	//console.log("gid=" + gid);
 	
 	var childProcess = require('child_process');
-childProcess.exec('adduser --system --ingroup -k etc/userdirs/ jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
+childProcess.exec('adduser --system --ingroup jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
 		if (err) throw err;
 		
 		if(stderr) throw new Error(stderr);
@@ -65,13 +66,16 @@ childProcess.exec('adduser --system --ingroup -k etc/userdirs/ jzedit_users ' + 
 		
 		var fs = require("fs");
 		
-		var usersPwFile = "./server/users.pw";
-		var encoding = "utf8";
+	var encoding = "utf8";
 		
-		
-		var usersPwString = fs.readFileSync(usersPwFile, encoding);
-		
-		if(NO_PW_HASH) {
+	try {
+	var usersPwString = fs.readFileSync(PW_FILE, encoding);
+	}
+	catch(err) {
+		if(err.code != "ENOENT") throw err;
+		var usersPwString = "";
+	}
+	if(NO_PW_HASH) {
 			var hashedPassword = password;
 		}
 		else {
@@ -81,10 +85,13 @@ childProcess.exec('adduser --system --ingroup -k etc/userdirs/ jzedit_users ' + 
 		
 		usersPwString += username + "|" + hashedPassword + "|" + homeDir + "|" + uid + "|" + gid + "\n";
 		
-		fs.writeFileSync(usersPwFile, usersPwString, encoding);
+	fs.writeFileSync(PW_FILE, usersPwString, encoding);
 		
 	
-	console.log("User with username=" + username + " and password=" + password + " successfully created!");
+	// Add skeleton files
+	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
+	
+	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
 	});
 	

@@ -24,8 +24,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-When creating a user, copy "default" files to home dir, such as a demo static site ( -k skeleton_dir or /etc/skel)
-
 deploy! user signups!?
 
 Testing the Mercurial integration/tools for the SSG
@@ -33,11 +31,13 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+Better apparmor guide and script
 
 Write a userdel script (userdel -r -f nameOfUser)
 
 Make apparmor and systemd service profiles
 
+Able to add npm modules to the SSG ...
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?

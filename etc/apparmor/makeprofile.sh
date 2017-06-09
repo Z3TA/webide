@@ -25,10 +25,10 @@ fi
 
 # Create Apparmor profile
 
+# The server should run while creating a profile!
+
 aa-genprof /usr/bin/jzedit
-if [ $? -eq 0 ]; then
-  echo "profile created!"
-else
+if ! [ $? -eq 0 ]; then
   echo "You need to install apparmor-utils ..."
   echo apt-get update
   echo apt-get install apparmor-utils
@@ -37,7 +37,6 @@ fi
 
 # Enforce
 aa-enforce /usr/bin/jzedit
-echo "profile enforced!"
 echo
 echo "If the server crashes with EACCESS or similar error run:"
 echo "sudo aa-complain /usr/bin/jzedit"
