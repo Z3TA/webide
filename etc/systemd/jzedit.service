@@ -17,7 +17,7 @@ WorkingDirectory=/srv/jzedit/
 # See etc/apparmor/usr.bin.jzedit for example apparmor profile (run makeprofile.sh to create one)
 # You can change the port to port 80 if you have no other http servers running
 # See etc/nginx/editor.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the editor server
-ExecStart=/usr/bin/jzedit server/server.js --port=8099 --pwfile=/etc/jzedit_users
+ExecStart=/usr/bin/nodejs server/server.js --port=8099 --pwfile=/etc/jzedit_users
 
 Restart=always
 
