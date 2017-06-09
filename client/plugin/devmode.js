@@ -91,7 +91,7 @@
 		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
 		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
 		
-		EDITOR.removeMenuItem(runTestsMenuItem);
+		if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
 		
 		// Disable console.log
 		//console.log = console.time = console.timeEnd = console.warn = function() {} // Eaten by the void
