@@ -24,6 +24,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+make it so that users can write to the static_site example!!
+chmod 700
+chown user 
+
 deploy! user signups!?
 
 Testing the Mercurial integration/tools for the SSG

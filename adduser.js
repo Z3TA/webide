@@ -92,6 +92,8 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	// Add skeleton files
 	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
 	
+	fs.chownSync(homeDir, uid, gid)
+	
 	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
 	});
@@ -166,5 +168,60 @@ function copyFolderRecursiveSync( source, target ) {
 	}
 }
 	
+
+function chownrSync (p, mode) {
 	
+	var fs = require('fs');
 	
+	var stats = fs.lstatSync(p)
+	if (stats.isSymbolicLink()) return;
+	if (stats.isDirectory()) return chmodrDirSync(p, mode);
+	else return fs.chmodSync(p, mode)
+}
+
+function chmodrDirSync (p, mode) {
+	var fs = require('fs');
+	var path = require('path');
+	
+	fs.readdirSync(p).forEach(function (child) {
+		chmodrSync(path.resolve(p, child), mode)
+	})
+	return fs.chmodSync(p, dirMode(mode))
+}
+
+
+	
+function chmodrSync (p, mode) {
+	// https://github.com/isaacs/chmodr/
+	
+	var fs = require('fs');
+	
+	var stats = fs.lstatSync(p)
+	if (stats.isSymbolicLink()) return;
+	if (stats.isDirectory()) return chmodrDirSync(p, mode);
+	else return fs.chmodSync(p, mode)
+}
+
+function chmodrDirSync (p, mode) {
+	var fs = require('fs');
+	var path = require('path');
+	
+	fs.readdirSync(p).forEach(function (child) {
+		chmodrSync(path.resolve(p, child), mode)
+	})
+	return fs.chmodSync(p, dirMode(mode))
+}
+
+function dirMode(mode) {
+	// If a party has r, add x
+	// so that dirs are listable
+	
+	if (mode & 0400)
+	mode |= 0100
+	if (mode & 040)
+	mode |= 010
+	if (mode & 04)
+	mode |= 01
+	return mode
+}
+
