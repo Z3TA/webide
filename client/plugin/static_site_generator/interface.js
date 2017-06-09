@@ -67,7 +67,7 @@
 			demoSite.url = "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")
 			
 		}
-		else if(EDITOR.user == "demo") {
+		else if(EDITOR.user != "admin") {
 			// Virtual folder
 			
 			demoSite.projectFolder = "/static_site_demo/";
@@ -460,6 +460,8 @@
 	
 	
 	function buildControl() {
+		
+		if(!sites) return alertBox("No sites for the static-site-generator available!");
 		
 		controlView = document.createElement("div");
 		
