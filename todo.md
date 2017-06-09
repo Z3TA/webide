@@ -31,7 +31,6 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
-fix bug, when saving in /, it asks "The path does not exist: // ...
 
 When creating a user, copy "default" files to home dir, such as a demo static site ( -k skeleton_dir or /etc/skel)
 

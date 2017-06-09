@@ -117,10 +117,12 @@ var UTIL = {
 			var delimiter = UTIL.getPathDelimiter(fullPath);
 			var filePart = fullPath.substr(fullPath.lastIndexOf(delimiter));
 			
-			console.log("filePart=" + filePart);
+			console.log("filePart=" + filePart + " delimiter=" + delimiter);
 			
 			if(filePart.indexOf(".") != -1) {
 				fullPath = fullPath.substr(0, fullPath.lastIndexOf(delimiter)+1); // Remove the file part
+				console.log("fullPath=" + fullPath +" (after removing file part)");
+				if(fullPath == "/") return ["/"];
 			}
 			// else: asume the last part is a folder
 			
