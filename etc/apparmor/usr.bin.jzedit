@@ -1,3 +1,10 @@
+# See http://wiki.apparmor.net/index.php/QuickProfileLanguage
+#
+# ix - Execute and inherit the current profile
+#
+#
+# Don't forget to reload/restart apparmor for changes to take effect
+#
 # Last Modified: Thu May 18 15:57:11 2017
 #include <tunables/global>
 
@@ -17,5 +24,5 @@
   /usr/bin/hg rix,
   /usr/bin/jzedit rix,
   /usr/bin/python2.7 ix,
-
+  /usr/bin/stat ix,
 }

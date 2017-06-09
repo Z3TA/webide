@@ -24,7 +24,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-make it so that users can write to the static_site example!!
+Trying to allow stat files in /home/** in apparmor profile.
+
+User can't stat files in preview because no x rights!?
+could not stat because of apparmor!
+
+
+update adduser.js: make it so that users can write to the static_site example!!
 chmod 700
 chown user 
 
