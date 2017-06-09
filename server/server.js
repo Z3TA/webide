@@ -421,10 +421,12 @@ function sockJsConnection(connection) {
 							if(USERNAME) errorMsg += "(Username specified in server arguments)";
 							send({error: errorMsg});
 							
-							log("username=" + username + " failed to login! Check if the password=" + password + " in server/users.pw match. If the passwords are not encrypted, start the server with argument -nopwhash", NOTICE);
+							log("username=" + username + " failed to login! Check if the password='" + password + "' in " + PW_FILE + " match. If the passwords are not encrypted, start the server with argument -nopwhash", NOTICE);
 						}
 						
 						function userOK(index, name, hasPassword, rootPath, uid, gid) {
+							
+							console.log("User OK!");
 							
 							userName = name;
 							
@@ -438,7 +440,7 @@ function sockJsConnection(connection) {
 									
 									if(err) {
 										console.warn("Unable to read /etc/passwd !");
-										throw new Error("Unable to read /etc/passwd to check uid=" + uid + " matching");
+										throw new Error("Unable to read /etc/passwd to check uid=" + uid + " matching: " + err.message);
 									}
 									else {
 										// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash

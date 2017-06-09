@@ -28,6 +28,8 @@ make it so that users can write to the static_site example!!
 chmod 700
 chown user 
 
+x-real-ip in nginx profile
+
 deploy! user signups!?
 
 Testing the Mercurial integration/tools for the SSG
