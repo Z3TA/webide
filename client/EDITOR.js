@@ -3972,6 +3972,8 @@ EDITOR.lastKeyPressed = "";
 		
 		console.log(e);
 		
+		if(e.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
+		
 		var file = e.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
