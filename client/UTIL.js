@@ -1,5 +1,5 @@
 /*
-
+	
 	This file contains useful (utility) functions
 	
 	All file paths should handle URL's ex: ftp://hostname:21/folder1/folder2
@@ -31,6 +31,12 @@ var UTIL = {
 	trailingSlash: function trailingSlash(folderPath) {
 		// Makes sure the folder has a trailing slash
 		console.log("Get trailing slash for folderPath=" + folderPath);
+		
+		if(folderPath == undefined) {
+			console.warn("folderPath=" + folderPath);
+			return folderPath;
+		}
+		
 		var delimiter = UTIL.getPathDelimiter(folderPath);
 		var lastCharacter = folderPath.substr(folderPath.length-1, 1);
 		if(lastCharacter != delimiter) {

@@ -1444,31 +1444,40 @@
 							});
 						}
 						else {
-							var defaultRepo = repos[1];
-							
-							if(defaultRepo.trim() != site.repository.trim()) {
+							var defaultRepo = repos[1].trim();
+							var siteRepo = site.repository.trim();
+							if(defaultRepo != siteRepo) {
 								
-								var changeDefault = "Change default";
-								var updateSettings = "Update settings";
-								var cancelSync = "Cancel Sync";
-								
-								confirmBox("Repository configured in the static site generator do not match with the default repository!<br>repository: " + site.repository + "<br>default: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
+								if(siteRepo == "" && defaultRepo != "") {
+									// Update settings
+									site.repository = defaultRepo;
+									EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
+									doHgSync();
+								}
+								else {
+									// Ask
+									var useDefault = "Use hgrc default repo";
+									var useSettings = "Use settings repo";
+									var cancelSync = "Cancel Sync";
 									
-									if(answer == changeDefault) {
-										var fullString = repos[0];
-										hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
-										EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
-											if(err) throw err; // Unexpected
+									confirmBox("Repository in SSG settings do not match with the default repository in hgrc!\nhsettings repo: " + site.repository + "\nhgrc default repo: " + defaultRepo, [changeDefault, updateSettings, cancelSync], function(answer) {
+										
+										if(answer == useSettings) {
+											var fullString = repos[0];
+											hgrcContent = hgrcContent.replace(fullString, "default = " + site.repository);
+											EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
+												if(err) throw err; // Unexpected
+												doHgSync();
+											});
+										}
+										else if(answer == useDefault) {
+											site.repository = defaultRepo;
+											EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
 											doHgSync();
-										});
-									}
-									else if(answer == updateSettings) {
-										site.repository = defaultRepo.trim();
-										EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
-										doHgSync();
-									}
-									//else if(answer == cancelSync) do nothing
-								});
+										}
+										//else if(answer == cancelSync) do nothing
+									});
+								}
 							}
 							else {
 								// All good, our repo is the default repo!
@@ -1591,7 +1600,7 @@
 			
 			function checkRepoStatus() {
 				
-				CLIENT.cmd("mercurial.status", {directory: selectedSite.projectFolder}, function hgstatus(err, resp) {
+				CLIENT.cmd("mercurial.status", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function hgstatus(err, resp) {
 					if(err) return alertBox(err.message);
 					
 					var modified = resp.modified;
@@ -1616,7 +1625,7 @@
 			}
 			
 			function checkRepoUnresolved() {
-				CLIENT.cmd("mercurial.resolvelist", {directory: selectedSite.projectFolder}, function resolveList(err, resp) {
+				CLIENT.cmd("mercurial.resolvelist", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function resolveList(err, resp) {
 					if(err) throw err;
 					
 					if(resp.resolved.length == 0 && resp.unresolved.length == 0) {
@@ -1638,7 +1647,7 @@
 			}
 			
 			function checkRepoMultipleHeads() {
-				CLIENT.cmd("mercurial.heads", {directory: selectedSite.projectFolder}, function resolveList(err, resp) {
+				CLIENT.cmd("mercurial.heads", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function resolveList(err, resp) {
 					if(err) throw err;
 					
 					if(resp.heads.length == 1) {
@@ -1652,7 +1661,7 @@
 						confirmBox("There are multiple heads in the Mercurial repository. Do you want to merge them ?", [merge, cancel], function(answer) {
 							
 							if(answer == merge) {
-								CLIENT.cmd("mercurial.merge", {directory: selectedSite.projectFolder}, function resolveList(err, resp) {
+								CLIENT.cmd("mercurial.merge", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function resolveList(err, resp) {
 									if(err) throw err;
 									
 									if(resp.unresolved == 0) {
@@ -1669,7 +1678,7 @@
 			}
 			
 			function pullFromRepo() {
-				CLIENT.cmd("mercurial.pull", {directory: selectedSite.projectFolder}, hgPull);
+				CLIENT.cmd("mercurial.pull", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, hgPull);
 				
 				function hgPull(err, resp) {
 					if(err) {
@@ -1678,7 +1687,7 @@
 						var authFailed = err.message.match(/abort: authorization failed/);
 						
 						if(authNeeded) {
-							return CLIENT.cmd("mercurial.pull", {directory: selectedSite.projectFolder, user: selectedSite.repoUser, pw: selectedSite.repoPw, save: save}, hgPull);
+							return CLIENT.cmd("mercurial.pull", {directory: UTIL.trailingSlash(selectedSite.projectFolder), user: selectedSite.repoUser, pw: selectedSite.repoPw, save: save}, hgPull);
 						}
 						else if(authFailed) {
 							var repoUrl = authNeeded[1];
@@ -1728,7 +1737,7 @@
 							alertBox("Can not update files that are not saved. Save the following files and then try again:\n" + filesOpenedInEditorAndNotSaved.join("\n"));
 						}
 						else {
-							CLIENT.cmd("mercurial.update", {directory: selectedSite.projectFolder}, function hgUpdated(err, resp) {
+							CLIENT.cmd("mercurial.update", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function hgUpdated(err, resp) {
 								if(err) return alertBox(err.message);
 								
 								var whenAllFilesReloaded = null;
@@ -1776,7 +1785,7 @@
 			}
 			
 			function pushToRepo() {
-				CLIENT.cmd("mercurial.push", {directory: selectedSite.projectFolder}, function pushed(err, resp) {
+				CLIENT.cmd("mercurial.push", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function pushed(err, resp) {
 					
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);

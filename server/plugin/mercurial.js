@@ -118,7 +118,7 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 MERCURIAL.status = function hgstatus(user, json, callback) {
 	// show changed files in the working directory
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -201,7 +201,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 MERCURIAL.add = function hgadd(user, json, callback) {
 	// add the specified files on the next commit
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	var files = json.files;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
@@ -230,7 +230,7 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 MERCURIAL.forget = function hgforget(user, json, callback) {
 	// forget the specified files on the next commit
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	var files = json.files;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
@@ -259,7 +259,7 @@ MERCURIAL.forget = function hgforget(user, json, callback) {
 MERCURIAL.init = function hginit(user, json, callback) {
 	// create a new repository in the given directory
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -285,7 +285,7 @@ MERCURIAL.init = function hginit(user, json, callback) {
 MERCURIAL.commit = function hgcommit(user, json, callback) {
 	// commit the specified files or all outstanding changes
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	var files = json.files;
 	var message = json.message;
 	
@@ -331,7 +331,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 		
 	*/
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	var hguser = json.user;
 	var pw = json.pw;
 	var save = json.save;
@@ -479,7 +479,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 MERCURIAL.pull = function hgpull(user, json, callback) {
 	// pull changes from remote repo
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	var hguser = json.user;
 	var pw = json.pw;
 	var saveUserPw = json.save;
@@ -594,7 +594,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 MERCURIAL.update = function hgupdate(user, json, callback) {
 	// Update pulled changes
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -649,7 +649,7 @@ MERCURIAL.merge = function hgmerge(user, json, callback) {
 		
 	*/
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -693,7 +693,7 @@ MERCURIAL.merge = function hgmerge(user, json, callback) {
 MERCURIAL.push = function hgpush(user, json, callback) {
 	// Update pulled changes
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -855,7 +855,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 	// Get all list of resolved and unresolved files
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
@@ -903,7 +903,7 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 	// Mark an unresolved file as resolved
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
@@ -947,7 +947,7 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 	// Mark an resolved file as Not resolved
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
@@ -987,7 +987,7 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 MERCURIAL.heads = function hgheads(user, json, callback) {
 	// Cheks for multiple heads
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
@@ -1011,7 +1011,7 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 
 MERCURIAL.reponame = function reponame(user, json, callback) {
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
@@ -1037,7 +1037,7 @@ MERCURIAL.reponame = function reponame(user, json, callback) {
 
 MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	
-	var directory = json.directory;
+	var directory = UTIL.trailingSlash(json.directory);
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
 		

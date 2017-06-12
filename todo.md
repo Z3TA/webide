@@ -24,6 +24,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+write a blog post
+
 Trying to allow stat files in /home/** in apparmor profile.
 
 User can't stat files in preview because no x rights!?
