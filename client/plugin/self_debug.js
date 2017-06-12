@@ -124,9 +124,19 @@
 		if(EDITOR.platform == "Windows") source = source.replace("file:///", ""); // Remove three slashes in windows
 		else source = source.replace("file://", ""); // Two slashes in linux (and other?)
 		
-		var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {\
+		// The source is always in client folder
+		var url = UTIL.getLocation(source);
+		//console.log("url.pathname=" + url.pathname);
+		var source = source.replace(url.pathname, "/client" + url.pathname);
+		
+		if(EDITOR.settings.devMode) {
+			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + EDITOR.workingDirectory + 'client/' + url.pathname + '\', undefined, function(err, file) {\
 		if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
 		EDITOR.renderNeeded();})">' + source + "</a>";
+		}
+		else {
+			var sourceLink = '' + source + "";
+		}
 		
 		var lineString = ":<b>" + lineno + "</b><br>";
 		
