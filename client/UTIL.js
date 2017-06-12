@@ -305,6 +305,9 @@ var UTIL = {
 		var editedRow = editedText.split(lbEditedText);
 		var originalRow = originalText.split(lbOriginalText);
 		
+		console.log("editedRow.length=" + editedRow.length);
+		console.log("originalRow.length=" + originalRow.length);
+		
 		/*
 			if(ignoreTransform) {
 			for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
@@ -499,6 +502,8 @@ var UTIL = {
 		*/
 		
 		console.log("Determining what line break characters to use ...");
+		
+		//console.log("determineLineBreakCharacters text=" + text);
 		
 		if(text.length == 0) {
 			console.warn("Can't determine line breaks without any text!");

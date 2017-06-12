@@ -154,7 +154,7 @@ var File; // File object is global
 		
 		// No need to check row because it will throw an error anyway if it's "wrong". But it does give friendlier errors.
 		if(row < 0) throw new Error("row=" + row + " less then zero");
-		if(row >= file.grid.length) throw new Error("row=" + row + " can not be more or equal to file.grid.length=" + file.grid.length);
+		if(row >= file.grid.length) throw new Error("File.rowText: row=" + row + " can not be more or equal to file.grid.length=" + file.grid.length);
 		
 		var txt = file.grid[row].indentationCharacters;
 		for(var col=0; col<file.grid[row].length; col++) {

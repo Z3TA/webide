@@ -91,7 +91,8 @@ var WysiwygEditor;
 		wysiwygEditor.whenLoaded = whenLoaded;
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
-		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML); // lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
+		
+		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(sourceFile.text); // lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
 		
 		wysiwygEditor.isCompiled = false;
 		
@@ -101,16 +102,37 @@ var WysiwygEditor;
 			
 			var srcHTML = wysiwygEditor.getSourceCodeBody();
 			var rawMainHtml = getSourceCodeBody(compiledSource, wysiwygEditor.bodyTagPreview);
+			
+			var lbSrc = UTIL.determineLineBreakCharacters(srcHTML);
+			var lbMain = UTIL.determineLineBreakCharacters(rawMainHtml);
+			
+			if(wysiwygEditor.lineBreak != lbSrc) throw new Error("lbSrc=" + UTIL.lbChars(lbSrc) + " wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
+			
+			
+			var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
+			var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
+			
 			wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 			
 			// Make sure there are no errors
-			var lbSrc = UTIL.occurrences(srcHTML, "\n");
-			var lbMain = UTIL.occurrences(rawMainHtml, "\n");
+			
+			
+			
+			var lbCountSrc = UTIL.occurrences(srcHTML, lbSrc);
+			var lbCountMain = UTIL.occurrences(rawMainHtml, lbMain);
+			
 			var removed = wysiwygEditor.ignoreTransform.removed.length;
 			var inserted = wysiwygEditor.ignoreTransform.inserted.length;
 			
-			if( (lbSrc - removed) != (lbMain - inserted) ) {
-				throw new Error("Not same amount of rows! lbSrc=" + lbSrc + " lbMain=" + lbMain + " removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+			if( (lbCountSrc - removed) != (lbCountMain - inserted) ) {
+				console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
+				console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
+				
+				console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
+				
+				console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+				console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
+				throw new Error("Not same amount of rows! lbCountSrc=" + lbCountSrc + " (" + UTIL.lbChars(lbSrc) + ") lbCountMain=" + lbCountMain + " (" + UTIL.lbChars(lbMain) + ") removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 			}
 			
 			console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
@@ -169,10 +191,13 @@ var WysiwygEditor;
 		
 		// Figure out on what row the code starts ()
 		var sourceFile = wysiwygEditor.sourceFile;
-		var srcMatchBody = sourceFile.text.match(/(<body.*>[\n|\r\n])/i);
+		var srcMatchBody = sourceFile.text.match(/<body.*>(\n|\r\n)/i);
+		console.log("srcMatchBody=" + JSON.stringify(srcMatchBody, null, 2));
+		
 		if(srcMatchBody === null) throw new Error("Can not find body tag in source file=" + sourceFile.path + "\n(The body tag needs to be followed by a line break)");
-		var srcStartIndex = srcMatchBody.index + srcMatchBody[1].length;
-		//console.log("srcStartIndex=" + srcStartIndex);
+		
+		var srcStartIndex = srcMatchBody.index + srcMatchBody[0].length;
+		console.log("srcStartIndex=" + srcStartIndex + " srcMatchBody.index=" + srcMatchBody.index + " srcMatchBody[0].length=" + srcMatchBody[0].length + " srcMatchBody[0]=" + srcMatchBody[0]);
 		var tmpCaret = sourceFile.createCaret(srcStartIndex);
 		wysiwygEditor.startRow = tmpCaret.row;
 	}
@@ -716,16 +741,23 @@ var WysiwygEditor;
 				// Remove the text on the line, but do not remove the line (yet)
 				row = diff.removed[i].row + startRow;
 				
+				if(row >= sourceFile.grid.length) throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.length + " diff.removed=" + JSON.stringify(diff.removed, null, 2));
+				
 				if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
 					
-					for(var row = 0; row<sourceFile.grid.length; row++) console.log(row + ": " + sourceFile.rowText(row));
+					// startRow wrong !?
+					console.log("startRow=" + startRow);
 					
-					throw new Error("Text on row=" + row + " doesn't match text to be removed!\n\
-					source=" + UTIL.escapeHtml(sourceFile.rowText(row).trim()) + "\n\
-					remove=" + UTIL.escapeHtml(diff.removed[i].text.trim()) + "\n\
-					diff=" + JSON.stringify(diff, null, 2) + "\n\n\
-					srcHTML=" + UTIL.lbChars(UTIL.escapeHtml(srcHTML)) + "\n\n\
-					prewBodyHtml=" + UTIL.lbChars(UTIL.escapeHtml(prewBodyHtml)));
+					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+					
+					console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
+					console.log("remove=" + diff.removed[i].text.trim());
+					console.log("srcHTML=" + UTIL.lbChars(srcHTML))
+					console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+					console.log("diff=" + JSON.stringify(diff, null, 2));
+					
+					throw new Error("Text on row=" + row + " doesn't match text to be removed! (see console log)");
+					
 				}
 				
 				removedText = sourceFile.removeAllTextOnRow(row);
@@ -1620,7 +1652,6 @@ var WysiwygEditor;
 		
 	}
 	
-	
 	function regexBody(bodyTag) {
 		//var body = /<body[^>]*>\s*[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i;
 		
@@ -1631,6 +1662,38 @@ var WysiwygEditor;
 		return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
 		
 	}
+	
+	
+	// ### Test(s)
+	
+	
+	EDITOR.addTest(function testWysiwygEditorDontBreakLineBreaks(callback) {
+		
+		// Make sure we can't break line-breaks in half eg: RN -> R...N'
+		
+		var html = '<html><body>\r\nHello\r\nWorld\r\n</body></html>';
+		
+		
+		EDITOR.openFile("wysiwygEditorDontBreakLineBreaks.htm", html, function(err, file) {
+			
+			//var wysiwygEditor = new WysiwygEditor(file, "body", false, undefined, undefined, undefined, html, "body");
+			
+			var wysiwygEditor = {
+				lineBreak: "\r\n",
+				bodyTagSource: "body",
+				sourceFile: file
+			};
+			
+			var source = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
+			
+			console.log("source=" + UTIL.lbChars(source));
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+		
+	}, 1);
 	
 	
 	
