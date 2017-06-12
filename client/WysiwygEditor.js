@@ -117,6 +117,7 @@ var WysiwygEditor;
 			
 			wysiwygEditor.setStartRow();
 			
+			
 			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
 				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
 				for(var i=0; i< wysiwygEditor.ignoreTransform.inserted.length; i++) {
@@ -137,6 +138,7 @@ var WysiwygEditor;
 				alertBox(msg);
 				return wysiwygEditor.close();
 			}
+			
 			
 		}
 		else wysiwygEditor.ignoreTransform = null;

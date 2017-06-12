@@ -1037,7 +1037,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				document.body = contentOfHtmlTag(document.html, "body");
 				
 				document.headScripts = document.findReplace("<script.*?src=[\"|'](.*?)[\"|'].*(>.*</script>|>)\\s{0,}", 1, "", document.head);
-				document.bodyScripts = document.findReplace("<script.*?src=[\"|'](.*?)[\"|'].*(>.*</script>|>)\\s{0,}", 1, "", document.body);
+				//document.bodyScripts = document.findReplace("<script.*?src=[\"|'](.*?)[\"|'].*(>.*</script>|>)\\s{0,}", 1, "", document.body);
 				
 				
 				// Compute this both first (for searchPart) and last (so that stuff get replaced)
