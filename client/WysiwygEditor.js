@@ -1667,6 +1667,41 @@ var WysiwygEditor;
 	// ### Test(s)
 	
 	
+	EDITOR.addTest(function testStartRowN(callback) {
+		var html = '<html><body>\nHello\nWorld\n</body></html>';
+		EDITOR.openFile("wysiwygEditorTestStartRow.htm", html, function(err, file) {
+			var wysiwygEditor = {
+				lineBreak: "\n",
+				bodyTagSource: "body",
+				sourceFile: file
+			};
+			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+			
+			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	EDITOR.addTest(function testStartRowRN(callback) {
+		var html = '<html><body>\r\nHello\r\nWorld\r\n</body></html>';
+		EDITOR.openFile("wysiwygEditorTestStartRow.htm", html, function(err, file) {
+			var wysiwygEditor = {
+				lineBreak: "\r\n",
+				bodyTagSource: "body",
+				sourceFile: file
+			};
+			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+			
+			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	});
+	
+	
 	EDITOR.addTest(function testWysiwygEditorDontBreakLineBreaks(callback) {
 		
 		// Make sure we can't break line-breaks in half eg: RN -> R...N'
@@ -1693,7 +1728,7 @@ var WysiwygEditor;
 			callback(true);
 		});
 		
-	}, 1);
+	});
 	
 	
 	
