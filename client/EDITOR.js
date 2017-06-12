@@ -2819,6 +2819,8 @@ EDITOR.lastKeyPressed = "";
 			
 		*/
 		
+		console.log("createPath: " + pathToCreate);
+		
 		var json = {pathToCreate: pathToCreate};
 		CLIENT.cmd("createPath", json, function(err, json) {
 			if(err) createPathCallback(err);

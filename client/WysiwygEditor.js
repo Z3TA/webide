@@ -1669,7 +1669,7 @@ var WysiwygEditor;
 	
 	EDITOR.addTest(function testStartRowN(callback) {
 		var html = '<html><body>\nHello\nWorld\n</body></html>';
-		EDITOR.openFile("wysiwygEditorTestStartRow.htm", html, function(err, file) {
+		EDITOR.openFile("wysiwygEditorTestStartRowN.htm", html, function(err, file) {
 			var wysiwygEditor = {
 				lineBreak: "\n",
 				bodyTagSource: "body",
@@ -1686,7 +1686,7 @@ var WysiwygEditor;
 	
 	EDITOR.addTest(function testStartRowRN(callback) {
 		var html = '<html><body>\r\nHello\r\nWorld\r\n</body></html>';
-		EDITOR.openFile("wysiwygEditorTestStartRow.htm", html, function(err, file) {
+		EDITOR.openFile("wysiwygEditorTestStartRowRN.htm", html, function(err, file) {
 			var wysiwygEditor = {
 				lineBreak: "\r\n",
 				bodyTagSource: "body",

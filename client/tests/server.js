@@ -4,78 +4,85 @@
 	
 	EDITOR.addTest(function testReadFromDisk(callback) {
 		
-		var json = {path: "test.txt", returnBuffer: false, encoding: "utf8"};
+		var testFolder = "/testfolder/";
+		var testFile = "testReadFromDisk.txt";
+		var testText = "abc123\n";
+		
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
+		});
+		
+		function fileCreated(err, path) {
+			if(err) throw err;
+			
+			var json = {path: path, returnBuffer: false, encoding: "utf8"};
 		
 		CLIENT.cmd("readFromDisk", json, function(err, json) {
 			if(err) throw err
 			else {
-				if(json.path.indexOf("test.txt") == -1) throw new Error("path=" + path);
-				if(json.data.length < 10) throw new Error("json.data.length=" + json.data.length);
+					if(json.path.indexOf(testFile) == -1) throw new Error("path=" + path);
+					if(json.data != testText) throw new Error("json.data=" + json.data + " is not testText=" + testText);
 				
 				callback(true);
 			}
 		});
-		
+		}
 	});
 	
 	EDITOR.addTest(function testGetFileSizeOnDisk(callback) {
 		
-		var json = {path: "test.txt"};
+		var testFolder = "/testfolder/";
+		var testFile = "testGetFileSizeOnDisk.txt";
+		var testText = "abc123\n";
+		
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
+		});
+		
+		function fileCreated(err, path) {
+			if(err) throw err;
+			
+			var json = {path: path};
 		
 		CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
 			if(err) throw err
 			else {
-				if(json.size < 10) throw new Error("json.size=" + json.size);
+				console.log("size=" + json.size);
+					if(json.size != testText.length) throw new Error("json.size=" + json.size + " testText=" + testText);
 				
 				callback(true);
 			}
 		});
+		}
 		
-	});
-	
-	EDITOR.addTest(function testSaveToDisk(callback) {
-		
-		var randomName = "djdsalkjsdfjfdsj.txt";
-		var randomContent = "98sfd9sdf978sa98dijslsdfjfsdjl";
-		
-		var json = {path: randomName, text: randomContent};
-		
-		CLIENT.cmd("saveToDisk", json, function(err, json) {
-			if(err) throw err
-			else {
-				var path = json.path;
-				
-				// Open the file and check the content
-				
-				CLIENT.cmd("readFromDisk", json, function(err, json) {
-					if(err) throw err
-					else {
-						if(json.path.indexOf(randomName) == -1) throw new Error("path=" + path);
-						if(json.data != randomContent) throw new Error("json.data=" + json.data);
-						
-						callback(true);
-					}
-				});
-				
-			}
-		});
-		
-	});
-	
+	}, 1);
 	
 	
 	EDITOR.addTest(function testListFiles(callback) {
 		
-		var json = {pathToFolder: "testfolder/"};
+		var testFolder = "/testfolder/";
+		var testFile = "testListFiles.txt";
+		var testText = "abc123\n";
+		
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
+		});
+		
+		function fileCreated(err, path) {
+		
+			var json = {pathToFolder: testFolder};
 		
 		CLIENT.cmd("listFiles", json, function(err, json) {
 			if(err) throw err
 			else {
 				
-				// Make sure testfile.txt is in the list
+				// Make sure testfile is in the list
 				var list = json.list;
 				var hasFile = false;
-				var lookForFileName = "testfile.txt";
+					var lookForFileName = testFile;
 				
 				//console.log("list=" + JSON.stringify(list, null, 2));
 				
@@ -89,6 +96,7 @@
 				callback(true);
 			}
 		});
+		}
 		
 	});
 	
@@ -132,18 +140,29 @@
 	
 	EDITOR.addTest(function testServe(callback) {
 		
-		var json = {folder: "/testfolder/"};
+		var testFolder = "/testfolder/";
+		var testFile = "testfile.txt";
+		var testText = "Hello World!\n";
 		
-		CLIENT.cmd("serve", json, function(err, json) {
-			if(err) throw err
-			else {
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
+		});
+		
+		
+		function fileCreated(err, path) {
+			if(err) throw err;
+			var json = {folder: testFolder};
+			CLIENT.cmd("serve", json, function(err, json) {
+				if(err) throw err
+				
 				
 				var url = json.url;
 				
 				if(!url) throw new Error("url expected!");
 				
-				var fileUrl = url + "testfile.txt";
-
+				var fileUrl = url + testFile;
+				
 				
 				// Launch http request
 				
@@ -157,13 +176,14 @@
 					
 					callback(true);
 					
+					// Teardown !?
+					
 				});
-				
-				
-			}
-		});
+			});
+		}
 		
-	}, 1);
+		
+	});
 	
 	
 	
