@@ -3123,6 +3123,21 @@ EDITOR.lastKeyPressed = "";
 		runTests_5616458984153156();
 	}
 	
+	EDITOR.deleteFile = function(filePath, callback) {
+		
+		var json = {filePath: filePath};
+		
+		CLIENT.cmd("deleteFile", json, function(err, json) {
+			if(err) {
+				if(callback) callback(err);
+				else throw err;
+			}
+			else {
+				if(callback) callback(err, json.filePath);
+			}
+		});
+		}
+	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();

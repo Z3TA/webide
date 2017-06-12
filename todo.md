@@ -45,6 +45,11 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
+Able to select files and folders in file explorer !?
+delete (and rename) files via file explorer
+delete files via commit tool
+
 Better apparmor guide and script
 
 Write a userdel script (userdel -r -f nameOfUser)
@@ -892,9 +897,6 @@ Translate to other lanugages (Swedish) lang.js file with all phrases, calling ST
 
 SSG: Meta publish date, publish only after this date. Make server auto publish!?
 
-File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
-Able to select files and folders in file explorer !?
-
 Better support for files that requires spaces ? Or add separate support for each format ? For example nginx config files. (auto indentation)
 
 Autocomplete variables withing strings!
@@ -1009,8 +1011,6 @@ ssg: show the ssg buttons whenever a file from a registered project is opened
 Smoothen the user experience when making a change in a web page, or adding a new article or blog post.
 
 Refactoring to use streams (and not have a separate big fil opener) so that large files can be opened via ftp
-
-delete (and rename) files via file explorer
 
 function list för asp and php !? (use https://github.com/felixfbecker/php-language-server and try VS Code Language Server Protocol)
 

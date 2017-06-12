@@ -346,11 +346,20 @@
 					
 					e = window.event || e;
 					e.stopPropagation();
+					e.preventDefault();
 					return false;
 					
 				}, false);
 				
 			}
+			
+			li.oncontextmenu = function (e) {
+				e.preventDefault();
+				
+				showFileItemMenu(li, item);
+				
+			};
+			
 			
 			var displayName = item.name;
 			if(displayName.length > 40) displayName = displayName.substr(0, 37) + "...";
@@ -391,6 +400,65 @@
 		else if(a.type == "d") return -1;
 		else if(b.type == "d") return 1;
 		else return 0;
+	}
+	
+	function showFileItemMenu(el, fileItem) {
+		
+		var fileItemMenu = document.getElementById("fileItemMenu");
+		
+		hideMenu(); // Hide old one if one exist
+		
+		fileItemMenu = document.createElement("ul");
+		fileItemMenu.setAttribute("id", "fileItemMenu");
+		
+		var optCancel = document.createElement("li");
+		optCancel.innerText = "Cancel";
+		optCancel.onclick = hideMenu;
+		fileItemMenu.appendChild(optCancel);
+		
+		var optDelete = document.createElement("li");
+		optDelete.innerText = "Delete";
+		fileItemMenu.appendChild(optDelete);
+		optDelete.onclick = function deleteFile(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			if(!event.ctrlKey) {
+				
+				var msg = "Are you sure you want to Delete the file ?\n" + fileItem.path + "\n\n(Ctrl-click to not show this confirmation next time)";
+				var yes = "Yes, delete it";
+				var no = "No, do not";
+				
+				confirmBox(msg, [yes, no], function deleteAnswer(answer) {
+					
+					if(answer == yes) deleteTheFile();
+					
+				});
+				
+			} else deleteTheFile();
+			
+			function deleteTheFile() {
+				el.parentNode.removeChild(el);
+				
+				EDITOR.deleteFile(fileItem.path);
+			}
+			
+			return false;
+			};
+		
+		el.appendChild(fileItemMenu);
+		
+		return false;
+		
+		function hideMenu(e) {
+			if(e) {
+				e.preventDefault()
+			e.stopPropagation();
+			}
+			if(fileItemMenu && fileItemMenu.parentNode) fileItemMenu.parentNode.removeChild(fileItemMenu);
+			return false;
+		}
+		
 	}
 	
 	function openOrCloseFolder(item) {

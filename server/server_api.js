@@ -1196,8 +1196,71 @@ API.mirror = function mirror(user, json, callback) {
 }
 
 
-
-
+API.deleteFile = function deleteFile(user, json, callback) {
+	
+	var filePath = user.translatePath(json.filePath);
+	if(filePath instanceof Error) return callback(filePath);
+	
+	// Check path for protocol
+	var url = require("url");
+	var parse = url.parse(filePath);
+	
+	if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+		
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			
+			var c = user.remoteConnections[parse.hostname].client;
+			
+			console.log("Deleting file from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
+			
+			// Asume the FTP server has support for RFC 3659 "size"
+			c.delete(parse.pathname, function ftpFileDeleted(err) {
+				if(err) {
+					console.warn(err.message);
+					callback(err);
+				}
+				else {
+					callback(null, {filePath: json.filePath});
+				}
+			});
+		}
+		else {
+			// Should we give an ENOENT here ?
+			callback(new Error("Failed to delete file: " + filePath + "\nNo connection open to FTP on " + parse.hostname + " !"));
+		}
+	}
+	else if(parse.protocol == "sftp:") {
+		
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			
+			var c = user.remoteConnections[parse.hostname].client;
+			
+			console.log("Deleting file from SFTP server: " + parse.pathname);
+			
+			c.remove(parse.pathname, function sftpFileDeleted(err) {
+				
+				if(err) callback(err);
+				else callback(null, {filePath: json.filePath});
+				
+			});
+		}
+		else {
+			callback(new Error("Failed to delete file: " + filePath + "\nNo connection open to SFTP on " + parse.hostname + " !"));
+		}
+	}
+	else {
+		
+		// It's a normal file path
+		
+		var fs = require("fs");
+		
+		fs.unlink(filePath, function localFileDeleted(err) {
+			if(err) callback(err);
+			else callback(null, {filePath: json.filePath});
+		});
+		
+	}
+	}
 
 
 
