@@ -616,19 +616,26 @@
 		
 		tr.appendChild(td);
 		
-		
 		td = document.createElement("td");
+		
 		// ### Ignore button
 		var ignoreButton = document.createElement("button");
 		ignoreButton.setAttribute("class", "button");
 		ignoreButton.appendChild(document.createTextNode("Ignore ..."));
 		ignoreButton.onclick = mercurialIgnore;
-		
 		td.appendChild(ignoreButton);
 		
+		var br = document.createElement("br");
+		td.appendChild(br);
+		
+		// ### Delete button
+		var deleteButton = document.createElement("button");
+		deleteButton.setAttribute("class", "button");
+		deleteButton.appendChild(document.createTextNode("Delete"));
+		deleteButton.onclick = mercurialDelete;
+		td.appendChild(deleteButton);
+		
 		tr.appendChild(td);
-		
-		
 		
 		table.appendChild(tr);
 		
@@ -641,6 +648,70 @@
 		*/
 		
 		return div;
+		
+		
+		
+		function mercurialDelete(e) {
+			
+			var removeFiles = [];
+			var deleteUntracked = []; // Remove untracked files from disk
+			var selectedFiles = fileSelect.options;
+			for(var i=0, filePath; i<selectedFiles.length; i++) {
+				if(selectedFiles[i].selected) {
+					filePath = selectedFiles[i].value;
+					if(untracked.indexOf(filePath) != -1) deleteUntracked.push(filePath);
+					else removeFiles.push(filePath);
+				}
+			}
+			console.log("deleteUntracked=" + JSON.stringify(deleteUntracked, null, 2));
+			console.log("removeFiles=" + JSON.stringify(removeFiles, null, 2));
+			
+			if(removeFiles.length == 0 && deleteUntracked.length == 0) return alertBox("No files selected!");
+				
+			if(!event.ctrlKey) {
+				var msg = "Are you sure you want to delete the following files ?\n" + removeFiles.concat(deleteUntracked).join("\n");
+				var yes = "Yes, Delete them";
+				var no = "No!";
+				
+				confirmBox(msg, [yes, no], function shouldDelete(answer) {
+					if(answer == yes) deleteTheFiles();
+						else updateCommitFileSelect(rootDir);
+					});
+			}
+			else deleteTheFiles();
+			
+		function deleteTheFiles() {
+				
+				var filesToBeDeleted = removeFiles.length + deleteUntracked.length;
+				
+				if(removeFiles.length > 0) {
+			CLIENT.cmd("mercurial.remove", {directory: rootDir, files: removeFiles}, function removed(err, resp) {
+				
+				if(err) alertBox(err.message);
+				else {
+							
+							filesToBeDeleted -= removeFiles.length;
+							
+							if(filesToBeDeleted == 0) updateCommitFileSelect(rootDir);
+							
+				};
+			});
+		}
+			
+				for (var i=0; i<deleteUntracked.length; i++) EDITOR.deleteFile(UTIL.trailingSlash(rootDir) + deleteUntracked[i], fileDeleted);
+					
+				function fileDeleted(err, path) {
+						
+							if(err) alertBox(err.message);
+							else {
+								filesToBeDeleted--;
+								
+								if(filesToBeDeleted == 0) updateCommitFileSelect(rootDir);
+							}
+						
+			}
+		}
+		}
 		
 		function mercurialIgnore(e) {
 			var tracked = []; // Check if some of the files are tracked, and ask if we should remove them
@@ -657,7 +728,7 @@
 			if(tracked.length > 0) {
 				var yes = "Yes, Forget them";
 				var no = "NO!";
-				confirmBox("Forget (stop tracking) the following files ?\n" + nonTracked.join("\n"), [no, yes], function(answer) {
+				confirmBox("Forget (stop tracking) the following files ?\n" + tracked.join("\n"), [no, yes], function(answer) {
 					
 					if(answer == no) {
 						
@@ -701,6 +772,10 @@
 				if(EDITOR.files.hasOwnProperty(ignoreFilePath)) {
 					console.log(".hgigonore already open");
 					var file = EDITOR.files[ignoreFilePath];
+					
+					contentToAdd = contentToAdd.replace(/\n/, file.lineBreak);
+					if(file.text.charAt(file.text.length-1) != "\n") contentToAdd = file.lineBreak + contentToAdd;
+					
 					file.write(contentToAdd, true);
 					saveFile(file);
 				}
@@ -712,6 +787,9 @@
 							console.log(".hgigonore already exists");
 							EDITOR.openFile(ignoreFilePath, undefined, function fileOpened(err, file) {
 								if(err) return alertBox(err.message);
+								
+								contentToAdd = contentToAdd.replace(/\n/, file.lineBreak);
+								if(file.text.charAt(file.text.length-1) != "\n") contentToAdd = file.lineBreak + contentToAdd;
 								
 								file.write(contentToAdd, true);
 								

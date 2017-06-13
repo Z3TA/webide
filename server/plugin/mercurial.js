@@ -239,11 +239,44 @@ MERCURIAL.forget = function hgforget(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-		var fileString = makeFileString(user, files, rootDir);
+		var fileString = makeFileString(user, files, directory, rootDir);
 		if(fileString instanceof Error) return callback(fileString);
 		
 		var exec = require('child_process').exec;
-		exec("hg forget" + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+		exec("hg forget " + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+			if(err) callback(err);
+			else if(stderr) callback(stderr);
+			else {
+				
+				if(stdout != "") callback(stdout);
+				else callback(null, {files: files});
+				
+			}
+		});
+	});
+}
+
+MERCURIAL.remove = function hgremove(user, json, callback) {
+	// removes the specified files from working / disk
+	
+	var directory = UTIL.trailingSlash(json.directory);
+	var files = json.files;
+	
+	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(files == undefined) return callback(new Error("No files defined"));
+	
+	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err);
+		
+		var fileString = makeFileString(user, files, directory, rootDir);
+		if(fileString instanceof Error) return callback(fileString);
+		
+		var exec = require('child_process').exec;
+		exec("hg remove --force " + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
+			
+			console.log("hg remove stderr=" + stderr);
+			console.log("hg remove stdout=" + stdout);
+			
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
 			else {
@@ -306,10 +339,10 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 		var exec = require('child_process').exec;
 		exec('hg commit -m "' + message + '"' + fileString, { cwd: localDirectory }, function (err, stdout, stderr) {
 			
-			console.log("stderr=" + stderr);
-			console.log("stdout=" + stdout);
+			console.log("hg commit stderr=" + stderr);
+			console.log("hg commit stdout=" + stdout);
 			
-			if(stdout == "nothing changed") return callback("Nothing has been changed! Did you forget to add files ?");
+			if(stdout.trim() == "nothing changed") return callback("Nothing has been changed! Did you forget to add files ?");
 			
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
@@ -1055,11 +1088,18 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 function makeFileString(user, files, directory, rootDir) {
 	// Returns a string of files for passing into a hg command
 	
+	if(arguments.length != 4) throw new Error("Only got " + arguments.length + "/4 arguments! user=" + user + " files=" + files + " directory=" + directory + " rootDir=" + rootDir);
+	if(files == undefined) throw new Error("files=" + files);
+	if(Object.prototype.toString.call( files ) != "[object Array]") throw new Error("Should be an array: files=" + files);
+	if(directory == undefined) throw new Error("directory=" + directory);
+	if(rootDir == undefined) throw new Error("rootDir=" + rootDir);
+	
+	
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return localPath;
-		if(localPath.indexOf(rootDir) == -1) return new Error("File not in local repository: " + files[i]);
+		if(localPath.indexOf(rootDir) == -1) return new Error("File not in local repository!\nFile:" + files[i] + "Not in: " + rootDir);
 		fileString += ' "' + localPath + '"';
 	}
 	
@@ -1150,6 +1190,8 @@ function checkDir(user, virtualPath, callback) {
 			var mercurialRoot = stdout.trim();
 			
 			mercurialRoot = UTIL.trailingSlash(mercurialRoot);
+			
+			if(!mercurialRoot) throw new Error("mercurialRoot=" + mercurialRoot);
 			
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {

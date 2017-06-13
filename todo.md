@@ -45,6 +45,10 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+Double clicking the file in commit file selection should open it.
+
+Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
+
 File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
 Able to select files and folders in file explorer !?
 delete (and rename) files via file explorer
@@ -206,6 +210,9 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Replace all using the same string in replace causes a endless loop. Example:
+replace shortString( with UTIL.shortString(
 
 Inserting [ characters is slow in large .js files and seem to screw up indentation!
 

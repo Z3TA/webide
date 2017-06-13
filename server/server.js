@@ -542,7 +542,7 @@ function sockJsConnection(connection) {
 								return true;
 								
 								function messageFromWorker(workerMessage, handle) {
-									console.log("Worker message from " + name + ": " + shortString(workerMessage) + " handle=" + handle);
+									console.log("Worker message from " + name + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 									
 									if(workerMessage.resp || workerMessage.error) send(workerMessage);
 									else if(workerMessage.message) {
@@ -623,7 +623,7 @@ function sockJsConnection(connection) {
 				
 				var str = JSON.stringify(answer);
 				
-				log(IP + " <= " + shortString(str));
+				log(IP + " <= " + UTIL.shortString(str));
 				
 				conn.write(str);
 			}
@@ -651,17 +651,6 @@ function sockJsConnection(connection) {
 		}
 	});
 	
-}
-
-
-function shortString(stringOrObject, limit) {
-	if(limit == undefined) limit = 142;
-	
-	var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject; 
-	
-	if(str.length > limit) str = str.substr(0,limit) + " ... (" + str.length + " characters)";
-	
-	return str;
 }
 
 // Overload console.log 

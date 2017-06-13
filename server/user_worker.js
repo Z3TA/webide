@@ -438,11 +438,11 @@ process.on('message', function commandMessage(message) {
 			funToRun = API;
 			for(var i=0; i<commands.length; i++) {
 				if(funToRun.hasOwnProperty(commands[i])) funToRun = funToRun[commands[i]];
-				else return send({error: "Unknown command=" + command + ": " + message});
+				else return send({error: "Unknown command=" + command + ": " + UTIL.shortString(message)});
 			}
 		}
 		else {
-			if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + message});
+			if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + UTIL.shortString(message)});
 			
 			funToRun = API[command];
 

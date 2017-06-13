@@ -1092,6 +1092,17 @@ var UTIL = {
 			if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
 		}
 		return s;
+	},
+	
+	shortString: function shortString(stringOrObject, limit) {
+		// Returns a string with max limit characters. Useful for debugging
+		if(limit == undefined) limit = 142;
+		
+		var str = (typeof stringOrObject == "object") ? JSON.stringify(stringOrObject) : stringOrObject;
+		
+		if(str.length > limit) str = str.substr(0,limit) + " ... (" + str.length + " characters)";
+		
+		return str;
 	}
 	
 }

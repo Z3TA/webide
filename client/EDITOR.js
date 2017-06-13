@@ -3125,6 +3125,8 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.deleteFile = function(filePath, callback) {
 		
+		console.log("Deleting filePath=" + filePath);
+		
 		var json = {filePath: filePath};
 		
 		CLIENT.cmd("deleteFile", json, function(err, json) {
