@@ -79,6 +79,10 @@ Able to add npm modules to the SSG ...
 What I'm thinking
 -----------------
 
+Need a good file explorer / file picker / file viewer / path selector. ex: where to save the file !?
+
+Use conf.json files instead of GUI where possible, example SSG config.
+
 The server should probably not run as root ...
 Open the http socket and start worker processes for each user, and then process.setuid(uid) !?
 
