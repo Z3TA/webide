@@ -30,7 +30,7 @@ var UTIL = {
 
 	trailingSlash: function trailingSlash(folderPath) {
 		// Makes sure the folder has a trailing slash
-		console.log("Get trailing slash for folderPath=" + folderPath);
+		//console.log("Get trailing slash for folderPath=" + folderPath);
 		
 		if(folderPath == undefined) {
 			console.warn("folderPath=" + folderPath);
@@ -41,7 +41,7 @@ var UTIL = {
 		var lastCharacter = folderPath.substr(folderPath.length-1, 1);
 		if(lastCharacter != delimiter) {
 			folderPath += delimiter;
-			console.log("Added trailing slash to path=" + folderPath);
+			//console.log("Added trailing slash to path=" + folderPath);
 		}
 		return folderPath;
 	},

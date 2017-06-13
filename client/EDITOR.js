@@ -4148,7 +4148,7 @@ EDITOR.lastKeyPressed = "";
 				
 				fun = EDITOR.eventListeners.paste[i].fun;
 				
-				ret = fun(EDITOR.currentFile, e.clipboardData);
+				ret = fun(EDITOR.currentFile, pasteEvent.clipboardData);
 				
 				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned:\n" + ret);
 				
