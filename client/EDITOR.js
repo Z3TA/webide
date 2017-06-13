@@ -3088,6 +3088,9 @@ EDITOR.lastKeyPressed = "";
 		//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
 		var theWindow = window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1), "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + "");
 		
+		console.log("theWindow.document.domain=" + theWindow.document.domain);
+		console.log("document.domain=" + document.domain);
+		
 		theWindow.document.open();
 		theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
 		theWindow.document.close();
