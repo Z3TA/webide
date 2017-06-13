@@ -1130,6 +1130,10 @@ var WysiwygEditor;
 			if(!doc) throw new Error("Unable to get preview window document!");
 			if(!win) throw new Error("Unable to get preview window window!");
 			
+			if(!doc.innerHTML) {
+				doc = doc.documentElement; // Hi Firefox!
+				if(!doc.innerHTML) throw new Error("doc.innerHTML=" + doc.innerHTML);
+			} 
 			
 			/*
 				var prewviewContent = doc.documentElement.outerHTML;
