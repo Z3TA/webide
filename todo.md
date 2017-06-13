@@ -24,6 +24,12 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Auto pick file-name (todays date!?) when click new page on SSG
+Default save path for new files i SSG profile.
+If many paths (separated by comma) the user has to pick one.
+Auto fill stuff in template file, like date, and author
+
+
 Test in different browsers!
 Work on first time usage experience "publishing a blog post"
 Select a web page theme ... !?
