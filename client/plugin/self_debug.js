@@ -118,19 +118,29 @@
 		var sendBugReport = "Write bug report";
 		var no = "Keep running";
 		
-
-	
-		// If windows detects / it will add C:/ if linux does Not detect / will will add the working dir
-		if(EDITOR.platform == "Windows") source = source.replace("file:///", ""); // Remove three slashes in windows
-		else source = source.replace("file://", ""); // Two slashes in linux (and other?)
+		console.log("EDITOR.platform=" + EDITOR.platform);
+		
+		// If Windows detects / it will add C:/
+		// If Linux does Not detect / it will will add the working dir
+		if(EDITOR.platform == "Windows") {
+			source = source.replace("file:///", ""); // Remove three slashes in windows
+		}
+		else {
+			
+			source = source.replace("file://", ""); // Two slashes in linux (and other?)
 		
 		// The source is always in client folder
 		var url = UTIL.getLocation(source);
-		//console.log("url.pathname=" + url.pathname);
+		console.log("url.pathname=" + url.pathname);
 		var source = source.replace(url.pathname, "/client" + url.pathname);
+		console.log("source=" + source);
+			
+			source = EDITOR.workingDirectory + 'client/' + url.pathname;
+			
+		}
 		
 		if(EDITOR.settings.devMode) {
-			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + EDITOR.workingDirectory + 'client/' + url.pathname + '\', undefined, function(err, file) {\
+			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + source + '\', undefined, function(err, file) {\
 		if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
 		EDITOR.renderNeeded();})">' + source + "</a>";
 		}

@@ -102,7 +102,7 @@ EDITOR.version = 0;      // Incremented on each commit. Loaded from version.inc 
 EDITOR.connections = {}  // Store connections to remote servers (FTP, SSH)
 EDITOR.remoteProtocols = ["ftp", "ftps", "sftp"]; // Supported remote connections
 EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.url, fires "bootstrap" event
-EDITOR.platform = /^Win/.test(window.navigator) ? "Windows" : (/^linux/.test(window.navigator) ? "Linux" : "Unknown");
+EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/.test(window.navigator.platform) ? "Linux" : "Unknown");
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
 

@@ -55,6 +55,8 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+Test window.navigator.platform, what value to use in EDITOR.platform !?
+
 Double clicking the file in commit file selection should open it.
 
 Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
