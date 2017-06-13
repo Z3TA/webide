@@ -66,7 +66,7 @@
 		
 		var labelPath = document.createElement("label");
 		labelPath.setAttribute("for", "inputPath");
-		labelPath.appendChild(document.createTextNode("Path:")); // Language settings!?
+		labelPath.appendChild(document.createTextNode("Save file path:")); // Language settings!?
 		labelPath.appendChild(inputPath);
 		
 		var buttonSaveAs = document.createElement("input");
