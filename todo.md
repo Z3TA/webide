@@ -24,8 +24,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Refactor to not use e or global window.event object due to browser incompatibility problems
-
 Test in different browsers!
 Work on first time usage experience "publishing a blog post"
 Select a web page theme ... !?
