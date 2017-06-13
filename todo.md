@@ -24,6 +24,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Use default url in jzedit server login gives bad url in Windows using nw.js
+
 Auto pick file-name (todays date!?) when click new page on SSG
 Default save path for new files i SSG profile.
 If many paths (separated by comma) the user has to pick one.

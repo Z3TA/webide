@@ -82,17 +82,12 @@ var USER_CONNECTIONS = {}; // username: {connections: [], counter: 0}
 
 var HTTP_SERVER;
 
-// On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
-// Use -p 8099 or --port 8099 as start arguments to listen to port 8099 instead of port 80
-var HTTP_PORT = getArg(["p", "port"]) || 80; 
-if(!isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
-
-
 // Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
 var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 
-
-
+// On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
+var HTTP_PORT = getArg(["p", "port"]) || 8099; 
+if(!isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
 
 
