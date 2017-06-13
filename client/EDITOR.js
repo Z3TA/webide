@@ -1261,7 +1261,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	EDITOR.resize = function(e) {
+	EDITOR.resize = function(resizeEvent) {
 		/*
 			
 			Why does the resize clear the canvas's !???
@@ -1273,7 +1273,7 @@ EDITOR.lastKeyPressed = "";
 		
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
 		
-		console.log("Resizing ... e=" + e + " EDITOR.shouldRender=" + EDITOR.shouldRender + "");
+		console.log("Resizing ... resizeEvent=" + resizeEvent + " EDITOR.shouldRender=" + EDITOR.shouldRender + "");
 		
 		console.time("resize");
 		
@@ -2858,23 +2858,23 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		else if(mock == "copy") {
-			var e = {
+			var copyEvent = {
 				clipboardData:  {
 					setData: function setData(format, data) { return true; }
 				},
 				preventDefault: function preventDefault() { return true; }
 			};
 			
-			return copy(e);
+			return copy(copyEvent);
 		}
 		else if(mock == "paste") {
-			var e = {
+			var pasteEvent = {
 				clipboardData:  {
 					getData: function getData(what) { return options.data; }
 				},
 				preventDefault: function preventDefault() { return true; }
 			};
-			paste(e);
+			paste(pasteEvent);
 		}
 		else if(mock == "doubleClick") {
 			if(!options.hasOwnProperty("x")) throw new Error("x coordinate required in options!");
@@ -2884,13 +2884,13 @@ EDITOR.lastKeyPressed = "";
 			
 			if(!options.target.className) options.target = {className: options.target}; // Shorter to write
 			
-			var e = {clientX: options.x, offsetX: options.x, clientY: options.y, offsetY: options.y, target: options.target, button: options.button}
-			console.log(e);
+			var doubleClickEvent = {clientX: options.x, offsetX: options.x, clientY: options.y, offsetY: options.y, target: options.target, button: options.button}
+			console.log(doubleClickEvent);
 			
-			mouseDown(e);
-			mouseUp(e);
-			mouseDown(e);
-			mouseUp(e);
+			mouseDown(doubleClickEvent);
+			mouseUp(doubleClickEvent);
+			mouseDown(doubleClickEvent);
+			mouseUp(doubleClickEvent);
 		}
 	}
 	
@@ -3255,22 +3255,22 @@ EDITOR.lastKeyPressed = "";
 	
 	/*
 	window.addEventListener("drop", fileDrop, false);
-	window.ondrop = function(e) { e.preventDefault(); console.log("window.ondrop"); return false };
-	window.ondragdrop = function(e) { e.preventDefault(); console.log("window.ondragdrop"); return false };
-	window.ondragleave = function(e) { e.preventDefault(); console.log("window.ondragleave"); return false };
-	window.ondragover = function(e) { e.preventDefault(); console.log("window.ondragover"); return false };
+		window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
+		window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
+		window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
+		window.ondragover = function(dragOver) { dragOver.preventDefault(); console.log("window.ondragover"); return false };
 	*/
 	
 	window.addEventListener("dblclick", dblclick);
 	
 	
 	window.addEventListener("load", main, false);
-	window.addEventListener("resize", function(e) {
+	window.addEventListener("resize", function(resizeEvent) {
 		console.log("EVENT RESIZE!");
 		EDITOR.resizeNeeded();
 		EDITOR.renderNeeded();
 		
-		EDITOR.interact("resize", e);
+		EDITOR.interact("resize", resizeEvent);
 		
 	}, false);
 	
@@ -3315,9 +3315,9 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	// Disable annoying menus
-	window.addEventListener("contextmenu", function(e) {
-		e = e || window.event;
-		e.preventDefault();
+	window.addEventListener("contextmenu", function(contextMenuEvent) {
+		contextMenuEvent = contextMenuEvent || window.event;
+		contextMenuEvent.preventDefault();
 		return false;
 	}, false);
 	
@@ -3444,11 +3444,11 @@ EDITOR.lastKeyPressed = "";
 		});
 		*/
 		
-		canvas.addEventListener("dragover", function(e) {
-			e.preventDefault();
-			console.log(e.target.className + " dragover");
+		canvas.addEventListener("dragover", function(dragOverEvent) {
+			dragOverEvent.preventDefault();
+			console.log(dragOverEvent.target.className + " dragover");
 			
-			//e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
+			//dragOverEvent.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
 			return false;
 		}, false);
 		
@@ -3489,7 +3489,7 @@ EDITOR.lastKeyPressed = "";
 		
 		// Handle directory dialog
 		directoryDialogHtmlElement = document.getElementById("directoryInput");
-		directoryDialogHtmlElement.addEventListener('change', function directorySelected(e) {
+		directoryDialogHtmlElement.addEventListener('change', function directorySelected(changeEvent) {
 			
 			console.log("Directory selected ...");
 			
@@ -3497,7 +3497,7 @@ EDITOR.lastKeyPressed = "";
 				throw new Error("There is no listener for the open directory dialog!");
 			}
 			
-			var file = e.target.files[0];
+			var file = changeEvent.target.files[0];
 			if (!file) {
 				throw new Error("No file selected from the open-file dialog.");
 				return;
@@ -3916,7 +3916,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	function readSingleFile(e) {
+	function readSingleFile(fileOpenDialogEvent) {
 		
 		console.log("Reading single file ...");
 		
@@ -3924,7 +3924,7 @@ EDITOR.lastKeyPressed = "";
 			throw new Error("There is no listener for the open file dialog!");
 		}
 		
-		var file = e.target.files[0];
+		var file = fileOpenDialogEvent.target.files[0];
 		if (!file) {
 			throw new Error("No file selected from the open-file dialog.");
 			return;
@@ -3941,8 +3941,8 @@ EDITOR.lastKeyPressed = "";
 			// Read the file
 			var reader = new FileReader();
 			
-			reader.onload = function(e) {
-				fileContent = e.target.result;
+			reader.onload = function(readerOnloadEvent) {
+				fileContent = readerOnloadEvent.target.result;
 				callCallback();
 			};
 			reader.readAsText(file);
@@ -3962,8 +3962,8 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	function chooseSaveAsPath(e) {
-		var file = e.target.files[0];
+	function chooseSaveAsPath(saveAsDialogEvent) {
+		var file = saveAsDialogEvent.target.files[0];
 		
 		if(EDITOR.filesaveAsCallback == undefined) {
 			throw new Error("There is no listener for the save file dialog!");
@@ -3984,16 +3984,16 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	function fileDrop(e) {
-		e.preventDefault();
+	function fileDrop(fileDropEvent) {
+		fileDropEvent.preventDefault();
 		
 		console.log("fileDrop");
 		
-		console.log(e);
+		console.log(fileDropEvent);
 		
-		if(e.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
+		if(fileDropEvent.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
 		
-		var file = e.dataTransfer.files[0];
+		var file = fileDropEvent.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
 		var fileType = file.type;
@@ -4010,10 +4010,15 @@ EDITOR.lastKeyPressed = "";
 		}
 		else readFile();
 		
+		EDITOR.interact("fileDrop", fileDropEvent);
+		
+		return false;
+		
+		
 		function saveFileFunction(filePath, callback) {
 			var reader = new FileReader();
-			reader.onload = function (event) {
-				var data = event.target.result;
+			reader.onload = function (readerEvent) {
+				var data = readerEvent.target.result;
 				
 				// Specifying encoding:base64 will magically convert to binary! 
 				// We do have to remove the data:image/png metadata though!
@@ -4039,12 +4044,12 @@ EDITOR.lastKeyPressed = "";
 			
 			var reader = new FileReader();
 			
-			reader.onload = function (event) {
+			reader.onload = function (readerEvent) {
 				
-				var content = event.target.result;
+				var content = readerEvent.target.result;
 				
 				
-				console.log("Drop op: " + event.target);
+				console.log("Drop op: " + readerEvent.target);
 				
 				EDITOR.openFile(filePath, content);
 				
@@ -4061,16 +4066,13 @@ EDITOR.lastKeyPressed = "";
 			*/
 		}
 		
-		EDITOR.interact("fileDrop", e);
-		
-		return false;
 	};
 	
 	
 	
 	
 	
-	function copy(e) {
+	function copy(copyEvent) {
 		
 		if(EDITOR.input) {
 			var textToPutOnClipboard = "";
@@ -4081,25 +4083,24 @@ EDITOR.lastKeyPressed = "";
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 			
-			
 			if (isIe) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
-				e.clipboardData.setData('text/plain', textToPutOnClipboard);
+				copyEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
 			}
-			e.preventDefault();
+			copyEvent.preventDefault();
 			
 		}
 		
 		// else: Do the default action (enable copying outside the canvas)
 		
-		EDITOR.interact("copy", e);
+		EDITOR.interact("copy", copyEvent);
 		
 		return textToPutOnClipboard;
 		
 	}
 	
-	function cut(e) {
+	function cut(cutEvent) {
 		
 		if(EDITOR.input) {
 			
@@ -4117,27 +4118,27 @@ EDITOR.lastKeyPressed = "";
 			if (isIe) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
-				e.clipboardData.setData('text/plain', textToPutOnClipboard);
+				cutEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
 			}
-			e.preventDefault();
+			cutEvent.preventDefault();
 		}
 		
 		// else: Do the default action (enable cutting outside the canvas)
 		
-		EDITOR.interact("cut", e);
+		EDITOR.interact("cut", cutEvent);
 	}
 	
 	
-	function paste(e) {
-		var text = e.clipboardData.getData('text'),
-		ret,
-		textChanged = false;
+	function paste(pasteEvent) {
+		var text = pasteEvent.clipboardData.getData('text');
+		var ret;
+		var textChanged = false;
 		
 		console.log("PASTE: " + UTIL.lbChars(text));
 		
 		if(EDITOR.input && EDITOR.currentFile) {
 			
-			e.preventDefault();
+			pasteEvent.preventDefault();
 			
 			console.log("Calling paste listeners (" + EDITOR.eventListeners.paste.length + ") ...");
 			for(var i=0, fun; i<EDITOR.eventListeners.paste.length; i++) {
@@ -4170,7 +4171,7 @@ EDITOR.lastKeyPressed = "";
 		
 		// else: Do the default action (enable pasting outside the canvas)
 		
-		EDITOR.interact("paste", e);
+		EDITOR.interact("paste", pasteEvent);
 		
 	}
 	
@@ -4197,19 +4198,19 @@ EDITOR.lastKeyPressed = "";
 	*/
 	
 	
-	function keyPressed(e) {
-		e = e || window.event; 
+	function keyPressed(keyPressEvent) {
+		keyPressEvent = keyPressEvent || window.event; 
 		
 		//e.preventDefault();
 		
-		var charCode = e.charCode || e.keyCode || e.which;
+		var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
 		var character = String.fromCharCode(charCode); 
-		var combo = getCombo(e);
+		var combo = getCombo(keyPressEvent);
 		var file = EDITOR.currentFile;
 		var preventDefault = false;
 		var funReturn = true;
 		
-		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + e.charCode + ", keyCode=" + e.keyCode + ", which=" + e.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
 		
 		
 		console.log("Calling keyPressed listeners (" + EDITOR.eventListeners.keyPressed.length + ") ...");
@@ -4322,7 +4323,7 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		
-		EDITOR.interact("keyPressed", e);
+		EDITOR.interact("keyPressed", keyPressEvent);
 		
 	}
 	
@@ -4333,17 +4334,17 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	function keyIsDown(e) {
+	function keyIsDown(keyDownEvent) {
 		/*
 			
 			note: Windows OS (or Chromium?) has some weird keyboard commands, like Ctrl + I to insert a tab!
 			
 		*/
-		e = e || window.event;
+		keyDownEvent = keyDownEvent || window.event;
 		
-		var charCode = e.charCode || e.keyCode;
+		var charCode = keyDownEvent.charCode || keyDownEvent.keyCode;
 		var character = String.fromCharCode(charCode);
-		var combo = getCombo(e);
+		var combo = getCombo(keyDownEvent);
 		var preventDefault = false;
 		var funReturn;
 		var captured = false;
@@ -4351,7 +4352,7 @@ EDITOR.lastKeyPressed = "";
 		var charCodeCtrl = 17;
 		var charCodeAlt = 18;
 		var gotError;
-		var targetElementClass = e.target.className;
+		var targetElementClass = keyDownEvent.target.className;
 		
 		/*
 			var backspaceCharCode = 8;
@@ -4451,7 +4452,7 @@ EDITOR.lastKeyPressed = "";
 			EDITOR.currentFile.checkCaret();
 		}
 		
-		EDITOR.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: e.shiftKey, altKey: e.altKey, ctrlKey: e.ctrlKey});
+		EDITOR.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: keyDownEvent.shiftKey, altKey: keyDownEvent.altKey, ctrlKey: keyDownEvent.ctrlKey});
 		
 		
 		if(combo.sum > 0 && !captured) {
@@ -4479,10 +4480,10 @@ EDITOR.lastKeyPressed = "";
 			//alert("Preventing default browser action!");
 			console.log("Preventing default browser action!");
 			
-			try {e.stopPropagation();} catch(err) {console.warn(err.message);}
+			try {keyDownEvent.stopPropagation();} catch(err) {console.warn(err.message);}
 			try {window.event.cancelBubble = true;} catch(err) {console.warn(err.message);}
 			
-			try {e.preventDefault();} catch(err) {console.warn(err.message);}
+			try {keyDownEvent.preventDefault();} catch(err) {console.warn(err.message);}
 			try {event.preventDefault();} catch(err) {console.warn(err.message);}
 			
 			return false;
@@ -4495,33 +4496,33 @@ EDITOR.lastKeyPressed = "";
 		
 	}
 	
-	function getCombo(e) {
+	function getCombo(eventObject) {
 		
 		var combo = {shift: false, alt: false, ctrl: false, sum: 0};
-		if(e.shiftKey) {
+		if(eventObject.shiftKey) {
 			combo.shift = true;
 			combo.sum += SHIFT;
 		}
-		if(e.altKey) {
+		if(eventObject.altKey) {
 			combo.alt = true;
 			combo.sum  += ALT;
 		}
-		if(e.ctrlKey) {
+		if(eventObject.ctrlKey) {
 			combo.ctrl = true;
 			combo.sum  += CTRL;
 		}
 		return combo;
 	}
 	
-	function keyIsUp(e) {
+	function keyIsUp(keyUpEvent) {
 		
-		e = e || window.event; 
+		keyUpEvent = keyUpEvent || window.event; 
 		
-		//e.preventDefault();
+		//keyUpEvent.preventDefault();
 		
-		var charCode = e.charCode || e.keyCode;
+		var charCode = keyUpEvent.charCode || keyUpEvent.keyCode;
 		var character = String.fromCharCode(charCode);
-		var combo = getCombo(e);
+		var combo = getCombo(keyUpEvent);
 		var funReturn;
 		
 		console.log("keyUp: " + charCode + " = " + character + " combo=" + JSON.stringify(combo));
@@ -4608,7 +4609,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		
-		EDITOR.interact("keyUp", e);
+		EDITOR.interact("keyUp", keyUpEvent);
 		
 		//return false;
 		
@@ -4616,23 +4617,22 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	
-	function mouseDown(e) {
+	function mouseDown(mouseDownEvent) {
 		
-		e = e || windows.event;
+		mouseDownEvent = mouseDownEvent || windows.event;
 		
-		var mouse = getMousePosition(e);
+		var mouse = getMousePosition(mouseDownEvent);
 		var mouseX = mouse.x;
 		var mouseY = mouse.y;
 		
-		
-		var caret,
-		button = e.button,
-		click,
-		target = e.target,
-		mouseDirection = "down",
-		preventDefault = false,
-		keyboardCombo = getCombo(e),
-		funReturn;
+		var caret;
+		var button = mouseDownEvent.button;
+		var click;
+		var target = mouseDownEvent.target;
+		var mouseDirection = "down";
+		var preventDefault = false;
+		var keyboardCombo = getCombo(mouseDownEvent);
+		var funReturn;
 		
 		//UTIL.objInfo(target);
 		
@@ -4720,7 +4720,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		
-		EDITOR.interact("mouseDown", e);
+		EDITOR.interact("mouseDown", mouseDownEvent);
 		
 		if(preventDefault) {
 			e.preventDefault(); // To prevent the annoying menus
@@ -4732,22 +4732,22 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	function mouseUp(e) {
-		e = e || window.event;
+	function mouseUp(mouseUpEvent) {
+		mouseUpEvent = mouseUpEvent || window.event;
 		
 		//e.preventDefault(); // Commented this because I couln't click on selected text inside html input 
 		
 		// Mouse position is on the current object (Canvas)
-		var mouse = getMousePosition(e);
+		var mouse = getMousePosition(mouseUpEvent);
 		var mouseX = mouse.x;
 		var mouseY = mouse.y;
 		
-		var caret,
-		button = e.button,
-		click,
-		target = e.target,
-		keyboardCombo = getCombo(e),
-		mouseDirection = "up";
+		var caret;
+		var button = mouseUpEvent.button;
+		var click;
+		var target = mouseUpEvent.target;
+		var keyboardCombo = getCombo(mouseUpEvent);
+		var mouseDirection = "up";
 		
 		if(button == undefined) button = 0; // For like touch events
 		
@@ -4781,35 +4781,35 @@ EDITOR.lastKeyPressed = "";
 		//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
 		
 		
-		EDITOR.interact("mouseUp", e);
+		EDITOR.interact("mouseUp", mouseUpEvent);
 		
 		return false;
 		//return true;
 		
 	}
 	
-	function getMousePosition(e) {
+	function getMousePosition(mouseEvent) {
 		
 		// Mouse position is on the current object (Canvas) 
-		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX;
-		var mouseY = e.offsetY==undefined?e.layerY:e.offsetY;
+		var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
+		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
 		
 		/*
-			if(e.page) console.log("e.page.x=" + e.page.x);
-			if(e.changedTouches) console.log("e.changedTouches[" + (e.changedTouches.length-1) + "]=" + e.changedTouches[e.changedTouches.length-1].pageX);
-			console.log("e.x=" + e.x);
-			console.log("e.offsetX=" + e.offsetX);
-			console.log("e.layerX=" + e.layerX);
+			if(e.page) console.log("mouseEvent.page.x=" + mouseEvent.page.x);
+			if(mouseEvent.changedTouches) console.log("mouseEvent.changedTouches[" + (mouseEvent.changedTouches.length-1) + "]=" + mouseEvent.changedTouches[e.changedTouches.length-1].pageX);
+			console.log("mouseEvent.x=" + e.x);
+			console.log("mouseEvent.offsetX=" + e.offsetX);
+			console.log("mouseEvent.layerX=" + e.layerX);
 		*/
 		
-		if(UTIL.isNumeric(e.clientX) && UTIL.isNumeric(e.clientY)) {
-			EDITOR.mouseX = parseInt(e.clientX);
-			EDITOR.mouseY = parseInt(e.clientY);
+		if(UTIL.isNumeric(mouseEvent.clientX) && UTIL.isNumeric(mouseEvent.clientY)) {
+			EDITOR.mouseX = parseInt(mouseEvent.clientX);
+			EDITOR.mouseY = parseInt(mouseEvent.clientY);
 		}
-		else if(e.changedTouches) {
+		else if(mouseEvent.changedTouches) {
 			
-			mouseX = Math.round(e.changedTouches[e.changedTouches.length-1].pageX); // pageX
-			mouseY = Math.round(e.changedTouches[e.changedTouches.length-1].pageY);
+			mouseX = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageX); // pageX
+			mouseY = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageY);
 			
 			// Touch events only have pageX with is the whole page. We only want the position on the canvas!
 			var rect = canvas.getBoundingClientRect();
@@ -4838,17 +4838,17 @@ EDITOR.lastKeyPressed = "";
 		
 	}
 	
-	function mouseMove(e) {
+	function mouseMove(mouseMoveEvent) {
 		
-		e = e || window.event;
+		mouseMoveEvent = mouseMoveEvent || window.event;
 		
-		//e.preventDefault();
+		//mouseMoveEvent.preventDefault();
 		
-		var mouse = getMousePosition(e);
+		var mouse = getMousePosition(mouseMoveEvent);
 		var mouseX = mouse.x;
 		var mouseY = mouse.y;
 		
-		var target = e.target;
+		var target = mouseMoveEvent.target;
 		
 		//console.log("mouseY=" + mouseY);
 		
@@ -4866,13 +4866,13 @@ EDITOR.lastKeyPressed = "";
 		
 		//console.log("EDITOR.input=" + EDITOR.input);
 		
-		EDITOR.interact("mouseMove", e);
+		EDITOR.interact("mouseMove", mouseMoveEvent);
 		
 		//return false;
 		
 	}
 	
-	function mouseclick(e) {
+	function mouseclick(mouseClickEvent) {
 		/*
 			Check for the EDITOR.shouldRender flag and render if true
 			
@@ -4880,26 +4880,26 @@ EDITOR.lastKeyPressed = "";
 		*/
 		console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.input=" + EDITOR.input);
 		
-		EDITOR.interact("mouseClick", e);
+		EDITOR.interact("mouseClick", mouseClickEvent);
 		
 		return true;
 		
 	}
 	
 	
-	function dblclick(e) {
+	function dblclick(dblClickEvent) {
 		
-		e = e || windows.event;
+		dblClickEvent = dblClickEvent || windows.event;
 		
 		// Mouse position is on the current object (Canvas) 
-		var mouseX = e.offsetX==undefined?e.layerX:e.offsetX;
-		var mouseY = e.offsetY==undefined?e.layerY:e.offsetY;
+		var mouseX = dblClickEvent.offsetX==undefined?dblClickEvent.layerX:dblClickEvent.offsetX;
+		var mouseY = dblClickEvent.offsetY==undefined?dblClickEvent.layerY:dblClickEvent.offsetY;
 		var caret;
-		var button = e.button;
+		var button = dblClickEvent.button;
 		var click;
-		var target = e.target;
+		var target = dblClickEvent.target;
 		var preventDefault = false;
-		var keyboardCombo = getCombo(e);
+		var keyboardCombo = getCombo(dblClickEvent);
 		var funReturn;
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
@@ -4956,10 +4956,10 @@ EDITOR.lastKeyPressed = "";
 			}
 		}
 		
-		EDITOR.interact("dblclick", e);
+		EDITOR.interact("dblclick", dblClickEvent);
 		
 		if(preventDefault) {
-			e.preventDefault(); // To prevent the annoying menus
+			dblClickEvent.preventDefault(); // To prevent the annoying menus
 			return false;
 		}
 		
@@ -4968,20 +4968,20 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	
-	function scrollWheel(e) {
+	function scrollWheel(scrollWheelEvent) {
 		
-		e = e || window.event;
+		scrollWheelEvent = scrollWheelEvent || window.event;
 		
-		console.log("scroll ... e.ctrlKey=" + e.ctrlKey);
+		console.log("scroll ... scrollWheelEvent.ctrlKey=" + scrollWheelEvent.ctrlKey);
 		
 		
 		
-		//console.log("wheelDelta=" + e.wheelDelta + " wheelDeltaY=" + e.wheelDeltaY + " deltaY=" + e.deltaY + " detail=" + e.detail );
+		//console.log("wheelDelta=" + scrollWheelEvent.wheelDelta + " wheelDeltaY=" + scrollWheelEvent.wheelDeltaY + " deltaY=" + scrollWheelEvent.deltaY + " detail=" + scrollWheelEvent.detail );
 		
-		var delta = e.wheelDelta || -e.detail,
-		target = e.target,
+		var delta = scrollWheelEvent.wheelDelta || -scrollWheelEvent.detail,
+		target = scrollWheelEvent.target,
 		tagName = target.tagName,
-		combo = getCombo(e),
+		combo = getCombo(scrollWheelEvent),
 		dir = delta > 0 ? -1 : 1,
 		steps = Math.abs(delta);
 		
@@ -4995,7 +4995,7 @@ EDITOR.lastKeyPressed = "";
 			}
 		}
 		
-		EDITOR.interact("mouseScroll", e);
+		EDITOR.interact("mouseScroll", scrollWheelEvent);
 		
 	}
 	

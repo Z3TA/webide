@@ -142,26 +142,26 @@
 		
 	}
 	
-	function typing(event) {
+	function typing(keyUpEvent) {
 		
-		console.log("event.keyCode=" + event.keyCode);
+		console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode);
 		
-		event.preventDefault();
+		keyUpEvent.preventDefault();
 
-		if (event.keyCode == charEnter) {
+		if (keyUpEvent.keyCode == charEnter) {
 			gotoFile();
 			return;
 		}
-		else if(event.keyCode == charEscape) {
+		else if(keyUpEvent.keyCode == charEscape) {
 			hide_gotoFileInput();
 			return;
 		}
-		else if(event.keyCode == keyUp) {
+		else if(keyUpEvent.keyCode == keyUp) {
 			moveUp();
 			inputGoto.focus();
 			return;
 		}
-		else if(event.keyCode == keyDown) {
+		else if(keyUpEvent.keyCode == keyDown) {
 			gotoFile_moveDown();
 			inputGoto.focus();
 			return;

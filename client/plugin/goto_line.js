@@ -75,12 +75,12 @@
 		footer.appendChild(gotoDiv);
 	
 	
-		inputGoto.addEventListener("keyup", function(event) {
-			event.preventDefault();
-			if (event.keyCode == 13) {
+		inputGoto.addEventListener("keyup", function(keyUpEvent) {
+			keyUpEvent.preventDefault();
+			if (keyUpEvent.keyCode == 13) {
 				gotoLine(); // When pressing enter
 			}
-			else if(event.keyCode == key_Esc) {
+			else if(keyUpEvent.keyCode == key_Esc) {
 				hide_gotoLineInput(); // When pressing escape
 			}
 		});

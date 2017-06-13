@@ -200,14 +200,14 @@ function promptBox(msg, isPassword, defaultValue, callback) {
 	cancel.addEventListener("click", function() {callback(null); dialog.close()}, false);
 	
 	
-	input.addEventListener("keyup", function(event) {
-		event.preventDefault();
+	input.addEventListener("keyup", function(e) {
+		e.preventDefault();
 		var enterKey = 13;
 		var escapeKey = 27;
 		// Clicking enter in the input area should "submit"
-		if (event.keyCode == enterKey) ok.click()
+		if (e.keyCode == enterKey) ok.click()
 		// Clicking escape should be same as cancel
-		else if(event.keyCode == escapeKey) cancel.click();
+		else if(e.keyCode == escapeKey) cancel.click();
 	});
 	
 	

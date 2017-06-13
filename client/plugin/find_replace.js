@@ -240,22 +240,22 @@
 			replaceAll(inputReplace.value, inputFind.value, EDITOR.currentFile, regexOption.checked, ignoreCaseOption.checked);
 		}, false);
 		
-		inputFind.addEventListener("keyup", function(event) {
+		inputFind.addEventListener("keyup", function(keyUpEvent) {
 			var keyEnter = 13;
 			var keyEscape = 27;
 			
-			event.preventDefault();
+			keyUpEvent.preventDefault();
 			
-			if (event.keyCode == keyEnter) {
+			if (keyUpEvent.keyCode == keyEnter) {
 				findButtonRight.click();
 			}
 		}, false);
 		
-		inputReplace.addEventListener("keyup", function(event) {
+		inputReplace.addEventListener("keyup", function(keyUpEvent) {
 			var keyEnter = 13;
 			var keyEscape = 27;
 			
-			if (event.keyCode == keyEnter) {
+			if (keyUpEvent.keyCode == keyEnter) {
 				replaceButton.click();
 			}
 		}, false);

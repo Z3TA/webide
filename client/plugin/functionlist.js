@@ -453,17 +453,17 @@ for(var func, element, i=0; i<functions.length; i++) {
 			
 			functionListWrap.appendChild(functionListSelect);
 			
-			functionListSelect.addEventListener("keyup", function(event) {
+			functionListSelect.addEventListener("keyup", function(keyUpEvent) {
 				var keyEscape = 27;
 				var keyLeft = 37;
 				var keyRight = 39;
 				
-				event.preventDefault();
+				keyUpEvent.preventDefault();
 				
-				if (event.keyCode == keyEscape) {
+				if (keyUpEvent.keyCode == keyEscape) {
 					blurFunctionList();
 				}
-				else if(event.keyCode == keyLeft || event.keyCode == keyRight) {
+				else if(keyUpEvent.keyCode == keyLeft || keyUpEvent.keyCode == keyRight) {
 					leftOrRight();
 				}
 			}, false);

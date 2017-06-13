@@ -1184,12 +1184,12 @@
 	
 	function previewSSG(file, combo, character, charCode, keyPushDirection, targetElementClass) {
 		if(!selectedSite) alertBox("No site selected!");
-		else previewPage(selectedSite, undefined, false);
+		else previewPage(selectedSite, undefined, false, combo.ctrl);
 		
 		return false;
 	}
 	
-	function previewPage(site, callback, edit, sourceFile) {
+	function previewPage(site, callback, edit, sourceFile, ignoreDraft) {
 		
 		console.log("Previewing " + site.name + ". edit=" + edit);
 		
@@ -1240,8 +1240,8 @@
 			}
 			else {
 				
-				console.log("event.ctrlKey=" + event.ctrlKey); // publish flag that ignores files starting with _ (underscore)
-				compile(site.source, site.preview, event.ctrlKey, function compiled_static() {
+				console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
+				compile(site.source, site.preview, ignoreDraft, function compiled_static() {
 				
 				var protocol = UTIL.urlProtocol(site.preview);
 				

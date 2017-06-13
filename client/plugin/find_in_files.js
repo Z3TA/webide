@@ -456,13 +456,13 @@
 		inputFind.addEventListener("blur", function() {
 			inputFindGotFocus = false;
 		}, false);
-		inputFind.addEventListener("keyup", function(event) {
+		inputFind.addEventListener("keyup", function(keyUpEvent) {
 			var keyEnter = 13;
 			var keyEscape = 27;
 			
-			event.preventDefault();
+			keyUpEvent.preventDefault();
 			
-			if (event.keyCode == keyEnter) {
+			if (keyUpEvent.keyCode == keyEnter) {
 				buttonFindInFiles.click();
 			}
 		}, false);

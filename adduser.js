@@ -3,7 +3,7 @@
 
 /*
 	This is a useful script for those managing jzedit running as a cloud editor,
-	it will add users both as system users and into the server/users.pw file.
+	it will add users both as system users and into the /etc/jzedit_users file.
 	
 	Create the group:
 	sudo addgroup jzedit_users

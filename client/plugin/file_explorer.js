@@ -419,11 +419,11 @@
 		var optDelete = document.createElement("li");
 		optDelete.innerText = "Delete";
 		fileItemMenu.appendChild(optDelete);
-		optDelete.onclick = function deleteFile(e) {
-			e.preventDefault();
-			e.stopPropagation();
+		optDelete.onclick = function deleteFile(clickEvent) {
+			clickEvent.preventDefault();
+			clickEvent.stopPropagation();
 			
-			if(!event.ctrlKey) {
+			if(!clickEvent.ctrlKey) {
 				
 				var msg = "Are you sure you want to Delete the file ?\n" + fileItem.path + "\n\n(Ctrl-click to not show this confirmation next time)";
 				var yes = "Yes, delete it";
@@ -515,9 +515,9 @@
 		EDITOR.openFile(filePath);
 	}
 	
-	function changeFs(event) {
+	function changeFs(selectChangeEvent) {
 		
-		var sel = event.target;
+		var sel = selectChangeEvent.target;
 		var host = sel.options[sel.selectedIndex].id;
 		
 		// Remember open folders ? 

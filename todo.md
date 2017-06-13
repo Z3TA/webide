@@ -24,6 +24,12 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Refactor to not use e or global window.event object due to browser incompatibility problems
+
+Test in different browsers!
+Work on first time usage experience "publishing a blog post"
+Select a web page theme ... !?
+
 write a blog post
 
 Trying to allow stat files in /home/** in apparmor profile.
@@ -210,6 +216,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Double clicking on a single letter in a large file takes forever to highlight. Optimization: Only highlight what the user can see!
 
 Replace all using the same string in replace causes a endless loop. Example:
 replace shortString( with UTIL.shortString(
@@ -862,6 +870,7 @@ When loading the spellchecker on Linux it complains about libstdc++.so.6 version
 
 spellchecker: Red waves doesn't go away when changing the word.
 
+Sup pixel antialias doesn't work on (Linux) Firefox, ...
 
 
 

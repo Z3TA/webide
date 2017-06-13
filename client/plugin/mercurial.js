@@ -651,7 +651,7 @@
 		
 		
 		
-		function mercurialDelete(e) {
+		function mercurialDelete(buttonClickEvent) {
 			
 			var removeFiles = [];
 			var deleteUntracked = []; // Remove untracked files from disk
@@ -668,7 +668,7 @@
 			
 			if(removeFiles.length == 0 && deleteUntracked.length == 0) return alertBox("No files selected!");
 				
-			if(!event.ctrlKey) {
+			if(!buttonClickEvent.ctrlKey) {
 				var msg = "Are you sure you want to delete the following files ?\n" + removeFiles.concat(deleteUntracked).join("\n");
 				var yes = "Yes, Delete them";
 				var no = "No!";
