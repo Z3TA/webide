@@ -566,6 +566,11 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 				var path = selectedItem.getAttribute("path");
 				var lineNr = selectedItem.getAttribute("lineNr");
 				
+				if(!path) {
+					console.log(selectedItem);
+					throw new Error("path=" + path)
+				}
+				
 				console.log("Opening " + path);
 				
 				EDITOR.openFile(path, undefined, function(err, file) {
