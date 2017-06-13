@@ -520,9 +520,8 @@ div.gotoFile li.selected {
 }
 
 div.gotoFile li b {
-	color: #fffdf7;
-	color: InfoText;
-}
+	color: black;
+	}
 
 div.gotoFile li:hover {
 	background-color: #b5d4ff;
