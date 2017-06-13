@@ -273,7 +273,7 @@
 			
 			dirsToSearch.push(currentDirPath);
 			
-			console.log("S directory: " + currentDirPath);
+			//console.log("S directory: " + currentDirPath);
 			
 			if(++recursions > maxRecursion) {
 				console.warn("recursions=" + recursions + " maxRecursion=" + maxRecursion);
@@ -302,7 +302,7 @@
 				
 				EDITOR.listFiles(currentDirPath, function searchit(err, folderItems) {
 					
-					console.log("F directory: " + currentDirPath);
+					//console.log("F directory: " + currentDirPath);
 					
 					dirsSearched.push(currentDirPath);
 					
@@ -327,7 +327,7 @@
 					}
 					
 					
-					console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
+					//console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
 					if(dirsSearched.length == dirsToSearch.length) { allDone(); };
 					
 				});
@@ -336,7 +336,7 @@
 			else {
 				dirsSearched.push(currentDirPath);
 				
-				console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
+				//console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
 if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			}
 		}

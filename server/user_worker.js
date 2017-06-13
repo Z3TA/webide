@@ -123,7 +123,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 
 	// Translates a virtual path to a real file-system path
 
-	console.log(user.name + " translatePath=" + pathToFileOrDir);
+	//console.log(user.name + " translatePath=" + pathToFileOrDir);
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 
@@ -161,31 +161,34 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 		if(translatedPath == path.resolve("users.pw")) {
 			console.warn("User name=" + user.name + " is accessing users.pw");
 		}
+		else if(translatedPath == "/etc/jzedit_user") {
+			console.warn("User name=" + user.name + " is accessing /etc/jzedit_user");
+		}
 		
 		if(isDirectory) translatedPath = UTIL.trailingSlash(translatedPath);
 		
-		console.log("translatedPath=" + translatedPath);
+		//console.log("translatedPath=" + translatedPath);
 		
 		// Make sure virutal path is in user.rootPath
 		if(translatedPath.indexOf(user.rootPath) != 0) {
-			console.warn("translatedPath=" + translatedPath + " does not contain user.rootPath=" + user.rootPath);
+			//console.warn("translatedPath=" + translatedPath + " does not contain user.rootPath=" + user.rootPath);
 			return new Error("Unable to access path=" + pathToFileOrDir);
 		}
 		else return translatedPath;
 		
 	}
 	else {
-		console.log("No need to translate (no rootPath)");
+		//console.log("No need to translate (no rootPath)");
 		return pathToFileOrDir;
 	}
 }
 
 user.toVirtualPath = function toVirtualPath(realPath) {
 	
-	console.log(user.name + " toVirtualPath realPath=" + realPath);
+	//console.log(user.name + " toVirtualPath realPath=" + realPath);
 	
 	if(!user.rootPath) {
-		console.log("No need to translate (no rootPath)");
+		//console.log("No need to translate (no rootPath)");
 		return realPath;
 	}
 	
@@ -202,7 +205,7 @@ user.toVirtualPath = function toVirtualPath(realPath) {
 	if(virtualPath.charAt(0) != "/" ) virtualPath = "/" + virtualPath;
 
 	
-	console.log("virtualPath=" + virtualPath);
+	//console.log("virtualPath=" + virtualPath);
 	
 	return virtualPath;
 	

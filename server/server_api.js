@@ -500,7 +500,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	else {
 		// ### List files using "normal" file system
 		var fs = require("fs");
-		console.log("Reading directory=" + pathToFolder);
+		//console.log("Reading directory=" + pathToFolder);
 		fs.readdir(pathToFolder, function readdir(err, folderItems) {
 			if(err) {
 				listFilesCallback(err);
@@ -527,7 +527,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 			}
 			
 			function stat(fileName, filePath) {
-				console.log("Making stat: " + filePath + "");
+				//console.log("Making stat: " + filePath + "");
 				
 				fs.stat(filePath, function stat(err, stats) {
 					
@@ -571,7 +571,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					statCounter++;
 					
-					console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
+					//console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
 					
 					if(statCounter==folderItems.length) listFilesCallback(null, {list: list});
 					
