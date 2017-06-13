@@ -533,6 +533,7 @@
 		buttonPreview.setAttribute("type", "button");
 		buttonPreview.setAttribute("class", "button");
 		buttonPreview.setAttribute("value", "Preview");
+		buttonPreview.setAttribute("title", "Ctrl-click to ignore (draft) files starting with _ (underscore)");
 		buttonPreview.addEventListener("click", function() {
 			previewPage(selectedSite, undefined, false);
 		}, false);
@@ -1238,7 +1239,9 @@
 				*/
 			}
 			else {
-				compile(site.source, site.preview, false, function compiled_static() {
+				
+				console.log("event.ctrlKey=" + event.ctrlKey); // publish flag that ignores files starting with _ (underscore)
+				compile(site.source, site.preview, event.ctrlKey, function compiled_static() {
 				
 				var protocol = UTIL.urlProtocol(site.preview);
 				
@@ -1829,7 +1832,7 @@
 		function publishIt() {
 			compile(site.source, site.publish, true, function buildDone() {
 				
-			alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:<a href="' + site.url + '">' + site.url + '</a>' : ''));
+				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:<a href="' + site.url + '" target="blank">' + site.url + '</a>' : ''));
 			
 		});
 		}
