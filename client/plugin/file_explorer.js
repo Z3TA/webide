@@ -353,8 +353,9 @@
 				
 			}
 			
-			li.oncontextmenu = function (e) {
-				e.preventDefault();
+			li.oncontextmenu = function contextmenu(contextMenuEvent) {
+				contextMenuEvent.preventDefault();
+				contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
 				
 				showFileItemMenu(li, item);
 				
@@ -404,12 +405,16 @@
 	
 	function showFileItemMenu(el, fileItem) {
 		
+		console.log("showFileItemMenu el=" + el);
+		console.log(el);
+		
 		var fileItemMenu = document.getElementById("fileItemMenu");
 		
 		hideMenu(); // Hide old one if one exist
 		
 		fileItemMenu = document.createElement("ul");
 		fileItemMenu.setAttribute("id", "fileItemMenu");
+		fileItemMenu.setAttribute("class", "fileContextMenu");
 		
 		var optCancel = document.createElement("li");
 		optCancel.innerText = "Cancel";
