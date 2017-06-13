@@ -957,8 +957,10 @@ function createUserWorker(name, uid, gid) {
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 		
-		if(process.getuid() == 0 && !CRAZY) {
-			throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+		if(process.getuid) {
+			if(process.getuid() == 0 && !CRAZY) {
+				throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+			}
 		}
 	}
 	
