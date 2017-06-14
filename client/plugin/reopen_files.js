@@ -63,7 +63,7 @@
 			EDITOR.removeEvent("fileOpen", reopenFiles);
 			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
 			
-			EDITOR.removeEvent("exit", reopen_files_closeEditor);
+			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			clearInterval(saveStateIntervalTimer);
 			
 		}
@@ -81,7 +81,7 @@
 		
 		if(serverUrl != CLIENT.url || serverUser != EDITOR.user) {
 			
-			EDITOR.removeEvent("exit", reopen_files_closeEditor);
+			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			clearInterval(saveStateIntervalTimer);
 			clearInterval(insaneBugCatcherInterval);
 
@@ -105,10 +105,10 @@
 		reopenFilesMain(function allFilesHaveReopened() {
 			
 			// Save state when exiting the editor
-			EDITOR.on("exit", reopen_files_closeEditor);
+			EDITOR.on("exit", saveStateOfOpenFiles);
 			
 			// Save state on regular intervals in case the editor crashes (or refresh)
-			saveStateIntervalTimer = setInterval(reopen_files_closeEditor, saveStateInterval);
+			saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
 			
 			// Catch bugs
 			insaneBugCatcherInterval = setInterval(insaneBugCatcher, 1000);
@@ -593,8 +593,7 @@
 		
 	}
 	
-	function reopen_files_closeEditor() {
-		// Save file state
+	function saveStateOfOpenFiles() {
 		
 		//if(!window.localStorage.ready()) throw new Error("window.localStorage is not ready! We can not save current session.");
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
