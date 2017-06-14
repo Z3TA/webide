@@ -24,21 +24,20 @@ var CLIENT = {}; // Client object is global
 	
 	CLIENT.connect = function(server, callback) {
 		
-		var currentLocation = window.location.href;
-		var protocol = (currentLocation.indexOf("://") != -1) ? currentLocation.substr(0, currentLocation.indexOf("://")) : undefined;
+		var loc = UTIL.getLocation(window.location.href);
+		var protocol = loc.protocol;
 		
-		console.log("protocol=" + protocol);
-		
-		var defaultURL = currentLocation;
-		if(defaultURL.indexOf("://") != -1) defaultURL = defaultURL.substr(defaultURL.indexOf("://")+3); // Remove protocol://
-		defaultURL = window.location.href.replace(/\/.*/, "/jzedit"); // Replace everything after hostname
+		console.log("protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
+
+		var defaultURL = loc.protocol + "://" + loc.host + "/jzedit"; // loc.host includes port!
 		
 		if(protocol.toLowerCase() == "file") {
 			defaultURL = "http://localhost:8099/jzedit";
 			
 			if(runtime == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
-			
 		}
+		
+		console.log("defaultURL=" + defaultURL);
 		
 		if(server == undefined) server = {url: defaultURL};
 		
@@ -81,7 +80,7 @@ var CLIENT = {}; // Client object is global
 			
 			var msg = e.data;
 			
-			console.log("Server: " + msg);
+			console.log("Server: " + UTIL.shortString(msg));
 			
 			CLIENT.connected = true;
 			

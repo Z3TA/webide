@@ -945,6 +945,8 @@ var UTIL = {
 		
 		// From: https://github.com/PxyUp/uri-parse-lib
 		
+		// todo: Handle file:///C:/Users/Z/somefile.txt
+		
         var badCharater = [":", "@", "://"];
 
 		var firstSplit, lastSplit, parsing, urlObject, checkerBadCharater, protoArray;
@@ -960,8 +962,8 @@ var UTIL = {
             href: url,
             hash: ""
         };
-			
-        var protoArray = ["http", "https", "ftp", "ssh", "sftp", "ftps"];
+		
+        var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps"];
 		
         function firstSplit (str, splitter) {
             var array;
