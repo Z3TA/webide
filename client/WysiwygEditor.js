@@ -551,13 +551,23 @@ var WysiwygEditor;
 	}
 	
 	
-	WysiwygEditor.prototype.previewKeyup = function previewKeyup(e) {
+	WysiwygEditor.prototype.previewKeyup = function previewKeyup(keyUpEvent) {
 		var wysiwygEditor = this;
 		console.log("previewKeyup! EDITOR.input=" + EDITOR.input);
-		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 		
+		//keyUpEvent = keyUpEvent || window.event;
+		
+		// Do not place caret in source code now if text was inserted (we'll do that later)
+		// Only place caret if keyboard arrow keys was used to move the caret
+		console.log("(keyUpEvent.keyCode=" + keyUpEvent.keyCode);
+		if(!EDITOR.input && (keyUpEvent.keyCode == 37 || keyUpEvent.keyCode == 38 || keyUpEvent.keyCode == 39 || keyUpEvent.keyCode == 40)) {
+			wysiwygEditor.placeCaretInSourceCode(keyUpEvent.target);
+		}
 		// Internet Explorer doesn't fire change events on content-editable
-		if(!previewInputFired) wysiwygEditor.previewInput();
+		else if(!previewInputFired) {
+			wysiwygEditor.previewInput();
+			previewInputFired = false;
+		}
 		
 		return true;
 	}
@@ -600,12 +610,14 @@ var WysiwygEditor;
 	}
 	
 	WysiwygEditor.prototype.previewInput = function previewInput(e) {
+		console.timeEnd("contentEdit");
 		var wysiwygEditor = this;
 		
 		// Called every time the contenteditable is updated
 		// If nothing happends, check the debug/console for the wysiwyg window! (set "toolbar": true, in package.json)
 		
 		console.log("previewInput!");
+		
 		
 		previewInputFired = true;
 		
