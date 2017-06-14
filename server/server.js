@@ -67,7 +67,9 @@ if(USERNAME && !PASSWORD) {
 }
 
 
-var NOUID = getArg(["nouid"]) || false; // Use -nouid to allow users without a uid specified
+// Use -nouid to allow users without a uid specified
+// Windows can not set uid, so don't bother checking if users have uid specified
+var NOUID = getArg(["nouid"]) || (process.platform == "win32"); 
 
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "./users.pw";
 
