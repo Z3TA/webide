@@ -88,7 +88,8 @@ EDITOR.settings = {
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
 	clearColumnOptimization: false, // When deleting a character, clears only the character
 	insert: false,
-	stdInPort: 13379
+	stdInPort: 13379,
+	useCliboardcatcher: false // Some browsers can (IE) can only capture clipboard events if a text element is focused
 };
 
 EDITOR.shouldRender = false;   // Internal flag, use EDITOR.renderNeeded() to re-render!
@@ -170,6 +171,8 @@ EDITOR.lastKeyPressed = "";
 	
 	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
 	
+	if(isIe) EDITOR.settings.useCliboardcatcher = true;
+	
 	
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
@@ -199,6 +202,8 @@ EDITOR.lastKeyPressed = "";
 	var widgetElementIdCounter = 0;
 	
 	var calledStartListeners = false;
+	
+	var giveBackFocusAfterClipboardEvent = false;
 	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
@@ -3325,8 +3330,19 @@ EDITOR.lastKeyPressed = "";
 	}, false);
 	
 	
+	// Modern browsers. Note: 3rd argument is required for Firefox <= 6
+	if (window.addEventListener) {
+		window.addEventListener('paste', paste, false);
+	}
+	// IE <= 8
+	else {
+		window.attachEvent('onpaste', paste);
+	}
+	
+	window.onpaste = function() {alert("paste window");};
+	
 	window.addEventListener('copy', copy);
-	window.addEventListener('paste', paste);
+	//window.addEventListener('paste', paste);
 	window.addEventListener('cut', cut);
 	
 	//window.addEventListener("message", onMessage, false);
@@ -3392,6 +3408,8 @@ EDITOR.lastKeyPressed = "";
 		});
 		
 		canvas = document.getElementById("canvas");
+		
+		canvas.onpaste = function() {alert("paste canvas");};
 		
 		// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
 		// Also make sure there are no drop or dragover events on window, document or parent elements!
@@ -3465,6 +3483,7 @@ EDITOR.lastKeyPressed = "";
 			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
 		
+		EDITOR.canvas = canvas;
 		EDITOR.canvasContext = ctx;
 		
 		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
@@ -4077,6 +4096,15 @@ EDITOR.lastKeyPressed = "";
 	
 	function copy(copyEvent) {
 		
+		console.log("copyEvent EDITOR.input=" + EDITOR.input);
+		
+		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+			// Give focus back to the editor/canvas
+			EDITOR.input = true;
+			canvas.focus();
+			giveBackFocusAfterClipboardEvent = false;
+		}
+		
 		if(EDITOR.input) {
 			var textToPutOnClipboard = "";
 			
@@ -4104,6 +4132,15 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	function cut(cutEvent) {
+		
+		console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+		
+		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+			// Give focus back to the editor/canvas
+			EDITOR.input = true;
+			canvas.focus();
+			giveBackFocusAfterClipboardEvent = false;
+		}
 		
 		if(EDITOR.input) {
 			
@@ -4133,9 +4170,28 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	function paste(pasteEvent) {
-		var text = pasteEvent.clipboardData.getData('text');
+		
+		console.log("pasteEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+
+		//var text = pasteEvent.clipboardData.getData('text');
 		var ret;
 		var textChanged = false;
+		
+		if (window.clipboardData && window.clipboardData.getData) { // IE
+			var text = window.clipboardData.getData('Text');
+		} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
+			var text = pasteEvent.clipboardData.getData('text/plain');
+		}
+		else {
+			alertBox("Unable to get platform/OS clipboard data!");
+		}
+		
+		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+			// Give focus back to the editor/canvas
+			EDITOR.input = true;
+			canvas.focus();
+			giveBackFocusAfterClipboardEvent = false;
+		}
 		
 		console.log("PASTE: " + UTIL.lbChars(text));
 		
@@ -4148,7 +4204,7 @@ EDITOR.lastKeyPressed = "";
 				
 				fun = EDITOR.eventListeners.paste[i].fun;
 				
-				ret = fun(EDITOR.currentFile, pasteEvent.clipboardData);
+				ret = fun(EDITOR.currentFile, text, pasteEvent);
 				
 				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned:\n" + ret);
 				
@@ -4462,9 +4518,59 @@ EDITOR.lastKeyPressed = "";
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 			
 			// Enable native commands
-			if(combo.ctrl && character == "C") {console.log("copy");}
-			else if(combo.ctrl && character == "V") {console.log("paste");}
-			else if(combo.ctrl && character == "X") {console.log("cut");}
+			if(combo.ctrl && character == "C") {
+				console.log("Native command: copy !?");
+				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
+					giveBackFocusAfterClipboardEvent = true;
+					
+					var clipboardcatcher = document.getElementById("clipboardcatcher");
+					clipboardcatcher.focus();
+					
+					var textToPutOnClipboard = "";
+					
+					if(EDITOR.currentFile) {
+						textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+					}
+					
+					clipboardcatcher.value = textToPutOnClipboard;
+					clipboardcatcher.select();
+					
+				}
+			}
+			else if(combo.ctrl && character == "V") {
+				console.log("Native command: paste !? EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
+				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
+					giveBackFocusAfterClipboardEvent = true;
+					
+					// Problem: If alertBox button was clicked, it takes 500ms to get focus back to canvas. But if we paste before that, input will be false.
+					
+					var clipboardcatcher = document.getElementById("clipboardcatcher");
+					clipboardcatcher.focus();
+
+				}
+			}
+			else if(combo.ctrl && character == "X") {
+				console.log("Native command: cut !?");
+				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
+					giveBackFocusAfterClipboardEvent = true;
+					
+					var clipboardcatcher = document.getElementById("clipboardcatcher");
+					clipboardcatcher.focus();
+					
+					var textToPutOnClipboard = "";
+					
+					if(EDITOR.currentFile) {
+						textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
+						
+						// Delete the selected text
+						//EDITOR.currentFile.deleteSelection();
+					}
+					
+					clipboardcatcher.value = textToPutOnClipboard;
+					clipboardcatcher.select();
+					
+				}
+			}
 			else if(combo.shift) {} // shift is usually safe (big and small letters yo!)
 			else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 			else if(combo.alt) {} // Wait for ALT+key combo!

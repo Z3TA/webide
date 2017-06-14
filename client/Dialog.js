@@ -53,7 +53,7 @@ function Dialog(msg, icon) {
 	div.setAttribute("class", "dialog");
 	div.setAttribute("style", "position: absolute; top: 50px; left: 50px");
 	
-	div.addEventListener("click", focusDefault, false);
+	div.addEventListener("click", focusDefaultElement, false);
 	
 	div.appendChild(message);
 	
@@ -93,16 +93,17 @@ function Dialog(msg, icon) {
 	
 	
 	// Give the focus to the box
+	this.editorHadInputFocus = EDITOR.input;
 	EDITOR.input = false;
 	
 	// Give the program time to add buttons etc to the dialog
 	// Also avoid accidently closing the dialog (while typing spaces)
 	var dialogDelay = 2000;
-	setTimeout(focusDefault, dialogDelay); 
+	setTimeout(focusDefaultElement, dialogDelay); 
 	
 	return 0;
 	
-	function focusDefault() {
+	function focusDefaultElement() {
 		// Give focus to the element with attribute focus:true
 		
 		var childElement = div.childNodes;
@@ -116,13 +117,31 @@ function Dialog(msg, icon) {
 		EDITOR.input = false;
 	}
 }
-Dialog.prototype.close = function() {
+Dialog.prototype.close = function(someEvent) {
 	this.div.parentElement.removeChild(this.div);
 	
-	// The editor watches for clicks outside the "editor" area (canvas), so wait until that is done before giving back input
-	setTimeout(function() {
-		EDITOR.input = true;
-	}, 500); // Not too fast, make sure the user has released the space bar
+	if(this.editorHadInputFocus) {
+		// The editor watches for clicks outside the "editor" area (canvas), so wait until that is done before giving back input
+		
+		//console.log(someEvent);
+		
+		console.log("someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
+		// If the user closes the dialog using the keyboard, we don't want to give back focus too fast, or a bunch of spaces will be inserted (if the user used the space key)
+		if(someEvent.screenX == 0 && someEvent.screenY == 0) {
+			// It was probably a "keyboard click"
+			var waitTime = 500;
+		}
+		else {
+			// Probably a mouse click
+			var waitTime = 0;
+		}
+		
+		setTimeout(function() {
+			console.log("Giving back editor focus/input ... EDITOR.input=" + EDITOR.input + "")
+			EDITOR.input = true;
+			EDITOR.canvas.focus();
+		}, waitTime);
+	}
 }
 
 function alertBox(msg, icon) {
@@ -133,7 +152,10 @@ function alertBox(msg, icon) {
 	button.setAttribute("focus", "true");
 	button.appendChild(document.createTextNode("OK"));
 	
-	button.addEventListener("click", function() {dialog.close()}, false);
+	button.addEventListener("click", function(clickEvent) {
+		console.log("alertBox button click: EDITOR.input=" + EDITOR.input + "");
+		dialog.close(clickEvent);
+	}, false);
 	
 	dialog.div.appendChild(button);
 	
@@ -181,7 +203,7 @@ function confirmBox(msg, options, callback, recursionCount) {
 		
 		button.appendChild(document.createTextNode(txt));
 		
-		button.addEventListener("click", function() {callback(txt); dialog.close();}, false);
+		button.addEventListener("click", function(clickEvent) {callback(txt); dialog.close(clickEvent);}, false);
 		
 		dialog.div.appendChild(button); 
 	}
@@ -206,14 +228,14 @@ function promptBox(msg, isPassword, defaultValue, callback) {
 	ok.setAttribute("type", "submit");
 	ok.appendChild(document.createTextNode("OK"));
 	
-	ok.addEventListener("click", function() {callback(input.value); dialog.close()}, false);
+	ok.addEventListener("click", function(clickEvent) {callback(input.value); dialog.close(clickEvent)}, false);
 	
 	
 	var cancel = document.createElement("button");
 	cancel.setAttribute("class", "prompt");
 	cancel.appendChild(document.createTextNode("Cancel")); // Language?
 	
-	cancel.addEventListener("click", function() {callback(null); dialog.close()}, false);
+	cancel.addEventListener("click", function(clickEvent) {callback(null); dialog.close(clickEvent)}, false);
 	
 	
 	input.addEventListener("keyup", function(e) {

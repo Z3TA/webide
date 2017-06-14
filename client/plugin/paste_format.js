@@ -3,15 +3,21 @@
 
 	EDITOR.on("paste", pasteFormat);
 	
-	function pasteFormat(file, clipboard) {
+	function pasteFormat(file, text, pasteEvent) {
 		
-		var text = clipboard.getData('text');
+		/*
+		if (window.clipboardData && window.clipboardData.getData) { // IE
+			var text = window.clipboardData.getData('Text');
+		} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
+			var text = pasteEvent.clipboardData.getData('text/plain');
+		}
+		*/
 		
 		// Fix lonely carrige-returns (without a line-feed)
 		//console.log("lineBreak=" + EDITOR.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));
 		text = text.replace(/\r/g, "");
 		
-		//console.log("clipboard text=" + UTIL.lbChars(text));
+		//console.log("text=" + UTIL.lbChars(text));
 		
 		var lines = text.split("\n");
 		
