@@ -961,8 +961,8 @@ var UTIL = {
             hash: ""
         };
 			
-        var protoArray = ["http", "https", "ftp", "ssh", "irc", "sftp"];
-			
+        var protoArray = ["http", "https", "ftp", "ssh", "sftp", "ftps"];
+		
         function firstSplit (str, splitter) {
             var array;
             if (str.indexOf(splitter) !== -1) {
