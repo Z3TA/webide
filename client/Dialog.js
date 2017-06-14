@@ -20,11 +20,11 @@ function Dialog(msg, icon) {
 	
 	msg = msg.replace(/\n/g, "<br>");
 	
-	var body = document.getElementById("body");
+	var body = document.getElementById("body") || document.body;
 	
 	if(!body) {
 		console.warn("Dialog created before html body is available");
-		return;
+		return 1;
 	}
 	
 	var message = document.createElement("div");
@@ -100,6 +100,8 @@ function Dialog(msg, icon) {
 	var dialogDelay = 2000;
 	setTimeout(focusDefault, dialogDelay); 
 	
+	return 0;
+	
 	function focusDefault() {
 		// Give focus to the element with attribute focus:true
 		
@@ -145,9 +147,23 @@ function alertBox(msg, icon) {
 	Example reason why you want to use custom confirm box:
 	* Native confirm box registers a keyPress if it was called on a keydown event
 */
-function confirmBox(msg, options, callback) {
+function confirmBox(msg, options, callback, recursionCount) {
 	
 	var dialog = new Dialog(msg);
+	
+	if(!dialog.div) {
+		return setTimeout(function wait() {
+			// Wait until the body element is available
+			
+			if(recursionCount) recursionCount++;
+			else recursionCount = 1;
+			
+			if(recursionCount > 4) throw new Error("Unable to show confirmBox msg=" + msg + " options=" + JSON.stringify(options));
+			
+			confirmBox(msg, options, callback, recursionCount);
+		
+		}, 100);
+	}
 	
 	for (var i=0; i<options.length; i++) {
 		makeButton(i);
