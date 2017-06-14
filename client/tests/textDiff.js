@@ -48,31 +48,28 @@ EDITOR.addTest(function testTextDiff(callback) {
 	
 	// Inserts and removed lines (make sure the row nr is right)
 	
-	diff = UTIL.textDiff(`
-	<p>Hello world</p>
-	<table>
-	<tr>
-	<th>Header1</th>
-	<th>Header2</th>
-	</tr>
-	<tr>
-	<td>Col1</td>
-	<td>Col2</td>
-	</tr>
-	</table>
-	`, `
-	<p>Hello world!</p>
-	<table>
-	<tbody><tr>
-	<th>Header1</th>
-	<th>Header2</th>
-	</tr>
-	<tr>
-	<td>Col1</td>
-	<td>Col2</td>
-	</tr>
-	</tbody></table>
-	`);
+	diff = UTIL.textDiff("<p>Hello world</p>\
+	<table>\
+	<tr>\
+	<th>Header1</th>\
+	<th>Header2</th>\
+	</tr>\
+	<tr>\
+	<td>Col1</td>\
+	<td>Col2</td>\
+	</tr>\
+	</table>\
+	", "<p>Hello world!</p>\
+	<table>\
+	<tbody><tr>\
+	<th>Header1</th>\
+	<th>Header2</th>\
+	</tr>\
+	<tr>\
+	<td>Col1</td>\
+	<td>Col2</td>\
+	</tr>\
+	</tbody></table>");
 	
 	if(diff.inserted.length != 3) throw new Error("Expected 3 lines to be inserted, not " + diff.inserted.length + ". diff=" + JSON.stringify(diff, null, 2));
 	if(diff.removed.length != 3) throw new Error("Expected 3 lines to be removed, not " + diff.removed.length + ". diff=" + JSON.stringify(diff, null, 2));

@@ -200,9 +200,7 @@
 				file.deleteTextRange(start,end); // will run sanity check
 				
 				if(charsBefore.length - charactersDeleted.length != charsAfter.length) {
-					throw new Error(`Expected charsBefore=${charsBefore.length} - charactersDeleted=${charactersDeleted.length} = charsAfter=${charsAfter.length}\n
-					charsAfter=${UTIL.lbChars(charsAfter)}\n
-					charactersDeleted=${UTIL.lbChars(charactersDeleted)}`); 
+					throw new Error("Expected charsBefore=" + charsBefore.length + " - charactersDeleted=" + charactersDeleted.length + " = charsAfter=" + charsAfter.length + "\ncharsAfter=" + UTIL.lbChars(charsAfter) + "\ncharactersDeleted=" + UTIL.lbChars(charactersDeleted) + "");
 				}
 				
 				file.putCharacter("z"); // will also check file.caret
