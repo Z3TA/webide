@@ -56,16 +56,15 @@
 			repoPw: ""
 		}
 		
-		if(EDITOR.user == "admin" && runtime == "nw.js") {
-			var path = require("path");
+		if(EDITOR.user == "admin") {
 			
-			demoSite.projectFolder = path.join(require("dirname"), "/userdirs/demo/static_site_demo/")  // Project folder
-			demoSite.source = path.join(require("dirname"), "/userdirs/demo/static_site_demo/source/")  // Source files (when colaborating; use a source control management tool!)
-			demoSite.preview = path.join(require("dirname"), "/userdirs/demo/static_site_demo/preview/") // Compiles files for review is saved here
-			demoSite.publish = path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-			demoSite.template = path.join(require("dirname"), "/userdirs/demo/static_site_demo/template.htm")  // A template for new pages/posts
-			demoSite.url = "file://" + path.join(require("dirname"), "/userdirs/demo/static_site_demo/public/")
-			
+			demoSite.projectFolder = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/");  // Project folder
+			demoSite.source = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/source/");  // Source files (when colaborating; use a source control management tool!)
+			demoSite.preview = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/preview/"); // Compiles files for review is saved here
+			demoSite.publish = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/public/");  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
+			demoSite.template = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/template.htm");  // A template for new pages/posts
+			demoSite.url = "file://" + EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/public/");
+
 		}
 		else if(EDITOR.user != "admin") {
 			// Virtual folder
@@ -2007,7 +2006,7 @@
 	
 	function like(site, fileListItem) {
 		
-		console.log("Like ? " + fileListItem);
+		console.log("Like ? " + JSON.stringify(fileListItem) + " site.source=" + site.source);
 		
 		if(!fileListItem) return false;
 		
