@@ -24,7 +24,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Use default url in jzedit server login gives bad url in Windows using nw.js
+(IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
 
 Auto pick file-name (todays date!?) when click new page on SSG
 Default save path for new files i SSG profile.
@@ -56,6 +56,8 @@ Testing the Mercurial integration/tools for the SSG
 
 
 todo:
+
+(optimization) reopen_files.js Don't auto-save state if something was changed within 3 seconds !?
 
 Test window.navigator.platform, what value to use in EDITOR.platform !?
 
