@@ -296,7 +296,7 @@ var UTIL = {
 			}
 		}
 	},
-
+	
 	escapeHtml: function escapeHtml(html) {
 		
 		html = html.replace(/</g, "&lt;");
@@ -930,15 +930,16 @@ var UTIL = {
 		var m9 = navigator.userAgent.search("MSIE 9.0");
 		var browser = "Unknown";
 		
-		if (c > -1) {
-			browser = "Chrome";
-		} else if (f > -1) {
-			browser = "Firefox";
-		} else if (m9 > -1) {
-			browser ="MSIE 9.0";
-		} else if (m8 > -1) {
-			browser ="MSIE 8.0";
-		}
+		var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+		var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
+		
+		if(isSafari) browser = "Safari";
+		else if (c > -1) browser = "Chrome";
+		else if (f > -1) browser = "Firefox";
+		else if (m9 > -1) browser ="MSIE 9.0";
+		else if (m8 > -1) browser ="MSIE 8.0";
+		else if(isIe) browser = "MSIE";
+		
 		return browser;
 	},
 	

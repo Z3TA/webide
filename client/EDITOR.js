@@ -169,9 +169,9 @@ EDITOR.lastKeyPressed = "";
 	// These variables and functions are private ...
 	// We only expose methods that are in the EDITOR object.
 	
-	var isIe = (navigator.userAgent.toLowerCase().indexOf("msie") != -1 || navigator.userAgent.toLowerCase().indexOf("trident") != -1);
+	var browser = UTIL.checkBrowser();
 	
-	if(isIe) EDITOR.settings.useCliboardcatcher = true;
+	if(browser.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
 	
 	
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
@@ -4114,7 +4114,7 @@ EDITOR.lastKeyPressed = "";
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 			
-			if (isIe) {
+			if (browser.indexOf("MSIE") == 0) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
 				copyEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
@@ -4155,7 +4155,7 @@ EDITOR.lastKeyPressed = "";
 			
 			if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 			
-			if (isIe) {
+			if (browser.indexOf("MSIE") == 0) {
 				window.clipboardData.setData('Text', textToPutOnClipboard);    
 			} else {
 				cutEvent.clipboardData.setData('text/plain', textToPutOnClipboard);
