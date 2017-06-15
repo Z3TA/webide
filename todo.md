@@ -53,6 +53,9 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
+When saving a .css file belonging to the SSG, reload it in the preview! 
+
 Prevent user_worker.js crash endless loop!
 
 (optimization) reopen_files.js Don't auto-save state if something was changed within 3 seconds !?
