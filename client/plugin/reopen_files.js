@@ -726,7 +726,7 @@
 		var array = text.split(fileDelimiter);
 		for(var i=0; i<array.length; i++) {
 			for(var j=i+1; j<array.length; j++) {
-				if(array[i] == array[j]) throw new Error("Element " + i + ": " + array[i] + " and  " + j + ": " + array[j] + " is the same! ");
+				if(array[i] == array[j]) throw new Error("Sanity check failed: Element " + i + ": " + array[i] + " and  " + j + ": " + array[j] + " is the same! ");
 			}
 		}
 		
