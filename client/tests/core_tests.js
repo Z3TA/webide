@@ -72,12 +72,11 @@
 	
 	EDITOR.addTest(function doesFileCaretUpdate(callback) {
 		
-		// bug: File.insertLineBreak(caret) with another caret then file.caret did not update the file caret.
-		
+		// bug: File.insertLineBreak(caret), with another caret then file.caret, did not update file.caret.
 		
 		EDITOR.openFile("doesFileCaretUpdate.txt", '', function(err, file) {
 			
-			file.write("foo\nbar", true);
+			file.write("foo" + file.lineBreak + "bar", true);
 			
 			// I first thought the bug was in File.createCaret(), but it was actually in File.insertLineBreak() !
 			
