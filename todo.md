@@ -24,6 +24,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Fixing a bunch of errors in production, that don't show up in dev!! ...
+- headers & footers disappears from SSG preview window when typing something in the source
+- When clicking on SSG WYSIWYG: /client//WysiwygEditor.js:1173 Uncaught Error: Unable to find wysiwygEditor.bodyTagPreview=main in preview window ! 
+
 Make a web page!
 
 (IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
@@ -52,6 +56,11 @@ Testing the Mercurial integration/tools for the SSG
 
 
 todo:
+
+When you use Ctrl+P to open "any" file, it's confusing when you see the compiled files from the SSG ...
+When SSG panel is open, change working dir, so a file search only searches inside source folder.
+
+EDITOR.autoCompletePath("/foo/ba") => /foo/bar/
 
 When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
 When saving a .css file belonging to the SSG, reload it in the preview! 
