@@ -24,6 +24,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Make a web page!
+
 (IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
 
 Auto pick file-name (todays date!?) when click new page on SSG
@@ -32,7 +34,6 @@ If many paths (separated by comma) the user has to pick one.
 Auto fill stuff in template file, like date, and author
 
 
-Test in different browsers!
 Work on first time usage experience "publishing a blog post"
 Select a web page theme ... !?
 
@@ -57,6 +58,8 @@ Testing the Mercurial integration/tools for the SSG
 
 todo:
 
+Prevent user_worker.js crash endless loop!
+
 (optimization) reopen_files.js Don't auto-save state if something was changed within 3 seconds !?
 
 Test window.navigator.platform, what value to use in EDITOR.platform !?
@@ -69,6 +72,7 @@ File explorer menu, when right clicking, [cancel, rename, new folder, new file, 
 Able to select files and folders in file explorer !?
 delete (and rename) files via file explorer
 delete files via commit tool
+Move files via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.
 
 Better apparmor guide and script
 
