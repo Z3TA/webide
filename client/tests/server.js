@@ -122,7 +122,7 @@
 			}
 		});
 		
-	}, 1);
+	});
 	
 	EDITOR.addTest(function testConnect(callback) {
 		
