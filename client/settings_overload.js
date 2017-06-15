@@ -3,17 +3,22 @@
 	
 	(You might want to add it to .hgignore .gitignore or equivalent)
 	
+	1l0Oo[]{}.,   These characters should look different using a good programmin font
+	
 */
 
-//EDITOR.settings.style.xmlTagColor = "rgb(255,0,0)";
+(function() { // Self calling function to not clutter global scope
 
-// 1l0Oo[]{}.,
-
-console.log("runtime=" + runtime);
+	// For example, chaning the color of xml tags:
+	//EDITOR.settings.style.xmlTagColor = "rgb(255,0,0)";
+	
+	var browser = UTIL.checkBrowser();
+	
+	console.log("runtime=" + runtime + " browser=" + browser + " process.platform=" + process.platform);
 
 if(runtime=="browser") {
 	
-	// We better use a web safe font ...
+	// We better use a web safe font in the browser
 	EDITOR.settings.style.font = "Courier New";
 	EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New";
 	EDITOR.settings.style.fontSize = 15;
@@ -21,31 +26,32 @@ if(runtime=="browser") {
 	EDITOR.settings.gridWidth = 9;
 	
 	// Web safe fonts are ugly, try to load a nice font ...
-	// OMG! DIFFERENT BROWSERS HAVE DIFFERENT SPACINGS FOR THE SAME FONT
-	if(UTIL.checkBrowser() != "Firefox") {
+		
+		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
 		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 		EDITOR.settings.style.font = "DejaVuSansMono";
-		EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVuSansMono";
+			EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
 		EDITOR.settings.style.fontSize = 13;
 		EDITOR.settings.gridHeight = 22;
 		EDITOR.settings.gridWidth = 7.83;
 	}
 	
-	
 	/*
-		Ligature test
+			Ligatures
+			---------
 		Ligatures are basically two letter as one. Fira code for example makes => into an arrow.
-		Confirmed to worke in: Chrome/Chromium, Firefox, 
 		
 		if(a != b && b <= c && x != y)
 		
 		<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
 		
 	*/
-	if(1==1) {
+		if(browser == "Chrome" || browser == "Safari" || browser == "Firefox") {
+			// Ligatures are confirmed to work in: Chrome/Chromium/Opera, Firefox, Safari, but not IE
 		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
 		EDITOR.settings.style.font = "Fira Code";
 		if(UTIL.checkBrowser() == "Firefox") {
+				// Firefox renders font's differently
 			EDITOR.settings.style.fontSize = 15;
 			EDITOR.settings.gridHeight = 23;
 			EDITOR.settings.gridWidth = 9;
@@ -57,16 +63,14 @@ if(runtime=="browser") {
 			EDITOR.settings.gridWidth = 7.83;
 			EDITOR.settings.style.highlightMatchFont = "bold 14px Fira Code";
 		}
-		
+		}
 	}
-	
-	
-}
-else if(process.platform == "windows") {
-	
+
+	if(process.platform == "win32" && (runtime == "nw.js" || browser == "Chrome") && EDITOR.settings.sub_pixel_antialias == true) {
+		// Only Chrome/Chromium/nw.js supports sub-pixel antialias. Consolas needs sub-pixel antialias to look good
+		
 	/*
-		Windows with "Smooth edges of screen fonts" turned off.
-		These font's look good:
+			When Windows with "Smooth edges of screen fonts" turned off, these font's look good:
 		
 		* DejaVu Sans Mono 14px
 		* ProggyCleanTT <=16px (very small)
@@ -76,7 +80,7 @@ else if(process.platform == "windows") {
 		* Courier New 16-17px
 		* Liberation Mono 12px
 		
-		otherwise Consolas is the best ;)
+			otherwise Consolas looks best ;)
 		
 	*/
 	
@@ -87,10 +91,12 @@ else if(process.platform == "windows") {
 	EDITOR.settings.gridWidth = 8.25;
 	
 }
-else if(process.platform == "linux") {
+
+if(process.platform == "linux" && runtime == "nw.js") {
 	
 	/*
-		
+			Linux does not have Consolas (see README.txt on how to download it if you are desperate)
+			
 		Tested fonts: 
 		* Inconsolata
 		* Ubuntu Mono
@@ -125,3 +131,5 @@ else if(process.platform == "linux") {
 	EDITOR.settings.gridWidth = 7.83;
 	
 }
+	
+})();
