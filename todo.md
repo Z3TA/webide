@@ -73,6 +73,7 @@ Able to select files and folders in file explorer !?
 delete (and rename) files via file explorer
 delete files via commit tool
 Move files via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.
+Copy a folder(or file) by right clicking, selecting copy. A copy is created, you can then move it via drag n drop.
 
 Better apparmor guide and script
 
