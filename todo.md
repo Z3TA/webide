@@ -44,11 +44,6 @@ Trying to allow stat files in /home/** in apparmor profile.
 User can't stat files in preview because no x rights!?
 could not stat because of apparmor!
 
-
-update adduser.js: make it so that users can write to the static_site example!!
-chmod 700
-chown user 
-
 x-real-ip in nginx profile
 
 deploy! user signups!?
@@ -905,6 +900,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Auto complete Save file path when saving.
 
 Functionality discovery: Add a search-glass-button in the upper right corner, clicking it is the same as clicking the keyboard function/ctrl button:
 It will bring a action command box, where you can select between all possible keyboard combos, and from stuff in the context menu.
