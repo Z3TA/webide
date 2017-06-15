@@ -128,14 +128,14 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 
 	if(user.rootPath) {
-		var url = require("url");
-		var path = require("path");
+		var urlModule = require("url");
+		var pathModule = require("path");
 		
-		var parse = url.parse(pathToFileOrDir);
+		var parsedUrl = urlModule.parse(pathToFileOrDir);
 		
-		//console.log(parse);
+		//console.log("parsedUrl=" + JSON.stringify(parsedUrl));
 		
-		var protocol = parse.protocol ? parse.protocol.toLowerCase() : "LOCAL:";
+		var protocol = parsedUrl.protocol ? parsedUrl.protocol.toLowerCase() : "LOCAL:";
 		protocol = protocol.substring(0, protocol.length-1); // Remove colon: 
 		
 		//console.log("protocol=" + protocol + " indexOf [" + REMOTE_PROTOCOLS.join(",") + "] = " + REMOTE_PROTOCOLS.indexOf(protocol));
@@ -143,22 +143,36 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 		if(REMOTE_PROTOCOLS.indexOf(protocol) != -1) return pathToFileOrDir;
 		
 		// else: The protocol is not allowed or its a local path
-		
+		//console.log("Not a URL (at least not a supported url) pathToFileOrDir=" + pathToFileOrDir);
 		
 		var lastCharOfPath = pathToFileOrDir.charAt(pathToFileOrDir.length-1);
 		
 		var isDirectory = (lastCharOfPath == "/" || lastCharOfPath == "\\");
 
+		// Problem: //foo/bar/baz will be parsed as root=//foo/bar
+		// Solution: Remove double delimiters at start of path
+		//var delimiter = UTIL.getPathDelimiter(pathToFileOrDir);
+		var delimiter = "/"; // \\[server]\[sharename]\ is a valid (root) path
+		while(pathToFileOrDir.charAt(0) == delimiter && pathToFileOrDir.charAt(1) == delimiter) pathToFileOrDir = pathToFileOrDir.substr(1);
 		
-		parse = path.parse(pathToFileOrDir);
+		var parsedPath = pathModule.parse(pathToFileOrDir);
 		
-		var pathToFileOrDirWithoutRoot = pathToFileOrDir.replace(parse.root, "");
+		//console.log("parsedPath=" + JSON.stringify(parsedPath));
 		
-		var translatedPath = path.join(user.rootPath, pathToFileOrDirWithoutRoot);
+		var pathToFileOrDirWithoutRoot = pathToFileOrDir.replace(parsedPath.root, "");
+		//console.log("pathToFileOrDirWithoutRoot=" + pathToFileOrDirWithoutRoot);
 		
-		translatedPath = path.resolve(translatedPath);
 		
-		if(translatedPath == path.resolve("users.pw")) {
+		// Convert path delimiters to FS delimiters
+		//pathToFileOrDirWithoutRoot = UTIL.toSystemPathDelimiters(pathToFileOrDirWithoutRoot);
+		
+		var translatedPath = pathModule.join(user.rootPath, pathToFileOrDirWithoutRoot);
+		//console.log("(after join) translatedPath=" + translatedPath);
+		
+		translatedPath = pathModule.resolve(translatedPath);
+		//console.log("(after resolve) translatedPath=" + translatedPath);
+		
+		if(translatedPath == pathModule.resolve("users.pw")) {
 			console.warn("User name=" + user.name + " is accessing users.pw");
 		}
 		else if(translatedPath == "/etc/jzedit_user") {

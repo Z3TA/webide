@@ -670,8 +670,14 @@ API.createPath = function createPath(user, json, createPathCallback) {
 		
 	*/
 	
+	var lastCharOfPath = json.pathToCreate.substr(json.pathToCreate.length-1);
+	
+	if(lastCharOfPath != "/" && lastCharOfPath != "\\") return createPathCallback("Last character is not a file path delimiter: " + json.pathToCreate);
+	
 	var pathToCreate = user.translatePath(json.pathToCreate);
 	if(pathToCreate instanceof Error) return createPathCallback(pathToCreate);
+	
+	console.log("json.pathToCreate=" + json.pathToCreate + " pathToCreate=" + pathToCreate);
 	
 	pathToCreate = UTIL.trailingSlash(pathToCreate);
 	

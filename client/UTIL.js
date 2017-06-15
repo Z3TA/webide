@@ -13,8 +13,21 @@ var UTIL = {
 	toSystemPathDelimiters: function toSystemPathDelimiters(path) {
 		
 		// Makes sure the path uses the right path delimiters ...
+		console.log("toSystemPathDelimiters: path=" + path);
 		
-		var delimiter = UTIL.getPathDelimiter(EDITOR.workingDirectory);
+		if(path.indexOf("://") != -1) {
+			var delimiter = "/";
+		}
+		else {
+		try {
+			var pathModule = require("path");
+			var delimiter = pathModule.sep;
+		}
+		catch(err) {
+			// Probably running in a browser
+			var delimiter = UTIL.getPathDelimiter(EDITOR.workingDirectory);
+		}
+		}
 		
 		console.log("delimiter=" + delimiter);
 		console.log("path=" + path);
@@ -25,9 +38,9 @@ var UTIL = {
 		console.log("path=" + path);
 		
 		return path;
-				
+		
 	},
-
+	
 	trailingSlash: function trailingSlash(folderPath) {
 		// Makes sure the folder has a trailing slash
 		//console.log("Get trailing slash for folderPath=" + folderPath);
@@ -112,6 +125,8 @@ var UTIL = {
 		*/
 		
 		fullPath = fullPath.trim(); // Remove white space before and after
+		
+		console.log("getFolders: fullPath=" + fullPath);
 		
 		if(fullPath == "/") return ["/"];
 		
@@ -219,9 +234,10 @@ var UTIL = {
 				paths.push(fullFolder); // Add root (drive letter)
 				
 				for(var i=0; i<folders.length; i++) {
+					if(folders[i] != "") {
 					fullFolder += folders[i] + "\\";
 					paths.push( fullFolder );
-					//(i<folders.length) fullFolder += ;
+					}
 				}
 				
 				return paths;
@@ -243,8 +259,10 @@ var UTIL = {
 				paths.push("/"); // Add root folder
 				
 				for(var i=0; i<folders.length; i++) {
+					if(folders[i] != "") {
 					fullFolder += folders[i] + "/";
 					paths.push(fullFolder);
+					}
 				}
 				
 				return paths;
@@ -252,15 +270,15 @@ var UTIL = {
 			}
 		}
 	},
-
-
+	
+	
 	getPathDelimiter: function getPathDelimiter(path) {
 		// Returns the delimiter character used for separating directories in a file-path or url
 		
 		// Use working directory if there's no path
 		if(!path && EDITOR.workingDirectory) path = EDITOR.workingDirectory;
 		
-	
+		
 		if(!path) {
 			console.warn("Unable to determine path delimiter. Slash / will be used! path=" + path);
 			return "/";
@@ -272,7 +290,10 @@ var UTIL = {
 		else {
 			if(path.indexOf("/") != -1) return "/";
 			else if(path.indexOf("\\") != -1) return "\\";
-			else throw new Error("Unable to determine file path folder separator/delimiter of path=" + path);
+			else {
+				console.warn("Unable to determine file path folder separator/delimiter of path=" + path);
+				return UTIL.toSystemPathDelimiters("/");
+			}
 		}
 	},
 

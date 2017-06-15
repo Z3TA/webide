@@ -57,7 +57,7 @@
 		});
 		}
 		
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function testListFiles(callback) {
@@ -104,7 +104,11 @@
 		
 		//alertBox(EDITOR.workingDirectory);
 		
-		var json = {pathToCreate: UTIL.toSystemPathDelimiters(EDITOR.workingDirectory + "/temp/foo/bar")};
+		
+		
+		var tempPath = "/temp/foo/bar/";
+		var pathToCreate = UTIL.toSystemPathDelimiters(EDITOR.workingDirectory + tempPath);
+		var json = {pathToCreate: pathToCreate};
 		
 		CLIENT.cmd("createPath", json, function(err, json) {
 			if(err) throw err
@@ -112,13 +116,13 @@
 				
 				var fullPath = json.path;
 				
-				if(fullPath.indexOf("foo") == -1) throw new Error("Full path does not include foo");
+				if(fullPath.indexOf("foo") == -1) throw new Error("Full path=" + fullPath + " does not include foo! pathToCreate=" + pathToCreate);
 				
 				callback(true);
 			}
 		});
 		
-	});
+	}, 1);
 	
 	EDITOR.addTest(function testConnect(callback) {
 		
