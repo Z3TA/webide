@@ -121,6 +121,8 @@
 
 		var indentation = indentationAround(file, row);
 		
+		if(indentation == null) throw new Error("(in)sanity: file.path=" + file.path + " row=" + row);
+		
 		if(indentationBefore.below == indentation.below && indentationBefore.above == indentation.above) return done();
 		
 		if(insideParsedObject(file.caret.index, file.parsed.quotes) || insideParsedObject(file.caret.index, file.parsed.comments)) return done();

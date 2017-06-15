@@ -1084,7 +1084,7 @@ var WysiwygEditor;
 			
 			previewWin.location.href = wysiwygEditor.url;
 			
-			// Can't seem to be able to set a onload event listener ...'
+			// Can't seem to be able to set a onload event listener ...
 			var checkLocationIntervalTime = 100;
 			setTimeout(checkLocation, checkLocationIntervalTime);
 			
@@ -1122,7 +1122,9 @@ var WysiwygEditor;
 			}
 			else {
 				console.log(previewWin);
-				throw new Error("Unable to get location from previewWin")
+				console.warn("Unable to get location from previewWin. Did the window close !?");
+				wysiwygEditor.close();
+				//throw new Error("Unable to get location from previewWin")
 			}
 		}
 		
@@ -1143,9 +1145,9 @@ var WysiwygEditor;
 			if(!win) throw new Error("Unable to get preview window window!");
 			
 			if(!doc.innerHTML) {
-				doc = doc.documentElement; // Hi Firefox!
+				if(doc.documentElement) doc = doc.documentElement; // Hi Firefox!
 				if(!doc.innerHTML) throw new Error("doc.innerHTML=" + doc.innerHTML);
-			} 
+			}
 			
 			/*
 				var prewviewContent = doc.documentElement.outerHTML;
