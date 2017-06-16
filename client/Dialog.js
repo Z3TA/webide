@@ -144,8 +144,23 @@ Dialog.prototype.close = function(someEvent) {
 	}
 }
 
-function alertBox(msg, icon) {
+function alertBox(msg, icon, recursionCount) {
 	var dialog = new Dialog(msg, icon);
+	
+	if(!dialog.div) {
+		return setTimeout(function wait() {
+			// Wait until the body element is available
+			
+			if(recursionCount) recursionCount++;
+			else recursionCount = 1;
+			
+			if(recursionCount > 4) throw new Error("Unable to show alertBox msg=" + msg + "");
+			
+			alertBox(msg, icon, recursionCount);
+			
+		}, 100);
+	}
+	
 	
 	var button = document.createElement("button");
 	button.setAttribute("class", "alert");
@@ -210,8 +225,22 @@ function confirmBox(msg, options, callback, recursionCount) {
 	
 }
 
-function promptBox(msg, isPassword, defaultValue, callback) {
+function promptBox(msg, isPassword, defaultValue, callback, recursionCount) {
 	var dialog = new Dialog(msg);
+	
+	if(!dialog.div) {
+		return setTimeout(function wait() {
+			// Wait until the body element is available
+			
+			if(recursionCount) recursionCount++;
+			else recursionCount = 1;
+			
+			if(recursionCount > 4) throw new Error("Unable to show promptBox msg=" + msg + "");
+			
+			promptBox(msg, isPassword, defaultValue, callback, recursionCount);
+			
+		}, 100);
+	}
 	
 	var input = document.createElement("input");
 	
