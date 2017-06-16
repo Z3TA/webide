@@ -22,12 +22,15 @@ have a tutorial that shows how to publish to webpage and write new posts
 
 
 What I'm working on
-
 -------------------
 
 
 Fixing a bunch of errors in production, that don't show up in dev!! ...
-- headers & footers disappears from SSG preview window when typing something in the source (because of RN !? nope)
+- headers & footers disappears from SSG preview window when typing something in the source
+it fails on dev in Opera/windows! because of RN !? nope 
+nw.js gets the wrong url: http://ivfoazhluq/about.htm ...
+
+
 - When clicking on SSG WYSIWYG: /client//WysiwygEditor.js:1173 Uncaught Error: Unable to find wysiwygEditor.bodyTagPreview=main in preview window ! 
 
 Make a web page!
