@@ -27,7 +27,7 @@ What I'm working on
 
 
 Fixing a bunch of errors in production, that don't show up in dev!! ...
-- headers & footers disappears from SSG preview window when typing something in the source
+- headers & footers disappears from SSG preview window when typing something in the source (because of RN !? nope)
 - When clicking on SSG WYSIWYG: /client//WysiwygEditor.js:1173 Uncaught Error: Unable to find wysiwygEditor.bodyTagPreview=main in preview window ! 
 
 Make a web page!
@@ -81,7 +81,7 @@ File explorer menu, when right clicking, [cancel, rename, new folder, new file, 
 Able to select files and folders in file explorer !?
 delete (and rename) files via file explorer
 delete files via commit tool
-Move files via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.
+Move files via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.z
 Copy a folder(or file) by right clicking, selecting copy. A copy is created, you can then move it via drag n drop.
 
 Better apparmor guide and script
@@ -91,6 +91,15 @@ Write a userdel script (userdel -r -f nameOfUser)
 Make apparmor and systemd service profiles
 
 Able to add npm modules to the SSG ...
+
+Update script that check https://www.webtigerteam.com/editor/download/linux/latest/version.inc and ask the user to update:
+The scripts syncs then checks hashtable.txt and compares to the local hashtable.txt and downloads all files that changed,
+then ask the user to restart the editor. (the client reloads)
+Also have some sort of fingerprint/signature to prevent MiTM attacks.
+The update should be done on server side /server.js
+
+
+
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?

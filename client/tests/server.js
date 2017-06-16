@@ -180,14 +180,14 @@
 					
 					callback(true);
 					
-					// Teardown !?
+					// Clieanup !?
 					
 				});
 			});
 		}
 		
 		
-	});
+	}, 1);
 	
 	
 	

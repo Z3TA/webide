@@ -745,11 +745,14 @@ function handleHttpRequest(request, response){
 	if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
 		localFolder = HTTP_ENDPOINTS[firstDir];
+		
+		localFolder = UTIL.toSystemPathDelimiters(localFolder);
+		
 		urlPath = urlPath.replace(firstDir + "/", "");
 		
 		responseHeaders['Cache-Control'] = 'no-cache';
 		
-		console.log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + " " + localFolder);
+		console.log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "");
 		
 	}
 	else {
@@ -782,10 +785,11 @@ function handleHttpRequest(request, response){
 	var filePath = path.join(localFolder, urlPath);
 	
 	
-	
 	if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath) || filePath.indexOf(PW_FILE) != -1) {
-		console.log("filePath=" + filePath);
-		console.log("localFolder=" + localFolder);
+		if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
+		if(!path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
+		if(filePath.indexOf(PW_FILE) != -1) console.log("PW_FILE=" + PW_FILE);
+		
 		console.log("urlPath=" + urlPath);
 		
 		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
