@@ -4,7 +4,7 @@
 	"window": {
 		"title": "JZedit",
 		"show": true,
-		"icon": "gfx/jz64.png", 
+		"icon": "client/gfx/jz64.png", 
 		"toolbar": true,
 		"frame": true,
 		"transparent": false,
@@ -25,6 +25,6 @@
 	},
 	"repository": {
 		"type": "Mercurial",
-		"url": "http://webtigerteam.com/jzedit/"
+		"url": "http://hg.webtigerteam.com/repo/jzedit/"
 	}
 }
