@@ -173,6 +173,7 @@ EDITOR.lastKeyPressed = "";
 	
 	if(browser.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
 	
+	if(browser != "Chrome") alertBox("The editor might be slow in your browser (" + browser + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
 	
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
