@@ -22,7 +22,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 
 
 What I'm working on
+
 -------------------
+
 
 Fixing a bunch of errors in production, that don't show up in dev!! ...
 - headers & footers disappears from SSG preview window when typing something in the source
@@ -242,6 +244,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+After clicking OK on the alertBox button (for example when turning devMode off) you can't write ...
 
 Double clicking on a single letter in a large file takes forever to highlight. Optimization: Only highlight what the user can see!
 
