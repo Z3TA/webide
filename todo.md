@@ -24,6 +24,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Writing test for broblem below:
 
 Fixing a bunch of errors in production, that don't show up in dev!! ...
 - headers & footers disappears from SSG preview window when typing something in the source
