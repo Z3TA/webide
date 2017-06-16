@@ -809,9 +809,16 @@
 			file.fileExtension == "php" || 
 			file.fileExtension == "xml") xmlMode = true; // Start in xml mode
 
-			if(file.text.substr(0,100).match(/(<!DOCTYPE html)|(<html.*>)/i)) xmlMode = true;
+			var matchHtml = file.text.substr(0,100).trim().match(/(<!DOCTYPE html)|(<html.*>)/i);
+			
+			if(matchHtml) {
+				if(matchHtml.index == 0) {
+				xmlMode = true;
+				console.log("Set xmlMode=" + xmlMode);
+				}
+			}
 		}
-
+		
 		
 		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
 		

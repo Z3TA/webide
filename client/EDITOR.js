@@ -3130,6 +3130,7 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.runTests = function runTests() {
 		runTests_5616458984153156();
+		return true;
 	}
 	
 	EDITOR.deleteFile = function(filePath, callback) {

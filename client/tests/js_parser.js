@@ -1,5 +1,17 @@
 
 
+EDITOR.addTest(function htmlTagInString(callback) {
+	EDITOR.openFile("htmlTagInString.js", '// foo\nvar bar = "<html>"', function(err, file) {
+		
+		if(file.parsed.comments.length != 1) throw new Error("Expected one comment")
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
+
 EDITOR.addTest(function xmlUnlosedTagColorWeirdness(callback) {
 	EDITOR.openFile("xmlUnlosedTagColorWeirdness.js", "'<h1>foo</h1 '\n'<h2>bar</h2>'", function(err, file) {
 		

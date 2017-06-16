@@ -29,7 +29,7 @@ Fixing a bunch of errors in production, that don't show up in dev!! ...
 - headers & footers disappears from SSG preview window when typing something in the source
 it fails on dev in Opera/windows! because of RN !? nope 
 nw.js gets the wrong url: http://ivfoazhluq/about.htm ...
-
+todo: Write tests that catches these!
 
 - When clicking on SSG WYSIWYG: /client//WysiwygEditor.js:1173 Uncaught Error: Unable to find wysiwygEditor.bodyTagPreview=main in preview window ! 
 
