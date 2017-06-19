@@ -24,8 +24,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Investigate why it's crazy slow in Firefox: 
-It's fine (avg 57 fps) in Firefox on Windows when devMode is set to false (no console.log's) but 0 fps when devMode is set to true!
 
 Writing test for problem below:
 
@@ -65,6 +63,8 @@ Testing the Mercurial integration/tools for the SSG
 
 
 todo:
+
+Unload/load all plugins when loggin in as a different users, or on a different server !?
 
 When you use Ctrl+P to open "any" file, it's confusing when you see the compiled files from the SSG ...
 When SSG panel is open, change working dir, so a file search only searches inside source folder.
@@ -1390,6 +1390,15 @@ Auto complete xml tags! (in xml/svg files)
 
 Optimization
 ============
+
+Firefox have some nasty performance issues ... paint 9ms keyisdown 12ms
+add console.time("keyIsDown")
+use animationframe instead of setinterval for render? setInterval, even though only 0.02ms to run seem to have some overhead cost!??
+
+Investigation why it's crazy slow in Firefox:
+It's fine (avg 57 fps) in Firefox on Windows when devMode is set to false (no console.log's) but 0 fps when devMode is set to true!
+The performance is also OK (avg 52 FPS) in Firefox on Linux, with a small file, and devMode set to false.
+
 
 Fixing performence problems in wysiwyg (pasting a word document took a lot of time, also typing in wysiwyg afterwards was slow)
 

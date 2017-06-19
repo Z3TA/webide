@@ -909,11 +909,21 @@ var WysiwygEditor;
 		
 	}
 	
-	
+	WysiwygEditor.prototype.getPreviewWindowHtml = function getPreviewWindowHtml() {
+		// Returns everyting in the preview window
+		// Useful for debugging purpuses
+		var wysiwygEditor = this;
+		var win = wysiwygEditor.previewWin.window;
+		var doc = win.document; // previewWin.document is not available in nw.js gui
+		
+		if(document.documentElement) doc = document.documentElement;
+		
+		return doc.innerHTML;
+	}
 	
 	WysiwygEditor.prototype.getContentEditableCode = function getContentEditableCode() {
 		// Returns the innerHTML of body, where the first line break is removed, and also the last line break if there's any
-		// The line breaks needts to be trimmed for the diff to work (see function getSourceCodeBody)
+		// The line-breaks needs to be trimmed for the diff to work (see function getSourceCodeBody)
 		
 		var wysiwygEditor = this;
 		

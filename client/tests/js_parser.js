@@ -9,7 +9,7 @@ EDITOR.addTest(function htmlTagInString(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 
 EDITOR.addTest(function xmlUnlosedTagColorWeirdness(callback) {

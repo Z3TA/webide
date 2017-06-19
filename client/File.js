@@ -201,7 +201,7 @@ var File; // File object is global
 		
 		if(caret.index == index && caret.row == row && caret.col == col) {
 			console.warn("Caret already at " + JSON.stringify(file.caret));
-			return;
+			return caret;
 		}
 		
 		if(index != undefined && row == undefined && col == undefined) return file.moveCaretToIndex(index, caret);
@@ -816,6 +816,7 @@ var File; // File object is global
 			
 			Always add another row because it's more simple, sligly faster and less bug prone.
 			If you want to add text to the first row, open the file using that text.
+			Use File.insertTextRow() to insert a row before EOF.
 		*/
 		if(text.length == 0) {
 			console.warn("No text in writeLine argument!");
