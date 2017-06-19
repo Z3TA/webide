@@ -24,7 +24,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Writing test for broblem below:
+Investigate why it's crazy slow in Firefox: 
+It's fine (avg 57 fps) in Firefox on Windows when devMode is set to false (no console.log's) but 0 fps when devMode is set to true!
+
+Writing test for problem below:
 
 Fixing a bunch of errors in production, that don't show up in dev!! ...
 - headers & footers disappears from SSG preview window when typing something in the source
