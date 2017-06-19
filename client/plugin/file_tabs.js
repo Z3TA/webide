@@ -175,6 +175,8 @@ for(var i=0; i<list.length; i++) {
 		
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
+		if(!el) throw new Error("Unable to find tab for file.path=" + file.path); // Possible due to tab being closed
+		
 		showUnsavedStatus(el);
 		
 	}
