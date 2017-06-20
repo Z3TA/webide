@@ -534,19 +534,6 @@ var WysiwygEditor;
 			}
 		}
 		
-		if(runtime == "nw.js") previewWin.show();
-		else {
-			// It's probably opened in another tab ...
-		}
-		
-		//else console.log("File is not the source file! sourceFile.path=" + sourceFile.path + " file.path=" + file.path);
-		
-		
-		
-		//}, 3000);
-		
-		
-		
 		return true;
 	}
 	
@@ -1088,6 +1075,9 @@ var WysiwygEditor;
 		
 		//previewWin.onload = previewWindowLoaded;
 		
+		var checkLocationMaxTries = 100;
+		var checkLocationTries = 0;
+		
 		if(wysiwygEditor.url && previewWin.location.href != wysiwygEditor.url) {
 			
 			console.log("Setting window url to wysiwygEditor.url=" + wysiwygEditor.url);
@@ -1120,6 +1110,8 @@ var WysiwygEditor;
 				wysiwygEditor.url=http://b9u41v9BFM:123@127.0.0.1:8080/testpage.htm
 			*/
 			
+			checkLocationTries++;
+			
 			var url = wysiwygEditor.url;
 			
 			var matchAuth = url.match(/^http(s)?:\/\/(.*:.*@)/);
@@ -1128,7 +1120,9 @@ var WysiwygEditor;
 			if(previewWin.location.href == url) previewWindowLoaded();
 			else if(previewWin.location.href) {
 				console.log("previewWin.location.href=" + previewWin.location.href + "wysiwygEditor.url=" + wysiwygEditor.url + "url=" + url);
-				setTimeout(checkLocation, checkLocationIntervalTime);
+				
+				if(checkLocationTries > checkLocationMaxTries) alertBox("Failed to get location from preview window! Did you close it ?");
+				else setTimeout(checkLocation, checkLocationIntervalTime);
 			}
 			else {
 				console.log(previewWin);

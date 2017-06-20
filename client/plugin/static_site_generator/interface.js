@@ -1257,12 +1257,17 @@
 					
 					console.log("serve url=" + url);
 					
-					// Replace the hostname with the hostname we are currently on to prevent cross origin errors
-					var host = UTIL.getLocation(url).host;
-					
-					url = url.replace(host, window.location.host);
-					
-					console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
+					if(runtime != "nw.js") {
+						// Replace the hostname with the hostname we are currently on to prevent cross origin errors
+						var host = UTIL.getLocation(url).host;
+						
+						if(!host) throw new Error('Did not expect "falsy" host=' + host);
+						if(!window.location.host) throw new Error('Did not expect "falsy" window.location.host=' + window.location.host);
+						
+						url = url.replace(host, window.location.host);
+						
+						console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
+					}
 					
 					previewBaseUrl = url;
 					
@@ -1342,6 +1347,8 @@
 							
 							if(previewWin) previewWin.close();
 							
+							
+							console.log("SSG url=" + url);
 							previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
 							
 							previewWin.onClose = function() {

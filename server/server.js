@@ -700,7 +700,7 @@ function createHttpEndpoint(folder, callback) {
 		}
 	}
 	
-	var endPoint = randomString(10);
+	var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
 	
 	HTTP_ENDPOINTS[endPoint] = folder;
 	
@@ -742,6 +742,8 @@ function handleHttpRequest(request, response){
 	
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
+	
+	
 	if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
 		localFolder = HTTP_ENDPOINTS[firstDir];
@@ -756,6 +758,8 @@ function handleHttpRequest(request, response){
 		
 	}
 	else {
+		
+		console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
 		
 		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 		
