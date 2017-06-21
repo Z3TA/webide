@@ -277,7 +277,7 @@
 						alertBox("Unable to login: " + err.message + "\nURL: " + server.url);
 					}
 					else {
-						alertBox("Successfully logged in to:\n" + server.url + "\nUser:" + resp.loginSuccess.user);
+						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
 					}
 				});
 					
