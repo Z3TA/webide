@@ -12,7 +12,6 @@ var CRAZY = getArg(["crazy", "crazy"]);
 var HTTP_ENDPOINTS = {};
 var HOME_DIR = getArg(["h", "homedir"]); // || "/home/";
 
-
 var NO_PW_HASH = getArg(["nopwhash"]);
 
 // Log levels
@@ -91,6 +90,9 @@ var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 var HTTP_PORT = getArg(["p", "port"]) || 8099; 
 if(!isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
+// For generating URL's
+var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
+var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 
 
 process.on("SIGINT", function sigInt() {
@@ -925,9 +927,10 @@ function makeUrl(endPoint) {
 	
 	var url = "http://";
 	
-	url += ip;
+	if(HOSTNAME) url += HOSTNAME;
+	else url += ip;
 	
-	if(port != 80) url += ":" + port;
+	if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
 	
 	url += "/";
 	
