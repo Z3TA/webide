@@ -126,7 +126,7 @@
 	
 	EDITOR.addTest(function testConnect(callback) {
 		
-		var connJson = {protocol: "ftp", serverAddress: "192.168.1.77", user: "test", passw: "test123"};
+		var connJson = {protocol: "ftp", serverAddress: "ftp.sunet.se", user: "anonymous", passw: ""};
 		
 		CLIENT.cmd("connect", connJson, function(err, json) {
 			if(err) throw err;
