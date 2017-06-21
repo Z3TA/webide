@@ -545,8 +545,11 @@ function sockJsConnection(connection) {
 									
 									if(workerMessage.resp || workerMessage.error) send(workerMessage);
 									else if(workerMessage.message) {
+										var counter = 0;
 										for(var conn in USER_CONNECTIONS[name].connections) {
-											send(workerMessage.message, conn);
+											if(!conn) console.warn("No connection for user=" + name + " counter=" + counter);
+											else send(workerMessage.message, conn);
+											counter++;
 										}
 									}
 									else if(workerMessage.request) {

@@ -470,45 +470,70 @@ for(var i=0; i<list.length; i++) {
 			EDITOR.closeFile(path);
 		}
 		
-		// Open test files
-		EDITOR.openFile("dirA/File1", 'File1', function(err, file) {
-			EDITOR.openFile("dirA/File2", 'File2', function(err, file) {
-				EDITOR.openFile("dirB/File3", 'File3', function(err, file) {
-					EDITOR.openFile("dirB/File4", 'File4', function(err, file) {
-						EDITOR.openFile("dirB/File5", 'File5', function(err, file) {
-							var list;
+		var testFiles = ["dirA/File0", "dirA/File1", "dirB/File2", "dirB/File3", "dirB/File4"];
+		
+			// Open test files
+		EDITOR.openFile(testFiles[0], 'File0', function(err, file) {
+			EDITOR.openFile(testFiles[1], 'File1', function(err, file) {
+				EDITOR.openFile(testFiles[2], 'File2', function(err, file) {
+					EDITOR.openFile(testFiles[3], 'File3', function(err, file) {
+						EDITOR.openFile(testFiles[4], 'File4', function(err, file) {
 							
-							EDITOR.currentFile = EDITOR.files["dirB/File5"];
+							var waitCounter = 0;
+							wait();
 							
-							console.log("order=" + EDITOR.currentFile.order);
+							function wait() {
+								if(waitCounter++ > 10) throw new Error("Waiting for other files to close before running file-order test max waitCounter=" + waitCounter + " reached! ");
+								
+								var list = EDITOR.sortFileList();
+								for(var i=0; i<list.length; i++) {
+									if(list[i].path != testFiles[i]) {
+										console.log("Waiting for file to close: " + list[i].path);
+										return setTimeout(wait, 100);
+									}
+								}
+								console.log("No unknown files found. Running test ...");
+								return tryOrder();
+							}
 							
-							EDITOR.currentFile.order-=1.5;
-							list = EDITOR.sortFileList();
-							if(list[3].path != "dirB/File5") throw new Error("dirB/File5 should be fourh! list=" + JSON.stringify( list.map(function(file){return file.path}) )  );
-					
-					EDITOR.currentFile.order-=1.5;
-					list = EDITOR.sortFileList();
-							if(list[2].path != "dirB/File5") throw new Error("dirB/File5 should be third! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
+							function tryOrder() {
+								
+								EDITOR.currentFile = EDITOR.files["dirB/File4"];
+								
+								console.log("order=" + EDITOR.currentFile.order);
+								
+								var list = EDITOR.sortFileList();
+								
+								if(list.length != 5) throw new Error("Unknow file in file list: " + JSON.stringify(  list.map(function(file){return file.path})  )); // We are insane! (JavaScript should be single threaded)
+								
+								EDITOR.currentFile.order-=1.5;
+								var listA = EDITOR.sortFileList();
+								if(listA[3].path != "dirB/File4") throw new Error("dirB/File4 should be fourh! listA=" + JSON.stringify( listA.map(function(file){return file.path}) )  );
+								
+								EDITOR.currentFile.order-=1.5;
+								var listB = EDITOR.sortFileList();
+								if(listB[2].path != "dirB/File4") throw new Error("dirB/File4 should be third! listB=" + JSON.stringify( listB.map(function(file){return file.path}) ));
+								
+								EDITOR.currentFile.order-=1.5;
+								var listC = EDITOR.sortFileList();
+								if(listC[1].path != "dirB/File4") throw new Error("dirB/File4 should be second! listC=" + JSON.stringify( listC.map(function(file){return file.path}) ));
+								
+								EDITOR.currentFile.order-=1.5;
+								var listD = EDITOR.sortFileList();
+								if(listD[0].path != "dirB/File4") throw new Error("dirB/File4 should be first! listD=" + JSON.stringify( listD.map(function(file){return file.path}) ));
+								
+								// Close test files
+								for(var path in EDITOR.files) {
+									EDITOR.closeFile(path);
+							}
 							
-							EDITOR.currentFile.order-=1.5;
-							list = EDITOR.sortFileList();
-							if(list[1].path != "dirB/File5") throw new Error("dirB/File5 should be second! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
+							callback(true);
+							}
 							
-							EDITOR.currentFile.order-=1.5;
-							list = EDITOR.sortFileList();
-							if(list[0].path != "dirB/File5") throw new Error("dirB/File5 should be first! list=" + JSON.stringify( list.map(function(file){return file.path}) ));
-							
-					// Close test files
-					for(var path in EDITOR.files) {
-						EDITOR.closeFile(path);
-					}
-					
-					callback(true);
-					
-				});
+						});
+					});
 				});
 			});
-		});
 		});
 		
 	});

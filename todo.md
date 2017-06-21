@@ -24,6 +24,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Making tests pass in production!
+
 Make a web page!
 
 (IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
