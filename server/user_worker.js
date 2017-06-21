@@ -110,9 +110,9 @@ user.changeWorkingDir = function changeWorkingDir(path) {
 user.remoteConnectionClosed = function remoteConnectionClosed(protocol, serverAddress) {
 	
 	// Notify the client about closed connection
-	user.send({resp: {
+	user.send({
 		connectionClosed: {protocol: protocol, serverAddress: serverAddress}
-	}});
+		});
 	
 	delete user.remoteConnections[serverAddress]; // Remove the connection
 	

@@ -890,9 +890,8 @@ API.connect = function connect(user, json, callback) {
 		ftpClient.on('error', function(err) {
 			
 			if(callback) callback(err);
-			
-			user.send(err.message);
-			
+			else user.send(err.message + " (serverAddress=" + serverAddress + ")");
+			callback = null;
 			user.remoteConnectionClosed("ftp", serverAddress);
 			
 		});

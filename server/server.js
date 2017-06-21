@@ -511,7 +511,7 @@ function sockJsConnection(connection) {
 								
 								var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
 								
-								log("User name=" + name + " logged in! userConnectionId=" + userConnectionId + "" + JSON.stringify(userInfo));
+								log("User name=" + name + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
 								
 								userWorker.send({identify: userInfo});
 								userWorker.on("message", messageFromWorker);
@@ -545,16 +545,9 @@ function sockJsConnection(connection) {
 									
 									if(workerMessage.resp || workerMessage.error) send(workerMessage);
 									else if(workerMessage.message) {
-										var counter = 0;
-										for(var conn in USER_CONNECTIONS[name].connections) {
-											if(!conn) console.warn("No connection for user=" + name + " counter=" + counter);
-											else if(!conn.write) {
-												console.log(conn);
-												throw new Error("No write method in user=" + name + " counter=" + counter + " connection!");
-											}
-											else send(workerMessage.message, conn);
-											counter++;
-										}
+										for (var i=0, conn; i<USER_CONNECTIONS[name].connections.length; i++) {
+											send(workerMessage.message, USER_CONNECTIONS[name].connections[i]);
+												}
 									}
 									else if(workerMessage.request) {
 										// For special functionality ...
@@ -625,7 +618,12 @@ function sockJsConnection(connection) {
 				
 				if(conn == undefined) conn = connection;
 				
-				if(answer.id == undefined) answer.id = id;
+				if(answer.id == undefined && id && answer.resp) answer.id = id;
+				
+				if(answer.id == id) id = null; // Do not reuse the same id
+				
+				if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
+				// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
 				
 				var str = JSON.stringify(answer);
 				
@@ -639,7 +637,7 @@ function sockJsConnection(connection) {
 	
 	connection.on("close", function() {
 		
-		log("Closed " + protocol + " from " + IP);
+		log("Closed client connection (protocol=" + protocol + ") from " + IP);
 		
 		
 		if(userWorker) {

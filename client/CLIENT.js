@@ -96,10 +96,11 @@ var CLIENT = {}; // Client object is global
 				
 				if(json.error) console.warn("Server ERROR: " + json.error);
 				
-				if((json.resp || json.event)) {
-					var resp = json.resp || json.event;
+				if(json.resp) {
+					var resp = json.resp;
 					for(var method in resp) {
 						// Call event listeners
+						// note: event listeners are also called If json has no id, and no resp ...
 						if(eventListeners.hasOwnProperty(method)) {
 							CLIENT.fireEvent(method, resp[method]);
 						}
@@ -136,6 +137,7 @@ var CLIENT = {}; // Client object is global
 							CLIENT.fireEvent(method, json[method]);
 						}
 						else throw new Error("Unexpected server response (method=" + method + "): " + JSON.stringify(json, null, 2));
+						// Might be an event without a listener!
 					}
 
 				}

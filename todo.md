@@ -24,6 +24,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Running server test connection results in server retruning several messages ... with old id's!?
+
 Making tests pass in production!
 
 Make a web page!
