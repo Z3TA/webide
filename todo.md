@@ -56,9 +56,9 @@ todo:
 Unload/load all plugins when loggin in as a different users, or on a different server !?
 
 When you use Ctrl+P to open "any" file, it's confusing when you see the compiled files from the SSG ...
-When SSG panel is open, change working dir, so a file search only searches inside source folder.
+When SSG panel is open, change working dir, so a file search only searches inside source folder!!
 
-EDITOR.autoCompletePath("/foo/ba") => /foo/bar/
+EDITOR.autoCompletePath("/foo/ba") => /foo/bar/ (when saving files)
 
 When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
 When saving a .css file belonging to the SSG, reload it in the preview! 
