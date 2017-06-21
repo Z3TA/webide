@@ -24,12 +24,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-SSG: preserve "compiled" headers and footers when updating the "preview" source code.
-
-
-
-- When clicking on SSG WYSIWYG: /client//WysiwygEditor.js:1173 Uncaught Error: Unable to find wysiwygEditor.bodyTagPreview=main in preview window ! 
-
 Make a web page!
 
 (IE11) WysiwygEditor is unable to place caret in contentEditable after edit.

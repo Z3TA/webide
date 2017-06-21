@@ -1309,7 +1309,7 @@
 					
 					function openPreviewWin() {
 						
-						if(edit) {
+						//if(edit) {
 							
 							// Get the source code for the compiled page in review, in order to compute ignoreTransform
 							
@@ -1326,8 +1326,8 @@
 								
 							});
 							
-						}
-						else loadWysiwygEditor();
+						//}
+						//else loadWysiwygEditor();
 						
 						
 						function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
