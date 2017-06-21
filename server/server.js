@@ -507,11 +507,11 @@ function sockJsConnection(connection) {
 									userConnectionId = ++USER_CONNECTIONS[name].counter;
 								}
 								
-								userWorker = createUserWorker(name, uid, gid)
+								userWorker = createUserWorker(name, uid, gid);
 								
 								var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
 								
-								log("User name=" + name + " logged in! " + JSON.stringify(userInfo));
+								log("User name=" + name + " logged in! userConnectionId=" + userConnectionId + "" + JSON.stringify(userInfo));
 								
 								userWorker.send({identify: userInfo});
 								userWorker.on("message", messageFromWorker);
@@ -548,6 +548,10 @@ function sockJsConnection(connection) {
 										var counter = 0;
 										for(var conn in USER_CONNECTIONS[name].connections) {
 											if(!conn) console.warn("No connection for user=" + name + " counter=" + counter);
+											else if(!conn.write) {
+												console.log(conn);
+												throw new Error("No write method in user=" + name + " counter=" + counter + " connection!");
+											}
 											else send(workerMessage.message, conn);
 											counter++;
 										}

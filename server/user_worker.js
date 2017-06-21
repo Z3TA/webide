@@ -50,7 +50,6 @@ var user = {};
 user.id = 0;
 user.name = "";
 user.remoteConnections = {};
-user.clientConnections = {}; // A user can be connected from many places
 user.storage = null;
 user.connectionId = 0;
 user.isSavingStorage = [];
