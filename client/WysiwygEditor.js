@@ -1133,7 +1133,7 @@ var WysiwygEditor;
 		}
 		
 		
-		function previewWindowLoaded() {
+		function previewWindowLoaded(retries) {
 			
 			console.log("Preview window loaded!");
 			
@@ -1148,11 +1148,6 @@ var WysiwygEditor;
 			if(!doc) throw new Error("Unable to get preview window document!");
 			if(!win) throw new Error("Unable to get preview window window!");
 			
-			if(!doc.innerHTML) {
-				if(doc.documentElement) doc = doc.documentElement; // Hi Firefox!
-				if(!doc.innerHTML) throw new Error("doc.innerHTML=" + doc.innerHTML);
-			}
-			
 			/*
 				var prewviewContent = doc.documentElement.outerHTML;
 				console.log("prewviewContent=" + prewviewContent);
@@ -1164,17 +1159,25 @@ var WysiwygEditor;
 				}
 			*/
 			
-			var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+			if(!doc.documentElement) throw new Error("doc.documentElement not available in doc=" + doc);
+			
+			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 			
 			if(bodyTags.length === 0) {
 				// The user probably have an open html tag above the body element
+				// or the document is not yet fully loaded !?
 				console.warn("previewWin dont have a body tag!");
 				
-				if(wysiwygEditor.isCompiled) {
-					
-					console.log("preview window html: " + doc.innerHTML);
-					
-					throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window !");
+				if(!retries) retries = 0;
+				
+				if(retries < 5) {
+					console.log("The document might not be fully loaded. Retrying ...");
+					return setTimeout(function() {
+					previewWindowLoaded(++retries);
+					}, 150);
+				}
+				else if(wysiwygEditor.isCompiled) {
+					throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
 				}
 				
 				attachFileChangeListener(wysiwygEditor);

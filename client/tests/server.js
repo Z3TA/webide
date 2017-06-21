@@ -144,7 +144,7 @@
 			
 		});
 		
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function testServe(callback) {

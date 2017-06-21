@@ -3,6 +3,8 @@
 EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	// Test if the wysiwygEditor gets the correct url in WYSIWYG-editing mode, and that the header and footer are not removed when editing the source
 	// This test never failed. The bug was in the SSG
+	// This test sometimes failed/fails because the document was not folly loaded ... 
+	
 	var compiledPage = "<html>\n<body>\nheader\n<main>\n<p>main</p>\n</main>\nfooter\n</body>\n</html>\n"
 	var sourcePage = "<html>\n<body>\n<p>main</p>\n</body>\n</html>\n"
 	var testFolder = "/testfolder/wysiwyg/";
@@ -57,4 +59,4 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	function cleanUp() {
 	}
 	
-});
+}, 1);

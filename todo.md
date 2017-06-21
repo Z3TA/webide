@@ -24,10 +24,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Running server test connection results in server retruning several messages ... with old id's!?
-
-Making tests pass in production!
-
 Make a web page!
 
 (IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
@@ -84,6 +80,7 @@ delete files via commit tool
 Move files via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.z
 Copy a folder(or file) by right clicking, selecting copy. A copy is created, you can then move it via drag n drop.
 
+
 Better apparmor guide and script
 
 Write a userdel script (userdel -r -f nameOfUser)
@@ -113,6 +110,14 @@ The update should be done on server side /server.js
 
 What I'm thinking
 -----------------
+
+Should the file tabs have it's own right click/context menu !? ... 
+Some options should only show up if clicked on the file tabs ...
+We should avoid having plugins depend on each others though!
+We might also have some options show up when we click on a file in the file explorer ...
+Maybe have different contexts, like a "file" for when clicking on a "file" and a "canvas" context when clicking on some text,
+a "selection" context for selected text. etc .. !?
+HTML element can have a context attribute, like "file" so that options for "file" contexts show up when right clicking on the element.
 
 Need a good file explorer / file picker / file viewer / path selector. ex: where to save the file !?
 
@@ -925,6 +930,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Close all tabs except this!
 
 Auto complete Save file path when saving.
 
