@@ -24,34 +24,25 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Make a web page!
-
-(IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
-
-Auto pick file-name (todays date!?) when click new page on SSG
-Default save path for new files i SSG profile.
-If many paths (separated by comma) the user has to pick one.
-Auto fill stuff in template file, like date, and author
-
-
-Work on first time usage experience "publishing a blog post"
-Select a web page theme ... !?
+Prepare for a beta tester to test the static site generator ...
+Get a beta tester and see if he manages to publish a web page using the static site generator!
 
 write a blog post
 
+
+
+
+todo:
+
+x-real-ip in nginx profile
+
+
+Make server run in apparmor ...
 Trying to allow stat files in /home/** in apparmor profile.
 
 User can't stat files in preview because no x rights!?
 could not stat because of apparmor!
 
-x-real-ip in nginx profile
-
-deploy! user signups!?
-
-Testing the Mercurial integration/tools for the SSG
-
-
-todo:
 
 Unload/load all plugins when loggin in as a different users, or on a different server !?
 
@@ -110,6 +101,10 @@ The update should be done on server side /server.js
 
 What I'm thinking
 -----------------
+
+User signups!?
+
+Select a web page theme ... !?
 
 Should the file tabs have it's own right click/context menu !? ... 
 Some options should only show up if clicked on the file tabs ...
@@ -819,8 +814,8 @@ Can't open Big files from FTP/SFTP because of the stream.
 When the editor touches (redoes) all whitespace, like when removing a } somwhere.
 The SCM system goes heywack ... a lot of updates here and there and stupid commits.
 
-
-
+(IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
+Low prio because IE will probably be replaced by Edge ... or probably never.
 
 
 Unable to repeat bugs (happens rarely)
@@ -930,6 +925,14 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+SSG:
+Auto pick file-name (todays date!?) when click new page on SSG
+Default save path for new files i SSG profile.
+If many paths (separated by comma) the user has to pick one.
+Auto fill stuff in template file, like date, and author
+
+
 
 Close all tabs except this!
 
