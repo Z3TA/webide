@@ -92,7 +92,7 @@ user.teardown = function teardown(msg) {
 
 user.send = function send(msg) {
 	
-	if(obj !== Object(obj)) {
+	if(msg !== Object(msg)) {
 		msg = {msg: msg};
 	}
 	
