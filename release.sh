@@ -46,6 +46,10 @@ rm -rf temp/release/linux/changeset.js
 echo "Copy over version.inc"
 cp version.inc temp/release/linux/
 
+# Update version (Use double quotes to make the shell expand variables while preserving whitespace)
+sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
+
+
 # Minify .js files
 # (npm install uglify-js -g)
 # find temp/release/linux/ -name '*.js' | xargs uglifyjs

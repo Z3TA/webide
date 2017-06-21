@@ -5246,8 +5246,7 @@ EDITOR.lastKeyPressed = "";
 							var match = myRegexp.exec(stdout);
 							
 							if(!match) {
-								console.log("Unable to find latest HG commit id! stdout=" + stdout);
-								EDITOR.version = -1;
+								console.warn("Unable to find latest HG commit id! stdout=" + stdout);
 								callback(EDITOR.version);
 							}
 							else {
@@ -5256,13 +5255,13 @@ EDITOR.lastKeyPressed = "";
 								}
 						}
 						else {
-							EDITOR.version = -1;
+							console.warn("Failed to run hg log in order to get editor version.");
 							callback(EDITOR.version);
 						}
 					});
 				}
 				else {
-					EDITOR.version = -1;
+					console.warn("Failed to read version.inc");
 					callback(EDITOR.version);
 				}
 			}
