@@ -136,7 +136,12 @@
 			
 			if(workingDirectory != url) throw new Error("Expected workingDirectory=" + workingDirectory + " to be url=" + url);
 			
-			callback(true);
+			CLIENT.cmd("connect", connJson, function(err, json) {
+				if(err) throw new Error("Failed to disconnect from ftp! " + err.msg);
+				
+				callback(true);
+			});
+			
 		});
 		
 	}, 1);
