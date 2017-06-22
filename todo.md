@@ -106,6 +106,8 @@ The update should be done on server side /server.js
 What I'm thinking
 -----------------
 
+Need a way to check that the editor is not broken before pushing!
+
 User signups!?
 
 Select a web page theme ... !?

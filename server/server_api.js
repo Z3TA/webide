@@ -367,7 +367,7 @@ else if(protocol == "sftp:") {
 			if(originalUmask) {
 				//process.umask(originalUmask); // Set back the original umask
 				process.umask(parseInt("0077", 8));
-				console.log("Changed back umask to 0077 (originalUmask=" + originalUmask.toString(8) ")");
+				console.log("Changed back umask to 0077 (originalUmask=" + originalUmask.toString(8) + ")");
 			}
 			
 			if(err) {
