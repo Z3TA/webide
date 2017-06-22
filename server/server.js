@@ -618,11 +618,12 @@ function sockJsConnection(connection) {
 				
 				if(conn == undefined) conn = connection;
 				
-				if(answer.id == undefined && id && answer.resp) answer.id = id;
+				if(answer.id == undefined && id) answer.id = id;
 				
 				if(answer.id == id) id = null; // Do not reuse the same id
 				
 				if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
+				if(!answer.id && answer.hasOwnProperty("error")) throw new Error("No id in answer with error! answer=" + JSON.stringify(answer));
 				// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
 				
 				var str = JSON.stringify(answer);
