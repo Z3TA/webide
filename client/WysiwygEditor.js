@@ -1135,14 +1135,28 @@ var WysiwygEditor;
 		
 		function previewWindowLoaded(retries) {
 			
+			if(!retries) retries = 0;
+			
 			console.log("Preview window loaded!");
 			
 			// Get the doc again after location reload
 			var doc = previewWin.document;
 			var win = previewWin.window;
 			
-			console.log(doc);
-			console.log(win);
+			if(!doc.documentElement) {
+				if(retries < 5) {
+					console.log("Unable to get doc.documentElement. The document might not be fully loaded. Retrying ...");
+					return setTimeout(function() {
+						previewWindowLoaded(++retries);
+					}, 150);
+				}
+				else {
+					console.log(doc);
+					console.log(win);
+					throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
+				}
+			}
+			
 			
 			if(!previewWin) throw new Error("Unable to get preview window!");
 			if(!doc) throw new Error("Unable to get preview window document!");
@@ -1159,8 +1173,6 @@ var WysiwygEditor;
 				}
 			*/
 			
-			if(!doc.documentElement) throw new Error("doc.documentElement not available in doc=" + doc);
-			
 			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 			
 			if(bodyTags.length === 0) {
@@ -1168,9 +1180,7 @@ var WysiwygEditor;
 				// or the document is not yet fully loaded !?
 				console.warn("previewWin dont have a body tag!");
 				
-				if(!retries) retries = 0;
-				
-				if(retries < 5) {
+				if(retries < 10) {
 					console.log("The document might not be fully loaded. Retrying ...");
 					return setTimeout(function() {
 					previewWindowLoaded(++retries);
@@ -1309,6 +1319,9 @@ var WysiwygEditor;
 				if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
 			}
 			
+			function wait() {
+			
+			}
 		}
 		
 	}
