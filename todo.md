@@ -34,6 +34,8 @@ write a blog post
 
 todo:
 
+Find out why jzedit service didn't start after producton server reboot.
+
 quick-edit
 http://editor.webtigerteam.com/?editPage=http%3A%2F%2Fmarkus.webtigerteam.com%2Fblog%2Fblog-post.htm&nodes=blogpost!%2Cp%2Cmain%2Cdiv%2Cbody%2Chtml%2C%2C
  ... didn't open the file.
