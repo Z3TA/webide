@@ -1838,8 +1838,16 @@
 		function publishIt() {
 			compile(site.source, site.publish, true, function buildDone() {
 				
-				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:<a href="' + site.url + '" target="blank">' + site.url + '</a>' : ''));
+				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:' + urlElementString(site.url) : ''));
 			
+				function urlElementString(url) {
+					
+					if(!url.match(/^http(s?):\/\//i)) url = "http://" + url;
+					
+					return '<a href="' + url + '" target="blank">' + url + '</a>';
+					
+				}
+				
 		});
 		}
 		
