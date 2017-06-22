@@ -348,8 +348,27 @@ else if(protocol == "sftp:") {
 		// Asume local file-system
 		
 		var fs = require("fs");
-		fs.writeFile(path, text, encoding, function(err) {
+		
+		var options = {
+			encoding: encoding
+		}
+		
+		if(json.public) {
+			// Make it so everyone can read it
+			var originalUmask = process.umask(parseInt("0022", 8)); // 755
+			options.mode = parseInt("0777", 8);
+			
+			// note: The file permissions wont change if the file already exists!
+		}
+		
+		fs.writeFile(path, text, options, function(err) {
 			console.log("Attempting saving to local file system: " + path + " ...");
+			
+			if(originalUmask) {
+				//process.umask(originalUmask); // Set back the original umask
+				process.umask(parseInt("0077", 8));
+				console.log("Changed back umask to 0077 (originalUmask=" + originalUmask.toString(8) ")");
+			}
 			
 			if(err) {
 				console.warn("Unable to save " + path + "!");
@@ -712,7 +731,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 			if(create.length > 0) executeMkdir(create.shift());
 			else done();
 			
-		});
+			});
 	}
 	
 	function done() {

@@ -142,7 +142,7 @@ API.compile = function compile(user, json, callback) {
 			if(foldersExist.indexOf(folder) != -1) {
 				console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
 								
-				CORE.saveToDisk(user, {path: filePath, text: text}, fileCreated);
+				CORE.saveToDisk(user, {path: filePath, text: text, public: publish}, fileCreated);
 				
 			}
 			else {
