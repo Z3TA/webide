@@ -154,11 +154,11 @@ function alertBox(msg, icon, recursionCount) {
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) throw new Error("Unable to show alertBox msg=" + msg + "");
+			if(recursionCount > 4) throw new Error("Unable to show alertBox, probably because the editor has not fully loaded. msg=" + msg + "");
 			
 			alertBox(msg, icon, recursionCount);
 			
-		}, 100);
+		}, 150);
 	}
 	
 	
