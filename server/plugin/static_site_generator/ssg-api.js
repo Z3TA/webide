@@ -196,7 +196,7 @@ API.compile = function compile(user, json, callback) {
 			folderAboutToBeCreated.push(folder);
 			
 			CORE.createPath(user, {pathToCreate: folder}, function(err, json) {
-				if(err) throw err;
+				if(err) return callback(err);
 				else {
 					folderAboutToBeCreated.splice(folderAboutToBeCreated.indexOf(folder, 1));
 					foldersExist.push(folder);
