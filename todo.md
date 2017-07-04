@@ -1541,6 +1541,9 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 ------------------------------------
 
+Web widget to Suggest change on a web page, for example contact update or correction of spelling mistake. Kinda like a "Wiki".
+The change get submitted like a "pull request". Where the webmaster see a diff, with the option to merge it in.
+
 A bug, feautre and security tracker where you can post bugs etc and vote.
 Each user got one 100 points vote, five 10 point votes and ten 1 point votes. And can only vote one time on each bug/feature.
 The features etc are then ordered (and pritoized?) depending on the points.
