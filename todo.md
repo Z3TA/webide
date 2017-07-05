@@ -7,6 +7,9 @@ Making a new web page/post should be as easy as making a new comment on HN, or p
 
 Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
 
+Have a DASHBOARD, to make it easier to know what to do
+ for SSG where the web master can select to create a new page, see last changes etc. mothly visitors etc
+
 
 2) Beta release?, get USER FEEDBACK!
 
@@ -23,6 +26,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 
 What I'm working on
 -------------------
+
+problem with permission on folders when publishing SSG site.
 
 Prepare for a beta tester to test the static site generator ...
 Get a beta tester and see if he manages to publish a web page using the static site generator!
