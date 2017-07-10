@@ -39,6 +39,10 @@ write a blog post
 
 todo:
 
+Add "edit page" to context menu in quickedit.js (only works in Firefox)
+https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
+
+
 Find out why jzedit service didn't start after producton server reboot.
 
 quick-edit
