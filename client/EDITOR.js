@@ -2914,7 +2914,7 @@ EDITOR.lastKeyPressed = "";
 		
 		widget.build = function buildWidget() {
 			
-			// But when this function is called, the DOM will exist!
+			// But when this function is called, the DOM *will* exist!
 			
 			var build;
 			

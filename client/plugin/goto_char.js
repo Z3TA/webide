@@ -2,6 +2,10 @@
 (function() {
 	
 	var gotoCharDialog = EDITOR.createWidget(buildGotoCharDialog);
+	var inputGoto;
+	
+	var KEY_H = 72;
+	var KEY_ESC = 27;
 	
 	EDITOR.plugin({
 		desc: "Go to character",
@@ -10,11 +14,18 @@
 	});
 	
 	function loadGoToCharacter() {
-		gotoCharDialog = 
+		
+		EDITOR.bindKey({desc: "Goto line ...", charCode: KEY_H, combo: CTRL, fun: showGotoCharWidget});
+		EDITOR.bindKey({desc: "Hite the goto-line GUI", charCode: KEY_ESC, fun: hideGotoCharWidget});
+		
 	}
 	
 	function unloadGoToCharacter() {
 		
+		EDITOR.unbindKey(showGotoCharWidget);
+		EDITOR.unbindKey(hideGotoCharWidget);
+		
+		gotoCharDialog.unload();
 	}
 	
 	function buildGotoCharDialog(widget) {
@@ -23,7 +34,7 @@
 		gotoDiv.setAttribute("id", "gotoDiv");
 		gotoDiv.setAttribute("class", "gotoDiv");
 		
-		var inputGoto = document.createElement("input");
+		inputGoto = document.createElement("input");
 		inputGoto.setAttribute("type", "text");
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
@@ -50,15 +61,13 @@
 		gotoDiv.appendChild(gotoButton);
 		gotoDiv.appendChild(cancelButton);
 		
-		return gotoDiv;
-		
 		
 		inputGoto.addEventListener("keyup", function(keyUpEvent) {
 			keyUpEvent.preventDefault();
 			if (keyUpEvent.keyCode == 13) {
 				gotoChar(); // When pressing enter
 			}
-			else if(keyUpEvent.keyCode == key_Esc) {
+			else if(keyUpEvent.keyCode == KEY_ESC) {
 				hideGotoCharWidget(); // When pressing escape
 			}
 		});
@@ -67,11 +76,49 @@
 		
 		cancelButton.addEventListener("click", hideGotoCharWidget, false);
 		
+		return gotoDiv;
+		
+		
 		function gotoChar() {
+			
 			var charNr = inputGoto.value;
+			
+			console.log("gotoChar " + charNr + " ...");
+			
+			var file = EDITOR.currentFile;
+			
+			if(isNaN(charNr)) {
+				alert("Enter a number!");
+			}
+			else if(!file) {
+				alert("No file open!");
+			}
+			else {
+				
+				if(charNr < 1) charNr = 1;
+				if(charNr > file.text.length) charNr = file.text.length;
+				
+				console.log("Placing caret near character nr " + charNr + " ...");
+				
+				file.moveCaretToIndex(charNr);
+				
+				hideGotoCharWidget();
+				
+			}
+			
+			return false; // Return false to prevent default
 			
 		}
 		
+	}
+	
+	function showGotoCharWidget() {
+		gotoCharDialog.show();
+		
+		inputGoto.focus();   // Add focus to the input
+		inputGoto.select();  // Select all
+		
+		return false;
 	}
 	
 	function hideGotoCharWidget() {
