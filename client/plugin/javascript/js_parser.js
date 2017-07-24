@@ -230,7 +230,7 @@
 							// The start property is at the { after function
 							// We need to start parsing at the function declaration so that the parser will find it
 							var parseEnd = f.end + charactersLength + 1;
-							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : ""), f.start); // Search backwards in file.text starting from f.start
+							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : "") + "(", f.start); // Search backwards in file.text starting from f.start
 							var parseStartRow = f.lineNumber-1;
 							var baseIndentation = file.grid[parseStartRow].indentation;
 							var oldStart = f.start;
