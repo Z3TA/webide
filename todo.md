@@ -35,10 +35,15 @@ trying to change log("certStore.set: hostname=" + hostname + " certs=" + certs);
 into:
 log("certStore.set: hostname=" + hostname + " certs=" + JSON.stringify(certs));
 but typing JSO... throws an error!
+Uncaught Error: fullParse.comments.length=56 oldParse.comments.length=57 Item 17: {"start":4176,"end":4211}
+test file: C:\Users\Z\dev-repositories\test\JZedit-tests\parseCommentOnlyFunctionOptError.js
 
- 
+Another bug, when removing the last code paragraph and trying to make the same edit:
+C:/Users/Z/dev-repositories/jzedit/client/plugin/javascript/js_parser.js:2214
+Uncaught Error: Grid row=88 does not exist!
+test file: C:\Users\Z\dev-repositories\test\JZedit-tests\parseCommentOnlyFunctionOptErrorGridRowNoExist.js
 
-
+parseJavaScript: options={"start":32,"end":1894,"baseIndentation":1,"startRow":26,"jsMode":true}
 
 problem with permission on folders when publishing SSG site.
 

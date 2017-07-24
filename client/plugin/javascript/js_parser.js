@@ -218,13 +218,13 @@
 					
 					if(f) { // Parse only that function
 						//console.log("Inside " + f.name);
-						if((f.end - f.start) < maxFunctionBodySize && file.text.charAt(f.end + charactersLength) == "}") { // If the function is not the majority of the file
+						if( ((f.end - f.start) < maxFunctionBodySize || EDITOR.devMode) && file.text.charAt(f.end + charactersLength) == "}") { // If the function is not the majority of the file
 							
 							console.time("parseOnlyFunctionOptimizer");
 							
 							//console.log("change type=" + type);
 							
-							//console.log("Parsing only f=" + f.name + "");
+							console.log("Parsing only f=" + f.name + "");
 							
 							
 							// The start property is at the { after function

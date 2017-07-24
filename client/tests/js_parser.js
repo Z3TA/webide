@@ -1,4 +1,18 @@
 
+EDITOR.addTest(function optFunOnlySameName(callback) {
+	EDITOR.openFile("optFunOnlySameName.js", 'var a = {\nxxx: function xxxSomething() {\n\n}\n};\n\nvar b = {\nxxx: function foo() {\n\n}\n};\n', function(err, file) {
+		
+		file.moveCaret(undefined, 8);
+		EDITOR.mock("keydown", {charCode: 65, target: "canvas"}); // Simulate entering a character. 65 = A
+		
+		// Uncaught Error: Grid row=12 does not exist!
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 
 EDITOR.addTest(function htmlTagInString(callback) {
 	EDITOR.openFile("htmlTagInString.js", '// foo\nvar bar = "<html>"', function(err, file) {
