@@ -27,6 +27,19 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Working on goto char plugin to make it easier to debug bug below ...
+
+Fixing parsing bug, when editing: \\192.168.0.1\nodejs\letsencrypt\letsencrypt.js
+line 128
+trying to change log("certStore.set: hostname=" + hostname + " certs=" + certs);
+into:
+log("certStore.set: hostname=" + hostname + " certs=" + JSON.stringify(certs));
+but typing JSO... throws an error!
+
+ 
+
+
+
 problem with permission on folders when publishing SSG site.
 
 Prepare for a beta tester to test the static site generator ...
@@ -35,7 +48,8 @@ Get a beta tester and see if he manages to publish a web page using the static s
 write a blog post
 
 
-
+Can not edit the page in WYSIWYG mode because of:
+Line 57: Inserted: <p>Written by <a href="../index.htm" rel="author">Johan Zetterberg</a> Jul 7, 2017.</p>
 
 todo:
 

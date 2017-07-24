@@ -489,7 +489,11 @@
 								console.log("fullParse to check for errors:");
 								var fullParse = parseJavaScript(file, {noIndention: true});
 								
-								if(fullParse.comments.length != oldParse.comments.length) throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " ");
+								if(fullParse.comments.length != oldParse.comments.length) {
+									console.log(fullParse.comments);
+									console.log(oldParse.comments);
+									throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " " + compareObjects(fullParse.comments, oldParse.comments));
+								}
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
 								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
 								
@@ -2559,5 +2563,18 @@
 		this.wordLength = wordLength;
 		this.selfEnding = selfEnding;
 	}
+	
+	function compareObjects(arr1, arr2) {
+		// Asumes each item in the array if an object
+		var diff = [];
+		for(var i=0; i<arr1.length && i<arr2.length; i++) {
+			for(var key in arr1[i]) {
+				if(arr1[i][key] != arr2[i][key]) return "Item " + i + ": " + JSON.stringify(arr2[i]);
+			}	
+		}
+		return "Same!";
+	}
+
+
 	
 })();
