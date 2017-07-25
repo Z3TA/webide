@@ -1,4 +1,18 @@
 
+EDITOR.addTest(function spaceAfterFunctionName(callback) {
+	EDITOR.openFile("spaceAfterFunctionName.js", 'function foo () {\n\n}\n', function(err, file) {
+		
+		file.moveCaret(undefined, 1);
+		EDITOR.mock("keydown", {charCode: 65, target: "canvas"}); // Simulate entering a character. 65 = A
+		
+		// Uncaught Error: Unable to find start of function=*foo* f.start=16 parseStart=-1 unction foo () 
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1)
+
 EDITOR.addTest(function optFunOnlySameName(callback) {
 	EDITOR.openFile("optFunOnlySameName.js", 'var a = {\nxxx: function xxxSomething() {\n\n}\n};\n\nvar b = {\nxxx: function foo() {\n\n}\n};\n', function(err, file) {
 		
@@ -11,7 +25,7 @@ EDITOR.addTest(function optFunOnlySameName(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 
 EDITOR.addTest(function htmlTagInString(callback) {

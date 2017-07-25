@@ -236,8 +236,9 @@
 							var oldStart = f.start;
 							var oldEnd = f.end;
 							
-							
 							// I do not trust reLastIndexOf ...
+							
+							if(parseStart == -1) parseStart = file.text.lastIndexOf("function " + f.name + " (", f.start);
 							
 							
 							// Fix for: foo = function() and foo = function foo()
@@ -251,6 +252,7 @@
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
 						
 							//console.time("hmm"); // These used to be slow
+							//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
 							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
 							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
 							//console.timeEnd("hmm");
