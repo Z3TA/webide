@@ -290,6 +290,9 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+When saving a file in Windows: The path does not exist:
+/\\192.168.0.1\www\webtigerteam.com\serverless\/
+
 After clicking OK on the alertBox button (for example when turning devMode off) you can't write ...
 
 Double clicking on a single letter in a large file takes forever to highlight. Optimization: Only highlight what the user can see!
