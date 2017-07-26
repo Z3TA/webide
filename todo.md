@@ -27,24 +27,6 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Working on goto char plugin to make it easier to debug bug below ...
-
-Fixing parsing bug, when editing: \\192.168.0.1\nodejs\letsencrypt\letsencrypt.js
-line 128
-trying to change log("certStore.set: hostname=" + hostname + " certs=" + certs);
-into:
-log("certStore.set: hostname=" + hostname + " certs=" + JSON.stringify(certs));
-but typing JSO... throws an error!
-Uncaught Error: fullParse.comments.length=56 oldParse.comments.length=57 Item 17: {"start":4176,"end":4211}
-test file: C:\Users\Z\dev-repositories\test\JZedit-tests\parseCommentOnlyFunctionOptError.js
-
-Another bug, when removing the last code paragraph and trying to make the same edit:
-C:/Users/Z/dev-repositories/jzedit/client/plugin/javascript/js_parser.js:2214
-Uncaught Error: Grid row=88 does not exist!
-test file: C:\Users\Z\dev-repositories\test\JZedit-tests\parseCommentOnlyFunctionOptErrorGridRowNoExist.js
-
-parseJavaScript: options={"start":32,"end":1894,"baseIndentation":1,"startRow":26,"jsMode":true}
-
 problem with permission on folders when publishing SSG site.
 
 Prepare for a beta tester to test the static site generator ...
@@ -53,10 +35,15 @@ Get a beta tester and see if he manages to publish a web page using the static s
 write a blog post
 
 
-Can not edit the page in WYSIWYG mode because of:
-Line 57: Inserted: <p>Written by <a href="../index.htm" rel="author">Johan Zetterberg</a> Jul 7, 2017.</p>
+
 
 todo:
+
+I'm working on serverless/chatt and edited the prod files in /tank/www/webtigerteam.com/serverless/chatapp/main.js
+now I want to compare with the repo /home/zeta/dev/chatapp/ ... 
+The hg plugins needs a diff function. A diff function is also useful. Should the diff function be built-in (not a plugin) ?
+EDITOR.diffFile(someFill, diffWithohterfile) => someFill-diffWithohterfile.diff.js insers in green and removed in red
+
 
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
 https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
