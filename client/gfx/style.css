@@ -28,6 +28,17 @@
 	/*-webkit-font-smoothing: none;*/
 	/*border: 1px solid pink;*/
 	
+	/*
+	-webkit-font-smoothing: none;
+	-webkit-font-smoothing: antialiased;
+	-webkit-font-smoothing: subpixel-antialiased;
+	// -webkit-text-stroke: 0.015em;
+	text-rendering: auto;
+	text-rendering: optimizeSpeed;
+	text-rendering: optimizeLegibility;
+	text-rendering: geometricPrecision;
+	*/
+	
 }
 
 html {
