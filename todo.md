@@ -27,6 +27,16 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Setting up the toolchain for programming is very hard for a beginner, "just edit and run node" is very confusing ...
+Make it so that you get "right into coding" example HTML page, being able to preview it by clicking a button, and edits are hot-loaded (without page refresh).
+When you load the editor the first time you have a HTML and JS file open, where it says "hit F1 to preview"
+
+update WysiwygEditor.js: When editing a CSS file and the preview is open, hot reload the CSS content!
+or when working on a JS file that is included in the pewview page, hot reload it!
+
+
+
+
 problem with permission on folders when publishing SSG site.
 
 Prepare for a beta tester to test the static site generator ...

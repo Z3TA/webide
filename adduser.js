@@ -92,9 +92,34 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	// Add skeleton files
 	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
 	
+	// add wwwpub
+	fs.mkdirSync(homeDir + "/wwwpub");
+	
 	chownrSync(homeDir, uid, gid);
 	
 	chmodrSync(homeDir, "700");
+	
+	// Make wwwpub public
+	chmodrSync(homeDir + "/wwwpub", "755");
+	
+	// Create nginx profile
+	var nginxProfile = "server {\
+	listen 80;\
+	#listen [::]:80 ipv6only=on;\
+	#listen 443 ssl;\
+	server_name " + username + ".webtigerteam.com;\
+	root " + homeDir + "/wwwpub/;\
+	index index.html index.htm;\
+	location / {\
+	  charset	utf-8;\
+	  try_files $uri $uri/ =404;\
+	}\n}";
+	fs.writeFileSync("/etc/nginx/sites-available/" + username + ".webtigerteam.com.nginx", nginxProfile);
+	fs.symlinkSync("/etc/nginx/sites-available/" + username + ".webtigerteam.com.nginx", "/etc/nginx/sites-enabled/" + username + ".webtigerteam.com");
+	
+	var child_process = require('child_process');
+	var reloadNginxError = child_process.execSync("service nginx reload");
+	if(reloadNginxError) throw reloadNginxError;
 	
 	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
