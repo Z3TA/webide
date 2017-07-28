@@ -955,6 +955,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Need a stop button for search-in-files. 
+
 SSG:
 Auto pick file-name (todays date!?) when click new page on SSG
 Default save path for new files i SSG profile.
