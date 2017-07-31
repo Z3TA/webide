@@ -477,7 +477,8 @@
 		
 		var labelSite = document.createElement("label");
 		labelSite.setAttribute("for", "selectSite");
-		labelSite.appendChild(document.createTextNode("Site:")); // Language settings!?
+		labelSite.setAttribute("title", "Select site");
+		labelSite.appendChild(document.createTextNode("Static Site Generator:")); // Language settings!?
 		labelSite.appendChild(selectSite);
 		
 		/*
