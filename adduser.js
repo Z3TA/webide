@@ -91,6 +91,17 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	
 	// Add skeleton files
 	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
+	fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
+	
+	// Update tamplates
+	var date = new Date();
+	var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+	replaceInFileSync(homeDir + "/my_web_site/source/template.htm, 
+	[
+		['<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">'],
+		['<meta name="author" content="Jon Doe">', '<meta name="author" content="' + username + '">'],
+		['<p>Written by <a href="../index.htm" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>']
+		]);
 	
 	// add wwwpub
 	fs.mkdirSync(homeDir + "/wwwpub");
@@ -98,6 +109,10 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	chownrSync(homeDir, uid, gid);
 	
 	chmodrSync(homeDir, "700");
+	
+	
+	
+	
 	
 	// Make wwwpub public
 	chmodrSync(homeDir + "/wwwpub", "755");
@@ -111,8 +126,8 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	root " + homeDir + "/wwwpub/;\
 	index index.html index.htm;\
 	location / {\
-	  charset	utf-8;\
-	  try_files $uri $uri/ =404;\
+	charset	utf-8;\
+	try_files $uri $uri/ =404;\
 	}\n}";
 	fs.writeFileSync("/etc/nginx/sites-available/" + username + ".webtigerteam.com.nginx", nginxProfile);
 	fs.symlinkSync("/etc/nginx/sites-available/" + username + ".webtigerteam.com.nginx", "/etc/nginx/sites-enabled/" + username + ".webtigerteam.com");
@@ -122,22 +137,22 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	if(reloadNginxError) throw reloadNginxError;
 	
 	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
-		
-	});
 	
-	function getGroupId(groupName) {
-		var fs = require("fs");
-		
-		var groupData = fs.readFileSync("/etc/group", "utf8");
-		
-		//console.log("groupData=" + groupData);
-		
-		var groups = groupData.split(/\r|\n/);
-		
-		// format: jzedit_users:x:115:
-		
-		for (var i=0, group, name, id; i<groups.length; i++) {
-			group = groups[i].split(":");
+});
+
+function getGroupId(groupName) {
+	var fs = require("fs");
+	
+	var groupData = fs.readFileSync("/etc/group", "utf8");
+	
+	//console.log("groupData=" + groupData);
+	
+	var groups = groupData.split(/\r|\n/);
+	
+	// format: jzedit_users:x:115:
+	
+	for (var i=0, group, name, id; i<groups.length; i++) {
+		group = groups[i].split(":");
 			name = group[0];
 			id = group[2];
 			
@@ -249,4 +264,21 @@ function chownrDirSync(p, uid, gid) {
 		chownrSync(path.resolve(p, child), uid, gid);
 	});
 	return fs.chownSync(p, uid, gid);
+}
+
+function replaceInFileSync(filePath, arrSearchReplace) {
+	var fs = require("fs");
+	var encoding = "utf8";
+	
+	// arrSearchReplace = [searchString, replaceString]
+	var text = fs.readFileSync(filePath, encoding);
+	
+	for (var i=0, searchString="", replaceString=""; i<arrSearchReplace.length; i++) {
+		searchString = arrSearchReplace[i][0];
+		replaceString = arrSearchReplace[i][1];
+		text = text.replace(searchString, replaceString);
+	}
+	
+	fs.writeFileSync(filePath, text, encoding);
+	
 }
