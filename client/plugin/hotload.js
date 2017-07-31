@@ -13,7 +13,7 @@
 	//alert("hotload");
 	
 	EDITOR.plugin({
-		desc: "Allows hot loading of plugins",
+		desc: "Allows hot reloading of plugins",
 		load: loadHotloader,
 		unload: unloadHotloader,
 	});
@@ -23,7 +23,7 @@
 		//alert("load");
 		var keyF7 = 118;
 		
-		EDITOR.bindKey({desc: "Reload current script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
+		EDITOR.bindKey({desc: "Hot-Reload current plugin script", fun: reloadCurrentScript, charCode: keyF7, combo: 0});
 		
 	}
 	
