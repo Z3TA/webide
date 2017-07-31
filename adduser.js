@@ -36,9 +36,29 @@ if(!username) throw new Error("No username specified!");
 	
 	//console.log("gid=" + gid);
 	
-	var childProcess = require('child_process');
+try {
+	var usersPwString = fs.readFileSync(PW_FILE, encoding);
+}
+catch(err) {
+	if(err.code != "ENOENT") throw err;
+	var usersPwString = "";
+}
+
+if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters that is not a-z or 0-9");
+
+if(username.length < 3) throw new Error("username needs to be at least 3 letters!");
+if(username.length > 20) throw new Error("username can not be more then 20 letters!");
+
+var users = usersPwString.split(/\r|\r\n);
+for (var i=0, name; i<users.length; i++) {
+	name = users[i].subString(0, users[i].indexOf("|"));
+	if(name == username) throw new Error("User already exist! username=" + username);
+}
+
+
+var childProcess = require('child_process');
 childProcess.exec('adduser --system --ingroup jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
-		if (err) throw err;
+	if (err) throw err;
 		
 		if(stderr) throw new Error(stderr);
 		
@@ -69,13 +89,6 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 		
 	var encoding = "utf8";
 		
-	try {
-	var usersPwString = fs.readFileSync(PW_FILE, encoding);
-	}
-	catch(err) {
-		if(err.code != "ENOENT") throw err;
-		var usersPwString = "";
-	}
 	if(NO_PW_HASH) {
 			var hashedPassword = password;
 		}
@@ -122,7 +135,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	listen 80;\
 	#listen [::]:80 ipv6only=on;\
 	#listen 443 ssl;\
-	server_name " + username + ".webtigerteam.com;\
+	server_name " + username + ".s3.webtigerteam.com;\
 	root " + homeDir + "/wwwpub/;\
 	index index.html index.htm;\
 	location / {\

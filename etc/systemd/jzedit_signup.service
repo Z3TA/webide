@@ -1,0 +1,26 @@
+# sudo cp etc/systemd/jzedit_signup.service /etc/systemd/system/jzedit_signup.service
+# sudo systemctl enable jzedit_signup   or   sudo systemctl daemon-reload
+# or sudo systemctl enable $(pwd)/etc/systemd/jzedit_signup.service
+# sudo systemctl start jzedit_signup
+
+[Unit]
+Description=Signup service for JZedit cloud editor
+After=network.target
+
+[Service]
+User=root
+
+# Change to the jzedit directory
+WorkingDirectory=/srv/jzedit/
+
+# Change to node or nodejs if you are not using apparmor.
+# See etc/apparmor/usr.bin.jzedit for example apparmor profile (run makeprofile.sh to create one)
+
+# See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
+
+ExecStart=/usr/bin/nodejs signup_service.js --port=8100 --pwfile=/etc/jzedit_users
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
