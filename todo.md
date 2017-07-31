@@ -35,7 +35,27 @@ update WysiwygEditor.js: When editing a CSS file and the preview is open, hot re
 or when working on a JS file that is included in the pewview page, hot reload it!
 
 
+---
 
+Static analysis, find undefined property! Example:
+
+function foo() {
+"use strict"
+
+let bar = {};
+bar.a = 1;
+bar.b = 2;
+console.log(bar.c);
+bar.c = 3;
+
+}
+
+foo();
+
+Have the parser find all referenced variables and objects (bar, bar.a, bar.b, bar.c) in the scope, plus all variable and property assignments (plus line number).
+Then have a plugin that find the scope in view, then check if any property or varable is referenced before assigned.
+
+---
 
 problem with permission on folders when publishing SSG site.
 
@@ -48,6 +68,8 @@ write a blog post
 
 
 todo:
+
+Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
 
 I'm working on serverless/chatt and edited the prod files in /tank/www/webtigerteam.com/serverless/chatapp/main.js
 now I want to compare with the repo /home/zeta/dev/chatapp/ ... 
@@ -1572,7 +1594,15 @@ Optimize if needed
 
 
 Feature list (Not ordered/prioritized)
-------------------------------------
+--------------------------------------
+
+WebRTC video/voice while in colaboration mode.
+
+For caloboration to work we need a better undo/redo that mirrors all actions. ex: insert a letter (mirror) deleting a letter
+https://en.wikipedia.org/wiki/Operational_transformation
+
+Keybinding configuration, keybinding file, presets with Sublime, Vim, Emacs, gives you a list of key-bindings and let you rebind the keys.
+Keybindings: [select box] [update button] [edit button]
 
 Web widget to Suggest change on a web page, for example contact update or correction of spelling mistake. Kinda like a "Wiki".
 The change get submitted like a "pull request". Where the webmaster see a diff, with the option to merge it in.
