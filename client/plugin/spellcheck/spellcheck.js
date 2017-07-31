@@ -56,7 +56,7 @@
 	
 	function spellCheckerMain() {
 		
-		menuItem = EDITOR.addMenuItem("Toggle spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
+		menuItem = EDITOR.addMenuItem("Spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
 		
 		for(var i=0; i<numWorkers; i++) {
 			loadWorker(useLanguages);
@@ -87,7 +87,7 @@
 		EDITOR.settings.enableSpellchecker = EDITOR.settings.enableSpellchecker ? false : true;
 		console.log("EDITOR.settings.enableSpellchecker=" + EDITOR.settings.enableSpellchecker);
 		
-		menuItem.innerHTML = "Toggle spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on");
+		menuItem.innerHTML = "Spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on");
 		
 		if(EDITOR.settings.enableSpellchecker) {
 			

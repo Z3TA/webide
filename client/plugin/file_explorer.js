@@ -34,14 +34,14 @@
 		
 		var key_E = 69;
 		
-		EDITOR.bindKey({desc: "Toggle file explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
+		EDITOR.bindKey({desc: "File explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
 		
 		//EDITOR.on("beforeResize", saveScrollPosition);
 		//EDITOR.on("afterResize", restoreScrollPosition);
 		
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
-		menuItem = EDITOR.addMenuItem("Toggle file explorer " + (visible ? "off":"on"), toggleFileExplorer);
+		menuItem = EDITOR.addMenuItem("File explorer " + (visible ? "off":"on"), toggleFileExplorer);
 		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
@@ -89,7 +89,7 @@
 		if(typeof toState == "boolean") visible = toState;
 		else visible = visible ? false : true; // Switch
 		
-		menuItem.innerHTML = "Toggle file explorer " + (visible ? "off":"on");
+		menuItem.innerHTML = "File explorer " + (visible ? "off":"on");
 		
 		if(visible) {
 			exploreDir(EDITOR.workingDirectory)

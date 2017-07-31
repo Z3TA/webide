@@ -33,7 +33,7 @@
 			EDITOR.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
 			
 			// Switch devMode on or off by hitting Ctrl + Alt + D
-			EDITOR.bindKey({desc: "Toggle devMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
+			EDITOR.bindKey({desc: "DevMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
 			
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
@@ -89,7 +89,7 @@
 		console.log("Disabling dev mode ...");
 		
 		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
-		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
+		toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
 		
 		if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
 		
@@ -122,7 +122,7 @@
 		if(toggleDevmodeMenuItem) {
 			toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
 		}
-		toggleDevmodeMenuItem = EDITOR.addMenuItem("Toggle dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
+		toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
 		
 		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests);
 		

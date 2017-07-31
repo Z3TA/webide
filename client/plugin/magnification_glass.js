@@ -27,7 +27,7 @@
 
 	function loadMagnificationGlass() {
 		
-		magnificationMenuItem = EDITOR.addMenuItem("Toggle magnification glass", showOrHideGlass);
+		magnificationMenuItem = EDITOR.addMenuItem("Magnification glass", showOrHideGlass);
 		
 	}
 	
