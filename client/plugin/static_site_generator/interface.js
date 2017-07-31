@@ -278,6 +278,8 @@
 		
 		//alertBox("UNloading");
 		
+		EDITOR.removeEvent("storageReady", getSites);
+		
 		EDITOR.removeMenuItem(menuItem);
 		
 		SSG_cleanup(); // closePreview();
