@@ -8,15 +8,28 @@
 	usernameAvailable: username
 	createAccount: username, password
 	
+	returns:
+	availableError:username:message
+	available:name:true||false
+	createError:username:message
+	created:username
+	serviceError:message
+	
 */
 
 "use strict";
+var getArg = require("./server/getArg.js");
 
-var ADMIN_EMAIL = getArg(["email", "email", "admin_email"]) || "zeta@zetafiles.org"; 
+var UTIL = require("./client/UTIL.js");
+
+var HTTP_PORT = getArg(["p", "port"]) || 8100; 
+if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
+
+var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
+
+var ADMIN_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org";
 
 var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
-
-var getArg = require("../server/getArg.js");
 
 var NO_PW_HASH = getArg(["nopwhash"]);
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "/etc/jzedit_users";
@@ -29,6 +42,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+var http = require("http");
 var httpServer = http.createServer(handleHttpRequest);
 
 httpServer.listen(HTTP_PORT, HTTP_IP);
@@ -42,7 +56,7 @@ wsServer.installHandlers(httpServer, {prefix:'/signup'});
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
 	// Enhanced console.log ...
-	var logModule = require("./log.js");
+	var logModule = require("./server/log.js");
 	
 	logModule.setLogLevel(LOGLEVEL);
 	log = logModule.log;
@@ -52,6 +66,20 @@ var log; // Using small caps because it looks and feels better
 	if(logFile) logModule.setLogFile(logFile);
 	
 })();
+
+// Overload console.log
+console.log = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 7);
+}
+
+// Overload console.warn
+console.warn = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 4);
+}
 
 function handleHttpRequest(request, response){
 	
@@ -64,7 +92,7 @@ function handleHttpRequest(request, response){
 	response.writeHead(404, "Not found", responseHeaders);
 	response.end("Nothing to see here");
 	
-});
+}
 
 function sockJsConnection(connection) {
 	
@@ -102,43 +130,93 @@ function sockJsConnection(connection) {
 		
 		// message: command:data
 		
-		var command = message.substring(message.indexOf(":"));
+		var command = message.substring(0, message.indexOf(":"));
 		var data = message.substring(message.indexOf(":")+1);
 		
 		if(!command) answer("Unknown command in message: " + message);
 		else if(!data) answer("No data in message: " + message);
-		else if(command == "usernameAvailable") usernameAvailable(data);
-		else if(command == "createAccount") createAccount(data);
-		else answer("Unknown command: " + command);
+		else if(command == "usernameAvailable") usernameAvailable(data, function available(err, name, isAvailable) {
+			if(err) answer("availableError:" + name + ":" + err);
+			else answer("available:" + name + ":" + isAvailable);
+		});
+		else if(command == "createAccount") createAccount(data, function account(err, username) {
+			if(err) answer("createError:" + username + ":" + err);
+			else answer("created:" + username);
+		});
+		else answer("serviceError:Unknown command: " + command);
 		
+		
+		function answer(str) {
+			log(IP + " <= " + UTIL.shortString(str));
+			connection.write(str);
+		}
 	});
 	
-	function answer(str) {
-		log(IP + " <= " + UTIL.shortString(str));
-		connection.write(str);
-	}
 	
-	function usernameAvailable(username) {
+	function usernameAvailable(username, callback) {
 		var fs = require("fs");
 		
 		var encoding = "utf8";
-		fs.readFile(PW_FILE, encoding, function(err, userPassw) {
+		fs.readFile(PW_FILE, encoding, function(err, usersPwString) {
 			if(err) {
 				log("Unable to read PW_FILE=" + PW_FILE + "! " + err.message, ERROR);
-				answer(serviceError);
+				callback(serviceError);
 				sendAlert(err.message + "\n" + err.stack);
 			}
 			else {
-				... i am here yo!
+				console.log("usersPwString:\n" + usersPwString);
+				var users = usersPwString.split(/\r|\r\n/);
+				for (var i=0, name; i<users.length; i++) {
+					name = users[i].substring(0, users[i].indexOf("|"));
+					if(name == username) return callback(null, name, false);
+				}
+				return callback(null, username, true);
 			}
 		});
 	}
 	
-	function createAccount(userData) {
+	function createAccount(userData, callback) {
 		var username = userData.substring(0, userData.indexOf(","));
 		var password = userData.substring(userData.indexOf(",") + 1);
 		
-		
+		var exec = require('child_process').exec;
+		var script = 'adduser.js';
+		exec(script, function adduser(error, stdout, stderr) {
+			if (error) {
+				log("Unable to create username=" + username + "! error=" + error, ERROR);
+				callback(serviceError);
+				sendAlert(error);
+				}
+			else if(stderr) {
+				log("Unable to create username=" + username + "! stderr=" + stderr, ERROR);
+				callback(serviceError);
+				sendAlert(stderr);
+			}
+			else if(stdout) {
+				var check = stdout.match(/User with username=(.*) and password=(.*) successfully added to (.*)/);
+				
+				if(check == null) {
+					log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
+					callback(serviceError);
+					sendAlert(stdout);
+				}
+				else if(check[2] == username && check[3] == password && check[4] == PW_FILE) {
+					log("Account username=" + username + "! successfully created!");
+					callback(null, username);
+				}
+				else {
+					log("Problem when creating username=" + username + "! stdout=" + stdout, ERROR);
+					callback(serviceError);
+					sendAlert(stdout);
+				}
+			}
+			else {
+				log("Problem when creating username=" + username + "! Exec script=" + script + " did not return anyting! arguments=" + JSON.stringify(arguments), ERROR);
+				callback(serviceError);
+				sendAlert(stdout);
+			}
+			
+		});
 	}
 	
 	
@@ -171,10 +249,10 @@ function sendMail(from, to, subject, text) {
 		text: text
 		
 	}, function(error, info){
-		if(error){
+		if(error) {
 			throw new Error(error);
 		}
-		else{
+		else {
 			log("Mail sent: " + info.response);
 		}
 	});

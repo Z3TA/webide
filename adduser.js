@@ -49,7 +49,7 @@ if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters
 if(username.length < 3) throw new Error("username needs to be at least 3 letters!");
 if(username.length > 20) throw new Error("username can not be more then 20 letters!");
 
-var users = usersPwString.split(/\r|\r\n);
+var users = usersPwString.split(/\r|\r\n/);
 for (var i=0, name; i<users.length; i++) {
 	name = users[i].subString(0, users[i].indexOf("|"));
 	if(name == username) throw new Error("User already exist! username=" + username);

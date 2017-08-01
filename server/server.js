@@ -88,7 +88,7 @@ var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 
 // On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
 var HTTP_PORT = getArg(["p", "port"]) || 8099; 
-if(!isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
+if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
 // For generating URL's
 var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
@@ -246,10 +246,6 @@ function main() {
 		})(HTTP_IP);
 	}
 	
-}
-
-function isNumeric(n) {
-	return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 function isIpV4(ip) {
