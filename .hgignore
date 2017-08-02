@@ -5,6 +5,7 @@ bootstrap.url
 userdirs/demo/static_site_demo/preview/*
 userdirs/demo/static_site_demo/public/*
 userdirs/demo/static_site_demo/build.log
+node_modules/*
 npm/*
 tests/_*
 temp/*

@@ -27,6 +27,9 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+signup service!
+
+
 Setting up the toolchain for programming is very hard for a beginner, "just edit and run node" is very confusing ...
 Make it so that you get "right into coding" example HTML page, being able to preview it by clicking a button, and edits are hot-loaded (without page refresh).
 When you load the editor the first time you have a HTML and JS file open, where it says "hit F1 to preview"
@@ -68,6 +71,11 @@ write a blog post
 
 
 todo:
+
+Remove all node_modules from repository
+Make releases include the node_modules plus nodejs!
+
+Make spellchecker work on server-side and use node_modules instead of compiled file.
 
 Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
 

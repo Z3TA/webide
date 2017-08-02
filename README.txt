@@ -1,24 +1,16 @@
 
-JZedit
-======
+JZedit/webIDE
+=============
 
-You need Node.JS to run the server: https://nodejs.org/
-
-node server/server.js --port=8080 --user=admin --pw=admin
-
-Then navigate to http://127.0.0.1:8080/ in your favorite browser. 
-
----
-
-This is a text/code editor that specialize in JavaScript, CSS and HTML.
+This is a text/code editor/IDE that specialize in JavaScript, CSS and HTML.
 
 See LICENCE.txt to know what you are allowed to do with it.
 
 See contribute.txt on how to send your changes.
 
-Available for Linux, Windows (and soon Mac OS X)
 
-
+Install instructions
+====================
 
 Windows
 -------
@@ -45,7 +37,7 @@ We do not yet have a developer licence for Mac OS X, meanwhile use the editor in
 
 node server/server.js --port=8080 --user=admin --pw=admin
 
-Type this address in the browser: http://127.0.0.1:8080/
+THen type this address in the browser: http://127.0.0.1:8080/
 
 
 
@@ -98,7 +90,7 @@ Running as a cloud editor
 =========================
 You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
 
-If you choose to open up the editor to others, i'ts adviced to create a system account for each user.
+If you choose to open up the editor to others, it's advised to create a system account for each user.
 
 Set user credentials in server/users.pw
 Make sure server/users.pw is not readable (sudo chmod 770 server/users.pw && sudo chown root:root server/users.pw)
@@ -107,9 +99,9 @@ Adding users in Linux:
 sudo addgroup --system jzedit_users
 sudo adduser --system --ingroup jzedit_users nameofuser
 
-And Create an apparmor profile, see apparmor/makeprofile.sh
+To create an apparmor profile, see apparmor/makeprofile.sh
 
-
+It's also possible to host the cloud editor on Windows, but then all users need to run as the same user.
 
 
 

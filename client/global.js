@@ -54,6 +54,7 @@ if(runtime == "browser") {
 	
 }
 else {
+	// Hack to make nw.js return the correct __dirname
 	__dirname = require("dirname");
 }
 

@@ -21,7 +21,9 @@
 		"replacestream": "^4.0.0",
 		"walk": "^2.3.9",
 		"diff": "^2.2.3",
-		"sockjs": "^0.3.4"
+		"sockjs": "^0.3.4",
+		"nodemailer": "^2.6.4",
+		"nodemailer-smtp-transport": "^2.7.2"
 	},
 	"repository": {
 		"type": "Mercurial",
