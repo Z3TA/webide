@@ -70,7 +70,10 @@ write a blog post
 
 
 
-todo:
+todo
+----
+
+make server tests cleanup after themselves
 
 Remove all node_modules from repository
 Make releases include the node_modules plus nodejs!

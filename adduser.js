@@ -29,6 +29,12 @@ var groupName = process.argv[4] || "jzedit_users";
 var NO_PW_HASH = getArg(["nopwhash"]);
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "/etc/jzedit_users";
 
+todo: Add support for node pipe (fork) so it can't hack the system by chaning the pw file etc
+
+var TEST = getArg(["t", "test"]);
+
+var ENCODING = "utf8";
+
 if(!username) throw new Error("No username specified!");
 	if(!password) throw new Error("No password specified!");
 	
@@ -36,8 +42,11 @@ if(!username) throw new Error("No username specified!");
 	
 	//console.log("gid=" + gid);
 	
+var fs = require("fs");
+
 try {
-	var usersPwString = fs.readFileSync(PW_FILE, encoding);
+	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
+	var etcPasswdString = fs.readFileSync("/etc/passwd", ENCODING);
 }
 catch(err) {
 	if(err.code != "ENOENT") throw err;
@@ -49,11 +58,18 @@ if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters
 if(username.length < 3) throw new Error("username needs to be at least 3 letters!");
 if(username.length > 20) throw new Error("username can not be more then 20 letters!");
 
+// Make sure user not already exist
 var users = usersPwString.split(/\r|\r\n/);
 for (var i=0, name; i<users.length; i++) {
-	name = users[i].subString(0, users[i].indexOf("|"));
-	if(name == username) throw new Error("User already exist! username=" + username);
+	name = users[i].substring(0, users[i].indexOf("|"));
+	if(name == username) throw new Error("User " + username + " already exist in " + PW_FILE + "! username=");
 }
+var users = etcPasswdString.split(/\r|\r\n/);
+for (var i=0, name; i<users.length; i++) {
+	name = users[i].substring(0, users[i].indexOf(":"));
+	if(name == username) throw new Error("User " + username + " already exist in /etc/passwd! username=");
+}
+
 
 
 var childProcess = require('child_process');
@@ -85,9 +101,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 		var uid = parseInt(matchUid[1]);
 		var homeDir = matchHomeDir[1];
 		
-		var fs = require("fs");
-		
-	var encoding = "utf8";
+	var fs = require("fs");
 		
 	if(NO_PW_HASH) {
 			var hashedPassword = password;
@@ -99,7 +113,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 		
 		usersPwString += username + "|" + hashedPassword + "|" + homeDir + "|" + uid + "|" + gid + "\n";
 		
-	fs.writeFileSync(PW_FILE, usersPwString, encoding);
+	fs.writeFileSync(PW_FILE, usersPwString, ENCODING);
 		
 	
 	// Add skeleton files
@@ -109,8 +123,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	// Update tamplates
 	var date = new Date();
 	var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-	replaceInFileSync(homeDir + "/my_web_site/source/template.htm, 
-	[
+	replaceInFileSync(homeDir + "/my_web_site/template.htm", [
 		['<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">'],
 		['<meta name="author" content="Jon Doe">', '<meta name="author" content="' + username + '">'],
 		['<p>Written by <a href="../index.htm" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>']
@@ -147,7 +160,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	
 	var child_process = require('child_process');
 	var reloadNginxError = child_process.execSync("service nginx reload");
-	if(reloadNginxError) throw reloadNginxError;
+	if(reloadNginxError && !TEST) throw reloadNginxError;
 	
 	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 	
@@ -281,10 +294,9 @@ function chownrDirSync(p, uid, gid) {
 
 function replaceInFileSync(filePath, arrSearchReplace) {
 	var fs = require("fs");
-	var encoding = "utf8";
 	
 	// arrSearchReplace = [searchString, replaceString]
-	var text = fs.readFileSync(filePath, encoding);
+	var text = fs.readFileSync(filePath, ENCODING);
 	
 	for (var i=0, searchString="", replaceString=""; i<arrSearchReplace.length; i++) {
 		searchString = arrSearchReplace[i][0];
@@ -292,6 +304,6 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 		text = text.replace(searchString, replaceString);
 	}
 	
-	fs.writeFileSync(filePath, text, encoding);
+	fs.writeFileSync(filePath, text, ENCODING);
 	
 }

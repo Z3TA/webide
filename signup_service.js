@@ -25,8 +25,6 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 	
 	var getArg = require("./server/getArg.js");
 	
-var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
-
 	var UTIL = require("./client/UTIL.js");
 	
 	var HTTP_PORT = getArg(["p", "port"]) || 8100; 
@@ -34,6 +32,8 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 	
 	var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 	
+var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
+
 	var ADMIN_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org";
 	
 	var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
@@ -175,7 +175,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					sendAlert(err.message + "\n" + err.stack);
 				}
 				else {
-					console.log("usersPwString:\n" + usersPwString);
+					//console.log("usersPwString:\n" + usersPwString);
 					var users = usersPwString.split(/\r|\r\n/);
 					for (var i=0, name; i<users.length; i++) {
 						name = users[i].substring(0, users[i].indexOf("|"));
@@ -184,7 +184,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					
 					// Also check for system users
 					fs.readFile("/etc/passwd", encoding, function(err, usersPwString) {
-						console.log("usersPwString:\n" + usersPwString);
+						//console.log("usersPwString:\n" + usersPwString);
 						var users = usersPwString.split(/\r|\r\n/);
 						for (var i=0, name; i<users.length; i++) {
 							name = users[i].substring(0, users[i].indexOf(":"));
@@ -205,16 +205,19 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 			var password = userData.substring(userData.indexOf(",") + 1);
 			
 			var exec = require('child_process').exec;
-			var script = 'adduser.js';
-			exec(script, function adduser(error, stdout, stderr) {
+			var script = './adduser.js';
+		var options = {
+			pwd: __dirname
+		}
+		exec(script, function adduser(error, stdout, stderr) {
 				if (error) {
 					log("Unable to create username=" + username + "! error=" + error, ERROR);
-					callback(serviceError);
+				callback(serviceError, username);
 					sendAlert(error);
 				}
 				else if(stderr) {
 					log("Unable to create username=" + username + "! stderr=" + stderr, ERROR);
-					callback(serviceError);
+				callback(serviceError, username);
 					sendAlert(stderr);
 				}
 				else if(stdout) {
@@ -222,7 +225,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					
 					if(check == null) {
 						log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
-						callback(serviceError);
+					callback(serviceError, username);
 						sendAlert(stdout);
 					}
 					else if(check[2] == username && check[3] == password && check[4] == PW_FILE) {
@@ -231,13 +234,13 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					}
 					else {
 						log("Problem when creating username=" + username + "! stdout=" + stdout, ERROR);
-						callback(serviceError);
+					callback(serviceError, username);
 						sendAlert(stdout);
 					}
 				}
 				else {
 					log("Problem when creating username=" + username + "! Exec script=" + script + " did not return anyting! arguments=" + JSON.stringify(arguments), ERROR);
-					callback(serviceError);
+				callback(serviceError, username);
 					sendAlert(stdout);
 				}
 				

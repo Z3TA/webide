@@ -45,7 +45,7 @@ window.onload = function main() {
 		else if(code == "available") {
 			if(arr[2]=="false") alertUsername("Username " + arr[1] + " is " + (arr[2]=="true" ? "" : "not") + " available!");
 			}
-		else if(code == "createError") alertGeneralMessage("Unable to create username " + arr[1] + ": " + arr[2]);
+		else if(code == "createError") alertGeneralMessage("Unable to create username " + arr[1] + " on " + arr[2] + ": " + arr[3]);
 		else if(code == "serviceError") alertGeneralMessage(arr[1]);
 		else if(code == "created") {
 			alertGeneralMessage("Successfully created username" + arr[1]);
@@ -117,7 +117,7 @@ window.onload = function main() {
 		alert("accountCreated");
 	}
 	
-	function alertGeneralMessage() {
+	function alertGeneralMessage(msg) {
 		generalAlertDiv.innerText = msg;
 		generalAlertDiv.style.display = "inline";
 	}
