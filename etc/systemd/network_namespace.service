@@ -1,0 +1,12 @@
+[Unit]
+Description=Linux network namespace example
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/bin/sh -c 'exec /sbin/ip netns exec vpn /usr/bin/sudo -u debian-transmission /usr/bin/transmission-daemon -f --log-error --config-dir /var/lib/transmission-daemon/info'
+ExecReload=/bin/kill -s HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
