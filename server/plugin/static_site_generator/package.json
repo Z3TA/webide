@@ -1,0 +1,13 @@
+{
+	"name": "Static Site Generator",
+	"private": true,
+	"description": "Static site generator for webIDE",
+	"version": "1.0.0",
+	"dependencies": {
+		"fs-extra" : "^0.30.0",
+		"iconv-lite" : "^0.4.13",
+		"jschardet" : "^1.4.1",
+		"mammoth" : "^1.0.3",
+		"marked" : "^0.3.5"
+		}
+}
