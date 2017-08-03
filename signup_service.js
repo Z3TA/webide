@@ -205,11 +205,21 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 			var password = userData.substring(userData.indexOf(",") + 1);
 			
 			var exec = require('child_process').exec;
-			var script = './adduser.js';
+			
+		// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
+		var commandArg = {
+			username: username,
+			password: password,
+			noPwHash: !!NO_PW_HASH, // bang bang (!!) converts the value to a boolean
+			pwFile: PW_FILE
+		};
+		
+		var command = "./adduser.js " + JSON.stringify(commandArg);
+		console.log("command=" + command);
 		var options = {
 			pwd: __dirname
 		}
-		exec(script, function adduser(error, stdout, stderr) {
+		exec(command, function adduser(error, stdout, stderr) {
 				if (error) {
 					log("Unable to create username=" + username + "! error=" + error, ERROR);
 				callback(serviceError, username);
@@ -239,7 +249,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					}
 				}
 				else {
-					log("Problem when creating username=" + username + "! Exec script=" + script + " did not return anyting! arguments=" + JSON.stringify(arguments), ERROR);
+				log("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!", ERROR);
 				callback(serviceError, username);
 					sendAlert(stdout);
 				}

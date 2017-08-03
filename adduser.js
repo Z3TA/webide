@@ -20,18 +20,34 @@
 	
 */
 
+
+var defaultGroupName = "jzedit_users";
+var defaultPasswordFile = "/etc/jzedit_users"
+
+// Get arguments ...
 var getArg = require("./server/getArg.js");
 
 var username = process.argv[2];
 var password = process.argv[3];
-var groupName = process.argv[4] || "jzedit_users";
+var groupName = process.argv[4] || defaultGroupName;
 
 var NO_PW_HASH = getArg(["nopwhash"]);
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "/etc/jzedit_users";
-
-todo: Add support for node pipe (fork) so it can't hack the system by chaning the pw file etc
-
+var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 var TEST = getArg(["t", "test"]);
+
+// Favor using JSON as argument to prevent hackers from passing arguments in their password
+try { var scriptArguments = JSON.parse(process.argv.join(" ")); }
+catch (err) { var scriptArguments = null; }
+
+if(scriptArguments) {
+	username = scriptArguments.username;
+	password = scriptArguments.password;
+	groupName = scriptArguments.groupName || defaultGroupName;
+	NO_PW_HASH = scriptArguments.noPwHash;
+	PW_FILE = scriptArguments.pwFile || defaultPasswordFile;
+	TEST = scriptArguments.test;
+}
+
 
 var ENCODING = "utf8";
 
@@ -46,12 +62,16 @@ var fs = require("fs");
 
 try {
 	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
-	var etcPasswdString = fs.readFileSync("/etc/passwd", ENCODING);
-}
+	}
 catch(err) {
 	if(err.code != "ENOENT") throw err;
+	console.warn("File do not exist: PW_FILE=" + PW_FILE + " (it will be created)")
 	var usersPwString = "";
 }
+
+
+	var etcPasswdString = fs.readFileSync("/etc/passwd", ENCODING);
+
 
 if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters that is not a-z or 0-9");
 
