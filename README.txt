@@ -12,9 +12,19 @@ See contribute.txt on how to send your changes.
 Install instructions
 ====================
 
+
+
 Windows
 -------
-Double click (run) start.bat
+
+Download and install nodejs from https://nodejs.org/
+It should come with a packet manager called npm.
+
+Open a command prompt (Click on start menu => run, then type "cmd.exe")
+Navigate to the folder this file is located in via the command prompt: cd path\to\jzedit
+Then install the dependencies by typing "npm install" and hit enter in the command prompt.
+
+After nodejs and all dependencies are installed, double click (run) start.bat
 
 "install": Double click (run) create_shortcut.vbs, it will place a shortcut to start.bat on your desktop.
 
@@ -33,11 +43,16 @@ Or run it via ./start.sh
 
 Mac OS X
 --------
-We do not yet have a developer licence for Mac OS X, meanwhile use the editor in Safari ...
+Download and install nodejs from https://nodejs.org/
+It should come with a packet manager called npm.
 
+Open a terminal: Function-key + Space, and type "terminal"
+Navigate to the folder this file is located in via the terminal: cd path\to\jzedit
+Then install the dependencies by typing "npm install" and hit enter in the terminal.
+After nodejs and all dependencies are installed, type this in the terminal:
 node server/server.js --port=8080 --user=admin --pw=admin
 
-THen type this address in the browser: http://127.0.0.1:8080/
+Then navigate to this address in your favorite web browser: http://127.0.0.1:8080/
 
 
 
