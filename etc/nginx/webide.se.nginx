@@ -1,20 +1,22 @@
-
-# sudo cp etc/nginx/editor.webtigerteam.com.nginx /etc/nginx/sites-available/
-# sudo ln -s /etc/nginx/sites-available/editor.webtigerteam.com.nginx  /etc/nginx/sites-enabled/editor.webtigerteam.com
-# or sudo ln -s $(pwd)/etc/nginx/editor.webtigerteam.com.nginx /etc/nginx/sites-enabled/editor.webtigerteam.com
-# service nginx reload
+# How to install:
+# 1. Make sure nginx is installed: apt-get install nginx
+# 2. mv etc/webide.se.nginx etc/editor.yourdomain.com.nginx
+# 3. Change server_name, ssl_certificate, ssl_certificate_key and replace webide.se to editor.yourdomain.com
+# 4. sudo cp etc/nginx/editor.yourdomain.com.nginx /etc/nginx/sites-available/editor.yourdomain.com.nginx
+# 5. sudo ln -s /etc/nginx/sites-available/editor.yourdomain.com.nginx  /etc/nginx/sites-enabled/editor.yourdomain.com
+# or sudo ln -s $(pwd)/editor.yourdomain.com.nginx /etc/nginx/sites-enabled/editor.yourdomain.com
+# 6. service nginx reload
 #
-
 
 server {
   listen 80;
-  server_name  editor.webtigerteam.com;
+  server_name webide.se;
   charset utf-8;
   
   # Ucomment to enable SSL:
   #listen 443 ssl;
-  #ssl_certificate      /etc/ssl/certs/letsencrypt/editor.webtigerteam.com.crt;
-  #ssl_certificate_key  /etc/ssl/private/editor.webtigerteam.com.key;
+  #ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
+  #ssl_certificate_key  /etc/ssl/private/webide.se.key;
  
   # Uncomment the line below to Enable IPv6
   #listen [::]:80 ipv6only=on;\
@@ -62,7 +64,7 @@ server {
   }
   
 
-  # Lets encrypt challange
+  # Lets encrypt challange (optional)
   location /.well-known/acme-challenge/ {
     # Omitting the / in proxy_pass will make nginx pass on the url
     # Pass the request on to the server that handles the lets-encrypt certificates

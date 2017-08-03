@@ -18,7 +18,7 @@ WorkingDirectory=/srv/jzedit/
 
 # See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
 
-ExecStart=/usr/bin/nodejs signup_service.js --port=8100 --pwfile=/etc/jzedit_users
+ExecStart=/usr/bin/nodejs signup_service.js --port=8100 --pwfile=/etc/jzedit_users --hostname=webide.se
 
 Restart=always
 

@@ -1,6 +1,5 @@
 var SOCKJS_OPEN = 1;
-var EDITOR_URL = "http://webide.se/";
-var SIGNUP_URL = "http://127.0.0.1:8100/signup";
+var SIGNUP_URL = "http://signup.webide.se/signup";
 var CHARCODE_ENTER = 13;
 var MIN_PW_LENGTH = 5;
 var MIN_USERNAME_LENGTH = 3;
@@ -98,23 +97,18 @@ window.onload = function main() {
 	function createButtonClick() {
 		var username = inputUsername.value;
 		var password = inputPassword.value;
-		createAccount(username, password, accountCreated);
+		createAccount(username, password);
 	}
 	
-	function checkNameAvailability(username, callback) {
-		
+	function checkNameAvailability(username) {
 		if(username.match(/[^a-zA-Z0-9]/)) {
 			alertBox("Username can only contain latin characters a-z, A-Z and numbers 0-9");
 		}
 		else connSend("usernameAvailable:" + username);
 	}
 	
-	function createAccount(username, password, callback) {
+	function createAccount(username, password) {
 		connSend("createAccount:" + username + ":" + password);
-	}
-	
-	function accountCreated(username) {
-		alert("accountCreated");
 	}
 	
 	function alertGeneralMessage(msg) {

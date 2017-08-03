@@ -21,20 +21,27 @@
 
 "use strict";
 
-var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "www", "ftp", "mail", "log", "smtp", "user", "users"]; // Don't allow these usernames
-	
+var BRAND_NAME = "JZedit";
+
+var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "www", "ftp", "mail", "log", "smtp", "user", "users", "signup", "dashboard", "webdide"]; // Don't allow these usernames
+
 	var getArg = require("./server/getArg.js");
 	
 	var UTIL = require("./client/UTIL.js");
+	
+	// For sending errors via email to an admin
+	var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
+	var SMTP_HOST = getArg(["mh", "smtp_host"]) || "127.0.0.1";
+	var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
+	var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
+	var ADMIN_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org";
 	
 	var HTTP_PORT = getArg(["p", "port"]) || 8100; 
 	if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 	
 	var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 	
-var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
-
-	var ADMIN_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org";
+	var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 	
 	var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
 	
@@ -97,7 +104,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 		var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 		
 		response.writeHead(404, "Not found", responseHeaders);
-		response.end("Nothing to see here");
+		response.end('This is the signup service for ' + BRAND_NAME + '.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html');
 		
 	}
 	
@@ -147,8 +154,8 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 				else answer("available:" + name + ":" + isAvailable);
 			});
 			else if(command == "createAccount") createAccount(data, function account(err, username) {
-			if(err) answer("createError:" + username + ":" + HOSTNAME + ":" + err);
-			else answer("created:" + username + ":" + HOSTNAME);
+				if(err) answer("createError:" + username + ":" + HOSTNAME + ":" + err);
+				else answer("created:" + username + ":" + HOSTNAME);
 			});
 			else answer("serviceError:Unknown command: " + command);
 			
@@ -163,7 +170,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 		function usernameAvailable(username, callback) {
 			var fs = require("fs");
 			
-		if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
+			if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
 			
 			var encoding = "utf8";
 			
@@ -204,30 +211,33 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 			var username = userData.substring(0, userData.indexOf(","));
 			var password = userData.substring(userData.indexOf(",") + 1);
 			
+			if(username.match(/[^a-zA-Z0-9]/)) return callback("Username can only contain letters a-z, A-Z, 0-9");
+			
+			
 			var exec = require('child_process').exec;
 			
-		// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
-		var commandArg = {
-			username: username,
-			password: password,
-			noPwHash: !!NO_PW_HASH, // bang bang (!!) converts the value to a boolean
-			pwFile: PW_FILE
-		};
-		
-		var command = "./adduser.js " + JSON.stringify(commandArg);
-		console.log("command=" + command);
-		var options = {
-			pwd: __dirname
-		}
-		exec(command, function adduser(error, stdout, stderr) {
+			// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
+			var commandArg = {
+				username: username,
+				password: password,
+				noPwHash: !!NO_PW_HASH, // bang bang (!!) converts the value to a boolean
+				pwFile: PW_FILE
+			};
+			
+			var command = "./adduser.js " + JSON.stringify(commandArg);
+			console.log("command=" + command);
+			var options = {
+				pwd: __dirname
+			}
+			exec(command, function adduser(error, stdout, stderr) {
 				if (error) {
 					log("Unable to create username=" + username + "! error=" + error, ERROR);
-				callback(serviceError, username);
+					callback(serviceError, username);
 					sendAlert(error);
 				}
 				else if(stderr) {
 					log("Unable to create username=" + username + "! stderr=" + stderr, ERROR);
-				callback(serviceError, username);
+					callback(serviceError, username);
 					sendAlert(stderr);
 				}
 				else if(stdout) {
@@ -235,7 +245,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					
 					if(check == null) {
 						log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
-					callback(serviceError, username);
+						callback(serviceError, username);
 						sendAlert(stdout);
 					}
 					else if(check[2] == username && check[3] == password && check[4] == PW_FILE) {
@@ -244,13 +254,13 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 					}
 					else {
 						log("Problem when creating username=" + username + "! stdout=" + stdout, ERROR);
-					callback(serviceError, username);
+						callback(serviceError, username);
 						sendAlert(stdout);
 					}
 				}
 				else {
-				log("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!", ERROR);
-				callback(serviceError, username);
+					log("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!", ERROR);
+					callback(serviceError, username);
 					sendAlert(stdout);
 				}
 				
@@ -262,7 +272,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 	
 	function sendAlert(text) {
 		
-		sendMail("errors@webtigerteam.com", ADMIN_EMAIL, "JZedit cloud editor signup problems", text);
+		sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, "JZedit cloud editor signup problems", text);
 		
 	}
 	
@@ -273,10 +283,12 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 		var nodemailer = require('nodemailer');
 		var smtpTransport = require('nodemailer-smtp-transport');
 		
-		var mailSettings = {};
-		mailSettings.port = 25;
-		mailSettings.host = "127.0.0.1"; // Need to allow relay from 127.0.0.1 !
+		var mailSettings = {
+			port: SMTP_PORT,
+			host: SMTP_HOST
+		};
 		
+		if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
 		
 		var transporter = nodemailer.createTransport(smtpTransport(mailSettings));
 		

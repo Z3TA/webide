@@ -1,9 +1,11 @@
-# sudo cp etc/nginx/signup.webtigerteam.com.nginx /etc/nginx/sites-available/signup.webtigerteam.com.nginx
-# sudo ln -s /etc/nginx/sites-available/signup.webtigerteam.com.nginx  /etc/nginx/sites-enabled/signup.webtigerteam.com
-# or sudo ln -s $(pwd)/signup.webtigerteam.com.nginx /etc/nginx/sites-enabled/signup.webtigerteam.com
-# service nginx reload
+# How to install:
+# 1. Make sure nginx is installed: apt-get install nginx
+# 2. mv etc/signup.webide.se.nginx etc/signup.yourdomain.com.nginx
+# 3. sudo cp etc/nginx/signup.yourdomain.com.nginx /etc/nginx/sites-available/signup.yourdomain.com.nginx
+# 4. sudo ln -s /etc/nginx/sites-available/signup.yourdomain.com.nginx  /etc/nginx/sites-enabled/signup.yourdomain.com
+# or sudo ln -s $(pwd)/signup.yourdomain.com.nginx /etc/nginx/sites-enabled/signup.yourdomain.com
+# 5. service nginx reload
 #
-
 
 server {
   listen 80;

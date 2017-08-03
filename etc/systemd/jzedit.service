@@ -18,7 +18,7 @@ WorkingDirectory=/srv/jzedit/
 # You can change the port to port 80 if you have no other http servers running
 # See etc/nginx/editor.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the editor server
 # Don't forget to change the hostname! If no hostname is given, the IP-address (default 127.0.0.1) will be used.
-ExecStart=/usr/bin/nodejs server/server.js --port=8099 --pwfile=/etc/jzedit_users --hostname=editor.webtigerteam.com --public_port=80
+ExecStart=/usr/bin/nodejs server/server.js --port=8099 --pwfile=/etc/jzedit_users --hostname=webide.se --public_port=80
 
 Restart=always
 
