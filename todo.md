@@ -73,6 +73,11 @@ write a blog post
 todo
 ----
 
+"Use as guest" (locally) button on the login widget. 
+Add signup link to the login widget.
+redirect http://editor.webtigerteam.com/ to webide (and signup page?)
+
+
 make server tests cleanup after themselves
 
 Remove all node_modules from repository
