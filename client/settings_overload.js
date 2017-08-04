@@ -46,7 +46,7 @@ if(runtime=="browser") {
 		<* <*> <+> <$> *** <| |> <|> !! || === ==> <<< >>> <> +++ <- -> => >> << >>= =<< .. ... :: -< >- -<< >>- ++ /= ==
 		
 	*/
-		if(browser == "Chrome" || browser == "Safari" || browser == "Firefox") {
+		if(1==2 && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
 			// Ligatures are confirmed to work in: Chrome/Chromium/Opera, Firefox, Safari, but not IE
 		UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css");
 		EDITOR.settings.style.font = "Fira Code";
