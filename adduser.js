@@ -5,9 +5,6 @@
 	This is a useful script for those managing jzedit running as a cloud editor,
 	it will add users both as system users and into the /etc/jzedit_users file.
 	
-	Create the group:
-	sudo addgroup jzedit_users
-	
 	Make this script executable:
 	sudo chmod +x adduser.js
 	
@@ -20,7 +17,6 @@
 	
 */
 
-var defaultGroupName = "jzedit_users";
 var defaultPasswordFile = "/etc/jzedit_users"
 var defaultDomain = "webide.se";
 
@@ -29,9 +25,6 @@ var getArg = require("./server/getArg.js");
 
 var username = process.argv[2];
 var password = process.argv[3];
-var groupName = process.argv[4] || defaultGroupName;
-
-if(groupName.substring(0,1) == "-") groupName = defaultGroupName;
 
 var NO_PW_HASH = getArg(["nopwhash"]);
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
@@ -45,7 +38,6 @@ catch (err) { var scriptArguments = null; }
 if(scriptArguments) {
 	username = scriptArguments.username;
 	password = scriptArguments.password;
-	groupName = scriptArguments.groupName || defaultGroupName;
 	NO_PW_HASH = scriptArguments.noPwHash;
 	PW_FILE = scriptArguments.pwFile || defaultPasswordFile;
 	DOMAIN = scriptArguments.domain || defaultDomain;
@@ -57,11 +49,7 @@ var ENCODING = "utf8";
 if(!username) throw new Error("No username specified!");
 	if(!password) throw new Error("No password specified!");
 	
-	var gid = getGroupId(groupName);
-	
-	//console.log("gid=" + gid);
-	
-var fs = require("fs");
+	var fs = require("fs");
 
 try {
 	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
@@ -101,7 +89,10 @@ for (var i=0, name; i<users.length; i++) {
 
 
 var childProcess = require('child_process');
-childProcess.exec('adduser --system --ingroup jzedit_users ' + username, function execAddUser(err, stdout, stderr) {
+
+// old: 'adduser --system --ingroup jzedit_users ' + username
+
+childProcess.exec('adduser ' + username + ' --system --group', function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
 		
 		if(stderr) throw new Error(stderr);
@@ -111,14 +102,21 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 			Adding system user `pelle' (UID 111) ...
 			Adding new user `pelle' (UID 111) with group `jzedit_users' ...
 			Creating home directory `/home/pelle' ...
+		
+		Adding new group `test123' (GID 140) ...
+		Adding new user `test123' (UID 126) with group `test123' ...
+		Creating home directory `/home/test123' ...
+		
 		*/
 		
 	//console.log("stdout=" + stdout);
 	
 		var matchUid = stdout.match(/\(UID (\d*)\)/);
+	var matchGid = stdout.match(/\(GID (\d*)\)/);
 	var matchHomeDir = stdout.match(/home directory `([^' ]*)'/);
 	
 		if(!matchUid) throw new Error("Unable to fund UID in stdout=" + stdout);
+	if(!matchGid) throw new Error("Unable to fund GID in stdout=" + stdout);
 		if(!matchHomeDir) throw new Error("Unable to fund UID in stdout=" + stdout);
 		
 	// Sanity check
@@ -127,8 +125,11 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	if(username != matchUserName[1]) throw new Error("The added user's username=" + matchUserName[1] + " is not the username=" + username + " we wanted! stdout=" + stdout);
 	
 		var uid = parseInt(matchUid[1]);
+	var gid = parseInt(matchGid[1]);
 		var homeDir = matchHomeDir[1];
-		
+	
+	//var gid = getGroupId(groupName);
+	
 	var fs = require("fs");
 		
 	if(NO_PW_HASH) {
@@ -146,6 +147,9 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	
 	// Add skeleton files
 	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs/", homeDir);
+	
+	// Give the SSG-demo folder a better name
 	fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
 	
 	// Update tamplates
@@ -163,22 +167,22 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	
 	chownrSync(homeDir, uid, gid);
 	
-	chmodrSync(homeDir, "700");
+	// Make it so that no one else beside the user can read the user files
+	chmodrSync(homeDir, "751");
+	// home dir needs to have execute permissions for everyone for the unix socket to work !!!?
 	
 	// Make wwwpub public
 	chmodrSync(homeDir + "/wwwpub", "755");
 	
 	
-	// create named pipes / unix socket
+	// Create a directory for unix sockets
 	fs.mkdirSync(homeDir + "/sock");
-	fs.mkdirSync(homeDir + "/sock/http1");
-	fs.mkdirSync(homeDir + "/sock/ws1");
-	
-	// Make sure www-data can read and write to the socket
+	chmodrSync(homeDir + "/sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
+	// Make sure www-data can read and write to unix socket
+	// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
 	var wwwgid = getGroupId("www-data");
 	chownrSync(homeDir + "/sock", uid, wwwgid);
-	chmodrSync(homeDir + "/sock", "770");
-	
+	// note: Each process needs to set umask to give write permission to the group!
 	
 	
 	// Create nginx profile
