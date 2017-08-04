@@ -1,0 +1,9 @@
+#
+# Each user will get a hard link to it's own nodejs binary so that we can use apparmor as an additional securyty layer
+#
+#
+
+/usr/bin/nodejs_someuser {
+  /home/someuser/** rw,
+
+}
