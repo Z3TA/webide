@@ -20,7 +20,6 @@
 	
 */
 
-
 var defaultGroupName = "jzedit_users";
 var defaultPasswordFile = "/etc/jzedit_users"
 var defaultDomain = "webide.se";
@@ -160,6 +159,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	
 	// add wwwpub
 	fs.mkdirSync(homeDir + "/wwwpub");
+	fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
 	
 	chownrSync(homeDir, uid, gid);
 	
@@ -288,22 +288,9 @@ function chmodrDirSync (p, mode) {
 	var path = require('path');
 	
 	fs.readdirSync(p).forEach(function (child) {
-		chmodrSync(path.resolve(p, child), mode)
+		chmodrSync(path.resolve(p, child), mode);
 	})
-	return fs.chmodSync(p, dirMode(mode))
-}
-
-function dirMode(mode) {
-	// If a party has r, add x
-	// so that dirs are listable
-	
-	if (mode & 0400)
-	mode |= 0100
-	if (mode & 040)
-	mode |= 010
-	if (mode & 04)
-	mode |= 01
-	return mode
+	return fs.chmodSync(p, mode);
 }
 
 function chownrSync(p, uid, gid) {
