@@ -1,0 +1,36 @@
+ server {
+  listen 80;
+  #listen [::]:80 ipv6only=on;
+  #listen 443 ssl;
+  server_name %USERNAME%.%DOMAIN%;
+  root %HOMEDIR%/wwwpub/;
+  index index.html index.htm;
+  location / {
+    charset	utf-8;
+    try_files $uri $uri/ =404;
+  }
+  
+  location /_http1 {
+    proxy_pass http://unix:%HOMEDIR%/sock/http1;
+    add_header 'Access-Control-Allow-Origin' '*';
+  }
+
+  location /_ws1 {
+    # Upgrade to websocket
+    proxy_pass http://unix:%HOMEDIR%/sock/ws1;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    add_header 'Access-Control-Allow-Origin' '*';
+  }
+
+
+  # Lets encrypt challange
+  location /.well-known/acme-challenge/ {
+    proxy_pass http://127.0.0.1:8094;
+    proxy_set_header  Host       $http_host;
+    proxy_set_header  X-Real-IP  $remote_addr;
+  }
+
+}

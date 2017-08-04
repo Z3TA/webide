@@ -23,6 +23,7 @@
 
 var defaultGroupName = "jzedit_users";
 var defaultPasswordFile = "/etc/jzedit_users"
+var defaultDomain = "webide.se";
 
 // Get arguments ...
 var getArg = require("./server/getArg.js");
@@ -31,9 +32,12 @@ var username = process.argv[2];
 var password = process.argv[3];
 var groupName = process.argv[4] || defaultGroupName;
 
+if(groupName.substring(0,1) == "-") groupName = defaultGroupName;
+
 var NO_PW_HASH = getArg(["nopwhash"]);
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
-var TEST = getArg(["t", "test"]);
+var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
+
 
 // Favor using JSON as argument to prevent hackers from passing arguments in their password
 try { var scriptArguments = JSON.parse(process.argv.join(" ")); }
@@ -45,8 +49,8 @@ if(scriptArguments) {
 	groupName = scriptArguments.groupName || defaultGroupName;
 	NO_PW_HASH = scriptArguments.noPwHash;
 	PW_FILE = scriptArguments.pwFile || defaultPasswordFile;
-	TEST = scriptArguments.test;
-}
+	DOMAIN = scriptArguments.domain || defaultDomain;
+	}
 
 
 var ENCODING = "utf8";
@@ -79,14 +83,19 @@ if(username.length < 3) throw new Error("username needs to be at least 3 letters
 if(username.length > 20) throw new Error("username can not be more then 20 letters!");
 
 // Make sure user not already exist
-var users = usersPwString.split(/\r|\r\n/);
+//console.log("usersPwString=" + usersPwString);
+var users = usersPwString.split(/\n|\r\n/);
+//console.log("users.length=" + users.length);
 for (var i=0, name; i<users.length; i++) {
 	name = users[i].substring(0, users[i].indexOf("|"));
 	if(name == username) throw new Error("User " + username + " already exist in " + PW_FILE + "! username=");
 }
-var users = etcPasswdString.split(/\r|\r\n/);
+//console.log("etcPasswdString=" + etcPasswdString);
+var users = etcPasswdString.split(/\n|\r\n/);
+//console.log("users.length=" + users.length);
 for (var i=0, name; i<users.length; i++) {
 	name = users[i].substring(0, users[i].indexOf(":"));
+	//console.log("name=" + name); // Why does it not find name !?
 	if(name == username) throw new Error("User " + username + " already exist in /etc/passwd! username=");
 }
 
@@ -156,31 +165,36 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 	
 	chmodrSync(homeDir, "700");
 	
-	
-	
-	
-	
 	// Make wwwpub public
 	chmodrSync(homeDir + "/wwwpub", "755");
 	
+	
+	// create named pipes / unix socket
+	fs.mkdirSync(homeDir + "/sock");
+	fs.mkdirSync(homeDir + "/sock/http1");
+	fs.mkdirSync(homeDir + "/sock/ws1");
+	
+	// Make sure www-data can read and write to the socket
+	var wwwgid = getGroupId("www-data");
+	chownrSync(homeDir + "/sock", uid, wwwgid);
+	chmodrSync(homeDir + "/sock", "770");
+	
+	
+	
 	// Create nginx profile
-	var nginxProfile = "server {\
-	listen 80;\
-	#listen [::]:80 ipv6only=on;\
-	#listen 443 ssl;\
-	server_name " + username + ".s3.webtigerteam.com;\
-	root " + homeDir + "/wwwpub/;\
-	index index.html index.htm;\
-	location / {\
-	charset	utf-8;\
-	try_files $uri $uri/ =404;\
-	}\n}";
-	fs.writeFileSync("/etc/nginx/sites-available/" + username + ".webtigerteam.com.nginx", nginxProfile);
-	fs.symlinkSync("/etc/nginx/sites-available/" + username + ".webtigerteam.com.nginx", "/etc/nginx/sites-enabled/" + username + ".webtigerteam.com");
+	var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
+	nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
+	nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+	nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+	
+	
+	fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
+	fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
 	
 	var child_process = require('child_process');
-	var reloadNginxError = child_process.execSync("service nginx reload");
-	if(reloadNginxError && !TEST) throw reloadNginxError;
+	var reloadNginxStdout = child_process.execSync("service nginx reload");
+	reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
+	if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
 	
 	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 	
@@ -189,7 +203,7 @@ childProcess.exec('adduser --system --ingroup jzedit_users ' + username, functio
 function getGroupId(groupName) {
 	var fs = require("fs");
 	
-	var groupData = fs.readFileSync("/etc/group", "utf8");
+	var groupData = fs.readFileSync("/etc/group", ENCODING);
 	
 	//console.log("groupData=" + groupData);
 	
@@ -259,7 +273,7 @@ function copyFolderRecursiveSync( source, target ) {
 
 function chmodrSync (p, mode) {
 	// https://github.com/isaacs/chmodr/
-	console.log("chmod mode=" + mode + " p=" + p);
+	//console.log("chmod mode=" + mode + " p=" + p);
 	var fs = require('fs');
 	
 	var stats = fs.lstatSync(p)
@@ -269,7 +283,7 @@ function chmodrSync (p, mode) {
 }
 
 function chmodrDirSync (p, mode) {
-	console.log("chmod dir mode=" + mode + " p=" + p);
+	//console.log("chmod dir mode=" + mode + " p=" + p);
 	var fs = require('fs');
 	var path = require('path');
 	
@@ -293,7 +307,7 @@ function dirMode(mode) {
 }
 
 function chownrSync(p, uid, gid) {
-	console.log("chown uid=" + uid + " gid=" + gid + " p=" + p);
+	//console.log("chown uid=" + uid + " gid=" + gid + " p=" + p);
 	var fs = require('fs');
 	var stats = fs.lstatSync(p);
 	if (stats.isSymbolicLink()) return;
@@ -302,7 +316,7 @@ function chownrSync(p, uid, gid) {
 }
 
 function chownrDirSync(p, uid, gid) {
-	console.log("chown dir uid=" + uid + " gid=" + gid + " p=" + p);
+	//console.log("chown dir uid=" + uid + " gid=" + gid + " p=" + p);
 	var fs = require('fs');
 	var path = require('path');
 	
