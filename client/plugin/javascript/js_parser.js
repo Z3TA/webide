@@ -245,18 +245,21 @@
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " = function", f.start);
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + "=function", f.start);
 							
-								
-								
+							
 							// Find foo: function foo()
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + ": function", f.start);
 							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
-						
+
+
 							//console.time("hmm"); // These used to be slow
 							//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
 							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
 							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
 							//console.timeEnd("hmm");
-								
+
+							// Anonymous functions
+							if(parseStart == -1) parseStart = file.text.lastIndexOf("function", f.start);
+							
 							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
 							// Make a full parse instead of throwing an error when not in dev mode !?

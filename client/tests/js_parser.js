@@ -1,4 +1,20 @@
 
+
+
+EDITOR.addTest(function callbackFunctionSpaceBeforeParentheses(callback) {
+	EDITOR.openFile("callbackFunctionSpaceBeforeParentheses.js", 'foo(function () {\n\n})\n', function(err, file) {
+		
+		file.moveCaret(undefined, 1);
+		EDITOR.mock("keydown", {charCode: 65, target: "canvas"}); // Simulate entering a character. 65 = A
+		
+		// Uncaught Error: Unable to find start of function=** f.start=17 parseStart=-1 oo(function ()
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1)
+
 EDITOR.addTest(function spaceAfterFunctionName(callback) {
 	EDITOR.openFile("spaceAfterFunctionName.js", 'function foo () {\n\n}\n', function(err, file) {
 		
@@ -11,7 +27,7 @@ EDITOR.addTest(function spaceAfterFunctionName(callback) {
 		callback(true);
 		
 	});
-}, 1)
+})
 
 EDITOR.addTest(function optFunOnlySameName(callback) {
 	EDITOR.openFile("optFunOnlySameName.js", 'var a = {\nxxx: function xxxSomething() {\n\n}\n};\n\nvar b = {\nxxx: function foo() {\n\n}\n};\n', function(err, file) {
