@@ -12,7 +12,7 @@ var CRAZY = getArg(["crazy", "crazy"]);
 var HTTP_ENDPOINTS = {};
 var HOME_DIR = getArg(["h", "homedir"]); // || "/home/";
 
-var NO_PW_HASH = getArg(["nopwhash"]);
+var NO_PW_HASH = getArg(["nopwhash"]) || false;
 
 // Log levels
 var WARN = 4;
@@ -70,7 +70,8 @@ if(USERNAME && !PASSWORD) {
 // Windows can not set uid, so don't bother checking if users have uid specified
 var NOUID = getArg(["nouid"]) || (process.platform == "win32"); 
 
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "./users.pw";
+var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
+var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 
 var UTIL = require("../client/UTIL.js");
 

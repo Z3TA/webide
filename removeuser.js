@@ -2,7 +2,8 @@
 ':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
 var defaultGroupName = "jzedit_users";
-var defaultPasswordFile = "/etc/jzedit_users"
+var defaultPasswordFile1 = "/etc/jzedit_users"
+var defaultPasswordFile2 = "server/users.pw"
 var defaultDomain = "webide.se";
 
 // Get arguments ...
@@ -10,7 +11,7 @@ var getArg = require("./server/getArg.js");
 
 var username = process.argv[2];
 
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
+var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile1;
 
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 
@@ -20,7 +21,36 @@ if(!username) throw new Error("No username specified!");
 
 var fs = require("fs");
 
-var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
+
+try {
+	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
+}
+catch(err) {
+	if(err.code != "ENOENT") throw err;
+	console.log("File not found! PW_FILE=" + PW_FILE);
+	if(PW_FILE == defaultPasswordFile1) {
+		//console.log("No users found in " + PW_FILE + ". Trying " + defaultPasswordFile2);
+		
+		try {
+			var usersPwString = fs.readFileSync(defaultPasswordFile2, ENCODING);
+		}
+		catch(err) {
+			if(err.code != "ENOENT") throw err;
+			else {
+				console.log("Could not find neaither of the following files:");
+				console.log(defaultPasswordFile1);
+				console.log(defaultPasswordFile2);
+				console.log("Specify pwfile in arguments!");
+				process.exit();
+			}
+		}
+		if(usersPwString) {
+			PW_FILE = defaultPasswordFile2;
+			console.warn("Using PW_FILE=" + PW_FILE);
+		}
+	}
+}
+
 
 var userRemovedFromPwFile = false;
 var arrUsers = usersPwString.split(/\rn|\n/);

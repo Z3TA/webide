@@ -32,7 +32,6 @@ if (ps aux | grep [n]odej*s*.*server\.js > /dev/null) then
 
 else
 
-
 	echo Starting the server ...
 	cd server
 	serverArg="--loglevel=5 --username=admin --password=admin --port=8099"
