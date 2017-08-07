@@ -76,6 +76,9 @@ write a blog post
 todo
 ----
 
+npm installer plugin, whenever "require" is detected, and a node_modules foulder is found, and it's not a node native or local module, ask if the module should be installed.
+
+
 "Use as guest" (locally) button on the login widget. 
 Add signup link to the login widget.
 redirect http://editor.webtigerteam.com/ to webide (and signup page?)
