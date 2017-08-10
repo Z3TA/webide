@@ -27,7 +27,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Trying to get chroot AND seteuid to work ...
+A nodejsrunner worker that runs with /home/user/chroot ? 
 
 signup service!
 
