@@ -27,7 +27,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-A nodejsrunner worker that runs with /home/user/chroot ? 
+When the jzedit server starts, it stars a nodejs_worker.js for each user, which is a init program that auto starts nodejs projects that is set in "prod" mode.
+(in prod -mode the user will get a mail if the script crashes) (there will also be a bunch of debugging goodies!)
+nodejs_worker.js runs chroot, setegid and seteuid. It also runs nodejs scripts on demand in "dev mode".
+
 
 signup service!
 

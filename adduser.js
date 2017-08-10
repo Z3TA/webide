@@ -145,6 +145,19 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 		
 	fs.writeFileSync(PW_FILE, usersPwString, ENCODING);
 		
+	// Create a hard link to nodejs so that we can have a apparmor profile on it
+	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+	
+	// Create and activate apparmor profile for the nodejs runner process
+	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
+	
+	var child_process = require('child_process');
+	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username);
+	enforceApparmorProfileStdout = enforceApparmorProfileStdout.toString(ENCODING);
+	if(enforceApparmorProfileStdout.trim()) throw new Error(enforceApparmorProfileStdout);
+	
 	
 	// Add skeleton files
 	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);

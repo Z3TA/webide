@@ -3,7 +3,7 @@
 #
 #
 
-/usr/bin/nodejs_someuser {
-  /home/someuser/** rw,
+/usr/bin/nodejs_%USERNAME% {
+  /home/%USERNAME%/** rw,
 
 }
