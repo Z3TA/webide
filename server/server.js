@@ -9,8 +9,13 @@ var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower 
 
 var CRAZY = getArg(["crazy", "crazy"]);
 
+var UTIL = require("../client/UTIL.js");
+
 var HTTP_ENDPOINTS = {};
-var HOME_DIR = getArg(["h", "homedir"]); // || "/home/";
+var defaultHomeDir = "/home/";
+var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
+if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
+
 
 var NO_PW_HASH = getArg(["nopwhash"]) || false;
 
@@ -73,7 +78,7 @@ var NOUID = getArg(["nouid"]) || (process.platform == "win32");
 var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 
-var UTIL = require("../client/UTIL.js");
+
 
 var GS = String.fromCharCode(29);
 var APC = String.fromCharCode(159);
@@ -556,7 +561,7 @@ function sockJsConnection(connection) {
 										
 										if(req.createHttpEndpoint) {
 											
-											createHttpEndpoint(req.createHttpEndpoint.folder, function(err, url) {
+											createHttpEndpoint(name, req.createHttpEndpoint.folder, function(err, url) {
 												if(err) throw err;
 												workerResp(req, {url: url})
 												
@@ -693,10 +698,10 @@ function isObject(obj) {
 
 
 
-function createHttpEndpoint(folder, callback) {
+function createHttpEndpoint(username, folder, callback) {
 	
 	if(HOME_DIR) {
-		if(folder.indexOf(HOME_DIR) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR);
+		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
 	
 	for(var endPoint in HTTP_ENDPOINTS) {
@@ -960,53 +965,55 @@ function createUserWorker(name, uid, gid) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
-	var args = ["--loglevel=" + LOGLEVEL];
+	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid];
 	
-	if(uid != undefined) options.uid = parseInt(uid);
-	if(gid != undefined) options.gid = parseInt(gid);
-	
-	if((uid == undefined || uid == -1)) {
-		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
-		
-		if(process.getuid) {
-			if(process.getuid() == 0 && !CRAZY) {
-				throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+		var USE_CHROOT = true;
+		if(!USE_CHROOT) {
+			if(uid != undefined) options.uid = parseInt(uid);
+			if(gid != undefined) options.gid = parseInt(gid);
+		}
+		if((uid == undefined || uid == -1)) {
+			log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
+			
+			if(process.getuid) {
+				if(process.getuid() == 0 && !CRAZY) {
+					throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+				}
 			}
 		}
-	}
-	
-	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
-	
-	try {
-		var worker = childProcess.fork("user_worker.js", args, options);
-	}
-	catch(err) {
-		if(err.code == "EPERM") {
-			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
-			throw new Error("Unable to spawn worker! (" + err.message + ")");
+		
+		log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
+		
+		try {
+			var worker = childProcess.fork("user_worker.js", args, options);
 		}
-		else throw err;
+		catch(err) {
+			if(err.code == "EPERM") {
+				if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
+				throw new Error("Unable to spawn worker! (" + err.message + ")");
+			}
+			else throw err;
+		}
+		
+		worker.on("close", function workerClose(code, signal) {
+			console.log(name + " worker close: code=" + code + " signal=" + signal);
+		});
+		
+		worker.on("disconnect", function workerDisconnect() {
+			console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+		});
+		
+		worker.on("error", function workerClose(err) {
+			console.log(name + " worker error: err.message=" + err.message);
+		});
+		
+		worker.on("exit", function workerExit(code, signal) {
+			console.log(name + " worker exit: code=" + code + " signal=" + signal);
+		});
+		
+		
+		return worker;
+		
 	}
-	
-	worker.on("close", function workerClose(code, signal) {
-		console.log(name + " worker close: code=" + code + " signal=" + signal);
-	});
-	
-	worker.on("disconnect", function workerDisconnect() {
-		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
-	});
-	
-	worker.on("error", function workerClose(err) {
-		console.log(name + " worker error: err.message=" + err.message);
-	});
-	
-	worker.on("exit", function workerExit(code, signal) {
-		console.log(name + " worker exit: code=" + code + " signal=" + signal);
-	});
-	
-	
-	return worker;
-	
-}
 
 main();

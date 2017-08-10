@@ -27,6 +27,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Trying to get chroot AND seteuid to work ...
+
 signup service!
 
 Running NodeJS scripts
@@ -328,6 +330,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Automatic " + + " in urls !? var csvUrl = "http://visual-utopia.com/history/"
 
 Can not edit the page in WYSIWYG mode because of:
 Line 57: Inserted: <p>Written by <a href="../index.htm" rel="author">Johan Zetterberg</a> Jul 7, 2017.</p>

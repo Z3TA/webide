@@ -17,7 +17,7 @@
 	
 */
 
-var defaultPasswordFile = "/etc/jzedit_users"
+var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
 var defaultDomain = "webide.se";
 
 // Get arguments ...
@@ -27,7 +27,7 @@ var username = process.argv[2];
 var password = process.argv[3];
 
 var NO_PW_HASH = getArg(["nopwhash"]);
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile1;
+var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 
 
@@ -39,7 +39,7 @@ if(scriptArguments) {
 	username = scriptArguments.username;
 	password = scriptArguments.password;
 	NO_PW_HASH = scriptArguments.noPwHash;
-	PW_FILE = scriptArguments.pwFile || defaultPasswordFile1;
+	PW_FILE = scriptArguments.pwFile || defaultPasswordFile;
 	DOMAIN = scriptArguments.domain || defaultDomain;
 	}
 
@@ -57,23 +57,7 @@ try {
 catch(err) {
 	if(err.code != "ENOENT") throw err;
 	var usersPwString = "";
-	if(PW_FILE == defaultPasswordFile1) {
-		//console.log("No users found in " + PW_FILE + ". Trying " + defaultPasswordFile2);
-		
-		try {
-			var usersPwString = fs.readFileSync(defaultPasswordFile2, ENCODING);
-		}
-		catch(err) {
-			if(err.code != "ENOENT") throw err;
-			var usersPwString = "";
-			if(!usersPwString) console.log("Could not locate password file. The following file will be created: " + PW_FILE + "");
-		}
-		if(usersPwString) {
-			PW_FILE = defaultPasswordFile2;
-			//console.warn("Using PW_FILE=" + PW_FILE);
-		}
-	}
-	else console.log("File not found! PW_FILE=" + PW_FILE + " (it will be created)");
+	console.log("File not found! PW_FILE=" + PW_FILE + " (it will be created)");
 	}
 
 

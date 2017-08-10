@@ -27,6 +27,8 @@ var getArg = require("./getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);
+//logModule.setLogFile("./user_worker.log");
+// console.log messages from here is visible on the parent!
 
 // Log levels
 var WARN = 4;
@@ -36,12 +38,35 @@ var DEBUG = 7;
 
 
 
+
+var USE_CHROOT = true;
+if(USE_CHROOT) {
+	/* Change root ...
+	posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
+		nvm install or nvm use (the version you want)
+		npm rebuild
+	*/
+	var posix = require("posix");
+var username = getArg(["u", "user", "username"]);
+	var uid = parseInt(getArg(["uid", "uid"]));
+	var gid = parseInt(getArg(["gid", "gid"]));
+	posix.chroot('/home/' + username);
+	posix.setegid(gid);
+	posix.seteuid(uid);
+	
+	
+	//var chroot = require("chroot");
+	//chroot("/home/" + username + "/", username);
+	
+}
+
 // Set default file permissions
 var newmask = parseInt("0027", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 var oldmask = process.umask(newmask);
 log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
 
-// Changed umask from 22 to 77 
+// Changed umask from 22 to 77
+
 
 var parentRequestCallback = {}; // id: callback function
 var parentRequestId = 0; // Counter (id) for parentRequestCallback
@@ -126,7 +151,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
 
-	if(user.rootPath) {
+	if(user.rootPath && !USE_CHROOT) {
 		var urlModule = require("url");
 		var pathModule = require("path");
 		
@@ -200,7 +225,7 @@ user.toVirtualPath = function toVirtualPath(realPath) {
 	
 	//console.log(user.name + " toVirtualPath realPath=" + realPath);
 	
-	if(!user.rootPath) {
+	if(!user.rootPath || USE_CHROOT) {
 		//console.log("No need to translate (no rootPath)");
 		return realPath;
 	}
@@ -546,3 +571,9 @@ console.warn = function() {
 	log(user.name + ": " + msg, 4);
 }
 
+// Overload console.error
+console.error = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(user.name + ": " + msg, 3);
+}
