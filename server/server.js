@@ -25,6 +25,8 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
+
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
 	// Enhanced console.log ...
@@ -967,53 +969,57 @@ function createUserWorker(name, uid, gid) {
 	var options = {};
 	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid];
 	
-		var USE_CHROOT = true;
-		if(!USE_CHROOT) {
-			if(uid != undefined) options.uid = parseInt(uid);
-			if(gid != undefined) options.gid = parseInt(gid);
-		}
-		if((uid == undefined || uid == -1)) {
-			log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
-			
-			if(process.getuid) {
-				if(process.getuid() == 0 && !CRAZY) {
-					throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
-				}
-			}
-		}
-		
-		log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
-		
-		try {
-			var worker = childProcess.fork("user_worker.js", args, options);
-		}
-		catch(err) {
-			if(err.code == "EPERM") {
-				if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
-				throw new Error("Unable to spawn worker! (" + err.message + ")");
-			}
-			else throw err;
-		}
-		
-		worker.on("close", function workerClose(code, signal) {
-			console.log(name + " worker close: code=" + code + " signal=" + signal);
-		});
-		
-		worker.on("disconnect", function workerDisconnect() {
-			console.log(name + " worker disconnect: worker.connected=" + worker.connected);
-		});
-		
-		worker.on("error", function workerClose(err) {
-			console.log(name + " worker error: err.message=" + err.message);
-		});
-		
-		worker.on("exit", function workerExit(code, signal) {
-			console.log(name + " worker exit: code=" + code + " signal=" + signal);
-		});
-		
-		
-		return worker;
-		
+	if(USE_CHROOT) {
+		args.push("-chroot")
 	}
+	else {
+		if(uid != undefined) options.uid = parseInt(uid);
+		if(gid != undefined) options.gid = parseInt(gid);
+	}
+
+
+	if((uid == undefined || uid == -1)) {
+		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
+		
+		if(process.getuid) {
+			if(process.getuid() == 0 && !CRAZY) {
+				throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
+			}
+		}
+	}
+	
+	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
+	
+	try {
+		var worker = childProcess.fork("user_worker.js", args, options);
+	}
+	catch(err) {
+		if(err.code == "EPERM") {
+			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
+			throw new Error("Unable to spawn worker! (" + err.message + ")");
+		}
+		else throw err;
+	}
+	
+	worker.on("close", function workerClose(code, signal) {
+		console.log(name + " worker close: code=" + code + " signal=" + signal);
+	});
+	
+	worker.on("disconnect", function workerDisconnect() {
+		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+	});
+	
+	worker.on("error", function workerClose(err) {
+		console.log(name + " worker error: err.message=" + err.message);
+	});
+	
+	worker.on("exit", function workerExit(code, signal) {
+		console.log(name + " worker exit: code=" + code + " signal=" + signal);
+	});
+	
+	
+	return worker;
+	
+}
 
 main();
