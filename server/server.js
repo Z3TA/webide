@@ -27,6 +27,8 @@ var DEBUG = 7;
 
 var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
 
+var NODE_WORKER = {}; // username:childProcess, list of nodejs user worker/initors
+
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
 	// Enhanced console.log ...
@@ -254,6 +256,19 @@ function main() {
 		})(HTTP_IP);
 	}
 	
+	// Start a nodejs worker/init script for each user
+	
+	var username = "test123";
+	var nodeWorkerArgs = [];
+	var nodeWorkerOptions = {
+		cwd: "/home/" + username,
+		env: {username: username}
+		execPath: "/usr/bin/nodejs_" + username
+	};
+	
+	NODE_WORKER["test123"] = child_process.fork("./node_worker.js", nodeWorkerArgs, );
+	
+
 }
 
 function isIpV4(ip) {
