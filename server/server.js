@@ -104,6 +104,8 @@ if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is n
 var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 
+var RUNNING_NODEJS_SCRIPTS = {}; // user: {scriptName: childProcess}
+
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -513,14 +515,17 @@ function sockJsConnection(connection) {
 							
 							function acceptUser(homeDir, shell) {
 								
-								var runningNodeJsScripts = {};
+								if(!RUNNING_NODEJS_SCRIPTS.hasOwnProperty(name)) RUNNING_NODEJS_SCRIPTS[name] = {};
 								
+									var runningNodeJsScripts = RUNNING_NODEJS_SCRIPTS[name];
+									
 									if(gid == undefined) gid = uid;
 									
 									if(!USER_CONNECTIONS.hasOwnProperty(name)) {
 										USER_CONNECTIONS[name] = {
 											connections: [connection],
-											counter: 0
+											counter: 0,
+											runningNodeJsScripts: {}
 										}
 										userConnectionId = 0;
 									}
@@ -592,98 +597,99 @@ function sockJsConnection(connection) {
 												var filePath = req.runNodeJsScript.filePath
 												
 												if(runningNodeJsScripts.hasOwnProperty(filePath)) {
-												// Stop the current running script before starting the same script again
-												stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-													runScript(filePath);
-												});
+													// Stop the current running script before starting the same script again
+													stopNodeJsScript(filePath, function nodeJsScriptKilled() {
+														runScript(filePath);
+													});
 												}
-											else runScript(filePath);
+												else runScript(filePath);
+												
+											}
+											
+											else if(req.stopNodeJsScript) {
+												var filePath = req.stopNodeJsScript.filePath
+												
+												if(!runningNodeJsScripts.hasOwnProperty(filePath)) return workerResp(req, {filePath: filePath}, "The script is not running: " + filePath);
+												
+												stopNodeJsScript(filePath, function nodeJsScriptKilled() {
+													workerResp(req, {filePath: filePath});
+												});
+											}
+											
+											else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 											
 										}
+										else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 										
-										else if(req.stopNodeJsScript) {
-											var filePath = req.stopNodeJsScript.filePath
+										function stopNodeJsScript(filePath, callback) {
 											
-											if(!runningNodeJsScripts.hasOwnProperty(filePath)) return workerResp(req, {filePath: filePath}, "The script is not running: " + filePath);
+											console.log(name + " killing NodeJS script: filePath=" + filePath);
 											
-											stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-												workerResp(req, {filePath: filePath});
-											});
-										}
-										
-										else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
-										
-									}
-									else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
-									
-									function stopNodeJsScript(filePath, callback) {
-										
-										console.log(name + " killing NodeJS script: filePath=" + filePath);
-										
-										if(!runningNodeJsScripts.hasOwnProperty(filePath)) return callback(); 
-										
-										var childProcess = runningNodeJsScripts[filePath];
-										
-										if(childProcess.connected) childProcess.disconnect();
-										
-										// Give it a chance to teardown before killing it
-										childProcess.kill('SIGTERM');
-										childProcess.kill('SIGINT');
-										childProcess.kill('SIGQUIT');
-										childProcess.kill('SIGHUP');
-										
-										var killTimeout = setTimeout(function kill() {
-											// Now kill it for good
-											childProcess.kill('SIGKILL');
-											setTimeout(function wait() {
-												// Make sure it has exited
-												if(runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
-												callback();
-											}, 300);
+											if(!runningNodeJsScripts.hasOwnProperty(filePath)) return callback(); 
+											
+											var childProcess = runningNodeJsScripts[filePath];
+											
+											if(childProcess.connected) childProcess.disconnect();
+											
+											// Give it a chance to teardown before killing it
+											childProcess.kill('SIGTERM');
+											childProcess.kill('SIGINT');
+											childProcess.kill('SIGQUIT');
+											childProcess.kill('SIGHUP');
+											
+											var killTimeout = setTimeout(function kill() {
+												// Now kill it for good
+												childProcess.kill('SIGKILL');
+												setTimeout(function wait() {
+													// Make sure it has exited
+													if(runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
+													callback();
+												}, 300);
 											}, 3000);
-										
-										setTimeout(function checkIfStillRunning() {
-											// Check if it has exited
-											if(!runningNodeJsScripts.hasOwnProperty(filePath)) {
-												clearTimeout(killTimeout);
-												callback(); 
-											}
-										}, 500);
-										
-									}
-									
-									function runScript(filePath) {
-										
-										console.log(name + " starting NodeJS script: filePath=" + filePath);
-										
-										runNodeJsScript(name, uid, gid, filePath, nodeJsScriptOnExit, nodeJsScriptOnMessage, nodeJsScriptOnStarted);
-										
-									function nodeJsScriptOnExit(exitObject) {
-										delete runningNodeJsScripts[filePath];
-										send({nodejsWorkerMessage: {
-												scriptName: req.runNodeJsScript.filePath,
-												exitCode: exitObject.code,
-												stdErrArr: exitObject.stdErrArr
-											}
-											});
+											
+											setTimeout(function checkIfStillRunning() {
+												// Check if it has exited
+												if(!runningNodeJsScripts.hasOwnProperty(filePath)) {
+													clearTimeout(killTimeout);
+													callback(); 
+												}
+											}, 500);
 											
 										}
 										
-										function nodeJsScriptOnMessage(nodejsWorkerMessage) {
-											send({nodejsWorkerMessage: nodejsWorkerMessage});
+										function runScript(filePath) {
+											
+											console.log(name + " starting NodeJS script: filePath=" + filePath);
+											
+											runNodeJsScript(name, uid, gid, filePath, nodeJsScriptOnExit, nodeJsScriptOnMessage, nodeJsScriptOnStarted);
+											
+											function nodeJsScriptOnExit(exitObject) {
+												delete runningNodeJsScripts[filePath];
+												send({nodejsWorkerMessage: {
+														scriptName: req.runNodeJsScript.filePath,
+													finished: true,
+													exitCode: exitObject.code,
+														stdErrArr: exitObject.stdErrArr
+													}
+												});
+												
+											}
+											
+											function nodeJsScriptOnMessage(nodejsWorkerMessage) {
+												send({nodejsWorkerMessage: nodejsWorkerMessage});
+											}
+											
+											function nodeJsScriptOnStarted(childProcess) {
+												runningNodeJsScripts[filePath] = childProcess;
+												workerResp(req, {filePath: filePath});
+											}
 										}
 										
-										function nodeJsScriptOnStarted(childProcess) {
-											runningNodeJsScripts[filePath] = childProcess;
-											workerResp(req, {filePath: filePath});
-										}
-									}
-									
-									function workerResp(req, resp, err) {
+										function workerResp(req, resp, err) {
 											if(id == undefined) throw new Error("id=" + id);
-										var obj = {id: id, parentResponse: resp};
-										if(err) obj.err = err;
-										userWorker.send(obj);
+											var obj = {id: id, parentResponse: resp};
+											if(err) obj.err = err;
+											userWorker.send(obj);
 										}
 										
 									}

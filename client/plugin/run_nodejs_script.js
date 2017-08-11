@@ -63,14 +63,14 @@
 				if(msg.scriptName == filePath) {
 					if(msg.log) file.writeLine(msg.log);
 					else if(msg.warn) file.writeLine("WARNING: " + msg.log);
-					else if(msg.exitCode) {
+					else if(msg.finished) {
 						if(msg.stdErrArr) {
 							for (var i=0; i<msg.stdErrArr.length; i++) {
 								file.writeLine(msg.stdErrArr[i]);
 							}
 						}
 						else file.writeLine("Done!");
-						filePath = null; // Don't append any more to the stdout file
+						CLIENT. // Don't append any more to the stdout file
 					}
 					EDITOR.renderNeeded();
 				}

@@ -27,7 +27,11 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Find a way to stop listening in run_nodejs_scripts.js!! (ex: re-running a script will keep appending to old stdout files)
+
 Be able to stop a script after reloading (relogin) the editor!
+
+Stop all running user nodejs scripts on server exit!
 
 Use systemd and service RootDirectory for nodejs scripts "in production" !?
 
