@@ -1,7 +1,7 @@
 /*
-
-
-
+	
+	
+	
 */
 
 "use strict";
@@ -47,7 +47,7 @@ if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superus
 
 if(USE_CHROOT) {
 	/* Change root ...
-	posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
+		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
 		nvm install or nvm use (the version you want)
 		npm rebuild
 		
@@ -90,16 +90,16 @@ user.isSavingStorage = [];
 user.rootPath = undefined;
 
 user.identify = function identify(info) {
-
+	
 	console.log("info: ", info);
-
+	
 	user.id = info.id;
 	user.name = info.name;
 	user.rootPath = info.rootPath;
 	user.defaultWorkingDirectory = info.homeDir;
-
+	
 	var path = require("path");
-
+	
 	if(user.rootPath) { // Use "true" path
 		user.rootPath = path.resolve(user.rootPath);
 		user.rootPath = UTIL.trailingSlash(user.rootPath);
@@ -146,20 +146,20 @@ user.remoteConnectionClosed = function remoteConnectionClosed(protocol, serverAd
 	// Notify the client about closed connection
 	user.send({
 		connectionClosed: {protocol: protocol, serverAddress: serverAddress}
-		});
+	});
 	
 	delete user.remoteConnections[serverAddress]; // Remove the connection
 	
 }
 
 user.translatePath = function translatePath(pathToFileOrDir) {
-
+	
 	// Translates a virtual path to a real file-system path
-
+	
 	//console.log(user.name + " translatePath=" + pathToFileOrDir);
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
-
+	
 	if(user.rootPath && !USE_CHROOT) {
 		var urlModule = require("url");
 		var pathModule = require("path");
@@ -181,7 +181,7 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 		var lastCharOfPath = pathToFileOrDir.charAt(pathToFileOrDir.length-1);
 		
 		var isDirectory = (lastCharOfPath == "/" || lastCharOfPath == "\\");
-
+		
 		// Problem: //foo/bar/baz will be parsed as root=//foo/bar
 		// Solution: Remove double delimiters at start of path
 		//var delimiter = UTIL.getPathDelimiter(pathToFileOrDir);
@@ -250,7 +250,7 @@ user.toVirtualPath = function toVirtualPath(realPath) {
 	
 	// Add a root slash if it doesn't start with a slash
 	if(virtualPath.charAt(0) != "/" ) virtualPath = "/" + virtualPath;
-
+	
 	
 	//console.log("virtualPath=" + virtualPath);
 	
@@ -262,7 +262,7 @@ user.toVirtualPath = function toVirtualPath(realPath) {
 user.loadStorage = function loadStorage(callback) {
 	
 	// callback storage as a object
-
+	
 	var fs = require("fs");
 	var filesRead = 0;
 	
@@ -302,7 +302,7 @@ user.loadStorage = function loadStorage(callback) {
 			}
 		}
 		else {
-		
+			
 			if(Object.prototype.toString.call( files ) !== '[object Array]') throw new Error("Expected files to be an Array! typeof=" + (typeof files) + " files=" + JSON.stringify(files));
 			
 			user.storage = {};
@@ -338,8 +338,8 @@ user.loadStorage = function loadStorage(callback) {
 		}
 		
 	});
-
-
+	
+	
 }
 
 user.saveStorageItem = function saveStorage(itemName, callback) {
@@ -411,7 +411,7 @@ user.saveStorageItem = function saveStorage(itemName, callback) {
 				console.log("Done saving storage item=" + itemName + " for user=" + user.name, 7);
 				
 			});
-
+			
 		});
 	});
 }
@@ -430,17 +430,17 @@ user.removeStorageItem = function removeStorageItem(itemName, callback) {
 			throw err;
 			
 			/*
-			if(err.code == "ENOENT") {
+				if(err.code == "ENOENT") {
 				console.warn(err.message);
 				
 				user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
 				callback(null);
 				
-			}
-			else {
+				}
+				else {
 				callback(err);
 				throw err;
-			}
+				}
 			*/
 		}
 		else {
@@ -453,11 +453,11 @@ user.removeStorageItem = function removeStorageItem(itemName, callback) {
 
 
 process.on('message', function commandMessage(message) {
-
+	
 	// We can not recive sockJS connection handles!
-
+	
 	if(message == undefined) throw new Error("User worker message=" + message);
-
+	
 	if(message.identify) {
 		user.identify(message.identify);
 	}
@@ -467,22 +467,22 @@ process.on('message', function commandMessage(message) {
 	else if(message.parentResponse) {
 		var id = message.id;
 		var resp = message.parentResponse;
-
+		
 		if(parentRequestCallback.hasOwnProperty(id)) {
-			parentRequestCallback[id](null, resp);
+			parentRequestCallback[id](message.err, resp);
 			delete parentRequestCallback[id];
 		}
 		else throw new Error("No callback saved for parentRequestCallback id=" + id);
 	}
 	else if(message.commands) {
-
+		
 		var command = message.commands.command;
 		var commands = command.split(".");
 		var json = message.commands.json;
 		var id = message.commands.id;
-
+		
 		var funToRun;
-
+		
 		if(commands.length > 1) {
 			// foo.bar.baz
 			funToRun = API;
@@ -495,9 +495,9 @@ process.on('message', function commandMessage(message) {
 			if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + UTIL.shortString(message)});
 			
 			funToRun = API[command];
-
+			
 		}
-
+		
 		if (typeof funToRun !== "function") {
 			send({error: "API error: Unknown command: " + command});
 		}
@@ -527,7 +527,7 @@ process.on('message', function commandMessage(message) {
 		}
 	}
 	else throw new Error("Unable to handle: message=" + JSON.stringify(message));
-
+	
 	function send(answer) {
 		
 		if(id) answer.id = id;
@@ -535,7 +535,7 @@ process.on('message', function commandMessage(message) {
 		process.send(answer);
 		
 	}
-
+	
 })
 
 
@@ -557,19 +557,34 @@ API.serve = function serve(user, json, callback) {
 }
 
 API.run_nodejs = function run_nodejs(user, json, callback) {
-
+	
 	// We do not have to translate the file path as the script will have the same chroot as the user see
 	
-	parentRequest({runNodeJsScript: {filePath: json.filePath}}, function(err, resp) {
+	var filePath = json.filePath;
+	
+	parentRequest({runNodeJsScript: {filePath: filePath}}, function(err, resp) {
 		callback(err, {filePath: resp.filePath});
 	});
-
+	
 }
 
+API.stop_nodejs = function stop_nodejs(user, json, callback) {
+	
+	// We do not have to translate the file path as the script will have the same chroot as the user see
+	
+	var filePath = json.filePath;
+	
+	parentRequest({stopNodeJsScript: {filePath: filePath}}, function(err, resp) {
+		callback(err, {filePath: resp.filePath});
+	});
+	
+}
+
+
 function parentRequest(req, callback) {
-
+	
 	var id = ++parentRequestId;
-
+	
 	process.send({id: id, request: req});
 	parentRequestCallback[id] = callback;
 }

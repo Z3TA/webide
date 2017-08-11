@@ -9,17 +9,32 @@
 	
 	function loadNodeJS() {
 		var keyF1 = 112;
-		
+		var keyF3 = 114;
 		EDITOR.bindKey({desc: "Runs the current (nodejs) file", fun: runNodeJsScript, charCode: keyF1, combo: 0});
+		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF3, combo: 0});
 	}
 	
 	function unloadNodeJS() {
 		EDITOR.unbindKey(runNodeJsScript);
+		EDITOR.unbindKey(stopNodeJsScript);
 	}
 	
+	function stopNodeJsScript() {
+		var filePath = EDITOR.currentFile.path;
+		
+		var json = {filePath: filePath};
+		
+		CLIENT.cmd("stop_nodejs", json, function(err, json) {
+			if(err) alertBox(err.message);
+			else {
+				console.log("Stopped script: " + json.filePath);
+				}
+		});
+		
+		return false;
+	}
 	
 	function runNodeJsScript() {
-		var currentFile = EDITOR.currentFile.path;
 		
 		var filePath = EDITOR.currentFile.path;
 		
@@ -50,11 +65,12 @@
 					else if(msg.warn) file.writeLine("WARNING: " + msg.log);
 					else if(msg.exitCode) {
 						if(msg.stdErrArr) {
-							for (var i=0; i<stdErrArr.length; i++) {
-								file.writeLine(stdErrArr[i]);
+							for (var i=0; i<msg.stdErrArr.length; i++) {
+								file.writeLine(msg.stdErrArr[i]);
 							}
 						}
 						else file.writeLine("Done!");
+						filePath = null; // Don't append any more to the stdout file
 					}
 					EDITOR.renderNeeded();
 				}

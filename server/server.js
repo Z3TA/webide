@@ -513,130 +513,204 @@ function sockJsConnection(connection) {
 							
 							function acceptUser(homeDir, shell) {
 								
+								var runningNodeJsScripts = {};
 								
-								if(gid == undefined) gid = uid;
-								
-								if(!USER_CONNECTIONS.hasOwnProperty(name)) {
-									USER_CONNECTIONS[name] = {
-										connections: [connection],
-										counter: 0
-									}
-									userConnectionId = 0;
-								}
-								else {
-									USER_CONNECTIONS[name].connections.push(connection);
-									userConnectionId = ++USER_CONNECTIONS[name].counter;
-								}
-								
-								userWorker = createUserWorker(name, uid, gid);
-								
-								var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
-								
-								log("User name=" + name + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
-								
-								userWorker.send({identify: userInfo});
-								userWorker.on("message", messageFromWorker);
-								userWorker.on("exit", workerExitHandler);
-								
-								/*
-									setTimeout(function() {
-									user.send({resp: {
-									test: {foo: 1, bar: 2}
-									}});
+									if(gid == undefined) gid = uid;
 									
-									}, 3000);
-								*/
-								
-								console.log("userConnectionId=" + userConnectionId);
-								
-								send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
-								
-								if(commandQueue.length > 0) {
-									console.log("Running " + commandQueue.length + " commands from the command queue ...");
-									for(var i=0; i<commandQueue.length; i++) {
-										handle(commandQueue[i]);
+									if(!USER_CONNECTIONS.hasOwnProperty(name)) {
+										USER_CONNECTIONS[name] = {
+											connections: [connection],
+											counter: 0
+										}
+										userConnectionId = 0;
 									}
-									commandQueue.length = 0;
-								}
-								
-								return true;
-								
-								function messageFromWorker(workerMessage, handle) {
-									console.log("Worker message from " + name + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+									else {
+										USER_CONNECTIONS[name].connections.push(connection);
+										userConnectionId = ++USER_CONNECTIONS[name].counter;
+									}
 									
-									if(workerMessage.resp || workerMessage.error) send(workerMessage);
-									else if(workerMessage.message) {
-										for (var i=0, conn; i<USER_CONNECTIONS[name].connections.length; i++) {
-											send(workerMessage.message, USER_CONNECTIONS[name].connections[i]);
-												}
+									userWorker = createUserWorker(name, uid, gid);
+									
+									var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
+									
+									log("User name=" + name + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
+									
+									userWorker.send({identify: userInfo});
+									userWorker.on("message", messageFromWorker);
+									userWorker.on("exit", workerExitHandler);
+									
+									/*
+										setTimeout(function() {
+										user.send({resp: {
+										test: {foo: 1, bar: 2}
+										}});
+										
+										}, 3000);
+									*/
+									
+									console.log("userConnectionId=" + userConnectionId);
+									
+									send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
+									
+									if(commandQueue.length > 0) {
+										console.log("Running " + commandQueue.length + " commands from the command queue ...");
+										for(var i=0; i<commandQueue.length; i++) {
+											handle(commandQueue[i]);
+										}
+										commandQueue.length = 0;
 									}
-									else if(workerMessage.request) {
-										// For special functionality ...
+									
+									return true;
+									
+									function messageFromWorker(workerMessage, handle) {
+										console.log("Worker message from " + name + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 										
-										var id = workerMessage.id;
-										var req = workerMessage.request;
-										
-										if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
-										
-										if(req.createHttpEndpoint) {
+										if(workerMessage.resp || workerMessage.error) send(workerMessage);
+										else if(workerMessage.message) {
+											for (var i=0, conn; i<USER_CONNECTIONS[name].connections.length; i++) {
+												send(workerMessage.message, USER_CONNECTIONS[name].connections[i]);
+											}
+										}
+										else if(workerMessage.request) {
+											// For special functionality ...
 											
-											createHttpEndpoint(name, req.createHttpEndpoint.folder, function(err, url) {
-												if(err) throw err;
-												workerResp(req, {url: url})
+											var id = workerMessage.id;
+											var req = workerMessage.request;
+											
+											if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+											
+											if(req.createHttpEndpoint) {
+												
+												createHttpEndpoint(name, req.createHttpEndpoint.folder, function(err, url) {
+													if(err) throw err;
+													workerResp(req, {url: url})
 												});
 											}
-										else if(req.runNodeJsScript) {
-											runNodeJsScript(name, uid, gid, req.runNodeJsScript.filePath, 
-											function whenDone(exitObject) {
-												send({nodejsWorkerMessage: {
-														scriptName: req.runNodeJsScript.filePath,
-														exitCode: exitObject.code,
-														stdErrArr: exitObject.stdErrArr
-												}
+											
+											else if(req.runNodeJsScript) {
+												
+												var filePath = req.runNodeJsScript.filePath
+												
+												if(runningNodeJsScripts.hasOwnProperty(filePath)) {
+												// Stop the current running script before starting the same script again
+												stopNodeJsScript(filePath, function nodeJsScriptKilled() {
+													runScript(filePath);
 												});
-												
-											},
-											function onMessage(nodejsWorkerMessage) {
-												send({nodejsWorkerMessage: nodejsWorkerMessage});
-												
-											});
-											workerResp(req, {filePath: req.runNodeJsScript.filePath});
+												}
+											else runScript(filePath);
+											
 										}
+										
+										else if(req.stopNodeJsScript) {
+											var filePath = req.stopNodeJsScript.filePath
+											
+											if(!runningNodeJsScripts.hasOwnProperty(filePath)) return workerResp(req, {filePath: filePath}, "The script is not running: " + filePath);
+											
+											stopNodeJsScript(filePath, function nodeJsScriptKilled() {
+												workerResp(req, {filePath: filePath});
+											});
+										}
+										
 										else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 										
 									}
 									else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 									
-									function workerResp(req, resp) {
-										if(id == undefined) throw new Error("id=" + id);
-										userWorker.send({id: id, parentResponse: resp});
+									function stopNodeJsScript(filePath, callback) {
+										
+										console.log(name + " killing NodeJS script: filePath=" + filePath);
+										
+										if(!runningNodeJsScripts.hasOwnProperty(filePath)) return callback(); 
+										
+										var childProcess = runningNodeJsScripts[filePath];
+										
+										if(childProcess.connected) childProcess.disconnect();
+										
+										// Give it a chance to teardown before killing it
+										childProcess.kill('SIGTERM');
+										childProcess.kill('SIGINT');
+										childProcess.kill('SIGQUIT');
+										childProcess.kill('SIGHUP');
+										
+										var killTimeout = setTimeout(function kill() {
+											// Now kill it for good
+											childProcess.kill('SIGKILL');
+											setTimeout(function wait() {
+												// Make sure it has exited
+												if(runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
+												callback();
+											}, 300);
+											}, 3000);
+										
+										setTimeout(function checkIfStillRunning() {
+											// Check if it has exited
+											if(!runningNodeJsScripts.hasOwnProperty(filePath)) {
+												clearTimeout(killTimeout);
+												callback(); 
+											}
+										}, 500);
+										
+									}
+									
+									function runScript(filePath) {
+										
+										console.log(name + " starting NodeJS script: filePath=" + filePath);
+										
+										runNodeJsScript(name, uid, gid, filePath, nodeJsScriptOnExit, nodeJsScriptOnMessage, nodeJsScriptOnStarted);
+										
+									function nodeJsScriptOnExit(exitObject) {
+										delete runningNodeJsScripts[filePath];
+										send({nodejsWorkerMessage: {
+												scriptName: req.runNodeJsScript.filePath,
+												exitCode: exitObject.code,
+												stdErrArr: exitObject.stdErrArr
+											}
+											});
+											
+										}
+										
+										function nodeJsScriptOnMessage(nodejsWorkerMessage) {
+											send({nodejsWorkerMessage: nodejsWorkerMessage});
+										}
+										
+										function nodeJsScriptOnStarted(childProcess) {
+											runningNodeJsScripts[filePath] = childProcess;
+											workerResp(req, {filePath: filePath});
+										}
+									}
+									
+									function workerResp(req, resp, err) {
+											if(id == undefined) throw new Error("id=" + id);
+										var obj = {id: id, parentResponse: resp};
+										if(err) obj.err = err;
+										userWorker.send(obj);
+										}
+										
+									}
+									
+									function workerExitHandler(code, signal) {
+										console.log(name + " worker exit: code=" + code + " signal=" + signal);
+										
+										var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
+										
+										if(code !== 0) {
+											msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
+											
+											log("Recreating user worker process for " + name);
+											
+											userWorker = createUserWorker(name, uid, gid);
+											userWorker.send({identify: userInfo});
+											
+											userWorker.on("message", messageFromWorker);
+											userWorker.on("exit", workerExitHandler);
+											
+										}
+										
+										send({msg: msg, id: 0});
+										
 									}
 									
 								}
-								
-								function workerExitHandler(code, signal) {
-									console.log(name + " worker exit: code=" + code + " signal=" + signal);
-									
-									var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
-									
-									if(code !== 0) {
-										msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
-										
-										log("Recreating user worker process for " + name);
-										
-										userWorker = createUserWorker(name, uid, gid);
-										userWorker.send({identify: userInfo});
-										
-										userWorker.on("message", messageFromWorker);
-										userWorker.on("exit", workerExitHandler);
-										
-									}
-									
-									send({msg: msg, id: 0});
-									
-								}
-								
-							}
 						}
 						
 					})(json.username, json.password);
@@ -731,7 +805,7 @@ function isObject(obj) {
 */
 
 
-function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage) {
+function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage, onStarted) {
 	
 	var stdErrArr = []; // Collect stderr messages, and send them when the process exit
 	var nodeWorkerArgs = [];
@@ -757,6 +831,8 @@ function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage) {
 	nodeWorker.stderr.on('data', nodejsWorkerStderr);
 	
 	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
+	
+	onStarted(nodeWorker);
 	
 	function messageFromNodejsWorker(workerMessage, handle) {
 		console.log("Nodejs worker message from " + username + ": " + workerMessage + " handle=" + handle);
