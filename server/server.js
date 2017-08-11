@@ -27,7 +27,7 @@ var DEBUG = 7;
 
 var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
 
-var NODE_WORKER = {}; // username:childProcess, list of nodejs user worker/initors
+var NODE_INIT = {}; // username:childProcess, list of nodejs initors
 
 var log; // Using small caps because it looks and feels better
 (function setLogginModule() { // Self calling function to not clutter script scope
@@ -257,7 +257,7 @@ function main() {
 	}
 	
 	
-	if(!USERNAME) {
+	if(!USERNAME && 1==2) {
 		// Start a nodejs worker/init script for each user
 		var username = "test123";
 		var nodeWorkerArgs = [];
@@ -267,7 +267,7 @@ function main() {
 			execPath: "/usr/bin/nodejs_" + username
 		};
 		
-		NODE_WORKER["test123"] = child_process.fork("./node_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+		NODE_INIT["test123"] = child_process.fork("./node_init.js", nodeWorkerArgs, nodeWorkerOptions);
 	}
 	
 
@@ -587,19 +587,17 @@ function sockJsConnection(connection) {
 											}
 										else if(req.runNodeJsScript) {
 											runNodeJsScript(name, uid, gid, req.runNodeJsScript.filePath, 
-											function whenDone(code, stderrArr) {
-												send({
-													resp: {
-														nodejsWorkerMessage: {
-															finish: code,
-															stderrArr: stderrArr
+											function whenDone(exitObject) {
+												send({nodejsWorkerMessage: {
+														scriptName: req.runNodeJsScript.filePath,
+														exitCode: exitObject.code,
+														stdErrArr: exitObject.stdErrArr
 												}
-													}
 												});
 												
 											},
 											function onMessage(nodejsWorkerMessage) {
-												send({resp: {nodejsWorkerMessage: nodejsWorkerMessage}});
+												send({nodejsWorkerMessage: nodejsWorkerMessage});
 												
 											});
 											workerResp(req, {filePath: req.runNodeJsScript.filePath});
@@ -737,61 +735,61 @@ function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage) {
 	
 	var stdErrArr = []; // Collect stderr messages, and send them when the process exit
 	var nodeWorkerArgs = [];
-		var nodeWorkerOptions = {
-			env: {
-				username: username, 
-				uid: 1000, 
-				gid: 1000, 
-				scriptToRun: filePath
-			},
-			execPath: "/usr/bin/nodejs_" + username,
-			silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
-		};
-		
-		var child_process = require("child_process");
-		var nodeWorker = child_process.fork("./nodejs_worker.js", nodeWorkerArgs, nodeWorkerOptions);
-		// The node worker will chroot to user's home dir, setegid and seteuid
-		
-		nodeWorker.on("message", messageFromNodejsWorker);
-		nodeWorker.on("error", nodejsWorkerError);
-		nodeWorker.on("exit", nodejsWorkerExitHandler);
-		nodeWorker.stdout.on('data', nodejsWorkerStdout);
-		nodeWorker.stderr.on('data', nodejsWorkerStderr);
-		
+	var nodeWorkerOptions = {
+		env: {
+			username: username, 
+			uid: 1000, 
+			gid: 1000, 
+			scriptToRun: filePath
+		},
+		execPath: "/usr/bin/nodejs_" + username,
+		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+	};
+	
+	var child_process = require("child_process");
+	var nodeWorker = child_process.fork("./nodejs_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+	// The node worker will chroot to user's home dir, setegid and seteuid
+	
+	nodeWorker.on("message", messageFromNodejsWorker);
+	nodeWorker.on("error", nodejsWorkerError);
+	nodeWorker.on("exit", nodejsWorkerExitHandler);
+	nodeWorker.stdout.on('data', nodejsWorkerStdout);
+	nodeWorker.stderr.on('data', nodejsWorkerStderr);
+	
 	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
-		
-		function messageFromNodejsWorker(workerMessage, handle) {
-			console.log("Nodejs worker message from " + username + ": " + workerMessage + " handle=" + handle);
-			onMessage(workerMessage);
-		}
-		
-		function nodejsWorkerExitHandler(code, signal) {
-			console.log(username + " nodejs worker exit: code=" + code + " signal=" + signal);
-		onExit({code: code, stdErrArr: stdErrArr});
-		}
-		
-		function nodejsWorkerError(err, something) {
-			console.log(username + " nodejs worker error: err=" + err + " something=" + something);
-		}
-		
-		function nodejsWorkerStdout(data) {
-			var txtArr = data.toString("utf8").trim().split("\n");
-			
-			for(var i=0; i<txtArr.length; i++) {
-			console.log(username + " nodejs_worker:stdout:" + txtArr[i]);
-			}
-		}
-		
-		function nodejsWorkerStderr(data) {
-			var txtArr = data.toString("utf8").trim().split("\n");
-			
-			for(var i=0; i<txtArr.length; i++) {
-			console.log(username + " nodejs_worker:stderr:" + txtArr[i]);
-				stdErrArr.push(txtArr[i]);
-			}
-		}
-		
+	
+	function messageFromNodejsWorker(workerMessage, handle) {
+		console.log("Nodejs worker message from " + username + ": " + workerMessage + " handle=" + handle);
+		onMessage(workerMessage);
 	}
+	
+	function nodejsWorkerExitHandler(code, signal) {
+		console.log(username + " nodejs worker exit: code=" + code + " signal=" + signal);
+		onExit({code: code, stdErrArr: stdErrArr});
+	}
+	
+	function nodejsWorkerError(err, something) {
+		console.log(username + " nodejs worker error: err=" + err + " something=" + something);
+	}
+	
+	function nodejsWorkerStdout(data) {
+		var txtArr = data.toString("utf8").trim().split("\n");
+		
+		for(var i=0; i<txtArr.length; i++) {
+			console.log(username + " nodejs_worker:stdout:" + txtArr[i]);
+		}
+	}
+	
+	function nodejsWorkerStderr(data) {
+		var txtArr = data.toString("utf8").trim().split("\n");
+		
+		for(var i=0; i<txtArr.length; i++) {
+			console.log(username + " nodejs_worker:stderr:" + txtArr[i]);
+			stdErrArr.push(txtArr[i]);
+		}
+	}
+	
+}
 
 
 function createHttpEndpoint(username, folder, callback) {

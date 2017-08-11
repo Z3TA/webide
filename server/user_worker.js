@@ -540,7 +540,7 @@ process.on('message', function commandMessage(message) {
 
 
 
-// ## Special API's ...
+// ## Special API's (that has to use parentRequest)...
 
 API.serve = function serve(user, json, callback) {
 	
@@ -554,6 +554,16 @@ API.serve = function serve(user, json, callback) {
 		callback(err, {url: resp.url});
 	});
 	
+}
+
+API.run_nodejs = function run_nodejs(user, json, callback) {
+
+	// We do not have to translate the file path as the script will have the same chroot as the user see
+	
+	parentRequest({runNodeJsScript: {filePath: json.filePath}}, function(err, resp) {
+		callback(err, {filePath: resp.filePath});
+	});
+
 }
 
 function parentRequest(req, callback) {
