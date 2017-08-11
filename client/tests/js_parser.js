@@ -1,5 +1,18 @@
 
 
+EDITOR.addTest(function cantFindFunctionStart(callback) {
+	EDITOR.openFile("cantFindFunctionStart.js", 'console.log = function() {\nlog("123");\n}\n\nconsole.warn = function() {\nlog("abc");\n}\n\nvar foo = {\nbar: {\nlog: function () {\n\n}\n}\n}\n', function(err, file) {
+		
+		file.moveCaret(undefined, 11);
+		EDITOR.mock("keydown", {charCode: 65, target: "canvas"}); // Simulate entering a character. 65 = A
+		
+		// Uncaught Error: Grid row=18 does not exist!
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
 
 EDITOR.addTest(function callbackFunctionSpaceBeforeParentheses(callback) {
 	EDITOR.openFile("callbackFunctionSpaceBeforeParentheses.js", 'foo(function () {\n\n})\n', function(err, file) {
@@ -13,7 +26,7 @@ EDITOR.addTest(function callbackFunctionSpaceBeforeParentheses(callback) {
 		callback(true);
 		
 	});
-}, 1)
+});
 
 EDITOR.addTest(function spaceAfterFunctionName(callback) {
 	EDITOR.openFile("spaceAfterFunctionName.js", 'function foo () {\n\n}\n', function(err, file) {

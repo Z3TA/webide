@@ -238,27 +238,40 @@
 							
 							// I do not trust reLastIndexOf ...
 							
-							if(parseStart == -1) parseStart = file.text.lastIndexOf("function " + f.name + " (", f.start);
-							
-							
-							// Fix for: foo = function() and foo = function foo()
-							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " = function", f.start);
-							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + "=function", f.start);
-							
-							
-							// Find foo: function foo()
-							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + ": function", f.start);
-							if(parseStart == -1) parseStart = file.text.lastIndexOf(f.name + " : function", f.start);
+							if(parseStart == -1) {
+
+								parseStart = [];
+
+								parseStart.push(file.text.lastIndexOf("function " + f.name + " (", f.start));
+								
+								
+								// Fix for: foo = function() and foo = function foo()
+								parseStart.push(file.text.lastIndexOf(f.name + " = function", f.start));
+								parseStart.push(file.text.lastIndexOf(f.name + "=function", f.start));
+								
+								
+								// Find foo: function foo()
+								parseStart.push(file.text.lastIndexOf(f.name + ": function", f.start));
+								parseStart.push(file.text.lastIndexOf(f.name + " : function", f.start));
 
 
-							//console.time("hmm"); // These used to be slow
-							//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
-							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end);
-							if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end);
-							//console.timeEnd("hmm");
+								//console.time("hmm"); // These used to be slow
+								//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
+								parseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end));
+								parseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end));
+								//console.timeEnd("hmm");
 
-							// Anonymous functions
-							if(parseStart == -1) parseStart = file.text.lastIndexOf("function", f.start);
+								// Anonymous functions
+								parseStart.push(file.text.lastIndexOf("function", f.start));
+
+								// Pick the location closest to the function body
+								parseStart.sort(function sortNumber(a,b) {
+								    return a - b;
+								});
+
+								parseStart = parseStart[parseStart.length-1];
+
+							}
 							
 							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
