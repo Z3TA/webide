@@ -27,7 +27,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Do spawned processes have the same chroot ?
+Do spawned processes have the same chroot ? Can't spawn from a chroot!!
+
+Use systemd and service RootDirectory for nodejs scripts "in production".
+
 
 
 When the jzedit server starts, it stars a nodejs_worker.js for each user, which is a init program that auto starts nodejs projects that is set in "prod" mode.

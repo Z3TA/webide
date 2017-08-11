@@ -50,6 +50,10 @@ if(USE_CHROOT) {
 	posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
 		nvm install or nvm use (the version you want)
 		npm rebuild
+		
+		The idea with chroot is that we do not have to translate paths to virtual root.
+		But when running with chroot we are not able to spawn any processes!!
+		
 	*/
 	var posix = require("posix");
 	var username = getArg(["u", "user", "username"]);

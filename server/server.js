@@ -256,17 +256,19 @@ function main() {
 		})(HTTP_IP);
 	}
 	
-	// Start a nodejs worker/init script for each user
 	
-	var username = "test123";
-	var nodeWorkerArgs = [];
-	var nodeWorkerOptions = {
-		cwd: "/home/" + username,
-		env: {username: username}
-		execPath: "/usr/bin/nodejs_" + username
-	};
-	
-	NODE_WORKER["test123"] = child_process.fork("./node_worker.js", nodeWorkerArgs, );
+	if(!USERNAME) {
+		// Start a nodejs worker/init script for each user
+		var username = "test123";
+		var nodeWorkerArgs = [];
+		var nodeWorkerOptions = {
+			cwd: "/home/" + username,
+			env: {username: username},
+			execPath: "/usr/bin/nodejs_" + username
+		};
+		
+		NODE_WORKER["test123"] = child_process.fork("./node_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+	}
 	
 
 }
@@ -341,7 +343,7 @@ function sockJsConnection(connection) {
 		function handle(message) { // A function so it can call itself from the queue
 			
 			if(message.indexOf(GS) == -1) {
-				return send({error: "Not a proper jzedit command (does not contain " + GS + " separator) : " + message});
+				return send({error: "Command does not contain " + GS + " separator : " + message});
 			}
 			
 			var json;
@@ -581,9 +583,26 @@ function sockJsConnection(connection) {
 											createHttpEndpoint(name, req.createHttpEndpoint.folder, function(err, url) {
 												if(err) throw err;
 												workerResp(req, {url: url})
+												});
+											}
+										else if(req.runNodeJsScript) {
+											runNodeJsScript(name, uid, gid, req.runNodeJsScript.filePath, 
+											function whenDone(code, stderrArr) {
+												send({
+													resp: {
+														nodejsWorkerMessage: {
+															finish: code,
+															stderrArr: stderrArr
+												}
+													}
+												});
+												
+											},
+											function onMessage(nodejsWorkerMessage) {
+												send({resp: {nodejsWorkerMessage: nodejsWorkerMessage}});
 												
 											});
-											
+											workerResp(req, {filePath: req.runNodeJsScript.filePath});
 										}
 										else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 										
@@ -713,6 +732,66 @@ function isObject(obj) {
 	}
 */
 
+
+function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage) {
+	
+	var stdErrArr = []; // Collect stderr messages, and send them when the process exit
+	var nodeWorkerArgs = [];
+		var nodeWorkerOptions = {
+			env: {
+				username: username, 
+				uid: 1000, 
+				gid: 1000, 
+				scriptToRun: filePath
+			},
+			execPath: "/usr/bin/nodejs_" + username,
+			silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+		};
+		
+		var child_process = require("child_process");
+		var nodeWorker = child_process.fork("./nodejs_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+		// The node worker will chroot to user's home dir, setegid and seteuid
+		
+		nodeWorker.on("message", messageFromNodejsWorker);
+		nodeWorker.on("error", nodejsWorkerError);
+		nodeWorker.on("exit", nodejsWorkerExitHandler);
+		nodeWorker.stdout.on('data', nodejsWorkerStdout);
+		nodeWorker.stderr.on('data', nodejsWorkerStderr);
+		
+	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
+		
+		function messageFromNodejsWorker(workerMessage, handle) {
+			console.log("Nodejs worker message from " + username + ": " + workerMessage + " handle=" + handle);
+			onMessage(workerMessage);
+		}
+		
+		function nodejsWorkerExitHandler(code, signal) {
+			console.log(username + " nodejs worker exit: code=" + code + " signal=" + signal);
+		onExit({code: code, stdErrArr: stdErrArr});
+		}
+		
+		function nodejsWorkerError(err, something) {
+			console.log(username + " nodejs worker error: err=" + err + " something=" + something);
+		}
+		
+		function nodejsWorkerStdout(data) {
+			var txtArr = data.toString("utf8").trim().split("\n");
+			
+			for(var i=0; i<txtArr.length; i++) {
+			console.log(username + " nodejs_worker:stdout:" + txtArr[i]);
+			}
+		}
+		
+		function nodejsWorkerStderr(data) {
+			var txtArr = data.toString("utf8").trim().split("\n");
+			
+			for(var i=0; i<txtArr.length; i++) {
+			console.log(username + " nodejs_worker:stderr:" + txtArr[i]);
+				stdErrArr.push(txtArr[i]);
+			}
+		}
+		
+	}
 
 
 function createHttpEndpoint(username, folder, callback) {
@@ -991,8 +1070,8 @@ function createUserWorker(name, uid, gid) {
 		if(uid != undefined) options.uid = parseInt(uid);
 		if(gid != undefined) options.gid = parseInt(gid);
 	}
-
-
+	
+	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 		

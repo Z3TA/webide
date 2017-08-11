@@ -22,11 +22,11 @@ function log(msg, lvl, noTrace) {
 	var _debug = 7;
 
 	if(lvl == undefined) lvl = _info;
-
+	
+	var where = "";
+	
 	if(lvl <= LOGLEVEL) {
 		
-		var where = "";
-
 		if(!noTrace) {
 
 			try { // Too see possible function responsible for RangeError: Maximum call stack size exceeded
@@ -124,9 +124,10 @@ function log(msg, lvl, noTrace) {
 				else CONSOLE_LOG_ORIGINAL(msgString);
 			}
 		}
-
-
 	}
+	
+	return where;
+	
 	function myDate() {
 		var d = new Date();
 		
