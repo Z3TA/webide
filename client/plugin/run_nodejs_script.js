@@ -38,7 +38,7 @@
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, "", function fileOpened(err, file) {
+			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + filePath + " ...", function fileOpened(err, file) {
 					if(err) throw err;
 					appendFile(file, msg);
 				});
@@ -47,6 +47,8 @@
 	
 	function stopNodeJsScript() {
 		var filePath = EDITOR.currentFile.path;
+		
+		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
 		
 		var json = {filePath: filePath};
 		
@@ -70,8 +72,7 @@
 			if(err) throw err;
 			else {
 				console.log("Started script: " + json.filePath);
-				nodejsWorkerMessage({log: "\n\n" + (new Date()) + ": Running " + filePath + " ...", scriptName: filePath});
-			}
+				}
 		});
 		
 		return false;

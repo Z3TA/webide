@@ -27,6 +27,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+copy lib deps to home dir so we can run chroot !?
+https://unix.stackexchange.com/questions/4897/providing-bin-and-lib-inside-a-chroot-jail
+bind doesn't seem to work !?
+
 Show incline result of consle.logs of nodejs scrips
 
 Show inline variable values using nodejs debugger repl

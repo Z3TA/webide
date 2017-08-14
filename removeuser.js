@@ -78,6 +78,29 @@ catch(err) {
 	else throw err;
 }
 
+// Remove apparmor profile
+var apparmorProfile = "/etc/apparmor.d/usr.bin.nodejs_" + username;
+try {
+	fs.unlinkSync(apparmorProfile);
+	}
+catch(err) {
+	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
+	else throw err;
+}
+
+
+// Unlink nodejs hard link
+var userNodejs = "/usr/bin/nodejs_" + username;
+try {
+	fs.unlinkSync(userNodejs);
+}
+catch(err) {
+	if(err.code == "ENOENT") console.warn("Did not find userNodejs=" + userNodejs);
+	else throw err;
+}
+
+
+
 var childProcess = require('child_process');
 childProcess.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;

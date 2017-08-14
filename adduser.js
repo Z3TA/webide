@@ -156,7 +156,11 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 	var child_process = require('child_process');
 	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username);
 	enforceApparmorProfileStdout = enforceApparmorProfileStdout.toString(ENCODING);
-	if(enforceApparmorProfileStdout.trim()) throw new Error(enforceApparmorProfileStdout);
+	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+	
+	// Copy dependencies that nodejs needs
+	var nodejsDeps = child_process.execSync("ldd nodejs_" + username);
+	...
 	
 	
 	// Add skeleton files
