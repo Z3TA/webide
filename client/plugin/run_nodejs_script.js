@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	var scriptCounter = 0;
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -38,7 +40,7 @@
 		
 		var filePath = EDITOR.currentFile.path;
 		
-		EDITOR.openFile(filePath + ".stdout", filePath + " stdout:\n", function fileOpened(err, file) {
+		EDITOR.openFile(filePath + ".stdout", "", function fileOpened(err, file) {
 			
 			if(err) throw err;
 			
@@ -56,7 +58,8 @@
 				}
 			});
 			
-			CLIENT.on("nodejsWorkerMessage", function nodejsWorkerMessage(msg) {
+			// Create an unique function (so it can be removed)
+			var nodejsWorkerMessage = new Function("arg", "return function " + "nodejsWorkerMessage" + ++scriptCounter + "(msg){ arg(msg) };")(function(msg) {
 				
 				console.log("nodejsWorkerMessage: " + JSON.stringify(msg));
 				
@@ -64,19 +67,19 @@
 					if(msg.log) file.writeLine(msg.log);
 					else if(msg.warn) file.writeLine("WARNING: " + msg.log);
 					else if(msg.finished) {
-						if(msg.stdErrArr) {
+						if(msg.stdErrArr.length > 0) {
 							for (var i=0; i<msg.stdErrArr.length; i++) {
 								file.writeLine(msg.stdErrArr[i]);
 							}
 						}
-						else file.writeLine("Done!");
-						CLIENT. // Don't append any more to the stdout file
+						//else file.writeLine(msg.scriptName + " exited with exit code " + msg.exitCode);
+						CLIENT.removeEvent("nodejsWorkerMessage", nodejsWorkerMessage); // Don't append any more to the stdout file
 					}
 					EDITOR.renderNeeded();
 				}
 				
-				
 			});
+			CLIENT.on("nodejsWorkerMessage", nodejsWorkerMessage);
 			
 		});
 		

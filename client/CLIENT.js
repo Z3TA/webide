@@ -222,6 +222,8 @@ var CLIENT = {}; // Client object is global
 			eventListeners[ev] = [];
 		}
 		
+		if(eventListeners[ev].indexOf(cb) != -1) throw new Error("Event listener already registered for ev=" + ev + " and cb=" + cb);
+		
 		eventListeners[ev].push(cb);
 		
 	}
@@ -243,10 +245,6 @@ var CLIENT = {}; // Client object is global
 	
 	
 	CLIENT.removeEvent = function(eventName, fun) {
-		/*
-			Note to myself: Some events have objects and others just have the function!!
-			
-		*/
 		
 		if(!eventListeners.hasOwnProperty(eventName)) {
 			console.warn("Unknown event: eventName=" + eventName);
@@ -261,7 +259,7 @@ var CLIENT = {}; // Client object is global
 			
 		function removeThem() {
 			for(var i=0; i<events.length; i++) {
-				if(events[i].fun == fun) {
+				if(events[i] == fun) {
 					events.splice(i, 1);
 					found++;
 					removeThem();
