@@ -818,6 +818,9 @@ var File; // File object is global
 			If you want to add text to the first row, open the file using that text.
 			Use File.insertTextRow() to insert a row before EOF.
 		*/
+		
+		text = text + ''; // Convert to string if it's not already a string
+		
 		if(text.length == 0) {
 			console.warn("No text in writeLine argument!");
 			return;
@@ -836,6 +839,8 @@ var File; // File object is global
 			}
 			return;
 		}
+		
+		if(text.indexOf("\n") != -1) console.warn("Text contains a line break: " + text);
 		
 		var lastGridRow = grid[grid.length-1];
 		

@@ -7,6 +7,8 @@
 	
 */
 
+console.log(__dirname);
+
 var username = process.env.username;
 var uid = process.env.uid;
 var gid = process.env.gid;
@@ -29,7 +31,6 @@ var posix = require("posix");
 // Set default file permissions
 	var newmask = parseInt("0027", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 	var oldmask = process.umask(newmask);
-	
 	
 
 	
@@ -54,7 +55,17 @@ function runScript(scriptName) {
 	fs.readFile(scriptName, "utf8", function readScript(err, code) {
 	if(err) throw err;
 	
-	var scriptContext = {
+		/*
+			All expected globals need to be specified here ...
+			https://nodejs.org/api/globals.html
+		*/
+		var scriptContext = {
+			Buffer: Buffer,
+			__dirname: getDirectoryFromPath(scriptName),
+			__filename: getFilenameFromPath(scriptName),
+			clearImmediate: clearImmediate,
+			clearInterval: clearInterval,
+			clearTimeout: clearTimeout,
 	console: {
 	log: function () {
 	var msg = arguments[0];
@@ -71,15 +82,28 @@ function runScript(scriptName) {
 	error: function () {
 	var msg = arguments[0];
 	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	var where = getStack(scriptName);
+					var where = getStack(scriptName, 0);
 					process.send({error: msg, scriptName: scriptName, location: where});
 	}
 	},
-	require: function (moduleName) {
+			exports: exports,
+			global: global,
+			module: module,
+			process: process,
+			require: function (moduleName) {
 				var where = getStack(scriptName);
 				process.send({require: moduleName, scriptName: scriptName, location: where});
+				
+				// Make relative paths work
+				if(moduleName.charAt(0) == ".") {
+					moduleName = getDirectoryFromPath(scriptName) + moduleName.substr(1);
+				}
+				
 				return require(moduleName);
-	}
+	},
+			setImmediate: setImmediate,
+			setInterval: setInterval,
+			setTimeout: setTimeout
 	}
 	var vm = require("vm");
 	var context = new vm.createContext(scriptContext);
@@ -107,17 +131,48 @@ function runScript(scriptName) {
 	});
 	}
 	
-	function getStack(scriptName) {
+	function getStack(scriptName, lineNr) {
+	if(lineNr == undefined) lineNr = 4;
 	var stack = (new Error().stack).split(/\r\n|\n/);
-	//console.log("stack: " + stack);
-	var line4 = stack[3];
-	//console.log("line4: " + line4);
-	var match = line4.match(new RegExp(scriptName + ":(\\d+):(\\d+)"));
-	//console.log("match: " + match);
-	if(!match) return line4;
-	if(match.length != 3) return line4;
+	
+	console.log("stack: " + stack);
+	/* Error
+		,    at getStack (/home/zeta/dev/jzedit/server/nodejs_worker.js:112:15)
+		,    at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js:99:16)
+		,    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
+	
+	*/
+	
+	if(lineNr >= stack.length) lineNr = stack.length-1;
+	var line = stack[lineNr];
+	
+	console.log("line: " + line);
+	
+	var match = line.match(new RegExp(scriptName + ":(\\d+):(\\d+)"));
+	
+	console.log("match: " + match);
+	
+	if(!match) return line;
+	if(match.length != 3) return line;
 	return {row: parseInt(match[1]), col: parseInt(match[2])};
 	}
 	
-	
-	
+function getDirectoryFromPath(path) {
+	if(path.indexOf("/") > -1) {
+		return path.substr(0, path.lastIndexOf('/'));
+	}
+	else {
+		// Assume \ is the folder separator
+		return path.substr(0, path.lastIndexOf('\\')+1);
+	}
+}
+
+function getFilenameFromPath(path) {
+	if(path.indexOf("/") > -1) {
+		return path.substr(path.lastIndexOf('/')+1);
+	}
+	else {
+		// Assume \ is the folder separator
+		return path.substr(path.lastIndexOf('\\')+1);
+	}
+}

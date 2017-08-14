@@ -83,13 +83,14 @@
 		
 		if(msg.log) file.writeLine(msg.log);
 		else if(msg.warn) file.writeLine("WARNING: " + msg.log);
+		else if(msg.error) file.writeLine(msg.error);
 		else if(msg.finished) {
 			if(msg.stdErrArr.length > 0) {
 				for (var i=0; i<msg.stdErrArr.length; i++) {
 					file.writeLine(msg.stdErrArr[i]);
 				}
 			}
-			//else file.writeLine(msg.scriptName + " exited with exit code " + msg.exitCode);
+			else file.writeLine(msg.scriptName + " exited with exit code " + msg.exitCode);
 			}
 		EDITOR.renderNeeded();
 	}
