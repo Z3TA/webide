@@ -27,9 +27,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Stop all running scripts when user disconnects from server.
+Show incline result of consle.logs of nodejs scrips
 
-Be able to stop a script after reloading (relogin) the editor!
+Show inline variable values using nodejs debugger repl
+
+Stop all running scripts when user disconnects from server ?
+
+User should be able to stop a script after reloading (relogin) the editor!
 
 Stop all running user nodejs scripts on server exit!
 

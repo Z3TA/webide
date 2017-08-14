@@ -7,8 +7,6 @@
 	
 */
 
-console.log(__dirname);
-
 var username = process.env.username;
 var uid = process.env.uid;
 var gid = process.env.gid;
@@ -32,6 +30,8 @@ var posix = require("posix");
 	var newmask = parseInt("0027", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 	var oldmask = process.umask(newmask);
 	
+// Show large stacks
+Error.stackTraceLimit = Infinity;
 
 	
 /*
@@ -68,24 +68,25 @@ function runScript(scriptName) {
 			clearTimeout: clearTimeout,
 	console: {
 	log: function () {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	var where = getStack(scriptName);
-					process.send({log: msg, scriptName: scriptName, location: where});
-	},
+					var msg = parseString(arguments[0]);
+					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
+						var where = getStack(scriptName);
+						process.send({log: msg, scriptName: scriptName, location: where});
+					},
 	warn: function () {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+					var msg = parseString(arguments[0]);
+					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
 	var where = getStack(scriptName);
 					process.send({warn: msg, scriptName: scriptName, location: where});
 	},
-	error: function () {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+				error: function () {
+					var msg = parseString(arguments[0]);
+					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
 					var where = getStack(scriptName, 0);
 					process.send({error: msg, scriptName: scriptName, location: where});
 	}
-	},
+				
+			},
 			exports: exports,
 			global: global,
 			module: module,
@@ -112,18 +113,21 @@ function runScript(scriptName) {
 	displayErrors: true
 	}
 	
+		//process.on('uncaughtException', function(err) {});
+		
 	// Try here will only capture global errors, not errors within functions!
-	try {
+	//try {
 	//var script = new vm.Script(code, scriptOptions);
 	//var result = script.runInContext(context);
 	//var result = script.runInNewContext(context, scriptOptions);
 	var result = vm.runInContext(code, context, scriptOptions);
-	}
-	catch(err) {
-			var where = getStack(scriptName);
-			process.send({error: err.message, scriptName: scriptName, location: where});
-	}
-	
+	//}
+		//catch(err) {
+			//console.log("vm:err:" + err.message);
+			//var where = getStack(scriptName);
+		//process.send({error: err.message, scriptName: scriptName, location: where, stack: err.stack()});
+	//}
+		
 		// result is always undefined ...
 		// We will exist when the script exists!
 		// Any code here will be executed *before* the script exits!
@@ -131,32 +135,77 @@ function runScript(scriptName) {
 	});
 	}
 	
+function parseString(obj) {
+	if(typeof obj == "object") return JSON.stringify(obj, null, 2);
+	else return obj + "";
+}
+
 	function getStack(scriptName, lineNr) {
-	if(lineNr == undefined) lineNr = 4;
+	if(lineNr == undefined) lineNr = 0;
+	
+	//RangeError: Maximum call stack size exceeded
+	try {
 	var stack = (new Error().stack).split(/\r\n|\n/);
-	
-	console.log("stack: " + stack);
-	/* Error
-		,    at getStack (/home/zeta/dev/jzedit/server/nodejs_worker.js:112:15)
-		,    at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js:99:16)
-		,    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
-	
-	*/
-	
-	if(lineNr >= stack.length) lineNr = stack.length-1;
-	var line = stack[lineNr];
-	
-	console.log("line: " + line);
-	
-	var match = line.match(new RegExp(scriptName + ":(\\d+):(\\d+)"));
-	
-	console.log("match: " + match);
-	
-	if(!match) return line;
-	if(match.length != 3) return line;
-	return {row: parseInt(match[1]), col: parseInt(match[2])};
+	}
+	catch(err) {
+		return null;
 	}
 	
+	filterStack(stack); // recursive
+	
+	if(lineNr >= stack.length) lineNr = stack.length-1;
+	
+	console.log("stack: " + stack);
+	
+	var re = new RegExp(scriptName + ":(\\d+):(\\d+)");
+	var match;
+	for (var i=0; i<stack.length; i++) {
+		match = stack[i].match(re);
+		if(match) break;
+		}
+	
+	if(!match) {
+		return stack[lineNr];
+	}
+	
+	//return {row: parseInt(match[1]), col: parseInt(match[2])};
+	return stack[i];
+	
+		
+		function filterStack(stack) {
+			/*
+				Remove unnessesary functions from the stack trace
+				
+				 Error
+				,    at getStack (/home/zeta/dev/jzedit/server/nodejs_worker.js:112:15)
+				,    at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js:99:16)
+				,    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
+				
+				
+				Error
+				,    at getStack (/home/zeta/dev/jzedit/server/nodejs_worker.js:143:15)
+				,    at Object.scriptContext.console.log (/home/zeta/dev/jzedit/server/nodejs_worker.js:71:19)
+				,    at /nodejs/funfuncat.js:8:9
+				,    at Object.exports.runInContext (vm.js:44:17)
+				,    at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js:121:18)
+				,    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
+				
+			*/
+			
+			for (var i=0; i<stack.length; i++) {
+				if(stack[i].indexOf("at readScript (/home/zeta/dev/jzedit/server/nodejs_worker.js") != -1) {
+					stack.splice(i, 2);
+					return filterStack(stack);
+				}
+				else if(stack[i].indexOf("/home/zeta/dev/jzedit/server/nodejs_worker.js") != -1) {
+					stack.splice(i, 1);
+					return filterStack(stack);
+				}
+			}
+		}
+		
+	}
+
 function getDirectoryFromPath(path) {
 	if(path.indexOf("/") > -1) {
 		return path.substr(0, path.lastIndexOf('/'));

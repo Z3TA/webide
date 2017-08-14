@@ -842,6 +842,7 @@ function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage, onStar
 	
 	function messageFromNodejsWorker(workerMessage, handle) {
 		console.log("Nodejs worker message from " + username + ": " + workerMessage + " handle=" + handle);
+		console.log(workerMessage);
 		onMessage(workerMessage);
 	}
 	

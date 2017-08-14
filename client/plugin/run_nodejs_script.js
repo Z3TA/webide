@@ -70,7 +70,8 @@
 			if(err) throw err;
 			else {
 				console.log("Started script: " + json.filePath);
-				}
+				nodejsWorkerMessage({log: "\n\n" + (new Date()) + ": Running " + filePath + " ...", scriptName: filePath});
+			}
 		});
 		
 		return false;
