@@ -626,6 +626,9 @@ function runScript(filePath, callback) {
 	var nodeScriptArgs = [];
 	var nodeScriptOptions = {
 		execPath: "/usr/bin/nodejs",
+		env: {
+			myName: user.name
+		}
 		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 	};
 	
