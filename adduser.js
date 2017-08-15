@@ -17,6 +17,9 @@
 	
 */
 
+var fs = require("fs");
+var child_process = require('child_process');
+
 var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
 var defaultDomain = "webide.se";
 
@@ -25,6 +28,11 @@ var getArg = require("./server/getArg.js");
 
 var username = process.argv[2];
 var password = process.argv[3];
+
+if(process.argv[3] == "-c") {
+	copyNodejs("/home/" + username);
+	process.exit();
+}
 
 var NO_PW_HASH = getArg(["nopwhash"]);
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
@@ -49,7 +57,7 @@ var ENCODING = "utf8";
 if(!username) throw new Error("No username specified!");
 	if(!password) throw new Error("No password specified!");
 	
-	var fs = require("fs");
+	
 
 try {
 	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
@@ -145,53 +153,7 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 		
 	fs.writeFileSync(PW_FILE, usersPwString, ENCODING);
 		
-	// Create a hard link to nodejs so that we can have a apparmor profile on it
-	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
 	
-	// Create and activate apparmor profile for the nodejs runner process
-	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
-	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
-	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
-	
-	var child_process = require('child_process');
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username);
-	enforceApparmorProfileStdout = enforceApparmorProfileStdout.toString(ENCODING);
-	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-	
-	// sudo aa-genprof /usr/bin/nodejs_username
-	
-	// Copy dependencies that nodejs needs
-	var nodejsDeps = child_process.execSync("ldd /usr/bin/nodejs_" + username).toString(ENCODING);
-	nodejsDeps = nodejsDeps.split(/\n|\r\n/);
-	var foldersCreated = [];
-	for (var i=0, folders, dir; i<nodejsDeps.length; i++) {
-			//console.log(i + ") " + nodejsDeps[i] + "");
-			nodejsDeps[i] = nodejsDeps[i].substring(nodejsDeps[i].indexOf("=>") + 2, nodejsDeps[i].indexOf("(")-1).trim();
-			//console.log(i + ") *" + nodejsDeps[i] + "*");
-			if(nodejsDeps[i] == "") continue;
-			folders = nodejsDeps[i].split("/");
-			dir = homeDir;
-			for (var j=1; j<folders.length-1; j++) {
-				dir = dir + "/" + folders[j]; 
-			if(foldersCreated.indexOf(dir) != -1) continue;
-			try {
-				//console.log("Creating folder: " + dir);
-					fs.mkdirSync(dir);
-				foldersCreated.push(dir);
-			}
-			catch(err) {
-				if(err.code != "EEXIST") throw err;
-				}
-			}
-			copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
-		}
-		
-	/*
-		sudo mknod -m 444 /home/test123/dev/urandom c 1 9
-		sudo mknod -m 444 /home/test123/dev/null c 1 3
-		
-	*/
 	
 		
 		// Add skeleton files
@@ -240,7 +202,6 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
 		nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 		
-		
 		fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
 		fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
 		
@@ -249,9 +210,89 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
 		if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
 		
+	
+	
+	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it
+	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+	
+	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
+	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
+	
+	
+	//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
+	//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+	
+	// sudo aa-genprof /usr/bin/nodejs_test123
+	
+	
+	copyNodejs(homeDir);
+	
+	// Nodejs needs /dev/urandom and /dev/null to start
+	fs.mkdirSync(homeDir + "/dev");
+	
+	var makdeUrandom = child_process.execSync("mknod -m 444 /home/" + username + "/dev/urandom c 1 9").toString(ENCODING);
+	if(makdeUrandom.trim() != "") throw makdeUrandom;
+	
+	var makeNull = child_process.execSync("mknod -m 444 /home/" + username + "/dev/null c 1 3").toString(ENCODING);
+	if(makeNull.trim() != "") throw makeNull;
+	
+	
+	// Create and activate apparmor profile for the user's nodejs binary
+	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.nodejs", ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.nodejs", apparmorProfile);
+	//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
+	//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+	
+	
+	
 		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
 	});
+
+function copyNodejs(homeDir) {
+	
+	// Copy the nodejs binary so it can be spawned from chroot
+	try {
+	fs.mkdirSync(homeDir + "/usr");
+	fs.mkdirSync(homeDir + "/usr/bin");
+	copyFileSync("/usr/bin/nodejs", homeDir + "/usr/bin/nodejs");
+	}
+	catch(err) {
+		if(err.code != "EEXIST") throw err;
+	}
+	
+	fs.chmodSync(homeDir + "/usr/bin/nodejs", "555");
+	
+	// Copy dependencies that nodejs needs
+	var nodejsDeps = child_process.execSync("ldd " + homeDir + "/usr/bin/nodejs").toString(ENCODING);
+	nodejsDeps = nodejsDeps.split(/\n|\r\n/);
+	var foldersCreated = [];
+	for (var i=0, folders, dir; i<nodejsDeps.length; i++) {
+		//console.log(i + ") " + nodejsDeps[i] + "");
+		nodejsDeps[i] = nodejsDeps[i].substring(nodejsDeps[i].indexOf("=>") + 2, nodejsDeps[i].indexOf("(")-1).trim();
+		//console.log(i + ") *" + nodejsDeps[i] + "*");
+		if(nodejsDeps[i] == "") continue;
+		folders = nodejsDeps[i].split("/");
+		dir = homeDir;
+		for (var j=1; j<folders.length-1; j++) {
+			dir = dir + "/" + folders[j];
+			if(foldersCreated.indexOf(dir) != -1) continue;
+			try {
+				//console.log("Creating folder: " + dir);
+				fs.mkdirSync(dir);
+				foldersCreated.push(dir);
+			}
+			catch(err) {
+				if(err.code != "EEXIST") throw err;
+			}
+		}
+		console.log("Copying " + nodejsDeps[i]);
+		copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
+		}
+}
 
 function getGroupId(groupName) {
 	var fs = require("fs");

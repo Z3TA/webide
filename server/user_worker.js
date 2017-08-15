@@ -88,6 +88,7 @@ user.storage = null;
 user.connectionId = 0;
 user.isSavingStorage = [];
 user.rootPath = undefined;
+user.runningNodeJsScripts = {};
 
 user.identify = function identify(info) {
 	
@@ -558,25 +559,150 @@ API.serve = function serve(user, json, callback) {
 
 API.run_nodejs = function run_nodejs(user, json, callback) {
 	
-	// We do not have to translate the file path as the script will have the same chroot as the user see
+	var filePath = user.translatePath(json.filePath);
 	
-	var filePath = json.filePath;
-	
-	parentRequest({runNodeJsScript: {filePath: filePath}}, function(err, resp) {
-		callback(err, {filePath: resp.filePath});
-	});
+	if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
+		// Stop the current running script before starting the same script again
+		stopNodeJsScript(filePath, function nodeJsScriptKilled() {
+			runScript(filePath, callback);
+		});
+	}
+	else runScript(filePath, callback);
 	
 }
 
 API.stop_nodejs = function stop_nodejs(user, json, callback) {
 	
-	// We do not have to translate the file path as the script will have the same chroot as the user see
+	var filePath = user.translatePath(json.filePath);
 	
-	var filePath = json.filePath;
+	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback("The script is not running: " + filePath, {filePath: filePath});
 	
-	parentRequest({stopNodeJsScript: {filePath: filePath}}, function(err, resp) {
+	stopNodeJsScript(filePath, function nodeJsScriptKilled() {
 		callback(err, {filePath: resp.filePath});
 	});
+	
+}
+
+function stopNodeJsScript(filePath, callback) {
+	
+	console.log(user.name + " killing NodeJS script: filePath=" + filePath);
+	
+	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback();
+	
+	var childProcess = user.runningNodeJsScripts[filePath];
+	
+	if(childProcess.connected) childProcess.disconnect();
+	
+	// Give it a chance to teardown before killing it
+	childProcess.kill('SIGTERM');
+	childProcess.kill('SIGINT');
+	childProcess.kill('SIGQUIT');
+	childProcess.kill('SIGHUP');
+	
+	var killTimeout = setTimeout(function kill() {
+		// Now kill it for good
+		childProcess.kill('SIGKILL');
+		setTimeout(function wait() {
+			// Make sure it has exited
+			if(user.runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
+			callback();
+		}, 300);
+	}, 3000);
+	
+	setTimeout(function checkIfStillRunning() {
+		// Check if it has exited
+		if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) {
+			clearTimeout(killTimeout);
+			callback();
+		}
+	}, 500);
+	
+}
+
+function runScript(filePath, callback) {
+	
+	console.log(user.name + " starting NodeJS script: filePath=" + filePath);
+	
+	runNodeJsScript(filePath, nodeJsScriptOnExit, nodeJsScriptOnMessage, nodeJsScriptOnStarted);
+	
+	function nodeJsScriptOnExit(exitObject) {
+		delete user.runningNodeJsScripts[filePath];
+		user.send({nodejsWorkerMessage: {
+				scriptName: filePath,
+				finished: true,
+				exitCode: exitObject.code,
+				stdErrArr: exitObject.stdErrArr
+			}
+		});
+		}
+	
+	function nodeJsScriptOnMessage(nodejsWorkerMessage) {
+		user.send({nodejsWorkerMessage: nodejsWorkerMessage});
+	}
+	
+	function nodeJsScriptOnStarted(childProcess) {
+		user.runningNodeJsScripts[filePath] = childProcess;
+		callback(null, {filePath: filePath});
+	}
+}
+
+
+function runNodeJsScript(filePath, onExit, onMessage, onStarted) {
+	
+	var stdErrArr = []; // Collect stderr messages, and send them when the process exit
+	var nodeWorkerArgs = [];
+	var nodeWorkerOptions = {
+		execPath: "/usr/bin/nodejs",
+		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+	};
+	
+	var child_process = require("child_process");
+	var nodeWorker = child_process.fork(filePath, nodeWorkerArgs, nodeWorkerOptions);
+	// The node worker will chroot to user's home dir, setegid and seteuid
+	
+	nodeWorker.on("message", messageFromNodejsWorker);
+	nodeWorker.on("error", nodejsWorkerError);
+	nodeWorker.on("exit", nodejsWorkerExitHandler);
+	nodeWorker.stdout.on('data', nodejsWorkerStdout);
+	nodeWorker.stderr.on('data', nodejsWorkerStderr);
+	
+	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
+	
+	onStarted(nodeWorker);
+	
+	function messageFromNodejsWorker(workerMessage, handle) {
+		console.log("Nodejs worker message from " + user.name + ": " + workerMessage + " handle=" + handle);
+		console.log(workerMessage);
+		onMessage(workerMessage);
+	}
+	
+	function nodejsWorkerExitHandler(code, signal) {
+		console.log(user.name + " nodejs worker exit: code=" + code + " signal=" + signal);
+		onExit({code: code, stdErrArr: stdErrArr});
+	}
+	
+	function nodejsWorkerError(err, something) {
+		console.log(user.name + " nodejs worker error: err=" + err + " something=" + something);
+	}
+	
+	function nodejsWorkerStdout(data) {
+		console.log("nodejsWorkerStdout: " + data);
+		
+		var txtArr = data.toString("utf8").trim().split("\n");
+		
+		for(var i=0; i<txtArr.length; i++) {
+			console.log(user.name + " nodejs_worker:stdout:" + txtArr[i]);
+		}
+	}
+	
+	function nodejsWorkerStderr(data) {
+		var txtArr = data.toString("utf8").trim().split("\n");
+		
+		for(var i=0; i<txtArr.length; i++) {
+			console.log(user.name + " nodejs_worker:stderr:" + txtArr[i]);
+			stdErrArr.push(txtArr[i]);
+		}
+	}
 	
 }
 

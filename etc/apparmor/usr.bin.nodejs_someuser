@@ -1,7 +1,10 @@
 #
-# Each user will get a hard link to it's own nodejs binary so that we can use apparmor as an additional securyty layer
+# Profile for the hard link to nodejs running user_worker.js 
+# which will setuid, setgid and chroot itself to the user's home dir
 #
-#
+# This process will spawn /home/%USERNAME%/usr/bin/nodejs 
+# which is responsible for running user scripts
+# 
 
 /usr/bin/nodejs_%USERNAME% {
   #capability dac_override,
@@ -22,7 +25,7 @@
   %JZEDIT%/node_modules/posix/build/Release/posix.node r,
   %JZEDIT%/node_modules/posix/lib/posix/index.js r,
   %JZEDIT%/node_modules/posix/package.json r,
-  %JZEDIT%/server/nodejs_worker.js r,
+  %JZEDIT%/server/user_worker.js r,
 
   /lib/** r,
   /run/resolvconf/resolv.conf r,

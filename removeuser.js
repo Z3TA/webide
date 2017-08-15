@@ -78,11 +78,20 @@ catch(err) {
 	else throw err;
 }
 
-// Remove apparmor profile
+// Remove apparmor profiles
 var apparmorProfile = "/etc/apparmor.d/usr.bin.nodejs_" + username;
 try {
 	fs.unlinkSync(apparmorProfile);
 	}
+catch(err) {
+	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
+	else throw err;
+}
+
+var apparmorProfile = "/etc/apparmor.d/home." + username + ".usr.bin.nodejs";
+try {
+	fs.unlinkSync(apparmorProfile);
+}
 catch(err) {
 	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
 	else throw err;

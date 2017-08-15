@@ -25,7 +25,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
+var USE_CHROOT = getArg(["chroot", "chroot"]) || true;
 
 var NODE_INIT = {}; // username:childProcess, list of nodejs initors
 
@@ -103,9 +103,6 @@ if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is n
 // For generating URL's
 var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
-
-var RUNNING_NODEJS_SCRIPTS = {}; // user: {scriptName: childProcess}
-
 
 process.on("SIGINT", function sigInt() {
 	log("Received SIGINT");
@@ -515,18 +512,13 @@ function sockJsConnection(connection) {
 							
 							function acceptUser(homeDir, shell) {
 								
-								if(!RUNNING_NODEJS_SCRIPTS.hasOwnProperty(name)) RUNNING_NODEJS_SCRIPTS[name] = {};
-								
-									var runningNodeJsScripts = RUNNING_NODEJS_SCRIPTS[name];
-									
 									if(gid == undefined) gid = uid;
 									
 									if(!USER_CONNECTIONS.hasOwnProperty(name)) {
 										USER_CONNECTIONS[name] = {
 											connections: [connection],
-											counter: 0,
-											runningNodeJsScripts: {}
-										}
+											counter: 0
+											}
 										userConnectionId = 0;
 									}
 									else {
@@ -592,98 +584,11 @@ function sockJsConnection(connection) {
 												});
 											}
 											
-											else if(req.runNodeJsScript) {
-												
-												var filePath = req.runNodeJsScript.filePath
-												
-												if(runningNodeJsScripts.hasOwnProperty(filePath)) {
-													// Stop the current running script before starting the same script again
-													stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-														runScript(filePath);
-													});
-												}
-												else runScript(filePath);
-												
-											}
-											
-											else if(req.stopNodeJsScript) {
-												var filePath = req.stopNodeJsScript.filePath
-												
-												if(!runningNodeJsScripts.hasOwnProperty(filePath)) return workerResp(req, {filePath: filePath}, "The script is not running: " + filePath);
-												
-												stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-													workerResp(req, {filePath: filePath});
-												});
-											}
-											
 											else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 											
 										}
 										else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 										
-										function stopNodeJsScript(filePath, callback) {
-											
-											console.log(name + " killing NodeJS script: filePath=" + filePath);
-											
-											if(!runningNodeJsScripts.hasOwnProperty(filePath)) return callback(); 
-											
-											var childProcess = runningNodeJsScripts[filePath];
-											
-											if(childProcess.connected) childProcess.disconnect();
-											
-											// Give it a chance to teardown before killing it
-											childProcess.kill('SIGTERM');
-											childProcess.kill('SIGINT');
-											childProcess.kill('SIGQUIT');
-											childProcess.kill('SIGHUP');
-											
-											var killTimeout = setTimeout(function kill() {
-												// Now kill it for good
-												childProcess.kill('SIGKILL');
-												setTimeout(function wait() {
-													// Make sure it has exited
-													if(runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
-													callback();
-												}, 300);
-											}, 3000);
-											
-											setTimeout(function checkIfStillRunning() {
-												// Check if it has exited
-												if(!runningNodeJsScripts.hasOwnProperty(filePath)) {
-													clearTimeout(killTimeout);
-													callback(); 
-												}
-											}, 500);
-											
-										}
-										
-										function runScript(filePath) {
-											
-											console.log(name + " starting NodeJS script: filePath=" + filePath);
-											
-											runNodeJsScript(name, uid, gid, filePath, nodeJsScriptOnExit, nodeJsScriptOnMessage, nodeJsScriptOnStarted);
-											
-											function nodeJsScriptOnExit(exitObject) {
-												delete runningNodeJsScripts[filePath];
-												send({nodejsWorkerMessage: {
-														scriptName: req.runNodeJsScript.filePath,
-													finished: true,
-													exitCode: exitObject.code,
-														stdErrArr: exitObject.stdErrArr
-													}
-												});
-												
-											}
-											
-											function nodeJsScriptOnMessage(nodejsWorkerMessage) {
-												send({nodejsWorkerMessage: nodejsWorkerMessage});
-											}
-											
-											function nodeJsScriptOnStarted(childProcess) {
-												runningNodeJsScripts[filePath] = childProcess;
-												workerResp(req, {filePath: filePath});
-											}
-										}
 										
 										function workerResp(req, resp, err) {
 											if(id == undefined) throw new Error("id=" + id);
@@ -809,70 +714,6 @@ function isObject(obj) {
 	
 	}
 */
-
-
-function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage, onStarted) {
-	
-	var stdErrArr = []; // Collect stderr messages, and send them when the process exit
-	var nodeWorkerArgs = [];
-	var nodeWorkerOptions = {
-		env: {
-			username: username, 
-			uid: uid, 
-			gid: gid, 
-			scriptToRun: filePath
-		},
-		execPath: "/usr/bin/nodejs_" + username,
-		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
-	};
-	
-	var child_process = require("child_process");
-	var nodeWorker = child_process.fork("./nodejs_worker.js", nodeWorkerArgs, nodeWorkerOptions);
-	// The node worker will chroot to user's home dir, setegid and seteuid
-	
-	nodeWorker.on("message", messageFromNodejsWorker);
-	nodeWorker.on("error", nodejsWorkerError);
-	nodeWorker.on("exit", nodejsWorkerExitHandler);
-	nodeWorker.stdout.on('data', nodejsWorkerStdout);
-	nodeWorker.stderr.on('data', nodejsWorkerStderr);
-	
-	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
-	
-	onStarted(nodeWorker);
-	
-	function messageFromNodejsWorker(workerMessage, handle) {
-		console.log("Nodejs worker message from " + username + ": " + workerMessage + " handle=" + handle);
-		console.log(workerMessage);
-		onMessage(workerMessage);
-	}
-	
-	function nodejsWorkerExitHandler(code, signal) {
-		console.log(username + " nodejs worker exit: code=" + code + " signal=" + signal);
-		onExit({code: code, stdErrArr: stdErrArr});
-	}
-	
-	function nodejsWorkerError(err, something) {
-		console.log(username + " nodejs worker error: err=" + err + " something=" + something);
-	}
-	
-	function nodejsWorkerStdout(data) {
-		var txtArr = data.toString("utf8").trim().split("\n");
-		
-		for(var i=0; i<txtArr.length; i++) {
-			console.log(username + " nodejs_worker:stdout:" + txtArr[i]);
-		}
-	}
-	
-	function nodejsWorkerStderr(data) {
-		var txtArr = data.toString("utf8").trim().split("\n");
-		
-		for(var i=0; i<txtArr.length; i++) {
-			console.log(username + " nodejs_worker:stderr:" + txtArr[i]);
-			stdErrArr.push(txtArr[i]);
-		}
-	}
-	
-}
 
 
 function createHttpEndpoint(username, folder, callback) {
@@ -1152,6 +993,7 @@ function createUserWorker(name, uid, gid) {
 		if(gid != undefined) options.gid = parseInt(gid);
 	}
 	
+	options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);

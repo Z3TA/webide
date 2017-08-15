@@ -31,6 +31,9 @@ I managed to run nodejs under chroot. So we should probably spawn the user's nod
 while chrooted. That way we can have a more restritive apparmor profile on the spawned worker.
 
 
+Figure out how to spawn mercurial inside chroot
+
+
 Show inline result of consle.logs of nodejs scrips
 
 Show inline variable values using nodejs debugger repl
