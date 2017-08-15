@@ -187,6 +187,12 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 			copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
 		}
 		
+	/*
+		sudo mknod -m 444 /home/test123/dev/urandom c 1 9
+		sudo mknod -m 444 /home/test123/dev/null c 1 3
+		
+	*/
+	
 		
 		// Add skeleton files
 		copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
