@@ -5,7 +5,11 @@
 	Gotcha: We are not able to capture errors from here. (they have to be handled by whoever spawns this script)
 	If we listen to process messages (from the parent) we can't know if and when the script exist!
 	
+	Gotchas: Can't use console.log while using apparmor.
+	
 */
+
+//console.log("process.env=" + JSON.stringify(process.env));
 
 var username = process.env.username;
 var uid = process.env.uid;
@@ -33,8 +37,7 @@ var posix = require("posix");
 // Show large stacks
 Error.stackTraceLimit = Infinity;
 
-	
-/*
+	/*
 	process.on('message', function commandMessage(message) {
 	
 	// We can not recive sockJS connection handles!
@@ -155,7 +158,7 @@ function parseString(obj) {
 	
 	if(lineNr >= stack.length) lineNr = stack.length-1;
 	
-	console.log("stack: " + stack);
+	//console.log("stack: " + stack);
 	
 	var re = new RegExp(scriptName + ":(\\d+):(\\d+)");
 	var match;

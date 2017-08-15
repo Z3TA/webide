@@ -68,11 +68,14 @@
 		
 		var json = {filePath: filePath};
 		
+		var stdOutFile = filePath + ".stdout";
+		if(EDITOR.files.hasOwnProperty(stdOutFile)) EDITOR.files[stdOutFile].writeLine(" \n \n" + (new Date()) + ": Running " + filePath + " ...");
+		
 		CLIENT.cmd("run_nodejs", json, function(err, json) {
 			if(err) throw err;
 			else {
 				console.log("Started script: " + json.filePath);
-				}
+			}
 		});
 		
 		return false;

@@ -818,8 +818,8 @@ function runNodeJsScript(username, uid, gid, filePath, onExit, onMessage, onStar
 	var nodeWorkerOptions = {
 		env: {
 			username: username, 
-			uid: 1000, 
-			gid: 1000, 
+			uid: uid, 
+			gid: gid, 
 			scriptToRun: filePath
 		},
 		execPath: "/usr/bin/nodejs_" + username,

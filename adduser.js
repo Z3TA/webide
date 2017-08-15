@@ -151,6 +151,7 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 	// Create and activate apparmor profile for the nodejs runner process
 	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
 	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
 	
 	var child_process = require('child_process');
@@ -158,69 +159,93 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 	enforceApparmorProfileStdout = enforceApparmorProfileStdout.toString(ENCODING);
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
+	// sudo aa-genprof /usr/bin/nodejs_username
+	
 	// Copy dependencies that nodejs needs
-	var nodejsDeps = child_process.execSync("ldd nodejs_" + username);
-	...
-	
-	
-	// Add skeleton files
-	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs/", homeDir);
-	
-	// Give the SSG-demo folder a better name
-	fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
-	
-	// Update tamplates
-	var date = new Date();
-	var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-	replaceInFileSync(homeDir + "/my_web_site/template.htm", [
-		['<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">'],
-		['<meta name="author" content="Jon Doe">', '<meta name="author" content="' + username + '">'],
-		['<p>Written by <a href="../index.htm" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>']
+	var nodejsDeps = child_process.execSync("ldd /usr/bin/nodejs_" + username).toString(ENCODING);
+	nodejsDeps = nodejsDeps.split(/\n|\r\n/);
+	var foldersCreated = [];
+	for (var i=0, folders, dir; i<nodejsDeps.length; i++) {
+			//console.log(i + ") " + nodejsDeps[i] + "");
+			nodejsDeps[i] = nodejsDeps[i].substring(nodejsDeps[i].indexOf("=>") + 2, nodejsDeps[i].indexOf("(")-1).trim();
+			//console.log(i + ") *" + nodejsDeps[i] + "*");
+			if(nodejsDeps[i] == "") continue;
+			folders = nodejsDeps[i].split("/");
+			dir = homeDir;
+			for (var j=1; j<folders.length-1; j++) {
+				dir = dir + "/" + folders[j]; 
+			if(foldersCreated.indexOf(dir) != -1) continue;
+			try {
+				//console.log("Creating folder: " + dir);
+					fs.mkdirSync(dir);
+				foldersCreated.push(dir);
+			}
+			catch(err) {
+				if(err.code != "EEXIST") throw err;
+				}
+			}
+			copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
+		}
+		
+		
+		// Add skeleton files
+		copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/nodejs/", homeDir);
+		
+		// Give the SSG-demo folder a better name
+		fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
+		
+		// Update tamplates
+		var date = new Date();
+		var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+		replaceInFileSync(homeDir + "/my_web_site/template.htm", [
+			['<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">'],
+			['<meta name="author" content="Jon Doe">', '<meta name="author" content="' + username + '">'],
+			['<p>Written by <a href="../index.htm" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>']
 		]);
-	
-	// add wwwpub
-	fs.mkdirSync(homeDir + "/wwwpub");
-	fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
-	
-	chownrSync(homeDir, uid, gid);
-	
-	// Make it so that no one else beside the user can read the user files
-	chmodrSync(homeDir, "751");
-	// home dir needs to have execute permissions for everyone for the unix socket to work !!!?
-	
-	// Make wwwpub public
-	chmodrSync(homeDir + "/wwwpub", "755");
-	
-	
-	// Create a directory for unix sockets
-	fs.mkdirSync(homeDir + "/sock");
-	chmodrSync(homeDir + "/sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
-	// Make sure www-data can read and write to unix socket
-	// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
-	var wwwgid = getGroupId("www-data");
-	chownrSync(homeDir + "/sock", uid, wwwgid);
-	// note: Each process needs to set umask to give write permission to the group!
-	
-	
-	// Create nginx profile
-	var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
-	nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
-	nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-	nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
-	
-	
-	fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
-	fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
-	
-	var child_process = require('child_process');
-	var reloadNginxStdout = child_process.execSync("service nginx reload");
-	reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
-	if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
-	
-	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
-	
-});
+		
+		// add wwwpub
+		fs.mkdirSync(homeDir + "/wwwpub");
+		fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
+		
+		chownrSync(homeDir, uid, gid);
+		
+		// Make it so that no one else beside the user can read the user files
+		chmodrSync(homeDir, "751");
+		// home dir needs to have execute permissions for everyone for the unix socket to work !!!?
+		
+		// Make wwwpub public
+		chmodrSync(homeDir + "/wwwpub", "755");
+		
+		
+		// Create a directory for unix sockets
+		fs.mkdirSync(homeDir + "/sock");
+		chmodrSync(homeDir + "/sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
+		// Make sure www-data can read and write to unix socket
+		// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
+		var wwwgid = getGroupId("www-data");
+		chownrSync(homeDir + "/sock", uid, wwwgid);
+		// note: Each process needs to set umask to give write permission to the group!
+		
+		
+		// Create nginx profile
+		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
+		nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
+		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+		nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+		
+		
+		fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
+		fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
+		
+		var child_process = require('child_process');
+		var reloadNginxStdout = child_process.execSync("service nginx reload");
+		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
+		if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
+		
+		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
+		
+	});
 
 function getGroupId(groupName) {
 	var fs = require("fs");
@@ -235,16 +260,16 @@ function getGroupId(groupName) {
 	
 	for (var i=0, group, name, id; i<groups.length; i++) {
 		group = groups[i].split(":");
-			name = group[0];
-			id = group[2];
-			
-			if(name == groupName) return parseInt(id);
-		}
+		name = group[0];
+		id = group[2];
 		
-		throw new Error("Unable to find id for groupName=" + groupName);
+		if(name == groupName) return parseInt(id);
 	}
 	
-	
+	throw new Error("Unable to find id for groupName=" + groupName);
+}
+
+
 
 
 
