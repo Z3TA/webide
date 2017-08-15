@@ -27,10 +27,13 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-libs need +x 
+hmm, seems we have to mount --bind /dev /home/user/dev
 
-I managed to run nodejs under chroot. So we should probably spawn the user's nodejs script
-while chrooted. That way we can have a more restritive apparmor profile on the spawned worker.
+make release work!
+
+rename to webide
+
+
 
 
 Figure out how to spawn mercurial inside chroot
