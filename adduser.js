@@ -30,6 +30,8 @@ var username = process.argv[2];
 var password = process.argv[3];
 
 if(process.argv[3] == "-c") {
+	//console.log(linksTo("/lib/x86_64-linux-gnu/libz.so.1"));
+	//process.exit();
 	copyNodejs("/home/" + username);
 	process.exit();
 }
@@ -268,7 +270,7 @@ function copyNodejs(homeDir) {
 	var nodejsDeps = child_process.execSync("ldd " + homeDir + "/usr/bin/nodejs").toString(ENCODING);
 	nodejsDeps = nodejsDeps.split(/\n|\r\n/);
 	var foldersCreated = [];
-	for (var i=0, folders, dir; i<nodejsDeps.length; i++) {
+	for (var i=0, folders, dir, link; i<nodejsDeps.length; i++) {
 		//console.log(i + ") " + nodejsDeps[i] + "");
 		nodejsDeps[i] = nodejsDeps[i].substring(nodejsDeps[i].indexOf("=>") + 2, nodejsDeps[i].indexOf("(")-1).trim();
 		//console.log(i + ") *" + nodejsDeps[i] + "*");
@@ -287,12 +289,38 @@ function copyNodejs(homeDir) {
 				if(err.code != "EEXIST") throw err;
 			}
 		}
+		// The link to the dep can also be a link itself, so check (recursively) until we find the file
+		link = linksTo(nodejsDeps[i]);
+		if(link != null) {
+			//console.log("Adding link=" + link);
+			nodejsDeps.push(nodejsDeps[i] + " => " + link + " ()");
+		}
 		console.log("Copying " + nodejsDeps[i]);
 		copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
 		}
 	for (var i=0; i<foldersCreated.length; i++) {
 		chmodrSync(foldersCreated[i], "555"); // lib files needs read and execute permission!
 	}
+}
+
+function linksTo(filePath) {
+	try {
+		var linkPath = fs.readlinkSync(filePath);
+	}
+	catch(err) {
+		if(err.code == "EINVAL") return null;
+		else throw err;
+	}
+	
+	if(linkPath.charAt(0) != "/") {
+		// Links to another file in *the same folder*
+		var paths = filePath.split("/");
+		for (var i=paths.length-2; i>-1; i--) {
+			linkPath = paths[i] + "/" + linkPath;
+		}
+	}
+	
+	return linkPath;
 }
 
 function getGroupId(groupName) {
