@@ -11,6 +11,8 @@
   }
   
   location ~/_http(\d+) {
+    proxy_set_header  Host       $http_host;
+    proxy_set_header  X-Real-IP  $remote_addr;
     proxy_pass http://unix:%HOMEDIR%/sock/_http$1;
     add_header 'Access-Control-Allow-Origin' '*';
   }
@@ -19,7 +21,9 @@
     # Upgrade to websocket
     proxy_pass http://unix:%HOMEDIR%/sock/_ws$1;
     proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Host       $http_host;
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header Upgrade    $http_upgrade;
     proxy_set_header Connection "upgrade";
 
     add_header 'Access-Control-Allow-Origin' '*';
