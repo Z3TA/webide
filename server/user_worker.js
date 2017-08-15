@@ -36,15 +36,9 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-
-var USE_CHROOT = false;
-
-var isRoot = process.getuid && process.getuid() === 0;
-
-if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
-
-
+var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
 log("process.env.uid=" + process.env.uid);
+
 
 if(parseInt(process.env.uid)) {
 
@@ -69,7 +63,10 @@ if(parseInt(process.env.uid)) {
 	
 	//var chroot = require("chroot");
 	//chroot("/home/" + username + "/", username);
-	
+	}
+else {
+	var isRoot = process.getuid && process.getuid() === 0;
+if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
 }
 
 // Set default file permissions
@@ -626,89 +623,80 @@ function runScript(filePath, callback) {
 	
 	console.log(user.name + " starting NodeJS script: filePath=" + filePath);
 	
-	runNodeJsScript(filePath, nodeJsScriptOnExit, nodeJsScriptOnMessage, nodeJsScriptOnStarted);
-	
-	function nodeJsScriptOnExit(exitObject) {
-		delete user.runningNodeJsScripts[filePath];
-		user.send({nodejsWorkerMessage: {
-				scriptName: filePath,
-				finished: true,
-				exitCode: exitObject.code,
-				stdErrArr: exitObject.stdErrArr
-			}
-		});
-		}
-	
-	function nodeJsScriptOnMessage(nodejsWorkerMessage) {
-		user.send({nodejsWorkerMessage: nodejsWorkerMessage});
-	}
-	
-	function nodeJsScriptOnStarted(childProcess) {
-		user.runningNodeJsScripts[filePath] = childProcess;
-		callback(null, {filePath: filePath});
-	}
-}
-
-
-function runNodeJsScript(filePath, onExit, onMessage, onStarted) {
-	
-	var stdErrArr = []; // Collect stderr messages, and send them when the process exit
-	var nodeWorkerArgs = [];
-	var nodeWorkerOptions = {
+	var nodeScriptArgs = [];
+	var nodeScriptOptions = {
 		execPath: "/usr/bin/nodejs",
 		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 	};
 	
 	var child_process = require("child_process");
-	var nodeWorker = child_process.fork(filePath, nodeWorkerArgs, nodeWorkerOptions);
+	var nodeScript = child_process.fork(filePath, nodeScriptArgs, nodeScriptOptions);
 	// The node worker will chroot to user's home dir, setegid and seteuid
 	
-	nodeWorker.on("message", messageFromNodejsWorker);
-	nodeWorker.on("error", nodejsWorkerError);
-	nodeWorker.on("exit", nodejsWorkerExitHandler);
-	nodeWorker.stdout.on('data', nodejsWorkerStdout);
-	nodeWorker.stderr.on('data', nodejsWorkerStderr);
+	nodeScript.on("message", messageFromNodeScript);
+	nodeScript.on("error", nodeScriptError);
+	nodeScript.on("exit", nodejScriptExit);
+	nodeScript.stdout.on('data', nodejScriptStdout);
+	nodeScript.stderr.on('data', nodejScriptStderr);
 	
 	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
 	
-	onStarted(nodeWorker);
+	user.runningNodeJsScripts[filePath] = nodeScript;
+	callback(null, {filePath: filePath});
 	
-	function messageFromNodejsWorker(workerMessage, handle) {
-		console.log("Nodejs worker message from " + user.name + ": " + workerMessage + " handle=" + handle);
-		console.log(workerMessage);
-		onMessage(workerMessage);
-	}
 	
-	function nodejsWorkerExitHandler(code, signal) {
-		console.log(user.name + " nodejs worker exit: code=" + code + " signal=" + signal);
-		onExit({code: code, stdErrArr: stdErrArr});
-	}
-	
-	function nodejsWorkerError(err, something) {
-		console.log(user.name + " nodejs worker error: err=" + err + " something=" + something);
-	}
-	
-	function nodejsWorkerStdout(data) {
-		console.log("nodejsWorkerStdout: " + data);
-		
-		var txtArr = data.toString("utf8").trim().split("\n");
-		
-		for(var i=0; i<txtArr.length; i++) {
-			console.log(user.name + " nodejs_worker:stdout:" + txtArr[i]);
+	function messageFromNodeScript(message, handle) {
+		console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
+		console.log(message);
+		user.send({nodejsMessage: {
+				scriptName: filePath,
+				message: message
+			}
+		});
 		}
+	
+	function nodejScriptExit(code, signal) {
+		console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
+		
+		delete user.runningNodeJsScripts[filePath];
+		
+		user.send({nodejsMessage: {
+				scriptName: filePath,
+				exit: {
+					code: code,
+					signal: signal
+				}
+			}
+		});
+		
 	}
 	
-	function nodejsWorkerStderr(data) {
-		var txtArr = data.toString("utf8").trim().split("\n");
+	function nodeScriptError(err) {
+		console.log(user.name + " nodejs script error: err=" + err);
+	}
+	
+	function nodejScriptStdout(data) {
+		console.log(user.name + ":" + filePath + ":stdout: data=" + data + "");
 		
-		for(var i=0; i<txtArr.length; i++) {
-			console.log(user.name + " nodejs_worker:stderr:" + txtArr[i]);
-			stdErrArr.push(txtArr[i]);
-		}
+		user.send({nodejsMessage: {
+				scriptName: filePath,
+				stdout: data.toString("utf8")
+			}
+		});
+		
+	}
+	
+	function nodejScriptStderr(data) {
+		console.log(user.name + ":" + filePath + ":stderr: data=" + data + "");
+		
+		user.send({nodejsMessage: {
+				scriptName: filePath,
+				stdout: data.toString("utf8")
+			}
+	});
 	}
 	
 }
-
 
 function parentRequest(req, callback) {
 	

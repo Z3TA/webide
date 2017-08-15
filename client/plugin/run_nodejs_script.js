@@ -14,7 +14,7 @@
 		EDITOR.bindKey({desc: "Stops the current (nodejs) script", fun: stopNodeJsScript, charCode: keyF3, combo: 0});
 		
 		
-		CLIENT.on("nodejsWorkerMessage", nodejsWorkerMessage);
+		CLIENT.on("nodejsMessage", nodejsMessage);
 		
 	}
 	
@@ -22,11 +22,11 @@
 		EDITOR.unbindKey(runNodeJsScript);
 		EDITOR.unbindKey(stopNodeJsScript);
 		
-		CLIENT.removeEvent("nodejsWorkerMessage", nodejsWorkerMessage); 
+		CLIENT.removeEvent("nodejsMessage", nodejsMessage); 
 	}
 	
-	function nodejsWorkerMessage(msg) {
-		console.log("nodejsWorkerMessage: " + JSON.stringify(msg));
+	function nodejsMessage(msg) {
+		console.log("nodejsMessage: " + JSON.stringify(msg));
 		
 		var filePath = msg.scriptName;
 			
@@ -86,17 +86,10 @@
 		
 		console.log("appendFile: " + file.path + " msg=" + msg);
 		
-		if(msg.log) file.writeLine(msg.log);
-		else if(msg.warn) file.writeLine("WARNING: " + msg.log);
-		else if(msg.error) file.writeLine(msg.error);
-		else if(msg.finished) {
-			if(msg.stdErrArr.length > 0) {
-				for (var i=0; i<msg.stdErrArr.length; i++) {
-					file.writeLine(msg.stdErrArr[i]);
-				}
-			}
-			else file.writeLine(msg.scriptName + " exited with exit code " + msg.exitCode);
-			}
+		if(msg.stdout) file.writeLine(msg.stdout);
+		else if(msg.stderr) file.writeLine(msg.stderr);
+		else if(msg.exit) file.writeLine(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+			
 		EDITOR.renderNeeded();
 	}
 	

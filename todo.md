@@ -27,6 +27,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+libs need +x 
+
 I managed to run nodejs under chroot. So we should probably spawn the user's nodejs script
 while chrooted. That way we can have a more restritive apparmor profile on the spawned worker.
 
