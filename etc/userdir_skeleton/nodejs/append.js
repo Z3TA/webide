@@ -1,3 +1,4 @@
+// Demo on how to append data to a file
 
 console.log('Attempting to append "data" to message.txt ...');
 

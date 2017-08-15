@@ -27,6 +27,8 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+Stop all running scripts when user disconnects from server !?
+
 hmm, seems we have to mount --bind /dev /home/user/dev
 
 make release work!
@@ -43,7 +45,7 @@ Show inline result of consle.logs of nodejs scrips
 
 Show inline variable values using nodejs debugger repl
 
-Stop all running scripts when user disconnects from server ?
+
 
 User should be able to stop a script after reloading (relogin) the editor!
 
