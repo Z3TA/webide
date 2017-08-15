@@ -292,6 +292,9 @@ function copyNodejs(homeDir) {
 		console.log("Copying " + nodejsDeps[i]);
 		copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
 		}
+	for (var i=0; i<foldersCreated.length; i++) {
+		chmodrSync(foldersCreated[i], "555"); // lib files needs read and execute permission!
+	}
 }
 
 function getGroupId(groupName) {
