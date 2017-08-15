@@ -37,15 +37,18 @@ var INFO = 6;
 var DEBUG = 7;
 
 
-
-
-var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
+var USE_CHROOT = false;
 
 var isRoot = process.getuid && process.getuid() === 0;
 
 if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
 
-if(USE_CHROOT) {
+
+log("process.env.uid=" + process.env.uid);
+
+if(parseInt(process.env.uid)) {
+
+	USE_CHROOT = true;
 	/* Change root ...
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
 		nvm install or nvm use (the version you want)
@@ -56,9 +59,9 @@ if(USE_CHROOT) {
 		
 	*/
 	var posix = require("posix");
-	var username = getArg(["u", "user", "username"]);
-	var uid = parseInt(getArg(["uid", "uid"]));
-	var gid = parseInt(getArg(["gid", "gid"]));
+	var username = process.env.username; // getArg(["u", "user", "username"]);
+	var uid = parseInt(process.env.uid); // getArg(["uid", "uid"])
+	var gid = parseInt(process.env.gid); // getArg(["gid", "gid"])
 	posix.chroot('/home/' + username);
 	posix.setegid(gid);
 	posix.seteuid(uid);

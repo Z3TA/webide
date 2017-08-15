@@ -160,7 +160,7 @@ function main() {
 	
 	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
 	
-	
+
 	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
 	
 	var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
@@ -985,15 +985,22 @@ function createUserWorker(name, uid, gid) {
 	var options = {};
 	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid];
 	
+	options.env = {
+		username: name,
+		uid: uid,
+		gid: gid,
+		loglevel: LOGLEVEL
+	}
+
 	if(USE_CHROOT) {
-		args.push("-chroot")
+
 	}
 	else {
 		if(uid != undefined) options.uid = parseInt(uid);
 		if(gid != undefined) options.gid = parseInt(gid);
 	}
 	
-	options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+	if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
 	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
