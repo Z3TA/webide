@@ -66,6 +66,8 @@
 		
 		var filePath = EDITOR.currentFile.path;
 		
+		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
+		
 		var json = {filePath: filePath};
 		
 		var stdOutFile = filePath + ".stdout";

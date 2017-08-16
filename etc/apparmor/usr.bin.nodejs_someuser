@@ -12,11 +12,13 @@
   capability setuid,
   capability sys_chroot,
 
+  signal receive set=cont peer=unconfined,
+  signal receive set=exists peer=unconfined,
   signal receive set=int peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=kill peer=unconfined,
   signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
   signal receive set=term peer=unconfined,
-
   signal send set=hup peer=/home/%USERNAME%/usr/bin/nodejs,
   signal send set=int peer=/home/%USERNAME%/usr/bin/nodejs,
   signal send set=int peer=/usr/bin/nodejs_%USERNAME%,
@@ -24,6 +26,7 @@
   signal send set=quit peer=/home/%USERNAME%/usr/bin/nodejs,
   signal send set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
   signal send set=term peer=/home/%USERNAME%/usr/bin/nodejs,
+  signal send set=term peer=/usr/bin/nodejs_%USERNAME%,
 
   network unix,
 
@@ -33,7 +36,9 @@
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,
-
+  
+  # Nead read to list files
+  /home/%USERNAME%/ r,
   /home/%USERNAME%/** rw,
 
   %JZEDIT%/node_modules/** r,
