@@ -66,7 +66,7 @@
 			return;
 		}
 		
-		if(fromWhat) fromWhat.innerText = UTIL.lbChars(file.indentation);
+		if(fromWhat) fromWhat.innerText = "current=" + UTIL.lbChars(file.indentation);
 		
 	}
 	
@@ -154,7 +154,10 @@
 		}
 		
 		file.reload(text);
-		showIndentationConvention(EDITOR.currentFile);
+		//showIndentationConvention(EDITOR.currentFile);
+		hideIndentationManager();
+		EDITOR.resizeNeeded();
+		
 	}
 	
 })();
