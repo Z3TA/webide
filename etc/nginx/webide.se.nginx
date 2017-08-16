@@ -14,12 +14,13 @@ server {
   charset utf-8;
   
   # Ucomment to enable SSL:
-  #listen 443 ssl;
-  #ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
-  #ssl_certificate_key  /etc/ssl/private/webide.se.key;
+  listen 443 ssl;
+  ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
+  ssl_certificate_key  /etc/ssl/private/webide.se.key;
  
   # Uncomment the line below to Enable IPv6
-  #listen [::]:80 ipv6only=on;\
+  listen [::]:80 ipv6only=on;
+  # Remove "ipv6only=on" if you have more then one site on ipv6   
 
   location / {
     

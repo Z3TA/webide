@@ -27,11 +27,11 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-Stop all running scripts when user disconnects from server !?
-
 make release work!
 
-rename to webide
+setup email server on prod
+
+Stop all running scripts when user disconnects from server !?
 
 run the script when pressing F1 on the stdout file
 

@@ -1,28 +1,40 @@
 # How to install:
-# 1. Make sure nginx is installed: apt-get install nginx
-# 2. mv etc/signup.webide.se.nginx etc/signup.yourdomain.com.nginx
-# 3. sudo cp etc/nginx/signup.yourdomain.com.nginx /etc/nginx/sites-available/signup.yourdomain.com.nginx
-# 4. sudo ln -s /etc/nginx/sites-available/signup.yourdomain.com.nginx  /etc/nginx/sites-enabled/signup.yourdomain.com
-# or sudo ln -s $(pwd)/signup.yourdomain.com.nginx /etc/nginx/sites-enabled/signup.yourdomain.com
-# 5. service nginx reload
+# 1. cd /srv/jzedit , or to where the jzedit edit files are
+# 2. Make sure nginx is installed: apt-get install nginx
+# 3. mv etc/signup.webide.se.nginx etc/signup.yourdomain.com.nginx
+# 4. sudo cp etc/nginx/signup.yourdomain.com.nginx /etc/nginx/sites-available/signup.yourdomain.com.nginx
+# 5. sudo ln -s /etc/nginx/sites-available/signup.yourdomain.com.nginx  /etc/nginx/sites-enabled/signup.yourdomain.com
+# 6. service nginx reload
+#
+# Note to self:
+# sudo ln -s $(pwd)/etc/nginx/signup.webide.se.nginx /etc/nginx/sites-enabled/signup.webide.se
 #
 
 server {
   listen 80;
-  server_name  signup.webtigerteam.com;
+  server_name  signup.webide.se;
   charset utf-8;
   
   # Ucomment to enable SSL
-  #listen 443 ssl;
-  #ssl_certificate      /etc/ssl/certs/letsencrypt/signup.webtigerteam.com.crt;
-  #ssl_certificate_key  /etc/ssl/private/signup.webtigerteam.com.key;
+  listen 443 ssl;
+  ssl_certificate      /etc/ssl/certs/letsencrypt/signup.webide.se.crt;
+  ssl_certificate_key  /etc/ssl/private/signup.webide.se.key;
 
   # Uncomment the line below to Enable IPv6
-  #listen [::]:80 ipv6only=on;\
+  listen [::]:80;
+  # Remove "ipv6only=on" if you have more then one site on ipv6   
 
   location / {
+
+
     # Let browsers sign up from anywhere
-    add_header Access-Control-Allow-Origin *;
+    # add_header Access-Control-Allow-Origin *;
+
+    # Problem: (where does https://webide.se get added !?)
+    # XMLHttpRequest cannot load https://signup.webide.se/signup/info. 
+    # The 'Access-Control-Allow-Origin' header contains multiple values 'https://webide.se, *', 
+    # but only one is allowed. Origin 'https://webide.se' is therefore not allowed access.
+
 
     # Dont cache!
     expires 0;
@@ -43,7 +55,7 @@ server {
   location @badgateway {
     add_header Access-Control-Allow-Origin * always;
     default_type text/plain;
-    return 502 "Signup service is down ... Dispatching code monkeys ...\n";
+    return 502 "Signup service is down!\n";
   }
 
   error_page 502 @badgateway;
