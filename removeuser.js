@@ -109,6 +109,11 @@ catch(err) {
 }
 
 
+// Unmount dev/urandom
+var umountUrandom = child_process.execSync("umount /home/" + username + "/dev/urandom").toString(ENCODING).trim();
+if(umountUrandom != "") throw umountUrandom;
+
+
 
 var childProcess = require('child_process');
 childProcess.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
