@@ -218,6 +218,15 @@
 		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
 		form.appendChild(labelCheckDefUrl);
 		
+		
+		// Signup message
+		var signupLink = document.createElement("a");
+		signupLink.appendChild(document.createTextNode("Signup / create account »"));
+		signupLink.setAttribute("href", "/signup/signup.html");
+		signupLink.setAttribute("class", "signup link");
+		form.appendChild(signupLink);
+		
+		
 		return form;
 		
 		

@@ -189,6 +189,18 @@ label, span, p {
 	font-family: caption;
 	}
 
+a.signup {
+	padding: 3px;
+	border-radius: 3px;
+	border: 1px solid blue;
+	color: blue;
+	background-color: white;
+	text-shadow: none;
+	font-weight: normal;
+	text-decoration: underline;
+margin-left: 1em;
+}
+
 input[type=text], input[type=password], select.select {
 	border-radius: 2px;
 	border: 1px inset #4a4a4a;

@@ -48,7 +48,7 @@ window.onload = function main() {
 		else if(code == "serviceError") alertGeneralMessage(arr[1]);
 		else if(code == "created") {
 			alertGeneralMessage("Successfully created username" + arr[1]);
-			document.location="http://" + arr[2] + "/";
+			document.location="https://" + arr[2] + "/";
 		}
 		else {
 			throw new Error("Unknown message from signup service: " + msg);

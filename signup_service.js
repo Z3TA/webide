@@ -112,7 +112,7 @@ var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 		
 		var IP = connection.remoteAddress;
 		
-		if(IP == undefined) {
+	if(IP == undefined || IP == "127.0.0.1") {
 			// Maybe because the user is connecting via HTTP instead of Websockets!?
 			IP = connection.headers["x-real-ip"];
 			//console.log(JSON.stringify(connection.headers, null, 2));
@@ -158,33 +158,36 @@ var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 			else if(!isAvailable) answer("available:" + name + ":" + isAvailable);
 			else createAccount(data, function account(err, username) {
 				if(err) answer("createError:" + username + ":" + HOSTNAME + ":" + err);
-				else answer("created:" + username + ":" + HOSTNAME);
+				else {
+					answer("created:" + username + ":" + HOSTNAME);
+					sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP);
+				}
 			});
 		});
 		else answer("serviceError:Unknown command: " + command);
-			
-			
-			function answer(str) {
-				log(IP + " <= " + UTIL.shortString(str));
-				connection.write(str);
-			}
-		});
 		
 		
-		function usernameAvailable(username, callback) {
-			var fs = require("fs");
-			
+		function answer(str) {
+			log(IP + " <= " + UTIL.shortString(str));
+			connection.write(str);
+		}
+	});
+	
+	
+	function usernameAvailable(username, callback) {
+		var fs = require("fs");
+		
 		username = username.split(",")[0];
 		
-			if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
-			
-			var encoding = "utf8";
+		if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
+		
+		var encoding = "utf8";
 		var notAvailable = false;
 		
-			fs.readFile(PW_FILE, encoding, function(err, usersPwString) {
-				
-				if(err) {
-					log("Unable to read PW_FILE=" + PW_FILE + "! " + err.message, ERROR);
+		fs.readFile(PW_FILE, encoding, function(err, usersPwString) {
+			
+			if(err) {
+				log("Unable to read PW_FILE=" + PW_FILE + "! " + err.message, ERROR);
 					callback(serviceError);
 					sendAlert(err.message + "\n" + err.stack);
 				}

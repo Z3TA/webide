@@ -33,13 +33,7 @@ cleaning up the todo list ...
 todo
 ----
 
-get e-mail notification when someone signs up!
-
-use httpS: consitencly
-
 check if the release chain works. Can users sign up?
-
-add signup link to the login widget
 
 Stop all running scripts when user disconnects from server !?
 
