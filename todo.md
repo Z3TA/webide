@@ -54,18 +54,15 @@ check for mercurial integration regression (due to chroot)
 
 Some sort of dashboard for when you first open the webide. So that you are not compleatly lost ...
 
-npm installer plugin, whenever "require" is detected, and a node_modules foulder is found, and it's not a node native or local module, ask if the module should be installed.
+npm installer plugin, whenever "require" is detected, and a node_modules folder is found, and it's not a node native or local module, ask if the module should be installed.
+see nodejs_worker.js
 
-
-"Use as guest" (locally) button on the login widget. 
-Add signup link to the login widget.
-redirect http://editor.webtigerteam.com/ to webide (and signup page?)
+"Use without logging in" button on the login widget. 
+- Hide stuff / disable plugins that need the server ...!
+- Option to "save" (download) a file
 
 
 make server tests cleanup after themselves
-
-Remove all node_modules from repository
-Make releases include the node_modules plus nodejs!
 
 Make spellchecker work on server-side and use node_modules instead of compiled file.
 
