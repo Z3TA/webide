@@ -27,68 +27,26 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-make release work!
+cleaning up the todo list ...
 
-setup email server on prod
+
+todo
+----
+
+check if the release chain works. Can users sign up?
+
+add signup link to the login widget
 
 Stop all running scripts when user disconnects from server !?
 
 run the script when pressing F1 on the stdout file
 
-
 Figure out how to spawn mercurial inside chroot
-
-
-Show inline result of consle.logs of nodejs scrips
-
-Show inline variable values using nodejs debugger repl
-
 
 
 User should be able to stop a script after reloading (relogin) the editor!
 
 Stop all running user nodejs scripts on server exit!
-
-Use systemd and service RootDirectory for nodejs scripts "in production" !?
-
-When the jzedit server starts, it stars a nodejs_worker.js for each user, which is a init program that auto starts nodejs projects that is set in "prod" mode.
-(in prod -mode the user will get a mail if the script crashes) (there will also be a bunch of debugging goodies!)
-nodejs_worker.js runs chroot, setegid and seteuid. It also runs nodejs scripts on demand in "dev mode".
-
-
-signup service!
-
-Running NodeJS scripts
-
-Setting up the toolchain for programming is very hard for a beginner, "just edit and run node" is very confusing ...
-Make it so that you get "right into coding" example HTML page, being able to preview it by clicking a button, and edits are hot-loaded (without page refresh).
-When you load the editor the first time you have a HTML and JS file open, where it says "hit F1 to preview"
-
-update WysiwygEditor.js: When editing a CSS file and the preview is open, hot reload the CSS content!
-or when working on a JS file that is included in the pewview page, hot reload it!
-
-
----
-
-Static analysis, find undefined property! Example:
-
-function foo() {
-"use strict"
-
-let bar = {};
-bar.a = 1;
-bar.b = 2;
-console.log(bar.c);
-bar.c = 3;
-
-}
-
-foo();
-
-Have the parser find all referenced variables and objects (bar, bar.a, bar.b, bar.c) in the scope, plus all variable and property assignments (plus line number).
-Then have a plugin that find the scope in view, then check if any property or varable is referenced before assigned.
-
----
 
 problem with permission on folders when publishing SSG site.
 
@@ -97,11 +55,11 @@ Get a beta tester and see if he manages to publish a web page using the static s
 
 write a blog post
 
+tests for mercurial integration.
+check for mercurial integration regression (due to chroot)
 
+get rid of "devmode off" when you start the editor in prod
 
-
-todo
-----
 
 Some sort of dashboard for when you first open the webide. So that you are not compleatly lost ...
 
@@ -205,6 +163,12 @@ The update should be done on server side /server.js
 
 What I'm thinking
 -----------------
+
+Use systemd and service RootDirectory for nodejs scripts "in production" !?
+
+Setting up the toolchain for programming is very hard for a beginner, "just edit and run node" is very confusing ...
+Make it so that you get "right into coding" example HTML page, being able to preview it by clicking a button, and edits are hot-loaded (without page refresh).
+When you load the editor the first time you have a HTML and JS file open, where it says "hit F1 to preview"
 
 Need a way to check that the editor is not broken before pushing!
 
@@ -1040,6 +1004,15 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Show inline result of consle.logs of nodejs scrips
+(see nodejs_worker.js)
+
+Show inline variable values using nodejs debugger repl
+
+update WysiwygEditor.js: When editing a CSS file and the preview is open, hot reload the CSS content!
+or when working on a JS file that is included in the pewview page, hot reload it!
+
+
 Need a stop button for search-in-files. 
 
 SSG:
@@ -1648,6 +1621,28 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+---
+
+Static analysis, find undefined property! Example:
+
+function foo() {
+"use strict"
+
+let bar = {};
+bar.a = 1;
+bar.b = 2;
+console.log(bar.c);
+bar.c = 3;
+
+}
+
+foo();
+
+Have the parser find all referenced variables and objects (bar, bar.a, bar.b, bar.c) in the scope, plus all variable and property assignments (plus line number).
+Then have a plugin that find the scope in view, then check if any property or varable is referenced before assigned.
+
+---
 
 WebRTC video/voice while in colaboration mode.
 

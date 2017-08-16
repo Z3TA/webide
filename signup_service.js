@@ -31,7 +31,7 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 	
 	// For sending errors via email to an admin
 	var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
-	var SMTP_HOST = getArg(["mh", "smtp_host"]) || "127.0.0.1";
+var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 	var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
 	var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
 	var ADMIN_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org";
@@ -153,11 +153,15 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 				if(err) answer("availableError:" + name + ":" + err);
 				else answer("available:" + name + ":" + isAvailable);
 			});
-			else if(command == "createAccount") createAccount(data, function account(err, username) {
+		else if(command == "createAccount") usernameAvailable(data, function available(err, name, isAvailable) {
+			if(err) answer("availableError:" + name + ":" + err);
+			else if(!isAvailable) answer("available:" + name + ":" + isAvailable);
+			else createAccount(data, function account(err, username) {
 				if(err) answer("createError:" + username + ":" + HOSTNAME + ":" + err);
 				else answer("created:" + username + ":" + HOSTNAME);
 			});
-			else answer("serviceError:Unknown command: " + command);
+		});
+		else answer("serviceError:Unknown command: " + command);
 			
 			
 			function answer(str) {
@@ -170,10 +174,13 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 		function usernameAvailable(username, callback) {
 			var fs = require("fs");
 			
+		username = username.split(",")[0];
+		
 			if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
 			
 			var encoding = "utf8";
-			
+		var notAvailable = false;
+		
 			fs.readFile(PW_FILE, encoding, function(err, usersPwString) {
 				
 				if(err) {
@@ -183,19 +190,21 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 				}
 				else {
 					//console.log("usersPwString:\n" + usersPwString);
-					var users = usersPwString.split(/\r|\r\n/);
+				var users = usersPwString.split(/\n|\r\n/);
 					for (var i=0, name; i<users.length; i++) {
 						name = users[i].substring(0, users[i].indexOf("|"));
-						if(name == username) return callback(null, name, false);
+					log("name=" + name + " == " + username + " ?", 7);
+					if(name == username) return callback(null, name, notAvailable);
 					}
 					
 					// Also check for system users
 					fs.readFile("/etc/passwd", encoding, function(err, usersPwString) {
 						//console.log("usersPwString:\n" + usersPwString);
-						var users = usersPwString.split(/\r|\r\n/);
+					var users = usersPwString.split(/\n|\r\n/);
 						for (var i=0, name; i<users.length; i++) {
-							name = users[i].substring(0, users[i].indexOf(":"));
-							if(name == username) return callback(null, name, false);
+						name = users[i].substring(0, users[i].indexOf(":"));
+						log("name=" + name + " == " + username + " ?", 7);
+						if(name == username) return callback(null, name, notAvailable);
 						}
 						
 						return callback(null, username, true);
@@ -248,16 +257,18 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 					if(check == null) {
 						log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
 						callback(serviceError, username);
-						sendAlert(stdout);
+					sendAlert("check=" + check + " failed on stdout=" + stdout);
 					}
-					else if(check[2] == username && check[3] == password && check[4] == PW_FILE) {
+				else if(check[1] == username && check[2] == password && check[3] == PW_FILE) {
 						log("Account username=" + username + "! successfully created!");
 						callback(null, username);
 					}
 					else {
-						log("Problem when creating username=" + username + "! stdout=" + stdout, ERROR);
+					log("Problem when creating username=" + username + " with password=" + password + " using PW_FILE=" + PW_FILE + "!\
+					 check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout, ERROR);
 						callback(serviceError, username);
-						sendAlert(stdout);
+					sendAlert("Problem when creating username=" + username + " with password=" + password + " using PW_FILE=" + PW_FILE + "!\
+					check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout);
 					}
 				}
 				else {
@@ -280,7 +291,7 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 	
 	function sendMail(from, to, subject, text) {
 		
-		log("Sending mail from=" + from + " to=" + to + " subject=" + subject + " text=" + text);
+	log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
 		
 		var nodemailer = require('nodemailer');
 		var smtpTransport = require('nodemailer-smtp-transport');

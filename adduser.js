@@ -104,11 +104,9 @@ for (var i=0, name; i<users.length; i++) {
 
 
 
-var childProcess = require('child_process');
-
 // old: 'adduser --system --ingroup jzedit_users ' + username
 
-childProcess.exec('adduser ' + username + ' --system --group', function execAddUser(err, stdout, stderr) {
+child_process.exec('adduser ' + username + ' --system --group', function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
 	
 	if(stderr) throw new Error(stderr);
@@ -146,8 +144,6 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 	
 	//var gid = getGroupId(groupName);
 	
-	var fs = require("fs");
-		
 	if(NO_PW_HASH) {
 			var hashedPassword = password;
 		}
@@ -212,7 +208,6 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 		fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
 		fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
 		
-		var child_process = require('child_process');
 		var reloadNginxStdout = child_process.execSync("service nginx reload");
 		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
 		if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);

@@ -20,7 +20,7 @@ var ENCODING = "utf8";
 if(!username) throw new Error("No username specified!");
 
 var fs = require("fs");
-
+var child_process = require('child_process');
 
 try {
 	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
@@ -110,13 +110,19 @@ catch(err) {
 
 
 // Unmount dev/urandom
-var umountUrandom = child_process.execSync("umount /home/" + username + "/dev/urandom").toString(ENCODING).trim();
-if(umountUrandom != "") throw umountUrandom;
+try {
+	child_process.execSync("umount /home/" + username + "/dev/urandom").toString(ENCODING);
+}
+catch(err) {
+	if(err.message.indexOf("umount: /home/" + username + "/dev/urandom: not mounted") != -1) console.warn(err.message);
+	else {
+		//console.log("*" + err.message.trim() + "*");
+		throw err;
+	}
+}
 
 
-
-var childProcess = require('child_process');
-childProcess.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
+child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
 	
 	var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
