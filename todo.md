@@ -27,117 +27,72 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-cleaning up the todo list ...
 
 
 todo
 ----
 
+1. fix regressions!! Mercurial support inside chroot! (write some tests)
+
+Find out why jzedit service didn't start after producton server reboot.
+
 Figure out why http_server_example.js wont run in dev, but does run in prod !?
 
-stop user from trying to open urandom !?
+Make server run under apparmor profile ...
+Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)
 
 check if the release chain works. Can users sign up?
 
+ship with node_modules!
+can't depend on a third party package manager to do the right thing.
+and we want to be sane, and debug the same code that the users are running.
+
+
 Figure out how to spawn mercurial inside chroot
 
-problem with permission on folders when publishing SSG site.
-
-Prepare for a beta tester to test the static site generator ...
-Get a beta tester and see if he manages to publish a web page using the static site generator!
-result: He failed. Managed to login, but didn't know what to do from there ...
-
-write a blog post
+make server tests cleanup after themselves
 
 tests for mercurial integration.
 check for mercurial integration regression (due to chroot)
 
-Some sort of dashboard for when you first open the webide. So that you are not compleatly lost ...
+Some sort of dashboard for when you first open the webIDE. So that you are not compleatly lost ...
+Each plugin can add stuff to the dashboard, so that clickin on stuff in the dashboard can interact with the plugin
+
+Able to add npm modules to the SSG ...
 
 npm installer plugin, whenever "require" is detected, and a node_modules folder is found, and it's not a node native or local module, ask if the module should be installed.
 see nodejs_worker.js
-
-"Use without logging in" button on the login widget. 
-- Hide stuff / disable plugins that need the server ...!
-- Option to "save" (download) a file
-
-
-make server tests cleanup after themselves
-
-Make spellchecker work on server-side and use node_modules instead of compiled file.
-
-Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
-
-I'm working on serverless/chatt and edited the prod files in /tank/www/webtigerteam.com/serverless/chatapp/main.js
-now I want to compare with the repo /home/zeta/dev/chatapp/ ... 
-The hg plugins needs a diff function. A diff function is also useful. Should the diff function be built-in (not a plugin) ?
-EDITOR.diffFile(someFill, diffWithohterfile) => someFill-diffWithohterfile.diff.js insers in green and removed in red
 
 
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
 https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
 
-
-Find out why jzedit service didn't start after producton server reboot.
-
 quick-edit
 http://editor.webtigerteam.com/?editPage=http%3A%2F%2Fmarkus.webtigerteam.com%2Fblog%2Fblog-post.htm&nodes=blogpost!%2Cp%2Cmain%2Cdiv%2Cbody%2Chtml%2C%2C
- ... didn't open the file.
+... didn't open the file.
 
-x-real-ip in nginx profile
-
-
-Make server run in apparmor ...
-Trying to allow stat files in /home/** in apparmor profile.
-
-User can't stat files in preview because no x rights!?
-could not stat because of apparmor!
-
-
-Unload/load all plugins when loggin in as a different users, or on a different server !?
 
 When you use Ctrl+P to open "any" file, it's confusing when you see the compiled files from the SSG ...
 When SSG panel is open, change working dir, so a file search only searches inside source folder!!
 
-EDITOR.autoCompletePath("/foo/ba") => /foo/bar/ (when saving files)
+Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
 
 When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
 When saving a .css file belonging to the SSG, reload it in the preview! 
 
 Prevent user_worker.js crash endless loop!
 
-(optimization) reopen_files.js Don't auto-save state if something was changed within 3 seconds !?
-
-Test window.navigator.platform, what value to use in EDITOR.platform !?
-
 Double clicking the file in commit file selection should open it.
 
 Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
 
-File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
-Able to select files and folders in file explorer !?
-delete (and rename) files via file explorer
-delete files via commit tool
-Move files via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.z
-Copy a folder(or file) by right clicking, selecting copy. A copy is created, you can then move it via drag n drop.
+Make spellchecker work on server-side and use node_modules instead of compiled file.
 
+write a blog post!
 
-Better apparmor guide and script
+Unload/load all plugins when loggin in as a different users, or on a different server
 
-Write a userdel script (userdel -r -f nameOfUser)
-
-Make apparmor and systemd service profiles
-
-Able to add npm modules to the SSG ...
-
-Update script that check https://www.webtigerteam.com/editor/download/linux/latest/version.inc and ask the user to update:
-The scripts syncs then checks hashtable.txt and compares to the local hashtable.txt and downloads all files that changed,
-then ask the user to restart the editor. (the client reloads)
-Also have some sort of fingerprint/signature to prevent MiTM attacks.
-The update should be done on server side /server.js
-
-
-
+stop user from trying to open urandom !?
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -151,6 +106,45 @@ The update should be done on server side /server.js
 
 What I'm thinking
 -----------------
+
+FEATURE FREEEZE!!!
+
+It seems making an editor/IDE is a forever task. I allocated six moths but have now worked over three years ...
+Truth is most users will *never use most of the features*. and the more features, the more regressions, which leads to slower development speed.
+So don't add a new feature for now. Just focus on the core features:
+* JavaScript programming
+* Creating web sites (using the SSG)
+* Writing NodeJS scripts (and micro services)
+* Mercurial integration for source control management
+
+I now have these four core features implemented, but they are rought, and I broke the Mercurial integration when adding NodeJS support (due to chroot).
+
+Some things I have learned:
+Most people making web pages don't want to deal with HTML, CSS, coding, they want a WYSIWYG!
+Users don't care what language a program is made in, they just want it to work and be easy to use.
+Users don't care if a web page use hand crafted HTML,CSS,JS or is generated by a photoshop plugin.
+Users don't care if the generated JS is bloated,slow and stupid, it just have to be *fast enough*
+Users don't care if something is running on bare metal or VM's ten levels deep, it just have to be *fast enough*
+Your users don't know everything you know, and have different values then you do!
+I need to figure out what users are willing to pay for and *not* trust my intuition
+
+You'll spend most of your time fixing bugs and issues, so optimize for debugging and seamless releases
+
+---
+
+When we have actual users, we can't just remove and readd because their stuff would be lost.
+There need to be a way to "Upgrade" users when changes have been made !
+
+---
+
+Prepare for a beta tester to test the static site generator ...
+Get a beta tester and see if he manages to publish a web page using the static site generator!
+result: He failed. Managed to login, but didn't know what to do from there ...
+
+I'm working on serverless/chatt and edited the prod files in /tank/www/webtigerteam.com/serverless/chatapp/main.js
+now I want to compare with the repo /home/zeta/dev/chatapp/ ...
+The hg plugins needs a diff function! A diff function is also useful (yeh) ... Should the diff function be built-in (not a plugin) ?
+EDITOR.diffFile(someFill, diffWithohterfile) => someFill-diffWithohterfile.diff.js inserts in green and removed in red
 
 Stop all running scripts when user disconnects from server !?
 A way to deamonize a nodejs script so that it will start and restart automatically.
@@ -316,6 +310,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+problem with permission on folders when publishing SSG site ... !?
 
 When trying to create a file without file type eg foo/bar dot baz: The path does not exist: /foo/bar/
 
@@ -999,6 +995,21 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+"Use without logging in" button on the login widget.
+- Hide stuff / disable plugins that need the server ...!
+- Option to "save" (download) a file
+
+---
+File explorer:
+File explorer menu, when right clicking, [cancel, rename, new folder, new file, delete]
+Able to select files and folders in file explorer !?
+delete (and rename) files via file explorer
+Move files in file explorer via drag n drop. Open folders automatically when you hover over them. Auto scroll when you are near the edges.z
+Copy a folder(or file) by right clicking, selecting copy. A copy is created, you can then move it via drag n drop.
+---
+
+EDITOR.autoCompletePath("/foo/ba") => /foo/bar/ (when saving files)
+
 Show inline result of consle.logs of nodejs scrips
 (see nodejs_worker.js)
 
@@ -1478,6 +1489,8 @@ Auto complete xml tags! (in xml/svg files)
 Optimization
 ============
 
+reopen_files.js Don't auto-save state if something was changed within 3 seconds !? (would save memory ?)
+
 Firefox have some nasty performance issues ... paint 9ms keyisdown 12ms
 add console.time("keyIsDown")
 use animationframe instead of setinterval for render? setInterval, even though only 0.02ms to run seem to have some overhead cost!??
@@ -1616,6 +1629,16 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+
+
+---
+
+Update script that check https://www.webtigerteam.com/editor/download/linux/latest/version.inc and ask the user to update:
+The scripts syncs then checks hashtable.txt and compares to the local hashtable.txt and downloads all files that changed,
+then ask the user to restart the editor. (the client reloads)
+Also have some sort of fingerprint/signature to prevent MiTM attacks.
+The update should be done on server side /server.js
 
 ---
 
