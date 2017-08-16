@@ -238,6 +238,9 @@ childProcess.exec('adduser ' + username + ' --system --group', function execAddU
 	var makeNull = child_process.execSync("mknod -m 444 /home/" + username + "/dev/null c 1 3").toString(ENCODING);
 	if(makeNull.trim() != "") throw makeNull;
 	
+	// On some system we need to mount --bind urandom !??
+	var mountUrandom = child_process.execSync("mount --bind /dev/urandom /home/" + username + "/dev/urandom").toString(ENCODING).trim();
+	if(mountUrandom != "") throw mountUrandom;
 	
 	// Create and activate apparmor profile for the user's nodejs binary
 	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.nodejs", ENCODING);

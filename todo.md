@@ -29,13 +29,11 @@ What I'm working on
 
 Stop all running scripts when user disconnects from server !?
 
-hmm, seems we have to mount --bind /dev /home/user/dev
-
 make release work!
 
 rename to webide
 
-
+run the script when pressing F1 on the stdout file
 
 
 Figure out how to spawn mercurial inside chroot
@@ -104,6 +102,8 @@ write a blog post
 
 todo
 ----
+
+Some sort of dashboard for when you first open the webide. So that you are not compleatly lost ...
 
 npm installer plugin, whenever "require" is detected, and a node_modules foulder is found, and it's not a node native or local module, ask if the module should be installed.
 
