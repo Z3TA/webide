@@ -1,7 +1,15 @@
+# cd /srv/jzedit , or to where you placed the files
+# 
+# Either copy this file to /etc/systemd/system/ and make modifications ...
 # sudo cp etc/systemd/jzedit_signup.service /etc/systemd/system/jzedit_signup.service
 # sudo systemctl enable jzedit_signup   or   sudo systemctl daemon-reload
-# or sudo systemctl enable $(pwd)/etc/systemd/jzedit_signup.service
+#
+# Or use as is ...
+# sudo systemctl enable $(pwd)/etc/systemd/jzedit_signup.service
 # sudo systemctl start jzedit_signup
+#
+# Signup url: https://webide.se/signup/signup.html
+#
 
 [Unit]
 Description=Signup service for JZedit cloud editor
