@@ -208,7 +208,7 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 		}
 		
 		function createAccount(userData, callback) {
-			var username = userData.substring(0, userData.indexOf(","));
+		var username = userData.substring(0, userData.indexOf(","));
 			var password = userData.substring(userData.indexOf(",") + 1);
 			
 			if(username.match(/[^a-zA-Z0-9]/)) return callback("Username can only contain letters a-z, A-Z, 0-9");
@@ -224,7 +224,8 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 				pwFile: PW_FILE
 			};
 			
-			var command = "./adduser.js " + JSON.stringify(commandArg);
+		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
+		var command = "./adduser.js '" + JSON.stringify(commandArg) + "'";
 			console.log("command=" + command);
 			var options = {
 				pwd: __dirname
@@ -241,6 +242,7 @@ var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "
 					sendAlert(stderr);
 				}
 				else if(stdout) {
+				log("stdout=" + stdout, DEBUG);
 					var check = stdout.match(/User with username=(.*) and password=(.*) successfully added to (.*)/);
 					
 					if(check == null) {

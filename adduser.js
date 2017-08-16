@@ -42,10 +42,15 @@ var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 
 
 // Favor using JSON as argument to prevent hackers from passing arguments in their password
-try { var scriptArguments = JSON.parse(process.argv.join(" ")); }
-catch (err) { var scriptArguments = null; }
+var maybeJson = process.argv.splice(2, process.argv.length).join(" ");
+try { var scriptArguments = JSON.parse(maybeJson); }
+catch (err) {
+	if(username.charAt(0) == "{") console.log("Unable to parse script parameters as JSON: " + err.message + " maybeJson=" + maybeJson);
+var scriptArguments = null; 
+}
 
 if(scriptArguments) {
+	console.log("Using JSON parameters!");
 	username = scriptArguments.username;
 	password = scriptArguments.password;
 	NO_PW_HASH = scriptArguments.noPwHash;
@@ -56,8 +61,8 @@ if(scriptArguments) {
 
 var ENCODING = "utf8";
 
-if(!username) throw new Error("No username specified!");
-	if(!password) throw new Error("No password specified!");
+if(!username) throw new Error("No username specified! scriptArguments=" + scriptArguments + " argv=" + maybeJson);
+if(!password) throw new Error("No password specified! scriptArguments=" + scriptArguments + " argv=" + maybeJson);
 	
 	
 
