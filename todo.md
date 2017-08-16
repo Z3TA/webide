@@ -33,31 +33,24 @@ cleaning up the todo list ...
 todo
 ----
 
+Figure out why http_server_example.js wont run in dev, but does run in prod !?
+
+stop user from trying to open urandom !?
+
 check if the release chain works. Can users sign up?
 
-Stop all running scripts when user disconnects from server !?
-
-run the script when pressing F1 on the stdout file
-
 Figure out how to spawn mercurial inside chroot
-
-
-User should be able to stop a script after reloading (relogin) the editor!
-
-Stop all running user nodejs scripts on server exit!
 
 problem with permission on folders when publishing SSG site.
 
 Prepare for a beta tester to test the static site generator ...
 Get a beta tester and see if he manages to publish a web page using the static site generator!
+result: He failed. Managed to login, but didn't know what to do from there ...
 
 write a blog post
 
 tests for mercurial integration.
 check for mercurial integration regression (due to chroot)
-
-get rid of "devmode off" when you start the editor in prod
-
 
 Some sort of dashboard for when you first open the webide. So that you are not compleatly lost ...
 
@@ -161,6 +154,11 @@ The update should be done on server side /server.js
 
 What I'm thinking
 -----------------
+
+Stop all running scripts when user disconnects from server !?
+A way to deamonize a nodejs script so that it will start and restart automatically.
+The script should continue to run even though the user temporarily lose connection !?
+User should be able to stop a script after reloading (relogin) the editor!
 
 Use systemd and service RootDirectory for nodejs scripts "in production" !?
 
@@ -321,6 +319,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+When trying to create a file without file type eg foo/bar dot baz: The path does not exist: /foo/bar/
 
 Automatic " + + " in urls !? var csvUrl = "http://visual-utopia.com/history/"
 

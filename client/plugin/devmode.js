@@ -41,7 +41,7 @@
 			if(runtime == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 			
 			if(EDITOR.settings.devMode == false) {
-				disableDevMode();
+				disableDevMode(true);
 			}
 			else if(EDITOR.settings.devMode == true) {
 				enableDevMode();
@@ -84,7 +84,7 @@
 		return false;
 	}
 	
-	function disableDevMode() {
+	function disableDevMode(noAlert) {
 		
 		console.log("Disabling dev mode ...");
 		
@@ -111,7 +111,7 @@
 			Only use the Chrome dev tools when you are actually debugging! Turn devMode OFF when you are not debugging (watching the console)
 		*/
 		
-		alertBox("devMode OFF!");
+		if(!noAlert) alertBox("devMode OFF!");
 		
 	}
 	
