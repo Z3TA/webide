@@ -1,11 +1,17 @@
 /*
+	This script has been depricated and nodejs scripts are spawned directly.
+	It's cool that we can "capture" console.log, require etc, 
+	so we might use vm instead of spawning scripts directly
+	
 	Let users run nodejs scripts.
 	The script will execute in a vm chrooted to the users home dir
 	
-	Gotcha: We are not able to capture errors from here. (they have to be handled by whoever spawns this script)
-	If we listen to process messages (from the parent) we can't know if and when the script exist!
+	Gotchas
+	-------
+	We are not able to capture errors from here. (they have to be handled by whoever spawns this script)
+	If we listen to process messages (from the parent) we can't know if and when the script exits!
+	Can't use console.log while using apparmor!??
 	
-	Gotchas: Can't use console.log while using apparmor.
 	
 */
 
