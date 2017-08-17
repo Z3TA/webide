@@ -97,6 +97,15 @@ catch(err) {
 	else throw err;
 }
 
+var apparmorProfile = "/etc/apparmor.d/home." + username + ".usr.bin.python";
+try {
+	fs.unlinkSync(apparmorProfile);
+}
+catch(err) {
+	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
+	else throw err;
+}
+
 //var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 //if(reloadApparmor != "") throw reloadApparmor;
 

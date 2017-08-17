@@ -224,15 +224,6 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		
 	
 	
-	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it
-	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
-	
-	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
-	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
-	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
-	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
 	// See how to debug apparmor in README.txt
 	
@@ -267,18 +258,28 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	var mountUrandom = child_process.execSync("mount --bind /dev/urandom /home/" + username + "/dev/urandom").toString(ENCODING).trim();
 	if(mountUrandom != "") throw mountUrandom;
 	
+	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it
+	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+	
+	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
+	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
+	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
+	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+	
 	// Create and activate apparmor profile for the user's nodejs binary
 	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.nodejs", ENCODING);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
 	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.nodejs", apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
+	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/nodejs").toString(ENCODING).trim();
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
 	// Create and activate apparmor profile for the user's python binary
 	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.python", ENCODING);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.nodejs", apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
+	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.python", apparmorProfile);
+	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/python").toString(ENCODING).trim();
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
 		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
