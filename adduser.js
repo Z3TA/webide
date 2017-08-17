@@ -162,7 +162,6 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 		
 		// Add skeleton files (the folder will be copied)
-	copyFolderRecursiveSync("etc/userdir_skeleton/bin", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
