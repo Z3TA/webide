@@ -27,36 +27,20 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+python apparmor profile
 
-adding python to chroot (so that we can run mercurial)
-
-hg needs /lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-and HOME needs to be in env variables!
-
-chroot needs /run/resolvconf/resolv.conf to resolve domains!
-
-hmm, for hg clone to work we need to allow python to access the internet! ...
-could solve any issues by setting up restrictive iptables and maybe a netns
-
-python needs extra files from /lib/ for dns ...
-/lib/x86_64-linux-gnu/libssl.so.1.0.0
-/lib/x86_64-linux-gnu/libnss_files.so.2
-/lib/x86_64-linux-gnu/libnss_mdns4_minimal.so.2
-/lib/x86_64-linux-gnu/libnss_dns.so.2
-/lib/x86_64-linux-gnu/libresolv.so.2
-
-hmm, should I just have these files in user skeleton !?
 
 todo
 ----
 
-refactor mercurial server plugin to use execFile instead of exec
-add needed files to chroot for mercurial to work in adduser or user skeleton !? 
 make an apparmor profile and make mercurial work under apparmor
 
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
 
 Find out why jzedit service didn't start after producton server reboot.
+
+hmm, for hg clone to work we need to allow python to access the internet! ...
+could solve any issues by setting up restrictive iptables and maybe a netns
 
 Make server run under apparmor profile ...
 Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)

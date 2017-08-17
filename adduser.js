@@ -162,12 +162,14 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 		
 		// Add skeleton files
-		copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo/", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/nodejs/", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/", homeDir);
 		
 		// Give the SSG-demo folder a better name
 		fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
 		
+	// Fix permissions !?
+	
+	
 		// Update tamplates
 		var date = new Date();
 		var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -231,19 +233,19 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 	//if(reloadApparmor != "") throw reloadApparmor;
 	
-	var nodeJsVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
-	console.log(nodeJsVersion);
-	copyProgram("nodejs", homeDir)
+	//var nodeJsVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
+	//console.log(nodeJsVersion);
+	//copyProgram("nodejs", homeDir)
 	
-	var pythonVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
-	console.log(pythonVersion);
-	copyProgram("python", homeDir)
+	//var pythonVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
+	//console.log(pythonVersion);
+	//copyProgram("python", homeDir)
 	
 	// Copy the python libs
-	copyFolderRecursiveSync("/usr/lib/python2.7/", "/home/" + username + "/usr/lib/python2.7/");
+	//copyFolderRecursiveSync("/usr/lib/python2.7/", "/home/" + username + "/usr/lib/python2.7/");
 	
 	// Copy mercurial
-	copyFileSync("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
+	//copyFileSync("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
 	
 	
 	// Nodejs needs /dev/urandom and /dev/null to start
@@ -266,7 +268,12 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
-	
+	// Create and activate apparmor profile for the user's python binary
+	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.python", ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.nodejs", apparmorProfile);
+	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
+	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
 		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		

@@ -1,0 +1,9 @@
+
+/home/%USERNAME%/usr/bin/python {
+
+  /home/%USERNAME%/ r,
+  /home/%USERNAME%/** rw,
+
+  #/dev/tty rw,
+
+}
