@@ -94,6 +94,7 @@ Unload/load all plugins when loggin in as a different users, or on a different s
 
 stop user from trying to open urandom !?
 
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!
@@ -102,10 +103,14 @@ stop user from trying to open urandom !?
 
 
 
-
-
 What I'm thinking
 -----------------
+
+Is a spawned process still there after client disconnect /reconnect ?
+Yes it is!! ? Nope ... Actually, it's killed a few seconds after the user disconnects (or when sockjs thinks the client disconnects)
+Even if the client reconnects it's killed!!
+There needs to be away to mark a program to "run forever" or go into prod etc ...
+
 
 FEATURE FREEEZE!!!
 

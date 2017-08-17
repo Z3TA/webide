@@ -145,6 +145,28 @@ ls /etc/apparmor.d/ | grep nodejs
 ls /etc/apparmor.d/disable/
 
 
+Installing more programs to the users folder (chroot)
+-----------------------------------------------------
+# Where is the program ?
+which python
+# Copy it to the user home dir
+
+
+# What libs are used ?
+ldd /usr/bin/python
+# Copy them to user home dir
+
+# Try to run it in chroot
+chroot /home/demonisse/ /usr/bin/python -c 'print "hi"'
+
+# Find all other dependencies and put them in the chroot (users home dir)
+# See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program
+wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
+sudo chmod +x tracefile
+./tracefile python
+
+
+# Create an apparmor profile
 
 
 

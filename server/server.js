@@ -332,7 +332,7 @@ function sockJsConnection(connection) {
 		
 	*/
 	
-	connection.on("data", function(message) {
+	connection.on("data", function sockJsMessage(message) {
 		
 		if(message.length > 100) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
 		else log(IP + " => " + message);
@@ -657,7 +657,7 @@ function sockJsConnection(connection) {
 		
 	});
 	
-	connection.on("close", function() {
+	connection.on("close", function sockJsClose() {
 		
 		log("Closed client connection (protocol=" + protocol + ") from " + IP);
 		
