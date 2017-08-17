@@ -577,8 +577,8 @@ API.stop_nodejs = function stop_nodejs(user, json, callback) {
 	
 	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback("The script is not running: " + filePath, {filePath: filePath});
 	
-	stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-		callback(err, {filePath: resp.filePath});
+	stopNodeJsScript(filePath, function nodeJsScriptKilled(err) {
+		callback(err, {filePath: filePath});
 	});
 	
 }
@@ -587,7 +587,7 @@ function stopNodeJsScript(filePath, callback) {
 	
 	console.log(user.name + " killing NodeJS script: filePath=" + filePath);
 	
-	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback();
+	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback(filePath + " is not running");
 	
 	var childProcess = user.runningNodeJsScripts[filePath];
 	
@@ -605,7 +605,7 @@ function stopNodeJsScript(filePath, callback) {
 		setTimeout(function wait() {
 			// Make sure it has exited
 			if(user.runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
-			callback();
+			callback(null);
 		}, 300);
 	}, 3000);
 	
@@ -613,7 +613,7 @@ function stopNodeJsScript(filePath, callback) {
 		// Check if it has exited
 		if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) {
 			clearTimeout(killTimeout);
-			callback();
+			callback(null);
 		}
 	}, 500);
 	
