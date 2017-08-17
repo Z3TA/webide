@@ -180,7 +180,14 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	// Use the systems ca's
 	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "/etc/ssl/certs/ca-certifacates.crt")
 	
-	// Fix permissions !?
+	// For DNS lookups to work:
+	chmodrSync(homeDir + "/etc/", "555");
+	chmodrSync(homeDir + "/run/", "444");
+	
+	// Libs need read and write (for all users)
+	chmodrSync(homeDir + "/lib/", "555");
+	chmodrSync(homeDir + "/lib64/", "555");
+	chmodrSync(homeDir + "/usr/", "555");
 	
 	
 		// Update tamplates

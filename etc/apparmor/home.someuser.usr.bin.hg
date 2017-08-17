@@ -8,6 +8,8 @@
   deny capability dac_read_search,
 
   network inet dgram,
+  network inet stream,
+  network inet6 dgram,
 
   #/dev/tty rw,
   /home/%USERNAME%/** rw,
