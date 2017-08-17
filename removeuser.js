@@ -117,7 +117,8 @@ try {
 	child_process.execSync("umount /home/" + username + "/dev/urandom").toString(ENCODING);
 }
 catch(err) {
-	if(err.message.indexOf("umount: /home/" + username + "/dev/urandom: not mounted") != -1) console.warn(err.message);
+	if(err.message.indexOf("umount: /home/" + username + "/dev/urandom: not mounted") != -1 
+	|| err.message.indexOf("umount: /home/" + username + "/dev/urandom: mountpoint not found") != -1 ) console.warn(err.message);
 	else {
 		//console.log("*" + err.message.trim() + "*");
 		throw err;
