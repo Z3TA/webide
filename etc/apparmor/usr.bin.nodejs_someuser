@@ -52,7 +52,9 @@
   /usr/lib/** r,
   /usr/share/zoneinfo/** r,
 
-  /home/%USERNAME%/usr/bin/nodejs Px -> /home/%USERNAME%/usr/bin/nodejs,
+  # P means "use profile" (and clear enviroment), x means execute
+  /home/%USERNAME%/usr/bin/hg Px,
+  /home/%USERNAME%/usr/bin/nodejs Px,
 
 }
 

@@ -27,8 +27,10 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
-python apparmor profile
+hmm, do don't actually need an apparmor profile for python!? just hg!?
 
+trying to figure out why dns lookups don't work in chroot on prod
+works if I bind /run/ ?
 
 todo
 ----

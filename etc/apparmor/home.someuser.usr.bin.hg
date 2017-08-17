@@ -1,0 +1,16 @@
+#include <tunables/global>
+
+/home/%USERNAME%/usr/bin/hg {
+  #include <abstractions/base>
+  #include <abstractions/python>
+
+  deny capability dac_override,
+  deny capability dac_read_search,
+
+  network inet dgram,
+
+  #/dev/tty rw,
+  /home/%USERNAME%/** rw,
+  /usr/bin/python2.7 ix,
+
+}
