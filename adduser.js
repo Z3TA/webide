@@ -173,6 +173,13 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		// Give the SSG-demo folder a better name
 		fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
 		
+	// Use the systems dns settings !?
+	//copyFileSync("/run/resolvconf/resolv.conf", homeDir + "/run/resolvconf/resolv.conf")
+	//copyFileSync("/etc/resolv.conf", homeDir + "/etc/resolv.conf")
+	
+	// Use the systems ca's
+	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "/etc/ssl/certs/ca-certifacates.crt")
+	
 	// Fix permissions !?
 	
 	
