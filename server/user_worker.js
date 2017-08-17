@@ -57,9 +57,17 @@ if(parseInt(process.env.uid)) {
 	var uid = parseInt(process.env.uid); // getArg(["uid", "uid"])
 	var gid = parseInt(process.env.gid); // getArg(["gid", "gid"])
 	posix.chroot('/home/' + username);
-	posix.setegid(gid);
-	posix.seteuid(uid);
+	//posix.setegid(gid);
+	//posix.seteuid(uid);
 	
+	process.setgid(gid);
+	process.setuid(uid);
+	
+	log(username + " worker process uid=" + uid + " gid=" + gid);
+	
+	if(uid === 0) log(username + " RUNNING AS ROOT!!!", WARN);
+	
+	if(process.getuid && process.getuid() === 0) throw new Error("Failed to change user! Worker process is still root! process.getuid()=" + process.getuid());
 	
 	//var chroot = require("chroot");
 	//chroot("/home/" + username + "/", username);

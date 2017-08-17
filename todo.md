@@ -29,9 +29,6 @@ What I'm working on
 
 hmm, do don't actually need an apparmor profile for python!? just hg!?
 
-When trying to clone repo: Permission denied: '/repo/test'
-after chmod 777 /home/plutt/repo/ I get abort: No module named templatekw!
-
 
 todo
 ----

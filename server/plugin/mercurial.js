@@ -123,6 +123,8 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 MERCURIAL.status = function hgstatus(user, json, callback) {
 	// show changed files in the working directory
 	
+	if(process.getuid) console.log("I am uid=" + process.getuid());
+	
 	var directory = UTIL.trailingSlash(json.directory);
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
