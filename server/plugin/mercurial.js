@@ -32,6 +32,11 @@ var CORE = require("../server_api.js");
 
 var MERCURIAL = {};
 
+var execFileOptions = {
+	env: {
+		HOME: "/"
+	}
+}
 
 MERCURIAL.clone = function hgclone(user, json, callback) {
 	// Clone a remote repository
@@ -51,16 +56,16 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	
 	localPath = UTIL.trailingSlash(localPath);
 	
-	var config = " --config auth.x.prefix=* --config auth.x.username=" + hguser + " --config auth.x.password=" + pw;
+	var config = ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw];
 	
-	console.log("process.env.PATH=" + process.env.PATH);
+	//console.log("process.env.PATH=" + process.env.PATH);
 	
 	/*
 		Using cwd in Linux will result in Error: spawn /bin/sh ENOENT !
 	*/
 	
-	var exec = require('child_process').exec;
-	exec("hg clone " + remote + " " + localPath + config, function (err, stdout, stderr) {
+	var execFile = require('child_process').execFile;
+	execFile("hg", ["clone", remote, localPath].concat(config), execFileOptions, function (err, stdout, stderr) {
 		
 		console.log("hg clone stderr=" + stderr);
 		console.log("hg clone stdout=" + stdout);
@@ -128,14 +133,14 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	localDirectory = UTIL.trailingSlash(localDirectory);
 	
-	var exec = require('child_process').exec;
+	var execFile = require('child_process').execFile;
 	
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory, virtualRootDir) {
 		
 		if(err) return callback(err);
 		
-		exec("hg status", { cwd: localDirectory }, function (err, stdout, stderr) {
+		execFile("hg", [" status"], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg status stderr=" + stderr);
 			console.log("hg status stdout=" + stdout);

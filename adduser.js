@@ -231,8 +231,20 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 	//if(reloadApparmor != "") throw reloadApparmor;
 	
+	var nodeJsVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
+	console.log(nodeJsVersion);
+	copyProgram("nodejs", homeDir)
 	
-	copyNodejs(homeDir);
+	var pythonVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
+	console.log(pythonVersion);
+	copyProgram("python", homeDir)
+	
+	// Copy the python libs
+	copyFolderRecursiveSync("/usr/lib/python2.7/", "/home/" + username + "/usr/lib/python2.7/");
+	
+	// Copy mercurial
+	copyFileSync("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
+	
 	
 	// Nodejs needs /dev/urandom and /dev/null to start
 	fs.mkdirSync(homeDir + "/dev");
@@ -262,30 +274,33 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 	});
 
-function copyNodejs(homeDir) {
+function copyProgram(program, homeDir) {
+	/*
+		Copy a program so it can be spawned from chroot
+		Asume the program is located in /usr/bin/
+	*/
 	
-	// Copy the nodejs binary so it can be spawned from chroot
 	try {
 	fs.mkdirSync(homeDir + "/usr");
 	fs.mkdirSync(homeDir + "/usr/bin");
-	copyFileSync("/usr/bin/nodejs", homeDir + "/usr/bin/nodejs");
+		copyFileSync("/usr/bin/" + program, homeDir + "/usr/bin/" + program);
 	}
 	catch(err) {
 		if(err.code != "EEXIST") throw err;
 	}
 	
-	fs.chmodSync(homeDir + "/usr/bin/nodejs", "555");
+	fs.chmodSync(homeDir + "/usr/bin/" + program, "555");
 	
-	// Copy dependencies that nodejs needs
-	var nodejsDeps = child_process.execSync("ldd " + homeDir + "/usr/bin/nodejs").toString(ENCODING);
-	nodejsDeps = nodejsDeps.split(/\n|\r\n/);
+	// Copy dependencies that the program needs
+	var deps = child_process.execSync("ldd " + homeDir + "/usr/bin/" + program).toString(ENCODING);
+	deps = deps.split(/\n|\r\n/);
 	var foldersCreated = [];
-	for (var i=0, folders, dir, link; i<nodejsDeps.length; i++) {
-		//console.log(i + ") " + nodejsDeps[i] + "");
-		nodejsDeps[i] = nodejsDeps[i].substring(nodejsDeps[i].indexOf("=>") + 2, nodejsDeps[i].indexOf("(")-1).trim();
-		//console.log(i + ") *" + nodejsDeps[i] + "*");
-		if(nodejsDeps[i] == "") continue;
-		folders = nodejsDeps[i].split("/");
+	for (var i=0, folders, dir, link; i<deps.length; i++) {
+		//console.log(i + ") " + deps[i] + "");
+		deps[i] = deps[i].substring(deps[i].indexOf("=>") + 2, deps[i].indexOf("(")-1).trim();
+		//console.log(i + ") *" + deps[i] + "*");
+		if(deps[i] == "") continue;
+		folders = deps[i].split("/");
 		dir = homeDir;
 		for (var j=1; j<folders.length-1; j++) {
 			dir = dir + "/" + folders[j];
@@ -300,13 +315,13 @@ function copyNodejs(homeDir) {
 			}
 		}
 		// The link to the dep can also be a link itself, so check (recursively) until we find the file
-		link = linksTo(nodejsDeps[i]);
+		link = linksTo(deps[i]);
 		if(link != null) {
 			//console.log("Adding link=" + link);
-			nodejsDeps.push(nodejsDeps[i] + " => " + link + " ()");
+			deps.push(deps[i] + " => " + link + " ()");
 		}
-		console.log("Copying " + nodejsDeps[i]);
-		copyFileSync(nodejsDeps[i], homeDir + nodejsDeps[i]);
+		console.log("Copying " + deps[i]);
+		copyFileSync(deps[i], homeDir + deps[i]);
 		}
 	for (var i=0; i<foldersCreated.length; i++) {
 		chmodrSync(foldersCreated[i], "555"); // lib files needs read and execute permission!
