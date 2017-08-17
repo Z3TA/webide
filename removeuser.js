@@ -97,6 +97,9 @@ catch(err) {
 	else throw err;
 }
 
+//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
+//if(reloadApparmor != "") throw reloadApparmor;
+
 
 // Unlink nodejs hard link
 var userNodejs = "/usr/bin/nodejs_" + username;

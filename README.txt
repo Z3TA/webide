@@ -120,6 +120,32 @@ It's also possible to host the cloud editor on Windows, but then all users need 
 
 
 
+Apparmor debugging
+------------------
+sudo service apparmor reload
+
+# Add missing rules in profile:
+sudo aa-genprof /usr/bin/nodejs_test123
+
+# Sometimes aa-genprof doesn't find everyting
+sudo aa-logprof
+
+# See what's going on:
+tail -f /var/log/kern.log
+
+# example problem: profile transition not found
+
+# is the profile active ?
+sudo apparmor_status | grep nodejs
+
+# does it exist ?
+ls /etc/apparmor.d/ | grep nodejs
+
+# is it disabled ?
+ls /etc/apparmor.d/disable/
+
+
+
 
 
 Compiling dependencies for old nw.js

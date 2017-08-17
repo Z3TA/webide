@@ -15,6 +15,8 @@
 	sudo userdel -r -f nameOfUser
 	sudo nano server/users.pw
 	
+	Gotcha: apparmor can be slooow to update profiles
+	
 */
 
 var fs = require("fs");
@@ -224,7 +226,10 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
-	// sudo aa-genprof /usr/bin/nodejs_test123
+	// See how to debug apparmor in README.txt
+	
+	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
+	//if(reloadApparmor != "") throw reloadApparmor;
 	
 	
 	copyNodejs(homeDir);
@@ -253,6 +258,8 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
+	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
+	
 	});
 
 function copyNodejs(homeDir) {

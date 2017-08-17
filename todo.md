@@ -27,6 +27,7 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+
 adding python to chroot (so that we can run mercurial)
 
 
@@ -36,8 +37,6 @@ todo
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
 
 Find out why jzedit service didn't start after producton server reboot.
-
-Figure out why http_server_example.js wont run in dev, but does run in prod !?
 
 Make server run under apparmor profile ...
 Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)

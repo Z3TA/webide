@@ -32,7 +32,7 @@
 
   /dev/null r,
   /dev/urandom r,
-  #/dev/tty rw,
+  /dev/tty rw,
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,
