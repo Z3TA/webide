@@ -50,6 +50,10 @@ hmm, should I just have these files in user skeleton !?
 todo
 ----
 
+refactor mercurial server plugin to use execFile instead of exec
+add needed files to chroot for mercurial to work in adduser or user skeleton !? 
+make an apparmor profile and make mercurial work under apparmor
+
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
 
 Find out why jzedit service didn't start after producton server reboot.
