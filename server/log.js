@@ -94,7 +94,6 @@ function log(msg, lvl, noTrace) {
 			var colorReset = "\x1b[0m"
 			var colorBlink = "\x1b[5m";
 			var colorUnderscore = "\x1b[4m";
-			
 
 			var msgString = "";
 
@@ -103,7 +102,7 @@ function log(msg, lvl, noTrace) {
 
 				if(lvl <= 6) msgString += colorReset;
 
-				if(lvl == _warning) msgString += colorBlink + colorUnderscore;
+				if(lvl == _warning) msgString += colorUnderscore;
 				//else if(lvl == _notice) msgString += colorUnderscore;
 
 				msgString += msg + " " + colorDim + where;
