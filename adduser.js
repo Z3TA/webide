@@ -161,9 +161,16 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 	
 		
-		// Add skeleton files
-		copyFolderRecursiveSync("etc/userdir_skeleton/", homeDir);
-		
+		// Add skeleton files (the folder will be copied)
+	copyFolderRecursiveSync("etc/userdir_skeleton/bin", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
+	
 		// Give the SSG-demo folder a better name
 		fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
 		
