@@ -79,70 +79,26 @@ catch(err) {
 }
 
 // Remove apparmor profiles
-var apparmorProfile = "/etc/apparmor.d/usr.bin.nodejs_" + username;
-try {
-	fs.unlinkSync(apparmorProfile);
-	}
-catch(err) {
-	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
-	else throw err;
-}
+unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
+unlink("/etc/apparmor.d/home." + username + ".usr.bin.nodejs");
+unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
+unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
 
-var apparmorProfile = "/etc/apparmor.d/home." + username + ".usr.bin.nodejs";
-try {
-	fs.unlinkSync(apparmorProfile);
-}
-catch(err) {
-	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
-	else throw err;
-}
-
-var apparmorProfile = "/etc/apparmor.d/home." + username + ".usr.bin.python";
-try {
-	fs.unlinkSync(apparmorProfile);
-}
-catch(err) {
-	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
-	else throw err;
-}
-
-var apparmorProfile = "/etc/apparmor.d/home." + username + ".usr.bin.hg";
-try {
-	fs.unlinkSync(apparmorProfile);
-}
-catch(err) {
-	if(err.code == "ENOENT") console.warn("Did not find apparmorProfile=" + apparmorProfile);
-	else throw err;
-}
 
 //var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 //if(reloadApparmor != "") throw reloadApparmor;
 
 
-// Unlink nodejs hard link
-var userNodejs = "/usr/bin/nodejs_" + username;
-try {
-	fs.unlinkSync(userNodejs);
-}
-catch(err) {
-	if(err.code == "ENOENT") console.warn("Did not find userNodejs=" + userNodejs);
-	else throw err;
-}
+unlink("/usr/bin/nodejs_" + username);
 
 
-// Unmount dev/urandom
-try {
-	child_process.execSync("umount /home/" + username + "/dev/urandom").toString(ENCODING);
-}
-catch(err) {
-	if(err.message.indexOf("umount: /home/" + username + "/dev/urandom: not mounted") != -1 
-	|| err.message.indexOf("umount: /home/" + username + "/dev/urandom: mountpoint not found") != -1 ) console.warn(err.message);
-	else {
-		//console.log("*" + err.message.trim() + "*");
-		throw err;
-	}
-}
-
+umount("/home/" + username + "/dev/urandom");
+umount("/home/" + username + "/lib");
+umount("/home/" + username + "/lib64");
+umount("/home/" + username + "/usr/lib");
+umount("/home/" + username + "/usr/bin/hg");
+umount("/home/" + username + "/usr/bin/python");
+umount("/home/" + username + "/usr/bin/nodejs");
 
 child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
@@ -156,4 +112,30 @@ child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout
 	console.log("User " + username + " deleted!");
 	
 });
+
+function unlink(path) {
+	var fs = require("fs");
+	try {
+		fs.unlinkSync(path);
+	}
+	catch(err) {
+		if(err.code == "ENOENT") console.warn("Did not find path=" + path);
+		else throw err;
+	}
+}
+
+function umount(path) {
+	var child_process = require("child_process");
+	try {
+		child_process.execSync("umount " + path).toString(ENCODING);
+	}
+	catch(err) {
+		if(err.message.indexOf("umount: " + path + ": not mounted") != -1
+		|| err.message.indexOf("umount: " + path + ": mountpoint not found") != -1 ) console.warn(err.message);
+		else {
+			//console.log("*" + err.message.trim() + "*");
+			throw err;
+		}
+	}
+}
 

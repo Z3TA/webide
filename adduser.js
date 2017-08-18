@@ -163,12 +163,12 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		
 		// Add skeleton files (the folder will be copied)
 	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
+	//copyFolderRecursiveSync("etc/userdir_skeleton/lib", homeDir);
+	//copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
+	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 	
 		// Give the SSG-demo folder a better name
 		fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
@@ -180,14 +180,19 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	// Use the systems ca's
 	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "/etc/ssl/certs/ca-certifacates.crt")
 	
+	// The user owns his files
+	chownrSync(homeDir, uid, gid);
+	
+	// Make it so that no one else beside the user can read the user files
+	chmodrSync(homeDir, "750");
+	
+	// home dir needs to have execute permissions for everyone for the unix sockets to work !!!?
+	fs.chmodSync(homeDir, "751");
+	
 	// For DNS lookups to work !?
 	chmodrSync(homeDir + "/etc/", "555");
 	chmodrSync(homeDir + "/run/", "444");
 	
-	// Libs need read and write (for all users !?)
-	chmodrSync(homeDir + "/lib/", "555");
-	chmodrSync(homeDir + "/lib64/", "555");
-	chmodrSync(homeDir + "/usr/", "555");
 	
 	
 		// Update tamplates
@@ -203,11 +208,8 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		fs.mkdirSync(homeDir + "/wwwpub");
 		fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
 		
-		chownrSync(homeDir, uid, gid);
 		
-		// Make it so that no one else beside the user can read the user files
-		chmodrSync(homeDir, "751");
-		// home dir needs to have execute permissions for everyone for the unix socket to work !!!?
+		
 		
 		// Make wwwpub public
 		chmodrSync(homeDir + "/wwwpub", "755");
@@ -219,7 +221,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		// Make sure www-data can read and write to unix socket
 		// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
 		var wwwgid = getGroupId("www-data");
-		chownrSync(homeDir + "/sock", uid, wwwgid);
+		chownrDirSync(homeDir + "/sock", uid, wwwgid);
 		// note: Each process needs to set umask to give write permission to the group!
 		
 		
@@ -262,19 +264,40 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	// Nodejs needs /dev/urandom and /dev/null to start
 	fs.mkdirSync(homeDir + "/dev");
 	
-	var makdeUrandom = child_process.execSync("mknod -m 444 /home/" + username + "/dev/urandom c 1 9").toString(ENCODING);
-	if(makdeUrandom.trim() != "") throw makdeUrandom;
+	//var makdeUrandom = child_process.execSync("mknod -m 444 /home/" + username + "/dev/urandom c 1 9").toString(ENCODING);
+	//if(makdeUrandom.trim() != "") throw makdeUrandom;
 	
 	var makeNull = child_process.execSync("mknod -m 444 /home/" + username + "/dev/null c 1 3").toString(ENCODING);
 	if(makeNull.trim() != "") throw makeNull;
 	
 	// On some system we need to mount --bind urandom !??
-	var mountUrandom = child_process.execSync("mount --bind /dev/urandom /home/" + username + "/dev/urandom").toString(ENCODING).trim();
-	if(mountUrandom != "") throw mountUrandom;
+	mount("/dev/urandom", "/home/" + username + "/dev/urandom");
+	
+	fs.mkdirSync("/home/" + username + "/usr/");
+	fs.mkdirSync("/home/" + username + "/usr/bin/");
+	
+	fs.chmodSync("/home/" + username + "/usr/", "555");
+	fs.chmodSync("/home/" + username + "/usr/bin/", "555");
+	
+	
+	// Mount these instead of copying to save hd space
+	mount("/lib/", "/home/" + username + "/lib");
+	mount("/lib64/", "/home/" + username + "/lib64");
+	mount("/usr/lib/", "/home/" + username + "/usr/lib");
+	mount("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
+	mount("/usr/bin/python", "/home/" + username + "/usr/bin/python");
+	mount("/usr/bin/nodejs", "/home/" + username + "/usr/bin/nodejs");
+	
 	
 	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it
 	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
 	
+	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
+	
+	/*
 	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
 	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
@@ -302,12 +325,48 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.hg", apparmorProfile);
 	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/hg").toString(ENCODING).trim();
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+	*/
 	
-		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
+	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
 	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
 	
 	});
+
+function createApparmorProfile(template, username) {
+	/*
+		ex: "./etc/apparmor/usr.bin.nodejs_someuser"
+	*/
+	
+	var apparmorProfile = fs.readFileSync(template, ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
+	
+	var dest = template.replace("someuser", username);
+	dest = dest.replace("./etc/apparmor/", "/etc/apparmor.d/");
+	fs.writeFileSync(dest, apparmorProfile);
+	
+	var bin = dest.replace("/etc/apparmor.d", "");
+	bin = dest.replace(".", "/");
+	
+	//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
+	//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+}
+
+function mount(source, target) {
+	var fs = require("fs");
+	
+	if ( fs.lstatSync( source ).isDirectory() ) {
+		fs.mkdirSync(target);
+	} else {
+		if ( fs.existsSync( target ) ) throw new Error("File aready exist: " + target); // Prevent overwriting
+		fs.closeSync(fs.openSync(target, 'w'));
+	}
+	
+	var mountResult = child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();
+	if(mountResult != "") throw mountResult;
+	
+}
 
 function copyProgram(program, homeDir) {
 	/*
@@ -462,7 +521,7 @@ function chmodrSync (p, mode) {
 	var stats = fs.lstatSync(p)
 	if (stats.isSymbolicLink()) return;
 	if (stats.isDirectory()) return chmodrDirSync(p, mode);
-	else return fs.chmodSync(p, mode)
+	else return fs.chmodSync(p, mode);
 }
 
 function chmodrDirSync (p, mode) {
