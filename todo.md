@@ -33,8 +33,6 @@ hmm, do don't actually need an apparmor profile for python!? just hg!?
 todo
 ----
 
-make an apparmor profile and make mercurial work under apparmor
-
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
 
 Find out why jzedit service didn't start after producton server reboot.
