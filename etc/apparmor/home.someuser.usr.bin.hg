@@ -13,6 +13,6 @@
 
   #/dev/tty rw,
   /home/%USERNAME%/** rw,
-  /usr/bin/python2.7 ix,
+  #/usr/bin/python2.7 ix,
 
 }

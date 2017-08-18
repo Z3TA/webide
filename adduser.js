@@ -180,11 +180,11 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	// Use the systems ca's
 	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "/etc/ssl/certs/ca-certifacates.crt")
 	
-	// For DNS lookups to work:
+	// For DNS lookups to work !?
 	chmodrSync(homeDir + "/etc/", "555");
 	chmodrSync(homeDir + "/run/", "444");
 	
-	// Libs need read and write (for all users)
+	// Libs need read and write (for all users !?)
 	chmodrSync(homeDir + "/lib/", "555");
 	chmodrSync(homeDir + "/lib64/", "555");
 	chmodrSync(homeDir + "/usr/", "555");
@@ -294,6 +294,13 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
 	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.python", apparmorProfile);
 	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/python").toString(ENCODING).trim();
+	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+	
+	// Create and activate apparmor profile for the user's hg executable
+	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.hg", ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.hg", apparmorProfile);
+	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/hg").toString(ENCODING).trim();
 	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 	
 		console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);

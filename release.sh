@@ -56,10 +56,10 @@ sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux
 
 
 echo "Make a Windows release"
-cp -rf temp/release/linux/. temp/release/windows/
+#cp -rf temp/release/linux/. temp/release/windows/
 
 echo "Make a OSX release"
-cp -rf temp/release/linux/. temp/release/osx/
+#cp -rf temp/release/linux/. temp/release/osx/
 
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
