@@ -29,9 +29,6 @@ What I'm working on
 
 hmm, do don't actually need an apparmor profile for python!? just hg!?
 
-100+ MB is a bit heavy for making copies for each user. We'll use mount --bind instead.
-Hide /usr/ /etc/ /lib/ /lib64/ /run/ when listing files
-
 note to self: it seems we can exec and have scripts as apparmor profiles!
 
 todo
