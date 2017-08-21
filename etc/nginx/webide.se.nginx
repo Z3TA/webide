@@ -47,7 +47,7 @@ server {
   location @badgateway {
     add_header Access-Control-Allow-Origin * always;
     default_type text/plain;
-    return 502 "Editor not online ... Dispatching code monkeys ...\n";
+    return 502 "Editor not online ... Wait a few seconds and then refresh the browser.\n";
   }
   
   error_page 502 @badgateway;
