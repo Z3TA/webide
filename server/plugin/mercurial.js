@@ -344,12 +344,11 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 		if(fileString instanceof Error) return callback(fileString);
 		
 		var execFile = require('child_process').execFile;
-		execFile('hg' ['commit', '-m "' + message + '"', fileString], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name, fileString], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
-			console.log("hg commit stderr=" + stderr);
-			console.log("hg commit stdout=" + stdout);
+			console.log("hg commit uid=" + process.getuid() + " gid=" + process.getgid() + " fileString=" + fileString + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
-			if(stdout.trim() == "nothing changed") return callback("Nothing has been changed! Did you forget to add files ?");
+			if(stdout.match(/nothing changed/) != null) return callback("Nothing has been changed! Did you forget to add files ?");
 			
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
@@ -1095,22 +1094,26 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 function makeFileString(user, files, directory, rootDir) {
 	// Returns a string of files for passing into a hg command
 	
+	console.log("makeFileString: files=" + JSON.stringify(files) + " directory=" + directory + " rootDir=" + rootDir + " user.rootPath=" + user.rootPath);
+	
 	if(arguments.length != 4) throw new Error("Only got " + arguments.length + "/4 arguments! user=" + user + " files=" + files + " directory=" + directory + " rootDir=" + rootDir);
 	if(files == undefined) throw new Error("files=" + files);
 	if(Object.prototype.toString.call( files ) != "[object Array]") throw new Error("Should be an array: files=" + files);
 	if(directory == undefined) throw new Error("directory=" + directory);
 	if(rootDir == undefined) throw new Error("rootDir=" + rootDir);
 	
-	
 	var fileString = "";
 	for(var i=0, localPath; i<files.length; i++) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return localPath;
 		if(localPath.indexOf(rootDir) == -1) return new Error("File not in local repository!\nFile:" + files[i] + "Not in: " + rootDir);
-		fileString += ' "' + localPath + '"';
+		
+		//if(user.rootPath) fileString += ' "' + localPath + '"';
+		fileString += ' ' + localPath + '';
+		//fileString += " '" + localPath + "'";
 	}
 	
-	return fileString;
+	return fileString.trim();
 }
 
 
@@ -1187,6 +1190,7 @@ function checkDir(user, virtualPath, callback) {
 	
 	var execFile = require('child_process').execFile;
 	execFile("hg", ["root"], { cwd: localDirectory, env: execFileOptions.env }, function hgroot(err, stdout, stderr) {
+		console.log("hg root (error=" + (!!err) + ") localDirectory=" + localDirectory);
 		console.log("hg root stderr=" + stderr);
 		console.log("hg root stdout=" + stdout);
 		

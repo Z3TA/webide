@@ -120,7 +120,7 @@ user.identify = function identify(info) {
 	}
 	
 	if(USE_CHROOT) {
-		user.rootPath = "/";
+		user.rootPath = null;
 		user.defaultWorkingDirectory = "/";
 	}
 	
