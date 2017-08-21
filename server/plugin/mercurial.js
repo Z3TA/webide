@@ -341,13 +341,13 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 		
 		//var fileString = makeFileString(user, files, directory, rootDir);
 		
-		var check = filesCheck(files);
-		if(check instanceof Error) return callback(check);
+		// Todo: check the path of each file
+		
 		
 		var execFile = require('child_process').execFile;
 		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
-			console.log("hg commit uid=" + process.getuid() + " gid=" + process.getgid() + " fileString=" + fileString + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
+			console.log("hg commit uid=" + process.getuid() + " gid=" + process.getgid() + " files=" + JSON.stringify(files) + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
 			if(stdout.match(/nothing changed/) != null) return callback("Nothing has been changed! Did you forget to add files ?");
 			
