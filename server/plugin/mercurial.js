@@ -341,9 +341,9 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 		
 		//var fileString = makeFileString(user, files, directory, rootDir);
 		
-		// Todo: check the path of each file
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
 		
-		// 5
 		var execFile = require('child_process').execFile;
 		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
@@ -1117,8 +1117,25 @@ function makeFileString(user, files, directory, rootDir) {
 	return fileString.trim();
 }
 
-function filesCheck(files) {
-	return true;
+function checkPaths(user, files, directory, rootDir) {
+	
+	console.log("checkPaths: files=" + JSON.stringify(files) + " directory=" + directory + " rootDir=" + rootDir + " user.rootPath=" + user.rootPath);
+	
+	if(arguments.length != 4) throw new Error("Only got " + arguments.length + "/4 arguments! user=" + user + " files=" + files + " directory=" + directory + " rootDir=" + rootDir);
+	if(files == undefined) throw new Error("files=" + files);
+	if(Object.prototype.toString.call( files ) != "[object Array]") throw new Error("Should be an array: files=" + files);
+	if(directory == undefined) throw new Error("directory=" + directory);
+	if(rootDir == undefined) throw new Error("rootDir=" + rootDir);
+	
+	for (var i=0, localPath; i<files.length; i++) {
+		localPath = user.translatePath(directory + files[i]);
+		if(localPath instanceof Error) return localPath;
+		if(localPath.indexOf(rootDir) == -1) return new Error("File not in local repository!\nFile:" + files[i] + "Not in: " + rootDir);
+		files[i] = localPath;
+	}
+	
+	return files;
+	
 }
 
 function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
