@@ -142,10 +142,9 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		if(err) return callback(err);
 		
-		execFile("hg", ["status", localDirectory], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["status", rootDir], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
-			console.log("hg status stderr=" + stderr);
-			console.log("hg status stdout=" + stdout);
+			console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
@@ -1206,9 +1205,7 @@ function checkDir(user, virtualPath, callback) {
 	
 	var execFile = require('child_process').execFile;
 	execFile("hg", ["root"], { cwd: localDirectory, env: execFileOptions.env }, function hgroot(err, stdout, stderr) {
-		console.log("hg root (error=" + (!!err) + ") localDirectory=" + localDirectory);
-		console.log("hg root stderr=" + stderr);
-		console.log("hg root stdout=" + stdout);
+		console.log("hg root (error=" + (!!err) + ") localDirectory=" + localDirectory + " stderr=" + stderr + " stdout=" + stdout);
 		
 		if(err) {
 			console.log("hg root failed! " + err.message);
@@ -1219,11 +1216,13 @@ function checkDir(user, virtualPath, callback) {
 			
 			var mercurialRoot = stdout.trim();
 			
-			if(mercurialRoot == "") mercurialRoot = localDirectory;
+			console.log("mercurialRoot=" + UTIL.lbChars(mercurialRoot));
+			
+			//if(mercurialRoot == "") mercurialRoot = localDirectory;
+			
+			if(mercurialRoot == "") throw new Error("mercurialRoot=" + mercurialRoot + " virtualPath=" + virtualPath + " localDirectory=" + localDirectory + "  ");
 			
 			mercurialRoot = UTIL.trailingSlash(mercurialRoot);
-			
-			if(!mercurialRoot) throw new Error("mercurialRoot=" + mercurialRoot);
 			
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
