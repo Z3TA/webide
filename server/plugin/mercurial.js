@@ -142,7 +142,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		if(err) return callback(err);
 		
-		execFile("hg", ["status", rootDir], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["status"], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
