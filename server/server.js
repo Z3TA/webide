@@ -122,7 +122,7 @@ function main() {
 	
 	// Get the current user (who runs this server)
 	var os = require("os");
-	var info = os.userInfo ? os.userInfo() : {username: "ROOT"};
+	var info = os.userInfo ? os.userInfo() : {username: "ROOT", uid: process.geteuid()};
 	var env = process.env;
 	
 	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
@@ -131,7 +131,11 @@ function main() {
 	
 	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
 	
-	
+	if(info.uid !== 0 && !USERNAME && USE_CHROOT) {
+		log("You need to start the server with a previleged user (using sudo) or root account.", 5);
+		log(info);
+		process.exit();
+	}
 	
 	
 	
