@@ -140,13 +140,10 @@ function umount(path, ignoreErrors) {
 	}
 	catch(err) {
 		if(!ignoreErrors) {
-		if(err.message.indexOf("umount: " + path + ": not mounted") != -1
-		|| err.message.indexOf("umount: " + path + ": mountpoint not found") != -1 ) console.warn(err.message);
-		else {
-			//console.log("*" + err.message.trim() + "*");
-			throw err;
+			if(err.message.indexOf("umount: " + path + ": not mounted") == -1
+			&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1 ) throw err;
+			// stderr message are already shown in the shell, no need to repeat them
 		}
-	}
 	}
 }
 
