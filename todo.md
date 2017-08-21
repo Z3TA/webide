@@ -52,13 +52,9 @@ ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
 
-
-Figure out how to spawn mercurial inside chroot
-
 make server tests cleanup after themselves
 
 tests for mercurial integration.
-check for mercurial integration regression (due to chroot)
 
 Some sort of dashboard for when you first open the webIDE. So that you are not compleatly lost ...
 Each plugin can add stuff to the dashboard, so that clickin on stuff in the dashboard can interact with the plugin
@@ -85,8 +81,6 @@ Hot-reload (live preview) scripts and css style sheets in the SSG when in previe
 When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
 When saving a .css file belonging to the SSG, reload it in the preview! 
 
-Prevent user_worker.js crash endless loop!
-
 Double clicking the file in commit file selection should open it.
 
 Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
@@ -96,8 +90,6 @@ Make spellchecker work on server-side and use node_modules instead of compiled f
 write a blog post!
 
 Unload/load all plugins when loggin in as a different users, or on a different server
-
-stop user from trying to open urandom !?
 
 
 * Fix bugs!
