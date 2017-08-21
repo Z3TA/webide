@@ -217,11 +217,11 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-		var fileString = makeFileString(user, files, directory, rootDir);
-		if(fileString instanceof Error) return callback(fileString);
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["add", fileString], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["add"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
 			else {
@@ -246,11 +246,11 @@ MERCURIAL.forget = function hgforget(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-		var fileString = makeFileString(user, files, directory, rootDir);
-		if(fileString instanceof Error) return callback(fileString);
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["forget", fileString], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["forget"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			if(err) callback(err);
 			else if(stderr) callback(stderr);
 			else {
@@ -275,11 +275,11 @@ MERCURIAL.remove = function hgremove(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-		var fileString = makeFileString(user, files, directory, rootDir);
-		if(fileString instanceof Error) return callback(fileString);
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["remove", "--force", fileString], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["remove", "--force"].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg remove stderr=" + stderr);
 			console.log("hg remove stdout=" + stdout);
@@ -338,8 +338,6 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
-		
-		//var fileString = makeFileString(user, files, directory, rootDir);
 		
 		files = checkPaths(user, files, directory, rootDir);
 		if(files instanceof Error) return callback(files);
@@ -954,12 +952,11 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 			files = [json.file];
 		}
 		
-		var fileString = makeFileString(user, files, directory, rootDir);
-		
-		if(fileString instanceof Error) return callback(fileString);
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["resolve", "--mark", fileString], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["resolve", "--mark"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg resolve --mark stderr=" + stderr);
 			console.log("hg resolve --mark stdout=" + stdout);
@@ -998,12 +995,11 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 			files = [json.file];
 		}
 		
-		var fileString = makeFileString(user, files, directory, rootDir);
-		
-		if(fileString instanceof Error) return callback(fileString);
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg", ["resolve", "--unmark", fileString], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["resolve", "--unmark"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg resolve --unmark stderr=" + stderr);
 			console.log("hg resolve --unmark stdout=" + stdout);
@@ -1093,8 +1089,10 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 }
 
 function makeFileString(user, files, directory, rootDir) {
-	// Returns a string of files for passing into a hg command
-	
+	/*
+		NOT USED because execFile needs to pass each file as it's own argument, not a string of all files
+		*/
+		
 	console.log("makeFileString: files=" + JSON.stringify(files) + " directory=" + directory + " rootDir=" + rootDir + " user.rootPath=" + user.rootPath);
 	
 	if(arguments.length != 4) throw new Error("Only got " + arguments.length + "/4 arguments! user=" + user + " files=" + files + " directory=" + directory + " rootDir=" + rootDir);
@@ -1108,10 +1106,7 @@ function makeFileString(user, files, directory, rootDir) {
 		localPath = user.translatePath(directory + files[i]);
 		if(localPath instanceof Error) return localPath;
 		if(localPath.indexOf(rootDir) == -1) return new Error("File not in local repository!\nFile:" + files[i] + "Not in: " + rootDir);
-		
-		//if(user.rootPath) fileString += ' "' + localPath + '"';
-		fileString += ' ' + localPath + '';
-		//fileString += " '" + localPath + "'";
+		fileString += ' "' + localPath + '"';
 	}
 	
 	return fileString.trim();
