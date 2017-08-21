@@ -343,7 +343,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 		
 		// Todo: check the path of each file
 		
-		
+		// 5
 		var execFile = require('child_process').execFile;
 		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
