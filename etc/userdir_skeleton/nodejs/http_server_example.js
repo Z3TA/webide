@@ -1,15 +1,17 @@
 /*
-	Boilerplate code to get a http server runnning
-	Can for example be used to create a REST API
+	Boilerplate code to get a http server runnning.
+	Can for example be used to create a REST API.
+	
+	Press F1 to run this Node.JS program
+	Then press F3 (or close the editor) to stop it.
 	
 	All HTTP requests (including Websockets) starting with _ (underscore) will be proxied
-	to the corresponding unix socket in your /sock/ folder. See example below ...
-	
+	to the corresponding unix socket in your /sock/ folder.
 */
 
 var unixSocket = "/sock/_http_server_example";
 	
-// We need the group (www-data) to have write access for the unix socket to work
+// We need the group (www-data) to have write access to the unix socket
 	var newMask = parseInt("0007", 8); // four digits, last three mask, ex: 0o027 => 750 file permissions
 	var oldMask = process.umask(newMask);
 	console.log("Changed umask from " + oldMask.toString(8) + " to " + newMask.toString(8));

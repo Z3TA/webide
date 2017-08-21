@@ -1,4 +1,4 @@
 
-// Press F1 to run in the webide
+// Press F1 to run this Node.JS program
 
 console.log("Hello World!");
