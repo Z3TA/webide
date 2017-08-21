@@ -92,58 +92,60 @@ unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
 unlink("/usr/bin/nodejs_" + username);
 
 // We don't want to accidently mess with any of these, so just in case we are doing some debugging
-umount("/home/" + username + "/dev/", true);
-umount("/home/" + username + "/lib/", true);
-umount("/home/" + username + "/lib64/", true);
-umount("/home/" + username + "/usr/", true);
-umount("/home/" + username + "/etc/", true);
-umount("/home/" + username + "/run/", true);
+/*
+	umount("/home/" + username + "/dev/", true);
+	umount("/home/" + username + "/lib/", true);
+	umount("/home/" + username + "/lib64/", true);
+	umount("/home/" + username + "/usr/", true);
+	umount("/home/" + username + "/etc/", true);
+	umount("/home/" + username + "/run/", true);
+*/
 
-
-umount("/home/" + username + "/dev/urandom");
-umount("/home/" + username + "/lib");
-umount("/home/" + username + "/lib64");
-umount("/home/" + username + "/usr/lib");
-umount("/home/" + username + "/usr/bin/hg");
-umount("/home/" + username + "/usr/bin/python");
-umount("/home/" + username + "/usr/bin/nodejs");
-
-
-child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
+	umount("/home/" + username + "/dev/urandom");
+	umount("/home/" + username + "/lib");
+	umount("/home/" + username + "/lib64");
+	umount("/home/" + username + "/usr/lib");
+	umount("/home/" + username + "/usr/bin/hg");
+	umount("/home/" + username + "/usr/bin/python");
+	umount("/home/" + username + "/usr/bin/nodejs");
+	
+	
+	child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
 	
 	var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
 	
 	if(stderr) {
-		if(stderr.trim() != mailspool) throw new Error(stderr);
-		}
+	if(stderr.trim() != mailspool) throw new Error(stderr);
+	}
 	
 	console.log("User " + username + " deleted!");
 	
-});
-
-function unlink(path) {
+	});
+	
+	function unlink(path) {
 	var fs = require("fs");
 	try {
-		fs.unlinkSync(path);
+	fs.unlinkSync(path);
 	}
 	catch(err) {
-		if(err.code == "ENOENT") console.warn("Did not find path=" + path);
-		else throw err;
+	if(err.code == "ENOENT") console.warn("Did not find path=" + path);
+	else throw err;
 	}
-}
-
-function umount(path, ignoreErrors) {
+	}
+	
+	function umount(path, ignoreErrors) {
 	var child_process = require("child_process");
 	try {
-		child_process.execSync("umount " + path).toString(ENCODING);
+	child_process.execSync("umount " + path).toString(ENCODING);
 	}
 	catch(err) {
-		if(!ignoreErrors) {
-			if(err.message.indexOf("umount: " + path + ": not mounted") == -1
-			&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1 ) throw err;
-			// stderr message are already shown in the shell, no need to repeat them
-		}
+	if(!ignoreErrors) {
+	if(err.message.indexOf("umount: " + path + ": not mounted") == -1
+	&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1 ) throw err;
+	// stderr message are already shown in the shell, no need to repeat them
 	}
-}
-
+	}
+	}
+	
+	
