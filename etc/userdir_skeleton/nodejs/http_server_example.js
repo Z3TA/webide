@@ -2,14 +2,12 @@
 	Boilerplate code to get a http server runnning
 	Can for example be used to create a REST API
 	
-	We are behind a proxy server on port 80 that will send us all requests to _http#
-	Where _http# can be any number - allowing many http "Micro Services" running at once
+	All HTTP requests (including Websockets) starting with _ (underscore) will be proxied
+	to the corresponding unix socket in your /sock/ folder. See example below ...
 	
 */
 
-
-var serviceId = 1; // Increment for each http service you create
-var unixSocket = "/sock/_http" + serviceId;
+var unixSocket = "/sock/_http_server_example";
 	
 // We need the group (www-data) to have write access for the unix socket to work
 	var newMask = parseInt("0007", 8); // four digits, last three mask, ex: 0o027 => 750 file permissions
@@ -31,7 +29,7 @@ function httpRequest(request, response) {
 	function httpServerError(err) {
 	console.log("HTTP server error: " + err.message);
 	if (err.code == 'EADDRINUSE') {
-	console.log("Deleting socket and retry listening ...");
+		// We'll delete the existing socket and retry listening ...
 	var fs = require("fs");
 	fs.unlinkSync(unixSocket);
 	httpServer.listen(unixSocket);
