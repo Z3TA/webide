@@ -142,7 +142,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		if(err) return callback(err);
 		
-		execFile("hg", ["status"], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["status", localDirectory], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg status stderr=" + stderr);
 			console.log("hg status stdout=" + stdout);
@@ -1218,6 +1218,8 @@ function checkDir(user, virtualPath, callback) {
 		else {
 			
 			var mercurialRoot = stdout.trim();
+			
+			if(mercurialRoot == "") mercurialRoot = localDirectory;
 			
 			mercurialRoot = UTIL.trailingSlash(mercurialRoot);
 			
