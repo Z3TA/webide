@@ -31,6 +31,8 @@ hmm, do don't actually need an apparmor profile for python!? just hg!?
 
 note to self: it seems we can exec and have scripts as apparmor profiles!
 
+hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
+
 todo
 ----
 
