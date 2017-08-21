@@ -1112,7 +1112,7 @@ function makeFileString(user, files, directory, rootDir) {
 		fileString += ' ' + localPath + '';
 		//fileString += " '" + localPath + "'";
 	}
-	
+	//
 	return fileString.trim();
 }
 
