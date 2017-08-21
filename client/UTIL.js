@@ -8,8 +8,18 @@
 
 "use strict";
 
-var UTIL = {
+if(typeof EDITOR == "undefined") {
+	var EDITOR = {
+		workingDirectory: "/",
+		remoteProtocols: ["ftp", "ftps", "sftp"],
+		settings: {
+			defaultLineBreakCharacter: "\n"
+		}
+	};
+}
 
+var UTIL = {
+	
 	toSystemPathDelimiters: function toSystemPathDelimiters(path) {
 		
 		// Makes sure the path uses the right path delimiters ...

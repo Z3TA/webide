@@ -119,6 +119,11 @@ user.identify = function identify(info) {
 		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
 	}
 	
+	if(USE_CHROOT) {
+		user.rootPath = "/";
+		user.defaultWorkingDirectory = "/";
+	}
+	
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
 	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".editorStorage" + path.sep) ;
