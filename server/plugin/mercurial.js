@@ -339,12 +339,13 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
-		var fileString = makeFileString(user, files, directory, rootDir);
+		//var fileString = makeFileString(user, files, directory, rootDir);
 		
-		if(fileString instanceof Error) return callback(fileString);
+		var check = filesCheck(files);
+		if(check instanceof Error) return callback(check);
 		
 		var execFile = require('child_process').execFile;
-		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name, fileString], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile('hg', ['commit', '-m "' + message + '"', "-u " + user.name].concat(files), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg commit uid=" + process.getuid() + " gid=" + process.getgid() + " fileString=" + fileString + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
@@ -1112,10 +1113,13 @@ function makeFileString(user, files, directory, rootDir) {
 		fileString += ' ' + localPath + '';
 		//fileString += " '" + localPath + "'";
 	}
-	//
+	
 	return fileString.trim();
 }
 
+function filesCheck(files) {
+	return true;
+}
 
 function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
 	
