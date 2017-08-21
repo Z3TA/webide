@@ -7,7 +7,6 @@ var UTIL = require("../client/UTIL.js");
 var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
 var ftpBusy = false;
 
-
 var API = {};
 
 API.readFromDisk = function readFromDisk(user, json, callback) {
@@ -584,9 +583,10 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					//console.log("stat: " + stats);
 					
-					
-					
-					list.push({type: type, name: fileName, path: user.toVirtualPath(filePath), size: size, date: mtime, problem: problem});
+					var mountedPaths = ["/dev/", "/usr/", "/lib/", "/lib64/"]; // Ignore mounted files and folders
+					if(user.workingDirectory != "/" || mountedPaths.indexOf(filePath) == -1) {
+						list.push({type: type, name: fileName, path: user.toVirtualPath(filePath), size: size, date: mtime, problem: problem});
+					}
 					
 					statCounter++;
 					
