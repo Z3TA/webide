@@ -36,6 +36,9 @@ hg root returns nothing because of apparmor. Trying to figure out missing permis
 todo
 ----
 
+write a blog post! (and fix issues/regressions that come up)
+
+
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
 
 Find out why jzedit service didn't start after producton server reboot.
@@ -86,8 +89,6 @@ Double clicking the file in commit file selection should open it.
 Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
 
 Make spellchecker work on server-side and use node_modules instead of compiled file.
-
-write a blog post!
 
 Unload/load all plugins when loggin in as a different users, or on a different server
 
