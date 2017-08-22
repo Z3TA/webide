@@ -56,6 +56,7 @@
 			repoPw: ""
 		}
 		
+		/*
 		if(EDITOR.user == "admin") {
 			
 			demoSite.projectFolder = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/");  // Project folder
@@ -66,7 +67,8 @@
 			demoSite.url = "file://" + EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/public/");
 
 		}
-		else if(EDITOR.user != "admin") {
+		*/
+		if(EDITOR.user != "admin") {
 			// Virtual folder
 			
 			demoSite.projectFolder = "/static_site_demo/";
@@ -75,6 +77,8 @@
 			demoSite.publish = "/static_site_demo/public/";
 			demoSite.template = "/static_site_demo/template.htm";
 			demoSite.projectFolder = "/static_site_demo/";
+			demoSite.publish = "/wwwpub/"
+			
 		}
 		else {
 			console.warn("No demosite will be available! EDITOR.user=" + EDITOR.user + " runtime=" + runtime);

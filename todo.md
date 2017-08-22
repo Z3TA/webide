@@ -27,9 +27,14 @@ have a tutorial that shows how to publish to webpage and write new posts
 What I'm working on
 -------------------
 
+rename  static_site_demo to my_web_site and edit adduser and interface.js (ssg)
+mage "my_web_site" work out of the box
+
 note to self: it seems we can exec and have scripts as apparmor profiles!
 
 hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
+
+
 
 todo
 ----
