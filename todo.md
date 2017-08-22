@@ -29,15 +29,6 @@ What I'm working on
 
 note to self: it seems we can exec and have scripts as apparmor profiles!
 
-Refactor SSG build.js into a module so it can be required, and called from chroot.
-or make it into a client plugin (again) !?
-or just run the script like when the user runs nodejs scripts !?
-or place it inside the chroot and spawn it !?
-or make it both spawnable and require-able !?
-
-problem: Node modules. Node modules should be looked up from the user's home folder
-
-
 hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
 
 todo

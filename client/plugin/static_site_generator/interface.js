@@ -247,6 +247,8 @@
 		
 		EDITOR.on("fileDrop", fileDrop);
 		
+		CLIENT.on("ssgBuildMessage", ssgBuildMessage);
+		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 		if(EDITOR.user == "demo") {
@@ -295,6 +297,8 @@
 		EDITOR.unbindKey(showSSG);
 		EDITOR.unbindKey(wysiwygSSG);
 		
+		CLIENT.removeEvent("ssgBuildMessage", ssgBuildMessage);
+		
 		if(manager) {
 			var footer = document.getElementById("footer");
 			footer.removeChild(manager);
@@ -303,6 +307,34 @@
 		
 	}
 	
+	function ssgBuildMessage(msg) {
+		console.log("ssgBuildMessage: " + JSON.stringify(msg));
+		
+		var stdOutFile = selectedSite.name + ".build.log";
+		
+		if(EDITOR.files.hasOwnProperty(stdOutFile)) {
+			appendBuildLog(EDITOR.files[stdOutFile], msg);
+		}
+		else {
+			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Building " + selectedSite.name + " ...", function fileOpened(err, file) {
+				if(err) throw err;
+				appendBuildLog(file, msg);
+			});
+		}
+	}
+	
+	function appendBuildLog(file, msg) {
+		
+		console.log("appendBuildLog: " + file.path + " msg=" + msg);
+		
+		if(msg.type == "console") file.writeLine('"' + msg.msg + '" ' + msg.location + "");
+		else if(msg.type == "error") file.writeLine('ERROR: ' + msg.msg);
+		else file.writeLine(JSON.stringify(msg, null, 2));
+		
+		//else if(msg.exit) file.writeLine(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+		
+		EDITOR.renderNeeded();
+	}
 	
 	function fileShow(file) {
 		

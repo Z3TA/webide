@@ -461,7 +461,7 @@ function compile(baseTree) {
 				
 			*/
 			
-			
+			var scriptName = document.path;
 			
 			log("Compiling file=" + document.path);
 			
@@ -477,7 +477,30 @@ function compile(baseTree) {
 			// Circular references to ease access
 			document.folder = branch;
 			document.root = ROOT;
-			document.console = console; // todo: send the message to the IDE client
+			//document.console = console; // todo: send the message to the IDE client
+			document.console = {
+				log: function () {
+					var msg = parseString(arguments[0]);
+					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
+					var where = getStack(scriptName);
+					SEND_MESSAGE({type: "console", msg: msg, scriptName: scriptName, location: where});
+				},
+				warn: function () {
+					var msg = parseString(arguments[0]);
+					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
+					var where = getStack(scriptName);
+					SEND_MESSAGE({type: "console", msg: msg, scriptName: scriptName, location: where});
+				},
+				error: function () {
+					var msg = parseString(arguments[0]);
+					for (var i = 1; i < arguments.length; i++) msg += " " + parseString(arguments[i]);
+					var where = getStack(scriptName, 0);
+					SEND_MESSAGE({type: "console", msg: msg, scriptName: scriptName, location: where});
+				}
+				
+			};
+			
+			
 			document.require = function(moduleName) {
 				console.log("Requring moduleName=" + moduleName);
 				var nodeModulesPathOriginal = process.env.NODE_PATH;
@@ -493,6 +516,10 @@ function compile(baseTree) {
 			};
 			document.all = ALLDOCUMENTS;
 			
+			var scriptOptions = {
+				filename: scriptName,
+				displayErrors: true
+			}
 			
 			var fileType = getFileType(document.path);
 			
@@ -1198,8 +1225,14 @@ Document.prototype.evaluate = function(str) {
 	var initCode = '"use strict";var document = this;';
 	var scriptCount = 0;
 	
-	script = new vm.Script(initCode);
+	var scriptOptions = {
+		filename: document.path,
+		displayErrors: true
+	}
+	
+	script = new vm.Script(initCode, scriptOptions);
 	script.runInContext(context);
+	
 	
 	for(var i=0; i<str.length; i++) {
 		checkChar(i);
@@ -1763,6 +1796,75 @@ function error(err) {
 	if(MAIN_CALLBACK) MAIN_CALLBACK(err);
 	console.error(err);
 }
+
+function parseString(obj) {
+	if(typeof obj == "object") return JSON.stringify(obj, null, 2);
+	else return obj + "";
+}
+
+function getStack(scriptName, lineNr) {
+	if(lineNr == undefined) lineNr = 0;
+	
+	//RangeError: Maximum call stack size exceeded
+	try {
+		var stack = (new Error().stack).split(/\r\n|\n/);
+	}
+	catch(err) {
+		return null;
+	}
+	
+	/*
+		Error
+		,    at getStack (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:1810:16)
+		,    at Object.document.console.log (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:485:18)
+		,    at evalmachine.<anonymous>:3:9,    at checkChar (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:1290:13)
+		,    at Document.evaluate (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:1238:3)
+		,    at evalFile (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:398:13)
+		,    at evalDir (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:376:5)
+		,    at evaluate (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:368:2)
+		,    at /home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:159:3
+		,    at checkComplete (/home/zeta/projects/jzedit/server/plugin/static_site_generator/ssg-build.js:871:5)
+		
+	*/
+	
+	stack.shift(); // Remove first item ("Error")
+	stack.shift(); // Remove second item ("at getStack")
+	
+	filterStack(stack); // recursive
+	
+	if(lineNr >= stack.length) lineNr = stack.length-1;
+	
+	console.log("stack: " + stack);
+	
+	/*
+	var re = new RegExp(scriptName + ":(\\d+):(\\d+)");
+	var match;
+	for (var i=0; i<stack.length; i++) {
+		match = stack[i].match(re);
+		if(match) break;
+	}
+	*/
+	
+	return stack[0].replace("    at evalmachine.<anonymous>", scriptName);
+	
+	//return {row: parseInt(match[1]), col: parseInt(match[2])};
+	
+	function filterStack(stack) {
+		
+		for (var i=0; i<stack.length; i++) {
+			if(stack[i].indexOf("at Object.document.console.log") != -1) {
+				stack.splice(i, 1);
+				return filterStack(stack);
+			}
+			else if(stack[i].indexOf("at Document.evaluate") != -1) {
+				stack.splice(i, 6);
+				return filterStack(stack);
+			}
+		}
+	}
+	
+}
+
 
 if (require.main === module) {
 	console.log('called directly');

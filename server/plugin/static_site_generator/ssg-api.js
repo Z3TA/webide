@@ -175,6 +175,9 @@ API.compile = function compile(user, json, callback) {
 		function worker_message(data) {
 			
 			//console.log("SSG data: " + JSON.stringify(data));
+			if(data.type == "console" || data.type == "error") {
+			user.send({ssgBuildMessage: data});
+			}
 			
 			if(data.type == "file") {
 				filesToSave++;
@@ -182,7 +185,6 @@ API.compile = function compile(user, json, callback) {
 			}
 			else if(data.type == "copy") {
 				filesToSave++;
-				
 				copyFile(user.toVirtualPath(data.from), user.toVirtualPath(data.to))
 			}
 			else if(data.type == "debug") {
@@ -193,8 +195,8 @@ API.compile = function compile(user, json, callback) {
 				if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) console.warn("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
 				else if(data.code == "ENOENT") console.warn("Problem occured when opening file...\n" + data.stack);
 				else console.log(data.stack);
-			}
-			else throw new Error("Unknown message from worker: " + JSON.stringify(data));
+				}
+			else console.warn("Unknown message from build script: " + JSON.stringify(data));
 			
 		}
 		
