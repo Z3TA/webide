@@ -730,6 +730,8 @@ var UTIL = {
 		}
 		else filePath = url;
 		
+		filePath = decodeURIComponent(filePath); // decore åäö etc
+		
 		console.log("filePath=" + filePath);
 		
 		if(filePath.indexOf("?") != -1) filePath = filePath.substring(0, filePath.indexOf("?"));
