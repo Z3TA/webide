@@ -804,7 +804,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile('hg', ['annotate', '"' + localPath + '"', '--line-number'], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile('hg', ['annotate', localPath, '--line-number'], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg annotate stderr=" + stderr);
 			console.log("hg annotate stdout=" + stdout);
@@ -835,7 +835,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 				if(changesetId.indexOf(changeId) == -1) {
 					changesetId.push(changeId);
 					
-					execFile('hg', ['log', '--rev ' + changeId], { cwd: rootDir, env: execFileOptions.env }, hglog);
+					execFile('hg', ['log', '--rev', changeId], { cwd: rootDir, env: execFileOptions.env }, hglog);
 				}
 				if(lineChangeset.hasOwnProperty(line)) {
 					// Only overwrite if the change was done after the current change
