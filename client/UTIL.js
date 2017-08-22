@@ -77,7 +77,7 @@ var UTIL = {
 			todo: replace EDITOR.getDir
 		*/
 		
-		console.log("getDir path=" + path);
+		//console.log("getDir path=" + path);
 		
 		if(path == undefined) {
 			if(EDITOR.currentFile) path = EDITOR.currentFile.path;

@@ -7,6 +7,8 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 var API = {};
 	
+var SSG_BUILD = require("./ssg-build.js");
+
 API.compile = function compile(user, json, callback) {
 	
 	var source = user.translatePath(json.source);
@@ -67,6 +69,11 @@ API.compile = function compile(user, json, callback) {
 		
 		var buildScript = path.join(__dirname, "build.js");
 		
+		if(user.rootPath == null) {
+			// We are inside a chroot
+			buildScript = "/usr/bin/ssg-build.js";
+		}
+		
 		console.log("buildScript=" + buildScript);
 		console.log("source=" + source);
 		
@@ -86,42 +93,42 @@ API.compile = function compile(user, json, callback) {
 		var folderAboutToBeCreated = [];
 		var waitingList = [];
 		
+		SSG_BUILD.basePath = source;
+		SSG_BUILD.pubFolder = destination;
+		SSG_BUILD.publish = publish;
+		SSG_BUILD.onMessage = worker_message;
+		
+		SSG_BUILD.compile(function done(err) {
+			if(err) throw err;
+			
+			console.log("Done compiling source=" + source + " to destination=" + destination);
+			
+			doneCompiling = true;
+			workerExitCode = 0;
+			checkDone();
+		});
+		
+		/*
 		var args = [source, destination];
 		
 		if(publish) args.push( "-publish");
 		
-		var worker = childProcess.fork(buildScript, args, {
+		var nodeScriptOptions = {
+			execPath: "/usr/bin/nodejs",
 			cwd: workingDir,
-			env: {"NODE_PATH": node_modules}, // Tell node runtime to check for modules in this folder
-		});
+			env: {
+			myName: user.name,
+			NODE_PATH: node_modules // Tell node runtime to check for modules in this folder
+			},
+			silent: false // If set to true: Makes us able to capture stdout and stderr, If set to false: It will use *our* stdout and stderr
+		};
 		
-		// PS. It's impossible to caputre stdout and stderr from the fork. You'll have to use process.send() to send message back here
 		
-		worker.on('message', function worker_message(data) {
-			
-			console.log("SSG data: " + JSON.stringify(data));
-			
-			if(data.type == "file") {
-				filesToSave++;
-				createFile(user.toVirtualPath(data.path), data.text)
-			}
-			else if(data.type == "copy") {
-				filesToSave++;
-
-				copyFile(user.toVirtualPath(data.from), user.toVirtualPath(data.to))
-			}
-			else if(data.type == "debug") {
-				console.log("SSG: " + data.msg);
-			}
-			else if(data.type == "error") {
-				//console.log(data);
-				if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) console.warn("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
-				else if(data.code == "ENOENT") console.warn("Problem occured when opening file...\n" + data.stack);
-				else console.log(data.stack);
-			}
-			else throw new Error("Unknown message from worker: " + JSON.stringify(data));
-			
-		});
+		var worker = childProcess.fork(buildScript, args, nodeScriptOptions);
+		
+		// Using process.send() to send message back here:
+		worker.on('message', worker_message);
+		
 		worker.on('error', function worker_error(code) {
 			console.warn("SSG: Error code=" + code);
 		});
@@ -134,6 +141,7 @@ API.compile = function compile(user, json, callback) {
 				checkDone();
 			}
 		});
+		*/
 		
 		function createFile(filePath, text) {
 
@@ -161,6 +169,32 @@ API.compile = function compile(user, json, callback) {
 					runWaitingList();
 				}
 			}
+		}
+		
+		function worker_message(data) {
+			
+			//console.log("SSG data: " + JSON.stringify(data));
+			
+			if(data.type == "file") {
+				filesToSave++;
+				createFile(user.toVirtualPath(data.path), data.text)
+			}
+			else if(data.type == "copy") {
+				filesToSave++;
+				
+				copyFile(user.toVirtualPath(data.from), user.toVirtualPath(data.to))
+			}
+			else if(data.type == "debug") {
+				console.log("SSG: " + data.msg);
+			}
+			else if(data.type == "error") {
+				//console.log(data);
+				if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) console.warn("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
+				else if(data.code == "ENOENT") console.warn("Problem occured when opening file...\n" + data.stack);
+				else console.log(data.stack);
+			}
+			else throw new Error("Unknown message from worker: " + JSON.stringify(data));
+			
 		}
 		
 		function copyFile(from, to) {
@@ -192,7 +226,7 @@ API.compile = function compile(user, json, callback) {
 		
 		function createPath(folder, createPathCallback) {
 			
-			console.log("Creating path=" + folder);
+			//console.log("Creating path=" + folder);
 			folderAboutToBeCreated.push(folder);
 			
 			CORE.createPath(user, {pathToCreate: folder}, function(err, json) {
@@ -209,22 +243,22 @@ API.compile = function compile(user, json, callback) {
 		}
 		
 		function runWaitingList() {
-			console.log("Items in waiting list: waitingList.length=" + waitingList.length);
+			//console.log("Items in waiting list: waitingList.length=" + waitingList.length + " filesToSave=" + filesToSave + " doneCompiling=" + doneCompiling);
 			if(waitingList.length > 0) waitingList.shift()();
 		}
 		
 		function fileSaved(path) {
-			console.log("Saved file path=" + path);
+			//console.log("Saved file path=" + path);
 			filesToSave--;
 			
-			console.log("Files left to be saved: filesToSave=" + filesToSave);
+			//console.log("Files left to be saved: filesToSave=" + filesToSave);
 			
 			if(filesToSave == 0) checkDone();
 		}
 		
 		function checkDone(exitCode) {
 			if(filesToSave == 0 && doneCompiling) {
-				
+				console.log("All files saved!");
 				callback(null, {ssgWorkerExitCode: workerExitCode});
 			}
 			else console.log("filesToSave=" + filesToSave + " exitCode=" + exitCode);

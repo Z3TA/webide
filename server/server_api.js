@@ -361,7 +361,7 @@ else if(protocol == "sftp:") {
 		}
 		
 		fs.writeFile(path, text, options, function(err) {
-			console.log("Attempting saving to local file system: " + path + " ...");
+			//console.log("Attempting saving to local file system: " + path + " ...");
 			
 			if(originalUmask) {
 				//process.umask(originalUmask); // Set back the original umask
@@ -374,7 +374,7 @@ else if(protocol == "sftp:") {
 				saveToDiskCallback(err);
 			}
 			else {
-				console.log("The file was successfully saved: " + path + "");
+				//console.log("The file was successfully saved: " + path + "");
 				saveToDiskCallback(null, {path: user.toVirtualPath(path)});
 			}
 		});
@@ -762,7 +762,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 		
 		// ## mkdir ...
 		
-		console.log("mkdir " + path);
+		//console.log("mkdir " + path);
 		
 		if(path.indexOf("//") != -1) {
 			path = path.replace(/\/\/+/g, "/"); // Remove double slashes

@@ -582,7 +582,11 @@ function sockJsConnection(connection) {
 											
 											if(req.createHttpEndpoint) {
 												
-												createHttpEndpoint(name, req.createHttpEndpoint.folder, function(err, url) {
+											var folder = req.createHttpEndpoint.folder;
+											
+											if(USE_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
+											
+												createHttpEndpoint(name, folder, function(err, url) {
 													if(err) throw err;
 													workerResp(req, {url: url})
 												});
@@ -722,6 +726,8 @@ function isObject(obj) {
 
 function createHttpEndpoint(username, folder, callback) {
 	
+	log("Creating HTTP endpoint to folder=" + folder + " ...");
+	
 	if(HOME_DIR) {
 		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
@@ -735,6 +741,8 @@ function createHttpEndpoint(username, folder, callback) {
 	var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
 	
 	HTTP_ENDPOINTS[endPoint] = folder;
+	
+	log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
 	
 	callback(null, makeUrl(endPoint));
 }
