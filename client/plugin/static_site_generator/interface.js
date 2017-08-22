@@ -1699,7 +1699,19 @@
 						var authFailed = err.message.match(/abort: authorization failed/);
 						
 						if(authNeeded) {
-							return CLIENT.cmd("mercurial.pull", {directory: UTIL.trailingSlash(selectedSite.projectFolder), user: selectedSite.repoUser, pw: selectedSite.repoPw, save: save}, hgPull);
+							if(selectedSite.repoUser == "") {
+								alertBox("The repository for " + selectedSite.name + " needs a username and password!");
+								editSiteSettings();
+							}
+							else {
+							var save = true; // Save credentials in .hgrc
+							return CLIENT.cmd("mercurial.pull", {
+							directory: UTIL.trailingSlash(selectedSite.projectFolder), 
+								user: selectedSite.repoUser, 
+								pw: selectedSite.repoPw, 
+								save: save
+							}, hgPull);
+						}
 						}
 						else if(authFailed) {
 							var repoUrl = authNeeded[1];

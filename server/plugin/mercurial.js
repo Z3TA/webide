@@ -391,7 +391,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 				env: execFileOptions.env,
 			}
 			
-			execFile("hg" ["incoming", "--stat", "--noninteractive"].concat(config), execOptions, function (err, stdout, stderr) {
+			execFile("hg", ["incoming", "--stat", "--noninteractive"].concat(config), execOptions, function (err, stdout, stderr) {
 				
 				console.log("localDirectory=" + localDirectory);
 				console.log("stdout=" + stdout);
@@ -531,7 +531,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 		var config = (hguser != undefined && pw != undefined) ? ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw] : [];
 		
 		var execFile = require('child_process').execFile;
-		execFile('hg' ['pull', '--noninteractive'].join(config), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile('hg', ['pull', '--noninteractive'].concat(config), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg pull stderr=" + stderr);
 			console.log("hg pull stdout=" + stdout);
@@ -575,7 +575,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				else throw new Error("Unexpected hg pull: stderr=" + stderr + " stdout=" + stdout);
 				
 				// Get list of changed files / Files that will be affected by a "hg update"
-				execFile('hg', ['status', '--rev .:tip'], { cwd: localDirectory, env: execFileOptions.env }, function (err, status_stdout, status_stderr) {
+				execFile('hg', ['status', '--rev', '.:tip'], { cwd: localDirectory, env: execFileOptions.env }, function (err, status_stdout, status_stderr) {
 					
 					console.log("hg status --rev .:tip stderr=" + status_stderr);
 					console.log("hg status --rev .:tip stdout=" + status_stdout);
@@ -898,7 +898,7 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		exec("hg", ["resolve", "--list"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["resolve", "--list"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg resolve --list stderr=" + stderr);
 			console.log("hg resolve --list stdout=" + stdout);
@@ -1028,7 +1028,7 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
-		execFile("hg" ["heads", "--topo"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile("hg", ["heads", "--topo"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			console.log("hg heads --topo stderr=" + stderr);
 			console.log("hg heads --topo stdout=" + stdout);
