@@ -97,6 +97,7 @@ API.compile = function compile(user, json, callback) {
 		SSG_BUILD.pubFolder = destination;
 		SSG_BUILD.publish = publish;
 		SSG_BUILD.onMessage = worker_message;
+		SSG_BUILD.nodeModulesPath = node_modules;
 		
 		SSG_BUILD.compile(function done(err) {
 			if(err) throw err;
