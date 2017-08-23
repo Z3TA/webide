@@ -23,18 +23,15 @@ have a tutorial that shows how to publish to webpage and write new posts
 6) New features
 
 
+WRITE TESTS FOR EACH BUG YOU FIX!! 
+AND ALSO FOR ALL NEW FEATURES!
 
 What I'm working on
 -------------------
 
-rename  static_site_demo to my_web_site and edit adduser and interface.js (ssg)
-mage "my_web_site" work out of the box
-
-note to self: it seems we can exec and have scripts as apparmor profiles!
-
 hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
 
-
+make server tests cleanup after themselves
 
 todo
 ----
@@ -43,6 +40,10 @@ write a blog post! (and fix issues/regressions that come up)
 
 
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
+
+test ftp/stfp/ftps
+
+hmm, I do remember editing file(s) in node_modules, (ftp module !?) to fix some encoding problems ... probably regressed now when we're no longer tracking node_modules.
 
 Find out why jzedit service didn't start after producton server reboot.
 
@@ -57,8 +58,6 @@ check if the release chain works. Can users sign up?
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
-
-make server tests cleanup after themselves
 
 tests for mercurial integration.
 
@@ -271,8 +270,8 @@ Should files be opened as streams!!?
 Would probably have to save remote files to a temporary location
 
 
-Lessons learned
----------------
+Things I've learned
+-------------------
 Use feature flag for stuff that are "in construction" so that the main branch is always working and can be pushed to production at any time.
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
@@ -283,7 +282,7 @@ note: Have to close the app and reopen it to reload NodeJS module source!
 note: Always restart after a (thrown) error! (Spent 3 hours debugging after a "throw" caused code in a NodeJS module to abort, and leaving it in a bad state.)
 Throw errors instead of just returning the void! (ex: if(foo == bad) return;) => throw new Error("foo is bad!")
 Plugin's GUI's should use their own event handlers for the GUI instead of cluttering keyBindings
-
+Seems we can exec and have scripts as apparmor profiles!
 
 When discovering a bug
 ----------------------

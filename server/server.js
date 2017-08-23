@@ -588,9 +588,20 @@ function sockJsConnection(connection) {
 											
 												createHttpEndpoint(name, folder, function(err, url) {
 													if(err) throw err;
-													workerResp(req, {url: url})
+													workerResp(req, {url: url});
 												});
 											}
+										else if(req.removeHttpEndpoint) {
+											
+											var folder = req.removeHttpEndpoint.folder;
+											
+											if(USE_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
+											
+											removeHttpEndpoint(name, folder, function(err, folder) {
+												if(err) throw err;
+												workerResp(req, {folder: folder});
+											});
+										}
 											
 											else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 											
@@ -747,6 +758,26 @@ function createHttpEndpoint(username, folder, callback) {
 	callback(null, makeUrl(endPoint));
 }
 
+function removeHttpEndpoint(username, folder, callback) {
+	
+	log("Removing HTTP endpoint to folder=" + folder + " ...");
+	
+	if(HOME_DIR) {
+		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not remove an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
+	}
+	
+	var endpointDeleted = false;
+	for(var endPoint in HTTP_ENDPOINTS) {
+		if(HTTP_ENDPOINTS[endPoint] == folder) {
+			delete HTTP_ENDPOINTS[endPoint];
+			endpointDeleted = true;
+		}
+	}
+	
+	if(endpointDeleted) callback(null, folder);
+	else callback("Endpoint to folder=" + folder + " not found!");
+	
+}
 
 function handleHttpRequest(request, response){
 	

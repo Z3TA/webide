@@ -5,6 +5,9 @@
 
 "use strict";
 
+// Need to require non native modules here before we are chrooted
+
+
 var UTIL = require("../client/UTIL.js");
 
 var API = require("./server_api.js");
@@ -566,7 +569,19 @@ API.serve = function serve(user, json, callback) {
 	parentRequest({createHttpEndpoint: {folder: folder}}, function(err, resp) {
 		callback(err, {url: resp.url});
 	});
+	}
+
+API.stop_serve = function serve(user, json, callback) {
 	
+	// Serve a folder via HTTP
+	
+	var folder = user.translatePath(json.folder);
+	
+	console.log("user.name=" + user.name + " wants to stop serving folder=" + folder);
+	
+	parentRequest({removeHttpEndpoint: {folder: folder}}, function(err, resp) {
+		callback(err, {folder: resp.folder});
+	});
 }
 
 API.run_nodejs = function run_nodejs(user, json, callback) {

@@ -1,10 +1,12 @@
 (function() {
 	"use strict";
-	
+	/*
+		Tests are run in parellel, so there might be errors when cleaning up!
+	*/
 	
 	EDITOR.addTest(function testReadFromDisk(callback) {
 		
-		var testFolder = "/testfolder/";
+		var testFolder = "/tempyoyotestarrrarrarunqename/";
 		var testFile = "testReadFromDisk.txt";
 		var testText = "abc123\n";
 		
@@ -24,15 +26,28 @@
 					if(json.path.indexOf(testFile) == -1) throw new Error("path=" + path);
 					if(json.data != testText) throw new Error("json.data=" + json.data + " is not testText=" + testText);
 				
-				callback(true);
-			}
-		});
+					// Cleanup
+					CLIENT.cmd("deleteFile", {filePath: path}, function(err, json) {
+						if(err) console.warn(err.message);
+						
+						// Cleanup
+							CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+							if(err) console.warn(err.message);
+								
+									callback(true);
+									
+						});
+						
+					});
+					
+				}
+			});
 		}
 	});
 	
 	EDITOR.addTest(function testGetFileSizeOnDisk(callback) {
 		
-		var testFolder = "/testfolder/";
+		var testFolder = "/tempyoyotestarrrarrarunqename/";
 		var testFile = "testGetFileSizeOnDisk.txt";
 		var testText = "abc123\n";
 		
@@ -45,16 +60,29 @@
 			if(err) throw err;
 			
 			var json = {path: path};
-		
-		CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
-			if(err) throw err
-			else {
-				console.log("size=" + json.size);
+			
+			CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
+				if(err) throw err
+				else {
+					console.log("size=" + json.size);
 					if(json.size != testText.length) throw new Error("json.size=" + json.size + " testText=" + testText);
-				
-				callback(true);
-			}
-		});
+					
+					// Cleanup
+					CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
+						if(err) console.warn(err.message);
+						
+							// Cleanup
+							CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+							if(err) console.warn(err.message);
+								
+									callback(true);
+									
+						});
+						
+					});
+					
+				}
+			});
 		}
 		
 	});
@@ -62,7 +90,7 @@
 	
 	EDITOR.addTest(function testListFiles(callback) {
 		
-		var testFolder = "/testfolder/";
+		var testFolder = "/tempyoyotestarrrarrarunqename/";
 		var testFile = "testListFiles.txt";
 		var testText = "abc123\n";
 		
@@ -72,28 +100,41 @@
 		});
 		
 		function fileCreated(err, path) {
-		
+			
 			var json = {pathToFolder: testFolder};
-		
-		CLIENT.cmd("listFiles", json, function(err, json) {
-			if(err) throw err
-			else {
-				
-				// Make sure testfile is in the list
-				var list = json.list;
-				var hasFile = false;
+			
+			CLIENT.cmd("listFiles", json, function(err, json) {
+				if(err) throw err
+				else {
+					
+					// Make sure testfile is in the list
+					var list = json.list;
+					var hasFile = false;
 					var lookForFileName = testFile;
-				
-				//console.log("list=" + JSON.stringify(list, null, 2));
-				
-				for(var i=0, file; i<list.length; i++) {
-					file = list[i];
-					if(file.name == lookForFileName) hasFile = true;
-				}
-				
-				if(!hasFile) throw new Error("Did not find lookForFileName=" + lookForFileName + " in list: " + JSON.stringify(list, null, 2));
-
-				callback(true);
+					
+					//console.log("list=" + JSON.stringify(list, null, 2));
+					
+					for(var i=0, file; i<list.length; i++) {
+						file = list[i];
+						if(file.name == lookForFileName) hasFile = true;
+					}
+					
+					if(!hasFile) throw new Error("Did not find lookForFileName=" + lookForFileName + " in list: " + JSON.stringify(list, null, 2));
+					
+					// Cleanup
+					CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
+						if(err) console.warn(err.message);
+						
+						// Cleanup
+							CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+							if(err) console.warn(err.message);
+								
+							callback(true);
+									
+							});
+							
+					});
+					
 			}
 		});
 		}
@@ -104,9 +145,7 @@
 		
 		//alertBox(EDITOR.workingDirectory);
 		
-		
-		
-		var tempPath = "/temp/foo/bar/";
+		var tempPath = "/tempyoyotestarrrarrarunqename/foo/bar/";
 		var pathToCreate = UTIL.toSystemPathDelimiters(EDITOR.workingDirectory + tempPath);
 		var json = {pathToCreate: pathToCreate};
 		
@@ -118,7 +157,26 @@
 				
 				if(fullPath.indexOf("foo") == -1) throw new Error("Full path=" + fullPath + " does not include foo! pathToCreate=" + pathToCreate);
 				
-				callback(true);
+				// Cleanup
+				CLIENT.cmd("deleteDirectory", {directory: "/tempyoyotestarrrarrarunqename/foo/bar/"}, function(err, json) {
+					if(err) console.warn(err.message);
+					
+					// Cleanup
+						CLIENT.cmd("deleteDirectory", {directory: "/tempyoyotestarrrarrarunqename/foo/"}, function(err, json) {
+						if(err) console.warn(err.message);
+							
+						// Cleanup
+								CLIENT.cmd("deleteDirectory", {directory: "/tempyoyotestarrrarrarunqename/"}, function(err, json) {
+							if(err) console.warn(err.message);
+									
+							callback(true);
+										
+								});
+								
+						});
+						
+				});
+				
 			}
 		});
 		
@@ -149,7 +207,7 @@
 	
 	EDITOR.addTest(function testServe(callback) {
 		
-		var testFolder = "/testfolder/";
+		var testFolder = "/tempyoyotestarrrarrarunqename/";
 		var testFile = "testfile.txt";
 		var testText = "Hello World!\n";
 		
@@ -183,14 +241,31 @@
 					
 					console.log("text=" + text);
 					
-					callback(true);
+					// Cleanup
+					CLIENT.cmd("stop_serve", {folder: testFolder}, function(err, json) {
+						if(err) throw err
+						else {
 					
-					// Clieanup !?
+					// Cleanup
+					CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
+								if(err) console.warn(err.message);
+						
+								// Cleanup
+							CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+									if(err) console.warn(err.message);
+								
+									callback(true);
+									
+									});
+								
+							});
+							
+						}
+					});
 					
 				});
 			});
 		}
-		
 		
 	});
 	

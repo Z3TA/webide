@@ -1,8 +1,12 @@
 
 "use strict";
 
+// Need to require non native modules here before we are chrooted
+
 var UTIL = require("../client/UTIL.js");
 
+var FTP = require('ftp');
+var SSH2 = require('ssh2');
 
 var ftpQueue = []; // todo: Allow parrallel FTP commands (seems connection is dropped if you send a command while waiting for another)
 var ftpBusy = false;
@@ -882,7 +886,7 @@ API.connect = function connect(user, json, callback) {
 			ftpQueue.length = 0;
 		}
 		
-		var Client = require('ftp');
+		var Client = FTP;
 		user.remoteConnections[serverAddress] = {client: new Client(), protocol: protocol};
 		var ftpClient = user.remoteConnections[serverAddress].client;
 		ftpClient.on('ready', function() {
@@ -1045,7 +1049,7 @@ API.connect = function connect(user, json, callback) {
 		}
 		
 		function connect() {
-			var Client = require('ssh2').Client;
+			var Client = SSH2.Client;
 			
 			var c = new Client();
 			c.on('ready', function() {
@@ -1286,6 +1290,76 @@ API.deleteFile = function deleteFile(user, json, callback) {
 	}
 	}
 
+
+API.deleteDirectory = function deleteDirectory(user, json, callback) {
+	
+	var directory = user.translatePath(json.directory);
+	if(directory instanceof Error) return callback(directory);
+	
+	var recursive = json.recursive;
+	
+	if(recursive) return callback("Recursive deletion of directory not yet supported!"); // should we implement it !?
+	
+	// Check path for protocol
+	var url = require("url");
+	var parse = url.parse(directory);
+	
+	if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+		
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			
+			var c = user.remoteConnections[parse.hostname].client;
+			
+			console.log("Deleting directory from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
+			
+			// Asume the FTP server has support for RFC 3659 "size" ?? HUH !?
+			c.rmdir(parse.pathname, function ftpDirDeleted(err) {
+				if(err) {
+					console.warn(err.message);
+					callback(err);
+				}
+				else {
+					callback(null, {directory: json.directory});
+				}
+			});
+		}
+		else {
+			// Should we give an ENOENT here ?
+			callback(new Error("Failed to delete directory: " + directory + "\nNo connection open to FTP on " + parse.hostname + " !"));
+		}
+	}
+	else if(parse.protocol == "sftp:") {
+		
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			
+			var c = user.remoteConnections[parse.hostname].client;
+			
+			console.log("Deleting directory from SFTP server: " + parse.pathname);
+			
+			c.rmdir(parse.pathname, function sftpDirDeleted(err) {
+				
+				if(err) callback(err);
+				else callback(null, {directory: json.directory});
+				
+			});
+		}
+		else {
+			callback(new Error("Failed to delete directory: " + directory + "\nNo connection open to SFTP on " + parse.hostname + " !"));
+		}
+	}
+	else {
+		
+		// It's a normal file path
+		
+		var fs = require("fs");
+		
+		fs.rmdir(directory, function localFileDeleted(err) {
+			if(err) callback(err);
+			else callback(null, {directory: json.directory});
+		});
+		
+	}
+}
 
 
 function runFtpQueue() {
