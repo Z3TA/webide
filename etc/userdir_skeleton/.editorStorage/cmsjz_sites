@@ -1,0 +1,17 @@
+[
+	{
+		"name": "My web site",
+		"pubUser": "",
+		"pubPw": "",
+		"key": "",
+		"repository": "",
+		"repoUser": "",
+		"repoPw": "",
+		"projectFolder": "/my_web_site/",
+		"source": "/my_web_site/source/",
+		"preview": "/my_web_site/preview/",
+		"publish": "/wwwpub/",
+		"template": "/my_web_site/template.htm",
+		"url": "%USERNAME%.%DOMAIN%"
+	}
+]

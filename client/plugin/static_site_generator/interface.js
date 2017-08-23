@@ -46,46 +46,6 @@
 		
 		console.log("Getting SSG sites ...");
 		
-		var demoSite = {
-			name: "Demo site",
-			pubUser: "",
-			pubPw: "",
-			key: "", // Publish key
-			repository: "",
-			repoUser: "",
-			repoPw: ""
-		}
-		
-		/*
-		if(EDITOR.user == "admin") {
-			
-			demoSite.projectFolder = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/");  // Project folder
-			demoSite.source = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/source/");  // Source files (when colaborating; use a source control management tool!)
-			demoSite.preview = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/preview/"); // Compiles files for review is saved here
-			demoSite.publish = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/public/");  // Compiled files for live deployment is sent to this folder, can be ftp, ftps, sftp url
-			demoSite.template = EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/template.htm");  // A template for new pages/posts
-			demoSite.url = "file://" + EDITOR.workingDirectory + UTIL.toSystemPathDelimiters("userdirs/demo/static_site_demo/public/");
-
-		}
-		*/
-		if(EDITOR.user != "admin") {
-			// Virtual folder
-			
-			demoSite.projectFolder = "/static_site_demo/";
-			demoSite.source = "/static_site_demo/source/";
-			demoSite.preview = "/static_site_demo/preview/";
-			demoSite.publish = "/static_site_demo/public/";
-			demoSite.template = "/static_site_demo/template.htm";
-			demoSite.projectFolder = "/static_site_demo/";
-			demoSite.publish = "/wwwpub/"
-			
-		}
-		else {
-			console.warn("No demosite will be available! EDITOR.user=" + EDITOR.user + " runtime=" + runtime);
-			demoSite = null;
-		}
-		
-		
 		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
 		
 		if(storageSites) {
@@ -96,14 +56,13 @@
 				throw new Error("Unable to parse sites from storage! " + err.message);
 			}
 		}
-		else if(demoSite) {
-			sites = [demoSite];
-		}
 		
-		if(!sites) throw new Error("Failed to get any sites from the static site generator!\n\
+		if(!sites) {console.warn("Failed to get any sites from the static site generator!\n\
 		storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
 		demoSite=" + JSON.stringify(demoSite, null, 2) + "\n\
 		sites=" + JSON.stringify(sites, null, 2));
+			//alertBox("You have no configurated static-site-generator sites.");
+		}
 		
 		// quickedit.js ...
 		if(QueryString.editPage) {
