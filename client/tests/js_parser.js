@@ -12,7 +12,7 @@ EDITOR.addTest(function cantFindFunctionStart(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 EDITOR.addTest(function callbackFunctionSpaceBeforeParentheses(callback) {
 	EDITOR.openFile("callbackFunctionSpaceBeforeParentheses.js", 'foo(function () {\n\n})\n', function(err, file) {

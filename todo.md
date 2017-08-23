@@ -31,6 +31,7 @@ What I'm working on
 
 hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
 
+bug: Mercurial commit tool doesn't find new files in sub folders !!?
 
 todo
 ----

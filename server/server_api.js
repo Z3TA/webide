@@ -1296,9 +1296,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 	var directory = user.translatePath(json.directory);
 	if(directory instanceof Error) return callback(directory);
 	
-	var recursive = json.recursive;
-	
-	if(recursive) return callback("Recursive deletion of directory not yet supported!"); // should we implement it !?
+	var recursive = json.recursive || false;
 	
 	// Check path for protocol
 	var url = require("url");
@@ -1313,7 +1311,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			console.log("Deleting directory from FTP server: " + parse.protocol + parse.hostname + parse.pathname);
 			
 			// Asume the FTP server has support for RFC 3659 "size" ?? HUH !?
-			c.rmdir(parse.pathname, function ftpDirDeleted(err) {
+			c.rmdir(parse.pathname, recursive, function ftpDirDeleted(err) {
 				if(err) {
 					console.warn(err.message);
 					callback(err);
@@ -1336,12 +1334,22 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			
 			console.log("Deleting directory from SFTP server: " + parse.pathname);
 			
+			if(recursive) {
+				recursiveDeleteSftpDir(c, parse.pathname, function dirDeletedRecursive(err) {
+					if(err) callback(err);
+					else callback(null, {directory: json.directory});
+				});
+			}
+			else {
+				
 			c.rmdir(parse.pathname, function sftpDirDeleted(err) {
 				
 				if(err) callback(err);
 				else callback(null, {directory: json.directory});
 				
 			});
+			}
+			
 		}
 		else {
 			callback(new Error("Failed to delete directory: " + directory + "\nNo connection open to SFTP on " + parse.hostname + " !"));
@@ -1353,14 +1361,171 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 		
 		var fs = require("fs");
 		
+		if(recursive) {
+			recursiveDeleteLocalDir(directory, function dirDeletedRecursive(err) {
+				if(err) callback(err);
+				else callback(null, {directory: json.directory});
+			});
+		}
+		else {
 		fs.rmdir(directory, function localFileDeleted(err) {
 			if(err) callback(err);
 			else callback(null, {directory: json.directory});
 		});
-		
+		}
 	}
+	
+	function recursiveDeleteSftpDir(sftpClient, pathToFolder, recursiveDeleteSftpDirCallback) {
+		
+			if(pathToFolder.substr(pathToFolder.length-1) != "/" && pathToFolder.substr(pathToFolder.length-1) != "\\") {
+			return recursiveDeleteSftpDirCallback("pathToFolder=" + pathToFolder + " does not end with a trailing slash!");
+			}
+			
+			var gotError = false;
+		var filesToBeDeleted = 0;
+		var foldersToBeDeleted = 0;
+		
+			console.log("SFTP recursive delete: pathToFolder=" + pathToFolder);
+			var b = sftpClient.readdir(pathToFolder, function sftpReadDir(err, folderItems) {
+				
+				if(gotError) return; // If we have already got an error while deleting the content of this directory
+				
+				if(!err) {
+				//console.log(JSON.stringify(folderItems, null, 2));
+					for(var i=0, path = "", type = ""; i<folderItems.length; i++) {
+					path = pathToFolder + folderItems[i].filename; // Asume pathToFolder has a trailing slash
+					type = folderItems[i].longname.substr(0, 1);
+					check(type, path);
+					}
+					}
+				
+				allFilesAndFoldersDeletedMaybe(err);
+			
+		});
+		
+		function check(type, path) {
+			if(type == "d") {
+				foldersToBeDeleted++;
+				path = UTIL.trailingSlash(path);
+				recursiveDeleteDir(path, function (err) {
+					foldersToBeDeleted--;
+					allFilesAndFoldersDeletedMaybe(err);
+				});
+			}
+			else {
+				filesToBeDeleted++;
+				sftpClient.remove(path, function sftpFileDeleted(err) {
+					filesToBeDeleted--;
+					allFilesAndFoldersDeletedMaybe(err);
+				});
+			}
+		}
+		
+			function allFilesAndFoldersDeletedMaybe(err) {
+				if(gotError) return; // If we have got an error, it means we have already called the callback
+				
+				if(err) {
+					// Got an error when deleting a file or folder in the directory
+					gotError = err;
+				recursiveDeleteSftpDirCallback(err);
+				}
+				else {
+				// Make sure the directory is emty before deleting it 
+				if(filesToBeDeleted === 0 && foldersToBeDeleted === 0) {
+					sftpClient.rmdir(pathToFolder, function sftpDirDeleted(err) {
+						recursiveDeleteSftpDirCallback(err);
+						});
+				}
+			}
+			}
+	}
+	
+	
+	
+	function recursiveDeleteLocalDir(pathToFolder, recursiveDeleteLocalDirCallback) {
+		var fs = require("fs");
+		
+		if(pathToFolder.substr(pathToFolder.length-1) != "/" && pathToFolder.substr(pathToFolder.length-1) != "\\") {
+			return recursiveDeleteLocalDirCallback("pathToFolder=" + pathToFolder + " does not end with a trailing slash!");
+		}
+		
+		var gotError = false;
+		var filesToBeDeleted = 0;
+		var foldersToBeDeleted = 0;
+		
+		console.log("Local file-system recursive delete: pathToFolder=" + pathToFolder);
+		
+		fs.readdir(pathToFolder, function readdir(err, folderItems) {
+			
+			if(err) allFilesAndFoldersDeletedMaybe(err);
+			else {
+				for(var i=0, path=""; i<folderItems.length; i++) {
+				// We do not know if it's a folder or file yet, folderItems is just an array of strings, we have to wait for stat
+					path = pathToFolder + folderItems[i];
+					stat(path);
+					
+					
+				}
+			}
+			
+			
+		});
+		
+		function stat(path) {
+			fs.stat(path, function (err, stats) {
+				
+				if(gotError) return; // If we have already got an error while deleting the content of this directory
+				
+				if(stats) {
+					
+					if(stats.isFile()) {
+						console.log("It's a file! path=" + path);
+						filesToBeDeleted++;
+						fs.unlink(path, function localFileDeleted(err) {
+							filesToBeDeleted--;
+							allFilesAndFoldersDeletedMaybe(err);
+						});
+					}
+					else if(stats.isDirectory()) {
+						console.log("It's a folder! path=" + path);
+						foldersToBeDeleted++;
+						path = UTIL.trailingSlash(path);
+						recursiveDeleteLocalDir(path, function (err) {
+							foldersToBeDeleted--;
+							allFilesAndFoldersDeletedMaybe(err);
+						});
+					}
+				}
+				
+				allFilesAndFoldersDeletedMaybe(err);
+				
+			});
+		}
+		
+	
+		function allFilesAndFoldersDeletedMaybe(err) {
+			
+			console.log("allFilesAndFoldersDeletedMaybe? gotError=" + gotError + " err=" + err + " filesToBeDeleted=" + filesToBeDeleted + " foldersToBeDeleted=" + foldersToBeDeleted);
+			
+			if(gotError) return; // If we have got an error, it means we have already called the callback
+			
+			if(err) {
+				// Got an error when deleting a file or folder in the directory
+				gotError = err;
+				recursiveDeleteLocalDirCallback(err);
+			}
+			else {
+				// Make sure the directory is emty before deleting it
+				if(filesToBeDeleted === 0 && foldersToBeDeleted === 0) {
+					fs.rmdir(pathToFolder, function localFileDeleted(err) {
+					recursiveDeleteLocalDirCallback(err);
+					});
+					}
+			}
+		}
+	}
+	
 }
-
 
 function runFtpQueue() {
 	

@@ -65,10 +65,10 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	*/
 	
 	var execFile = require('child_process').execFile;
-	execFile("hg", ["clone", remote, localPath].concat(config), execFileOptions, function (err, stdout, stderr) {
+	var arg = ["clone", remote, localPath].concat(config);
+	execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
 		
-		console.log("hg clone stderr=" + stderr);
-		console.log("hg clone stdout=" + stdout);
+		console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 		
 		if(err) {
 			
