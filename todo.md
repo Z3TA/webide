@@ -31,7 +31,6 @@ What I'm working on
 
 hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
 
-make server tests cleanup after themselves
 
 todo
 ----
