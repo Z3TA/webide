@@ -167,11 +167,11 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	//copyFolderRecursiveSync("etc/userdir_skeleton/lib64", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/nodejs", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/static_site_demo", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/my_web_site", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/.editorStorage", homeDir);
 	
-		// Give the SSG-demo folder a better name
-		fs.renameSync(homeDir + "/static_site_demo/", homeDir + "/my_web_site");
+	
 		
 	// Use the systems dns settings !?
 	//copyFileSync("/run/resolvconf/resolv.conf", homeDir + "/run/resolvconf/resolv.conf")
@@ -204,10 +204,18 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 			['<p>Written by <a href="../index.htm" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>']
 		]);
 		
+	// Update demo site 
+	var cmsjz_sites = fs.readFileSync(homeDir + ".editorStorage/cmsjz_sites", ENCODING);
+	cmsjz_sites = cmsjz_sites.replace(/%USERNAME%/g, username);
+	cmsjz_sites = cmsjz_sites.replace(/%HOMEDIR%/g, homeDir);
+	cmsjz_sites = cmsjz_sites.replace(/%DOMAIN%/g, DOMAIN);
+	fs.writeFileSync(homeDir + ".editorStorage/cmsjz_sites", cmsjz_sites);
+	
+	
 		// add wwwpub
 		fs.mkdirSync(homeDir + "/wwwpub");
 		fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
-		
+	chownrDirSync(homeDir + "/wwwpub", uid, gid);
 		
 		
 		
