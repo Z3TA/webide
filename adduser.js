@@ -205,11 +205,11 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		]);
 		
 	// Update demo site 
-	var cmsjz_sites = fs.readFileSync(homeDir + ".editorStorage/cmsjz_sites", ENCODING);
+	var cmsjz_sites = fs.readFileSync(homeDir + "/.editorStorage/cmsjz_sites", ENCODING);
 	cmsjz_sites = cmsjz_sites.replace(/%USERNAME%/g, username);
 	cmsjz_sites = cmsjz_sites.replace(/%HOMEDIR%/g, homeDir);
 	cmsjz_sites = cmsjz_sites.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + ".editorStorage/cmsjz_sites", cmsjz_sites);
+	fs.writeFileSync(homeDir + "/.editorStorage/cmsjz_sites", cmsjz_sites);
 	
 	
 		// add wwwpub
