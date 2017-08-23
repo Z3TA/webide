@@ -1078,7 +1078,7 @@
 			
 			selectSite.selectedIndex = selectedIndex;// Select the new option
 			
-			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites)); // Save all sites in local-storage
+			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2)); // Save all sites in local-storage
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -1142,7 +1142,7 @@
 			selectedSite.repository = inputRepository.value;
 			selectedSite.url = inputUrl.value;
 			
-			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
+			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
 			
 			editView.style.display = "none";
 			controlView.style.display = "block";
@@ -1499,7 +1499,7 @@
 								if(siteRepo == "" && defaultRepo != "") {
 									// Update settings
 									site.repository = defaultRepo;
-									EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
+									EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
 									doHgSync();
 								}
 								else {
@@ -1520,7 +1520,7 @@
 										}
 										else if(answer == useDefault) {
 											site.repository = defaultRepo;
-											EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites));
+											EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
 											doHgSync();
 										}
 										//else if(answer == cancelSync) do nothing
