@@ -31,7 +31,7 @@ What I'm working on
 
 hg root returns nothing because of apparmor. Trying to figure out missing permission for hg.
 
-bug: Mercurial commit tool doesn't find new files in sub folders !!?
+Writing tests for ftp/stfp/ftps
 
 todo
 ----
@@ -94,6 +94,7 @@ Make spellchecker work on server-side and use node_modules instead of compiled f
 
 Unload/load all plugins when loggin in as a different users, or on a different server
 
+A feature to show a file or project ... git + github integration !? Client plugin to auto create github repos
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -315,6 +316,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Mercurial commit tool doesn't find new files in sub folders !!?
 
 When making a multi line comments, and there is a multi line comment in a function below. the pof opt in devmode complains about different amount of functions (only in devmode! due to check)
 
