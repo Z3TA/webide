@@ -21,7 +21,7 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 		CLIENT.cmd("serve", serveJson, function(err, serveRespJson) {
 		if(err) throw err
 			
-			var serveUrl = serveRespJson.url;
+			var serveUrl = "http://" + serveRespJson.url;
 			
 			var fileUrl = serveUrl + testFile;
 		
