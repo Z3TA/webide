@@ -1193,7 +1193,7 @@
 		/*
 			We must create the window here, so that it get asociated with the button click
 			Some browsers will not let us change the window position, so we need to specify it here also.
-			To prevent same origin plocy error, the editor must be server via http or https! (not file://)
+			To prevent same origin policy error, the editor must be served via http or https! (not file://)
 		*/
 		var newWindow = EDITOR.createWindow();
 		
@@ -1253,6 +1253,11 @@
 					
 					var url = json.url;
 					
+						if(location) {
+							if(location.protocol) url = location.protocol + "//" + url;
+						}
+						else url = "http://" + url;
+						
 					console.log("serve url=" + url);
 					
 					if(runtime != "nw.js") {

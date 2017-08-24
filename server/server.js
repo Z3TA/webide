@@ -1013,7 +1013,7 @@ function makeUrl(endPoint) {
 	//console.log(address);
 	//console.log("ipList=" + JSON.stringify(ipList));
 	
-	var url = "http://";
+	var url = ""; // "http://";
 	
 	if(HOSTNAME) url += HOSTNAME;
 	else url += ip;

@@ -31,8 +31,6 @@ What I'm working on
 
 Writing tests for ftp/stfp/ftps
 
-use https in Wysiwygeditor.js! if the editor uses https (and everywhere else)
-
 When re-logging in after server disconnection, the editor goes nuts on unsaved (new file?) and re-opens it.
 
 
