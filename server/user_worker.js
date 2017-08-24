@@ -134,9 +134,33 @@ user.identify = function identify(info) {
 	
 }
 
-user.teardown = function teardown(msg) {
+user.teardown = function teardown(msg, terddownComplete) {
+	// Cleanup and then exit!
+	
+	console.log("Recived teardown request from parent process!");
+	
+	// Stop running NodeJS scrips
+	var scriptsToStop = 0;
+	for(var filePath in user.runningNodeJsScripts) {
+		scriptsToStop++;
+		stopNodeJsScript(filePath, nodeJsScriptStopped);
+	}
+	
+	doneMaybe();
 	
 	// Disconnect from remote servers etc ...
+
+	function nodeJsScriptStopped() {
+		scriptsToStop--;
+		doneMaybe();
+	}
+	
+	function doneMaybe() {
+		if(scriptsToStop === 0) {
+			//process.send({done: "teardown"});
+			process.exit();
+		}
+	}
 }
 
 user.send = function send(msg) {

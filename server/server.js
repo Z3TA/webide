@@ -298,6 +298,7 @@ function sockJsConnection(connection) {
 	var protocol = connection.protocol;
 	var agent = connection.headers["user-agent"];
 	var commandQueue = [];
+	var awaitingMessagesFromWorker = {};
 	
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
@@ -568,20 +569,27 @@ function sockJsConnection(connection) {
 										
 										if(workerMessage.resp || workerMessage.error) send(workerMessage);
 										else if(workerMessage.message) {
+										if(USER_CONNECTIONS.hasOwnProperty(name)) {
 											for (var i=0, conn; i<USER_CONNECTIONS[name].connections.length; i++) {
 												send(workerMessage.message, USER_CONNECTIONS[name].connections[i]);
 											}
 										}
-										else if(workerMessage.request) {
-											// For special functionality ...
+									}
+									else if(workerMessage.done) { // Not used! Saved if we need it in the future
+										if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
+											awaitingMessagesFromWorker[workerMessage.done]();
+										}
+									}
+									else if(workerMessage.request) {
+										// For special functionality ...
+										
+										var id = workerMessage.id;
+										var req = workerMessage.request;
+										
+										if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+										
+										if(req.createHttpEndpoint) {
 											
-											var id = workerMessage.id;
-											var req = workerMessage.request;
-											
-											if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
-											
-											if(req.createHttpEndpoint) {
-												
 											var folder = req.createHttpEndpoint.folder;
 											
 											if(USE_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
@@ -678,13 +686,22 @@ function sockJsConnection(connection) {
 	
 	connection.on("close", function sockJsClose() {
 		
+		// Thankfully users are not disconnected "right away", there are some tolerence for unstable networks
+		
 		log("Closed client connection (protocol=" + protocol + ") from " + IP);
 		
 		
 		if(userWorker) {
 			
 			// Each connection has it's own worker process!
+			
 			userWorker.send({teardown: true}); // Worker should be exiting ...
+			
+			/*
+			awaitingMessagesFromWorker["teardownComplete"] = function afterTeardown() {
+				userWorker.kill('SIGTERM');
+			};
+			*/
 			
 			// Users logged in with the same name can however send messages to each others ...
 			
@@ -694,6 +711,8 @@ function sockJsConnection(connection) {
 				delete USER_CONNECTIONS[userName];
 			}
 		}
+		else console.log("Client had not worker process! userName=" + userName + " userConnectionId=" + userConnectionId + " IP=" + IP);
+		
 	});
 	
 }
@@ -1080,10 +1099,11 @@ function createUserWorker(name, uid, gid) {
 		console.log(name + " worker error: err.message=" + err.message);
 	});
 	
+	/*
 	worker.on("exit", function workerExit(code, signal) {
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
 	});
-	
+	*/
 	
 	return worker;
 	

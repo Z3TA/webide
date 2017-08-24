@@ -94,6 +94,8 @@ Make spellchecker work on server-side and use node_modules instead of compiled f
 
 Unload/load all plugins when loggin in as a different users, or on a different server
 
+node_modules widget. when a non native nodejs module is found 'require("foo")' check if foo is installed and ask if it should be installed. also show some info from npmjs.org
+
 A feature to show a file or project ... git + github integration !? Client plugin to auto create github repos
 
 * Fix bugs!
