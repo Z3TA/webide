@@ -31,7 +31,7 @@ What I'm working on
 
 Writing tests for ftp/stfp/ftps
 
-
+When connecting to an sftp server, the welcome message gets appended to the working dir!
 
 todo
 ----

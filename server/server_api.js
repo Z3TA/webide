@@ -864,7 +864,10 @@ API.connect = function connect(user, json, callback) {
 	var keyPath = json.keyPath;
 	var workingDir = json.workingDir;
 	
-	if(protocol == undefined) throw new Error("No protocol defined!");
+	if(protocol == undefined) return callback("No protocol defined!");
+	if(serverAddress == undefined) return callback("No serverAddress defined!");
+	if(username == undefined) return callback("No user defined!");
+	if(workingDir !== undefined) return callback("workingDir parameter not yet implemented!");
 	
 	if(protocol.indexOf(":") != -1) {
 		console.warn("Removing : (colon) from protocol=" + protocol);
@@ -1061,21 +1064,28 @@ API.connect = function connect(user, json, callback) {
 					stream.on('close', function(code, signal) {
 						//console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
 						
+						console.log("SFTP pwd result: dir=" + dir);
+						
+						// Problem: "This service allows sftp connections only"
+						var workingDir = UTIL.trailingSlash(protocol + "://" + serverAddress);
+						if(dir.charAt(0) == "/") {
+						
 						// Chop off the newline character
 						dir = dir.substring(0, dir.length-1);
 						
-						var workingDir = UTIL.trailingSlash(protocol + "://" + serverAddress + dir.replace("\\", "/"));
+							var workingDir = workingDir + dir.replace("\\", "/");
+						}
 						
 						cb(null, c, workingDir);
 						
 						//c.end();
 					}).on('data', function(data) {
-						//console.log('STDOUT: ' + data);
+						console.log('SFTP pwd stdout: ' + data);
 						dir += data;
 					}).stderr.on('data', function(data) {
 						cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
 						//user.send("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
-						console.warn('STDERR: ' + data);
+						console.warn('SFTP pwd stderr: ' + data);
 					});
 				});
 				
@@ -1265,7 +1275,13 @@ API.deleteFile = function deleteFile(user, json, callback) {
 			
 			console.log("Deleting file from SFTP server: " + parse.pathname);
 			
-			c.remove(parse.pathname, function sftpFileDeleted(err) {
+			/*
+			for (var m in c) {
+				console.log(m + ": " + typeof c[m]);
+			}
+			*/
+			
+			c.unlink(parse.pathname, function sftpFileDeleted(err) {
 				
 				if(err) callback(err);
 				else callback(null, {filePath: json.filePath});
