@@ -33,6 +33,8 @@ hg root returns nothing because of apparmor. Trying to figure out missing permis
 
 Writing tests for ftp/stfp/ftps
 
+hmm, user scripts are not killed when a user logs out because no process signal permission !? 
+
 todo
 ----
 

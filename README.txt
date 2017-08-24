@@ -119,6 +119,15 @@ To create an apparmor profile, see apparmor/makeprofile.sh
 It's also possible to host the cloud editor on Windows, but then all users need to run as the same user.
 
 
+Adding and removing users
+-------------------------
+
+
+# Error: Command failed: umount "target is busy"
+ps -aux | grep nodejs
+kill -s 2 810460 
+sudo -u username kill 810460
+
 
 Apparmor debugging
 ------------------
