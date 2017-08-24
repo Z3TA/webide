@@ -1,6 +1,7 @@
+# cd /srv/jzedit (or where you put the files)
 # sudo cp etc/systemd/jzedit.service /etc/systemd/system/jzedit.service
+# or, sudo ln -s $(pwd)/etc/systemd/jzedit.service /etc/systemd/system/jzedit.service
 # sudo systemctl enable jzedit   or   sudo systemctl daemon-reload
-# or sudo systemctl enable $(pwd)/etc/systemd/jzedit.service
 # sudo systemctl start jzedit
 
 [Unit]

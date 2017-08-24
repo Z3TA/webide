@@ -31,7 +31,13 @@ What I'm working on
 
 Writing tests for ftp/stfp/ftps
 
-hmm, user scripts are not killed when a user logs out because no process signal permission !? 
+see what happends when prod server reboots. does jzeidt auto start !?
+
+use https in Wysiwygeditor.js! if the editor uses https (and everywhere else)
+
+When re-logging in after server disconnection, the editor goes nuts on unsaved (new file?) and re-opens it.
+
+prod server don't find systemd service files after reboot!!! ?
 
 todo
 ----

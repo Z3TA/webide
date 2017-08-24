@@ -2935,15 +2935,21 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		
-		widget.show = function showWidget() {
+		widget.show = function showWidget(options) {
+			
+			if(options == undefined) options = {};
 			
 			console.log("Showing widget ...");
 			
+			if(options.stealFocus !== false) {
 			EDITOR.input = false; // Steal focus from the file
+			}
 			
 			if(!widget.mainElement) widget.build(); // Build the GUI if it's not already built
 			
 			widget.mainElement.style.display = "block";
+			
+			//if(options.stealFocus === false) widget.blur();
 			
 			EDITOR.resizeNeeded();
 			
