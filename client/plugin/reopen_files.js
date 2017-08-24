@@ -77,7 +77,7 @@
 		//if(!window.localStorage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
-		console.log("serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
+		console.log("reopenFiles ... serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
 		
 		if(serverUrl != CLIENT.url || serverUser != EDITOR.user) {
 			
@@ -122,6 +122,8 @@
 	
 	function reopenFilesMain(reopenFilesCallback) {
 		
+		console.log("reopenFiles ... reopenFilesMain");
+		
 		if(window.localStorage.getItem("openedFiles") == null) {
 			window.localStorage.setItem("openedFiles", "");
 		}
@@ -155,10 +157,13 @@
 			
 			// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
 			for(var i=0; i<files.length; i++) {
+				
+				// Problem: The editor might already have the file open, and we are here because of a server reconnect
+				if(!EDITOR.files.hasOwnProperty(files[i])) {
 				console.log("gonna open files[" + i + "]=" + files[i]);
 				openFile(files[i], fileInListOpened);
 			}
-			
+			}
 			
 		}
 		else {
@@ -336,6 +341,7 @@
 						}
 					}
 					console.log("Reopening file path=" + path +" typeof content=" + typeof content);
+					
 					EDITOR.openFile(path, content, fileReopened); 
 				}
 				
