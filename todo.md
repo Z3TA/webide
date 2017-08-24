@@ -29,23 +29,29 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-Writing tests for ftp/stfp/ftps
+thinking/designing a dashboard welecome thingy: something you see when you first login.
+show time of day (very important lol, need to fill it out with stuff so it looks cool)
+Total page views, with a graph for monthy/deyly? views
+List of deployed nodejs "micro serves" with key metrics (+cpu and mem usage)
+Live visitors (how many are visiting the site right now) with a graph for per day and nr max this moth.
+Most visited pages with cool graph
 
-When connecting to an sftp server, the welcome message gets appended to the working dir!
+each plugin can add a "dashboard-widget" !?
+
 
 todo
 ----
+
+Better onboarding. What to do after first login ? (blank screen that say Ctrl+P to open a file)
 
 write a blog post! (and fix issues/regressions that come up)
 
 
 1. fix regressions!! Mercurial support inside chroot! (write some tests)
 
-test ftp/stfp/ftps
+write more tests for ftp/stfp/ftps
 
 hmm, I do remember editing file(s) in node_modules, (ftp module !?) to fix some encoding problems ... probably regressed now when we're no longer tracking node_modules.
-
-Find out why jzedit service didn't start after producton server reboot.
 
 hmm, for hg clone to work we need to allow python to access the internet! ...
 could solve any issues by setting up restrictive iptables and maybe a netns
@@ -53,13 +59,9 @@ could solve any issues by setting up restrictive iptables and maybe a netns
 Make server run under apparmor profile ...
 Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)
 
-check if the release chain works. Can users sign up?
-
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
-
-tests for mercurial integration.
 
 Some sort of dashboard for when you first open the webIDE. So that you are not compleatly lost ...
 Each plugin can add stuff to the dashboard, so that clickin on stuff in the dashboard can interact with the plugin
@@ -68,6 +70,8 @@ Able to add npm modules to the SSG ...
 
 npm installer plugin, whenever "require" is detected, and a node_modules folder is found, and it's not a node native or local module, ask if the module should be installed.
 see nodejs_worker.js
+
+node_modules widget. when a non native nodejs module is found 'require("foo")' check if foo is installed and ask if it should be installed. also show some info from npmjs.org
 
 
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
@@ -94,9 +98,9 @@ Make spellchecker work on server-side and use node_modules instead of compiled f
 
 Unload/load all plugins when loggin in as a different users, or on a different server
 
-node_modules widget. when a non native nodejs module is found 'require("foo")' check if foo is installed and ask if it should be installed. also show some info from npmjs.org
-
 A feature to show a file or project ... git + github integration !? Client plugin to auto create github repos
+
+
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
