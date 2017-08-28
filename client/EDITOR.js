@@ -206,6 +206,8 @@ EDITOR.lastKeyPressed = "";
 	
 	var giveBackFocusAfterClipboardEvent = false;
 	
+	var dashboardVisible = false;
+	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -3156,6 +3158,19 @@ EDITOR.lastKeyPressed = "";
 		});
 		}
 	
+	EDITOR.addDashboardWidget = function(el) {
+		var dashboard = document.getElementById("dashboard");
+		console.log(dashboard);
+		var child = dashboard.appendChild(el);
+		return child;
+	}
+	
+	EDITOR.removeDashboardWidget = function(el) {
+		var dashboard = document.getElementById("dashboard");
+		var removedNode = dashboard.removeChild(el);
+		return removedNode;
+	}
+	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
@@ -3583,6 +3598,10 @@ EDITOR.lastKeyPressed = "";
 				}
 				
 			});
+			
+			var dashboard = document.getElementById("dashboard");
+			dashboard.style.display="block";
+			
 		});
 
 		CLIENT.on("connectionLost", function() {

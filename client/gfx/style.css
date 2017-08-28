@@ -52,6 +52,13 @@ body {
 	font-family: Arial;
 	}
 
+.dashboard {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	display: none;
+}
+
 canvas {
 	text-rendering: optimizeLegibility;
 	font-kerning : normal;

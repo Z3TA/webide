@@ -33,6 +33,7 @@
 	
 	var previewBaseUrl;
 	
+	var pageViewsStat;
 	
 	// Add plugin to editor
 	EDITOR.plugin({
@@ -58,8 +59,8 @@
 		}
 		
 		if(!sites) {console.warn("Failed to get any sites from the static site generator!\n\
-		storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
-		sites=" + JSON.stringify(sites, null, 2));
+			storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
+			sites=" + JSON.stringify(sites, null, 2));
 			//alertBox("You have no configurated static-site-generator sites.");
 		}
 		
@@ -230,6 +231,8 @@
 			}, timer);
 		}
 		
+		pageViewsStat = EDITOR.addDashboardWidget(createPageViewStatWidget());
+		
 	}
 	
 	function SSG_cleanup() {
@@ -266,6 +269,88 @@
 			footer.removeChild(manager);
 			EDITOR.resizeNeeded();
 		}
+		
+		EDITOR.removeDashboardWidget(pageViewsStat);
+		
+	}
+	
+	function createPageViewStatWidget() {
+		
+		var pageViewStat = document.createElement("div");
+		pageViewStat.setAttribute("class", "pageViewStat");
+		
+		pageViewStat.appendChild(document.createTextNode("Total page views last 30 days"));
+		pageViewStat.appendChild(document.createElement("hr"));
+		
+		var total = document.createElement("span");
+		total.innerText = 1337;
+		
+		pageViewStat.appendChild(total);
+		
+		var previousDiv = document.createElement("div");
+		
+		previousDiv.appendChild(document.createTextNode("Previous:"));
+		
+		var previous = document.createElement("span");
+		previous.innerText = 1320;
+		
+		previousDiv.appendChild(previous);
+		
+		previousDiv.appendChild(document.createTextNode("/"));
+		
+		var percIncrease = document.createElement("span");
+		percIncrease.setAttribute("class", "posetive");
+		percIncrease.innerText = "+1,3%";
+		
+		previousDiv.appendChild(percIncrease);
+		
+		pageViewStat.appendChild(previousDiv);
+		
+		var canvas = document.createElement("canvas");
+		canvas.setAttribute("width", "500");
+		canvas.setAttribute("height", "150");
+		
+		pageViewStat.appendChild(canvas);
+		
+		var fakeData = [1075,1150,1100,1200,1420,1320,1337];
+		drawGraph(fakeData);
+		
+		return pageViewStat;
+		
+		function drawGraph(data) {
+			var ctx = canvas.getContext("2d", {alpha: true});
+			
+			var sortedData = data.sort(function asc(a, b) {
+				return a - b;
+			});
+			
+			var min = sortedData[0];
+			var max = sortedData[sortedData.length-1];
+			var diff = max - min;
+			
+			var canvasWidth = canvas.width;
+			var canvasHeight = canvas.height;
+			
+			var x = 0;
+			var y = 0;
+			
+			ctx.clearRect(0,0, canvasWidth, canvasHeight);
+			
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			for(var i=0; i<data.length; i++) {
+				x = canvasWidth / data.length * i;
+				y = canvasHeight / diff * (data[i]-min);
+				ctx.lineTo(x,y);
+				}
+			ctx.strokeStyle="#b4dbeb";
+			ctx.strokeWidth=2;
+			ctx.stroke();
+			
+			
+			}
+		
+		
 		
 	}
 	
@@ -374,7 +459,7 @@
 						
 						
 						if(currentFileName.match(/^(header|footer).html?/)) {
-						var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
+							var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
 						}
 						else {
 							var fileSrc = path.replace(site.source, ""); // File paths needs to be relative!
@@ -407,8 +492,8 @@
 				
 			}
 			
-			}
 		}
+	}
 	
 	
 	function switchSite(index) {
@@ -1238,80 +1323,80 @@
 				
 				console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
 				compile(site.source, site.preview, ignoreDraft, function compiled_static() {
-				
-				var protocol = UTIL.urlProtocol(site.preview);
-				
-				if(protocol != "file") {
-					alertBox("Preview uploaded to: " + site.preview);
-					return;
-				}
-				
-				CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
 					
-					if(err) throw err;
+					var protocol = UTIL.urlProtocol(site.preview);
 					
-					var url = json.url;
+					if(protocol != "file") {
+						alertBox("Preview uploaded to: " + site.preview);
+						return;
+					}
 					
+					CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
+						
+						if(err) throw err;
+						
+						var url = json.url;
+						
 						if(location) {
 							if(location.protocol) url = location.protocol + "//" + url;
 						}
 						else url = "http://" + url;
 						
-					console.log("serve url=" + url);
-					
-					if(runtime != "nw.js") {
-						// Replace the hostname with the hostname we are currently on to prevent cross origin errors
-						var host = UTIL.getLocation(url).host;
+						console.log("serve url=" + url);
 						
-						if(!host) throw new Error('Did not expect "falsy" host=' + host);
-						if(!window.location.host) throw new Error('Did not expect "falsy" window.location.host=' + window.location.host);
-						
-						url = url.replace(host, window.location.host);
-						
-						console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
-					}
-					
-					previewBaseUrl = url;
-					
-					if(sourceFile) {
-						url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
-						
-						openPreviewWin();
-						
-					}
-					else {
-						// Open the index page
-						
-						notEditableReason = "No file open";
-						editable = false;
-						
-						EDITOR.listFiles(site.preview, function(err, list) {
+						if(runtime != "nw.js") {
+							// Replace the hostname with the hostname we are currently on to prevent cross origin errors
+							var host = UTIL.getLocation(url).host;
 							
-							if(err) throw err;
+							if(!host) throw new Error('Did not expect "falsy" host=' + host);
+							if(!window.location.host) throw new Error('Did not expect "falsy" window.location.host=' + window.location.host);
 							
-							var page = "";
+							url = url.replace(host, window.location.host);
 							
-							for (var i=0; i<list.length; i++) {
-								if(list[i].name.match(/\index\.html?/i) != null) {
-									page = list[i].name;
-									break;
-								}
-							}
-							
-							if(page) {
-								if(url.substr(url.length-1) != "/") url += "/";
-								url += page;
-							}
-							else throw new Error("Unable to find index page in preview directory!");
+							console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
+						}
+						
+						previewBaseUrl = url;
+						
+						if(sourceFile) {
+							url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 							
 							openPreviewWin();
 							
-						});
-					}
-					
-					function openPreviewWin() {
+						}
+						else {
+							// Open the index page
+							
+							notEditableReason = "No file open";
+							editable = false;
+							
+							EDITOR.listFiles(site.preview, function(err, list) {
+								
+								if(err) throw err;
+								
+								var page = "";
+								
+								for (var i=0; i<list.length; i++) {
+									if(list[i].name.match(/\index\.html?/i) != null) {
+										page = list[i].name;
+										break;
+									}
+								}
+								
+								if(page) {
+									if(url.substr(url.length-1) != "/") url += "/";
+									url += page;
+								}
+								else throw new Error("Unable to find index page in preview directory!");
+								
+								openPreviewWin();
+								
+							});
+						}
 						
-						//if(edit) {
+						function openPreviewWin() {
+							
+							//if(edit) {
 							
 							// Get the source code for the compiled page in review, in order to compute ignoreTransform
 							
@@ -1328,45 +1413,45 @@
 								
 							});
 							
-						//}
-						//else loadWysiwygEditor();
-						
-						
-						function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
+							//}
+							//else loadWysiwygEditor();
 							
-							var bodyTag = "body";
-							var onlyPreview = (edit == false);
-							var whenLoaded = function previewLoaded() {
-								if(buttonPreview) {
-									buttonPreview.setAttribute("class", "button active");
-									if(edit) {
-										buttonWysiwyg.setAttribute("class", "button active");
-										wysiwygEnabled = true;
+							
+							function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
+								
+								var bodyTag = "body";
+								var onlyPreview = (edit == false);
+								var whenLoaded = function previewLoaded() {
+									if(buttonPreview) {
+										buttonPreview.setAttribute("class", "button active");
+										if(edit) {
+											buttonWysiwyg.setAttribute("class", "button active");
+											wysiwygEnabled = true;
+										}
 									}
+									if(callback) callback();
 								}
-								if(callback) callback();
-							}
-							
-							if(previewWin) previewWin.close();
-							
-							
-							console.log("SSG url=" + url);
-							previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
-							
-							previewWin.onClose = function() {
-								if(buttonPreview) {
-									buttonPreview.setAttribute("class", "button");
-									buttonWysiwyg.setAttribute("class", "button");
-									wysiwygEnabled = false;
+								
+								if(previewWin) previewWin.close();
+								
+								
+								console.log("SSG url=" + url);
+								previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
+								
+								previewWin.onClose = function() {
+									if(buttonPreview) {
+										buttonPreview.setAttribute("class", "button");
+										buttonWysiwyg.setAttribute("class", "button");
+										wysiwygEnabled = false;
+									}
 								}
 							}
 						}
-					}
+					});
 				});
-			});
+			}
 		}
-		}
-		}
+	}
 	
 	
 	function closePreview() {
@@ -1565,7 +1650,7 @@
 				if(path.indexOf(rootPath) != -1 && !EDITOR.files[path].isSaved) {
 					unsavedFiles.push(EDITOR.files[path]);
 				}
-				}
+			}
 			
 			askToSaveFiles();
 			
@@ -1703,14 +1788,14 @@
 								editSiteSettings();
 							}
 							else {
-							var save = true; // Save credentials in .hgrc
-							return CLIENT.cmd("mercurial.pull", {
-							directory: UTIL.trailingSlash(selectedSite.projectFolder), 
-								user: selectedSite.repoUser, 
-								pw: selectedSite.repoPw, 
-								save: save
-							}, hgPull);
-						}
+								var save = true; // Save credentials in .hgrc
+								return CLIENT.cmd("mercurial.pull", {
+									directory: UTIL.trailingSlash(selectedSite.projectFolder), 
+									user: selectedSite.repoUser, 
+									pw: selectedSite.repoPw, 
+									save: save
+								}, hgPull);
+							}
 						}
 						else if(authFailed) {
 							var repoUrl = authNeeded[1];
@@ -1853,7 +1938,7 @@
 			compile(site.source, site.publish, true, function buildDone() {
 				
 				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:' + urlElementString(site.url) : ''));
-			
+				
 				function urlElementString(url) {
 					
 					if(!url.match(/^http(s?):\/\//i)) url = "http://" + url;
@@ -1862,7 +1947,7 @@
 					
 				}
 				
-		});
+			});
 		}
 		
 	}
