@@ -42,6 +42,13 @@ each plugin can add a "dashboard-widget" !?
 todo
 ----
 
+w/forkflow: Edit pages on a ftp server ...
+
+  Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.
+
+  Find in files on ftp server ... Move "find in files" to server and make it work with ftp/sft/ftps 
+
+
 Better onboarding. What to do after first login ? (blank screen that say Ctrl+P to open a file)
 
 write a blog post! (and fix issues/regressions that come up)

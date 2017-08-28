@@ -63,6 +63,13 @@
 			}
 		});
 		
+	});
+	
+	
+	EDITOR.addTest(function ftpFindInFiles(callback) {
+		// test test123
+		
+		
 	}, 1);
 	
 	
