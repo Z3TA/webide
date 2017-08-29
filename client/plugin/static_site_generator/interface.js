@@ -286,7 +286,7 @@
 		pageViewStat.appendChild(description);
 		pageViewStat.appendChild(document.createElement("hr"));
 		
-		var total = document.createElement("span");
+		var total = document.createElement("div");
 		total.setAttribute("class", "total value");
 		total.innerText = (1337).toLocaleString();
 		

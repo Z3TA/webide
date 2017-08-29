@@ -78,8 +78,9 @@ body {
 
 .dashboardWidget span.value {
 	font-family: Arial, Helvetica, sans-serif;
-	font-weight: bold;
 	color: #989898;
+	font-size: 1.1em;
+	font-weight: 600;
 	}
 
 .dashboardWidget .description {
@@ -89,18 +90,19 @@ body {
 }
 
 .dashboardWidget hr {
-	border-bottom: 1px solid #c7c7c7;
+	border-bottom: 1px solid #e6e6e6;
 	}
 
-.dashboardWidget span.total {
-	font-size: 6em;
+.dashboardWidget div.total {
+	margin-top: 0.2em;
+	font-size: 6.5em;
 	color: #353535;
 	text-shadow: -1px 0 #585858, 0 1px #585858, 1px 0 #585858, 0 -1px #585858;
 }
 
-.dashboardWidget span.previous {
-	font-size: 3em;
-}
+.dashboardWidget div.previous {
+	font-size: 1.5em;
+	}
 
 
 .dashboardWidget span.posetive {
@@ -108,7 +110,7 @@ body {
 }
 
 .dashboard .pageViewStat {
-	font-size: 1.2em;
+	font-size: 1em;
 }
 
 
