@@ -3171,6 +3171,16 @@ EDITOR.lastKeyPressed = "";
 		return removedNode;
 	}
 	
+	EDITOR.hideDashboard = function hideDashboard() {
+		var dashboard = document.getElementById("dashboard");
+		dashboard.style.display = "none";
+	}
+	
+	EDITOR.showDashboard = function showDashboard() {
+		var dashboard = document.getElementById("dashboard");
+		dashboard.style.display = "block";
+	}
+	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		
 		var connectedFiles = filesOnServer();
