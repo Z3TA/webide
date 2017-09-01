@@ -239,13 +239,17 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
 		nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 		
+	try {
 		fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
 		fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
 		
 		var reloadNginxStdout = child_process.execSync("service nginx reload");
 		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
 		if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
-		
+	}
+	catch (err) {
+		console.warn(err.message + " Nginx web server is probably not installed !!");
+	}
 	
 	
 	
