@@ -394,8 +394,12 @@ function sockJsConnection(connection) {
 							console.log("Using PW_FILE=" + PW_FILE + " ...");
 							var fs = require("fs");
 							fs.readFile(PW_FILE, "utf8", function(err, data) {
-								if(err) throw err;
-								
+								if(err) {
+									if(err.code == "ENOEND") {
+										log("Could not find PW_FILE=" + PW_FILE + " ... Add users by running ./adduser.js user pw", NOTICE);
+									}
+									else throw err;
+								}
 								//console.log("data=" + data);
 								//console.log("data.trim()=" + data.trim());
 								//console.log("data.trim().split()=" + JSON.stringify(data.trim().split(/\n|\r\n/)));
