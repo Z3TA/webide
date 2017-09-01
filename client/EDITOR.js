@@ -3159,15 +3159,35 @@ EDITOR.lastKeyPressed = "";
 		}
 	
 	EDITOR.addDashboardWidget = function(el) {
+		
+		if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
+		
 		var dashboard = document.getElementById("dashboard");
 		console.log(dashboard);
+		try {
 		var child = dashboard.appendChild(el);
+		}
+		catch(err) {
+			console.log("addDashboardWidget: el:");
+			console.log(el);
+			throw err;
+		}
+		
 		return child;
 	}
 	
 	EDITOR.removeDashboardWidget = function(el) {
 		var dashboard = document.getElementById("dashboard");
-		var removedNode = dashboard.removeChild(el);
+		
+		try {
+			var removedNode = dashboard.removeChild(el);
+		}
+		catch(err) {
+			console.log("removeDashboardWidget: el:");
+			console.log(el);
+			throw err;
+		}
+		
 		return removedNode;
 	}
 	

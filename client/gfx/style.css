@@ -52,6 +52,9 @@ body {
 	font-family: Arial;
 	}
 
+
+/* ############### DASHBOARD ############# */
+
 .dashboard {
 	font-family: Arial, Helvetica, sans-serif;
 	position: absolute;
@@ -63,6 +66,7 @@ body {
 }
 
 .dashboard span {
+	color: #a8a8a8;
 	text-shadow: none;
 	font-family: Arial, Helvetica, sans-serif;
 }
@@ -112,6 +116,36 @@ body {
 .dashboard .pageViewStat {
 	font-size: 1em;
 }
+
+.dashboardWidget.newfile {
+	padding-top: 0;
+	padding-bottom: 0;
+	border: 1px solid #e5e5e5;
+}
+
+.dashboardWidget.newfile span {
+	margin-right: 1em;
+	vertical-align: middle;
+}
+
+.dashboardWidget button {
+	margin: 0;
+	padding: 0.5em;
+	height: 3em;
+	min-width: 9em;
+	font-weight: normal;
+	color: #797979;
+	text-transform: uppercase;
+	border-left: 1px solid #e5e5e5;
+	background-color: white;
+	background: linear-gradient(top, #eeeeee 0%, #ffffff 100%);
+}
+
+.dashboardWidget button img {
+	vertical-align: middle;
+	
+}
+
 
 
 /* ############################ */

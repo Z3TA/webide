@@ -2,6 +2,6 @@
 Name=jzedit
 Comment=Run the editor
 Exec=bash -c '_PWD="$PWD"; cd "`echo $0 | sed s/jzedit.desktop$//`"; ./start.sh run; cd "_PWD"' %k
-Icon=/home/zeta/projects/jzedit/client/gfx/jz64.png
+Icon=/home/Z/Projects/jzedit/client/gfx/jz64.png
 Terminal=false
 Type=Application
