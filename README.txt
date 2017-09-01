@@ -32,6 +32,14 @@ If you want the editor to auto "restart", add restart after target in the shortc
 
 Linux:
 ------
+Open a terminal ...
+Navigate to the folder where you put jzedit: cd jzedit
+Install nodejs: sudo apt install nodejs
+Link nodejs to node: sudo ln -s `which nodejs` /usr/bin/node
+Install npm (Node Package Manager): sudo apt install npm
+Install "node_modules" packages: npm install
+
+
 Make jzedit.desktop and start.sh executable:
 Via terminal: chmod +x jzedit.desktop start.sh
 Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
