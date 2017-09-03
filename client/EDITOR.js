@@ -567,6 +567,8 @@ EDITOR.lastKeyPressed = "";
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
+				EDITOR.hideDashboard();
+				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
 				EDITOR.renderNeeded();
 				
@@ -3629,10 +3631,7 @@ EDITOR.lastKeyPressed = "";
 				
 			});
 			
-			var dashboard = document.getElementById("dashboard");
-			dashboard.style.display="block";
-			
-		});
+			});
 
 		CLIENT.on("connectionLost", function() {
 			
