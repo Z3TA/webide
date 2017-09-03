@@ -74,30 +74,14 @@
 		
 		newFileWidget.appendChild(span);
 		
-		var txtFile = document.createElement("button");
-		txtFile.setAttribute("class", "newfile txt");
-		
-		var docImg = document.createElement("img");
-		docImg.setAttribute("src", "gfx/icon/doc.svg");
-		docImg.setAttribute("width", "20");
-		docImg.setAttribute("height", "20");
-		txtFile.appendChild(docImg);
-		
-		txtFile.appendChild(document.createTextNode("Plain Text"));
-		txtFile.onclick = function(clickEvent) {
-			createNewFile("file.txt", "This is a plain text file");
-			EDITOR.hideDashboard();
-		};
-		newFileWidget.appendChild(txtFile);
-		
 		
 		var jsFile = document.createElement("button");
 		jsFile.setAttribute("class", "newfile js");
 		
 		var jsImg = document.createElement("img");
 		jsImg.setAttribute("src", "gfx/icon/js.svg");
-		jsImg.setAttribute("width", "20");
-		jsImg.setAttribute("height", "20");
+		jsImg.setAttribute("width", "16");
+		jsImg.setAttribute("height", "16");
 		jsFile.appendChild(jsImg);
 		
 		jsFile.appendChild(document.createTextNode("JavaScript"));
@@ -113,8 +97,8 @@
 		
 		var htmlImg = document.createElement("img");
 		htmlImg.setAttribute("src", "gfx/icon/html.svg");
-		htmlImg.setAttribute("width", "20");
-		htmlImg.setAttribute("height", "20");
+		htmlImg.setAttribute("width", "16");
+		htmlImg.setAttribute("height", "16");
 		htmlButton.appendChild(htmlImg);
 		
 		htmlButton.appendChild(document.createTextNode("HTML"));
@@ -126,6 +110,13 @@
 		
 		var anyFile = document.createElement("button");
 		anyFile.setAttribute("class", "newfile anyfile");
+		
+		var docImg = document.createElement("img");
+		docImg.setAttribute("src", "gfx/icon/doc.svg");
+		docImg.setAttribute("width", "16");
+		docImg.setAttribute("height", "16");
+		anyFile.appendChild(docImg);
+		
 		anyFile.appendChild(document.createTextNode("Other"));
 		anyFile.onclick = function(clickEvent) {
 			createNewFile("new file", "");
