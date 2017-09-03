@@ -232,6 +232,10 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 		chownrDirSync(homeDir + "/sock", uid, wwwgid);
 		// note: Each process needs to set umask to give write permission to the group!
 		
+	// Create a directory where nginx can save logs
+	fs.mkdirSync(homeDir + "/log");
+	//chmodrSync(homeDir + "/log", "770");
+	//chownrDirSync(homeDir + "/log", uid, wwwgid);
 		
 		// Create nginx profile
 		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);

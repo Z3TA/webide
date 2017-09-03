@@ -73,6 +73,20 @@ server {
     add_header 'Access-Control-Allow-Origin' '*';
   }
   
+  location /nginx_status {
+    # Show whole server stats
+    # server accepts handled requests, x, y, z:
+    # x = Accepted connections
+    # y = Handled connections
+    # z = Handles requests
+
+    stub_status on;
+    access_log   off;
+    # only allow access from 127.0.01 #
+    #allow 127.0.01;
+    #deny all;
+  }
+
 
   # Lets encrypt challange (optional)
   location /.well-known/acme-challenge/ {
