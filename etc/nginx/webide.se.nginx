@@ -8,19 +8,28 @@
 # 6. service nginx reload
 #
 
+
+# Redirect to https:
 server {
   listen 80;
+  listen [::]:80;
   server_name webide.se;
-  charset utf-8;
-  
-  # Ucomment to enable SSL:
+  return 301 https://webide.se$request_uri;
+}
+
+server {
+
   listen 443 ssl;
   ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
   ssl_certificate_key  /etc/ssl/private/webide.se.key;
+
  
-  # Uncomment the line below to Enable IPv6
-  listen [::]:80 ipv6only=on;
+  listen [::]:443 ipv6only=on ssl;
   # Remove "ipv6only=on" if you have more then one site on ipv6   
+
+  server_name webide.se;
+  charset utf-8;
+
 
   location / {
     

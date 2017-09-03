@@ -17,6 +17,7 @@
   #  add_header 'Access-Control-Allow-Origin' '*';
   #}
 
+
   location ~/_([^/]+) {
     # Anything starting with an underscore
     # Upgrade to websocket (if possible)
@@ -30,6 +31,14 @@
     add_header 'Access-Control-Allow-Origin' '*';
   }
 
+  location /nginx_status {
+    # Turn on stats
+    stub_status on;
+    access_log   off;
+    # only allow access from 127.0.01 #
+    #allow 127.0.01;
+    #deny all;
+  }
 
   # Lets encrypt challange
   location /.well-known/acme-challenge/ {

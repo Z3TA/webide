@@ -10,8 +10,15 @@
 # sudo ln -s $(pwd)/etc/nginx/signup.webide.se.nginx /etc/nginx/sites-enabled/signup.webide.se
 #
 
+# Redirect to https:
 server {
   listen 80;
+  listen [::]:80;
+  server_name signup.webide.se;
+  return 301 https://signup.webide.se$request_uri;
+}
+
+server {
   server_name  signup.webide.se;
   charset utf-8;
   
@@ -21,7 +28,7 @@ server {
   ssl_certificate_key  /etc/ssl/private/signup.webide.se.key;
 
   # Uncomment the line below to Enable IPv6
-  listen [::]:80;
+  listen [::]:443 ssl;
   # Remove "ipv6only=on" if you have more then one site on ipv6   
 
   location / {
