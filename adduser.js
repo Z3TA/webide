@@ -236,7 +236,8 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	fs.mkdirSync(homeDir + "/log");
 	//chmodrSync(homeDir + "/log", "770");
 	//chownrDirSync(homeDir + "/log", uid, wwwgid);
-		
+	// todo: Make the user the default owner of foles created in log, and make files not readable by others
+	
 		// Create nginx profile
 		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
 		nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
