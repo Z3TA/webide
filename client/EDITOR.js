@@ -800,6 +800,37 @@ EDITOR.lastKeyPressed = "";
 		
 	}
 	
+	// To count file lines we have to read the file, so just read the file ...
+	
+	EDITOR.readLines = function readLines(filePath, options, callback) {
+		// Reads lines options.start to options.end of file, calls back with the lines as an array
+		
+		console.log("Reading lines from: filePath=" + filePath + " options=" + JSON.stringify(options));
+		
+		var json = {path: filePath, start: options.start, end: options.end};
+		
+		CLIENT.cmd("readLines", json, function readLines(err, json) {
+			if(err) callback(err);
+			else callback(null, json.lines, json.end, json.totalLines);
+		});
+		}
+	
+	EDITOR.writeLines = function writeLines(filePath, start, lines, callback) {
+		// Writes lines to file starting at line start
+		
+		if(typeof start != "number") throw new Error('Parameter "start" needs to be a number!');
+		if( Object.prototype.toString.call( lines ) != '[object Array]' ) throw new Error('Parameter "lines" needs to be an array!');
+		
+		console.log("Writing lines to: filePath=" + filePath + " start=" + start);
+		
+		var json = {path: filePath, start: start, lines: lines};
+		
+		CLIENT.cmd("writeLines", json, function readLines(err, json) {
+			if(err) callback(err);
+			else callback(null);
+		});
+	}
+	
 	EDITOR.writeStream = function(file) {
 		/* 
 			Writes the content of a file to a destination FS/FTP/SFTP

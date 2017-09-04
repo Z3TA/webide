@@ -13,6 +13,188 @@ var ftpBusy = false;
 
 var API = {};
 
+API.readLines = function readFromDisk(user, json, callback) {
+
+	console.log("readLines: json=" + JSON.stringify(json)); 
+	
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
+	
+	var url = require("url");
+	var parse = url.parse(path);
+	
+	var encoding = json.encoding || "utf8";
+	var lineBreak = json.lineBreak || "\n";
+	var startLine = json.start || 1;
+	var MAX_LINES = 10000;
+	var endLine = json.end || MAX_LINES;
+	var lines = [];
+	var stream;
+	var text = "";
+	var totalLines = 1; // The first line is line 1 (even if the file contains no line breaks)
+	var flush = false;
+	
+		if(!callback) {
+			throw new Error("No callback defined!");
+		}
+	
+	if(startLine < 1) return callback("start line can not be below line 1 (line 1 is the first line)");
+	if(startLine > endLine) return callback("start line can not be above end line!");
+		
+		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+			
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+				
+				var c = user.remoteConnections[parse.hostname].client;
+				
+				console.log("Getting file from FTP server: " + parse.pathname);
+				
+				c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
+					
+					if(err) throw err;
+					
+					console.log("Reading file from FTP ...");
+					
+					console.log(fileReadStream);
+					
+					stream = fileReadStream;
+					
+					stream.setEncoding('utf8');
+					stream.on('readable', readStream);
+					stream.on("end", streamEnded);
+					stream.on("error", streamError);
+					stream.on("close", streamClose);
+					
+					// Hmm it seems the FTP module uses "old" streams:
+					var StringDecoder = require('string_decoder').StringDecoder;
+					var decoder = new StringDecoder('utf8');
+					var str;
+					stream.on('data', function(data) {
+						str = decoder.write(data);
+						fileContent += str;
+						console.log('loaded part of the file');
+					});
+					
+				});
+				
+			}
+			else {
+				user.send({msg: "No connection open to FTP on " + parse.hostname + " !"});
+			}
+		}
+		else if(parse.protocol == "sftp:") {
+			
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+				
+				var c = user.remoteConnections[parse.hostname].client;
+				
+				console.log("Getting file from SFTP server: " + parse.pathname);
+				
+				var options = {
+					encoding: "utf8"
+				}
+				// Could also use sftp.createReadStream
+				c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
+					
+					if(err) console.warn(err.message);
+					
+					callback(err, {path: path, data: buffer.toString("utf8")});
+					
+					
+				});
+				
+			}
+			else {
+				user.send({msg: "No connection open to SFTP on " + parse.hostname + " !"});
+			}
+		}
+		
+		else {
+			
+			// Asume local file system
+			var fs = require("fs");
+			if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
+			
+			stream = fs.createReadStream(path);
+			stream.on('readable', readStream);
+			stream.on("end", streamEnded);
+			stream.on("error", streamError);
+			stream.on("close", streamClose);
+			
+		}
+		
+		
+		// Functions to handle NodeJS ReadableStream's
+		function streamClose() {
+			console.log("Stream closed! path=" + path);
+		}
+		
+		function streamError(err) {
+			console.log("Stream error! path=" + path);
+			throw err;
+		}
+		
+		function streamEnded() {
+		console.log("Stream ended! path=" + path + "flush=" + flush + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine);
+			
+		callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines});
+			
+		}
+		
+		function readStream() {
+			// Called each time there is something comming down the stream
+			
+			var chunk;
+			var StringDecoder = require('string_decoder').StringDecoder;
+			var decoder = new StringDecoder('utf8');
+		var tempLines = [];
+		
+			//var chunkSize = 512; // How many bytes to recive in each chunk
+			
+			console.log("Reading stream ... isPaused=" + stream.isPaused());
+			
+			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
+				
+				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
+				
+			text += decoder.write(chunk);
+				
+			// Todo: Handle different line break convenctions. For now asume Line-feeds (unix/Linux)
+			
+			tempLines = text.split(lineBreak);
+			
+			if(tempLines.length > 1) { // It contains at least one line break
+				totalLines += tempLines.length-1;
+				
+				if(lines.length == 0 && startLine > 0 && totalLines > startLine) {
+					console.log("First: tempLines.length=" + tempLines.length + " ");
+					lines = tempLines.splice(startLine - totalLines + tempLines.length-1, (endLine-startLine) + 1);
+					console.log("First: lines.length=" + lines.length);
+				}
+				else if(!flush && totalLines >= startLine) {
+					console.log("Middle: lines.length=" + lines.length);
+					lines = lines.concat(tempLines.splice(0, tempLines.length-1)); // Add lines up to the last line break
+				}
+				text = text.substr(text.lastIndexOf(lineBreak) + lineBreak.length); // text now contains the text after the last line break
+				
+				console.log("flush=" + flush + " tempLines.length=" + tempLines.length + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine);
+				
+			}
+			
+			if(!flush && totalLines >= endLine) {
+				
+				console.log("All lines found! lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine + "  ");
+				
+				if(lines.length > (endLine-startLine+1)) lines.splice((endLine-startLine), lines.length);
+				
+				// Continue, so that we know how many lines the file has
+				flush = true;
+			}
+			
+			}
+		}
+	}
+
 API.readFromDisk = function readFromDisk(user, json, callback) {
 	
 	var path = user.translatePath(json.path);

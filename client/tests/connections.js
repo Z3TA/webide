@@ -67,10 +67,11 @@
 	
 	
 	EDITOR.addTest(function ftpFindInFiles(callback) {
-		// test test123
+		// todo!
 		
+		callback(true);
 		
-	}, 1);
+	});
 	
 	
 })();
