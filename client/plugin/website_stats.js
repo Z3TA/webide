@@ -15,6 +15,8 @@
 	
 	function createPageViewStatWidget() {
 		
+		var readMonths = 0;
+		
 		var pageViewStat = document.createElement("div");
 		pageViewStat.setAttribute("class", "pageViewStat dashboardWidget");
 		

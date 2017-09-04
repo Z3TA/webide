@@ -801,7 +801,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.countLines = function countLines(filePath, callback) {
-		// You probably want to use EDITOR.readLines instead! (It includes totalLines)
+		// You probably want to use EDITOR.readLines instead! (EDITOR.readLines gives totalLines as well as lines)
 		
 		console.log("Counting lines in: filePath=" + filePath + "");
 		
