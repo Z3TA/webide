@@ -29,6 +29,8 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+making things crash gracefully when not logged in ...
+
 readLines api
 read log files to get number of requests etc for dashboard statistics
 

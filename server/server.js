@@ -373,8 +373,11 @@ function sockJsConnection(connection) {
 				//console.log("json=" + JSON.stringify(json));
 				
 				if(command != "identify") {
-					console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
-					commandQueue.push(message);
+					//console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
+					//commandQueue.push(message);
+					
+					send({error: "You need to login!", resp: {loginNeeded: command}});
+					
 				}
 				else {
 					

@@ -951,12 +951,19 @@
 		
 		while(fileSelect.firstChild) fileSelect.removeChild(fileSelect.firstChild); // Emty file list
 		
-		CLIENT.cmd("mercurial.status", {directory: directory || UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDir}, function hgstatus(err, resp) {
+		if(directory == undefined) {
+			if(EDITOR.currentFile) directory = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+			else directory = EDITOR.workingDirectory;
+		}
+		
+		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, resp) {
 			if(err) {
 				if(callback) callback(err);
-				else alertBox(err.message);
+				else {
+					alertBox(err.message);
+					hideMercurialWidgets();
+				}
 			}
-			
 			else {
 				
 				// Update the scope

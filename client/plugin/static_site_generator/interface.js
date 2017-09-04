@@ -456,7 +456,7 @@
 	
 	function buildControl() {
 		
-		if(!sites) return alertBox("No sites for the static-site-generator available!");
+		//if(!sites) return alertBox("No sites for the static-site-generator available!");
 		
 		controlView = document.createElement("div");
 		

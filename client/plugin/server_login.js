@@ -39,6 +39,7 @@
 		CLIENT.on("loginSuccess", hideLoginDialog);
 		CLIENT.on("connectionConnected", serverLoginOnConnected);
 		CLIENT.on("connectionLost", serverLoginOnConnectionLost);
+		CLIENT.on("loginNeeded", serverLoginLoginNeeded);
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
@@ -61,10 +62,16 @@
 		CLIENT.removeEvent("loginSuccess", hideLoginDialog);
 		CLIENT.removeEvent("connectionConnected", serverLoginOnConnected);
 		CLIENT.removeEvent("connectionLost", serverLoginOnConnectionLost);
+		CLIENT.removeEvent("loginNeeded", serverLoginLoginNeeded);
 		
 		EDITOR.unbindKey(hideLoginDialog);
 		
 		if(menuItem) EDITOR.removeMenuItem(menuItem);
+	}
+	
+	function serverLoginLoginNeeded(loginNeededByCommand) {
+		console.log("Login needed because of command: " + loginNeededByCommand);
+		showLoginDialog();
 	}
 	
 	function serverLoginOnConnectionLost() {
