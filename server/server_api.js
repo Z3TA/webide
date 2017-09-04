@@ -15,6 +15,17 @@ var API = {};
 
 API.readLines = function readFromDisk(user, json, callback) {
 
+	API.readLines(user, json, function linesRead(err, json) {
+		if(err) return callback(err);
+		
+		callback(null, {path: json.path, totalLines: json.totalLines});
+		
+	});
+	
+}
+
+API.readLines = function readFromDisk(user, json, callback) {
+
 	console.log("readLines: json=" + JSON.stringify(json)); 
 	
 	var path = user.translatePath(json.path);

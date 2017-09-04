@@ -800,7 +800,18 @@ EDITOR.lastKeyPressed = "";
 		
 	}
 	
-	// To count file lines we have to read the file, so just read the file ...
+	EDITOR.countLines = function countLines(filePath, callback) {
+		// You probably want to use EDITOR.readLines instead! (It includes totalLines)
+		
+		console.log("Counting lines in: filePath=" + filePath + "");
+		
+		var json = {path: filePath};
+		
+		CLIENT.cmd("countLines", json, function readLines(err, json) {
+			if(err) callback(err);
+			else callback(null, json.totalLines);
+		});
+	}
 	
 	EDITOR.readLines = function readLines(filePath, options, callback) {
 		// Reads lines options.start to options.end of file, calls back with the lines as an array
