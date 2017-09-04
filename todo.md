@@ -29,6 +29,10 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+readLines api
+read log files to get number of requests etc for dashboard statistics
+
+
 thinking/designing a dashboard welecome thingy: something you see when you first login.
 show time of day (very important lol, need to fill it out with stuff so it looks cool)
 Total page views, with a graph for monthy/deyly? views
@@ -1017,6 +1021,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+When using Ctrl + P and hold down the up/down key, it should switch selection. Instead of having to press the key multible times. Be able to just hold it down.
 
 "Use without logging in" button on the login widget.
 - Hide stuff / disable plugins that need the server ...!
