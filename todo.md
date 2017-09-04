@@ -334,6 +334,8 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+regression: When no file is open and you use Ctrl+P, pressing enter does nothing!
+
 Mercurial commit tool doesn't find new files in sub folders !!?
 
 When making a multi line comments, and there is a multi line comment in a function below. the pof opt in devmode complains about different amount of functions (only in devmode! due to check)
