@@ -68,6 +68,9 @@ window.onload = function main() {
 		
 		var username = inputUsername.value;
 		
+		var urlUser = document.getElementById("urlUser");
+		urlUser.innerText = username;
+		
 		usernameAlertDiv.style.display="none";
 		
 		if(username.length < MIN_USERNAME_LENGTH) return alertUsername("Username needs to be at least " + MIN_USERNAME_LENGTH + " characters!");
