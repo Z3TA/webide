@@ -65,6 +65,8 @@ var WysiwygEditor;
 	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTagSource, onlyPreview, newWindow, url, whenLoaded, compiledSource, bodyTagPreview) {
 		var wysiwygEditor = this;
 		
+		if(!sourceFile) throw new Error("Expected sourceFile when calling WysiwygEditor");
+		
 		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path + " url=" + url);
 		
 		if(wysiwygEditor == undefined || wysiwygEditor == window) throw new Error("Call WysiwygEditor with the new keyword! Example: var foo = new WysiwygEditor()");

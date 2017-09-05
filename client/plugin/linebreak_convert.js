@@ -23,6 +23,8 @@
 	function convertLinebreaks() {
 		var file = EDITOR.currentFile;
 		
+		if(!file) return alertBox("No file open!");
+		
 		var yes = "Yes, convert";
 		var no = "NO"
 		var msg = "";

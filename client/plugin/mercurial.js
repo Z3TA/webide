@@ -86,6 +86,9 @@
 		EDITOR.removeEvent("moveCaret", showAnnotations);
 		EDITOR.removeEvent("commitTool", mercurialCommitTool);
 		EDITOR.removeEvent("resolveTool", mercurialResolveTool);
+		
+		EDITOR.removeMenuItem(annotateMenuItem);
+		
 	}
 	
 	function mercurialCommitTool(directory) {
@@ -1328,7 +1331,7 @@
 		
 		var file = EDITOR.currentFile;
 		
-		if(!file) return true;
+		if(!file) return alertBox("Open a file to see annotations");
 		
 		var annotateMenuItemPosition = annotateMenuItem ? EDITOR.removeMenuItem(annotateMenuItem) : null;
 		annotateMenuItem = EDITOR.addMenuItem("Hide Comments", annotateOff, annotateMenuItemPosition);

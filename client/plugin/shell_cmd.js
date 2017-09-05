@@ -44,7 +44,7 @@
 	
 	function createShellFile() {
 		
-		EDITOR.openFile("shell", promptString, function shellFileOpen(err, file) {
+			EDITOR.openFile("shell", promptString, function shellFileOpen(err, file) {
 			
 			shellFile = file;
 			
@@ -87,12 +87,16 @@
 						var output = stdout + stderr;
 						
 						output = output.replace(/\r/g, "");
-						
-						shellFile.insertTextRow(output, file.caret.row);
-						
-						shellFile.insertText(promptString);
+						printOutput(output);
 						
 					});
+				}
+					else alertBox("Shell comamnds not support in " + runtime + " runtime");
+				
+				function printOutput(output) {
+					shellFile.insertTextRow(output, file.caret.row);
+					
+					shellFile.insertText(promptString);
 				}
 				
 			}

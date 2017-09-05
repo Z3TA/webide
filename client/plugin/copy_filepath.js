@@ -38,7 +38,7 @@
 					}
 				}
 				else {
-					alert("No file open!");
+					alertBox("No file open!");
 				}
 				
 				EDITOR.hideMenu();

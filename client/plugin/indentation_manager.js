@@ -127,6 +127,8 @@
 		
 		var file = EDITOR.currentFile;
 		
+		if(!file) return alertBox("No file open!");
+		
 		var yes = "Save", no = "NO!";
 		
 		var currentIndentationCharacters = "";

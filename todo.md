@@ -48,6 +48,10 @@ each plugin can add a "dashboard-widget" !?
 todo
 ----
 
+npm modules
+
+What happens when you go offline ? Should it be possible to do work offline ? Like on on a train.
+
 w/forkflow: Edit pages on a ftp server ...
 
   Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.

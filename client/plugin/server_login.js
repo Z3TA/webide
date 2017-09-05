@@ -148,7 +148,7 @@
 		// ### Url
 		var labelUrl = document.createElement("label");
 		labelUrl.setAttribute("for", "serverLoginUrl");
-		labelUrl.appendChild(document.createTextNode("URL: "));
+		labelUrl.appendChild(document.createTextNode("Server URL: "));
 		form.appendChild(labelUrl);
 		
 		if(window.location.protocol == "file:") {
@@ -220,7 +220,7 @@
 		var connectButton = document.createElement("input");
 		connectButton.setAttribute("type", "submit");
 		connectButton.setAttribute("class", "button");
-		connectButton.setAttribute("value", "Connect");
+		connectButton.setAttribute("value", "Login");
 		//connectButton.onclick = connectToServer;
 		form.appendChild(connectButton);
 		

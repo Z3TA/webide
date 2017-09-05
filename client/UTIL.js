@@ -171,10 +171,8 @@ var UTIL = {
 			console.log("protocol=" + protocol);
 			
 			if(EDITOR.remoteProtocols.indexOf(protocol) == -1) {
-				throw new Error("protocol=" + protocol + " is not a supported protocol! If it's a Windows path, use " + protocol + ":\\ instead!");
+				console.warn("protocol=" + protocol + " is not a supported protocol! If it's a Windows path, use " + protocol + ":\\ instead!"); // eg C:\\
 			}
-			
-			// Now it's definitely a URL!
 			
 			var path = fullPath.substr(protocol.length + 3); // Remote protocol part and the ://
 			var hostname = path.substr(0, path.indexOf("/")); // Also include port nr if specified (hostname:port)

@@ -5,6 +5,7 @@
 // The EDITOR object lives in global scope, so that it can be accessed everywhere.
 var EDITOR = {};
 
+
 var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
