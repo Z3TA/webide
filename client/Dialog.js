@@ -242,22 +242,38 @@ function promptBox(msg, isPassword, defaultValue, callback, recursionCount) {
 		}, 100);
 	}
 	
-	var input = document.createElement("input");
 	
-	if(isPassword) input.setAttribute("type", "password")
-	else input.setAttribute("type", "text");
+	
+	if(isPassword) {
+		var input = document.createElement("input");
+		input.setAttribute("type", "password");
+	}
+	else {
+		var input = document.createElement("textarea");
+		input.setAttribute("type", "text");
+	}
 	
 	input.setAttribute("class", "input prompt");
 	input.setAttribute("focus", "true");
 	
-	if(defaultValue) input.setAttribute("value", defaultValue);
+	if(defaultValue) {
+		if(isPassword) input.setAttribute("value", defaultValue);
+		else input.innerText = defaultValue;
+	}
 	
 	var ok = document.createElement("button");
 	ok.setAttribute("class", "prompt");
 	ok.setAttribute("type", "submit");
 	ok.appendChild(document.createTextNode("OK"));
 	
-	ok.addEventListener("click", function(clickEvent) {callback(input.value); dialog.close(clickEvent)}, false);
+	ok.addEventListener("click", function(clickEvent) {
+		
+		var value = input.value || input.innerText;
+		
+		callback(value); 
+		dialog.close(clickEvent);
+		
+	}, false);
 	
 	
 	var cancel = document.createElement("button");
