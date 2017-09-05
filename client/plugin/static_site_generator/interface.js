@@ -1180,7 +1180,7 @@
 	
 	function previewSSG(file, combo, character, charCode, keyPushDirection, targetElementClass) {
 		if(!selectedSite) alertBox("No site selected!");
-		else previewPage(selectedSite, undefined, false, combo.ctrl);
+		else previewPage(selectedSite, undefined, false, file, combo.ctrl);
 		
 		return false;
 	}
@@ -1206,11 +1206,21 @@
 				else compileIt(file);
 			});
 		}
+		else if((typeof sourceFile != "object")) {
+			throw new Error("sourceFile needs to be a File object! sourceFile=" + sourceFile);
+		}
 		else compileIt(sourceFile);
 		
 		return false;
 		
 		function compileIt(sourceFile) {
+			
+			if(!sourceFile) throw new Error("No source file specified!");
+			
+			if(typeof sourceFile.text != "string") {
+				console.log(sourceFile);
+				throw new Error("Property text in sourceFile is not a string! sourceFile.text=" + sourceFile.text);
+			}
 			
 			var matchAbsSrc = sourceFile.text.match(/(src|href)\s?=\s?['"]\//i);
 			
@@ -1948,6 +1958,8 @@
 			}
 		}
 		else pickFileToPreview(site, makeItEditable);
+		
+		return false; // Prevent default browser action
 		
 		
 		function makeItEditable(err, sourceFile) {
