@@ -344,10 +344,11 @@
 		for(var i=0; i<sites.length; i++) {
 			if(EDITOR.currentFile.path.indexOf(sites[i].source) != -1) {
 				handleFile(sites[i], dataFile);
+				return true;
 			}
 		}
 		
-		return false; // Returing false will show a message, returning true will not show the message (that a file was saved)
+		return false; // Returing true means we handled the filedrop
 		
 		function handleFile(site, dataFile) {
 			

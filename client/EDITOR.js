@@ -4112,6 +4112,26 @@ EDITOR.lastKeyPressed = "";
 		
 		console.log(fileDropEvent);
 		
+		var text = fileDropEvent.dataTransfer.getData('Text');
+		
+		if(text) {
+			// Drop the text into the current file
+			if(EDITOR.currentFile) {
+			
+				// Get row and col
+				var mouseX = fileDropEvent.offsetX;
+				var mouseY = fileDropEvent.offsetY;
+				var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+				
+				EDITOR.currentFile.insertText(text, caret);
+				
+			}
+			else {
+				// Create a new file with the dropped text
+			}
+			return;
+		}
+		
 		if(fileDropEvent.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
 		
 		var file = fileDropEvent.dataTransfer.files[0];
@@ -4121,12 +4141,21 @@ EDITOR.lastKeyPressed = "";
 		
 		// The default action is to open the file in the editor.
 		// But if the editor don't support the file, ask plugins what to do with it ...
+		var handled = false;
 		if(notSupported(fileType)) {
 			
 			console.log("Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
-			for(var i=0; i<EDITOR.eventListeners.fileDrop.length; i++) {
-				EDITOR.eventListeners.fileDrop[i].fun(file);
+			for(var i=0, h=false; i<EDITOR.eventListeners.fileDrop.length; i++) {
+				h = EDITOR.eventListeners.fileDrop[i].fun(file);
+				if(h) handled = true;
 				}
+			
+			if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
+				if(path) saveFileFunction(path, function(err, path) {
+					if(err) alertBox(err.message);
+					else alertBox("The file has been saved: " + path);
+				});
+			});
 			
 		}
 		else readFile();
