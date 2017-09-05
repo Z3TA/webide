@@ -2,40 +2,61 @@
 <html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="welcome.css">
+	
 	<title>Welcome to webide.se</title>
+	
 </head>
 <body>
 
 <h1>Welcome to webide.se</h1>
 
-<p>This is the source code of a web page (html file).</p>
+<p>You are looking at the source code of a web page (html file).</p>
 
-<p>This file is placed in your wwwpub folder, all files splaced in /wwwpub/ will be accessable from
-http://%USERNAME%.webide.se/<br>
-Try opening the url http://%USERNAME%.webide.se/welcome.htm in another browser window or tab !</p>
+<p>This file is placed in your wwwpub folder, and all files placed there will be
+accessable from http://%USERNAME%.webide.se/ (this is the address to your web
+site)</p>
 
-<p>HTML is a friendly markup language that is easy to learn, but JZedit also comes with a built in "What you see is what you get" (WYSIWYG) editor.<br>
-Go back to the editor window/tab and Right click to bring up the menu, and then click on WYSIWYG.
-Any change you make in either the code window or the preview window will be visible in both.<br>
-Try to make some changes to this document and see what happends !</p>
+<p>Try making some changes to this file, and save with <kbd>Ctrl + S</kbd>.<br>
+Then goto http://%USERNAME%.webide.se/welcome.htm in another
+tab/window.</p>
 
-<p>The changes will become live as soot as you hit Ctrl + S to save.</p>
+
 
 
 <h2>Static site Generator</h2>
 
-<p>To speed up development of larger web sites, with many sections and pages, JZedit has a built in
-Static Site Generator (SSG). Click F9, or "Static Site Generator" in the right click menu to bring up the
-manager widget for the SSG.<br>
-From there you can ...</p>
+<p>To manage larger web sites, the editor has a Static Site Generator (SSG).<br>
+Show the SSG manager by hitting <kbd>F9</kbd>, or select "Static Site Generator" in
+the menu that comes up when you do a mouse right-click .</p>
+
+
+<h4>Using the SSG to write a new blog post</h4>
+
+<ol>
+	<li>In the SSG manager click <kbd>New Page</kbd>.</li>
+	
+	<li>Preview the page: <kbd>Ctrl + F9</kbd> or <kbd>Preview</kbd> in SSG manager.</li>
+	
+	<li><kbd>Ctrl + S</kbd> to save the file as <i>/my_web_site/source/blog/blog_post.html</i></li>
+	
+		<li>Publish the site <kbd>Ctrl + Alt + Shift + F9</kbd> or <kbd>Publish</kbd> in SSG manager.</li>
+	</ol>
 
 
 
+		<h3>Adding images to a web page</h3>
+		
+<p>Drag a file from your computer to the editor, and select a path to save it as.</p>
 
 
+		<h2>Running Node.JS scripts</h2>
+		
+<p><kbd>Ctrl + P</kbd> then type hello.js and press <kbd>Enter</kbd>.<br>
+Then press <kbd>F1</kbd> to run the file/script.</p>
 
-
-<p></p>
-
-</body>
-</html>
+		<p></p>
+		
+		</body>
+		</html>
+		

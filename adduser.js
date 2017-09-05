@@ -212,12 +212,19 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	fs.writeFileSync(homeDir + "/.editorStorage/cmsjz_sites", cmsjz_sites);
 	
 	
-		// add wwwpub
-		//fs.mkdirSync(homeDir + "/wwwpub");
-		fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
+		
+	// Update welcome file
+	var welcome_file = fs.readFileSync(homeDir + "/wwwpub/welcome.html", ENCODING);
+	welcome_file = welcome_file.replace(/%USERNAME%/g, username);
+	welcome_file = welcome_file.replace(/%DOMAIN%/g, DOMAIN);
+	fs.writeFileSync(homeDir + "/wwwpub/welcome.html", welcome_file);
+		
+	
+	// add wwwpub
+	//fs.mkdirSync(homeDir + "/wwwpub");
+	fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
 	chownrDirSync(homeDir + "/wwwpub", uid, gid);
-		
-		
+	
 		
 		// Make wwwpub public
 		chmodrSync(homeDir + "/wwwpub", "755");
