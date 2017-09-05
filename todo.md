@@ -29,20 +29,10 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-making things crash gracefully when not logged in ...
+Fix issues with SSG.
 
-readLines api
-read log files to get number of requests etc for dashboard statistics
+A welcome page explaining stuff. (Open this file for new signups)
 
-
-thinking/designing a dashboard welecome thingy: something you see when you first login.
-show time of day (very important lol, need to fill it out with stuff so it looks cool)
-Total page views, with a graph for monthy/deyly? views
-List of deployed nodejs "micro serves" with key metrics (+cpu and mem usage)
-Live visitors (how many are visiting the site right now) with a graph for per day and nr max this moth.
-Most visited pages with cool graph
-
-each plugin can add a "dashboard-widget" !?
 
 
 todo

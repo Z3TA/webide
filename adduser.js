@@ -213,7 +213,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 	
 		// add wwwpub
-		fs.mkdirSync(homeDir + "/wwwpub");
+		//fs.mkdirSync(homeDir + "/wwwpub");
 		fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
 	chownrDirSync(homeDir + "/wwwpub", uid, gid);
 		
