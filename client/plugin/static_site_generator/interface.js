@@ -1200,7 +1200,7 @@
 			
 			if(sourceFile.path.indexOf(site.source) !== 0) {
 				//throw new Error('Source file does not belong to "' + site.name + '"!\nsourceFile.path=' + sourceFile.path + '\nsite.source=' + site.source);
-				alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + site.source + ' and try again.');
+				alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + site.source + ' and try again.\n\n(have you saved the file ?)');
 				newWindow.close();
 			}
 			else compileIt(sourceFile);
