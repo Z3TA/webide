@@ -80,7 +80,7 @@ if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superus
 }
 
 // Set default file permissions
-var newmask = parseInt("0027", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
+var newmask = parseInt("0022", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
 var oldmask = process.umask(newmask);
 log("Changed umask from " + oldmask.toString(8) + " to " + newmask.toString(8), DEBUG);
 

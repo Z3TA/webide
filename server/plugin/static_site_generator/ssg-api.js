@@ -56,6 +56,7 @@ API.compile = function compile(user, json, callback) {
 		fsReady(null, user.workingDirectory);
 	}
 	
+	
 	function fsReady(err, workingDir) {
 		
 		if(err) return callback(err);
@@ -207,7 +208,7 @@ API.compile = function compile(user, json, callback) {
 			
 			if(foldersExist.indexOf(folder) != -1) {
 				
-				CORE.copyFile(user, {from: from, to: to}, fileCopied);
+				CORE.copyFile(user, {from: from, to: to, public: publish}, fileCopied);
 				
 			}
 			else {
@@ -232,7 +233,7 @@ API.compile = function compile(user, json, callback) {
 			//console.log("Creating path=" + folder);
 			folderAboutToBeCreated.push(folder);
 			
-			CORE.createPath(user, {pathToCreate: folder}, function(err, json) {
+			CORE.createPath(user, {pathToCreate: folder, public: publish}, function(err, json) {
 				if(err) return callback(err);
 				else {
 					folderAboutToBeCreated.splice(folderAboutToBeCreated.indexOf(folder, 1));

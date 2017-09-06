@@ -13,6 +13,10 @@ var ftpBusy = false;
 
 var API = {};
 
+var DEFAULT_FILE_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = read (note: umask is 0022)
+var DEFAULT_FOLDER_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = read (note: umask is 0022)
+// Default is only the user are allowed to access files the user creates (umask 0022)
+
 API.readLines = function readFromDisk(user, json, callback) {
 
 	API.readLines(user, json, function linesRead(err, json) {
@@ -385,7 +389,17 @@ API.copyFile = function copyFile(user, json, callback) {
 		done(err);
 	});
 	
-	var wr = fs.createWriteStream(target);
+	var options = {
+		mode:  DEFAULT_FILE_MODE
+	};
+	
+	if(json.public) {
+		// Make it so everyone can read it
+		options.mode = parseInt("0777", 8);
+		// note: The file permissions wont change if the file already exists!
+	}
+	
+	var wr = fs.createWriteStream(target, options);
 	wr.on("error", function(err) {
 		done(err);
 	});
@@ -396,6 +410,7 @@ API.copyFile = function copyFile(user, json, callback) {
 
 	function done(err) {
 		if (!cbCalled) {
+			
 			callback(err, {to: target});
 			cbCalled = true;
 		}
@@ -546,25 +561,21 @@ else if(protocol == "sftp:") {
 		var fs = require("fs");
 		
 		var options = {
-			encoding: encoding
+			encoding: encoding,
+			mode: DEFAULT_FILE_MODE
 		}
 		
 		if(json.public) {
 			// Make it so everyone can read it
-			var originalUmask = process.umask(parseInt("0022", 8)); // 755
-			options.mode = parseInt("0777", 8);
+			options.mode = parseInt("0777", 8); // 1 = execute, 2 = write, 4 = read
 			
 			// note: The file permissions wont change if the file already exists!
 		}
 		
+		console.log("saveToDisk: path=" + path + " options=" + JSON.stringify(options) + " json.public=" + json.public);
+		
 		fs.writeFile(path, text, options, function(err) {
 			//console.log("Attempting saving to local file system: " + path + " ...");
-			
-			if(originalUmask) {
-				//process.umask(originalUmask); // Set back the original umask
-				process.umask(parseInt("0077", 8));
-				console.log("Changed back umask to 0077 (originalUmask=" + originalUmask.toString(8) + ")");
-			}
 			
 			if(err) {
 				console.warn("Unable to save " + path + "!");
@@ -928,7 +939,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 			if(create.length > 0) executeMkdir(create.shift());
 			else done();
 			
-			});
+			}, json.public);
 	}
 	
 	function done() {
@@ -955,7 +966,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 		}
 	}
 	
-	function createPathSomewhere(path, createPathSomewhereCallback) {
+	function createPathSomewhere(path, createPathSomewhereCallback, publicFolder) {
 		
 		// ## mkdir ...
 		
@@ -1010,7 +1021,19 @@ API.createPath = function createPath(user, json, createPathCallback) {
 			// ### Create a directory using "normal" file system
 			var fs = require("fs");
 			
-			fs.mkdir(path, function(err) {
+			
+			var folderMode = DEFAULT_FOLDER_MODE;
+			
+			if(publicFolder) {
+				// Make it so everyone can read it
+				folderMode = parseInt("0777", 8);
+				
+				// note: The file permissions wont change if the file already exists!
+				}
+			
+			
+			fs.mkdir(path, folderMode, function(err) {
+				
 				if(err) createPathSomewhereCallback(err, path);
 				else createPathSomewhereCallback(null, path);
 			});
