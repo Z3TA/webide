@@ -1208,7 +1208,7 @@
 		
 		return false;
 		
-		function compileIt(sourceFile) {
+		function compileIt(sourceFile, recursionCounter) {
 			
 			if(!sourceFile) throw new Error("No source file specified!");
 			
@@ -1219,16 +1219,60 @@
 			
 			var matchAbsSrc = sourceFile.text.match(/(src|href)\s?=\s?['"]\//i);
 			
+			
 			if(!sourceFile.isSaved) {
 				newWindow.close();
 				return alertBox("Save file before preview:\n" + sourceFile.path);
 			}
 			else if(matchAbsSrc) {
-				newWindow.close();
-				console.log("matchAbsSrc=" + JSON.stringify(matchAbsSrc));
-				alertBox("Make any src or href attributes relative! (remove the slash from " + matchAbsSrc[0] + ")\n\nsrc and href in headers and footers needs to be absolute, but in the page/content they need to be relative.");
-				/* 
-					headers and footers need to have absolute href and src attributs because they will be concatenated from different folder depths
+				/*
+					The SSG worker replaces all absolute paths to relative paths.
+					And the WysiwygEditor.js will complain if there's a diff. eg <a href="/"> was replaced with <a href="../index.htm">
+					solution: Try to fix it automatically
+					*/
+				
+				if(recursionCounter == undefined) {
+					console.log("Attempt automatic fix of absolute paths in sourceFile.path=" + sourceFile.path);
+					recursionCounter = 1;
+					
+					// /foo/source/bar/file.htm => bar/file.htm (count the slashes)
+					var relativePath = sourceFile.path.replace(site.source, "");
+					console.log("relativePath=" + relativePath);
+					var folderLevels = UTIL.occurrences(relativePath, "/", false);
+					var relativePath = "";
+					for (var i=0; i<folderLevels; i++) {
+						relativePath += "../";
+					}
+					
+					var text = sourceFile.text; // Don't change file.text directoy or we'll mess up the grid!
+					
+					text = text.replace(/(href\s?=\s?['"])\/(['"])/i, "$1" + relativePath + "index.htm$2");
+					text = text.replace(/(href\s?=\s?['"])\//i, "$1" + relativePath);
+					text = text.replace(/(src\s?=\s?['"])\//i, "$1" + relativePath);
+					
+					sourceFile.reload(text);
+					
+					EDITOR.saveFile(sourceFile, sourceFile.path, function(err, path) {
+						if(err) {
+							throw new Error("Got an error when trying to save " + sourceFile.path + " after automatic relative paths fix. Error: " + err.message);
+						}
+						else {
+							compileIt(sourceFile, recursionCounter);
+						}
+					});
+					
+				}
+				else {
+					
+					console.log("recursionCounter=" + recursionCounter);
+					
+					newWindow.close();
+					console.log("matchAbsSrc=" + JSON.stringify(matchAbsSrc));
+					alertBox("Make any src or href attributes are relative! (remove the slash from " + matchAbsSrc[0] + ")\n\n" + 
+					"src and href in headers and footers needs to be absolute, but in the page/content they need to be relative.");
+					
+					/* 
+						headers and footers need to have absolute href and src attributs because they will be concatenated from different folder depths
 					Having abslute paths makes it possible to make all paths relative once all headers and footers have been inserted into the page source.
 					The static site generator will concatenate every header.htm in this file hierarchy:
 					|--header.htm
@@ -1238,6 +1282,7 @@
 					|------header.htm
 					|------page.htm
 				*/
+				}
 			}
 			else {
 				
