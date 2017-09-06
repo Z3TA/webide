@@ -29,7 +29,6 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-Welcome file did not open first time, but does open after reload ... !?
 
 A welcome page explaining stuff. (Open this file for new signups)
 
