@@ -820,7 +820,7 @@ function findFiles(dir, parentBranch, done) {
 							fileName = changeFileType(fileName, "docx", "htm");
 							fileName = changeFileType(fileName, "md", "htm");
 							
-							fileName = changeFileType(fileName, "html", "htm"); // For consitency
+							//fileName = changeFileType(fileName, "html", "htm"); // For consitency
 							
 							fileName = fileName.replace(/\s/g, ""); // Remove white space
 							
