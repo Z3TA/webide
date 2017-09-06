@@ -29,12 +29,17 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+When saving a file (image) and the folder you save to doesn't exist, you get an error.
+Ask if user wants to create the folder instead!
+
 A welcome page explaining stuff. (Open this file for new signups)
 
 
 
 todo
 ----
+
+Investigating added the editor to chrome web store and test it in a Chromebook.
 
 npm modules
 
