@@ -29,8 +29,6 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-Fix issues with SSG.
-
 A welcome page explaining stuff. (Open this file for new signups)
 
 

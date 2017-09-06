@@ -170,7 +170,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	copyFolderRecursiveSync("etc/userdir_skeleton/my_web_site", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/.editorStorage", homeDir);
-	
+	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
 	
 		
 	// Use the systems dns settings !?
