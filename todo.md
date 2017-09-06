@@ -29,8 +29,6 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-polish Preview / WYSIWYG buttons highlighting when opening/closing the preview window ?
-
 
 A welcome page explaining stuff. (Open this file for new signups)
 

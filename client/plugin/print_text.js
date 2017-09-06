@@ -1,7 +1,9 @@
 (function() {
 	/*
-		Naive priting function
-	*/
+		Naive priting function.
+		*/
+	
+	return; // Deprecated becasue too buggy! (it sometimes printed junk) Open the file in another program to print it!
 	
 	"use strict";
 
