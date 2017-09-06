@@ -1929,11 +1929,17 @@
 				// Update dates
 				var date = new Date();
 				var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-				text = text.replace('<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">');
+				text = text.replace('<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + zeroPad(date.getMonth()) + '-' + zeroPad(date.getDate()) + '">');
 				text = text.replace('<meta name="author" content="Jon Doe">', '<meta name="author" content="' + EDITOR.user + '">');
-				text = text.replace('<p>Written by <a href="/" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>');
+				text = text.replace('<p>Written by <a href="/" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + EDITOR.user + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>');
 				
 				EDITOR.openFile("newPage.htm", text);
+			}
+			
+			function zeroPad(nr) {
+				nr = nr + ""; // Turn it into a string
+				if(nr.length < 2) nr = "0" + nr;
+				return nr;
 			}
 			
 		});
