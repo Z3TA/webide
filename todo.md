@@ -29,7 +29,7 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-root / in href ... ssg
+polish Preview / WYSIWYG buttons highlighting when opening/closing the preview window ?
 
 
 A welcome page explaining stuff. (Open this file for new signups)
@@ -1024,6 +1024,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Explore old commits and see what files was include and what changed.
 
 When you are about to save a file, and then switch to another file, the file-save icon is still open, and you might acidentally save the wrong file ... !
 

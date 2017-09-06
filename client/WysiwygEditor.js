@@ -1348,9 +1348,15 @@ var WysiwygEditor;
 		wysiwygEditor.onlyPreview = true;
 		
 		var doc = wysiwygEditor.previewWin.document;
+		
+		if(!doc) {
+			// The window has probably been closed!
+			return callback();
+		}
+		
 		var bodyTags = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 		
-		if(!doc || bodyTags.length === 0) {
+		if(bodyTags.length === 0) {
 			// The preview window has probably been closed.
 			// Don't bother about it
 			return callback();
