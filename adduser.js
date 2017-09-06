@@ -194,15 +194,6 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	chmodrSync(homeDir + "/run/", "444");
 	
 	
-	
-		// Update tamplates
-		var date = new Date();
-		var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-		replaceInFileSync(homeDir + "/my_web_site/template.htm", [
-			['<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">'],
-			['<meta name="author" content="Jon Doe">', '<meta name="author" content="' + username + '">'],
-			['<p>Written by <a href="../index.htm" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>']
-		]);
 		
 	// Update demo site 
 	var cmsjz_sites = fs.readFileSync(homeDir + "/.editorStorage/cmsjz_sites", ENCODING);

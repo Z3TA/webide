@@ -1229,7 +1229,7 @@
 					The SSG worker replaces all absolute paths to relative paths.
 					And the WysiwygEditor.js will complain if there's a diff. eg <a href="/"> was replaced with <a href="../index.htm">
 					solution: Try to fix it automatically
-					*/
+				*/
 				
 				if(recursionCounter == undefined) {
 					console.log("Attempt automatic fix of absolute paths in sourceFile.path=" + sourceFile.path);
@@ -1273,15 +1273,15 @@
 					
 					/* 
 						headers and footers need to have absolute href and src attributs because they will be concatenated from different folder depths
-					Having abslute paths makes it possible to make all paths relative once all headers and footers have been inserted into the page source.
-					The static site generator will concatenate every header.htm in this file hierarchy:
-					|--header.htm
-					|--folder1/
-					|----header.htm
-					|----folder2/
-					|------header.htm
-					|------page.htm
-				*/
+						Having abslute paths makes it possible to make all paths relative once all headers and footers have been inserted into the page source.
+						The static site generator will concatenate every header.htm in this file hierarchy:
+						|--header.htm
+						|--folder1/
+						|----header.htm
+						|----folder2/
+						|------header.htm
+						|------page.htm
+					*/
 				}
 			}
 			else {
@@ -1925,6 +1925,14 @@
 			
 			if(err) alertBox(err.message);
 			else {
+				
+				// Update dates
+				var date = new Date();
+				var monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+				text = text.replace('<meta name="created" content="2042-03-22">', '<meta name="created" content="' + date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + '">');
+				text = text.replace('<meta name="author" content="Jon Doe">', '<meta name="author" content="' + EDITOR.user + '">');
+				text = text.replace('<p>Written by <a href="/" rel="author">Jon Doe</a> Mars 22, 2042.</p>', '<p>Written by <a href="../index.htm" rel="author">' + username + '</a> ' + monthName[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '.</p>');
+				
 				EDITOR.openFile("newPage.htm", text);
 			}
 			
