@@ -439,10 +439,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			}
 			*/
 			
-			// Remove focus from the editor
-			if(EDITOR.currentFile) {
 				EDITOR.input = false;
-			}
 			
 			
 			inputGoto.focus();   // Add focus to the input
