@@ -29,8 +29,6 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-Folders did not get x rights when compiling ssg site!
-
 
 A welcome page explaining stuff. (Open this file for new signups)
 

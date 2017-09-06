@@ -372,13 +372,13 @@
 						
 						var currentFileName = UTIL.getFilenameFromPath(file.path);
 						
-						
-						
 						if(currentFileName.match(/^(header|footer).html?/)) {
 							var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
 						}
 						else {
-							var fileSrc = path.replace(site.source, ""); // File paths needs to be relative!
+							// File paths needs to be relative!
+							var relativePath = getRelativePath(file.path, site.source);
+							var fileSrc = relativePath + path.replace(site.source, ""); 
 						}
 						
 						if(isImage) {
@@ -1235,14 +1235,8 @@
 					console.log("Attempt automatic fix of absolute paths in sourceFile.path=" + sourceFile.path);
 					recursionCounter = 1;
 					
-					// /foo/source/bar/file.htm => bar/file.htm (count the slashes)
-					var relativePath = sourceFile.path.replace(site.source, "");
-					console.log("relativePath=" + relativePath);
-					var folderLevels = UTIL.occurrences(relativePath, "/", false);
-					var relativePath = "";
-					for (var i=0; i<folderLevels; i++) {
-						relativePath += "../";
-					}
+					
+					var relativePath = getRelativePath(sourceFile.path, site.source);
 					
 					var text = sourceFile.text; // Don't change file.text directoy or we'll mess up the grid!
 					
@@ -2110,6 +2104,19 @@
 		&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
 		);
 		
+	}
+	
+	function getRelativePath(path, root) {
+		
+		// /foo/source/bar/file.htm => bar/file.htm (count the slashes)
+		var relativePath = path.replace(root, "");
+		console.log("relativePath=" + relativePath);
+		var folderLevels = UTIL.occurrences(relativePath, "/", false);
+		var relativePath = "";
+		for (var i=0; i<folderLevels; i++) {
+			relativePath += "../";
+		}
+		return relativePath;
 	}
 	
 	
