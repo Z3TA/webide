@@ -1188,7 +1188,7 @@
 	
 	function previewPage(site, callback, edit, sourceFile, ignoreDraft) {
 		
-		console.log("Previewing " + site.name + ". edit=" + edit);
+		console.log('Previewing site.name="' + site.name + '". edit=' + edit);
 		
 		/*
 			We must create the window here, so that it get asociated with the button click
@@ -1210,7 +1210,14 @@
 		else if((typeof sourceFile != "object")) {
 			throw new Error("sourceFile needs to be a File object! sourceFile=" + sourceFile);
 		}
-		else compileIt(sourceFile);
+		else {
+			
+			if(sourceFile.path.indexOf(site.source) !== 0) {
+				//throw new Error('Source file does not belong to "' + site.name + '"!\nsourceFile.path=' + sourceFile.path + '\nsite.source=' + site.source);
+				alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + site.source + ' and try again.');
+			}
+			else compileIt(sourceFile);
+		}
 		
 		return false;
 		
