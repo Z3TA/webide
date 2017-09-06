@@ -29,6 +29,8 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+Welcome file did not open first time, but does open after reload ... !?
+
 A welcome page explaining stuff. (Open this file for new signups)
 
 
@@ -1017,6 +1019,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+When opening the file explorer, open folders so that you can see the current file
 
 When using Ctrl + P and hold down the up/down key, it should switch selection. Instead of having to press the key multible times. Be able to just hold it down.
 

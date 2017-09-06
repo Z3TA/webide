@@ -1,19 +1,15 @@
 (function() {
 	/*
-		If no file has been opened after one second. Open the welcome file
+		Open the welcome file
 		
 	*/
 	"use strict";
 	
-	var timer = 1000; // Milliseconds
+	// The file is not available until the user has logged in
+	CLIENT.on("loginSuccess", openWelcome);
 	
-	var loadOrder = 999; // Load late
-	
-	EDITOR.on("start", openWelcome, loadOrder);
-	
-	function openWelcome() {
-		setTimeout(function openWelcomeFileAfterSomeTime() {
-			
+	function openWelcome(login) {
+		
 			if(Object.keys(EDITOR.files).length === 0) {
 				
 				EDITOR.openFile("/wwwpub/welcome.html", undefined, function fileOpened(err, file) {
@@ -21,11 +17,8 @@
 					if(err) console.warn(err);
 					
 				});
-				
-				
-			}
-		}, timer);
-		
+				}
+			
 	}
 	
 	
