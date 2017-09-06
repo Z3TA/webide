@@ -240,9 +240,9 @@
 		var path = "";
 		
 		if(file.savedAs) path = file.path;
-		else if(EDITOR.lastFile) path = UTIL.getDirectoryFromPath(EDITOR.lastFile.path);
-		
-		if(!path) path = EDITOR.workingDirectory;
+		// Why use the lastFile.path !?
+		// else if(EDITOR.lastFile) path = UTIL.getDirectoryFromPath(EDITOR.lastFile.path);
+		if(!path) path = EDITOR.workingDirectory + file.path;
 		
 		
 		inputPath.value = path;

@@ -319,6 +319,8 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
 		
+		console.log("Changing working directory to: " + workingDir);
+		
 		// Update internally (on client)
 		var workingDirectory = setWorkingDirectory(workingDir);
 		

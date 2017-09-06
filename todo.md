@@ -329,6 +329,10 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+Sometimes you get "undefined is not a function!" when Ctrl+Shift+F to find in files.
+
+When having file annotations (hg) on, the server sometimes complains about "too big" in large files (EDITOR.js).
+
 regression: When no file is open and you use Ctrl+P, pressing enter does nothing!
 
 Mercurial commit tool doesn't find new files in sub folders !!?

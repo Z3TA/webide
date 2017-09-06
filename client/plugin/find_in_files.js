@@ -187,7 +187,7 @@
 			}
 			
 			if(!inputFindGotFocus) {
-				inputFind.focus();
+				inputFind.focus(); // undefined is not a function!
 			}
 			
 			EDITOR.input = false; // Remove focus from the file
