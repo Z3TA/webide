@@ -58,11 +58,27 @@
 		
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
 		
+		EDITOR.on("openFileTool", openAnyFileTool);
+		
 	}
 	
 	function gotoFile_unload() {
 		EDITOR.unbindKey(show_gotoFileInput);
 		EDITOR.unbindKey(hide_gotoFileInput);
+		
+		EDITOR.removeEvent("openFileTool", openAnyFileTool);
+	}
+	
+	function openAnyFileTool(directory) {
+		
+		if(directory) {
+		if(inputFolder) inputFolder.value = directory;
+			else EDITOR.changeWorkingDir(directory);
+		}
+		show_gotoFileInput();
+		
+		return true;
+		
 	}
 	
 	function build_gotoInput() {

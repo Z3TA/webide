@@ -521,7 +521,7 @@
 			if(EDITOR.currentFile) defaultPath = UTIL.getDirectoryFromPath(EDITOR.currentFile.path)
 			else defaultPath = EDITOR.workingDirectory;
 			
-			EDITOR.fileOpenDialog(defaultPath, function selectKey(path) {
+			EDITOR.localFileDialog(defaultPath, function selectKey(path) {
 				inputKey.value = path;
 });
 }

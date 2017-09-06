@@ -499,21 +499,7 @@
 			
 			EDITOR.changeWorkingDir(selectedSite.source);
 			
-			EDITOR.fileOpenDialog(selectedSite.source, function fileSelected(filePath, content) {
-				
-				EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
-					
-					if(err) throw err;
-					
-					// Mark the file as saved, because we just opened it
-					file.isSaved = true;
-					file.savedAs = true;
-					file.changed = false;
-					
-					EDITOR.renderNeeded();
-					
-				});
-			});
+			EDITOR.openFileTool(selectedSite.source);
 			
 			hideSSG();
 		}, false);
@@ -1046,7 +1032,7 @@
 		}
 		
 		function browseKey() {
-			EDITOR.fileOpenDialog(undefined, function selectKey(path) {
+			EDITOR.localFileDialog(undefined, function selectKey(path) {
 				inputPubAuthKey.value = path;
 			});
 		}

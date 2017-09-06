@@ -139,7 +139,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	commitTool: [],
 	resolveTool: [],
 	mergeTool: [],
-	fileDrop: []
+	fileDrop: [],
+	openFileTool: []
 };
 
 EDITOR.renderFunctions = [];
@@ -972,7 +973,7 @@ EDITOR.lastKeyPressed = "";
 		fileOpen.setAttribute("nwworkingdir", UTIL.trailingSlash(defaultPath));
 	}
 	
-	EDITOR.fileOpenDialog = function(defaultPath, callback) {
+	EDITOR.localFileDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS file select dialog window.
 			File path is then passed to the callback function.
@@ -3244,6 +3245,15 @@ EDITOR.lastKeyPressed = "";
 	EDITOR.showDashboard = function showDashboard() {
 		var dashboard = document.getElementById("dashboard");
 		dashboard.style.display = "block";
+	}
+	
+	EDITOR.openFileTool = function fileOpenTool(directory) {
+		console.log("Calling openFileTool listeners (" + EDITOR.eventListeners.openFileTool.length + ")");
+		for(var i=0, f, ret=false; i<EDITOR.eventListeners.openFileTool.length; i++) {
+			ret = EDITOR.eventListeners.openFileTool[i].fun(directory);
+			if(ret === true) break; // Only open one tool
+		}
+		
 	}
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {

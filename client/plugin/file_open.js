@@ -18,12 +18,18 @@
 		
 		// Add items to the canvas context meny
 		menu = EDITOR.addMenuItem("Open local file ...", openFile);
+		
+		EDITOR.on("openFileTool", openLocalFileTool);
+		
 	}
 	
 	function unload() {
 		EDITOR.unbindKey(openFile);
 		
 		EDITOR.removeMenuItem(menu);
+		
+		EDITOR.removeEvent("openFileTool", openLocalFileTool);
+		
 	}
 	
 	function openFile() {
@@ -80,8 +86,14 @@
 		//alertBox(defaultPath);
 		// It doesn't seem we can set default path in Linux !
 		
+		openLocalFile(defaultPath);
+		
+		return false; // Prevent default
+	}
+	
+	function openLocalFile(directory) {
 		console.log("Telling the editor to open the file dialog window ...");
-		EDITOR.fileOpenDialog(defaultPath, function after_dialog_open_file(filePath, content) {
+		EDITOR.localFileDialog(directory, function after_dialog_open_file(filePath, content) {
 			
 			//console.log("filePath=" + filePath);
 			//console.log("content=" + content);
@@ -89,9 +101,9 @@
 			console.log("File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
 			EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
-			
+				
 				if(err) throw err;
-			
+				
 				// Mark the file as saved, because we just opened it
 				file.isSaved = true;
 				file.savedAs = true;
@@ -103,11 +115,14 @@
 				
 			});
 		});
-		
-		return false; // Prevent default
 	}
 	
-
-	
+	function openLocalFileTool(directory) {
+		// Only answer on openFileTool events if we are running locally/"native"
+		if(EDITOR.user != "admin") return false;
+		
+		openLocalFile(directory);
+		
+	}
 	
 })();
