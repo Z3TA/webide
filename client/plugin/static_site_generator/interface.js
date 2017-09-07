@@ -361,11 +361,13 @@
 			//else if(isImage) defaultPath = site.source + "gfx/" + filePath;
 			else defaultPath = site.source + filePath;
 			
-			var msg;
-			if(isImage) var msg = "Where to save the image ?"
-			else msg = "Where to save the file ?";
+			if(isImage) var whereToSaveMessage = "Where to save the image ?"
+			else var whereToSaveMessage = "Where to save the file ?";
 			
-			promptBox(msg, false, defaultPath, function(filePath) {
+			askWhereToSave();
+			
+			function askWhereToSave() {
+				promptBox(whereToSaveMessage, false, defaultPath, function(filePath) {
 				if(filePath) {
 					saveFile(filePath, function fileSaved(err, path) {
 						if(err) return alertBox(err.message);
@@ -393,8 +395,42 @@
 					});
 				}
 			});
+			}
 			
 			function saveFile(filePath, callback) {
+				
+				var folders = UTIL.getFolders(filePath);
+				
+				if(folders.length > 1) {
+					EDITOR.folderExistIn(folders[folders.length-2], UTIL.getFolderName(folders[folders.length-1]), function (path) {
+						if(path === false) {
+							var createPath = "Create the path";
+							var saveElsewhere = "Save the file elsewhere";
+							var dontSave = "Don't save the file";
+							confirmBox("The folder does not exist: " + folders[folders.length-1] + "\n" + 
+							"Do you want to create the path ?", [createPath, saveElsewhere, dontSave], function(answer) {
+								if(answer == createPath) {
+									EDITOR.createPath(folders[folders.length-1], function(err) {
+										if(err) throw err;
+										else readFile();
+									});
+									}
+								else if(answer == saveElsewhere) {
+									askWhereToSave();
+								}
+								else if(answer == dontSave) {
+									// Do nothing
+								}
+								else throw new Error("Unexpected answer=" + answer);
+								
+							});
+							
+						}
+					});
+				}
+				else readFile(); // It will be saved in the root dir
+				
+				function readFile() {
 				var reader = new FileReader();
 				reader.onload = function (event) {
 					var data = event.target.result;
@@ -405,7 +441,7 @@
 					EDITOR.saveToDisk(filePath, data, callback, false, "base64");
 				};
 				reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
-				
+				}
 			}
 			
 		}
