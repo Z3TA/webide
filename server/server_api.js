@@ -146,14 +146,15 @@ API.readLines = function readFromDisk(user, json, callback) {
 		
 		function streamError(err) {
 			console.log("Stream error! path=" + path);
-			throw err;
+			if(callback) callback(err);
+			callback = null;
 		}
 		
 		function streamEnded() {
-		console.log("Stream ended! path=" + path + "flush=" + flush + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine);
+			console.log("Stream ended! path=" + path + "flush=" + flush + " lines.length=" + lines.length + " totalLines=" + totalLines + " startLine=" + startLine + " endLine=" + endLine);
 			
-		callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines});
-			
+			if(callback) callback(null, {path: path, lines: lines, end: Math.min(endLine, totalLines), totalLines: totalLines});
+			callback = null;
 		}
 		
 		function readStream() {
