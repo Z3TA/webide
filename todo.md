@@ -7,15 +7,11 @@ Making a new web page/post should be as easy as making a new comment on HN, or p
 
 Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
 
-Have a DASHBOARD, to make it easier to know what to do
- for SSG where the web master can select to create a new page, see last changes etc. mothly visitors etc
-
 
 2) Beta release?, get USER FEEDBACK!
 
-find beta tester
-setup ftp + webpage
-have a tutorial that shows how to publish to webpage and write new posts
+find beta testers!
+
 
 3) Bug/issue fixing and refactoring
 4) Polishing of existing features
@@ -29,19 +25,31 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-When saving a file (image) and the folder you save to doesn't exist, you get an error.
-Ask if user wants to create the folder instead!
+npm module ...
 
-A welcome page explaining stuff. (Open this file for new signups)
+Should the user install modules manually !?
+
+When running a nodejs script, check for package.json,
+if package.json exist run "npm install" before running the script.
+
+If no package.json exist, ask the user "Do you want to create a package.json for [name of file] to keep track of dependencies" ?
+"Not now", "Create package.json"
+
+Whenever there's an error like "Error: Cannot find module 'leftpad'",
+Ask the user: "Do you want to install leftpad ?":
+"Yes", "Yes, and add to package.json"
+
+
 
 
 
 todo
 ----
 
+npm modules
+
 Investigating added the editor to chrome web store and test it in a Chromebook.
 
-npm modules
 
 What happens when you go offline ? Should it be possible to do work offline ? Like on on a train.
 
@@ -1528,6 +1536,9 @@ Auto complete xml tags! (in xml/svg files)
 
 Optimization
 ============
+
+js parser needs more optimizations!
+parseJavaScript: 118.947021484375ms (full file: interface.js)
 
 reopen_files.js Don't auto-save state if something was changed within 3 seconds !? (would save memory ?)
 
