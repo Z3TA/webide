@@ -2869,15 +2869,18 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	EDITOR.createPath = function(pathToCreate, createPathCallback) {
+	EDITOR.createPath = function(directoryPathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists
 			
 		*/
 		
-		console.log("createPath: " + pathToCreate);
+		console.log("createPath: " + directoryPathToCreate);
 		
-		var json = {pathToCreate: pathToCreate};
+		var lastCharOfPath = directoryPathToCreate.substr(directoryPathToCreate.length-1);
+		if(lastCharOfPath != "/" && lastCharOfPath != "\\") throw new Error("Last character is not a file path delimiter: " + directoryPathToCreate);
+		
+		var json = {pathToCreate: directoryPathToCreate};
 		CLIENT.cmd("createPath", json, function(err, json) {
 			if(err) createPathCallback(err);
 			else createPathCallback(null, json.path);
