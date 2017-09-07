@@ -224,63 +224,75 @@
 							
 							//console.log("change type=" + type);
 							
-							console.log("Parsing only f=" + f.name + "");
+							//console.log("Parsing only function name=" + f.name + " line=" + f.lineNumber + " endRow=" + f.endRow);
 							
 							
 							// The start property is at the { after function
 							// We need to start parsing at the function declaration so that the parser will find it
 							var parseEnd = f.end + charactersLength + 1;
-							var parseStart = file.text.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : "") + "(", f.start); // Search backwards in file.text starting from f.start
 							var parseStartRow = f.lineNumber-1;
 							var baseIndentation = file.grid[parseStartRow].indentation;
 							var oldStart = f.start;
 							var oldEnd = f.end;
+
+							// Try to find the function declaration
+							var gridRowStartIndex = file.grid[parseStartRow].startIndex;
+							// Prevent from searching too far
+							var funcDecText = file.text.substring(gridRowStartIndex, f.start);
+
+							//console.log("funcDecText=" + funcDecText);
+
+							var parseStart = funcDecText.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : "") + "(", f.start); // Search backwards in file.text starting from f.start
+
 							
 							// I do not trust reLastIndexOf ...
 							
 							if(parseStart == -1) {
 
-								parseStart = [];
+								var arrParseStart = [];
 
-								parseStart.push(file.text.lastIndexOf("function " + f.name + " (", f.start));
+								arrParseStart.push(funcDecText.lastIndexOf("function " + f.name + " (", f.start));
 								
 								
 								// Fix for: foo = function() and foo = function foo()
-								parseStart.push(file.text.lastIndexOf(f.name + " = function", f.start));
-								parseStart.push(file.text.lastIndexOf(f.name + "=function", f.start));
+								arrParseStart.push(funcDecText.lastIndexOf(f.name + " = function", f.start));
+								arrParseStart.push(funcDecText.lastIndexOf(f.name + "=function", f.start));
 								
 								
 								// Find foo: function foo()
-								parseStart.push(file.text.lastIndexOf(f.name + ": function", f.start));
-								parseStart.push(file.text.lastIndexOf(f.name + " : function", f.start));
+								arrParseStart.push(funcDecText.lastIndexOf(f.name + ": function", f.start));
+								arrParseStart.push(funcDecText.lastIndexOf(f.name + " : function", f.start));
 
 
 								//console.time("hmm"); // These used to be slow
 								//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
-								parseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), file.text, f.start, f.end));
-								parseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), file.text, f.start, f.end));
+								arrParseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), funcDecText));
+								arrParseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), funcDecText));
 								//console.timeEnd("hmm");
 
 								// Anonymous functions
-								parseStart.push(file.text.lastIndexOf("function", f.start));
+								arrParseStart.push(funcDecText.lastIndexOf("function", f.start));
 
 								// Pick the location closest to the function body
-								parseStart.sort(function sortNumber(a,b) {
+								arrParseStart.sort(function sortNumber(a,b) {
 								    return a - b;
 								});
 
-								parseStart = parseStart[parseStart.length-1];
+								parseStart = arrParseStart[arrParseStart.length-1];
 
 							}
 							
 							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
 							// Make a full parse instead of throwing an error when not in dev mode !?
-						
+							
+							//console.log("parseStart=" + parseStart);
+
+							parseStart = parseStart + gridRowStartIndex;
 						
 							
 							//console.log("characters=" + UTIL.lbChars(characters));
-							console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
+							//console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
 							
 							//console.log("Gonna parse text=\n" + file.text.substring(parseStart, parseEnd));
 							
