@@ -17,7 +17,7 @@ var DEFAULT_FILE_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = read
 var DEFAULT_FOLDER_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = read (note: umask is 0022)
 // Default is only the user are allowed to access files the user creates (umask 0022)
 
-API.readLines = function readFromDisk(user, json, callback) {
+API.countLines = function countLines(user, json, callback) {
 
 	API.readLines(user, json, function linesRead(err, json) {
 		if(err) return callback(err);
@@ -28,7 +28,7 @@ API.readLines = function readFromDisk(user, json, callback) {
 	
 }
 
-API.readLines = function readFromDisk(user, json, callback) {
+API.readLines = function readLines(user, json, callback) {
 
 	console.log("readLines: json=" + JSON.stringify(json)); 
 	

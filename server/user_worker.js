@@ -41,6 +41,12 @@ var DEBUG = 7;
 var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
 log("process.env.uid=" + process.env.uid);
 
+var npmExecFileOptions = {
+	env: {
+		HOME: "/"
+	}
+}
+
 
 if(parseInt(process.env.uid)) {
 
@@ -303,7 +309,6 @@ user.loadStorage = function loadStorage(callback) {
 	
 	// callback storage as a object
 	
-	var fs = require("fs");
 	var filesRead = 0;
 	
 	console.log("Reading storage files for user=" + user.name + " in directory: " + user.storageDir);
@@ -315,6 +320,7 @@ user.loadStorage = function loadStorage(callback) {
 		throw new Error("Can not read the storage when it's being saved! user.isSavingStorage=" + JSON.stringify(user.isSavingStorage));
 	}
 	
+	var fs = require("fs");
 	fs.readdir(user.storageDir, function readingStorageDir(err, files) {
 		
 		if(err) {
@@ -414,6 +420,7 @@ user.saveStorageItem = function saveStorage(itemName, callback) {
 		}
 		
 		//console.log("Saving data to filePath=" + filePath);
+		var fs = require("fs");
 		fs.writeFile(filePath, storageString, function writeStorage(err) {
 			if(err) {
 				callback(new Error("Unable to save storage item=" + itemName + " ! Error: " + err.message));
@@ -587,6 +594,7 @@ API.serve = function serve(user, json, callback) {
 	// Serve a folder via HTTP
 	
 	var folder = user.translatePath(json.folder);
+	if(folder instanceof Error) return callback(folder);
 	
 	console.log("user.name=" + user.name + " serving folder=" + folder);
 	
@@ -600,6 +608,7 @@ API.stop_serve = function serve(user, json, callback) {
 	// Serve a folder via HTTP
 	
 	var folder = user.translatePath(json.folder);
+	if(folder instanceof Error) return callback(folder);
 	
 	console.log("user.name=" + user.name + " wants to stop serving folder=" + folder);
 	
@@ -611,20 +620,22 @@ API.stop_serve = function serve(user, json, callback) {
 API.run_nodejs = function run_nodejs(user, json, callback) {
 	
 	var filePath = user.translatePath(json.filePath);
+	if(filePath instanceof Error) return callback(filePath);
 	
 	if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
 		// Stop the current running script before starting the same script again
 		stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-			runScript(filePath, callback);
+			runNodeJsScript(filePath, json.installAllModules, callback);
 		});
 	}
-	else runScript(filePath, callback);
+	else runNodeJsScript(filePath, json.installAllModules, callback);
 	
 }
 
 API.stop_nodejs = function stop_nodejs(user, json, callback) {
 	
 	var filePath = user.translatePath(json.filePath);
+	if(filePath instanceof Error) return callback(filePath);
 	
 	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback("The script is not running: " + filePath, {filePath: filePath});
 	
@@ -634,11 +645,98 @@ API.stop_nodejs = function stop_nodejs(user, json, callback) {
 	
 }
 
+API.install_nodejs_module = function install_nodejs_module(user, json, callback) {
+	
+	var moduleName = json.name;
+	var filePath = user.translatePath(json.filePath);
+	if(filePath instanceof Error) return callback(filePath);
+	
+	var directory = UTIL.getDirectoryFromPath(filePath);
+	npmExecFileOptions.cwd = directory;
+	
+	var saveType = "--save"; // Package will appear in your dependencies.
+	if(json.saveDev) saveType = "--save-dev"; // Package will appear in your devDependencies
+	else if(json.saveOptional) saveType = "--save-optional"; // Package will appear in your optionalDependencies.
+
+	installNodejsModule(filePath, moduleName, saveType, function nodejsModuleInstalled(err) {
+		callback(err);
+	});
+	
+}
+
+function installNodejsModule(filePath, moduleName, saveType, callback) {
+	var fs = require("fs");
+	
+	var directory = UTIL.getDirectoryFromPath(filePath);
+	npmExecFileOptions.cwd = directory;
+	
+	fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
+		if(err) {
+			if(err.code == "ENOENT") {
+				// package.json don't exist! Create it.
+				var execFile = require('child_process').execFile;
+				var arg = ["init", "--force"];
+				execFile("npm", arg, npmExecFileOptions, function (err, stdout, stderr) {
+					
+					console.log("npm " + JSON.stringify(arg) + " err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+					
+					if(err) callback(new Error("Failed to create package.json: " + err.message));
+					else if(stderr) callback(new Error("Problem creating package.json: " + stderr));
+					else {
+						if(stdout) {
+							user.send({nodejsMessage: {
+									scriptName: filePath,
+									stdout: stdout
+								}
+							});
+						}
+						return installModule();
+						}
+				});
+				
+			}
+			else return callback(err);
+		}
+		else {
+			
+			try {
+				var packageObj = JSON.parse(packageTxt);
+			}
+			catch(parseError) {
+				return callback(new Error("Unable to parse package.json: " + parseError.message));
+			}
+			
+			installModule();
+		}
+	});
+	
+	function installModule() {
+		var execFile = require('child_process').execFile;
+		var arg = ["install", moduleName, saveType];
+		execFile("npm", arg, npmExecFileOptions, function (err, stdout, stderr) {
+			console.log("npm " + JSON.stringify(arg) + " err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+			if(err) callback(new Error("Failed to install '" + moduleName + "': " + err.message));
+			else if(stderr) callback(new Error("Problem installing '" + moduleName + "': " + err.message));
+			else {
+				if(stdout) {
+					user.send({nodejsMessage: {
+							scriptName: filePath,
+							stdout: stdout
+						}
+					});
+				}
+				return callback(null);
+				}
+		});
+	}
+}
+
+
 function stopNodeJsScript(filePath, callback) {
 	
 	console.log(user.name + " killing NodeJS script: filePath=" + filePath);
 	
-	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback(filePath + " is not running");
+	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback(new Error(filePath + " is not running"));
 	
 	var childProcess = user.runningNodeJsScripts[filePath];
 	
@@ -670,8 +768,51 @@ function stopNodeJsScript(filePath, callback) {
 	
 }
 
-function runScript(filePath, callback) {
+function runNodeJsScript(filePath, installAllModules, callback) {
 	
+	var directory = UTIL.getDirectoryFromPath(filePath);
+	npmExecFileOptions.cwd = directory;
+	
+	var fs = require("fs");
+	fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
+		if(err) {
+			if(err.code == "ENOENT") runIt(false);
+			else return callback(err);
+		}
+		else {
+			
+		try {
+				var packageObj = JSON.parse(packageTxt);
+		}
+			catch(parseError) {
+				return runIt(false);
+			}
+			
+			// package.json was found. Lets make sure dependencies exist
+			var execFile = require('child_process').execFile;
+			execFile("npm", ["install"], npmExecFileOptions, function (err, stdout, stderr) {
+			
+				console.log("npm install err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+				
+				if(err) callback(new Error("Failed to install dependencies: " + err.message));
+				else if(stderr) callback(new Error("Problem installing dependencies: " + stderr));
+					else {
+					if(stdout) {
+					user.send({nodejsMessage: {
+							scriptName: filePath,
+								stdout: stdout
+						}
+					});
+					}
+					return runIt(true);
+					}
+			});
+			
+		}
+	});
+	
+	function runIt(packageJsonExist) {
+		
 	console.log(user.name + " starting NodeJS script: filePath=" + filePath);
 	
 	var nodeScriptArgs = [];
@@ -741,16 +882,50 @@ function runScript(filePath, callback) {
 	}
 	
 	function nodejScriptStderr(data) {
-		console.log(user.name + ":" + filePath + ":stderr: data=" + data + "");
+			console.log(user.name + ":" + filePath + ":stderr: data (" + (typeof data) + ") =  " + data + "");
 		
-		user.send({nodejsMessage: {
-				scriptName: filePath,
-				stdout: data.toString("utf8")
+			var stderr = data.toString("utf8");
+			
+			var matchModuleError = stderr.match(/Error: Cannot find module '(.*)'/);
+			
+			if(matchModuleError) {
+				
+				if(installAllModules) {
+					// Try to install the module and run the script again
+					installNodejsModule(filePath, matchModuleError[1], undefined, function(err) {
+						if(err) user.send(err.message);
+						else {
+							
+							if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
+								if(err) console.log(err.message); // Means the script was already stopped.
+								runNodeJsScript(filePath, installAllModules, function(err) {
+									if(err) user.send(err.message);
+								});
+							})
+							
+						}
+					});
+					
+				}
+				else {
+				user.send({nodejsMessage: {
+						scriptName: filePath,
+							cannotFindModule: matchModuleError[1]
+						}
+					});
+				}
 			}
-	});
+			
+			user.send({nodejsMessage: {
+					scriptName: filePath,
+					stdout: stderr
+				}
+			});
+		}
+		
 	}
-	
 }
+
 
 function parentRequest(req, callback) {
 	

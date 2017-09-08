@@ -30,10 +30,50 @@
 		
 		var filePath = msg.scriptName;
 			
-		var stdOutFile = filePath + ".stdout";
+		if(msg.cannotFindModule) {
+			
+			var no = "No! (don't run script)";
+			var installAll = "Yes, install all modules!"
+			var yes = "Yes!";
+			
+			
+			confirmBox("Install nodejs module <b>" + msg.cannotFindModule + "</b>  ?", [no, installAll, yes], function(answer) {
+				if(answer == "no") {
+					// Do nothing
+		}
+				else if(answer == yes) {
+					CLIENT.cmd("install_nodejs_module", {name: msg.cannotFindModule, filePath: filePath}, function(err, json) {
+						if(err) alertBox(err.message);
+						else {
+							// Attempt to run the script again
+							CLIENT.cmd("run_nodejs", {filePath: filePath}, function(err, json) {
+								if(err) throw err;
+								else {
+									console.log("Started script: " + json.filePath);
+								}
+							});
+						}
+					});
+				}
+				else if(answer == installAll) {
+					// Run the script again, and install all modules found
+					CLIENT.cmd("run_nodejs", {filePath: filePath, installAllModules: true}, function(err, json) {
+						if(err) throw err;
+						else {
+							console.log("Started script: " + json.filePath);
+						}
+					});
+					}
+				else throw new Error("Unknown answer=" + answer);
+				});
+		}
 		
-		if(EDITOR.files.hasOwnProperty(stdOutFile)) {
-			console.log("filePath=" + stdOutFile + " exist in EDITOR.files");
+		if(msg.stdout) {
+			
+			var stdOutFile = filePath + ".stdout";
+			
+			if(EDITOR.files.hasOwnProperty(stdOutFile)) {
+				console.log("filePath=" + stdOutFile + " exist in EDITOR.files");
 			appendFile(EDITOR.files[stdOutFile], msg);
 		}
 		else {
@@ -44,6 +84,7 @@
 				});
 			}
 		}
+	}
 	
 	function stopNodeJsScript() {
 		var filePath = EDITOR.currentFile.path;
