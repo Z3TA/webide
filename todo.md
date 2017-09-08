@@ -25,6 +25,20 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+npm is symlinked from /usr/bin/npm to /usr/share/npm/bin/npm-cli.js
+
+when running npm from chroot it can't require ../lib/npm.js because __dirname is /usr/bin instead of /usr/share/npm/bin/ ...
+
+$ sudo ls -la /usr/bin/npm
+lrwxrwxrwx 1 root root 27 Dec  8  2015 /usr/bin/npm -> ../share/npm/bin/npm-cli.js
+$ sudo ls -la /home/localdev/usr/bin/npm
+-rwxr-xr-x 1 root root 2270 Sep  8 16:50 /home/localdev/usr/bin/npm
+
+The broblem is outside chroot "it" follows the symlink, but inside chroot, there is no visible symlink.
+
+Try execFile /usr/share/npm/bin/npm-cli.js instead !?
+
+
 npm module ...
 
 Should the user install modules manually !?

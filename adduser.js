@@ -299,6 +299,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	mount("/lib/", "/home/" + username + "/lib");
 	mount("/lib64/", "/home/" + username + "/lib64");
 	mount("/usr/lib/", "/home/" + username + "/usr/lib");
+	mount("/usr/share/", "/home/" + username + "/usr/share"); // npm dependencies
 	mount("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
 	mount("/usr/bin/python", "/home/" + username + "/usr/bin/python");
 	mount("/usr/bin/nodejs", "/home/" + username + "/usr/bin/nodejs");

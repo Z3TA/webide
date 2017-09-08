@@ -83,7 +83,7 @@ unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.nodejs");
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
-
+unlink("/etc/apparmor.d/home." + username + ".usr.bin.npm");
 
 //var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 //if(reloadApparmor != "") throw reloadApparmor;
@@ -105,10 +105,11 @@ unlink("/usr/bin/nodejs_" + username);
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
 	umount("/home/" + username + "/usr/lib");
+umount("/home/" + username + "/usr/share");
 	umount("/home/" + username + "/usr/bin/hg");
 	umount("/home/" + username + "/usr/bin/python");
 	umount("/home/" + username + "/usr/bin/nodejs");
-	
+umount("/home/" + username + "/usr/bin/npm");
 	
 	child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
