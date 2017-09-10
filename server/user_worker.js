@@ -659,7 +659,7 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 	else if(json.saveOptional) saveType = "--save-optional"; // Package will appear in your optionalDependencies.
 
 	installNodejsModule(filePath, moduleName, saveType, function nodejsModuleInstalled(err) {
-		callback(err);
+		callback(err, {name: moduleName});
 	});
 	
 }
@@ -676,22 +676,31 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 				// package.json don't exist! Create it.
 				var execFile = require('child_process').execFile;
 				var arg = ["init", "--force"];
-				execFile("npm", arg, npmExecFileOptions, function (err, stdout, stderr) {
+				execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
 					
-					console.log("npm " + JSON.stringify(arg) + " err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+					console.log("npm " + JSON.stringify(arg) + " err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 					
-					if(err) callback(new Error("Failed to create package.json: " + err.message));
-					else if(stderr) callback(new Error("Problem creating package.json: " + stderr));
-					else {
-						if(stdout) {
-							user.send({nodejsMessage: {
+					if(err) return callback(new Error("Failed to create package.json: " + err.message));
+					
+					if(stderr) {
+						
+						stderr = stderr.replace(/npm WARN using --force I sure hope you know what you are doing\./, "").trim();
+						
+						if(stderr) {
+						return callback(new Error("Problem creating package.json: " + stderr));
+						}
+					}
+					
+					if(stdout) {
+						user.send({nodejsMessage: {
 									scriptName: filePath,
 									stdout: stdout
 								}
 							});
 						}
+					
 						return installModule();
-						}
+					
 				});
 				
 			}
@@ -713,20 +722,29 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 	function installModule() {
 		var execFile = require('child_process').execFile;
 		var arg = ["install", moduleName, saveType];
-		execFile("npm", arg, npmExecFileOptions, function (err, stdout, stderr) {
+		execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
 			console.log("npm " + JSON.stringify(arg) + " err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
-			if(err) callback(new Error("Failed to install '" + moduleName + "': " + err.message));
-			else if(stderr) callback(new Error("Problem installing '" + moduleName + "': " + err.message));
-			else {
-				if(stdout) {
+			
+			if(err) return callback(new Error("Failed to install '" + moduleName + "': " + err.message));
+			
+			if(stderr) {
+				
+				stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
+				stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
+				
+				if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + err.message));
+			}
+			
+			if(stdout) {
 					user.send({nodejsMessage: {
 							scriptName: filePath,
 							stdout: stdout
 						}
 					});
 				}
-				return callback(null);
-				}
+			
+			return callback(null);
+			
 		});
 	}
 }
@@ -781,7 +799,7 @@ function runNodeJsScript(filePath, installAllModules, callback) {
 		}
 		else {
 			
-		try {
+			try {
 				var packageObj = JSON.parse(packageTxt);
 		}
 			catch(parseError) {
@@ -790,13 +808,21 @@ function runNodeJsScript(filePath, installAllModules, callback) {
 			
 			// package.json was found. Lets make sure dependencies exist
 			var execFile = require('child_process').execFile;
-			execFile("npm", ["install"], npmExecFileOptions, function (err, stdout, stderr) {
+			var arg = ["install"];
+			execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
 			
 				console.log("npm install err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 				
-				if(err) callback(new Error("Failed to install dependencies: " + err.message));
-				else if(stderr) callback(new Error("Problem installing dependencies: " + stderr));
-					else {
+				if(err) return callback(new Error("Failed to install dependencies: " + err.message));
+				
+				if(stderr) {
+					
+					stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
+					stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
+					
+					if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + err.message));
+				}
+				
 					if(stdout) {
 					user.send({nodejsMessage: {
 							scriptName: filePath,
@@ -805,7 +831,7 @@ function runNodeJsScript(filePath, installAllModules, callback) {
 					});
 					}
 					return runIt(true);
-					}
+					
 			});
 			
 		}
