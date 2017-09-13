@@ -313,7 +313,8 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.npm", username);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
+	
 	
 	/*
 	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);

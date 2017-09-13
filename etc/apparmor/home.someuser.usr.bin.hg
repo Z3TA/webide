@@ -1,4 +1,3 @@
-#include <tunables/global>
 
 /home/%USERNAME%/usr/bin/hg {
   #include <abstractions/base>

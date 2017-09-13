@@ -34,8 +34,6 @@
   /dev/urandom r,
   /dev/tty rw,
 
-  /etc/ld.so.cache r,
-  /etc/nsswitch.conf r,
   
   # Nead read to list files
   /home/%USERNAME%/ r,
@@ -45,16 +43,17 @@
   %JZEDIT%/server/** r,
   %JZEDIT%/client/** r,
 
+  /etc/ld.so.cache r,
+  /etc/nsswitch.conf r,
   /lib/** r,
-
   /run/resolvconf/resolv.conf r,
-
   /usr/lib/** r,
   /usr/share/zoneinfo/** r,
 
   # P means "use profile" (and clear enviroment), x means execute
   /home/%USERNAME%/usr/bin/hg Px,
   /home/%USERNAME%/usr/bin/nodejs Px,
+  /home/%USERNAME%/usr/share/npm/bin/npm-cli.js Px,
 
 }
 

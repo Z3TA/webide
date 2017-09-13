@@ -25,35 +25,7 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-npm is symlinked from /usr/bin/npm to /usr/share/npm/bin/npm-cli.js
-
-when running npm from chroot it can't require ../lib/npm.js because __dirname is /usr/bin instead of /usr/share/npm/bin/ ...
-
-$ sudo ls -la /usr/bin/npm
-lrwxrwxrwx 1 root root 27 Dec  8  2015 /usr/bin/npm -> ../share/npm/bin/npm-cli.js
-$ sudo ls -la /home/localdev/usr/bin/npm
--rwxr-xr-x 1 root root 2270 Sep  8 16:50 /home/localdev/usr/bin/npm
-
-The broblem is outside chroot "it" follows the symlink, but inside chroot, there is no visible symlink.
-
-Try execFile /usr/share/npm/bin/npm-cli.js instead !?
-
-
-npm module ...
-
-Should the user install modules manually !?
-
-When running a nodejs script, check for package.json,
-if package.json exist run "npm install" before running the script.
-
-If no package.json exist, ask the user "Do you want to create a package.json for [name of file] to keep track of dependencies" ?
-"Not now", "Create package.json"
-
-Whenever there's an error like "Error: Cannot find module 'leftpad'",
-Ask the user: "Do you want to install leftpad ?":
-"Yes", "Yes, and add to package.json"
-
-
+fixing apparmor issues with npm
 
 
 
@@ -354,6 +326,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Logging in as the same user, twice, you get dublicates and wierd behaviour ...
 
 Sometimes you get "undefined is not a function!" when Ctrl+Shift+F to find in files.
 

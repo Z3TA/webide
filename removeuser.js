@@ -83,7 +83,7 @@ unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.nodejs");
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
-unlink("/etc/apparmor.d/home." + username + ".usr.bin.npm");
+unlink("/etc/apparmor.d/home." + username + ".usr.share.npm.bin.npm-cli.js");
 
 //var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 //if(reloadApparmor != "") throw reloadApparmor;
