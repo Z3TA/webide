@@ -288,11 +288,19 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	// On some system we need to mount --bind urandom !??
 	mount("/dev/urandom", "/home/" + username + "/dev/urandom");
 	
+	
+	// Create directory for executables
 	fs.mkdirSync("/home/" + username + "/usr/");
 	fs.mkdirSync("/home/" + username + "/usr/bin/");
 	
 	fs.chmodSync("/home/" + username + "/usr/", "555");
 	fs.chmodSync("/home/" + username + "/usr/bin/", "555");
+	
+	
+	// npm needs to write in /usr/local !??
+	fs.mkdirSync("/home/" + username + "/usr/local/");
+	chownrDirSync("/home/" + username + "/usr/local/", uid, gid);
+	fs.chmodSync("/home/" + username + "/usr/local/", "775");
 	
 	
 	// Mount these instead of copying to save hd space
@@ -303,7 +311,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	mount("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
 	mount("/usr/bin/python", "/home/" + username + "/usr/bin/python");
 	mount("/usr/bin/nodejs", "/home/" + username + "/usr/bin/nodejs");
-	mount("/usr/bin/npm", "/home/" + username + "/usr/bin/npm");
+	//mount("/usr/bin/npm", "/home/" + username + "/usr/bin/npm");
 	
 	
 	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it

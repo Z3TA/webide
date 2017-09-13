@@ -1,4 +1,6 @@
 
+#include <tunables/global>
+
 /home/%USERNAME%/usr/bin/python {
 
   /home/%USERNAME%/ r,

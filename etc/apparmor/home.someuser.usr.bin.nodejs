@@ -2,6 +2,8 @@
 # Profile for the nodejs binary responsible for running user scripts
 #
 
+#include <tunables/global>
+
 /home/%USERNAME%/usr/bin/nodejs {
 	
   signal receive set=hup peer=/usr/bin/nodejs_%USERNAME%,

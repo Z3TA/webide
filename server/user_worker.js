@@ -670,6 +670,8 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	npmExecFileOptions.cwd = directory;
 	
+	console.log("installNodejsModule: moduleName=" + moduleName + " saveType=" + saveType + " npmExecFileOptions=" + JSON.stringify(npmExecFileOptions)); 
+	
 	fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
 		if(err) {
 			if(err.code == "ENOENT") {
