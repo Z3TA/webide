@@ -298,11 +298,11 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 	
 	// npm needs to write in /usr/local !??
-	fs.mkdirSync("/home/" + username + "/usr/local/");
-	chownrDirSync("/home/" + username + "/usr/local/", uid, gid);
-	fs.chmodSync("/home/" + username + "/usr/local/", "775");
+	//fs.mkdirSync("/home/" + username + "/usr/local/");
+	//chownrDirSync("/home/" + username + "/usr/local/", uid, gid);
+	//fs.chmodSync("/home/" + username + "/usr/local/", "775");
 	
-	
+
 	// Mount these instead of copying to save hd space
 	mount("/lib/", "/home/" + username + "/lib");
 	mount("/lib64/", "/home/" + username + "/lib64");
