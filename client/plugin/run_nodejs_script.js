@@ -38,9 +38,9 @@
 			
 			
 			confirmBox("Install nodejs module <b>" + msg.cannotFindModule + "</b>  ?", [no, installAll, yes], function(answer) {
-				if(answer == "no") {
+				if(answer == no) {
 					// Do nothing
-		}
+				}
 				else if(answer == yes) {
 					CLIENT.cmd("install_nodejs_module", {name: msg.cannotFindModule, filePath: filePath}, function(err, json) {
 						if(err) alertBox(err.message);
