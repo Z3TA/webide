@@ -17,6 +17,8 @@
 		//console.log("lineBreak=" + EDITOR.currentFile.lineBreak.replace("\r", "CR").replace("\n", "LF"));
 		text = text.replace(/\r/g, "");
 		
+		if(file.mode == "text") return text; // Don't remove spaces
+		
 		//console.log("text=" + UTIL.lbChars(text));
 		
 		var lines = text.split("\n");
