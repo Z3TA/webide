@@ -25,7 +25,6 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-fixing apparmor issues with npm
 
 
 
