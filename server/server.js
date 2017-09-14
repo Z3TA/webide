@@ -7,7 +7,7 @@ var getArg = require("./getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
-var CRAZY = getArg(["crazy", "crazy"]);
+var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows user workers to run as root
 
 var UTIL = require("../client/UTIL.js");
 
