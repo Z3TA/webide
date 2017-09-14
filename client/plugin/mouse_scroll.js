@@ -5,24 +5,31 @@
 	"use strict";
 
 	var originalTopMargin = EDITOR.settings.topMargin;
-
+	var deltaNext = 0;
+	
+	
 	EDITOR.on("mouseScroll", onScroll);
 	
 	var lastScroll = new Date();
 	
-	function onScroll(dir, steps, combo) {
+	function onScroll(dir, steps, combo, scrollEvent) {
 		
 		var time = new Date();
+		var deltaY = Math.abs(scrollEvent.deltaY)
+		var scrollSeed = Math.floor((deltaY + deltaNext) / 17);
 		
-		console.log("scroll dir=" + dir + " time=" + (time - lastScroll));
+		console.log("scroll dir=" + dir + " time=" + (time - lastScroll) + " scrollSeed=" + scrollSeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY);
 		
-		if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
+		//if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
 			// It's annoying if we limit scroll speed on most systems
 			// But on Mac it's super fast, so it's more annoying because it's too fast.
-			console.log("skipped scroll dir!");
-			return; // Fix insane fast scrolling
-		}
+			//console.log("skipped scroll dir!");
+			//return; // Fix insane fast scrolling
+		//}
 		
+		
+		if(scrollSeed == 0) deltaNext += deltaY;
+		else deltaNext = 0;
 		
 		lastScroll = time;
 		
@@ -39,7 +46,11 @@
 				
 				var maxStartRow = Math.max(0, EDITOR.currentFile.grid.length - EDITOR.view.visibleRows/2);
 				
-				var startRow = file.startRow + EDITOR.settings.scrollStep * dir;
+				
+				
+				// Smooth scroll if scrollSeed == 1 !?
+				
+				var startRow = file.startRow + scrollSeed * dir;
 				
 				
 				if(startRow > maxStartRow) {

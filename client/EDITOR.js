@@ -5243,7 +5243,7 @@ EDITOR.lastKeyPressed = "";
 		if(tagName == "CANVAS") {
 			console.log("Calling mouseScroll listeners (" + EDITOR.eventListeners.mouseScroll.length + ") ...");
 			for(var i=0; i<EDITOR.eventListeners.mouseScroll.length; i++) {
-				EDITOR.eventListeners.mouseScroll[i].fun(dir, steps, combo);
+				EDITOR.eventListeners.mouseScroll[i].fun(dir, steps, combo, scrollWheelEvent);
 			}
 		}
 		
