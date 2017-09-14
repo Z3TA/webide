@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 	
-	var sites; // Array of sites
+	var sites= []; // Array of sites
 	var manager;
 	var selectSite;
 	var selectedSite;
@@ -368,33 +368,33 @@
 			
 			function askWhereToSave() {
 				promptBox(whereToSaveMessage, false, defaultPath, function(filePath) {
-				if(filePath) {
-					saveFile(filePath, function fileSaved(err, path) {
-						if(err) return alertBox(err.message);
-						
-						var currentFileName = UTIL.getFilenameFromPath(file.path);
-						
-						if(currentFileName.match(/^(header|footer).html?/)) {
-							var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
-						}
-						else {
-							// File paths needs to be relative!
-							var relativePath = getRelativePath(file.path, site.source);
-							var fileSrc = relativePath + path.replace(site.source, ""); 
-						}
-						
-						if(isImage) {
-							// todo: Some sort of crop and resize tool
-							file.insertText('<img src="' + fileSrc + '">');
-						}
-						else {
-							var fileName = UTIL.getFilenameFromPath(filePath);
-							file.insertText('<a href="' + fileSrc + '">' + fileName + '</a>');
-						}
-						
-					});
-				}
-			});
+					if(filePath) {
+						saveFile(filePath, function fileSaved(err, path) {
+							if(err) return alertBox(err.message);
+							
+							var currentFileName = UTIL.getFilenameFromPath(file.path);
+							
+							if(currentFileName.match(/^(header|footer).html?/)) {
+								var fileSrc = path.replace(site.source, "/"); // File paths needs to be absolute!
+							}
+							else {
+								// File paths needs to be relative!
+								var relativePath = getRelativePath(file.path, site.source);
+								var fileSrc = relativePath + path.replace(site.source, ""); 
+							}
+							
+							if(isImage) {
+								// todo: Some sort of crop and resize tool
+								file.insertText('<img src="' + fileSrc + '">');
+							}
+							else {
+								var fileName = UTIL.getFilenameFromPath(filePath);
+								file.insertText('<a href="' + fileSrc + '">' + fileName + '</a>');
+							}
+							
+						});
+					}
+				});
 			}
 			
 			function saveFile(filePath, callback) {
@@ -414,7 +414,7 @@
 										if(err) throw err;
 										else readFile();
 									});
-									}
+								}
 								else if(answer == saveElsewhere) {
 									askWhereToSave();
 								}
@@ -431,16 +431,16 @@
 				else readFile(); // It will be saved in the root dir
 				
 				function readFile() {
-				var reader = new FileReader();
-				reader.onload = function (event) {
-					var data = event.target.result;
-					
-					// Specifying encoding:base64 will magically convert to binary!
-					// We do have to remove the data:image/png metadata though!
-					data = data.replace("data:" + fileType + ";base64,", "");
-					EDITOR.saveToDisk(filePath, data, callback, false, "base64");
-				};
-				reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
+					var reader = new FileReader();
+					reader.onload = function (event) {
+						var data = event.target.result;
+						
+						// Specifying encoding:base64 will magically convert to binary!
+						// We do have to remove the data:image/png metadata though!
+						data = data.replace("data:" + fileType + ";base64,", "");
+						EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+					};
+					reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
 				}
 			}
 			
@@ -501,6 +501,8 @@
 		selectSite.setAttribute("id", "selectSite");
 		selectSite.setAttribute("class", "select");
 		selectSite.addEventListener("change", changeSelectSite, false);
+		
+		if(sites == undefined) throw new Error("Did not detect any configured sites for the static site generator!");
 		
 		if(sites.length > 0) {
 			sites.forEach(addSiteOption);
@@ -610,35 +612,35 @@
 		
 		if(sites.length > 0) changeSelectSite(); // Select the one currently selected
 		
-		function changeSelectSite() {
-			
-			//alertBox("Fired changeSelectSite");
-			
-			var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
-			selectedSite = sites[selectedSiteIndex];
-			EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
-			
-			inputSiteName.value = selectedSite.name;
-			inputProjectFolder.value = selectedSite.projectFolder;
-			inputSourceFolder.value = selectedSite.source;
-			inputPreviewFolder.value = selectedSite.preview;
-			inputPublishFolder.value = selectedSite.publish;
-			inputTemplate.value = selectedSite.template;
-			inputPubAuthUser.value = selectedSite.pubUser;
-			inputPubAuthPw.value = selectedSite.pubPw;
-			inputPubAuthKey.value = selectedSite.key;
-			inputRepoAuthUser.value = selectedSite.repoUser;
-			inputRepoAuthPw.value = selectedSite.repoPw;
-			inputRepository.value = selectedSite.repository;
-			inputUrl.value = selectedSite.url;
-		}
 		
 	}
 	
+	function changeSelectSite() {
+		
+		//alertBox("Fired changeSelectSite");
+		
+		var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
+		selectedSite = sites[selectedSiteIndex];
+		EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
+		
+		inputSiteName.value = selectedSite.name;
+		inputProjectFolder.value = selectedSite.projectFolder;
+		inputSourceFolder.value = selectedSite.source;
+		inputPreviewFolder.value = selectedSite.preview;
+		inputPublishFolder.value = selectedSite.publish;
+		inputTemplate.value = selectedSite.template;
+		inputPubAuthUser.value = selectedSite.pubUser;
+		inputPubAuthPw.value = selectedSite.pubPw;
+		inputPubAuthKey.value = selectedSite.key;
+		inputRepoAuthUser.value = selectedSite.repoUser;
+		inputRepoAuthPw.value = selectedSite.repoPw;
+		inputRepository.value = selectedSite.repository;
+		inputUrl.value = selectedSite.url;
+	}
 	
 	function editSiteSettings() {
 		
-		if(!selectedSite) throw new Error("No selected site");
+		//if(!selectedSite) throw new Error("No selected site");
 		
 		editView.style.display="block";
 		controlView.style.display="none"; // Hide this div
@@ -1102,7 +1104,8 @@
 		function saveSiteSettings() {
 			
 			if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not ready!");
-			if(!selectedSite) throw new Error("No site selected!");
+			
+			if(!selectedSite) return saveNewSite();
 			
 			if(selectedSite.name != inputSiteName.value) {
 				selectSite.options[selectSite.selectedIndex].text = inputSiteName.value;
@@ -1139,7 +1142,21 @@
 			EDITOR.storage.setItem("cmsjz_selectedSiteName", "");
 			// Does it fire onChange events? 
 			
+			editView.style.display = "none"; // Hide the edit view
+			controlView.style.display = "block"; // Show the connection view
+			EDITOR.resizeNeeded();
 			
+			sites.splice(sites.indexOf(selectedSite), 1);
+			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2)); // Save all sites in local-storage
+			
+			// Select another site
+			if(sites.length > 0) {
+				selectedSite = sites[0];
+				changeSelectSite();
+			}
+			else selectedSite = undefined;
+			
+			//alertBox("Site deleted!");
 			
 		}
 		
