@@ -668,6 +668,8 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 	var fs = require("fs");
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
+	var fileName = UTIL.getFilenameFromPath(filePath);
+	var folderName = UTIL.getFolderName(filePath);
 	npmExecFileOptions.cwd = directory;
 	
 	console.log("installNodejsModule: moduleName=" + moduleName + " saveType=" + saveType + " npmExecFileOptions=" + JSON.stringify(npmExecFileOptions)); 
@@ -676,32 +678,23 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 		if(err) {
 			if(err.code == "ENOENT") {
 				// package.json don't exist! Create it.
-				var execFile = require('child_process').execFile;
-				var arg = ["init", "--force"];
-				execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
-					
-					console.log("npm " + JSON.stringify(arg) + " err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
-					
+				fs.writeFile(directory + "package.json", '' + 
+				'{\n' +
+				'"name": "' + folderName + '",\n' +
+				'"version": "1.0.0",\n' +
+				'"description": "",\n' +
+				'"main": "' + fileName + '",\n' +
+				'"scripts": {\n' +
+				'  "test": "echo \\\"Error: no test specified\\\" && exit 1"\n' +
+				'},\n' +
+				'"keywords": [],\n' +
+				'"author": "' + user.name + '",\n' +
+				'"license": "ISC"\n' +
+				'}\n', "utf8", function (err) {
+				
 					if(err) return callback(new Error("Failed to create package.json: " + err.message));
 					
-					if(stderr) {
-						
-						stderr = stderr.replace(/npm WARN using --force I sure hope you know what you are doing\./, "").trim();
-						
-						if(stderr) {
-						return callback(new Error("Problem creating package.json: " + stderr));
-						}
-					}
-					
-					if(stdout) {
-						user.send({nodejsMessage: {
-									scriptName: filePath,
-									stdout: stdout
-								}
-							});
-						}
-					
-						return installModule();
+					return installModule();
 					
 				});
 				
@@ -725,7 +718,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 		var execFile = require('child_process').execFile;
 		var arg = ["install", moduleName, saveType];
 		execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
-			console.log("npm " + JSON.stringify(arg) + " err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+			console.log("npm " + JSON.stringify(arg) + " err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 			
 			if(err) return callback(new Error("Failed to install '" + moduleName + "': " + err.message));
 			
@@ -734,7 +727,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 				stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
 				stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
 				
-				if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + err.message));
+				if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + stderr));
 			}
 			
 			if(stdout) {
