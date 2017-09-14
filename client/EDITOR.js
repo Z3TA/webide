@@ -3254,11 +3254,15 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.openFileTool = function fileOpenTool(directory) {
 		console.log("Calling openFileTool listeners (" + EDITOR.eventListeners.openFileTool.length + ")");
-		for(var i=0, f, ret=false; i<EDITOR.eventListeners.openFileTool.length; i++) {
+		
+		var ret = false;
+		
+		for(var i=0, f; i<EDITOR.eventListeners.openFileTool.length; i++) {
 			ret = EDITOR.eventListeners.openFileTool[i].fun(directory);
 			if(ret === true) break; // Only open one tool
 		}
 		
+		return ret;
 	}
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {

@@ -77,7 +77,7 @@
 		}
 		show_gotoFileInput();
 		
-		return true;
+		return true; // true means we handled it
 		
 	}
 	
@@ -160,7 +160,7 @@
 	
 	function typing(keyUpEvent) {
 		
-		console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode);
+		console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input);
 		
 		keyUpEvent.preventDefault();
 

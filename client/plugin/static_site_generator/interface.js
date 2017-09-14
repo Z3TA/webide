@@ -535,11 +535,13 @@
 		buttonOpenEdit.addEventListener("click", function() {
 			if(!selectedSite) throw new Error("No site selected!");
 			
+			hideSSG(); // Sets EDITOR.input to true
+			
 			EDITOR.changeWorkingDir(selectedSite.source);
 			
-			EDITOR.openFileTool(selectedSite.source);
+			EDITOR.openFileTool(selectedSite.source); // Sets EDITOR.input to false
 			
-			hideSSG();
+		
 		}, false);
 		
 		var buttonNewPage = document.createElement("input");
