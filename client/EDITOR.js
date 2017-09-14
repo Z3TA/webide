@@ -81,7 +81,7 @@ EDITOR.settings = {
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting
 	},
-	scrollStep: 3,
+	scrollSpeedMultiplier: 1/17,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
 	bigFileSize: 400000, //  Bytes, all files larger then this will be opened as streams
 	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize

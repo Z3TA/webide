@@ -6,7 +6,7 @@
 (function() {
 	"use strict";
 	
-	var o_gridHeight, o_gridWidth, o_fontSize, visibleRows, visibleColumns, blueBoxStartRow, o_font, o_scrollStep;
+	var o_gridHeight, o_gridWidth, o_fontSize, visibleRows, visibleColumns, blueBoxStartRow, o_font, o_scrollSpeedMultiplier;
 	
 	var zoomedIn = false;
 	
@@ -25,7 +25,7 @@
 		o_gridWidth = EDITOR.settings.gridWidth;
 		o_fontSize = EDITOR.settings.style.fontSize;
 		o_font = EDITOR.settings.style.font;
-		o_scrollStep = EDITOR.settings.scrollStep;
+		o_scrollSpeedMultiplier = EDITOR.settings.scrollSpeedMultiplier;
 		
 		EDITOR.bindKey({desc: "Toggle zoom", charCode: charCodeZ, combo: ALT, fun: zoomSwitch});
 		
@@ -49,7 +49,7 @@
 		EDITOR.settings.gridWidth = EDITOR.settings.gridWidth / 6;
 		EDITOR.settings.style.fontSize = EDITOR.settings.style.fontSize / 4;
 		//EDITOR.settings.style.font = "bold " + o_font;
-		EDITOR.settings.scrollStep = 20;
+		EDITOR.settings.scrollSpeedMultiplier = 1/4;
 		
 		visibleRows = EDITOR.view.visibleRows;
 		visibleColumns = EDITOR.view.visibleColumns;
@@ -105,7 +105,7 @@
 		EDITOR.settings.gridWidth = o_gridWidth;
 		EDITOR.settings.style.fontSize = o_fontSize;
 			EDITOR.settings.style.font = o_font;
-			EDITOR.settings.scrollStep = o_scrollStep;
+			EDITOR.settings.scrollSpeedMultiplier = o_scrollSpeedMultiplier;
 			
 		zoomedIn = false;
 		

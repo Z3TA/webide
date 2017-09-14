@@ -16,7 +16,7 @@
 		
 		var time = new Date();
 		var deltaY = Math.abs(scrollEvent.deltaY)
-		var scrollSeed = Math.floor((deltaY + deltaNext) / 17);
+		var scrollSeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
 		
 		console.log("scroll dir=" + dir + " time=" + (time - lastScroll) + " scrollSeed=" + scrollSeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY);
 		
