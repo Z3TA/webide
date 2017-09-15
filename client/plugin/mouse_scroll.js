@@ -16,9 +16,14 @@
 		
 		var time = new Date();
 		var deltaY = Math.abs(scrollEvent.deltaY)
-		var scrollSeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
 		
-		console.log("scroll dir=" + dir + " time=" + (time - lastScroll) + " scrollSeed=" + scrollSeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY);
+		if(!deltaY) deltaY = 53; // Some browsers (Firefox) don't give deltaY
+		
+		var scrollSpeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
+		
+		
+		
+		console.log("scroll dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
 		
 		//if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
 			// It's annoying if we limit scroll speed on most systems
@@ -28,7 +33,7 @@
 		//}
 		
 		
-		if(scrollSeed == 0) deltaNext += deltaY;
+		if(scrollSpeed == 0) deltaNext += deltaY;
 		else deltaNext = 0;
 		
 		lastScroll = time;
@@ -48,9 +53,9 @@
 				
 				
 				
-				// Smooth scroll if scrollSeed == 1 !?
+				// Smooth scroll if scrollSpeed == 1 !?
 				
-				var startRow = file.startRow + scrollSeed * dir;
+				var startRow = file.startRow + scrollSpeed * dir;
 				
 				
 				if(startRow > maxStartRow) {
