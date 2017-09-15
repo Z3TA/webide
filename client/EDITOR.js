@@ -4245,9 +4245,21 @@ EDITOR.lastKeyPressed = "";
 		
 		var msg = windowMessageEvent.data;
 		
-		if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content);
-		if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin)
-		
+		if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content, function fileOpened(err, file) {
+			if(err) throw err;
+			
+			EDITOR.on("fileChange", function fileChanged(fileThatChanged, change, text, index, row, col) {
+				if(fileThatChanged == file) parent.postMessage({
+					fileUpdate: {
+						name: msg.openFile.name,
+						content: file.text
+				}
+				}, "*");
+			});
+			
+		});
+		else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin)
+		else throw new Error("Unable to handle message: " + msg);
 		
 	}
 	
