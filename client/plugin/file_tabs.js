@@ -429,7 +429,7 @@ for(var i=0; i<list.length; i++) {
 				//closeFileButton.setAttribute("class", "blink closeFileTab ");
 				closeFileButton.setAttribute("class", "closeFileTab blink");
 
-				alert("File not saved.\nCtrl click to close without saving.");
+				alertBox("File not saved.\nCtrl click to close without saving.");
 				console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
 
 				closeFileButton.blur();
