@@ -11,6 +11,16 @@
 	var inputPathMinSize = 50;
 	var menu;
 	
+	var mimeMap = {
+		css: "text/css",
+		html: "text/html",
+		htm: "text/html",
+		js: "application/x-javascript",
+		svg: "image/svg+xml",
+		txt: "text/plain",
+		xml: "application/xml",
+	}
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Choose file path for saving files",
@@ -75,30 +85,63 @@
 		buttonSaveAs.setAttribute("class", "button");
 		buttonSaveAs.setAttribute("value", "Save as");
 		saveDialog.appendChild(buttonSaveAs);
+		buttonSaveAs.addEventListener("click", saveFileInPath, false);
 		
-		if(runtime != "browser") {
-		var buttonBrowse = document.createElement("input");
-		buttonBrowse.setAttribute("type", "button");
-		buttonBrowse.setAttribute("class", "button half");
-		buttonBrowse.setAttribute("value", "Browse local file-system");
-		saveDialog.appendChild(buttonBrowse);
+		if(runtime == "browser") {
+			var buttonDownload = document.createElement("input");
+			buttonDownload.setAttribute("type", "button");
+			buttonDownload.setAttribute("class", "button half");
+			buttonDownload.setAttribute("value", "Download file");
+			saveDialog.appendChild(buttonDownload);
+			buttonDownload.addEventListener("click", function clickDownload() {
+			
+				var name = inputPath.value;
+				
+				downloadFile(EDITOR.currentFile, name)
+				
+			}, false);
 		}
-		
-		
-		
-		
+		else {
+			var buttonBrowse = document.createElement("input");
+			buttonBrowse.setAttribute("type", "button");
+			buttonBrowse.setAttribute("class", "button half");
+			buttonBrowse.setAttribute("value", "Browse local file-system");
+			saveDialog.appendChild(buttonBrowse);
+			buttonBrowse.addEventListener("click", browsePath, false);
+		}
 		
 		footer.appendChild(saveDialog);
 		
-		// Events
-		buttonBrowse.addEventListener("click", browsePath, false);
 		
-		buttonSaveAs.addEventListener("click", saveFileInPath, false);
+		
 		
 		// todo: inputPath.keyUp, if it's not a slash, auto suggest the path by checking existing paths
 		// Or just make a better file dialog, like the native one, but with support for remote paths!!?
 		
 	}
+	
+	function downloadFile(file, name) {
+		
+		if(!file) throw new Error("No file to download!");
+		
+		var fileName = UTIL.getFilenameFromPath(file.path);
+		var fileExtension = UTIL.getFileExtension(file.path);
+			
+		if(!name) name = fileName;
+		
+		var mime = "text/plain";
+		
+		if(mimeMap.hasOwnProperty(fileExtension)) mime = mimeMap[fileExtension];
+		
+			var a = document.createElement('a');
+		a.download = name;
+		a.href = "data:" + mime + ";base64," + btoa(file.text);
+			
+			document.body.appendChild(a); // In some browsers we need to append the link in order to click it
+			a.click();
+			document.body.removeChild(a);
+			
+		}
 	
 	function saveFileInPath() {
 		var file = EDITOR.currentFile;
