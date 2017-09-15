@@ -1968,11 +1968,13 @@
 	
 	function newPage(site) {
 		
+		if(!site.template) return alertBox("No template file for new file/page specified! Edit settings and set a path for template file.");
+		
 		EDITOR.changeWorkingDir(site.source);
 		
 		EDITOR.readFromDisk(site.template, function fileRead(err, path, text) {
 			
-			if(err) alertBox(err.message);
+			if(err) alertBox("Unable to find new file/page template! (site.template=" + site.template + "). " + err.message);
 			else {
 				
 				// Update dates
