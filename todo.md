@@ -27,11 +27,15 @@ What I'm working on
 
 
 
+Embedding the editor
+
+Save button: when in browser, downloading file ...
 
 todo
 ----
 
 npm modules
+Able to add npm modules to the SSG ...
 
 Investigating added the editor to chrome web store and test it in a Chromebook.
 
@@ -44,8 +48,6 @@ w/forkflow: Edit pages on a ftp server ...
 
   Find in files on ftp server ... Move "find in files" to server and make it work with ftp/sft/ftps 
 
-
-Better onboarding. What to do after first login ? (blank screen that say Ctrl+P to open a file)
 
 write a blog post! (and fix issues/regressions that come up)
 
@@ -65,16 +67,6 @@ Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to al
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
-
-Some sort of dashboard for when you first open the webIDE. So that you are not compleatly lost ...
-Each plugin can add stuff to the dashboard, so that clickin on stuff in the dashboard can interact with the plugin
-
-Able to add npm modules to the SSG ...
-
-npm installer plugin, whenever "require" is detected, and a node_modules folder is found, and it's not a node native or local module, ask if the module should be installed.
-see nodejs_worker.js
-
-node_modules widget. when a non native nodejs module is found 'require("foo")' check if foo is installed and ask if it should be installed. also show some info from npmjs.org
 
 
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
@@ -1022,6 +1014,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Investigate render_indentation.js is it needed ? fix regressions.
+
+What about (SSH) keys when using the browser as client !?
+
 Autocomplete: When finding a require statement, parse that file ...
 
 Explore old commits and see what files was include and what changed.
@@ -1669,6 +1665,12 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+SSH into another server and run shell commands.
+
+Ask for sudo password if we get EACCES error !? Then sudo echo "file content" > nameoffile.txt
+
+---
 
 Drag and drop folder to upload files
 

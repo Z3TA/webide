@@ -3462,7 +3462,7 @@ EDITOR.lastKeyPressed = "";
 	//window.addEventListener('paste', paste);
 	window.addEventListener('cut', cut);
 	
-	//window.addEventListener("message", onMessage, false);
+	window.addEventListener("message", onMessage, false);
 	
 	function main() {
 		
@@ -4239,7 +4239,17 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	
-	
+	function onMessage(windowMessageEvent) {
+		// For (example) recieving message from a page that has the editor embeded
+		console.log("Window message from: origin=" + windowMessageEvent.origin);
+		
+		var msg = windowMessageEvent.data;
+		
+		if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content);
+		if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin)
+		
+		
+	}
 	
 	function copy(copyEvent) {
 		

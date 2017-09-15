@@ -68,22 +68,25 @@
 		labelPath.setAttribute("for", "inputPath");
 		labelPath.appendChild(document.createTextNode("Save file path:")); // Language settings!?
 		labelPath.appendChild(inputPath);
+		saveDialog.appendChild(labelPath);
 		
 		var buttonSaveAs = document.createElement("input");
 		buttonSaveAs.setAttribute("type", "button");
 		buttonSaveAs.setAttribute("class", "button");
 		buttonSaveAs.setAttribute("value", "Save as");
+		saveDialog.appendChild(buttonSaveAs);
 		
+		if(runtime != "browser") {
 		var buttonBrowse = document.createElement("input");
 		buttonBrowse.setAttribute("type", "button");
 		buttonBrowse.setAttribute("class", "button half");
 		buttonBrowse.setAttribute("value", "Browse local file-system");
-		
-		
-		
-		saveDialog.appendChild(labelPath);
-		saveDialog.appendChild(buttonSaveAs);
 		saveDialog.appendChild(buttonBrowse);
+		}
+		
+		
+		
+		
 		
 		footer.appendChild(saveDialog);
 		
