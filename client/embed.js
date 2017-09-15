@@ -16,6 +16,20 @@
 	
 	var noNameCounter = 0;
 	
+	// Name (desciption) of plugins to disable when embedded:
+	var disablePlugins = [
+		"Server login dialog",
+		"Static site generator management interface",
+		"File explorer window widget",
+		"Mercurial SCM integration",
+		"Run shell commands on local or remote system",
+		"Manage and connect to FTP/SSH servers.",
+		"Manage console logs, devTools and toggle devMode",
+		'Adds "Close file" and "Close the editor" key combos and a "Close file" context menu item',
+		"Create new file option to context menu and bound to Ctrl + N",
+		"Adds option to reload the file from disk in the context menu"
+	];
+	
 window.addEventListener("load", function windowLoaded() {
 	
 	var defaultEditorWidth = "800"; // tip: Editor your CSS for .editor and use min-width, max-width etc
@@ -95,8 +109,10 @@ window.addEventListener("load", function windowLoaded() {
 						}
 					}, "*");
 					
-					this.contentWindow.postMessage({"disablePlugin": "Server login dialog"}, "*");
-					
+				for (var i=0; i<disablePlugins.length; i++) {
+					this.contentWindow.postMessage({"disablePlugin": disablePlugins[i]}, "*");
+				}
+				
 				});
 		iframe.src = editorLocation + editorSettings;
 		}

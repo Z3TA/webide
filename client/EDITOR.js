@@ -1695,6 +1695,8 @@ EDITOR.lastKeyPressed = "";
 		var menuElement = document.createElement("li");
 		menuElement.innerHTML = htmlText;
 		
+		console.warn("Adding menu item: " + htmlText);
+		
 		if(callback) menuElement.onclick = callback;
 		
 		if(position) {

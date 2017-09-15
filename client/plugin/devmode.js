@@ -21,7 +21,7 @@
 	*/
 	
 	EDITOR.plugin({
-		desc: "Manages console logs, devTools and toggle devMode",
+		desc: "Manage console logs, devTools and toggle devMode",
 		order: 10,
 		load:function devModeLoad() {
 			
@@ -57,6 +57,7 @@
 		unload: function unloadDevMode() {
 			
 			EDITOR.removeMenuItem(toggleDevmodeMenuItem);
+			EDITOR.removeMenuItem(runTestsMenuItem);
 			
 			if(showDevToolsMenuItem) EDITOR.removeMenuItem(showDevToolsMenuItem);
 			

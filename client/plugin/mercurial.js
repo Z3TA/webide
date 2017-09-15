@@ -89,6 +89,8 @@
 		
 		EDITOR.removeMenuItem(annotateMenuItem);
 		
+		EDITOR.removeMenuItem(repoCloneMenuItem);
+		
 	}
 	
 	function mercurialCommitTool(directory) {
