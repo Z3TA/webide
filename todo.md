@@ -31,11 +31,13 @@ Plugin -> file tabs
 
 Embedding the editor
 
-fix scrolling in Firefox
 fix copy/pasting in Firefox
+
 
 todo
 ----
+
+webide: Put nodeJS scripts in "production" mode. Deoploy to production.
 
 refactor voice, EDITOR.say, so all plugins can use it.
 
