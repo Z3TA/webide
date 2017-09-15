@@ -548,7 +548,7 @@ var UTIL = {
 			console.log("Using CRLF");
 			return "\r\n";
 		}
-		else if(nr > rn) {
+		else if(nr > rn && nr > 1) {
 			console.warn("Using LFCR");
 			return "\n\r";
 		}
