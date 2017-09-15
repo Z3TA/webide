@@ -89,7 +89,9 @@ window.addEventListener("load", function windowLoaded() {
 	var iframe = document.createElement("iframe");
 	iframe.setAttribute("width", editorWidth);
 	iframe.setAttribute("height", editorHeight);
-	
+			iframe.setAttribute("class", "editor JZedit");
+			iframe.setAttribute("frameborder", "0");
+			
 		ta.parentNode.insertBefore(iframe, ta);
 		
 		
