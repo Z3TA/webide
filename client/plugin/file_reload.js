@@ -46,12 +46,16 @@ if(!file) return true;
 		
 		function reload() {
 			EDITOR.readFromDisk(file.path, function(err, path, text) {
+				
+				if(err) throw err;
+				else {
 				file.reload(text);
 				
 				file.saved(); // Because we reloaded from disk
+				}
 				
-});
-			}
+			});
+		}
 		
 	}
 	
