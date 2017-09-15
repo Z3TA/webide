@@ -95,7 +95,7 @@
 			saveDialog.appendChild(buttonDownload);
 			buttonDownload.addEventListener("click", function clickDownload() {
 			
-				var name = inputPath.value;
+				var name =  UTIL.getFilenameFromPath(inputPath.value);
 				
 				downloadFile(EDITOR.currentFile, name)
 				
