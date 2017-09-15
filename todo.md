@@ -25,14 +25,19 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+Voice sytheziser ?
 
+Plugin -> file tabs
 
 Embedding the editor
 
-Save button: when in browser, downloading file ...
+fix scrolling in Firefox
+fix copy/pasting in Firefox
 
 todo
 ----
+
+refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
 Able to add npm modules to the SSG ...
