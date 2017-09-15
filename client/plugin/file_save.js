@@ -90,7 +90,7 @@
 		if(runtime == "browser") {
 			var buttonDownload = document.createElement("input");
 			buttonDownload.setAttribute("type", "button");
-			buttonDownload.setAttribute("class", "button half");
+			buttonDownload.setAttribute("class", "button");
 			buttonDownload.setAttribute("value", "Download file");
 			saveDialog.appendChild(buttonDownload);
 			buttonDownload.addEventListener("click", function clickDownload() {
