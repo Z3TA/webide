@@ -1224,8 +1224,8 @@
 			var backSlash = String.fromCharCode(92); // this: \
 			
 			// Save a history of the last characters
-			//pastChar8 = pastChar7;
-			//pastChar7 = pastChar6;
+			pastChar8 = pastChar7;
+			pastChar7 = pastChar6;
 			pastChar6 = pastChar5;
 			pastChar5 = pastChar4;
 			pastChar4 = pastChar3;
@@ -1561,6 +1561,14 @@
 					insideXmlTagEnding = true;
 					insideRegExp = false;
 				}
+				// Exit out of textarea
+				else if(insideScriptTag && pastChar8 == "<" && pastChar7 == "/" && pastChar6 == "t" && pastChar5 == "e" && pastChar4 == "x" && pastChar3 == "t" && pastChar2 == "a" && pastChar1 == "r" && pastChar0 == "e" && char == "a") {
+					insideXmlTag = true;
+					xmlTagSelfEnding = false;
+					xmlTagStart = i-9;
+					insideXmlTagEnding = true;
+					insideRegExp = false;
+				}
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
 				}
@@ -1577,7 +1585,7 @@
 					
 					//console.log("xmlTag=" + xmlTag);
 					
-					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre") {
+					if(xmlTag.toLowerCase() == "script" || xmlTag.toLowerCase() == "pre" ||  xmlTag.toLowerCase() == "textarea") {
 						
 						//console.log(xmlTag);
 						
