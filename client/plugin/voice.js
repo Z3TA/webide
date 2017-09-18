@@ -2,6 +2,8 @@
 	
 	"use strict";
 	
+	return console.warn("under construction");
+	
 	if (!('speechSynthesis' in window)) {
 		console.warn("Speech Synthesis not possible in your browser!");
 		return;
