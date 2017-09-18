@@ -42,20 +42,27 @@ unity-webapps-runner -i test -h http://127.0.0.1:8099/index.htm !??
 remove nw.js !?
 
 url starts with file://
-
 Investigating: unable to preview SSG in nw.js (require not specified)
+(found many errors. One of them was that we where using file:// protocol in urls due to nw.js)
 
 
 
-
-Voice sytheziser ?
-
+Voice sytheziser ... refactor the plugin: Implement EDITOR.say or speak, so each module can implement voice support (for blind people)
+Because we are using the canvas, screen readers will have problems.
 
 
 todo
 ----
 
-Show correct URL to file in error messages.
+fix bug: SSG valde bort-kommenterad <abstract> element som descr i stället för det icke bortkommenterade!
+
+fix regression: current file in browser title bar!!
+
+When working in the browser, Ctrl+O opens a local file, but when you edit it, its actually NOT a local file!
+Make local files Ctrl+Shift+O and Ctrl+O the same as Ctrl+P !
+
+
+Rename a file! For example to publish a draft i SSG: Raname _name to name (without underscore)
 
 Find in file
 
