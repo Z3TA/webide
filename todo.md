@@ -25,6 +25,15 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+serve folder is /home/username/home/username ...
+
+url starts with file://
+
+Investigating: unable to preview SSG in nw.js (require not specified)
+
+
+
+
 Voice sytheziser ?
 
 Plugin -> file tabs
@@ -36,6 +45,7 @@ fix copy/pasting in Firefox
 
 todo
 ----
+
 
 webide: Put nodeJS scripts in "production" mode. Deoploy to production.
 
@@ -1020,6 +1030,20 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Do not touch indentation inside textarea, pre, or comments
+
+---
+
+Properly indentate if,for,etc statement that don't use curly brackets !?
+if (foo==bar)
+  foo();
+else
+  bar
+
+look for JavaScript "in the wild" and see if the editor indentates it properly.
+
+---
 
 Investigate render_indentation.js is it needed ? fix regressions.
 

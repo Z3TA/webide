@@ -602,8 +602,8 @@ function sockJsConnection(connection) {
 											if(USE_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
 											
 												createHttpEndpoint(name, folder, function(err, url) {
-													if(err) throw err;
-													workerResp(req, {url: url});
+													if(err) workerResp(req, null, err.message);
+													else workerResp(req, {url: url});
 												});
 											}
 										else if(req.removeHttpEndpoint) {
@@ -769,19 +769,28 @@ function createHttpEndpoint(username, folder, callback) {
 		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
 	
-	for(var endPoint in HTTP_ENDPOINTS) {
-		if(HTTP_ENDPOINTS[endPoint] == folder) {
-			return callback(null, makeUrl(endPoint));
+	// Make sure the path exist
+	var fs = require("fs");
+	fs.stat(folder, function statResult(err, stats) {
+		if(err) return callback(err);
+		
+		for(var endPoint in HTTP_ENDPOINTS) {
+			if(HTTP_ENDPOINTS[endPoint] == folder) {
+				return callback(null, makeUrl(endPoint));
+			}
 		}
-	}
+		
+		var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
+		
+		HTTP_ENDPOINTS[endPoint] = folder;
+		
+		log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
+		
+		callback(null, makeUrl(endPoint));
+		
+		
+	});
 	
-	var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
-	
-	HTTP_ENDPOINTS[endPoint] = folder;
-	
-	log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
-	
-	callback(null, makeUrl(endPoint));
 }
 
 function removeHttpEndpoint(username, folder, callback) {

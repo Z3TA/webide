@@ -511,12 +511,12 @@ process.on('message', function commandMessage(message) {
 	else if(message.teardown) {
 		user.teardown();
 	}
-	else if(message.parentResponse) {
+	else if(message.id) {
 		var id = message.id;
 		var resp = message.parentResponse;
-		
+		var err = message.err;
 		if(parentRequestCallback.hasOwnProperty(id)) {
-			parentRequestCallback[id](message.err, resp);
+			parentRequestCallback[id](err, resp);
 			delete parentRequestCallback[id];
 		}
 		else throw new Error("No callback saved for parentRequestCallback id=" + id);
@@ -599,7 +599,8 @@ API.serve = function serve(user, json, callback) {
 	console.log("user.name=" + user.name + " serving folder=" + folder);
 	
 	parentRequest({createHttpEndpoint: {folder: folder}}, function(err, resp) {
-		callback(err, {url: resp.url});
+		if(err) callback(err);
+		else callback(err, {url: resp.url});
 	});
 	}
 
