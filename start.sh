@@ -34,7 +34,7 @@ else
 
 	echo Starting the server ...
 	cd server
-	serverArg="--loglevel=7 --username=admin --password=admin --port=8099"
+	serverArg="--loglevel=7 --username=admin --password=admin --port=8099  --nochroot=true"
 
 	# Check if we should use nodejs or just node
 	if type nodejs >/dev/null

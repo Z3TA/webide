@@ -17,7 +17,7 @@ var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
 
-var NO_PW_HASH = getArg(["nopwhash"]) || false;
+var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 // Log levels
 var WARN = 4;
@@ -25,7 +25,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-var USE_CHROOT = getArg(["chroot", "chroot"]) || true;
+var NO_CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
 
 var NODE_INIT = {}; // username:childProcess, list of nodejs initors
 
@@ -131,7 +131,7 @@ function main() {
 	
 	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
 	
-	if(info.uid !== 0 && !USERNAME && USE_CHROOT) {
+	if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
 		log("You need to start the server with a previleged user (using sudo) or root account.", 5);
 		log(info);
 		process.exit();
@@ -387,7 +387,9 @@ function sockJsConnection(connection) {
 						
 						if(USERNAME) {
 							console.log("Using USERNAME=" + USERNAME+ " from argument ...")
-							if(USERNAME == username && PASSWORD == password) userOK(0, USERNAME, true);
+
+							// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
+							if(USERNAME == username && PASSWORD == password) userOK(0, CURRENT_USER, true);
 							else {
 								console.log("'" + USERNAME + "' != '" + username + "' or '" + PASSWORD + "' != '" + password + "'");
 								wrongPw();
@@ -599,8 +601,10 @@ function sockJsConnection(connection) {
 											
 											var folder = req.createHttpEndpoint.folder;
 											
-											if(USE_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
+											if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
 											
+											console.log("createHttpEndpoint: NO_CHROOT=" + NO_CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
+
 												createHttpEndpoint(name, folder, function(err, url) {
 													if(err) workerResp(req, null, err.message);
 													else workerResp(req, {url: url});
@@ -610,7 +614,7 @@ function sockJsConnection(connection) {
 											
 											var folder = req.removeHttpEndpoint.folder;
 											
-											if(USE_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
+											if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
 											
 											removeHttpEndpoint(name, folder, function(err, folder) {
 												if(err) throw err;
@@ -1070,10 +1074,7 @@ function createUserWorker(name, uid, gid) {
 		loglevel: LOGLEVEL
 	}
 
-	if(USE_CHROOT) {
-
-	}
-	else {
+	if(NO_CHROOT) {
 		if(uid != undefined) options.uid = parseInt(uid);
 		if(gid != undefined) options.gid = parseInt(gid);
 	}
