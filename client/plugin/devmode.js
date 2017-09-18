@@ -57,7 +57,7 @@
 		unload: function unloadDevMode() {
 			
 			EDITOR.removeMenuItem(toggleDevmodeMenuItem);
-			EDITOR.removeMenuItem(runTestsMenuItem);
+			if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
 			
 			if(showDevToolsMenuItem) EDITOR.removeMenuItem(showDevToolsMenuItem);
 			
