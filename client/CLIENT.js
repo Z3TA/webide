@@ -27,6 +27,8 @@ var CLIENT = {}; // Client object is global
 		var loc = UTIL.getLocation(window.location.href);
 		var protocol = loc.protocol;
 		
+		if(!protocol) throw new Error("Unable to get protocol from window.location.href=" + window.location.href);
+
 		console.log("protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
 
 		var defaultURL = loc.protocol + "://" + loc.host + "/jzedit"; // loc.host includes port!

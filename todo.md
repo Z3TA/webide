@@ -25,7 +25,15 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-serve folder is /home/username/home/username ...
+Investigating how we can get rid of nw.js and only use http/https as url protocol ...
+
+In old version of nw.js urls start with file://
+In newer versions urls start with chrome-extension://
+We want urls to use http or https!!
+
+unity-webapps-runner -i test -h http://127.0.0.1:8099/index.htm !??
+
+remove nw.js !?
 
 url starts with file://
 

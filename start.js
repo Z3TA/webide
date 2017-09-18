@@ -325,16 +325,18 @@ function startClient(ip, port, proto) {
 	var tryPrograms = [];
 		
 	// Always try nw.js first!
-	tryPrograms.push(["nw", ["."]]); // Any version of nw.js
-	tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
+	//tryPrograms.push(["nw", ["."]]); // Any version of nw.js
+	//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
 	
 	// We prefare the chromium/chrome browser!
 	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
 	tryPrograms.push(["chrome", ["--app=" + url]]);
 
 	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
-	//tryPrograms.push(["firefox", ["-new-tab", url]]); // We can open a url in a new tab though
-	tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
+	// We want to open files via http/https though! Using file:// protocol will cause issues.
+	tryPrograms.push(["firefox", ["-new-tab", url]]); // We can open a url in a new tab though
+	//tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
+
 	
 	if(platform == "win32") {
 		// Only try IE on Windows
@@ -344,7 +346,7 @@ function startClient(ip, port, proto) {
 	if(platform == "darwin") {
 		// Only try Safari on Mac
 		// Unfortunately Safari doesn't support chromless
-		// We might be able to remote the chrome after it started though, by using osascript
+		// We might be able to remove the chrome after it started though, by using osascript
 
 		//tryPrograms.push(["/Applications/Safari.app/Contents/MacOS/Safari & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"http://www.google.com\"'"]);
 

@@ -169,7 +169,7 @@ function main() {
 	
 	var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
 	
-	log(serverAdvertiseMessage, 6);
+	log(serverAdvertiseMessage);
 	
 	// Open client url in browser !?
 	
