@@ -18,10 +18,17 @@ chmod +x jzedit.desktop
 
 function startClient {
 	echo Starting the client ...
+	url=http://127.0.0.1:8099/index.htm
 	# Start the client (editor)
 	#runtime/nwjs-v0.12.3-linux-x64/nw . --remote-debugging-port=57341
-	runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1
-	#runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text
+	#runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1
+	runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1 ||
+	chromium-browser --app=$url > /dev/null 2>&1 ||
+	chrome --app=$url > /dev/null 2>&1 ||
+	chrome --app=$url > /dev/null 2>&1 ||
+	firefox- new-tab $url > /dev/null 2>&1 ||
+    safari $url 2>&1 ||
+	echo "Failed to start the client!"
 }
 
 
