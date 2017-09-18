@@ -27,6 +27,12 @@ What I'm working on
 
 Investigating how we can get rid of nw.js and only use http/https as url protocol ...
 
+In Chrome/Chromium we can press F12 to bring up dev tools.
+WOW, Chromium performs better then nw.js !
+Running chromium with --app=url is optimal
+There should probably be performance tests so we know if the runtime have performance regressions.
+
+
 In old version of nw.js urls start with file://
 In newer versions urls start with chrome-extension://
 We want urls to use http or https!!
@@ -44,16 +50,22 @@ Investigating: unable to preview SSG in nw.js (require not specified)
 
 Voice sytheziser ?
 
-Plugin -> file tabs
-
-Embedding the editor
-
-fix copy/pasting in Firefox
 
 
 todo
 ----
 
+Show correct URL to file in error messages.
+
+Find in file
+
+Make everything work without nw.js. And remove nw.js dependency.
+
+Plugin -> file tabs
+
+Embedding the editor
+
+fix copy/pasting in Firefox
 
 webide: Put nodeJS scripts in "production" mode. Deoploy to production.
 
@@ -342,6 +354,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+When copy pasting text into a file with CrLf line breks on linux ...
 
 Logging in as the same user, twice, you get dublicates and wierd behaviour ...
 
