@@ -1949,6 +1949,10 @@
 		return false;
 		
 		function publishIt() {
+			
+			if(!site.source) throw new Error("Site name=" + site.name + " has no source folder specified! site.source=" + site.source);
+			if(!site.publish) throw new Error("Site name=" + site.name + " has no publish url specified! site.publish=" + site.publish);
+			
 			compile(site.source, site.publish, true, function buildDone() {
 				
 				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:' + urlElementString(site.url) : ''));

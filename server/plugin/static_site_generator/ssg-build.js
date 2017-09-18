@@ -117,6 +117,8 @@ function log(txt) {
 }
 */
 
+var ABORT = false;
+
 var main = {
 	basePath: BASEPATH,
 	pubFolder: PUBFOLDER,
@@ -188,7 +190,10 @@ var main = {
 		
 	});
 	
-}
+},
+	abort: function abort() {
+		ABORT = true;
+	}
 }
 
 /*
@@ -313,6 +318,8 @@ function copyOtherFiles(callback) {
 
 function build(baseTree, baseFolder, callback) {
 	
+	if(ABORT) callback();
+	
 	var filesToWrite = 0;
 	
 	buildeDir(baseFolder, baseTree); // Recursive
@@ -365,9 +372,14 @@ function evaluate(baseTree) {
 		Finds media files?
 	*/
 	
+	if(ABORT) return;
+	
 	evalDir(baseTree);
 	
 	function evalDir(branch) {
+		
+		if(ABORT) return;
+		
 		var fileType = "";
 		
 		for(var fileName in branch.documents) {
@@ -427,6 +439,8 @@ function findDepth(document) {
 
 function compile(baseTree) {
 	
+	if(ABORT) return;
+	
 	var basePath = BASEPATH;
 	
 	//log("baseTree.folders=" + baseTree.folders);
@@ -441,7 +455,7 @@ function compile(baseTree) {
 	
 	function compileDir(branch, parentBranch) {
 		
-		
+		if(ABORT) return;
 		
 		branch.parent = parentBranch;
 		
@@ -747,6 +761,8 @@ function findFiles(dir, parentBranch, done) {
 	
 	function walk(dir, parentBranch, done) {
 		
+		if(ABORT) return;
+		
 		// Get last part of the dir
 		
 		log("walking dir=" + dir);
@@ -777,6 +793,7 @@ function findFiles(dir, parentBranch, done) {
 			if (err) error(err);
 			
 			if(ERROR) return;
+			if(ABORT) return;
 			
 			branch.documents = {};
 			
@@ -1793,7 +1810,9 @@ function resolvePath(dir, file) {
 function error(err) {
 	if(SEND_MESSAGE) SEND_MESSAGE({type: "error", stack: err.stack, code: err.code});
 	ERROR = true;
+	ABORT = true;
 	if(MAIN_CALLBACK) MAIN_CALLBACK(err);
+	MAIN_CALLBACK = null; // Prevent more callbacks, eg. from requests that are still in flight that also will give an error
 	console.error(err);
 }
 

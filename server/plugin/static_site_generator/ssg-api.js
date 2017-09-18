@@ -9,6 +9,8 @@ var API = {};
 	
 var SSG_BUILD = require("./ssg-build.js");
 
+var ABORT = false;
+
 API.compile = function compile(user, json, callback) {
 	
 	var source = user.translatePath(json.source);
@@ -17,6 +19,7 @@ API.compile = function compile(user, json, callback) {
 	var pubUser = json.pubUser;
 	var pubPw = json.pubPw;
 	var pubKey = json.pubKey;
+	var abort = false;
 	
 	var url = require("url");
 	var parse = url.parse(destination);
@@ -101,7 +104,14 @@ API.compile = function compile(user, json, callback) {
 		SSG_BUILD.nodeModulesPath = node_modules;
 		
 		SSG_BUILD.compile(function done(err) {
-			if(err) throw err;
+			if(err) {
+				var e = new Error("Problem generating static site:" + err.message)
+				SSG_BUILD.abort(); // This is not enough, it will not abort requests already made to for example fs module.
+				ABORT = true;
+				callback(e);
+				return;
+				throw e; // Need to abort everything! (there will be request to save files, etc, in the event loop)
+				}
 			
 			console.log("Done compiling source=" + source + " to destination=" + destination);
 			
@@ -203,6 +213,7 @@ API.compile = function compile(user, json, callback) {
 		
 		function copyFile(from, to) {
 
+			if(ABORT) return;
 			
 			var folder = UTIL.getDirectoryFromPath(to);
 			
@@ -229,6 +240,8 @@ API.compile = function compile(user, json, callback) {
 		}
 		
 		function createPath(folder, createPathCallback) {
+			
+			if(ABORT) return;
 			
 			//console.log("Creating path=" + folder);
 			folderAboutToBeCreated.push(folder);

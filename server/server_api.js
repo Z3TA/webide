@@ -497,6 +497,8 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 
 API.saveToDisk = function saveToDisk(user, json, saveToDiskCallback) {
 
+	if(json.path == undefined) return saveToDiskCallback(new Error("json.path=" + json.path));
+	
 	var path = user.translatePath(json.path);
 	if(path instanceof Error) return saveToDiskCallback(path);
 	

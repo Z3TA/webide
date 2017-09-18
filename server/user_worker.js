@@ -202,6 +202,8 @@ user.translatePath = function translatePath(pathToFileOrDir) {
 	
 	// Translates a virtual path to a real file-system path
 	
+	if(pathToFileOrDir == undefined) throw new Error("pathToFileOrDir=" + pathToFileOrDir);
+	
 	//console.log(user.name + " translatePath=" + pathToFileOrDir);
 	
 	pathToFileOrDir = UTIL.removeFileColonSlashSlash(pathToFileOrDir);
