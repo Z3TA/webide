@@ -38,7 +38,7 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-var USE_CHROOT = getArg(["chroot", "chroot"]) || false;
+var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 log("process.env.uid=" + process.env.uid);
 
 var npmExecFileOptions = {
