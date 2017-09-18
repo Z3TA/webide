@@ -21,7 +21,9 @@ function startClient {
 	# Start the client (editor)
 	#runtime/nwjs-v0.12.3-linux-x64/nw . --remote-debugging-port=57341
 	runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1
+	#runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text
 }
+
 
 
 # Check if the server is already running
@@ -34,7 +36,7 @@ else
 
 	echo Starting the server ...
 	cd server
-	serverArg="--loglevel=7 --username=admin --password=admin --port=8099  --nochroot=true"
+	serverArg="--loglevel=7 --username=admin --password=admin --port=8099 --nochroot=true"
 
 	# Check if we should use nodejs or just node
 	if type nodejs >/dev/null
@@ -64,6 +66,8 @@ else
 	# Make sure the server is running
 	if ! (ps ax | grep "[n]${CMD:1}" > /dev/null) then
 	    echo "Could not start the server!" >&2
+	    echo "[n]${CMD:1}"
+	    ps ax | grep "[n]${CMD:1}"
 	else
 		echo Server started!
 
