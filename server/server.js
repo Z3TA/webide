@@ -561,7 +561,12 @@ function sockJsConnection(connection) {
 									
 									console.log("userConnectionId=" + userConnectionId);
 									
-									send({resp: {loginSuccess: {user: userName, cId: userConnectionId}}});
+								var installDirectory = "/";
+								
+								if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
+								else log("name=" + name + " NO_CHROOT=" + NO_CHROOT);
+								
+								send({resp: {loginSuccess: {user: userName, cId: userConnectionId, installDirectory: installDirectory}}});
 									
 									if(commandQueue.length > 0) {
 										console.log("Running " + commandQueue.length + " commands from the command queue ...");

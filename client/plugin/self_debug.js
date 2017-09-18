@@ -131,11 +131,13 @@
 		
 		// The source is always in client folder
 		var url = UTIL.getLocation(source);
+			console.log(url);
+			console.log("document.location.href=" + document.location.href);
 		console.log("url.pathname=" + url.pathname);
 		var source = source.replace(url.pathname, "/client" + url.pathname);
 		console.log("source=" + source);
 			
-			source = EDITOR.workingDirectory + 'client/' + url.pathname;
+			source = EDITOR.installDirectory + 'client/' + url.pathname;
 			
 		}
 		

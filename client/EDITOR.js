@@ -107,6 +107,7 @@ EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.
 EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/.test(window.navigator.platform) ? "Linux" : "Unknown");
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
+EDITOR.installDirectory = "/";
 
 EDITOR.collaborationMode = false;
 
@@ -3665,6 +3666,9 @@ EDITOR.lastKeyPressed = "";
 		CLIENT.on("loginSuccess", function loggedInToServer(login) {
 			
 			EDITOR.user = login.user;
+			
+			EDITOR.installDirectory = login.installDirectory || "/";
+			//alertBox(JSON.stringify(login));
 			
 			console.log("Logged in as user: " + EDITOR.user);
 			

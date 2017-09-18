@@ -84,7 +84,7 @@ function startNewServer() {
 	var serverPort = "8099";
 	var serverIp = "127.0.0.1";
 
-	var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort];
+	var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
 
 	var serverOptions = {
 		stdio: "inherit"
