@@ -3191,6 +3191,9 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.runTests = function runTests() {
+		
+		if(EDITOR.workingDirectory != "/") return alertBox("Make sure you are running under chroot and with a dummy user before running tests");
+		
 		runTests_5616458984153156();
 		return true;
 	}
