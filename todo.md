@@ -25,7 +25,13 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
-Investigating how we can get rid of nw.js and only use http/https as url protocol ...
+
+
+Trying to fix preview problem in SSG with nw.js runtime (due to file:// protocol)
+
+----
+
+Investigating how we can get rid of nw.js as a dependency (and only use http/https as url protocol ?) ...
 
 In Chrome/Chromium we can press F12 to bring up dev tools.
 WOW, Chromium performs better then nw.js !
@@ -33,13 +39,16 @@ Running chromium with --app=url is optimal
 There should probably be performance tests so we know if the runtime have performance regressions.
 
 
+Was investigating: "unable to preview SSG in nw.js (require not specified)"
+(found many errors. One of them was that we where using file:// protocol in urls due to nw.js)
+
+Maybe we should try to make it work with file:// protocols so it works in Firefox's -chrome (less)
+
 In old version of nw.js urls start with file://
 In newer versions urls start with chrome-extension://
 We want urls to use http or https!!
 
 
-Investigating: unable to preview SSG in nw.js (require not specified)
-(found many errors. One of them was that we where using file:// protocol in urls due to nw.js)
 
 
 
@@ -50,7 +59,8 @@ Because we are using the canvas, screen readers will have problems.
 todo
 ----
 
-fix bug: SSG valde bort-kommenterad <abstract> element som descr i stället för det icke bortkommenterade!
+
+fix 
 
 fix regression: current file in browser title bar!! (chromium)
 
@@ -357,6 +367,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+bug: SSG valde bort-kommenterad <abstract> element som descr i stället för det icke bortkommenterade!
 
 When using non asci characters in commit messages, Mercurial will complain!
 

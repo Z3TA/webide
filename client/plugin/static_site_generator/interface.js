@@ -558,6 +558,7 @@
 		buttonPreview.setAttribute("value", "Preview");
 		buttonPreview.setAttribute("title", "Ctrl-click to ignore (draft) files starting with _ (underscore)");
 		buttonPreview.addEventListener("click", function() {
+			if(!selectedSite) return alertBox("No site selected!");
 			previewPage(selectedSite, undefined, false);
 		}, false);
 		
@@ -1229,6 +1230,8 @@
 	
 	function previewPage(site, callback, edit, sourceFile, ignoreDraft) {
 		
+		if(!site) throw new Error("site=" + site);
+		
 		console.log('Previewing site.name="' + site.name + '". edit=' + edit);
 		
 		/*
@@ -1351,15 +1354,18 @@
 						
 						var url = json.url;
 						
+						console.log("url=" + url);
+						
 						if(location) {
-							if(location.protocol) url = location.protocol + "//" + url;
+							console.log("location.protocol=" + location.protocol);
+							//if(location.protocol) url = location.protocol + "//" + url;
 						}
-						else url = "http://" + url;
+						//else url = "http://" + url;
 						
 						console.log("serve url=" + url);
 						
-						if(runtime != "nw.js") {
-							// Replace the hostname with the hostname we are currently on to prevent cross origin errors
+						//if(runtime != "nw.js") {
+						// Replace the hostname with the hostname we are currently on to prevent cross origin errors
 							var host = UTIL.getLocation(url).host;
 							
 							if(!host) throw new Error('Did not expect "falsy" host=' + host);
@@ -1368,7 +1374,7 @@
 							url = url.replace(host, window.location.host);
 							
 							console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
-						}
+						//}
 						
 						previewBaseUrl = url;
 						
@@ -1449,7 +1455,7 @@
 								if(previewWin) previewWin.close();
 								
 								
-								console.log("SSG url=" + url);
+								console.log("SSG url=" + url + " runtime=" + runtime);
 								previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
 								
 								previewWin.onClose = function() {

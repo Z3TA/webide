@@ -1121,7 +1121,7 @@ var WysiwygEditor;
 			
 			if(previewWin.location.href == url) previewWindowLoaded();
 			else if(previewWin.location.href) {
-				console.log("previewWin.location.href=" + previewWin.location.href + "wysiwygEditor.url=" + wysiwygEditor.url + "url=" + url);
+				console.log("previewWin.location.href=" + previewWin.location.href + " wysiwygEditor.url=" + wysiwygEditor.url + " url=" + url);
 				
 				if(checkLocationTries > checkLocationMaxTries) alertBox("Failed to get location from preview window! Did you close it ?");
 				else setTimeout(checkLocation, checkLocationIntervalTime);
