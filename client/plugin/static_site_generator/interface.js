@@ -182,8 +182,8 @@
 		
 		//alertBox("loading");
 		
-		EDITOR.on("storageReady", getSites);
-		
+		if(EDITOR.storage.ready()) getSites();
+		else EDITOR.on("storageReady", getSites);
 		
 		var keyF9 = 120;
 		var keyEscape = 27;
@@ -1333,126 +1333,148 @@
 						return;
 					}
 					
+					// If the editor is run with file:// protocol we don't have to use the serve API to view the preview
+					// Provided that the preview url is not a ftp/sft/ftps url
+					console.log("site.preview=" + site.preview);
+					
+					if(site.preview.match(/^(ftp|sftp|ftps):/i)) {
+						alertBox("Preview uploaded to: " + site.preview);
+						alertBox("Can not preview from remote location such as ftp, sftp or ftps. The preview location must be a local folder.");
+						}
+					else if(document.location.href.match(/^file:/)) {
+						// Don't have to serve
+						previewServed(site.preview)
+					}
+					else {
+					
 					CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
 						
 						if(err) throw err;
 						
 						var url = json.url;
 						
-						console.log("url=" + url);
-						
-						if(location) {
-							console.log("location.protocol=" + location.protocol);
-							//if(location.protocol) url = location.protocol + "//" + url;
-						}
-						//else url = "http://" + url;
-						
-						console.log("serve url=" + url);
-						
-						//if(runtime != "nw.js") {
-						// Replace the hostname with the hostname we are currently on to prevent cross origin errors
-							var host = UTIL.getLocation(url).host;
+							// Replace the hostname with the hostname we are currently on to prevent cross origin errors
+							var loc = UTIL.getLocation(url);
 							
-							if(!host) throw new Error('Did not expect "falsy" host=' + host);
+							if(!loc.host) throw new Error('Did not expect "falsy" loc.host=' + loc.host);
 							if(!window.location.host) throw new Error('Did not expect "falsy" window.location.host=' + window.location.host);
 							
-							url = url.replace(host, window.location.host);
+							url = url.replace(loc.host, window.location.host);
 							
-							console.log("host=" + host + " window.location.host=" + window.location.host + " url=" + url);
-						//}
-						
-						previewBaseUrl = url;
-						
-						if(sourceFile) {
-							url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
+							console.log("loc.host=" + loc.host + " window.location.host=" + window.location.host + " url=" + url);
 							
-							openPreviewWin();
+							if(!url.match(/^http(s?):/i)) url = window.location.protocol + "//" + url;
+
+							previewServed(url);
 							
-						}
-						else {
-							// Open the index page
+						});
+					}
+					
+						function previewServed(url) {
+							console.log("url=" + url);
 							
-							notEditableReason = "No file open";
-							editable = false;
+							if(location) {
+								console.log("location.protocol=" + location.protocol);
+								//if(location.protocol) url = location.protocol + "//" + url;
+							}
+							//else url = "http://" + url;
 							
-							EDITOR.listFiles(site.preview, function(err, list) {
-								
-								if(err) throw err;
-								
-								var page = "";
-								
-								for (var i=0; i<list.length; i++) {
-									if(list[i].name.match(/\index\.html?/i) != null) {
-										page = list[i].name;
-										break;
-									}
-								}
-								
-								if(page) {
-									if(url.substr(url.length-1) != "/") url += "/";
-									url += page;
-								}
-								else throw new Error("Unable to find index page in preview directory!");
+							console.log("serve url=" + url);
+							
+							
+							previewBaseUrl = url;
+							
+							if(sourceFile) {
+								url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 								
 								openPreviewWin();
 								
-							});
-						}
-						
-						function openPreviewWin() {
-							
-							//if(edit) {
-							
-							// Get the source code for the compiled page in review, in order to compute ignoreTransform
-							
-							var previewPath = sourceFile.path.replace(site.source, site.preview);
-							
-							EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
+							}
+							else {
+								// Open the index page
 								
-								if(err) throw err;
+								notEditableReason = "No file open";
+								editable = false;
 								
-								var compiledSource = txt;
-								var compliedSourceBodyTag = "main";
-								
-								loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
-								
-							});
-							
-							//}
-							//else loadWysiwygEditor();
-							
-							
-							function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
-								
-								var bodyTag = "body";
-								var onlyPreview = (edit == false);
-								var whenLoaded = function previewLoaded() {
-									if(buttonPreview) {
-										buttonPreview.setAttribute("class", "button active");
-										if(edit) {
-											buttonWysiwyg.setAttribute("class", "button active");
-											wysiwygEnabled = true;
+								EDITOR.listFiles(site.preview, function(err, list) {
+									
+									if(err) throw err;
+									
+									var page = "";
+									
+									for (var i=0; i<list.length; i++) {
+										if(list[i].name.match(/\index\.html?/i) != null) {
+											page = list[i].name;
+											break;
 										}
 									}
-									if(callback) callback();
-								}
+									
+									if(page) {
+										if(url.substr(url.length-1) != "/") url += "/";
+										url += page;
+									}
+									else throw new Error("Unable to find index page in preview directory!");
+									
+									openPreviewWin();
+									
+								});
+							}
+							
+							function openPreviewWin() {
 								
-								if(previewWin) previewWin.close();
+								//if(edit) {
+								
+								// Get the source code for the compiled page in review, in order to compute ignoreTransform
+								
+								var previewPath = sourceFile.path.replace(site.source, site.preview);
+								
+								EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
+									
+									if(err) throw err;
+									
+									var compiledSource = txt;
+									var compliedSourceBodyTag = "main";
+									
+									loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
+									
+								});
+								
+								//}
+								//else loadWysiwygEditor();
 								
 								
-								console.log("SSG url=" + url + " runtime=" + runtime);
-								previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
-								
-								previewWin.onClose = function() {
-									if(buttonPreview) {
-										buttonPreview.setAttribute("class", "button");
-										buttonWysiwyg.setAttribute("class", "button");
-										wysiwygEnabled = false;
+								function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
+									
+									var bodyTag = "body";
+									var onlyPreview = (edit == false);
+									var whenLoaded = function previewLoaded() {
+										if(buttonPreview) {
+											buttonPreview.setAttribute("class", "button active");
+											if(edit) {
+												buttonWysiwyg.setAttribute("class", "button active");
+												wysiwygEnabled = true;
+											}
+										}
+										if(callback) callback();
+									}
+									
+									if(previewWin) previewWin.close();
+									
+									
+									console.log("SSG url=" + url + " runtime=" + runtime);
+									previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
+									
+									previewWin.onClose = function() {
+										if(buttonPreview) {
+											buttonPreview.setAttribute("class", "button");
+											buttonWysiwyg.setAttribute("class", "button");
+											wysiwygEnabled = false;
+										}
 									}
 								}
 							}
 						}
-					});
+					
 				});
 			}
 		}
