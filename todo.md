@@ -22,47 +22,22 @@ find beta testers!
 WRITE TESTS FOR EACH BUG YOU FIX!! 
 AND ALSO FOR ALL NEW FEATURES!
 
+
+There's no rush in getting rid of nw.js, but we should make sure everything works without it!
+Make sure everything works in Chrome/Chromium browser, then also Firefox (with -chrome arg)
+and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to make it work in
+new versions of nw.js though.
+
+
 What I'm working on
 -------------------
 
-In shell start.sh when exiting (with exit code <> 0 ??) it starts the next runtime in the list ...
+running tests ...
 
----
-
-Trying to fix preview problem in SSG with nw.js runtime (due to file:// protocol)
-
-----
-
-Investigating how we can get rid of nw.js as a dependency (and only use http/https as url protocol ?) ...
-
-In Chrome/Chromium we can press F12 to bring up dev tools.
-WOW, Chromium performs better then nw.js !
-Running chromium with --app=url is optimal
-There should probably be performance tests so we know if the runtime have performance regressions.
-
-
-Was investigating: "unable to preview SSG in nw.js (require not specified)"
-(found many errors. One of them was that we where using file:// protocol in urls due to nw.js)
-
-Maybe we should try to make it work with file:// protocols so it works in Firefox's -chrome (less)
-
-In old version of nw.js urls start with file://
-In newer versions urls start with chrome-extension://
-We want urls to use http or https!!
-
-
-
-
-
-Voice sytheziser ... refactor the plugin: Implement EDITOR.say or speak, so each module can implement voice support (for blind people)
-Because we are using the canvas, screen readers will have problems.
 
 
 todo
 ----
-
-
-fix 
 
 fix regression: current file in browser title bar!! (chromium)
 
@@ -159,6 +134,8 @@ A feature to show a file or project ... git + github integration !? Client plugi
 
 What I'm thinking
 -----------------
+
+There should probably be performance tests so we know if the runtime have performance regressions.
 
 Is a spawned process still there after client disconnect /reconnect ?
 Yes it is!! ? Nope ... Actually, it's killed a few seconds after the user disconnects (or when sockjs thinks the client disconnects)
@@ -369,6 +346,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+In shell start.sh when exiting (with exit code <> 0 ??) it starts the next runtime in the list ...
 
 bug: SSG valde bort-kommenterad <abstract> element som descr i stället för det icke bortkommenterade!
 
@@ -1072,7 +1051,13 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Voice sytheziser ... refactor the plugin: Implement EDITOR.say or speak, so each module can implement voice support (for blind people)
+Because we are using the canvas, screen readers will have problems.
+
+---
+
 Do not touch indentation inside textarea, pre, or comments
+(quick fix workaround was to make it parse like a script tag so we could show code)
 
 ---
 
