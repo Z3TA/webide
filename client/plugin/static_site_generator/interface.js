@@ -56,11 +56,13 @@
 			}
 		}
 		
-		if(!sites) {console.warn("Failed to get any sites from the static site generator!\n\
+		if(!sites) {
+			console.warn("Failed to get any sites from the static site generator!\n\
 			storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
 			sites=" + JSON.stringify(sites, null, 2));
 			//alertBox("You have no configurated static-site-generator sites.");
 		}
+		else console.log("sites: " + JSON.stringify(sites, null, 2));
 		
 		// quickedit.js ...
 		if(QueryString.editPage) {

@@ -518,9 +518,13 @@ function sockJsConnection(connection) {
 									
 								}
 							}
+							else if(USERNAME && NO_CHROOT) {
+								// Running as standalone desktop app
+								var homeDir = process.env.HOME || process.env.USERPROFILE;
+								if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
+								acceptUser(homeDir);
+							}
 							else {
-								
-								
 								acceptUser();
 							}
 							

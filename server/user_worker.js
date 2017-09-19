@@ -108,12 +108,14 @@ user.runningNodeJsScripts = {};
 
 user.identify = function identify(info) {
 	
-	console.log("info: ", info);
+	console.log("info: ", JSON.stringify(info));
 	
 	user.id = info.id;
 	user.name = info.name;
 	user.rootPath = info.rootPath;
 	user.defaultWorkingDirectory = info.homeDir;
+	
+	console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory);
 	
 	var path = require("path");
 	
@@ -121,20 +123,27 @@ user.identify = function identify(info) {
 		user.rootPath = path.resolve(user.rootPath);
 		user.rootPath = UTIL.trailingSlash(user.rootPath);
 		user.defaultWorkingDirectory = "/";
+		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user.rootPath=" + user.rootPath + ")");
 	}
 	else if(!user.defaultWorkingDirectory) {
 		var editorDir = path.resolve("./../");
 		user.defaultWorkingDirectory = UTIL.trailingSlash(editorDir);
+		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because user had no defaultWorkingDirectory)");
 	}
 	
 	if(USE_CHROOT) {
 		user.rootPath = null;
 		user.defaultWorkingDirectory = "/";
+		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because CHROOT=" + CHROOT + ")");
 	}
 	
+	var lastCharOfDir = user.defaultWorkingDirectory.substr(user.defaultWorkingDirectory.length-1);
+	if(lastCharOfDir != "/" && lastCharOfDir != "\\") throw new Error("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " does not end with a slash! info=" + JSON.stringify(info));
+
+
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
-	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".editorStorage" + path.sep) ;
+	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".jzeditStorage" + path.sep) ;
 	
 	console.log("Identified as user.name=" + user.name + " workingDirectory=" + user.workingDirectory);
 	
