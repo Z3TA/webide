@@ -19,7 +19,8 @@ API.compile = function compile(user, json, callback) {
 	var pubUser = json.pubUser;
 	var pubPw = json.pubPw;
 	var pubKey = json.pubKey;
-	var abort = false;
+	
+	ABORT = false;
 	
 	var url = require("url");
 	var parse = url.parse(destination);
@@ -62,8 +63,9 @@ API.compile = function compile(user, json, callback) {
 	
 	function fsReady(err, workingDir) {
 		
-		if(err) return callback(err);
-
+		if(err) {
+			return callback(err);
+		}
 		
 		console.log("Compiling: " + source);
 		
@@ -156,7 +158,8 @@ API.compile = function compile(user, json, callback) {
 		*/
 		
 		function createFile(filePath, text) {
-
+			if(ABORT) return SSG_BUILD.abort();
+			
 			var folder = UTIL.getDirectoryFromPath(filePath);
 			
 			if(foldersExist.indexOf(folder) != -1) {
@@ -172,8 +175,12 @@ API.compile = function compile(user, json, callback) {
 			}
 			
 			function fileCreated(err, path) {
+				if(ABORT) return;
+				
 				if(err) {
 					//throw err;
+					ABORT = true;
+					SSG_BUILD.abort();
 					return callback(err);
 				}
 				else {
@@ -184,6 +191,10 @@ API.compile = function compile(user, json, callback) {
 		}
 		
 		function worker_message(data) {
+			
+			if(ABORT) {
+				
+			}
 			
 			//console.log("SSG data: " + JSON.stringify(data));
 			if(data.type == "console" || data.type == "error") {
@@ -229,6 +240,8 @@ API.compile = function compile(user, json, callback) {
 			}
 			
 			function fileCopied(err, json) {
+				if(ABORT) return;
+				
 				if(err) {
 					console.warn("Unable to copy file (" + err.message + ")\n" + json.to);
 				}
@@ -247,8 +260,14 @@ API.compile = function compile(user, json, callback) {
 			folderAboutToBeCreated.push(folder);
 			
 			CORE.createPath(user, {pathToCreate: folder, public: publish}, function(err, json) {
-				if(err) return callback(err);
-				else {
+				if(ABORT) return;
+				
+				if(err) {
+					ABORT = true;
+					SSG_BUILD.abort();
+					return callback(err);
+				}
+					else {
 					folderAboutToBeCreated.splice(folderAboutToBeCreated.indexOf(folder, 1));
 					foldersExist.push(folder);
 					
@@ -260,6 +279,8 @@ API.compile = function compile(user, json, callback) {
 		}
 		
 		function runWaitingList() {
+			if(ABORT) return;
+			
 			//console.log("Items in waiting list: waitingList.length=" + waitingList.length + " filesToSave=" + filesToSave + " doneCompiling=" + doneCompiling);
 			if(waitingList.length > 0) waitingList.shift()();
 		}
@@ -274,6 +295,8 @@ API.compile = function compile(user, json, callback) {
 		}
 		
 		function checkDone(exitCode) {
+			if(ABORT) return;
+			
 			if(filesToSave == 0 && doneCompiling) {
 				console.log("All files saved!");
 				callback(null, {ssgWorkerExitCode: workerExitCode});
