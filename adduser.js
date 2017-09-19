@@ -312,7 +312,6 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	mount("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
 	mount("/usr/bin/python", "/home/" + username + "/usr/bin/python");
 	mount("/usr/bin/nodejs", "/home/" + username + "/usr/bin/nodejs");
-	//mount("/usr/bin/npm", "/home/" + username + "/usr/bin/npm");
 	
 	
 	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it

@@ -109,7 +109,7 @@ umount("/home/" + username + "/usr/share");
 	umount("/home/" + username + "/usr/bin/hg");
 	umount("/home/" + username + "/usr/bin/python");
 	umount("/home/" + username + "/usr/bin/nodejs");
-umount("/home/" + username + "/usr/bin/npm");
+
 	
 	child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
