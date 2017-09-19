@@ -8,6 +8,8 @@
 		
 		EDITOR.readLines(testFileLocation, {start: 1, end: 10}, function(err, lines) {
 			
+			if(err) return callback(err);
+			
 			if(lines.length != 10) throw new Error("Expected 10 lines. Not " + lines.length + " ! lines=" + JSON.stringify(lines, null, 2));
 			
 			if(lines[0] != "L1_First_line") throw new Error("lines[0]=" + lines[0]);
@@ -17,7 +19,7 @@
 				
 		});
 		
-	});
+	}, 1);
 	
 	
 	EDITOR.addTest(function testReadLines2(callback) {

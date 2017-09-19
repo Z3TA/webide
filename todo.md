@@ -32,7 +32,8 @@ new versions of nw.js though.
 What I'm working on
 -------------------
 
-running tests ...
+Do mounts survive reboots !?
+
 
 
 

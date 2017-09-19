@@ -58,7 +58,7 @@ Open a terminal: Function-key + Space, and type "terminal"
 Navigate to the folder this file is located in via the terminal: cd path\to\jzedit
 Then install the dependencies by typing "npm install" and hit enter in the terminal.
 After nodejs and all dependencies are installed, type this in the terminal:
-node server/server.js --port=8080 --user=admin --pw=admin
+node server/server.js --port=8080 --user=admin --pw=admin -nochroot
 
 Then navigate to this address in your favorite web browser: http://127.0.0.1:8080/
 

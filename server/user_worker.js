@@ -134,7 +134,7 @@ user.identify = function identify(info) {
 	if(USE_CHROOT) {
 		user.rootPath = null;
 		user.defaultWorkingDirectory = "/";
-		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because CHROOT=" + CHROOT + ")");
+		console.log("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " (because USE_CHROOT=" + USE_CHROOT + ")");
 	}
 	
 	var lastCharOfDir = user.defaultWorkingDirectory.substr(user.defaultWorkingDirectory.length-1);
