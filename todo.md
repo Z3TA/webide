@@ -37,11 +37,7 @@ In old version of nw.js urls start with file://
 In newer versions urls start with chrome-extension://
 We want urls to use http or https!!
 
-unity-webapps-runner -i test -h http://127.0.0.1:8099/index.htm !??
 
-remove nw.js !?
-
-url starts with file://
 Investigating: unable to preview SSG in nw.js (require not specified)
 (found many errors. One of them was that we where using file:// protocol in urls due to nw.js)
 
@@ -56,7 +52,7 @@ todo
 
 fix bug: SSG valde bort-kommenterad <abstract> element som descr i stället för det icke bortkommenterade!
 
-fix regression: current file in browser title bar!!
+fix regression: current file in browser title bar!! (chromium)
 
 When working in the browser, Ctrl+O opens a local file, but when you edit it, its actually NOT a local file!
 Make local files Ctrl+Shift+O and Ctrl+O the same as Ctrl+P !
@@ -361,6 +357,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+When using non asci characters in commit messages, Mercurial will complain!
 
 When copy pasting text into a file with CrLf line breks on linux ...
 

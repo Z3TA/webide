@@ -7,7 +7,7 @@
 	var menu;
 	
 	EDITOR.plugin({
-		desc: "Open file dialog using Ctrl+O or via context menu",
+		desc: "Open local file dialog",
 		load: load,
 		unload: unload,
 	});
