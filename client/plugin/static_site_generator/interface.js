@@ -212,23 +212,6 @@
 		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
-		if(EDITOR.user == "demo") {
-			// Open demo site if no file is open
-			var timer = 1000; // Milliseconds
-			setTimeout(function () {
-				
-				var openFiles = Object.keys(EDITOR.files).length;
-				
-				if(openFiles === 0) {
-					
-					var filePath = path.join(require("dirname") + "/userdirs/demo/static_site_demo/source/about.htm");
-					
-					EDITOR.openFile(filePath);
-					
-				}
-			}, timer);
-		}
-		
 	}
 	
 	function SSG_cleanup() {
