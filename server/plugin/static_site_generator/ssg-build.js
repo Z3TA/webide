@@ -128,7 +128,9 @@ var main = {
 	compile: function main(main_callback) {
 	
 	// Reset
-	ALLDOCUMENTS = [];
+		ABORT = false;
+		
+		ALLDOCUMENTS = [];
 	OTHERFILES = [];
 	ROOT = {};
 	MEDIAFILES = [];
