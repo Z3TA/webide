@@ -25,7 +25,9 @@ AND ALSO FOR ALL NEW FEATURES!
 What I'm working on
 -------------------
 
+In shell start.sh when exiting (with exit code <> 0 ??) it starts the next runtime in the list ...
 
+---
 
 Trying to fix preview problem in SSG with nw.js runtime (due to file:// protocol)
 
