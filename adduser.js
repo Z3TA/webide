@@ -169,7 +169,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	copyFolderRecursiveSync("etc/userdir_skeleton/run", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/my_web_site", homeDir);
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
-	copyFolderRecursiveSync("etc/userdir_skeleton/.editorStorage", homeDir);
+	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
 	
 		
@@ -194,13 +194,21 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	chmodrSync(homeDir + "/run/", "444");
 	
 	
+	// Try Copy over the test file (only exist in dev)
+	try {
+	copyFileSync("./testfile.txt", "/home/" + username + "/testfile.txt");
+	}
+	catch(err) {
+		if(err.code != "ENOENT") throw err;
+	}
+	
 		
 	// Update demo site 
-	var cmsjz_sites = fs.readFileSync(homeDir + "/.editorStorage/cmsjz_sites", ENCODING);
+	var cmsjz_sites = fs.readFileSync(homeDir + "/.jzeditStorage/cmsjz_sites", ENCODING);
 	cmsjz_sites = cmsjz_sites.replace(/%USERNAME%/g, username);
 	cmsjz_sites = cmsjz_sites.replace(/%HOMEDIR%/g, homeDir);
 	cmsjz_sites = cmsjz_sites.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + "/.editorStorage/cmsjz_sites", cmsjz_sites);
+	fs.writeFileSync(homeDir + "/.jzeditStorage/cmsjz_sites", cmsjz_sites);
 	
 	
 		
