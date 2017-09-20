@@ -147,6 +147,41 @@ umount("/home/" + username + "/usr/share");
 	// stderr message are already shown in the shell, no need to repeat them
 	}
 	}
+	
+	// Remove entry from /etc/fstab
+	var text = fs.readFileSync("/etc/fstab", ENCODING);
+	var reMount = new RegExp("(.*) " + regExpEsc(path) + " none bind 0 0\n");
+	var entry = text.match(reMount);
+	if(!entry) {
+		console.log("Not found in /etc/fstab: " + path);
 	}
+	else {
+	text = text.replace(entry[0], "");
+	
+	if(text.match(reMount)) throw new Error("Failed to remove /etc/fstab entry: " + entry[0]);
+	
+	fs.writeFileSync("/etc/fstab", text, ENCODING);
+	}
+}
+
+function regExpEsc(str) {
+	return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
+function replaceInFileSync(filePath, arrSearchReplace) {
+	var fs = require("fs");
+	
+	// arrSearchReplace = [searchString, replaceString]
+	var text = fs.readFileSync(filePath, ENCODING);
+	
+	for (var i=0, searchString="", replaceString=""; i<arrSearchReplace.length; i++) {
+		searchString = arrSearchReplace[i][0];
+		replaceString = arrSearchReplace[i][1];
+		text = text.replace(searchString, replaceString);
+	}
+	
+	fs.writeFileSync(filePath, text, ENCODING);
+	
+}
 	
 	

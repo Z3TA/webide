@@ -293,7 +293,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	var makeNull = child_process.execSync("mknod -m 444 /home/" + username + "/dev/null c 1 3").toString(ENCODING);
 	if(makeNull.trim() != "") throw makeNull;
 	
-	// On some system we need to mount --bind urandom !??
+	// On some systems we need to mount --bind urandom !??
 	mount("/dev/urandom", "/home/" + username + "/dev/urandom");
 	
 	
@@ -400,6 +400,10 @@ function mount(source, target) {
 	
 	var mountResult = child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();
 	if(mountResult != "") throw mountResult;
+	
+	// Append to /etc/fstab so it is re-mounted after reboot
+	fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
+	
 	
 }
 
