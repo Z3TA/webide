@@ -19,7 +19,7 @@
 				
 		});
 		
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function testReadLines2(callback) {
