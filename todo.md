@@ -32,13 +32,26 @@ new versions of nw.js though.
 What I'm working on
 -------------------
 
-Do mounts survive reboots !?
+Escape special terminal characters!
+
+Using nodejs debugger and repl to find undefined properties at runtime !
+And also show inline console.logs! (the result of the console log)
+
+The debugger needs inet access! Try to use a namespace !? unshare 
+
+
+
+
+
 
 
 
 
 todo
 ----
+
+Do mounts survive reboots !?
+Test reboot to see if the entries in /etc/fstab works!
 
 fix regression: current file in browser title bar!! (chromium)
 

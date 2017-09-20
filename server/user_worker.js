@@ -79,7 +79,15 @@ if(parseInt(process.env.uid)) {
 	
 	//var chroot = require("chroot");
 	//chroot("/home/" + username + "/", username);
-	}
+	
+	// Unshare network namespace
+	/*
+	var CLONE_NEWNET = 0x40000000;
+	var unshare = require("unshare");
+	unshare(CLONE_NEWNET);
+	*/
+	
+}
 else {
 	var isRoot = process.getuid && process.getuid() === 0;
 if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
@@ -634,13 +642,15 @@ API.run_nodejs = function run_nodejs(user, json, callback) {
 	var filePath = user.translatePath(json.filePath);
 	if(filePath instanceof Error) return callback(filePath);
 	
+	var debugit = json.debug || false;
+	
 	if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
 		// Stop the current running script before starting the same script again
 		stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-			runNodeJsScript(filePath, json.installAllModules, callback);
+			runNodeJsScript(filePath, json.installAllModules, debugit, callback);
 		});
 	}
-	else runNodeJsScript(filePath, json.installAllModules, callback);
+	else runNodeJsScript(filePath, json.installAllModules, debugit, callback);
 	
 }
 
@@ -793,7 +803,9 @@ function stopNodeJsScript(filePath, callback) {
 	
 }
 
-function runNodeJsScript(filePath, installAllModules, callback) {
+function runNodeJsScript(filePath, installAllModules, debugit, callback) {
+	
+	debugit = true;
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	npmExecFileOptions.cwd = directory;
@@ -846,8 +858,17 @@ function runNodeJsScript(filePath, installAllModules, callback) {
 	
 	function runIt(packageJsonExist) {
 		
+		//if(debugit) runDebugger();
+		//else runScript();
+		
+		
 	console.log(user.name + " starting NodeJS script: filePath=" + filePath);
-	
+		
+		var fileName = UTIL.getFilenameFromPath(filePath);
+		var breakPoints = [];
+		var nextBreakPoint;
+		var whenDebuggerReady;
+		var nodeScript;
 	var nodeScriptArgs = [];
 	var nodeScriptOptions = {
 		execPath: "/usr/bin/nodejs",
@@ -857,67 +878,177 @@ function runNodeJsScript(filePath, installAllModules, callback) {
 		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 	};
 	
-	var child_process = require("child_process");
-	var nodeScript = child_process.fork(filePath, nodeScriptArgs, nodeScriptOptions);
-	// The node worker will chroot to user's home dir, setegid and seteuid
-	
-	nodeScript.on("message", messageFromNodeScript);
-	nodeScript.on("error", nodeScriptError);
-	nodeScript.on("exit", nodejScriptExit);
-	nodeScript.stdout.on('data', nodejScriptStdout);
-	nodeScript.stderr.on('data', nodejScriptStderr);
-	
-	// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
-	
-	user.runningNodeJsScripts[filePath] = nodeScript;
-	callback(null, {filePath: filePath});
-	
-	
-	function messageFromNodeScript(message, handle) {
-		console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
-		console.log(message);
-		user.send({nodejsMessage: {
-				scriptName: filePath,
-				message: message
-			}
-		});
-		}
-	
-	function nodejScriptExit(code, signal) {
-		console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
-		
-		delete user.runningNodeJsScripts[filePath];
-		
-		user.send({nodejsMessage: {
-				scriptName: filePath,
-				exit: {
-					code: code,
-					signal: signal
+		if(debugit) {
+			nodeScriptOptions.execArgv = ["debug"];
+			
+			fs.readFile(filePath, "utf-8", function(err, text) {
+				if(err) return callback(err);
+				
+				// Find all console.log ...
+				// Executing console.log expressions in the repl might be dangerous. eg: console.log(c++, foo());
+				var rows = text.split(/\n|\r\n/);
+				
+				console.log(user.name + ":" + filePath + ": rows=" + rows.length);
+				
+				var reConsoleLog = /console\.log\s*\((.*)\)/;
+				var match;
+				for (var i=0; i<rows.length; i++) {
+					match = rows[i].match(reConsoleLog);
+					if(match) {
+						console.log(user.name + ":" + filePath + ":breakpoint: line=" + (i+1) + " expression=" + match[1]);
+						breakPoints.push({line: i+1, expression: match[1], type: "console.log"});
+					}
 				}
-			}
+				start();
+				
+			});
+		}
+		else {
+			start();
+		}
+		
+		function start() {
+			var child_process = require("child_process");
+			nodeScript = child_process.fork(filePath, nodeScriptArgs, nodeScriptOptions);
+			// The node worker will chroot to user's home dir, setegid and seteuid
+			
+			nodeScript.on("message", messageFromNodeScript);
+			nodeScript.on("error", nodeScriptError);
+			nodeScript.on("exit", nodejScriptExit);
+			
+			nodeScript.stdout.on('data', nodejsScriptStdout);
+			nodeScript.stderr.on('data', nodejsScriptStderr);
+			
+			if(debugit && breakPoints.length > 0) {
+				nodeScript.stdin.setEncoding('utf-8');
+				}
+			
+			// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
+			
+			user.runningNodeJsScripts[filePath] = nodeScript;
+			callback(null, {filePath: filePath});
+		}
+		
+		function messageFromNodeScript(message, handle) {
+			console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
+			console.log(message);
+			user.send({nodejsMessage: {scriptName: filePath, message: message}});
+		}
+		
+		function nodejScriptExit(code, signal) {
+			console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
+			
+			delete user.runningNodeJsScripts[filePath];
+			
+			user.send({nodejsMessage: {
+					scriptName: filePath,
+					exit: {
+						code: code,
+						signal: signal
+					}
+				}
 		});
 		
 	}
 	
 	function nodeScriptError(err) {
 		console.log(user.name + " nodejs script error: err=" + err);
+			//user.send({nodejsMessage: {scriptName: filePath, scriptError: err.message}});
 	}
 	
-	function nodejScriptStdout(data) {
-		console.log(user.name + ":" + filePath + ":stdout: data=" + data + "");
+		function stdin(text) {
+			console.log(user.name + ":" + filePath + ":stdin: " + text);
+			
+			nodeScript.stdin.write(text + "\n");
+		}
 		
-		user.send({nodejsMessage: {
-				scriptName: filePath,
-				stdout: data.toString("utf8")
+		function nodejsScriptStdout(data) {
+			var text = data.toString("utf8");
+			console.log(user.name + ":" + filePath + ":stdout: " + data + "");
+			console.log("text=" + debugText(text) + "  nextBreakPoint=" + JSON.stringify(nextBreakPoint));
+			
+			if(debugit) {
+				
+				// To convert from decimal to hex, open repl and type: parseInt(n).toString(16);
+				// The hex can then be used as escape character \xhex (where hex is the charcode in decimal)
+				// Numbers lower then 10 needs to be padded with a zero. eg 8 becomes x08
+				
+				
+				// The debugger always breaks at the first code entry,
+				// We need to wait for that before sending it stuff
+				var matchBreak = text.match(/\x08?break in (.*):(\d*)/);
+				if(!nextBreakPoint && matchBreak) {
+					log("Debugger connected and ready! matchBreak=" + JSON.stringify(matchBreak));
+					
+					// This might be the first breakpoint!!!
+					// The debugger always stop on the first expression found
+					if(matchBreak[2] == breakPoints[0].line) {
+						// it *is* the first breakpoint!
+						nextBreakPoint = breakPoints.shift();
+						for (var i=0; i<breakPoints.length; i++) {
+							stdin("setBreakpoint(" + breakPoints[i].line + ")");
+						}
+						checkText();
+					}
+					else {
+						for (var i=0; i<breakPoints.length; i++) {
+							stdin("setBreakpoint(" + breakPoints[i].line + ")");
+						}
+						nextBreakPoint = breakPoints.shift();
+						}
+					stdin("cont");
+				}
+				else if(nextBreakPoint) {
+					checkText();
 			}
-		});
+			else {
+					console.log("Unexpected: " + debugText(text));
+				}
+			}
+			else {
+				user.send({nodejsMessage: {scriptName: filePath,stdout: text}});
+			}
+			
+			function checkText() {
+				// break in undefinedProperty.js:18
+				
+				if(text == "\x08break in " + fileName + ":" + nextBreakPoint.line) {
+					if(nextBreakPoint.type=="console.log") {
+						stdin("cont");
+						// we'll get the result printed out by console.log in the next message ... (hopefully)
+					}
+					else stdin("repl");
+				}
+				else if(text == "Press Ctrl + C to leave debug repl") {
+					stdin(nextBreakPoint.expression);
+				}
+				else if(text.match(/^\x08?</)) {
+					if(nextBreakPoint.type=="console.log") {
+						user.send({nodejsMessage: {scriptName: filePath, line: nextBreakPoint.line, "console.log": text.trim()}});
+						continueDebug();
+					}
+					else if(nextBreakPoint.type=="undefinedMember") {
+						// ?
+					}
+				}
+			}
+		}
 		
-	}
-	
-	function nodejScriptStderr(data) {
-			console.log(user.name + ":" + filePath + ":stderr: data (" + (typeof data) + ") =  " + data + "");
+		function continueDebug() {
+			if(breakPoints.length > 0) {
+				nextBreakPoint = breakPoints.shift();
+				stdin("cont");
+			}
+			else stdin("quit");
+		}
 		
+		function nodejsScriptStderr(data) {
+			
 			var stderr = data.toString("utf8");
+			
+			console.log(user.name + ":" + filePath + ":stderr: " + debugText(stderr) + " (" + (typeof data) + ") =  " + data + "");
+			
+			
 			
 			var matchModuleError = stderr.match(/Error: Cannot find module '(.*)'/);
 			
@@ -931,7 +1062,7 @@ function runNodeJsScript(filePath, installAllModules, callback) {
 							
 							if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
 								if(err) console.log(err.message); // Means the script was already stopped.
-								runNodeJsScript(filePath, installAllModules, function(err) {
+								runNodeJsScript(filePath, installAllModules, debugit, function(err) {
 									if(err) user.send(err.message);
 								});
 							})
@@ -966,6 +1097,53 @@ function parentRequest(req, callback) {
 	
 	process.send({id: id, request: req});
 	parentRequestCallback[id] = callback;
+}
+
+function debugText(text) {
+	var d = "";
+	for (var i=0, c; i<text.length; i++) {
+		c = text.charCodeAt(i);
+		if(c==0) d += "NUL";
+		else if(c==1) d += "SOH";
+		else if(c==2) d += "STX";
+		else if(c==3) d += "ETX";
+		else if(c==4) d += "EOT";
+		else if(c==5) d += "ENQ";
+		else if(c==6) d += "ACK";
+		else if(c==7) d += "BEL";
+		else if(c==8) d += "BS";
+		else if(c==9) d += "HT";
+		else if(c==10) d += "LF";
+		else if(c==11) d += "VT";
+		else if(c==12) d += "FF";
+		else if(c==13) d += "CR";
+		else if(c==14) d += "SO";
+		else if(c==15) d += "SI";
+		else if(c==16) d += "DLE";
+		else if(c==17) d += "DC1";
+		else if(c==18) d += "DC2";
+		else if(c==19) d += "DC3";
+		else if(c==20) d += "DC4";
+		else if(c==21) d += "NAK";
+		else if(c==22) d += "SYN";
+		else if(c==23) d += "ETB";
+		else if(c==24) d += "CAN";
+		else if(c==25) d += "EM";
+		else if(c==26) d += "SUB";
+		else if(c==27) d += "ESC";
+		else if(c==28) d += "FS";
+		else if(c==29) d += "GS";
+		else if(c==30) d += "RS";
+		else if(c==31) d += "US";
+		else if(c>=32 && c<=126) d += text.charAt(i);
+		else if(c==127) d += "DEL";
+		
+		else if(c==160) d += "SPACE";
+		else if(c>=161 && c<=255) d += text.charAt(i);
+		else d += "_" + c + "_";
+		}
+	
+	return d;
 }
 
 
