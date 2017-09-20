@@ -1361,6 +1361,11 @@
 							quotes.push(new Quote(quoteStart, i));
 							word = text.substring(quoteStart, i+1);
 							//console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
+							
+							// Leave xml tag if it was opened inside the quote
+							// But not if it's a vbScript doube "" ("" escpapes a double-quote in vbScript!)
+							if(insideXmlTag && xmlTagInsideQuote && text.charAt(charIndex+1) != '"') insideXmlTag = false;
+							
 							return;
 						}
 					}
@@ -1377,6 +1382,10 @@
 						if(lastChar != backSlash || (lastChar == backSlash && llChar == backSlash)) {	
 							insideSingleQuote = false;
 							quotes.push(new Quote(quoteStart, i));
+							
+							// Leave xml tag if it was opened inside the quote
+							if(insideXmlTag && xmlTagInsideQuote) insideXmlTag = false;
+							
 							return;
 						}
 					}

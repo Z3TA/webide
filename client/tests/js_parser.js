@@ -1,4 +1,15 @@
 
+EDITOR.addTest(function arrowInIf(callback) {
+	EDITOR.openFile("arrowInIf.js", 'if((foo) == "<") {\n\n}\n', function(err, file) {
+		
+		if(file.grid[1].indentation != 1) throw new Error("Expected indentation on line 2 to be 1, not " + file.grid[1].indentation);
+		
+			EDITOR.closeFile(file.path);
+			callback(true);
+			
+		});
+}, 1);
+
 
 EDITOR.addTest(function cantFindFunctionStart(callback) {
 	EDITOR.openFile("cantFindFunctionStart.js", 'console.log = function() {\nlog("123");\n}\n\nconsole.warn = function() {\nlog("abc");\n}\n\nvar foo = {\nbar: {\nlog: function () {\n\n}\n}\n}\n', function(err, file) {
