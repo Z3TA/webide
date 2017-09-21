@@ -1815,6 +1815,8 @@ EDITOR.lastKeyPressed = "";
 		// Will display a talk bubble (plugin/render_info.js)
 		var info = EDITOR.info;
 		
+		console.log("addInfo: row=" + row + " col=" + col + " txt=" + txt + "");
+		
 		console.time("addInfo");
 		
 		// Convert the text to an array, one line per row
@@ -1845,6 +1847,7 @@ EDITOR.lastKeyPressed = "";
 			
 			// Remove all text at next editor interaction
 			EDITOR.onNextInteraction(function() {
+				console.warn("Clearing info! row=" + row + " col=" + col + " txt=" + JSON.stringify(txt));
 				EDITOR.removeAllInfo(row, col);
 			});
 			
@@ -1909,6 +1912,8 @@ EDITOR.lastKeyPressed = "";
 		
 		for(var i=0; i<info.length; i++) {
 			if(info[i].row == row && info[i].col == col) {
+				
+				console.warn("Removing info from row=" + row + " col=" + col);
 				
 				// Remove info
 				info.splice(i,1);

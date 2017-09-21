@@ -27,7 +27,7 @@ There's no rush in getting rid of nw.js, but we should make sure everything work
 Make sure everything works in Chrome/Chromium browser, then also Firefox (with -chrome arg)
 and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to make it work in
 new versions of nw.js though.
-
+ubuntu: webapp-container / unity-webapps-runner ?
 
 What I'm working on
 -------------------
@@ -39,8 +39,13 @@ And also show inline console.logs! (the result of the console log)
 
 The debugger needs inet access! Try to use a namespace !? unshare 
 
+Also make it so that the user can set breakpoints!
+Then when the user hovers over a variable, execute the variable in the debugger repl
 
+todo: use the chrome-debugger api instead of nodejs debugger so that we also can debug web apps in chrome.
+Able to add break-points: Ctrl+B or clicking on the line number.
 
+Also implement support for the chromium debugger protocol so we can debug web apps (and the editor itself)!
 
 
 

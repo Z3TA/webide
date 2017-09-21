@@ -753,11 +753,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			}
 			
 			if(stdout) {
-					user.send({nodejsMessage: {
-							scriptName: filePath,
-							stdout: stdout
-						}
-					});
+				user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
 				}
 			
 			return callback(null);
@@ -773,16 +769,33 @@ function stopNodeJsScript(filePath, callback) {
 	
 	if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) return callback(new Error(filePath + " is not running"));
 	
-	var childProcess = user.runningNodeJsScripts[filePath];
+	var childProcess = user.runningNodeJsScripts[filePath].childProcess;
+	var isDebugger = user.runningNodeJsScripts[filePath].isDebugger;
 	
-	if(childProcess.connected) childProcess.disconnect();
+	childProcess.stdin.setEncoding('ascii'); 
 	
+	if(isDebugger) {
+	console.log(user.name + ":" + filePath + ":stdin: quit");
+	childProcess.stdin.write("quit" + "\n");
+	}
+	else {
+	console.log(user.name + ":" + filePath + ":stdin: Ctrl+C");
+	childProcess.stdin.write("\x03"); // CTRL-C
+	}
+	
+	// Give CTRL-C a chance before sending kill signals
+	var signalTimeout = setTimeout(function sendSignals() {
+	
+		if(childProcess.connected) childProcess.disconnect();
+		
 	// Give it a chance to teardown before killing it
 	childProcess.kill('SIGTERM');
 	childProcess.kill('SIGINT');
 	childProcess.kill('SIGQUIT');
 	childProcess.kill('SIGHUP');
+	}, 1000);
 	
+	// Give the other kill signals a chance before sending final kill signal
 	var killTimeout = setTimeout(function kill() {
 		// Now kill it for good
 		childProcess.kill('SIGKILL');
@@ -796,6 +809,7 @@ function stopNodeJsScript(filePath, callback) {
 	setTimeout(function checkIfStillRunning() {
 		// Check if it has exited
 		if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) {
+			clearTimeout(signalTimeout);
 			clearTimeout(killTimeout);
 			callback(null);
 		}
@@ -839,15 +853,11 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 					stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
 					stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
 					
-					if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + err.message));
+					if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + stderr));
 				}
 				
 					if(stdout) {
-					user.send({nodejsMessage: {
-							scriptName: filePath,
-								stdout: stdout
-						}
-					});
+					user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
 					}
 					return runIt(true);
 					
@@ -925,14 +935,14 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 			
 			// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
 			
-			user.runningNodeJsScripts[filePath] = nodeScript;
+			user.runningNodeJsScripts[filePath] = {childProcess: nodeScript, isDebugger: debugit};
 			callback(null, {filePath: filePath});
 		}
 		
 		function messageFromNodeScript(message, handle) {
 			console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
 			console.log(message);
-			user.send({nodejsMessage: {scriptName: filePath, message: message}});
+			user.send({nodejsMessage: {scriptName: filePath, ICP: message}});
 		}
 		
 		function nodejScriptExit(code, signal) {
@@ -940,20 +950,13 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 			
 			delete user.runningNodeJsScripts[filePath];
 			
-			user.send({nodejsMessage: {
-					scriptName: filePath,
-					exit: {
-						code: code,
-						signal: signal
-					}
-				}
-		});
-		
+			user.send({nodejsMessage: {scriptName: filePath, exit: {code: code, signal: signal}}});
+			
 	}
 	
 	function nodeScriptError(err) {
 		console.log(user.name + " nodejs script error: err=" + err);
-			//user.send({nodejsMessage: {scriptName: filePath, scriptError: err.message}});
+			//user.send({nodejsMessage: {scriptName: filePath, error: err.message}});
 	}
 	
 		function stdin(text) {
@@ -973,6 +976,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 				// The hex can then be used as escape character \xhex (where hex is the charcode in decimal)
 				// Numbers lower then 10 needs to be padded with a zero. eg 8 becomes x08
 				
+				// childProcess.stdin.write("\x03"); // CTRL-C
 				
 				// The debugger always breaks at the first code entry,
 				// We need to wait for that before sending it stuff
@@ -1006,7 +1010,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 				}
 			}
 			else {
-				user.send({nodejsMessage: {scriptName: filePath,stdout: text}});
+				user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
 			}
 			
 			function checkText() {
@@ -1024,7 +1028,10 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 				}
 				else if(text.match(/^\x08?</)) {
 					if(nextBreakPoint.type=="console.log") {
-						user.send({nodejsMessage: {scriptName: filePath, line: nextBreakPoint.line, "console.log": text.trim()}});
+						var logMsg = text;
+						logMsg = logMsg.replace(/^\x08?< /, "");
+						logMsg = logMsg.replace(/\ndebug> /, "");
+						user.send({nodejsMessage: {scriptName: filePath, line: nextBreakPoint.line, "console.log": logMsg}});
 						continueDebug();
 					}
 					else if(nextBreakPoint.type=="undefinedMember") {
@@ -1039,7 +1046,9 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 				nextBreakPoint = breakPoints.shift();
 				stdin("cont");
 			}
-			else stdin("quit");
+			else {
+				user.send({nodejsMessage: {scriptName: filePath, noMoreBreakPoints: true}});
+				}
 		}
 		
 		function nodejsScriptStderr(data) {
@@ -1072,19 +1081,11 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 					
 				}
 				else {
-				user.send({nodejsMessage: {
-						scriptName: filePath,
-							cannotFindModule: matchModuleError[1]
-						}
-					});
+					user.send({nodejsMessage: {scriptName: filePath, cannotFindModule: matchModuleError[1]}});
 				}
 			}
 			
-			user.send({nodejsMessage: {
-					scriptName: filePath,
-					stdout: stderr
-				}
-			});
+			user.send({nodejsMessage: {scriptName: filePath, stderr: stderr}});
 		}
 		
 	}

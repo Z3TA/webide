@@ -67,24 +67,71 @@
 				else throw new Error("Unknown answer=" + answer);
 				});
 		}
+		else if(msg.stdout) stdout(msg);
+		else if(msg.stderr) stdout(msg);
+		else if(msg.exit) stdout(msg);
 		
-		if(msg.stdout) {
+		else if(msg.noMoreBreakPoints) {
 			
-			var stdOutFile = filePath + ".stdout";
+		}
+		
+		else if(msg["console.log"]) {
+			stdout(msg);
 			
-			if(EDITOR.files.hasOwnProperty(stdOutFile)) {
-				console.log("filePath=" + stdOutFile + " exist in EDITOR.files");
+			// Also show it inline if it's visible
+			if(!msg.line) throw new Error("msg.line=" + msg.line);
+			var line = parseInt(msg.line);
+			if(isNaN(line)) throw new Error("msg.line=" + msg.line + " is not a number!");
+			
+			if(!EDITOR.files.hasOwnProperty(filePath)) {
+				console.warn("The source file is not open: filePath=" + filePath);
+				return;
+			}
+			
+			var file = EDITOR.files[filePath];
+			
+			if(!file) throw new Error("The file is gone: filePath=" + filePath);
+			
+			var row = line-1;
+			//if(file.rowVisible(row)) {
+			var rowText = file.rowText(row, false);
+			var col = rowText.indexOf("console.log");
+			var txt = msg["console.log"];
+			txt = txt.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
+			txt = txt.replace(">", "&gt;");
+			//EDITOR.addInfo(row-1, col, "WTF!?");
+			
+			EDITOR.showFile(file); // Make sure it's in view
+			
+			EDITOR.addInfo(row, col, txt);
+			//}
+			
+			}
+			
+		else if(msg.ICP) alertBox("ICP from " + scriptName + ": " + msg.ICP);
+			
+			else if(msg.error) alertBox(scripName + " error: " + msg.error);
+			
+			else throw new Error("Unknown message from nodej script: " + JSON.stringify(msg));
+			
+		}
+	
+	function stdout(msg) {
+		var stdOutFile = msg.scriptName + ".stdout";
+		
+		if(EDITOR.files.hasOwnProperty(stdOutFile)) {
+			console.log("filePath=" + stdOutFile + " exist in EDITOR.files");
 			appendFile(EDITOR.files[stdOutFile], msg);
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + filePath + " ...", function fileOpened(err, file) {
-					if(err) throw err;
-					appendFile(file, msg);
-				});
-			}
+			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...", function fileOpened(err, file) {
+				if(err) throw err;
+				appendFile(file, msg);
+			});
 		}
 	}
+	
 	
 	function stopNodeJsScript() {
 		var filePath = EDITOR.currentFile.path;
@@ -129,7 +176,7 @@
 		
 		console.log("appendFile: " + file.path + " msg=" + msg);
 		
-		if(msg.stdout) file.writeLine(msg.stdout);
+		if(msg.stdout) file.writeLine( (msg.type ? msg.type + ": " : "") + msg.stdout );
 		else if(msg.stderr) file.writeLine(msg.stderr);
 		else if(msg.exit) file.writeLine(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
 			

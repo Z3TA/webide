@@ -148,15 +148,20 @@ var File; // File object is global
 		file.parse = true; // Always parse new files by default
 	}
 	
-	File.prototype.rowText = function(row) {
-		// Returns the characters on that row, including indentation characters!
+	File.prototype.rowText = function(row, includeIndentationCharacters) {
+		// Returns the characters on that row
+		if(includeIndentationCharacters == undefined) includeIndentationCharacters = true; // Including indentation characters!
+		
 		var file = this;
 		
 		// No need to check row because it will throw an error anyway if it's "wrong". But it does give friendlier errors.
 		if(row < 0) throw new Error("row=" + row + " less then zero");
 		if(row >= file.grid.length) throw new Error("File.rowText: row=" + row + " can not be more or equal to file.grid.length=" + file.grid.length);
 		
-		var txt = file.grid[row].indentationCharacters;
+		var txt = "";
+		
+		if(includeIndentationCharacters) txt = txt + file.grid[row].indentationCharacters;
+		
 		for(var col=0; col<file.grid[row].length; col++) {
 			txt = txt + file.grid[row][col].char;
 		}

@@ -9,11 +9,13 @@
 	
 	var key_B = 66;
 	
-	EDITOR.bindKey({desc: "Show a message in window taskbar icon", charCode: key_B, combo: CTRL, fun: badgeMe});
+	EDITOR.bindKey({desc: "Show a message in window taskbar icon", charCode: key_B, combo: CTRL + ALT, fun: badgeMe});
 	
 	function badgeMe() {
-		var GUI = require('nw.gui').Window.get();
-		GUI.setBadgeLabel("99");
+		
+		var browser = browser || chrome;
+		browser.browserAction.setBadgeText({text: "99"});
+		
 		return true;
 	}
 
