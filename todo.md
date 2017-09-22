@@ -98,8 +98,10 @@ xwininfo -display :1 -root -children
 x11vnc -usepw -rfbport 5901 -display :1 -id 0x400001
 (problem: You don't see menus)
 
-
-
+Investigate use of unix sockets for x11vnc and chromium-browser remote-debugging-port !
+chromium-browser remote-debugging needs a port nr (unix sockets might work on Android)
+node-inspect needs host and port!
+x11vnc supports unixsock !!
 
 todo
 ----
@@ -110,12 +112,22 @@ Xvfb :1 -ac -screen 0 800x600x24 &
 # Start chromium-browser on that virtual monitor (id=1)
 runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
 # Use x11vnc to serve a vnc session on the chromium-browser window
-x11vnc -usepw -rfbport 5901 -display :1 -id 0x400001
+x11vnc -usepw -passwd test -rfbport 5901 -display :1 -id 0x400001
 # Open noVNC browser client that connects to the x11vnc server using websockets
 See vnc.js example
+# 
+node-inspect 127.0.0.1:9222
+repl
+window.location="file to debug"
+Ctrl+C
+scripts
+breakpoints('path to script', linenr)
+
 
 Running a virtual monitor and a vnc server use a lot of resources. And it's not the smoothest experience.
 But'ts not very convenient for the user to start a local browser that we can connect the debugger to (in Chromebooks you for example have to get root access)
+
+firewall iptables rules !.. If nodejs scripts are allowed inet, we need to block outgoing e-mail spam etc. 
 
 
 Do mounts survive reboots !?

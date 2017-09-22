@@ -19,6 +19,7 @@
     "chokidar": "^1.7.0",
     "diff": "^2.2.3",
     "ftp": "^0.3.10",
+    "http-proxy": "^1.16.2",
     "iroh": "https://github.com/Z3TA/Iroh/tarball/a45218b13ce9754a2429817923ad749d7c49658d",
     "nodemailer": "^2.6.4",
     "nodemailer-smtp-transport": "^2.7.2",

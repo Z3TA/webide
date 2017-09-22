@@ -392,10 +392,12 @@ function mount(source, target) {
 	var fs = require("fs");
 	
 	if ( fs.lstatSync( source ).isDirectory() ) {
+		// The source is a directory. Create a directory!
 		fs.mkdirSync(target);
 	} else {
+		// The source is not a directory (it's a file!?). Check if the file exist, then create it
 		if ( fs.existsSync( target ) ) throw new Error("File aready exist: " + target); // Prevent overwriting
-		fs.closeSync(fs.openSync(target, 'w'));
+		fs.closeSync(fs.openSync(target, 'w')); // Create emty file
 	}
 	
 	var mountResult = child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();

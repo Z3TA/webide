@@ -129,8 +129,8 @@ It's also possible to host the cloud editor on Windows, but then all users need 
 
 Installing vnc dependencies
 ---------------------------
-apt update
-apt install xvfb x11vnc
+sudo apt update
+sudo apt install xvfb x11vnc chromium-browser
 
 
 
