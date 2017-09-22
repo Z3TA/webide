@@ -32,8 +32,6 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-Escape special terminal characters!
-
 Using nodejs debugger and repl to find undefined properties at runtime !
 And also show inline console.logs! (the result of the console log)
 
@@ -48,9 +46,60 @@ Able to add break-points: Ctrl+B or clicking on the line number.
 Also implement support for the chromium debugger protocol so we can debug web apps (and the editor itself)!
 
 
+With node-inspect we can use the nodejs debugger cli interface to debug both nodejs and chrome!!
+
+use https://github.com/novnc/noVNC to run a web browser in a web browser eg chromium-browser --remote-debugging-port=9222
+then node-inspect 127.0.0.1:9222
+
+
+TightVNC
+xtightvncviewer
+
+run vnc on a window:
+x11vnc -id 0x4a00001
+
+xwininfo to get window id
+
+
+# install desktop on linux server:
+apt-get install xorg lxde-core
+
+# start vnc server (on display 1):
+vncserver :1 -geometry 800x600 -depth 24
+
+# start vnc server as another user, and start an app on that display:
+runuser -l johan -c 'vncserver :1 -geometry 800x600 -depth 24'
+runuser -l johan -c 'DISPLAY=:1 chromium-browser'
+
+runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
+runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://space.zetafiles.org/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
 
 
 
+# stop vnc server:
+vncserver -kill :1
+runuser -l johan -c 'vncserver -kill :1'
+
+# "virtual" x server with xvfb:
+Xvfb :1 -ac -screen 0 800x600x24 &
+DISPLAY=:1 chromium-browser
+
+# Start a program:
+xvfb-run --server-args="$DISPLAY -screen 0 $GEOMETRY -ac +extension RANDR" java .... > log/ui_output.log 2> log/ui_error.log &
+
+# vnc itself
+x11vnc -forever -usepw -shared -rfbport 5900 -display $DISPLAY
+x11vnc -rfbport 5901 -display :1 -localhost -usepw -passwd test
+
+# Get the window id
+xwininfo -display :1 -root -children
+
+# 
+x11vnc -usepw -rfbport 5901 -display :1 -id 0x400001
+(problem: You don't see menus)
+
+
+Running a game in Xvfb and x11vnc will use a lot of cpu resources.
 
 todo
 ----

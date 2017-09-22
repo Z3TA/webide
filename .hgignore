@@ -10,3 +10,4 @@ npm/*
 tests/_*
 temp/*
 .editorStorage/*
+client/noVNC/*

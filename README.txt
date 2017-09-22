@@ -127,6 +127,13 @@ To create an apparmor profile, see apparmor/makeprofile.sh
 It's also possible to host the cloud editor on Windows, but then all users need to run as the same user.
 
 
+Installing vnc dependencies
+---------------------------
+apt update
+apt install xvfb x11vnc
+
+
+
 Adding and removing users
 -------------------------
 
