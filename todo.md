@@ -99,10 +99,24 @@ x11vnc -usepw -rfbport 5901 -display :1 -id 0x400001
 (problem: You don't see menus)
 
 
-Running a game in Xvfb and x11vnc will use a lot of cpu resources.
+
 
 todo
 ----
+
+When debugging a web app
+# Use Xvfb to create a vritual monitor
+Xvfb :1 -ac -screen 0 800x600x24 &
+# Start chromium-browser on that virtual monitor (id=1)
+runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
+# Use x11vnc to serve a vnc session on the chromium-browser window
+x11vnc -usepw -rfbport 5901 -display :1 -id 0x400001
+# Open noVNC browser client that connects to the x11vnc server using websockets
+See vnc.js example
+
+Running a virtual monitor and a vnc server use a lot of resources. And it's not the smoothest experience.
+But'ts not very convenient for the user to start a local browser that we can connect the debugger to (in Chromebooks you for example have to get root access)
+
 
 Do mounts survive reboots !?
 Test reboot to see if the entries in /etc/fstab works!
