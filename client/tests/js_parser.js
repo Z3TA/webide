@@ -1,4 +1,16 @@
 
+
+EDITOR.addTest(function singleDblQuoteHtml(callback) {
+	EDITOR.openFile("singleDblQuoteHtml", '<!DOCTYPE html>\n<html>\n<body>\n<script>\nvar foo = \'<span class="foo"></span>\';\n</script>\n<div id="foo">\n\n</div>\n</body>\n</html>\n', function(err, file) {
+		
+		if(file.grid[7].indentation != 1) throw new Error("Expected indentation on line 8 to be 1, not " + file.grid[1].indentation);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 EDITOR.addTest(function arrowInIf(callback) {
 	EDITOR.openFile("arrowInIf.js", 'if((foo) == "<") {\n\n}\n', function(err, file) {
 		
@@ -8,8 +20,7 @@ EDITOR.addTest(function arrowInIf(callback) {
 			callback(true);
 			
 		});
-}, 1);
-
+});
 
 EDITOR.addTest(function cantFindFunctionStart(callback) {
 	EDITOR.openFile("cantFindFunctionStart.js", 'console.log = function() {\nlog("123");\n}\n\nconsole.warn = function() {\nlog("abc");\n}\n\nvar foo = {\nbar: {\nlog: function () {\n\n}\n}\n}\n', function(err, file) {
