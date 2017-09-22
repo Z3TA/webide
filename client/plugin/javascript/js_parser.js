@@ -790,7 +790,8 @@
 		openXmlTags = 0,
 		xmlTagLastOpenRow = -1,
 		xmlModeBeforeTag = false,
-		xmlTagInsideQuote = false,
+		xmlTagInsideDblQuote = false,
+		xmlTagInsideSingleQuote = false,
 		insideScriptTag = false,
 		llChar = "",
 		lllChar = "",
@@ -1364,7 +1365,7 @@
 							
 							// Leave xml tag if it was opened inside the quote
 							// But not if it's a vbScript doube "" ("" escpapes a double-quote in vbScript!)
-							if(insideXmlTag && xmlTagInsideQuote && text.charAt(charIndex+1) != '"') insideXmlTag = false;
+							if(insideXmlTag && xmlTagInsideDblQuote && text.charAt(charIndex+1) != '"') insideXmlTag = false;
 							
 							return;
 						}
@@ -1384,7 +1385,7 @@
 							quotes.push(new Quote(quoteStart, i));
 							
 							// Leave xml tag if it was opened inside the quote
-							if(insideXmlTag && xmlTagInsideQuote) insideXmlTag = false;
+							if(insideXmlTag && xmlTagInsideSingleQuote) insideXmlTag = false;
 							
 							return;
 						}
@@ -1531,9 +1532,8 @@
 				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || insideQuote)) {
 					insideXmlTag = true;
 					
-					if(insideQuote) {
-						xmlTagInsideQuote = true;
-					}
+					if(insideDblQuote) xmlTagInsideDblQuote = true;
+					if(insideSingleQuote) xmlTagInsideSingleQuote = true;
 					
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
@@ -2262,8 +2262,7 @@
 				
 				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
 				
-				if(insideXmlTag && xmlTagInsideQuote && !insideQuote) insideXmlTag = false;
-				
+				if(insideXmlTag && (insideDblQuote || insideSingleQuote) && !insideQuote) insideXmlTag = false;
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
