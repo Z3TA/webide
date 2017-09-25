@@ -650,7 +650,7 @@ API.debugInBrowserVnc = function serve(user, json, callback) {
 		if(err) return callback(err);
 		
 		//startNodeInspect(resp.chromiumDebuggerPort, url, breakPoints, sourceFile, function(err) {
-		callback(err, {vncChannel: resp.vncChannel, vncPassword: resp.vncPassword});
+		callback(err, resp);
 		//});
 		
 		});

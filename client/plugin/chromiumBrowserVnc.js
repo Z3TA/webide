@@ -18,13 +18,12 @@
 	
 	function debugInBrowserVnc() {
 	
-		// Need to create the window right away so it's registered to the event and not stopped (by popup stopper)
-		
-		var width = 780; // When Chromium runs fullscreen inside a 800x600 screen
-		var height = 553;
+		var width = 800; // When Chromium runs fullscreen inside a 800x600 screen
+		var height = 600;
 		var top = 1;
 		var left = 500;
 		
+		// Need to create the window right away so it's registered to the event and not stopped (by popup stopper)
 		noVncWindow = EDITOR.createWindow(undefined, width, height, top, left);
 		
 		
@@ -40,14 +39,17 @@
 				
 				var vncChannel = respJson.vncChannel;
 				var vncPassword = respJson.vncPassword;
+				var vncHost = respJson.vncHost;
+				var vncPort = respJson.vncPort;
 				
+				var path = undefined;
+				
+				if(vncChannel) {
 				var loc = UTIL.getLocation(window.location.href);
+				path = loc.protocol + "://" + loc.host + "/vnc/" + vncChannel;
+				}
 				
-				var path = loc.protocol + "://" + loc.host + "/vnc/" + vncChannel;
-				
-				alertBox("path=" + path);
-				
-				//launchNoVnc(path, vncPassword)
+				launchNoVnc(vncHost, vncPort, path, vncPassword)
 				
 			}
 		});
@@ -56,10 +58,12 @@
 	}
 	
 	
-	function launchNoVnc(path, pw) {
+	function launchNoVnc(host, port, path, pw) {
 		
-		//var url = "noVNC/vnc.html?host=" + host + "&port=" + port + "&password=" + encodeURIComponent(pw) + "&autoconnect=true"
-		var url = "noVNC/vnc.html?path=" + encodeURIComponent(path) + "&password=" + encodeURIComponent(pw) + "&autoconnect=true"
+		var url;
+		
+		if(path) url = "/noVNC/vnc.html?path=" + encodeURIComponent(path) + "&password=" + encodeURIComponent(pw) + "&autoconnect=true";
+		else url = "/noVNC/vnc.html?host=" + host + "&port=" + port + "&password=" + encodeURIComponent(pw) + "&autoconnect=true"
 		
 		noVncWindow.location = url;
 		

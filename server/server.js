@@ -20,6 +20,7 @@ if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 // Log levels
+var ERROR = 3;
 var WARN = 4;
 var NOTICE = 5;
 var INFO = 6;
@@ -119,6 +120,9 @@ var PORTS_IN_USE = [HTTP_PORT];
 		
 		HTTP_SERVER.close();
 		
+	for(var displayId in VNC_CHANNEL) stopVncChannel(displayId);
+	
+	
 		process.exit();
 		
 	});
@@ -643,8 +647,7 @@ var PORTS_IN_USE = [HTTP_PORT];
 										else if(req.debugInBrowserVnc) {
 											var url = req.debugInBrowserVnc.url;
 											startChromiumBrowserInVnc(name, uid, gid, url, function(err, resp) {
-													if(err) throw err;
-													workerResp(req, resp);
+												workerResp(req, resp, err);
 												});
 												
 											}
@@ -658,7 +661,7 @@ var PORTS_IN_USE = [HTTP_PORT];
 										function workerResp(req, resp, err) {
 											if(id == undefined) throw new Error("id=" + id);
 											var obj = {id: id, parentResponse: resp};
-											if(err) obj.err = err;
+											if(err) obj.err = err.message ? err.message : err;
 											userWorker.send(obj);
 										}
 										
@@ -748,6 +751,12 @@ var PORTS_IN_USE = [HTTP_PORT];
 				if(USER_CONNECTIONS[userName].connections.length === 0) {
 					delete USER_CONNECTIONS[userName];
 				}
+			
+			for(var displayId in VNC_CHANNEL) {
+				if(VNC_CHANNEL[displayId].startedBy == userName) stopVncChannel(displayId);
+			}
+			
+			
 			}
 			else console.log("Client had not worker process! userName=" + userName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 			
@@ -1179,8 +1188,17 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		if(uid == undefined && !CRAZY) throw new Error("uid required!");
 	if(gid == undefined && !CRAZY) throw new Error("gid required!");
 		
-	var displayId = 1; // can it be 0 (zero) ?
-		
+	// If chromium-browser is already running on a display (by the same user ??),
+	// it will make a clean close (no useful message). Probabbly because it detects that the user is already runnig another chromium-browser
+	for(var displayId in VNC_CHANNEL) {
+		if(VNC_CHANNEL[displayId].startedBy == username) {
+			// Give the old session
+			return callback(null, VNC_CHANNEL[displayId].info);
+		}
+	}
+	
+	var displayId = 5; // Don't start on a low number, if running on a dev box it might already have one or more monitors!
+	
 	// Pick a channel (display id) that is not used
 	while(VNC_CHANNEL.hasOwnProperty(displayId) && displayId < 10000) displayId++;
 	
@@ -1189,26 +1207,32 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	var httpProxy = require('http-proxy');
 	var vncUnixSocket =  HOME_DIR + username + "/sock/vnc";
 	// https://github.com/nodejitsu/node-http-proxy#proxying-websockets
-	VNC_CHANNEL[displayId] = {
-		// The proxy that will proxy requests to the x11vnc server (using websocket)
-		proxy: new httpProxy.createProxyServer({
+	VNC_CHANNEL[displayId] = {startedBy: username};
+	
+	
+	
+	// The proxy that will proxy requests to the x11vnc server (using websocket)
+	// unix socket (AF_UNIX) requires the modified libvncserver
+	// bundled in the the x11vnc 0.9.13 tarball and later.
+	var modifiedLibvncserver = false;
+	if(modifiedLibvncserver) {
+		VNC_CHANNEL[displayId].proxy = new httpProxy.createProxyServer({
 			target: {
 				socketPath: vncUnixSocket
 			},
 			ws: true
-		})
-	};
+		});
+	}
 	
-		var childProcess = require("child_process");
+	var childProcess = require("child_process");
 		var xvfbOptions = {};
 		var chromiumBrowserOptions = {};
 		var x11vncOptions = {};
-		var xvfbArgs = [
-			":" + displayId,  // Server/monitor/display ... ?
-			"-ac", // Disables X access control
-		"-screen 0 800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
-		];
+	
+	var chromiumDebuggerPort = getTcpPort(CHROMIUM_DEBUG_PORT);
+	var chromeWindowId = "0x400001"; // It's hopefully always the same
 		
+	
 		if((uid == undefined || uid == -1)) {
 			log("No uid specified! Browser will run as username=" + CURRENT_USER, WARN);
 		}
@@ -1224,41 +1248,141 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			x11vncOptions.gid = parseInt(gid);
 		}
 		
-		log("Creating VNC for username=" + username + " uid=" + uid + " gid=" + gid, DEBUG);
+	log("Creating VNC for username=" + username + " uid=" + uid + " gid=" + gid, DEBUG);
+	
+	var xvfbStartCounter = 0;
+	
+	startXvfb();
+	
+	function startXvfb() {
 		
-		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " xvfbOptions=" + JSON.stringify(xvfbOptions));
-	var xvfb = childProcess.spawn("Xvfb", xvfbArgs, xvfbOptions);
+		xvfbStartCounter++;
+		
+		var xvfbArgs = [
+			":" + displayId,  // Server/monitor/display ... ?
+			"-screen",
+			"0",
+			"800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
+			"-ac" // Disables X access control
+		];
+		
+		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
+		var xvfb = childProcess.spawn("Xvfb", xvfbArgs, xvfbOptions);
+		
+		VNC_CHANNEL[displayId].xvfb = xvfb;
 		
 		xvfb.on("close", function (code, signal) {
-		console.log(username + " xvfb close: code=" + code + " signal=" + signal);
+			log(username + " xvfb (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 		});
 		
 		xvfb.on("disconnect", function () {
-		console.log(username + " xvfb disconnect: xvfb.connected=" + xvfb.connected);
+			log(username + " xvfb (displayId=" + displayId + ") disconnect: xvfb.connected=" + xvfb.connected, DEBUG);
 		});
 		
 		xvfb.on("error", function (err) {
-		log(username + " xvfb error: err.message=" + err.message, ERROR);
+			log(username + " xvfb (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
 			console.error(err);
 		});
 		
-	xvfb.stdout.on("data", function(data) {
-		log(username + " xvfb stdout: " + data, DEBUG);
-	});
-	
-	xvfb.stderr.on("data", function (data) {
-		log(username + " xvfb stderr: " + data, WARN);
-	});
-	
+		xvfb.stdout.on("data", function(data) {
+			log(username + " xvfb (displayId=" + displayId + ") stdout: " + data, WARN);
+		});
 		
-		// chromium-browser
-		var chromiumDebuggerPort = getTcpPort(CHROMIUM_DEBUG_PORT);
+		xvfb.stderr.on("data", function (data) {
+			log(username + " xvfb (displayId=" + displayId + ") stderr: " + data, ERROR);
+			
+			if(data.indexOf("(EE) Server is already active for display " + displayId) != -1) {
+				/*
+					The server was probably restarted without killing xvfb
+					This means a chromium-browser and x11vnc is also probably running !
+					And will make x11vnc close (ListenOnTCPPort: Address already in use)
+					
+					We don't want to reuse chromium-browser inside the "ghost" Xvfb because we don't know what user started it.
+					And it's probably best to not reuse the Xvfb either.
+					But the user has already been sent the callback ...
+					
+					Killing a xvfb will kill both chromium-browser's inside it and x11vnc ...
+					
+				*/
+				var ps = require('ps-node');
+				
+				
+				ps.lookup({
+					command: 'Xvfb',
+					arguments: xvfbArgs.join(" "),
+				}, function(err, resultList ) {
+					if (err) {
+						throw new Error( err );
+					}
+					
+					resultList.forEach(function( p ){
+						if( p ){
+							console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
+							ps.kill( p.pid, function( err ) {
+								if (err) {
+									throw new Error( err );
+								}
+								else {
+									console.log( 'Process %s has been killed!', pid );
+									// Restart Xvfb. But only if it has not already been restarted to prevent endless loop.
+									if(xvfbStartCounter <= 1) startXvfb();
+									
+								}
+							});
+						}
+						else throw new Error("Expected p");
+					});
+				});
+			}
+			
+		});
+		
+		// Wait until Xvfb is successfully running before starting chromium-browser !
+		var timeInterval = 100;
+		var maxCheck = 10;
+		var checkCounter = 0;
+		
+		setTimeout(isXvfbRunning, timeInterval);
+		
+		function isXvfbRunning() {
+			
+			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
+			childProcess.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
+				
+				if(++checkCounter > maxCheck) {
+					xvfb.kill();
+					callback(new Error("Failed to start Xvfb in a timely manner"));
+				}
+				if(stderr.indexOf('xwininfo: error: unable to open display ":' + displayId + '"') != -1) {
+					// The Xvfb has not yet started, or it has crashed!
+					setTimeout(isXvfbRunning, timeInterval);
+				}
+				else if(stdout.indexOf(chromeWindowId) != -1) {
+					// A chromium-browser is already running inside. That means it's a "ghost" Xvfb
+					// Wait until Xvfb gives an "(EE) Server is already active for display" message on stderr
+					// Which will trigger a restart of Xvfb
+					setTimeout(isXvfbRunning, timeInterval);
+				}
+				else {
+					// Xvfb has started, and no chromium-browser window exists (yet)
+					startChromiumBrowser();
+				}
+				
+			});
+			}
+		}
+	
+	
+	function startChromiumBrowser() {
 		
 	if(url == undefined) url = "about:blank";
 	
+	// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
 		var chromiumBrowserArgs = [
 			//"--chrome", // No idea what --chrome flag does ...
-		"--kiosk " + url, // Full screen
+		"--kiosk", // Full screen
+		url,
 			"--incognito", // Don't save cache or history
 			"--disable-pinch", // Disables compositor-accelerated touch-screen pinch gestures. Why not ?
 			"--overscroll-history-navigation=0", // disable history navigation in response to horizontal overscroll. Why not ?
@@ -1271,82 +1395,139 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		+ " chromiumBrowserOptions=" + JSON.stringify(chromiumBrowserOptions) + " on displayId=" + displayId);
 	var chromiumBrowser = childProcess.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
 		
+	VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
+	
 		chromiumBrowser.on("close", function (code, signal) {
-		console.log(username + " chromium-browser close: code=" + code + " signal=" + signal);
+		log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 			freeTcpPort(chromiumDebuggerPort);
+			
+			// Should we restart chromium-browser !?
+			
 		});
 		
 		chromiumBrowser.on("disconnect", function () {
-		console.log(username + " chromium-browser disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected);
+		log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
 		});
 		
 		chromiumBrowser.on("error", function (err) {
-		log(username + " chromium-browser error: err.message=" + err.message, ERROR);
+		log(username + " chromium-browser (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
 			console.error(err);
 		});
 		
 	chromiumBrowser.stdout.on("data", function(data) {
-		log(username + " chromiumBrowser stdout: " + data, DEBUG);
+		log(username + " chromiumBrowser (displayId=" + displayId + ") stdout: " + data, INFO);
 	});
 	
 	chromiumBrowser.stderr.on("data", function (data) {
-		log(username + " chromiumBrowser stderr: " + data, WARN);
+		log(username + " chromiumBrowser (displayId=" + displayId + ") stderr: " + data, DEBUG);
 	});
 	
+	// Wait until chromium-browser has started ...
+	var timeInterval = 100;
+	var maxCheck = 10;
+	var checkCounter = 0;
+	setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
+	
+	function checkIfChromiumBrowserHasStarted() {
+		var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
+		childProcess.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+			console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
+				if(stdout.indexOf(chromeWindowId) != -1) startX11vnc();
+			else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
+			else {
+					VNC_CHANNEL[displayId].xvfb.kill();
+				callback(new Error("Failed to start chromium-browser in a timely manner. Result from xwininfo: + " + stdout));
+			}
+		});
+	}
+	}
+	
+	function startX11vnc() {
 		
 		// x11vnc    
-	//var x11vncPort = getTcpPort(VNC_PORT);
-	var x11vncPort = 0;
+		var x11vncPort = getTcpPort(VNC_PORT);
+		
+		if(modifiedLibvncserver) x11vncPort = 0;
+		
 		// note: x11vnc supports both websockets and normal tcp on the same port! 
 		
-	var vncPassword = generatePassword(8);
-	
-		var x11vncArgs = [
-			"-usepw", // We shall use a password! To prevent other users getting int our vnc session.
-		"-passwd " + vncPassword, // Generate a temporary password
-			"-rfbport " + x11vncPort, // What port to use
-		"-unixsock " + vncUnixSocket, // Listen on unix socket
-			"-display :" + displayId, // What X11-Server/monitor/display to use
-			"-id 0x400001" // The window id. Get it by running xwininfo -display :1 -root -children. Hopefully always the same (the main chromium-browser window)
+		var vncPassword = generatePassword(8);
+		
+		
+		// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
+	var x11vncArgs = [
+			"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
+		"-passwd",
+		vncPassword,
+		"-rfbport",
+		x11vncPort,
+		"-display",
+		":" + displayId,
+		"-id",
+			chromeWindowId,
+			"-forever"
 		];
+		
+		if(modifiedLibvncserver) {
+			x11vncArgs.push("unixsock");
+			x11vncArgs.push(vncUnixSocket);
+		}
 		
 		log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
 		+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
 	var x11vnc = childProcess.spawn("x11vnc", x11vncArgs, x11vncOptions);
 		
+		VNC_CHANNEL[displayId].x11vnc = x11vnc;
+		
 		x11vnc.on("close", function (code, signal) {
-		console.log(username + " x11vnc close: code=" + code + " signal=" + signal);
+			log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 			freeTcpPort(chromiumDebuggerPort);
 		});
 		
 		x11vnc.on("disconnect", function () {
-		console.log(username + " x11vnc disconnect: x11vnc.connected=" + x11vnc.connected);
+			log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
 		});
 		
 		x11vnc.on("error", function (err) {
-		log(username + " x11vnc error: err.message=" + err.message, ERROR);
+			log(username + " x11vnc (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
 			console.error(err);
 		});
 		
-	x11vnc.stdout.on("data", function(data) {
-		log(username + " x11vnc stdout: " + data, DEBUG);
+	x11vnc.stdout.on("data", function (data) {
+			log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
 	});
 	
 	x11vnc.stderr.on("data", function (data) {
-		log(username + " x11vnc stderr: " + data, WARN);
+			log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
 	});
 	
 		var resp = {
 			chromiumDebuggerPort: chromiumDebuggerPort,
-		vncPort: x11vncPort,
-		vncChannel: displayId,
 		vncPassword: vncPassword
 		}
 		
-		callback(null, resp);
+		if(modifiedLibvncserver) {
+			resp.vncChannel = displayId;
+		}
+		else {
+			resp.vncHost = HOSTNAME;
+			resp.vncPort = x11vncPort;
+		}
 		
+		VNC_CHANNEL[displayId].info = resp;
+		
+		callback(null, resp);
 	}
-	
+}
+
+function stopVncChannel(displayId) {
+	if(VNC_CHANNEL[displayId].proxy) VNC_CHANNEL[displayId].proxy.close();
+	if(VNC_CHANNEL[displayId].x11vnc) VNC_CHANNEL[displayId].x11vnc.kill();
+	if(VNC_CHANNEL[displayId].chromiumBrowser) VNC_CHANNEL[displayId].chromiumBrowser.kill();
+	if(VNC_CHANNEL[displayId].xvfb) VNC_CHANNEL[displayId].xvfb.kill();
+	delete VNC_CHANNEL[displayId];
+}
+
 function generatePassword(n) {
 	if(n == undefined) n = 8;
 	var pw = "";
