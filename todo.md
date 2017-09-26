@@ -32,102 +32,14 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-Using nodejs debugger and repl to find undefined properties at runtime !
-And also show inline console.logs! (the result of the console log)
-
-The debugger needs inet access! Try to use a namespace !? unshare 
-
-Also make it so that the user can set breakpoints!
-Then when the user hovers over a variable, execute the variable in the debugger repl
-
-todo: use the chrome-debugger api instead of nodejs debugger so that we also can debug web apps in chrome.
-Able to add break-points: Ctrl+B or clicking on the line number.
-
-Also implement support for the chromium debugger protocol so we can debug web apps (and the editor itself)!
-
-
-With node-inspect we can use the nodejs debugger cli interface to debug both nodejs and chrome!!
-
-use https://github.com/novnc/noVNC to run a web browser in a web browser eg chromium-browser --remote-debugging-port=9222
-then node-inspect 127.0.0.1:9222
-
-
-TightVNC
-xtightvncviewer
-
-run vnc on a window:
-x11vnc -id 0x4a00001
-
-xwininfo to get window id
-
-
-# install desktop on linux server:
-apt-get install xorg lxde-core
-
-# start vnc server (on display 1):
-vncserver :1 -geometry 800x600 -depth 24
-
-# start vnc server as another user, and start an app on that display:
-runuser -l johan -c 'vncserver :1 -geometry 800x600 -depth 24'
-runuser -l johan -c 'DISPLAY=:1 chromium-browser'
-
-runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
-runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://space.zetafiles.org/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
 
 
 
-# stop vnc server:
-vncserver -kill :1
-runuser -l johan -c 'vncserver -kill :1'
 
-# "virtual" x server with xvfb:
-Xvfb :1 -ac -screen 0 800x600x24 &
-DISPLAY=:1 chromium-browser
 
-# Start a program:
-xvfb-run --server-args="$DISPLAY -screen 0 $GEOMETRY -ac +extension RANDR" java .... > log/ui_output.log 2> log/ui_error.log &
-
-# vnc itself
-x11vnc -forever -usepw -shared -rfbport 5900 -display $DISPLAY
-x11vnc -rfbport 5901 -display :1 -localhost -usepw -passwd test
-
-# Get the window id
-xwininfo -display :1 -root -children
-
-# 
-x11vnc -usepw -rfbport 5901 -display :1 -id 0x400001
-(problem: You don't see menus)
-
-Investigate use of unix sockets for x11vnc and chromium-browser remote-debugging-port !
-chromium-browser remote-debugging needs a port nr (unix sockets might work on Android)
-node-inspect needs host and port!
-x11vnc supports unixsock !!
 
 todo
 ----
-
-When debugging a web app
-# Use Xvfb to create a vritual monitor
-Xvfb :1 -ac -screen 0 800x600x24 &
-# Start chromium-browser on that virtual monitor (id=1)
-runuser -l johan -c 'DISPLAY=:1 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222'
-# Use x11vnc to serve a vnc session on the chromium-browser window
-x11vnc -usepw -passwd test -rfbport 5901 -display :1 -id 0x400001
-# Open noVNC browser client that connects to the x11vnc server using websockets
-See vnc.js example
-# 
-node-inspect 127.0.0.1:9222
-repl
-window.location="file to debug"
-Ctrl+C
-scripts
-breakpoints('path to script', linenr)
-
-
-Running a virtual monitor and a vnc server use a lot of resources. And it's not the smoothest experience.
-But'ts not very convenient for the user to start a local browser that we can connect the debugger to (in Chromebooks you for example have to get root access)
-
-firewall iptables rules !.. If nodejs scripts are allowed inet, we need to block outgoing e-mail spam etc. 
 
 
 Do mounts survive reboots !?
@@ -228,6 +140,12 @@ A feature to show a file or project ... git + github integration !? Client plugi
 
 What I'm thinking
 -----------------
+
+work-flow: Colaborating with someone else ...
+Should it be possible for two people to login to and use the same account at the same time !?
+How should they colaborate ? Using SCM like git/mercurial !?
+
+---
 
 There should probably be performance tests so we know if the runtime have performance regressions.
 
@@ -1669,6 +1587,33 @@ Preserve (manual) indentation inside block comments and pre tags !?
 
 Auto complete xml tags! (in xml/svg files)
 
+---
+
+### Debugging
+
+node-inspect 127.0.0.1:9222
+repl
+window.location="file to debug"
+Ctrl+C
+scripts
+breakpoints('path to script', linenr)
+
+Using nodejs debugger and repl to find undefined properties at runtime !
+And also show inline console.logs! (the result of the console log)
+
+The debugger needs inet access! Try to use a namespace !? unshare 
+
+Also make it so that the user can set breakpoints!
+Then when the user hovers over a variable, execute the variable in the debugger repl
+
+todo: use the chrome-debugger api instead of nodejs debugger so that we also can debug web apps in chrome.
+Able to add break-points: Ctrl+B or clicking on the line number.
+
+With node-inspect we can use the nodejs debugger cli interface to debug both nodejs and chrome!!
+
+Use node-inspect instead of "nodejs debug"
+
+---
 
 Optimization
 ============

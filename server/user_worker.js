@@ -649,7 +649,7 @@ API.debugInBrowserVnc = function serve(user, json, callback) {
 	parentRequest({debugInBrowserVnc: {url: url}}, function(err, resp) {
 		if(err) return callback(err);
 		
-		//startNodeInspect(resp.chromiumDebuggerPort, url, breakPoints, sourceFile, function(err) {
+		//debugUsingChromeDebuggingProtocol(resp.chromiumDebuggerPort, url, breakPoints, sourceFile, function(err) {
 		callback(err, resp);
 		//});
 		
@@ -1111,15 +1111,33 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 	}
 }
 
-function startNodeInspect(port, visitUrl, breakPoints, sourceFile, callback) {
+function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, sourceFile, callback) {
+	/*
+		
+		The Chrome Debugger Protocol, sometimes also called Chrome DevTools Protocol, or
+		Remote Debugging Protocol is used to inpsect the v8 JavaScript engine and web sites.
+		
+		https://chromedevtools.github.io/devtools-protocol/
+		
+		Adapters exist for other Browsers. And since NodeJS v8 it's also built into NodeJS.
+		It's however a but obscure to use and have bad documentation. So we use node-inspect
+		as an abstraction over the Chrome Remote debugging protocol.
+		
+		https://github.com/nodejs/node-inspect
+		
+		node-inspect works like the debugger built into NodeJS, so with node-inspect we can 
+		use the NodeJS debug API to debug both NodeJS and chromium web apps!
+		
+		node-inspect needs NodeJS v6 or later !!!
+		
+		To use this with Nodejs add --inspect=9222 (replace port) in the nodejs arguments.
+		
+	*/
 	
-	// node-inspect needs NodeJS v6 or later !!!
 	
 	var fs = require("fs");
 	
-	console.log(user.name + " starting node-inspect: port=" + port + " visitUrl=" + visitUrl + " breakPoints=" + JSON.stringify(breakPoints) + " sourceFile=" + sourceFile);
-	
-	
+	console.log(user.name + " starting node-inspect: port=" + remotePort + " visitUrl=" + visitUrl + " breakPoints=" + JSON.stringify(breakPoints) + " sourceFile=" + sourceFile);
 	
 	
 		var nextBreakPoint;
