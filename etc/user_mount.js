@@ -39,6 +39,7 @@ function mount(source, target) {
 	var mountResult = child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();
 	}
 	catch(err) {
+		//throw err;
 		console.warn(err.message);
 	}
 	}
