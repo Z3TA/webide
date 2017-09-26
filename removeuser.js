@@ -203,7 +203,7 @@ function unlink(path) {
 	function umount(path, ignoreErrors) {
 	var child_process = require("child_process");
 	try {
-	child_process.execSync("umount " + path).toString(ENCODING);
+		child_process.execSync("umount " + path + " --force").toString(ENCODING);
 	}
 	catch(err) {
 	if(!ignoreErrors) {

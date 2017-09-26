@@ -33,17 +33,12 @@ What I'm working on
 -------------------
 
 
-running tests
-getaddrinfo 
-
+Do mounts survive reboots !?
+Test reboot to see if the entries in /etc/fstab works!
 
 
 todo
 ----
-
-
-Do mounts survive reboots !?
-Test reboot to see if the entries in /etc/fstab works!
 
 fix regression: current file in browser title bar!! (chromium)
 
