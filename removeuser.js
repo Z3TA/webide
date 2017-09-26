@@ -15,6 +15,12 @@ var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFil
 
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 
+var NOZFS = !!getArg(["nozfs", "nozfs"]);
+
+var HOME = getArg(["home", "home"]) || "/home/";
+
+if(HOME.charAt(HOME.length-1) != "/") throw new Error("Home dir needs to end with a slash: HOME=" + HOME);
+
 var ENCODING = "utf8";
 
 if(!username) throw new Error("No username specified!");
@@ -78,6 +84,11 @@ catch(err) {
 	else throw err;
 }
 
+// Reload nginx to remove descriptors to files in user home dir
+var nginxReloadStdout = child_process.execSync("service nginx reload");
+nginxReloadStdout = nginxReloadStdout.toString(ENCODING);
+if(nginxReloadStdout) console.log(nginxReloadStdout);
+
 // Remove apparmor profiles
 unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
 unlink("/etc/apparmor.d/home." + username + ".usr.bin.nodejs");
@@ -110,8 +121,61 @@ umount("/home/" + username + "/usr/share");
 	umount("/home/" + username + "/usr/bin/python");
 	umount("/home/" + username + "/usr/bin/nodejs");
 
+
+if(!NOZFS) {
+	// Need to get the zfs pool
+	child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
+		if(stderr.indexOf("zfs: not found") != -1) NOZFS = true;
+		else if(err) throw err;
+		else {
+			
+			var homeWithoutEndingSlashAndEscapedSlashes = HOME.substr(0, HOME.length-1).replace(/\//, "\\/");
+			var rePool = new RegExp("(.*)\\/.*" + homeWithoutEndingSlashAndEscapedSlashes + "\\n");
+			var matchPool = stdout.match(rePool);
+			
+			if(matchPool) {
+				var zfsPool = matchPool[1];
+				var userHomeDir = HOME + username;
+				
+				try {
+				var zfsDestroyStdout = child_process.execSync("zfs destroy " + zfsPool + userHomeDir);
+				zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
+				}
+				catch(err) {
+					if(err.message.indexOf("cannot open '" + zfsPool + HOME + username + "': dataset does not exist") != -1) {
+						console.log(err.message);
+					}
+					else throw err;
+					}
+				
+				if(zfsDestroyStdout) console.log(zfsDestroyStdout);
+				
+				// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
+				
+				
+				userdel();
+				
+			}
+			else {
+				console.warn("No zfs file systems exist for " + HOME + " !");
+				NOZFS = true;
+			}
+			
+		}
+	});
+}
+else userdel();
+
+
+function userdel() {
 	
-	child_process.exec('userdel -r -f ' + username, function execAddUser(err, stdout, stderr) {
+	var userDelCmd = 'userdel -f ';
+	
+	if(NOZFS) userDelCmd += " -r"; // Also remove home dir
+	
+	userDelCmd += " " + username;
+	
+	child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
 	
 	var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
@@ -123,8 +187,9 @@ umount("/home/" + username + "/usr/share");
 	console.log("User " + username + " deleted!");
 	
 	});
-	
-	function unlink(path) {
+}
+
+function unlink(path) {
 	var fs = require("fs");
 	try {
 	fs.unlinkSync(path);
@@ -142,8 +207,9 @@ umount("/home/" + username + "/usr/share");
 	}
 	catch(err) {
 	if(!ignoreErrors) {
-	if(err.message.indexOf("umount: " + path + ": not mounted") == -1
-	&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1 ) throw err;
+	if( err.message.indexOf("umount: " + path + ": not mounted") == -1
+	&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
+			&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) throw err;
 	// stderr message are already shown in the shell, no need to repeat them
 	}
 	}

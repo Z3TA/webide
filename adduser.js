@@ -24,6 +24,7 @@ var child_process = require('child_process');
 
 var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
 var defaultDomain = "webide.se";
+var defaultHome = "/home/";
 
 // Get arguments ...
 var getArg = require("./server/getArg.js");
@@ -34,14 +35,20 @@ var password = process.argv[3];
 if(process.argv[3] == "-c") {
 	//console.log(linksTo("/lib/x86_64-linux-gnu/libz.so.1"));
 	//process.exit();
-	copyNodejs("/home/" + username);
+	copyNodejs(HOME + username);
 	process.exit();
 }
 
 var NO_PW_HASH = getArg(["nopwhash"]);
 var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
+var NOZFS = !!getArg(["nozfs", "nozfs"]);
+var HOME = getArg(["home", "home"]) || defaultHome;
 
+if(HOME.charAt(0) != "/") throw new Error("HOME needs to be an absolute path! (start with a slash) HOME=" + HOME);
+// Only linux or other unix-like systems are supported (sorry Windows)
+
+if(HOME.charAt(HOME.length-1) != "/") throw new Error("Home dir needs to end with a slash: HOME=" + HOME);
 
 // Favor using JSON as argument to prevent hackers from passing arguments in their password
 var maybeJson = process.argv.splice(2, process.argv.length).join(" ");
@@ -58,6 +65,7 @@ if(scriptArguments) {
 	NO_PW_HASH = scriptArguments.noPwHash;
 	PW_FILE = scriptArguments.pwFile || defaultPasswordFile;
 	DOMAIN = scriptArguments.domain || defaultDomain;
+	HOME = scriptArguments.home || defaultHome;
 	}
 
 
@@ -105,10 +113,56 @@ for (var i=0, name; i<users.length; i++) {
 }
 
 
+var userHomeDir = HOME + username;
 
-// old: 'adduser --system --ingroup jzedit_users ' + username
+if(fs.existsSync(userHomeDir)) throw new Error("Directory already exist: " + userHomeDir);
 
-child_process.exec('adduser ' + username + ' --system --group', function execAddUser(err, stdout, stderr) {
+var zfsPool;
+
+if(!NOZFS) {
+child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
+	// If zfs doesn't exist we get both an err and stderr.
+	// If not super user we get both an err and stderr.
+	//console.log("zfs: err=" + (err ? err.message : "") + " stdout=" + stdout + " stderr=" + stderr);
+	
+	if(stderr.indexOf("zfs: not found") != -1) NOZFS = true;
+	else if(err) throw err;
+	else {
+		
+			// zpc/home         3.84G  1.37T  5.02M  /home
+			var homeWithoutEndingSlashAndEscapedSlashes = HOME.substr(0, HOME.length-1).replace(/\//, "\\/");
+			var rePool = new RegExp("(.*)\\/.*" + homeWithoutEndingSlashAndEscapedSlashes + "\\n");
+			var matchPool = stdout.match(rePool);
+			
+	if(matchPool) {
+				zfsPool = matchPool[1];
+				
+				var zfsCreateStdout = child_process.execSync("zfs create " + zfsPool + userHomeDir);
+				zfsCreateStdout = zfsCreateStdout.toString(ENCODING);
+				
+				if(zfsCreateStdout) console.log(zfsCreateStdout);
+				else console.log("Created zfs file system on " + userHomeDir);
+				
+			}
+			else {
+				console.warn("No zfs file systems exist for " + HOME + " !");
+				NOZFS = true;
+			}
+			}
+		
+		adduser();
+		
+});
+}
+else adduser();
+
+function adduser() {
+	
+	// old: 'adduser --system --ingroup jzedit_users ' + username
+	var adduserCmd = 'adduser ' + username + ' --system --group'
+	if(!NOZFS) adduserCmd += " --no-create-home";
+	
+child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	if (err) throw err;
 	
 	if(stderr) throw new Error(stderr);
@@ -196,7 +250,7 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	
 	// Try Copy over the test file (only exist in dev)
 	try {
-	copyFileSync("./testfile.txt", "/home/" + username + "/testfile.txt");
+			copyFileSync("./testfile.txt", HOME + username + "/testfile.txt");
 	}
 	catch(err) {
 		if(err.code != "ENOENT") throw err;
@@ -278,95 +332,66 @@ child_process.exec('adduser ' + username + ' --system --group', function execAdd
 	//copyProgram("python", homeDir)
 	
 	// Copy the python libs
-	//copyFolderRecursiveSync("/usr/lib/python2.7/", "/home/" + username + "/usr/lib/python2.7/");
+		//copyFolderRecursiveSync("/usr/lib/python2.7/", HOME + username + "/usr/lib/python2.7/");
 	
 	// Copy mercurial
-	//copyFileSync("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
+		//copyFileSync("/usr/bin/hg", HOME + username + "/usr/bin/hg");
 	
 	
 	// Nodejs needs /dev/urandom and /dev/null to start
 	fs.mkdirSync(homeDir + "/dev");
 	
-	//var makdeUrandom = child_process.execSync("mknod -m 444 /home/" + username + "/dev/urandom c 1 9").toString(ENCODING);
+		//var makdeUrandom = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/urandom c 1 9").toString(ENCODING);
 	//if(makdeUrandom.trim() != "") throw makdeUrandom;
 	
-	var makeNull = child_process.execSync("mknod -m 444 /home/" + username + "/dev/null c 1 3").toString(ENCODING);
+		var makeNull = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/null c 1 3").toString(ENCODING);
 	if(makeNull.trim() != "") throw makeNull;
 	
 	// On some systems we need to mount --bind urandom !??
-	mount("/dev/urandom", "/home/" + username + "/dev/urandom");
+		mount("/dev/urandom", HOME + username + "/dev/urandom");
 	
 	
 	// Create directory for executables
-	fs.mkdirSync("/home/" + username + "/usr/");
-	fs.mkdirSync("/home/" + username + "/usr/bin/");
+		fs.mkdirSync(HOME + username + "/usr/");
+		fs.mkdirSync(HOME + username + "/usr/bin/");
 	
-	fs.chmodSync("/home/" + username + "/usr/", "555");
-	fs.chmodSync("/home/" + username + "/usr/bin/", "555");
+		fs.chmodSync(HOME + username + "/usr/", "555");
+		fs.chmodSync(HOME + username + "/usr/bin/", "555");
 	
 	
 	// npm needs /usr/local/etc or it will try to create it
-	fs.mkdirSync("/home/" + username + "/usr/local/");
-	fs.mkdirSync("/home/" + username + "/usr/local/etc");
-	//chownrDirSync("/home/" + username + "/usr/local/", uid, gid);
-	//chmodrSync("/home/" + username + "/usr/local/", "555");
+		fs.mkdirSync(HOME + username + "/usr/local/");
+		fs.mkdirSync(HOME + username + "/usr/local/etc");
+		//chownrDirSync(HOME + username + "/usr/local/", uid, gid);
+		//chmodrSync(HOME + username + "/usr/local/", "555");
 	
 
 	// Mount these instead of copying to save hd space
-	mount("/lib/", "/home/" + username + "/lib");
-	mount("/lib64/", "/home/" + username + "/lib64");
-	mount("/usr/lib/", "/home/" + username + "/usr/lib");
-	mount("/usr/share/", "/home/" + username + "/usr/share"); // npm dependencies
-	mount("/usr/bin/hg", "/home/" + username + "/usr/bin/hg");
-	mount("/usr/bin/python", "/home/" + username + "/usr/bin/python");
-	mount("/usr/bin/nodejs", "/home/" + username + "/usr/bin/nodejs");
+		mount("/lib/", HOME + username + "/lib");
+		mount("/lib64/", HOME + username + "/lib64");
+		mount("/usr/lib/", HOME + username + "/usr/lib");
+		mount("/usr/share/", HOME + username + "/usr/share"); // npm dependencies
+		mount("/usr/bin/hg", HOME + username + "/usr/bin/hg");
+		mount("/usr/bin/python", HOME + username + "/usr/bin/python");
+		mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
 	
 	
 	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it
 	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
 	
+
 	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
+		createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
-	
-	
-	/*
-	var apparmorProfile = fs.readFileSync("./etc/apparmor/usr.bin.nodejs_someuser", ENCODING);
-	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
-	fs.writeFileSync("/etc/apparmor.d/usr.bin.nodejs_" + username, apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /usr/bin/nodejs_" + username).toString(ENCODING).trim();
-	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-	
-	// Create and activate apparmor profile for the user's nodejs binary
-	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.nodejs", ENCODING);
-	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.nodejs", apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/nodejs").toString(ENCODING).trim();
-	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-	
-	// Create and activate apparmor profile for the user's python binary
-	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.python", ENCODING);
-	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.python", apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/python").toString(ENCODING).trim();
-	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-	
-	// Create and activate apparmor profile for the user's hg executable
-	var apparmorProfile = fs.readFileSync("./etc/apparmor/home.someuser.usr.bin.hg", ENCODING);
-	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
-	fs.writeFileSync("/etc/apparmor.d/home." + username + ".usr.bin.hg", apparmorProfile);
-	var enforceApparmorProfileStdout = child_process.execSync("aa-enforce /home/" + username + "/usr/bin/hg").toString(ENCODING).trim();
-	if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
-	*/
 	
 	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
 		
 	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
 	
 	});
+}
 
 function createApparmorProfile(template, username) {
 	/*
@@ -378,6 +403,8 @@ function createApparmorProfile(template, username) {
 	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
 	
 	var dest = template.replace("someuser", username);
+	var homeDot = HOME.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
+	dest = dest.replace("home.", homeDot);
 	dest = dest.replace("./etc/apparmor/", "/etc/apparmor.d/");
 	fs.writeFileSync(dest, apparmorProfile);
 	
