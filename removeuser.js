@@ -214,6 +214,8 @@ function unlink(path) {
 	}
 	}
 	
+	return;
+	// Server was unable to boot after adding stuff to fstab!!
 	// Remove entry from /etc/fstab
 	var text = fs.readFileSync("/etc/fstab", ENCODING);
 	var reMount = new RegExp("(.*) " + regExpEsc(path) + " none bind 0 0\n");

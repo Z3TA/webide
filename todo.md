@@ -35,6 +35,8 @@ What I'm working on
 
 Do mounts survive reboots !?
 Test reboot to see if the entries in /etc/fstab works!
+They made it so that the server wouldn't boot!
+Add systemd scripts that mounts the mountpoints when jzedit service starts!?
 
 
 todo

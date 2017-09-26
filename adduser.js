@@ -22,7 +22,7 @@
 var fs = require("fs");
 var child_process = require('child_process');
 
-var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
+var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users";
 var defaultDomain = "webide.se";
 var defaultHome = "/home/";
 
@@ -432,8 +432,8 @@ function mount(source, target) {
 	if(mountResult != "") throw mountResult;
 	
 	// Append to /etc/fstab so it is re-mounted after reboot
-	fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
-	
+	//fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
+	// Server was unable to boot after adding stuff to fstab!!
 	
 }
 
