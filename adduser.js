@@ -313,7 +313,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
 	}
 	catch (err) {
-		console.warn(err.message + " Nginx web server is probably not installed !!");
+		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
 	}
 	
 	

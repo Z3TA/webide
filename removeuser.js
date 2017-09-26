@@ -85,9 +85,12 @@ catch(err) {
 }
 
 // Reload nginx to remove descriptors to files in user home dir
+try {
 var nginxReloadStdout = child_process.execSync("service nginx reload");
-nginxReloadStdout = nginxReloadStdout.toString(ENCODING);
-if(nginxReloadStdout) console.log(nginxReloadStdout);
+}
+catch(err) {
+	if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1) throw err;
+}
 
 // Remove apparmor profiles
 unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
