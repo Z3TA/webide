@@ -399,6 +399,7 @@ function createApparmorProfile(template, username) {
 	*/
 	
 	var apparmorProfile = fs.readFileSync(template, ENCODING);
+	apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME);
 	apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
 	apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, __dirname);
 	

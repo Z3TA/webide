@@ -1,7 +1,7 @@
 
 #include <tunables/global>
 
-/home/%USERNAME%/usr/bin/hg {
+%HOME%%USERNAME%/usr/bin/hg {
   #include <abstractions/base>
   #include <abstractions/python>
 
@@ -13,7 +13,7 @@
   network inet6 dgram,
 
   #/dev/tty rw,
-  /home/%USERNAME%/** rw,
+  %HOME%%USERNAME%/** rw,
   #/usr/bin/python2.7 ix,
 
 }

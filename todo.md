@@ -33,8 +33,8 @@ What I'm working on
 -------------------
 
 
-
-
+running tests
+getaddrinfo 
 
 
 

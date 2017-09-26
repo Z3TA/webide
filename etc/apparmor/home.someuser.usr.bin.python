@@ -1,10 +1,10 @@
 
 #include <tunables/global>
 
-/home/%USERNAME%/usr/bin/python {
+%HOME%%USERNAME%/usr/bin/python {
 
-  /home/%USERNAME%/ r,
-  /home/%USERNAME%/** rw,
+  %HOME%%USERNAME%/ r,
+  %HOME%%USERNAME%/** rw,
 
   #/dev/tty rw,
 
