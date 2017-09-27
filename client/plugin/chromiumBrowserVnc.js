@@ -51,7 +51,7 @@
 				
 				alertBox((path ? path : vncPort) + " pw=" + vncPassword);
 				
-				//launchNoVnc(vncHost, vncPort, path, vncPassword)
+				launchNoVnc(vncHost, vncPort, path, vncPassword);
 				
 			}
 		});
