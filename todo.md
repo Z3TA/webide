@@ -40,7 +40,7 @@ Streamline the experience of sharing and publishing a web document via the edito
 todo
 ----
 
-Printing using Ctrl + P
+Fix urls in rss_en.xml. make them point to user.webide.se ! replace in adduser.js
 
 Rename a file! For example to publish a draft i SSG: Raname _name to name (without underscore)
 
