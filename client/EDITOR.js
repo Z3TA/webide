@@ -2314,6 +2314,8 @@ EDITOR.lastKeyPressed = "";
 		}
 		else if(runtime=="browser") {
 			window.title = file.path;
+			document.title = file.path;
+			window.status = file.path;
 		}
 		
 		// Save as dir should start in the same dir as the last saved-as viewed file, (not last opened)

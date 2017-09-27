@@ -40,8 +40,6 @@ Streamline the experience of sharing and publishing a web document via the edito
 todo
 ----
 
-fix regression: current file in browser title bar!! (chromium)
-
 When working in the browser, Ctrl+O opens a local file, but when you edit it, its actually NOT a local file!
 Make local files Ctrl+Shift+O and Ctrl+O the same as Ctrl+P !
 
