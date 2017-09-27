@@ -23,7 +23,7 @@
 	var keyDown = 40;
 	var charEscape = 27;
 	var charEnter = 13;
-	var charP = 80;
+	
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -54,7 +54,11 @@
 		
 		hide_gotoFileInput();
 		
-		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + R
+		var charP = 80;
+		var charO = 79;
+		
+		//EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
+		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charO, combo: CTRL, fun: show_gotoFileInput}); // ctrl + O
 		
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
 		
