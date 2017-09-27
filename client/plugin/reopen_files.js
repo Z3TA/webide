@@ -62,8 +62,8 @@
 			
 			EDITOR.removeEvent("fileOpen", reopenFiles);
 			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
-			
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
+			
 			clearInterval(saveStateIntervalTimer);
 			
 		}
