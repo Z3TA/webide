@@ -1027,3 +1027,14 @@ ul.resolveList li {
 }
 
 */
+
+
+@media print {
+	
+	.leftColumn {display: none;}
+	.rightColumn {display: none;}
+	.header {display: none;}
+	.footer {display: none;}
+	
+}
+
