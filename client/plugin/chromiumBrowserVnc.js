@@ -44,10 +44,10 @@
 				
 				var path = undefined;
 				
-				if(vncChannel) {
 				var loc = UTIL.getLocation(window.location.href);
-				path = loc.protocol + "://" + loc.host + "/vnc/" + vncChannel;
-				}
+				
+				if(vncChannel) path = loc.protocol + "://" + loc.host + "/vnc/" + vncChannel;
+				else if(loc.protocol == "https") path = loc.protocol + "://" + loc.host + "/_vnc" + vncPort;
 				
 				launchNoVnc(vncHost, vncPort, path, vncPassword)
 				

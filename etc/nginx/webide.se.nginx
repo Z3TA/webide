@@ -88,6 +88,20 @@ server {
   }
 
 
+  # x11vnc crashes when receiving a websocket over https (SSL/TSL), so we have to proxy over http 
+  location ~/_vnc(\d*) {
+    # Upgrade to websocket
+    
+    proxy_pass http://127.0.0.1:$1;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    
+    #add_header 'Access-Control-Allow-Origin' '*';
+  }
+
+
+
   # Lets encrypt challange (optional)
   location /.well-known/acme-challenge/ {
     # Omitting the / in proxy_pass will make nginx pass on the url

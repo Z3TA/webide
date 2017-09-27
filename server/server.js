@@ -1266,6 +1266,8 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			"-ac" // Disables X access control
 		];
 		
+		// debug: Xvfb :5 -screen 0 800x600x24 -ac &
+		
 		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
 		var xvfb = childProcess.spawn("Xvfb", xvfbArgs, xvfbOptions);
 		
@@ -1389,6 +1391,9 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			"--remote-debugging-port=" + chromiumDebuggerPort // Port that we can connect chrome inspector to
 		];
 		
+		// debug: runuser -l demo -c 'DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222' & 
+		// or debug: DISPLAY=:5 chromium-browser &
+		
 		chromiumBrowserOptions.env = {DISPLAY: ":" + displayId};
 		
 		log("Starting chromium-browser with args=" + JSON.stringify(chromiumBrowserArgs) 
@@ -1472,6 +1477,9 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			x11vncArgs.push("unixsock");
 			x11vncArgs.push(vncUnixSocket);
 		}
+		
+		// debug: xwininfo -display :5 -root -children
+		// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
 		
 		log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
 		+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
