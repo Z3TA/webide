@@ -46,8 +46,8 @@
 				
 				var loc = UTIL.getLocation(window.location.href);
 				
-				if(vncChannel) path = loc.protocol + "://" + loc.host + "/vnc/" + vncChannel;
-				else if(loc.protocol == "https") path = loc.protocol + "://" + loc.host + "/_vnc" + vncPort;
+				if(vncChannel) path = "/vnc/" + vncChannel;
+				else if(loc.protocol == "https") path = "/_vnc" + vncPort;
 				
 				alertBox((path ? path : vncPort) + " pw=" + vncPassword);
 				
