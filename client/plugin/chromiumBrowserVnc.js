@@ -18,10 +18,16 @@
 	
 	function debugInBrowserVnc() {
 	
-		var width = 800; // When Chromium runs fullscreen inside a 800x600 screen
+		// When Chromium runs fullscreen inside a 800x600 screen
+		var width = 800; 
 		var height = 600;
 		var top = 1;
 		var left = 500;
+		
+		// Get rid of the black border (but prevent scrollbars)
+		width = 780;
+		height = 580;
+		
 		
 		// Need to create the window right away so it's registered to the event and not stopped (by popup stopper)
 		noVncWindow = EDITOR.createWindow(undefined, width, height, top, left);
@@ -49,7 +55,7 @@
 				if(vncChannel) path = "/vnc/" + vncChannel;
 				else if(loc.protocol == "https") path = "/_vnc" + vncPort;
 				
-				alertBox((path ? path : vncPort) + " pw=" + vncPassword);
+				//alertBox((path ? path : vncPort) + " pw=" + vncPassword);
 				
 				launchNoVnc(vncHost, vncPort, path, vncPassword);
 				
