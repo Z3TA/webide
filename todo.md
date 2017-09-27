@@ -32,7 +32,6 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-Test jzedit_user_mounts.service
 
 Streamline the experience of sharing and publishing a web document via the editor.
 
