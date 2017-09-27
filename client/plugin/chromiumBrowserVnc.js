@@ -49,7 +49,9 @@
 				if(vncChannel) path = loc.protocol + "://" + loc.host + "/vnc/" + vncChannel;
 				else if(loc.protocol == "https") path = loc.protocol + "://" + loc.host + "/_vnc" + vncPort;
 				
-				launchNoVnc(vncHost, vncPort, path, vncPassword)
+				alertBox(path ? path : vncPort);
+				
+				//launchNoVnc(vncHost, vncPort, path, vncPassword)
 				
 			}
 		});
