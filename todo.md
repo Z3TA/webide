@@ -32,11 +32,12 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+Testing Ctrl+Alt+C (vnc) on webide
 
-Do mounts survive reboots !?
-Test reboot to see if the entries in /etc/fstab works!
-They made it so that the server wouldn't boot!
-Add systemd scripts that mounts the mountpoints when jzedit service starts!?
+Test jzedit_user_mounts.service
+
+Streamline the experience of sharing and publishing a web document via the editor.
+
 
 
 todo
@@ -125,7 +126,7 @@ Unload/load all plugins when loggin in as a different users, or on a different s
 
 A feature to show a file or project ... git + github integration !? Client plugin to auto create github repos
 
-
+demo-example: Making a web service that makes you able to request data from an XML file.
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -1059,6 +1060,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Be better at guessing the file path in file open and file save dialog.
 
 Voice sytheziser ... refactor the plugin: Implement EDITOR.say or speak, so each module can implement voice support (for blind people)
 Because we are using the canvas, screen readers will have problems.

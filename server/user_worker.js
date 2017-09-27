@@ -647,6 +647,8 @@ API.debugInBrowserVnc = function serve(user, json, callback) {
 	console.log("user.name=" + user.name + " requesting chromium-browser in VNC and node-inspect");
 	
 	parentRequest({debugInBrowserVnc: {url: url}}, function(err, resp) {
+		console.log("parentRequest returned err=" + err + " resp=" + resp);
+		
 		if(err) return callback(err);
 		
 		//debugUsingChromeDebuggingProtocol(resp.chromiumDebuggerPort, url, breakPoints, sourceFile, function(err) {
