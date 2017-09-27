@@ -32,12 +32,6 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-https://webide.se/noVNC/vnc.html?host=webide.se&port=5901&password=59109484&autoconnect=true
-https://webide.se/noVNC/vnc.html?host=webide.se&port=5901
-
-x11vnc in prod seems to crash when you visit from websocket!
-it's because of SSL!!
-
 Testing Ctrl+Alt+C (vnc) on webide
 
 Test jzedit_user_mounts.service
