@@ -264,7 +264,11 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	cmsjz_sites = cmsjz_sites.replace(/%DOMAIN%/g, DOMAIN);
 	fs.writeFileSync(homeDir + "/.jzeditStorage/cmsjz_sites", cmsjz_sites);
 	
-	
+		// Update RSS file in demo site
+		var rss_file = fs.readFileSync(homeDir + "/my_web_site/source/rss_en.xml", ENCODING);
+		rss_file = rss_file.replace(/%USERNAME%/g, username);
+		rss_file = rss_file.replace(/%DOMAIN%/g, DOMAIN);
+		fs.writeFileSync(homeDir + "/my_web_site/source/rss_en.xml", rss_file);
 		
 	// Update welcome file
 	var welcome_file = fs.readFileSync(homeDir + "/wwwpub/welcome.html", ENCODING);
@@ -635,11 +639,14 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 	
 	// arrSearchReplace = [searchString, replaceString]
 	var text = fs.readFileSync(filePath, ENCODING);
-	
-	for (var i=0, searchString="", replaceString=""; i<arrSearchReplace.length; i++) {
+	var maxCount = 500; // Prevent endless loop
+	for (var i=0, searchString="", replaceString="", counter=0; i<arrSearchReplace.length; i++) {
+		counter = 0;
+		while(text.indexOf(searchString) != -1 && counter++ < maxCount) {
 		searchString = arrSearchReplace[i][0];
 		replaceString = arrSearchReplace[i][1];
 		text = text.replace(searchString, replaceString);
+			}
 	}
 	
 	fs.writeFileSync(filePath, text, ENCODING);
