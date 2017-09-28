@@ -363,7 +363,10 @@
 			
 			
 			var displayName = item.name;
-			if(displayName.length > 40) displayName = displayName.substr(0, 37) + "...";
+			if(displayName.length > 40) {
+				li.setAttribute("title", displayName);
+				displayName = displayName.substr(0, 37) + "...";
+			}
 			
 			li.appendChild(icon);
 			
