@@ -128,6 +128,8 @@ umount("/home/" + username + "/usr/share");
 if(!NOZFS) {
 	// Need to get the zfs pool
 	child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
+		var zfsDestroyRetry = 0;
+		
 		if(stderr.indexOf("zfs: not found") != -1) NOZFS = true;
 		else if(err) throw err;
 		else {
@@ -139,24 +141,7 @@ if(!NOZFS) {
 			if(matchPool) {
 				var zfsPool = matchPool[1];
 				var userHomeDir = HOME + username;
-				
-				try {
-				var zfsDestroyStdout = child_process.execSync("zfs destroy " + zfsPool + userHomeDir);
-				zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
-				}
-				catch(err) {
-					if(err.message.indexOf("cannot open '" + zfsPool + HOME + username + "': dataset does not exist") != -1) {
-						console.log(err.message);
-					}
-					else throw err;
-					}
-				
-				if(zfsDestroyStdout) console.log(zfsDestroyStdout);
-				
-				// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
-				
-				
-				userdel();
+				zfsDestroy(zfsPool, userHomeDir);
 				
 			}
 			else {
@@ -165,6 +150,45 @@ if(!NOZFS) {
 			}
 			
 		}
+		
+		function zfsDestroy(zfsPool, userHomeDir) {
+			
+			if(++zfsDestroyRetry > 1) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
+			
+			try {
+				var zfsDestroyStdout = child_process.execSync("zfs destroy " + zfsPool + userHomeDir);
+				zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
+			}
+			catch(zfsDestroyErr) {
+				if(zfsDestroyErr.message.indexOf("cannot open '" + zfsPool + HOME + username + "': dataset does not exist") != -1) {
+					console.log(zfsDestroyErr.message);
+				}
+				if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
+					// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
+					// Try to restart jzedit server to see if it helps
+					try {
+					var restartJzeditStdout = child_process.execSync("service jzedit restart");
+					restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
+					}
+					catch(restartJzeditErr) {
+						console.log(restartJzeditErr.message);
+						throw("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
+					}
+					if(restartJzeditStdout) console.log(restartJzeditStdout);
+					zfsDestroy(zfsPool, userHomeDir); // Try again
+					
+				}
+				else throw zfsDestroyErr;
+			}
+			
+			if(zfsDestroyStdout) console.log(zfsDestroyStdout);
+			
+			
+			
+			
+			userdel();
+		}
+		
 	});
 }
 else userdel();
@@ -179,42 +203,42 @@ function userdel() {
 	userDelCmd += " " + username;
 	
 	child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
-	if (err) throw err;
-	
-	var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
-	
-	if(stderr) {
-	if(stderr.trim() != mailspool) throw new Error(stderr);
-	}
-	
-	console.log("User " + username + " deleted!");
-	
+		if (err) throw err;
+		
+		var mailspool = "userdel: " + username + " mail spool (/var/mail/" + username + ") not found";
+		
+		if(stderr) {
+			if(stderr.trim() != mailspool) throw new Error(stderr);
+		}
+		
+		console.log("User " + username + " deleted!");
+		
 	});
 }
 
 function unlink(path) {
 	var fs = require("fs");
 	try {
-	fs.unlinkSync(path);
+		fs.unlinkSync(path);
 	}
 	catch(err) {
-	if(err.code == "ENOENT") console.warn("Did not find path=" + path);
-	else throw err;
+		if(err.code == "ENOENT") console.warn("Did not find path=" + path);
+		else throw err;
 	}
-	}
-	
-	function umount(path, ignoreErrors) {
+}
+
+function umount(path, ignoreErrors) {
 	var child_process = require("child_process");
 	try {
 		child_process.execSync("umount " + path + " --force").toString(ENCODING);
 	}
 	catch(err) {
-	if(!ignoreErrors) {
-	if( err.message.indexOf("umount: " + path + ": not mounted") == -1
-	&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
+		if(!ignoreErrors) {
+			if( err.message.indexOf("umount: " + path + ": not mounted") == -1
+			&& err.message.indexOf("umount: " + path + ": mountpoint not found") == -1
 			&& err.message.indexOf("umount: " + path + ": No such file or directory") == -1 ) throw err;
-	// stderr message are already shown in the shell, no need to repeat them
-	}
+			// stderr message are already shown in the shell, no need to repeat them
+		}
 	}
 	
 	return;
@@ -227,11 +251,11 @@ function unlink(path) {
 		console.log("Not found in /etc/fstab: " + path);
 	}
 	else {
-	text = text.replace(entry[0], "");
-	
-	if(text.match(reMount)) throw new Error("Failed to remove /etc/fstab entry: " + entry[0]);
-	
-	fs.writeFileSync("/etc/fstab", text, ENCODING);
+		text = text.replace(entry[0], "");
+		
+		if(text.match(reMount)) throw new Error("Failed to remove /etc/fstab entry: " + entry[0]);
+		
+		fs.writeFileSync("/etc/fstab", text, ENCODING);
 	}
 }
 
@@ -254,5 +278,4 @@ function replaceInFileSync(filePath, arrSearchReplace) {
 	fs.writeFileSync(filePath, text, ENCODING);
 	
 }
-	
-	
+
