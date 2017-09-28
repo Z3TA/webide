@@ -1776,6 +1776,278 @@ API.rename = function rename(user, json, callback) {
 	
 }
 
+API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFilesCallback) {
+	/*
+		Finds or replaces inside files
+		Can be run on remote file systems (ftp,sftp,ftps)
+		
+		Streams vs non streams: Streams use less memory but is harder to search with multi-line regexp
+		Hopefully each file will not be that big and we'll be able to load each file into memory.
+		
+		
+		
+	*/
+	
+	var searchPath = json.searchPath;
+	if(searchPath == undefined) return callback(new Error("searchPath=" + searchPath + " is not defined!");
+	
+	var searchString = json.searchString;
+	if(searchString == undefined) return callback(new Error("searchString=" + searchString + " is not defined!");
+	
+	try {
+		var testSearchString = new RegExp(fileFilter);
+	}
+	catch(err) {
+		return callback(new Error("Bad RegExp: searchString=" + searchString + ": " + err.message);
+	}
+	
+	var fileFilter = json.fileFilter;
+	if(fileFilter == undefined) return callback(new Error("fileFilter=" + fileFilter + " is not defined!");
+	
+	try {
+	var fileFilterRegExp = new RegExp(fileFilter);
+	}
+	catch(err) {
+		return callback(new Error("Bad RegExp: fileFilter=" + fileFilter + ": " + err.message);
+	}
+	
+	var searchSubfolders = json.searchSubfolders || false;
+	var maxFolderDepth = json.maxFolderDepth || 10;
+	var searchMaxFiles = json.searchMaxFiles || 100000;
+	var maxTotalMatches = json.maxTotalMatches = || 500;
+	var caseSensitive = json.caseSensitive || false;
+	var searchSessionId = json.id || 0;
+	var showSurroundingLines = json.showSurroundingLines || 1;
+	
+	var totalFiles = 0;
+	var filesSearched = 0;
+	
+	var fileQueue = []; // Files to be searched
+	var foldersToRead = 0;
+	var totalMatches = 0;
+	var totalFilesFound = 0;
+	var matches = [];
+	var flags = "g"; // Always make a global search!
+	var filesBeingSearched = 0;
+	var abort = false;
+	var finish = false;
+	var searchSymLinks = true;
+	
+	if(!caseSensitive) flags += "i";
+	
+	searchDir(searchPath, 0);
+	
+	function searchDir(folderPath, folderDepth) {
+		
+		console.log("Searching: " + folderPath);
+		
+		if(folderDepth > maxFolderDepth) return console.log("Max folder depth reached! maxFolderDepth=" + maxFolderDepth + " folderDepth=" + folderDepth + " folderPath=" + folderPath);
+		
+		foldersToRead++;
+		
+		API.listFiles(user, {pathToFolder: folderPath}, function fileList(err, json) {
+			
+			if(abort) return console.log("Aborting file search/replace");
+			
+			if(err) return abortError(err);
+			
+			var fileList = json.list;
+			/*
+				type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+				name - string - File or folder name
+				path - string - Full path to file/folder
+				size - float - The size of the entry in bytes.
+				date - Date - The last modified date of the entry.
+			*/
+			for (var i=0; i<fileList.length; i++) {
+				if(fileList[i].type == "d" && searchSubfolders) searchDir(fileList[i].path, ++folderDepth);
+				else if(fileList[i].type == "-" || (fileList[i].type == "l" && searchSymLinks)) {
+					totalFilesFound++;
+					if(fileFilterRegExp.test(fileList[i].path)) fileQueue.push(fileList[i].path);
+				}
+			}
+			
+			foldersToRead--;
+			
+			doWeHaveAllFiles();
+			
+		});
+		
+	}
+	
+	function doWeHaveAllFiles() {
+		if(foldersToRead == 0) {
+			// All folders have now been searched!
+			if(fileQueue.length == 0) {
+				done("Found " + totalFilesFound + " files. But none of them math the file filter!");
+			}
+			else {
+				continueSearchFiles();
+				}
+			}
+	}
+	
+	function continueSearchFiles() {
+		
+		console.log("continueSearchFiles: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+		
+		if(abort) return console.log("Aborting from continueSearchFiles()");
+		if(finish) throw new Error("We should not be calling continueSearchFiles() if finished!");
+		
+		if(totalFiles >= searchMaxFiles) {
+			doneFinish("Aborted the search because we reached searchMaxFiles=" + searchMaxFiles + " limit!");
+			abort = true;
+		}
+		else if(totalMatches >= maxTotalMatches) {
+			doneFinish("Aborted the search because we reached maxTotalMatches=" + maxTotalMatches + " limit!");
+			abort = true;
+		}
+		else while(fileQueue.length > 0 && filesBeingSearched < maxFilesToSearchAtTheSameTime) searchNextFileInQueue();
+		
+		doneMaybe();
+		
+	}
+	
+	function doneMybe() {
+		
+		console.log("doneMybe: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+		
+		if(abort) return console.log("Aborting from doneMybe()");
+		if(finish) throw new Error("We should not be calling doneMybe() if finished!");
+		
+		if(fileQueue.length == 0 && filesBeingSearched == 0) doneFinish();
+		else {
+			continueSearchFiles();
+			//setTimeout(continueSearchFiles, 10); // Give a few milliseconds of rest ?
+	}
+	}
+	
+	function searchNextFileInQueue() {
+	
+		console.log("searchNextFileInQueue: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+		
+		if(abort) return console.log("Aborting from searchNextFileInQueue()");
+		if(finish) throw new Error("We should not be calling searchNextFileInQueue() if finished!");
+		
+		var filePath = fileQueue.pop(); // Last in, first out
+		
+		if(filePath == undefined) {
+			if(fileQueue.length == 0) doneFinish();
+			else throw new Error("filePath=" + filePath + " fileQueue.length=" + fileQueue.length);
+		}
+		else searchFile(filePath);
+		
+	}
+	
+	function searchFile(filePath) {
+		filesBeingSearched++;
+		API.readFromDisk(user, {path: filePath}, function readFile(err, json) {
+			
+			if(err) return abortError(err);
+			
+			var filePath = json.path;
+			var fileContent = json.data;
+		
+			var myRe = new RegExp(searchString, flags); // Create a new RegExp for each file!
+			
+			
+				
+				console.log("Searching file: " + filePath);
+				
+				var result;
+				var lastIndex = 0;
+				var lastLine = 1;
+			var rowsAbove = [];
+			var rowsBeneath = [];
+			
+				while ((result = myRe.exec(fileContent)) !== null) {
+					
+					totalMatches++;
+					
+					// Figure out what the line number is
+					var textSlice = fileContent.slice(result.lastIndex, result.index);
+					var arrRows = textSlice.split(/\r\n|\n/);
+					var line = arrRows.length + lastLine;
+					
+					lastLine = line;
+					
+					if(matches.indexOf(result[0]) == -1) matches.push(result[0]); // Highlight these later
+					
+					if(showSurroundingLines) {
+					rowsObove = arrRows.slice(-showSurroundingLines);
+					var index = result.index;
+					for (var i=index; i<fileContent.length; i++) {
+						if(fileContent.charAt(i) == "\n") {
+							rowsBeneath.push(fileContent.slice(index, i);
+							index = i+1;
+						}
+					}
+					
+				}
+				
+				user.send({
+					foundInFile: {
+				id: searchSessionId, 
+						text: result[0],
+						lineText: rowsBeneath.unshift();
+				index: result.index, 
+				line: line, 
+				file: filePath,
+						rowsObove: rowsObove,
+						rowsBeneath: rowsBeneath
+				}
+				});
+				
+				console.log("Found " + result[0] + " on index=" + result.index + " line=" + line " in file=" + filePath);
+				
+			}
+			
+			if(replace) {
+				
+				console.log("Replacing in file: " + filePath);
+				
+				fileContent = fileContent.replace(myRe, replaceWith);
+				
+				API.saveToDisk(user, {path: filePath, text: fileContent}, function readFile(err, json) {
+					if(err) return abortError(err);
+					
+					filesBeingSearched--;
+					doneMaybe();
+					
+				});
+				
+			}
+			else {
+				filesBeingSearched--;
+				doneMaybe();
+			}
+			
+			
+		});
+	}
+	
+	function doneFinish(msg) {
+		if(abort) throw new Error("Called done while aborting!");
+		if(done) throw new Error("Already done!");
+		
+		done = true;
+		
+		if(msg == undefined) msg = "Finished searching "
+		
+		findReplaceInFilesCallback(null, {finish: msg});
+		
+	}
+	
+	
+	
+	
+	function abortError(err) {
+		if(!abort) findReplaceInFilesCallback(err);
+		abort = true;
+	}
+	
+}
+
 
 
 function runFtpQueue() {

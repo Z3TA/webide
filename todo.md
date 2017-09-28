@@ -32,15 +32,14 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+Find in file
 
-Streamline the experience of sharing and publishing a web document via the editor.
+
 
 
 
 todo
 ----
-
-Find in file
 
 Make everything work without nw.js. And remove nw.js dependency.
 
@@ -59,8 +58,6 @@ Able to add npm modules to the SSG ...
 
 Investigating added the editor to chrome web store and test it in a Chromebook.
 
-
-What happens when you go offline ? Should it be possible to do work offline ? Like on on a train.
 
 w/forkflow: Edit pages on a ftp server ...
 
@@ -97,7 +94,7 @@ http://editor.webtigerteam.com/?editPage=http%3A%2F%2Fmarkus.webtigerteam.com%2F
 ... didn't open the file.
 
 
-When you use Ctrl+P to open "any" file, it's confusing when you see the compiled files from the SSG ...
+When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
 When SSG panel is open, change working dir, so a file search only searches inside source folder!!
 
 Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
@@ -116,6 +113,8 @@ Unload/load all plugins when loggin in as a different users, or on a different s
 A feature to show a file or project ... git + github integration !? Client plugin to auto create github repos
 
 demo-example: Making a web service that makes you able to request data from an XML file.
+
+Streamline the experience of sharing and publishing a web document via the editor.
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?

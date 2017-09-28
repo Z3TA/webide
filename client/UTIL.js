@@ -739,6 +739,7 @@ var UTIL = {
 	},
 	
 	isFolderPath: function isFolderPath(path) {
+		throw new Error("Depricated! Use EDITOR.folderExistIn(pathToParentFolder, folderName, folderExistInCallback) instead!");
 		var fs = require("fs");
 		try {
 			var stat = fs.lstatSync(path);
