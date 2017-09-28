@@ -32,10 +32,9 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+chromium-browser (displayId=5) close: code=null signal=SIGTRAP
+
 Find in file
-
-
-
 
 
 todo
