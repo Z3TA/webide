@@ -545,6 +545,7 @@ EDITOR.lastKeyPressed = "";
 			function fileLoaded() {
 				
 				// Dilemma: Should file open even listeners be called before or after the callback!??
+				// answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
 				
@@ -558,6 +559,8 @@ EDITOR.lastKeyPressed = "";
 					if(!EDITOR.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 				}
 				
+				callCallbacks(err, file);
+				
 				console.log("Calling fileOpen listeners (" + EDITOR.eventListeners.fileOpen.length + ") path=" + path);
 				for(var i=0; i<EDITOR.eventListeners.fileOpen.length; i++) {
 					//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.fileOpen[i].fun));
@@ -568,7 +571,6 @@ EDITOR.lastKeyPressed = "";
 				EDITOR.showFile(file);
 				EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				
-				callCallbacks(err, file);
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
@@ -898,7 +900,7 @@ EDITOR.lastKeyPressed = "";
 			EDITOR.saveToDisk(file.path, file.text, doneSaving);
 		}
 		
-		function savedAs(err, newFile) { // intermediate function via ditor.openFile
+		function savedAs(err, newFile) { // intermediate function via EDITOR.openFile
 			if(err) throw err;
 			
 			file = newFile;
@@ -3278,6 +3280,61 @@ EDITOR.lastKeyPressed = "";
 		
 		return ret;
 	}
+	
+	EDITOR.renameFile = function renameFile(oldPath, newPath, callback) {
+		// Same as moving a file
+		
+		console.log("Renaming oldPath=" + oldPath + " to newPath=" + newPath);
+		
+		if(callback == undefined) throw new Error("Expected third function parameter to be a callback!");
+		
+		if(oldPath == newPath) return callback(new Error("Old path is the same as the newPath=" + newPath));
+		
+		if(EDITOR.files.hasOwnProperty(newPath)) return callback(new Error("There is already a file open with path=" + newPath));
+		
+		
+		
+		//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
+		
+		CLIENT.cmd("rename", {oldPath: oldPath, newPath: newPath}, function(err, json) {
+			if(err) return callback(err);
+				
+			if(EDITOR.files.hasOwnProperty(oldPath)) {
+					// File is opened in the editor!
+					// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
+					
+				var file = EDITOR.files[oldPath];
+				
+					// Save the text, do not count on the garbage collector the be "slow"
+					var text = file.text; 
+					var isSaved = file.isSaved;
+					var changed = file.changed;
+					var savedAs = file.savedAs;
+					
+					var doNotSwitchFile = true;
+					EDITOR.closeFile(file.path, doNotSwitchFile);
+					EDITOR.openFile(newPath, text, function(openFileErr, newFile) {
+						
+						if(openFileErr) throw openFileErr;
+						
+						newFile.isSaved = isSaved;
+						newFile.changed = changed;
+						newFile.savedAs = savedAs;
+						
+					// Make sure file save event listeners are called
+					
+					
+						callback(null, newFile.path);
+						
+					});
+				}
+			else callback(null, newPath);
+				
+		});
+		
+	}
+	
+	
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 		

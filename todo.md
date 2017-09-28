@@ -40,10 +40,6 @@ Streamline the experience of sharing and publishing a web document via the edito
 todo
 ----
 
-Fix urls in rss_en.xml. make them point to user.webide.se ! replace in adduser.js
-
-Rename a file! For example to publish a draft i SSG: Raname _name to name (without underscore)
-
 Find in file
 
 Make everything work without nw.js. And remove nw.js dependency.
@@ -1054,6 +1050,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Key binding are impossible to "forget" once you've learned them. So we have to support the most common keybindings from all popular editors!!
+In order for the editor to feel nice eg. doing what the user intents.
+When there are two ore more keys that does different things on different editors. Ask the user what to do and if the setting should be remembered.
+
+---
+
 Be better at guessing the file path in file open and file save dialog.
 
 Voice sytheziser ... refactor the plugin: Implement EDITOR.say or speak, so each module can implement voice support (for blind people)
@@ -1610,6 +1612,8 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Double click to highlight a word in a large file is slow ...
 
 js parser needs more optimizations!
 parseJavaScript: 118.947021484375ms (full file: interface.js)

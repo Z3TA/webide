@@ -20,6 +20,7 @@
 	var defaultScroll = 0;
 	var fsSelect;
 	var openFolders = [];
+	var maxNameLength = 40;
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -363,7 +364,7 @@
 			
 			
 			var displayName = item.name;
-			if(displayName.length > 40) {
+			if(displayName.length > maxNameLength) {
 				li.setAttribute("title", displayName);
 				displayName = displayName.substr(0, 37) + "...";
 			}
@@ -406,7 +407,7 @@
 		else return 0;
 	}
 	
-	function showFileItemMenu(el, fileItem) {
+	function showFileItemMenu(el, fsFileItem) {
 		
 		console.log("showFileItemMenu el=" + el);
 		console.log(el);
@@ -431,9 +432,11 @@
 			clickEvent.preventDefault();
 			clickEvent.stopPropagation();
 			
+			var filePath = el.getAttribute("path");
+			
 			if(!clickEvent.ctrlKey) {
 				
-				var msg = "Are you sure you want to Delete the file ?\n" + fileItem.path + "\n\n(Ctrl-click to not show this confirmation next time)";
+				var msg = "Are you sure you want to Delete the file ?\n" + filePath + "\n\n(Ctrl-click to not show this confirmation next time)";
 				var yes = "Yes, delete it";
 				var no = "No, do not";
 				
@@ -448,11 +451,50 @@
 			function deleteTheFile() {
 				el.parentNode.removeChild(el);
 				
-				EDITOR.deleteFile(fileItem.path);
+				EDITOR.deleteFile(filePath);
 			}
 			
 			return false;
 			};
+		
+		
+		var optRename = document.createElement("li");
+		optRename.innerText = "Rename";
+		fileItemMenu.appendChild(optRename);
+		optRename.onclick = function renameFile(clickEvent) {
+			clickEvent.preventDefault();
+			clickEvent.stopPropagation();
+			
+			var oldPath = el.getAttribute("path");
+			
+			promptBox("Rename file:", false, oldPath, function(newPath) {
+				if(newPath) EDITOR.renameFile(oldPath, newPath, function fileRenamed(err, newPath) {
+				if(err) alertBox(err.message);
+				else {
+				
+						el.setAttribute("path", newPath);
+					
+						// Hide the menu
+						el.removeChild(fileItemMenu);
+						
+					// Change the name text node!
+						el.removeChild(el.lastChild); // hopefully the text node
+						
+						var displayName = UTIL.getFilenameFromPath(newPath);
+						if(displayName.length > maxNameLength) {
+							el.setAttribute("title", displayName);
+							displayName = displayName.substr(0, 37) + "...";
+						}
+						el.appendChild(document.createTextNode(displayName));
+						
+					
+				}
+			});
+			});
+			
+			return false;
+		};
+		
 		
 		el.appendChild(fileItemMenu);
 		
