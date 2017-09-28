@@ -1789,32 +1789,32 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	*/
 	
 	var searchPath = json.searchPath;
-	if(searchPath == undefined) return callback(new Error("searchPath=" + searchPath + " is not defined!");
+	if(searchPath == undefined) return callback(new Error("searchPath=" + searchPath + " is not defined!"));
 	
 	var searchString = json.searchString;
-	if(searchString == undefined) return callback(new Error("searchString=" + searchString + " is not defined!");
+	if(searchString == undefined) return callback(new Error("searchString=" + searchString + " is not defined!"));
 	
 	try {
 		var testSearchString = new RegExp(fileFilter);
 	}
 	catch(err) {
-		return callback(new Error("Bad RegExp: searchString=" + searchString + ": " + err.message);
+		return callback(new Error("Bad RegExp: searchString=" + searchString + ": " + err.message));
 	}
 	
 	var fileFilter = json.fileFilter;
-	if(fileFilter == undefined) return callback(new Error("fileFilter=" + fileFilter + " is not defined!");
+	if(fileFilter == undefined) return callback(new Error("fileFilter=" + fileFilter + " is not defined!"));
 	
 	try {
 	var fileFilterRegExp = new RegExp(fileFilter);
 	}
 	catch(err) {
-		return callback(new Error("Bad RegExp: fileFilter=" + fileFilter + ": " + err.message);
+		return callback(new Error("Bad RegExp: fileFilter=" + fileFilter + ": " + err.message));
 	}
 	
 	var searchSubfolders = json.searchSubfolders || false;
 	var maxFolderDepth = json.maxFolderDepth || 10;
 	var searchMaxFiles = json.searchMaxFiles || 100000;
-	var maxTotalMatches = json.maxTotalMatches = || 500;
+	var maxTotalMatches = json.maxTotalMatches || 500;
 	var caseSensitive = json.caseSensitive || false;
 	var searchSessionId = json.id || 0;
 	var showSurroundingLines = json.showSurroundingLines || 1;
@@ -1978,7 +1978,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 					var index = result.index;
 					for (var i=index; i<fileContent.length; i++) {
 						if(fileContent.charAt(i) == "\n") {
-							rowsBeneath.push(fileContent.slice(index, i);
+							rowsBeneath.push(fileContent.slice(index, i));
 							index = i+1;
 						}
 					}
@@ -1989,7 +1989,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 					foundInFile: {
 				id: searchSessionId, 
 						text: result[0],
-						lineText: rowsBeneath.unshift();
+						lineText: rowsBeneath.unshift(),
 				index: result.index, 
 				line: line, 
 				file: filePath,
@@ -1998,7 +1998,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 				}
 				});
 				
-				console.log("Found " + result[0] + " on index=" + result.index + " line=" + line " in file=" + filePath);
+				console.log("Found " + result[0] + " on index=" + result.index + " line=" + line + " in file=" + filePath);
 				
 			}
 			
