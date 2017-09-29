@@ -1,7 +1,6 @@
 (function() {
 	"use strict";
 	
-	return;
 	
 	var footer, div, regexOption, subfolderOption, inputInDir, inputFileFilter, optionCaseSensitive;
 	
@@ -16,6 +15,10 @@
 	var defaultSearchTerm = "";
 	var defaultSearchFolder = EDITOR.workingDirectory;
 	var defaultSearchFilter = "\.js$|\.htm$|\.html$|\.css$";
+	var searchReportCounter = 0;
+	
+	var filesMatched = {};
+	var lastRowNr = -1;
 	
 	EDITOR.on("start", function find_in_files_main() {
 		
@@ -36,8 +39,64 @@
 		
 		EDITOR.on("dblclick", fifdblclick);
 		
+		CLIENT.on("foundInFile", foundInFile);
 		
 	});
+	
+	function foundInFile(json) {
+		
+		var fileId = json.id;
+		
+		var filePath = searchReportFileName(fileId);
+		var file;
+		
+		if(EDITOR.files.hasOwnProperty(filePath)) {
+			file = EDITOR.files[filePath];
+			append(file);
+		}
+		else {
+			EDITOR.openFile(filePath, "", function(err, file) {
+				
+				if(err) throw err;
+				
+				append(file);
+				
+			});
+		}
+		
+		function append(reportFile) {
+			
+			if(!filesMatched.hasOwnProperty(fileId)) filesMatched[fileId] = [];
+			
+				var matchFound = (filesMatched[fileId].indexOf(json.file) != -1)
+				
+				if(!matchFound) {
+					reportFile.insertLineBreak();
+					reportFile.insertLineBreak();
+					reportFile.insertText(json.file);
+					reportFile.insertLineBreak();
+					reportFile.insertText(underline(json.file));
+					reportFile.insertLineBreak();
+					
+					filesMatched[fileId].push(json.file);
+				}
+				
+				var rowNr = json.lineNr-1;
+				
+			console.log("foundInFile!!");
+			console.log(json);
+			
+				if(rowNr != lastRowNr) {
+					// Print all content of that line
+					reportFile.insertText( linePad(json.lineNr) + json.lineText );
+					reportFile.insertLineBreak();
+				}
+				
+				lastRowNr = rowNr;
+				
+				matchFound = true;
+			}
+	}
 	
 	function isSearchReport(file) {
 		
@@ -493,10 +552,14 @@
 		
 	}
 	
+	function searchReportFileName(searchReportCounter) {
+		return "search_report " + (searchReportCounter) + ".tmp"
+	}
+	
 	function searchFiles(searchString, useRegEx, searchSubfolders, searchPath, fileFilter, caseSensitive) {
 		
 		var reportFile;
-		var reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
+		var reportFilePath = searchReportFileName(searchReportCounter);
 		
 		if(!useRegEx) {
 			// Convert to a regexp
@@ -511,12 +574,14 @@
 		
 		// Do not overwrite opened files!
 		while(EDITOR.files.hasOwnProperty(reportFilePath)) {
-			reportFilePath = "search_report " + (searchReportCounter++) + ".tmp";
+			reportFilePath = searchReportFileName(searchReportCounter++);
 		}
 		
 		// File extension (.tmp) so that it's not formatted by the JS parser
 		var content = "";
 		EDITOR.openFile(reportFilePath, content, function(err, file) {
+			
+			if(err) throw err;
 			
 			reportFile = file;
 			
@@ -529,96 +594,72 @@
 			reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match: " + searchString + (caseSensitive ? " (case sensitive) ": "") + ":");
 			reportFile.insertLineBreak();
 			
-			var filesMatched = [];
-			
-			CLIENT.on("foundInFile", function foundInFile(json) {
+			filesMatched[searchReportCounter] = [];
+			lastRowNr = -1;
 				
-				var matchFound = (filesMatched.indexOf(json.file) != -1)
+				var json = {
+					searchString: searchString,
+					searchSubfolders: searchSubfolders,
+					searchPath: searchPath,
+					fileFilter: fileFilter,
+					caseSensitive: caseSensitive,
+					id: searchReportCounter
+				};
 				
-				if(!matchFound) {
-					reportFile.insertLineBreak();
-					reportFile.insertLineBreak();
-					reportFile.insertText(json.file);
-					reportFile.insertLineBreak();
-					reportFile.insertText(underline(json.file));
-					reportFile.insertLineBreak();
+				CLIENT.cmd("findReplaceInFiles", json, function(err, json) {
+					if(err) {
+						alertBox(err.message);
+						reportFile.writeLine(err.message);
+						
+						//inputInDir.setAttribute("class", "inputtext indir error");
+						//return alert("Can't do a search in a path that don't exist");
+						
+					}
+					else {
+						reportFile.writeLine(json.msg);
+						
+						
+						
+					}
 					
-					filesMatched.push(json.file);
-				}
-				
-				var rowNr = json.line-1;
-				
-				if(rowNr != lastRowNr) {
-					// Print all content of that line
-					reportFile.insertText( linePad(json.l) + json.lineText );
-					reportFile.insertLineBreak();
-				}
-				
-				lastRowNr = rowNr;
-				
-				matchFound = true;
+					
+				});
 				
 			});
-			
-			var json = {
-				searchString: searchString,
-				searchSubfolders: searchSubfolders,
-				searchPath: searchPath,
-				fileFilter: fileFilter,
-				caseSensitive: caseSensitive,
-				id: searchReportCounter
-			};
-			
-			CLIENT.cmd("findReplaceInFiles", json, function(err, json) {
-				if(err) {
-					alertBox(err.message);
-					reportFile.writeLine(err.message);
-					
-					//inputInDir.setAttribute("class", "inputtext indir error");
-					//return alert("Can't do a search in a path that don't exist");
-					
-				}
-				else {
-					reportFile.writeLine(json.msg);
-				}
-				
-				
-			});
-			
-		});
 		
 		
 		
-		function linePad(nr) {
-			// Add spacing and a colon
-			var space = 6;
-			var str = "" + nr + "";
-			var length = str.length;
-			
-			for(var i=length; i<space; i++) {
-				str = " " + str;
-			}
-			return "Line " + str + ": ";
+		
+		
+	}
+	
+	function linePad(nr) {
+		// Add spacing and a colon
+		var space = 6;
+		var str = "" + nr + "";
+		var length = str.length;
+		
+		for(var i=length; i<space; i++) {
+			str = " " + str;
+		}
+		return "Line " + str + ": ";
+	}
+	
+	function underline(txt) {
+		// Make a line as long as the text
+		var line = [];
+		
+		for(var i=0; i<txt.length; i++) {
+			line.push("-");
 		}
 		
-		function underline(txt) {
-			// Make a line as long as the text
-			var line = [];
-			
-			for(var i=0; i<txt.length; i++) {
-				line.push("-");
-			}
-			
-			return line.join("");
-			
-		}
+		return line.join("");
 		
-		
-		function filterFileNames(name) { 
-			return fileFilterRegExp.test(name);
-		}
-		
-		
+	}
+	
+	
+	function filterFileNames(name) {
+		return fileFilterRegExp.test(name);
 	}
 	
 })();

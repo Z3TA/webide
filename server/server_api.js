@@ -1817,7 +1817,8 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	var maxTotalMatches = json.maxTotalMatches || 500;
 	var caseSensitive = json.caseSensitive || false;
 	var searchSessionId = json.id || 0;
-	var showSurroundingLines = json.showSurroundingLines || 1;
+	var showSurroundingLines = json.showSurroundingLines || 2;
+	var replaceWith = json.replaceWith;
 	
 	var totalFiles = 0;
 	var filesSearched = 0;
@@ -1830,8 +1831,9 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	var flags = "g"; // Always make a global search!
 	var filesBeingSearched = 0;
 	var abort = false;
-	var finish = false;
+	var done = false;
 	var searchSymLinks = true;
+	var maxFilesToSearchAtTheSameTime = 5;
 	
 	if(!caseSensitive) flags += "i";
 	
@@ -1878,6 +1880,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	function doWeHaveAllFiles() {
 		if(foldersToRead == 0) {
 			// All folders have now been searched!
+			totalFiles = fileQueue.length;
 			if(fileQueue.length == 0) {
 				done("Found " + totalFilesFound + " files. But none of them math the file filter!");
 			}
@@ -1892,15 +1895,17 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		console.log("continueSearchFiles: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
 		if(abort) return console.log("Aborting from continueSearchFiles()");
-		if(finish) throw new Error("We should not be calling continueSearchFiles() if finished!");
+		if(done) return console.log("Already done! from continueSearchFiles()");
 		
 		if(totalFiles >= searchMaxFiles) {
 			doneFinish("Aborted the search because we reached searchMaxFiles=" + searchMaxFiles + " limit!");
 			abort = true;
+			return;
 		}
 		else if(totalMatches >= maxTotalMatches) {
 			doneFinish("Aborted the search because we reached maxTotalMatches=" + maxTotalMatches + " limit!");
 			abort = true;
+			return;
 		}
 		else while(fileQueue.length > 0 && filesBeingSearched < maxFilesToSearchAtTheSameTime) searchNextFileInQueue();
 		
@@ -1908,17 +1913,17 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		
 	}
 	
-	function doneMybe() {
+	function doneMaybe() {
 		
-		console.log("doneMybe: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+		console.log("doneMaybe: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(abort) return console.log("Aborting from doneMybe()");
-		if(finish) throw new Error("We should not be calling doneMybe() if finished!");
+		if(abort) return console.log("Aborting from doneMaybe()");
+		if(done) throw new Error("We should not be calling doneMaybe() if done!");
 		
 		if(fileQueue.length == 0 && filesBeingSearched == 0) doneFinish();
 		else {
-			continueSearchFiles();
-			//setTimeout(continueSearchFiles, 10); // Give a few milliseconds of rest ?
+			//continueSearchFiles(); // RangeError: Maximum call stack size exceeded
+			setTimeout(continueSearchFiles, 10); // Give a few milliseconds of rest
 	}
 	}
 	
@@ -1927,7 +1932,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		console.log("searchNextFileInQueue: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
 		if(abort) return console.log("Aborting from searchNextFileInQueue()");
-		if(finish) throw new Error("We should not be calling searchNextFileInQueue() if finished!");
+		if(done) throw new Error("We should not be calling searchNextFileInQueue() if !");
 		
 		var filePath = fileQueue.pop(); // Last in, first out
 		
@@ -1956,7 +1961,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 				
 				var result;
 				var lastIndex = 0;
-				var lastLine = 1;
+			var lastLine = 1;
 			var rowsAbove = [];
 			var rowsBeneath = [];
 			
@@ -1965,44 +1970,64 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 					totalMatches++;
 					
 					// Figure out what the line number is
-					var textSlice = fileContent.slice(result.lastIndex, result.index);
-					var arrRows = textSlice.split(/\r\n|\n/);
-					var line = arrRows.length + lastLine;
+				// Select all text up until the first line break after the search match index
+				var firstLineBreakAfterResult = fileContent.indexOf("\n", result.index + result[0].length);
+				var textAboveInludingResult = fileContent.slice(  result.lastIndex, firstLineBreakAfterResult  );
+				if(textAboveInludingResult.charAt(textAboveInludingResult.length-1) == "\r") textAboveInludingResult = textAboveInludingResult.slice(0, -1);
+				var resultRows =  result[0].split(/\r\n|\n/);
+				var textAboveInludingResultRows = textAboveInludingResult.split(/\r\n|\n/);
+				var lineNr = textAboveInludingResultRows.length - resultRows.length + 1;
+				
+				lastLine = lineNr;
 					
-					lastLine = line;
-					
+				var lineText = "";
+				// Line text can be many lines!
+				for (var i=0; i<resultRows.length; i++) {
+					lineText = textAboveInludingResultRows.pop() + "\n" + lineText;
+				}
+				lineText = lineText.trim();
+				
 					if(matches.indexOf(result[0]) == -1) matches.push(result[0]); // Highlight these later
 					
 					if(showSurroundingLines) {
-					rowsObove = arrRows.slice(-showSurroundingLines);
-					var index = result.index;
-					for (var i=index; i<fileContent.length; i++) {
+					rowsAbove = textAboveInludingResultRows.slice( -showSurroundingLines );
+					var index = firstLineBreakAfterResult;
+					if(fileContent.charAt(index) == "\r") index++;
+					if(fileContent.charAt(index) == "\n") index++;
+					rowsBeneath = [];
+						for (var i=index; i<fileContent.length; i++) {
 						if(fileContent.charAt(i) == "\n") {
-							rowsBeneath.push(fileContent.slice(index, i));
+							rowsBeneath.push(fileContent.slice(index, i).trim());
 							index = i+1;
+							if(rowsBeneath.length >= showSurroundingLines) break;
 						}
 					}
+						
+					}
+					
+				console.log("textAboveInludingResultRows=" + JSON.stringify(textAboveInludingResultRows));
+					console.log("rowsAbove=" + JSON.stringify(rowsAbove));
+					
+					console.log("Found " + result[0] + " on index=" + result.index + " lastIndex=" + result.lastIndex + " showSurroundingLines=" + showSurroundingLines + " lineNr=" + lineNr + " in file=" + filePath);
+					
+					user.send({
+						foundInFile: {
+							id: searchSessionId, 
+							text: result[0],
+							lineText: lineText,
+							index: result.index, 
+							lineNr: lineNr, 
+							file: filePath,
+							rowsAbove: rowsAbove,
+							rowsBeneath: rowsBeneath
+						}
+					});
+					
+					
 					
 				}
-				
-				user.send({
-					foundInFile: {
-				id: searchSessionId, 
-						text: result[0],
-						lineText: rowsBeneath.unshift(),
-				index: result.index, 
-				line: line, 
-				file: filePath,
-						rowsObove: rowsObove,
-						rowsBeneath: rowsBeneath
-				}
-				});
-				
-				console.log("Found " + result[0] + " on index=" + result.index + " line=" + line + " in file=" + filePath);
-				
-			}
 			
-			if(replace) {
+			if(replaceWith) {
 				
 				console.log("Replacing in file: " + filePath);
 				
@@ -2032,9 +2057,9 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		
 		done = true;
 		
-		if(msg == undefined) msg = "Finished searching "
+		if(msg == undefined) msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched."
 		
-		findReplaceInFilesCallback(null, {finish: msg});
+		findReplaceInFilesCallback(null, {msg: msg, matches: matches});
 		
 	}
 	
