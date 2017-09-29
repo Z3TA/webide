@@ -546,6 +546,8 @@ EDITOR.lastKeyPressed = "";
 				
 				// Dilemma: Should file open even listeners be called before or after the callback!??
 				// answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
+				// problem: The callback might change the file, triggering file.change() then plugins will go nuts because they have not seen the file (being opened) yet!
+				// sultion: The file open event listeners need to be called before the file open callback(s)! 
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
 				
@@ -559,13 +561,13 @@ EDITOR.lastKeyPressed = "";
 					if(!EDITOR.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
 				}
 				
-				callCallbacks(err, file);
-				
 				console.log("Calling fileOpen listeners (" + EDITOR.eventListeners.fileOpen.length + ") path=" + path);
 				for(var i=0; i<EDITOR.eventListeners.fileOpen.length; i++) {
 					//console.log("function " + UTIL.getFunctionName(EDITOR.eventListeners.fileOpen[i].fun));
 					EDITOR.eventListeners.fileOpen[i].fun(file); // Call function
 				}
+				
+				callCallbacks(err, file);
 				
 				// Switch to this file
 				EDITOR.showFile(file);
