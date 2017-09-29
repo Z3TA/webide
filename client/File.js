@@ -868,6 +868,35 @@ var File; // File object is global
 		
 	}
 	
+	File.prototype.writeLineBreak = function() {
+		// Inserts a line break at EOF
+		var file = this;
+		
+		if(!file.lineBreak) throw new Error("File has no line break! file.lineBreak=" + file.lineBreak);
+		
+		var textIndex = file.text.length + file.lineBreak.length;
+		
+		insertGridRow(file, textIndex, "");
+		
+		file.text += file.lineBreak;
+		
+		file.checkGrid();
+		
+		var grid = file.grid;
+		if(file.caret.eof) {
+			// Move the caret (only have to do that if it's EOF)
+			file.caret.index = file.text.length;
+			file.caret.row = grid.length - 1;
+			file.caret.col = grid[grid.length-1].length;
+			
+			file.checkCaret();
+			
+			file.scrollToCaret();
+		}
+		
+		// Should I call file.change !?!?!?
+		
+	}
 	
 	File.prototype.insertTextOnRow = function(text, row) {
 		// Inserts text at the first column at row
@@ -1905,6 +1934,7 @@ var File; // File object is global
 	
 	
 	File.prototype.insertLineBreak = function(caret) {
+		// Inserts a line break at the file caret
 		var file = this;
 		
 		

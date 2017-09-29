@@ -1965,68 +1965,72 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 			var rowsAbove = [];
 			var rowsBeneath = [];
 			
-				while ((result = myRe.exec(fileContent)) !== null) {
+			while ((result = myRe.exec(fileContent)) !== null) {
 					
 					totalMatches++;
 					
 					// Figure out what the line number is
-				// Select all text up until the first line break after the search match index
-				var firstLineBreakAfterResult = fileContent.indexOf("\n", result.index + result[0].length);
-				var textAboveInludingResult = fileContent.slice(  result.lastIndex, firstLineBreakAfterResult  );
-				if(textAboveInludingResult.charAt(textAboveInludingResult.length-1) == "\r") textAboveInludingResult = textAboveInludingResult.slice(0, -1);
-				var resultRows =  result[0].split(/\r\n|\n/);
-				var textAboveInludingResultRows = textAboveInludingResult.split(/\r\n|\n/);
-				var lineNr = textAboveInludingResultRows.length - resultRows.length + 1;
-				
-				lastLine = lineNr;
+					// Select all text up until the first line break after the search match index
+					var firstLineBreakAfterResult = fileContent.indexOf("\n", result.index + result[0].length);
+					var textAboveInludingResult = fileContent.slice(  result.lastIndex, firstLineBreakAfterResult  );
+					if(textAboveInludingResult.charAt(textAboveInludingResult.length-1) == "\r") textAboveInludingResult = textAboveInludingResult.slice(0, -1);
+					var resultRows =  result[0].split(/\r\n|\n/);
+					var textAboveInludingResultRows = textAboveInludingResult.split(/\r\n|\n/);
+					var lineNr = textAboveInludingResultRows.length - resultRows.length + 1;
 					
-				var lineText = "";
-				// Line text can be many lines!
-				for (var i=0; i<resultRows.length; i++) {
-					lineText = textAboveInludingResultRows.pop() + "\n" + lineText;
-				}
-				lineText = lineText.trim();
-				
+					lastLine = lineNr;
+					
+					var lineText = "";
+					// Line text can be many lines!
+					for (var i=0; i<resultRows.length; i++) {
+						lineText = textAboveInludingResultRows.pop() + "\n" + lineText;
+					}
+					lineText = lineText.trim();
+					
 					if(matches.indexOf(result[0]) == -1) matches.push(result[0]); // Highlight these later
 					
 					if(showSurroundingLines) {
-					rowsAbove = textAboveInludingResultRows.slice( -showSurroundingLines );
-					var index = firstLineBreakAfterResult;
-					if(fileContent.charAt(index) == "\r") index++;
-					if(fileContent.charAt(index) == "\n") index++;
-					rowsBeneath = [];
+						rowsAbove = textAboveInludingResultRows.slice( -showSurroundingLines );
+						var index = firstLineBreakAfterResult;
+						if(fileContent.charAt(index) == "\r") index++;
+						if(fileContent.charAt(index) == "\n") index++;
+						rowsBeneath = [];
 						for (var i=index; i<fileContent.length; i++) {
-						if(fileContent.charAt(i) == "\n") {
-							rowsBeneath.push(fileContent.slice(index, i).trim());
-							index = i+1;
-							if(rowsBeneath.length >= showSurroundingLines) break;
+							if(fileContent.charAt(i) == "\n") {
+								rowsBeneath.push(fileContent.slice(index, i).trim());
+								index = i+1;
+								if(rowsBeneath.length >= showSurroundingLines) break;
+							}
 						}
-					}
 						
 					}
 					
-				//console.log("textAboveInludingResultRows=" + JSON.stringify(textAboveInludingResultRows));
+					//console.log("textAboveInludingResultRows=" + JSON.stringify(textAboveInludingResultRows));
 					//console.log("rowsAbove=" + JSON.stringify(rowsAbove));
 					
 					console.log("Found " + result[0] + " on index=" + result.index + " lastIndex=" + result.lastIndex + " showSurroundingLines=" + showSurroundingLines + " lineNr=" + lineNr + " in file=" + filePath);
 					
-					user.send({
-						foundInFile: {
-							id: searchSessionId, 
-							text: result[0],
-							lineText: lineText,
-							index: result.index, 
-							lineNr: lineNr, 
-							file: filePath,
-							rowsAbove: rowsAbove,
-							rowsBeneath: rowsBeneath,
+					var foundInFile = {
+						id: searchSessionId,
+						text: result[0],
+						lineText: lineText,
+						index: result.index,
+						lineNr: lineNr,
+						file: filePath,
+						rowsAbove: rowsAbove,
+						rowsBeneath: rowsBeneath,
 						regExp: myRe.toString()
-						}
-					});
+					};
 					
-					
-					
+					if(replaceWith) {
+					foundInFile.replaceWith = replaceWith;
+					// Run replace op on client side, not twice here.
+					//foundInFile.replacedWith = result[0].replace(myRe, replaceWith);
 				}
+				
+				user.send({foundInFile: foundInFile});
+				
+			}
 			
 			if(replaceWith) {
 				
@@ -2036,7 +2040,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 				
 				API.saveToDisk(user, {path: filePath, text: fileContent}, function readFile(err, json) {
 					if(err) return abortError(err);
-					
+						
 					filesBeingSearched--;
 					doneMaybe();
 					

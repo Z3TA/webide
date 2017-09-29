@@ -32,7 +32,11 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-chromium-browser (displayId=5) close: code=null signal=SIGTRAP
+Polishing and testing the find and replace in files function. 
+Polishing the search report from find and replace in files
+
+Should file.writeLine, file.write, file.writeLineBreak call file.change !?!?!?
+
 
 Find in file
 

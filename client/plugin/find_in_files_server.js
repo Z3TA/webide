@@ -16,7 +16,7 @@
 	var defaultSearchFolder = EDITOR.workingDirectory;
 	var defaultSearchFilter = "\.js$|\.htm$|\.html$|\.css$";
 	var searchReportCounter = 0;
-	
+	var linePadSpace = 6;
 	var filesMatched = {};
 	var lastRowNr = -1;
 	
@@ -58,7 +58,10 @@
 			append(file);
 		}
 		else {
+			console.log("Creating search report file: " + filePath + " fileId=" + fileId);
 			EDITOR.openFile(filePath, "", function(err, file) {
+				
+				console.log("Search report file creted: " + file.path + " fileId=" + fileId);
 				
 				if(err) throw err;
 				
@@ -69,47 +72,79 @@
 		
 		function append(reportFile) {
 			
+			console.log("Appending to search report file: " + reportFile.path + " grid.length=" + reportFile.grid.length + " text.length=" + reportFile.text.length + " fileId=" + fileId + " json.lineNr=" + json.lineNr);
+			
 			// Make sure the second line of the report file has the regexp meta
 			// Even if there's only one row, grid length is 1
 			if(reportFile.grid.length <= 1) {
-				if(file.text.trim() == "") reportFile.writeLine("Find in File(s) Report");
+				if(reportFile.text.trim() == "") reportFile.writeLine("Find in File(s) Report");
 				reportFile.writeLine("RegExp: " + json.regExp);
 			}
 			else {
-			var secondLineOfReportFile = reportFile.rowText(1);
+				var secondLineOfReportFile = reportFile.rowText(1);
 				if(secondLineOfReportFile.slice(0, 8) != "RegExp: ") reportFile.insertTextRow("RegExp: " + json.regExp, 1);
 			}
 			
 			if(!filesMatched.hasOwnProperty(fileId)) filesMatched[fileId] = [];
 			
-				var matchFound = (filesMatched[fileId].indexOf(json.file) != -1)
+			var matchFound = (filesMatched[fileId].indexOf(json.file) != -1)
+			
+			if(!matchFound) {
+				reportFile.writeLineBreak();
+				reportFile.writeLineBreak();
+				reportFile.write(json.file);
+				reportFile.writeLineBreak();
+				reportFile.write(underline(json.file));
+				reportFile.writeLineBreak();
 				
-				if(!matchFound) {
-					reportFile.insertLineBreak();
-					reportFile.insertLineBreak();
-					reportFile.insertText(json.file);
-					reportFile.insertLineBreak();
-					reportFile.insertText(underline(json.file));
-					reportFile.insertLineBreak();
+				filesMatched[fileId].push(json.file);
+				
+				if(json.replaceWith) {
+					// Do the replace operation on the file if it's open
+					if(EDITOR.files.hasOwnProperty(json.file)) {
+						EDITOR.files[json.file].reload(EDITOR.files[json.file].text.replace(regExpFromString(json.regExp), json.replaceWith));
+					}
 					
-					filesMatched[fileId].push(json.file);
 				}
-				
-				var rowNr = json.lineNr-1;
-				
+			}
+			
+			var rowNr = json.lineNr-1;
+			
 			console.log("foundInFile!!");
 			console.log(json);
 			
-				if(rowNr != lastRowNr) {
-					// Print all content of that line
-					reportFile.insertText( linePad(json.lineNr) + json.lineText );
-					reportFile.insertLineBreak();
+			// if the row is the same as last row, the line will be ignored (because it would look the same)
+			if(rowNr != lastRowNr) {
+				// Print all content of that line
+				reportFile.write( linePad(json.lineNr) + json.lineText );
+				
+				if(json.replaceWith) {
+					var replacedLineText = json.lineText.replace(regExpFromString(json.regExp), json.replaceWith);
+					if(replacedLineText != json.lineText) reportFile.write( " => " + replacedLineText );
 				}
 				
-				lastRowNr = rowNr;
-				
-				matchFound = true;
+				reportFile.writeLineBreak();
 			}
+			
+			
+			lastRowNr = rowNr;
+			
+			matchFound = true;
+		}
+	}
+	
+	function regExpFromString(regExpString) {
+		var flags = regExpString.replace(/.*\/([gimy]*)$/, '$1');
+		var pattern = regExpString.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+		
+		//var regex = new RegExp(pattern, flags);
+		//var regex = new RegExp(regExpString);
+		
+		var match = regExpString.match(new RegExp('^/(.*?)/([gimy]*)$'));
+		
+		console.log("regExpFromString match=" + JSON.stringify(match));
+		
+		return new RegExp(match[1], match[2]);
 	}
 	
 	function isSearchReport(file) {
@@ -169,65 +204,65 @@
 			var regExpString = matchSearchString[1];
 			
 			console.log("regExpString=" + regExpString);
-				
-				
-				// Create a regEx to find the word(s) to highlight
+			
+			
+			// Create a regEx to find the word(s) to highlight
 			var flags = regExpString.replace(/.*\/([gimy]*)$/, '$1');
 			var pattern = regExpString.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
 			
 			//var regex = new RegExp(pattern, flags);
 			//var regex = new RegExp(regExpString);
-				
+			
 			var match = regExpString.match(new RegExp('^/(.*?)/([gimy]*)$'));
-				// sanity check here
+			// sanity check here
 			
 			console.log("match=" + JSON.stringify(match));
 			
-				var regex = new RegExp(match[1], match[2]);
-				
+			var regex = new RegExp(match[1], match[2]);
+			
 			console.log("regex=" + regex);
 			
-				console.log("flags=" + flags);
-				console.log("pattern=" + pattern);
-				console.log("regex.flags=" + regex.flags);
-				console.log("regex.source=" + regex.source);
+			console.log("flags=" + flags);
+			console.log("pattern=" + pattern);
+			console.log("regex.flags=" + regex.flags);
+			console.log("regex.source=" + regex.source);
+			
+			// Open the file, then go to the line, and highlight the search word
+			
+			console.log("line=" + lineNr);
+			console.log("path=" + path);
+			
+			EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
 				
-				// Open the file, then go to the line, and highlight the search word
-				
-				console.log("line=" + lineNr);
-				console.log("path=" + path);
-				
-				EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
-					
 				console.log("file opened=" + file.path);
 				
-					// Scroll to and place the caret on the line
-					file.gotoLine(lineNr, function afterScrolled() {
-						
-						console.log("scrolled to the right place!?")
-						
-						// Find all matches in the whole file (can be many!)
-						var result;
-						var words = [];
-						while ((result = regex.exec(file.text)) !== null) { // Find the word(s)
-							if(words.indexOf(result[0]) == -1) words.push(result[0]); 
-						}
-						
-						// Highlight the matched words
-						console.log("words=" + words);
-						console.log("regex flags=" + regex.flags + " source=" + regex.source);
-						for(var i=0; i<words.length; i++) {
-							file.highlightText(words[i]);						
-						}
-						
-						
-					});
+				// Scroll to and place the caret on the line
+				file.gotoLine(lineNr, function afterScrolled() {
+					
+					console.log("scrolled to the right place!?")
+					
+					// Find all matches in the whole file (can be many!)
+					var result;
+					var words = [];
+					while ((result = regex.exec(file.text)) !== null) { // Find the word(s)
+						if(words.indexOf(result[0]) == -1) words.push(result[0]); 
+					}
+					
+					// Highlight the matched words
+					console.log("words=" + words);
+					console.log("regex flags=" + regex.flags + " source=" + regex.source);
+					for(var i=0; i<words.length; i++) {
+						file.highlightText(words[i]);						
+					}
 					
 					
 				});
 				
 				
-			}
+			});
+			
+			
+		}
 		else console.log("File is not a search report!");
 		
 	}
@@ -560,7 +595,7 @@
 			searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked);
 		}, false);		
 		buttonReplaceInFiles.addEventListener("click", function() {
-			alert("Not yet implemented!");
+			searchFiles(inputFind.value, regexOption.checked, subfolderOption.checked, inputInDir.value, inputFileFilter.value, optionCaseSensitive.checked, inputReplace.value);
 		}, false);
 		buttonBrowseFolder.addEventListener("click", function browseFolder() {
 			var defaultPath = "";
@@ -585,7 +620,7 @@
 		return "search_report " + (searchReportCounter) + ".tmp"
 	}
 	
-	function searchFiles(searchString, useRegEx, searchSubfolders, searchPath, fileFilter, caseSensitive) {
+	function searchFiles(searchString, useRegEx, searchSubfolders, searchPath, fileFilter, caseSensitive, replaceWith) {
 		
 		var reportFile;
 		var reportFilePath = searchReportFileName(searchReportCounter);
@@ -625,36 +660,38 @@
 			
 			filesMatched[searchReportCounter] = [];
 			lastRowNr = -1;
-				
-				var json = {
-					searchString: searchString,
-					searchSubfolders: searchSubfolders,
-					searchPath: searchPath,
-					fileFilter: fileFilter,
-					caseSensitive: caseSensitive,
-					id: searchReportCounter
-				};
-				
-				CLIENT.cmd("findReplaceInFiles", json, function(err, json) {
-					if(err) {
-						alertBox(err.message);
-						reportFile.writeLine(err.message);
-						
-						//inputInDir.setAttribute("class", "inputtext indir error");
-						//return alert("Can't do a search in a path that don't exist");
-						
-					}
-					else {
-						reportFile.writeLine(json.msg);
-						
-						
-						
-					}
+			
+			var json = {
+				searchString: searchString,
+				searchSubfolders: searchSubfolders,
+				searchPath: searchPath,
+				fileFilter: fileFilter,
+				caseSensitive: caseSensitive,
+				id: searchReportCounter
+			};
+			
+			if(replaceWith) json.replaceWith = replaceWith;
+			
+			CLIENT.cmd("findReplaceInFiles", json, function(err, json) {
+				if(err) {
+					alertBox(err.message);
+					reportFile.writeLine(err.message);
+					
+					//inputInDir.setAttribute("class", "inputtext indir error");
+					//return alert("Can't do a search in a path that don't exist");
+					
+				}
+				else {
+					reportFile.writeLine(json.msg);
 					
 					
-				});
+					
+				}
+				
 				
 			});
+			
+		});
 		
 		
 		
@@ -664,11 +701,10 @@
 	
 	function linePad(nr) {
 		// Add spacing and a colon
-		var space = 6;
 		var str = "" + nr + "";
 		var length = str.length;
 		
-		for(var i=length; i<space; i++) {
+		for(var i=length; i<linePadSpace; i++) {
 			str = " " + str;
 		}
 		return "Line " + str + ": ";
