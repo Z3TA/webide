@@ -32,6 +32,11 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+Lots of 
+Uncaught Error: Showing a file that is not open! (when running tests)
+after moving callCallbacks in file open.
+
+
 Polishing and testing the find and replace in files function. 
 Polishing the search report from find and replace in files
 
