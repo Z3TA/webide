@@ -1399,6 +1399,8 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		// debug: ps ax | grep chromium
 		// debug: runuser -l demo -c 'DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222' & 
 		// debug: DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0
+		// debug: Try starting google-chrome: https://askubuntu.com/questions/79280/how-to-install-chrome-browser-properly-via-command-line
+		
 		
 		chromiumBrowserOptions.env = {DISPLAY: ":" + displayId};
 		
