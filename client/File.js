@@ -3451,7 +3451,7 @@ var File; // File object is global
 			EDITOR.fireEvent("moveCaret", file, file.caret); // Always fire an event when we move the file caret!
 			
 			EDITOR.renderNeeded();
-			
+			if(callback) callback();
 		}
 		else if(file.isBig) {
 			// It's a big file and we'll have to load another part of the file ...

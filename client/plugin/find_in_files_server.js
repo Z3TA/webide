@@ -45,6 +45,9 @@
 	
 	function foundInFile(json) {
 		
+		console.log("foundInFile!!");
+		console.log(json);
+		
 		var fileId = json.id;
 		
 		var filePath = searchReportFileName(fileId);
@@ -65,6 +68,17 @@
 		}
 		
 		function append(reportFile) {
+			
+			// Make sure the second line of the report file has the regexp meta
+			// Even if there's only one row, grid length is 1
+			if(reportFile.grid.length <= 1) {
+				if(file.text.trim() == "") reportFile.writeLine("Find in File(s) Report");
+				reportFile.writeLine("RegExp: " + json.regExp);
+			}
+			else {
+			var secondLineOfReportFile = reportFile.rowText(1);
+				if(secondLineOfReportFile.slice(0, 8) != "RegExp: ") reportFile.insertTextRow("RegExp: " + json.regExp, 1);
+			}
 			
 			if(!filesMatched.hasOwnProperty(fileId)) filesMatched[fileId] = [];
 			
@@ -104,13 +118,15 @@
 		
 		var text = file.text;
 		
-		var containsFilesIn = (text.search(/Files in .* that match:/) != -1);
+		if(file.grid.length < 2) return false;
+		
+		var secondLineContainsRegExp = (file.rowText(1).slice(0,8) == "RegExp: ");
 		var containsLines = (text.search(/Line\s*?\d*:/) != -1);
 		var containsPathMd = (text.search(/^-*$/) != -1 != -1);
 		
-		console.log("containsFilesIn=" + containsFilesIn + " containsLines=" + containsLines + " containsPathMd=" + containsPathMd);
+		console.log("secondLineContainsRegExp=" + secondLineContainsRegExp + " containsLines=" + containsLines + " containsPathMd=" + containsPathMd);
 		
-		if(containsFilesIn && containsLines && containsPathMd) return true
+		if(secondLineContainsRegExp && containsLines && containsPathMd) return true
 		else return false;
 		
 	}
@@ -142,64 +158,77 @@
 			while(row > 0 && file.grid[row][0].char != "-") row--; // Search up for a row that starts with "--------" (below a path)
 			var path = file.rowText(row-1);
 			
-			// Find the search string
+			// Find the search string (to be highlighted when/if the files is opened)
 			var firstRowText = file.rowText(0);
-			var searchFor = "that match: "; // This string could change depending on localization/language
-			var searchString = firstRowText.substring(firstRowText.indexOf(searchFor) + searchFor.length);
+			var secondRowText = file.rowText(1);
 			
-			console.log("searchString=" + searchString);
+			var matchSearchString = secondRowText.match(/RegExp: (.*)/);
 			
+			if(!matchSearchString) return console.warn("Could not find the search string that was used!");
 			
-			// Create a regEx to find the word(s) to highlight
-			var flags = searchString.replace(/.*\/([gimy]*)$/, '$1');
-			var pattern = searchString.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
-			//var regex = new RegExp(pattern, flags);
-			//var regex = new RegExp(searchString);
+			var regExpString = matchSearchString[1];
 			
-			var match = searchString.match(new RegExp('^(.*?)/([gimy]*)$'));
-			// sanity check here
-			var regex = new RegExp(match[1], match[2]);
-			
-			console.log("flags=" + flags);
-			console.log("pattern=" + pattern);
-			console.log("regex.flags=" + regex.flags);
-			console.log("regex.source=" + regex.source);
-			
-			// Open the file, then go to the line, and highlight the search word
-			
-			console.log("line=" + lineNr);
-			console.log("path=" + path);
-			
-			EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
+			console.log("regExpString=" + regExpString);
 				
-				// Scroll to and place the caret on the line
-				file.gotoLine(lineNr, function afterScrolled() {
+				
+				// Create a regEx to find the word(s) to highlight
+			var flags = regExpString.replace(/.*\/([gimy]*)$/, '$1');
+			var pattern = regExpString.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+			
+			//var regex = new RegExp(pattern, flags);
+			//var regex = new RegExp(regExpString);
+				
+			var match = regExpString.match(new RegExp('^/(.*?)/([gimy]*)$'));
+				// sanity check here
+			
+			console.log("match=" + JSON.stringify(match));
+			
+				var regex = new RegExp(match[1], match[2]);
+				
+			console.log("regex=" + regex);
+			
+				console.log("flags=" + flags);
+				console.log("pattern=" + pattern);
+				console.log("regex.flags=" + regex.flags);
+				console.log("regex.source=" + regex.source);
+				
+				// Open the file, then go to the line, and highlight the search word
+				
+				console.log("line=" + lineNr);
+				console.log("path=" + path);
+				
+				EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
 					
-					console.log("scrolled to the right place!?")
-					
-					// Find all matches in the whole file (can be many!)
-					var result;
-					var words = [];
-					while ((result = regex.exec(file.text)) !== null) { // Find the word(s)
-						if(words.indexOf(result[0]) == -1) words.push(result[0]); 
-					}
-					
-					// Highlight the matched words
-					console.log("words=" + words);
-					console.log("regex flags=" + regex.flags + " source=" + regex.source);
-					for(var i=0; i<words.length; i++) {
-						file.highlightText(words[i]);						
-					}
+				console.log("file opened=" + file.path);
+				
+					// Scroll to and place the caret on the line
+					file.gotoLine(lineNr, function afterScrolled() {
+						
+						console.log("scrolled to the right place!?")
+						
+						// Find all matches in the whole file (can be many!)
+						var result;
+						var words = [];
+						while ((result = regex.exec(file.text)) !== null) { // Find the word(s)
+							if(words.indexOf(result[0]) == -1) words.push(result[0]); 
+						}
+						
+						// Highlight the matched words
+						console.log("words=" + words);
+						console.log("regex flags=" + regex.flags + " source=" + regex.source);
+						for(var i=0; i<words.length; i++) {
+							file.highlightText(words[i]);						
+						}
+						
+						
+					});
 					
 					
 				});
 				
 				
-			});
-			
-			
-		}
-		
+			}
+		else console.log("File is not a search report!");
 		
 	}
 	
@@ -591,7 +620,7 @@
 			
 			EDITOR.renderNeeded();
 			
-			reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match: " + searchString + (caseSensitive ? " (case sensitive) ": "") + ":");
+			reportFile.insertText("Files in '" + searchPath + "' (" + fileFilter + ") that match '" + searchString + "'" + (caseSensitive ? " (case sensitive) ": "") + ":");
 			reportFile.insertLineBreak();
 			
 			filesMatched[searchReportCounter] = [];

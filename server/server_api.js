@@ -1882,7 +1882,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 			// All folders have now been searched!
 			totalFiles = fileQueue.length;
 			if(fileQueue.length == 0) {
-				done("Found " + totalFilesFound + " files. But none of them math the file filter!");
+				doneFinish("Found " + totalFilesFound + " files. But none of them math the file filter!");
 			}
 			else {
 				continueSearchFiles();
@@ -2005,8 +2005,8 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 						
 					}
 					
-				console.log("textAboveInludingResultRows=" + JSON.stringify(textAboveInludingResultRows));
-					console.log("rowsAbove=" + JSON.stringify(rowsAbove));
+				//console.log("textAboveInludingResultRows=" + JSON.stringify(textAboveInludingResultRows));
+					//console.log("rowsAbove=" + JSON.stringify(rowsAbove));
 					
 					console.log("Found " + result[0] + " on index=" + result.index + " lastIndex=" + result.lastIndex + " showSurroundingLines=" + showSurroundingLines + " lineNr=" + lineNr + " in file=" + filePath);
 					
@@ -2019,7 +2019,8 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 							lineNr: lineNr, 
 							file: filePath,
 							rowsAbove: rowsAbove,
-							rowsBeneath: rowsBeneath
+							rowsBeneath: rowsBeneath,
+						regExp: myRe.toString()
 						}
 					});
 					
