@@ -1267,6 +1267,8 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		];
 		
 		// debug: Xvfb :5 -screen 0 800x600x24 -ac &
+		// debug: xwininfo -display :5 -root -children
+		// debug: ps ax | grep Xvfb
 		
 		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
 		var xvfb = childProcess.spawn("Xvfb", xvfbArgs, xvfbOptions);
@@ -1383,6 +1385,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
 		var chromiumBrowserArgs = [
 			//"--chrome", // No idea what --chrome flag does ...
+			"--user-data-dir=" + HOME_DIR + username,
 		"--kiosk", // Full screen
 		url,
 			"--incognito", // Don't save cache or history
@@ -1391,8 +1394,11 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			"--remote-debugging-port=" + chromiumDebuggerPort // Port that we can connect chrome inspector to
 		];
 		
+		// debug: xwininfo -display :5 -root -children
+		// debug: Xvfb :5 -screen 0 800x600x24 -ac &
+		// debug: ps ax | grep chromium
 		// debug: runuser -l demo -c 'DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222' & 
-		// or debug: DISPLAY=:5 chromium-browser &
+		// debug: DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0
 		
 		chromiumBrowserOptions.env = {DISPLAY: ":" + displayId};
 		
