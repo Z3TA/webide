@@ -222,13 +222,25 @@ EDITOR.lastKeyPressed = "";
 	
 	// # Working Directory
 	var workingDirectory; // Private variable
-	if(!Object.defineProperty) console.warn("Object.defineProperty not available!");
+	if(!Object.defineProperty) {
+		console.warn("Object.defineProperty not available!");
+	
+		EDITOR.renderNeeded = renderNeeded; 
+		
+	}
 	else {
 		Object.defineProperty(EDITOR, 'workingDirectory', {
 			get: function getWorkingDirectory() { return workingDirectory; },
 			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
 			enumerable: true
 		});
+		
+		Object.defineProperty(EDITOR, 'renderNeeded', {
+			get: function() {return renderNeeded;} ,
+			set: function () { throw new Error("EDITOR.renderNeeded() is a function! Do not overwrite it!"); },
+			enumerable: false
+		});
+		
 	}
 	
 	setWorkingDirectory(UTIL.trailingSlash(process.cwd()));
@@ -240,6 +252,16 @@ EDITOR.lastKeyPressed = "";
 		console.log("workingDirectory=" + EDITOR.workingDirectory);
 		
 		if(__dirname != EDITOR.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+	}
+	
+	function renderNeeded() {
+		// Tell the editor that it needs to render
+		
+		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
+			// For debugging, so we know why a render was needed
+			console.log(UTIL.getStack("renderNeeded"));
+		}
+		EDITOR.shouldRender = true;
 	}
 	
 	function setWorkingDirectory(workingDir) {
@@ -1033,16 +1055,6 @@ EDITOR.lastKeyPressed = "";
 		if(defaultPath) directoryDialogHtmlElement.setAttribute("nwworkingdir", defaultPath);
 		
 		directoryDialogHtmlElement.click(); // Bring up the OS path selector window
-	}
-	
-	EDITOR.renderNeeded = function() {
-		// Tell the editor that it needs to render
-		
-		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
-			// For debugging, so we know why a render was needed
-			console.log(UTIL.getStack("renderNeeded"));
-		}
-		EDITOR.shouldRender = true;
 	}
 	
 	EDITOR.resizeNeeded = function() {
