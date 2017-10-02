@@ -3403,6 +3403,8 @@ var File; // File object is global
 			
 			textRange = file.createTextRange(start, end);
 			
+			//console.log("highlightning textRange=" + textRange);
+			
 			textRange.forEach(highLightBox);
 			
 			start = end+1; // Continue search at the end of the word to prevent loop

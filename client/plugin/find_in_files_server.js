@@ -299,11 +299,11 @@
 	}
 	
 	function findInFiles(file) {
-		if(file) {
-			console.log("divVisible=" + divVisible);
+		
+		console.log("divVisible=" + divVisible);
 			if(!divVisible) {
 				show_find_in_files();
-				var selectedText = file.getSelectedText();
+				var selectedText = file ? file.getSelectedText() : "";
 				if(selectedText.length > 0) {
 					// Put the selected text into the search box
 					inputFind.value = selectedText;
@@ -317,7 +317,6 @@
 			EDITOR.input = false; // Remove focus from the file
 			
 			return false; // Prevent default (browser) action
-		}
 	}
 	
 	function pressEnter() {
@@ -382,8 +381,6 @@
 		if(size < 20) size = 20;
 		
 		console.log("EDITOR.currentFile.path=" + (EDITOR.currentFile ? EDITOR.currentFile.path : undefined) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory + " size=" + size);
-		
-		alertBox(searchFolder);
 		
 		var inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
@@ -687,7 +684,14 @@
 				else {
 					reportFile.writeLine(json.msg);
 					
+					// Highlight the matches
+					var matches = json.matches;
+					console.log("matches=" + matches);
+					for(var i=0; i<matches.length; i++) {
+						reportFile.highlightText(matches[i]);
+					}
 					
+					console.log(json);
 					
 				}
 				
@@ -698,7 +702,7 @@
 		
 		
 		
-		
+		return false;
 		
 	}
 	
