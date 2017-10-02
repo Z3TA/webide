@@ -13,7 +13,6 @@
 	var maxTotalMatches = 500;
 	
 	var defaultSearchTerm = "";
-	var defaultSearchFolder = EDITOR.workingDirectory;
 	var defaultSearchFilter = "\.js$|\.htm$|\.html$|\.css$";
 	var searchReportCounter = 0;
 	var linePadSpace = 6;
@@ -377,8 +376,14 @@
 		div.setAttribute("id", "findInFile");
 		div.setAttribute("class", "findInFile");
 		
+		var searchFolder = EDITOR.currentFile ? UTIL.getDirectoryFromPath(EDITOR.currentFile.path) : EDITOR.workingDirectory;
+		var size = searchFolder.length;
+		if(size > 40) size = 40;
+		if(size < 20) size = 20;
 		
-		var size = UTIL.getDirectoryFromPath(undefined).length;
+		console.log("EDITOR.currentFile.path=" + (EDITOR.currentFile ? EDITOR.currentFile.path : undefined) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory + " size=" + size);
+		
+		alertBox(searchFolder);
 		
 		var inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
@@ -397,9 +402,7 @@
 		inputInDir.setAttribute("type", "text");
 		inputInDir.setAttribute("id", "inputInDir");
 		inputInDir.setAttribute("class", "inputtext indir");
-		inputInDir.value = UTIL.getDirectoryFromPath(undefined); // The directory of the current file being open
-		if(inputInDir.value=="") inputInDir.value = defaultSearchFolder;
-		
+		inputInDir.value = searchFolder;
 		inputInDir.setAttribute("size", size);
 		
 		inputFileFilter = document.createElement("input");

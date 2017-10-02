@@ -84,7 +84,7 @@ var UTIL = {
 			else return UTIL.trailingSlash(EDITOR.workingDirectory); // (editor) working dir
 		}
 		
-		if(!path) throw new Error("Unable to get directory from path=" + path);
+		if(typeof path != "string") throw new Error("Unable to get directory from path=" + path);
 		
 		var lastSlash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
 		
