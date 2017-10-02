@@ -4,19 +4,23 @@
 /*
 	How to embed the editor in a web site:
 	
-	Add this to to header element:
+		Add the following inside the html head element:
 	<script src="https://webide.se/embed.js"></script>
 	
-	Then have the code in textarea elements, with editor in the class atrribute:
-	<textarea name="filename.txt" class="editor">some code ...</textarea>
+		Then place code snippets in textarea elements, with editor in the class atrribute, like this:
+		<textarea class="editor" name="code.js">alert("Hello World");</textarea>
 	
+		
+		
+		(tip: Turn off JavaScript and adjust the rows and cols attributes for the textarea elements to make the text fit)
+		
 */
 
 	var editorsOpen = {};
 	
 	var noNameCounter = 0;
 	
-	// Name (desciption) of plugins to disable when embedded:
+	// Name (description) of plugins to disable when embedded:
 	var disablePlugins = [
 		"Server login dialog",
 		"Static site generator management interface",
@@ -32,9 +36,11 @@
 	
 window.addEventListener("load", function windowLoaded() {
 	
-	var defaultEditorWidth = "800"; // tip: Editor your CSS for .editor and use min-width, max-width etc
+		
+		var defaultEditorWidth = "800"; 
 	var defaultEditorHeight = "500"
-	
+		// (tip: Add .editor with min-width, max-width etc to your CSS file)
+		
 	var taEl = document.getElementsByTagName("textarea");
 	
 	console.log("Found " + taEl.length + " textarea elements.");
@@ -62,7 +68,7 @@ window.addEventListener("load", function windowLoaded() {
 		var offsetHeight = parseInt(ta.offsetHeight);
 		var editorWidth = offsetWidth || defaultEditorWidth;
 		var editorHeight = offsetHeight || defaultEditorHeight;
-		var editorLocation = "http://127.0.0.1:8080/";
+			var editorLocation = getEditorLocation();
 		var editorSettings = "?";
 		
 			var counter = 0;
@@ -76,7 +82,7 @@ window.addEventListener("load", function windowLoaded() {
 			
 			editorsOpen[fileName] = ta;
 			
-			// When not rows or cols are specified:
+			// The values below is what you would expect to be the browsers default values, meaning no rows and cols attributes are set
 		if(ta.rows <= 2 || ta.cols <= 20) {
 			editorWidth = defaultEditorWidth;
 			editorHeight = defaultEditorHeight;
@@ -139,4 +145,23 @@ window.addEventListener("message", function receiveMessage(windowMessageEvent) {
 		else throw new Error("Unable to handle message: " + msg);
 		
 	});
+	
+	function getEditorLocation() {
+		// The location of the editor should be the same as this file, or postMessage will not work! (meaning the textarea's wont be updated)
+		
+		var url;
+		
+		if(document.currentScript) {
+			url = document.currentScript.src;
+			url = url.slice(0, url.lastIndexOf("/") + 1);
+			return url;
+			}
+		else {
+			console.warn("Unable to determine editor URL!");
+			//return "http://127.0.0.1:8080/";
+			return "https://webide.se/";
+		}
+		
+		}
+	
 })();
