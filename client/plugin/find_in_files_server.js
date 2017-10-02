@@ -125,10 +125,13 @@
 				reportFile.writeLineBreak();
 			}
 			
+			EDITOR.renderNeeded();
 			
 			lastRowNr = rowNr;
 			
 			matchFound = true;
+			
+			
 		}
 	}
 	
@@ -691,7 +694,7 @@
 						reportFile.highlightText(matches[i]);
 					}
 					
-					console.log(json);
+					EDITOR.renderNeeded();
 					
 				}
 				
