@@ -32,30 +32,13 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-Lots of 
-Uncaught Error: Showing a file that is not open! (when running tests)
-after moving callCallbacks in file open.
+fix copy/pasting in Firefox
 
 
-Polishing and testing the find and replace in files function. 
-Polishing the search report from find and replace in files
-
-Should file.writeLine, file.write, file.writeLineBreak call file.change !?!?!?
-
-
-Find in file
 
 
 todo
 ----
-
-Make everything work without nw.js. And remove nw.js dependency.
-
-Plugin -> file tabs
-
-Embedding the editor
-
-fix copy/pasting in Firefox
 
 webide: Put nodeJS scripts in "production" mode. Deoploy to production.
 
@@ -134,6 +117,10 @@ Streamline the experience of sharing and publishing a web document via the edito
 
 What I'm thinking
 -----------------
+
+Should file.writeLine, file.write, file.writeLineBreak call file.change !?!?!?
+
+---
 
 work-flow: Colaborating with someone else ...
 Should it be possible for two people to login to and use the same account at the same time !?
