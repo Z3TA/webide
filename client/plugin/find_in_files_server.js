@@ -638,7 +638,7 @@
 		
 		// Do not overwrite opened files!
 		while(EDITOR.files.hasOwnProperty(reportFilePath)) {
-			reportFilePath = searchReportFileName(searchReportCounter++);
+			reportFilePath = searchReportFileName(++searchReportCounter);
 		}
 		
 		// File extension (.tmp) so that it's not formatted by the JS parser
