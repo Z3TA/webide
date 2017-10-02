@@ -32,6 +32,10 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+Firefox can paste in data, but the character v is inserted before.
+Firefox can not put data into the clipboard, and character is deleted.
+
+
 fix copy/pasting in Firefox
 
 

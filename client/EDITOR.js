@@ -90,7 +90,7 @@ EDITOR.settings = {
 	clearColumnOptimization: false, // When deleting a character, clears only the character
 	insert: false,
 	stdInPort: 13379,
-	useCliboardcatcher: false // Some browsers can (IE) can only capture clipboard events if a text element is focused
+	useCliboardcatcher: false // Some browsers (IE) can only capture clipboard events if a text element is focused
 };
 
 EDITOR.shouldRender = false;   // Internal flag, use EDITOR.renderNeeded() to re-render!
@@ -175,6 +175,7 @@ EDITOR.lastKeyPressed = "";
 	var browser = UTIL.checkBrowser();
 	
 	if(browser.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
+	//if(browser.indexOf("Firefox") == 0) EDITOR.settings.useCliboardcatcher = true;
 	
 	if(browser != "Chrome") alertBox("The editor might be slow in your browser (" + browser + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
 	
@@ -4391,6 +4392,8 @@ EDITOR.lastKeyPressed = "";
 		
 		// else: Do the default action (enable copying outside the canvas)
 		
+		console.log("textToPutOnClipboard=" + textToPutOnClipboard);
+		
 		EDITOR.interact("copy", copyEvent);
 		
 		return textToPutOnClipboard;
@@ -4437,7 +4440,9 @@ EDITOR.lastKeyPressed = "";
 	
 	function paste(pasteEvent) {
 		
-		console.log("pasteEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+		console.log("pasteEvent EDITOR.input=" + EDITOR.input + 
+		" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
+		" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 
 		//var text = pasteEvent.clipboardData.getData('text');
 		var ret;
@@ -4801,6 +4806,7 @@ EDITOR.lastKeyPressed = "";
 					clipboardcatcher.value = textToPutOnClipboard;
 					clipboardcatcher.select();
 					
+					//preventDefault = true;
 				}
 			}
 			else if(combo.ctrl && character == "V") {
@@ -4808,11 +4814,13 @@ EDITOR.lastKeyPressed = "";
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
 					
-					// Problem: If alertBox button was clicked, it takes 500ms to get focus back to canvas. But if we paste before that, input will be false.
+					// Problem: If alertBox button was clicked, it takes 500ms to get focus back to canvas. 
+					// But if we paste before that, input will be false.
 					
 					var clipboardcatcher = document.getElementById("clipboardcatcher");
 					clipboardcatcher.focus();
 
+					//preventDefault = true;
 				}
 			}
 			else if(combo.ctrl && character == "X") {
@@ -4834,6 +4842,8 @@ EDITOR.lastKeyPressed = "";
 					
 					clipboardcatcher.value = textToPutOnClipboard;
 					clipboardcatcher.select();
+					
+					//preventDefault = true;
 					
 				}
 			}
