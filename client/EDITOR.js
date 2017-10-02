@@ -375,10 +375,10 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	
-	EDITOR.openFile = function(path, text, callback) {
+	EDITOR.openFile = function(path, text, state, callback) {
 		/*
 			Note: The caller of this function needs to handle file state, 
-			such as file.isSaved, file.savedAs and file.changed
+			such as file.isSaved, file.savedAs and file.changed (pass it as an object into the state parameter)
 			Unless text==undefined, then it will be opened from disk and asumed saved.
 			
 			problem: The same file might be opened many times while we are waiting for it's data
@@ -400,6 +400,11 @@ EDITOR.lastKeyPressed = "";
 		
 		if(typeof text === "function") throw new Error("The callback should be in the third argument. Second argument is for file content");
 		
+		// State parameter is optional
+		if(typeof state === "function" && !callback) {
+			callback = state;
+			state = undefined;
+		}
 		
 		// Check if the file is already opened
 		if(EDITOR.files.hasOwnProperty(path)) {
@@ -542,12 +547,20 @@ EDITOR.lastKeyPressed = "";
 				newFile.changed = false;
 			}
 			
+			if(state) {
+				if(state.isSaved != undefined) newFile.isSaved = state.isSaved;
+				if(state.savedAs != undefined) newFile.savedAs = state.savedAs;
+				if(state.changed != undefined) newFile.changed = state.changed;
+			}
+			
 			function fileLoaded() {
 				
-				// Dilemma: Should file open even listeners be called before or after the callback!??
+				// Dilemma1: Should file open even listeners be called before or after the callback!??
 				// answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
 				// problem: The callback might change the file, triggering file.change() then plugins will go nuts because they have not seen the file (being opened) yet!
 				// sultion: The file open event listeners need to be called before the file open callback(s)! 
+				// problem2: The callback might close the file!
+				// solution: callCallbacks should be called *after* file open events. Allow file state in EDITOR.openFile parameters.
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
 				
@@ -567,12 +580,13 @@ EDITOR.lastKeyPressed = "";
 					EDITOR.eventListeners.fileOpen[i].fun(file); // Call function
 				}
 				
-				callCallbacks(err, file);
 				
 				// Switch to this file
 				EDITOR.showFile(file);
 				EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				
+				
+				callCallbacks(err, file);
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
@@ -3309,26 +3323,21 @@ EDITOR.lastKeyPressed = "";
 				
 					// Save the text, do not count on the garbage collector the be "slow"
 					var text = file.text; 
-					var isSaved = file.isSaved;
-					var changed = file.changed;
-					var savedAs = file.savedAs;
+				var state = {
+					isSaved: file.isSaved,
+					changed: file.changed,
+					savedAs: file.savedAs
+				}
 					
 					var doNotSwitchFile = true;
 					EDITOR.closeFile(file.path, doNotSwitchFile);
-					EDITOR.openFile(newPath, text, function(openFileErr, newFile) {
-						
-						if(openFileErr) throw openFileErr;
-						
-						newFile.isSaved = isSaved;
-						newFile.changed = changed;
-						newFile.savedAs = savedAs;
-						
-					// Make sure file save event listeners are called
+					EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
 					
+					if(openFileErr) throw openFileErr;
 					
-						callback(null, newFile.path);
-						
-					});
+					callback(null, newFile.path);
+					
+				});
 				}
 			else callback(null, newPath);
 				
