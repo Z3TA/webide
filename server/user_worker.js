@@ -43,7 +43,8 @@ log("process.env.uid=" + process.env.uid);
 
 var npmExecFileOptions = {
 	env: {
-		HOME: "/"
+		HOME: "/",
+		dev: true
 	}
 }
 

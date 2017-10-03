@@ -7,10 +7,15 @@
 	
 	All HTTP requests (including Websockets) starting with _ (underscore) will be proxied
 	to the corresponding unix socket in your /sock/ folder.
+	
+	When the script is started in the editor, process.env.dev will exist.
+	When the script is started in "production", process.env.prod will exist.
 */
 
-var unixSocket = "/sock/_http_server_example";
-	
+if(process.env.dev) var unixSocket = "/sock/_http_server_example_dev";
+else if(process.env.prod) var unixSocket = "/sock/_http_server_example";
+else throw new Error("No dev or prod enviroment variables!");
+
 // We need the group (www-data) to have write access to the unix socket
 	var newMask = parseInt("0007", 8); // four digits, last three mask, ex: 0o027 => 750 file permissions
 	var oldMask = process.umask(newMask);
