@@ -32,13 +32,28 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+There needs to be away to mark a program to "run forever" or go into prod etc ...
+webide: Put nodeJS scripts in "production" mode. Deoploy to production.
+Use systemd and service RootDirectory for nodejs scripts "in production" !?
+Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
+Users need a convenient way to deploy there work ...
+deploy, start/stop and debug nodeJS in the editor
 
+F1 = run script
+F2 = stop script
+F3 = npm update !?
+F4 = deploy script
+
+Pleace specify the main file in package.json
+
+
+Deoply copies everything, except folders named data, into a production enviroment and restarts the main app
 
 
 todo
 ----
 
-webide: Put nodeJS scripts in "production" mode. Deoploy to production.
+
 
 refactor voice, EDITOR.say, so all plugins can use it.
 
@@ -131,7 +146,7 @@ There should probably be performance tests so we know if the runtime have perfor
 Is a spawned process still there after client disconnect /reconnect ?
 Yes it is!! ? Nope ... Actually, it's killed a few seconds after the user disconnects (or when sockjs thinks the client disconnects)
 Even if the client reconnects it's killed!!
-There needs to be away to mark a program to "run forever" or go into prod etc ...
+
 
 
 FEATURE FREEEZE!!!
@@ -178,15 +193,13 @@ A way to deamonize a nodejs script so that it will start and restart automatical
 The script should continue to run even though the user temporarily lose connection !?
 User should be able to stop a script after reloading (relogin) the editor!
 
-Use systemd and service RootDirectory for nodejs scripts "in production" !?
+
 
 Setting up the toolchain for programming is very hard for a beginner, "just edit and run node" is very confusing ...
 Make it so that you get "right into coding" example HTML page, being able to preview it by clicking a button, and edits are hot-loaded (without page refresh).
 When you load the editor the first time you have a HTML and JS file open, where it says "hit F1 to preview"
 
 Need a way to check that the editor is not broken before pushing!
-
-User signups!?
 
 Select a web page theme ... !?
 
@@ -209,10 +222,6 @@ var uid = parseInt(process.env.SUDO_UID); // If the server was started using sud
 if (uid) process.setuid(uid);
 
 The server don't need a container, but it's OK to run a isolated group of users in a VPS.
-
-How should jzedit be deployed !? rsync to server, then restart the editor server process
-
-Users need a convenient way to deploy there work ...
 
 Should the editor's platform be a dev platform, or only an editor ? 
 We need to run the dev-app on the same server to get a debug channel, but the "production" server should not be the same as dev/editor server.
@@ -1905,8 +1914,6 @@ HTML helper, shadowing in attributes. ex: <form ... show: action, method
 
 Cancel or resume subscription from within the editor
 
-Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
-
 Git integration: stage for commit, commit, push 
 
 When pasting in a if or for statement without matching curly-brackets, insert the missing bracket if the global matched brackets is ok.
@@ -1924,7 +1931,6 @@ how a fat red circle around variables that are not defined anywhere!?
 
 shift button to move without moving the cursor.
 
-deploy, start/stop and debug nodeJS in the editor
 
 Nightmode/eye rest. High contrast makes the eys work hard! Make a "night mode" for those long coding nights.
 

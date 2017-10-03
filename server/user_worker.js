@@ -711,6 +711,12 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 function installNodejsModule(filePath, moduleName, saveType, callback) {
 	var fs = require("fs");
 	
+	if(filePath == undefined) throw new Error("filePath not defined! filePath=" + filePath);
+	if(moduleName == undefined) throw new Error("moduleName not defined! moduleName=" + moduleName);
+	if(saveType == undefined) throw new Error("saveType not defined! saveType=" + saveType);
+	
+	if(typeof callback != "function") throw new Error("Expected callback (" + typeof callback + ") to be a function!");
+	
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	var fileName = UTIL.getFilenameFromPath(filePath);
 	var folderName = UTIL.getFolderName(filePath);
@@ -841,7 +847,7 @@ function stopNodeJsScript(filePath, callback) {
 
 function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 	
-	debugit = true;
+	debugit = false;
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	npmExecFileOptions.cwd = directory;
@@ -866,7 +872,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 			var arg = ["install"];
 			execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
 			
-				console.log("npm install err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+				console.log("npm install err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 				
 				if(err) return callback(new Error("Failed to install dependencies: " + err.message));
 				
@@ -1087,7 +1093,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 				
 				if(installAllModules) {
 					// Try to install the module and run the script again
-					installNodejsModule(filePath, matchModuleError[1], undefined, function(err) {
+					installNodejsModule(filePath, matchModuleError[1], "--save", function(err) {
 						if(err) user.send(err.message);
 						else {
 							
@@ -1330,7 +1336,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 				
 				if(installAllModules) {
 					// Try to install the module and run the script again
-					installNodejsModule(filePath, matchModuleError[1], undefined, function(err) {
+				installNodejsModule(filePath, matchModuleError[1], "--save", function(err) {
 						if(err) user.send(err.message);
 						else {
 							
