@@ -212,6 +212,12 @@ EDITOR.lastKeyPressed = "";
 	
 	var dashboardVisible = false;
 	
+	// For keeping track of native copy, paste, cut functionality in Firefox
+	// To prevent Firefox from calling keyUp events before copy/paste/cut event
+	var nativeCopy = false;
+	var nativePaste = false;
+	var nativeCut = false;
+	
 	/*
 		EDITOR functionality (accessible from global scope) By having this code here, we can use private variables
 		
@@ -4363,7 +4369,10 @@ EDITOR.lastKeyPressed = "";
 	
 	function copy(copyEvent) {
 		
-		console.log("copyEvent EDITOR.input=" + EDITOR.input);
+		console.log("copyEvent EDITOR.input=" + EDITOR.input + 
+		" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
+		" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent +
+		" EDITOR.input=" + EDITOR.input);
 		
 		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
 			// Give focus back to the editor/canvas
@@ -4373,6 +4382,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		if(EDITOR.input) {
+			
 			var textToPutOnClipboard = "";
 			
 			if(EDITOR.currentFile) {
@@ -4389,10 +4399,9 @@ EDITOR.lastKeyPressed = "";
 			copyEvent.preventDefault();
 			
 		}
-		
 		// else: Do the default action (enable copying outside the canvas)
 		
-		console.log("textToPutOnClipboard=" + textToPutOnClipboard);
+		//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
 		
 		EDITOR.interact("copy", copyEvent);
 		
@@ -4531,7 +4540,13 @@ EDITOR.lastKeyPressed = "";
 	function keyPressed(keyPressEvent) {
 		keyPressEvent = keyPressEvent || window.event; 
 		
-		//e.preventDefault();
+		// Firefox go here before callcing copy/paste/cut events
+		if(nativeCopy || nativePaste || nativeCut) {
+			nativeCopy = false;
+			nativePaste = false;
+			nativeCut = false;
+			return;
+		}
 		
 		var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
 		var character = String.fromCharCode(charCode); 
@@ -4788,9 +4803,14 @@ EDITOR.lastKeyPressed = "";
 		if(combo.sum > 0 && !captured) {
 			// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 			
+			var browser = UTIL.checkBrowser();
+			
 			// Enable native commands
 			if(combo.ctrl && character == "C") {
 				console.log("Native command: copy !?");
+				
+				if(browser == "Firefox") nativeCopy = true;
+				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
 					
@@ -4811,6 +4831,9 @@ EDITOR.lastKeyPressed = "";
 			}
 			else if(combo.ctrl && character == "V") {
 				console.log("Native command: paste !? EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
+				
+				if(browser == "Firefox") nativePaste = true;
+				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
 					
@@ -4825,6 +4848,9 @@ EDITOR.lastKeyPressed = "";
 			}
 			else if(combo.ctrl && character == "X") {
 				console.log("Native command: cut !?");
+				
+				if(browser == "Firefox") nativeCut = true;
+				
 				if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 					giveBackFocusAfterClipboardEvent = true;
 					
@@ -4875,6 +4901,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		else {
 			console.log("Executing default browser/OS action ...");
+			// 
 			return true;
 		}
 		
