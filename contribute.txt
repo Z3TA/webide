@@ -1,7 +1,9 @@
 Contributing
 ============
 
-Send any changes to zeta@zetafiles.org, with a note:
+If you make changes to this software, feel free to send them to zeta@zetafiles.org
+
+If it's a big update, (more then a couple lines of code), you also have to include the following note:
 "I give you full irrevocable copyright for this code, including but not limited to the right to sell, and distribute."
 
 
