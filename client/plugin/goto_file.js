@@ -18,6 +18,7 @@
 	var dirsToSearch = [];
 	var dirsSearched = [];
 	var searchRetries = 0;
+	var currentDir;
 	
 	var keyUp = 38;
 	var keyDown = 40;
@@ -85,7 +86,7 @@
 		
 	}
 	
-	function build_gotoInput() {
+	function build_gotoInput(currentDir) {
 		
 		gotoDiv = document.createElement("div");
 		gotoDiv.setAttribute("id", "gotoDiv");
@@ -101,7 +102,7 @@
 		inputFolder.setAttribute("type", "text");
 		inputFolder.setAttribute("id", "inputFolder");
 		inputFolder.setAttribute("class", "inputtext");
-		inputFolder.setAttribute("value", EDITOR.workingDirectory);
+		inputFolder.setAttribute("value", currentDir || EDITOR.workingDirectory);
 		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
 		
 		var labelGoto = document.createElement("label");
@@ -419,6 +420,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	
 	function show_gotoFileInput(file, combo) {
 		
+		if(file) currentDir = UTIL.getDirectoryFromPath(file.path);
+		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 
 		if(!gotoInputIsVisible) {
@@ -428,7 +431,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
 			
 			//if(!gotoDiv) build_gotoInput();
-			build_gotoInput(); // Always build!
+			build_gotoInput(currentDir); // Always build!
 			
 			var footerHeight = parseInt(footer.style.height);
 			//var heightNeeded = 45;
