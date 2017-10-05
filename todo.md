@@ -32,6 +32,9 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+Refactor EDITOR.readFromDisk
+
+
 There needs to be away to mark a program to "run forever" or go into prod etc ...
 webide: Put nodeJS scripts in "production" mode. Deoploy to production.
 Use systemd and service RootDirectory for nodejs scripts "in production" !?
@@ -44,16 +47,30 @@ F2 = stop script
 F3 = npm update !?
 F4 = deploy script
 
-Pleace specify the main file in package.json
+Please specify the main file in package.json
 
 
 Deoply copies everything, except folders named data, into a production enviroment and restarts the main app
 
+It seems popular to push to production, eg git push {azure/appharbor/heroku/whatever} master
+
+Or should nodejs scripts run forever ? No, you want a separate dev and prod!
+Should prod have access to user home dir ? Yes! prod need to be able to read/write files somwhere
+
+Each users nodejs deamon loader should be chrooted to the users home dir, so that dev and prod see the same file tree.
+
+Ask the user if he/she wants to copy the files to another location, or run the "prod" script from the current location !?
+Always copy to another location!
+
+.prod folder with a readme: When you doploy an app, the files will be copied here. 
+
+if the file that is open when the user hits deploy, is not the same as the main file in package.json, ask the user to be sure.
+
+
+
 
 todo
 ----
-
-
 
 refactor voice, EDITOR.say, so all plugins can use it.
 
@@ -346,6 +363,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Was editing a nginx config file and somehow non-space/tab characters was added to the indentation characters!
 
 In shell start.sh when exiting (with exit code <> 0 ??) it starts the next runtime in the list ...
 

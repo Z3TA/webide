@@ -839,7 +839,18 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	
-	EDITOR.readFromDisk = function readFromDisk(path, callback, returnBuffer, encoding) {
+	EDITOR.readFromDisk = function readFromDisk(path, returnBuffer, encoding, callback) {
+		
+		if(callback == undefined && typeof encoding == "function") {
+			callback = encoding;
+			encoding = "utf8";
+		}
+		if(callback == undefined && typeof returnBuffer == "function") {
+			callback = returnBuffer;
+			returnBuffer = false;
+		}
+		
+		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 		
 		console.log("Reading file: " + path);
 		
