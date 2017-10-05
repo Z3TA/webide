@@ -714,7 +714,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 
 	var folder = folder.folder;
 	
-	if(!folder.match(/[/\]$)) return callback(new Error("Folder paths need to end with a folder delimiter (slash)!"));
+	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder paths need to end with a folder delimiter (slash)!"));
 	
 	var pjPath = folder + "package.json";
 	
@@ -723,7 +723,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 	fs.readFile(pjPath, "utf-8", function(pjReadErr, pjContent) {
 		if(pjReadErr) {
 			if(pjReadErr.code == "ENOEND") return callback(new Error("There need to be a package.json the folder: " + folder));
-			else return callback(new Error("Unable to read package.json: " + pjReadErr.message);
+			else return callback(new Error("Unable to read package.json: " + pjReadErr.message));
 		}
 		
 		try {
@@ -752,7 +752,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 		});
 		
 		function filterPath(path) {
-			if(path.match(/data\/?$/) return false;
+			if(path.match(/data\/?$/)) return false;
 			else return true;
 		} 
 		
