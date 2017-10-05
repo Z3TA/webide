@@ -21,6 +21,7 @@ API.mercurial = require("./plugin/mercurial.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
+var copyFolderRecursively = require('ncp').ncp;
 
 var logModule = require("./log.js");
 var log = logModule.log;
@@ -708,6 +709,61 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 	});
 	
 }
+
+API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
+
+	var folder = folder.folder;
+	
+	if(!folder.match(/[/\]$)) return callback(new Error("Folder paths need to end with a folder delimiter (slash)!"));
+	
+	var pjPath = folder + "package.json";
+	
+	var fs = require("fs");
+	
+	fs.readFile(pjPath, "utf-8", function(pjReadErr, pjContent) {
+		if(pjReadErr) {
+			if(pjReadErr.code == "ENOEND") return callback(new Error("There need to be a package.json the folder: " + folder));
+			else return callback(new Error("Unable to read package.json: " + pjReadErr.message);
+		}
+		
+		try {
+			var pjParsed = JSON.parse(pjContent);
+		}
+		catch(pjParseErr) {
+			return callback(new Error("Unable to parse package.json: " + pjParseErr.message));
+		}
+		
+		var mainFile = pjParsed.main;
+		var projectName = pjParsed.name;
+		
+		if(mainFile == undefined) {
+			var pjMainErr = new Error("package.json needs to have a main entry file specified!");
+			pjMainErr.code = "PJMAIN";
+			return callback(pjMainErr);
+		}
+		
+		
+		var prodFolder = "/.prod/" + foldername;
+		
+		copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
+			if(copyFolderErr) return callback(copyFolderErr);
+			else return callback(null, {name: projectName, prodFolder: prodFolder});
+			
+		});
+		
+		function filterPath(path) {
+			if(path.match(/data\/?$/) return false;
+			else return true;
+		} 
+		
+	});
+	
+
+}
+
+
+
+
 
 function installNodejsModule(filePath, moduleName, saveType, callback) {
 	var fs = require("fs");

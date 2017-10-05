@@ -320,7 +320,9 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
 	}
 	
-	
+		// Make folder for deoploying deamons
+		fs.mkdirSync(homeDir + "/.prod");
+		
 	
 	// See how to debug apparmor in README.txt
 	
