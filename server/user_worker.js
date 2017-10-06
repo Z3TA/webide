@@ -28,6 +28,8 @@ var log = logModule.log;
 
 var getArg = require("./getArg.js");
 
+var nodejsDeamonManagerPort = 8100;
+
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);
 //logModule.setLogFile("./user_worker.log");
@@ -712,9 +714,12 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 
 API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 
-	var folder = folder.folder;
+	var folder = json.folder;
+	var pw = json.pw;
 	
 	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder paths need to end with a folder delimiter (slash)!"));
+	if(pw == undefined) return callback(new Error("User password is needed to deploy Node.JS script!"));
+	
 	
 	var pjPath = folder + "package.json";
 	
@@ -742,13 +747,31 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 			return callback(pjMainErr);
 		}
 		
-		
+		var foldername = UTIL.getFolderName(folder);
 		var prodFolder = "/.prod/" + foldername;
 		
 		copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
 			if(copyFolderErr) return callback(copyFolderErr);
-			else return callback(null, {name: projectName, prodFolder: prodFolder});
-			
+			else {
+				
+				// Tell deamon manager to restart the app
+				var http = require("http");
+				httpGet({
+				uath: user.name + ":" + pw, 
+				hostname: "127.0.0.1", 
+				port: nodejsDeamonManagerPort, 
+				path: "/restartService/" + user.name + "/" + projectName
+				}, function (err, resp) {
+					
+					if(err) {
+						return callback(new Error("Failed to restart " + projectName + "! " + err.message));
+					}
+					else {
+						return callback(null, {name: projectName, prodFolder: prodFolder});
+					}
+					
+				});
+				}
 		});
 		
 		function filterPath(path) {
@@ -761,8 +784,53 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 
 }
 
-
-
+function httpGet(options, callback) {
+	
+	var url = require('url');
+	var address;
+	
+	if(typeof options == "string") {
+		address = options;
+		var parse = url.parse(address);
+		options = {
+			hostname: parse.host,
+			port: parse.port || 80,
+			path: parse.path,
+			};
+	}
+	
+	if(typeof callback != "function") throw new Error("allback function expected! callback=" + callback);
+	
+	options.method = "GET";
+	
+	if(!options.headers) options.headers = {
+		"Cache-Control": "no-cache"
+	}
+	
+	if(options.port == undefined) options.port = 80;
+	
+	var http = require("http");
+	var req = http.request(options, function (res) {
+	
+	res.setEncoding('utf8');
+		var rawData = '';
+		res.on('data', function(chunk) { rawData += chunk; });
+		res.on('end', function() {
+			if(res.statusCode != 200) {
+				callback(new Error("Failed to get url=" + url + " statusCode=" + res.statusCode + " data=" + rawData));
+			}
+			else {
+				callback(null, rawData);
+			}
+		});
+	});
+	
+	req.on('error', function (err) {
+		callback(err);
+	});
+	
+	req.end();
+}
 
 
 function installNodejsModule(filePath, moduleName, saveType, callback) {

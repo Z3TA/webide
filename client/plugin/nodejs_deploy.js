@@ -25,12 +25,16 @@
 		
 		var folder = folders.pop();
 		
-		function readPj(folder, callback) {
-		EDITOR.readFromDisk(folder + "package.json", function fileRead(filePath, fileContent) {
-				if(err) {
-					if(err.code == "ENOEND" && folders.length > 0) {
+		readPj(folder);
+		
+		return false;
+		
+		function readPj(folder) {
+		EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
+				if(readFileErr) {
+					if(readFileErr.code == "ENOEND" && folders.length > 0) {
 						folder = folders.pop();
-					readPj(folder, callback);
+					readPj(folder);
 					}
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
@@ -60,12 +64,26 @@
 				else {
 					
 					// Found a package.json!
+					try {
+						var json = JSON.parse(fileContent);
+					}
+					catch(err) {
+						return alertBox("Failed the parse " + filePath + "! " + err.message);
+					}
 					
-					CLIENT.cmd("deploy_nodejs", {folder: folder}, function(err, resp) {
-						if(err) alertBox(err.message);
-						else alertBox(resp.name + " deployed to production: " + resp.prodFolder);
+					var projectName = json.name;
+					
+					
+					promptBox("Enter password to deploy " + projectName + ":", true, function(pw) {
+					
+						CLIENT.cmd("deploy_nodejs", {folder: folder, pw: pw}, function(err, resp) {
+							if(err) alertBox(err.message);
+							else alertBox(resp.name + " deployed to production: " + resp.prodFolder);
+							
+						});
 						
 					});
+					
 					
 					
 				}
