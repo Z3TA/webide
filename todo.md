@@ -32,8 +32,7 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-Refactor EDITOR.readFromDisk
-
+nodejs userscript deamon watcher ...
 
 There needs to be away to mark a program to "run forever" or go into prod etc ...
 webide: Put nodeJS scripts in "production" mode. Deoploy to production.
@@ -77,10 +76,10 @@ refactor voice, EDITOR.say, so all plugins can use it.
 npm modules
 Able to add npm modules to the SSG ...
 
-Investigating added the editor to chrome web store and test it in a Chromebook.
+Investigate adding the editor to chrome web store and test it in a Chromebook.
 
 
-w/forkflow: Edit pages on a ftp server ...
+workflow: Edit pages on a ftp server ...
 
   Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.
 
