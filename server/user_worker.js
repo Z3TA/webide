@@ -864,21 +864,14 @@ function stopNodeJsScript(filePath, callback) {
 	childProcess.stdin.write("quit" + "\n");
 	}
 	else {
-	console.log(user.name + ":" + filePath + ":stdin: Ctrl+C");
-	childProcess.stdin.write("\x03"); // CTRL-C
+	//console.log(user.name + ":" + filePath + ":stdin: Ctrl+C");
+		//childProcess.stdin.write("\x03"); // CTRL-C
+		// Sending Ctrl+C did throw an error in nodejs native net modules !..
+		// Give CTRL-C a chance before sending kill signals
+		// var signalTimeout = setTimeout(sendSignals, 1000);
+		sendSignals();
 	}
 	
-	// Give CTRL-C a chance before sending kill signals
-	var signalTimeout = setTimeout(function sendSignals() {
-	
-		if(childProcess.connected) childProcess.disconnect();
-		
-	// Give it a chance to teardown before killing it
-	childProcess.kill('SIGTERM');
-	childProcess.kill('SIGINT');
-	childProcess.kill('SIGQUIT');
-	childProcess.kill('SIGHUP');
-	}, 1000);
 	
 	// Give the other kill signals a chance before sending final kill signal
 	var killTimeout = setTimeout(function kill() {
@@ -894,12 +887,22 @@ function stopNodeJsScript(filePath, callback) {
 	setTimeout(function checkIfStillRunning() {
 		// Check if it has exited
 		if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) {
-			clearTimeout(signalTimeout);
+			//clearTimeout(signalTimeout);
 			clearTimeout(killTimeout);
 			callback(null);
 		}
 	}, 500);
 	
+	function sendSignals() {
+		
+		if(childProcess.connected) childProcess.disconnect();
+		
+		// Give it a chance to teardown before killing it
+		childProcess.kill('SIGTERM');
+		childProcess.kill('SIGINT');
+		childProcess.kill('SIGQUIT');
+		childProcess.kill('SIGHUP');
+	}
 }
 
 function runNodeJsScript(filePath, installAllModules, debugit, callback) {
