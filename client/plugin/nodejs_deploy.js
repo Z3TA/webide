@@ -19,7 +19,7 @@
 		
 		// Figure out what folder (project) the user wants to deploy ...
 		
-		if(!file) alertBox("No current file open!");
+		if(!currentFile) alertBox("No current file open!");
 		
 		var folders = UTIL.getFolders(currentFile.path);
 		
@@ -43,9 +43,9 @@
 								var pjTemplate = {
 									"name": UTIL.getFolderName(folder),
 									"version": "1.0.0",
-									"description": "What this project does",
+									"description": "What this micro service does",
 									"author": EDITOR.username,
-									"main": currentFile.path
+									"main": UTIL.getFilenameFromPath(currentFile.path)
 								};
 								
 								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), function(err, file) {
