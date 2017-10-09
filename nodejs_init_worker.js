@@ -20,10 +20,9 @@
 
 "use strict"
 
-var DEFAULT_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org"; // Errors with This script is sent here
-var DEFAULT_PATH = "/tank/nodejs/";
-
 var getArg = require("./server/getArg.js");
+
+var DEFAULT_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org"; // Errors with This script is sent here
 
 var UTIL = require("./client/UTIL.js");
 
@@ -37,8 +36,6 @@ var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
 var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
 var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
-
-
 
 	var CHILD = {}; // Holds references to the child processes
 var STOP = []; // List of processes being stopped, so they wont restart
@@ -69,6 +66,7 @@ var STOP = []; // List of processes being stopped, so they wont restart
 PATH = UTIL.trailingSlash(PATH); // Make sure it ends with a slash
 	
 // What happens if we open a file stream before chroot ?
+// answer: the file stream will be kept open =)
 
 //var initLogFilePath = "/log/nodejs_init_worker.log";
 var initLogFilePath = PATH + "log/nodejs_init_worker.log";
@@ -279,7 +277,7 @@ function findScripts(pathToFolder, callback) {
 		}
 		if(folderItems.length == 0) {
 			log("No files found in pathToFolder=" + pathToFolder, ERR); 
-			// It's OK to exit
+			process.exit(0); // A clean exit, because we have nothing to do 
 		}
 		else {
 			folderItems.forEach(function(fileName) {

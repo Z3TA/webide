@@ -1151,7 +1151,7 @@ function handleHttpRequest(request, response) {
 			console.log(name + " worker disconnect: worker.connected=" + worker.connected);
 		});
 		
-		worker.on("error", function workerClose(err) {
+	worker.on("error", function workerError(err) {
 			console.log(name + " worker error: err.message=" + err.message);
 		});
 		

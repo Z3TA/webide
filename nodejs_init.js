@@ -213,6 +213,10 @@ function httpServerListening() {
 
 function startNodejsInitWorker(homeDir, name, uid, gid) {
 	
+	var restartWaitTime  = 1000; // How long to wait for restart
+	var restartTimer;
+	var resetRestartWaitTime;
+	
 	homeDir = UTIL.trailingSlash(homeDir);
 	
 	var nodeWorkerArgs = [];
@@ -225,33 +229,70 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		}
 	};
 	
-	var child_process = require("child_process");
-	NODE_INIT_WORKER[name] = child_process.fork("./nodejs_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
-	var worker = NODE_INIT_WORKER[name];
+	restart();
 	
-	worker.on("close", function workerClose(code, signal) {
-		log(name + " worker close: code=" + code + " signal=" + signal);
-	});
+	function restart() {
+		var child_process = require("child_process");
+		
+		if(NODE_INIT_WORKER.hasOwnProperty(name)) {
+			// Make sure it's dead
+			if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
+			NODE_INIT_WORKER[name].kill('SIGKILL');
+		}
+		
+		NODE_INIT_WORKER[name] = child_process.fork("./nodejs_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+		var worker = NODE_INIT_WORKER[name];
+		
+		worker.on("close", workerClose);
+		worker.on("disconnect", workerDisconnect);
+		worker.on("error", workerError);
+		worker.on("message", messageFromWorker);
+		worker.on("exit", workerExitHandler);
+	}
 	
-	worker.on("disconnect", function workerDisconnect() {
-		log(name + " worker disconnect: worker.connected=" + worker.connected);
-	});
 	
-	worker.on("error", function workerClose(err) {
+	function workerDisconnect() {
+		log(name + " worker disconnect: worker.connected=" + NODE_INIT_WORKER[name].connected);
+	}
+	
+	function workerError(err) {
 		log(name + " worker error: err.message=" + err.message);
-	});
+	}
 	
-	worker.on("message", function messageFromWorker(msg, handle) {
-	
+	function messageFromWorker(msg, handle) {
+		
 		if(msg.message) {
 			log(name + " worker message: " + msg.message.msg, msg.message.level);
 		}
 		
-	});
+	}
 	
-	worker.on("exit", function workerExitHandler(code, signal) {
+	function workerClose(code, signal) {
+		log(name + " worker close: code=" + code + " signal=" + signal);
+	}
+	
+	function workerExitHandler(code, signal) {
 		log(name + " worker exit: code=" + code + " signal=" + signal);
-	});
+		
+		// A non zero exit code is fatal and we need to restart the worker
+		if(parseInt(code) !== 0) {
+			log(name + " worker process exited with code=" + code, ERR);
+			
+			restartTimer = setTimeout(function restart() {
+				restartWaitTime = restartWaitTime * 2;
+				clearTimeout(resetRestartWaitTime);
+				
+				restart();
+				
+				resetRestartWaitTime = setTimeout(function() {
+					// If the worker has not crashed in 30 seconds
+					restartWaitTime = 1000;
+				}, 30000);
+				
+			}, restartWaitTime);
+		}
+		
+	}
 	
 }
 

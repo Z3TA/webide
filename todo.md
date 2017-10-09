@@ -32,6 +32,10 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+nodejs deploy: start if first time started, restart if updated
+
+test nodejs depply and nodejs init !
+
 nodejs userscript deamon watcher ...
 
 There needs to be away to mark a program to "run forever" or go into prod etc ...
