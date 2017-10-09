@@ -298,9 +298,14 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		
 	// Create a directory where nginx can save logs
 	fs.mkdirSync(homeDir + "/log");
-	//chmodrSync(homeDir + "/log", "770");
-	//chownrDirSync(homeDir + "/log", uid, wwwgid);
-	// todo: Make the user the default owner of foles created in log, and make files not readable by others
+		chmodrSync(homeDir + "/log", "2770"); // Set the group-id bit so that all new files created will belong to the group
+		chownrDirSync(homeDir + "/log", uid, gid);
+		
+		// Create a directory for putting "in production" files
+		fs.mkdirSync(homeDir + "/.prod");
+		chmodrSync(homeDir + "/log", "770");
+		chownrDirSync(homeDir + "/log", uid, gid);
+		
 	
 		// Create nginx profile
 		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);

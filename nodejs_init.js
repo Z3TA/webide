@@ -36,7 +36,10 @@ var DEBUG = 7; // <7>This is a DEBUG level message
 var INFO = 6; // <6>This is an INFO level message
 var NOTICE = 5; // <5>This is a NOTICE level message
 var WARNING = 4; // <4>This is a WARNING level message
+var WARN = 4;
 var ERR = 3; // <3>This is an ERR level message
+var ERROR = 3;
+
 
 var fs = require("fs");
 fs.readFile(PW_FILE, "utf8", function(err, data) {
