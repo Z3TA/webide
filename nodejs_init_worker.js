@@ -41,7 +41,7 @@ log("Starting nodeinit");
   var DEFAULT_EMAIL = "zeta@zetafiles.org"; // Errors with This script is sent here
 var DEFAULT_PATH = "/tank/nodejs/";
 
-var getArg = require("./getArg.js");
+var getArg = require("./server/getArg.js");
 
 var PATH = getArg(["path"]) || process.env.homeDir;
 var EMAIL = getArg(["email"]) || process.env.email;

@@ -28,8 +28,6 @@ var DEBUG = 7;
 
 var NO_CHROOT = !!(getArg(["nochroot", "nochroot"]) || false);
 
-var NODE_INIT = {}; // username:childProcess, list of nodejs initors
-
 var DISPLAY_ID = 0; // Counter of visual displays
 
 var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
@@ -273,22 +271,7 @@ var PORTS_IN_USE = [HTTP_PORT];
 			})(HTTP_IP);
 		}
 		
-		
-		if(!USERNAME && 1==2) {
-			// Start a nodejs worker/init script for each user
-			var username = "test123";
-			var nodeWorkerArgs = [];
-			var nodeWorkerOptions = {
-				cwd: "/home/" + username,
-				env: {username: username},
-				execPath: "/usr/bin/nodejs_" + username
-			};
-			
-			NODE_INIT["test123"] = child_process.fork("./node_init.js", nodeWorkerArgs, nodeWorkerOptions);
 		}
-		
-		
-	}
 	
 	function isIpV4(ip) {
 		if(ip.match(/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/)) return true;
