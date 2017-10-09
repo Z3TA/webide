@@ -13,24 +13,8 @@
 	
 	open a scriptname.stdout.log and scriptname.stderr.log file for each micro-service
 	
-	start a http service used for manually restarting a deamon. 
-	
-	
-	
-	Add watcher and automatically restart the script if the main file changes
-	
-	
-	
 	Arguments: --path=/tank/nodejs/johan/ --email=zeta@zetafiles.org --sms=0738498018
 	
-	<7>This is a DEBUG level message
-	<6>This is an INFO level message
-	<5>This is a NOTICE level message
-	<4>This is a WARNING level message
-	<3>This is an ERR level message
-	<2>This is a CRIT level message
-	<1>This is an ALERT level message
-	<0>This is an EMERG level message
 	
 */
 
@@ -43,9 +27,10 @@ var DEFAULT_PATH = "/tank/nodejs/";
 
 var getArg = require("./server/getArg.js");
 
-var PATH = getArg(["path"]) || process.env.homeDir;
+var PATH = getArg(["path", "homeDir"]) || process.env.homeDir;
 var EMAIL = getArg(["email"]) || process.env.email;
-
+var UID = getArg(["uid"]) || process.env.uod;
+var GID = getArg(["gid"]) || process.env.gid;
 
 
 	var CHILD = {}; // Holds references to the child processes
@@ -69,12 +54,13 @@ var EMAIL = getArg(["email"]) || process.env.email;
 	var NODE_MAILER = require('nodemailer');
 	var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 	
+var posix = require("posix");
+var uid = parseInt(process.env.uid);
+var gid = parseInt(process.env.gid);
+posix.chroot(PATH);
 
 
-
-	function main() {
-		
-	if(getArg(["runtests"]) !== undefined) {
+if(getArg(["runtests"]) !== undefined) {
 		runTests();
 	}
 	else {
@@ -103,7 +89,7 @@ var EMAIL = getArg(["email"]) || process.env.email;
 		
 	});
 	
-	}
+	
 	
 	function shutdownInitWorker() {
 		
@@ -463,7 +449,13 @@ var EMAIL = getArg(["email"]) || process.env.email;
 	
 	
 	function log(msg, level) {
-		if(level == undefined) level = 6;
+	
+	if(process.send) {
+		// Forked from another nodejs process
+	process.send({message: {msg: msg, level: level}});
+	}
+	else {
+	if(level == undefined) level = 6;
 		
 		if(process.stdout.isTTY) {
 			console.log(myDate() + " " + msg);
@@ -473,7 +465,7 @@ var EMAIL = getArg(["email"]) || process.env.email;
 			console.log("<" + level + ">" + msg);
 		}
 	}
-	
+}
 	
 	function myDate() {
 		var d = new Date();
@@ -514,6 +506,5 @@ var EMAIL = getArg(["email"]) || process.env.email;
 		return stack;
 	}
 	
-main();
-	
+
 	

@@ -27,7 +27,16 @@ var nodejsDeamonManagerPort = 8100;
 var HTTP_PORT = getArg(["p", "port"]) || nodejsDeamonManagerPort; 
 var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 
-var NODE_INIT = {}; // username:childProcess, list of nodejs initors
+var NODE_INIT_WORKER = {}; // username:childProcess
+
+var UTC = false;
+
+// Systemd console message leveles
+var DEBUG = 7; // <7>This is a DEBUG level message
+var INFO = 6; // <6>This is an INFO level message
+var NOTICE = 5; // <5>This is a NOTICE level message
+var WARNING = 4; // <4>This is a WARNING level message
+var ERR = 3; // <3>This is an ERR level message
 
 var fs = require("fs");
 fs.readFile(PW_FILE, "utf8", function(err, data) {
@@ -112,7 +121,7 @@ function httpRequest(request, response) {
 	
 	var auth = getAuth(request.headers["authorization"]);
 	var username = auth.username;
-	var password = aut.password;
+	var password = auth.password;
 	
 	if(!NO_PW_HASH) {
 		var pwHash = require("./server/pwHash.js");
@@ -150,7 +159,7 @@ function httpRequest(request, response) {
 		}
 		
 		response.writeHead(401);
-		response.end('Authorization failed! username=' + username);
+		response.end('Authorization failed! username=' + username + "\n");
 		
 	});
 	
@@ -161,31 +170,31 @@ function httpRequest(request, response) {
 		var projectName = arr[1];
 		var action = arr[2];
 		
-		if(!CHILD.hasOwnProperty(username)) {
+		if(!NODE_INIT_WORKER.hasOwnProperty(username)) {
 			startNodejsInitWorker(homeDir, username, uid, gid);
 			
 			// Don't have to wait for the init worker, ...
 		}
 		
 		if(action == "start") {
-			CHILD[username].send({restart: projectName});
+			NODE_INIT_WORKER[username].send({restart: projectName});
 			response.writeHead(200);
-			response.end('Starting ' + projectName);
+			response.end('Starting ' + projectName + "\n");
 		}
 		else if(action == "stop") {
-			CHILD[username].send({stop: projectName});
+			NODE_INIT_WORKER[username].send({stop: projectName});
 			response.writeHead(200);
-			response.end('Stopping ' + projectName);
+			response.end('Stopping ' + projectName + "\n");
 		}
 		else if(action == "restart") {
-			CHILD[username].send({restart: projectName});
+			NODE_INIT_WORKER[username].send({restart: projectName});
 			response.writeHead(200);
-			response.end('Restarting ' + projectName);
+			response.end('Restarting ' + projectName + "\n");
 		}
 		// debug ?
 		else {
 			response.writeHead(400);
-			response.end('Unknown action: ' + action);
+			response.end('Unknown action: ' + action + "\n");
 		}
 	}
 	
@@ -199,14 +208,14 @@ function httpServerListening() {
 	console.log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
 }
 
-function startNodejsInitWorker(homeDir, username, uid, gid) {
+function startNodejsInitWorker(homeDir, name, uid, gid) {
 	
 	homeDir = UTIL.trailingSlash(homeDir);
 	
 	var nodeWorkerArgs = [];
 	var nodeWorkerOptions = {
 		cwd: homeDir,
-		execPath: "/usr/bin/nodejs_" + username,
+		execPath: "/usr/bin/nodejs_" + name,
 		env: {
 			homeDir: homeDir,
 			uid: uid,
@@ -214,6 +223,92 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 		}
 	};
 	
-	NODE_INIT[username] = child_process.fork("./node_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+	NODE_INIT_WORKER[name] = child_process.fork("./node_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+	var worker = NODE_INIT_WORKER[name];
 	
+	worker.on("close", function workerClose(code, signal) {
+		console.log(name + " worker close: code=" + code + " signal=" + signal);
+	});
+	
+	worker.on("disconnect", function workerDisconnect() {
+		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+	});
+	
+	worker.on("error", function workerClose(err) {
+		console.log(name + " worker error: err.message=" + err.message);
+	});
+	
+	userWorker.on("message", function messageFromWorker(msg, handle) {
+	
+		if(msg.message) {
+			log(username + ": " + msg.message.msg, msg.message.level);
+		}
+		
+		
+	});
+	
+	userWorker.on("exit", function workerExitHandler(code, signal) {
+		console.log(name + " worker exit: code=" + code + " signal=" + signal);
+	});
+	
+}
+
+function log(msg, level) {
+	if(level == undefined) level = 6;
+	
+	if(process.stdout.isTTY) {
+		console.log(myDate() + " " + msg);
+	}
+	else {
+		/* 
+			Probably running under systemd:
+			<7>This is a DEBUG level message
+			<6>This is an INFO level message
+			<5>This is a NOTICE level message
+			<4>This is a WARNING level message
+			<3>This is an ERR level message
+			<2>This is a CRIT level message
+			<1>This is an ALERT level message
+			<0>This is an EMERG level message
+		*/
+		console.log("<" + level + ">" + myDate() + ":" + msg);
+	}
+}
+
+// Overload console.log
+console.log = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 7);
+}
+
+// Overload console.warn
+console.warn = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 4);
+}
+
+function myDate() {
+	var d = new Date();
+	
+	if(UTC) {
+		var timezone =  d.getTimezoneOffset() // difference in minutes from GMT
+		d.setTime(d.getTime() + (timezone*60*1000));
+	}
+	
+	var hour = addZero(d.getHours());
+	var minute = addZero(d.getMinutes());
+	var second = addZero(d.getSeconds());
+	
+	var day = addZero(d.getDate());
+	var month = addZero(1+d.getMonth());
+	var year = d.getFullYear();
+	
+	return year + "-" + month + "-" + day + " (" + hour + ":" + minute + ":" + second + ")";
+	
+	function addZero(n) {
+		if(n < 10) return "0" + n;
+		else return n;
+	}
 }
