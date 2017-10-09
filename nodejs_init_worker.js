@@ -20,7 +20,7 @@
 
 "use strict"
 
-  var DEFAULT_EMAIL = "zeta@zetafiles.org"; // Errors with This script is sent here
+var DEFAULT_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org"; // Errors with This script is sent here
 var DEFAULT_PATH = "/tank/nodejs/";
 
 var getArg = require("./server/getArg.js");
@@ -28,100 +28,179 @@ var getArg = require("./server/getArg.js");
 var UTIL = require("./client/UTIL.js");
 
 var PATH = getArg(["path", "path", "homeDir"]) || process.env.homeDir;
-var EMAIL = getArg(["email", "email"]) || process.env.email;
-var UID = getArg(["uid", "uid"]) || process.env.uod;
+var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user
+var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
+
+// For sending errors via email to an admin
+var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
+var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
+var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
+var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
+
 
 
 	var CHILD = {}; // Holds references to the child processes
-	
+var STOP = []; // List of processes being stopped, so they wont restart
+
 	var SHUTDOWN = false;
 	
 	var UTC = false; // If set to true, use GMT+0 on time stamps
 	
-// Require non-native modules before entering chroot!
-var NODE_MAILER = require('nodemailer');
-var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
+	// Require non-native modules before entering chroot!
+	var NODE_MAILER = require('nodemailer');
+	var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 	
 	if(!PATH) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
-if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
-if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
-
-// tip: type "id -u username" and "id -g username" in a terminal to get some user's user id and group id
-
-// Systemd console message leveles
-var DEBUG = 7; // <7>This is a DEBUG level message
-var INFO = 6; // <6>This is an INFO level message
-var NOTICE = 5; // <5>This is a NOTICE level message
-var WARNING = 4; // <4>This is a WARNING level message
-var WARN = 4;
-var ERR = 3; // <3>This is an ERR level message
-var ERROR = 3;
-
+	if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
+	if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
+	
+	// tip: type "id -u username" and "id -g username" in a terminal to get some user's user id and group id
+	
+	// Systemd console message leveles
+	var DEBUG = 7; // <7>This is a DEBUG level message
+	var INFO = 6; // <6>This is an INFO level message
+	var NOTICE = 5; // <5>This is a NOTICE level message
+	var WARNING = 4; // <4>This is a WARNING level message
+	var WARN = 4;
+	var ERR = 3; // <3>This is an ERR level message
+	var ERROR = 3;
+	
 PATH = UTIL.trailingSlash(PATH); // Make sure it ends with a slash
+	
+// What happens if we open a file stream before chroot ?
 
-	if(!EMAIL) {
-		log("No email specified. Default email will be used!", 4);
-		EMAIL= DEFAULT_EMAIL;
-	}
-
-var posix = require("posix");
-try {
-posix.chroot(PATH);
-}
-catch(err) {
-	if(err.code == "EPERM") return initError(new Error("Not running as root! (try using sudo)"));
-	else throw err;
-}
-
-//log("GID=" + GID + " UID=" + UID);
-
-process.setgid(parseInt(GID));
-process.setuid(parseInt(UID));
-
-
-var initLogFilePath = "/log/nodejs_init_worker.log";
+//var initLogFilePath = "/log/nodejs_init_worker.log";
+var initLogFilePath = PATH + "log/nodejs_init_worker.log";
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
-log("Starting nodejs init worker ...");
-
-if(getArg(["runtests"]) !== undefined) {
+	var posix = require("posix");
+	try {
+		posix.chroot(PATH);
+	}
+	catch(err) {
+		if(err.code == "EPERM") return initError(new Error("Not running as root! (try using sudo)"));
+		else throw err;
+	}
+	
+	//log("GID=" + GID + " UID=" + UID);
+	
+	process.setgid(parseInt(GID));
+	process.setuid(parseInt(UID));
+	
+	
+	
+	log("Starting nodejs init worker ...");
+	
+	if(getArg(["runtests"]) !== undefined) {
 		runTests();
 	}
 	else {
 		
-	findScripts("/.prod", function(scripts) {
+		findScripts("/.prod", function(scripts) {
 			
-		for (var i=0; i<scripts.length; i++) {
-			startScript(scripts[i].main, scripts[i].name, scripts[i].log);
-		}
+			for (var i=0; i<scripts.length; i++) {
+			startScript(scripts[i].main, scripts[i].name, scripts[i].log, scripts[i].email);
+			}
+			
+		});
+	}
+	
+	process.on("SIGINT", function() {
+		log("Received SIGINT");
+		shutdownInitWorker();
+	});
+	
+	
+	process.on('message', function commandMessage(message) {
+		
+		if(message == undefined) throw new Error("User worker message=" + message);
+		
+		if(message.restart) restart(message.restart);
+		else if(message.stop) stop(message.stop);
+		else if(message.start) start(message.start);
+		else if(message.shutdown) shutdownInitWorker();
+	else throw new Error("Unknown message=" + JSON.stringify(message));
 		
 	});
-}
-
-process.on("SIGINT", function() {
-	log("Received SIGINT");
-	shutdownInitWorker();
-});
-
-
-process.on('message', function commandMessage(message) {
 	
-	if(message == undefined) throw new Error("User worker message=" + message);
+	function restart(projectName) {
+		log("Recieved restart command for " + projectName);
 	
-	if(message.restart) restart(message.restart);
-	else if(message.stop) stop(message.stop);
-	else if(message.shutdown) shutdownInitWorker();
-	else throw new Error("Unknown message=" + JSON.stringify(message));
+	log("Sending stop signals and disconnecting from: " + projectName);
+	closeChild(CHILD[projectName]);
 	
-});
-
-function restart(projectName) {
+	// It will be respawned!
 	
-}
-
-function stop(projectName) {
+	}
+	
+	function stop(projectName) {
+		log("Recieved stop command for " + projectName);
+	
+	if(!CHILD.hasOwnProperty(projectName)) return log("Script is not running: " + projectName);
+	
+	STOP.push(projectName);
+	
+	closeChild(CHILD[projectName]);
+	
+	setTimeout(function makeSureItsDead() {
+		CHILD[projectName].kill('SIGKILL');
+		while(STOP.indexOf(projectName) != -1) STOP.splice(STOP.indexOf(projectName), 1);
+		delete CHILD[projectName];
+	}, 5000);
+	
+	}
+	
+function start(pathToFolder) {
+	log("Recieved start command for project folder: " + pathToFolder);
+		
+	// Look up start parameters ...
+	
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	var findFile = UTIL.getFolderName(pathToFolder);
+	var packageJson = pathToFolder + "package.json";
+	fs.readFile(packageJson, "utf8", function(err, data) {
+		if(err) {
+			if(err.code == "ENOENT") {
+				log("File not found: " + packageJson, DEBUG);
+				// See if there is a file with the same name as the folder, then use that file
+				log("Looking for " + findFile + ".js in " + pathToFolder + " ...", DEBUG);
+				fs.readdir(pathToFolder, function (err, folderItems) {
+					if(err) initError(err);
+					else {
+						folderItems.forEach(function(fileName) {
+							
+							var scriptFilePath = path.join(pathToFolder, fileName);
+							
+							if(fileName == findFile + ".js") startScript(scriptFilePath, findFile, "/log/" + fileName + ".log");
+							
+						});
+					}
+					});
+				
+			}
+			else initError(err);
+		}
+		else {
+			
+			try {
+				var json = JSON.parse(data);
+			}
+			catch(err) {
+				return initError(new Error("Unable to parse " + packageJson + " : " + err.message));
+			}
+			
+			if(json.main) {
+				var name = json.name || findFile;
+				var mainFile = path.join(pathToFolder, json.main);
+				startScript(mainFile, name, "/log/" + name + ".log", json.email);
+			}
+			else return log(packageJson + " has no main file entry!");
+			}
+		
+	});
+	
 }
 
 function shutdownInitWorker() {
@@ -155,56 +234,56 @@ function shutdownInitWorker() {
 	
 	if(closed.length > 0) {
 		// Tell what process was killed
-		sendMail(EMAIL, "Killing processes due to SIGINT", "The daemon master process received a SIGINT and killed the following daemons:\n * " + closed.join("\n * "), undefined, function() {
+		if(EMAIL) sendMail(EMAIL, "Killing processes due to SIGINT", "The nodejs init script reaceaved a SIGINT. This is most likely due to a server reboot or upgrade. The following nodejs services where stopped:\n * " + closed.join("\n * "), undefined, function() {
 			process.exit();
 		});
-		}
-		else process.exit();
-		
 	}
+	else process.exit();
 	
+}
+
+
+function closeChild(childProcess) {
+	// Allow the process to gracefully shut down
 	
-	function closeChild(childProcess) {
-		// Allow the process to gracefully shut down
-		
-		if(childProcess.connected) childProcess.disconnect();
-		
-		childProcess.kill('SIGTERM');
-		childProcess.kill('SIGINT');
-		childProcess.kill('SIGQUIT');
-		childProcess.kill('SIGHUP');
-	}
+	if(childProcess.connected) childProcess.disconnect();
 	
-	
-	function findScripts(pathToFolder, callback) {
+	childProcess.kill('SIGTERM');
+	childProcess.kill('SIGINT');
+	childProcess.kill('SIGQUIT');
+	childProcess.kill('SIGHUP');
+}
+
+
+function findScripts(pathToFolder, callback) {
 	/*
 		Search each folder for a package.json file, 
 		read the package.json,
 		main entry is the script name
 	*/
 	
-		var fs = require("fs");
-		var path = require("path");
-		
-		var scripts = []; // Scripts found
-		
-		var foldersToLookIn = 0;
-		var filesToStat = 0;
+	var fs = require("fs");
+	var path = require("path");
+	
+	var scripts = []; // Scripts found
+	
+	var foldersToLookIn = 0;
+	var filesToStat = 0;
 	var readingFiles = 0;
 	
-		log("Reading directory pathToFolder=" + pathToFolder, 7);
-		
-		fs.readdir(pathToFolder, function readdir(err, folderItems) {
-			if(err) {
-				return initError(err);
-			}
-			if(folderItems.length == 0) {
+	log("Reading directory pathToFolder=" + pathToFolder, 7);
+	
+	fs.readdir(pathToFolder, function readdir(err, folderItems) {
+		if(err) {
+			return initError(err);
+		}
+		if(folderItems.length == 0) {
 			log("No files found in pathToFolder=" + pathToFolder, ERR); 
 			// It's OK to exit
 		}
 		else {
-				folderItems.forEach(function(fileName) {
-					
+			folderItems.forEach(function(fileName) {
+				
 					var filePath = path.join(pathToFolder, fileName)
 					
 					if(fileName.indexOf("�") != -1) log("Encoding problem in filePath=" + filePath, 4);
@@ -238,79 +317,78 @@ function shutdownInitWorker() {
 		
 		function lookForScript(findFile, pathToFolder) {
 			
-		var packageJson = path.join(pathToFolder, "package.json");
-		
-		readingFiles++;
-		log("Opening " + packageJson, DEBUG);
-		fs.readFile(packageJson, "utf8", function(err, data) {
-			readingFiles--;
-			if(err) {
-				if(err.code == "ENOENT") {
-					log("File not found: " + packageJson, DEBUG);
-					// See if there is a file with the same name as the folder, then use that file
-					foldersToLookIn++;
-					log("Looking for " + findFile + " in " + pathToFolder + " ...", DEBUG);
-					fs.readdir(pathToFolder, function (err, folderItems) {
-						if(err) initError(err);
-						else {
-							folderItems.forEach(function(fileName) {
-								
-								var scriptFilePath = path.join(pathToFolder, fileName);
-								
-								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, log: "/log/" + fileName + ".log"});
-								
-							});
-						}
+			var packageJson = path.join(pathToFolder, "package.json");
+			
+			readingFiles++;
+			log("Opening " + packageJson, DEBUG);
+			fs.readFile(packageJson, "utf8", function(err, data) {
+				readingFiles--;
+				if(err) {
+					if(err.code == "ENOENT") {
+						log("File not found: " + packageJson, DEBUG);
+						// See if there is a file with the same name as the folder, then use that file
+						foldersToLookIn++;
+					log("Looking for " + findFile + ".js in " + pathToFolder + " ...", DEBUG);
+						fs.readdir(pathToFolder, function (err, folderItems) {
+							if(err) initError(err);
+							else {
+								folderItems.forEach(function(fileName) {
+									
+									var scriptFilePath = path.join(pathToFolder, fileName);
+									
+									if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, log: "/log/" + fileName + ".log"});
+									
+								});
+							}
+							
+							foldersToLookIn--;
+							checkDone();
+						});
 						
-						foldersToLookIn--;
-						checkDone();
-					});
+					}
+					else initError(err);
+				}
+				else {
 					
+					try {
+						var json = JSON.parse(data);
+					}
+					catch(err) {
+						return initError(new Error("Unable to parse " + packageJson + " : " + err.message));
+					}
+					
+					if(json.main) {
+						var name = json.name || findFile;
+						var mainFile = path.join(pathToFolder, json.main);
+					scripts.push({main: mainFile, name: name, log: "/log/" + name + ".log", email: json.email});
+					}
+					else return log(packageJson + " has no main file entry!");
+					
+					checkDone();
 				}
-				else initError(err);
-			}
-			else {
 				
-				try {
-					var json = JSON.parse(data);
-				}
-				catch(err) {
-					return initError(new Error("Unable to parse " + packageJson + " : " + err.message));
-				}
 				
-				if(json.main) {
-					var name = json.name || findFile;
-					var mainFile = path.join(pathToFolder, json.main);
-					scripts.push({main: mainFile, name: name, log: "/log/" + name + ".log"});
-				}
-				else return log(packageJson + " has no main file entry!");
-				
-				checkDone();
-			}
+			});
 			
-			
-		});
-		
 			
 		}
 		
 		function checkDone() {
-		if(foldersToLookIn == 0 && filesToStat == 0 && readingFiles == 0) callback(scripts);
+			if(foldersToLookIn == 0 && filesToStat == 0 && readingFiles == 0) callback(scripts);
 		}
 		
 	}
 	
-function startScript(scriptPath, projectName, logFilePath) {
+function startScript(scriptPath, projectName, logFilePath, email) {
 		
-	if(scriptPath == undefined) throw new Error("scriptPath=" + scriptPath);
-	if(projectName == undefined) throw new Error("projectName=" + projectName);
-	if(logFilePath == undefined) throw new Error("logFilePath=" + logFilePath);
-	
-	
-	
-		var scriptName = getFileNameFromPath(scriptPath);
+		if(scriptPath == undefined) throw new Error("scriptPath=" + scriptPath);
+		if(projectName == undefined) throw new Error("projectName=" + projectName);
+		if(logFilePath == undefined) throw new Error("logFilePath=" + logFilePath);
 		
-	log("Starting " + projectName + " ... ( main: " + scriptName + " log: " + logFilePath + " )", 7);
+	if(CHILD.hasOwnProperty(projectName)) return log("Already initiated: " + projectName + " (try stopping it)"); 
+	if(STOP.indexOf(projectName) != -1) return log("Can not start Script while it's being stopped: " + projectName + "");
+	
+		log("Starting " + projectName + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
 		
 		var waitRestart = [2000,5000,10000,30000,60000,1800000];
 		var waitKill = 1000; // How long to wait from SIGHUB to SIGKILL
@@ -328,9 +406,9 @@ function startScript(scriptPath, projectName, logFilePath) {
 		var childProcess;
 		
 		respawn(); // Starts the child process
-	
-	var logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
-	logStream.write(myDate() + ": Starting ...\n");
+		
+		var logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
+		logStream.write(myDate() + ": Starting ...\n");
 		
 		function respawn() {
 			
@@ -348,12 +426,12 @@ function startScript(scriptPath, projectName, logFilePath) {
 			
 			stdHistory.length = 0; // Reset the history
 			
-		logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
-		logStream.write(myDate() + ": Restarting ....\n");
-		
-			CHILD[scriptName] = cp.fork(scriptPath, arg, opt);
+			logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
+			logStream.write(myDate() + ": Restarting ....\n");
 			
-			childProcess = CHILD[scriptName];
+			CHILD[projectName] = cp.fork(scriptPath, arg, opt);
+			
+			childProcess = CHILD[projectName];
 			
 			// Attach event listeners
 			childProcess.stdout.on('data', stdout);
@@ -369,9 +447,9 @@ function startScript(scriptPath, projectName, logFilePath) {
 			var txtArr = data.toString("utf8").trim().split("\n");
 			
 			for(var i=0; i<txtArr.length; i++) {
-				log(scriptName + ": " + txtArr[i], 7);
+				log(projectName + ": " + txtArr[i], 7);
 				historyAdd(txtArr[i]);
-			logStream.write(myDate() + ": " + txtArr[i] + "\n");
+				logStream.write(myDate() + ": " + txtArr[i] + "\n");
 			}
 			
 		}
@@ -380,34 +458,31 @@ function startScript(scriptPath, projectName, logFilePath) {
 			var txtArr = data.toString("utf8").trim().split("\n");
 			
 			for(var i=0; i<txtArr.length; i++) {
-				log(scriptName + ": " + txtArr[i], 3);
+				log(projectName + ": " + txtArr[i], 3);
 				historyAdd(txtArr[i]);
-			logStream.write(myDate() + ": " + txtArr[i] + "\n");
+				logStream.write(myDate() + ": " + txtArr[i] + "\n");
 			}
 			
 			// Send the error message via email
-			
 			var firstLineInErrMsg = txtArr[0];
-			
-			//sendMail(EMAIL, scriptName + ": " + txtArr[4], data);
+		if(email) sendMail(email, projectName + ": " + txtArr[4], data);
 			
 			// Log the error
-			
-			log(scriptName + ": " + txtArr[0] + " " + txtArr[4], 3);
+			log(projectName + ": " + txtArr[0] + " " + txtArr[4], 3);
 			
 		}
 		
 		
 		function closeStdioStreams(code, signal) {
 			
-			log(scriptName + " closed stdio streams! code=" + code + " signal=" + signal);
+			log(projectName + " closed stdio streams! code=" + code + " signal=" + signal);
 			
 		}
 		
 		function childProcessEnded(code, signal) {
 			var finalExit = (code !== null);
 			
-			log(scriptName + " ended! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
+			log(projectName + " ended! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
 			
 			// NodeJS errors will have a code, but if the process is killed via a signal, we wont get a final exit
 			// So always restart!
@@ -422,18 +497,19 @@ function startScript(scriptPath, projectName, logFilePath) {
 		
 		function exit(code, signal) {
 			
-		logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
+			logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
 			
 			isRestarting = true;
 			
-			if(SHUTDOWN) return;
+		if(SHUTDOWN || STOP.indexOf(projectName) != -1) return;
 			
 			var waitForRespawn = 0;
 			if(restarts < waitRestart.length-1) waitForRespawn = waitRestart[restarts];
 			else waitForRespawn = waitRestart[waitRestart.length-1];
 			
-			//sendMail(EMAIL, scriptName + ": Exit code=" + code + " signal=" + signal, stdHistory.join("\n"));
-			
+		//if(email) sendMail(email, projectName + ": Exit code=" + code + " signal=" + signal, stdHistory.join("\n"));
+		// Only send mail on errors (not restarts)
+		
 			log("Waiting " + waitForRespawn + "ms to restart: " + scriptPath, 7);
 			
 			clearTimeout(resetRestartsTimer);
@@ -488,15 +564,15 @@ function startScript(scriptPath, projectName, logFilePath) {
 		
 		log("Sending mail from=" + from + " to=" + to + " subject=" + subject + " text=\n********************************************\n* " + text.replace(/\n/g, "\n* ") + "\n********************************************\n", 7);
 		
-		var transporter = NODE_MAILER.createTransport(SMTP_TRANSPORT({
-			port: 25,
-			host: "zetafiles.org",
-			auth: {
-				user: "mailform@zetafiles.org",
-				pass: "oijafs8419jifg555757fsdds3fhkl4edgggsd"
-			}
-		}));
-		
+	var mailSettings = {
+		port: SMTP_PORT,
+		host: SMTP_HOST
+	};
+	
+	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
+	
+	var transporter = nodemailer.createTransport(smtpTransport(mailSettings));
+	
 		transporter.sendMail({
 			from: from,
 			to: to,
@@ -531,40 +607,40 @@ function startScript(scriptPath, projectName, logFilePath) {
 		
 		log(position + "\n    " + err.message, 3);
 		
-		//sendMail(DEFAULT_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\n Arguments:\n" + process.argv.join("\n"));
-	
-	process.exit(1);
+		sendMail(DEFAULT_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\n Arguments:\n" + process.argv.join("\n"));
+		
+		process.exit(1);
 	}
 	
 	
 	function log(msg, level) {
-	
-	if(!initLogStream) {
-		console.warn("initLogStream=" + initLogStream);
-		console.log(msg + "\n");
-		}
-	else initLogStream.write(myDate() + ": " + msg + "\n");
-	
-	if(process.send) {
-		// Forked from another nodejs process
-	process.send({message: {msg: msg, level: level}});
-	}
-	else {
-	if(level == undefined) level = 6;
 		
-		if(process.stdout.isTTY) {
-			// Probably started from command line
-			console.log(myDate() + ": " + msg);
+		if(!initLogStream) {
+			console.warn("initLogStream=" + initLogStream);
+			console.log(msg + "\n");
+		}
+		else initLogStream.write(myDate() + ": " + msg + "\n");
+		
+		if(process.send) {
+			// Forked from another nodejs process
+			process.send({message: {msg: msg, level: level}});
 		}
 		else {
-			// Probably started by systemd
-			console.log("<" + level + ">" + msg);
+			if(level == undefined) level = 6;
+			
+			if(process.stdout.isTTY) {
+				// Probably started from command line
+				console.log(myDate() + ": " + msg);
+			}
+			else {
+				// Probably started by systemd
+				console.log("<" + level + ">" + msg);
+			}
 		}
 	}
-}
 	
-
-
+	
+	
 	function myDate() {
 		var d = new Date();
 		

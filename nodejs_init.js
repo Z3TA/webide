@@ -48,7 +48,7 @@ fs.readFile(PW_FILE, "utf8", function(err, data) {
 	// Start a nodejs worker/init script for each user
 	var row = data.trim().split(/\n|\r\n/);
 	
-	console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
+	log("Loaded " + PW_FILE + " (" + row.length + " users found)");
 	
 	// format: username|password|rootDir|uid|gid
 	
@@ -66,7 +66,7 @@ fs.readFile(PW_FILE, "utf8", function(err, data) {
 		pUid = test[3];
 		pGid = test[4];
 		
-		//startNodejsInitWorker(pRootDir, pUser, pUid, pGid);
+		startNodejsInitWorker(pRootDir, pUser, pUid, pGid);
 	
 	}
 	
@@ -120,7 +120,7 @@ function getAuth(authorization_header_string) {
 }
 
 function httpRequest(request, response) {
-	console.log("Request to " + request.url + " from " + (request.headers["x-real-ip"] || request.connection.remoteAddress));
+	log("Request to " + request.url + " from " + (request.headers["x-real-ip"] || request.connection.remoteAddress));
 	
 	var auth = getAuth(request.headers["authorization"]);
 	var username = auth.username;
@@ -137,7 +137,7 @@ function httpRequest(request, response) {
 		// Start a nodejs worker/init script for each user
 		var row = data.trim().split(/\n|\r\n/);
 		
-		console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
+		log("Loaded " + PW_FILE + " (" + row.length + " users found)");
 		
 		// format: username|password|rootDir|uid|gid
 		
@@ -208,7 +208,7 @@ function httpServerError(err) {
 }
 
 function httpServerListening() {
-	console.log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
+	log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
 }
 
 function startNodejsInitWorker(homeDir, name, uid, gid) {
@@ -217,41 +217,40 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 	
 	var nodeWorkerArgs = [];
 	var nodeWorkerOptions = {
-		cwd: homeDir,
 		execPath: "/usr/bin/nodejs_" + name,
 		env: {
 			homeDir: homeDir,
 			uid: uid,
-			gid: guid
+			gid: gid
 		}
 	};
 	
-	NODE_INIT_WORKER[name] = child_process.fork("./node_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+	var child_process = require("child_process");
+	NODE_INIT_WORKER[name] = child_process.fork("./nodejs_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
 	var worker = NODE_INIT_WORKER[name];
 	
 	worker.on("close", function workerClose(code, signal) {
-		console.log(name + " worker close: code=" + code + " signal=" + signal);
+		log(name + " worker close: code=" + code + " signal=" + signal);
 	});
 	
 	worker.on("disconnect", function workerDisconnect() {
-		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+		log(name + " worker disconnect: worker.connected=" + worker.connected);
 	});
 	
 	worker.on("error", function workerClose(err) {
-		console.log(name + " worker error: err.message=" + err.message);
+		log(name + " worker error: err.message=" + err.message);
 	});
 	
-	userWorker.on("message", function messageFromWorker(msg, handle) {
+	worker.on("message", function messageFromWorker(msg, handle) {
 	
 		if(msg.message) {
-			log(username + ": " + msg.message.msg, msg.message.level);
+			log(name + " worker message: " + msg.message.msg, msg.message.level);
 		}
-		
 		
 	});
 	
-	userWorker.on("exit", function workerExitHandler(code, signal) {
-		console.log(name + " worker exit: code=" + code + " signal=" + signal);
+	worker.on("exit", function workerExitHandler(code, signal) {
+		log(name + " worker exit: code=" + code + " signal=" + signal);
 	});
 	
 }
@@ -278,19 +277,6 @@ function log(msg, level) {
 	}
 }
 
-// Overload console.log
-console.log = function() {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(msg, 7);
-}
-
-// Overload console.warn
-console.warn = function() {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(msg, 4);
-}
 
 function myDate() {
 	var d = new Date();
