@@ -760,7 +760,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 				uath: user.name + ":" + pw, 
 				hostname: "127.0.0.1", 
 				port: nodejsDeamonManagerPort, 
-				path: "/restartService/" + user.name + "/" + projectName
+					path: prodFolder + "?restart"
 				}, function (err, resp) {
 					
 					if(err) {

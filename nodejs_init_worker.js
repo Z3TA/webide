@@ -99,60 +99,66 @@ var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 		findScripts("/.prod", function(scripts) {
 			
 			for (var i=0; i<scripts.length; i++) {
-			startScript(scripts[i].main, scripts[i].name, scripts[i].log, scripts[i].email);
-			}
-			
-		});
-	}
-	
-	process.on("SIGINT", function() {
-		log("Received SIGINT");
-		shutdownInitWorker();
+			startService(scripts[i].main, scripts[i].name, scripts[i].pathToFolder, scripts[i].log, scripts[i].email);
+		}
+		
 	});
+}
+
+process.on("SIGINT", function() {
+	log("Received SIGINT");
+	shutdownInitWorker();
+});
+
+
+process.on('message', commandMessage);
+
+function commandMessage(message) {
 	
+	log("Recieved rcp: " + JSON.stringifu(message));
 	
-	process.on('message', function commandMessage(message) {
-		
-		if(message == undefined) throw new Error("User worker message=" + message);
-		
-		if(message.restart) restart(message.restart);
-		else if(message.stop) stop(message.stop);
-		else if(message.start) start(message.start);
-		else if(message.shutdown) shutdownInitWorker();
+	if(message == undefined) throw new Error("User worker message=" + message);
+	
+	if(message.restart) restart(message.restart);
+	else if(message.stop) stop(message.stop);
+	else if(message.start) start(message.start);
+	else if(message.shutdown) shutdownInitWorker();
 	else throw new Error("Unknown message=" + JSON.stringify(message));
-		
-	});
 	
-	function restart(projectName) {
-		log("Recieved restart command for " + projectName);
+}
+
+function restart(pathToFolder) {
+	log("Recieved restart command for " + pathToFolder);
 	
-	log("Sending stop signals and disconnecting from: " + projectName);
-	closeChild(CHILD[projectName]);
+	if(!CHILD.hasOwnProperty(pathToFolder)) return start(pathToFolder);
+	
+	log("Sending stop signals and disconnecting from: " + pathToFolder);
+	closeChild(CHILD[pathToFolder]);
 	
 	// It will be respawned!
 	
-	}
+}
+
+function stop(pathToFolder) {
+	log("Recieved stop command for " + pathToFolder);
 	
-	function stop(projectName) {
-		log("Recieved stop command for " + projectName);
+	if(!CHILD.hasOwnProperty(pathToFolder)) return log("Service is not running: " + pathToFolder);
 	
-	if(!CHILD.hasOwnProperty(projectName)) return log("Script is not running: " + projectName);
+	STOP.push(pathToFolder);
 	
-	STOP.push(projectName);
-	
-	closeChild(CHILD[projectName]);
+	closeChild(CHILD[pathToFolder]);
 	
 	setTimeout(function makeSureItsDead() {
-		CHILD[projectName].kill('SIGKILL');
-		while(STOP.indexOf(projectName) != -1) STOP.splice(STOP.indexOf(projectName), 1);
-		delete CHILD[projectName];
+		CHILD[pathToFolder].kill('SIGKILL');
+		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
+		delete CHILD[pathToFolder];
 	}, 5000);
 	
-	}
-	
+}
+
 function start(pathToFolder) {
 	log("Recieved start command for project folder: " + pathToFolder);
-		
+	
 	// Look up start parameters ...
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
@@ -171,7 +177,7 @@ function start(pathToFolder) {
 							
 							var scriptFilePath = path.join(pathToFolder, fileName);
 							
-							if(fileName == findFile + ".js") startScript(scriptFilePath, findFile, "/log/" + fileName + ".log");
+							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, "/log/" + fileName + ".log");
 							
 						});
 					}
@@ -192,7 +198,7 @@ function start(pathToFolder) {
 			if(json.main) {
 				var name = json.name || findFile;
 				var mainFile = path.join(pathToFolder, json.main);
-				startScript(mainFile, name, "/log/" + name + ".log", json.email);
+				startService(mainFile, name, pathToFolder, "/log/" + name + ".log", json.email);
 			}
 			else return log(packageJson + " has no main file entry!");
 			}
@@ -334,7 +340,7 @@ function findScripts(pathToFolder, callback) {
 									
 									var scriptFilePath = path.join(pathToFolder, fileName);
 									
-									if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, log: "/log/" + fileName + ".log"});
+								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: "/log/" + fileName + ".log"});
 									
 								});
 							}
@@ -358,7 +364,7 @@ function findScripts(pathToFolder, callback) {
 					if(json.main) {
 						var name = json.name || findFile;
 						var mainFile = path.join(pathToFolder, json.main);
-					scripts.push({main: mainFile, name: name, log: "/log/" + name + ".log", email: json.email});
+					scripts.push({main: mainFile, name: name, pathToFolder: pathToFolder, log: "/log/" + name + ".log", email: json.email});
 					}
 					else return log(packageJson + " has no main file entry!");
 					
@@ -377,16 +383,16 @@ function findScripts(pathToFolder, callback) {
 		
 	}
 	
-function startScript(scriptPath, projectName, logFilePath, email) {
+function startService(scriptPath, projectName, pathToFolder, logFilePath, email) {
 		
 		if(scriptPath == undefined) throw new Error("scriptPath=" + scriptPath);
-		if(projectName == undefined) throw new Error("projectName=" + projectName);
+	if(pathToFolder == undefined) throw new Error("pathToFolder=" + pathToFolder);
 		if(logFilePath == undefined) throw new Error("logFilePath=" + logFilePath);
 		
-	if(CHILD.hasOwnProperty(projectName)) return log("Already initiated: " + projectName + " (try stopping it)"); 
-	if(STOP.indexOf(projectName) != -1) return log("Can not start Script while it's being stopped: " + projectName + "");
+	if(CHILD.hasOwnProperty(pathToFolder)) return log("Already initiated: " + pathToFolder + " (try stopping it)"); 
+	if(STOP.indexOf(pathToFolder) != -1) return log("Can not start Script while it's being stopped: " + pathToFolder + "");
 	
-		log("Starting " + projectName + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
+	log("Starting " + pathToFolder + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
 		
 		var waitRestart = [2000,5000,10000,30000,60000,1800000];
 		var waitKill = 1000; // How long to wait from SIGHUB to SIGKILL
@@ -427,9 +433,9 @@ function startScript(scriptPath, projectName, logFilePath, email) {
 			logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
 			logStream.write(myDate() + ": Restarting ....\n");
 			
-			CHILD[projectName] = cp.fork(scriptPath, arg, opt);
+		CHILD[pathToFolder] = cp.fork(scriptPath, arg, opt);
 			
-			childProcess = CHILD[projectName];
+		childProcess = CHILD[pathToFolder];
 			
 			// Attach event listeners
 			childProcess.stdout.on('data', stdout);
@@ -499,7 +505,7 @@ function startScript(scriptPath, projectName, logFilePath, email) {
 			
 			isRestarting = true;
 			
-		if(SHUTDOWN || STOP.indexOf(projectName) != -1) return;
+		if(SHUTDOWN || STOP.indexOf(pathToFolder) != -1) return;
 			
 			var waitForRespawn = 0;
 			if(restarts < waitRestart.length-1) waitForRespawn = waitRestart[restarts];
@@ -569,7 +575,7 @@ function startScript(scriptPath, projectName, logFilePath, email) {
 	
 	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
 	
-	var transporter = nodemailer.createTransport(smtpTransport(mailSettings));
+	var transporter = NODE_MAILER.createTransport(SMTP_TRANSPORT(mailSettings));
 	
 		transporter.sendMail({
 			from: from,

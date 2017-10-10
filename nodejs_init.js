@@ -167,39 +167,42 @@ function httpRequest(request, response) {
 	});
 	
 	
-	function executeOrder(homeDir, username, uid, gid) {
+	function executeOrder(homeDir, name, uid, gid) {
 		// example: /service-name/restart
-		var arr = request.url.split("/");
-		var projectName = arr[1];
-		var action = arr[2];
+		var arr = request.url.split("?");
+		var pathToFolder = arr[0];
+		var action = arr[1];
 		
-		if(!NODE_INIT_WORKER.hasOwnProperty(username)) {
-			startNodejsInitWorker(homeDir, username, uid, gid);
-			
-			// Don't have to wait for the init worker, ...
+		if(!NODE_INIT_WORKER.hasOwnProperty(name)) {
+			startNodejsInitWorker(homeDir, name, uid, gid);
+			// Don't have to wait for the init worker, ... or ?
+		}
+		else if(!NODE_INIT_WORKER[name].connected) {
+			startNodejsInitWorker(homeDir, name, uid, gid);
+			// Don't have to wait for the init worker, ... or ?
 		}
 		
-		if(action == "start") {
-			NODE_INIT_WORKER[username].send({restart: projectName});
-			response.writeHead(200);
-			response.end('Starting ' + projectName + "\n");
+			if(action == "start") {
+				NODE_INIT_WORKER[name].send({restart: pathToFolder});
+				response.writeHead(200);
+				response.end('Starting ' + pathToFolder + "\n");
+			}
+			else if(action == "stop") {
+				NODE_INIT_WORKER[name].send({stop: pathToFolder});
+				response.writeHead(200);
+				response.end('Stopping ' + pathToFolder + "\n");
+			}
+			else if(action == "restart") {
+				NODE_INIT_WORKER[name].send({restart: pathToFolder});
+				response.writeHead(200);
+				response.end('Restarting ' + pathToFolder + "\n");
+			}
+			// debug ?
+			else {
+				response.writeHead(400);
+				response.end('Unknown action: ' + action + "\n");
+			}
 		}
-		else if(action == "stop") {
-			NODE_INIT_WORKER[username].send({stop: projectName});
-			response.writeHead(200);
-			response.end('Stopping ' + projectName + "\n");
-		}
-		else if(action == "restart") {
-			NODE_INIT_WORKER[username].send({restart: projectName});
-			response.writeHead(200);
-			response.end('Restarting ' + projectName + "\n");
-		}
-		// debug ?
-		else {
-			response.writeHead(400);
-			response.end('Unknown action: ' + action + "\n");
-		}
-	}
 	
 	}
 
@@ -211,11 +214,12 @@ function httpServerListening() {
 	log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
 }
 
-function startNodejsInitWorker(homeDir, name, uid, gid) {
+function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
 	
 	var restartWaitTime  = 1000; // How long to wait for restart
 	var restartTimer;
 	var resetRestartWaitTime;
+	var firstPing = randomNr(6);
 	
 	homeDir = UTIL.trailingSlash(homeDir);
 	
@@ -236,10 +240,12 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		
 		if(NODE_INIT_WORKER.hasOwnProperty(name)) {
 			// Make sure it's dead
+			log("Making sure init worker for " + name + " is dead ...");
 			if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
 			NODE_INIT_WORKER[name].kill('SIGKILL');
 		}
 		
+		log("Starting init worker for " + name + " ...");
 		NODE_INIT_WORKER[name] = child_process.fork("./nodejs_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
 		var worker = NODE_INIT_WORKER[name];
 		
@@ -248,6 +254,11 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		worker.on("error", workerError);
 		worker.on("message", messageFromWorker);
 		worker.on("exit", workerExitHandler);
+		
+		
+		
+		worker.send({ping: firstPing});
+		
 	}
 	
 	
@@ -264,6 +275,12 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		if(msg.message) {
 			log(name + " worker message: " + msg.message.msg, msg.message.level);
 		}
+		else if(msg.pong) {
+			if(msg.pong == firstPing) {
+				//callback(null);
+				firstPing = null;
+			}
+		}
 		
 	}
 	
@@ -278,7 +295,7 @@ function startNodejsInitWorker(homeDir, name, uid, gid) {
 		if(parseInt(code) !== 0) {
 			log(name + " worker process exited with code=" + code, ERR);
 			
-			restartTimer = setTimeout(function restart() {
+			restartTimer = setTimeout(function () {
 				restartWaitTime = restartWaitTime * 2;
 				clearTimeout(resetRestartWaitTime);
 				
@@ -342,3 +359,13 @@ function myDate() {
 		else return n;
 	}
 }
+
+function randomNr(n) {
+	var nr = "1"; // Always start with nr 1 to prevent a zero
+	for (var i=0; i<n-1; i++) {
+		nr += Math.floor(Math.random() * 10);
+	}
+	return parseInt(nr);
+}
+
+
