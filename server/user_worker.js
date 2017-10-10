@@ -757,7 +757,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 				// Tell deamon manager to restart the app
 				var http = require("http");
 				httpGet({
-				uath: user.name + ":" + pw, 
+					auth: user.name + ":" + pw, 
 				hostname: "127.0.0.1", 
 				port: nodejsDeamonManagerPort, 
 					path: prodFolder + "?restart"

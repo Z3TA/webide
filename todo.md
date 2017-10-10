@@ -32,7 +32,10 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-nodejs deploy: start if first time started, restart if updated
+handle sigint on nodejs_init.js
+
+should service logs have date message appended to each stdout message !?
+(service manager message it's ok to have date, but the user might also append a date, resulting in double dates.)
 
 test nodejs depply and nodejs init !
 

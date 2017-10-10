@@ -278,7 +278,7 @@ function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
 		else if(msg.pong) {
 			if(msg.pong == firstPing) {
 				//callback(null);
-				firstPing = null;
+				firstPing = randomNr(6);
 			}
 		}
 		

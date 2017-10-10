@@ -32,7 +32,7 @@
 		function readPj(folder) {
 		EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
 				if(readFileErr) {
-					if(readFileErr.code == "ENOEND" && folders.length > 0) {
+					if(readFileErr.code == "ENOENT" && folders.length > 0) {
 						folder = folders.pop();
 					readPj(folder);
 					}
@@ -52,14 +52,17 @@
 									"main": UTIL.getFilenameFromPath(currentFile.path)
 								};
 								
-								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), function(err, file) {
+								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), function(openFileErr, file) {
+									if(openFileErr) alertBox(openFileErr.message);
 									
 								});
 								
 							}
 							});
 						}
-					else alertBox(err.message);
+					else {
+						throw readFileErr;
+					}
 				}
 				else {
 					
@@ -67,8 +70,8 @@
 					try {
 						var json = JSON.parse(fileContent);
 					}
-					catch(err) {
-						return alertBox("Failed the parse " + filePath + "! " + err.message);
+					catch(parseErr) {
+						return alertBox("Failed the parse " + filePath + "! " + parseErr.message);
 					}
 					
 					var projectName = json.name;

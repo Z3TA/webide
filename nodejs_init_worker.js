@@ -115,7 +115,7 @@ process.on('message', commandMessage);
 
 function commandMessage(message) {
 	
-	log("Recieved rcp: " + JSON.stringifu(message));
+	log("Recieved rcp: " + JSON.stringify(message));
 	
 	if(message == undefined) throw new Error("User worker message=" + message);
 	
@@ -123,6 +123,7 @@ function commandMessage(message) {
 	else if(message.stop) stop(message.stop);
 	else if(message.start) start(message.start);
 	else if(message.shutdown) shutdownInitWorker();
+	else if(message.ping) process.send({pong: message.ping});
 	else throw new Error("Unknown message=" + JSON.stringify(message));
 	
 }
@@ -392,7 +393,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	if(CHILD.hasOwnProperty(pathToFolder)) return log("Already initiated: " + pathToFolder + " (try stopping it)"); 
 	if(STOP.indexOf(pathToFolder) != -1) return log("Can not start Script while it's being stopped: " + pathToFolder + "");
 	
-	log("Starting " + pathToFolder + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
+	log("Starting service: " + pathToFolder + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
 		
 		var waitRestart = [2000,5000,10000,30000,60000,1800000];
 		var waitKill = 1000; // How long to wait from SIGHUB to SIGKILL
@@ -406,7 +407,10 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		
 		var cp = require('child_process');
 		var arg = [];
-		var opt = {silent: true};
+		var opt = {
+		silent: true,
+		execPath: "/usr/bin/nodejs" // note: we are in chroot!
+	};
 		var childProcess;
 		
 		respawn(); // Starts the child process
@@ -426,7 +430,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 				if(childProcess.connected) childProcess.disconnect();
 			}
 			
-			log("Starting: " + scriptPath, 7);
+			log("Running main script: " + scriptPath, 7);
 			
 			stdHistory.length = 0; // Reset the history
 			
