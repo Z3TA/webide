@@ -152,11 +152,10 @@
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
 						var cancel = "No, cancel deployment";
-						confirmBox("Unable to find a package.json in the project root. Do you want to create it ?", [createPj, cancel], function(answer) {
+						var folder = UTIL.getDirectoryFromPath(currentFile.path);
+						confirmBox("Unable to find a package.json in " + folder + ". Do you want to create it ?", [createPj, cancel], function(answer) {
 							if(answer == createPj) {
 							
-								var folder = UTIL.getDirectoryFromPath(currentFile.path);
-								
 								var pjTemplate = {
 									"name": UTIL.getFolderName(folder),
 									"version": "1.0.0",
@@ -165,7 +164,7 @@
 									"main": UTIL.getFilenameFromPath(currentFile.path)
 								};
 								
-								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), function(openFileErr, file) {
+								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), {savedAs: true, isSaved: true}, function(openFileErr, file) {
 									if(openFileErr) alertBox(openFileErr.message);
 									
 								});
