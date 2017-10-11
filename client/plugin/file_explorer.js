@@ -432,26 +432,30 @@
 			clickEvent.preventDefault();
 			clickEvent.stopPropagation();
 			
-			var filePath = el.getAttribute("path");
+			var path = el.getAttribute("path");
+			var isFolder = (path.charAt(path.length-1) == "/" || path.charAt(path.length-1) == "\\");
 			
-			if(!clickEvent.ctrlKey) {
+			if(!clickEvent.ctrlKey && isFolder) {
 				
-				var msg = "Are you sure you want to Delete the file ?\n" + filePath + "\n\n(Ctrl-click to not show this confirmation next time)";
+				var msg = "Are you sure you want to Delete the entire folder ?\n" + path + "\n\n(Ctrl-click to not show this confirmation next time)";
 				var yes = "Yes, delete it";
 				var no = "No, do not";
 				
 				confirmBox(msg, [yes, no], function deleteAnswer(answer) {
 					
-					if(answer == yes) deleteTheFile();
+					if(answer == yes) deleteIt();
 					
 				});
 				
-			} else deleteTheFile();
+			} else deleteIt();
 			
-			function deleteTheFile() {
+			function deleteIt() {
 				el.parentNode.removeChild(el);
 				
-				EDITOR.deleteFile(filePath);
+				if(isFolder) CLIENT.cmd("deleteDirectory", {directory: path, recursive: true}, function(err, json) {
+					if(err) alertBox(err.message);
+					});
+				else EDITOR.deleteFile(path);
 			}
 			
 			return false;
