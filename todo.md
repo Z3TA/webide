@@ -32,8 +32,7 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-stop in production
-remove from production
+ignore folders named data (only create them if they don't exist) when deoploying ?
 
 test nodejs deploy and nodejs init !
 
@@ -51,6 +50,10 @@ Shift+Ctrl+F3 = retire production script
 
 todo
 ----
+
+delete folder from file explorer
+
+when calling promtBox with pw it doesn't get input focus right away which is annoying
 
 refactor voice, EDITOR.say, so all plugins can use it.
 

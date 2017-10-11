@@ -41,6 +41,10 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+
+var USER_PROD_FOLDER = "/.prod/";
+
+
 var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 log("process.env.uid=" + process.env.uid);
 
@@ -712,7 +716,54 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 	
 }
 
-API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
+API.nodejs_init_stop = function nodejs_init_stop(user, json, callback) {
+	
+	var folder = json.folder;
+	var pw = json.pw;
+	
+	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder path need to end with a folder delimiter (slash)!"));
+	if(pw == undefined) return callback(new Error("User password is needed to stop Node.JS script!"));
+	
+	var folderName = UTIL.getFolderName(folder);
+	
+	var prodFolder = USER_PROD_FOLDER + folderName + "/";
+	
+	nodejs_init_action("stop", prodFolder, pw, callback);
+	
+}
+
+API.nodejs_init_restart = function nodejs_init_restart(user, json, callback) {
+	
+	var folder = json.folder;
+	var pw = json.pw;
+	var folderName = UTIL.getFolderName(folder);
+	var prodFolder = USER_PROD_FOLDER + folderName + "/";
+	
+	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder path need to end with a folder delimiter (slash)!"));
+	if(pw == undefined) return callback(new Error("User password needed to restart " + prodFolder + " !"));
+	
+	nodejs_init_action("restart", prodFolder, pw, callback);
+	
+}
+
+API.nodejs_init_remove = function nodejs_init_removet(user, json, callback) {
+	
+	var folder = json.folder;
+	var pw = json.pw;
+	var folderName = UTIL.getFolderName(folder);
+	var prodFolder = USER_PROD_FOLDER + folderName + "/";
+	
+	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder path need to end with a folder delimiter (slash)!"));
+	if(pw == undefined) return callback(new Error("User password needed to remove " + prodFolder + " !"));
+	
+	API.deleteDirectory(user, {directory: prodFolder, recursive: true}, function(err, resp) {
+		if(err) callback(err);
+		else nodejs_init_action("stop", prodFolder, pw, callback);
+	});
+	
+}
+
+API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 
 	var folder = json.folder;
 	var pw = json.pw;
@@ -748,7 +799,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 		}
 		
 		var foldername = UTIL.getFolderName(folder);
-		var prodFolder = "/.prod/" + foldername;
+		var prodFolder = USER_PROD_FOLDER + foldername;
 		
 		/*
 			note: We could also fpt/sftp/rsync the files to another server!
@@ -758,24 +809,7 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 		copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
 			if(copyFolderErr) return callback(copyFolderErr);
 			else {
-				
-				// Tell deamon manager to restart the app
-				var http = require("http");
-				httpGet({
-					auth: user.name + ":" + pw, 
-				hostname: "127.0.0.1", 
-				port: nodejsDeamonManagerPort, 
-					path: prodFolder + "?restart"
-				}, function (err, resp) {
-					
-					if(err) {
-						return callback(new Error("Failed to restart " + projectName + "! " + err.message));
-					}
-					else {
-						return callback(null, {name: projectName, prodFolder: prodFolder});
-					}
-					
-				});
+				nodejs_init_action("restart", prodFolder, pw, callback);
 				}
 		});
 		
@@ -788,6 +822,27 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 	
 
 }
+
+
+function nodejs_init_action(action, prodFolder, pw, callback) {
+	var http = require("http");
+	httpGet({
+		auth: user.name + ":" + pw,
+		hostname: "127.0.0.1",
+		port: nodejsDeamonManagerPort,
+		path: prodFolder + action
+	}, function (err, resp) {
+		
+		if(err) {
+			return callback(new Error("Failed to " + action + " " + prodFolder + "! " + err.message));
+		}
+		else {
+			return callback(null, {prodFolder: prodFolder});
+		}
+		
+	});
+}
+
 
 function httpGet(options, callback) {
 	

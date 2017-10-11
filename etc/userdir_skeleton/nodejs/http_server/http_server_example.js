@@ -15,7 +15,7 @@
 	
 	Scripts deployed to production will keep running even if you close the editor.
 	Press Ctrl+F3 to stop a in-production script.
-	(note: A script in production script will be restarted after a server reboot, even if it was stopped!)
+	(note: A script in production will be restarted after a server machine reboot, even if it was stopped!)
 	Press Shift+Ctrl+F3 to remove a script prom production
 	
 	

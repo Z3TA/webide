@@ -7,7 +7,7 @@
 	
 	open log file in user's home dir /log/deamon_manager.log
 	
-	traverse the .prod folder and look for a package.json file.
+	traverse the USER_PROD_FOLDER and look for a package.json file.
 	look for main script and start it
 	restart the script if it exits, and notify the user via e-mail or sms
 	
@@ -64,6 +64,8 @@ var WARN = 4;
 var ERR = 3; // <3>This is an ERR level message
 var ERROR = 3;
 
+var USER_PROD_FOLDER = "/.prod/";
+
 PATH = UTIL.trailingSlash(PATH); // Make sure it ends with a slash
 
 // What happens if we open a file stream before chroot ?
@@ -97,7 +99,7 @@ if(getArg(["runtests"]) !== undefined) {
 }
 else {
 	
-	findScripts("/.prod", function(scripts) {
+	findScripts(USER_PROD_FOLDER, function(scripts) {
 		
 		for (var i=0; i<scripts.length; i++) {
 			startService(scripts[i].main, scripts[i].name, scripts[i].pathToFolder, scripts[i].log, scripts[i].email);

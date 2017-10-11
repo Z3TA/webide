@@ -6,11 +6,13 @@
 		load: function loadNodeJsDeploy() {
 			var keyF1 = 112;
 			var keyF3 = 114;
-			EDITOR.bindKey({desc: "Deoploy the nodejs project this file belongs to", fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
+			EDITOR.bindKey({desc: "Deoploy the nodejs project the currently open file belongs to", fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
 			
-			//EDITOR.bindKey({desc: "Stop the in-production nodejs project this file belongs to", fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+			EDITOR.bindKey({desc: "(Re)Start the in-production nodejs project the currently open file belongs to", fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
 			
-			EDITOR.bindKey({desc: "Remove the nodejs project this file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
+			EDITOR.bindKey({desc: "Stop the in-production nodejs project the currently open file belongs to", fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+			
+			EDITOR.bindKey({desc: "Remove the nodejs project the currently open file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
 			
 		},
 		unload: function unloadNodeJsDeploy() {
@@ -18,6 +20,113 @@
 		},
 	});
 	
+	function nodejsProdStop(currentFile) {
+		
+		getProjFolder(currentFile, function(err, folder, pj) {
+			if(err) alertBox(err.message);
+			else promptBox("Enter password to stop " + pj.name + " in production:", true, function(pw) {
+			CLIENT.cmd("nodejs_init_stop", {folder: folder, pw: pw}, function(err, resp) {
+				if(err) alertBox(err.message);
+					else alertBox(resp.name + " stopped!");
+				});
+			});
+		});
+		
+		return false;
+	}
+	
+	function nodejsProdRemove(currentFile) {
+		
+		getProjFolder(currentFile, function(err, folder, pj) {
+			if(err) alertBox(err.message);
+			else promptBox("Enter password to remove " + pj.name + " from production:", true, function(pw) {
+				CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
+					if(err) alertBox(err.message);
+					else alertBox(resp.name + " removed from production!");
+				});
+			});
+		});
+		
+		return false;
+	}
+	
+	function nodejsProdRestart(currentFile) {
+		
+		getProjFolder(currentFile, function(err, folder, pj) {
+			if(err) alertBox(err.message);
+			else promptBox("Enter password to restart " + pj.name + " in production:", true, function(pw) {
+				CLIENT.cmd("nodejs_init_restart", {folder: folder, pw: pw}, function(err, resp) {
+					if(err) alertBox(err.message);
+					else alertBox(resp.name + " restarted!");
+				});
+			});
+		});
+		
+		return false;
+	}
+	
+	function getProjFolder(currentFile, callback) {
+		var folders = UTIL.getFolders(currentFile.path);
+		
+		var folder = folders.pop();
+		
+		readPj(folder);
+		
+		function readPj(folder) {
+			EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
+				if(readFileErr) {
+					if(readFileErr.code == "ENOENT" && folders.length > 0) {
+						folder = folders.pop();
+						readPj(folder);
+					}
+					else if(folders.length == 0) {
+						callback(new Error("Unable to find package.json"));
+					}
+					else {
+						throw readFileErr;
+					}
+				}
+				else {
+					
+					// Found a package.json!
+					try {
+						var json = JSON.parse(fileContent);
+					}
+					catch(parseErr) {
+						return callback("Failed the parse " + filePath + "! " + parseErr.message);
+					}
+					
+					callback(null, folder, json);
+					
+				}
+			});
+		}
+	}
+	
+	function createPj() {
+		var createPj = "Create package.json";
+		var cancel = "No, cancel deployment";
+		confirmBox("Unable to find a package.json in the project root. Do you want to create it ?", [createPj, cancel], function(answer) {
+			if(answer == createPj) {
+				
+				var folder = UTIL.getDirectoryFromPath(currentFile.path);
+				
+				var pjTemplate = {
+					"name": UTIL.getFolderName(folder),
+					"version": "1.0.0",
+					"description": "What this micro service does",
+					"author": EDITOR.username,
+					"main": UTIL.getFilenameFromPath(currentFile.path)
+				};
+				
+				EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), function(openFileErr, file) {
+					if(openFileErr) alertBox(openFileErr.message);
+					
+				});
+				
+			}
+		});
+	}
 	
 	function nodejsDeploy(currentFile, combo, character, charCode, buttonPushDirection, targetElementClass) {
 		
@@ -83,7 +192,7 @@
 					
 					promptBox("Enter password to deploy " + projectName + ":", true, function(pw) {
 					
-						CLIENT.cmd("deploy_nodejs", {folder: folder, pw: pw}, function(err, resp) {
+						CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
 							if(err) alertBox(err.message);
 							else alertBox(resp.name + " deployed to production: " + resp.prodFolder);
 							
