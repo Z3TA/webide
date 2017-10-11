@@ -768,6 +768,8 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 	var folder = json.folder;
 	var pw = json.pw;
 	
+	if(folder == undefined) return callback(new Error("A folder need to be specified where to the find the source code to be deployed! folder=" + folder));
+	
 	if(!folder.match(/(\/|\\)$/)) return callback(new Error("Folder paths need to end with a folder delimiter (slash)!"));
 	if(pw == undefined) return callback(new Error("User password is needed to deploy Node.JS script!"));
 	
@@ -825,13 +827,18 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 
 
 function nodejs_init_action(action, prodFolder, pw, callback) {
+	if(action == undefined) throw new Error("action=" + action);
+	if(prodFolder == undefined) throw new Error("prodFolder=" + prodFolder);
+	if(pw == undefined) throw new Error("pw=" + pw);
+	if(callback == undefined) throw new Error("callback=" + callback);
+	
 	var http = require("http");
 	httpGet({
 		auth: user.name + ":" + pw,
 		hostname: "127.0.0.1",
 		port: nodejsDeamonManagerPort,
-		path: prodFolder + action
-	}, function (err, resp) {
+		path: prodFolder + "?" + action
+	}, function nodejsInitActionCommand(err, resp) {
 		
 		if(err) {
 			return callback(new Error("Failed to " + action + " " + prodFolder + "! " + err.message));
@@ -874,10 +881,10 @@ function httpGet(options, callback) {
 	
 	res.setEncoding('utf8');
 		var rawData = '';
-		res.on('data', function(chunk) { rawData += chunk; });
-		res.on('end', function() {
+		res.on('data', function http_data(chunk) { rawData += chunk; });
+		res.on('end', function http_req_end() {
 			if(res.statusCode != 200) {
-				callback(new Error("Failed to get url=" + url + " statusCode=" + res.statusCode + " data=" + rawData));
+				callback(new Error("Failed to get " + options.path + " statusCode=" + res.statusCode + " data=" + rawData));
 			}
 			else {
 				callback(null, rawData);

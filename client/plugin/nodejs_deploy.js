@@ -143,7 +143,12 @@
 		return false;
 		
 		function readPj(folder) {
+			if(folder == undefined) throw new Error("folder=" + folder);
+			
+			console.log("Looking for package.json in folder=" + folder + " ..."); 
 		EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
+				if(folder == undefined) throw new Error("folder=" + folder);
+				
 				if(readFileErr) {
 					if(readFileErr.code == "ENOENT" && folders.length > 0) {
 						folder = folders.pop();
@@ -152,7 +157,7 @@
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
 						var cancel = "No, cancel deployment";
-						var folder = UTIL.getDirectoryFromPath(currentFile.path);
+						folder = UTIL.getDirectoryFromPath(currentFile.path);
 						confirmBox("Unable to find a package.json in " + folder + ". Do you want to create it ?", [createPj, cancel], function(answer) {
 							if(answer == createPj) {
 							
@@ -178,22 +183,22 @@
 				}
 				else {
 					
+					if(folder == undefined) throw new Error("folder=" + folder);
+					
 					// Found a package.json!
 					try {
-						var json = JSON.parse(fileContent);
+						var pj = JSON.parse(fileContent);
 					}
 					catch(parseErr) {
 						return alertBox("Failed the parse " + filePath + "! " + parseErr.message);
 					}
 					
-					var projectName = json.name;
-					
-					
-					promptBox("Enter password to deploy " + projectName + ":", true, function(pw) {
-					
+					if(pj.main == undefined) alertBox(filePath + " needs to have a main (file path entry)!");
+					else promptBox("Enter password to deploy " + pj.name + ":", true, function(pw) {
+						if(folder == undefined) throw new Error("folder=" + folder);
 						CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
 							if(err) alertBox(err.message);
-							else alertBox(resp.name + " deployed to production: " + resp.prodFolder);
+							else alertBox(pj.name + " deployed to production: " + resp.prodFolder);
 							
 						});
 						

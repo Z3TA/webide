@@ -32,6 +32,19 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+2017-10-11 (17:02:27) ltest1 worker message: Recieved start command for project folder: /.prod/hello
+The last character is not a delimiter=/ path=/.prod/hello/
+path=/.prod/hello
+/home/Z/Projects/jzedit/nodejs_init_worker.js:208
+				var mainFile = path.join(pathToFolder, json.main);
+				               ^
+
+ReferenceError: path is not defined
+    at /home/Z/Projects/jzedit/nodejs_init_worker.js:208:20
+    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
+
+
+
 ignore folders named data (only create them if they don't exist) when deoploying ?
 
 test nodejs deploy and nodejs init !
@@ -1070,6 +1083,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Show a fat warning if a variable inside function parameters also is declared in the function body
+
+---
 
 Key binding are impossible to "forget" once you've learned them. So we have to support the most common keybindings from all popular editors!!
 In order for the editor to feel nice eg. doing what the user intents.
