@@ -1,0 +1,27 @@
+#
+# cd /srv/jzedit , or to where you placed the files
+# sudo cp etc/systemd/jzedit_nodejs_init.service /etc/systemd/system/jzedit_nodejs_init.service
+# sudo systemctl enable jzedit_nodejs_init   or   sudo systemctl daemon-reload
+#
+
+[Unit]
+Description=Responsible for starting and monitoring nodejs micro services
+After=network.target
+
+[Service]
+User=root
+
+# Change to the jzedit directory
+WorkingDirectory=/srv/jzedit/
+
+# Change to node or nodejs if you are not using apparmor.
+# See etc/apparmor/usr.bin.jzedit for example apparmor profile (run makeprofile.sh to create one)
+
+# See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
+
+ExecStart=/usr/bin/nodejs nodejs_init.js --port=8200 --pwfile=/etc/jzedit_users
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

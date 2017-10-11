@@ -28,7 +28,7 @@ var log = logModule.log;
 
 var getArg = require("./getArg.js");
 
-var nodejsDeamonManagerPort = 8100;
+var nodejsDeamonManagerPort = 8200;
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);
