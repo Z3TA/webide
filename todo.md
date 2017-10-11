@@ -32,8 +32,6 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-handle sigint on nodejs_init.js
-
 should service logs have date message appended to each stdout message !?
 (service manager message it's ok to have date, but the user might also append a date, resulting in double dates.)
 
@@ -153,6 +151,13 @@ Streamline the experience of sharing and publishing a web document via the edito
 
 What I'm thinking
 -----------------
+
+idea on adding flags:
+Add a flag to the startup process when working on a feature. If the flag is present, the feature will not load in production.
+When the feature is complete, just remove the flag!
+eg. --disable-plugis=foo,bar,baz
+
+
 
 Should file.writeLine, file.write, file.writeLineBreak call file.change !?!?!?
 
