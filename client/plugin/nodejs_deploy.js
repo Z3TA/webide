@@ -8,6 +8,10 @@
 			var keyF3 = 114;
 			EDITOR.bindKey({desc: "Deoploy the nodejs project this file belongs to", fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
 			
+			//EDITOR.bindKey({desc: "Stop the in-production nodejs project this file belongs to", fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+			
+			EDITOR.bindKey({desc: "Remove the nodejs project this file belongs to from production", fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
+			
 		},
 		unload: function unloadNodeJsDeploy() {
 			EDITOR.unbindKey(nodejsDeploy);

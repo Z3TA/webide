@@ -32,43 +32,19 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-should service logs have date message appended to each stdout message !?
-(service manager message it's ok to have date, but the user might also append a date, resulting in double dates.)
+stop in production
+remove from production
 
-test nodejs depply and nodejs init !
+test nodejs deploy and nodejs init !
 
-nodejs userscript deamon watcher ...
-
-There needs to be away to mark a program to "run forever" or go into prod etc ...
-webide: Put nodeJS scripts in "production" mode. Deoploy to production.
-Use systemd and service RootDirectory for nodejs scripts "in production" !?
-Node-JS app one click deployment. Upload and restart from the editor. Debug app in production from the editor.
-Users need a convenient way to deploy there work ...
-deploy, start/stop and debug nodeJS in the editor
 
 F1 = run script
-F2 = stop script
-F3 = npm update !?
-F4 = deploy script
+F3 = stop script
 
-Please specify the main file in package.json
+Ctrl + F1 = deploy script
+Ctrl+F3 = stop production script
+Shift+Ctrl+F3 = retire production script
 
-
-Deoply copies everything, except folders named data, into a production enviroment and restarts the main app
-
-It seems popular to push to production, eg git push {azure/appharbor/heroku/whatever} master
-
-Or should nodejs scripts run forever ? No, you want a separate dev and prod!
-Should prod have access to user home dir ? Yes! prod need to be able to read/write files somwhere
-
-Each users nodejs deamon loader should be chrooted to the users home dir, so that dev and prod see the same file tree.
-
-Ask the user if he/she wants to copy the files to another location, or run the "prod" script from the current location !?
-Always copy to another location!
-
-.prod folder with a readme: When you doploy an app, the files will be copied here. 
-
-if the file that is open when the user hits deploy, is not the same as the main file in package.json, ask the user to be sure.
 
 
 
@@ -79,7 +55,10 @@ todo
 refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
-Able to add npm modules to the SSG ...
+using modules in SSG ... Able to add npm modules to the SSG ...
+
+
+able to delete directories from file explorer
 
 Investigate adding the editor to chrome web store and test it in a Chromebook.
 
@@ -151,6 +130,14 @@ Streamline the experience of sharing and publishing a web document via the edito
 
 What I'm thinking
 -----------------
+
+What about users that don't have function keys ?
+
+Keyboard shortcuts are hard to remember ...
+
+
+
+---
 
 idea on adding flags:
 Add a flag to the startup process when working on a feature. If the flag is present, the feature will not load in production.
@@ -1789,6 +1776,10 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Make each production-folder a zfs filesystem
+Take a snapshot when doploying
+Make it possible to rollback to an earlier deployemnt
 
 SSH into another server and run shell commands.
 

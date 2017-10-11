@@ -415,6 +415,9 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	var arg = [];
 	var opt = {
 		silent: true,
+		env: {
+			prod: true
+		},
 		execPath: "/usr/bin/nodejs" // note: we are in chroot!
 	};
 	var childProcess;

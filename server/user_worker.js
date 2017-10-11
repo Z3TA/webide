@@ -750,6 +750,11 @@ API.deploy_nodejs = function deploy_nodejs(user, json, callback) {
 		var foldername = UTIL.getFolderName(folder);
 		var prodFolder = "/.prod/" + foldername;
 		
+		/*
+			note: We could also fpt/sftp/rsync the files to another server!
+			And talk to the nodejs_init.service on that server.
+			*/
+		
 		copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
 			if(copyFolderErr) return callback(copyFolderErr);
 			else {
@@ -1039,7 +1044,8 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 	var nodeScriptOptions = {
 		execPath: "/usr/bin/nodejs",
 		env: {
-			myName: user.name
+			myName: user.name,
+				dev: true
 		},
 		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 	};
