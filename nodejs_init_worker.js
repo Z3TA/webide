@@ -41,8 +41,8 @@ var STOP = []; // List of processes being stopped, so they wont restart
 
 var SHUTDOWN = false;
 
-var TIMERS = [];
-
+var TIMERS = {};
+var GLOBTMERS = [];
 var UTC = false; // If set to true, use GMT+0 on time stamps
 
 // Require non-native modules before entering chroot!
@@ -134,6 +134,9 @@ function commandMessage(message) {
 }
 
 function restart(pathToFolder) {
+	
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	
 	log("Recieved restart command for " + pathToFolder);
 	
 	if(!CHILD.hasOwnProperty(pathToFolder)) return start(pathToFolder);
@@ -146,25 +149,42 @@ function restart(pathToFolder) {
 }
 
 function stop(pathToFolder) {
+	
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	
 	log("Recieved stop command for " + pathToFolder);
 	
-	if(!CHILD.hasOwnProperty(pathToFolder)) return log("Service is not running: " + pathToFolder);
+	if(!CHILD.hasOwnProperty(pathToFolder)) return log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
 	
 	STOP.push(pathToFolder);
+	
+	log("Clearing " + TIMERS[pathToFolder].length + " timers from " + pathToFolder);
+	TIMERS[pathToFolder].forEach(clearTimeout);
+	TIMERS[pathToFolder].length = 0;
 	
 	closeChild(CHILD[pathToFolder]);
 	
 	var killTimeout = setTimeout(function makeSureItsDead() {
 		CHILD[pathToFolder].kill('SIGKILL');
-		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
+		
+		GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
+		
+		if(TIMERS[pathToFolder].length > 0) initError( new Error(pathToFolder + " has " + TIMERS[pathToFolder].length + " timers!") );
+		
+		delete TIMERS[pathToFolder];
 		delete CHILD[pathToFolder];
-		TIMERS.splice(TIMERS.indexOf(killTimeout), 1);
+		
+		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
+		
 	}, 5000);
-	TIMERS.push(killTimeout);
+	GLOBTMERS.push(killTimeout);
 	
 }
 
 function start(pathToFolder) {
+	
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	
 	log("Recieved start command for project folder: " + pathToFolder);
 	
 	// Look up start parameters ...
@@ -241,6 +261,7 @@ function shutdownInitWorker() {
 	var closed = [];
 	
 	for(var name in CHILD) {
+		TIMERS[name].forEach(clearTimeout);
 		closeChild(CHILD[name]);
 		log("Closing " + name);
 		closed.push(name);
@@ -253,7 +274,7 @@ function shutdownInitWorker() {
 		});
 	}
 	
-	TIMERS.forEach(clearTimeout);
+	GLOBTMERS.forEach(clearTimeout);
 	
 }
 
@@ -400,10 +421,14 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	if(pathToFolder == undefined) throw new Error("pathToFolder=" + pathToFolder);
 	if(logFilePath == undefined) throw new Error("logFilePath=" + logFilePath);
 	
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	
 	if(CHILD.hasOwnProperty(pathToFolder)) return log("Already initiated: " + pathToFolder + " (try stopping it)"); 
 	if(STOP.indexOf(pathToFolder) != -1) return log("Can not start Script while it's being stopped: " + pathToFolder + "");
 	
 	log("Starting service: " + pathToFolder + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
+	
+	TIMERS[pathToFolder] = [];
 	
 	var waitRestart = [2000,5000,10000,30000,60000,1800000];
 	var waitKill = 1000; // How long to wait from SIGHUB to SIGKILL
@@ -432,8 +457,6 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	logStream.write(myDate() + ": Starting ...\n");
 	
 	function respawn() {
-		
-		clearTimeout(respawnTimer);
 		
 		if(SHUTDOWN) return;
 		
@@ -537,24 +560,32 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		log("Waiting " + waitForRespawn + "ms to restart: " + scriptPath, 7);
 		
 		clearTimeout(resetRestartsTimer);
+		TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
 		clearTimeout(respawnTimer);
+		TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(respawnTimer), 1);
 		
-		respawnTimer = setTimeout(function() {
+		var respawnTimer = setTimeout(function() {
+			TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(respawnTimer), 1);
 			
 			restarts++;
 			
 			respawn();
 			
-			resetRestartsTimer = setTimeout(function() {
+			var resetRestartsTimer = setTimeout(function() {
+				TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
+				
 				// Reset the restarts counter if the service has been running for more then 60 seconds ...
 				restarts = 0;
-				TIMERS.splice(TIMERS.indexOf(resetRestartsTimer), 1);
+				
 			}, 60000);
-			TIMERS.push(resetRestartsTimer);
+			TIMERS[pathToFolder].push(resetRestartsTimer);
 			
-			TIMERS.splice(TIMERS.indexOf(respawnTimer), 1);
+			
 		}, waitForRespawn);
-		TIMERS.push(respawnTimer);
+		TIMERS[pathToFolder].push(respawnTimer);
+		
+		
+		log(pathToFolder + " timers=" + TIMERS[pathToFolder].length);
 		
 	}
 	
