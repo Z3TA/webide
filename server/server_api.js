@@ -1696,11 +1696,9 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 				// We do not know if it's a folder or file yet, folderItems is just an array of strings, we have to wait for stat
 					path = pathToFolder + folderItems[i];
 					stat(path);
-					
-					
-				}
+					}
+				allFilesAndFoldersDeletedMaybe(null);
 			}
-			
 			
 		});
 		

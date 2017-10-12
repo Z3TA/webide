@@ -51,8 +51,6 @@ Shift+Ctrl+F3 = retire production script
 todo
 ----
 
-delete folder from file explorer
-
 refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
