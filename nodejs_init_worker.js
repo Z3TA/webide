@@ -101,6 +101,13 @@ else {
 	
 	findScripts(USER_PROD_FOLDER, function(scripts) {
 		
+		if(scripts.length == 0) {
+			log("No nodejs services found!");
+			// Make sure there's nothing to do and gracefully exit
+			initLogStream.end();
+			process.disconnect();
+		}
+		
 		for (var i=0; i<scripts.length; i++) {
 			startService(scripts[i].main, scripts[i].name, scripts[i].pathToFolder, scripts[i].log, scripts[i].email);
 		}
@@ -239,7 +246,6 @@ function start(pathToFolder) {
 
 function shutdownInitWorker() {
 	
-	
 	if(SHUTDOWN) {
 		// Second time receiving the SIGINT, kill all children and exit
 		
@@ -247,17 +253,14 @@ function shutdownInitWorker() {
 		
 		for(var name in CHILD) CHILD[name].kill('SIGKILL');
 		
-		initLogStream.exit();
-		
-		//process.exit();
-		
-	}
+		initLogStream.end();
+		process.disconnect();
+		process.exit();
+		}
 	
 	SHUTDOWN = true;
 	
 	// Close all child processes ...
-	
-	
 	var closed = [];
 	
 	for(var name in CHILD) {
@@ -270,11 +273,15 @@ function shutdownInitWorker() {
 	if(closed.length > 0) {
 		// Tell what process was killed
 		if(EMAIL) sendMail(EMAIL, "Killing processes due to SIGINT", "The nodejs init script reaceaved a SIGINT ...\nThis is most likely due to a server reboot or upgrade.\nThe following nodejs services where stopped:\n * " + closed.join("\n * "), undefined, function() {
-			
+			doneShutdown();
 		});
 	}
 	
 	GLOBTMERS.forEach(clearTimeout);
+	
+	function doneShutdown() {
+		
+	}
 	
 }
 
@@ -311,7 +318,8 @@ function findScripts(pathToFolder, callback) {
 	
 	fs.readdir(pathToFolder, function readdir(err, folderItems) {
 		if(err) {
-			return initError(err);
+			if(err.code == "ENOENT") return callback(scripts);
+			else return initError(err);
 		}
 		if(folderItems.length == 0) {
 			log("No files found in pathToFolder=" + pathToFolder, ERR); 
