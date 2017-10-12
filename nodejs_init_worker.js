@@ -172,6 +172,9 @@ function stop(pathToFolder) {
 	closeChild(CHILD[pathToFolder]);
 	
 	var killTimeout = setTimeout(function makeSureItsDead() {
+		
+		log("Sending SIGKILL to " + pathToFolder);
+		
 		CHILD[pathToFolder].kill('SIGKILL');
 		
 		GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
@@ -180,6 +183,8 @@ function stop(pathToFolder) {
 		
 		delete TIMERS[pathToFolder];
 		delete CHILD[pathToFolder];
+		
+		// Why is resetRestartsTimer still active !?!?!?!?!?!?
 		
 		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
 		
@@ -537,7 +542,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	function childProcessEnded(code, signal) {
 		var finalExit = (code !== null);
 		
-		log(projectName + " ended! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
+		log(pathToFolder + " ended! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
 		
 		// NodeJS errors will have a code, but if the process is killed via a signal, we wont get a final exit
 		// So always restart!
@@ -545,12 +550,14 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		if(!finalExit) closeChild(childProcess); // Make sure it's really dead, and disconnect from it
 		// (but do not send SIGKILL because we want to give it a chance to gracefully shut down)
 		
-		exit(code, signal);
+		//exit(code, signal);
 		
 	}
 	
 	
 	function exit(code, signal) {
+		
+		log(pathToFolder + " Exit: code=" + code + " signal=" + signal);
 		
 		logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
 		
