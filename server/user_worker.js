@@ -808,17 +808,27 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 			And talk to the nodejs_init.service on that server.
 			*/
 		
-		copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
-			if(copyFolderErr) return callback(copyFolderErr);
-			else {
-				nodejs_init_action("restart", prodFolder, pw, callback);
+		var fs = require("fs");
+		fs.mkdir(USER_PROD_FOLDER, function makeSureProdFolderExist(err) {
+			
+			if(err) {
+				if(err.code != "EEXIST") return callback(err);
+			}
+			
+			copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
+				if(copyFolderErr) return callback(copyFolderErr);
+				else {
+					nodejs_init_action("restart", prodFolder, pw, callback);
 				}
+			});
+			
+			function filterPath(path) {
+				if(path.match(/data\/?$/)) return false;
+				else return true;
+			}
+			
 		});
 		
-		function filterPath(path) {
-			if(path.match(/data\/?$/)) return false;
-			else return true;
-		} 
 		
 	});
 	
