@@ -8,7 +8,7 @@
 
 "use strict";
 
-function Dialog(msg, icon) {
+function Dialog(msg, icon, dialogDelay) {
 	
 	console.warn("Creating dialog: msg=" + msg); // Using console.warn so we'll get callsite
 	
@@ -98,7 +98,8 @@ function Dialog(msg, icon) {
 	
 	// Give the program time to add buttons etc to the dialog
 	// Also avoid accidently closing the dialog (while typing spaces)
-	var dialogDelay = 2000;
+	if(dialogDelay === 0) return 0; // Manually set focus
+	if(dialogDelay == undefined) dialogDelay = 2000;
 	setTimeout(focusDefaultElement, dialogDelay); 
 	
 	return 0;
@@ -225,7 +226,7 @@ function confirmBox(msg, options, callback, recursionCount) {
 	
 }
 
-function promptBox(msg, isPassword, defaultValue, callback, recursionCount) {
+function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursionCount) {
 	
 	if(typeof isPasswod == "function" && callback == undefined) {
 		callback = isPasswod;
@@ -236,9 +237,13 @@ function promptBox(msg, isPassword, defaultValue, callback, recursionCount) {
 		callback = defaultValue;
 		defaultValue = undefined;
 	}
+	else if(typeof dialogDelay == "function" && callback == undefined) {
+		callback = dialogDelay;
+		dialogDelay = undefined;
+	}
 	else if(typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 	
-	var dialog = new Dialog(msg);
+	var dialog = new Dialog(msg, undefined, dialogDelay);
 	
 	if(!dialog.div) {
 		return setTimeout(function wait() {
@@ -249,7 +254,7 @@ function promptBox(msg, isPassword, defaultValue, callback, recursionCount) {
 			
 			if(recursionCount > 4) throw new Error("Unable to show promptBox msg=" + msg + "");
 			
-			promptBox(msg, isPassword, defaultValue, callback, recursionCount);
+			promptBox(msg, isPassword, defaultValue, callback, dialogDelay, recursionCount);
 			
 		}, 100);
 	}
@@ -309,6 +314,12 @@ function promptBox(msg, isPassword, defaultValue, callback, recursionCount) {
 	dialog.div.appendChild(input);
 	dialog.div.appendChild(cancel);
 	dialog.div.appendChild(ok);
+	
+	if(dialogDelay === 0) {
+	EDITOR.input = false;
+		input.focus();
+	
+	}
 	
 	return dialog;
 }

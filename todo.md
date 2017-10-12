@@ -53,8 +53,6 @@ todo
 
 delete folder from file explorer
 
-when calling promtBox with pw it doesn't get input focus right away which is annoying
-
 refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
