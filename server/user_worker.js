@@ -841,7 +841,7 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 	}, function nodejsInitActionCommand(err, resp) {
 		
 		if(err) {
-			return callback(new Error("Failed to " + action + " " + prodFolder + "! " + err.message));
+			return callback(new Error("Failed to " + action + " " + prodFolder + "\n" + err.message));
 		}
 		else {
 			return callback(null, {prodFolder: prodFolder});
