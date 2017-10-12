@@ -106,7 +106,7 @@ var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 		var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 		
 		response.writeHead(404, "Not found", responseHeaders);
-		response.end('This is the signup service for ' + BRAND_NAME + '.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html');
+		response.end('This is the signup service for ' + BRAND_NAME + '.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html\n');
 		
 	}
 	
