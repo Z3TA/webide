@@ -183,6 +183,7 @@ function start(pathToFolder) {
 					else {
 						folderItems.forEach(function(fileName) {
 							
+							var path = require("path");
 							var scriptFilePath = path.join(pathToFolder, fileName);
 							
 							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, "/log/" + fileName + ".log");
@@ -205,6 +206,7 @@ function start(pathToFolder) {
 			
 			if(json.main) {
 				var name = json.name || findFile;
+				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
 				startService(mainFile, name, pathToFolder, "/log/" + name + ".log", json.email);
 			}

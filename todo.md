@@ -32,19 +32,6 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-2017-10-11 (17:02:27) ltest1 worker message: Recieved start command for project folder: /.prod/hello
-The last character is not a delimiter=/ path=/.prod/hello/
-path=/.prod/hello
-/home/Z/Projects/jzedit/nodejs_init_worker.js:208
-				var mainFile = path.join(pathToFolder, json.main);
-				               ^
-
-ReferenceError: path is not defined
-    at /home/Z/Projects/jzedit/nodejs_init_worker.js:208:20
-    at FSReqWrap.readFileAfterClose [as oncomplete] (fs.js:380:3)
-
-
-
 ignore folders named data (only create them if they don't exist) when deoploying ?
 
 test nodejs deploy and nodejs init !
