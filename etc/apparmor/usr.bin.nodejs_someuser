@@ -42,6 +42,7 @@
   %JZEDIT%/node_modules/** r,
   %JZEDIT%/server/** r,
   %JZEDIT%/client/** r,
+  %JZEDIT%/nodejs_init_worker.js r,
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,
