@@ -20,7 +20,7 @@ find beta testers!
 
 
 WRITE TESTS FOR EACH BUG YOU FIX!! 
-AND ALSO FOR ALL NEW FEATURES!
+AND REGRESSION TESTS FOR ALL NEW FEATURES!
 
 
 There's no rush in getting rid of nw.js, but we should make sure everything works without it!
@@ -32,7 +32,7 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-ignore folders named data (only create them if they don't exist) when deoploying ?
+
 
 test nodejs deploy and nodejs init !
 
@@ -1606,6 +1606,9 @@ Figure out when indentation in the sourfe file goes bad and prevent it
 Preserve (manual) indentation inside block comments and pre tags !?
 
 Auto complete xml tags! (in xml/svg files)
+
+when deoploying nodejs micro services, ignore folders named data (only create them if they don't exist) when deoploying !?
+make it possible to deploy to ftp/sft/ftps!
 
 ---
 

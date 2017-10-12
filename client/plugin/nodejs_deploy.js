@@ -25,7 +25,7 @@
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) alertBox(err.message);
 			else promptBox("Enter password to stop " + pj.name + " in production:", true, function(pw) {
-			CLIENT.cmd("nodejs_init_stop", {folder: folder, pw: pw}, function(err, resp) {
+			if(pw != null) CLIENT.cmd("nodejs_init_stop", {folder: folder, pw: pw}, function(err, resp) {
 				if(err) alertBox(err.message);
 					else alertBox(resp.name + " stopped!");
 				});
@@ -40,7 +40,7 @@
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) alertBox(err.message);
 			else promptBox("Enter password to remove " + pj.name + " from production:", true, function(pw) {
-				CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
+				if(pw != null) CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
 					if(err) alertBox(err.message);
 					else alertBox(resp.name + " removed from production!");
 				});
@@ -55,7 +55,7 @@
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) alertBox(err.message);
 			else promptBox("Enter password to restart " + pj.name + " in production:", true, function(pw) {
-				CLIENT.cmd("nodejs_init_restart", {folder: folder, pw: pw}, function(err, resp) {
+				if(pw != null) CLIENT.cmd("nodejs_init_restart", {folder: folder, pw: pw}, function(err, resp) {
 					if(err) alertBox(err.message);
 					else alertBox(resp.name + " restarted!");
 				});
@@ -183,8 +183,6 @@
 				}
 				else {
 					
-					if(folder == undefined) throw new Error("folder=" + folder);
-					
 					// Found a package.json!
 					try {
 						var pj = JSON.parse(fileContent);
@@ -195,16 +193,14 @@
 					
 					if(pj.main == undefined) alertBox(filePath + " needs to have a main (file path entry)!");
 					else promptBox("Enter password to deploy " + pj.name + ":", true, function(pw) {
-						if(folder == undefined) throw new Error("folder=" + folder);
-						CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
+						
+						if(pw != null) CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
 							if(err) alertBox(err.message);
 							else alertBox(pj.name + " deployed to production: " + resp.prodFolder);
 							
 						});
 						
 					});
-					
-					
 					
 				}
 			}); 
