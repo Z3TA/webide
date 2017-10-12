@@ -303,8 +303,8 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		
 		// Create a directory for putting "in production" files
 		fs.mkdirSync(homeDir + "/.prod");
-		chmodrSync(homeDir + "/log", "770");
-		chownrDirSync(homeDir + "/log", uid, gid);
+		chmodrSync(homeDir + "/.prod", "770");
+		chownrDirSync(homeDir + "/.prod", uid, gid);
 		
 	
 		// Create nginx profile
