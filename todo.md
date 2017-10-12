@@ -32,8 +32,6 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
-
-
 test nodejs deploy and nodejs init !
 
 
@@ -80,6 +78,8 @@ hmm, I do remember editing file(s) in node_modules, (ftp module !?) to fix some 
 
 hmm, for hg clone to work we need to allow python to access the internet! ...
 could solve any issues by setting up restrictive iptables and maybe a netns
+
+make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
 
 Make server run under apparmor profile ...
 Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)

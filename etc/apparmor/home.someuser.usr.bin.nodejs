@@ -19,6 +19,7 @@
   signal send set=rtmin+1 peer=%HOME%%USERNAME%/usr/bin/nodejs,
 	 signal send set=term peer=%HOME%%USERNAME%/usr/bin/nodejs,
 
+  # Must allow network in order to inspect/debug
   network inet stream,
   network inet6 stream,
   network unix,
