@@ -200,17 +200,19 @@ function httpRequest(request, response) {
 		var arr = request.url.split("?");
 		var pathToFolder = arr[0];
 		var action = arr[1];
+		var isStarting = false;
 		
-		if(!NODE_INIT_WORKER.hasOwnProperty(name)) {
+		if(!NODE_INIT_WORKER.hasOwnProperty(name) && action != "stop") {
 			startNodejsInitWorker(homeDir, name, uid, gid);
-			// Don't have to wait for the init worker, ... or ?
+			isStarting = true;
 		}
-		else if(!NODE_INIT_WORKER[name].connected) {
+		else if(!NODE_INIT_WORKER[name].connected && action != "stop") {
 			startNodejsInitWorker(homeDir, name, uid, gid);
-			// Don't have to wait for the init worker, ... or ?
+			isStarting = true;
 		}
 		
 		if(action == "start") {
+			if(isStarting) return;
 			NODE_INIT_WORKER[name].send({restart: pathToFolder});
 			response.writeHead(200);
 			response.end('Starting ' + pathToFolder + "\n");
@@ -221,6 +223,7 @@ function httpRequest(request, response) {
 			response.end('Stopping ' + pathToFolder + "\n");
 		}
 		else if(action == "restart") {
+			if(isStarting) return;
 			NODE_INIT_WORKER[name].send({restart: pathToFolder});
 			response.writeHead(200);
 			response.end('Restarting ' + pathToFolder + "\n");
