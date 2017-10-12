@@ -1685,6 +1685,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 		var gotError = false;
 		var filesToBeDeleted = 0;
 		var foldersToBeDeleted = 0;
+		var pathsToStat = 0;
 		
 		console.log("Local file-system recursive delete: pathToFolder=" + pathToFolder);
 		
@@ -1703,7 +1704,9 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 		});
 		
 		function stat(path) {
+			pathsToStat++;
 			fs.stat(path, function (err, stats) {
+				pathsToStat--;
 				
 				if(gotError) return; // If we have already got an error while deleting the content of this directory
 				
@@ -1736,7 +1739,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 	
 		function allFilesAndFoldersDeletedMaybe(err) {
 			
-			console.log("allFilesAndFoldersDeletedMaybe? gotError=" + gotError + " err=" + err + " filesToBeDeleted=" + filesToBeDeleted + " foldersToBeDeleted=" + foldersToBeDeleted);
+			console.log("allFilesAndFoldersDeletedMaybe? gotError=" + gotError + " err=" + err + " pathsToStat=" + pathsToStat + " filesToBeDeleted=" + filesToBeDeleted + " foldersToBeDeleted=" + foldersToBeDeleted);
 			
 			if(gotError) return; // If we have got an error, it means we have already called the callback
 			
@@ -1747,7 +1750,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			}
 			else {
 				// Make sure the directory is emty before deleting it
-				if(filesToBeDeleted === 0 && foldersToBeDeleted === 0) {
+				if(filesToBeDeleted === 0 && foldersToBeDeleted === 0 && pathsToStat === 0) {
 					fs.rmdir(pathToFolder, function localFileDeleted(err) {
 					recursiveDeleteLocalDirCallback(err);
 					});
