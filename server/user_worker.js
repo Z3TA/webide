@@ -1076,7 +1076,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 					stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
 					stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
 					
-					if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + stderr));
+					if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
 				}
 				
 					if(stdout) {
