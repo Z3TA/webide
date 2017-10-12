@@ -148,10 +148,15 @@ function restart(pathToFolder) {
 	
 	if(!CHILD.hasOwnProperty(pathToFolder)) return start(pathToFolder);
 	
+	if(CHILD[pathToFolder].connected) {
 	log("Sending stop signals and disconnecting from: " + pathToFolder);
 	closeChild(CHILD[pathToFolder]);
-	
-	// It will be respawned!
+		// it will be restarted!
+	}
+	else {
+		closeChild(CHILD[pathToFolder]); // Just in case
+		start(pathToFolder);
+	}
 	
 }
 
@@ -183,8 +188,6 @@ function stop(pathToFolder) {
 		
 		delete TIMERS[pathToFolder];
 		delete CHILD[pathToFolder];
-		
-		// Why is resetRestartsTimer still active !?!?!?!?!?!?
 		
 		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
 		
@@ -260,7 +263,7 @@ function shutdownInitWorker() {
 		
 		initLogStream.end();
 		process.disconnect();
-		process.exit();
+		process.exit(0);
 		}
 	
 	SHUTDOWN = true;
@@ -453,6 +456,8 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	var isRestarting = true; // Prevent killing a process that is about to respawn
 	var resetRestartsTimer;
 	
+	var resetRestartsTimerCounter = 0;
+	
 	var cp = require('child_process');
 	var arg = [];
 	var opt = {
@@ -494,7 +499,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		childProcess.stdout.on('data', stdout);
 		childProcess.stderr.on('data', stderr);
 		childProcess.on('close', closeStdioStreams);
-		childProcess.on('exit', childProcessEnded);
+		childProcess.on('exit', childProcessExit);
 		
 		isRestarting= false;
 		
@@ -539,25 +544,16 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		
 	}
 	
-	function childProcessEnded(code, signal) {
+	function childProcessExit(code, signal) {
 		var finalExit = (code !== null);
 		
-		log(pathToFolder + " ended! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
+		log(pathToFolder + " exit! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
 		
 		// NodeJS errors will have a code, but if the process is killed via a signal, we wont get a final exit
 		// So always restart!
 		
 		if(!finalExit) closeChild(childProcess); // Make sure it's really dead, and disconnect from it
 		// (but do not send SIGKILL because we want to give it a chance to gracefully shut down)
-		
-		//exit(code, signal);
-		
-	}
-	
-	
-	function exit(code, signal) {
-		
-		log(pathToFolder + " Exit: code=" + code + " signal=" + signal);
 		
 		logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
 		
@@ -575,32 +571,41 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		log("Waiting " + waitForRespawn + "ms to restart: " + scriptPath, 7);
 		
 		clearTimeout(resetRestartsTimer);
+		resetRestartsTimerCounter--;
+		//log("Cleared a resetRestartsTimer! resetRestartsTimerCounter=" + resetRestartsTimerCounter);
 		TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
 		clearTimeout(respawnTimer);
+		//log("Cleared a respawnTimer!");
 		TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(respawnTimer), 1);
 		
-		var respawnTimer = setTimeout(function() {
+		respawnTimer = setTimeout(function() {
+			//log("Executed a respawnTimer!");
 			TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(respawnTimer), 1);
 			
 			restarts++;
 			
 			respawn();
 			
-			var resetRestartsTimer = setTimeout(function() {
+			resetRestartsTimer = setTimeout(function() {
+				resetRestartsTimerCounter--;
+				log("Resetting respawntime for " + pathToFolder);
 				TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
 				
 				// Reset the restarts counter if the service has been running for more then 60 seconds ...
 				restarts = 0;
 				
 			}, 60000);
+			resetRestartsTimerCounter++;
+			//log("Started a resetRestartsTimer! resetRestartsTimerCounter=" + resetRestartsTimerCounter);
 			TIMERS[pathToFolder].push(resetRestartsTimer);
 			
 			
 		}, waitForRespawn);
+		//log("Started a respawnTimer!");
 		TIMERS[pathToFolder].push(respawnTimer);
 		
 		
-		log(pathToFolder + " timers=" + TIMERS[pathToFolder].length);
+		//log(pathToFolder + " timers=" + TIMERS[pathToFolder].length);
 		
 	}
 	
