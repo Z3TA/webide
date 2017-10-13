@@ -105,6 +105,14 @@ console.log("Installing VNC dependencies");
 exec("apt install xvfb x11vnc chromium-browser -y");
 
 
+console.log("Installing Mercurial");
+exec("apt install mercurial -y");
+
+
+console.log("Installing NPM");
+exec("apt install npm -y");
+
+
 console.log("Finish!");
 
 console.log("P.S: You probably have to edit /etc/nginx/sites-available/" + HOSTNAME + ".nginx and /etc/nginx/sites-available/signup." + HOSTNAME + ".nginx and then run systemctl reload nginx (use nginx -T to check for errors)");
