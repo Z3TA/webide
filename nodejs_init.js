@@ -260,7 +260,8 @@ function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
 		env: {
 			homeDir: homeDir,
 			uid: uid,
-			gid: gid
+			gid: gid,
+			user: name
 		}
 	};
 	

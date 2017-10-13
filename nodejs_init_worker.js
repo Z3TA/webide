@@ -29,6 +29,7 @@ var PATH = getArg(["path", "path", "homeDir"]) || process.env.homeDir;
 var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
+var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
 
 // For sending errors via email to an admin
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
@@ -463,7 +464,8 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	var opt = {
 		silent: true,
 		env: {
-			prod: true
+			prod: true,
+			myName: USERNAME
 		},
 		execPath: "/usr/bin/nodejs" // note: we are in chroot!
 	};
