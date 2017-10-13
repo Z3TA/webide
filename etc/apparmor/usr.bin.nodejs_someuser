@@ -45,6 +45,7 @@
 
   %JZEDIT%/node_modules/** r,
   %JZEDIT%/server/** r,
+  %JZEDIT%/shared/** r,
   %JZEDIT%/client/** r,
   %JZEDIT%/nodejs_init_worker.js r,
 
