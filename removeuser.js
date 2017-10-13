@@ -161,7 +161,7 @@ if(!NOZFS) {
 			}
 			catch(zfsDestroyErr) {
 				if(zfsDestroyErr.message.indexOf("cannot open '" + zfsPool + HOME + username + "': dataset does not exist") != -1) {
-					console.log(zfsDestroyErr.message);
+					console.log("zfsDestroyErr: " + zfsDestroyErr.message);
 				}
 				if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
 					// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
@@ -171,8 +171,8 @@ if(!NOZFS) {
 					restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
 					}
 					catch(restartJzeditErr) {
-						console.log(restartJzeditErr.message);
-						throw("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
+						console.log("restartJzeditErr: " + restartJzeditErr.message);
+						throw new Error("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
 					}
 					if(restartJzeditStdout) console.log(restartJzeditStdout);
 					zfsDestroy(zfsPool, userHomeDir); // Try again

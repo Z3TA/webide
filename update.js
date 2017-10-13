@@ -10,6 +10,11 @@
 	*/
 
 var getArg = require("./server/getArg.js");
+var copyFileSync = require("./shared/copyFileSync.js");
+var copyFolderRecursiveSync = require("./shared/copyFolderRecursiveSync.js");
+var chmodrSync = require("./shared/chmodrSync.js");
+var chmodrDirSync = require("./shared/chmodrDirSync.js");
+var chownrDirSync = require("./shared/chownrDirSync.js");
 
 var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users";
 var defaultHome = "/home/";
@@ -36,19 +41,34 @@ run("systemctl reload nginx");
 
 
 
-// Update apparmor profiles (for each user)
+
 var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
 var users = usersPwString.split(/\n|\r\n/);
 //console.log("users.length=" + users.length);
-for (var i=0, username; i<users.length; i++) {
+for (var i=0, username, homeDir; i<users.length; i++) {
 	username = users[i].substring(0, users[i].indexOf("|"));
 	
 	if(username) {
+		// Update apparmor profiles (for each user)
 	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
+		
+		// Make sure files exist and file permissions is rights ...
+		homeDir = HOME + username;
+		
+		// Create a directory where nginx can save logs
+		try { fs.mkdirSync(homeDir + "/log"); } catch(err) { console.log(err.message); }
+			chmodrSync(homeDir + "/log", "2770"); // Set the group-id bit so that all new files created will belong to the group
+			chownrDirSync(homeDir + "/log", uid, gid);
+		
+		
+		// Create a directory for putting "in production" files
+		try { fs.mkdirSync(homeDir + "/.prod"); } catch(err) { console.log(err.message); }
+		chmodrSync(homeDir + "/.prod", "770");
+		chownrDirSync(homeDir + "/.prod", uid, gid);
 	}
 }
 run("systemctl reload apparmor");
@@ -84,19 +104,3 @@ function run(cmd) {
 	if(stdout.trim()) throw new Error(stdout);
 }
 
-function copyFileSync( source, target ) {
-	
-	var fs = require('fs');
-	var path = require('path');
-	
-	var targetFile = target;
-	
-	//if target is a directory a new file with the same name will be created
-	if ( fs.existsSync( target ) ) {
-		if ( fs.lstatSync( target ).isDirectory() ) {
-			targetFile = path.join( target, path.basename( source ) );
-		}
-	}
-	
-	fs.writeFileSync(targetFile, fs.readFileSync(source));
-}

@@ -21,6 +21,12 @@
 
 var fs = require("fs");
 var child_process = require('child_process');
+var copyFileSync = require("./shared/copyFileSync.js");
+var copyFolderRecursiveSync = require("./shared/copyFolderRecursiveSync.js");
+var chmodrSync = require("./shared/chmodrSync.js");
+var chmodrDirSync = require("./shared/chmodrDirSync.js");
+var chownrSync = require("./shared/chownrSync.js");
+var chownrDirSync = require("./shared/chownrDirSync.js");
 
 var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users";
 var defaultDomain = "webide.se";
@@ -325,30 +331,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
 	}
 	
-		// Make folder for deoploying deamons
-		fs.mkdirSync(homeDir + "/.prod");
 		
-	
-	// See how to debug apparmor in README.txt
-	
-	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
-	//if(reloadApparmor != "") throw reloadApparmor;
-	
-	//var nodeJsVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
-	//console.log(nodeJsVersion);
-	//copyProgram("nodejs", homeDir)
-	
-	//var pythonVersion = child_process.execSync("nodejs -v").toString(ENCODING).trim();
-	//console.log(pythonVersion);
-	//copyProgram("python", homeDir)
-	
-	// Copy the python libs
-		//copyFolderRecursiveSync("/usr/lib/python2.7/", HOME + username + "/usr/lib/python2.7/");
-	
-	// Copy mercurial
-		//copyFileSync("/usr/bin/hg", HOME + username + "/usr/bin/hg");
-	
-	
 	// Nodejs needs /dev/urandom and /dev/null to start
 	fs.mkdirSync(homeDir + "/dev");
 	
@@ -377,7 +360,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		//chmodrSync(HOME + username + "/usr/local/", "555");
 	
 
-	// Mount these instead of copying to save hd space
+	// Mount these instead of copying to save hdd space
 		mount("/lib/", HOME + username + "/lib");
 		mount("/lib64/", HOME + username + "/lib64");
 		mount("/usr/lib/", HOME + username + "/usr/lib");
@@ -387,10 +370,11 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
 	
 	
-	// Create a hard link to nodejs for use with user_worker.js so that we can have a apparmor profile on it
+	// Create a hard link to nodejs for use with user_worker.js so that we can have a separate apparmor profile on it and still use nodejs fork
 	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
 	
-
+		
+		// See how to debug apparmor in README.txt
 	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
 		createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
@@ -544,102 +528,6 @@ function getGroupId(groupName) {
 	throw new Error("Unable to find id for groupName=" + groupName);
 }
 
-
-
-
-
-function copyFileSync( source, target ) {
-	
-	var fs = require('fs');
-	var path = require('path');
-	
-	var targetFile = target;
-	
-	//if target is a directory a new file with the same name will be created
-	if ( fs.existsSync( target ) ) {
-		if ( fs.lstatSync( target ).isDirectory() ) {
-			targetFile = path.join( target, path.basename( source ) );
-		}
-	}
-	
-	fs.writeFileSync(targetFile, fs.readFileSync(source));
-}
-
-function copyFolderRecursiveSync( source, target ) {
-	
-	var fs = require('fs');
-	var path = require('path');
-	
-	var files = [];
-	
-	//check if folder needs to be created or integrated
-	var targetFolder = path.join( target, path.basename( source ) );
-	if ( !fs.existsSync( targetFolder ) ) {
-		fs.mkdirSync( targetFolder );
-	}
-	
-	//copy
-	if ( fs.lstatSync( source ).isDirectory() ) {
-		files = fs.readdirSync( source );
-		files.forEach( function ( file ) {
-			var curSource = path.join( source, file );
-			if ( fs.lstatSync( curSource ).isDirectory() ) {
-				copyFolderRecursiveSync( curSource, targetFolder );
-			} else {
-				copyFileSync( curSource, targetFolder );
-			}
-		} );
-	}
-}
-	
-
-function chmodrSync (p, mode) {
-	// https://github.com/isaacs/chmodr/
-	//console.log("chmod mode=" + mode + " p=" + p);
-	var fs = require('fs');
-	
-	var stats = fs.lstatSync(p)
-	if (stats.isSymbolicLink()) return;
-	if (stats.isDirectory()) return chmodrDirSync(p, mode);
-	else return fs.chmodSync(p, mode);
-}
-
-function chmodrDirSync (p, mode) {
-	//console.log("chmod dir mode=" + mode + " p=" + p);
-	var fs = require('fs');
-	var path = require('path');
-	
-	fs.readdirSync(p).forEach(function (child) {
-		chmodrSync(path.resolve(p, child), mode);
-	});
-	
-	// If the folder got read permission, also make sure it has execute permission so we can list it's content
-	if(mode.length == 3) {
-		for (var i=0; i<3; i++) if(mode.charAt(i) == "4" || mode.charAt(i) == "6") mode = mode.substr(0, i) + (parseInt(mode.charAt(i)) +1) + mode.substr(i+1);
-		}
-	
-	return fs.chmodSync(p, mode);
-}
-
-function chownrSync(p, uid, gid) {
-	//console.log("chown uid=" + uid + " gid=" + gid + " p=" + p);
-	var fs = require('fs');
-	var stats = fs.lstatSync(p);
-	if (stats.isSymbolicLink()) return;
-	if (stats.isDirectory()) return chownrDirSync(p, uid, gid);
-	else return fs.chownSync(p, uid, gid);
-}
-
-function chownrDirSync(p, uid, gid) {
-	//console.log("chown dir uid=" + uid + " gid=" + gid + " p=" + p);
-	var fs = require('fs');
-	var path = require('path');
-	
-	fs.readdirSync(p).forEach(function (child) {
-		chownrSync(path.resolve(p, child), uid, gid);
-	});
-	return fs.chownSync(p, uid, gid);
-}
 
 function replaceInFileSync(filePath, arrSearchReplace) {
 	var fs = require("fs");
