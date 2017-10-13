@@ -72,7 +72,7 @@ var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 	var log; // Using small caps because it looks and feels better
 	(function setLogginModule() { // Self calling function to not clutter script scope
 		// Enhanced console.log ...
-		var logModule = require("./server/log.js");
+	var logModule = require("./shared/log.js");
 		
 		logModule.setLogLevel(LOGLEVEL);
 		log = logModule.log;

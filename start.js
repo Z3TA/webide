@@ -15,7 +15,7 @@
 
 "use strict";
 
-var log = require("./server/log.js").log;
+var log = require("./shared/log.js").log;
 
 // Log levels
 var WARN = 4;
