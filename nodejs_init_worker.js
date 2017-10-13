@@ -70,11 +70,8 @@ PATH = UTIL.trailingSlash(PATH); // Make sure it ends with a slash
 
 // What happens if we open a file stream before chroot ?
 // answer: the file stream will be kept open =)
+// We need to wait after setuid though, unless we want to allow dac_read_search (allows root to override read-file permission)
 
-//var initLogFilePath = "/log/nodejs_init_worker.log";
-var initLogFilePath = PATH + "log/nodejs_init_worker.log";
-var fs = require("fs");
-var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
 var posix = require("posix");
 try {
@@ -90,7 +87,10 @@ catch(err) {
 process.setgid(parseInt(GID));
 process.setuid(parseInt(UID));
 
-
+// We are not in chroot!
+var initLogFilePath = "/log/nodejs_init_worker.log";
+var fs = require("fs");
+var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
 log("Starting nodejs init worker ...");
 

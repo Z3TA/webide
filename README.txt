@@ -135,7 +135,7 @@ sudo -u username kill 810460
 
 You might have to: sudo systemctl disable jzedit_user_mounts && sudo reboot
 
-lling vnc dependencies
+Installing vnc dependencies
 ---------------------------
 sudo apt update
 sudo apt install xvfb x11vnc chromium-browser
@@ -143,8 +143,9 @@ sudo apt install xvfb x11vnc chromium-browser
 
 Using ap debugging
 ------------------
+apt install apparmor-utils
 
-do service apparmor reload
+sudo service apparmor reload
 
 # Add missing rules in profile:
 sudo aa-genprof /usr/bin/nodejs_test123

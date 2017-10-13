@@ -51,6 +51,8 @@ Shift+Ctrl+F3 = retire production script
 todo
 ----
 
+fix bug that adds text to indentation characters  ... !!
+
 refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
