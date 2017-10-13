@@ -34,13 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-
-
-create demo account on webide.se
-
-
-
-
 test nodejs deploy and nodejs init in production!
 
 
