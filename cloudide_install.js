@@ -40,6 +40,9 @@ var ENCODING = "utf-8";
 // Install apparmor for extra security, each user will have their own apparmor profile that only allow them to access their home dir
 exec("apt install apparmor -y");
 
+// User file
+fs.writeFileSync("/etc/jzedit_users", "");
+
 
 	// Install the cloud-IDE service that runs server/server.js
 console.log("Installing jzedit.service");
