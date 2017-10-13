@@ -1,0 +1,10 @@
+# The default server.
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;	
+
+  location / {
+    return 404 "<html><body>The site you are looking for is in another castle ...</body></html>";
+  }
+	
+}

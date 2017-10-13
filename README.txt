@@ -113,8 +113,17 @@ Running as a cloud editor
 =========================
 You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
 
-Nodejs needs to be installed! 
+Make sure nodejs is installed:
 # apt install nodejs
+
+If you have a Linux (Ubunt) server you can run this install script:
+nodejs cloudide_install.js --domain=yourdomain.com
+
+Edit /etc/nginx/sites-available/yourdomain.com.nginx
+
+
+To check for Nginx config problems:
+# nginx -T
 
 Adding and removing users
 -------------------------

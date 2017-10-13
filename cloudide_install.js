@@ -81,7 +81,18 @@ jzedit_nginx = jzedit_nginx.replace(/webide\.se/g, HOSTNAME);
 fs.writeFileSync("/etc/nginx/sites-available/" + HOSTNAME + ".nginx", jzedit_nginx);
 execTry("ln -s /etc/nginx/sites-available/" + HOSTNAME + ".nginx  /etc/nginx/sites-enabled/" + HOSTNAME + "")
 
+console.log("Installing signup." + HOSTNAME + ".nginx config");
+var signup_nginx = fs.readFileSync("etc/nginx/signup.webide.se.nginx", ENCODING);
+signup_nginx = signup_nginx.replace(/webide\.se/g, HOSTNAME);
+fs.writeFileSync("/etc/nginx/sites-available/signup." + HOSTNAME + ".nginx", signup_nginx);
+execTry("ln -s /etc/nginx/sites-available/signup." + HOSTNAME + ".nginx  /etc/nginx/sites-enabled/signup." + HOSTNAME + "")
+
+console.log("Adding default Nginx config");
+exec("cp etc/nginx/default.nginx /etc/nginx/sites-available/default");
+
+
 //exec("systemctl reload nginx");
+
 
 console.log("Installing logrotate script for nginx log files");
 execTry("ln -s $(pwd)/etc/nginx/nginx.logrotate.conf /etc/logrotate.d/nginx.logrotate.conf");
@@ -93,7 +104,7 @@ exec("apt install xvfb x11vnc chromium-browser -y");
 
 console.log("Finish!");
 
-console.log("P.S: You probably have to edit /etc/nginx/sites-available/" + HOSTNAME + ".nginx and then run systemctl reload nginx");
+console.log("P.S: You probably have to edit /etc/nginx/sites-available/" + HOSTNAME + ".nginx and /etc/nginx/sites-available/signup." + HOSTNAME + ".nginx and then run systemctl reload nginx (use nginx -T to check for errors)");
 
 function execTry(cmd) {
 	try {

@@ -34,13 +34,10 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-making a cloudide_install.js script ...
 
-Upating README.txt on how to run the editor as a cloud ide
 
-I couln't umount /home/demo/lib
-so I tried deleting it ...
-bad idea!
+create demo account on webide.se
+
 
 
 
