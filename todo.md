@@ -35,7 +35,8 @@ What I'm working on
 -------------------
 
 test nodejs deploy and nodejs init in production!
-
+run tests in production
+write a test to test nodejs deploy automatically
 
 F1 = run script
 F3 = stop script
