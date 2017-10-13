@@ -3,7 +3,7 @@
 
 "use strict";
 
-var getArg = require("./getArg.js");
+var getArg = require("../shared/getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
@@ -36,7 +36,7 @@ var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 	var log; // Using small caps because it looks and feels better
 	(function setLogginModule() { // Self calling function to not clutter script scope
 		// Enhanced console.log ...
-		var logModule = require("./log.js");
+	var logModule = require("../shared/log.js");
 		
 		logModule.setLogLevel(LOGLEVEL);
 		log = logModule.log;

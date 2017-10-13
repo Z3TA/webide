@@ -7,7 +7,7 @@ var defaultPasswordFile2 = "server/users.pw"
 var defaultDomain = "webide.se";
 
 // Get arguments ...
-var getArg = require("./server/getArg.js");
+var getArg = require("./shared/getArg.js");
 
 var username = process.argv[2];
 

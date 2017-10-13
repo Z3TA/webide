@@ -19,7 +19,7 @@
 
 "use strict"
 
-var getArg = require("./server/getArg.js");
+var getArg = require("./shared/getArg.js");
 
 var DEFAULT_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org"; // Errors with This script is sent here
 

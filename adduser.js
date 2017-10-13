@@ -33,7 +33,7 @@ var defaultDomain = "webide.se";
 var defaultHome = "/home/";
 
 // Get arguments ...
-var getArg = require("./server/getArg.js");
+var getArg = require("./shared/getArg.js");
 
 var username = process.argv[2];
 var password = process.argv[3];

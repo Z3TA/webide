@@ -23,10 +23,10 @@ var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
 var copyFolderRecursively = require('ncp').ncp;
 
-var logModule = require("./log.js");
+var logModule = require("../shared/log.js");
 var log = logModule.log;
 
-var getArg = require("./getArg.js");
+var getArg = require("../shared/getArg.js");
 
 var nodejsDeamonManagerPort = 8200;
 

@@ -9,7 +9,7 @@
 	
 	*/
 
-var getArg = require("./server/getArg.js");
+var getArg = require("./shared/getArg.js");
 var copyFileSync = require("./shared/copyFileSync.js");
 var copyFolderRecursiveSync = require("./shared/copyFolderRecursiveSync.js");
 var chmodrSync = require("./shared/chmodrSync.js");

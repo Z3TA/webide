@@ -27,7 +27,7 @@ var BRAND_NAME = "JZedit";
 var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "www", "ftp", "mail", "log", "smtp", "user", 
 "users", "signup", "dashboard", "webdide", "email"]; 
 
-	var getArg = require("./server/getArg.js");
+var getArg = require("./shared/getArg.js");
 	
 	var UTIL = require("./client/UTIL.js");
 	

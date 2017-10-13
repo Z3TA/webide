@@ -5,7 +5,7 @@
 	Mount everything to each user home dir for chroot to work
 */
 
-var getArg = require("./../server/getArg.js");
+var getArg = require("../shared/getArg.js");
 var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users";
 var defaultHome = "/home/";
 

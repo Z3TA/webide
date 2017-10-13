@@ -32,6 +32,16 @@ ubuntu: webapp-container / unity-webapps-runner ?
 What I'm working on
 -------------------
 
+making a cloudide_install.js script ...
+
+Upating README.txt on how to run the editor as a cloud ide
+
+I couln't umount /home/demo/lib
+so I tried deleting it ...
+bad idea!
+
+
+
 test nodejs deploy and nodejs init in production!
 
 
@@ -1066,6 +1076,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Opening big files support in the browser
+
+---
 
 Show a fat warning if a variable inside function parameters also is declared in the function body
 
