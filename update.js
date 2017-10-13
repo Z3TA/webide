@@ -29,15 +29,15 @@ var child_process = require('child_process');
 
 
 // Update services
-copyFileSync("./etc/systemd/jzedit.service", "/etc/systemd/system/jzedit.service");
-copyFileSync("./etc/systemd/jzedit_signup.service", "/etc/systemd/system/jzedit_signup.service");
+//copyFileSync("./etc/systemd/jzedit.service", "/etc/systemd/system/jzedit.service");
+//copyFileSync("./etc/systemd/jzedit_signup.service", "/etc/systemd/system/jzedit_signup.service");
 copyFileSync("./etc/systemd/jzedit_user_mounts.service", "/etc/systemd/system/jzedit_user_mounts.service");
 copyFileSync("./etc/systemd/jzedit_nodejs_init.service", "/etc/systemd/system/jzedit_nodejs_init.service");
 
 run("systemctl daemon-reload");
-run("systemctl restart jzedit");
-run("systemctl restart jzedit_signup");
-run("systemctl reload nginx");
+//run("systemctl restart jzedit");
+//run("systemctl restart jzedit_signup");
+
 
 
 
@@ -82,6 +82,7 @@ for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.lengt
 	}
 }
 run("systemctl reload apparmor");
+
 
 
 function createApparmorProfile(template, username) {

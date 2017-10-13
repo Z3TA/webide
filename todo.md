@@ -29,6 +29,8 @@ and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to m
 new versions of nw.js though.
 ubuntu: webapp-container / unity-webapps-runner ?
 
+Commit messages should explain WHY you did the change, we can already see what you did by looking at the diff. We want to know WHY you did it.
+
 What I'm working on
 -------------------
 

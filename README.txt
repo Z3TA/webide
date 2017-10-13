@@ -113,40 +113,29 @@ Running as a cloud editor
 =========================
 You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
 
-If you choose to open up the editor to others, it's advised to create a system account for each user.
-
-Set user credentials in server/users.pw
-Make sure server/users.pw is not readable (sudo chmod 770 server/users.pw && sudo chown root:root server/users.pw)
-
-Adding users in Linux:
-sudo addgroup --system jzedit_users
-sudo adduser --system --ingroup jzedit_users nameofuser
-
-To create an apparmor profile, see apparmor/makeprofile.sh
-
-It's also possible to host the cloud editor on Windows, but then all users need to run as the same user.
-
-
-Installing vnc dependencies
----------------------------
-sudo apt update
-sudo apt install xvfb x11vnc chromium-browser
-
-
+Nodejs needs to be installed! 
+# apt install nodejs
 
 Adding and removing users
 -------------------------
-
 
 # Error: Command failed: umount "target is busy"
 ps -aux | grep nodejs
 kill -s 2 810460 
 sudo -u username kill 810460
 
+You might have to: sudo systemctl disable jzedit_user_mounts && sudo reboot
 
-Apparmor debugging
+lling vnc dependencies
+---------------------------
+sudo apt update
+sudo apt install xvfb x11vnc chromium-browser
+
+
+Using ap debugging
 ------------------
-sudo service apparmor reload
+
+do service apparmor reload
 
 # Add missing rules in profile:
 sudo aa-genprof /usr/bin/nodejs_test123
@@ -190,13 +179,14 @@ sudo chmod +x tracefile
 ./tracefile python
 
 
-# Create an apparmor profile
+# Cate an apparmor profile
 
 
 
-Compiling dependencies for old nw.js
-------------------------------------
-To build for the right modules version:
+Compil
+
+ing dependencies for old nw.js
+----------==================================== for the right modules version:
 node-gyp rebuild --target=1.2.0 --msvs_version=2015
 
 
