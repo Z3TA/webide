@@ -45,8 +45,18 @@ run("systemctl reload nginx");
 var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
 var users = usersPwString.split(/\n|\r\n/);
 //console.log("users.length=" + users.length);
-for (var i=0, username, homeDir; i<users.length; i++) {
-	username = users[i].substring(0, users[i].indexOf("|"));
+for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.length; i++) {
+	
+	col = users[i].trim().split("|");
+	
+	username = col[0];
+	
+	if(username.charAt(0) == "#") continue; // Ignore users who's username starts with #
+	
+	password = col[1];
+	rootDir = col[2];
+	uid = parseInt(col[3]);
+	gid = parseInt(col[4]);
 	
 	if(username) {
 		// Update apparmor profiles (for each user)
