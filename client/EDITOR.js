@@ -232,7 +232,7 @@ EDITOR.lastKeyPressed = "";
 	if(!Object.defineProperty) {
 		console.warn("Object.defineProperty not available!");
 	
-		EDITOR.renderNeeded = renderNeeded; 
+		//EDITOR.renderNeeded = renderNeeded; 
 		
 	}
 	else {
@@ -242,12 +242,13 @@ EDITOR.lastKeyPressed = "";
 			enumerable: true
 		});
 		
+		/*
 		Object.defineProperty(EDITOR, 'renderNeeded', {
 			get: function() {return renderNeeded;} ,
 			set: function () { throw new Error("EDITOR.renderNeeded() is a function! Do not overwrite it!"); },
 			enumerable: false
 		});
-		
+		*/
 	}
 	
 	setWorkingDirectory(UTIL.trailingSlash(process.cwd()));
@@ -261,7 +262,7 @@ EDITOR.lastKeyPressed = "";
 		if(__dirname != EDITOR.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 	}
 	
-	function renderNeeded() {
+	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
