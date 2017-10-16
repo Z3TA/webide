@@ -231,12 +231,6 @@ Need a good file explorer / file picker / file viewer / path selector. ex: where
 
 Use conf.json files instead of GUI where possible, example SSG config.
 
-The server should probably not run as root ...
-Open the http socket and start worker processes for each user, and then process.setuid(uid) !?
-
-var uid = parseInt(process.env.SUDO_UID); // If the server was started using sudo
-if (uid) process.setuid(uid);
-
 The server don't need a container, but it's OK to run a isolated group of users in a VPS.
 
 Should the editor's platform be a dev platform, or only an editor ? 
