@@ -89,7 +89,7 @@ could solve any issues by setting up restrictive iptables and maybe a netns
 make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
 
 Make server run under apparmor profile ...
-Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)
+
 
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
@@ -209,11 +209,6 @@ now I want to compare with the repo /home/zeta/dev/chatapp/ ...
 The hg plugins needs a diff function! A diff function is also useful (yeh) ... Should the diff function be built-in (not a plugin) ?
 EDITOR.diffFile(someFill, diffWithohterfile) => someFill-diffWithohterfile.diff.js inserts in green and removed in red
 
-Stop all running scripts when user disconnects from server !?
-A way to deamonize a nodejs script so that it will start and restart automatically.
-The script should continue to run even though the user temporarily lose connection !?
-User should be able to stop a script after reloading (relogin) the editor!
-
 
 
 Setting up the toolchain for programming is very hard for a beginner, "just edit and run node" is very confusing ...
@@ -324,6 +319,7 @@ Would probably have to save remote files to a temporary location
 
 Things I've learned
 -------------------
+Trying to allow stat files in /home/** in apparmor profile. use: /home/ r, to allow listing files (need it even if we have ** r)
 Use feature flag for stuff that are "in construction" so that the main branch is always working and can be pushed to production at any time.
 Try do debug without console.log!
 Always use F5 to reload! Or exit functions might not fire!
