@@ -34,9 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-test nodejs deploy and nodejs init in production!
 run tests in production
-write a test to test nodejs deploy automatically
 
 F1 = run script
 F3 = stop script
@@ -51,6 +49,10 @@ Shift+Ctrl+F3 = retire production script
 
 todo
 ----
+
+fix copy-pasting in Macbook
+
+when doing Ctrl+O use the parent folder of the file being active (instead of the current folder)
 
 fix bug that adds text to indentation characters  ... !!
 
@@ -1071,6 +1073,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Allow proper zooming, check window.devicePixelRatio ...
+Browser zooming alwost does the right thing ...
 
 Opening big files support in the browser
 
