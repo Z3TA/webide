@@ -238,7 +238,7 @@
 			CLIENT.cmd("serve", json, function(err, json) {
 				if(err) throw err
 				
-				var url = "http://" + json.url;
+				var url = document.location.protocol + "//" + json.url;
 				
 				if(!url) throw new Error("url expected!");
 				
