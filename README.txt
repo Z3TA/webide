@@ -141,7 +141,7 @@ sudo apt update
 sudo apt install xvfb x11vnc chromium-browser
 
 
-Using ap debugging
+Apparmor debugging
 ------------------
 apt install apparmor-utils
 

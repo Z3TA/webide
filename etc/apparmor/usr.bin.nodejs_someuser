@@ -32,6 +32,13 @@
   network inet stream,
   network inet6 stream,
 
+  # It also needs internet access to connect to ftp/sftp/ftps servers!
+  network inet dgram,
+  network inet6 dgram,
+
+  # stream is TCP and dgram is UDP ? (UDP is needed for DNS lookups)
+
+  # Unix sockets are a file system object, which means we can give it user permissions
   network unix,
 
   /dev/null r,

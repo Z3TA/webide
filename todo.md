@@ -36,14 +36,6 @@ What I'm working on
 
 run tests in production
 
-F1 = run script
-F3 = stop script
-
-Ctrl + F1 = deploy script
-Ctrl+F3 = stop production script
-Shift+Ctrl+F3 = retire production script
-
-
 
 
 
@@ -52,6 +44,7 @@ todo
 
 fix copy-pasting in Macbook
 
+when doing Ctrl+O and the current folder is in the working dir, use the working dir!
 when doing Ctrl+O use the parent folder of the file being active (instead of the current folder)
 
 fix bug that adds text to indentation characters  ... !!
@@ -85,6 +78,8 @@ hmm, I do remember editing file(s) in node_modules, (ftp module !?) to fix some 
 
 hmm, for hg clone to work we need to allow python to access the internet! ...
 could solve any issues by setting up restrictive iptables and maybe a netns
+probably want to use netns (sudo ip netns exec NAME ping google.com) to put each worker process in a network namespace.
+
 
 make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
 
