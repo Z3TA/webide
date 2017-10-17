@@ -825,7 +825,11 @@ var UTIL = {
 				clearTimeout(timeoutTimer);
 				if(xmlHttp.status == 200) callback(null, xmlHttp.responseText);
 				else {
-					var err = new Error(xmlHttp.responseText + " xmlHttp.status=" + xmlHttp.status + " xmlHttp.readyState=" + xmlHttp.readyState + " url=" + url);
+					var err = new Error(xmlHttp.responseText + 
+					" status: " + xmlHttp.status + 
+					" readyState: " + xmlHttp.readyState + 
+					" headers: " + XMLHttpRequest.getAllResponseHeaders() + 
+					" url: " + url);
 					err.CODE = xmlHttp.status;
 					callback(err);
 				}
@@ -839,6 +843,8 @@ var UTIL = {
 		xmlHttp.send(null);
 		}
 		// catch errors like "Mixed Content"
+		// Actually we are not able to catch that error. It seems Chrome just prints it to console.error and continues with the request !??
+		// xhr usually follows redirects, but not if there's this silent "Mixed Content" error!
 		catch(xmlHttpErr) { 
 			xmlHttp.onreadystatechange = null;
 			xmlHttp.abort();
