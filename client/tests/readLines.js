@@ -28,6 +28,8 @@
 		
 		EDITOR.readLines(testFileLocation, {start: 11, end: 20}, function(err, lines) {
 			
+			if(err) return callback(err);
+			
 			if(lines.length != 10) throw new Error("Expected 10 lines! Not " + lines.length + " lines=" + JSON.stringify(lines, null, 2));
 			
 			if(lines[0] != "L11_abcdefghijkl") throw new Error("lines[0]=" + lines[0]);
@@ -45,6 +47,8 @@
 		
 		EDITOR.readLines(testFileLocation, {start: 30001, end: 30010}, function(err, lines) {
 			
+			if(err) return callback(err);
+			
 			if(lines.length != 10) throw new Error("Expected 10 lines! Not " + lines.length + " lines=" + JSON.stringify(lines, null, 2));
 			
 			if(lines[0] != "L30001_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅ") throw new Error("lines[0]=" + lines[0]);
@@ -61,6 +65,8 @@
 		var testFileLocation = "testfile.txt";
 		
 		EDITOR.readLines(testFileLocation, {start: 33996, end: 34005}, function(err, lines) {
+			
+			if(err) return callback(err);
 			
 			if(lines.length != 5) throw new Error("Expected 5 lines! Not " + lines.length + " lines=" + JSON.stringify(lines, null, 2));
 			
