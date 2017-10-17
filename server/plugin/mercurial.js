@@ -56,6 +56,8 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	
 	localPath = UTIL.trailingSlash(localPath);
 	
+	if(localPath.split(/\/|\\/).length < 4) return callback(new Error("Can not clone into a root folder. Use an intermediary directly like /repo" + localPath + ""));
+	
 	var config = ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw];
 	
 	//console.log("process.env.PATH=" + process.env.PATH);
