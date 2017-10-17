@@ -193,10 +193,10 @@ sudo chmod +x tracefile
 
 
 
-Compil
+Compiling dependencies for old nw.js
+====================================
 
-ing dependencies for old nw.js
-----------==================================== for the right modules version:
+for the right modules version:
 node-gyp rebuild --target=1.2.0 --msvs_version=2015
 
 
