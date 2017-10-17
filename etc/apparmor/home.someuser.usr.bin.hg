@@ -14,6 +14,7 @@
   network inet6 stream,
 
   #/dev/tty rw,
+  %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rw,
   #/usr/bin/python2.7 ix,
 
