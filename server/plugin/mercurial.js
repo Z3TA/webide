@@ -1218,6 +1218,7 @@ function checkDir(user, virtualPath, callback) {
 			
 			console.log("mercurialRoot=" + UTIL.lbChars(mercurialRoot));
 			
+			// Sometimes (debugging fun ahead) apparmor causes hg root to return emty ...
 			//if(mercurialRoot == "") mercurialRoot = localDirectory;
 			
 			if(mercurialRoot == "") throw new Error("mercurialRoot=" + mercurialRoot + " virtualPath=" + virtualPath + " localDirectory=" + localDirectory + "  ");

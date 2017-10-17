@@ -121,6 +121,8 @@ demo-example: Making a web service that makes you able to request data from an X
 
 Streamline the experience of sharing and publishing a web document via the editor.
 
+Figure out why hg root *sometimes* returns emty result (it has something to do with apparmor)
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!
