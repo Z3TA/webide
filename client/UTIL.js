@@ -834,7 +834,16 @@ var UTIL = {
 		}
 		
 		xmlHttp.open("GET", url, true); // true for asynchronous
+		
+		try {
 		xmlHttp.send(null);
+		}
+		// catch errors like "Mixed Content"
+		catch(xmlHttpErr) { 
+			xmlHttp.onreadystatechange = null;
+			xmlHttp.abort();
+			callback(xmlHttpErr);
+		}
 		
 		timeoutTimer = setTimeout(timeout, timeoutTimeMs);
 		
