@@ -825,7 +825,7 @@ var UTIL = {
 				clearTimeout(timeoutTimer);
 				if(xmlHttp.status == 200) callback(null, xmlHttp.responseText);
 				else {
-					var err = new Error(xmlHttp.responseText + " xmlHttp.status=" + xmlHttp.status + " xmlHttp.readyState=" + xmlHttp.readyState);
+					var err = new Error(xmlHttp.responseText + " xmlHttp.status=" + xmlHttp.status + " xmlHttp.readyState=" + xmlHttp.readyState + " url=" + url);
 					err.CODE = xmlHttp.status;
 					callback(err);
 				}
