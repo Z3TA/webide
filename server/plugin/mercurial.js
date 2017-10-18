@@ -1226,13 +1226,52 @@ function checkDir(user, virtualPath, callback) {
 	
 	var localDirectory = UTIL.getDirectoryFromPath(localPath);
 	
-	// First check if directory exist
-	CORE.listFiles(user, {pathToFolder: localDirectory}, function(err, listFilesResp) {
-		
+	findDotHg(localDirectory, function(err, mercurialRoot) {
 		if(err) callback(err);
-		else hgRoot();
-		
+		else {
+			mercurialRoot = UTIL.trailingSlash(mercurialRoot);
+			
+			if(user.rootPath) {
+				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
+					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
+					return callback("Unable to find a mercurial reposity from path=" + virtualPath);
+				}
+			}
+			
+			var virtualRootDir = user.toVirtualPath(mercurialRoot);
+			
+			if(virtualRootDir instanceof Error) callback("Unable to find a mercurial reposity from path=" + virtualPath);
+			else {
+				
+				callback(null, mercurialRoot, localPath, virtualRootDir);
+				
+			}
+		}
 	});
+	
+	function findDotHg(dir, findDotHgCallback) {
+		// Recursively dig down the path to find a .hg folder
+		var dirList = UTIL.getFolders(dir);
+		dir = dirList.pop();
+		CORE.listFiles(user, {pathToFolder: dir}, function(err, listFilesResp) {
+			
+			if(err) findDotHgCallback(err);
+			else {
+				var fileList = listFilesResp.list;
+				for (var i=0; i<fileList.length; i++) {
+					if(fileList[i].name == ".hg") return findDotHgCallback(null, dir);
+				}
+			}
+			
+			if(dirList.length > 0) {
+				dir = dirList.pop();
+				findDotHg(dir, findDotHgCallback)
+			}
+			
+		});
+	}
+	
+	
 	
 	function hgRoot() {
 	var execFile = require('child_process').execFile;
@@ -1249,9 +1288,6 @@ function checkDir(user, virtualPath, callback) {
 			var mercurialRoot = stdout.trim();
 			
 			console.log("mercurialRoot=" + UTIL.lbChars(mercurialRoot));
-			
-			// Sometimes (debugging fun ahead) apparmor causes hg root to return emty ...
-			//if(mercurialRoot == "") mercurialRoot = localDirectory;
 			
 			if(mercurialRoot == "") throw new Error("mercurialRoot=" + mercurialRoot + " virtualPath=" + virtualPath + " localDirectory=" + localDirectory + "  ");
 			
