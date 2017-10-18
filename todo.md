@@ -41,9 +41,6 @@ todo
 
 fix copy-pasting in Macbook
 
-Mercurial commits with åäö ...
-abort: decoding near ' "småfix"': 'ascii' codec can't decode byte 0xc3 in position 4: ordinal not in 
-
 fix bug that adds text to indentation characters  ... !!
 
 refactor voice, EDITOR.say, so all plugins can use it.
