@@ -333,6 +333,14 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	}
 	
 		
+		// Create a hard link to nodejs for use with user_worker.js so that we can have a separate apparmor profile on it and still use nodejs fork
+		fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+		
+		/*
+			Error: EXDEV: cross-device link not permitted, link '/usr/bin/nodejs' -> '/usr/bin/nodejs_demo2'
+			
+		*/
+		
 	// Nodejs needs /dev/urandom and /dev/null to start
 	fs.mkdirSync(homeDir + "/dev");
 	
@@ -370,9 +378,6 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		mount("/usr/bin/python", HOME + username + "/usr/bin/python");
 		mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
 	
-	
-	// Create a hard link to nodejs for use with user_worker.js so that we can have a separate apparmor profile on it and still use nodejs fork
-	fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
 	
 		
 		// See how to debug apparmor in README.txt

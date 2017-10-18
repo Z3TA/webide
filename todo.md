@@ -34,8 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-when cloning: first make sure there's not already a repo at the target location!
-with hg root: Check if the folder we run hg root on exist!
 
 
 run tests in production
