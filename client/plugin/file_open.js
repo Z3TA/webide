@@ -72,11 +72,16 @@
 				
 			}
 		
-		
-			// Change default directory to the same as current file
-			defaultPath = UTIL.getDirectoryFromPath(undefined);
+		// Change default directory to the same as current file
 			
-		
+			if(file.path.indexOf(EDITOR.workingDirectory) != -1) defaultPath = EDITOR.workingDirectory;
+			else {
+				var folders = getFolders(file.path);
+				if(folders.length > 0) folders.pop(); // Use parent folder
+				defaultPath = folders.pop();
+				console.log("defaultPath=" + defaultPath);
+			}
+			
 		}
 		else {
 			// No current file opened. Use working dir!?

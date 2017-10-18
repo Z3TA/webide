@@ -86,7 +86,7 @@
 		
 	}
 	
-	function build_gotoInput(currentDir) {
+	function build_gotoInput(folderToSearchIn) {
 		
 		gotoDiv = document.createElement("div");
 		gotoDiv.setAttribute("id", "gotoDiv");
@@ -102,7 +102,7 @@
 		inputFolder.setAttribute("type", "text");
 		inputFolder.setAttribute("id", "inputFolder");
 		inputFolder.setAttribute("class", "inputtext");
-		inputFolder.setAttribute("value", currentDir || EDITOR.workingDirectory);
+		inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
 		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
 		
 		var labelGoto = document.createElement("label");
@@ -420,7 +420,18 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	
 	function show_gotoFileInput(file, combo) {
 		
-		if(file) currentDir = UTIL.getDirectoryFromPath(file.path);
+		if(file) {
+			currentDir = UTIL.getDirectoryFromPath(file.path);
+		
+			var folderToSearchIn = currentDir;
+			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) folderToSearchIn = EDITOR.workingDirectory;
+		else {
+				var folders = getFolders(folderToSearchIn);
+			if(folders.length > 0) folders.pop(); // Use parent folder
+				folderToSearchIn = folders.pop();
+				console.log("folderToSearchIn=" + folderToSearchIn);
+		}
+		}
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 
@@ -431,7 +442,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
 			
 			//if(!gotoDiv) build_gotoInput();
-			build_gotoInput(currentDir); // Always build!
+			build_gotoInput(folderToSearchIn); // Always build!
 			
 			var footerHeight = parseInt(footer.style.height);
 			//var heightNeeded = 45;

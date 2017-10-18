@@ -36,19 +36,13 @@ What I'm working on
 
 
 
-
 todo
 ----
 
 fix copy-pasting in Macbook
 
-
-
 Mercurial commits with åäö ...
 abort: decoding near ' "småfix"': 'ascii' codec can't decode byte 0xc3 in position 4: ordinal not in 
-
-when doing Ctrl+O and the current folder is in the working dir, use the working dir!
-when doing Ctrl+O use the parent folder of the file being active (instead of the current folder)
 
 fix bug that adds text to indentation characters  ... !!
 
@@ -57,11 +51,9 @@ refactor voice, EDITOR.say, so all plugins can use it.
 npm modules
 using modules in SSG ... Able to add npm modules to the SSG ...
 
-
 able to delete directories from file explorer
 
 Investigate adding the editor to chrome web store and test it in a Chromebook.
-
 
 workflow: Edit pages on a ftp server ...
 
