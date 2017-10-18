@@ -58,12 +58,31 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	
 	//if(localPath.split(/\/|\\/).length < 4) return callback(new Error("Can not clone into a root folder. Use an intermediary directly like /repo" + localPath + ""));
 	
-	var config = ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw];
+	// First make sure that a Mercurial repo does Not already exist at the target locatino
+	CORE.listFiles(user, {pathToFolder: localPath}, function(err, listFilesResp) {
+		
+		if(err) {
+			if(err.code == "ENOENT") clone();
+			else callback(err);
+		}
+		else {
+		var fileList = listFilesResp.list;
+		for (var i=0; i<fileList.length; i++) {
+			if(fileList[i].name == ".hg") return callback( new Error(".hg folder already exist in " + localPath) );
+		}
+		
+		clone();
+		}
+	}); 
 	
-	//console.log("process.env.PATH=" + process.env.PATH);
 	
-	/*
-		Using cwd in Linux will result in Error: spawn /bin/sh ENOENT !
+	function clone() {
+		var config = ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw];
+		
+		//console.log("process.env.PATH=" + process.env.PATH);
+		
+		/*
+			Using cwd in Linux will result in Error: spawn /bin/sh ENOENT !
 	*/
 	
 	var execFile = require('child_process').execFile;
@@ -114,12 +133,14 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 				
 			} else done();
 			
-			function done() {callback(null, {path: local});}
+			function done() {
+					callback(null, {path: local});
+				}
 			
 		}
 	});
 }
-
+}
 
 
 MERCURIAL.status = function hgstatus(user, json, callback) {
@@ -1205,6 +1226,15 @@ function checkDir(user, virtualPath, callback) {
 	
 	var localDirectory = UTIL.getDirectoryFromPath(localPath);
 	
+	// First check if directory exist
+	CORE.listFiles(user, {pathToFolder: localDirectory}, function(err, listFilesResp) {
+		
+		if(err) callback(err);
+		else hgRoot();
+		
+	});
+	
+	function hgRoot() {
 	var execFile = require('child_process').execFile;
 	execFile("hg", ["root"], { cwd: localDirectory, env: execFileOptions.env }, function hgroot(err, stdout, stderr) {
 		console.log("hg root (error=" + (!!err) + ") localDirectory=" + localDirectory + " stderr=" + stderr + " stdout=" + stdout);
@@ -1244,6 +1274,7 @@ function checkDir(user, virtualPath, callback) {
 			}
 		}
 	});
+}
 }
 
 function objectionize(str, changesets) {
