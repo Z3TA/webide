@@ -334,12 +334,10 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	
 		
 		// Create a hard link to nodejs for use with user_worker.js so that we can have a separate apparmor profile on it and still use nodejs fork
-		fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+		//fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+		// Use mount --bind instead of hard link to prevent EXDEV: cross-device link not permitted (we sometimes got that error even though the link was on the same device!)
+		mount('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
 		
-		/*
-			Error: EXDEV: cross-device link not permitted, link '/usr/bin/nodejs' -> '/usr/bin/nodejs_demo2'
-			
-		*/
 		
 	// Nodejs needs /dev/urandom and /dev/null to start
 	fs.mkdirSync(homeDir + "/dev");

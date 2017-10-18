@@ -21,6 +21,8 @@ for (var i=0, username, mountResult; i<users.length; i++) {
 	username = users[i].substring(0, users[i].indexOf("|"));
 	
 	if(username) {
+		mount("/usr/bin/nodejs", "/usr/bin/nodejs_" + username); // So user_worker.js can have separate Apparmor profile for each user
+		
 	mount("/dev/urandom", HOME + username + "/dev/urandom");
 	mount("/lib/", HOME + username + "/lib");
 	mount("/lib64/", HOME + username + "/lib64");

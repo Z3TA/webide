@@ -103,7 +103,7 @@ unlink("/etc/apparmor.d/home." + username + ".usr.share.npm.bin.npm-cli.js");
 //if(reloadApparmor != "") throw reloadApparmor;
 
 
-unlink("/usr/bin/nodejs_" + username);
+unlink("/usr/bin/nodejs_" + username); // Used by user_worker.js 
 
 // We don't want to accidently mess with any of these, so just in case we are doing some debugging
 /*
@@ -243,20 +243,7 @@ function umount(path, ignoreErrors) {
 	
 	return;
 	// Server was unable to boot after adding stuff to fstab!!
-	// Remove entry from /etc/fstab
-	var text = fs.readFileSync("/etc/fstab", ENCODING);
-	var reMount = new RegExp("(.*) " + regExpEsc(path) + " none bind 0 0\n");
-	var entry = text.match(reMount);
-	if(!entry) {
-		console.log("Not found in /etc/fstab: " + path);
-	}
-	else {
-		text = text.replace(entry[0], "");
-		
-		if(text.match(reMount)) throw new Error("Failed to remove /etc/fstab entry: " + entry[0]);
-		
-		fs.writeFileSync("/etc/fstab", text, ENCODING);
-	}
+	// We made jzedit_user_mounts.service instead, that mounts the mount-points on system upstart
 }
 
 function regExpEsc(str) {
