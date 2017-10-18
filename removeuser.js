@@ -103,7 +103,7 @@ unlink("/etc/apparmor.d/home." + username + ".usr.share.npm.bin.npm-cli.js");
 //if(reloadApparmor != "") throw reloadApparmor;
 
 
-unlink("/usr/bin/nodejs_" + username); // Used by user_worker.js 
+umount("/usr/bin/nodejs_" + username); // Used by user_worker.js 
 
 // We don't want to accidently mess with any of these, so just in case we are doing some debugging
 /*
