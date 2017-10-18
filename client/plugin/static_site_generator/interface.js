@@ -333,9 +333,13 @@
 			}
 		}
 		
+		console.log("Current file does not belong to any SSG project!");
+		
 		return false; // Returing true means we handled the filedrop
 		
 		function handleFile(site, dataFile) {
+			
+			console.log("Current file belongs to SSG project: " + site.name);
 			
 			var filePath = dataFile.path || dataFile.name;
 			var fileType = dataFile.type;
@@ -354,8 +358,11 @@
 			function askWhereToSave() {
 				promptBox(whereToSaveMessage, false, defaultPath, function(filePath) {
 					if(filePath) {
+						console.log("Saving file: " + filePath);
 						saveFile(filePath, function fileSaved(err, path) {
 							if(err) return alertBox(err.message);
+							
+							console.log("Saved file: " + path);
 							
 							var currentFileName = UTIL.getFilenameFromPath(file.path);
 							
@@ -389,6 +396,7 @@
 				if(folders.length > 1) {
 					EDITOR.folderExistIn(folders[folders.length-2], UTIL.getFolderName(folders[folders.length-1]), function (path) {
 						if(path === false) {
+							console.log("Path doesn't exist!");
 							var createPath = "Create the path";
 							var saveElsewhere = "Save the file elsewhere";
 							var dontSave = "Don't save the file";
@@ -410,6 +418,10 @@
 								
 							});
 							
+						}
+						else {
+							console.log("Path exist!");
+							readFile();
 						}
 					});
 				}

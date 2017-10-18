@@ -36,15 +36,16 @@ What I'm working on
 
 
 
-run tests in production
-
-
-
 
 todo
 ----
 
 fix copy-pasting in Macbook
+
+
+
+Mercurial commits with åäö ...
+abort: decoding near ' "småfix"': 'ascii' codec can't decode byte 0xc3 in position 4: ordinal not in 
 
 when doing Ctrl+O and the current folder is in the working dir, use the working dir!
 when doing Ctrl+O use the parent folder of the file being active (instead of the current folder)
