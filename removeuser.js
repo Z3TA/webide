@@ -104,6 +104,7 @@ unlink("/etc/apparmor.d/home." + username + ".usr.share.npm.bin.npm-cli.js");
 
 
 umount("/usr/bin/nodejs_" + username); // Used by user_worker.js 
+unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!
 
 // We don't want to accidently mess with any of these, so just in case we are doing some debugging
 /*
