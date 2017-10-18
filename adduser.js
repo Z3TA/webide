@@ -232,7 +232,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
 	
-		copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "/testfile.txt");
+		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "/testfile.txt");
 		
 	// Use the systems dns settings !?
 	//copyFileSync("/run/resolvconf/resolv.conf", homeDir + "/run/resolvconf/resolv.conf")
