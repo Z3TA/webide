@@ -426,7 +426,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			var folderToSearchIn = currentDir;
 			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) folderToSearchIn = EDITOR.workingDirectory;
 		else {
-				var folders = getFolders(folderToSearchIn);
+				var folders = UTIL.getFolders(folderToSearchIn);
 			if(folders.length > 0) folders.pop(); // Use parent folder
 				folderToSearchIn = folders.pop();
 				console.log("folderToSearchIn=" + folderToSearchIn);

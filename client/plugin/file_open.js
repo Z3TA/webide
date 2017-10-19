@@ -76,7 +76,7 @@
 			
 			if(file.path.indexOf(EDITOR.workingDirectory) != -1) defaultPath = EDITOR.workingDirectory;
 			else {
-				var folders = getFolders(file.path);
+				var folders = UTIL.getFolders(file.path);
 				if(folders.length > 0) folders.pop(); // Use parent folder
 				defaultPath = folders.pop();
 				console.log("defaultPath=" + defaultPath);
