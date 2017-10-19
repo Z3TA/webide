@@ -36,6 +36,7 @@ What I'm working on
 
 
 
+
 todo
 ----
 
@@ -47,8 +48,6 @@ refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
 using modules in SSG ... Able to add npm modules to the SSG ...
-
-able to delete directories from file explorer
 
 Investigate adding the editor to chrome web store and test it in a Chromebook.
 
@@ -1052,6 +1051,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Browse files, for example when picking a save-as path, or opening a file.
+
+
+Git support via Mercurial ? http://hg-git.github.io/
+
 
 Allow proper zooming, check window.devicePixelRatio ...
 Browser zooming alwost does the right thing ...
