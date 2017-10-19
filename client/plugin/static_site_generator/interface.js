@@ -72,18 +72,33 @@
 			
 			var site = isSite(url);
 			
+			console.log("quickedit: url=" + url + " site=" + site); 
+			
 			if(site) {
-				var path = UTIL.getPathFromUrl(url);
-				var dir = UTIL.getDirectoryFromPath(path);
+				var filePath = UTIL.getPathFromUrl(url);
+				var pubUrlPath = site.url ? UTIL.getDirectoryFromPath(site.url) : "/";
 				
-				if(path.indexOf(site.publish) != -1) {
-					path = path.substr(path.indexOf(site.publish)); // Remove hostname and stuff
+				// If the site is published in a folder eg /foo/ remove /foo/ from filePath
+				if(filePath.indexOf(pubUrlPath) == 0) filePath = filePath.slice(pubUrlPath.length);
+				
+				filePath = UTIL.trailingSlash(site.source) + filePath;
+				while(filePath.indexOf("//") != -1) filePath = filePath.replace("//", "/");
+				
+				console.log("filePath=" + filePath + " pubUrlPath=" + pubUrlPath + " ");
+				
+				/*
+				else {
+					alertBox("Unable to figure out which file this is:\n" + path);
+					console.log("site.source=" + site.source);
+					console.log("site.publish=" + site.publish);
+					console.log("path=" + path);
 					
-					path = path.replace(site.publish, site.source);
-					
-					EDITOR.openFile(path, undefined, function fileOpened(err, file) {
+				}
+				*/
+				
+				EDITOR.openFile(filePath, undefined, function fileOpened(err, file) {
 						if(err) {
-							alertBox("Unable to open this file:\n" + path);
+						alertBox("Unable to open " + filePath + " " + err.message + "");
 						}
 						else {
 							// Find where to edit
@@ -141,21 +156,7 @@
 						}
 						
 					});
-					
-				}
-				else {
-					alertBox("Unable to figure out witch file this is:\n" + path);
-					console.log("site.source=" + site.source);
-					console.log("site.publish=" + site.publish);
-					console.log("path=" + path);
-					
-				}
-				
-				
-				// Figure out wich file ...
-				
-				
-			}
+					}
 			else {
 				console.warn("Couln't determine what site the url belongs to: " + url);
 			}
@@ -165,11 +166,13 @@
 				for(var i=0, site; i<sites.length; i++) {
 					site = sites[i];
 					
-					if(url.indexOf(site.url) == 0) return site;
-					if(url.indexOf(site.publish) == 0) return site;
-					if(url.indexOf(site.preview) == 0) return site;
+					console.log(url + " == " + site.url + " ??");
 					
-				}
+					if(url.indexOf(site.url) != -1 || site.url.indexOf(url) != -1) return site;
+					else if(url.indexOf(site.publish) != 0) return site;
+					else if(url.indexOf(site.preview) != 0) return site;
+						else return null;
+					}
 			}
 			
 		}

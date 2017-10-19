@@ -13,7 +13,7 @@
 	"use strict";
 	
 	function editPage(nodes, url) {
-		var editorUrl = "http://127.0.0.1/"; // Change this to the editor URL
+		var editorUrl = "https://webide.se/"; // Change this to the editor URL
 		
 		document.location = editorUrl + "?editPage=" + encodeURIComponent(url) + "&nodes=" + encodeURIComponent(nodes.join(",")) + "";
 	}
