@@ -88,9 +88,10 @@ Error.stackTraceLimit = Infinity;
 
 
 // Global constants, note that const is block scoped!! (can't if(foo) const bar =1)
-const SHIFT = 1;
-const CTRL = 2;
-const ALT = 4;
+// Don't use const just yet (not all browsers support it)'
+var SHIFT = 1;
+var CTRL = 2;
+var ALT = 4;
 
 
 
