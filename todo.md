@@ -1781,9 +1781,13 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+CSS "function" list
+
+---
 Make each production-folder a zfs filesystem
 Take a snapshot when doploying
 Make it possible to rollback to an earlier deployemnt
+---
 
 SSH into another server and run shell commands.
 
