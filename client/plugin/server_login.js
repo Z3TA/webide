@@ -242,11 +242,19 @@
 		
 		// Signup message
 		var signupLink = document.createElement("a");
-		signupLink.appendChild(document.createTextNode("Signup / create account »"));
+		signupLink.appendChild(document.createTextNode("Signup"));
+		signupLink.setAttribute("title", "Click here to create an account");
 		signupLink.setAttribute("href", "/signup/signup.html");
 		signupLink.setAttribute("class", "signup link");
 		form.appendChild(signupLink);
 		
+		//about
+		var aboutLink = document.createElement("a");
+		aboutLink.appendChild(document.createTextNode("About"));
+		aboutLink.setAttribute("title", "More information");
+		aboutLink.setAttribute("href", "/about/about.htm");
+		aboutLink.setAttribute("class", "signup link");
+		form.appendChild(aboutLink);
 		
 		return form;
 		
