@@ -388,7 +388,7 @@
 					window.localStorage.setItem("openedFiles", addToStringList(window.localStorage.getItem("openedFiles"), file.path, fileDelimiter));
 					
 					// Change the state holder item
-					let state = window.localStorage.getItem("state_" + file.path);
+					var state = window.localStorage.getItem("state_" + file.path);
 					window.localStorage.removeItem("state_" + path);
 					window.localStorage.setItem("state_" + file.path, state);
 					
