@@ -7,57 +7,56 @@
 	</head>
 <body>
 
-<h1>What is webide.se ?</h1>
+<h1>webide.se</h1>
 
 <p><a href="https://webide.se/">webide.se</a> is <a href="#jzedit">JZedit</a> running on a server.</p>
 
-<p>webide.se is a cloud developer environment where you can compile static web sites and develop Node.JS micro-services.<br>
-webide.se also gives web hosting space for static web sites and Node.JS micro services, 
-making it possible to both develop and run (host, in production) full stack JavaScript web applications from any device that have a web browser, 
-without need for plugins or installing anything!</p>
+<p>webide.se is a cloud development environment where you can compile static web sites and develop Node.JS micro-services.</p>
 
+<p>webide.se give you web hosting space for static web sites and Node.JS micro services,
+making it possible to both develop and run (host, in production) full stack JavaScript web applications from any device that have a web browser, 
+without need for plugins or installing anything, or using a terminal or command line!</p>
 
 
 
 <a name="jzedit"></a>
-<h1>What is JZedit</h1>
+<h1>JZedit</h1>
 
-<p>JZedit is a editor for programming, specialized in JavaScript, CSS, HTML and web
+<p>JZedit is a text editor for programming, specialized in JavaScript, CSS, HTML and web
 development, with IDE-like features such as auto complete and built in version
-control (Mercurial) support, and a built in Static site generator.</p>
+control (Mercurial), and a built in static-site-generator.</p>
 
-<p>JZedit is open source and can run locally on a PC or any device supporting Node.JS.<br>
+<p>JZedit is open source and can run locally on a PC or any device capable of running <a href="https://www.nodejs.org/">Node.JS</a>.<br>
 It can also run on a headless private server where you connect to it from a browser.</p>
 
 
 <h2>Features</h2>
 
-Grouped file tabs
-
-Automatic indentation management, save time not having to indent your code.
-
-Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted, makes it faster to navigate in large files.
-
-Smart auto-completion of JavaScript variables <kbd>Tab</kbd>.
-
-Static site generator with JavaScript support, kinda like classic ASP, but with support for Node.JS modules.
-
-WYSIYG and editor side by side, write HTML without knowing HTML. 
-
-Connect to FTP/FTPS/SFTP and edit files remotely.
-
-Commit from within the editor and show annotation
+<ul>
+	<li>Grouped file tabs</li>
+	<li>Function list - For quick navigation, and search of JavaScript functions.</li>
+		<li>Automatic indentation management - Save time not having to indent your code!</li>
+	<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted - Makes it faster to navigate in large files.</li>
+		<li>Smart auto-completion of JavaScript variables <kbd>Tab</kbd>.</li>
+		<li>Static site generator with JavaScript support, kinda like classic ASP, but with support for Node.JS modules.</li>
+	<li>WYSIYG and editor side by side - Write HTML without knowing HTML.</li>
+		<li>Connect to FTP/FTPS/SFTP and edit files remotely.</li>
+		<li>Commit from within the editor and show annotations.</li>
+	<li>It's possible to run it embedded on a web site.</li>
+	</ul>
 
 
 <h2>Architecture</h2>
 
-<p>JZedit's source code is made of vanilla (no transpiling) JavaScript, HTML and CSS, and use HTML Canvas for rendering.<br>
-JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features. 
-Back-end and front-end is separated in order to make everything work in the browser.<br>
-JZedit has a small core of only a few files. All functionality, even the rending, are implemented as plugins.
+<p>JZedit's source code is made of vanilla (no transpiling) JavaScript, HTML and CSS, and use HTML Canvas for rendering.</p>
+
+<p>JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features.&nbsp;</p>
+
+<p>Backend and frontend is separated in order to make everything work in the browser.</p>
+
+<p>JZedit has a small core of only a few files. All functionality, even the rending, are implemented as plugins.<br>
 Each plugin is independent - they do not depend on each other - avoiding complexity.<br>
 Plugins can be hot loaded, so while making a plugin, you can refresh it without reloading the editor.</p>
-
 
 </body>
 </html>
