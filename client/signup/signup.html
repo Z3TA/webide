@@ -14,68 +14,53 @@
 	<script type="text/javascript" src="../sockjs-0.3.4.js"></script>
 	<script type="text/javascript" src="signup.js"></script>
 	
-	</head>
-<body>
-
-<main>
-
-<blockquote>WARNING: THIS IS EARLY ACCESS ALPHA. PLEASE DO NOT USE IT UNLESS YOU 
- ARE PREPARED TO HANDLE WITH SERIOUS ISSUES AND POSSIBLE INTERRUPTIONS</blockquote>
-
-
-<h1>JZedit</h1>
-
-<p>JZedit is a open source cloud editor and development enviroment (IDE) for websites, apps and Node.JS services.<br>
-You can run it locally as a "native" web app, or in the "cloud" (in a web browser).</p>
-
-<p>When running in the cloud, the editor needs to connect to a server for features such as FTP and Source control management (Mercurial) to work.<br>
-Additionally, when using the cloud editor you get webhosting space to host web pages and Node.JS services ...</p>
-
-<p>Want to make a web page or app ? And have it running live in the cloud five minuts from now ?</p>
-
-<p>All you have to know is some JavaScript, HTML and CSS.</p>
-
-<p>Deoply your homepage/app or node.js service in one click.</p>
-
-<fieldset>
-<legend>Cloud Signup</legend>
-
-<p>Create a free account:</p>
-
-<span class="alert" id="generalAlert">You need to enable JavaScript!</span>
-
-<div class="input-single">
-<label for="username">Username</label>
-	<input type="text" id="username" />  <span class="alert" id="usernameAlert"></span>
-</div>
-<div class="input-single">
-<label for="password">Password</label>: 
-	<input type="password" id="password" />  <span class="alert" id="pwAlert"></span>
-</div>
-
-<p>Your website url: <span id="urlUser">user</span>.webide.se</p>
-
-<button id="createButton">Create account & Start developing</button></p>
-
-</fieldset>
-
-<nav>
-<ul>
-<li><a href="/">Already have an account?</a></li>
-<li><a href="/help/index.html">Guides</a></li>
-</ul>
-</nav>
-
-<h2>Features</h2>
-
-<p>Besides an IDE for JavaScript and NodeJS with function-list, auto-completion, auto-formatter and debugger, etc, the webIDE also has:</p>
-
-<ul>
-	<li>Static site generator with WYSIWYG mode</li>
-<li>Mercurial source control management integration</li>
-	<li>SSH/SFTP and FTP/FTPS integration</li>
-	</ul>
-
+	<script type="text/javascript" src="clouds.js"></script>
+		
+		</head>
+		<body>
+		
+		<main>
+		
+		<blockquote class="alpha warning">WARNING: THIS IS EARLY ACCESS ALPHA. PLEASE DO NOT USE IT UNLESS YOU 
+		ARE PREPARED TO HANDLE WITH SERIOUS ISSUES AND POSSIBLE INTERRUPTIONS</blockquote>
+		
+		
+		<p>Want to make a web page or app ? And have it running live in the cloud five minuts from now ?</p>
+		
+		<p>All you have to know is some JavaScript, HTML and CSS.</p>
+		
+		<p>Deploy your homepage/app or node.js service in one click.</p>
+		
+		<fieldset>
+		<legend>Cloud Signup</legend>
+		
+		<p>Create a free account:</p>
+		
+		<span class="alert" id="generalAlert">You need to enable JavaScript!</span>
+		
+		<div class="input-single">
+	<label for="username">Username:</label>
+		<input type="text" id="username" />  <span class="alert" id="usernameAlert"></span>
+		</div>
+		<div class="input-single">
+	<label for="password">Password:</label> 
+		<input type="password" id="password" />  <span class="alert" id="pwAlert"></span>
+		</div>
+		
+		<p>Your website url: <span id="urlUser">user</span>.webide.se</p>
+		
+		<button id="createButton">Create account & Start developing</button></p>
+		
+		</fieldset>
+		
+		<nav>
+		<ul>
+		<li><a href="/">Already have an account?</a></li>
+		<li><a href="/about/about.htm">About</a></li>
+		<!--<li><a href="/help/index.html">Guides</a></li>-->
+		</ul>
+		</nav>
+		
 		</main>
 		
 		</body>

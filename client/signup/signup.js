@@ -1,10 +1,14 @@
+(function() {
+	
 var SOCKJS_OPEN = 1;
 var SIGNUP_URL = "https://signup.webide.se/signup";
 var CHARCODE_ENTER = 13;
 var MIN_PW_LENGTH = 5;
 var MIN_USERNAME_LENGTH = 3;
 
-window.onload = function main() {
+	window.addEventListener("load", signup, false);
+	
+	function signup() {
 	var inputUsername = document.getElementById("username");
 	var inputPassword = document.getElementById("password");
 	var createButton = document.getElementById("createButton");
@@ -145,3 +149,4 @@ window.onload = function main() {
 	}
 	
 }
+})();

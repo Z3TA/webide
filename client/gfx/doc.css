@@ -1,8 +1,30 @@
 body {
 	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
-	font-size: 13px;
-	line-height: 1.3em;
+	font-size: 1em;
+	line-height: 1.4em;
 	color: #242729;
+	margin: 0;
+	padding: 0;
+}
+
+main {
+	margin: 1em;
+	background-color: rgba(194, 224, 250, 0.9);
+	border: 1px solid #bed3e4;
+	border-radius: 1em;
+	padding: 2em;
+	margin: 1em;
+	max-width: 800px;
+}
+
+p {
+	margin-top: 1.1em;
+	margin-bottom: 1.1em;
+}
+
+li {
+	margin-top: .1em;
+	margin-bottom: .1em;
 }
 
 kbd {
@@ -19,4 +41,34 @@ kbd {
 	border-radius: 3px;
 	box-shadow: 0 1px 0 rgba(12,13,14,0.2),0 0 0 2px #FFF inset;
 	white-space: nowrap;
+}
+
+
+.alpha.warning {
+	margin: 0;
+	background-color: #efefef;
+	padding: 1em;
+	border: 1px dotted black;
+	font-size: 0.6em;
+	display: inline-block;
+	}
+
+legend {
+	padding: 0.2em 0.5em;
+	border:1px solid #bed3e4;
+	font-weight: bold;
+	background-color: orange;
+	border-radius: 3px;
+	}
+
+fieldset {
+	padding: 1em;
+	border:1px solid #bed3e4;
+	background-color: white;
+	border-radius: 5px;
+	max-width: 600px;
+	}
+
+label {
+	font-weight:bold;
 }
