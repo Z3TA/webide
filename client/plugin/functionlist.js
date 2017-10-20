@@ -305,7 +305,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 			if(func.start <= charIndex && func.end >= charIndex) {
 				
 				if(func.subFunctions.length > 0) {
-					let result = findCurrentFunction(func.subFunctions, charIndex);
+					var result = findCurrentFunction(func.subFunctions, charIndex);
 					if(result != null) {
 						return result; // The subfunction (recursive)
 					}
@@ -346,7 +346,7 @@ for(var func, element, i=0; i<functions.length; i++) {
 				}
 				
 				if(func.subFunctions.length > 0) {
-					let result = searchFunctions(str, func.subFunctions);
+				var result = searchFunctions(str, func.subFunctions);
 					
 					if(result.length > 0) matches = matches.concat(result);
 				}

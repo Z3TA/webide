@@ -136,7 +136,7 @@
 					console.log("Quad click!");
 					// Select the whole paragraph: Look for double line-breaks + also match {}
 					
-					let textRange = findParagraph(file, caret.index);
+					var textRange = findParagraph(file, caret.index);
 					
 					if(textRange) {
 					
@@ -187,7 +187,7 @@
 							// Place caret at the end of the selection (to prevent the last character from popping)
 							file.moveCaretToIndex(endIndex, caret);
 							
-							//let pop = true;
+							//var pop = true;
 							//if(file.caret.eol) pop = false;
 							
 							makeSelection(file, caret);
@@ -461,8 +461,8 @@
 		
 		if(1 == 1) {
 			ctx.strokeStyle="rgba(255,0,0, 1)";
-			let h = adjustToGridY(height);
-			let t = ( h >= gh)*gh;
+			var h = adjustToGridY(height);
+			var t = ( h >= gh)*gh;
 			ctx.strokeRect(mouseStartX,mouseStartY - t , adjustToGridX(width), h + t  );
 		}
 		else {

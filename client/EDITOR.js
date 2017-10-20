@@ -531,9 +531,9 @@ EDITOR.lastKeyPressed = "";
 						//return;
 						
 						console.warn("File larger then " + EDITOR.settings.bigFileSize + " bytes. It will be opened as a stream!");
-						let notFromDisk = false;
-						let tooBig = true;
-						let text = "";
+						var notFromDisk = false;
+						var tooBig = true;
+						var text = "";
 						load(null, path, text, notFromDisk, tooBig);
 					}
 					else {

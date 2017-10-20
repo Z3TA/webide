@@ -185,13 +185,13 @@
 		
 		for (var row=0; row<buffer.length; row++) {
 			
-			let columns = buffer[row].length;
-			let bufferRow = buffer[row];
+			var columns = buffer[row].length;
+			var bufferRow = buffer[row];
 			
 			if(columns > 3) {
-				let char1 = bufferRow[0].char;
-				let char2 = bufferRow[1].char;
-				let char3 = bufferRow[2].char;
+				var char1 = bufferRow[0].char;
+				var char2 = bufferRow[1].char;
+				var char3 = bufferRow[2].char;
 				
 				if(char1 == H || char2 == H || char3 == H) {
 					headingMaybe(row); 
@@ -203,8 +203,8 @@
 					headingMaybe(row-1, 1);
 				}
 				else if(char1 == "/" && (char2 == "/" || char2 == "*") && columns > 4) { // It's a line comment
-					let char4 = bufferRow[3].char;
-					let char5 = bufferRow[4].char;
+					var char4 = bufferRow[3].char;
+					var char5 = bufferRow[4].char;
 					
 					if(char3 == H || char4 == H || char5 == H) {
 						headingMaybe(row);
@@ -232,7 +232,7 @@
 			if(size == undefined) size = 0;
 			
 			for (var col=0; col<buffer[row].length; col++) {
-				let char = buffer[row][col].char;
+				var char = buffer[row][col].char;
 				
 				//console.log("char=" + char);
 				
@@ -260,22 +260,22 @@
 			
 			if(size > 0 || 1==1) {
 				// ## Paint header
-				let col = 0;
-				let startRow = file.startRow;
-				let left = EDITOR.settings.leftMargin + (col + buffer[row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
-				let top = EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight;
-				let bgColor = "blue"; // EDITOR.settings.style.commentColor
-				let textColor = "yellow" // EDITOR.settings.style.textColor
+				var col = 0;
+				var startRow = file.startRow;
+				var left = EDITOR.settings.leftMargin + (col + buffer[row].indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
+				var top = EDITOR.settings.topMargin + (row) * EDITOR.settings.gridHeight;
+				var bgColor = "blue"; // EDITOR.settings.style.commentColor
+				var textColor = "yellow" // EDITOR.settings.style.textColor
 				
 				// ### Set font (size)
-				let fontSize = Math.max(10, 22 - size * 2.5);
+				var fontSize = Math.max(10, 22 - size * 2.5);
 				ctx.font= fontSize + "px " + EDITOR.settings.style.font;
 				//ctx.textBaseline = "bottom"; // top
 				
 				// ### Measure text
 				
-				let width = ctx.measureText(text).width;
-				let height = fontSize;
+				var width = ctx.measureText(text).width;
+				var height = fontSize;
 				
 				// ### Clear background
 				ctx.fillStyle = bgColor;

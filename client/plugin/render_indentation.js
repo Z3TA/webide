@@ -83,17 +83,17 @@
 			
 			for(var row=0; row<buffer.length; row++) {
 				
-				let level = buffer[row].indentation;
+				var level = buffer[row].indentation;
 				
 				
 				for(var lvl=1; lvl<level; lvl++) {
 					
 					// All lines goes straight down
 					
-					let x1 = leftMargin + (lvl) * tabSpace * gridWidth + 2.5; // x.5 for sub-pixel (very thin) line
-					let y1 = topMargin + (row+startRow) * gridHeight;
-					let x2 = x1;
-					let y2 = y1 + gridHeight;
+					var x1 = leftMargin + (lvl) * tabSpace * gridWidth + 2.5; // x.5 for sub-pixel (very thin) line
+					var y1 = topMargin + (row+startRow) * gridHeight;
+					var x2 = x1;
+					var y2 = y1 + gridHeight;
 					
 					ctx.moveTo(x1, y1);
 					ctx.lineTo(x1, y2);
@@ -111,14 +111,14 @@
 				
 				for(var row=problemRow; row<buffer.length; row++) {
 					
-					let level = buffer[row].indentation;
+					var level = buffer[row].indentation;
 					
 					if(level == problem) {
 					
-						let x1 = leftMargin + (level-1) * tabSpace * gridWidth + 2;
-						let y1 = topMargin + (row+startRow) * gridHeight;
-						let x2 = x1;
-						let y2 = y1 + gridHeight;
+						var x1 = leftMargin + (level-1) * tabSpace * gridWidth + 2;
+						var y1 = topMargin + (row+startRow) * gridHeight;
+						var x2 = x1;
+						var y2 = y1 + gridHeight;
 				
 						ctx.moveTo(x1, y1);
 						ctx.lineTo(x1, y2);

@@ -238,7 +238,7 @@
 						
 					}
 					else if(variable.type == "this") {
-						let p = functionName.split(".");
+						var p = functionName.split(".");
 						
 						searchFunctionThis(p[0], keyName);
 					}
@@ -252,7 +252,7 @@
 					console.log()
 					if(variableName.substr(0, wordLength) == word) {
 						
-						let variable = variables[variableName];
+						var variable = variables[variableName];
 						
 						if(!optionExist(options, variableName)) {
 							
@@ -484,9 +484,9 @@
 					/* Check what function "this" refers to
 						And method
 					*/
-					let thisProps = scope.thisIs.name.split(".");
+					var thisProps = scope.thisIs.name.split(".");
 					
-					let functionNameLastPart = property[property.length-1];
+					var functionNameLastPart = property[property.length-1];
 					functionName = "";
 					for(var i=0; i<thisProps.length-1; i++) {
 						functionName = functionName + thisProps[i] + ".";
@@ -510,9 +510,9 @@
 				   
 				*/ 
 				for(var vName in js.globalVariables) {
-					let variable = js.globalVariables[vName];
+					var variable = js.globalVariables[vName];
 					if(variable.type == "unknown") {
-						let possibleFunctionName = variable.value;
+						var possibleFunctionName = variable.value;
 						
 						theFunction = getFunctionWithName(js.functions, possibleFunctionName)
 
@@ -528,7 +528,7 @@
 				
 				if(scope.variables.hasOwnProperty(property[0])) {
 					// We found the variable
-					let variable = scope.variables[property[0]];
+					var variable = scope.variables[property[0]];
 					
 					// Traverse the variable-property tree
 					for(var i=1; i<property.length; i++) {
@@ -537,7 +537,7 @@
 						}
 					}
 					
-					let functionNameLastPart = property[property.length-1];
+					var functionNameLastPart = property[property.length-1];
 					
 					if(variable.type == "String") {
 						theFunction = stringPrototype[functionNameLastPart];
@@ -623,7 +623,7 @@
 		
 		// Add local varibales for each function
 		for(var i=0; i<foundFunctions.length; i++) {
-			let func = foundFunctions[i];
+			var func = foundFunctions[i];
 			for(var variableName in func.variables) {
 				foundVariables[variableName] = func.variables[variableName];
 				// Deeper nests over-rides globals as intended!

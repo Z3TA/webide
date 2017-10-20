@@ -93,11 +93,11 @@
 			
 			// Begin spell-checking all opened files
 			
-			let change = "toggleSpellcheckerOn"
-			let text = "";
-			let index = 0;
-			let row = 0;
-			let col = 0;
+			var change = "toggleSpellcheckerOn"
+			var text = "";
+			var index = 0;
+			var row = 0;
+			var col = 0;
 			
 			if(EDITOR.currentFile) runSpellCheck(EDITOR.currentFile, change, text, index, row, col); // Start with the file in view
 			

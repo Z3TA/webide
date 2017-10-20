@@ -105,9 +105,9 @@
 		if(lastOpenXmlTagStart != -1) {
 			// We have an open xml tag ... What is it?
 			var xmlTagBody = textUpUntilChar.substring(lastOpenXmlTagStart, charIndex);
-			let firstSpace = xmlTagBody.indexOf(" ");
-			let firstRightTag = xmlTagBody.indexOf(">");
-			let end = 0;
+			var firstSpace = xmlTagBody.indexOf(" ");
+			var firstRightTag = xmlTagBody.indexOf(">");
+			var end = 0;
 			if(firstSpace > -1 && firstSpace < firstRightTag) {
 				end = firstSpace;
 			}

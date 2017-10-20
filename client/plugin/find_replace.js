@@ -358,7 +358,7 @@
 			}
 			else {
 				show_search();
-				let selectedText = file.getSelectedText();
+				var selectedText = file.getSelectedText();
 				if(selectedText.length > 0) {
 					// Put the selected text into the search box and make a search
 					inputFind.value = selectedText;
@@ -479,7 +479,7 @@
 			
 			if(direction=="left") {
 				//console.log("searching left");
-				let begin = start-1;
+				var begin = start-1;
 				
 				if(ignoreCase) start = text.toLowerCase().lastIndexOf(str.toLowerCase(), begin)
 				else start = text.lastIndexOf(str, begin);
