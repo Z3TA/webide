@@ -34,11 +34,18 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+Make a script the minifies and inlines all js and css and gzip it, then when / is requested, send the gzip bundle!
+Load time went from 1000ms to 300ms by bundling!
+
+A text editor made in JavaScript less then 500kb gziped and loads in 300ms ... =)
 
 
+Styling the signup page
 
 todo
 ----
+
+open large files "benchmark optimization"
 
 fix copy-pasting in Macbook
 
