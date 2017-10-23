@@ -14,6 +14,9 @@
 var fs = require("fs");
 var bundle = fs.readFileSync("client/index.htm", "utf8");
 
+// Remove tests
+bundle = bundle.replace(/<!-- BEGIN TESTS -->[\s\S]+<!-- END TESTS -->/mg, "");
+
 // Find scripts
 var reScripts = /<script.*src="(.*)"><\/script>/g;
 var scripts = [];
