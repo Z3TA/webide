@@ -50,6 +50,12 @@ cp version.inc temp/release/linux/
 sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 
 
+# Generate bundle
+cd temp/release/linux/
+nodejs makebundle.js
+gzip client/bundle.htm --best
+cd ../../../
+
 # Minify .js files
 # (npm install uglify-js -g)
 # find temp/release/linux/ -name '*.js' | xargs uglifyjs
