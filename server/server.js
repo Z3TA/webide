@@ -113,6 +113,9 @@ var VNC_PORT = 5901;
 
 var PORTS_IN_USE = [HTTP_PORT];
 
+var fs = require("fs");
+var BUNDLE_GZIP_SIZE = fs.statSync("../client/bundle.htm.gz").size;
+
 	process.on("SIGINT", function sigInt() {
 		log("Received SIGINT");
 		
@@ -874,12 +877,30 @@ function handleHttpRequest(request, response) {
 			http "endpoints" needs to pass same origin policy!
 		*/
 		
-		var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
+	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
+	
+	if(request.url == "/") {
+	var acceptEncoding = request.headers['accept-encoding'];
+		if(acceptEncoding.match(/\bgzip\b/)) {
+			
+			responseHeaders['Content-Encoding'] = "gzip";
+			responseHeaders['Content-Length'] = BUNDLE_GZIP_SIZE;
+			responseHeaders['Content-Type'] = "text/html";
+			
+		response.writeHead(200, responseHeaders);
 		
+		var fs = require("fs");
+		var readStream = fs.createReadStream("../client/bundle.htm.gz");
+		readStream.pipe(response);
+		return;
+	}
+	}
+	
+	
 	if(firstDir == "vnc" && secondDir) {
 		
 		if(VNC_CHANNEL.hasOwnProperty(secondDir)) {
-		
+			
 			console.log("Proxying request to VNC channel: " + secondDir);
 		
 			VNC_CHANNEL[secondDir].proxy.web(request, response);
