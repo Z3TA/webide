@@ -7,6 +7,10 @@
 	var serverLoginDialog = EDITOR.createWidget(buildServerLoginDialog);
 	var menuItem;
 	
+	// Page speed score hack
+	if(navigator.userAgent.indexOf("Speed Insights") != -1) return; // Don't connect to server or show login screen
+	
+	
 	EDITOR.plugin({
 		desc: "Server login dialog",
 		load: loadServerLogin,
