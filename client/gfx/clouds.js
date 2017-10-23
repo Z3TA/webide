@@ -7,6 +7,7 @@
 	var IMAGES_LOADED = 0;
 	var WINDOW_LOADED = false;
 	var CLOUD = [];
+	var BG_COLOR = "#4eb2ff";
 	
 	var IMG = [
 		"0.png",
@@ -36,7 +37,7 @@
 				IMAGES_LOADED++;
 				clouds();
 			}
-			img.src = "clouds/" + imgSrc;
+			img.src = "/gfx/clouds/" + imgSrc;
 			return img;
 		}
 		
@@ -45,7 +46,7 @@
 		CANVAS.style.zIndex = -1;
 		CANVAS.style.position = "fixed";
 		CANVAS.style.top = "0px";
-		CANVAS.style.opacity = 0.3;
+		CANVAS.style.opacity = 0.15;
 		
 			var body = document.body;
 			
@@ -71,7 +72,7 @@
 	
 	function animate() {
 		var ctx = CANVAS.getContext('2d');
-		ctx.fillStyle="#4eb2ff";
+		ctx.fillStyle=BG_COLOR;
 		ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
 		ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 		for (var i=0, img; i<CLOUD.length; i++) {

@@ -123,6 +123,10 @@ Streamline the experience of sharing and publishing a web document via the edito
 
 Figure out why hg root *sometimes* returns emty result (it has something to do with apparmor)
 
+Do what this guy expect the editor to do:
+http://moolenaar.net/habits.html
+
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!
