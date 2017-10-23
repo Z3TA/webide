@@ -881,6 +881,7 @@ function handleHttpRequest(request, response) {
 	
 	if(request.url == "/") {
 	var acceptEncoding = request.headers['accept-encoding'];
+		if(!acceptEncoding) acceptEncoding = '';
 		if(acceptEncoding.match(/\bgzip\b/)) {
 			
 			responseHeaders['Content-Encoding'] = "gzip";
@@ -894,6 +895,9 @@ function handleHttpRequest(request, response) {
 		readStream.pipe(response);
 		return;
 	}
+		else {
+			console.log("acceptEncoding=" + acceptEncoding);
+		}
 	}
 	
 	
