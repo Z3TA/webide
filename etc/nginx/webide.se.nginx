@@ -30,7 +30,6 @@ server {
   server_name webide.se;
   charset utf-8;
 
-
   location / {
     
     # Allow cross domain requests (always adds the header to all, even 400 errors!)
@@ -53,6 +52,12 @@ server {
     
   }
   
+  location = / {
+    gzip_static on;
+    index bundle.htm;
+    alias /srv/jzedit/client/;
+  }
+
   location @badgateway {
     add_header Access-Control-Allow-Origin * always;
     default_type text/plain;
