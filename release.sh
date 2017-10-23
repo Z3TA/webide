@@ -53,7 +53,7 @@ sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux
 # Generate bundle
 cd temp/release/linux/
 nodejs makebundle.js
-gzip client/bundle.htm --best
+gzip client/bundle.htm --best --keep
 cd ../../../
 
 # Minify .js files
