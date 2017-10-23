@@ -27,7 +27,7 @@ if(runtime=="browser") {
 	
 	// Web safe fonts are ugly, try to load a nice font ...
 		
-		if(1==2 && browser != "Firefox") { // Firefox have wierd kerning/spacing
+		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
 		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
 		EDITOR.settings.style.font = "DejaVuSansMono";
 			EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
