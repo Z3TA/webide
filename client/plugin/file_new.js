@@ -17,7 +17,7 @@
 			
 			menuItem = EDITOR.addMenuItem("Create new file", contentMenuNewFile);
 			
-			newFileDashboardWidget = EDITOR.addDashboardWidget(createNewFileDashboardWidget());
+			//newFileDashboardWidget = EDITOR.addDashboardWidget(createNewFileDashboardWidget());
 			
 			
 		},
@@ -26,7 +26,7 @@
 			
 			EDITOR.unbindKey(keyboardNewFile);
 			
-			EDITOR.removeDashboardWidget(newFileDashboardWidget);
+			//EDITOR.removeDashboardWidget(newFileDashboardWidget);
 			
 		},
 		order: 1
