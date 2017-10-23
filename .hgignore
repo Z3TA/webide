@@ -11,3 +11,4 @@ tests/_*
 temp/*
 .editorStorage/*
 client/noVNC/*
+client/bundle.htm*
