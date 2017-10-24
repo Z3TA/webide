@@ -85,6 +85,10 @@
 	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
 		// Only fix indentation if the parser has parsed the blocks so we know how much indentation to use
+		if(!file.parsed) {
+			console.log("File has not been parsed: " + file.path);
+			return done();
+		}
 		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return done();
 		
 		if(type=="linebreak") {

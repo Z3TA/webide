@@ -11,6 +11,7 @@
 		quotes
 		comments
 		xmlTags
+		blockMatch
 		
 		And make code indentation !
 		
@@ -312,7 +313,7 @@
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		//console.log("xmlTags:" + JSON.stringify(xmlTags, null, 2));
 		
-		return {language: "XML", quotes: quotes, comments: comments, xmlTags: xmlTags};
+		return {language: "XML", quotes: quotes, comments: comments, xmlTags: xmlTags, blockMatch: (openXmlTags === 0)};
 		
 	}
 	
@@ -341,9 +342,11 @@
 	
 	function isXML(file) {
 		
+		if(file.parsed) {
 		if(file.parsed.language && file.parsed.language != "XML") {
 			console.warn("File has already been parsed:  file.parsed.language=" + file.parsed.language + " file.path=" + file.path);
 			return false;
+		}
 		}
 		
 		if(file.fileExtension == "xml" ||

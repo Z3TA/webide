@@ -359,6 +359,15 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+Problem when trying to paste:
+@font-face {
+font-family: Play;
+src: url("fonts/Play/Play-Regular.ttf") format('truetype');
+}
+into xml file (svg) style block with cdata
+
+When saving as on a ftp site, it asks to create the path, then it will have trouble showing the folder in file explorer ...
+
 Was editing a nginx config file and somehow non-space/tab characters was added to the indentation characters!
 
 In shell start.sh when exiting (with exit code <> 0 ??) it starts the next runtime in the list ...
