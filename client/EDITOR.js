@@ -1237,7 +1237,9 @@ EDITOR.lastKeyPressed = "";
 				ctx.fillText(friendlyString, left, top);
 			}
 			
-			console.log("No file open");
+			// Render clouds !?
+			
+			//console.log("No file open");
 		}
 		
 		//console.log("rendering finish");
@@ -2705,6 +2707,10 @@ EDITOR.lastKeyPressed = "";
 		for(var i=0; i<keyBindings.length; i++) {
 			if(UTIL.getFunctionName(keyBindings[i].fun) == funName) {
 				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
+			}
+			if(keyBindings[i].charCode == b.charCode && keyBindings[i].combo == b.combo) {
+				// It's OK to bind the same key combo do many things, eg Esc key, but we should give a warning:
+				UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
 			}
 		}
 		
