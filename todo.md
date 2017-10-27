@@ -34,7 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-
+figure out how many JavaScript programmers that use vi/vim key bindings
 
 todo
 ----
@@ -135,6 +135,57 @@ What I'm thinking
 What about users that don't have function keys ?
 
 Keyboard shortcuts are hard to remember ...
+
+---
+
+Support key bindings for the popular text editors currently being used by web developers:
+Visual Studio 38.8%
+Notepad++ 34.3%
+Sublime Text 31.4%
+Vim 27.1%
+
+But instead of trying to "support" these key-bindings, why not try to be better !?
+
+Modal editing (using different modes) is a nice concept. Using the mouse is however very inutive and not much slower !?
+Laptops does however have a touch pad instead of a mouse. And phones have touch screens. It would be nice to be able to program efficiently from the phone!
+
+Keyboard layouts look different and it's really only the latin character keys a-z and number keys 1-0, plus tab, caps-lock,space, comma, dot, and maybe shift - that are located at the same places!
+Some keyboards don't have F1-F12 or a number-pad!
+
+Caps-lock can be used to switch modes!
+
+Shift is used to select text in many "modern" text editors. So shift should always be used to select stuff while in command mode.
+Examples: 
+shift+=Select everything inside whatever you are in (parentheses, brackets, string, function) 
+shift+=Same as shift+i but also selects the (parentheses, brackets, string, function)
+shift+=Selects until (from left to right) the end of whatever you are in (parentheses, brackets, string, function) 
+shift+=Selects the whole file
+shift+move=selects and moves (ijkl ?)
+ijkl = move
+esdf = scrolls up, left, right, down, right
+m=record macro
+r=run macro, or repeat last command
+w,r=switch between files: w=switch left, r=switch right
+g123=goto line 123, goes while typing (first to row 1 then to row 12 then to row 123)
+ghi=search for hi, searches while typing, and moves there
+shift+g same as g... but also selects
+
+3i=move 3 lines up
+3(shift+)i=select 3 lines up
+0=goto colum 0
+.(dot)=go right to next dot or to eol 
+o=move one word right
+u=move one word left
+c= (one press) copy (two presses) cut
+p=paste
+
+Special motions: a=all i=in t='till
+
+
+
+
+
+
 
 
 
