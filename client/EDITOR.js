@@ -2701,20 +2701,31 @@ EDITOR.lastKeyPressed = "";
 		
 		if(!b.desc) UTIL.getStack("Key binding should have a description!");
 		
-		// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
-		var funName = UTIL.getFunctionName(b.fun);
-		if(funName == "") throw new Error("Key binding function can not be anonymous!")
-		for(var i=0; i<keyBindings.length; i++) {
-			if(UTIL.getFunctionName(keyBindings[i].fun) == funName) {
-				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
+		var disable = [];
+		
+			// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
+			var funName = UTIL.getFunctionName(b.fun);
+			if(funName == "") throw new Error("Key binding function can not be anonymous!")
+			for(var i=0; i<keyBindings.length; i++) {
+				if(UTIL.getFunctionName(keyBindings[i].fun) == funName) {
+					throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
+				}
+				if(keyBindings[i].charCode == b.charCode && keyBindings[i].combo == b.combo) {
+				if(b.disableOthers) disable.push(keyBindings[i]);
+					else {
+						// It's OK to bind the same key combo do many things, eg Esc key, but we should give a warning:
+						UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
+					}
+				}
 			}
-			if(keyBindings[i].charCode == b.charCode && keyBindings[i].combo == b.combo) {
-				// It's OK to bind the same key combo do many things, eg Esc key, but we should give a warning:
-				UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
-			}
+			
+		for (var i=0; i<disable.length; i++) {
+			keyBindings.splice( keyBindings.indexOf(disable[i], 1) );
 		}
 		
 		keyBindings.push(b);
+		
+		return disable; // Allows key bindings that disable others to enable the other 
 		
 	}
 	
