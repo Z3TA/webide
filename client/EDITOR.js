@@ -1102,6 +1102,7 @@ EDITOR.lastKeyPressed = "";
 			ctx.restore();
 			ctx.save();
 			ctx.scale(pixelRatio,pixelRatio);
+			//ctx.scale(1,1);
 		}
 		
 		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
