@@ -3605,8 +3605,8 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	// Fix annoying scrolling on Mobile
-	window.addEventListener("scroll", preventMotion, false);
-	window.addEventListener("touchmove", preventMotion, false);
+	window.addEventListener("scroll", function(e) {console.log(e);}, false);
+	window.addEventListener("touchmove", function(e) {console.log(e);}, false);
 	
 	function preventMotion(event)
 	{
@@ -3614,6 +3614,7 @@ EDITOR.lastKeyPressed = "";
 		event.preventDefault();
 		event.stopPropagation();
 	}
+	
 	// End: Annoying scrolling fix
 	
 	
@@ -5306,6 +5307,8 @@ EDITOR.lastKeyPressed = "";
 		
 		mouseMoveEvent = mouseMoveEvent || window.event;
 		
+		console.log(mouseMoveEvent);
+		
 		//mouseMoveEvent.preventDefault();
 		
 		var mouse = getMousePosition(mouseMoveEvent);
@@ -5323,7 +5326,7 @@ EDITOR.lastKeyPressed = "";
 				
 				//console.log(UTIL.getFunctionName(fun));
 				
-				fun(mouseX, mouseY, target); // Call it
+				fun(mouseX, mouseY, target, mouseMoveEvent.type); // Call it
 				
 			}
 		}

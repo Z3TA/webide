@@ -498,7 +498,10 @@
 		
 	}
 	
-	function mouseSelectMouseMove(x, y, target) {
+	function mouseSelectMouseMove(x, y, target, type) {
+		
+		console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " type=" + type + " ");
+		
 		if(target.className == "fileCanvas") {
 			mouseX = x;
 			mouseY = y;

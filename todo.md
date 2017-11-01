@@ -34,6 +34,15 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+todo: On mobile: prevent scrolling away, able to scroll the text!, prevent double click when touching
+
+If there is another type touchmove after, do a scroll instead of text select!
+
+Able to scroll the text om mobile: Scroll like you scroll a web site, touch down, touch up
+Scroll instead of selecting text when doing an swiping action
+
+Virtual keyboard: border when you hover a key, change background and vibrate when you press.
+
 Can you code on a mobile ?
 Holy shit! It loads on Opera Mobile running on a 7 years old Nokia! And it's even responsive.
 There is no keyboard input though ... 
