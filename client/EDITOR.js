@@ -5122,7 +5122,7 @@ EDITOR.lastKeyPressed = "";
 					console.log("REFOCUS!");
 				*/
 			}
-			else {
+			else if(button !== 0) {
 				
 				// No current file or not the left button.
 				
