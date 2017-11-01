@@ -5119,7 +5119,9 @@ EDITOR.lastKeyPressed = "";
 				EDITOR.input = true;
 				
 				// Remove focus from everything else
-				try{ document.activeElement.blur(); } catch(err) {console.log("Unable to blur: " + err.message);};
+				if(typeof document.activeElement.blur == "function") document.activeElement.blur();
+				else console.log("Unable to blur active element!:");
+				
 				canvas.focus();
 				
 				// Delete selection outside of the canvas
