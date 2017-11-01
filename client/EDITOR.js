@@ -3603,6 +3603,20 @@ EDITOR.lastKeyPressed = "";
 	
 	window.addEventListener("message", onMessage, false);
 	
+	
+	// Fix annoying scrolling on Mobile
+	window.addEventListener("scroll", preventMotion, false);
+	window.addEventListener("touchmove", preventMotion, false);
+	
+	function preventMotion(event)
+	{
+		window.scrollTo(0, 0);
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	// End: Annoying scrolling fix
+	
+	
 	function main() {
 		
 		console.log("Starting the editor ...");

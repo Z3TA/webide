@@ -38,11 +38,12 @@
 	text-rendering: optimizeLegibility;
 	text-rendering: geometricPrecision;
 	*/
-	
 }
 
 html {
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
+	overflow-x: hidden;
+	overflow-y: hidden;
 	}
 
 body {
@@ -50,6 +51,8 @@ body {
 	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
 	font-family: Arial;
+	overflow-x: hidden;
+	overflow-y: hidden;
 	}
 
 
