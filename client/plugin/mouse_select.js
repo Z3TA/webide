@@ -28,6 +28,8 @@
 		mouseY = 0,
 		isSelecting = false,
 		clicksAfterEachOther = 0,
+	llEvType = "",
+	lastEvType = "",
 		currentDirection;
 
 	EDITOR.on("start", mouse_select_init);
@@ -50,6 +52,17 @@
 	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo, ev) {
 		
 		console.log("mouseSelect! mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + " ev.type=" + ev.type);
+		
+		// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
+		console.log(" llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);
+		
+		if(llEvType=="touchend" && lastEvType=="mousedown" && ev.type=="mouseup") return; // Prevent "double" click when doing touch
+		
+		if(llEvType=="touchstart" && lastEvType=="touchend" && ev.type=="mousedown") return; // Prevent "double" mousedown after touchstart
+		
+		llEvType = lastEvType;
+		lastEvType = ev.type;
+		
 		
 		lastDirection = currentDirection;
 		currentDirection = direction;
@@ -123,10 +136,6 @@
 				var diff = (new Date()) - lastUp; // milliseconds
 				console.log("diff=" + diff);
 				
-				// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
-				if(ev.type=="touchend" || ev.type == "touchstart") {
-					return false;
-				}
 				
 				if(diff < dblClickTime) { //  && lastCaretIndex == caret.index
 					clicksAfterEachOther++;
@@ -135,7 +144,11 @@
 					clicksAfterEachOther = 0;
 				}
 				
-				console.log("diff=" + diff + " dblClickTime=" + dblClickTime + " clicksAfterEachOther=" + clicksAfterEachOther + " lastCaretIndex=" + lastCaretIndex + " caret.index=" + caret.index + "");
+				console.log("diff=" + diff + 
+				" dblClickTime=" + dblClickTime + 
+				" clicksAfterEachOther=" + clicksAfterEachOther + 
+				" lastCaretIndex=" + lastCaretIndex + 
+				" caret.index=" + caret.index);
 				
 				if(clicksAfterEachOther == 3) {
 					console.log("Quad click!");
@@ -210,9 +223,19 @@
 				
 				//makeSelection(file, caret);
 
+				// If we return here it will prevent "double" calling mouseup and mousedown, 
+				
+				
+				// Setting lastUp seem to fire mouseup and mousedown
+				
 				lastUp = new Date();
 				lastCaretIndex = caret.index;
+				
+				// But if we return here it *will* call mouseup and mousedown !
+				
+				
 
+				
 			}
 			
 			
