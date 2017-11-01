@@ -93,21 +93,17 @@
 				}
 					else alertBox("Shell comamnds not support in " + runtime + " runtime");
 				
-				function printOutput(output) {
-					shellFile.insertTextRow(output, file.caret.row);
-					
-					shellFile.insertText(promptString);
-				}
-				
 			}
-			
-			
-			
-			
 			
 			return false;
 		}
 		else return true;
+		
+		function printOutput(output) {
+			shellFile.insertTextRow(output, file.caret.row);
+			
+			shellFile.insertText(promptString);
+		}
 		
 	}
 	

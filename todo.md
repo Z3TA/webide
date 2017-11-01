@@ -34,6 +34,12 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+Can you code on a mobile ?
+Holy shit! It loads on Opera Mobile running on a 7 years old Nokia! And it's even responsive.
+There is no keyboard input though ... 
+https://www.opera.com/developer/mobile-emulator
+
+
 Dashboard:
 ssg: Lista tidagare dokument, antal besökare
 Fast buttons for edit a document, create a new document/post in SSG.

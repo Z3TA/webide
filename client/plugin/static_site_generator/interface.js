@@ -160,24 +160,21 @@
 			else {
 				console.warn("Couln't determine what site the url belongs to: " + url);
 			}
-			
-			function isSite(url) {
-				// Figure out if the url belongs to any of our sites ...
-				for(var i=0, site; i<sites.length; i++) {
-					site = sites[i];
-					
-					console.log(url + " == " + site.url + " ??");
-					
-					if(url.indexOf(site.url) != -1 || site.url.indexOf(url) != -1) return site;
-					else if(url.indexOf(site.publish) != 0) return site;
-					else if(url.indexOf(site.preview) != 0) return site;
-						else return null;
-					}
 			}
-			
+		
+		function isSite(url) {
+			// Figure out if the url belongs to any of our sites ...
+			for(var i=0, site; i<sites.length; i++) {
+				site = sites[i];
+				
+				console.log(url + " == " + site.url + " ??");
+				
+				if(url.indexOf(site.url) != -1 || site.url.indexOf(url) != -1) return site;
+				else if(url.indexOf(site.publish) != 0) return site;
+				else if(url.indexOf(site.preview) != 0) return site;
+				else return null;
+			}
 		}
-		
-		
 	}
 	
 	function load() {
