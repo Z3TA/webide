@@ -34,14 +34,14 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-todo: On mobile: prevent scrolling away, able to scroll the text!, prevent double click when touching
-
-If there is another type touchmove after, do a scroll instead of text select!
-
-Able to scroll the text om mobile: Scroll like you scroll a web site, touch down, touch up
-Scroll instead of selecting text when doing an swiping action
+scrolling text on mobile ... 
+Only scroll if the touchmove event is fired at the far right side !? Otherwise do a select !? And don't place the cursor if the touchstart is at the far right
+Allow scrolling sideways x
+Scroll x on the far bottom
+Show scroll bars when scrolling!! So the user see the scroll zone and where in the document he/she is.
 
 Virtual keyboard: border when you hover a key, change background and vibrate when you press.
+Use HTML buttons and leave figuring out which key was pressed to the browser/device !?
 
 Can you code on a mobile ?
 Holy shit! It loads on Opera Mobile running on a 7 years old Nokia! And it's even responsive.
@@ -441,6 +441,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+Unable to find start of function (jsparser optimizer) when there is a line break between function name() and {
 
 Problem when trying to paste:
 @font-face {

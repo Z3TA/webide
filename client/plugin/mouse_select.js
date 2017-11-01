@@ -30,6 +30,9 @@
 		clicksAfterEachOther = 0,
 	llEvType = "",
 	lastEvType = "",
+	lastY = -1,
+	lastX = -1,
+	deltaNext = 0,
 		currentDirection;
 
 	EDITOR.on("start", mouse_select_init);
@@ -531,10 +534,40 @@
 		console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " ev.type=" + ev.type + " ");
 		
 		if(ev.type == "touchmove") {
+			// Prevent scrolling of the body
 			window.scrollTo(0, 0);
 			ev.preventDefault();
 			ev.stopPropagation();
-			console.log("Prevented touchmove!");
+			
+			// Scroll the text!
+			var file = EDITOR.currentFile;
+			if(lastY != -1 && file) {
+				//var deltaY = Math.abs(lastY - y);
+				var deltaY = 1;
+				var deltaX = lastX - x;
+				if(deltaX == 0) { 
+				console.log("--> deltaY=" + deltaY);
+				var dir = lastY > y ? 1 : -1;
+				var scrollSpeed = Math.floor((deltaY + deltaNext) / 5);
+				
+				if(scrollSpeed == 0) deltaNext += deltaY;
+				else deltaNext = 0;
+				
+				if(scrollSpeed > 0 && !deltaX) {
+				var startRow = file.startRow + scrollSpeed * dir;
+				console.log("Scrolling from row " + file.startRow + " to " + startRow + " deltaY=" + deltaY + " dir=" + dir + " scrollSpeed=" + scrollSpeed + " ");
+				if(startRow < 0) startRow = 0;
+				file.scrollTo(undefined, startRow);
+				
+				EDITOR.renderNeeded();
+				}
+			}
+			}
+			
+			lastY = y;
+			lastX = x;
+			return;
+			
 		}
 		
 		if(target.className == "fileCanvas") {
