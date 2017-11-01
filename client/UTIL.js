@@ -1157,9 +1157,8 @@ var UTIL = {
 	
 }
 
-try {
-	module.exports = UTIL;
+// Try catch threw an exception in Opera Mobile using Dragonly debugger
+if(typeof module != "undefined") {
+	if(module.hasOwnProperty("exports")) module.exports = UTIL;
 }
-catch(err) {
-	// We are in a browser
-}
+

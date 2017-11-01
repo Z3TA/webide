@@ -155,7 +155,7 @@ function alertBox(msg, icon, recursionCount) {
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) throw new Error("Unable to show alertBox, probably because the editor has not fully loaded. msg=" + msg + "");
+			if(recursionCount > 4) console.warn("Unable to show alertBox, probably because the editor has not fully loaded. msg=" + msg + "");
 			
 			alertBox(msg, icon, recursionCount);
 			
@@ -196,7 +196,7 @@ function confirmBox(msg, options, callback, recursionCount) {
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) throw new Error("Unable to show confirmBox msg=" + msg + " options=" + JSON.stringify(options));
+			if(recursionCount > 4) console.warn("Unable to show confirmBox msg=" + msg + " options=" + JSON.stringify(options));
 			
 			confirmBox(msg, options, callback, recursionCount);
 		
@@ -252,7 +252,7 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) throw new Error("Unable to show promptBox msg=" + msg + "");
+			if(recursionCount > 4) console.warn("Unable to show promptBox msg=" + msg + "");
 			
 			promptBox(msg, isPassword, defaultValue, callback, dialogDelay, recursionCount);
 			

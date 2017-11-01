@@ -13,11 +13,10 @@
 "use strict";
 
 var runtime = (function is_nwjs() {
-	try{
+	if(typeof require != "undefined") {
 		return (typeof require('nw.gui') !== "undefined");
-	} catch (e){
-		return false;
 	}
+	return false;
 })() ? "nw.js" : "browser";
 
 
