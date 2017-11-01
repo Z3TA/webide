@@ -2926,7 +2926,15 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
-		// Returns all files in a directory
+		/*
+			Returns all files in a directory as an array. Each item is an object with these properties:
+		
+			type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+			name - string - File or folder name
+			path - string - Full path to file/folder
+			size - float - The size of the entry in bytes.
+			date - Date - The last modified date of the entry.
+			*/
 		
 		if(pathToFolder == undefined) throw new Error("pathToFolder=" + pathToFolder);
 		

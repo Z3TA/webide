@@ -163,9 +163,6 @@
 				else if(command == YANK) pasteBuffer = file.text.charAt(file.caret.index) + paste;
 				else if(command == VISUAL_SELECT) file.select(file.grid[file.caret.row][file.caret.col]);
 			}
-			
-			else file.moveCaretLeft(file.caret, actionNr);
-			
 			EDITOR.renderNeeded();
 		}
 		if(lastChar == "j") file.moveCaretDown(file.caret,actionNr);

@@ -34,7 +34,13 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-figure out how many JavaScript programmers that use vi/vim key bindings
+Dashboard:
+ssg: Lista tidagare dokument, antal besökare
+Fast buttons for edit a document, create a new document/post in SSG.
+package?json for the ssg ?
+
+Översätta till Svenska ?
+
 
 todo
 ----
@@ -138,7 +144,7 @@ Keyboard shortcuts are hard to remember ...
 
 ---
 
-Support key bindings for the popular text editors currently being used by web developers:
+Support key bindings for the popular text editors currently being used by web developers !?:
 Visual Studio 38.8%
 Notepad++ 34.3%
 Sublime Text 31.4%
@@ -179,6 +185,9 @@ u=move one word left
 c= (one press) copy (two presses) cut
 p=paste
 
+space=direction up or left: ex: ghi(space) searches left for hi. ijkl after a space searches in that direction
+g+space=searches up for the word the cursor is at
+
 Special motions: a=all i=in t='till
 
 
@@ -188,6 +197,20 @@ Special motions: a=all i=in t='till
 
 
 
+
+---
+
+Using the editor in a terminal:
+npm install jzedit -g
+jzeidt -server -u admin -p 123 -c your-ip
+Follow instructions on the screen. eg: 
+Open your favorite browser and go to: http://host:5999/
+
+If you already have a jzedit client running:
+Ctrl+P
+Type the hostname you want to SSH/FTP into
+Hit enter
+Follow the instructions
 
 ---
 

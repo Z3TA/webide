@@ -25,6 +25,7 @@
 	var charEscape = 27;
 	var charEnter = 13;
 	
+	var workingDir;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
