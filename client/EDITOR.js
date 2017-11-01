@@ -3605,14 +3605,14 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	// Fix annoying scrolling on Mobile
-	window.addEventListener("scroll", function(e) {console.log(e);}, false);
-	window.addEventListener("touchmove", function(e) {console.log(e);}, false);
+	window.addEventListener("scroll", preventMotion, false);
+	//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
 	
-	function preventMotion(event)
-	{
+	function preventMotion(event) {
 		window.scrollTo(0, 0);
 		event.preventDefault();
 		event.stopPropagation();
+		console.log("Prevented scroll!");
 	}
 	
 	// End: Annoying scrolling fix
@@ -5156,7 +5156,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
-		
+		console.log(mouseDownEvent);
 		
 		console.log("Calling mouseClick (down) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
 		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
@@ -5174,7 +5174,7 @@ EDITOR.lastKeyPressed = "";
 				
 				// Note that caret is a temporary position caret (not the current file.caret)!
 				
-				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo); // Call it
+				funReturn = click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent); // Call it
 				
 				if(funReturn === false) {
 					preventDefault = true;
@@ -5217,6 +5217,7 @@ EDITOR.lastKeyPressed = "";
 		if(button == undefined) button = 0; // For like touch events
 		
 		console.log("Mouse up on class " + target.className + "!");
+		console.log(mouseUpEvent);
 		
 		if(target.className == "fileCanvas") {
 			
@@ -5238,7 +5239,7 @@ EDITOR.lastKeyPressed = "";
 				
 				console.log("Calling " + UTIL.getFunctionName(click.fun) + " ...");
 				
-				click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo); // Call it
+				click.fun(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
 			}
 		}
 		
@@ -5326,7 +5327,7 @@ EDITOR.lastKeyPressed = "";
 				
 				//console.log(UTIL.getFunctionName(fun));
 				
-				fun(mouseX, mouseY, target, mouseMoveEvent.type); // Call it
+				fun(mouseX, mouseY, target, mouseMoveEvent); // Call it
 				
 			}
 		}

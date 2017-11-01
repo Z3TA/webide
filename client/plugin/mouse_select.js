@@ -47,9 +47,9 @@
 		mouseSelect.apply(this, arguments);
 	}
 	
-	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo) {
+	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo, ev) {
 		
-		console.log("mouseSelect! mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + "");
+		console.log("mouseSelect! mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + " ev.type=" + ev.type);
 		
 		lastDirection = currentDirection;
 		currentDirection = direction;
@@ -122,6 +122,11 @@
 				
 				var diff = (new Date()) - lastUp; // milliseconds
 				console.log("diff=" + diff);
+				
+				// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
+				if(ev.type=="touchend" || ev.type == "touchstart") {
+					return false;
+				}
 				
 				if(diff < dblClickTime) { //  && lastCaretIndex == caret.index
 					clicksAfterEachOther++;
@@ -498,9 +503,16 @@
 		
 	}
 	
-	function mouseSelectMouseMove(x, y, target, type) {
+	function mouseSelectMouseMove(x, y, target, ev) {
 		
-		console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " type=" + type + " ");
+		console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " ev.type=" + ev.type + " ");
+		
+		if(ev.type == "touchmove") {
+			window.scrollTo(0, 0);
+			ev.preventDefault();
+			ev.stopPropagation();
+			console.log("Prevented touchmove!");
+		}
 		
 		if(target.className == "fileCanvas") {
 			mouseX = x;
