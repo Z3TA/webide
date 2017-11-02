@@ -61,6 +61,8 @@ package?json for the ssg ?
 todo
 ----
 
+keyboard hover effect: make buttons background change slightly
+
 make file tabs smaller on small screens
 
 optimize mouse select to not listen if not started selecting (or scrolling)
