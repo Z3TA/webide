@@ -160,6 +160,8 @@
 	
 	<script type="text/javascript" src="plugin/working_directory_updater.js"></script>
 	
+	<script type="text/javascript" src="plugin/virtual_keyboard.js"></script>
+	
 	
 	<!-- BEGIN TESTS -->
 	<!-- Place tests here, they will be removed by the release.sh script -->
@@ -208,7 +210,9 @@
 	<p><a href="about/about.htm">about</a> - <a href="signup/signup.html">signup</a></p>
 </div>
 </noscript>
-	<div id="dashboard" class="dashboard"></div>
+
+<div id="virtualKeyboard" class="virtualKeyboard"><h2>HEJ HEJ!</h2> <p>I am the virtual keyboard!</p></div>
+<div id="dashboard" class="dashboard"></div>
 	<div class="wireframe rows">
 		
 		<div id="header" class="header" draggable="false"></div>
@@ -216,7 +220,7 @@
 		<div id="columns" class="columns">
 			<div id="leftColumn" class="leftColumn"></div>
 			<div id="content" class="content centerColumn">
-				<canvas id="canvas" class="fileCanvas">
+				<canvas id="canvas" class="fileCanvas"></canvas>
 			</div>
 			<div id="rightColumn" class="rightColumn"></div>
 			
@@ -240,6 +244,8 @@
 		<li class="sep">Separator</li>
 		<li>Second item</li>-->
 	</ul>
+	
+	
 	
 	</body>
 	</html>

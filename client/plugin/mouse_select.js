@@ -531,7 +531,7 @@
 	
 	function mouseSelectMouseMove(x, y, target, ev) {
 		
-		console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " ev.type=" + ev.type + " ");
+		//console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " ev.type=" + ev.type + " ");
 		
 		if(ev.type == "touchmove") {
 			// Prevent scrolling of the body

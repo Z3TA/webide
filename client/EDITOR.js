@@ -231,7 +231,7 @@ EDITOR.lastKeyPressed = "";
 	var workingDirectory; // Private variable
 	if(!Object.defineProperty) {
 		console.warn("Object.defineProperty not available!");
-	
+		
 		//EDITOR.renderNeeded = renderNeeded; 
 		
 	}
@@ -243,11 +243,11 @@ EDITOR.lastKeyPressed = "";
 		});
 		
 		/*
-		Object.defineProperty(EDITOR, 'renderNeeded', {
+			Object.defineProperty(EDITOR, 'renderNeeded', {
 			get: function() {return renderNeeded;} ,
 			set: function () { throw new Error("EDITOR.renderNeeded() is a function! Do not overwrite it!"); },
 			enumerable: false
-		});
+			});
 		*/
 	}
 	
@@ -313,7 +313,7 @@ EDITOR.lastKeyPressed = "";
 				return null;
 			}
 			else return _serverStorage[id];
-
+			
 		},
 		
 		removeItem: function storageRemoveItem(id, callback) {
@@ -342,7 +342,7 @@ EDITOR.lastKeyPressed = "";
 			else {
 				//console.log("instanceof " + (instanceof _serverStorage));
 				throw new Error("_serverStorage=" + _serverStorage + " typeof " + (typeof _serverStorage));
-
+				
 			}
 		}
 	};	
@@ -361,7 +361,7 @@ EDITOR.lastKeyPressed = "";
 		// The server will check if the directory exists
 		CLIENT.cmd("setWorkingDirectory", json, function(err, json) {
 			if(err) throw err;
-			});
+		});
 		
 	}
 	
@@ -888,7 +888,7 @@ EDITOR.lastKeyPressed = "";
 			if(err) callback(err);
 			else callback(null, json.lines, json.end, json.totalLines);
 		});
-		}
+	}
 	
 	EDITOR.writeLines = function writeLines(filePath, start, lines, callback) {
 		// Writes lines to file starting at line start
@@ -1008,7 +1008,7 @@ EDITOR.lastKeyPressed = "";
 			if(err) callback(err);
 			else callback(null, json.to);
 		});
-
+		
 	}
 	
 	EDITOR.fileSaveDialog = function(defaultPath, callback) {
@@ -2704,22 +2704,22 @@ EDITOR.lastKeyPressed = "";
 		
 		var disable = [];
 		
-			// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
-			var funName = UTIL.getFunctionName(b.fun);
-			if(funName == "") throw new Error("Key binding function can not be anonymous!")
-			for(var i=0; i<keyBindings.length; i++) {
-				if(UTIL.getFunctionName(keyBindings[i].fun) == funName) {
-					throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
-				}
-				if(keyBindings[i].charCode == b.charCode && keyBindings[i].combo == b.combo) {
+		// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
+		var funName = UTIL.getFunctionName(b.fun);
+		if(funName == "") throw new Error("Key binding function can not be anonymous!")
+		for(var i=0; i<keyBindings.length; i++) {
+			if(UTIL.getFunctionName(keyBindings[i].fun) == funName) {
+				throw new Error("The function name=" + funName + " is already used by another key binder. Please use an uniqe function name!")
+			}
+			if(keyBindings[i].charCode == b.charCode && keyBindings[i].combo == b.combo) {
 				if(b.disableOthers) disable.push(keyBindings[i]);
-					else {
-						// It's OK to bind the same key combo do many things, eg Esc key, but we should give a warning:
-						UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
-					}
+				else {
+					// It's OK to bind the same key combo do many things, eg Esc key, but we should give a warning:
+					UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !");
 				}
 			}
-			
+		}
+		
 		for (var i=0; i<disable.length; i++) {
 			keyBindings.splice( keyBindings.indexOf(disable[i], 1) );
 		}
@@ -2929,13 +2929,13 @@ EDITOR.lastKeyPressed = "";
 	EDITOR.listFiles = function(pathToFolder, listFilesCallback) {
 		/*
 			Returns all files in a directory as an array. Each item is an object with these properties:
-		
+			
 			type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			name - string - File or folder name
 			path - string - Full path to file/folder
 			size - float - The size of the entry in bytes.
 			date - Date - The last modified date of the entry.
-			*/
+		*/
 		
 		if(pathToFolder == undefined) throw new Error("pathToFolder=" + pathToFolder);
 		
@@ -3066,7 +3066,7 @@ EDITOR.lastKeyPressed = "";
 			widget.mainElement = build;
 			
 			if(parentNode == undefined) parentNode = document.getElementById("footer");
-		
+			
 			if(!parentNode) throw new Error("parentNode=" + parentNode);
 			
 			parentNode.appendChild(widget.mainElement);
@@ -3080,7 +3080,7 @@ EDITOR.lastKeyPressed = "";
 			console.log("Showing widget ...");
 			
 			if(options.stealFocus !== false) {
-			EDITOR.input = false; // Steal focus from the file
+				EDITOR.input = false; // Steal focus from the file
 			}
 			
 			if(!widget.mainElement) widget.build(); // Build the GUI if it's not already built
@@ -3122,7 +3122,7 @@ EDITOR.lastKeyPressed = "";
 			}
 			
 			return widget.mainElement;
-	}
+		}
 		
 		widget.create = function(grid) {
 			// Add input elements in a grid, witch is a multi dimentional array or rows and columns
@@ -3147,16 +3147,16 @@ EDITOR.lastKeyPressed = "";
 							
 							if(element[el].nodeName == "LABEL") td.setAttribute("align", "right");
 							
-								td.appendChild(element[el]);
-								tr.appendChild(td);
-							}
+							td.appendChild(element[el]);
+							tr.appendChild(td);
+						}
 					}
 					else {
 						td = document.createElement("td");
 						td.appendChild(element);
 						tr.appendChild(td);
-						}
 					}
+				}
 				table.appendChild(tr);
 			}
 			
@@ -3188,8 +3188,8 @@ EDITOR.lastKeyPressed = "";
 					if(item.size) input.setAttribute("size", item.size);
 					if(item.value) input.setAttribute("value", item.value);
 					element.push(input);
-						
-					}
+					
+				}
 				else if(item.type == "button") {
 					if(item.label == undefined) throw new Error("Button must have a label!");
 					element = document.createElement("input");
@@ -3296,7 +3296,7 @@ EDITOR.lastKeyPressed = "";
 				if(callback) callback(err, json.filePath);
 			}
 		});
-		}
+	}
 	
 	EDITOR.addDashboardWidget = function(el) {
 		
@@ -3305,7 +3305,7 @@ EDITOR.lastKeyPressed = "";
 		var dashboard = document.getElementById("dashboard");
 		console.log(dashboard);
 		try {
-		var child = dashboard.appendChild(el);
+			var child = dashboard.appendChild(el);
 		}
 		catch(err) {
 			console.log("addDashboardWidget: el:");
@@ -3371,37 +3371,78 @@ EDITOR.lastKeyPressed = "";
 		
 		CLIENT.cmd("rename", {oldPath: oldPath, newPath: newPath}, function(err, json) {
 			if(err) return callback(err);
-				
+			
 			if(EDITOR.files.hasOwnProperty(oldPath)) {
-					// File is opened in the editor!
-					// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
-					
+				// File is opened in the editor!
+				// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
+				
 				var file = EDITOR.files[oldPath];
 				
-					// Save the text, do not count on the garbage collector the be "slow"
-					var text = file.text; 
+				// Save the text, do not count on the garbage collector the be "slow"
+				var text = file.text; 
 				var state = {
 					isSaved: file.isSaved,
 					changed: file.changed,
 					savedAs: file.savedAs
 				}
-					
-					var doNotSwitchFile = true;
-					EDITOR.closeFile(file.path, doNotSwitchFile);
-					EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
+				
+				var doNotSwitchFile = true;
+				EDITOR.closeFile(file.path, doNotSwitchFile);
+				EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
 					
 					if(openFileErr) throw openFileErr;
 					
 					callback(null, newFile.path);
 					
 				});
-				}
+			}
 			else callback(null, newPath);
-				
+			
 		});
 		
 	}
 	
+	
+	// # Virtual keyboard
+	var virtualKeyboard = {
+		main: []
+	};
+	
+	var virtualKeyboardElement;
+	
+	virtualKeyboard.main[0] = document.createElement("div");
+	virtualKeyboard.main[0].setAttribute("class", "row");
+	
+	EDITOR.virtualKeyboard = {
+		addKey: function addVirtualKeyboardKey(el, row, group) {
+			if(group == undefined) group = "main";
+			if(row == undefined) row = 0;
+			if(!virtualKeyboard.hasOwnProperty(group)) throw new Error("The virtual keyboard has no group called " + group);
+			
+			if(!virtualKeyboard[group].rows[row]) {
+				for (var i=virtualKeyboard[group].rows.length-1; i<row; i++) {
+					virtualKeyboard[group].rows[row] = document.createElement("div");
+					virtualKeyboard[group].rows[row].setAttribute("class", "row");
+					virtualKeyboard[group].el.appendChild(virtualKeyboard[group].rows[row]);
+				}
+			}
+			
+			virtualKeyboard[group].rows[row].appendChild(el);
+		},
+		removeKey: function removeVirtualKeyboardKey(el, row, group) {
+			virtualKeyboard[group].rows[row].removeChild(el);
+		},
+		hide: function hideVirutalKeyboard() {
+			virtualKeyboardElement.style.display = "none";
+		},
+		show: function showVirutalKeyboard() {
+			virtualKeyboardElement.style.display = "block";
+		},
+		isVisible: function isVirtualKeyboardVisible() {
+			return (virtualKeyboardElement.style.display == "block");
+		}
+		
+	}
 	
 	
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
@@ -3518,7 +3559,7 @@ EDITOR.lastKeyPressed = "";
 	// More Event listeners ...
 	
 	/*
-	window.addEventListener("drop", fileDrop, false);
+		window.addEventListener("drop", fileDrop, false);
 		window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
 		window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
 		window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
@@ -3680,14 +3721,24 @@ EDITOR.lastKeyPressed = "";
 		
 		canvas = document.getElementById("canvas");
 		
+		virtualKeyboardElement = document.getElementById("virtualKeyboard");
+		virtualKeyboard.main = {
+			el: document.createElement("div"),
+			rows: []
+		}
+		virtualKeyboard.main.el.setAttribute("class", "group");
+		virtualKeyboardElement.appendChild(virtualKeyboard.main.el);
+		
+		
+		
 		canvas.onpaste = function() {alert("paste canvas");};
 		
 		// In order to get the drop event to fire you need to cancel the ondragenter and ondragover events!
 		// Also make sure there are no drop or dragover events on window, document or parent elements!
 		
 		/*
-		canvas.addEventListener("drop", function(e) {
-		e.preventDefault();
+			canvas.addEventListener("drop", function(e) {
+			e.preventDefault();
 			console.log(e.target.className + " drop");
 			
 			console.log(e.dataTransfer.files[0]);
@@ -3695,33 +3746,33 @@ EDITOR.lastKeyPressed = "";
 			console.log(e.dataTransfer.files[0].size + " bytes");
 			
 			return false;
-		}, false);
-		
-		canvas.addEventListener("dragdrop", function(e) {
-		e.preventDefault();
+			}, false);
+			
+			canvas.addEventListener("dragdrop", function(e) {
+			e.preventDefault();
 			console.log(e.target.className + " dragdrop");
 			return false;
-		}, false);
-		
-		canvas.addEventListener("dragenter", function(e) {
-		e.preventDefault();
+			}, false);
+			
+			canvas.addEventListener("dragenter", function(e) {
+			e.preventDefault();
 			console.log(e.target.className + " dragenter");
 			e.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
 			console.log(e);
 			
 			return false;
-		}, false);
-		
-		canvas.addEventListener("dragleave", function(e) {
-		e.preventDefault();
+			}, false);
+			
+			canvas.addEventListener("dragleave", function(e) {
+			e.preventDefault();
 			console.log(e.target.className + " dragleave");
 			
 			return false;
-		}, false);
-		
-		
-		
-		document.addEventListener("dragstart", function(event) {
+			}, false);
+			
+			
+			
+			document.addEventListener("dragstart", function(event) {
 			
 			console.log(e.target.className + " dragstart");
 			
@@ -3733,7 +3784,7 @@ EDITOR.lastKeyPressed = "";
 			
 			// Change the opacity of the draggable element
 			event.target.style.opacity = "0.4";
-		});
+			});
 		*/
 		
 		canvas.addEventListener("dragover", function(dragOverEvent) {
@@ -3832,7 +3883,7 @@ EDITOR.lastKeyPressed = "";
 			// ### Populate EDITOR.storage (_serverStorage)
 			CLIENT.cmd("storageGetAll", function gotStorageFromServer(err, json) {
 				if(err) throw err;
-
+				
 				if(!json.storage) throw new Error("Expected to retrive storage data from server ... json=" + JSON.stringify(json, null, 2));
 				
 				if(typeof json.storage !== "object") throw new Error("typeof json.storage: " + typeof json.storage);
@@ -3841,7 +3892,7 @@ EDITOR.lastKeyPressed = "";
 				
 				// Many plugins depend on the storage being available ...
 				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
-
+				
 				
 				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
 					fun = EDITOR.eventListeners.storageReady[i].fun;
@@ -3850,8 +3901,8 @@ EDITOR.lastKeyPressed = "";
 				
 			});
 			
-			});
-
+		});
+		
 		CLIENT.on("connectionLost", function() {
 			
 			EDITOR.user = null;
@@ -3867,12 +3918,12 @@ EDITOR.lastKeyPressed = "";
 		//console.log("main function loaded");
 		
 		/*		
-		// Sort and load the start events
-		// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
-		// The order of things should not matter!
-		// Some event listeners has high or low prio though ...
-		// Ex: some plugins only want to parse the file if no other parser have yet parsed it
-		// or some autocomplete functions only want to run if no other autocompletion has been found.
+			// Sort and load the start events
+			// note: PLUGINS SHOULD NEVER DEPEND ON ANOTHER PLUGIN!
+			// The order of things should not matter!
+			// Some event listeners has high or low prio though ...
+			// Ex: some plugins only want to parse the file if no other parser have yet parsed it
+			// or some autocomplete functions only want to run if no other autocompletion has been found.
 		*/
 		
 		EDITOR.eventListeners.start.sort(function(a, b) {
@@ -4032,8 +4083,8 @@ EDITOR.lastKeyPressed = "";
 		*/
 		
 		windowLoaded = true;
-
-
+		
+		
 		
 		function stdIn(data) {
 			
@@ -4293,7 +4344,7 @@ EDITOR.lastKeyPressed = "";
 		if(text) {
 			// Drop the text into the current file
 			if(EDITOR.currentFile) {
-			
+				
 				// Get row and col
 				var mouseX = fileDropEvent.offsetX;
 				var mouseY = fileDropEvent.offsetY;
@@ -4324,7 +4375,7 @@ EDITOR.lastKeyPressed = "";
 			for(var i=0, h=false; i<EDITOR.eventListeners.fileDrop.length; i++) {
 				h = EDITOR.eventListeners.fileDrop[i].fun(file);
 				if(h) handled = true;
-				}
+			}
 			
 			if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
 				if(path) saveFileFunction(path, function(err, path) {
@@ -4410,7 +4461,7 @@ EDITOR.lastKeyPressed = "";
 					fileUpdate: {
 						name: msg.openFile.name,
 						content: file.text
-				}
+					}
 				}, "*");
 			});
 			
@@ -4505,7 +4556,7 @@ EDITOR.lastKeyPressed = "";
 		console.log("pasteEvent EDITOR.input=" + EDITOR.input + 
 		" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
 		" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
-
+		
 		//var text = pasteEvent.clipboardData.getData('text');
 		var ret;
 		var textChanged = false;
@@ -4895,7 +4946,7 @@ EDITOR.lastKeyPressed = "";
 					
 					var clipboardcatcher = document.getElementById("clipboardcatcher");
 					clipboardcatcher.focus();
-
+					
 					//preventDefault = true;
 				}
 			}
@@ -5154,7 +5205,7 @@ EDITOR.lastKeyPressed = "";
 		else{
 			
 			EDITOR.input = false;
-
+			
 		}
 		
 		console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
@@ -5310,7 +5361,7 @@ EDITOR.lastKeyPressed = "";
 		
 		mouseMoveEvent = mouseMoveEvent || window.event;
 		
-		console.log(mouseMoveEvent);
+		//console.log(mouseMoveEvent);
 		
 		//mouseMoveEvent.preventDefault();
 		
@@ -5611,7 +5662,7 @@ EDITOR.lastKeyPressed = "";
 							else {
 								EDITOR.version = parseInt(match[1]);
 								callback(EDITOR.version);
-								}
+							}
 						}
 						else {
 							console.warn("Failed to run hg log in order to get editor version.");

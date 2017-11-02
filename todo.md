@@ -42,6 +42,7 @@ Show scroll bars when scrolling!! So the user see the scroll zone and where in t
 
 Virtual keyboard: border when you hover a key, change background and vibrate when you press.
 Use HTML buttons and leave figuring out which key was pressed to the browser/device !?
+Virtual keyboard should be built into the editor. So that plugins can add keys ... so you can have dedicated keys instead of key combos!
 
 Can you code on a mobile ?
 Holy shit! It loads on Opera Mobile running on a 7 years old Nokia! And it's even responsive.
@@ -59,6 +60,8 @@ package?json for the ssg ?
 
 todo
 ----
+
+optimize mouse select to not listen if not started selecting (or scrolling)
 
 modal editing, like in VIM
 
