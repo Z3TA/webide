@@ -1445,6 +1445,16 @@ EDITOR.lastKeyPressed = "";
 		var columnsHeight = contentHeight;
 		
 		
+		// Position the virtual keyboard
+		var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
+		var vkWidth = parseInt(vkcs.width);
+		var vkHeight = parseInt(vkcs.height);
+		
+		console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
+		
+		//virtualKeyboardElement.style.top = (windowHeight - vkHeight * 2 - 15) + "px";
+		//virtualKeyboardElement.style.left = (windowWidth / 2 - vkWidth / 2) + "px";
+		
 		/*
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
@@ -1821,6 +1831,7 @@ EDITOR.lastKeyPressed = "";
 		var menu = document.getElementById("canvasContextmenu");
 		
 		menu.style.visibility = "hidden"; // Always hide the menu on mouse down
+		menu.style.height = "1px";
 		
 		// Clear temorary menu items
 		var tempItems = document.getElementById("canvasContextmenuTemp");
@@ -1861,6 +1872,7 @@ EDITOR.lastKeyPressed = "";
 		menu.style.visibility = "visible";
 		menu.style.top = posY + "px";
 		menu.style.left = posX + "px";
+		menu.style.height = "100%";
 	}
 	
 	EDITOR.addInfo = function(row, col, txt) {
@@ -3414,7 +3426,7 @@ EDITOR.lastKeyPressed = "";
 	virtualKeyboard.main[0].setAttribute("class", "row");
 	
 	EDITOR.virtualKeyboard = {
-		addKey: function addVirtualKeyboardKey(el, row, group) {
+		addKey: function addVirtualKeyboardKey(newElement, row, position, group) {
 			if(group == undefined) group = "main";
 			if(row == undefined) row = 0;
 			if(!virtualKeyboard.hasOwnProperty(group)) throw new Error("The virtual keyboard has no group called " + group);
@@ -3427,7 +3439,18 @@ EDITOR.lastKeyPressed = "";
 				}
 			}
 			
-			virtualKeyboard[group].rows[row].appendChild(el);
+			var parentElement = virtualKeyboard[group].rows[row];
+			
+			if(position == undefined) position = parentElement.children.length-1;
+			
+			if(position > parentElement.children.length) {
+				throw new Error("Virtual keyboard row " + row + " only has " + 
+				parentElement.children.length + " keys. So we can not insert on position " + position + " ");
+			}
+			
+			parentElement.insertBefore(newElement, parentElement.children[position]);
+			
+			//virtualKeyboard[group].rows[row].appendChild(newElement);
 		},
 		removeKey: function removeVirtualKeyboardKey(el, row, group) {
 			virtualKeyboard[group].rows[row].removeChild(el);
