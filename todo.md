@@ -61,6 +61,10 @@ package?json for the ssg ?
 todo
 ----
 
+detetch touch-screen and only show virtual keyboard if using touch screen.
+
+make virtual keyboard keys smaller on small screen and a bit larger on large screens
+
 keyboard hover effect: make buttons background change slightly
 
 make file tabs smaller on small screens

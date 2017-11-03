@@ -2133,9 +2133,8 @@ EDITOR.lastKeyPressed = "";
 			An abstraction that lets you have many auto-complete functions. 
 			Register using: EDITOR.on("autoComplete", function)
 			
-			The function should return an array with possible auto-complete options,
-			or optionally, an array of arrays where the second index is how many characters
-			the mouse should be moved left, after inserting the text.
+			The function should return an array with possible auto-complete options, or optionally, an array of arrays 
+			where the second index is how many characters the caret should be moved left - after inserting the text.
 			
 			Ex: [word1, word2, word3] or [[wordl, n], [word2, n]]
 			
@@ -4868,7 +4867,7 @@ EDITOR.lastKeyPressed = "";
 		// You probably want to use bindKey instead of eventListeners.keyDown!
 		console.log("Calling keyDown listeners (" + EDITOR.eventListeners.keyDown.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.keyDown.length; i++) {
-			funReturn = EDITOR.eventListeners.keyDown[i].fun(EDITOR.currentFile, character, combo); // Call function
+			funReturn = EDITOR.eventListeners.keyDown[i].fun(EDITOR.currentFile, character, combo, keyDownEvent); // Call function
 			
 			if(funReturn === false) {
 				preventDefault = true;
