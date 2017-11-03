@@ -64,21 +64,18 @@ body {
 /* ############### Virtual Keyboard ############### */
 
 .virtualKeyboard {
-	bottom: 0px;
-	right: 0px;
 	border-top: 1px solid #cfcfcf;
 	border-left: 1px solid #cfcfcf;
-	border-top-left-radius: 10px;
+	border-top-left-radius: 6px;
 	z-index: 10;
 	position: absolute;
-	font-size: 40px;
-	overflow-x: scroll;
-	overflow-y: scroll;
-	overflow: visible;
+	top: -500px;
+	left: 0px;
 	display: block;
 	text-align: right;
 	background-color: rgba(200,200,200, .5);
-}
+	min-width: 380px;
+	}
 
 
 .virtualKeyboard .row {
@@ -103,10 +100,17 @@ body {
 	outline-color: transparent;
 	text-align: center;
 	vertical-align: top;
+	transition: all ease 0.1s;
+	box-shadow: 0px 2px 0px #bababa;
 }
 
 .virtualKeyboard button:active {
-	outline-color: orange;
+	box-shadow: 0px 0px 0px #bababa;
+	margin-top: 2px;
+}
+
+.virtualKeyboard button:hover {
+	color: red;
 }
 
 .virtualKeyboard button.on {
@@ -1124,6 +1128,22 @@ noscript div p {
 
 @media (max-width: 600px) {
 	
+	.virtualKeyboard {
+		min-width: 310px;
+	}
+
+	.virtualKeyboard .row {
+		height: 16px;
+	}
+	
+	.virtualKeyboard button {
+		font-size: 9px;
+		border-radius: 3px;
+		min-width: 14px;
+		min-height: 15px;
+	}
+	
+	
 	.dialog {
 		box-shadow: inset 0px 4px 10px #888888;
 		padding-top: 6px;
@@ -1160,3 +1180,22 @@ noscript div p {
 	
 }
 
+
+@media (min-width: 1000px) {
+	
+	.virtualKeyboard {
+		min-width: 590px;
+	}
+	
+	.virtualKeyboard .row {
+		height: 35px;
+	}
+	
+	.virtualKeyboard button {
+		font-size: 13px;
+		border-radius: 3px;
+		min-width: 30px;
+		min-height: 32px;
+	}
+	
+}

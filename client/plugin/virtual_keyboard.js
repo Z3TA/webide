@@ -18,10 +18,10 @@
 			addButtons();
 			
 			// Wait for touch events before showing the virtual keyboard
-			EDITOR.on("mouseClick", touchMaybeOnMouseDown);
+			//EDITOR.on("mouseClick", touchMaybeOnMouseDown);
 			
 			// Listen for keyboard events to make sure the user has a keyboard before hiding the virtual keyboard
-			EDITOR.on("keyDown", maybeHasKeyboard);
+			//EDITOR.on("keyDown", maybeHasKeyboard);
 			
 			
 		},
@@ -61,6 +61,13 @@
 	function addButtons() {
 		var body = document.body;
 		
+		/*
+			
+			Use white space character like EN QUAD to align
+			http://jkorpela.fi/chars/spaces.html
+			
+		*/
+		
 		// ### First row
 		
 		makeButton("1", 0);
@@ -81,8 +88,7 @@
 		makeButton("+", 0);
 		
 		makeButton("back", 0, function space(click) {
-			EDITOR.input = true;
-			EDITOR.mock( "keydown", { charCode:8 } );
+			fireKey(8, "keydown");
 		});
 		
 		makeButton("#", 0);
@@ -214,14 +220,11 @@
 		
 		if(ev == undefined) {
 			ev = function() {
-				EDITOR.input = true;
-				if(alt && CAPS) EDITOR.mock( "keypress", { charCode: alt.charCodeAt(0) } );
-				else EDITOR.mock( "keypress", { charCode: char.charCodeAt(0) } );
-				if (navigator.vibrate) {
-					// vibration API supported
-					navigator.vibrate(50);
-				}
 				
+				if(alt && CAPS) fireKey(alt.charCodeAt(0));
+				else fireKey(char.charCodeAt(0));
+				
+				return false;
 			}
 		}
 		
@@ -240,6 +243,50 @@
 		if(alt) buttons[char].alt = alt;
 		
 		return b;
+	}
+	
+	function insertAtCaret(txtarea, text) {
+		// https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
+		//var txtarea = document.getElementById(areaId);
+		var scrollPos = txtarea.scrollTop;
+		var caretPos = txtarea.selectionStart;
+		
+		var front = (txtarea.value).substring(0, caretPos);
+		var back = (txtarea.value).substring(txtarea.selectionEnd, txtarea.value.length);
+		txtarea.value = front + text + back;
+		caretPos = caretPos + text.length;
+		txtarea.selectionStart = caretPos;
+		txtarea.selectionEnd = caretPos;
+		txtarea.focus();
+		txtarea.scrollTop = scrollPos;
+	}
+	
+	function fireKey(charCode, eventType) {
+		
+		if(eventType == undefined) eventType = "keypress";
+		
+		// If a input or textarea element had focus, send it the character!
+		if(EDITOR.lastElementWithFocus && (
+		( EDITOR.lastElementWithFocus.nodeName == "INPUT" && 
+		(EDITOR.lastElementWithFocus.type == "text" || EDITOR.lastElementWithFocus.type == "password")
+		) || EDITOR.lastElementWithFocus.nodeName == "TEXTAREA")) {
+			
+			insertAtCaret(EDITOR.lastElementWithFocus, String.fromCharCode(charCode));
+			
+			EDITOR.lastElementWithFocus.focus();
+		}
+		else {
+			
+			EDITOR.input = true;
+			EDITOR.mock( eventType, { charCode: charCode } );
+			
+		}
+		
+		if (navigator.vibrate) {
+			// vibration API supported
+			navigator.vibrate(50);
+		}
+		
 	}
 	
 })();

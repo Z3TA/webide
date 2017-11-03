@@ -1452,8 +1452,9 @@ EDITOR.lastKeyPressed = "";
 		
 		console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
 		
-		//virtualKeyboardElement.style.top = (windowHeight - vkHeight * 2 - 15) + "px";
-		//virtualKeyboardElement.style.left = (windowWidth / 2 - vkWidth / 2) + "px";
+		// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
+		virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
+		virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
 		
 		/*
 			console.log("windowWidth=" + windowWidth);
@@ -5158,6 +5159,8 @@ EDITOR.lastKeyPressed = "";
 	function mouseDown(mouseDownEvent) {
 		
 		mouseDownEvent = mouseDownEvent || windows.event;
+		
+		EDITOR.lastElementWithFocus = document.activeElement;
 		
 		var mouse = getMousePosition(mouseDownEvent);
 		var mouseX = mouse.x;
