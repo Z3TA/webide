@@ -30,9 +30,12 @@
 		clicksAfterEachOther = 0,
 	llEvType = "",
 	lastEvType = "",
-	lastY = -1,
 	lastX = -1,
-	deltaNext = 0,
+	lastY = -1,
+	deltaNextX = 0,
+	deltaNextY = 0,
+	scrollbarRight = false,
+	scrollbarBottom = false,
 		currentDirection;
 
 	EDITOR.on("start", mouse_select_init);
@@ -58,6 +61,19 @@
 		
 		// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
 		console.log(" llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);
+		
+		if(scrollbarRight) {
+			EDITOR.removeRender(scrollbarRightRender);
+			scrollbarRight = false;
+		}
+		if(scrollbarBottom) {
+			EDITOR.removeRender(scrollbarBottomRender);
+			scrollbarBottom = false;
+		}
+		
+		// Prevent selection in the scroll area
+		if(ev.type == "touchstart" && mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return false; 
+		if(ev.type == "touchstart" && mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return false;
 		
 		if(llEvType=="touchend" && lastEvType=="mousedown" && ev.type=="mouseup") return; // Prevent "double" click when doing touch
 		
@@ -533,27 +549,38 @@
 		
 		//console.log("mouseSelectMouseMove: x=" + x + " y=" + y + " target=" + target + " ev.type=" + ev.type + " ");
 		
+		
+		
 		if(ev.type == "touchmove") {
 			// Prevent scrolling of the body
-			window.scrollTo(0, 0);
 			ev.preventDefault();
 			ev.stopPropagation();
+			window.scrollTo(0, 0);
 			
-			// Scroll the text!
+			// Scroll the text!?
+			
 			var file = EDITOR.currentFile;
+			var deltaX = Math.abs(lastX - x);
+			var deltaY = Math.abs(lastY - y);
+			
+			console.log("--> deltaX=" + deltaX + " deltaY=" + deltaY);
+			
+			if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) {
+			
+				if(!scrollbarRight) {
+					EDITOR.addRender(scrollbarRightRender);
+					scrollbarRight = true;
+				}
+				
 			if(lastY != -1 && file) {
-				//var deltaY = Math.abs(lastY - y);
-				var deltaY = 1;
-				var deltaX = lastX - x;
-				if(deltaX == 0) { 
-				console.log("--> deltaY=" + deltaY);
+					
 				var dir = lastY > y ? 1 : -1;
-				var scrollSpeed = Math.floor((deltaY + deltaNext) / 5);
+					var scrollSpeed = Math.round((deltaY + deltaNextY) / 5);
 				
-				if(scrollSpeed == 0) deltaNext += deltaY;
-				else deltaNext = 0;
+				if(scrollSpeed == 0) deltaNextY += deltaY;
+				else deltaNextY = 0;
 				
-				if(scrollSpeed > 0 && !deltaX) {
+				if(scrollSpeed > 0) {
 				var startRow = file.startRow + scrollSpeed * dir;
 				console.log("Scrolling from row " + file.startRow + " to " + startRow + " deltaY=" + deltaY + " dir=" + dir + " scrollSpeed=" + scrollSpeed + " ");
 				if(startRow < 0) startRow = 0;
@@ -563,11 +590,54 @@
 				}
 			}
 			}
+			else if(y > EDITOR.view.canvasHeight - EDITOR.settings.scrollZone) {
+				
+				if(!scrollbarBottom) {
+					EDITOR.addRender(scrollbarBottomRender);
+					scrollbarBottom = true;
+				}
+				
+				if(deltaX && file) {
+					
+					var dir = lastX > x ? 1 : -1;
+					var scrollSpeed = Math.floor((deltaX + deltaNextX) / 30);
+					
+					if(scrollSpeed == 0) deltaNextX += deltaX;
+					else deltaNextX = 0;
+					
+					if(scrollSpeed > 0) {
+						
+						var startColumn = file.startColumn + scrollSpeed * dir;
+						if(startColumn < 0) startColumn = 0;
+						var deltaColumn = file.startColumn - startColumn;
+						
+						// Prevent scrolling too far to the left
+						if(file.startColumn < 0) {
+							file.startColumn = 0;
+							EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
+							EDITOR.renderNeeded();
+						}
+						
+						// Prevent scrolling too far to the right
+						for (var row=file.startRow; row<=(file.startRow+EDITOR.view.visibleRows) && row < file.grid.length; row++) {
+							if( (file.startColumn+EDITOR.view.endingColumn) < file.grid[row].length) {
+								// Found something. Do the scrolling
+								file.startColumn += scrollSpeed * dir;
+								EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
+								EDITOR.renderNeeded();
+								break;
+							}
+							}
+						
+					}
+					}
+			}
 			
 			lastY = y;
 			lastX = x;
-			return;
 			
+			isSelecting = false;
+			return;
 		}
 		
 		if(target.className == "fileCanvas") {
@@ -595,8 +665,9 @@
 		else {
 			// Mouse is outside the canvas
 			isSelecting = false;
-		}
+		
 	}
+}
 	
 	function findWord(index, text) {
 		// Returns an object with the start and end index of the word
@@ -662,4 +733,34 @@
 		
 	}
 
+	function scrollbarRightRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		
+		ctx.strokeStyle="rgba(0,255,0,0.5)";
+		ctx.fillStyle="rgba(0,0,255,0.5)";
+		
+		var x = EDITOR.view.canvasWidth - EDITOR.settings.scrollZone;
+		var y = 0;
+		var width = EDITOR.settings.scrollZone;
+		var height = EDITOR.view.canvasHeight;
+		
+		ctx.rect(x,y,width,height);
+		ctx.stroke();
+		
+	}
+	
+	function scrollbarBottomRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+		
+		ctx.strokeStyle="rgba(0,255,0,0.5)";
+		ctx.fillStyle="rgba(0,0,255,0.5)";
+		
+		var x = 0;
+		var y = EDITOR.view.canvasHeight - EDITOR.settings.scrollZone;
+		var width = EDITOR.view.canvasWidth;
+		var height = EDITOR.settings.scrollZone;
+		
+		ctx.rect(x,y,width,height);
+		ctx.stroke();
+		
+	}
+	
 })();

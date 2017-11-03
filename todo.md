@@ -34,20 +34,14 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+Fixing scrolling using touch ! scroll zones ...
+
 scrolling text on mobile ... 
 Only scroll if the touchmove event is fired at the far right side !? Otherwise do a select !? And don't place the cursor if the touchstart is at the far right
 Allow scrolling sideways x
 Scroll x on the far bottom
 Show scroll bars when scrolling!! So the user see the scroll zone and where in the document he/she is.
 
-Virtual keyboard: border when you hover a key, change background and vibrate when you press.
-Use HTML buttons and leave figuring out which key was pressed to the browser/device !?
-Virtual keyboard should be built into the editor. So that plugins can add keys ... so you can have dedicated keys instead of key combos!
-
-Can you code on a mobile ?
-Holy shit! It loads on Opera Mobile running on a 7 years old Nokia! And it's even responsive.
-There is no keyboard input though ... 
-https://www.opera.com/developer/mobile-emulator
 
 
 Dashboard:

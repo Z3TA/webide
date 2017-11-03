@@ -58,6 +58,7 @@ EDITOR.settings = {
 		width: 1,
 		color: "rgb(0,0,0)"
 	},
+	scrollZone: 80, // Scrollbar zone, right and bottom. When touching down in the zone we should scroll
 	leftMargin: 50,
 	rightMargin: 50,
 	topMargin: 10,
@@ -2060,6 +2061,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.addPreRender = function(renderFunction) {
+		// pre-renders modifies the buffer and returns the buffer, for example adding colors
 		return EDITOR.preRenderFunctions.push(fun) - 1;
 	}
 	EDITOR.removePreRender = function(renderFunction) {
@@ -3673,9 +3675,9 @@ EDITOR.lastKeyPressed = "";
 	//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
 	
 	function preventMotion(event) {
-		window.scrollTo(0, 0);
 		event.preventDefault();
 		event.stopPropagation();
+		window.scrollTo(0, 0);
 		console.log("Prevented scroll!");
 	}
 	

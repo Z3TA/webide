@@ -10,8 +10,11 @@
 	// Set dir to "up" so that the caret col and row doesn't change between down and up !??
 	EDITOR.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "down", targetClass:"fileCanvas", button: 0, combo: 0}); 
 	
-	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button) {
+	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 
+		// Prevent placing the caret in the scroll area mouseDownEvent.type == "touchstart" && 
+		if(mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
+		if(mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
 		
 		if(EDITOR.currentFile && caret) {
 			
