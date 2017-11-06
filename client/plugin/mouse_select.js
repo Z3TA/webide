@@ -51,7 +51,7 @@
 	
 	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo, ev) {
 		
-		console.log("mouseSelect! mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + " ev.type=" + ev.type);
+		//console.log("mouseSelect! mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + keyboardCombo + " ev.type=" + ev.type);
 		
 		// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
 		console.log(" llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);

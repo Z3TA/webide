@@ -3,12 +3,20 @@
 	var TOUCH = false;
 	var mouseCounter = 0;
 	var touchCounter = 0;
-	var lastX = -1;
-	var lastY = -1;
-	var deltaNextX = 0;
-	var deltaNextY = 0;
-	var scrollbarRight = false;
-	var scrollbarBottom = false;
+	var verticalScrolling = false;
+	var horizontalScrolling = false;
+	
+	var touchDownX = 0;
+	var touchDownY = 0;
+	var startRow = 0;
+	var startCol = 0;
+	var lastPosX = 0;
+	var lastPosY = 0;
+	var isScrolling = false;
+	var scrollSpeedX = 0;
+	var scrollSpeedY = 0;
+	var lastSpeedMeasureX = 0;
+	var lastSpeedMeasureY = 0;
 	
 	EDITOR.plugin({
 		desc: "Allow touch scrolling in right and bottom screen area",
@@ -30,34 +38,19 @@
 			
 			EDITOR.removeEvent("mouseClick", tsTouchMove);
 			
-			EDITOR.removeRender(scrollbarRightRender);
-			EDITOR.removeRender(scrollbarBottomRender);
+			EDITOR.removeRender(verticalScrollingRender);
+			EDITOR.removeRender(horizontalScrollingRender);
 			
 		}
 	});
 	
-	function tsTouchDown() {
-		touch.apply(this, arguments);
-	}
+	function tsTouchDown(x, y) {
+		var file = EDITOR.currentFile;
+		}
 	
 	function tsTouchUp() {
-		touch.apply(this, arguments);
-	}
+		}
 	
-	function touch(x, y, caret, direction, button, target, keyboardCombo, ev) {
-		
-		if(scrollbarRight) {
-			EDITOR.removeRender(scrollbarRightRender);
-			scrollbarRight = false;
-		}
-		if(scrollbarBottom) {
-			EDITOR.removeRender(scrollbarBottomRender);
-			scrollbarBottom = false;
-		}
-		
-		
-		
-	}
 	
 	function tsTouchMove(x, y, target, ev) {
 		if(ev.type == "touchmove") {
@@ -69,86 +62,157 @@
 			// Scroll the text!?
 			
 			var file = EDITOR.currentFile;
-			var deltaX = Math.abs(lastX - x);
-			var deltaY = Math.abs(lastY - y);
 			
-			console.log("--> deltaX=" + deltaX + " deltaY=" + deltaY);
+			if(!file) return true;
 			
-			if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) {
+			
+			console.log("touchmove: isScrolling=" + isScrolling + 
+			" x=" + x +
+			" y=" + y + 
+			" horizontalScrolling=" + horizontalScrolling + 
+			" verticalScrolling=" + verticalScrolling);
+			
+			if(!isScrolling) {
+				reset();
 				
-				if(!scrollbarRight) {
-					EDITOR.addRender(scrollbarRightRender);
-					scrollbarRight = true;
-				}
+				isScrolling = true;
+				lastMove = new Date();
 				
-				if(lastY != -1 && file) {
-					
-					var dir = lastY > y ? 1 : -1;
-					var scrollSpeed = Math.round((deltaY + deltaNextY) / 5);
-					
-					if(scrollSpeed == 0) deltaNextY += deltaY;
-					else deltaNextY = 0;
-					
-					if(scrollSpeed > 0) {
-						var startRow = file.startRow + scrollSpeed * dir;
-						console.log("Scrolling from row " + file.startRow + " to " + startRow + " deltaY=" + deltaY + " dir=" + dir + " scrollSpeed=" + scrollSpeed + " ");
-						if(startRow < 0) startRow = 0;
-						file.scrollTo(undefined, startRow);
-						
-						EDITOR.renderNeeded();
-					}
-				}
-			}
-			else if(y > EDITOR.view.canvasHeight - EDITOR.settings.scrollZone) {
-				
-				if(!scrollbarBottom) {
-					EDITOR.addRender(scrollbarBottomRender);
-					scrollbarBottom = true;
-				}
-				
-				if(deltaX && file) {
-					
-					var dir = lastX > x ? 1 : -1;
-					var scrollSpeed = Math.floor((deltaX + deltaNextX) / 30);
-					
-					if(scrollSpeed == 0) deltaNextX += deltaX;
-					else deltaNextX = 0;
-					
-					if(scrollSpeed > 0) {
-						
-						var startColumn = file.startColumn + scrollSpeed * dir;
-						if(startColumn < 0) startColumn = 0;
-						var deltaColumn = file.startColumn - startColumn;
-						
-						// Prevent scrolling too far to the left
-						if(file.startColumn < 0) {
-							file.startColumn = 0;
-							EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
-							EDITOR.renderNeeded();
+				if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone) && y > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) {
+					// In the bottom right corner
+					if(Math.abs(x - lastPosX) > Math.abs(y - lastPosY)) {
+						EDITOR.addRender(horizontalScrollingRender);
+						horizontalScrolling = true;
 						}
-						
-						// Prevent scrolling too far to the right
-						for (var row=file.startRow; row<=(file.startRow+EDITOR.view.visibleRows) && row < file.grid.length; row++) {
-							if( (file.startColumn+EDITOR.view.endingColumn) < file.grid[row].length) {
-								// Found something. Do the scrolling
-								file.startColumn += scrollSpeed * dir;
-								EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
-								EDITOR.renderNeeded();
-								break;
-							}
+					else if(Math.abs(x - lastPosX) < Math.abs(y - lastPosY)) {
+						EDITOR.addRender(verticalScrollingRender);
+						verticalScrolling = true;
 						}
-						
+					// else: Unable to determine if the user is scrolling horizontally or vertical
 					}
-				}
+				else if(x > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) {
+					// Inside vertical (row) scroll area
+					EDITOR.addRender(verticalScrollingRender);
+					verticalScrolling = true;
+					}
+				else if(y > EDITOR.view.canvasHeight - EDITOR.settings.scrollZone) {
+					// Inside horizontal (column) scroll area
+					EDITOR.addRender(horizontalScrollingRender);
+					horizontalScrolling = true;
+					}
 			}
 			
-			lastY = y;
-			lastX = x;
+			// Keep track of swiping speed. Swiping faster should scroll more
+			var measureInterval = 50;
 			
-			isSelecting = false;
-			return;
+			if( (new Date()) - lastMove > measureInterval) {
+				
+				var deltaX = Math.abs(lastSpeedMeasureY - x);
+				var deltaY = Math.abs(lastSpeedMeasureX - y);
+				
+				scrollSpeedX = (deltaX * 0.01);
+				scrollSpeedY = (deltaY * 0.05);
+				
+				lastSpeedMeasureY = y;
+				lastSpeedMeasureX = x;
+			}
+			
+			lastMove = new Date();
+			
+			//if(scrollSpeedX == 0) scrollSpeedX = 1;
+			//if(scrollSpeedY == 0) scrollSpeedY = 1;
+			
+			
+			var moveDistanceX = Math.abs(touchDownX - x);
+			var moveDistanceY = Math.abs(touchDownY - y);
+			
+			/*
+				Swiping right --> should scroll left
+				Swiping left <--- should scroll right
+				Swiping up should scroll down
+				Swping down should scroll up
+			*/
+			var moveDirectionX = x > touchDownX ? -1 : 1;
+			var moveDirectionY = y > touchDownY ? -1 : 1;
+			
+			console.log(" -- verticalScrolling=" + verticalScrolling + 
+			" horizontalScrolling=" + horizontalScrolling + 
+			" moveDirectionX=" + moveDirectionX + 
+			" moveDistanceX=" + moveDistanceX + 
+			" moveDistanceY=" + moveDirectionY + 
+			" scrollSpeedX=" + scrollSpeedX + 
+			" scrollSpeedY=" + scrollSpeedY + 
+			" x=" + x + 
+			" y=" + y + 
+			" lastSpeedMeasureX=" + lastSpeedMeasureX + 
+			" lastSpeedMeasureY=" + lastSpeedMeasureY + 
+			" lastPosX=" + lastPosX + 
+			" lastPosY=" + lastPosY + 
+			" deltaX=" + deltaX + 
+			" deltaY=" + deltaY + "");
+			
+			if(verticalScrolling) {
+				
+				var scrollToRow = startRow + Math.round(moveDistanceY * scrollSpeedY * moveDirectionY);
+				if(scrollToRow < 0) scrollToRow = 0;
+				
+				if(isNaN(scrollToRow)) throw new Error("startRow=" + startRow + " startColumn=" + startColumn + " scrollSpeedY=" + scrollSpeedY + " moveDirectionY=" + moveDirectionY);
+				
+				console.log("file.startRow=" + file.startRow + " scrollToRow=" + scrollToRow);
+				
+				if(file.startRow != scrollToRow) {
+					console.log("Scrolling from row " + file.startRow + " to " + scrollToRow + " deltaY=" + deltaY + " moveDirectionY=" + moveDirectionY + " scrollSpeedY=" + scrollSpeedY + " ");
+					
+					file.scrollTo(undefined, scrollToRow);
+					reset();
+					
+				}
+			}
+			else if(horizontalScrolling) {
+				
+				var scrollToColumn = startColumn + Math.round(moveDistanceX + scrollSpeedX * moveDirectionX);
+				if(scrollToColumn < 0) scrollToColumn = 0;
+				
+				if(isNaN(scrollToColumn)) throw new Error("scrollToColumn=" + scrollToColumn + " startColumn=" + startColumn + " scrollSpeedX=" + scrollSpeedX + " moveDirectionX=" + moveDirectionX);
+				
+				console.log("file.startColumn=" + file.startColumn + " scrollToColumn=" + scrollToColumn);
+				
+				if(file.startColumn != scrollToColumn) {
+					
+					// Prevent scrolling too far to the right
+					for (var row=file.startRow; row<=(file.startRow+EDITOR.view.visibleRows) && row < file.grid.length; row++) {
+						if( (file.startColumn+EDITOR.view.endingColumn) < file.grid[row].length) {
+							// Found something. Do the scrolling
+							file.scrollTo(scrollToColumn, undefined);
+							reset();
+							break;
+						}
+					}
+					
+				}
+			}
+			
+			lastPosX = x;
+			lastPosY = y;
+		}
+		
+		function reset() {
+			touchDownX = x;
+			touchDownY = y;
+			
+			startRow = file.startRow;
+			startColumn = file.startColumn;
+			
+			isScrolling = false;
+			verticalScrolling = false;
+			horizontalScrolling = false;
+			
+				EDITOR.removeRender(verticalScrollingRender);
+				EDITOR.removeRender(horizontalScrollingRender);
+				
 		}
 	}
+	
 	
 	function touchMaybeOnMouseDown(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		console.log(mouseDownEvent);
@@ -168,8 +232,8 @@
 			}
 		}
 	}
-
-	function scrollbarRightRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+	
+	function verticalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		
 		ctx.strokeStyle="rgba(0,255,0,0.5)";
 		ctx.fillStyle="rgba(0,0,255,0.5)";
@@ -184,7 +248,7 @@
 		
 	}
 	
-	function scrollbarBottomRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
+	function horizontalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		
 		ctx.strokeStyle="rgba(0,255,0,0.5)";
 		ctx.fillStyle="rgba(0,0,255,0.5)";

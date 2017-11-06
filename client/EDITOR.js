@@ -178,7 +178,7 @@ EDITOR.lastKeyPressed = "";
 	if(browser.indexOf("MSIE") == 0) EDITOR.settings.useCliboardcatcher = true;
 	//if(browser.indexOf("Firefox") == 0) EDITOR.settings.useCliboardcatcher = true;
 	
-	if(browser != "Chrome") alertBox("The editor might be slow in your browser (" + browser + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
+	//if(browser != "Chrome") alertBox("The editor might be slow in your browser (" + browser + ").\nThe editor runs best in Chrome/Chromium/Opera", "warning");
 	
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
@@ -2054,6 +2054,7 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.addRender = function(fun) {
+		if(EDITOR.renderFunctions.indexOf(fun)) throw new Error("The function is already registered as a renderer: " + UTIL.getFunctionName(fun));
 		return EDITOR.renderFunctions.push(fun) - 1;
 	}
 	EDITOR.removeRender = function(fun) {
