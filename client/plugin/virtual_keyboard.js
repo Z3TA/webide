@@ -89,6 +89,7 @@
 		
 		makeButton("back", 0, function space(click) {
 			fireKey(8, "keydown");
+			return false;
 		});
 		
 		makeButton("#", 0);
