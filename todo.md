@@ -447,6 +447,13 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+---
+Function list doesn't always update when debug mode is off !?
+When clicking on a function in the function-list:
+/home/Z/Projects/jzedit/client/File.js:3537
+Uncaught Error: Can't scroll to line=736 because it's above file.grid.length=656
+---
+
 Unable to find start of function (jsparser optimizer) when there is a line break between function name() and {
 
 Problem when trying to paste:
