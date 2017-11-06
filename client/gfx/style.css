@@ -100,7 +100,7 @@ body {
 	outline-color: transparent;
 	text-align: center;
 	vertical-align: top;
-	transition: all ease 0.1s;
+	/*transition: all ease 0.1s;*/
 	box-shadow: 0px 2px 0px rgba(180, 180, 180, .9);
 }
 
@@ -1111,6 +1111,15 @@ noscript div p {
 
 
 
+/*
+	https://www.emailonacid.com/blog/article/email-development/emailology_media_queries_demystified_min-width_and_max-width
+	
+	min-width:  greater than or equal to
+	max-width:  less than or equal to
+	
+*/
+
+
 @media print {
 	
 	.leftColumn {display: none;}
@@ -1121,8 +1130,30 @@ noscript div p {
 }
 
 
-@media (max-height: 600px) {
+@media (max-height: 150px) {
+	/* Hide the virtual keyboard so it doesn't get in the way */
+	.virtualKeyboard {
+		display: none;
+	}
+}
+
+
+@media (min-width: 1000px) {
 	
+	.virtualKeyboard {
+		min-width: 590px;
+	}
+	
+	.virtualKeyboard .row {
+		height: 35px;
+	}
+	
+	.virtualKeyboard button {
+		font-size: 13px;
+		border-radius: 3px;
+		min-width: 30px;
+		min-height: 32px;
+	}
 	
 }
 
@@ -1131,7 +1162,7 @@ noscript div p {
 	.virtualKeyboard {
 		min-width: 310px;
 	}
-
+	
 	.virtualKeyboard .row {
 		height: 16px;
 	}
@@ -1176,26 +1207,29 @@ noscript div p {
 	.dialog .input {
 		margin-bottom: 10px;
 		font-size: 12px;
-		}
+	}
 	
 }
 
-
-@media (min-width: 1000px) {
+@media (max-width: 350px) {
 	
+	/* Screen too small for the keyboard to fit !? */
 	.virtualKeyboard {
-		min-width: 590px;
-	}
+		min-width: 200px;
+		min-height: 48px;
+		}
 	
 	.virtualKeyboard .row {
-		height: 35px;
+		min-height: 10px;
+		height: 0;
 	}
 	
 	.virtualKeyboard button {
-		font-size: 13px;
-		border-radius: 3px;
-		min-width: 30px;
-		min-height: 32px;
+		font-size: 6px;
+		border-radius: 1px;
+		min-width: 8px;
+		min-height: 9px;
+		margin: 1px;
 	}
 	
 }
