@@ -140,9 +140,10 @@
 			var moveDirectionX = x > touchDownX ? -1 : 1;
 			var moveDirectionY = y > touchDownY ? -1 : 1;
 			
-			scrollSpeedX = (deltaX * 0.02);
-			scrollSpeedY = (deltaY * 0.05);
-				
+			//scrollSpeedX = (deltaX * 0.02);
+			//scrollSpeedY = (deltaY * 0.01);
+			scrollSpeedY = Math.sqrt(deltaY) * 0.1;
+			
 			lastMeasureX = x;
 			lastMeasureY = y;
 			
