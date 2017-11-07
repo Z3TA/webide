@@ -34,7 +34,10 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Virtual keyboard feels slow. Text is not inserted until the animation has finished !?
+hiding / showing virtual keyboard
+
+
+
 
 
 Dashboard:
