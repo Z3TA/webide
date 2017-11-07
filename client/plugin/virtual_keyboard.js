@@ -279,7 +279,9 @@
 		else {
 			
 			EDITOR.input = true;
-			EDITOR.mock( eventType, { charCode: charCode } );
+			var doDefaultAction = EDITOR.mock( eventType, { charCode: charCode } );
+			
+			console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
 			
 		}
 		

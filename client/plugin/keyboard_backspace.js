@@ -29,7 +29,7 @@
 				renderNotNeeded = false;
 				file.deleteSelection();
 				EDITOR.renderNeeded();
-				return true; // Only delete the selection
+				return false; // Only delete the selection
 			}
 			
 			if(caret.index > 0) {
