@@ -2054,10 +2054,12 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.addRender = function(fun) {
-		if(EDITOR.renderFunctions.indexOf(fun)) throw new Error("The function is already registered as a renderer: " + UTIL.getFunctionName(fun));
+		console.log("Adding render: " + UTIL.getFunctionName(fun));
+		if(EDITOR.renderFunctions.indexOf(fun) != -1) throw new Error("The function is already registered as a renderer: " + UTIL.getFunctionName(fun));
 		return EDITOR.renderFunctions.push(fun) - 1;
 	}
 	EDITOR.removeRender = function(fun) {
+		console.log("Removing render: " + UTIL.getFunctionName(fun));
 		return removeFrom(EDITOR.renderFunctions, fun)
 	}
 	
