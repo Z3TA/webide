@@ -1833,7 +1833,7 @@ EDITOR.lastKeyPressed = "";
 		var menu = document.getElementById("canvasContextmenu");
 		
 		menu.style.visibility = "hidden"; // Always hide the menu on mouse down
-		menu.style.height = "1px";
+		//menu.style.height = "1px";
 		
 		// Clear temorary menu items
 		var tempItems = document.getElementById("canvasContextmenuTemp");
@@ -1860,8 +1860,10 @@ EDITOR.lastKeyPressed = "";
 			
 			}, 100); 
 		*/
-		var offsetHeight = parseInt(menu.offsetHeight);
+		var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
 		var offsetWidth = parseInt(menu.offsetWidth);
+		
+		console.log("menu: offsetHeight=" + offsetHeight);
 		
 		if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
 		if((posX+offsetWidth) > EDITOR.with) posX = EDITOR.with - offsetWidth;
@@ -1874,7 +1876,7 @@ EDITOR.lastKeyPressed = "";
 		menu.style.visibility = "visible";
 		menu.style.top = posY + "px";
 		menu.style.left = posX + "px";
-		menu.style.height = "100%";
+		//menu.style.height = "100%";
 	}
 	
 	EDITOR.addInfo = function(row, col, txt) {
