@@ -12,9 +12,9 @@
 	
 	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 
-		// Prevent placing the caret in the scroll area mouseDownEvent.type == "touchstart" && 
-		if(mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
-		if(mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
+		// Prevent placing the caret in the scroll area 
+		if(mouseDownEvent.type == "touchstart" && mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
+		if(mouseDownEvent.type == "touchstart" && mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
 		
 		if(EDITOR.currentFile && caret) {
 			

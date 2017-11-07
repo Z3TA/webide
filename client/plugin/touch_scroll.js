@@ -81,7 +81,7 @@
 		if(!file) return true; // Do nothing if no file is open
 		
 		
-		//if(ev.type != "touchmove") return; // Do nothing unless it's a touchmove event, eg. ignore mousemove events
+		if(ev.type != "touchmove") return; // Do nothing unless it's a touchmove event, eg. ignore mousemove events
 		
 		// Prevent scrolling of the DOM window. We only want to scroll the text
 			ev.preventDefault();
