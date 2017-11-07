@@ -22,6 +22,8 @@
 (function() {
 	"use strict";
 	
+	if(window.location.href.indexOf("&vim") == -1) return; // Work in progress!
+	
 	var modalEditMenuItem;
 	var modalEditCommandWidget;
 	var modalEditingCommandInput;
