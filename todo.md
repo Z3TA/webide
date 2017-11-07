@@ -34,14 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Fixing scrolling using touch ! scroll zones ...
-
-scrolling text on mobile ... 
-Only scroll if the touchmove event is fired at the far right side !? Otherwise do a select !? And don't place the cursor if the touchstart is at the far right
-Allow scrolling sideways x
-Scroll x on the far bottom
-Show scroll bars when scrolling!! So the user see the scroll zone and where in the document he/she is.
-
+Virtual keyboard feels slow. Text is not inserted until the animation has finished !?
 
 
 Dashboard:

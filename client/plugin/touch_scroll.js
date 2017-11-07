@@ -140,9 +140,10 @@
 			var moveDirectionX = x > touchDownX ? -1 : 1;
 			var moveDirectionY = y > touchDownY ? -1 : 1;
 			
-			//scrollSpeedX = (deltaX * 0.02);
+			scrollSpeedX = (deltaX * 0.02);
+			
 			//scrollSpeedY = (deltaY * 0.01);
-			scrollSpeedY = Math.sqrt(deltaY) * 0.1;
+			scrollSpeedY = Math.sqrt(deltaY) * 0.05;
 			
 			lastMeasureX = x;
 			lastMeasureY = y;
@@ -288,8 +289,8 @@
 	
 	function verticalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		
-		ctx.strokeStyle="rgba(0,255,0,0.5)";
-		ctx.fillStyle="rgba(0,0,255,0.5)";
+		ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
+		ctx.fillStyle="rgba(210, 210, 210, 0.1)";
 		
 		var x = EDITOR.view.canvasWidth - EDITOR.settings.scrollZone;
 		var y = 0;
@@ -297,14 +298,15 @@
 		var height = EDITOR.view.canvasHeight;
 		
 		ctx.rect(x,y,width,height);
+		ctx.fill();
 		ctx.stroke();
 		
 	}
 	
 	function horizontalScrollingRender(ctx, buffer, file, startRow, containZeroWidthCharacters) {
 		
-		ctx.strokeStyle="rgba(0,255,0,0.5)";
-		ctx.fillStyle="rgba(0,0,255,0.5)";
+		ctx.strokeStyle="rgba(180, 180, 180, 0.4)";
+		ctx.fillStyle="rgba(210, 210, 210, 0.3)";
 		
 		var x = 0;
 		var y = EDITOR.view.canvasHeight - EDITOR.settings.scrollZone;
@@ -313,6 +315,7 @@
 		
 		ctx.rect(x,y,width,height);
 		ctx.stroke();
+		ctx.fill();
 		
 	}
 	
