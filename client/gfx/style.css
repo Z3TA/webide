@@ -786,7 +786,7 @@ div.gotoFile li:hover {
 
 .menu {
 	display: block;
-	visibility: visible;
+	visibility: hidden;
 	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
 	position: absloute;
 	top: 100px;
