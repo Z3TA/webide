@@ -1,3 +1,4 @@
+
 body {
 	font-family: 'sans-serif';
 	font-size: 1em;
@@ -11,9 +12,10 @@ body {
 	background-color: #f5f7fa;
 	background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
 	background-repeat: no-repeat;
-}
+	}
 
-main {
+.main {
+	margin: 2em;
 	margin: auto;
 	margin-top: 20px;
 	margin-bottom: 25px;
@@ -26,7 +28,7 @@ abstract {
 	border: 1px solid #e8ecf0;
 	background-color: white;
 	display: inline-block;
-	min-width: 80%;
+	
 	margin: auto;
 	font-size: 1.2em;
 	line-height: 1.2em;

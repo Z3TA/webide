@@ -3,6 +3,8 @@
 		
 	*/
 	
+	if(typeof window.requestAnimationFrame == "undefined") return;
+	
 	var CANVAS;
 	var IMAGES_LOADED = 0;
 	var WINDOW_LOADED = false;

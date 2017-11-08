@@ -3,73 +3,75 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
+	<meta name="viewport" content="initial-scale=0.8, user-scalable=yes" />
 	<link rel="stylesheet" type="text/css" href="../gfx/doc.css" />
 	<script type="text/javascript" src="../gfx/clouds.js"></script>
 	</head>
 <body>
 
 
-<main>
-
-<abstract>
-<p>Want to make a web-site or app ? And have it running live in the cloud five minuts from now ?</p>
-
-<p>All you have to know is some JavaScript, HTML and CSS !</p>
-
-<p>Deploy your web apps and micro-services in one click ...</p>
-</abstract>
-
-<h1>webide.se</h1>
-
-<p><a href="https://webide.se/">webide.se</a> is the <a href="#jzedit">JZedit</a> source code editor for JavaScript, running on a server.</p>
-
-<p>webide.se give you web hosting space for static web sites and Node.JS micro services,
-making it possible to both develop and run (host, in production) full stack JavaScript web applications from any device that have a web browser, 
-without need for plugins or installing anything, or using a terminal or command line!</p>
-
-
-
-<a name="jzedit"></a>
-<h1>JZedit</h1>
-
-<p>JZedit is a text editor for JavaScript, CSS, HTML and web
-development, with IDE-like features such as auto-complete and built in version
-control (Mercurial), and a built in static-site-generator.</p>
-
-<p>JZedit is open source and can run locally on a PC or any device capable of running <a href="https://www.nodejs.org/">Node.JS</a>.<br>
-It can also run on a headless private server where you connect to it from a browser.</p>
-
-
-<h2>Features</h2>
-
-<ul>
-	<li>Grouped file tabs</li>
-	<li>Function list - For quick navigation, and search of JavaScript functions.</li>
+<div class="main">
+	
+	<abstract>
+	<p>Want to make a web-site or app ? And have it running live in the cloud five minuts from now ?</p>
+	
+	<p>All you have to know is some JavaScript, HTML and CSS !</p>
+	
+	<p>Deploy your web apps and micro-services in one click ...</p>
+	</abstract>
+	
+	<h1>webide.se</h1>
+	
+	<p><a href="https://webide.se/">webide.se</a> is the <a href="#jzedit">JZedit</a> source code editor for JavaScript, running on a server.</p>
+	
+	<p>webide.se give you web hosting space for static web sites and Node.JS micro services,
+	making it possible to both develop and run (host, in production) full stack JavaScript web applications from any device that have a web browser, 
+	without need for plugins or installing anything, or using a terminal or command line!</p>
+	
+	
+	
+	<a name="jzedit"></a>
+	<h1>JZedit</h1>
+	
+	<p>JZedit is a text editor for JavaScript, CSS, HTML and web
+	development, with IDE-like features such as auto-complete and built in version
+	control (Mercurial), and a built in static-site-generator.</p>
+	
+	<p>JZedit is open source and can run locally on a PC or any device capable of running <a href="https://www.nodejs.org/">Node.JS</a>.<br>
+	It can also run on a headless private server where you connect to it from a browser.</p>
+	
+	
+	<h2>Features</h2>
+	
+	<ul>
+		<li>Grouped file tabs</li>
+		<li>Function list - For quick navigation, and search of JavaScript functions.</li>
 		<li>Automatic indentation management - Save time not having to indent your code!</li>
-	<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted - Makes it faster to navigate in large files.</li>
+		<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted - Makes it faster to navigate in large files.</li>
 		<li>Smart auto-completion of JavaScript variables <kbd>Tab</kbd>.</li>
-	<li>Static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
-	<li>WYSIYG and editor side by side - Write HTML without knowing HTML.</li>
+		<li>Static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
+		<li>WYSIYG and editor side by side - Write HTML without knowing HTML.</li>
 		<li>Connect to FTP/FTPS/SFTP servers and edit files remotely.</li>
 		<li>Commit from within the editor and show annotations.</li>
-	<li>It's possible to run the editor embedded on a web site.</li>
+		<li>It's possible to run the editor embedded on a web site.</li>
 	</ul>
+	
+	
+	<h2>Architecture</h2>
+	
+	<p>JZedit is made in JavaScript, HTML and CSS. And it use HTML Canvas for rendering (no content-editable).</p>
+	
+	<p>JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
+	
+	<p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
+	The client-side/front-end run in any browser or <a href="https://nwjs.io/">nw.js</a></p>
+	
+	<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
+	Each plugin is independent: They do not depend on each other - avoiding complexity.<br>
+	Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
+	
+</div>
 
-
-<h2>Architecture</h2>
-
-<p>JZedit is made in JavaScript, HTML and CSS. And it use HTML Canvas for rendering (no content-editable).</p>
-
-<p>JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
-
-<p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
-The client-side/front-end run in any browser or <a href="https://nwjs.io/">nw.js</a></p>
-
-<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
-Each plugin is independent: They do not depend on each other - avoiding complexity.<br>
-Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
-
-</main>
-
-</body>
-</html>
+	</body>
+	</html>
+	
