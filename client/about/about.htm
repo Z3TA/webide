@@ -26,7 +26,7 @@
 	
 	<p>webide.se give you web hosting space for static web sites and Node.JS micro services,
 	making it possible to both develop and run (host, in production) full stack JavaScript web applications from any device that have a web browser, 
-	without need for plugins or installing anything, or using a terminal or command line!</p>
+	without need for plugins or installing anything, and without touching a terminal or command line!</p>
 	
 	
 	
@@ -52,22 +52,22 @@
 		<li>Static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
 		<li>WYSIYG and editor side by side - Write HTML without knowing HTML.</li>
 		<li>Connect to FTP/FTPS/SFTP servers and edit files remotely.</li>
-		<li>Commit from within the editor and show annotations.</li>
+		<li>Source control: Commit from within the editor and show annotations.</li>
 		<li>It's possible to run the editor embedded on a web site.</li>
 	</ul>
 	
 	
 	<h2>Architecture</h2>
 	
-	<p>JZedit is made in JavaScript, HTML and CSS. And it use HTML Canvas for rendering (no content-editable).</p>
+	<p>JZedit is made in JavaScript, HTML and CSS. And it use HTML Canvas for rendering (not content-editable).</p>
 	
 	<p>JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
 	
 	<p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
-	The client-side/front-end run in any browser or <a href="https://nwjs.io/">nw.js</a></p>
+	And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
 	
 	<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
-	Each plugin is independent: They do not depend on each other - avoiding complexity.<br>
+	Each plugin is an independent unit and do not depend on or interfere with other plugins.<br>
 	Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 	
 </div>
