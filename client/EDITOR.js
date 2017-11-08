@@ -5027,11 +5027,10 @@ EDITOR.lastKeyPressed = "";
 			//alert("Preventing default browser action!");
 			console.log("Preventing default browser action!");
 			
-			try {keyDownEvent.stopPropagation();} catch(err) {console.warn(err.message);}
-			try {window.event.cancelBubble = true;} catch(err) {console.warn(err.message);}
-			
-			try {keyDownEvent.preventDefault();} catch(err) {console.warn(err.message);}
-			try {event.preventDefault();} catch(err) {console.warn(err.message);}
+			if(typeof keyDownEvent.stopPropagation == "function") keyDownEvent.stopPropagation();
+			if(window.event && typeof window.event.cancelBubble != "undefined") window.event.cancelBubble = true;
+			if(typeof keyDownEvent.preventDefault == "function") keyDownEvent.preventDefault();
+			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 			
 			return false;
 		}
