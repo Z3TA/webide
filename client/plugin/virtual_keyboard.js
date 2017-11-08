@@ -12,8 +12,6 @@
 		desc: "Add a default set of buttons to the virtual keyboard",
 		load: function loadVirtualKeyboard() {
 			
-			EDITOR.virtualKeyboard.hide();
-			
 			// enable vibration support
 			navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
 			
@@ -23,7 +21,7 @@
 			EDITOR.on("mouseClick", touchMaybeOnMouseDown);
 			
 			// Listen for keyboard events to make sure the user has a keyboard before hiding the virtual keyboard
-			//EDITOR.on("keyDown", maybeHasKeyboard);
+			EDITOR.on("keyDown", maybeHasKeyboard);
 			
 			
 		},
@@ -41,16 +39,16 @@
 	
 	function touchMaybeOnMouseDown(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		console.log(mouseDownEvent);
+		// Some devices only send mousedown on touch!
+		// And some send both!
 		console.log("touchMaybeOnMouseDown: mouseDownEvent.type=" + mouseDownEvent.type + " touchCounter=" + touchCounter + " mouseCounter=" + mouseCounter + " keyDownCounter=" + keyDownCounter + "");
 		if(mouseDownEvent.type == "touchstart") {
 			touchCounter++;
-			if(keyDownCounter == 0) {
-				//alertBox("Showing virtual keyboard!");
-			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
-			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
-			
 				EDITOR.virtualKeyboard.show();
 				EDITOR.resizeNeeded(); // Needed to position the virtual keyboard
+			if(touchCounter > 3 && keyDownCounter == 0) {
+				EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
+				EDITOR.removeEvent("keyDown", maybeHasKeyboard);
 			}
 		}
 		else if(mouseDownEvent.type == "mousedown") {
@@ -60,17 +58,22 @@
 	}
 	
 	function maybeHasKeyboard(file, character, combo, keyDownEvent) {
+		console.log("maybeHasKeyboard: keyDownEvent.type=" + keyDownEvent.type + " keyDownCounter=" + keyDownCounter);
 		if(keyDownEvent.type=="keydown") keyDownCounter++;
 		
-		if(touchCounter == 0 && mouseCounter > 0 && keyDownCounter > 0 && EDITOR.virtualKeyboard.isVisible) {
-			// We are now pretty shure that the user has both a mouse and a keyboard
+			// We are now pretty shure that the user has a keyboard
 			//alertBox("Hiding virtual keyboard!");
+		
+			EDITOR.virtualKeyboard.hide();
+		
+		if(keyDownCounter > 50 && touchCounter == 0) {
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
 			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
-			EDITOR.virtualKeyboard.hide();
 		}
 		
 	}
+		
+	
 	
 	function addButtons() {
 		var body = document.body;
