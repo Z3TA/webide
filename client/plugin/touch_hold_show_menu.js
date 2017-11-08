@@ -26,12 +26,16 @@
 		if(mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
 		if(mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
 		
+		console.log(mouseDownEvent);
+		
 		touchDownTimer = setTimeout(showMenu, 500);
 	}
 	
 	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
 		if(mouseDownEvent.type != "touchend") return;
+		
+		console.log(mouseDownEvent);
 		
 		clearTimeout(touchDownTimer);
 	}

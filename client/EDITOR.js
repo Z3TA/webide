@@ -227,6 +227,7 @@ EDITOR.lastKeyPressed = "";
 	*/
 	
 	
+	var lastMouseDownEventType = "";
 	
 	// # Working Directory
 	var workingDirectory; // Private variable
@@ -1829,7 +1830,9 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	EDITOR.hideMenu = function() {
-		// Hide the menu
+		
+		//alert(UTIL.getStack("Hide menu"));
+		
 		var menu = document.getElementById("canvasContextmenu");
 		
 		menu.style.visibility = "hidden"; // Always hide the menu on mouse down
@@ -5193,7 +5196,8 @@ EDITOR.lastKeyPressed = "";
 		
 		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 			
-			EDITOR.hideMenu();
+			// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
+			if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.hideMenu();
 			
 			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
@@ -5270,6 +5274,7 @@ EDITOR.lastKeyPressed = "";
 			}
 		}
 		
+		lastMouseDownEventType = mouseDownEvent.type;
 		
 		EDITOR.interact("mouseDown", mouseDownEvent);
 		
