@@ -19,8 +19,8 @@
 if(runtime=="browser") {
 	
 	// We better use a web safe font in the browser
-	EDITOR.settings.style.font = "Courier New";
-	EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New";
+		EDITOR.settings.style.font = "Courier New, Courier, monospace";
+		EDITOR.settings.style.highlightMatchFont = "bold 15px Courier New, Courier, monospace";
 	EDITOR.settings.style.fontSize = 15;
 	EDITOR.settings.gridHeight = 23;
 	EDITOR.settings.gridWidth = 9;
@@ -33,8 +33,8 @@ if(runtime=="browser") {
 		
 		if( (!isNaN(width) && width <= 600) || (!isNaN(height) && height <= 250) ) {
 			// Use a smaller text size on small screens
-			EDITOR.settings.style.font = "Courier New";
-			EDITOR.settings.style.highlightMatchFont = "bold 11px Courier New";
+			EDITOR.settings.style.font = "Courier New, Courier, monospace";
+			EDITOR.settings.style.highlightMatchFont = "bold 10px Courier New, Courier, monospace";
 			EDITOR.settings.style.fontSize = 10;
 			EDITOR.settings.gridHeight = 14;
 			EDITOR.settings.gridWidth = 6;
