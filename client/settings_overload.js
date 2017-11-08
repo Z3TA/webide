@@ -25,7 +25,27 @@ if(runtime=="browser") {
 	EDITOR.settings.gridHeight = 23;
 	EDITOR.settings.gridWidth = 9;
 	
-	// Web safe fonts are ugly, try to load a nice font ...
+		
+		var width = parseInt(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
+		var height = parseInt(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
+		
+		//alert("width=" + width + " height=" + height + "");
+		
+		if( (!isNaN(width) && width <= 600) || (!isNaN(height) && height <= 250) ) {
+			// Use a smaller text size on small screens
+			EDITOR.settings.style.font = "Courier New";
+			EDITOR.settings.style.highlightMatchFont = "bold 11px Courier New";
+			EDITOR.settings.style.fontSize = 10;
+			EDITOR.settings.gridHeight = 14;
+			EDITOR.settings.gridWidth = 6;
+			EDITOR.settings.leftMargin = 24;
+			EDITOR.settings.rightMargin = 24;
+			EDITOR.settings.topMargin = 4;
+			EDITOR.settings.bottomMargin = 2;
+		}
+		else {
+		
+		// Web safe fonts are ugly, try to load a nice font ...
 		
 		if(browser != "Firefox") { // Firefox have wierd kerning/spacing
 		UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css");
@@ -35,8 +55,9 @@ if(runtime=="browser") {
 		EDITOR.settings.gridHeight = 22;
 		EDITOR.settings.gridWidth = 7.83;
 	}
-	
-	/*
+		}
+		
+		/*
 			Ligatures
 			---------
 		Ligatures are basically two letter as one. Fira code for example makes => into an arrow.
@@ -64,6 +85,9 @@ if(runtime=="browser") {
 			EDITOR.settings.style.highlightMatchFont = "bold 14px Fira Code";
 		}
 		}
+		
+		
+		
 	}
 
 	if(process.platform == "win32" && (runtime == "nw.js" || browser == "Chrome") && EDITOR.settings.sub_pixel_antialias == true) {

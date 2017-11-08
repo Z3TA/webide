@@ -1133,6 +1133,14 @@ noscript div p {
 
 @media (max-height: 570px) {
 
+	* {
+		font-size: 10px;
+	}
+	
+	input[type=button], button.button, input[type=submit] {
+		min-width: 80px;
+	}
+	
 	.menu {
 		max-height: 100%;
 		max-width: 75%;
@@ -1142,8 +1150,27 @@ noscript div p {
 		font-size: 10px;
 		padding: 5px 10px 5px 7px;
 		}
+	
+	ul#tabList li.tabFileItem {
+		margin-top: 3px;
+		padding-top: 1px;
+		line-height: 10px;
+	}
+	
+	ul#tabList ul.folderFileList {
+		max-height: 17px;
+	}
+	
+	ul#tabList li.tabFolderItem.single {
+		padding-top: 8px;
+		
+	}
+	
+	ul#tabList li.tabFileItem {
+		font-size: 10px;
+		
 }
-
+}
 
 @media (max-height: 150px) {
 	/* Hide the virtual keyboard so it doesn't get in the way */
