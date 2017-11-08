@@ -64,7 +64,7 @@
 			// We are now pretty shure that the user has a keyboard
 			//alertBox("Hiding virtual keyboard!");
 		
-			EDITOR.virtualKeyboard.hide();
+		if(keyDownCounter > 0) EDITOR.virtualKeyboard.hide();
 		
 		if(keyDownCounter > 50 && touchCounter == 0) {
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
