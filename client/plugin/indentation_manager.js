@@ -108,6 +108,15 @@
 		}
 		indentationManager.appendChild(btnUseTabs);
 		
+		var cancel = document.createElement("button");
+		cancel.setAttribute("class", "button");
+		cancel.innerText = "Cancel"
+		cancel.addEventListener("click", function cancel() {
+			hideIndentationManager();
+		}, false);
+		indentationManager.appendChild(cancel);
+		
+		
 		var footer = document.getElementById("footer");
 		footer.appendChild(indentationManager);
 		

@@ -1224,6 +1224,15 @@
 		labelSavePassword.appendChild(document.createTextNode("Save credentials"));
 		form.appendChild(labelSavePassword);
 		
+		var cancel = document.createElement("button");
+		cancel.setAttribute("type", "button");
+		cancel.setAttribute("class", "button");
+		cancel.innerText = "Cancel"
+		cancel.addEventListener("click", function cancel() {
+			hideCloneDialog();
+		}, false);
+		form.appendChild(cancel);
+		
 		return form;
 		
 		function cloneRepo(e) {

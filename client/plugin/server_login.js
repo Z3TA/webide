@@ -243,6 +243,14 @@
 		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
 		form.appendChild(labelCheckDefUrl);
 		
+		var cancel = document.createElement("button");
+		cancel.setAttribute("type", "button");
+		cancel.setAttribute("class", "button");
+		cancel.innerText = "Cancel"
+		cancel.addEventListener("click", function cancel() {
+			hideLoginDialog();
+		}, false);
+		form.appendChild(cancel);
 		
 		// Signup message
 		var signupLink = document.createElement("a");

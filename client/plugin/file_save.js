@@ -87,6 +87,7 @@
 		saveDialog.appendChild(buttonSaveAs);
 		buttonSaveAs.addEventListener("click", saveFileInPath, false);
 		
+		
 		if(runtime == "browser") {
 			var buttonDownload = document.createElement("input");
 			buttonDownload.setAttribute("type", "button");
@@ -109,6 +110,15 @@
 			saveDialog.appendChild(buttonBrowse);
 			buttonBrowse.addEventListener("click", browsePath, false);
 		}
+		
+		var cancel = document.createElement("button");
+		cancel.setAttribute("class", "button");
+		cancel.innerText = "Cancel"
+		cancel.addEventListener("click", function cancel() {
+			hideSaveDialog();
+		}, false);
+		saveDialog.appendChild(cancel);
+		
 		
 		footer.appendChild(saveDialog);
 		
