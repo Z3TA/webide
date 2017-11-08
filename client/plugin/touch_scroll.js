@@ -41,7 +41,7 @@
 			EDITOR.removeEvent("mouseClick", tsTouchDown);
 			EDITOR.removeEvent("mouseClick", tsTouchUp);
 			
-			EDITOR.removeEvent("mouseClick", tsTouchMove);
+			EDITOR.removeEvent("mouseMove", tsTouchMove);
 			
 			EDITOR.removeRender(verticalScrollingRender);
 			EDITOR.removeRender(horizontalScrollingRender);
