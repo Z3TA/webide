@@ -3004,6 +3004,8 @@ EDITOR.lastKeyPressed = "";
 			
 			// Also specify options.shiftKey, otions.altKey and options.ctrlKey witch can be true
 			
+			options.type ="mock-keydown";
+			
 			var retDown = keyIsDown(options);
 			keyIsUp(options);
 			
@@ -3464,13 +3466,13 @@ EDITOR.lastKeyPressed = "";
 		},
 		hide: function hideVirutalKeyboard() {
 			virtualKeyboardElement.style.display = "none";
+			this.isVisible = false;
 		},
 		show: function showVirutalKeyboard() {
 			virtualKeyboardElement.style.display = "block";
+			this.isVisible = true;
 		},
-		isVisible: function isVirtualKeyboardVisible() {
-			return (virtualKeyboardElement.style.display == "block");
-		}
+		isVisible: true
 		
 	}
 	

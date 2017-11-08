@@ -4,13 +4,15 @@
 	var GROUP = "main";
 	
 	var CAPS = false;
-	var TOUCH = false;
 	var mouseCounter = 0;
 	var touchCounter = 0;
+	var keyDownCounter = 0;
 	
 	EDITOR.plugin({
 		desc: "Add a default set of buttons to the virtual keyboard",
 		load: function loadVirtualKeyboard() {
+			
+			EDITOR.virtualKeyboard.hide();
 			
 			// enable vibration support
 			navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
@@ -18,7 +20,7 @@
 			addButtons();
 			
 			// Wait for touch events before showing the virtual keyboard
-			//EDITOR.on("mouseClick", touchMaybeOnMouseDown);
+			EDITOR.on("mouseClick", touchMaybeOnMouseDown);
 			
 			// Listen for keyboard events to make sure the user has a keyboard before hiding the virtual keyboard
 			//EDITOR.on("keyDown", maybeHasKeyboard);
@@ -30,32 +32,44 @@
 			removeButtons();
 			
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
+			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
 			
+			EDITOR.virtualKeyboard.hide();
 			
 		}
 	});
 	
 	function touchMaybeOnMouseDown(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		console.log(mouseDownEvent);
+		console.log("touchMaybeOnMouseDown: mouseDownEvent.type=" + mouseDownEvent.type + " touchCounter=" + touchCounter + " mouseCounter=" + mouseCounter + " keyDownCounter=" + keyDownCounter + "");
 		if(mouseDownEvent.type == "touchstart") {
-			TOUCH = true;
 			touchCounter++;
+			if(keyDownCounter == 0) {
+				//alertBox("Showing virtual keyboard!");
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
-			EDITOR.virtualKeyboard.show();
+			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
+			
+				EDITOR.virtualKeyboard.show();
+				EDITOR.resizeNeeded(); // Needed to position the virtual keyboard
+			}
 		}
 		else if(mouseDownEvent.type == "mousedown") {
 			// Mobile browsers also send mousedown events on touchstart events!
 			mouseCounter++;
-			if(mouseCounter > 1 && mouseCounter > touchCounter) {
-				TOUCH = false;
-				EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
-				EDITOR.virtualKeyboard.hide();
-			}
 		}
 	}
 	
 	function maybeHasKeyboard(file, character, combo, keyDownEvent) {
-		console.log(keyDownEvent);
+		if(keyDownEvent.type=="keydown") keyDownCounter++;
+		
+		if(touchCounter == 0 && mouseCounter > 0 && keyDownCounter > 0 && EDITOR.virtualKeyboard.isVisible) {
+			// We are now pretty shure that the user has both a mouse and a keyboard
+			//alertBox("Hiding virtual keyboard!");
+			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
+			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
+			EDITOR.virtualKeyboard.hide();
+		}
+		
 	}
 	
 	function addButtons() {
