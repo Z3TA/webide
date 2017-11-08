@@ -810,10 +810,8 @@ div.gotoFile li:hover {
 	background-image: linear-gradient(to bottom, #eef3fe, #d9e3fa);
 	background-image: linear-gradient(to bottom, #eef3fe, #d9e3fa);
 	
-	
 	box-shadow: 0 1px 10px ThreeDShadow;
-	
-}
+	}
 
 .menu li {
 	font-size: 13px;
@@ -1144,7 +1142,7 @@ noscript div p {
 	.menu {
 		max-height: 100%;
 		max-width: 75%;
-		overflow: scroll;
+		overflow-y: scroll;
 	}
 	.menu li {
 		font-size: 10px;
