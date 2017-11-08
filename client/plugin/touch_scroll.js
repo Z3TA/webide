@@ -1,7 +1,6 @@
 (function() {
 	"use strict";
 	
-	var TOUCH = false;
 	var mouseCounter = 0;
 	var touchCounter = 0;
 	var verticalScrolling = false;
@@ -22,7 +21,7 @@
 	var touching = false;
 	var lastMoveDirectionX = 0;
 	var lastMoveDirectionY = 0;
-	
+	var virtualKeyboardWasVisible = false;
 	
 	EDITOR.plugin({
 		desc: "Allow touch scrolling in right and bottom screen area",
@@ -52,6 +51,7 @@
 	
 	function tsTouchDown(x, y) {
 		console.log("touchdown!");
+		
 		horizontalScrolling = false;
 		verticalScrolling = false;
 		maybeScroll = true;
@@ -70,6 +70,9 @@
 		touching = false;
 		EDITOR.removeRender(verticalScrollingRender);
 		EDITOR.removeRender(horizontalScrollingRender);
+		
+		if(virtualKeyboardWasVisible && !EDITOR.virtualKeyboard.isVisible) EDITOR.virtualKeyboard.show();
+		
 		}
 	
 	
@@ -191,6 +194,12 @@
 		" startColumn=" + startColumn +
 		" startRow=" + startRow + "");
 			
+		if(verticalScrolling || horizontalScrolling) {
+			if(EDITOR.virtualKeyboard.isVisible) virtualKeyboardWasVisible = true;
+			//virtualKeyboardWasVisible = EDITOR.virtualKeyboard.isVisible;
+			EDITOR.virtualKeyboard.hide();
+		}
+		
 			if(verticalScrolling) {
 				
 			var scrollToRow = startRow + Math.round(moveDistanceY * scrollSpeedY) * lastMoveDirectionY;
@@ -271,7 +280,7 @@
 	function touchMaybeOnMouseDown(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		console.log(mouseDownEvent);
 		if(mouseDownEvent.type == "touchstart") {
-			TOUCH = true;
+			
 			touchCounter++;
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
 			EDITOR.virtualKeyboard.show();
@@ -280,7 +289,7 @@
 			// Mobile browsers also send mousedown events on touchstart events!
 			mouseCounter++;
 			if(mouseCounter > 1 && mouseCounter > touchCounter) {
-				TOUCH = false;
+				
 				EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
 				EDITOR.virtualKeyboard.hide();
 			}
