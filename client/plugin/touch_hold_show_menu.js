@@ -21,13 +21,18 @@
 	
 	function ltTouchDown(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
-		if(mouseDownEvent.type == "touchstart" && mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
-		if(mouseDownEvent.type == "touchstart" && mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
+		if(mouseDownEvent.type != "touchstart") return;
+		
+		if(mouseX > (EDITOR.view.canvasWidth - EDITOR.settings.scrollZone)) return;
+		if(mouseY > (EDITOR.view.canvasHeight - EDITOR.settings.scrollZone)) return;
 		
 		touchDownTimer = setTimeout(showMenu, 500);
 	}
 	
-	function ltTouchUp() {
+	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
+		
+		if(mouseDownEvent.type != "touchend") return;
+		
 		clearTimeout(touchDownTimer);
 	}
 	

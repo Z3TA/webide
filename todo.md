@@ -34,7 +34,10 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-hiding / showing virtual keyboard
+show menu on long touch
+problem: (due to mousedown after touchdown ? and mouseup !? ) menu hides itself right after it shows
+
+Able to abort from all widgets without a keyboard
 
 
 
