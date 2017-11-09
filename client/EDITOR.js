@@ -1866,6 +1866,8 @@ EDITOR.lastKeyPressed = "";
 		var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
 		var offsetWidth = parseInt(menu.offsetWidth);
 		
+		//alert("offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
+		
 		console.log("menu: offsetHeight=" + offsetHeight);
 		
 		if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
@@ -3685,6 +3687,7 @@ EDITOR.lastKeyPressed = "";
 	//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
 	
 	function preventMotion(event) {
+		//return true;
 		event.preventDefault();
 		event.stopPropagation();
 		window.scrollTo(0, 0);
@@ -3697,6 +3700,8 @@ EDITOR.lastKeyPressed = "";
 	function main() {
 		
 		console.log("Starting the editor ...");
+		
+		//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
 		
 		CLIENT.on("mirror", function clientMirror(json) {
 			

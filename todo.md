@@ -34,18 +34,23 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-show menu on long touch
-problem: (due to mousedown after touchdown ? and mouseup !? ) menu hides itself right after it shows
-
-Able to abort from all widgets without a keyboard
 
 
+Test on ipad!
+Test on iphone
+
+keycombo buttons to the virtual keyboard!??
+
+blog!
 
 
 
 Dashboard:
 ssg: Lista tidagare dokument, antal besökare
 Fast buttons for edit a document, create a new document/post in SSG.
+
+button: create new web site
+
 package?json for the ssg ?
 
 Översätta till Svenska ?
