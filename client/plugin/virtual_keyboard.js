@@ -237,18 +237,11 @@
 		
 		var alt = (char.length == 1 && char != char.toUpperCase()) && char.toUpperCase();
 		
-		var touchEvent;
-		
 		if(ev == undefined) {
 			ev = function(e) {
 				
 				if(alt && CAPS) fireKey(alt.charCodeAt(0));
 				else fireKey(char.charCodeAt(0));
-				
-				try {
-					touchEvent.preventDefault();
-				}
-				catch(err) {}
 				
 				return false;
 			}
@@ -259,15 +252,14 @@
 		b.innerText = char;
 		b.onclick = ev;
 		
-		// Prevent zooming in when double clicking on a key
-		// This seems to cause slow typing on iPad's though
 		b.ontouchstart = function(e) {
-			//touchEvent = e;
-		};
-		
-		b.ontouchend = function(e) {
-		touchEvent = e;
-		};
+			ev();
+			e.preventDefault();
+			b.style.marginTop = "2px";
+			setTimeout(function() {
+				b.style.marginTop = "0px";
+			}, 50);
+			}
 		
 		EDITOR.virtualKeyboard.addKey(b, row, GROUP);
 		
