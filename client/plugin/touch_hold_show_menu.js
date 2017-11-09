@@ -28,7 +28,11 @@
 		
 		console.log(mouseDownEvent);
 		
-		touchDownTimer = setTimeout(showMenu, 500);
+		touchDownTimer = setTimeout(function showMenu() {
+			
+			EDITOR.showMenu(mouseX, mouseY);
+			
+		}, 500);
 	}
 	
 	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
@@ -40,11 +44,6 @@
 		clearTimeout(touchDownTimer);
 	}
 	
-	function showMenu() {
-		
-		EDITOR.showMenu();
-		
-	}
 	
 	
 })();
