@@ -1201,8 +1201,7 @@ noscript div p {
 	
 	.virtualKeyboard {
 		min-width: 310px;
-		border: 1px solid blue;
-	}
+		}
 	
 	.virtualKeyboard .row {
 		height: 16px;
@@ -1258,7 +1257,6 @@ noscript div p {
 	.virtualKeyboard {
 		min-width: 200px;
 		min-height: 48px;
-		border: 1px solid red;
 		}
 	
 	.virtualKeyboard .row {
