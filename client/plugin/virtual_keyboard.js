@@ -187,12 +187,12 @@
 		
 		
 		
-		makeButton("@", 3);
 		
-		makeButton("compl", 3, function space(click) {
+		makeButton("  space  ", 3, function space(click) {
 			EDITOR.input = true;
-			EDITOR.mock( "keydown", { charCode: EDITOR.settings.autoCompleteKey } );
+			EDITOR.mock( "keypress", { charCode: " ".charCodeAt(0) } );
 		});
+		
 		
 		makeButton("z", 3);
 		makeButton("x", 3);
@@ -202,6 +202,11 @@
 		makeButton("n", 3);
 		makeButton("m", 3);
 		
+		makeButton("compl", 3, function space(click) {
+			EDITOR.input = true;
+			EDITOR.mock( "keydown", { charCode: EDITOR.settings.autoCompleteKey } );
+		});
+		
 		makeButton("<", 3);
 		makeButton(">", 3);
 		
@@ -210,14 +215,10 @@
 		makeButton("?", 3);
 		makeButton(":", 3);
 		
-		makeButton("  space  ", 3, function space(click) {
-			EDITOR.input = true;
-			EDITOR.mock( "keypress", { charCode: " ".charCodeAt(0) } );
-		});
 		
 		makeButton("|", 3);
-		
-		
+		makeButton("&", 3);
+		makeButton("@", 3);
 		
 		
 		
