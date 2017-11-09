@@ -142,16 +142,18 @@
 		
 		
 		makeButton("CAPS", 2, function capsLock(click) {
+			// Why is click sometimes undefined !?
 			if(CAPS) {
 				CAPS = false;
-				click.target.setAttribute("class", "kb");
+				if(typeof click != "undefined" && click.target) click.target.setAttribute("class", "kb");
 				for(var char in buttons) {
 					if(buttons[char].alt) buttons[char].el.innerText = char;
 				}
 			}
 			else {
 				CAPS = true;
-				click.target.setAttribute("class", "kb on");
+				
+				if(typeof click != "undefined" && click.target) click.target.setAttribute("class", "kb on");
 				
 				for(var char in buttons) {
 					if(buttons[char].alt) buttons[char].el.innerText = buttons[char].alt;
