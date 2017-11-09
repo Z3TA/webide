@@ -44,8 +44,8 @@
 		console.log("touchMaybeOnMouseDown: mouseDownEvent.type=" + mouseDownEvent.type + " touchCounter=" + touchCounter + " mouseCounter=" + mouseCounter + " keyDownCounter=" + keyDownCounter + "");
 		if(mouseDownEvent.type == "touchstart") {
 			touchCounter++;
-				EDITOR.virtualKeyboard.show();
-				EDITOR.resizeNeeded(); // Needed to position the virtual keyboard
+			EDITOR.virtualKeyboard.show();
+			EDITOR.resizeNeeded(); // Needed to position the virtual keyboard
 			if(touchCounter > 3 && keyDownCounter == 0) {
 				EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
 				EDITOR.removeEvent("keyDown", maybeHasKeyboard);
@@ -61,8 +61,8 @@
 		console.log("maybeHasKeyboard: keyDownEvent.type=" + keyDownEvent.type + " keyDownCounter=" + keyDownCounter);
 		if(keyDownEvent.type=="keydown") keyDownCounter++;
 		
-			// We are now pretty shure that the user has a keyboard
-			//alertBox("Hiding virtual keyboard!");
+		// We are now pretty shure that the user has a keyboard
+		//alertBox("Hiding virtual keyboard!");
 		
 		if(keyDownCounter > 0) EDITOR.virtualKeyboard.hide();
 		
@@ -72,7 +72,7 @@
 		}
 		
 	}
-		
+	
 	
 	
 	function addButtons() {
@@ -237,11 +237,18 @@
 		
 		var alt = (char.length == 1 && char != char.toUpperCase()) && char.toUpperCase();
 		
+		var touchEvent;
+		
 		if(ev == undefined) {
-			ev = function() {
+			ev = function(e) {
 				
 				if(alt && CAPS) fireKey(alt.charCodeAt(0));
 				else fireKey(char.charCodeAt(0));
+				
+				try {
+					touchEvent.preventDefault();
+				}
+				catch(err) {}
 				
 				return false;
 			}
@@ -251,6 +258,17 @@
 		b.setAttribute("class", "kb");
 		b.innerText = char;
 		b.onclick = ev;
+		
+		// Prevent zooming in when double clicking on a key
+		// This seems to cause slow typing on iPad's though
+		b.ontouchstart = function(e) {
+			//touchEvent = e;
+		};
+		
+		b.ontouchend = function(e) {
+		touchEvent = e;
+		};
+		
 		EDITOR.virtualKeyboard.addKey(b, row, GROUP);
 		
 		buttons[char] = {
