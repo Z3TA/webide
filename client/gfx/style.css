@@ -24,7 +24,7 @@
 * {
 	padding: 0px;
 	margin: 0px;
-	border: 0px solid red;
+	border: 0;
 	/*-webkit-font-smoothing: none;*/
 	/*border: 1px solid pink;*/
 	
@@ -294,13 +294,12 @@ canvas {
 	padding-bottom: 6px;
 	padding-left: 4px;
 	padding-right: 4px;
-	 
+	
 }
 .footer:empty { 
 	border: none; /* Hide the border if the footer is empty */
 	padding: 0px;
 }
-
 
 .sizer {
 	background-color: #682c35;
@@ -811,6 +810,10 @@ div.gotoFile li:hover {
 	background-image: linear-gradient(to bottom, #eef3fe, #d9e3fa);
 	
 	box-shadow: 0 1px 10px ThreeDShadow;
+	max-width: 90%;
+	max-height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
 	}
 
 .menu li {
@@ -869,6 +872,7 @@ div.gotoFile li:hover {
 	color: #1f2122;
 	background-image: linear-gradient(to bottom, #dde1e9 0%, #fafafa 100%), linear-gradient(to bottom, #3acfd5 0%, #3a4ed5 100%);
 	max-width: 408px;
+	max-width: 90%;
 	word-wrap: break-word;
 }
 
@@ -1135,10 +1139,6 @@ noscript div p {
 		font-size: 10px;
 	}
 	
-	input[type=button], button.button, input[type=submit] {
-		min-width: 80px;
-	}
-	
 	.menu {
 		max-height: 100%;
 		max-width: 75%;
@@ -1201,6 +1201,7 @@ noscript div p {
 	
 	.virtualKeyboard {
 		min-width: 310px;
+		border: 1px solid blue;
 	}
 	
 	.virtualKeyboard .row {
@@ -1257,6 +1258,7 @@ noscript div p {
 	.virtualKeyboard {
 		min-width: 200px;
 		min-height: 48px;
+		border: 1px solid red;
 		}
 	
 	.virtualKeyboard .row {
@@ -1272,4 +1274,18 @@ noscript div p {
 		margin: 1px;
 	}
 	
+	input[type=button], button.button, input[type=submit] {
+		min-width: 80px;
+	}
+	
 }
+
+
+/* Make mobile browsers NOT zoom */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	select,
+	textarea,
+	input {
+		font-size: 16px;
+	}
+	}

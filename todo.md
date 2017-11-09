@@ -34,6 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+iPhone gets zoomed in when showing a widget!
 
 
 Test on ipad!
