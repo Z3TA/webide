@@ -5212,7 +5212,7 @@ EDITOR.lastKeyPressed = "";
 				EDITOR.input = true;
 				
 				// Remove focus from everything else
-				if(typeof document.activeElement.blur == "function") document.activeElement.blur();
+				if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
 				else console.log("Unable to blur active element!:");
 				
 				canvas.focus();
