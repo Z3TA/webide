@@ -191,6 +191,7 @@
 		
 		
 		makeButton("  space  ", 3, function space(click) {
+			click.target.blur();
 			EDITOR.input = true;
 			EDITOR.mock( "keypress", { charCode: " ".charCodeAt(0) } );
 		});
@@ -243,6 +244,10 @@
 		if(ev == undefined) {
 			ev = function(e) {
 				
+				e.preventDefault();
+				
+				clearSelection();
+				
 				if(alt && CAPS) fireKey(alt.charCodeAt(0));
 				else fireKey(char.charCodeAt(0));
 				
@@ -253,16 +258,16 @@
 		var b = document.createElement("button");
 		b.setAttribute("class", "kb");
 		b.innerText = char;
-		b.onclick = ev;
+		//b.onclick = ev;
 		
-		b.ontouchstart = function(e) {
+		b.addEventListener("click", ev, true);
+		b.addEventListener("touchstart", function(e) {
 			ev();
-			e.preventDefault();
 			b.style.marginTop = "2px";
 			setTimeout(function() {
 				b.style.marginTop = "0px";
 			}, 50);
-			}
+		}, true); // Prevent bubbling
 		
 		EDITOR.virtualKeyboard.addKey(b, row, GROUP);
 		
@@ -321,6 +326,14 @@
 			navigator.vibrate(50);
 		}
 		
+	}
+	
+	function clearSelection() {
+		if ( document.selection ) {
+			document.selection.empty();
+		} else if ( window.getSelection ) {
+			window.getSelection().removeAllRanges();
+		}
 	}
 	
 })();

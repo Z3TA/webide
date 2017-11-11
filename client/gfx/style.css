@@ -73,6 +73,7 @@ body {
 	text-align: right;
 	background-color: rgba(200,200,200, .5);
 	min-width: 380px;
+	user-select: none;
 	}
 
 
@@ -83,6 +84,7 @@ body {
 	padding: 0;
 	position: relative;
 	margin: 1px;
+	user-select: none;
 }
 
 .virtualKeyboard button {
@@ -100,6 +102,7 @@ body {
 	vertical-align: top;
 	/*transition: all ease 0.1s;*/
 	box-shadow: 0px 2px 0px rgba(180, 180, 180, .9);
+	user-select: none;
 }
 
 
