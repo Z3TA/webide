@@ -260,6 +260,11 @@
 				if(alt && CAPS) fireKey(alt.charCodeAt(0));
 				else fireKey(char.charCodeAt(0));
 				
+				b.style.marginTop = "2px";
+				setTimeout(function() {
+					b.style.marginTop = "0px";
+				}, 50);
+				
 				return false;
 			}
 		}
@@ -269,14 +274,8 @@
 		b.innerText = char;
 		//b.onclick = ev;
 		
-		b.addEventListener("click", ev, true);
-		b.addEventListener("touchstart", function(e) {
-			ev();
-			b.style.marginTop = "2px";
-			setTimeout(function() {
-				b.style.marginTop = "0px";
-			}, 50);
-		}, true); // Prevent bubbling
+		b.addEventListener("click", ev, true); // Prevent bubbling
+		b.addEventListener("touchstart", ev, true); // Prevent bubbling
 		
 		EDITOR.virtualKeyboard.addKey(b, row, GROUP);
 		
