@@ -105,10 +105,8 @@ body {
 	user-select: none;
 }
 
-
+/* Don't style the active, because sometimes the button can be active, but not register a click! */
 .virtualKeyboard button:active {
-	box-shadow: 0px 0px 0px rgba(180, 180, 180, .9);
-	margin-top: 2px;
 }
 
 .virtualKeyboard button:hover {
