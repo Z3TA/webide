@@ -429,12 +429,23 @@ for(var i=0; i<list.length; i++) {
 				//closeFileButton.setAttribute("class", "blink closeFileTab ");
 				closeFileButton.setAttribute("class", "closeFileTab blink");
 
-				alertBox("File not saved.\nCtrl click to close without saving.");
-				console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
-
-				closeFileButton.blur();
+				var yes = "Ignore changes";
+				var no = "Don't close!"
+				confirmBox("The file is not saved. Are you sure you want to close it !?\n(Ctrl click to close without saving)", [yes, no], function(answer) {
 				
-			}
+					if(answer == yes) {
+						EDITOR.closeFile(path);
+					}
+					closeFileButton.setAttribute("class", "closeFileTab blink");
+					
+				});
+				
+				//alertBox("File not saved.\nCtrl click to close without saving.");
+					console.log("closeFileButton.class=" + closeFileButton.getAttribute("class"));
+					
+					closeFileButton.blur();
+					
+				}
 			else {
 				EDITOR.closeFile(path);
 			}
