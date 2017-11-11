@@ -105,6 +105,8 @@
 		makeButton("+", 0);
 		
 		makeButton("back", 0, function space(click) {
+			click.target.blur();
+			clearSelection();
 			fireKey(8, "keydown");
 			return false;
 		});
@@ -142,6 +144,8 @@
 		
 		
 		makeButton("CAPS", 2, function capsLock(click) {
+			click.target.blur();
+			clearSelection();
 			// Why is click sometimes undefined !?
 			if(CAPS) {
 				CAPS = false;
@@ -180,6 +184,8 @@
 		makeButton("{", 2);
 		
 		makeButton("Enter ", 2, function space(click) {
+			click.target.blur();
+			clearSelection();
 			EDITOR.input = true;
 			EDITOR.mock( "keydown", { charCode:13 } );
 		});
@@ -192,6 +198,7 @@
 		
 		makeButton("  space  ", 3, function space(click) {
 			click.target.blur();
+			clearSelection();
 			EDITOR.input = true;
 			EDITOR.mock( "keypress", { charCode: " ".charCodeAt(0) } );
 		});
@@ -206,6 +213,8 @@
 		makeButton("m", 3);
 		
 		makeButton("compl", 3, function space(click) {
+			click.target.blur();
+			clearSelection();
 			EDITOR.input = true;
 			EDITOR.mock( "keydown", { charCode: EDITOR.settings.autoCompleteKey } );
 		});
