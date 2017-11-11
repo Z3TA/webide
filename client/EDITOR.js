@@ -1458,6 +1458,9 @@ EDITOR.lastKeyPressed = "";
 		virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
 		virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
 		
+		//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
+		//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
+		
 		/*
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);

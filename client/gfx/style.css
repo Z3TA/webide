@@ -67,8 +67,10 @@ body {
 	border-top-left-radius: 6px;
 	z-index: 10;
 	position: absolute;
-	top: -500px;
-	left: 0px;
+	/*bottom: -100px;
+	right: 0px;*/
+	top: -100px;
+	left: 1px;
 	text-align: right;
 	background-color: rgba(200,200,200, .5);
 	user-select: none;
@@ -81,10 +83,12 @@ body {
 .virtualKeyboard .row {
 	border: 0px solid orange;
 	height: 20px;
+	width: 100%;
 	margin: 0;
 	padding: 0;
 	margin: 1px;
 	user-select: none;
+	display: table-row;
 }
 
 .virtualKeyboard button {

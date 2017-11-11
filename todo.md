@@ -34,6 +34,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+problem: virtual Keyboard schrinks for each time we switch between landscape and portrait 
+make it all into a table!?
 
 keycombo buttons to the virtual keyboard!??
 
