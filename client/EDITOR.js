@@ -3430,17 +3430,11 @@ EDITOR.lastKeyPressed = "";
 	
 	
 	// # Virtual keyboard
-	var virtualKeyboard = {
-		main: []
-	};
-	
 	var virtualKeyboardElement;
-	
-	virtualKeyboard.main[0] = document.createElement("div");
-	virtualKeyboard.main[0].setAttribute("class", "row");
 	
 	EDITOR.virtualKeyboard = {
 		addKey: function addVirtualKeyboardKey(newElement, row, position, group) {
+			console.log("Adding virtual keyboard key: row=" + row + " position=" + position + " group=" + group);
 			if(group == undefined) group = "main";
 			if(row == undefined) row = 0;
 			if(!virtualKeyboard.hasOwnProperty(group)) throw new Error("The virtual keyboard has no group called " + group);
@@ -3762,12 +3756,20 @@ EDITOR.lastKeyPressed = "";
 		canvas = document.getElementById("canvas");
 		
 		virtualKeyboardElement = document.getElementById("virtualKeyboard");
+		var virtualKeyboardGroups = document.getElementById("virtualKeyboardGroups");
 		virtualKeyboard.main = {
-			el: document.createElement("div"),
+			el: document.createElement("td"),
 			rows: []
 		}
 		virtualKeyboard.main.el.setAttribute("class", "group");
-		virtualKeyboardElement.appendChild(virtualKeyboard.main.el);
+		virtualKeyboardGroups.appendChild(virtualKeyboard.main.el);
+		
+		virtualKeyboard.misc = {
+			el: document.createElement("td"),
+			rows: []
+		}
+		virtualKeyboard.misc.el.setAttribute("class", "group");
+		virtualKeyboardGroups.appendChild(virtualKeyboard.misc.el);
 		
 		
 		

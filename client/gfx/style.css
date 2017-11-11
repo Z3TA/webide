@@ -69,20 +69,20 @@ body {
 	position: absolute;
 	top: -500px;
 	left: 0px;
-	display: block;
 	text-align: right;
 	background-color: rgba(200,200,200, .5);
-	min-width: 380px;
 	user-select: none;
 	}
 
+.virtualKeyboard .group {
+	vertical-align: top;
+	}
 
 .virtualKeyboard .row {
 	border: 0px solid orange;
 	height: 20px;
 	margin: 0;
 	padding: 0;
-	position: relative;
 	margin: 1px;
 	user-select: none;
 }
@@ -1182,10 +1182,6 @@ noscript div p {
 
 @media (min-width: 1000px) {
 	
-	.virtualKeyboard {
-		min-width: 590px;
-	}
-	
 	.virtualKeyboard .row {
 		height: 35px;
 	}
@@ -1200,10 +1196,6 @@ noscript div p {
 }
 
 @media (max-width: 600px) {
-	
-	.virtualKeyboard {
-		min-width: 310px;
-		}
 	
 	.virtualKeyboard .row {
 		height: 16px;
@@ -1254,12 +1246,6 @@ noscript div p {
 }
 
 @media (max-width: 350px) {
-	
-	/* Screen too small for the keyboard to fit !? */
-	.virtualKeyboard {
-		min-width: 200px;
-		min-height: 48px;
-		}
 	
 	.virtualKeyboard .row {
 		min-height: 10px;

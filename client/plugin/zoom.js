@@ -7,9 +7,7 @@
 	"use strict";
 	
 	var o_gridHeight, o_gridWidth, o_fontSize, visibleRows, visibleColumns, blueBoxStartRow, o_font, o_scrollSpeedMultiplier;
-	
 	var zoomedIn = false;
-	
 	var charCodeUp = 38;
 	var charCodeDown = 40;
 	var charCodeAlt = 18;
@@ -34,6 +32,31 @@
 		EDITOR.bindKey({desc: "Scroll And move the caret down", charCode: charCodeDown, combo: ALT + CTRL, fun: scrollDown});
 		
 		EDITOR.renderFunctions.push(showMarkdownHeadings);
+		
+		var strZoomIn = "zoom in "; // special " " space so the with of the button will be the same when chaning text
+		var strZoomOut = "zoom out";
+		
+		var zoomButton = document.createElement("button");
+		zoomButton.setAttribute("class", "kb");
+		zoomButton.innerText = strZoomIn;
+		
+		zoomButton.onclick = function() {
+			zoomSwitch(EDITOR.currentFile);
+			if(zoomedIn) {
+				zoomButton.innerText = strZoomOut;
+				zoomButton.setAttribute("class", "kb on");
+			}
+			else {
+				zoomButton.innerText = strZoomIn;
+				zoomButton.setAttribute("class", "kb");
+			}
+		}
+		
+		var keyboardRow = 0;
+		var keyboardGroup = "misc";
+		var keyboardPosition = 0;
+		EDITOR.virtualKeyboard.addKey(zoomButton, keyboardRow, keyboardPosition, keyboardGroup);
+		
 	}
 	
 	function zoomSwitch(file, combo, character, charCode, direction) {
@@ -43,7 +66,7 @@
 	}
 	
 	function zoom(file, combo, character, charCode, direction) {
-	
+		
 		console.log("zooming!");
 		EDITOR.settings.gridHeight = EDITOR.settings.gridHeight / 6;
 		EDITOR.settings.gridWidth = EDITOR.settings.gridWidth / 6;
