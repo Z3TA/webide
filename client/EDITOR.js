@@ -1479,7 +1479,7 @@ EDITOR.lastKeyPressed = "";
 		*/
 		
 		EDITOR.height = windowHeight;
-		EDITOR.with = windowWidth;
+		EDITOR.width = windowWidth;
 		
 		
 		//UTIL.objInfo(centerColumn);
@@ -1871,7 +1871,7 @@ EDITOR.lastKeyPressed = "";
 		console.log("menu: offsetHeight=" + offsetHeight);
 		
 		if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
-		if((posX+offsetWidth) > EDITOR.with) posX = EDITOR.with - offsetWidth;
+		if((posX+offsetWidth) > EDITOR.width) posX = EDITOR.width - offsetWidth;
 		
 		if(posX <= EDITOR.mouseX) {
 			// Place the menu on the left side
