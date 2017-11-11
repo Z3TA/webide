@@ -879,6 +879,8 @@ function handleHttpRequest(request, response) {
 		
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
+	//responseHeaders['Cache-Control'] = 'no-cache'; // For debugging
+	
 	if(firstDir == "vnc" && secondDir) {
 		
 		if(VNC_CHANNEL.hasOwnProperty(secondDir)) {
@@ -1143,11 +1145,15 @@ function handleHttpRequest(request, response) {
 				if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
 				throw new Error("Unable to spawn worker! (" + err.message + ")");
 			}
-			else throw err;
+			else {
+			console.log("args=" + JSON.stringify(args) + " options=" + JSON.stringify(options));
+			// If you get spawn EACCES is probably means that hard link or mount to /usr/bin/nodejs_username no longer exist!
+			throw err;
 		}
-		
-		worker.on("close", function workerClose(code, signal) {
-			console.log(name + " worker close: code=" + code + " signal=" + signal);
+	}
+	
+	worker.on("close", function workerClose(code, signal) {
+		console.log(name + " worker close: code=" + code + " signal=" + signal);
 		});
 		
 		worker.on("disconnect", function workerDisconnect() {
