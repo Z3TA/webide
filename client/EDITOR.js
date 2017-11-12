@@ -3444,7 +3444,7 @@ EDITOR.lastKeyPressed = "";
 			
 			if(!virtualKeyboard[group].rows[row]) {
 				for (var i=virtualKeyboard[group].rows.length-1; i<row; i++) {
-					virtualKeyboard[group].rows[row] = document.createElement("div");
+					virtualKeyboard[group].rows[row] = document.createElement("nobr");
 					virtualKeyboard[group].rows[row].setAttribute("class", "row");
 					virtualKeyboard[group].el.appendChild(virtualKeyboard[group].rows[row]);
 				}
