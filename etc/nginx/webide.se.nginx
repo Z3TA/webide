@@ -38,7 +38,8 @@ server {
     # Allow cross domain requests (always adds the header to all, even 400 errors!)
     # Using always will create doublicates in 4xx errors
     # So for 4xx errors, 5xx, and others, Access-Control-Allow-Origin * will have to be added manually
-    add_header Access-Control-Allow-Origin *;
+    # SockJS already adds a Access-Control-Allow-Origin header. Adding two of them will cause the browser to fail loading the page!
+    # add_header Access-Control-Allow-Origin *;
     
     # Allow the browser to read the Content-Length header
     add_header Access-Control-Expose-Headers "Content-Length";
