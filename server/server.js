@@ -976,7 +976,8 @@ function handleHttpRequest(request, response) {
 		var stat = fs.stat(filePath, function(err, stats) {
 			
 			if(err) {
-				
+			responseHeaders['Access-Control-Allow-Origin'] = "*";
+			
 				response.writeHead(404, "Error", responseHeaders);
 				
 				if(err.code == "ENOENT") {
