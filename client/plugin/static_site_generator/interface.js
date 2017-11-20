@@ -1433,9 +1433,11 @@
 							if(!loc.host) throw new Error('Did not expect "falsy" loc.host=' + loc.host);
 							if(!window.location.host) throw new Error('Did not expect "falsy" window.location.host=' + window.location.host);
 							
+							if(loc.host != window.location.host) {
 							url = url.replace(loc.host, window.location.host);
 							
 							alertBox("Serve host was " + loc.host + " but was replaced with " + window.location.host + " to prevent cross origin errors!");
+							}
 							
 							console.log("loc.host=" + loc.host + " window.location.host=" + window.location.host + " url=" + url);
 							
