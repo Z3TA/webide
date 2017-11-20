@@ -34,9 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-bug fix: When previwing. Open the file from the jzedit host server! 
-
-bug fix: Pasting stuff from google docs give error in Wysiwyg editor
 
 dashboard!
 
@@ -525,6 +522,8 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+When pasting stuff into an emty document in wysiwyg it gets added after the body tag
 
 ---
 Function list doesn't always update when debug mode is off !?
