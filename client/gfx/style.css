@@ -878,7 +878,6 @@ div.gotoFile li:hover {
 	color: #1f2122;
 	background-image: linear-gradient(to bottom, #dde1e9 0%, #fafafa 100%), linear-gradient(to bottom, #3acfd5 0%, #3a4ed5 100%);
 	max-width: 408px;
-	max-width: 90%;
 	word-wrap: break-word;
 }
 
