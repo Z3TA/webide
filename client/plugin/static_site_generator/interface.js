@@ -1435,6 +1435,8 @@
 							
 							url = url.replace(loc.host, window.location.host);
 							
+							alertBox("Serve host was " + loc.host + " but was replaced with " + window.location.host + " to prevent cross origin errors!");
+							
 							console.log("loc.host=" + loc.host + " window.location.host=" + window.location.host + " url=" + url);
 							
 							if(!url.match(/^http(s?):/i)) url = window.location.protocol + "//" + url;
