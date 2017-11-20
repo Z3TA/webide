@@ -168,6 +168,13 @@ ls /etc/apparmor.d/ | grep nodejs
 ls /etc/apparmor.d/disable/
 
 
+After reboot
+------------
+Hard links and mountpoints will be deleted on reboot. If you are developing the editor itself ./removeuser.js testuser and ./adduser.js testuser testpw
+If you however are on a production server, make sure the jzedit_user_mounts.service is running: sudo systemctl status jzedit_user_mounts
+
+
+
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 # Where is the program ?
