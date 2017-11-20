@@ -36,6 +36,8 @@ What I'm working on
 
 bug fix: When previwing. Open the file from the jzedit host server! 
 
+bug fix: Pasting stuff from google docs give error in Wysiwyg editor
+
 dashboard!
 
 If the user is not logged in, show login widget on dashboard!
