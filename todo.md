@@ -34,13 +34,23 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-problem: virtual Keyboard schrinks for each time we switch between landscape and portrait 
-make it all into a table!?
+bug fix: When previwing. Open the file from the jzedit host server! 
 
-keycombo buttons to the virtual keyboard!??
+dashboard!
 
-blog!
+If the user is not logged in, show login widget on dashboard!
 
+
+
+Able to resize virtual keyboard
+Don't show menu when dragging (selecting text)
+Able to scroll the menu when zoomed in
+
+Able to create a new folder
+
+Able to move files between folders
+
+bug: Right clicking on a folder in file explorer brings up the options below all the files!
 
 
 Dashboard:
@@ -56,6 +66,71 @@ package?json for the ssg ?
 
 todo
 ----
+
+"help" widget.
+textarea: Need help? Type here ...
+<send> <invite ...> <hide> (you can hide/show the chat using ctrl+?)
+
+invite: Type the name of the user you want to invite to your session, or give them this address: 
+
+Jon Doe want to enter you session.
+
+Read only, Write access, Decline
+
+All users on the server will see the chat!? Or only admins !?
+Or only those invited to the session !?
+
+
+colaboration mode:
+
+When two users are logged in with the same username/pw:
+The client that last moved the caret can edit the document !? All others can only read.
+("The document is locked, move or place the caret to unlock it. For collaborate editing you must have different accounts and invite the other party.")
+
+Problem: The same user goes to work on another computer. When he goes back to his old computer, he wants to get the new updates!
+Solution: When a user comes back online. Check if the last saved state (text) is the same as the text on the disk. If not; tell the user!
+
+When a user has invited another user:
+Both users can edit the document at the same time! (using list/sequence CRDT): https://gotocon.com/dl/goto-berlin-2016/slides/MartinKleppmann_ConflictResolutionForEventualConsistency.pdf
+
+(Right click and select; "share with collaborators" to let invited parties to edit the document at the same time)
+
+When a document is shared, the text is shared and the document reopened in colaboration mode ?
+All documents is always in colaboration mode, even though there is no colaborators !?
+
+When a document that has colaborators is saved, both the original "text" and the grid is saved: eg: file.htm + file.htm.jz (containing the grid in JSON)
+When opening a document, the editor will check for the same document but with .jz and load that as the grid.
+
+A history of all edits need to be saved !!! ? But can be deleted when all colaborators have recived them.
+
+
+What if user goes offline ? (the train goues though a tunnel): When the user comes back online, his changes are synced. 
+What if the user close his computer while offline ? 
+
+The server needs to keep track on who has recived what messages.
+The server needs to keep a log of all edits. Example: Johan: insert "a" with id 4Johan at after id 4Pelle
+
+When the user comes back online, his edits get sent to the server and he get sent the edits made by collaborators.
+The server keeps track on what he has missed.
+
+todo: We need a better undo/rodo!
+
+What if a user deletes an entire row and another user edits that row !? 
+
+
+Have a different data structure for colaboration editing !?
+
+
+
+Several users should be able to edit the document at the same time!!
+
+keycombo buttons to the virtual keyboard!??
+
+tombstones
+
+
+
+
 
 detetch touch-screen and only show virtual keyboard if using touch screen.
 
@@ -2331,6 +2406,7 @@ Self hosted cloud editor. Work in the browser.
 Built in SQL query, with GUI for editing tables
 
 SQL auto completion: SELECT foo FROM table WHERE bar = ? (lookup mysql schema)
+
 
 Need though
 -----------
