@@ -366,9 +366,16 @@ var WysiwygEditor;
 		
 		var doc = previewWin.window.document;
 		var element = doc.elementFromPoint(x, y);
+		
+		if(element == null) {
+			alertBox("Unable to get element on x=" + x + " y=" + y);
+			return false;
+		}
+		else {
 		var childNode = element.childNodes[0]; // The text node
 		
 		return wysiwygEditor.placeCaretOnTextNode(childNode, charPos);
+		}
 	}
 	
 	WysiwygEditor.prototype.placeCaretOnTextNode = function placeCaretOnTextNode(node, charPos) {
@@ -578,7 +585,7 @@ var WysiwygEditor;
 		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
 	}
 	
-	WysiwygEditor.prototype.previewPaste = function previewPaste(e) {
+	WysiwygEditor.prototype.previewPaste = function previewPaste(e, doc) {
 		var wysiwygEditor = this;
 		
 		console.log("previewPaste!");
@@ -594,7 +601,7 @@ var WysiwygEditor;
 		cleaned = sanitize(cleaned, wysiwygEditor.sourceFile.lineBreak);
 		
 		var aShowDefaultUI = true;
-		contentEditor.execCommand("insertHTML", aShowDefaultUI, cleaned);
+		doc.execCommand("insertHTML", aShowDefaultUI, cleaned);
 		
 	}
 	
@@ -1281,7 +1288,7 @@ var WysiwygEditor;
 				body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
 				body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
 				body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
-				body.onpaste = function(e) {wysiwygEditor.previewPase(e)};
+				body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
 				
 				// body.input doesn't work on nw.js gui, has to use window instead
 				//body.input = function(e) {wysiwygEditor.previewInput(e)};
