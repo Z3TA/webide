@@ -13,8 +13,9 @@
 	});
 	
 	function load() {
-		// Bind to ctrl + O
-		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: 79, combo: CTRL + SHIFT, fun: openFile});
+		
+		var key_O = 79;
+		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: key_O, combo: CTRL + SHIFT, fun: openFile});
 		
 		// Add items to the canvas context meny
 		menu = EDITOR.addMenuItem("Open local file ...", openFile);

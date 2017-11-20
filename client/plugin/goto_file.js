@@ -59,8 +59,8 @@
 		var charP = 80;
 		var charO = 79;
 		
-		//EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
-		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charO, combo: CTRL, fun: show_gotoFileInput}); // ctrl + O
+		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
+		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
 		
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
 		
@@ -70,9 +70,13 @@
 	
 	function gotoFile_unload() {
 		EDITOR.unbindKey(show_gotoFileInput);
+		EDITOR.unbindKey(show_gotoFileInput2);
+		
 		EDITOR.unbindKey(hide_gotoFileInput);
 		
 		EDITOR.removeEvent("openFileTool", openAnyFileTool);
+		
+		
 	}
 	
 	function openAnyFileTool(directory) {
@@ -417,7 +421,10 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 		
 	}
 	
-	
+	// Can't have event listeners with the same name
+	function show_gotoFileInput2(file, combo) {
+		return show_gotoFileInput(file, combo);
+	}
 	
 	function show_gotoFileInput(file, combo) {
 		
