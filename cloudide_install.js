@@ -115,7 +115,9 @@ exec("apt install npm -y");
 
 console.log("Finish!");
 
-console.log("P.S: You probably have to edit /etc/nginx/sites-available/" + HOSTNAME + ".nginx and /etc/nginx/sites-available/signup." + HOSTNAME + ".nginx and then run systemctl reload nginx (use nginx -T to check for errors)");
+console.log("P.S: You probably have to edit /etc/nginx/sites-available/" + HOSTNAME + ".nginx and\
+ /etc/nginx/sites-available/signup." + HOSTNAME + ".nginx and \
+then run systemctl reload nginx (use nginx -T to check for errors)");
 
 function execTry(cmd) {
 	try {
