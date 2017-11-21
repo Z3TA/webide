@@ -11,6 +11,7 @@ var MIN_USERNAME_LENGTH = 3;
 	function signup() {
 	var inputUsername = document.getElementById("username");
 	var inputPassword = document.getElementById("password");
+		var inputPassword2 = document.getElementById("password2");
 	var createButton = document.getElementById("createButton");
 	var usernameAlertDiv = document.getElementById("usernameAlert");
 	var pwAlertDiv = document.getElementById("pwAlert");
@@ -23,6 +24,7 @@ var MIN_USERNAME_LENGTH = 3;
 	
 	inputUsername.addEventListener("keyup", inputUserNameKeyUp);
 	inputPassword.addEventListener("keyup", inputPasswordKeyUp);
+		inputPassword2.addEventListener("keyup", inputPasswordKeyUp);
 	createButton.addEventListener("click", createButtonClick);
 	
 	var sockJsReservedQuirk = '';
@@ -90,13 +92,17 @@ var MIN_USERNAME_LENGTH = 3;
 	function inputPasswordKeyUp(keyUpEvent) {
 		var charCode = keyUpEvent.charCode || keyUpEvent.keyCode;
 		var password = inputPassword.value;
-		
+			var password2 = inputPassword2.value;
+			
 		pwAlertDiv.style.display = "none";
 		
 		if(password.length < MIN_PW_LENGTH) alertPassword("The password needs to be at least " + MIN_PW_LENGTH + " characters!");
-		if(!password.match(/[^a-zA-Z]/)) alertPassword("It's a good idea to have special characters in the password!");
-		
-		if(charCode == CHARCODE_ENTER && inputUsername.value.length >= MIN_USERNAME_LENGTH) createAccount(inputUsername.value, inputPassword.value);
+		else if(!password.match(/[^a-zA-Z]/)) alertPassword("It's a good idea to have special characters in the password!");
+			else if(password != password2 && password2) alertPassword("The repeated password is not the same!");
+			
+		if(charCode == CHARCODE_ENTER && 
+			inputUsername.value.length >= MIN_USERNAME_LENGTH &&
+			password == password2) createAccount(inputUsername.value, inputPassword.value);
 		
 	}
 	
@@ -104,6 +110,10 @@ var MIN_USERNAME_LENGTH = 3;
 	function createButtonClick() {
 		var username = inputUsername.value;
 		var password = inputPassword.value;
+			var password2 = inputPassword2.value;
+			
+			if(password != password2) return;
+			
 		createAccount(username, password);
 	}
 	
