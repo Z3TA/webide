@@ -226,6 +226,9 @@ Do what this guy expect the editor to do:
 http://moolenaar.net/habits.html
 
 
+investigate build.js vs ssg-build.js
+
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!

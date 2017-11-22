@@ -73,12 +73,12 @@ API.compile = function compile(user, json, callback) {
 		var childProcess = require("child_process");
 		var path = require('path');
 		
-		var buildScript = path.join(__dirname, "build.js");
+		//var buildScript = path.join(__dirname, "build.js");
+		var buildScript = "/usr/bin/ssg-build.js";
 		
 		if(user.rootPath == null) {
 			// We are inside a chroot
-			buildScript = "/usr/bin/ssg-build.js";
-		}
+			}
 		
 		console.log("buildScript=" + buildScript);
 		console.log("source=" + source);
