@@ -62,8 +62,13 @@
 			sites=" + JSON.stringify(sites, null, 2));
 			//alertBox("You have no configurated static-site-generator sites.");
 		}
-		else console.log("sites: " + JSON.stringify(sites, null, 2));
+		else {
+			console.log("sites: " + JSON.stringify(sites, null, 2));
 		
+			// Show some quick nav in the dashboard
+			
+			
+			
 		// quickedit.js ...
 		if(QueryString.editPage) {
 			
@@ -95,6 +100,8 @@
 					
 				}
 				*/
+					
+					if(filePath.slice(filePath.length-1) == "/") filePath = filePath + "index.htm";
 				
 				EDITOR.openFile(filePath, undefined, function fileOpened(err, file) {
 						if(err) {
@@ -161,6 +168,7 @@
 				console.warn("Couln't determine what site the url belongs to: " + url);
 			}
 			}
+		}
 		
 		function isSite(url) {
 			// Figure out if the url belongs to any of our sites ...
