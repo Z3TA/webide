@@ -36,8 +36,6 @@
 		
 		if(startRow == undefined) startRow = 0;
 		
-		ctx.font=EDITOR.settings.fontSize + "px " + EDITOR.settings.font;
-		ctx.textBaseline = "top";
 		ctx.fillStyle = EDITOR.settings.lineNumberColor;
 		
 		for(var row = 0; row < buffer.length; row++) {

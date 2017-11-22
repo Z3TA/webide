@@ -23,8 +23,8 @@
 		console.time("hintsRender");
 		
 		// Set text style
-		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "top";
+		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		//ctx.textBaseline = "top";
 		
 		var left = 0,
 			top = 0,

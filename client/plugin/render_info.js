@@ -49,7 +49,7 @@
 		
 		//ctx.font="14px Arial";
 		
-		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 
 		
 		for(var i=0; i<comments.length; i++) {

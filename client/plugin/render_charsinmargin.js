@@ -56,8 +56,8 @@
 			
 
 		//ctx.strokeStyle="rgba(0,255,0,0.5)";
-		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "top";
+		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		//ctx.textBaseline = "top";
 		
 		ctx.beginPath(); // Reset all the paths!
 		

@@ -623,6 +623,8 @@ EDITOR.lastKeyPressed = "";
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
 				EDITOR.hideDashboard();
+				//EDITOR.showDashboard();
+				
 				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
 				EDITOR.renderNeeded();
@@ -1115,6 +1117,8 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log("render file=" + EDITOR.currentFile.path);
 			
+			console.time("render");
+			
 			if(!EDITOR.currentFile.render) {
 				console.warn("File render flag set to '" + EDITOR.currentFile.render + "'");
 				
@@ -1127,7 +1131,7 @@ EDITOR.lastKeyPressed = "";
 				return;
 			}
 			
-			console.time("render");
+			
 			
 			var file = EDITOR.currentFile,
 			buffer = [],
@@ -1599,6 +1603,11 @@ EDITOR.lastKeyPressed = "";
 		//showCanvasNodes();
 		
 		// Show the file canvas again and set focus
+		
+		// The canvas seem to be reset when resizing!
+		EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		EDITOR.canvasContext.textBaseline = "top";
+		
 		
 		console.timeEnd("resize");
 		
@@ -3850,6 +3859,10 @@ EDITOR.lastKeyPressed = "";
 		else {
 			ctx = canvas.getContext("2d", {alpha: false}); // {alpha: false} allows sub pixel anti-alias (LCD-text). 
 		}
+		
+		// Set the font only once for performance
+		ctx.font=EDITOR.settings.fontSize + "px " + EDITOR.settings.font;
+		ctx.textBaseline = "top";
 		
 		EDITOR.canvas = canvas;
 		EDITOR.canvasContext = ctx;

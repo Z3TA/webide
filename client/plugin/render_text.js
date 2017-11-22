@@ -43,7 +43,8 @@
 		
 
 		ctx.strokeStyle="rgba(0,255,0,0.5)";
-		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		// Setting the font takes 1-2ms! Don't do it at every render!
+		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 		ctx.textBaseline = "top";
 		ctx.fillStyle = oldStyle;
 		

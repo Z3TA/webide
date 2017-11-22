@@ -191,7 +191,7 @@
 			EDITOR.view.endingColumn = EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns;
 		}
 		
-		
+		EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 	}
 	
 	
@@ -309,6 +309,10 @@
 				ctx.fillStyle = textColor;
 				ctx.fillText(text, left, top);
 				ctx.stroke();
+				
+				
+				// Reset the font
+				ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 				
 				//console.log("left=" + left + " top=" + top + " width=" + width + " height=" + height);
 				

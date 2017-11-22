@@ -154,6 +154,9 @@
 			ctx.fillText(lP, firstLocation.x, firstLocation.y);
 				ctx.fillText(rP, secondLocation.x, secondLocation.y);
 			
+			// Reset font
+			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			
 			//ctx.fill(); // Needed for rect to fill!
 		}
 		else {

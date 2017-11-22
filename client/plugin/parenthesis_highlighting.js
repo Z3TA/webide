@@ -169,8 +169,8 @@
 			
 			ctx.font=EDITOR.settings.style.highlightParenthesisFont;
 			
-			console.log("ctx.font=" + ctx.font);
-			console.log("EDITOR.settings.style.highlightParenthesisFont=" + EDITOR.settings.style.highlightParenthesisFont);
+			//console.log("ctx.font=" + ctx.font);
+			//console.log("EDITOR.settings.style.highlightParenthesisFont=" + EDITOR.settings.style.highlightParenthesisFont);
 			
 			if(firstP > secondP) { // right parenthesis first
 				ctx.fillText(rP, firstLocation.x, firstLocation.y);
@@ -180,6 +180,9 @@
 				ctx.fillText(lP, firstLocation.x, firstLocation.y);
 				ctx.fillText(rP, secondLocation.x, secondLocation.y);
 			}
+			
+			// Reset the font
+			ctx.font=EDITOR.settings.fontSize + "px " + EDITOR.settings.font;
 			
 			
 			//ctx.fill(); // Needed for rect to fill!
