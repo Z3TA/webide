@@ -57,6 +57,8 @@ var File; // File object is global
 		
 		file.setFileExtension();
 		
+		// We'll give each new character a unique id: file.charIdCounter++ + EDITOR.username + userSessionId
+		file.charIdCounter = 0;
 		
 		
 		// The grid ... A digital frontier ... I tried to picture clusters of information ... And then ... One day ... I got in!!!
@@ -71,6 +73,8 @@ var File; // File object is global
 		
 		
 		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
+		
+		
 		
 		if(file.isBig) {
 			file.parse = false; // Do not parse big files
@@ -3159,7 +3163,7 @@ var File; // File object is global
 		
 	}
 	
-	File.prototype.change = function(change, text, index, row, col) {
+	File.prototype.change = function(change, text, index, row, col, charId) {
 		/*
 			This method is hopefully called every time the file changes.
 			So that we can know if the file has been saved or not.
