@@ -4,7 +4,7 @@
 	var pageViewsStat;
 	
 	EDITOR.plugin({
-		desc: "Show web site stats on ",
+		desc: "Show web site stats on dashboard",
 		load: function loadWebsiteStats() {
 			pageViewsStat = EDITOR.addDashboardWidget(createPageViewStatWidget());
 		},
