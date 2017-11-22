@@ -1605,6 +1605,7 @@ EDITOR.lastKeyPressed = "";
 		// Show the file canvas again and set focus
 		
 		// The canvas seem to be reset when resizing!
+		//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
 		EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 		EDITOR.canvasContext.textBaseline = "top";
 		
