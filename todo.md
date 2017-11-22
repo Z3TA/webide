@@ -34,10 +34,13 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+bug: parser fails and becomes incredibly slow!
 
-dashboard!
+onClick="document.form1.submit(); document.getElementById('muskler').innerHTML = '<br><br>Laddar...<br><br>';">
+				<br>
 
-If the user is not logged in, show login widget on dashboard!
+
+If the user is not logged in, show login widget on dashboard!?
 
 
 
