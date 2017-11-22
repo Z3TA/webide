@@ -19,9 +19,8 @@
 	}
 	
 	document.addEventListener( "click", function(e) {
-		console.log(event);
 		
-		if(!e) e = event;
+		if(!e && typeof event != "undefined") e = event;
 		
 		var leftButton = 1;
 		
@@ -32,7 +31,7 @@
 			var sel = window.getSelection();
 			var range = sel.getRangeAt(0);
 			var node = sel.anchorNode;
-			while (range.toString().indexOf(' ') != 0) {
+			while (range.toString().indexOf(' ') != 0 && range.startOffset > 0) {
 				range.setStart(node, (range.startOffset - 1));
 			}
 			range.setStart(node, range.startOffset + 1);
