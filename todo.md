@@ -34,17 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-bug: parser fails and becomes incredibly slow!
 
-onClick="document.form1.submit(); document.getElementById('muskler').innerHTML = '<br><br>Laddar...<br><br>';">
-				<br>
-
-
-If the user is not logged in, show login widget on dashboard!?
-
-
-
-Able to resize virtual keyboard
 Don't show menu when dragging (selecting text)
 Able to scroll the menu when zoomed in
 
@@ -239,6 +229,11 @@ investigate build.js vs ssg-build.js
 
 What I'm thinking
 -----------------
+
+Editing a web page is kinda awkward ...
+What about being able to click on the web page and edit right there !? With an option to open editor:
+Save, Abort, Open IDE
+
 
 What about users that don't have function keys ?
 
