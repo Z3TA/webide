@@ -10,7 +10,7 @@
 
 function Dialog(msg, icon, dialogDelay) {
 	
-	console.warn("Creating dialog: msg=" + msg); // Using console.warn so we'll get callsite
+	console.log(UTIL.getStack("Creating dialog: msg=" + msg));
 	
 	if(msg == undefined) throw new Error("Dialog without a message!");
 	
