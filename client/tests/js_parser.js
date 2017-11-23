@@ -1,5 +1,18 @@
 
 
+
+EDITOR.addTest(function singleQuoteInDoubleQuoteHtml(callback) {
+	EDITOR.openFile("singleQuoteInDoubleQuote.htm", '<html>\n<button onClick="foo.innerHTML = \'<br>\';">\n<br>\n</html>', function(err, file) {
+		
+		//console.log(file.parsed.xmlTags);
+		if(file.parsed.xmlTags.length != 4) throw new Error("Expect 4 HTML tags, but found " + file.parsed.xmlTags.length);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
+
 EDITOR.addTest(function singleDblQuoteHtml(callback) {
 	EDITOR.openFile("singleDblQuoteHtml", '<!DOCTYPE html>\n<html>\n<body>\n<script>\nvar foo = \'<span class="foo"></span>\';\n</script>\n<div id="foo">\n\n</div>\n</body>\n</html>\n', function(err, file) {
 		
@@ -9,7 +22,7 @@ EDITOR.addTest(function singleDblQuoteHtml(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 EDITOR.addTest(function arrowInIf(callback) {
 	EDITOR.openFile("arrowInIf.js", 'if((foo) == "<") {\n\n}\n', function(err, file) {

@@ -1365,8 +1365,10 @@
 							
 							// Leave xml tag if it was opened inside the quote
 							// But not if it's a vbScript doube "" ("" escpapes a double-quote in vbScript!)
-							if(insideXmlTag && xmlTagInsideDblQuote && text.charAt(charIndex+1) != '"') insideXmlTag = false;
-							
+							if(insideXmlTag && xmlTagInsideDblQuote && text.charAt(charIndex+1) != '"') {
+								insideXmlTag = false;
+								xmlTagInsideDblQuote = false;
+							}
 							return;
 						}
 					}
@@ -1385,9 +1387,11 @@
 							quotes.push(new Quote(quoteStart, i));
 							
 							// Leave xml tag if it was opened inside the quote
-							if(insideXmlTag && xmlTagInsideSingleQuote) insideXmlTag = false;
-							
+							if(insideXmlTag && xmlTagInsideSingleQuote) {
+								insideXmlTag = false;
+								xmlTagInsideSingleQuote = false;
 							return;
+							}
 						}
 					}
 					else {
@@ -1529,8 +1533,16 @@
 					// Ending tag: </foo>
 					insideXmlTagEnding = true;
 				}
-				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || insideQuote)) {
+				else if(char == "<" && !insideParenthesis[codeBlockDepth] && (xmlMode || (insideQuote && !insideXmlTag) )) {
 					insideXmlTag = true;
+					
+					/*console.log("insideXmlTag! col=" + column + 
+					" row=" + row + 
+					" xmlMode=" + xmlMode + 
+					" insideQuote=" + insideQuote + 
+					" insideSingleQuote=" + insideSingleQuote + 
+					" insideDblQuote=" + insideDblQuote);
+					*/
 					
 					if(insideDblQuote) xmlTagInsideDblQuote = true;
 					if(insideSingleQuote) xmlTagInsideSingleQuote = true;
@@ -1581,7 +1593,7 @@
 				else if(char == " " && insideXmlTag && xmlTagWordLength === 0) {
 					xmlTagWordLength = i - xmlTagStart;
 				}
-				else if(char == ">" && insideXmlTag && !insideParenthesis[codeBlockDepth]) {
+				else if(char == ">" && insideXmlTag && (!insideQuote || (xmlTagInsideDblQuote || xmlTagInsideSingleQuote)) && !insideParenthesis[codeBlockDepth]) {
 					if(pastChar0 == "/") {
 						xmlTagSelfEnding = true; // Self ending xml tag: <foo />
 					}
@@ -1647,6 +1659,8 @@
 					insideXmlTag = false;
 					insideXmlTagEnding = false;
 					
+						xmlTagInsideDblQuote = false;
+						xmlTagInsideSingleQuote = false;
 					
 				}
 				
