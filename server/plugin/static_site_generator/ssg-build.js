@@ -1449,7 +1449,10 @@ function contentOfHtmlTag(text, tag, nr) {
 		
 	} while (insideXmp && tagEnd != -1);
 	
-	if(tagEnd == -1) error(new Error("Could not find tag ending for tag: " + tag + ""));
+	if(tagEnd == -1) {
+		console.warn("Could not find tag ending for tag: " + tag + "");
+		return "";
+	}
 	
 	if(ERROR) return;
 	
