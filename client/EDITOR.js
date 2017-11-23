@@ -3465,8 +3465,11 @@ EDITOR.lastKeyPressed = "";
 			
 			var parentElement = virtualKeyboard[group].rows[row];
 			
-			if(position == undefined) position = parentElement.children.length-1;
-			
+			if(position == undefined) {
+				virtualKeyboard[group].rows[row].appendChild(newElement);
+			}
+			else {
+				
 			if(position > parentElement.children.length) {
 				throw new Error("Virtual keyboard row " + row + " only has " + 
 				parentElement.children.length + " keys. So we can not insert on position " + position + " ");
@@ -3475,6 +3478,7 @@ EDITOR.lastKeyPressed = "";
 			parentElement.insertBefore(newElement, parentElement.children[position]);
 			
 			//virtualKeyboard[group].rows[row].appendChild(newElement);
+			}
 		},
 		removeKey: function removeVirtualKeyboardKey(el, row, group) {
 			virtualKeyboard[group].rows[row].removeChild(el);

@@ -8,6 +8,7 @@
 	var touchCounter = 0;
 	var keyDownCounter = 0;
 	
+	
 	EDITOR.plugin({
 		desc: "Add a default set of buttons to the virtual keyboard",
 		load: function loadVirtualKeyboard() {
@@ -233,10 +234,29 @@
 		makeButton("@", 3);
 		
 		
-		
-		
+		makeButton("Big", 2, biggerButtons, "misc");
+		makeButton("Sml", 2, smallerButtons, "misc");
 		
 	}
+	
+	function biggerButtons() {
+		resizeButtons(1.1)
+	}
+	
+	function smallerButtons() {
+		resizeButtons(.91)
+	}
+	
+	function resizeButtons(percentage) {
+		var kb = document.getElementById("virtualKeyboard");
+		var b = kb.getElementsByTagName("button");
+		
+		for(var i=0; i<b.length; i++) {
+			//console.log(b[i]);
+			if(b[i]) b[i].style.width= parseInt(b[0].offsetWidth) * percentage + "px";
+			}
+			EDITOR.resizeNeeded();
+		}
 	
 	function removeButtons() {
 		for(var char in buttons) {
@@ -244,7 +264,9 @@
 		}
 	}
 	
-	function makeButton(char, row, ev) {
+	function makeButton(char, row, ev, group) {
+		
+		if(group == undefined) group = GROUP;
 		
 		if(row == undefined) row = 0;
 		
@@ -277,12 +299,14 @@
 		b.addEventListener("click", ev, true); // Prevent bubbling
 		b.addEventListener("touchstart", ev, true); // Prevent bubbling
 		
-		EDITOR.virtualKeyboard.addKey(b, row, GROUP);
+		var pos = undefined;
+		
+		EDITOR.virtualKeyboard.addKey(b, row, pos, group);
 		
 		buttons[char] = {
 			el: b,
 			row: row,
-			group: GROUP
+			group: group
 		};
 		
 		if(alt) buttons[char].alt = alt;
