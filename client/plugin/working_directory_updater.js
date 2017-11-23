@@ -31,7 +31,8 @@ EDITOR.plugin({
 		
 		// See if we can find package.json or index.htm
 		
-		var folders = UTIL.getFolders(file.path);
+		var folderPath = UTIL.getDirectoryFromPath(file.path);
+		var folders = UTIL.getFolders(folderPath);
 		
 		search(folders.pop()); // Search down recursively 
 		
