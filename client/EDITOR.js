@@ -3480,10 +3480,12 @@ EDITOR.lastKeyPressed = "";
 		hide: function hideVirutalKeyboard() {
 			virtualKeyboardElement.style.display = "none";
 			this.isVisible = false;
+			EDITOR.resizeNeeded();
 		},
 		show: function showVirutalKeyboard() {
 			virtualKeyboardElement.style.display = "block";
 			this.isVisible = true;
+			EDITOR.resizeNeeded();
 		},
 		isVisible: true
 		
@@ -3785,6 +3787,19 @@ EDITOR.lastKeyPressed = "";
 		virtualKeyboard.misc.el.setAttribute("class", "group");
 		virtualKeyboardGroups.appendChild(virtualKeyboard.misc.el);
 		
+		var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard); // Add items to the canvas context menu
+		
+		EDITOR.virtualKeyboard.hide();
+		
+		function toggleVirtualKeyboard() {
+			if(EDITOR.virtualKeyboard.isVisible) {
+				EDITOR.virtualKeyboard.hide();
+			}
+			else {
+				EDITOR.virtualKeyboard.show();
+			}
+			EDITOR.hideMenu();
+		}
 		
 		
 		canvas.onpaste = function() {alert("paste canvas");};
