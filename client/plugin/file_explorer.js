@@ -21,7 +21,8 @@
 	var fsSelect;
 	var openFolders = [];
 	var maxNameLength = 40;
-	var lastMoved = "";
+	var lastMovedFrom = "";
+	var lastMovedTo = "";
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -293,6 +294,7 @@
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
 			icon.setAttribute("onerror", "this.src='gfx/icon/doc.svg'");
+			icon.setAttribute("draggable", "false");
 			
 			// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 			if(item.type == "d") type = "folder";
@@ -616,32 +618,47 @@
 		// We will get a drag event for every folder
 		console.log(dragEvent);
 		var fromPath = dragEvent.dataTransfer.getData("text");
+		if(fromPath == null || fromPath == "null") {
+			console.log(dragEvent);
+			throw new Error("Unable to get text data from drop event!");
+		}
+		
 		var dropOnPath = dragEvent.target.getAttribute("path");
 		
-		// For some reason the drop event is called many times ...
-		if(fromPath == lastMoved) return console.warn("Already moved: fromPath=" + fromPath);
-		
-		lastMoved = fromPath;
-		
 		// We are always dropping into a folder. So if the user dropped on a file, we want to place it in that file's folder
-		var toPath = UTIL.getDirectoryFromPath(dropOnPath);
+		var toFolder = UTIL.getDirectoryFromPath(dropOnPath);
 		
-		var droppedOnFile = dropOnPath != toPath;
+		// For some reason the drop event is called many times ... Ignore repeated moves
+		if(fromPath == lastMovedFrom && toFolder == lastMovedTo) return console.warn("Already moved: fromPath=" + fromPath + " toFolder=" + toFolder);
+		lastMovedFrom = fromPath;
+		lastMovedTo = toFolder;
+		
+		// Ignore when dropping at the same place
+		var fromFolder = UTIL.getDirectoryFromPath(fromPath);
+		if(fromPath == dropOnPath) return console.warn("Dropped at itself: fromPath=" + fromPath + " dropOnPath=" + dropOnPath);
+		if(fromFolder == toFolder) return console.warn("Dropped in same folder: fromFolder=" + fromFolder + " toFolder=" + toFolder);
+		
+		var droppedOnFile = dropOnPath != toFolder;
+		var itemIsFolder = (fromFolder == fromPath);
 		
 		var fromElement = document.getElementById(fromPath); // id is the path
-		var toElement = document.getElementById(toPath);
-		var toUlEl = document.getElementById(toPath + "_items");
+		var toElement = document.getElementById(toFolder);
+		var toUlEl = document.getElementById(toFolder + "_items");
 		
-		console.log("fromPath=" + fromPath + " toPath=" + toPath);
+		console.log("fromPath=" + fromPath + " toFolder=" + toFolder);
 		
 		
-		CLIENT.cmd("move", {from: fromPath, to: toPath}, function itemMoved(err, resp) {
+		CLIENT.cmd("move", {from: fromPath, to: toFolder}, function itemMoved(err, resp) {
 			if(err) return alertBox(err.message);
 			
 			var newPath = resp.path;
 			
 			fromElement.setAttribute("id", newPath);
 			fromElement.setAttribute("path", newPath);
+			
+			if(itemIsFolder) {
+				updateChildPaths(fromPath, newPath);
+				}
 			
 			fromElement.parentNode.removeChild(fromElement);
 			
@@ -657,7 +674,40 @@
 					toUlEl.insertBefore(fromElement, toUlEl.childNodes[0]);
 				}
 				else toUlEl.appendChild(fromElement); // Place item last
+				
+			}
 			
+			function updateChildPaths(fromPath, newPath) {
+				// Recursively update the path of all child elements
+				var itemUl = document.getElementById(fromPath + "_items");
+				if(itemUl) {
+					var itemChilds = itemUl.childNodes;
+					for(var i=0, childPath; i<itemChilds.length; i++) {
+						childPath = itemChilds[i].getAttribute("id");
+						itemChilds[i].id = newChildPath(childPath, newPath);
+						itemChilds[i].path = newChildPath(childPath, newPath);
+						if(UTIL.isDirectory(childPath)) updateChildPaths(childPath, newPath); // Recursive
+					}
+				}
+			}
+			
+			function newChildPath(childPath, folder) {
+				// Returns the new path for a child item in the moved folder
+				
+				// Sanity check
+				if(typeof folder != "string") throw new Error("Expected folder=" + folder + " to be a string!");
+				var lastCharOfFolder = folder.slice(folder.length-1);
+				if(lastCharOfFolder != "/" && lastCharOfFolder != "\\") throw new Error("folder=" + folder + " is not a directory!");
+				
+				// Get the name of the child file or folder
+				var isFolder = UTIL.isDirectory(childPath);
+				var name = isFolder ? UTIL.getFolderName(childPath) : UTIL.getFilenameFromPath(childPath);
+				
+				var newPath = folder + name;
+				
+				if(isFolder) newPath = UTIL.trailingSlash(newPath);
+				
+				return newPath;
 			}
 			
 		});

@@ -749,7 +749,13 @@ var UTIL = {
 			return false;
 		}
 	},
-
+	
+	isDirectory: function isDirectory(path) {
+		// It's a directory if the path ends with a slash
+		var lastChar = path.slice(path.length-1);
+		return (lastChar == "/" || lastChar == "\\");
+	},
+	
 	getStack: function getStack(msg) {
 		// Used in debugging, to get a stack trace of function being called
 		// ex: console.log(UTIL.getStack("foo"));
