@@ -3376,12 +3376,14 @@ EDITOR.lastKeyPressed = "";
 		hide: function hideDashboard() {
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.display = "none";
-			this.isVisible = false;
+			EDITOR.dashboard.isVisible = false;
+			return true;
 		},
 		show: function showDashboard() {
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.display = "block";
-			this.isVisible = true;
+			EDITOR.dashboard.isVisible = true;
+			return true;
 		},
 		isVisible: false
 	}
