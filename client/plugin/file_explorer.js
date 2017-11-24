@@ -680,14 +680,14 @@
 			fromElement.parentNode.removeChild(fromElement);
 			
 			if(toUlEl) {
-				if(droppedOnFile) {
+				if(toUlEl.childNodes.length > 0 && itemIsFolder) {
+					// Place it first
+					toUlEl.insertBefore(fromElement, toUlEl.childNodes[0]);
+				}
+				else if(droppedOnFile) {
 					// Place the item where it was dropped
 					var fileEl = document.getElementById(dropOnPath);
 					toUlEl.insertBefore(fromElement, fileEl);
-				}
-				else if(toUlEl.childNodes.length > 1) {
-					// Place it first
-					toUlEl.insertBefore(fromElement, toUlEl.childNodes[0]);
 				}
 				else toUlEl.appendChild(fromElement); // Place item last
 				
