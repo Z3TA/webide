@@ -424,6 +424,10 @@
 		console.log("showFileItemMenu el=" + el);
 		console.log(el);
 		
+		var fileItemMenuHolder = el;
+		var path = el.getAttribute("path");
+		var isFolder = UTIL.isDirectory(path);
+		
 		var fileItemMenu = document.getElementById("fileItemMenu");
 		
 		hideMenu(); // Hide old one if one exist
@@ -488,21 +492,32 @@
 					if(err) alertBox(err.message);
 					else {
 						
-						el.setAttribute("path", newPath);
+						updateItemPaths(path, newPath); // Update elements id and path attribute, and do it recursively for childs if it's an open folder
 						
-						// Hide the menu
-						el.removeChild(fileItemMenu);
+						fileItemMenuHolder.removeChild(fileItemMenu); // Hide the menu
 						
 						// Change the name text node!
-						el.removeChild(el.lastChild); // hopefully the text node
-						
-						var displayName = UTIL.getFilenameFromPath(newPath);
-						if(displayName.length > maxNameLength) {
-							el.setAttribute("title", displayName);
-							displayName = displayName.substr(0, 37) + "...";
+						if(el != fileItemMenuHolder) {
+							// It's a folder that is open!
+							el.removeChild(el.childNodes[2]); // hopefully the text node
+							var displayName = UTIL.getDirectoryFromPath(newPath);
+							if(displayName.length > maxNameLength) {
+								el.setAttribute("title", displayName);
+								displayName = displayName.substr(0, 37) + "...";
+							}
+							el.insertBefore(document.createTextNode(displayName), el.childNodes[2]);
 						}
-						el.appendChild(document.createTextNode(displayName));
-						
+						else {
+							// It's a file or closed folder
+							el.removeChild(el.lastChild); // hopefully the text node
+							
+							var displayName = UTIL.getFilenameFromPath(newPath);
+							if(displayName.length > maxNameLength) {
+								el.setAttribute("title", displayName);
+								displayName = displayName.substr(0, 37) + "...";
+							}
+							el.appendChild(document.createTextNode(displayName));
+						}
 						
 					}
 				});
@@ -511,8 +526,15 @@
 			return false;
 		};
 		
+		// Open the menu after the item.
+		// If it's a folder item that is extended (has child nodes) we need to add the menu as the first child
+		var childElements = document.getElementById(path + "_items");
+		if(childElements) {
+			fileItemMenuHolder = childElements;
+			childElements.insertBefore(fileItemMenu, childElements.childNodes[0]);
+		}
+		else el.appendChild(fileItemMenu);
 		
-		el.appendChild(fileItemMenu);
 		
 		return false;
 		
@@ -653,20 +675,14 @@
 			
 			var newPath = resp.path;
 			
-			fromElement.setAttribute("id", newPath);
-			fromElement.setAttribute("path", newPath);
-			
-			if(itemIsFolder) {
-				updateChildPaths(fromPath, newPath);
-				}
+			updateItemPaths(fromPath, newPath);
 			
 			fromElement.parentNode.removeChild(fromElement);
 			
 			if(toUlEl) {
-				
 				if(droppedOnFile) {
 					// Place the item where it was dropped
-					var fileEl = document.getElementById("dropOnPath");
+					var fileEl = document.getElementById(dropOnPath);
 					toUlEl.insertBefore(fromElement, fileEl);
 				}
 				else if(toUlEl.childNodes.length > 1) {
@@ -677,38 +693,6 @@
 				
 			}
 			
-			function updateChildPaths(fromPath, newPath) {
-				// Recursively update the path of all child elements
-				var itemUl = document.getElementById(fromPath + "_items");
-				if(itemUl) {
-					var itemChilds = itemUl.childNodes;
-					for(var i=0, childPath; i<itemChilds.length; i++) {
-						childPath = itemChilds[i].getAttribute("id");
-						itemChilds[i].id = newChildPath(childPath, newPath);
-						itemChilds[i].path = newChildPath(childPath, newPath);
-						if(UTIL.isDirectory(childPath)) updateChildPaths(childPath, newPath); // Recursive
-					}
-				}
-			}
-			
-			function newChildPath(childPath, folder) {
-				// Returns the new path for a child item in the moved folder
-				
-				// Sanity check
-				if(typeof folder != "string") throw new Error("Expected folder=" + folder + " to be a string!");
-				var lastCharOfFolder = folder.slice(folder.length-1);
-				if(lastCharOfFolder != "/" && lastCharOfFolder != "\\") throw new Error("folder=" + folder + " is not a directory!");
-				
-				// Get the name of the child file or folder
-				var isFolder = UTIL.isDirectory(childPath);
-				var name = isFolder ? UTIL.getFolderName(childPath) : UTIL.getFilenameFromPath(childPath);
-				
-				var newPath = folder + name;
-				
-				if(isFolder) newPath = UTIL.trailingSlash(newPath);
-				
-				return newPath;
-			}
 			
 		});
 		
@@ -720,6 +704,49 @@
 		console.log("dragOver:");
 		console.log(dragEvent);
 		dragEvent.preventDefault();
+	}
+	
+	function updateItemPaths(fromPath, newPath) {
+		// Updates the id and path attribute for an item
+		// If it's a folder: Recursively update the path of the folder and all of it's child elements
+		
+		console.log("Updating fromPath=" + fromPath + " to newPath=" + newPath);
+		
+		var element = document.getElementById(fromPath);
+		if(!element) throw new Error("Did not find element for path=" + fromPath);
+		
+		var itemUl = document.getElementById(fromPath + "_items");
+		// Only opened folders will have an itemUl element !
+		if(itemUl) {
+			var itemChilds = itemUl.childNodes;
+			for(var i=0, childPath, newChildPath; i<itemChilds.length; i++) {
+				childPath = itemChilds[i].getAttribute("id");
+				newChildPath = getNewChildPath(childPath, newPath)
+				updateItemPaths(childPath, newChildPath); // Recursive
+			}
+		}
+		
+		element.setAttribute("id", newPath);
+		element.setAttribute("path", newPath);
+	}
+	
+	function getNewChildPath(childPath, folder) {
+		// Returns the new path for a child item in the moved folder
+		
+		// Sanity check
+		if(typeof folder != "string") throw new Error("Expected folder=" + folder + " to be a string!");
+		var lastCharOfFolder = folder.slice(folder.length-1);
+		if(lastCharOfFolder != "/" && lastCharOfFolder != "\\") throw new Error("folder=" + folder + " is not a directory!");
+		
+		// Get the name of the child file or folder
+		var isFolder = UTIL.isDirectory(childPath);
+		var name = isFolder ? UTIL.getFolderName(childPath) : UTIL.getFilenameFromPath(childPath);
+		
+		var newPath = folder + name;
+		
+		if(isFolder) newPath = UTIL.trailingSlash(newPath);
+		
+		return newPath;
 	}
 	
 })();
