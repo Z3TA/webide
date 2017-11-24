@@ -1,5 +1,7 @@
 (function() {
 	
+	if(window.location.href.indexOf("dashboard") == -1) return; // Dev Flag 
+	
 	var toggleDashboardMenuItem;
 	
 	EDITOR.plugin({
