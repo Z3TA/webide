@@ -378,6 +378,8 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 
 API.copyFile = function copyFile(user, json, callback) {
 	
+	// todo: Make it work with remote connections!
+	
 	var source = user.translatePath(json.from);
 	var target = user.translatePath(json.to);
 	
@@ -418,7 +420,36 @@ API.copyFile = function copyFile(user, json, callback) {
 	}
 }
 
-
+API.move = function move(user, json, callback) {
+	
+	// todo: Make it work with remote connections!
+	
+	var lastCharOfDestination = json.to.slice(json.to.length-1);
+	if(lastCharOfDestination != "/" && lastChar != "\\") return callback(new Error("Destination needs to be a directory!"))
+	
+	var from = user.translatePath(json.from);
+	var to = user.translatePath(json.to);
+	
+	var lastCharOfItem = from.slice(from.length-1);
+	
+	var itemIsFolder = (lastCharOfItem == "/" || lastCharOfItem == "\\");
+	
+	var itemName = itemIsFolder ? UTIL.getFolderName(from) : UTIL.getFilenameFromPath(from);
+	
+	var oldPath = from;
+	var newPath = to + itemName;
+	
+	if(itemIsFolder) newPath = UTIL.trailingSlash(newPath);
+	
+	var fs = require("fs");
+	fs.rename(oldPath, newPath, function renamed(err) {
+		if(err) return callback(err);
+		
+		callback(null, {path: newPath});
+		
+	});
+	
+}
 
 API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 	

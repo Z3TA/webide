@@ -9,7 +9,7 @@
 		▼
 		► (use this)
 	*/
-
+	
 	"use strict;"
 	
 	var fileExplorerFolders;
@@ -21,6 +21,7 @@
 	var fsSelect;
 	var openFolders = [];
 	var maxNameLength = 40;
+	var lastMoved = "";
 	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
@@ -246,7 +247,8 @@
 			// Make the parent folder appear open
 			
 			// let (aka block scope) only solves a symtom of the bigger problem: 
-			// Using varaibles from parent or global scope (dont't do that) and function scope is probably what you want (not block scope)
+			// Using varaibles from parent or global scope (dont't do that) 
+			// and function scope is probably what you want (not block scope)
 			parent.setAttribute("class", "folder open");
 			var childNodes = parent.childNodes;
 			var box = childNodes[0];
@@ -260,6 +262,7 @@
 		
 		var ul = document.createElement("ul");
 		ul.setAttribute("class", "tree");
+		ul.setAttribute("id", dir + "_items");
 		
 		// List files in working dir, get name of parent folder
 		EDITOR.listFiles(dir, function gotFileList(err, listItems) {
@@ -298,12 +301,19 @@
 			else if(item.type == "*") type = "problem";
 			
 			li.setAttribute("path", item.path);
+			li.setAttribute("id", item.path);
+			
+			li.setAttribute("draggable", "true");
+			li.ondragstart = dragItem;
 			
 			if(item.path == findDir || item.name == findDir) dirFound = li;
 			
 			if(type == "folder") {
 				
 				li.setAttribute("class", "folder closed");
+				
+				li.ondrop = dropItem;
+				li.ondragover = dragOverItem;
 				
 				icon.setAttribute("src", "gfx/icon/folder.svg");
 				
@@ -454,12 +464,12 @@
 				
 				if(isFolder) CLIENT.cmd("deleteDirectory", {directory: path, recursive: true}, function(err, json) {
 					if(err) alertBox(err.message);
-					});
+				});
 				else EDITOR.deleteFile(path);
 			}
 			
 			return false;
-			};
+		};
 		
 		
 		var optRename = document.createElement("li");
@@ -473,15 +483,15 @@
 			
 			promptBox("Rename file:", false, oldPath, function(newPath) {
 				if(newPath) EDITOR.renameFile(oldPath, newPath, function fileRenamed(err, newPath) {
-				if(err) alertBox(err.message);
-				else {
-				
+					if(err) alertBox(err.message);
+					else {
+						
 						el.setAttribute("path", newPath);
-					
+						
 						// Hide the menu
 						el.removeChild(fileItemMenu);
 						
-					// Change the name text node!
+						// Change the name text node!
 						el.removeChild(el.lastChild); // hopefully the text node
 						
 						var displayName = UTIL.getFilenameFromPath(newPath);
@@ -491,9 +501,9 @@
 						}
 						el.appendChild(document.createTextNode(displayName));
 						
-					
-				}
-			});
+						
+					}
+				});
 			});
 			
 			return false;
@@ -507,7 +517,7 @@
 		function hideMenu(e) {
 			if(e) {
 				e.preventDefault()
-			e.stopPropagation();
+				e.stopPropagation();
 			}
 			if(fileItemMenu && fileItemMenu.parentNode) fileItemMenu.parentNode.removeChild(fileItemMenu);
 			return false;
@@ -591,6 +601,75 @@
 			}
 			else throw new Error("Not connected to " + host);
 		}
+	}
+	
+	function dragItem(dragEvent) {
+		console.log("dragstart:");
+		console.log(dragEvent);
+		dragEvent.dataTransfer.setData("text", dragEvent.target.getAttribute("id"));
+	}
+	
+	function dropItem(dragEvent) {
+		dragEvent.preventDefault();
+		
+		console.log("drop:");
+		// We will get a drag event for every folder
+		console.log(dragEvent);
+		var fromPath = dragEvent.dataTransfer.getData("text");
+		var dropOnPath = dragEvent.target.getAttribute("path");
+		
+		// For some reason the drop event is called many times ...
+		if(fromPath == lastMoved) return console.warn("Already moved: fromPath=" + fromPath);
+		
+		lastMoved = fromPath;
+		
+		// We are always dropping into a folder. So if the user dropped on a file, we want to place it in that file's folder
+		var toPath = UTIL.getDirectoryFromPath(dropOnPath);
+		
+		var droppedOnFile = dropOnPath != toPath;
+		
+		var fromElement = document.getElementById(fromPath); // id is the path
+		var toElement = document.getElementById(toPath);
+		var toUlEl = document.getElementById(toPath + "_items");
+		
+		console.log("fromPath=" + fromPath + " toPath=" + toPath);
+		
+		
+		CLIENT.cmd("move", {from: fromPath, to: toPath}, function itemMoved(err, resp) {
+			if(err) return alertBox(err.message);
+			
+			var newPath = resp.path;
+			
+			fromElement.setAttribute("id", newPath);
+			fromElement.setAttribute("path", newPath);
+			
+			fromElement.parentNode.removeChild(fromElement);
+			
+			if(toUlEl) {
+				
+				if(droppedOnFile) {
+					// Place the item where it was dropped
+					var fileEl = document.getElementById("dropOnPath");
+					toUlEl.insertBefore(fromElement, fileEl);
+				}
+				else if(toUlEl.childNodes.length > 1) {
+					// Place it first
+					toUlEl.insertBefore(fromElement, toUlEl.childNodes[0]);
+				}
+				else toUlEl.appendChild(fromElement); // Place item last
+			
+			}
+			
+		});
+		
+		return false; // Prevent drop event from firing many times
+		
+	}
+	
+	function dragOverItem(dragEvent) {
+		console.log("dragOver:");
+		console.log(dragEvent);
+		dragEvent.preventDefault();
 	}
 	
 })();
