@@ -34,16 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-
-Don't show menu when dragging (selecting text)
-Able to scroll the menu when zoomed in
-
-Able to create a new folder
-
-Able to move files between folders
-
-bug: Right clicking on a folder in file explorer brings up the options below all the files!
-
+try native keyboard on mobile, input text
 
 Dashboard:
 ssg: Lista tidagare dokument, antal besökare
@@ -1140,6 +1131,9 @@ The SCM system goes heywack ... a lot of updates here and there and stupid commi
 
 (IE11) WysiwygEditor is unable to place caret in contentEditable after edit.
 Low prio because IE will probably be replaced by Edge ... or probably never.
+
+bug: When moving a folder out from another folder into that folder it dissappears
+bug: When renaming and then moving a child's child folder it has the old id/path!
 
 
 Unable to repeat bugs (happens rarely)
