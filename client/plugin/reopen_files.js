@@ -28,6 +28,8 @@
 	
 	var serverUrl, serverUser;
 	
+	var reopenFilesCalled = false;
+	
 	EDITOR.plugin({
 		desc: "Open up the files from last session", 
 		order: 999, // Load after the parser and other stuff that has fileOpen event listener
@@ -74,6 +76,10 @@
 	
 	function reopenFiles() {
 
+		if(reopenFilesCalled) throw new Error("reopenFiles called twice!");
+		
+		reopenFilesCalled = true;
+		
 		//if(!window.localStorage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
