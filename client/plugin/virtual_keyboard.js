@@ -56,6 +56,7 @@
 			// Mobile browsers also send mousedown events on touchstart events!
 			mouseCounter++;
 		}
+		return true;
 	}
 	
 	function maybeHasKeyboard(file, character, combo, keyDownEvent) {
@@ -272,32 +273,36 @@
 		
 		var alt = (char.length == 1 && char != char.toUpperCase()) && char.toUpperCase();
 		
-		if(ev == undefined) {
-			ev = function(e) {
+		var click = function(e) {
 				
 				e.preventDefault();
 				
 				clearSelection();
 				
+				if(ev) ev(e);
+				else {
 				if(alt && CAPS) fireKey(alt.charCodeAt(0));
 				else fireKey(char.charCodeAt(0));
+				}
 				
 				b.style.marginTop = "2px";
+			b.style.marginBottom = "-2px";
 				setTimeout(function() {
 					b.style.marginTop = "0px";
+				b.style.marginBottom = "0px";
 				}, 50);
 				
 				return false;
 			}
-		}
+		
 		
 		var b = document.createElement("button");
 		b.setAttribute("class", "kb");
 		b.innerText = char;
 		//b.onclick = ev;
 		
-		b.addEventListener("click", ev, true); // Prevent bubbling
-		b.addEventListener("touchstart", ev, true); // Prevent bubbling
+		b.addEventListener("click", click, true); // Prevent bubbling
+		b.addEventListener("touchstart", click, true); // Prevent bubbling
 		
 		var pos = undefined;
 		
