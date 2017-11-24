@@ -35,6 +35,8 @@
 		order: 999, // Load after the parser and other stuff that has fileOpen event listener
 		load: function loadReopenFilesPlugin() {
 			
+			reopenFilesCalled = false;
+			
 			EDITOR.on("storageReady", reopenFiles);
 			/*
 				problem: storageReady can be called many times, for example if the user re-login (as another user)
@@ -62,7 +64,7 @@
 		
 			clearInterval(insaneBugCatcherInterval);
 			
-			EDITOR.removeEvent("fileOpen", reopenFiles);
+			EDITOR.removeEvent("fileOpen", addToOpenedFiles);
 			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			
@@ -76,7 +78,11 @@
 	
 	function reopenFiles() {
 
-		if(reopenFilesCalled) throw new Error("reopenFiles called twice!");
+		if(reopenFilesCalled) {
+			// Happens when you get disconnected, and storageReady is called.
+			console.warn("reopenFiles called twice!");
+			return;
+		}
 		
 		reopenFilesCalled = true;
 		
