@@ -6,10 +6,10 @@
 	EDITOR.plugin({
 		desc: "Show web site stats on dashboard",
 		load: function loadWebsiteStats() {
-			pageViewsStat = EDITOR.addDashboardWidget(createPageViewStatWidget());
+			pageViewsStat = EDITOR.dashboard.addWidget(createPageViewStatWidget());
 		},
 		unload: function unloadWebsiteStats() {
-			EDITOR.removeDashboardWidget(pageViewsStat);
+			EDITOR.dashboard.removeWidget(pageViewsStat);
 		},
 		});
 	

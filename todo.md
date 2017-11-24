@@ -34,9 +34,10 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-try native keyboard on mobile, input text
+
 
 Dashboard:
+Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
 ssg: Lista tidagare dokument, antal besökare
 Fast buttons for edit a document, create a new document/post in SSG.
 
@@ -209,6 +210,7 @@ http://moolenaar.net/habits.html
 
 investigate build.js vs ssg-build.js
 
+try native keyboard on mobile, input text
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?

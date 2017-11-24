@@ -622,8 +622,8 @@ EDITOR.lastKeyPressed = "";
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
-				EDITOR.hideDashboard();
-				//EDITOR.showDashboard();
+				EDITOR.dashboard.hide();
+				//EDITOR.dashboard.show();
 				
 				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
@@ -3340,47 +3340,50 @@ EDITOR.lastKeyPressed = "";
 		});
 	}
 	
-	EDITOR.addDashboardWidget = function(el) {
-		
-		if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
-		
-		var dashboard = document.getElementById("dashboard");
-		console.log(dashboard);
-		try {
-			var child = dashboard.appendChild(el);
-		}
-		catch(err) {
-			console.log("addDashboardWidget: el:");
-			console.log(el);
-			throw err;
-		}
-		
-		return child;
-	}
 	
-	EDITOR.removeDashboardWidget = function(el) {
-		var dashboard = document.getElementById("dashboard");
-		
-		try {
-			var removedNode = dashboard.removeChild(el);
-		}
-		catch(err) {
-			console.log("removeDashboardWidget: el:");
-			console.log(el);
-			throw err;
-		}
-		
-		return removedNode;
-	}
-	
-	EDITOR.hideDashboard = function hideDashboard() {
-		var dashboard = document.getElementById("dashboard");
-		dashboard.style.display = "none";
-	}
-	
-	EDITOR.showDashboard = function showDashboard() {
-		var dashboard = document.getElementById("dashboard");
-		dashboard.style.display = "block";
+	EDITOR.dashboard = {
+		addWidget: function(el) {
+			
+			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
+			
+			var dashboard = document.getElementById("dashboard");
+			console.log(dashboard);
+			try {
+				var child = dashboard.appendChild(el);
+			}
+			catch(err) {
+				console.log("addDashboardWidget: el:");
+				console.log(el);
+				throw err;
+			}
+			
+			return child;
+		},
+		removeWidget: function(el) {
+			var dashboard = document.getElementById("dashboard");
+			
+			try {
+				var removedNode = dashboard.removeChild(el);
+			}
+			catch(err) {
+				console.log("removeDashboardWidget: el:");
+				console.log(el);
+				throw err;
+			}
+			
+			return removedNode;
+		},
+		hide: function hideDashboard() {
+			var dashboard = document.getElementById("dashboard");
+			dashboard.style.display = "none";
+			this.isVisible = false;
+		},
+		show: function showDashboard() {
+			var dashboard = document.getElementById("dashboard");
+			dashboard.style.display = "block";
+			this.isVisible = true;
+		},
+		isVisible: false
 	}
 	
 	EDITOR.openFileTool = function fileOpenTool(directory) {
