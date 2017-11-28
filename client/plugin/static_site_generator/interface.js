@@ -2125,7 +2125,7 @@
 		
 		wysiwygEnabled = wysiwygEnabled ? false : true; // Toggle 
 		
-		if(!wysiwygEnabled && previewWin) return previewWin.disableEdit(function() {
+		if(!wysiwygEnabled && previewWin) return previewWin.disableEdit(function WysiwygEditorDisabled() {
 			
 			if(buttonWysiwyg) {
 				buttonWysiwyg.setAttribute("class", "button");
@@ -2173,6 +2173,12 @@
 		function makeItEditable(err, sourceFile) {
 			
 			if(err) throw err;
+			
+			if(sourceFile.text.indexOf("<?JS") != -1) {
+				alertBox('Can not edit pages containing dynamic "server side" JavaScript!');
+				// previewWin never opened!
+				return;
+			}
 			
 			var edit = true;
 			var callback = previewWinOpened;
