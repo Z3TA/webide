@@ -42,6 +42,7 @@ The editor tries to open selectAllThenDelete.js because it was open when the edi
 But there is an error in File constructor so it's never opened. (don't know if this is the problem)
 Then when I run the test, nothing happens!
 
+P.S. Make a test case for this before fixing it! eg. put in the bad state in localStorage for reopenfiles.js
 
 
 When selecting all and then pasting:
