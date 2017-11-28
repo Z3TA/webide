@@ -3278,9 +3278,15 @@ EDITOR.lastKeyPressed = "";
 		var theWindow = window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1), 
 		"height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
 		
-		console.log("theWindow.document.domain=" + theWindow.document.domain);
-		console.log("document.domain=" + document.domain);
+		if(!theWindow) {
+			alertBox("Could not open the window. Please Try again, or disable the popup stopper!");
+			return null;
+		}
+		else {
 		
+			console.log("theWindow.document.domain=" + theWindow.document.domain);
+			console.log("document.domain=" + document.domain);
+			
 		theWindow.document.open();
 		theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
 		theWindow.document.close();
@@ -3288,6 +3294,7 @@ EDITOR.lastKeyPressed = "";
 		EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
 		
 		return theWindow;
+	}
 	}
 	
 	// Tools for handling repositories (Mercurial, Git, etc)
