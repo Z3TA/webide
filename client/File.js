@@ -521,6 +521,9 @@ var File; // File object is global
 		var lineBreakCharacters;
 		var index = 0;
 		
+		if(file.text.charAt(0) == "\t") throw new Error("File starts with a tab: " + file.path);
+		if(file.text.charAt(file.text.length-1) == "\t") throw new Error("File starts with a tab: " + file.path);
+		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
 		if(file.startRow < 0) throw new Error("file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + "");
@@ -709,7 +712,11 @@ var File; // File object is global
 				char = file.text.charAt(caret.index);
 				if(char != "\r" && char != "\n") {
 					file.debugGrid();
-					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + ", should be either a Line Feed (10) or Carriage return (13) when caret.eol = " + caret.eol + "(true) and not caret.eof=true(" + caret.eof + ")\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + " caret.row=" + caret.row + " caret.col=" + caret.col + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length);
+					throw new Error("Character \"" + char + "\" (" + char.charCodeAt(0) + ") at the caret.index=" + caret.index + 
+					", should be either a Line Feed (10) or Carriage return (13) when caret.eol = " + caret.eol + 
+					"(true) and not caret.eof=true(" + caret.eof + ")\nFile size=" + file.text.length + " rows=" + (file.grid.length+1) + 
+					" caret.row=" + caret.row + " caret.col=" + caret.col + " file.grid[" + caret.row + "].length=" + file.grid[caret.row].length + 
+					"file.text=" + UTIL.lbChars(file.text));
 				}
 			}
 		}
