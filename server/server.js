@@ -1149,6 +1149,7 @@ function handleHttpRequest(request, response) {
 			else {
 			console.log("args=" + JSON.stringify(args) + " options=" + JSON.stringify(options));
 			// If you get spawn EACCES is probably means that hard link or mount to /usr/bin/nodejs_username no longer exist!
+			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + name + " exist!", NOTICE);
 			throw err;
 		}
 	}
