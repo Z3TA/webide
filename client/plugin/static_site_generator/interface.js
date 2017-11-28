@@ -2261,7 +2261,7 @@
 		
 		return (fileListItem.path.indexOf(site.source) == 0 // A source file
 		&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
-		&& !fileListItem.name.match(/(header|footer|index).html?/i) // Don't chose header footer or index.html
+		&& !fileListItem.name.match(/(header|footer).html?/i) // Don't chose header footer or index.html
 		);
 		
 	}
