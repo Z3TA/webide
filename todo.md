@@ -34,6 +34,31 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+Bugzeption!!! Was preparing to demo the WYSIWYG but then found bug and when trying to fix it got another bug, and when fixing that got another bug, and when fixing that got another bug ...
+
+
+Trying to fix bug, but another bug prevents me ...
+The editor tries to open selectAllThenDelete.js because it was open when the editor last closed.
+But there is an error in File constructor so it's never opened. (don't know if this is the problem)
+Then when I run the test, nothing happens!
+
+
+
+When selecting all and then pasting:
+
+/client//File.js:712
+Uncaught Error: Character "" (NaN) at the caret.index=1, should be either a Line Feed (10) or Carriage return (13) when caret.eol = true(true) and not caret.eof=true(false)
+File size=1 rows=2 caret.row=0 caret.col=0 file.grid[0].length=0
+
+
+Make the fucking WYSIWYG work !
+
+When writing close to the body end tag:
+Uncaught Error: Text on row=24 doesn't match text to be removed! (see console log)
+
+
+
+
 
 
 Dashboard:

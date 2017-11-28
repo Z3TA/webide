@@ -11,7 +11,7 @@ EDITOR.addTest(function singleQuoteInDoubleQuoteHtml(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 EDITOR.addTest(function singleDblQuoteHtml(callback) {
 	EDITOR.openFile("singleDblQuoteHtml", '<!DOCTYPE html>\n<html>\n<body>\n<script>\nvar foo = \'<span class="foo"></span>\';\n</script>\n<div id="foo">\n\n</div>\n</body>\n</html>\n', function(err, file) {

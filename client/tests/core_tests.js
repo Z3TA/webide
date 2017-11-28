@@ -40,6 +40,40 @@
 		
 	}
 	
+	EDITOR.addTest(function selectAllThenDelete(callback) {
+		
+		if(EDITOR.files.hasOwnProperty("selectAllThenDelete.js")) EDITOR.closeFile("selectAllThenDelete.js");
+		
+		EDITOR.openFile("selectAllThenDelete.js", 'if(1==2) {\n\talert("momo");\n}\n', function(err, file) {
+			
+			if(err) throw err;
+			
+			alert("hej");
+			
+			// Sneak in a tab
+			file.write("\t");
+			
+			// Select all
+			var key_A = 65;
+			EDITOR.mock("keydown", {charCode: key_A, ctrlKey: true});
+			
+			// Delete
+			var key_del = 46;
+			EDITOR.mock("keydown", {charCode: 46});
+			
+			// We should now have deleted everything!
+			
+			if(file.text.length > 0) {
+				console.log(UTIL.lbChars(file.text));
+				throw new Error("Expected all content to be deleted! file.text.length=" + file.text.length);
+			}
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	}, 1);
+	
 	
 	EDITOR.addTest(function UTIL_getFolders(callback) {
 		

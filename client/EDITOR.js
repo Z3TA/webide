@@ -488,6 +488,8 @@ EDITOR.lastKeyPressed = "";
 		
 		if(openFileQueue.indexOf(path) != -1) {
 			
+			console.log("File in openFileQueue! path=" + path);
+			
 			// Add callback to the waiting list to be called once the file has been loaded
 			if(callback) {
 				if(!fileOpenExtraCallbacks.hasOwnProperty(path)) fileOpenExtraCallbacks[path] = [];
@@ -518,6 +520,7 @@ EDITOR.lastKeyPressed = "";
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size
+			console.log("Getting file size on disk. path=" + path);
 			EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 				
 				if(err) {
@@ -569,6 +572,8 @@ EDITOR.lastKeyPressed = "";
 			
 			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
 			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
+			// note: If there's an error in File constructor - fileLoaded will never be called!
+			EDITOR.files[path] = newFile;
 			
 			if(!newFile.path) fileOpenError(new Error("Internal error: The file has no path!")); // For sanity
 			
@@ -595,8 +600,6 @@ EDITOR.lastKeyPressed = "";
 				// solution: callCallbacks should be called *after* file open events. Allow file state in EDITOR.openFile parameters.
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
-				
-				EDITOR.files[path] = newFile;
 				
 				file = EDITOR.files[path];
 				
@@ -4702,6 +4705,8 @@ EDITOR.lastKeyPressed = "";
 				file.deleteSelection();
 				
 				file.insertText(text);
+				
+				//file.fixCaret();
 			}
 		}
 		
