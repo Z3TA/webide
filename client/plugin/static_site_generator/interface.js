@@ -2261,15 +2261,29 @@
 	
 	function like(site, fileListItem) {
 		
-		console.log("Like ? " + JSON.stringify(fileListItem) + " site.source=" + site.source);
+		if(!fileListItem) {
+			console.log("We don't like " + fileListItem.path + " because it's falsy");
+			return false;
+		}
 		
-		if(!fileListItem) return false;
+		if(fileListItem.path.indexOf(site.source) != 0) {
+			console.log("We don't like " + fileListItem.path + " because it's not part of site.source=" + site.source);
+			return false;
+		}
 		
-		return (fileListItem.path.indexOf(site.source) == 0 // A source file
-		&& fileListItem.name.match(/html?$/i) // We only like HTML code! :P
-		&& !fileListItem.name.match(/(header|footer).html?/i) // Don't chose header footer or index.html
-		);
+		if(!fileListItem.name.match(/html?$/i)) {
+			console.log("We don't like " + fileListItem.path + " because it's not a HTML file");
+			return false;
+		}
 		
+		if(fileListItem.name.match(/(header|footer).html?/i)) {
+			console.log("We don't like " + fileListItem.path + " because it's not a header of footer file");
+			return false;
+		}
+		
+		console.log("We DO like " + fileListItem.path + " !");
+		
+		return true;
 	}
 	
 	function getRelativePath(path, root) {
