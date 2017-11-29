@@ -29,6 +29,7 @@
 	var serverUrl, serverUser;
 	
 	var reopenFilesCalled = false;
+	var allFilesOpenedAlreadyCalled = false;
 	
 	EDITOR.plugin({
 		desc: "Open up the files from last session", 
@@ -36,6 +37,7 @@
 		load: function loadReopenFilesPlugin() {
 			
 			reopenFilesCalled = false;
+			allFilesOpenedAlreadyCalled = false;
 			
 			EDITOR.on("storageReady", reopenFiles);
 			/*
@@ -231,6 +233,7 @@
 			
 			allFilesOpenedNeverCalled = false;
 			
+			
 			console.log("All files from last lession opened!");
 			
 			findBugs(true); // true == also check if the list match EDITOR.files
@@ -248,6 +251,8 @@
 
 			reopenFilesCallback();
 			
+			if(allFilesOpenedAlreadyCalled) throw new Error("allFilesOpenedAlreadyCalled=" + allFilesOpenedAlreadyCalled);
+			allFilesOpenedAlreadyCalled = true;
 		}
 		
 		
