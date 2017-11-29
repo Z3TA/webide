@@ -34,20 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-
-When selecting all and then pasting:
-
-/client//File.js:712
-Uncaught Error: Character "" (NaN) at the caret.index=1, should be either a Line Feed (10) or Carriage return (13) when caret.eol = true(true) and not caret.eof=true(false)
-File size=1 rows=2 caret.row=0 caret.col=0 file.grid[0].length=0
-
-
-Make the fucking WYSIWYG work !
-
-When writing close to the body end tag:
-Uncaught Error: Text on row=24 doesn't match text to be removed! (see console log)
-
-
+Investigate why the line break is removed and fix the bug in Wysiwyg editor
 
 
 
