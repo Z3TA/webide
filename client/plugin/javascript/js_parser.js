@@ -218,7 +218,9 @@
 					
 					if(f) { // Parse only that function
 						//console.log("Inside " + f.name);
-						if( ((f.end - f.start) < maxFunctionBodySize || EDITOR.devMode) && file.text.charAt(f.end + charactersLength) == "}") { // If the function is not the majority of the file
+						
+						// If the function is not the majority of the file
+						if( ((f.end - f.start) < maxFunctionBodySize || EDITOR.settings.devMode) && file.text.charAt(f.end + charactersLength) == "}") {
 							
 							console.time("parseOnlyFunctionOptimizer");
 							
