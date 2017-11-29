@@ -65,15 +65,33 @@ var File; // File object is global
 		//console.log("Gonna create the grid for file.path=" + file.path);	
 		file.grid = file.createGrid();
 		
-		file.checkGrid();
+		var checkGridError = null;
+		try {
+			file.checkGrid(); // Sanity check
+		}
+		catch(err) {
+			checkGridError = err;
+		}
 		
 		// A splitted emty string will always become one item in an array. So if the file is empty: file.grid.length=1
 		file.totalRows = file.grid.length-1; // Only big files use this, and big files (currently) can't be edited, so we don't have to track and update this (yet)
 		if(file.isBig) file.totalRows = -1; // Leaving it to loadFilePart() to find totalRows
 		
-		
+		var checkCaretError = null;
+		try {
 		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
-		
+		}
+		catch(err) {
+			checkCaretError = err;
+			// We failed to create the caret, so create a caret manually
+			if(checkGridError) {
+				console.warn("Problem creating grid and placing caret in file.path=" + path);
+				file.text = file.text.trim();
+				if(file.text.length == 0) file.caret = {index: 0, row: 0, col: 0, eol: true, eof: true};
+				else file.caret = {index: 0, row: 0, col: 0, eol: false, eof: false};
+			}
+			else file.caret = {index: 0, row: 0, col: 0, eol: (file.grid[0].length > 0 ? false : true), eof: (file.grid.length > 0 ? false : true)};
+		}
 		
 		
 		if(file.isBig) {
@@ -81,14 +99,16 @@ var File; // File object is global
 			
 			file.loadFilePart(file.partStartRow, function filePartLoaded() {
 				
-				if(callback) callback();
+				if(callback) callback(checkGridError || checkCaretError);
 				
 			});
 			
 		}
 		else {
 			
-			if(callback) setTimeout(callback, 0); // Make it async
+			if(callback) setTimeout(function newFileConstructorFinished() {
+				callback(checkGridError || checkCaretError);
+			}, 0);
 			
 		}
 	}
@@ -648,6 +668,8 @@ var File; // File object is global
 			//console.warn("No caret specified, checking file.caret ...");
 			caret = file.caret;
 		}
+		
+		if(caret == undefined) throw new Error("File has no caret: " + file.path);
 		
 		//console.log("Checking caret=" + JSON.stringify(caret));
 		

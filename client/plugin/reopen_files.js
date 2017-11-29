@@ -368,7 +368,12 @@
 			
 			function fileReopened(err, file) {
 				
-				console.log("Got (Reopening) file from editor path=" + path + "");
+				if(file) {
+				// Sanity check: In case EDITOR.openFile returns the wrong file
+				if(file.path != path) throw new Error("File opened, but with another path: path=" + path + " file.path=" + file.path);
+				}
+				
+				console.log("Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
 				
 				if(err) console.log("err.path=" + err.path);
 				if(file) console.log("file.path=" + file.path);
@@ -381,7 +386,7 @@
 					
 					console.error(err.message);
 					console.log(err.stack);
-					alertBox("Unable to open file:\n" + path + "\nError: " + err.message);
+					alertBox("Unable to reopen file:\n" + path + "\nError: " + err.message);
 					
 					// Remove from opened files
 					window.localStorage.setItem("openedFiles", removeFromStringList(window.localStorage.getItem("openedFiles"), path, fileDelimiter));

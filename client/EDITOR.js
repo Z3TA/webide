@@ -456,7 +456,9 @@ EDITOR.lastKeyPressed = "";
 				
 				var file = EDITOR.files[path];
 				
-				if(!EDITOR.currentFile) return fileOpenError(new Error("Internal error: No current file!")); // For sanity
+				if(!EDITOR.currentFile) {
+					return fileOpenError(new Error("There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files))); // For sanity
+				}
 				
 				if(EDITOR.currentFile != file) {
 					// Switch to it ...
@@ -571,11 +573,10 @@ EDITOR.lastKeyPressed = "";
 			if(EDITOR.files.hasOwnProperty(path)) throw new Error("File is already opened:\n" + path);
 			
 			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
-			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
-			// note: If there's an error in File constructor - fileLoaded will never be called!
-			EDITOR.files[path] = newFile;
 			
-			if(!newFile.path) fileOpenError(new Error("Internal error: The file has no path!")); // For sanity
+			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
+			
+			if(!newFile.path) fileOpenError(new Error("The file has no path!")); // For sanity
 			
 			if(!notFromDisk) {
 				// Because we opened it from disk:
@@ -590,7 +591,9 @@ EDITOR.lastKeyPressed = "";
 				if(state.changed != undefined) newFile.changed = state.changed;
 			}
 			
-			function fileLoaded() {
+			function fileLoaded(fileLoadError) {
+				
+				if(fileLoadError) return fileOpenError(fileLoadError);
 				
 				// Dilemma1: Should file open even listeners be called before or after the callback!??
 				// answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
@@ -601,6 +604,7 @@ EDITOR.lastKeyPressed = "";
 				
 				// Dilemma 2: Should fileOpen events fire before or after fileShow events?
 				
+				EDITOR.files[path] = newFile;
 				file = EDITOR.files[path];
 				
 				if(!EDITOR.files.hasOwnProperty(path)) throw new Error("File didn't enter EDITOR.files"); // For sanity
@@ -620,13 +624,13 @@ EDITOR.lastKeyPressed = "";
 				EDITOR.showFile(file);
 				EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				
-				
-				callCallbacks(err, file);
+				if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
+				// If we are this far, there should be no error!
+				callCallbacks(null, file);
 				
 				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
 				
-				EDITOR.dashboard.hide();
-				//EDITOR.dashboard.show();
+				EDITOR.dashboard.hide(); // Hide dashboard when opening a file
 				
 				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
