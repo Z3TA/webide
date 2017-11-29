@@ -765,6 +765,7 @@ var WysiwygEditor;
 					console.log("srcHTML=" + UTIL.lbChars(srcHTML))
 					console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 					console.log("diff=" + JSON.stringify(diff, null, 2));
+					console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 					
 					throw new Error("Text on row=" + row + " doesn't match text to be removed! (see console log)");
 					

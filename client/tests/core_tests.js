@@ -78,7 +78,7 @@
 			
 			callback(true);
 		});
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function UTIL_getFolders(callback) {

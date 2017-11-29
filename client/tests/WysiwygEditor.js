@@ -64,3 +64,81 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	}
 	
 });
+
+
+EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
+	/*
+		It should handle a diff where one line have been removed and one line has been changed
+	
+		The bug is actually because the file has two emty lines (instead of only one) after the body start tag!
+		Causing the startrow to be one off, then the ending line break get removed!
+		
+	*/
+	
+	var compiledPage = "<html>\n<body>\nheader\n<main>\n\n\n<p>Paragraph</p>\n\n\n</main>\nfooter\n</body>\n</html>\n"
+	
+	var sourcePage = "<html>\n<body>\n\n\n<p>Paragraph</p>\n\n\n</body>\n</html>\n";
+	
+	var testFolder = "/testfolder/wysiwyg/";
+	var testFile = "wysiwygRemoveLineReplaceLine.htm";
+	var newWindow = EDITOR.createWindow();
+	
+	EDITOR.createPath(testFolder, function folderCreated(err, path) {
+		if(err) throw err;
+		EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
+	});
+	
+	function fileCreated(err, filePath) {
+		var serveJson = {folder: testFolder};
+		CLIENT.cmd("serve", serveJson, function(err, serveRespJson) {
+			if(err) throw err
+			
+			var serveUrl = document.location.protocol + "//" + serveRespJson.url;
+			
+			var fileUrl = serveUrl + testFile;
+			
+			EDITOR.openFile(testFile, sourcePage, function(err, sourceFile) {
+				
+				var bodyTag = "body";
+				var onlyPreview = false;
+				var url = fileUrl;
+				var compliedSourceBodyTag = "main";
+				var wysiwygEditor = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, wysiwygEditorLoaded, compiledPage, compliedSourceBodyTag);
+				
+				function wysiwygEditorLoaded() {
+					
+					if(wysiwygEditor.url != url) throw new Error("Expected wysiwygEditor.url=" + wysiwygEditor.url + " == " + "url=" + url);
+					
+					// Remove a line and change one line
+					var doc = newWindow.window.document;
+					var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+					
+					body.innerHTML = "<p>Paragraph</p>\n\n\<p>foo</p>";
+					
+					// Trigger oninput
+					wysiwygEditor.previewInput();
+					
+					// If the bug exist, it should now have removed the last line break
+					// So it's now in a bad state
+					// Trigger oninput again
+					wysiwygEditor.previewInput();
+					// The wysiwygEditor will now complain: Uncaught Error: Text on row=6 doesn't match text to be removed!
+					
+					
+					EDITOR.closeFile(sourceFile.path);
+					callback(true);
+					newWindow.close();
+					cleanUp();
+					
+				}
+				
+			});
+		});
+	}
+	
+	function cleanUp() {
+	}
+	
+	
+	
+}, 1);
