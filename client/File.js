@@ -4238,6 +4238,37 @@ var File; // File object is global
 		
 	}
 	
+	File.prototype.fixIndentation = function fixIndentation(indentationCharacters) {
+		var file = this;
+		var text = file.text;
+		var grid = file.grid;
+		
+		if(!indentationCharacters) indentationCharacters = file.indentation;
+		
+		var currentIndentationCharacters = "";
+		var shouldHaveIndentationCharacters = "";
+		
+		// Go from bottom to top so that startIndex don't get effected
+		for(var row=grid.length-1; row>-1; row--) {
+			
+			currentIndentationCharacters = grid[row].indentationCharacters,
+			shouldHaveIndentationCharacters = "";
+			for(var i=0; i<grid[row].indentation; i++) shouldHaveIndentationCharacters += indentationCharacters;
+			
+			//console.log("row=" + row + " shouldHaveIndentationCharacters=" + UTIL.lbChars(shouldHaveIndentationCharacters) + " currentIndentationCharacters=" + UTIL.lbChars(currentIndentationCharacters));
+			
+			if(shouldHaveIndentationCharacters != currentIndentationCharacters) {
+				
+				// Remove and add
+				text = text.substr(0, grid[row].startIndex-currentIndentationCharacters.length) + shouldHaveIndentationCharacters + text.substring(grid[row].startIndex, text.length);
+				
+				//console.log("text=" + UTIL.lbChars(text));
+			}
+		}
+		
+		file.reload(text);
+	}
+	
 	
 	// Private functions ...
 	
