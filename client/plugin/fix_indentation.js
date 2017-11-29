@@ -27,7 +27,7 @@
 			
 			1. Parse file
 			2. Fix indentation of inserted text
-			3. Fix index's for comments etc?
+			3. Fix index's for comments etc!
 			
 		*/
 		
@@ -39,11 +39,67 @@
 		// Make sure this runs before the parser
 		EDITOR.on("fileChange", checkIndentationOnBeforeParser, runOrderOfParser-20);
 		
+		if(window.location.href.indexOf("checkIndentation") != -1) {
+		// Make sure this runs after fixIndentationOnChange
+		EDITOR.on("fileChange", checkIndentationAfterFix, runOrderOfParser+20+5);
+		
+		// Make sure this runs after the parser
+		EDITOR.on("fileOpen", checkIndentationOnFileOpen, runOrderOfParser+20);
+	}
+	}
+	
+	function checkIndentationOnFileOpen(file) {
+		
+		if(file.mode != "code") return true; // Only check for files that are parsed
+		
+		// Asume the file has already been parsed!
+		if(!file.parsed) throw new Error("The file has not been parsed!");
+		
+		var indentationMissmatch = false;
+		for(var row = 0; row<file.grid.length; row++) {
+			if(file.grid[row].indentation != file.grid[row].indentationCharacters.length) {
+				indentationMissmatch = true;
+				break;
+	}
+		}
+	
+		if(indentationMissmatch) {
+			var yes = "Fix indentation";
+			var no = "Leave it as is";
+			
+			confirmBox("Fix indentation in " + file.path + " ?", [yes, no], function (answer) {
+				if(answer == yes) {
+					file.fixIndentation();
+				}
+			});
+			}
+	}
+	
+	
+	function checkIndentationAfterFix(file, typeOfFileChange) {
+		// Try to detect bugs in this plugin
+		if(!EDITOR.settings.devMode) return true; 
+		
+		console.time("Check indentation after fix on file update");
+		
+		for(var row = 0; row<file.grid.length; row++) {
+			if(file.grid[row].indentation != file.grid[row].indentationCharacters.length) {
+				console.warn("row=" + row + " indentation=" + file.grid[row].indentation + 
+				" indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) + 
+				" owned=" + file.grid[row].owned);
+				//if(showAlert) alertBox("Inconsistent indentation on line " + (row+1) + ". Expected " + file.grid[row].indentation + 
+					//" characters but there are " + file.grid[row].indentationCharacters.length + " (" + UTIL.lbChars(file.grid[row].indentationCharacters) + ")");
+				}
+		}
+		
+		console.timeEnd("Check indentation after fix on file update");
 	}
 	
 	function checkIndentationOnBeforeParser(file, type, character, index, row, col) {
 		
-		// Check the indentation of the surrounding rows BEFORE the parsed kicks in a updates the indentation
+		if(file.mode != "code") return true; // Don't bother checking indentation of non code
+		
+		// Check the indentation of the surrounding rows BEFORE the parsed kicks in and updates the indentation
 		
 		indentationBefore = indentationAround(file, row);
 		
@@ -84,6 +140,8 @@
 	
 	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
+		if(file.mode != "code") return true; // Don't bother checking indentation of non code
+		
 		// Only fix indentation if the parser has parsed the blocks so we know how much indentation to use
 		if(!file.parsed) {
 			console.log("File has not been parsed: " + file.path);
@@ -93,13 +151,13 @@
 		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
-			var newRow = row+1; 
-			file.grid[newRow].owned = true;
-			if(file.grid.length <= 2 && newRow > 0) {
+			var newRowNr = row+1; 
+			file.grid[newRowNr].owned = true;
+			if(file.grid.length <= 2 && newRowNr > 0) {
 				file.grid[row].owned = true; // Also take ownership of the start row
 				fixIndentation(file, row); // The line the user was on when pressing Enter
 			}
-			fixIndentation(file, newRow); // The new line just inserted 
+			fixIndentation(file, newRowNr); // The new line just inserted 
 			//file.grid[row+1].unshift(new Box("*"));
 			return done();
 		}
@@ -125,7 +183,7 @@
 
 		var indentation = indentationAround(file, row);
 		
-		if(indentation == null) throw new Error("(in)sanity: file.path=" + file.path + " row=" + row);
+		if(indentation == null) throw new Error("(in)sanity: file.path=" + file.path + " row=" + row + " indentation=" + indentation);
 		
 		if(indentationBefore.below == indentation.below && indentationBefore.above == indentation.above) return done();
 		
