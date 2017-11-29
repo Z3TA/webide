@@ -55,7 +55,13 @@ var File; // File object is global
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
 		
-		file.setFileExtension();
+		file.setFileExtension(); // Also sets file.mode = "code" || "text"
+		
+		if(file.mode == "code") {
+			// Don't let the file start or end with a tab
+			while(file.text.charAt(0) == "\t") file.text = file.text.slice(1);
+			while(file.text.charAt(file.text.length-1) == "\t") file.text = file.text.slice(0, file.text.length-1);
+		}
 		
 		// We'll give each new character a unique id: file.charIdCounter++ + EDITOR.username + userSessionId
 		file.charIdCounter = 0;
@@ -541,8 +547,10 @@ var File; // File object is global
 		var lineBreakCharacters;
 		var index = 0;
 		
-		//if(file.text.charAt(0) == "\t") throw new Error("File starts with a tab: " + file.path);
-		//if(file.text.charAt(file.text.length-1) == "\t") throw new Error("File starts with a tab: " + file.path);
+		if(file.mode == "code") {
+		if(file.text.charAt(0) == "\t") throw new Error("File starts with a tab: " + file.path);
+		if(file.text.charAt(file.text.length-1) == "\t") throw new Error("File starts with a tab: " + file.path);
+		}
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
 		
@@ -2010,7 +2018,8 @@ var File; // File object is global
 		
 		
 		
-		/* How much indentation?
+		/* 
+			How much indentation?
 			Let the code intelligence handle the indentation!
 			
 			newRow.indentation = currentRow.indentation;
@@ -3201,7 +3210,8 @@ var File; // File object is global
 		var file = this;
 		
 		if(file.isCallingChangeEventListeners) {
-			throw new Error("fileChange event listeners (" + UTIL.getFunctionName(file.isCallingChangeEventListeners) + ") are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
+			throw new Error("fileChange event listeners (" + UTIL.getFunctionName(file.isCallingChangeEventListeners) + 
+			") are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
 		}
 		
 		file.changed = true;

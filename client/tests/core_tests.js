@@ -44,14 +44,15 @@
 		
 		if(EDITOR.files.hasOwnProperty("selectAllThenDelete.js")) EDITOR.closeFile("selectAllThenDelete.js");
 		
-		EDITOR.openFile("selectAllThenDelete.js", 'if(1==2) {\n\talert("momo");\n}\n', function(err, file) {
+		EDITOR.openFile("selectAllThenDelete.js", 'if(1==2) {\n\talert("momo");\n}\n\t', function(err, file) {
 			
 			if(err) throw err;
 			
-			alert("hej");
-			
 			// Sneak in a tab
-			file.write("\t");
+			//file.write("\t");
+			// If we try to sneak in a tab it will not be hidden in the indentationCharacters
+			// The bug only appears if the tab is in the indentationCharacters
+			
 			
 			// Select all
 			var key_A = 65;
@@ -67,6 +68,11 @@
 				console.log(UTIL.lbChars(file.text));
 				throw new Error("Expected all content to be deleted! file.text.length=" + file.text.length);
 			}
+			
+			/*
+				The solution to this bug was to have the File constructor remove any tabs at the beginning
+				or end of the file.
+				*/
 			
 			EDITOR.closeFile(file.path);
 			
