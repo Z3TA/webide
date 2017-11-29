@@ -55,19 +55,24 @@
 		// Asume the file has already been parsed!
 		if(!file.parsed) throw new Error("The file has not been parsed!");
 		
-		var indentationMissmatch = false;
+		var spaces = 1;
+		if(file.indentationCharacters.indexOf(" ") == 0) spaces = file.indentationCharacters.length;
+		
+		var indentationMissmatchRow = -1;
 		for(var row = 0; row<file.grid.length; row++) {
-			if(file.grid[row].indentation != file.grid[row].indentationCharacters.length) {
-				indentationMissmatch = true;
+			if(file.grid[row].indentation != file.grid[row].indentationCharacters.length / spaces) {
+				indentationMissmatchRow = row;
 				break;
 	}
 		}
 	
-		if(indentationMissmatch) {
+		if(indentationMissmatchRow != -1) {
 			var yes = "Fix indentation";
 			var no = "Leave it as is";
 			
-			confirmBox("Fix indentation in " + file.path + " ?", [yes, no], function (answer) {
+			confirmBox("Fix indentation in " + file.path + " ?\nLine " + (indentationMissmatchRow+1) + 
+			" has " + file.grid[row].indentation + " levels of indentation while the source file has " + 
+			UTIL.lbChars(file.grid[row].indentationCharacters), [yes, no], function (answer) {
 				if(answer == yes) {
 					file.fixIndentation();
 				}
