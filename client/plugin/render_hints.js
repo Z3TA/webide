@@ -4,7 +4,7 @@
 
 	/*
 	
-		Renders hits for arguments etc
+		Renders hints for arguments etc
 	
 	*/
 	
