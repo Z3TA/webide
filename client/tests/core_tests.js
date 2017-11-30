@@ -40,6 +40,26 @@
 		
 	}
 	
+	EDITOR.addTest(function placeCaretOnEmtyLine(callback) {
+		
+		// The editor should be able to place the caret on an emty line!
+		
+		EDITOR.openFile("placeCaretOnEmtyLine.js", '{\n\n\n\n}', function(err, file) {
+			
+			var caret = file.createCaret(2);
+			
+			if(caret.row != 1) throw new Error("Caret was expected to be on row 1: " + JSON.stringify(file.caret));
+			if(caret.col != 0) throw new Error("Caret was expected to be on col 0: " + JSON.stringify(file.caret));
+			if(caret.index != 2) throw new Error("Caret index was expected to be 2: " + JSON.stringify(file.caret));
+			if(caret.eol != true) throw new Error("Caret was expected to be on eol: " + JSON.stringify(file.caret));
+			
+			EDITOR.closeFile(file.path);
+			
+			callback(true);
+		});
+	}, 1);
+	
+	
 	EDITOR.addTest(function selectAllThenDelete(callback) {
 		
 		if(EDITOR.files.hasOwnProperty("selectAllThenDelete.js")) EDITOR.closeFile("selectAllThenDelete.js");

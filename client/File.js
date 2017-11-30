@@ -425,7 +425,7 @@ var File; // File object is global
 		}
 		
 		
-		console.log("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
+		console.warn("Creating caret at index=" + caret.index + " row=" + caret.row + " col=" + caret.col + " eol=" + caret.eol + " eof=" + caret.eof + " grid.length=" + grid.length);
 		console.log(UTIL.getStack("creating caret"));
 		
 		// Sanity check if we got it right
@@ -2621,11 +2621,24 @@ var File; // File object is global
 					
 					//console.log("grid[" + row + "].length=" + grid[row].length);
 					
+					if(grid[row].startIndex >= index) {
+						caret.index = grid[row].startIndex;
+						caret.row = row;
+						caret.col = 0;
+						if(grid[row].length > 0) caret.eol = false;
+						else caret.eol = true;
+						if(file.text.length > index) caret.eof = false;
+						else caret.eof = true;
+						found = true;
+						break main;
+					}
+					else console.log("grid[" + row + "].startIndex < " + index);
+					
 					for(var col=0; col<grid[row].length; col++) {
 						
 						gridIndex = grid[row][col].index;
 						
-						//console.log("gridIndex=" + gridIndex);
+						console.log("gridIndex=" + gridIndex + " col=" + col + " row=" + row);
 						
 						if(gridIndex == index) {
 							caret.row = row;
@@ -2637,8 +2650,21 @@ var File; // File object is global
 							break main;
 							
 						}
+						else if(gridIndex == (index-1) && col==grid[row].length-1) {
+							// eol on this row! (but not eof)
+							caret.row = row;
+							caret.col = col+1;
+							caret.eol = true;
+							caret.eof = false;
+							
+							found = true;
+							break main;
+							
+						}
 						else if(gridIndex > index) {
-							// index might be in the indentation characters
+							throw new Error("We should never reach this: gridIndex=" + gridIndex + " index=" + index);
+							// index might be on an empty line
+							// or index might be in the indentation characters
 							if(row == 0) {
 								// Place caret at col
 								caret.index = gridIndex;
@@ -2660,17 +2686,6 @@ var File; // File object is global
 									caret.index = grid[caret.row].startIndex;
 								}
 							}
-							
-							found = true;
-							break main;
-							
-						}
-						else if(gridIndex == (index-1) && col==grid[row].length-1) {
-							// eol on this row! (but not eof)
-							caret.row = row;
-							caret.col = col+1;
-							caret.eol = true;
-							caret.eof = false;
 							
 							found = true;
 							break main;
