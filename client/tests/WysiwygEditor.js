@@ -141,4 +141,4 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 	
 	
 	
-}, 1);
+});

@@ -2638,7 +2638,7 @@ var File; // File object is global
 						
 						gridIndex = grid[row][col].index;
 						
-						console.log("gridIndex=" + gridIndex + " col=" + col + " row=" + row);
+						//console.log("gridIndex=" + gridIndex + " col=" + col + " row=" + row);
 						
 						if(gridIndex == index) {
 							caret.row = row;

@@ -34,10 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Investigate why the line break is removed and fix the bug in Wysiwyg editor
-
-The problem is that file.createCaret places the caret on the wrong line. So we get the wrong startRow!
-It doesn't seem to be able to place the caret on an emty line!
 
 
 Dashboard:

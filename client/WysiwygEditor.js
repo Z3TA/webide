@@ -687,6 +687,8 @@ var WysiwygEditor;
 				
 			}
 			
+			//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+			//console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 			
 			// Compare the source with the editable preview
 			var diff = UTIL.textDiff(srcHTML, prewBodyHtml);
@@ -1276,14 +1278,10 @@ var WysiwygEditor;
 				
 				// Only index and xml pages can contain server code! So we do not need to worry about that
 				
-				
-				
 			}
 			
 			
 			if(!wysiwygEditor.onlyPreview) {
-				
-				
 				// Make body editable and attatch event listeners
 				
 				body.setAttribute("contenteditable", "true");
