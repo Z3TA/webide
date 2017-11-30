@@ -15,8 +15,8 @@
 	
 	function loadGoToCharacter() {
 		
-		EDITOR.bindKey({desc: "Goto line ...", charCode: KEY_H, combo: CTRL, fun: showGotoCharWidget});
-		EDITOR.bindKey({desc: "Hite the goto-line GUI", charCode: KEY_ESC, fun: hideGotoCharWidget});
+		EDITOR.bindKey({desc: "Goto character ...", charCode: KEY_H, combo: CTRL, fun: showGotoCharWidget});
+		EDITOR.bindKey({desc: "Hide the goto-character GUI", charCode: KEY_ESC, fun: hideGotoCharWidget});
 		
 	}
 	
