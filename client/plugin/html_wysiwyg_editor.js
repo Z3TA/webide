@@ -17,7 +17,7 @@
 	});
 	
 	function load() {
-		menuItem = EDITOR.addMenuItem("WYSIWYG", function() {
+		menuItem = EDITOR.addMenuItem("WYSIWYG", function menuClickWysiwyg() {
 			
 			if(EDITOR.currentFile) createwysiWygEditor(EDITOR.currentFile);
 			else alertBox("No file open! Open a HTML file and try again.");
