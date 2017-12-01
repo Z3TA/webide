@@ -1057,6 +1057,8 @@ var WysiwygEditor;
 		console.warn("(re)loading preview window ... dance=" + dance);
 		
 		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ?");
+		// dance=true means the source code will be updated with the code we'll get after loading the contenteditable.
+		// it will for example insert <tbody> elements and possibly more depending on browser
 		
 		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) throw new Error("Can not reload a second time if the source code have been compiled");
 		
