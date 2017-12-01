@@ -154,6 +154,8 @@
 		}
 		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return done();
 		
+		if(file.parsed.blockMatch === false) return true; // Don't fix indentation if there's a block missmatch
+		
 		if(type=="linebreak") {
 			// We now "own" this new line. And nobody will complain if we fix indentation ...
 			var newRowNr = row+1; 

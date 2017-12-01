@@ -34,8 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-When inserting a multi line comment, last char becomes a tab!
-Auto close multi line commens and { if the last line becomes a tab !?
 
 A preview that does live refresh
 
