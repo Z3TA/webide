@@ -7,6 +7,9 @@
 	var inPreview;
 	var previewWin;
 	var theWindow;
+	var urlPath;
+	var folder;
+	var consoleLogOriginal;
 	
 	EDITOR.plugin({
 		desc: "Preview HTML files",
@@ -29,15 +32,19 @@
 		inPreview = file;
 		
 		theWindow = EDITOR.createWindow();
+		theWindow.addEventListener("load", function() {
+			alertBox("It loaded!");
+		}, false);
 		
-		var folder = UTIL.getDirectoryFromPath(inPreview.path);
+		folder = UTIL.getDirectoryFromPath(inPreview.path);
 		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
 		
 			if(err) throw err;
 			
-			var url = json.url;
-			if(!url.match(/^http(s?):/i)) url = window.location.protocol + "//" + url;
-			url += UTIL.getFilenameFromPath(inPreview.path);
+			urlPath = json.url;
+			if(!urlPath.match(/^http(s?):/i)) urlPath = window.location.protocol + "//" + urlPath;
+			var url = urlPath + UTIL.getFilenameFromPath(inPreview.path);
+			
 			
 			var onlyPreview = true;
 			var bodyTag = undefined;
@@ -55,19 +62,153 @@
 		});
 	}
 	
+	
 	function whenLoaded() {
-		console.log("BANANA!");
-		console.log(theWindow.window.console.log);
 		
-		// Override the console log of the preview window
-		var consoleLogOriginal = theWindow.window.console.log;
-		theWindow.window.console.log = function(msg) {
-				console.log("Captured console.log: " + msg);
-				alertBox(msg);
+		theWindow.window.onerror = captureError;
+		
+		
+		// Override the console log of the preview window and display the messages as info
+		consoleLogOriginal = theWindow.window.console.log;
+		theWindow.window.console.log = captureConsoleLog;
+		
+	}
+	
+	function captureError(message, source, lineno, colno, error) {
+		//alert(message + " line=" + lineno);
+		
+		if(!lineno) {
+			return console.warn("No linenno!");
+		}
+		
+		console.log("source=" + source);
+		var filePath = folder + source.replace(urlPath, "");
+		var file = EDITOR.files[filePath];
+		
+		if(!file) {
+			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
+			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
+			EDITOR.renderNeeded();})">' + source + "</a>";
+			var lineString = ":<b>" + lineno + "</b><br>";
+			alertBox(sourceLink + lineString + message);
+		}
+		else {
+			file.scrollToLine(lineno);
+			var row = lineno-1;
+			var col = colno ? colno : 0;
+			EDITOR.addInfo(row, col, message);
+		}
+		
+	}
+	
+	function captureConsoleLog() {
+		// Console log takes many arguments and concatenates them
+		var msg = "";
+		for (var i=0; i<arguments.length; i++) {
+			if(typeof arguments[i] == "string") msg = msg + " " + arguments[i];
+			else if(typeof arguments[i] == "object") {
+				var stringifyError = false;
+				try {
+					var jsonStr = JSON.stringify(arguments[i]);
+				}
+				catch(err) {
+					stringifyError = true;
+				}
+				if(stringifyError) {
+					msg = msg + " " + arguments[i].toString();
+				}
+				else msg = msg + " " + jsonStr;
+			}
+			else {
+				msg = msg + " " + arguments[i].toString();
 			}
 		}
-
-	
+		if(msg.length > 1) msg = msg.slice(1, msg.length); // Remove the first space
+		
+		//consoleLogOriginal(msg);
+		consoleLogOriginal.apply(undefined, arguments);
+		
+		console.log("Captured console.log: " + msg);
+		// Figure out what script made the log
+		/*
+			Error
+			at console.theWindow.window.console.log (http://192.168.0.3:8080/plugin/web_preview.js:67:17)
+			at HTMLHeadingElement.h.onclick (http://192.168.0.3:8080/wpmym3uyoq/welcome.html:13:13)
+			
+			
+		*/
+		var stack = (new Error("")).stack;
+		var arrStack = stack.split("\n");
+		var stackLineWithFile;
+		for (var i=0, index = 0; i<arrStack.length; i++) {
+			// at console.captureConsoleLog
+			// 
+			index = arrStack[i].trim().indexOf("at console.captureConsoleLog");
+			console.log("index=" + index);
+			if(index != -1) {
+				stackLineWithFile = arrStack[i+1];
+				break;
+			}
+		}
+		
+		if(stackLineWithFile) {
+			
+			var reFile = new RegExp("\\(?" + urlPath + "(.*):(\\d*):(\\d*)\\)?");
+			console.log(reFile);
+			console.log(stackLineWithFile);
+			var matchFile = stackLineWithFile.match(reFile);
+			if(!matchFile) throw new Error("Could not get file info from stackLineWithFile=" + stackLineWithFile);
+			console.log(matchFile);
+			var filePath = folder + matchFile[1];
+			var row = parseInt(matchFile[2])-1;
+			var col = parseInt(matchFile[3]);
+			console.log("filePath=" + filePath);
+			if(EDITOR.files.hasOwnProperty(filePath)) {
+				var file = EDITOR.files[filePath];
+				if(file == EDITOR.currentFile) {
+					if(row >= file.startRow && row <= (file.startRow+EDITOR.view.visibleRows)) {
+						col = col - file.grid[row].indentationCharacters.length;
+						if(col < 0) { // Sanity check
+							throw new Error("col=" + col + " file.grid[" + row + "].indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) +
+							" (" + file.grid[row].indentationCharacters.length + ")");
+						}
+						var rowText = file.rowText(row);
+						var matchText = rowText.match(/console.log ?\( ?(['"`])(.*)\1\)/);
+						if(!matchText) throw new Error("matchText=" + matchText + " rowText=" + rowText + "");
+						var quote = matchText[1];
+						var logText = matchText[2];
+						
+						/*
+							// Trying to do something fancy like displaying the values ontop of the variables
+							
+							var jsdiff = JsDiff ? JsDiff : require('diff');
+							var diff = jsdiff.diffChars(logText, msg);
+							console.log(diff);
+							var tot = 0;
+							var removedLength = 0;
+							var addedLength = 0;
+							for (var i=0; i<.diff.length; i++) {
+							if(diff[i].added) addedLength += diff[i].count;
+							else if(diff[i].removed) removedLength++;
+							else {
+							
+							}
+							}
+						*/
+						
+						EDITOR.addInfo(row, col, msg);
+						
+					}
+					else console.log("The row is not in veiw: row=" + row + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+				}
+				else console.log("File is not in view: " + filePath);
+			}
+			else console.log("File not opened in the editor: " + filePath);
+		}
+		else throw new Error("Did not find the file location in stack=" + stack);
+		
+		
+	}
 	
 	function refreshMaybe(fileSaved) {
 		
@@ -82,11 +223,35 @@
 		
 		//console.log("style?" + !!inPreview.text.match(reStyle) + " script?" + !!inPreview.text.match(reScript));
 		
-		if(!inPreview.text.match(reStyle) && !inPreview.text.match(reScript)) return true;
+		if(!inPreview.text.match(reStyle) && !inPreview.text.match(reScript) && fileSaved != inPreview) return true;
+		
+		theWindow.window.addEventListener("load", function() {
+			alertBox("MOhaha loaded!");
+		});
+		/*
+			Doesn't seem to be any way to add a load event ...
+			if whenLoaded is fired too early, the window will get overwritten
+			if it's fired too late we won't capture any errors or console.log's during the loading of the page!
+		*/
+		
+		var interval = setInterval(function() {
+			if(theWindow.window.console.log != captureConsoleLog) {
+				clearInterval(interval);
+				whenLoaded();
+			}
+			
+		}, 1);
+		
+		setTimeout(function() {
+			clearInterval(interval);
+			if(theWindow.window.console.log != captureConsoleLog) throw new Error("Failed to attach error and console.log integration");
+		}, 150);
 		
 		var contenEditable = false;
 		previewWin.reload(contenEditable);
 		
+		//setTimeout(whenLoaded, 0);
+		//whenLoaded();
 	}
 	
 })();

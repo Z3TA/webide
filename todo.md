@@ -34,12 +34,9 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-When previewing I want to see the errors directly in the editor!
-Also hijack console.log and show the messages directly in the editor!
-accomplish with window.opener !
-
-
 Coding an agar clone as a nodejs example
+
+
 
 Dashboard:
 Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
