@@ -711,6 +711,7 @@ var fs = require("fs");
 			
 		});
 		
+	// ## Connection close
 		connection.on("close", function sockJsClose() {
 			
 			// Thankfully users are not disconnected "right away", there are some tolerence for unstable networks
@@ -1567,4 +1568,3 @@ function freeTcpPort(port) {
 
 	
 	main();
-	

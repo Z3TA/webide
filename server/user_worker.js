@@ -191,6 +191,7 @@ user.teardown = function teardown(msg, terddownComplete) {
 			//process.send({done: "teardown"});
 			process.exit();
 		}
+		else log("Waiting fo " + scriptsToStop + " scripts to stop before closing user worker.");
 	}
 }
 
