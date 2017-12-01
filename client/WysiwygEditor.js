@@ -1094,6 +1094,8 @@ var WysiwygEditor;
 		var checkLocationMaxTries = 100;
 		var checkLocationTries = 0;
 		
+		
+		
 		if(wysiwygEditor.url && previewWin.location.href != wysiwygEditor.url) {
 			
 			console.log("Setting window url to wysiwygEditor.url=" + wysiwygEditor.url);
@@ -1106,6 +1108,12 @@ var WysiwygEditor;
 			
 			//previewWin.addEventListener("load", previewWindowLoaded);
 		}
+		else if(wysiwygEditor.url && previewWin.location.href == wysiwygEditor.url) {
+			console.log("Reloading the window!");
+			wysiwygEditor.isReloading = true;
+			previewWin.location.reload();
+			
+		}
 		else if(!wysiwygEditor.url) {
 			
 			//previewWin.location.href = "about:blank";
@@ -1117,6 +1125,9 @@ var WysiwygEditor;
 			previewWin.document.close();
 			
 			previewWindowLoaded();
+		}
+		else {
+			throw new Error("What to do ? wysiwygEditor.url=" + wysiwygEditor.url + " previewWin.location.href=" + previewWin.location.href);
 		}
 		
 		function checkLocation() {
@@ -1172,7 +1183,6 @@ var WysiwygEditor;
 					throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
 				}
 			}
-			
 			
 			if(!previewWin) throw new Error("Unable to get preview window!");
 			if(!doc) throw new Error("Unable to get preview window document!");
@@ -1305,7 +1315,8 @@ var WysiwygEditor;
 			
 			// Remove the fileChange event listener when closing the content-editable window
 			previewWin.window.onbeforeunload = function() {
-				wysiwygEditor.close();
+				if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
+				else wysiwygEditor.close();
 				//return true; // Shows a "are you sure" message
 			};
 			

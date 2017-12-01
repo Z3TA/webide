@@ -56,6 +56,8 @@ todo
 
 When creating a new file, I want the default save file path to be the path from the last file I just saved!
 
+not colaborate editing, but everyone logged in with the same username should see what their clones are up to!
+
 Investigate why fix_indendation.js is not fixing the indentation!
 
 "help" widget.

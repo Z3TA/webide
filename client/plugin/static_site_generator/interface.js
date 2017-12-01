@@ -246,6 +246,7 @@
 		EDITOR.removeEvent("exit", SSG_cleanup);
 		EDITOR.removeEvent("fileOpen", fileOpen);
 		EDITOR.removeEvent("fileDrop", fileDrop);
+		EDITOR.removeEvent("fileSave", fileSave);
 		
 		EDITOR.unbindKey(hideSSG);
 		EDITOR.unbindKey(previewSSG);

@@ -634,7 +634,7 @@ API.serve = function serve(user, json, callback) {
 
 API.stop_serve = function serve(user, json, callback) {
 	
-	// Serve a folder via HTTP
+	// Stop serving a folder
 	
 	var folder = user.translatePath(json.folder);
 	if(folder instanceof Error) return callback(folder);
