@@ -34,6 +34,11 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+When previewing I want to see the errors directly in the editor!
+Also hijack console.log and show the messages directly in the editor!
+accomplish with window.opener !
+
+
 Coding an agar clone as a nodejs example
 
 Dashboard:
@@ -50,8 +55,6 @@ package?json for the ssg ?
 
 todo
 ----
-
-When creating a new file, I want the default save file path to be the path from the last file I just saved!
 
 not colaborate editing, but everyone logged in with the same username should see what their clones are up to!
 

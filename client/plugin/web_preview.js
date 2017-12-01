@@ -6,6 +6,7 @@
 	var menuItem;
 	var inPreview;
 	var previewWin;
+	var theWindow;
 	
 	EDITOR.plugin({
 		desc: "Preview HTML files",
@@ -27,7 +28,7 @@
 		
 		inPreview = file;
 		
-		var newWindow = EDITOR.createWindow();
+		theWindow = EDITOR.createWindow();
 		
 		var folder = UTIL.getDirectoryFromPath(inPreview.path);
 		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
@@ -40,7 +41,8 @@
 			
 			var onlyPreview = true;
 			var bodyTag = undefined;
-			previewWin = new WysiwygEditor(inPreview, bodyTag, onlyPreview, newWindow, url);
+			previewWin = new WysiwygEditor(inPreview, bodyTag, onlyPreview, theWindow, url, whenLoaded);
+			
 			
 			previewWin.onClose = function() {
 				CLIENT.cmd("serve", {folder: folder}, function httpServerStopped(err, json) {
@@ -52,6 +54,20 @@
 			
 		});
 	}
+	
+	function whenLoaded() {
+		console.log("BANANA!");
+		console.log(theWindow.window.console.log);
+		
+		// Override the console log of the preview window
+		var consoleLogOriginal = theWindow.window.console.log;
+		theWindow.window.console.log = function(msg) {
+				console.log("Captured console.log: " + msg);
+				alertBox(msg);
+			}
+		}
+
+	
 	
 	function refreshMaybe(fileSaved) {
 		
