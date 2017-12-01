@@ -548,8 +548,19 @@ var File; // File object is global
 		var index = 0;
 		
 		if(file.mode == "code") {
-		if(file.text.charAt(0) == "\t") throw new Error("File starts with a tab: " + file.path);
-			if(file.text.charAt(file.text.length-1) == "\t") throw new Error("File ends with a tab: " + file.path);
+			// Files ending up with a tab at the start or end is so common that we can't throw an error.
+			// It is for example used in some tests
+			// We do however want to figure out all the reasons why the file ends up with a tab at the end! (and fix them)
+		if(file.text.charAt(0) == "\t") {
+//throw new Error("File starts with a tab: " + file.path);
+				console.warn("File starts with a tab: " + file.path);
+				if(EDITOR.settings.devMode) alertBox("File starts with a tab: " + file.path);
+			}
+			if(file.text.charAt(file.text.length-1) == "\t") {
+//throw new Error("File ends with a tab: " + file.path);
+				console.warn("File ends with a tab: " + file.path);
+				if(EDITOR.settings.devMode) alertBox("File now ends with a tab: " + file.path);
+			}
 		}
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
