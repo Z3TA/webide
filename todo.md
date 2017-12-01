@@ -34,7 +34,12 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+When inserting a multi line comment, last char becomes a tab!
+Auto close multi line commens and { if the last line becomes a tab !?
 
+A preview that does live refresh
+
+Coding an agar clone as a nodejs example
 
 Dashboard:
 Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
@@ -50,6 +55,8 @@ package?json for the ssg ?
 
 todo
 ----
+
+When creating a new file, I want the default save file path to be the path from the last file I just saved!
 
 Investigate why fix_indendation.js is not fixing the indentation!
 

@@ -549,7 +549,7 @@ var File; // File object is global
 		
 		if(file.mode == "code") {
 		if(file.text.charAt(0) == "\t") throw new Error("File starts with a tab: " + file.path);
-		if(file.text.charAt(file.text.length-1) == "\t") throw new Error("File starts with a tab: " + file.path);
+			if(file.text.charAt(file.text.length-1) == "\t") throw new Error("File ends with a tab: " + file.path);
 		}
 		
 		if(file.startRow % 1 > 0) throw new Error("file.startRow=" + file.startRow + " Needs to be an integer!");
