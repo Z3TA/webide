@@ -34,9 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-
-A preview that does live refresh
-
 Coding an agar clone as a nodejs example
 
 Dashboard:

@@ -13,11 +13,14 @@ EDITOR.plugin({
 		load: function loadWorkingDirectoryUpdater() {
 		
 			EDITOR.on("fileShow", updateWorkingDirectory);
+			EDITOR.on("fileSave", updateWorkingDirectory);
+			
 			
 		},
 		unload: function unloadWorkingDirectoryUpdater() {
 			
 			EDITOR.removeEvent("fileShow", updateWorkingDirectory);
+			EDITOR.removeEvent("fileSave", updateWorkingDirectory);
 		
 		}
 	});
@@ -46,14 +49,30 @@ EDITOR.plugin({
 				for (var i=0; i<files.length; i++) {
 					if(files[i].name == "package.json" || files[i].name.indexOf("index.htm") != -1) {
 						
-						EDITOR.changeWorkingDir(currentFolder);
+						if(EDITOR.workingDirectory != currentFolder) EDITOR.changeWorkingDir(currentFolder);
 						return;
 					}
 					}
 				
 				if(folders.length > 0) search(folders.pop());
+				else doSomething();
 				
 			});
+		}
+		
+		function doSomething() {
+			
+			var file = EDITOR.currentFile;
+			
+			if(!file) return true;
+			
+			var currentFolder = UTIL.getDirectoryFromPath(file.path);
+			
+			if(currentFolder.indexOf(EDITOR.workingDirectory) == -1) {
+				// The file switched to or saved is not part of the current woring directory, so change working directory!
+				EDITOR.changeWorkingDir(currentFolder);
+			}
+			
 		}
 		
 	}
