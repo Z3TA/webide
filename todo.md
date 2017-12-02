@@ -36,6 +36,8 @@ What I'm working on
 
 preview - auto completion. Check the window object for global variables!
 
+hmm: Can't seam to be able to list properties in window.document!
+
 for(var name in window) if(window[name].indexOf(word) == 0) ... 
 
 Coding an agar clone as a nodejs example

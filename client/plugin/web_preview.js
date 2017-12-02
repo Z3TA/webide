@@ -16,10 +16,15 @@
 		load: function loadWebPreview() {
 			menuItem = EDITOR.addMenuItem("Preview HTML", webPreview);
 			EDITOR.on("fileSave", refreshMaybe);
+			var order = 1;
+			EDITOR.on("autoComplete", webPreviewAutocomplete, order);
 		},
 		unload: function unloadWebPreview() {
 			EDITOR.removeMenuItem(menuItem);
 			EDITOR.removeEvent("fileSave", refreshMaybe);
+			
+			if(previewWin) previewWin.close();
+			
 		}
 	});
 	
@@ -236,9 +241,11 @@
 		
 		var interval = setInterval(function() {
 			if(theWindow.window.console.log != captureConsoleLog) {
+				console.log("yep!");
 				clearInterval(interval);
 				whenLoaded();
 			}
+			else console.log("nope");
 			
 		}, 1);
 		
@@ -252,6 +259,40 @@
 		
 		//setTimeout(whenLoaded, 0);
 		//whenLoaded();
+	}
+	
+	function webPreviewAutocomplete(file, word, wordLength, gotOptions) {
+		console.log("webPreviewAutocomplete: word=" + word + " previewWin?" + (!!previewWin) + " wordLength=" + wordLength);
+		// Auto complete global variables
+		if(!previewWin) return;
+		if(wordLength == 0) return;
+		
+		var options = [];
+		
+		var words = word.split(".");
+		var obj = theWindow.window;
+		var before = "";
+		for (var i=0; i<words.length-1; i++) {
+			before += words[i] + ".";
+			console.log("before=" + before);
+			obj = obj[words[i]];
+			if(!obj) {
+				console.log("Object does not exist: " + before);
+				return;
+			}
+		}
+		console.log(obj);
+		var names = Object.getOwnPropertyNames(obj);
+		var nameLength = wordLength - before.length;
+		var lookFor = word.slice(before.length);
+		for(var i=0; i<names.length; i++) {
+			console.log(names[i].slice(0,nameLength) + "=" + lookFor + " ? name=" + names[i]);
+			if(names[i].slice(0,nameLength) == lookFor) options.push(before + names[i]);
+			}
+		
+		console.log("Found " + options.length + " results: " + JSON.stringify(options));
+		
+		return options;
 	}
 	
 })();
