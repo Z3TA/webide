@@ -34,11 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-preview - auto completion. Check the window object for global variables!
-
-hmm: Can't seam to be able to list properties in window.document!
-
-for(var name in window) if(window[name].indexOf(word) == 0) ... 
 
 Coding an agar clone as a nodejs example
 
