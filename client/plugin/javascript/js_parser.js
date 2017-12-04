@@ -1305,19 +1305,19 @@
 				!CSS && !insideTemplateLiteral) {
 					insideRegExp = true;
 					regExpStart = i;
-					console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
+					//console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "[" && lastChar != "\\") {
 					insideRegExpBracket = true;
-					console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
+					//console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "]" && (lastChar != "\\" || (lastChar == "\\" && llChar == "\\" ))) {
 					insideRegExpBracket = false;
-					console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
+					//console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "/" && !insideRegExpBracket && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {
 					insideRegExp = false;
-					console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp +
+					//console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp +
 					" typeof=" + typeof insideRegExp + " file.path=" + file.path);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
 					}

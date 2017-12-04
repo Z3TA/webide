@@ -59,6 +59,15 @@ package?json for the ssg ?
 todo
 ----
 
+properly indentate:
+if(1==1)
+console.log("a");
+console.log("b");
+
+console.log("c");
+
+
+
 not colaborate editing, but everyone logged in with the same username should see what their clones are up to!
 
 Investigate why fix_indendation.js is not fixing the indentation!

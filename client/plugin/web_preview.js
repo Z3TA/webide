@@ -269,6 +269,8 @@
 		
 		var options = [];
 		
+		console.log("dingdong");
+		
 		var words = word.split(".");
 		var obj = theWindow.window;
 		var before = "";
@@ -282,17 +284,80 @@
 			}
 		}
 		console.log(obj);
-		var names = Object.getOwnPropertyNames(obj);
+		
+		var names = [];
+		
+		var beforeNoDot = before.slice(0,-1);
+		
+		if(typeof Object.getOwnPropertyNames != "undefined") {
+		console.log("Object.getOwnPropertyNames(" + beforeNoDot + ")");
+		addNamesFromArray(Object.getOwnPropertyNames(obj));
+		} else console.warn("Object.getOwnPropertyNames not supported by your browser!");
+		
+		if(typeof Object.keys == "undefined") console.warn("Object.keys not supported by your browser!");
+		else if(typeof obj.__proto__ == "undefined") console.warn("obj.__proto__ not supported by your browser!");
+		else {
+console.log("Object.keys(" + beforeNoDot + ".__proto__)");
+		addNamesFromArray(Object.keys(obj.__proto__));
+		}
+		
+		if(typeof Object.getPrototypeOf != "undefined") {
+		console.log("Object.getPrototypeOf(" + beforeNoDot + "))");
+		addNamesFromObject(Object.getPrototypeOf(obj));
+			
+			if(typeof obj.__proto__ == "undefined") console.warn("obj.__proto__ not supported by your browser!");
+			else {
+			console.log("Object.getPrototypeOf(" + beforeNoDot + ".__proto__)");
+			addNamesFromObject(Object.getPrototypeOf(obj.__proto__));
+			}
+		} else console.warn("Object.getPrototypeOf not supported by your browser!");
+		
+		
 		var nameLength = wordLength - before.length;
 		var lookFor = word.slice(before.length);
 		for(var i=0; i<names.length; i++) {
 			console.log(names[i].slice(0,nameLength) + "=" + lookFor + " ? name=" + names[i]);
-			if(names[i].slice(0,nameLength) == lookFor) options.push(before + names[i]);
-			}
+				if(names[i].slice(0,nameLength) == lookFor) {
+				if(typeof obj[names[i]] == "function") options.push([before + names[i] + "()", 1]);
+				else options.push(before + names[i]);
+				}
+		}
 		
 		console.log("Found " + options.length + " results: " + JSON.stringify(options));
 		
 		return options;
-	}
+		
+		function addNamesFromArray(arr) {
+			var dup = 0;
+				for (var i=0; i<arr.length; i++) {
+				if(names.indexOf(arr[i]) == -1) names.push(arr[i]);
+					else dup++;
+				}
+			console.log("Added " + (arr.length-dup) + " of " + arr.length + " properties");
+				}
+		
+		function addNamesFromObject(obj) {
+			var dup = 0;
+			var tot = 0;
+			for (var name in obj) {
+				tot++;
+				if(names.indexOf(name) == -1) names.push(name);
+				else dup++;
+			}
+			console.log("Added " + (tot-dup) + " of " + tot + " properties");
+		}
+		
+		
+		function args(func) {
+return (func + '')
+.replace(/[/][/].*$/mg,'') // strip single-line comments
+.replace(/\s+/g, '') // strip white space
+.replace(/[/][*][^/*]*[*][/]/g, '') // strip multi-line comments
+			.split('){', 1)[0].replace(/^[^(]*[(]/, '') // extract the parameters
+.replace(/=[^,]+/g, '') // strip any ES6 defaults
+.split(',').filter(Boolean); // split & filter [""]
+}
+			
+		}
 	
 })();
