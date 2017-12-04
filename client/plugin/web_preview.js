@@ -178,8 +178,8 @@
 							" (" + file.grid[row].indentationCharacters.length + ")");
 						}
 						var rowText = file.rowText(row);
-						var matchText = rowText.match(/console.log ?\( ?(['"`])(.*)\1\)/);
-						if(!matchText) throw new Error("matchText=" + matchText + " rowText=" + rowText + "");
+						var matchText = rowText.match(/console.log ?\( ?(['"`]?)(.*)\1\)/);
+						if(!matchText) throw new Error("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
 						var quote = matchText[1];
 						var logText = matchText[2];
 						
