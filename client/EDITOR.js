@@ -2214,7 +2214,7 @@ EDITOR.lastKeyPressed = "";
 		var wordLength = word.length;
 		console.log("Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
-		var ret, fun, addWord, addMcl;
+		var ret, fun, addWord, addMcl, functionArguments;
 		
 		console.log("Calling autoComplete listeners (" + EDITOR.eventListeners.autoComplete.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.autoComplete.length; i++) {
@@ -2230,6 +2230,7 @@ EDITOR.lastKeyPressed = "";
 						if(Array.isArray(ret[j])) {
 							addWord = ret[j][0];
 							addMcl = ret[j][1];
+							functionArguments = ret[j][2];
 						}
 						else {
 							addWord = ret[j];
@@ -2290,6 +2291,8 @@ EDITOR.lastKeyPressed = "";
 		}
 		else if(options.length == 1) {
 			completeWord(word, options[0], mcl[0]);
+			if(functionArguments && functionArguments.length > 0) EDITOR.addInfo( file.caret.row, file.caret.col, functionArguments.join(",") );
+			
 		}
 		
 		return false; // disable default action

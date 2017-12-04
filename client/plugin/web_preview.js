@@ -318,7 +318,7 @@ console.log("Object.keys(" + beforeNoDot + ".__proto__)");
 		for(var i=0; i<names.length; i++) {
 			console.log(names[i].slice(0,nameLength) + "=" + lookFor + " ? name=" + names[i]);
 				if(names[i].slice(0,nameLength) == lookFor) {
-				if(typeof obj[names[i]] == "function") options.push([before + names[i] + "()", 1]);
+				if(typeof obj[names[i]] == "function") options.push([before + names[i] + "()", 1, args(obj[names[i]])]);
 				else options.push(before + names[i]);
 				}
 		}
