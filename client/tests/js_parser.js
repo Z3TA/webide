@@ -1,5 +1,14 @@
 
-
+EDITOR.addTest(function slashInRegexBracket(callback) {
+	EDITOR.openFile("slashInRegexBracket.js", "foo.replace(/[/][*][^/*]*[*][/]/g), ''); // strip multi-line comments", function(err, file) {
+		
+		if(file.parsed.comments.length != 1) throw new Error("Expect 1 JavaScript comment, but found " + file.parsed.comments.length);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
 
 EDITOR.addTest(function singleQuoteInDoubleQuoteHtml(callback) {
 	EDITOR.openFile("singleQuoteInDoubleQuote.htm", '<html>\n<button onClick="foo.innerHTML = \'<br>\';">\n<br>\n</html>', function(err, file) {

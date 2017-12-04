@@ -1,25 +1,25 @@
 (function() {
 	
 	/*
-
+		
 		warning: There be dragons!
 		
 		This file parses javascript and returns an object with the following objects:
-			functions
-			quotes
-			comments
-			globalVariables
-			blockMatch = true|false (if there are as many { as there are }
-			xmlTags
+		functions
+		quotes
+		comments
+		globalVariables
+		blockMatch = true|false (if there are as many { as there are }
+		xmlTags
 		
 		It also updates the indentation property on the grid rows!!
-	
+		
 		Goals: 
-			Intelli:
-				Find misspelled properties!
-
-			Parser:
-				Find property name variables xxx.prop = yyy
+		Intelli:
+		Find misspelled properties!
+		
+		Parser:
+		Find property name variables xxx.prop = yyy
 		
 		
 		Optimization:
@@ -53,8 +53,8 @@
 		
 		instead of:
 		var a,
-			b,
-			b;
+		b,
+		b;
 		
 		var foo = {
 		},
@@ -81,7 +81,7 @@
 		bar(
 		baz(done)));
 	*/
-
+	
 	"use strict";
 	
 	EDITOR.plugin({
@@ -89,10 +89,10 @@
 		order: 100,
 		load:function jsParserMain() {
 			
-		EDITOR.on("fileOpen", onFileOpen);
-		EDITOR.on("fileChange", parseJsOnChange, 100);
-
-	},
+			EDITOR.on("fileOpen", onFileOpen);
+			EDITOR.on("fileChange", parseJsOnChange, 100);
+			
+		},
 		unload: function unloadJsParser() {
 			
 			EDITOR.removeEvent("fileOpen", onFileOpen);
@@ -118,10 +118,10 @@
 		else {
 			console.warn(file.path + " didn't want to be parsed by the JavaScript parser");			
 		}
-
+		
 	}
 	
-
+	
 	
 	
 	
@@ -158,7 +158,7 @@
 			return false;
 		}
 	}
-
+	
 	
 	function isWhiteSpace(char) {
 		return char == "" || char == " " || char == "\t" || char == "\r" || char == "\n";
@@ -214,7 +214,7 @@
 					
 					// This optimization has about 15% overhead in large files. So skip it if the function size is larger then 80% of the file
 					var maxFunctionBodySize = Math.round(file.text.length * 0.8);
-										
+					
 					
 					if(f) { // Parse only that function
 						//console.log("Inside " + f.name);
@@ -236,23 +236,23 @@
 							var baseIndentation = file.grid[parseStartRow].indentation;
 							var oldStart = f.start;
 							var oldEnd = f.end;
-
+							
 							// Try to find the function declaration
 							var gridRowStartIndex = file.grid[parseStartRow].startIndex;
 							// Prevent from searching too far
 							var funcDecText = file.text.substring(gridRowStartIndex, f.start);
-
+							
 							//console.log("funcDecText=" + funcDecText);
-
+							
 							var parseStart = funcDecText.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : "") + "(", f.start); // Search backwards in file.text starting from f.start
-
+							
 							
 							// I do not trust reLastIndexOf ...
 							
 							if(parseStart == -1) {
-
+								
 								var arrParseStart = [];
-
+								
 								arrParseStart.push(funcDecText.lastIndexOf("function " + f.name + " (", f.start));
 								
 								
@@ -264,24 +264,24 @@
 								// Find foo: function foo()
 								arrParseStart.push(funcDecText.lastIndexOf(f.name + ": function", f.start));
 								arrParseStart.push(funcDecText.lastIndexOf(f.name + " : function", f.start));
-
-
+								
+								
 								//console.time("hmm"); // These used to be slow
 								//if(parseStart == -1) parseStart = UTIL.reLastIndexOf(new RegExp("function\\s" + f.name + "\\s" + "(", "m"), file.text, f.start, f.end);
 								arrParseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*:\\s*function"), funcDecText));
 								arrParseStart.push(UTIL.reLastIndexOf(new RegExp(f.name + "\\s*=\\s*function"), funcDecText));
 								//console.timeEnd("hmm");
-
+								
 								// Anonymous functions
 								arrParseStart.push(funcDecText.lastIndexOf("function", f.start));
-
+								
 								// Pick the location closest to the function body
 								arrParseStart.sort(function sortNumber(a,b) {
-								    return a - b;
+									return a - b;
 								});
-
+								
 								parseStart = arrParseStart[arrParseStart.length-1];
-
+								
 							}
 							
 							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
@@ -289,9 +289,9 @@
 							// Make a full parse instead of throwing an error when not in dev mode !?
 							
 							//console.log("parseStart=" + parseStart);
-
+							
 							parseStart = parseStart + gridRowStartIndex;
-						
+							
 							
 							//console.log("characters=" + UTIL.lbChars(characters));
 							//console.log("parseStartRow=" + parseStartRow + " baseIndentation=" + baseIndentation + " charactersLength=" + charactersLength + " parseStart=" + parseStart + " parseEnd=" + parseEnd);
@@ -500,7 +500,7 @@
 							// Save old values
 							var oldEnd = f.end;
 							var endRowDiff = ff.endRow - f.endRow;
-
+							
 							
 							// Update the start, end, endRow, and lineNumber of all functions below the one just parsed, or parents of it.
 							// Have to go though all functions (recursive) because we can't asume our named array is sorted
@@ -546,7 +546,7 @@
 										throw err;
 									}
 								}
-								}
+							}
 							
 							
 							file.haveParsed(oldParse);
@@ -639,7 +639,7 @@
 			// Check if inside a function
 			// Returns the function, or false
 			var f, s;
-
+			
 			for(var i=0; i<functions.length; i++) {
 				f = functions[i];
 				if(!f.arrowFunction && f.start < caretIndex && f.end >= caretIndex) {
@@ -845,13 +845,13 @@
 			file.fileExtension == "asp" || 
 			file.fileExtension == "php" || 
 			file.fileExtension == "xml") xmlMode = true; // Start in xml mode
-
+			
 			var matchHtml = file.text.substr(0,100).trim().match(/(<!DOCTYPE html)|(<html.*>)/i);
 			
 			if(matchHtml) {
 				if(matchHtml.index == 0) {
-				xmlMode = true;
-				console.log("Set xmlMode=" + xmlMode);
+					xmlMode = true;
+					console.log("Set xmlMode=" + xmlMode);
 				}
 			}
 		}
@@ -1167,7 +1167,7 @@
 							variable =theFunction.variables[properties[1]];
 							startIndex = 2;
 						}
-
+						
 					}
 					else {
 						// We have found an undeclared (no var) global variable?
@@ -1181,7 +1181,7 @@
 					// Traverse the variable pyramid ... Loop through the property chain
 					variable = traverseVariableTree(properties, variable, startIndex);
 					
-
+					
 					
 					variable.type = getVariableType(rightSide);
 					if(variable.type == "this") {
@@ -1250,7 +1250,7 @@
 			
 			column++;
 			
-
+			
 			
 			
 			// ### Quotes and comments ...
@@ -1281,7 +1281,7 @@
 			
 			if(!xmlMode) {
 				
-				//if(char === '"') console.log("insideDblQuote? insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp); 
+				//if(char === '"') console.log("insideDblQuote? insideDblQuote=" + insideDblQuote + " insideLineComment=" + insideLineComment + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 				
 				/*
 					### RegExp strings
@@ -1292,33 +1292,41 @@
 					
 					RegExp or block comment!? RegExp can not start with *
 					
-					RegExp or division!?  
-					For example, (, [, {, ;, and all of the binary operators can only be followed by a regexp. 
+					RegExp or division!?
+					For example, (, [, {, ;, and all of the binary operators can only be followed by a regexp.
 					Likewise, ), ], }, identifiers, and string/number literals can only be followed by a division sign.
 					http://stackoverflow.com/questions/4726295/division-regexp-conflict-while-tokenizing-javascript
 					
 				*/
 				
-				if(char == "/" 
-				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="") 
-				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag && !CSS && !insideTemplateLiteral) {
-					
+				if(char == "/"
+				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
+				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag &&
+				!CSS && !insideTemplateLiteral) {
 					insideRegExp = true;
 					regExpStart = i;
-					//console.log("RegExp: line=" + lineNumber + " column=" + column);
+					console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "[" && lastChar != "\\") {
 					insideRegExpBracket = true;
+					console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "]" && (lastChar != "\\" || (lastChar == "\\" && llChar == "\\" ))) {
 					insideRegExpBracket = false;
+					console.log("RegExp: insideRegExp=" + insideRegExp + " insideRegExpBracket=" + insideRegExpBracket + " line=" + lineNumber + " column=" + column);
 				}
 				else if(insideRegExp && char == "/" && !insideRegExpBracket && (lastChar != backSlash || (llChar == backSlash && lastChar == backSlash)) ) {
 					insideRegExp = false;
-					//console.log("Exit regexp: line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp);
+					console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp +
+					" typeof=" + typeof insideRegExp + " file.path=" + file.path);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
-				}
-				
+					}
+
+				/*
+				console.log(" i=" + i + " char=" + char + " line=" + lineNumber + " col=" + column + " insideRegExp=" + insideRegExp + " regExpStart=" + regExpStart + 
+				" insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideHTMLComment=" + insideHTMLComment + 
+				" insideBlockComment=" + insideBlockComment + " insideTemplateLiteral=" + insideTemplateLiteral + " check=" + (insideRegExp && regExpStart != i-1));
+				*/
 				
 				// ### Comments: //
 				if(char == "/" && lastChar == "/" && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideLineComment  && !insideHTMLComment && !insideRegExp && !CSS && !insideTemplateLiteral) {
@@ -1333,9 +1341,9 @@
 					//console.log("Found line comment: " +  text.substring(commentStart, i))
 				}
 				
-				
 				// ### Comments: /*   */
-				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment && !insideBlockComment && !insideTemplateLiteral) {
+				else if(char == "*" && lastChar == "/" && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideHTMLComment 
+				&& !insideBlockComment && !insideTemplateLiteral && !(insideRegExp && regExpStart != i-1)) {
 					insideBlockComment = true;
 					insideRegExp = false;
 					commentStart = i-1;
@@ -1392,7 +1400,7 @@
 							if(insideXmlTag && xmlTagInsideSingleQuote) {
 								insideXmlTag = false;
 								xmlTagInsideSingleQuote = false;
-							return;
+								return;
 							}
 						}
 					}
@@ -1475,10 +1483,10 @@
 						insideXmlTag = false;
 						
 						if(insideDblQuote) {
-						quotes.push(new Quote(quoteStart, i-2));
-						//word = text.substring(quoteStart, i+1);
-						//console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
-						
+							quotes.push(new Quote(quoteStart, i-2));
+							//word = text.substring(quoteStart, i+1);
+							//console.log("endeDblQuote! quoteStart=" + quoteStart + " i=" + i);
+							
 							insideDblQuoteBeforeLangTag = true;
 						}
 						insideDblQuote = false;
@@ -1539,11 +1547,11 @@
 					insideXmlTag = true;
 					
 					/*console.log("insideXmlTag! col=" + column + 
-					" row=" + row + 
-					" xmlMode=" + xmlMode + 
-					" insideQuote=" + insideQuote + 
-					" insideSingleQuote=" + insideSingleQuote + 
-					" insideDblQuote=" + insideDblQuote);
+						" row=" + row + 
+						" xmlMode=" + xmlMode + 
+						" insideQuote=" + insideQuote + 
+						" insideSingleQuote=" + insideSingleQuote + 
+						" insideDblQuote=" + insideDblQuote);
 					*/
 					
 					if(insideDblQuote) xmlTagInsideDblQuote = true;
@@ -1661,12 +1669,14 @@
 					insideXmlTag = false;
 					insideXmlTagEnding = false;
 					
-						xmlTagInsideDblQuote = false;
-						xmlTagInsideSingleQuote = false;
+					xmlTagInsideDblQuote = false;
+					xmlTagInsideSingleQuote = false;
 					
 				}
 				
 			}
+			
+			
 			
 			//console.log("Line " + lineNumber + " column=" + column + " char=" + char + " CSS=" + CSS + " xmlMode=" + xmlMode + " xmlModeBeforeTag=" + xmlModeBeforeTag + " xmlModeBeforeScript=" + xmlModeBeforeScript + " insideXmlTag=" + insideXmlTag + " lastXmlTag=" + lastXmlTag + " insideScriptTag=" + insideScriptTag + " insideHTMLComment=" + insideHTMLComment + " insideRegExp=" + insideRegExp);
 			
@@ -1676,13 +1686,13 @@
 			else {
 				insideCodeBlock = true;
 			}
-
+			
 			if(!insideQuote && !insideComment && !xmlMode && !vbScript && !PHP && !CSS && !insideRegExp && !insideXmlTag) {
 				
 				//console.log("char(" + i + ")=" + char + "");
 				
 				/*
-				char == " " || char == "\t" || char == "\n" || 
+					char == " " || char == "\t" || char == "\n" || 
 				*/
 				
 				if(char == "}" || char == ";" || char == "," || char == "{" || char == lastLineBreakCharacter) {
@@ -1717,7 +1727,7 @@
 				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
 					
 					//console.log("Found character=, insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " leftSide=" + leftSide + " rightSide=" + rightSide + " word=" + word + " lastWord=" + lastWord + " (line=" + lineNumber + ")");
-
+					
 					if(insideArray[codeBlockDepth]) {
 						arrayItemCount[codeBlockDepth]++;
 					}
@@ -1757,7 +1767,7 @@
 				else if(char == "}") {
 					
 					//console.log("} insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " line:" + lineNumber + "");
-
+					
 					
 					if(insideFunctionBody[subFunctionDepth]) {
 						R[subFunctionDepth]++;
@@ -1767,7 +1777,7 @@
 						//console.log("R[" + subFunctionDepth + "]++");
 						
 						//console.log("L[" + subFunctionDepth + "]=" + L[subFunctionDepth] + ", R[" + subFunctionDepth + "]=" + R[subFunctionDepth] + " (line:" + lineNumber + ")");
-
+						
 						
 						if(L[subFunctionDepth] === R[subFunctionDepth]) {
 							// End of current function
@@ -1776,7 +1786,7 @@
 							
 							myFunction[subFunctionDepth].end = i;
 							myFunction[subFunctionDepth].endRow = row;
-
+							
 							
 							if(subFunctionDepth > 0) {
 								L[subFunctionDepth] = -1;
@@ -1795,7 +1805,7 @@
 						
 						
 					}
-
+					
 				}
 				else if( (char == "=" || char == ":") && !insideParenthesis[codeBlockDepth]) {
 					
@@ -1805,14 +1815,14 @@
 					afterPointer[codeBlockDepth] = char;
 					
 					//console.log("found a pointer (" + char + ") codeBlockDepth=" + codeBlockDepth + " variableName=" + variableName + " leftSide=" + leftSide + " rightSide=" + rightSide + " lastWord=" + lastWord + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + "  (line:" + lineNumber + ")");
-
+					
 					// Figure out the left side (the variable name)
 					
 					//leftSide = findLeftSide(char);
 					
-
+					
 					//console.log("ap leftSide=" + leftSide);
-
+					
 				}
 				else if(char == "(") {
 					
@@ -1841,7 +1851,7 @@
 						if(functionName.indexOf("(") != -1) functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
 						
 						//if(functionName.indexOf("=") != -1) functionName = "";
-												
+						
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
 						
 						insideFunctionArguments = true;
@@ -1849,14 +1859,14 @@
 						//console.log("insideFunctionArguments!");
 						
 						functionArgumentsStart = i+1;
-
+						
 					}
 					
 					insideParenthesis[codeBlockDepth] = "(";
 					parenthesisStart[codeBlockDepth] = i;
 					
 				}
-
+				
 				else if(char == ")") {
 					insideParenthesis[codeBlockDepth] = "";
 					word = text.substring(parenthesisStart[codeBlockDepth], i+1);
@@ -1896,7 +1906,7 @@
 					
 					insideFunctionDeclaration = true;
 					functionName = lastVariableName;
-										
+					
 					arrowFunctionStart = i;
 					
 					afterPointer[codeBlockDepth] = false;
@@ -1918,15 +1928,15 @@
 						//console.log("Found function=" + functionName + "! insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionArguments=" + insideFunctionArguments + "");
 						
 						willBeJSON = false; // It will not be JSON until we find another {
-											
+						
 						
 						/*
-						json = {
+							json = {
 							foo: function() {
-								<!-- We are here, cleare the afterPointer for current depth
+							<!-- We are here, cleare the afterPointer for current depth
 							}
-						}
-						
+							}
+							
 						*/
 						//afterPointer[codeBlockDepth] = false; // only endpointer should end it!?
 						
@@ -1941,7 +1951,7 @@
 						
 						properties = functionName.split(".");
 						
-
+						
 						//console.log("subFunctionDepth=" + subFunctionDepth);
 						
 						if(insideFunctionBody[subFunctionDepth]) {
@@ -1981,11 +1991,11 @@
 								delete globalVariables[functionName];
 							}
 							
-
+							
 							if(properties.length > 1) {
 								theFunction = getFunctionWithName(functions, properties[0]);
 								if(theFunction) {
-								// This is a variable (method) for a function: foo.bar.baz = function()
+									// This is a variable (method) for a function: foo.bar.baz = function()
 									// This is run after variables has been added.
 									// Change the variable type to Method
 									// Using Object.hasOwnProperty.call because the object might have a variable called "hasOwnProperty"
@@ -1997,7 +2007,7 @@
 										
 										variable.type = "Method";
 									}
-
+									
 								}
 							}
 						}
@@ -2014,7 +2024,7 @@
 						
 						//console.log("L[" + subFunctionDepth + "]++");
 						
-
+						
 					}
 					else {
 						//console.log("1130: Did we find a JSON? (line:" + lineNumber + ")")
@@ -2159,7 +2169,7 @@
 							else if(word == "function" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 							}
-
+							
 							
 							// ### SUB ... END SUB
 							else if(word == "sub" && lastWord == "end") {
@@ -2168,7 +2178,7 @@
 							else if(word == "sub" && lastWord != "exit") {
 								vb_nextRowIndentation = 1;
 							}
-
+							
 							
 							//console.log("line=" + (lineNumber) + " word=" + word + " vb_thisRowIndentation=" + vb_thisRowIndentation + " vb_nextRowIndentation=" + vb_nextRowIndentation);
 							
@@ -2232,12 +2242,12 @@
 			if(char == lastLineBreakCharacter) {
 				// ## Line breaks
 				
-
-					
+				
+				
 				// Set indentation on CURRENT row
 				
 				//console.log("Adding indentation to line=" + lineNumber + " : " + vb_thisRowIndentation);
-
+				
 				// If we are still inside a quote, and the line break was not preceded with a backslash: ignore the quote
 				if((insideSingleQuote || insideDblQuote) && lnw != "\\") {
 					console.warn("Line " + lineNumber + ": Unclosed quote!");
@@ -2258,7 +2268,7 @@
 				
 				//console.log("--- new line=" + (row) + " vb_thisRowIndentation=" + vb_thisRowIndentation + " ---");
 				if(indentate) file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
-
+				
 				if(vb_nextRowIndentation == 1) {
 					vb_thisRowIndentation++;
 					vb_nextRowIndentation = 0;
@@ -2301,7 +2311,7 @@
 			newFunc.endRow = lineNumber+parseStartRow;
 			
 			properties = functionName.split(".");
-
+			
 			//console.log("subFunctionDepth=" + subFunctionDepth);
 			
 			if(insideFunctionBody[subFunctionDepth] && myFunction[subFunctionDepth]) {
@@ -2309,7 +2319,7 @@
 				
 				subFunctionIndex = myFunction[subFunctionDepth].subFunctions.push(newFunc) - 1;
 				
-								
+				
 				if(properties.length > 1) {
 					if(Object.hasOwnProperty.call(myFunction[subFunctionDepth].variables, properties[0])) {
 						// This is a variable (method) for a function: foo.bar.baz = () => {}
@@ -2334,8 +2344,8 @@
 						//console.log("deleteFromGlobalVar=" + functionName + " newFunc.name=" + newFunc.name + " row=" + row + " column=" + column);
 						delete globalVariables[functionName];
 					}
-				
-
+					
+					
 					if(properties.length > 1) {
 						theFunction = getFunctionWithName(functions, properties[0]);
 						if(theFunction) {
@@ -2351,7 +2361,7 @@
 								
 								variable.type = "Method";
 							}
-
+							
 						}
 					}
 				}
@@ -2383,11 +2393,11 @@
 					word = word + char;
 				}
 				if(  insideParenthesis[codeBlockDepth] + char == "(function " || insideParenthesis[codeBlockDepth] == "(function(" ) {
-						//console.log("clousure line=" + lineNumber + "");
-						insideFunctionDeclaration = true;
-						lastWord="";
-						word = "";
-					}
+					//console.log("clousure line=" + lineNumber + "");
+					insideFunctionDeclaration = true;
+					lastWord="";
+					word = "";
+				}
 				
 				//word = "";
 				lastWord = "";
@@ -2425,7 +2435,7 @@
 				return;
 			}
 			else if(charIndex == textLength || char == "=" || char == "(" || char == ")" || char == "\t" || char == "\r" || char == "\n" || char == "," || char == ";" || char == "{" || char == "}" || char == ":" || char == "," || char == "[" || char == "]") {
-
+				
 				// char == " " || char == "+" || char == "-" || char == "/" || char == ">" || char == "<" ||
 				// If we are inside an array, the word is a value!
 				// insideArray[codeBlockDepth] ||
@@ -2445,7 +2455,7 @@
 						return;
 					}
 					else {
-
+						
 						words.push(word);
 						
 						//console.log("NEW WORD='" + word + "' insideVariableDeclaration[" + subFunctionDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[codeBlockDepth=" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth] + " insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + "  insideCodeBlock=" + insideCodeBlock + " codeBlock[" + codeBlockDepth + "]=" + JSON.stringify(codeBlock[codeBlockDepth]) + " insideFunctionDeclaration=" + insideFunctionDeclaration + " willBeJSON=" + willBeJSON + " insideArray[" + codeBlockDepth + "]=" + insideArray[codeBlockDepth] + " foundVariableInVariableDeclaration=" + foundVariableInVariableDeclaration + " (line:" + lineNumber + ")");
@@ -2483,7 +2493,7 @@
 								
 								if(!insideCodeBlock) {
 									// A global variable is declared:
-
+									
 									globalVariables[word] = new Variable();
 									//console.log("Added GLOBAL variable=" + word + "");
 									foundVariableInVariableDeclaration = false;
@@ -2517,7 +2527,7 @@
 										}
 										
 										
-
+										
 										
 									}
 									else {
@@ -2538,14 +2548,14 @@
 						word = "";
 					}
 					
-
+					
 				}
 				else {
 					//console.log("errm? word=" + word);
 				}
 			}
 			else {
-
+				
 				word = word + char;
 				
 				if(word == " ") word = "";
@@ -2636,7 +2646,7 @@
 		}
 		return "Same!";
 	}
-
-
+	
+	
 	
 })();
