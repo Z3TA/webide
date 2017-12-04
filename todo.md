@@ -34,6 +34,14 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+Github integration:
+- Create new github repo
+- Clone from github repo
+- Commit
+- Push
+- Pull
+
+
 
 Coding an agar clone as a nodejs example
 
