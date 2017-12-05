@@ -33,6 +33,8 @@
 	
 	var previewBaseUrl;
 	
+	var progressBar;
+	
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Static site generator management interface",
@@ -222,6 +224,8 @@
 		
 		CLIENT.on("ssgBuildMessage", ssgBuildMessage);
 		
+		CLIENT.on("ssgProgressStatus", ssgProgressStatus);
+		
 		// if document.location.href.indexOf("ssg") ... open that site and page in edit mode
 		
 	}
@@ -278,6 +282,25 @@
 				if(err) throw err;
 				appendBuildLog(file, msg);
 			});
+		}
+	}
+	
+	function ssgProgressStatus(status) {
+		console.log("ssgProgressStatus: " + JSON.stringify(status));
+		
+		progressBar.max = status.max;
+		progressBar.value = status.value;
+		
+		if(status.max == status.value) {
+progressBar.style.display = "none";
+			EDITOR.resizeNeeded();
+			progressBar.max = 1;
+			progressBar.value = 0;
+		}
+		else {
+			var oldStyleDisplay = progressBar.style.display;
+			progressBar.style.display = "block";
+			if(oldStyleDisplay != "block") EDITOR.resizeNeeded();
 		}
 	}
 	
@@ -564,6 +587,13 @@
 		//if(!sites) return alertBox("No sites for the static-site-generator available!");
 		
 		controlView = document.createElement("div");
+		
+		progressBar = document.createElement("progress");
+		progressBar.setAttribute("class", "progress ssg");
+		progressBar.setAttribute("style", "display: none;");
+		progressBar.setAttribute("value", "0");
+		progressBar.setAttribute("max", "1");
+		controlView.appendChild(progressBar);
 		
 		selectSite = document.createElement("select");
 		selectSite.setAttribute("id", "selectSite");

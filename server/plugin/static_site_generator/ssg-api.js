@@ -26,6 +26,9 @@ API.compile = function compile(user, json, callback) {
 	var parse = url.parse(destination);
 	var protocol = parse.protocol;
 	
+	var fsTotal = 0;
+	var fsComplete = 0;
+	
 	if(protocol) protocol = protocol.replace(/:/g, "").toLowerCase();
 	
 	console.log("protocol: " + protocol);
@@ -160,8 +163,11 @@ API.compile = function compile(user, json, callback) {
 			var folder = UTIL.getDirectoryFromPath(filePath);
 			
 			if(foldersExist.indexOf(folder) != -1) {
-				console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
+				//console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
 								
+				fsTotal++;
+				user.send({ssgProgressStatus: {value: fsComplete, max: fsTotal}});
+				
 				CORE.saveToDisk(user, {path: filePath, text: text, public: publish}, fileCreated);
 				
 			}
@@ -173,6 +179,9 @@ API.compile = function compile(user, json, callback) {
 			
 			function fileCreated(err, path) {
 				if(ABORT) return;
+				
+				fsComplete++;
+				user.send({ssgProgressStatus: {value: fsComplete, max: fsTotal}});
 				
 				if(err) {
 					//throw err;
@@ -227,6 +236,8 @@ API.compile = function compile(user, json, callback) {
 			
 			if(foldersExist.indexOf(folder) != -1) {
 				
+				user.send({ssgProgressStatus: {value: fsComplete, max: ++fsTotal}});
+				
 				CORE.copyFile(user, {from: from, to: to, public: publish}, fileCopied);
 				
 			}
@@ -237,6 +248,10 @@ API.compile = function compile(user, json, callback) {
 			}
 			
 			function fileCopied(err, json) {
+				
+				//console.log("Copied file to=" + json.to);
+				user.send({ssgProgressStatus: {value: ++fsComplete, max: fsTotal}});
+				
 				if(ABORT) return;
 				
 				if(err) {
@@ -253,10 +268,16 @@ API.compile = function compile(user, json, callback) {
 			
 			if(ABORT) return;
 			
+			user.send({ssgProgressStatus: {value: fsComplete, max: ++fsTotal}});
+			
 			//console.log("Creating path=" + folder);
 			folderAboutToBeCreated.push(folder);
 			
 			CORE.createPath(user, {pathToCreate: folder, public: publish}, function(err, json) {
+				
+				//console.log("Created path=" + folder);
+				user.send({ssgProgressStatus: {value: ++fsComplete, max: fsTotal}});
+				
 				if(ABORT) return;
 				
 				if(err) {
