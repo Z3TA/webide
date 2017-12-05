@@ -378,11 +378,33 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 
 API.copyFile = function copyFile(user, json, callback) {
 	
-	// todo: Make it work with remote connections!
-	
 	var source = user.translatePath(json.from);
 	var target = user.translatePath(json.to);
 	
+	API.readFromDisk(user, {path: source}, function fileRead(err, read) {
+
+		if(err) return callback(err);
+		
+		API.saveToDisk(user, {path: target, public: json.public}, function fileWrite(err, write) {
+			
+			if(err) return callback(err);
+			else callback(null, {to: write.path});
+			
+		});
+		
+	});
+	
+	/*
+		var options = {
+		mode:  DEFAULT_FILE_MODE
+		};
+		
+		if(json.public) {
+		// Make it so everyone can read it
+		options.mode = parseInt("0777", 8);
+		// note: The file permissions wont change if the file already exists!
+		}
+		
 	var cbCalled = false;
 	
 	var fs = require("fs");
@@ -391,16 +413,6 @@ API.copyFile = function copyFile(user, json, callback) {
 	rd.on("error", function(err) {
 		done(err);
 	});
-	
-	var options = {
-		mode:  DEFAULT_FILE_MODE
-	};
-	
-	if(json.public) {
-		// Make it so everyone can read it
-		options.mode = parseInt("0777", 8);
-		// note: The file permissions wont change if the file already exists!
-	}
 	
 	var wr = fs.createWriteStream(target, options);
 	wr.on("error", function(err) {
@@ -418,6 +430,8 @@ API.copyFile = function copyFile(user, json, callback) {
 			cbCalled = true;
 		}
 	}
+	*/
+	
 }
 
 API.move = function move(user, json, callback) {
