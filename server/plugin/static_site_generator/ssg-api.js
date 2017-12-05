@@ -36,24 +36,20 @@ API.compile = function compile(user, json, callback) {
 	if(REMOTE_PROTOCOLS.indexOf(protocol) != -1) {
 		// We will need to connect to the remote location before uploading files
 		var serverAddress = parse.host;
-		var auth = parse.auth, user, passw;
+		var auth = parse.auth;
 		if(auth) {
 			auth = auth.split(":");
 			if(auth.length == 2) {
-				user = auth[0];
-				passw = auth[1];
+				pubUser = auth[0];
+				pubPw = auth[1];
 			}
-		}
-		else if(pubUser) {
-			user = pubUser;
-			passw = pubPw;
 		}
 		var keyPath = pubKey;
 		
 		var workingDir = parse.path;
 		
 		// workingDir: workingDir
-		CORE.connect(user, {protocol: protocol, serverAddress: serverAddress, user: user, passw: passw, keyPath: keyPath}, fsReady);
+		CORE.connect(user, {protocol: protocol, serverAddress: serverAddress, user: pubUser, passw: pubPw, keyPath: keyPath}, fsReady);
 		
 	}
 	else {
