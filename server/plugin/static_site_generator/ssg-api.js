@@ -36,6 +36,8 @@ API.compile = function compile(user, json, callback) {
 	console.log("source=" + JSON.stringify(url.parse(source), null, 2));
 	console.log("destination=" + JSON.stringify(url.parse(destination), null, 2));
 	
+	user.send({ssgProgressStatus: {value: 0, max: 1}});
+	
 	if(REMOTE_PROTOCOLS.indexOf(protocol) != -1) {
 		// We will need to connect to the remote location before uploading files
 		var serverAddress = parse.host;
@@ -165,9 +167,6 @@ API.compile = function compile(user, json, callback) {
 			if(foldersExist.indexOf(folder) != -1) {
 				//console.log("Saving to disk filePath=" + filePath + " because folder exist: folder=" + folder);
 								
-				fsTotal++;
-				user.send({ssgProgressStatus: {value: fsComplete, max: fsTotal}});
-				
 				CORE.saveToDisk(user, {path: filePath, text: text, public: publish}, fileCreated);
 				
 			}
@@ -209,10 +208,12 @@ API.compile = function compile(user, json, callback) {
 			
 			if(data.type == "file") {
 				filesToSave++;
+				user.send({ssgProgressStatus: {value: fsComplete, max: ++fsTotal}});
 				createFile(user.toVirtualPath(data.path), data.text)
 			}
 			else if(data.type == "copy") {
 				filesToSave++;
+				user.send({ssgProgressStatus: {value: fsComplete, max: ++fsTotal}});
 				copyFile(user.toVirtualPath(data.from), user.toVirtualPath(data.to))
 			}
 			else if(data.type == "debug") {
@@ -235,8 +236,6 @@ API.compile = function compile(user, json, callback) {
 			var folder = UTIL.getDirectoryFromPath(to);
 			
 			if(foldersExist.indexOf(folder) != -1) {
-				
-				user.send({ssgProgressStatus: {value: fsComplete, max: ++fsTotal}});
 				
 				CORE.copyFile(user, {from: from, to: to, public: publish}, fileCopied);
 				
