@@ -14,7 +14,7 @@ var ABORT = false;
 API.compile = function compile(user, json, callback) {
 	
 	var source = user.translatePath(json.source);
-	var destination = user.translatePath(json.destination);
+	var destination = user.translatePath(UTIL.trailingSlash(json.destination));
 	var publish = json.publish;
 	var pubUser = json.pubUser;
 	var pubPw = json.pubPw;
