@@ -2105,7 +2105,7 @@
 	
 	function compile(source, destination, publish, callback) {
 		
-		CLIENT.cmd("SSG.compile", {source: source, destination: destination, publish: publish}, function(err, json) {
+		CLIENT.cmd("SSG.compile", {source: source, destination: destination, publish: publish, pubUser: selectedSite.pubUser, pubPw: selectedSite.pubPw, pubKey: selectedSite.key}, function(err, json) {
 			
 			if(err) throw err;
 			else callback(json.ssgWorkerExitCode);

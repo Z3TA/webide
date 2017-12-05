@@ -44,7 +44,7 @@ API.compile = function compile(user, json, callback) {
 				passw = auth[1];
 			}
 		}
-		else if(pubUser.length > 0) {
+		else if(pubUser) {
 			user = pubUser;
 			passw = pubPw;
 		}
