@@ -385,7 +385,7 @@ API.copyFile = function copyFile(user, json, callback) {
 
 		if(err) return callback(err);
 		
-		API.saveToDisk(user, {path: target, public: json.public}, function fileWrite(err, write) {
+		API.saveToDisk(user, {path: target, text: read.data, public: json.public}, function fileWrite(err, write) {
 			
 			if(err) return callback(err);
 			else callback(null, {to: write.path});
