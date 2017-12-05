@@ -221,14 +221,13 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 	
 	var fileContent = "";
 	var stream;
+	var fileBuffer = [];
 	
-	if(!callback) {
-		throw new Error("No callback defined!");
-	}
-
-	
-	
-	var fs = require("fs");
+		if(!callback) {
+			throw new Error("No callback defined!");
+		}
+		
+		var fs = require("fs");
 		
 		console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
 		//console.log(UTIL.getStack("Read from disk"));
@@ -238,10 +237,10 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 		var parse = url.parse(path);
 		
 		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
-		
-		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
-			var c = user.remoteConnections[parse.hostname].client;
+				var c = user.remoteConnections[parse.hostname].client;
 				
 				console.log("Getting file from FTP server: " + parse.pathname);
 				
@@ -266,9 +265,12 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 					var decoder = new StringDecoder('utf8');
 					var str;
 					stream.on('data', function(data) {
-						str = decoder.write(data);
+					if(returnBuffer) fileBuffer.push(data);
+					else {
+str = decoder.write(data);
 						fileContent += str;
-						console.log('loaded part of the file');
+					}
+					console.log('loaded part of the file');
 					});
 					
 				});
@@ -280,9 +282,9 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 		}
 		else if(parse.protocol == "sftp:") {
 			
-		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
-			var c = user.remoteConnections[parse.hostname].client;
+				var c = user.remoteConnections[parse.hostname].client;
 				
 				console.log("Getting file from SFTP server: " + parse.pathname);
 				
@@ -294,8 +296,17 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 					
 					if(err) console.warn(err.message);
 					
-				callback(err, {path: path, data: buffer.toString("utf8")});
-				
+					var resp = {path: path};
+					
+					if(returnBuffer) {
+						resp.data = buffer;
+						}
+					else {
+						resp.data = buffer.toString("utf8");
+						}
+					
+					callback(err, resp);
+					
 					
 				});
 				
@@ -317,8 +328,8 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 				fs.readFile(path, function(err, buffer) {
 					if(err) console.warn(err.message);
 					
-				callback(err, {path: user.toVirtualPath(path), data: buffer});
-				
+					callback(err, {path: user.toVirtualPath(path), data: buffer});
+					
 				});
 			}
 			else {
@@ -327,65 +338,75 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 				fs.readFile(path, encoding, function(err, string) {
 					if(err) console.warn(err.message);
 					
-				callback(err, {path: user.toVirtualPath(path), data: string});
-				
+					callback(err, {path: user.toVirtualPath(path), data: string});
+					
 				});
 			}
 		}
-	
-	
-	// Functions to handle NodeJS ReadableStream's
-	function streamClose() {
-		console.log("Stream closed! path=" + path);
-	}
-	
-	function streamError(err) {
-		console.log("Stream error! path=" + path);
-		throw err;
-	}
-	
-	function streamEnded() {
-		console.log("Stream ended! path=" + path);
 		
-		callback(null, {path: path, data: fileContent});
 		
-	}
-	
-	function readStream() {
-		// Called each time there is something comming down the stream
+		// Functions to handle NodeJS ReadableStream's
+		function streamClose() {
+			console.log("Stream closed! path=" + path);
+		}
 		
-		var chunk;
-		var str = "";
-		var StringDecoder = require('string_decoder').StringDecoder;
-		var decoder = new StringDecoder('utf8');
+		function streamError(err) {
+			console.log("Stream error! path=" + path);
+			throw err;
+		}
 		
-		//var chunkSize = 512; // How many bytes to recive in each chunk
-		
-		console.log("Reading stream ... isPaused=" + stream.isPaused());
-		
-		while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
+		function streamEnded() {
+			console.log("Stream ended! path=" + path);
 			
-			// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
-			str = decoder.write(chunk);
-			
-			fileContent += str;
-			
-			console.log("Got chunk! str.length=" + str.length + "");
+		var resp = {path: path};
+
+		if(returnBuffer) {
+			resp.data = fileBuffer;
+}
+		else {
+			resp.data = fileContent;
+		}
+		
+		callback(null, resp);
 			
 		}
+	
+		function readStream() {
+			// Called each time there is something comming down the stream
+			
+			var chunk;
+			var str = "";
+			var StringDecoder = require('string_decoder').StringDecoder;
+			var decoder = new StringDecoder('utf8');
+			
+			//var chunkSize = 512; // How many bytes to recive in each chunk
+			
+			console.log("Reading stream ... isPaused=" + stream.isPaused());
+			
+			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
+				
+				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
+				str = decoder.write(chunk);
+				
+				fileContent += str;
+				
+				console.log("Got chunk! str.length=" + str.length + "");
+				
+			}
+		}
 	}
-}
 
 API.copyFile = function copyFile(user, json, callback) {
 	
 	var source = user.translatePath(json.from);
 	var target = user.translatePath(json.to);
 	
-	API.readFromDisk(user, {path: source}, function fileRead(err, read) {
+	// Use buffers and Not text, or images will not work!
+	API.readFromDisk(user, {path: source, returnBuffer: true}, function fileRead(err, read) {
 
 		if(err) return callback(err);
 		
-		API.saveToDisk(user, {path: target, text: read.data, public: json.public}, function fileWrite(err, write) {
+		API.saveToDisk(user, {path: target, text: read.data, inputBuffer: true, public: json.public}, function fileWrite(err, write) {
 			
 			if(err) return callback(err);
 			else callback(null, {to: write.path});
@@ -638,12 +659,13 @@ else if(protocol == "sftp:") {
 	
 	
 	function uploadFTP(pathname, text) {
-		console.log("Uploading to FTP ... pathname=" + pathname);
+		console.log("Uploading to FTP ... pathname=" + pathname + " inputBuffer=" + inputBuffer);
 		
 		if(user.remoteConnections.hasOwnProperty(hostname)) {
 			
 			var ftpClient = user.remoteConnections[hostname].client;
 			
+			// ftp put wants a buffer. Convert to buffer if it's not a buffer!
 			var input = inputBuffer ? text : new Buffer(text, encoding);
 			var useCompression = false;
 			
