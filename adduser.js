@@ -285,13 +285,14 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		
 	
 	// add wwwpub
+		var wwwgid = getGroupId("www-data");
 	//fs.mkdirSync(homeDir + "/wwwpub");
 	fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
-	chownrDirSync(homeDir + "/wwwpub", uid, gid);
+		chownrDirSync(homeDir + "/wwwpub", uid, wwwgid);
 	
 		
-		// Make wwwpub public
-		chmodrSync(homeDir + "/wwwpub", "755");
+		// Make wwwpub public, and set the group-id bit so that all new files get the www-data group
+		chmodrSync(homeDir + "/wwwpub", "2755");
 		
 		
 		// Create a directory for unix sockets
@@ -299,7 +300,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		chmodrSync(homeDir + "/sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
 		// Make sure www-data can read and write to unix socket
 		// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
-		var wwwgid = getGroupId("www-data");
+		
 		chownrDirSync(homeDir + "/sock", uid, wwwgid);
 		// note: Each process needs to set umask to give write permission to the group!
 		
