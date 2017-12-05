@@ -1114,10 +1114,10 @@ API.connect = function connect(user, json, callback) {
 	var keyPath = json.keyPath;
 	var workingDir = json.workingDir;
 	
-	if(protocol == undefined) return callback("No protocol defined!");
-	if(serverAddress == undefined) return callback("No serverAddress defined!");
-	if(username == undefined) return callback("No user defined!");
-	if(workingDir !== undefined) return callback("workingDir parameter not yet implemented!");
+	if(protocol == undefined) return callback("No protocol defined! protocol=" + protocol);
+	if(serverAddress == undefined) return callback("No serverAddress defined! serverAddress=" + serverAddress);
+	if(username == undefined) return callback("No user defined! username=" + username);
+	if(workingDir !== undefined) return callback("workingDir parameter not yet implemented! workingDir=" + workingDir);
 	
 	if(protocol.indexOf(":") != -1) {
 		console.warn("Removing : (colon) from protocol=" + protocol);

@@ -52,7 +52,8 @@ API.compile = function compile(user, json, callback) {
 		
 		var workingDir = parse.path;
 		
-		CORE.connect(user, {protocol: protocol, serverAddress: serverAddress, user: user, passw: passw, keyPath: keyPath, workingDir: workingDir}, fsReady);
+		// workingDir: workingDir
+		CORE.connect(user, {protocol: protocol, serverAddress: serverAddress, user: user, passw: passw, keyPath: keyPath}, fsReady);
 		
 	}
 	else {
