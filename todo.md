@@ -34,6 +34,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+push authorization
+
 
 hggit !
 easy_install hg-git
@@ -56,6 +58,8 @@ Github integration:
 - Push
 - Pull
 
+
+How to save !? How will the user figure out Ctrl+S is used for saving !?
 
 
 Coding an agar clone as a nodejs example

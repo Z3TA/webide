@@ -136,7 +136,7 @@ var UTIL = {
 		
 		fullPath = fullPath.trim(); // Remove white space before and after
 		
-		console.log("getFolders: fullPath=" + fullPath);
+		//console.log("getFolders: fullPath=" + fullPath);
 		
 		if(fullPath == "/") return ["/"];
 		
@@ -212,7 +212,7 @@ var UTIL = {
 			// Windows driveIndex can be both C:\ and C:\\
 			var driveIndex = fullPath.indexOf(":\\");
 			
-			console.log("driveIndex=" + driveIndex);
+			//console.log("driveIndex=" + driveIndex);
 			
 			if(driveIndex != -1) {
 				// It's a Windows file-system path

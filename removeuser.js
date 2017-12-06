@@ -116,15 +116,17 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very impor
 	umount("/home/" + username + "/run/", true);
 */
 
+// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
 	umount("/home/" + username + "/dev/urandom");
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
 	umount("/home/" + username + "/usr/lib");
+umount("/home/" + username + "/usr/local/lib");
 umount("/home/" + username + "/usr/share");
 	umount("/home/" + username + "/usr/bin/hg");
 	umount("/home/" + username + "/usr/bin/python");
 	umount("/home/" + username + "/usr/bin/nodejs");
-
+umount("/home/" + username + "/etc/ssl/certs");
 
 if(!NOZFS) {
 	// Need to get the zfs pool

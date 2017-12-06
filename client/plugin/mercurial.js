@@ -1126,28 +1126,31 @@
 		var form = document.createElement("form");
 		form.onsubmit = cloneRepo;
 		
+		/*
 		// ### SCM Type
 		var labelSCM = document.createElement("label");
 		labelSCM.setAttribute("for", "scm");
 		labelSCM.appendChild(document.createTextNode("Type: "));
 		form.appendChild(labelSCM);
 		
+		
 		var scm = document.createElement("select");
 		scm.setAttribute("id", "scm");
 		scm.setAttribute("class", "select scm");
 		scm.setAttribute("title", "Select what type of software version control protocol to use");
+		
 		
 		var optMercurial = document.createElement("option");
 		optMercurial.appendChild(document.createTextNode("Mercurial"));
 		
 		scm.appendChild(optMercurial);
 		form.appendChild(scm);
-		
+		*/
 		
 		// ### Remote repository
 		var labelRepo = document.createElement("label");
 		labelRepo.setAttribute("for", "repo");
-		labelRepo.appendChild(document.createTextNode("Repository: "));
+		labelRepo.appendChild(document.createTextNode("Mercurial or Git Repository: "));
 		form.appendChild(labelRepo);
 		
 		var repo = document.createElement("input");

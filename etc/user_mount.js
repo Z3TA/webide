@@ -27,12 +27,15 @@ for (var i=0, username, mountResult; i<users.length; i++) {
 	mount("/lib/", HOME + username + "/lib");
 	mount("/lib64/", HOME + username + "/lib64");
 	mount("/usr/lib/", HOME + username + "/usr/lib");
+		mount("/usr/local/lib", HOME + username + "/usr/local/lib"); // Needed for Python packages (hggit)
 	mount("/usr/share/", HOME + username + "/usr/share"); // npm dependencies
 	mount("/usr/bin/hg", HOME + username + "/usr/bin/hg");
 	mount("/usr/bin/python", HOME + username + "/usr/bin/python");
 	mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
+		mount("/etc/ssl/certs", HOME + username + "/etc/ssl/certs");
+		
 	}
-}
+	}
 
 function mount(source, target) {
 	// Folders and files should already exist!

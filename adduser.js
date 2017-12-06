@@ -19,6 +19,8 @@
 	
 */
 
+var UTIL = require("./client/UTIL.js");
+
 var fs = require("fs");
 var child_process = require('child_process');
 var copyFileSync = require("./shared/copyFileSync.js");
@@ -291,6 +293,10 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		chownrDirSync(homeDir + "/wwwpub", uid, wwwgid);
 	
 		
+		// Enable hggit
+		fs.writeFileSync(homeDir + "/.hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n', ENCODING);
+		
+		
 		// Make wwwpub public, and set the group-id bit so that all new files get the www-data group
 		chmodrSync(homeDir + "/wwwpub", "2755");
 		
@@ -372,11 +378,13 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		mount("/lib/", HOME + username + "/lib");
 		mount("/lib64/", HOME + username + "/lib64");
 		mount("/usr/lib/", HOME + username + "/usr/lib");
+		mount("/usr/local/lib", HOME + username + "/usr/local/lib"); // Needed for Python packages (hggit)
 		mount("/usr/share/", HOME + username + "/usr/share"); // npm dependencies
 		mount("/usr/bin/hg", HOME + username + "/usr/bin/hg");
 		mount("/usr/bin/python", HOME + username + "/usr/bin/python");
 		mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
-	
+		mount("/etc/ssl/certs", HOME + username + "/etc/ssl/certs"); // Sometimes? Needed for SSL verfification
+		
 	
 		
 		// See how to debug apparmor in README.txt
@@ -421,7 +429,8 @@ function mount(source, target) {
 	
 	if ( fs.lstatSync( source ).isDirectory() ) {
 		// The source is a directory. Create a directory!
-		fs.mkdirSync(target);
+		makeDirPsync(target);
+		
 	} else {
 		// The source is not a directory (it's a file!?). Check if the file exist, then create it
 		if ( fs.existsSync( target ) ) throw new Error("File aready exist: " + target); // Prevent overwriting
@@ -437,6 +446,21 @@ function mount(source, target) {
 	
 }
 
+function makeDirPsync(target) {
+	// Make all the directories in the path ...
+	// Should we check if they exist first, or just try creating them all !?
+	target = UTIL.trailingSlash(target);
+	var paths = UTIL.getFolders(target);
+	for (var i=0; i<paths.length; i++) {
+		try {
+			fs.mkdirSync(paths[i]);
+		}
+		catch(err) {
+			if(err.code != "EEXIST") throw err;
+		}
+	}
+}
+
 function copyProgram(program, homeDir) {
 	/*
 		Copy a program so it can be spawned from chroot
@@ -444,8 +468,8 @@ function copyProgram(program, homeDir) {
 	*/
 	
 	try {
-	fs.mkdirSync(homeDir + "/usr");
-	fs.mkdirSync(homeDir + "/usr/bin");
+		fs.mkdirSync(homeDir + "/usr");
+		fs.mkdirSync(homeDir + "/usr/bin");
 		copyFileSync("/usr/bin/" + program, homeDir + "/usr/bin/" + program);
 	}
 	catch(err) {
