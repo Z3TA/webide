@@ -166,7 +166,9 @@
 		// First check if the folder exist
 		var fullPath = inputPath.value;
 		var includeHostInfo = true;
-		var folderPaths = UTIL.getFolders(fullPath, includeHostInfo);
+		var folderDelimiter = UTIL.getPathDelimiter(fullPath);
+		var folderPath = fullPath.slice(0, fullPath.lastIndexOf(folderDelimiter)) + folderDelimiter;
+		var folderPaths = UTIL.getFolders(folderPath, includeHostInfo);
 		
 		console.log("folderPaths=" + JSON.stringify(folderPaths));
 		

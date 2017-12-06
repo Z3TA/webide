@@ -143,6 +143,7 @@ var UTIL = {
 		var lastChar = fullPath.substr(fullPath.length-1);
 		
 		if(lastChar != "/" && lastChar != "\\") {
+			console.warn("getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
 			// Check if the path contains a file, and remove it
 			console.log("lastChar=" + lastChar + " fullPath=" + fullPath);
 			var delimiter = UTIL.getPathDelimiter(fullPath);
@@ -155,7 +156,7 @@ var UTIL = {
 				console.log("fullPath=" + fullPath +" (after removing file part)");
 				if(fullPath == "/") return ["/"];
 			}
-			// else: asume the last part is a folder
+			else console.warn("Assuming " + filePart + " is a directory!");
 			
 		}
 		
