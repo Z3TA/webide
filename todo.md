@@ -34,6 +34,21 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+
+hggit !
+easy_install hg-git
+
+~/.hgrc
+[extensions]
+hgext.bookmarks =
+hggit = 
+
+hg clone https://github.com/Z3TA/gittest.git
+
+There will be an error if the git repo is empty, make sure it has at least one file before cloning!
+
+
+
 Github integration:
 - Create new github repo
 - Clone from github repo
