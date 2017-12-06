@@ -648,7 +648,9 @@ else if(protocol == "sftp:") {
 			
 			if(err) {
 				console.warn("Unable to save " + path + "!");
-				saveToDiskCallback(err);
+				
+				if(err.code == "EISDIR") saveToDiskCallback(new Error("Make sure " + path + " is not a directory! " + err.message));
+				else saveToDiskCallback(err);
 			}
 			else {
 				//console.log("The file was successfully saved: " + path + "");
@@ -1837,8 +1839,13 @@ API.rename = function rename(user, json, callback) {
 	if(oldPath == undefined) return callback(new Error("oldPath=" + oldPath + " can not be null or undefined!"));
 	if(newPath == undefined) return callback(new Error("newPath=" + newPath + " can not be null or undefined!"));
 	
+	// First make a copy of the file, and then delete it !?
+	
 	var fs = require("fs");
 	fs.rename(oldPath, newPath, function(err) {
+		
+		if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not a directory! " + err.message);
+		
 		callback(err, {oldPath: oldPath, newPath: newPath});
 	});
 	
