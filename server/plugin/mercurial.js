@@ -755,6 +755,9 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 	// Update pulled changes
 	
 	var directory = UTIL.trailingSlash(json.directory);
+	var hguser = json.user;
+	var pw = json.pw;
+	var saveUserPw = json.save;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
@@ -763,8 +766,10 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 		
 		localDirectory = UTIL.trailingSlash(localDirectory);
 		
+		var config = (hguser != undefined && pw != undefined) ? ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw] : [];
+		
 		var execFile = require('child_process').execFile;
-		execFile('hg', ['push', '--noninteractive'], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		execFile('hg', ['push', '--noninteractive'].concat(config), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 			
 			// hg push seem to return errorcode (err) when no changes found
 			
@@ -796,24 +801,43 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 					callback(null, {changesets: null, remote: repoUrl});
 				}
 				else {
-					// added 2 changesets with 1 changes to 1 files
-					
-					var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
-					
-					if(!matchUpdate) return callback(stdout);
-					else {
-						var resp = {
-							changesets: matchUpdate[1],
-							changes: matchUpdate[2],
-							files: matchUpdate[3],
-							remote: repoUrl,
-							directory: user.toVirtualPath(rootDir)
-						};
-						
-						callback(null, resp);
+					// Different servers returns different text ...
+					var resp = {
+						remote: repoUrl,
+						directory: user.toVirtualPath(rootDir)
 					}
 					
+					// Mercurial:
+					// added 2 changesets with 1 changes to 1 files
+					var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
+					if(matchUpdate) {
+						resp.changesets = matchUpdate[1];
+						resp.changes = matchUpdate[2];
+						resp.files = matchUpdate[3];
+					}
+					
+					// Git(hub)
+					//added 1 commits with 1 trees and 1 blobs
+					if(matchUpdate == null) matchUpdate = stdout.match(/added (\d+) commits with (\d+) trees and (\d+) blobs/);
+					if(matchUpdate) {
+						resp.changesets = matchUpdate[1];
+						resp.changes = matchUpdate[2];
+						resp.files = matchUpdate[3];
+					}
+					
+					if(!matchUpdate) return callback(stdout);
+					else callback(null, resp);
+					
 				}
+				
+				if(saveUserPw) {
+					console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
+					saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
+						if (err) throw err;
+						console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+					});
+				}
+				
 			}
 		});
 	});

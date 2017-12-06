@@ -915,16 +915,7 @@
 					}
 					else {
 						
-						if(alsoPush) {
-							CLIENT.cmd("mercurial.push", {directory: rootDir}, function commited(err, resp) {
-								
-								if(err) alertBox(err.message);
-								else {
-									alertBox("Successfully commited and pushed to " + resp.remote);
-									commitSuccessful(resp.directory);
-								};
-							});
-						}
+						if(alsoPush) CLIENT.cmd("mercurial.push", {directory: rootDir}, hgPush);
 						else {
 							alertBox("Successfully commited! (don't forget to push)");
 							commitSuccessful(resp.directory);
@@ -932,6 +923,29 @@
 					};
 				});
 			}
+			
+			function hgPush(err, resp) {
+				if(err) {
+					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+					var authFailed = err.message.match(/abort: authorization failed/);
+					
+					if(authNeeded) {
+						var repoUrl = authNeeded[1];
+						showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", function authorized(username, password, save) {
+							if(username != null) CLIENT.cmd("mercurial.push", {directory: rootDir, user: username, pw: password, save: save}, hgPush);
+						}, "Push");
+						return;
+					}
+					else if(authFailed) {
+							alertBox("Authorization filed!\nUnable to Push to " + repoUrl);
+					}
+					else alertBox(err.message);
+					}
+					else {
+						alertBox("Successfully commited and pushed to " + resp.remote);
+						commitSuccessful(resp.directory);
+					}
+				}
 			
 			function commitSuccessful(directory) {
 				
