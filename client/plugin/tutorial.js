@@ -24,10 +24,14 @@
 	
 	
 	function achiveFileChange(file) {
-		if(!achievements.fileSave) alertBox('Press Ctrl + S to save changes!');
+		if(!achievements.fileSave) setTimeout(function() {
+			if(file.changed) {
+alertBox('Press Ctrl + S to save changes!');
+				EDITOR.removeEvent("fileChange", achiveFileChange);
+			}
+			}, 500);
 		
-		achived("fileChange");
-		EDITOR.removeEvent("fileChange", achiveFileChange);
+		//achived("fileChange");
 		}
 	
 	function achiveSaveFile(file) {
