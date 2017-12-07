@@ -49,7 +49,7 @@
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
 		
-		menuItem = EDITOR.addMenuItem("Login to JZedit server", showLoginDialog);
+		menuItem = EDITOR.addMenuItem("Switch user", showLoginDialog);
 		
 	}
 	
