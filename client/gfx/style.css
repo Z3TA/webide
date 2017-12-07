@@ -793,7 +793,7 @@ div.gotoFile li:hover {
 .menu {
 	display: block;
 	visibility: hidden;
-	position: absloute;
+	position: absolute;
 	top: 100px;
 	left: 100px;
 	z-index: 10;
@@ -820,6 +820,7 @@ div.gotoFile li:hover {
 	max-height: 100%;
 	overflow-x: hidden;
 	overflow-y: auto;
+	
 	}
 
 .menu li {

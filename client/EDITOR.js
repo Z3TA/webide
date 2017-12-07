@@ -1976,6 +1976,8 @@ EDITOR.lastKeyPressed = "";
 		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 		var menuDownABit = 10;
 		
+		//recoverFromFullScreenMenu(menu);
+		
 		var touchX = EDITOR.mouseX;
 		var touchY = EDITOR.mouseY;
 		
@@ -1998,7 +2000,7 @@ EDITOR.lastKeyPressed = "";
 		
 		//alert("offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
 		
-		console.log("menu: offsetHeight=" + offsetHeight);
+		console.log("menu: offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
 		
 		/*
 			When long touching the menu comes up underneath and a menu click is triggered!
@@ -2023,6 +2025,11 @@ EDITOR.lastKeyPressed = "";
 			var belowTouch = !((touchX < posX || touchX > posX + offsetWidth) && (touchY < posY || touchY > posY + offsetHeight));
 			
 		if(EDITOR.touchDown && belowTouch) {
+			
+			console.log("EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX + 
+			" offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight + 
+			" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height + 
+			" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
 			
 			menu.style.top = orgY + "px";
 			menu.style.left = orgX + "px";
@@ -6013,7 +6020,7 @@ window.getSelection().removeAllRanges();
 		menu.style.top = "0px";
 		menu.style.left = "0px";
 		menu.style.border="0px solid";
-		menu.style.width="100%";
+		//menu.style.width="100%";
 		menu.style.maxWidth="100%";
 		menu.style.height="100%";
 		menu.style.overflow="auto";
@@ -6030,7 +6037,7 @@ window.getSelection().removeAllRanges();
 		wireframe.style.display = "block";
 		menu.style.position="";
 		menu.style.border="";
-		menu.style.width="";
+		//menu.style.width="";
 		menu.style.maxWidth="";
 		menu.style.height="";
 		menu.style.overflow="";

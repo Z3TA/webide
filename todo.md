@@ -34,8 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Fix issue with menu that is always full screen. It should only go full screen if the mouse pointer is under the menu which will trigger a click on the menu!
-
 Make all menu items dynamic, only show "Save file" if the file is unsaved.
 
 Check the width and height of the menu and if it's bigger then 75% of the screen:
@@ -48,6 +46,7 @@ How to save !? How will the user figure out Ctrl+S is used for saving !?
 Run the editor as a web app:
 in Chrome: More tools > Add to desktop ...
 
+https://developer.mozilla.org/en-US/docs/Web/Manifest
 
 Coding an agar clone as a nodejs example
 
