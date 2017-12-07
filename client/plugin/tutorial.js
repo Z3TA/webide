@@ -81,7 +81,7 @@
 		
 		var achievementsString = EDITOR.storage.getItem("tutorialAchievements");
 		
-		alertBox(achievementsString);
+		//alertBox(achievementsString);
 		
 		if(achievementsString) {
 			try {
