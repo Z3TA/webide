@@ -42,9 +42,10 @@ Check the width and height of the menu and if it's bigger then 75% of the screen
 2) If there is no available horizontal space, make it full screen (only visible object in body) so mobile devices can scroll it
 Remove all selection after bringing forth the menu, as long press means select in most mobile devices.
 
-Instead of on, off, toggle, show, hide etc have a bullet in the menu that indicatets if something is on or off.
-
 How to save !? How will the user figure out Ctrl+S is used for saving !?
+
+Run the editor as a web app:
+in Chrome: More tools > Add to desktop ...
 
 
 Coding an agar clone as a nodejs example
@@ -65,6 +66,8 @@ package?json for the ssg ?
 
 todo
 ----
+
+When running WYSIWYG when in Preview mode (web_preview.js) the preview is no longer getting updates! (only when you save)
 
 Give friendly error when trying to pull emty git repo with hggit
 
