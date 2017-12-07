@@ -1780,24 +1780,67 @@ EDITOR.lastKeyPressed = "";
 		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 	
+	EDITOR.updateMenuItem = function(menuElement, active, htmlText, callback) {
+		
+		if(menuElement == undefined) throw new Error("menuElement=" + menuElement + " !");
+		
+		var li = menuElement;
+		
+		var child = li.childNodes;
+		var bullet = child[0];
+		var text = child[1];
+		var keyComboEl = child[2];
+		
+		if(active) bullet.setAttribute("class", "bullet active");
+		else bullet.setAttribute("class", "bullet inactive");
+		
+		if(htmlText) {
+			text.innerHTML = htmlText;
+		}
+		
+		if(callback) {
+		var keyCombo = EDITOR.getKeyFor(callback);
+		if(keyCombo) keyComboEl.innerText = keyCombo;
+		else keyComboEl.innerText = "";
+			
+			li.onclick = function(clickEvent) {
+				// Give the same function parameters as key bound events
+				var file = EDITOR.currentFile;
+				var combo = getCombo(clickEvent);
+				var character = null;
+				var charCode = 0;
+				var direction = "down";
+				callback(file, combo, character, charCode, direction);
+			}
+		}
+		
+		}
 	
 	EDITOR.addMenuItem = function(htmlText, callback, position) {
 		var menu = document.getElementById("canvasContextmenu");
 		
-		var menuElement = document.createElement("li");
-		menuElement.innerHTML = htmlText;
+		var li = document.createElement("li");
+		
+		var bullet = document.createElement("span");
+		bullet.setAttribute("class", "bullet inactive");
+		
+		li.appendChild(bullet);
+		
+		var menuText = document.createElement("span");
+		menuText.setAttribute("class", "text");
+		menuText.innerHTML = htmlText;
+		
+		li.appendChild(menuText);
 		
 		var keyCombo = EDITOR.getKeyFor(callback);
-		if(keyCombo) {
-			var keyComboEl = document.createElement("span");
-			keyComboEl.setAttribute("class", "key");
-			keyComboEl.innerText = keyCombo;
-			menuElement.appendChild(keyComboEl);
-		}
+		var keyComboEl = document.createElement("span");
+		keyComboEl.setAttribute("class", "key");
+		if(keyCombo) keyComboEl.innerText = keyCombo;
+		li.appendChild(keyComboEl);
 		
-		console.warn("Adding menu item: " + htmlText);
+		console.warn("Adding menu item: " + htmlText + " keyCombo=" + keyCombo);
 		
-		if(callback) menuElement.onclick = function(clickEvent) {
+		if(callback) li.onclick = function(clickEvent) {
 			// Give the same function parameters as key bound events
 			var file = EDITOR.currentFile;
 			var combo = getCombo(clickEvent);
@@ -1810,15 +1853,15 @@ EDITOR.lastKeyPressed = "";
 		if(position) {
 			if(position < 0) position = 0
 			else if(position >= menu.children.length) position = menu.children.length-1;
-			menu.insertBefore(menuElement, menu.children[position]);
+			menu.insertBefore(li, menu.children[position]);
 		}
 		else {
-			menu.appendChild(menuElement);
+			menu.appendChild(li);
 		}
 		
 		// Don't forget to call EDITOR.hideMenu() after the item has been clicked!
 		
-		return menuElement;
+		return li;
 	}
 	
 	EDITOR.removeMenuItem = function(menuElement) {
@@ -1830,7 +1873,7 @@ EDITOR.lastKeyPressed = "";
 		
 		var positionIndex = Array.prototype.indexOf.call(menu.children, menuElement);
 		
-		if(menuElement.parentNode == undefined) throw new Error("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
+		if(menuElement.parentNode == undefined) return console.warn("menuElement has no parent! menuElement.innerHTML=" + menuElement.innerHTML);
 		
 		if(menuElement.parentNode == menu) menu.removeChild(menuElement);
 		else throw new Error("menuElement not part of menu! menuElement.innerHTML=" + menuElement.innerHTML + "\nmenu.innerHTML=" + menu.innerHTML + "\nmenuElement.parent.innerHTML=" + menuElement.parent.innerHTML);
@@ -1853,21 +1896,29 @@ EDITOR.lastKeyPressed = "";
 		//var menu = document.getElementById("canvasContextmenu");
 		var tempItems = document.getElementById("canvasContextmenuTemp");
 		
-		var menuElement = document.createElement("li");
-		menuElement.innerHTML = htmlText;
+		var li = document.createElement("li");
+		
+		var bullet = document.createElement("span");
+		bullet.setAttribute("class", "bullet inactive");
+		
+		li.appendChild(bullet);
+		
+		var menuText = document.createElement("span");
+		menuText.setAttribute("class", "text");
+		menuText.innerHTML = htmlText;
+		
+		li.appendChild(menuText);
 		
 		var keyCombo = EDITOR.getKeyFor(callback);
-		if(keyCombo) {
-			var keyComboEl = document.createElement("span");
-			keyComboEl.setAttribute("class", "key");
-			keyComboEl.innerText = keyCombo;
-			menuElement.appendChild(keyComboEl);
-		}
+		var keyComboEl = document.createElement("span");
+		keyComboEl.setAttribute("class", "key");
+		if(keyCombo) keyComboEl.innerText = keyCombo;
+			li.appendChild(keyComboEl);
 		
 		var separator =  document.createElement("li");
 		separator.setAttribute("class", "sep");
 		
-		if(callback) menuElement.onclick = function(clickEvent) {
+		if(callback) li.onclick = function(clickEvent) {
 			// Give the same function parameters as key bound events
 			var file = EDITOR.currentFile;
 			var combo = getCombo(clickEvent);
@@ -1877,13 +1928,16 @@ EDITOR.lastKeyPressed = "";
 			callback(file, combo, character, charCode, direction);
 		}
 		
-		tempItems.appendChild(menuElement);
+		tempItems.appendChild(li);
 		
 		// Add many: accept array?
 		
 		tempItems.appendChild(separator);
 		
 		//tempItems.insertBefore(menuElement, tempItems.firstChild);
+		
+		return li;
+		
 	}
 	
 	
@@ -2486,6 +2540,8 @@ EDITOR.lastKeyPressed = "";
 		
 		if(typeof funName == "function") funName = UTIL.getFunctionName(funName); // Convert to string
 		
+		//console.log("getKeyFor: funName=" + funName);
+		
 		// names of known key codes (0-255)
 		var getKeyboardMapping = [
 			"", // [0]
@@ -2750,7 +2806,10 @@ EDITOR.lastKeyPressed = "";
 		var f, character, combo = "";
 		for(var i=0; i<keyBindings.length; i++) {
 			f = keyBindings[i]
+			//console.log(UTIL.getFunctionName(f.fun) + " == " + funName + " ?");
 			if(UTIL.getFunctionName(f.fun) == funName) {
+				
+				//console.log(funName + " !!");
 				
 				if(f.charCode) {
 					character = getKeyboardMapping[f.charCode];
@@ -2768,6 +2827,8 @@ EDITOR.lastKeyPressed = "";
 					case 6: combo = "CTRL + ALT"; break;
 					case 7: combo = "SHIFT + CTRL + ALT"; break;
 				}
+				
+				//console.log("getKeyFor: funName=" + funName + " combo=" + combo + " character=" + character);
 				
 				if(combo) return combo + " + " + character;
 				else return character;
@@ -3864,13 +3925,17 @@ EDITOR.lastKeyPressed = "";
 		EDITOR.virtualKeyboard.hide();
 		
 		function toggleVirtualKeyboard() {
+			EDITOR.hideMenu();
+			
 			if(EDITOR.virtualKeyboard.isVisible) {
 				EDITOR.virtualKeyboard.hide();
+				EDITOR.updateMenuItem(virtualKeyboardMenuItem, false);
 			}
 			else {
 				EDITOR.virtualKeyboard.show();
+				EDITOR.updateMenuItem(virtualKeyboardMenuItem, true);
 			}
-			EDITOR.hideMenu();
+			
 		}
 		
 		

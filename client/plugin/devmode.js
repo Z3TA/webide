@@ -89,8 +89,8 @@
 		
 		console.log("Disabling dev mode ...");
 		
-		if(toggleDevmodeMenuItem) toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
-		toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode ON", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context meny
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode ON", toggleDevMode);
+		EDITOR.updateMenuItem(toggleDevmodeMenuItem, false, "Dev-mode ON");
 		
 		if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
 		
@@ -120,10 +120,8 @@
 		
 		showDevTools();
 		
-		if(toggleDevmodeMenuItem) {
-			toggleDevmodeMenuItemPosition = EDITOR.removeMenuItem(toggleDevmodeMenuItem);
-		}
-		toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode OFF", toggleDevMode, toggleDevmodeMenuItemPosition); // Add items to the canvas context menu
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode OFF", toggleDevMode);
+		EDITOR.updateMenuItem(toggleDevmodeMenuItem, true, "Dev-mode OFF");
 		
 		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests);
 		

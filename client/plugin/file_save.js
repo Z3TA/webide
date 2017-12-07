@@ -343,7 +343,7 @@
 	
 	function showSaveOption(file, x, y, ev) {
 		if(!file) return true;
-		if(!file.changed) return true;
+		if(file.isSaved) return true;
 		if(!file.savedAs) return true;
 		
 		EDITOR.addTempMenuItem("Save file", saveCurrentFile);

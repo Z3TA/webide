@@ -793,7 +793,6 @@ div.gotoFile li:hover {
 .menu {
 	display: block;
 	visibility: hidden;
-	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
 	position: absloute;
 	top: 100px;
 	left: 100px;
@@ -824,18 +823,15 @@ div.gotoFile li:hover {
 	}
 
 .menu li {
-	font-size: 13px;
-	color: #838ca2;
-	color: #313a4f;
-	
-	color: black;
 	background-color: #f6f6f6;
 	/*text-shadow: 0 1px white;*/
 	cursor: default;
 	display: block;
 	position: relative;
-	padding: 5px 12px 5px 12px;
-	
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	padding-right: 5px;
 	text-decoration: none;
 	border: 1px solid transparent;
 	}
@@ -858,6 +854,36 @@ div.gotoFile li:hover {
 	/* background-image: linear-gradient(to bottom, #7688bd, #4e64a3); */
 }
 
+.menu li .bullet {
+	display: inline-block;
+	vertical-align: middle;
+	color: #45b73b;
+	font-weight: bold;
+	text-shadow: 0px 0px 0px black;
+	font-size: 13px;
+	width: 15px;
+	text-align: center;
+	font-size: 20px;
+}
+
+.menu li .bullet.inactive:before {
+	content:"\2003";
+	
+	}
+
+.menu li .bullet.active:before {
+	content:"\2022";
+	}
+
+.menu li .text {
+	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
+	font-weight: normal;
+	text-shadow: none;
+	font-size: 13px;
+	color: #838ca2;
+	color: #313a4f;
+	color: black;
+}
 
 .menu li .key {
 	display:inline-block;
@@ -874,6 +900,8 @@ div.gotoFile li:hover {
 .menu li:hover .key {
 	color: #1460AA;
 	}
+
+
 
 
 /* ### Dialogs */

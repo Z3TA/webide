@@ -15,7 +15,7 @@
 			// Bind to ctrl + N
 			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: keyboardNewFile});
 			
-			menuItem = EDITOR.addMenuItem("Create new file", contentMenuNewFile);
+			menuItem = EDITOR.addMenuItem("Create new file", keyboardNewFile);
 			
 			//newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
@@ -33,15 +33,10 @@
 	});
 	
 	function keyboardNewFile(file, combo, character, charCode, direction) {
+		EDITOR.hideMenu();
 		createNewFile("new file", "");
 		return false;
 	}
-	
-	function contentMenuNewFile(clickEvent) {
-		createNewFile("new file", "");
-		EDITOR.hideMenu();
-		}
-	
 	
 	function createNewFile(path, content) {
 		

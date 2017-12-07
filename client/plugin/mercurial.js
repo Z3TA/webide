@@ -1356,8 +1356,7 @@
 		
 		if(!file) return alertBox("Open a file to see annotations");
 		
-		var annotateMenuItemPosition = annotateMenuItem ? EDITOR.removeMenuItem(annotateMenuItem) : null;
-		annotateMenuItem = EDITOR.addMenuItem("Hide Comments", annotateOff, annotateMenuItemPosition);
+		EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, hideAnnotationsString, annotateOff);
 		
 		showAnnotations(file, file.caret);
 		
@@ -1496,8 +1495,7 @@
 	function annotateOff() {
 		doAnnotate = false;
 		
-		var annotateMenuItemPosition = annotateMenuItem ? EDITOR.removeMenuItem(annotateMenuItem) : null;
-		annotateMenuItem = EDITOR.addMenuItem(showAnnotationsString, annotateOn, annotateMenuItemPosition);
+		EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
 		
 		EDITOR.removeEvent("moveCaret", showAnnotations);
 		

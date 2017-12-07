@@ -87,12 +87,15 @@
 	
 	function toggleFileExplorer(toState) {
 		
+		EDITOR.hideMenu();
+		
 		//alertBox("toState=" + toState);
 		
 		if(typeof toState == "boolean") visible = toState;
 		else visible = visible ? false : true; // Switch
 		
-		menuItem.innerHTML = "File explorer " + (visible ? "off":"on");
+		//menuItem.innerHTML = "File explorer " + (visible ? "off":"on");
+		EDITOR.updateMenuItem(menuItem, visible, "File explorer " + (visible ? "off":"on"));
 		
 		if(visible) {
 			exploreDir(EDITOR.workingDirectory)
