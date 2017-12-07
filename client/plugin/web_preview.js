@@ -14,19 +14,34 @@
 	EDITOR.plugin({
 		desc: "Preview HTML files",
 		load: function loadWebPreview() {
-			menuItem = EDITOR.addMenuItem("Preview HTML", webPreview);
+			//menuItem = EDITOR.addMenuItem("Preview HTML", webPreview);
+			EDITOR.on("showMenu", maybeShowPreviewInMenu);
 			EDITOR.on("fileSave", refreshMaybe);
 			var order = 1;
 			EDITOR.on("autoComplete", webPreviewAutocomplete, order);
 		},
 		unload: function unloadWebPreview() {
-			EDITOR.removeMenuItem(menuItem);
+			//EDITOR.removeMenuItem(menuItem);
+			EDITOR.removeEvent("showMenu", maybeShowPreviewInMenu);
 			EDITOR.removeEvent("fileSave", refreshMaybe);
 			
 			if(previewWin) previewWin.close();
 			
 		}
 	});
+	
+	function maybeShowPreviewInMenu() {
+		
+		var file = EDITOR.currentFile;
+		
+		if(!file) return true;
+		if(!file.path.match(/html?$/i)) return true;
+		
+		menuItem = EDITOR.addTempMenuItem("Preview", webPreview);
+		
+		if(inPreview) EDITOR.updateMenuItem(menuItem, true);
+		
+	}
 	
 	function webPreview() {
 		EDITOR.hideMenu();
@@ -71,7 +86,6 @@
 	function whenLoaded() {
 		
 		theWindow.window.onerror = captureError;
-		
 		
 		// Override the console log of the preview window and display the messages as info
 		consoleLogOriginal = theWindow.window.console.log;
@@ -243,13 +257,14 @@
 			if(theWindow.window.console.log != captureConsoleLog) {
 				console.log("yep!");
 				clearInterval(interval);
+				clearTimeout(timeout);
 				whenLoaded();
 			}
 			else console.log("nope");
 			
 		}, 1);
 		
-		setTimeout(function() {
+		var timeout = setTimeout(function() {
 			clearInterval(interval);
 			if(theWindow.window.console.log != captureConsoleLog) throw new Error("Failed to attach error and console.log integration");
 		}, 150);
