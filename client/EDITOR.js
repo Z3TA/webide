@@ -228,6 +228,9 @@ EDITOR.lastKeyPressed = "";
 	*/
 	
 	
+	EDITOR.touchDown = false; // Is the user still holding down/touching ?
+	EDITOR.scrollingEnabled = false;
+	
 	var lastMouseDownEventType = "";
 	
 	// # Working Directory
@@ -1947,6 +1950,8 @@ EDITOR.lastKeyPressed = "";
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
+		recoverFromFullScreenMenu(menu);
+		
 		menu.style.visibility = "hidden"; // Always hide the menu on mouse down
 		//menu.style.height = "1px";
 		
@@ -1961,15 +1966,22 @@ EDITOR.lastKeyPressed = "";
 	}
 	
 	EDITOR.showMenu = function(posX, posY, clickEvent) {
+		if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
+		if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
+		
+		clearSelection();
 		if(menuVisibleOnce == false) EDITOR.renderNeeded();
 		menuVisibleOnce = true;
 		var menu = document.getElementById("canvasContextmenu");
 		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 		var menuDownABit = 10;
 		
-		if(posX === EDITOR.mouseX || posX === undefined) posX = EDITOR.mouseX + notUpOnMenu;
+		var touchX = EDITOR.mouseX;
+		var touchY = EDITOR.mouseY;
 		
-		if(posY === undefined) posY = EDITOR.mouseY + menuDownABit;
+		if(posX === touchX || posX === undefined) posX = touchX + notUpOnMenu;
+		
+		if(posY === undefined) posY = touchY + menuDownABit;
 		
 		for(var i=0, f; i<EDITOR.eventListeners.showMenu.length; i++) {
 			EDITOR.eventListeners.showMenu[i].fun(EDITOR.currentFile, posX, posY, clickEvent);
@@ -1988,6 +2000,15 @@ EDITOR.lastKeyPressed = "";
 		
 		console.log("menu: offsetHeight=" + offsetHeight);
 		
+		/*
+			When long touching the menu comes up underneath and a menu click is triggered!
+			So bring in the menu outside of the touch, and then correct the position
+		*/
+		
+		var orgX = posX;
+		var orgY = posY;
+		
+		
 		if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
 		if((posX+offsetWidth) > EDITOR.width) posX = EDITOR.width - offsetWidth;
 		
@@ -1996,10 +2017,53 @@ EDITOR.lastKeyPressed = "";
 			posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
 		}
 		
-		menu.style.visibility = "visible";
+		if(posX < 0) posX = 0;
+		if(posY < 0) posY = 0;
+		
+			var belowTouch = !((touchX < posX || touchX > posX + offsetWidth) && (touchY < posY || touchY > posY + offsetHeight));
+			
+		if(EDITOR.touchDown && belowTouch) {
+			
+			menu.style.top = orgY + "px";
+			menu.style.left = orgX + "px";
+			
+			var interval = setInterval(waitForTouchUp, 50);
+			var timeout = setTimeout(giveUp, 1500);
+		}
+		else {
 		menu.style.top = posY + "px";
 		menu.style.left = posX + "px";
+		}
+		
+		menu.style.visibility = "visible";
+			
+			
 		//menu.style.height = "100%";
+		
+		function waitForTouchUp() {
+			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
+			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
+			clearSelection();
+			
+			if(!EDITOR.touchDown) {
+				giveUp();
+				
+				if(offsetHeight > EDITOR.height || offsetWidth*2 > EDITOR.width) {
+					// Hide everything besides the menu
+					fullScreenMenu(menu);
+				}
+				else {
+				menu.style.top = posY + "px";
+				menu.style.left = posX + "px";
+				}
+			}
+		}
+		
+		function giveUp() {
+			clearInterval(interval);
+			clearTimeout(timeout);
+		}
+		
 	}
 	
 	EDITOR.addInfo = function(row, col, txt) {
@@ -3830,6 +3894,7 @@ EDITOR.lastKeyPressed = "";
 	//window.addEventListener("touchmove", function(e) {console.log(e);}, false);
 	
 	function preventMotion(event) {
+		if(EDITOR.scrollingEnabled) return true;
 		//return true;
 		event.preventDefault();
 		event.stopPropagation();
@@ -5351,6 +5416,7 @@ EDITOR.lastKeyPressed = "";
 		mouseDownEvent = mouseDownEvent || windows.event;
 		
 		EDITOR.lastElementWithFocus = document.activeElement;
+		EDITOR.touchDown = true;
 		
 		var mouse = getMousePosition(mouseDownEvent);
 		var mouseX = mouse.x;
@@ -5471,6 +5537,8 @@ EDITOR.lastKeyPressed = "";
 		mouseUpEvent = mouseUpEvent || window.event;
 		
 		//e.preventDefault(); // Commented this because I couln't click on selected text inside html input 
+		
+		EDITOR.touchDown = false;
 		
 		// Mouse position is on the current object (Canvas)
 		var mouse = getMousePosition(mouseUpEvent);
@@ -5929,6 +5997,45 @@ EDITOR.lastKeyPressed = "";
 		return "Are you sure you want to close the editor ?";
 	}
 	
+	function clearSelection() {
+if ( document.selection ) {
+document.selection.empty();
+} else if ( window.getSelection ) {
+window.getSelection().removeAllRanges();
+}
+	}
 	
+	function fullScreenMenu(menu) {
+		var wireframe = document.getElementById("wireframe");
+		//EDITOR.virtualKeyboard.hide();
+		wireframe.style.display = "none";
+		menu.style.position="relative";
+		menu.style.top = "0px";
+		menu.style.left = "0px";
+		menu.style.border="0px solid";
+		menu.style.width="100%";
+		menu.style.maxWidth="100%";
+		menu.style.height="100%";
+		menu.style.overflow="auto";
+		EDITOR.scrollingEnabled = true;
+		
+		EDITOR.addTempMenuItem("Hide menu", function() {
+			EDITOR.hideMenu();
+		});
+		
+	}
+	
+	function recoverFromFullScreenMenu(menu) {
+		var wireframe = document.getElementById("wireframe");
+		wireframe.style.display = "block";
+		menu.style.position="";
+		menu.style.border="";
+		menu.style.width="";
+		menu.style.maxWidth="";
+		menu.style.height="";
+		menu.style.overflow="";
+		EDITOR.scrollingEnabled = false;
+		EDITOR.resizeNeeded();
+	}
 	
 })();

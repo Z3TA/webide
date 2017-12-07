@@ -34,7 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-You must show the menu when you start the editor, to make sure the user knows how to find it.
 Make all menu items dynamic, only show "Save file" if the file is unsaved.
 
 Check the width and height of the menu and if it's bigger then 75% of the screen:
