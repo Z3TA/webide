@@ -1,0 +1,13 @@
+{
+	"version": "1.0.0",
+	"name": "JZedit",
+	"description": "Web IDE: Editor for creating wep sites and apps",
+	"launch_path": "/index.htm",
+	"icons": {
+		"64": "/gfx/jz64.png"
+	},
+	"developer": {
+		"name": "Johan Zetterberg",
+		"url": "http://www.webtigerteam.com/johan/"
+	}
+}

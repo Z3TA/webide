@@ -26,7 +26,9 @@ var mimeMap = {
 	ico: "image/x-icon",
 	ttf: "application/octet-stream",
 	woff2: "font/woff2",
-	woff: "application/font-woff"
+	woff: "application/font-woff",
+	webmanifest: "application/manifest+json",
+	webapp: "application/x-web-app-manifest+json"
 }
 
 module.exports = mimeMap;
