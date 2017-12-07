@@ -48,7 +48,7 @@
 		
 		touchDownTimer = setTimeout(function showMenu() {
 			
-			EDITOR.showMenu(mouseX, mouseY);
+			EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
 			
 		}, 500);
 	}
