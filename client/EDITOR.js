@@ -10,7 +10,7 @@ var tempTest = 0;
 var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
-
+var menuVisibleOnce = false;
 
 // List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
@@ -142,7 +142,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	resolveTool: [],
 	mergeTool: [],
 	fileDrop: [],
-	openFileTool: []
+	openFileTool: [],
+	showMenu: []
 };
 
 EDITOR.renderFunctions = [];
@@ -1120,7 +1121,7 @@ EDITOR.lastKeyPressed = "";
 		
 		//console.log("rendering ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
 		
-		if(EDITOR.currentFile) {
+		if(EDITOR.currentFile && menuVisibleOnce) {
 			
 			console.log("render file=" + EDITOR.currentFile.path);
 			
@@ -1230,6 +1231,8 @@ EDITOR.lastKeyPressed = "";
 			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			ctx.textBaseline = "top";
 			
+			/*
+				
 			var keyCombo, friendlyString;
 			
 			if(EDITOR.user) {
@@ -1240,8 +1243,11 @@ EDITOR.lastKeyPressed = "";
 				keyCombo = EDITOR.getKeyFor("openFile");
 				friendlyString = "Press " + keyCombo +" to open a file";
 			}
+			*/
 			
-			if(keyCombo) {
+			var friendlyString = "Right click or long-touch to show the menu!"
+			
+			if(friendlyString) {
 				// Place the string in the center
 				var textMeasure = ctx.measureText(friendlyString);
 				var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
@@ -1868,7 +1874,9 @@ EDITOR.lastKeyPressed = "";
 		
 	}
 	
-	EDITOR.showMenu = function(posX, posY) {
+	EDITOR.showMenu = function(posX, posY, clickEvent) {
+		if(menuVisibleOnce == false) EDITOR.renderNeeded();
+		menuVisibleOnce = true;
 		var menu = document.getElementById("canvasContextmenu");
 		var notUpOnMenu = 6; // displace the menu so that the mouse-up event doesn't fire on it
 		var menuDownABit = 10;
@@ -1876,6 +1884,10 @@ EDITOR.lastKeyPressed = "";
 		if(posX === EDITOR.mouseX || posX === undefined) posX = EDITOR.mouseX + notUpOnMenu;
 		
 		if(posY === undefined) posY = EDITOR.mouseY + menuDownABit;
+		
+		for(var i=0, f; i<EDITOR.eventListeners.showMenu.length; i++) {
+			EDITOR.eventListeners.showMenu[i].fun(EDITOR.currentFile, posX, posY, clickEvent);
+			}
 		
 		// Make sure it fits on the screen!!
 		/*
@@ -3995,7 +4007,7 @@ EDITOR.lastKeyPressed = "";
 				
 				// Many plugins depend on the storage being available ...
 				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
-				
+				// Treat EDITOR.storage as window.localStorage! Eg. It's all strings so you jave to JSON.parse !
 				
 				for(var i=0, fun; i<EDITOR.eventListeners.storageReady.length; i++) {
 					fun = EDITOR.eventListeners.storageReady[i].fun;
@@ -5304,7 +5316,7 @@ EDITOR.lastKeyPressed = "";
 				
 				EDITOR.input = false;
 				
-				EDITOR.showMenu();
+				EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
 				
 			}
 			
