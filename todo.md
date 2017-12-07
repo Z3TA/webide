@@ -36,7 +36,6 @@ What I'm working on
 
 bug: File edits doesn't show after a reload! Works in nw.js but not the browser!
 
-tutorial alerts shows many times!
 
 Make all menu items dynamic, only show "Save file" if the file is unsaved.
 

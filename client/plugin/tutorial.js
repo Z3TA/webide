@@ -10,6 +10,8 @@
 	var tutorialMessageInterval;
 	var tutorialMessages = {};
 	
+	var achiveFileChangeTimeout;
+	
 	EDITOR.plugin({
 		desc: "Tutorial: Show friendly help messages",
 		load: loadTutorial,
@@ -53,13 +55,17 @@
 	
 	function achiveFileChange(file) {
 		if(!achievements) return true;
-		if(!achievements.fileSave) setTimeout(function() {
+		if(!achievements.fileSave) {
+			clearTimeout(achiveFileChangeTimeout);
+			achiveFileChangeTimeout = setTimeout(function() {
 			if(file.changed) {
 				if(EDITOR.hasKeyboard) alertBox('Press Ctrl + S to save changes!');
 				else alertBox('Use long touch-down to show the menu and select "Save file" to save!');
+					
 				EDITOR.removeEvent("fileChange", achiveFileChange);
 			}
 			}, 500);
+		}
 		else if(achievements.fileSave) EDITOR.removeEvent("fileChange", achiveFileChange);
 		
 		//achived("fileChange");
