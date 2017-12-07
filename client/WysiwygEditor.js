@@ -555,11 +555,17 @@ var WysiwygEditor;
 		
 		//keyUpEvent = keyUpEvent || window.event;
 		
+		var key_S = 83;
+		
 		// Do not place caret in source code now if text was inserted (we'll do that later)
 		// Only place caret if keyboard arrow keys was used to move the caret
 		console.log("(keyUpEvent.keyCode=" + keyUpEvent.keyCode);
 		if(!EDITOR.input && (keyUpEvent.keyCode == 37 || keyUpEvent.keyCode == 38 || keyUpEvent.keyCode == 39 || keyUpEvent.keyCode == 40)) {
 			wysiwygEditor.placeCaretInSourceCode(keyUpEvent.target);
+		}
+		else if(!EDITOR.input && keyUpEvent.keyCode == key_S && keyUpEvent.ctrlKey) {
+			// The user hit Ctrl+S while in the preview window
+			EDITOR.saveFile(wysiwygEditor.sourceFile);
 		}
 		// Internet Explorer doesn't fire change events on content-editable
 		else if(!previewInputFired) {
