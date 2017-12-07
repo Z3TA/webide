@@ -834,12 +834,11 @@ div.gotoFile li:hover {
 	cursor: default;
 	display: block;
 	position: relative;
-	padding: 5px 20px 5px 12px;
+	padding: 5px 12px 5px 12px;
 	
 	text-decoration: none;
 	border: 1px solid transparent;
-	
-}
+	}
 
 .menu li.sep {
 	margin-top: 4px;
@@ -859,6 +858,22 @@ div.gotoFile li:hover {
 	/* background-image: linear-gradient(to bottom, #7688bd, #4e64a3); */
 }
 
+
+.menu li .key {
+	display:inline-block;
+	color: #919191;
+	font-size: 9px;
+	text-shadow: none;
+	vertical-align: middle;
+	margin-left: 4px;
+	float: right;
+	right: 0px;
+	margin-top: 4px;
+	}
+
+.menu li:hover .key {
+	color: #1460AA;
+	}
 
 
 /* ### Dialogs */

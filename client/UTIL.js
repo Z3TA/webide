@@ -60,6 +60,8 @@ var UTIL = {
 			return folderPath;
 		}
 		
+		if(typeof folderPath != "string") throw new Error("folderPath=" + folderPath + " (" + typeof folderPath + ") needs to be a string!");
+		
 		var delimiter = UTIL.getPathDelimiter(folderPath);
 		var lastCharacter = folderPath.substr(folderPath.length-1, 1);
 		if(lastCharacter != delimiter) {
@@ -292,6 +294,8 @@ var UTIL = {
 			console.warn("Unable to determine path delimiter. Slash / will be used! path=" + path);
 			return "/";
 		}
+		
+		if(typeof path != "string") throw new Error("path=" + path + " (" + typeof path + ") needs to be a string!");
 		
 		var lastChar = path.substring(path.length-1);
 		

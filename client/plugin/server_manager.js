@@ -71,10 +71,7 @@
 		EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
 		EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
 		
-		menuItem = EDITOR.addMenuItem("Remote connections", function() {
-			showServerManger();
-			EDITOR.hideMenu();
-		});
+		menuItem = EDITOR.addMenuItem("Remote connections", showServerManger);
 		
 	}
 	
@@ -532,6 +529,8 @@
 	function showServerManger() {
 		
 		console.log("Show server manager");
+		
+		EDITOR.hideMenu();
 		
 		// Steal focus from the file
 		EDITOR.input = false;

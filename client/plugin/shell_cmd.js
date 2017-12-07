@@ -20,16 +20,14 @@
 	});
 	
 	function loadShell() {
-		shellMenuItem = EDITOR.addMenuItem("Shell command ...", function() {
-			createShellFile();
-			EDITOR.hideMenu();
-		});
 		
 		var T = 84;
 		var ENTER = 13;
 		
 		EDITOR.bindKey({desc: "Run shell command", charCode: ENTER, fun: runShellCommand});
 		EDITOR.bindKey({desc: "Enter shell commands", charCode: T, combo: CTRL, fun: createShellFile});
+		
+		shellMenuItem = EDITOR.addMenuItem("Shell command ...", createShellFile);
 		
 	}
 	
@@ -43,6 +41,8 @@
 	}
 	
 	function createShellFile() {
+		
+		EDITOR.hideMenu();
 		
 			EDITOR.openFile("shell", promptString, function shellFileOpen(err, file) {
 			

@@ -335,6 +335,8 @@
 			EDITOR.saveFile(file);
 		}
 		
+		EDITOR.hideMenu();
+		
 		return false;
 		
 	}
@@ -344,10 +346,7 @@
 		if(!file.changed) return true;
 		if(!file.savedAs) return true;
 		
-		EDITOR.addTempMenuItem("Save file", function() {
-			EDITOR.hideMenu();
-			EDITOR.saveFile(file);
-		});
+		EDITOR.addTempMenuItem("Save file", saveCurrentFile);
 		
 	}
 	

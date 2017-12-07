@@ -1787,9 +1787,25 @@ EDITOR.lastKeyPressed = "";
 		var menuElement = document.createElement("li");
 		menuElement.innerHTML = htmlText;
 		
+		var keyCombo = EDITOR.getKeyFor(callback);
+		if(keyCombo) {
+			var keyComboEl = document.createElement("span");
+			keyComboEl.setAttribute("class", "key");
+			keyComboEl.innerText = keyCombo;
+			menuElement.appendChild(keyComboEl);
+		}
+		
 		console.warn("Adding menu item: " + htmlText);
 		
-		if(callback) menuElement.onclick = callback;
+		if(callback) menuElement.onclick = function(clickEvent) {
+			// Give the same function parameters as key bound events
+			var file = EDITOR.currentFile;
+			var combo = getCombo(clickEvent);
+			var character = null;
+			var charCode = 0;
+			var direction = "down";
+			callback(file, combo, character, charCode, direction);
+		}
 		
 		if(position) {
 			if(position < 0) position = 0
@@ -1840,10 +1856,26 @@ EDITOR.lastKeyPressed = "";
 		var menuElement = document.createElement("li");
 		menuElement.innerHTML = htmlText;
 		
+		var keyCombo = EDITOR.getKeyFor(callback);
+		if(keyCombo) {
+			var keyComboEl = document.createElement("span");
+			keyComboEl.setAttribute("class", "key");
+			keyComboEl.innerText = keyCombo;
+			menuElement.appendChild(keyComboEl);
+		}
+		
 		var separator =  document.createElement("li");
 		separator.setAttribute("class", "sep");
 		
-		if(callback) menuElement.onclick = callback;
+		if(callback) menuElement.onclick = function(clickEvent) {
+			// Give the same function parameters as key bound events
+			var file = EDITOR.currentFile;
+			var combo = getCombo(clickEvent);
+			var character = null;
+			var charCode = 0;
+			var direction = "down";
+			callback(file, combo, character, charCode, direction);
+		}
 		
 		tempItems.appendChild(menuElement);
 		

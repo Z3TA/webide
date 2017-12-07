@@ -55,17 +55,11 @@
 	function loadMercurial() {
 		
 		// todo: Only show commit and annotate if the file belongs to a Mercurial SCM repo
-		repoCommitMenuItem = EDITOR.addMenuItem("Commit", function() {
-			showCommitDialog();
-			EDITOR.hideMenu();
-		});
+		repoCommitMenuItem = EDITOR.addMenuItem("Commit", showCommitDialog);
 		
 		annotateMenuItem = EDITOR.addMenuItem(showAnnotationsString, annotateOn);
 		
-		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", function() {
-			showCloneDialog();
-			EDITOR.hideMenu();
-		});
+		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
@@ -1282,6 +1276,7 @@
 	
 	
 	function showCloneDialog() {
+		EDITOR.hideMenu();
 		return repoCloneDialog.show();
 	}
 	
@@ -1522,6 +1517,13 @@
 	
 	
 	function showCommitDialog(directory) {
+		
+		console.log("heyho");
+		console.log(directory);
+		
+		if(directory instanceof File) directory = UTIL.getDirectoryFromPath(directory.path);
+		
+		EDITOR.hideMenu();
 		repoCommitDialog.show();
 		
 		// Reset these values

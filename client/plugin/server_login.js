@@ -3,7 +3,7 @@
 	
 	var DEFAULT_USERNAME = "admin";
 	var DEFAULT_PASSWORD = "admin";
-
+	
 	var serverLoginDialog = EDITOR.createWidget(buildServerLoginDialog);
 	var menuItem;
 	
@@ -18,12 +18,12 @@
 		order: 999999 // We want to run after most other plugins, so the other plugins can deal with server connections too
 	});
 	
-
+	
 	function loadServerLogin() {
-
+		
 		/*
-		Wait before start events and plugins have loaded before connecting to the server !..
-		Or plugins listening for events from the server, or loginSuccess etc will not fire.
+			Wait before start events and plugins have loaded before connecting to the server !..
+			Or plugins listening for events from the server, or loginSuccess etc will not fire.
 		*/
 		
 		var server = undefined;
@@ -32,13 +32,13 @@
 			var url = localStorage.getItem("editorServerUrl");
 			if(url) server = {url: url};
 		}
-
+		
 		CLIENT.connect(server, function connectedToServer(err) {
 			
-
+			
 		});
-	
-	
+		
+		
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
 		CLIENT.on("connectionConnected", serverLoginOnConnected);
@@ -47,19 +47,16 @@
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
-
 		
-		menuItem = EDITOR.addMenuItem("Login to JZeidt server", function() {
-			showLoginDialog();
-			EDITOR.hideMenu();
-		});
+		
+		menuItem = EDITOR.addMenuItem("Login to JZeidt server", showLoginDialog);
 		
 	}
 	
 	function unloadServerLogin() {
 		
 		serverLoginDialog.unload();
-
+		
 		EDITOR.removeEvent("start", showLoginDialog);
 		
 		CLIENT.removeEvent("loginFail", showLoginDialog);
@@ -129,6 +126,7 @@
 	}
 	
 	function showLoginDialog(options) {
+		EDITOR.hideMenu();
 		return serverLoginDialog.show(options);
 	}
 	
@@ -138,12 +136,12 @@
 	
 	function buildServerLoginDialog(widget) {
 		/*
-		return widget.create([
+			return widget.create([
 			[{type: "text", label: "Hostname/IP:", value: "localhost"}],
 			[{type: "text", label: "Username:", value: "admin"}],
 			[{type: "password", label: "Password:", value: "admin"}],
 			[{type: "button", label: "Connect", onclick: connectToServer}]
-		]);
+			]);
 		*/
 		
 		var form = document.createElement("form");
@@ -179,7 +177,7 @@
 			userValue = DEFAULT_USERNAME;
 			pwValue = DEFAULT_PASSWORD;
 		}
-
+		
 		var url = document.createElement("input");
 		url.setAttribute("type", "text");
 		url.setAttribute("id", "serverLoginUrl");
@@ -237,7 +235,7 @@
 		checkDefUrl.setAttribute("id", "checkDefUrl");
 		form.appendChild(checkDefUrl);
 		
-
+		
 		var labelCheckDefUrl = document.createElement("label");
 		labelCheckDefUrl.setAttribute("for", "checkDefUrl");
 		labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
@@ -293,7 +291,7 @@
 				if(userValue && localStorage.getItem("editorServerUser") != userValue) localStorage.setItem("editorServerUser", userValue);
 				if(pwValue && localStorage.getItem("editorServerPw") != pwValue) localStorage.setItem("editorServerPw", pwValue);
 			}
-
+			
 		}
 		
 		
@@ -330,7 +328,7 @@
 						alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
 					}
 				});
-					
+				
 			}
 			
 		}

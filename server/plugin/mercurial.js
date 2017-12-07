@@ -149,9 +149,11 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	if(process.getuid) console.log("I am uid=" + process.getuid());
 	
-	var directory = UTIL.trailingSlash(json.directory);
+	var directory =json.directory;
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
+	if(typeof directory != "string") throw new Error("directory=" + directory + " (" + typeof directory + ") needs to be a string!");
+	directory = UTIL.trailingSlash(json.directory);
 	
 	var localDirectory = user.translatePath(directory);
 	

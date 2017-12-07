@@ -207,10 +207,7 @@
 		
 		//build();
 		
-		menuItem = EDITOR.addMenuItem("Static site generator", function() {
-			showSSG();
-			EDITOR.hideMenu();
-		});
+		menuItem = EDITOR.addMenuItem("Static site generator", showSSG);
 		
 		EDITOR.on("fileShow", fileShow);
 		
@@ -1286,6 +1283,8 @@ progressBar.style.display = "none";
 	function showSSG() {
 		
 		console.log("Showing the static site generator -interface")
+		
+		EDITOR.hideMenu();
 		
 		EDITOR.input = false; // Steal focus from the file
 		
