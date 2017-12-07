@@ -828,8 +828,8 @@ div.gotoFile li:hover {
 	cursor: default;
 	display: block;
 	position: relative;
-	padding-top: 5px;
-	padding-bottom: 5px;
+	padding-top: 3px;
+	padding-bottom: 3px;
 	padding-left: 2px;
 	padding-right: 5px;
 	text-decoration: none;
@@ -864,6 +864,7 @@ div.gotoFile li:hover {
 	width: 15px;
 	text-align: center;
 	font-size: 20px;
+	line-height: 13px;
 }
 
 .menu li .bullet.inactive:before {
