@@ -34,30 +34,15 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-push authorization
+You must show the menu when you start the editor, to make sure the user knows how to find it.
+Make all menu items dynamic, only show "Save file" if the file is unsaved.
 
+Check the width and height of the menu and if it's bigger then 75% of the screen:
+1) Check if there are available horizontal space, then split the menu into horizontal columns.
+2) If there is no available horizontal space, make it full screen (only visible object in body) so mobile devices can scroll it
+Remove all selection after bringing forth the menu, as long press means select in most mobile devices.
 
-hggit !
-easy_install hg-git
-
-~/.hgrc
-[extensions]
-hgext.bookmarks =
-hggit = 
-
-hg clone https://github.com/Z3TA/gittest.git
-
-There will be an error if the git repo is empty, make sure it has at least one file before cloning!
-
-
-
-Github integration:
-- Create new github repo
-- Clone from github repo
-- Commit
-- Push
-- Pull
-
+Instead of on, off, toggle, show, hide etc have a bullet in the menu that indicatets if something is on or off.
 
 How to save !? How will the user figure out Ctrl+S is used for saving !?
 
@@ -80,6 +65,8 @@ package?json for the ssg ?
 
 todo
 ----
+
+Give friendly error when trying to pull emty git repo with hggit
 
 properly indentate:
 if(1==1)
@@ -254,6 +241,7 @@ http://moolenaar.net/habits.html
 investigate build.js vs ssg-build.js
 
 try native keyboard on mobile, input text
+
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
