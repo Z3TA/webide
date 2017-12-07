@@ -45,6 +45,9 @@
 		// Add items to the canvas context meny
 		menu = EDITOR.addMenuItem("Save as ...", saveAs);
 		
+		EDITOR.on("showMenu", showSaveOption);
+		
+		
 	}
 	
 	function unloadFileSaver() {
@@ -55,6 +58,8 @@
 		EDITOR.unbindKey(enter);
 		
 		EDITOR.removeMenuItem(menu);
+		
+		EDITOR.removeEvent("showMenu", showSaveOption);
 		
 		hideSaveDialog();
 	}
@@ -67,7 +72,8 @@
 		
 		var footer = document.getElementById("footer");
 		
-		saveDialog = document.createElement("div");
+		saveDialog = document.createElement("form");
+		saveDialog.onsubmit = saveFileInPath;
 		
 		inputPath = document.createElement("input");
 		inputPath.setAttribute("type", "text");
@@ -81,11 +87,11 @@
 		saveDialog.appendChild(labelPath);
 		
 		var buttonSaveAs = document.createElement("input");
-		buttonSaveAs.setAttribute("type", "button");
+		buttonSaveAs.setAttribute("type", "submit");
 		buttonSaveAs.setAttribute("class", "button");
 		buttonSaveAs.setAttribute("value", "Save as");
 		saveDialog.appendChild(buttonSaveAs);
-		buttonSaveAs.addEventListener("click", saveFileInPath, false);
+		//buttonSaveAs.addEventListener("click", saveFileInPath, false);
 		
 		
 		if(runtime == "browser") {
@@ -118,6 +124,9 @@
 			hideSaveDialog();
 		}, false);
 		saveDialog.appendChild(cancel);
+		
+		
+		
 		
 		
 		footer.appendChild(saveDialog);
@@ -158,7 +167,7 @@
 		
 		if(!file) {
 			alert("Can not save without a file!")
-			return;
+			return false;
 		}
 		
 		if(!inputPath) throw new Error("Is the save dialog visible?");
@@ -198,6 +207,7 @@
 		}
 		else save();
 		
+		return false;
 		
 		function save() {
 			EDITOR.saveFile(file, inputPath.value, function fileSaved(err, path) {
@@ -326,6 +336,18 @@
 		}
 		
 		return false;
+		
+	}
+	
+	function showSaveOption(file, x, y, ev) {
+		if(!file) return true;
+		if(!file.changed) return true;
+		if(!file.savedAs) return true;
+		
+		EDITOR.addTempMenuItem("Save file", function() {
+			EDITOR.hideMenu();
+			EDITOR.saveFile(file);
+		});
 		
 	}
 	
