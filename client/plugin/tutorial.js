@@ -1,7 +1,7 @@
 (function() {
 "use strict";
 
-	var achievements = {};
+	var achievements = null; // Wait for storage!
 	var experience = 0; // todo
 	
 	var isInWebAppiOS = (window.navigator.standalone == true);
@@ -18,11 +18,8 @@
 
 	function loadTutorial() {
 		EDITOR.on("storageReady", loadAchievements);
-		EDITOR.on("fileSave", achiveSaveFile);
-		EDITOR.on("fileChange", achiveFileChange);
 		
-		
-		if(isChrome() && !(isInWebAppiOS || isInWebAppChrome)) {
+		if(isChrome() && !(isInWebAppiOS || isInWebAppChrome) && runtime == "browser") {
 			tutorialMessages.appMode = function() {
 			alertBox("Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
 				delete tutorialMessages.appMode;
@@ -55,6 +52,7 @@
 		}
 	
 	function achiveFileChange(file) {
+		if(!achievements) return true;
 		if(!achievements.fileSave) setTimeout(function() {
 			if(file.changed) {
 				if(EDITOR.hasKeyboard) alertBox('Press Ctrl + S to save changes!');
@@ -62,12 +60,13 @@
 				EDITOR.removeEvent("fileChange", achiveFileChange);
 			}
 			}, 500);
+		else if(achievements.fileSave) EDITOR.removeEvent("fileChange", achiveFileChange);
 		
 		//achived("fileChange");
 		}
 	
 	function achiveSaveFile(file) {
-		achived("saveFile");
+		achived("fileSave");
 		EDITOR.removeEvent("fileSave", achiveSaveFile);
 	}
 	
@@ -76,6 +75,8 @@
 		
 		var achievementsString = EDITOR.storage.getItem("tutorialAchievements");
 		
+		alertBox(achievementsString);
+		
 		if(achievementsString) {
 			try {
 				achievements = JSON.parse(achievementsString);
@@ -83,7 +84,12 @@
 			catch(err) {
 				throw new Error("Unable to parse achievements: " + err.message);
 			}
-		}
+			if(!achievements) achievements = {};
+			}
+		else achievements = {};
+		
+		EDITOR.on("fileSave", achiveSaveFile);
+		EDITOR.on("fileChange", achiveFileChange);
 	}
 	
 	function achived(goal) {
@@ -91,7 +97,7 @@
 		var alreadyAchived = achievements[goal];
 		achievements[goal] = true;
 		if(!alreadyAchived) {
-EDITOR.storage.setItem("tutorialAchievements", JSON.stringify(achievements));
+			EDITOR.storage.setItem("tutorialAchievements", JSON.stringify(achievements));
 		}
 	}
 	

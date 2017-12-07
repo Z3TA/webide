@@ -34,6 +34,10 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+bug: File edits doesn't show after a reload! Works in nw.js but not the browser!
+
+tutorial alerts shows many times!
+
 Make all menu items dynamic, only show "Save file" if the file is unsaved.
 
 Check the width and height of the menu and if it's bigger then 75% of the screen:
@@ -66,6 +70,8 @@ package?json for the ssg ?
 
 todo
 ----
+
+On Chromebook when you Preview a web page, it wont auto update on file change after you have saved once, or edited outside the body.
 
 When running WYSIWYG when in Preview mode (web_preview.js) the preview is no longer getting updates! (only when you save)
 
