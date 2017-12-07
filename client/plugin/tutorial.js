@@ -4,6 +4,12 @@
 	var achievements = {};
 	var experience = 0; // todo
 	
+	var isInWebAppiOS = (window.navigator.standalone == true);
+	var isInWebAppChrome = (window.matchMedia('(display-mode: standalone)').matches);
+	
+	var tutorialMessageInterval;
+	var tutorialMessages = {};
+	
 	EDITOR.plugin({
 		desc: "Tutorial: Show friendly help messages",
 		load: loadTutorial,
@@ -14,14 +20,39 @@
 		EDITOR.on("storageReady", loadAchievements);
 		EDITOR.on("fileSave", achiveSaveFile);
 		EDITOR.on("fileChange", achiveFileChange);
+		
+		
+		if(isChrome() && !(isInWebAppiOS || isInWebAppChrome)) {
+			tutorialMessages.appMode = function() {
+			alertBox("Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
+				delete tutorialMessages.appMode;
+		}
+		} else console.log("isChrome=" + isChrome() + " isInWebAppiOS=" + isInWebAppiOS + " isInWebAppChrome=" + isInWebAppChrome + "");
+		
+		// Show a friendly "message" every second (messages should remove themselves once they have executed)
+		tutorialMessageInterval = setInterval(showTotorialMessage, 60000);
+		
 		}
 	
 	function unloadTutorial() {
 		EDITOR.removeEvent("storageReady", loadAchievements);
 		EDITOR.removeEvent("fileSave", achiveSaveFile);
 		EDITOR.removeEvent("fileChange", achiveFileChange);
+	
+		clearInterval(tutorialMessageInterval);
 	}
 	
+	function showTotorialMessage() {
+		
+		var msg = Object.keys(tutorialMessages);
+		
+		if(msg.length == 0) return clearInterval(tutorialMessageInterval);
+		
+		var random = Math.floor(Math.random() * msg.length);
+		
+		tutorialMessages[msg[random]]();
+		
+		}
 	
 	function achiveFileChange(file) {
 		if(!achievements.fileSave) setTimeout(function() {
@@ -61,6 +92,30 @@
 		achievements[goal] = true;
 		if(!alreadyAchived) {
 EDITOR.storage.setItem("tutorialAchievements", JSON.stringify(achievements));
+		}
+	}
+	
+	
+	function isChrome() {
+		var isChromium = window.chrome,
+		winNav = window.navigator,
+		vendorName = winNav.vendor,
+		isOpera = winNav.userAgent.indexOf("OPR") > -1,
+		isIEedge = winNav.userAgent.indexOf("Edge") > -1,
+		isIOSChrome = winNav.userAgent.match("CriOS");
+		
+		if (isIOSChrome) {
+			return true;
+		} else if (
+		isChromium !== null &&
+		typeof isChromium !== "undefined" &&
+		vendorName === "Google Inc." &&
+		isOpera === false &&
+		isIEedge === false
+		) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
