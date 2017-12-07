@@ -1136,6 +1136,13 @@ noscript div p {
 	margin: .5em;
 }
 
+p.noscript {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #222222;
+	text-shadow: none;
+	margin: .5em;
+}
+
 
 .progress.ssg {
 width: 100%;
