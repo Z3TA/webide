@@ -26,7 +26,8 @@
 	function achiveFileChange(file) {
 		if(!achievements.fileSave) setTimeout(function() {
 			if(file.changed) {
-alertBox('Press Ctrl + S to save changes!');
+				if(EDITOR.hasKeyboard) alertBox('Press Ctrl + S to save changes!');
+				else alertBox('Use long touch-down to show the menu and select "Save file" to save!');
 				EDITOR.removeEvent("fileChange", achiveFileChange);
 			}
 			}, 500);

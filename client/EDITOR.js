@@ -230,6 +230,7 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.touchDown = false; // Is the user still holding down/touching ?
 	EDITOR.scrollingEnabled = false;
+	EDITOR.hasKeyboard = false; // true if keyup is detected
 	
 	var lastMouseDownEventType = "";
 	
@@ -5320,6 +5321,8 @@ EDITOR.lastKeyPressed = "";
 		keyUpEvent = keyUpEvent || window.event; 
 		
 		//keyUpEvent.preventDefault();
+		
+		if(keyUpEvent.type=="keyup") EDITOR.hasKeyboard = true;
 		
 		var charCode = keyUpEvent.charCode || keyUpEvent.keyCode;
 		var character = String.fromCharCode(charCode);
