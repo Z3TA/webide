@@ -188,6 +188,8 @@
 		
 		// Check if the row above or below has a different indentation comparing to before the parse, then fix all rows in that block
 
+		if(!indentationBefore) return true; // For exampe when reloading from disk without changing the file
+		
 		var indentation = indentationAround(file, row);
 		
 		if(indentation == null) throw new Error("(in)sanity: file.path=" + file.path + " row=" + row + " indentation=" + indentation);
