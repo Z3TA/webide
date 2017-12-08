@@ -50,6 +50,7 @@ Run the editor as a web app:
 in Chrome: More tools > Add to desktop ...
 
 https://developer.mozilla.org/en-US/docs/Web/Manifest
+https://developers.google.com/web/fundamentals/app-install-banners/
 
 Coding an agar clone as a nodejs example
 
@@ -69,6 +70,13 @@ package?json for the ssg ?
 
 todo
 ----
+
+
+
+Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
+Make a preview event, that plugins can answer to
+
+Making the virtual keyboard bigger doesn't seem to work in Opera Mobile!
 
 On Chromebook when you Preview a web page, it wont auto update on file change after you have saved once, or edited outside the body.
 
