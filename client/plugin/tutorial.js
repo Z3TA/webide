@@ -60,7 +60,7 @@
 			achiveFileChangeTimeout = setTimeout(function() {
 			if(file.changed) {
 				if(EDITOR.hasKeyboard) alertBox('Press Ctrl + S to save changes!');
-				else alertBox('Use long touch-down to show the menu and select "Save file" to save!');
+				else alertBox('Use long touch-down to show the menu and select "Save file" to save! Or if you have a keyboard use Ctrl + S');
 					
 				EDITOR.removeEvent("fileChange", achiveFileChange);
 			}
