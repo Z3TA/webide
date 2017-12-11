@@ -34,16 +34,9 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-
-apparmor on dev doesn't seem to work!
-
-hggit doesn't seem to work in prod!
-
 bug: File edits doesn't show after a reload! Works in nw.js but not the browser!
 
-cling a repo takes a lot of time, use loading bar !?
-
-when logging in to the editor: Uncaught Error: There is already a function named achiveSaveFile for the fileSave event
+cloning a repo takes a lot of time, use loading bar !?
 
 
 Make all menu items dynamic, only show "Save file" if the file is unsaved.
@@ -53,13 +46,8 @@ Check the width and height of the menu and if it's bigger then 75% of the screen
 2) If there is no available horizontal space, make it full screen (only visible object in body) so mobile devices can scroll it
 Remove all selection after bringing forth the menu, as long press means select in most mobile devices.
 
-How to save !? How will the user figure out Ctrl+S is used for saving !?
 
-Run the editor as a web app:
-in Chrome: More tools > Add to desktop ...
 
-https://developer.mozilla.org/en-US/docs/Web/Manifest
-https://developers.google.com/web/fundamentals/app-install-banners/
 
 Coding an agar clone as a nodejs example
 
@@ -79,9 +67,6 @@ package?json for the ssg ?
 
 todo
 ----
-
-When typing / in Firefox it brings up search ...
-
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to

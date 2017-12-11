@@ -5061,6 +5061,9 @@ EDITOR.lastKeyPressed = "";
 		
 		EDITOR.interact("keyPressed", keyPressEvent);
 		
+// Prevent Firefox's quick search
+		if(charCode == 47 && browser == "Firefox") keyPressEvent.preventDefault();
+			
 	}
 	
 	function resizeAndRender() {
@@ -5411,7 +5414,6 @@ EDITOR.lastKeyPressed = "";
 			}
 			
 		}
-		
 		
 		EDITOR.interact("keyUp", keyUpEvent);
 		
