@@ -36,172 +36,47 @@ What I'm working on
 
 bug: File edits doesn't show after a reload! Works in nw.js but not the browser!
 
-cloning a repo takes a lot of time, use loading bar !?
 
-
-Make all menu items dynamic, only show "Save file" if the file is unsaved.
-
-Check the width and height of the menu and if it's bigger then 75% of the screen:
-1) Check if there are available horizontal space, then split the menu into horizontal columns.
-2) If there is no available horizontal space, make it full screen (only visible object in body) so mobile devices can scroll it
-Remove all selection after bringing forth the menu, as long press means select in most mobile devices.
-
-
-
+Making a webside using only prod
 
 Coding an agar clone as a nodejs example
 
 
 
-Dashboard:
-Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
-ssg: Lista tidagare dokument, antal besökare
-Fast buttons for edit a document, create a new document/post in SSG.
-
-button: create new web site
-
-package?json for the ssg ?
-
-Översätta till Svenska ?
-
-
 todo
 ----
+
+---
+Irritatning having to change the folder on where to look for files when opening a file.
+If less then max results are found in search, then automatically snab to parent folder.
+Do the search on server side so it gets faster!
+Although: When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
+When SSG panel is open, change working dir, so a file search only searches inside source folder!!
+---
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
 
-Making the virtual keyboard bigger doesn't seem to work in Opera Mobile!
-
-On Chromebook when you Preview a web page, it wont auto update on file change after you have saved once, or edited outside the body.
-
-When running WYSIWYG when in Preview mode (web_preview.js) the preview is no longer getting updates! (only when you save)
+Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
+Eg. only show save if file is unsaved, or only show Run in Node.js is it's a JavaScript file (detect nodejs ? require, no window)
 
 Give friendly error when trying to pull emty git repo with hggit
 
-properly indentate:
-if(1==1)
-console.log("a");
-console.log("b");
-
-console.log("c");
-
-
-
-not colaborate editing, but everyone logged in with the same username should see what their clones are up to!
-
 Investigate why fix_indendation.js is not fixing the indentation!
-
-"help" widget.
-textarea: Need help? Type here ...
-<send> <invite ...> <hide> (you can hide/show the chat using ctrl+?)
-
-invite: Type the name of the user you want to invite to your session, or give them this address: 
-
-Jon Doe want to enter you session.
-
-Read only, Write access, Decline
-
-All users on the server will see the chat!? Or only admins !?
-Or only those invited to the session !?
-
-
-colaboration mode:
-
-When two users are logged in with the same username/pw:
-The client that last moved the caret can edit the document !? All others can only read.
-("The document is locked, move or place the caret to unlock it. For collaborate editing you must have different accounts and invite the other party.")
-
-Problem: The same user goes to work on another computer. When he goes back to his old computer, he wants to get the new updates!
-Solution: When a user comes back online. Check if the last saved state (text) is the same as the text on the disk. If not; tell the user!
-
-When a user has invited another user:
-Both users can edit the document at the same time! (using list/sequence CRDT): https://gotocon.com/dl/goto-berlin-2016/slides/MartinKleppmann_ConflictResolutionForEventualConsistency.pdf
-
-(Right click and select; "share with collaborators" to let invited parties to edit the document at the same time)
-
-When a document is shared, the text is shared and the document reopened in colaboration mode ?
-All documents is always in colaboration mode, even though there is no colaborators !?
-
-When a document that has colaborators is saved, both the original "text" and the grid is saved: eg: file.htm + file.htm.jz (containing the grid in JSON)
-When opening a document, the editor will check for the same document but with .jz and load that as the grid.
-
-A history of all edits need to be saved !!! ? But can be deleted when all colaborators have recived them.
-
-
-What if user goes offline ? (the train goues though a tunnel): When the user comes back online, his changes are synced. 
-What if the user close his computer while offline ? 
-
-The server needs to keep track on who has recived what messages.
-The server needs to keep a log of all edits. Example: Johan: insert "a" with id 4Johan at after id 4Pelle
-
-When the user comes back online, his edits get sent to the server and he get sent the edits made by collaborators.
-The server keeps track on what he has missed.
-
-todo: We need a better undo/rodo!
-
-What if a user deletes an entire row and another user edits that row !? 
-
-
-Have a different data structure for colaboration editing !?
-
-
-
-Several users should be able to edit the document at the same time!!
-
-keycombo buttons to the virtual keyboard!??
-
-tombstones
-
-
-
-
-
-detetch touch-screen and only show virtual keyboard if using touch screen.
-
-make virtual keyboard keys smaller on small screen and a bit larger on large screens
-
-keyboard hover effect: make buttons background change slightly
-
-make file tabs smaller on small screens
-
-optimize mouse select to not listen if not started selecting (or scrolling)
-
-modal editing, like in VIM
 
 open large files "benchmark optimization"
 
-fix copy-pasting in Macbook
+fix copy-pasting in Macbook!!
 
-fix bug that adds text to indentation characters  ... !!
+Investigate adding the editor to chrome web store and test it in a Chromebook.
 
 refactor voice, EDITOR.say, so all plugins can use it.
 
 npm modules
 using modules in SSG ... Able to add npm modules to the SSG ...
 
-Investigate adding the editor to chrome web store and test it in a Chromebook.
-
-workflow: Edit pages on a ftp server ...
-
-  Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.
-
-  Find in files on ftp server ... Move "find in files" to server and make it work with ftp/sft/ftps 
-
 
 write a blog post! (and fix issues/regressions that come up)
-
-
-1. fix regressions!! Mercurial support inside chroot! (write some tests)
-
-write more tests for ftp/stfp/ftps
-
-hmm, I do remember editing file(s) in node_modules, (ftp module !?) to fix some encoding problems ... probably regressed now when we're no longer tracking node_modules.
-
-hmm, for hg clone to work we need to allow python to access the internet! ...
-could solve any issues by setting up restrictive iptables and maybe a netns
-probably want to use netns (sudo ip netns exec NAME ping google.com) to put each worker process in a network namespace.
-
 
 make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
 
@@ -216,13 +91,7 @@ and we want to be sane, and debug the same code that the users are running.
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
 https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
 
-quick-edit
-http://editor.webtigerteam.com/?editPage=http%3A%2F%2Fmarkus.webtigerteam.com%2Fblog%2Fblog-post.htm&nodes=blogpost!%2Cp%2Cmain%2Cdiv%2Cbody%2Chtml%2C%2C
-... didn't open the file.
 
-
-When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
-When SSG panel is open, change working dir, so a file search only searches inside source folder!!
 
 Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
 
@@ -264,6 +133,14 @@ try native keyboard on mobile, input text
 
 What I'm thinking
 -----------------
+
+hmm, for hg clone to work we need to allow python to access the internet! ...
+could solve any issues by setting up restrictive iptables and maybe a netns
+probably want to use netns (sudo ip netns exec NAME ping google.com) to put each worker process in a network namespace.
+
+package?json for the ssg !?
+
+Översätta till Svenska !?
 
 Editing a web page is kinda awkward ...
 What about being able to click on the web page and edit right there !? With an option to open editor:
@@ -558,6 +435,15 @@ Run all tests! (to make sure you did not break anything else)
 
 BUGS (and issues)
 =================
+
+fix bug that adds text to indentation characters  ... !!
+make a sanity check that checks the indentatioin characters for non white space characters
+
+On Chromebook when you Preview a web page, it wont auto update on file change after you have saved once, or edited outside the body.
+
+When running WYSIWYG when in Preview mode (web_preview.js) the preview is no longer getting updates! (only when you save)
+
+Making the virtual keyboard bigger doesn't seem to work in Opera Mobile!
 
 When pasting stuff into an emty document in wysiwyg it gets added after the body tag
 
@@ -1288,6 +1174,23 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+workflow: Edit pages on a ftp server ...
+  Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.
+
+not colaborate editing, but everyone logged in with the same username should see what their clones are up to!
+
+Support .editorConfig !
+
+A diff tool ...
+
+Column aligment: When line breaks in var declarations, lists, function calls and arguments
+
+Cache invalidation with the SSG: When a file is added, all href's to that file is updated with ?v=n++
+Also with CSS!
+
+cloning a repo takes a lot of time, use loading bar !?
+Use spawn instead of execFile !? And hg clone -v for verbosity
+
 Browse files, for example when picking a save-as path, or opening a file.
 
 
@@ -1841,6 +1744,17 @@ when deoploying nodejs micro services, ignore folders named data (only create th
 make it possible to deploy to ftp/sft/ftps!
 
 ---
+properly indentate:
+if(1==1)
+console.log("a");
+console.log("b");
+
+console.log("c");
+
+---
+
+
+
 
 ### Debugging
 
@@ -1983,6 +1897,8 @@ Run for loops in parallel:
 
 Battery benchmark optimization. Detect if the computer is running on battery and make stuff more energy efficient (disable resource hungry features)
 
+optimize mouse select to not listen if not started selecting (or scrolling)
+
 
 Feature
 =======
@@ -2016,6 +1932,77 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+---
+"help" widget.
+textarea: Need help? Type here ...
+<send> <invite ...> <hide> (you can hide/show the chat using ctrl+?)
+
+invite: Type the name of the user you want to invite to your session, or give them this address: 
+
+Jon Doe want to enter you session.
+
+Read only, Write access, Decline
+
+All users on the server will see the chat!? Or only admins !?
+Or only those invited to the session !?
+---
+
+colaboration mode:
+
+When two users are logged in with the same username/pw:
+The client that last moved the caret can edit the document !? All others can only read.
+("The document is locked, move or place the caret to unlock it. For collaborate editing you must have different accounts and invite the other party.")
+
+Problem: The same user goes to work on another computer. When he goes back to his old computer, he wants to get the new updates!
+Solution: When a user comes back online. Check if the last saved state (text) is the same as the text on the disk. If not; tell the user!
+
+When a user has invited another user:
+Both users can edit the document at the same time! (using list/sequence CRDT): https://gotocon.com/dl/goto-berlin-2016/slides/MartinKleppmann_ConflictResolutionForEventualConsistency.pdf
+
+(Right click and select; "share with collaborators" to let invited parties to edit the document at the same time)
+
+When a document is shared, the text is shared and the document reopened in colaboration mode ?
+All documents is always in colaboration mode, even though there is no colaborators !?
+
+When a document that has colaborators is saved, both the original "text" and the grid is saved: eg: file.htm + file.htm.jz (containing the grid in JSON)
+When opening a document, the editor will check for the same document but with .jz and load that as the grid.
+
+A history of all edits need to be saved !!! ? But can be deleted when all colaborators have recived them.
+
+
+What if user goes offline ? (the train goues though a tunnel): When the user comes back online, his changes are synced. 
+What if the user close his computer while offline ? 
+
+The server needs to keep track on who has recived what messages.
+The server needs to keep a log of all edits. Example: Johan: insert "a" with id 4Johan at after id 4Pelle
+
+When the user comes back online, his edits get sent to the server and he get sent the edits made by collaborators.
+The server keeps track on what he has missed.
+
+todo: We need a better undo/rodo!
+
+What if a user deletes an entire row and another user edits that row !? 
+
+
+Have a different data structure for colaboration editing !?
+
+
+
+Several users should be able to edit the document at the same time!!
+
+keycombo buttons to the virtual keyboard!??
+
+tombstones
+
+---
+
+Dashboard:
+Cool looking graphs, it's OK if they display bogus data for now though. dashboards sell!
+ssg: List documents, and how many visitors that thave viewed them
+Fast buttons for edit a document, create a new document/post in SSG.
+button: create new web site
+
 
 CSS "function" list
 
@@ -2446,6 +2433,9 @@ Self hosted cloud editor. Work in the browser.
 Built in SQL query, with GUI for editing tables
 
 SQL auto completion: SELECT foo FROM table WHERE bar = ? (lookup mysql schema)
+
+modal editing, like in VIM
+
 
 
 Need though
