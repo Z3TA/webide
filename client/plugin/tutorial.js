@@ -24,7 +24,7 @@
 		
 		if(isChrome() && !(isInWebAppiOS || isInWebAppChrome) && runtime == "browser") {
 			tutorialMessages.appMode = function() {
-			alertBox("Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
+				alertBox("<i>Friendly tip:</i><br>Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
 				delete tutorialMessages.appMode;
 		}
 		} else console.log("isChrome=" + isChrome() + " isInWebAppiOS=" + isInWebAppiOS + " isInWebAppChrome=" + isInWebAppChrome + "");
