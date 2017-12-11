@@ -11,6 +11,7 @@
 	var tutorialMessages = {};
 	
 	var achiveFileChangeTimeout;
+	var firstTimeLoadAchievements = true;
 	
 	EDITOR.plugin({
 		desc: "Tutorial: Show friendly help messages",
@@ -94,8 +95,13 @@
 			}
 		else achievements = {};
 		
+		// storageReady gets called every time we are re-connected to the server!
+		if(firstTimeLoadAchievements) {
 		EDITOR.on("fileSave", achiveSaveFile);
 		EDITOR.on("fileChange", achiveFileChange);
+	}
+		
+		firstTimeLoadAchievements = false;
 	}
 	
 	function achived(goal) {
