@@ -34,7 +34,15 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+bug: Mercurial thinks nothing has changed after changing a file in test repo
+
+hggit doesn't seem to work in prod!
+
 bug: File edits doesn't show after a reload! Works in nw.js but not the browser!
+
+cling a repo takes a lot of time, use loading bar !?
+
+when logging in to the editor: Uncaught Error: There is already a function named achiveSaveFile for the fileSave event
 
 
 Make all menu items dynamic, only show "Save file" if the file is unsaved.
