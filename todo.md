@@ -52,6 +52,8 @@ If less then max results are found in search, then automatically snab to parent 
 Do the search on server side so it gets faster!
 Although: When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
 When SSG panel is open, change working dir, so a file search only searches inside source folder!!
+ignoreorlowprio= only search these folders if no result have been found, search them last
+API.findFiles
 ---
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
