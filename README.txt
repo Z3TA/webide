@@ -167,6 +167,17 @@ ls /etc/apparmor.d/ | grep nodejs
 # is it disabled ?
 ls /etc/apparmor.d/disable/
 
+# Temporary stopping apparmor
+service apparmor stop
+service apparmor teardown
+
+# Complain to allow evrything but show logs
+sudo aa-complain /home/demo/usr/bin/hg
+
+# Put a profile back into enforce
+sudo aa-enforce /home/demo/usr/bin/hg
+
+
 
 After reboot
 ------------

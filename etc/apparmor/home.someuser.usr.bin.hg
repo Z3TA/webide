@@ -12,6 +12,7 @@
   network inet stream,
   network inet6 dgram,
   network inet6 stream,
+  network unix,
 
   #/dev/tty rw,
   %HOME%%USERNAME%/ r,

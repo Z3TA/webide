@@ -34,7 +34,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-bug: Mercurial thinks nothing has changed after changing a file in test repo
+
+apparmor on dev doesn't seem to work!
 
 hggit doesn't seem to work in prod!
 
@@ -79,6 +80,7 @@ package?json for the ssg ?
 todo
 ----
 
+When typing / in Firefox it brings up search ...
 
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
