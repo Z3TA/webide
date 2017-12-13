@@ -34,7 +34,9 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-SSG can't find svg images!
+Index file and svg files in SSG doesn't seem to get read rights when previewing eg 700 shuld be 755
+Files saved in wwwpub should *always* be public!! Or you will get a 403
+
 
 Making a webside using only prod
 
@@ -46,8 +48,6 @@ todo
 ----
 
 Preview should have the same window size when clicking preview again!
-
-Files saved in wwwpub should *always* be public!! Or you will get a 403
 
 When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
 
