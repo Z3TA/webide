@@ -987,7 +987,7 @@ function handleHttpRequest(request, response) {
 					
 					response.end("File not found: " + filePath);
 					
-					console.warn("File not found: " + filePath);
+					console.warn("HTTP Server: File not found: " + filePath);
 					
 				}
 				else {
