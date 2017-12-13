@@ -91,7 +91,7 @@
 		//if(!window.localStorage.ready()) throw new Error("EDITOR.storage not ready! Can not reopopen files from last session.");
 		if(!window.localStorage) throw new Error("window.localStorage not available!");
 		
-		console.log("reopenFiles ... serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
+		console.log("reopenFiles: serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user=" + EDITOR.user);
 		
 		if(serverUrl != CLIENT.url || serverUser != EDITOR.user) {
 			
@@ -126,6 +126,8 @@
 			
 			// Catch bugs
 			insaneBugCatcherInterval = setInterval(insaneBugCatcher, 1000);
+			
+			console.log("reopenFiles: All files reopened!");
 			
 		});
 
