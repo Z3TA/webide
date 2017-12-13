@@ -1604,7 +1604,10 @@ function findMedia(txt, lookFor, group) {
 			
 			files[i] = replaceAll(files[i], "\\", "/");
 			
-			if(MEDIAFILES.indexOf(files[i]) == -1) MEDIAFILES.push(files[i]);
+			if(MEDIAFILES.indexOf(files[i]) == -1) {
+				console.log("Found media file: " + files[i]);
+				MEDIAFILES.push(files[i]);
+				}
 		}
 	}
 	
