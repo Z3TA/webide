@@ -62,12 +62,28 @@ var WysiwygEditor;
 	
 	var previewInputFired = false;
 	
-	WysiwygEditor = function WysiwygEditor(sourceFile, bodyTagSource, onlyPreview, newWindow, url, whenLoaded, compiledSource, bodyTagPreview) {
+	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
+		
+		var sourceFile = options.sourceFile;
+		var bodyTagSource = options.bodyTagSource;
+		var onlyPreview = options.onlyPreview;
+		var newWindow = options.newWindow;
+		var url = options.url;
+		var whenLoaded = options.whenLoaded;
+		var compiledSource = options.compiledSource;
+		var bodyTagPreview = options.bodyTagPreview;
+		var top = options.top;
+		var left = options.left;
+		var width = options.width;
+		var height = options.height;
+		
+		
 		
 		if(!sourceFile) throw new Error("Expected sourceFile when calling WysiwygEditor");
 		
-		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path + " url=" + url);
+		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path + " url=" + url + 
+		" top=" + top + " left=" + left + " width=" + width + " height=" + height);
 		
 		if(wysiwygEditor == undefined || wysiwygEditor == window) throw new Error("Call WysiwygEditor with the new keyword! Example: var foo = new WysiwygEditor()");
 		
@@ -185,7 +201,7 @@ var WysiwygEditor;
 		if(onlyPreview) dance = false;
 		
 		wysiwygEditor.reload(dance, function firstLoad() {
-			wysiwygEditor.positionate();
+			wysiwygEditor.positionate(top, left, width, height);
 		});
 		
 	}
@@ -206,16 +222,16 @@ var WysiwygEditor;
 		wysiwygEditor.startRow = tmpCaret.row;
 	}
 	
-	WysiwygEditor.prototype.positionate = function positionate() {
+	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {
 		var wysiwygEditor = this;
 		
 		// Decide window width, height and placement ...
 		var windowPadding = 0;
 		var unityLeftThingy = 10;
-		var previeWidth = Math.round(screen.width / 3.5) - windowPadding * 2;
-		var previewHeight = screen.height - windowPadding * 2;
-		var posX = screen.width - previeWidth - windowPadding;
-		var posY = windowPadding;
+		var previeWidth = width || Math.round(screen.width / 3.5) - windowPadding * 2;
+		var previewHeight = height || (screen.height - windowPadding * 2);
+		var posX = left || (screen.width - previeWidth - windowPadding);
+		var posY = top || windowPadding;
 		
 		var previewWin = wysiwygEditor.previewWin;
 		
@@ -233,6 +249,12 @@ var WysiwygEditor;
 			previewWin.moveTo(posX, posY);
 			previewWin.resizeTo(previeWidth, previewHeight);
 			
+			/*
+				wysiwygEditor.screenX = previewWin.screenX || previewWin.screenLeft;
+			wysiwygEditor.screenY = previewWin.screenY || previewWin.screenTop;
+			wysiwygEditor.innerWidth = previewWin.innerWidth;
+			wysiwygEditor.innerHeight = previewWin.innerHeight;
+			*/
 			
 			// Resize the editor
 			var editorCodeWindow = window; // gui.Window.get();

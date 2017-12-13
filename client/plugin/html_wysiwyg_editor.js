@@ -19,7 +19,9 @@
 	function load() {
 		menuItem = EDITOR.addMenuItem("WYSIWYG", function menuClickWysiwyg() {
 			
-			if(EDITOR.currentFile) createwysiWygEditor(EDITOR.currentFile);
+			if(EDITOR.currentFile) {
+createwysiWygEditor({sourceFile: EDITOR.currentFile});
+			}
 			else alertBox("No file open! Open a HTML file and try again.");
 			
 			EDITOR.hideMenu();
@@ -38,7 +40,7 @@
 		}
 		
 		wysiwygEditor = new WysiwygEditor(file);
-
+		
 	}
 	
 	

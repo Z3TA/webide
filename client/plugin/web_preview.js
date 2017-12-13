@@ -68,7 +68,14 @@
 			
 			var onlyPreview = true;
 			var bodyTag = undefined;
-			previewWin = new WysiwygEditor(inPreview, bodyTag, onlyPreview, theWindow, url, whenLoaded);
+			previewWin = new WysiwygEditor({
+sourceFile: inPreview, 
+bodyTagSource: bodyTag, 
+onlyPreview: onlyPreview, 
+newWindow: theWindow, 
+url: url, 
+whenLoaded: whenLoaded
+});
 			
 			
 			previewWin.onClose = function() {

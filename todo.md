@@ -34,6 +34,11 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+When having search open and then bringing up search in files:
+/home/Z/Projects/jzedit/client/plugin/find_in_files_server.js:317
+Uncaught TypeError: undefined is not a function
+
+
 Making a website using only prod
 
 Coding an agar clone as a nodejs example
@@ -42,17 +47,6 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
-
-Preview should have the same window size when clicking preview again!
-
-When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
-
-Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
-Make a preview event, that plugins can answer to
-
-Make backup of a folder. Copy folder or make a zip file.
-
-Init SCM on a folder. And later be able to add a remote repo.
 
 
 ---
@@ -64,6 +58,17 @@ When SSG panel is open, change working dir, so a file search only searches insid
 ignoreorlowprio= only search these folders if no result have been found, search them last
 API.findFiles
 ---
+
+When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
+
+Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
+Make a preview event, that plugins can answer to
+
+Make backup of a folder. Copy folder or make a zip file.
+
+Init SCM on a folder. And later be able to add a remote repo.
+
+
 
 
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.

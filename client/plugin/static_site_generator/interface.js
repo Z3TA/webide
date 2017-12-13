@@ -1336,7 +1336,19 @@ progressBar.style.display = "none";
 			Some browsers will not let us change the window position, so we need to specify it here also.
 			To prevent same origin policy error, the editor must be served via http or https! (not file://)
 		*/
-		var newWindow = EDITOR.createWindow();
+		
+		if(previewWin) {
+			console.log("previewWin.screenX=" + previewWin.screenX + " previewWin.previewWin.screenX=" + previewWin.previewWin.screenX + " previewWin.previewWin.innerWidth=" + previewWin.previewWin.innerWidth);
+			
+			var url = undefined;
+			var width = parseInt(previewWin.previewWin.innerWidth);
+			var height = parseInt(previewWin.previewWin.innerHeight);
+			var top = parseInt(previewWin.previewWin.screenY || previewWin.previewWin.screenTop);
+			var left = parseInt(previewWin.previewWin.screenX || previewWin.previewWin.screenLeft);
+			var newWindow = EDITOR.createWindow(url, width, height, top, left);
+		}
+		else var newWindow = EDITOR.createWindow();
+		
 		
 		
 		if(sourceFile == undefined) {		
@@ -1578,8 +1590,21 @@ progressBar.style.display = "none";
 									
 									
 									console.log("SSG url=" + url + " runtime=" + runtime);
-									previewWin = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, whenLoaded, compiledSource, compliedSourceBodyTag);
-									
+									previewWin = new WysiwygEditor({
+sourceFile: sourceFile,
+bodyTagSource: bodyTag, 
+onlyPreview: onlyPreview, 
+newWindow: newWindow, 
+url: url, 
+whenLoaded: whenLoaded, 
+compiledSource: compiledSource, 
+bodyTagPreview: compliedSourceBodyTag,
+top: top,
+left: left,
+width: width,
+height: height
+								});
+								
 									previewWin.onClose = function() {
 										if(buttonPreview) {
 											buttonPreview.setAttribute("class", "button");
