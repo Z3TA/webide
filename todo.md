@@ -34,8 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-bug: File edits doesn't show after a reload! Works in nw.js but not the browser!
-
+SSG can't find svg images!
 
 Making a webside using only prod
 
@@ -45,6 +44,20 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
+
+Preview should have the same window size when clicking preview again!
+
+Files saved in wwwpub should *always* be public!! Or you will get a 403
+
+When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
+
+Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
+Make a preview event, that plugins can answer to
+
+Make backup of a folder. Copy folder or make a zip file.
+
+Init SCM on a folder. And later be able to add a remote repo.
+
 
 ---
 Irritatning having to change the folder on where to look for files when opening a file.
@@ -56,8 +69,6 @@ ignoreorlowprio= only search these folders if no result have been found, search 
 API.findFiles
 ---
 
-Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
-Make a preview event, that plugins can answer to
 
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
 Eg. only show save if file is unsaved, or only show Run in Node.js is it's a JavaScript file (detect nodejs ? require, no window)
