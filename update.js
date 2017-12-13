@@ -59,6 +59,8 @@ for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.lengt
 	gid = parseInt(col[4]);
 	
 	if(username) {
+		// ## Things to do to each existing user
+		
 		// Update apparmor profiles (for each user)
 	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
@@ -79,6 +81,11 @@ for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.lengt
 		try { fs.mkdirSync(homeDir + "/.prod"); } catch(err) { console.log(err.message); }
 		chmodrSync(homeDir + "/.prod", "770");
 		chownrDirSync(homeDir + "/.prod", uid, gid);
+		
+		// Make sure www-data has access to wwwpub folder
+		run("chmod 2755 " + homeDir + "/wwwpub");
+		run("chown -R " + username + ":www-data " + homeDir + "/wwwpub");
+		
 	}
 }
 run("systemctl reload apparmor");

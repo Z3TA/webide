@@ -34,11 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Index file and svg files in SSG doesn't seem to get read rights when previewing eg 700 shuld be 755
-Files saved in wwwpub should *always* be public!! Or you will get a 403
-
-
-Making a webside using only prod
+Making a website using only prod
 
 Coding an agar clone as a nodejs example
 
@@ -135,6 +131,7 @@ investigate build.js vs ssg-build.js
 
 try native keyboard on mobile, input text
 
+Parser doesn't seem to find variables inside for(var a, b, c)
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
