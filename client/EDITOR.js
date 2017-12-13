@@ -542,6 +542,8 @@ EDITOR.lastKeyPressed = "";
 						//fileOpenError(new Error("File too big: " + path));
 						//return;
 						
+						if(runtime == "browser") return fileOpenError(new Error("Opening large files not yet supported in the browser!"));
+						
 						console.warn("File larger then " + EDITOR.settings.bigFileSize + " bytes. It will be opened as a stream!");
 						var notFromDisk = false;
 						var tooBig = true;
