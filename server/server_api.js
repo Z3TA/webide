@@ -17,6 +17,9 @@ var DEFAULT_FILE_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = read
 var DEFAULT_FOLDER_MODE = parseInt("0770", 8); // 1 = execute, 2 = write, 4 = read (note: umask is 0022)
 // Default is only the user are allowed to access files the user creates (umask 0022)
 
+var FIND_FILES_ABORTED = false;
+var FIND_FILES_IN_FLIGHT = 0;
+
 API.countLines = function countLines(user, json, callback) {
 
 	API.readLines(user, json, function linesRead(err, json) {
@@ -779,7 +782,13 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						if(type == "d") path = UTIL.trailingSlash(path);
 						
 						//console.log("path=" + path);
-						list.push({type: type, name: folderItems[i].filename, path: path, size: parseFloat(folderItems[i].attrs.size), date: new Date(folderItems[i].attrs.mtime*1000)});
+						list.push({
+						type: type, 
+						name: folderItems[i].filename, 
+						path: path, 
+						size: parseFloat(folderItems[i].attrs.size), 
+						date: new Date(folderItems[i].attrs.mtime*1000)
+						});
 					}
 					
 					listFilesCallback(null, {list: list});
@@ -2153,6 +2162,115 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	
 }
 
+API.findFiles = function findFiles(user, json, findFilesCallback) {
+	/*
+		Finds all files recursively in a folder.
+		Keep searching, in parent folder, until maxResults have been found!
+		Notify the client when switching folder
+		*/
+	
+	if(FIND_FILES_ABORTED && FIND_FILES_IN_FLIGHT > 0) return findFilesCallback(null, {aborted: true, findFilesInFlight: FIND_FILES_IN_FLIGHT});
+	
+	FIND_FILES_ABORTED = false;
+	
+	var startFolder = json.folder;
+	var findFile = json.name;
+	var useRegexp = json.useRegexp || false;
+	
+	if(startFolder == undefined) return findFilesCallback(new Error("startFolder=" + startFolder));
+	if(findFile == undefined) return findFilesCallback(new Error("findFile=" + findFile));
+	
+	if(!useRegexp) findFile = UTIL.escapeRegExp(findFile);
+	
+	var reName = new RegExp(".*" + findFile + ".*");
+	
+	var maxResults = 20;
+	var filesFound = 0;
+	var foldersToSearch = [];
+	
+	startFolder = UTIL.trailingSlash(startFolder);
+	
+	var folders = UTIL.getFolders(startFolder);
+	var totalFoldersToSearch = 0;
+	var totalFoldersSearched = 0;
+	
+	searchFolder(folders.pop());
+	
+	function searchFolder(folder) {
+		if(FIND_FILES_ABORTED) return;
+		if(foldersToSearch.indexOf(folder) != -1) return; // Folder already searched
+		foldersToSearch.push(folder);
+		FIND_FILES_IN_FLIGHT++;
+		totalFoldersToSearch++;
+		user.send({
+			findFilesStatus: {
+				totalFoldersToSearch: totalFoldersToSearch, 
+				totalFoldersSearched: totalFoldersSearched, 
+				filesInFlight: FIND_FILES_IN_FLIGHT, 
+		filesFound: filesFound
+			}
+		});
+		listFiles(user, {pathToFolder: folder}, function listFilesCallback(err, resp) {
+			FIND_FILES_IN_FLIGHT--;
+			totalFoldersSearched++;
+			
+			if(err) {
+				console.warn(err.message);
+				return;
+				}
+			
+			if(FIND_FILES_ABORTED) return;
+			
+			var fileList = resp.list;
+			for (var i=0, path; i<fileList.length; i++) {
+				path = user.toVirtualPath(fileList[i].path);
+				if(fileList[i].type=="d") searchFolder(path);
+				else if(path.match(reName)) {
+						user.send({fileFound: path});
+						filesFound++;
+						
+				}
+			}
+			
+			user.send({
+				findFilesStatus: {
+					totalFoldersToSearch: totalFoldersToSearch,
+					totalFoldersSearched: totalFoldersSearched,
+					filesInFlight: FIND_FILES_IN_FLIGHT,
+					filesFound: filesFound
+				}
+			});
+			
+			if(filesFound >= maxResults) return finish(null);
+			else if(FIND_FILES_IN_FLIGHT == 0 && folders.length > 0 && filesFound < maxResults) {
+				folder = folders.pop();
+				user.send({pathGlob: folder});
+				searchFolder(folder);
+			}
+			else if(FIND_FILES_IN_FLIGHT == 0 && folders.length == 0) {
+				
+			}
+			else throw new Error("Unexpected: FIND_FILES_IN_FLIGHT=" + FIND_FILES_IN_FLIGHT + " folders=" + JSON.stringify(folders) +
+			" filesFound=" + filesFound + " maxResults=" + maxResults);
+			
+		});
+	}
+	
+	function searchDone() {
+	}
+	
+	function finish(err, resp) {
+		if(!FIND_FILES_ABORTED) {
+			FIND_FILES_ABORTED = true;
+			findFilesCallback(err, resp);
+		}
+	}
+	
+}
+
+API.abortFindFiles = function abortFindFiles(user, json, findFilesCallback) {
+	FIND_FILES_ABORTED = true;
+	}
 
 
 function runFtpQueue() {

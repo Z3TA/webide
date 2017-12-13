@@ -34,6 +34,17 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+---
+Irritatning having to change the folder on where to look for files when opening a file.
+If less then max results are found in search, then automatically snab to parent folder.
+Do the search on server side so it gets faster!
+Although: When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
+When SSG panel is open, change working dir, so a file search only searches inside source folder!!
+ignoreorlowprio= only search these folders if no result have been found, search them last
+API.findFiles
+---
+
+
 When having search open and then bringing up search in files:
 /home/Z/Projects/jzedit/client/plugin/find_in_files_server.js:317
 Uncaught TypeError: undefined is not a function
@@ -48,17 +59,6 @@ Coding an agar clone as a nodejs example
 todo
 ----
 
-
----
-Irritatning having to change the folder on where to look for files when opening a file.
-If less then max results are found in search, then automatically snab to parent folder.
-Do the search on server side so it gets faster!
-Although: When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
-When SSG panel is open, change working dir, so a file search only searches inside source folder!!
-ignoreorlowprio= only search these folders if no result have been found, search them last
-API.findFiles
----
-
 When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
@@ -66,9 +66,9 @@ Make a preview event, that plugins can answer to
 
 Make backup of a folder. Copy folder or make a zip file.
 
-Init SCM on a folder. And later be able to add a remote repo.
-
-
+Init SCM on a folder. And later be able to add a remote repo. (Init SCM repo)
+If a remote repo is specified, clone to temp folder, check for file colitions (file exist in both folders) then copy over the content from the temp folder.
+Ask what to do for each file colliton ?
 
 
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
@@ -1947,6 +1947,8 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Test runner feedback. See the test results when you hit save.
 
 ---
 "help" widget.
