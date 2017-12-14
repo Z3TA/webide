@@ -21,251 +21,268 @@
 	var charEnter = 13;
 	var workingDir;
 	var progressBar;
+	var fileCache = [];
+	var defaultMaxResults = 20;
+	var maxResults = defaultMaxResults;
 	
-	EDITOR.plugin({
-		desc: "Open any file ...",
-		load: gotoFile_load,
-		unload: gotoFile_unload
-	});
-	
-	function gotoFile_load() {
+		EDITOR.plugin({
+			desc: "Open any file ...",
+			load: gotoFile_load,
+			unload: gotoFile_unload
+		});
 		
-		footer = document.getElementById("footer");
-		gotoDiv = document.getElementById("goto");
-		inputGoto = document.getElementById("inputGoto");
-		gotoButton = document.getElementById("buttonGoto");
-		gotoList = document.getElementById("gotoList");
-		inputFolder = document.getElementById("inputFolder");
-		
-		// Sanity check
-		if(!footer) {
-			throw new Error("Can not find the footer!");
-		}
-		
-		// Insert text into translation dictionary if they dont exist
-		//dictionary.default("gotoline", "Goto line")
-		
-		// Create the hypertext markup if it doesn't existpppp
-		
-		//build_gotoInput();
-		
-		hide_gotoFileInput();
-		
-		var charP = 80;
-		var charO = 79;
-		
-		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
-		EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
-		
-		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
-		
-		EDITOR.on("openFileTool", openAnyFileTool);
-		
-		CLIENT.on("findFilesStatus", gotoFileProgressStatus);
-		CLIENT.on("fileFound", gotoFileFileFound);
-		CLIENT.on("pathGlob", gotoFilePathGlob);
-		
-		
-	}
-	
-	function gotoFile_unload() {
-		EDITOR.unbindKey(show_gotoFileInput);
-		EDITOR.unbindKey(show_gotoFileInput2);
-		
-		EDITOR.unbindKey(hide_gotoFileInput);
-		
-		EDITOR.removeEvent("openFileTool", openAnyFileTool);
-		
-		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
-		CLIENT.removeEvent("fileFound", gotoFileFileFound);
-		CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
-		
-		hide_gotoFileInput();
-	}
-	
-	function openAnyFileTool(directory) {
-		
-		if(directory) {
-		if(inputFolder) inputFolder.value = directory;
-			else EDITOR.changeWorkingDir(directory);
-		}
-		show_gotoFileInput();
-		
-		return true; // true means we handled it
-		
-	}
-	
-	function build_gotoInput(folderToSearchIn) {
-		
-		gotoDiv = document.createElement("div");
-		gotoDiv.setAttribute("id", "gotoDiv");
-		gotoDiv.setAttribute("class", "gotoFile");
-		
-		progressBar = document.createElement("progress");
-		progressBar.setAttribute("class", "progress findFiles");
-		progressBar.setAttribute("style", "display: none; width: 100%");
-		progressBar.setAttribute("value", "0");
-		progressBar.setAttribute("max", "1");
-		
-		inputGoto = document.createElement("input");
-		inputGoto.setAttribute("type", "text");
-		inputGoto.setAttribute("id", "inputGoto");
-		inputGoto.setAttribute("class", "inputtext");
-		inputGoto.setAttribute("placeholder", "Filename");
-		
-		inputFolder = document.createElement("input");
-		inputFolder.setAttribute("type", "text");
-		inputFolder.setAttribute("id", "inputFolder");
-		inputFolder.setAttribute("class", "inputtext");
-		inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
-		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
-		
-		var labelGoto = document.createElement("label");
-		labelGoto.setAttribute("for", "inputGoto");
-		labelGoto.appendChild(document.createTextNode("File (search):")); // Language settings!?
-		
-		var labelFolder = document.createElement("label");
-		labelFolder.setAttribute("for", "inputFolder");
-		labelFolder.appendChild(document.createTextNode(" in directory:")); // Language settings!?
-		
-		gotoButton = document.createElement("input");
-		gotoButton.setAttribute("type", "button");
-		gotoButton.setAttribute("class", "button");
-		gotoButton.setAttribute("id", "gotoButton");
-		gotoButton.setAttribute("value", "Open");
-		gotoButton.setAttribute("title", "Press Enter to Open selected file");
-		
-		var cancelButton = document.createElement("input");
-		cancelButton.setAttribute("type", "button");
-		cancelButton.setAttribute("class", "button");
-		cancelButton.setAttribute("id", "cancelButton");
-		cancelButton.setAttribute("value", "Cancel");
-		
-		gotoList = document.createElement("ul");
-		gotoList.setAttribute("id", "gotoList");
-		gotoList.setAttribute("title", "Use keyboard up/down arrow to select a file from the list");
-		
-		//var li = document.createElement("li");
-		//li.appendChild(document.createTextNode("test 123"));
-		//gotoList.appendChild(li);
-		
-		gotoDiv.appendChild(gotoList);
-		
-		gotoDiv.appendChild(progressBar);
-		
-		gotoDiv.appendChild(labelGoto);
-		gotoDiv.appendChild(inputGoto);
-		
-		gotoDiv.appendChild(labelFolder);
-		gotoDiv.appendChild(inputFolder);
-		
-		gotoDiv.appendChild(gotoButton);
-		gotoDiv.appendChild(cancelButton);
-		
-		
-		footer.appendChild(gotoDiv);
-		
-		gotoButton.addEventListener("click", gotoFile, false);
-		
-		cancelButton.addEventListener("click", hide_gotoFileInput, false);
-		
-		inputGoto.addEventListener("keyup", typing, false);
-		
-		//inputFolder.addEventListener("keyup", chandingDir, false);
-		
-		gotoInputIsVisible = true;
-		
-		console.log("built gotoInput!");
-		
-	}
-	
-	function typing(keyUpEvent) {
-		
-		console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input);
-		
-		keyUpEvent.preventDefault();
-
-		if(isSearching) abortFindFiles();
-		
-		if (keyUpEvent.keyCode == charEnter) {
-			gotoFile();
-			return;
-		}
-		else if(keyUpEvent.keyCode == charEscape) {
+		function gotoFile_load() {
+			
+			footer = document.getElementById("footer");
+			gotoDiv = document.getElementById("goto");
+			inputGoto = document.getElementById("inputGoto");
+			gotoButton = document.getElementById("buttonGoto");
+			gotoList = document.getElementById("gotoList");
+			inputFolder = document.getElementById("inputFolder");
+			
+			// Sanity check
+			if(!footer) {
+				throw new Error("Can not find the footer!");
+			}
+			
+			// Insert text into translation dictionary if they dont exist
+			//dictionary.default("gotoline", "Goto line")
+			
+			// Create the hypertext markup if it doesn't existpppp
+			
+			//build_gotoInput();
+			
 			hide_gotoFileInput();
-			return;
-		}
-		else if(keyUpEvent.keyCode == keyUp) {
-			moveUp();
-			inputGoto.focus();
-			return;
-		}
-		else if(keyUpEvent.keyCode == keyDown) {
-			gotoFile_moveDown();
-			inputGoto.focus();
-			return;
+			
+			var charP = 80;
+			var charO = 79;
+			
+			EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charP, combo: CTRL, fun: show_gotoFileInput}); // ctrl + P
+			EDITOR.bindKey({desc: "Open file by searching for file path", charCode: charO, combo: CTRL, fun: show_gotoFileInput2}); // ctrl + O
+			
+			EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
+			
+			EDITOR.on("openFileTool", openAnyFileTool);
+			
+			CLIENT.on("findFilesStatus", gotoFileProgressStatus);
+			CLIENT.on("fileFound", gotoFileFileFound);
+			CLIENT.on("pathGlob", gotoFilePathGlob);
+			
+			
 		}
 		
+		function gotoFile_unload() {
+			EDITOR.unbindKey(show_gotoFileInput);
+			EDITOR.unbindKey(show_gotoFileInput2);
+			
+			EDITOR.unbindKey(hide_gotoFileInput);
+			
+			EDITOR.removeEvent("openFileTool", openAnyFileTool);
+			
+			CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
+			CLIENT.removeEvent("fileFound", gotoFileFileFound);
+			CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
+			
+			hide_gotoFileInput();
+		}
+		
+		function openAnyFileTool(directory) {
+			
+			if(directory) {
+				if(inputFolder) inputFolder.value = directory;
+				else EDITOR.changeWorkingDir(directory);
+			}
+			show_gotoFileInput();
+			
+			return true; // true means we handled it
+			
+		}
+		
+		function build_gotoInput(folderToSearchIn) {
+			
+			gotoDiv = document.createElement("div");
+			gotoDiv.setAttribute("id", "gotoDiv");
+			gotoDiv.setAttribute("class", "gotoFile");
+			
+			progressBar = document.createElement("progress");
+			progressBar.setAttribute("class", "progress findFiles");
+			progressBar.setAttribute("style", "display: none; width: 100%");
+			progressBar.setAttribute("value", "0");
+			progressBar.setAttribute("max", "1");
+			
+			inputGoto = document.createElement("input");
+			inputGoto.setAttribute("type", "text");
+			inputGoto.setAttribute("id", "inputGoto");
+			inputGoto.setAttribute("class", "inputtext");
+			inputGoto.setAttribute("placeholder", "Filename");
+			
+			inputFolder = document.createElement("input");
+			inputFolder.setAttribute("type", "text");
+			inputFolder.setAttribute("id", "inputFolder");
+			inputFolder.setAttribute("class", "inputtext");
+			inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
+			inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
+			
+			var labelGoto = document.createElement("label");
+			labelGoto.setAttribute("for", "inputGoto");
+			labelGoto.appendChild(document.createTextNode("File (search):")); // Language settings!?
+			
+			var labelFolder = document.createElement("label");
+			labelFolder.setAttribute("for", "inputFolder");
+			labelFolder.appendChild(document.createTextNode(" in directory:")); // Language settings!?
+			
+			gotoButton = document.createElement("input");
+			gotoButton.setAttribute("type", "button");
+			gotoButton.setAttribute("class", "button");
+			gotoButton.setAttribute("id", "gotoButton");
+			gotoButton.setAttribute("value", "Open");
+			gotoButton.setAttribute("title", "Press Enter to Open selected file");
+			
+			var cancelButton = document.createElement("input");
+			cancelButton.setAttribute("type", "button");
+			cancelButton.setAttribute("class", "button");
+			cancelButton.setAttribute("id", "cancelButton");
+			cancelButton.setAttribute("value", "Cancel");
+			
+			gotoList = document.createElement("ul");
+			gotoList.setAttribute("id", "gotoList");
+			gotoList.setAttribute("title", "Use keyboard up/down arrow to select a file from the list");
+			
+			//var li = document.createElement("li");
+			//li.appendChild(document.createTextNode("test 123"));
+			//gotoList.appendChild(li);
+			
+			gotoDiv.appendChild(gotoList);
+			
+			gotoDiv.appendChild(progressBar);
+			
+			gotoDiv.appendChild(labelGoto);
+			gotoDiv.appendChild(inputGoto);
+			
+			gotoDiv.appendChild(labelFolder);
+			gotoDiv.appendChild(inputFolder);
+			
+			gotoDiv.appendChild(gotoButton);
+			gotoDiv.appendChild(cancelButton);
+			
+			
+			footer.appendChild(gotoDiv);
+			
+			gotoButton.addEventListener("click", gotoFile, false);
+			
+			cancelButton.addEventListener("click", hide_gotoFileInput, false);
+			
+			inputGoto.addEventListener("keyup", typing, false);
+			
+			//inputFolder.addEventListener("keyup", chandingDir, false);
+			
+			gotoInputIsVisible = true;
+			
+			console.log("built gotoInput!");
+			
+		}
+		
+		function typing(keyUpEvent) {
+			
+			console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input);
+			
+			keyUpEvent.preventDefault();
+			
+			if(isSearching) abortFindFiles();
+			
+			if (keyUpEvent.keyCode == charEnter) {
+				gotoFile();
+				return;
+			}
+			else if(keyUpEvent.keyCode == charEscape) {
+				hide_gotoFileInput();
+				return;
+			}
+			else if(keyUpEvent.keyCode == keyUp) {
+				moveUp();
+				inputGoto.focus();
+				return;
+			}
+			else if(keyUpEvent.keyCode == keyDown) {
+				gotoFile_moveDown();
+				inputGoto.focus();
+				return;
+			}
+			
+			var text = inputGoto.value
+			
+			if(text.length > 0) {
+				trySearch();
+			}
+			else {
+				EDITOR.resizeNeeded();
+			}
+			
+		}
+		
+		function trySearch() {
+			
+			console.log("trySearch: isSearching=" + isSearching);
+			
+			clearTimeout(searchTimer); // Clear any queued up searches
+			
+			// Clear the list
+			matchesFound = 0;
+			while(gotoList.firstChild) {
+				gotoList.removeChild(gotoList.firstChild);
+			}
+			EDITOR.resizeNeeded();
+			
 		var text = inputGoto.value
 		
-		if(text.length > 0) {
-			trySearch();
-		}
-		else {
-			EDITOR.resizeNeeded();
-		}
+		// Search the cache first
+		var reName = new RegExp(text, "ig");
+		for (var i=0, match; i<fileCache.length; i++) {
+			match = fileCache[i].match(reName);
+			if(match) {
+				appendResult(fileCache[i], match);
+				if(isSearching && matchesFound >= defaultMaxResults) return abortFindFiles();
+				if(matchesFound >= defaultMaxResults) return;
+				}
+			}
 		
-	}
-		
-	function trySearch() {
-		
-		console.log("trySearch: isSearching=" + isSearching);
-		
-		clearTimeout(searchTimer); // Clear any queued up searches
-		
-		// Clear the list
-		matchesFound = 0;
-		while(gotoList.firstChild) {
-			gotoList.removeChild(gotoList.firstChild);
-		}
-		EDITOR.resizeNeeded();
+		maxResults = defaultMaxResults - matchesFound;
 		
 		if(!isSearching) {
-			var text = inputGoto.value
 			search(text);
+			}
+			else {
+				CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+					if(err) throw err;
+					
+					if(resp.filesInFlight == 0) {
+						isSearching = false;
+						trySearch();
+					}
+					else searchTimer = setTimeout(trySearch, 500);
+					
+				});
+			}
 		}
-		else {
-			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+		
+		function search(searchString) {
+			var searchPath = inputFolder.value; //EDITOR.workingDirectory;
+			isSearching = true;
+			console.time("findFiles"); // Edit server's cuncurrencty setting to fine tune!
+		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults}, function searchFinish(err, resp) {
+				isSearching = false;
 				if(err) throw err;
 				
-				if(resp.filesInFlight == 0) {
-					isSearching = false;
-					trySearch();
-				}
-				else searchTimer = setTimeout(trySearch, 500);
+				console.timeEnd("findFiles");
+				
+				console.log("Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
+				
+				if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
+				
+				progressBar.style.display = "none";
+				EDITOR.resizeNeeded();
 				
 			});
-		}
-	}
-	
-	function search(searchString) {
-		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
-		isSearching = true;
-		console.time("findFiles"); // Edit server's cuncurrencty setting to fine tune!
-		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: 20}, function searchFinish(err, resp) {
-			isSearching = false;
-			if(err) throw err;
-			
-			console.timeEnd("findFiles");
-			
-			console.log("Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
-			
-			if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
-			
-			progressBar.style.display = "none";
-			EDITOR.resizeNeeded();
-			
-});
 		}
 		
 		function appendResult(filePath, matchArr) {
@@ -296,285 +313,286 @@
 			
 			li.onclick = gotoFile;
 			
-		EDITOR.resizeNeeded();
+			EDITOR.resizeNeeded();
 			EDITOR.resize();
-		
+			
 		}
 		
-	
-	
-	// Can't have event listeners with the same name
-	function show_gotoFileInput2(file, combo) {
-		return show_gotoFileInput(file, combo);
-	}
-	
-	function show_gotoFileInput(file, combo) {
 		
-		if(file) {
-			currentDir = UTIL.getDirectoryFromPath(file.path);
 		
-			var folderToSearchIn = currentDir;
-			if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) folderToSearchIn = EDITOR.workingDirectory;
-		else {
-				var folders = UTIL.getFolders(folderToSearchIn);
-			if(folders.length > 0) folders.pop(); // Use parent folder
-				folderToSearchIn = folders.pop();
-				console.log("folderToSearchIn=" + folderToSearchIn);
-		}
+		// Can't have event listeners with the same name
+		function show_gotoFileInput2(file, combo) {
+			return show_gotoFileInput(file, combo);
 		}
 		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
-
-		if(!gotoInputIsVisible) {
+		function show_gotoFileInput(file, combo) {
 			
-			console.log("gotoDiv=" + gotoDiv);
-			
-			if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
-			
-			//if(!gotoDiv) build_gotoInput();
-			build_gotoInput(folderToSearchIn); // Always build!
-			
-			var footerHeight = parseInt(footer.style.height);
-			//var heightNeeded = 45;
-			// The div function will take up as much place as it needs!
-			
-			gotoDiv.style.display="block";
-			
-			/* We need the footer to be this high
-			if(footerHeight < heightNeeded) {
-				//footer.style.height = footerHeight + heightNeeded + "px";
-				EDITOR.resizeNeeded();
+			if(file) {
+				currentDir = UTIL.getDirectoryFromPath(file.path);
+				
+				var folderToSearchIn = currentDir;
+				if(folderToSearchIn.indexOf(EDITOR.workingDirectory) != -1) folderToSearchIn = EDITOR.workingDirectory;
+				else {
+					var folders = UTIL.getFolders(folderToSearchIn);
+					if(folders.length > 0) folders.pop(); // Use parent folder
+					folderToSearchIn = folders.pop();
+					console.log("folderToSearchIn=" + folderToSearchIn);
+				}
 			}
-			*/
 			
+			console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
+			
+			if(!gotoInputIsVisible) {
+				
+				console.log("gotoDiv=" + gotoDiv);
+				
+				if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
+				
+				//if(!gotoDiv) build_gotoInput();
+				build_gotoInput(folderToSearchIn); // Always build!
+				
+				var footerHeight = parseInt(footer.style.height);
+				//var heightNeeded = 45;
+				// The div function will take up as much place as it needs!
+				
+				gotoDiv.style.display="block";
+				
+				/* We need the footer to be this high
+					if(footerHeight < heightNeeded) {
+					//footer.style.height = footerHeight + heightNeeded + "px";
+					EDITOR.resizeNeeded();
+					}
+				*/
+				
 				EDITOR.input = false;
-			
-			
-			inputGoto.focus();   // Add focus to the input
-			inputGoto.select();  // Select all
-			
-		
-			
-			gotoInputIsVisible = true;
-			
-			EDITOR.resizeNeeded();
-			EDITOR.renderNeeded();
-			
-		}
-		
-		return false; // Return false to prevent default
-	}
-
-	function hide_gotoFileInput() {
-		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
-		
-		if(isSearching) abortFindFiles();
-		
-		if(gotoInputIsVisible) {
-			
-			// Hide the search window
-			//gotoDiv.style.display="none"; // Need to hide this, or the footer will not scrimp
-			
-			gotoDiv.parentNode.removeChild(gotoDiv);
-			
-			//footer.style.height = "0px"; // Hmm, can't be less then one px
-			
-			// Bring back focus to the current file
-			if(EDITOR.currentFile) {
-				EDITOR.input = true;
+				
+				
+				inputGoto.focus();   // Add focus to the input
+				inputGoto.select();  // Select all
+				
+				
+				
+				gotoInputIsVisible = true;
+				
+				EDITOR.resizeNeeded();
+				EDITOR.renderNeeded();
+				
 			}
 			
-			gotoInputIsVisible = false;
-			
-			EDITOR.resizeNeeded();
-			EDITOR.renderNeeded();
-			
-			return false;
+			return false; // Return false to prevent default
 		}
 		
-		return true;
-	}
-	
-	function moveUp() {
-		
-		console.log("Moving up ...");
-		
-		if(!gotoList) return true;
-		
-		var listItems = gotoList.childNodes;
-		
-		inputGoto.blur();
-		
-		// Witch list item is selected?
-		for (var i=0; i<listItems.length; i++) {
-			if(listItems[i].getAttribute("class") == "selected") {
+		function hide_gotoFileInput() {
+			
+			console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
+			
+			if(isSearching) abortFindFiles();
+			
+			if(gotoInputIsVisible) {
 				
-				if(i < listItems.length && i > 0) {
-					listItems[i].setAttribute("class", "notselected");
-					listItems[i-1].setAttribute("class", "selected");
-				}
-				break;
-			}
-		}
-		
-		setTimeout(function() { // Can't focus right away or it will be a keyup!
-		//inputGoto.focus();
-		}, 100); // This can wary!!! *sight* 
-		
-		return false; // false: prevent default browser action
-		
-	}
-	
-	function gotoFile_moveDown() {
-		
-		if(!gotoList) return true; // Allow default browser action if the gotoList doesn't exist
-		
-		var listItems = gotoList.childNodes;
-		
-		inputGoto.blur();
-		
-		// Witch list item is selected?
-		for (var i=0; i<listItems.length; i++) {
-			if(listItems[i].getAttribute("class") == "selected") {
+				// Hide the search window
+				//gotoDiv.style.display="none"; // Need to hide this, or the footer will not scrimp
 				
-				if(i < (listItems.length-1)) { // Not last
-					listItems[i].setAttribute("class", "notselected");
-					listItems[i+1].setAttribute("class", "selected");
+				gotoDiv.parentNode.removeChild(gotoDiv);
+				
+				//footer.style.height = "0px"; // Hmm, can't be less then one px
+				
+				// Bring back focus to the current file
+				if(EDITOR.currentFile) {
+					EDITOR.input = true;
 				}
 				
-				break;
-			}
-		}
-		
-		//console.log("yoyo i=" + i + " listItems.length=" + listItems.length);
-		
-		if(i == (listItems.length-1)) {
-			inputGoto.focus();
-		}
-		
-		return false; // false: prevent default browser action
-	}
-	
-	function gotoFile(e) {
-		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
-		
-		if(gotoInputIsVisible && !EDITOR.input) {
-			
-			var selectedItem;
-			
-			if(e) {
-				selectedItem = e.target;
+				gotoInputIsVisible = false;
+				
+				EDITOR.resizeNeeded();
+				EDITOR.renderNeeded();
+				
+				return false;
 			}
 			
-			if(!selectedItem) {
-				var listItems = gotoList.childNodes;
+			return true;
+		}
+		
+		function moveUp() {
+			
+			console.log("Moving up ...");
+			
+			if(!gotoList) return true;
+			
+			var listItems = gotoList.childNodes;
+			
+			inputGoto.blur();
+			
+			// Witch list item is selected?
+			for (var i=0; i<listItems.length; i++) {
+				if(listItems[i].getAttribute("class") == "selected") {
+					
+					if(i < listItems.length && i > 0) {
+						listItems[i].setAttribute("class", "notselected");
+						listItems[i-1].setAttribute("class", "selected");
+					}
+					break;
+				}
+			}
+			
+			setTimeout(function() { // Can't focus right away or it will be a keyup!
+				//inputGoto.focus();
+			}, 100); // This can wary!!! *sight* 
+			
+			return false; // false: prevent default browser action
+			
+		}
+		
+		function gotoFile_moveDown() {
+			
+			if(!gotoList) return true; // Allow default browser action if the gotoList doesn't exist
+			
+			var listItems = gotoList.childNodes;
+			
+			inputGoto.blur();
+			
+			// Witch list item is selected?
+			for (var i=0; i<listItems.length; i++) {
+				if(listItems[i].getAttribute("class") == "selected") {
+					
+					if(i < (listItems.length-1)) { // Not last
+						listItems[i].setAttribute("class", "notselected");
+						listItems[i+1].setAttribute("class", "selected");
+					}
+					
+					break;
+				}
+			}
+			
+			//console.log("yoyo i=" + i + " listItems.length=" + listItems.length);
+			
+			if(i == (listItems.length-1)) {
+				inputGoto.focus();
+			}
+			
+			return false; // false: prevent default browser action
+		}
+		
+		function gotoFile(e) {
+			
+			console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
+			
+			if(gotoInputIsVisible && !EDITOR.input) {
 				
-				// Witch list item is selected?
+				var selectedItem;
 				
-				for (var i=0; i<listItems.length; i++) {
-					if(listItems[i].getAttribute("class") == "selected") {
-						selectedItem = listItems[i];
-						break;
+				if(e) {
+					selectedItem = e.target;
+				}
+				
+				if(!selectedItem) {
+					var listItems = gotoList.childNodes;
+					
+					// Witch list item is selected?
+					
+					for (var i=0; i<listItems.length; i++) {
+						if(listItems[i].getAttribute("class") == "selected") {
+							selectedItem = listItems[i];
+							break;
+						}
 					}
 				}
-			}
-			
-			if(selectedItem) {
 				
-				var path = selectedItem.getAttribute("path");
-				var lineNr = selectedItem.getAttribute("lineNr");
-				
-				if(!path) {
-					console.log(selectedItem);
-					throw new Error("path=" + path)
+				if(selectedItem) {
+					
+					var path = selectedItem.getAttribute("path");
+					var lineNr = selectedItem.getAttribute("lineNr");
+					
+					if(!path) {
+						console.log(selectedItem);
+						throw new Error("path=" + path)
+					}
+					
+					console.log("Opening " + path);
+					
+					EDITOR.openFile(path, undefined, function(err, file) {
+						
+						if(err) {
+							alert(err.message);
+							return;
+						}
+						
+						//console.log("Going to line " + lineNr);
+						EDITOR.renderNeeded();
+						
+						var dir = UTIL.getDirectoryFromPath(path);
+						
+						if(dir.indexOf(EDITOR.workingDirectory) == -1) {
+							// Set the working directory to this files's folder
+							EDITOR.changeWorkingDir(dir);
+						}
+						
+						
+					});
+					
 				}
 				
-				console.log("Opening " + path);
 				
-				EDITOR.openFile(path, undefined, function(err, file) {
+				/*
 					
-					if(err) {
-						alert(err.message);
-						return;
-}
+					console.log("Going to line " + line + ".");
 					
-					//console.log("Going to line " + lineNr);
-					EDITOR.renderNeeded();
+					file.caret.row = line-1;
+					//file.caret.col = 0;
 					
-					var dir = UTIL.getDirectoryFromPath(path);
-					
-					if(dir.indexOf(EDITOR.workingDirectory) == -1) {
-						// Set the working directory to this files's folder
-						EDITOR.changeWorkingDir(dir);
-						}
-					
-					
-				});
+					file.fixCaret();
+					file.scrollToCaret();
+				*/
+				
+				hide_gotoFileInput();
+				
+				return false; // Return false to prevent default (typing a linebreak character)
 				
 			}
-			
-			
-			/*
-				
-				console.log("Going to line " + line + ".");
-				
-				file.caret.row = line-1;
-				//file.caret.col = 0;
-				
-				file.fixCaret();
-				file.scrollToCaret();
-			*/
-			
-			hide_gotoFileInput();
-			
-			return false; // Return false to prevent default (typing a linebreak character)
-			
-		}
-		return true;
-	}
-	
-	
-	function gotoFileProgressStatus(status) {
-		console.log("gotoFileProgressStatus: " + JSON.stringify(status));
-		
-		// Whatever gives the highest percentage
-		if(status.totalFoldersSearched / status.totalFoldersToSearch > status.found / status.maxResults) {
-			progressBar.max = status.totalFoldersToSearch;
-			progressBar.value =status.totalFoldersSearched;
-		}
-		else {
-			progressBar.max = status.maxResults;
-			progressBar.value = status.found;
+			return true;
 		}
 		
-		if(progressBar.max == progressBar.value) {
-			progressBar.style.display = "none";
-			EDITOR.resizeNeeded();
-			progressBar.max = 1;
-			progressBar.value = 0;
+		
+		function gotoFileProgressStatus(status) {
+			console.log("gotoFileProgressStatus: " + JSON.stringify(status));
+			
+			// Whatever gives the highest percentage
+			if(status.totalFoldersSearched / status.totalFoldersToSearch > status.found / status.maxResults) {
+				progressBar.max = status.totalFoldersToSearch;
+				progressBar.value =status.totalFoldersSearched;
+			}
+			else {
+				progressBar.max = status.maxResults;
+				progressBar.value = status.found;
+			}
+			
+			if(progressBar.max == progressBar.value) {
+				progressBar.style.display = "none";
+				EDITOR.resizeNeeded();
+				progressBar.max = 1;
+				progressBar.value = 0;
+			}
+			else {
+				var oldStyleDisplay = progressBar.style.display;
+				progressBar.style.display = "block";
+				if(oldStyleDisplay != "block") EDITOR.resizeNeeded();
+			}
 		}
-		else {
-			var oldStyleDisplay = progressBar.style.display;
-			progressBar.style.display = "block";
-			if(oldStyleDisplay != "block") EDITOR.resizeNeeded();
+		
+		function gotoFileFileFound(file) {
+			appendResult(file.path, file.match);
+			gotoFileProgressStatus(file);
+		if(fileCache.indexOf(file.path) == -1) fileCache.push(file.path);
 		}
-	}
-	
-	function gotoFileFileFound(file) {
-		appendResult(file.path, file.match);
-		gotoFileProgressStatus(file);
-	}
-	
-	function gotoFilePathGlob(folder) {
-		inputFolder.value = folder;
-	}
-	
-	function abortFindFiles() {
-		CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
-			if(err) throw err;
+		
+		function gotoFilePathGlob(folder) {
+			inputFolder.value = folder;
+		}
+		
+		function abortFindFiles() {
+			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+				if(err) throw err;
 			});
-	}
-	
+		}
+		
 	})();

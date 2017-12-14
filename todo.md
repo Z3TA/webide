@@ -36,6 +36,8 @@ What I'm working on
 
 file name search ...
 
+added cahche, but it still calls the findFiles api !?
+
 sometimes when you use backspace it goes into an endless loop trySearch
 
 ---
