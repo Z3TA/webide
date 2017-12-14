@@ -36,7 +36,7 @@ What I'm working on
 
 file name search ...
 
-status bar moves back and forth ... 
+sometimes when you use backspace it goes into an endless loop trySearch
 
 ---
 Irritatning having to change the folder on where to look for files when opening a file.

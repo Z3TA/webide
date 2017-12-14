@@ -219,6 +219,8 @@
 		
 	function trySearch() {
 		
+		console.log("trySearch: isSearching=" + isSearching);
+		
 		clearTimeout(searchTimer); // Clear any queued up searches
 		
 		// Clear the list
@@ -249,11 +251,14 @@
 	function search(searchString) {
 		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
 		isSearching = true;
+		console.time("findFiles"); // Edit server's cuncurrencty setting to fine tune!
 		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: 20}, function searchFinish(err, resp) {
 			isSearching = false;
 			if(err) throw err;
 			
-			console.log("Search finish! found=" + resp.found + " totalFoldersSearched=" + resp.totalFoldersSearched + " buzy=" + resp.buzy);
+			console.timeEnd("findFiles");
+			
+			console.log("Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
 			
 			if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
 			
@@ -534,8 +539,15 @@
 	function gotoFileProgressStatus(status) {
 		console.log("gotoFileProgressStatus: " + JSON.stringify(status));
 		
-		progressBar.max = status.totalFoldersToSearch;
-		progressBar.value = status.totalFoldersSearched;
+		// Whatever gives the highest percentage
+		if(status.totalFoldersSearched / status.totalFoldersToSearch > status.found / status.maxResults) {
+			progressBar.max = status.totalFoldersToSearch;
+			progressBar.value =status.totalFoldersSearched;
+		}
+		else {
+			progressBar.max = status.maxResults;
+			progressBar.value = status.found;
+		}
 		
 		if(progressBar.max == progressBar.value) {
 			progressBar.style.display = "none";
@@ -552,6 +564,7 @@
 	
 	function gotoFileFileFound(file) {
 		appendResult(file.path, file.match);
+		gotoFileProgressStatus(file);
 	}
 	
 	function gotoFilePathGlob(folder) {
