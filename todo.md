@@ -34,6 +34,10 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+file name search ...
+
+status bar moves back and forth ... 
+
 ---
 Irritatning having to change the folder on where to look for files when opening a file.
 If less then max results are found in search, then automatically snab to parent folder.

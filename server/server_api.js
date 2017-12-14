@@ -2169,7 +2169,7 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 		Notify the client when switching folder
 		*/
 	
-	if(FIND_FILES_ABORTED && FIND_FILES_IN_FLIGHT > 0) return findFilesCallback(null, {aborted: true, findFilesInFlight: FIND_FILES_IN_FLIGHT});
+	if(FIND_FILES_ABORTED && FIND_FILES_IN_FLIGHT > 0) return finish(null, {buzy: true});
 	
 	FIND_FILES_ABORTED = false;
 	
@@ -2177,14 +2177,14 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 	var findFile = json.name;
 	var useRegexp = json.useRegexp || false;
 	
-	if(startFolder == undefined) return findFilesCallback(new Error("startFolder=" + startFolder));
-	if(findFile == undefined) return findFilesCallback(new Error("findFile=" + findFile));
+	if(startFolder == undefined) return finish(new Error("startFolder=" + startFolder));
+	if(findFile == undefined) return finish(new Error("findFile=" + findFile));
 	
 	if(!useRegexp) findFile = UTIL.escapeRegExp(findFile);
 	
-	var reName = new RegExp(".*" + findFile + ".*");
+	var reName = new RegExp(findFile, "ig");
 	
-	var maxResults = 20;
+	var maxResults = json.maxResults || 20;
 	var filesFound = 0;
 	var foldersToSearch = [];
 	
@@ -2193,11 +2193,12 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 	var folders = UTIL.getFolders(startFolder);
 	var totalFoldersToSearch = 0;
 	var totalFoldersSearched = 0;
-	
+var callbackCalled = false;
+
 	searchFolder(folders.pop());
 	
 	function searchFolder(folder) {
-		if(FIND_FILES_ABORTED) return;
+		if(FIND_FILES_ABORTED) return finish(null);
 		if(foldersToSearch.indexOf(folder) != -1) return; // Folder already searched
 		foldersToSearch.push(folder);
 		FIND_FILES_IN_FLIGHT++;
@@ -2206,11 +2207,12 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 			findFilesStatus: {
 				totalFoldersToSearch: totalFoldersToSearch, 
 				totalFoldersSearched: totalFoldersSearched, 
-				filesInFlight: FIND_FILES_IN_FLIGHT, 
-		filesFound: filesFound
+				foldersBeingSearched: FIND_FILES_IN_FLIGHT, 
+		found: filesFound,
+				name: findFile
 			}
 		});
-		listFiles(user, {pathToFolder: folder}, function listFilesCallback(err, resp) {
+		API.listFiles(user, {pathToFolder: folder}, function listFilesCallback(err, resp) {
 			FIND_FILES_IN_FLIGHT--;
 			totalFoldersSearched++;
 			
@@ -2219,16 +2221,24 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 				return;
 				}
 			
-			if(FIND_FILES_ABORTED) return;
+			if(FIND_FILES_ABORTED) return finish(null);
 			
 			var fileList = resp.list;
-			for (var i=0, path; i<fileList.length; i++) {
+			for (var i=0, path, matchArr; i<fileList.length; i++) {
 				path = user.toVirtualPath(fileList[i].path);
 				if(fileList[i].type=="d") searchFolder(path);
-				else if(path.match(reName)) {
-						user.send({fileFound: path});
-						filesFound++;
-						
+				else {
+matchArr = path.match(reName);
+if(matchArr) {
+					user.send({
+fileFound: {
+path: path, 
+match: matchArr
+}
+});
+					filesFound++;
+						if(filesFound >= maxResults) break;
+				}
 				}
 			}
 			
@@ -2236,40 +2246,52 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 				findFilesStatus: {
 					totalFoldersToSearch: totalFoldersToSearch,
 					totalFoldersSearched: totalFoldersSearched,
-					filesInFlight: FIND_FILES_IN_FLIGHT,
-					filesFound: filesFound
+					foldersBeingSearched: FIND_FILES_IN_FLIGHT,
+					found: filesFound,
+					name: findFile
 				}
 			});
 			
-			if(filesFound >= maxResults) return finish(null);
+			if(filesFound >= maxResults) {
+return finish(null);
+			}
 			else if(FIND_FILES_IN_FLIGHT == 0 && folders.length > 0 && filesFound < maxResults) {
 				folder = folders.pop();
 				user.send({pathGlob: folder});
 				searchFolder(folder);
 			}
 			else if(FIND_FILES_IN_FLIGHT == 0 && folders.length == 0) {
-				
+				return finish(null);
 			}
-			else throw new Error("Unexpected: FIND_FILES_IN_FLIGHT=" + FIND_FILES_IN_FLIGHT + " folders=" + JSON.stringify(folders) +
+			else if(FIND_FILES_IN_FLIGHT == 0) throw new Error("Unexpected: FIND_FILES_IN_FLIGHT=" + FIND_FILES_IN_FLIGHT + " folders=" + JSON.stringify(folders) +
 			" filesFound=" + filesFound + " maxResults=" + maxResults);
 			
 		});
 	}
 	
-	function searchDone() {
-	}
-	
 	function finish(err, resp) {
-		if(!FIND_FILES_ABORTED) {
-			FIND_FILES_ABORTED = true;
+FIND_FILES_ABORTED = true;
+		if(!callbackCalled) {
+			callbackCalled = true;
+			if(!resp) resp = {};
+			
+			if(!resp.buzy) resp.buzy = false;
+			if(!resp.found) resp.found = filesFound;
+if(!resp.foldersBeingSearched) resp.foldersBeingSearched = FIND_FILES_IN_FLIGHT;
+if(!resp.maxResults) resp.maxResults = maxResults;
+			if(!resp.totalFoldersToSearch) resp.totalFoldersToSearch = totalFoldersToSearch;
+			if(!resp.totalFoldersSearched) resp.totalFoldersSearched = totalFoldersSearched;
+			if(!resp.name) resp.name = findFile;
+			
 			findFilesCallback(err, resp);
 		}
 	}
 	
 }
 
-API.abortFindFiles = function abortFindFiles(user, json, findFilesCallback) {
+API.abortFindFiles = function abortFindFiles(user, json, abortFindFilesCallback) {
 	FIND_FILES_ABORTED = true;
+abortFindFilesCallback(null, {foldersBeingSearched: FIND_FILES_IN_FLIGHT});
 	}
 
 

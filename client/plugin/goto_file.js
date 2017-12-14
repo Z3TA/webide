@@ -10,22 +10,17 @@
 	var gotoButton;
 	var gotoList;
 	var selectedChild = 0;
-	var firstRun = true;
-	var files = [];
 	var inputFolder;
 	var isSearching = false;
 	var searchTimer;
-	var dirsToSearch = [];
-	var dirsSearched = [];
-	var searchRetries = 0;
 	var currentDir;
-	
+	var matchesFound = 0;
 	var keyUp = 38;
 	var keyDown = 40;
 	var charEscape = 27;
 	var charEnter = 13;
-	
 	var workingDir;
+	var progressBar;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -66,6 +61,11 @@
 		
 		EDITOR.on("openFileTool", openAnyFileTool);
 		
+		CLIENT.on("findFilesStatus", gotoFileProgressStatus);
+		CLIENT.on("fileFound", gotoFileFileFound);
+		CLIENT.on("pathGlob", gotoFilePathGlob);
+		
+		
 	}
 	
 	function gotoFile_unload() {
@@ -76,7 +76,11 @@
 		
 		EDITOR.removeEvent("openFileTool", openAnyFileTool);
 		
+		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
+		CLIENT.removeEvent("fileFound", gotoFileFileFound);
+		CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
 		
+		hide_gotoFileInput();
 	}
 	
 	function openAnyFileTool(directory) {
@@ -96,6 +100,12 @@
 		gotoDiv = document.createElement("div");
 		gotoDiv.setAttribute("id", "gotoDiv");
 		gotoDiv.setAttribute("class", "gotoFile");
+		
+		progressBar = document.createElement("progress");
+		progressBar.setAttribute("class", "progress findFiles");
+		progressBar.setAttribute("style", "display: none; width: 100%");
+		progressBar.setAttribute("value", "0");
+		progressBar.setAttribute("max", "1");
 		
 		inputGoto = document.createElement("input");
 		inputGoto.setAttribute("type", "text");
@@ -139,8 +149,9 @@
 		//li.appendChild(document.createTextNode("test 123"));
 		//gotoList.appendChild(li);
 		
-		
 		gotoDiv.appendChild(gotoList);
+		
+		gotoDiv.appendChild(progressBar);
 		
 		gotoDiv.appendChild(labelGoto);
 		gotoDiv.appendChild(inputGoto);
@@ -160,7 +171,7 @@
 		
 		inputGoto.addEventListener("keyup", typing, false);
 		
-		inputFolder.addEventListener("keyup", chandingDir, false);
+		//inputFolder.addEventListener("keyup", chandingDir, false);
 		
 		gotoInputIsVisible = true;
 		
@@ -174,6 +185,8 @@
 		
 		keyUpEvent.preventDefault();
 
+		if(isSearching) abortFindFiles();
+		
 		if (keyUpEvent.keyCode == charEnter) {
 			gotoFile();
 			return;
@@ -202,191 +215,53 @@
 			EDITOR.resizeNeeded();
 		}
 		
-		function trySearch() {
-			// Clear the list
-			while(gotoList.firstChild) {
-				gotoList.removeChild(gotoList.firstChild);
-			}
-			EDITOR.resizeNeeded();
-			
-			if(!isSearching) {
-				searchRetries = 0;
-				search(text);
-			}
+	}
+		
+	function trySearch() {
+		
+		clearTimeout(searchTimer); // Clear any queued up searches
+		
+		// Clear the list
+		matchesFound = 0;
+		while(gotoList.firstChild) {
+			gotoList.removeChild(gotoList.firstChild);
+		}
+		EDITOR.resizeNeeded();
+		
+		if(!isSearching) {
+			var text = inputGoto.value
+			search(text);
+		}
 		else {
+			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+				if(err) throw err;
 				
-				var waitingFor = "";
-				
-				clearTimeout(searchTimer); // Clear any queued up searches
-				
-				var numLeft = (dirsToSearch.length - dirsSearched.length);
-				
-				console.log("Waiting for current search to finish before searching again ... (" + numLeft + " left)");
-				
-				if(numLeft == 1) {
-					// Find out the offender
-					for(var i=0; i<dirsToSearch.length; i++) {
-						if(dirsSearched.indexOf(dirsToSearch[i]) == -1) {
-							console.log(dirsToSearch[i]);
-							waitingFor = dirsToSearch[i];
-						}
-					}
-				}
-				
-				var maxSearchRetries = 15;
-				// todo: add spinner animation!
-				
-				if(++searchRetries > maxSearchRetries) { 
-					// Give up and reset the current search. And tell the user
+				if(resp.filesInFlight == 0) {
 					isSearching = false;
-					dirsSearched.length = 0;
-					dirsToSearch.length = 0;
-					searchRetries = 0;
-					firstRun = true;
-					
-					if(waitingFor) alert("Gave up search in " + waitingFor)
-					else alert("Too much latency! Gave up searching. (" + numLeft + " folders left to search)");
+					trySearch();
 				}
 				else searchTimer = setTimeout(trySearch, 500);
 				
-			}
+			});
 		}
-	}
-		
-	
-	function chandingDir() {
-		files.length = 0; // Reset file cache
 	}
 	
 	function search(searchString) {
-		/*
-			First check for file names, then content of files
-			
-			First time, search all dirs, then search files array
-		*/
-		var allDoneCalls = 0;
 		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
-		var maxResults = 20;
-		var matchesFound = 0;
-		var searchSubfolders = true;
-		var totalFiles = 0;
-		var filesSearched = 0;
-		//var ext = ["html", "htm", "css", "txt", "md", "js", "", "bat", "sh"];
-		var recursions = 0;
-		var maxRecursion = 10000;
-		var ignorePaths = [];
-		
-		dirsToSearch.length = 0;
-		dirsSearched.length = 0;
-		
-		if (firstRun || files.length == 0) {
-			isSearching = true;
-			console.log("First run.");
-			searchDir(searchPath);
-			firstRun = false;
-		}
-		else {
-			console.log("Searching files array! length=" + files.length);
-			for (var i=0; i<files.length; i++) {
-				searchFile(files[i]);
-				if(matchesFound >= maxResults) break; // matchesFound is incremented in appendResult
-				}
-			if(matchesFound == 0) EDITOR.resizeNeeded();
-			allDone();
-		}
-		
-		function searchDir(currentDirPath) {
-			
-			dirsToSearch.push(currentDirPath);
-			
-			//console.log("S directory: " + currentDirPath);
-			
-			if(++recursions > maxRecursion) {
-				console.warn("recursions=" + recursions + " maxRecursion=" + maxRecursion);
-				dirsSearched.push(currentDirPath);
-				console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
-				if(dirsSearched.length == dirsToSearch.length) {
-					allDone();
-				}
-				else {
-					ignorePaths.push(currentDirPath);
-				}
-				alert("Too deep. Ignoring " + currentDirPath);
-				return;
-			}
-			
-			// Check if it's in a path we should ignore
-			var searchIt = true;
-			for(var j=0; j<ignorePaths.length; j++) {
-				if(currentDirPath.indexOf(ignorePaths[j]) != -1) {
-					console.log("Ignoring path=" + currentDirPath + "\nIt's in: " + ignorePaths[j]);
-					searchIt = false;
-					break;
-				}
-			}
-			if(searchIt) {
-				
-				EDITOR.listFiles(currentDirPath, function searchit(err, folderItems) {
-					
-					//console.log("F directory: " + currentDirPath);
-					
-					dirsSearched.push(currentDirPath);
-					
-					if(err) {
-						console.warn(UTIL.getStack("Error reading folder: " + currentDirPath + "\n" + err.message));
-						alert("Error reading folder: " + currentDirPath + "\n" + err.message);
-					}
-					else {
-						//console.log("folderItems=" + JSON.stringify(folderItems, null, 2));
-						
-						for(var i=0; i<folderItems.length; i++) {
-							if (folderItems[i].type=="-") {
-								files.push(folderItems[i].path); // Cache file
-								searchFile(folderItems[i].path);
-							}
-							else if (folderItems[i].type=="d" && searchSubfolders) {
-								if(folderItems[i].name != "temp" && folderItems[i].name != "tmp" && folderItems[i].name.substr(0,1) != ".") { // Do not search in dot files or temp/tmp folders
-									searchDir(folderItems[i].path);
-								}
-							}
-						}
-					}
-					
-					
-					//console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
-					if(dirsSearched.length == dirsToSearch.length) { allDone(); };
-					
-				});
-				
-			}
-			else {
-				dirsSearched.push(currentDirPath);
-				
-				//console.log("dirsSearched=" + dirsSearched.length + " dirsToSearch=" + dirsToSearch.length + " " + (dirsSearched.length==dirsToSearch.length));
-if(dirsSearched.length == dirsToSearch.length) { allDone();};
-			}
-		}
-		
-		function searchFile(filePath) {
-			
-			if(matchesFound < maxResults) {
-				var re = new RegExp(searchString, "ig");
-				var matchArr = filePath.match(re);
-				if(matchArr != null) {
-					appendResult(filePath, matchArr);
-				}
-				
-				totalFiles++;
-			}
-		}
-		
-		function allDone() {
+		isSearching = true;
+		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: 20}, function searchFinish(err, resp) {
 			isSearching = false;
-			console.log("Done searching " + totalFiles + " files for '" + searchString + "'");
+			if(err) throw err;
 			
-			if(++allDoneCalls > 1) throw new Error("allDone() called more then once!");
+			console.log("Search finish! found=" + resp.found + " totalFoldersSearched=" + resp.totalFoldersSearched + " buzy=" + resp.buzy);
 			
-			}
+			if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
+			
+			progressBar.style.display = "none";
+			EDITOR.resizeNeeded();
+			
+});
+		}
 		
 		function appendResult(filePath, matchArr) {
 			
@@ -416,10 +291,12 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			
 			li.onclick = gotoFile;
 			
-			EDITOR.resizeNeeded();
+		EDITOR.resizeNeeded();
+			EDITOR.resize();
+		
 		}
 		
-	}
+	
 	
 	// Can't have event listeners with the same name
 	function show_gotoFileInput2(file, combo) {
@@ -487,6 +364,8 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 		
 		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
 		
+		if(isSearching) abortFindFiles();
+		
 		if(gotoInputIsVisible) {
 			
 			// Hide the search window
@@ -502,9 +381,6 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 			}
 			
 			gotoInputIsVisible = false;
-			
-			firstRun = true;
-			files.length = 0;
 			
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
@@ -627,8 +503,7 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 					if(dir.indexOf(EDITOR.workingDirectory) == -1) {
 						// Set the working directory to this files's folder
 						EDITOR.changeWorkingDir(dir);
-						firstRun = true; // Make it not use cached file's list
-}
+						}
 					
 					
 				});
@@ -656,4 +531,37 @@ if(dirsSearched.length == dirsToSearch.length) { allDone();};
 	}
 	
 	
-})();
+	function gotoFileProgressStatus(status) {
+		console.log("gotoFileProgressStatus: " + JSON.stringify(status));
+		
+		progressBar.max = status.totalFoldersToSearch;
+		progressBar.value = status.totalFoldersSearched;
+		
+		if(progressBar.max == progressBar.value) {
+			progressBar.style.display = "none";
+			EDITOR.resizeNeeded();
+			progressBar.max = 1;
+			progressBar.value = 0;
+		}
+		else {
+			var oldStyleDisplay = progressBar.style.display;
+			progressBar.style.display = "block";
+			if(oldStyleDisplay != "block") EDITOR.resizeNeeded();
+		}
+	}
+	
+	function gotoFileFileFound(file) {
+		appendResult(file.path, file.match);
+	}
+	
+	function gotoFilePathGlob(folder) {
+		inputFolder.value = folder;
+	}
+	
+	function abortFindFiles() {
+		CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+			if(err) throw err;
+			});
+	}
+	
+	})();
