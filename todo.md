@@ -34,7 +34,12 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Merge stuff from web_preview.js to WysiwygEditor.js
+When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
+
+Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
+Make a preview event, that plugins can answer to
+
+Merge stuff from web_preview.js to WysiwygEditor.js !?
 
 
 When having search open and then bringing up search in files:
@@ -50,11 +55,6 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
-
-When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
-
-Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
-Make a preview event, that plugins can answer to
 
 Make backup of a folder. Copy folder or make a zip file.
 

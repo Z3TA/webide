@@ -605,8 +605,105 @@ var WysiwygEditor;
 		
 		//UTIL.objInfo(e.target);
 		
-		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(e.target);
+		var file = EDITOR.currentFile;
 		
+		if(!EDITOR.input && file == wysiwygEditor.sourceFile) wysiwygEditor.placeCaretInSourceCode(e.target);
+		
+		if(file.path.slice(-3) == "css") {
+			console.log("Current file is a CSS file!");
+			var fileName = UTIL.getFilenameFromPath(file.path);
+			var reStyle = new RegExp('<link.*href=.*' + fileName, "i");
+			var win = wysiwygEditor.previewWin.window;
+			var doc = win.document;
+			var styleSheets = doc.styleSheets;
+			var styleSheetFound = false;
+			
+			for (var i=0; i<styleSheets.length; i++) {
+				if(styleSheets[i].href.indexOf(fileName) != -1) {
+					styleSheetFound = true;
+					break;
+				}
+			}
+			
+			if(!styleSheetFound) {
+				console.log("fileName=" + fileName + " doesn't seem to be part of any stylesheet!");
+				console.log(styleSheets);
+				return;
+			}
+			
+			
+			
+				// The currently opened css file is in the web document!
+				// Go to the related place in the css file
+				
+				console.log("Current file is a stylesheet to the file in preview!");
+				
+				var cssRules = css(e.target);
+				
+				console.log("cssRules: " + cssRules);
+				
+				var rule = "";
+				var index = 0;
+				for (var i=0; i<cssRules.length; i++) {
+					rule = cssRules[i].slice(0, cssRules[i].indexOf("{"));
+					index = file.text.indexOf(rule);
+					if(index != -1) {
+						var loc = file.rowFromIndex(index);
+						alertBox(JSON.stringify(loc));
+						file.scrollTo(undefined, loc.row);
+						break;
+					}
+				}
+				
+		}
+		
+		
+		function css(el) {
+			var sheets = doc.styleSheets, ret = [];
+			el.matches = el.matches || el.webkitMatchesSelector || el.mozMatchesSelector
+			|| el.msMatchesSelector || el.oMatchesSelector;
+			for (var i in sheets) {
+				var rules = sheets[i].rules || sheets[i].cssRules;
+				for (var r in rules) {
+					if (el.matches(rules[r].selectorText)) {
+						ret.push(rules[r].cssText);
+					}
+				}
+			}
+			return ret;
+		}
+		
+		function getCssSearchArray(el) {
+			if(!el) return null;
+			
+			var findStyleLocation = [];
+			var elClass = el.getAttribute("class");
+			var nodeName = el.nodeName;
+			var combos = [];
+			combos.push(nodeName);
+				if(elClass.indexOf(" ") != -1) {
+					// It has many classes
+					var elClassArr = elClass.split(" ");
+					var longStr = nodeName;
+					for (var i=0; i<elClassArr.length; i++) {
+					combos.push(nodeName + "." + className);
+						longStr += "." + className;
+					}
+				combos.push(longStr);
+				}
+				else {
+				combos.push(nodeName + "." + className);
+				}
+				
+			findStyleLocation.push(combos);
+			
+				if(el.parentElement) {
+					var parent = getCssSearchArray(el.parentElement);
+					if(parent != null) findStyleLocation.concat(parent);
+				}
+				
+				return findStyleLocation;
+			}
 	}
 	
 	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(e) {
@@ -1320,13 +1417,13 @@ var WysiwygEditor;
 				
 			}
 			
+			body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
 			
 			if(!wysiwygEditor.onlyPreview) {
 				// Make body editable and attatch event listeners
 				
 				body.setAttribute("contenteditable", "true");
 				
-				body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
 				body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
 				body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
 				body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
@@ -1354,26 +1451,27 @@ var WysiwygEditor;
 				console.error(err);
 			};
 			
-			done();
 			
-			function done() {
+				done();
 				
-				wysiwygEditor.hasLoaded = true;
+				function done() {
+					
+					wysiwygEditor.hasLoaded = true;
+					
+					if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded();
+					wysiwygEditor.whenLoaded = null;
+					
+					console.log("Done (re)loading preview window");
+					
+					if(callback) callback();
+					
+					if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
+				}
 				
-				if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded();
-				wysiwygEditor.whenLoaded = null;
-				
-				console.log("Done (re)loading preview window");
-				
-				if(callback) callback();
-				
-				if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
+				function wait() {
+					
+				}
 			}
-			
-			function wait() {
-			
-			}
-		}
 		
 	}
 	
