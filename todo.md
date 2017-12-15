@@ -34,15 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
----
-Irritatning having to change the folder on where to look for files when opening a file.
-If less then max results are found in search, then automatically snab to parent folder.
-Do the search on server side so it gets faster!
-Although: When you use Ctrl+O to open "any" file, it's confusing when you see the compiled files from the SSG ...
-When SSG panel is open, change working dir, so a file search only searches inside source folder!!
-ignoreorlowprio= only search these folders if no result have been found, search them last
-API.findFiles
----
+Merge stuff from web_preview.js to WysiwygEditor.js
 
 
 When having search open and then bringing up search in files:
