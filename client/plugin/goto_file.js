@@ -24,6 +24,8 @@
 	var fileCache = [];
 	var defaultMaxResults = 20;
 	var maxResults = defaultMaxResults;
+	var lastSearchText = "";
+	var lastTypedText = "";
 	
 		EDITOR.plugin({
 			desc: "Open any file ...",
@@ -184,11 +186,12 @@
 		
 		function typing(keyUpEvent) {
 			
-			console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input);
+		var text = inputGoto.value
+		
+		console.log("keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 			
 			keyUpEvent.preventDefault();
 			
-			if(isSearching) abortFindFiles();
 			
 			if (keyUpEvent.keyCode == charEnter) {
 				gotoFile();
@@ -209,9 +212,14 @@
 				return;
 			}
 			
-			var text = inputGoto.value
-			
 			if(text.length > 0) {
+			// If using shift and other combo key, this will be called twice without the text changing
+			if(text == lastTypedText) {
+				console.warn("typing same: text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+				return;
+			}
+			lastTypedText = text;
+			if(isSearching) abortFindFiles();
 				trySearch();
 			}
 			else {
@@ -222,9 +230,16 @@
 		
 		function trySearch() {
 			
-			console.log("trySearch: isSearching=" + isSearching);
+		var text = inputGoto.value;
+		
+		console.log("trySearch: isSearching=" + isSearching + " text=" + text);
 			
-			clearTimeout(searchTimer); // Clear any queued up searches
+		if(lastSearchText == text) {
+			UTIL.getStack("trySearch repeated! text=" + text + " lastSearchText=" + lastSearchText + " isSearching=" + isSearching);
+			//return;
+		}
+		
+		clearTimeout(searchTimer); // Clear any queued up searches
 			
 			// Clear the list
 			matchesFound = 0;
@@ -233,23 +248,31 @@
 			}
 			EDITOR.resizeNeeded();
 			
-		var text = inputGoto.value
+		
 		
 		// Search the cache first
+		var toIgnore = [];
 		var reName = new RegExp(text, "ig");
-		for (var i=0, match; i<fileCache.length; i++) {
-			match = fileCache[i].match(reName);
-			if(match) {
-				appendResult(fileCache[i], match);
-				if(isSearching && matchesFound >= defaultMaxResults) return abortFindFiles();
-				if(matchesFound >= defaultMaxResults) return;
+			for (var i=0, match; i<fileCache.length; i++) {
+				match = fileCache[i].match(reName);
+				if(match) {
+					appendResult(fileCache[i], match);
+				toIgnore.push(fileCache[i]);
+					if(matchesFound >= defaultMaxResults) {
+						console.log("Max results found via cache!");
+						if(isSearching) abortFindFiles();
+						return;
+					}
 				}
+				console.log("i=" + i + " " + fileCache[i] + " text=" + text + " match=" + match);
 			}
-		
-		maxResults = defaultMaxResults - matchesFound;
-		
-		if(!isSearching) {
-			search(text);
+			
+			maxResults = defaultMaxResults - matchesFound;
+			
+			console.log("Found " + matchesFound + " in cache (" + fileCache.length + "), will try to find " + maxResults + " more from disk");
+			
+			if(!isSearching) {
+			search(text, toIgnore);
 			}
 			else {
 				CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
@@ -265,12 +288,14 @@
 			}
 		}
 		
-		function search(searchString) {
-			var searchPath = inputFolder.value; //EDITOR.workingDirectory;
+		function search(searchString, ignore) {
+		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
 			isSearching = true;
 			console.time("findFiles"); // Edit server's cuncurrencty setting to fine tune!
-		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults}, function searchFinish(err, resp) {
-				isSearching = false;
+		console.log("Search begun! searchString=" + searchString + " ignore=" + ignore);
+		lastSearchText = searchString;
+		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
+				
 				if(err) throw err;
 				
 				console.timeEnd("findFiles");
@@ -278,7 +303,8 @@
 				console.log("Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
 				
 				if(resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
-				
+			else isSearching = false;
+			
 				progressBar.style.display = "none";
 				EDITOR.resizeNeeded();
 				
@@ -477,6 +503,8 @@
 			
 			console.log("gotoInputIsVisible=" + gotoInputIsVisible + " EDITOR.input=" + EDITOR.input);
 			
+		if(isSearching) abortFindFiles();
+		
 			if(gotoInputIsVisible && !EDITOR.input) {
 				
 				var selectedItem;
@@ -580,11 +608,16 @@
 		}
 		
 		function gotoFileFileFound(file) {
-			appendResult(file.path, file.match);
-			gotoFileProgressStatus(file);
-		if(fileCache.indexOf(file.path) == -1) fileCache.push(file.path);
-		}
-		
+console.log("File found: " + file.path);
+		if(fileCache.indexOf(file.path) == -1) {
+fileCache.push(file.path);
+		console.log("Added to cache: " + file.path);
+}
+		else throw new Error("We should not find files already in cache as they should have been ignored! path=" + file.path);
+		appendResult(file.path, file.match);
+		gotoFileProgressStatus(file);
+	}
+	
 		function gotoFilePathGlob(folder) {
 			inputFolder.value = folder;
 		}

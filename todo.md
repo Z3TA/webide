@@ -34,12 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-file name search ...
-
-added cahche, but it still calls the findFiles api !?
-
-sometimes when you use backspace it goes into an endless loop trySearch
-
 ---
 Irritatning having to change the folder on where to look for files when opening a file.
 If less then max results are found in search, then automatically snab to parent folder.
