@@ -13,7 +13,7 @@
 server {
   listen 80;
   listen [::]:80;
-  server_name webide.se www.webide.se;
+  server_name webide.se www.webide.se webeditor.se www.webeditor.se;
   return 301 https://webide.se$request_uri;
 }
 
