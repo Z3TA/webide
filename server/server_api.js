@@ -861,9 +861,10 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						/*
 							EPERM = operation not permitted
 							EBUSY = resource busy or locked
+							ENOENT = no such file or directory
 						*/
 						
-						if(err.code == "EPERM" || err.code == "EBUSY") {
+						if(err.code == "EPERM" || err.code == "EBUSY" || err.code == "ENOENT") {
 							problem = err.code;
 							type = "*"
 						}

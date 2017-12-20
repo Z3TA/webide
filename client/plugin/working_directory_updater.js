@@ -40,7 +40,7 @@ EDITOR.plugin({
 		search(folders.pop()); // Search down recursively 
 		
 		function search(currentFolder) {
-			EDITOR.listFiles(currentFolder, function(err, files) {
+			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 				
 				if(err) return alertBox(err.message);
 				
