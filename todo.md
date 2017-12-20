@@ -39,7 +39,7 @@ Testing: When clicking on an element in preview and a css file belonging to that
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
 
-Merge stuff from web_preview.js to WysiwygEditor.js !?
+Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
 
 
 When having search open and then bringing up search in files:
@@ -65,6 +65,9 @@ Having to right click to see anything is annoying ...
 When chaning something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 
 Make backup of a folder. Copy folder or make a zip file.
+
+Make it work on (old?) Android browser!
+Make it work on iOS browser and Safari!
 
 Init SCM on a folder. And later be able to add a remote repo. (Init SCM repo)
 If a remote repo is specified, clone to temp folder, check for file colitions (file exist in both folders) then copy over the content from the temp folder.
@@ -1080,6 +1083,8 @@ Low prio because IE will probably be replaced by Edge ... or probably never.
 bug: When moving a folder out from another folder into that folder it dissappears
 bug: When renaming and then moving a child's child folder it has the old id/path!
 
+Se commit 2357 about fs links ... How should we handle them ? 
+Got an ENOENT error when stating .steam folder which links elwhere
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
