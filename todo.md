@@ -34,8 +34,6 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Testing: When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
-
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
 
@@ -61,6 +59,8 @@ Bug: sometimes get into a CLIENT.cmd req=abortFindFiles loop!
 .html files in wwwpub
 
 Having to right click to see anything is annoying ...
+
+Those "friendly tips" messages are annoying ...
 
 When chaning something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 
