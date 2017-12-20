@@ -628,6 +628,8 @@ fileCache.push(file.path);
 			
 			if(resp.filesInFlight == 0) isSearching = false;
 
+			console.log("Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
+			
 			});
 		}
 		
