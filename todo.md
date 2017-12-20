@@ -56,8 +56,6 @@ todo
 
 Bug: sometimes get into a CLIENT.cmd req=abortFindFiles loop!
 
-.html files in wwwpub
-
 Having to right click to see anything is annoying ...
 
 Those "friendly tips" messages are annoying ...
