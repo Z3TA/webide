@@ -3172,7 +3172,7 @@ EDITOR.lastKeyPressed = "";
 		
 		var json = {pathToFolder: pathToFolder};
 		
-		CLIENT.cmd("listFiles", json, function(err, json) {
+		CLIENT.cmd("listFiles", json, function listFilesResp(err, json) {
 			if(err) listFilesCallback(err);
 			else listFilesCallback(null, json.list);
 		});
