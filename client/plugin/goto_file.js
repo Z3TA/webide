@@ -625,6 +625,9 @@ fileCache.push(file.path);
 		function abortFindFiles() {
 			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
 				if(err) throw err;
+			
+			if(resp.filesInFlight == 0) isSearching = false;
+
 			});
 		}
 		

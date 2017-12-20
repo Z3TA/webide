@@ -56,6 +56,8 @@ Coding an agar clone as a nodejs example
 todo
 ----
 
+Bug: sometimes get into a CLIENT.cmd req=abortFindFiles loop!
+
 .html files in wwwpub
 
 Having to right click to see anything is annoying ...
