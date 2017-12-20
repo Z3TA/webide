@@ -649,7 +649,7 @@ var WysiwygEditor;
 					index = file.text.indexOf(rule);
 					if(index != -1) {
 						var loc = file.rowFromIndex(index);
-						alertBox(JSON.stringify(loc));
+						//alertBox(JSON.stringify(loc));
 						file.scrollTo(undefined, loc.row);
 						break;
 					}

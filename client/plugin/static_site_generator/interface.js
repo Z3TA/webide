@@ -233,7 +233,7 @@
 	}
 	
 	function unload() {
-		// Cleaning up, for example when disabling a plugin
+		// Cleaning up, for example when disabling the plugin
 		
 		//alertBox("UNloading");
 		

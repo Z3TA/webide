@@ -34,7 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
+Testing: When clicking on an element in preview and a css file belonging to that page is open, go to where that element's style is defined.
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
@@ -55,6 +55,12 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
+
+.html files in wwwpub
+
+Having to right click to see anything is annoying ...
+
+When chaning something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 
 Make backup of a folder. Copy folder or make a zip file.
 
