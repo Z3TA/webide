@@ -34,6 +34,18 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+
+Making a website using only prod ...
+
+Making some example projects ...
+
+Coding an agar clone as a nodejs example
+
+
+
+todo
+----
+
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
 
@@ -44,27 +56,16 @@ When having search open and then bringing up search in files:
 /home/Z/Projects/jzedit/client/plugin/find_in_files_server.js:317
 Uncaught TypeError: undefined is not a function
 
-
-Making a website using only prod
-
-Coding an agar clone as a nodejs example
-
-
-
-todo
-----
-
 Bug: sometimes get into a CLIENT.cmd req=abortFindFiles loop!
 
 Having to right click to see anything is annoying ...
 
 Those "friendly tips" messages are annoying ...
 
-When chaning something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
+When changing something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 
 Make backup of a folder. Copy folder or make a zip file.
 
-Make it work on (old?) Android browser!
 Make it work on iOS browser and Safari!
 
 Init SCM on a folder. And later be able to add a remote repo. (Init SCM repo)
@@ -149,6 +150,21 @@ Parser doesn't seem to find variables inside for(var a, b, c)
 
 What I'm thinking
 -----------------
+
+Why has not high level programming languages changed in the last 50 years !?
+Why are we still typing programming *code* into a text editor !?
+
+idea: Program using voice! Demo: Add elements to a web site. eg. new heading: Tigers
+new paragraph: Tigers are big and scary cats. 
+
+new button, id tigerbutton, class tigerbutton, 
+
+tigerbutton onclick alert you clicked on the tiger!
+
+class tigerbutton add image tiger.png 
+
+
+---
 
 hmm, for hg clone to work we need to allow python to access the internet! ...
 could solve any issues by setting up restrictive iptables and maybe a netns
