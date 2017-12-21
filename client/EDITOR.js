@@ -4622,7 +4622,7 @@ EDITOR.lastKeyPressed = "";
 			if(re) {
 				match = speechResult.match(re);
 				if(match) {
-					fun(speechResult, EDITOR.currentFile);
+					fun(speechResult, EDITOR.currentFile, match);
 				}
 				}
 			else fun(speechResult, EDITOR.currentFile);

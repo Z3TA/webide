@@ -59,7 +59,7 @@
 		EDITOR.removeEvent("voiceCommand", gotoLineVoice);
 	}
 	
-	function gotoLineVoice(match, file) {
+	function gotoLineVoice(text, file, match) {
 		
 		console.log(match);
 		
