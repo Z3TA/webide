@@ -3,6 +3,12 @@
 	
 	"use strict";
 
+	EDITOR.plugin({
+		desc: "Goto line",
+		load: gotoLine_load,
+		unload: gotoLine_unload
+	});
+	
 	var gotoDiv;
 	var footer;
 	var gotoInputIsVisible = false;
@@ -11,9 +17,9 @@
 	var key_Esc = 27;
 	var key_G = 71;
 	
-	window.addEventListener("load", goto_init, false);
+	//window.addEventListener("load", goto_init, false);
 
-	function goto_init() {
+	function gotoLine_load() {
 		
 		// Create markup
 		footer = document.getElementById("footer");
@@ -36,8 +42,32 @@
 		hide_gotoLineInput();
 		
 		EDITOR.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: show_gotoInput}); // ctrl + G
-		EDITOR.bindKey({desc: "Hite the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
+		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
+		
+		EDITOR.addEvent("voiceCommand", {
+		re: /goto line (\d*)/i, 
+			grammar: ["goto line"], fun: gotoLineVoice
+		});
+		
+		}
+	
+	function gotoLine_unload() {
+		
+		EDITOR.unbindKey(show_gotoInput);
+		EDITOR.unbindKey(hide_gotoLineInput);
+		
+		EDITOR.removeEvent("voiceCommand", gotoLineVoice);
 	}
+	
+	function gotoLineVoice(match) {
+		
+		console.log(match);
+		
+		var line = parseInt(match[1]);
+		
+		file.gotoLine(line);
+		
+		}
 	
 	function build_gotoInput() {
 			
@@ -168,7 +198,7 @@
 	}
 
 	
-	function gotoLine() {
+	function gotoLine(line) {
 		
 		if(gotoInputIsVisible) {
 			

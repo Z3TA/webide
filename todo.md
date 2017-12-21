@@ -34,6 +34,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+Voice commands / Speach recognition
+
 
 Making a website using only prod ...
 
