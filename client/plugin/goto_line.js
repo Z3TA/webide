@@ -45,7 +45,7 @@
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
 		
 		EDITOR.addEvent("voiceCommand", {
-		re: /goto line (\d*)/i, 
+			re: /go ?to line (\d*)/i, 
 			grammar: ["goto line"], fun: gotoLineVoice
 		});
 		
