@@ -59,13 +59,13 @@
 		EDITOR.removeEvent("voiceCommand", gotoLineVoice);
 	}
 	
-	function gotoLineVoice(match) {
+	function gotoLineVoice(match, file) {
 		
 		console.log(match);
 		
 		var line = parseInt(match[1]);
 		
-		file.gotoLine(line);
+		if(file) file.gotoLine(line);
 		
 		}
 	
