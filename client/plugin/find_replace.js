@@ -32,6 +32,11 @@
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
 		});
 		
+		EDITOR.addEvent("voiceCommand", {
+			re: /find (.*)/i,
+			grammar: ["find *"], fun: findInFile
+		});
+		
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
 		div = document.getElementById("findReplace");
@@ -49,6 +54,13 @@
 		
 	}
 	
+	function findInFile(text, file, match) {
+		
+		var str = match[1];
+		
+		find(str, file);
+		
+		}
 	
 	function buildDiv() {
 		
@@ -382,6 +394,8 @@
 	}
 	
 	function find(str, file, useRegex, keepSelection, dontLoop, direction, ignoreCase) {
+		
+		if(ignoreCase == undefined) ignoreCase = true;
 		
 		// Selects the text, and moves the caret to it, return first text index of str
 		

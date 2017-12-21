@@ -45,8 +45,8 @@
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
 		
 		EDITOR.addEvent("voiceCommand", {
-			re: /go ?to line (\d*)/i, 
-			grammar: ["goto line"], fun: gotoLineVoice
+			re: /(go ?to)? ?line (\d*)/i, 
+			grammar: ["goto line *", "line *"], fun: gotoLineVoice
 		});
 		
 		}
@@ -63,7 +63,7 @@
 		
 		console.log(match);
 		
-		var line = parseInt(match[1]);
+		var line = parseInt(match[2]);
 		
 		if(file) file.gotoLine(line);
 		

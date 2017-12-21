@@ -4599,6 +4599,11 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 	function speechRecognitionResult() {
+		/*
+			You need to be on localhost or httpS or you will get access error
+			
+			
+		*/
 		
 			// The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
 			// The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
@@ -5207,8 +5212,15 @@ EDITOR.lastKeyPressed = "";
 		// Mac command key ?
 		if(charCode == charCodeCtrl) {
 			console.log("recognition start! (keyDown Ctrl)");
-			if(recognition) recognition.start();
-		}
+			if(recognition) {
+try {
+					recognition.start();
+}
+catch(err) {
+console.warn(err.message);
+}
+}
+}
 		else console.log("recognition: Not ctrl! charCode=" + charCode);
 		
 		
@@ -5517,56 +5529,58 @@ EDITOR.lastKeyPressed = "";
 		var charCodeCtrl = 17;
 		if(charCode == charCodeCtrl) {
 			console.log("recognition stop! (keyUp Ctrl)");
-			if(recognition) recognition.stop();
+			if(recognition) {
+				recognition.stop();
+			}
 		}
 		else console.log("recognition: Not ctrl! charCode=" + charCode);
 		
 		EDITOR.interact("keyUp", keyUpEvent);
-			
-			//return false;
-			
-		}
 		
+		//return false;
 		
+	}
+	
+	
+	
+	function mouseDown(mouseDownEvent) {
 		
-		function mouseDown(mouseDownEvent) {
+		mouseDownEvent = mouseDownEvent || windows.event;
+		
+		EDITOR.lastElementWithFocus = document.activeElement;
+		EDITOR.touchDown = true;
+		
+		var mouse = getMousePosition(mouseDownEvent);
+		var mouseX = mouse.x;
+		var mouseY = mouse.y;
+		
+		var caret;
+		var button = mouseDownEvent.button;
+		var click;
+		var target = mouseDownEvent.target;
+		var mouseDirection = "down";
+		var preventDefault = false;
+		var keyboardCombo = getCombo(mouseDownEvent);
+		var funReturn;
+		
+		//UTIL.objInfo(target);
+		
+		if(button == undefined) button = 0; // For like touch events
+		
+		var menu = document.getElementById("canvasContextmenu");
+		
+		//console.log("mouseDown on target.className=" + target.className);
+		
+		if(target.className == "fileCanvas" || target.className == "content centerColumn") {
 			
-			mouseDownEvent = mouseDownEvent || windows.event;
+			// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
+			if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.hideMenu();
 			
-			EDITOR.lastElementWithFocus = document.activeElement;
-			EDITOR.touchDown = true;
+			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
-			var mouse = getMousePosition(mouseDownEvent);
-			var mouseX = mouse.x;
-			var mouseY = mouse.y;
 			
-			var caret;
-			var button = mouseDownEvent.button;
-			var click;
-			var target = mouseDownEvent.target;
-			var mouseDirection = "down";
-			var preventDefault = false;
-			var keyboardCombo = getCombo(mouseDownEvent);
-			var funReturn;
-			
-			//UTIL.objInfo(target);
-			
-			if(button == undefined) button = 0; // For like touch events
-			
-			var menu = document.getElementById("canvasContextmenu");
-			
-			//console.log("mouseDown on target.className=" + target.className);
-			
-			if(target.className == "fileCanvas" || target.className == "content centerColumn") {
-				
-				// Some browsers send a mousedown event after a touchstart event. Don't hide the second time (a plugin might show the menu on mousedown)
-				if(! (lastMouseDownEventType == "touchstart" && mouseDownEvent.type == "mousedown") ) EDITOR.hideMenu();
-				
-				caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
-				
-				
-				if(EDITOR.currentFile && (button == 0)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
-					// Give focus
+			if(EDITOR.currentFile && (button == 0)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+				// Give focus
 					EDITOR.input = true;
 					
 					// Remove focus from everything else
