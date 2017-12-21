@@ -4610,14 +4610,8 @@ EDITOR.lastKeyPressed = "";
 			// We then return the transcript property of the SpeechRecognitionAlternative object
 			
 			var last = event.results.length - 1;
-			var color = event.results[last][0].transcript;
-			
-			diagnostic.textContent = 'Result received: ' + color + '.';
-			bg.style.backgroundColor = color;
-			console.log('Confidence: ' + event.results[0][0].confidence);
-			console.log(event.results);
-			
-			var speechResult = event.results[0][0].transcript;
+		var speechResult = event.results[last][0].transcript;
+		//var speechResult = event.results[0][0].transcript;
 			
 			console.log ("speechResult=" + speechResult);
 		
