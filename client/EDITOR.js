@@ -4655,11 +4655,37 @@ break;
 		
 		if(captured) EDITOR.hideMenu();
 		
-		if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
+		
+		if(!captured && EDITOR.lastElementWithFocus && (
+		( EDITOR.lastElementWithFocus.nodeName == "INPUT" &&
+		(EDITOR.lastElementWithFocus.type == "text" || EDITOR.lastElementWithFocus.type == "password")
+		) || EDITOR.lastElementWithFocus.nodeName == "TEXTAREA")) {
+			
+			insertAtCaret(EDITOR.lastElementWithFocus, speechResult);
+			
+			//EDITOR.lastElementWithFocus.focus();
+		}
+		else if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
+		
 		
 		console.log(speechRecognitionEvent);
 	}
 	
+	function insertAtCaret(txtarea, text) {
+		// https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
+		//var txtarea = document.getElementById(areaId);
+		var scrollPos = txtarea.scrollTop;
+		var caretPos = txtarea.selectionStart;
+		
+		var front = (txtarea.value).substring(0, caretPos);
+		var back = (txtarea.value).substring(txtarea.selectionEnd, txtarea.value.length);
+		txtarea.value = front + text + back;
+		caretPos = caretPos + text.length;
+		txtarea.selectionStart = caretPos;
+		txtarea.selectionEnd = caretPos;
+		txtarea.focus();
+		txtarea.scrollTop = scrollPos;
+	}
 	
 	function mainLoop() {
 		resizeAndRender();
