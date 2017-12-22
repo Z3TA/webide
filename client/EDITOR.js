@@ -3721,7 +3721,7 @@ EDITOR.lastKeyPressed = "";
 				if(!virtualKeyboard[group].rows[row]) {
 					for (var i=virtualKeyboard[group].rows.length-1; i<row; i++) {
 						virtualKeyboard[group].rows[row] = document.createElement("nobr");
-						virtualKeyboard[group].rows[row].setAttribute("class", "row");
+					virtualKeyboard[group].rows[row].setAttribute("class", "virtualKeyboardRow");
 						virtualKeyboard[group].el.appendChild(virtualKeyboard[group].rows[row]);
 					}
 				}
@@ -4049,14 +4049,14 @@ EDITOR.lastKeyPressed = "";
 				el: document.createElement("td"),
 				rows: []
 			}
-			virtualKeyboard.main.el.setAttribute("class", "group");
+		virtualKeyboard.main.el.setAttribute("class", "virtualKeyboardGroup");
 			virtualKeyboardGroups.appendChild(virtualKeyboard.main.el);
 			
 			virtualKeyboard.misc = {
 				el: document.createElement("td"),
 				rows: []
 			}
-			virtualKeyboard.misc.el.setAttribute("class", "group");
+		virtualKeyboard.misc.el.setAttribute("class", "virtualKeyboardGroup");
 			virtualKeyboardGroups.appendChild(virtualKeyboard.misc.el);
 			
 			var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard); // Add items to the canvas context menu
@@ -5636,6 +5636,13 @@ console.warn(err.message);
 				
 			}
 			
+		if(target.className == "fileCanvas" || target.className == "keyboardButton" ||
+		target.className == "virtualKeyboardRow" || target.className == "virtualKeyboardGroup") {
+			// Prevent whatever nasty thing the browser wants to do
+			// like zooming out etc.
+			mouseDownEvent.preventDefault();
+		}
+		
 			console.log("Mouse down: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 			console.log(mouseDownEvent);
 			
@@ -5706,13 +5713,16 @@ console.warn(err.message);
 				// Only get a caret if the click is on the canvas 
 				caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
-			// Prevent whatever nasty thing the browser wants to do with the canvas
-			// like zooming out etc.
-			mouseUpEvent.preventDefault();
-			
 			}
-			
-			console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		
+		if(target.className == "fileCanvas" || target.className == "keyboardButton" || 
+		target.className == "virtualKeyboardRow" || target.className == "virtualKeyboardGroup") {
+		// Prevent whatever nasty thing the browser wants to do
+		// like zooming out etc.
+		mouseUpEvent.preventDefault();
+		}
+		
+		console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
 			for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
 				click = EDITOR.eventListeners.mouseClick[i];
 				

@@ -76,11 +76,11 @@ body {
 	user-select: none;
 	}
 
-.virtualKeyboard .group {
+.virtualKeyboard .virtualKeyboardGroup {
 	vertical-align: top;
 	}
 
-.virtualKeyboard .row {
+.virtualKeyboard .virtualKeyboardRow {
 	border: 0px solid orange;
 	height: 20px;
 	width: 100%;
@@ -1248,7 +1248,7 @@ width: 100%;
 
 @media (min-width: 1000px) {
 	
-	.virtualKeyboard .row {
+	.virtualKeyboard .virtualKeyboardRow {
 		height: 35px;
 	}
 	
@@ -1263,7 +1263,7 @@ width: 100%;
 
 @media (max-width: 600px) {
 	
-	.virtualKeyboard .row {
+	.virtualKeyboard .virtualKeyboardRow {
 		height: 16px;
 	}
 	
@@ -1313,7 +1313,7 @@ width: 100%;
 
 @media (max-width: 350px) {
 	
-	.virtualKeyboard .row {
+	.virtualKeyboard .virtualKeyboardRow {
 		min-height: 10px;
 		height: 0;
 	}

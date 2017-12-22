@@ -151,7 +151,7 @@
 			// Why is click sometimes undefined !?
 			if(CAPS) {
 				CAPS = false;
-				if(typeof click != "undefined" && click.target) click.target.setAttribute("class", "kb");
+				if(typeof click != "undefined" && click.target) click.target.setAttribute("class", "keyboardButton");
 				for(var char in buttons) {
 					if(buttons[char].alt) buttons[char].el.innerText = char;
 				}
@@ -159,7 +159,7 @@
 			else {
 				CAPS = true;
 				
-				if(typeof click != "undefined" && click.target) click.target.setAttribute("class", "kb on");
+				if(typeof click != "undefined" && click.target) click.target.setAttribute("class", "keyboardButton on");
 				
 				for(var char in buttons) {
 					if(buttons[char].alt) buttons[char].el.innerText = buttons[char].alt;
@@ -297,7 +297,7 @@
 		
 		
 		var b = document.createElement("button");
-		b.setAttribute("class", "kb");
+		b.setAttribute("class", "keyboardButton");
 		b.innerText = char;
 		//b.onclick = ev;
 		
@@ -336,6 +336,8 @@
 	}
 	
 	function fireKey(charCode, eventType) {
+		
+		//event.preventDefault();
 		
 		if(eventType == undefined) eventType = "keypress";
 		
