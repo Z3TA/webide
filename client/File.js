@@ -3528,10 +3528,12 @@ var File; // File object is global
 			throw new Error("line=" + line + " is not a number!");
 		}
 		else if(line < 1) {
-			throw new Error("Can't go to line=" + line + " because it's below 1!");
+			console.warn("Can't go to line=" + line + " because it's below 1!");
+			line = 1;
 		}
 		else if(line > Math.max(file.grid.length, (file.totalRows+1))) {
-			throw new Error("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + "");
+			console.warn("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + "");
+			line = file.totalRows+1;
 		}
 		
 		//var maxFileRow = Math.max(0, Math.max(file.grid.length, (file.totalRows+1)) - EDITOR.view.visibleRows);

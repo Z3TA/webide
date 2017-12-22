@@ -34,7 +34,7 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-Voice commands / Speach recognition
+Voice commands / Speach recognition: test on mobile, add voice commands for common key-bindings
 
 
 Making a website using only prod ...

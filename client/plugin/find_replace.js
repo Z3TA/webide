@@ -33,8 +33,8 @@
 		});
 		
 		EDITOR.addEvent("voiceCommand", {
-			re: /find (.*)/i,
-			grammar: ["find *"], fun: findInFile
+			re: /(find|search) (.*)/i,
+			grammar: ["find", "search"], fun: findInFile
 		});
 		
 		// Point variables to the document object model
@@ -56,7 +56,7 @@
 	
 	function findInFile(text, file, match) {
 		
-		var str = match[1];
+		var str = match[2];
 		
 		find(str, file);
 		

@@ -46,7 +46,7 @@
 		
 		EDITOR.addEvent("voiceCommand", {
 			re: /(go ?to)? ?line (\d*)/i, 
-			grammar: ["goto line *", "line *"], fun: gotoLineVoice
+			grammar: ["(goto|go to) line <numbers>", "line <numbers>"], fun: gotoLineVoice
 		});
 		
 		}

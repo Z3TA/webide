@@ -244,11 +244,11 @@ EDITOR.lastKeyPressed = "";
 		recognition.stop();
 	}
 	recognition.onerror = function speechRecognitionError(ev) {
-		alertBox("Speech recognition error: " + ev.error);
+			console.warn("Speech recognition error: " + ev.error);
 	}
 	recognition.onnomatch = function speechRecognitionNomatch(ev) {
 		console.log(ev);
-		alertBox("Speech recognition found no matching commands!");
+			console.warn("Speech recognition found no matching commands!");
 	}
 	}
 	
@@ -1801,7 +1801,10 @@ EDITOR.lastKeyPressed = "";
 			}
 			
 			var speechRecognitionList = new SpeechGrammarList();
-			var grammar = '#JSGF V1.0; grammar phrase; public <phrase> = ' + speechRecognitionGrammar.join(' | ') + ' ;';
+			var grammar = "#JSGF V1.0; grammar JZedit;";
+			grammar += "<number>=1|2|3|4|5|6|7|8|9|0;";
+			grammar += "<numbers>=<number>|<number><number>|<number><number><number>|<number><number><number><number>;"
+			grammar += "public <phrase> = " + speechRecognitionGrammar.join(' | ') + ' ;';
 			speechRecognitionList.addFromString(grammar, 1);
 			recognition.grammars = speechRecognitionList;
 		}
@@ -4598,9 +4601,11 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		
-	function speechRecognitionResult() {
+	function speechRecognitionResult(speechRecognitionEvent) {
 		/*
 			You need to be on localhost or httpS or you will get access error
+			
+			JSpeech Grammar Format:https://www.w3.org/TR/jsgf/
 			
 			
 		*/
@@ -4614,9 +4619,11 @@ EDITOR.lastKeyPressed = "";
 			// The [0] returns the SpeechRecognitionAlternative at position 0.
 			// We then return the transcript property of the SpeechRecognitionAlternative object
 			
-			var last = event.results.length - 1;
-		var speechResult = event.results[last][0].transcript;
-		//var speechResult = event.results[0][0].transcript;
+		if(speechRecognitionEvent == undefined) speechRecognitionEvent = event;
+		
+		var last = speechRecognitionEvent.results.length - 1;
+		var speechResult = speechRecognitionEvent.results[last][0].transcript;
+		//var speechResult = speechRecognitionEvent.results[0][0].transcript;
 			
 			console.log ("speechResult=" + speechResult);
 		
@@ -4633,6 +4640,7 @@ EDITOR.lastKeyPressed = "";
 			else fun(speechResult, EDITOR.currentFile);
 				}
 		
+		console.log(speechRecognitionEvent);
 		}
 		
 	
