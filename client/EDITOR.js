@@ -5676,8 +5676,6 @@ console.warn(err.message);
 		function mouseUp(mouseUpEvent) {
 			mouseUpEvent = mouseUpEvent || window.event;
 			
-			//e.preventDefault(); // Commented this because I couln't click on selected text inside html input 
-			
 			EDITOR.touchDown = false;
 			
 			// Mouse position is on the current object (Canvas)
@@ -5701,6 +5699,11 @@ console.warn(err.message);
 				
 				// Only get a caret if the click is on the canvas 
 				caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
+			
+			// Prevent whatever nasty thing the browser wants to do with the canvas
+			// like zooming out etc.
+			mouseUpEvent.preventDefault();
+			
 			}
 			
 			console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
