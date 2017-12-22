@@ -49,11 +49,12 @@ body {
 	background-color: #edeff3; /* same color as canvas artifact. Only visible if something is not 100% height */
 	height: 100%; /* We need height 100% here for height 100% to work in child elements */
 	font-family: Arial;
-	}
+	-webkit-transform: scale(1.00); /* Prevents the browser from "accidently" zooming out when switching orientation */
+}
 
 
 /* prevent menu from making the page higher - screwing up layout 
-#canvasContextmenu {
+	#canvasContextmenu {
 	overflow: scroll;
 }
 */
