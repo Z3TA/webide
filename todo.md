@@ -34,8 +34,12 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
+
 Voice commands / Speach recognition: test on mobile, add voice commands for common key-bindings
 
+vioce command mode and insert mode: when in insert mode what you say is inserted as text !?
+Use The Insert key for insertingn speach to text !?
 
 Making a website using only prod ...
 
@@ -47,6 +51,8 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
+
+In the file open list when holding down the arrow key it should go continuously!
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
