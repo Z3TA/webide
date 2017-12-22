@@ -2011,9 +2011,15 @@ EDITOR.lastKeyPressed = "";
 			
 			recoverFromFullScreenMenu(menu);
 			
-			menu.style.visibility = "hidden"; // Always hide the menu on mouse down
-			//menu.style.height = "1px";
+		// We can't use .display="none" or it will not be possible to measure the size of the menu!
+			menu.style.visibility = "hidden";
+		//.style.display="none";
+		//menu.style.height = "1px";
 			
+		// Move it elsewhere so we don't see the ghost border in Android browser
+		menu.style.top = -1000 + "px";
+		menu.style.left = -1000 + "px";
+		
 			// Clear temorary menu items
 			var tempItems = document.getElementById("canvasContextmenuTemp");
 			while(tempItems.firstChild){
@@ -2102,7 +2108,7 @@ EDITOR.lastKeyPressed = "";
 			}
 			
 			menu.style.visibility = "visible";
-			
+		//menu.style.display="block";
 			
 			//menu.style.height = "100%";
 			
@@ -6149,6 +6155,8 @@ console.warn(err.message);
 		}
 		
 		function fullScreenMenu(menu) {
+		// The menu will cover the whole screen
+		
 			var wireframe = document.getElementById("wireframe");
 			//EDITOR.virtualKeyboard.hide();
 			wireframe.style.display = "none";
@@ -6169,6 +6177,8 @@ console.warn(err.message);
 		}
 		
 		function recoverFromFullScreenMenu(menu) {
+		// Reset everything from fullScreenMenu()
+		
 			var wireframe = document.getElementById("wireframe");
 			wireframe.style.display = "block";
 			menu.style.position="";
