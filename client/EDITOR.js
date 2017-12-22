@@ -4634,7 +4634,6 @@ EDITOR.lastKeyPressed = "";
 			console.log ("speechResult=" + speechResult);
 		
 		var file = EDITOR.currentFile;
-		if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
 		
 		console.log("Calling voiceCommand listeners (" + EDITOR.eventListeners.voiceCommand.length + ")");
 		for(var i=0, fun, re, match, captured; i<EDITOR.eventListeners.voiceCommand.length; i++) {
@@ -4643,7 +4642,7 @@ EDITOR.lastKeyPressed = "";
 			if(re) {
 				match = speechResult.match(re);
 				if(match) {
-					captured = fun(speechResult, EDITOR.currentFile, match);
+					captured = fun(speechResult, file, match);
 					if(captured != true && captured != false) throw new Error(UTIL.getFunctionName(fun) 
 					+ ' did not return true or false (' + captured + ') to indicate if it "captured" the voice command.');
 					if(captured === true) {
@@ -4651,10 +4650,12 @@ break;
 					}
 				}
 			}
-			else fun(speechResult, EDITOR.currentFile);
+			else fun(speechResult, file);
 		}
 		
 		if(captured) EDITOR.hideMenu();
+		
+		if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
 		
 		console.log(speechRecognitionEvent);
 	}
