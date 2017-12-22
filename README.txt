@@ -218,3 +218,14 @@ for the right modules version:
 node-gyp rebuild --target=1.2.0 --msvs_version=2015
 
 
+
+
+Misc
+=====
+How to hide the annoying menu in Android that covers the virtual keyboard:
+-------------------------------------------------------------------------
+Go into settings... Look for browser bar (General settings: Toolbar).. Select to turn it off. 
+
+
+
+
