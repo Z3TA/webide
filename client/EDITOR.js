@@ -3921,7 +3921,7 @@ EDITOR.lastKeyPressed = "";
 		
 		// Capture mobile events
 		window.addEventListener("touchstart", mouseDown, false);
-		window.addEventListener("touchend", mouseUp, false);
+	window.addEventListener("touchend", mouseUp, false);
 		window.addEventListener("touchmove", mouseMove, false);
 		
 		
@@ -4633,148 +4633,158 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log ("speechResult=" + speechResult);
 		
+		var file = EDITOR.currentFile;
+		if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
+		
 		console.log("Calling voiceCommand listeners (" + EDITOR.eventListeners.voiceCommand.length + ")");
-		for(var i=0, fun, re, match; i<EDITOR.eventListeners.voiceCommand.length; i++) {
+		for(var i=0, fun, re, match, captured; i<EDITOR.eventListeners.voiceCommand.length; i++) {
 			fun = EDITOR.eventListeners.voiceCommand[i].fun;
 			re = EDITOR.eventListeners.voiceCommand[i].re;
 			if(re) {
 				match = speechResult.match(re);
 				if(match) {
-					fun(speechResult, EDITOR.currentFile, match);
+					captured = fun(speechResult, EDITOR.currentFile, match);
+					if(captured != true && captured != false) throw new Error(UTIL.getFunctionName(fun) 
+					+ ' did not return true or false (' + captured + ') to indicate if it "captured" the voice command.');
+					if(captured === true) {
+break;
+					}
 				}
-				}
+			}
 			else fun(speechResult, EDITOR.currentFile);
-				}
+		}
+		
+		if(captured) EDITOR.hideMenu();
 		
 		console.log(speechRecognitionEvent);
-		}
-		
+	}
 	
-		function mainLoop() {
-			resizeAndRender();
-			
-			//requestanimframe
-			
-			// animation renders
+	
+	function mainLoop() {
+		resizeAndRender();
+		
+		//requestanimframe
+		
+		// animation renders
+	}
+	
+	
+	function readSingleFile(fileOpenDialogEvent) {
+		
+		console.log("Reading single file ...");
+		
+		if(EDITOR.fileOpenCallback == undefined) {
+			throw new Error("There is no listener for the open file dialog!");
 		}
 		
+		var file = fileOpenDialogEvent.target.files[0];
+		if (!file) {
+			throw new Error("No file selected from the open-file dialog.");
+			return;
+		}
 		
-		function readSingleFile(fileOpenDialogEvent) {
+		var fileName = file.name;
+		var filePath = file.path;
+		var fileContent = undefined;
+		
+		if(runtime == "browser") {
 			
-			console.log("Reading single file ...");
+			filePath = fileName; // filePath is undefined in the browser
 			
-			if(EDITOR.fileOpenCallback == undefined) {
-				throw new Error("There is no listener for the open file dialog!");
-			}
+			// Read the file
+			var reader = new FileReader();
 			
-			var file = fileOpenDialogEvent.target.files[0];
-			if (!file) {
-				throw new Error("No file selected from the open-file dialog.");
-				return;
-			}
+			reader.onload = function(readerOnloadEvent) {
+				fileContent = readerOnloadEvent.target.result;
+				callCallback();
+			};
+			reader.readAsText(file);
 			
-			var fileName = file.name;
-			var filePath = file.path;
-			var fileContent = undefined;
+		}
+		else {
+			callCallback();
+		}
+		
+		function callCallback() {
+			console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
+			EDITOR.fileOpenCallback(filePath, fileContent);
+			EDITOR.fileOpenCallback = undefined;
 			
-			if(runtime == "browser") {
+			fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
+		}
+	}
+	
+	
+	function chooseSaveAsPath(saveAsDialogEvent) {
+		var file = saveAsDialogEvent.target.files[0];
+		
+		if(EDITOR.filesaveAsCallback == undefined) {
+			throw new Error("There is no listener for the save file dialog!");
+		}
+		
+		if (!file) {
+			console.warn("No file selected!");
+			EDITOR.filesaveAsCallback(undefined);
+			return;
+		}
+		
+		var fileName = file.name;
+		var filePath = file.path;
+		
+		EDITOR.filesaveAsCallback(filePath);
+		
+		EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
+	}
+	
+	
+	function fileDrop(fileDropEvent) {
+		fileDropEvent.preventDefault();
+		
+		console.log("fileDrop");
+		
+		console.log(fileDropEvent);
+		
+		var text = fileDropEvent.dataTransfer.getData('Text');
+		
+		if(text) {
+			// Drop the text into the current file
+			if(EDITOR.currentFile) {
 				
-				filePath = fileName; // filePath is undefined in the browser
+				// Get row and col
+				var mouseX = fileDropEvent.offsetX;
+				var mouseY = fileDropEvent.offsetY;
+				var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 				
-				// Read the file
-				var reader = new FileReader();
-				
-				reader.onload = function(readerOnloadEvent) {
-					fileContent = readerOnloadEvent.target.result;
-					callCallback();
-				};
-				reader.readAsText(file);
+				EDITOR.currentFile.insertText(text, caret);
 				
 			}
 			else {
-				callCallback();
+				// Create a new file with the dropped text
 			}
-			
-			function callCallback() {
-				console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
-				EDITOR.fileOpenCallback(filePath, fileContent);
-				EDITOR.fileOpenCallback = undefined;
-				
-				fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
-			}
+			return;
 		}
 		
+		if(fileDropEvent.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
 		
-		function chooseSaveAsPath(saveAsDialogEvent) {
-			var file = saveAsDialogEvent.target.files[0];
+		var file = fileDropEvent.dataTransfer.files[0];
+		var filePath = file.path || file.name;
+		
+		var fileType = file.type;
+		
+		// The default action is to open the file in the editor.
+		// But if the editor don't support the file, ask plugins what to do with it ...
+		var handled = false;
+		if(notSupported(fileType)) {
 			
-			if(EDITOR.filesaveAsCallback == undefined) {
-				throw new Error("There is no listener for the save file dialog!");
+			console.log("Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
+			for(var i=0, h=false; i<EDITOR.eventListeners.fileDrop.length; i++) {
+				h = EDITOR.eventListeners.fileDrop[i].fun(file);
+				if(h) handled = true;
 			}
 			
-			if (!file) {
-				console.warn("No file selected!");
-				EDITOR.filesaveAsCallback(undefined);
-				return;
-			}
-			
-			var fileName = file.name;
-			var filePath = file.path;
-			
-			EDITOR.filesaveAsCallback(filePath);
-			
-			EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
-		}
-		
-		
-		function fileDrop(fileDropEvent) {
-			fileDropEvent.preventDefault();
-			
-			console.log("fileDrop");
-			
-			console.log(fileDropEvent);
-			
-			var text = fileDropEvent.dataTransfer.getData('Text');
-			
-			if(text) {
-				// Drop the text into the current file
-				if(EDITOR.currentFile) {
-					
-					// Get row and col
-					var mouseX = fileDropEvent.offsetX;
-					var mouseY = fileDropEvent.offsetY;
-					var caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
-					
-					EDITOR.currentFile.insertText(text, caret);
-					
-				}
-				else {
-					// Create a new file with the dropped text
-				}
-				return;
-			}
-			
-			if(fileDropEvent.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
-			
-			var file = fileDropEvent.dataTransfer.files[0];
-			var filePath = file.path || file.name;
-			
-			var fileType = file.type;
-			
-			// The default action is to open the file in the editor.
-			// But if the editor don't support the file, ask plugins what to do with it ...
-			var handled = false;
-			if(notSupported(fileType)) {
-				
-				console.log("Calling fileDrop listeners (" + EDITOR.eventListeners.fileDrop.length + ")");
-				for(var i=0, h=false; i<EDITOR.eventListeners.fileDrop.length; i++) {
-					h = EDITOR.eventListeners.fileDrop[i].fun(file);
-					if(h) handled = true;
-				}
-				
-				if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
-					if(path) saveFileFunction(path, function(err, path) {
-						if(err) alertBox(err.message);
+			if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
+				if(path) saveFileFunction(path, function(err, path) {
+					if(err) alertBox(err.message);
 						else alertBox("The file has been saved: " + path);
 					});
 				});
@@ -5063,9 +5073,12 @@ EDITOR.lastKeyPressed = "";
 			for(var i=0; i<EDITOR.eventListeners.keyPressed.length; i++) {
 				funReturn = EDITOR.eventListeners.keyPressed[i].fun(file, character, combo); // Call function
 				
-				if(funReturn !== true && funReturn !== false) throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + " did not return true or false!");
-				
-				if(funReturn === false && !preventDefault) {
+				if(funReturn !== true && funReturn !== false) {
+throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + 
+				" did not return true or false!");
+			}
+			
+			if(funReturn === false && !preventDefault) {
 					preventDefault = true;
 					if(file && EDITOR.input) console.log(UTIL.getFunctionName(EDITOR.eventListeners.keyPressed[i].fun) + " prevented insertion of character=" + character + " into file.path=" + file.path);
 				}
@@ -5672,6 +5685,16 @@ console.warn(err.message);
 				}
 			}
 			
+		if(mouseDownEvent.type == "touchstart" && recognition) {
+			try {
+				recognition.start();
+			}
+			catch(err) {
+				console.warn(err.message);
+			}
+		}
+		
+		
 			lastMouseDownEventType = mouseDownEvent.type;
 			
 			EDITOR.interact("mouseDown", mouseDownEvent);
@@ -5743,6 +5766,9 @@ console.warn(err.message);
 			
 			//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
 			
+		if(mouseUpEvent.type == "touchstart" && recognition) {
+			recognition.stop();
+		}
 			
 			EDITOR.interact("mouseUp", mouseUpEvent);
 			

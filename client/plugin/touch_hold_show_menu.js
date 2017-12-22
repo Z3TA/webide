@@ -2,6 +2,8 @@
 	"use strict";
 	
 	var touchDownTimer;
+	var touchTooLongTimer;
+	var showTheMenu = false;
 	
 	EDITOR.plugin({
 		desc: "Show (context) menu on long touch",
@@ -48,9 +50,16 @@
 		
 		touchDownTimer = setTimeout(function showMenu() {
 			
-			EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
+			showTheMenu = true;
 			
-		}, 500);
+		}, 300);
+		
+		touchTooLongTimer = setTimeout(function showMenu() {
+			
+			showTheMenu = false;
+			
+		}, 1500);
+		
 	}
 	
 	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
@@ -60,6 +69,12 @@
 		console.log(mouseDownEvent);
 		
 		clearTimeout(touchDownTimer);
+		clearTimeout(touchTooLongTimer);
+		
+		if(showTheMenu) {
+EDITOR.showMenu(mouseX, mouseY, mouseDownEvent);
+			showTheMenu = false;
+		}
 	}
 	
 	

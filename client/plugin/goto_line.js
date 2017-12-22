@@ -65,12 +65,15 @@
 		
 		var line = parseInt(match[2]);
 		
-		if(file) file.gotoLine(line);
-		
+		if(file) {
+file.gotoLine(line);
+			return true;
 		}
+		else return false;
+	}
 	
 	function build_gotoInput() {
-			
+		
 		gotoDiv = document.createElement("div");
 		gotoDiv.setAttribute("id", "gotoDiv");
 		gotoDiv.setAttribute("class", "gotoDiv");

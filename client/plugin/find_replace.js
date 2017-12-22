@@ -60,6 +60,7 @@
 		
 		find(str, file);
 		
+		return true;
 		}
 	
 	function buildDiv() {
