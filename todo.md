@@ -34,6 +34,8 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
+goto-file abort loop ...
+
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
 Voice commands / Speach recognition: test on mobile, add voice commands for common key-bindings
