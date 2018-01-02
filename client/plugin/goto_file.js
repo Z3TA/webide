@@ -286,9 +286,11 @@
 			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
 				if(err) throw err;
 				
-				console.log("Trying search because resp.filesInFlight=" + resp.filesInFlight);
+				console.log("Trying search because resp.foldersBeingSearched=" + resp.foldersBeingSearched);
 				
-				if(resp.filesInFlight == 0) {
+				if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
+				
+				if(resp.foldersBeingSearched == 0) {
 					isSearching = false;
 					trySearch();
 				}
@@ -642,7 +644,9 @@
 		CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
 			if(err) throw err;
 			
-			if(resp.filesInFlight == 0) isSearching = false;
+			if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
+			
+			if(resp.foldersBeingSearched == 0) isSearching = false;
 			
 			console.log("Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
 			
