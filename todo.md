@@ -152,6 +152,9 @@ Parser doesn't seem to find variables inside for(var a, b, c)
 
 When there's an error in a NodeJS script open the file, scroll to the line and show the error!
 
+Autocompleting JS in html files doesn't work! It shows the result but doesn't complete. And often it completes with a html end tag!
+
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!
