@@ -150,6 +150,8 @@ try native keyboard on mobile, input text
 
 Parser doesn't seem to find variables inside for(var a, b, c)
 
+When there's an error in a NodeJS script open the file, scroll to the line and show the error!
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!
@@ -1217,6 +1219,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Autocomplete paths when saving files, or "save file here" on file explorer context menu should request savefile-widget.
 
 workflow: Edit pages on a ftp server ...
   Extract zip/rar/gz files. Example: connect to ftp server, right click and "unpack to folder ... " specify "local" directory.

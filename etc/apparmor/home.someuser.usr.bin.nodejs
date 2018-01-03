@@ -21,7 +21,9 @@
 
   # Must allow network in order to inspect/debug
   network inet stream,
+  network inet dgram,
   network inet6 stream,
+  network inet6 dgram,
   network unix,
 	
   %HOME%%USERNAME%/ r,
