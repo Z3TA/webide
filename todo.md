@@ -34,7 +34,11 @@ Commit messages should explain WHY you did the change, we can already see what y
 What I'm working on
 -------------------
 
-goto-file abort loop ...
+if the server crashes and I can't reboot and make a rollback ...
+make it easier to recover from the rollback!!
+each user have their own fs which is intact, we should only have to re-add the user ...!?
+
+
 
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
@@ -154,6 +158,9 @@ When there's an error in a NodeJS script open the file, scroll to the line and s
 
 Autocompleting JS in html files doesn't work! It shows the result but doesn't complete. And often it completes with a html end tag!
 
+Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth
+
+Ctrl + Hover ? Click on a function, show that function declaration
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?

@@ -932,6 +932,15 @@ var UTIL = {
 		}
 	},
 
+	regexpAssert: function regexpAssert(re, strings, subIndex, expectedResult) {
+		var match;
+		for (var i=0; i<strings.length; i++) {
+			match = strings[i].match(re);
+			if(match == null) throw new Error("No match for '" + strings[i]);
+			if(match[subIndex] != expectedResult) throw new Error("Did not find " + expectedResult + " in " + JSON.stringify(match) + " for string: " + strings[i]);
+		}
+	},
+	
 	indexOfZeroWidthCharacter: function indexOfZeroWidthCharacter(str) {
 		var zeroWidth = [
 			"\u200E", // LEFT-TO-RIGHT MARK 

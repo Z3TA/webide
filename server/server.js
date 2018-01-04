@@ -1149,7 +1149,8 @@ function handleHttpRequest(request, response) {
 			}
 			else {
 			console.log("args=" + JSON.stringify(args) + " options=" + JSON.stringify(options));
-			// If you get spawn EACCES is probably means that hard link or mount to /usr/bin/nodejs_username no longer exist!
+			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
+			// Easiest solution is to remove and re-add the user. If it's in production you should install the jzedit_user_mounts.service'
 			if(uid) log("Did you reboot !? Check if mount to /usr/bin/nodejs_" + name + " exist!", NOTICE);
 			throw err;
 		}

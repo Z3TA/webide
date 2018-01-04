@@ -16,6 +16,8 @@
 	var gotoButton;
 	var key_Esc = 27;
 	var key_G = 71;
+	var key_J = 74;
+	var RE_SUB;
 	
 	//window.addEventListener("load", goto_init, false);
 
@@ -42,11 +44,25 @@
 		hide_gotoLineInput();
 		
 		EDITOR.bindKey({desc: "Goto line ...", charCode: key_G, combo: CTRL, fun: show_gotoInput}); // ctrl + G
+		EDITOR.bindKey({desc: "Goto line ...", charCode: key_J, combo: CTRL, fun: show_gotoInputEmacs}); // ctrl + J (Emacs)
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: key_Esc, fun: hide_gotoLineInput});
 		
+		var voiceRegexp = /((go ?to)|(jump( ?to)?))?( ?line)? (\d*)/i;
+		
+		RE_SUB = 6;
+		
+		UTIL.regexpAssert(voiceRegexp, [
+		"goto line 100", 
+		"go to line 100", 
+			"jump to line 100",
+			"jump 100",
+		"goto 100", 
+			"jump to 100"
+		], RE_SUB, "100");
+		
 		EDITOR.addEvent("voiceCommand", {
-			re: /(go ?to)? ?line (\d*)/i, 
-			grammar: ["(goto|go to) line <numbers>", "line <numbers>"], fun: gotoLineVoice
+			re: voiceRegexp, 
+			grammar: ["(goto|go to|jump to) line|jump to|jump) <numbers>", "line <numbers>"], fun: gotoLineVoice
 		});
 		
 		}
@@ -54,6 +70,8 @@
 	function gotoLine_unload() {
 		
 		EDITOR.unbindKey(show_gotoInput);
+		EDITOR.unbindKey(show_gotoInputEmacs);
+		
 		EDITOR.unbindKey(hide_gotoLineInput);
 		
 		EDITOR.removeEvent("voiceCommand", gotoLineVoice);
@@ -63,13 +81,18 @@
 		
 		console.log(match);
 		
-		var line = parseInt(match[2]);
+		var line = parseInt(match[RE_SUB]);
+		
+		if(isNaN(line)) {
+console.warn("line=" + line + " is not a number! match=" + JSON.stringify(match) + " RE_SUB=" + RE_SUB); 
+			return false; // Did not capture it
+		}
 		
 		if(file) {
 file.gotoLine(line);
-			return true;
+			return true; // Captured!
 		}
-		else return false;
+		else return false; // Did not capture it
 	}
 	
 	function build_gotoInput() {
@@ -126,6 +149,10 @@ file.gotoLine(line);
 		
 		console.log("built gotoInput!");
 
+	}
+	
+	function show_gotoInputEmacs(file, combo) {
+		return show_gotoInput(file, combo);
 	}
 	
 	function show_gotoInput(file, combo) {
