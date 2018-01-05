@@ -265,6 +265,8 @@
 		
 		EDITOR.resizeNeeded();
 		
+		console.log("After showing save dialog: EDITOR.input=" + EDITOR.input);
+		
 		return false;
 	}
 	

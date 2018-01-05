@@ -269,6 +269,7 @@ EDITOR.lastKeyPressed = "";
 		
 		// # Working Directory
 		var workingDirectory; // Private variable
+	var _editorInput = true;
 		if(!Object.defineProperty) {
 			console.warn("Object.defineProperty not available!");
 			
@@ -282,6 +283,17 @@ EDITOR.lastKeyPressed = "";
 				enumerable: true
 			});
 			
+		// For debugging input focus
+		Object.defineProperty(EDITOR, 'input', {
+			get: function getEditorInputFocus() { return _editorInput; },
+			set: function setEditorInputFocus(newValue) {
+				console.warn("Set EDITOR.input to " + newValue);
+				if(newValue) _editorInput = true;
+				else _editorInput = false;
+			},
+			enumerable: true
+		});
+		
 			/*
 				Object.defineProperty(EDITOR, 'renderNeeded', {
 				get: function() {return renderNeeded;} ,

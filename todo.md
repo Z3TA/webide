@@ -31,13 +31,45 @@ ubuntu: webapp-container / unity-webapps-runner ?
 
 Commit messages should explain WHY you did the change, we can already see what you did by looking at the diff. We want to know WHY you did it.
 
+Note to myself:
+Always make a ZFS snapshot before running apt upgrade!!!
+on ZOL (ZFS on Linux) running apt upgrade killed the system
+
 What I'm working on
 -------------------
+
+Fixing annotate comments for large files ...
+When trying to show commit messages for a large file (EDITOR.js):
+Server: API error: stdout maxBuffer exceeded
+
+Trying to find the reason for Why does right mouse clicking set EDITOR.input to false ?
+line 5678 in EDITOR.js
+
+
+Investigating EDITOR.input
+Should EDITOR.showMenu set EDITOR.input to false !?
+Should EDITOR.hideMenu set EDITOR.input to true !?
+
+
+Ctrl+S in the browser (save file) did not take away focus from the editor!!
+
 
 if the server crashes and I can't reboot and make a rollback ...
 make it easier to recover from the rollback!!
 each user have their own fs which is intact, we should only have to re-add the user ...!?
 
+Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
+Should there be a .jzeditpw file in each user dir !?
+
+
+I was gonna delete and recreate the demo user, to fix problems with user read rights in wwwpub folder.
+(nginx couldn't (403 access denied) read image placed in wwwpub)
+But couln't unmount user demo's dir because it was in use.
+So I had to reboot.
+And while I was on it I also ran apt update && apt upgrade
+But then the server didn't boot! It seems it got stuck on grub menu, which couln't find the disk
+Noone of the updates had anything to do with grub or ZFS though!
+Had to make a zfs snapshot rollback to get the server to boot.
 
 
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
@@ -172,6 +204,13 @@ Ctrl + Hover ? Click on a function, show that function declaration
 
 What I'm thinking
 -----------------
+
+How do you install something ? Like ffmpeg . And then how do you run it ?
+Able to run shell commands or nodejs repl in the editor !?
+We don't like command lines
+Solution: Use a module that installs the program!
+
+---
 
 Why has not high level programming languages changed in the last 50 years !?
 Why are we still typing programming *code* into a text editor !?
@@ -1990,6 +2029,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Multiple cursors (like in sublime) Ctrl+D to create another cursor.
+Shift+Ctrl+l = 
 
 Test runner feedback. See the test results when you hit save.
 
