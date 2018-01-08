@@ -356,6 +356,8 @@ progressBar.style.display = "none";
 		
 		var file = EDITOR.currentFile;
 		
+		if(!file) return false; // No file is open so the image is probably not supposed to go into a SSG site
+		
 		// Check if the current file belongs to a SSG project:
 		for(var i=0; i<sites.length; i++) {
 			if(EDITOR.currentFile.path.indexOf(sites[i].source) != -1) {
