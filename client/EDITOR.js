@@ -288,6 +288,7 @@ EDITOR.lastKeyPressed = "";
 			get: function getEditorInputFocus() { return _editorInput; },
 			set: function setEditorInputFocus(newValue) {
 				console.warn("Set EDITOR.input to " + newValue);
+				console.log(UTIL.getStack("Set EDITOR.input to " + newValue));
 				if(newValue) _editorInput = true;
 				else _editorInput = false;
 			},
@@ -2017,10 +2018,15 @@ EDITOR.lastKeyPressed = "";
 		
 		EDITOR.hideMenu = function() {
 			
-			//alert(UTIL.getStack("Hide menu"));
+		console.log(UTIL.getStack("Hide menu"));
 			
 			var menu = document.getElementById("canvasContextmenu");
 			
+		if(menu.style.visibility == "hidden") {
+			console.warn("Menu already hidden. No need to hide it!");
+			return;
+		}
+		
 			recoverFromFullScreenMenu(menu);
 			
 		// We can't use .display="none" or it will not be possible to measure the size of the menu!
@@ -5630,8 +5636,11 @@ console.warn(err.message);
 		var funReturn;
 		
 		//UTIL.objInfo(target);
+		var leftMouseButton = 0;
+		var rightMouseButton = 2;
+		var maybeCenterMouseButton = 1;
 		
-		if(button == undefined) button = 0; // For like touch events
+		if(button == undefined) button = leftMouseButton; // For like touch events
 		
 		var menu = document.getElementById("canvasContextmenu");
 		
@@ -5645,7 +5654,7 @@ console.warn(err.message);
 			caret = EDITOR.mousePositionToCaret(mouseX, mouseY);
 			
 			
-			if(EDITOR.currentFile && (button == 0)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
+			if(EDITOR.currentFile && (button == leftMouseButton)) {// 0=Left mouse button, 2=Right mouse button, 1=Center?
 				// Give focus
 					EDITOR.input = true;
 					
@@ -5671,9 +5680,9 @@ console.warn(err.message);
 						console.log("REFOCUS!");
 					*/
 				}
-				else if(button !== 0) {
+			else if(button !== leftMouseButton) {
 					
-					// No current file or not the left button.
+				// No current file. Or not the left button.
 					
 					EDITOR.input = false;
 					

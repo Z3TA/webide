@@ -330,14 +330,14 @@
 	
 	function saveCurrentFile(file, combo, character, charCode, direction) {
 		
+		EDITOR.hideMenu();
+		
 		if(file.savedAs === false || combo.sum == CTRL + SHIFT) {
 			saveAs();
 		}
 		else {
 			EDITOR.saveFile(file);
 		}
-		
-		EDITOR.hideMenu();
 		
 		return false;
 		
