@@ -90,6 +90,13 @@ Coding an agar clone as a nodejs example
 todo
 ----
 
+I want to prepare a web document for another user, so that when he logs in the document
+I prepared should open!
+When loggin in as another user, the editor should open up the last files that user had opened!
+Same as if that user would login again!
+Also don't try to open the files the user had opened before (on a previews login)!
+
+
 In the file open list when holding down the arrow key it should go continuously!
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
@@ -180,6 +187,8 @@ Do what this guy expect the editor to do:
 http://moolenaar.net/habits.html
 
 
+
+
 investigate build.js vs ssg-build.js
 
 try native keyboard on mobile, input text
@@ -193,6 +202,9 @@ Autocompleting JS in html files doesn't work! It shows the result but doesn't co
 Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth
 
 Ctrl + Hover ? Click on a function, show that function declaration
+
+When commiting and files are missing. Ask to remove those files from source control!
+
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
