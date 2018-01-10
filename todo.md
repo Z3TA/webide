@@ -38,22 +38,6 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-Fixing annotate comments for large files ...
-When trying to show commit messages for a large file (EDITOR.js):
-Server: API error: stdout maxBuffer exceeded
-
-Trying to find the reason for Why does right mouse clicking set EDITOR.input to false ?
-line 5678 in EDITOR.js
-
-
-Investigating EDITOR.input
-Should EDITOR.showMenu set EDITOR.input to false !?
-Should EDITOR.hideMenu set EDITOR.input to true !?
-
-
-Ctrl+S in the browser (save file) did not take away focus from the editor!!
-
-
 if the server crashes and I can't reboot and make a rollback ...
 make it easier to recover from the rollback!!
 each user have their own fs which is intact, we should only have to re-add the user ...!?

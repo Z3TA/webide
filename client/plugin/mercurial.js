@@ -1404,7 +1404,7 @@
 			else if(annotation === undefined) throw new Error("annotation=" + annotation);
 			
 			var changesets = annotation.changesets;
-			var lineChangeset = annotation.lineChangeset;
+			var lineChangeset = annotation.lines;
 			var lastLine = annotation.lastLine;
 			
 			
@@ -1430,6 +1430,7 @@
 			if(workingCopy != -1) {
 				// Get the right annotation on the right line
 				// This needs more work! ...
+				// todo: Is this really needed? 
 				
 				var lineStart = 0;
 				var lineSplit = 0;
@@ -1453,21 +1454,19 @@
 				}
 			}
 			
-			console.log("Showing comments on line=" + line + " for file=" + file.path + "");
+			//console.log("Showing comments on line=" + line + " for file=" + file.path + "");
 			
-			if(lineChangeset.hasOwnProperty(line)) {
-				var changeId = lineChangeset[line];
+			// todo: When the user adds or remove lines, the annotation line mapping will be off! 
+			// dilemma: Unless the user has saved, calling hg annotate again will not give the correct lines!
+			
+			var changeId = lineChangeset[line-1];
 				if(!changesets.hasOwnProperty(changeId)) throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2));
 				var change = changesets[changeId];
-				annotationWidget.innerText = change.user + " - " + change.date + " - " + change.summary;
+			console.log("change=" + change);
+			annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
 				console.log("changesets=" + JSON.stringify(changesets, null, 2));
 				console.log("showing changeset changeId=" + changeId);
 				EDITOR.resizeNeeded();
-			}
-			else {
-				console.log("No changeset available for line=" + line);
-				hide();
-			}
 			
 			annotation.lastLine = line;
 		}

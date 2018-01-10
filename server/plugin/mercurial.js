@@ -856,9 +856,9 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 		var execFile = require('child_process').execFile;
 		var spawn = require('child_process').spawn;
 		
-		//execFile('hg', ['annotate', localPath, '--line-number'], { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, function (err, stdout, stderr) {
+		//execFile('hg', ['annotate', localPath], { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, function (err, stdout, stderr) {
 		
-		var annotate = spawn("hg", ['annotate', localPath, '--line-number'], {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var annotate = spawn("hg", ['annotate', localPath, "--ignore-space-change"], {cwd: rootDir, env: execFileOptions.env, shell: false});
 		var stdout = "";
 		var stderr = "";
 		
@@ -878,11 +878,12 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 		});
 		
 		annotate.on('close', function annotateDone(exitCode) {
-			if(stdout.length < 500) console.log("hg annotate stdout=" + stdout);
-			else console.log("hg annotate stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+			//if(stdout.length < 500) console.log("hg annotate stdout=" + stdout);
+			//else console.log("hg annotate stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+			console.log("stdout=" + stdout);
+			console.log("stderr=" + stderr);
 			
 			console.log("exitCode=" + exitCode);
-			console.log("stderr=" + stderr);
 			
 			if(exitCode || stderr) {
 				var err = new Error(stderr);
@@ -899,29 +900,24 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 				12:4: line 4
 				20:5:
 				
-				changeset:line:summary
+				changeset:line-content
 			*/
 			
-			var annotation = stdout.trim().split(/\n|\r\n/);
+			var lines = stdout.trim().split(/\n|\r\n/);
 			var changesetId = [];
-			var lineChangeset = {};
 			var changesets = {};
 			var logCounter = 0;
 			
-			for(var i=0, changeId, line; i<annotation.length; i++) {
-				annotation[i] = annotation[i].split(":");
-				changeId = parseInt(annotation[i][0]);
-				line = parseInt(annotation[i][1]);
+			for(var i=1, changeId; i<lines.length; i++) {
+				lines[i] = lines[i].split(":");
+				changeId = parseInt(lines[i][0]);
+				
 				if(changesetId.indexOf(changeId) == -1) {
 					changesetId.push(changeId);
 					
-					execFile('hg', ['log', '--rev', changeId], { cwd: rootDir, env: execFileOptions.env }, hglog);
-				}
-				if(lineChangeset.hasOwnProperty(line)) {
-					// Only overwrite if the change was done after the current change
-					if(lineChangeset[line] < changeId) lineChangeset[line] = changeId;
-				}
-				else lineChangeset[line] = changeId;
+					execFile('hg', ["-v", "log", "--rev", changeId], { cwd: rootDir, env: execFileOptions.env }, hglog);
+					}
+				lines[i] = changeId; // Map line to changeset
 			}
 			
 			function hglog(err, stdout, stderr) {
@@ -936,6 +932,16 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 					user:        Johan Zetterberg <zeta@zetafiles.org>
 					date:        Thu Apr 20 17:06:17 2017 +0200
 					summary:     line9
+					
+					(when using -v flag) 
+					changeset:   1482:0db0022ed845
+					user:        zeta@zetafiles.org
+					date:        Tue May 30 16:58:40 2017 +0200
+					files:       client/gfx/style.css client/plugin/mercurial.js server/plugin/mercurial.js todo.md
+					description:
+					More work on the Mercurial plugin
+					
+					
 				*/
 				
 				var pair = stdout.trim().split(/\n|\r\n/);
@@ -943,8 +949,6 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 				for(var i=0, name, value, changeId, arrChangeset; i<pair.length; i++) {
 					name = pair[i].substr(0, pair[i].indexOf(":"));
 					value = pair[i].substr(pair[i].indexOf(":")+1).trim();
-					console.log("name=" + name);
-					console.log("value=" + value);
 					
 					if(name == "changeset") {
 						arrChangeset = value.split(":")
@@ -952,7 +956,16 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 						if(isNaN(changeId)) throw new Error("changeId=" + changeId + " arrChangeset=" + JSON.stringify(arrChangeset) + " pair=" + JSON.stringify(pair) + " stdout=" + stdout);
 						obj = changesets[changeId] = {hash: arrChangeset[1]};
 					}
+					else if(name == "description") {
+						// it can be several lines
+						obj[name] = stdout.slice(stdout.indexOf(name+":") + name.length+1).trim();
+						console.log(name + " = " + obj[name]);
+						break;
+					}
 					else obj[name] = value;
+					
+					console.log("name=" + name);
+					console.log("value=" + value);
 				}
 				
 				if(++logCounter == changesetId.length) done();
@@ -960,7 +973,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 			}
 			
 			function done() {
-				callback(null, {changesets: changesets, lineChangeset: lineChangeset});
+				callback(null, {changesets: changesets, lines: lines});
 			}
 			
 			
