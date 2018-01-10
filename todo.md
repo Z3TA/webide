@@ -38,13 +38,12 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-if the server crashes and I can't reboot and make a rollback ...
-make it easier to recover from the rollback!!
-each user have their own fs which is intact, we should only have to re-add the user ...!?
-
 Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
 Should there be a .jzeditpw file in each user dir !?
 
+if the server crashes and I can't reboot and make a rollback ...
+make it easier to recover from the rollback!!
+each user have their own fs which is intact, we should only have to re-add the user ...!?
 
 I was gonna delete and recreate the demo user, to fix problems with user read rights in wwwpub folder.
 (nginx couldn't (403 access denied) read image placed in wwwpub)
@@ -56,12 +55,7 @@ Noone of the updates had anything to do with grub or ZFS though!
 Had to make a zfs snapshot rollback to get the server to boot.
 
 
-bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
-Voice commands / Speach recognition: test on mobile, add voice commands for common key-bindings
-
-vioce command mode and insert mode: when in insert mode what you say is inserted as text !?
-Use The Insert key for insertingn speach to text !?
 
 Making a website using only prod ...
 
@@ -79,6 +73,9 @@ I prepared should open!
 When loggin in as another user, the editor should open up the last files that user had opened!
 Same as if that user would login again!
 Also don't try to open the files the user had opened before (on a previews login)!
+
+
+bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
 
 In the file open list when holding down the arrow key it should go continuously!
@@ -1846,6 +1843,11 @@ console.log("c");
 
 ---
 
+
+Voice commands / Speach recognition: test it on mobile, add voice commands for common key-bindings
+
+vioce command mode and insert mode: when in insert mode what you say is inserted as text !?
+Use The Insert key for insertingn speach to text !?
 
 
 
