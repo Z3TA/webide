@@ -187,6 +187,12 @@ Ctrl + Hover ? Click on a function, show that function declaration
 When commiting and files are missing. Ask to remove those files from source control!
 
 
+When deoplying, check package.json for "deploy_script" where a deploy script can be specified. 
+It must be a file path (to a .js file) as jzedit does not have a shell when running as a cloud ide.
+The specified nodejs script will run when the user deploy via the editor instead of the default:
+The default (if deploy is not specified) is to use nodejs_init that comes with the editor (copies files to prodFolder and restarts it via nodejs_init daemon)
+
+
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
 * Fix bugs!
