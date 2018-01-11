@@ -48,6 +48,7 @@
 		console.log("Getting SSG sites ...");
 		
 		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
+		var filePath; // File to be opened via quickedit
 		
 		if(storageSites) {
 			try {
@@ -67,13 +68,14 @@
 		else {
 			console.log("sites: " + JSON.stringify(sites, null, 2));
 		
-			// Show some quick nav in the dashboard
+			// Show some quick nav in the dashboard !?
 			
 			
 			
-		// quickedit.js ...
+		
+			// QueryString is from global.js
 		if(QueryString.editPage) {
-			
+				// ### quickedit.js ...
 			var url = QueryString.editPage;
 			var nodes = QueryString.nodes.split(",");
 			
@@ -82,7 +84,7 @@
 			console.log("quickedit: url=" + url + " site=" + site); 
 			
 			if(site) {
-				var filePath = UTIL.getPathFromUrl(url);
+				filePath = UTIL.getPathFromUrl(url);
 				var pubUrlPath = site.url ? UTIL.getDirectoryFromPath(site.url) : "/";
 				
 				// If the site is published in a folder eg /foo/ remove /foo/ from filePath
@@ -104,71 +106,78 @@
 				*/
 					
 					if(filePath.slice(filePath.length-1) == "/") filePath = filePath + "index.htm";
-				
-				EDITOR.openFile(filePath, undefined, function fileOpened(err, file) {
-						if(err) {
-						alertBox("Unable to open " + filePath + " " + err.message + "");
-						}
-						else {
-							// Find where to edit
-							if(QueryString.nodes) {
-								
-								var element = QueryString.nodes.split(",");
-								
-								element.reverse();
-								
-								var i = 0;
-								var index = -1;
-								
-								console.log("Finding where to put caret ...");
-								for(; i<element.length-1; i++) {
-									//console.log(element[i]);
-									if(element[i] == "main") {
-										element[i] = "body"; 
-										break;
-									}
-								}
-								
-								
-								
-								for(; i<element.length; i++) {
-									if(element[i] !== "") {
-										console.log(element[i]);
-										index = file.text.indexOf(element[i], index);
-									}
-								}
-								
-								console.log("i=" + i);
-								console.log("index=" + index + " (" + file.text.substr(index, 30) + " ...)");
-								console.log("element=" + JSON.stringify(element));
-								
-								if(index != -1) {
-									/*
-										If the file was open when the editor last closed, the reopen_files.js plugin will place
-										the caret. So wait some time ...
-									*/
-									setTimeout(function placeCaretAfterReopenFiles() {
-										file.moveCaret(index);
-										file.scrollToCaret();
-										
-										EDITOR.showFile(file);
-										
-										//  We can't open the WYSIWYG editor automatically, or it would be stopped by the popup-blocker
-										
-										if(like(site, file) && buttonWysiwyg) buttonWysiwyg.setAttribute("class", "button highlighted");
-										
-									}, 100);
-									
-								}
-							}
-							
-						}
-						
-					});
+					
+					EDITOR.openFile(filePath, undefined, quickeditFileOpened);
+					
+					
 					}
 			else {
 				console.warn("Couln't determine what site the url belongs to: " + url);
 			}
+			}
+		}
+		
+		function quickeditFileOpened(err, file) {
+			if(err) {
+				if(err.code == "ENOENT" && filePath.match(/index\.htm$/i)) {
+					// Try with index.html instead of index.htm (some servers only allow the index file to be .html !)
+					EDITOR.openFile(filePath.replace(/index\.htm$/i, "index.html"), undefined, quickeditFileOpened);
+				}
+				else alertBox("Unable to open " + filePath + " " + err.message + "");
+			}
+			else {
+				// Find where to edit
+				if(QueryString.nodes) {
+					
+					var element = QueryString.nodes.split(",");
+					
+					element.reverse();
+					
+					var i = 0;
+					var index = -1;
+					
+					console.log("Finding where to put caret ...");
+					for(; i<element.length-1; i++) {
+						//console.log(element[i]);
+						if(element[i] == "main") {
+							element[i] = "body";
+							break;
+						}
+					}
+					
+					
+					
+					for(; i<element.length; i++) {
+						if(element[i] !== "") {
+							console.log(element[i]);
+							index = file.text.indexOf(element[i], index);
+						}
+					}
+					
+					console.log("i=" + i);
+					console.log("index=" + index + " (" + file.text.substr(index, 30) + " ...)");
+					console.log("element=" + JSON.stringify(element));
+					
+					if(index != -1) {
+						/*
+							If the file was open when the editor last closed, the reopen_files.js plugin will place
+							the caret. So wait some time ...
+						*/
+						setTimeout(function placeCaretAfterReopenFiles() {
+							file.moveCaret(index);
+							file.scrollToCaret();
+							
+							EDITOR.showFile(file);
+							
+							//  We can't open the WYSIWYG editor automatically, or it would be stopped by the popup-blocker
+							
+							if(like(site, file) && buttonWysiwyg) buttonWysiwyg.setAttribute("class", "button highlighted");
+							
+						}, 100);
+						
+					}
+				}
+				
 			}
 		}
 		
