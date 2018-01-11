@@ -38,6 +38,7 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+
 Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
 Should there be a .jzeditpw file in each user dir !?
 
@@ -73,6 +74,17 @@ I prepared should open!
 When loggin in as another user, the editor should open up the last files that user had opened!
 Same as if that user would login again!
 Also don't try to open the files the user had opened before (on a previews login)!
+
+Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
+
+EDITOR.showFileExplorer(folder): Plugins can "fight" over which plugin shall display a file explorer
+
+
+Opening a file is too hard for someone used to a CMS !!????
+Show a CMS like admin page for web sites (SSG)
+
+HTML helper guide plugin ???
+Show a widget with the common "editor" icons like header, link, table etc, that helps you insert HTML
 
 
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
@@ -191,6 +203,9 @@ When deoplying, check package.json for "deploy_script" where a deploy script can
 It must be a file path (to a .js file) as jzedit does not have a shell when running as a cloud ide.
 The specified nodejs script will run when the user deploy via the editor instead of the default:
 The default (if deploy is not specified) is to use nodejs_init that comes with the editor (copies files to prodFolder and restarts it via nodejs_init daemon)
+
+When opening a file. But no results are found and you press enter, try opening whatever is in the input (eg /etc/foo)
+If input starts with / and has another / eg /foo/ switch to that folder! When it changes to /foo/bar/ switch to that folder!
 
 
 * Fix bugs!
