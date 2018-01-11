@@ -23,7 +23,7 @@ var UTIL = {
 	toSystemPathDelimiters: function toSystemPathDelimiters(path) {
 		
 		// Makes sure the path uses the right path delimiters ...
-		console.log("toSystemPathDelimiters: path=" + path);
+		//console.log("toSystemPathDelimiters: path=" + path);
 		
 		if(path.indexOf("://") != -1) {
 			var delimiter = "/";
@@ -39,13 +39,13 @@ var UTIL = {
 		}
 		}
 		
-		console.log("delimiter=" + delimiter);
-		console.log("path=" + path);
+		//console.log("delimiter=" + delimiter);
+		//console.log("path=" + path);
 				
 		path = path.replace(/\//g, delimiter);
 		path = path.replace(/\\/g, delimiter);
 		
-		console.log("path=" + path);
+		//console.log("path=" + path);
 		
 		return path;
 		
@@ -291,7 +291,7 @@ var UTIL = {
 		
 		
 		if(!path) {
-			console.warn("Unable to determine path delimiter. Slash / will be used! path=" + path);
+			console.warn("Unable to determine path delimiter from path=" + path + ". Slash / will be used!");
 			return "/";
 		}
 		
@@ -304,7 +304,7 @@ var UTIL = {
 			if(path.indexOf("/") != -1) return "/";
 			else if(path.indexOf("\\") != -1) return "\\";
 			else {
-				console.warn("Unable to determine file path folder separator/delimiter of path=" + path);
+				//console.warn("Unable to determine file path folder separator/delimiter of path=" + path);
 				return UTIL.toSystemPathDelimiters("/");
 			}
 		}
@@ -905,7 +905,26 @@ var UTIL = {
 		return re.lastIndex - res[0].length;
 	},
 
-
+	joinPaths: function joinPaths(paths) {
+		/*
+			
+			Ex: ["foo", "bar/baz/"] => "/foo/bar/baz/"
+			
+		*/
+		
+		if(Object.prototype.toString.call( paths ) != '[object Array]') throw new Error("Argument needs to be an array: paths=" + paths);
+		
+		for (var i=0; i<paths.length-1; i++) {
+			paths[i] = UTIL.trailingSlash(paths[i]);
+			if(paths[i].indexOf("\\") != -1) throw new Error("Backslash in " + paths[i] + " paths=" + JSON.stringify(paths));
+		}
+		
+		var path = "/" + paths.join("/");
+		while(path.indexOf("//") != -1) path = path.replace("//", "/");
+		
+		return path;
+	},
+	
 	reLastIndexOf: function reLastIndexOf(regex, str, startpos) {
 		
 		regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));

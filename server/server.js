@@ -83,8 +83,6 @@ var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 	// Windows can not set uid, so don't bother checking if users have uid specified
 	var NOUID = getArg(["nouid"]) || (process.platform == "win32"); 
 	
-	var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
-	var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 	
 	
 	
@@ -292,7 +290,7 @@ var fs = require("fs");
 	function sockJsConnection(connection) {
 		
 		var userWorker = null;
-		var userName = null;
+	var userConnectionName = null;
 		var userConnectionId = -1;
 		var IP = connection.remoteAddress;
 		var protocol = connection.protocol;
@@ -385,97 +383,87 @@ var fs = require("fs");
 						
 						(function checkUser(username, password) {
 							
+						if(!NO_PW_HASH && !PASSWORD) {
+							var pwHash = require("./pwHash.js");
+							password = pwHash(password);
+						}
+						
 							if(USERNAME) {
 								console.log("Using USERNAME=" + USERNAME+ " from argument ...")
 								
 								// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
-								if(USERNAME == username && PASSWORD == password) userOK(0, CURRENT_USER, true);
-								else {
-									console.log("'" + USERNAME + "' != '" + username + "' or '" + PASSWORD + "' != '" + password + "'");
-									wrongPw();
-								}
+							if(USERNAME == username && PASSWORD == password) idSuccess();
+							else idFail("Wong username or password! (Username specified in server arguments)");
 							}
 							else {
-								console.log("Using PW_FILE=" + PW_FILE + " ...");
-								var fs = require("fs");
-								fs.readFile(PW_FILE, "utf8", function(err, data) {
-									if(err) {
-										if(err.code == "ENOEND") {
-											log("Could not find PW_FILE=" + PW_FILE + " ... Add users by running ./adduser.js user pw", NOTICE);
-										}
-										else throw err;
-									}
-									//console.log("data=" + data);
-									//console.log("data.trim()=" + data.trim());
-									//console.log("data.trim().split()=" + JSON.stringify(data.trim().split(/\n|\r\n/)));
-									
-									var row = data.trim().split(/\n|\r\n/);
-									
-									console.log("Loaded " + PW_FILE + " (" + row.length + " users found)");
-									
-									if(!NO_PW_HASH) {
-										var pwHash = require("./pwHash.js");
-										password = pwHash(password);
-									}
-									
-									// format: username|password|rootDir|uid|gid
-									
-									// note: usernames can not contain |
-									
-									for(var i=0, test, hasPw, hasUid, pUser, pPass, pRootDir, pUid, pGid; i<row.length; i++) {
-										test = row[i].trim().split("|");
-										
-										pUser = test[0];
-										
-										if(pUser.charAt(0) == "#") continue; // Ignore users who's username starts with #
-										
-										pPass = test[1];
-										pRootDir = test[2];
-										pUid = test[3];
-										pGid = test[4];
-										
-										hasPw = pPass ? pPass.length > 0 : false;
-										hasUid = pUid ? pUid.length > 0 : false;
-										
-										if(pUser == username && pPass == password) {
-											console.log("username and passwords match user=" + pUser);
-											if(!hasUid && !NOUID) {
-												throw new Error("user=" + pUser + " in " + PW_FILE + " has no uid! (uid=" + pUid + ")\nIngore this check by adding -nouid to the arguments.");
-											}
-											userOK(i, pUser, hasPw, pRootDir, pUid, pGid);
-										}
-										else console.log("Not " + pUser);
-										// Check all to prevent timing attack (no break or return)
-									}
-									
-									if(!userName) wrongPw();
-									
-								});
+							
+							var fs = require("fs");
+							
+							fs.readdir(HOME_DIR, function readDir(err, files) {
+								if(err) throw err;
+								
+								var checkingPw = false;
+								for (var i=0; i<files.length; i++) {
+									if(files[i] == username) {
+										checkingPw = true;
+checkPw();
+										break;
+								}
+								}
+								
+								if(!checkingPw) idFail("User does not exist: " + username);
+								
+							});
 							}
 							
-							function wrongPw() {
-								var errorMsg = "Wrong username=" + username + " or password";
-								if(USERNAME) errorMsg += "(Username specified in server arguments)";
-								send({error: errorMsg});
-								
-								log("username=" + username + " failed to login! Check if the password='" + password + "' in " + PW_FILE + " match and the user exist. If the passwords are not hashed, start the server with argument -nopwhash", NOTICE);
-							}
+						function checkPw() {
 							
-							function userOK(index, name, hasPassword, rootPath, uid, gid) {
+							fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
+								if(err) {
+									console.error(err);
+									idFail(err.message);
+								}
+								else {
+									if(password == pwstringFromFile) idSuccess();
+								else idFail("Wrong password for user: " + username);
+								}
+							});
+							
+						}
+						
+						function idFail(errorMsg) {
+							send({error: errorMsg});
+							log("username=" + username + " failed to login: " + errorMsg);
+						}
+						
+						function idSuccess() {
+							
+							var rootPath; // The path to chroot into (currently same as home dir)
+							var uid, gid; // System user-id and group-id
+							var homeDir; // User's home dir
+							var shell; // User's shell (currently disabled/not implemented)
+							
+							userConnectionName = username;
+							
+							if(USERNAME && NO_CHROOT) {
+								// Running as standalone desktop app
+								homeDir = process.env.HOME || process.env.USERPROFILE;
+								if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
+								acceptUser();
+							}
+							else {
 								
-								userName = name;
+								// Get home, uid and gid 
 								
-								if(uid != undefined) {
-									
 									var fs = require("fs");
-									
 									fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
-									
-									function gotMoreUserInfo(err, etcPasswd) {
+							}
+							
+							function gotMoreUserInfo(err, etcPasswd) {
 										
 										if(err) {
 											console.warn("Unable to read /etc/passwd !");
-											throw new Error("Unable to read /etc/passwd to check uid=" + uid + " matching: " + err.message);
+											throw new Error("Unable to read /etc/passwd: " + err.message);
 										}
 										else {
 											// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
@@ -483,10 +471,10 @@ var fs = require("fs");
 											
 											for(var i=0, row; i<rows.length; i++) {
 												row = rows[i].trim().split(":");
-												if(foundUserIn(row)) return;
+										if(foundUserIn(row)) return acceptUser();
 											}
 											
-											throw new Error("Unable to find user name=" + name + " or uid=" + uid + " in /etc/passwd");
+									throw new Error("Unable to find username=" + username + " in /etc/passwd");
 											
 										}
 										
@@ -498,57 +486,44 @@ var fs = require("fs");
 											var pShell = row[6];
 											
 											var found = false;
-											if(pName == name) {
-												console.log("Found name=" + name + " in /etc/passwd");
-												if(pUid != uid) throw new Error("name=" + name + " does not match uid=" + uid + " with pUid=" + pUid);
-												found = true;
-											}
-											else if(pUid == uid) {
-												console.log("Found uid=" + uid + " in /etc/passwd");
-												if(pName != name) throw new Error("uid=" + uid + " does not match name=" + name + " with pName=" + pName);
-												found = true;
-											}
-											
-											if(found) {
-												acceptUser(pDir, pShell);
-												return true;
+									if(pName == username) {
+										console.log("Found username=" + username + " in /etc/passwd");
+												
+										homeDir = pDir;
+										shell = pShell;
+										uid = pUid;
+										gid = pGid;
+										rootPath = pDir;
+										
+										return true;
 											}
 											else return false;
 										}
 										
 									}
-								}
-								else if(USERNAME && NO_CHROOT) {
-									// Running as standalone desktop app
-									var homeDir = process.env.HOME || process.env.USERPROFILE;
-									if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
-									acceptUser(homeDir);
-								}
-								else {
-									acceptUser();
-								}
 								
-								function acceptUser(homeDir, shell) {
+								
+								function acceptUser() {
 									
 									if(gid == undefined) gid = uid;
 									
-									if(!USER_CONNECTIONS.hasOwnProperty(name)) {
-										USER_CONNECTIONS[name] = {
+								if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+									USER_CONNECTIONS[userConnectionName] = {
 											connections: [connection],
 											counter: 0
 										}
 										userConnectionId = 0;
 									}
 									else {
-										USER_CONNECTIONS[name].connections.push(connection);
-										userConnectionId = ++USER_CONNECTIONS[name].counter;
+									USER_CONNECTIONS[userConnectionName].connections.push(connection);
+									userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
 									}
 									
-									userWorker = createUserWorker(name, uid, gid);
+								userWorker = createUserWorker(userConnectionName, uid, gid);
 									
-									var userInfo = {id: index, name: name, rootPath: rootPath, homeDir: homeDir, shell: shell};
+								var userInfo = {name: userConnectionName, rootPath: rootPath, homeDir: homeDir, shell: shell};
 									
-									log("User name=" + name + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
+								log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
 									
 									userWorker.send({identify: userInfo});
 									userWorker.on("message", messageFromWorker);
@@ -568,9 +543,9 @@ var fs = require("fs");
 									var installDirectory = "/";
 									
 									if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
-									else log("name=" + name + " NO_CHROOT=" + NO_CHROOT);
+								else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
 									
-									send({resp: {loginSuccess: {user: userName, cId: userConnectionId, installDirectory: installDirectory}}});
+								send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
 									
 									if(commandQueue.length > 0) {
 										console.log("Running " + commandQueue.length + " commands from the command queue ...");
@@ -583,13 +558,13 @@ var fs = require("fs");
 									return true;
 									
 									function messageFromWorker(workerMessage, handle) {
-										console.log("Worker message from " + name + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+									console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 										
 										if(workerMessage.resp || workerMessage.error) send(workerMessage);
 										else if(workerMessage.message) {
-											if(USER_CONNECTIONS.hasOwnProperty(name)) {
-												for (var i=0, conn; i<USER_CONNECTIONS[name].connections.length; i++) {
-													send(workerMessage.message, USER_CONNECTIONS[name].connections[i]);
+										if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+											for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+												send(workerMessage.message, USER_CONNECTIONS[userConnectionName].connections[i]);
 												}
 											}
 										}
@@ -610,11 +585,11 @@ var fs = require("fs");
 												
 												var folder = req.createHttpEndpoint.folder;
 												
-												if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
+											if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
 												
 												console.log("createHttpEndpoint: NO_CHROOT=" + NO_CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
 												
-												createHttpEndpoint(name, folder, function(err, url) {
+											createHttpEndpoint(userConnectionName, folder, function(err, url) {
 													if(err) workerResp(req, null, err.message);
 													else workerResp(req, {url: url});
 												});
@@ -623,16 +598,16 @@ var fs = require("fs");
 												
 												var folder = req.removeHttpEndpoint.folder;
 												
-												if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + name + folder;
+											if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
 												
-												removeHttpEndpoint(name, folder, function(err, folder) {
+											removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
 													if(err) throw err;
 													workerResp(req, {folder: folder});
 												});
 											}
 										else if(req.debugInBrowserVnc) {
 											var url = req.debugInBrowserVnc.url;
-											startChromiumBrowserInVnc(name, uid, gid, url, function(err, resp) {
+											startChromiumBrowserInVnc(userConnectionName, uid, gid, url, function(err, resp) {
 												workerResp(req, resp, err);
 												});
 												
@@ -654,16 +629,16 @@ var fs = require("fs");
 									}
 									
 									function workerExitHandler(code, signal) {
-										console.log(name + " worker exit: code=" + code + " signal=" + signal);
+									console.log(userConnectionName + " worker exit: code=" + code + " signal=" + signal);
 										
 										var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
 										
 										if(code !== 0) {
 											msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
 											
-											log("Recreating user worker process for " + name);
+										log("Recreating user worker process for " + userConnectionName);
 											
-											userWorker = createUserWorker(name, uid, gid);
+										userWorker = createUserWorker(userConnectionName, uid, gid);
 											userWorker.send({identify: userInfo});
 											
 											userWorker.on("message", messageFromWorker);
@@ -733,19 +708,19 @@ var fs = require("fs");
 				
 				// Users logged in with the same name can however send messages to each others ...
 				
-				USER_CONNECTIONS[userName].connections.splice(USER_CONNECTIONS[userName].connections.indexOf(connection), 1);
+			USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
 				
-				if(USER_CONNECTIONS[userName].connections.length === 0) {
-					delete USER_CONNECTIONS[userName];
+			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
+				delete USER_CONNECTIONS[userConnectionName];
 				}
 			
 			for(var displayId in VNC_CHANNEL) {
-				if(VNC_CHANNEL[displayId].startedBy == userName) stopVncChannel(displayId);
+				if(VNC_CHANNEL[displayId].startedBy == userConnectionName) stopVncChannel(displayId);
 			}
 			
 			
 			}
-			else console.log("Client had not worker process! userName=" + userName + " userConnectionId=" + userConnectionId + " IP=" + IP);
+		else console.log("Client had not worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 			
 		});
 		
@@ -944,10 +919,9 @@ function handleHttpRequest(request, response) {
 		var filePath = path.join(localFolder, urlPath);
 		
 		
-		if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath) || filePath.indexOf(PW_FILE) != -1) {
+		if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath)) {
 			if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
 			if(!path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
-			if(filePath.indexOf(PW_FILE) != -1) console.log("PW_FILE=" + PW_FILE);
 			
 			console.log("urlPath=" + urlPath);
 			

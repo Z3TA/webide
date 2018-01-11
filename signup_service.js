@@ -44,11 +44,12 @@ var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 	var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
 	
 	var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
-	
+var defaultHomeDir = "/home/";
+var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
+
 	var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
 	
 	var NO_PW_HASH = getArg(["nopwhash"]);
-	var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || "/etc/jzedit_users";
 	
 	var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 	// Log levels
@@ -186,20 +187,20 @@ var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
 		var encoding = "utf8";
 		var notAvailable = false;
 		
-		fs.readFile(PW_FILE, encoding, function(err, usersPwString) {
+		fs.readdir(HOME_DIR, function(err, homeDirs) {
 			
 			if(err) {
-				log("Unable to read PW_FILE=" + PW_FILE + "! " + err.message, ERROR);
+				log("Unable to read home dirs HOME_DIR=" + HOME_DIR + "! " + err.message, ERROR);
 					callback(serviceError);
 					sendAlert(err.message + "\n" + err.stack);
 				}
 				else {
 					//console.log("usersPwString:\n" + usersPwString);
-				var users = usersPwString.split(/\n|\r\n/);
-					for (var i=0, name; i<users.length; i++) {
-						name = users[i].substring(0, users[i].indexOf("|"));
+				
+				for (var i=0, name; i<homeDirs.length; i++) {
+					name = homeDirs[i];
 					log("name=" + name + " == " + username + " ?", 7);
-					if(name == username) return callback(null, name, notAvailable);
+						if(name == username) return callback(null, name, notAvailable);
 					}
 					
 					// Also check for system users

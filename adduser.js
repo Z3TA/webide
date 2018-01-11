@@ -30,7 +30,6 @@ var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrSync = require("./shared/chownrSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
 
-var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users";
 var defaultDomain = "webide.se";
 var defaultHome = "/home/";
 
@@ -48,7 +47,6 @@ if(process.argv[3] == "-c") {
 }
 
 var NO_PW_HASH = getArg(["nopwhash"]);
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 var NOZFS = !!getArg(["nozfs", "nozfs"]);
 var HOME = getArg(["home", "home"]) || defaultHome;
@@ -71,7 +69,6 @@ if(scriptArguments) {
 	username = scriptArguments.username;
 	password = scriptArguments.password;
 	NO_PW_HASH = scriptArguments.noPwHash;
-	PW_FILE = scriptArguments.pwFile || defaultPasswordFile;
 	DOMAIN = scriptArguments.domain || defaultDomain;
 	HOME = scriptArguments.home || defaultHome;
 	}
@@ -83,18 +80,6 @@ if(!username) throw new Error("No username specified! scriptArguments=" + script
 if(!password) throw new Error("No password specified! scriptArguments=" + scriptArguments + " argv=" + maybeJson);
 	
 	
-
-try {
-	var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
-	}
-catch(err) {
-	if(err.code != "ENOENT") throw err;
-	var usersPwString = "";
-	console.log("File not found! PW_FILE=" + PW_FILE + " (it will be created)");
-	}
-
-
-
 var etcPasswdString = fs.readFileSync("/etc/passwd", ENCODING);
 
 
@@ -104,13 +89,12 @@ if(username.length < 3) throw new Error("username needs to be at least 3 letters
 if(username.length > 20) throw new Error("username can not be more then 20 letters!");
 
 // Make sure user not already exist
-//console.log("usersPwString=" + usersPwString);
-var users = usersPwString.split(/\n|\r\n/);
-//console.log("users.length=" + users.length);
-for (var i=0, name; i<users.length; i++) {
-	name = users[i].substring(0, users[i].indexOf("|"));
-	if(name == username) throw new Error("User " + username + " already exist in " + PW_FILE + "!");
+
+var userDirs = fs.readdirSync(HOME);
+for (var i=0; i<userDirs.length; i++) {
+	if(userDirs[i] == username) throw new Error(HOME + "/" + userDirs[i]+ " already exist!");
 }
+
 //console.log("etcPasswdString=" + etcPasswdString);
 var users = etcPasswdString.split(/\n|\r\n/);
 //console.log("users.length=" + users.length);
@@ -216,9 +200,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 			var hashedPassword = pwHash(password);
 		}
 		
-		usersPwString += username + "|" + hashedPassword + "|" + homeDir + "|" + uid + "|" + gid + "\n";
-		
-	fs.writeFileSync(PW_FILE, usersPwString, ENCODING);
+		fs.writeFileSync(UTIL.joinPaths([HOME, username, "/.jzeditpw"]), hashedPassword, ENCODING);
 		
 	
 	
@@ -391,7 +373,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
 	
-	console.log("User with username=" + username + " and password=" + password + " successfully added to " + PW_FILE);
+		console.log("User with username=" + username + " and password=" + password + " successfully added!");
 		
 	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
 	

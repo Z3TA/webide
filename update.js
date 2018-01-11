@@ -15,11 +15,10 @@ var copyFolderRecursiveSync = require("./shared/copyFolderRecursiveSync.js");
 var chmodrSync = require("./shared/chmodrSync.js");
 var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
+var eachUser = require("./shared/eachUser.js");
 
-var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users";
 var defaultHome = "/home/";
 
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
 var HOME = getArg(["home", "home"]) || defaultHome;
 
 var ENCODING = "utf8";
@@ -53,12 +52,9 @@ for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.lengt
 	
 	if(username.charAt(0) == "#") continue; // Ignore users who's username starts with #
 	
-	password = col[1];
-	rootDir = col[2];
-	uid = parseInt(col[3]);
-	gid = parseInt(col[4]);
+	eachUser(HOME, function(username, password, homeDir, uid, gid) {
 	
-	if(username) {
+	
 		// ## Things to do to each existing user
 		
 		// Update apparmor profiles (for each user)
@@ -86,10 +82,11 @@ for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.lengt
 		run("chmod 2755 " + homeDir + "/wwwpub");
 		run("chown -R " + username + ":www-data " + homeDir + "/wwwpub");
 		
-	}
-}
+}, function allUsersFound() {
+
 run("systemctl reload apparmor");
 
+});
 
 
 function createApparmorProfile(template, username) {
