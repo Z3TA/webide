@@ -46,7 +46,7 @@
 		
 		// EDITOR.on("changeWorkingDir", exploreDir);
 		
-		menuItem = EDITOR.addMenuItem("File explorer " + (visible ? "off":"on"), toggleFileExplorer);
+		menuItem = EDITOR.addMenuItem("File explorer", toggleFileExplorer);
 		
 		leftColumn = document.getElementById("leftColumn");
 		rightColumn = document.getElementById("rightColumn");
@@ -106,7 +106,7 @@
 		else visible = visible ? false : true; // Switch
 		
 		//menuItem.innerHTML = "File explorer " + (visible ? "off":"on");
-		EDITOR.updateMenuItem(menuItem, visible, "File explorer " + (visible ? "off":"on"));
+		EDITOR.updateMenuItem(menuItem, visible, "File explorer");
 		
 		if(visible) {
 			exploreDir(EDITOR.workingDirectory)

@@ -22,7 +22,7 @@
 	
 	EDITOR.plugin({
 		desc: "Manage console logs, devTools and toggle devMode",
-		order: 10,
+		order: 10000, // Show far down in the menu
 		load:function devModeLoad() {
 			
 			var keyF5 = 116;
@@ -89,8 +89,8 @@
 		
 		console.log("Disabling dev mode ...");
 		
-		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode ON", toggleDevMode);
-		EDITOR.updateMenuItem(toggleDevmodeMenuItem, false, "Dev-mode ON");
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode);
+		EDITOR.updateMenuItem(toggleDevmodeMenuItem, false, "Editor debugmode");
 		
 		if(runTestsMenuItem) EDITOR.removeMenuItem(runTestsMenuItem);
 		
@@ -120,8 +120,10 @@
 		
 		showDevTools();
 		
-		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Dev-mode OFF", toggleDevMode);
-		EDITOR.updateMenuItem(toggleDevmodeMenuItem, true, "Dev-mode OFF");
+		// todo: How can I show the menu item further down !? So it does not annoy end users
+		
+		if(!toggleDevmodeMenuItem) toggleDevmodeMenuItem = EDITOR.addMenuItem("Editor debugmode", toggleDevMode);
+		EDITOR.updateMenuItem(toggleDevmodeMenuItem, true, "Editor debugmode");
 		
 		runTestsMenuItem = EDITOR.addMenuItem("Run tests", runTests);
 		
