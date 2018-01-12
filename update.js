@@ -18,7 +18,6 @@ var chownrDirSync = require("./shared/chownrDirSync.js");
 var eachUser = require("./shared/eachUser.js");
 
 var defaultHome = "/home/";
-
 var HOME = getArg(["home", "home"]) || defaultHome;
 
 var ENCODING = "utf8";
@@ -26,6 +25,7 @@ var ENCODING = "utf8";
 var fs = require("fs");
 var child_process = require('child_process');
 
+var UTIL = require("./client/UTIL.js");
 
 // Update services
 //copyFileSync("./etc/systemd/jzedit.service", "/etc/systemd/system/jzedit.service");
@@ -38,51 +38,38 @@ run("systemctl daemon-reload");
 //run("systemctl restart jzedit_signup");
 
 
-
-
-
-var usersPwString = fs.readFileSync(PW_FILE, ENCODING);
-var users = usersPwString.split(/\n|\r\n/);
-//console.log("users.length=" + users.length);
-for (var i=0, col, username, password, rootDir, uid, gid, homeDir; i<users.length; i++) {
+eachUser(HOME, function(user) {
 	
-	col = users[i].trim().split("|");
+	console.log(user);
 	
-	username = col[0];
-	
-	if(username.charAt(0) == "#") continue; // Ignore users who's username starts with #
-	
-	eachUser(HOME, function(username, password, homeDir, uid, gid) {
-	
-	
-		// ## Things to do to each existing user
+	// ## Things to do with each existing user
 		
 		// Update apparmor profiles (for each user)
-	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
+	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", user.name);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", user.name);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", user.name);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", user.name);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", user.name);
 		
 		// Make sure files exist and file permissions is rights ...
-		homeDir = HOME + username;
+		
 		
 		// Create a directory where nginx can save logs
-		try { fs.mkdirSync(homeDir + "/log"); } catch(err) { console.log(err.message); }
-			chmodrSync(homeDir + "/log", "2770"); // Set the group-id bit so that all new files created will belong to the group
-			chownrDirSync(homeDir + "/log", uid, gid);
+	try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, "log/"])); } catch(err) { console.log(err.message); }
+	chmodrSync(UTIL.joinPaths([user.homeDir, "log/"]), "2770"); // Set the group-id bit so that all new files created will belong to the group
+	chownrDirSync(UTIL.joinPaths([user.homeDir, "log/"]), user.uid, user.gid);
 		
 		
 		// Create a directory for putting "in production" files
-		try { fs.mkdirSync(homeDir + "/.prod"); } catch(err) { console.log(err.message); }
-		chmodrSync(homeDir + "/.prod", "770");
-		chownrDirSync(homeDir + "/.prod", uid, gid);
+	try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, ".prod/"])); } catch(err) { console.log(err.message); }
+	chmodrSync(UTIL.joinPaths([user.homeDir, ".prod/"]), "770");
+	chownrDirSync(UTIL.joinPaths([user.homeDir, ".prod/"]), user.uid, user.gid);
 		
 		// Make sure www-data has access to wwwpub folder
-		run("chmod 2755 " + homeDir + "/wwwpub");
-		run("chown -R " + username + ":www-data " + homeDir + "/wwwpub");
+	run("chmod 2755 " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
+	run("chown -R " + user.name + ":www-data " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
 		
-}, function allUsersFound() {
+	}, function allUsersFound() {
 
 run("systemctl reload apparmor");
 
