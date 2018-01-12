@@ -650,6 +650,20 @@ progressBar.style.display = "none";
 			
 		}, false);
 		
+		var buttonExplore = document.createElement("input");
+		buttonExplore.setAttribute("type", "button");
+		buttonExplore.setAttribute("class", "button");
+		buttonExplore.setAttribute("value", "Explore files");
+		buttonExplore.setAttribute("title", "Show file explorer");
+		buttonExplore.addEventListener("click", function() {
+			if(!selectedSite) throw new Error("No site selected!");
+			
+			EDITOR.changeWorkingDir(selectedSite.source);
+			
+			EDITOR.fileExplorer(selectedSite.source);
+			
+		}, false);
+		
 		var buttonNewPage = document.createElement("input");
 		buttonNewPage.setAttribute("type", "button");
 		buttonNewPage.setAttribute("class", "button");
@@ -710,6 +724,7 @@ progressBar.style.display = "none";
 		
 		controlView.appendChild(labelSite); // Includes selectSite
 		controlView.appendChild(buttonOpenEdit);
+		controlView.appendChild(buttonExplore);
 		controlView.appendChild(buttonNewPage);
 		controlView.appendChild(buttonPreview);
 		controlView.appendChild(buttonWysiwyg);

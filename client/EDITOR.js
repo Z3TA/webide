@@ -144,7 +144,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	fileDrop: [],
 	openFileTool: [],
 	showMenu: [],
-	voiceCommand: []
+	voiceCommand: [],
+	fileExplorer: [] // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
 };
 
 EDITOR.renderFunctions = [];
@@ -3677,6 +3678,19 @@ EDITOR.lastKeyPressed = "";
 			return ret;
 		}
 		
+	EDITOR.fileExplorer = function fileExplorerTool(directory) {
+		console.log("Calling fileExplorer listeners (" + EDITOR.eventListeners.fileExplorer.length + ")");
+		
+		var ret = false;
+		
+		for(var i=0, f; i<EDITOR.eventListeners.fileExplorer.length; i++) {
+			ret = EDITOR.eventListeners.fileExplorer[i].fun(directory);
+			if(ret === true) break; // Only open one tool
+		}
+		
+		return ret;
+	}
+	
 		EDITOR.renameFile = function renameFile(oldPath, newPath, callback) {
 			// Same as moving a file
 			

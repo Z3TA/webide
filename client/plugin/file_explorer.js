@@ -39,6 +39,8 @@
 		
 		EDITOR.bindKey({desc: "File explorer", charCode: key_E, combo: CTRL, fun: toggleFileExplorer});
 		
+		EDITOR.on("fileExplorer", openFileExplorerTool);
+		
 		//EDITOR.on("beforeResize", saveScrollPosition);
 		//EDITOR.on("afterResize", restoreScrollPosition);
 		
@@ -83,6 +85,15 @@
 		
 		EDITOR.unbindKey(toggleFileExplorer);
 		
+		EDITOR.removeEvent("fileExplorer", openFileExplorerTool);
+		
+	}
+	
+	function openFileExplorerTool(directory) {
+		// The user wants to explore ...
+		// ATM this is the only file explorer, so always take the job!
+		toggleFileExplorer();
+		return true; 
 	}
 	
 	function toggleFileExplorer(toState) {
