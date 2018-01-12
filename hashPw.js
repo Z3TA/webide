@@ -5,7 +5,7 @@
 	Input: clear text password
 	Output: Hashed password
 	
-	Useful for manually adding passwords to the JZedit password file
+	Useful for manually chaning user passwords.
 	
 	sudo chmod +x hashPw.js
 	
@@ -25,5 +25,4 @@ var pwHash = require("./server/pwHash.js");
 console.time("Time taken");
 	console.log(pwHash(pw));
 console.timeEnd("Time taken");
-	
 	
