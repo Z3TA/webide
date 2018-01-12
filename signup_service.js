@@ -257,8 +257,9 @@ var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 				}
 				else if(stdout) {
 				log("stdout=" + stdout, DEBUG);
-				var check = stdout.match(/User with username=(.*) and password=(.*) successfully added!/g);
-					
+				var check = stdout.match(/User with username=(.*) and password=(.*) successfully added/g);
+				// User with username=demo4 and password=demo4 successfully added!
+				
 					if(check == null) {
 						log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
 						callback(serviceError, username);
