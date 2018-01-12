@@ -39,7 +39,6 @@ What I'm working on
 -------------------
 
 test signup
-test user_mount.js
 
 Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
 Should there be a .jzeditpw file in each user dir !?

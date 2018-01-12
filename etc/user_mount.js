@@ -14,22 +14,22 @@ var ENCODING = "utf8";
 
 var UTIL = require("../client/UTIL.js");
 
-eachUser(HOME, function(username) {
+eachUser(HOME, function(user) {
 
-console.log("Mounting folders for jzedit user: " + username + "");
+	console.log("Mounting folders for jzedit user: " + user.name + "");
 
-mount("/usr/bin/nodejs", "/usr/bin/nodejs_" + username); // So user_worker.js can have separate Apparmor profile for each user
+	mount("/usr/bin/nodejs", "/usr/bin/nodejs_" + user.name); // So user_worker.js can have separate Apparmor profile for each user
 
-mount("/dev/urandom", HOME + username + "/dev/urandom");
-mount("/lib/", HOME + username + "/lib");
-mount("/lib64/", HOME + username + "/lib64");
-mount("/usr/lib/", HOME + username + "/usr/lib");
-mount("/usr/local/lib", HOME + username + "/usr/local/lib"); // Needed for Python packages (hggit)
-mount("/usr/share/", HOME + username + "/usr/share"); // npm dependencies
-mount("/usr/bin/hg", HOME + username + "/usr/bin/hg");
-mount("/usr/bin/python", HOME + username + "/usr/bin/python");
-mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
-mount("/etc/ssl/certs", HOME + username + "/etc/ssl/certs");
+	mount("/dev/urandom", HOME + user.name + "/dev/urandom");
+	mount("/lib/", HOME + user.name + "/lib");
+	mount("/lib64/", HOME + user.name + "/lib64");
+	mount("/usr/lib/", HOME + user.name + "/usr/lib");
+	mount("/usr/local/lib", HOME + user.name + "/usr/local/lib"); // Needed for Python packages (hggit)
+	mount("/usr/share/", HOME + user.name + "/usr/share"); // npm dependencies
+	mount("/usr/bin/hg", HOME + user.name + "/usr/bin/hg");
+	mount("/usr/bin/python", HOME + user.name + "/usr/bin/python");
+	mount("/usr/bin/nodejs", HOME + user.name + "/usr/bin/nodejs");
+	mount("/etc/ssl/certs", HOME + user.name + "/etc/ssl/certs");
 });
 
 
