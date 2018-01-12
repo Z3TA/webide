@@ -79,7 +79,9 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 					users[username].pw = hashedPw;
 					userFoundCb(users[username]);
 				}
-				else userFoundCb(username);
+				else {
+					console.warn(".jzeditpw found but user does not exist in " + etcPasswPath);
+				}
 				
 				}
 			

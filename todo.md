@@ -38,7 +38,24 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+After a rootfs rollback user home fs might exist, but user won't exist in /etc/passwd!!!
+
+
 test signup
+
+if rootfs is rolled back, there will be no hard links to nodejs_username on /usr/bin
+Mount stuff when user logs in !?
+
+Also when rootfs is rolled back, apparmor profiles will be missing!!
+
+Also when rootfs is rolled back, nginx profiles will be missing! Use another server for static web hosting !?
+
+idea: The user experience needs to be made fault tolerant. If server goes down, 
+the user should be able to just use another server!!
+use google drive for file storage !?
+have separate nodejs prod server!?
+
+
 
 Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
 Should there be a .jzeditpw file in each user dir !?
