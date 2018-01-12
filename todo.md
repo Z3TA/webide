@@ -38,6 +38,9 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+test signup
+test user_mount.js
+test update.js
 
 Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
 Should there be a .jzeditpw file in each user dir !?
@@ -2048,6 +2051,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+When reading a log file ... Have editor api for following a file, like in tail -f
+
 
 Multiple cursors (like in sublime) Ctrl+D to create another cursor.
 Shift+Ctrl+l = 

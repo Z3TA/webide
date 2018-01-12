@@ -235,9 +235,8 @@ var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 			var commandArg = {
 				username: username,
 				password: password,
-				noPwHash: !!NO_PW_HASH, // bang bang (!!) converts the value to a boolean
-				pwFile: PW_FILE
-			};
+				noPwHash: !!NO_PW_HASH // bang bang (!!) converts the value to a boolean
+				};
 			
 		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
 		var command = "./adduser.js '" + JSON.stringify(commandArg) + "'";
@@ -258,23 +257,25 @@ var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 				}
 				else if(stdout) {
 				log("stdout=" + stdout, DEBUG);
-					var check = stdout.match(/User with username=(.*) and password=(.*) successfully added to (.*)/);
+					var check = stdout.match(/User with username=(.*) and password=(.*) successfully added!/);
 					
 					if(check == null) {
 						log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
 						callback(serviceError, username);
 					sendAlert("check=" + check + " failed on stdout=" + stdout);
 					}
-				else if(check[1] == username && check[2] == password && check[3] == PW_FILE) {
+				else if(check[1] == username && check[2] == password) {
 						log("Account username=" + username + "! successfully created!");
 						callback(null, username);
 					}
 					else {
-					log("Problem when creating username=" + username + " with password=" + password + " using PW_FILE=" + PW_FILE + "!\
-					 check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout, ERROR);
+					log("Problem when creating username=" + username + " with password=" + password + "!" +
+					" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout, ERROR);
+					
 						callback(serviceError, username);
-					sendAlert("Problem when creating username=" + username + " with password=" + password + " using PW_FILE=" + PW_FILE + "!\
-					check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout);
+					sendAlert("Problem when creating username=" + username + " with password=" + password + 
+					" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout);
+					
 					}
 				}
 				else {

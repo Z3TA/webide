@@ -18,9 +18,6 @@ var defaultHomeDir = "/home/";
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
-var defaultPasswordFile = process.platform == "win32" ? "./users.pw" : "/etc/jzedit_users"
-var PW_FILE = getArg(["pwfile", "pwfile", "passwordFile"]) || defaultPasswordFile;
-
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
 var nodejsDeamonManagerPort = 8200;
@@ -49,45 +46,23 @@ var HTTP_SERVER;
 process.on("SIGINT", sigint);
 
 var fs = require("fs");
-fs.readFile(PW_FILE, "utf8", function(err, data) {
-	if(err) throw err;
-	
-	// Start a nodejs worker/init script for each user
-	var row = data.trim().split(/\n|\r\n/);
-	
-	log("Loaded " + PW_FILE + " (" + row.length + " users found)");
-	
-	// format: username|password|rootDir|uid|gid
-	
-	// note: usernames can not contain |
-	
-	for(var i=0, test, pUser, pPass, pRootDir, pUid, pGid; i<row.length; i++) {
-		test = row[i].trim().split("|");
-		
-		pUser = test[0];
-		
-		if(pUser.charAt(0) == "#") continue; // Ignore users who's username starts with #
-		
-		pPass = test[1];
-		pRootDir = test[2];
-		pUid = test[3];
-		pGid = test[4];
-		
-		startNodejsInitWorker(pRootDir, pUser, pUid, pGid);
-		
-	}
-	
+
+var eachUser = require("./shared/eachUser.js");
+
+eachUser(HOME_DIR, userFound, allUsersFound);
+
+function userFound(username, hashedPw, homeDir, uid, gid) {
+	startNodejsInitWorker(homeDir, username, uid, gid);
+}
+
+function allUsersFound() {
 	var http = require('http');
 	HTTP_SERVER = http.createServer();
 	HTTP_SERVER.on("request", httpRequest);
 	HTTP_SERVER.on("error", httpServerError);
 	HTTP_SERVER.on("listening", httpServerListening);
 	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
-	
-	
-	
-});
-
+}
 
 function getAuth(authorization_header_string) {
 	var username = "";
@@ -159,82 +134,71 @@ function httpRequest(request, response) {
 		password = pwHash(password);
 	}
 	
-	fs.readFile(PW_FILE, "utf8", function(err, data) {
-		if(err) throw err;
-		
-		// Start a nodejs worker/init script for each user
-		var row = data.trim().split(/\n|\r\n/);
-		
-		log("Loaded " + PW_FILE + " (" + row.length + " users found)");
-		
-		// format: username|password|rootDir|uid|gid
-		
-		// note: usernames can not contain |
-		
-		for(var i=0, test, pUser, pPass, pRootDir, pUid, pGid; i<row.length; i++) {
-			test = row[i].trim().split("|");
+	var homeDir = UTIL.trailingSlash(UTIL.joinPaths([HOME_DIR, username]));
+	var pwFilePath = UTIL.joinPaths([homeDir, ".jzeditpw"]);
+	
+	fs.readFile(pwFilePath, "utf8", function(err, pwFileContent) {
+		if(err) {
+			if(err.code != "ENOENT") throw err;
+
+response.writeHead(401);
+response.end('Authorization failed! Unknown username=' + username + "\n");
+}
 			
-			pUser = test[0];
-			
-			if(pUser.charAt(0) == "#") continue; // Ignore users who's username starts with #
-			
-			pPass = test[1];
-			pRootDir = test[2];
-			pUid = test[3];
-			pGid = test[4];
-			
-			if(pUser == username && pPass == password) {
-				return executeOrder(pRootDir, pUser, pUid, pGid);
-			}
-			
+		if(pwFileContent == password) return executeOrder();
+		else {
+			response.writeHead(401);
+			response.end('Authorization failed! Bad password for username=' + username + "\n");
 		}
-		
-		response.writeHead(401);
-		response.end('Authorization failed! username=' + username + "\n");
 		
 	});
-	
-	
-	function executeOrder(homeDir, name, uid, gid) {
-		// example: /service-name/restart
-		var arr = request.url.split("?");
-		var pathToFolder = arr[0];
-		var action = arr[1];
-		var isStarting = false;
+				
+			function executeOrder() {
+			// example: /service-name/restart
+			var arr = request.url.split("?");
+			var pathToFolder = arr[0];
+			var action = arr[1];
+			var isStarting = false;
+		var userInfo = require("./shared/userInfo.js");
 		
-		if(!NODE_INIT_WORKER.hasOwnProperty(name) && action != "stop") {
-			startNodejsInitWorker(homeDir, name, uid, gid);
-			isStarting = true;
-		}
-		else if(!NODE_INIT_WORKER[name].connected && action != "stop") {
-			startNodejsInitWorker(homeDir, name, uid, gid);
-			isStarting = true;
-		}
+		userInfo(username, function(err, user) {
 		
-		if(action == "start") {
-			if(isStarting) return;
-			NODE_INIT_WORKER[name].send({restart: pathToFolder});
-			response.writeHead(200);
-			response.end('Starting ' + pathToFolder + "\n");
-		}
-		else if(action == "stop") {
-			NODE_INIT_WORKER[name].send({stop: pathToFolder});
-			response.writeHead(200);
-			response.end('Stopping ' + pathToFolder + "\n");
-		}
-		else if(action == "restart") {
-			if(isStarting) return;
-			NODE_INIT_WORKER[name].send({restart: pathToFolder});
-			response.writeHead(200);
-			response.end('Restarting ' + pathToFolder + "\n");
-		}
-		// debug ?
-		else {
-			response.writeHead(400);
-			response.end('Unknown action: ' + action + "\n");
-		}
+			if(err) throw err;
+			
+			if(!NODE_INIT_WORKER.hasOwnProperty(username) && action != "stop") {
+				startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
+				isStarting = true;
+			}
+			else if(!NODE_INIT_WORKER[username].connected && action != "stop") {
+				startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
+				isStarting = true;
+			}
+			
+			if(action == "start") {
+				if(isStarting) return;
+				NODE_INIT_WORKER[username].send({restart: pathToFolder});
+				response.writeHead(200);
+				response.end('Starting ' + pathToFolder + "\n");
+			}
+			else if(action == "stop") {
+				NODE_INIT_WORKER[username].send({stop: pathToFolder});
+				response.writeHead(200);
+				response.end('Stopping ' + pathToFolder + "\n");
+			}
+			else if(action == "restart") {
+				if(isStarting) return;
+				NODE_INIT_WORKER[username].send({restart: pathToFolder});
+				response.writeHead(200);
+				response.end('Restarting ' + pathToFolder + "\n");
+			}
+			// debug ?
+			else {
+				response.writeHead(400);
+				response.end('Unknown action: ' + action + "\n");
+			}
+		
+	});
 	}
-	
 }
 
 function httpServerError(err) {
