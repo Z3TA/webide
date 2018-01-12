@@ -257,11 +257,12 @@ var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 				}
 				else if(stdout) {
 				log("stdout=" + stdout, DEBUG);
-				var check = stdout.match(/User with username=(.*) and password=(.*) successfully added/g);
+				var checkre = /User with username=(.*) and password=(.*) successfully added/g;
+				var check = stdout.match(checkre);
 				// User with username=demo4 and password=demo4 successfully added!
 				
 					if(check == null) {
-						log("Unable to create username=" + username + "! stdout=" + stdout, ERROR);
+					log("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout, ERROR);
 						callback(serviceError, username);
 					sendAlert("check=" + check + " failed on stdout=" + stdout);
 					}
