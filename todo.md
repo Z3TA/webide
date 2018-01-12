@@ -38,10 +38,11 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-After a rootfs rollback user home fs might exist, but user won't exist in /etc/passwd!!!
-
-
 test signup
+
+omg I could just have made an "recoverusers" script and saved two days of work!
+
+After a rootfs rollback user home fs might exist, but user won't exist in /etc/passwd!!!
 
 if rootfs is rolled back, there will be no hard links to nodejs_username on /usr/bin
 Mount stuff when user logs in !?
