@@ -915,6 +915,7 @@ var UTIL = {
 		if(Object.prototype.toString.call( paths ) != '[object Array]') throw new Error("Argument needs to be an array: paths=" + paths);
 		
 		for (var i=0; i<paths.length-1; i++) {
+			if(!paths[i]) throw new Error("Item " + i + "=" + paths[i] + " is emty or undefined!");
 			paths[i] = UTIL.trailingSlash(paths[i]);
 			if(paths[i].indexOf("\\") != -1) throw new Error("Backslash in " + paths[i] + " paths=" + JSON.stringify(paths));
 		}

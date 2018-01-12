@@ -18,10 +18,12 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 	var usersToCheck = 0;
 		var fs = require("fs");
 		
-	fs.readFile("/etc/passwd", "utf8", function readPwFile(err, etcPasswd) {
+	var etcPasswPath = "/etc/passwd";
+	
+	fs.readFile(etcPasswPath, "utf8", function readPwFile(err, etcPasswd) {
 			
 			if(err) {
-			console.warn("Unable to read /etc/passwd: " + err.message);
+			throw err;
 			}
 			else {
 				// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
@@ -31,18 +33,19 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 					row = rows[i].trim().split(":");
 					mapUser(row);
 				}
+			
+			fs.readdir(HOME, function (err, homeDirs) {
+				if(err) throw err;
+				// Check each home-dir for .jzeditpw file
+				for (var i=0; i<homeDirs.length; i++) {
+					usersToCheck++;
+					checkPw(homeDirs[i]);
+				}
+				
+				if(usersToCheck==0 && allFoundCb) allFoundCb();
+			});
 				}
 		
-		fs.readdir(HOME, function (err, homeDirs) {
-			if(err) throw err;
-			// Check each home dir for .jzeditpw file
-			for (var i=0; i<homeDirs.length; i++) {
-				usersToCheck++;
-				checkPw(homeDirs[i]);
-			}
-			
-			if(usersToCheck==0 && allFoundCb) allFoundCb();
-		});
 			
 			function mapUser(row) {
 				var pName = row[0];
