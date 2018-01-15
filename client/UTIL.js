@@ -124,6 +124,16 @@ var UTIL = {
 		else return arr[arr.length-1];
 		},
 	
+	parentFolder: function parentFolder(path) {
+		// Returns a file's or folder's parent folder
+		
+		var folders = UTIL.getFolders(path);
+		
+		if(folders.length > 1) return folders[folders.length-2];
+		else return folders[0];
+		
+		},
+	
 	getFolders: function getFolders(fullPath, includeHostInfo) {
 		/* 
 			Returns each folder in the path. Can take an url or a local filesystem path

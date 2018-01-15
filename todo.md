@@ -38,48 +38,9 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-mount libs when logging in, unmount when logging out.
-create links and make sure apparmor profiles are in place
+Try moving a user from one server to anohter ...
 
-
-Didn't get logged in after signup! (Chromium guest)
-
-test signup
-
-omg I could just have made an "recoverusers" script and saved two days of work!
-
-After a rootfs rollback user home fs might exist, but user won't exist in /etc/passwd!!!
-
-if rootfs is rolled back, there will be no hard links to nodejs_username on /usr/bin
-Mount stuff when user logs in !?
-
-Also when rootfs is rolled back, apparmor profiles will be missing!!
-
-Also when rootfs is rolled back, nginx profiles will be missing! Use another server for static web hosting !?
-
-idea: The user experience needs to be made fault tolerant. If server goes down, 
-the user should be able to just use another server!!
-use google drive for file storage !?
-have separate nodejs prod server!?
-
-
-
-Making jzedit recover from a zfs root rollback, user dirs seem to be intact. 
-Should there be a .jzeditpw file in each user dir !?
-
-if the server crashes and I can't reboot and make a rollback ...
-make it easier to recover from the rollback!!
-each user have their own fs which is intact, we should only have to re-add the user ...!?
-
-I was gonna delete and recreate the demo user, to fix problems with user read rights in wwwpub folder.
-(nginx couldn't (403 access denied) read image placed in wwwpub)
-But couln't unmount user demo's dir because it was in use.
-So I had to reboot.
-And while I was on it I also ran apt update && apt upgrade
-But then the server didn't boot! It seems it got stuck on grub menu, which couln't find the disk
-Noone of the updates had anything to do with grub or ZFS though!
-Had to make a zfs snapshot rollback to get the server to boot.
-
+Solution to Backing up user dirs ...
 
 
 
@@ -93,6 +54,10 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
+
+Didn't get logged in after signup! (Chromium guest) !??
+
+test signup
 
 nginx doesn't give a x-real-ip header!
 

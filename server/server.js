@@ -32,80 +32,83 @@ var DISPLAY_ID = 0; // Counter of visual displays
 
 var VNC_CHANNEL = {}; // displayId: {proxy: http-proxy, name: username}
 
-	
-	var log; // Using small caps because it looks and feels better
-	(function setLogginModule() { // Self calling function to not clutter script scope
-		// Enhanced console.log ...
+
+var log; // Using small caps because it looks and feels better
+(function setLogginModule() { // Self calling function to not clutter script scope
+	// Enhanced console.log ...
 	var logModule = require("../shared/log.js");
-		
-		logModule.setLogLevel(LOGLEVEL);
-		log = logModule.log;
-		
-		var logFile = getArg(["lf", "logfile"]) || null; // default: Write to stdout, if specified write to a file
-		
-		if(logFile) logModule.setLogFile(logFile);
-		
-	})();
 	
+	logModule.setLogLevel(LOGLEVEL);
+	log = logModule.log;
 	
-	(function() {
-		// Make sure we are in the server directory
-		var dir = process.cwd();
-		var folders = dir.split(/\/|\\/);
-		var lastFolder = folders[folders.length-1];
-		
-		//console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
-		
-		if(lastFolder == "jzedit") {
-			try {
-				process.chdir('./server');
-				//console.log('New directory: ' + process.cwd());
-			}
-			catch (err) {
-				console.log('chdir: ' + err);
-			}
+	var logFile = getArg(["lf", "logfile"]) || null; // default: Write to stdout, if specified write to a file
+	
+	if(logFile) logModule.setLogFile(logFile);
+	
+})();
+
+
+(function() {
+	// Make sure we are in the server directory
+	var dir = process.cwd();
+	var folders = dir.split(/\/|\\/);
+	var lastFolder = folders[folders.length-1];
+	
+	//console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
+	
+	if(lastFolder == "jzedit") {
+		try {
+			process.chdir('./server');
+			//console.log('New directory: ' + process.cwd());
 		}
-	})();
-	
-	
-	
-	var CURRENT_USER = "ROOT";
-	
-	var USERNAME = getArg(["u", "user", "username"]);
-	var PASSWORD = getArg(["pw", "pw", "password"]);
-	
-	if(USERNAME && !PASSWORD) {
-		// Ask for password ...
+		catch (err) {
+			console.log('chdir: ' + err);
+		}
 	}
-	
-	
-	// Use -nouid to allow users without a uid specified
-	// Windows can not set uid, so don't bother checking if users have uid specified
-	var NOUID = getArg(["nouid"]) || (process.platform == "win32"); 
-	
-	
-	
-	
-	var GS = String.fromCharCode(29);
-	var APC = String.fromCharCode(159);
-	
-	
-	
-	var USER_CONNECTIONS = {}; // username: {connections: [], counter: 0}
-	
-	var HTTP_SERVER;
-	
-	// Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
-	var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
-	
-	// On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
-	var HTTP_PORT = getArg(["p", "port"]) || 8099; 
-	if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
-	
-	// For generating URL's
-	var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
-	var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
-	
+})();
+
+
+
+var CURRENT_USER = "ROOT";
+
+var USERNAME = getArg(["u", "user", "username"]);
+var PASSWORD = getArg(["pw", "pw", "password"]);
+
+if(USERNAME && !PASSWORD) {
+	// Ask for password ...
+}
+
+
+// Use -nouid to allow users without a uid specified
+// Windows can not set uid, so don't bother checking if users have uid specified
+var NOUID = getArg(["nouid"]) || (process.platform == "win32"); 
+
+
+
+
+var GS = String.fromCharCode(29);
+var APC = String.fromCharCode(159);
+
+
+
+var USER_CONNECTIONS = {}; // username: {connections: [], counter: 0}
+
+var HTTP_SERVER;
+
+// Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
+var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
+
+// On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
+var HTTP_PORT = getArg(["p", "port"]) || 8099; 
+if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
+
+// For generating URL's
+var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
+var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
+
+var defaultDomain = "localhost";
+var DOMAIN = getArg(["d", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME);
+
 var CHROMIUM_DEBUG_PORT = 9222;
 var VNC_PORT = 5901;
 
@@ -114,745 +117,968 @@ var PORTS_IN_USE = [HTTP_PORT];
 var fs = require("fs");
 
 
-	process.on("SIGINT", function sigInt() {
-		log("Received SIGINT");
-		
-		HTTP_SERVER.close();
-		
+process.on("SIGINT", function sigInt() {
+	log("Received SIGINT");
+	
+	HTTP_SERVER.close();
+	
 	for(var displayId in VNC_CHANNEL) stopVncChannel(displayId);
 	
 	
+	process.exit();
+	
+});
+
+process.on("exit", function () {
+	log("Program exit\n\n", 6, true);
+});
+
+function main() {
+	
+	
+	// Get the current user (who runs this server)
+	var os = require("os");
+	var info = os.userInfo ? os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+	var env = process.env;
+	
+	CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
+	
+	log("Server running as user=" + CURRENT_USER);
+	
+	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
+	
+	if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
+		log("You need to start the server with a previleged user (using sudo) or root account.", 5);
+		log(info);
 		process.exit();
-		
+	}
+	
+	
+	
+	var sockJs = require("sockjs");
+	var wsServer = sockJs.createServer();
+	wsServer.on("connection", sockJsConnection);
+	
+	var http = require("http");
+	
+	HTTP_SERVER = http.createServer(handleHttpRequest);
+	
+	HTTP_SERVER.on("error", function(err) {
+		console.log("err.code=" + err.code);
+		if(err.code == "EACCES") {
+			log("Unable to create server on port=" + HTTP_PORT + " and ip=" + HTTP_IP + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
+			process.exit(1);
+		}
+		else throw err;
 	});
 	
-	process.on("exit", function () {
-		log("Program exit\n\n", 6, true);
-	});
+	if(isIpV4(HTTP_IP)) {
+		if(!isPrivatev4IP(HTTP_IP)) log("NOT A PRIVATE IP=" + HTTP_IP, 4);
+	}
+	else log("Not a IPv4 address");
 	
-	function main() {
-		
-		
-		// Get the current user (who runs this server)
-		var os = require("os");
-		var info = os.userInfo ? os.userInfo() : {username: "ROOT", uid: process.geteuid()};
-		var env = process.env;
-		
-		CURRENT_USER = env.SUDO_USER ||	env.LOGNAME || env.USER || env.LNAME ||	env.USERNAME || info.username;
-		
-		log("Server running as user=" + CURRENT_USER);
-		
-		if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
-		
-		if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
-			log("You need to start the server with a previleged user (using sudo) or root account.", 5);
-			log(info);
-			process.exit();
-		}
-		
-		
-		
-		var sockJs = require("sockjs");
-		var wsServer = sockJs.createServer();
-		wsServer.on("connection", sockJsConnection);
-		
-		var http = require("http");
-		
-		HTTP_SERVER = http.createServer(handleHttpRequest);
-		
-		HTTP_SERVER.on("error", function(err) {
-			console.log("err.code=" + err.code);
-			if(err.code == "EACCES") {
-				log("Unable to create server on port=" + HTTP_PORT + " and ip=" + HTTP_IP + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
-				process.exit(1);
-			}
-			else throw err;
-		});
-		
-		if(isIpV4(HTTP_IP)) {
-			if(!isPrivatev4IP(HTTP_IP)) log("NOT A PRIVATE IP=" + HTTP_IP, 4);
-		}
-		else log("Not a IPv4 address");
-		
-		
-		HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
-		
-		
-		wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
-		
-		var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
-		
-		log(serverAdvertiseMessage);
-		
-		// Open client url in browser !?
-		
-		if(HTTP_IP != "127.0.0.1") {
-			(function broadcast(myIp) {
+	
+	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
+	
+	
+	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
+	
+	var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
+	
+	log(serverAdvertiseMessage);
+	
+	// Open client url in browser !?
+	
+	if(HTTP_IP != "127.0.0.1") {
+		(function broadcast(myIp) {
+			
+			// Listen to and answer broadcast messages
+			// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
+			
+			var broadcastAddresses = [];
+			
+			var broadcastPort = 6024;
+			
+			if(myIp == "0.0.0.0") {
+				// We'll have to find all broadcast addresses ...
+				var os = require('os');
 				
-				// Listen to and answer broadcast messages
-				// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
-				
-				var broadcastAddresses = [];
-				
-				var broadcastPort = 6024;
-				
-				if(myIp == "0.0.0.0") {
-					// We'll have to find all broadcast addresses ...
-					var os = require('os');
-					
-					var interfaces = os.networkInterfaces();
-					var addresses = [];
-					for (var k in interfaces) {
-						for (var k2 in interfaces[k]) {
-							var address = interfaces[k][k2];
-							if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
-								broadcastAddresses.push(broadcastAddress(address.address));
-							}
+				var interfaces = os.networkInterfaces();
+				var addresses = [];
+				for (var k in interfaces) {
+					for (var k2 in interfaces[k]) {
+						var address = interfaces[k][k2];
+						if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
+							broadcastAddresses.push(broadcastAddress(address.address));
 						}
 					}
 				}
-				else if(isPrivatev4IP(myIp)) broadcastAddresses.push(broadcastAddress(myIp));
+			}
+			else if(isPrivatev4IP(myIp)) broadcastAddresses.push(broadcastAddress(myIp));
+			
+			if(broadcastAddresses.length > 0) {
 				
-				if(broadcastAddresses.length > 0) {
-					
-					console.log("broadcastAddresses: ", broadcastAddresses);
-					
-					var dgram = require('dgram');
-					
-					// Server
-					var broadcastServer = dgram.createSocket("udp4");
-					broadcastServer.bind(function() {
-						broadcastServer.setBroadcast(true);
-						// We must send at least one broadcast message to be able to receive messages!
-						for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
-					});
-					
-					// Client
-					var broadcastClient = dgram.createSocket('udp4');
-					
-					broadcastClient.on('listening', function () {
-						var address = broadcastClient.address();
-						console.log('UDP Client listening on ' + address.address + ":" + address.port);
-						broadcastClient.setBroadcast(true);
-					});
-					
-					broadcastClient.on('message', function (message, rinfo) {
-						console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
-						
-						var lookForServerMessage = "Where can I find a jzedit server?"
-						
-						if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
-						
-					});
-					
-					broadcastClient.bind(broadcastPort);
-				}
+				console.log("broadcastAddresses: ", broadcastAddresses);
 				
-				function setAdvertiseInterval(broadcastAddress) {
-					// We need to keep sending messages, or we will not receive any!
-					setInterval(function() {
-						advertise(broadcastAddress, broadcastServer);
-					}, 4500); // Need to send often (every 4500ms) to be able to receive messages
-				}
+				var dgram = require('dgram');
 				
-				function advertise(broadcastAddress) {
-					var message = new Buffer(serverAdvertiseMessage);
-					broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
-						console.log("Sent '" + message + "'");
-					});
-				}
+				// Server
+				var broadcastServer = dgram.createSocket("udp4");
+				broadcastServer.bind(function() {
+					broadcastServer.setBroadcast(true);
+					// We must send at least one broadcast message to be able to receive messages!
+					for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
+				});
 				
-				function broadcastAddress(ip) {
-					// Asume 255.255.255.0 netmask
-					var arr = ip.split(".");
-					arr[3] = "255";
-					return arr.join(".");
-				}
+				// Client
+				var broadcastClient = dgram.createSocket('udp4');
 				
-			})(HTTP_IP);
-		}
-		
-		}
-	
-	function isIpV4(ip) {
-		if(ip.match(/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/)) return true;
-		else return false; 
+				broadcastClient.on('listening', function () {
+					var address = broadcastClient.address();
+					console.log('UDP Client listening on ' + address.address + ":" + address.port);
+					broadcastClient.setBroadcast(true);
+				});
+				
+				broadcastClient.on('message', function (message, rinfo) {
+					console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+					
+					var lookForServerMessage = "Where can I find a jzedit server?"
+					
+					if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
+					
+				});
+				
+				broadcastClient.bind(broadcastPort);
+			}
+			
+			function setAdvertiseInterval(broadcastAddress) {
+				// We need to keep sending messages, or we will not receive any!
+				setInterval(function() {
+					advertise(broadcastAddress, broadcastServer);
+				}, 4500); // Need to send often (every 4500ms) to be able to receive messages
+			}
+			
+			function advertise(broadcastAddress) {
+				var message = new Buffer(serverAdvertiseMessage);
+				broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
+					console.log("Sent '" + message + "'");
+				});
+			}
+			
+			function broadcastAddress(ip) {
+				// Asume 255.255.255.0 netmask
+				var arr = ip.split(".");
+				arr[3] = "255";
+				return arr.join(".");
+			}
+			
+		})(HTTP_IP);
 	}
 	
-	function isPrivatev4IP(ip) {
-		var parts = ip.split('.');
-		return parts[0] === '10' || parts[0] === '127' ||
-		(parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
-		(parts[0] === '192' && parts[1] === '168');
-	}
+}
+
+function isIpV4(ip) {
+	if(ip.match(/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/)) return true;
+	else return false; 
+}
+
+function isPrivatev4IP(ip) {
+	var parts = ip.split('.');
+	return parts[0] === '10' || parts[0] === '127' ||
+	(parts[0] === '172' && (parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31)) || 
+	(parts[0] === '192' && parts[1] === '168');
+}
+
+
+function sockJsConnection(connection) {
 	
-	
-	function sockJsConnection(connection) {
-		
-		var userWorker = null;
+	var userWorker = null;
 	var userConnectionName = null;
-		var userConnectionId = -1;
-		var IP = connection.remoteAddress;
-		var protocol = connection.protocol;
-		var agent = connection.headers["user-agent"];
-		var commandQueue = [];
-		var awaitingMessagesFromWorker = {};
+	var userConnectionId = -1;
+	var IP = connection.remoteAddress;
+	var protocol = connection.protocol;
+	var agent = connection.headers["user-agent"];
+	var commandQueue = [];
+	var awaitingMessagesFromWorker = {};
+	
+	console.log("connection.remoteAddress=" + connection.remoteAddress);
+	
+	//console.log(connection);
+	
+	if(IP == undefined) {
+		// Maybe because the user is connecting via HTTP instead of Websockets!?
+		IP = connection.headers["x-real-ip"];
+		//console.log(JSON.stringify(connection.headers, null, 2));
+	}
+	else {
+		// Update: nginx gives ::ffff:127.0.0.1 !!!?
+		var ipLength = IP.length;
+		var nginxIP = "127.0.0.1";
 		
-		console.log("connection.remoteAddress=" + connection.remoteAddress);
-		
-		//console.log(connection);
-		
-		if(IP == undefined) {
-			// Maybe because the user is connecting via HTTP instead of Websockets!?
-			IP = connection.headers["x-real-ip"];
-			//console.log(JSON.stringify(connection.headers, null, 2));
-		}
-		else {
-			// Update: nginx gives ::ffff:127.0.0.1 !!!?
-			var ipLength = IP.length;
-			var nginxIP = "127.0.0.1";
+		if(IP.substring(ipLength - nginxIP.length) == "127.0.0.1") {
+			// From nginx
 			
-			if(IP.substring(ipLength - nginxIP.length) == "127.0.0.1") {
-				// From nginx
-				
-				console.log("connection.headers=" + JSON.stringify(connection.headers));
-				
-				var xRealIp = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
-				
-				if(xRealIp == undefined) {
-					log("Unable to get IP address from x-real-ip headers", DEBUG);
-				}
-				
-			}
-		}
-		
-		log("Connection on " + protocol + " from " + IP);
-		
-		/*
+			console.log("connection.headers=" + JSON.stringify(connection.headers));
 			
-			Everything sent must be commands.
-			If not identified/logged in, commands will be queued
+			var xRealIp = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
 			
-		*/
-		
-		connection.on("data", function sockJsMessage(message) {
-			
-			if(message.length > 100) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
-			else log(IP + " => " + message);
-			
-			handle(message);
-			
-			function handle(message) { // A function so it can call itself from the queue
-				
-				if(message.indexOf(GS) == -1) {
-					return send({error: "Command does not contain " + GS + " separator : " + message});
-				}
-				
-				var json;
-				var arr = message.split(GS);
-				var id = arr[0];
-				var command = arr[1];
-				
-				if(isNaN(parseInt(id))) return send({msg: "id=" + id + " is not an integer: " + message});
-				
-				if(arr.length >= 3) {
-					try {
-						json = JSON.parse(arr[2]);
-					}
-					catch(err) {
-						return send({error: "Failed to parse JSON (" + err.message + "): " + message});
-					}
-				}
-				
-				console.log("The command queue has " + commandQueue.length + " items.");
-				
-				if(!userWorker) {
-					
-					//console.log("json=" + JSON.stringify(json));
-					
-					if(command != "identify") {
-						//console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
-						//commandQueue.push(message);
-						
-						send({error: "You need to login!", resp: {loginNeeded: command}});
-						
-					}
-					else {
-						
-						// # Identify
-						
-						(function checkUser(username, password) {
-							
-						if(!NO_PW_HASH && !PASSWORD) {
-							var pwHash = require("./pwHash.js");
-							password = pwHash(password);
-						}
-						
-							if(USERNAME) {
-								console.log("Using USERNAME=" + USERNAME+ " from argument ...")
-								
-								// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
-							if(USERNAME == username && PASSWORD == password) idSuccess();
-							else idFail("Wong username or password! (Username specified in server arguments)");
-							}
-							else {
-							
-							var fs = require("fs");
-							
-							fs.readdir(HOME_DIR, function readDir(err, files) {
-								if(err) throw err;
-								
-								var checkingPw = false;
-								for (var i=0; i<files.length; i++) {
-									if(files[i] == username) {
-										checkingPw = true;
-checkPw();
-										break;
-								}
-								}
-								
-								if(!checkingPw) idFail("User does not exist: " + username);
-								
-							});
-							}
-							
-						function checkPw() {
-							
-							fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
-								if(err) {
-									console.error(err);
-									idFail(err.message);
-								}
-								else {
-									if(password == pwstringFromFile) idSuccess();
-								else idFail("Wrong password for user: " + username);
-								}
-							});
-							
-						}
-						
-						function idFail(errorMsg) {
-							send({error: errorMsg});
-							log("username=" + username + " failed to login: " + errorMsg);
-						}
-						
-						function idSuccess() {
-							
-							var rootPath; // The path to chroot into (currently same as home dir)
-							var uid, gid; // System user-id and group-id
-							var homeDir; // User's home dir
-							var shell; // User's shell (currently disabled/not implemented)
-							
-							userConnectionName = username;
-							
-							if(USERNAME && NO_CHROOT) {
-								// Running as standalone desktop app
-								homeDir = process.env.HOME || process.env.USERPROFILE;
-								if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
-								acceptUser();
-							}
-							else {
-								
-								// Get home, uid and gid 
-								
-									var fs = require("fs");
-									fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
-							}
-							
-							function gotMoreUserInfo(err, etcPasswd) {
-										
-										if(err) {
-											console.warn("Unable to read /etc/passwd !");
-											throw new Error("Unable to read /etc/passwd: " + err.message);
-										}
-										else {
-											// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
-											var rows = etcPasswd.trim().split("\n");
-											
-											for(var i=0, row; i<rows.length; i++) {
-												row = rows[i].trim().split(":");
-										if(foundUserIn(row)) return acceptUser();
-											}
-											
-									throw new Error("Unable to find username=" + username + " in /etc/passwd");
-											
-										}
-										
-										function foundUserIn(row) {
-											var pName = row[0];
-											var pUid = row[2];
-											var pGid = row[3];
-											var pDir = row[5];
-											var pShell = row[6];
-											
-											var found = false;
-									if(pName == username) {
-										console.log("Found username=" + username + " in /etc/passwd");
-												
-										homeDir = pDir;
-										shell = pShell;
-										uid = pUid;
-										gid = pGid;
-										rootPath = pDir;
-										
-										return true;
-											}
-											else return false;
-										}
-										
-									}
-								
-								
-								function acceptUser() {
-									
-									if(gid == undefined) gid = uid;
-									
-								if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-									USER_CONNECTIONS[userConnectionName] = {
-											connections: [connection],
-											counter: 0
-										}
-										userConnectionId = 0;
-									}
-									else {
-									USER_CONNECTIONS[userConnectionName].connections.push(connection);
-									userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
-									}
-									
-								userWorker = createUserWorker(userConnectionName, uid, gid);
-									
-								var userInfo = {name: userConnectionName, rootPath: rootPath, homeDir: homeDir, shell: shell};
-									
-								log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
-									
-									userWorker.send({identify: userInfo});
-									userWorker.on("message", messageFromWorker);
-									userWorker.on("exit", workerExitHandler);
-									
-									/*
-										setTimeout(function() {
-										user.send({resp: {
-										test: {foo: 1, bar: 2}
-										}});
-										
-										}, 3000);
-									*/
-									
-									console.log("userConnectionId=" + userConnectionId);
-									
-									var installDirectory = "/";
-									
-									if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
-								else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
-									
-								send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
-									
-									if(commandQueue.length > 0) {
-										console.log("Running " + commandQueue.length + " commands from the command queue ...");
-										for(var i=0; i<commandQueue.length; i++) {
-											handle(commandQueue[i]);
-										}
-										commandQueue.length = 0;
-									}
-									
-									return true;
-									
-									function messageFromWorker(workerMessage, handle) {
-									console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
-										
-										if(workerMessage.resp || workerMessage.error) send(workerMessage);
-										else if(workerMessage.message) {
-										if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-											for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-												send(workerMessage.message, USER_CONNECTIONS[userConnectionName].connections[i]);
-												}
-											}
-										}
-										else if(workerMessage.done) { // Not used! Saved if we need it in the future
-											if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
-												awaitingMessagesFromWorker[workerMessage.done]();
-											}
-										}
-										else if(workerMessage.request) {
-											// For special functionality ...
-											
-											var id = workerMessage.id;
-											var req = workerMessage.request;
-											
-											if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
-											
-											if(req.createHttpEndpoint) {
-												
-												var folder = req.createHttpEndpoint.folder;
-												
-											if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
-												
-												console.log("createHttpEndpoint: NO_CHROOT=" + NO_CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
-												
-											createHttpEndpoint(userConnectionName, folder, function(err, url) {
-													if(err) workerResp(req, null, err.message);
-													else workerResp(req, {url: url});
-												});
-											}
-											else if(req.removeHttpEndpoint) {
-												
-												var folder = req.removeHttpEndpoint.folder;
-												
-											if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
-												
-											removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
-													if(err) throw err;
-													workerResp(req, {folder: folder});
-												});
-											}
-										else if(req.debugInBrowserVnc) {
-											var url = req.debugInBrowserVnc.url;
-											startChromiumBrowserInVnc(userConnectionName, uid, gid, url, function(err, resp) {
-												workerResp(req, resp, err);
-												});
-												
-											}
-											
-											else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
-											
-										}
-										else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
-										
-										
-										function workerResp(req, resp, err) {
-											if(id == undefined) throw new Error("id=" + id);
-											var obj = {id: id, parentResponse: resp};
-											if(err) obj.err = err.message ? err.message : err;
-											userWorker.send(obj);
-										}
-										
-									}
-									
-									function workerExitHandler(code, signal) {
-									console.log(userConnectionName + " worker exit: code=" + code + " signal=" + signal);
-										
-										var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
-										
-										if(code !== 0) {
-											msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
-											
-										log("Recreating user worker process for " + userConnectionName);
-											
-										userWorker = createUserWorker(userConnectionName, uid, gid);
-											userWorker.send({identify: userInfo});
-											
-											userWorker.on("message", messageFromWorker);
-											userWorker.on("exit", workerExitHandler);
-											
-										}
-										
-										send({msg: msg, id: 0});
-										
-									}
-									
-								}
-							}
-							
-						})(json.username, json.password);
-						
-						
-					}
-				}
-				else {
-					
-					userWorker.send({commands: {command: command, json: json, id: id}});
-					
-				}
-				
-				function send(answer, conn) {
-					
-					if(conn == undefined) conn = connection;
-					
-					if(answer.id == undefined && id) answer.id = id;
-					
-					if(answer.id == id) id = null; // Do not reuse the same id
-					
-					if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
-					if(!answer.id && answer.hasOwnProperty("error")) throw new Error("No id in answer with error! answer=" + JSON.stringify(answer));
-					// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
-					
-					var str = JSON.stringify(answer);
-					
-					log(IP + " <= " + UTIL.shortString(str));
-					
-					conn.write(str);
-				}
+			if(xRealIp == undefined) {
+				log("Unable to get IP address from x-real-ip headers", DEBUG);
 			}
 			
-		});
+		}
+	}
+	
+	log("Connection on " + protocol + " from " + IP);
+	
+	/*
 		
-	// ## Connection close
-		connection.on("close", function sockJsClose() {
+		Everything sent must be commands.
+		If not identified/logged in, commands will be queued
+		
+	*/
+	
+	connection.on("data", sockJsMessage);
+	
+	connection.on("close", sockJsClose);
+	
+	
+	function sockJsMessage(message) {
+		
+		if(message.length > 100) log(IP + " => " + message.substr(0,100) + " ... (" + message.length + " characters)");
+		else log(IP + " => " + message);
+		
+		handleUserMessage(message);
+		
+		
+	}
+	
+	function sockJsClose() {
+		
+		// Thankfully users are not disconnected "right away", there are some tolerence for unstable networks
+		
+		log("Closed client connection (protocol=" + protocol + ") from " + IP);
+		
+		
+		if(userWorker) {
 			
-			// Thankfully users are not disconnected "right away", there are some tolerence for unstable networks
+			// Each connection has it's own worker process!
 			
-			log("Closed client connection (protocol=" + protocol + ") from " + IP);
+			userWorker.send({teardown: true}); // Worker should be exiting ...
 			
+			/*
+				awaitingMessagesFromWorker["teardownComplete"] = function afterTeardown() {
+				userWorker.kill('SIGTERM');
+				};
+			*/
 			
-			if(userWorker) {
-				
-				// Each connection has it's own worker process!
-				
-				userWorker.send({teardown: true}); // Worker should be exiting ...
-				
-				/*
-					awaitingMessagesFromWorker["teardownComplete"] = function afterTeardown() {
-					userWorker.kill('SIGTERM');
-					};
-				*/
-				
-				// Users logged in with the same name can however send messages to each others ...
-				
+			// Users logged in with the same name can however send messages to each others ...
+			
 			USER_CONNECTIONS[userConnectionName].connections.splice(USER_CONNECTIONS[userConnectionName].connections.indexOf(connection), 1);
-				
+			
 			if(USER_CONNECTIONS[userConnectionName].connections.length === 0) {
 				delete USER_CONNECTIONS[userConnectionName];
-				}
+			}
 			
 			for(var displayId in VNC_CHANNEL) {
 				if(VNC_CHANNEL[displayId].startedBy == userConnectionName) stopVncChannel(displayId);
 			}
 			
 			
+		}
+		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
+		
+		unmountMounts(userConnectionName);
+		
+	}
+	
+	function unmountMounts(username) {
+		
+		
+		
+	}
+	
+	
+	function handleUserMessage(message) { // A function so it can call itself from the queue
+		
+		if(message.indexOf(GS) == -1) {
+			return send({error: "Command does not contain " + GS + " separator : " + message});
+		}
+		
+		var json;
+		var arr = message.split(GS);
+		var id = arr[0];
+		var command = arr[1];
+		
+		if(isNaN(parseInt(id))) return send({msg: "id=" + id + " is not an integer: " + message});
+		
+		if(arr.length >= 3) {
+			try {
+				json = JSON.parse(arr[2]);
 			}
-		else console.log("Client had not worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
-			
-		});
-		
-	}
-	
-	// Overload console.log 
-	console.log = function() {
-		var msg = arguments[0];
-		for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-		log(msg, 7);
-	}
-	
-	// Overload console.warn
-	console.warn = function() {
-		var msg = arguments[0];
-		for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-		log(msg, 4);
-	}
-	
-	
-	function isObject(obj) {
-		return obj === Object(obj);
-	}
-	
-	/*
-		API.serve = function serve(user, json, callback) {
-		
-		// Serve a folder via HTTP
-		
-		var folder = user.translatePath(json.folder);
-		
-		console.log("user.name=" + user.name + " serving folder=" + folder);
-		
-		createHttpEndpoint(folder, function(err, url) {
-		if(err) throw err;
-		callback(err, {url: url});
-		});
-		
-		}
-	*/
-	
-	
-	function createHttpEndpoint(username, folder, callback) {
-		
-		log("Creating HTTP endpoint to folder=" + folder + " ...");
-		
-		if(HOME_DIR) {
-			if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
-		}
-		
-		// Make sure the path exist
-		var fs = require("fs");
-		fs.stat(folder, function statResult(err, stats) {
-			if(err) return callback(err);
-			
-			for(var endPoint in HTTP_ENDPOINTS) {
-				if(HTTP_ENDPOINTS[endPoint] == folder) {
-					return callback(null, makeUrl(endPoint));
-				}
+			catch(err) {
+				return send({error: "Failed to parse JSON (" + err.message + "): " + message});
 			}
-			
-			var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
-			
-			HTTP_ENDPOINTS[endPoint] = folder;
-			
-			log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
-			
-			callback(null, makeUrl(endPoint));
-			
-			
-		});
-		
-	}
-	
-	function removeHttpEndpoint(username, folder, callback) {
-		
-		log("Removing HTTP endpoint to folder=" + folder + " ...");
-		
-		if(HOME_DIR) {
-			if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not remove an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 		}
 		
-		var endpointDeleted = false;
+		console.log("The command queue has " + commandQueue.length + " items.");
+		
+		if(!userWorker) {
+			
+			//console.log("json=" + JSON.stringify(json));
+			
+			if(command != "identify") {
+				//console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
+				//commandQueue.push(message);
+				
+				send({error: "You need to login!", resp: {loginNeeded: command}});
+				
+			}
+			else {
+				
+				// # Identify
+				
+				(function checkUser(username, password) {
+					
+					if(!NO_PW_HASH && !PASSWORD) {
+						var pwHash = require("./pwHash.js");
+						password = pwHash(password);
+					}
+					
+					if(USERNAME) {
+						console.log("Using USERNAME=" + USERNAME+ " from argument ...")
+						
+						// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
+						if(USERNAME == username && PASSWORD == password) idSuccess();
+						else idFail("Wong username or password! (Username specified in server arguments)");
+					}
+					else {
+						
+						var fs = require("fs");
+						
+						fs.readdir(HOME_DIR, function readDir(err, files) {
+							if(err) throw err;
+							
+							var checkingPw = false;
+							for (var i=0; i<files.length; i++) {
+								if(files[i] == username) {
+									checkingPw = true;
+									checkPw();
+									break;
+								}
+							}
+							
+							if(!checkingPw) idFail("User does not exist: " + username);
+							
+						});
+					}
+					
+					function checkPw() {
+						
+						fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
+							if(err) {
+								console.error(err);
+								idFail(err.message);
+							}
+							else {
+								if(password == pwstringFromFile) idSuccess();
+								else idFail("Wrong password for user: " + username);
+							}
+						});
+						
+					}
+					
+					function idFail(errorMsg) {
+						send({error: errorMsg});
+						log("username=" + username + " failed to login: " + errorMsg);
+					}
+					
+					function idSuccess() {
+						
+						var rootPath; // The path to chroot into (currently same as home dir)
+						var uid, gid; // System user-id and group-id
+						var homeDir; // User's home dir
+						var shell; // User's shell (currently disabled/not implemented)
+						
+						userConnectionName = username;
+						
+						if(USERNAME && NO_CHROOT) {
+							// Running as standalone desktop app
+							homeDir = process.env.HOME || process.env.USERPROFILE;
+							if(homeDir) homeDir = UTIL.trailingSlash(homeDir);
+							acceptUser();
+						}
+						else {
+							
+							// Get home, uid and gid
+							
+							var fs = require("fs");
+							fs.readFile("/etc/passwd", "utf8", gotMoreUserInfo);
+						}
+						
+						function gotMoreUserInfo(err, etcPasswd) {
+							
+							if(err) {
+								console.warn("Unable to read /etc/passwd !");
+								throw new Error("Unable to read /etc/passwd: " + err.message);
+							}
+							else {
+								// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
+								var rows = etcPasswd.trim().split("\n");
+								
+								for(var i=0, row; i<rows.length; i++) {
+									row = rows[i].trim().split(":");
+									if(foundUserIn(row)) return checkMounts();
+								}
+								
+								throw new Error("Unable to find username=" + username + " in /etc/passwd");
+								
+							}
+							
+							function foundUserIn(row) {
+								var pName = row[0];
+								var pUid = row[2];
+								var pGid = row[3];
+								var pDir = row[5];
+								var pShell = row[6];
+								
+								var found = false;
+								if(pName == username) {
+									console.log("Found username=" + username + " in /etc/passwd");
+									
+									homeDir = UTIL.trailingSlash(pDir);
+									shell = pShell;
+									uid = pUid;
+									gid = pGid;
+									rootPath = pDir;
+									
+									return true;
+								}
+								else return false;
+							}
+							
+						}
+						
+						function checkMounts() {
+							// Make sure everything is mounted
+							
+							// www user needs to have write access to /sock and read access to /wwwpub
+							// make sure the right www user id
+							/*
+								
+								
+								getGroupId("www-data", function(err, wwwgid) {
+								
+								if(err) throw err;
+								
+								chownDirRecursive(homeDir + "/wwwpub", uid, wwwgid, function(err) {
+								if(err) throw err;
+								
+								});
+								
+								chownDirRecursive(homeDir + "/sock", uid, wwwgid, function(err) {
+								if(err) throw err;
+								
+								});
+								
+								});
+							*/
+							
+							// Make sure nginx profile exist
+							var nginxProfileOK = false;
+							var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
+							fs.stat(nginxProfilePath, function (err, stats) {
+								if(err) {
+									if(err.code != "ENOENT") throw err;
+									
+									fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
+										if(err) throw err;
+										
+										nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
+										nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+										nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+										
+										fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+											if(err) throw err;
+											nginxProfileOK = true;
+											readyMaybe();
+										});
+										
+									});
+								}
+								else {
+									nginxProfileOK = true;
+									readyMaybe();
+								}
+							});
+							
+							// Make sure mounts exist
+							// We need separate executables (hard link works) to have separate apparmor profiles
+							var nodeJsLinkOK = false;
+							mount('/usr/bin/nodejs', '/usr/bin/nodejs_' + username, function(err) {
+								if(err) throw err;
+								
+								nodeJsLinkOK = true;
+								readyMaybe();
+							});
+							
+							var nullNodCreated = false;
+							var urandomCreated = false;
+							makeDirP(homeDir + "dev", function() {
+								
+								fs.stat(homeDir + "dev/null", function (err, stats) {
+									if(err) {
+										if(err.code != "ENOENT") throw err;
+										
+										// dev/null doesn't exist. Create it!
+										var exec = require('child_process').exec;
+										exec("mknod -m 444 " + homeDir + "dev/null c 1 3", function(error, stdout, stderr) {
+											if(error) throw(error);
+											if(stderr) throw new Error(stderr);
+											if(stdout) throw new Error(stdout);
+											
+											nullNodCreated = true;
+											readyMaybe();
+										});
+										
+									}
+									else {
+										// dev/null already exist!
+										nullNodCreated = true;
+										readyMaybe();
+									}
+								});
+								
+								// On some systems we need to mount --bind urandom (not create it)
+								mount("/dev/urandom", HOME_DIR + username + "/dev/urandom", function (err) {
+									if(err) throw err;
+									
+									urandomCreated = true;
+									readyMaybe();
+								});
+							});
+							
+							
+							// Mount these instead of copying to save hdd space
+							var foldersToMount = 9;
+							mount("/lib/", homeDir + "lib", folderMounted);
+							mount("/lib64/", homeDir + "lib64", folderMounted);
+							mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
+							mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
+							mount("/usr/share/", homeDir + "usr/share", folderMounted); // npm dependencies
+							mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+							mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+							mount("/usr/bin/nodejs", homeDir + "usr/bin/nodejs", folderMounted);
+							mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+							
+							// Create apparmor proiles unless they exist
+							var apparmorProfilesToCreate = 5;
+							var reloadApparmor = false;
+							var reloadedApparmor = false;
+							createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
+							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.nodejs", username, apparmorProfileCreated);
+							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.python", username, apparmorProfileCreated);
+							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.hg", username, apparmorProfileCreated);
+							createApparmorProfile("../etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username, apparmorProfileCreated);
+							
+							function apparmorProfileCreated(err) {
+								if(err) throw err;
+								apparmorProfilesToCreate--;
+								
+								if(apparmorProfilesToCreate == 0 && reloadApparmor) {
+									var exec = require('child_process').exec;
+									exec("service apparmor reload", function(error, stdout, stderr) {
+										if(error) throw(error);
+										if(stderr) throw new Error(stderr);
+										if(stdout) throw new Error(stdout);
+										
+										reloadedApparmor = true;
+										readyMaybe();
+									});
+								} 
+								
+								readyMaybe();
+							}
+							
+							function folderMounted(err) {
+								foldersToMount--;
+								if(err) throw err;
+								
+								readyMaybe();
+							}
+							
+							function readyMaybe() {
+								if(nginxProfileOK && nodeJsLinkOK && nullNodCreated && urandomCreated && foldersToMount == 0 && 
+								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor )) {
+									acceptUser();
+								}
+								else console.log("nginxProfileOK=" + nginxProfileOK + " ");
+							}
+							
+							
+							function createApparmorProfile(template, username, callback) {
+								/*
+									ex: "./etc/apparmor/usr.bin.nodejs_someuser"
+								*/
+								
+								var dest = template.replace("someuser", username);
+								var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
+								dest = dest.replace("home.", homeDot);
+								dest = dest.replace("../etc/apparmor/", "/etc/apparmor.d/");
+								
+								console.log("Apparmor: template=" + template + " dest=" + dest);
+								
+								// First check if the profile exist
+								fs.stat(dest, function (err, stats) {
+									
+									if(err) {
+										if(err.code != "ENOENT") throw err;
+										
+										fs.readFile(template, "utf8", function (err, apparmorProfile) {
+											if(err) throw err;
+											
+											apparmorProfile = apparmorProfile.replace(/%HOME%/g, HOME_DIR);
+											apparmorProfile = apparmorProfile.replace(/%USERNAME%/g, username);
+											apparmorProfile = apparmorProfile.replace(/%JZEDIT%/g, UTIL.parentFolder(__dirname));
+											
+											// Create the profile
+											fs.writeFile(dest, apparmorProfile, function (err) {
+												if(err) throw err;
+												
+												reloadApparmor = true;
+												
+												/*
+													var bin = dest.replace("/etc/apparmor.d", "");
+													bin = dest.replace(".", "/");
+													
+													//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
+													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
+												*/
+												
+											});
+										});
+									}
+									else {
+										// profile already exist!
+										return callback(null);
+									}
+									
+								});
+							}
+							
+						}
+						
+						
+						function acceptUser() {
+							
+							if(gid == undefined) gid = uid;
+							
+							if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+								USER_CONNECTIONS[userConnectionName] = {
+									connections: [connection],
+									counter: 0
+								}
+								userConnectionId = 0;
+							}
+							else {
+								USER_CONNECTIONS[userConnectionName].connections.push(connection);
+								userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
+							}
+							
+							userWorker = createUserWorker(userConnectionName, uid, gid);
+							
+							var userInfo = {name: userConnectionName, rootPath: rootPath, homeDir: homeDir, shell: shell};
+							
+							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
+							
+							userWorker.send({identify: userInfo});
+							userWorker.on("message", messageFromWorker);
+							userWorker.on("exit", workerExitHandler);
+							
+							/*
+								setTimeout(function() {
+								user.send({resp: {
+								test: {foo: 1, bar: 2}
+								}});
+								
+								}, 3000);
+							*/
+							
+							console.log("userConnectionId=" + userConnectionId);
+							
+							var installDirectory = "/";
+							
+							if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
+							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
+							
+							send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
+							
+							if(commandQueue.length > 0) {
+								console.log("Running " + commandQueue.length + " commands from the command queue ...");
+								for(var i=0; i<commandQueue.length; i++) {
+									handleUserMessage(commandQueue[i]);
+								}
+								commandQueue.length = 0;
+							}
+							
+							return true;
+							
+							function messageFromWorker(workerMessage, handle) {
+								console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+								
+								if(workerMessage.resp || workerMessage.error) send(workerMessage);
+								else if(workerMessage.message) {
+									if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+										for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+											send(workerMessage.message, USER_CONNECTIONS[userConnectionName].connections[i]);
+										}
+									}
+								}
+								else if(workerMessage.done) { // Not used! Saved if we need it in the future
+									if(awaitingMessagesFromWorker.hasOwnProperty(workerMessage.done)) {
+										awaitingMessagesFromWorker[workerMessage.done]();
+									}
+								}
+								else if(workerMessage.request) {
+									// For special functionality ...
+									
+									var id = workerMessage.id;
+									var req = workerMessage.request;
+									
+									if(id == undefined) throw new Error("Got worker request without a id! id=" + id);
+									
+									if(req.createHttpEndpoint) {
+										
+										var folder = req.createHttpEndpoint.folder;
+										
+										if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
+										
+										console.log("createHttpEndpoint: NO_CHROOT=" + NO_CHROOT + " req.createHttpEndpoint.folder=" + req.createHttpEndpoint.folder + " folder=" + folder);
+										
+										createHttpEndpoint(userConnectionName, folder, function(err, url) {
+											if(err) workerResp(req, null, err.message);
+											else workerResp(req, {url: url});
+										});
+									}
+									else if(req.removeHttpEndpoint) {
+										
+										var folder = req.removeHttpEndpoint.folder;
+										
+										if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
+										
+										removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
+											if(err) throw err;
+											workerResp(req, {folder: folder});
+										});
+									}
+									else if(req.debugInBrowserVnc) {
+										var url = req.debugInBrowserVnc.url;
+										startChromiumBrowserInVnc(userConnectionName, uid, gid, url, function(err, resp) {
+											workerResp(req, resp, err);
+										});
+										
+									}
+									
+									else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+									
+								}
+								else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
+								
+								
+								function workerResp(req, resp, err) {
+									if(id == undefined) throw new Error("id=" + id);
+									var obj = {id: id, parentResponse: resp};
+									if(err) obj.err = err.message ? err.message : err;
+									userWorker.send(obj);
+								}
+								
+							}
+							
+							function workerExitHandler(code, signal) {
+								console.log(userConnectionName + " worker exit: code=" + code + " signal=" + signal);
+								
+								var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
+								
+								if(code !== 0) {
+									msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
+									
+									log("Recreating user worker process for " + userConnectionName);
+									
+									userWorker = createUserWorker(userConnectionName, uid, gid);
+									userWorker.send({identify: userInfo});
+									
+									userWorker.on("message", messageFromWorker);
+									userWorker.on("exit", workerExitHandler);
+									
+								}
+								
+								send({msg: msg, id: 0});
+								
+							}
+							
+						}
+					}
+					
+				})(json.username, json.password);
+				
+				
+			}
+		}
+		else {
+			
+			userWorker.send({commands: {command: command, json: json, id: id}});
+			
+		}
+		
+		function send(answer, conn) {
+			
+			if(conn == undefined) conn = connection;
+			
+			if(answer.id == undefined && id) answer.id = id;
+			
+			if(answer.id == id) id = null; // Do not reuse the same id
+			
+			if(!answer.id && answer.hasOwnProperty("resp")) throw new Error("No id in answer with resp! answer=" + JSON.stringify(answer));
+			if(!answer.id && answer.hasOwnProperty("error")) throw new Error("No id in answer with error! answer=" + JSON.stringify(answer));
+			// Possible cause: callback being called twice or a "resp" that should be an "event" instead.
+			
+			var str = JSON.stringify(answer);
+			
+			log(IP + " <= " + UTIL.shortString(str));
+			
+			conn.write(str);
+		}
+	}
+	
+}
+
+// Overload console.log 
+console.log = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 7);
+}
+
+// Overload console.warn
+console.warn = function() {
+	var msg = arguments[0];
+	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+	log(msg, 4);
+}
+
+
+function isObject(obj) {
+	return obj === Object(obj);
+}
+
+/*
+	API.serve = function serve(user, json, callback) {
+	
+	// Serve a folder via HTTP
+	
+	var folder = user.translatePath(json.folder);
+	
+	console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+	createHttpEndpoint(folder, function(err, url) {
+	if(err) throw err;
+	callback(err, {url: url});
+	});
+	
+	}
+*/
+
+
+function createHttpEndpoint(username, folder, callback) {
+	
+	log("Creating HTTP endpoint to folder=" + folder + " ...");
+	
+	if(HOME_DIR) {
+		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
+	}
+	
+	// Make sure the path exist
+	var fs = require("fs");
+	fs.stat(folder, function statResult(err, stats) {
+		if(err) return callback(err);
+		
 		for(var endPoint in HTTP_ENDPOINTS) {
 			if(HTTP_ENDPOINTS[endPoint] == folder) {
-				delete HTTP_ENDPOINTS[endPoint];
-				endpointDeleted = true;
+				return callback(null, makeUrl(endPoint));
 			}
 		}
 		
-		if(endpointDeleted) callback(null, folder);
-		else callback("Endpoint to folder=" + folder + " not found!");
+		var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
 		
+		HTTP_ENDPOINTS[endPoint] = folder;
+		
+		log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
+		
+		callback(null, makeUrl(endPoint));
+		
+		
+	});
+	
+}
+
+function removeHttpEndpoint(username, folder, callback) {
+	
+	log("Removing HTTP endpoint to folder=" + folder + " ...");
+	
+	if(HOME_DIR) {
+		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not remove an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
 	
+	var endpointDeleted = false;
+	for(var endPoint in HTTP_ENDPOINTS) {
+		if(HTTP_ENDPOINTS[endPoint] == folder) {
+			delete HTTP_ENDPOINTS[endPoint];
+			endpointDeleted = true;
+		}
+	}
+	
+	if(endpointDeleted) callback(null, folder);
+	else callback("Endpoint to folder=" + folder + " not found!");
+	
+}
+
 function handleHttpRequest(request, response) {
-		
-		
+	
+	
 	// socketPath
 	
 	
-		var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
-		var urlPath = UTIL.getPathFromUrl(request.url);
-		
-		
-		
-		var dirs = urlPath.split("/");
-		
-		var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
+	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+	var urlPath = UTIL.getPathFromUrl(request.url);
+	
+	
+	
+	var dirs = urlPath.split("/");
+	
+	var firstDir = dirs[0] || dirs[1]; // Urls usually start with an /
 	var secondDir = dirs[1] ? dirs[2] : dirs[1];
 	
 	
-		var path = require("path");
-		
-		var folder;
-		var localFolder;
-		
-		/*
-			var authHeader = request.headers["authorization"] || "";
-			var authToken = authHeader.split(/\s+/).pop() || "";
-			var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
-			var authParts = authBuffer.split(/:/);
-			var username=authParts[0];
-			var password=authParts[1];
-		*/
-		
+	var path = require("path");
+	
+	var folder;
+	var localFolder;
+	
+	/*
+		var authHeader = request.headers["authorization"] || "";
+		var authToken = authHeader.split(/\s+/).pop() || "";
+		var authBuffer = new Buffer(authToken, "base64").toString(); // convert from base64
+		var authParts = authBuffer.split(/:/);
+		var username=authParts[0];
+		var password=authParts[1];
+	*/
+	
 	log("HTTP request from IP=" + IP + " urlPath=" + urlPath + " request.url=" + request.url + " host=" + request.headers.host + " firstDir=" + firstDir + " secondDir=" + secondDir);
-		
-		/*
-			http "endpoints" needs to pass same origin policy!
-		*/
-		
+	
+	/*
+		http "endpoints" needs to pass same origin policy!
+	*/
+	
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
 	//responseHeaders['Cache-Control'] = 'no-cache'; // For debugging
@@ -862,9 +1088,9 @@ function handleHttpRequest(request, response) {
 		if(VNC_CHANNEL.hasOwnProperty(secondDir)) {
 			
 			console.log("Proxying request to VNC channel: " + secondDir);
-		
+			
 			VNC_CHANNEL[secondDir].proxy.web(request, response);
-		
+			
 		}
 		else {
 			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
@@ -876,252 +1102,252 @@ function handleHttpRequest(request, response) {
 	}
 	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
-			localFolder = HTTP_ENDPOINTS[firstDir];
+		localFolder = HTTP_ENDPOINTS[firstDir];
+		
+		localFolder = UTIL.toSystemPathDelimiters(localFolder);
+		
+		urlPath = urlPath.replace(firstDir + "/", "");
+		
+		responseHeaders['Cache-Control'] = 'no-cache';
+		
+		console.log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "");
+		
+	}
+	else {
+		
+		console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
+		
+		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+		
+		localFolder = path.resolve("../client/");
+		
+		console.log("Serving from the jzedit client folder: " + localFolder);
+		
+		/*
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
+			return;
+		*/
+		
+	}
+	
+	console.log("localFolder=" + localFolder);
+	console.log("urlPath=" + urlPath);
+	
+	
+	if(urlPath == "") {
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("No file in url: " + urlPath);
+		return;
+	}
+	
+	
+	var filePath = path.join(localFolder, urlPath);
+	
+	
+	if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath)) {
+		if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
+		if(!path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
+		
+		console.log("urlPath=" + urlPath);
+		
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Bad path: " + urlPath);
+		return;
+	}
+	
+	
+	
+	
+	var fileExtension = UTIL.getFileExtension(urlPath);
+	
+	var mimeMap = require("./mimeMap.js");
+	
+	if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
+		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+		response.end("Bad file type: '" + fileExtension + "'");
+		
+		console.warn("Unknown mime type: fileExtension=" + fileExtension);
+		
+		return;
+	}
+	
+	var fs = require("fs");
+	
+	var stat = fs.stat(filePath, function(err, stats) {
+		
+		if(err) {
+			responseHeaders['Access-Control-Allow-Origin'] = "*";
 			
-			localFolder = UTIL.toSystemPathDelimiters(localFolder);
+			response.writeHead(404, "Error", responseHeaders);
 			
-			urlPath = urlPath.replace(firstDir + "/", "");
+			if(err.code == "ENOENT") {
+				//var virtualPath = user.toVirtualPath(filePath);
+				//response.end("File not found: " + virtualPath);
+				
+				response.end("File not found: " + filePath);
+				
+				console.warn("HTTP Server: File not found: " + filePath);
+				
+			}
+			else {
+				response.end(err.message);
+			}
 			
-			responseHeaders['Cache-Control'] = 'no-cache';
 			
-			console.log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "");
+		}
+		else if(stats == undefined) throw new Error("No stats!");
+		else if(!stats.isFile()) {
+			
+			response.writeHead(404, "Error", responseHeaders);
+			response.end("Not a file: " + filePath);
 			
 		}
 		else {
 			
-			console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
+			responseHeaders['Content-Type'] = mimeMap[fileExtension];
+			responseHeaders['Content-Length'] = stats.size;
 			
-			if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+			response.writeHead(200, responseHeaders);
 			
-			localFolder = path.resolve("../client/");
-			
-			console.log("Serving from the jzedit client folder: " + localFolder);
-			
-			/*
-				response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-				response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
-				return;
-			*/
+			var readStream = fs.createReadStream(filePath);
+			readStream.pipe(response);
 			
 		}
 		
-		console.log("localFolder=" + localFolder);
-		console.log("urlPath=" + urlPath);
-		
-		
-		if(urlPath == "") {
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("No file in url: " + urlPath);
-			return;
+	});
+	
+	
+}
+
+
+function makeUrl(endPoint) {
+	
+	if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
+	if(!HTTP_SERVER.address) {
+		console.log(HTTP_SERVER);
+		throw new Error("HTTP_SERVER has no address property!");
+	}
+	
+	var address = HTTP_SERVER.address();
+	
+	
+	var port = HTTP_PORT;
+	
+	if(address) { // Sanity check
+		if(address.port) {
+			if(address.port != HTTP_PORT) throw new Error("address.port=" + address.port + " is not the same as HTTP_PORT=" + HTTP_PORT);
 		}
 		
-		
-		var filePath = path.join(localFolder, urlPath);
-		
-		
-		if(filePath.indexOf(localFolder) != 0 || !path.isAbsolute(filePath)) {
-			if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
-			if(!path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
+	}
+	
+	
+	var ip = HTTP_IP;
+	if(ip == "0.0.0.0" || ip == "::") {
+		// Find servers IP
+		var ipList = [];
+		var os = require('os');
+		var ifaces = os.networkInterfaces();
+		log("Listening IP's:", 7);
+		Object.keys(ifaces).forEach(function (ifname) {
+			var alias = 0;
 			
-			console.log("urlPath=" + urlPath);
-			
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Bad path: " + urlPath);
-			return;
-		}
-		
-		
-		
-		
-		var fileExtension = UTIL.getFileExtension(urlPath);
-		
-		var mimeMap = require("./mimeMap.js");
-		
-		if(fileExtension && !mimeMap.hasOwnProperty(fileExtension)) {
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Bad file type: '" + fileExtension + "'");
-			
-			console.warn("Unknown mime type: fileExtension=" + fileExtension);
-			
-			return;
-		}
-		
-		var fs = require("fs");
-		
-		var stat = fs.stat(filePath, function(err, stats) {
-			
-			if(err) {
-			responseHeaders['Access-Control-Allow-Origin'] = "*";
-			
-				response.writeHead(404, "Error", responseHeaders);
-				
-				if(err.code == "ENOENT") {
-					//var virtualPath = user.toVirtualPath(filePath);
-					//response.end("File not found: " + virtualPath);
-					
-					response.end("File not found: " + filePath);
-					
-					console.warn("HTTP Server: File not found: " + filePath);
-					
-				}
-				else {
-					response.end(err.message);
+			ifaces[ifname].forEach(function (iface) {
+				if ('IPv4' !== iface.family || iface.internal !== false) {
+					// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+					log(ifname + "=" + iface.address + " (internal)", 7);
+					return;
 				}
 				
+				if (alias >= 1) {
+					// this single interface has multiple ipv4 addresses
+					log(ifname + '=' + alias + ", " + iface.address, 7);
+				} else {
+					// this interface has only one ipv4 adress
+					log(ifname + "=" + iface.address, 7);
+				}
+				++alias;
 				
-			}
-			else if(stats == undefined) throw new Error("No stats!");
-			else if(!stats.isFile()) {
+				ipList.push(iface.address);
 				
-				response.writeHead(404, "Error", responseHeaders);
-				response.end("Not a file: " + filePath);
-				
-			}
-			else {
-				
-				responseHeaders['Content-Type'] = mimeMap[fileExtension];
-				responseHeaders['Content-Length'] = stats.size;
-				
-				response.writeHead(200, responseHeaders);
-				
-				var readStream = fs.createReadStream(filePath);
-				readStream.pipe(response);
-				
-			}
-			
+			});
 		});
 		
-		
+		ip = ipList[0];
 	}
 	
+	//console.log(address);
+	//console.log("ipList=" + JSON.stringify(ipList));
 	
-	function makeUrl(endPoint) {
-		
-		if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
-		if(!HTTP_SERVER.address) {
-			console.log(HTTP_SERVER);
-			throw new Error("HTTP_SERVER has no address property!");
-		}
-		
-		var address = HTTP_SERVER.address();
-		
-		
-		var port = HTTP_PORT;
-		
-		if(address) { // Sanity check
-			if(address.port) {
-				if(address.port != HTTP_PORT) throw new Error("address.port=" + address.port + " is not the same as HTTP_PORT=" + HTTP_PORT);
-			}
-			
-		}
-		
-		
-		var ip = HTTP_IP;
-		if(ip == "0.0.0.0" || ip == "::") {
-			// Find servers IP
-			var ipList = [];
-			var os = require('os');
-			var ifaces = os.networkInterfaces();
-			log("Listening IP's:", 7);
-			Object.keys(ifaces).forEach(function (ifname) {
-				var alias = 0;
-				
-				ifaces[ifname].forEach(function (iface) {
-					if ('IPv4' !== iface.family || iface.internal !== false) {
-						// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-						log(ifname + "=" + iface.address + " (internal)", 7);
-						return;
-					}
-					
-					if (alias >= 1) {
-						// this single interface has multiple ipv4 addresses
-						log(ifname + '=' + alias + ", " + iface.address, 7);
-					} else {
-						// this interface has only one ipv4 adress
-						log(ifname + "=" + iface.address, 7);
-					}
-					++alias;
-					
-					ipList.push(iface.address);
-					
-				});
-			});
-			
-			ip = ipList[0];
-		}
-		
-		//console.log(address);
-		//console.log("ipList=" + JSON.stringify(ipList));
-		
-		var url = ""; // "http://";
-		
-		if(HOSTNAME) url += HOSTNAME;
-		else url += ip;
-		
-		if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
-		
-		url += "/";
-		
-		if(endPoint) url += endPoint + "/";
-		
-		return url;
+	var url = ""; // "http://";
+	
+	if(HOSTNAME) url += HOSTNAME;
+	else url += ip;
+	
+	if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
+	
+	url += "/";
+	
+	if(endPoint) url += endPoint + "/";
+	
+	return url;
+}
+
+function randomString(letters) {
+	
+	if(letters == undefined) letters = 5;
+	
+	var text = "";
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	
+	for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
+	
+	return text;
+}
+
+function createUserWorker(name, uid, gid) {
+	var childProcess = require("child_process");
+	
+	
+	// You can have different group and user. Default is the user/group running the node process
+	var options = {};
+	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid];
+	
+	options.env = {
+		username: name,
+		uid: uid,
+		gid: gid,
+		loglevel: LOGLEVEL
 	}
 	
-	function randomString(letters) {
-		
-		if(letters == undefined) letters = 5;
-		
-		var text = "";
-		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		
-		for( var i=0; i < letters; i++ ) text += possible.charAt(Math.floor(Math.random() * possible.length));
-		
-		return text;
+	if(NO_CHROOT) {
+		if(uid != undefined) options.uid = parseInt(uid);
+		if(gid != undefined) options.gid = parseInt(gid);
 	}
 	
-	function createUserWorker(name, uid, gid) {
-		var childProcess = require("child_process");
+	if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+	
+	if((uid == undefined || uid == -1)) {
+		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
 		
-		
-		// You can have different group and user. Default is the user/group running the node process
-		var options = {};
-		var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid];
-		
-		options.env = {
-			username: name,
-			uid: uid,
-			gid: gid,
-			loglevel: LOGLEVEL
-		}
-		
-		if(NO_CHROOT) {
-			if(uid != undefined) options.uid = parseInt(uid);
-			if(gid != undefined) options.gid = parseInt(gid);
-		}
-		
-		if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
-		
-		if((uid == undefined || uid == -1)) {
-			log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);
-			
-			if(process.getuid) {
-				if(process.getuid() == 0 && !CRAZY) {
-					throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
-				}
+		if(process.getuid) {
+			if(process.getuid() == 0 && !CRAZY) {
+				throw new Error("It's not recommended to run a user worker process as root (Use argument -crazy if you want to do it anyway)");
 			}
 		}
-		
-		log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
-		
-		try {
-			var worker = childProcess.fork("user_worker.js", args, options);
+	}
+	
+	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
+	
+	try {
+		var worker = childProcess.fork("user_worker.js", args, options);
+	}
+	catch(err) {
+		if(err.code == "EPERM") {
+			if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
+			throw new Error("Unable to spawn worker! (" + err.message + ")");
 		}
-		catch(err) {
-			if(err.code == "EPERM") {
-				if(uid != undefined) log("Unable to spawn worker with uid=" + uid + " and gid=" + gid + ".\nTry running the server with a privileged (sudo) user.", NOTICE);
-				throw new Error("Unable to spawn worker! (" + err.message + ")");
-			}
-			else {
+		else {
 			console.log("args=" + JSON.stringify(args) + " options=" + JSON.stringify(options));
 			// If you get spawn EACCES it probably means that the hard link or mount to /usr/bin/nodejs_username no longer exist!
 			// Easiest solution is to remove and re-add the user. If it's in production you should install the jzedit_user_mounts.service'
@@ -1132,32 +1358,32 @@ function handleHttpRequest(request, response) {
 	
 	worker.on("close", function workerClose(code, signal) {
 		console.log(name + " worker close: code=" + code + " signal=" + signal);
-		});
-		
-		worker.on("disconnect", function workerDisconnect() {
-			console.log(name + " worker disconnect: worker.connected=" + worker.connected);
-		});
-		
-	worker.on("error", function workerError(err) {
-			console.log(name + " worker error: err.message=" + err.message);
-		});
-		
-		/*
-			worker.on("exit", function workerExit(code, signal) {
-			console.log(name + " worker exit: code=" + code + " signal=" + signal);
-			});
-		*/
-		
-		return worker;
-		
-	}
+	});
 	
+	worker.on("disconnect", function workerDisconnect() {
+		console.log(name + " worker disconnect: worker.connected=" + worker.connected);
+	});
+	
+	worker.on("error", function workerError(err) {
+		console.log(name + " worker error: err.message=" + err.message);
+	});
+	
+	/*
+		worker.on("exit", function workerExit(code, signal) {
+		console.log(name + " worker exit: code=" + code + " signal=" + signal);
+		});
+	*/
+	
+	return worker;
+	
+}
+
 function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
-		
-		if(username == undefined && !CRAZY) throw new Error("username required!");
-		if(uid == undefined && !CRAZY) throw new Error("uid required!");
+	
+	if(username == undefined && !CRAZY) throw new Error("username required!");
+	if(uid == undefined && !CRAZY) throw new Error("uid required!");
 	if(gid == undefined && !CRAZY) throw new Error("gid required!");
-		
+	
 	// If chromium-browser is already running on a display (by the same user ??),
 	// it will make a clean close (no useful message). Probabbly because it detects that the user is already runnig another chromium-browser
 	for(var displayId in VNC_CHANNEL) {
@@ -1195,29 +1421,29 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	}
 	
 	var childProcess = require("child_process");
-		var xvfbOptions = {};
-		var chromiumBrowserOptions = {};
-		var x11vncOptions = {};
+	var xvfbOptions = {};
+	var chromiumBrowserOptions = {};
+	var x11vncOptions = {};
 	
 	var chromiumDebuggerPort = getTcpPort(CHROMIUM_DEBUG_PORT);
 	var chromeWindowId = "0x400001"; // It's hopefully always the same
-		
 	
-		if((uid == undefined || uid == -1)) {
-			log("No uid specified! Browser will run as username=" + CURRENT_USER, WARN);
-		}
-		
-		if(uid != undefined) {
-			xvfbOptions.uid = parseInt(uid);
-			chromiumBrowserOptions.uid = parseInt(uid);
-			x11vncOptions.uid = parseInt(uid);
-		}
-		if(gid != undefined) {
-			xvfbOptions.gid = parseInt(gid);
-			chromiumBrowserOptions.gid = parseInt(gid);
-			x11vncOptions.gid = parseInt(gid);
-		}
-		
+	
+	if((uid == undefined || uid == -1)) {
+		log("No uid specified! Browser will run as username=" + CURRENT_USER, WARN);
+	}
+	
+	if(uid != undefined) {
+		xvfbOptions.uid = parseInt(uid);
+		chromiumBrowserOptions.uid = parseInt(uid);
+		x11vncOptions.uid = parseInt(uid);
+	}
+	if(gid != undefined) {
+		xvfbOptions.gid = parseInt(gid);
+		chromiumBrowserOptions.gid = parseInt(gid);
+		x11vncOptions.gid = parseInt(gid);
+	}
+	
 	log("Creating VNC for username=" + username + " uid=" + uid + " gid=" + gid, DEBUG);
 	
 	var xvfbStartCounter = 0;
@@ -1344,20 +1570,20 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 				}
 				
 			});
-			}
 		}
+	}
 	
 	
 	function startChromiumBrowser() {
 		
-	if(url == undefined) url = "about:blank";
-	
-	// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
+		if(url == undefined) url = "about:blank";
+		
+		// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
 		var chromiumBrowserArgs = [
 			//"--chrome", // No idea what --chrome flag does ...
 			"--user-data-dir=" + HOME_DIR + username,
-		"--kiosk", // Full screen
-		url,
+			"--kiosk", // Full screen
+			url,
 			"--incognito", // Don't save cache or history
 			"--disable-pinch", // Disables compositor-accelerated touch-screen pinch gestures. Why not ?
 			"--overscroll-history-navigation=0", // disable history navigation in response to horizontal overscroll. Why not ?
@@ -1376,12 +1602,12 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		log("Starting chromium-browser with args=" + JSON.stringify(chromiumBrowserArgs) 
 		+ " chromiumBrowserOptions=" + JSON.stringify(chromiumBrowserOptions) + " on displayId=" + displayId);
-	var chromiumBrowser = childProcess.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
+		var chromiumBrowser = childProcess.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
 		
-	VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
-	
+		VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
+		
 		chromiumBrowser.on("close", function (code, signal) {
-		log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+			log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
 			freeTcpPort(chromiumDebuggerPort);
 			
 			// Should we restart chromium-browser !?
@@ -1389,40 +1615,40 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		});
 		
 		chromiumBrowser.on("disconnect", function () {
-		log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
+			log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
 		});
 		
 		chromiumBrowser.on("error", function (err) {
-		log(username + " chromium-browser (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+			log(username + " chromium-browser (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
 			console.error(err);
 		});
 		
-	chromiumBrowser.stdout.on("data", function(data) {
-		log(username + " chromiumBrowser (displayId=" + displayId + ") stdout: " + data, INFO);
-	});
-	
-	chromiumBrowser.stderr.on("data", function (data) {
-		log(username + " chromiumBrowser (displayId=" + displayId + ") stderr: " + data, DEBUG);
-	});
-	
-	// Wait until chromium-browser has started ...
-	var timeInterval = 100;
-	var maxCheck = 10;
-	var checkCounter = 0;
-	setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
-	
-	function checkIfChromiumBrowserHasStarted() {
-		var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-		childProcess.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
-			console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
-				if(stdout.indexOf(chromeWindowId) != -1) startX11vnc();
-			else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
-			else {
-					VNC_CHANNEL[displayId].xvfb.kill();
-				callback(new Error("Failed to start chromium-browser in a timely manner. Result from xwininfo: + " + stdout));
-			}
+		chromiumBrowser.stdout.on("data", function(data) {
+			log(username + " chromiumBrowser (displayId=" + displayId + ") stdout: " + data, INFO);
 		});
-	}
+		
+		chromiumBrowser.stderr.on("data", function (data) {
+			log(username + " chromiumBrowser (displayId=" + displayId + ") stderr: " + data, DEBUG);
+		});
+		
+		// Wait until chromium-browser has started ...
+		var timeInterval = 100;
+		var maxCheck = 10;
+		var checkCounter = 0;
+		setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
+		
+		function checkIfChromiumBrowserHasStarted() {
+			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
+			childProcess.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
+				if(stdout.indexOf(chromeWindowId) != -1) startX11vnc();
+				else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
+				else {
+					VNC_CHANNEL[displayId].xvfb.kill();
+					callback(new Error("Failed to start chromium-browser in a timely manner. Result from xwininfo: + " + stdout));
+				}
+			});
+		}
 	}
 	
 	function startX11vnc() {
@@ -1438,15 +1664,15 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		
 		// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
-	var x11vncArgs = [
+		var x11vncArgs = [
 			"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
-		"-passwd",
-		vncPassword,
-		"-rfbport",
-		x11vncPort,
-		"-display",
-		":" + displayId,
-		"-id",
+			"-passwd",
+			vncPassword,
+			"-rfbport",
+			x11vncPort,
+			"-display",
+			":" + displayId,
+			"-id",
 			chromeWindowId,
 			"-forever"
 		];
@@ -1461,7 +1687,7 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 		
 		log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
 		+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
-	var x11vnc = childProcess.spawn("x11vnc", x11vncArgs, x11vncOptions);
+		var x11vnc = childProcess.spawn("x11vnc", x11vncArgs, x11vncOptions);
 		
 		VNC_CHANNEL[displayId].x11vnc = x11vnc;
 		
@@ -1479,17 +1705,17 @@ function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 			console.error(err);
 		});
 		
-	x11vnc.stdout.on("data", function (data) {
+		x11vnc.stdout.on("data", function (data) {
 			log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
-	});
-	
-	x11vnc.stderr.on("data", function (data) {
+		});
+		
+		x11vnc.stderr.on("data", function (data) {
 			log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
-	});
-	
+		});
+		
 		var resp = {
 			chromiumDebuggerPort: chromiumDebuggerPort,
-		vncPassword: vncPassword
+			vncPassword: vncPassword
 		}
 		
 		if(modifiedLibvncserver) {
@@ -1521,25 +1747,278 @@ function generatePassword(n) {
 	return pw;
 }
 
-	function getTcpPort(preferPort) {
+function getTcpPort(preferPort) {
 	// There are only 65,535 ports ...
 	
 	var port = preferPort;
 	
 	while(PORTS_IN_USE.indexOf(port) != -1 && port < 65535) {
 		port++;
-		} 
+	} 
 	
 	if(port >= 65535) throw new Error("We are out of ports!");
 	
 	PORTS_IN_USE.push(port);
 	
 	return port;
-	}
+}
 
 function freeTcpPort(port) {
 	while(PORTS_IN_USE.indexOf(port) != -1) PORTS_IN_USE.splice(PORTS_IN_USE.indexOf(port), 1);
-	}
+}
 
+function getGroupId(groupName, callback) {
+	var fs = require("fs");
+	fs.readFile("/etc/group", "utf8", function(err, groupData) {
+		
+		if(err) return callback(err);
+		
+		//console.log("groupData=" + groupData);
+		
+		var groups = groupData.split(/\r|\n/);
+		
+		// format: jzedit_users:x:115:
+		
+		for (var i=0, group, name, id; i<groups.length; i++) {
+			group = groups[i].split(":");
+			name = group[0];
+			id = group[2];
+			
+			if(name == groupName) return callback(null, parseInt(id));
+		}
+		
+		return callback(new Error("Unable to find id for groupName=" + groupName));
+	});
+}
+
+function chownDirRecursive(path, uid, gid, callback) {
+	var fs = require("fs");
 	
-	main();
+	path = UTIL.trailingSlash(path); // Path is always a directory, put a slash after it to ease concatenation
+	
+	var abort = false;
+	
+	var dirsToRead = 0;
+	var pathsToStat = 0;
+	var pathsToChown = 0;
+	
+	dirsToRead++;
+	fs.readdir(path, function readDir(err, files) {
+		dirsToRead--;
+		if(abort) return;
+		if(err) return done(err);
+		
+		for (var i=0; i<files.length; i++) {
+			doPath(path + files[i]);
+		}
+		
+	});
+	
+	// Closure for path so statResult know's which path it stat'ed
+	function doPath(path) {
+		
+		// Check if it's a directory
+		pathsToStat++;
+		fs.stat(path, function statResult(err, stats) {
+			pathsToStat--;
+			if(abort) return;
+			if(err) return done(err);
+			
+			// recursively chown if it's a directory
+			if(stats.isDirectory()) chownDirRecursive(path, uid, gid, function(err) {
+				if(err) return done(err);
+				
+				doneMaybe();
+				
+			});
+		});
+		
+		// Chown the path
+		pathsToChown++;
+		fs.chown(path, uid, gid, function chowned(err) {
+			pathsToChown--;
+			if(err) return done(err);
+			
+			doneMaybe();
+		});
+		
+	}
+	
+	function doneMaybe() {
+		if(abort) return;
+		
+		if(pathsToStat == 0 && dirsToRead == 0 && pathsToChown == 0) done(null);
+	}
+	
+	function done(err) {
+		if(callback) {
+			abort = true;
+			
+			callback(err);
+			callback = null;
+		}
+	}
+	
+}
+
+
+function mount(sourcePath, targetPath, callback) {
+	var fs = require("fs");
+	
+	var abort = false;
+	
+	// Are we mounting a file or a folder !?
+	
+	fs.stat(sourcePath, function(err, sourceStats) {
+		
+		if(err) return done(err);
+		
+		// Does the target exist ?
+		fs.stat(targetPath, function(err, targetStats) {
+			
+			if(err) {
+				if(err.code != "ENOENT") return done(err);
+				
+				if(sourceStats.isDirectory()) {
+					makeDirP(targetPath, function(err) {
+						if(err) return done(err);
+						targetCreated();
+					});
+				}
+				else {
+					var parentFolder = UTIL.parentFolder(targetPath);
+					makeDirP(parentFolder, function(err) {
+						if(err) return done(err);
+						
+						// Create emty file
+						fs.open(target, 'w', function (err, fd) {
+							if(err) return done(err);
+							
+							fs.close(fs, function(err) {
+								if(err) return done(err);
+								targetCreated();
+							}); 
+						});
+					});
+				}
+			}
+			else {
+				
+				if(sourceStats.ino == targetStats.ino) return done(null); // Already mounted!
+				
+				if(sourceStats.isDirectory()) {
+					
+					if(!targetStats.isDirectory()) return done(new Error("Source is a directory, but target is not! sourcePath=" + sourcePath + 
+					" targetPath=" + targetPath + " sourceStats=" + sourceStats + " targetStats=" + targetStats + " "));
+					
+					// Check if the target folder is emty
+					fs.readdir(targetPath, function readDir(err, files) {
+						if(err) return done(err);
+						
+						if(files.length > 0) return done(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
+						else targetCreated();
+						
+					});
+				}
+				else {
+					// Make sure the file is emty
+					if(targetStats.size !== 0) done(new Error("Target file not emty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
+					else targetCreated();
+					
+				}
+			}
+			
+			function targetCreated() {
+				
+				var exec = require('child_process').exec;
+				
+				exec("mount --bind " + sourcePath + " " + targetPath , function(error, stdout, stderr) {
+					if(error) return done(error);
+					if(stderr) return done(new Error(stderr));
+					if(stdout) return done(new Error(stdout));
+					
+					return done(null);
+				});
+				
+			}
+			
+		});
+		
+	});
+	
+	function done(err) {
+		if(callback) {
+			abort = true;
+			
+			callback(err);
+			callback = null;
+		}
+	}
+	
+	/*
+		
+		
+		if ( fs.lstatSync( source ).isDirectory() ) {
+		// The source is a directory. Create a directory!
+		makeDirPsync(target);
+		
+		} else {
+		// The source is not a directory (it's a file!?). Check if the file exist, then create it
+		if ( fs.existsSync( target ) ) throw new Error("File aready exist: " + target); // Prevent overwriting
+		fs.closeSync(fs.openSync(target, 'w')); // Create emty file
+		}
+		
+		var mountResult = child_process.execSync("mount --bind " + source + " " + target ).toString(ENCODING).trim();
+		if(mountResult != "") throw mountResult;
+		
+		// Append to /etc/fstab so it is re-mounted after reboot
+		//fs.appendFileSync('/etc/fstab', source + '   ' +  target + ' none bind 0 0\n')
+		// Server was unable to boot after adding stuff to fstab!!
+	*/
+}
+
+function makeDirP(path, callback) {
+	
+	var folders = UTIL.getFolders(path);
+	
+	if(folders.length == 0) throw new Error("Unable to get folders from path=" + path + " folders=" + JSON.stringify(folders));
+	
+	// Create the folders if they don't exist
+	
+	checkFolder(folders.shift());
+	
+	function checkFolder(folderPath) {
+		if(!folderPath) throw new Error("folderPath=" + folderPath + " path=" + path + " folders=" + JSON.stringify(folders)); // For sanity
+		
+		fs.stat(folderPath, function(err, stats) {
+			if(err) {
+				if(err.code != "ENOENT") return done(err);
+				
+				// The path does not exist. Create it!
+				fs.mkdir(folderPath, function (err) {
+					if(err) return done(err);
+					
+					if(folders.length > 0) checkFolder(folders.shift());
+					else done(null);
+				});
+			}
+			else if(!stats.isDirectory()) {
+				return done(new Error("Not a directory: folderPath=" + folderPath + " path=" + path + " folders=" + JSON.stringify(folders)));
+			}
+			else {
+				if(folders.length > 0) checkFolder(folders.shift());
+				else done(null);
+			}
+		});
+	}
+	
+	function done(err) {
+		if(callback) {
+			callback(err);
+			callback = null;
+		}
+	}
+}
+
+main();
+
