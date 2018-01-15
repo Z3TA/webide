@@ -38,6 +38,8 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+User get no answer after identifying!! user=demo (that I moved to dev from prod)
+
 Try moving a user from one server to anohter ...
 
 ssh root@ben.100m.se 'zfs snapshot ben/home/demo@backup && zfs send ben/home/demo@backup' | sudo zfs receive zpc/home/demo

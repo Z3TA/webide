@@ -695,6 +695,13 @@ function sockJsConnection(connection) {
 												
 											});
 											
+											toChown++;
+											fs.chown(HOME_DIR + username, uid, gid, function chowned(err) {
+												toChown--;
+												if(err) throw err;
+												checkedUserRights();
+											});
+											
 											function check(file) { // Closure so we know which path
 												var path = UTIL.joinPaths([HOME_DIR, username, file]);
 												
@@ -790,7 +797,9 @@ function sockJsConnection(connection) {
 								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor )) {
 									acceptUser();
 								}
-								else console.log("nginxProfileOK=" + nginxProfileOK + " ");
+								else console.log("nginxProfileOK=" + nginxProfileOK + " nodeJsLinkOK=" + nodeJsLinkOK + " nullNodCreated=" + nullNodCreated + 
+								" urandomCreated=" + urandomCreated + " foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
+								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " ");
 							}
 							
 							
@@ -1897,6 +1906,16 @@ function chownDirRecursive(path, uid, gid, callback) {
 			chownDirRecursiveDoneMaybe();
 		});
 		
+	pathsToChown++;
+	arrPathsToChown.push(path);
+	fs.chown(path, uid, gid, function chowned(err) {
+		pathsToChown--;
+		arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+		if(err) return chownDirRecursiveDone(err);
+		
+		chownDirRecursiveDoneMaybe();
+	});
+	
 		// Closure for path so statResult know's which path it stat'ed
 		function doPath(path) {
 			
@@ -1907,10 +1926,11 @@ function chownDirRecursive(path, uid, gid, callback) {
 				if(abort) return;
 			if(err) return chownDirRecursiveDone(err);
 				
+				if(stats.isDirectory()) {
 				// recursively chown if it's a directory
 				pathsToChown++;
-			arrPathsToChown.push(path);
-				if(stats.isDirectory()) chownDirRecursive(path, uid, gid, function(err) {
+				arrPathsToChown.push(path);
+chownDirRecursive(path, uid, gid, function(err) {
 					pathsToChown--;
 				arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
 				if(err) return chownDirRecursiveDone(err);
@@ -1918,19 +1938,21 @@ function chownDirRecursive(path, uid, gid, callback) {
 					chownDirRecursiveDoneMaybe();
 					
 				});
-			});
-			
-			// Chown the path
-			pathsToChown++;
-		arrPathsToChown.push(path);
-			fs.chown(path, uid, gid, function chowned(err) {
-				pathsToChown--;
-			arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
-			if(err) return chownDirRecursiveDone(err);
-				
-				chownDirRecursiveDoneMaybe();
-			});
-			
+			}
+			else {
+				// chown the file
+				pathsToChown++;
+				arrPathsToChown.push(path);
+				fs.chown(path, uid, gid, function chowned(err) {
+					pathsToChown--;
+					arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+					if(err) return chownDirRecursiveDone(err);
+					
+					chownDirRecursiveDoneMaybe();
+				});
+				}
+		});
+		
 		}
 		
 		function chownDirRecursiveDoneMaybe() {
