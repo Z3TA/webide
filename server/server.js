@@ -531,8 +531,8 @@ function sockJsConnection(connection) {
 									if(foundUserIn(row)) return checkMounts();
 								}
 								
-								throw new Error("Unable to find username=" + username + " in /etc/passwd");
-								
+								idFail("Unable to find username=" + username + " in /etc/passwd ! A server admin need to active the account.");
+								// Activate the account: sudo useradd -r -s /bin/false nameofuser
 							}
 							
 							function foundUserIn(row) {
@@ -548,8 +548,8 @@ function sockJsConnection(connection) {
 									
 									homeDir = UTIL.trailingSlash(pDir);
 									shell = pShell;
-									uid = pUid;
-									gid = pGid;
+									uid = parseInt(pUid);
+									gid = parseInt(pGid);
 									rootPath = pDir;
 									
 									return true;
@@ -560,32 +560,27 @@ function sockJsConnection(connection) {
 						}
 						
 						function checkMounts() {
-							// Make sure everything is mounted
+							// Make sure everything is mounted etc ...
 							
-							// www user needs to have write access to /sock and read access to /wwwpub
-							// make sure the right www user id
-							/*
-								
-								
-								getGroupId("www-data", function(err, wwwgid) {
-								
-								if(err) throw err;
-								
-								chownDirRecursive(homeDir + "/wwwpub", uid, wwwgid, function(err) {
-								if(err) throw err;
-								
-								});
-								
-								chownDirRecursive(homeDir + "/sock", uid, wwwgid, function(err) {
-								if(err) throw err;
-								
-								});
-								
-								});
-							*/
+							// When a user have been moved to another server, the user id will be different.
+							// So we have to reset the user permissions! 
+							// www-data user id might be the same though, depending on distro
 							
-							// Make sure nginx profile exist
 							var nginxProfileOK = false;
+							var nodeJsLinkOK = false;
+							var nullNodCreated = false;
+							var urandomCreated = false;
+							var foldersToMount = 9;
+							var apparmorProfilesToCreate = 5;
+							var reloadApparmor = false;
+							var reloadedApparmor = false;
+							
+							checkUserRights(username, function (err) {
+								if(err) throw err;
+								
+								
+								
+							// Make sure nginx profile exist
 							var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
 							fs.stat(nginxProfilePath, function (err, stats) {
 								if(err) {
@@ -601,29 +596,26 @@ function sockJsConnection(connection) {
 										fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 											if(err) throw err;
 											nginxProfileOK = true;
-											readyMaybe();
+												checkMountsMaybe();
 										});
 										
 									});
 								}
 								else {
 									nginxProfileOK = true;
-									readyMaybe();
+										checkMountsMaybe();
 								}
 							});
 							
 							// Make sure mounts exist
 							// We need separate executables (hard link works) to have separate apparmor profiles
-							var nodeJsLinkOK = false;
 							mount('/usr/bin/nodejs', '/usr/bin/nodejs_' + username, function(err) {
 								if(err) throw err;
 								
 								nodeJsLinkOK = true;
-								readyMaybe();
+									checkMountsMaybe();
 							});
 							
-							var nullNodCreated = false;
-							var urandomCreated = false;
 							makeDirP(homeDir + "dev", function() {
 								
 								fs.stat(homeDir + "dev/null", function (err, stats) {
@@ -638,14 +630,14 @@ function sockJsConnection(connection) {
 											if(stdout) throw new Error(stdout);
 											
 											nullNodCreated = true;
-											readyMaybe();
+												checkMountsMaybe();
 										});
 										
 									}
 									else {
 										// dev/null already exist!
 										nullNodCreated = true;
-										readyMaybe();
+											checkMountsMaybe();
 									}
 								});
 								
@@ -654,14 +646,12 @@ function sockJsConnection(connection) {
 									if(err) throw err;
 									
 									urandomCreated = true;
-									readyMaybe();
+										checkMountsMaybe();
 								});
 							});
 							
-							
 							// Mount these instead of copying to save hdd space
-							var foldersToMount = 9;
-							mount("/lib/", homeDir + "lib", folderMounted);
+								mount("/lib/", homeDir + "lib", folderMounted);
 							mount("/lib64/", homeDir + "lib64", folderMounted);
 							mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
 							mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
@@ -672,14 +662,102 @@ function sockJsConnection(connection) {
 							mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 							
 							// Create apparmor proiles unless they exist
-							var apparmorProfilesToCreate = 5;
-							var reloadApparmor = false;
-							var reloadedApparmor = false;
 							createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.nodejs", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.python", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.hg", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username, apparmorProfileCreated);
+								
+							});
+							
+							function checkUserRights(username, callback) {
+								var toChown = 0;
+								var toStat = 0;
+								
+								fs.stat(HOME_DIR + username, function (err, stats) {
+									if(err) throw err;
+									
+									if(stats.uid != uid || stats.gid != gid) {
+										// Reset the fs user rights
+										// Don't chown all dirs though, chowning the mounted files could be disastrous!'
+										
+										// www user needs to have write access to /sock and read access to /wwwpub
+										// make sure the right www user id
+										getGroupId("www-data", function(err, wwwgid) {
+											if(err) throw err;
+											
+											fs.readdir(HOME_DIR + username, function (err, files) {
+												if(err) throw err;
+												
+												for (var i=0; i<files.length; i++) {
+													check(files[i]);
+												}
+												
+											});
+											
+											function check(file) { // Closure so we know which path
+												var path = UTIL.joinPaths([HOME_DIR, username, file]);
+												
+												console.log("checkUserRights: Checking file=" + file + " path=" + path);
+												
+												if(file=="dev" || file=="lib" || file=="lib64" || file=="usr") {
+													// Ignore these. Chown'ing these could be disastrous!
+													checkedUserRights();
+													return;
+												}
+												else if(file=="wwwpub" || file == "sock") {
+													// www-data should be the group
+													toChown++;
+													chownDirRecursive(path, uid, wwwgid, function(err) {
+														toChown--;
+														if(err) throw err;
+														checkedUserRights();
+													});
+													return;
+												}
+												else {
+													
+													// Is it a folder ?
+													toStat++;
+													fs.stat(path, function (err, stats) {
+														toStat--;
+														if(err) throw err;
+														
+														if(stats.isDirectory()) {
+															toChown++;
+															chownDirRecursive(path, uid, gid, function(err) {
+																toChown--;
+																if(err) throw err;
+																checkedUserRights();
+															});
+														}
+														else {
+															toChown++;
+															fs.chown(path, uid, gid, function chowned(err) {
+																toChown--;
+																if(err) throw err;
+																checkedUserRights();
+															});
+														}
+													});
+												}
+											}
+											
+										});
+										}
+									});
+								
+								function checkedUserRights() {
+									if(toChown == 0 && toStat == 0) {
+										if(callback) {
+											callback(null);
+											callback = null;
+											}
+									}
+									else console.log("checkUserRights: toChown=" + toChown + " toStat=" + toStat);
+								}
+								
+							}
 							
 							function apparmorProfileCreated(err) {
 								if(err) throw err;
@@ -693,21 +771,21 @@ function sockJsConnection(connection) {
 										if(stdout) throw new Error(stdout);
 										
 										reloadedApparmor = true;
-										readyMaybe();
+										checkMountsMaybe();
 									});
 								} 
 								
-								readyMaybe();
+								checkMountsMaybe();
 							}
 							
 							function folderMounted(err) {
 								foldersToMount--;
 								if(err) throw err;
 								
-								readyMaybe();
+								checkMountsMaybe();
 							}
 							
-							function readyMaybe() {
+							function checkMountsMaybe() {
 								if(nginxProfileOK && nodeJsLinkOK && nullNodCreated && urandomCreated && foldersToMount == 0 && 
 								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor )) {
 									acceptUser();
@@ -1792,6 +1870,9 @@ function getGroupId(groupName, callback) {
 }
 
 function chownDirRecursive(path, uid, gid, callback) {
+	
+	if(typeof callback != "function") throw new Error("Expected fourth parameter callback=" + callback + " to be a callback function!");
+	
 	var fs = require("fs");
 	
 	path = UTIL.trailingSlash(path); // Path is always a directory, put a slash after it to ease concatenation
@@ -1801,65 +1882,80 @@ function chownDirRecursive(path, uid, gid, callback) {
 	var dirsToRead = 0;
 	var pathsToStat = 0;
 	var pathsToChown = 0;
+	var arrPathsToChown = [];
 	
-	dirsToRead++;
-	fs.readdir(path, function readDir(err, files) {
-		dirsToRead--;
-		if(abort) return;
-		if(err) return done(err);
+		dirsToRead++;
+		fs.readdir(path, function readDir(err, files) {
+			dirsToRead--;
+			if(abort) return;
+		if(err) return chownDirRecursiveDone(err);
+			
+			for (var i=0; i<files.length; i++) {
+				doPath(path + files[i]);
+			}
+			
+			chownDirRecursiveDoneMaybe();
+		});
 		
-		for (var i=0; i<files.length; i++) {
-			doPath(path + files[i]);
+		// Closure for path so statResult know's which path it stat'ed
+		function doPath(path) {
+			
+			// Check if it's a directory
+			pathsToStat++;
+			fs.stat(path, function statResult(err, stats) {
+				pathsToStat--;
+				if(abort) return;
+			if(err) return chownDirRecursiveDone(err);
+				
+				// recursively chown if it's a directory
+				pathsToChown++;
+			arrPathsToChown.push(path);
+				if(stats.isDirectory()) chownDirRecursive(path, uid, gid, function(err) {
+					pathsToChown--;
+				arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+				if(err) return chownDirRecursiveDone(err);
+					
+					chownDirRecursiveDoneMaybe();
+					
+				});
+			});
+			
+			// Chown the path
+			pathsToChown++;
+		arrPathsToChown.push(path);
+			fs.chown(path, uid, gid, function chowned(err) {
+				pathsToChown--;
+			arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+			if(err) return chownDirRecursiveDone(err);
+				
+				chownDirRecursiveDoneMaybe();
+			});
+			
 		}
 		
-	});
-	
-	// Closure for path so statResult know's which path it stat'ed
-	function doPath(path) {
+		function chownDirRecursiveDoneMaybe() {
+			if(pathsToStat == 0 && dirsToRead == 0 && pathsToChown == 0 && !abort) {
+			console.log("chownDirRecursive: Done! path=" + path);
+			chownDirRecursiveDone(null);
+		}
+		else {
+				console.log("chownDirRecursive: path=" + path + " pathsToStat=" + pathsToStat + " dirsToRead=" + dirsToRead + 
+			" pathsToChown=" + pathsToChown + " abort=" + abort + " arrPathsToChown=" + JSON.stringify(arrPathsToChown));
+			}
+		}
 		
-		// Check if it's a directory
-		pathsToStat++;
-		fs.stat(path, function statResult(err, stats) {
-			pathsToStat--;
-			if(abort) return;
-			if(err) return done(err);
-			
-			// recursively chown if it's a directory
-			if(stats.isDirectory()) chownDirRecursive(path, uid, gid, function(err) {
-				if(err) return done(err);
-				
-				doneMaybe();
-				
-			});
-		});
-		
-		// Chown the path
-		pathsToChown++;
-		fs.chown(path, uid, gid, function chowned(err) {
-			pathsToChown--;
-			if(err) return done(err);
-			
-			doneMaybe();
-		});
-		
-	}
-	
-	function doneMaybe() {
-		if(abort) return;
-		
-		if(pathsToStat == 0 && dirsToRead == 0 && pathsToChown == 0) done(null);
-	}
-	
-	function done(err) {
-		if(callback) {
+	function chownDirRecursiveDone(err) {
 			abort = true;
 			
+			if(callback) {
 			callback(err);
+			console.log("chownDirRecursive: Called callback! pack=" + path + " err=" + err);
 			callback = null;
+			}
+		else throw new Error("Callback to be called twice!");
 		}
+		
 	}
-	
-}
 
 
 function mount(sourcePath, targetPath, callback) {
@@ -1871,31 +1967,31 @@ function mount(sourcePath, targetPath, callback) {
 	
 	fs.stat(sourcePath, function(err, sourceStats) {
 		
-		if(err) return done(err);
+		if(err) return mountDone(err);
 		
 		// Does the target exist ?
 		fs.stat(targetPath, function(err, targetStats) {
 			
 			if(err) {
-				if(err.code != "ENOENT") return done(err);
+				if(err.code != "ENOENT") return mountDone(err);
 				
 				if(sourceStats.isDirectory()) {
 					makeDirP(targetPath, function(err) {
-						if(err) return done(err);
+						if(err) return mountDone(err);
 						targetCreated();
 					});
 				}
 				else {
 					var parentFolder = UTIL.parentFolder(targetPath);
 					makeDirP(parentFolder, function(err) {
-						if(err) return done(err);
+						if(err) return mountDone(err);
 						
 						// Create emty file
-						fs.open(target, 'w', function (err, fd) {
-							if(err) return done(err);
+						fs.open(targetPath, 'w', function (err, fileDescriptor) {
+							if(err) return mountDone(err);
 							
-							fs.close(fs, function(err) {
-								if(err) return done(err);
+							fs.close(fileDescriptor, function(err) {
+								if(err) return mountDone(err);
 								targetCreated();
 							}); 
 						});
@@ -1904,25 +2000,25 @@ function mount(sourcePath, targetPath, callback) {
 			}
 			else {
 				
-				if(sourceStats.ino == targetStats.ino) return done(null); // Already mounted!
+				if(sourceStats.ino == targetStats.ino) return mountDone(null); // Already mounted!
 				
 				if(sourceStats.isDirectory()) {
 					
-					if(!targetStats.isDirectory()) return done(new Error("Source is a directory, but target is not! sourcePath=" + sourcePath + 
+					if(!targetStats.isDirectory()) return mountDone(new Error("Source is a directory, but target is not! sourcePath=" + sourcePath + 
 					" targetPath=" + targetPath + " sourceStats=" + sourceStats + " targetStats=" + targetStats + " "));
 					
 					// Check if the target folder is emty
 					fs.readdir(targetPath, function readDir(err, files) {
-						if(err) return done(err);
+						if(err) return mountDone(err);
 						
-						if(files.length > 0) return done(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
+						if(files.length > 0) return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
 						else targetCreated();
 						
 					});
 				}
 				else {
 					// Make sure the file is emty
-					if(targetStats.size !== 0) done(new Error("Target file not emty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
+					if(targetStats.size !== 0) mountDone(new Error("Target file not emty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
 					else targetCreated();
 					
 				}
@@ -1933,11 +2029,11 @@ function mount(sourcePath, targetPath, callback) {
 				var exec = require('child_process').exec;
 				
 				exec("mount --bind " + sourcePath + " " + targetPath , function(error, stdout, stderr) {
-					if(error) return done(error);
-					if(stderr) return done(new Error(stderr));
-					if(stdout) return done(new Error(stdout));
+					if(error) return mountDone(error);
+					if(stderr) return mountDone(new Error(stderr));
+					if(stdout) return mountDone(new Error(stdout));
 					
-					return done(null);
+					return mountDone(null);
 				});
 				
 			}
@@ -1946,10 +2042,9 @@ function mount(sourcePath, targetPath, callback) {
 		
 	});
 	
-	function done(err) {
+	function mountDone(err) {
+		abort = true;
 		if(callback) {
-			abort = true;
-			
 			callback(err);
 			callback = null;
 		}
@@ -1992,27 +2087,27 @@ function makeDirP(path, callback) {
 		
 		fs.stat(folderPath, function(err, stats) {
 			if(err) {
-				if(err.code != "ENOENT") return done(err);
+				if(err.code != "ENOENT") return makeDirPDone(err);
 				
 				// The path does not exist. Create it!
 				fs.mkdir(folderPath, function (err) {
-					if(err) return done(err);
+					if(err) return makeDirPDone(err);
 					
 					if(folders.length > 0) checkFolder(folders.shift());
-					else done(null);
+					else makeDirPDone(null);
 				});
 			}
 			else if(!stats.isDirectory()) {
-				return done(new Error("Not a directory: folderPath=" + folderPath + " path=" + path + " folders=" + JSON.stringify(folders)));
+				return makeDirPDone(new Error("Not a directory: folderPath=" + folderPath + " path=" + path + " folders=" + JSON.stringify(folders)));
 			}
 			else {
 				if(folders.length > 0) checkFolder(folders.shift());
-				else done(null);
+				else makeDirPDone(null);
 			}
 		});
 	}
 	
-	function done(err) {
+	function makeDirPDone(err) {
 		if(callback) {
 			callback(err);
 			callback = null;

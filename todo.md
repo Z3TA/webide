@@ -40,6 +40,8 @@ What I'm working on
 
 Try moving a user from one server to anohter ...
 
+ssh root@ben.100m.se 'zfs snapshot ben/home/demo@backup && zfs send ben/home/demo@backup' | sudo zfs receive zpc/home/demo
+
 Solution to Backing up user dirs ...
 
 
