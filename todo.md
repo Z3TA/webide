@@ -38,6 +38,10 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+mount libs when logging in, unmount when logging out.
+create links and make sure apparmor profiles are in place
+
+
 Didn't get logged in after signup! (Chromium guest)
 
 test signup
