@@ -38,6 +38,8 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+Didn't get logged in after signup! (Chromium guest)
+
 test signup
 
 omg I could just have made an "recoverusers" script and saved two days of work!
@@ -87,6 +89,11 @@ Coding an agar clone as a nodejs example
 
 todo
 ----
+
+nginx doesn't give a x-real-ip header!
+
+When a site has been published via SSG it says site published to foo.bar.com and it's supposed to att http:// but it did not!
+
 
 I want to prepare a web document for another user, so that when he logs in the document
 I prepared should open!
