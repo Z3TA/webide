@@ -318,13 +318,15 @@ function sockJsConnection(connection) {
 		if(IP.substring(ipLength - nginxIP.length) == "127.0.0.1") {
 			// From nginx
 			
+			// PS: SockJS filters connection headers! The version we use lets x-real-ip through though.
 			console.log("connection.headers=" + JSON.stringify(connection.headers));
 			
-			var xRealIp = connection.headers["x-real-ip"]; // X-Real-IP  x-real-ip
+			var xRealIp = connection.headers["x-real-ip"];
 			
 			if(xRealIp == undefined) {
 				log("Unable to get IP address from x-real-ip headers", DEBUG);
 			}
+			else IP = xRealIp;
 			
 		}
 	}
