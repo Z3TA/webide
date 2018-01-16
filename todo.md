@@ -38,32 +38,23 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-User get no answer after identifying!! user=demo (that I moved to dev from prod)
+Test goto_files on sftp site
 
-Try moving a user from one server to anohter ...
-
-ssh root@ben.100m.se 'zfs snapshot ben/home/demo@backup && zfs send ben/home/demo@backup' | sudo zfs receive zpc/home/demo
-
-Solution to Backing up user dirs ...
+When I'm on a remote fs (sftp) I get a bunch of errors about folder not found (it seems it tries to look for the remote folder locally)
 
 
-
-Making a website using only prod ...
-
-Making some example projects ...
-
-Coding an agar clone as a nodejs example
 
 
 
 todo
 ----
 
+
 Didn't get logged in after signup! (Chromium guest) !??
 
 test signup
 
-nginx doesn't give a x-real-ip header!
+
 
 When a site has been published via SSG it says site published to foo.bar.com and it's supposed to att http:// but it did not!
 

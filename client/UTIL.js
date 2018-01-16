@@ -146,6 +146,8 @@ var UTIL = {
 			
 		*/
 		
+		if(includeHostInfo == undefined) includeHostInfo = true;
+		
 		fullPath = fullPath.trim(); // Remove white space before and after
 		
 		//console.log("getFolders: fullPath=" + fullPath);

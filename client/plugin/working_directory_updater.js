@@ -35,16 +35,16 @@ EDITOR.plugin({
 		// See if we can find package.json or index.htm
 		
 		var folderPath = UTIL.getDirectoryFromPath(file.path);
-		var folders = UTIL.getFolders(folderPath);
+		var folders = UTIL.getFolders(folderPath, true);
 		
 		search(folders.pop()); // Search down recursively 
 		
 		function search(currentFolder) {
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 				
-				if(err) return alertBox(err.message);
+				if(err) throw err;
 				
-				//console.log("Checking if working directory: " + currentFolder);
+				console.log("Checking if working directory: " + currentFolder);
 				
 				for (var i=0; i<files.length; i++) {
 					if(files[i].name == "package.json" || files[i].name.indexOf("index.htm") != -1) {

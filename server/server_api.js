@@ -2195,7 +2195,7 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 		var progressInterval = 350; // Prevent spamming the client when searching thousands of folders
 		startFolder = UTIL.trailingSlash(startFolder);
 		
-		var folders = UTIL.getFolders(startFolder);
+		var folders = UTIL.getFolders(startFolder, true);
 		var totalFoldersToSearch = 0;
 		var totalFoldersSearched = 0;
 		var callbackCalled = false;

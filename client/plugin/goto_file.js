@@ -304,7 +304,7 @@
 		var searchPath = inputFolder.value; //EDITOR.workingDirectory;
 		isSearching = true;
 		console.time("findFiles"); // Edit server's cuncurrencty setting to fine tune!
-		console.log("Search begun! searchString=" + searchString + " ignore=" + ignore);
+		console.log("Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + ignore);
 		lastSearchText = searchString;
 		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: false, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
 			
