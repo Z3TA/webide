@@ -70,7 +70,7 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	function cleanUp() {
 	}
 	
-}, 1);
+});
 
 
 EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {

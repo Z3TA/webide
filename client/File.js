@@ -554,12 +554,12 @@ var File; // File object is global
 		if(file.text.charAt(0) == "\t") {
 //throw new Error("File starts with a tab: " + file.path);
 				console.warn("File starts with a tab: " + file.path);
-				if(EDITOR.settings.devMode) alertBox("File starts with a tab: " + file.path);
+				if(EDITOR.settings.devMode && !EDITOR.runningTests) alertBox("File starts with a tab: " + file.path);
 			}
 			if(file.text.charAt(file.text.length-1) == "\t") {
 //throw new Error("File ends with a tab: " + file.path);
 				console.warn("File ends with a tab: " + file.path);
-				if(EDITOR.settings.devMode) alertBox("File now ends with a tab: " + file.path);
+				if(EDITOR.settings.devMode && !EDITOR.runningTests) alertBox("File now ends with a tab: " + file.path);
 			}
 		}
 		

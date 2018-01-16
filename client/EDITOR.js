@@ -94,6 +94,7 @@ EDITOR.settings = {
 	useCliboardcatcher: false // Some browsers (IE) can only capture clipboard events if a text element is focused
 };
 
+EDITOR.runningTests = false;   // Able to ignore some stuff like alerts while tests are running
 EDITOR.shouldRender = false;   // Internal flag, use EDITOR.renderNeeded() to re-render!
 EDITOR.shouldResize = false;   // Internal flag, use EDITOR.resizeNeeded() to re-size!
 EDITOR.fileIndex = -1;   // Keep track on opened files (for undo/redo)
@@ -3603,7 +3604,7 @@ EDITOR.lastKeyPressed = "";
 		 (Working directory (" + EDITOR.workingDirectory + ") needs to be / (root))");
 			
 			EDITOR.changeWorkingDir("/");
-			
+		
 			runTests_5616458984153156();
 			return true;
 		}
@@ -4547,6 +4548,9 @@ EDITOR.lastKeyPressed = "";
 				});
 				}
 			*/
+		
+		EDITOR.runningTests = true;
+		
 			doTheTests();
 			
 			
@@ -4614,6 +4618,7 @@ EDITOR.lastKeyPressed = "";
 				
 				function allTestsDone() {
 					
+				EDITOR.runningTests = false;
 					allDone = true;
 					
 					if(fails === 0) testResults.push("All " + finished + " tests passed!")
