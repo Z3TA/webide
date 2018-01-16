@@ -65,6 +65,8 @@ var WysiwygEditor;
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
 		
+		if(arguments.length != 1) throw new Error("Expected only one argument (options object)");
+		
 		var sourceFile = options.sourceFile;
 		var bodyTagSource = options.bodyTagSource;
 		var onlyPreview = options.onlyPreview;

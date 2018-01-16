@@ -31,11 +31,18 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 		
 			EDITOR.openFile("page_source.htm", sourcePage, function(err, sourceFile) {
 				
-				var bodyTag = "body";
-				var onlyPreview = false;
 				var url = fileUrl;
-				var compliedSourceBodyTag = "main";
-				var wysiwygEditor = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, wysiwygEditorLoaded, compiledPage, compliedSourceBodyTag);
+				
+				var wysiwygEditor = new WysiwygEditor({
+					sourceFile: sourceFile, 
+					bodyTagSource: "body", 
+					onlyPreview: false, 
+					newWindow: newWindow, 
+					url: url, 
+					whenLoaded: wysiwygEditorLoaded, 
+					compiledSource: compiledPage, 
+					bodyTagPreview: "main"
+});
 				
 				function wysiwygEditorLoaded() {
 					
@@ -63,7 +70,7 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	function cleanUp() {
 	}
 	
-});
+}, 1);
 
 
 EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
@@ -99,11 +106,22 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 			
 			EDITOR.openFile(testFile, sourcePage, function(err, sourceFile) {
 				
+				if(err) throw err;
+				
 				var bodyTag = "body";
 				var onlyPreview = false;
 				var url = fileUrl;
 				var compliedSourceBodyTag = "main";
-				var wysiwygEditor = new WysiwygEditor(sourceFile, bodyTag, onlyPreview, newWindow, url, wysiwygEditorLoaded, compiledPage, compliedSourceBodyTag);
+				var wysiwygEditor = new WysiwygEditor({
+sourceFile: sourceFile, 
+bodyTagSource: bodyTag, 
+onlyPreview: onlyPreview, 
+newWindow: newWindow, 
+url: url, 
+whenLoaded: wysiwygEditorLoaded, 
+compiledSource: compiledPage, 
+bodyTagPreview: compliedSourceBodyTag
+				});
 				
 				function wysiwygEditorLoaded() {
 					
