@@ -566,6 +566,8 @@ function sockJsConnection(connection) {
 							// So we have to reset the user permissions! 
 							// www-data user id might be the same though, depending on distro
 							
+							console.log("Checking mounts ...");
+							
 							var nginxProfileOK = false;
 							var nodeJsLinkOK = false;
 							var nullNodCreated = false;
@@ -578,7 +580,7 @@ function sockJsConnection(connection) {
 							checkUserRights(username, function (err) {
 								if(err) throw err;
 								
-								
+								console.log("User rights OK for username=" + username);
 								
 							// Make sure nginx profile exist
 							var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
@@ -596,14 +598,14 @@ function sockJsConnection(connection) {
 										fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 											if(err) throw err;
 											nginxProfileOK = true;
-												checkMountsMaybe();
+												checkMountsReadyMaybe();
 										});
 										
 									});
 								}
 								else {
 									nginxProfileOK = true;
-										checkMountsMaybe();
+										checkMountsReadyMaybe();
 								}
 							});
 							
@@ -613,7 +615,7 @@ function sockJsConnection(connection) {
 								if(err) throw err;
 								
 								nodeJsLinkOK = true;
-									checkMountsMaybe();
+									checkMountsReadyMaybe();
 							});
 							
 							makeDirP(homeDir + "dev", function() {
@@ -630,14 +632,14 @@ function sockJsConnection(connection) {
 											if(stdout) throw new Error(stdout);
 											
 											nullNodCreated = true;
-												checkMountsMaybe();
+												checkMountsReadyMaybe();
 										});
 										
 									}
 									else {
 										// dev/null already exist!
 										nullNodCreated = true;
-											checkMountsMaybe();
+											checkMountsReadyMaybe();
 									}
 								});
 								
@@ -646,7 +648,7 @@ function sockJsConnection(connection) {
 									if(err) throw err;
 									
 									urandomCreated = true;
-										checkMountsMaybe();
+										checkMountsReadyMaybe();
 								});
 							});
 							
@@ -673,6 +675,8 @@ function sockJsConnection(connection) {
 							function checkUserRights(username, callback) {
 								var toChown = 0;
 								var toStat = 0;
+								
+								console.log("Checking user rights ...");
 								
 								fs.stat(HOME_DIR + username, function (err, stats) {
 									if(err) throw err;
@@ -752,7 +756,10 @@ function sockJsConnection(connection) {
 											
 										});
 										}
-									});
+									else {
+										checkedUserRights();
+									}
+								});
 								
 								function checkedUserRights() {
 									if(toChown == 0 && toStat == 0) {
@@ -778,26 +785,26 @@ function sockJsConnection(connection) {
 										if(stdout) throw new Error(stdout);
 										
 										reloadedApparmor = true;
-										checkMountsMaybe();
+										checkMountsReadyMaybe();
 									});
 								} 
 								
-								checkMountsMaybe();
+								checkMountsReadyMaybe();
 							}
 							
 							function folderMounted(err) {
 								foldersToMount--;
 								if(err) throw err;
 								
-								checkMountsMaybe();
+								checkMountsReadyMaybe();
 							}
 							
-							function checkMountsMaybe() {
+							function checkMountsReadyMaybe() {
 								if(nginxProfileOK && nodeJsLinkOK && nullNodCreated && urandomCreated && foldersToMount == 0 && 
 								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor )) {
 									acceptUser();
 								}
-								else console.log("nginxProfileOK=" + nginxProfileOK + " nodeJsLinkOK=" + nodeJsLinkOK + " nullNodCreated=" + nullNodCreated + 
+								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " nodeJsLinkOK=" + nodeJsLinkOK + " nullNodCreated=" + nullNodCreated + 
 								" urandomCreated=" + urandomCreated + " foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
 								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " ");
 							}
