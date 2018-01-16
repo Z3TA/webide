@@ -38,12 +38,10 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-fixing failing tests
+A search for "deletemeuniquefolder" in dir "/home/Z/Projects/jzedit/":
+Found 0 match(es) in 172/544 file(s) searched.
 
-Test goto_files on sftp site
-
-When I'm on a remote fs (sftp) I get a bunch of errors about folder not found (it seems it tries to look for the remote folder locally)
-
+But searching in /home/Z/Projects/jzedit/client/ DOES find it!
 
 
 
