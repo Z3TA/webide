@@ -36,7 +36,6 @@
 	
 	var annotateMenuItem;
 	var showAnnotationsString = "Show commit messages";
-	var hideAnnotationsString = "Hide commit messages";
 	var annotations = {};
 	var doAnnotate = false;
 	
@@ -1356,7 +1355,7 @@
 		
 		if(!file) return alertBox("Open a file to see annotations");
 		
-		EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, hideAnnotationsString, annotateOff);
+		EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
 		
 		showAnnotations(file, file.caret);
 		
