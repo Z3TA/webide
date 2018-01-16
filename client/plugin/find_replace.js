@@ -6,7 +6,6 @@
 	var footer, div, inputFind, inputReplace, inputInDir, findButtonLeft, findButtonRight, replaceButton, regexOption, subfolderOption, findAllButton, 
 		replaceAllButton, ignoreCaseOption;
 	
-	
 	var inputFindGotFocus = false;
 	var lastSearchEnd = -1; // Deprecated !??
 	var searchReportCounter = 0;

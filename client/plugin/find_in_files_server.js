@@ -1,8 +1,11 @@
 (function() {
 	"use strict";
 	
+	// todo: Make into a plugin!
 	
 	var footer, div, regexOption, subfolderOption, inputInDir, inputFileFilter, optionCaseSensitive;
+	
+	var inputFind;
 	
 	var inputFindGotFocus = false;
 	
@@ -313,8 +316,8 @@
 				}
 			}
 			
-			if(!inputFindGotFocus) {
-				inputFind.focus(); // undefined is not a function!
+		if(!inputFindGotFocus) {
+			inputFind.focus();
 			}
 			
 			EDITOR.input = false; // Remove focus from the file
@@ -385,7 +388,7 @@
 		
 		console.log("EDITOR.currentFile.path=" + (EDITOR.currentFile ? EDITOR.currentFile.path : undefined) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory + " size=" + size);
 		
-		var inputFind = document.createElement("input");
+		inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
 		inputFind.setAttribute("id", "inputFind");
 		inputFind.setAttribute("class", "inputtext");
