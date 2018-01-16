@@ -55,6 +55,7 @@ Didn't get logged in after signup! (Chromium guest) !??
 
 test signup
 
+benchmark optimization: opening (and editing) large files.
 
 
 When a site has been published via SSG it says site published to foo.bar.com and it's supposed to att http:// but it did not!
@@ -71,11 +72,8 @@ Right clicking in WYSIWYG should show a common (common in wysiwyg editors) forma
 EDITOR.showFileExplorer(folder): Plugins can "fight" over which plugin shall display a file explorer
 
 
-Opening a file is too hard for someone used to a CMS !!????
-Show a CMS like admin page for web sites (SSG)
 
-HTML helper guide plugin ???
-Show a widget with the common "editor" icons like header, link, table etc, that helps you insert HTML
+Make a .htm example page that have all the common html elements.
 
 
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
