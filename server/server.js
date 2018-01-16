@@ -304,32 +304,10 @@ function sockJsConnection(connection) {
 	console.log("connection.remoteAddress=" + connection.remoteAddress);
 	
 	//console.log(connection);
+	if(connection.headers["x-real-ip"]) IP = connection.headers["x-real-ip"];
 	
-	if(IP == undefined) {
-		// Maybe because the user is connecting via HTTP instead of Websockets!?
-		IP = connection.headers["x-real-ip"];
-		//console.log(JSON.stringify(connection.headers, null, 2));
-	}
-	else {
-		// Update: nginx gives ::ffff:127.0.0.1 !!!?
-		var ipLength = IP.length;
-		var nginxIP = "127.0.0.1";
-		
-		if(IP.substring(ipLength - nginxIP.length) == "127.0.0.1") {
-			// From nginx
-			
-			// PS: SockJS filters connection headers! The version we use lets x-real-ip through though.
-			console.log("connection.headers=" + JSON.stringify(connection.headers));
-			
-			var xRealIp = connection.headers["x-real-ip"];
-			
-			if(xRealIp == undefined) {
-				log("Unable to get IP address from x-real-ip headers", DEBUG);
-			}
-			else IP = xRealIp;
-			
-		}
-	}
+	// ipv6 can give ::ffff:127.0.0.1 or 127.0.0.1-xxxx
+	// PS: SockJS filters connection headers! The version we use lets x-real-ip through though.
 	
 	log("Connection on " + protocol + " from " + IP);
 	
@@ -351,7 +329,6 @@ function sockJsConnection(connection) {
 		else log(IP + " => " + message);
 		
 		handleUserMessage(message);
-		
 		
 	}
 	
