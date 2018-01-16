@@ -8,7 +8,7 @@ EDITOR.addTest(function slashInRegexBracket(callback) {
 		callback(true);
 		
 	});
-}, 1);
+});
 
 EDITOR.addTest(function singleQuoteInDoubleQuoteHtml(callback) {
 	EDITOR.openFile("singleQuoteInDoubleQuote.htm", '<html>\n<button onClick="foo.innerHTML = \'<br>\';">\n<br>\n</html>', function(err, file) {

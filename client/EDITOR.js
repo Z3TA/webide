@@ -3337,7 +3337,15 @@ EDITOR.lastKeyPressed = "";
 				
 				if(!options.target.className) options.target = {className: options.target}; // Shorter to write
 				
-				var doubleClickEvent = {clientX: options.x, offsetX: options.x, clientY: options.y, offsetY: options.y, target: options.target, button: options.button}
+				var doubleClickEvent = {clientX: options.x, 
+			offsetX: options.x, 
+			clientY: options.y, 
+			offsetY: options.y, 
+			target: options.target, 
+				button: options.button,
+				preventDefault: function() {console.log("Mocked doubleClick event prevent default.")}
+				
+			}
 				console.log(doubleClickEvent);
 				
 				mouseDown(doubleClickEvent);

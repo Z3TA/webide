@@ -38,6 +38,8 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+fixing failing tests
+
 Test goto_files on sftp site
 
 When I'm on a remote fs (sftp) I get a bunch of errors about folder not found (it seems it tries to look for the remote folder locally)
@@ -49,6 +51,7 @@ When I'm on a remote fs (sftp) I get a bunch of errors about folder not found (i
 todo
 ----
 
+Issues with Hg annotations after hot reloading the plugin!
 
 Didn't get logged in after signup! (Chromium guest) !??
 
