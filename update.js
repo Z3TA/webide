@@ -30,7 +30,6 @@ var UTIL = require("./client/UTIL.js");
 // Update services
 //copyFileSync("./etc/systemd/jzedit.service", "/etc/systemd/system/jzedit.service");
 //copyFileSync("./etc/systemd/jzedit_signup.service", "/etc/systemd/system/jzedit_signup.service");
-copyFileSync("./etc/systemd/jzedit_user_mounts.service", "/etc/systemd/system/jzedit_user_mounts.service");
 copyFileSync("./etc/systemd/jzedit_nodejs_init.service", "/etc/systemd/system/jzedit_nodejs_init.service");
 
 run("systemctl daemon-reload");

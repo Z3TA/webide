@@ -840,7 +840,7 @@ if(callback) callback(null);
 							
 							function createApparmorProfile(template, username, callback) {
 								/*
-									ex: "./etc/apparmor/usr.bin.nodejs_someuser"
+									example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
 								*/
 								
 								var dest = template.replace("someuser", username);

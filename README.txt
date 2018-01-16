@@ -179,13 +179,6 @@ sudo aa-enforce /home/demo/usr/bin/hg
 
 
 
-After reboot
-------------
-Hard links and mountpoints will be deleted on reboot. If you are developing the editor itself ./removeuser.js testuser and ./adduser.js testuser testpw
-If you however are on a production server, make sure the jzedit_user_mounts.service is running: sudo systemctl status jzedit_user_mounts
-
-
-
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
 # Where is the program ?
@@ -208,6 +201,16 @@ sudo chmod +x tracefile
 
 
 # Cate an apparmor profile
+
+
+Moving user from a server to another using zfs
+----------------------------------------------
+ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
+
+(The same method can be used to make backups)
+
+# Enable the user on the new server: 
+sudo useradd -r -s /bin/false nameofuser
 
 
 

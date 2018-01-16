@@ -354,6 +354,8 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	
 
 	// Mount these instead of copying to save hdd space
+		// They will be mounted when the user first login
+		/*
 		mount("/lib/", HOME + username + "/lib");
 		mount("/lib64/", HOME + username + "/lib64");
 		mount("/usr/lib/", HOME + username + "/usr/lib");
@@ -363,16 +365,19 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		mount("/usr/bin/python", HOME + username + "/usr/bin/python");
 		mount("/usr/bin/nodejs", HOME + username + "/usr/bin/nodejs");
 		mount("/etc/ssl/certs", HOME + username + "/etc/ssl/certs"); // Sometimes? Needed for SSL verfification
-		
+		*/
 	
 		
 		// See how to debug apparmor in README.txt
-	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
+		// Apparmor profiles will be created when the user first login
+		/*
+		createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", username);
 		createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", username);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username);
-	
+		*/
+		
 		console.log("User with username=" + username + " and password=" + password + " successfully added!");
 		
 	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
