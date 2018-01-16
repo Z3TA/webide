@@ -388,13 +388,41 @@ function sockJsConnection(connection) {
 		}
 		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 		
-		unmountMounts(userConnectionName);
+		// The user might reconnect, so we don't want to unmount stuff!
+		/*
+			setTimeout(function() {
+unmountMounts(userConnectionName);
+		}, 2000);
+		*/
 		
 	}
 	
-	function unmountMounts(username) {
+	function unmountMounts(username, callback) {
 		
+		var toUnmount = 10;
 		
+		umount(UTIL.joinPaths([HOME_DIR, username, "/dev/urandom"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/lib"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/lib64"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/lib"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/local/lib"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/share"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/hg"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/python"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/nodejs"]), unmounted);
+		umount(UTIL.joinPaths([HOME_DIR, username, "/etc/ssl/certs"]), unmounted);
+		
+		function unmounted(err) {
+			toUnmount--;
+			if(err) {
+				if(callback) callback(err);
+				else console.warn(err.message);
+				callback = null;
+			}
+			else if(toUnmount == 0) {
+if(callback) callback(null);
+				}
+		}
 		
 	}
 	
@@ -2100,6 +2128,42 @@ function mount(sourcePath, targetPath, callback) {
 		// Server was unable to boot after adding stuff to fstab!!
 	*/
 }
+
+
+function umount(path, callback) {
+	
+	
+	var exec = require('child_process').exec;
+	
+	exec("umount " + path + " --force --lazy" , function(error, stdout, stderr) {
+		
+		console.log("umount: path=" + path + " error=" + error + " stdout=" + stdout + " stderr=" + stderr);
+		
+		if(error) {
+			if(error.message.indexOf("umount: " + path + ": not mounted") != -1) {
+				console.warn("not mounted: path=" + path);
+		}
+			else if(error.message.indexOf("umount: " + path + ": mountpoint not found") != -1) {
+				console.warn("mountpoint not found: path=" + path);
+		}
+			else if(error.message.indexOf("umount: " + path + ": No such file or directory") != -1) {
+			console.warn("No such file or directory: path=" + path);
+		}
+			else return callback(error);
+		}
+		else {
+		if(stderr) return callback(new Error(stderr));
+		if(stdout) return callback(new Error(stdout));
+		}
+		
+		console.log("umount: success! path=" + path);
+		
+		return callback(null);
+		
+	});
+	
+}
+
 
 function makeDirP(path, callback) {
 	
