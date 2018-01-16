@@ -102,7 +102,7 @@
 			
 		});
 		
-	});
+	}, 1);
 	
 	
 	EDITOR.addTest(function ftpFindInFiles(callback) {
