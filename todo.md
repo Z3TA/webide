@@ -39,17 +39,9 @@ What I'm working on
 -------------------
 
 
-Didn't get logged in after signup! (Chromium guest) !??
-
-test signup
-
-
 
 todo
 ----
-
-benchmark optimization: opening (and editing) large files.
-
 
 When a site has been published via SSG it says site published to foo.bar.com and it's supposed to att http:// but it did not!
 
@@ -1855,6 +1847,9 @@ Voice commands / Speach recognition: test it on mobile, add voice commands for c
 vioce command mode and insert mode: when in insert mode what you say is inserted as text !?
 Use The Insert key for insertingn speach to text !?
 
+---
+
+Better support for large files, like being able to edit and search.
 
 
 ### Debugging
@@ -2033,6 +2028,8 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+When opening images png, jpg, show image viewer, with ability to create thumbnails.
 
 When reading a log file ... Have editor api for following a file, like in tail -f
 
