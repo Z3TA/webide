@@ -43,11 +43,9 @@ What I'm working on
 todo
 ----
 
-When a site has been published via SSG it says site published to foo.bar.com and it's supposed to att http:// but it did not!
-
-
 I want to prepare a web document for another user, so that when he logs in the document
 I prepared should open!
+
 When loggin in as another user, the editor should open up the last files that user had opened!
 Same as if that user would login again!
 Also don't try to open the files the user had opened before (on a previews login)!
@@ -1232,6 +1230,7 @@ The code sometimes "jumps" when editing in a subfunction.
 
 Pasting code into an emty (sub) function sometimes does weird things
 
+When a site has been published via SSG it says site published to foo.bar.com and it's supposed to add http:// but it did not!??
 
 
 
