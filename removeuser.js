@@ -57,7 +57,7 @@ catch(err) {
 	
 	// Reload nginx to remove descriptors to files in user home dir
 	try {
-		var nginxReloadStdout = child_process.execSync("service nginx reload");
+		var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 2");
 	}
 	catch(err) {
 		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1) throw err;
@@ -239,5 +239,4 @@ catch(err) {
 		fs.writeFileSync(filePath, text, ENCODING);
 		
 	}
-	
 	
