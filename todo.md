@@ -43,13 +43,6 @@ What I'm working on
 todo
 ----
 
-I want to prepare a web document for another user, so that when he logs in the document
-I prepared should open!
-
-When loggin in as another user, the editor should open up the last files that user had opened!
-Same as if that user would login again!
-Also don't try to open the files the user had opened before (on a previews login)!
-
 Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
 
 EDITOR.showFileExplorer(folder): Plugins can "fight" over which plugin shall display a file explorer
