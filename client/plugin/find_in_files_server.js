@@ -21,6 +21,7 @@
 	var linePadSpace = 6;
 	var filesMatched = {};
 	var lastRowNr = -1;
+	var progressBar;
 	
 	EDITOR.on("start", function find_in_files_main() {
 		
@@ -42,6 +43,7 @@
 		EDITOR.on("dblclick", fifdblclick);
 		
 		CLIENT.on("foundInFile", foundInFile);
+		CLIENT.on("findInFilesStatus", findInFilesProgressStatus);
 		
 	});
 	
@@ -388,6 +390,12 @@
 		
 		console.log("EDITOR.currentFile.path=" + (EDITOR.currentFile ? EDITOR.currentFile.path : undefined) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory + " size=" + size);
 		
+		progressBar = document.createElement("progress");
+		progressBar.setAttribute("class", "progress findFiles");
+		progressBar.setAttribute("style", "display: none; width: 100%");
+		progressBar.setAttribute("value", "0");
+		progressBar.setAttribute("max", "1");
+		
 		inputFind = document.createElement("input");
 		inputFind.setAttribute("type", "text");
 		inputFind.setAttribute("id", "inputFind");
@@ -574,6 +582,7 @@
 		
 		// wow, adding dom elements is really tedious!
 		
+		div.appendChild(progressBar);
 		
 		div.appendChild(table);
 		
@@ -688,6 +697,7 @@
 					
 				}
 				else {
+					
 					reportFile.writeLine(json.msg);
 					
 					// Highlight the matches
@@ -696,6 +706,8 @@
 					for(var i=0; i<matches.length; i++) {
 						reportFile.highlightText(matches[i]);
 					}
+					
+					progressBar.style.display = "none";
 					
 					EDITOR.renderNeeded();
 					
@@ -738,6 +750,26 @@
 	
 	function filterFileNames(name) {
 		return fileFilterRegExp.test(name);
+	}
+	
+	function findInFilesProgressStatus(status) {
+		console.log("findInFilesProgressStatus: " + JSON.stringify(status));
+		
+		// Whatever gives the highest percentage
+		progressBar.max = status.totalFoldersToSearch + status.totalFiles;
+		progressBar.value = status.totalFoldersSearched + status.totalFilesSearched;
+		
+		if(progressBar.max == progressBar.value) {
+			progressBar.style.display = "none";
+			EDITOR.resizeNeeded();
+			progressBar.max = 1;
+			progressBar.value = 0;
+		}
+		else {
+			var oldStyleDisplay = progressBar.style.display;
+			progressBar.style.display = "block";
+			if(oldStyleDisplay != "block") EDITOR.resizeNeeded();
+		}
 	}
 	
 })();

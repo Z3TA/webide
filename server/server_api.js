@@ -1919,6 +1919,12 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	var done = false;
 	var searchSymLinks = true;
 	var maxFilesToSearchAtTheSameTime = 5;
+	var totalFoldersSearched = 0;
+	var totalFoldersToSearch = 0;
+	var progressInterval = 350;
+	var lastProgress = new Date();
+	var searchBegin = new Date();
+	var totalFilesSearched = 0;
 	
 	if(!caseSensitive) flags += "i";
 	
@@ -1932,6 +1938,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		
 		foldersToRead++;
 		folderDepth++;
+		totalFoldersToSearch++;
 		
 		API.listFiles(user, {pathToFolder: folderPath}, function fileList(err, json) {
 			
@@ -1948,7 +1955,9 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 				date - Date - The last modified date of the entry.
 			*/
 			for (var i=0; i<fileList.length; i++) {
-				if(fileList[i].type == "d" && searchSubfolders) searchDir(fileList[i].path, folderDepth);
+				if(fileList[i].type == "d" && searchSubfolders) {
+searchDir(fileList[i].path, folderDepth);
+				}
 				else if(fileList[i].type == "-" || (fileList[i].type == "l" && searchSymLinks)) {
 					totalFilesFound++;
 					if(fileFilterRegExp.test(fileList[i].path)) fileQueue.push(fileList[i].path);
@@ -1956,6 +1965,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 			}
 			
 			foldersToRead--;
+			totalFoldersSearched++;
 			
 			doWeHaveAllFiles();
 			
@@ -2006,6 +2016,8 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		if(abort) return console.log("Aborting from doneMaybe()");
 		if(done) throw new Error("We should not be calling doneMaybe() if done!");
 		
+		sendProgress();
+		
 		if(fileQueue.length == 0 && filesBeingSearched == 0) doneFinish();
 		else {
 			//continueSearchFiles(); // RangeError: Maximum call stack size exceeded
@@ -2041,9 +2053,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		
 			var myRe = new RegExp(searchString, flags); // Create a new RegExp for each file!
 			
-			
-				
-				console.log("Searching file: " + filePath);
+			console.log("Searching file: " + filePath);
 				
 				var result;
 				var lastIndex = 0;
@@ -2128,6 +2138,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 					if(err) return abortError(err);
 						
 					filesBeingSearched--;
+					totalFilesSearched++;
 					doneMaybe();
 					
 				});
@@ -2135,6 +2146,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 			}
 			else {
 				filesBeingSearched--;
+				totalFilesSearched++;
 				doneMaybe();
 			}
 			
@@ -2148,18 +2160,40 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		
 		done = true;
 		
-		if(msg == undefined) msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched."
+		if(msg == undefined) {
+			var totalTime = Math.round((((new Date()) - searchBegin) / 10) / 100);
+			msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.\n";
+			}
 		
 		findReplaceInFilesCallback(null, {msg: msg, matches: matches});
 		
 	}
 	
-	
-	
-	
 	function abortError(err) {
 		if(!abort) findReplaceInFilesCallback(err);
 		abort = true;
+	}
+	
+	function sendProgress() {
+		var now = new Date();
+		if(now - lastProgress > progressInterval) {
+			user.send({
+				findInFilesStatus: {
+					totalFoldersToSearch: totalFoldersToSearch,
+					totalFoldersSearched: totalFoldersSearched,
+					foldersBeingSearched: foldersToRead,
+					fileQueue: fileQueue.length,
+					totalFiles: totalFiles,
+					totalFilesSearched: totalFilesSearched,
+					filesBeingSearched: filesBeingSearched,
+					totalMatches: totalMatches,
+					maxTotalMatches: maxTotalMatches,
+					searchString: searchString,
+					folder: searchPath
+				}
+			});
+			lastProgress = now;
+		}
 	}
 	
 }
