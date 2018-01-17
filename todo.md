@@ -38,6 +38,7 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+Files manually moved or saved to wwwpub don't get www-data as group owner!!!
 
 
 todo
