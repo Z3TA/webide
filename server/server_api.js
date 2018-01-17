@@ -1869,7 +1869,9 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		Streams vs non streams: Streams use less memory but is harder to search with multi-line regexp
 		Hopefully each file will not be that big and we'll be able to load each file into memory.
 		
-		
+		Performance optimization:
+		maxFilesToSearchAtTheSameTime = 5; Found 3 match(es) in 2655/10365 file(s) searched in 186s.
+		maxFilesToSearchAtTheSameTime = 50; Found 3 match(es) in 2655/10365 file(s) searched in 41.66s.
 		
 	*/
 	
@@ -1918,7 +1920,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	var abort = false;
 	var done = false;
 	var searchSymLinks = true;
-	var maxFilesToSearchAtTheSameTime = 5;
+	var maxFilesToSearchAtTheSameTime = 50; // Hard drivers are really bad at multi tasking
 	var totalFoldersSearched = 0;
 	var totalFoldersToSearch = 0;
 	var progressInterval = 350;
@@ -2161,7 +2163,7 @@ searchDir(fileList[i].path, folderDepth);
 		done = true;
 		
 		if(msg == undefined) {
-			var totalTime = Math.round((((new Date()) - searchBegin) / 10) / 100);
+			var totalTime = Math.round(((new Date()) - searchBegin) / 10) / 100;
 			msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.\n";
 			}
 		
