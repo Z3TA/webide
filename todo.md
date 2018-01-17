@@ -39,8 +39,6 @@ What I'm working on
 -------------------
 
 
-Testing ./removeuser.js script
-
 Didn't get logged in after signup! (Chromium guest) !??
 
 test signup
