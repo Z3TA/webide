@@ -223,6 +223,7 @@ function sockJsConnection(connection) {
 	}
 	
 	function createAccount(userData, callback) {
+		console.time("createAccount");
 		var username = userData.substring(0, userData.indexOf(","));
 		var password = userData.substring(userData.indexOf(",") + 1);
 		
@@ -282,6 +283,8 @@ function sockJsConnection(connection) {
 					" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout);
 					
 				}
+				
+				console.timeEnd("createAccount");
 			}
 			else {
 				log("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!", ERROR);

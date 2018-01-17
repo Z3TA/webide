@@ -52,11 +52,11 @@
 			else if(code == "available") {
 				if(arr[2]=="false") alertUsername("Username " + arr[1] + " is " + (arr[2]=="true" ? "" : "not") + " available!");
 			}
-			else if(code == "createError") alertGeneralMessage("Unable to create username " + arr[1] + " on " + arr[2] + ": " + arr[3]);
+			else if(code == "createError") alertGeneralMessage("Unable to create user " + arr[1] + " on " + arr[2] + ": " + arr[3]);
 			else if(code == "serviceError") alertGeneralMessage(arr[1]);
 			else if(code == "created") {
-				alertGeneralMessage("Successfully created username" + arr[1]);
-				document.location="https://" + arr[2] + "/";
+				alertGeneralMessage("Successfully created user " + arr[1]);
+				document.location = location.protocol + "://" + arr[2] + "/";
 			}
 			else {
 				throw new Error("Unknown message from signup service: " + msg);
@@ -114,7 +114,7 @@
 			var password = inputPassword.value;
 			var password2 = inputPassword2.value;
 			
-			if(password != password2) return;
+			if(password != password2) return alertPassword("The repeated password is not the same!");;
 			
 			createAccount(username, password);
 		}
@@ -127,6 +127,7 @@
 		}
 		
 		function createAccount(username, password) {
+			alertGeneralMessage("Creating user " + username + ". Please wait ...");
 			connSend("createAccount:" + username + "," + password);
 		}
 		
@@ -155,7 +156,10 @@
 				var err = new Error("Not connected to signup service!");
 				err.code = "CONNECTION_CLOSED";
 				if(callback) callback(err);
-				else throw err;
+				else {
+					alertGeneralMessage("Lost connection or not connected to signup service!");
+					throw err;
+				}
 			}
 			
 		}
