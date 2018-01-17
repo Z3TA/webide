@@ -38,22 +38,17 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-A search for "deletemeuniquefolder" in dir "/home/Z/Projects/jzedit/":
-Found 0 match(es) in 172/544 file(s) searched.
 
-But searching in /home/Z/Projects/jzedit/client/ DOES find it!
+Testing ./removeuser.js script
 
+Didn't get logged in after signup! (Chromium guest) !??
+
+test signup
 
 
 
 todo
 ----
-
-Issues with Hg annotations after hot reloading the plugin!
-
-Didn't get logged in after signup! (Chromium guest) !??
-
-test signup
 
 benchmark optimization: opening (and editing) large files.
 
@@ -1163,6 +1158,9 @@ bug: When renaming and then moving a child's child folder it has the old id/path
 
 Se commit 2357 about fs links ... How should we handle them ? 
 Got an ENOENT error when stating .steam folder which links elwhere
+
+Issues with Hg annotations after hot reloading the plugin!
+
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------

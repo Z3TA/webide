@@ -30,7 +30,7 @@ var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrSync = require("./shared/chownrSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
 
-var defaultDomain = "localhost";
+var defaultDomain = "webide.se";
 var defaultHome = "/home/";
 
 // Get arguments ...
