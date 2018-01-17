@@ -915,7 +915,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 				if(changesetId.indexOf(changeId) == -1) {
 					changesetId.push(changeId);
 					
-					execFile('hg', ["-v", "log", "--rev", changeId], { cwd: rootDir, env: execFileOptions.env }, hglog);
+					execFile('hg', ["-v", "log", "--rev", changeId], { cwd: rootDir, env: execFileOptions.env, maxBuffer: 1024 * 1024 * 10 }, hglog);
 					}
 				lines[i] = changeId; // Map line to changeset
 			}
