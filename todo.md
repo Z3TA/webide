@@ -43,7 +43,6 @@ What I'm working on
 todo
 ----
 
-Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
 
 EDITOR.showFileExplorer(folder): Plugins can "fight" over which plugin shall display a file explorer
 
@@ -1251,6 +1250,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
 
 Autocomplete paths when saving files, or "save file here" on file explorer context menu should request savefile-widget.
 
