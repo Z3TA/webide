@@ -1931,6 +1931,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		if(folderDepth > maxFolderDepth) return console.log("Max folder depth reached! maxFolderDepth=" + maxFolderDepth + " folderDepth=" + folderDepth + " folderPath=" + folderPath);
 		
 		foldersToRead++;
+		folderDepth++;
 		
 		API.listFiles(user, {pathToFolder: folderPath}, function fileList(err, json) {
 			
@@ -1947,7 +1948,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 				date - Date - The last modified date of the entry.
 			*/
 			for (var i=0; i<fileList.length; i++) {
-				if(fileList[i].type == "d" && searchSubfolders) searchDir(fileList[i].path, ++folderDepth);
+				if(fileList[i].type == "d" && searchSubfolders) searchDir(fileList[i].path, folderDepth);
 				else if(fileList[i].type == "-" || (fileList[i].type == "l" && searchSymLinks)) {
 					totalFilesFound++;
 					if(fileFilterRegExp.test(fileList[i].path)) fileQueue.push(fileList[i].path);
