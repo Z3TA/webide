@@ -3901,9 +3901,131 @@ var File; // File object is global
 		return !(gridRow < startRow || gridRow > endRow);
 	}
 	
-	
-	
 	File.prototype.loadFilePart = function loadFilePart(partStartRow, callback) {
+		var file = this;
+		if(partStartRow == undefined) partStartRow = 0;
+		
+		if(partStartRow < 0) throw new Error("Can not begin stream in negative row:" + partStartRow);
+		
+		if(file.totalRows != -1) {
+			if(partStartRow >= file.totalRows) throw new Error("Can not begin stream in above file.totalRows=" + file.totalRows);
+		}
+		
+		if(callback == undefined) console.warn("loadFilePart with no callback!");
+		
+		var endRow = partStartRow + EDITOR.settings.bigFileLoadRows;
+		
+		CLIENT.cmd("readLines", {path: file.path, start: partStartRow+1, end: endRow+1, lineBreak: file.lineBreak, max: EDITOR.settings.bigFileLoadRows}, function readLines(err, resp) {
+
+			if(err) {
+				if(callback) callback(err);
+				else alertBox("Unable to load file part: " + err.message);
+			}
+			else {
+			
+				// resp: {path, lines, end, totalLines}
+				file.text = resp.lines.join(file.lineBreak);
+				
+				var endReached = resp.end == resp.totalLines;
+				
+				//file.debugGrid();
+				
+				file.indentation = determineIndentationConvention(file.text, file.lineBreak);
+				
+				file.grid = file.createGrid();
+				
+				console.log("Loaded " + file.grid.length + " rows! EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows);
+				
+				console.log("Fixing caret ... ");
+				console.log("file.caret.row=" + file.caret.row + " ");
+				
+				var diff = (file.partStartRow - partStartRow);
+				
+				console.log("diff=" + diff);
+				
+				// Move the caret to the same position it was on
+				file.caret.row += diff;
+				console.log("Placed it at file.caret.row=" + file.caret.row + " ");
+				
+				if(file.caret.row < 0) {
+					// Place the caret at the top
+					console.log("Place the caret at the top");
+					file.caret.row = 0;
+					file.caret.col = 0;
+					
+					
+					if(file.grid[0].length > 0) {
+						file.caret.eol = false;
+						file.caret.eof = false;
+					}
+					else {
+						file.caret.eol = true;
+						if(file.caret.row == (file.grid.length-1)) {
+							file.caret.eof = true;
+						}
+						else {
+							file.caret.eof = false;
+						}
+					}
+					
+				}
+				else if(file.caret.row >= (file.grid.length)) {
+					// Place the caret at EOF
+					console.log("Place the caret at EOF");
+					file.caret.row = file.grid.length-1;
+					file.caret.col = file.grid[file.grid.length-1].length -1;
+					file.caret.eol = true;
+					file.caret.eof = true;
+				}
+				
+				file.fixCaret();
+				
+				console.log("After fixing caret: file.caret.row=" + file.caret.row + " ");
+				
+				
+				
+				
+				file.partStartRow = partStartRow;
+				
+				
+				
+				
+				//EDITOR.renderNeeded();
+				
+				callback(null);
+				
+				// Force render!?
+				//EDITOR.shouldRender = true;
+				//EDITOR.render();
+				
+				if(endReached) {
+					file.tail = true;
+					file.head = false;
+				}
+				else if(partStartRow == 0) {
+					file.head = true;
+					file.tail = false;
+				}
+				else {
+					file.head = false;
+					file.tail = false;
+				}
+				
+				
+				console.log("file.totalRows=" + file.totalRows);
+				var totalLineBreaks = resp.totalLines-1;
+			file.totalRows = totalLineBreaks;
+			
+			}
+			
+			
+
+		});
+		
+		
+	}
+	
+	File.prototype.loadFilePartOld = function loadFilePart(partStartRow, callback) {
 		/*
 			
 			To not get event limit errors we have to flush the toilet after we are done.

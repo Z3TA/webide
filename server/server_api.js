@@ -44,7 +44,7 @@ API.readLines = function readLines(user, json, callback) {
 	var encoding = json.encoding || "utf8";
 	var lineBreak = json.lineBreak || "\n";
 	var startLine = json.start || 1;
-	var MAX_LINES = 10000;
+	var MAX_LINES = json.max || 10000;
 	var endLine = json.end || MAX_LINES;
 	var lines = [];
 	var stream;
@@ -59,8 +59,12 @@ API.readLines = function readLines(user, json, callback) {
 	if(startLine < 1) return callback("start line can not be below line 1 (line 1 is the first line)");
 	if(startLine > endLine) return callback("start line can not be above end line!");
 		
+	// todo: Support ftp/ftps and ftps !!?
+	
 		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 			
+		return callback(new Error("readLines on ftp or ftps not yet supported!"));
+		
 			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
 				var c = user.remoteConnections[parse.hostname].client;
@@ -102,6 +106,8 @@ API.readLines = function readLines(user, json, callback) {
 		}
 		else if(parse.protocol == "sftp:") {
 			
+		return callback(new Error("readLines on sftp not yet supported!"));
+		
 			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				
 				var c = user.remoteConnections[parse.hostname].client;
