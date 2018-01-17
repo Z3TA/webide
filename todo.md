@@ -38,8 +38,12 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-Files manually moved or saved to wwwpub don't get www-data as group owner!!!
+must link /etc/nginx/sites-available/foo to /etc/nginx/sites-enabled/ !! (in server.js)
 
+nginx not working on prod!
+
+Files manually moved or saved to wwwpub don't get www-data 
+(seems you have to set public flag! 777 filtershapenbit)
 
 todo
 ----
