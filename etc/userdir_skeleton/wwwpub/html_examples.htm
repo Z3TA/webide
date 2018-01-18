@@ -19,15 +19,62 @@
 
 <p>This is a paragraph.</p>
 
-<p>This is another paragraph with <b>bolt</b> <i>italic</i> and <u>underlined</u> text.</p> 
+<p>This is another paragraph with <b>bold</b> <i>italic</i> and <u>underlined</u> text.</p> 
 
-<svg width="200" height="200">
-	
-	<circle cx='100' cy='100' r='100' fill='yellow'/>
-	<circle cx='140' cy='60' r='15' fill='black'/>
-	<circle cx='70' cy='60' r='15' fill='black'/>
-	<path d='M 10 19 A 8 8 0 0 0 20 19' stroke='black' stroke-width='2'/>
-	
+<!-- SVG smilie image -->
+<svg width="204" height="204">
+	<circle cx='102' cy='102' r='100' fill='yellow' stroke="black" stroke-width='2'/>
+	<circle cx='60' cy='65' r='15' fill='black'/>
+	<circle cx='140' cy='60' r='16' fill='black'/>
+	<path d='M 70 140 A 10 10 90 0 0 150 120' stroke='red' stroke-width='8'/>
+	<!--A rx ry x-axis-rotation large-arc-flag sweep-flag x y -->
 </svg>
+
+<hr>
+
+<p>A paragraph with a line<br>
+break in it</p>
+
+<table>
+	<tr>
+		<th>Table header</th>
+		<th>Table header 2</th>
+	</tr>
+	<tr>
+		<td>Row 1</td>
+		<td>Interesting data</td>
+		</tr>
+	<tr>
+		<td>Row 2</td>
+		<td>Interesting data 2</td>
+	</tr>
+</table>
+
+<center>
+<p>A paragraph in the center</p>
+</center>
+
+<form action="mailto:me@mycompany.com?subject=web">
 	
-	</body>
+	<input type="hidden" name="secret" value="Can't see this">
+	
+	<input type="text" name="textinput" placeholder="type text here" size="30"><br>
+	<br>
+	<textarea name="bigtext" rows="4" cols="40">Type a lot of text here</textarea><br>
+	<br>
+	<label for="date">Pick a date: <input type="date" id="date" name="date"></label><br>
+	<br>
+	<label for="phone">Your nr: <input type="text" id="phone" name="phone" /></label><br>
+	<br>
+	<input type="radio" id="dogs" name="animal" /><label for="dogs">I like dogs</label><br>
+	<input type="radio" id="cats" name="animal" /><label for="cats">I like cats</label><br>
+	<br>
+	<input type="checkbox" id="alegic" name="alegic" /><label for="alegic">I'm alegic to pets</label><br>
+	<br>
+	<button type="button">I'm a button</button>
+	<button type="submit">Click to submit</button>
+	
+</form>
+
+
+</body>
