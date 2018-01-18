@@ -1124,7 +1124,7 @@ function createHttpEndpoint(username, folder, callback) {
 	
 	log("Creating HTTP endpoint to folder=" + folder + " ...");
 	
-	if(HOME_DIR) {
+	if(HOME_DIR && !USERNAME) {
 		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
 	
