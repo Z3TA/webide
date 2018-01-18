@@ -1,6 +1,8 @@
 (function() {
 "use strict";
 
+	if(window.location.href.indexOf("tutorial") == -1) return;
+	
 	var achievements = null; // Wait for storage!
 	var experience = 0; // todo
 	
