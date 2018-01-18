@@ -2016,6 +2016,12 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+---
+When you change left side of tag/element. Auto change the right side/closing tag. 
+Eg when you change a <h2> to a <h3> auto change the closing </h2> to </h3>
+(Only when you hit tab/auto-complete !?)
+---
+
 When in WYSIWYG mode you can drag elements like buttons and input to the WYSIWYG. Like in VisualBasic.
 When you double click on the element, you get to the code that handles the onclick event. (like in vb)
 
