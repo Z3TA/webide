@@ -321,6 +321,12 @@
 		
 		console.log(obj);
 		
+		if(obj == null) {
+			console.warn("Unable to get window object. Has the window been closed!?");
+			previewWin = null;
+			return;
+		}
+		
 		var names = [];
 		
 		var beforeNoDot = before.slice(0,-1);
