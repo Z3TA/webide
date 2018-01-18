@@ -13,32 +13,40 @@
 <div class="main">
 	
 	<abstract>
-	<p>Want to make a web-site or app ? And have it running live in the cloud five minuts from now ?</p>
-	
-	<p>All you have to know is some JavaScript, HTML and CSS !</p>
+	<p>Want to make a web-site or app ?<br>
+	And have it running <i>live</i> on the web/cloud five minuts from now ?</p>
 	
 	<p>Deploy your web apps and micro-services in one click ...</p>
 	</abstract>
 	
-	<h1>webide.se</h1>
+	<h1>Free JZedit server: webide.se</h1>
 	
-	<p><a href="https://webide.se/">webide.se</a> is the <a href="#jzedit">JZedit</a> source code editor for JavaScript, running on a server.</p>
+	<!--<p><a href="https://webide.se/">webide.se</a> is a free <a href="#jzedit">JZedit</a> server.</p>-->
 	
-	<p>webide.se give you web hosting space for static web sites and Node.JS micro services,
-	making it possible to both develop and run (host, in production) full stack JavaScript web applications from any device that have a web browser, 
-	without need for plugins or installing anything, and without touching a terminal or command line!</p>
+	<p>webide.se is an online editor, and can also host your web sites and Node.JS apps,
+	making it easy to both develop and deploy (run, in production) full stack JavaScript web applications 
+	from any device that have a web browser.
+	Without installing anything, or touching a terminal or command line!</p>
 	
+	
+	<h2>Why should I use webide.se to edit my web site !?</h2>
+	
+	<p>Besides being an online editor where you can edit the HTML, CSS and JavaScript, It also has a built in static site generator (SSG).<br>
+	Press <kbd>F9</kbd> or select "Static site generator" from the menu to see the tool-buttons for the SSG.
+	There you can press the <kbd>preview</kbd> button, that lets you see changes in real time. Or the <kbd>WYSIWYG</kbd>-button 
+	which enables edits in the preview window aka. "What you see is what you get".</p>
 	
 	
 	<a name="jzedit"></a>
 	<h1>JZedit</h1>
 	
-	<p>JZedit is a text editor for JavaScript, CSS, HTML and web
-	development, with IDE-like features such as auto-complete and built in version
-	control (Mercurial), and a built in static-site-generator.</p>
+	<p>webide.se is a free server for JZedit which is a code editor for JavaScript, CSS, and HTML, 
+	with IDE-like features such as auto-complete and built in version
+	control (Mercurial with hggit).</p>
 	
-	<p>JZedit is open source and can run locally on a PC or any device capable of running <a href="https://www.nodejs.org/">Node.JS</a>.<br>
-	It can also run on a headless private server where you connect to it from a browser.</p>
+	<p>While being a "cloud editor" it can also run locally on a PC, 
+	or any device that can run <a href="https://www.nodejs.org/">Node.JS</a>.</p>
+	
 	
 	
 	<h2>Features</h2>
@@ -54,7 +62,8 @@
 		<li>Connect to FTP/FTPS/SFTP servers and edit files remotely.</li>
 		<li>Source control: Commit from within the editor and show annotations.</li>
 		<li>It's possible to run the editor embedded on a web site.</li>
-	</ul>
+		<li>Client can run on mobile phones and tables (or any HTML5 compatible device).</li>
+		</ul>
 	
 	
 	<h2>Architecture</h2>
@@ -67,11 +76,10 @@
 	And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
 	
 	<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
-	Each plugin is an independent unit and do not depend on or interfere with other plugins.<br>
+	Each plugin is an independent unit and do not depend on, or interfere with other plugins.<br>
 	Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 	
 </div>
 
 	</body>
 	</html>
-	
