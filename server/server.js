@@ -584,7 +584,7 @@ if(callback) callback(null);
 							var apparmorProfilesToCreate = 5;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
-							
+
 							checkUserRights(username, function (err) {
 								if(err) throw err;
 								
@@ -593,7 +593,8 @@ if(callback) callback(null);
 							// Make sure nginx profile exist
 							var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
 							fs.stat(nginxProfilePath, function (err, stats) {
-								if(err) {
+
+if(err) {
 									if(err.code != "ENOENT") throw err;
 									
 									fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
@@ -605,19 +606,47 @@ if(callback) callback(null);
 										
 										fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
 											if(err) throw err;
-											nginxProfileOK = true;
-												checkMountsReadyMaybe();
+												checkNginxEnabled();
 										});
 										
 									});
 								}
 								else {
-									nginxProfileOK = true;
+										checkNginxEnabled();
+									}
+									
+									function checkNginxEnabled() {
+									
+										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + username + "." + DOMAIN;
+										fs.stat(nginxProfileEnabledPath, function (err, stats) {
+if(err) {
+if(err.code != "ENOENT") throw err;
+
+												fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
+if(err) throw err;
+												
+var exec = require('child_process').exec;
+exec("service nginx reload", function(error, stdout, stderr) {
+if(error) throw(error);
+if(stderr) throw new Error(stderr);
+if(stdout) throw new Error(stdout);
+
+nginxProfileOK = true;
+checkMountsReadyMaybe();
+});
+
+												});
+										}
+else {
+										nginxProfileOK = true;
 										checkMountsReadyMaybe();
-								}
-							});
-							
-							// Make sure mounts exist
+										}
+									});
+									}
+									
+								});
+								
+								// Make sure mounts exist
 							// We need separate executables (hard link works) to have separate apparmor profiles
 							mount('/usr/bin/nodejs', '/usr/bin/nodejs_' + username, function(err) {
 								if(err) throw err;

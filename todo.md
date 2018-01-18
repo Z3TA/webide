@@ -38,12 +38,6 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-must link /etc/nginx/sites-available/foo to /etc/nginx/sites-enabled/ !! (in server.js)
-
-nginx not working on prod!
-
-Files manually moved or saved to wwwpub don't get www-data 
-(seems you have to set public flag! 777 filtershapenbit)
 
 todo
 ----
@@ -2026,6 +2020,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+When in WYSIWYG mode you can drag elements like buttons and input to the WYSIWYG. Like in VisualBasic.
+When you double click on the element, you get to the code that handles the onclick event. (like in vb)
 
 When opening images png, jpg, show image viewer, with ability to create thumbnails.
 
