@@ -37,7 +37,7 @@
 		if(!file) return true;
 		if(!file.path.match(/html?$/i)) return true;
 		
-		menuItem = EDITOR.addTempMenuItem("Preview", webPreview);
+		menuItem = EDITOR.addTempMenuItem("Web Preview", webPreview);
 		
 		if(inPreview) EDITOR.updateMenuItem(menuItem, true);
 		

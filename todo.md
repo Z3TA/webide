@@ -44,6 +44,9 @@ todo
 
 Make a .htm example page that have all the common html elements.
 
+Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
+see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
+plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
 
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
