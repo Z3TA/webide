@@ -202,7 +202,8 @@ var WysiwygEditor;
 		
 		if(onlyPreview) dance = false;
 		
-		wysiwygEditor.reload(dance, function firstLoad() {
+		wysiwygEditor.reload(dance, function firstLoad(err) {
+			if(err) throw err;
 			wysiwygEditor.positionate(top, left, width, height);
 		});
 		
@@ -1178,7 +1179,7 @@ var WysiwygEditor;
 		
 	}
 	
-	WysiwygEditor.prototype.reload = function reload(dance, callback) {
+	WysiwygEditor.prototype.reload = function reload(dance, reloadCallback) {
 		var wysiwygEditor = this;
 		
 		console.warn("(re)loading preview window ... dance=" + dance);
@@ -1195,33 +1196,25 @@ var WysiwygEditor;
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
 		var previewWin = wysiwygEditor.previewWin;
-		
 		var gotError = false;
 		
 		try {
 			previewWin.blur();
 		}
 		catch(err) {
-			
-			alertBox("The preview window has been closed!");
 			wysiwygEditor.close();
-			return callback();
-			
-		}
-		
-		
+			if(reloadCallback) reloadCallback(err);
+			else alertBox("Unable to blur the window. Has it been cloed !? " + err.message);
+			return;
+			}
 		
 		var sourceFile = wysiwygEditor.sourceFile;
-		
-		
 		var html = sourceFile.text;
 		
 		//previewWin.onload = previewWindowLoaded;
 		
 		var checkLocationMaxTries = 100;
 		var checkLocationTries = 0;
-		
-		
 		
 		if(wysiwygEditor.url && previewWin.location.href != wysiwygEditor.url) {
 			
@@ -1240,6 +1233,8 @@ var WysiwygEditor;
 			wysiwygEditor.isReloading = true;
 			previewWin.location.reload();
 			
+			var checkLocationIntervalTime = 100;
+			setTimeout(checkLocation, checkLocationIntervalTime);
 		}
 		else if(!wysiwygEditor.url) {
 			
@@ -1259,6 +1254,8 @@ var WysiwygEditor;
 		
 		function checkLocation() {
 			
+			console.log("reload:checkLocation");
+			
 			/*
 				previewWin.location.href=http://127.0.0.1:8080/testpage.htm
 				wysiwygEditor.url=http://b9u41v9BFM:123@127.0.0.1:8080/testpage.htm
@@ -1271,21 +1268,29 @@ var WysiwygEditor;
 			var matchAuth = url.match(/^http(s)?:\/\/(.*:.*@)/);
 			if(matchAuth) url = url.replace(matchAuth[2], "");
 			
-			if(previewWin.location.href == url) previewWindowLoaded();
+			if(previewWin.location.href == url) {
+previewWindowLoaded();
+			}
 			else if(previewWin.location.href) {
 				console.log("previewWin.location.href=" + previewWin.location.href + " wysiwygEditor.url=" + wysiwygEditor.url + " url=" + url);
 				
 				if(checkLocationTries > checkLocationMaxTries) {
-					alertBox("Failed to get location from preview window! (Did you close it ?) URL=" + url);
+					var err = new Error("Failed to get location from preview window after reload! (Did you close it ?) URL=" + url);
+					
+					if(reloadCallback) reloadCallback(err);
+					else alertBox(err.message);
 				}
 				else setTimeout(checkLocation, checkLocationIntervalTime);
 			}
 			else {
 				console.log(previewWin);
-				console.warn("Unable to get location from previewWin. Did the window close !?");
+				var err = new Error("Unable to get location from previewWin. Did the window close !?");
+				
+				if(reloadCallback) reloadCallback(err);
+				else alertBox(err.message);
+				
 				wysiwygEditor.close();
-				//throw new Error("Unable to get location from previewWin")
-			}
+				}
 		}
 		
 		
@@ -1342,12 +1347,13 @@ var WysiwygEditor;
 					}, 150);
 				}
 				else if(wysiwygEditor.isCompiled) {
-					throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
+					var err = new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
+					
+					if(reloadCallback) reloadCallback(err);
+					else throw err;
 				}
 				
 				attachFileChangeListener(wysiwygEditor);
-				
-				if(callback) callback();
 				
 				return done();
 			}
@@ -1455,11 +1461,9 @@ var WysiwygEditor;
 				console.error(err);
 			};
 			
-			
 				done();
 				
 				function done() {
-					
 					wysiwygEditor.hasLoaded = true;
 					
 					if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded();
@@ -1467,14 +1471,14 @@ var WysiwygEditor;
 					
 					console.log("Done (re)loading preview window");
 					
-					if(callback) callback();
+				if(reloadCallback) reloadCallback(null);
 					
 					if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
-				}
 				
-				function wait() {
-					
-				}
+				wysiwygEditor.ignoreSourceFileChange = false;
+				
+			}
+				
 			}
 		
 	}
@@ -1488,7 +1492,7 @@ var WysiwygEditor;
 		
 	}
 	
-	WysiwygEditor.prototype.disableEdit = function enableEdit(callback) {
+	WysiwygEditor.prototype.disableEdit = function disableEdit(callback) {
 		var wysiwygEditor = this;
 		
 		console.log("Disabling WYSIWYG editing of " + wysiwygEditor.sourceFile.path);
