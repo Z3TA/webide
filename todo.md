@@ -23,44 +23,61 @@ AND REGRESSION TESTS FOR ALL NEW FEATURES!
 Commit messages should explain WHY you did the change, we can already see what you did by looking at the diff. We want to know WHY you did it.
 
 
-Note to myself:
+Note to myself
+--------------
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might brick the server
+
+
+ship with node_modules!
+can't depend on a third party package manager to do the right thing.
+and we want to be sane, and debug the same code that the users are running.
 
 
 What I'm working on
 -------------------
 
-Make a .htm example page that have all the common html elements.
+Issue tracking system, (that is better then this todo.md file)
+I want to gatogorize (bug, polishing, new feature, in-progress, thinking) and prioritize:
+Plus and minus buttons to each issue, points=prio  
+
+once in-progress they will be ordered by date of entry
+
+Keep it as text file!? Give each paragraph points using plus minus. Auto sorting by points.
+
+topic
+----- (same amount of _ as heading characters)
+
+--- 
+counts as a paragraph.
+--- 
+
+formatting: (1p) text ...
+Paragraph needs to begin with (##p)
+
+The cursor should follow the paragraph when it moves (auto sorted)
+
+Or just make a web (app) interface !?
+
 
 
 todo
 ----
 
-Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
-see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
-plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
-
 bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
-
-In the file open list when holding down the arrow key it should go continuously!
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
 
+Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
+see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
+plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
+
+
+In the file open list when holding down the arrow key it should go continuously!
+
 Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
-
-
-When having search open and then bringing up search in files:
-/home/Z/Projects/jzedit/client/plugin/find_in_files_server.js:317
-Uncaught TypeError: undefined is not a function
-
-Bug: sometimes get into a CLIENT.cmd req=abortFindFiles loop!
-
-Having to right click to see anything is annoying ...
-
-Those "friendly tips" messages are annoying ...
 
 When changing something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 
@@ -80,8 +97,6 @@ Give friendly error when trying to pull emty git repo with hggit
 
 Investigate why fix_indendation.js is not fixing the indentation!
 
-open large files "benchmark optimization"
-
 fix copy-pasting in Macbook!!
 
 Investigate adding the editor to chrome web store and test it in a Chromebook.
@@ -99,9 +114,6 @@ make a iptables script to prevent e-mail spam and other malicious stuff users mi
 Make server run under apparmor profile ...
 
 
-ship with node_modules!
-can't depend on a third party package manager to do the right thing.
-and we want to be sane, and debug the same code that the users are running.
 
 
 Add "edit page" to context menu in quickedit.js (only works in Firefox)
