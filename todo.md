@@ -38,7 +38,7 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
-Investigating why Wysiwyg.js url get file:// on desktop version
+
 
 todo
 ----
