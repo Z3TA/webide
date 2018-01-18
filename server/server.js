@@ -1156,7 +1156,7 @@ function removeHttpEndpoint(username, folder, callback) {
 	
 	log("Removing HTTP endpoint to folder=" + folder + " ...");
 	
-	if(HOME_DIR) {
+	if(HOME_DIR && !USERNAME) {
 		if(folder.indexOf(HOME_DIR + username) !== 0) throw new Error("Can not remove an http-endpoint outside HOME_DIR=" + HOME_DIR + username);
 	}
 	
