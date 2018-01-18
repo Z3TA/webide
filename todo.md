@@ -42,11 +42,6 @@ What I'm working on
 todo
 ----
 
-
-EDITOR.showFileExplorer(folder): Plugins can "fight" over which plugin shall display a file explorer
-
-
-
 Make a .htm example page that have all the common html elements.
 
 
