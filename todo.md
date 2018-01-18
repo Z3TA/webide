@@ -1,21 +1,18 @@
 
 Prio:
 
-1) Make it possible for a non-dev to make web documents
-
-Making a new web page/post should be as easy as making a new comment on HN, or posting a status update on Facebook.
-
-Site owner should seamlessly and conveniently click on their home page to make changes, or add new content.
-
+1) Demoable. Make sure things work when demoing the editor
+- SCM integration
 
 2) Beta release?, get USER FEEDBACK!
-
 find beta testers!
 
-
 3) Bug/issue fixing and refactoring
+
 4) Polishing of existing features
+
 5) Optimization (toggle devMode off when testing!)
+
 6) New features
 
 
@@ -38,12 +35,11 @@ on ZOL (ZFS on Linux) running apt upgrade killed the system
 What I'm working on
 -------------------
 
+Make a .htm example page that have all the common html elements.
 
 
 todo
 ----
-
-Make a .htm example page that have all the common html elements.
 
 Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
 see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
@@ -1248,6 +1244,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+More work on web_preview.js plugin. Auto-complete, check if the file belongs to the web site being previewed
 
 Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
 
@@ -2541,6 +2539,8 @@ Built in SQL query, with GUI for editing tables
 SQL auto completion: SELECT foo FROM table WHERE bar = ? (lookup mysql schema)
 
 modal editing, like in VIM
+
+Integrated testing and code coverage tools. See which lines that wasn't executed by the tests.
 
 
 

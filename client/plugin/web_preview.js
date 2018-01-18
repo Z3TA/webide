@@ -19,6 +19,7 @@
 			EDITOR.on("fileSave", refreshMaybe);
 			var order = 1;
 			EDITOR.on("autoComplete", webPreviewAutocomplete, order);
+			
 		},
 		unload: function unloadWebPreview() {
 			//EDITOR.removeMenuItem(menuItem);
@@ -299,6 +300,8 @@
 		if(!previewWin) return;
 		if(wordLength == 0) return;
 		
+		// todo: Check if file has anything to do with the web page in preview (eg a script)
+		
 		var options = [];
 		
 		console.log("dingdong");
@@ -315,6 +318,7 @@
 				return;
 			}
 		}
+		
 		console.log(obj);
 		
 		var names = [];
