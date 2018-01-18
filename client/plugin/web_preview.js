@@ -79,7 +79,7 @@ whenLoaded: whenLoaded
 			
 			
 			previewWin.onClose = function() {
-				CLIENT.cmd("serve", {folder: folder}, function httpServerStopped(err, json) {
+				CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
 					if(err) throw err;
 					inPreview = undefined;
 					previewWin = undefined;
