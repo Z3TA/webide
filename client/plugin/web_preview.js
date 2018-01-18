@@ -61,6 +61,8 @@
 		
 			if(err) throw err;
 			
+			console.log("Serve URL=" + json.url);
+			
 			urlPath = json.url;
 			if(!urlPath.match(/^http(s?):/i)) urlPath = window.location.protocol + "//" + urlPath;
 			var url = urlPath + UTIL.getFilenameFromPath(inPreview.path);

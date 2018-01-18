@@ -1275,7 +1275,9 @@ var WysiwygEditor;
 			else if(previewWin.location.href) {
 				console.log("previewWin.location.href=" + previewWin.location.href + " wysiwygEditor.url=" + wysiwygEditor.url + " url=" + url);
 				
-				if(checkLocationTries > checkLocationMaxTries) alertBox("Failed to get location from preview window! Did you close it ?");
+				if(checkLocationTries > checkLocationMaxTries) {
+					alertBox("Failed to get location from preview window! (Did you close it ?) URL=" + url);
+				}
 				else setTimeout(checkLocation, checkLocationIntervalTime);
 			}
 			else {
