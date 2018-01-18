@@ -20,17 +20,13 @@ WRITE TESTS FOR EACH BUG YOU FIX!!
 AND REGRESSION TESTS FOR ALL NEW FEATURES!
 
 
-There's no rush in getting rid of nw.js, but we should make sure everything works without it!
-Make sure everything works in Chrome/Chromium browser, then also Firefox (with -chrome arg)
-and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to make it work in
-new versions of nw.js though.
-ubuntu: webapp-container / unity-webapps-runner ?
-
 Commit messages should explain WHY you did the change, we can already see what you did by looking at the diff. We want to know WHY you did it.
+
 
 Note to myself:
 Always make a ZFS snapshot before running apt upgrade!!!
-on ZOL (ZFS on Linux) running apt upgrade killed the system
+on ZOL (ZFS on Linux) running apt upgrade might brick the server
+
 
 What I'm working on
 -------------------
@@ -452,6 +448,12 @@ Replace all file IO with streams !?
 
 Should files be opened as streams!!?
 Would probably have to save remote files to a temporary location
+
+There's no rush in getting rid of nw.js, but we should make sure everything works without it!
+Make sure everything works in Chrome/Chromium browser, then also Firefox (with -chrome arg)
+and also (but low prio) Safari and IE (and maybe Edge). Don't bother trying to make it work in
+new versions of nw.js though.
+ubuntu: webapp-container / unity-webapps-runner ?
 
 
 Things I've learned
