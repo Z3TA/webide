@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
+npm ERR! Exit status -2
 
 See if vumoviemaker can run in the editor
 
