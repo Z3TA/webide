@@ -218,7 +218,7 @@
 		
 		if(text.length > 0) {
 			// If using shift and other combo key, this will be called twice without the text changing
-			if(text == lastTypedText) {
+			if(text == lastTypedText && lastTypedText == lastSearchText) {
 				console.warn("typing same: text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 				return;
 			}
