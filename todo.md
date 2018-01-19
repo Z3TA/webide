@@ -37,7 +37,8 @@ and we want to be sane, and debug the same code that the users are running.
 What I'm working on
 -------------------
 
-bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
+Nothing comes up if you search goto_file for the same thing you did last time !?
+
 
 
 todo
@@ -51,7 +52,7 @@ see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual pl
 plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
 
 
-In the file open list when holding down the arrow key it should go continuously!
+
 
 Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
 

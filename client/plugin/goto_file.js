@@ -64,6 +64,9 @@
 		
 		EDITOR.bindKey({desc: "Hide the goto-line GUI", charCode: charEscape, fun: hide_gotoFileInput});
 		
+		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyUp, fun: gotoFile_moveUp});
+		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyDown, fun: gotoFile_moveDown});
+		
 		EDITOR.on("openFileTool", openAnyFileTool);
 		
 		CLIENT.on("findFilesStatus", gotoFileProgressStatus);
@@ -201,13 +204,14 @@
 			hide_gotoFileInput();
 			return;
 		}
+		
 		else if(keyUpEvent.keyCode == keyUp) {
-			moveUp();
+			//gotoFile_moveUp();
 			inputGoto.focus();
 			return;
 		}
 		else if(keyUpEvent.keyCode == keyDown) {
-			gotoFile_moveDown();
+			//gotoFile_moveDown();
 			inputGoto.focus();
 			return;
 		}
@@ -454,15 +458,16 @@
 		return true;
 	}
 	
-	function moveUp() {
+	function gotoFile_moveUp() {
+		
+		if(!gotoInputIsVisible) return true;
+		if(!gotoList) return true;
 		
 		console.log("Moving up ...");
 		
-		if(!gotoList) return true;
-		
 		var listItems = gotoList.childNodes;
 		
-		inputGoto.blur();
+		//inputGoto.blur(); // why ?
 		
 		// Witch list item is selected?
 		for (var i=0; i<listItems.length; i++) {
@@ -486,11 +491,12 @@
 	
 	function gotoFile_moveDown() {
 		
+		if(!gotoInputIsVisible) return true;
 		if(!gotoList) return true; // Allow default browser action if the gotoList doesn't exist
 		
 		var listItems = gotoList.childNodes;
 		
-		inputGoto.blur();
+		//inputGoto.blur();
 		
 		// Witch list item is selected?
 		for (var i=0; i<listItems.length; i++) {
