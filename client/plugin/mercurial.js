@@ -1165,7 +1165,7 @@
 		repo.setAttribute("id", "repo");
 		repo.setAttribute("class", "inputtext url");
 		repo.setAttribute("title", "URL to remote repository");
-		repo.setAttribute("size", "30");
+		repo.setAttribute("size", "40");
 		repo.setAttribute("value", defaultRepo.url);
 		form.appendChild(repo);
 		
