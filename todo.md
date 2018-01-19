@@ -1259,6 +1259,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+More intellisence. One of the reason ppl use HypeScript is because it gives them better intellisense.
+We can however give them intellisens without HypeScript!
+
 More work on web_preview.js plugin. Auto-complete, check if the file belongs to the web site being previewed
 
 Right clicking in WYSIWYG should show a common (common in wysiwyg editors) formatting/transofmations menu , eg bold, heading, link
