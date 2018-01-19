@@ -37,27 +37,6 @@ and we want to be sane, and debug the same code that the users are running.
 What I'm working on
 -------------------
 
-Issue tracking system, (that is better then this todo.md file)
-I want to gatogorize (bug, polishing, new feature, in-progress, thinking) and prioritize:
-Plus and minus buttons to each issue, points=prio  
-
-once in-progress they will be ordered by date of entry
-
-Keep it as text file!? Give each paragraph points using plus minus. Auto sorting by points.
-
-topic
------ (same amount of _ as heading characters)
-
---- 
-counts as a paragraph.
---- 
-
-formatting: (1p) text ...
-Paragraph needs to begin with (##p)
-
-The cursor should follow the paragraph when it moves (auto sorted)
-
-Or just make a web (app) interface !?
 
 
 
