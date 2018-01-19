@@ -4,6 +4,8 @@
 	EDITOR.addTest(function noNeedToCommit(callback) {
 		/*
 			bug: Server says "no need to commit" even though files have been changed.
+			
+			The original fix for this bug was to enable unix network for the hg binary in apparmor!
 		*/
 		var rootFolder = "/mercurialCloneRepoUniqueNameNoNeedToCommit/";
 		var testFolder = rootFolder + "test/";
