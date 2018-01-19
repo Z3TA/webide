@@ -5127,7 +5127,7 @@ break;
 		function keyPressed(keyPressEvent) {
 			keyPressEvent = keyPressEvent || window.event; 
 			
-			// Firefox go here before callcing copy/paste/cut events
+		// Firefox and Safari go here before calling copy/paste/cut events
 			if(nativeCopy || nativePaste || nativeCut) {
 				nativeCopy = false;
 				nativePaste = false;
@@ -5310,7 +5310,7 @@ throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.even
 			
 			console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass);
 			
-			lastKeyDown = charCode;
+		
 			
 		// Mac command key ?
 		if(charCode == charCodeCtrl) {
@@ -5407,17 +5407,21 @@ console.warn(err.message);
 			
 			EDITOR.interact("keyDown", {charCode: charCode, target: targetElementClass, shiftKey: keyDownEvent.shiftKey, altKey: keyDownEvent.altKey, ctrlKey: keyDownEvent.ctrlKey});
 			
+		var leftWindowKey = 91; // Command key on Mac
+		var rightWindowKey = 92;
 			
-			if(combo.sum > 0 && !captured) {
+		var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
+		
+			if((combo.sum > 0 || windowKey) && !captured) {
 				// The user hit a combo, with shift, alt, ctrl + something, but it was not captured. 
 				
 				var browser = UTIL.checkBrowser();
 				
 				// Enable native commands
-				if(combo.ctrl && character == "C") {
+			if( (combo.ctrl || windowKey)  && character == "C") {
 					console.log("Native command: copy !?");
 					
-					if(browser == "Firefox") nativeCopy = true;
+				if(browser == "Firefox" || browser == "Safari") nativeCopy = true;
 					
 					if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 						giveBackFocusAfterClipboardEvent = true;
@@ -5437,10 +5441,10 @@ console.warn(err.message);
 						//preventDefault = true;
 					}
 				}
-				else if(combo.ctrl && character == "V") {
+			else if( (combo.ctrl || windowKey) && character == "V") {
 					console.log("Native command: paste !? EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 					
-					if(browser == "Firefox") nativePaste = true;
+				if(browser == "Firefox" || browser == "Safari") nativePaste = true;
 					
 					if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 						giveBackFocusAfterClipboardEvent = true;
@@ -5454,10 +5458,10 @@ console.warn(err.message);
 						//preventDefault = true;
 					}
 				}
-				else if(combo.ctrl && character == "X") {
+			else if( (combo.ctrl || windowKey) && character == "X") {
 					console.log("Native command: cut !?");
 					
-					if(browser == "Firefox") nativeCut = true;
+				if(browser == "Firefox" || browser == "Safari") nativeCut = true;
 					
 					if(EDITOR.settings.useCliboardcatcher && EDITOR.input) {
 						giveBackFocusAfterClipboardEvent = true;
@@ -5485,6 +5489,7 @@ console.warn(err.message);
 				else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 				else if(combo.alt) {} // Wait for ALT+key combo!
 				else if(charCode == 17 || combo.ctrl) {console.log("Ctrl ...");} // Wait for Ctrl+key combo!
+			else if(windowKey) {console.log("Window/Cmd key ...");preventDefault = true;} // Do we want to capture Window/Cmd combos !?
 				//else if(combo.shift) {} // Wait for Shift+key combo!
 				//&&//&&//
 				else {
@@ -5495,6 +5500,8 @@ console.warn(err.message);
 				
 			}
 			
+		lastKeyDown = charCode;
+		
 		if(preventDefault) {
 				//alert("Preventing default browser action!");
 				console.log("Preventing default browser action!");

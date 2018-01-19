@@ -28,129 +28,32 @@ Note to myself
 Always make a ZFS snapshot before running apt upgrade!!!
 on ZOL (ZFS on Linux) running apt upgrade might brick the server
 
-
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
 
+Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
+Eg. only show save if file is unsaved, or only show Run in Node.js is it's a JavaScript file (detect nodejs ? require, no window)
 
 What I'm working on
 -------------------
-
-Nothing comes up if you search goto_file for the same thing you did last time !?
 
 
 
 todo
 ----
 
-Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
-Make a preview event, that plugins can answer to
-
-Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
-see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
-plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
-
-
-
-
-Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
-
-
-
-When changing something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
-
-Make backup of a folder. Copy folder or make a zip file.
-
 Make it work on iOS browser and Safari!
-
-Init SCM on a folder. And later be able to add a remote repo. (Init SCM repo)
-If a remote repo is specified, clone to temp folder, check for file colitions (file exist in both folders) then copy over the content from the temp folder.
-Ask what to do for each file colliton ?
-
-
-Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
-Eg. only show save if file is unsaved, or only show Run in Node.js is it's a JavaScript file (detect nodejs ? require, no window)
-
-Give friendly error when trying to pull emty git repo with hggit
 
 Investigate why fix_indendation.js is not fixing the indentation!
 
-fix copy-pasting in Macbook!!
-
-Investigate adding the editor to chrome web store and test it in a Chromebook.
-
-refactor voice, EDITOR.say, so all plugins can use it.
-
-npm modules
-using modules in SSG ... Able to add npm modules to the SSG ...
-
-
-write a blog post! (and fix issues/regressions that come up)
-
-make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
-
-Make server run under apparmor profile ...
-
-
-
-
-Add "edit page" to context menu in quickedit.js (only works in Firefox)
-https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
-
-
-
-Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
-
-When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
-When saving a .css file belonging to the SSG, reload it in the preview! 
-
-Double clicking the file in commit file selection should open it.
-
-Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
+Investigate adding the editor to chrome web store. Test in a Chromebook.
 
 Make spellchecker work on server-side and use node_modules instead of compiled file.
 
-Unload/load all plugins when loggin in as a different users, or on a different server
-
-A feature to show a file or project ... git + github integration !? Client plugin to auto create github repos
-
-demo-example: Making a web service that makes you able to request data from an XML file.
-
-Streamline the experience of sharing and publishing a web document via the editor.
-
-Figure out why hg root *sometimes* returns emty result (it has something to do with apparmor)
-
-Do what this guy expect the editor to do:
-http://moolenaar.net/habits.html
-
-
-
-
 investigate build.js vs ssg-build.js
 
-try native keyboard on mobile, input text
 
-Parser doesn't seem to find variables inside for(var a, b, c)
-
-When there's an error in a NodeJS script open the file, scroll to the line and show the error!
-
-Autocompleting JS in html files doesn't work! It shows the result but doesn't complete. And often it completes with a html end tag!
-
-Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth
-
-Ctrl + Hover ? Click on a function, show that function declaration
-
-When commiting and files are missing. Ask to remove those files from source control!
-
-
-When deoplying, check package.json for "deploy_script" where a deploy script can be specified. 
-It must be a file path (to a .js file) as jzedit does not have a shell when running as a cloud ide.
-The specified nodejs script will run when the user deploy via the editor instead of the default:
-The default (if deploy is not specified) is to use nodejs_init that comes with the editor (copies files to prodFolder and restarts it via nodejs_init daemon)
-
-When opening a file. But no results are found and you press enter, try opening whatever is in the input (eg /etc/foo)
-If input starts with / and has another / eg /foo/ switch to that folder! When it changes to /foo/bar/ switch to that folder!
 
 
 * Fix bugs!
@@ -491,8 +394,26 @@ Make sure the test case succeeds
 Run all tests! (to make sure you did not break anything else)
 
 
+
+
+
+Security
+========
+
+make a iptables script to prevent e-mail spam and other malicious stuff users might do when they have network access ...
+
+Make server run under apparmor profile ...
+
+
+
+
+
 BUGS (and issues)
 =================
+
+Autocompleting JS in html files doesn't work! It shows the result but doesn't complete. And often it completes with a html end tag!
+
+Parser doesn't seem to find variables inside for(var a, b, c)
 
 fix bug that adds text to indentation characters  ... !!
 make a sanity check that checks the indentatioin characters for non white space characters
@@ -1237,6 +1158,58 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Unload/load all plugins when loggin in as a different users, or on a different server
+
+When there's an error in a NodeJS script open the file, scroll to the line and show the error!
+
+When commiting and files are missing. Ask to remove those files from source control!
+
+---
+When deoplying, check package.json for "deploy_script" where a deploy script can be specified. 
+It must be a file path (to a .js file) as jzedit does not have a shell when running as a cloud ide.
+The specified nodejs script will run when the user deploy via the editor instead of the default:
+The default (if deploy is not specified) is to use nodejs_init that comes with the editor (copies files to prodFolder and restarts it via nodejs_init daemon)
+---
+
+When opening a file. But no results are found and you press enter, try opening whatever is in the input (eg /etc/foo)
+If input starts with / and has another / eg /foo/ switch to that folder! When it changes to /foo/bar/ switch to that folder!
+
+Hot-reload (live preview) scripts and css style sheets in the SSG when in preview. 
+
+When saving a file belonging to the SSG while preview is open (not WYSIWYG), re-compile and update the preview.
+When saving a .css file belonging to the SSG, reload it in the preview! 
+
+Double clicking the file in commit file selection should open it.
+
+Mercurial commit: "show diff" button that runs hg diff and show the results (with colors ?) 
+
+Add "edit page" to context menu in quickedit.js (only works in Firefox)
+https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu
+
+refactor voice, EDITOR.say, so all plugins can use it.
+
+npm modules
+using modules in SSG ... Able to add npm modules to the SSG ...
+
+Init SCM on a folder. And later be able to add a remote repo. (Init SCM repo)
+If a remote repo is specified, clone to temp folder, check for file colitions (file exist in both folders) then copy over the content from the temp folder.
+Ask what to do for each file colliton ?
+
+Give friendly error when trying to pull emty git repo with hggit
+
+---
+Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
+Make a preview event, that plugins can answer to
+
+Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
+see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
+plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
+---
+
+Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
+
+When changing something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 
 More intellisence. One of the reason ppl use HypeScript is because it gives them better intellisense.
 We can however give them intellisens without HypeScript!
@@ -2013,6 +1986,12 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth
+
+Ctrl + Hover ? Click on a function, show that function declaration
+
+Possible to make a backup of a folder. Copy folder or make a zip file.
 
 ---
 When you change left side of tag/element. Auto change the right side/closing tag. 
