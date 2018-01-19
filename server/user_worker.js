@@ -678,10 +678,10 @@ API.run_nodejs = function run_nodejs(user, json, callback) {
 	if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
 		// Stop the current running script before starting the same script again
 		stopNodeJsScript(filePath, function nodeJsScriptKilled() {
-			runNodeJsScript(filePath, json.installAllModules, debugit, callback);
+			runNodeJsScript(filePath, json.args, json.installAllModules, debugit, callback);
 		});
 	}
-	else runNodeJsScript(filePath, json.installAllModules, debugit, callback);
+	else runNodeJsScript(filePath, json.args, json.installAllModules, debugit, callback);
 	
 }
 
@@ -1051,7 +1051,7 @@ function stopNodeJsScript(filePath, callback) {
 	}
 }
 
-function runNodeJsScript(filePath, installAllModules, debugit, callback) {
+function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
 	debugit = false;
 	
@@ -1114,7 +1114,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 		var nextBreakPoint;
 		var whenDebuggerReady;
 		var nodeScript;
-	var nodeScriptArgs = [];
+		var nodeScriptArgs = args.split(" ");
 	var nodeScriptOptions = {
 		execPath: "/usr/bin/nodejs",
 		env: {
@@ -1307,7 +1307,7 @@ function runNodeJsScript(filePath, installAllModules, debugit, callback) {
 							
 							if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
 								if(err) console.log(err.message); // Means the script was already stopped.
-								runNodeJsScript(filePath, installAllModules, debugit, function(err) {
+								runNodeJsScript(filePath, args, installAllModules, debugit, function(err) {
 									if(err) user.send(err.message);
 								});
 							})
@@ -1336,7 +1336,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 		https://chromedevtools.github.io/devtools-protocol/
 		
 		Adapters exist for other Browsers. And since NodeJS v8 it's also built into NodeJS.
-		It's however a but obscure to use and have bad documentation. So we use node-inspect
+		It's however a bit obscure to use and have bad documentation. So we use node-inspect
 		as an abstraction over the Chrome Remote debugging protocol.
 		
 		https://github.com/nodejs/node-inspect
@@ -1550,7 +1550,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 							
 							if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
 								if(err) console.log(err.message); // Means the script was already stopped.
-								runNodeJsScript(filePath, installAllModules, debugit, function(err) {
+								runNodeJsScript(filePath, args, installAllModules, debugit, function(err) {
 									if(err) user.send(err.message);
 								});
 							})

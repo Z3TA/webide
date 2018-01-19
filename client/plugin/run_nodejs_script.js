@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	var defaultArguments = "";
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -152,23 +154,42 @@
 	
 	function runNodeJsScript() {
 		
-		var filePath = EDITOR.currentFile.path;
+		var file = EDITOR.currentFile;
+		
+		if(!file) return alertBox("No file open!");
+		
+		var filePath = file.path;
 		
 		if(filePath.substr(filePath.length-7) == ".stdout") filePath = filePath.substr(0, filePath.length-7);
 		
 		var json = {filePath: filePath};
 		
-		var stdOutFile = filePath + ".stdout";
-		if(EDITOR.files.hasOwnProperty(stdOutFile)) EDITOR.files[stdOutFile].writeLine(" \n \n" + (new Date()) + ": Running " + filePath + " ...");
-		
-		CLIENT.cmd("run_nodejs", json, function(err, json) {
-			if(err) throw err;
-			else {
-				console.log("Started script: " + json.filePath);
+		// Check if the file requires arguments
+		if(file.text.indexOf("process.argv")) {
+			var isPassword = false;
+			var dialogDelay = 0;
+			promptBox("Use these arguments (process.argv): ", isPassword, defaultArguments, dialogDelay, function(args) {
+				if(args==null) return;
+				json.args = args;
+				defaultArguments = args;
+				start(json);
+			});
 			}
-		});
+		else start(json);
 		
 		return false;
+		
+		function start(json) {
+			var stdOutFile = filePath + ".stdout";
+			if(EDITOR.files.hasOwnProperty(stdOutFile)) EDITOR.files[stdOutFile].writeLine(" \n \n" + (new Date()) + ": Running " + filePath + " ...");
+			
+			CLIENT.cmd("run_nodejs", json, function(err, json) {
+				if(err) throw err;
+				else {
+					console.log("Started script: " + json.filePath);
+				}
+			});
+		}
 		
 	}
 	

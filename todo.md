@@ -39,11 +39,11 @@ What I'm working on
 -------------------
 
 
+See if vumoviemaker can run in the editor
+
 
 todo
 ----
-
-Make it work on iOS browser and Safari!
 
 Investigate why fix_indendation.js is not fixing the indentation!
 

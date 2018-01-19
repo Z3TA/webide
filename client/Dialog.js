@@ -228,8 +228,10 @@ function confirmBox(msg, options, callback, recursionCount) {
 
 function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursionCount) {
 	
-	if(typeof isPasswod == "function" && callback == undefined) {
-		callback = isPasswod;
+	console.log("typeof isPassword = " + (typeof isPassword));
+	
+	if(typeof isPassword == "function" && callback == undefined) {
+		callback = isPassword;
 		isPassword = false;
 		defaultValue = undefined;
 	}
@@ -241,7 +243,8 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 		callback = dialogDelay;
 		dialogDelay = undefined;
 	}
-	else if(typeof callback != "function") throw new Error("No callback function! callback=" + callback);
+	
+	if(typeof callback != "function") throw new Error("No callback function! callback=" + callback + " arguments=" + JSON.stringify(arguments));
 	
 	var dialog = new Dialog(msg, undefined, dialogDelay);
 	
