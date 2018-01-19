@@ -372,7 +372,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 			
 			console.log("hg commit uid=" + process.getuid() + " gid=" + process.getgid() + " files=" + JSON.stringify(files) + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
-			if(stdout.match(/nothing changed/) != null) return callback("Nothing has been changed! Did you forget to add files ?");
+			if(stdout.match(/nothing changed/) != null) return callback("Nothing has changed! Did you forget to add files ?");
 			
 			if(err) callback(err);
 			else if(stderr) callback(stderr);

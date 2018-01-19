@@ -814,6 +814,10 @@ EDITOR.lastKeyPressed = "";
 		
 		EDITOR.closeFile = function(path, doNotSwitchFile) {
 			
+		if(typeof path != "string" && path && path instanceof File) {
+			path = path.path; // file.path
+		}
+		
 			if(!EDITOR.files.hasOwnProperty(path)) {
 				throw new Error("Can't close file that is not open: " + path);
 			}

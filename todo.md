@@ -37,14 +37,11 @@ and we want to be sane, and debug the same code that the users are running.
 What I'm working on
 -------------------
 
-
+bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
 
 
 todo
 ----
-
-bug: No changes detected (no need to commit) ... fixed this bug a couple of days ago ... ADD A TEST FOR IT!
-
 
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
@@ -57,6 +54,8 @@ plugin that only adds preview to context meny and calls EDITOR.preivew() where S
 In the file open list when holding down the arrow key it should go continuously!
 
 Merge stuff from web_preview.js to WysiwygEditor.js !? It's a link!
+
+
 
 When changing something in the source code, auto scroll to that element in preview on Wysiwygeditor.js !
 

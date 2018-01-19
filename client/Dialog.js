@@ -12,7 +12,7 @@ function Dialog(msg, icon, dialogDelay) {
 	
 	console.log(UTIL.getStack("Creating dialog: msg=" + msg));
 	
-	if(msg == undefined) throw new Error("Dialog without a message!");
+	if(msg == undefined) throw new Error("Dialog without a message! msg=" + msg);
 	
 	msg = msg.toString(); // Convert numbers etc to string so we can use the replace method
 	
