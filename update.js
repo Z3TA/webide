@@ -71,7 +71,7 @@ eachUser(HOME, function(user) {
 	}, function allUsersFound() {
 
 run("systemctl reload apparmor");
-	run("systemctl reload jzedit");
+	run("systemctl restart jzedit");
 });
 
 
