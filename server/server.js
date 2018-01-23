@@ -584,7 +584,8 @@ if(callback) callback(null);
 							var apparmorProfilesToCreate = 5;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
-
+							var checkMountsAbort = false;
+							
 							checkUserRights(username, function (err) {
 								if(err) throw err;
 								
@@ -593,12 +594,15 @@ if(callback) callback(null);
 							// Make sure nginx profile exist
 							var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
 							fs.stat(nginxProfilePath, function (err, stats) {
-
+									if(checkMountsAbort) return;
+									
 if(err) {
 									if(err.code != "ENOENT") throw err;
 									
 									fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
-										if(err) throw err;
+											if(checkMountsAbort) return;
+											
+											if(err) throw err;
 										
 										nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
 										nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
@@ -619,7 +623,9 @@ if(err) {
 									
 										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + username + "." + DOMAIN;
 										fs.stat(nginxProfileEnabledPath, function (err, stats) {
-if(err) {
+											if(checkMountsAbort) return;
+											
+											if(err) {
 if(err.code != "ENOENT") throw err;
 
 												fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
@@ -656,8 +662,11 @@ else {
 							});
 							
 							makeDirP(homeDir + "dev", function() {
-								
+									if(checkMountsAbort) return;
+									
 								fs.stat(homeDir + "dev/null", function (err, stats) {
+										if(checkMountsAbort) return;
+										
 									if(err) {
 										if(err.code != "ENOENT") throw err;
 										
@@ -831,12 +840,16 @@ else {
 							
 							function folderMounted(err) {
 								foldersToMount--;
-								if(err) throw err;
-								
+								if(err) {
+									// Error: Target directory not empty! Can not mount to targetPath=/home/johan/etc/ssl/certs targetStats=[object Object]
+									return checkMountsError(err);
+									//throw err;
+								}
 								checkMountsReadyMaybe();
 							}
 							
 							function checkMountsReadyMaybe() {
+								if(checkMountsAbort) return;
 								if(nginxProfileOK && nodeJsLinkOK && nullNodCreated && urandomCreated && foldersToMount == 0 && 
 								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor )) {
 									acceptUser();
@@ -846,6 +859,11 @@ else {
 								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " ");
 							}
 							
+							function checkMountsError(err) {
+								if(checkMountsAbort) return;
+								checkMountsAbort = true;
+								idFail("Problem creating mounts: " + err.message);
+							}
 							
 							function createApparmorProfile(template, username, callback) {
 								/*
