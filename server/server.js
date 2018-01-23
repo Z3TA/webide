@@ -497,6 +497,9 @@ if(callback) callback(null);
 					}
 					
 					function idFail(errorMsg) {
+						
+						if(errorMsg instanceof Error) errorMsg = errorMsg.message;
+						
 						send({error: errorMsg});
 						log("username=" + username + " failed to login: " + errorMsg);
 					}
