@@ -38,6 +38,25 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+install hggit on server!
+
+ImportError: No module named hggit
+Python -c "import hggit"
+
+*** failed to import extension hggit: No module named hggit
+
+check for .hgrc in user root when logging in!
+
+
+Problem cloning:
+https://github.com/Z3TA/jsql.git
+(HTTP Error 406: Not Acceptable)
+Problem with ca certificates !?
+works on dev machine
+
+Writing blog post about jssql
+
+
 npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
 npm ERR! Exit status -2
 
@@ -1160,6 +1179,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+WYSIWYG tool fro creating links and headings
 
 Unload/load all plugins when loggin in as a different users, or on a different server
 

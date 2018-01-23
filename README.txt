@@ -232,3 +232,12 @@ Go into settings... Look for browser bar (General settings: Toolbar).. Select to
 
 
 
+Problems cloning from Github
+----------------------------
+Make sure the server has hggit installed!
+python -c "import hggit"
+(should not give an error if it's installed)
+How to install:
+apt-get install python-pip
+easy_install hg-git
+
