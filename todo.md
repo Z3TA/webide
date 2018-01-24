@@ -38,14 +38,30 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-goto_file.js:560 path=null
+problem: markup underlines --- get red
 
-Searching files give error that we found a file already in cache!
+diff coloring
 
-prevent line breaks in file names!
+@@ -38,14 +38,20 @@
+
+@@ -[starting at line on old],[lines included removed lines] +[starting at line on new],[nr of lines including added lines] @@
 
 
-Writing blog post about jssql
+
+Able to see commit history like in hggit
+
+Able to push to repo! (without commit & push)
+
+Show a diff ... when making a commit. Show the selected file and highlight changed/added rows !?
+
+Able to inline text under a row !? Like SCM removed/old-changed lines, or peek at definition
+gridRow.rowGap !?
+gridRow.fold !?
+
+
+implementing jsql example on webide.se
+
+Writing blog post about jsql
 
 
 npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
@@ -56,6 +72,8 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?
 
 Investigate why fix_indendation.js is not fixing the indentation!
 
