@@ -40,21 +40,6 @@ What I'm working on
 
 prevent line breaks in file names!
 
-install hggit on server!
-
-ImportError: No module named hggit
-Python -c "import hggit"
-
-*** failed to import extension hggit: No module named hggit
-
-check for .hgrc in user root when logging in!
-
-
-Problem cloning:
-https://github.com/Z3TA/jsql.git
-(HTTP Error 406: Not Acceptable)
-Problem with ca certificates !?
-works on dev machine
 
 Writing blog post about jssql
 
