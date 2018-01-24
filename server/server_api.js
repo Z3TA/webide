@@ -1862,7 +1862,9 @@ API.rename = function rename(user, json, callback) {
 	var fs = require("fs");
 	fs.rename(oldPath, newPath, function(err) {
 		
+		if(err) {
 		if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not a directory! " + err.message);
+		}
 		
 		callback(err, {oldPath: oldPath, newPath: newPath});
 	});
