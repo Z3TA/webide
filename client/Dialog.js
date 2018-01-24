@@ -303,12 +303,12 @@ function promptBox(msg, isPassword, defaultValue, dialogDelay, callback, recursi
 	cancel.addEventListener("click", function(clickEvent) {callback(null); dialog.close(clickEvent)}, false);
 	
 	
-	input.addEventListener("keyup", function(e) {
-		e.preventDefault();
+	input.addEventListener("keydown", function(e) {
 		var enterKey = 13;
 		var escapeKey = 27;
 		// Clicking enter in the input area should "submit"
-		if (e.keyCode == enterKey) {
+		if (e.keyCode == enterKey && !e.shiftKey) {
+			e.preventDefault();
 			e.stopPropagation();
 			ok.click();
 		return false;
