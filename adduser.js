@@ -188,7 +188,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	
 		var uid = parseInt(matchUid[1]);
 	var gid = parseInt(matchGid[1]);
-		var homeDir = matchHomeDir[1];
+		var homeDir = UTIL.trailingSlash(matchHomeDir[1]);
 	
 	//var gid = getGroupId(groupName);
 	
@@ -216,14 +216,14 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
 	
-		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "/testfile.txt");
+		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "testfile.txt");
 		
 	// Use the systems dns settings !?
-	//copyFileSync("/run/resolvconf/resolv.conf", homeDir + "/run/resolvconf/resolv.conf")
-	//copyFileSync("/etc/resolv.conf", homeDir + "/etc/resolv.conf")
+	//copyFileSync("/run/resolvconf/resolv.conf", homeDir + "run/resolvconf/resolv.conf")
+	//copyFileSync("/etc/resolv.conf", homeDir + "etc/resolv.conf")
 	
 	// Use the systems ca's
-	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "/etc/ssl/certs/ca-certifacates.crt")
+	//copyFileSync("/etc/ssl/certs/ca-certifacates.crt", homeDir + "etc/ssl/certs/ca-certifacates.crt")
 	
 	// The user owns his files
 	chownrSync(homeDir, uid, gid);
@@ -235,8 +235,8 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	fs.chmodSync(homeDir, "751");
 	
 	// For DNS lookups to work !?
-	chmodrSync(homeDir + "/etc/", "444");
-	chmodrSync(homeDir + "/run/", "444");
+	chmodrSync(homeDir + "etc/", "444");
+	chmodrSync(homeDir + "run/", "444");
 	
 	
 	// Try Copy over the test file (only exist in dev)
@@ -249,55 +249,55 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	
 		
 	// Update demo site 
-	var cmsjz_sites = fs.readFileSync(homeDir + "/.jzeditStorage/cmsjz_sites", ENCODING);
+	var cmsjz_sites = fs.readFileSync(homeDir + ".jzeditStorage/cmsjz_sites", ENCODING);
 	cmsjz_sites = cmsjz_sites.replace(/%USERNAME%/g, username);
 	cmsjz_sites = cmsjz_sites.replace(/%HOMEDIR%/g, homeDir);
 	cmsjz_sites = cmsjz_sites.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + "/.jzeditStorage/cmsjz_sites", cmsjz_sites);
+	fs.writeFileSync(homeDir + ".jzeditStorage/cmsjz_sites", cmsjz_sites);
 	
 		// Update RSS file in demo site
-		var rss_file = fs.readFileSync(homeDir + "/my_web_site/source/rss_en.xml", ENCODING);
+		var rss_file = fs.readFileSync(homeDir + "my_web_site/source/rss_en.xml", ENCODING);
 		rss_file = rss_file.replace(/%USERNAME%/g, username);
 		rss_file = rss_file.replace(/%DOMAIN%/g, DOMAIN);
-		fs.writeFileSync(homeDir + "/my_web_site/source/rss_en.xml", rss_file);
+		fs.writeFileSync(homeDir + "my_web_site/source/rss_en.xml", rss_file);
 		
 	// Update welcome file
-	var welcome_file = fs.readFileSync(homeDir + "/wwwpub/welcome.html", ENCODING);
+	var welcome_file = fs.readFileSync(homeDir + "wwwpub/welcome.html", ENCODING);
 	welcome_file = welcome_file.replace(/%USERNAME%/g, username);
 	welcome_file = welcome_file.replace(/%DOMAIN%/g, DOMAIN);
-	fs.writeFileSync(homeDir + "/wwwpub/welcome.html", welcome_file);
+	fs.writeFileSync(homeDir + "wwwpub/welcome.html", welcome_file);
 		
 	
 	// add wwwpub
 		var wwwgid = getGroupId("www-data");
-	//fs.mkdirSync(homeDir + "/wwwpub");
-	fs.writeFileSync(homeDir + "/wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
-		chownrDirSync(homeDir + "/wwwpub", uid, wwwgid);
+	//fs.mkdirSync(homeDir + "wwwpub");
+	fs.writeFileSync(homeDir + "wwwpub/index.htm", '<doctype html><meta charset="utf-8">Site not yet published', ENCODING);
+		chownrDirSync(homeDir + "wwwpub", uid, wwwgid);
 	// Make wwwpub public, and set the group-id bit so that all new files get the www-data group
-		chmodrSync(homeDir + "/wwwpub", "2755");
+		chmodrSync(homeDir + "wwwpub", "2755");
 		
 		
 		// Enable hggit
-		fs.writeFileSync(homeDir + "/.hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n', ENCODING);
+		fs.writeFileSync(homeDir + ".hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n', ENCODING);
 		
 		
 		// Create a directory for unix sockets
-		fs.mkdirSync(homeDir + "/sock");
+		fs.mkdirSync(homeDir + "sock");
 		// Make sure www-data can read and write to unix sockets
 		// https://stackoverflow.com/questions/21342828/node-express-unix-domain-socket-permissions
-		chmodrSync(homeDir + "/sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
-		chownrDirSync(homeDir + "/sock", uid, wwwgid);
+		chmodrSync(homeDir + "sock", "2770"); // Set the group-id bit so that all new files created will belong to the group
+		chownrDirSync(homeDir + "sock", uid, wwwgid);
 		// note: Each process needs to set umask to give write permission to the group!
 		
 	// Create a directory where nginx can save logs
-	fs.mkdirSync(homeDir + "/log");
-		chmodrSync(homeDir + "/log", "2770"); // Set the group-id bit so that all new files created will belong to the group
-		chownrDirSync(homeDir + "/log", uid, gid);
+	fs.mkdirSync(homeDir + "log");
+		chmodrSync(homeDir + "log", "2770"); // Set the group-id bit so that all new files created will belong to the group
+		chownrDirSync(homeDir + "log", uid, gid);
 		
 		// Create a directory for putting "in production" files
-		fs.mkdirSync(homeDir + "/.prod");
-		chmodrSync(homeDir + "/.prod", "770");
-		chownrDirSync(homeDir + "/.prod", uid, gid);
+		fs.mkdirSync(homeDir + ".prod");
+		chmodrSync(homeDir + ".prod", "770");
+		chownrDirSync(homeDir + ".prod", uid, gid);
 		
 	
 		// Create nginx profile
@@ -326,7 +326,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		
 		
 	// Nodejs needs /dev/urandom and /dev/null to start
-	fs.mkdirSync(homeDir + "/dev");
+	fs.mkdirSync(homeDir + "dev");
 	
 		//var makdeUrandom = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/urandom c 1 9").toString(ENCODING);
 	//if(makdeUrandom.trim() != "") throw makdeUrandom;
@@ -451,19 +451,21 @@ function copyProgram(program, homeDir) {
 		Asume the program is located in /usr/bin/
 	*/
 	
+	homeDir = UTIL.trailingSlash(homeDir);
+	
 	try {
-		fs.mkdirSync(homeDir + "/usr");
-		fs.mkdirSync(homeDir + "/usr/bin");
-		copyFileSync("/usr/bin/" + program, homeDir + "/usr/bin/" + program);
+		fs.mkdirSync(homeDir + "usr");
+		fs.mkdirSync(homeDir + "usr/bin");
+		copyFileSync("/usr/bin/" + program, homeDir + "usr/bin/" + program);
 	}
 	catch(err) {
 		if(err.code != "EEXIST") throw err;
 	}
 	
-	fs.chmodSync(homeDir + "/usr/bin/" + program, "555");
+	fs.chmodSync(homeDir + "usr/bin/" + program, "555");
 	
 	// Copy dependencies that the program needs
-	var deps = child_process.execSync("ldd " + homeDir + "/usr/bin/" + program).toString(ENCODING);
+	var deps = child_process.execSync("ldd " + homeDir + "usr/bin/" + program).toString(ENCODING);
 	deps = deps.split(/\n|\r\n/);
 	var foldersCreated = [];
 	for (var i=0, folders, dir, link; i<deps.length; i++) {
