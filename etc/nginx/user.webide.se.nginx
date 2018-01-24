@@ -16,8 +16,8 @@
   }
   
   #location ~/_http(\d+) {
-  #  proxy_set_header  Host       $http_host;
-  #  proxy_set_header  X-Real-IP  $remote_addr;
+  #  proxy_set_header  host       $http_host;
+  #  proxy_set_header  x-real-ip  $remote_addr;
   #  proxy_pass http://unix:%HOMEDIR%sock/_http$1;
   #  add_header 'Access-Control-Allow-Origin' '*';
   #}
@@ -28,10 +28,10 @@
     # Upgrade to websocket (if possible)
     proxy_pass http://unix:%HOMEDIR%sock/_$1;
     proxy_http_version 1.1;
-    proxy_set_header Host       $http_host;
-    proxy_set_header X-Real-IP  $remote_addr;
-    proxy_set_header Upgrade    $http_upgrade;
-    proxy_set_header Connection "upgrade";
+    proxy_set_header host       $http_host;
+    proxy_set_header x-real-ip  $remote_addr;
+    proxy_set_header upgrade    $http_upgrade;
+    proxy_set_header connection "upgrade";
 
     add_header 'Access-Control-Allow-Origin' '*';
   }
@@ -40,8 +40,8 @@
   # Lets encrypt challange
   location /.well-known/acme-challenge/ {
     proxy_pass http://127.0.0.1:8094;
-    proxy_set_header  Host       $http_host;
-    proxy_set_header  X-Real-IP  $remote_addr;
+    proxy_set_header  host       $http_host;
+    proxy_set_header  x-real-ip  $remote_addr;
   }
 
 }
