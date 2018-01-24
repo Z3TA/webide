@@ -638,7 +638,10 @@
 			fileCache.push(file.path);
 			console.log("Added to cache: " + file.path);
 		}
-		else throw new Error("We should not find files already in cache as they should have been ignored! path=" + file.path);
+		else {
+			console.log("fileCache:" + JSON.stringify(fileCache, null, 2));
+throw new Error("We should not find files already in cache as they should have been ignored! path=" + file.path);
+		}
 		appendResult(file.path, file.match);
 		gotoFileProgressStatus(file);
 	}
