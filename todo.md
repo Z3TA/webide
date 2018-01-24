@@ -38,6 +38,10 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+goto_file.js:560 path=null
+
+Searching files give error that we found a file already in cache!
+
 prevent line breaks in file names!
 
 

@@ -556,6 +556,7 @@
 				var lineNr = selectedItem.getAttribute("lineNr");
 				
 				if(!path) {
+					console.log("selectedItem::");
 					console.log(selectedItem);
 					throw new Error("path=" + path)
 				}
