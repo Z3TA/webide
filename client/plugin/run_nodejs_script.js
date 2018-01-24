@@ -165,7 +165,7 @@
 		var json = {filePath: filePath};
 		
 		// Check if the file requires arguments
-		if(file.text.indexOf("process.argv")) {
+		if(file.text.indexOf("process.argv") != -1) {
 			var isPassword = false;
 			var dialogDelay = 0;
 			promptBox("Use these arguments (process.argv): ", isPassword, defaultArguments, dialogDelay, function(args) {
