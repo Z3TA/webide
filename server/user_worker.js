@@ -1053,6 +1053,9 @@ function stopNodeJsScript(filePath, callback) {
 
 function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	
+	if(args == undefined) args = "";
+	if(typeof args != "string") throw new Error("args=" + args + " (" + (typeof args) + ") need to be a string!");
+	
 	debugit = false;
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
