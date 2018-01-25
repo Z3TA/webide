@@ -54,10 +54,6 @@ Able to push to repo! (without commit & push)
 
 Show a diff ... when making a commit. Show the selected file and highlight changed/added rows !?
 
-Able to inline text under a row !? Like SCM removed/old-changed lines, or peek at definition
-gridRow.rowGap !?
-gridRow.fold !?
-
 
 implementing jsql example on webide.se
 
