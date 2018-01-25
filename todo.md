@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-problem: markup underlines --- get red
-
 diff coloring
 
 @@ -38,14 +38,20 @@
