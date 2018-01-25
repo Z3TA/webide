@@ -1180,6 +1180,62 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	});
 }
 
+MERCURIAL.log = function hglog(user, json, callback) {
+	// Get a list of all changesets in a local repository
+	
+var directory = json.directory;
+
+	if(directory == undefined) return callback(new Error("No directory defined"));
+
+	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var spawn = require('child_process').spawn;
+		var log = spawn("hg", ['log', "-v", "-Tjson",], {cwd: rootDir, env: execFileOptions.env, shell: false});
+		var stdout = "";
+		var stderr = "";
+		
+		log.stdout.on('data', function logStdout(data) {
+			stdout += data;
+		});
+		
+		log.stderr.on('data', function logStderr(data) {
+			stderr += data;
+		});
+		
+		log.on('error', function logError(err) {
+			//console.log("stdout=" + stdout);
+			//console.log("stderr=" + stderr);
+			if(callback) callback(err);
+			callback = null;
+		});
+		
+		log.on('close', function logDataRecived(exitCode) {
+			//console.log("stdout=" + stdout);
+			//console.log("stderr=" + stderr);
+			//console.log("exitCode=" + exitCode);
+			
+			if(exitCode || stderr) {
+				var err = new Error(stderr);
+				err.code = exitCode;
+				if(callback) callback(err);
+				callback = null;
+				return;
+			}
+			
+			try {
+				var revisions = JSON.parse(stdout);
+				}
+			catch(err) {
+				return callback(new Error("Unable to parse (" + err.message + ") hg.log stdout=" + stdout));
+			}
+			
+			callback(null, revisions);
+			
+		});
+		});
+}
+
 function makeFileString(user, files, directory, rootDir) {
 	/*
 		NOT USED because execFile needs to pass each file as it's own argument, not a string of all files

@@ -342,6 +342,21 @@ span.nobreak {
 }
 
 
+.footer table.data {
+	border: 1px solid #323232;
+	border-radius: 3px;
+	color: white;
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 12px;
+}
+
+.footer table. tr {
+	background-color: #48494a;
+}
+
+.footer table.data th {
+	line-height: 20px;
+}
 
 ul, li {
 	margin: 0px;

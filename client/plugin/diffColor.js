@@ -1,3 +1,9 @@
+/*
+	@@ -38,14 +38,20 @@
+	
+	@@ -[starting at line on old],[lines included removed lines] +[starting at line on new],[nr of lines including added lines] @@
+	
+*/
 
 (function() {
 	EDITOR.plugin({

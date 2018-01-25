@@ -34,13 +34,16 @@
 	var userValue = "demo";
 	var pwValue = "demo";
 	
-	var annotateMenuItem;
-	var showAnnotationsString = "Show commit messages";
 	var annotations = {};
 	var doAnnotate = false;
 	
 	var resolveDialog = EDITOR.createWidget(buildResolveDialog);
 	var resolveFileList;
+	
+	var versionHistoryVisible = false;
+	var versionHistoryWidget = EDITOR.createWidget(buildVersionHistoryWidget);
+	var historyTableBody;
+	var selectedRev; // {id, files}
 	
 	// todo: Reload annotations when the file on disk changes!! (like a reload), update, merge, etc
 	
@@ -106,10 +109,15 @@
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
 				}
 				
-				annotateMenuItem = EDITOR.addTempMenuItem(showAnnotationsString, true, annotateOn);
-				
+				var showAnnotationsString = "Show commit messages";
+				var annotateMenuItem = EDITOR.addTempMenuItem(showAnnotationsString, false, annotateOn);
 				if(doAnnotate) EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
 				else EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
+				
+				var showHistoryString = "Version history";
+				var historyMenyItem = EDITOR.addTempMenuItem(showHistoryString, true, showVersionHistory);
+				if(versionHistoryVisible) EDITOR.updateMenuItem(historyMenyItem, versionHistoryVisible, showHistoryString, hideVersionHistory);
+				else EDITOR.updateMenuItem(historyMenyItem, versionHistoryVisible, showHistoryString, showVersionHistory);
 				
 				}
 		});
@@ -1685,6 +1693,189 @@
 		}
 		
 		
+	}
+	
+	function showVersionHistory() {
+		versionHistoryVisible = true;
+		EDITOR.hideMenu();
+		
+		versionHistoryWidget.show();
+		
+		fillHistoryTable();
+		
+		return true;
+	}
+	
+	function hideVersionHistory() {
+		
+		versionHistoryVisible = false;
+		EDITOR.hideMenu();
+		return versionHistoryWidget.hide();
+	}
+	
+	function buildVersionHistoryWidget(widget) {
+		
+		historyTableBody = document.createElement("tbody");
+		
+		var div = document.createElement("div");
+		div.setAttribute("class", "versionHistory");
+		
+		var historyTable = document.createElement("table");
+		historyTable.setAttribute("style", "max-height: 50%; overflow-y: scroll;"); // use EDITOR.height !?
+		historyTable.setAttribute("class", "versionHistory data");
+		
+		var thead = document.createElement("thead");
+		
+		var tr = document.createElement("tr");
+		
+		var th = document.createElement("th");
+		th.innerText = "Rev";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Date";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Author";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "Message";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
+		th.innerText = "File(s)"; // Select box
+		tr.appendChild(th);
+		
+		thead.appendChild(tr);
+		historyTable.appendChild(thead);
+		
+		historyTable.appendChild(historyTableBody);
+		
+		div.appendChild(historyTable);
+		
+		var diffRev = document.createElement("button");
+		diffRev.setAttribute("class", "button");
+		diffRev.innerText = "Diff Rev.";
+		diffRev.setAttribute("title", "Compare with revision before");
+		diffRev.onclick = revDiffSelectedRev;
+		div.appendChild(diffRev);
+		
+		var diffHead = document.createElement("button");
+		diffHead.setAttribute("class", "button");
+		diffHead.innerText = "Diff Current";
+		diffHead.setAttribute("title", "Compare with before revision");
+		div.appendChild(diffHead);
+		
+		var openRev = document.createElement("button");
+		openRev.setAttribute("class", "button");
+		openRev.setAttribute("title", "Open selected file revision");
+		openRev.innerText = "Open rev";
+		div.appendChild(openRev);
+		
+		var openCurrent = document.createElement("button");
+		openCurrent.setAttribute("class", "button");
+		openCurrent.setAttribute("title", "Open the selected file");
+		openCurrent.innerText = "Open current";
+		div.appendChild(openCurrent);
+		
+		var revertSelected = document.createElement("button");
+		revertSelected.setAttribute("class", "button");
+		revertSelected.setAttribute("title", "Open the selected file");
+		revertSelected.innerText = "Revert selected";
+		div.appendChild(revertSelected);
+		
+		var checkout = document.createElement("button");
+		checkout.setAttribute("class", "button");
+		checkout.setAttribute("title", "Revert all files to this revision");
+		checkout.innerText = "Checkout";
+		div.appendChild(checkout);
+		
+		return div;
+		
+	}
+	
+	function fillHistoryTable() {
+		while(historyTableBody.firstChild) historyTableBody.removeChild(historyTableBody.firstChild); // Emty table
+		
+		if(EDITOR.currentFile && EDITOR.currentFile.savedAs) {
+			var directory = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
+		}
+		else {
+			var directory = EDITOR.workingDirectory;
+		}
+		
+		CLIENT.cmd("mercurial.log", {directory: directory}, function resolveList(err, changes) {
+			if(err) throw err;
+			
+			console.log("mercurial.log changes:");
+			console.log(changes);
+			
+			for (var i=0, tr, td, sel, opt; i<changes.length; i++) {
+				tr = document.createElement("tr");
+				tr.setAttribute("id", "rev" + changes[i].rev);
+				
+					td = document.createElement("td");
+					td.innerText = changes[i].rev;
+					tr.appendChild(td);
+					
+					td = document.createElement("td");
+					td.innerText = new Date(changes[i].date);
+					tr.appendChild(td);
+					
+					td = document.createElement("td");
+					td.innerText = changes[i].user;
+					tr.appendChild(td);
+					
+					td = document.createElement("td");
+					td.innerText = changes[i].desc;
+					tr.appendChild(td);
+					
+					td = document.createElement("td");
+					sel = document.createElement("select");
+					tr.appendChild(td);
+					
+				if(changes[i].files) {
+					for (var j=0; j<changes[i].files.length; j++) {
+						opt = document.createElement("option");
+						opt.innerText = changes[i].files[j];
+						sel.appendChild(opt);
+					}
+				} else console.warn("No files: " + changes[i]);
+				
+					
+					td.appendChild(sel);
+					tr.appendChild(td);
+					
+					tr.onclick = tableRowClick;
+					
+					historyTableBody.appendChild(tr);
+					
+				}
+			
+			EDITOR.resizeNeeded();
+			
+			function tableRowClick(e) {
+				var tr = e.target;
+				while(tr.parentNode && tr.nodeName != "TR") tr = tr.parentNode;
+				
+				if(tr.nodeName != "TR") throw new Error("Unable to get which table row on the version history you clicked on");
+				
+				var rev = parseInt(tr.id);
+				selectedRev = changes[rev];
+				for (var nodeIndex=0; nodeIndex<historyTableBody.childNodes.length; nodeIndex++) {
+					historyTableBody.childNodes[nodeIndex].style.backgroundColor = "#48494a";
+				}
+				tr.style.backgroundColor = "#2f2f2f";
+			};
+		});
+		
+	}
+	
+	function revDiffSelectedRev() {
+		// Show diff of selected rev
+		alert(selectedRev.rev);
 	}
 	
 })();
