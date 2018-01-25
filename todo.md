@@ -65,6 +65,8 @@ See if vumoviemaker can run in the editor
 todo
 ----
 
+See last changed and file size on file when hovering on it in file explorer !?
+
 Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?
 
 Investigate why fix_indendation.js is not fixing the indentation!
