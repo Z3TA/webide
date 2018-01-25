@@ -53,24 +53,19 @@
 	
 	function loadMercurial() {
 		
-		// todo: Only show commit and annotate if the file belongs to a Mercurial SCM repo
-		repoCommitMenuItem = EDITOR.addMenuItem("Commit", showCommitDialog);
-		
-		annotateMenuItem = EDITOR.addMenuItem(showAnnotationsString, annotateOn);
-		
-		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
-		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
 		
+		EDITOR.on("showMenu", showScmMenuItemsMaybe);
+		
+		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
+		
 	}
 	
 	function unloadMercurial() {
-		
-		if(repoCommitMenuItem) EDITOR.removeMenuItem(repoCommitMenuItem);
 		
 		EDITOR.unbindKey(hideMercurialWidgets);
 		
@@ -80,11 +75,45 @@
 		EDITOR.removeEvent("commitTool", mercurialCommitTool);
 		EDITOR.removeEvent("resolveTool", mercurialResolveTool);
 		
-		EDITOR.removeMenuItem(annotateMenuItem);
+		EDITOR.removeEvent("showMenu", showScmMenuItemsMaybe);
 		
 		EDITOR.removeMenuItem(repoCloneMenuItem);
 		
 	}
+	
+	function showScmMenuItemsMaybe() {
+		var file = EDITOR.currentFile;
+		
+		if(file.savedAs) {
+		var directory = UTIL.getDirectoryFromPath(file.path);
+		}
+		else {
+			var directory = EDITOR.workingDirectory;
+		}
+		
+			CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, resp) {
+				if(err) {
+				console.log("mercurial.status error: " + err.message);
+				// Most likely no local repository found
+			}
+				else {
+				
+				console.log("mercurial.status resp: " + JSON.stringify(resp));
+				
+				// resp"modified":[],"added":[],"removed":[],"missing":[],"untracked":
+				
+				if(resp.modified.length != 0 || resp.added.length != 0 || resp.removed.length != 0 || resp.missing.length != 0 || resp.untracked.length != 0) {
+				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
+				}
+				
+				annotateMenuItem = EDITOR.addTempMenuItem(showAnnotationsString, true, annotateOn);
+				
+				if(doAnnotate) EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
+				else EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
+				
+				}
+		});
+		}
 	
 	function mercurialCommitTool(directory) {
 		// Does the directory has a initated Mercurial repo ?
@@ -1355,8 +1384,6 @@
 		
 		if(!file) return alertBox("Open a file to see annotations");
 		
-		EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOff);
-		
 		showAnnotations(file, file.caret);
 		
 		EDITOR.on("moveCaret", showAnnotations);
@@ -1492,8 +1519,6 @@
 	
 	function annotateOff() {
 		doAnnotate = false;
-		
-		EDITOR.updateMenuItem(annotateMenuItem, doAnnotate, showAnnotationsString, annotateOn);
 		
 		EDITOR.removeEvent("moveCaret", showAnnotations);
 		

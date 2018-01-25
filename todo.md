@@ -38,6 +38,12 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+height of meny with temp entires
+
+mercurial tools ... adding to menu
+
+addMenuTemp item grouping
+
 diff coloring
 
 @@ -38,14 +38,20 @@
@@ -46,11 +52,14 @@ diff coloring
 
 
 
-Able to see commit history like in hggit
+Version history: Able to see commit history like in hggit
 
 Able to push to repo! (without commit & push)
 
 Show a diff ... when making a commit. Show the selected file and highlight changed/added rows !?
+
+
+
 
 
 implementing jsql example on webide.se
@@ -1076,6 +1085,8 @@ Issues with Hg annotations after hot reloading the plugin!
 
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
+
+After a bunch of edits I got error "can not find start of function". When I restarted the editor or copied the file to anohter instance of the editor the error was gone!
 
 The indentation "jumps"/is inconsistent when having breaks before {, [ or ( 
 

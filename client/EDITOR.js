@@ -1971,11 +1971,19 @@ EDITOR.lastKeyPressed = "";
 			
 		}
 		
-		EDITOR.addTempMenuItem = function(htmlText, callback) {
+	EDITOR.addTempMenuItem = function(htmlText, addSeparator, callback) {
 			/*
 				These items are removed when the menu is hidden
 			*/
 			
+		if(typeof addSeparator == "function" && callback == undefined) {
+			callback = addSeparator;
+			addSeparator = true;
+		}
+		
+		if(addSeparator == undefined) addSeparator = true;
+		
+		
 			//var menu = document.getElementById("canvasContextmenu");
 			var tempItems = document.getElementById("canvasContextmenuTemp");
 			
@@ -2015,7 +2023,7 @@ EDITOR.lastKeyPressed = "";
 			
 			// Add many: accept array?
 			
-			tempItems.appendChild(separator);
+		if(addSeparator) tempItems.appendChild(separator);
 			
 			//tempItems.insertBefore(menuElement, tempItems.firstChild);
 			
