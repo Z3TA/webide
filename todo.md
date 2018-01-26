@@ -38,16 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-trying to hide version history when clicking cancel.
-
-working on version history ...
-
-design of html tables in widget (version history)
-
-height of menu with temp entires
-
-Version history: Able to see commit history like in hggit
-
 Able to push to repo! (without commit & push)
 
 Show a diff ... when making a commit. Show the selected file and highlight changed/added rows !?
@@ -66,6 +56,8 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+height of menu with temp entires (the bottom of the menu is below the page)
 
 See last changed and file size on file when hovering on it in file explorer !?
 

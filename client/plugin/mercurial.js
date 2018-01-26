@@ -1774,6 +1774,9 @@
 		
 		div.appendChild(historyTableHolder);
 		
+		/*
+			todo: 
+			
 		var diffRev = document.createElement("button");
 		diffRev.setAttribute("class", "button");
 		diffRev.innerText = "Diff Rev.";
@@ -1811,11 +1814,13 @@
 		checkout.innerText = "Checkout";
 		div.appendChild(checkout);
 		
+		*/
+		
 		var cancel = document.createElement("button");
-		checkout.setAttribute("class", "button");
-		checkout.innerText = "Cancel";
+		cancel.setAttribute("class", "button");
+		cancel.innerText = "Cancel";
 		cancel.onclick = hideVersionHistory;
-		div.appendChild(checkout);
+		div.appendChild(cancel);
 		
 		return div;
 		
