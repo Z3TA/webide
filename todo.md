@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+trying to hide version history when clicking cancel.
+
 working on version history ...
 
 design of html tables in widget (version history)

@@ -896,7 +896,33 @@ var UTIL = {
 		for(var i=0; i<left; i++) padding += " ";
 		return str + padding;
 	},
+	
+	zeroPad: function zeroPad(str, padLength) {
+		
+		if(typeof str != "string") str = str.toString();
+		
+		if(padLength == undefined) padLength = Math.max(2, str.length);
+		
+		var left = padLength - str.length;
+		if (left <= 0) return str; // Return early if no padding is needed
+		
+		var padding = "";
+		for(var i=0; i<left; i++) padding += "0";
+		return padding + str;
+	},
 
+	monthName: function monthName(dayOfMonth) {
+		
+		return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dayOfMonth];
+		
+		},
+	
+	dayName: function monthName(dayOfWeek) {
+		
+		return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayOfWeek];
+		
+	},
+	
 	makePathAbsolute: function makePathAbsolute(path) {
 		if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
 			var fspath = require("path");

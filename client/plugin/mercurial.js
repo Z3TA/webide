@@ -44,6 +44,7 @@
 	var versionHistoryWidget = EDITOR.createWidget(buildVersionHistoryWidget);
 	var historyTableBody;
 	var selectedRev; // {id, files}
+	var lastActiveHistoryTableRow;
 	
 	// todo: Reload annotations when the file on disk changes!! (like a reload), update, merge, etc
 	
@@ -1710,6 +1711,8 @@
 	
 	function hideVersionHistory() {
 		
+		console.log("Hiding version history!");
+		
 		versionHistoryVisible = false;
 		EDITOR.hideMenu();
 		return versionHistoryWidget.hide();
@@ -1724,6 +1727,7 @@
 		
 		var historyTableHolder = document.createElement("div");
 		historyTableHolder.setAttribute("style", "height: " + Math.round(EDITOR.height/2.5) + "px; overflow-y: scroll;");
+		historyTableHolder.setAttribute("class", "tableHolder");
 		
 		var historyTable = document.createElement("table");
 		historyTable.setAttribute("class", "versionHistory data");
@@ -1744,15 +1748,21 @@
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
+		th.innerText = "Time";
+		tr.appendChild(th);
+		
+		var th = document.createElement("th");
 		th.innerText = "Author";
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
+		//th.setAttribute("style", "min-width: 35%");
 		th.innerText = "Message";
 		tr.appendChild(th);
 		
 		var th = document.createElement("th");
-		th.innerText = "File(s)"; // Select box
+		th.setAttribute("colspan", "2");
+		th.innerText = "File(s)";
 		tr.appendChild(th);
 		
 		thead.appendChild(tr);
@@ -1767,38 +1777,44 @@
 		var diffRev = document.createElement("button");
 		diffRev.setAttribute("class", "button");
 		diffRev.innerText = "Diff Rev.";
-		diffRev.setAttribute("title", "Compare with revision before");
+		diffRev.setAttribute("title", "Compare selected files in selected revision with the last revison for the file below selected revison.");
 		diffRev.onclick = revDiffSelectedRev;
 		div.appendChild(diffRev);
 		
 		var diffHead = document.createElement("button");
 		diffHead.setAttribute("class", "button");
 		diffHead.innerText = "Diff Current";
-		diffHead.setAttribute("title", "Compare with before revision");
+		diffHead.setAttribute("title", "Compare selected files in selected revison with latest (head)");
 		div.appendChild(diffHead);
 		
 		var openRev = document.createElement("button");
 		openRev.setAttribute("class", "button");
-		openRev.setAttribute("title", "Open selected file revision");
+		openRev.setAttribute("title", "Open selected file in selected revision");
 		openRev.innerText = "Open rev";
 		div.appendChild(openRev);
 		
 		var openCurrent = document.createElement("button");
 		openCurrent.setAttribute("class", "button");
-		openCurrent.setAttribute("title", "Open the selected file");
+		openCurrent.setAttribute("title", "Open the selected file (current version/head)");
 		openCurrent.innerText = "Open current";
 		div.appendChild(openCurrent);
 		
 		var revertSelected = document.createElement("button");
 		revertSelected.setAttribute("class", "button");
-		revertSelected.setAttribute("title", "Open the selected file");
+		revertSelected.setAttribute("title", "Revert selected files to selected revision");
 		revertSelected.innerText = "Revert selected";
 		div.appendChild(revertSelected);
 		
 		var checkout = document.createElement("button");
 		checkout.setAttribute("class", "button");
-		checkout.setAttribute("title", "Revert all files to this revision");
+		checkout.setAttribute("title", "Move all files to selected revision");
 		checkout.innerText = "Checkout";
+		div.appendChild(checkout);
+		
+		var cancel = document.createElement("button");
+		checkout.setAttribute("class", "button");
+		checkout.innerText = "Cancel";
+		cancel.onclick = hideVersionHistory;
 		div.appendChild(checkout);
 		
 		return div;
@@ -1821,7 +1837,9 @@
 			console.log("mercurial.log changes:");
 			console.log(changes);
 			
-			for (var i=0, tr, td, sel, opt; i<changes.length; i++) {
+			var reEmail = /<(.*)>/;
+			
+			for (var i=0, tr, td, sel, opt, span, d, a, msg, matchEmail, email; i<changes.length; i++) {
 				tr = document.createElement("tr");
 				tr.setAttribute("id", "rev" + changes[i].rev);
 				
@@ -1829,31 +1847,54 @@
 					td.innerText = changes[i].rev;
 					tr.appendChild(td);
 					
-					td = document.createElement("td");
-					td.innerText = new Date(changes[i].date);
-					tr.appendChild(td);
-					
-					td = document.createElement("td");
-					td.innerText = changes[i].user;
-					tr.appendChild(td);
-					
-					td = document.createElement("td");
-					td.innerText = changes[i].desc;
-					tr.appendChild(td);
-					
-					td = document.createElement("td");
-					sel = document.createElement("select");
-					tr.appendChild(td);
-					
-				if(changes[i].files) {
-					for (var j=0; j<changes[i].files.length; j++) {
-						opt = document.createElement("option");
-						opt.innerText = changes[i].files[j];
-						sel.appendChild(opt);
-					}
-				} else console.warn("No files: " + changes[i]);
+				d = new Date((changes[i].date[0] +  changes[i].date[1]) * 1000);
 				
+				// date
+					td = document.createElement("td");
+				//td.innerText = d.getDate() + " " + UTIL.monthName(d.getMonth()) + " " + d.getFullYear().toString().slice(-2); // d.toLocaleDateString();
+				//td.innerText = d.toLocaleDateString();
+				//td.innerText = UTIL.dayName(d.getDay()) + " " + UTIL.zeroPad(d.getFullYear().toString().slice(-2)) + "-" + UTIL.zeroPad(d.getMonth()+1) + "-" + UTIL.zeroPad(d.getDate());
+				td.innerText = UTIL.dayName(d.getDay()) + " " + d.getDate() + " " + UTIL.monthName(d.getMonth()) + " -" + d.getFullYear().toString().slice(-2);
+				tr.appendChild(td);
+				
+				// time
+				td = document.createElement("td");
+				td.innerText = UTIL.zeroPad(d.getHours()) + ":" + UTIL.zeroPad(d.getMinutes());  // d.toLocaleTimeString();
+				tr.appendChild(td);
 					
+				// Author
+					td = document.createElement("td");
+				matchEmail = reEmail.exec(changes[i].user);
+				if(matchEmail) {
+					email = matchEmail[1];
+					a = document.createElement("a");
+					a.setAttribute("href", "mailto:" + email + "?subject=Rev " + changes[i].rev);
+					a.setAttribute("target", "_blank"); // Prevent leaving the page
+					a.innerText = changes[i].user.replace("<" + email + ">", "");
+					td.appendChild(a);
+				}
+				else td.innerText = changes[i].user;
+				tr.appendChild(td);
+				
+				// Message
+				td = document.createElement("td");
+				td.setAttribute("class", "text");
+				td.innerText = changes[i].desc;
+				tr.appendChild(td);
+				
+				td = document.createElement("td");
+				td.innerText = changes[i].files && changes[i].files.length;
+				tr.appendChild(td);
+				
+				td = document.createElement("td");
+				if(changes[i].files) {
+					sel = document.createElement("select");
+						for (var j=0; j<changes[i].files.length; j++) {
+							opt = document.createElement("option");
+							opt.innerText = changes[i].files[j];
+							sel.appendChild(opt);
+						}
+					} else console.warn("No files: " + changes[i]);
 					td.appendChild(sel);
 					tr.appendChild(td);
 					
@@ -1871,12 +1912,14 @@
 				
 				if(tr.nodeName != "TR") throw new Error("Unable to get which table row on the version history you clicked on");
 				
+				if(lastActiveHistoryTableRow) lastActiveHistoryTableRow.setAttribute("class", "");
+				
 				var rev = parseInt(tr.id);
 				selectedRev = changes[rev];
-				for (var nodeIndex=0; nodeIndex<historyTableBody.childNodes.length; nodeIndex++) {
-					historyTableBody.childNodes[nodeIndex].style.backgroundColor = "#48494a";
-				}
-				tr.style.backgroundColor = "#2f2f2f";
+				tr.setAttribute("class", "selected");
+				
+				lastActiveHistoryTableRow = tr;
+				
 			};
 		});
 		

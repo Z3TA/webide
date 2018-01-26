@@ -343,31 +343,65 @@ span.nobreak {
 
 
 .footer table.data {
-	border: 1px solid #323232;
-	border-radius: 3px;
 	color: white;
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 12px;
+	font-size: 13px;
 	width: 100%;
+}
+
+div.tableHolder {
+	background-color: #f6f6f6;
+	margin-top: 2px;
 }
 
 .footer table.data tr {
 	background-color: #f6f6f6;
 	color: black;
+	border-bottom: 1px solid #bcbcbc;
+}
+
+.footer table.data tr:nth-child(even) {background: #f6f6f6;}
+.footer table.data tr:nth-child(odd) {background: #ffffff;}
+
+.footer table.data tr.selected {
+	background-color: #b6d1fd;
 }
 
 .footer table.data th {
-	line-height: 20px;
 	font-weight: bold;
 	text-align: left;
+	border-bottom: 1px solid #bcbcbc;
+	color: #f6f6f3;
+	background-color: #414141;
+	background: linear-gradient(#545657, #434343, #454545);
+	text-shadow: 0px -1px 0px #1f2020;
+	padding: 2px;
+	padding-top: 6px;
+	padding-bottom: 6px;
 }
 
 .footer table.data td {
-	line-height: 20px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	border-bottom: 1px solid #cccccc;
 	}
 
-.footer table.data td.wide {
-	min-width: 50%;
+.footer table.data td.text {
+	line-height: 28px;
+	max-width: 500px;
+}
+
+
+
+.footer table.data select {
+	background-color: transparent;
+	min-width: 100%;
+	max-width: 150px;
+	}
+
+.footer table.data span {
+color: black;
+	text-shadow: none;
 }
 
 ul, li {
