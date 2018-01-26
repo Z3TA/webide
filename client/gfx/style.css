@@ -348,14 +348,26 @@ span.nobreak {
 	color: white;
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 12px;
+	width: 100%;
 }
 
-.footer table. tr {
-	background-color: #48494a;
+.footer table.data tr {
+	background-color: #f6f6f6;
+	color: black;
 }
 
 .footer table.data th {
 	line-height: 20px;
+	font-weight: bold;
+	text-align: left;
+}
+
+.footer table.data td {
+	line-height: 20px;
+	}
+
+.footer table.data td.wide {
+	min-width: 50%;
 }
 
 ul, li {

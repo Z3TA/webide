@@ -87,6 +87,8 @@
 	function showScmMenuItemsMaybe() {
 		var file = EDITOR.currentFile;
 		
+		if(!file) return true;
+		
 		if(file.savedAs) {
 		var directory = UTIL.getDirectoryFromPath(file.path);
 		}
@@ -1720,9 +1722,14 @@
 		var div = document.createElement("div");
 		div.setAttribute("class", "versionHistory");
 		
+		var historyTableHolder = document.createElement("div");
+		historyTableHolder.setAttribute("style", "height: " + Math.round(EDITOR.height/2.5) + "px; overflow-y: scroll;");
+		
 		var historyTable = document.createElement("table");
-		historyTable.setAttribute("style", "max-height: 50%; overflow-y: scroll;"); // use EDITOR.height !?
 		historyTable.setAttribute("class", "versionHistory data");
+		historyTable.setAttribute("border", "1");
+		historyTable.setAttribute("cellpadding", "3");
+		
 		
 		var thead = document.createElement("thead");
 		
@@ -1753,7 +1760,9 @@
 		
 		historyTable.appendChild(historyTableBody);
 		
-		div.appendChild(historyTable);
+		historyTableHolder.appendChild(historyTable);
+		
+		div.appendChild(historyTableHolder);
 		
 		var diffRev = document.createElement("button");
 		diffRev.setAttribute("class", "button");
@@ -1854,7 +1863,7 @@
 					
 				}
 			
-			EDITOR.resizeNeeded();
+			//EDITOR.resizeNeeded();
 			
 			function tableRowClick(e) {
 				var tr = e.target;
