@@ -657,12 +657,12 @@ else {
 								
 								// Make sure mounts exist
 							// We need separate executables (hard link works) to have separate apparmor profiles
-							mount('/usr/bin/nodejs', '/usr/bin/nodejs_' + username, function(err) {
-								if(err) throw err;
-								
-								nodeJsLinkOK = true;
+							mount(process.argv[0], '/usr/bin/nodejs_' + username, function(err) {
+									if(err) throw err;
+									
+									nodeJsLinkOK = true;
 									checkMountsReadyMaybe();
-							});
+								});
 							
 							makeDirP(homeDir + "dev", function() {
 									if(checkMountsAbort) return;
@@ -709,7 +709,7 @@ else {
 							mount("/usr/share/", homeDir + "usr/share", folderMounted); // npm dependencies
 							mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 							mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-							mount("/usr/bin/nodejs", homeDir + "usr/bin/nodejs", folderMounted);
+								mount(process.argv[0], homeDir + "usr/bin/nodejs", folderMounted);
 							mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 							
 							// Create apparmor proiles unless they exist

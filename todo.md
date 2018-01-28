@@ -38,6 +38,16 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Able to run nodejs scripts on devices that has no function keys
+detect if possible nodejs script (using process, or web script using document) and add temp menu item: "Run nodejs script"
+
+
+Google cloud shell support:
+- chrooting into home dir
+- start script 
+- click deploy the editor (see https://cloud.google.com/shell/docs/open-in-cloud-shell)
+
+
 Able to push to repo! (without commit & push)
 
 Show a diff ... when making a commit. Show the selected file and highlight changed/added rows !?
@@ -84,6 +94,12 @@ investigate build.js vs ssg-build.js
 
 What I'm thinking
 -----------------
+
+
+Give the user a in (in browser) virtual machine (that runs in the user's browser) !?!?
+
+
+---
 
 How do you install something ? Like ffmpeg . And then how do you run it ?
 Able to run shell commands or nodejs repl in the editor !?

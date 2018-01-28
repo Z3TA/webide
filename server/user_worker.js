@@ -1119,13 +1119,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var nodeScript;
 		var nodeScriptArgs = args.split(" ");
 	var nodeScriptOptions = {
-		execPath: "/usr/bin/nodejs",
-		env: {
-			myName: user.name,
-				dev: true
-		},
-		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
-	};
+			execPath: process.argv[0], // First argument is the path to the nodejs executable!
+			env: {
+					myName: user.name,
+					dev: true
+				},
+				silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+			};
 	
 		if(debugit) {
 			nodeScriptOptions.execArgv = ["debug"]; // Arguments for nodejs (the forked process)
@@ -1364,7 +1364,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 	var nodeInspectPath = "/usr/bin/node-inspect";
 	var nodeInspectArgs = [];
 	var nodeInspectOptions = {
-		execPath: "/usr/bin/nodejs",
+		execPath: process.argv[0], // First argument is the path to the nodejs executable!
 			env: {
 				myName: user.name
 			},
