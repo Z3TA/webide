@@ -1118,8 +1118,16 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var whenDebuggerReady;
 		var nodeScript;
 		var nodeScriptArgs = args.split(" ");
-	var nodeScriptOptions = {
-			execPath: process.argv[0], // First argument is the path to the nodejs executable!
+		
+		if(USE_CHROOT) {
+			var nodejsPath = "/usr/bin/nodejs";
+		}
+		else {
+			var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
+		}
+		
+		var nodeScriptOptions = {
+			execPath: nodejsPath, 
 			env: {
 					myName: user.name,
 					dev: true
@@ -1363,8 +1371,16 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 	var nodeInspect;
 	var nodeInspectPath = "/usr/bin/node-inspect";
 	var nodeInspectArgs = [];
+	
+	if(USE_CHROOT) {
+		var nodejsPath = "/usr/bin/nodejs";
+	}
+	else {
+		var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
+	}
+	
 	var nodeInspectOptions = {
-		execPath: process.argv[0], // First argument is the path to the nodejs executable!
+		execPath:nodejsPath,
 			env: {
 				myName: user.name
 			},
