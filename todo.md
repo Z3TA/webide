@@ -38,9 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Able to run nodejs scripts on devices that has no function keys
-detect if possible nodejs script (using process, or web script using document) and add temp menu item: "Run nodejs script"
-
 
 Google cloud shell support:
 - chrooting into home dir
