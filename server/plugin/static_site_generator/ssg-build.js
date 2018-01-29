@@ -84,8 +84,8 @@ var MARKED = require('marked');
 var JSCHARDET = require("jschardet");
 
 // These paths needs to be absolute!
-var BASEPATH = mustBePath(process.argv[2], "."); // Path to files that should be processed
-var PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder 
+var BASEPATH; // Path to files that should be processed
+var PUBFOLDER; // The bublic/publication folder 
 
 // todo: Allow more flags
 var PUBLISH = process.argv[4];
@@ -1895,6 +1895,11 @@ function getStack(scriptName, lineNr) {
 
 if (require.main === module) {
 	console.log('called directly');
+	
+	// These paths needs to be absolute!
+	BASEPATH = mustBePath(process.argv[2], "."); // Path to files that should be processed
+	PUBFOLDER = mustBePath(process.argv[3], "pub/"); // The bublic/publication folder
+	
 	main.compile();
 } else {
 	console.log('required as a module');
