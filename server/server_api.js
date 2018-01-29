@@ -2390,6 +2390,32 @@ abortFindFilesCallback(null, {foldersBeingSearched: FIND_FILES_IN_FLIGHT});
 	}
 
 
+API.shell = function shellCommand(user, json, shellCommandCallback) {
+	
+	var exec = require('child_process').exec;
+	
+	var commandToRun = json.command;
+	
+	var execOptions = {
+		encoding: 'utf8',
+		timeout: 2000,
+		maxBuffer: 200*1024,
+		killSignal: 'SIGTERM',
+		cwd: null,
+		env: null
+	}
+	
+	exec(commandToRun, execOptions, function(err, stdout, stderr) {
+		var output = stdout + stderr;
+		
+		if(typeof output == "string") output = output.replace(/\r/g, "");
+		
+		shellCommandCallback(err, {output: output});
+		
+	});
+	}
+
+
 function runFtpQueue() {
 	
 	console.log(ftpQueue.length + " items left in the FTP queue");

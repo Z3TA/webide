@@ -91,8 +91,17 @@
 						
 					});
 				}
-					else alertBox("Shell comamnds not support in " + runtime + " runtime");
-				
+					else {
+					CLIENT.cmd("shell", {command: commandToRun}, function(err, resp) {
+						
+						if(resp.output) printOutput(resp.output);
+						else if(err) printOutput(err.message);
+						else throw new Error("Got no error or output from shell command!");
+						
+					});
+					
+					//alertBox("Shell comamnds not support in " + runtime + " runtime");
+				}
 			}
 			
 			return false;
@@ -103,6 +112,8 @@
 			shellFile.insertTextRow(output, file.caret.row);
 			
 			shellFile.insertText(promptString);
+			
+			shellFile.scrollToCaret();
 		}
 		
 	}
