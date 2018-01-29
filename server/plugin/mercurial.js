@@ -908,7 +908,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 			var changesets = {};
 			var logCounter = 0;
 			
-			for(var i=1, changeId; i<lines.length; i++) {
+			for(var i=0, changeId; i<lines.length; i++) {
 				lines[i] = lines[i].split(":");
 				changeId = parseInt(lines[i][0]);
 				

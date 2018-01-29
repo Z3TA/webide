@@ -1546,13 +1546,27 @@
 			// dilemma: Unless the user has saved, calling hg annotate again will not give the correct lines!
 			
 			var changeId = lineChangeset[line-1];
-				if(!changesets.hasOwnProperty(changeId)) throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2));
+			
+			if(changeId) {
 				var change = changesets[changeId];
-			console.log("change=" + change);
-			annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
-				console.log("changesets=" + JSON.stringify(changesets, null, 2));
-				console.log("showing changeset changeId=" + changeId);
-				EDITOR.resizeNeeded();
+				if(!change) {
+					for(var id in changesets) console.log(id + " = " + changesets[id]);
+					throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2) + 
+					" typeof changesets = " + (typeof changesets) + " change=" + change + " Object.keys(changesets)=" + Object.keys(changesets) + 
+					" typeof changeId = " + (typeof changeId) + " changesets.hasOwnProperty(" + changeId + ")=" + changesets.hasOwnProperty(changeId) + 
+					" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') + " " +
+					"lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
+					}
+				console.log("change=" + change);
+					annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
+					console.log("changesets=" + JSON.stringify(changesets, null, 2));
+					console.log("showing changeset changeId=" + changeId);
+					EDITOR.resizeNeeded();
+				}
+			else {
+				//.warn("No annotations for line " + line + " in " + file.path);
+				annotationWidget.innerText = "No annotations for line " + line + " in " + file.path;
+			}
 			
 			annotation.lastLine = line;
 		}
