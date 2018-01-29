@@ -164,7 +164,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	var execFile = require('child_process').execFile;
 	
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory, virtualRootDir) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory, virtualRootDir) {
 		
 		if(err) return callback(err);
 		
@@ -239,7 +239,7 @@ MERCURIAL.add = function hgadd(user, json, callback) {
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(files == undefined) return callback(new Error("No files defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		files = checkPaths(user, files, directory, rootDir);
@@ -268,7 +268,7 @@ MERCURIAL.forget = function hgforget(user, json, callback) {
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(files == undefined) return callback(new Error("No files defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		files = checkPaths(user, files, directory, rootDir);
@@ -297,7 +297,7 @@ MERCURIAL.remove = function hgremove(user, json, callback) {
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(files == undefined) return callback(new Error("No files defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		files = checkPaths(user, files, directory, rootDir);
@@ -361,7 +361,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	
 	if(Object.prototype.toString.call( files ) !== '[object Array]') return callback("Expected files to be an array of files");
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		files = checkPaths(user, files, directory, rootDir);
@@ -401,7 +401,7 @@ MERCURIAL.incoming = function hgincoming(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
@@ -549,8 +549,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
-		if(err) return callback(err);
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
+		if(err) return callback(err, {directory: user.toVirtualPath(rootDir)});
 		
 		localDirectory = UTIL.trailingSlash(localDirectory);
 		
@@ -577,14 +577,14 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				console.log("noChanges=" + noChanges);
 			}
 			
-			if(err) callback(err);
-			else if(stderr) callback(stderr);
+			if(err) callback(err, {directory: user.toVirtualPath(rootDir)});
+			else if(stderr) callback(stderr, {directory: user.toVirtualPath(rootDir)});
 			else {
 				
 				// added 2 changesets with 1 changes to 1 files
 				
 				var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
-				var resp = {repo: repoUrl};
+				var resp = {repo: repoUrl, directory: user.toVirtualPath(rootDir)};
 				var fileCount = -1;
 				
 				if(matchPull) {
@@ -661,7 +661,7 @@ MERCURIAL.update = function hgupdate(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		localDirectory = UTIL.trailingSlash(localDirectory);
@@ -716,7 +716,7 @@ MERCURIAL.merge = function hgmerge(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		localDirectory = UTIL.trailingSlash(localDirectory);
@@ -763,7 +763,7 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localDirectory) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
 		
 		localDirectory = UTIL.trailingSlash(localDirectory);
@@ -792,56 +792,56 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 			
 			if(err) {
 				if(noChanges) {
-					callback(null, {changesets: null, remote: repoUrl});
+					callback(null, {changesets: null, remote: repoUrl, directory: user.toVirtualPath(rootDir)});
 				}
-				else callback(err);
+				else callback(err, {directory: user.toVirtualPath(rootDir)});
 			}
-			else if(stderr) callback(stderr);
+			else if(stderr) callback(stderr, {directory: user.toVirtualPath(rootDir)});
 			else {
-				
-				if(noChanges) {
-					callback(null, {changesets: null, remote: repoUrl});
-				}
-				else {
-					// Different servers returns different text ...
-					var resp = {
-						remote: repoUrl,
-						directory: user.toVirtualPath(rootDir)
-					}
 					
-					// Mercurial:
-					// added 2 changesets with 1 changes to 1 files
-					var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
-					if(matchUpdate) {
-						resp.changesets = matchUpdate[1];
-						resp.changes = matchUpdate[2];
-						resp.files = matchUpdate[3];
+					if(noChanges) {
+					callback(null, {changesets: null, remote: repoUrl, directory: user.toVirtualPath(rootDir)});
 					}
-					
-					// Git(hub)
-					//added 1 commits with 1 trees and 1 blobs
-					if(matchUpdate == null) matchUpdate = stdout.match(/added (\d+) commits with (\d+) trees and (\d+) blobs/);
-					if(matchUpdate) {
-						resp.changesets = matchUpdate[1];
-						resp.changes = matchUpdate[2];
-						resp.files = matchUpdate[3];
-					}
-					
-					if(!matchUpdate) return callback(stdout);
+					else {
+						// Different servers returns different text ...
+						var resp = {
+							remote: repoUrl,
+							directory: user.toVirtualPath(rootDir)
+						}
+						
+						// Mercurial:
+						// added 2 changesets with 1 changes to 1 files
+						var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
+						if(matchUpdate) {
+							resp.changesets = matchUpdate[1];
+							resp.changes = matchUpdate[2];
+							resp.files = matchUpdate[3];
+						}
+						
+						// Git(hub)
+						//added 1 commits with 1 trees and 1 blobs
+						if(matchUpdate == null) matchUpdate = stdout.match(/added (\d+) commits with (\d+) trees and (\d+) blobs/);
+						if(matchUpdate) {
+							resp.changesets = matchUpdate[1];
+							resp.changes = matchUpdate[2];
+							resp.files = matchUpdate[3];
+						}
+						
+					if(!matchUpdate) return callback(stdout, {directory: user.toVirtualPath(rootDir)});
 					else callback(null, resp);
+						
+					}
+					
+					if(saveUserPw) {
+						console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
+						saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
+							if (err) throw err;
+							console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
+						});
+					}
 					
 				}
-				
-				if(saveUserPw) {
-					console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
-					saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
-						if (err) throw err;
-						console.log(user.name + " saved Mercurial credentials for repoUrl=" + repoUrl);
-					});
-				}
-				
-			}
-		});
+			});
 	});
 }
 
@@ -850,7 +850,7 @@ MERCURIAL.annotate = function hgannotate(user, json, callback) {
 	
 	var virtualFilePath = json.file;
 	
-	checkDir(user, virtualFilePath, function rootDir(err, rootDir, localPath) {
+	checkDir(user, virtualFilePath, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
@@ -987,7 +987,7 @@ MERCURIAL.resolvelist = function hgresolvelist(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
@@ -1035,7 +1035,7 @@ MERCURIAL.resolvemark = function hgresolvemark(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var files = json.files;
@@ -1078,7 +1078,7 @@ MERCURIAL.resolveunmark = function hgresolveunmark(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var files = json.files;
@@ -1117,7 +1117,7 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
@@ -1141,7 +1141,7 @@ MERCURIAL.reponame = function reponame(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var execFile = require('child_process').execFile;
@@ -1167,7 +1167,7 @@ MERCURIAL.hasRepo = function reponame(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		
 		if(err) return callback(err);
 		
@@ -1187,7 +1187,7 @@ var directory = json.directory;
 
 	if(directory == undefined) return callback(new Error("No directory defined"));
 
-	checkDir(user, directory, function rootDir(err, rootDir, localPath) {
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
 		var spawn = require('child_process').spawn;

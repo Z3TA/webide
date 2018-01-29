@@ -130,14 +130,18 @@
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
 				}
 				
+				
 				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
-					EDITOR.addTempMenuItem("Push <i>to</i> repo", false, function() {
+					EDITOR.addTempMenuItem("Push", false, function() {
+						EDITOR.hideMenu();
 						push(status.rootDir);
 					});
-					EDITOR.addTempMenuItem("Merge <i>from</i> repo", false, function() {
-						mercurialDance(file);
-					});
 				}
+				
+				EDITOR.addTempMenuItem("Pull (and update+merge)", false, function() {
+					EDITOR.hideMenu();
+					mercurialDance(file);
+				});
 				
 				var showAnnotationsString = "Show commit messages";
 				var annotateMenuItem = EDITOR.addTempMenuItem(showAnnotationsString, false, annotateOn);
@@ -339,9 +343,9 @@
 					
 					if(authNeeded) {
 						var repoUrl = authNeeded[1];
-						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
+						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", resp.directory, "Pull", function authorized(username, password, save) {
 							if(username != null) CLIENT.cmd("mercurial.pull", {directory: fileDirectory, user: username, pw: password, save: save}, hgPull);
-						}, "Pull");
+						});
 						return;
 					}
 					else if(authFailed) {
@@ -439,7 +443,7 @@
 					
 					if(authNeeded) {
 						var repoUrl = authNeeded[1];
-						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", function authorized(username, password, save) {
+						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", resp.directory, function authorized(username, password, save) {
 							if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
 						}, "Pull");
 						return;
@@ -545,9 +549,9 @@
 					
 					if(authNeeded) {
 						var repoUrl = authNeeded[1];
-						showAuthDialog("Need authorization for pulling from " + repoUrl + ": ", function authorized(username, password, save) {
+						showAuthDialog("Need authorization for pulling from " + repoUrl + ": ", resp.directory, "Pull", function authorized(username, password, save) {
 							if(username != null) CLIENT.cmd("mercurial.pull", {directory: dir, user: username, pw: password, save: save}, hgPull);
-						}, "Pull");
+						});
 						return;
 					}
 					else if(authFailed) {
@@ -991,9 +995,9 @@
 					
 					if(authNeeded) {
 						var repoUrl = authNeeded[1];
-						showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", function authorized(username, password, save) {
+						showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", resp.directory, "Push", function authorized(username, password, save) {
 							if(username != null) CLIENT.cmd("mercurial.push", {directory: rootDir, user: username, pw: password, save: save}, hgPush);
-						}, "Push");
+						});
 						return;
 					}
 					else if(authFailed) {
@@ -1037,9 +1041,9 @@
 				
 				if(authNeeded) {
 					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", function authorized(username, password, save) {
+					showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", rootDir, "Push", function authorized(username, password, save) {
 						if(username != null) CLIENT.cmd("mercurial.push", {directory: rootDir, user: username, pw: password, save: save}, hgPush);
-					}, "Push");
+					});
 					return;
 				}
 				else if(authFailed) {
@@ -1049,8 +1053,7 @@
 			}
 			else {
 				alertBox("Successfully pushed to " + resp.remote);
-				commitSuccessful(resp.directory);
-			}
+				}
 		}
 		
 	}
@@ -1554,8 +1557,8 @@
 					throw new Error("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2) + 
 					" typeof changesets = " + (typeof changesets) + " change=" + change + " Object.keys(changesets)=" + Object.keys(changesets) + 
 					" typeof changeId = " + (typeof changeId) + " changesets.hasOwnProperty(" + changeId + ")=" + changesets.hasOwnProperty(changeId) + 
-					" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') + " " +
-					"lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
+					" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') +
+					" lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 					}
 				console.log("change=" + change);
 					annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
@@ -1649,7 +1652,14 @@
 		else return true;
 	}
 	
-	function showAuthDialog(message, callback, submitText) {
+	function showAuthDialog(message, rootDir, submitText, callback) {
+		
+		if(rootDir == undefined) throw new Error("rootDir=" + rootDir);
+		
+		if(typeof submitText == "function") {
+			callback = submitText;
+			submitText = undefined;
+		}
 		
 		if(typeof callback != "function") throw new Error("Need a callback function!");
 		
