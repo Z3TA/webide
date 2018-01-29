@@ -302,7 +302,7 @@
 			var server = {url: url.value};
 			
 			if(CLIENT.connected) {
-				if(CLIENT.url != server.url || EDITOR.user != user.value) {
+				if(CLIENT.url != server.url || (EDITOR.user && EDITOR.user != user.value)) {
 					// Must disconnect in order to login as a different user!
 					console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user=" + EDITOR.user + " user.value=" + user.value);
 					CLIENT.disconnect();
