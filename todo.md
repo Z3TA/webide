@@ -38,13 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Check if nginx is installed and skip nginx files when making chroot
+Working on Mercurial pull
 
-Google cloud shell support:
-- chrooting into home dir
-- start script 
-- click deploy the editor (see https://cloud.google.com/shell/docs/open-in-cloud-shell)
-
+Sync with repo after each save !?
 
 Able to push to repo! (without commit & push)
 

@@ -138,7 +138,7 @@
 					});
 				}
 				
-				EDITOR.addTempMenuItem("Pull (and update+merge)", false, function() {
+				EDITOR.addTempMenuItem("Pull (update+merge)", false, function() {
 					EDITOR.hideMenu();
 					mercurialDance(file);
 				});
@@ -306,12 +306,15 @@
 			CLIENT.cmd("mercurial.heads", {directory: fileDirectory}, function resolveList(err, resp) {
 				if(err) throw err;
 				
-				if(resp.heads.length > 1) {
+				if(resp.heads.length == 1) {
+					pullFromRepo(fileDirectory);
+				}
+				else {
 					
 					var merge = "Merge";
 					var cancel = "Cancel";
 					
-					confirmBox("There are multiple heads in Mercurial. Do you want to merge them ?", [merge, cancel], function(answer) {
+					confirmBox("There are multiple heads (" + resp.heads + ") in Mercurial. Do you want to merge them ?", [merge, cancel], function(answer) {
 						
 						if(answer == merge) {
 							CLIENT.cmd("mercurial.merge", {directory: fileDirectory}, function resolveList(err, resp) {
@@ -330,7 +333,7 @@
 			});
 		}
 		
-		function pullFromRepo() {
+		function pullFromRepo(fileDirectory) {
 			console.log("Mercurial: Pulling from remote repository ...");
 			
 			CLIENT.cmd("mercurial.pull", {directory: fileDirectory}, hgPull);
@@ -430,7 +433,7 @@
 		
 		
 		
-		function pullFromRepo() {
+		function pullFromRepo2() {
 			console.log("Mercurial: Pulling from remote repository ...");
 			
 			CLIENT.cmd("mercurial.pull", {directory: rootDir}, hgPull);
@@ -1567,7 +1570,7 @@
 					EDITOR.resizeNeeded();
 				}
 			else {
-				//.warn("No annotations for line " + line + " in " + file.path);
+				console.warn("No annotations for line " + line + " in " + file.path + " changeId=" + changeId + " lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 				annotationWidget.innerText = "No annotations for line " + line + " in " + file.path;
 			}
 			
@@ -1639,7 +1642,7 @@
 	
 	function hideMercurialWidgets() {
 		// Returning false prevents browser's default action. Only return false if we did something.
-		return !!( repoCommitDialog.hide() + hideCloneDialog() + hideAuthDialog() );
+		return !!( repoCommitDialog.hide() + hideCloneDialog() + hideAuthDialog() + hideVersionHistory() );
 	}
 	
 	function hideAuthDialog() {
