@@ -46,6 +46,14 @@
 	var selectedRev; // {id, files}
 	var lastActiveHistoryTableRow;
 	
+	
+	var testRepo = {
+		url: "https://hg.webtigerteam.com/repo/test",
+		into: "/repo/test/",
+		user: "user",
+		pw: "pass"
+	}
+	
 	// todo: Reload annotations when the file on disk changes!! (like a reload), update, merge, etc
 	
 	EDITOR.plugin({
@@ -66,6 +74,16 @@
 		EDITOR.on("showMenu", showScmMenuItemsMaybe);
 		
 		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
+		
+		if(QueryString.repo) {
+			testRepo = {
+				url: QueryString.repo,
+				into: "/repo/" + UTIL.getFolderName(QueryString.repo),
+				user: "",
+				pw: ""
+			}
+			showCloneDialog();
+		}
 		
 	}
 	
@@ -1118,13 +1136,6 @@
 	}
 	
 	function buildCloneDialog(widget) {
-		
-		var testRepo = {
-			url: "https://hg.webtigerteam.com/repo/test",
-			into: "/repo/test/",
-			user: "user",
-			pw: "pass"
-		}
 		
 		var defaultRepo = testRepo;
 		

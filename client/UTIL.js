@@ -719,33 +719,38 @@ var UTIL = {
 
 	getPathFromUrl: function getPathFromUrl(url) {
 		
-		console.log("url=" + url);
-		
-		var protocolIndex = url.indexOf("://");
-		var protocol = "";
-		
-		if(protocolIndex != -1) {
-			protocol = url.substr(0, protocolIndex);
-			url = url.substr(url.indexOf("://")+3);
-		}
-		
-		console.log("protocol=" + protocol);
-		console.log("url=" + url);
-		
-		if(protocol) {
-			while(url.indexOf("/") == 0) url = url.substr(1); // Remove all starting slashes from ex: file:///C:\users\...
-		}
-		
-		console.log("url=" + url);
-		
 		var filePath;
 		
-		if(protocol.toLowerCase() != "file" && (url.indexOf("/") != -1)) {
-			filePath = url.substr(url.indexOf("/"));
-		}
-		else filePath = url;
+		console.log("url=" + url);
 		
-		filePath = decodeURIComponent(filePath); // decore åäö etc
+		if(url.charAt(0) == "/") {
+			filePath = url;
+			}
+else {
+			var protocolIndex = url.indexOf("://");
+			var protocol = "";
+			
+			if(protocolIndex != -1) {
+				protocol = url.substr(0, protocolIndex);
+				url = url.substr(url.indexOf("://")+3);
+			}
+			
+			console.log("protocol=" + protocol);
+			console.log("url=" + url);
+			
+			if(protocol) {
+				while(url.indexOf("/") == 0) url = url.substr(1); // Remove all starting slashes from ex: file:///C:\users\...
+			}
+			
+			console.log("url=" + url);
+			
+			if(protocol.toLowerCase() != "file" && (url.indexOf("/") != -1)) {
+				filePath = url.substr(url.indexOf("/"));
+			}
+			else filePath = url;
+		}
+		
+		filePath = decodeURIComponent(filePath); // decode åäö etc
 		
 		console.log("filePath=" + filePath);
 		

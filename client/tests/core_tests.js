@@ -40,6 +40,18 @@
 		
 	}
 	
+	EDITOR.addTest(function getPathFromUrl(callback) {
+		
+		var path = UTIL.getPathFromUrl("http://127.0.0.1:8080/?repo=https://github.com/Z3TA/test.git");
+		if(path != "/") throw new Error("Expected the path to be / not " + path);
+		
+		var path = UTIL.getPathFromUrl("/?repo=https://github.com/Z3TA/test.git");
+		if(path != "/") throw new Error("Expected the path to be / not " + path);
+		
+		callback(true);
+		
+	}, 1);
+	
 	EDITOR.addTest(function placeCaretOnEmtyLine(callback) {
 		
 		// The editor should be able to place the caret on an emty line!
