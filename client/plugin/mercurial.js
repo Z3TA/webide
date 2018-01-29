@@ -115,19 +115,28 @@
 			var directory = EDITOR.workingDirectory;
 		}
 		
-			CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, resp) {
+		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
 				if(err) {
 				console.log("mercurial.status error: " + err.message);
 				// Most likely no local repository found
 			}
 				else {
 				
-				console.log("mercurial.status resp: " + JSON.stringify(resp));
+				console.log("mercurial.status : " + JSON.stringify(status));
 				
-				// resp"modified":[],"added":[],"removed":[],"missing":[],"untracked":
+				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
-				if(resp.modified.length != 0 || resp.added.length != 0 || resp.removed.length != 0 || resp.missing.length != 0 || resp.untracked.length != 0) {
+				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0 || status.untracked.length != 0) {
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
+				}
+				
+				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
+					EDITOR.addTempMenuItem("Push <i>to</i> repo", false, function() {
+						push(status.rootDir);
+					});
+					EDITOR.addTempMenuItem("Merge <i>from</i> repo", false, function() {
+						mercurialDance(file);
+					});
 				}
 				
 				var showAnnotationsString = "Show commit messages";
@@ -1013,6 +1022,35 @@
 		
 		function commitAndPush(e) {
 			mercurialCommit(e, true);
+		}
+		
+	}
+	
+	function push(rootDir) {
+		
+		CLIENT.cmd("mercurial.push", {directory: rootDir}, hgPush);
+		
+		function hgPush(err, resp) {
+			if(err) {
+				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+				var authFailed = err.message.match(/abort: authorization failed/);
+				
+				if(authNeeded) {
+					var repoUrl = authNeeded[1];
+					showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", function authorized(username, password, save) {
+						if(username != null) CLIENT.cmd("mercurial.push", {directory: rootDir, user: username, pw: password, save: save}, hgPush);
+					}, "Push");
+					return;
+				}
+				else if(authFailed) {
+					alertBox("Authorization filed!\nUnable to Push to " + repoUrl);
+				}
+				else alertBox(err.message);
+			}
+			else {
+				alertBox("Successfully pushed to " + resp.remote);
+				commitSuccessful(resp.directory);
+			}
 		}
 		
 	}
