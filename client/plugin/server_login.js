@@ -307,8 +307,7 @@
 				else if(EDITOR.user != user.value) identify();
 				else alertBox("Already logged in as user=" + EDITOR.user + " on \n" + CLIENT.url);
 			}
-			
-			if(!CLIENT.connected) {
+			else {
 				CLIENT.connect(server, function connectionOpen(err) {
 					if(err) alertBox("Problem connecting to JZedit server on " + JSON.stringify(server));
 					else identify()

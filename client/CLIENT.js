@@ -60,6 +60,9 @@ var CLIENT = {}; // Client object is global
 			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
+			console.log("connection.onopen: connection.readyState=" + connection.readyState);
+			// readyState when using xhr !? Wait for readyState !?
+			
 			if(callback) callback(null); // Don't wait for login, just callback and say we successfully connected
 			callback = null; // Prevent calling the connect callback when connection is closed after a successful onopen
 			
@@ -289,6 +292,7 @@ var CLIENT = {}; // Client object is global
 			if(callback) callback(null);
 		}
 		else {
+			console.log("connection.readyState=" + connection.readyState);
 			if(callback) {
 				var err = new Error("Not connected to jzedit server");
 				err.code = "CONNECTION_CLOSED";
