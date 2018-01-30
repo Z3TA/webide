@@ -18,7 +18,7 @@
 			
 				EDITOR.on("afterResize", resizeTerminals);
 				EDITOR.on("keyPressed", terminalKeyPressed);
-				EDITOR.on("keyDown", terminalkeyDown); // Needed to detect enter
+			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
 			EDITOR.on("fileClose", terminalCloseFile);
 			
 			},
@@ -29,7 +29,7 @@
 			CLIENT.removeEvent("terminal", terminalMessage);
 			
 				EDITOR.removeEvent("afterResize", resizeTerminals);
-				EDITOR.removeEvent("keyDown", terminalkeyDown);
+			EDITOR.removeEvent("keyDown", terminalKeyDown);
 				EDITOR.removeEvent("fileClose", terminalCloseFile);
 			}
 		});
@@ -164,24 +164,31 @@
 		return false;
 		}
 		
-	function terminalkeyDown(file, character, combo, keyDownEvent) {
+	function terminalKeyDown(file, character, combo, keyDownEvent) {
 		if(terminalFiles.indexOf(file) == -1) return true;
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
 		console.log("key down: " + character + " (" + code + ")");
 		
-		if(code != 13) return true;
-		
 		var id = file.path.match(reTerm)[1];
+		var data;
 		
-		CLIENT.cmd("terminal.write", {id: id, data: character}, function terminalWrite(err) {
-			if(err) alertBox(err.message);
-		});
+		if(code == 13) { // Enter
+			data = character;
+		}
+else if(code == 67 && combo.ctrl) { // Ctrl+C
+			data = String.fromCharCode(3); // ETX (end of text) 
+}
+			else return true;
+			
+			CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
+				if(err) alertBox(err.message);
+			});
+			
+return false;
+		}
 		
-		return false;
-		
-	}
 	
 	function terminalCloseFile(file) {
 		if(terminalFiles.indexOf(file) == -1) return true;
