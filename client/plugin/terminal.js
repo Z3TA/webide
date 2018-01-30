@@ -131,7 +131,7 @@ if(callback) callback(null, EDITOR.files[name]);
 					char = data.charAt(i);
 					code = data.charCodeAt(i);
 					
-					if(code == 7) { // BEL *beep*
+					if(code == 7) { // BEL
 						}
 				else if(code == 13) { // cr
 				}
@@ -145,6 +145,10 @@ if(callback) callback(null, EDITOR.files[name]);
 					}
 					else if(inText) {
 					if(code == 10) file.insertLineBreak();
+					else if(code == 8) {
+						file.moveCaretLeft();
+						file.deleteCharacter();
+						}
 					else file.putCharacter(char);
 					}
 					
@@ -184,7 +188,10 @@ if(callback) callback(null, EDITOR.files[name]);
 else if(code == 67 && combo.ctrl) { // Ctrl+C
 			data = String.fromCharCode(3); // ETX (end of text) 
 }
-			else return true;
+		else if(code == 8) { // backspace
+			data = character;
+		}
+		else return true;
 			
 			CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
 				if(err) alertBox(err.message);
