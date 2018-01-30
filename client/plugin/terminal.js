@@ -76,8 +76,11 @@
 			
 		if(!name) throw new Error("name=" + name);
 		
-			if(EDITOR.files.hasOwnProperty(name) && callback) return callback(null, EDITOR.files[name]); 
-			
+		if(EDITOR.files.hasOwnProperty(name)) {
+if(callback) callback(null, EDITOR.files[name]); 
+		return;
+		}
+		
 			EDITOR.openFile(name, "", function fileOpened(err, file) {
 				if(err) {
 					if(callback) return callback(err);
