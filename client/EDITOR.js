@@ -5367,6 +5367,7 @@ console.warn(err.message);
 				}
 			}
 			
+		if(!preventDefault) {
 			// Check key bindings
 			for(var i=0, binding; i<keyBindings.length; i++) {
 				
@@ -5405,8 +5406,9 @@ console.warn(err.message);
 					//console.log("NOT calling function:" + UTIL.getFunctionName(binding.fun) + " " + JSON.stringify(binding));
 				}
 			}
-			
-			// Throwing the actual error here doesn't give a call stack! meh ... Need to see the console.warning to see the call stack
+		}
+		
+		// Throwing the actual error here doesn't give a call stack! meh ... Need to see the console.warning to see the call stack
 			//if(gotError) throw gotError; // throw new Error("There was an error when calling keyBindings. Se warnings in console log!");
 			// Otimally we would want all key bound functions to run before throwing the error, but it's too annoying to not see the call stack in the error
 			
