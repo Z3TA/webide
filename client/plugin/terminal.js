@@ -120,6 +120,12 @@ if(callback) callback(null, EDITOR.files[name]);
 			
 			console.log("terminal:" + JSON.stringify(term, null, 2));
 			
+		/*
+			
+			Terminal is always in insert mode !?
+			
+		*/
+		
 			function parse(data) {
 				
 				var char = "";
@@ -127,10 +133,12 @@ if(callback) callback(null, EDITOR.files[name]);
 				var inCommand = false;
 			var inText = true;
 				
-				for (var i=0; i<data.length; i++) {
+			for (var i=0; i<data.length; i++) {
 					char = data.charAt(i);
 					code = data.charCodeAt(i);
 					
+				console.log("char=" + char + " code=" + code);
+				
 					if(code == 7) { // BEL
 						}
 				else if(code == 13) { // cr
@@ -147,18 +155,19 @@ if(callback) callback(null, EDITOR.files[name]);
 					if(code == 10) file.insertLineBreak();
 					else if(code == 8) {
 						file.moveCaretLeft();
-						file.deleteCharacter();
+						//file.deleteCharacter();
 						}
-					else file.putCharacter(char);
+					else {
+						if(!file.caret.eol) file.deleteCharacter();
+						file.putCharacter(char);
 					}
-					
 				}
-				
-				EDITOR.renderNeeded();
 			}
+			EDITOR.renderNeeded();
 		}
-		
-		function terminalKeyPressed(file, character, combo) {
+	}
+	
+	function terminalKeyPressed(file, character, combo) {
 		if(terminalFiles.indexOf(file) == -1) return true;
 		
 		var id = file.path.match(reTerm)[1];
@@ -170,8 +179,8 @@ if(callback) callback(null, EDITOR.files[name]);
 		});
 		
 		return false;
-		}
-		
+	}
+	
 	function terminalKeyDown(file, character, combo, keyDownEvent) {
 		if(terminalFiles.indexOf(file) == -1) return true;
 		
@@ -182,24 +191,29 @@ if(callback) callback(null, EDITOR.files[name]);
 		var id = file.path.match(reTerm)[1];
 		var data;
 		
+		var ESC = String.fromCharCode(27);
+		
 		if(code == 13) { // Enter
 			data = character;
 		}
-else if(code == 67 && combo.ctrl) { // Ctrl+C
+		else if(code == 67 && combo.ctrl) { // Ctrl+C
 			data = String.fromCharCode(3); // ETX (end of text) 
-}
+		}
 		else if(code == 8) { // backspace
 			data = character;
 		}
-		else return true;
-			
-			CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
-				if(err) alertBox(err.message);
-			});
-			
-return false;
+		else if(code == 37) { // arrow left
+			data = ESC + "[D";
 		}
+		else return true;
 		
+		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
+			if(err) alertBox(err.message);
+		});
+		
+		return false;
+	}
+	
 	
 	function terminalCloseFile(file) {
 		if(terminalFiles.indexOf(file) == -1) return true;
@@ -213,5 +227,5 @@ return false;
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 		
 	}
-		
-	})();
+	
+})();
