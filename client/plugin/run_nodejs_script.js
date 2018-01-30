@@ -8,7 +8,7 @@
 		EDITOR.plugin({
 			desc: "Allows running Node.JS scripts",
 			load: loadNodeJS,
-			unload: unloadNodeJS,
+			unload: unloadNodeJS
 		});
 		
 		function loadNodeJS() {
