@@ -88,6 +88,7 @@ if(callback) callback(null, EDITOR.files[name]);
 				}
 				
 			file.mode = "text";
+			file.parse = false;
 			
 			terminalFiles.push(file);
 				
