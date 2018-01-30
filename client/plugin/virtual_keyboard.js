@@ -66,16 +66,13 @@
 		// We are now pretty shure that the user has a keyboard
 		//alertBox("Hiding virtual keyboard!");
 		
-		if(keyDownCounter > 0) EDITOR.virtualKeyboard.hide();
+		if(keyDownCounter > 0 && EDITOR.virtualKeyboard.isVisible) EDITOR.virtualKeyboard.hide();
 		
 		if(keyDownCounter > 50 && touchCounter == 0) {
 			EDITOR.removeEvent("mouseClick", touchMaybeOnMouseDown);
 			EDITOR.removeEvent("keyDown", maybeHasKeyboard);
 		}
-		
-	}
-	
-	
+		}
 	
 	function addButtons() {
 		var body = document.body;

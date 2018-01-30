@@ -3803,8 +3803,9 @@ EDITOR.lastKeyPressed = "";
 			},
 			hide: function hideVirutalKeyboard() {
 				virtualKeyboardElement.style.display = "none";
+			if(this.isVisible) EDITOR.resizeNeeded();
+			else console.warn("Virtual keyboard already hidden!");
 				this.isVisible = false;
-				EDITOR.resizeNeeded();
 			},
 			show: function showVirutalKeyboard() {
 				virtualKeyboardElement.style.display = "block";
