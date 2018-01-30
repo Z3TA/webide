@@ -130,9 +130,10 @@ if(callback) callback(null, EDITOR.files[name]);
 				
 				var char = "";
 				var code = 0;
-				var inCommand = false;
+			var inEsc = false;
 			var inText = true;
-				
+			var inBracket = false;
+			
 			for (var i=0; i<data.length; i++) {
 					char = data.charAt(i);
 					code = data.charCodeAt(i);
@@ -144,19 +145,34 @@ if(callback) callback(null, EDITOR.files[name]);
 				else if(code == 13) { // cr
 				}
 					else if(code == 27) { // ESC
-						inCommand = true;
+					inEsc = true;
 						inText = false;
 					}
-					else if(inCommand && code == 109) { // m
+				else if(inEsc && char == "]") {
+					inBracket = true;
+					inEsc = false;
+				}
+				else if(inBracket && char == "K") {
+					// Erase End of Line
+					// todo: Erase until end of line
+				}
+				else if(inEsc && code == 109) { // m
 						inText = true;
-						inCommand = false;
+					inEsc = false;
 					}
 					else if(inText) {
 					if(code == 10) file.insertLineBreak();
-					else if(code == 8) {
+					else if(code == 8) { // BS  (backspace)  
 						file.moveCaretLeft();
 						//file.deleteCharacter();
 						}
+					else if(code == 9) { // TAB (horizontal tab)
+						var spaces = ""
+						for (var j=0; j<EDITOR.settings.tabSpace; j++) {
+							spaces += " ";
+						}
+						file.insertText(spaces);
+					}
 					else {
 						if(!file.caret.eol) file.deleteCharacter();
 						file.putCharacter(char);
@@ -205,7 +221,18 @@ if(callback) callback(null, EDITOR.files[name]);
 		else if(code == 37) { // arrow left
 			data = ESC + "[D";
 		}
-		else return true;
+		else if(code == 39) { // arrow right
+			data = ESC + "[C";
+		}
+		
+		else if(code == 38) { // arrow up
+			data = ESC + "[A";
+		}
+		else if(code == 40) { // arrow down
+			data = ESC + "[B";
+		}
+		
+else return true;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
