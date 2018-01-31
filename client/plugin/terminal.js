@@ -443,6 +443,10 @@ if(callback) callback(null, EDITOR.files[name]);
 		
 		if(code == 13) { // Enter
 			data = character;
+		
+			// We don't want the text right of the caret to cary over to the next line!
+			//file.writeLineBreak();
+			file.moveCaretToEnd();
 		}
 		else if(code == 67 && combo.alt) { // Alt+C (instead of Ctrl+C which is used for copying)
 			data = String.fromCharCode(3); // ETX (end of text) 
