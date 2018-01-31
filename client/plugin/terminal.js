@@ -666,6 +666,17 @@
 					inText = true;
 				}
 				
+				else if(inNumber && char == "P") {
+					// This is not in the spec!!?!? But bash sends it
+					var times = parseInt(inNumber);
+					
+					console.log("Delete " + times + " characters");
+					for(var j=0; j<times;j++) file.deleteCharacter();
+				
+					inNumber = "";
+					inText = true;
+				}
+				
 				else if(inEsc && code == 109) { // m
 					inText = true;
 					inEsc = false;
@@ -689,7 +700,7 @@
 						file.insertText(spaces);
 					}
 					else {
-						if(!file.caret.eol && (data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
+						if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 						file.putCharacter(char);
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
 					}
