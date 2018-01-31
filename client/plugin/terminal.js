@@ -135,57 +135,242 @@ if(callback) callback(null, EDITOR.files[name]);
 			var inEsc = false;
 			var inText = true;
 			var inBracket = false;
+			var inNumber = "";
+			var bright = false;
+			var inDisplayMode = false;
+			var inNumberSerie = false;
+			var numberSerie = [];
+			
+			var defaultForeGroundColor = EDITOR.settings.style.textColor;
+			var defaultBackgroundColor = EDITOR.settings.style.bgColor;
+			
+			var colorBlack = "black";
+			var colorRed = "red";
+			var colorGreen = "green";
+			var colorYellow = "yellow";
+			var colorBlue = "blue";
+			var colorMagenta = "magenta";
+			var colorCyan = "cyan";
+			var colorWhite = "white";
+			
+			var bright = false;
+			var dim = false;
+			var underscore = false;
+			var blink = false;
+			var reverse = false;
+			var hidden = false;
+			var foregroundColor = defaultForeGroundColor;
+			var backgroundColor = defaultBackgroundColor;
 			
 			for (var i=0; i<data.length; i++) {
 					char = data.charAt(i);
 					code = data.charCodeAt(i);
 					
-				console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket + "");
-				
+				console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket + 
+				" inNumberSerie=" + inNumberSerie + " inNumber=" + inNumber + " ");
+					
 					if(code == 7) { // BEL
-						}
-				else if(code == 13) { // cr
-				}
+					inNumber = "";
+					inNumberSerie = false;
+					numberSerie.length = 0;
+					inText = true;
+					}
+					else if(code == 13) { // cr
+					}
 					else if(code == 27) { // ESC
-					inEsc = true;
+						inEsc = true;
 						inText = false;
 					}
-				else if(inEsc && code == 91) { // [
-					inBracket = true;
-					inEsc = false;
-				}
-				else if(inBracket && char == "K") {
-					// Erase End of Line
-					// todo: Erase until end of line
-					var row = file.grid[file.caret.row];
-					if(row.length > file.caret.col) {
-						var firstIndex = file.caret.index;
-						var lastIndex = row[row.length-1].index;
-						file.deleteTextRange(firstIndex, lastIndex);
+				else if(inEsc && (code == 91 || code == 93)) { // 91=[  93=]  
+						inBracket = true;
+						inEsc = false;
 					}
-					inBracket = false;
-				inText = true;
-			}
+					else if(inBracket && char == "K") {
+						// Erase End of Line
+						// todo: Erase until end of line
+						var row = file.grid[file.caret.row];
+						if(row.length > file.caret.col) {
+							var firstIndex = file.caret.index;
+							var lastIndex = row[row.length-1].index;
+							file.deleteTextRange(firstIndex, lastIndex);
+						}
+						inBracket = false;
+						inText = true;
+					}
+					
+					// ### Start numbers
+					else if(inBracket && code == 48) { // 0
+						inNumber = "0";
+						inBracket = false;
+					}
+					else if(inBracket && code == 49) { // 1
+						inNumber = "1";
+						inBracket = false;
+					}
+					else if(inBracket && code == 50) { // 2
+						inNumber = "2";
+						inBracket = false;
+					}
+					else if(inBracket && code == 51) { // 3
+						inNumber = "3";
+						inBracket = false;
+					}
+					else if(inBracket && code == 52) { // 4
+						inNumber = "4";
+						inBracket = false;
+					}
+					else if(inBracket && code == 53) { // 5
+						inNumber = "5";
+						inBracket = false;
+					}
+					else if(inBracket && code == 54) { // 6
+						inNumber = "6";
+						inBracket = false;
+					}
+					else if(inBracket && code == 55) { // 7
+						inNumber = "7";
+						inBracket = false;
+					}
+					else if(inBracket && code == 56) { // 8
+						inNumber = "8";
+						inBracket = false;
+					}
+					else if(inBracket && code == 57) { // 9
+						inNumber = "9";
+						inBracket = false;
+					}
+					
+					// ### Add numbers
+					else if((inNumber || inNumberSerie) && code == 48) { // 0
+						inNumber += "0";
+					}
+					else if((inNumber || inNumberSerie) && code == 49) { // 1
+						inNumber += "1";
+					}
+					else if((inNumber || inNumberSerie) && code == 50) { // 2
+						inNumber += "2";
+					}
+					else if((inNumber || inNumberSerie) && code == 51) { // 3
+						inNumber += "3";
+					}
+					else if((inNumber || inNumberSerie) && code == 52) { // 4
+						inNumber += "4";
+					}
+					else if((inNumber || inNumberSerie) && code == 53) { // 5
+						inNumber += "5";
+					}
+					else if((inNumber || inNumberSerie) && code == 54) { // 6
+						inNumber += "6";
+					}
+					else if((inNumber || inNumberSerie) && code == 55) { // 7
+						inNumber += "7";
+					}
+					else if((inNumber || inNumberSerie) && code == 56) { // 8
+						inNumber += "8";
+					}
+					else if((inNumber || inNumberSerie) && code == 57) { // 9
+						inNumber += "9";
+					}
+					
+					else if(inNumber && code == 59) { // ;
+						numberSerie.push(inNumber);
+						inNumberSerie = true;
+						inNumber = "";
+					}
+					
+					else if(inNumber && code == 109) { // m
+						// ### Display mode
+						
+					numberSerie.push(inNumber);
+					
+					for (var j=0; j<numberSerie.length; j++) {
+						// foreground
+						if(numberSerie[j] == "30") foregroundColor = colorBlack;
+						else if(numberSerie[j] == "31") foregroundColor = colorRed;
+						else if(numberSerie[j] == "32") foregroundColor = colorGreen;
+						else if(numberSerie[j] == "33") foregroundColor = colorYellow;
+						else if(numberSerie[j] == "34") foregroundColor = colorBlue;
+						else if(numberSerie[j] == "35") foregroundColor = colorMagenta;
+						else if(numberSerie[j] == "36") foregroundColor = colorCyan;
+						else if(numberSerie[j] == "37") foregroundColor = colorWhite;
+						
+						// background
+						else if(numberSerie[j] == "40") backgroundColor = colorBlack;
+						else if(numberSerie[j] == "41") backgroundColor = colorRed;
+						else if(numberSerie[j] == "42") backgroundColor = colorGreen;
+						else if(numberSerie[j] == "43") backgroundColor = colorYellow;
+						else if(numberSerie[j] == "44") backgroundColor = colorBlue;
+						else if(numberSerie[j] == "45") backgroundColor = colorMagenta;
+						else if(numberSerie[j] == "46") backgroundColor = colorCyan;
+						else if(numberSerie[j] == "47") backgroundColor = colorWhite;
+						
+						else {
+							while(numberSerie[j].length > 0) {
+							
+								if(numberSerie[j].charAt(0) == "0") {
+									// Reset all
+									bright = false;
+									dim = false;
+									underscore = false;
+									blink = false;
+									reverse = false;
+									hidden = false;
+									foregroundColor = defaultForeGroundColor;
+									backgroundColor = defaultBackgroundColor;
+								}
+								else if(numberSerie[j].charAt(0) == "1") {
+									bright = true;
+								}
+								else if(numberSerie[j].charAt(0) == "2") {
+									dim = true;
+								}
+								else if(numberSerie[j].charAt(0) == "4") {
+									underscore = true;
+								}
+								else if(numberSerie[j].charAt(0) == "5") {
+									blink = true;
+								}
+								else if(numberSerie[j].charAt(0) == "7") {
+									reverse = true;
+								}
+								else if(numberSerie[j].charAt(0) == "8") {
+									hidden = true;
+								}
+								
+								numberSerie[j] = numberSerie[j].slice(1);
+							}
+						}
+						}
+					
+					inNumber = "";
+					inNumberSerie = false;
+					numberSerie.length = 0;
+					inText = true;
+				}
+				
 				else if(inEsc && code == 109) { // m
 					inText = true;
 					inEsc = false;
-					}
-					else if(inText) {
+				}
+				else if(inText) {
+					// ### Text
+					
 					if(code == 10) file.insertLineBreak();
 					else if(code == 8) { // BS  (backspace)  
 						file.moveCaretLeft();
-						//file.deleteCharacter();
+							//file.deleteCharacter();
 						}
-					else if(code == 9) { // TAB (horizontal tab)
-						var spaces = ""
-						for (var j=0; j<EDITOR.settings.tabSpace; j++) {
-							spaces += " ";
+						else if(code == 9) { // TAB (horizontal tab)
+							var spaces = ""
+							for (var j=0; j<EDITOR.settings.tabSpace; j++) {
+								spaces += " ";
+							}
+							file.insertText(spaces);
 						}
-						file.insertText(spaces);
-					}
-					else {
-						if(!file.caret.eol) file.deleteCharacter();
-						file.putCharacter(char);
+						else {
+							if(!file.caret.eol) file.deleteCharacter();
+							file.putCharacter(char);
+						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
 					}
 				}
 			}
@@ -242,7 +427,7 @@ if(callback) callback(null, EDITOR.files[name]);
 			data = ESC + "[B";
 		}
 		
-else return true;
+		else return true;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
