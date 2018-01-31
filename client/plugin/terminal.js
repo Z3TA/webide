@@ -43,7 +43,7 @@
 			
 			var cwd = EDITOR.currentFile && UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 			var cols = EDITOR.view.visibleColumns;
-			var rows = EDITOR.view.visibleRows;
+		var rows = EDITOR.view.visibleRows;
 			
 			CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows}, function terminalOpened(err, term) {
 				if(err) return alertBox(err.message);
@@ -140,7 +140,6 @@ if(callback) callback(null, EDITOR.files[name]);
 			var inBracket = false;
 			var inNumber = "";
 			var bright = false;
-			var inDisplayMode = false;
 			var inNumberSerie = false;
 			var numberSerie = [];
 			
@@ -183,9 +182,13 @@ if(callback) callback(null, EDITOR.files[name]);
 					else if(code == 27) { // ESC
 						inEsc = true;
 						inText = false;
-					}
+					inBracket = false;
+					inNumberSerie = false;
+					inNumber = "";
+					numberSerie.length = 0;
+				}
 				else if(inEsc && (code == 91 || code == 93)) { // 91=[  93=]  
-						inBracket = true;
+					inBracket = true;
 						inEsc = false;
 					}
 					else if(inBracket && char == "K") {
@@ -201,7 +204,7 @@ if(callback) callback(null, EDITOR.files[name]);
 						inText = true;
 					}
 					
-					// ### Start numbers
+				// ### Start numbers
 					else if(inBracket && code == 48) { // 0
 						inNumber = "0";
 						inBracket = false;
@@ -280,7 +283,117 @@ if(callback) callback(null, EDITOR.files[name]);
 						inNumberSerie = true;
 						inNumber = "";
 					}
+				
+				else if(inBracket && code == 109) { // m
+					resetDisplay();
+					inBracket = false;
+					inText = true;
+				}
+				
+				// ### Clearing lines
+				else if(char == "K" && (inBracket || inNumber == "0") ) {
+					console.log("todo: Clear line from cursor right ");
+				}
+				else if(char == "K" && inNumber == "1") {
+					console.log("todo: Clear line from cursor left ");
+				}
+				else if(char == "K" && inNumber == "2") {
+					console.log("todo: Clear entire line ");
+				}
+				
+				// ### Clearing screen
+				else if(char == "J" && (inBracket || inNumber == "0") ) {
+					console.log("todo: Clear screen from cursor down");
+				}
+				else if(char == "J" && inNumber == "1") {
+					console.log("todo: Clear screen from cursor up ");
+				}
+				else if(code == 74 && inNumber == "2") { // J
+					console.log("Clear entire screen");
 					
+					var startRow = file.startRow;
+					var caretX = file.caret.col;
+					
+					console.log("Clear entire screen! startRow=" + startRow + " file.grid.length=" + file.grid.length);
+					
+					for(var row=startRow; row<file.grid.length; row++) {
+						console.log("Clearing row=" + row);
+						file.removeAllTextOnRow(row);
+					}
+					
+					//file.scrollTo(caretX, startRow);
+					
+				}
+				
+				// ### Moving the cursor
+				else if(inBracket && char == "H") {
+					// Move cursor to upper left corner
+					file.moveCaret(undefined, file.startRow, 0);
+				}
+				else if(inNumberSerie && char == "H") {
+					// Move cursor to screen location v,h
+					
+					var toCol = parseInt(inNumber) - 1;
+					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1;
+					
+					console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
+					
+					while(toRow >= file.grid.length) {
+						file.writeLineBreak();
+					}
+					
+					console.log(" file.grid.length=" + file.grid.length + " toRow=" + toRow);
+					console.log(" file.grid[" + toRow + "].length=" + file.grid[toRow].length);
+					
+					if(toCol >= file.grid[toRow].length) {
+						var spaces = "";
+						for(var j=0; j<toCol-file.grid[toRow].length; j++) {
+							spaces += " ";
+						}
+						file.moveCaret(undefined, toRow, file.grid[toRow].length-1);
+						file.insertText(spaces);
+					}
+						
+					file.moveCaret(undefined, toRow, toCol);
+					
+						inNumber = "";
+						inNumberSerie = false;
+					//numberSerie.length = 0;
+					if(numberSerie.length > 0) throw new Error("Unexpected numberSerie.length=" + numberSerie.length + " numberSerie=" + JSON.stringify(numberSerie));
+						inText = true;
+						}
+				else if(inNumber && char == "A") {
+					// Move cursor up n lines 
+					for(var j=0; j<times;j++) file.moveCaretUp();
+					
+					inNumber = "";
+					inText = true;
+				}
+				else if(inNumber && char == "B") {
+					// Move cursor down n lines
+					var times = parseInt(inNumber);
+					for(var j=0; j<times;j++) file.moveCaretDown();
+					
+					inNumber = "";
+					inText = true;
+				}
+				else if(inNumber && char == "C") {
+					// Move cursor right n lines 
+					var times = parseInt(inNumber);
+					for(var j=0; j<times;j++) file.moveCaretRight();
+					
+					inNumber = "";
+					inText = true;
+				}
+				else if(inNumber && char == "D") {
+					// Move cursor left n lines
+					var times = parseInt(inNumber);
+					for(var j=0; j<times;j++) file.moveCaretLeft();
+					
+					inNumber = "";
+					inText = true;
+				}
+				
 				else if(inNumber && code == 104) { // h
 					/*
 						Esc[20h 	Set new line mode 	LMN
@@ -345,15 +458,7 @@ if(callback) callback(null, EDITOR.files[name]);
 							while(numberSerie[j].length > 0) {
 							
 								if(numberSerie[j].charAt(0) == "0") {
-									// Reset all
-									bright = false;
-									dim = false;
-									underscore = false;
-									blink = false;
-									reverse = false;
-									hidden = false;
-									foregroundColor = defaultForeGroundColor;
-									backgroundColor = defaultBackgroundColor;
+									resetDisplay(); // Reset all
 								}
 								else if(numberSerie[j].charAt(0) == "1") {
 									bright = true;
@@ -412,6 +517,18 @@ if(callback) callback(null, EDITOR.files[name]);
 				}
 			}
 			EDITOR.renderNeeded();
+			
+			function resetDisplay() {
+				bright = false;
+				dim = false;
+				underscore = false;
+				blink = false;
+				reverse = false;
+				hidden = false;
+				foregroundColor = defaultForeGroundColor;
+				backgroundColor = defaultBackgroundColor;
+			}
+			
 		}
 	}
 	
