@@ -16,6 +16,9 @@
 			
 			CLIENT.on("terminal", terminalMessage);
 			
+			var keyEscape = 27;
+			EDITOR.bindKey({desc: "Send ETX (end of text) to terminal (Instead of Ctrl+C which is used for copying)", fun: terminalEndOfText, charCode: keyEscape, combo: 0});
+			
 				EDITOR.on("afterResize", resizeTerminals);
 				EDITOR.on("keyPressed", terminalKeyPressed);
 			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
@@ -122,9 +125,9 @@ if(callback) callback(null, EDITOR.files[name]);
 			
 		/*
 			
-			Terminal is always in insert mode !?
-			
 			http://www.termsys.demon.co.uk/vtansi.htm
+			http://ascii-table.com/ansi-escape-sequences-vt-100.php
+			
 			
 		*/
 		
@@ -278,7 +281,41 @@ if(callback) callback(null, EDITOR.files[name]);
 						inNumber = "";
 					}
 					
-					else if(inNumber && code == 109) { // m
+				else if(inNumber && code == 104) { // h
+					/*
+						Esc[20h 	Set new line mode 	LMN
+						Esc[?1h 	Set cursor key to application 	DECCKM
+						none 	Set ANSI (versus VT52) 	DECANM
+						Esc[?3h 	Set number of columns to 132 	DECCOLM
+						Esc[?4h 	Set smooth scrolling 	DECSCLM
+						Esc[?5h 	Set reverse video on screen 	DECSCNM
+						Esc[?6h 	Set origin to relative 	DECOM
+						Esc[?7h 	Set auto-wrap mode 	DECAWM
+						Esc[?8h 	Set auto-repeat mode 	DECARM
+						Esc[?9h 	Set interlacing mode 	DECINLM
+					*/
+					
+					inNumber = "";
+					inText = true;
+				}
+				else if(inNumber && code == 108) { // l
+					/*
+						Esc[20l 	Set line feed mode 	LMN
+						Esc[?1l 	Set cursor key to cursor 	DECCKM
+						Esc[?2l 	Set VT52 (versus ANSI) 	DECANM
+						Esc[?3l 	Set number of columns to 80 	DECCOLM
+						Esc[?4l 	Set jump scrolling 	DECSCLM
+						Esc[?5l 	Set normal video on screen 	DECSCNM
+						Esc[?6l 	Set origin to absolute 	DECOM
+						Esc[?7l 	Reset auto-wrap mode 	DECAWM
+						Esc[?8l 	Reset auto-repeat mode 	DECARM
+					Esc[?9l 	Reset interlacing mode 	DECINLM*/
+					
+					inNumber = "";
+					inText = true;
+				}
+				
+				else if(inNumber && code == 109) { // m
 						// ### Display mode
 						
 					numberSerie.push(inNumber);
@@ -368,7 +405,7 @@ if(callback) callback(null, EDITOR.files[name]);
 							file.insertText(spaces);
 						}
 						else {
-							if(!file.caret.eol) file.deleteCharacter();
+						if(!file.caret.eol && (data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 							file.putCharacter(char);
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
 					}
@@ -407,7 +444,7 @@ if(callback) callback(null, EDITOR.files[name]);
 		if(code == 13) { // Enter
 			data = character;
 		}
-		else if(code == 67 && combo.ctrl) { // Ctrl+C
+		else if(code == 67 && combo.alt) { // Alt+C (instead of Ctrl+C which is used for copying)
 			data = String.fromCharCode(3); // ETX (end of text) 
 		}
 		else if(code == 8) { // backspace
@@ -438,6 +475,18 @@ if(callback) callback(null, EDITOR.files[name]);
 		return false;
 	}
 	
+	function terminalEndOfText(file, combo, character, charCode, keyPushDirection, targetElementClass) {
+		if(terminalFiles.indexOf(file) == -1) return true;
+		
+		var id = file.path.match(reTerm)[1];
+		var data = String.fromCharCode(3); // ETX (end of text) 
+		
+		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
+if(err) alertBox(err.message);
+});
+
+return false;
+	}
 	
 	function terminalCloseFile(file) {
 		if(terminalFiles.indexOf(file) == -1) return true;
