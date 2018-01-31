@@ -3341,9 +3341,6 @@ var File; // File object is global
 		
 		console.log("scrolling to caret:" + JSON.stringify(caret) + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 		
-		
-		// Up and down ...
-		var maxStartRow = Math.max(0, file.grid.length - EDITOR.view.visibleRows) + 1;
 		var startRow = file.startRow;
 		var startColumn = file.startColumn;
 		
@@ -3356,8 +3353,8 @@ var File; // File object is global
 			startRow = caret.row;
 			
 		}
-		else if(caret.row >= (file.startRow + EDITOR.view.visibleRows - 1)) {
-			// Caret is below the visible space
+		else if(caret.row >= (file.startRow + EDITOR.view.visibleRows)) {
+			console.log("Caret is below the visible space");
 			
 			startRow = caret.row - EDITOR.view.visibleRows + 2;
 		}
@@ -3408,7 +3405,6 @@ var File; // File object is global
 		file.scrollTo(startColumn, startRow);
 		
 		//EDITOR.renderNeeded(); // Don't need to render until actually scrolled
-		
 		
 	}
 	
