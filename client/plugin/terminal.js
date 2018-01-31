@@ -497,7 +497,10 @@ if(callback) callback(null, EDITOR.files[name]);
 				else if(inText) {
 					// ### Text
 					
-					if(code == 10) file.insertLineBreak();
+					if(code == 10) {
+						file.moveCaretToEnd();
+						file.writeLineBreak();
+					}
 					else if(code == 8) { // BS  (backspace)  
 						file.moveCaretLeft();
 							//file.deleteCharacter();
@@ -509,7 +512,7 @@ if(callback) callback(null, EDITOR.files[name]);
 							}
 							file.insertText(spaces);
 						}
-						else {
+					else {
 						if(!file.caret.eol && (data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 							file.putCharacter(char);
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
@@ -563,7 +566,7 @@ if(callback) callback(null, EDITOR.files[name]);
 		
 			// We don't want the text right of the caret to cary over to the next line!
 			//file.writeLineBreak();
-			file.moveCaretToEnd();
+			//file.moveCaretToEnd();
 		}
 		else if(code == 67 && combo.alt) { // Alt+C (instead of Ctrl+C which is used for copying)
 			data = String.fromCharCode(3); // ETX (end of text) 
