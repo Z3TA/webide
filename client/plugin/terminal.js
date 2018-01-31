@@ -278,7 +278,7 @@
 					inText = true;
 				}
 				
-				else if(inNumberSerie && char == "r") {
+				else if(inNumberSerie && inNumber && char == "r") {
 					console.log("todo: Set top and bottom lines of a window"); 
 					// What does this mean !?!?!?
 					inNumberSerie = false;
