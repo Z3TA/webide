@@ -419,12 +419,14 @@ if(callback) callback(null, EDITOR.files[name]);
 		else if(code == 39) { // arrow right
 			data = ESC + "[C";
 		}
-		
 		else if(code == 38) { // arrow up
 			data = ESC + "[A";
 		}
 		else if(code == 40) { // arrow down
 			data = ESC + "[B";
+		}
+		else if(code == 9) { // tab
+			data = "\t";
 		}
 		
 		else return true;
