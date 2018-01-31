@@ -124,6 +124,8 @@ if(callback) callback(null, EDITOR.files[name]);
 			
 			Terminal is always in insert mode !?
 			
+			http://www.termsys.demon.co.uk/vtansi.htm
+			
 		*/
 		
 			function parse(data) {
@@ -138,7 +140,7 @@ if(callback) callback(null, EDITOR.files[name]);
 					char = data.charAt(i);
 					code = data.charCodeAt(i);
 					
-				console.log("char=" + char + " code=" + code);
+				console.log("char=" + char + " code=" + code + " inEsc=" + inEsc + " inText=" + inText + " inBracket=" + inBracket + "");
 				
 					if(code == 7) { // BEL
 						}
@@ -148,16 +150,24 @@ if(callback) callback(null, EDITOR.files[name]);
 					inEsc = true;
 						inText = false;
 					}
-				else if(inEsc && char == "]") {
+				else if(inEsc && code == 91) { // [
 					inBracket = true;
 					inEsc = false;
 				}
 				else if(inBracket && char == "K") {
 					// Erase End of Line
 					// todo: Erase until end of line
-				}
+					var row = file.grid[file.caret.row];
+					if(row.length > file.caret.col) {
+						var firstIndex = file.caret.index;
+						var lastIndex = row[row.length-1].index;
+						file.deleteTextRange(firstIndex, lastIndex);
+					}
+					inBracket = false;
+				inText = true;
+			}
 				else if(inEsc && code == 109) { // m
-						inText = true;
+					inText = true;
 					inEsc = false;
 					}
 					else if(inText) {
