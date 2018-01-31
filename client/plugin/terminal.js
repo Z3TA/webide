@@ -309,8 +309,6 @@ if(callback) callback(null, EDITOR.files[name]);
 					console.log("todo: Clear screen from cursor up ");
 				}
 				else if(code == 74 && inNumber == "2") { // J
-					console.log("Clear entire screen");
-					
 					var startRow = file.startRow;
 					var caretX = file.caret.col;
 					
@@ -322,19 +320,18 @@ if(callback) callback(null, EDITOR.files[name]);
 					}
 					
 					//file.scrollTo(caretX, startRow);
-					
-				}
+					}
 				
 				// ### Moving the cursor
 				else if(inBracket && char == "H") {
-					// Move cursor to upper left corner
+					console.log("Move cursor to upper left corner");
 					file.moveCaret(undefined, file.startRow, 0);
 				}
 				else if(inNumberSerie && char == "H") {
-					// Move cursor to screen location v,h
-					
 					var toCol = parseInt(inNumber) - 1;
 					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1;
+					
+					console.log("Move cursor to screen location vertically " + toRow + ", horizontally " + toCol + " ");
 					
 					console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
 					
@@ -363,31 +360,32 @@ if(callback) callback(null, EDITOR.files[name]);
 						inText = true;
 						}
 				else if(inNumber && char == "A") {
-					// Move cursor up n lines 
+					var times = parseInt(inNumber);
+					console.log("Move cursor up " + times + " lines");
 					for(var j=0; j<times;j++) file.moveCaretUp();
 					
 					inNumber = "";
 					inText = true;
 				}
 				else if(inNumber && char == "B") {
-					// Move cursor down n lines
 					var times = parseInt(inNumber);
+					console.log("Move cursor down " + times + " lines");
 					for(var j=0; j<times;j++) file.moveCaretDown();
 					
 					inNumber = "";
 					inText = true;
 				}
 				else if(inNumber && char == "C") {
-					// Move cursor right n lines 
 					var times = parseInt(inNumber);
+					console.log("Move cursor right " + times + " lines");
 					for(var j=0; j<times;j++) file.moveCaretRight();
 					
 					inNumber = "";
 					inText = true;
 				}
 				else if(inNumber && char == "D") {
-					// Move cursor left n lines
 					var times = parseInt(inNumber);
+					console.log("Move cursor left " + times + " lines");
 					for(var j=0; j<times;j++) file.moveCaretLeft();
 					
 					inNumber = "";
