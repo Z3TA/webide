@@ -290,6 +290,17 @@ if(callback) callback(null, EDITOR.files[name]);
 					inText = true;
 				}
 				
+				else if(inNumberSerie && char == "r") {
+					console.log("todo: Set top and bottom lines of a window"); 
+					// What does this mean !?!?!?
+					inNumberSerie = false;
+					numberSerie.length = 0;
+					inNumber = "";
+					inText = true;
+				}
+				
+				
+				
 				// ### Clearing lines
 				else if(char == "K" && (inBracket || inNumber == "0") ) {
 					console.log("todo: Clear line from cursor right ");
