@@ -39,6 +39,10 @@ What I'm working on
 -------------------
 
 terminal emulator
+- getting nano to work
+-- scroll buffers !?
+- Copy/pasting
+- Placing the cursor using the mouse
 
 
 
@@ -1228,7 +1232,7 @@ Operational transform.
 Each file change get an id (counter) and who made the change.
 The client sends the last id from change recived when sending a edit
 If the id is lower then the last sent, the edit is transormed.
-If the client recives a change while he/she has edits in flight, the incoming change is transformed.
+If the client recives a change while he/she has edits in flight, the incoming change is transformed. 
 
 ---
 
