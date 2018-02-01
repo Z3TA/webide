@@ -693,6 +693,7 @@
 						file.writeLineBreak();
 					}
 					else if(code == 8) { // BS  (backspace)  
+						//if(file.caret.col > 0) file.moveCaretLeft();
 						file.moveCaretLeft();
 						//file.deleteCharacter();
 					}
