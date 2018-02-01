@@ -1193,6 +1193,45 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+---
+Spectator mode:
+When the same user, or a user invited to the file/session open the same file. The spectator can only read/view the file.
+And all updates to the file is sent from the writer to the spectators.
+The original editor (or invitor) can select to temporary allow a spectator to edit the document.
+You also get a chat box where you can write messages.
+
+"file.path has been opened in another session. Do you want to allow the other session to see your changes live ? 
+The other session will not be able to change the file unless you allowit. 
+["Allow spectator", "Allow colaborate editing" "Keep editing without specator(s)"]
+
+(when original session closes the file or disconnects)
+"The other session(s) has closed *files*. Re-open the file(s) to be able to make changes." ["Reopen files now", "OK"] 
+
+"Accept invitation by user.name to ["specate" || "colaborate edit"] file.path ?"
+
+"file.path is already opened in another session. The file will be opened read-only!" ["Request spectate", "Request edit", "OK"]
+
+When loading a file, see if another user is logged in with the same user/pw and if the file is open, load that state!!
+If the file is unsaved, ask to save a backup.
+
+Possible to "request edit"
+
+"Type the name of the user you want to invote to spectate file.path"
+If the user don't exist or is inactive: You get an invite URL that automatically opens the spectator session
+
+If the users have the same username, show the host name, with the diff (foo.bar,baz.bar => foo,baz), in the chat"
+
+---
+
+Operational transform.
+
+Each file change get an id (counter) and who made the change.
+The client sends the last id from change recived when sending a edit
+If the id is lower then the last sent, the edit is transormed.
+If the client recives a change while he/she has edits in flight, the incoming change is transformed.
+
+---
+
 WYSIWYG tool fro creating links and headings
 
 Unload/load all plugins when loggin in as a different users, or on a different server
@@ -1874,6 +1913,8 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Opening and closing [] brackets is slow in large files. Even though dev mode is off!
 
 Double click to highlight a word in a large file is slow ...
 
