@@ -216,10 +216,11 @@
 					
 					//if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
 					
-					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
+					if(err.code == "ABORT") return console.warn("The save was aborted: " + err.message);
 					
-				}
-			});
+					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "warning");
+					}
+				});
 			
 			hideSaveDialog();
 		}

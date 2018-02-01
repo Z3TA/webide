@@ -1018,699 +1018,717 @@ EDITOR.lastKeyPressed = "";
 				}
 				console.warn("File will be saved under another path; old=" + file.path + " new=" + path);
 				
-				// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
-				
-				EDITOR.closeFile(file.path, true); // true = do not switch to another file
-				
-				EDITOR.openFile(path, text, savedAs); // Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
-				
+			// Check if the file exist on disk so we don't accidently overwrite it!
+			EDITOR.doesFileExist(path, function fileExist(exist) {
+				if(exist) {
+					var overwrite = "Overwrite";
+					var cancel = "Cancel";
+					confirmBox("File already exist: " + path + "\nDo you want to overwrite it ?", [overwrite, cancel], function(answer) {
+if(answer == overwrite) reOpen(file.path, path);
+else {
+							var err = new Error("You aborted the save (as) to prevent overwriting existing file");
+err.code = "ABORT";
+callback(err);
+}
+});
+				}
+				else reOpen(file.path, path);
+			});
 			}
-			else {
-				EDITOR.saveToDisk(file.path, file.text, doneSaving);
-			}
+		else {
+			EDITOR.saveToDisk(file.path, file.text, doneSaving);
+		}
+		
+		function reOpen(oldPath, newPath) {
+			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
-			function savedAs(err, newFile) { // intermediate function via EDITOR.openFile
+			EDITOR.closeFile(oldPath, true); // true = do not switch to another file
+			
+			// Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
+			EDITOR.openFile(newPath, text, function savedAs(err, newFile) {
 				if(err) throw err;
 				
 				file = newFile;
 				
 				EDITOR.saveToDisk(file.path, file.text, doneSaving);
-			}
+			}); 
+		}
+		
+		
+		function doneSaving(err, path) {
 			
-			function doneSaving(err, path) {
+			if(!err) {
+				if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
 				
-				if(!err) {
-					if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
-					
-					console.log("Successfully saved " + file.path);
-					file.saved(); // Call functions that listen for save events
-					
-				}
-				
-				if(callback) callback(err, path);
-				
-				if(err && !callback) throw err;
+				console.log("Successfully saved " + file.path);
+				file.saved(); // Call functions that listen for save events
 				
 			}
 			
-		}
-		
-		
-		EDITOR.saveToDisk = function(path, text, saveToDiskCallback, inputBuffer, encoding) {
-			// You probably want to use EDITOR.saveFile instead!
-			// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
+			if(callback) callback(err, path);
 			
-			// Only works with text files !
-			
-			if(!saveToDiskCallback) throw new Error("saveToDisk called without a callback function!");
-			
-			var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
-			
-			CLIENT.cmd("saveToDisk", json, function(err, json) {
-				if(err) saveToDiskCallback(err);
-				else saveToDiskCallback(null, json.path);
-			});
+			if(err && !callback) throw err;
 			
 		}
 		
-		EDITOR.copyFile = function(from, to, callback) {
-			// Copies a file from one location to another location, can be local file-system or a remote connection
-			
-			CLIENT.cmd("copyFile", {from: from, to: to}, function(err, json) {
-				if(err) callback(err);
-				else callback(null, json.to);
-			});
-			
-		}
+	}
+	
+	
+	EDITOR.saveToDisk = function(path, text, saveToDiskCallback, inputBuffer, encoding) {
+		// You probably want to use EDITOR.saveFile instead!
+		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
-		EDITOR.fileSaveDialog = function(defaultPath, callback) {
-			/*
-				Brings up the OS save file dialog window and calls the callback with the path.
-			*/
-			EDITOR.filesaveAsCallback = callback;
-			
-			var fileSaveAs = document.getElementById("fileSaveAs");
-			
-			if(defaultPath) EDITOR.setFileSavePath(defaultPath);
-			
-			fileSaveAs.click(); // Bring up the OS path selector window
-		}
+		// Only works with text files !
 		
-		EDITOR.setFileSavePath = function(defaultPath) {
-			var fileSaveAs = document.getElementById("fileSaveAs");
-			fileSaveAs.setAttribute("nwsaveas", defaultPath);
-		}
+		if(!saveToDiskCallback) throw new Error("saveToDisk called without a callback function!");
 		
-		EDITOR.setFileOpenPath = function(defaultPath) {
-			// path needs to be a directory
-			var fileOpen = document.getElementById("fileInput");
-			fileOpen.setAttribute("nwworkingdir", UTIL.trailingSlash(defaultPath));
-		}
+		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
 		
-		EDITOR.localFileDialog = function(defaultPath, callback) {
-			/*
-				Brings up the OS file select dialog window.
-				File path is then passed to the callback function.
-			*/
+		CLIENT.cmd("saveToDisk", json, function(err, json) {
+			if(err) saveToDiskCallback(err);
+			else saveToDiskCallback(null, json.path);
+		});
+		
+	}
+	
+	EDITOR.copyFile = function(from, to, callback) {
+		// Copies a file from one location to another location, can be local file-system or a remote connection
+		
+		CLIENT.cmd("copyFile", {from: from, to: to}, function(err, json) {
+			if(err) callback(err);
+			else callback(null, json.to);
+		});
+		
+	}
+	
+	EDITOR.fileSaveDialog = function(defaultPath, callback) {
+		/*
+			Brings up the OS save file dialog window and calls the callback with the path.
+		*/
+		EDITOR.filesaveAsCallback = callback;
+		
+		var fileSaveAs = document.getElementById("fileSaveAs");
+		
+		if(defaultPath) EDITOR.setFileSavePath(defaultPath);
+		
+		fileSaveAs.click(); // Bring up the OS path selector window
+	}
+	
+	EDITOR.setFileSavePath = function(defaultPath) {
+		var fileSaveAs = document.getElementById("fileSaveAs");
+		fileSaveAs.setAttribute("nwsaveas", defaultPath);
+	}
+	
+	EDITOR.setFileOpenPath = function(defaultPath) {
+		// path needs to be a directory
+		var fileOpen = document.getElementById("fileInput");
+		fileOpen.setAttribute("nwworkingdir", UTIL.trailingSlash(defaultPath));
+	}
+	
+	EDITOR.localFileDialog = function(defaultPath, callback) {
+		/*
+			Brings up the OS file select dialog window.
+			File path is then passed to the callback function.
+		*/
+		
+		console.log("Bringing up the file open dialog ...");
+		
+		EDITOR.fileOpenCallback = callback;
+		
+		var fileOpen = document.getElementById("fileInput");
+		
+		//if(defaultPath == undefined) defaultPath = EDITOR.workingDirectory;
+		
+		if(!defaultPath) defaultPath = UTIL.getDirectoryFromPath(undefined);
+		else {
 			
-			console.log("Bringing up the file open dialog ...");
+			var lastChar = defaultPath.substr(defaultPath.length-1);
 			
-			EDITOR.fileOpenCallback = callback;
+			//console.log("lastChar of defaultPath=" + lastChar);
 			
-			var fileOpen = document.getElementById("fileInput");
-			
-			//if(defaultPath == undefined) defaultPath = EDITOR.workingDirectory;
-			
-			if(!defaultPath) defaultPath = UTIL.getDirectoryFromPath(undefined);
-			else {
-				
-				var lastChar = defaultPath.substr(defaultPath.length-1);
-				
-				//console.log("lastChar of defaultPath=" + lastChar);
-				
-				if(! (lastChar == "/" || lastChar == "\\")) {
-					console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
-				}
-				EDITOR.setFileOpenPath(defaultPath);
+			if(! (lastChar == "/" || lastChar == "\\")) {
+				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
 			}
-			
-			fileOpen.click(); // Bring up the OS path selector window
+			EDITOR.setFileOpenPath(defaultPath);
 		}
 		
-		EDITOR.directoryDialog = function(defaultPath, callback) {
-			
-			console.log("Bringing up the directory dialog ...");
-			
-			directoryDialogCallback = callback;
-			
-			if(defaultPath) directoryDialogHtmlElement.setAttribute("nwworkingdir", defaultPath);
-			
-			directoryDialogHtmlElement.click(); // Bring up the OS path selector window
+		fileOpen.click(); // Bring up the OS path selector window
+	}
+	
+	EDITOR.directoryDialog = function(defaultPath, callback) {
+		
+		console.log("Bringing up the directory dialog ...");
+		
+		directoryDialogCallback = callback;
+		
+		if(defaultPath) directoryDialogHtmlElement.setAttribute("nwworkingdir", defaultPath);
+		
+		directoryDialogHtmlElement.click(); // Bring up the OS path selector window
+	}
+	
+	EDITOR.resizeNeeded = function() {
+		// Tell the editor that it needs to resize
+		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
+			// For debugging, so we know why a resize was needed
+			console.log(UTIL.getStack("resizeNeeded"));
+		}
+		EDITOR.shouldResize = true;
+	}
+	
+	EDITOR.render = function() {
+		
+		if(!EDITOR.shouldRender) {
+			console.warn("Not rendering because it's not needed!");
+			return;
+		}
+		if(EDITOR.shouldResize) {
+			console.warn("Resizing before rendering!");
+			EDITOR.resize();
 		}
 		
-		EDITOR.resizeNeeded = function() {
-			// Tell the editor that it needs to resize
-			if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
-				// For debugging, so we know why a resize was needed
-				console.log(UTIL.getStack("resizeNeeded"));
-			}
-			EDITOR.shouldResize = true;
+		// Fix blurryness for screens with high pixel ratio
+		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+		if(pixelRatio !== 1) {
+			ctx.restore();
+			ctx.save();
+			ctx.scale(pixelRatio,pixelRatio);
+			//ctx.scale(1,1);
 		}
 		
-		EDITOR.render = function() {
+		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
+		
+		//console.log("rendering ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
+		
+		if(EDITOR.currentFile && menuVisibleOnce) {
 			
-			if(!EDITOR.shouldRender) {
-				console.warn("Not rendering because it's not needed!");
-				return;
-			}
-			if(EDITOR.shouldResize) {
-				console.warn("Resizing before rendering!");
-				EDITOR.resize();
-			}
+			console.log("render file=" + EDITOR.currentFile.path);
 			
-			// Fix blurryness for screens with high pixel ratio
-			var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
-			if(pixelRatio !== 1) {
-				ctx.restore();
-				ctx.save();
-				ctx.scale(pixelRatio,pixelRatio);
-				//ctx.scale(1,1);
-			}
+			console.time("render");
 			
-			EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
-			
-			//console.log("rendering ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
-			
-			if(EDITOR.currentFile && menuVisibleOnce) {
+			if(!EDITOR.currentFile.render) {
+				console.warn("File render flag set to '" + EDITOR.currentFile.render + "'");
 				
-				console.log("render file=" + EDITOR.currentFile.path);
-				
-				console.time("render");
-				
-				if(!EDITOR.currentFile.render) {
-					console.warn("File render flag set to '" + EDITOR.currentFile.render + "'");
-					
-					// Just paint the background
-					ctx.fillStyle = EDITOR.settings.style.bgColor;
-					
-					//ctx.clearRect(0, 0, canvas.width, canvas.height);
-					ctx.fillRect(0, 0, canvas.width, canvas.height);
-					
-					return;
-				}
-				
-				
-				
-				var file = EDITOR.currentFile,
-				buffer = [],
-				grid = EDITOR.currentFile.grid;
-				
-				
-				
-				
-				var funName = "";
-				
-				var startRow = 0; // Used for only rendering some rows for optimization. This functions renders all row, so startRow = 0
-				
-				// The reason why we clone the rows and not just push the pointer, is so that the coloring functions don't have to reset all the colors!
-				
-				// Create the buffer
-				//console.time("createBuffer");
-				var bufferStartRow = Math.max(0, file.startRow);
-				var bufferEndRow = Math.min(grid.length, file.startRow+EDITOR.view.visibleRows);
-				for(var row = bufferStartRow; row < bufferEndRow; row++) {
-					buffer.push(file.cloneRow(row)); // Clone the row
-				}
-				//console.timeEnd("createBuffer");
-				
-				if(buffer.length == 0) {
-					console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
-				}
-				
-				// Load on the fly functionality on the buffer
-				
-				// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging performance issues.
-				//console.time("preRenders");
-				for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
-					//funName = UTIL.getFunctionName(EDITOR.preRenderFunctions[i]);
-					//console.time("prerender: " + funName);
-					buffer = EDITOR.preRenderFunctions[i](buffer, file); // Call render
-					//console.timeEnd("prerender: " + funName);
-				}
-				//console.timeEnd("preRenders");
-				
-				
-				// Find out if the buffer contains zero with characters ( might need optimization )
-				if(buffer.length > 0) {
-					var startIndex = buffer[0].startIndex;
-					var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
-					var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
-					
-				}
-				else var containZeroWidthCharacters = false;
-				
-				//ctx.imageSmoothingEnabled = true;
-				
-				//ctx.translate(0,0);
-				
+				// Just paint the background
 				ctx.fillStyle = EDITOR.settings.style.bgColor;
 				
 				//ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				
-				/*
-					ctx.fillStyle = "#FF0000";
-					ctx.fillRect(0,0,150,75);
-					ctx.lineWidth = 1;
-				*/
-				
-				//console.time("renders");
-				for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-					//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
-					//console.time("render: " + funName);
-					EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, startRow, containZeroWidthCharacters); // Call render
-					//console.timeEnd("render: " + funName);
-				}
-				//console.timeEnd("renders");
-				
-				
-				EDITOR.renderCaret(file.caret);
-				
-				
-				console.timeEnd("render");
-				
-			}
-			else {
-				// Show some useful info for new users ...
-				
-				ctx.fillStyle = EDITOR.settings.style.bgColor;
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
-				
-				ctx.fillStyle = EDITOR.settings.style.textColor;
-				
-				ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-				ctx.textBaseline = "top";
-				
-				/*
-					
-					var keyCombo, friendlyString;
-					
-					if(EDITOR.user) {
-					keyCombo = EDITOR.getKeyFor("show_gotoFileInput");
-					friendlyString = "Press " + keyCombo +" to search/open a file";
-					}
-					else {
-					keyCombo = EDITOR.getKeyFor("openFile");
-					friendlyString = "Press " + keyCombo +" to open a file";
-					}
-				*/
-				
-				var friendlyString = "Right click or long-touch to show the menu!"
-				
-				if(friendlyString) {
-					// Place the string in the center
-					var textMeasure = ctx.measureText(friendlyString);
-					var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
-					var top =  EDITOR.view.canvasHeight / 2 - 20;
-					
-					ctx.beginPath(); // Reset all the paths!
-					ctx.fillText(friendlyString, left, top);
-				}
-				
-				// Render clouds !?
-				
-				//console.log("No file open");
-			}
-			
-			//console.log("rendering finish");
-		}
-		
-		EDITOR.renderRow = function(gridRow) {
-			
-			console.log("rendering ROW ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
-			
-			if(EDITOR.currentFile) {
-				
-				var file = EDITOR.currentFile;
-				
-				if(gridRow == undefined) gridRow = file.caret.row;
-				if(file.grid.length <= gridRow) throw new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " ");
-				
-				if(!file.rowVisible(gridRow)) {
-					console.warn("Row=" + gridRow + " not in view!");
-					return;
-				}
-				
-				var screenRow = Math.max(0, gridRow - file.startRow);
-				
-				console.time("renderRow");
-				
-				var buffer = [];
-				
-				// Create the buffer
-				buffer.push(file.cloneRow(gridRow)); // Clone the row
-				
-				
-				// Load on the fly functionality on the buffer
-				// No prerender when rendering rows!?
-				
-				for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
-					buffer = EDITOR.preRenderFunctions[i](buffer, file);
-				}
-				
-				//console.log(JSON.stringify(buffer, null, 4));
-				
-				ctx.fillStyle = EDITOR.settings.style.bgColor;
-				
-				var top = EDITOR.settings.topMargin + screenRow * EDITOR.settings.gridHeight;
-				
-				// Clear only that row
-				ctx.fillRect(0, top, canvas.width, EDITOR.settings.gridHeight);
-				
-				/*
-					ctx.fillStyle = "#FF0000";
-					ctx.fillRect(0,0,150,75);
-					ctx.lineWidth = 1;
-				*/
-				
-				for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-					EDITOR.renderFunctions[i](ctx, buffer, file, screenRow); // Call render
-				}
-				
-				console.timeEnd("renderRow");
-				
-			}
-			else {
-				console.log("No file open");
-			}
-			
-		}
-		
-		
-		EDITOR.renderColumn = function(row, col, character, textColor) {
-			// For optimization: Prints a character on the screen.
-			
-			if(textColor == undefined) textColor = EDITOR.settings.style.textColor;
-			
-			var file = EDITOR.currentFile;
-			
-			var top = EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight;
-			var left = EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth;
-			
-			ctx.fillStyle = textColor;
-			
-			//ctx.fillStyle = "rgb(0,0,0)";
-			ctx.fillText(character, left, top);
-			
-		}
-		
-		EDITOR.clearColumn = function(row, col) {
-			// For optimization: Clears a box (screen area) instead of doing a full re-render
-			
-			var file = EDITOR.currentFile;
-			
-			var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
-			var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth); // -0.5 to clear sub pixels (caret)
-			
-			if(row == file.caret.row) {
-				ctx.fillStyle = EDITOR.settings.style.currentLineColor;
-			}
-			else {
-				ctx.fillStyle = EDITOR.settings.style.bgColor;
-			}
-			
-			//ctx.fillStyle = "rgba(255,0,0, 0.5)";
-			ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
-			
-		}
-		
-		EDITOR.renderCaret = function(caret, colPlus) {
-			
-			if(colPlus == undefined) colPlus = 0;
-			
-			var row = caret.row;
-			var col = caret.col + colPlus;
-			
-			var file = EDITOR.currentFile;
-			
-			if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
-			
-			// Math.floor to prevent sub pixels
-			var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
-			var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
-			
-			ctx.fillStyle = EDITOR.settings.caret.color;
-			
-			ctx.fillRect(left, top, EDITOR.settings.caret.width, EDITOR.settings.gridHeight);
-			
-			// Show the "direction" of the caret
-			ctx.fillRect(left, top+EDITOR.settings.gridHeight - EDITOR.settings.caret.width, 4, EDITOR.settings.caret.width);
-			
-		}
-		
-		
-		EDITOR.resize = function(resizeEvent) {
-			/*
-				
-				Why does the resize clear the canvas's !???
-				
-			*/
-			
-			if(!EDITOR.shouldResize) return; // Don't resize if it's not needed.
-			EDITOR.shouldResize = false; // Prevent this function from running again
-			
-			//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
-			
-			console.log("Resizing ... resizeEvent=" + resizeEvent + " EDITOR.shouldRender=" + EDITOR.shouldRender + "");
-			
-			console.time("resize");
-			
-			var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
-			
-			
-			// Resize listeners (before)
-			console.log("Calling beforeResize listeners (" + EDITOR.eventListeners.beforeResize.length + ") ...");
-			for(var i=0; i<EDITOR.eventListeners.beforeResize.length; i++) {
-				EDITOR.eventListeners.beforeResize[i].fun(EDITOR.currentFile);
-			}
-			
-			/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
-				var canvasNodes = document.getElementsByTagName("CANVAS");
-				for(var i=0; i<canvasNodes.length; i++) {
-				canvasNodes[i].style.display = "none";
-				}
-			*/
-			
-			// Remove the wrapper styles so they get dynamic
-			var wrappers = document.getElementsByClassName("wrap");
-			for (var i = 0; i < wrappers.length; i++) {
-				wrappers[i].setAttribute("savedScrollTop", wrappers[i].scrollTop); // Save scrolling position
-				wrappers[i].setAttribute("savedScrollLeft", wrappers[i].scrollLeft);
-				
-				wrappers[i].style.height = "auto";
-				wrappers[i].style.width = "auto";
+				return;
 			}
 			
 			
-			// Save focus for the current file and give back focus after ther resize
-			var file = EDITOR.currentFile;
+			
+			var file = EDITOR.currentFile,
+			buffer = [],
+			grid = EDITOR.currentFile.grid;
 			
 			
 			
-			//console.log("Resizing stuff ...")
+			
+			var funName = "";
+			
+			var startRow = 0; // Used for only rendering some rows for optimization. This functions renders all row, so startRow = 0
+			
+			// The reason why we clone the rows and not just push the pointer, is so that the coloring functions don't have to reset all the colors!
+			
+			// Create the buffer
+			//console.time("createBuffer");
+			var bufferStartRow = Math.max(0, file.startRow);
+			var bufferEndRow = Math.min(grid.length, file.startRow+EDITOR.view.visibleRows);
+			for(var row = bufferStartRow; row < bufferEndRow; row++) {
+				buffer.push(file.cloneRow(row)); // Clone the row
+			}
+			//console.timeEnd("createBuffer");
+			
+			if(buffer.length == 0) {
+				console.warn("buffer is zero! file.startRow=" + file.startRow + " grid.length=" + grid.length + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+			}
+			
+			// Load on the fly functionality on the buffer
+			
+			// Actually measuring the time is a lot of overhead! Only uncomment if you are debugging performance issues.
+			//console.time("preRenders");
+			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
+				//funName = UTIL.getFunctionName(EDITOR.preRenderFunctions[i]);
+				//console.time("prerender: " + funName);
+				buffer = EDITOR.preRenderFunctions[i](buffer, file); // Call render
+				//console.timeEnd("prerender: " + funName);
+			}
+			//console.timeEnd("preRenders");
 			
 			
-			var header = document.getElementById("header");
-			var footer = document.getElementById("footer");
-			var leftColumn = document.getElementById("leftColumn");
-			var rightColumn = document.getElementById("rightColumn");
-			var content = document.getElementById("content"); // Center column
-			var columns = document.getElementById("columns");
+			// Find out if the buffer contains zero with characters ( might need optimization )
+			if(buffer.length > 0) {
+				var startIndex = buffer[0].startIndex;
+				var endIndex = buffer[buffer.length-1].startIndex + buffer[buffer.length-1].length;
+				var containZeroWidthCharacters = (UTIL.indexOfZeroWidthCharacter(file.text.substring(startIndex, endIndex)) != -1);
+				
+			}
+			else var containZeroWidthCharacters = false;
 			
+			//ctx.imageSmoothingEnabled = true;
 			
-			var contentComputedStyle = window.getComputedStyle(content, null); // Center column
-			var columnsComputedStyle = window.getComputedStyle(columns, null);
-			var headerHeight = parseInt(header.offsetHeight);
-			var footerHeight = parseInt(footer.offsetHeight);
-			var headerFooterHeight = headerHeight + footerHeight;
-			var leftColumnWidth = parseInt(leftColumn.offsetWidth);
-			var rightColumnWidth = parseInt(rightColumn.offsetWidth);
-			var leftRightColumnWidth = leftColumnWidth + rightColumnWidth;
-			var windowHeight = parseInt(window.innerHeight);
-			var windowWidth = parseInt(window.innerWidth);
-			var contentWidth = windowWidth - leftRightColumnWidth;
-			//var contentHeight = parseInt(contentComputedStyle.height);
-			var contentHeight = windowHeight - headerFooterHeight;
-			var columnsHeight = contentHeight;
+			//ctx.translate(0,0);
 			
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
 			
-			// Position the virtual keyboard
-			var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
-			var vkWidth = parseInt(vkcs.width);
-			var vkHeight = parseInt(vkcs.height);
-			
-			console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
-			
-			// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
-			virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
-			virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
-			
-			//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
-			//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
+			//ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
 			/*
-				console.log("windowWidth=" + windowWidth);
-				console.log("windowHeight=" + windowHeight);
-				console.log("leftColumnWidth=" + leftColumnWidth);
-				console.log("rightColumnWidth=" + rightColumnWidth);
-				console.log("leftRightColumnWidth=" + leftRightColumnWidth);
-				console.log("headerHeight=" + headerHeight);
-				console.log("footerHeight=" + footerHeight);
-				console.log("headerFooterHeight=" + headerFooterHeight);
-				console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " computedWidth=" + contentComputedStyle.width + ")");
-				console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " computedHeight=" + contentComputedStyle.height + ")");
-				console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " cunputedHeight=" + columnsComputedStyle.height + ")");
-				
-				console.log("offsetWidth=" + content.offsetWidth)
-				console.log("innerWidth=" + content.innerWidth)
-				console.log("outherWidth=" + content.outherWidth)
-				console.log("width=" + contentComputedStyle.width);
-				console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
+				ctx.fillStyle = "#FF0000";
+				ctx.fillRect(0,0,150,75);
+				ctx.lineWidth = 1;
 			*/
 			
-			EDITOR.height = windowHeight;
-			EDITOR.width = windowWidth;
-			
-			
-			//UTIL.objInfo(centerColumn);
-			
-			
-			//EDITOR.view.canvasWidth = windowWidth - leftRightColumnWidth;
-			EDITOR.view.canvasWidth = contentWidth;
-			EDITOR.view.canvasHeight = contentHeight;
-			/*
-				EDITOR.view.canvasWidth = (windowWidth - leftRightColumnWidth);
-				EDITOR.view.canvasHeight = (windowHeight - headerFooterHeight);
-				
-				
-				content.style.width = EDITOR.view.canvasWidth + "px";
-				content.style.height = EDITOR.view.canvasHeight + "px";
-			*/
-			
-			console.log("canvasWidth=" + EDITOR.view.canvasWidth);
-			console.log("canvasHeight=" + EDITOR.view.canvasHeight);
-			
-			
-			leftColumn.style.height = EDITOR.view.canvasHeight + "px";
-			rightColumn.style.height = EDITOR.view.canvasHeight + "px";
-			
-			shareHeight(leftColumn.childNodes, contentHeight);
-			shareHeight(rightColumn.childNodes, contentHeight);
-			
-			
-			
-			// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
-			
-			var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
-			//console.log("leftColumnPadding=" + leftColumnPadding);
-			var columnPadding = parseInt(leftColumnPadding);
-			var leftWrappers = leftColumn.getElementsByClassName("wrap");
-			for (var i = 0; i < leftWrappers.length; i++) {
-				//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth) 
-				// We always need to set with or the canvas will drop down below
-				leftWrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+			//console.time("renders");
+			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
+				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
+				//console.time("render: " + funName);
+				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, startRow, containZeroWidthCharacters); // Call render
+				//console.timeEnd("render: " + funName);
 			}
-			var rightWrappers = rightColumn.getElementsByClassName("wrap");
-			for (var i = 0; i < rightWrappers.length; i++) {
-				rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
-			}
+			//console.timeEnd("renders");
 			
-			// Restore scrolling of the wrappers
-			for (var i = 0; i < wrappers.length; i++) {
-				console.log("Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
-				wrappers[i].scrollTop = wrappers[i].getAttribute("savedScrollTop");
-				wrappers[i].scrollLeft = wrappers[i].getAttribute("savedScrollLeft");
-			}
+			
+			EDITOR.renderCaret(file.caret);
+			
+			
+			console.timeEnd("render");
+			
+		}
+		else {
+			// Show some useful info for new users ...
+			
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			ctx.fillStyle = EDITOR.settings.style.textColor;
+			
+			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			ctx.textBaseline = "top";
 			
 			/*
-				var wrappers = document.getElementsByClassName("wrap");
-				for (var i = 0; i < wrappers.length; i++) {
-				//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth)
-				// We always need to set with or the canvas will drop down below
-				wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
-				}
-			*/
-			
-			//console.log("columnPadding=" + columnPadding);
-			
-			
-			// Calculate column width and row height
-			EDITOR.view.visibleColumns = Math.ceil((EDITOR.view.canvasWidth - EDITOR.settings.leftMargin - EDITOR.settings.rightMargin) / EDITOR.settings.gridWidth);
-			
-			//console.log("(resize1) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
-			//console.log("(resize1) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
-			
-			// ceil (overflow)
-			EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
-			
-			//console.log("visibleRows=" + EDITOR.view.visibleRows);
-			//console.log("topMargin=" + EDITOR.settings.topMargin);
-			//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
-			
-			
-			canvas.style.width = EDITOR.view.canvasWidth + "px";
-			canvas.style.height = EDITOR.view.canvasHeight + "px";
-			
-			canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
-			canvas.height = EDITOR.view.canvasHeight * pixelRatio;
-			
-			if(EDITOR.currentFile) {
-				// Fix horizontal column after resizing
-				if(EDITOR.view.endingColumn < EDITOR.view.visibleColumns) {
-					EDITOR.currentFile.startColumn = 0;
-					EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
+				
+				var keyCombo, friendlyString;
+				
+				if(EDITOR.user) {
+				keyCombo = EDITOR.getKeyFor("show_gotoFileInput");
+				friendlyString = "Press " + keyCombo +" to search/open a file";
 				}
 				else {
-					EDITOR.view.endingColumn = EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns;
+				keyCombo = EDITOR.getKeyFor("openFile");
+				friendlyString = "Press " + keyCombo +" to open a file";
 				}
+			*/
+			
+			var friendlyString = "Right click or long-touch to show the menu!"
+			
+			if(friendlyString) {
+				// Place the string in the center
+				var textMeasure = ctx.measureText(friendlyString);
+				var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
+				var top =  EDITOR.view.canvasHeight / 2 - 20;
 				
+				ctx.beginPath(); // Reset all the paths!
+				ctx.fillText(friendlyString, left, top);
+			}
+			
+			// Render clouds !?
+			
+			//console.log("No file open");
+		}
+		
+		//console.log("rendering finish");
+	}
+	
+	EDITOR.renderRow = function(gridRow) {
+		
+		console.log("rendering ROW ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
+		
+		if(EDITOR.currentFile) {
+			
+			var file = EDITOR.currentFile;
+			
+			if(gridRow == undefined) gridRow = file.caret.row;
+			if(file.grid.length <= gridRow) throw new Error("gridRow=" + gridRow + " over file.grid.length=" + file.grid.length + " ");
+			
+			if(!file.rowVisible(gridRow)) {
+				console.warn("Row=" + gridRow + " not in view!");
+				return;
+			}
+			
+			var screenRow = Math.max(0, gridRow - file.startRow);
+			
+			console.time("renderRow");
+			
+			var buffer = [];
+			
+			// Create the buffer
+			buffer.push(file.cloneRow(gridRow)); // Clone the row
+			
+			
+			// Load on the fly functionality on the buffer
+			// No prerender when rendering rows!?
+			
+			for(var i=0; i<EDITOR.preRenderFunctions.length; i++) {
+				buffer = EDITOR.preRenderFunctions[i](buffer, file);
+			}
+			
+			//console.log(JSON.stringify(buffer, null, 4));
+			
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
+			
+			var top = EDITOR.settings.topMargin + screenRow * EDITOR.settings.gridHeight;
+			
+			// Clear only that row
+			ctx.fillRect(0, top, canvas.width, EDITOR.settings.gridHeight);
+			
+			/*
+				ctx.fillStyle = "#FF0000";
+				ctx.fillRect(0,0,150,75);
+				ctx.lineWidth = 1;
+			*/
+			
+			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
+				EDITOR.renderFunctions[i](ctx, buffer, file, screenRow); // Call render
+			}
+			
+			console.timeEnd("renderRow");
+			
+		}
+		else {
+			console.log("No file open");
+		}
+		
+	}
+	
+	
+	EDITOR.renderColumn = function(row, col, character, textColor) {
+		// For optimization: Prints a character on the screen.
+		
+		if(textColor == undefined) textColor = EDITOR.settings.style.textColor;
+		
+		var file = EDITOR.currentFile;
+		
+		var top = EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight;
+		var left = EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth;
+		
+		ctx.fillStyle = textColor;
+		
+		//ctx.fillStyle = "rgb(0,0,0)";
+		ctx.fillText(character, left, top);
+		
+	}
+	
+	EDITOR.clearColumn = function(row, col) {
+		// For optimization: Clears a box (screen area) instead of doing a full re-render
+		
+		var file = EDITOR.currentFile;
+		
+		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth); // -0.5 to clear sub pixels (caret)
+		
+		if(row == file.caret.row) {
+			ctx.fillStyle = EDITOR.settings.style.currentLineColor;
+		}
+		else {
+			ctx.fillStyle = EDITOR.settings.style.bgColor;
+		}
+		
+		//ctx.fillStyle = "rgba(255,0,0, 0.5)";
+		ctx.fillRect(left, top, EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
+		
+	}
+	
+	EDITOR.renderCaret = function(caret, colPlus) {
+		
+		if(colPlus == undefined) colPlus = 0;
+		
+		var row = caret.row;
+		var col = caret.col + colPlus;
+		
+		var file = EDITOR.currentFile;
+		
+		if(!file.grid[row]) throw new Error("row=" + row + " does not exist in file grid! file.grid.length=" + file.grid.length);
+		
+		// Math.floor to prevent sub pixels
+		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
+		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
+		
+		ctx.fillStyle = EDITOR.settings.caret.color;
+		
+		ctx.fillRect(left, top, EDITOR.settings.caret.width, EDITOR.settings.gridHeight);
+		
+		// Show the "direction" of the caret
+		ctx.fillRect(left, top+EDITOR.settings.gridHeight - EDITOR.settings.caret.width, 4, EDITOR.settings.caret.width);
+		
+	}
+	
+	
+	EDITOR.resize = function(resizeEvent) {
+		/*
+			
+			Why does the resize clear the canvas's !???
+			
+		*/
+		
+		if(!EDITOR.shouldResize) return; // Don't resize if it's not needed.
+		EDITOR.shouldResize = false; // Prevent this function from running again
+		
+		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
+		
+		console.log("Resizing ... resizeEvent=" + resizeEvent + " EDITOR.shouldRender=" + EDITOR.shouldRender + "");
+		
+		console.time("resize");
+		
+		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
+		
+		
+		// Resize listeners (before)
+		console.log("Calling beforeResize listeners (" + EDITOR.eventListeners.beforeResize.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.beforeResize.length; i++) {
+			EDITOR.eventListeners.beforeResize[i].fun(EDITOR.currentFile);
+		}
+		
+		/* The canvas elements mess up the layout, so we need to hide them before calculating their new widths
+			var canvasNodes = document.getElementsByTagName("CANVAS");
+			for(var i=0; i<canvasNodes.length; i++) {
+			canvasNodes[i].style.display = "none";
+			}
+		*/
+		
+		// Remove the wrapper styles so they get dynamic
+		var wrappers = document.getElementsByClassName("wrap");
+		for (var i = 0; i < wrappers.length; i++) {
+			wrappers[i].setAttribute("savedScrollTop", wrappers[i].scrollTop); // Save scrolling position
+			wrappers[i].setAttribute("savedScrollLeft", wrappers[i].scrollLeft);
+			
+			wrappers[i].style.height = "auto";
+			wrappers[i].style.width = "auto";
+		}
+		
+		
+		// Save focus for the current file and give back focus after ther resize
+		var file = EDITOR.currentFile;
+		
+		
+		
+		//console.log("Resizing stuff ...")
+		
+		
+		var header = document.getElementById("header");
+		var footer = document.getElementById("footer");
+		var leftColumn = document.getElementById("leftColumn");
+		var rightColumn = document.getElementById("rightColumn");
+		var content = document.getElementById("content"); // Center column
+		var columns = document.getElementById("columns");
+		
+		
+		var contentComputedStyle = window.getComputedStyle(content, null); // Center column
+		var columnsComputedStyle = window.getComputedStyle(columns, null);
+		var headerHeight = parseInt(header.offsetHeight);
+		var footerHeight = parseInt(footer.offsetHeight);
+		var headerFooterHeight = headerHeight + footerHeight;
+		var leftColumnWidth = parseInt(leftColumn.offsetWidth);
+		var rightColumnWidth = parseInt(rightColumn.offsetWidth);
+		var leftRightColumnWidth = leftColumnWidth + rightColumnWidth;
+		var windowHeight = parseInt(window.innerHeight);
+		var windowWidth = parseInt(window.innerWidth);
+		var contentWidth = windowWidth - leftRightColumnWidth;
+		//var contentHeight = parseInt(contentComputedStyle.height);
+		var contentHeight = windowHeight - headerFooterHeight;
+		var columnsHeight = contentHeight;
+		
+		
+		// Position the virtual keyboard
+		var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
+		var vkWidth = parseInt(vkcs.width);
+		var vkHeight = parseInt(vkcs.height);
+		
+		console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
+		
+		// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
+		virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
+		virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
+		
+		//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
+		//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
+		
+		/*
+			console.log("windowWidth=" + windowWidth);
+			console.log("windowHeight=" + windowHeight);
+			console.log("leftColumnWidth=" + leftColumnWidth);
+			console.log("rightColumnWidth=" + rightColumnWidth);
+			console.log("leftRightColumnWidth=" + leftRightColumnWidth);
+			console.log("headerHeight=" + headerHeight);
+			console.log("footerHeight=" + footerHeight);
+			console.log("headerFooterHeight=" + headerFooterHeight);
+			console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " computedWidth=" + contentComputedStyle.width + ")");
+			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " computedHeight=" + contentComputedStyle.height + ")");
+			console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " cunputedHeight=" + columnsComputedStyle.height + ")");
+			
+			console.log("offsetWidth=" + content.offsetWidth)
+			console.log("innerWidth=" + content.innerWidth)
+			console.log("outherWidth=" + content.outherWidth)
+			console.log("width=" + contentComputedStyle.width);
+			console.log("webkitLogicalWidth=" + contentComputedStyle.webkitLogicalWidth);
+		*/
+		
+		EDITOR.height = windowHeight;
+		EDITOR.width = windowWidth;
+		
+		
+		//UTIL.objInfo(centerColumn);
+		
+		
+		//EDITOR.view.canvasWidth = windowWidth - leftRightColumnWidth;
+		EDITOR.view.canvasWidth = contentWidth;
+		EDITOR.view.canvasHeight = contentHeight;
+		/*
+			EDITOR.view.canvasWidth = (windowWidth - leftRightColumnWidth);
+			EDITOR.view.canvasHeight = (windowHeight - headerFooterHeight);
+			
+			
+			content.style.width = EDITOR.view.canvasWidth + "px";
+			content.style.height = EDITOR.view.canvasHeight + "px";
+		*/
+		
+		console.log("canvasWidth=" + EDITOR.view.canvasWidth);
+		console.log("canvasHeight=" + EDITOR.view.canvasHeight);
+		
+		
+		leftColumn.style.height = EDITOR.view.canvasHeight + "px";
+		rightColumn.style.height = EDITOR.view.canvasHeight + "px";
+		
+		shareHeight(leftColumn.childNodes, contentHeight);
+		shareHeight(rightColumn.childNodes, contentHeight);
+		
+		
+		
+		// Set a static with and height to wrappers so that dynamic changes wont resize the wireframe (wrappes should have css: overflow: auto!important;)
+		
+		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
+		//console.log("leftColumnPadding=" + leftColumnPadding);
+		var columnPadding = parseInt(leftColumnPadding);
+		var leftWrappers = leftColumn.getElementsByClassName("wrap");
+		for (var i = 0; i < leftWrappers.length; i++) {
+			//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth) 
+			// We always need to set with or the canvas will drop down below
+			leftWrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+		}
+		var rightWrappers = rightColumn.getElementsByClassName("wrap");
+		for (var i = 0; i < rightWrappers.length; i++) {
+			rightWrappers[i].style.width = (rightColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+		}
+		
+		// Restore scrolling of the wrappers
+		for (var i = 0; i < wrappers.length; i++) {
+			console.log("Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
+			wrappers[i].scrollTop = wrappers[i].getAttribute("savedScrollTop");
+			wrappers[i].scrollLeft = wrappers[i].getAttribute("savedScrollLeft");
+		}
+		
+		/*
+			var wrappers = document.getElementsByClassName("wrap");
+			for (var i = 0; i < wrappers.length; i++) {
+			//if(parseInt(wrapperComputedStyle.width) > leftColumnWidth)
+			// We always need to set with or the canvas will drop down below
+			wrappers[i].style.width = (leftColumnWidth) + "px"; // - (columnPadding * 2 + 2) + "px";
+			}
+		*/
+		
+		//console.log("columnPadding=" + columnPadding);
+		
+		
+		// Calculate column width and row height
+		EDITOR.view.visibleColumns = Math.ceil((EDITOR.view.canvasWidth - EDITOR.settings.leftMargin - EDITOR.settings.rightMargin) / EDITOR.settings.gridWidth);
+		
+		//console.log("(resize1) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("(resize1) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		
+		// ceil (overflow)
+		EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
+		
+		//console.log("visibleRows=" + EDITOR.view.visibleRows);
+		//console.log("topMargin=" + EDITOR.settings.topMargin);
+		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
+		
+		
+		canvas.style.width = EDITOR.view.canvasWidth + "px";
+		canvas.style.height = EDITOR.view.canvasHeight + "px";
+		
+		canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
+		canvas.height = EDITOR.view.canvasHeight * pixelRatio;
+		
+		if(EDITOR.currentFile) {
+			// Fix horizontal column after resizing
+			if(EDITOR.view.endingColumn < EDITOR.view.visibleColumns) {
+				EDITOR.currentFile.startColumn = 0;
+				EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			}
 			else {
-				console.warn("No current file! EDITOR.currentFile=" + EDITOR.currentFile);
-				EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
-				
+				EDITOR.view.endingColumn = EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns;
 			}
 			
-			//console.log("(resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
-			//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		}
+		else {
+			console.warn("No current file! EDITOR.currentFile=" + EDITOR.currentFile);
+			EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			
-			// Resize listeners (after)
-			console.log("Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
-			for(var i=0; i<EDITOR.eventListeners.afterResize.length; i++) {
-				EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile);
+		}
+		
+		//console.log("(resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		
+		// Resize listeners (after)
+		console.log("Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
+		for(var i=0; i<EDITOR.eventListeners.afterResize.length; i++) {
+			EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile);
+		}
+		
+		// Show the canvas nodes again
+		//setTimeout(showCanvasNodes, 1000);
+		
+		//showCanvasNodes();
+		
+		// Show the file canvas again and set focus
+		
+		// The canvas seem to be reset when resizing!
+		//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
+		EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		EDITOR.canvasContext.textBaseline = "top";
+		
+		
+		console.timeEnd("resize");
+		
+		EDITOR.renderNeeded();
+		EDITOR.render(); // Always render (right away to brevent black background blink) after a resize
+		
+		//EDITOR.renderNeeded(); // Always render after a resize (but nor right away!?
+		
+		function shareHeight(elements, maxTotalHeight) {
+			
+			// If there are many elements in leftColumn or rightColumn, they have to share the height
+			
+			var devidedHeight = Math.floor(maxTotalHeight / elements.length);
+			var computedStyle;
+			var totalHeight = 0;
+			var maxTotalHeight = contentHeight;
+			
+			for (var i = 0; i < elements.length; i++) {
+				computedStyle = window.getComputedStyle(elements[i], null);
+				totalHeight += parseInt(computedStyle.height);
 			}
 			
-			// Show the canvas nodes again
-			//setTimeout(showCanvasNodes, 1000);
-			
-			//showCanvasNodes();
-			
-			// Show the file canvas again and set focus
-			
-			// The canvas seem to be reset when resizing!
-			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
-			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-			EDITOR.canvasContext.textBaseline = "top";
-			
-			
-			console.timeEnd("resize");
-			
-			EDITOR.renderNeeded();
-			EDITOR.render(); // Always render (right away to brevent black background blink) after a resize
-			
-			//EDITOR.renderNeeded(); // Always render after a resize (but nor right away!?
-			
-			function shareHeight(elements, maxTotalHeight) {
-				
-				// If there are many elements in leftColumn or rightColumn, they have to share the height
-				
-				var devidedHeight = Math.floor(maxTotalHeight / elements.length);
-				var computedStyle;
-				var totalHeight = 0;
-				var maxTotalHeight = contentHeight;
-				
+			var height = 0;
+			var newHeight = 0;
+			var availableHeight = maxTotalHeight - totalHeight;;
+			if(availableHeight < 0) {
+				// One or more elements need to shrink
 				for (var i = 0; i < elements.length; i++) {
 					computedStyle = window.getComputedStyle(elements[i], null);
-					totalHeight += parseInt(computedStyle.height);
-				}
-				
-				var height = 0;
-				var newHeight = 0;
-				var availableHeight = maxTotalHeight - totalHeight;;
-				if(availableHeight < 0) {
-					// One or more elements need to shrink
-					for (var i = 0; i < elements.length; i++) {
-						computedStyle = window.getComputedStyle(elements[i], null);
 						height = parseInt(computedStyle.height);
 						
 						newHeight = Math.min(maxTotalHeight, Math.max(devidedHeight, height + availableHeight));
