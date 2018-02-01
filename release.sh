@@ -143,12 +143,21 @@ cd ..
 cd ..
 #rm -rf temp/release/$name-v$version$beta-$commit
 
+echo "Create a tarball and compress server release"
+cd temp/release/
+mv server $name-v$version$beta-$commit-server
+tar -zcf $name-v$version$beta-$commit-server.tar.gz $name-v$version$beta-$commit-server
+cd ..
+cd ..
+#rm -rf temp/release/$name-v$version$beta-$commit-server
 
 echo "Remove files no longer needed"
 rm version.inc
 
 
 # Move the files to www
+scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+
 
 # Update the homepage
 
