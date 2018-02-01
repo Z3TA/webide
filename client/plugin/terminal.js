@@ -343,7 +343,7 @@
 				}
 				
 				// ### Moving the cursor
-				else if((inEsc || inNumber) && char == "A") {
+				else if((inEsc || inNumber || inBracket) && char == "A") {
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -351,10 +351,11 @@
 					for(var j=0; j<times;j++) file.moveCaretUp();
 					
 					inEsc = false;
+					inBracket = false;
 					inNumber = "";
 					inText = true;
 				}
-				else if((inEsc || inNumber) && char == "B") {
+				else if((inEsc || inNumber || inBracket) && char == "B") {
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -362,10 +363,11 @@
 					for(var j=0; j<times;j++) file.moveCaretDown();
 					
 					inEsc = false;
+					inBracket = false;
 					inNumber = "";
 					inText = true;
 				}
-				else if((inEsc || inNumber) && char == "C") {
+				else if((inEsc || inNumber || inBracket) && char == "C") {
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -373,10 +375,11 @@
 					for(var j=0; j<times;j++) file.moveCaretRight();
 					
 					inEsc = false;
+					inBracket = false;
 					inNumber = "";
 					inText = true;
 				}
-				else if((inEsc || inNumber) && char == "D") {
+				else if((inEsc || inNumber || inBracket) && char == "D") {
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					
@@ -384,6 +387,7 @@
 					for(var j=0; j<times;j++) file.moveCaretLeft();
 					
 					inEsc = false;
+					inBracket = false;
 					inNumber = "";
 					inText = true;
 				}
