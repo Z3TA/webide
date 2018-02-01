@@ -765,16 +765,16 @@
 		else if(code == 8) { // backspace
 			data = character;
 		}
-		else if(code == 37) { // arrow left
+		else if(code == 37 && combo.sum == 0) { // arrow left
 			data = ESC + "[D";
 		}
-		else if(code == 39) { // arrow right
+		else if(code == 39 && combo.sum == 0) { // arrow right
 			data = ESC + "[C";
 		}
-		else if(code == 38) { // arrow up
+		else if(code == 38 && combo.sum == 0) { // arrow up
 			data = ESC + "[A";
 		}
-		else if(code == 40) { // arrow down
+		else if(code == 40 && combo.sum == 0) { // arrow down
 			data = ESC + "[B";
 		}
 		else if(code == 9) { // tab
