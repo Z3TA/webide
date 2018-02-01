@@ -15,7 +15,7 @@
 			// Bind to ctrl + N
 			EDITOR.bindKey({desc: "Create new file", charCode: 78, combo: CTRL, fun: keyboardNewFile});
 			
-			menuItem = EDITOR.addMenuItem("Create new file", keyboardNewFile);
+			menuItem = EDITOR.addMenuItem("New file", keyboardNewFile);
 			
 			//newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
 			
