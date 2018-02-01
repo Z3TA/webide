@@ -164,6 +164,14 @@
 			var foregroundColor = defaultForeGroundColor;
 			var backgroundColor = defaultBackgroundColor;
 			
+			if(!file.terminal) file.terminal = {
+				topLine: 0,
+				bottomLine: EDITOR.view.visibleRows,
+				topScrollRowBuffer: [],
+				bottomScrollRowBuffer: []
+			};
+			var terminalState = file.terminal;
+			
 			for (var i=0; i<data.length; i++) {
 				char = data.charAt(i);
 				code = data.charCodeAt(i);
@@ -279,8 +287,16 @@
 				}
 				
 				else if(inNumberSerie && inNumber && char == "r") {
-					console.log("todo: Set top and bottom lines of a window"); 
-					// What does this mean !?!?!?
+					console.log("Set top and bottom lines of a window"); 
+					
+					var bottom = parseInt(inNumber);
+					var top = parseInt(numberSerie.pop());
+					
+					if( isNaN(top) || isNaN(bottom) ) throw new Error("top=" + top + " bottom=" + bottom + " data=" + data);
+					
+					terminalState.topLine = top;
+					terminalState.bottomLine = bottom;
+					
 					inNumberSerie = false;
 					numberSerie.length = 0;
 					inNumber = "";
@@ -400,7 +416,7 @@
 				}
 				else if(inNumberSerie && (char == "H" || char == "f")) {
 					var toCol = parseInt(inNumber) - 1;
-					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1;
+					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1 + terminalState.topLine;
 					
 					console.log("Move cursor to screen location vertically " + toRow + ", horizontally " + toCol + " ");
 					
@@ -430,16 +446,6 @@
 					if(numberSerie.length > 0) throw new Error("Unexpected numberSerie.length=" + numberSerie.length + " numberSerie=" + JSON.stringify(numberSerie));
 					inText = true;
 				}
-				else if(inEsc && char == "D") {
-					console.log("todo: Move/scroll window up one line");
-					inEsc = false;
-					inText = true;
-				}
-				else if(inEsc && char == "M") {
-					console.log("todo: Move/scroll window down one line");
-					inEsc = false;
-					inText = true;
-				}
 				else if(inEsc && char == "E") {
 					console.log("todo: Move to next line");
 					inEsc = false;
@@ -453,6 +459,58 @@
 				else if(inEsc && char == "8") {
 					console.log("todo: Restore cursor position and attributes");
 					inEsc = false;
+					inText = true;
+				}
+				
+				// ### Scrolling
+				else if( (inEsc || inNumber) && char == "D") {
+					if(inNumber) var times = parseInt(inNumber);
+					else var times = 1;
+					console.log("todo: Move/scroll window UP " + times + " line(s)");
+					var topRow = file.startRow + terminalState.topLine;
+					var bottomRow = file.startRow + terminalState.bottomLine;
+					
+					var topLineText = "";
+					var bottomLineText = "";
+					for(var j=0; j<times; j++) {
+					topLineText = terminalState.topScrollRowBuffer.pop();
+					
+					if(topLineText == undefined) topLineText = "";
+					
+					file.insertTextRow(topLineText, topRow);
+					
+					bottomLineText = file.removeRow(bottomRow);
+					terminalState.bottomScrollRowBuffer.unshift(bottomLineText);
+					}
+					
+					inEsc = false;
+					inBracket = false;
+					inNumber = "";
+					inText = true;
+				}
+				else if( (inEsc || inNumber) && char == "M") {
+					if(inNumber) var times = parseInt(inNumber);
+					else var times = 1;
+					console.log("todo: Move/scroll window DOWN " + times + " line(s)");
+					var topRow = file.startRow + terminalState.topLine;
+					var bottomRow = file.startRow + terminalState.bottomLine;
+					
+var bottomLineText = "";
+var topLineText = "";
+					for(var j=0; j<times; j++) {
+					bottomLineText = terminalState.bottomScrollRowBuffer.shift();
+					
+					if(bottomLineText == undefined) bottomLineText = "";
+					
+					file.insertTextRow(bottomLineText, bottomRow);
+					
+					topLineText = file.removeRow(topRow);
+					terminalState.topScrollRowBuffer.push(topLineText);
+					}
+					
+					inEsc = false;
+					inBracket = false;
+					inNumber = "";
 					inText = true;
 				}
 				
