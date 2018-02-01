@@ -705,7 +705,7 @@
 						file.insertText(spaces);
 					}
 					else {
-						if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
+						if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 						file.putCharacter(char);
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
 					}
