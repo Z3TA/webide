@@ -376,8 +376,13 @@
 					else var times = 1;
 					
 					console.log("Move cursor down " + times + " lines");
-					for(var j=0; j<times;j++) file.moveCaretDown();
-					
+					for(var j=0; j<times;j++) {
+						if(file.caret.row == file.grid.length-1) {
+							file.moveCaretToEnd();
+							file.insertLineBreak();
+						}
+						else file.moveCaretDown();
+					}
 					inEsc = false;
 					inBracket = false;
 					inNumber = "";
@@ -416,7 +421,7 @@
 				}
 				else if(inNumberSerie && (char == "H" || char == "f")) {
 					var toCol = parseInt(inNumber) - 1;
-					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1 + terminalState.topLine;
+					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1; // + terminalState.topLine;
 					
 					console.log("Move cursor to screen location vertically " + toRow + ", horizontally " + toCol + " ");
 					
@@ -463,12 +468,15 @@
 				}
 				
 				// ### Scrolling
-				else if( (inEsc || inNumber) && char == "D") {
+				else if( (inEsc || inNumber) && (char == "D" || char == "L")) {
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					console.log("todo: Move/scroll window UP " + times + " line(s)");
-					var topRow = file.startRow + terminalState.topLine;
-					var bottomRow = file.startRow + terminalState.bottomLine;
+					var topRow = file.startRow;
+					var bottomRow = file.startRow;
+					
+					if(terminalState.topLine > 0) topRow += terminalState.topLine-1;
+					if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
 					
 					var topLineText = "";
 					var bottomLineText = "";
@@ -477,8 +485,9 @@
 					
 					if(topLineText == undefined) topLineText = "";
 					
-					file.insertTextRow(topLineText, topRow);
-					
+					//file.insertTextRow(topLineText, topRow);
+						file.insertTextRow("", topRow);
+						
 					bottomLineText = file.removeRow(bottomRow);
 					terminalState.bottomScrollRowBuffer.unshift(bottomLineText);
 					}
@@ -492,8 +501,11 @@
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
 					console.log("todo: Move/scroll window DOWN " + times + " line(s)");
-					var topRow = file.startRow + terminalState.topLine;
-					var bottomRow = file.startRow + terminalState.bottomLine;
+					var topRow = file.startRow;
+					var bottomRow = file.startRow;
+					
+					if(terminalState.topLine > 0) topRow += terminalState.topLine+1;
+					if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
 					
 var bottomLineText = "";
 var topLineText = "";
@@ -502,7 +514,8 @@ var topLineText = "";
 					
 					if(bottomLineText == undefined) bottomLineText = "";
 					
-					file.insertTextRow(bottomLineText, bottomRow);
+					//file.insertTextRow(bottomLineText, bottomRow);
+						file.insertTextRow("", bottomRow);
 					
 					topLineText = file.removeRow(topRow);
 					terminalState.topScrollRowBuffer.push(topLineText);
@@ -746,9 +759,13 @@ var topLineText = "";
 				else if(inText) {
 					// ### Text
 					
-					if(code == 10) {
+					if(code == 10) { // New Line
 						file.moveCaretToEnd();
 						file.writeLineBreak();
+					}
+					else if(code == 13) {// Carriage Return
+						file.moveCaretToEnd();
+						file.moveCaretDown();
 					}
 					else if(code == 8) { // BS  (backspace)  
 						//if(file.caret.col > 0) file.moveCaretLeft();
