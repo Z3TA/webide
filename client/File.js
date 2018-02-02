@@ -2740,11 +2740,29 @@ var File; // File object is global
 		
 	}
 	
-	File.prototype.moveCaretToEnd = function(caret, cb) {
+	File.prototype.moveCaretToEndOfLine = function(caret) {
 		var file = this;
-		// Moves the caret to the end of the file
 		
-		console.log("File:moveCaretToEnd");
+		console.log("File:moveCaretToEndOfLine");
+		
+		if(caret == undefined) caret = file.caret;
+		
+		caret.index -= caret.col;
+		caret.col = file.grid[file.caret.row].length;
+		caret.index += caret.col;
+		caret.eol = true;
+		
+		file.checkCaret(caret);
+		
+			EDITOR.fireEvent("moveCaret", file, caret);
+			
+			return caret;
+		}
+	
+	File.prototype.moveCaretToEndOfFile = function(caret, cb) {
+		var file = this;
+		
+		console.log("File:moveCaretToEndOfFile");
 		
 		if(caret == undefined) caret = file.caret;
 		
@@ -3275,7 +3293,7 @@ var File; // File object is global
 			Moves the caret to a possible position 
 		*/
 		
-		console.log("File:moveCaretToEnd");
+		console.log("File:fixCaret");
 		
 		if(caret == undefined) caret = file.caret
 		else {

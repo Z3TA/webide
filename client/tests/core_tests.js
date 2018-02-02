@@ -583,7 +583,7 @@
 		// We should do a full parse if the ending bracket is missing !? ...
 		EDITOR.openFile("deleteLastCurly.js", 'function foo() {\nfunction bar() {\n}\n}', function(err, file) {
 			
-			file.moveCaretToEnd(undefined, function(caret) {
+			file.moveCaretToEndOfFile(undefined, function(caret) {
 				
 				file.moveCaretLeft();
 				file.deleteCharacter();
@@ -610,7 +610,7 @@
 				file.select(file.grid[i]);
 			}
 			
-			file.moveCaretToEnd(undefined, function(caret) {
+			file.moveCaretToEndOfFile(undefined, function(caret) {
 				file.scrollToCaret();
 				file.deleteSelection();
 				

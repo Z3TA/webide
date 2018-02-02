@@ -50,7 +50,7 @@
 			
 			shellFile.lineBreak = "\n";
 			
-			shellFile.moveCaretToEnd();
+			shellFile.moveCaretToEndOfFile();
 			
 		});
 		

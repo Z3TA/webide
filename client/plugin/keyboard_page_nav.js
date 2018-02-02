@@ -56,7 +56,7 @@
 		else {
 			// Move caret to the bottom
 			//file.caret.row = file.grid.length;
-			file.moveCaretToEnd(file.caret, function() {
+			file.moveCaretToEndOfFile(file.caret, function() {
 				
 				file.scrollToCaret();
 

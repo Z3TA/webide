@@ -185,8 +185,6 @@
 					numberSerie.length = 0;
 					inText = true;
 				}
-				else if(code == 13) { // cr
-				}
 				else if(code == 27) { // ESC
 					inEsc = true;
 					inText = false;
@@ -314,6 +312,7 @@
 						var lastIndex = row[row.length-1].index;
 						file.deleteTextRange(firstIndex, lastIndex);
 					}
+					file.deleteCharacter(); // Also remove the line break!
 					inBracket = false;
 					inNumber = "";
 					inText = true;
@@ -377,11 +376,15 @@
 					
 					console.log("Move cursor down " + times + " lines");
 					for(var j=0; j<times;j++) {
+						console.log("file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
+						
 						if(file.caret.row == file.grid.length-1) {
-							file.moveCaretToEnd();
+							// Terminal wants to move the caret down, but there are no more lines in the editor:
+							file.moveCaretToEndOfFile();
 							file.insertLineBreak();
 						}
 						else file.moveCaretDown();
+						
 					}
 					inEsc = false;
 					inBracket = false;
@@ -760,11 +763,18 @@ var topLineText = "";
 					// ### Text
 					
 					if(code == 10) { // New Line
-						file.moveCaretToEnd();
+						var bottomLine = file.startRow;
+						if(terminalState.bottomLine > 0) bottomLine += terminalState.bottomLine-1;
+						if(file.caret.row >= bottomLine) {
+							//terminalState.bottomScrollRowBuffer.unshift("");
+						}
+						else {
+							file.moveCaretToEndOfFile();
 						file.writeLineBreak();
+						}
 					}
 					else if(code == 13) {// Carriage Return
-						file.moveCaretToEnd();
+						file.moveCaretToEndOfLine();
 						file.moveCaretDown();
 					}
 					else if(code == 8) { // BS  (backspace)  
@@ -833,7 +843,7 @@ var topLineText = "";
 			
 			// We don't want the text right of the caret to cary over to the next line!
 			//file.writeLineBreak();
-			//file.moveCaretToEnd();
+			//file.moveCaretToEndOfFile();
 		}
 		else if(code == 67 && combo.alt) { // Alt+C (instead of Ctrl+C which is used for copying)
 			data = String.fromCharCode(3); // ETX (end of text) 

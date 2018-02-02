@@ -185,7 +185,7 @@
 		
 		if(lastChar == "g" && llChar == "g") file.moveCaretToTopOfFile();
 		
-		if(lastChar == "G") file.moveCaretToEnd();
+		if(lastChar == "G") file.moveCaretToEndOfFile();
 		
 		
 		// Special ? motions a=all i=in til='till f=find-worard F=find-backwards

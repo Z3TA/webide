@@ -273,7 +273,7 @@ return;
 						
 						if(err) GUI.showDevTools();
 						
-						file.moveCaretToEnd(file.caret, function() {
+						file.moveCaretToEndOfFile(file.caret, function() {
 							file.scrollToCaret(file.caret);
 						});
 					});
