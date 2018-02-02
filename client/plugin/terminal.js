@@ -775,7 +775,7 @@ var topLineText = "";
 					}
 					else if(code == 13) {// Carriage Return
 						file.moveCaretToEndOfLine();
-						file.moveCaretDown();
+						//file.moveCaretDown();
 					}
 					else if(code == 8) { // BS  (backspace)  
 						//if(file.caret.col > 0) file.moveCaretLeft();
