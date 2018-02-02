@@ -381,6 +381,9 @@
 					else var times = 1;
 					
 					console.log("Move cursor down " + times + " lines");
+					
+					var col = file.caret.col;
+					
 					for(var j=0; j<times;j++) {
 						console.log("file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
 						
@@ -392,6 +395,11 @@
 						else file.moveCaretDown();
 						
 					}
+					
+					if(file.caret.col < col) {
+						file.insertSpace(col - file.caret.col);
+					}
+					
 					inEsc = false;
 					inBracket = false;
 					inNumber = "";
