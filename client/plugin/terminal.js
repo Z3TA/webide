@@ -537,7 +537,7 @@ var topLineText = "";
 				}
 				
 				
-				else if(inNumber && code == 104) { // h
+				else if(inNumber && char == "h") {
 					/*
 						Esc[20h 	Set new line mode 	LMN
 						Esc[?1h 	Set cursor key to application 	DECCKM
@@ -549,12 +549,15 @@ var topLineText = "";
 						Esc[?7h 	Set auto-wrap mode 	DECAWM
 						Esc[?8h 	Set auto-repeat mode 	DECARM
 						Esc[?9h 	Set interlacing mode 	DECINLM
+						
+						ESC[?47h  Save screen
+						
 					*/
 					
 					inNumber = "";
 					inText = true;
 				}
-				else if(inNumber && code == 108) { // l
+				else if(inNumber && char == "l") { // small L
 					/*
 						Esc[20l 	Set line feed mode 	LMN
 						Esc[?1l 	Set cursor key to cursor 	DECCKM
@@ -610,6 +613,7 @@ var topLineText = "";
 				}
 				else if(inEsc && char == "0" && data.charAt(i-1) == ")") {
 					console.log("todo: Set G1 special chars. & line set  ");
+					// baud rate ??
 					inEsc = false;
 					inText = true;
 				}
@@ -797,7 +801,9 @@ var topLineText = "";
 						file.insertText(spaces);
 					}
 					else {
-						if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
+						//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
+						// terminal always overwrite !?
+						if(!file.caret.eol) file.deleteCharacter();
 						file.putCharacter(char);
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
 					}
