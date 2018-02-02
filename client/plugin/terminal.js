@@ -521,7 +521,7 @@
 					var topRow = file.startRow;
 					var bottomRow = file.startRow;
 					
-					if(terminalState.topLine > 0) topRow += terminalState.topLine;
+					if(terminalState.topLine > 0) topRow += (terminalState.topLine-1);
 					if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
 					
 var bottomLineText = "";
