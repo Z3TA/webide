@@ -859,33 +859,115 @@ var topLineText = "";
 		
 		var ESC = String.fromCharCode(27);
 		
-		if(code == 13) { // Enter
+		
+		
+		if(code == 8) { // backspace
+			data = character;
+		}
+		else if(code == 9) { // tab
+			data = "\t";
+		}
+		else if(code == 13) { // Enter
 			data = character;
 			
 			// We don't want the text right of the caret to cary over to the next line!
 			//file.writeLineBreak();
 			//file.moveCaretToEndOfFile();
 		}
-		else if(code == 67 && combo.alt) { // Alt+C (instead of Ctrl+C which is used for copying)
-			data = String.fromCharCode(3); // ETX (end of text) 
-		}
-		else if(code == 8) { // backspace
-			data = character;
-		}
 		else if(code == 37 && combo.sum == 0) { // arrow left
 			data = ESC + "[D";
-		}
-		else if(code == 39 && combo.sum == 0) { // arrow right
-			data = ESC + "[C";
 		}
 		else if(code == 38 && combo.sum == 0) { // arrow up
 			data = ESC + "[A";
 		}
+		else if(code == 39 && combo.sum == 0) { // arrow right
+			data = ESC + "[C";
+		}
 		else if(code == 40 && combo.sum == 0) { // arrow down
 			data = ESC + "[B";
 		}
-		else if(code == 9) { // tab
-			data = "\t";
+		else if(code == 46 && combo.sum == 0) { // Delete
+			data = String.fromCharCode(127);
+		}
+		
+		// CTRL+ (we'll use ALT instead)
+		else if(character == "A" && combo.alt) {
+			data = String.fromCharCode(1);
+		}
+		else if(character == "B" && combo.alt) {
+			data = String.fromCharCode(2);
+		}
+		else if(character == "C" && combo.alt) { // Alt+C (instead of Ctrl+C which is used for copying)
+			data = String.fromCharCode(3); // ETX (end of text)
+		}
+		else if(character == "D" && combo.alt) {
+			data = String.fromCharCode(4);
+		}
+		else if(character == "E" && combo.alt) {
+			data = String.fromCharCode(5);
+		}
+		else if(character == "F" && combo.alt) {
+			data = String.fromCharCode(6);
+		}
+		else if(character == "G" && combo.alt) {
+			data = String.fromCharCode(7);
+		}
+		else if(character == "H" && combo.alt) {
+			data = String.fromCharCode(8);
+		}
+		else if(character == "I" && combo.alt) {
+			data = String.fromCharCode(9);
+		}
+		else if(character == "J" && combo.alt) {
+			data = String.fromCharCode(10);
+		}
+		else if(character == "K" && combo.alt) {
+			data = String.fromCharCode(11);
+		}
+		else if(character == "L" && combo.alt) {
+			data = String.fromCharCode(12);
+		}
+		else if(character == "M" && combo.alt) {
+			data = String.fromCharCode(13);
+		}
+		else if(character == "N" && combo.alt) {
+			data = String.fromCharCode(14);
+		}
+		else if(character == "O" && combo.alt) {
+			data = String.fromCharCode(15);
+		}
+		else if(character == "P" && combo.alt) {
+			data = String.fromCharCode(16);
+		}
+		else if(character == "Q" && combo.alt) {
+			data = String.fromCharCode(17);
+		}
+		else if(character == "R" && combo.alt) {
+			data = String.fromCharCode(18);
+		}
+		else if(character == "S" && combo.alt) {
+			data = String.fromCharCode(19);
+		}
+		else if(character == "T" && combo.alt) {
+			data = String.fromCharCode(20);
+		}
+		else if(character == "U" && combo.alt) {
+			data = String.fromCharCode(21);
+		}
+		else if(character == "V" && combo.alt) {
+			data = String.fromCharCode(22);
+		}
+		else if(character == "W" && combo.alt) {
+			data = String.fromCharCode(23);
+		}
+		else if(character == "X" && combo.alt) {
+			data = String.fromCharCode(24);
+		}
+		else if(character == "Y" && combo.alt) {
+			data = String.fromCharCode(25);
+		}
+		else if(character == "Z" && combo.alt) {
+			data = String.fromCharCode(26);
 		}
 		
 		else return true;
