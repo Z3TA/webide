@@ -2072,6 +2072,8 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+Opening images (png, jpg) shows the rendered image with img tools (crop and thumbnail frame)
+
 Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth
 
 Ctrl + Hover ? Click on a function, show that function declaration
