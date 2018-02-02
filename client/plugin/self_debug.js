@@ -191,11 +191,11 @@
 			}
 			
 			if(answer == yes) {
-				if(runtime == "browser") document.location = document.location.href;
+				if(RUNTIME == "browser") document.location = document.location.href;
 				else process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
-				if(EDITOR.settings.devMode && runtime != "browser") {
+				if(EDITOR.settings.devMode && RUNTIME != "browser") {
 					// Show the chrome dev tools
 					var gui = require('nw.gui').Window.get();
 					gui.showDevTools();
@@ -211,7 +211,7 @@
 	function reportTemplate(message, source, lineno, colno, error) {
 		// Create a template used to report bugs
 		
-		var editorArgs = runtime == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
+		var editorArgs = RUNTIME == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
 		
 		var message = 'To: "Johan Zetterberg" <zeta@zetafiles.org>\n' +
 		'Subject: JZedit ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +

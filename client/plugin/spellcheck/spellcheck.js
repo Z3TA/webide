@@ -6,11 +6,11 @@
 	*/
 	"use strict";
 	
-	if(runtime == "browser") {
+	if(RUNTIME == "browser") {
 		console.warn("Spell-checking not yet supported in the browser!");
 		return;
 	}
-	if(runtime == "nw.js") {
+	if(RUNTIME == "nw.js") {
 		if(!process.versions['node-webkit'].match(/^0\.12\.*/)) {
 			console.warn("Spellchecker not yet supported in nw.js later then 0.12.x");
 			return;

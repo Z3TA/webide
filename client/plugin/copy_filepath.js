@@ -15,7 +15,7 @@
 					
 					var text = EDITOR.currentFile.path;
 					
-					if(runtime == "nw.js") {
+					if(RUNTIME == "nw.js") {
 					
 					// Load native UI library
 					var gui = require('nw.gui');

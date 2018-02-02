@@ -12,7 +12,7 @@
 
 "use strict";
 
-var runtime = (function is_nwjs() {
+var RUNTIME = (function is_nwjs() {
 	if(typeof require != "undefined") {
 		return (typeof require('nw.gui') !== "undefined");
 	}
@@ -21,8 +21,8 @@ var runtime = (function is_nwjs() {
 
 
 var __dirname;
-if(runtime == "browser") {
-	//alert("runtime=" + runtime);
+if(RUNTIME == "browser") {
+	//alert("RUNTIME=" + RUNTIME);
 	var process = {
 		platform: (function findPlatForm() {
 			var platform = "win32";
@@ -58,9 +58,9 @@ else {
 }
 
 
-var QueryString = function () {
+var QUERY_STRING = function () {
   // This function is anonymous, is executed immediately and 
-  // the return value is assigned to QueryString!
+	// the return value is assigned to global object QUERY_STRING
   var query_string = {};
   var query = window.location.search.substring(1);
   var vars = query.split("&");

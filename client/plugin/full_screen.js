@@ -13,7 +13,7 @@
 	
 	function toggleTullScreen() {
 		
-		if(runtime == "nw.js") { 
+		if(RUNTIME == "nw.js") { 
 			var GUI = require('nw.gui').Window.get();
 			GUI.toggleKioskMode();
 			}

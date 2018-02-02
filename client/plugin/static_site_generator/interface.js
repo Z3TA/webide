@@ -71,10 +71,7 @@
 			// Show some quick nav in the dashboard !?
 			
 			
-			
-		
-			// QueryString is from global.js
-		if(QueryString.editPage) {
+			if(QUERY_STRING.editPage) {
 				// ### quickedit.js ...
 			var url = QueryString.editPage;
 			var nodes = QueryString.nodes.split(",");
@@ -1615,7 +1612,7 @@ progressBar.style.display = "none";
 									if(previewWin) previewWin.close();
 									
 									
-									console.log("SSG url=" + url + " runtime=" + runtime);
+								console.log("SSG url=" + url + " RUNTIME=" + RUNTIME);
 									previewWin = new WysiwygEditor({
 sourceFile: sourceFile,
 bodyTagSource: bodyTag, 

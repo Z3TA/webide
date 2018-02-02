@@ -14,9 +14,9 @@
 	
 	var browser = UTIL.checkBrowser();
 	
-	console.log("runtime=" + runtime + " browser=" + browser + " process.platform=" + process.platform);
+	console.log("RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform);
 
-if(runtime=="browser") {
+	if(RUNTIME=="browser") {
 	
 	// We better use a web safe font in the browser
 		EDITOR.settings.style.font = "Courier New, Courier, monospace";
@@ -90,7 +90,7 @@ if(runtime=="browser") {
 		
 	}
 
-	if(process.platform == "win32" && (runtime == "nw.js" || browser == "Chrome") && EDITOR.settings.sub_pixel_antialias == true) {
+	if(process.platform == "win32" && (RUNTIME == "nw.js" || browser == "Chrome") && EDITOR.settings.sub_pixel_antialias == true) {
 		// Only Chrome/Chromium/nw.js supports sub-pixel antialias. Consolas needs sub-pixel antialias to look good
 		
 	/*
@@ -116,7 +116,7 @@ if(runtime=="browser") {
 	
 }
 
-if(process.platform == "linux" && runtime == "nw.js") {
+	if(process.platform == "linux" && RUNTIME == "nw.js") {
 	
 	/*
 			Linux does not have Consolas (see README.txt on how to download it if you are desperate)

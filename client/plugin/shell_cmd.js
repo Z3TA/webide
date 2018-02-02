@@ -79,7 +79,7 @@
 					env: null
 				}
 				
-				if(runtime == "nw.js") {
+				if(RUNTIME == "nw.js") {
 					var exec = require('child_process').exec;
 					
 					exec(commandToRun, execOptions, function(err, stdout, stderr) {

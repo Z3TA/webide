@@ -38,7 +38,7 @@
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
 			
-			if(runtime == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
+			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.addMenuItem("Show dev tools", showDevTools); // Built in Chromium dev tools
 			
 			if(EDITOR.settings.devMode == false) {
 				disableDevMode(true);
@@ -157,7 +157,7 @@
 	}
 	
 	function showDevTools() {
-		if(runtime=="nw.js") {
+		if(RUNTIME=="nw.js") {
 			require('nw.gui').Window.get().showDevTools();
 		}
 		EDITOR.hideMenu();

@@ -7,7 +7,7 @@
 	
 	"use strict";
 
-	if(runtime == "browser") {
+	if(RUNTIME == "browser") {
 		console.warn("Printer functionality not yet available in the browser!");
 		return;
 	}

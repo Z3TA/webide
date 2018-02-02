@@ -1,8 +1,8 @@
 (function() {
 	
-	//alert("runtime=" + runtime);
+	//alert("RUNTIME=" + RUNTIME);
 	
-	if(runtime == "browser") {
+	if(RUNTIME == "browser") {
 		console.warn("Winstate not yet supported in the browser!");
 		return;
 	}

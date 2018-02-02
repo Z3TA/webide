@@ -94,7 +94,7 @@
 		//buttonSaveAs.addEventListener("click", saveFileInPath, false);
 		
 		
-		if(runtime == "browser") {
+		if(RUNTIME == "browser") {
 			var buttonDownload = document.createElement("input");
 			buttonDownload.setAttribute("type", "button");
 			buttonDownload.setAttribute("class", "button");

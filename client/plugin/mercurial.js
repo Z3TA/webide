@@ -75,10 +75,10 @@
 		
 		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
 		
-		if(QueryString.repo) {
+		if(QUERY_STRING.repo) {
 			testRepo = {
-				url: QueryString.repo,
-				into: "/repo/" + UTIL.getFolderName(QueryString.repo),
+				url: QUERY_STRING.repo,
+				into: "/repo/" + UTIL.getFolderName(QUERY_STRING.repo),
 				user: "",
 				pw: ""
 			}

@@ -981,7 +981,7 @@ var WysiwygEditor;
 		
 		
 		
-		if(runtime == "nw.js") {
+		if(RUNTIME == "nw.js") {
 			// Show the editor window
 			var gui = require('nw.gui');
 			var win = gui.Window.get();

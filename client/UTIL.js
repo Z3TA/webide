@@ -658,7 +658,7 @@ var UTIL = {
 
 
 	isFilePath: function isFilePath(filePath) {
-		if(runtime == "browser") {
+		if(RUNTIME == "browser") {
 			if(linuxPathValidation(filePath)) return true
 			else return false;
 		}

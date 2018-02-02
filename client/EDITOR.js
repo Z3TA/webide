@@ -310,7 +310,7 @@ EDITOR.lastKeyPressed = "";
 		
 		setWorkingDirectory(UTIL.trailingSlash(process.cwd()));
 		
-		if(runtime!="browser") {
+	if(RUNTIME!="browser") {
 			// Check if the working directory is the same as the editor (hmm, why?)
 			
 			console.log("__dirname=" + __dirname);
@@ -571,7 +571,7 @@ EDITOR.lastKeyPressed = "";
 			
 			if(text == undefined) {
 				
-				if(runtime!="browser") {
+			if(RUNTIME!="browser") {
 					path = UTIL.makePathAbsolute(path);
 				}
 				console.warn("Text is undefined! Reading file from disk: " + path)
@@ -592,7 +592,7 @@ EDITOR.lastKeyPressed = "";
 							//fileOpenError(new Error("File too big: " + path));
 							//return;
 							
-							//if(runtime == "browser") return fileOpenError(new Error("Opening large files not yet supported in the browser!"));
+						//if(RUNTIME == "browser") return fileOpenError(new Error("Opening large files not yet supported in the browser!"));
 							
 							console.warn("File larger then " + EDITOR.settings.bigFileSize + " bytes. It will be opened as a stream!");
 							var notFromDisk = false;
@@ -2692,12 +2692,12 @@ callback(err);
 			if(focus == undefined) focus = true;
 			
 			// Set window title
-			if(runtime=="nw.js") {
+		if(RUNTIME=="nw.js") {
 				var gui = require('nw.gui');
 				var win = gui.Window.get();
 				win.title = file.path;
 			}
-			else if(runtime=="browser") {
+		else if(RUNTIME=="browser") {
 				window.title = file.path;
 				document.title = file.path;
 				window.status = file.path;
@@ -3885,7 +3885,7 @@ callback(err);
 			return false; // Function not found in list
 		}
 		
-		if(runtime == "nw.js") {
+	if(RUNTIME == "nw.js") {
 			// Handle window close
 			// Load native UI library
 			var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
@@ -4405,7 +4405,7 @@ callback(err);
 				}
 			}
 			
-			if(runtime != "browser") {
+		if(RUNTIME != "browser") {
 				/*
 					NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
 					We will have to use a wrapper and send the data via a socket
@@ -4487,7 +4487,7 @@ callback(err);
 			//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
 			
 			/*
-				// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
+			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
 				//setTimeout(display, 500);
 				//display();
 				
@@ -4792,7 +4792,7 @@ break;
 		var filePath = file.path;
 		var fileContent = undefined;
 		
-		if(runtime == "browser") {
+		if(RUNTIME == "browser") {
 			
 			filePath = fileName; // filePath is undefined in the browser
 			
@@ -6232,7 +6232,7 @@ console.warn(err.message);
 				if(err) {
 					// Failed to read file 
 					
-					if(runtime != "browser") {
+				if(RUNTIME != "browser") {
 						
 						// Try Mercurial
 						var exec = require('child_process').exec;
