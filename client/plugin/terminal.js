@@ -312,7 +312,6 @@
 						var lastIndex = row[row.length-1].index;
 						file.deleteTextRange(firstIndex, lastIndex);
 					}
-					file.deleteCharacter(); // Also remove the line break!
 					inBracket = false;
 					inNumber = "";
 					inText = true;
@@ -340,7 +339,7 @@
 					inNumber = "";
 					inText = true;
 				}
-				else if(code == 74 && inNumber == "2") { // J
+				else if(char == "J" && inNumber == "2") { // J
 					var startRow = file.startRow;
 					var caretX = file.caret.col;
 					
@@ -363,7 +362,14 @@
 					else var times = 1;
 					
 					console.log("Move cursor up " + times + " lines");
+					
+					var col = file.caret.col;
+					
 					for(var j=0; j<times;j++) file.moveCaretUp();
+					
+					if(file.caret.col < col) {
+						file.insertSpace(col - file.caret.col);
+					}
 					
 					inEsc = false;
 					inBracket = false;
@@ -774,7 +780,8 @@ var topLineText = "";
 						}
 					}
 					else if(code == 13) {// Carriage Return
-						file.moveCaretToEndOfLine();
+						//file.moveCaretToEndOfLine();
+						file.moveCaretToStartOfLine();
 						//file.moveCaretDown();
 					}
 					else if(code == 8) { // BS  (backspace)  

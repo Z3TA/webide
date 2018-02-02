@@ -1109,7 +1109,20 @@ var File; // File object is global
 		
 	}
 	
-	
+	File.prototype.insertSpace = function(spaceCount, caret) {
+		// Insert spaceCount spaces at caret
+		var file = this;
+		
+		if(spaceCount == undefined) spaceCount = 1;
+		if(caret == undefined) caret = file.caret;
+		
+		var spaces = "";
+		for(var j=0; j<spaceCount; j++) {
+			spaces += " ";
+		}
+		
+		return file.insertText(spaces, caret);
+		}
 	
 	File.prototype.insertText = function(text, caret) {
 		
@@ -2739,6 +2752,28 @@ var File; // File object is global
 		return caret;
 		
 	}
+	
+	File.prototype.moveCaretToStartOfLine = function(caret) {
+		var file = this;
+		
+		console.log("File:moveCaretToStartOfLine");
+		
+		if(caret == undefined) caret = file.caret;
+		
+		if(caret.col > 0) caret.eof = false; // We will no longer be at EOF
+		
+		caret.index -= caret.col;
+		caret.col = 0;
+		
+		if(file.grid[caret.row].length == 0) caret.eol = true;
+		else caret.eol = false;
+		
+			file.checkCaret(caret);
+			
+			EDITOR.fireEvent("moveCaret", file, caret);
+			
+			return caret;
+		}
 	
 	File.prototype.moveCaretToEndOfLine = function(caret) {
 		var file = this;
