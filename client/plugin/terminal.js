@@ -809,6 +809,7 @@ var topLineText = "";
 						file.insertText(spaces);
 					}
 					else {
+						console.log("Terminal Insert: " + UTIL.lbChars(char));
 						//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 						// terminal always overwrite !?
 						if(!file.caret.eol) file.deleteCharacter();

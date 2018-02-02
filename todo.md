@@ -38,12 +38,15 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-When scrolling back up I get:
-\u001b[2;9r\u001b[2;1H\u001b[4L\u001b[1;12r\u001b[3;1Hl5\r\u001b[1Bl6\r\u001b[1Bl7\r\u001b[1Bl8"
+ab(here)c
+X
+\u001b[4h \u001b[4l\bX
+I want abXc but get aXc in the editor
+
+
+bug: Editor dont want to insert more terminal stuff while on last line
 
 terminal emulator
-- getting nano to work
--- scroll buffers !? \u001b[2;26r\u001b[2;1H\u001b[12M\u001b[1;28r\u001b[2;1H   \r\u001b[12B"
 - Copy/pasting
 - Placing the cursor using the mouse
 
