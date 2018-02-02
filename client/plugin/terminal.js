@@ -887,7 +887,8 @@ var topLineText = "";
 			data = ESC + "[B";
 		}
 		else if(code == 46 && combo.sum == 0) { // Delete
-			data = String.fromCharCode(127);
+			// ab|c => We will get \b\u001b[1Pc\b (BACK DEL1 c BACK
+			data = ESC + "[C" + String.fromCharCode(127); // Move right then delete
 		}
 		
 		// CTRL+ (we'll use ALT instead)
