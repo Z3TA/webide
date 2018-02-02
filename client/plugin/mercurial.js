@@ -130,7 +130,6 @@
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
 				}
 				
-				
 				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
 					EDITOR.addTempMenuItem("Push", false, function() {
 						EDITOR.hideMenu();
@@ -138,10 +137,12 @@
 					});
 				}
 				
+				if(QUERY_STRING.pull) {
 				EDITOR.addTempMenuItem("Pull (update+merge)", false, function() {
 					EDITOR.hideMenu();
 					mercurialDance(file);
 				});
+				}
 				
 				var showAnnotationsString = "Show commit messages";
 				var annotateMenuItem = EDITOR.addTempMenuItem(showAnnotationsString, false, annotateOn);
