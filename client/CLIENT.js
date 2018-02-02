@@ -36,7 +36,7 @@ var CLIENT = {}; // Client object is global
 		if(protocol.toLowerCase() == "file") {
 			defaultURL = "http://localhost:8099/jzedit";
 			
-			if(runtime == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
+			if(RUNTIME == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
 		}
 		
 		console.log("defaultURL=" + defaultURL);
