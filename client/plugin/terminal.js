@@ -788,17 +788,12 @@ var topLineText = "";
 				else if(inText) {
 					// ### Text
 					
-					if(code == 10) { // New Line
+					if(code == 10) { // New Line \n
 						var bottomLine = file.startRow;
 						if(terminalState.bottomLine > 0) bottomLine += terminalState.bottomLine-1;
-						if(file.caret.row >= bottomLine) {
-							//terminalState.bottomScrollRowBuffer.unshift("");
-						}
-						else {
 							file.moveCaretToEndOfFile();
 						file.writeLineBreak();
 						}
-					}
 					else if(code == 13) {// Carriage Return
 						//file.moveCaretToEndOfLine();
 						file.moveCaretToStartOfLine();

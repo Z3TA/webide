@@ -38,13 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-ab(here)c
-X
-\u001b[4h \u001b[4l\bX
-I want abXc but get aXc in the editor
-
-
-bug: Editor dont want to insert more terminal stuff while on last line
 
 terminal emulator
 - Copy/pasting
