@@ -561,6 +561,9 @@ var topLineText = "";
 						ESC[?47h  Save screen
 						
 					*/
+					if(inNumber == 4) {
+						terminalState.smoothScrolling = true;
+					}
 					
 					inNumber = "";
 					inText = true;
@@ -576,7 +579,12 @@ var topLineText = "";
 						Esc[?6l 	Set origin to absolute 	DECOM
 						Esc[?7l 	Reset auto-wrap mode 	DECAWM
 						Esc[?8l 	Reset auto-repeat mode 	DECARM
-					Esc[?9l 	Reset interlacing mode 	DECINLM*/
+					Esc[?9l 	Reset interlacing mode 	DECINLM
+					*/
+					
+					if(inNumber == 4) {
+						terminalState.smoothScrolling = false;
+					}
 					
 					inNumber = "";
 					inText = true;
@@ -812,7 +820,7 @@ var topLineText = "";
 						console.log("Terminal Insert: " + UTIL.lbChars(char));
 						//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 						// terminal always overwrite !?
-						if(!file.caret.eol) file.deleteCharacter();
+						if(!file.caret.eol && !terminalState.smoothScrolling) file.deleteCharacter();
 						file.putCharacter(char);
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
 					}
