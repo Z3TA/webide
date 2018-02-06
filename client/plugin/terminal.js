@@ -439,7 +439,7 @@
 				}
 				else if(inNumberSerie && (char == "H" || char == "f")) {
 					var toCol = parseInt(inNumber) - 1;
-					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1; // + terminalState.topLine;
+					var toRow = parseInt(file.startRow + parseInt(numberSerie.pop())) - 1; // + terminalState.topLine;
 					
 					console.log("Move cursor to screen location vertically row=" + toRow + ", horizontally col=" + toCol + " ");
 					
@@ -799,7 +799,7 @@ var topLineText = "";
 				else if(inText) {
 					// ### Text
 					
-					if(code == 10) { // New Line \n
+					if(code == 10) { // New Line \n at cursor! (todo: add the line at the cursor and not eof!)
 						var bottomLine = file.startRow;
 						if(terminalState.bottomLine > 0) bottomLine += terminalState.bottomLine-1;
 							file.moveCaretToEndOfFile();

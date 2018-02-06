@@ -38,7 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-
+\u001b[4;10r\u001b[4;1H\u001bM\u001b[1;12r\u001b[5;1H
+(todo: add the line at the cursor and not eof!)
 
 
 terminal emulator
