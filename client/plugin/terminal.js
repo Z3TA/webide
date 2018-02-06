@@ -285,10 +285,11 @@
 				}
 				
 				else if(inNumberSerie && inNumber && char == "r") {
-					console.log("Set top and bottom lines of a window"); 
 					
 					var bottom = parseInt(inNumber);
 					var top = parseInt(numberSerie.pop());
+					
+					console.log("Set top=" + top + " and bottom=" + bottom + " lines of a window"); 
 					
 					if( isNaN(top) || isNaN(bottom) ) throw new Error("top=" + top + " bottom=" + bottom + " data=" + data);
 					
@@ -440,7 +441,7 @@
 					var toCol = parseInt(inNumber) - 1;
 					var toRow = file.startRow + parseInt(numberSerie.pop()) - 1; // + terminalState.topLine;
 					
-					console.log("Move cursor to screen location vertically " + toRow + ", horizontally " + toCol + " ");
+					console.log("Move cursor to screen location vertically row=" + toRow + ", horizontally col=" + toCol + " ");
 					
 					console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
 					
@@ -517,12 +518,15 @@
 				else if( (inEsc || inNumber) && char == "M") {
 					if(inNumber) var times = parseInt(inNumber);
 					else var times = 1;
-					console.log("todo: Move/scroll window DOWN " + times + " line(s)");
+					
 					var topRow = file.startRow;
 					var bottomRow = file.startRow;
 					
 					if(terminalState.topLine > 0) topRow += (terminalState.topLine-1);
 					if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
+					
+					console.log("Move/scroll window DOWN " + times + " line(s) startRow=" + startRow + " topLine=" + terminalState.topLine + 
+					" bottomLine=" + terminalState.bottomLine + " topRow=" + topRow + " bottomRow=" + bottomRow);
 					
 var bottomLineText = "";
 var topLineText = "";
@@ -532,9 +536,16 @@ var topLineText = "";
 					if(bottomLineText == undefined) bottomLineText = "";
 					
 					//file.insertTextRow(bottomLineText, bottomRow);
-						file.insertTextRow("", bottomRow);
-					
-					topLineText = file.removeRow(topRow);
+						
+						if(!inNumber) {
+							topLineText = file.removeRow(bottomRow);
+						file.insertTextRow("", topRow);
+						}
+						else {
+							file.insertTextRow("", bottomRow+1);
+							topLineText = file.removeRow(topRow);
+						}
+						
 					terminalState.topScrollRowBuffer.push(topLineText);
 					}
 					
