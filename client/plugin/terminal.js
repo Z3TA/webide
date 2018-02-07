@@ -806,7 +806,7 @@ var topLineText = "";
 						console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow + 
 						" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
 						
-						if(terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
+						if(terminalState.topLine > 0 && terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
 							file.removeRow(terminalState.topLine-1 + file.startRow);
 						}
 						
