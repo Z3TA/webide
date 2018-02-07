@@ -58,7 +58,7 @@
 			chars = 0;
 			
 			for(var col = 0; col < buffer[row].length; col++) {
-				console.log("xxx col=" + col + " chars=" + chars);
+				//console.log("xxx col=" + col + " chars=" + chars);
 				if(buffer[row][col].bgColor != oldBgColor) {
 					if(oldBgColor) {
 						
@@ -66,7 +66,7 @@
 						
 					ctx.fillStyle = oldBgColor;
 						ctx.fillRect(left, top,	width, EDITOR.settings.gridHeight);
-						console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width);
+						//console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width);
 						
 				}
 					
@@ -78,7 +78,7 @@
 				chars++;
 				
 			}
-			console.log("yyy row=" + row);
+			//console.log("yyy row=" + row);
 			
 			
 			// For the last bgcolor
@@ -86,7 +86,7 @@
 				width = EDITOR.settings.gridWidth * chars;
 				ctx.fillStyle = oldBgColor;
 				ctx.fillRect(left, top,	width, EDITOR.settings.gridHeight);
-				console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width + " EOL!");
+				//console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width + " EOL!");
 			}
 			
 			
