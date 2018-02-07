@@ -411,8 +411,10 @@
 					else var times = 1;
 					
 					console.log("Move cursor right " + times + " lines");
-					for(var j=0; j<times;j++) file.moveCaretRight();
-					
+					for(var j=0; j<times;j++) {
+						if(file.caret.eol) file.insertText(" ");
+						else file.moveCaretRight();
+					}
 					inEsc = false;
 					inBracket = false;
 					inNumber = "";
