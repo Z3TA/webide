@@ -3688,7 +3688,7 @@ var File; // File object is global
 			
 			This function is ONLY used to scroll the grid. It should NOT be used to load parts of large files. Although it will automatically load "ahead" in large files. 
 			
-			y is the row in the grid (not large file)
+			Function parameter y is the row in the grid (not large file)
 			
 		*/
 		

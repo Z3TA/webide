@@ -342,16 +342,20 @@
 				}
 				else if(char == "J" && inNumber == "2") { // J
 					var startRow = file.startRow;
-					var caretX = file.caret.col;
 					
 					console.log("Clear entire screen! startRow=" + startRow + " file.grid.length=" + file.grid.length);
 					
+					file.moveCaretToEndOfFile();
+					file.insertLineBreak();
+					file.startRow = file.caret.row;
+					EDITOR.renderNeeded();
+					
+					/*
 					for(var row=startRow; row<file.grid.length; row++) {
 						console.log("Clearing row=" + row);
 						file.removeAllTextOnRow(row);
 					}
-					
-					//file.scrollTo(caretX, startRow);
+					*/
 					
 					inNumber = "";
 					inText = true;
