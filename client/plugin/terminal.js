@@ -801,13 +801,24 @@ var topLineText = "";
 				else if(inText) {
 					// ### Text
 					
-					if(code == 10) { // New Line \n at cursor! (todo: add the line at the cursor and not eof!)
-						var bottomLine = file.startRow;
-						if(terminalState.bottomLine > 0) bottomLine += terminalState.bottomLine-1;
-							file.moveCaretToEndOfFile();
-						file.writeLineBreak();
+					if(code == 10) { // New Line \n
+						
+						console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow + 
+						" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
+						
+						if(terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
+							file.removeRow(terminalState.topLine-1 + file.startRow);
 						}
-					else if(code == 13) {// Carriage Return
+						
+						if(file.caret.row == file.grid.length-1) {
+						file.moveCaretToEndOfFile();
+							file.writeLineBreak();
+						}
+						else {
+file.insertLineBreak();
+						}
+					}
+					else if(code == 13) {// Carriage Return \r
 						//file.moveCaretToEndOfLine();
 						file.moveCaretToStartOfLine();
 						//file.moveCaretDown();
