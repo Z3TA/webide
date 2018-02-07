@@ -144,7 +144,7 @@
 			var numberSerie = [];
 			
 			var defaultForeGroundColor = EDITOR.settings.style.textColor;
-			var defaultBackgroundColor = EDITOR.settings.style.bgColor;
+			var defaultBackgroundColor = null; // EDITOR.settings.style.bgColor;
 			
 			var colorBlack = "black";
 			var colorRed = "red";
@@ -719,7 +719,7 @@ var topLineText = "";
 					inText = true;
 				}
 				
-				else if(inNumber && code == 109) { // m
+				else if(inNumber && char == "m") { // code=109
 					// ### Display mode
 					
 					numberSerie.push(inNumber);
@@ -823,12 +823,21 @@ var topLineText = "";
 						file.insertText(spaces);
 					}
 					else {
-						console.log("Terminal Insert: " + UTIL.lbChars(char));
+						console.log("Terminal Insert: " + UTIL.lbChars(char) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
 						//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 						// terminal always overwrite !?
 						if(!file.caret.eol && !terminalState.smoothScrolling) file.deleteCharacter();
 						file.putCharacter(char);
+						
+						if(backgroundColor != defaultBackgroundColor) file.grid[file.caret.row][file.caret.col-1].bgColor = backgroundColor;
+						
 						if(foregroundColor != defaultForeGroundColor) file.grid[file.caret.row][file.caret.col-1].color = foregroundColor;
+						else if(reverse) {
+							// Make the (default?) text color the background and the bacgkround the text color
+							file.grid[file.caret.row][file.caret.col-1].bgColor = EDITOR.settings.style.textColor;
+							file.grid[file.caret.row][file.caret.col-1].color = EDITOR.settings.style.bgColor;
+						}
+						
 					}
 				}
 			}

@@ -4623,6 +4623,7 @@ var File; // File object is global
 		box.wave = false;
 		box.circle = false;
 		box.color = EDITOR.settings.style.textColor;
+		box.bgColor = null;
 		box.quote = false; // part of a quote
 		box.comment = false; // part of a comment
 	}
@@ -4632,7 +4633,8 @@ var File; // File object is global
 		var box = this,
 		newBox = new Box(box.char, box.index);
 		
-		//newBox.color = box.color;
+		newBox.color = box.color;
+		newBox.bgColor = box.bgColor;
 		newBox.selected = box.selected;
 		newBox.highlighted = box.highlighted;
 		newBox.highlighted = box.highlighted;
@@ -4643,7 +4645,8 @@ var File; // File object is global
 			(only used in the javascript plugin, and added to the Box template to prevent "hidden classes".
 			. We probably will have to refactor how this work. )
 			
-			color will not be cloned, and have to be applied by preRender functions
+			Avoid setting box color and bgcolor. Instead apply the color via preRender functions !
+			
 		*/
 		return newBox;
 	}
