@@ -976,7 +976,7 @@ var File; // File object is global
 	}
 	
 	File.prototype.insertTextRow = function(text, row) {
-		// Inserts a new row of text at row
+		console.log("Insert a new row of text=" + text + " at row=" + row);
 		
 		var file = this;
 		var grid = file.grid;

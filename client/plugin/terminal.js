@@ -460,7 +460,7 @@
 							spaces += " ";
 						}
 						file.moveCaret(undefined, toRow, file.grid[toRow].length-1);
-						file.insertText(spaces);
+						if(spaces) file.insertText(spaces);
 					}
 					
 					file.moveCaret(undefined, toRow, toCol);
