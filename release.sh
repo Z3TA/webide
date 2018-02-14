@@ -147,6 +147,10 @@ echo "Create a tarball and compress server release"
 cd temp/release/
 mv server $name-v$version$beta-$commit-server
 tar -zcf $name-v$version$beta-$commit-server.tar.gz $name-v$version$beta-$commit-server
+
+# Move it back to just "server" so other batch scripts don't have to figure out the version
+mv $name-v$version$beta-$commit-server server
+
 cd ..
 cd ..
 #rm -rf temp/release/$name-v$version$beta-$commit-server
