@@ -1,3 +1,7 @@
+#
+# Apparmor manual:
+# http://manpages.ubuntu.com/manpages/trusty/man5/apparmor.d.5.html
+#
 
 #include <tunables/global>
 
