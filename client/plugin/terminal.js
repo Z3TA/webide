@@ -69,9 +69,12 @@
 		}
 		
 		function resizeTerminal(id) {
+			if(CLIENT.connected) {
 			CLIENT.cmd("terminal.resize", {id: id, cols: cols, rows: rows}, function terminalResized(err) {
 				if(err) console.warn(err.message);
 			});
+		}
+			else console.warn("Not connected to server!");
 		}
 	}
 	

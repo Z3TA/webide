@@ -69,8 +69,6 @@ todo:
 
 change color of yellow and torkos
 
-eternal loop in server_login after disconnected while in terminal !?
-
 Issue when copying text rows with lf into a file with crlf line breaks !
 
 
