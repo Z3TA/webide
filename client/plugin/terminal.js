@@ -785,6 +785,16 @@ var topLineText = "";
 						}
 					}
 					
+					if(backgroundColor == defaultBackgroundColor && EDITOR.settings.style.bgColor == "rgb(255,255,255)") {
+						// If there's no background set, the editors default will be used.
+						// Many programs asume you are using a black or very dark background for the terminal!
+						// So if we are using the white default we have to make some color adjustments
+						
+						if(foregroundColor == colorYellow) foregroundColor = "#c59800";
+						if(foregroundColor == colorCyan) foregroundColor = "#008686";
+						if(foregroundColor == colorWhite) foregroundColor = "#828282";
+					}
+					
 					inNumber = "";
 					inNumberSerie = false;
 					numberSerie.length = 0;

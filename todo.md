@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-change color of yellow and torkos
-
 Issue when copying text rows with lf into a file with crlf line breaks !
 
 
