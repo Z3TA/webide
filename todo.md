@@ -38,34 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-forkpty:
-mount -o bind /dev /home/ltest1/dev/
-
-did not work:
-mknod -m 666 /home/ltest1/dev/ptmx c 5 2
-mknod -m 666 /home/ltest1/dev/tty c 5 0
-mknod -m 622 /home/ltest1/dev/console c 5 1
-chown root:tty /home/ltest1/dev/{console,ptmx,tty}
-
-
-sudo touch /home/ltest1/dev/ptmx
-sudo mount --bind /dev/ptmx /home/ltest1/dev/ptmx
-
---- either of these is needed:
-mount --bind /dev/pts /home/ltest1/dev/pts # forkpty will fail without it!
-mount devpts /home/ltest1/dev/pts -t devpts
-----
-
-note needed:
-mount -t sysfs sys /home/ltest1/sys/
-mount -t proc proc /home/ltest1/proc/
-
-
-mount -t devpts none "/home/ltest1/dev/pts" -o ptmxmode=0666,newinstance # doesn't work!
-
-Trying to get terminal to run in chroot
-
-todo:
+Issues with " and ' in terminal
 
 change color of yellow and torkos
 
