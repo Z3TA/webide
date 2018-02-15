@@ -74,6 +74,49 @@ Then hit Ctrl + Shift + S to post it. (There will be a confirmation box).
 
 
 
+Running the editor in Google Cloud Shell
+========================================
+Go to https://console.cloud.google.com/
+Login with your Google account
+
+Click on the icon in the top right that looks like >_ and says "Activate Google Cloud Shell"
+It will bring up a virtual pseudo-terminal at the bottom. Click on it to start typing ...
+curl https://www.webtigerteam.com/jzedit/download/
+
+Take notice of the latest server release for jzedit. Then type:
+wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_beta-2580-server.tar.gz
+(replace the number 2580 with the latest jzedit server relase!)
+This will download the gzipped tar archive.
+
+(tip: Pressing tab in the terminal will autocomplete file paths)
+
+Then unpack the tarball:
+tar xf jzedit-v1_beta-2580-server.tar.gz
+
+And go into it's folder:
+cd jzedit-v1_beta-2580-server
+
+Install dependencies:
+npm install
+
+cd into the server directory:
+cd server
+
+Start the nodejs server
+node server.js --username=zetafiles --password=secretqwerty123 --port=8080 -nochroot
+
+The server should now be listening to http port 8080 and ip 127.0.0.1
+If this was a normal shell you should have used the public IP instead of 127.0.0.1
+and open http://public-ip:8080/ in a browser. 
+But in Google Cloud shell we have to run it via a proxy ...
+
+We want to "preview" the "app" ... Click on any link in the Cloud API menu.
+Clicking on a link will show some new icons to the right on top of the terminal.
+Click on the icon that looks like <> and say "Web preview". And select "Preview on port 8080"
+This will open a new browser tab, that will hopefully load the editor!
+
+Note that some things will be a bit slow as the proxy does not support websockets.
+
 
 Font settings and styling
 =========================
