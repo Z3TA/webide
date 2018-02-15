@@ -14,8 +14,10 @@ var API = require("./server_api.js");
 
 
 // Server plugin API's
+//API.test = require("./plugin/test.js"); // Make sure the files have read persmission!
 API.SSG = require("./plugin/static_site_generator/ssg-api.js");
 API.mercurial = require("./plugin/mercurial.js");
+
 API.terminal = require("./plugin/terminal.js");
 
 
@@ -94,6 +96,8 @@ if(parseInt(process.env.uid)) {
 	var unshare = require("unshare");
 	unshare(CLONE_NEWNET);
 	*/
+	
+	process.env.HOME = "/";
 	
 }
 else {

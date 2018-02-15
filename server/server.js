@@ -583,8 +583,8 @@ if(callback) callback(null);
 							var nodeJsLinkOK = false;
 							var nullNodCreated = false;
 							var urandomCreated = false;
-							var foldersToMount = 9;
-							var apparmorProfilesToCreate = 5;
+							var foldersToMount = 12;
+							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
 							var checkMountsAbort = false;
@@ -711,13 +711,17 @@ else {
 							mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
 								mount(process.argv[0], homeDir + "usr/bin/nodejs", folderMounted);
 							mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
-							
+								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+								mount("/dev/pts/", homeDir + "/dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+								
 							// Create apparmor proiles unless they exist
 							createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.nodejs", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.python", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.hg", username, apparmorProfileCreated);
 							createApparmorProfile("../etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username, apparmorProfileCreated);
+								createApparmorProfile("../etc/apparmor/home.someuser.bin.bash", username, apparmorProfileCreated);
 								
 							});
 							

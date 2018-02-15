@@ -4,6 +4,8 @@
 	
 */
 
+var pty = require('pty.js');
+
 var TERMINAL_COUNTER = 0;
 
 var TERMINAL = {};
@@ -11,7 +13,7 @@ var TERMINAL = {};
 var TERMINALS = {};
 
 TERMINAL.open = function newTerminal(user, json, callback) {
-	var pty = require('pty.js');
+	
 	var cols = json.cols || 80;
 	var rows = json.rows || 30;
 	var cwd = json.cwd || process.env.HOME;
