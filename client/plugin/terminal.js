@@ -95,6 +95,7 @@
 			
 			file.mode = "text";
 			file.parse = false;
+			file.parsed = null;
 			
 			terminalFiles.push(file);
 			
