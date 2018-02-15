@@ -8,4 +8,8 @@
 
   #/dev/tty rw,
 
+  %HOME%%USERNAME%/usr/bin/hg Px,
+  %HOME%%USERNAME%/usr/bin/nodejs Px,
+  %HOME%%USERNAME%/usr/share/npm/bin/npm-cli.js Px,
+
 }

@@ -49,7 +49,8 @@ eachUser(HOME, function(user) {
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", user.name);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", user.name);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", user.name);
-		
+	createApparmorProfile("./etc/apparmor/home.someuser.bin.bash", user.name);
+	
 		// Make sure files exist and file permissions is rights ...
 		
 		

@@ -38,6 +38,16 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+/home/ltest1/usr/share/npm/bin/npm-cli.js
+/usr/bin/node ix,
+/usr/bin/env ix,
+
+sudo ln -s /usr/bin/nodejs /home/ltest1/usr/bin/node
+
+sudo ln -s ../share/npm/bin/npm-cli.js /home/ltest1/usr/bin/npm
+
+running nodejs npm, hg in terminal chrooted
+
 Issue when copying text rows with lf into a file with crlf line breaks !
 
 
