@@ -68,6 +68,8 @@
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide Mercurial widgets", charCode: char_Esc, fun: hideMercurialWidgets});
+		EDITOR.bindKey({desc: "Source control: Commit", fun: showCommitDialog, charCode: "C".charCodeAt(0), combo: ALT});
+		EDITOR.bindKey({desc: "Source control: Compare working directory with parent revision", fun: diffWorkingDirectory, charCode: "D".charCodeAt(0), combo: ALT});
 		
 		//EDITOR.on("fileOpen", mercurialFileOpen);
 		EDITOR.on("commitTool", mercurialCommitTool);
@@ -695,7 +697,7 @@
 					files.push(filePath);
 						}
 				}
-			diff(rootDir, files);
+			mercurialDiff(rootDir, files);
 			};
 		
 		td.appendChild(diffButton);
@@ -1534,6 +1536,7 @@
 			if(!annotationWidget) {
 				annotationWidget = document.createElement("div");
 				annotationWidget.setAttribute("id", "mercurialAnnotationWidget");
+				annotationWidget.setAttribute("class", "mercurialAnnotationWidget");
 				footer.appendChild(annotationWidget);
 			}
 			else {
@@ -1594,12 +1597,13 @@
 					annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
 					console.log("changesets=" + JSON.stringify(changesets, null, 2));
 					console.log("showing changeset changeId=" + changeId);
-					EDITOR.resizeNeeded();
-				}
+					}
 			else {
 				console.warn("No annotations for line " + line + " in " + file.path + " changeId=" + changeId + " lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 				annotationWidget.innerText = "No annotations for line " + line + " in " + file.path;
 			}
+			
+			EDITOR.resizeNeeded();
 			
 			annotation.lastLine = line;
 		}
@@ -2038,7 +2042,7 @@
 		alert(selectedRev.rev);
 	}
 	
-	function diff(directory, filePaths) {
+	function mercurialDiff(directory, filePaths) {
 		
 		if(filePaths == undefined) filePaths = [];
 		if(directory == undefined) directory = EDITOR.workingDirectory;
@@ -2059,8 +2063,13 @@
 					if(err) alertBox(err.message);
 				});
 			});
-			
+		
 		}
+	
+	function diffWorkingDirectory() {
+		mercurialDiff(rootDir);
+		return false;
+	}
 	
 	function buildVersionControlWidget(widget) {
 
@@ -2076,26 +2085,44 @@
 		var selRev = document.createElement("select");
 		*/
 		
+		var form = document.createElement("form");
 		var diff = document.createElement("fieldset");
+		
 		var diffLegend = document.createElement("legend");
-		diffLegend.appendChild(document.createTextNode("Diff"));
+		diffLegend.appendChild(document.createTextNode(" Diff "));
 		diff.appendChild(diffLegend);
 		
 		var diffCurrent = document.createElement("button");
 		diffCurrent.appendChild(document.createTextNode("Working directory"));
 		diffCurrent.setAttribute("title", "Compare current working directory with parent revision");
+		diffCurrent.setAttribute("class", "button");
+		diffCurrent.onclick = function() {
+			mercurialDiff(rootDir, []);
+		}
 		diff.appendChild(diffCurrent);
+		
+		var diffCurrentKey = document.createElement("span");
+		diffCurrentKey.appendChild(document.createTextNode( EDITOR.getKeyFor(diffWorkingDirectory) ));
+		diffCurrentKey.setAttribute("class", "key");
+		diffCurrent.appendChild(diffCurrentKey);
 		
 		var diffFile = document.createElement("button");
 		diffFile.appendChild(document.createTextNode("Current file"));
 		diffFile.setAttribute("title", "Compare currently open file with parent revision");
+		diffFile.setAttribute("class", "button");
+		diffFile.onclick = function() {
+			mercurialDiff(rootDir, [EDITOR.currentFile.path]);
+		}
 		diff.appendChild(diffFile);
 		
+		//form.appendChild(diff);
+		//div.appendChild(form);
 		div.appendChild(diff);
 		
 		var log = document.createElement("button");
 		log.appendChild(document.createTextNode("Log"));
 		log.setAttribute("title", "Show log/revision history");
+		log.setAttribute("class", "button");
 		log.onclick = function() {
 			//widget.hide();
 			showVersionHistory();
@@ -2105,6 +2132,7 @@
 		var annotations = document.createElement("button");
 		annotations.appendChild(document.createTextNode("Annotations"));
 		annotations.setAttribute("title", "Toggle annotations on/off");
+		annotations.setAttribute("class", "button");
 		annotations.onclick = function() {
 			if(doAnnotate) annotateOff();
 			else annotateOn();
@@ -2113,15 +2141,21 @@
 		
 		var commit = document.createElement("button");
 		commit.appendChild(document.createTextNode("Commit"));
+		commit.setAttribute("class", "button");
 		commit.onclick = function() {
 			//widget.hide();
 			showCommitDialog();
 		}
 		div.appendChild(commit);
 		
+		var commitKey = document.createElement("span");
+		commitKey.appendChild(document.createTextNode( EDITOR.getKeyFor(showCommitDialog) ));
+		commitKey.setAttribute("class", "key");
+		commit.appendChild(commitKey);
 		
 		var cancel = document.createElement("button");
 		cancel.appendChild(document.createTextNode("Cancel"));
+		cancel.setAttribute("class", "button");
 		cancel.onclick = function() {
 			widget.hide();
 		}

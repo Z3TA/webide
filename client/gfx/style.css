@@ -322,6 +322,21 @@ canvas {
 
 /* ###### Standard settings ####### (Place high so they can be over-written by custom styling)*/
 
+fieldset {
+	border: 2px groove #747474;
+	display: inline-block;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 13px;
+	padding-top: 0px;
+	padding-bottom: 5px;
+	margin-bottom: 8px;
+	margin-top: 0px;
+	text-align: center;
+	vertical-align: middle;
+	background: rgba(200, 200, 200, 0.1);
+}
+
 span.nobreak {
 	
 }
@@ -417,7 +432,7 @@ li ul {
 	margin-left: 1em;
 }
 
-label, span, p {
+label, span, p, legend {
 	color: #f6f6f3;
 	text-shadow: 0px -1px 0px #1f2020;
 	font-weight: normal;
@@ -468,11 +483,28 @@ input[type=button], button.button, input[type=submit] {
 	padding: 4px;
 	margin: 4px;
 	font-size: 13px;
+	vertical-align: middle;
 }
 
 input[type=button].half {
 	min-width: 55px;
 }
+
+/* For showing key-combo shortcut for the button functionality */
+button .key {
+	color: #919191;
+	font-size: 9px;
+	text-shadow: none;
+	vertical-align: middle;
+	margin-left: 4px;
+	font-family: inherit;
+	display: block;
+	margin-top: 2px;
+	}
+button .key:hover {
+	color: white;
+	}
+
 
 .highlighted {
 	background-color: orange!important;
@@ -488,6 +520,17 @@ input[type=text].error {
 td input[type=text] {
 	max-width: calc(100% - 16px);
 }
+
+
+
+.mercurialAnnotationWidget {
+	background-color: rgba(255,255,255, 0.9);
+	color: black;
+	border: 1px solid #555555;
+	padding: 3px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	}
 
 
 /* ############### File Tabs ############## */
