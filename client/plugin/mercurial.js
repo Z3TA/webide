@@ -46,6 +46,7 @@
 	var selectedRev; // {id, files}
 	var lastActiveHistoryTableRow;
 	
+	var versionControlWidget = EDITOR.createWidget(buildVersionControlWidget);
 	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
@@ -125,6 +126,10 @@
 				console.log("mercurial.status : " + JSON.stringify(status));
 				
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
+				
+				
+				if(!versionControlWidget.visible) EDITOR.addTempMenuItem("Version Control", false, showVersionControlWidget);
+				
 				
 				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0 || status.untracked.length != 0) {
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
@@ -1480,7 +1485,6 @@
 		EDITOR.hideMenu();
 	}
 	
-	
 	function showAnnotations(file, caret) {
 		
 		if(!doAnnotate) return;
@@ -2057,5 +2061,78 @@
 			});
 			
 		}
+	
+	function buildVersionControlWidget(widget) {
+
+		var div = document.createElement("div");
+		
+		/*
+			
+		
+		var labRev = document.createElement("button");
+		labRev.setAttribute("for", "selRev");
+			labRev.appendChild(document.createTextNode("Rev:"));
+		
+		var selRev = document.createElement("select");
+		*/
+		
+		var diff = document.createElement("fieldset");
+		var diffLegend = document.createElement("legend");
+		diffLegend.appendChild(document.createTextNode("Diff"));
+		diff.appendChild(diffLegend);
+		
+		var diffCurrent = document.createElement("button");
+		diffCurrent.appendChild(document.createTextNode("Working directory"));
+		diffCurrent.setAttribute("title", "Compare current working directory with parent revision");
+		diff.appendChild(diffCurrent);
+		
+		var diffFile = document.createElement("button");
+		diffFile.appendChild(document.createTextNode("Current file"));
+		diffFile.setAttribute("title", "Compare currently open file with parent revision");
+		diff.appendChild(diffFile);
+		
+		div.appendChild(diff);
+		
+		var log = document.createElement("button");
+		log.appendChild(document.createTextNode("Log"));
+		log.setAttribute("title", "Show log/revision history");
+		log.onclick = function() {
+			//widget.hide();
+			showVersionHistory();
+		}
+		div.appendChild(log);
+		
+		var annotations = document.createElement("button");
+		annotations.appendChild(document.createTextNode("Annotations"));
+		annotations.setAttribute("title", "Toggle annotations on/off");
+		annotations.onclick = function() {
+			if(doAnnotate) annotateOff();
+			else annotateOn();
+		}
+		div.appendChild(annotations);
+		
+		var commit = document.createElement("button");
+		commit.appendChild(document.createTextNode("Commit"));
+		commit.onclick = function() {
+			//widget.hide();
+			showCommitDialog();
+		}
+		div.appendChild(commit);
+		
+		
+		var cancel = document.createElement("button");
+		cancel.appendChild(document.createTextNode("Cancel"));
+		cancel.onclick = function() {
+			widget.hide();
+		}
+		div.appendChild(cancel);
+		
+		return div;
+	}
+	
+	function showVersionControlWidget() {
+		EDITOR.hideMenu();
+		versionControlWidget.show();
+	}
 	
 })();

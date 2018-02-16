@@ -3396,7 +3396,7 @@ callback(err);
 			
 			// Some boilderplate/abstraction for creating HTML form widget, 
 			
-			var widget = {mainElement: null};
+			var widget = {mainElement: null, visible: false};
 			
 			// When this function is created, DOM does not exist!
 			
@@ -3441,6 +3441,8 @@ callback(err);
 				
 				EDITOR.resizeNeeded();
 				
+			widget.visible = true;
+			
 				return false;
 			}
 			
@@ -3461,6 +3463,8 @@ callback(err);
 					EDITOR.resizeNeeded();
 				}
 				
+			widget.visible = false;
+			
 				return wasHidden;
 			}
 			
