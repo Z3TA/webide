@@ -38,30 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Version control widget: buttons: commit, pull, push, update, merge, diff...
-Easy way to commit/annotate so users will commit/annotate often: shortcut key!?
-Show diffs in terminal !?
-
-Select box for which head or reversion to diff with
-
-
-mercurial: Check if there are things to pull
-
-
-EDITOR.shell, lets plugins, like the terminal, run a command.
-
-
-
-
-
-
-Working on Mercurial pull
-
-Sync with repo after each save !?
+Version control widget: push
 
 Able to push to repo! (without commit & push)
-
-Show a diff ... when making a commit. Show the selected file and highlight changed/added rows !?
 
 
 implementing jsql example on webide.se
