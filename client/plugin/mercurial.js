@@ -677,6 +677,27 @@
 		var br = document.createElement("br");
 		td.appendChild(br);
 		
+		// ### Diff button
+		var diffButton = document.createElement("button");
+		diffButton.setAttribute("class", "button");
+		diffButton.appendChild(document.createTextNode("Diff"));
+		diffButton.onclick = function diffButtonClick() {
+			var files = [];
+			var selectedFiles = fileSelect.options;
+				for(var i=0, filePath; i<selectedFiles.length; i++) {
+					if(selectedFiles[i].selected) {
+						filePath = selectedFiles[i].value;
+					files.push(filePath);
+						}
+				}
+			diff(rootDir, files);
+			};
+		
+		td.appendChild(diffButton);
+		
+		tr.appendChild(td);
+		td = document.createElement("td");
+		
 		// ### Cancel button
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
@@ -687,15 +708,15 @@
 		
 		td.appendChild(cancelButton);
 		
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
+		var br = document.createElement("br");
+		td.appendChild(br);
 		
 		// ### Ignore button
 		var ignoreButton = document.createElement("button");
 		ignoreButton.setAttribute("class", "button");
 		ignoreButton.appendChild(document.createTextNode("Ignore ..."));
 		ignoreButton.onclick = mercurialIgnore;
+		
 		td.appendChild(ignoreButton);
 		
 		var br = document.createElement("br");
@@ -706,6 +727,7 @@
 		deleteButton.setAttribute("class", "button");
 		deleteButton.appendChild(document.createTextNode("Delete"));
 		deleteButton.onclick = mercurialDelete;
+		
 		td.appendChild(deleteButton);
 		
 		tr.appendChild(td);
@@ -2011,5 +2033,29 @@
 		// Show diff of selected rev
 		alert(selectedRev.rev);
 	}
+	
+	function diff(directory, filePaths) {
+		
+		if(filePaths == undefined) filePaths = [];
+		if(directory == undefined) directory = EDITOR.workingDirectory;
+		
+		// filePaths will/can have the root dir removed
+		
+		if(typeof directory != "string") throw new Error("directory need to be a file path! directory=" + directory + " (not a string)");
+		if(!filePaths instanceof Array) throw new Error("filePaths need to be a list (array) of file paths! filePaths=" + filePaths);
+			
+		CLIENT.cmd("mercurial.diff", {directory: directory, files: filePaths}, function hgDiff(err, resp) {
+				
+				if(err) return alertBox(err.message);
+				
+				var text = resp.text;
+				var fileName = "hg.diff";
+				if(filePaths.length == 1) fileName = filePaths[0] + ".diff";
+				EDITOR.openFile(fileName, text, function(err, file) {
+					if(err) alertBox(err.message);
+				});
+			});
+			
+		}
 	
 })();

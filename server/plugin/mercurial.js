@@ -1236,6 +1236,66 @@ var directory = json.directory;
 		});
 }
 
+
+MERCURIAL.diff = function hgdiff(user, json, callback) {
+
+var directory = json.directory;
+var filePaths = json.files;
+
+if(filePaths == undefined) filePaths = [];
+
+	if(directory == undefined) return callback(new Error("No directory specified!"));
+	
+checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+if(err) return callback(err);
+
+var spawn = require('child_process').spawn;
+
+var diff = spawn("hg", ['diff'].concat(filePaths), {cwd: rootDir, env: execFileOptions.env, shell: false});
+var stdout = "";
+var stderr = "";
+
+diff.stdout.on('data', function diffStdout(data) {
+stdout += data;
+});
+
+diff.stderr.on('data', function diffStderr(data) {
+stderr += data;
+});
+
+diff.on('error', function diffError(err) {
+console.log("stdout=" + stdout);
+console.log("stderr=" + stderr);
+if(callback) callback(err);
+callback = null;
+});
+
+diff.on('close', function diffDone(exitCode) {
+			//if(stdout.length < 500) console.log("hg diff stdout=" + stdout);
+			//else console.log("hg diff stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+			console.log("diff stdout=" + stdout);
+			console.log("diff stderr=" + stderr);
+
+			console.log("diff exitCode=" + exitCode);
+
+if(exitCode || stderr) {
+var err = new Error(stderr);
+err.code = exitCode;
+if(callback) callback(err);
+callback = null;
+return;
+}
+
+			var resp = {
+				text: stdout
+			}
+			
+			callback(null, resp);
+			
+		});
+});
+}
+
 function makeFileString(user, files, directory, rootDir) {
 	/*
 		NOT USED because execFile needs to pass each file as it's own argument, not a string of all files

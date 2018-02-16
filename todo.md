@@ -38,13 +38,19 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Version control widget: buttons: commit, pull, push, update, merge, diff...
+Easy way to commit/annotate so users will commit/annotate often: shortcut key!?
+Show diffs in terminal !?
 
-Issue when copying text rows with lf into a file with crlf line breaks !
+Select box for which head or reversion to diff with
 
 
-terminal emulator
-- Copy/pasting
-- Placing the cursor using the mouse
+mercurial: Check if there are things to pull
+
+
+EDITOR.shell, lets plugins, like the terminal, run a command.
+
+
 
 
 
@@ -71,6 +77,15 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+School signup: Se progress and usage statistics from team members
+
+
+terminal emulator
+- Copy/pasting
+- Placing the cursor using the mouse
+
+Issue when copying text rows with lf into a file with crlf line breaks !
 
 height of menu with temp entires (the bottom of the menu is below the page)
 
