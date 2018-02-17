@@ -93,6 +93,8 @@
 	function unloadMercurial() {
 		
 		EDITOR.unbindKey(hideMercurialWidgets);
+		EDITOR.unbindKey(showCommitDialog);
+		EDITOR.unbindKey( diffWorkingDirectory);
 		
 		//EDITOR.removeEvent("fileOpen", mercurialFileOpen);
 		
@@ -1908,6 +1910,15 @@ console.log("mercurial.status : " + JSON.stringify(status));
 		}
 		div.appendChild(butCheckProblems);
 		
+		var butClone = document.createElement("button");
+		butClone.appendChild(document.createTextNode("Clone a repo"));
+		butClone.setAttribute("class", "button");
+		butClone.onclick = function() {
+			widget.hide();
+			showCloneDialog();
+		}
+		div.appendChild(butClone);
+		
 		var cancel = document.createElement("button");
 		cancel.appendChild(document.createTextNode("Cancel"));
 		cancel.setAttribute("class", "button");
@@ -2227,7 +2238,7 @@ if(err) return alertBox(err.message);
 				var merge = "Merge";
 				var cancel = "Cancel";
 				
-				confirmBox("There are multiple heads (" + resp.heads + ") in Mercurial. Do you want to merge them ?", [merge, cancel], function(answer) {
+				confirmBox("There are multiple heads:\n" + JSON.stringify(resp.heads, null, 2) + "\n\nDo you want to merge them ?", [merge, cancel], function(answer) {
 					
 					if(answer == merge) {
 						CLIENT.cmd("mercurial.merge", {directory: fileDirectory}, function resolveList(err, resp) {

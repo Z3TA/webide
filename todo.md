@@ -57,6 +57,10 @@ See if vumoviemaker can run in the editor
 todo
 ----
 
+bug in terminal:
+/home/Z/Projects/jzedit/client/plugin/terminal.js:463
+Uncaught TypeError: Cannot read property 'length' of undefined
+
 School signup: Se progress and usage statistics from team members
 
 
