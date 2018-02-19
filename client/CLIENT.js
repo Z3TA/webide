@@ -127,7 +127,7 @@ var CLIENT = {}; // Client object is global
 						delete callbackWaitList[json.id];
 					}
 					
-					else throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + callbackWaitList);
+					else throw new Error("Can not find id=" + json.id + " in callbackWaitList=" + JSON.stringify(callbackWaitList) + "\n" + JSON.stringify(json, null, 2));
 					// If the above happends, check to make sure the callback in the server command is only called once!
 					
 				}
