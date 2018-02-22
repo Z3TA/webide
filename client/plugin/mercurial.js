@@ -142,7 +142,7 @@
 				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
 					EDITOR.addTempMenuItem("Push", false, function() {
 						EDITOR.hideMenu();
-						push(status.rootDir);
+						mercurialPush(status.rootDir);
 					});
 				}
 				
@@ -730,9 +730,11 @@
 		
 	}
 	
-	function push(rootDir) {
+	function mercurialPush(fileDirectory) {
 		
-		CLIENT.cmd("mercurial.push", {directory: rootDir}, hgPush);
+		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
+		
+		CLIENT.cmd("mercurial.push", {directory: fileDirectory}, hgPush);
 		
 		function hgPush(err, resp) {
 			if(err) {
@@ -741,8 +743,8 @@
 				
 				if(authNeeded) {
 					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", rootDir, "Push", function authorized(username, password, save) {
-						if(username != null) CLIENT.cmd("mercurial.push", {directory: rootDir, user: username, pw: password, save: save}, hgPush);
+					showAuthDialog("Need authorization for Pushing changes to " + repoUrl + ": ", fileDirectory, "Push", function authorized(username, password, save) {
+						if(username != null) CLIENT.cmd("mercurial.push", {directory: fileDirectory, user: username, pw: password, save: save}, hgPush);
 					});
 					return;
 				}
@@ -1820,6 +1822,15 @@
 		commitKey.appendChild(document.createTextNode( EDITOR.getKeyFor(showCommitDialog) ));
 		commitKey.setAttribute("class", "key");
 		commit.appendChild(commitKey);
+		
+		var butPush = document.createElement("button");
+		butPush.appendChild(document.createTextNode("Push"));
+		butPush.setAttribute("title", "Upload local commits to remote repository");
+		butPush.setAttribute("class", "button half");
+		butPush.onclick = function() {
+			mercurialPush(rootDir);
+			}
+		div.appendChild(butPush);
 		
 		var butPull = document.createElement("button");
 		butPull.appendChild(document.createTextNode("Pull"));
