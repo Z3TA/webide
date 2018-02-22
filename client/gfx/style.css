@@ -1254,8 +1254,20 @@ width: 100%;
 	height: 5px;
 }
 
+div.group select {
+	border: 1px solid green;
+	}
 
+div.group {
+	display: inline-block;
+	padding: 2px;
+	vertical-align: middle;
+}
 
+.repoCommit .group.buttons {
+	border: 1px solid red;
+	max-width: 260px; /* many rows */
+}
 
 @keyframes flash
 {
@@ -1364,6 +1376,13 @@ width: 100%;
 		min-height: 32px;
 	}
 	
+}
+
+@media (max-width: 914px) {
+.repoCommit .group.buttons {
+	border: 1px solid yellow;
+	max-width: none; /* one long row */
+}
 }
 
 @media (max-width: 600px) {

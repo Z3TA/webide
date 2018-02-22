@@ -302,10 +302,8 @@
 		var div = document.createElement("div");
 		div.setAttribute("class", "repoCommit");
 		
-		var table = document.createElement("table"); // One table to rule them all!
-		
-		var tr = document.createElement("tr");
-		var td = document.createElement("td");
+		var group = document.createElement("div");
+		group.setAttribute("class", "group");
 		
 		fileSelect = document.createElement("select");
 		fileSelect.setAttribute("class", "file list");
@@ -313,32 +311,33 @@
 		fileSelect.setAttribute("title", "Select files");
 		fileSelect.setAttribute("multiple", "multiple");
 		
-		td = document.createElement("td");
-		td.appendChild(fileSelect);
-		tr.appendChild(td);
+		group.appendChild(fileSelect);
+		div.appendChild(group);
 		
+		
+		var group = document.createElement("div");
+		group.setAttribute("class", "group");
 		
 		var textarea = document.createElement("textarea");
 		textarea.setAttribute("cols", "50");
 		textarea.setAttribute("rows", "6");
 		textarea.setAttribute("placeholder", "Comments ...");
 		
-		td = document.createElement("td");
-		td.appendChild(textarea);
-		tr.appendChild(td);
+		group.appendChild(textarea);
+		div.appendChild(group);
 		
 		
-		td = document.createElement("td");
+		var group = document.createElement("div");
+		group.setAttribute("class", "group buttons");
+		
 		// ### Commit button
 		var commitButton = document.createElement("button");
 		commitButton.setAttribute("class", "button");
 		commitButton.appendChild(document.createTextNode("Commit changes"));
 		commitButton.onclick = mercurialCommit;
 		
-		td.appendChild(commitButton);
+		group.appendChild(commitButton);
 		
-		var br = document.createElement("br");
-		td.appendChild(br);
 		
 		// ### Commit & Push button
 		var commitAndPushButton = document.createElement("button");
@@ -346,10 +345,8 @@
 		commitAndPushButton.appendChild(document.createTextNode("Commit & Push"));
 		commitAndPushButton.onclick = commitAndPush;
 		
-		td.appendChild(commitAndPushButton);
+		group.appendChild(commitAndPushButton);
 		
-		var br = document.createElement("br");
-		td.appendChild(br);
 		
 		// ### Diff button
 		var diffButton = document.createElement("button");
@@ -367,10 +364,8 @@
 			mercurialDiff(rootDir, files);
 			};
 		
-		td.appendChild(diffButton);
+		group.appendChild(diffButton);
 		
-		tr.appendChild(td);
-		td = document.createElement("td");
 		
 		// ### Cancel button
 		var cancelButton = document.createElement("button");
@@ -380,10 +375,8 @@
 			hideCommitDialog();
 		};
 		
-		td.appendChild(cancelButton);
+		group.appendChild(cancelButton);
 		
-		var br = document.createElement("br");
-		td.appendChild(br);
 		
 		// ### Ignore button
 		var ignoreButton = document.createElement("button");
@@ -391,10 +384,8 @@
 		ignoreButton.appendChild(document.createTextNode("Ignore ..."));
 		ignoreButton.onclick = mercurialIgnore;
 		
-		td.appendChild(ignoreButton);
+		group.appendChild(ignoreButton);
 		
-		var br = document.createElement("br");
-		td.appendChild(br);
 		
 		// ### Delete button
 		var deleteButton = document.createElement("button");
@@ -402,13 +393,10 @@
 		deleteButton.appendChild(document.createTextNode("Delete"));
 		deleteButton.onclick = mercurialDelete;
 		
-		td.appendChild(deleteButton);
+		group.appendChild(deleteButton);
 		
-		tr.appendChild(td);
+		div.appendChild(group);
 		
-		table.appendChild(tr);
-		
-		div.appendChild(table);
 		
 		/*
 			inputrootDir = document.createElement("input");

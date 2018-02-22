@@ -38,14 +38,10 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+
 för att undvika att sista raden slutar med en tab eller space:
 Om sista raden blir indenterad, infoga en sluttag där (för den senaste inmatadew taggen eller måsvingen)
 Om sista raden blir minus-indenterad, ta bort samma sluttagg eller måsvinge från sista raden.
-
-
-Version control widget: push
-
-Able to push to repo! (without commit & push)
 
 
 implementing jsql example on webide.se
