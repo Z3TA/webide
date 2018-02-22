@@ -153,6 +153,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(typeof directory != "string") throw new Error("directory=" + directory + " (" + typeof directory + ") needs to be a string!");
+	
 	directory = UTIL.trailingSlash(json.directory);
 	
 	var localDirectory = user.translatePath(directory);
@@ -163,8 +164,12 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	var execFile = require('child_process').execFile;
 	
+	console.log("hg.status checkDir: directory=" + directory);
+	
 	// Make sure we are not checking in a parent dir (that the user don't have acccess to)
 	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory, virtualRootDir) {
+		
+		console.log("hg.status checkDir answer: rootDir=" + rootDir);
 		
 		if(err) return callback(err);
 		
@@ -1452,6 +1457,12 @@ function checkDir(user, virtualPath, callback) {
 			if(dirList.length > 0) {
 				dir = dirList.pop();
 				findDotHg(dir, findDotHgCallback)
+			}
+			else {
+				// No .hg folder found!
+				var err = new Error("No .hg folder found!");
+				err.code = "NO_HG_FOLDER";
+				findDotHgCallback(err);
 			}
 			
 		});

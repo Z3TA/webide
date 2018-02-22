@@ -123,11 +123,12 @@
 		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
 				if(err) {
 				console.log("mercurial.status error: " + err.message);
-				// Most likely no local repository found
+				// Most likely no local repository found !?
+				//alertBox(err.message);
 			}
 				else {
 				
-				console.log("mercurial.status : " + JSON.stringify(status));
+				console.log("mercurial.status : " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
 				
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
