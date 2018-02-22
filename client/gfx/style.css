@@ -1376,7 +1376,7 @@ div.group {
 	
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1315px) {
 	div.group, .repoCommit .group.buttons {
 	border: 0px solid yellow;
 	max-width: none; /* one long row */
