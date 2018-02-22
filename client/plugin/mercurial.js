@@ -817,7 +817,9 @@
 				if(selected) option.setAttribute("selected", "selected");
 				
 				option.appendChild(document.createTextNode(filePath));
-				//option.onclick = clickFile;
+				option.ondblclick = function openFile() {
+					EDITOR.openFile(fullPath);
+				};
 				
 				fileSelect.appendChild(option);
 			}
