@@ -12,6 +12,9 @@ var benchmarkCharacterCode = 190;
 var inputCount = 0;
 var menuVisibleOnce = false;
 
+// Don't show the firendly message on how to show the menu if the menu is disabled
+if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1) menuVisibleOnce = true;
+
 // List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
 EDITOR.supportedFiles = [
@@ -2083,7 +2086,10 @@ callback(err);
 		}
 		
 		EDITOR.showMenu = function(posX, posY, clickEvent) {
-			if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
+			
+		if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) return new Error("Menu is disabled by query string!");;
+		
+		if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 			
 			clearSelection();

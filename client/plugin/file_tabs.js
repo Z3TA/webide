@@ -13,6 +13,9 @@
 	
 	//var fileList = []; // Temporary array copy of opened files!?
 	
+	//if(QUERY_STRING["embed"]) return;
+	
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) return;
 	
 	EDITOR.on("start", file_tabs);
 	

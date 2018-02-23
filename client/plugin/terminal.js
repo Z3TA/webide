@@ -12,7 +12,7 @@
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
 			
-			menuItem = EDITOR.addMenuItem("Terminal", startTerminal);
+			menuItem = EDITOR.addMenuItem("Terminal", startTerminalFromMenu);
 			
 			CLIENT.on("terminal", terminalMessage);
 			
@@ -43,8 +43,12 @@
 		}
 	});
 	
+	function startTerminalFromMenu(file, combo, character, charCode, direction) {
+		startTerminal();
+	}
+	
 	function startTerminalOnLogin() {
-		startTerminal(function startTerminalCallback(err, file) {
+		startTerminal(function (err, file) {
 			if(err) return alertBox(err.message);
 			
 			// Wait for other plugins like reopenFiles to do it's thing
@@ -117,6 +121,9 @@
 			file.parsed = null;
 			
 			terminalFiles.push(file);
+			
+			console.log(typeof callback)
+			console.log(callback);
 			
 			if(callback) callback(null, file);
 			
