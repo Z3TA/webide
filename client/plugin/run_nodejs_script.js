@@ -52,8 +52,9 @@
 		
 		var text = file.text;
 		
-		if(text.indexOf("document.getElementOf") != -1) return false;
+		if(text.indexOf("document.getElementById") != -1) return false;
 		if(text.indexOf("window.onload") != -1) return false;
+		
 		
 		return true;
 		
