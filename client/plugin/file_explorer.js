@@ -12,6 +12,8 @@
 	
 	"use strict;"
 	
+	//if(QUERY_STRING["embed"]) return;
+	
 	var fileExplorerFolders;
 	var fileExplorerWrap;
 	var leftColumn, rightColumn;	

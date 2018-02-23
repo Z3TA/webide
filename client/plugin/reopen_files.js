@@ -1,6 +1,7 @@
-(function() {"use strict";
+(function() {
+	
+	"use strict";
 		
-
 	/*
 		1. Open up the files from last time, when opening the EDITOR.
 		
@@ -13,6 +14,9 @@
 	
 	*/
 
+	if(QUERY_STRING["embed"]) return;
+	
+	
 	var fileDelimiter = ";"; // Used to separate the file paths in the openedFiles string
 
 	var saveStateInterval = 5000;

@@ -5,6 +5,8 @@
 	*/
 	"use strict";
 	
+	if(QUERY_STRING["embed"]) return;
+	
 	// The file is not available until the user has logged in
 	CLIENT.on("loginSuccess", openWelcome);
 	
