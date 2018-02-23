@@ -136,7 +136,7 @@
 				if(!versionControlWidget.visible) EDITOR.addTempMenuItem("Version Control ...", false, showVersionControlWidget);
 				
 				
-				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0 || status.untracked.length != 0) {
+				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0) {
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
 				}
 				
