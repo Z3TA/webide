@@ -2070,6 +2070,9 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+A separate window for HTML widgets and control. 
+VB-like drag and drop headers et.al elements into either the code-area or WYSIWYG area.
+
 Opening images (png, jpg) shows the rendered image with img tools (crop and thumbnail frame)
 
 Ctrl + Up/down = Move between blocks, go to next emty line in the same block depth

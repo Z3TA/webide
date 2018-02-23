@@ -140,6 +140,8 @@
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
 				}
 				
+				/*
+					
 				if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
 					EDITOR.addTempMenuItem("Push", false, function() {
 						EDITOR.hideMenu();
@@ -163,6 +165,7 @@
 				var historyMenyItem = EDITOR.addTempMenuItem(showHistoryString, true, showVersionHistory);
 				if(versionHistoryVisible) EDITOR.updateMenuItem(historyMenyItem, versionHistoryVisible, showHistoryString, hideVersionHistory);
 				else EDITOR.updateMenuItem(historyMenyItem, versionHistoryVisible, showHistoryString, showVersionHistory);
+				*/
 				
 				}
 		});
