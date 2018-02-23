@@ -71,8 +71,6 @@ terminal emulator
 
 Issue when copying text rows with lf into a file with crlf line breaks !
 
-height of menu with temp entires (the bottom of the menu is below the page)
-
 See last changed and file size on file when hovering on it in file explorer !?
 
 Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?

@@ -923,6 +923,7 @@ div.gotoFile li:hover {
 	box-shadow: 0 1px 10px ThreeDShadow;
 	max-width: 90%;
 	max-height: 100%;
+	min-width: 150px;
 	overflow-x: hidden;
 	overflow-y: auto;
 	

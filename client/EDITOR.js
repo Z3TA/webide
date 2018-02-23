@@ -11,6 +11,7 @@ var benchmarkCharacter = ".";
 var benchmarkCharacterCode = 190;
 var inputCount = 0;
 var menuVisibleOnce = false;
+var menuIsFullScreen = false;
 
 // Don't show the firendly message on how to show the menu if the menu is disabled
 if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1) menuVisibleOnce = true;
@@ -2048,17 +2049,33 @@ callback(err);
 			
 			//tempItems.insertBefore(menuElement, tempItems.firstChild);
 			
-			return li;
-			
+		if(!menuIsFullScreen) {
+		// Resize the menu
+		var menu = document.getElementById("canvasContextmenu");
+		var offsetHeight = parseInt(menu.offsetHeight); // height of the element including vertical padding and borders
+		var offsetWidth = parseInt(menu.offsetWidth);
+		var itemHeight = parseInt(li.offsetHeight);
+		var posY = parseInt(menu.style.top);
+		
+		console.log("itemHeight=" + itemHeight);
+		
+			if(posY > (EDITOR.height - offsetHeight)) {
+			posY = EDITOR.height - offsetHeight;
+				menu.style.top = posY + "px";
+			}
 		}
 		
+		return li;
 		
-		EDITOR.hideMenu = function() {
-			
+	}
+	
+	
+	EDITOR.hideMenu = function() {
+		
 		console.log(UTIL.getStack("Hide menu"));
-			
-			var menu = document.getElementById("canvasContextmenu");
-			
+		
+		var menu = document.getElementById("canvasContextmenu");
+		
 		if(menu.style.visibility == "hidden") {
 			console.warn("Menu already hidden. No need to hide it!");
 			return;
@@ -2112,6 +2129,7 @@ callback(err);
 				EDITOR.eventListeners.showMenu[i].fun(EDITOR.currentFile, posX, posY, clickEvent);
 			}
 			
+		
 			// Make sure it fits on the screen!!
 			/*
 				setTimeout(function() { // Wait for div content to load
@@ -2175,9 +2193,13 @@ callback(err);
 				if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 				clearSelection();
 				
-				if(!EDITOR.touchDown) {
-					giveUp();
-					
+			var offsetHeight = parseInt(menu.offsetHeight);
+			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
+			
+			if(!EDITOR.touchDown) {
+				console.log("There where no touch down!");
+				giveUp();
+			
 					if(offsetHeight > EDITOR.height || offsetWidth*2 > EDITOR.width) {
 						// Hide everything besides the menu
 						fullScreenMenu(menu);
@@ -2186,11 +2208,16 @@ callback(err);
 						menu.style.top = posY + "px";
 						menu.style.left = posX + "px";
 					}
-				}
 			}
-			
-			function giveUp() {
-				clearInterval(interval);
+			else {
+				console.log("There was a touch down!");
+				//menu.style.top = posY + "px";
+				//menu.style.left = posX + "px";
+			}
+		}
+		
+		function giveUp() {
+			clearInterval(interval);
 				clearTimeout(timeout);
 			}
 			
@@ -6333,6 +6360,8 @@ console.warn(err.message);
 			menu.style.overflow="auto";
 			EDITOR.scrollingEnabled = true;
 			
+		menuIsFullScreen = true;
+		
 			EDITOR.addTempMenuItem("Hide menu", function() {
 				EDITOR.hideMenu();
 			});
@@ -6351,7 +6380,10 @@ console.warn(err.message);
 			menu.style.height="";
 			menu.style.overflow="";
 			EDITOR.scrollingEnabled = false;
+		menuIsFullScreen = false;
 			EDITOR.resizeNeeded();
+		
+		
 		}
 		
 	})();
