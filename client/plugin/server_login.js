@@ -99,8 +99,8 @@
 			// Attempt to login ...
 			
 			if(localStorage) {
-				var userValue = localStorage.getItem("editorServerUser") || DEFAULT_USERNAME;
-				var pwValue = localStorage.getItem("editorServerPw") || DEFAULT_PASSWORD;
+				var userValue = QUERY_STRING["login"] || localStorage.getItem("editorServerUser") || DEFAULT_USERNAME;
+				var pwValue = QUERY_STRING["pw"] || localStorage.getItem("editorServerPw") || DEFAULT_PASSWORD;
 			}
 			
 			if(userValue && pwValue) {

@@ -24,6 +24,10 @@
 			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
 			EDITOR.on("fileClose", terminalCloseFile);
 			
+			if(QUERY_STRING["start"] && QUERY_STRING["start"].indexOf("terminal") != -1) {
+				CLIENT.on("loginSuccess", startTerminalOnLogin);
+			} 
+			
 		},
 		unload: function unloadTerminal() {
 			
@@ -34,10 +38,23 @@
 			EDITOR.removeEvent("afterResize", resizeTerminals);
 			EDITOR.removeEvent("keyDown", terminalKeyDown);
 			EDITOR.removeEvent("fileClose", terminalCloseFile);
+			
+			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 		}
 	});
 	
-	function startTerminal() {
+	function startTerminalOnLogin() {
+		startTerminal(function startTerminalCallback(err, file) {
+			if(err) return alertBox(err.message);
+			
+			// Wait for other plugins like reopenFiles to do it's thing
+			setTimeout(function() {
+			EDITOR.showFile(file);
+			}, 1000);
+		});
+	}
+	
+	function startTerminal(startTerminalCallback) {
 		
 		EDITOR.hideMenu();
 		
@@ -46,10 +63,12 @@
 		var rows = EDITOR.view.visibleRows;
 		
 		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows}, function terminalOpened(err, term) {
-			if(err) return alertBox(err.message);
-			
+			if(err) {
+				if(startTerminalCallback) startTerminalCallback(err);
+				else return alertBox(err.message);
+			}
 			// We might get terminal data before we get the open callback!
-			openTerminalFile("terminal" + term.id);
+			openTerminalFile("terminal" + term.id, startTerminalCallback);
 			
 		});
 	}

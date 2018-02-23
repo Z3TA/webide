@@ -19,6 +19,7 @@ var CLIENT = {}; // Client object is global
 	var callbackWaitList = {};
 	var cache = {};
 	var connection = {readyState: 0};
+	var loggedIn = null;
 	
 	CLIENT.connected = false;
 	
@@ -231,6 +232,8 @@ var CLIENT = {}; // Client object is global
 		
 		eventListeners[ev].push(cb);
 		
+		if(ev == "loginSuccess" && loggedIn) cb(loggedIn);
+		
 	}
 	
 	CLIENT.fireEvent = function fireEvent(ev, data) {
@@ -278,6 +281,7 @@ var CLIENT = {}; // Client object is global
 	CLIENT.on("loginSuccess", function(json) {
 		if(json.cId == undefined) throw new Error("Did not get cId from loginSuccess event!");
 		CLIENT.connectionId = json.cId;
+		loggedIn = json;
 	});
 	
 	
