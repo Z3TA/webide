@@ -5728,6 +5728,8 @@ console.warn(err.message);
 		EDITOR.lastElementWithFocus = document.activeElement;
 		EDITOR.touchDown = true;
 		
+		window.focus(); // Enable capturing key events if we are in an iframe
+		
 		var mouse = getMousePosition(mouseDownEvent);
 		var mouseX = mouse.x;
 		var mouseY = mouse.y;
