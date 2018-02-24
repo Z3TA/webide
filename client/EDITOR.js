@@ -5328,14 +5328,14 @@ throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.even
 			
 			EDITOR.interact("keyPressed", keyPressEvent);
 			
-			// Prevent Firefox's quick search (/ slash)
-			if(charCode == 47 && browser == "Firefox") keyPressEvent.preventDefault();
+		
+		// Prevent Firefox's quick search (/ slash)
+			if(EDITOR.input && charCode == 47) keyPressEvent.preventDefault();
 			
-		// Prevent scrolling down when hitting space in Firefox
-		if(EDITOR.input && charCode == 32) {
-			keyPressEvent.preventDefault();
-			
-		}
+			// Prevent scrolling down when hitting space in Firefox
+			if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
+				
+		
 		}
 		
 		function resizeAndRender() {
