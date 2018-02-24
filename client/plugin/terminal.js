@@ -16,9 +16,6 @@
 			
 			CLIENT.on("terminal", terminalMessage);
 			
-			var keyEscape = 27;
-			EDITOR.bindKey({desc: "Send ETX (end of text) to terminal (Instead of Ctrl+C which is used for copying)", fun: terminalEndOfText, charCode: keyEscape, combo: 0});
-			
 			EDITOR.on("afterResize", resizeTerminals);
 			EDITOR.on("keyPressed", terminalKeyPressed);
 			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
