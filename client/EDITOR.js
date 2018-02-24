@@ -5193,6 +5193,8 @@ break;
 		function keyPressed(keyPressEvent) {
 			keyPressEvent = keyPressEvent || window.event; 
 			
+		//keyPressEvent.preventDefault();
+		
 		// Firefox and Safari go here before calling copy/paste/cut events
 			if(nativeCopy || nativePaste || nativeCut) {
 				nativeCopy = false;
@@ -5326,9 +5328,14 @@ throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.even
 			
 			EDITOR.interact("keyPressed", keyPressEvent);
 			
-			// Prevent Firefox's quick search
+			// Prevent Firefox's quick search (/ slash)
 			if(charCode == 47 && browser == "Firefox") keyPressEvent.preventDefault();
 			
+		// Prevent scrolling down when hitting space in Firefox
+		if(EDITOR.input && charCode == 32) {
+			keyPressEvent.preventDefault();
+			
+		}
 		}
 		
 		function resizeAndRender() {
@@ -5346,6 +5353,8 @@ throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.even
 			*/
 			keyDownEvent = keyDownEvent || window.event;
 			
+		//keyDownEvent.preventDefault();
+		
 			var charCode = keyDownEvent.charCode || keyDownEvent.keyCode;
 			var character = String.fromCharCode(charCode);
 			var combo = getCombo(keyDownEvent);
@@ -5569,6 +5578,7 @@ console.warn(err.message);
 			}
 			
 		lastKeyDown = charCode;
+		
 		
 		if(preventDefault) {
 				//alert("Preventing default browser action!");
