@@ -921,6 +921,8 @@ file.insertLineBreak();
 		
 		console.log("key pressed: " + character);
 		
+		if(!EDITOR.input) return true;
+		
 		CLIENT.cmd("terminal.write", {id: id, data: character}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});
@@ -934,6 +936,8 @@ file.insertLineBreak();
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
 		console.log("key down: " + character + " (" + code + ")");
+		
+		if(!EDITOR.input) return true;
 		
 		var id = file.path.match(reTerm)[1];
 		var data;
