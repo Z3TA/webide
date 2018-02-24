@@ -331,6 +331,8 @@
 		
 		//if(lineNr == undefined) lineNr = 0;
 		
+		if(!gotoList) return console.warn("gotoList not available!");
+		
 		var html = filePath;
 		for (var i=0; i<matchArr.length; i++) {
 			html = html.replace(matchArr[i], "<b>" + matchArr[i] + "</b>");
@@ -608,6 +610,8 @@
 	
 	function gotoFileProgressStatus(status) {
 		console.log("gotoFileProgressStatus: " + JSON.stringify(status));
+		
+		if(!progressBar) return console.warn("Progress bar not loaded!");
 		
 		// Whatever gives the highest percentage
 		if(status.totalFoldersSearched / status.totalFoldersToSearch > status.found / status.maxResults) {
