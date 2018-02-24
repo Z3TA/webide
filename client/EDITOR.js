@@ -2104,7 +2104,7 @@ callback(err);
 		
 		EDITOR.showMenu = function(posX, posY, clickEvent) {
 			
-		if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) return new Error("Menu is disabled by query string!");;
+		if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1) return new Error("Menu is disabled by query string!");;
 		
 		if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 			if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
