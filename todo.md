@@ -38,6 +38,17 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+I have now figured out why some files end up with a tab at EOF.
+It's because of unlocsed html tags or {} angel brackets.
+
+Auto insert } when typing { if file.parsed.blockMatch == true
+
+Auto insert </close> tag when typing an > if:
+1) The line has an even < and > count
+2) It's not a closing tag
+3) There are an uneven amount of opened and closed tags
+4) The tag just opened does not have a matching close tag and don't end with />
+
 
 för att undvika att sista raden slutar med en tab eller space:
 Om sista raden blir indenterad, infoga en sluttag där (för den senaste inmatadew taggen eller måsvingen)
