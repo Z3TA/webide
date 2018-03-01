@@ -1586,11 +1586,56 @@
 		
 		*/
 		
-		var cancel = document.createElement("button");
-		cancel.setAttribute("class", "button");
-		cancel.innerText = "Cancel";
-		cancel.onclick = hideVersionHistory;
-		div.appendChild(cancel);
+		var butCancel = document.createElement("button");
+		butCancel.setAttribute("class", "button");
+		butCancel.innerText = "Cancel";
+		butCancel.onclick = hideVersionHistory;
+		div.appendChild(butCancel);
+		
+		var butDiff = document.createElement("button");
+		butDiff.setAttribute("class", "half button");
+		butDiff.innerText = "See Changes";
+		butDiff.setAttribute("title", "Compare all changes in selected revision with the revison before it.");
+		butDiff.onclick = function diffClick() {
+			
+			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			
+			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: selectedRev.rev}, function hgDiff(err, resp) {
+				
+				if(err) return alertBox(err.message);
+				
+				var text = resp.text;
+				var fileName = "rev" + selectedRev.rev + ".diff";
+				EDITOR.openFile(fileName, text, function(err, file) {
+					if(err) alertBox(err.message);
+				});
+			});
+		};
+		div.appendChild(butDiff);
+		
+		var butDiffFile = document.createElement("button");
+		butDiffFile.setAttribute("class", "half button");
+		butDiffFile.innerText = "See Changes to selected file(s)";
+		butDiff.setAttribute("title", "Compare selected file(s) in selected revision with the revison before it.");
+		butDiffFile.onclick = function diffFileClick() {
+			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
+			var filePaths = getSelects(fileSelEl);
+			CLIENT.cmd("mercurial.diff", {directory: fileDirectory, changes: selectedRev.rev, files: filePaths}, function hgDiff(err, resp) {
+				
+				if(err) return alertBox(err.message);
+				
+				var text = resp.text;
+				var fileName = "hg.diff";
+				if(filePaths.length == 1) fileName = filePaths[0] + "-rev" + selectedRev.rev + ".diff";
+				EDITOR.openFile(fileName, text, function(err, file) {
+					if(err) alertBox(err.message);
+				});
+			});
+		};
+		div.appendChild(butDiffFile);
 		
 		return div;
 		
@@ -1664,6 +1709,7 @@
 				td = document.createElement("td");
 				if(changes[i].files) {
 					sel = document.createElement("select");
+					sel.setAttribute("id", "rev_" + changes[i].rev + "_file_sel");
 						for (var j=0; j<changes[i].files.length; j++) {
 							opt = document.createElement("option");
 							opt.innerText = changes[i].files[j];
@@ -1689,7 +1735,10 @@
 				
 				if(lastActiveHistoryTableRow) lastActiveHistoryTableRow.setAttribute("class", "");
 				
-				var rev = parseInt(tr.id);
+				var rev = parseInt(tr.id.slice(3)); // remove rev from rev123
+				
+				if(!changes.hasOwnProperty(rev)) throw new Error("Unable to find rev=" + rev + " in changes! tr.id=" + tr.id);
+				
 				selectedRev = changes[rev];
 				tr.setAttribute("class", "selected");
 				
@@ -2266,6 +2315,19 @@ if(err) return alertBox(err.message);
 	}
 	
 	
+	function getSelects(selEl) {
+		// Returns an array of selected values from select element
+		if(!selEl) throw new Error("selEl=" + selEl);
+		var arr = [];
+		var opt = selEl.options;
+			for(var i=0, val; i<opt.length; i++) {
+				if(opt[i].selected) {
+					val = opt[i].value;
+				if(arr.indexOf(val) == -1) arr.push(val);
+					}
+			}
+		return arr;
+		}
 	
 	
 })();
