@@ -2058,42 +2058,29 @@ console.log("mercurial.status : " + JSON.stringify(status));
 					
 					console.log("pull resp: " + JSON.stringify(resp, null, 2));
 					
-					
-					var changes = resp.changes;
+					var updatedFiles = resp.files;
 					var repoUrl = resp.repo;
 					var notSaved = [];
 					var changedFiles = 0;
 					
 					if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
 					
-					if(changes === null || changes === 0) {
-						alertBox("No incoming changes from " + repoUrl);
-						//console.log("Mercurial: No incoming changes detected!")
-						return; // No incoming changes
+					var msg = "";
+					//added 2 changesets with 1 changes to 1 files
+					
+					if(resp.changesets) {
+						var msg = "Finished downloading " + resp.changesets + " changesets with " + resp.changes + 
+						" changes to " + resp.fileCount + " files from " + repoUrl;
+					}
+					else if(updatedFiles.length > 0) {
+						if(msg) msg += "\n";
+						msg += updatedFiles.length + " files are ready to be updated (click update)";
+					}
+					else if(updatedFiles.length == 0) {
+						if(msg) msg += "\n";
+						msg += "(Nothing to update)"
 					}
 					
-					console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
-					
-					for(var i=0; i<changes.length; i++) {
-						var files = Object.keys(changes[i].files);
-						changedFiles += files.length;
-						for(var j=0; j<files.length; j++) {
-							
-							var filePath = files[j];
-							
-							if(EDITOR.files.hasOwnProperty(filePath)) {
-								// We only care about files opened by the editor
-							
-							var changedFile = EDITOR.files[filePath];
-							
-							if(!changedFile.isSaved) notSaved.push(filePath);
-							
-						}
-					}
-				}
-				
-				var msg = "Finished downloading " + changes.length + " changes to " + changedFiles + " files from " + repoUrl;
-				
 				alertBox(msg);
 				}
 		}
@@ -2139,14 +2126,6 @@ if(err) return alertBox(err.message);
 				var untrackedUpdated = [];
 				
 				if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
-				
-					if(changes === null || changes === 0) {
-					alertBox("No incoming changes from " + repoUrl);
-					//console.log("Mercurial: No incoming changes detected!")
-					return; // No incoming changes
-				}
-				
-				console.log("Mercurial: Incoming changes: " + JSON.stringify(changes, null, 2));
 				
 				checkFiles: for(var i=0; i<changes.length; i++) {
 					var files = Object.keys(changes[i].files);
@@ -2216,6 +2195,182 @@ if(err) return alertBox(err.message);
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
+		// Check what revision we are on, and if we need to update
+		CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, resp) {
+if(err) throw err;
+			
+			var summary = resp.summary;
+			
+			var currentRevision = parseInt(summary.parent.slice(0, summary.parent.indexOf(":")));
+			
+			if(isNaN(currentRevision)) throw new Error("resp.summary=" + JSON.stringify(resp.summary));
+			
+			if(summary.update == "(current)") return alertBox("Nothing to update!");
+			
+			// Check status of current revision to see if anything needs to be commited before updating
+			CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, status) {
+if(err) throw err;
+
+				if(status.modified.length > 0 || status.added.length > 0 || status.removed.length > 0) {
+					var msg = "You should commit before updating, or the changes to the following file(s) might be lost:";
+					if(status.modified.length > 0) msg += "\nModified: " + status.modified.join(", ");
+					if(status.added.length > 0) msg += "\nAdded: " + status.added.join(", ");
+					if(status.removed.length > 0) msg += "\nRemoved: " + status.removed.join(", ");
+					
+					var optCommit = "I'll commit";
+					var optDoItAnyway = "Update anyway";
+					var optAbort = "Abort";
+					
+					confirmBox(msg, [optCommit, optDoItAnyway, optAbort], function(answer) {
+						
+						if(answer == optCommit) showCommitDialog();
+						else if(answer == optDoItAnyway) checkEditorFiles();
+						else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
+						
+					});
+						}
+				else checkEditorFiles();
+				
+			});
+			
+		});
+		
+		function checkEditorFiles() {
+			
+			// Get info about the pulled updates. eg. what changed from current revision to latest revision
+CLIENT.cmd("mercurial.log", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, changes) {
+if(err) throw err;
+
+// Check status between current (.) revision and latested (tip) revision
+CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, resp) {
+if(err) throw err;
+
+var affectedFiles = resp.modified.concat(resp.removed);
+var repoUrl = resp.repo;
+var ask = false;
+var notSaved = [];
+var remoteUpdated = [];
+var untrackedUpdated = [];
+
+if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+
+// Check all files opened in the editor to see if they will be affected by the update
+var filePath;
+var msg = "";
+for(var pathOfOpenFile in EDITOR.files) {
+if(EDITOR.files[pathOfOpenFile].isSaved) continue;
+else {
+filePath = pathOfOpenFile.replace(rootDir, "");
+							msg = "";
+if(resp.modified.indexOf(filePath) != -1) {
+msg = filePath + " has been modified!";
+								}
+if(resp.added.indexOf(filePath) != -1) {
+msg = filePath + " has been replaced!";
+}
+if(resp.removed.indexOf(filePath) != -1) {
+msg = filePath + " has been removed!";
+}
+
+if(msg) {
+// Ask for one file at a time
+								return askUser(msg);
+}
+							}
+						}
+
+					function askUser(msg) {
+						var optUpdate = "Update file";
+var optSaveCommit = "Save my changes and Commit";
+var optRevertLocal = "Ignore my changes and Update";
+var optAbort = "Abort";
+
+confirmBox(msg, [], function(answer) {
+
+if(answer == optDoNothing) return;
+else if(answer == optRevertLocal || answer == optUpdate) {
+mercurialUpdate(dir, true);
+}
+else if(answer == optSaveCommit) {
+EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
+showCommitDialog();
+});
+}
+else throw new Error("Unknown answer=" + answer);
+
+});
+						}
+						
+						
+						checkFiles: for(var i=0; i<changes.length; i++) {
+							var files = Object.keys(changes[i].files);
+							for(var j=0; j<files.length; j++) {
+								
+								var filePath = files[j];
+								
+								if(EDITOR.files.hasOwnProperty(filePath)) {
+									// We only care about files opened by the editor
+									
+									var changedFile = EDITOR.files[filePath];
+									
+									if(!changedFile.isSaved) notSaved.push(filePath);
+									
+									if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
+									
+									if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
+									
+									var msg = "File has been updated:\n"  + changedFile.path + "\n\
+									Repo: " + repoUrl + "\n\
+									Date: " + changes[i].date + "\n\
+									User: " + changes[i].user + "\n\n<i>" + changes[i].summary + "</i>";
+									
+									var optUpdate = "Update file";
+									var optDoNothing = "Do nothing";
+									var optSaveCommit = "Save my changes and Commit";
+									var optRevertLocal = "Ignore my changes and Update"
+									
+									var options;
+									
+									if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
+									else options = [optDoNothing, optUpdate];
+									
+									ask = true;
+									
+									confirmBox(msg, options, function(answer) {
+										
+										if(answer == optDoNothing) return;
+										else if(answer == optRevertLocal || answer == optUpdate) {
+											mercurialUpdate(dir, true);
+										}
+										else if(answer == optSaveCommit) {
+											EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
+												showCommitDialog();
+											});
+										}
+										else throw new Error("Unknown answer=" + answer);
+										
+									});
+								}
+							}
+						}
+						
+						if(!ask) {
+							console.log("Mercurial: No apparent conflict. Updating!")
+							pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
+						}
+						
+					});
+
+});
+
+});
+			
+		}
+		
+		
+		
+		function doTheUpdate() {
+		
 		CLIENT.cmd("mercurial.update", {directory: fileDirectory}, function hgUpdate(err, resp) {
 					if(err) {
 						throw err;
@@ -2270,9 +2425,9 @@ if(err) return alertBox(err.message);
 					}
 					
 				});
-				
-			}
-			
+		}
+	}
+	
 	function figureOutDirectoryIfUndefined(fileDirectory) {
 		if(fileDirectory != undefined) return fileDirectory;
 		

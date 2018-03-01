@@ -173,65 +173,69 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		if(err) return callback(err);
 		
-		execFile("hg", ["status"], { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
-			
-			console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " ");
-			
-			if(err) callback(err);
-			else if(stderr) callback(stderr);
-			else {
+		var args = ["status"];
+		
+		if(json.rev) args.push("--rev " + json.rev);
+		
+		execFile("hg", args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 				
-				var modified = [];
-				var added = [];
-				var removed = [];
-				var missing = [];
-				var untracked = [];
+				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " ");
 				
-				var files;
-				
-				if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
-				else files = stdout.split("\n");
-				
-				/*
-					The codes used to show the status of files are:
+				if(err) callback(err);
+				else if(stderr) callback(stderr);
+				else {
 					
-					M = modified
-					A = added
-					R = removed
-					C = clean
-					! = missing (deleted by non-hg command, but still tracked)
-					? = not tracked
-					I = ignored
-					= origin of the previous file (with --copies)
+					var modified = [];
+					var added = [];
+					var removed = [];
+					var missing = [];
+					var untracked = [];
 					
-				*/
-				
-				for(var attr, path, i=0; i<files.length-1; i++) {
-					attr = files[i].substring(0, files[i].indexOf(" "));
-					path = files[i].substring(attr.length + 1);
+					var files;
 					
-					if(attr == "M") modified.push(path);
-					else if(attr == "A") added.push(path);
-					else if(attr == "R") removed.push(path);
-					else if(attr == "!") missing.push(path);
-					else if(attr == "?") untracked.push(path);
-					else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
+					if(stdout.indexOf("\r\n") != -1) files = stdout.split("\r\n");
+					else files = stdout.split("\n");
+					
+					/*
+						The codes used to show the status of files are:
+						
+						M = modified
+						A = added
+						R = removed
+						C = clean
+						! = missing (deleted by non-hg command, but still tracked)
+						? = not tracked
+						I = ignored
+						= origin of the previous file (with --copies)
+						
+					*/
+					
+					for(var attr, path, i=0; i<files.length-1; i++) {
+						attr = files[i].substring(0, files[i].indexOf(" "));
+						path = files[i].substring(attr.length + 1);
+						
+						if(attr == "M") modified.push(path);
+						else if(attr == "A") added.push(path);
+						else if(attr == "R") removed.push(path);
+						else if(attr == "!") missing.push(path);
+						else if(attr == "?") untracked.push(path);
+						else throw new Error("Unknown status attr=" + attr + " for path=" + path + "\nfile=" + files[i]);
+					}
+					
+					var resp = {
+						modified: modified,
+						added: added,
+						removed: removed,
+						missing: missing,
+						untracked: untracked, 
+						rootDir: virtualRootDir
+					}
+					
+					callback(null, resp);
+					
 				}
-				
-				var resp = {
-					modified: modified,
-					added: added,
-					removed: removed,
-					missing: missing,
-					untracked: untracked, 
-					rootDir: virtualRootDir
-				}
-				
-				callback(null, resp);
-				
-			}
+			});
 		});
-	});
 }
 
 
@@ -596,8 +600,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				if(matchPull) {
 					resp.changesets = parseInt(matchPull[1]);
 					resp.changes = parseInt(matchPull[2]);
-					
 					fileCount = parseInt(matchPull[3]);
+					resp.fileCount = fileCount;
 				}
 				else if(noChanges) {
 					// for example when running hg pull again
@@ -1146,6 +1150,36 @@ MERCURIAL.heads = function hgheads(user, json, callback) {
 	});
 }
 
+MERCURIAL.head = function hghead(user, json, callback) {
+	// Get the current head(s) (latest revision)
+	
+	var directory = UTIL.trailingSlash(json.directory);
+	
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var execFile = require('child_process').execFile;
+		execFile("hg", ["head", "--Tjson"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+			
+			console.log("hg head stderr=" + stderr);
+			console.log("hg head stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			try {
+				var heads = JSON.parse(stdout);
+			}
+			catch(err) {
+				return callback(new Error("Unable to parse heads: " + stdout));
+			}
+			
+			callback(null, {heads: heads});
+			
+		});
+	});
+}
+
 MERCURIAL.reponame = function reponame(user, json, callback) {
 	
 	var directory = UTIL.trailingSlash(json.directory);
@@ -1199,49 +1233,53 @@ var directory = json.directory;
 	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
 		if(err) return callback(err);
 		
-		var spawn = require('child_process').spawn;
-		var log = spawn("hg", ['log', "-v", "-Tjson",], {cwd: rootDir, env: execFileOptions.env, shell: false});
-		var stdout = "";
-		var stderr = "";
+		var args = ['log', "-v", "-Tjson"];
 		
-		log.stdout.on('data', function logStdout(data) {
-			stdout += data;
-		});
+		if(json.rev != undefined) args.push("--rev " + json.rev);
 		
-		log.stderr.on('data', function logStderr(data) {
-			stderr += data;
-		});
-		
-		log.on('error', function logError(err) {
-			//console.log("stdout=" + stdout);
-			//console.log("stderr=" + stderr);
-			if(callback) callback(err);
-			callback = null;
-		});
-		
-		log.on('close', function logDataRecived(exitCode) {
-			//console.log("stdout=" + stdout);
-			//console.log("stderr=" + stderr);
-			//console.log("exitCode=" + exitCode);
+			var spawn = require('child_process').spawn;
+		var log = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+			var stdout = "";
+			var stderr = "";
 			
-			if(exitCode || stderr) {
-				var err = new Error(stderr);
-				err.code = exitCode;
+			log.stdout.on('data', function logStdout(data) {
+				stdout += data;
+			});
+			
+			log.stderr.on('data', function logStderr(data) {
+				stderr += data;
+			});
+			
+			log.on('error', function logError(err) {
+				//console.log("stdout=" + stdout);
+				//console.log("stderr=" + stderr);
 				if(callback) callback(err);
 				callback = null;
-				return;
-			}
+			});
 			
-			try {
-				var revisions = JSON.parse(stdout);
+			log.on('close', function logDataRecived(exitCode) {
+				//console.log("stdout=" + stdout);
+				//console.log("stderr=" + stderr);
+				//console.log("exitCode=" + exitCode);
+				
+				if(exitCode || stderr) {
+					var err = new Error(stderr);
+					err.code = exitCode;
+					if(callback) callback(err);
+					callback = null;
+					return;
 				}
-			catch(err) {
-				return callback(new Error("Unable to parse (" + err.message + ") hg.log stdout=" + stdout));
-			}
-			
-			callback(null, revisions);
-			
-		});
+				
+				try {
+					var revisions = JSON.parse(stdout);
+				}
+				catch(err) {
+					return callback(new Error("Unable to parse (" + err.message + ") hg.log stdout=" + stdout));
+				}
+				
+				callback(null, revisions);
+				
+			});
 		});
 }
 
@@ -1378,6 +1416,31 @@ MERCURIAL.cat = function hgcat(user, json, callback) {
 		});
 	});
 }
+
+MERCURIAL.summary = function hgsummary(user, json, callback) {
+	
+	var directory = UTIL.trailingSlash(json.directory);
+	
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var execFile = require('child_process').execFile;
+		execFile("hg", ["summary"], { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+			
+			console.log("hg summary stderr=" + stderr);
+			console.log("hg summary stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			var summary = objectionize(stdout);
+			
+			callback(null, {summary: summary});
+			
+		});
+	});
+}
+
 
 function makeFileString(user, files, directory, rootDir) {
 	/*
