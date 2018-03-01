@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+double outputs from console logs in nodejs scripts !???
+
 
 implementing jsql example on webide.se
 

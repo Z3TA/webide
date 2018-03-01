@@ -35,10 +35,19 @@
 		
 		if(!file) return true;
 		
-		if(!isNodejsScript(file)) return true;
+		var isStdoutFile = false;
+		var filePath = file.path;
+		if(filePath.substr(filePath.length-7) == ".stdout") {
+filePath = filePath.substr(0, filePath.length-7);
+			isStdoutFile = true;
+		}
+		
+		var scriptIsRunning = (runningScripts.indexOf(filePath) != -1);
+		
+		if(!isNodejsScript(file) && !scriptIsRunning && !isStdoutFile) return true;
 		
 		var addSeparator = true;
-		var scriptIsRunning = (runningScripts.indexOf(file.path) != -1);
+		
 		var scriptMenuItem = EDITOR.addTempMenuItem("Run nodejs script", addSeparator, runNodeJsScript);
 		if(scriptIsRunning) EDITOR.updateMenuItem(scriptMenuItem, scriptIsRunning, "Stop nodej script", stopNodeJsScript);
 		else EDITOR.updateMenuItem(scriptMenuItem, scriptIsRunning, "Run nodejs script", runNodeJsScript);
