@@ -3476,20 +3476,28 @@ callback(err);
 				
 			widget.visible = true;
 			
-				return false;
+			var browser = UTIL.checkBrowser();
+			if(browser == "Firefox") {
+				// Firefox waits some time before moving the elements if they don't fit ...
+				setTimeout(function firefoxLag() {
+					EDITOR.resizeNeeded();
+				}, 500);
 			}
 			
-			widget.hide = function showWidget() {
+			return false;
+		}
+		
+		widget.hide = function showWidget() {
+			
+			console.log("Hiding widget ...");
+			
+			var wasHidden = true;
+			
+			if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
+			
+			// Only need to hide if the object is created!
+			if(widget.mainElement) {
 				
-				console.log("Hiding widget ...");
-				
-				var wasHidden = true;
-				
-				if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
-				
-				// Only need to hide if the object is created!
-				if(widget.mainElement) {
-					
 					if(!widget.mainElement.style.display != "none") wasHidden = false;
 					
 					widget.mainElement.style.display = "none";
