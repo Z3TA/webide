@@ -268,7 +268,8 @@ node-gyp rebuild --target=1.2.0 --msvs_version=2015
 
 Misc
 =====
-How to hide the annoying menu in Android that covers the virtual keyboard:
+
+How to hide the annoying menu in Android that covers the virtual keyboard
 -------------------------------------------------------------------------
 Go into settings... Look for browser bar (General settings: Toolbar).. Select to turn it off. 
 
@@ -283,4 +284,15 @@ python -c "import hggit"
 How to install:
 apt-get install python-pip
 easy_install hg-git
+
+
+Problems running apt 
+--------------------
+You might get an error like this:
+unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
+
+ This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
+E:
+
+
 
