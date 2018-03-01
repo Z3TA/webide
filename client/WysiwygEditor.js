@@ -1466,7 +1466,7 @@ previewWindowLoaded();
 				function done() {
 					wysiwygEditor.hasLoaded = true;
 					
-					if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded();
+				if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded(wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
 					wysiwygEditor.whenLoaded = null;
 					
 					console.log("Done (re)loading preview window");

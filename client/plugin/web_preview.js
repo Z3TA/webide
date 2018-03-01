@@ -45,63 +45,72 @@
 	}
 	
 	function webPreview() {
-		EDITOR.hideMenu();
 		
 		var file = EDITOR.currentFile;
 		if(!file) return true;
+		
+		if(inPreview && theWindow) {
+			// Attempt to close it
+			theWindow.close();
+			EDITOR.updateMenuItem(menuItem, false);
+			return;
+		}
+		
+		EDITOR.hideMenu();
 		
 		inPreview = file;
 		
 		theWindow = EDITOR.createWindow();
 		theWindow.addEventListener("load", function() {
-			alertBox("It loaded!");
+			//alertBox("It loaded!");
+			console.log("preview window loaded!");
 		}, false);
-		
-		folder = UTIL.getDirectoryFromPath(inPreview.path);
-		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
 			
-			if(err) throw err;
-			
-			console.log("Serve URL=" + json.url);
-			
-			urlPath = json.url;
-			
-			// HTTP serve gives the URL without protocol !?
-			var reHttp = /^http(s?):/i;
-			if(!urlPath.match(reHttp)) {
-				if(window.location.protocol.match(reHttp)) {
-					urlPath = window.location.protocol + "//" + urlPath;
+			folder = UTIL.getDirectoryFromPath(inPreview.path);
+			CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
+				
+				if(err) throw err;
+				
+				console.log("Serve URL=" + json.url);
+				
+				urlPath = json.url;
+				
+				// HTTP serve gives the URL without protocol !?
+				var reHttp = /^http(s?):/i;
+				if(!urlPath.match(reHttp)) {
+					if(window.location.protocol.match(reHttp)) {
+						urlPath = window.location.protocol + "//" + urlPath;
+					}
+					else urlPath = "http://" + urlPath;
 				}
-				else urlPath = "http://" + urlPath;
-			}
-			var url = urlPath + UTIL.getFilenameFromPath(inPreview.path);
-			
-			
-			var onlyPreview = true;
-			var bodyTag = undefined;
-			previewWin = new WysiwygEditor({
-				sourceFile: inPreview, 
-				bodyTagSource: bodyTag, 
-				onlyPreview: onlyPreview, 
+				var url = urlPath + UTIL.getFilenameFromPath(inPreview.path);
+				
+				
+				var onlyPreview = true;
+				var bodyTag = undefined;
+				previewWin = new WysiwygEditor({
+					sourceFile: inPreview, 
+					bodyTagSource: bodyTag, 
+					onlyPreview: onlyPreview, 
 				newWindow: theWindow, 
-				url: url, 
-				whenLoaded: whenLoaded
-			});
-			
-			
-			previewWin.onClose = function() {
-				CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
-					if(err) throw err;
-					inPreview = undefined;
-					previewWin = undefined;
+					url: url, 
+					whenLoaded: whenLoaded
 				});
-			}
-			
-		});
-	}
+				
+				
+				previewWin.onClose = function() {
+					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
+						if(err) throw err;
+						inPreview = undefined;
+						previewWin = undefined;
+					});
+				}
+				
+			});
+		}
 	
 	
-	function whenLoaded() {
+	function whenLoaded(file, win) {
 		
 		theWindow.window.onerror = captureError;
 		
