@@ -1308,6 +1308,73 @@ args.push("-c " + json.changes);
 		});
 }
 
+MERCURIAL.cat = function hgcat(user, json, callback) {
+	
+	// Shows the state of a file at a given revision
+	
+	var directory = json.directory;
+	var revision = json.rev;
+	var filePath = json.file;
+	
+	if(directory == undefined) return callback(new Error("No directory specified!"));
+	if(revision == undefined) return callback(new Error("No rev specified!"));
+	if(filePath == undefined) return callback(new Error("No file specified!"));
+	
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		var spawn = require('child_process').spawn;
+		
+		var args = ["cat", "-r " + json.rev, filePath];
+		
+	//console.log("hg cat args=" + JSON.stringify(args) + " json=" + JSON.stringify(json));
+	
+	var cat = spawn("hg", args, {cwd: rootDir, env: execFileOptions.env, shell: false});
+	var stdout = "";
+	var stderr = "";
+	
+	cat.stdout.on('data', function catStdout(data) {
+		stdout += data;
+		});
+		
+		cat.stderr.on('data', function catStderr(data) {
+			stderr += data;
+		});
+		
+		cat.on('error', function catError(err) {
+			console.log("stdout=" + stdout);
+			console.log("stderr=" + stderr);
+			if(callback) callback(err);
+			callback = null;
+		});
+		
+		cat.on('close', function catDone(exitCode) {
+			if(stdout.length < 500) console.log("hg cat stdout=" + stdout);
+			else console.log("hg cat stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+			//console.log("cat stdout=" + stdout);
+			console.log("cat stderr=" + stderr);
+			
+			console.log("cat exitCode=" + exitCode);
+			
+			if(exitCode || stderr) {
+				var err = new Error(stderr);
+				err.code = exitCode;
+				if(callback) callback(err);
+				callback = null;
+				return;
+			}
+			
+			var resp = {
+				path: filePath,
+				text: stdout
+			}
+			
+			callback(null, resp);
+			
+		});
+	});
+}
+
 function makeFileString(user, files, directory, rootDir) {
 	/*
 		NOT USED because execFile needs to pass each file as it's own argument, not a string of all files

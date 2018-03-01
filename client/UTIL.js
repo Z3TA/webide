@@ -714,9 +714,20 @@ var UTIL = {
 	},
 
 	getFileExtension: function getFileExtension(filePath) {
+		// Returns the file extension, not including the dot. eg foo.bar => bar
 		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
 	},
 
+	getFileNameWithoutExtension: function getFileNameWithoutExtension(filePath) {
+		var fileName = UTIL.getFilenameFromPath(filePath);
+		var fileExtension = UTIL.getFileExtension(fileName);
+		
+		if(fileExtension.lengt == 0) return fileName;
+		
+		return fileName.slice(0, fileName.length - fileExtension.length);
+		
+	},
+	
 	getPathFromUrl: function getPathFromUrl(url) {
 		
 		var filePath;

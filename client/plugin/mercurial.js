@@ -1617,7 +1617,7 @@
 		var butDiffFile = document.createElement("button");
 		butDiffFile.setAttribute("class", "half button");
 		butDiffFile.innerText = "See Changes to selected file(s)";
-		butDiff.setAttribute("title", "Compare selected file(s) in selected revision with the revison before it.");
+		butDiffFile.setAttribute("title", "Compare selected file(s) in selected revision with the revison before it.");
 		butDiffFile.onclick = function diffFileClick() {
 			if(!selectedRev) return alertBox("No revision selected. (click on it)");
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
@@ -1636,6 +1636,35 @@
 			});
 		};
 		div.appendChild(butDiffFile);
+		
+		
+		var butCatFile = document.createElement("button");
+		butCatFile.setAttribute("class", "button");
+		butCatFile.innerText = "See file";
+		butCatFile.setAttribute("title", "See the selected file at the selected revision.");
+		butCatFile.onclick = function diffFileClick() {
+			if(!selectedRev) return alertBox("No revision selected. (click on it)");
+			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
+			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
+			var filePaths = getSelects(fileSelEl);
+			if(filePaths.length != 1) return alertBox("Only one file can be selected!");
+			var filePath = filePaths[0];
+			CLIENT.cmd("mercurial.cat", {directory: fileDirectory, rev: selectedRev.rev, file: filePath}, function hgDiff(err, resp) {
+				
+				if(err) return alertBox(err.message);
+				
+				var text = resp.text;
+				
+				var ext = UTIL.getFileExtension(filePath);
+				var name = UTIL.getFileNameWithoutExtension(filePath);
+				var fileName = name + "-rev" + selectedRev.rev;
+				if(ext.length > 0) fileName += "." + ext;
+				EDITOR.openFile(fileName, text, function(err, file) {
+					if(err) alertBox(err.message);
+				});
+			});
+		};
+		div.appendChild(butCatFile);
 		
 		return div;
 		
