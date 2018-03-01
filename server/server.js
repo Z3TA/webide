@@ -2102,7 +2102,7 @@ function mount(sourcePath, targetPath, callback) {
 					fs.readdir(targetPath, function readDir(err, files) {
 						if(err) return mountDone(err);
 						
-						if(files.length > 0) return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
+						if(files.length > 0) return mountDone(new Error("Target directory not empty! Can not mount to targetPath=" + targetPath + " targetStats=" + JSON.stringify(targetStats) + " "));
 						else targetCreated();
 						
 					});
