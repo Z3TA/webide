@@ -591,6 +591,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				var matchPull = stdout.match(/added (\d+) changesets with (\d+) changes to (\d+) files/);
 				var resp = {repo: repoUrl, directory: user.toVirtualPath(rootDir)};
 				var fileCount = -1;
+				var matchHgGit = stdout.match(/importing git objects into hg/);
 				
 				if(matchPull) {
 					resp.changesets = parseInt(matchPull[1]);
@@ -602,6 +603,9 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 					resp.changesets = 0;
 					resp.changes = 0;
 					fileCount = 0;
+				}
+				else if(matchHgGit) {
+					// hggit doesn't give any info
 				}
 				else throw new Error("Unexpected hg pull: stderr=" + stderr + " stdout=" + stdout);
 				
@@ -633,8 +637,10 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 							}
 						}
 						
+						if(!matchHgGit) {
 						// Sanity check
 						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
+						}
 						
 						resp["files"] = pulledFiles;
 						

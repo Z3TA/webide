@@ -40,6 +40,22 @@ What I'm working on
 
 
 
+amend botton to commit UI
+
+
+unexpected output when pulling using hggit:
+pulling from https://github.com/Z3TA/jsql.git
+importing git objects into hg
+(run 'hg update' to get a working copy)
+
+
+
+
+bug: js-parser: anonymous functions get wrong name if foo: to the left. 
+Example in server/mercurial.js where anonymous function in execFile callback 
+get the name "env" because of exec env option.
+
+
 implementing jsql example on webide.se
 
 Writing blog post about jsql
