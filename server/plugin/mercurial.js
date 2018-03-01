@@ -600,9 +600,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 					fileCount = parseInt(matchPull[3]);
 				}
 				else if(noChanges) {
-					resp.changesets = 0;
-					resp.changes = 0;
-					fileCount = 0;
+					// for example when running hg pull again
 				}
 				else if(matchHgGit) {
 					// hggit doesn't give any info
@@ -637,7 +635,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 							}
 						}
 						
-						if(!matchHgGit) {
+						if(!matchHgGit && !noChanges) {
 						// Sanity check
 						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
 						}
