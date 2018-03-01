@@ -746,7 +746,13 @@
 				else alertBox(err.message);
 			}
 			else {
-				alertBox("Successfully pushed to " + resp.remote);
+				
+				var msg = "Successfully pushed to " + resp.remote;
+				
+				if(resp.changesets == null) msg += "\n(no changes)";
+				else msg += "(" + resp.changesets + " changesets with " + resp.changes + " changes to " + resp.files + " files)";
+				
+				alertBox(msg);
 				}
 		}
 		
