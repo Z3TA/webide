@@ -57,8 +57,8 @@
 			comment = comments[i];
 			
 			if(comment.row >= file.grid.length) {
-				console.warn("row=" + comment.row + " above file grid! comment=" + JSON.stringify(comment));
-			}
+				throw new Error("row=" + comment.row + " above file grid! comment=" + JSON.stringify(comment) + " curren-file: " + EDITOR.currentFile.path);
+				}
 			
 			// Calculate position ...
 			indentation = file.grid[comment.row].indentation;

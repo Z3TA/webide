@@ -118,6 +118,8 @@ var WysiwygEditor;
 		
 		wysiwygEditor.isCompiled = false;
 		
+		wysiwygEditor.onErrorEvent = options.onErrorEvent;
+		
 		if(compiledSource) {
 			
 			wysiwygEditor.isCompiled = true;
@@ -1456,15 +1458,20 @@ previewWindowLoaded();
 			};
 			
 			// Capture errors on the content-editable so that they do not go by unoticed
-			previewWin.window.onerror = function(err) {
-				alertBox(err.message ? err.message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
-				console.error(err);
-			};
+			previewWin.window.addEventListener("error", function(errorEvent) {
+				// https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
+				if(wysiwygEditor.onErrorEvent) wysiwygEditor.onErrorEvent(errorEvent);
+				else {
+					var message = errorEvent.message;
+					alertBox(message ? message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
+					console.error(errorEvent.error);
+				}
+			});
 			
-				done();
-				
-				function done() {
-					wysiwygEditor.hasLoaded = true;
+			done();
+			
+			function done() {
+				wysiwygEditor.hasLoaded = true;
 					
 				if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded(wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
 					wysiwygEditor.whenLoaded = null;

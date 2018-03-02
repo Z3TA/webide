@@ -16,6 +16,7 @@
 	var urlPath;
 	var folder;
 	var consoleLogOriginal;
+	var switchedDebugSourceFile = false; // Prevent switching file more then once when showing errors in the source file
 	
 	EDITOR.plugin({
 		desc: "Preview HTML files",
@@ -100,11 +101,11 @@
 					onlyPreview: onlyPreview, 
 				newWindow: theWindow, 
 					url: url, 
-					whenLoaded: whenLoaded
+					whenLoaded: whenLoaded,
+				onErrorEvent: captureError
 				});
 				
-				
-				previewWin.onClose = function() {
+			previewWin.onClose = function() {
 					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
 						if(err) throw err;
 						inPreview = undefined;
@@ -118,24 +119,27 @@
 	
 	function whenLoaded(file, win) {
 		
-		theWindow.window.onerror = captureError;
-		
 		// Override the console log of the preview window and display the messages as info
 		consoleLogOriginal = theWindow.window.console.log;
 		theWindow.window.console.log = captureConsoleLog;
 		
 	}
 	
-	function captureError(message, source, lineno, colno, error) {
+	function captureError(errorEvent) {
+		
+		var message = errorEvent.message;
+		var source = errorEvent.filename;
+		var lineno = errorEvent.lineno;
+		var colno = errorEvent.colno;
+		var error = errorEvent.error;
+		
 		//alert(message + " line=" + lineno);
 		
 		if(!lineno) {
 			return console.warn("No linenno!");
 		}
 		
-		console.log("source=" + source);
-		console.log("folder=" + source);
-		console.log("urlPath=" + urlPath);
+		console.log("Web preview error: source=" + source + " lineno=" + lineno + " message=" + message + " urlPath=" + urlPath + " folder=" + folder);
 		
 		var filePath = folder + source.replace(urlPath, "");
 		var file = EDITOR.files[filePath];
@@ -151,8 +155,12 @@
 			file.scrollToLine(lineno);
 			var row = lineno-1;
 			var col = colno ? colno : 0;
-			EDITOR.showFile(file);
-			EDITOR.addInfo(row, col, message);
+			if(EDITOR.currentFile != file && !switchedDebugSourceFile) {
+EDITOR.showFile(file);
+				switchedDebugSourceFile = true;
+				EDITOR.addInfo(row, col, message);
+			}
+			
 		}
 		
 	}
@@ -308,6 +316,8 @@
 		
 		var contenEditable = false;
 		previewWin.reload(contenEditable);
+		
+		switchedDebugSourceFile = false;
 		
 		//setTimeout(whenLoaded, 0);
 		//whenLoaded();
