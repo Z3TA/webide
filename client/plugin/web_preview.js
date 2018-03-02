@@ -209,13 +209,15 @@ EDITOR.showFile(file);
 		for (var i=0, index = 0; i<arrStack.length; i++) {
 			// at console.captureConsoleLog
 			// 
-			index = arrStack[i].trim().indexOf("at console.captureConsoleLog");
-			console.log("index=" + index);
-			if(index != -1) {
-				stackLineWithFile = arrStack[i+1];
-				break;
+			index = arrStack[i].trim().indexOf("at console.captureConsoleLog"); // Chrome
+			if(index == -1) index = arrStack[i].indexOf("captureConsoleLog@"); // Firefox
+			
+				console.log("index=" + index);
+				if(index != -1) {
+					stackLineWithFile = arrStack[i+1];
+					break;
+				}
 			}
-		}
 		
 		if(stackLineWithFile) {
 			
