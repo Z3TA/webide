@@ -38,16 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-amend button to commit UI
-
-
-
-
-bug: js-parser: anonymous functions get wrong name if foo: to the left. 
-Example in server/mercurial.js where anonymous function in execFile callback 
-get the name "env" because of exec env option.
-
-
 implementing jsql example on webide.se
 
 Writing blog post about jsql
@@ -450,6 +440,10 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+bug: js-parser: anonymous functions get wrong name if foo: to the left. 
+Example in server/mercurial.js where anonymous function in execFile callback 
+get the name "env" because of exec env option.
 
 Autocompleting JS in html files doesn't work! It shows the result but doesn't complete. And often it completes with a html end tag!
 
