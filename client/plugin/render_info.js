@@ -56,6 +56,10 @@
 
 			comment = comments[i];
 			
+			if(comment.row >= file.grid.length) {
+				console.warn("row=" + comment.row + " above file grid! comment=" + JSON.stringify(comment));
+			}
+			
 			// Calculate position ...
 			indentation = file.grid[comment.row].indentation;
 			indentationWidth = indentation * tabSpace;
