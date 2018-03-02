@@ -2231,6 +2231,10 @@ callback(err);
 			
 			console.time("addInfo");
 			
+		if(!EDITOR.currentFile) throw new Error("No current file!");
+		if(EDITOR.currentFile.grid.length <= row) throw new Error("Current file only has " + EDITOR.currentFile.grid.length + " rows!" +
+		" Unable to place info message on row=" + row);
+		
 			// Convert the text to an array, one line per row
 			txt = txt.split("\n");
 			
