@@ -158,8 +158,10 @@
 			if(EDITOR.currentFile != file && !switchedDebugSourceFile) {
 EDITOR.showFile(file);
 				switchedDebugSourceFile = true;
-				EDITOR.addInfo(row, col, message);
-			}
+				}
+			
+			if(EDITOR.currentFile == file) EDITOR.addInfo(row, col, message);
+			
 			
 		}
 		
