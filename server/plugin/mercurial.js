@@ -175,7 +175,11 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		
 		var args = ["status"];
 		
-		if(json.rev) args.push("--rev " + json.rev);
+		if(json.rev) {
+//args.push("--rev " + json.rev);
+			args.push("--rev");
+			args.push(json.rev);
+		}
 		
 		execFile("hg", args, { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
 				
@@ -1435,7 +1439,35 @@ MERCURIAL.summary = function hgsummary(user, json, callback) {
 			
 			var summary = objectionize(stdout);
 			
-			callback(null, {summary: summary});
+			callback(null, summary[0]);
+			
+			});
+	});
+}
+
+MERCURIAL.revert = function hgrevert(user, json, callback) {
+	
+	var directory = UTIL.trailingSlash(json.directory);
+	
+	var files = json.files;
+	if(files == undefined) return callback(new Error("No files defined"));
+
+	checkDir(user, directory, function gotRootDir(err, rootDir, localPath) {
+		if(err) return callback(err);
+		
+		files = checkPaths(user, files, directory, rootDir);
+		if(files instanceof Error) return callback(files);
+		
+		var execFile = require('child_process').execFile;
+		execFile("hg", ["revert"].concat(files), { cwd: rootDir, env: execFileOptions.env }, function (err, stdout, stderr) {
+			
+			console.log("hg revert stderr=" + stderr);
+			console.log("hg revert stdout=" + stdout);
+			
+			if(err) return callback(err);
+			if(stderr) return callback(stderr);
+			
+			callback(null, files);
 			
 		});
 	});

@@ -2191,15 +2191,26 @@ if(err) return alertBox(err.message);
 	
 	function mercurialUpdate(fileDirectory, reloadFiles) {
 		
+/*
+For files opened in the editor:
+if not saved but will be updated: ask
+if saved but not commited: ask
+
+1. Check the status/difference between current revision and head
+2. Check the status of the current revision
+
+
+*/
+
 		console.log("Mercurial: Update");
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
+var reopenFiles = []; // Files closed during the update, but will be reopened afterwards
+
 		// Check what revision we are on, and if we need to update
-		CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, resp) {
+		CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, summary) {
 if(err) throw err;
-			
-			var summary = resp.summary;
 			
 			var currentRevision = parseInt(summary.parent.slice(0, summary.parent.indexOf(":")));
 			
@@ -2208,167 +2219,90 @@ if(err) throw err;
 			if(summary.update == "(current)") return alertBox("Nothing to update!");
 			
 			// Check status of current revision to see if anything needs to be commited before updating
-			CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, status) {
-if(err) throw err;
-
-				if(status.modified.length > 0 || status.added.length > 0 || status.removed.length > 0) {
-					var msg = "You should commit before updating, or the changes to the following file(s) might be lost:";
-					if(status.modified.length > 0) msg += "\nModified: " + status.modified.join(", ");
-					if(status.added.length > 0) msg += "\nAdded: " + status.added.join(", ");
-					if(status.removed.length > 0) msg += "\nRemoved: " + status.removed.join(", ");
-					
-					var optCommit = "I'll commit";
-					var optDoItAnyway = "Update anyway";
-					var optAbort = "Abort";
-					
-					confirmBox(msg, [optCommit, optDoItAnyway, optAbort], function(answer) {
-						
-						if(answer == optCommit) showCommitDialog();
-						else if(answer == optDoItAnyway) checkEditorFiles();
-						else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
-						
-					});
-						}
-				else checkEditorFiles();
-				
-			});
-			
-		});
-		
-		function checkEditorFiles() {
-			
-			// Get info about the pulled updates. eg. what changed from current revision to latest revision
-CLIENT.cmd("mercurial.log", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, changes) {
+			CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, current) {
 if(err) throw err;
 
 // Check status between current (.) revision and latested (tip) revision
-CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, resp) {
+CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, updated) {
 if(err) throw err;
 
-var affectedFiles = resp.modified.concat(resp.removed);
-var repoUrl = resp.repo;
-var ask = false;
-var notSaved = [];
-var remoteUpdated = [];
-var untrackedUpdated = [];
+// We only care about the files opened in the editor of which will also be updated
+// either if it's not saved, or not commited
 
-if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+var uncommited = current.modified.concat(current.added);
+var toBeUpdated = updated.modified.concat(updated.added).concat(updated.removed);
 
-// Check all files opened in the editor to see if they will be affected by the update
-var filePath;
-var msg = "";
-for(var pathOfOpenFile in EDITOR.files) {
-if(EDITOR.files[pathOfOpenFile].isSaved) continue;
-else {
-filePath = pathOfOpenFile.replace(rootDir, "");
-							msg = "";
-if(resp.modified.indexOf(filePath) != -1) {
-msg = filePath + " has been modified!";
-								}
-if(resp.added.indexOf(filePath) != -1) {
-msg = filePath + " has been replaced!";
-}
-if(resp.removed.indexOf(filePath) != -1) {
-msg = filePath + " has been removed!";
-}
+checkOpenedFiles();
 
-if(msg) {
-// Ask for one file at a time
-								return askUser(msg);
-}
+					function checkOpenedFiles() {
+						var filePath;
+						for(var path in EDITOR.files) {
+							filePath = path.replace(rootDir, ""); // So they can be compared
+							
+							if(!EDITOR.files[path].isSaved && toBeUpdated.indexOf(filePath) != -1) {
+								// File opened in the editor that is not saved.
+								return askDiscard(EDITOR.files[path], "Discard unsaved changes to " + filePath + " ?");
 							}
-						}
-
-					function askUser(msg) {
-						var optUpdate = "Update file";
-var optSaveCommit = "Save my changes and Commit";
-var optRevertLocal = "Ignore my changes and Update";
-var optAbort = "Abort";
-
-confirmBox(msg, [], function(answer) {
-
-if(answer == optDoNothing) return;
-else if(answer == optRevertLocal || answer == optUpdate) {
-mercurialUpdate(dir, true);
-}
-else if(answer == optSaveCommit) {
-EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
-showCommitDialog();
-});
-}
-else throw new Error("Unknown answer=" + answer);
-
-});
-						}
+							else if(uncommited.indexOf(filePath) != -1 && toBeUpdated.indexOf(filePath) != -1) {
+								// File opened in the editor has not been commited
+								return askCommit(EDITOR.files[path], "Commit changes before updating ?\n" + filePath + "\nUncommited changes will be lost!");
+							}
+							}
 						
+// It's safe to update
+doTheUpdate();
+}
 						
-						checkFiles: for(var i=0; i<changes.length; i++) {
-							var files = Object.keys(changes[i].files);
-							for(var j=0; j<files.length; j++) {
-								
-								var filePath = files[j];
-								
-								if(EDITOR.files.hasOwnProperty(filePath)) {
-									// We only care about files opened by the editor
-									
-									var changedFile = EDITOR.files[filePath];
-									
-									if(!changedFile.isSaved) notSaved.push(filePath);
-									
-									if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
-									
-									if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
-									
-									var msg = "File has been updated:\n"  + changedFile.path + "\n\
-									Repo: " + repoUrl + "\n\
-									Date: " + changes[i].date + "\n\
-									User: " + changes[i].user + "\n\n<i>" + changes[i].summary + "</i>";
-									
-									var optUpdate = "Update file";
-									var optDoNothing = "Do nothing";
-									var optSaveCommit = "Save my changes and Commit";
-									var optRevertLocal = "Ignore my changes and Update"
-									
-									var options;
-									
-									if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
-									else options = [optDoNothing, optUpdate];
-									
-									ask = true;
-									
-									confirmBox(msg, options, function(answer) {
-										
-										if(answer == optDoNothing) return;
-										else if(answer == optRevertLocal || answer == optUpdate) {
-											mercurialUpdate(dir, true);
-										}
-										else if(answer == optSaveCommit) {
-											EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
-												showCommitDialog();
-											});
-										}
-										else throw new Error("Unknown answer=" + answer);
-										
+						function askDiscard(file, msg) {
+							// File is not saved
+							var optDiscard = "Discard unsaved changes";
+							var optAbort = "Abort the update";
+							confirmBox(msg, [optDiscard, optAbort], function(answer) {
+								if(answer == optDiscard) {
+									reload(file, function(err) {
+										if(err) throw err;
+										checkOpenedFiles();
 									});
 								}
-							}
+								else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
+								});
 						}
 						
-						if(!ask) {
-							console.log("Mercurial: No apparent conflict. Updating!")
-							pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
-						}
-						
-					});
+function askCommit(file, msg) {
+// File has not been commited
+var optAbort = "Abort udpate";
+var optCommit = "Commit";
+var optRevert = "Revert uncommited changes";
+var optMerge = "Merge uncommited changes to updated file"; // Default Mercurial behaviour
 
-});
+confirmBox(msg, [optAbort, optCommit, optRevert, optMerge], function(answer) {
 
+if(answer == optCommit) {
+								showCommitDialog();
+}
+								else if(answer == optRevert) {
+CLIENT.cmd("mercurial.revert", {directory: fileDirectory, files: [file.path]}, function hgRevert(err, files) {
+if(err) throw err;
+
+									reload(file, function(err) {
+										if(err) throw err;
+										checkOpenedFiles();
+									});
+									});
+								}
+							else if(answer == optMerge) {
+var doNotSwitchFile = true;
+reopenFiles.push(file.path);
+								EDITOR.closeFile(file.path, doNotSwitchFile);
+checkOpenedFiles();
+}
+								else if(answer != optAbort) throw new Error("Unknown answer=" + answer);
+								});
+}
 });
-			
-		}
-		
-		
-		
+			});
+		});
+
 		function doTheUpdate() {
 		
 		CLIENT.cmd("mercurial.update", {directory: fileDirectory}, function hgUpdate(err, resp) {
@@ -2384,6 +2318,7 @@ else throw new Error("Unknown answer=" + answer);
 					if(resp.unresolved > 0) alertBox("There are unresolved files ...");
 					
 					var filesToBeReloaded = 0;
+var filesToBeReopened = 0;
 				var filesReloaded = [];
 				
 				for(var i=0; i<files.length; i++) {
@@ -2392,40 +2327,58 @@ else throw new Error("Unknown answer=" + answer);
 							
 							var file = EDITOR.files[files[i]];
 							
-							reloadFile(file);
+							reload(file, reloaded);
 							
 						}
 					}
-					if(filesToBeReloaded === 0) done(false);
+
+for (var i=0; i<reopenFiles.length; i++) {
+EDITOR.openFile(reopenFiles[i], undefined, reopened);
+}
+
+					if(filesToBeReloaded == 0 && filesToBeReopened == 0) done();
 					
 				}
 					
-					function reloadFile(file) {
-						console.log("Mercurial: Reloading file=" + file.path);
-						EDITOR.readFromDisk(file.path, function(err, path, data) {
-							if(err) throw err;
-							
-							file.reload(data);
-							
-					filesReloaded.push(path);
-					
-							if(--filesToBeReloaded === 0) done();
-							
-						});
-					}
-					
+function reloaded(err, path) {
+if(err) throw err;
+filesReloaded.push(path);
+filesToBeReloaded--;
+if(filesToBeReloaded == 0 && filesToBeReopened == 0) done();
+}
+
+function reopened(err, path) {
+if(err) throw err;
+filesToBeReopened--;
+if(filesToBeReloaded == 0 && filesToBeReopened == 0) done();
+}
+
 					function done() {
 						
-				var msg = resp.updated + " updated, " + resp.merged + " merged, " + resp.removed + " removed and " + resp.unresolved + " unresolved.";
+				var msg = resp.updated + " updated, " + resp.merged + " merged, " + resp.removed + " removed and " + resp.unresolved + " files unresolved.";
 				
 				if(filesReloaded.length > 0) msg += "\nFiles opened in the editor have been reloaded:\n" + filesReloaded.join("\n");
 				
 				alertBox(msg);
 				
 					}
-					
-				});
+					});
 		}
+
+function reload(file, callback) {
+var filePath = file.path;
+EDITOR.readFromDisk(filePath, function(err, path, text) {
+if(err) throw err;
+else {
+file.reload(text);
+
+file.saved(); // Because we reloaded from disk
+
+if(callback) callback(null, filePath);
+}
+});
+}
+
 	}
 	
 	function figureOutDirectoryIfUndefined(fileDirectory) {
