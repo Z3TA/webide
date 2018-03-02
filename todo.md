@@ -38,7 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-active buttons, so you can see if you are pushing it or not
+error reporting in web preview
+
 
 implementing jsql example on webide.se
 

@@ -1,6 +1,12 @@
 
 (function() {
 	
+	/*
+		
+		Currently assuming we are only previewing one website at a time!
+		
+	*/
+	
 	"use strict";
 	
 	var menuItem;
@@ -128,6 +134,9 @@
 		}
 		
 		console.log("source=" + source);
+		console.log("folder=" + source);
+		console.log("urlPath=" + urlPath);
+		
 		var filePath = folder + source.replace(urlPath, "");
 		var file = EDITOR.files[filePath];
 		
@@ -142,6 +151,7 @@
 			file.scrollToLine(lineno);
 			var row = lineno-1;
 			var col = colno ? colno : 0;
+			EDITOR.showFile(file);
 			EDITOR.addInfo(row, col, message);
 		}
 		
