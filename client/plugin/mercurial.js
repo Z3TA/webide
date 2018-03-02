@@ -1791,7 +1791,7 @@
 	
 	function mercurialDiff(directory, filePaths) {
 		
-		if(filePaths == undefined) filePaths = [];
+		if(filePaths == undefined) filePaths = EDITOR.currentFile && [EDITOR.currentFile.path];
 		if(directory == undefined) directory = EDITOR.workingDirectory;
 		
 		// filePaths will/can have the root dir removed
@@ -1806,6 +1806,7 @@
 				var text = resp.text;
 				var fileName = "hg.diff";
 				if(filePaths.length == 1) fileName = filePaths[0] + ".diff";
+			console.log("filePaths=" + filePaths);
 				EDITOR.openFile(fileName, text, function(err, file) {
 					if(err) alertBox(err.message);
 				});
