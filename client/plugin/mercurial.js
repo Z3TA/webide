@@ -2065,7 +2065,6 @@ console.log("mercurial.status : " + JSON.stringify(status));
 					
 					if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
 					
-					var msg = "";
 					//added 2 changesets with 1 changes to 1 files
 					
 					if(resp.changesets) {
@@ -2073,12 +2072,10 @@ console.log("mercurial.status : " + JSON.stringify(status));
 						" changes to " + resp.fileCount + " files from " + repoUrl;
 					}
 					else if(updatedFiles.length > 0) {
-						if(msg) msg += "\n";
-						msg += updatedFiles.length + " files are ready to be updated (click update)";
+						var msg = updatedFiles.length + " files are ready to be updated (click update)";
 					}
 					else if(updatedFiles.length == 0) {
-						if(msg) msg += "\n";
-						msg += "(Nothing to update)"
+						var msg = "No new changes on " + repoUrl;
 					}
 					
 				alertBox(msg);
@@ -2117,72 +2114,7 @@ if(err) return alertBox(err.message);
 				else throw err;
 			}
 			else {
-				
-				var changes = resp.changes;
-				var repoUrl = resp.repo;
-				var ask = false;
-				var notSaved = [];
-				var remoteUpdated = [];
-				var untrackedUpdated = [];
-				
-				if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
-				
-				checkFiles: for(var i=0; i<changes.length; i++) {
-					var files = Object.keys(changes[i].files);
-					for(var j=0; j<files.length; j++) {
-						
-						var filePath = files[j];
-						
-						if(EDITOR.files.hasOwnProperty(filePath)) {
-							// We only care about files opened by the editor
-							
-							var changedFile = EDITOR.files[filePath];
-							
-							if(!changedFile.isSaved) notSaved.push(filePath);
-							
-							if(untracked.indexOf(filePath) != -1) untrackedUpdated.push(filePath);
-							
-							if(localModified.indexOf(filePath) != -1) remoteUpdated.push(filePath);
-							
-							var msg = "File has been updated:\n"  + changedFile.path + "\n\
-							Repo: " + repoUrl + "\n\
-							Date: " + changes[i].date + "\n\
-							User: " + changes[i].user + "\n\n<i>" + changes[i].summary + "</i>";
-							
-							var optUpdate = "Update file";
-							var optDoNothing = "Do nothing";
-							var optSaveCommit = "Save my changes and Commit";
-							var optRevertLocal = "Ignore my changes and Update"
-							
-							var options;
-							
-							if(!changedFile.isSaved) options = [optSaveCommit, optRevertLocal, optDoNothing];
-							else options = [optDoNothing, optUpdate];
-							
-							ask = true;
-							
-							confirmBox(msg, options, function(answer) {
-								
-								if(answer == optDoNothing) return;
-								else if(answer == optRevertLocal || answer == optUpdate) {
-									mercurialUpdate(dir, true);
-								}
-								else if(answer == optSaveCommit) {
-									EDITOR.saveFile(changedFile, undefined, function fileSaved(err, filePath) {
-										showCommitDialog();
-									});
-								}
-								else throw new Error("Unknown answer=" + answer);
-								
-							});
-						}
-					}
-				}
-				
-				if(!ask) {
-					console.log("Mercurial: No apparent conflict. Updating!")
-					pullAndUpdate(dir, false); // It's safe to update as no files opened by the editor have changed (there can still be merge conflicts though)
-				}
+					mercurialUpdate();
 			}
 		}
 		});
@@ -2195,11 +2127,6 @@ if(err) return alertBox(err.message);
 For files opened in the editor:
 if not saved but will be updated: ask
 if saved but not commited: ask
-
-1. Check the status/difference between current revision and head
-2. Check the status of the current revision
-
-
 */
 
 		console.log("Mercurial: Update");
@@ -2219,7 +2146,7 @@ if(err) throw err;
 			if(summary.update == "(current)") return alertBox("Nothing to update!");
 			
 			// Check status of current revision to see if anything needs to be commited before updating
-			CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, current) {
+			CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: "."}, function hgStatus(err, current) {
 if(err) throw err;
 
 // Check status between current (.) revision and latested (tip) revision

@@ -38,21 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-working on hg update (checking files opened in the editor)
-
-hg pull client side needs to be rewritten (it uses code from hg incoming that we don't want to use)
-
-hg pull doesn't work.
-
-make sure users commit before pulling!!! (hg status)
-
-amend botton to commit UI
-
-
-unexpected output when pulling using hggit:
-pulling from https://github.com/Z3TA/jsql.git
-importing git objects into hg
-(run 'hg update' to get a working copy)
+amend button to commit UI
 
 
 
