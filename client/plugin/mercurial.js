@@ -411,7 +411,7 @@
 		// ### Cancel button
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("class", "button");
-		cancelButton.appendChild(document.createTextNode("Cancel"));
+		cancelButton.appendChild(document.createTextNode("Cancel commit"));
 		cancelButton.onclick = function cancel() {
 			hideCommitDialog();
 		};
@@ -896,8 +896,8 @@
 		
 		var div = document.createElement("div");
 		
-		var text = document.createElement("span");
-		text.appendChild(document.createTextNode("Click on the check box to mark/unmark a file as resolved. Click on the file path to open it."));
+		var text = document.createElement("p");
+		text.appendChild(document.createTextNode("The files below needs to be resolved. Click on the check box to mark/unmark a file as resolved. Click on the file path to open it."));
 		
 		resolveFileList = document.createElement("ul");
 		resolveFileList.setAttribute("class", "resolveList");
@@ -905,7 +905,8 @@
 		
 		// ### Commands
 		var cancel = document.createElement("button");
-		cancel.appendChild(document.createTextNode("Cancel"));
+		cancel.setAttribute("class", "button");
+		cancel.appendChild(document.createTextNode("Cancel resolve"));
 		cancel.onclick = function() {
 			widget.hide();
 		}
@@ -1073,7 +1074,7 @@
 		var cancel = document.createElement("button");
 		cancel.setAttribute("type", "button");
 		cancel.setAttribute("class", "button");
-		cancel.innerText = "Cancel"
+		cancel.innerText = "Cancel clone"
 		cancel.addEventListener("click", function cancel() {
 			hideCloneDialog();
 		}, false);
@@ -1468,7 +1469,7 @@
 		var cancelButton = document.createElement("button");
 		cancelButton.setAttribute("type", "button");
 		cancelButton.setAttribute("class", "button");
-		cancelButton.appendChild(document.createTextNode("Cancel"));
+		cancelButton.appendChild(document.createTextNode("Cancel auth"));
 		
 		
 		auth.appendChild(cancelButton);
@@ -1638,7 +1639,7 @@
 		
 		var butCancel = document.createElement("button");
 		butCancel.setAttribute("class", "button");
-		butCancel.innerText = "Cancel";
+		butCancel.innerText = "Cancel history";
 		butCancel.onclick = hideVersionHistory;
 		div.appendChild(butCancel);
 		
@@ -2054,7 +2055,7 @@ console.log("mercurial.status : " + JSON.stringify(status));
 		div.appendChild(butClone);
 		
 		var cancel = document.createElement("button");
-		cancel.appendChild(document.createTextNode("Cancel"));
+		cancel.appendChild(document.createTextNode("Cancel version control"));
 		cancel.setAttribute("class", "button");
 		cancel.onclick = function() {
 			widget.hide();

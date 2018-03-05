@@ -419,6 +419,10 @@ color: black;
 	text-shadow: none;
 }
 
+.footer p {
+	margin: 4px;
+}
+
 ul, li {
 	margin: 0px;
 	list-style-type: none;
@@ -464,6 +468,10 @@ input[type=text], input[type=password], select.select {
 
 input[type=checkbox] {
 	text-align: absmiddle;
+	vertical-align: middle;
+	margin: 3px;
+	width: 16px;
+	height: 16px;
 }
 
 .button.active {
@@ -1112,12 +1120,18 @@ div.gotoFile li:hover {
 }
 
 ul.resolveList li {
-	margin: 0.5em;
-	border: 1px solid blue;
-	border-radius: 3px;
+	margin: 4px;
+	padding: 1px;
+	border: 0px solid blue;
+	border-radius: 0px;
+	display: inline-block;
 }
 
-
+.resolveList a {
+	color: #b8dfff;
+	text-decoration: underline;
+	vertical-align: middle;
+}
 
 /* ############### File explorer ############### */
 
