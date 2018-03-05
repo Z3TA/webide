@@ -569,13 +569,72 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 		
 		var config = (hguser != undefined && pw != undefined) ? ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw] : [];
 		
-		var execFile = require('child_process').execFile;
-		execFile('hg', ['pull', '--noninteractive'].concat(config), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		var spawn = require('child_process').spawn;
+		var pull = spawn("hg", ["pull", "--noninteractive", "--debug"].concat(config), {cwd: rootDir, env: execFileOptions.env, shell: false});
+			var stdout = "";
+			var stderr = "";
 			
-			console.log("hg pull stderr=" + stderr);
-			console.log("hg pull stdout=" + stdout);
+		var progressCounter = 0;
+		
+			pull.stdout.on('data', function pullStdout(data) {
+				stdout += data;
 			
-			if(stdout) {
+			// todo: Better estimation on progress!
+			progressCounter++;
+			
+			user.send({
+				mercurialProgress: {
+					max: Math.max(progressCounter,10),
+					value: progressCounter
+				}
+			});
+			
+			});
+			
+			pull.stderr.on('data', function pullStderr(data) {
+				stderr += data;
+			});
+			
+			pull.on('error', function pullError(err) {
+				console.log("stdout=" + stdout);
+				console.log("stderr=" + stderr);
+			
+			pullDone(err);
+			
+			});
+			
+		/*
+			
+			bash-4.3$ hg pull --debug
+			pulling from https://github.com/Z3TA/jsql.git
+			Counting objects: 3, done.
+			Total 3 (delta 1), reused 2 (delta 0), pack-reused 0
+			importing git objects into hg
+			importing: 2e27fbd459a45f6a7573c03a19275c3a014c1cf2
+			committing files:
+			README.md
+			committing manifest
+			committing changelog
+			(run 'hg update' to get a working copy)
+			
+		*/
+		
+		pull.on('close', function pullClose(exitCode) {
+				if(stdout.length < 500) console.log("hg pull stdout=" + stdout);
+				else console.log("hg pull stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+				
+			//console.log("stdout=" + stdout);
+			//console.log("stderr=" + stderr);
+				
+				console.log("exitCode=" + exitCode);
+				
+				if(exitCode || stderr) {
+					var err = new Error(stderr);
+					err.code = exitCode;
+				return pullDone(err);
+				}
+				
+				
 				
 				var matchRepoUrl = stdout.match(/pulling from (.*)/);
 				
@@ -588,11 +647,8 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				var noChanges = stdout.match(/(\r\n|\n)no changes found/);
 				
 				console.log("noChanges=" + noChanges);
-			}
-			
-			if(err) callback(err, {directory: user.toVirtualPath(rootDir)});
-			else if(stderr) callback(stderr, {directory: user.toVirtualPath(rootDir)});
-			else {
+				
+				
 				
 				// added 2 changesets with 1 changes to 1 files
 				
@@ -616,6 +672,7 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 				else throw new Error("Unexpected hg pull: stderr=" + stderr + " stdout=" + stdout);
 				
 				// Get list of changed files / Files that will be affected by a "hg update"
+				var execFile = require('child_process').execFile;
 				execFile('hg', ['status', '--rev', '.:tip'], { cwd: localDirectory, env: execFileOptions.env }, function (err, status_stdout, status_stderr) {
 					
 					console.log("hg status --rev .:tip stderr=" + status_stderr);
@@ -644,14 +701,14 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 						}
 						
 						if(!matchHgGit && !noChanges) {
-						// Sanity check
-						if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
+							// Sanity check
+							if(fileCount != pulledFiles.length) throw new Error("fileCount=" + fileCount + " pulledFiles (" + pulledFiles.length + ") = " + JSON.stringify(pulledFiles) + " affectedFilesString=" + affectedFilesString);
 						}
 						
 						resp["files"] = pulledFiles;
 						
-						callback(null, resp);
-						
+					pullDone(null, resp);
+					
 					}
 					
 				});
@@ -664,10 +721,23 @@ MERCURIAL.pull = function hgpull(user, json, callback) {
 					});
 				}
 				
+			function pullDone(err, resp) {
 				
+				if(resp == undefined || resp.directory == undefined) resp = {directory: user.toVirtualPath(rootDir)};
+				
+				if(callback) callback(err, resp);
+				callback = null;
+				
+				// show full progress
+				user.send({
+					mercurialProgress: {
+						max: progressCounter,
+						value: progressCounter
+					}
+				});
 			}
+			});
 		});
-	});
 }
 
 
@@ -771,7 +841,18 @@ MERCURIAL.merge = function hgmerge(user, json, callback) {
 }
 
 MERCURIAL.push = function hgpush(user, json, callback) {
-	// Update pulled changes
+	
+	/*
+		
+		bash-4.3$ hg push --debug
+		pushing to https://github.com/Z3TA/jsql.git
+		finding hg commits to export
+		using auth.foo.* for authentication
+		http auth: user zeta@zetafiles.org, password ************
+		searching for changes
+		abort: branch 'refs/heads/master' changed on the server, please pull and merge before pushing
+		
+	*/
 	
 	var directory = UTIL.trailingSlash(json.directory);
 	var hguser = json.user;

@@ -25,6 +25,8 @@ function log(msg, lvl, noTrace) {
 	
 	var where = "";
 	
+	//CONSOLE_LOG_ORIGINAL("msg.length=" + msg.length);
+	
 	if(lvl <= LOGLEVEL) {
 		
 		if(!noTrace) {

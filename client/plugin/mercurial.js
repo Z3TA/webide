@@ -48,6 +48,9 @@
 	
 	var versionControlWidget = EDITOR.createWidget(buildVersionControlWidget);
 	
+	var progressBar;
+	var progressBarWidget = EDITOR.createWidget(buildProgressBarWidget);
+	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
 		into: "/repo/test/",
@@ -75,6 +78,11 @@
 		EDITOR.on("commitTool", mercurialCommitTool);
 		
 		EDITOR.on("showMenu", showScmMenuItemsMaybe);
+		
+		CLIENT.on("mercurialProgress", mercurialProgressStatus);
+		// Make the progress bar appear on top:
+		progressBarWidget.show();
+		progressBarWidget.hide();
 		
 		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
 		
@@ -106,6 +114,35 @@
 		
 		EDITOR.removeMenuItem(repoCloneMenuItem);
 		
+		CLIENT.removeEvent("mercurialProgress", mercurialProgressStatus);
+		
+	}
+	
+	function buildProgressBarWidget(widget) {
+		progressBar = document.createElement("progress");
+		progressBar.setAttribute("class", "progress mercurial");
+		progressBar.setAttribute("style", "width: 100%");
+		progressBar.setAttribute("value", "0");
+		progressBar.setAttribute("max", "1");
+		
+		return progressBar;
+	}
+	
+	function mercurialProgressStatus(status) {
+		console.log("mercurialProgressStatus: " + JSON.stringify(status));
+		
+		if(!progressBar) progressBarWidget.show();
+		
+		if(status.max == status.value) {
+			progressBarWidget.hide();
+			progressBar.max = 1;
+			progressBar.value = 0;
+		}
+		else {
+			progressBarWidget.show();
+			progressBar.max = status.max;
+			progressBar.value = status.value;
+		}
 	}
 	
 	function showScmMenuItemsMaybe() {

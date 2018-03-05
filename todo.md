@@ -1198,6 +1198,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+Give a warning when there are two functions with the same name in the same scope!
+For example a named lamda function and a normal function, and the lamda functions tries to call the normal function,
+but calls itself over and over again. Will be a bit hard to debug.
+
 ---
 Spectator mode:
 When the same user, or a user invited to the file/session open the same file. The spectator can only read/view the file.
