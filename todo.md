@@ -38,9 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Handle mercurial merge conflicts:
-conflicts while merging
-
+Hmm, nodejs seems to buffer all spawn stdout data from hg push ...
+How do we get a working progress bar !?
 
 
 implementing jsql example on webide.se

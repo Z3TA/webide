@@ -905,6 +905,23 @@ bash-4.3$ hg push --debug
 			http auth: user zeta@zetafiles.org, password ************
 			searching for changes
 			abort: branch 'refs/heads/master' changed on the server, please pull and merge before pushing
+			
+			
+			finding hg commits to export
+			exporting hg objects to git
+			converting revision 0753c292adfe608c2de1fff3046ebe3562455467
+			using auth.foo.* for authentication
+			http auth: user zeta@zetafiles.org, password ************
+			searching for changes
+			1 commits found
+			list of commits:
+			d04b4e0650f9e0e8480653c7c2012b40fed24236
+			adding objects
+			using auth.foo.* for authentication
+			http auth: user zeta@zetafiles.org, password ************
+			added 1 commits with 1 trees and 1 blobs
+			updating reference default::refs/heads/master => GIT:d04b4e06
+			
 */
 
 		push.on('close', function pushClose(exitCode) {
