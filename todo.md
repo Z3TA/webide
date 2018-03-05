@@ -38,8 +38,10 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-some lag when clicking commit & push ... gets confusing, did it succeed ? was there an error ?
-probably need a progress bar.
+Handle mercurial merge conflicts:
+conflicts while merging
+
+
 
 implementing jsql example on webide.se
 

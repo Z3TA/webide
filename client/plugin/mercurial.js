@@ -704,6 +704,10 @@
 							// todo:  'hg resolve -m [FILE]' !?!?
 							alertBox("We need to reslove the merge conflict manually.");
 						}
+						else if(err.message.match(/unresolved merge conflicts/)) {
+							alertBox("Resolve merge conflicts before committing!");
+							checkForUnresolved(opt.directory, false);
+						}
 						else alertBox(err.message);
 					}
 					else {
@@ -893,7 +897,7 @@
 		var div = document.createElement("div");
 		
 		var text = document.createElement("span");
-		text.appendChild(document.createTextNode("Check files to marke them as resolved. Click on a file to open it."));
+		text.appendChild(document.createTextNode("Click on the check box to mark/unmark a file as resolved. Click on the file path to open it."));
 		
 		resolveFileList = document.createElement("ul");
 		resolveFileList.setAttribute("class", "resolveList");
@@ -901,13 +905,14 @@
 		
 		// ### Commands
 		var cancel = document.createElement("button");
-		cancel.appeendChild(document.createTextNode("Cancel"));
+		cancel.appendChild(document.createTextNode("Cancel"));
 		cancel.onclick = function() {
 			widget.hide();
 		}
 		
 		commands.appendChild(cancel);
 		
+		div.appendChild(text);
 		div.appendChild(resolveFileList);
 		div.appendChild(commands);
 		
@@ -1121,7 +1126,7 @@
 		if(unresolved == undefined) throw new Error("unresolved=" + unresolved);
 		
 		// Update files
-		
+		if(!resolveFileList) resolveDialog.show();
 		while(resolveFileList.firstChild) resolveFileList.removeChild(resolveFileList.firstChild); // Emty list
 		
 		var files = resolved.concat(unresolved);
@@ -1147,7 +1152,7 @@
 			
 			checkbox.onclick = function fileCheck(e) {
 				if(checkbox.checked) {
-					CLIENT.cmd("mercurial.resolvemark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
+					CLIENT.cmd("mercurial.resolvemark", {directory: fileDirectory, file: file.replace(fileDirectory, "")}, function resolveList(err, resp) {
 						if(err) throw err;
 						if(resp.allResolved) {
 							resolveDialog.hide();
@@ -1156,7 +1161,7 @@
 					});
 				}
 				else {
-					CLIENT.cmd("mercurial.resolveunmark", {directory: fileDirectory, file: file}, function resolveList(err, resp) {
+					CLIENT.cmd("mercurial.resolveunmark", {directory: fileDirectory, file: file.replace(fileDirectory, "")}, function resolveList(err, resp) {
 						if(err) throw err;
 					});
 				}
@@ -1164,9 +1169,11 @@
 			
 			var a = document.createElement("a");
 			a.appendChild(document.createTextNode(file));
+			a.setAttribute("href", "javascript:void(0)"); // So it will be styled as a link
 			a.onclick = function clickFile(e) {
 				EDITOR.openFile(file);
 			}
+			
 			
 			li.appendChild(checkbox);
 			li.appendChild(a);
@@ -2173,6 +2180,9 @@ if saved but not commited: ask
 		
 var reopenFiles = []; // Files closed during the update, but will be reopened afterwards
 
+		checkForUnresolved(fileDirectory, function checkedForUnresolved(err) {
+		if(err) throw err;
+
 		// Check what revision we are on, and if we need to update
 		CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, summary) {
 if(err) throw err;
@@ -2272,8 +2282,12 @@ checkOpenedFiles();
 		
 		CLIENT.cmd("mercurial.update", {directory: fileDirectory}, function hgUpdate(err, resp) {
 					if(err) {
-						throw err;
+					
+					if(err.message.indexOf("conflicts while merging") != -1) {
+						checkForUnresolved(fileDirectory);
 					}
+					else throw err;
+				}
 					else {
 						
 						console.log("Mercurial: Update resp=" + JSON.stringify(resp));
@@ -2343,7 +2357,7 @@ if(callback) callback(null, filePath);
 }
 });
 }
-
+		});
 	}
 	
 	function figureOutDirectoryIfUndefined(fileDirectory) {
@@ -2356,7 +2370,14 @@ if(callback) callback(null, filePath);
 		return fileDirectory;
 	}
 		
-	function checkForUnresolved(fileDirectory, callback) {
+	function checkForUnresolved(fileDirectory, showAlert, callback) {
+		
+		if(typeof showAlert == "function") {
+			callback = showAlert;
+			showAlert = undefined;
+		}
+		
+		if(showAlert == undefined) showAlert = true;
 		
 		// Also checks for multiple heads if all files are resolved!
 		
@@ -2373,13 +2394,15 @@ if(callback) callback(null, filePath);
 				checkForMultipleHeads(fileDirectory, callback);
 			}
 			else if(resp.unresolved.length > 0) {
+				if(showAlert) alertBox("There are unresolved files!\nFix problems and then mark them as resolved.");
 				showResolveDialog(resp.resolved, resp.unresolved, fileDirectory);
-				if(callback) callback(null, resp);
+				//if(callback) callback(null, resp);
 			}
 			else {
 				// All files are resolved
+				if(showAlert) alertBox("All files are resolved. You need to commit!");
 				showCommitDialog();
-				if(callback) callback(null, resp);
+				//if(callback) callback(null, resp);
 			}
 			});
 	}
