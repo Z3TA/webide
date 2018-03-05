@@ -842,18 +842,6 @@ MERCURIAL.merge = function hgmerge(user, json, callback) {
 
 MERCURIAL.push = function hgpush(user, json, callback) {
 	
-	/*
-		
-		bash-4.3$ hg push --debug
-		pushing to https://github.com/Z3TA/jsql.git
-		finding hg commits to export
-		using auth.foo.* for authentication
-		http auth: user zeta@zetafiles.org, password ************
-		searching for changes
-		abort: branch 'refs/heads/master' changed on the server, please pull and merge before pushing
-		
-	*/
-	
 	var directory = UTIL.trailingSlash(json.directory);
 	var hguser = json.user;
 	var pw = json.pw;
@@ -869,38 +857,85 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 		var config = (hguser != undefined && pw != undefined) ? ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw] : [];
 		
 		var execFile = require('child_process').execFile;
-		execFile('hg', ['push', '--noninteractive'].concat(config), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		//execFile('hg', ['push', '--noninteractive'].concat(config), { cwd: localDirectory, env: execFileOptions.env }, function (err, stdout, stderr) {
+		
+			// hg push seem to return errorcode (err) when no changes are found !
 			
-			// hg push seem to return errorcode (err) when no changes found
+			var spawn = require('child_process').spawn;
+		var push = spawn("hg", ["push", "--noninteractive", "--debug"].concat(config), {cwd: rootDir, env: execFileOptions.env, shell: false});
+var stdout = "";
+var stderr = "";
+
+var progressCounter = 0;
+
+		push.stdout.on('data', function pushStdout(data) {
+stdout += data;
+
+			console.log("push stdout data=" + data);
 			
-			console.log("stderr=" + stderr);
-			console.log("stdout=" + stdout);
-			
-			if(stdout) {
+// todo: Better estimation on progress!
+progressCounter++;
+
+user.send({
+mercurialProgress: {
+max: Math.max(progressCounter,10),
+value: progressCounter
+}
+});
+
+});
+
+		push.stderr.on('data', function pushStderr(data) {
+stderr += data;
+});
+
+		push.on('error', function pushError(err) {
+console.log("stdout=" + stdout);
+console.log("stderr=" + stderr);
+
+			pushDone(err);
+
+});
+
+/*
+bash-4.3$ hg push --debug
+			pushing to https://github.com/Z3TA/jsql.git
+			finding hg commits to export
+			using auth.foo.* for authentication
+			http auth: user zeta@zetafiles.org, password ************
+			searching for changes
+			abort: branch 'refs/heads/master' changed on the server, please pull and merge before pushing
+*/
+
+		push.on('close', function pushClose(exitCode) {
+			if(stdout.length < 500) console.log("hg push stdout=" + stdout);
+			else console.log("hg push stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+
+//console.log("stdout=" + stdout);
+//console.log("stderr=" + stderr);
+
+console.log("exitCode=" + exitCode);
+
+if(exitCode || stderr) {
 				
-				var noChanges = stdout.match(/no changes found/);
+				var errMessage = stderr || stdout;
+				var noChanges = errMessage.match(/no changes found/);
+				if(noChanges) return pushDone(null, {changesets: null, remote: repoUrl, directory: user.toVirtualPath(rootDir)});
 				
+				var err = new Error(errMessage);
+err.code = exitCode;
+				return pushDone(err);
+}
+			
+			var noChanges = stdout.match(/no changes found/);
 				var matchPush = stdout.match(/pushing to (.*)/);
-				
 				var repoUrl = matchPush ? matchPush[1] : null;
 				
-			}
-			
 			console.log("repoUrl=" + repoUrl);
 			
-			if(err) {
-				if(noChanges) {
-					callback(null, {changesets: null, remote: repoUrl, directory: user.toVirtualPath(rootDir)});
-				}
-				else callback(err, {directory: user.toVirtualPath(rootDir)});
-			}
-			else if(stderr) callback(stderr, {directory: user.toVirtualPath(rootDir)});
-			else {
+			if(noChanges) return pushDone(null, {changesets: null, remote: repoUrl, directory: user.toVirtualPath(rootDir)});
 					
-					if(noChanges) {
-					callback(null, {changesets: null, remote: repoUrl, directory: user.toVirtualPath(rootDir)});
-					}
-					else {
+			
 						// Different servers returns different text ...
 						var resp = {
 							remote: repoUrl,
@@ -925,11 +960,11 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 							resp.files = matchUpdate[3];
 						}
 						
-					if(!matchUpdate) return callback(stdout, {directory: user.toVirtualPath(rootDir)});
-					else callback(null, resp);
+			if(!matchUpdate) return pushDone(stdout, {directory: user.toVirtualPath(rootDir)});
+			else pushDone(null, resp);
 						
-					}
 					
+				
 					if(saveUserPw) {
 						console.log("Saving mercurial credentials for user.name=" + user.name + " for repoUrl=" + repoUrl);
 						saveCredentialsInHgrc(user, localDirectory, repoUrl, hguser, pw, function hgrcSaved(err) {
@@ -938,8 +973,23 @@ MERCURIAL.push = function hgpush(user, json, callback) {
 						});
 					}
 					
-				}
-			});
+			function pushDone(err, resp) {
+					
+					if(resp == undefined || resp.directory == undefined) resp = {directory: user.toVirtualPath(rootDir)};
+					
+					if(callback) callback(err, resp);
+					callback = null;
+					
+					// show full progress
+					user.send({
+						mercurialProgress: {
+							max: progressCounter,
+							value: progressCounter
+						}
+					});
+				
+			}
+		});
 	});
 }
 
