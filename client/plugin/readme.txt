@@ -9,23 +9,23 @@ Make a .js file in the plugin directory. Or a new folder if you need many files 
 Encapsulate your plugin into a self calling function to avoid littering the global scope: (function() { ... })();
 
 
-Run the editor in devMode: Ctrl + D. Or add "editor.settings.devMode = true" in settings_overload.js
+Run the editor in devMode: Ctrl + D. Or add "EDITOR.settings.devMode = true" in settings_overload.js
 
 Keep your plugin completely separated/standalone from the other plugins!
-Only complex/intervene with the core files (editor.js or File.js).
+Only interact with the core files (EDITOR.js or File.js). Do NOT interface with other modules!
 
-Do not modify file.text directly. Instead add an abstraction layer method to File.js witch properly call file event listeners.
-Also feel free to add new methods and functions in editor.js and global.js
+Do not modify file.text directly. Instead add an abstraction layer method to File.js which properly call file event listeners.
+Also feel free to add new methods and functions in EDITOR.js and global.js
 
 
 Testing
 -------
-Add automatic tests using: editor.addTest(function nameOfYourTest(callback) { .... })
+Add automatic tests using: EDITOR.addTest(function nameOfYourTest(callback) { .... })
 Your test function should trow errors, or call the callback function with argument false, or true if the test succeeded.
 
 Place the test file(s) in the tests/ folder. (they will be loaded automatically)
 Encapsulate your test code into a self calling function to avoid littering the global scope: (function() { ... })();
-Or put "editor.addTest" in the plugin's code so it can access private variables.
+Or put "EDITOR.addTest" in the plugin's code so it can access private variables.
 
 Tips: Write "bug traps" and sanity checks like: if(foo != bar) throw new Error("Expected foo=" + foo + " to equal bar=" + bar); 
 
@@ -43,10 +43,10 @@ Name files using _ (underscore, instead of white spaces or camelCasing).
 Initiation / starting point
 ---------------------------
 A plugin that is just a key binding:
-editor.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() { ... }});
+EDITOR.bindKey({desc: "Show all keyBindings", fun: function showKeyBindings() { ... }});
 
 While more advanced plugins should call:
-editor.plugin({desc: "Open up the files from last session", order: 999, load: function reopenFiles() { ... }, unload: unloadReopenFiles});
+EDITOR.plugin({desc: "Open up the files from last session", order: 999, load: function reopenFiles() { ... }, unload: unloadReopenFiles});
 
 The name of the "fun" function should be descriptive to ease debugging.
 
@@ -69,15 +69,15 @@ Once the plugin is finished and all bugs have bean ironed out, leave the (import
 
 Putting stuff in the left column
 --------------------------------
-If you want scroll:auto, create a div with class "wrap". All "wrap" objects will be resized by editor.resize()
+If you want scroll:auto, create a div with class "wrap". All "wrap" objects will be resized by EDITOR.resize()
 
 
 
 Key binding
 -----------
-editor.keyBindings.push({charCode: charCode, combo: CTRL + SHIFT + ALT, fun: functionToRun});
+EDITOR.keyBindings.push({charCode: charCode, combo: CTRL + SHIFT + ALT, fun: functionToRun});
 
-See editor.js: function keyIsDown
+See EDITOR.js: function keyIsDown
 
 Note: Function bound to keys need to return true or false! When returning false, the default (chromium) behavior is prevented.
 
@@ -118,7 +118,7 @@ Test how fast your code run:
 console.time("nameOfTimer");
 console.timeEnd("nameOfTimer");
 
-Then set: editor.settings.devMode = false;
+Then set: EDITOR.settings.devMode = false;
 
 Open up the debugger (Ctrl+D, two times) to see the console messages.
 
@@ -176,7 +176,7 @@ The content of bootstrap.url must be a valid JSON file.
 
 If bootstrap.url is found by the editor, on a 200 OK, it will download and parse the content of that address and save it in localstorage
 
-The content can be accessed from editor.bootstrap. And plugins can use that info for auto configurations.
+The content can be accessed from EDITOR.bootstrap. And plugins can use that info for auto configurations.
 
 
 
