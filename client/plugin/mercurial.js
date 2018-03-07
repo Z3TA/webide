@@ -169,14 +169,15 @@
 				
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
+				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0) {
+					repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
+				}
+				
 				var versionControlString = "Version Control ...";
 				var versionControlMenuItem = EDITOR.addTempMenuItem(versionControlString, false, showVersionControlWidget);
 				if(versionControlWidget.visible) EDITOR.updateMenuItem(versionControlMenuItem, true, versionControlString, hideVersionControlWidget);
 				else EDITOR.updateMenuItem(versionControlMenuItem, false, versionControlString, showVersionControlWidget);
 				
-				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0) {
-				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
-				}
 				
 				/*
 					
