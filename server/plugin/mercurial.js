@@ -868,6 +868,10 @@ var stderr = "";
 
 var progressCounter = 0;
 
+		sendProgress(0);
+		
+		var progressInterval = setInterval(sendProgress, 500); // Fake progress
+		
 		push.stdout.on('data', function pushStdout(data) {
 stdout += data;
 
@@ -876,13 +880,7 @@ stdout += data;
 // todo: Better estimation on progress!
 progressCounter++;
 
-user.send({
-mercurialProgress: {
-max: Math.max(progressCounter,10),
-value: progressCounter
-}
-});
-
+			sendProgress();
 });
 
 		push.stderr.on('data', function pushStderr(data) {
@@ -933,6 +931,8 @@ bash-4.3$ hg push --debug
 
 console.log("exitCode=" + exitCode);
 
+			clearInterval(progressInterval);
+			
 if(exitCode || stderr) {
 				
 				var errMessage = stderr || stdout;
@@ -998,15 +998,22 @@ err.code = exitCode;
 					callback = null;
 					
 					// show full progress
-					user.send({
-						mercurialProgress: {
-							max: progressCounter,
-							value: progressCounter
-						}
-					});
+				sendProgress(progressCounter, progressCounter);
 				
 			}
+			
 		});
+		
+		function sendProgress(value, max) {
+			if(value == undefined) value = progressCounter++;
+			if(max == undefined) max = Math.max(progressCounter,20);
+			user.send({
+				mercurialProgress: {
+					max: max,
+					value: value
+				}
+			});
+		}
 	});
 }
 
