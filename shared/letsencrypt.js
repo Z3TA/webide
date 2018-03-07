@@ -52,7 +52,10 @@ letsencrypt.register = function register(domain, adminEmail, callback) {
 		if(exitCode || stderr) {
 			var err = new Error(stderr);
 			err.code = exitCode;
+			
 			if(callback) callback(err);
+			else console.warn(err.message);
+			
 			callback = null;
 			return;
 		}

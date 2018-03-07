@@ -52,6 +52,7 @@ var NO_PW_HASH = getArg(["nopwhash"]);
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 var NOZFS = !!getArg(["nozfs", "nozfs"]);
 var HOME = getArg(["home", "home"]) || defaultHome;
+var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
 if(HOME.charAt(0) != "/") throw new Error("HOME needs to be an absolute path! (start with a slash) HOME=" + HOME);
 // Only linux or other unix-like systems are supported (sorry Windows)
@@ -320,6 +321,10 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
 	}
 	
+		// Register SSL certificate for user web page
+		var letsencrypt = require("./shared/letsencrypt.js");
+		letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL);
+		
 		
 		// Create a hard link to nodejs for use with user_worker.js so that we can have a separate apparmor profile on it and still use nodejs fork
 		//fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
