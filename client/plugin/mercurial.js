@@ -169,9 +169,10 @@
 				
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
-				
-				if(!versionControlWidget.visible) EDITOR.addTempMenuItem("Version Control ...", false, showVersionControlWidget);
-				
+				var versionControlString = "Version Control ...";
+				var versionControlMenuItem = EDITOR.addTempMenuItem(versionControlString, false, showVersionControlWidget);
+				if(versionControlWidget.visible) EDITOR.updateMenuItem(versionControlMenuItem, true, versionControlString, hideVersionControlWidget);
+				else EDITOR.updateMenuItem(versionControlMenuItem, false, versionControlString, showVersionControlWidget);
 				
 				if(status.modified.length != 0 || status.added.length != 0 || status.removed.length != 0 || status.missing.length != 0) {
 				repoCommitMenuItem = EDITOR.addTempMenuItem("Commit", false, showCommitDialog);
@@ -2068,6 +2069,11 @@ console.log("mercurial.status : " + JSON.stringify(status));
 	function showVersionControlWidget() {
 		EDITOR.hideMenu();
 		versionControlWidget.show();
+	}
+	
+	function hideVersionControlWidget() {
+		EDITOR.hideMenu();
+		versionControlWidget.hide();
 	}
 	
 	function mercurialPullFromRepo(fileDirectory) {
