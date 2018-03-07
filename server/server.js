@@ -3,7 +3,7 @@
 
 "use strict";
 
-var DEFAULT = require("default.json");
+var DEFAULT = require("../default.js");
 
 var getArg = require("../shared/getArg.js");
 
@@ -648,7 +648,7 @@ var defaultDomain = DEFAULT.domain;
 															
 															nginxProfileOK = true;
 															
-															checkSllCert();
+														checkSslCert();
 															
 															checkMountsReadyMaybe();
 														});
@@ -658,7 +658,7 @@ var defaultDomain = DEFAULT.domain;
 												else {
 													nginxProfileOK = true;
 													
-													checkSSlCert();
+												checkSslCert();
 													
 													checkMountsReadyMaybe();
 												}
@@ -937,85 +937,96 @@ var defaultDomain = DEFAULT.domain;
 								
 								function checkSslCert() {
 									// Check ssl certificate
-									fs.stat("/etc/ssl/certs/letsencrypt/" + username + "." + DOMAIN + ".crt", function(err, stat) {
-										if(err == null) {
-											// The certificate exist!
+								fs.stat("/etc/letsencrypt/live/" + username + "." + DOMAIN + + "/fullchain.pem", function(err, stat) {
+									if(err == null) {
+										// The certificate exist!
+										sslCertChecked = true;
+										checkMountsReadyMaybe();
+									} else if(err.code == 'ENOENT') {
+										// the cert does not exist. Try to register it
+										var letsencrypt = require("../shared/letsencrypt.js");
+										letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL, function(err) {
+											if(err) {
+												if(err.code == "ENOENT") console.warn("certbot not installed!");
+												else throw err;
+											}
+											else {
+												console.log("SSL certificate for " + username + "." + DOMAIN + " installed!");
+											}
 											sslCertChecked = true;
 											checkMountsReadyMaybe();
-										} else if(err.code == 'ENOENT') {
-											// the cert does not exist. Try to register it
-											
-											
-										} else {
-											throw err;
-										}
-									});
-								}
-							} // checkMounts
-							
-							
-							function acceptUser() {
-								
-								if(gid == undefined) gid = uid;
-								
-								if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-									USER_CONNECTIONS[userConnectionName] = {
-										connections: [connection],
-										counter: 0
+										});
+										
+									} else {
+										throw err;
 									}
-									userConnectionId = 0;
+								});
+							}
+						} // checkMounts
+						
+						
+						function acceptUser() {
+							
+							if(gid == undefined) gid = uid;
+							
+							if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+								USER_CONNECTIONS[userConnectionName] = {
+									connections: [connection],
+									counter: 0
 								}
-								else {
-									USER_CONNECTIONS[userConnectionName].connections.push(connection);
-									userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
+								userConnectionId = 0;
+							}
+							else {
+								USER_CONNECTIONS[userConnectionName].connections.push(connection);
+								userConnectionId = ++USER_CONNECTIONS[userConnectionName].counter;
+							}
+							
+							userWorker = createUserWorker(userConnectionName, uid, gid);
+							
+							var userInfo = {name: userConnectionName, rootPath: rootPath, homeDir: homeDir, shell: shell};
+							
+							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
+							
+							userWorker.send({identify: userInfo});
+							userWorker.on("message", messageFromWorker);
+							userWorker.on("exit", workerExitHandler);
+							
+							/*
+								setTimeout(function() {
+								user.send({resp: {
+								test: {foo: 1, bar: 2}
+								}});
+								
+								}, 3000);
+							*/
+							
+							console.log("userConnectionId=" + userConnectionId);
+							
+							var installDirectory = "/";
+							
+							if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
+							else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
+							
+							send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
+							
+							if(commandQueue.length > 0) {
+								console.log("Running " + commandQueue.length + " commands from the command queue ...");
+								for(var i=0; i<commandQueue.length; i++) {
+									handleUserMessage(commandQueue[i]);
 								}
+								commandQueue.length = 0;
+							}
+							
+							return true;
+							
+							function messageFromWorker(workerMessage, handle) {
+								console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 								
-								userWorker = createUserWorker(userConnectionName, uid, gid);
-								
-								var userInfo = {name: userConnectionName, rootPath: rootPath, homeDir: homeDir, shell: shell};
-								
-								log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
-								
-								userWorker.send({identify: userInfo});
-								userWorker.on("message", messageFromWorker);
-								userWorker.on("exit", workerExitHandler);
-								
-								/*
-									setTimeout(function() {
-									user.send({resp: {
-									test: {foo: 1, bar: 2}
-									}});
-									
-									}, 3000);
-								*/
-								
-								console.log("userConnectionId=" + userConnectionId);
-								
-								var installDirectory = "/";
-								
-								if(NO_CHROOT) installDirectory = __dirname.replace(/\/server$/, "/");
-								else log("userConnectionName=" + userConnectionName + " NO_CHROOT=" + NO_CHROOT);
-								
-								send({resp: {loginSuccess: {user: userConnectionName, cId: userConnectionId, installDirectory: installDirectory}}});
-								
-								if(commandQueue.length > 0) {
-									console.log("Running " + commandQueue.length + " commands from the command queue ...");
-									for(var i=0; i<commandQueue.length; i++) {
-										handleUserMessage(commandQueue[i]);
-									}
-									commandQueue.length = 0;
-								}
-								
-								return true;
-								
-								function messageFromWorker(workerMessage, handle) {
-									console.log("Worker message from " + userConnectionName + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
-									
-									if(workerMessage.resp || workerMessage.error) send(workerMessage);
-									else if(workerMessage.message) {
-										if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-											for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
-												send(workerMessage.message, USER_CONNECTIONS[userConnectionName].connections[i]);
+								if(workerMessage.resp || workerMessage.error) send(workerMessage);
+								else if(workerMessage.message) {
+									if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+										for (var i=0, conn; i<USER_CONNECTIONS[userConnectionName].connections.length; i++) {
+											send(workerMessage.message, USER_CONNECTIONS[userConnectionName].connections[i]);
 											}
 										}
 									}

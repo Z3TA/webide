@@ -19,7 +19,7 @@
 	
 */
 
-var DEFAULT = require("./default.json");
+var DEFAULT = require("./default.js");
 
 var UTIL = require("./client/UTIL.js");
 
@@ -33,7 +33,7 @@ var chownrSync = require("./shared/chownrSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
 
 var defaultDomain = DEFAULT.domain;;
-var defaultHome = DEFAULT.home-dir;
+var defaultHome = DEFAULT.home_dir;
 
 // Get arguments ...
 var getArg = require("./shared/getArg.js");

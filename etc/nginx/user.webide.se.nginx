@@ -1,14 +1,25 @@
- server {
+
+# Redirect to https:
+server {
   listen 80;
-  listen [::]:80 ipv6only=on;
-  #listen 443 ssl;
+  listen [::]:80;
+  server_name %USERNAME%.%DOMAIN%;
+  return 301 https://%USERNAME%.%DOMAIN%$request_uri;
+}
+
+server {
+  #listen 80;
+  #listen [::]:80 ipv6only=on;
+  listen 443 ssl;
+  listen [::]:443 ssl;
   server_name %USERNAME%.%DOMAIN%;
   root %HOMEDIR%wwwpub/;
   index index.html index.htm;
 
+  ssl_certificate      /etc/letsencrypt/live/%USERNAME%.webide.se/fullchain.pem;
+  ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.webide.se/privkey.pem;
 
   access_log %HOMEDIR%log/access.log combined;
-
 
   location / {
     charset	utf-8;
@@ -22,7 +33,6 @@
   #  add_header 'Access-Control-Allow-Origin' '*';
   #}
 
-
   location ~/_([^/]+) {
     # Anything starting with an underscore
     # Upgrade to websocket (if possible)
@@ -34,14 +44,6 @@
     proxy_set_header connection "upgrade";
 
     add_header 'Access-Control-Allow-Origin' '*';
-  }
-
-
-  # Lets encrypt challange
-  location /.well-known/acme-challenge/ {
-    proxy_pass http://127.0.0.1:8094;
-    proxy_set_header  host       $http_host;
-    proxy_set_header  x-real-ip  $remote_addr;
   }
 
 }
