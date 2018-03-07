@@ -1,23 +1,23 @@
 
 # Redirect to https:
-server {
-  listen 80;
-  listen [::]:80;
-  server_name %USERNAME%.%DOMAIN%;
-  return 301 https://%USERNAME%.%DOMAIN%$request_uri;
-}
+#SSL#server {
+  #SSL#listen 80;
+  #SSL#listen [::]:80;
+  #SSL#server_name %USERNAME%.%DOMAIN%;
+  #SSL#return 301 https://%USERNAME%.%DOMAIN%$request_uri;
+#SSL#}
 
 server {
-  #listen 80;
-  #listen [::]:80 ipv6only=on;
-  listen 443 ssl;
-  listen [::]:443 ssl;
+  listen 80;
+  listen [::]:80 ipv6only=on;
+  #SSL#listen 443 ssl;
+  #SSL#listen [::]:443 ssl;
   server_name %USERNAME%.%DOMAIN%;
   root %HOMEDIR%wwwpub/;
   index index.html index.htm;
 
-  ssl_certificate      /etc/letsencrypt/live/%USERNAME%.webide.se/fullchain.pem;
-  ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.webide.se/privkey.pem;
+  #SSL#ssl_certificate      /etc/letsencrypt/live/%USERNAME%.webide.se/fullchain.pem;
+  #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.webide.se/privkey.pem;
 
   access_log %HOMEDIR%log/access.log combined;
 

@@ -74,8 +74,12 @@ letsencrypt.register = function register(domain, adminEmail, callback) {
 			var err = new Error(stderr);
 			err.code = exitCode;
 			
+			if(stderr.match(/too many failed authorizations recently/)) {
+				err.code = "RATE_LIMIT";
+			}
+			
 			if(callback) callback(err);
-			else console.warn(err.message);
+			else console.warn("CERTBOT ERROR: " + err.message);
 			
 			callback = null;
 			return;

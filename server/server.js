@@ -937,6 +937,11 @@ var defaultDomain = DEFAULT.domain;
 								
 								function checkSslCert() {
 									// Check ssl certificate
+								
+								sslCertChecked = true;
+								checkMountsReadyMaybe();
+								return;
+								
 								var certPath = "/etc/letsencrypt/live/" + username + "." + DOMAIN + "/fullchain.pem";
 								fs.stat(certPath, function(err, stat) {
 									if(err == null) {
@@ -951,10 +956,15 @@ var defaultDomain = DEFAULT.domain;
 										letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL, function(err) {
 											if(err) {
 												if(err.code == "ENOENT") console.warn("certbot not installed!");
+												else if(err.code == "RATE_LIMIT") console.warn("Unable to create letsencrypt cert because of rate limit!");
 												else throw err;
 											}
 											else {
 												console.log("SSL certificate for " + username + "." + DOMAIN + " installed!");
+											
+												// Enable SSL on the site
+												
+											
 											}
 											sslCertChecked = true;
 											checkMountsReadyMaybe();
