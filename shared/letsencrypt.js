@@ -35,8 +35,8 @@ letsencrypt.register = function register(domain, adminEmail, callback) {
 	});
 	
 	certbot.on('error', function certbotError(err) {
-		console.log("stdout=" + stdout);
-		console.log("stderr=" + stderr);
+		console.log("ERROR: stdout=" + stdout);
+		console.log("ERROR: stderr=" + stderr);
 		if(callback) callback(err);
 		callback = null;
 	});
@@ -46,10 +46,31 @@ letsencrypt.register = function register(domain, adminEmail, callback) {
 		else console.log("certbot stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
 		//console.log("certbot stdout=" + stdout);
 		console.log("certbot stderr=" + stderr);
-		
 		console.log("certbot exitCode=" + exitCode);
 		
-		if(exitCode || stderr) {
+		/*
+			
+			-------------------------------------------------------------------------------
+			Certificate not yet due for renewal; no action taken.
+			-------------------------------------------------------------------------------
+			
+			certbot stderr=Saving debug log to /var/log/letsencrypt/letsencrypt.log
+			Plugins selected: Authenticator nginx, Installer nginx
+			Starting new HTTPS connection (1): acme-v01.api.letsencrypt.org
+			Cert not yet due for renewal
+			Keeping the existing certificate
+			
+			certbot exitCode=0
+			Saving debug log to /var/log/letsencrypt/letsencrypt.log
+			Plugins selected: Authenticator nginx, Installer nginx
+			Starting new HTTPS connection (1): acme-v01.api.letsencrypt.org
+			Cert not yet due for renewal
+			Keeping the existing certificate
+			
+			
+		*/
+		
+		if(exitCode) {
 			var err = new Error(stderr);
 			err.code = exitCode;
 			
