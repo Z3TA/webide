@@ -937,12 +937,15 @@ var defaultDomain = DEFAULT.domain;
 								
 								function checkSslCert() {
 									// Check ssl certificate
-								fs.stat("/etc/letsencrypt/live/" + username + "." + DOMAIN + + "/fullchain.pem", function(err, stat) {
+								var certPath = "/etc/letsencrypt/live/" + username + "." + DOMAIN + "/fullchain.pem";
+								fs.stat(certPath, function(err, stat) {
 									if(err == null) {
 										// The certificate exist!
 										sslCertChecked = true;
 										checkMountsReadyMaybe();
-									} else if(err.code == 'ENOENT') {
+									}
+									else if(err.code == 'ENOENT') {
+										console.log("ENOENT: certPath=" + certPath);
 										// the cert does not exist. Try to register it
 										var letsencrypt = require("../shared/letsencrypt.js");
 										letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL, function(err) {
@@ -956,12 +959,14 @@ var defaultDomain = DEFAULT.domain;
 											sslCertChecked = true;
 											checkMountsReadyMaybe();
 										});
-										
-									} else {
+										}
+									else {
+										// Another error
 										throw err;
 									}
 								});
 							}
+							
 						} // checkMounts
 						
 						
