@@ -1,0 +1,8 @@
+/*
+	Default server settings 
+*/
+module.exports = {
+	admin_email: "zeta@zetafiles.org",
+	domain: "webide.se",
+	home_dir: "/home/"
+	}

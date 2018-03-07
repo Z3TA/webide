@@ -19,6 +19,8 @@
 	
 */
 
+var DEFAULT = require("./default.json");
+
 var UTIL = require("./client/UTIL.js");
 
 var fs = require("fs");
@@ -30,8 +32,8 @@ var chmodrDirSync = require("./shared/chmodrDirSync.js");
 var chownrSync = require("./shared/chownrSync.js");
 var chownrDirSync = require("./shared/chownrDirSync.js");
 
-var defaultDomain = "webide.se";
-var defaultHome = "/home/";
+var defaultDomain = DEFAULT.domain;;
+var defaultHome = DEFAULT.home-dir;
 
 // Get arguments ...
 var getArg = require("./shared/getArg.js");

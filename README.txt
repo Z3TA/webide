@@ -221,6 +221,16 @@ sudo aa-complain /home/demo/usr/bin/hg
 sudo aa-enforce /home/demo/usr/bin/hg
 
 
+Installing certbot (letsencrypt)
+--------------------------------
+$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo add-apt-repository ppa:certbot/certbot
+$ sudo apt-get update
+$ sudo apt-get install python-certbot-nginx 
+
+
+
 
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
