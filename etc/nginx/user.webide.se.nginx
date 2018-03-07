@@ -1,6 +1,6 @@
  server {
   listen 80;
-  #listen [::]:80 ipv6only=on;
+  listen [::]:80 ipv6only=on;
   #listen 443 ssl;
   server_name %USERNAME%.%DOMAIN%;
   root %HOMEDIR%wwwpub/;

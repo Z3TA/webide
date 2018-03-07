@@ -38,6 +38,11 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+letsencrypt ipv6!!
+
+Letsencrypt cert for each webide user so they can serve their stuff under https (for basic browser stuff to work)
+example: Blocked loading mixed active content “http://johan.webide.se/_jsql/sockjs/info?t=1520416425180”
+
 
 
 implementing jsql example on webide.se
