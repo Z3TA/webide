@@ -940,7 +940,7 @@ var defaultDomain = DEFAULT.domain;
 								var certPath = "/etc/letsencrypt/live/" + username + "." + DOMAIN + "/fullchain.pem";
 								fs.stat(certPath, function(err, stat) {
 									if(err == null) {
-										// The certificate exist!
+										console.log("SSL certificate for " + username + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
 										checkMountsReadyMaybe();
 									}
