@@ -3,6 +3,8 @@
 #
 # Send error report
 #
+#  cp etc/systemd/systemd-email.sh /usr/local/bin/
+#
 
 /usr/bin/sendmail -t <<ERRMAIL
 To: $1

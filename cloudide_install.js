@@ -56,7 +56,7 @@ exec("apt install apparmor -y");
 // %n passes the unit's name to the template.
 console.log("Installing status-email-user@.service");
 exec("apt install sendmail -y");
-exec("cp etc/systemd/systemd-email.sh /usr/local/bin/systemd-email.sh");
+exec("cp etc/systemd/systemd-email.sh /usr/local/bin/");
 var reportService = fs.readFileSync("./etc/systemd/status-email-user@.service", ENCODING);
 reportService = reportService.replace("zeta@zetafiles.org", ADMIN_EMAIL);
 fs.writeFileSync("/etc/systemd/system/status-email-user@.service", reportService);
