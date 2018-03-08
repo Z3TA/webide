@@ -38,6 +38,16 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+dont't remove info message when scrolling (only when moving the cursor)
+
+
+Does apparmor even work on webide !?
+on dev machine:
+Failed to install dependencies: spawn /usr/share/npm/bin/npm-cli.js ENOENT
+
+
+need progress bar when cloning a repo!
+
 Having nodejs stdout in *another* file (tab) is annoying. 
 
 Finding the editor tab in the browser after visiting a web page (documentation, reference) is annoying.

@@ -141,7 +141,7 @@
 			var row = line-1;
 			//if(file.rowVisible(row)) {
 			var rowText = file.rowText(row, false);
-			var col = rowText.indexOf("console.log");
+			var col = rowText.indexOf("console.log") + 12;
 			var txt = msg["console.log"];
 			txt = txt.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
 			txt = txt.replace(">", "&gt;");

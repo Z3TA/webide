@@ -1065,10 +1065,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	npmExecFileOptions.cwd = directory;
 	
+	var patchedFilePath = filePath + ".tmp";
+	
 	var fs = require("fs");
+	
 	fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
 		if(err) {
-			if(err.code == "ENOENT") runIt(false);
+			if(err.code == "ENOENT") patchIt(false);
 			else return callback(err);
 		}
 		else {
@@ -1077,7 +1080,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				var packageObj = JSON.parse(packageTxt);
 		}
 			catch(parseError) {
-				return runIt(false);
+				return patchIt(false);
 			}
 			
 			// package.json was found. Lets make sure dependencies exist
@@ -1101,18 +1104,59 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 					if(stdout) {
 					user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
 					}
-					return runIt(true);
+				return patchIt(true);
 					
 			});
 			
 		}
 	});
 	
+	function patchIt(packageJsonExist) {
+		
+		// Patch the file with debugging console.log's
+		fs.readFile(filePath, "utf8", function read(err, data) {
+			if(err) return callback(err);
+			
+			data = data.replace(/(console\.log ?\(.*\))/g, "__C_S_L_O_G_O_R('\x02' + __line);$1");
+			
+			var debugFunc = `
+			Object.defineProperty(global, '__stack', {
+				get: function(){
+					var orig = Error.prepareStackTrace;
+					Error.prepareStackTrace = function(_, stack){ return stack; };
+					var err = new Error;
+					Error.captureStackTrace(err, arguments.callee);
+					var stack = err.stack;
+					Error.prepareStackTrace = orig;
+					return stack;
+				}
+			});
+			
+			Object.defineProperty(global, '__line', {
+				get: function(){
+					return __stack[1].getLineNumber();
+				}
+			});
+			
+			var __C_S_L_O_G_O_R = console.log;
+			`;
+			
+			// 19 lines
+			
+			data = debugFunc + data;
+			
+			fs.writeFile(patchedFilePath, data, function write(err) {
+				if(err) throw err;
+				
+				runIt(packageJsonExist);
+			});
+			});
+	}
+	
 	function runIt(packageJsonExist) {
 		
 		//if(debugit) runDebugger();
 		//else runScript();
-		
 		
 	console.log(user.name + " starting NodeJS script: filePath=" + filePath);
 		
@@ -1122,6 +1166,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var whenDebuggerReady;
 		var nodeScript;
 		var nodeScriptArgs = args.split(" ");
+		var lineNr = 0;
 		
 		if(USE_CHROOT) {
 			var nodejsPath = "/usr/bin/nodejs";
@@ -1170,7 +1215,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		
 		function start() {
 			var child_process = require("child_process");
-			nodeScript = child_process.fork(filePath, nodeScriptArgs, nodeScriptOptions);
+			nodeScript = child_process.fork(patchedFilePath, nodeScriptArgs, nodeScriptOptions);
 			// The node worker will chroot to user's home dir, setegid and seteuid
 			
 			nodeScript.on("message", messageFromNodeScript);
@@ -1217,9 +1262,17 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		}
 		
 		function nodejsScriptStdout(data) {
-			var text = data.toString("utf8");
+			var text = data.toString("utf8").trim();
 			console.log(user.name + ":" + filePath + ":stdout: " + data + "");
 			console.log("text=" + debugText(text) + "  nextBreakPoint=" + JSON.stringify(nextBreakPoint));
+			
+			if(lineNr) {
+				user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": text}});
+				lineNr = 0;
+				return;
+			}
+			
+			if(text.charAt(0) == "\x02") return parseLines(text);
 			
 			if(debugit) {
 				
@@ -1262,6 +1315,51 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			}
 			else {
 				user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
+			}
+			
+			function parseLines(text) {
+/*
+
+text can contain many console.logs!
+
+*/
+
+var newLine = text.indexOf("\n");
+
+if(newLine == -1) {
+lineNr = parseInt(text.slice(1)) - 20;
+return; // next stdout will be a console.log !
+}
+else {
+// text contains one ore more lines
+lineNr = parseInt(text.slice(1, newLine)) - 20;
+var lines = text.trim().split("\n");
+lines.shift(); // Remove the line with ESC + lineNr
+
+					var lineText = "";
+					var string = "";
+					
+while(lines.length > 0) {
+						lineText = lines.shift();
+						if(lineText.charAt(0) == "\x02") {
+							// a new console log
+							if(string) {
+								// send last console.log
+								user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": string.trim()}});
+								string = "";
+							}
+							lineNr = parseInt(text.slice(1)) - 20;
+}
+						else {
+							// asume it's the same console.log but it has many lines
+							string += "\n" + lineText;
+}
+					}
+					if(string) {
+						user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": string.trim()}});
+						}
+					lineNr = 0;
+				}
 			}
 			
 			function checkText() {
