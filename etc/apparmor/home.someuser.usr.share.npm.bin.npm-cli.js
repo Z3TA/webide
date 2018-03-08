@@ -27,6 +27,6 @@
 
     %HOME%%USERNAME%/usr/local/** rw,
     
-  /usr/bin/nodejs ix,
+  %HOME%%USERNAME%/usr/bin/nodejs ix,
 
 }
