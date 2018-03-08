@@ -38,14 +38,11 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-problem: Can't activate SSL before we got a cert!
+Having nodejs stdout in *another* file (tab) is annoying. 
 
-what about users .nginx profiles !? Should we update them when new stuff are addded !?!?
+Finding the editor tab in the browser after visiting a web page (documentation, reference) is annoying.
 
-Letsencrypt cert for each webide user so they can serve their stuff under https (for basic browser stuff to work)
-example: Blocked loading mixed active content “http://johan.webide.se/_jsql/sockjs/info?t=1520416425180”
-
-
+Fighting the CORS-hydra
 
 implementing jsql example on webide.se
 
