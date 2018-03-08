@@ -1,0 +1,14 @@
+#
+#  For sending an e-mail when a service crashes
+#
+#  Yes, it MUST be named @.service
+#
+
+[Unit]
+Description=status email for %i to user
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/systemd-email.sh zeta@zetafiles.org %i
+User=nobody
+Group=systemd-journal
