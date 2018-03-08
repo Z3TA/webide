@@ -6,7 +6,11 @@
 #  cp etc/systemd/systemd-email.sh /usr/local/bin/
 #
 
-/usr/bin/sendmail -t <<ERRMAIL
+echo "Sending report ..."
+
+# Ubuntu has sendmail in /usr/sbin/
+
+sendmail -t <<ERRMAIL
 To: $1
 From: systemd <root@$HOSTNAME>
 Subject: $2
