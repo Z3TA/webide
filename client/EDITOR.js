@@ -2262,11 +2262,16 @@ callback(err);
 				//console.log("imgArray=" + imgArray.length);
 				
 				// Remove all text at next editor interaction
-				EDITOR.onNextInteraction(function() {
+			// nope: They will be removed when moving the cursor
+			/*
+				EDITOR.onNextInteraction(function(ev) {
+				console.log("editor interaction ev=", ev);
+				if(ev == "mouseMove") return;
 					console.warn("Clearing info! row=" + row + " col=" + col + " txt=" + JSON.stringify(txt));
 					EDITOR.removeAllInfo(row, col);
 				});
-				
+			*/
+			
 				// Check if there's already info on that positioin
 				for(var i=0; i<info.length; i++) {
 					if(info[i].row == row && info[i].col == col) {
@@ -2324,8 +2329,9 @@ callback(err);
 		
 		EDITOR.removeAllInfo = function(row, col, txt) {
 			// Find the item in the array, then splice it ...
-			var info = EDITOR.info;
 			
+		var info = EDITOR.info;
+		
 			for(var i=0; i<info.length; i++) {
 				if(info[i].row == row && info[i].col == col) {
 					
@@ -4142,6 +4148,8 @@ callback(err);
 			
 			EDITOR.on("moveCaret", function mirrorCaretMovement(file, caret) {
 				
+			EDITOR.info.length = 0; // Clear info messages
+			
 				if(caret == file.caret && EDITOR.collaborationMode) {
 					CLIENT.cmd("mirror", {
 						object: "FILE", 
