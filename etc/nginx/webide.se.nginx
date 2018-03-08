@@ -20,15 +20,17 @@ server {
 server {
 
   listen 443 ssl;
-  ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
-  ssl_certificate_key  /etc/ssl/private/webide.se.key;
 
- 
-  listen [::]:443 ipv6only=on ssl;
+  #listen [::]:443 ipv6only=on ssl;
+  listen [::]:443 ssl;
   # Remove "ipv6only=on" if you have more then one site on ipv6   
 
   server_name webide.se;
   charset utf-8;
+
+  # todo: let certbot handle the certificate
+  ssl_certificate      /etc/ssl/certs/letsencrypt/webide.se.crt;
+  ssl_certificate_key  /etc/ssl/private/webide.se.key;
 
   gzip on;
   gzip_types text/plain text/html text/javascript application/json;
