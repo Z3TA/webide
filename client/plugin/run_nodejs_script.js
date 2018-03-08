@@ -259,13 +259,15 @@
 			var method = file.writeLine.bind(file);;
 		}
 		
+		if(msg.stderr) method(msg.stderr);
+		
 		if(msg.stdout) method( (msg.type ? msg.type + ": " : "") + msg.stdout );
-		else if(msg.stderr) method(msg.stderr);
-		else if(msg.exit) method(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+		if(msg["console.log"]) method(msg["console.log"]);
 		
-		
-		EDITOR.renderNeeded();
-	}
+			if(msg.exit) method(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+			
+			EDITOR.renderNeeded();
+		}
 	
 	
 })();
