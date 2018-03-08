@@ -972,6 +972,9 @@ function sockJsConnection(connection) {
 												else {
 													console.warn(err.message);
 												}
+												
+												sslCertChecked = true;
+												return checkMountsReadyMaybe();
 											}
 											else {
 												console.log("SSL certificate for " + username + "." + DOMAIN + " installed!");
@@ -1000,8 +1003,6 @@ function sockJsConnection(connection) {
 														});
 												});
 											}
-											sslCertChecked = true;
-											return checkMountsReadyMaybe();
 										});
 									}
 									else {
