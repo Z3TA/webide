@@ -982,10 +982,19 @@ function sockJsConnection(connection) {
 													if(err) throw err;
 													data = data.replace(/#SSL#/g, "");
 													fs.writeFile(nginxProfilePath, data, function(err) {
-														console.log("SSL enabled: " + nginxProfilePath);
 														if(err) throw err;
-														sslCertChecked = true;
-														return checkMountsReadyMaybe();
+														
+														console.log("SSL enabled: " + nginxProfilePath);
+														
+														var exec = require('child_process').exec;
+														exec("service nginx reload", function(error, stdout, stderr) {
+															if(error) throw(error);
+															if(stderr) throw new Error(stderr);
+															if(stdout) throw new Error(stdout);
+															
+															sslCertChecked = true;
+															return checkMountsReadyMaybe();
+														});
 														});
 												});
 											}
