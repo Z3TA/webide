@@ -21,7 +21,9 @@
 
 var getArg = require("./shared/getArg.js");
 
-var DEFAULT_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org"; // Errors with This script is sent here
+var DEFAULT = require("default.js");
+
+var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 
 var UTIL = require("./client/UTIL.js");
 
@@ -32,8 +34,8 @@ var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
 
 // For sending errors via email to an admin
-var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
-var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
+var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
+var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
 var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
 var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
 
@@ -688,7 +690,7 @@ function initError(err) {
 	
 	log(position + "\n    " + err.message, 3);
 	
-	sendMail(DEFAULT_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\n Arguments:\n" + process.argv.join("\n"));
+	sendMail(ADMIN_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\n Arguments:\n" + process.argv.join("\n"));
 	
 	process.exit(1);
 }

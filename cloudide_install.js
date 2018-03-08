@@ -32,32 +32,36 @@ exec("chmod +x adduser.js");
 
 
 var HOSTNAME = getArg(["host", "host", "hostname", "domain"]); // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
+var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin_email", "admin_mail"]); // E-mail address for letsencrypt
 
 if(!HOSTNAME) throw new Error("Please specify the host/domain name that will be used to access the Cloud IDE. Argument: --domain=yourdomain.com")
+if(!ADMIN_EMAIL) throw new Error("Please specify the e-mail address for the administartor Argument: --mail=admin@yourdomain.com")
 
 var ENCODING = "utf-8";
+
+
+// Edit default's
+var defaults = fs.readFileSync("default.js", ENCODING);
+defaults = defaults.replace("zeta@zetafiles.org", ADMIN_EMAIL);
+defaults = defaults.replace("webide.se", HOSTNAME);
+fs.writeFileSync("default.js", defaults);
+
 
 // Install apparmor for extra security, each user will have their own apparmor profile that only allow them to access their home dir
 exec("apt install apparmor -y");
 
-// User file
-fs.writeFileSync("/etc/jzedit_users", "");
 
 
 	// Install the cloud-IDE service that runs server/server.js
 console.log("Installing jzedit.service");
 	var jzedit_service = fs.readFileSync("etc/systemd/jzedit.service", ENCODING);
-	jzedit_service = jzedit_service.replace(/webide\.se/g, HOSTNAME);
+jzedit_service = jzedit_service.replace("webide.se", HOSTNAME);
+jzedit_service = jzedit_service.replace("zeta@zetafiles.org", ADMIN_EMAIL);
 fs.writeFileSync("/etc/systemd/system/jzedit.service", jzedit_service);
 	exec("systemctl enable jzedit");
 	
 
-// Install service that makes sure folders are mounted into the users home dirs for programs to work under choroot
-console.log("Installing jzedit_user_mounts.service");
-exec("cp etc/systemd/jzedit_user_mounts.service /etc/systemd/system/jzedit_user_mounts.service");
-exec("systemctl enable jzedit_user_mounts");
 
-	
 // Signup service to let users signup
 	// If you enable automatic signup you probably also want to edit client/signup/signup.html
 console.log("Installing jzedit_signup.service");
@@ -120,11 +124,23 @@ console.log("Installing NPM");
 exec("apt install npm -y");
 
 
+console.log("Installing Letsencrypt's certbot");
+exec("apt-get install software-properties-common -y");
+exec("add-apt-repository ppa:certbot/certbot -y");
+exec("apt-get update");
+exec("apt-get install python-certbot-nginx -y");
+
+
 console.log("Finish!");
 
-console.log("P.S: You probably have to edit /etc/nginx/sites-available/" + HOSTNAME + ".nginx and\
- /etc/nginx/sites-available/signup." + HOSTNAME + ".nginx and \
-then run systemctl reload nginx (use nginx -T to check for errors)");
+console.log("You might need to edit the following files:");
+console.log("/etc/nginx/sites-available/" + HOSTNAME + ".nginx");
+console.log("/etc/nginx/sites-available/signup." + HOSTNAME + ".nginx");
+console.log(__dirname + "default.js");
+console.log("");
+console.log("then run systemctl reload nginx");
+console.log("(use nginx -T to check for errors)");
+
 
 function execTry(cmd) {
 	try {

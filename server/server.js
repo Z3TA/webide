@@ -9,7 +9,7 @@ var getArg = require("../shared/getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 
-var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
+var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
 	var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows user workers to run as root
 	
@@ -100,10 +100,10 @@ var defaultHomeDir = DEFAULT.home_dir;
 	var HTTP_SERVER;
 	
 	// Use -ip "::" or -ip "0.0.0.0" to make it listen on unspecified addresses.
-	var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
+	var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 	
 	// On some systems (Mac) you need elevated privilege (sudo) to listen to ports below 1024
-	var HTTP_PORT = getArg(["p", "port"]) || 8099; 
+var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.editor_http_port; 
 	if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 	
 	// For generating URL's

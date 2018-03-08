@@ -21,7 +21,8 @@
 
 "use strict";
 
-var BRAND_NAME = "JZedit";
+var DEFAULT = require("default.js"");
+
 
 // Don't allow these usernames
 var RESERVED_USERNAMES = ["JavaScript", "JS", "admin", "root", "webtigerteam", "www", "ftp", "mail", "log", "smtp", "user", 
@@ -32,19 +33,19 @@ var getArg = require("./shared/getArg.js");
 var UTIL = require("./client/UTIL.js");
 
 // For sending errors via email to an admin
-var SMTP_PORT = getArg(["mp", "smtp_port"]) || 25;
-var SMTP_HOST = getArg(["mh", "smtp_host"]) || "epost.zetafiles.org";
+var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
+var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
 var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
 var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
-var ADMIN_EMAIL = getArg(["admin", "admin", "admin_email"]) || "zeta@zetafiles.org";
+var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
-var HTTP_PORT = getArg(["p", "port"]) || 8100; 
+var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.signup_http_port; 
 if(!UTIL.isNumeric(HTTP_PORT)) throw new Error("HTTP_PORT=" + HTTP_PORT + " is not a numeric value! process arguments=" + process.argv.join(" "))
 
-var HTTP_IP = getArg(["ip", "ip"]) || "127.0.0.1";
+var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
-var defaultHomeDir = "/home/";
+var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 
 var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
@@ -107,7 +108,7 @@ function handleHttpRequest(request, response){
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
 	response.writeHead(404, "Not found", responseHeaders);
-	response.end('This is the signup service for ' + BRAND_NAME + '.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html\n');
+	response.end('This is the signup service for ' + HOSTNAME + ' editor.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html\n');
 	
 }
 

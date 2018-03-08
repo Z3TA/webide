@@ -5,9 +5,14 @@
 	
 */
 module.exports = {
-	admin_email: "zeta@zetafiles.org",
 	domain: "webide.se",
-	home_dir: "/home/"
+	admin_email: "zeta@zetafiles.org",
+	home_dir: "/home/",
+	editor_http_port: 8099,
+	signup_http_port: 8100,
+	smtp_port: 25,
+	smtp_host: "epost.zetafiles.org",
+	http_ip: "127.0.0.1"
 	}
 
 /*
