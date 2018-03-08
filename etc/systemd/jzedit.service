@@ -6,6 +6,7 @@
 [Unit]
 Description=JZedit cloud editor
 After=network.target
+OnFailure=status-email-user@%n.service
 
 [Service]
 User=root

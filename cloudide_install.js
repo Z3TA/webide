@@ -51,6 +51,18 @@ fs.writeFileSync("default.js", defaults);
 exec("apt install apparmor -y");
 
 
+// for sending error reports
+// edit the service you want emails for and add OnFailure=status-email-user@%n.service to the [Unit] section. 
+// %n passes the unit's name to the template.
+console.log("Installing status-email-user@.service");
+exec("apt install sendmail -y");
+exec("cp etc/systemd/systemd-email.sh /usr/local/bin/systemd-email.sh");
+var reportService = fs.readFileSync("./etc/systemd/status-email-user@.service", ENCODING);
+reportService = reportService.replace("zeta@zetafiles.org", ADMIN_EMAIL);
+fs.writeFileSync("/etc/systemd/system/status-email-user@.service", reportService);
+exec("systemctl enable status-email-user@.service");
+
+
 
 	// Install the cloud-IDE service that runs server/server.js
 console.log("Installing jzedit.service");
