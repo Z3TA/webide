@@ -57,6 +57,7 @@ exec("apt install apparmor -y");
 console.log("Installing status-email-user@.service");
 exec("apt install sendmail -y");
 exec("cp etc/systemd/systemd-email.sh /usr/local/bin/");
+exec("chmod 774 /usr/local/bin/systemd-email.sh")
 var reportService = fs.readFileSync("./etc/systemd/status-email-user@.service", ENCODING);
 reportService = reportService.replace("zeta@zetafiles.org", ADMIN_EMAIL);
 fs.writeFileSync("/etc/systemd/system/status-email-user@.service", reportService);
