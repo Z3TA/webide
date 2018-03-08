@@ -594,7 +594,7 @@ function sockJsConnection(connection) {
 							var reloadedApparmor = false;
 							var checkMountsAbort = false;
 							var sslCertChecked = false;
-							
+							var userAccepted = false;
 							
 							checkUserRights(username, function (err) {
 								if(err) throw err;
@@ -873,7 +873,11 @@ function sockJsConnection(connection) {
 								if(nginxProfileOK && nodeJsLinkOK && nullNodCreated && urandomCreated && foldersToMount == 0 && 
 								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) &&
 								sslCertChecked) {
-									acceptUser();
+									if(!userAccepted) { // Prevent double accept
+										acceptUser();
+										userAccepted = true;
+									}
+									else throw new Error("User already accepted!");
 								}
 								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " nodeJsLinkOK=" + nodeJsLinkOK + " nullNodCreated=" + nullNodCreated + 
 								" urandomCreated=" + urandomCreated + " foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
@@ -944,16 +948,15 @@ function sockJsConnection(connection) {
 									if(err == null) {
 										console.log("SSL certificate for " + username + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
-										checkMountsReadyMaybe();
-									}
+										return checkMountsReadyMaybe();
+										}
 									else if(err.code == 'ENOENT') {
 										console.log("ENOENT: certPath=" + certPath);
 										
 										if(FAILED_SSL_REG.hasOwnProperty(username + "." + DOMAIN)) {
 											log("Skipping SSL registration because of too many failed attempts!");
 											sslCertChecked = true;
-											checkMountsReadyMaybe();
-											return;
+											return checkMountsReadyMaybe();
 										}
 										
 										// the cert does not exist. Try to register it
@@ -982,12 +985,12 @@ function sockJsConnection(connection) {
 														console.log("SSL enabled: " + nginxProfilePath);
 														if(err) throw err;
 														sslCertChecked = true;
-														checkMountsReadyMaybe();
-													});
+														return checkMountsReadyMaybe();
+														});
 												});
 											}
 											sslCertChecked = true;
-											checkMountsReadyMaybe();
+											return checkMountsReadyMaybe();
 										});
 									}
 									else {
