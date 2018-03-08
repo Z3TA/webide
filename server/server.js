@@ -992,6 +992,8 @@ function sockJsConnection(connection) {
 															if(stderr) throw new Error(stderr);
 															if(stdout) throw new Error(stdout);
 															
+															console.log("nginx reloaded!");
+															
 															sslCertChecked = true;
 															return checkMountsReadyMaybe();
 														});
