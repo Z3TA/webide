@@ -2223,8 +2223,11 @@ callback(err);
 			
 		}
 		
-		EDITOR.addInfo = function(row, col, txt) {
+	EDITOR.addInfo = function(row, col, txt, lvl) {
 			// Will display a talk bubble (plugin/render_info.js)
+		
+		if(lvl == undefined) lvl = 3; // 1=Err 2=Warn 3=Info
+		
 			var info = EDITOR.info;
 			
 			console.log("addInfo: row=" + row + " col=" + col + " txt=" + txt + "");
@@ -2244,7 +2247,7 @@ callback(err);
 			
 			// Convert each text row to an image
 			for(var i=0; i<txt.length; i++) {
-				makeImage(txt[i]);
+			makeImage(txt[i]);
 			}
 			
 			/*
@@ -2291,7 +2294,8 @@ callback(err);
 					info.push({
 						row: row,
 						col: col,
-						text: imgArray
+						text: imgArray,
+					lvl: lvl
 					});
 				}
 				
@@ -6234,13 +6238,15 @@ console.warn(err.message);
 			
 			//console.log("width=" + width);
 			
-			var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
-			'<foreignObject width="100%" height="100%">' +
-			'<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:' + EDITOR.settings.style.fontSize + 'px; font-family: ' + EDITOR.settings.style.font + ';">' +
-			html +
-			'</div>' +
-			'</foreignObject>' +
-			'</svg>';
+		var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">';
+		//data += '<image x="0" y="0" width="30" height="30" xlink:href="/gfx/error.svg" />';
+		data += '<foreignObject width="100%" height="100%">';
+		// Font must be web safe font! Seems to ignore our style.css ...
+		data += '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:14px; font-family: Arial;">';
+		data += html;
+		data += '</div>';
+		data += '</foreignObject>';
+		data += '</svg>';
 			
 			var DOMURL = window.URL || window.webkitURL || window;
 			

@@ -5,6 +5,8 @@
 	
 	var runningScripts = [];
 	
+	var debugStr = "__C_S_L_O_G_O_R('\x02' + __line);";
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -111,8 +113,66 @@
 				else throw new Error("Unknown answer=" + answer);
 			});
 		}
-		else if(msg.stdout) stdout(msg);
-		else if(msg.stderr) stdout(msg);
+		else if(msg.stdout) {
+stdout(msg);
+		}
+		else if(msg.stderr) {
+			// ## stderr
+			
+			var reLine = new RegExp("(" + UTIL.escapeRegExp(filePath) + ")(\\.tmp:)(\\d+)");
+			var matchLine = msg.stderr.match(reLine);
+			
+			console.log("reLine=", reLine);
+			console.log("matchLine=", matchLine);
+			console.log("msg.stderr=", msg.stderr);
+			
+			if(matchLine) {
+				// The error is in the file being run
+					// update line numbers
+					var arr, line, path, actualLine;
+					var text = msg.stderr;
+					while(arr = reLine.exec(text)) {
+						console.log(arr);
+						line = arr[3];
+						actualLine = parseInt(line) - 20;
+						path = arr[1];
+						text = text.replace(reLine, path + ":" + actualLine);
+					} 
+					
+					console.log("msg.stderr=" + msg.stderr);
+					console.log("text=" + text);
+					
+					msg.stderr = text;
+					
+					if(EDITOR.currentFile.path == path) showErrorMessage(EDITOR.currentFile, text);
+				
+					}
+			else {
+				if(EDITOR.currentFile.path != path) {
+					// File is not in veiw. Attempt to open it ...
+					if(EDITOR.files.hasOwnProperty(path)) {
+						var file = EDITOR.files[path];
+						EDITOR.showFile(file);
+						showErrorMessage(file, msg.stderr);
+					}
+					else {
+						EDITOR.openFile(path, undefined, function open(err, file) {
+							if(err) return console.warn(err);
+							
+							showErrorMessage(file, msg.stderr);
+						});
+					}
+				}
+			}
+			
+			while(msg.stderr.indexOf(debugStr) != -1) {
+				msg.stderr = msg.stderr.replace(debugStr, "");
+				}
+				
+			stdout(msg);
+			
+			// end if(msg.stderr)
+		} 
 		else if(msg.exit) {
 			runningScripts.splice(runningScripts.indexOf(filePath), 1);
 			stdout(msg);
@@ -122,6 +182,8 @@
 		}
 		
 		else if(msg["console.log"]) {
+			// ## console.log
+			
 			stdout(msg);
 			
 			// Also show it inline if it's visible
@@ -135,6 +197,8 @@
 			}
 			
 			var file = EDITOR.files[filePath];
+			
+			if(file != EDITOR.currentFile) return; // File not visible
 			
 			if(!file) throw new Error("The file is gone: filePath=" + filePath);
 			
@@ -162,6 +226,69 @@
 		
 	}
 	
+	function showErrorMessage(file, text) {
+		
+		
+		
+		/*
+			/nodejs/err.js:8
+			" excepteur sint esse enim occaecat ullamco" + xxx + " fugiat et reprehenderit. " +
+			.                                              ^
+			ReferenceError: xxx is not defined
+			at foo (/nodejs/err.js:8:50)
+			at main (/nodejs/err.js:3:2)
+		*/
+		
+		// Get the error description
+		var reLine = new RegExp("(" + UTIL.escapeRegExp(file.path) + "):(\\d+)");
+		var arr = text.split("\n");
+		var loc = arr[0];
+		var inline = arr[1];
+		var point = arr[2];
+		var desc = arr[3];
+		var inDebugStr = false;
+		var matchLine = text.match(reLine);
+		var inlineTrim = 0;
+		
+		if(!desc) desc = arr[4];
+		
+			console.log("!showErrorMessage arr=", arr);
+			
+			if(!matchLine) throw new Error("Unable to get line number! text=" + text);
+			
+			var lineNr = parseInt(matchLine[2]);
+			
+		// Remove debug console.log's
+			if(inline.indexOf(debugStr) != -1) {
+				inDebugStr = true;
+				inline = inline.replace(debugStr, "");
+			}
+			
+		
+		// Trim inline string
+		while(inline.charAt(0).match(/\s/)) {
+			inlineTrim++;
+			inline = inline.slice(1);
+		}
+		
+		// Figure out where to place the text
+			var includeIndentationCharacters = false;
+			var rowText = file.rowText(lineNr-1, includeIndentationCharacters);
+			var col = rowText.indexOf(inline);
+			
+			if(col == -1) throw new Error("Unable to find inline=" + inline + " on rowText=" + rowText);
+			
+			if(inDebugStr) col -= 30;
+			
+			col = col + point.length - 1; // The marker
+		col = col - inlineTrim;
+		
+		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
+		
+		EDITOR.addInfo(lineNr-1, col, desc, 1);
+			
+		}
+	
 	function stdout(msg) {
 		var stdOutFile = msg.scriptName + ".stdout";
 		
@@ -171,7 +298,7 @@
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...", function fileOpened(err, file) {
+			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", function fileOpened(err, file) {
 				if(err) throw err;
 				file.moveCaretToEndOfFile();
 				appendFile(file, msg);
@@ -262,12 +389,12 @@
 		if(msg.stderr) method(msg.stderr);
 		
 		if(msg.stdout) method( (msg.type ? msg.type + ": " : "") + msg.stdout );
-		if(msg["console.log"]) method(msg["console.log"]);
+		if(msg["console.log"]) method(msg["console.log"] + "\n");
 		
-			if(msg.exit) method(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
-			
-			EDITOR.renderNeeded();
-		}
+		if(msg.exit) method(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+		
+		EDITOR.renderNeeded();
+	}
 	
 	
 })();

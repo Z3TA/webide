@@ -16,14 +16,18 @@
 	
 	EDITOR.on("start", infoBubbles);
 	
+	// Load icons
+	var iconError = new Image();
+	iconError.src = "gfx/error.svg";
+	
+	
 	function infoBubbles() {
 		
 		// Extend editor (moved to core, because many plugins depend on this)
 		
 		// Add renderer
 		EDITOR.renderFunctions.push(infoRender);
-
-	}
+}
 	
 
 	function infoRender(ctx, buffer, file) {
@@ -46,6 +50,9 @@
 		var indentation = 0;
 		var indentationWidth = 0;
 		var tabSpace = EDITOR.settings.tabSpace;
+		var iconPadding = 0;
+		var fontHeight = 19;
+		var iconHeight = 18;
 		
 		//ctx.font="14px Arial";
 		
@@ -67,7 +74,7 @@
 			x = leftMargin + (comment.col + indentationWidth - startColumn) * gridWidth + adjustX;
 			y = topMargin + comment.row * gridHeight - startRow * gridHeight + gridHeight + adjustY;
 
-			textHeight = comment.text.length * gridHeight;
+			textHeight = comment.text.length * fontHeight;
 			
 			console.log("textHeight=" + textHeight);
 			
@@ -80,7 +87,7 @@
 			
 			// Draw the bubble
 			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
-			drawBubble(ctx, x, y, textWidth + textPadding*2, textHeight + textPadding*2, radius);
+			drawBubble(ctx, x, y, textWidth + textPadding*2, textHeight + textPadding*2, radius, comment.lvl);
 
 			// Draw the text
 			/*
@@ -89,8 +96,14 @@
 				ctx.fillText(comment.text[j], x + textPadding, y + textPadding + j * gridHeight);
 			}
 			*/
+			
+			if(comment.lvl == 1) {
+				ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
+				iconPadding = 25;
+			}
+			
 			for(var j=0; j<comment.text.length;j++) {
-				ctx.drawImage(comment.text[j], x + textPadding, y + textPadding + j * gridHeight);
+				ctx.drawImage(comment.text[j], x + textPadding + iconPadding, y + textPadding + j * fontHeight);
 			}
 			
 			
@@ -99,13 +112,29 @@
 		
 	}
 	
-	function drawBubble(ctx, x, y, w, h, radius)
-	{
+	function drawBubble(ctx, x, y, w, h, radius, lvl) {
+		
+		if(lvl == 1) {
+			ctx.fillStyle="rgb(255, 236, 236)";
+			ctx.strokeStyle="rgba(255,180,180, 0.8)";
+			ctx.lineWidth="2";
+		}
+		else if(lvl == 2) {
+			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
+ctx.strokeStyle="rgba(255,255,0, 0.5)";
+			ctx.lineWidth="1";
+		}
+		else {
+			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
+ctx.strokeStyle="rgba(0,0,0, 0.5)";
+			ctx.lineWidth="1";
+		}
+		
 		var r = x + w;
 		var b = y + h;
 		ctx.beginPath();
-		ctx.strokeStyle="rgba(0,0,0, 0.5)";
-		ctx.lineWidth="1";
+		
+		
 		ctx.moveTo(x+radius, y);
 		ctx.lineTo(x+radius/2, y-pigHeight);
 		ctx.lineTo(x+radius * 2, y);
