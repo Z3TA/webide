@@ -71,11 +71,9 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			for (var i=0; i<fileList.length; i++) {
 				if(fileList[i].name == ".hg") return callback( new Error(".hg folder already exist in " + localPath) );
 			}
-			
 			clone();
 		}
 	}); 
-	
 	
 	function clone() {
 		var config = ["--config", "auth.x.prefix=*", "--config", "auth.x.username=" + hguser, "--config", "auth.x.password=" + pw];
@@ -86,29 +84,88 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			Using cwd in Linux will result in Error: spawn /bin/sh ENOENT !
 		*/
 		
-		var execFile = require('child_process').execFile;
-		var arg = ["clone", remote, localPath].concat(config);
-		execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
-			
-			console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
-			
-			if(err) {
-				
-				var destinationNotEmpty = stderr.match(/abort: destination '(.*)' is not empty/);
+		//var execFile = require('child_process').execFile;
+		var arg = ["clone", "-v", remote, localPath].concat(config);
+		
+		var spawn = require('child_process').spawn;
+var clone = spawn("hg", arg, {env: execFileOptions.env, shell: false});
+var stdout = "";
+var stderr = "";
+
+var progressCounter = 0;
+var progressMax = 30;
+
+user.send({mercurialProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
+
+var progressInterval = setInterval(function() {
+progressCounter++;
+progressMax++;
+			user.send({mercurialProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
+}, 500); // Fake progress
+
+clone.stdout.on('data', function cloneStdout(data) {
+stdout += data;
+
+console.log("clone stdout data=" + data);
+
+/*
+todo: Better estimation on progress!
+
+Total 33 (delta 10), reused 19 (delta 0), pack-reused 4
+importing git objects into hg
+committing files:
+LICENSE
+README.md
+committing manifest
+committing changelog
+committing files:
+server.js
+committing manifest
+committing changelog
+
+*/
+progressCounter++;
+
+			user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+});
+
+clone.stderr.on('data', function cloneStderr(data) {
+stderr += data;
+});
+
+clone.on('error', function cloneError(err) {
+console.log("clone error stdout=" + stdout);
+console.log("clone error stderr=" + stderr);
+
+			var destinationNotEmpty = stderr.match(/abort: destination '(.*)' is not empty/);
 				
 				if(destinationNotEmpty) {
-					callback(new Error("The destination folder is not empty: " + local + destinationNotEmpty[1]));
+				cloneDone(new Error("The destination folder is not empty: " + local + destinationNotEmpty[1]));
 				}
-				else callback(err);
+			else if(stderr) cloneDone(err);
 				
-			}
-			else if(stderr) {
+			user.send({mercurialProgress: {max: 1, value: 1}});
+
+});
+
+clone.on('close', function cloneClose(exitCode) {
+if(stdout.length < 500) console.log("hg clone stdout=" + stdout);
+else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
+
+//console.log("stdout=" + stdout);
+//console.log("stderr=" + stderr);
+
+console.log("exitCode=" + exitCode);
+		
+		//execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
+			//console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+			
+			if(stderr) {
 				
 				if(stderr.match(/: No such file or directory$/)) {
-					callback("Directory does not exist: " + local);
+					cloneDone("Directory does not exist: " + local);
 				}			
-				
-				else callback(stderr);
+				else cloneDone(stderr);
 			}
 			else {
 				
@@ -129,17 +186,24 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 					
 					saveCredentialsInHgrc(user, localPath, remote, hguser, pw, function hgrcSaved(err) {
 						if (err) throw err;
-						else done();
+						else cloneDone();
 					});
 					
-				} else done();
+				} else cloneDone();
 				
-				function done() {
-					callback(null, {path: local});
-				}
 				
 			}
 		});
+		
+		function cloneDone(err) {
+			if(callback) {
+callback(null, {path: local});
+				callback = null;
+				clearInterval(progressInterval);
+				user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
+				}
+			else if(callback === null) throw new Error("clone callback already called!");
+			}
 	}
 }
 
@@ -176,7 +240,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 		var args = ["status"];
 		
 		if(json.rev) {
-//args.push("--rev " + json.rev);
+			//args.push("--rev " + json.rev);
 			args.push("--rev");
 			args.push(json.rev);
 		}
@@ -867,10 +931,14 @@ var stdout = "";
 var stderr = "";
 
 var progressCounter = 0;
+var progressMax = 10;
 
-		sendProgress(0);
+		user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
 		
-		var progressInterval = setInterval(sendProgress, 500); // Fake progress
+		var progressInterval = setInterval(function() {
+progressCounter++;
+			user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+}, 500); // Fake progress
 		
 		push.stdout.on('data', function pushStdout(data) {
 stdout += data;
@@ -879,8 +947,7 @@ stdout += data;
 			
 // todo: Better estimation on progress!
 progressCounter++;
-
-			sendProgress();
+			user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
 });
 
 		push.stderr.on('data', function pushStderr(data) {
@@ -998,22 +1065,12 @@ err.code = exitCode;
 					callback = null;
 					
 					// show full progress
-				sendProgress(progressCounter, progressCounter);
+				user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
 				
 			}
 			
 		});
 		
-		function sendProgress(value, max) {
-			if(value == undefined) value = progressCounter++;
-			if(max == undefined) max = Math.max(progressCounter,20);
-			user.send({
-				mercurialProgress: {
-					max: max,
-					value: value
-				}
-			});
-		}
 	});
 }
 
@@ -1627,7 +1684,6 @@ MERCURIAL.revert = function hgrevert(user, json, callback) {
 		});
 	});
 }
-
 
 function makeFileString(user, files, directory, rootDir) {
 	/*
