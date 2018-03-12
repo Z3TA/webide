@@ -186,7 +186,7 @@ stdout(msg);
 			
 			stdout(msg);
 			
-			// Also show it inline if it's visible
+			// Also show it inline
 			if(!msg.line) throw new Error("msg.line=" + msg.line);
 			var line = parseInt(msg.line);
 			if(isNaN(line)) throw new Error("msg.line=" + msg.line + " is not a number!");
@@ -197,8 +197,6 @@ stdout(msg);
 			}
 			
 			var file = EDITOR.files[filePath];
-			
-			if(file != EDITOR.currentFile) return; // File not visible
 			
 			if(!file) throw new Error("The file is gone: filePath=" + filePath);
 			
