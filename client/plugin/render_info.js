@@ -63,6 +63,8 @@
 
 			comment = comments[i];
 			
+			if(comment.file != EDITOR.currentFile) continue;
+			
 			if(comment.row >= file.grid.length) {
 				throw new Error("row=" + comment.row + " above file grid! comment=" + JSON.stringify(comment) + " curren-file: " + EDITOR.currentFile.path);
 				}

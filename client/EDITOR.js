@@ -2223,9 +2223,11 @@ callback(err);
 			
 		}
 		
-	EDITOR.addInfo = function(row, col, txt, lvl) {
+	EDITOR.addInfo = function(row, col, txt, file, lvl) {
 			// Will display a talk bubble (plugin/render_info.js)
 		
+		if(file == undefined) file = EDITOR.currentFile;
+		if(! file instanceof File) throw new Error("Third argument file is supposed to be a File object");
 		if(lvl == undefined) lvl = 3; // 1=Err 2=Warn 3=Info
 		
 			var info = EDITOR.info;
@@ -2234,8 +2236,8 @@ callback(err);
 			
 			console.time("addInfo");
 			
-		if(!EDITOR.currentFile) throw new Error("No current file!");
-		if(EDITOR.currentFile.grid.length <= row) throw new Error("Current file only has " + EDITOR.currentFile.grid.length + " rows!" +
+		if(!file) throw new Error("No file!");
+		if(file.grid.length <= row) throw new Error("file only has " + file.grid.length + " rows!" +
 		" Unable to place info message on row=" + row);
 		
 			// Convert the text to an array, one line per row
@@ -2295,6 +2297,7 @@ callback(err);
 						row: row,
 						col: col,
 						text: imgArray,
+					file: file,
 					lvl: lvl
 					});
 				}
@@ -2306,28 +2309,19 @@ callback(err);
 				
 			}
 			
-			
-			
 			function makeImage(item) {
-				
 				//console.log("item=" + item);
-				
 				htmlToImage(item, function(img) {
 					imgArray.push(img);
 					
 					//console.log("imagesToMake=" + imagesToMake);
 					//console.log("imagesMade=" + imagesMade);
 					
-					//EDITOR.currentFile.canvas.getContext("2d").drawImage(imgArray[0], 0, 0);		
-					
-					
 					if(++imagesMade == imagesToMake) {
 						allImagesMade();
 					}
 				});
-				
-				
-			}
+				}
 			
 		}
 		

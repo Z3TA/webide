@@ -209,11 +209,11 @@ stdout(msg);
 			var txt = msg["console.log"];
 			txt = txt.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
 			txt = txt.replace(">", "&gt;");
-			//EDITOR.addInfo(row-1, col, "WTF!?");
+			//EDITOR.addInfo(row-1, col, "WTF!?", file);
 			
 			EDITOR.showFile(file); // Make sure it's in view
 			
-			EDITOR.addInfo(row, col, txt);
+			EDITOR.addInfo(row, col, txt, file);
 			//}
 			
 		}
@@ -285,7 +285,7 @@ stdout(msg);
 		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
 		
-		EDITOR.addInfo(lineNr-1, col, desc, 1);
+		EDITOR.addInfo(lineNr-1, col, desc, file, 1);
 			
 		}
 	
