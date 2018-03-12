@@ -38,16 +38,10 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Does apparmor even work on webide !?
-on dev machine:
-Failed to install dependencies: spawn /usr/share/npm/bin/npm-cli.js ENOENT
+Ctrl+Tab chaning tab in the browser is annoying
+Ctrl + up/down move to next/previous tab !?
+Ctrl + left/right move to left/right tab !?
 
-
-need progress bar when cloning a repo!
-
-Having nodejs stdout in *another* file (tab) is annoying. 
-
-Finding the editor tab in the browser after visiting a web page (documentation, reference) is annoying.
 
 Fighting the CORS-hydra
 
@@ -64,6 +58,10 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+Does apparmor even work on webide !?
+on dev machine:
+Failed to install dependencies: spawn /usr/share/npm/bin/npm-cli.js ENOENT
 
 bug in terminal:
 /home/Z/Projects/jzedit/client/plugin/terminal.js:463
