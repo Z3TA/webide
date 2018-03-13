@@ -1186,7 +1186,7 @@ var WysiwygEditor;
 		
 		console.warn("(re)loading preview window ... dance=" + dance);
 		
-		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ?");
+		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ? First argument in WysiwygEditor.reload()");
 		// dance=true means the source code will be updated with the code we'll get after loading the contenteditable.
 		// it will for example insert <tbody> elements and possibly more depending on browser
 		
@@ -1446,6 +1446,18 @@ previewWindowLoaded();
 				//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
 			}
 			else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
+			
+			// Capture F5 and make a soft reload
+			previewWin.window.onkeydown = function keyDown(keyDownEvent) {
+				//console.log("previewWin.window.onkeydown:", keyDownEvent);
+				var keyF5 = 116;
+				if(keyDownEvent.keyCode == keyF5) {
+					keyDownEvent.preventDefault();
+					wysiwygEditor.reload(dance);
+					return false;
+				}
+				else return true;
+			};
 			
 			
 			attachFileChangeListener(wysiwygEditor);
