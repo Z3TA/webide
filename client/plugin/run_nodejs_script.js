@@ -254,6 +254,8 @@ stdout(msg);
 			
 			if(!matchLine) throw new Error("Unable to get line number! text=" + text);
 			
+		console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
+		
 			var lineNr = parseInt(matchLine[2]);
 			
 		// Remove debug console.log's
@@ -274,9 +276,15 @@ stdout(msg);
 			var rowText = file.rowText(lineNr-1, includeIndentationCharacters);
 			var col = rowText.indexOf(inline);
 			
-			if(col == -1) throw new Error("Unable to find inline=" + inline + " on rowText=" + rowText);
+			if(col == -1) {
+			/*
+				throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
+				
+			*/
 			
-			if(inDebugStr) col -= 30;
+			throw new Error("Unable to find inline=" + inline + " on rowText=" + rowText);
+		}
+		if(inDebugStr) col -= 30;
 			
 			col = col + point.length - 1; // The marker
 		col = col - inlineTrim;

@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Problem with nodejs errors when the error is in another file
+
 Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
 
 
