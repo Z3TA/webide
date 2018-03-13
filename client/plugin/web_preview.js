@@ -168,16 +168,17 @@
 		else {
 			file.scrollToLine(lineno);
 			var row = lineno-1;
-			var col = colno ? colno : 0;
+			if(file.grid.length <= row) throw new Error("row=" + row + " outside the file.grid.length=" + file.grid.length + " for file.path=" + file.path + " source=" + source);
+			var col = colno ? colno - file.grid[row].indentationCharacters : 0;
 			if(EDITOR.currentFile != file && !switchedDebugSourceFile) {
-EDITOR.showFile(file);
-				switchedDebugSourceFile = true;
+					EDITOR.showFile(file);
+					switchedDebugSourceFile = true;
 				}
-			
-			if(EDITOR.currentFile == file) EDITOR.addInfo(row, col, message);
-			
-			
-		}
+				
+				EDITOR.addInfo(row, col, message, file, 1);
+				
+				
+			}
 		
 	}
 	
@@ -245,11 +246,16 @@ EDITOR.showFile(file);
 			var row = parseInt(matchFile[2])-1;
 			var col = parseInt(matchFile[3]);
 			console.log("filePath=" + filePath);
-			if(EDITOR.files.hasOwnProperty(filePath)) {
-				var file = EDITOR.files[filePath];
-				if(file == EDITOR.currentFile) {
-					if(row >= file.startRow && row <= (file.startRow+EDITOR.view.visibleRows)) {
-						col = col - file.grid[row].indentationCharacters.length;
+			
+			
+			if(!EDITOR.files.hasOwnProperty(filePath)) return console.log("File not opened in the editor: " + filePath);
+			
+			var file = EDITOR.files[filePath];
+				//if(file != EDITOR.currentFile) return console.log("File is not in view: " + filePath);
+				
+			//if(!(row >= file.startRow && row <= (file.startRow+EDITOR.view.visibleRows))) return console.log("The row is not in veiw: row=" + row + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+			
+			col = col - file.grid[row].indentationCharacters.length;
 						if(col < 0) { // Sanity check
 							throw new Error("col=" + col + " file.grid[" + row + "].indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) +
 							" (" + file.grid[row].indentationCharacters.length + ")");
@@ -278,14 +284,8 @@ EDITOR.showFile(file);
 							}
 						*/
 						
-						EDITOR.addInfo(row, col, msg);
+						EDITOR.addInfo(row, col, msg, file);
 						
-					}
-					else console.log("The row is not in veiw: row=" + row + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
-				}
-				else console.log("File is not in view: " + filePath);
-			}
-			else console.log("File not opened in the editor: " + filePath);
 		}
 		else throw new Error("Did not find the file location in stack=" + stack);
 		
