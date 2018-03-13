@@ -209,7 +209,7 @@ stdout(msg);
 			txt = txt.replace(">", "&gt;");
 			//EDITOR.addInfo(row-1, col, "WTF!?", file);
 			
-			EDITOR.showFile(file); // Make sure it's in view
+			//EDITOR.showFile(file); // Make sure it's in view
 			
 			EDITOR.addInfo(row, col, txt, file);
 			//}
