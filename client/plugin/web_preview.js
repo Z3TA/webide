@@ -68,11 +68,21 @@
 		inPreview = file;
 		
 		theWindow = EDITOR.createWindow();
+		
+		theWindow.onerror = function() {
+			alert("theWindow.onerror:", err);
+		};
+		
 		theWindow.addEventListener("load", function() {
 			//alertBox("It loaded!");
 			console.log("preview window loaded!");
 		}, false);
 			
+		theWindow.addEventListener("error", function(err) {
+			alertBox("Window error!", err);
+			
+		}, false);
+		
 			folder = UTIL.getDirectoryFromPath(inPreview.path);
 			CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
 				
@@ -122,6 +132,10 @@
 		// Override the console log of the preview window and display the messages as info
 		consoleLogOriginal = theWindow.window.console.log;
 		theWindow.window.console.log = captureConsoleLog;
+		theWindow.window.console.warn = captureConsoleLog;
+		theWindow.window.console.error = function(err) {
+			alertBox("theWindow.window.console.error:", err);
+		};
 		
 	}
 	
@@ -133,7 +147,7 @@
 		var colno = errorEvent.colno;
 		var error = errorEvent.error;
 		
-		//alert(message + " line=" + lineno);
+		alertBox(message + " line=" + lineno);
 		
 		if(!lineno) {
 			return console.warn("No linenno!");
