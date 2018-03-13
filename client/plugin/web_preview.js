@@ -321,12 +321,13 @@
 		
 		var interval = setInterval(function() {
 			if(theWindow.window.console.log != captureConsoleLog) {
-				console.log("yep!");
+				// When console.log no longer point to captureConsoleLog it means the window has reloaded!
+				console.log("web preview window reloaded!");
 				clearInterval(interval);
 				clearTimeout(timeout);
 				whenLoaded();
 			}
-			else console.log("nope");
+			else console.log("web preview window not yet reloaded!");
 			
 		}, 1);
 		
@@ -335,8 +336,8 @@
 			if(theWindow.window.console.log != captureConsoleLog) throw new Error("Failed to attach error and console.log integration");
 		}, 150);
 		
-		var contenEditable = false;
-		previewWin.reload(contenEditable);
+		var noContenEditable = false;
+		previewWin.reload(noContenEditable);
 		
 		switchedDebugSourceFile = false;
 		
