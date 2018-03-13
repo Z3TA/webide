@@ -147,7 +147,7 @@
 		var colno = errorEvent.colno;
 		var error = errorEvent.error;
 		
-		alertBox(message + " line=" + lineno);
+		//alertBox(message + " line=" + lineno);
 		
 		if(!lineno) {
 			return console.warn("No linenno!");
@@ -166,7 +166,7 @@
 			alertBox(sourceLink + lineString + message);
 		}
 		else {
-			file.scrollToLine(lineno);
+			
 			var row = lineno-1;
 			if(file.grid.length <= row) throw new Error("row=" + row + " outside the file.grid.length=" + file.grid.length + " for file.path=" + file.path + " source=" + source);
 			var col = colno ? colno - file.grid[row].indentationCharacters : 0;
@@ -174,7 +174,10 @@
 					EDITOR.showFile(file);
 					switchedDebugSourceFile = true;
 				}
+			else console.log("(EDITOR.currentFile == file)=" + (EDITOR.currentFile == file) + " switchedDebugSourceFile=" + switchedDebugSourceFile);
 				
+			if(EDITOR.currentFile == file) file.scrollToLine(lineno);
+			
 				EDITOR.addInfo(row, col, message, file, 1);
 				
 				
