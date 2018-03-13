@@ -38,6 +38,12 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
+
+
+Annoying dealing with CORS headers ...
+
+
 Ctrl+Tab chaning tab in the browser is annoying
 Ctrl + up/down move to next/previous tab !?
 Ctrl + left/right move to left/right tab !?

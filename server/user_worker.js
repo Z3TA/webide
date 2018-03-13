@@ -1273,6 +1273,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			}
 			
 			if(text.charAt(0) == "\x02") return parseLines(text);
+			else console.log("text.charAt(0)=" + text.charAt(0));
 			
 			if(debugit) {
 				
