@@ -43,7 +43,7 @@ server {
     proxy_set_header upgrade    $http_upgrade;
     proxy_set_header connection "upgrade";
 
-    add_header 'Access-Control-Allow-Origin' '*';
+    #add_header 'Access-Control-Allow-Origin' '*';
   }
 
 }
