@@ -119,17 +119,37 @@ stdout(msg);
 		else if(msg.stderr) {
 			// ## stderr
 			
-			var reLine = new RegExp("(" + UTIL.escapeRegExp(filePath) + ")(\\.tmp:)(\\d+)");
-			var matchLine = msg.stderr.match(reLine);
+			/*
+				_http_outgoing.js:333
+				throw new Error('`value` required in setHeader("' + name + '", value).');
+				^
+				
+				Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
+				at ServerResponse.OutgoingMessage.setHeader (_http_outgoing.js:333:11)
+				at Server.httpRequest (/nodejs/jsql/server.js.tmp:69:11)
+				at Server.new_handler (/nodejs/jsql/node_modules/sockjs/lib/utils.js:89:20)
+				at emitTwo (events.js:87:13)
+				at Server.emit (events.js:172:7)
+				at HTTPParser.parserOnIncoming [as onIncoming] (_http_server.js:528:12)
+				at HTTPParser.parserOnHeadersComplete (_http_common.js:88:23)
+			*/
+			
+			var firstLine = msg.stderr.slice(0, msg.stderr.indexOf("\n"));
+			var reLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
+			var matchLine = firstLine.match(reLine);
 			
 			console.log("reLine=", reLine);
 			console.log("matchLine=", matchLine);
 			console.log("msg.stderr=", msg.stderr);
 			
-			if(matchLine) {
-				// The error is in the file being run
+			if(!matchLine) throw new Error("Unable to find " + reLine + " in error message: " + msg.stderr);
+			
+			var path = matchLine[1];
+			
+			if(path == filePath) {
+					// The error is in the file being run
 					// update line numbers
-					var arr, line, path, actualLine;
+					var arr, line, actualLine;
 					var text = msg.stderr;
 					while(arr = reLine.exec(text)) {
 						console.log(arr);
@@ -145,34 +165,34 @@ stdout(msg);
 					msg.stderr = text;
 					
 					if(EDITOR.currentFile.path == path) showErrorMessage(EDITOR.currentFile, text);
-				
-					}
-			else {
-				if(EDITOR.currentFile.path != path) {
-					// File is not in veiw. Attempt to open it ...
-					if(EDITOR.files.hasOwnProperty(path)) {
-						var file = EDITOR.files[path];
-						EDITOR.showFile(file);
-						showErrorMessage(file, msg.stderr);
-					}
-					else {
-						EDITOR.openFile(path, undefined, function open(err, file) {
-							if(err) return console.warn(err);
-							
+					
+				}
+				else {
+					if(EDITOR.currentFile.path != path) {
+						// File is not in veiw. Attempt to open it ...
+						if(EDITOR.files.hasOwnProperty(path)) {
+							var file = EDITOR.files[path];
+							EDITOR.showFile(file);
 							showErrorMessage(file, msg.stderr);
-						});
+						}
+						else {
+							EDITOR.openFile(path, undefined, function open(err, file) {
+								if(err) return console.warn(err);
+								
+								showErrorMessage(file, msg.stderr);
+							});
+						}
 					}
 				}
-			}
-			
-			while(msg.stderr.indexOf(debugStr) != -1) {
-				msg.stderr = msg.stderr.replace(debugStr, "");
+				
+				while(msg.stderr.indexOf(debugStr) != -1) {
+					msg.stderr = msg.stderr.replace(debugStr, "");
 				}
 				
-			stdout(msg);
-			
-			// end if(msg.stderr)
-		} 
+				stdout(msg);
+				
+				// end if(msg.stderr)
+			} 
 		else if(msg.exit) {
 			runningScripts.splice(runningScripts.indexOf(filePath), 1);
 			stdout(msg);
@@ -226,8 +246,6 @@ stdout(msg);
 	
 	function showErrorMessage(file, text) {
 		
-		
-		
 		/*
 			/nodejs/err.js:8
 			" excepteur sint esse enim occaecat ullamco" + xxx + " fugiat et reprehenderit. " +
@@ -256,15 +274,15 @@ stdout(msg);
 			
 		console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
 		
-			var lineNr = parseInt(matchLine[2]);
-			
+		var lineNr = parseInt(matchLine[2]);
+		console.log("lineNr=" + lineNr);
+		
 		// Remove debug console.log's
 			if(inline.indexOf(debugStr) != -1) {
 				inDebugStr = true;
 				inline = inline.replace(debugStr, "");
 			}
 			
-		
 		// Trim inline string
 		while(inline.charAt(0).match(/\s/)) {
 			inlineTrim++;
@@ -272,8 +290,8 @@ stdout(msg);
 		}
 		
 		// Figure out where to place the text
-			var includeIndentationCharacters = false;
-			var rowText = file.rowText(lineNr-1, includeIndentationCharacters);
+		var includeIndentationCharacters;
+		var rowText = file.rowText(lineNr-1, includeIndentationCharacters=false);
 			var col = rowText.indexOf(inline);
 			
 			if(col == -1) {

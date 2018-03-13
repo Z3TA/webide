@@ -180,6 +180,9 @@ var File; // File object is global
 	
 	File.prototype.rowText = function(row, includeIndentationCharacters) {
 		// Returns the characters on that row
+		
+		if(row == undefined) throw new Error("First argument row=" + row + " in File.rowText() need to be specified!");
+		
 		if(includeIndentationCharacters == undefined) includeIndentationCharacters = true; // Including indentation characters!
 		
 		var file = this;
