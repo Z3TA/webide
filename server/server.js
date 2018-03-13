@@ -1113,8 +1113,8 @@ function sockJsConnection(connection) {
 										if(!NO_CHROOT && HOME_DIR) folder = HOME_DIR + userConnectionName + folder;
 										
 										removeHttpEndpoint(userConnectionName, folder, function(err, folder) {
-											if(err) throw err;
-											workerResp(req, {folder: folder});
+											//if(err) throw err;
+											workerResp(err, {folder: folder});
 										});
 									}
 									else if(req.debugInBrowserVnc) {
