@@ -2223,7 +2223,7 @@ callback(err);
 			
 		}
 		
-	EDITOR.addInfo = function(row, col, txt, file, lvl) {
+	EDITOR.addInfo = function(row, col, textString, file, lvl) {
 			// Will display a talk bubble (plugin/render_info.js)
 		
 		if(file == undefined) file = EDITOR.currentFile;
@@ -2232,6 +2232,11 @@ callback(err);
 		
 			var info = EDITOR.info;
 			
+		if(info.length > 100) {
+			console.warn("Too many info messages! Resetting!");
+			info.length = 0;
+		}
+		
 			console.log("addInfo: row=" + row + " col=" + col + " txt=" + txt + "");
 			
 			console.time("addInfo");
@@ -2241,7 +2246,7 @@ callback(err);
 		" Unable to place info message on row=" + row);
 		
 			// Convert the text to an array, one line per row
-			txt = txt.split("\n");
+		var txt = textString.split("\n");
 			
 			var imagesToMake = txt.length;
 			var imagesMade = 0;
@@ -2281,12 +2286,17 @@ callback(err);
 				for(var i=0; i<info.length; i++) {
 					if(info[i].row == row && info[i].col == col) {
 						
-						// Add text
+					if(info[i].str == textString) info[i].count++;
+					else {
+						// Add text ...
+						// Adding too many info boxes can freeze the computer because we'll run out of memory!
+						if(info[i].text.length > 100) return console.warn("Too many info messages added to row=" + row + " and col=" + col);
+						
 						for(var j=0; j<imgArray.length; j++) {
 							info[i].text.push(imgArray[j]);
 						}
-						
-						found = true;
+					}
+					found = true;
 						break;
 					}
 				}
@@ -2298,8 +2308,10 @@ callback(err);
 						col: col,
 						text: imgArray,
 					file: file,
-					lvl: lvl
-					});
+					lvl: lvl,
+					str: textString,
+					count: 1
+				});
 				}
 				
 				console.timeEnd("addInfo");

@@ -53,6 +53,9 @@
 		var iconPadding = 0;
 		var fontHeight = 19;
 		var iconHeight = 18;
+		var countTextWidth = 0;
+		var countTextHeight = 0;
+		var countTextPadding = 0;
 		
 		//ctx.font="14px Arial";
 		
@@ -60,7 +63,7 @@
 
 		
 		for(var i=0; i<comments.length; i++) {
-
+			
 			comment = comments[i];
 			
 			if(comment.file != EDITOR.currentFile) continue;
@@ -87,9 +90,21 @@
 				textWidth = Math.max(textWidth, comment.text[j].width);
 			}
 			
+			if(comment.count > 1) {
+				//ctx.font="10px Arial";
+				countTextWidth = ctx.measureText(comment.count.toString()).width;
+				countTextHeight = 13; // Can't measure the height
+				countTextPadding = 2;
+			}
+			else {
+				countTextWidth = 0;
+				countTextHeight = 0;
+				countTextPadding = 0;
+			}
+			
 			// Draw the bubble
 			ctx.fillStyle=EDITOR.settings.style.currentLineColor;
-			drawBubble(ctx, x, y, textWidth + textPadding*2, textHeight + textPadding*2, radius, comment.lvl);
+			drawBubble(ctx, x, y, textWidth + textPadding*2 + countTextWidth, textHeight + textPadding*2, radius, comment.lvl);
 
 			// Draw the text
 			/*
@@ -103,9 +118,17 @@
 				ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
 				iconPadding = 25;
 			}
+			else {
+				iconPadding = 0;
+			}
+			
+			if(comment.count > 1) {
+				ctx.fillStyle="rgba(0,0,0, .7)";
+				ctx.fillText(comment.count, x + textPadding + iconPadding, y + textPadding);
+				}
 			
 			for(var j=0; j<comment.text.length;j++) {
-				ctx.drawImage(comment.text[j], x + textPadding + iconPadding, y + textPadding + j * fontHeight);
+				ctx.drawImage(comment.text[j], x + textPadding + iconPadding + countTextWidth + countTextPadding, y + textPadding + j * fontHeight);
 			}
 			
 			

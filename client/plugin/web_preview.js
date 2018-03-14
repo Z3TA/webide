@@ -54,10 +54,10 @@
 	function webPreview() {
 		
 		var file = EDITOR.currentFile;
-		if(!file) return true;
+		if(!file) return console.warn("Unable to run preview: No file open!");
 		
 		if(inPreview && theWindow) {
-			// Attempt to close it
+			console.log("Attempt to close preview window ....");
 			theWindow.close();
 			EDITOR.updateMenuItem(menuItem, false);
 			return;
