@@ -7,7 +7,7 @@
 	Activate via context menu
 	After activation: Esc = Enters command mode (or should we use tab!?)
 	
-	Problem: A lot of key bindings overlap "modern" key bindings like Ctrl+V for pasing, while in vim it goes into visual block mode.
+	Problem: A lot of key bindings overlap "modern" key bindings like Ctrl+V for pasting, while in vim it goes into visual block mode.
 	Solution: Disable other key bindings when enabling modal editing and Enable them again when Disabling modal editing
 	
 	
