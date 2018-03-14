@@ -152,6 +152,18 @@ stdout(msg);
 			
 			var pathOnFirstLine = matchFirstLine[1];
 			
+			// update line numbers for the file being run in the stack trace
+			var reFileRun = new RegExp(UTIL.escapeRegExp(filePath) + "\\.tmp:(\\d+)");
+			var arr, line=0, actualLine=0;
+			console.log("Update line numbers:");
+			while(arr = reFileRun.exec(text)) {
+				console.log(arr);
+				line = arr[1];
+					actualLine = parseInt(line) - 20;
+				text = text.replace(reFileRun, filePath + ":" + actualLine);
+					}
+				msg.stderr = text;
+				
 			var stackTrace = text.match(/\((.*):(\d+)\)/g);
 			// remove the parentheses
 			for (var i=0; i<stackTrace.length; i++) {
@@ -159,17 +171,6 @@ stdout(msg);
 			}
 			console.log("stackTrace=" + JSON.stringify(stackTrace));
 			
-			// update line numbers for the file being run in the stack trace
-			var reFileRun = new RegExp(UTIL.escapeRegExp(filePath) + "\\.tmp:(\\d+)");
-			var arr, line=0, actualLine=0;
-			while(arr = reFileRun.exec(text)) {
-				//console.log(arr);
-				line = arr[1];
-					actualLine = parseInt(line) - 20;
-				text = text.replace(reFileRun, filePath + ":" + actualLine);
-					}
-				msg.stderr = text;
-				
 				//console.log("msg.stderr=" + msg.stderr);
 				//console.log("text=" + text);
 				
