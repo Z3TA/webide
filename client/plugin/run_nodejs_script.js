@@ -153,6 +153,8 @@ stdout(msg);
 			var pathOnFirstLine = matchFirstLine[1];
 			
 			var stackTrace = text.match(/\((.*):(\d+)\)/g);
+			console.log("stackTrace=" + JSON.stringify(stackTrace));
+			
 			
 				// update line numbers for the file being run in the stack trace
 			var reFileRun = new RegExp(UTIL.escapeRegExp(filePath) + "\\.tmp:(\\d+)");
@@ -320,6 +322,24 @@ stdout(msg);
 			ReferenceError: xxx is not defined
 			at foo (/nodejs/err.js:8:50)
 			at main (/nodejs/err.js:3:2)
+			
+			
+			---
+			
+			_http_outgoing.js:333
+			throw new Error('`value` required in setHeader("' + name + '", value).');
+			^
+			
+			Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
+			at ServerResponse.OutgoingMessage.setHeader (_http_outgoing.js:333:11)
+			at Server.httpRequest (/nodejs/jsql/server.js:49:11)
+			at Server.new_handler (/nodejs/jsql/node_modules/sockjs/lib/utils.js:89:20)
+			at emitTwo (events.js:87:13)
+			at Server.emit (events.js:172:7)
+			at HTTPParser.parserOnIncoming [as onIncoming] (_http_server.js:528:12)
+			at HTTPParser.parserOnHeadersComplete (_http_common.js:88:23)
+			
+			
 		*/
 		
 		// Get the error description
@@ -362,17 +382,40 @@ stdout(msg);
 		var col = rowText.indexOf(inline);
 		
 		if(col == -1) {
+			console.log("Unable to find inline=" + inline + " on rowText=" + rowText);
 			/*
 				throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
 				
+				
+				The "throw error" can be in another file, and we are going to show the error in one of the files in the stack trace ...
+				Example: 
+				Error: Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
+				Line: response.setHeader("Access-Control-Allow-Origin", origin)
+				
+				Run a diff to see if there's anything in common !?
+				
 			*/
+			var jsdiff = JsDiff;
+			var diff = jsdiff.diffChars(rowText, inline);
+			diff.sort(function(a, b) {
+				if(a.added || a.removed) return -1;
+				if(a.count > b.count) return 1;
+				if(b.count > a.count) return -1;
+				if(b.removed || b.added) return 1;
+				return 0;
+			});
+			var common = diff[0].value;
 			
-			throw new Error("Unable to find inline=" + inline + " on rowText=" + rowText);
-		}
+			console.log("common=" + common + " diff=" + JSON.stringify(diff, null, 2));
+			
+			if(common.length > 1) col = rowText.indexOf(common);
+			else col = 0;
+			}
+		else {
 		if(inDebugStr) col -= 30;
-		
-		col = col + point.length - 1; // The marker
-		col = col - inlineTrim;
+			col = col + point.length - 1; // The marker
+			col = col - inlineTrim;
+		}
 		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
 		
