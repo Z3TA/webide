@@ -38,7 +38,25 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Problem with nodejs errors when the error is in another file
+hg merge -r tip
+abort: outstanding uncommitted merge
+
+hg resolve --all says stuff has been resolved
+
+hg resolve --list shows nothing
+
+
+when trying to commit the merge I get: "We need to reslove the merge conflict manually."
+
+hg merge tip (worked)
+
+/client//CLIENT.js:123
+Error: Server: API error: Command failed: hg merge
+abort: no matching bookmark to merge - please merge with an explicit rev or bookmark
+(run 'hg heads' to see all heads)
+
+
+
 
 Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
 
