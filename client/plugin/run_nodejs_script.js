@@ -163,11 +163,11 @@ stdout(msg);
 				text = text.replace(reFileRun, filePath + ":" + actualLine);
 					}
 				msg.stderr = text;
-				
+			
 			var stackTrace = text.match(/\((.*):(\d+)\)/g);
-			// remove the parentheses
+			// remove the parentheses and line:column
 			for (var i=0; i<stackTrace.length; i++) {
-				stackTrace[i] = stackTrace[i].slice(1, -1);
+				stackTrace[i] = stackTrace[i].slice(1, stackTrace[i].indexOf(":"));
 			}
 			console.log("stackTrace=" + JSON.stringify(stackTrace));
 			
@@ -401,11 +401,11 @@ stdout(msg);
 			*/
 			var jsdiff = JsDiff;
 			var diff = jsdiff.diffChars(rowText, inline);
+			diff = diff.concat(jsdiff.diffChars(rowText, desc)); // The error can also be helpful
 			diff.sort(function(a, b) {
-				if(a.added || a.removed) return -1;
-				if(a.count > b.count) return 1;
-				if(b.count > a.count) return -1;
-				if(b.removed || b.added) return 1;
+				if(a.added || a.removed) return 1;
+				if(a.count > b.count) return -1;
+				if(b.count > a.count) return 1;
 				return 0;
 			});
 			var common = diff[0].value;
