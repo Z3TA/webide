@@ -670,7 +670,9 @@ var File; // File object is global
 		if(EDITOR.currentFile == file) {
 		// Check if the scrolling is OK
 		if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
-				throw new Error("Scrolling bug: EDITOR.currentFile.path=" + EDITOR.currentFile.path + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
+				throw new Error("Scrolling bug: EDITOR.currentFile.path=" + EDITOR.currentFile.path + 
+				" EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + 
+				" EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
 		}
 		}
 		
