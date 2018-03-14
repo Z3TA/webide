@@ -1270,6 +1270,16 @@ var WysiwygEditor;
 			var matchAuth = url.match(/^http(s)?:\/\/(.*:.*@)/);
 			if(matchAuth) url = url.replace(matchAuth[2], "");
 			
+			try {
+				var test = previewWin.location.href;
+			}
+			catch(err) {
+				var myError = new Error("Unable to access " + url + " \n" + err.message);
+				if(reloadCallback) reloadCallback(myError);
+				else alertBox(myError.message);
+				wysiwygEditor.close();
+			}
+			
 			if(previewWin.location.href == url) {
 previewWindowLoaded();
 			}

@@ -3648,6 +3648,13 @@ callback(err);
 			}
 			else {
 				
+			try {
+				var test = theWindow.document.domain;
+			}
+			catch(err) {
+				return alertBox("Unable to access " + url + " \n" + err.message);
+			}
+			
 				console.log("theWindow.document.domain=" + theWindow.document.domain);
 				console.log("document.domain=" + document.domain);
 				
