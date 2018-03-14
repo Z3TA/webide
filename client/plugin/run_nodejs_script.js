@@ -132,67 +132,115 @@ stdout(msg);
 				at Server.emit (events.js:172:7)
 				at HTTPParser.parserOnIncoming [as onIncoming] (_http_server.js:528:12)
 				at HTTPParser.parserOnHeadersComplete (_http_common.js:88:23)
+				
+				
+				Prefer opening the file currently in view, then the main file, 
+				then file's opened, then any file with a file path ...
+				
 			*/
 			
-			var firstLine = msg.stderr.slice(0, msg.stderr.indexOf("\n"));
-			var reLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
-			var matchLine = firstLine.match(reLine);
+			var text = msg.stderr;
+			var firstLine = text.slice(0, msg.stderr.indexOf("\n"));
+			var reFirstLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
+			var matchFirstLine = firstLine.match(reFirstLine);
 			
-			console.log("reLine=", reLine);
-			console.log("matchLine=", matchLine);
+			console.log("reFirstLine=", reFirstLine);
+			console.log("matchFirstLine=", matchFirstLine);
 			console.log("msg.stderr=", msg.stderr);
 			
-			if(!matchLine) throw new Error("Unable to find " + reLine + " in error message: " + msg.stderr);
+			if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in error message: " + msg.stderr);
 			
-			var path = matchLine[1];
+			var pathOnFirstLine = matchFirstLine[1];
 			
-			if(path == filePath) {
+			var stackTrace = text.match(/\((.*):(\d+)\)/g);
+			
+				// update line numbers for the file being run in the stack trace
+			var reFileRun = new RegExp(UTIL.escapeRegExp(filePath) + "\\.tmp:(\\d+)");
+				var arr, line=0, actualLine=0;
+			while(arr = reFileRun.exec(text)) {
+					//console.log(arr);
+				line = arr[1];
+					actualLine = parseInt(line) - 20;
+				text = text.replace(reFileRun, filePath + ":" + actualLine);
+					}
+				msg.stderr = text;
+				
+				//console.log("msg.stderr=" + msg.stderr);
+				//console.log("text=" + text);
+				
+				if(pathOnFirstLine == EDITOR.currentFile.path) {
+					// The error is in the file currently in view
+					showErrorMessage(EDITOR.currentFile, text);
+				}
+				else if(pathOnFirstLine == filePath) {
 					// The error is in the file being run
-					// update line numbers
-					var arr, line, actualLine;
-					var text = msg.stderr;
-					while(arr = reLine.exec(text)) {
-						console.log(arr);
-						line = arr[3];
-						actualLine = parseInt(line) - 20;
-						path = arr[1];
-						text = text.replace(reLine, path + ":" + actualLine);
-					} 
-					
-					console.log("msg.stderr=" + msg.stderr);
-					console.log("text=" + text);
-					
-					msg.stderr = text;
-					
-					if(EDITOR.currentFile.path == path) showErrorMessage(EDITOR.currentFile, text);
-					
+				attemptOpen(pathOnFirstLine, function opened(err, file) {
+						// We should not have any problems opening this file ...
+						if(err) throw err;
+						else showErrorMessage(file, msg.stderr);
+					});
 				}
 				else {
-					if(EDITOR.currentFile.path != path) {
-						// File is not in veiw. Attempt to open it ...
-						if(EDITOR.files.hasOwnProperty(path)) {
-							var file = EDITOR.files[path];
-							EDITOR.showFile(file);
-							showErrorMessage(file, msg.stderr);
-						}
-						else {
-							EDITOR.openFile(path, undefined, function open(err, file) {
-								if(err) return console.warn(err);
-								
-								showErrorMessage(file, msg.stderr);
-							});
-						}
+					// The path is not the file being run or the current file in view
+					
+					if(pathOnFirstLine.charAt(0) == "/") { // Asume unix like file path ( not Windows like C:\\\\///Windows\\//// )
+						// Attempt to open this file
+					attemptOpen(pathOnFirstLine, function opened(err, file) {
+							if(err) {
+								console.error(err);
+							alertBox(text);
+							}
+							else showErrorMessage(file, msg.stderr);
+						});
 					}
+					else {
+						// The error is in a native nodejs library ...
+						// Traverse the stack to find a file we can actually open
+						// Does the file in view or the file being run show up in the stack ? Then open it !
+					
+					if(EDITOR.currentFile && stackTrace.indexOf(EDITOR.currentFile.path) != -1) {
+						showErrorMessage(EDITOR.currentFile, msg.stderr);
+						}
+					else if(stackTrace.indexOf(filePath) != -1) {
+						attemptOpen(filePath, function opened(err, file) {
+							// We should not have any problems opening this file ...
+							if(err) throw err;
+							else showErrorMessage(file, msg.stderr);
+						});
+					}
+					else {
+						// Attempt to open any file that has a real file path
+						var found = false;
+					for (var i=0; i<stackTrace.length; i++) {
+							if(stackTrace[i].charAt(0) == "/") {
+								found = true;
+								attemptOpen(stackTrace[i], function opened(err, file) {
+									if(err) {
+										console.error(err);
+										alertBox(text);
+									}
+									else showErrorMessage(file, msg.stderr);
+								});
+							}
+						}
+						if(!found) alertBox(text);
+					}
+					
+					
 				}
 				
-				while(msg.stderr.indexOf(debugStr) != -1) {
-					msg.stderr = msg.stderr.replace(debugStr, "");
-				}
 				
-				stdout(msg);
-				
-				// end if(msg.stderr)
-			} 
+			}
+			
+			// Remove debug strings from error message before showing it in the stdout file
+			while(msg.stderr.indexOf(debugStr) != -1) {
+				msg.stderr = msg.stderr.replace(debugStr, "");
+			}
+			
+			stdout(msg);
+			
+			// end if(msg.stderr)
+		} 
 		else if(msg.exit) {
 			runningScripts.splice(runningScripts.indexOf(filePath), 1);
 			stdout(msg);
@@ -242,7 +290,26 @@ stdout(msg);
 		
 		else throw new Error("Unknown message from nodej script: " + JSON.stringify(msg));
 		
+		
+		function attemptOpen(path, callback) {
+			if(EDITOR.currentFile && EDITOR.currentFile.path == path) return callback(null, EDITOR.currentFile);
+			if(EDITOR.files.hasOwnProperty(path)) {
+				var file = EDITOR.files[path];
+				EDITOR.showFile(file);
+				return callback(null, file);
+			}
+			else {
+				EDITOR.openFile(path, undefined, function open(err, file) {
+					if(err) return callback(err);
+					else {
+						return callback(null, file);
+					}
+				});
+			}
+		}
+		
 	}
+	
 	
 	function showErrorMessage(file, text) {
 		
@@ -268,21 +335,21 @@ stdout(msg);
 		
 		if(!desc) desc = arr[4];
 		
-			console.log("!showErrorMessage arr=", arr);
-			
-			if(!matchLine) throw new Error("Unable to get line number! text=" + text);
-			
+		console.log("!showErrorMessage arr=", arr);
+		
+		if(!matchLine) throw new Error("Unable to get line number! text=" + text);
+		
 		console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
 		
 		var lineNr = parseInt(matchLine[2]);
 		console.log("lineNr=" + lineNr);
 		
 		// Remove debug console.log's
-			if(inline.indexOf(debugStr) != -1) {
-				inDebugStr = true;
-				inline = inline.replace(debugStr, "");
-			}
-			
+		if(inline.indexOf(debugStr) != -1) {
+			inDebugStr = true;
+			inline = inline.replace(debugStr, "");
+		}
+		
 		// Trim inline string
 		while(inline.charAt(0).match(/\s/)) {
 			inlineTrim++;
@@ -292,9 +359,9 @@ stdout(msg);
 		// Figure out where to place the text
 		var includeIndentationCharacters;
 		var rowText = file.rowText(lineNr-1, includeIndentationCharacters=false);
-			var col = rowText.indexOf(inline);
-			
-			if(col == -1) {
+		var col = rowText.indexOf(inline);
+		
+		if(col == -1) {
 			/*
 				throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
 				
@@ -303,15 +370,15 @@ stdout(msg);
 			throw new Error("Unable to find inline=" + inline + " on rowText=" + rowText);
 		}
 		if(inDebugStr) col -= 30;
-			
-			col = col + point.length - 1; // The marker
+		
+		col = col + point.length - 1; // The marker
 		col = col - inlineTrim;
 		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
 		
 		EDITOR.addInfo(lineNr-1, col, desc, file, 1);
-			
-		}
+		
+	}
 	
 	function stdout(msg) {
 		var stdOutFile = msg.scriptName + ".stdout";
