@@ -2359,10 +2359,12 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 		}
 		
 		function finish(err, resp) {
-		if( (FIND_FILES_IN_FLIGHT > 0 || searchQueue.length > 0) && (!FIND_FILES_ABORTED && filesFound < maxResults && folders.length > 0) ) {
+		if( (FIND_FILES_IN_FLIGHT != 0 || searchQueue.length > 0) && (!FIND_FILES_ABORTED && filesFound < maxResults && folders.length > 0) ) {
 			throw new Error("FIND_FILES_IN_FLIGHT=" + FIND_FILES_IN_FLIGHT + " filesFound=" + filesFound + 
-			" maxResults=" + maxResults + " folders.length=" + folders.length + " searchQueue.length=" + searchQueue.length);
+			" maxResults=" + maxResults + " folders.length=" + folders.length + " searchQueue.length=" + searchQueue.length + 
+			"FIND_FILES_ABORTED=" + FIND_FILES_ABORTED);
 		}
+		
 		FIND_FILES_ABORTED = true;
 			if(!callbackCalled) {
 				callbackCalled = true;
