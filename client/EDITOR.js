@@ -680,12 +680,13 @@ EDITOR.lastKeyPressed = "";
 						EDITOR.eventListeners.fileOpen[i].fun(file); // Call function
 					}
 					
-					
+				if(!state || state.show !== false) {
 					// Switch to this file
 					EDITOR.showFile(file);
 					EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
-					
-					if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
+				}
+				
+				if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
 					// If we are this far, there should be no error!
 					callCallbacks(null, file);
 					

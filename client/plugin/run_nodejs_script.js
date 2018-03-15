@@ -438,7 +438,7 @@ stdout(msg);
 		}
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
-			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", function fileOpened(err, file) {
+			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
 				if(err) throw err;
 				file.moveCaretToEndOfFile();
 				appendFile(file, msg);
