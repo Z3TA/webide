@@ -38,38 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-hg merge -r tip
-abort: outstanding uncommitted merge
 
-hg resolve --all says stuff has been resolved
-
-hg resolve --list shows nothing
-
-
-when trying to commit the merge I get: "We need to reslove the merge conflict manually."
-
-hg merge tip (worked)
-
-/client//CLIENT.js:123
-Error: Server: API error: Command failed: hg merge
-abort: no matching bookmark to merge - please merge with an explicit rev or bookmark
-(run 'hg heads' to see all heads)
-
-
-
-
-Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
-
-
-Annoying dealing with CORS headers ...
-
-
-Ctrl+Tab chaning tab in the browser is annoying
-Ctrl + up/down move to next/previous tab !?
-Ctrl + left/right move to left/right tab !?
-
-
-Fighting the CORS-hydra
 
 implementing jsql example on webide.se
 
@@ -84,6 +53,10 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+Better documentation (maybe a blog post!?) on how unix sockets work in jzedit
+problem: When running web_preview files are loaded from webide.se.
+How to know which user to access ? johan.webide.se
 
 Does apparmor even work on webide !?
 on dev machine:
@@ -180,6 +153,32 @@ Visual Studio 38.8%
 Notepad++ 34.3%
 Sublime Text 31.4%
 Vim 27.1%
+
+Stack exchange 2018 survey:
+Visual Studio Code    38.7%
+Visual Studio    35.7%
+Notepad++    34.5%
+Sublime Text    30.2%
+IntelliJ    26.5%
+Vim    26.1%
+Eclipse    18.7%
+Atom    18.6%
+Android Studio    17.6%
+PyCharm    11.4%
+PHPStorm    10.7%
+Xcode    8.8%
+NetBeans    8.4%
+IPython / Jupyter    5.9%
+Emacs    3.7%
+RStudio    1.9%
+RubyMine    1.8%
+TextMate    1.0%
+Coda    0.6%
+Komodo    0.6%
+Zend    0.4%
+Light Table    0.2%
+
+
 
 But instead of trying to "support" these key-bindings, why not try to be better !?
 
@@ -477,6 +476,34 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+
+Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
+
+---
+
+/client//CLIENT.js:123
+Error: Server: API error: Command failed: hg merge
+abort: no matching bookmark to merge - please merge with an explicit rev or bookmark
+(run 'hg heads' to see all heads)
+
+hg merge tip (worked)
+
+when trying to commit the merge I get: "We need to reslove the merge conflict manually."
+
+hg resolve --list shows nothing
+
+hg resolve --all says stuff has been resolved
+
+hg merge -r tip
+abort: outstanding uncommitted merge
+
+hg commit -m "hmm" worked!! ??!?!?
+
+---
+
+
+files opened in the editor was not reloaded when doing hg update !!!
 
 bug: js-parser: anonymous functions get wrong name if foo: to the left. 
 Example in server/mercurial.js where anonymous function in execFile callback 
@@ -1231,6 +1258,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Ctrl+Tab to switch tabs not working in the browser (it changes browser tab) is annoying
+Ctrl + up/down move to next/previous tab !?
+Ctrl + left/right move to left/right tab !?
+
+---
 
 Give a warning when there are two functions with the same name in the same scope!
 For example a named lamda function and a normal function, and the lamda functions tries to call the normal function,
