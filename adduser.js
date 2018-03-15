@@ -281,7 +281,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		
 		
 		// Enable hggit
-		fs.writeFileSync(homeDir + ".hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n', ENCODING);
+		fs.writeFileSync(homeDir + ".hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n[ui]\nusername = ' + username + "\n\n", ENCODING);
 		
 		
 		// Create a directory for unix sockets
