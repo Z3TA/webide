@@ -129,6 +129,8 @@
 	
 	function whenLoaded(file, win) {
 		
+		console.log("web_preview_loaded file=" + file.path);
+		
 		// Override the console log of the preview window and display the messages as info
 		consoleLogOriginal = theWindow.window.console.log;
 		theWindow.window.console.log = captureConsoleLog;
