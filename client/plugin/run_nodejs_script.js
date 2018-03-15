@@ -140,19 +140,8 @@ stdout(msg);
 			*/
 			
 			var text = msg.stderr;
-			var firstLine = text.slice(0, msg.stderr.indexOf("\n"));
-			var reFirstLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
-			var matchFirstLine = firstLine.match(reFirstLine);
 			
-			console.log("reFirstLine=", reFirstLine);
-			console.log("matchFirstLine=", matchFirstLine);
-			console.log("msg.stderr=", msg.stderr);
-			
-			if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in error message: " + msg.stderr);
-			
-			var pathOnFirstLine = matchFirstLine[1];
-			
-			// update line numbers for the file being run in the stack trace
+			// First update line number and remove .tmp
 			var reFileRun = new RegExp(UTIL.escapeRegExp(filePath) + "\\.tmp:(\\d+)");
 			var arr, line=0, actualLine=0;
 			console.log("Update line numbers:");
@@ -163,6 +152,15 @@ stdout(msg);
 				text = text.replace(reFileRun, filePath + ":" + actualLine);
 					}
 				msg.stderr = text;
+			
+			// Get the path from the first line of the error message
+			var firstLine = text.slice(0, text.indexOf("\n"));
+			var reFirstLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
+			var matchFirstLine = firstLine.match(reFirstLine);
+			var pathOnFirstLine = matchFirstLine[1];
+			if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in error message: " + text);
+			console.log("pathOnFirstLine=" + pathOnFirstLine);
+			
 			
 			var stackTrace = text.match(/\((.*):(\d+)\)/g);
 			// remove the parentheses and line:column
@@ -180,6 +178,7 @@ stdout(msg);
 				}
 				else if(pathOnFirstLine == filePath) {
 					// The error is in the file being run
+				console.log("Opening " + pathOnFirstLine + " because it's the file bing run");
 				attemptOpen(pathOnFirstLine, function opened(err, file) {
 						// We should not have any problems opening this file ...
 						if(err) throw err;
@@ -187,10 +186,11 @@ stdout(msg);
 					});
 				}
 				else {
-					// The path is not the file being run or the current file in view
+					// The path in the first line is not the file being run nor the current file in view
 					
 					if(pathOnFirstLine.charAt(0) == "/") { // Asume unix like file path ( not Windows like C:\\\\///Windows\\//// )
 						// Attempt to open this file
+					console.log("Opening " + pathOnFirstLine + " because it's an actual path (starts with a slash)");
 					attemptOpen(pathOnFirstLine, function opened(err, file) {
 							if(err) {
 								console.error(err);
@@ -208,6 +208,7 @@ stdout(msg);
 						showErrorMessage(EDITOR.currentFile, msg.stderr);
 						}
 					else if(stackTrace.indexOf(filePath) != -1) {
+						console.log("Opening " + filePath + " because it's in the stack trace");
 						attemptOpen(filePath, function opened(err, file) {
 							// We should not have any problems opening this file ...
 							if(err) throw err;
@@ -220,6 +221,7 @@ stdout(msg);
 					for (var i=0; i<stackTrace.length; i++) {
 							if(stackTrace[i].charAt(0) == "/") {
 								found = true;
+								console.log("Opening " + stackTrace[i] + " because it's in the stack trace and is an actual path (starts with a slash)");
 								attemptOpen(stackTrace[i], function opened(err, file) {
 									if(err) {
 										console.error(err);
