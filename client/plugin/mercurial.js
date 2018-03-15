@@ -86,15 +86,7 @@
 		
 		repoCloneMenuItem = EDITOR.addMenuItem("Clone/add Repo ...", showCloneDialog);
 		
-		if(QUERY_STRING.repo) {
-			testRepo = {
-				url: QUERY_STRING.repo,
-				into: "/repo/" + UTIL.getFolderName(QUERY_STRING.repo),
-				user: "",
-				pw: ""
-			}
-			showCloneDialog();
-		}
+		CLIENT.on("loginSuccess", cloneRepoMaybe);
 		
 	}
 	
@@ -116,6 +108,36 @@
 		
 		CLIENT.removeEvent("mercurialProgress", mercurialProgressStatus);
 		
+		CLIENT.removeEvent("loginSuccess", cloneRepoMaybe);
+		
+	}
+	
+	function cloneRepoMaybe() {
+		/*
+			Is it a good idea to clone the repo automatically ?
+			Or should we just show the clone dialog with repo pre-filled !?
+			
+			Example url: https://webide.se/?repo=https://github.com/Z3TA/vumoviemaker.git
+		*/
+		if(QUERY_STRING.repo) {
+			var folder = "/repo/";
+			
+			var matchGit = QUERY_STRING.repo.match(/\/([^/]*)\.git$/);
+			var matchUrl = QUERY_STRING.repo.match(/\/([^/]*)$/);
+			
+			if(QUERY_STRING.repo.slice(-1) == "/") folder += UTIL.getFolderName(QUERY_STRING.repo) + "/";
+			else if(matchGit) folder += matchGit[1] + "/";
+			else if(matchUrl) folder += matchUrl[1] + "/";
+			
+			testRepo = {
+				url: QUERY_STRING.repo,
+				into: folder,
+				user: "",
+				pw: ""
+			}
+			showCloneDialog();
+			QUERY_STRING.repo = null; // Don't attempt to clone again after reconnection
+		}
 	}
 	
 	function buildProgressBarWidget(widget) {
