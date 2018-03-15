@@ -528,7 +528,7 @@ stdout(msg);
 		if(msg.stdout) write( (msg.type ? msg.type + ": " : "") + msg.stdout );
 		if(msg["console.log"]) write(msg["console.log"] + "\n");
 		
-		if(msg.exit) write(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+		if(msg.exit) write((eof ? "\n" : "") + msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
 		
 		EDITOR.renderNeeded();
 		
@@ -536,7 +536,7 @@ stdout(msg);
 		if(eof) {
 			// Auto scroll down
 			//var method = file.insertText.bind(file);
-				if(str.slice(-1) != "\n") str += "\n";
+				//if(str.slice(0,1) != "\n") str = "\n" + str;
 				file.insertText(str);
 		}
 		else {
