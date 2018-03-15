@@ -327,7 +327,7 @@
 				console.log("web preview window reloaded!");
 				clearInterval(interval);
 				clearTimeout(timeout);
-				whenLoaded();
+				whenLoaded(inPreview, theWindow);
 			}
 			else console.log("web preview window not yet reloaded!");
 			
