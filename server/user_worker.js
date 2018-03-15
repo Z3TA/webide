@@ -59,7 +59,7 @@ var npmExecFileOptions = {
 
 
 if(parseInt(process.env.uid)) {
-
+	
 	USE_CHROOT = true;
 	/* Change root ...
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
@@ -92,9 +92,9 @@ if(parseInt(process.env.uid)) {
 	
 	// Unshare network namespace
 	/*
-	var CLONE_NEWNET = 0x40000000;
-	var unshare = require("unshare");
-	unshare(CLONE_NEWNET);
+		var CLONE_NEWNET = 0x40000000;
+		var unshare = require("unshare");
+		unshare(CLONE_NEWNET);
 	*/
 	
 	process.env.HOME = "/";
@@ -102,7 +102,7 @@ if(parseInt(process.env.uid)) {
 }
 else {
 	var isRoot = process.getuid && process.getuid() === 0;
-if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
+	if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
 }
 
 // Set default file permissions
@@ -159,8 +159,8 @@ user.identify = function identify(info) {
 	
 	var lastCharOfDir = user.defaultWorkingDirectory.substr(user.defaultWorkingDirectory.length-1);
 	if(lastCharOfDir != "/" && lastCharOfDir != "\\") throw new Error("user.defaultWorkingDirectory=" + user.defaultWorkingDirectory + " does not end with a slash! info=" + JSON.stringify(info));
-
-
+	
+	
 	user.workingDirectory = user.defaultWorkingDirectory;
 	
 	user.storageDir = user.translatePath(user.defaultWorkingDirectory + ".jzeditStorage" + path.sep) ;
@@ -184,7 +184,7 @@ user.teardown = function teardown(msg, terddownComplete) {
 	doneMaybe();
 	
 	// Disconnect from remote servers etc ...
-
+	
 	function nodeJsScriptStopped() {
 		scriptsToStop--;
 		doneMaybe();
@@ -634,7 +634,7 @@ API.serve = function serve(user, json, callback) {
 		if(err) callback(err);
 		else callback(err, {url: resp.url});
 	});
-	}
+}
 
 API.stop_serve = function serve(user, json, callback) {
 	
@@ -668,7 +668,7 @@ API.debugInBrowserVnc = function serve(user, json, callback) {
 		callback(err, resp);
 		//});
 		
-		});
+	});
 }
 
 
@@ -714,7 +714,7 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 	var saveType = "--save"; // Package will appear in your dependencies.
 	if(json.saveDev) saveType = "--save-dev"; // Package will appear in your devDependencies
 	else if(json.saveOptional) saveType = "--save-optional"; // Package will appear in your optionalDependencies.
-
+	
 	installNodejsModule(filePath, moduleName, saveType, function nodejsModuleInstalled(err) {
 		callback(err, {name: moduleName});
 	});
@@ -769,7 +769,7 @@ API.nodejs_init_remove = function nodejs_init_removet(user, json, callback) {
 }
 
 API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
-
+	
 	var folder = json.folder;
 	var pw = json.pw;
 	
@@ -811,7 +811,7 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 		/*
 			note: We could also fpt/sftp/rsync the files to another server!
 			And talk to the nodejs_init.service on that server.
-			*/
+		*/
 		
 		var fs = require("fs");
 		fs.mkdir(USER_PROD_FOLDER, function makeSureProdFolderExist(err) {
@@ -837,7 +837,7 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 		
 	});
 	
-
+	
 }
 
 
@@ -878,7 +878,7 @@ function httpGet(options, callback) {
 			hostname: parse.host,
 			port: parse.port || 80,
 			path: parse.path,
-			};
+		};
 	}
 	
 	if(typeof callback != "function") throw new Error("allback function expected! callback=" + callback);
@@ -893,8 +893,8 @@ function httpGet(options, callback) {
 	
 	var http = require("http");
 	var req = http.request(options, function (res) {
-	
-	res.setEncoding('utf8');
+		
+		res.setEncoding('utf8');
 		var rawData = '';
 		res.on('data', function http_data(chunk) { rawData += chunk; });
 		res.on('end', function http_req_end() {
@@ -948,7 +948,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 				'"author": "' + user.name + '",\n' +
 				'"license": "ISC"\n' +
 				'}\n', "utf8", function (err) {
-				
+					
 					if(err) return callback(new Error("Failed to create package.json: " + err.message));
 					
 					return installModule();
@@ -989,7 +989,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			
 			if(stdout) {
 				user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
-				}
+			}
 			
 			return callback(null);
 			
@@ -1010,11 +1010,11 @@ function stopNodeJsScript(filePath, callback) {
 	childProcess.stdin.setEncoding('ascii'); 
 	
 	if(isDebugger) {
-	console.log(user.name + ":" + filePath + ":stdin: quit");
-	childProcess.stdin.write("quit" + "\n");
+		console.log(user.name + ":" + filePath + ":stdin: quit");
+		childProcess.stdin.write("quit" + "\n");
 	}
 	else {
-	//console.log(user.name + ":" + filePath + ":stdin: Ctrl+C");
+		//console.log(user.name + ":" + filePath + ":stdin: Ctrl+C");
 		//childProcess.stdin.write("\x03"); // CTRL-C
 		// Sending Ctrl+C did throw an error in nodejs native net modules !..
 		// Give CTRL-C a chance before sending kill signals
@@ -1078,7 +1078,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			try {
 				var packageObj = JSON.parse(packageTxt);
-		}
+			}
 			catch(parseError) {
 				return patchIt(false);
 			}
@@ -1087,7 +1087,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			var execFile = require('child_process').execFile;
 			var arg = ["install"];
 			execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
-			
+				
 				console.log("npm install err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 				
 				if(err) return callback(new Error("Failed to install dependencies: " + err.message));
@@ -1101,11 +1101,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 					if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
 				}
 				
-					if(stdout) {
+				if(stdout) {
 					user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
-					}
+				}
 				return patchIt(true);
-					
+				
 			});
 			
 		}
@@ -1117,25 +1117,27 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		fs.readFile(filePath, "utf8", function read(err, data) {
 			if(err) return callback(err);
 			
-			data = data.replace(/(console\.log ?\(.*\))/g, "__C_S_L_O_G_O_R('\x02' + __line);$1");
+			//data = data.replace(/(console\.log ?\(.*\))/g, "__C_S_L_O_G_O_R('\x02' + __line);$1");
+			//data = data.replace(/console\.log *\( *(['"`])(.*)\1 *\)/g, "console.log('\x02' + __line + '\\n' + '$2')");
+			data = data.replace(/(console\.log *\(.*\))/g, "__C_S_L_O_G_O_R('\x02' + __line) || $1");
 			
 			var debugFunc = `
 			Object.defineProperty(global, '__stack', {
-				get: function(){
-					var orig = Error.prepareStackTrace;
-					Error.prepareStackTrace = function(_, stack){ return stack; };
-					var err = new Error;
-					Error.captureStackTrace(err, arguments.callee);
-					var stack = err.stack;
-					Error.prepareStackTrace = orig;
-					return stack;
-				}
+			get: function(){
+			var orig = Error.prepareStackTrace;
+			Error.prepareStackTrace = function(_, stack){ return stack; };
+			var err = new Error;
+			Error.captureStackTrace(err, arguments.callee);
+			var stack = err.stack;
+			Error.prepareStackTrace = orig;
+			return stack;
+			}
 			});
 			
 			Object.defineProperty(global, '__line', {
-				get: function(){
-					return __stack[1].getLineNumber();
-				}
+			get: function(){
+			return __stack[1].getLineNumber();
+			}
 			});
 			
 			var __C_S_L_O_G_O_R = console.log;
@@ -1150,7 +1152,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				
 				runIt(packageJsonExist);
 			});
-			});
+		});
 	}
 	
 	function runIt(packageJsonExist) {
@@ -1158,7 +1160,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		//if(debugit) runDebugger();
 		//else runScript();
 		
-	console.log(user.name + " starting NodeJS script: filePath=" + filePath);
+		console.log(user.name + " starting NodeJS script: filePath=" + filePath);
 		
 		var fileName = UTIL.getFilenameFromPath(filePath);
 		var breakPoints = [];
@@ -1178,12 +1180,12 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var nodeScriptOptions = {
 			execPath: nodejsPath, 
 			env: {
-					myName: user.name,
-					dev: true
-				},
-				silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
-			};
-	
+				myName: user.name,
+				dev: true
+			},
+			silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+		};
+		
 		if(debugit) {
 			nodeScriptOptions.execArgv = ["debug"]; // Arguments for nodejs (the forked process)
 			
@@ -1227,7 +1229,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			if(debugit && breakPoints.length > 0) {
 				nodeScript.stdin.setEncoding('utf-8');
-				}
+			}
 			
 			// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
 			
@@ -1248,13 +1250,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			user.send({nodejsMessage: {scriptName: filePath, exit: {code: code, signal: signal}}});
 			
-	}
-	
-	function nodeScriptError(err) {
-		console.log(user.name + " nodejs script error: err=" + err);
+		}
+		
+		function nodeScriptError(err) {
+			console.log(user.name + " nodejs script error: err=" + err);
 			//user.send({nodejsMessage: {scriptName: filePath, error: err.message}});
-	}
-	
+		}
+		
 		function stdin(text) {
 			console.log(user.name + ":" + filePath + ":stdin: " + text);
 			
@@ -1304,13 +1306,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 							stdin("setBreakpoint(" + breakPoints[i].line + ")");
 						}
 						nextBreakPoint = breakPoints.shift();
-						}
+					}
 					stdin("cont");
 				}
 				else if(nextBreakPoint) {
 					checkText();
-			}
-			else {
+				}
+				else {
 					console.log("Unexpected: " + debugText(text));
 				}
 			}
@@ -1319,28 +1321,28 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			}
 			
 			function parseLines(text) {
-/*
-
-text can contain many console.logs!
-
-*/
-
-var newLine = text.indexOf("\n");
-
-if(newLine == -1) {
-lineNr = parseInt(text.slice(1)) - 20;
-return; // next stdout will be a console.log !
-}
-else {
-// text contains one ore more lines
-lineNr = parseInt(text.slice(1, newLine)) - 20;
-var lines = text.trim().split("\n");
-lines.shift(); // Remove the line with ESC + lineNr
-
+				/*
+					
+					text can contain many console.logs!
+					
+				*/
+				
+				var newLine = text.indexOf("\n");
+				
+				if(newLine == -1) {
+					lineNr = parseInt(text.slice(1)) - 20;
+					return; // next stdout will be a console.log !
+				}
+				else {
+					// text contains one ore more lines
+					lineNr = parseInt(text.slice(1, newLine)) - 20;
+					var lines = text.trim().split("\n");
+					lines.shift(); // Remove the line with ESC + lineNr
+					
 					var lineText = "";
 					var string = "";
 					
-while(lines.length > 0) {
+					while(lines.length > 0) {
 						lineText = lines.shift();
 						if(lineText.charAt(0) == "\x02") {
 							// a new console log
@@ -1350,15 +1352,15 @@ while(lines.length > 0) {
 								string = "";
 							}
 							lineNr = parseInt(text.slice(1)) - 20;
-}
+						}
 						else {
 							// asume it's the same console.log but it has many lines
 							string += "\n" + lineText;
-}
+						}
 					}
 					if(string) {
 						user.send({nodejsMessage: {scriptName: filePath, line: lineNr, "console.log": string.trim()}});
-						}
+					}
 					lineNr = 0;
 				}
 			}
@@ -1398,7 +1400,7 @@ while(lines.length > 0) {
 			}
 			else {
 				user.send({nodejsMessage: {scriptName: filePath, noMoreBreakPoints: true}});
-				}
+			}
 		}
 		
 		function nodejsScriptStderr(data) {
@@ -1470,7 +1472,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 	console.log(user.name + " starting node-inspect: port=" + remotePort + " visitUrl=" + visitUrl + " breakPoints=" + JSON.stringify(breakPoints) + " sourceFile=" + sourceFile);
 	
 	
-		var nextBreakPoint;
+	var nextBreakPoint;
 	var nodeInspect;
 	var nodeInspectPath = "/usr/bin/node-inspect";
 	var nodeInspectArgs = [];
@@ -1484,12 +1486,12 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 	
 	var nodeInspectOptions = {
 		execPath:nodejsPath,
-			env: {
-				myName: user.name
-			},
-			silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
-		};
-		
+		env: {
+			myName: user.name
+		},
+		silent: true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+	};
+	
 	if(sourceFile) {
 		var directory = UTIL.getDirectoryFromPath(sourceFile);
 		var fileName = UTIL.getFilenameFromPath(sourceFile);
@@ -1517,178 +1519,178 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 		});
 	}
 	else start();
-		
-		function start() {
-			var child_process = require("child_process");
+	
+	function start() {
+		var child_process = require("child_process");
 		nodeInspect = child_process.fork(nodeInspectPath, nodeInspectArgs, nodeInspectOptions);
-			// The node worker will chroot to user's home dir, setegid and seteuid
-			
+		// The node worker will chroot to user's home dir, setegid and seteuid
+		
 		nodeInspect.on("message", messageFromNodeScript);
 		nodeInspect.on("error", nodeInspectError);
 		nodeInspect.on("exit", nodejScriptExit);
-			
+		
 		nodeInspect.stdout.on('data', nodejsScriptStdout);
 		nodeInspect.stderr.on('data', nodejsScriptStderr);
-			
-			if(debugit && breakPoints.length > 0) {
+		
+		if(debugit && breakPoints.length > 0) {
 			nodeInspect.stdin.setEncoding('utf-8');
-			}
-			
-			// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
-			
+		}
+		
+		// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
+		
 		user.runningNodeJsScripts[filePath] = {childProcess: nodeInspect, isDebugger: debugit};
-			callback(null, {filePath: filePath});
-		}
+		callback(null, {filePath: filePath});
+	}
+	
+	function messageFromNodeScript(message, handle) {
+		console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
+		console.log(message);
+		user.send({nodejsMessage: {scriptName: filePath, ICP: message}});
+	}
+	
+	function nodejScriptExit(code, signal) {
+		console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
 		
-		function messageFromNodeScript(message, handle) {
-			console.log(user.name + ":" + filePath + ":message: message=" + message + " handle=" + handle);
-			console.log(message);
-			user.send({nodejsMessage: {scriptName: filePath, ICP: message}});
-		}
+		delete user.runningNodeJsScripts[filePath];
 		
-		function nodejScriptExit(code, signal) {
-			console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
-			
-			delete user.runningNodeJsScripts[filePath];
-			
-			user.send({nodejsMessage: {scriptName: filePath, exit: {code: code, signal: signal}}});
-			
-		}
+		user.send({nodejsMessage: {scriptName: filePath, exit: {code: code, signal: signal}}});
 		
+	}
+	
 	function nodeInspectError(err) {
-			console.log(user.name + " nodejs script error: err=" + err);
-			//user.send({nodejsMessage: {scriptName: filePath, error: err.message}});
-		}
+		console.log(user.name + " nodejs script error: err=" + err);
+		//user.send({nodejsMessage: {scriptName: filePath, error: err.message}});
+	}
+	
+	function stdin(text) {
+		console.log(user.name + ":" + filePath + ":stdin: " + text);
 		
-		function stdin(text) {
-			console.log(user.name + ":" + filePath + ":stdin: " + text);
-			
 		nodeInspect.stdin.write(text + "\n");
-		}
+	}
+	
+	function nodejsScriptStdout(data) {
+		var text = data.toString("utf8");
+		console.log(user.name + ":" + filePath + ":stdout: " + data + "");
+		console.log("text=" + debugText(text) + "  nextBreakPoint=" + JSON.stringify(nextBreakPoint));
 		
-		function nodejsScriptStdout(data) {
-			var text = data.toString("utf8");
-			console.log(user.name + ":" + filePath + ":stdout: " + data + "");
-			console.log("text=" + debugText(text) + "  nextBreakPoint=" + JSON.stringify(nextBreakPoint));
+		if(debugit) {
 			
-			if(debugit) {
+			// To convert from decimal to hex, open repl and type: parseInt(n).toString(16);
+			// The hex can then be used as escape character \xhex (where hex is the charcode in decimal)
+			// Numbers lower then 10 needs to be padded with a zero. eg 8 becomes x08
+			
+			// childProcess.stdin.write("\x03"); // CTRL-C
+			
+			// The debugger always breaks at the first code entry,
+			// We need to wait for that before sending it stuff
+			var matchBreak = text.match(/\x08?break in (.*):(\d*)/);
+			if(!nextBreakPoint && matchBreak) {
+				log("Debugger connected and ready! matchBreak=" + JSON.stringify(matchBreak));
 				
-				// To convert from decimal to hex, open repl and type: parseInt(n).toString(16);
-				// The hex can then be used as escape character \xhex (where hex is the charcode in decimal)
-				// Numbers lower then 10 needs to be padded with a zero. eg 8 becomes x08
-				
-				// childProcess.stdin.write("\x03"); // CTRL-C
-				
-				// The debugger always breaks at the first code entry,
-				// We need to wait for that before sending it stuff
-				var matchBreak = text.match(/\x08?break in (.*):(\d*)/);
-				if(!nextBreakPoint && matchBreak) {
-					log("Debugger connected and ready! matchBreak=" + JSON.stringify(matchBreak));
-					
-					// This might be the first breakpoint!!!
-					// The debugger always stop on the first expression found
-					if(matchBreak[2] == breakPoints[0].line) {
-						// it *is* the first breakpoint!
-						nextBreakPoint = breakPoints.shift();
-						for (var i=0; i<breakPoints.length; i++) {
-							stdin("setBreakpoint(" + breakPoints[i].line + ")");
-						}
-						checkText();
+				// This might be the first breakpoint!!!
+				// The debugger always stop on the first expression found
+				if(matchBreak[2] == breakPoints[0].line) {
+					// it *is* the first breakpoint!
+					nextBreakPoint = breakPoints.shift();
+					for (var i=0; i<breakPoints.length; i++) {
+						stdin("setBreakpoint(" + breakPoints[i].line + ")");
 					}
-					else {
-						for (var i=0; i<breakPoints.length; i++) {
-							stdin("setBreakpoint(" + breakPoints[i].line + ")");
-						}
-						nextBreakPoint = breakPoints.shift();
-					}
-					stdin("cont");
-				}
-				else if(nextBreakPoint) {
 					checkText();
 				}
 				else {
-					console.log("Unexpected: " + debugText(text));
-				}
-			}
-			else {
-				user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
-			}
-			
-			function checkText() {
-				// break in undefinedProperty.js:18
-				
-				if(text == "\x08break in " + fileName + ":" + nextBreakPoint.line) {
-					if(nextBreakPoint.type=="console.log") {
-						stdin("cont");
-						// we'll get the result printed out by console.log in the next message ... (hopefully)
+					for (var i=0; i<breakPoints.length; i++) {
+						stdin("setBreakpoint(" + breakPoints[i].line + ")");
 					}
-					else stdin("repl");
+					nextBreakPoint = breakPoints.shift();
 				}
-				else if(text == "Press Ctrl + C to leave debug repl") {
-					stdin(nextBreakPoint.expression);
-				}
-				else if(text.match(/^\x08?</)) {
-					if(nextBreakPoint.type=="console.log") {
-						var logMsg = text;
-						logMsg = logMsg.replace(/^\x08?< /, "");
-						logMsg = logMsg.replace(/\ndebug> /, "");
-						user.send({nodejsMessage: {scriptName: filePath, line: nextBreakPoint.line, "console.log": logMsg}});
-						continueDebug();
-					}
-					else if(nextBreakPoint.type=="undefinedMember") {
-						// ?
-					}
-				}
-			}
-		}
-		
-		function continueDebug() {
-			if(breakPoints.length > 0) {
-				nextBreakPoint = breakPoints.shift();
 				stdin("cont");
 			}
+			else if(nextBreakPoint) {
+				checkText();
+			}
 			else {
-				user.send({nodejsMessage: {scriptName: filePath, noMoreBreakPoints: true}});
+				console.log("Unexpected: " + debugText(text));
 			}
 		}
+		else {
+			user.send({nodejsMessage: {scriptName: filePath, stdout: text}});
+		}
 		
-		function nodejsScriptStderr(data) {
+		function checkText() {
+			// break in undefinedProperty.js:18
 			
-			var stderr = data.toString("utf8");
+			if(text == "\x08break in " + fileName + ":" + nextBreakPoint.line) {
+				if(nextBreakPoint.type=="console.log") {
+					stdin("cont");
+					// we'll get the result printed out by console.log in the next message ... (hopefully)
+				}
+				else stdin("repl");
+			}
+			else if(text == "Press Ctrl + C to leave debug repl") {
+				stdin(nextBreakPoint.expression);
+			}
+			else if(text.match(/^\x08?</)) {
+				if(nextBreakPoint.type=="console.log") {
+					var logMsg = text;
+					logMsg = logMsg.replace(/^\x08?< /, "");
+					logMsg = logMsg.replace(/\ndebug> /, "");
+					user.send({nodejsMessage: {scriptName: filePath, line: nextBreakPoint.line, "console.log": logMsg}});
+					continueDebug();
+				}
+				else if(nextBreakPoint.type=="undefinedMember") {
+					// ?
+				}
+			}
+		}
+	}
+	
+	function continueDebug() {
+		if(breakPoints.length > 0) {
+			nextBreakPoint = breakPoints.shift();
+			stdin("cont");
+		}
+		else {
+			user.send({nodejsMessage: {scriptName: filePath, noMoreBreakPoints: true}});
+		}
+	}
+	
+	function nodejsScriptStderr(data) {
+		
+		var stderr = data.toString("utf8");
+		
+		console.log(user.name + ":" + filePath + ":stderr: " + debugText(stderr) + " (" + (typeof data) + ") =  " + data + "");
+		
+		
+		
+		var matchModuleError = stderr.match(/Error: Cannot find module '(.*)'/);
+		
+		if(matchModuleError) {
 			
-			console.log(user.name + ":" + filePath + ":stderr: " + debugText(stderr) + " (" + (typeof data) + ") =  " + data + "");
-			
-			
-			
-			var matchModuleError = stderr.match(/Error: Cannot find module '(.*)'/);
-			
-			if(matchModuleError) {
-				
-				if(installAllModules) {
-					// Try to install the module and run the script again
+			if(installAllModules) {
+				// Try to install the module and run the script again
 				installNodejsModule(filePath, matchModuleError[1], "--save", function(err) {
-						if(err) user.send(err.message);
-						else {
-							
-							if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
-								if(err) console.log(err.message); // Means the script was already stopped.
-								runNodeJsScript(filePath, args, installAllModules, debugit, function(err) {
-									if(err) user.send(err.message);
-								});
-							})
-							
-						}
-					});
-					
-				}
-				else {
-					user.send({nodejsMessage: {scriptName: filePath, cannotFindModule: matchModuleError[1]}});
-				}
+					if(err) user.send(err.message);
+					else {
+						
+						if(user.runningNodeJsScripts.hasOwnProperty(filePath)) stopNodeJsScript(filePath, function scriptStopped(err) {
+							if(err) console.log(err.message); // Means the script was already stopped.
+							runNodeJsScript(filePath, args, installAllModules, debugit, function(err) {
+								if(err) user.send(err.message);
+							});
+						})
+						
+					}
+				});
+				
 			}
-			
-			user.send({nodejsMessage: {scriptName: filePath, stderr: stderr}});
+			else {
+				user.send({nodejsMessage: {scriptName: filePath, cannotFindModule: matchModuleError[1]}});
+			}
 		}
 		
+		user.send({nodejsMessage: {scriptName: filePath, stderr: stderr}});
+	}
+	
 }
 
 
@@ -1743,7 +1745,7 @@ function debugText(text) {
 		else if(c==160) d += "SPACE";
 		else if(c>=161 && c<=255) d += text.charAt(i);
 		else d += "_" + c + "_";
-		}
+	}
 	
 	return d;
 }
