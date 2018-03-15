@@ -2308,6 +2308,8 @@ checkOpenedFiles();
 var filesToBeReopened = 0;
 				var filesReloaded = [];
 				
+						console.log("files that has been updated: " + JSON.stringify(files));
+						
 				for(var i=0; i<files.length; i++) {
 						if(EDITOR.files.hasOwnProperty(files[i])) {
 							filesToBeReloaded++;
@@ -2319,6 +2321,8 @@ var filesToBeReopened = 0;
 						}
 					}
 
+						console.log("files to reopen: " + JSON.stringify(reopenFiles));
+						
 for (var i=0; i<reopenFiles.length; i++) {
 EDITOR.openFile(reopenFiles[i], undefined, reopened);
 }
@@ -2354,6 +2358,7 @@ if(filesToBeReloaded == 0 && filesToBeReopened == 0) done();
 
 function reload(file, callback) {
 var filePath = file.path;
+				console.log("Reloading " + filePath + " ...");
 EDITOR.readFromDisk(filePath, function(err, path, text) {
 if(err) throw err;
 else {
