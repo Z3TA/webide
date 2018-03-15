@@ -5370,6 +5370,9 @@ throw new Error("keyPressed event listener: " + UTIL.getFunctionName(EDITOR.even
 		// Prevent Firefox's quick search (/ slash)
 			if(EDITOR.input && charCode == 47) keyPressEvent.preventDefault();
 			
+		// Prevent Firefox's quick find (' single quote)
+		if(EDITOR.input && charCode == 39) keyPressEvent.preventDefault();
+		
 			// Prevent scrolling down when hitting space in Firefox
 			if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
 				
