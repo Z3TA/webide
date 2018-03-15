@@ -371,16 +371,22 @@ stdout(msg);
 		console.log("lineNr=" + lineNr);
 		
 		// Remove debug console.log's
+		console.log("inline=" + inline);
+		console.log("inDebugStr=" + inDebugStr);
 		if(inline.indexOf(debugStr) != -1) {
 			inDebugStr = true;
 			inline = inline.replace(debugStr, "");
 		}
+		console.log("inDebugStr=" + inDebugStr);
 		
 		// Trim inline string
 		while(inline.charAt(0).match(/\s/)) {
 			inlineTrim++;
 			inline = inline.slice(1);
 		}
+		console.log("inlineTrim=" + inlineTrim);
+		console.log("point.length=" + point.length);
+		
 		
 		// Figure out where to place the text
 		var includeIndentationCharacters;
@@ -418,7 +424,7 @@ stdout(msg);
 			else col = 0;
 			}
 		else {
-		if(inDebugStr) col -= 30;
+		if(inDebugStr && col >= 30) col = col - 30;
 			col = col + point.length - 1; // The marker
 			col = col - inlineTrim;
 		}
