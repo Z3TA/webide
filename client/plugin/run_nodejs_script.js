@@ -522,24 +522,30 @@ stdout(msg);
 		console.log("appendFile: " + file.path + " msg=" + msg);
 		
 		var eof = file.caret.eof;
-		
 		console.log("caret eof=" + eof + " " + JSON.stringify(file.caret));
 		
-		if(eof) {
-			var method = file.insertText.bind(file);
-		}
-		else {
-			var method = file.writeLine.bind(file);;
-		}
+		if(msg.stderr) write(msg.stderr);
+		if(msg.stdout) write( (msg.type ? msg.type + ": " : "") + msg.stdout );
+		if(msg["console.log"]) write(msg["console.log"] + "\n");
 		
-		if(msg.stderr) method(msg.stderr);
-		
-		if(msg.stdout) method( (msg.type ? msg.type + ": " : "") + msg.stdout );
-		if(msg["console.log"]) method(msg["console.log"] + "\n");
-		
-		if(msg.exit) method(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+		if(msg.exit) write(msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
 		
 		EDITOR.renderNeeded();
+		
+		function write(str) {
+		if(eof) {
+			// Auto scroll down
+			//var method = file.insertText.bind(file);
+				if(str.slice(-1) != "\n") str += "\n";
+				file.insertText(str);
+		}
+		else {
+			// Just add the text without scrolling down to it
+				//var method = file.writeLine.bind(file);;
+				file.writeLine(str);
+		}
+		}
+		
 	}
 	
 	
