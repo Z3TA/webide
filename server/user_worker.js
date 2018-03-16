@@ -48,6 +48,7 @@ var USER_PROD_FOLDER = "/.prod/";
 
 
 var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
+log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")");
 log("process.env.uid=" + process.env.uid);
 
 var npmExecFileOptions = {

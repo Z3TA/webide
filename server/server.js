@@ -1041,7 +1041,7 @@ idFail("Wrong password for user: " + username);
 							
 							userWorker = createUserWorker(userConnectionName, uid, gid);
 							
-							var userInfo = {name: userConnectionName, rootPath: rootPath, homeDir: homeDir, shell: shell};
+							var userInfo = {name: userConnectionName, rootPath: !NO_CHROOT && rootPath, homeDir: homeDir, shell: shell};
 							
 							log("User userConnectionName=" + userConnectionName + " logged in! userConnectionId=" + userConnectionId + " userInfo=" + JSON.stringify(userInfo));
 							
@@ -1565,12 +1565,10 @@ function createUserWorker(name, uid, gid) {
 	
 	// You can have different group and user. Default is the user/group running the node process
 	var options = {};
-	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid];
+	var args = ["--loglevel=" + LOGLEVEL, "--username=" + name, "--uid=" + uid, "--gid=" + gid, "--chroot=" + !NO_CHROOT];
 	
 	options.env = {
 		username: name,
-		uid: uid,
-		gid: gid,
 		loglevel: LOGLEVEL
 	}
 	
@@ -1578,7 +1576,12 @@ function createUserWorker(name, uid, gid) {
 		if(uid != undefined) options.uid = parseInt(uid);
 		if(gid != undefined) options.gid = parseInt(gid);
 	}
-	else if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+	else {
+		options.env.uid = uid;
+		options.env.gid = gid;
+		
+		if(uid) options.execPath = "/usr/bin/nodejs_" + name; // Hard link to nodejs binary so each user can have an unique apparmor profile
+		}
 	
 	if((uid == undefined || uid == -1)) {
 		log("No uid specified!\nUSER WILL RUN AS username=" + CURRENT_USER, WARN);

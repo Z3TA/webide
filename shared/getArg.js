@@ -35,6 +35,8 @@ function getArg(word) {
 		var value = match[match.length-1];
 		//console.log("value=" + value);
 		if(value === undefined) return true;
+		else if(value === "false") return false;
+		else if(value === "true") return true;
 		else return value;
 	}
 	else return undefined;
