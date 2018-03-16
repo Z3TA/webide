@@ -550,8 +550,8 @@ idFail("Wrong password for user: " + username);
 									if(foundUserIn(row)) return checkMounts();
 								}
 								
-								idFail("Unable to find username=" + username + " in /etc/passwd ! A server admin need to active the account.");
-								// Activate the account: sudo useradd -r -s /bin/false nameofuser
+								idFail("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
+								// Add user account: sudo useradd -r -s /bin/false nameofuser
 							}
 							
 							function foundUserIn(row) {
@@ -584,6 +584,11 @@ idFail("Wrong password for user: " + username);
 							// When a user have been moved to another server, the user id will be different.
 							// So we have to reset the user permissions! 
 							// www-data user id might be the same though, depending on distro
+							
+							if(NO_CHROOT) {
+								console.log("Not checking mounts because -nochroot option in server parameters");
+								return acceptUser();
+							}
 							
 							console.log("Checking mounts ...");
 							
