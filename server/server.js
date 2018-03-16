@@ -497,7 +497,7 @@ function sockJsConnection(connection) {
 								if(password == pwstringFromFile) idSuccess();
 								else {
 idFail("Wrong password for user: " + username);
-									console.log("*" + password + "* != *" + pwstringFromFile + "*");
+									console.log("Hashed pw *" + password + "* (entered by user) != *" + pwstringFromFile + "* (.jzeditpw file)");
 								}
 							}
 						});

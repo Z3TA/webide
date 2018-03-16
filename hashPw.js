@@ -5,9 +5,12 @@
 	Input: clear text password
 	Output: Hashed password
 	
-	Useful for manually chaning user passwords.
+	Useful for manually changing user passwords.
 	
 	sudo chmod +x hashPw.js
+	
+	Remove ending line break in .jzeditpw file: 
+	truncate -s -1 /home/user/.jzeditpw
 	
 */
 
