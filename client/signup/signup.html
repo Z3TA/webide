@@ -31,37 +31,38 @@
 	
 	<p>Create a free account:</p>
 	
-	<span class="alert" id="generalAlert">You need to enable JavaScript!</span>
+	<noscript class="alert">You need to enable JavaScript!</noscript>
 	
-	<div class="input-single">
-		<label for="username">Username:</label>
-		<input type="text" id="username" placeholder="Username" />  <span class="alert" id="usernameAlert"></span>
+	<div class="alert" id="generalAlert"></div>
+	
+		<div class="input-single">
+			<label for="username">Username:</label>
+			<input type="text" id="username" placeholder="Username" />  <span class="alert" id="usernameAlert"></span>
+		</div>
+		<div class="input-single">
+			<label for="password">Password:</label> 
+			<input type="password" id="password" placeholder="Password" />  <span class="alert" id="pwAlert"></span>
+		</div>
+		<div class="input-single">
+			<label for="password">Repeat password:</label>
+			<input type="password" id="password2" placeholder="Password" />
+		</div>
+		
+		<p>Your website url: <span id="urlUser">user</span>.webide.se</p>
+		
+		<button id="createButton">Create your cloud-IDE account</button></p>
+		
+		</fieldset>
+		
+		<nav>
+		<ul>
+			<li><a href="/">Already have an account?</a></li>
+			<li><a href="/about/about.htm">About</a></li>
+			<!--<li><a href="/help/index.html">Guides</a></li>-->
+		</ul>
+		</nav>
+		
 	</div>
-	<div class="input-single">
-		<label for="password">Password:</label> 
-		<input type="password" id="password" placeholder="Password" />  <span class="alert" id="pwAlert"></span>
-	</div>
-	<div class="input-single">
-		<label for="password">Repeat password:</label>
-		<input type="password" id="password2" placeholder="Password" />
-	</div>
-	
-	<p>Your website url: <span id="urlUser">user</span>.webide.se</p>
-	
-	<button id="createButton">Create your cloud-IDE account</button></p>
-	
-	</fieldset>
-	
-	<nav>
-	<ul>
-		<li><a href="/">Already have an account?</a></li>
-		<li><a href="/about/about.htm">About</a></li>
-		<!--<li><a href="/help/index.html">Guides</a></li>-->
-	</ul>
-	</nav>
-	
-</div>
 
 	</body>
 	</link>
-	
