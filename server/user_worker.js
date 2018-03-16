@@ -48,8 +48,8 @@ var USER_PROD_FOLDER = "/.prod/";
 
 
 var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
-log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")");
-log("process.env.uid=" + process.env.uid);
+log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")", 7);
+log("process.env.uid=" + process.env.uid, 7);
 
 var npmExecFileOptions = {
 	env: {
@@ -105,6 +105,11 @@ else {
 	var isRoot = process.getuid && process.getuid() === 0;
 	if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
 }
+
+var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
+
+if(process.getuid) log("Running user worker process with uid=" + process.getuid() + " (" + processUser + ")");
+else log("Unable to get process uid!", 4);
 
 // Set default file permissions
 var newmask = parseInt("0022", 8); // four digits, last three mask, ex: 0o027 ==> 750 file permissions
