@@ -562,6 +562,7 @@ EDITOR.lastKeyPressed = "";
 					fileOpenExtraCallbacks[path].push(callback);
 					return; // Don't do anything else
 				}
+			else alertBox("Please wait ... Opening file: " + path);
 				/*
 					var err = new Error("File is already in the queue to be opened, please wait!");			
 					err.code = "INQUEUE";
@@ -719,7 +720,10 @@ EDITOR.lastKeyPressed = "";
 				if(callback) {
 					callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 				}
-				else if(file) {
+			else if(err) {
+				alertBox(err.message);
+			}
+			else if(file) {
 					console.log("No callback for file.path=" + file.path);
 				}
 				
