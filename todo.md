@@ -477,6 +477,15 @@ Make server run under apparmor profile ...
 BUGS (and issues)
 =================
 
+---
+
+When going to EOF and then to start of file in a big file:
+/home/Z/Projects/jzedit/client//File.js:3814
+Uncaught Error: Increase EDITOR.settings.bigFileLoadRows=3000 to at least 3450
+
+(doesn't help to increase bigFileLoadRows)
+
+---
 
 Sometimes nodejs console.log's doesn't get inlined and I get line nr instead
 

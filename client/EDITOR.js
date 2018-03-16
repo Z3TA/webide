@@ -91,7 +91,7 @@ EDITOR.settings = {
 	scrollSpeedMultiplier: 1/17,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
 	bigFileSize: 400*1024, // (Bytes), all files larger then this will be opened as streams
-	bigFileLoadRows: 2000, // Rows to load into the editor if the file size is over bigFileSize
+	bigFileLoadRows: 3000, // Rows to load into the editor if the file size is over bigFileSize
 	autoCompleteKey: 9, // Tab
 	renderColumnOptimization: false, // When typing in a big file that is rendered on each key stroke we might miss the vsync train, this will make characters appear before any parsing etc
 	clearColumnOptimization: false, // When deleting a character, clears only the character

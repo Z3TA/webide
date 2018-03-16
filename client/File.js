@@ -3691,7 +3691,8 @@ var File; // File object is global
 			
 			Use this function instead of modifying file.startColumn and file.startRow directly!
 			
-			This function is ONLY used to scroll the grid. It should NOT be used to load parts of large files. Although it will automatically load "ahead" in large files. 
+			This function is ONLY used to scroll the grid. It should NOT be used to load parts of large files. 
+			Although it will automatically load "ahead" in large files. 
 			
 			Function parameter y is the row in the grid (not large file)
 			
@@ -3810,7 +3811,8 @@ var File; // File object is global
 			
 			console.log("y=" + y);
 			
-			if(y < low) throw new Error("Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
+			if(y < low) throw new Error("Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + 
+			" to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows / 2);
