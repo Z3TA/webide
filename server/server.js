@@ -495,7 +495,10 @@ function sockJsConnection(connection) {
 							}
 							else {
 								if(password == pwstringFromFile) idSuccess();
-								else idFail("Wrong password for user: " + username);
+								else {
+idFail("Wrong password for user: " + username);
+									console.log("*" + password + "* != *" + pwstringFromFile + "*");
+								}
 							}
 						});
 						
