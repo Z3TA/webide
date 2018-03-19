@@ -69,21 +69,21 @@
 		
 		theWindow = EDITOR.createWindow();
 		
-		/*
-			theWindow.onerror = function() {
-			alert("theWindow.onerror:", err);
-		};
 		
-		theWindow.addEventListener("load", function() {
-			//alertBox("It loaded!");
+		theWindow.onerror = function(err) {
+			console.error(err);
+			alertBox("theWindow.onerror:" + err.message);
+		};
+		theWindow.addEventListener("load", function(loadEvent) {
+			alertBox("Window load event!");
 			console.log("preview window loaded!");
 		}, false);
 			
 		theWindow.addEventListener("error", function(err) {
-			alertBox("Window error!", err);
-			
-		}, false);
-		*/
+			console.error(err);
+			alertBox("Window error event: " + err.message);
+			}, false);
+		
 		
 		//if(!theWindow) return alertBox("Failed to open a new window!");
 		
@@ -161,7 +161,7 @@
 		var colno = errorEvent.colno;
 		var error = errorEvent.error;
 		
-		//alertBox(message + " line=" + lineno);
+		alertBox("Captured error: message=" + message + " line=" + lineno);
 		
 		if(!lineno) {
 			return console.warn("No linenno!");
