@@ -2719,6 +2719,12 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.showFile = function(file, focus) {
 		
+		if(!(file instanceof File)) {
+			file = EDITOR.files[file];
+		}
+		
+		if(!file) throw new Error("file=" + file + " need to be a File object or a path to an open file");
+		
 		console.log("Showing " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
 		
 		if(file == EDITOR.currentFile) {
