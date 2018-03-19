@@ -38,7 +38,17 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Inline web_preview errors don't show!
+
+
+Is the error throwing before error listeners are attached !?
+
+(doesn't matter if the editor is in debugmode or not!)
+
+sometimes web_preview captures a JS error and sometimes it does not (capture the same error)!!! ???
+
+File tabs suddenly dissappeared in Safari ... and I can no longer show dialogs!!! ?????
+
+Inline web_preview errors *sometimes* don't show!
 
 Safari don't show inline nodej console.log's
 

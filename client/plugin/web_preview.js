@@ -69,7 +69,7 @@
 		
 		theWindow = EDITOR.createWindow();
 		
-		
+		// The following 3 events are never called! (they are just here for sanity)
 		theWindow.onerror = function(err) {
 			console.error(err);
 			alertBox("theWindow.onerror:" + err.message);
@@ -148,8 +148,11 @@
 		theWindow.window.console.log = captureConsoleLog;
 		theWindow.window.console.warn = captureConsoleLog;
 		theWindow.window.console.error = function(err) {
-			alertBox("theWindow.window.console.error:", err);
+			alertBox("theWindow.window.console.error:" + err);
 		};
+		
+		console.log(new Date().getTime());
+		console.log("Error and console.log capture functions attached!");
 		
 	}
 	
