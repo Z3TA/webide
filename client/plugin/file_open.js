@@ -3,6 +3,12 @@
 	
 	"use strict";
 	
+	if(RUNTIME != "browser") {
+console.warn("Open local files only available in browsers");
+		// The default is local files when running the editor natively (in NW.js)
+		return;
+	}
+	
 	var fileInput;
 	var menu;
 	
@@ -10,6 +16,7 @@
 		desc: "Open local file dialog",
 		load: load,
 		unload: unload,
+		order: 1100
 	});
 	
 	function load() {
@@ -18,7 +25,7 @@
 		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: key_O, combo: CTRL + SHIFT, fun: openFile});
 		
 		// Add items to the canvas context meny
-		menu = EDITOR.addMenuItem("Open local file ...", openFile);
+		menu = EDITOR.addMenuItem('Open file from <i title="computer/phone/usb">device</i>', openFile);
 		
 		EDITOR.on("openFileTool", openLocalFileTool);
 		

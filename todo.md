@@ -43,8 +43,6 @@ Sorting the menu items
 Don't resize until fully loaded!!?
 line 4571
 
-How to open a file !? (trying the editor on a macbook)
-
 implementing jsql example on webide.se
 
 Writing blog post about jsql

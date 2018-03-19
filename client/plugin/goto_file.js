@@ -26,6 +26,7 @@
 	var maxResults = defaultMaxResults;
 	var lastSearchText = "";
 	var lastTypedText = "";
+	var menuItem;
 	
 	EDITOR.plugin({
 		desc: "Open any file ...",
@@ -73,6 +74,7 @@
 		CLIENT.on("fileFound", gotoFileFileFound);
 		CLIENT.on("pathGlob", gotoFilePathGlob);
 		
+		menuItem = EDITOR.addMenuItem('Open (search) file', show_gotoFileInput);
 		
 	}
 	
@@ -87,6 +89,8 @@
 		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
 		CLIENT.removeEvent("fileFound", gotoFileFileFound);
 		CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
+		
+		EDITOR.removeMenuItem(menuItem);
 		
 		hide_gotoFileInput();
 	}
