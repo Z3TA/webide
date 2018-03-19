@@ -69,7 +69,8 @@
 		
 		theWindow = EDITOR.createWindow();
 		
-		theWindow.onerror = function() {
+		/*
+			theWindow.onerror = function() {
 			alert("theWindow.onerror:", err);
 		};
 		
@@ -82,6 +83,9 @@
 			alertBox("Window error!", err);
 			
 		}, false);
+		*/
+		
+		//if(!theWindow) return alertBox("Failed to open a new window!");
 		
 			folder = UTIL.getDirectoryFromPath(inPreview.path);
 			CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
@@ -127,7 +131,15 @@
 		}
 	
 	
-	function whenLoaded(file, win) {
+	function whenLoaded(err, file, win) {
+		
+		if(err) {
+			alertBox(err.message);
+			theWindow.close();
+			inPreview = null;
+			theWindow = null;
+			return;
+		}
 		
 		console.log("web_preview_loaded file=" + file.path);
 		
@@ -316,7 +328,7 @@
 console.warn("Unable to access theWindow.window=" + theWindow.window);
 			// Likely cause: WysiwygEditor.js aborted.
 			theWindow = null;
-			inPreview = null;
+			inPreview 
 			return;
 		}
 		

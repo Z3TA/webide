@@ -123,7 +123,8 @@ compiledSource: compiledPage,
 bodyTagPreview: compliedSourceBodyTag
 				});
 				
-				function wysiwygEditorLoaded() {
+				function wysiwygEditorLoaded(err) {
+					if(err) throw err;
 					
 					if(wysiwygEditor.url != url) throw new Error("Expected wysiwygEditor.url=" + wysiwygEditor.url + " == " + "url=" + url);
 					

@@ -124,17 +124,24 @@ Dialog.prototype.close = function(someEvent) {
 	if(this.editorHadInputFocus) {
 		// The editor watches for clicks outside the "editor" area (canvas), so wait until that is done before giving back input
 		
-		//console.log(someEvent);
+		var waitTime = 0; 
 		
-		console.log("someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
-		// If the user closes the dialog using the keyboard, we don't want to give back focus too fast, or a bunch of spaces will be inserted (if the user used the space key)
-		if(someEvent.screenX == 0 && someEvent.screenY == 0) {
-			// It was probably a "keyboard click"
-			var waitTime = 500;
+		
+		if(!someEvent) {
+			console.warn("No event given! someEvent=" + someEvent);
 		}
-		else {
-			// Probably a mouse click
-			var waitTime = 0;
+else {
+			//console.log(someEvent);
+			
+			console.log("someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
+			// If the user closes the dialog using the keyboard, we don't want to give back focus too fast, or a bunch of spaces will be inserted (if the user used the space key)
+			if(someEvent.screenX == 0 && someEvent.screenY == 0) {
+				// It was probably a "keyboard click"
+				waitTime = 500;
+			}
+			else {
+				waitTime = 0; // Probably a mouse click
+			}
 		}
 		
 		setTimeout(function() {

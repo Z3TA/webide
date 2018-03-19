@@ -1598,7 +1598,9 @@ progressBar.style.display = "none";
 									
 									var bodyTag = "body";
 									var onlyPreview = (edit == false);
-									var whenLoaded = function previewLoaded() {
+									var whenLoaded = function previewLoaded(err) {
+									if(err) return alertBox(err.message);
+									
 										if(buttonPreview) {
 											buttonPreview.setAttribute("class", "button active");
 											if(edit) {
