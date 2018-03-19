@@ -3860,8 +3860,8 @@ callback(err);
 		
 		// # Virtual keyboard
 		var virtualKeyboardElement;
-		
-		EDITOR.virtualKeyboard = {
+	var virtualKeyboard = {};
+	EDITOR.virtualKeyboard = {
 			addKey: function addVirtualKeyboardKey(newElement, row, position, group) {
 				console.log("Adding virtual keyboard key: row=" + row + " position=" + position + " group=" + group);
 				if(group == undefined) group = "main";
