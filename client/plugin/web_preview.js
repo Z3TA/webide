@@ -347,7 +347,7 @@ console.warn("Unable to access theWindow.window=" + theWindow.window);
 				console.log("web preview window reloaded!");
 				clearInterval(interval);
 				clearTimeout(timeout);
-				whenLoaded(inPreview, theWindow);
+				whenLoaded(null, inPreview, theWindow);
 			}
 			else console.log("web preview window not yet reloaded!");
 			
