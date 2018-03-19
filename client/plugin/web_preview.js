@@ -312,6 +312,14 @@
 		
 		if(!inPreview.text.match(reStyle) && !inPreview.text.match(reScript) && fileSaved != inPreview) return true;
 		
+		if(!theWindow.window) {
+console.warn("Unable to access theWindow.window=" + theWindow.window);
+			// Likely cause: WysiwygEditor.js aborted.
+			theWindow = null;
+			inPreview = null;
+			return;
+		}
+		
 		theWindow.window.addEventListener("load", function() {
 			alertBox("MOhaha loaded!");
 		});

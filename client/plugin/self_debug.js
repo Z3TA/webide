@@ -112,12 +112,6 @@
 		
 		console.warn("Error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
 		
-		var yes = "Close/restart editor";
-		var createTestRestart = "Create a test case and restart";
-		var createTestKeepRunning = "Create a test case and keep running";
-		var sendBugReport = "Write bug report";
-		var no = "Keep running";
-		
 		console.log("EDITOR.platform=" + EDITOR.platform);
 		
 
@@ -164,6 +158,34 @@
 			lineString = "";
 		}
 		
+		// We need editor errors to look different to other dialogs.
+		// Or the user will think all dialogs are editor errors, especially if it's a JavaScript error.
+		var death = document.createElement("div");
+		death.setAttribute("id", "death");
+		death.style.width = window.innerWidth + "px";
+		death.style.height = window.innerHeight + "px";
+		death.style.zIndex = "2";
+		death.style.position = "absolute";
+		death.style.top = "0px";
+		death.style.left = "0px";
+		death.style.backgroundColor = "darkred";
+		
+		var deathText = document.createElement("span");
+		deathText.style.fontSize = "20px";
+		deathText.innerText = "EDITOR ERROR (CRASH): WARNING! THE EDITOR MIGHT BE IN A BAD STATE! Restarting the editor is adviced. A bug report would be helpful.";
+		
+		death.appendChild(deathText);
+		
+		document.body.appendChild(death);
+		
+		
+		
+		var yes = "Close/restart editor";
+		var createTestRestart = "Create a test case and restart";
+		var createTestKeepRunning = "Create a test case and keep running";
+		var sendBugReport = "Write bug report";
+		var no = "Keep running";
+		
 		confirmBox("" + sourceLink + lineString + message + "<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
@@ -189,6 +211,8 @@
 				
 				
 			}
+			
+			document.body.removeChild(death);
 			
 			if(answer == yes) {
 				if(RUNTIME == "browser") document.location = document.location.href;

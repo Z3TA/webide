@@ -38,10 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Sorting the menu items
+Inline web_preview errors don't show!
 
-Don't resize until fully loaded!!?
-line 4571
+Safari don't show inline nodej console.log's
 
 implementing jsql example on webide.se
 
