@@ -132,9 +132,9 @@
 	
 	
 	function whenLoaded(err, file, win) {
-		
+		console.log("whenLoaded: err=", err);
 		if(err) {
-			alertBox(err.message);
+			alertBox(err.message || err);
 			theWindow.close();
 			inPreview = null;
 			theWindow = null;
