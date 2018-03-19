@@ -74,7 +74,7 @@
 		CLIENT.on("fileFound", gotoFileFileFound);
 		CLIENT.on("pathGlob", gotoFilePathGlob);
 		
-		menuItem = EDITOR.addMenuItem('Open (search) file', show_gotoFileInput);
+		menuItem = EDITOR.addMenuItem('Open/search file', show_gotoFileInput);
 		
 	}
 	
