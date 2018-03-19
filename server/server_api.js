@@ -2391,8 +2391,10 @@ API.abortFindFiles = function abortFindFiles(user, json, abortFindFilesCallback)
 abortFindFilesCallback(null, {foldersBeingSearched: FIND_FILES_IN_FLIGHT});
 	}
 
+/*
+	// Deprecated! Use virtual terminal instead!
 
-API.shell = function shellCommand(user, json, shellCommandCallback) {
+	API.shell = function shellCommand(user, json, shellCommandCallback) {
 	
 	var exec = require('child_process').exec;
 	
@@ -2416,7 +2418,7 @@ API.shell = function shellCommand(user, json, shellCommandCallback) {
 		
 	});
 	}
-
+*/
 
 function runFtpQueue() {
 	
