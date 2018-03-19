@@ -375,6 +375,8 @@
 	
 	function show_gotoFileInput(file, combo) {
 		
+		EDITOR.hideMenu();
+		
 		if(file) {
 			currentDir = UTIL.getDirectoryFromPath(file.path);
 			
