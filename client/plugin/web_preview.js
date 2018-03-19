@@ -167,7 +167,11 @@
 			return console.warn("No linenno!");
 		}
 		
-		console.log("Web preview error: source=" + source + " lineno=" + lineno + " message=" + message + " urlPath=" + urlPath + " folder=" + folder);
+		console.log(errorEvent);
+		
+		console.log("Web preview error: source=" + source + " lineno=" + lineno + " message=" + message + 
+		" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.stack);
+		
 		
 		var filePath = folder + source.replace(urlPath, "");
 		var file = EDITOR.files[filePath];
@@ -191,6 +195,7 @@
 			else console.log("(EDITOR.currentFile == file)=" + (EDITOR.currentFile == file) + " switchedDebugSourceFile=" + switchedDebugSourceFile);
 				
 			if(EDITOR.currentFile == file) file.scrollToLine(lineno);
+			else EDITOR.showFile(file);
 			
 				EDITOR.addInfo(row, col, message, file, 1);
 				
