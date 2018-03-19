@@ -30,7 +30,7 @@
 		desc: "File explorer window widget",
 		load: load,
 		unload: unload,
-		order: 500 // functionList: 200, (a higher number makes it start sooner)
+		order: 500 // functionList: 200, (a higher number makes it start later)
 	});
 	
 	function load() {

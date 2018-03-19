@@ -456,7 +456,7 @@ EDITOR.lastKeyPressed = "";
 			if(a.order < b.order) {
 				return -1;
 			}
-			else if(b.order < a.order) {
+			else if(a.order > b.order) {
 				return 1;
 			}
 			else {
@@ -1797,7 +1797,7 @@ EDITOR.lastKeyPressed = "";
 			}
 		}
 		
-		if(options.order == undefined) options.order = 1;
+		if(options.order == undefined) options.order = 1000;
 		if(typeof options.fun != "function") {
 			throw new Error("There needs to be a function!");
 		}
@@ -3172,6 +3172,7 @@ EDITOR.lastKeyPressed = "";
 		return false;
 	}
 	
+	var pluginSortOrder = 1000;
 	EDITOR.plugin = function(p) {
 		/*
 			If you have made a plugin. Use EDITOR.plugin(desc, load, unload) instead of EDITOR.on("start") !
@@ -3182,6 +3183,8 @@ EDITOR.lastKeyPressed = "";
 		
 		if((typeof p.unload !== "function")) throw new Error("The plugin should have a unload method!");
 		if(!p.desc) throw new Error("The plugin should have a description!");
+		
+		if(typeof p.order != "number") p.order = ++pluginSortOrder; // Will be sorted ASC
 		
 		p.loaded = false;
 		
@@ -3227,7 +3230,8 @@ EDITOR.lastKeyPressed = "";
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
 		
-		if(order == undefined) order = 0;
+		var defaultTestOrder = 1000;
+		if(order == undefined) order = defaultTestOrder;
 		
 		for(var i=0; i<EDITOR.tests.length; i++) {
 			if(EDITOR.tests[i].text == funName) {
@@ -3238,14 +3242,18 @@ EDITOR.lastKeyPressed = "";
 				}
 				else throw new Error("Test function name=" + funName + " already exist!");
 			}
-			if(order > 0 && EDITOR.tests[i].order > order) throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you want " + funName + " to run first!");
+			// It's a bit annoying if you have set a test to load first, but forgot to remove the order from some other test ...
+			// This will show which function that also has been ordered to run first
+			if(order <= 1 && EDITOR.tests[i].order < order) {
+throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you want " + funName + " to run first!");
+			}
 		}
 		
 		EDITOR.tests.push({fun: fun, text: funName, order: order});
 		
 		// Sort the tests by order
 		EDITOR.tests.sort(function sortTests(a, b) {
-			return b.order - a.order;
+			return a.order - b.order;
 		});
 		
 	}

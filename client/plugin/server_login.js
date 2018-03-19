@@ -15,7 +15,7 @@
 		desc: "Server login dialog",
 		load: loadServerLogin,
 		unload: unloadServerLogin,
-		order: 999999 // We want to run after most other plugins, so the other plugins can deal with server connections too
+		order: 100000 // We want to run after most other plugins, so the other plugins can deal with server connections too
 	});
 	
 	

@@ -40,7 +40,7 @@
 		desc: "Static site generator management interface",
 		load: load,
 		unload: unload,
-		order: 1100 // So that "quickedit" don't open the file before reopen_files.js plugin does
+		order: 2100 // So that "quickedit" don't open the file before reopen_files.js plugin does
 	});
 	
 	function getSites() {

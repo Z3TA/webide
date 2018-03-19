@@ -37,7 +37,7 @@
 	
 	EDITOR.plugin({
 		desc: "Open up the files from last session", 
-		order: 999, // Load after the parser and other stuff that has fileOpen event listener
+		order: 2000, // Load after the parser and other stuff that has fileOpen event listener
 		load: function loadReopenFilesPlugin() {
 			
 			reopenFilesCalled = false;

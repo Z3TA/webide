@@ -14,7 +14,7 @@
 	var charCodeShift = 16;
 	var charCodeZ = 90;
 	var scrollStep = 5;
-	var loadOrder = 999; // Should load after the renders
+	var loadOrder = 1500; // Should load after the renders
 	
 	EDITOR.on("start", zoomInit, loadOrder);
 	

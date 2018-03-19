@@ -29,7 +29,7 @@
 			//EDITOR.dashboard.removeWidget(newFileDashboardWidget);
 			
 		},
-		order: 1
+		order: 10
 	});
 	
 	function keyboardNewFile(file, combo, character, charCode, direction) {
