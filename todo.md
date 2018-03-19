@@ -38,7 +38,12 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Sorting the menu items
 
+Don't resize until fully loaded!!?
+line 4571
+
+How to open a file !? (trying the editor on a macbook)
 
 implementing jsql example on webide.se
 

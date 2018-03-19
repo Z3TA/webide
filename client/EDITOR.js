@@ -4212,23 +4212,8 @@ callback(err);
 		virtualKeyboard.misc.el.setAttribute("class", "virtualKeyboardGroup");
 			virtualKeyboardGroups.appendChild(virtualKeyboard.misc.el);
 			
-			var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard); // Add items to the canvas context menu
-			
-			EDITOR.virtualKeyboard.hide();
-			
-			function toggleVirtualKeyboard() {
-				EDITOR.hideMenu();
-				
-				if(EDITOR.virtualKeyboard.isVisible) {
-					EDITOR.virtualKeyboard.hide();
-					EDITOR.updateMenuItem(virtualKeyboardMenuItem, false);
-				}
-				else {
-					EDITOR.virtualKeyboard.show();
-					EDITOR.updateMenuItem(virtualKeyboardMenuItem, true);
-				}
-				
-			}
+		EDITOR.virtualKeyboard.hide();
+		
 			
 			
 			canvas.onpaste = function() {alert("paste canvas");};
@@ -4484,6 +4469,25 @@ callback(err);
 				}
 			}
 			
+		
+		// Add the virtual keyboard menu item after the plugins so it will be placed low in the menu
+		var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard); // Add items to the canvas context menu
+		
+		function toggleVirtualKeyboard() {
+			EDITOR.hideMenu();
+			
+			if(EDITOR.virtualKeyboard.isVisible) {
+				EDITOR.virtualKeyboard.hide();
+				EDITOR.updateMenuItem(virtualKeyboardMenuItem, false);
+			}
+			else {
+				EDITOR.virtualKeyboard.show();
+				EDITOR.updateMenuItem(virtualKeyboardMenuItem, true);
+			}
+			
+		}
+		
+		
 		if(RUNTIME != "browser") {
 				/*
 					NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
