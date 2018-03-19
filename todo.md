@@ -38,7 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-
+Sometimes web_preview.js "get stuck" indicating that it's active in the menu, but nothing happends when you click!
 
 Is the error throwing before error listeners are attached !?
 

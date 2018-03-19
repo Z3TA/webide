@@ -234,7 +234,7 @@
 		//consoleLogOriginal(msg);
 		consoleLogOriginal.apply(undefined, arguments);
 		
-		console.log("Captured console.log: " + msg);
+		console.log("Captured console.log (" + arguments.length + " argument(s)): " + msg);
 		// Figure out what script made the log
 		/*
 			Error
