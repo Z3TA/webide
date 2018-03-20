@@ -176,7 +176,7 @@
 		
 		death.appendChild(deathText);
 		
-		document.body.appendChild(death);
+		if(document && document.body) document.body.appendChild(death);
 		
 		
 		
@@ -212,7 +212,7 @@
 				
 			}
 			
-			document.body.removeChild(death);
+			if(document && document.body) document.body.removeChild(death);
 			
 			if(answer == yes) {
 				if(RUNTIME == "browser") document.location = document.location.href;
