@@ -47,10 +47,8 @@
 			if(buffer[row].selected) { // The whole row is selected
 				ctx.rect(EDITOR.settings.leftMargin, top,	EDITOR.settings.gridWidth * buffer[row].length, EDITOR.settings.gridHeight);
 			}
-			{
-				
+			
 				for(var col = 0; col < buffer[row].length; col++) {
-					
 					
 					left = EDITOR.settings.leftMargin + (col + indentation * EDITOR.settings.tabSpace - file.startColumn) * EDITOR.settings.gridWidth;
 					
@@ -61,18 +59,16 @@
 						ctx.rect(left, top,	EDITOR.settings.gridWidth, EDITOR.settings.gridHeight);
 					}
 					
-				}
 			}
-				
+			
 		}
 		
 		ctx.fill();
-
+		
 		//ctx.stroke();
 		//console.timeEnd("selectionRender");
-
-
+		
 	}
-
-
+	
+	
 })();
