@@ -34,7 +34,7 @@ EDITOR.supportedFiles = [
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
-	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's)
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!!
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: [  // Intendent after these XML tags
@@ -2379,6 +2379,7 @@ EDITOR.lastKeyPressed = "";
 			}
 		}
 		
+		// Calling render here (efter each key event) seems to be the fastest (faster then requestAnimationFrame)
 		resizeAndRender();
 		
 		function nextInteractionFunctions() {
@@ -4580,6 +4581,8 @@ throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you wa
 		
 		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
+		
+		
 		// note to self: Just temorary, dont forget to remove:
 		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
 		
@@ -4861,15 +4864,6 @@ throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you wa
 		txtarea.focus();
 		txtarea.scrollTop = scrollPos;
 	}
-	
-	function mainLoop() {
-		resizeAndRender();
-		
-		//requestanimframe
-		
-		// animation renders
-	}
-	
 	
 	function readSingleFile(fileOpenDialogEvent) {
 		
@@ -5398,13 +5392,20 @@ throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you wa
 		// Prevent scrolling down when hitting space in Firefox
 		if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
 		
-		
 	}
 	
 	function resizeAndRender() {
 		
+		// Only do the resize or render if it's actually needed
+		
 		if(EDITOR.shouldResize) EDITOR.resize();
+		
+		//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
 		if(EDITOR.shouldRender) EDITOR.render();
+		
+		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
+		
+		// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
 	}
 	
 	
