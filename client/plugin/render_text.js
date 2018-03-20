@@ -82,7 +82,7 @@
 			left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn) * EDITOR.settings.gridWidth;
 			
 			if(isNaN(left)) throw new Error("left is NaN");
-			if(isNaN(top)) throw new Error("top is NaN");
+			if(isNaN(top)) throw new Error("top is NaN EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " row=" + row + " startRow=" + startRow + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
 
 			for(var col = colStart; col < colStop; col++) {
 				
