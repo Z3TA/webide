@@ -11,7 +11,7 @@
 	
 	var menuItem;
 	var inPreview;
-	var previewWin;
+	var wEditor;
 	var theWindow;
 	var urlPath;
 	var folder;
@@ -33,7 +33,7 @@
 			EDITOR.removeEvent("showMenu", maybeShowPreviewInMenu);
 			EDITOR.removeEvent("fileSave", refreshMaybe);
 			
-			if(previewWin) previewWin.close();
+			if(wEditor) wEditor.close();
 			
 		}
 	});
@@ -109,7 +109,7 @@
 				
 				var onlyPreview = true;
 				var bodyTag = undefined;
-				previewWin = new WysiwygEditor({
+			wEditor = new WysiwygEditor({
 					sourceFile: inPreview, 
 					bodyTagSource: bodyTag, 
 					onlyPreview: onlyPreview, 
@@ -119,11 +119,11 @@
 				onErrorEvent: captureError
 				});
 				
-			previewWin.onClose = function() {
+			wEditor.onClose = function() {
 					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
 						if(err) throw err;
 						inPreview = undefined;
-						previewWin = undefined;
+					wEditor = undefined;
 					});
 				}
 				
@@ -319,9 +319,9 @@
 	
 	function refreshMaybe(fileSaved) {
 		
-		//console.log("inPreview=" + !!inPreview + " previewWin=" + !!previewWin);
+		//console.log("inPreview=" + !!inPreview + " wEditor=" + !!wEditor);
 		
-		if(!inPreview || !previewWin) return true;
+		if(!inPreview || !wEditor || !theWindow) return true;
 		
 		var fileName = UTIL.getFilenameFromPath(fileSaved.path);
 		
@@ -332,9 +332,9 @@
 		
 		if(!inPreview.text.match(reStyle) && !inPreview.text.match(reScript) && fileSaved != inPreview) return true;
 		
-		if(!theWindow.window) {
+		if(!theWindow || !theWindow.window) {
 console.warn("Unable to access theWindow.window=" + theWindow.window);
-			// Likely cause: WysiwygEditor.js aborted.
+			// Likely cause: WysiwygEditor.js aborted. Or the window has been closed
 			theWindow = null;
 			inPreview 
 			return;
@@ -367,7 +367,7 @@ console.warn("Unable to access theWindow.window=" + theWindow.window);
 		}, 150);
 		
 		var noContenEditable = false;
-		previewWin.reload(noContenEditable);
+		wEditor.reload(noContenEditable);
 		
 		switchedDebugSourceFile = false;
 		
@@ -376,9 +376,9 @@ console.warn("Unable to access theWindow.window=" + theWindow.window);
 	}
 	
 	function webPreviewAutocomplete(file, word, wordLength, gotOptions) {
-		console.log("webPreviewAutocomplete: word=" + word + " previewWin?" + (!!previewWin) + " wordLength=" + wordLength);
+		console.log("webPreviewAutocomplete: word=" + word + " wEditor?" + (!!wEditor) + " wordLength=" + wordLength);
 		// Auto complete global variables
-		if(!previewWin) return;
+		if(!wEditor || !theWindow) return;
 		if(wordLength == 0) return;
 		
 		// todo: Check if file has anything to do with the web page in preview (eg a script)
@@ -404,7 +404,7 @@ console.warn("Unable to access theWindow.window=" + theWindow.window);
 		
 		if(obj == null) {
 			console.warn("Unable to get window object. Has the window been closed!?");
-			previewWin = null;
+			wEditor = null;
 			return;
 		}
 		
