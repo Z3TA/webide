@@ -46,8 +46,6 @@ Is the error throwing before error listeners are attached !?
 
 sometimes web_preview captures a JS error and sometimes it does not (capture the same error)!!! ???
 
-File tabs suddenly dissappeared in Safari ... and I can no longer show dialogs!!! ?????
-
 Inline web_preview errors *sometimes* don't show!
 
 Safari don't show inline nodej console.log's
