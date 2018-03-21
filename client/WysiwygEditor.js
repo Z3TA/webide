@@ -1213,24 +1213,6 @@ var WysiwygEditor;
 			return;
 			}
 		
-		
-		// Adding DOMContentLoaded event and onreadystatechange event seems to slow down the load time enough to capture early errors !? Nope
-		
-		previewWin.document.addEventListener('DOMContentLoaded', function(ev) {
-			console.log("DOMContentLoaded:");
-			console.log(ev);
-		});
-		
-		previewWin.onreadystatechange = function(readystatechangeEvent) {
-			console.log("readystatechangeEvent:");
-			console.log(readystatechangeEvent);
-			if (previewWin.document.readyState === 'complete') {
-				//dom is ready, window.onload fires later
-				alertBox("document complete!");
-			}
-		};
-		
-		
 		var sourceFile = wysiwygEditor.sourceFile;
 		var html = sourceFile.text;
 		
@@ -1252,9 +1234,12 @@ var WysiwygEditor;
 			//console.log("previewWin.location.href=" + previewWin.location.href);
 			
 			
-			// Can't seem to be able to set a onload event listener ...
-			// problem: We wont be able to capture early event! (like errors before we have attacked the error event listener)
+			// problem: We can't set load event listener, or any event listener on the window!
+			// solution: Check previewWin.location.href == url in intervals until it has changed
+			
+			// problem: We wont be able to capture early events! (like errors before we have attacked the error event listener)
 			// solution: none :(
+			
 			var checkLocationIntervalTime = 100;
 			setTimeout(checkLocation, checkLocationIntervalTime);
 			

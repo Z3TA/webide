@@ -38,6 +38,24 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+web_preview don't really need to use the WysiwygEditor.js
+the reason it's using it is because it can live update the document while editing the source html.
+
+All functionality from the SSG interface.js and web_preview.js should probably be moved to the WysiwygEditor.js !!
+such as css refresh, error and console.log inlining.
+
+The root of the problem is that window.open needs to be called directly after an IO event.
+Or the browser will stop the "popup".
+So the WysiwygEditor uses window.location = location to load the right url.
+
+the problem is we have to wait for API.serve to serve the file before it can be opened using window.open
+
+I have severe sleep deprication!
+
+I seem to have broken the WysiwygEditor!! ...
+
+web_preview can not use WysiwygEditor because it can't capture early errors, because it has to change location
+
 Sometimes web_preview.js "get stuck" indicating that it's active in the menu, but nothing happends when you click!
 
 Is the error throwing before error listeners are attached !?
