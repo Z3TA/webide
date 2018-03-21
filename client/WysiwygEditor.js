@@ -1241,15 +1241,40 @@ var WysiwygEditor;
 		
 		if(wysiwygEditor.url && previewWin.location.href != wysiwygEditor.url) {
 			
-			console.log("Setting window url to wysiwygEditor.url=" + wysiwygEditor.url);
+			//console.log(previewWin);
+			//console.log(previewWin.window);
+			//console.log(previewWin.document);
 			
-			previewWin.location.href = wysiwygEditor.url;
+			console.log("Setting window url to wysiwygEditor.url=" + wysiwygEditor.url +
+			" because wysiwygEditor.url=" + wysiwygEditor.url + " is not the same as previewWin.location.href=" + previewWin.location.href);
+			
+			//console.log("previewWin.window.location.href=" + previewWin.window.location.href);
+			//console.log("previewWin.location.href=" + previewWin.location.href);
+			
 			
 			// Can't seem to be able to set a onload event listener ...
+			// problem: We wont be able to capture early event! (like errors before we have attacked the error event listener)
+			// solution: none :(
 			var checkLocationIntervalTime = 100;
 			setTimeout(checkLocation, checkLocationIntervalTime);
 			
-			//previewWin.addEventListener("load", previewWindowLoaded);
+			/*
+				
+			
+			previewWin.addEventListener("load", function(ev) {
+				alert("previewWin load event!");
+			});
+			
+			previewWin.window.addEventListener("load", function(ev) {
+				alert("previewWin window load event!");
+			});
+			*/
+			
+			//var oldWindow = previewWin.window;
+			//while(oldWindow == previewWin.window) console.log("waiting ....");
+			
+			previewWin.location.href = wysiwygEditor.url;
+			
 		}
 		else if(wysiwygEditor.url && previewWin.location.href == wysiwygEditor.url) {
 			console.log("Reloading the window!");
