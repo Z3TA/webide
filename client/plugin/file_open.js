@@ -3,12 +3,6 @@
 	
 	"use strict";
 	
-	if(RUNTIME != "browser") {
-console.warn("Open local files only available in browsers");
-		// The default is local files when running the editor natively (in NW.js)
-		return;
-	}
-	
 	var fileInput;
 	var menu;
 	
