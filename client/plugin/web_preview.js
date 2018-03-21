@@ -366,8 +366,7 @@ console.warn("Unable to access theWindow.window=" + theWindow.window);
 			if(theWindow.window.console.log != captureConsoleLog) throw new Error("Failed to attach error and console.log integration");
 		}, 150);
 		
-		var noContenEditable = false;
-		wEditor.reload(noContenEditable);
+		wEditor.reload(false); // contenEditable = false;
 		
 		switchedDebugSourceFile = false;
 		

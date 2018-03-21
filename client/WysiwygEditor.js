@@ -1213,6 +1213,23 @@ var WysiwygEditor;
 			return;
 			}
 		
+		
+		// Adding DOMContentLoaded event and onreadystatechange event seems to slow down the load time enough to capture early errors !?
+		previewWin.addEventListener('DOMContentLoaded', function(ev) {
+			console.log("DOMContentLoaded:");
+			console.log(ev);
+		});
+		
+		previewWin.onreadystatechange = function(readystatechangeEvent) {
+			console.log("readystatechangeEvent:");
+			console.log(readystatechangeEvent);
+			if (previewWin.document.readyState === 'complete') {
+				//dom is ready, window.onload fires later
+				alertBox("document complete!");
+			}
+		};
+		
+		
 		var sourceFile = wysiwygEditor.sourceFile;
 		var html = sourceFile.text;
 		
@@ -1312,7 +1329,7 @@ previewWindowLoaded();
 		
 		function previewWindowLoaded(retries) {
 			
-			if(!retries) retries = 0;
+			if(retries == undefined) retries = 0;
 			
 			console.log("Preview window loaded!");
 			
