@@ -100,7 +100,7 @@ var WysiwygEditor;
 			console.warn("Creating a new window ...");
 			
 			// We need to create the window right away to prevent it being blocked ...
-			var newWindow = EDITOR.createWindow(url);
+			var newWindow = EDITOR.createWindow({url: url});
 			
 			if(!newWindow) throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass it as the fourth parameter!")
 		}
@@ -1214,8 +1214,9 @@ var WysiwygEditor;
 			}
 		
 		
-		// Adding DOMContentLoaded event and onreadystatechange event seems to slow down the load time enough to capture early errors !?
-		previewWin.addEventListener('DOMContentLoaded', function(ev) {
+		// Adding DOMContentLoaded event and onreadystatechange event seems to slow down the load time enough to capture early errors !? Nope
+		
+		previewWin.document.addEventListener('DOMContentLoaded', function(ev) {
 			console.log("DOMContentLoaded:");
 			console.log(ev);
 		});

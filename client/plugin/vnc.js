@@ -25,7 +25,7 @@
 		var top = 1;
 		var left = 500;
 		
-		var win = EDITOR.createWindow(url, width, height, top, left);
+		var win = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left});
 		
 		// Why doesn't it load automatically !?
 		win.location = url;

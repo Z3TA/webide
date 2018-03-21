@@ -1368,7 +1368,7 @@ progressBar.style.display = "none";
 			var height = parseInt(previewWin.previewWin.innerHeight);
 			var top = parseInt(previewWin.previewWin.screenY || previewWin.previewWin.screenTop);
 			var left = parseInt(previewWin.previewWin.screenX || previewWin.previewWin.screenLeft);
-			var newWindow = EDITOR.createWindow(url, width, height, top, left);
+			var newWindow = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left});
 		}
 		else var newWindow = EDITOR.createWindow();
 		

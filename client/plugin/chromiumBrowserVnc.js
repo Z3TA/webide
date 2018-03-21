@@ -30,7 +30,7 @@
 		
 		
 		// Need to create the window right away so it's registered to the event and not stopped (by popup stopper)
-		noVncWindow = EDITOR.createWindow(undefined, width, height, top, left);
+		noVncWindow = EDITOR.createWindow({url: undefined, width: width, height: height, top: top, left: left});
 		
 		
 		var reqJson = {

@@ -3651,8 +3651,15 @@ throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you wa
 	}
 	
 	EDITOR.openWindows = [];
-	EDITOR.createWindow = function(url, width, height, top, left) {
+	EDITOR.createWindow = function(options) {
 		
+		if(options) {
+		var url = options.url;
+		var width = options.width;
+		var height = options.height;
+		var top = options.top;
+		var left = options.left;
+		}
 		
 		// Decide window width, height and placement ...
 		// Some browsers will not allow us to change these via script after the window have has been created.
@@ -3670,34 +3677,46 @@ throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you wa
 		
 		if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
 		
-		//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
-		var theWindow = window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1), 
-		"height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
+		// Attempt to attach load event listeners as early as possible
+		return (function(ow){
+			ow . addEventListener(  'load', function(){alert("loaded (addEventListener)")}, false);
+			//ow .      attachEvent('onload', function(){alert("loaded (attachEvent)")}, false);
+			
+			// wait ...
+			var i=1;
+			while(i<1000000) i += i/2;
+			
+			//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
+			var theWindow = ow;
+			
+			if(!theWindow) {
+				alertBox("Could not open the window. Please Try again, or disable the popup stopper!");
+				return null;
+			}
+			else {
+				
+				try {
+					var test = theWindow.document.domain;
+				}
+				catch(err) {
+					return alertBox("Unable to access " + url + " \n" + err.message);
+				}
+				
+				console.log("theWindow.document.domain=" + theWindow.document.domain);
+				console.log("document.domain=" + document.domain);
+				
+				theWindow.document.open();
+				theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
+				theWindow.document.close();
+				
+				EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
+				
+				return theWindow;
+			}
+			
+		}(window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1),
+		"height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no")));
 		
-		if(!theWindow) {
-			alertBox("Could not open the window. Please Try again, or disable the popup stopper!");
-			return null;
-		}
-		else {
-			
-			try {
-				var test = theWindow.document.domain;
-			}
-			catch(err) {
-				return alertBox("Unable to access " + url + " \n" + err.message);
-			}
-			
-			console.log("theWindow.document.domain=" + theWindow.document.domain);
-			console.log("document.domain=" + document.domain);
-			
-			theWindow.document.open();
-			theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
-			theWindow.document.close();
-			
-			EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
-			
-			return theWindow;
-		}
 	}
 	
 	// Tools for handling repositories (Mercurial, Git, etc)
