@@ -43,6 +43,10 @@
 			# sudo chown sftptest:sftptest /home/sftptest/uploads
 			# sudo chmod 755 /home/sftptest/uploads
 			
+			6. Test access
+			sftp sftptest@testserver
+			
+			
 		*/
 		
 		
@@ -56,7 +60,6 @@
 					if(err) throw err;
 					EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
 				});
-				
 				
 			}
 			
@@ -102,7 +105,7 @@
 			
 		});
 		
-	}, 1);
+	});
 	
 	
 	EDITOR.addTest(function ftpFindInFiles(callback) {

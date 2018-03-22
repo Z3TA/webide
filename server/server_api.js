@@ -713,7 +713,7 @@ else if(protocol == "sftp:") {
 
 
 API.listFiles = function listFiles(user, json, listFilesCallback) {
-	if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
+	if(listFilesCallback == undefined) throw new Error("Need to specify a callback!");
 
 	var pathToFolder = json.pathToFolder;
 	
@@ -742,6 +742,8 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 	var protocol = parse.protocol;
 	var hostname = parse.hostname;
 	var pathname = parse.pathname;
+	
+	console.log("listFiles: protocol=" + protocol + " pathToFolder=" + pathToFolder);
 	
 	if(protocol == "ftp:" || protocol == "ftps:") {
 		// ### List files using FTP protocol
@@ -1010,7 +1012,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 	
 	if(protocol) protocol = protocol.replace(/:/g, "").toLowerCase();
 	
-	console.log("hostname=" + hostname + " pathToCreate=" + pathToCreate + " parse=" + JSON.stringify(parse));
+	console.log("create=" + JSON.stringify(create) + " hostname=" + hostname + " pathToCreate=" + pathToCreate + " parse=" + JSON.stringify(parse));
 	
 	create.shift(); // Don't bother with the root
 	
@@ -1023,13 +1025,19 @@ API.createPath = function createPath(user, json, createPathCallback) {
 	
 	function executeMkdir(folder) {
 		// This is a recursive function!
-		createPathSomewhere(folder, function(err, path) {
-			if(err) errors.push(err.message + " path=" + path);
+		createPathSomewhere(folder, json.public, function(err, path) {
+			if(err) {
+errors.push(err.message + " path=" + path);
+				//console.warn("Failed to create path=" + path + "\n" + err.message);
+			}
+			else {
+				//console.log("Successfully created path=" + path);
+			}
 			
 			if(create.length > 0) executeMkdir(create.shift());
 			else done();
 			
-			}, json.public);
+			});
 	}
 	
 	function done() {
@@ -1056,15 +1064,26 @@ API.createPath = function createPath(user, json, createPathCallback) {
 		}
 	}
 	
-	function createPathSomewhere(path, createPathSomewhereCallback, publicFolder) {
+	function createPathSomewhere(path, publicFolder, createPathSomewhereCallback) {
 		
 		// ## mkdir ...
 		
-		//console.log("mkdir " + path);
+		console.log("Creating path=" + path);
 		
-		if(path.indexOf("//") != -1) {
+		if(path.indexOf("//") > 6) {
 			path = path.replace(/\/\/+/g, "/"); // Remove double slashes
-			console.warn("Sanitizing path=" + path + " pathToCreate=" + pathToCreate);
+			
+			if(protocol) {
+				// Re-add the slash after the protocol
+				path = path.replace(protocol + ":/", protocol + "://");
+			}
+			
+			console.warn("Sanitized path=" + path + " pathToCreate=" + pathToCreate);
+		}
+		
+		if(protocol) {
+			// We only want the path!
+			path = url.parse(path).pathname;
 		}
 		
 		if(protocol == "ftp" || protocol == "ftps") {
