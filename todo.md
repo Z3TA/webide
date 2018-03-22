@@ -38,9 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-add sftp test user
+Refactoring WysiwygEditor.js to not use window.location redirect, but instead close and reopen the window when reloading.
+(in order to be able to capture early errors)
 
-Fix whatever we broke in WysiwygEditor.js (and write tests!)
 
 Make sure we can capture early events by not using window.location redirect BEFORE refactoring!
 
