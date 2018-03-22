@@ -3251,8 +3251,9 @@ EDITOR.lastKeyPressed = "";
 			}
 			// It's a bit annoying if you have set a test to load first, but forgot to remove the order from some other test ...
 			// This will show which function that also has been ordered to run first
-			if(order <= 1 && EDITOR.tests[i].order < order) {
-throw new Error("Remove order from test '" + EDITOR.tests[i].text + "' if you want " + funName + " to run first!");
+			if(order < defaultTestOrder && EDITOR.tests[i].order <= order) {
+				throw new Error("order=" + order + " defaultTestOrder=" + defaultTestOrder + " EDITOR.tests[" + i + "].order=" + EDITOR.tests[i].order + 
+				"  Remove order from test '" + EDITOR.tests[i].text + "' if you want " + funName + " to run first!\n" + UTIL.getStack("test"));
 			}
 		}
 		

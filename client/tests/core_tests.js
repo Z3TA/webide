@@ -50,7 +50,7 @@
 		
 		callback(true);
 		
-	}, 1);
+	});
 	
 	EDITOR.addTest(function placeCaretOnEmtyLine(callback) {
 		
