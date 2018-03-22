@@ -3651,6 +3651,13 @@ EDITOR.lastKeyPressed = "";
 		return widget;
 	}
 	
+	/*
+		// Test if there's a popup stopper:
+	setTimeout(function() {
+		EDITOR.createWindow();
+	}, 2000);
+	*/
+	
 	EDITOR.openWindows = [];
 	EDITOR.createWindow = function(options) {
 		
@@ -3660,7 +3667,11 @@ EDITOR.lastKeyPressed = "";
 		var height = options.height;
 		var top = options.top;
 		var left = options.left;
+			var onError = options.onError;
 		}
+		
+		if(!url) console.warn("Provide an url option argument to EDITOR.createWindow to avoid using window.location redirects! " +
+		"We can not capture events on window.location redirect's until it has loaded, so you might miss some early events, like errors");
 		
 		// Decide window width, height and placement ...
 		// Some browsers will not allow us to change these via script after the window have has been created.
@@ -3676,48 +3687,51 @@ EDITOR.lastKeyPressed = "";
 		// You can't resize a window or tab that wasn’t created by window.open.
 		// You can't resize a window or tab when it’s in a window with more than one tab.
 		
-		if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
+		//if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
+		if(url == undefined) url = "about:blank";
 		
-		// Attempt to attach load event listeners as early as possible
-		return (function(ow){
-			ow . addEventListener(  'load', function(){alert("loaded (addEventListener)")}, false);
-			//ow .      attachEvent('onload', function(){alert("loaded (attachEvent)")}, false);
+		var theWindow = window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1),
+		"height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
 			
-			// wait ...
-			var i=1;
-			while(i<1000000) i += i/2;
-			
-			//var windowLocation = window.location.href.replace(/index.htm.*/i, "dummy.htm");
-			var theWindow = ow;
-			
-			if(!theWindow) {
-				alertBox("Could not open the window. Please Try again, or disable the popup stopper!");
+		if(!theWindow) {
+			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
+			alertBox("Could not open the window. Please Try again, or disable the popup stopper!");
 				return null;
 			}
 			else {
 				
+			// Due to CORS we might get errors accessing properties on the new window
 				try {
 					var test = theWindow.document.domain;
 				}
 				catch(err) {
-					return alertBox("Unable to access " + url + " \n" + err.message);
+				alertBox("Unable to access " + url + " \n" + err.message);
+				return null;
 				}
+				
+			theWindow.addEventListener("load", function() { console.log((new Date()).getTime() + " loaded window!"); }, false);
+			theWindow.addEventListener("DOMContentLoaded", function() { console.log((new Date()).getTime() + " DOMContentLoaded for new window!"); }, false);
+			
+				theWindow.addEventListener("error", function(err) {
+					console.error(err);
+					if(onError) onError(err);
+					else alertBox("Window error message: " + err.message);
+				}, false);
 				
 				console.log("theWindow.document.domain=" + theWindow.document.domain);
 				console.log("document.domain=" + document.domain);
 				
+				if(!url) {
 				theWindow.document.open();
 				theWindow.document.write("<!DOCTYPE html><head></head><body><p>Loading ...</p></body>");
 				theWindow.document.close();
+				}
 				
 				EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
 				
 				return theWindow;
 			}
 			
-		}(window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1),
-		"height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no")));
-		
 	}
 	
 	// Tools for handling repositories (Mercurial, Git, etc)
