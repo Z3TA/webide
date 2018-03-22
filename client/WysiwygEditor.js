@@ -1187,14 +1187,29 @@ var WysiwygEditor;
 	WysiwygEditor.prototype.reload = function reload(dance, reloadCallback) {
 		var wysiwygEditor = this;
 		
+		/*
+			
+			Note that when the window is reloaded. There will be a new window object. And all event listeners need to be re-attached to that object.
+			
+		*/
+		
 		console.warn("(re)loading preview window ... dance=" + dance);
 		
 		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ? First argument in WysiwygEditor.reload()");
 		// dance=true means the source code will be updated with the code we'll get after loading the contenteditable.
 		// it will for example insert <tbody> elements and possibly more depending on browser
 		
-		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) throw new Error("Can not reload a second time if the source code have been compiled");
-		
+		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) {
+			/*
+				The source code has most likely been changed during the "dance" where contentediable code is synced 
+				with source code (tbody etc elements are added). The "dance" mangles the source code so it should be
+				avoided if possible, but is needed for the WYSIWYG (contentediable) functionality, so we can make sane diffs
+				in contenteditable vs source code to see what changed.
+				
+				But if the source code has been saved, we could try a re-compile !?
+			*/
+throw new Error("Can not reload a second time if the source code have been compiled");
+		}
 		
 		// Reload with new HTML ...
 		
@@ -1209,7 +1224,7 @@ var WysiwygEditor;
 		catch(err) {
 			wysiwygEditor.close();
 			if(reloadCallback) reloadCallback(err);
-			else alertBox("Unable to blur the window. Has it been cloed !? " + err.message);
+			else alertBox("Unable to blur the window. Has it been closed !? " + err.message);
 			return;
 			}
 		
@@ -1416,6 +1431,10 @@ previewWindowLoaded();
 				// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
 				var prewBodyHtml = wysiwygEditor.getContentEditableCode();
 				console.log("(after write) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+				
+				if(srcHtmlBeforeDance == prewBodyHtml) {
+					console.warn("No dance needed !?");
+				}
 				
 				// Sanitize (add line break etc) to the content-editable code
 				var sanitazed = sanitize(prewBodyHtml, wysiwygEditor.lineBreak);
