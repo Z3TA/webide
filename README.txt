@@ -266,6 +266,25 @@ ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fr
 sudo useradd -r -s /bin/false nameofuser
 
 
+Take a snapshot before upgrading the server
+-------------------------------------------
+It's a good idea to take a system snapshot before making system updates, so that you can roll back in case something goes wrong.
+
+sudo zfs list -t snapshot
+sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+
+# cannot create snapshot 'ben/ROOT/ubuntu@upgrade': dataset already exists
+sudo zfs destroy ben/ROOT/ubuntu@upgrade
+sudo zfs snapshot ben/ROOT/ubuntu@upgrade
+
+sudo apt update && sudo apt upgrade
+
+# optional: To prevent running out of disk space, remove packages no longer needed
+sudo apt autoremove
+
+# Always reboot after a system upgrade to check if the system boots with the new upgrades
+# You don't want the system to be stuck att boot during a unplanned reboot (for example automatic start after power failure)
+
 
 Compiling dependencies for old nw.js
 ====================================

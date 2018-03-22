@@ -38,6 +38,19 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+add sftp test user
+
+Fix whatever we broke in WysiwygEditor.js (and write tests!)
+
+Make sure we can capture early events by not using window.location redirect BEFORE refactoring!
+
+Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!
+
+Merge stuff like error inlining from web_preview to WysiwygEditor.js !?
+
+Is there a way to detect if the window.open is blocked !? error ? And tell the user to either allow the popup or click on a button.
+
+
 web_preview don't really need to use the WysiwygEditor.js
 the reason it's using it is because it can live update the document while editing the source html.
 
@@ -1390,7 +1403,7 @@ Give friendly error when trying to pull emty git repo with hggit
 Preview vs Preview ... It's confusing when SSG and web_preview both have a preview ...
 Make a preview event, that plugins can answer to
 
-Listeners for preivew and WYWIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
+Listeners for preivew and WYSIWYG commands. Make SSG listen and use SSG if it belongs to a SSG site.
 see web_preview.js and html_wysiwyg_editor.js (separate meny entry and actual plugin, 
 plugin that only adds preview to context meny and calls EDITOR.preivew() where SSG or web_preview can take the call)
 ---
