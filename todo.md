@@ -38,7 +38,13 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Pressing enter (new line) on WYSIWYG preview window takes focus away!
+Problem: There is both web_preview and SSG preview ... using web_preview on a SSG-site doesn't work.
+Solution: Make plugins listen for "preview" 
+
+Should functionality from web_preview and SSG preview be added to WysiwygEditor !?
+why not: It's better to make separate plugins for example React, SSG's, etc
+
+Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
 
 Make sure we can capture early events by not using window.location redirect BEFORE refactoring!
 

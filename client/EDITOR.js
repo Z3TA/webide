@@ -3669,8 +3669,7 @@ EDITOR.lastKeyPressed = "";
 		var height = options.height;
 		var top = options.top;
 		var left = options.left;
-			var onError = options.onError;
-		}
+			}
 		
 		if(!url) console.warn("Provide an url option argument to EDITOR.createWindow to avoid using window.location redirects! " +
 		"We can not capture events on window.location redirect's until it has loaded, so you might miss some early events, like errors");
@@ -3731,17 +3730,11 @@ EDITOR.lastKeyPressed = "";
 				return callback(new Error("Unable to access " + url + " \n" + err.message));
 				}
 			
-			console.log((new Date()).getTime() + " readyState=" + theWindow.document.readyState);
+			console.log("New window: " + (new Date()).getTime() + " readyState=" + theWindow.document.readyState);
 				
-			theWindow.addEventListener("load", function() { console.log((new Date()).getTime() + " loaded window!"); }, false);
-			theWindow.addEventListener("DOMContentLoaded", function() { console.log((new Date()).getTime() + " DOMContentLoaded for new window!"); }, false);
+			theWindow.addEventListener("load", function() { console.log("New window: " + (new Date()).getTime() + " load event!"); }, false);
+			theWindow.addEventListener("DOMContentLoaded", function() { console.log("New window: " + (new Date()).getTime() + " DOMContentLoaded event!"); }, false);
 			
-				theWindow.addEventListener("error", function(err) {
-					console.error(err);
-					if(onError) onError(err);
-					else alertBox("Window error message: " + err.message);
-				}, false);
-				
 				console.log("theWindow.document.domain=" + theWindow.document.domain);
 				console.log("document.domain=" + document.domain);
 				

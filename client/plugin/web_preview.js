@@ -10,8 +10,7 @@
 	"use strict";
 	
 	var menuItem;
-	var inPreview;
-	var wEditor;
+	var inPreviewFile;
 	var theWindow;
 	var urlPath;
 	var folder;
@@ -33,7 +32,7 @@
 			EDITOR.removeEvent("showMenu", maybeShowPreviewInMenu);
 			EDITOR.removeEvent("fileSave", refreshMaybe);
 			
-			if(wEditor) wEditor.close();
+			if(theWindow) theWindow.close();
 			
 		}
 	});
@@ -47,7 +46,7 @@
 		
 		menuItem = EDITOR.addTempMenuItem("Web Preview", webPreview);
 		
-		if(inPreview) EDITOR.updateMenuItem(menuItem, true);
+		if(inPreviewFile) EDITOR.updateMenuItem(menuItem, true);
 		
 	}
 	
@@ -56,104 +55,96 @@
 		var file = EDITOR.currentFile;
 		if(!file) return console.warn("Unable to run preview: No file open!");
 		
-		if(inPreview && theWindow) {
+		if(inPreviewFile || theWindow) {
 			console.log("Attempt to close preview window ....");
 			theWindow.close();
 			EDITOR.updateMenuItem(menuItem, false);
+			inPreviewFile = null;
+			theWindow = null;
 			return;
 		}
 		
 		EDITOR.hideMenu();
 		
-		inPreview = file;
+		openPreviewWindow(file);
 		
-		theWindow = EDITOR.createWindow();
+	}
+	
+	function openPreviewWindow(file) {
+		if(theWindow) theWindow.close(); // Close the old window
 		
-		// The following 3 events are never called! (they are just here for sanity)
-		theWindow.onerror = function(err) {
-			console.error(err);
-			alertBox("theWindow.onerror:" + err.message);
-		};
-		theWindow.addEventListener("load", function(loadEvent) {
-			alertBox("Window load event!");
-			console.log("preview window loaded!");
-		}, false);
-			
-		theWindow.addEventListener("error", function(err) {
-			console.error(err);
-			alertBox("Window error event: " + err.message);
-			}, false);
-		
+		inPreviewFile = file;
 		
 		//if(!theWindow) return alertBox("Failed to open a new window!");
 		
-			folder = UTIL.getDirectoryFromPath(inPreview.path);
-			CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
-				
-				if(err) throw err;
-				
-				console.log("Serve URL=" + json.url);
-				
-				urlPath = json.url;
-				
-				// HTTP serve gives the URL without protocol !?
-				var reHttp = /^http(s?):/i;
-				if(!urlPath.match(reHttp)) {
-					if(window.location.protocol.match(reHttp)) {
-						urlPath = window.location.protocol + "//" + urlPath;
-					}
-					else urlPath = "http://" + urlPath;
+		folder = UTIL.getDirectoryFromPath(inPreviewFile.path);
+		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
+			
+			if(err) throw err;
+			
+			console.log("Serve URL=" + json.url);
+			
+			urlPath = json.url;
+			
+			// HTTP serve gives the URL without protocol !?
+			var reHttp = /^http(s?):/i;
+			if(!urlPath.match(reHttp)) {
+				if(window.location.protocol.match(reHttp)) {
+					urlPath = window.location.protocol + "//" + urlPath;
 				}
-				var url = urlPath + UTIL.getFilenameFromPath(inPreview.path);
+				else urlPath = "http://" + urlPath;
+			}
+			var url = urlPath + UTIL.getFilenameFromPath(inPreviewFile.path);
+			
+			EDITOR.createWindow({url: url}, windowCreated);
+			
+			function windowCreated(err, newWindow) {
+				
+				if(err) return alertBox(err.message);
+				
+				theWindow = newWindow;
+				
+				theWindow.addEventListener("error", captureError);
+				
+				// Override the console log of the preview window and display the messages as info
+				consoleLogOriginal = theWindow.window.console.log;
+				theWindow.window.console.log = captureConsoleLog;
+				theWindow.window.console.warn = captureConsoleLog;
+				theWindow.window.console.error = function(err) {
+					alertBox("theWindow.window.console.error:" + err);
+				};
+				
+				theWindow.addEventListener("load", function(loadEvent) {
+					console.log("preview window loaded!");
+				}, false);
+				
+				console.log(new Date().getTime());
+				console.log("Error and console.log capture functions attached!");
 				
 				
-				var onlyPreview = true;
-				var bodyTag = undefined;
-			wEditor = new WysiwygEditor({
-					sourceFile: inPreview, 
-					bodyTagSource: bodyTag, 
-					onlyPreview: onlyPreview, 
-				newWindow: theWindow, 
-					url: url, 
+				/*
+					var onlyPreview = true;
+					var bodyTag = undefined;
+					wEditor = new WysiwygEditor({
+					sourceFile: inPreviewFile,
+					bodyTagSource: bodyTag,
+					onlyPreview: onlyPreview,
+					newWindow: theWindow,
+					url: url,
 					whenLoaded: whenLoaded,
-				onErrorEvent: captureError
-				});
-				
-			wEditor.onClose = function() {
+					onErrorEvent: captureError
+					});
+					
+					wEditor.onClose = function() {
 					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
-						if(err) throw err;
-						inPreview = undefined;
+					if(err) throw err;
+					inPreviewFile = undefined;
 					wEditor = undefined;
 					});
-				}
-				
-			});
-		}
-	
-	
-	function whenLoaded(err, file, win) {
-		console.log("whenLoaded: err=", err);
-		if(err) {
-			alertBox(err.message || err);
-			theWindow.close();
-			inPreview = null;
-			theWindow = null;
-			return;
-		}
-		
-		console.log("web_preview_loaded file=" + file.path);
-		
-		// Override the console log of the preview window and display the messages as info
-		consoleLogOriginal = theWindow.window.console.log;
-		theWindow.window.console.log = captureConsoleLog;
-		theWindow.window.console.warn = captureConsoleLog;
-		theWindow.window.console.error = function(err) {
-			alertBox("theWindow.window.console.error:" + err);
-		};
-		
-		console.log(new Date().getTime());
-		console.log("Error and console.log capture functions attached!");
-		
+					}
+				*/
+			}
+		});
 	}
 	
 	function captureError(errorEvent) {
@@ -164,7 +155,7 @@
 		var colno = errorEvent.colno;
 		var error = errorEvent.error;
 		
-		alertBox("Captured error: message=" + message + " line=" + lineno);
+		console.log("Captured error: message=" + message + " line=" + lineno);
 		
 		if(!lineno) {
 			return console.warn("No linenno!");
@@ -179,33 +170,28 @@
 		var filePath = folder + source.replace(urlPath, "");
 		var file = EDITOR.files[filePath];
 		
-		if(!file) {
-			var sourceLink = '<a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
-			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
-			EDITOR.renderNeeded();})">' + source + "</a>";
-			var lineString = ":<b>" + lineno + "</b><br>";
-			alertBox(sourceLink + lineString + message);
-		}
-		else {
-			
+		if(file) {
 			var row = lineno-1;
 			if(file.grid.length <= row) throw new Error("row=" + row + " outside the file.grid.length=" + file.grid.length + " for file.path=" + file.path + " source=" + source);
 			var col = colno ? colno - file.grid[row].indentationCharacters : 0;
 			if(EDITOR.currentFile != file && !switchedDebugSourceFile) {
-					EDITOR.showFile(file);
-					switchedDebugSourceFile = true;
-				}
+				EDITOR.showFile(file);
+				switchedDebugSourceFile = true;
+			}
 			else console.log("(EDITOR.currentFile == file)=" + (EDITOR.currentFile == file) + " switchedDebugSourceFile=" + switchedDebugSourceFile);
-				
+			
 			if(EDITOR.currentFile == file) file.scrollToLine(lineno);
 			else EDITOR.showFile(file);
 			
-				EDITOR.addInfo(row, col, message, file, 1);
-				
-				
+			EDITOR.addInfo(row, col, message, file, 1);
+		}
+		else { // The file is not opened
+			var sourceLink = 'Detected error in: <a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
+			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
+			EDITOR.renderNeeded();})">' + filePath + ":" + lineno + "</a>";
+			alertBox(sourceLink + "\n\n" + message + "");
 			}
-		
-	}
+		}
 	
 	function captureConsoleLog() {
 		// Console log takes many arguments and concatenates them
@@ -319,65 +305,37 @@
 	
 	function refreshMaybe(fileSaved) {
 		
-		//console.log("inPreview=" + !!inPreview + " wEditor=" + !!wEditor);
+		//console.log("inPreviewFile=" + !!inPreviewFile + " theWindow=" + !!theWindow);
 		
-		if(!inPreview || !wEditor || !theWindow) return true;
+		if(!inPreviewFile || !theWindow) return true;
 		
 		var fileName = UTIL.getFilenameFromPath(fileSaved.path);
 		
 		var reStyle = new RegExp('<link.*href=.*' + fileName, "i");
 		var reScript = new RegExp('<script.*src=".*' + fileName, "i");
 		
-		//console.log("style?" + !!inPreview.text.match(reStyle) + " script?" + !!inPreview.text.match(reScript));
+		//console.log("style?" + !!inPreviewFile.text.match(reStyle) + " script?" + !!inPreviewFile.text.match(reScript));
 		
-		if(!inPreview.text.match(reStyle) && !inPreview.text.match(reScript) && fileSaved != inPreview) return true;
+		if(!inPreviewFile.text.match(reStyle) && !inPreviewFile.text.match(reScript) && fileSaved != inPreviewFile) return true;
 		
 		if(!theWindow || !theWindow.window) {
 console.warn("Unable to access theWindow.window=" + theWindow.window);
-			// Likely cause: WysiwygEditor.js aborted. Or the window has been closed
+			// Likely cause: The window has been closed
 			theWindow = null;
-			inPreview 
-			return;
+			inPreviewFile = null;
+			return true;
 		}
 		
-		theWindow.window.addEventListener("load", function() {
-			alertBox("MOhaha loaded!");
-		});
-		/*
-			Doesn't seem to be any way to add a load event ...
-			if whenLoaded is fired too early, the window will get overwritten
-			if it's fired too late we won't capture any errors or console.log's during the loading of the page!
-		*/
-		
-		var interval = setInterval(function() {
-			if(theWindow.window.console.log != captureConsoleLog) {
-				// When console.log no longer point to captureConsoleLog it means the window has reloaded!
-				console.log("web preview window reloaded!");
-				clearInterval(interval);
-				clearTimeout(timeout);
-				whenLoaded(null, inPreview, theWindow);
-			}
-			else console.log("web preview window not yet reloaded!");
-			
-		}, 1);
-		
-		var timeout = setTimeout(function() {
-			clearInterval(interval);
-			if(theWindow.window.console.log != captureConsoleLog) throw new Error("Failed to attach error and console.log integration");
-		}, 150);
-		
-		wEditor.reload(false); // contenEditable = false;
+		openPreviewWindow(inPreviewFile); // Close and re-open
 		
 		switchedDebugSourceFile = false;
 		
-		//setTimeout(whenLoaded, 0);
-		//whenLoaded();
 	}
 	
 	function webPreviewAutocomplete(file, word, wordLength, gotOptions) {
-		console.log("webPreviewAutocomplete: word=" + word + " wEditor?" + (!!wEditor) + " wordLength=" + wordLength);
+		console.log("webPreviewAutocomplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
 		// Auto complete global variables
-		if(!wEditor || !theWindow) return;
+		if(!theWindow) return;
 		if(wordLength == 0) return;
 		
 		// todo: Check if file has anything to do with the web page in preview (eg a script)
@@ -403,7 +361,7 @@ console.warn("Unable to access theWindow.window=" + theWindow.window);
 		
 		if(obj == null) {
 			console.warn("Unable to get window object. Has the window been closed!?");
-			wEditor = null;
+			theWindow = null;
 			return;
 		}
 		
