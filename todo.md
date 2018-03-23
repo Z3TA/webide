@@ -38,6 +38,12 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+We should reuse error and console.log inlining from run_nodejs_script with the error and console.log inlining in web_preview!
+Make an util function !?
+
+Should we re-factor back web_preview to use WysiwygEditor.js and move functionality like error and console.log inlining there !?
+
+
 Problem: There is both web_preview and SSG preview ... using web_preview on a SSG-site doesn't work.
 Solution: Make plugins listen for "preview" 
 
@@ -46,42 +52,13 @@ why not: It's better to make separate plugins for example React, SSG's, etc
 
 Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
 
-Make sure we can capture early events by not using window.location redirect BEFORE refactoring!
-
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!
 
 Merge stuff like error inlining from web_preview to WysiwygEditor.js !?
 
-Is there a way to detect if the window.open is blocked !? error ? And tell the user to either allow the popup or click on a button.
-
-
-web_preview don't really need to use the WysiwygEditor.js
-the reason it's using it is because it can live update the document while editing the source html.
 
 All functionality from the SSG interface.js and web_preview.js should probably be moved to the WysiwygEditor.js !!
 such as css refresh, error and console.log inlining.
-
-The root of the problem is that window.open needs to be called directly after an IO event.
-Or the browser will stop the "popup".
-So the WysiwygEditor uses window.location = location to load the right url.
-
-the problem is we have to wait for API.serve to serve the file before it can be opened using window.open
-
-I have severe sleep deprication!
-
-I seem to have broken the WysiwygEditor!! ...
-
-web_preview can not use WysiwygEditor because it can't capture early errors, because it has to change location
-
-Sometimes web_preview.js "get stuck" indicating that it's active in the menu, but nothing happends when you click!
-
-Is the error throwing before error listeners are attached !?
-
-(doesn't matter if the editor is in debugmode or not!)
-
-sometimes web_preview captures a JS error and sometimes it does not (capture the same error)!!! ???
-
-Inline web_preview errors *sometimes* don't show!
 
 Safari don't show inline nodej console.log's
 
