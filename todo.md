@@ -38,7 +38,15 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-We should reuse error and console.log inlining from run_nodejs_script with the error and console.log inlining in web_preview!
+Speed and performance is a selling point for the editor, so we need to look into that!
+Worst performance hog is currently writing javascript in global scope within a large javascript file.
+
+
+Thinking of reasons why it would not be a good idea to move web_preview and SSG functionality like CSS auto refresh into WysiwygEditor.js
+If we do not move the functionality into one place we'll end up re-implementing them in many places. For example detecting F5 and make a "controlled" reload of the preview window.
+
+
+We should reuse error and console.log inlining from run_nodejs_script with the error and console.log inlining in web_preview!?
 Make an util function !?
 
 Should we re-factor back web_preview to use WysiwygEditor.js and move functionality like error and console.log inlining there !?
@@ -75,6 +83,11 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+When a user is connected from two computers and have the same file open, send all file changes to the server that then broadcast to all clients logged in as that user
+and runs a transorm ? Or just don't apply the changes until they come in from the server (like in the terminal)
+Need to send a message to the server when a file is closed by the client to keep track of which files are open.
+
 
 Better documentation (maybe a blog post!?) on how unix sockets work in jzedit
 problem: When running web_preview files are loaded from webide.se.
