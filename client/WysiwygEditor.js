@@ -80,7 +80,7 @@ var WysiwygEditor;
 		var width = options.width;
 		var height = options.height;
 		
-		
+		if(!url) throw new Error("The preview/WYSIWYG needs an URL or it will not be able to load CSS and JavaScript files! url=" + url);
 		
 		if(!sourceFile) throw new Error("Expected sourceFile when calling WysiwygEditor");
 		
@@ -96,13 +96,15 @@ var WysiwygEditor;
 		if(sourceFile.text.indexOf("<?JS") != -1) throw new Error("Source file contains dynamic script tags. Ignore/transform filter not yet implemented.");
 		
 		if(!newWindow) {
-			
 			console.warn("Creating a new window ...");
 			
 			// We need to create the window right away to prevent it being blocked ...
-			var newWindow = EDITOR.createWindow({url: url});
+			newWindow = EDITOR.createWindow({url: url});
 			
-			if(!newWindow) throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass it as the fourth parameter!")
+			if(!newWindow) {
+throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass it as the fourth parameter!")
+				// todo: show a confirm so that it can open without the popup stopper blocking it, when clicking on the confirm button
+			}
 		}
 		wysiwygEditor.previewWin = newWindow;
 		
@@ -193,25 +195,44 @@ var WysiwygEditor;
 		
 		
 		if(!wysiwygEditor.bodyExistInSource()) {
-			console.warn("bodyTag=" + wysiwygEditor.bodyTagSource + " does not exist in source code!");
+			alertBox("bodyTag=" + wysiwygEditor.bodyTagSource + " does not exist in source code!");
 			wysiwygEditor.close();
 			return;
 		}
 		
 		wysiwygEditor.setStartRow();
 		
-		var dance = true;
+		if(newWindow && newWindow.window.location.href != "about:blank") {
+			wysiwygEditor.attachTo(newWindow, firstLoad);
+		}
+		else {
+			//throw new Error("The window needs to have an actual URL! newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href)
+			console.warn("window has no url! newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href);
+			
+			if(wysiwygEditor.url) {
+				console.log("Attempting reload of url=" + wysiwygEditor + " ...");
+				wysiwygEditor.reload(firstLoad);
+			}
+			else throw new Error("url=" + url + " newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href);
+			
+		}
 		
-		if(onlyPreview) dance = false;
-		
-		wysiwygEditor.reload(dance, function firstLoad(err) {
+		function firstLoad(err) {
 			if(err) {
 				if(whenLoaded) return whenLoaded(err);
 				else throw err;
 			}
+			
+			wysiwygEditor.hasLoaded = true;
+			
 			wysiwygEditor.positionate(top, left, width, height);
-		});
-		
+			
+			if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
+			
+			if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
+			wysiwygEditor.whenLoaded = null;
+			
+		}
 	}
 	
 	WysiwygEditor.prototype.setStartRow = function setStartRow() {
@@ -478,8 +499,7 @@ var WysiwygEditor;
 			
 			if(wysiwygEditor.isCompiled) return wysiwygEditor.close();
 			
-			var dance = false;
-			wysiwygEditor.reload(dance);
+			wysiwygEditor.reload();
 			return;
 		}
 		
@@ -1065,6 +1085,8 @@ var WysiwygEditor;
 		var doc = win.document; // previewWin.document is not available in nw.js gui
 		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 		
+		console.log(doc);
+		
 		var prewHTML = body.innerHTML;
 		
 		//prewHTML = removeHeadLineBreak(prewHTML);
@@ -1184,26 +1206,23 @@ var WysiwygEditor;
 		
 	}
 	
-	WysiwygEditor.prototype.reload = function reload(dance, reloadCallback) {
+	WysiwygEditor.prototype.reload = function reload(reloadCallback) {
 		var wysiwygEditor = this;
 		
 		/*
 			
-			Note that when the window is reloaded. There will be a new window object. And all event listeners need to be re-attached to that object.
+			Note that when the window is reloaded. There will be a new window object. 
+			And all event listeners need to be re-attached to that object.
 			
 		*/
 		
-		console.warn("(re)loading preview window ... dance=" + dance);
-		
-		if(dance == undefined) throw new Error("Shall we WYSIWYG dance ? First argument in WysiwygEditor.reload()");
-		// dance=true means the source code will be updated with the code we'll get after loading the contenteditable.
-		// it will for example insert <tbody> elements and possibly more depending on browser
+		console.warn("(re)loading preview window ...");
 		
 		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) {
 			/*
 				The source code has most likely been changed during the "dance" where contentediable code is synced 
 				with source code (tbody etc elements are added). The "dance" mangles the source code so it should be
-				avoided if possible, but is needed for the WYSIWYG (contentediable) functionality, so we can make sane diffs
+				avoided if possible, but it's needed for the WYSIWYG (contentediable) functionality, so we can make sane diffs
 				in contenteditable vs source code to see what changed.
 				
 				But if the source code has been saved, we could try a re-compile !?
@@ -1211,355 +1230,240 @@ var WysiwygEditor;
 throw new Error("Can not reload a second time if the source code have been compiled");
 		}
 		
-		// Reload with new HTML ...
+		// We don't want to use wysiwygEditor.previewWin.location = wysiwygEditor.previewWin.location.href redirect.
+		// Because it would not be possible to capture early events as there is no way to add event listeners to it until it has loaded!
 		
-		wysiwygEditor.ignoreSourceFileChange = true;
+		wysiwygEditor.previewWin.close();
 		
-		var previewWin = wysiwygEditor.previewWin;
-		var gotError = false;
+		EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
 		
-		try {
-			previewWin.blur();
-		}
-		catch(err) {
-			wysiwygEditor.close();
-			if(reloadCallback) reloadCallback(err);
-			else alertBox("Unable to blur the window. Has it been closed !? " + err.message);
-			return;
-			}
+		function windowCreated(err, newWindow) {
 		
-		var sourceFile = wysiwygEditor.sourceFile;
-		var html = sourceFile.text;
-		
-		//previewWin.onload = previewWindowLoaded;
-		
-		var checkLocationMaxTries = 100;
-		var checkLocationTries = 0;
-		
-		if(wysiwygEditor.url && previewWin.location.href != wysiwygEditor.url) {
-			
-			//console.log(previewWin);
-			//console.log(previewWin.window);
-			//console.log(previewWin.document);
-			
-			console.log("Setting window url to wysiwygEditor.url=" + wysiwygEditor.url +
-			" because wysiwygEditor.url=" + wysiwygEditor.url + " is not the same as previewWin.location.href=" + previewWin.location.href);
-			
-			//console.log("previewWin.window.location.href=" + previewWin.window.location.href);
-			//console.log("previewWin.location.href=" + previewWin.location.href);
-			
-			
-			// problem: We can't set load event listener, or any event listener on the window!
-			// solution: Check previewWin.location.href == url in intervals until it has changed
-			
-			// problem: We wont be able to capture early events! (like errors before we have attacked the error event listener)
-			// solution: none :(
-			
-			var checkLocationIntervalTime = 100;
-			setTimeout(checkLocation, checkLocationIntervalTime);
-			
-			/*
-				
-			
-			previewWin.addEventListener("load", function(ev) {
-				alert("previewWin load event!");
-			});
-			
-			previewWin.window.addEventListener("load", function(ev) {
-				alert("previewWin window load event!");
-			});
-			*/
-			
-			//var oldWindow = previewWin.window;
-			//while(oldWindow == previewWin.window) console.log("waiting ....");
-			
-			previewWin.location.href = wysiwygEditor.url;
-			
-		}
-		else if(wysiwygEditor.url && previewWin.location.href == wysiwygEditor.url) {
-			console.log("Reloading the window!");
-			wysiwygEditor.isReloading = true;
-			previewWin.location.reload();
-			
-			var checkLocationIntervalTime = 100;
-			setTimeout(checkLocation, checkLocationIntervalTime);
-		}
-		else if(!wysiwygEditor.url) {
-			
-			//previewWin.location.href = "about:blank";
-			// Write the html to the content-editable
-			console.log("Writing html=" + UTIL.lbChars(html));
-			
-			previewWin.document.open();
-			previewWin.document.write(html);
-			previewWin.document.close();
-			
-			previewWindowLoaded();
-		}
-		else {
-			throw new Error("What to do ? wysiwygEditor.url=" + wysiwygEditor.url + " previewWin.location.href=" + previewWin.location.href);
-		}
-		
-		function checkLocation() {
-			
-			console.log("reload:checkLocation");
-			
-			/*
-				previewWin.location.href=http://127.0.0.1:8080/testpage.htm
-				wysiwygEditor.url=http://b9u41v9BFM:123@127.0.0.1:8080/testpage.htm
-			*/
-			
-			checkLocationTries++;
-			
-			var url = wysiwygEditor.url;
-			
-			var matchAuth = url.match(/^http(s)?:\/\/(.*:.*@)/);
-			if(matchAuth) url = url.replace(matchAuth[2], "");
-			
-			try {
-				var test = previewWin.location.href;
-			}
-			catch(err) {
-				var myError = new Error("Unable to access: " + url + "!\n" + err.message);
-				if(reloadCallback) reloadCallback(myError);
-				else alertBox(myError.message);
-				wysiwygEditor.close();
-				return;
+if(err) {
+				if(reloadCallback) return reloadCallback(err);
+else throw err;
 			}
 			
-			if(previewWin.location.href == url) {
-previewWindowLoaded();
-			}
-			else if(previewWin.location.href) {
-				console.log("previewWin.location.href=" + previewWin.location.href + " wysiwygEditor.url=" + wysiwygEditor.url + " url=" + url);
-				
-				if(checkLocationTries > checkLocationMaxTries) {
-					var err = new Error("Failed to get location from preview window after reload! (Did you close it ?) URL=" + url);
-					
-					if(reloadCallback) reloadCallback(err);
-					else alertBox(err.message);
-				}
-				else setTimeout(checkLocation, checkLocationIntervalTime);
+			wysiwygEditor.attachTo(newWindow, function attached(err) {
+			if(err) {
+				if(reloadCallback) return reloadCallback(err);
+				else throw err;
 			}
 			else {
-				console.log(previewWin);
-				var err = new Error("Unable to get location from previewWin. Did the window close !?");
+				console.log("Successfully attached WysiwygetEdtior to new window");
 				
-				if(reloadCallback) reloadCallback(err);
-				else alertBox(err.message);
+				console.log("Done (re)loading preview window");
 				
-				wysiwygEditor.close();
-				}
+				if(reloadCallback) reloadCallback(null);
+				
+				wysiwygEditor.ignoreSourceFileChange = false;
+			}
+		});
+		}
+	}
+	
+	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback) {
+		
+		if(typeof callback != "function") throw new Error("callback=" + callback);
+		
+		console.log("Attaching event listeners etc to " + newWindow);
+		var wysiwygEditor = this;
+		
+		if(newWindow == undefined) throw new Error("newWindow=" + newWindow);
+		
+		wysiwygEditor.previewWin = newWindow;
+		
+		var previewWin = wysiwygEditor.previewWin;
+		
+		console.log("readyState=" + previewWin.document.readyState);
+		
+		if(previewWin.document.readyState == "complete") attachEvents();
+		else previewWin.addEventListener("load", function windowLoaded() {
+			 attachEvents();
+		});
+		
+		function attachEvents() {
+		
+			var doc = previewWin.document;
+		var win = previewWin.window;
+		
+		if(!doc.documentElement) {
+				throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
 		}
 		
+		if(!previewWin) throw new Error("Unable to get preview window!");
+		if(!doc) throw new Error("Unable to get preview window document!");
+		if(!win) throw new Error("Unable to get preview window window!");
 		
-		function previewWindowLoaded(retries) {
+		/*
+			var prewviewContent = doc.documentElement.outerHTML;
+			console.log("prewviewContent=" + prewviewContent);
+			if(prewviewContent != html && prewviewContent) {
 			
-			if(retries == undefined) retries = 0;
-			
-			console.log("Preview window loaded!");
-			
-			// Get the doc again after location reload
-			var doc = previewWin.document;
-			var win = previewWin.window;
-			
-			if(!doc.documentElement) {
-				if(retries < 5) {
-					console.log("Unable to get doc.documentElement. The document might not be fully loaded. Retrying ...");
-					return setTimeout(function() {
-						previewWindowLoaded(++retries);
-					}, 150);
-				}
-				else {
-					console.log(doc);
-					console.log(win);
-					throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
-				}
+			console.log("html=" + html);
+			console.log("prewviewContent=" + prewviewContent);
+			throw new Error("Failed to write HTML to preview window!");
 			}
-			
-			if(!previewWin) throw new Error("Unable to get preview window!");
-			if(!doc) throw new Error("Unable to get preview window document!");
-			if(!win) throw new Error("Unable to get preview window window!");
-			
-			/*
-				var prewviewContent = doc.documentElement.outerHTML;
-				console.log("prewviewContent=" + prewviewContent);
-				if(prewviewContent != html && prewviewContent) {
-				
-				console.log("html=" + html);
-				console.log("prewviewContent=" + prewviewContent);
-				throw new Error("Failed to write HTML to preview window!");
-				}
-			*/
-			
-			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
-			
-			if(bodyTags.length === 0) {
-				// The user probably have an open html tag above the body element
-				// or the document is not yet fully loaded !?
-				console.warn("previewWin dont have a body tag!");
-				
-				if(retries < 10) {
-					console.log("The document might not be fully loaded. Retrying ...");
-					return setTimeout(function() {
-					previewWindowLoaded(++retries);
-					}, 150);
-				}
-				else if(wysiwygEditor.isCompiled) {
-					var err = new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
-					
-					if(reloadCallback) reloadCallback(err);
-					else throw err;
-				}
-				
-				attachFileChangeListener(wysiwygEditor);
-				
-				return done();
+		*/
+		
+		var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+		
+		if(bodyTags.length == 0) {
+				console.log((new Date()).getTime() + " unable to get " + wysiwygEditor.bodyTagPreview + " element! doc.readyState=" + doc.readyState +
+				" doc.documentElement.readyState=" + doc.documentElement.readyState);
+				return callback(new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview +
+				" in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML + " doc.innerHTML=" + doc.innerHTML + ""));
 			}
 			
 			var body = bodyTags[0];
+		
+			if(wysiwygEditor.isCompiled) wysiwygEditor.dance();
 			
-			if(dance) {
-				// We need to dance to make sure source code and content-editable code is the same ...
-				
-				var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
-				
-				// Need to know line break convention before getting the content-editable code!
-				console.log("WYSIWYG determine line break convention:");
-				wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML); 
-				
-				// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
-				var prewBodyHtml = wysiwygEditor.getContentEditableCode();
-				console.log("(after write) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
-				
-				if(srcHtmlBeforeDance == prewBodyHtml) {
-					console.warn("No dance needed !?");
-				}
-				
-				// Sanitize (add line break etc) to the content-editable code
-				var sanitazed = sanitize(prewBodyHtml, wysiwygEditor.lineBreak);
-				
-				if(sanitazed != prewBodyHtml) {
-					setContentEditableBody(body, sanitazed);
-					prewBodyHtml = wysiwygEditor.getContentEditableCode();
-					console.log("(after sanitation) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
-				}
-				
-				// Use the contenteditable line break convention in the source file to make life easier
-				if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
-					var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
-					html = html.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
-					console.log("Replaced line breaks in source code: html=" + UTIL.lbChars(html));
-				}
-				
-				// Replace the the content of the body element with the content-editable code
-				html = changeCodeInBody(prewBodyHtml, html, wysiwygEditor.bodyTagSource);
-				
-				console.log("(after setting) html=" + UTIL.lbChars(html));
-				
-				sourceFile.reload(html);
-				
-				// Finally make the body of the source file the body of the content-editable
-				var srcHTML = wysiwygEditor.getSourceCodeBody();
-				setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
-				
-				
-				// The source code and content-editable should now have the same line breaks!
-				
-				console.log("(after) srcHTML=" + UTIL.lbChars(srcHTML));
-				
-				// The source code and content editable code should now be the same!
-				if(wysiwygEditor.getContentEditableCode() != srcHTML) {
-					throw new Error("Source code does not match!\n \
-					wysiwygEditor.getContentEditableCode()=" + UTIL.lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
-					srcHTML=" + UTIL.lbChars(srcHTML) + "\n\n\
-					diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), srcHTML, null, 2)));
-				}
-				
-				sourceFile.checkGrid();
-				
-				// Problem: The source code and a "compiled" page might diff a lot
-				// Solution: .... ???
-				
-				var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, srcHTML);
-				console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
-				
-				// It's ok to add new lines, but not OK to add new content
-				
-				// Only index and xml pages can contain server code! So we do not need to worry about that
-				
+		body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
+		
+		if(!wysiwygEditor.onlyPreview) {
+			// Make body editable and attatch event listeners
+			
+			body.setAttribute("contenteditable", "true");
+			
+			body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
+			body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
+			body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
+			
+			// body.input doesn't work on nw.js gui, has to use window instead
+			//body.input = function(e) {wysiwygEditor.previewInput(e)};
+			body.oninput = function(e) {wysiwygEditor.previewInput(e)};
+			//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
+		}
+		else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
+		
+		// Capture F5 and make a soft reload
+		previewWin.window.onkeydown = function keyDown(keyDownEvent) {
+			//console.log("previewWin.window.onkeydown:", keyDownEvent);
+			var keyF5 = 116;
+			if(keyDownEvent.keyCode == keyF5) {
+				keyDownEvent.preventDefault();
+				wysiwygEditor.reload();
+				return false;
 			}
-			
-			body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
-			
-			if(!wysiwygEditor.onlyPreview) {
-				// Make body editable and attatch event listeners
-				
-				body.setAttribute("contenteditable", "true");
-				
-				body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
-				body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
-				body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
-				
-				// body.input doesn't work on nw.js gui, has to use window instead
-				//body.input = function(e) {wysiwygEditor.previewInput(e)};
-				body.oninput = function(e) {wysiwygEditor.previewInput(e)};
-				//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
+			else return true;
+		};
+		
+		attachFileChangeListener(wysiwygEditor);
+		
+		// Remove the fileChange event listener when closing the content-editable window
+		previewWin.window.onbeforeunload = function() {
+			if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
+			else wysiwygEditor.close();
+			//return true; // Shows a "are you sure" message
+		};
+		
+		// Capture errors on the content-editable so that they do not go by unoticed
+		previewWin.window.addEventListener("error", function(errorEvent) {
+			// https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
+			if(wysiwygEditor.onErrorEvent) wysiwygEditor.onErrorEvent(errorEvent);
+			else {
+				var message = errorEvent.message;
+				alertBox(message ? message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
+				console.error(errorEvent.error);
 			}
-			else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
+		});
 			
-			// Capture F5 and make a soft reload
-			previewWin.window.onkeydown = function keyDown(keyDownEvent) {
-				//console.log("previewWin.window.onkeydown:", keyDownEvent);
-				var keyF5 = 116;
-				if(keyDownEvent.keyCode == keyF5) {
-					keyDownEvent.preventDefault();
-					wysiwygEditor.reload(dance);
-					return false;
+			callback(null);
+			
+	}
+	}
+	
+	WysiwygEditor.prototype.dance = function dance() {
+		// We need to dance to make sure source code and content-editable code is the same ...
+		var wysiwygEditor = this;
+		
+		if(!wysiwygEditor.previewWin) throw new Error("Unable to get preview window!");
+		
+		var doc = wysiwygEditor.previewWin.document;
+		if(!doc) throw new Error("Unable to get preview window document!");
+		
+		var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
+		
+		var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+		
+		if(bodyTags.length === 0) {
+			// The user probably have an open html tag above the body element
+			// or the document is not yet fully loaded !?
+			
+				throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
 				}
-				else return true;
-			};
-			
-			
-			attachFileChangeListener(wysiwygEditor);
-			
-			// Remove the fileChange event listener when closing the content-editable window
-			previewWin.window.onbeforeunload = function() {
-				if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
-				else wysiwygEditor.close();
-				//return true; // Shows a "are you sure" message
-			};
-			
-			// Capture errors on the content-editable so that they do not go by unoticed
-			previewWin.window.addEventListener("error", function(errorEvent) {
-				// https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
-				if(wysiwygEditor.onErrorEvent) wysiwygEditor.onErrorEvent(errorEvent);
-				else {
-					var message = errorEvent.message;
-					alertBox(message ? message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
-					console.error(errorEvent.error);
-				}
-			});
-			
-			done();
-			
-			function done() {
-				wysiwygEditor.hasLoaded = true;
-					
-				if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
-					wysiwygEditor.whenLoaded = null;
-					
-					console.log("Done (re)loading preview window");
-					
-				if(reloadCallback) reloadCallback(null);
-					
-					if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
-				
-				wysiwygEditor.ignoreSourceFileChange = false;
-				
-			}
-				
-			}
+		
+		var body = bodyTags[0];
+		
+		// Need to know line break convention before getting the content-editable code!
+		console.log("WYSIWYG determine line break convention:");
+		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML);
+		
+		// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
+		var prewBodyHtml = wysiwygEditor.getContentEditableCode();
+		console.log("(after write) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+		
+		if(srcHtmlBeforeDance == prewBodyHtml) {
+			console.warn("No dance needed !?");
+			return;
+		}
+		
+		wysiwygEditor.ignoreSourceFileChange = true;
+		
+		// Sanitize (add line break etc) to the content-editable code
+		var sanitazed = sanitize(prewBodyHtml, wysiwygEditor.lineBreak);
+		
+		if(sanitazed != prewBodyHtml) {
+			setContentEditableBody(body, sanitazed);
+			prewBodyHtml = wysiwygEditor.getContentEditableCode();
+			console.log("(after sanitation) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+		}
+		
+		// Use the contenteditable line break convention in the source file to make life easier
+		if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
+			var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
+			html = html.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
+			console.log("Replaced line breaks in source code: html=" + UTIL.lbChars(html));
+		}
+		
+		// Replace the the content of the body element with the content-editable code
+		html = changeCodeInBody(prewBodyHtml, html, wysiwygEditor.bodyTagSource);
+		
+		console.log("(after setting) html=" + UTIL.lbChars(html));
+		
+		sourceFile.reload(html);
+		
+		// Finally make the body of the source file the body of the content-editable
+		var srcHTML = wysiwygEditor.getSourceCodeBody();
+		setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
+		
+		
+		// The source code and content-editable should now have the same line breaks!
+		
+		console.log("(after) srcHTML=" + UTIL.lbChars(srcHTML));
+		
+		// The source code and content editable code should now be the same!
+		if(wysiwygEditor.getContentEditableCode() != srcHTML) {
+			throw new Error("Source code does not match!\n \
+			wysiwygEditor.getContentEditableCode()=" + UTIL.lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
+			srcHTML=" + UTIL.lbChars(srcHTML) + "\n\n\
+			diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), srcHTML, null, 2)));
+		}
+		
+		sourceFile.checkGrid();
+		
+		// Problem: The source code and a "compiled" page might diff a lot
+		// Solution: .... ???
+		
+		var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, srcHTML);
+		console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
+		
+		// It's ok to add new lines, but not OK to add new content
+		
+		// Only index and xml pages can contain server code! So we do not need to worry about that
+		
+		wysiwygEditor.ignoreSourceFileChange = false;
 		
 	}
 	

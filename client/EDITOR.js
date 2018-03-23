@@ -3659,7 +3659,9 @@ EDITOR.lastKeyPressed = "";
 	*/
 	
 	EDITOR.openWindows = [];
-	EDITOR.createWindow = function(options) {
+	EDITOR.createWindow = function(options, callback) {
+		
+		if(typeof callback != "function") throw new Error("EDITOR.createWindow needs a callback function as second parameter!");
 		
 		if(options) {
 		var url = options.url;
@@ -3690,24 +3692,46 @@ EDITOR.lastKeyPressed = "";
 		//if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
 		if(url == undefined) url = "about:blank";
 		
-		var theWindow = window.open(url ? url : "about:blank", "previewWindow" + (EDITOR.openWindows.length + 1),
-		"height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
+		var theWindow = open(url);
 			
-		if(!theWindow) {
+		if(theWindow != null) testWindow(theWindow);
+		else {
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
-			alertBox("Could not open the window. Please Try again, or disable the popup stopper!");
-				return null;
-			}
-			else {
-				
+			
+			var failText = "The new window was most likely blocked by a popup blocker. " +
+			"Click OK to retry opening it. (enable popups from " + document.domain + " to get rid of this message)"
+			
+			var errorText = "Could not open the window. Please disable the popup stopper!"
+			
+			/*
+				// native confirm dialog did not enable the window!
+				var tryAgain = confirm(failText);
+			if(tryAgain) theWindow = open(url);
+			*/
+			
+			var ok = "OK";
+			confirmBox(failText, [ok], function(answer) {
+			if(answer == ok) {
+					theWindow = open(url);
+					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
+					if(!theWindow) return callback(new Error(errorText));
+					else return testWindow(theWindow);
+				}
+				else callback(new Error(errorText));
+				});
+		}
+		
+		function testWindow(theWindow) {
+			
 			// Due to CORS we might get errors accessing properties on the new window
-				try {
-					var test = theWindow.document.domain;
+			try {
+				var test = theWindow.document.domain;
 				}
 				catch(err) {
-				alertBox("Unable to access " + url + " \n" + err.message);
-				return null;
+				return callback(new Error("Unable to access " + url + " \n" + err.message));
 				}
+			
+			console.log((new Date()).getTime() + " readyState=" + theWindow.document.readyState);
 				
 			theWindow.addEventListener("load", function() { console.log((new Date()).getTime() + " loaded window!"); }, false);
 			theWindow.addEventListener("DOMContentLoaded", function() { console.log((new Date()).getTime() + " DOMContentLoaded for new window!"); }, false);
@@ -3729,9 +3753,15 @@ EDITOR.lastKeyPressed = "";
 				
 				EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
 				
-				return theWindow;
+				return callback(null, theWindow);
 			}
-			
+		
+		function open(url) {
+			if(!url) url = "about:blank";
+			var windowId = "previewWindow" + (EDITOR.openWindows.length + 1);
+			return window.open(url, windowId, "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
+		}
+		
 	}
 	
 	// Tools for handling repositories (Mercurial, Git, etc)

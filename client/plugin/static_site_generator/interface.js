@@ -1355,27 +1355,49 @@ progressBar.style.display = "none";
 		console.log('Previewing site.name="' + site.name + '". edit=' + edit);
 		
 		/*
-			We must create the window here, so that it get asociated with the button click
+			We must create the window here, so that it get associated with the button click
 			Some browsers will not let us change the window position, so we need to specify it here also.
+			
 			To prevent same origin policy error, the editor must be served via http or https! (not file://)
 		*/
 		
+		var url = undefined;
+		var newWindow;
 		if(previewWin) {
-			console.log("previewWin.screenX=" + previewWin.screenX + " previewWin.previewWin.screenX=" + previewWin.previewWin.screenX + " previewWin.previewWin.innerWidth=" + previewWin.previewWin.innerWidth);
+			// We want to use the same window position and width/height
+			try {
+				var test = previewWin.previewWin.innerWidth;
+			}
+			catch(err) {
+				console.warn("Unable to measure old window. It's most likely closed already: " + err.message);
+				var options = {url: url};
+			}
 			
-			var url = undefined;
+			if(!options) {
+				console.log("previewWin.screenX=" + previewWin.screenX);
+				console.log("previewWin.previewWin.screenX=" + previewWin.previewWin.screenX);
+				console.log("previewWin.previewWin.innerWidth=" + previewWin.previewWin.innerWidth);
+			
 			var width = parseInt(previewWin.previewWin.innerWidth);
 			var height = parseInt(previewWin.previewWin.innerHeight);
 			var top = parseInt(previewWin.previewWin.screenY || previewWin.previewWin.screenTop);
 			var left = parseInt(previewWin.previewWin.screenX || previewWin.previewWin.screenLeft);
-			var newWindow = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left});
+			
+				options = {url: url, width: width, height: height, top: top, left: left};
+			}
+			
+			EDITOR.createWindow(options, newWindowCreated);
 		}
-		else var newWindow = EDITOR.createWindow();
+		else EDITOR.createWindow({url: url}, newWindowCreated);
 		
-		
-		
-		if(sourceFile == undefined) {		
-			pickFileToPreview(site, function(err, file) {
+		function newWindowCreated(err, winOpened) {
+			
+			if(err) return alertBox(err.message);
+			
+			newWindow = winOpened;
+			
+			if(sourceFile == undefined) {		
+				pickFileToPreview(site, function(err, file) {
 				if(err) {
 					newWindow.close();
 					alertBox(err.message);
@@ -1395,8 +1417,7 @@ progressBar.style.display = "none";
 			}
 			else compileIt(sourceFile);
 		}
-		
-		return false;
+		}
 		
 		function compileIt(sourceFile, recursionCounter) {
 			
@@ -1614,7 +1635,7 @@ progressBar.style.display = "none";
 									if(previewWin) previewWin.close();
 									
 									
-								console.log("SSG url=" + url + " RUNTIME=" + RUNTIME);
+								console.log("SSG url=" + url + " RUNTIME=" + RUNTIME + " newWindow=" + newWindow);
 									previewWin = new WysiwygEditor({
 sourceFile: sourceFile,
 bodyTagSource: bodyTag, 
@@ -2339,29 +2360,29 @@ height: height
 		
 	}
 	
-	function like(site, fileListItem) {
+	function like(site, file) {
 		
-		if(!fileListItem) {
-			console.log("We don't like " + fileListItem.path + " because it's falsy");
+		if(!file) {
+			console.log("We don't like site=" + site + " because file=" + file);
 			return false;
 		}
 		
-		if(fileListItem.path.indexOf(site.source) != 0) {
-			console.log("We don't like " + fileListItem.path + " because it's not part of site.source=" + site.source);
+		if(file.path.indexOf(site.source) != 0) {
+			console.log("We don't like " + file.path + " because it's not part of site.source=" + site.source);
 			return false;
 		}
 		
-		if(!fileListItem.name.match(/html?$/i)) {
-			console.log("We don't like " + fileListItem.path + " because it's not a HTML file");
+		if(!file.name.match(/html?$/i)) {
+			console.log("We don't like " + file.path + " because it's not a HTML file");
 			return false;
 		}
 		
-		if(fileListItem.name.match(/(header|footer).html?/i)) {
-			console.log("We don't like " + fileListItem.path + " because it's not a header of footer file");
+		if(file.name.match(/(header|footer).html?/i)) {
+			console.log("We don't like " + file.path + " because it's not a header of footer file");
 			return false;
 		}
 		
-		console.log("We DO like " + fileListItem.path + " !");
+		console.log("We DO like " + file.path + " !");
 		
 		return true;
 	}
