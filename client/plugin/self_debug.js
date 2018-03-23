@@ -232,7 +232,7 @@
 	
 	
 	
-	function reportTemplate(message, source, lineno, colno, error) {
+	function reportTemplate(errMessage, source, lineno, colno, error) {
 		// Create a template used to report bugs
 		
 		var editorArgs = RUNTIME == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
@@ -245,6 +245,7 @@
 		'Platform: ' + process.platform + '\n' +
 		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
+		errMessage + '\n\n' +
 		(error ? error.stack : "Error stack:") + '\n' +
 		'\n' +
 		'How to repeat:\n' + 
