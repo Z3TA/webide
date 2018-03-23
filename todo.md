@@ -38,9 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Refactoring WysiwygEditor.js to not use window.location redirect, but instead close and reopen the window when reloading.
-(in order to be able to capture early errors)
-
+Pressing enter (new line) on WYSIWYG preview window takes focus away!
 
 Make sure we can capture early events by not using window.location redirect BEFORE refactoring!
 
@@ -2039,6 +2037,11 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+add a perf mode, that don't run console log's but do run console.time!
+
+idea: wait until 800ms since last input before running parsers etc. And concatenate changes, for example text input. But do show the text on the screen!
+
 
 Opening and closing [] brackets is slow in large files. Even though dev mode is off!
 
