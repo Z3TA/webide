@@ -42,6 +42,8 @@ What I'm working on
 
 Make sure the WYSIWYG for the SSG works !!! Write tests!
 
+Make it so I can't make a prod release unless all tests have passed!!!
+
 Thinking of reasons why it would not be a good idea to move web_preview and SSG functionality like CSS auto refresh into WysiwygEditor.js
 If we do not move the functionality into one place we'll end up re-implementing them in many places. For example detecting F5 and make a "controlled" reload of the preview window.
 
