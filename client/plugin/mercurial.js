@@ -110,6 +110,8 @@
 		
 		CLIENT.removeEvent("loginSuccess", cloneRepoMaybe);
 		
+		hideMercurialWidgets();
+		
 	}
 	
 	function cloneRepoMaybe() {
@@ -1722,6 +1724,11 @@
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
 			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
 			var filePaths = getSelects(fileSelEl);
+			console.log("cat file:");
+			
+			console.log(selectedRev);
+			console.log(fileSelEl);
+			console.log(filePaths);
 			if(filePaths.length != 1) return alertBox("Only one file can be selected!");
 			var filePath = filePaths[0];
 			CLIENT.cmd("mercurial.cat", {directory: fileDirectory, rev: selectedRev.rev, file: filePath}, function hgDiff(err, resp) {
@@ -1839,11 +1846,17 @@
 				
 				if(lastActiveHistoryTableRow) lastActiveHistoryTableRow.setAttribute("class", "");
 				
+				console.log("selectedRev:");
+				console.log(tr);
 				var rev = parseInt(tr.id.slice(3)); // remove rev from rev123
+				console.log("rev=" + rev);
 				
 				if(!changes.hasOwnProperty(rev)) throw new Error("Unable to find rev=" + rev + " in changes! tr.id=" + tr.id);
 				
+				// Why does this select the wrong change/rev !? Example selecting rev 2763 sets selectedRev to rev 17!
 				selectedRev = changes[rev];
+				console.log(selectedRev);
+				
 				tr.setAttribute("class", "selected");
 				
 				lastActiveHistoryTableRow = tr;

@@ -86,7 +86,7 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 		
 	*/
 	
-	var compiledPage = "<html>\n<body>\nheader\n<main>\n\n\n<p>Paragraph</p>\n\n\n</main>\nfooter\n</body>\n</html>\n"
+	var compiledPage = "<html>\n<body>\nheader\n<main>\n\n\n<p>Paragraph</p>\n\n\n</main>\nfooter\n</body>\n</html>\n";
 	
 	var sourcePage = "<html>\n<body>\n\n\n<p>Paragraph</p>\n\n\n</body>\n</html>\n";
 	

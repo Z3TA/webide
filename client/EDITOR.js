@@ -1089,13 +1089,19 @@ EDITOR.lastKeyPressed = "";
 		
 		// Only works with text files !
 		
-		if(!saveToDiskCallback) throw new Error("saveToDisk called without a callback function!");
+		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
 		
 		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
 		
 		CLIENT.cmd("saveToDisk", json, function(err, json) {
-			if(err) saveToDiskCallback(err);
-			else saveToDiskCallback(null, json.path);
+			if(err) {
+				if(saveToDiskCallback) saveToDiskCallback(err);
+				else throw err;
+			}
+			else {
+				if(saveToDiskCallback) saveToDiskCallback(null, json.path);
+				else console.log("File saved to disk: " + json.path);
+			}
 		});
 		
 	}
@@ -3381,8 +3387,14 @@ EDITOR.lastKeyPressed = "";
 		
 		var json = {pathToCreate: directoryPathToCreate};
 		CLIENT.cmd("createPath", json, function(err, json) {
-			if(err) createPathCallback(err);
-			else createPathCallback(null, json.path);
+			if(err) {
+				if(createPathCallback) createPathCallback(err);
+				else throw err;
+			}
+			else {
+				if(createPathCallback) createPathCallback(null, json.path);
+				else console.log("Path created: " + json.path);
+			}
 		});
 		
 	}

@@ -38,11 +38,14 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+hg log selecting wrong change!
+
 3 windows are loaded in testWysywygEditor.js
 
 Make sure the WYSIWYG for the SSG works !!! Write tests!
 
 Make it so I can't make a prod release unless all tests have passed!!!
+run the tests in different browsers!!
 
 Thinking of reasons why it would not be a good idea to move web_preview and SSG functionality like CSS auto refresh into WysiwygEditor.js
 If we do not move the functionality into one place we'll end up re-implementing them in many places. For example detecting F5 and make a "controlled" reload of the preview window.
