@@ -3660,22 +3660,31 @@ EDITOR.lastKeyPressed = "";
 	
 	EDITOR.openWindows = [];
 	EDITOR.createWindow = function(options, callback) {
+		// A callback is needed because we might have to show a button for the user to click to open the new window (if the browser has a popup stopper)
 		
-		if(typeof callback != "function") throw new Error("EDITOR.createWindow needs a callback function as second parameter!");
+		if(typeof options != "object") throw new Error("options need to be an object (with at least a url property) !");
+		if(typeof callback != "function") throw new Error("EDITOR.createWindow needs a callback function as second parameter! callback=" + callback + " (" + (typeof callback) + ")");
 		
-		if(options) {
 		var url = options.url;
 		var width = options.width;
 		var height = options.height;
 		var top = options.top;
 		var left = options.left;
-			}
+		var waitUntilLoaded = options.waitUntilLoaded || false;
 		
-		if(!url) console.warn("Provide an url option argument to EDITOR.createWindow to avoid using window.location redirects! " +
-		"We can not capture events on window.location redirect's until it has loaded, so you might miss some early events, like errors");
+		if(!url) throw new Error("Provide an url option argument to EDITOR.createWindow to avoid using window.location redirects! " +
+		"We can not capture events on window.location redirect's until it has loaded, so you might miss some early events, like errors.");
+		/*
+			If it's blocked by the browser's built in popup stopper we'll show a button telling the user to click it to open the window
+			
+			Tip: You can set url to about:blank and then close/reopen the window when you know what url to load. 
+			Some browsers (Chrome) will allow the popup if another window is closed prior.
+			*/ 
+		
+		console.warn("Creating new window url=" + url);
 		
 		// Decide window width, height and placement ...
-		// Some browsers will not allow us to change these via script after the window have has been created.
+		// Some browsers (which?) will not allow us to change these via script after the window have has been created (so we must set them here).
 		var windowPadding = 0;
 		var unityLeftThingy = 10;
 		var previeWidth = width || Math.round(screen.width / 3.5) - windowPadding * 2;
@@ -3732,7 +3741,19 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log("New window: " + (new Date()).getTime() + " readyState=" + theWindow.document.readyState);
 				
-			theWindow.addEventListener("load", function() { console.log("New window: " + (new Date()).getTime() + " load event!"); }, false);
+			theWindow.addEventListener("load", function() {
+				console.log("New window: " + (new Date()).getTime() + " load event!");
+				/*
+					document.readyState === "complete" does not mean everything has loaded!
+					So because it's impossible to tell if the window has loaded or not,
+					we will give the window object a new property: loaded (true or undefined)
+					
+					What if the window was loaded until we got here (theWindow.addEventListener("load") ? Nightmare!
+					
+				*/
+				theWindow.loaded = true; 
+				if(waitUntilLoaded) callback(null, theWindow);
+			}, false);
 			theWindow.addEventListener("DOMContentLoaded", function() { console.log("New window: " + (new Date()).getTime() + " DOMContentLoaded event!"); }, false);
 			
 				console.log("theWindow.document.domain=" + theWindow.document.domain);
@@ -3746,7 +3767,7 @@ EDITOR.lastKeyPressed = "";
 				
 				EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
 				
-				return callback(null, theWindow);
+			if(!waitUntilLoaded) return callback(null, theWindow);
 			}
 		
 		function open(url) {

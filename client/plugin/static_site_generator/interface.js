@@ -1361,7 +1361,7 @@ progressBar.style.display = "none";
 			To prevent same origin policy error, the editor must be served via http or https! (not file://)
 		*/
 		
-		var url = undefined;
+		var url = "about:blank";
 		var newWindow;
 		if(previewWin) {
 			// We want to use the same window position and width/height

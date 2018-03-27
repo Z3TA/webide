@@ -38,12 +38,15 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Speed and performance is a selling point for the editor, so we need to look into that!
-Worst performance hog is currently writing javascript in global scope within a large javascript file.
+3 windows are loaded in testWysywygEditor.js
 
+Make sure the WYSIWYG for the SSG works !!! Write tests!
 
 Thinking of reasons why it would not be a good idea to move web_preview and SSG functionality like CSS auto refresh into WysiwygEditor.js
 If we do not move the functionality into one place we'll end up re-implementing them in many places. For example detecting F5 and make a "controlled" reload of the preview window.
+
+Speed and performance is a selling point for the editor, so we need to look into that!
+Worst performance hog is currently writing javascript in global scope within a large javascript file.
 
 
 We should reuse error and console.log inlining from run_nodejs_script with the error and console.log inlining in web_preview!?
@@ -136,8 +139,10 @@ investigate build.js vs ssg-build.js
 What I'm thinking
 -----------------
 
+Storing state in "web_preview" so if you for example fill out a form, the data will still be there when the code is updated.
+Remve and re-add only the element that is being changed !? (instead of reloading the whole body)
 
-Give the user a in (in browser) virtual machine (that runs in the user's browser) !?!?
+Give the user a (in browser) virtual machine (that runs inside the user's browser) !?!?
 
 
 ---

@@ -13,12 +13,16 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	var sourcePage = "<html>\n<body>\n<p>main</p>\n</body>\n</html>\n"
 	var testFolder = "/testfolder/wysiwyg/";
 	var testFile = "page_compiled.htm";
-	var newWindow = EDITOR.createWindow();
+	var newWindow = EDITOR.createWindow({url: "about:blank"}, windowOpened);
 	
-	EDITOR.createPath(testFolder, function folderCreated(err, path) {
+	function windowOpened (err, theWindow) {
 		if(err) throw err;
-		EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
-	});
+		newWindow = theWindow;
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
+		});
+	}
 	
 	function fileCreated(err, filePath) {
 		var serveJson = {folder: testFolder};
@@ -88,12 +92,30 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 	
 	var testFolder = "/testfolder/wysiwyg/";
 	var testFile = "wysiwygRemoveLineReplaceLine.htm";
-	var newWindow = EDITOR.createWindow();
+	var newWindow;
+	var wysiwygEditorLoadedCalled = false;
 	
-	EDITOR.createPath(testFolder, function folderCreated(err, path) {
+	EDITOR.createWindow({url: "about:blank"}, windowOpened);
+	
+	setTimeout(function() {
+		if(!wysiwygEditorLoadedCalled) {
+			if(newWindow) newWindow.close();
+			throw new Error("wysiwygEditor did not load in a timely manner");
+		}
+	}, 1000);
+	
+	function windowOpened(err, theWindow) {
 		if(err) throw err;
-		EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
-	});
+		
+		if(!theWindow) throw new Error("theWindow=" + theWindow);
+		
+		newWindow = theWindow;
+		
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
+		});
+	}
 	
 	function fileCreated(err, filePath) {
 		var serveJson = {folder: testFolder};
@@ -123,13 +145,16 @@ compiledSource: compiledPage,
 bodyTagPreview: compliedSourceBodyTag
 				});
 				
-				function wysiwygEditorLoaded(err) {
+				function wysiwygEditorLoaded(err, sourceFile, previewWin) {
+					wysiwygEditorLoadedCalled = true;
 					if(err) throw err;
+					
+					if(!wysiwygEditor) throw new Error("wysiwygEditor=" + wysiwygEditor);
 					
 					if(wysiwygEditor.url != url) throw new Error("Expected wysiwygEditor.url=" + wysiwygEditor.url + " == " + "url=" + url);
 					
 					// Remove a line and change one line
-					var doc = newWindow.window.document;
+					var doc = previewWin.document;
 					var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 					
 					body.innerHTML = "<p>Paragraph</p>\n\n\<p>foo</p>";
@@ -146,7 +171,8 @@ bodyTagPreview: compliedSourceBodyTag
 					
 					EDITOR.closeFile(sourceFile.path);
 					callback(true);
-					newWindow.close();
+					newWindow.close(); // Should already be closed as WysiwygEditor had to reload it
+					previewWin.close();
 					cleanUp();
 					
 				}
@@ -160,4 +186,4 @@ bodyTagPreview: compliedSourceBodyTag
 	
 	
 	
-});
+}, 1);

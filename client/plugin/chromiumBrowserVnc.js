@@ -18,51 +18,39 @@
 	
 	function debugInBrowserVnc() {
 	
-		// When Chromium runs fullscreen inside a 800x600 screen
-		var width = 800; 
-		var height = 600;
-		var top = 1;
-		var left = 500;
 		
-		// Get rid of the black border (but prevent scrollbars)
-		width = 780;
-		height = 580;
-		
-		
-		// Need to create the window right away so it's registered to the event and not stopped (by popup stopper)
-		noVncWindow = EDITOR.createWindow({url: undefined, width: width, height: height, top: top, left: left});
-		
-		
-		var reqJson = {
-			url: "http://www.webtigerteam.com/johan/"
-		};
-		
-		CLIENT.cmd("debugInBrowserVnc", reqJson, function(err, respJson) {
-			if(err) {
-				alertBox("Error when running chromium-browser in vnc: " + err.message);
-			}
-			else {
-				
-				var vncChannel = respJson.vncChannel;
-				var vncPassword = respJson.vncPassword;
-				var vncHost = respJson.vncHost;
-				var vncPort = respJson.vncPort;
-				
-				var path = undefined;
-				
-				var loc = UTIL.getLocation(window.location.href);
-				
-				if(vncChannel) path = "/vnc/" + vncChannel;
-				else if(loc.protocol == "https") path = "/_vnc" + vncPort;
-				
-				//alertBox((path ? path : vncPort) + " pw=" + vncPassword);
-				
-				launchNoVnc(vncHost, vncPort, path, vncPassword);
-				
-			}
+			var reqJson = {
+				url: "http://www.webtigerteam.com/johan/"
+			};
+			
+			CLIENT.cmd("debugInBrowserVnc", reqJson, function(err, respJson) {
+				if(err) {
+					alertBox("Error when running chromium-browser in vnc: " + err.message);
+				}
+				else {
+					
+					var vncChannel = respJson.vncChannel;
+					var vncPassword = respJson.vncPassword;
+					var vncHost = respJson.vncHost;
+					var vncPort = respJson.vncPort;
+					
+					var path = undefined;
+					
+					var loc = UTIL.getLocation(window.location.href);
+					
+					if(vncChannel) path = "/vnc/" + vncChannel;
+					else if(loc.protocol == "https") path = "/_vnc" + vncPort;
+					
+					//alertBox((path ? path : vncPort) + " pw=" + vncPassword);
+					
+					
+					launchNoVnc(vncHost, vncPort, path, vncPassword);
+					
+				}
 		});
 		
 		return true;
+		
 	}
 	
 	
@@ -73,34 +61,26 @@
 		if(path) url = "/noVNC/vnc.html?path=" + encodeURIComponent(path) + "&password=" + encodeURIComponent(pw) + "&autoconnect=true";
 		else url = "/noVNC/vnc.html?host=" + host + "&port=" + port + "&password=" + encodeURIComponent(pw) + "&autoconnect=true"
 		
-		noVncWindow.location = url;
+		// When Chromium runs fullscreen inside a 800x600 screen
+		var width = 800;
+		var height = 600;
+		var top = 1;
+		var left = 500;
 		
-		var checksIfWinLoaded = 0;
-		var checkLoadedInterval = setInterval(winLoadedMaybe, 100);
-		var noVNC_control_bar_anchor;
+		// Get rid of the black border (but prevent scrollbars)
+		width = 780;
+		height = 580;
+		
+		EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 		
 		return false;
 		
-		function winLoadedMaybe() {
-			var maxTest = 10;
-			console.log("Have the noVNC window loaded yet ? Test " + checksIfWinLoaded + " of " + maxTest);
-			noVNC_control_bar_anchor = noVncWindow.document.getElementById("noVNC_control_bar_anchor");
+		function winLoaded(err, theWindow) {
+			if(err) return alertBox(err.message);
 			
-			if(noVNC_control_bar_anchor) {
-				clearInterval(checkLoadedInterval);
-				winLoaded();
-			}
-			else {
-				if(++checksIfWinLoaded > maxTest) {
-					clearInterval(checkLoadedInterval);
-					alertBox("It seems noVNC failed to load ... !?");
-				};
-			}
-		}
-		
-		function winLoaded() {
-			//alertBox("noVNC loaded!");
+			noVncWindow = theWindow;
 			
+			var noVNC_control_bar_anchor = noVncWindow.document.getElementById("noVNC_control_bar_anchor");
 			noVNC_control_bar_anchor.style.display="none"; // Not needed
 			noVncWindow.document.getElementById("noVNC_canvas").style.margin = "0px";
 			//noVncWindow.resizeTo(width, height);

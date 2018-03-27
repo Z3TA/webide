@@ -95,19 +95,6 @@ var WysiwygEditor;
 		
 		if(sourceFile.text.indexOf("<?JS") != -1) throw new Error("Source file contains dynamic script tags. Ignore/transform filter not yet implemented.");
 		
-		if(!newWindow) {
-			console.warn("Creating a new window ...");
-			
-			// We need to create the window right away to prevent it being blocked ...
-			newWindow = EDITOR.createWindow({url: url});
-			
-			if(!newWindow) {
-throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass it as the fourth parameter!")
-				// todo: show a confirm so that it can open without the popup stopper blocking it, when clicking on the confirm button
-			}
-		}
-		wysiwygEditor.previewWin = newWindow;
-		
 		wysiwygEditor.url = url;
 		wysiwygEditor.bodyTagSource = bodyTagSource || "body";
 		wysiwygEditor.bodyTagPreview = bodyTagPreview || "body";
@@ -202,24 +189,46 @@ throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass 
 		
 		wysiwygEditor.setStartRow();
 		
-		if(newWindow && newWindow.window.location.href != "about:blank") {
-			wysiwygEditor.attachTo(newWindow, firstLoad);
+		if(!newWindow) {
+			console.warn("Creating a new window newWindow=" + newWindow + "...");
+			
+			// We need to create the window right away to prevent it being blocked ...
+			newWindow = EDITOR.createWindow({url: url}, windowCreated);
 		}
-		else {
-			//throw new Error("The window needs to have an actual URL! newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href)
-			console.warn("window has no url! newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href);
+		else windowCreated(null);
+		
+		function windowCreated(err) {
+			console.log("wysiwygEditor windowCreated!");
+			if(err) throw err;
 			
-			if(wysiwygEditor.url) {
-				console.log("Attempting reload of url=" + wysiwygEditor + " ...");
-				wysiwygEditor.reload(firstLoad);
+			wysiwygEditor.previewWin = newWindow;
+			
+			if(newWindow && newWindow.window.location.href != "about:blank") {
+				wysiwygEditor.attachTo(newWindow, firstLoad);
 			}
-			else throw new Error("url=" + url + " newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href);
-			
+			else {
+				//throw new Error("The window needs to have an actual URL! newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href)
+				console.warn("window has no url! newWindow=" + newWindow + " newWindow.window.location.href=" + (newWindow && newWindow.window && newWindow.window.location.href));
+				
+				if(wysiwygEditor.url) {
+					console.log("Attempting reload of url=" + wysiwygEditor + " ...");
+					wysiwygEditor.reload(firstLoad);
+				}
+				else throw new Error("url=" + url + " newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href);
+				
+			}
 		}
 		
 		function firstLoad(err) {
+			
+			console.log("wysiwygEditor firstLoad!"); // why is it never called !?
+			
 			if(err) {
-				if(whenLoaded) return whenLoaded(err);
+				if(wysiwygEditor.whenLoaded) {
+					wysiwygEditor.whenLoaded(err);
+					wysiwygEditor.whenLoaded = null;
+					return;
+				}
 				else throw err;
 			}
 			
@@ -229,9 +238,18 @@ throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass 
 			
 			if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
 			
-			if(wysiwygEditor.whenLoaded) wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
-			wysiwygEditor.whenLoaded = null;
-			
+			if(wysiwygEditor.whenLoaded) {
+				/*
+					When calling whenLoaded the constructor might not have returned the new WysiwygEditor object!!
+					So make sure it's async.
+				*/
+				setTimeout(function makeitAsync() {
+					if(!wysiwygEditor.whenLoaded) return console.warn("wysiwygEditor.whenLoaded has gone away!");
+					
+				wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
+					wysiwygEditor.whenLoaded = null;
+				}, 1);
+				}
 		}
 	}
 	
@@ -906,7 +924,9 @@ throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass 
 				// Remove the text on the line, but do not remove the line (yet)
 				row = diff.removed[i].row + startRow;
 				
-				if(row >= sourceFile.grid.length) throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.length + " diff.removed=" + JSON.stringify(diff.removed, null, 2));
+				if(row >= sourceFile.grid.length) {
+throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.length + " diff.removed=" + JSON.stringify(diff.removed, null, 2));
+				}
 				
 				if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
 					
@@ -915,16 +935,24 @@ throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass 
 					
 					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 					
-					console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
-					console.log("remove=" + diff.removed[i].text.trim());
-					console.log("srcHTML=" + UTIL.lbChars(srcHTML))
-					console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
-					console.log("diff=" + JSON.stringify(diff, null, 2));
-					console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
-					
-					throw new Error("Text on row=" + row + " doesn't match text to be removed! (see console log)");
-					
-				}
+					var rowsPrewBodyHtml = prewBodyHtml.split(/\n|\r\n/);
+					console.log("prewBodyHtml:");
+					for(var j = 0; j<rowsPrewBodyHtml.length; j++) console.log(j + ": " + rowsPrewBodyHtml[j]);
+					console.log("sourceFile:");
+						for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+						
+						console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
+						console.log("remove=" + diff.removed[i].text.trim());
+						console.log("srcHTML=" + UTIL.lbChars(srcHTML))
+						console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+						console.log("diff=" + JSON.stringify(diff, null, 2));
+						console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+						
+						
+						
+						throw new Error("Text on row=" + row + " doesn't match text to be removed! (see console log)");
+						
+					}
 				
 				removedText = sourceFile.removeAllTextOnRow(row);
 				
@@ -1207,6 +1235,8 @@ throw new Error("The new window was blocked! Use EDITOR.createWindow() and pass 
 	}
 	
 	WysiwygEditor.prototype.reload = function reload(reloadCallback) {
+		console.log("WysiwygEditor reload!");
+		
 		var wysiwygEditor = this;
 		
 		/*
@@ -1233,18 +1263,20 @@ throw new Error("Can not reload a second time if the source code have been compi
 		// We don't want to use wysiwygEditor.previewWin.location = wysiwygEditor.previewWin.location.href redirect.
 		// Because it would not be possible to capture early events as there is no way to add event listeners to it until it has loaded!
 		
-		wysiwygEditor.previewWin.close();
+		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 		
 		EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
 		
 		function windowCreated(err, newWindow) {
-		
+			console.log("WysiwygEditor reload windowCreated!");
+			
 if(err) {
 				if(reloadCallback) return reloadCallback(err);
 else throw err;
 			}
 			
 			wysiwygEditor.attachTo(newWindow, function attached(err) {
+				console.log("WysiwygEditor reload attached!");
 			if(err) {
 				if(reloadCallback) return reloadCallback(err);
 				else throw err;
@@ -1263,6 +1295,7 @@ else throw err;
 	}
 	
 	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback) {
+		console.log("WysiwygEditor attachTo!");
 		
 		if(typeof callback != "function") throw new Error("callback=" + callback);
 		
@@ -1277,13 +1310,15 @@ else throw err;
 		
 		console.log("readyState=" + previewWin.document.readyState);
 		
-		if(previewWin.document.readyState == "complete") attachEvents();
+		if(previewWin.loaded) attachEvents();
 		else previewWin.addEventListener("load", function windowLoaded() {
 			 attachEvents();
 		});
 		
 		function attachEvents() {
 		
+			if(!previewWin.loaded) throw new Error("The preview window has not loaded!");
+			
 			var doc = previewWin.document;
 		var win = previewWin.window;
 		
@@ -1419,6 +1454,8 @@ else throw err;
 			prewBodyHtml = wysiwygEditor.getContentEditableCode();
 			console.log("(after sanitation) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 		}
+		
+		var sourceFile = wysiwygEditor.sourceFile;
 		
 		// Use the contenteditable line break convention in the source file to make life easier
 		if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {

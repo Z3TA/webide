@@ -25,37 +25,14 @@
 		var top = 1;
 		var left = 500;
 		
-		var win = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left});
-		
-		// Why doesn't it load automatically !?
-		win.location = url;
-		
-		var checksIfWinLoaded = 0;
-		var checkLoadedInterval = setInterval(winLoadedMaybe, 100);
-		var noVNC_control_bar_anchor;
+		EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 		
 		return false;
 		
-		function winLoadedMaybe() {
-			var maxTest = 10;
-			console.log("Have the noVNC window loaded yet ? Test " + checksIfWinLoaded + " of " + maxTest);
-			noVNC_control_bar_anchor = win.document.getElementById("noVNC_control_bar_anchor");
+		function winLoaded(err, win) {
+			if(err) return alertBox(err.message);
 			
-			if(noVNC_control_bar_anchor) {
-				clearInterval(checkLoadedInterval);
-				winLoaded();
-			}
-			else {
-				if(++checksIfWinLoaded > maxTest) {
-					clearInterval(checkLoadedInterval);
-					alertBox("It seems noVNC failed to load ... !?");
-				};
-			}
-		}
-		
-		function winLoaded() {
-			//alertBox("noVNC loaded!");
-			
+			var noVNC_control_bar_anchor = win.document.getElementById("noVNC_control_bar_anchor");
 			noVNC_control_bar_anchor.style.display="none"; // Not needed
 			win.document.getElementById("noVNC_canvas").style.margin = "0px";
 			//win.resizeTo(width, height);
