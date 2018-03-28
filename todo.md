@@ -38,7 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-hg log selecting wrong change!
+in wysiwyg input sometimes run twice on the same input!!
 
 3 windows are loaded in testWysywygEditor.js
 

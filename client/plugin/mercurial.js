@@ -1765,8 +1765,12 @@
 		CLIENT.cmd("mercurial.log", {directory: directory}, function resolveList(err, changes) {
 			if(err) throw err;
 			
-			console.log("mercurial.log changes:");
-			console.log(changes);
+			//console.log("mercurial.log changes:");
+			//console.log(changes);
+			
+			changes.sort(function sortChanges(a, b) {
+				return b.rev - a.rev;
+			});
 			
 			var reEmail = /<(.*)>/;
 			
