@@ -1934,8 +1934,9 @@ else throw err;
 				bodyTagSource: "body",
 				sourceFile: file
 			};
-			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
+			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
 			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
 			
 			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
@@ -1955,8 +1956,9 @@ else throw err;
 				bodyTagSource: "body",
 				sourceFile: file
 			};
-			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
+			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
 			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
 			
 			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
@@ -1976,8 +1978,9 @@ else throw err;
 				bodyTagSource: "body",
 				sourceFile: file
 			};
-			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
+			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
 			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
 			
 			EDITOR.closeFile(file.path);
@@ -2002,10 +2005,12 @@ else throw err;
 				bodyTagSource: "body",
 				sourceFile: file
 			};
+			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
 			var source = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
-			
 			console.log("source=" + UTIL.lbChars(source));
+			
+			// Throw !?!?!
 			
 			EDITOR.closeFile(file.path);
 			
