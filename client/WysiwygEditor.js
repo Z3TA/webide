@@ -267,6 +267,24 @@ var WysiwygEditor;
 		console.log("srcStartIndex=" + srcStartIndex + " srcMatchBody.index=" + srcMatchBody.index + " srcMatchBody[0].length=" + srcMatchBody[0].length + " srcMatchBody[0]=" + srcMatchBody[0]);
 		var tmpCaret = sourceFile.createCaret(srcStartIndex);
 		wysiwygEditor.startRow = tmpCaret.row;
+		
+		if(EDITOR.settings.devMode) {
+		console.log("Set wysiwygEditor.startRow=" + wysiwygEditor.startRow + " in source:");
+		for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+			
+			var srcBodyRows = wysiwygEditor.getSourceCodeBody().split(/\n|\r\n/);
+			console.log("source body html:");
+			for (var j=0; j<srcBodyRows.length; j++) console.log(j + ": " + srcBodyRows[j]);
+			
+			// Sanity check
+			for (var i=0; i<srcBodyRows.length; i++) {
+				if(srcBodyRows[i] != sourceFile.rowText(wysiwygEditor.startRow + i)) {
+throw new Error("source body (i=" + i + ") does not match on row wysiwygEditor.startRow=" + wysiwygEditor.startRow + " + i=" + i + " = " + (wysiwygEditor.startRow + i));
+				}
+			}
+			}
+		
+		
 	}
 	
 	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {
@@ -785,7 +803,7 @@ var WysiwygEditor;
 		// Called every time the contenteditable is updated
 		// If nothing happends, check the debug/console for the wysiwyg window! (set "toolbar": true, in package.json)
 		
-		console.log("previewInput!");
+		console.warn("previewInput!");
 		
 		
 		previewInputFired = true;
@@ -872,6 +890,8 @@ var WysiwygEditor;
 			var ignored = 0;
 			if(!ignoreTransform) console.log("Nothing in ignoreTransform");
 			else {
+				console.log("ignoreTransform:");
+				console.log(ignoreTransform);
 				if(ignoreTransform.inserted.length > 0) {
 					for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
 						for(var j=0; j<diff.inserted.length; j++) {
@@ -917,6 +937,13 @@ var WysiwygEditor;
 			console.log("diff.removed=" + JSON.stringify(diff.removed, null, 2));
 			console.log("diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 			
+			//console.log("source:" + UTIL.lbChars(wysiwygEditor.sourceFile.text));
+			console.log("srcHTML: " + UTIL.lbChars(srcHTML));
+			console.log("prewBodyHtml: " + UTIL.lbChars(prewBodyHtml));
+			
+			console.log("source before:");
+			for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+			
 			// Apply the transformation to the source code ...
 			var removedText = "";
 			for(var i=0; i<diff.removed.length; i++) {
@@ -943,8 +970,9 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 						
 						console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
 						console.log("remove=" + diff.removed[i].text.trim());
-						console.log("srcHTML=" + UTIL.lbChars(srcHTML))
-						console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+					console.log("source code body before:" + UTIL.lbChars(srcHTML));
+					console.log("source code body after:" + wysiwygEditor.getSourceCodeBody());
+					console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
 						console.log("diff=" + JSON.stringify(diff, null, 2));
 						console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 						
@@ -1025,6 +1053,12 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 				text = sourceFile.removeRow(row);
 				console.log("Removed row=" + row + " text=" + text);
 			}
+			
+			//console.log("source after:" + UTIL.lbChars(wysiwygEditor.sourceFile.text));
+			console.log("source after:");
+			for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+			
+			console.log("source code body after:" + UTIL.lbChars(wysiwygEditor.getSourceCodeBody()));
 			
 			// after the transformation: Update what should be ignored again ? Nope
 			
@@ -1420,6 +1454,8 @@ else throw err;
 		
 		var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
 		
+		console.log("srcHtmlBeforeDance=" + UTIL.lbChars(srcHtmlBeforeDance));
+		
 		var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 		
 		if(bodyTags.length === 0) {
@@ -1456,36 +1492,37 @@ else throw err;
 		}
 		
 		var sourceFile = wysiwygEditor.sourceFile;
+		var allSourceHtml = sourceFile.text;
 		
 		// Use the contenteditable line break convention in the source file to make life easier
 		if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
 			var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
-			html = html.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
-			console.log("Replaced line breaks in source code: html=" + UTIL.lbChars(html));
+			allSourceHtml = allSourceHtml.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
+			console.log("Replaced line breaks in source code: allSourceHtml=" + UTIL.lbChars(allSourceHtml));
 		}
 		
 		// Replace the the content of the body element with the content-editable code
-		html = changeCodeInBody(prewBodyHtml, html, wysiwygEditor.bodyTagSource);
+		allSourceHtml = changeCodeInBody(prewBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource);
 		
-		console.log("(after setting) html=" + UTIL.lbChars(html));
+		console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
 		
-		sourceFile.reload(html);
+		sourceFile.reload(allSourceHtml);
 		
 		// Finally make the body of the source file the body of the content-editable
-		var srcHTML = wysiwygEditor.getSourceCodeBody();
-		setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
+		var sourceBody = wysiwygEditor.getSourceCodeBody();
+		setContentEditableBody(body, sourceBody, wysiwygEditor.lineBreak);
 		
 		
 		// The source code and content-editable should now have the same line breaks!
 		
-		console.log("(after) srcHTML=" + UTIL.lbChars(srcHTML));
+		console.log("(after) sourceBody=" + UTIL.lbChars(sourceBody));
 		
 		// The source code and content editable code should now be the same!
-		if(wysiwygEditor.getContentEditableCode() != srcHTML) {
+		if(wysiwygEditor.getContentEditableCode() != sourceBody) {
 			throw new Error("Source code does not match!\n \
 			wysiwygEditor.getContentEditableCode()=" + UTIL.lbChars(wysiwygEditor.getContentEditableCode()) + "\n\n\
-			srcHTML=" + UTIL.lbChars(srcHTML) + "\n\n\
-			diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), srcHTML, null, 2)));
+			sourceBody=" + UTIL.lbChars(sourceBody) + "\n\n\
+			diff=" + JSON.stringify(UTIL.textDiff(wysiwygEditor.getContentEditableCode(), sourceBody, null, 2)));
 		}
 		
 		sourceFile.checkGrid();
@@ -1493,12 +1530,12 @@ else throw err;
 		// Problem: The source code and a "compiled" page might diff a lot
 		// Solution: .... ???
 		
-		var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, srcHTML);
+		var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, sourceBody);
 		console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
 		
 		// It's ok to add new lines, but not OK to add new content
 		
-		// Only index and xml pages can contain server code! So we do not need to worry about that
+		// Only index and xml pages can contain SSG server code! So we do not need to worry about that
 		
 		wysiwygEditor.ignoreSourceFileChange = false;
 		
@@ -1900,6 +1937,31 @@ else throw err;
 			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
 			
 			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
+			
+			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
+			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
+			if(sourceBodyHtmlRows.length != 2) throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 2");
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+		});
+	}, 1);
+	
+	EDITOR.addTest(function testStartRowNN(callback) {
+		var html = '<html><body>\n\nHello\nWorld\n</body></html>';
+		EDITOR.openFile("wysiwygEditorTestStartRowN.htm", html, function(err, file) {
+			var wysiwygEditor = {
+				lineBreak: "\n",
+				bodyTagSource: "body",
+				sourceFile: file
+			};
+			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+			
+			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
+			
+			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
+			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
+			if(sourceBodyHtmlRows.length != 3) throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 3");
 			
 			EDITOR.closeFile(file.path);
 			callback(true);

@@ -155,9 +155,9 @@ bodyTagPreview: compliedSourceBodyTag
 					
 					// Remove a line and change one line
 					var doc = previewWin.document;
-					var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+					var contentElement = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 					
-					body.innerHTML = "<p>Paragraph</p>\n\n\<p>foo</p>";
+					contentElement.innerHTML = "<p>Paragraph</p>\n\n\<p>foo</p>";
 					
 					// Trigger oninput
 					wysiwygEditor.previewInput();
@@ -186,4 +186,4 @@ bodyTagPreview: compliedSourceBodyTag
 	
 	
 	
-}, 1);
+}, 2);
