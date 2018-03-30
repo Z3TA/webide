@@ -1928,7 +1928,11 @@ else throw err;
 			throw new Error("Can not find bodyTag=" + bodyTag + " with line breaks!");
 		}
 		
-		var bodyHtml = srcMatchBody[1];
+		if(srcMatchBody.length != 3) throw new Error("Unexpeced match: srcMatchBody=" + JSON.stringify(srcMatchBody));
+		
+		var bodyHtml = srcMatchBody[2];
+		console.log("srcMatchBody=" + JSON.stringify(srcMatchBody));
+		
 		
 		//bodyHtml = removeHeadWhiteSpace(bodyHtml, lineBreak);
 		//bodyHtml = removeTailWhiteSpace(bodyHtml, lineBreak);
@@ -1944,7 +1948,15 @@ else throw err;
 		console.log("Returning regexp for bodyTag=" + bodyTag);
 		
 		//return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
-		return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*[\\n|\\r\\n]([\\s\\S]*)[\\n|\\r\\n][\\t ]*<\\/" + bodyTag + ">", "i");
+		return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*(\\n|\\r\\n)([\\s\\S]*)(\\n|\\r\\n)[\\t ]*<\\/" + bodyTag + ">", "i");
+		
+		/*
+			* = Matches the preceding expression 0 or more times
+			
+			
+			
+		*/
+		
 	}
 	
 	
@@ -2011,7 +2023,7 @@ else throw err;
 			EDITOR.closeFile(file.path);
 			callback(true);
 		});
-	});
+	}, 1);
 	
 	
 	EDITOR.addTest(function testWysiwygEditorDontBreakLineBreaks(callback) {

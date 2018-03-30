@@ -38,6 +38,16 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Debugging regexp ... regexBody
+
+How do I get it to not split up the last \r\n !?
+
+var str = "abcdeab";
+var re = /(ab|b)(.*)(ab|b)/;
+str.match(re);
+[ 'abcdeab', 'ab', 'cdea', 'b', index: 0, input: 'abcdeab' ]
+
+
 fixing bug in WysiwygEditor.prototype.setStartRow
 write tests!
 
