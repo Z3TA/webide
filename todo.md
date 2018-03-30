@@ -185,6 +185,21 @@ investigate build.js vs ssg-build.js
 What I'm thinking
 -----------------
 
+A more modular Preivew/Wysiwyg so you can add new features as plugins !?
+
+Examples:
+
+Updating the css of a file in preview when a css file in it is updated: Belong to core !?
+Searching the window object on auto-complete: 
+
+Add preview as a file object/property !? if(file.preview) ... file.preview.window
+
+---
+
+Users want to control who has access to their web sites! Look up user control systems!
+
+---
+
 Storing state in "web_preview" so if you for example fill out a form, the data will still be there when the code is updated.
 Remve and re-add only the element that is being changed !? (instead of reloading the whole body)
 
@@ -2239,6 +2254,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+User management. User roles and directories. Able to specify which URL's (web directories) can be accessed by which users/roles.
+Assign users to roles. Add and modify users. Automatically create .htaccess files and manage Nginx configs.
 
 A separate window for HTML widgets and control. 
 VB-like drag and drop headers et.al elements into either the code-area or WYSIWYG area.

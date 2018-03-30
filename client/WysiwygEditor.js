@@ -103,33 +103,38 @@ var WysiwygEditor;
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
-		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(sourceFile.text); // lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
+		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(sourceFile.text); 
+		// lineBreak convention will change once the WYSIWYG editor has danced / reloaded !
 		
 		wysiwygEditor.isCompiled = false;
 		
 		wysiwygEditor.onErrorEvent = options.onErrorEvent;
 		
+		
 		if(compiledSource) {
-			
+/*
+				If the source code has been "compiled". For example in case of the built in Static Site Generator (SSG) the 
+				content of the body element is now in the main element. And header and footer have been added to the body element.
+			*/
 			wysiwygEditor.isCompiled = true;
 			
 			var srcHTML = wysiwygEditor.getSourceCodeBody();
-			var rawMainHtml = getSourceCodeBody(compiledSource, wysiwygEditor.bodyTagPreview);
-			
 			var lbSrc = UTIL.determineLineBreakCharacters(srcHTML);
+			var rawMainHtml = getElementContent(compiledSource, wysiwygEditor.bodyTagPreview, lbSrc);
 			var lbMain = UTIL.determineLineBreakCharacters(rawMainHtml);
 			
+			// Sanity check
 			if(wysiwygEditor.lineBreak != lbSrc) throw new Error("lbSrc=" + UTIL.lbChars(lbSrc) + " wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
 			
-			
-			var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
-			var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
-			
+			/*
+				
+				Optimally we want to support stuff being different inside the main content. For example removed script tags.
+				But it has not yet been implemented. Is it even possible !? 
+				
+			*/
 			wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 			
 			// Make sure there are no errors
-			
-			
 			
 			var lbCountSrc = UTIL.occurrences(srcHTML, lbSrc);
 			var lbCountMain = UTIL.occurrences(rawMainHtml, lbMain);
@@ -138,6 +143,9 @@ var WysiwygEditor;
 			var inserted = wysiwygEditor.ignoreTransform.inserted.length;
 			
 			if( (lbCountSrc - removed) != (lbCountMain - inserted) ) {
+				var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
+				var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
+				
 				console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
 				console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
 				
@@ -152,6 +160,8 @@ var WysiwygEditor;
 			
 			wysiwygEditor.setStartRow();
 			
+			
+			// Because "ignoreTransform" is not yet supported:
 			
 			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
 				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
@@ -173,10 +183,9 @@ var WysiwygEditor;
 				alertBox(msg);
 				return wysiwygEditor.close();
 			}
-			
-			
 		}
-		else wysiwygEditor.ignoreTransform = null;
+		else wysiwygEditor.ignoreTransform = null; // Not compiled
+		
 		
 		wysiwygEditorCounter++;
 		
@@ -186,6 +195,19 @@ var WysiwygEditor;
 			wysiwygEditor.close();
 			return;
 		}
+		
+		// Sanity check
+		// Note that line breaks are always added as padding around the source!
+		var theSource = wysiwygEditor.getSourceCodeBody();
+		console.log("theSource=" + UTIL.lbChars(theSource));
+		console.log("sourceFile.text=" + UTIL.lbChars(sourceFile.text));
+		if(sourceFile.text.indexOf(theSource) == -1) {
+			throw new Error("The source's body element can't be found in the source file!");
+		}
+		
+		/*
+			Problem: wysiwygEditor.getSourceCodeBody() trims all white space and then ads one line padding
+			*/
 		
 		wysiwygEditor.setStartRow();
 		
@@ -269,23 +291,32 @@ var WysiwygEditor;
 		wysiwygEditor.startRow = tmpCaret.row;
 		
 		if(EDITOR.settings.devMode) {
-		console.log("Set wysiwygEditor.startRow=" + wysiwygEditor.startRow + " in source:");
-		for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 			
-			var srcBodyRows = wysiwygEditor.getSourceCodeBody().split(/\n|\r\n/);
-			console.log("source body html:");
-			for (var j=0; j<srcBodyRows.length; j++) console.log(j + ": " + srcBodyRows[j]);
+			var sourceCodeBody = wysiwygEditor.getSourceCodeBody();
+			
+			var srcBodyRows = sourceCodeBody.split(/\n|\r\n/);
 			
 			// Sanity check
-			for (var i=0; i<srcBodyRows.length; i++) {
-				if(srcBodyRows[i] != sourceFile.rowText(wysiwygEditor.startRow + i)) {
-throw new Error("source body (i=" + i + ") does not match on row wysiwygEditor.startRow=" + wysiwygEditor.startRow + " + i=" + i + " = " + (wysiwygEditor.startRow + i));
+			for (var row=0, rowText=""; row<srcBodyRows.length; row++) {
+				rowText = sourceFile.rowText(wysiwygEditor.startRow + row)
+				if(srcBodyRows[row] != rowText) {
+					
+					console.log("Problem with setting wysiwygEditor.startRow=" + wysiwygEditor.startRow + " in source:");
+					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+					
+					console.log("sourceCodeBody=" + UTIL.lbChars(sourceCodeBody));
+					
+					console.log("source body html:");
+					for (var j=0; j<srcBodyRows.length; j++) console.log(j + ": " + srcBodyRows[j]);
+					
+					console.log("rowText: " + rowText);
+					console.log("srcBodyRows[" + row + "]: " + srcBodyRows[row]);
+					throw new Error("Source's body (row=" + row + " of body element) does not match row=" + (wysiwygEditor.startRow + row) + 
+					" (wysiwygEditor.startRow=" + wysiwygEditor.startRow + " + row=" + row + " = " + (wysiwygEditor.startRow + row) + " of the source");
 				}
 			}
 			}
-		
-		
-	}
+		}
 	
 	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {
 		var wysiwygEditor = this;
@@ -556,8 +587,8 @@ throw new Error("source body (i=" + i + ") does not match on row wysiwygEditor.s
 		var srcHTML = wysiwygEditor.getSourceCodeBody();
 		
 		// Can not change the file in a fileChange event or it would create an endless loop
-		// Witch means we can not sanitize on source code changes,
-		// witch also means we can not sanitize on content-editable changes!
+		// Which means we can not sanitize on source code changes,
+		// which also means we can not sanitize on content-editable changes!
 		
 		setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
 		
@@ -1151,10 +1182,21 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		
 		var prewHTML = body.innerHTML;
 		
+		/*
+			Problem: body.innerHTML returns all text inside the element including first line break and indentation characters
+			while getElementBody and regexBody ignores the line breaks after <body> and before </body>
+			
+			Hmm, that shouldn't metter. Do browsers add extra line breaks !?
+			
+			return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
+		*/
+		
+		//var reBody = /^\s*[\n|\r\n]?([\s\S]*)[\n|\r\n]?\s*/
+		
 		//prewHTML = removeHeadLineBreak(prewHTML);
 		
-		prewHTML = removeHeadWhiteSpaceAndAddLineBreak(prewHTML, wysiwygEditor.lineBreak);
-		prewHTML = removeTailWhiteSpaceAndAddLineBreak(prewHTML, wysiwygEditor.lineBreak);
+		//prewHTML = removeHeadWhiteSpace(prewHTML, wysiwygEditor.lineBreak);
+		//prewHTML = removeTailWhiteSpace(prewHTML, wysiwygEditor.lineBreak);
 		
 		
 		return prewHTML;	
@@ -1200,35 +1242,11 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		
 	}
 	
-	WysiwygEditor.prototype.getSourceCodeBody = function getSourceCodeBody(sourceFile) {
-		// Returns the body of the source HTML code
-		
-		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
-		// so there needs to be a line-break after <body> and before </body>
-		
+	WysiwygEditor.prototype.getSourceCodeBody = function getSourceCodeBody() {
 		
 		var wysiwygEditor = this;
 		
-		var sourceFile = wysiwygEditor.sourceFile;
-		
-		var srcMatchBody = sourceFile.text.match(regexBody(wysiwygEditor.bodyTagSource));
-		
-		var srcHTML;
-		
-		if(srcMatchBody == null) {
-			//alertBox("Can not find body-tags with line breaks!");
-			
-			// just warn, then stop where getSourceCodeBody() is called, and try to fix the problem !?
-			
-			console.log("sourceFile.text=" + UTIL.lbChars(sourceFile.text));
-			throw new Error("Could not find wysiwygEditor.bodyTagSource=" + wysiwygEditor.bodyTagSource + " element in source file:\n" + sourceFile.path + "");
-		}
-		
-		srcHTML = srcMatchBody[1];
-		
-		srcHTML = removeHeadWhiteSpaceAndAddLineBreak(srcHTML, wysiwygEditor.lineBreak);
-		srcHTML = removeTailWhiteSpaceAndAddLineBreak(srcHTML, wysiwygEditor.lineBreak);
-		
+		var srcHTML = getElementContent(wysiwygEditor.sourceFile.text, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak)
 		
 		return srcHTML;
 		
@@ -1634,8 +1652,7 @@ else throw err;
 		// The white space before </body> is preserved to keep source file indentation characters
 		
 		// Sanity check!
-		if(html.match(regCheck) === null) throw new Error("We are not sane!\n\
-		html=" + UTIL.lbChars(html));
+		if(html.match(regCheck) === null) throw new Error("We are not sane!\n html=" + UTIL.lbChars(html));
 		
 		return html;
 	}
@@ -1654,6 +1671,15 @@ else throw err;
 	}
 	
 	
+	function removeHeadWhiteSpace(text, LB) {
+		if(!LB) throw new Error("Need to specify line-break character to use! LB=" + LB)
+		return text.replace(/^\s*/, LB);
+	}
+	
+	function removeTailWhiteSpace(text, LB) {
+		if(!LB) throw new Error("Need to specify line-break character to use! LB=" + LB)
+		return text.replace(/\s*$/, LB);
+	}
 	
 	function removeHeadWhiteSpaceAndAddLineBreak(text, LB) {
 		if(!LB) throw new Error("Need to specify line-break character to use! LB=" + LB)
@@ -1736,7 +1762,7 @@ else throw err;
 	}
 	
 	EDITOR.addTest(function testInsertLineBreaks(callback) {
-		// bug: Adding a space in the content-editable moves it cursor to the top
+		// bug: Adding a space in the content-editable moved it's cursor to the top
 		var str1 = "\n<p>abc <br></p>\n";
 		
 		var str2 = insertLineBreaks(str1, "\n");
@@ -1883,7 +1909,7 @@ else throw err;
 		
 	}
 	
-	function getSourceCodeBody(fileText, bodyTag, lineBreak) {
+	function getElementContent(fileText, bodyTag, lineBreak) {
 		
 		if(fileText == undefined) throw new Error("Need fileText");
 		if(bodyTag == undefined) {
@@ -1904,22 +1930,21 @@ else throw err;
 		
 		var bodyHtml = srcMatchBody[1];
 		
-		bodyHtml = removeHeadWhiteSpaceAndAddLineBreak(bodyHtml, lineBreak);
-		bodyHtml = removeTailWhiteSpaceAndAddLineBreak(bodyHtml, lineBreak);
+		//bodyHtml = removeHeadWhiteSpace(bodyHtml, lineBreak);
+		//bodyHtml = removeTailWhiteSpace(bodyHtml, lineBreak);
 		
 		return bodyHtml;
 		
 	}
 	
 	function regexBody(bodyTag) {
-		//var body = /<body[^>]*>\s*[\n|\r\n]([\s\S]*)[\n|\r\n]\s*<\/body>/i;
 		
 		if(bodyTag == undefined) throw new Error("No bodyTag=" + bodyTag + " defined!")
 		
 		console.log("Returning regexp for bodyTag=" + bodyTag);
 		
-		return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
-		
+		//return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
+		return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*[\\n|\\r\\n]([\\s\\S]*)[\\n|\\r\\n][\\t ]*<\\/" + bodyTag + ">", "i");
 	}
 	
 	
@@ -1927,7 +1952,7 @@ else throw err;
 	
 	
 	EDITOR.addTest(function testStartRowN(callback) {
-		var html = '<html><body>\nHello\nWorld\n</body></html>';
+		var html = '<html>\n<body>\nHello\nWorld\n</body>\n</html>';
 		EDITOR.openFile("wysiwygEditorTestStartRowN.htm", html, function(err, file) {
 			var wysiwygEditor = {
 				lineBreak: "\n",
@@ -1937,7 +1962,7 @@ else throw err;
 			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
 			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
-			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
+			if(wysiwygEditor.startRow != 2) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 2");
 			
 			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
 			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
@@ -1946,10 +1971,10 @@ else throw err;
 			EDITOR.closeFile(file.path);
 			callback(true);
 		});
-	}, 1);
+	});
 	
 	EDITOR.addTest(function testStartRowNN(callback) {
-		var html = '<html><body>\n\nHello\nWorld\n</body></html>';
+		var html = '<html>\n<body>\n\nHello\nWorld\n\n</body>\n</html>';
 		EDITOR.openFile("wysiwygEditorTestStartRowN.htm", html, function(err, file) {
 			var wysiwygEditor = {
 				lineBreak: "\n",
@@ -1959,11 +1984,11 @@ else throw err;
 			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
 			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
-			if(wysiwygEditor.startRow != 1) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 1");
+			if(wysiwygEditor.startRow != 2) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 2");
 			
 			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
 			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
-			if(sourceBodyHtmlRows.length != 3) throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 3");
+			if(sourceBodyHtmlRows.length != 4) throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 4");
 			
 			EDITOR.closeFile(file.path);
 			callback(true);

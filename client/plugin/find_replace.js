@@ -422,7 +422,13 @@
 			
 			if(ignoreCase) flags += "i";
 			
+			try {
 			var re = new RegExp(str, flags);
+			}
+			catch(err) {
+				if(err) return alertBox(err.message);
+			}
+			
 			var result;
 			
 			if(direction=="left") {

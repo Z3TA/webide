@@ -61,9 +61,9 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 					if(html.indexOf("footer") == -1) throw new Error("preview/wysiwyg window doesn't contain footer!");
 					
 					EDITOR.closeFile(sourceFile.path);
-					callback(true);
-					newWindow.close();
+					wysiwygEditor.close();
 					cleanUp();
+					callback(true);
 					
 				}
 				
@@ -102,7 +102,7 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 			if(newWindow) newWindow.close();
 			throw new Error("wysiwygEditor did not load in a timely manner");
 		}
-	}, 1000);
+	}, 2000);
 	
 	function windowOpened(err, theWindow) {
 		if(err) throw err;
