@@ -1941,8 +1941,8 @@ else throw err;
 		
 	}
 	
-	function regexBody(bodyTag) {
-		
+	function regexBody(bodyTag, lineBreak) {
+		// todo: if(lineBreak == "\n" else if(lineBreak == "\r\n")
 		if(bodyTag == undefined) throw new Error("No bodyTag=" + bodyTag + " defined!")
 		
 		console.log("Returning regexp for bodyTag=" + bodyTag);

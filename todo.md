@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+work around the problem using if to avoid (\n|\r\n)
+
 Debugging regexp ... regexBody
 
 How do I get it to not split up the last \r\n !?
