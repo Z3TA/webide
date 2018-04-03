@@ -1520,7 +1520,7 @@ else throw err;
 		}
 		
 		// Replace the the content of the body element with the content-editable code
-		allSourceHtml = changeCodeInBody(prewBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource);
+		allSourceHtml = changeCodeInBody(prewBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak);
 		
 		console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
 		
@@ -1628,12 +1628,12 @@ else throw err;
 	}
 	
 	
-	function changeCodeInBody(newBodyCode, html, bodyTag) {
+	function changeCodeInBody(newBodyCode, html, bodyTag, lineBreak) {
 		
 		// There need to be a line break directly after <body> and before </body> !
 		// This is to prevent having the body tags included in text diff
 		
-		var regCheck = regexBody(bodyTag);
+		var regCheck = regexBody(bodyTag, lineBreak);
 		
 		if(html.match(regCheck) === null) throw new Error("Unable to find bodyTag=" + bodyTag + " element when setting the code body.\n\
 		html=" + UTIL.lbChars(html));
@@ -1921,16 +1921,16 @@ else throw err;
 		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
 		// so there needs to be a line-break after <body> and before </body>
 		
-		var srcMatchBody = fileText.match(regexBody(bodyTag));
+		var srcMatchBody = fileText.match(regexBody(bodyTag, lineBreak));
 		
 		if(srcMatchBody == null) {
 			console.log(fileText);
 			throw new Error("Can not find bodyTag=" + bodyTag + " with line breaks!");
 		}
 		
-		if(srcMatchBody.length != 3) throw new Error("Unexpeced match: srcMatchBody=" + JSON.stringify(srcMatchBody));
+		if(srcMatchBody.length != 2) throw new Error("Unexpeced match: srcMatchBody=" + JSON.stringify(srcMatchBody));
 		
-		var bodyHtml = srcMatchBody[2];
+		var bodyHtml = srcMatchBody[1];
 		console.log("srcMatchBody=" + JSON.stringify(srcMatchBody));
 		
 		
@@ -1942,20 +1942,21 @@ else throw err;
 	}
 	
 	function regexBody(bodyTag, lineBreak) {
-		// todo: if(lineBreak == "\n" else if(lineBreak == "\r\n")
 		if(bodyTag == undefined) throw new Error("No bodyTag=" + bodyTag + " defined!")
-		
 		console.log("Returning regexp for bodyTag=" + bodyTag);
 		
+		if(lineBreak == "\r\n") {
+			return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\r\\n([\\s\\S]*)\\r\\n[\\t ]*<\\/" + bodyTag + ">", "i");
+		}
+		else {
+return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + bodyTag + ">", "i");
+		}
+		
 		//return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
-		return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*(\\n|\\r\\n)([\\s\\S]*)(\\n|\\r\\n)[\\t ]*<\\/" + bodyTag + ">", "i");
 		
 		/*
 			* = Matches the preceding expression 0 or more times
-			
-			
-			
-		*/
+			*/
 		
 	}
 	
@@ -1978,8 +1979,11 @@ else throw err;
 			
 			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
 			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
-			if(sourceBodyHtmlRows.length != 2) throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 2");
-			
+			if(sourceBodyHtmlRows.length != 2) {
+				console.log("testStartRowN sourceBodyHtml:");
+				console.log(sourceBodyHtml);
+				throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 2");
+			}
 			EDITOR.closeFile(file.path);
 			callback(true);
 		});
@@ -2000,7 +2004,11 @@ else throw err;
 			
 			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
 			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
-			if(sourceBodyHtmlRows.length != 4) throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 4");
+			if(sourceBodyHtmlRows.length != 4) {
+				console.log("testStartRowNN sourceBodyHtml:");
+				console.log(sourceBodyHtml);
+				throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 4.");
+			}
 			
 			EDITOR.closeFile(file.path);
 			callback(true);
@@ -2023,8 +2031,7 @@ else throw err;
 			EDITOR.closeFile(file.path);
 			callback(true);
 		});
-	}, 1);
-	
+	});
 	
 	EDITOR.addTest(function testWysiwygEditorDontBreakLineBreaks(callback) {
 		

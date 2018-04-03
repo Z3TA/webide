@@ -102,7 +102,7 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 			if(newWindow) newWindow.close();
 			throw new Error("wysiwygEditor did not load in a timely manner");
 		}
-	}, 2000);
+	}, 6000);
 	
 	function windowOpened(err, theWindow) {
 		if(err) throw err;
@@ -184,6 +184,4 @@ bodyTagPreview: compliedSourceBodyTag
 	function cleanUp() {
 	}
 	
-	
-	
-}, 2);
+});

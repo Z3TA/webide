@@ -38,21 +38,12 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-work around the problem using if to avoid (\n|\r\n)
+figure out why renaming a file makes the test pass!
 
-Debugging regexp ... regexBody
+wywywyg tests doesn't close windows!
 
-How do I get it to not split up the last \r\n !?
-
-var str = "abcdeab";
-var re = /(ab|b)(.*)(ab|b)/;
-str.match(re);
-[ 'abcdeab', 'ab', 'cdea', 'b', index: 0, input: 'abcdeab' ]
-
-
-fixing bug in WysiwygEditor.prototype.setStartRow
-write tests!
-
+hmm, why do the tests succeed one running them one at atime, but fail when you run them after each other !?
+Problem seems to be because of the file in the test had the same name as another file from another test!
 
 The test sometimes succeeds because the source changes before it's compared to the contentEditable!
 
@@ -144,6 +135,26 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+Every time a property of a method is accessed when running a node/js script add if(foo.bar===undefined) console.log(__line + ":foo.bar:undefined)
+
+__checkObj(foo.bar, "foo.bar", __line);
+
+function __checkObj(obj, oname, line) {
+  if(typeof obj != "object") console.log(line + ":" + oname + ":" + obj);
+}
+
+Then when you hover the mouse over it you see the value.
+
+---
+
+Able to set breakpoint in JavaScript and pause the execution !?
+
+Could "pause" with alert() !?
+
+---
+
+Investigate making an app for chrome-book !?
 
 When a user is connected from two computers and have the same file open, send all file changes to the server that then broadcast to all clients logged in as that user
 and runs a transorm ? Or just don't apply the changes until they come in from the server (like in the terminal)

@@ -830,7 +830,7 @@ EDITOR.lastKeyPressed = "";
 		}
 		
 		if(!EDITOR.files.hasOwnProperty(path)) {
-			throw new Error("Can't close file that is not open: " + path);
+			throw new Error("Can't close file that is not open: " + path + " Opened files are: " + JSON.stringify(Object.keys(EDITOR.files)).slice(1,-1));
 		}
 		else {
 			
