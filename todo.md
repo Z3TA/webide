@@ -38,12 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-figure out why renaming a file makes the test pass!
-
 wywywyg tests doesn't close windows!
-
-hmm, why do the tests succeed one running them one at atime, but fail when you run them after each other !?
-Problem seems to be because of the file in the test had the same name as another file from another test!
 
 The test sometimes succeeds because the source changes before it's compared to the contentEditable!
 

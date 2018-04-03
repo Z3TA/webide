@@ -1997,6 +1997,13 @@ return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + 
 				bodyTagSource: "body",
 				sourceFile: file
 			};
+			
+			if(file.text != html) {
+				console.log("file.text=" + UTIL.lbChars(file.text) + "");
+				console.log("html=" + UTIL.lbChars(html));
+				throw new Error("file.text (length=" + file.text.length + ") does not match html (length=" + html.length + ")");
+			}
+			
 			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
 			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
@@ -2007,6 +2014,7 @@ return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + 
 			if(sourceBodyHtmlRows.length != 4) {
 				console.log("testStartRowNN sourceBodyHtml:");
 				console.log(sourceBodyHtml);
+				console.log("EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 				throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 4.");
 			}
 			

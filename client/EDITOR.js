@@ -515,8 +515,8 @@ EDITOR.lastKeyPressed = "";
 				
 				var file = EDITOR.files[path];
 				
-				if(!EDITOR.currentFile) {
-					return fileOpenError(new Error("There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files))); // For sanity
+				if(!EDITOR.currentFile) { // For sanity
+					return fileOpenError(new Error("There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files)));
 				}
 				
 				if(EDITOR.currentFile != file) {
@@ -551,6 +551,14 @@ EDITOR.lastKeyPressed = "";
 			
 			console.log("File in openFileQueue! path=" + path);
 			
+			/*
+				If two things are waiting for a particular file to open, call both things once it has opened.
+				But if text content is set, it is (most likely) not the same file!!!
+			
+				Could also add a counter to it's name, like when the file is already opened!?
+			*/
+			if(text != undefined) throw new Error("File with path=" + path + " is already in the queue, pick another file name!");
+			
 			// Add callback to the waiting list to be called once the file has been loaded
 			if(callback) {
 				if(!fileOpenExtraCallbacks.hasOwnProperty(path)) fileOpenExtraCallbacks[path] = [];
@@ -573,6 +581,7 @@ EDITOR.lastKeyPressed = "";
 		if(!UTIL.isString(path)) return fileOpenError(new Error("path is not a string: " + path));
 		
 		openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
+		console.log("File path=" + path + " added to openFileQueue=" + JSON.stringify(openFileQueue));
 		
 		if(text == undefined) {
 			
@@ -688,22 +697,22 @@ EDITOR.lastKeyPressed = "";
 				}
 				
 				if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
-				// If we are this far, there should be no error!
-				callCallbacks(null, file);
 				
-				openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
+				removeFromQueue(path);
 				
 				EDITOR.dashboard.hide(); // Hide dashboard when opening a file
 				
-				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
 				EDITOR.renderNeeded();
+				
+				// At last, call the function(s) to be run after the file has been opened
+				callCallbacks(null, file);
 				
 			}
 		}
 		
 		function fileOpenError(err) {
-			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
+			removeFromQueue(path);
 			
 			console.warn(err.message);
 			
@@ -712,11 +721,9 @@ EDITOR.lastKeyPressed = "";
 			console.warn("Error when opening file path=" + path + " message: " + err.message);
 			
 			return err;
-			
 		}
 		
 		function callCallbacks(err, file) {
-			
 			if(callback) {
 				callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
@@ -735,6 +742,13 @@ EDITOR.lastKeyPressed = "";
 				// Then remove them
 				delete fileOpenExtraCallbacks[path]
 			}
+		}
+		
+		function removeFromQueue(path) {
+			if(openFileQueue.indexOf(path) == -1) throw new Error("File path=" + path + " not in openFileQueue=" + JSON.stringify(openFileQueue));
+			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
+			if(openFileQueue.indexOf(path) != -1) throw new Error("File path=" + path + " still in openFileQueue=" + JSON.stringify(openFileQueue));
+			console.log("Removed from openFileQueue! path=" + path);
 		}
 		
 	}
@@ -881,7 +895,8 @@ EDITOR.lastKeyPressed = "";
 			
 			
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
-				if(EDITOR.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path);
+				if(EDITOR.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path + 
+				"\nIt was closed 100ms ago. If you are running tests, use different file names for each test!");
 			}, 100);
 			
 			if(switchTo) {
