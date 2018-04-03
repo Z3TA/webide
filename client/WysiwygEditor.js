@@ -1991,7 +1991,7 @@ return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + 
 	
 	EDITOR.addTest(function testStartRowNN(callback) {
 		var html = '<html>\n<body>\n\nHello\nWorld\n\n</body>\n</html>';
-		EDITOR.openFile("wysiwygEditorTestStartRowN.htm", html, function(err, file) {
+		EDITOR.openFile("wysiwygEditorTestStartRowNN.htm", html, function(err, file) {
 			var wysiwygEditor = {
 				lineBreak: "\n",
 				bodyTagSource: "body",

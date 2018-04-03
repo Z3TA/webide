@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-wywywyg tests doesn't close windows!
-
 The test sometimes succeeds because the source changes before it's compared to the contentEditable!
 
 originalText=N

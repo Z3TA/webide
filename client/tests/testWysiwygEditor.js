@@ -13,7 +13,9 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	var sourcePage = "<html>\n<body>\n<p>main</p>\n</body>\n</html>\n"
 	var testFolder = "/testfolder/wysiwyg/";
 	var testFile = "page_compiled.htm";
-	var newWindow = EDITOR.createWindow({url: "about:blank"}, windowOpened);
+	var newWindow;
+	
+	EDITOR.createWindow({url: "about:blank"}, windowOpened);
 	
 	function windowOpened (err, theWindow) {
 		if(err) throw err;
@@ -175,6 +177,12 @@ bodyTagPreview: compliedSourceBodyTag
 					previewWin.close();
 					cleanUp();
 					
+					/*
+						setTimeout(function checkifWindowClosed() {
+					if(newWindow) throw new Error("window doesn't appear the be closed: newWindow=" + newWindow);
+					}, 1000);
+					*/
+					
 				}
 				
 			});
@@ -184,4 +192,6 @@ bodyTagPreview: compliedSourceBodyTag
 	function cleanUp() {
 	}
 	
-});
+	
+	
+}, 1);
