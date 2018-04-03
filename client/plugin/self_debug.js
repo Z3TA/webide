@@ -169,6 +169,7 @@
 		death.style.top = "0px";
 		death.style.left = "0px";
 		death.style.backgroundColor = "darkred";
+		death.style.opacity = "0.5";
 		
 		var deathText = document.createElement("span");
 		deathText.style.fontSize = "20px";
