@@ -38,51 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-The test sometimes succeeds because the source changes before it's compared to the contentEditable!
-
-originalText=N
-<p>Paragraph</p>N
-N
-<p>foo</p>N
-
-UTIL.js:478 editedText=N
-<p>Paragraph</p>N
-N
-<p>foo</p>N
-
-When the test fails:
-originalText=N
-<p>Paragraph</p>N
-
-UTIL.js:478 editedText=N
-<p>Paragraph</p>N
-N
-<p>foo</p>N
-
-inserted=[
-  {
-    "text": "",
-    "row": 2
-  },
-  {
-    "text": "<p>foo</p>",
-    "row": 2
-  }
-]
-
-it seems to be a timing error !? Maybe something todo with "makeAsync" !?
-
-The error is in WysiwygEditor.prototype.setStartRow !!
-
-in wysiwyg input sometimes run twice on the same input!!
-
-3 windows are loaded in testWysywygEditor.js
-
-Make sure the WYSIWYG for the SSG works !!! Write tests!
-
-Make it so I can't make a prod release unless all tests have passed!!!
-run the tests in different browsers!!
-reload the editor and run the tests again (sometimes the test succeeds in first run but fails in second run)
+FOR FUCKS SAKE MAKE SURE STUFF WORK BEFORE PUSHING TO PRODUCTION!!!!!!!!!!!! DO MANUAL TESTING!!!! MAKE MORE AUTOMATIC TESTS!!!!
 
 Thinking of reasons why it would not be a good idea to move web_preview and SSG functionality like CSS auto refresh into WysiwygEditor.js
 If we do not move the functionality into one place we'll end up re-implementing them in many places. For example detecting F5 and make a "controlled" reload of the preview window.

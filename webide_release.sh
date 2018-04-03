@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo -n "Do all tests pass (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^n" ;then exit;fi
+
 cd /home/Z/Projects/jzedit/
 ./release.sh
 
@@ -14,3 +18,4 @@ nodejs update.js
 EOF
 
 # rsync -rv
+

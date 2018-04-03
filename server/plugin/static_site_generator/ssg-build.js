@@ -578,7 +578,7 @@ function compile(baseTree) {
 			var bodyOnloads = document.bodyOnloads; // Array of script sources
 			var headScripts = document.headScripts; // Array
 			var head = document.head; // String with title, keywords, etc removed
-			var mainHtml = "<main>\n" + document.body + "\n</main>\n"; 
+			var mainHtml = "<main>" + document.body + "</main>\n"; 
 			var bodyScripts = document.bodyScripts;
 			var headerHtml = "";
 			var footerHtml = "";

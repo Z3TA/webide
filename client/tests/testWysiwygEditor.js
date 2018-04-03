@@ -1,5 +1,74 @@
 
 
+EDITOR.addTest(function previewCompiled(callback) {
+	/*
+		Should we allow the compiler to add arbitary line breaks as padding for the body/main element !?
+	*/
+	
+	return callback(true);
+	
+	var compiledPage = "<html>\n<body>\nheader\n<main>\n\n\n<h1>Hello world</h1>\n\n<p>Paragraph</p>\n\n\t</main>\nfooter\n</body>\n</html>\n"
+	var sourcePage = "<html>\n<body>\n\n<h1>Hello world</h1>\n\n<p>Paragraph</p>\n\n</body>\n</html>\n"
+	var testFolder = "/testfolder/wysiwyg/";
+	var testFile = "page_compiled_extra_added.htm";
+	var newWindow;
+	
+	EDITOR.createWindow({url: "about:blank"}, windowOpened);
+	
+	function windowOpened (err, theWindow) {
+		if(err) throw err;
+		newWindow = theWindow;
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
+		});
+	}
+	
+	function fileCreated(err, filePath) {
+		var serveJson = {folder: testFolder};
+		CLIENT.cmd("serve", serveJson, function(err, serveRespJson) {
+			if(err) throw err
+			
+			var serveUrl = document.location.protocol + "//" + serveRespJson.url;
+			
+			var fileUrl = serveUrl + testFile;
+			
+			EDITOR.openFile("page_source.htm", sourcePage, function(err, sourceFile) {
+				
+				var url = fileUrl;
+				
+				var wysiwygEditor = new WysiwygEditor({
+					sourceFile: sourceFile,
+					bodyTagSource: "body",
+					onlyPreview: false,
+					newWindow: newWindow,
+					url: url,
+					whenLoaded: wysiwygEditorLoaded,
+					compiledSource: compiledPage,
+					bodyTagPreview: "main"
+				});
+				
+				function wysiwygEditorLoaded() {
+					
+					// Does it load !?
+					
+					EDITOR.closeFile(sourceFile.path);
+					wysiwygEditor.close();
+					cleanUp();
+					callback(true);
+					
+				}
+				
+			});
+		});
+	}
+	
+	function cleanUp() {
+	}
+	
+}, 1);
+
+
 EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	/*
 	Test if the wysiwygEditor gets the correct url in WYSIWYG-editing mode, 
@@ -192,6 +261,9 @@ bodyTagPreview: compliedSourceBodyTag
 	function cleanUp() {
 	}
 	
-	
-	
-}, 1);
+});
+
+
+
+
+

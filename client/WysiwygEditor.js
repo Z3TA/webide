@@ -1918,14 +1918,15 @@ else throw err;
 		}
 		if(lineBreak == undefined) lineBreak = UTIL.determineLineBreakCharacters(fileText);
 		
-		// In order for the diff to work, we can not start and end on the sam row as the <body> or </body> tags
+		// In order for the diff to work, we can not start and end on the same row as the <body> or </body> tags
 		// so there needs to be a line-break after <body> and before </body>
 		
 		var srcMatchBody = fileText.match(regexBody(bodyTag, lineBreak));
 		
 		if(srcMatchBody == null) {
 			console.log(fileText);
-			throw new Error("Can not find bodyTag=" + bodyTag + " with line breaks!");
+			throw new Error("Can not find bodyTag=" + bodyTag + " with a line break after it!" + 
+			" There need to be a line break after the opening and before the closing of the " + bodyTag + " element!");
 		}
 		
 		if(srcMatchBody.length != 2) throw new Error("Unexpeced match: srcMatchBody=" + JSON.stringify(srcMatchBody));
