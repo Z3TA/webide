@@ -223,8 +223,6 @@
 		
 		EDITOR.on("fileDrop", fileDrop);
 		
-		EDITOR.on("fileSave", fileSave);
-		
 		CLIENT.on("ssgBuildMessage", ssgBuildMessage);
 		
 		CLIENT.on("ssgProgressStatus", ssgProgressStatus);
@@ -253,7 +251,6 @@
 		EDITOR.removeEvent("exit", SSG_cleanup);
 		EDITOR.removeEvent("fileOpen", fileOpen);
 		EDITOR.removeEvent("fileDrop", fileDrop);
-		EDITOR.removeEvent("fileSave", fileSave);
 		
 		EDITOR.unbindKey(hideSSG);
 		EDITOR.unbindKey(previewSSG);
@@ -481,67 +478,6 @@ progressBar.style.display = "none";
 			}
 			
 		}
-	}
-	
-	function fileSave(file) {
-		//console.log("Checking for CSS file ...");
-		var fileExt = UTIL.getFileExtension(file.path);
-		var fileName = UTIL.getFilenameFromPath(file.path);
-		if(fileExt == "css" && previewWin) {
-			var win = previewWin.previewWin;
-			if(!win) throw new Error("Unable to get preview window");
-			var doc = win.document;
-			if(!doc) throw new Error("Unable to get document from preview window");
-			
-			var links = doc.getElementsByTagName('link');
-			for (var i=0; i<links.length; i++) {
-				if(links[i].getAttribute("rel").toLowerCase().indexOf("stylesheet") != -1) {
-					//console.log(links[i].href);
-					if(links[i].href.indexOf(fileName) != -1) {
-						
-						// The source file is not the same as the preview file.
-						// Remove the link and append a style element instead
-						
-						var parent = links[i].parentNode;
-							
-						var style = document.createElement("style")
-						style.setAttribute("href", links[i].href);
-						style.innerText = file.text;
-						
-						parent.insertBefore(style, links[i]);
-						parent.removeChild(links[i]);
-						
-						console.log("Replaced link css with style for " + fileName);
-						
-						//return updateCss(file, links[i], href);
-						return;
-						
-						}
-				}
-			}
-			// Update style
-			var style = doc.getElementsByTagName('style');
-			for (var i=0, href; i<style.length; i++) {
-				href = style[i].getAttribute("href");
-				if(href) {
-					if(href.indexOf(fileName) != -1) {
-						style[i].innerText = file.text;
-						console.log("Replaced style content for " + fileName);
-						return;
-					}
-				}
-			}
-			
-			//console.log("fileName=" + fileName + " was not found on the page in preview.");
-			
-		}
-		//else console.log("fileExt=" + fileExt + " previewWin=" + previewWin);
-		
-		function updateCss(file, linkEl, href) {
-			// Copy the file into the preview folder
-			
-		}
-		
 	}
 	
 	function switchSite(index) {

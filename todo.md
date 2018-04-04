@@ -38,6 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+editing the source file no longer seem to update the preview window!!!
+
+
 Should probably make WysiwygEditor/preview plugin based !?
 
 Functionality right now that should be shared/moved into WysiwygEditor:
@@ -65,6 +68,7 @@ Can precompiled pages safely be reloaded ? When for example a script file change
 Safari don't show inline nodej console.log's
 
 
+The wysiwygEditor seems to add new-line padding in the body ... but max two !?
 
 
 implementing jsql example on webide.se
@@ -550,6 +554,23 @@ Make server run under apparmor profile ...
 BUGS (and issues)
 =================
 
+Some characters wont show up (not even as question marks) for example: abortFindFile<-typehere
+
+---
+goto_file goes into a abortFindFile loop
+
+2018-04-04 (12:21:26) 192.168.0.3 => 176abortFindFiles (server.js:335:8))
+2018-04-04 (12:21:26) The command queue has 0 items. (server.js:437:11))
+2018-04-04 (12:21:26) Worker message from ltest1: {"resp":{"foldersBeingSearched":-2148},"id":"176"} handle=undefined (server.js:1081:17))
+2018-04-04 (12:21:26) 192.168.0.3 <= {"resp":{"foldersBeingSearched":-2148},"id":"176"} (server.js:1201:4))
+2018-04-04 (12:21:27) 192.168.0.3 => 177abortFindFiles (server.js:335:8))
+2018-04-04 (12:21:27) The command queue has 0 items. (server.js:437:11))
+2018-04-04 (12:21:27) Worker message from ltest1: {"resp":{"foldersBeingSearched":-2148},"id":"177"} handle=undefined (server.js:1081:17))
+2018-04-04 (12:21:27) 192.168.0.3 <= {"resp":{"foldersBeingSearched":-2148},"id":"177"} (server.js:1201:4))
+2018-04-04 (12:21:27) 192.168.0.3 => 178abortFindFiles (server.js:335:8))
+2018-04-04 (12:21:27) The command queue has 0 items. (server.js:437:11))
+2018-04-04 (12:21:27) Worker message from ltest1: {"resp":{"foldersBeingSearched":-2148},"id":"178"} handle=undefined (server.js:1081:17))
+2018-04-04 (12:21:27) 192.168.0.3 <= {"resp":{"foldersBeingSearched":-2148},"id":"178"} (server.js:1201:4))
 ---
 
 When going to EOF and then to start of file in a big file:

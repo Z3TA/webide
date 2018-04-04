@@ -665,6 +665,94 @@ var WysiwygEditor;
 		return true;
 	}
 	
+	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file) {
+var wysiwygEditor = this;
+
+		if(!file) throw new Error("file=" + file);
+		
+		console.log("WysiwygEditor.anyFileSaved: " + file.path);
+
+var previewWin = wysiwygEditor.previewWin;
+
+try {
+var doc = previewWin.window.document;
+}
+catch(err) {
+console.error(err);
+// Most likely the user has closed the preview window
+wysiwygEditor.close();
+return;
+}
+		
+		//console.log("Checking for CSS file ...");
+		var fileExt = UTIL.getFileExtension(file.path);
+		var fileName = UTIL.getFilenameFromPath(file.path);
+		
+		if(fileExt == "css") {
+			var win = wysiwygEditor.previewWin;
+			if(!win) throw new Error("Unable to get wysiwygEditor window! win=" + win);
+			var doc = win.document;
+			if(!doc) throw new Error("Unable to get document from wysiwygEditor window! doc=" + doc);
+			
+			var links = doc.getElementsByTagName('link');
+			for (var i=0; i<links.length; i++) {
+				if(links[i].getAttribute("rel").toLowerCase().indexOf("stylesheet") != -1) {
+					//console.log(links[i].href);
+					if(links[i].href.indexOf(fileName) != -1) {
+						
+						// Remove the link and append a style element instead
+						
+						var parent = links[i].parentNode;
+						
+						var style = document.createElement("style")
+						style.setAttribute("href", links[i].href);
+						style.innerText = file.text;
+						
+						parent.insertBefore(style, links[i]);
+						parent.removeChild(links[i]);
+						
+						console.log("Replaced link css with style for " + fileName);
+						
+						//return updateCss(file, links[i], href);
+						return;
+						
+					}
+				}
+			}
+			// Update style
+			var style = doc.getElementsByTagName('style');
+			for (var i=0, href; i<style.length; i++) {
+				href = style[i].getAttribute("href");
+				if(href) {
+					if(href.indexOf(fileName) != -1) {
+						style[i].innerText = file.text;
+						console.log("Replaced style content for " + fileName);
+						return;
+					}
+				}
+			}
+			
+			//console.log("fileName=" + fileName + " was not found on the page in preview.");
+			}
+		if(fileExt == "js") {
+			
+			if(wysiwygEditor.isCompiled) {
+if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can not reload !");
+			}
+		
+			// todo: Check if the file was any of the <script elements. and if so Reload!
+		
+		}
+		
+		function updateCss(file, linkEl, href) {
+			// Copy the file into the preview folder
+			
+		}
+		
+		
+	}
+	
+	
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(keyUpEvent) {
 		var wysiwygEditor = this;
@@ -1437,7 +1525,8 @@ else throw err;
 		};
 		
 		attachFileChangeListener(wysiwygEditor);
-		
+			attachFileSaveListener(wysiwygEditor);
+			
 		// Remove the fileChange event listener when closing the content-editable window
 		previewWin.window.onbeforeunload = function() {
 			if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
@@ -1612,7 +1701,7 @@ else throw err;
 	function attachFileChangeListener(wysiwygEditor) {
 		// fileChange wants an uniqe function name ...
 		console.log("Unique function name for fileChange event:");
-		var name = "wysiwygEditor" + wysiwygEditorCounter;
+		var name = "wysiwygEditorFileChnage" + wysiwygEditorCounter;
 		var customAction = function(file, type, characters, caretIndex, row, col) {
 			wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
 		}
@@ -1627,6 +1716,23 @@ else throw err;
 		wysiwygEditor.ignoreSourceFileChange = false;
 	}
 	
+	function attachFileSaveListener(wysiwygEditor) {
+		// All EDITOR events wants an uniqe function name ...
+		console.log("Unique function name for fileSave event:");
+		var name = "wysiwygEditorFileSave" + wysiwygEditorCounter;
+		var customAction = function(file) {
+			wysiwygEditor.anyFileSaved(file);
+		}
+		var func = new Function("action", "return function " + name + "(file){ action(file) };")(customAction);
+		
+		if(wysiwygEditor.fileSaveEventListener) EDITOR.removeEvent("fileSave", wysiwygEditor.fileSaveEventListener);
+		
+		EDITOR.on("fileSave", func);
+		
+		wysiwygEditor.fileSaveEventListener = func;
+		
+		wysiwygEditor.ignoreSourceFileChange = false;
+	}
 	
 	function changeCodeInBody(newBodyCode, html, bodyTag, lineBreak) {
 		
