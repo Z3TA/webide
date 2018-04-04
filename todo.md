@@ -38,9 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-editing the source file no longer seem to update the preview window!!!
-
-
 Should probably make WysiwygEditor/preview plugin based !?
 
 Functionality right now that should be shared/moved into WysiwygEditor:

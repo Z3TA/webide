@@ -1705,7 +1705,7 @@ else throw err;
 		var customAction = function(file, type, characters, caretIndex, row, col) {
 			wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
 		}
-		var func = new Function("action", "return function " + name + "(file, type, characters, caretIndex, row, col){ action(file, type, characters, caretIndex, row, col) };")(customAction);
+		var func = new Function("action" + name, "return function " + name + "(file, type, characters, caretIndex, row, col){ action" + name + "(file, type, characters, caretIndex, row, col) };")(customAction);
 		
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 		
@@ -1723,7 +1723,7 @@ else throw err;
 		var customAction = function(file) {
 			wysiwygEditor.anyFileSaved(file);
 		}
-		var func = new Function("action", "return function " + name + "(file){ action(file) };")(customAction);
+		var func = new Function("action" + name, "return function " + name + "(file){ action" + name + "(file) };")(customAction);
 		
 		if(wysiwygEditor.fileSaveEventListener) EDITOR.removeEvent("fileSave", wysiwygEditor.fileSaveEventListener);
 		
