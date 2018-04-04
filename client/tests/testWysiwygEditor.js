@@ -66,7 +66,7 @@ EDITOR.addTest(function previewCompiled(callback) {
 	function cleanUp() {
 	}
 	
-}, 1);
+});
 
 
 EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
@@ -105,8 +105,17 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 			var fileUrl = serveUrl + testFile;
 		
 			EDITOR.openFile("page_source.htm", sourcePage, function(err, sourceFile) {
+				if(err) throw err;
 				
 				var url = fileUrl;
+				var wysiwygEditorLoadedCalled = false;
+				
+				setTimeout(function() {
+					if(!wysiwygEditorLoadedCalled) {
+						if(newWindow) newWindow.close();
+						throw new Error("wysiwygEditor did not load in a timely manner");
+					}
+				}, 5000);
 				
 				var wysiwygEditor = new WysiwygEditor({
 					sourceFile: sourceFile, 
@@ -120,6 +129,8 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 });
 				
 				function wysiwygEditorLoaded() {
+					
+					wysiwygEditorLoadedCalled = true;
 					
 					if(wysiwygEditor.url != url) throw new Error("Expected wysiwygEditor.url=" + wysiwygEditor.url + " == " + "url=" + url);
 					
@@ -145,7 +156,7 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	function cleanUp() {
 	}
 	
-});
+}, 1);
 
 
 EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
@@ -173,7 +184,7 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 			if(newWindow) newWindow.close();
 			throw new Error("wysiwygEditor did not load in a timely manner");
 		}
-	}, 6000);
+	}, 5000);
 	
 	function windowOpened(err, theWindow) {
 		if(err) throw err;

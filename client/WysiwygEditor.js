@@ -110,6 +110,9 @@ var WysiwygEditor;
 		
 		wysiwygEditor.onErrorEvent = options.onErrorEvent;
 		
+		wysiwygEditor.closed = false; // If the WysiwygEditor has been closed or not
+		wysiwygEditor.id = ++wysiwygEditorCounter;
+		
 		
 		if(compiledSource) {
 /*
@@ -187,7 +190,7 @@ var WysiwygEditor;
 		else wysiwygEditor.ignoreTransform = null; // Not compiled
 		
 		
-		wysiwygEditorCounter++;
+		
 		
 		
 		if(!wysiwygEditor.bodyExistInSource()) {
@@ -265,9 +268,10 @@ var WysiwygEditor;
 					When calling whenLoaded the constructor might not have returned the new WysiwygEditor object!!
 					So make sure it's async.
 				*/
+				console.log("About to call whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
 				setTimeout(function makeitAsync() {
-					if(!wysiwygEditor.whenLoaded) return console.warn("wysiwygEditor.whenLoaded has gone away!");
-					
+					if(!wysiwygEditor.whenLoaded) throw new Error("wysiwygEditor.whenLoaded has gone away!");
+					console.log("Calling whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
 				wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
 					wysiwygEditor.whenLoaded = null;
 				}, 1);
@@ -1214,9 +1218,12 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		
 		var wysiwygEditor = this;
 		
-		console.warn("Closing preview window!");
+		console.log("About to close wysiwygEditor" + wysiwygEditor.id + " wysiwygEditor.closed=" + wysiwygEditor.closed);
+		
+		if(wysiwygEditor.closed) return console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
+		if(wysiwygEditor.fileSaveEventListener) EDITOR.removeEvent("fileSave", wysiwygEditor.fileSaveEventListener);
 		
 		/*
 			body.onmouseup = null;
@@ -1228,9 +1235,16 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
+		wysiwygEditor.closed = true;
+		// Closing the window will also call wysiwygEditor.close()
 		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 		
-		if(wysiwygEditor.onClose) wysiwygEditor.onClose();
+		if(wysiwygEditor.onClose) {
+wysiwygEditor.onClose();
+			wysiwygEditor.onClose = null;
+		}
+		
+		console.warn("WysiwygEditor" + wysiwygEditor.id + " closed!");
 		
 	}
 	

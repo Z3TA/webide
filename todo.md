@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Investigate why wysiwygEditor tests sometimes get timeout errors!
+
 Should probably make WysiwygEditor/preview plugin based !?
 
 Functionality right now that should be shared/moved into WysiwygEditor:

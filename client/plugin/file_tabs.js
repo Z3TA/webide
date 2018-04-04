@@ -497,13 +497,13 @@ for(var i=0; i<list.length; i++) {
 							wait();
 							
 							function wait() {
-								if(waitCounter++ > 10) throw new Error("Waiting for other files to close before running file-order test max waitCounter=" + waitCounter + " reached! ");
+								if(waitCounter++ > 20) throw new Error("Waiting for other files to close before running file-order test max waitCounter=" + waitCounter + " reached! ");
 								
 								var list = EDITOR.sortFileList();
 								for(var i=0; i<list.length; i++) {
 									if(list[i].path != testFiles[i]) {
 										console.log("Waiting for file to close: " + list[i].path);
-										return setTimeout(wait, 100);
+										return setTimeout(wait, 300);
 									}
 								}
 								console.log("No unknown files found. Running test ...");
