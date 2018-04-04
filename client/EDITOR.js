@@ -3769,7 +3769,10 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				}
 			
 			console.log("New window: " + (new Date()).getTime() + " readyState=" + theWindow.document.readyState);
-				
+			
+			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
+			if(url == "about:blank") theWindow.isBlankUrl = true;
+			
 			theWindow.addEventListener("load", function() {
 				console.log("New window: " + (new Date()).getTime() + " load event!");
 				/*

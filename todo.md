@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+problem: window location is always about:blank right after it has been opened!
+
 write test that makes sure no extra line breaks are added during dance.
 
 write test that checks if console log capturing works

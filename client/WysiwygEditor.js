@@ -67,7 +67,7 @@ var WysiwygEditor;
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
 		
-		if(arguments.length != 1) throw new Error("Expected only one argument (options object)");
+		if(arguments.length != 1) throw new Error("Expected one argument (options object) got " + arguments.length + " arguments/parameters !");
 		
 		var sourceFile = options.sourceFile;
 		var bodyTagSource = options.bodyTagSource;
@@ -81,6 +81,10 @@ var WysiwygEditor;
 		var left = options.left;
 		var width = options.width;
 		var height = options.height;
+		
+		if(newWindow == window) throw new Error("The window can not be the main window!");
+		console.log("newWindow:");
+		console.log(newWindow);
 		
 		if(!url) throw new Error("The preview/WYSIWYG needs an URL or it will not be able to load CSS and JavaScript files! url=" + url);
 		
@@ -223,29 +227,31 @@ var WysiwygEditor;
 			console.warn("Creating a new window newWindow=" + newWindow + "...");
 			
 			// We need to create the window right away to prevent it being blocked ...
-			newWindow = EDITOR.createWindow({url: url}, windowCreated);
+			EDITOR.createWindow({url: url}, windowCreated);
 		}
-		else windowCreated(null);
+		else windowCreated(null, newWindow);
 		
-		function windowCreated(err) {
+		function windowCreated(err, newWindow) {
 			console.log("wysiwygEditor windowCreated!");
 			if(err) throw err;
 			
 			wysiwygEditor.previewWin = newWindow;
 			
-			if(newWindow && newWindow.window.location.href != "about:blank") {
-				wysiwygEditor.attachTo(newWindow, firstLoad);
-			}
-			else {
-				//throw new Error("The window needs to have an actual URL! newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href)
-				console.warn("window has no url! newWindow=" + newWindow + " newWindow.window.location.href=" + (newWindow && newWindow.window && newWindow.window.location.href));
-				
+			/*
+				The newWindow object will not have window.location populated until DOMContentLoaded!!
+				*/
+			
+			if(!newWindow) throw new Error("newWindow=" + newWindow);
+			
+			if(newWindow.isBlankUrl) {
 				if(wysiwygEditor.url) {
-					console.log("Attempting reload of url=" + wysiwygEditor + " ...");
+					console.log("Attempting reload to load correct window url=" + wysiwygEditor.url + " ...");
 					wysiwygEditor.reload(firstLoad);
 				}
-				else throw new Error("url=" + url + " newWindow=" + newWindow + " newWindow.window.location.href=" + newWindow.window.location.href);
-				
+				else throw new Error("url=" + url + " The window need to have an URL!");
+				}
+			else {
+				wysiwygEditor.attachTo(newWindow, firstLoad);
 			}
 		}
 		
@@ -1270,7 +1276,7 @@ wysiwygEditor.onClose();
 		var win = wysiwygEditor.previewWin.window;
 		var doc = win.document; // previewWin.document is not available in nw.js gui
 		
-		if(document.documentElement) doc = document.documentElement;
+		if(doc.documentElement) doc = doc.documentElement;
 		
 		return doc.innerHTML;
 	}
@@ -1462,6 +1468,8 @@ else throw err;
 		var wysiwygEditor = this;
 		
 		if(newWindow == undefined) throw new Error("newWindow=" + newWindow);
+		
+		if(newWindow == window) throw new Error("newWindow can not be the same as window!"); // Sanity
 		
 		wysiwygEditor.previewWin = newWindow;
 		

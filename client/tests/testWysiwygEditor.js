@@ -156,7 +156,7 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 	function cleanUp() {
 	}
 	
-}, 1);
+});
 
 
 EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
@@ -274,7 +274,94 @@ bodyTagPreview: compliedSourceBodyTag
 	
 });
 
+EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
+var html = '<html>\n<body>\n<p>Hello World!</p>\n</body>\n</html>\n';
+	
+	launchServe(html, html, "wysiwygNoExtraLineBreaks.htm", function(err, preview, cleanup) {
+		if(err) throw err;
+		
+		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
+		
+		var prewHTML = preview.getPreviewWindowHtml();
+		
+		if(prewHTML != html)  {
+			console.log("prewHTML: " + UTIL.lbChars(prewHTML));
+			console.log("html: " + UTIL.lbChars(html));
+throw new Error("HTML changed!");
+		}
+		
+		cleanup();
+		
+		callback(true);
+		});
+}, 1);
 
+function launchServe(sourcePage, compiledPage, testFile, callback) {
+	
+	var testFolder = "/testfolder/wysiwyg/";
+	
+	EDITOR.createPath(testFolder, function folderCreated(err, path) {
+		if(err) return callback(err);
+			EDITOR.saveToDisk(testFolder + testFile, compiledPage, fileCreated);
+		});
+	
+	function fileCreated(err, filePath) {
+		if(err) return callback(err);
+		CLIENT.cmd("serve", {folder: testFolder}, function(err, serveRespJson) {
+			if(err) return callback(err);
+			
+			var serveUrl = document.location.protocol + "//" + serveRespJson.url;
+			var fileUrl = serveUrl + testFile;
+			
+			EDITOR.openFile(testFile, sourcePage, function(err, sourceFile) {
+				if(err) return callback(err);
+				
+				var url = fileUrl;
+				var wysiwygEditorLoadedCalled = false;
+				
+				setTimeout(function() {
+					if(!wysiwygEditorLoadedCalled) {
+						callback(new Error("wysiwygEditor did not load in a timely manner"));
+					}
+				}, 5000);
+				
+				var opt = {
+					sourceFile: sourceFile,
+					bodyTagSource: "body",
+					onlyPreview: true,
+					url: url,
+					whenLoaded: wysiwygEditorLoaded,
+				}
+				
+				if(compiledPage != sourcePage) {
+opt.compiledSource = compiledPage;
+					if(compiledPage.indexOf("<main") != -1) opt.bodyTagPreview = "main";
+				}
+				
+				var wysiwygEditor = new WysiwygEditor(opt);
+				
+				function wysiwygEditorLoaded() {
+					
+					wysiwygEditorLoadedCalled = true;
+					
+					if(wysiwygEditor.url != url) throw new Error("Expected wysiwygEditor.url=" + wysiwygEditor.url + " == " + "url=" + url);
+					
+					callback(null, wysiwygEditor, cleanUp);
+					
+				}
+				
+				function cleanUp() {
+					EDITOR.closeFile(sourceFile.path);
+					wysiwygEditor.close();
+				}
+				
+			});
+		});
+	}
+	
+	
+	
+}
 
 
 
