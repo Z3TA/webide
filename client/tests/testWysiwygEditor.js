@@ -275,19 +275,28 @@ bodyTagPreview: compliedSourceBodyTag
 });
 
 EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
-var html = '<html>\n<body>\n<p>Hello World!</p>\n</body>\n</html>\n';
+	var fileHtml = '<head></head><body>\n\n<p>Hello World!</p>\n</body>';
+	//var fileHtml = '<html>\n<body>\n\n<p>Hello World!</p>\n</body></html>';
 	
-	launchServe(html, html, "wysiwygNoExtraLineBreaks.htm", function(err, preview, cleanup) {
+	launchServe(fileHtml, fileHtml, "wysiwygNoExtraLineBreaks.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
 		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
 		
+		var fileBodyHtml = preview.getSourceCodeBody();
+		var prewBodyHTML = preview.getContentEditableCode();
 		var prewHTML = preview.getPreviewWindowHtml();
+		//var lb = "\n";
+		//var lbPrewHTML = UTIL.occurrences(prewHTML, lb);
+		//var lbHtml = UTIL.occurrences(fileHtml, lb);
 		
-		if(prewHTML != html)  {
-			console.log("prewHTML: " + UTIL.lbChars(prewHTML));
-			console.log("html: " + UTIL.lbChars(html));
-throw new Error("HTML changed!");
+		console.log("fileBodyHtml: " + UTIL.lbChars(fileBodyHtml));
+		console.log("prewBodyHTML: " + UTIL.lbChars(prewBodyHTML));
+		console.log("prewHTML: " + UTIL.lbChars(prewHTML));
+		console.log("fileHtml: " + UTIL.lbChars(fileHtml));
+		
+		if(fileBodyHtml != prewBodyHTML)  {
+			throw new Error("The fileBodyHtml is not the same as prewBodyHTML!");
 		}
 		
 		cleanup();
