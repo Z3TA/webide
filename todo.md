@@ -38,13 +38,13 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-FOR FUCKS SAKE MAKE SURE STUFF WORK BEFORE PUSHING TO PRODUCTION!!!!!!!!!!!! DO MANUAL TESTING!!!! MAKE MORE AUTOMATIC TESTS!!!!
+Should probably make WysiwygEditor/preview plugin based !?
 
-Thinking of reasons why it would not be a good idea to move web_preview and SSG functionality like CSS auto refresh into WysiwygEditor.js
-If we do not move the functionality into one place we'll end up re-implementing them in many places. For example detecting F5 and make a "controlled" reload of the preview window.
+Functionality right now that should be shared/moved into WysiwygEditor:
+SSG - Saving a CSS file beloning to a site will refresh the CSS in the preview window =>  Or Just move it into WysiwygEditor, can't think of any circumstances where you would not want that functionality
+web_preview - console logs and errors will be displayed inline in the source file PREVIEW.on("log"), PREVIEW.on("warn"), PREVIEW.on("error")
+web_preview - autocomplete checks and traverse the window object for variables to auto-complete EDITOR.on("autocomplete") ... for each file in PREVIEW.files 
 
-Speed and performance is a selling point for the editor, so we need to look into that!
-Worst performance hog is currently writing javascript in global scope within a large javascript file.
 
 
 We should reuse error and console.log inlining from run_nodejs_script with the error and console.log inlining in web_preview!?
@@ -52,9 +52,8 @@ Make an util function !?
 
 Should we re-factor back web_preview to use WysiwygEditor.js and move functionality like error and console.log inlining there !?
 
-
 Problem: There is both web_preview and SSG preview ... using web_preview on a SSG-site doesn't work.
-Solution: Make plugins listen for "preview" 
+Solution: Make plugins listen for "preview" !?
 
 Should functionality from web_preview and SSG preview be added to WysiwygEditor !?
 why not: It's better to make separate plugins for example React, SSG's, etc
@@ -63,13 +62,10 @@ Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in 
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!
 
-Merge stuff like error inlining from web_preview to WysiwygEditor.js !?
-
-
-All functionality from the SSG interface.js and web_preview.js should probably be moved to the WysiwygEditor.js !!
-such as css refresh, error and console.log inlining.
-
 Safari don't show inline nodej console.log's
+
+
+
 
 implementing jsql example on webide.se
 
@@ -85,15 +81,19 @@ See if vumoviemaker can run in the editor
 todo
 ----
 
-Every time a property of a method is accessed when running a node/js script add if(foo.bar===undefined) console.log(__line + ":foo.bar:undefined)
+Every time a property or a method is accessed when running a node/javascript add 
 
 __checkObj(foo.bar, "foo.bar", __line);
 
 function __checkObj(obj, oname, line) {
-  if(typeof obj != "object") console.log(line + ":" + oname + ":" + obj);
+  var val;
+  if(typeof obj != "object") val = obj;
+  else val = __safeStringify(obj);
+  console.log(line + ":" + oname + ":" + val);
 }
 
-Then when you hover the mouse over it you see the value.
+Then when you hover the mouse over it and holds down shift you see the value.
+And you get a warning for all properties that are undefined
 
 ---
 
@@ -2071,6 +2071,9 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Speed and performance is a selling point for the editor, so we need to look into that!
+Worst performance hog is currently writing javascript in global scope within a large javascript file.
 
 add a perf mode, that don't run console log's but do run console.time!
 
