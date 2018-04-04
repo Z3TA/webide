@@ -38,7 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Investigate why wysiwygEditor tests sometimes get timeout errors!
+WysiwygEditor annoyingly adds line-break padding around the body !!...!!
+
+Trying to make WysiwygEditor capture console logs ...
 
 Should probably make WysiwygEditor/preview plugin based !?
 
@@ -83,6 +85,8 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+Can two wysiwygEditor windows be open and do stuff at the same time !?
 
 Every time a property or a method is accessed when running a node/javascript add 
 

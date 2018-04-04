@@ -61,6 +61,8 @@ var WysiwygEditor;
 	var wysiwygEditorCounter = 0; // WysiwygEditor instances
 	
 	var previewInputFired = false;
+	var consoleLogOriginal;
+	
 	
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
@@ -101,6 +103,8 @@ var WysiwygEditor;
 		wysiwygEditor.onlyPreview = (onlyPreview == true);
 		wysiwygEditor.whenLoaded = whenLoaded;
 		
+		wysiwygEditor.captureConsoleLog = options.captureConsoleLog || true;
+		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
 		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(sourceFile.text); 
@@ -112,6 +116,7 @@ var WysiwygEditor;
 		
 		wysiwygEditor.closed = false; // If the WysiwygEditor has been closed or not
 		wysiwygEditor.id = ++wysiwygEditorCounter;
+		
 		
 		
 		if(compiledSource) {
@@ -1541,7 +1546,7 @@ else throw err;
 		attachFileChangeListener(wysiwygEditor);
 			attachFileSaveListener(wysiwygEditor);
 			
-		// Remove the fileChange event listener when closing the content-editable window
+		// Remove the fileChange and fileSave event listener when closing the content-editable window
 		previewWin.window.onbeforeunload = function() {
 			if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
 			else wysiwygEditor.close();
@@ -1559,9 +1564,18 @@ else throw err;
 			}
 		});
 			
+			if(wysiwygEditor.captureConsoleLog) {
+			consoleLogOriginal = previewWin.window.console.log;
+				previewWin.window.console.log = function() {
+					console.log(typeof wysiwygEditor.consoleLog);
+					wysiwygEditor.consoleLog(arguments)
+				};
+				previewWin.window.console.warn = function() {wysiwygEditor.captureConsoleLog(arguments)};
+			}
+			
 			callback(null);
 			
-	}
+		}
 	}
 	
 	WysiwygEditor.prototype.dance = function dance() {
@@ -1583,8 +1597,8 @@ else throw err;
 			// The user probably have an open html tag above the body element
 			// or the document is not yet fully loaded !?
 			
-				throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
-				}
+			throw new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML);
+		}
 		
 		var body = bodyTags[0];
 		
@@ -1710,6 +1724,136 @@ else throw err;
 		if(callback) callback();
 		
 	}
+	
+	WysiwygEditor.prototype.consoleLog = function consoleLog(arg) {
+		var wysiwygEditor = this;
+		
+		// Console log takes many arguments and concatenates them
+		console.log("Console log detected!");
+		var msg = "";
+		for (var i=0; i<arg.length; i++) {
+			if(typeof arg[i] == "string") msg = msg + " " + arg[i];
+			else if(typeof arg[i] == "object") {
+				var stringifyError = false;
+				try {
+					var jsonStr = JSON.stringify(arg[i]);
+				}
+				catch(err) {
+					stringifyError = true;
+				}
+				if(stringifyError) {
+					msg = msg + " " + arg[i].toString();
+				}
+				else msg = msg + " " + jsonStr;
+			}
+			else {
+				msg = msg + " " + arg[i].toString();
+			}
+		}
+		if(msg.length > 1) msg = msg.slice(1, msg.length); // Remove the first space
+		
+		//consoleLogOriginal(msg);
+		consoleLogOriginal.apply(undefined, arg);
+		
+		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
+		// Figure out what script made the log
+		/*
+			Error
+			at console.theWindow.window.console.log (http://192.168.0.3:8080/plugin/web_preview.js:67:17)
+			at HTMLHeadingElement.h.onclick (http://192.168.0.3:8080/wpmym3uyoq/welcome.html:13:13)
+			
+			Error
+			at WysiwygEditor.consoleLog (WysiwygEditor.js:1767)
+			at console.previewWin.window.console.log (WysiwygEditor.js:1571)
+			at window.onload (:8080/bmqxrp638r/test.js:5)
+			at WysiwygEditor.consoleLog (WysiwygEditor.js:1767)
+			at console.previewWin.window.console.log (WysiwygEditor.js:1571)
+			at window.onload (:8080/bmqxrp638r/test.js:5)
+			at WysiwygEditor.consoleLog (WysiwygEditor.js:1837)
+			at console.previewWin.window.console.log (WysiwygEditor.js:1571)
+			at window.onload (:8080/bmqxrp638r/test.js:5)
+			
+		*/
+		var stack = (new Error("")).stack;
+		var arrStack = stack.split("\n");
+		
+		for(var i=0; i<arrStack.length; i++) console.log(i + " " + arrStack[i]);
+		
+		var stackLineWithFile;
+		for (var i=0, index = 0; i<arrStack.length; i++) {
+			
+				index = arrStack[i].trim().indexOf("at console.previewWin.window.console.log"); // Chrome
+			if(index == -1) index = arrStack[i].indexOf("previewWin.window.console.log@"); // Firefox
+				
+				console.log("index=" + index);
+				if(index != -1) {
+					stackLineWithFile = arrStack[i+1];
+					break;
+				}
+			}
+		
+		if(stackLineWithFile) {
+			var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
+			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
+			
+			console.log("urlPath=" + urlPath);
+			console.log("folder=" + folder);
+			
+			var reFile = new RegExp("\\(?" + urlPath + "(.*):(\\d*):(\\d*)\\)?");
+			console.log(reFile);
+			console.log(stackLineWithFile);
+			var matchFile = stackLineWithFile.match(reFile);
+			if(!matchFile) throw new Error("Could not get file info from stackLineWithFile=" + stackLineWithFile);
+			console.log(matchFile);
+			var filePath = folder + matchFile[1];
+			var row = parseInt(matchFile[2])-1;
+			var col = parseInt(matchFile[3]);
+			console.log("filePath=" + filePath);
+			
+			
+			if(!EDITOR.files.hasOwnProperty(filePath)) return console.log("File not opened in the editor: " + filePath);
+			
+			var file = EDITOR.files[filePath];
+			//if(file != EDITOR.currentFile) return console.log("File is not in view: " + filePath);
+			
+			//if(!(row >= file.startRow && row <= (file.startRow+EDITOR.view.visibleRows))) return console.log("The row is not in veiw: row=" + row + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+			
+			col = col - file.grid[row].indentationCharacters.length;
+			if(col < 0) { // Sanity check
+				throw new Error("col=" + col + " file.grid[" + row + "].indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) +
+				" (" + file.grid[row].indentationCharacters.length + ")");
+			}
+			var rowText = file.rowText(row);
+			var matchText = rowText.match(/console.log ?\( ?(['"`]?)(.*)\1\)/);
+			if(!matchText) throw new Error("Unabled to find console.log on line=" + (row+1) + " in " + file.path + " matchText=" + matchText + " rowText=" + rowText + "");
+			var quote = matchText[1];
+			var logText = matchText[2];
+			
+			/*
+				// Trying to do something fancy like displaying the values ontop of the variables
+				
+				var jsdiff = JsDiff ? JsDiff : require('diff');
+				var diff = jsdiff.diffChars(logText, msg);
+				console.log(diff);
+				var tot = 0;
+				var removedLength = 0;
+				var addedLength = 0;
+				for (var i=0; i<.diff.length; i++) {
+				if(diff[i].added) addedLength += diff[i].count;
+				else if(diff[i].removed) removedLength++;
+				else {
+				
+				}
+				}
+			*/
+			
+			EDITOR.addInfo(row, col, msg, file);
+			
+		}
+		else throw new Error("Did not find the file location in stack=" + stack);
+		
+	}
+	
 	
 	
 	function attachFileChangeListener(wysiwygEditor) {
@@ -1881,17 +2025,6 @@ else throw err;
 		return html;
 	}
 	
-	EDITOR.addTest(function testInsertLineBreaks(callback) {
-		// bug: Adding a space in the content-editable moved it's cursor to the top
-		var str1 = "\n<p>abc <br></p>\n";
-		
-		var str2 = insertLineBreaks(str1, "\n");
-		
-		if(str1 != str2) throw new Error("Trimmed white space where it should not!\nstr1=" + UTIL.lbChars(str1) + "\nstr2=" + UTIL.lbChars(str2));
-		
-		callback(true);
-		
-	});
 	
 	function insertLineBreaks(html, LB) {
 		
@@ -2082,8 +2215,22 @@ return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + 
 	}
 	
 	
+	
+	
+	
 	// ### Test(s)
 	
+	EDITOR.addTest(function testInsertLineBreaks(callback) {
+		// bug: Adding a space in the content-editable moved it's cursor to the top
+		var str1 = "\n<p>abc <br></p>\n";
+		
+		var str2 = insertLineBreaks(str1, "\n");
+		
+		if(str1 != str2) throw new Error("Trimmed white space where it should not!\nstr1=" + UTIL.lbChars(str1) + "\nstr2=" + UTIL.lbChars(str2));
+		
+		callback(true);
+		
+	});
 	
 	EDITOR.addTest(function testStartRowN(callback) {
 		var html = '<html>\n<body>\nHello\nWorld\n</body>\n</html>';
