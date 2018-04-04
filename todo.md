@@ -38,6 +38,10 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+write test that makes sure no extra line breaks are added during dance.
+
+write test that checks if console log capturing works
+
 WysiwygEditor annoyingly adds line-break padding around the body !!...!!
 
 Trying to make WysiwygEditor capture console logs ...
