@@ -3768,13 +3768,26 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				return callback(new Error("Unable to access " + url + " \n" + err.message));
 				}
 			
-			console.log("New window: " + (new Date()).getTime() + " readyState=" + theWindow.document.readyState);
+			/*
+				Problem: It's impossible to tell if the window has finished loading. eg. if we attach a load event listener to it, it might never fire!
+				Chrome always gives document.readyState=complete even if it has not finished loading.
+				Firefox gives document.readyState=uninitialized
+				We can however check for theWindow.location.href that will be about:blank until the window has loaded!
+				(window.location.href will be populated at DOMContentLoaded)
+				
+			*/
+			console.log("theWindow.location.href = " + theWindow.location.href);
+			console.log("New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState);
 			
+			if(theWindow.location.href == "about:blank") theWindow.loaded = false; 
+else theWindow.loaded = true;
+
 			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
 			if(url == "about:blank") theWindow.isBlankUrl = true;
 			
 			theWindow.addEventListener("load", function() {
-				console.log("New window: " + (new Date()).getTime() + " load event!");
+				console.log("New window: " +  UTIL.timeStamp() + " load event!");
+				console.log("theWindow.location.href = " + theWindow.location.href);
 				/*
 					document.readyState === "complete" does not mean everything has loaded!
 					So because it's impossible to tell if the window has loaded or not,
@@ -3783,10 +3796,14 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 					What if the window was loaded until we got here (theWindow.addEventListener("load") ? Nightmare!
 					
 				*/
+if(theWindow.loaded === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
 				theWindow.loaded = true; 
 				if(waitUntilLoaded) callback(null, theWindow);
 			}, false);
-			theWindow.addEventListener("DOMContentLoaded", function() { console.log("New window: " + (new Date()).getTime() + " DOMContentLoaded event!"); }, false);
+			theWindow.addEventListener("DOMContentLoaded", function() {
+				console.log("New window: " + UTIL.timeStamp() + " DOMContentLoaded event!"); 
+				console.log("theWindow.location.href = " + theWindow.location.href);
+			}, false);
 			
 				console.log("theWindow.document.domain=" + theWindow.document.domain);
 				console.log("document.domain=" + document.domain);
@@ -3805,8 +3822,9 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		function open(url) {
 			if(!url) url = "about:blank";
 			var windowId = "previewWindow" + (EDITOR.openWindows.length + 1);
+			
 			return window.open(url, windowId, "height=" + previewHeight + ",width=" + previeWidth + ",top=" + posY + ",left=" + posX + ",location=no");
-		}
+			}
 		
 	}
 	

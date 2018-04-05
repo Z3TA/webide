@@ -19,7 +19,6 @@ if(typeof EDITOR == "undefined") {
 }
 
 var UTIL = {
-	
 	toSystemPathDelimiters: function toSystemPathDelimiters(path) {
 		
 		// Makes sure the path uses the right path delimiters ...
@@ -1247,6 +1246,11 @@ else {
 		if(str.length > limit) str = str.substr(0,limit) + " ... (" + str.length + " characters)";
 		
 		return str;
+	},
+	timeStampCounter: 0,
+	timeStamp: function timeStamp() {
+		// For measuring the order of things
+		return (new Date()).getTime() + "-" + (++this.timeStampCounter);
 	}
 	
 }

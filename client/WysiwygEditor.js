@@ -1491,16 +1491,64 @@ else throw err;
 		
 		var previewWin = wysiwygEditor.previewWin;
 		
-		console.log("readyState=" + previewWin.document.readyState);
+		console.log("previewWin.document.readyState=" + previewWin.document.readyState);
 		
-		if(previewWin.loaded) attachEvents();
+		/*
+			We want to overload the console.log as fast as possible so we can capture early console.log's
+			The window might already have loaded! Thus we missed the early console.log's !!
+		*/
+		if(wysiwygEditor.captureConsoleLog) {
+			consoleLogOriginal = previewWin.window.console.log;
+			previewWin.window.console.log = consoleLogCapturer;
+			previewWin.window.console.warn = consoleLogCapturer;
+			
+			// For sanity
+			if(previewWin.loaded === false) {
+				previewWin.addEventListener("load", function checkConsoleLogOverloaded() {
+					if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
+					else console.log("consoleLogCapturer attached successfully!? (it attached before load) " +  + UTIL.timeStamp());
+				});
+			}
+			else if(previewWin.loaded === true) {
+				console.log("consoleLogCapturer attached successfully!? (it attached after load) " + UTIL.timeStamp());
+			}
+			/*
+				1522935134102 attached
+				1522935134322 console.log hi
+				So why is it not captured !!?!?!?!?!?!?!?
+				*/
+			setTimeout(function checkAgainConsoleLogOverloaded() {
+				if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
+				else console.log("consoleLogCapturer *still* attached ! " +  + UTIL.timeStamp());
+			},30);
+			// Just adding the code above seems to make it capture it!!! why ?
+			
+		}
+		
+		// Capture errors on the content-editable so that they do not go by unoticed
+		previewWin.window.addEventListener("error", function(errorEvent) {
+			// https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
+			if(wysiwygEditor.onErrorEvent) wysiwygEditor.onErrorEvent(errorEvent);
+			else {
+				var message = errorEvent.message;
+				alertBox(message ? message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
+				console.error(errorEvent.error);
+			}
+		});
+		
+		
+		if(previewWin.loaded === true) attachEvents();
 		else previewWin.addEventListener("load", function windowLoaded() {
 			 attachEvents();
 		});
 		
+		function consoleLogCapturer() {
+			wysiwygEditor.consoleLog(arguments);
+		}
+		
 		function attachEvents() {
 		
-			if(!previewWin.loaded) throw new Error("The preview window has not loaded!");
+			if(previewWin.loaded !== true) throw new Error("The preview window has not loaded!");
 			
 			var doc = previewWin.document;
 		var win = previewWin.window;
@@ -1575,34 +1623,23 @@ else throw err;
 		attachFileChangeListener(wysiwygEditor);
 			attachFileSaveListener(wysiwygEditor);
 			
-		// Remove the fileChange and fileSave event listener when closing the content-editable window
-		previewWin.window.onbeforeunload = function() {
-			if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
+			/*
+				Remove the fileChange and fileSave event listener when closing the content-editable window
+			
+				Note: If the window loads fast, onbeforeunload will be called (Chrome)!
+				We put it behind a timeout in the hopes of it not firing 
+			*/
+		
+			setTimeout(function afterWeirdStuff() {
+			previewWin.window.onbeforeunload = function onbeforeunload() {
+				console.warn("onbeforeunload called!");
+				if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
 			else wysiwygEditor.close();
 			//return true; // Shows a "are you sure" message
 		};
 		
-		// Capture errors on the content-editable so that they do not go by unoticed
-		previewWin.window.addEventListener("error", function(errorEvent) {
-			// https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
-			if(wysiwygEditor.onErrorEvent) wysiwygEditor.onErrorEvent(errorEvent);
-			else {
-				var message = errorEvent.message;
-				alertBox(message ? message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
-				console.error(errorEvent.error);
-			}
-		});
-			
-			if(wysiwygEditor.captureConsoleLog) {
-			consoleLogOriginal = previewWin.window.console.log;
-				previewWin.window.console.log = function() {
-					console.log(typeof wysiwygEditor.consoleLog);
-					wysiwygEditor.consoleLog(arguments)
-				};
-				previewWin.window.console.warn = function() {wysiwygEditor.captureConsoleLog(arguments)};
-			}
-			
 			callback(null);
+			}, 1);
 			
 		}
 	}
@@ -1787,20 +1824,11 @@ else throw err;
 		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
 		// Figure out what script made the log
 		/*
-			Error
-			at console.theWindow.window.console.log (http://192.168.0.3:8080/plugin/web_preview.js:67:17)
-			at HTMLHeadingElement.h.onclick (http://192.168.0.3:8080/wpmym3uyoq/welcome.html:13:13)
 			
 			Error
-			at WysiwygEditor.consoleLog (WysiwygEditor.js:1767)
-			at console.previewWin.window.console.log (WysiwygEditor.js:1571)
-			at window.onload (:8080/bmqxrp638r/test.js:5)
-			at WysiwygEditor.consoleLog (WysiwygEditor.js:1767)
-			at console.previewWin.window.console.log (WysiwygEditor.js:1571)
-			at window.onload (:8080/bmqxrp638r/test.js:5)
-			at WysiwygEditor.consoleLog (WysiwygEditor.js:1837)
-			at console.previewWin.window.console.log (WysiwygEditor.js:1571)
-			at window.onload (:8080/bmqxrp638r/test.js:5)
+			at WysiwygEditor.consoleLog (http://192.168.0.3:8080/WysiwygEditor.js:1820:16)
+			at consoleLogCapturer (http://192.168.0.3:8080/WysiwygEditor.js:1532:18)
+			at http://192.168.0.3:8080/kvkvx3pet0/inlineConsoleLog.htm:4:9
 			
 		*/
 		var stack = (new Error("")).stack;
@@ -1811,8 +1839,8 @@ else throw err;
 		var stackLineWithFile;
 		for (var i=0, index = 0; i<arrStack.length; i++) {
 			
-				index = arrStack[i].trim().indexOf("at console.previewWin.window.console.log"); // Chrome
-			if(index == -1) index = arrStack[i].indexOf("previewWin.window.console.log@"); // Firefox
+			index = arrStack[i].trim().indexOf("at consoleLogCapturer"); // Chrome
+			if(index == -1) index = arrStack[i].indexOf("consoleLogCapturer@"); // Firefox
 				
 				console.log("index=" + index);
 				if(index != -1) {
@@ -1822,6 +1850,7 @@ else throw err;
 			}
 		
 		if(stackLineWithFile) {
+			
 			var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
 			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
 			
@@ -1839,7 +1868,10 @@ else throw err;
 			var col = parseInt(matchFile[3]);
 			console.log("filePath=" + filePath);
 			
-			
+			if(!wysiwygEditor.sourceFile.path.match(/\/|\\/)) {
+				// Source file path has no slash in it! (some tests doesn't add the root slash)
+				if(filePath.charAt(0) == "/" || filePath.charAt(0) == "\\") filePath = filePath.slice(1);
+			}
 			if(!EDITOR.files.hasOwnProperty(filePath)) return console.log("File not opened in the editor: " + filePath);
 			
 			var file = EDITOR.files[filePath];
