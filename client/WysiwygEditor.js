@@ -378,6 +378,8 @@ var WysiwygEditor;
 	
 	
 	WysiwygEditor.prototype.getCaretPosition = function getCaretPosition() {
+		console.warn("WysiwygEditor.getCaretPosition");
+		
 		var wysiwygEditor = this;
 		
 		// Returns the (parent) element center x,y coordinate and position in the text node
@@ -1278,22 +1280,33 @@ wysiwygEditor.onClose();
 		
 		if(doc.documentElement) doc = doc.documentElement;
 		
-		return doc.innerHTML;
+		var prewHtml = doc.innerHTML;
+		
+		console.log("prewHtml:" + prewHtml);
+		
+		return prewHtml;
 	}
 	
 	WysiwygEditor.prototype.getContentEditableCode = function getContentEditableCode() {
-		// Returns the innerHTML of body, where the first line break is removed, and also the last line break if there's any
-		// The line-breaks needs to be trimmed for the diff to work (see function getSourceCodeBody)
-		
 		var wysiwygEditor = this;
 		
-		var win = wysiwygEditor.previewWin.window;
-		var doc = win.document; // previewWin.document is not available in nw.js gui
-		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+		// innerHTML will also get the line-break after <body> and before </body> !!!?
 		
-		console.log(doc);
+		//var win = wysiwygEditor.previewWin.window;
+		//var doc = win.document; // previewWin.document is not available in nw.js gui
+		//var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+		//console.log(body);
+		//var prewHTML = body.innerHTML;
 		
-		var prewHTML = body.innerHTML;
+		var html = wysiwygEditor.getPreviewWindowHtml();
+		
+		// Sanity check:
+		if(wysiwygEditor.lineBreak == "\n" && html.indexOf("\r") != -1) {
+throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) + " but html contains CR!");
+		}
+		
+		var prewHTML = getElementContent(html, wysiwygEditor.bodyTagPreview, wysiwygEditor.lineBreak);
+		
 		
 		/*
 			Problem: body.innerHTML returns all text inside the element including first line break and indentation characters
@@ -1356,14 +1369,17 @@ wysiwygEditor.onClose();
 	}
 	
 	WysiwygEditor.prototype.getSourceCodeBody = function getSourceCodeBody() {
-		
 		var wysiwygEditor = this;
+		
+		// Sanity check:
+		if(wysiwygEditor.lineBreak == "\n" && wysiwygEditor.sourceFile.text.indexOf("\r") != -1) {
+			throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) + " but sourceFile.text contains CR!");
+		}
 		
 		var srcHTML = getElementContent(wysiwygEditor.sourceFile.text, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak)
 		
 		return srcHTML;
-		
-	}
+		}
 	
 	WysiwygEditor.prototype.bodyExistInSource = function bodyExistInSource(close) {
 		var wysiwygEditor = this;
@@ -1519,9 +1535,12 @@ else throw err;
 			
 			var body = bodyTags[0];
 		
-			if(wysiwygEditor.isCompiled) wysiwygEditor.dance();
+			/*
+				"dancing" will mess up the source code, so we want to avoid it if possible.
+				I'ts only needed if we want to edit in WYSIWYG mode !?
+			*/
+			if(!wysiwygEditor.onlyPreview) wysiwygEditor.dance();
 			
-		body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
 		
 		if(!wysiwygEditor.onlyPreview) {
 			// Make body editable and attatch event listeners
@@ -1539,6 +1558,8 @@ else throw err;
 		}
 		else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
 		
+			body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
+			
 		// Capture F5 and make a soft reload
 		previewWin.window.onkeydown = function keyDown(keyDownEvent) {
 			//console.log("previewWin.window.onkeydown:", keyDownEvent);
@@ -1866,8 +1887,8 @@ else throw err;
 	
 	function attachFileChangeListener(wysiwygEditor) {
 		// fileChange wants an uniqe function name ...
-		console.log("Unique function name for fileChange event:");
-		var name = "wysiwygEditorFileChnage" + wysiwygEditorCounter;
+		var name = "wysiwygEditorFileChange" + wysiwygEditor.id;
+		console.log("Unique function name for fileChange event: " + name);
 		var customAction = function(file, type, characters, caretIndex, row, col) {
 			wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
 		}
@@ -1884,8 +1905,8 @@ else throw err;
 	
 	function attachFileSaveListener(wysiwygEditor) {
 		// All EDITOR events wants an uniqe function name ...
-		console.log("Unique function name for fileSave event:");
-		var name = "wysiwygEditorFileSave" + wysiwygEditorCounter;
+		var name = "wysiwygEditorFileSave" + wysiwygEditor.id;
+		console.log("Unique function name for fileSave event: " + name);
 		var customAction = function(file) {
 			wysiwygEditor.anyFileSaved(file);
 		}

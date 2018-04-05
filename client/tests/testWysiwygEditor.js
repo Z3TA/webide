@@ -112,10 +112,9 @@ EDITOR.addTest(function wysiwygCompiledHeaderFooter(callback) {
 				
 				setTimeout(function() {
 					if(!wysiwygEditorLoadedCalled) {
-						if(newWindow) newWindow.close();
-						throw new Error("wysiwygEditor did not load in a timely manner");
+						throw new Error("wysiwygEditor did not load in a timely manner.  Load the dev console on the opened window and check for errors!");
 					}
-				}, 5000);
+				}, 8000);
 				
 				var wysiwygEditor = new WysiwygEditor({
 					sourceFile: sourceFile, 
@@ -181,10 +180,10 @@ EDITOR.addTest(function wysiwygRemoveLineReplaceLine(callback) {
 	
 	setTimeout(function() {
 		if(!wysiwygEditorLoadedCalled) {
-			if(newWindow) newWindow.close();
-			throw new Error("wysiwygEditor did not load in a timely manner");
+			throw new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors!");
+			// The test can however succeed without any errors! It just takes too long. WHY??
 		}
-	}, 5000);
+	}, 8000);
 	
 	function windowOpened(err, theWindow) {
 		if(err) throw err;
@@ -239,7 +238,7 @@ bodyTagPreview: compliedSourceBodyTag
 					var doc = previewWin.document;
 					var contentElement = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 					
-					contentElement.innerHTML = "<p>Paragraph</p>\n\n\<p>foo</p>";
+					contentElement.innerHTML = "\n<p>Paragraph</p>\n\n\<p>foo</p>\n";
 					
 					// Trigger oninput
 					wysiwygEditor.previewInput();
@@ -252,10 +251,9 @@ bodyTagPreview: compliedSourceBodyTag
 					
 					
 					EDITOR.closeFile(sourceFile.path);
-					callback(true);
-					newWindow.close(); // Should already be closed as WysiwygEditor had to reload it
 					previewWin.close();
 					cleanUp();
+					callback(true);
 					
 					/*
 						setTimeout(function checkifWindowClosed() {
@@ -272,7 +270,7 @@ bodyTagPreview: compliedSourceBodyTag
 	function cleanUp() {
 	}
 	
-});
+}, 1);
 
 EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
 	var fileHtml = '<head></head><body>\n\n<p>Hello World!</p>\n</body>';
@@ -303,7 +301,7 @@ EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
 		
 		callback(true);
 		});
-}, 1);
+});
 
 function launchServe(sourcePage, compiledPage, testFile, callback) {
 	
@@ -330,7 +328,7 @@ function launchServe(sourcePage, compiledPage, testFile, callback) {
 				
 				setTimeout(function() {
 					if(!wysiwygEditorLoadedCalled) {
-						callback(new Error("wysiwygEditor did not load in a timely manner"));
+						callback(new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors!"));
 					}
 				}, 5000);
 				
