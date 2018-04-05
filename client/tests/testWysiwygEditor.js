@@ -305,7 +305,7 @@ EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
 
 EDITOR.addTest(function inlineConsoleLog(callback) {
 	// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
-	var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},200);\n</script>\n\n<p>Hello World!</p>\n</body>';
+	var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Hello World!</p>\n</body>';
 	
 	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
 		if(err) throw err;
@@ -321,7 +321,7 @@ if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 		cleanup();
 		
 		callback(true);
-		}, 250);
+		}, 100);
 		
 	});
 }, 1);
@@ -351,7 +351,7 @@ function launchServe(sourcePage, compiledPage, testFile, callback) {
 				
 				setTimeout(function() {
 					if(!wysiwygEditorLoadedCalled) {
-						callback(new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors!"));
+						callback(new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors! You might also have to enable popups!"));
 						callback =  null; // Prevent it from calling again
 					}
 				}, 5000);

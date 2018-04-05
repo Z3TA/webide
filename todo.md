@@ -38,11 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-write test that checks if console log capturing works
-
-WysiwygEditor annoyingly adds line-break padding around the body !!...!!
-
-Trying to make WysiwygEditor capture console logs ...
+Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
 
 Should probably make WysiwygEditor/preview plugin based !?
 
