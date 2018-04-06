@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Update preview autocomplete to only autcomplete if the file belongs to the preview document. For example a script
-
 Test are run async (all at the same time). Some tests want to be run alone.
 Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
 

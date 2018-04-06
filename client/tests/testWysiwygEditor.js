@@ -392,10 +392,9 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 		var atCaret = autoComplete(file, index);
 		UTIL.assert(atCaret.word, '.innerHTML');
 		
-		EDITOR.closeFile(file.path);
+		cleanup();
 		callback(true);
-		
-	});
+		});
 	
 	function autoComplete(file, index) {
 		

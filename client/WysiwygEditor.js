@@ -1973,19 +1973,33 @@ else throw err;
 	}
 
 	WysiwygEditor.prototype.autoComplete = function autoComplete(file, word, wordLength, gotOptions) {
-var wysiwygEditor = this;
+		/*
+			Autocomplete global variables from the window in preview
+		*/
+		var wysiwygEditor = this;
 	
 		var theWindow = wysiwygEditor.previewWin;
-		
-		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
 		
 		if(!theWindow) throw new Error("The preview window has been closed!?"); // Sanity check
 		
 		if(wordLength == 0) return;
 		
-		// Auto complete global variables
+		if(file != wysiwygEditor.sourceFile) {
+			// Check if file has anything to do with the web page in preview (eg a script)
+			var related = false;
+		var fileName = UTIL.getFilenameFromPath(file.path);
+			var scripts = theWindow.document.getElementsByTagName('script');
+		for (var i=0; i<scripts.length; i++) {
+			//console.log(scripts[i].src);
+			if(scripts[i].src.indexOf(fileName) != -1) {
+					related = true;
+				break;
+				}
+			}
+		if(!related) return;
+		}
 		
-		// todo: Check if file has anything to do with the web page in preview (eg a script)
+		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
 		
 		var options = [];
 		
