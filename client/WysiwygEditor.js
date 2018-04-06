@@ -1976,9 +1976,12 @@ else throw err;
 		/*
 			Autocomplete global variables from the window in preview
 		*/
+		
 		var wysiwygEditor = this;
 	
 		var theWindow = wysiwygEditor.previewWin;
+		
+		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
 		
 		if(!theWindow) throw new Error("The preview window has been closed!?"); // Sanity check
 		
@@ -1998,8 +2001,6 @@ else throw err;
 			}
 		if(!related) return;
 		}
-		
-		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
 		
 		var options = [];
 		

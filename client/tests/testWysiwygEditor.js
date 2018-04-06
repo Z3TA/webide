@@ -364,7 +364,7 @@ EDITOR.addTest(function inlineErrorMessages(callback) {
 		
 		setTimeout(function checkEditorInfo() {
 			console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
-			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info=" + EDITOR.info);
 			
 			cleanup();
 			
@@ -408,12 +408,37 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 		return file.wordAtCaret(file.caret, wordDelimiters);
 	}
 	
-	}, 1);
+	});
 
+	EDITOR.addTest(function pressEnterTwiceInWYSIWYG(callback) {
+		/*
+			
+			Pressing enter *twice* seem to remove the line breaks before </main> end tag !?
+			
+		*/
+		var fileHtml = '<head></head><body>\n<p>Test pressEnterTwiceInWYSIWYG</p>\n</body>';
+		var compiledHtml = '<head></head><body>\n<p>Header</p>\n<main>\n<p>Test pressEnterTwiceInWYSIWYG</p>\n</main>\n<p>Footer</p>\n</body>';
+		
+		launchServe(fileHtml, compiledHtml, "pressEnterTwiceInWYSIWYG.htm", false, function(err, preview, cleanup) {
+			if(err) throw err;
+			
+			
+			
+			//cleanup();
+			//callback(true);
+		});
+		
+	}, 1);
 	
+	function launchServe(sourcePage, compiledPage, testFile, onlyPreview, callback) {
 	
-function launchServe(sourcePage, compiledPage, testFile, callback) {
-	
+		if(typeof onlyPreview == "function" && callback == undefined) {
+			callback = onlyPreview;
+			onlyPreview = undefined;
+			}
+		
+		if(onlyPreview == undefined) onlyPreview = true;
+		
 	var testFolder = "/testfolder/wysiwyg/";
 	
 	EDITOR.createPath(testFolder, function folderCreated(err, path) {
@@ -445,7 +470,7 @@ function launchServe(sourcePage, compiledPage, testFile, callback) {
 				var opt = {
 					sourceFile: sourceFile,
 					bodyTagSource: "body",
-					onlyPreview: true,
+						onlyPreview: onlyPreview,
 					url: url,
 					whenLoaded: wysiwygEditorLoaded,
 				}

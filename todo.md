@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+A test for pressing enter two times in WYSIWYG ... It seems to remove the precious new-line characters after <main> and before </main>
+
 Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!

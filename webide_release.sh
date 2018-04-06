@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo -n "Do all tests pass (y/n)? "
+echo -n "Have you done extensive manual testing and do All automatic tests pass (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi
 
