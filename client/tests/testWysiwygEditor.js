@@ -324,7 +324,33 @@ if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 		}, 100);
 		
 	});
+});
+
+/*
+	EDITOR.addTest(function inlineConsoleLogFast(callback) {
+	// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
+	var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},10);\n</script>\n\n<p>Hello World!</p>\n</body>';
+	
+	launchServe(fileHtml, fileHtml, "inlineConsoleLogFast.htm", function(err, preview, cleanup) {
+		if(err) throw err;
+		
+		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
+		
+		console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
+		
+		setTimeout(function checkEditorInfo() {
+			console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
+			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+			
+			cleanup();
+			
+			callback(true);
+		}, 100);
+		
+	});
 }, 1);
+*/
+
 
 function launchServe(sourcePage, compiledPage, testFile, callback) {
 	

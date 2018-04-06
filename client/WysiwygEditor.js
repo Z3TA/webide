@@ -1517,12 +1517,21 @@ else throw err;
 				1522935134322 console.log hi
 				So why is it not captured !!?!?!?!?!?!?!?
 				*/
+			/*
 			setTimeout(function checkAgainConsoleLogOverloaded() {
 				if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
 				else console.log("consoleLogCapturer *still* attached ! " +  + UTIL.timeStamp());
 			},30);
+			*/
 			// Just adding the code above seems to make it capture it!!! why ?
-			
+			// Because it now always attaches before load !?
+			// ok, it now seems to always attach before load, even though we have uncommented the code
+			/*
+				consoleLogCapturer attached successfully!? (it attached after load) 1523000404122-1
+				hi 1523000404155
+				ok, so if it attached after load, it will not capture the console.log, even though console log comes after ...
+				
+			*/
 		}
 		
 		// Capture errors on the content-editable so that they do not go by unoticed
