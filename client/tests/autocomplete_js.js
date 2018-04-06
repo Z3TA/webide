@@ -61,7 +61,7 @@
 			file.moveCaret(undefined, 1); // Move into the function
 			
 			file.putCharacter(firstArg.substr(0,1)); // a
-			
+			EDITOR.showFile(file);
 			EDITOR.mock("keydown", {charCode: key_tab}); // tab
 			
 			var textOnRow = file.rowText(file.caret.row).trim();

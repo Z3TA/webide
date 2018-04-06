@@ -1,4 +1,4 @@
-
+(function() {
 
 EDITOR.addTest(function previewCompiled(callback) {
 	/*
@@ -273,8 +273,8 @@ bodyTagPreview: compliedSourceBodyTag
 });
 
 EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
-	var fileHtml = '<head></head><body>\n\n<p>Hello World!</p>\n</body>';
-	//var fileHtml = '<html>\n<body>\n\n<p>Hello World!</p>\n</body></html>';
+		var fileHtml = '<head></head><body>\n\n<p>Test wysiwygNoExtraLineBreaks</p>\n</body>';
+		//var fileHtml = '<html>\n<body>\n\n<p>Test wysiwygNoExtraLineBreaks</p>\n</body></html>';
 	
 	launchServe(fileHtml, fileHtml, "wysiwygNoExtraLineBreaks.htm", function(err, preview, cleanup) {
 		if(err) throw err;
@@ -305,7 +305,7 @@ EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
 
 EDITOR.addTest(function inlineConsoleLog(callback) {
 	// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
-	var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Hello World!</p>\n</body>';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
 	
 	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
 		if(err) throw err;
@@ -353,9 +353,9 @@ if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 
 EDITOR.addTest(function inlineErrorMessages(callback) {
 	// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
-	var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error("This is an error! " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Hello World!</p>\n</body>';
+		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error("This is an error! " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Test inlineErrorMessages</p>\n</body>';
 	
-	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
+		launchServe(fileHtml, fileHtml, "inlineErrorMessages.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
 		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
@@ -378,9 +378,9 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 	
 	var var1 = "ocument.act";
 	var var2 = 'document.getElementById("foobar").innerH';
-	var fileHtml = '<head></head><body>\n<script>\nd' + var1 + '\n' + var2 + '\n</script>\n<div id="foobar"></div>\n</body>';
+		var fileHtml = '<head></head><body>\n<script>\nd' + var1 + '\n' + var2 + '\n</script>\n<div id="foobar">Test previewAutocomplete</div>\n</body>';
 	
-	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
+	launchServe(fileHtml, fileHtml, "previewAutocomplete.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
 		var file = preview.sourceFile;
@@ -403,13 +403,16 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 		var wordDelimiters = " \t\r\n;:()"
 		
 		file.moveCaretToIndex(index);
+			EDITOR.showFile(file);
 		EDITOR.mock("keydown", {charCode: key_tab}); // tab to autocomplete
 		
 		return file.wordAtCaret(file.caret, wordDelimiters);
 	}
 	
-}, 1);
+	}, 1);
 
+	
+	
 function launchServe(sourcePage, compiledPage, testFile, callback) {
 	
 	var testFolder = "/testfolder/wysiwyg/";
@@ -473,10 +476,7 @@ opt.compiledSource = compiledPage;
 			});
 		});
 	}
-	
-	
-	
 }
 
-
+})();
 
