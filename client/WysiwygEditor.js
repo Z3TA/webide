@@ -1225,7 +1225,6 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 	}
 	
 	
-	
 	WysiwygEditor.prototype.close = function close() {
 		// Clean up and close the window ...
 		
@@ -1237,6 +1236,7 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
 		if(wysiwygEditor.fileSaveEventListener) EDITOR.removeEvent("fileSave", wysiwygEditor.fileSaveEventListener);
+		if(wysiwygEditor.autoCompleteListener) EDITOR.removeEvent("autoComplete", wysiwygEditor.autoCompleteListener);
 		
 		/*
 			body.onmouseup = null;
@@ -1258,8 +1258,7 @@ wysiwygEditor.onClose();
 		}
 		
 		console.warn("WysiwygEditor" + wysiwygEditor.id + " closed!");
-		
-	}
+		}
 	
 	WysiwygEditor.prototype.isOpen = function isOpen() {
 		var wysiwygEditor = this;
@@ -1627,6 +1626,7 @@ else throw err;
 		
 		attachFileChangeListener(wysiwygEditor);
 			attachFileSaveListener(wysiwygEditor);
+			attachAutoCompleteListener(wysiwygEditor);
 			
 			/*
 				Remove the fileChange and fileSave event listener when closing the content-editable window
@@ -1971,6 +1971,123 @@ else throw err;
 			alertBox(sourceLink + "\n\n" + message + "");
 		}
 	}
+
+	WysiwygEditor.prototype.autoComplete = function autoComplete(file, word, wordLength, gotOptions) {
+var wysiwygEditor = this;
+	
+		var theWindow = wysiwygEditor.previewWin;
+		
+		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
+		
+		if(!theWindow) throw new Error("The preview window has been closed!?"); // Sanity check
+		
+		if(wordLength == 0) return;
+		
+		// Auto complete global variables
+		
+		// todo: Check if file has anything to do with the web page in preview (eg a script)
+		
+		var options = [];
+		
+		console.log("dingdong");
+		
+		var words = word.split(".");
+		var obj = theWindow;
+		var before = "";
+		for (var i=0; i<words.length-1; i++) {
+			before += words[i] + ".";
+			console.log("before=" + before);
+			obj = obj[words[i]];
+			if(!obj) {
+				console.log("Object does not exist: " + before);
+				return;
+			}
+		}
+		
+		console.log(obj);
+		
+		if(obj == null) {
+			console.warn("Unable to get window object. Has the window been closed!?");
+			return;
+		}
+		
+		var names = [];
+		
+		var beforeNoDot = before.slice(0,-1);
+		
+		if(typeof Object.getOwnPropertyNames != "undefined") {
+			console.log("Object.getOwnPropertyNames(" + beforeNoDot + ")");
+			addNamesFromArray(Object.getOwnPropertyNames(obj));
+		} else console.warn("Object.getOwnPropertyNames not supported by your browser!");
+		
+		if(typeof Object.keys == "undefined") console.warn("Object.keys not supported by your browser!");
+		else if(typeof obj.__proto__ == "undefined") console.warn("obj.__proto__ not supported by your browser!");
+		else {
+			console.log("Object.keys(" + beforeNoDot + ".__proto__)");
+			addNamesFromArray(Object.keys(obj.__proto__));
+		}
+		
+		if(typeof Object.getPrototypeOf != "undefined") {
+			console.log("Object.getPrototypeOf(" + beforeNoDot + "))");
+			addNamesFromObject(Object.getPrototypeOf(obj));
+			
+			if(typeof obj.__proto__ == "undefined") console.warn("obj.__proto__ not supported by your browser!");
+			else {
+				console.log("Object.getPrototypeOf(" + beforeNoDot + ".__proto__)");
+				addNamesFromObject(Object.getPrototypeOf(obj.__proto__));
+			}
+		} else console.warn("Object.getPrototypeOf not supported by your browser!");
+		
+		
+		var nameLength = wordLength - before.length;
+		var lookFor = word.slice(before.length);
+		for(var i=0, short; i<names.length; i++) {
+			short = names[i].slice(0,nameLength);
+			console.log(short + "=" + lookFor + " ? " + (short==lookFor) + " name=" + names[i]);
+			if(short == lookFor) {
+				if(typeof obj[names[i]] == "function") options.push([before + names[i] + "()", 1, args(obj[names[i]])]);
+				else options.push(before + names[i]);
+			}
+		}
+		
+		console.log("Found " + options.length + " results: " + JSON.stringify(options));
+		
+		return options;
+		
+		function addNamesFromArray(arr) {
+			var dup = 0;
+			for (var i=0; i<arr.length; i++) {
+				if(names.indexOf(arr[i]) == -1) names.push(arr[i]);
+				else dup++;
+			}
+			console.log("Added " + (arr.length-dup) + " of " + arr.length + " properties");
+		}
+		
+		function addNamesFromObject(obj) {
+			var dup = 0;
+			var tot = 0;
+			for (var name in obj) {
+				tot++;
+				if(names.indexOf(name) == -1) names.push(name);
+				else dup++;
+			}
+			console.log("Added " + (tot-dup) + " of " + tot + " properties");
+		}
+		
+		
+		function args(func) {
+			return (func + '')
+			.replace(/[/][/].*$/mg,'') // strip single-line comments
+			.replace(/\s+/g, '') // strip white space
+			.replace(/[/][*][^/*]*[*][/]/g, '') // strip multi-line comments
+			.split('){', 1)[0].replace(/^[^(]*[(]/, '') // extract the parameters
+			.replace(/=[^,]+/g, '') // strip any ES6 defaults
+			.split(',').filter(Boolean); // split & filter [""]
+		}
+		
+	}
+	
+	
 	
 	function attachFileChangeListener(wysiwygEditor) {
 		// fileChange wants an uniqe function name ...
@@ -2005,8 +2122,24 @@ else throw err;
 		
 		wysiwygEditor.fileSaveEventListener = func;
 		
-		wysiwygEditor.ignoreSourceFileChange = false;
 	}
+	
+	function attachAutoCompleteListener(wysiwygEditor) {
+	// All EDITOR events wants an uniqe function name ...
+		var name = "wysiwygEditorAutoComplete" + wysiwygEditor.id;
+		console.log("Unique function name for autoComplete event: " + name);
+		var customAction = function(file, word, wordLength, gotOptions) {
+			return wysiwygEditor.autoComplete(file, word, wordLength, gotOptions);
+		}
+		var func = new Function("action" + name, "return function " + name + "(file, word, wordLength, gotOptions){ return action" + name + "(file, word, wordLength, gotOptions) };")(customAction);
+		
+		if(wysiwygEditor.autoCompleteListener) EDITOR.removeEvent("autoComplete", wysiwygEditor.autoCompleteListener);
+		
+		var order = 1;
+		EDITOR.on("autoComplete", func, order);
+		
+		wysiwygEditor.autoCompleteListener = func;
+		}
 	
 	function changeCodeInBody(newBodyCode, html, bodyTag, lineBreak) {
 		

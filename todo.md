@@ -38,6 +38,15 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+be able to autocomplete: document.getElementById("topic").inn
+it breaks at )
+
+Autcomplete doesn't autocomplete inside <script> elements !? it just show a info bubble
+
+Don't autocomplete </script> unless it's on a new line (eg complete length=0) 
+
+implementing autocomplete to wysiwygEditor
+
 Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
 
 Should probably make WysiwygEditor/preview plugin based !?
@@ -56,6 +65,8 @@ Should we re-factor back web_preview to use WysiwygEditor.js and move functional
 
 Problem: There is both web_preview and SSG preview ... using web_preview on a SSG-site doesn't work.
 Solution: Make plugins listen for "preview" !?
+
+Ctrl+R + Menu entry "Preview" calls EDITOR.preview(file) which fires the preview event. The first plugin that returns false gets to handle it
 
 Should functionality from web_preview and SSG preview be added to WysiwygEditor !?
 why not: It's better to make separate plugins for example React, SSG's, etc

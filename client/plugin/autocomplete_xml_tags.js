@@ -19,7 +19,7 @@
 			return;
 		}
 		
-		// Found nothing to complete. Maybe we want to close last opened xml tag!?
+		// Because high order, there's proabbly nothing else to complete. Maybe we want to close last opened xml tag!?
 		//var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
 		var lastOpenXmlTag = findLastOpenXmlTag2(file, charIndex);
 		

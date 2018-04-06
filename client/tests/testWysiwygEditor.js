@@ -372,6 +372,41 @@ EDITOR.addTest(function inlineErrorMessages(callback) {
 		}, 100);
 		
 	});
+});
+
+EDITOR.addTest(function previewAutocomplete(callback) {
+	
+	/*
+		Adding a id to a element will add a global variable (HTML5 standard)
+	*/
+	
+	var fileHtml = '<head></head><body>\n<script>\nfoo\n</script>\n<div id="foobar"></div>\n</body>';
+	
+	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
+		if(err) throw err;
+		
+		var index = 32;
+		var file = preview.sourceFile;
+		var atCaret = autoComplete(file, index);
+		
+		UTIL.assert(atCaret.word, "foobar");
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+	
+	function autoComplete(file, index) {
+		
+		var key_tab = 9;
+		var wordDelimiters = " \t\r\n;:()"
+		
+		file.moveCaretToIndex(index);
+		EDITOR.mock("keydown", {charCode: key_tab}); // tab to autocomplete
+		
+		return file.wordAtCaret(file.caret, wordDelimiters);
+	}
+	
 }, 1);
 
 function launchServe(sourcePage, compiledPage, testFile, callback) {

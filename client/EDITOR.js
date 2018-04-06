@@ -554,7 +554,8 @@ EDITOR.lastKeyPressed = "";
 			/*
 				If two things are waiting for a particular file to open, call both things once it has opened.
 				But if text content is set, it is (most likely) not the same file!!!
-			
+				issue: reopen_files will open the file with content set! Why ?
+				
 				Could also add a counter to it's name, like when the file is already opened!?
 			*/
 			if(text != undefined) throw new Error("File with path=" + path + " is already in the queue to be opened, pick another file name!");
@@ -1841,6 +1842,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				console.warn("Undefined callback in event listener:" + JSON.stringify(EDITOR.eventListeners[eventName][i]));
 			}
 		}
+		
+		console.log("Adding function " + UTIL.getFunctionName(options.fun) + " to event " + eventName);
 		
 		var index = EDITOR.eventListeners[eventName].push(options);
 		
