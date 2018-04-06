@@ -67,50 +67,50 @@
 		}
 		else {
 			console.log("sites: " + JSON.stringify(sites, null, 2));
-		
+			
 			// Show some quick nav in the dashboard !?
 			
 			
 			if(QUERY_STRING.editPage) {
 				// ### quickedit.js ...
-			var url = QueryString.editPage;
-			var nodes = QueryString.nodes.split(",");
-			
-			var site = isSite(url);
-			
-			console.log("quickedit: url=" + url + " site=" + site); 
-			
-			if(site) {
-				filePath = UTIL.getPathFromUrl(url);
-				var pubUrlPath = site.url ? UTIL.getDirectoryFromPath(site.url) : "/";
+				var url = QueryString.editPage;
+				var nodes = QueryString.nodes.split(",");
 				
-				// If the site is published in a folder eg /foo/ remove /foo/ from filePath
-				if(filePath.indexOf(pubUrlPath) == 0) filePath = filePath.slice(pubUrlPath.length);
+				var site = isSite(url);
 				
-				filePath = UTIL.trailingSlash(site.source) + filePath;
-				while(filePath.indexOf("//") != -1) filePath = filePath.replace("//", "/");
+				console.log("quickedit: url=" + url + " site=" + site); 
 				
-				console.log("filePath=" + filePath + " pubUrlPath=" + pubUrlPath + " ");
-				
-				/*
-				else {
-					alertBox("Unable to figure out which file this is:\n" + path);
-					console.log("site.source=" + site.source);
-					console.log("site.publish=" + site.publish);
-					console.log("path=" + path);
+				if(site) {
+					filePath = UTIL.getPathFromUrl(url);
+					var pubUrlPath = site.url ? UTIL.getDirectoryFromPath(site.url) : "/";
 					
-				}
-				*/
+					// If the site is published in a folder eg /foo/ remove /foo/ from filePath
+					if(filePath.indexOf(pubUrlPath) == 0) filePath = filePath.slice(pubUrlPath.length);
+					
+					filePath = UTIL.trailingSlash(site.source) + filePath;
+					while(filePath.indexOf("//") != -1) filePath = filePath.replace("//", "/");
+					
+					console.log("filePath=" + filePath + " pubUrlPath=" + pubUrlPath + " ");
+					
+					/*
+						else {
+						alertBox("Unable to figure out which file this is:\n" + path);
+						console.log("site.source=" + site.source);
+						console.log("site.publish=" + site.publish);
+						console.log("path=" + path);
+						
+						}
+					*/
 					
 					if(filePath.slice(filePath.length-1) == "/") filePath = filePath + "index.htm";
 					
 					EDITOR.openFile(filePath, undefined, quickeditFileOpened);
 					
 					
-					}
-			else {
-				console.warn("Couln't determine what site the url belongs to: " + url);
-			}
+				}
+				else {
+					console.warn("Couln't determine what site the url belongs to: " + url);
+				}
 			}
 		}
 		
@@ -223,6 +223,8 @@
 		
 		EDITOR.on("fileDrop", fileDrop);
 		
+		EDITOR.on("previewTool", ssgPreviewTool, 1000); // Run before web_preview.js
+		
 		CLIENT.on("ssgBuildMessage", ssgBuildMessage);
 		
 		CLIENT.on("ssgProgressStatus", ssgProgressStatus);
@@ -251,6 +253,8 @@
 		EDITOR.removeEvent("exit", SSG_cleanup);
 		EDITOR.removeEvent("fileOpen", fileOpen);
 		EDITOR.removeEvent("fileDrop", fileDrop);
+		EDITOR.removeEvent("previewTool", ssgPreviewTool);
+		
 		
 		EDITOR.unbindKey(hideSSG);
 		EDITOR.unbindKey(previewSSG);
@@ -292,7 +296,7 @@
 		progressBar.value = status.value;
 		
 		if(status.max == status.value) {
-progressBar.style.display = "none";
+			progressBar.style.display = "none";
 			EDITOR.resizeNeeded();
 			progressBar.max = 1;
 			progressBar.value = 0;
@@ -1277,7 +1281,29 @@ progressBar.style.display = "none";
 		return false;
 	}
 	
-	function previewSSG(file, combo, character, charCode, keyPushDirection, targetElementClass) {
+	function ssgPreviewTool(file, combo) {
+		
+		// Figure out if the file belongs to the SSG
+		
+		console.log("ssgPreviewTool");
+		
+		if(!selectedSite) {
+			console.log("No site selected!");
+			return false;
+		}
+		
+		if(file.path.indexOf(selectedSite.source) == -1) {
+			console.log("selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
+			return false;
+		}
+		
+		previewPage(selectedSite, undefined, false, file, combo.ctrl);
+		
+		return true;
+		
+	}
+	
+	function previewSSG(file, combo) {
 		if(!selectedSite) alertBox("No site selected!");
 		else previewPage(selectedSite, undefined, false, file, combo.ctrl);
 		
@@ -1313,12 +1339,12 @@ progressBar.style.display = "none";
 				console.log("previewWin.screenX=" + previewWin.screenX);
 				console.log("previewWin.previewWin.screenX=" + previewWin.previewWin.screenX);
 				console.log("previewWin.previewWin.innerWidth=" + previewWin.previewWin.innerWidth);
-			
-			var width = parseInt(previewWin.previewWin.innerWidth);
-			var height = parseInt(previewWin.previewWin.innerHeight);
-			var top = parseInt(previewWin.previewWin.screenY || previewWin.previewWin.screenTop);
-			var left = parseInt(previewWin.previewWin.screenX || previewWin.previewWin.screenLeft);
-			
+				
+				var width = parseInt(previewWin.previewWin.innerWidth);
+				var height = parseInt(previewWin.previewWin.innerHeight);
+				var top = parseInt(previewWin.previewWin.screenY || previewWin.previewWin.screenTop);
+				var left = parseInt(previewWin.previewWin.screenX || previewWin.previewWin.screenLeft);
+				
 				options = {url: url, width: width, height: height, top: top, left: left};
 			}
 			
@@ -1334,25 +1360,25 @@ progressBar.style.display = "none";
 			
 			if(sourceFile == undefined) {		
 				pickFileToPreview(site, function(err, file) {
-				if(err) {
-					newWindow.close();
-					alertBox(err.message);
-				}
-				else compileIt(file);
-			});
-		}
-		else if((typeof sourceFile != "object")) {
-			throw new Error("sourceFile needs to be a File object! sourceFile=" + sourceFile);
-		}
-		else {
-			
-			if(sourceFile.path.indexOf(site.source) !== 0) {
-				//throw new Error('Source file does not belong to "' + site.name + '"!\nsourceFile.path=' + sourceFile.path + '\nsite.source=' + site.source);
-				alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + site.source + ' and try again.\n\n(have you saved the file ?)');
-				newWindow.close();
+					if(err) {
+						newWindow.close();
+						alertBox(err.message);
+					}
+					else compileIt(file);
+				});
 			}
-			else compileIt(sourceFile);
-		}
+			else if((typeof sourceFile != "object")) {
+				throw new Error("sourceFile needs to be a File object! sourceFile=" + sourceFile);
+			}
+			else {
+				
+				if(sourceFile.path.indexOf(site.source) !== 0) {
+					//throw new Error('Source file does not belong to "' + site.name + '"!\nsourceFile.path=' + sourceFile.path + '\nsite.source=' + site.source);
+					alertBox('' + sourceFile.path + ' does not belong to "' + site.name + '". Open a file from ' + site.source + ' and try again.\n\n(have you saved the file ?)');
+					newWindow.close();
+				}
+				else compileIt(sourceFile);
+			}
 		}
 		
 		function compileIt(sourceFile, recursionCounter) {
@@ -1444,19 +1470,19 @@ progressBar.style.display = "none";
 					if(site.preview.match(/^(ftp|sftp|ftps):/i)) {
 						alertBox("Preview uploaded to: " + site.preview);
 						alertBox("Can not preview from remote location such as ftp, sftp or ftps. The preview location must be a local folder.");
-						}
+					}
 					else if(document.location.href.match(/^file:/)) {
 						// Don't have to serve
 						previewServed(site.preview)
 					}
 					else {
-					
-					CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
 						
-						if(err) throw err;
-						
-						var url = json.url;
-						
+						CLIENT.cmd("serve", {folder: site.preview}, function httpServerStarted(err, json) {
+							
+							if(err) throw err;
+							
+							var url = json.url;
+							
 							// Replace the hostname with the hostname we are currently on to prevent cross origin errors
 							var loc = UTIL.getLocation(url);
 							
@@ -1464,139 +1490,139 @@ progressBar.style.display = "none";
 							if(!window.location.host) throw new Error('Did not expect "falsy" window.location.host=' + window.location.host);
 							
 							if(loc.host != window.location.host) {
-							url = url.replace(loc.host, window.location.host);
-							
-							alertBox("Serve host was " + loc.host + " but was replaced with " + window.location.host + " to prevent cross origin errors!");
+								url = url.replace(loc.host, window.location.host);
+								
+								alertBox("Serve host was " + loc.host + " but was replaced with " + window.location.host + " to prevent cross origin errors!");
 							}
 							
 							console.log("loc.host=" + loc.host + " window.location.host=" + window.location.host + " url=" + url);
 							
 							if(!url.match(/^http(s?):/i)) url = window.location.protocol + "//" + url;
-
+							
 							previewServed(url);
 							
 						});
 					}
 					
-						function previewServed(url) {
-							console.log("url=" + url);
+					function previewServed(url) {
+						console.log("url=" + url);
+						
+						if(location) {
+							console.log("location.protocol=" + location.protocol);
+							//if(location.protocol) url = location.protocol + "//" + url;
+						}
+						//else url = "http://" + url;
+						
+						console.log("serve url=" + url);
+						
+						
+						previewBaseUrl = url;
+						
+						if(sourceFile) {
+							url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
 							
-							if(location) {
-								console.log("location.protocol=" + location.protocol);
-								//if(location.protocol) url = location.protocol + "//" + url;
-							}
-							//else url = "http://" + url;
+							openPreviewWin();
 							
-							console.log("serve url=" + url);
+						}
+						else {
+							// Open the index page
 							
+							notEditableReason = "No file open";
+							editable = false;
 							
-							previewBaseUrl = url;
-							
-							if(sourceFile) {
-								url += sourceFile.path.replace(site.source, "").replace(/\\/g, "/"); // url needs to have / instead of \ for path delimiter
+							EDITOR.listFiles(site.preview, function(err, list) {
+								
+								if(err) throw err;
+								
+								var page = "";
+								
+								for (var i=0; i<list.length; i++) {
+									if(list[i].name.match(/\index\.html?/i) != null) {
+										page = list[i].name;
+										break;
+									}
+								}
+								
+								if(page) {
+									if(url.substr(url.length-1) != "/") url += "/";
+									url += page;
+								}
+								else throw new Error("Unable to find index page in preview directory!");
 								
 								openPreviewWin();
 								
-							}
-							else {
-								// Open the index page
-								
-								notEditableReason = "No file open";
-								editable = false;
-								
-								EDITOR.listFiles(site.preview, function(err, list) {
-									
-									if(err) throw err;
-									
-									var page = "";
-									
-									for (var i=0; i<list.length; i++) {
-										if(list[i].name.match(/\index\.html?/i) != null) {
-											page = list[i].name;
-											break;
-										}
-									}
-									
-									if(page) {
-										if(url.substr(url.length-1) != "/") url += "/";
-										url += page;
-									}
-									else throw new Error("Unable to find index page in preview directory!");
-									
-									openPreviewWin();
-									
-								});
-							}
+							});
+						}
+						
+						function openPreviewWin() {
 							
-							function openPreviewWin() {
+							//if(edit) {
+							
+							// Get the source code for the compiled page in review, in order to compute ignoreTransform
+							
+							var previewPath = sourceFile.path.replace(site.source, site.preview);
+							
+							EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
 								
-								//if(edit) {
+								if(err) throw err;
 								
-								// Get the source code for the compiled page in review, in order to compute ignoreTransform
+								var compiledSource = txt;
+								var compliedSourceBodyTag = "main";
 								
-								var previewPath = sourceFile.path.replace(site.source, site.preview);
+								loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
 								
-								EDITOR.readFromDisk(previewPath, function gotPreviewSource(err, path, txt) {
-									
-									if(err) throw err;
-									
-									var compiledSource = txt;
-									var compliedSourceBodyTag = "main";
-									
-									loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
-									
-								});
+							});
+							
+							//}
+							//else loadWysiwygEditor();
+							
+							
+							function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
 								
-								//}
-								//else loadWysiwygEditor();
-								
-								
-								function loadWysiwygEditor(compiledSource, compliedSourceBodyTag) {
-									
-									var bodyTag = "body";
-									var onlyPreview = (edit == false);
-									var whenLoaded = function previewLoaded(err) {
+								var bodyTag = "body";
+								var onlyPreview = (edit == false);
+								var whenLoaded = function previewLoaded(err) {
 									if(err) return alertBox(err.message);
 									
-										if(buttonPreview) {
-											buttonPreview.setAttribute("class", "button active");
-											if(edit) {
-												buttonWysiwyg.setAttribute("class", "button active");
-												wysiwygEnabled = true;
-											}
+									if(buttonPreview) {
+										buttonPreview.setAttribute("class", "button active");
+										if(edit) {
+											buttonWysiwyg.setAttribute("class", "button active");
+											wysiwygEnabled = true;
 										}
-										if(callback) callback();
 									}
-									
-									if(previewWin) previewWin.close();
-									
-									
+									if(callback) callback();
+								}
+								
+								if(previewWin) previewWin.close();
+								
+								
 								console.log("SSG url=" + url + " RUNTIME=" + RUNTIME + " newWindow=" + newWindow);
-									previewWin = new WysiwygEditor({
-sourceFile: sourceFile,
-bodyTagSource: bodyTag, 
-onlyPreview: onlyPreview, 
-newWindow: newWindow, 
-url: url, 
-whenLoaded: whenLoaded, 
-compiledSource: compiledSource, 
-bodyTagPreview: compliedSourceBodyTag,
-top: top,
-left: left,
-width: width,
-height: height
+								previewWin = new WysiwygEditor({
+									sourceFile: sourceFile,
+									bodyTagSource: bodyTag, 
+									onlyPreview: onlyPreview, 
+									newWindow: newWindow, 
+									url: url, 
+									whenLoaded: whenLoaded, 
+									compiledSource: compiledSource, 
+									bodyTagPreview: compliedSourceBodyTag,
+									top: top,
+									left: left,
+									width: width,
+									height: height
 								});
 								
-									previewWin.onClose = function() {
-										if(buttonPreview) {
-											buttonPreview.setAttribute("class", "button");
-											buttonWysiwyg.setAttribute("class", "button");
-											wysiwygEnabled = false;
-										}
+								previewWin.onClose = function() {
+									if(buttonPreview) {
+										buttonPreview.setAttribute("class", "button");
+										buttonWysiwyg.setAttribute("class", "button");
+										wysiwygEnabled = false;
 									}
 								}
 							}
 						}
+					}
 					
 				});
 			}

@@ -38,22 +38,12 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Problem: There is both web_preview and SSG preview ... using web_preview on a SSG-site doesn't work.
-Solution: Make plugins listen for "preview" !?
-
-Ctrl+R + Menu entry "Preview" calls EDITOR.preview(file) which fires the preview event. The first plugin that returns false gets to handle it
-
-Should functionality from web_preview and SSG preview be added to WysiwygEditor !?
-why not: It's better to make separate plugins for example React, SSG's, etc
-
 Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!
 
 Safari don't show inline nodej console.log's
 
-
-The wysiwygEditor seems to add new-line padding in the body ... but max two !?
 
 
 implementing jsql example on webide.se

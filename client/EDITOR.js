@@ -152,7 +152,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	openFileTool: [],
 	showMenu: [],
 	voiceCommand: [],
-	fileExplorer: [] // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
+	fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
+	previewTool: []
 };
 
 EDITOR.renderFunctions = [];
@@ -1983,7 +1984,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			var character = null;
 			var charCode = 0;
 			var direction = "down";
-			callback(file, combo, character, charCode, direction);
+			callback(file, combo, character, charCode, direction, clickEvent);
 		}
 		
 		if(position) {
@@ -2069,7 +2070,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			var character = null;
 			var charCode = 0;
 			var direction = "down";
-			callback(file, combo, character, charCode, direction);
+			callback(file, combo, character, charCode, direction, clickEvent);
 		}
 		
 		tempItems.appendChild(li);
@@ -3940,6 +3941,31 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 		
 		for(var i=0, f; i<EDITOR.eventListeners.openFileTool.length; i++) {
 			ret = EDITOR.eventListeners.openFileTool[i].fun(directory);
+			if(ret === true) break; // Only open one tool
+		}
+		
+		return ret;
+	}
+	
+	EDITOR.previewTool = function previewTool(file, ev) {
+		
+		if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
+		
+		if(! file instanceof File) throw new Error("First argument file need to be a File object!");
+		
+		// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
+		console.log("ev.constructor.name=" + ev.constructor.name);
+		if(typeof ev != "object") throw new Error("Second argument ev needs to be an event object!");
+		
+		
+		console.log("Calling previewTool listeners (" + EDITOR.eventListeners.previewTool.length + ")");
+		
+		var ret = false;
+		
+		var combo = getCombo(ev);
+		
+		for(var i=0, f; i<EDITOR.eventListeners.previewTool.length; i++) {
+			ret = EDITOR.eventListeners.previewTool[i].fun(file, combo);
 			if(ret === true) break; // Only open one tool
 		}
 		
