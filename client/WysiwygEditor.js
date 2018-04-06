@@ -1506,7 +1506,7 @@ else throw err;
 			if(previewWin.loaded === false) {
 				previewWin.addEventListener("load", function checkConsoleLogOverloaded() {
 					if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
-					else console.log("consoleLogCapturer attached successfully!? (it attached before load) " +  + UTIL.timeStamp());
+					else console.log("consoleLogCapturer attached successfully!? (it attached before load) " + UTIL.timeStamp());
 				});
 			}
 			else if(previewWin.loaded === true) {
