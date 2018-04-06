@@ -1535,21 +1535,17 @@ else throw err;
 		}
 		
 		// Capture errors on the content-editable so that they do not go by unoticed
-		previewWin.window.addEventListener("error", function(errorEvent) {
-			// https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
-			if(wysiwygEditor.onErrorEvent) wysiwygEditor.onErrorEvent(errorEvent);
-			else {
-				var message = errorEvent.message;
-				alertBox(message ? message : "There was an error in the WYSIWYG editor!\nCheck the developer console for the WYSIWYG window for error details ...");
-				console.error(errorEvent.error);
-			}
-		});
+		previewWin.window.addEventListener("error", captureError);
 		
 		
 		if(previewWin.loaded === true) attachEvents();
 		else previewWin.addEventListener("load", function windowLoaded() {
 			 attachEvents();
 		});
+		
+		function captureError(err) {
+			wysiwygEditor.error(err);
+		}
 		
 		function consoleLogCapturer() {
 			wysiwygEditor.consoleLog(arguments);
@@ -1924,7 +1920,57 @@ else throw err;
 		
 	}
 	
-	
+	WysiwygEditor.prototype.error = function error(errorEvent) {
+		var wysiwygEditor = this;
+		
+		var message = errorEvent.message;
+		var source = errorEvent.filename;
+		var lineno = errorEvent.lineno;
+		var colno = errorEvent.colno;
+		var error = errorEvent.error;
+		
+		console.log("Captured error: message=" + message + " line=" + lineno);
+		
+		if(!lineno) {
+			return console.warn("No linenno!");
+		}
+		
+		console.log(errorEvent);
+		
+		var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
+		var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
+		
+		console.log("error: source=" + source + " lineno=" + lineno + " message=" + message +
+		" urlPath=" + urlPath + " folder=" + folder + " stack=" + errorEvent.stack);
+		
+		var filePath = folder + source.replace(urlPath, "");
+		
+		if(!wysiwygEditor.sourceFile.path.match(/\/|\\/)) {
+			// Source file path has no slash in it! (some tests doesn't add the root slash)
+			if(filePath.charAt(0) == "/" || filePath.charAt(0) == "\\") filePath = filePath.slice(1);
+		}
+		
+		var file = EDITOR.files[filePath];
+		
+		if(file) {
+			var row = lineno-1;
+			if(file.grid.length <= row) throw new Error("row=" + row + " outside the file.grid.length=" + file.grid.length + " for file.path=" + file.path + " source=" + source);
+			var col = colno ? colno - file.grid[row].indentationCharacters : 0;
+			if(EDITOR.currentFile != file) {
+				EDITOR.showFile(file);
+				}
+			
+			file.scrollToLine(lineno);
+			
+			EDITOR.addInfo(row, col, message, file, 1);
+		}
+		else { // The file is not opened
+			var sourceLink = 'Detected error in: <a href="JavaScript: EDITOR.openFile(\'' + filePath + '\', undefined, function(err, file) {\
+			if(err) alertBox(err.message); else file.gotoLine(' + lineno + ');\
+			EDITOR.renderNeeded();})">' + filePath + ":" + lineno + "</a>";
+			alertBox(sourceLink + "\n\n" + message + "");
+		}
+	}
 	
 	function attachFileChangeListener(wysiwygEditor) {
 		// fileChange wants an uniqe function name ...

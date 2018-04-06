@@ -351,6 +351,28 @@ if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 }, 1);
 */
 
+EDITOR.addTest(function inlineErrorMessages(callback) {
+	// The window might load before WysiwygEditor has set the error listener! So we need to set a timer !
+	var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nthrow new Error("This is an error! " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Hello World!</p>\n</body>';
+	
+	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
+		if(err) throw err;
+		
+		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
+		
+		console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
+		
+		setTimeout(function checkEditorInfo() {
+			console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
+			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+			
+			cleanup();
+			
+			callback(true);
+		}, 100);
+		
+	});
+}, 1);
 
 function launchServe(sourcePage, compiledPage, testFile, callback) {
 	
