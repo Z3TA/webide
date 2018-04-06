@@ -2655,8 +2655,12 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			
 			
 			// Show info
-			for(var i=0; i<options.length; i++) {
-				EDITOR.addInfo(file.caret.row, file.caret.col, options[i].replace(new RegExp(file.lineBreak,"g"), " "));
+			for(var i=0, opt; i<options.length; i++) {
+				opt =  options[i];
+				opt = opt.replace(new RegExp(file.lineBreak,"g"), " ");
+				opt = opt.replace(/</g, "&lt;"); // Because EDITOR.addInfo takes HTML
+				opt = opt.replace(/>/g, "&gt;");
+				EDITOR.addInfo(file.caret.row, file.caret.col, opt);
 			}
 			
 		}

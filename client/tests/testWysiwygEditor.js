@@ -380,16 +380,17 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 		Adding a id to a element will add a global variable (HTML5 standard)
 	*/
 	
-	var fileHtml = '<head></head><body>\n<script>\nfoo\n</script>\n<div id="foobar"></div>\n</body>';
+	var var1 = "ocument.act";
+	var fileHtml = '<head></head><body>\n<script>\nd' + var1 + '\n</script>\n<div id="foobar"></div>\n</body>';
 	
 	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
-		var index = 32;
+		var index = fileHtml.indexOf(var1) + var1.length;
 		var file = preview.sourceFile;
 		var atCaret = autoComplete(file, index);
 		
-		UTIL.assert(atCaret.word, "foobar");
+		UTIL.assert(atCaret.word, "document.activeElement");
 		
 		EDITOR.closeFile(file.path);
 		callback(true);
