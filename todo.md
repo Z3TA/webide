@@ -38,23 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Test are run async (all at the same time). Some tests want to be run alone.
-Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
-
-Should probably make WysiwygEditor/preview plugin based !?
-
-Functionality right now that should be shared/moved into WysiwygEditor:
-SSG - Saving a CSS file beloning to a site will refresh the CSS in the preview window =>  Or Just move it into WysiwygEditor, can't think of any circumstances where you would not want that functionality
-web_preview - console logs and errors will be displayed inline in the source file PREVIEW.on("log"), PREVIEW.on("warn"), PREVIEW.on("error")
-web_preview - autocomplete checks and traverse the window object for variables to auto-complete EDITOR.on("autocomplete") ... for each file in PREVIEW.files 
-
-
-
-We should reuse error and console.log inlining from run_nodejs_script with the error and console.log inlining in web_preview!?
-Make an util function !?
-
-Should we re-factor back web_preview to use WysiwygEditor.js and move functionality like error and console.log inlining there !?
-
 Problem: There is both web_preview and SSG preview ... using web_preview on a SSG-site doesn't work.
 Solution: Make plugins listen for "preview" !?
 
@@ -165,14 +148,8 @@ investigate build.js vs ssg-build.js
 What I'm thinking
 -----------------
 
-A more modular Preivew/Wysiwyg so you can add new features as plugins !?
-
-Examples:
-
-Updating the css of a file in preview when a css file in it is updated: Belong to core !?
-Searching the window object on auto-complete: 
-
-Add preview as a file object/property !? if(file.preview) ... file.preview.window
+Test are run async (all at the same time). Some tests want to be run alone.
+Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
 
 ---
 
