@@ -1997,12 +1997,19 @@ var wysiwygEditor = this;
 		for (var i=0; i<words.length-1; i++) {
 			before += words[i] + ".";
 			console.log("before=" + before);
-			obj = obj[words[i]];
-			if(!obj) {
-				console.log("Object does not exist: " + before);
-				return;
+			if(words[i].match(/\(|\)|\[|\]/)) {
+				// It calls a function or access's a property
+				// so it needs to be evaulated
+				// this could have some interesting side effects :P
+				obj = theWindow.eval(  before.slice(0,-1)  );
+				console.log("Evaulated: " + before.slice(0,-1) + " = " + obj);
 			}
-		}
+			else obj = obj[words[i]];
+				if(!obj) {
+				console.log("Object does not exist: " + before.slice(0,-1) + " (" + words[i] + ")");
+					return;
+				}
+			}
 		
 		console.log(obj);
 		

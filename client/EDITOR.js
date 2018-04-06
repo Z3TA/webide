@@ -2549,7 +2549,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 		
-		var wordDelimiters = " ()[]{}+-/<>\r\n!";
+		var wordDelimiters = " {}+-/<>\r\n!";
 		var char = "";
 		var word = "";
 		var options = []; // Word options

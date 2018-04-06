@@ -376,21 +376,21 @@ EDITOR.addTest(function inlineErrorMessages(callback) {
 
 EDITOR.addTest(function previewAutocomplete(callback) {
 	
-	/*
-		Adding a id to a element will add a global variable (HTML5 standard)
-	*/
-	
 	var var1 = "ocument.act";
-	var fileHtml = '<head></head><body>\n<script>\nd' + var1 + '\n</script>\n<div id="foobar"></div>\n</body>';
+	var var2 = 'document.getElementById("foobar").innerH';
+	var fileHtml = '<head></head><body>\n<script>\nd' + var1 + '\n' + var2 + '\n</script>\n<div id="foobar"></div>\n</body>';
 	
 	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
-		var index = fileHtml.indexOf(var1) + var1.length;
 		var file = preview.sourceFile;
+		var index = file.text.indexOf(var1) + var1.length;
 		var atCaret = autoComplete(file, index);
-		
 		UTIL.assert(atCaret.word, "document.activeElement");
+		
+		var index = file.text.indexOf(var2) + var2.length;
+		var atCaret = autoComplete(file, index);
+		UTIL.assert(atCaret.word, '.innerHTML');
 		
 		EDITOR.closeFile(file.path);
 		callback(true);
