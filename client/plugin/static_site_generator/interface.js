@@ -292,6 +292,8 @@
 	function ssgProgressStatus(status) {
 		console.log("ssgProgressStatus: " + JSON.stringify(status));
 		
+		if(!progressBar) return;
+		
 		progressBar.max = status.max;
 		progressBar.value = status.value;
 		
