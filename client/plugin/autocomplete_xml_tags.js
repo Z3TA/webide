@@ -8,7 +8,7 @@
 	
 	function autoCompleteXml(file, word, wordLength, gotOptions) {
 		
-		//if(gotOptions > 0) return;
+		if(gotOptions > 0) return;
 		
 		var options = [];
 		var charIndex = file.caret.index;
@@ -23,9 +23,15 @@
 		//var lastOpenXmlTag = findLastOpenXmlTag(file.text, charIndex);
 		var lastOpenXmlTag = findLastOpenXmlTag2(file, charIndex);
 		
-		if(lastOpenXmlTag.length > 0 && lastOpenXmlTag != "<") {
+		if(lastOpenXmlTag.length == 0) return;
+		if(lastOpenXmlTag == "<") return;
+		
+		console.log("lastOpenXmlTag=" + lastOpenXmlTag);
+		
+		if(lastOpenXmlTag.match(/script/i) && word.length > 0) return; // Avoid adding </script> when inside a script element
+		
 			options.push(word + "</" + lastOpenXmlTag + ">");
-		}
+		
 		
 		return options;
 	}
