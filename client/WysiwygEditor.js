@@ -218,7 +218,7 @@ var WysiwygEditor;
 		}
 		
 		/*
-			Problem: wysiwygEditor.getSourceCodeBody() trims all white space and then ads one line padding
+			Problem: wysiwygEditor.getSourceCodeBody() trims all white space and then ads one line padding ??!
 			*/
 		
 		wysiwygEditor.setStartRow();
@@ -390,20 +390,26 @@ var WysiwygEditor;
 		var doc = previewWin.window.document;
 		
 		var selection = doc.getSelection();
-		if(selection) {
-			/*
+
+if(!selection) throw new Error("Unable to get selection");
+
+		 
+		/*
 				anchorNode/baseNode: Where selection starts
 				focusNode/extentNode: Where selection ends
 			*/
 			
 			var baseNode = selection.baseNode ? selection.baseNode : selection.anchorNode
 			
+		if(!baseNode) {
 			console.log("selection:");
 			console.log(selection);
-			
-			if(baseNode) {
-				
-				if(baseNode.nodeType == Node.TEXT_NODE) {
+			console.log(selection.baseNode);
+			console.log(selection.anchorNode);
+			throw new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
+			}
+		
+		if(baseNode.nodeType == Node.TEXT_NODE) {
 					// Measure the parent node (can't measure text nodes)
 					var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
 					var pos = parentNode.getBoundingClientRect();
@@ -435,10 +441,8 @@ var WysiwygEditor;
 				// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
 				return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos, text: parentNode ? parentNode.innerText : baseNode.innerText };
 				
-			}
-			else throw new Error("no baseNode");
-		}
-		else throw new Error("Unable to get selection");
+		
+		
 		
 	}
 	
@@ -932,7 +936,7 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 		
 	}
 	
-	WysiwygEditor.prototype.previewInput = function previewInput(e) {
+	WysiwygEditor.prototype.previewInput = function previewInput(inputEvent) {
 		console.timeEnd("contentEdit");
 		var wysiwygEditor = this;
 		
@@ -1289,40 +1293,35 @@ wysiwygEditor.onClose();
 	WysiwygEditor.prototype.getContentEditableCode = function getContentEditableCode() {
 		var wysiwygEditor = this;
 		
-		// innerHTML will also get the line-break after <body> and before </body> !!!?
+		/*
+			innerHTML will also get the line-break after <body> and before </body> !
+			But contentEditable likes to remove those line breaks!
+			So we have to add those line breaks manually!
+		*/
 		
-		//var win = wysiwygEditor.previewWin.window;
-		//var doc = win.document; // previewWin.document is not available in nw.js gui
-		//var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+		// 
+		
+		var win = wysiwygEditor.previewWin.window;
+		var doc = win.document; // previewWin.document is not available in nw.js gui
+		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 		//console.log(body);
-		//var prewHTML = body.innerHTML;
 		
-		var html = wysiwygEditor.getPreviewWindowHtml();
+		if(!body) {
+			console.log(win);
+			console.log(doc);
+			throw new Error("Unable to find body element bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in doc.innerHTML=" + doc.innerHTML);
+		}
+		
+		var html = body.innerHTML;
+		var prewHTML = wysiwygEditor.lineBreak + html.trim() + wysiwygEditor.lineBreak;
+		
+		//var html = wysiwygEditor.getPreviewWindowHtml();
+		//var prewHTML = getElementContent(html, wysiwygEditor.bodyTagPreview, wysiwygEditor.lineBreak);
 		
 		// Sanity check:
 		if(wysiwygEditor.lineBreak == "\n" && html.indexOf("\r") != -1) {
 throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) + " but html contains CR!");
 		}
-		
-		var prewHTML = getElementContent(html, wysiwygEditor.bodyTagPreview, wysiwygEditor.lineBreak);
-		
-		
-		/*
-			Problem: body.innerHTML returns all text inside the element including first line break and indentation characters
-			while getElementBody and regexBody ignores the line breaks after <body> and before </body>
-			
-			Hmm, that shouldn't metter. Do browsers add extra line breaks !?
-			
-			return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
-		*/
-		
-		//var reBody = /^\s*[\n|\r\n]?([\s\S]*)[\n|\r\n]?\s*/
-		
-		//prewHTML = removeHeadLineBreak(prewHTML);
-		
-		//prewHTML = removeHeadWhiteSpace(prewHTML, wysiwygEditor.lineBreak);
-		//prewHTML = removeTailWhiteSpace(prewHTML, wysiwygEditor.lineBreak);
-		
 		
 		return prewHTML;	
 		

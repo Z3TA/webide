@@ -415,18 +415,53 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 			
 			Pressing enter *twice* seem to remove the line breaks before </main> end tag !?
 			
+			Sometimes this test fails with "Can't find firstParagraph" !?!?
+			
 		*/
-		var fileHtml = '<head></head><body>\n<p>Test pressEnterTwiceInWYSIWYG</p>\n</body>';
-		var compiledHtml = '<head></head><body>\n<p>Header</p>\n<main>\n<p>Test pressEnterTwiceInWYSIWYG</p>\n</main>\n<p>Footer</p>\n</body>';
+		var fileHtml = '<head></head><body>\n<p id="ppp">Test pressEnterTwiceInWYSIWYG</p>\n</body>';
+		var compiledHtml = '<head></head><body>\n<p>Header</p>\n<main>\n<p id="ppp">Test pressEnterTwiceInWYSIWYG</p>\n</main>\n<p>Footer</p>\n</body>';
 		
-		launchServe(fileHtml, compiledHtml, "pressEnterTwiceInWYSIWYG.htm", false, function(err, preview, cleanup) {
+		launchServe(fileHtml, compiledHtml, "pressEnterTwiceInWYSIWYG.htm", false, function servedPreview(err, wEditor, cleanup) {
 			if(err) throw err;
 			
+			// Sometimes the document have not fully loaded, even though the browser says so (Can't find firstParagraph)
+			setTimeout(function wtfChrome() {
+			
+			var win = wEditor.previewWin;
+			var doc = win.document;
+			var main = doc.getElementsByTagName("main")[0];
+			
+				console.log(win);
+				console.log(doc);
+				
+				var firstParagraph = doc.getElementById("ppp");
+				
+				if(!firstParagraph) {
+				console.log(doc);
+				throw new Error("Can't find firstParagraph=" + firstParagraph + " win=" + win + " doc=" + doc + " doc.innerHTML=" + doc.innerHTML);
+			}
+				
+			var newParagraph = doc.createElement("p");
+				newParagraph.innerText = "Line 1";
+				var firstParagraph = doc.getElementById("ppp");
+				main.insertBefore(newParagraph, firstParagraph);
+				main.focus(); // Need focus, or it can't get caret position inside contenteditable!
+			wEditor.previewInput();
+				
+				var newParagraph = doc.createElement("p");
+				newParagraph.innerText = "Line 2";
+				var firstParagraph = doc.getElementById("ppp");
+				main.insertBefore(newParagraph, firstParagraph);
+				main.focus();
+				wEditor.previewInput();
+				
+				cleanup();
+				callback(true);
+				
+			},10);
 			
 			
-			//cleanup();
-			//callback(true);
-		});
+			});
 		
 	}, 1);
 	
@@ -467,9 +502,9 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 					}
 				}, 5000);
 				
-				var opt = {
+					var opt = {
 					sourceFile: sourceFile,
-					bodyTagSource: "body",
+						bodyTagSource: "body",
 						onlyPreview: onlyPreview,
 					url: url,
 					whenLoaded: wysiwygEditorLoaded,
@@ -477,7 +512,7 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 				
 				if(compiledPage != sourcePage) {
 opt.compiledSource = compiledPage;
-					if(compiledPage.indexOf("<main") != -1) opt.bodyTagPreview = "main";
+						if(compiledPage.indexOf("<main") != -1) opt.bodyTagPreview = "main";
 				}
 				
 				var wysiwygEditor = new WysiwygEditor(opt);
