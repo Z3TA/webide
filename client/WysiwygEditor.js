@@ -44,7 +44,7 @@ var WysiwygEditor;
 	* 
 	* 			// make sure it's saved, and that the preview is from the last save
 	if(!sourceFile.isSaved ) {
-	var diff = UTIL.textDiff(srcHTML, main.innerHTML);
+	var diff = UTIL.textDiff(srcBodyHtml, main.innerHTML);
 	if(diff.inserted.length > 0 || diff.removed.length > 0) {
 	alertBox("The page (" + UTIL.getFilenameFromPath(sourceFile.path) + ") will not be editable from WYSIWYG mode because there are unsaved changes in the source file!");
 	disableContentEdit();
@@ -969,10 +969,10 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 			
 			// Compare the source codes ...
 			
-			var srcHTML = wysiwygEditor.getSourceCodeBody();
+			var srcBodyHtml = wysiwygEditor.getSourceCodeBody();
 			
-			var body = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
-			var prewBodyHtml = wysiwygEditor.getContentEditableCode();
+			var prevBody = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+			var prevBodyHtml = wysiwygEditor.getContentEditableCode();
 			
 			/*
 				
@@ -986,12 +986,12 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 				
 			*/
 			
-			var sanitized = sanitize(prewBodyHtml, wysiwygEditor.lineBreak);
+			var sanitized = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
 			
-			if(sanitized == prewBodyHtml) console.log("No white space sanitiaztion needed"); 
+			if(sanitized == prevBodyHtml) console.log("No white space sanitiaztion needed"); 
 			else {
 				
-				console.log("prewBodyHtml=\n" + UTIL.debugWhiteSpace(prewBodyHtml) + "\n");
+				console.log("prevBodyHtml=\n" + UTIL.debugWhiteSpace(prevBodyHtml) + "\n");
 				
 				console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
 				
@@ -1004,9 +1004,9 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 				
 				var caretPosition = wysiwygEditor.getCaretPosition();
 				
-				setContentEditableBody(body, sanitized);
+				setContentEditableBody(prevBody, sanitized);
 				
-				prewBodyHtml = wysiwygEditor.getContentEditableCode();
+				prevBodyHtml = wysiwygEditor.getContentEditableCode();
 				
 				console.log("caretPosition: " + JSON.stringify(caretPosition));
 				
@@ -1016,11 +1016,11 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 				
 			}
 			
-			//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
-			//console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+			//console.log("srcBodyHtml=" + UTIL.lbChars(srcBodyHtml));
+			//console.log("prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 			
 			// Compare the source with the editable preview
-			var diff = UTIL.textDiff(srcHTML, prewBodyHtml);
+			var diff = UTIL.textDiff(srcBodyHtml, prevBodyHtml);
 			
 			/*
 				Problem: When ignoreTransform removes a diff ...
@@ -1078,8 +1078,8 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 			console.log("diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 			
 			//console.log("source:" + UTIL.lbChars(wysiwygEditor.sourceFile.text));
-			console.log("srcHTML: " + UTIL.lbChars(srcHTML));
-			console.log("prewBodyHtml: " + UTIL.lbChars(prewBodyHtml));
+			console.log("srcBodyHtml: " + UTIL.lbChars(srcBodyHtml));
+			console.log("prevBodyHtml: " + UTIL.lbChars(prevBodyHtml));
 			
 			console.log("source before:");
 			for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
@@ -1102,17 +1102,17 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 					
 					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 					
-					var rowsPrewBodyHtml = prewBodyHtml.split(/\n|\r\n/);
-					console.log("prewBodyHtml:");
+					var rowsPrewBodyHtml = prevBodyHtml.split(/\n|\r\n/);
+					console.log("prevBodyHtml:");
 					for(var j = 0; j<rowsPrewBodyHtml.length; j++) console.log(j + ": " + rowsPrewBodyHtml[j]);
 					console.log("sourceFile:");
 						for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 						
 						console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
 						console.log("remove=" + diff.removed[i].text.trim());
-					console.log("source code body before:" + UTIL.lbChars(srcHTML));
+					console.log("source code body before:" + UTIL.lbChars(srcBodyHtml));
 					console.log("source code body after:" + wysiwygEditor.getSourceCodeBody());
-					console.log("prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+					console.log("prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 						console.log("diff=" + JSON.stringify(diff, null, 2));
 						console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 						
@@ -1294,9 +1294,9 @@ wysiwygEditor.onClose();
 		var wysiwygEditor = this;
 		
 		/*
-			innerHTML will also get the line-break after <body> and before </body> !
-			But contentEditable likes to remove those line breaks!
-			So we have to add those line breaks manually!
+			innerHTML will *sometimes* include the line-break after <body> and before </body> !
+			And it *sometimes* removes the same line breaks ...
+			
 		*/
 		
 		// 
@@ -1313,7 +1313,8 @@ wysiwygEditor.onClose();
 		}
 		
 		var html = body.innerHTML;
-		var prewHTML = wysiwygEditor.lineBreak + html.trim() + wysiwygEditor.lineBreak;
+		//var prewHTML = wysiwygEditor.lineBreak + html.trim() + wysiwygEditor.lineBreak;
+		var prewHTML = html;
 		
 		//var html = wysiwygEditor.getPreviewWindowHtml();
 		//var prewHTML = getElementContent(html, wysiwygEditor.bodyTagPreview, wysiwygEditor.lineBreak);
@@ -1374,9 +1375,9 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 			throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) + " but sourceFile.text contains CR!");
 		}
 		
-		var srcHTML = getElementContent(wysiwygEditor.sourceFile.text, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak)
+		var srcBodyHtml = getElementContent(wysiwygEditor.sourceFile.text, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak)
 		
-		return srcHTML;
+		return srcBodyHtml;
 		}
 	
 	WysiwygEditor.prototype.bodyExistInSource = function bodyExistInSource(close) {
@@ -1677,10 +1678,10 @@ else throw err;
 		wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML);
 		
 		// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
-		var prewBodyHtml = wysiwygEditor.getContentEditableCode();
-		console.log("(after write) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+		var prevBodyHtml = wysiwygEditor.getContentEditableCode();
+		console.log("(after write) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 		
-		if(srcHtmlBeforeDance == prewBodyHtml) {
+		if(srcHtmlBeforeDance == prevBodyHtml) {
 			console.warn("No dance needed !?");
 			return;
 		}
@@ -1688,12 +1689,12 @@ else throw err;
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
 		// Sanitize (add line break etc) to the content-editable code
-		var sanitazed = sanitize(prewBodyHtml, wysiwygEditor.lineBreak);
+		var sanitazed = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
 		
-		if(sanitazed != prewBodyHtml) {
+		if(sanitazed != prevBodyHtml) {
 			setContentEditableBody(body, sanitazed);
-			prewBodyHtml = wysiwygEditor.getContentEditableCode();
-			console.log("(after sanitation) prewBodyHtml=" + UTIL.lbChars(prewBodyHtml));
+			prevBodyHtml = wysiwygEditor.getContentEditableCode();
+			console.log("(after sanitation) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 		}
 		
 		var sourceFile = wysiwygEditor.sourceFile;
@@ -1707,7 +1708,7 @@ else throw err;
 		}
 		
 		// Replace the the content of the body element with the content-editable code
-		allSourceHtml = changeCodeInBody(prewBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak);
+		allSourceHtml = changeCodeInBody(prevBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak);
 		
 		console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
 		
@@ -2193,15 +2194,17 @@ else throw err;
 	
 	
 	
-	function setContentEditableBody(body, srcHTML, lb) {
+	function setContentEditableBody(body, srcBodyHtml, lb) {
 		
-		body.innerHTML = srcHTML;
+		console.log("Setting content editable body ( " + srcBodyHtml.length + " characters)");
+		
+		body.innerHTML = srcBodyHtml;
 		
 		// Do not need to pad the code with line breaks! 
 		// Only the source code need to have line breaks before body tags!
 		// The diff campares innerHTML with source code without the lines of the body elements
 		
-		//body.innerHTML = lb + srcHTML + lb;
+		//body.innerHTML = lb + srcBodyHtml + lb;
 	}
 	
 	

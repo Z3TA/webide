@@ -377,10 +377,17 @@ var UTIL = {
 		//if(editedRow[editedRow.length-1] != "") throw new Error("Edited text must end with a line break to make it easier to diff! editedText=" + UTIL.lbChars(editedText));
 		//if(originalRow[originalRow.length-1] != "") throw new Error("Original text must end with a line break to make it easier to diff! originalText=" + UTIL.lbChars(originalText));
 		
-		// Add an ending line-break if one doesn't exist
-		if(editedRow[editedRow.length-1] != "") editedRow.push("");
-		if(originalRow[originalRow.length-1] != "") originalRow.push(""); 
-		
+		// Add an ending line-break if one doesn't exist. Why ? To make diff easier, so that each line ends with a line break (including the last line)
+		var extraLbAddedToEdited = false;
+		var extraLbAddedToOriginal = false;
+		if(editedRow[editedRow.length-1] != "") {
+editedRow.push("");
+			extraLbAddedToEdited = true;
+		}
+		if(originalRow[originalRow.length-1] != "") {
+originalRow.push("");
+			extraLbAddedToOriginal = true;
+		}
 		editedText = editedRow.join(lbEditedText);
 		originalText = originalRow.join(lbOriginalText);
 		
@@ -413,7 +420,11 @@ var UTIL = {
 		for (var i=0; i<diff.length; i++) {
 			line = diff[i].value.split(lb);
 			
-			if(line.length < 2 || line[line.length-1] != "") throw new Error("Line does not end with a new-line character! diff[" + i + "]=" + JSON.stringify(diff[i]) + " line=" + JSON.stringify(line));
+			if(line.length < 2 || line[line.length-1] != "") {
+				console.log("diff[" + i + "]=" + JSON.stringify(diff[i]) + "");
+				console.log("line=" + JSON.stringify(line));
+				throw new Error("Line does not end with a new-line character! See console.log's");
+			}
 			
 			lineBreakCount = 0;
 			
@@ -469,6 +480,12 @@ var UTIL = {
 		
 		console.log("extraLbAdded=" + extraLbAdded);
 		if(extraLbAdded) inserted.pop();
+		
+		if(extraLbAddedToEdited && !extraLbAddedToOriginal) {
+			if(line[line.length-1] != "") throw new Error("Expected last line line[" + (line.length-1) + "]=" + line[line.length-1] + " to be emty");
+			console.log("The last row was removed! line.length=" + line.length + " totalLineBreaks=" + totalLineBreaks + " lineBreakCount=" + lineBreakCount + "");
+			removed.push({text: "", row: totalLineBreaks});
+			}
 		
 		console.log("inserted=" + JSON.stringify(inserted, null, 2));
 		console.log("removed=" + JSON.stringify(removed, null, 2));

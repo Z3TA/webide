@@ -901,7 +901,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			setTimeout(function checkIfRemoved() { // Check again to make sure it has been removed
 				if(EDITOR.files.hasOwnProperty(path)) throw new Error("Closed file is still in the editor! path=" + path + 
 				"\nIt was closed 100ms ago. If you are running tests, use different file names for each test!");
-			}, 100);
+			}, 30);
 			
 			if(switchTo) {
 				EDITOR.showFile(switchTo);

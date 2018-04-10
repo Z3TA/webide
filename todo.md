@@ -38,7 +38,10 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-A test for pressing enter two times in WYSIWYG ... It seems to remove the precious new-line characters after <main> and before </main>
+Only remove info messages for that file! (problem when running (async) tests that test for info messages) 
+EDITOR.js 4349
+
+Extensive testing on WysiwygEditor!!
 
 Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
 
@@ -61,6 +64,9 @@ See if vumoviemaker can run in the editor
 
 todo
 ----
+
+When inlining console.log's and you are editing the file, the position of the console log might have changed!!
+Investigate hot code loading. 
 
 Can two wysiwygEditor windows be open and do stuff at the same time !?
 
@@ -1334,6 +1340,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Show rev in annotactions
+
+---
 
 Ctrl+Tab to switch tabs not working in the browser (it changes browser tab) is annoying
 Ctrl + up/down move to next/previous tab !?

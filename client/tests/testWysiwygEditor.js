@@ -272,45 +272,94 @@ bodyTagPreview: compliedSourceBodyTag
 	
 });
 
-EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
+	EDITOR.addTest(function wysiwygNoExtraLineBreaks(callback) {
+		/*
+			We want the compiled bodytag html and file body html to be the same after the "dance"
+			(it only dance in WYSIWYG mode)
+		*/
 		var fileHtml = '<head></head><body>\n\n<p>Test wysiwygNoExtraLineBreaks</p>\n</body>';
-		//var fileHtml = '<html>\n<body>\n\n<p>Test wysiwygNoExtraLineBreaks</p>\n</body></html>';
-	
-	launchServe(fileHtml, fileHtml, "wysiwygNoExtraLineBreaks.htm", function(err, preview, cleanup) {
-		if(err) throw err;
+		var compiledHtml = '<head></head><body>\n<main>\n\n<p>Test wysiwygNoExtraLineBreaks</p>\n</main>\n</body>';
 		
-		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
-		
-		var fileBodyHtml = preview.getSourceCodeBody();
-		var prewBodyHTML = preview.getContentEditableCode();
-		var prewHTML = preview.getPreviewWindowHtml();
-		//var lb = "\n";
-		//var lbPrewHTML = UTIL.occurrences(prewHTML, lb);
-		//var lbHtml = UTIL.occurrences(fileHtml, lb);
-		
-		console.log("fileBodyHtml: " + UTIL.lbChars(fileBodyHtml));
-		console.log("prewBodyHTML: " + UTIL.lbChars(prewBodyHTML));
-		console.log("prewHTML: " + UTIL.lbChars(prewHTML));
-		console.log("fileHtml: " + UTIL.lbChars(fileHtml));
-		
-		if(fileBodyHtml != prewBodyHTML)  {
-			throw new Error("The fileBodyHtml is not the same as prewBodyHTML!");
-		}
-		
-		cleanup();
-		
-		callback(true);
+		launchServe(fileHtml, compiledHtml, "wysiwygNoExtraLineBreaks.htm", false, function(err, preview, cleanup) {
+			if(err) throw err;
+			
+			var fileBodyHtml = preview.getSourceCodeBody();
+			var prewBodyHTML = preview.getContentEditableCode();
+			var prewHTML = preview.getPreviewWindowHtml();
+			//var lb = "\n";
+			//var lbPrewHTML = UTIL.occurrences(prewHTML, lb);
+			//var lbHtml = UTIL.occurrences(fileHtml, lb);
+			
+			console.log("fileBodyHtml: " + UTIL.lbChars(fileBodyHtml));
+			console.log("prewBodyHTML: " + UTIL.lbChars(prewBodyHTML));
+			console.log("prewHTML: " + UTIL.lbChars(prewHTML));
+			console.log("fileHtml: " + UTIL.lbChars(fileHtml));
+			
+			if(fileBodyHtml != prewBodyHTML)  {
+				throw new Error("The fileBodyHtml is not the same as prewBodyHTML! See console logs!");
+			}
+			
+			cleanup();
+			
+			callback(true);
 		});
-});
-
+	});
+	
+	EDITOR.addTest(function wysiwygHandleExtraLinebreak(callback) {
+		/*
+			Contenteditable sometimes inserts an extra line-break at the start, and sometimes removes it
+			This might be tricky for the diff algoritm.
+		*/
+		var fileHtml = '<head></head><body>\n<p>Paragraph 1</p>\n\n<p>Paragraph 2</p>\n</body>';
+		var compiledHtml = '<head></head><body>\nTest wysiwygHandleExtraLinebreak\n<main>\n<p>Paragraph 1</p>\n\n<p>Paragraph 2</p>\n</main>\n</body>';
+		
+		launchServe(fileHtml, compiledHtml, "wysiwygHandleExtraLinebreak.htm", false, function wysiwygEditorStarted(err, wysiwygEditor, cleanup) {
+			if(err) throw err;
+			
+			// Remove a line and change one line
+			var doc = wysiwygEditor.previewWin.window.document;
+			var contentElement = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+			
+			// Insert extra line break
+			contentElement.innerHTML = "\n\n<p>Paragraph 1</p>\n\n\<p>foo</p>\n\n<p>Paragraph 2</p>\n";
+			
+			// Trigger oninput
+			wysiwygEditor.previewInput();
+			
+			// Now remove them
+			contentElement.innerHTML = "<p>Paragraph 1</p>\n\n\<p>bar</p>\n\n<p>Paragraph 2</p>";
+			
+			// Trigger oninput
+			wysiwygEditor.previewInput();
+			
+			var fileBodyHtml = wysiwygEditor.getSourceCodeBody();
+			var prewBodyHTML = wysiwygEditor.getContentEditableCode();
+			var prewHTML = wysiwygEditor.getPreviewWindowHtml();
+			//var lb = "\n";
+			//var lbPrewHTML = UTIL.occurrences(prewHTML, lb);
+			//var lbHtml = UTIL.occurrences(fileHtml, lb);
+			
+			console.log("fileBodyHtml: " + UTIL.lbChars(fileBodyHtml));
+			console.log("prewBodyHTML: " + UTIL.lbChars(prewBodyHTML));
+			console.log("prewHTML: " + UTIL.lbChars(prewHTML));
+			console.log("fileHtml: " + UTIL.lbChars(fileHtml));
+			
+			if(fileBodyHtml != prewBodyHTML)  {
+				throw new Error("The fileBodyHtml is not the same as prewBodyHTML! See console logs!");
+			}
+			
+			cleanup();
+			
+			callback(true);
+		});
+	});
+	
 EDITOR.addTest(function inlineConsoleLog(callback) {
 	// The window might load before WysiwygEditor has overloaded window.console.log! So we need to set a timer !
 		var fileHtml = '<head></head><body>\n<script>\nsetTimeout(function() {\nconsole.log("hi " + (new Date()).getTime());\n},50);\n</script>\n\n<p>Test inlineConsoleLog</p>\n</body>';
 	
 	launchServe(fileHtml, fileHtml, "inlineConsoleLog.htm", function(err, preview, cleanup) {
 		if(err) throw err;
-		
-		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
 		
 		console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 		
@@ -334,8 +383,6 @@ if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 	launchServe(fileHtml, fileHtml, "inlineConsoleLogFast.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
-		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
-		
 		console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 		
 		setTimeout(function checkEditorInfo() {
@@ -358,13 +405,11 @@ EDITOR.addTest(function inlineErrorMessages(callback) {
 		launchServe(fileHtml, fileHtml, "inlineErrorMessages.htm", function(err, preview, cleanup) {
 		if(err) throw err;
 		
-		if(preview.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
-		
 		console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 		
 		setTimeout(function checkEditorInfo() {
 			console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
-				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info=" + EDITOR.info);
+				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info.length=" +EDITOR.info.length + " to be at least 1. EDITOR.info=" + EDITOR.info);
 			
 			cleanup();
 			
@@ -372,7 +417,7 @@ EDITOR.addTest(function inlineErrorMessages(callback) {
 		}, 100);
 		
 	});
-});
+}, 1);
 
 EDITOR.addTest(function previewAutocomplete(callback) {
 	
@@ -412,20 +457,14 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 
 	EDITOR.addTest(function pressEnterTwiceInWYSIWYG(callback) {
 		/*
-			
 			Pressing enter *twice* seem to remove the line breaks before </main> end tag !?
-			
-			Sometimes this test fails with "Can't find firstParagraph" !?!?
-			
-		*/
+			It seem the browser removes the ending line break only *sometimes* (at random) so we need the WysiwygEditor to handle it and not blow up
+			*/
 		var fileHtml = '<head></head><body>\n<p id="ppp">Test pressEnterTwiceInWYSIWYG</p>\n</body>';
 		var compiledHtml = '<head></head><body>\n<p>Header</p>\n<main>\n<p id="ppp">Test pressEnterTwiceInWYSIWYG</p>\n</main>\n<p>Footer</p>\n</body>';
 		
 		launchServe(fileHtml, compiledHtml, "pressEnterTwiceInWYSIWYG.htm", false, function servedPreview(err, wEditor, cleanup) {
 			if(err) throw err;
-			
-			// Sometimes the document have not fully loaded, even though the browser says so (Can't find firstParagraph)
-			setTimeout(function wtfChrome() {
 			
 			var win = wEditor.previewWin;
 			var doc = win.document;
@@ -441,29 +480,31 @@ EDITOR.addTest(function previewAutocomplete(callback) {
 				throw new Error("Can't find firstParagraph=" + firstParagraph + " win=" + win + " doc=" + doc + " doc.innerHTML=" + doc.innerHTML);
 			}
 				
+				setTimeout(function firstLine() {
 			var newParagraph = doc.createElement("p");
 				newParagraph.innerText = "Line 1";
 				var firstParagraph = doc.getElementById("ppp");
 				main.insertBefore(newParagraph, firstParagraph);
 				main.focus(); // Need focus, or it can't get caret position inside contenteditable!
 			wEditor.previewInput();
+					
+					setTimeout(function secondLine() {
+						var newParagraph = doc.createElement("p");
+						newParagraph.innerText = "Line 2";
+						var firstParagraph = doc.getElementById("ppp");
+						main.insertBefore(newParagraph, firstParagraph);
+						main.focus();
+						wEditor.previewInput();
+						
+						cleanup();
+						callback(true);
+						
+					}, 500); // Simulate user interaction
+				}, 500);
 				
-				var newParagraph = doc.createElement("p");
-				newParagraph.innerText = "Line 2";
-				var firstParagraph = doc.getElementById("ppp");
-				main.insertBefore(newParagraph, firstParagraph);
-				main.focus();
-				wEditor.previewInput();
-				
-				cleanup();
-				callback(true);
-				
-			},10);
-			
-			
 			});
 		
-	}, 1);
+	});
 	
 	function launchServe(sourcePage, compiledPage, testFile, onlyPreview, callback) {
 	
@@ -519,23 +560,31 @@ opt.compiledSource = compiledPage;
 				
 				function wysiwygEditorLoaded() {
 					
+						// Sometimes the document have not fully loaded, even though the browser says so
+						setTimeout(function waitUntilReallyLoaded() {
 					wysiwygEditorLoadedCalled = true;
 					
 					if(wysiwygEditor.url != url) throw new Error("Expected wysiwygEditor.url=" + wysiwygEditor.url + " == " + "url=" + url);
 					
-					if(callback) callback(null, wysiwygEditor, cleanUp);
+						if(wysiwygEditor.previewWin == window) throw new Error("The preview window should not be the same as the editor's window!");
+						
+					if(callback) {
+							callback(null, wysiwygEditor, cleanUp);
+							}
+							
+						},30); 
+						
+					}
 					
-				}
-				
-				function cleanUp() {
-					EDITOR.closeFile(sourceFile.path);
-					wysiwygEditor.close();
-				}
-				
+					function cleanUp() {
+						EDITOR.closeFile(sourceFile.path);
+						wysiwygEditor.close();
+					}
+					
+				});
 			});
-		});
+		}
 	}
-}
-
+	
 })();
 
