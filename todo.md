@@ -1385,12 +1385,27 @@ If the users have the same username, show the host name, with the diff (foo.bar,
 
 ---
 
-Operational transform.
+When two users are logged in with the same username, or one have been invited to join a session. 
+Colaboration mode will be active. And events will be mirrored.
 
-Each file change get an id (counter) and who made the change.
-The client sends the last id from change recived when sending a edit
-If the id is lower then the last sent, the edit is transormed.
-If the client recives a change while he/she has edits in flight, the incoming change is transformed. 
+### Operational transform.
+
+Users sends to the server what they believe to be the current event order.
+If the server recives an event with the wrong (the same) order, it transforms one of the events.
+
+Ex:
+User 1 sends move caret to row 5 (order=1)
+User 2 sends add new line at row 4 (order=1)
+
+(there can be two outcomes, eg the server recives user 1's event first, or the server recives user 2's event first)
+
+Outcome 1: Server recives user 1's event first: move caret to row 5 (order=1)
+When user 2's event comes in, the server only has to change the order to order=2 as move caret has already been sent out. 
+TCP guarantees order. So (with TCP) the user can not recive order 2 before they recive order 1
+
+outcome 2: Server recives user 2's event first: add new line at row 4
+Server updates the move caret event to order=2 and change row from 5 to 6.
+
 
 ---
 
