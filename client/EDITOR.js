@@ -862,6 +862,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				EDITOR.eventListeners.fileClose[i].fun(file); // Call function
 			}
 			
+			EDITOR.removeAllInfo(file);
 			
 			// Make sure lastFile is not the file being closed
 			if(EDITOR.lastFile == file) {
@@ -869,6 +870,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				EDITOR.lastFile = EDITOR.lastChangedFile([file]);
 				console.log("Changed lastfile to: " + EDITOR.lastFile.path);
 			}
+			
 			// Make sure lastFile is not currentFile
 			if(EDITOR.lastFile == EDITOR.currentFile && EDITOR.lastFile != undefined) {
 				console.warn("lastFile is the currentFile:" + EDITOR.currentFile.path);
@@ -2303,14 +2305,14 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			
 			//console.log("imgArray=" + imgArray.length);
 			
-			// Remove all text at next editor interaction
+			// Remove all text at next editor interaction ?
 			// nope: They will be removed when moving the cursor
 			/*
 				EDITOR.onNextInteraction(function(ev) {
 				console.log("editor interaction ev=", ev);
 				if(ev == "mouseMove") return;
 				console.warn("Clearing info! row=" + row + " col=" + col + " txt=" + JSON.stringify(txt));
-				EDITOR.removeAllInfo(row, col);
+				EDITOR.removeAllInfo(file, row, col);
 				});
 			*/
 			
@@ -2369,13 +2371,15 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 	}
 	
-	EDITOR.removeAllInfo = function(row, col, txt) {
+	EDITOR.removeAllInfo = function(file, row, col) {
 		// Find the item in the array, then splice it ...
+		
+		if(!(file instanceof File)) throw new Error("Firs argument file=" + file + " needs to be a file object!");
 		
 		var info = EDITOR.info;
 		
 		for(var i=0; i<info.length; i++) {
-			if(info[i].row == row && info[i].col == col) {
+			if(info[i].file == file && (info[i].row == row || row == undefined) && (info[i].col == col || col == undefined)) {
 				
 				console.warn("Removing info from row=" + row + " col=" + col);
 				
@@ -2383,7 +2387,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				info.splice(i,1);
 				
 				// Call removeAllInfo again, just to make sure ALL is removed
-				EDITOR.removeAllInfo(row, col);
+				EDITOR.removeAllInfo(file, row, col);
 				return; // Splice can be buggy if many rows are removed in a for-loop
 				
 			}
@@ -4346,10 +4350,11 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 		
 		EDITOR.on("moveCaret", function mirrorCaretMovement(file, caret) {
 			
-			EDITOR.info.length = 0; // Clear info messages
+			// Clear info messages in this file
+			EDITOR.removeAllInfo(file);
 			
 			if(caret == file.caret && EDITOR.collaborationMode) {
-				CLIENT.cmd("mirror", {
+CLIENT.cmd("mirror", {
 					object: "FILE", 
 					path: file.path, 
 					method: "moveCaret", 

@@ -3,8 +3,8 @@
 	/*
 		Prints talk bubbles
 		
-		Add "comments" with EDITOR.addInfo(row, col, info);
-		Remove them with EDITOR.removeAllInfo(row, col);
+		Add "comments" with EDITOR.addInfo();
+		Remove them with EDITOR.removeAllInfo();
 	
 	*/
 	
