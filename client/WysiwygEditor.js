@@ -523,7 +523,7 @@ if(!selection) throw new Error("Unable to get selection");
 		var wysiwygEditor = this;
 		var previewWin = wysiwygEditor.previewWin;
 		
-		console.log("placing caret on index " + charPos + " on:");
+		console.log("placing caret on index " + charPos + " on (node ? " + !!node + "):");
 		console.log(node);
 		
 		var doc = previewWin.window.document;
@@ -600,18 +600,13 @@ if(!selection) throw new Error("Unable to get selection");
 		// Delay updating so that we do not render broken tags etc and save some battery
 		//updatePreviewOnChange = setTimeout(function() {
 		
-		
-		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
-		
-		if(!body) throw new Error("Unable to find bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " element!");
-		
 		var srcHTML = wysiwygEditor.getSourceCodeBody();
 		
 		// Can not change the file in a fileChange event or it would create an endless loop
 		// Which means we can not sanitize on source code changes,
 		// which also means we can not sanitize on content-editable changes!
 		
-		setContentEditableBody(body, srcHTML, wysiwygEditor.lineBreak);
+		wysiwygEditor.setContentEditableBody(srcHTML);
 		
 		// Setting innerHTML makes the caret disappear. Place it again ...
 		// Find out the tag and if we are near text, then find the tag in content-editable
@@ -777,7 +772,7 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(keyUpEvent) {
 		var wysiwygEditor = this;
-		console.log("previewKeyup! EDITOR.input=" + EDITOR.input);
+		console.log("previewKeyup! EDITOR.input=" + EDITOR.input + " previewInputFired=" + previewInputFired);
 		
 		//keyUpEvent = keyUpEvent || window.event;
 		
@@ -937,7 +932,7 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 	}
 	
 	WysiwygEditor.prototype.previewInput = function previewInput(inputEvent) {
-		console.timeEnd("contentEdit");
+		console.time("previewInput");
 		var wysiwygEditor = this;
 		
 		// Called every time the contenteditable is updated
@@ -995,6 +990,8 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 				
 				console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
 				
+				previewWin.window.addEventListener("input", function(e) {console.log("input after sanitation!");});
+				
 				/*
 					Problem: contenteditable will lose the caret when the html is updated, 
 					this is verry annoying when typing as the cursor jumps
@@ -1004,7 +1001,7 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 				
 				var caretPosition = wysiwygEditor.getCaretPosition();
 				
-				setContentEditableBody(prevBody, sanitized);
+				wysiwygEditor.setContentEditableBody(sanitized);
 				
 				prevBodyHtml = wysiwygEditor.getContentEditableCode();
 				
@@ -1222,7 +1219,7 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		wysiwygEditor.previewWin.focus();
 		EDITOR.input = false;
 		
-		console.timeEnd("contentEdit");
+		console.timeEnd("previewInput");
 		
 		sourceFile.checkGrid();
 		
@@ -1692,7 +1689,7 @@ else throw err;
 		var sanitazed = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
 		
 		if(sanitazed != prevBodyHtml) {
-			setContentEditableBody(body, sanitazed);
+			wysiwygEditor.setContentEditableBody(sanitazed);
 			prevBodyHtml = wysiwygEditor.getContentEditableCode();
 			console.log("(after sanitation) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 		}
@@ -1716,7 +1713,7 @@ else throw err;
 		
 		// Finally make the body of the source file the body of the content-editable
 		var sourceBody = wysiwygEditor.getSourceCodeBody();
-		setContentEditableBody(body, sourceBody, wysiwygEditor.lineBreak);
+		wysiwygEditor.setContentEditableBody(sourceBody);
 		
 		
 		// The source code and content-editable should now have the same line breaks!
@@ -2109,7 +2106,24 @@ else throw err;
 		
 	}
 	
-	
+	WysiwygEditor.prototype.setContentEditableBody = function setContentEditableBody(srcBodyHtml) {
+		var wysiwygEditor = this;
+		
+		var doc = wysiwygEditor.previewWin.window.document;
+		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+		
+		if(!body) throw new Error("Unable to find bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " element!");
+		
+		console.log("Setting content editable body ( " + srcBodyHtml.length + " characters)");
+		
+		body.innerHTML = srcBodyHtml;
+		
+		// Do not need to pad the code with line breaks!
+		// Only the source code need to have line breaks before body tags!
+		// The diff campares innerHTML with source code without the lines of the body elements
+		
+		//body.innerHTML = lb + srcBodyHtml + lb;
+	}
 	
 	function attachFileChangeListener(wysiwygEditor) {
 		// fileChange wants an uniqe function name ...
@@ -2194,18 +2208,6 @@ else throw err;
 	
 	
 	
-	function setContentEditableBody(body, srcBodyHtml, lb) {
-		
-		console.log("Setting content editable body ( " + srcBodyHtml.length + " characters)");
-		
-		body.innerHTML = srcBodyHtml;
-		
-		// Do not need to pad the code with line breaks! 
-		// Only the source code need to have line breaks before body tags!
-		// The diff campares innerHTML with source code without the lines of the body elements
-		
-		//body.innerHTML = lb + srcBodyHtml + lb;
-	}
 	
 	
 	function removeHeadWhiteSpace(text, LB) {

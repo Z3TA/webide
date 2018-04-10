@@ -38,12 +38,11 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Only remove info messages for that file! (problem when running (async) tests that test for info messages) 
-EDITOR.js 4349
-
-Extensive testing on WysiwygEditor!!
+input event doesn't fire in Firefox after resetting the content html
 
 Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
+
+Extensive testing on WysiwygEditor!!
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!
 
