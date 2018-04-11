@@ -114,7 +114,7 @@
 			});
 		}
 		else if(msg.stdout) {
-stdout(msg);
+			stdout(msg);
 		}
 		else if(msg.stderr) {
 			// ## stderr
@@ -148,10 +148,10 @@ stdout(msg);
 			while(arr = reFileRun.exec(text)) {
 				console.log(arr);
 				line = arr[1];
-					actualLine = parseInt(line) - 20;
+				actualLine = parseInt(line) - 20;
 				text = text.replace(reFileRun, filePath + ":" + actualLine);
-					}
-				msg.stderr = text;
+			}
+			msg.stderr = text;
 			
 			// Get the path from the first line of the error message
 			var firstLine = text.slice(0, text.indexOf("\n"));
@@ -169,44 +169,44 @@ stdout(msg);
 			}
 			console.log("stackTrace=" + JSON.stringify(stackTrace));
 			
-				//console.log("msg.stderr=" + msg.stderr);
-				//console.log("text=" + text);
-				
-				if(pathOnFirstLine == EDITOR.currentFile.path) {
-					// The error is in the file currently in view
-					showErrorMessage(EDITOR.currentFile, text);
-				}
-				else if(pathOnFirstLine == filePath) {
-					// The error is in the file being run
+			//console.log("msg.stderr=" + msg.stderr);
+			//console.log("text=" + text);
+			
+			if(pathOnFirstLine == EDITOR.currentFile.path) {
+				// The error is in the file currently in view
+				showErrorMessage(EDITOR.currentFile, text);
+			}
+			else if(pathOnFirstLine == filePath) {
+				// The error is in the file being run
 				console.log("Opening " + pathOnFirstLine + " because it's the file bing run");
 				attemptOpen(pathOnFirstLine, function opened(err, file) {
-						// We should not have any problems opening this file ...
-						if(err) throw err;
+					// We should not have any problems opening this file ...
+					if(err) throw err;
+					else showErrorMessage(file, msg.stderr);
+				});
+			}
+			else {
+				// The path in the first line is not the file being run nor the current file in view
+				
+				if(pathOnFirstLine.charAt(0) == "/") { // Asume unix like file path ( not Windows like C:\\\\///Windows\\//// )
+					// Attempt to open this file
+					console.log("Opening " + pathOnFirstLine + " because it's an actual path (starts with a slash)");
+					attemptOpen(pathOnFirstLine, function opened(err, file) {
+						if(err) {
+							console.error(err);
+							alertBox(text);
+						}
 						else showErrorMessage(file, msg.stderr);
 					});
 				}
 				else {
-					// The path in the first line is not the file being run nor the current file in view
-					
-					if(pathOnFirstLine.charAt(0) == "/") { // Asume unix like file path ( not Windows like C:\\\\///Windows\\//// )
-						// Attempt to open this file
-					console.log("Opening " + pathOnFirstLine + " because it's an actual path (starts with a slash)");
-					attemptOpen(pathOnFirstLine, function opened(err, file) {
-							if(err) {
-								console.error(err);
-							alertBox(text);
-							}
-							else showErrorMessage(file, msg.stderr);
-						});
-					}
-					else {
-						// The error is in a native nodejs library ...
-						// Traverse the stack to find a file we can actually open
-						// Does the file in view or the file being run show up in the stack ? Then open it !
+					// The error is in a native nodejs library ...
+					// Traverse the stack to find a file we can actually open
+					// Does the file in view or the file being run show up in the stack ? Then open it !
 					
 					if(EDITOR.currentFile && stackTrace.indexOf(EDITOR.currentFile.path) != -1) {
 						showErrorMessage(EDITOR.currentFile, msg.stderr);
-						}
+					}
 					else if(stackTrace.indexOf(filePath) != -1) {
 						console.log("Opening " + filePath + " because it's in the stack trace");
 						attemptOpen(filePath, function opened(err, file) {
@@ -218,7 +218,7 @@ stdout(msg);
 					else {
 						// Attempt to open any file that has a real file path
 						var found = false;
-					for (var i=0; i<stackTrace.length; i++) {
+						for (var i=0; i<stackTrace.length; i++) {
 							if(stackTrace[i].charAt(0) == "/") {
 								found = true;
 								console.log("Opening " + stackTrace[i] + " because it's in the stack trace and is an actual path (starts with a slash)");
@@ -422,9 +422,9 @@ stdout(msg);
 			
 			if(common.length > 1) col = rowText.indexOf(common);
 			else col = 0;
-			}
+		}
 		else {
-		if(inDebugStr && col >= 30) col = col - 30;
+			if(inDebugStr && col >= 30) col = col - 30;
 			col = col + point.length - 1; // The marker
 			col = col - inlineTrim;
 		}
@@ -445,9 +445,26 @@ stdout(msg);
 		else {
 			console.log("Open file: filePath=" + stdOutFile + " ...");
 			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
-				if(err) throw err;
-				file.moveCaretToEndOfFile();
-				appendFile(file, msg);
+				if(err) {
+					if(err.code == "IN_QUEUE") {
+						setTimeot(function waitForFileToOpen() {
+							if(EDITOR.files.hasOwnProperty(stdOutFile)) {
+								var file = EDITOR.files[stdOutFile];
+								file.moveCaretToEndOfFile();
+								appendFile(file, msg);
+							}
+							else {
+								throw new Error("The file was in queue to be opened, but never opened! path=" + stdOutFile);
+							}
+						}, 300);
+						return;
+					}
+					else throw err;
+				}
+				else {
+					file.moveCaretToEndOfFile();
+					appendFile(file, msg);
+				}
 			});
 		}
 	}
@@ -533,17 +550,17 @@ stdout(msg);
 		EDITOR.renderNeeded();
 		
 		function write(str) {
-		if(eof) {
-			// Auto scroll down
-			//var method = file.insertText.bind(file);
+			if(eof) {
+				// Auto scroll down
+				//var method = file.insertText.bind(file);
 				//if(str.slice(0,1) != "\n") str = "\n" + str;
 				file.insertText(str);
-		}
-		else {
-			// Just add the text without scrolling down to it
+			}
+			else {
+				// Just add the text without scrolling down to it
 				//var method = file.writeLine.bind(file);;
 				file.writeLine(str);
-		}
+			}
 		}
 		
 	}
