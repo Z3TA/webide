@@ -30,8 +30,8 @@ sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 echo "Remove tests"
 sed -i 's/(<!-- BEGIN TESTS -->).*(<!-- END TESTS -->)//' temp/release/linux/client/index.htm
 
-echo Remove test users
-sed -i '4,$d' temp/release/linux/server/users.pw
+#echo Remove test users
+#sed -i '4,$d' temp/release/linux/server/users.pw
 
 echo "Clean up"
 rm -rf temp/release/linux/.hg/
@@ -114,7 +114,6 @@ rm -rf temp/release/server/JZedit.desktop
 rm -rf temp/release/server/osx_start.sh
 rm -rf temp/release/server/start.js
 rm -rf temp/release/server/bin
-rm -rf temp/release/server/tests
 rm -rf temp/release/server/userdirs
 
 
