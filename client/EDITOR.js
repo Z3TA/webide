@@ -559,7 +559,12 @@ EDITOR.lastKeyPressed = "";
 				
 				Could also add a counter to it's name, like when the file is already opened!?
 			*/
-			if(text != undefined) throw new Error("File with path=" + path + " is already in the queue to be opened, pick another file name!");
+			if(text != undefined) {
+				var errMsg = "File with path=" + path + " is already in the queue to be opened (from disk). So it's unsafe to overwrite the file content!";
+				if(callback) return callback(new Error(errMsg));
+				else throw new Error(errMsg);
+				//return console.warn(errMsg);
+			}
 			
 			// Add callback to the waiting list to be called once the file has been loaded
 			if(callback) {
