@@ -38,9 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-input event doesn't fire in Firefox after resetting the content html
+todo: remove br inside p when doing sanitation.
 
-Pressing enter (new line) on WYSIWYG preview window takes focus away ! (only in Firefox)
 
 Extensive testing on WysiwygEditor!!
 

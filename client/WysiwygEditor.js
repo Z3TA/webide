@@ -63,6 +63,7 @@ var WysiwygEditor;
 	var previewInputFired = false;
 	var consoleLogOriginal;
 	
+	var browser = UTIL.checkBrowser();
 	
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
@@ -503,6 +504,8 @@ if(!selection) throw new Error("Unable to get selection");
 	
 	WysiwygEditor.prototype.placeCaret = function placeCaret(x, y, charPos) {
 		var wysiwygEditor = this;
+		console.log("placeCaret: x=" + x + " y=" + y + " charPos=" + charPos);
+		
 		var previewWin = wysiwygEditor.previewWin;
 		
 		var doc = previewWin.window.document;
@@ -532,6 +535,11 @@ if(!selection) throw new Error("Unable to get selection");
 		var range = doc.createRange();
 		var sel = win.getSelection();
 		
+		if(browser=="Firefox" && node.tagName == "BR") {
+			// Firefox can set the caret position, but it's not possible to input/write after the caret has been set in a br element
+			node = node.parentNode; // Most likely a p element
+			}
+		
 		try {
 			range.setStart(node, charPos);
 		}
@@ -546,7 +554,7 @@ if(!selection) throw new Error("Unable to get selection");
 		
 		return true;
 		
-	}
+		}
 	
 	WysiwygEditor.prototype.sourceFileChange = function sourceFileChange(file, type, characters, caretIndex, row, col) {
 		var wysiwygEditor = this;
@@ -593,7 +601,7 @@ if(!selection) throw new Error("Unable to get selection");
 		
 		console.log("Update wysiwyg for file.path=" + file.path);
 		
-		// if type=reload need to redo dance
+		// if type==reload need to redo dance
 		
 		//if(updatePreviewOnChange) clearTimeout(updatePreviewOnChange);
 		
@@ -2107,9 +2115,12 @@ else throw err;
 	}
 	
 	WysiwygEditor.prototype.setContentEditableBody = function setContentEditableBody(srcBodyHtml) {
+		// Updates the content of the content-editable element
+		
 		var wysiwygEditor = this;
 		
-		var doc = wysiwygEditor.previewWin.window.document;
+		var win = wysiwygEditor.previewWin;
+		var doc = win.window.document;
 		var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 		
 		if(!body) throw new Error("Unable to find bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " element!");
@@ -2117,12 +2128,24 @@ else throw err;
 		console.log("Setting content editable body ( " + srcBodyHtml.length + " characters)");
 		
 		body.innerHTML = srcBodyHtml;
+		// note: after HTML have been reset, variable body points to the *old* body. So we need to re-reference the body variable to the *new* body!
+		
+		/*
+			var parser=new DOMParser();
+		var htmlDoc=parser.parseFromString(srcBodyHtml, "text/html");
+		while (body.firstChild) body.removeChild(body.firstChild); // Clear content
+		while (htmlDoc.firstChild) body.appendChild(htmlDoc.firstChild); // Add new content
+		*/
+		
+		//var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+		//if(!body) throw new Error("Unable to find bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " element!");
 		
 		// Do not need to pad the code with line breaks!
 		// Only the source code need to have line breaks before body tags!
-		// The diff campares innerHTML with source code without the lines of the body elements
+		// The diff campares innerHTML with source code without the source code's line-breaks after <body> and before </body>
 		
 		//body.innerHTML = lb + srcBodyHtml + lb;
+		
 	}
 	
 	function attachFileChangeListener(wysiwygEditor) {
