@@ -61,6 +61,7 @@
 		
 		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 
+		console.log("infoRender: comments.length=" + comments.length);
 		
 		for(var i=0; i<comments.length; i++) {
 			
@@ -81,7 +82,7 @@
 
 			textHeight = comment.text.length * fontHeight;
 			
-			console.log("textHeight=" + textHeight);
+			console.log("Rendering info message on row=" + comment.row + " textHeight=" + textHeight);
 			
 			// Measure max text width
 			for(var j=0; j<comment.text.length;j++) {

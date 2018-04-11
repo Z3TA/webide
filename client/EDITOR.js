@@ -2270,16 +2270,16 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		if(! file instanceof File) throw new Error("Third argument file is supposed to be a File object");
 		if(lvl == undefined) lvl = 3; // 1=Err 2=Warn 3=Info
 		
+		console.log("EDITOR.addInfo! row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+		
+		console.time("addInfo");
+		
 		var info = EDITOR.info;
 		
 		if(info.length > 100) {
 			console.warn("Too many info messages! Resetting!");
 			info.length = 0;
 		}
-		
-		console.log("addInfo: row=" + row + " col=" + col + " txt=" + txt + "");
-		
-		console.time("addInfo");
 		
 		if(!file) throw new Error("No file!");
 		if(file.grid.length <= row) throw new Error("file only has " + file.grid.length + " rows!" +
@@ -2300,9 +2300,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		/*
 			Problem: Because info is pushed after each other, and is async, not all messages
 			might be shown
-			
-			
-		*/
+			*/
 		
 		function allImagesMade() {
 			// Tell the editor to render
@@ -2356,18 +2354,20 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			
 			console.timeEnd("addInfo");
 			
+			console.log("Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+			// todo: only re-render if the info is in view
 			EDITOR.renderNeeded();
 			EDITOR.render();
 			
 		}
 		
 		function makeImage(item) {
-			//console.log("item=" + item);
+			console.log("makeImage item=" + item);
 			htmlToImage(item, function(img) {
 				imgArray.push(img);
 				
-				//console.log("imagesToMake=" + imagesToMake);
-				//console.log("imagesMade=" + imagesMade);
+				console.log("imagesToMake=" + imagesToMake);
+				console.log("imagesMade=" + imagesMade);
 				
 				if(++imagesMade == imagesToMake) {
 					allImagesMade();
@@ -2379,6 +2379,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 	
 	EDITOR.removeAllInfo = function(file, row, col) {
 		// Find the item in the array, then splice it ...
+		
+		console.log(UTIL.getStack("EDITOR.removeAllInfo!"));
 		
 		if(!(file instanceof File)) throw new Error("Firs argument file=" + file + " needs to be a file object!");
 		
@@ -6460,21 +6462,31 @@ CLIENT.cmd("mirror", {
 		data += '</foreignObject>';
 		data += '</svg>';
 		
-		var DOMURL = window.URL || window.webkitURL || window;
+		console.log("Creating SVG image: data=" + data);
 		
 		var img = new Image();
-		var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-		var url = DOMURL.createObjectURL(svg);
+		
 		
 		img.onload = function () {
+			console.log("SVG image created!");
 			callback(img);
-			DOMURL.revokeObjectURL(url);
-			//console.log("Image yo!");
-			
+			if(url) DOMURL.revokeObjectURL(url);
+			}
+		
+		var browser = UTIL.checkBrowser();
+		
+		var DOMURL = window.URL || window.webkitURL || window;
+		if( DOMURL.createObjectUR ) {
+			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+			var url = DOMURL.createObjectURL(svg);
+			img.src = url;
+		}
+		else {
+			data = "data:image/svg+xml," + data;
+			img.src = data;
 		}
 		
-		img.src = url;
-	}
+		}
 	
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
