@@ -1873,7 +1873,10 @@ else throw err;
 			console.log(reFile);
 			console.log(stackLineWithFile);
 			var matchFile = stackLineWithFile.match(reFile);
-			if(!matchFile) throw new Error("Could not get file info from stackLineWithFile=" + stackLineWithFile);
+			if(!matchFile) {
+				console.warn("Could not get file path from stackLineWithFile=" + stackLineWithFile + ". Most likely it's from another domain.");
+				return;
+				}
 			console.log(matchFile);
 			var filePath = folder + matchFile[1];
 			var row = parseInt(matchFile[2])-1;
