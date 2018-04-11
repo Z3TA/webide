@@ -38,9 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-todo: remove br inside p when doing sanitation.
-
-
 Extensive testing on WysiwygEditor!!
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!

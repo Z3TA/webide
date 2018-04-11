@@ -561,6 +561,13 @@ if(!selection) throw new Error("Unable to get selection");
 		
 		console.log("WysiwygEditor.sourceFileChange type=" + type + " ignoreSourceFileChange=" + wysiwygEditor.ignoreSourceFileChange + " row=" + row + " wysiwygEditor.startRow=" + wysiwygEditor.startRow);
 		
+		/*
+			Problem: Can not change the file in a fileChange event or it would create an endless loop
+			Which means we can not sanitize on source code changes,
+			which also means we can not sanitize on content-editable changes!
+			
+			Solution: ignoreSourceFileChange variable, and only sanitize on content-editable changes
+		*/
 		if(wysiwygEditor.ignoreSourceFileChange) return true;
 		
 		if(!wysiwygEditor.sourceFile) throw new Error("wysiwygEditor.sourceFile=" + wysiwygEditor.sourceFile);
@@ -610,9 +617,6 @@ if(!selection) throw new Error("Unable to get selection");
 		
 		var srcHTML = wysiwygEditor.getSourceCodeBody();
 		
-		// Can not change the file in a fileChange event or it would create an endless loop
-		// Which means we can not sanitize on source code changes,
-		// which also means we can not sanitize on content-editable changes!
 		
 		wysiwygEditor.setContentEditableBody(srcHTML);
 		
@@ -985,20 +989,18 @@ if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can 
 				solution: Beautify the code!
 				
 				problem 2: The beautifier touches even more stuff, amplifying the nr 1 problem
-				solution 2: insert stuff like <tbody> *before* going into WYSIWYG mode
+				solution 2: insert stuff like <tbody> *before* going into WYSIWYG mode - eg "dance"
 				
 			*/
 			
 			var sanitized = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
-			
+			// note: We want to make as little sanitation as possible, 
+			// as resetting the whole content-editable content at every key-stroke will feel laggy.
 			if(sanitized == prevBodyHtml) console.log("No white space sanitiaztion needed"); 
 			else {
 				
 				console.log("prevBodyHtml=\n" + UTIL.debugWhiteSpace(prevBodyHtml) + "\n");
-				
 				console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
-				
-				previewWin.window.addEventListener("input", function(e) {console.log("input after sanitation!");});
 				
 				/*
 					Problem: contenteditable will lose the caret when the html is updated, 
@@ -1693,7 +1695,7 @@ else throw err;
 		
 		wysiwygEditor.ignoreSourceFileChange = true;
 		
-		// Sanitize (add line break etc) to the content-editable code
+		// Sanitize (add line breaks etc) to the content-editable code
 		var sanitazed = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
 		
 		if(sanitazed != prevBodyHtml) {
