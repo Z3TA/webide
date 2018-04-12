@@ -122,7 +122,11 @@ var WysiwygEditor;
 		wysiwygEditor.closed = false; // If the WysiwygEditor has been closed or not
 		wysiwygEditor.id = ++wysiwygEditorCounter;
 		
+		wysiwygEditor.sourceFileIsSaved = true; // Keep track of wheter the source file is saved or not. After the "dance" it's still considered saved, even though it has changed!
 		
+		wysiwygEditor.isReloading = false;
+		
+		wysiwygEditor.reCompile = options.reCompile;
 		
 		if(compiledSource) {
 /*
@@ -177,7 +181,7 @@ var WysiwygEditor;
 			// Because "ignoreTransform" is not yet supported:
 			
 			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
-				var msg = "Can not edit the page in WYSIWYG mode because of:\n";
+				var msg = "Can not edit the page in WYSIWYG mode because the HTML does not match the source:\n";
 				for(var i=0; i< wysiwygEditor.ignoreTransform.inserted.length; i++) {
 					msg += "Line " + (wysiwygEditor.ignoreTransform.inserted[i].row + 1 + wysiwygEditor.startRow) + ": ";
 					if(wysiwygEditor.ignoreTransform.inserted[i].text == "") msg += " Inserted New line\n"
@@ -581,6 +585,8 @@ if(!selection) throw new Error("Unable to get selection");
 		
 		if(type == "reload" && wysiwygEditor.isCompiled) return wysiwygEditor.close();
 		
+		wysiwygEditor.sourceFileIsSaved = false;
+		
 		if(!wysiwygEditor.bodyExistInSource()) return true;
 		
 		var previewWin = wysiwygEditor.previewWin;
@@ -693,13 +699,15 @@ if(!selection) throw new Error("Unable to get selection");
 		return true;
 	}
 	
-	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file) {
+	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file, path, saveCallback) {
 var wysiwygEditor = this;
 
 		if(!file) throw new Error("file=" + file);
 		
 		console.log("WysiwygEditor.anyFileSaved: " + file.path);
 
+		if(file == wysiwygEditor.sourceFile) wysiwygEditor.sourceFileIsSaved = true;
+		
 var previewWin = wysiwygEditor.previewWin;
 
 try {
@@ -709,7 +717,7 @@ catch(err) {
 console.error(err);
 // Most likely the user has closed the preview window
 wysiwygEditor.close();
-return;
+			return saveCallback(null);
 }
 		
 		//console.log("Checking for CSS file ...");
@@ -741,8 +749,7 @@ return;
 						
 						console.log("Replaced link css with style for " + fileName);
 						
-						//return updateCss(file, links[i], href);
-						return;
+						return saveCallback(null);
 						
 					}
 				}
@@ -755,7 +762,7 @@ return;
 					if(href.indexOf(fileName) != -1) {
 						style[i].innerText = file.text;
 						console.log("Replaced style content for " + fileName);
-						return;
+						return saveCallback(null);
 					}
 				}
 			}
@@ -763,23 +770,27 @@ return;
 			//console.log("fileName=" + fileName + " was not found on the page in preview.");
 			}
 		if(fileExt == "js") {
+			/*
+				It's not a good idea to reload just the JS unless the file's are design to be able to do that (like plugins in jzedit)
+				As variables might still hold state. Old html elements would still linger, etc.
+				
+				It's better to store state in web storage. For example localStorage. And have the "app" go to where you last left when you refresh.
 			
-			if(wysiwygEditor.isCompiled) {
-if(!wysiwygEditor.reCompile) return console.log("No reCompile method found. Can not reload !");
-			}
-		
+			*/
 			// todo: Check if the file was any of the <script elements. and if so Reload!
 		
+			var scripts = doc.getElementsByTagName('script');
+			for (var i=0; i<scripts.length; i++) {
+				if(scripts[i].src.indexOf(fileName) != -1) {
+					wysiwygEditor.reload(function(err) {
+						if(err) alertBox(err.message);
+						saveCallback(null);
+					});
+					break;
+					}
+			}
 		}
-		
-		function updateCss(file, linkEl, href) {
-			// Copy the file into the preview folder
-			
-		}
-		
-		
 	}
-	
 	
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(keyUpEvent) {
@@ -1246,7 +1257,7 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		if(wysiwygEditor.closed) return console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
-		if(wysiwygEditor.fileSaveEventListener) EDITOR.removeEvent("fileSave", wysiwygEditor.fileSaveEventListener);
+		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterFileSave", wysiwygEditor.afterFileSaveEventListener);
 		if(wysiwygEditor.autoCompleteListener) EDITOR.removeEvent("autoComplete", wysiwygEditor.autoCompleteListener);
 		
 		/*
@@ -1435,21 +1446,53 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 		
 		console.warn("(re)loading preview window ...");
 		
-		if(wysiwygEditor.isCompiled && wysiwygEditor.hasLoaded) {
-			/*
-				The source code has most likely been changed during the "dance" where contentediable code is synced 
-				with source code (tbody etc elements are added). The "dance" mangles the source code so it should be
-				avoided if possible, but it's needed for the WYSIWYG (contentediable) functionality, so we can make sane diffs
-				in contenteditable vs source code to see what changed.
-				
-				But if the source code has been saved, we could try a re-compile !?
-			*/
-throw new Error("Can not reload a second time if the source code have been compiled");
+		
+		if(wysiwygEditor.hasLoaded) {
+
+			if(!wysiwygEditor.sourceFileIsSaved) {
+			var err = new Error("It's not safe to reoad because the wysiwygEditor source file has not been saved!");
+			if(reloadCallback) return reloadCallback(err);
+			else alertBox(err.message);
 		}
 		
+		if(wysiwygEditor.isCompiled) {
+				/*
+					The source code has most likely been changed during the "dance" where contentediable code is synced
+					with source code (tbody etc elements are added). The "dance" mangles the source code so it should be
+					avoided if possible, but it's needed for the WYSIWYG (contentediable) functionality, so we can make sane diffs
+					in contenteditable vs source code to see what changed.
+					
+					But if the source code has been saved, we could try a re-compile !?
+				*/
+				if(!wysiwygEditor.reCompile) {
+					var err = new Error("No reCompile method found. Can not reload (a second time) if the source code have been compiled !");
+					if(reloadCallback) return reloadCallback(err);
+					else alertBox(err.message);
+					}
+				
+				wysiwygEditor.reCompile(function(err) {
+				if(err) {
+						if(reloadCallback) return reloadCallback(err);
+						else return alertBox(err.message);
+					}
+					
+					readyToRefresh();
+				
+			});
+				
+				return; // Wait for reCompile
+			
+			}
+		}
+		
+		readyToRefresh();
+		
+		function readyToRefresh() {
 		// We don't want to use wysiwygEditor.previewWin.location = wysiwygEditor.previewWin.location.href redirect.
 		// Because it would not be possible to capture early events as there is no way to add event listeners to it until it has loaded!
 		
+			wysiwygEditor.isReloading = true; // Prevent onbeforeunload from calling wysiwygEditor.close() when the window closes
+			
 		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 		
 		EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
@@ -1457,6 +1500,8 @@ throw new Error("Can not reload a second time if the source code have been compi
 		function windowCreated(err, newWindow) {
 			console.log("WysiwygEditor reload windowCreated!");
 			
+				wysiwygEditor.isReloading = false;
+				
 if(err) {
 				if(reloadCallback) return reloadCallback(err);
 else throw err;
@@ -1479,6 +1524,7 @@ else throw err;
 			}
 		});
 		}
+	}
 	}
 	
 	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback) {
@@ -1636,7 +1682,7 @@ else throw err;
 			attachAutoCompleteListener(wysiwygEditor);
 			
 			/*
-				Remove the fileChange and fileSave event listener when closing the content-editable window
+				Remove the fileChange and afterFileSave event listener when closing the content-editable window
 			
 				Note: If the window loads fast, onbeforeunload will be called (Chrome)!
 				We put it behind a timeout in the hopes of it not firing 
@@ -1645,8 +1691,7 @@ else throw err;
 			setTimeout(function afterWeirdStuff() {
 			previewWin.window.onbeforeunload = function onbeforeunload() {
 				console.warn("onbeforeunload called!");
-				if(wysiwygEditor.isReloading) wysiwygEditor.isReloading = false;
-			else wysiwygEditor.close();
+					if(!wysiwygEditor.isReloading) wysiwygEditor.close();
 			//return true; // Shows a "are you sure" message
 		};
 		
@@ -2174,17 +2219,17 @@ else throw err;
 	function attachFileSaveListener(wysiwygEditor) {
 		// All EDITOR events wants an uniqe function name ...
 		var name = "wysiwygEditorFileSave" + wysiwygEditor.id;
-		console.log("Unique function name for fileSave event: " + name);
-		var customAction = function(file) {
-			wysiwygEditor.anyFileSaved(file);
+		console.log("Unique function name for afterFileSave event: " + name);
+		var customAction = function(file, path, saveCallback) {
+			return wysiwygEditor.anyFileSaved(file, path, saveCallback);
 		}
-		var func = new Function("action" + name, "return function " + name + "(file){ action" + name + "(file) };")(customAction);
+		var func = new Function("action" + name, "return function " + name + "(file, path, saveCallback){ return action" + name + "(file, path, saveCallback) };")(customAction);
 		
-		if(wysiwygEditor.fileSaveEventListener) EDITOR.removeEvent("fileSave", wysiwygEditor.fileSaveEventListener);
+		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterFileSave", wysiwygEditor.afterFileSaveEventListener);
 		
-		EDITOR.on("fileSave", func);
+		EDITOR.on("afterFileSave", func);
 		
-		wysiwygEditor.fileSaveEventListener = func;
+		wysiwygEditor.afterFileSaveEventListener = func;
 		
 	}
 	

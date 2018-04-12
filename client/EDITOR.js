@@ -126,35 +126,36 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	fileHide: [],
 	fileShow: [],
 	fileParse: [],
-	fileSave: [],
+	beforeFileSave: [], // todo: event that is called before a file is saved (to disk)
+	afterFileSave: [],
 	fileChange: [], 
-	mouseScroll: [], 
-	mouseClick: [], 
-	dblclick: [],
-	mouseMove: [],
-	paste: [],  // You get a chance to format the pasted data ...
-	beforeResize: [],
-	afterResize: [],
-	exit: [],
-	start: [],
-	interaction: [],
-	keyDown: [],
-	moveCaret: [],
-	autoComplete: [],
-	keyPressed: [],
-	changeWorkingDir: [],
-	bootstrap: [],
-	storageReady: [], // When server storage is ready to be used
-	commitTool: [],
-	resolveTool: [],
-	mergeTool: [],
-	fileDrop: [],
-	openFileTool: [],
-	showMenu: [],
-	voiceCommand: [],
-	fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
-	previewTool: []
-};
+		mouseScroll: [], 
+		mouseClick: [], 
+		dblclick: [],
+		mouseMove: [],
+		paste: [],  // You get a chance to format the pasted data ...
+		beforeResize: [],
+		afterResize: [],
+		exit: [],
+		start: [],
+		interaction: [],
+		keyDown: [],
+		moveCaret: [],
+		autoComplete: [],
+		keyPressed: [],
+		changeWorkingDir: [],
+		bootstrap: [],
+		storageReady: [], // When server storage is ready to be used
+		commitTool: [],
+		resolveTool: [],
+		mergeTool: [],
+		fileDrop: [],
+		openFileTool: [],
+		showMenu: [],
+		voiceCommand: [],
+		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
+		previewTool: []
+	};
 
 EDITOR.renderFunctions = [];
 EDITOR.preRenderFunctions = [];
@@ -1093,17 +1094,80 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		function doneSaving(err, path) {
 			
-			if(!err) {
-				if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
-				
-				console.log("Successfully saved " + file.path);
-				file.saved(); // Call functions that listen for save events
-				
+			if(err) {
+if(callback) return callback(err, path);
+				else throw err;
 			}
 			
-			if(callback) callback(err, path);
+			if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
+				
+				console.log("Successfully saved " + file.path);
+				
+				file.saved(); // Change state to saved
+				
+				// Call functions that listen for save events
+				// The file save event listeners need to take a callback or return something
+				callEventListeners(EDITOR.eventListeners.afterFileSave, function allListenersCalled(errors) {
+				
+				if(errors.length > 0) console.warn("Some afterFileSave event listeners failed:");
+				
+				for (var i=0; i<errors.length; i++) {
+					console.error(errors[i]);
+					}
+					
+				// Call back without an error even though some of the afterFileSave events failed.
+				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
+					if(callback) callback(null, path);
+					
+			});
+		}
+		
+		function callEventListeners(eventListeners, allListenersCalled) {
+			var waitingFor = [];
+			var eventFunsCalled = 0;
+			var errors = [];
+			var alreadyTooLate = false;
 			
-			if(err && !callback) throw err;
+			for(var i=0; i<eventListeners.length; i++) callSaveListener(eventListeners[i].fun);
+			
+			if(waitingFor.length > 0) {
+				var maxWait = 5;
+				var waitCounter = 0;
+				var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
+			}
+			
+			function callSaveListener(fun) {
+				var fName = UTIL.getFunctionName(fun);
+				waitingFor.push(fName);
+				console.log("Calling fileSave eventListener: " + fName);
+				var ret = fun(file, path, saveCallback);
+				eventFunsCalled++;
+				if(ret) saveCallback(null);// The function did not return void, asume it's done!
+				
+				function saveCallback(err) {
+					if(err) errors.push(err);
+					var index = waitingFor.indexOf(fName);
+					if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back! Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
+					waitingFor.splice(index, 1);
+					if(waitingFor.length == 0 && eventFunsCalled == eventListeners.length && !alreadyTooLate) {
+						if(checkInterval) clearInterval(checkInterval);
+						allListenersCalled(errors);
+					}
+					return;
+				}
+			}
+			
+			function checkIfReturnedOrCalledCallback() {
+				console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
+				
+				if(++waitCounter >= maxWait) {
+					clearInterval(checkInterval);
+					errors.push(new Error("The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor)));
+					alreadyTooLate = true;
+					allListenersCalled(errors);
+				}
+				
+			}
 			
 		}
 		
@@ -2300,7 +2364,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		/*
 			Problem: Because info is pushed after each other, and is async, not all messages
 			might be shown
-			*/
+		*/
 		
 		function allImagesMade() {
 			// Tell the editor to render
@@ -3797,11 +3861,12 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				
 			*/
 			console.log("theWindow.location.href = " + theWindow.location.href);
-			console.log("New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState);
+			console.log("New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
+			console.log("theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
 			
 			if(theWindow.location.href == "about:blank") theWindow.loaded = false; 
 else theWindow.loaded = true;
-
+			
 			// window.location wont be populated until DOMContentLoaded! So it's impossible to check if the URL is blank or not! Thus:
 			if(url == "about:blank") theWindow.isBlankUrl = true;
 			
@@ -3821,7 +3886,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 				if(waitUntilLoaded) callback(null, theWindow);
 			}, false);
 			theWindow.addEventListener("DOMContentLoaded", function() {
-				console.log("New window: " + UTIL.timeStamp() + " DOMContentLoaded event!"); 
+				console.log("New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState); 
 				console.log("theWindow.location.href = " + theWindow.location.href);
 			}, false);
 			

@@ -447,7 +447,7 @@
 			EDITOR.openFile(stdOutFile, "\n\n" + (new Date()) + ": Running " + msg.scriptName + " ...\n\n", {show: false}, function fileOpened(err, file) {
 				if(err) {
 					if(err.code == "IN_QUEUE") {
-						setTimeot(function waitForFileToOpen() {
+						setTimeout(function waitForFileToOpen() {
 							if(EDITOR.files.hasOwnProperty(stdOutFile)) {
 								var file = EDITOR.files[stdOutFile];
 								file.moveCaretToEndOfFile();

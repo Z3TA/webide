@@ -13,14 +13,13 @@ EDITOR.plugin({
 		load: function loadWorkingDirectoryUpdater() {
 		
 			EDITOR.on("fileShow", updateWorkingDirectory);
-			EDITOR.on("fileSave", updateWorkingDirectory);
-			
+			EDITOR.on("afterFileSave", updateWorkingDirectory);
 			
 		},
 		unload: function unloadWorkingDirectoryUpdater() {
 			
 			EDITOR.removeEvent("fileShow", updateWorkingDirectory);
-			EDITOR.removeEvent("fileSave", updateWorkingDirectory);
+			EDITOR.removeEvent("afterFileSave", updateWorkingDirectory);
 		
 		}
 	});
@@ -28,9 +27,9 @@ EDITOR.plugin({
 	
 	function updateWorkingDirectory(file) {
 		
-		if(!file) return;
+		if(!file) return true;
 		
-		if(!file.savedAs) return;
+		if(!file.savedAs) return true;
 		
 		// See if we can find package.json or index.htm
 		
@@ -38,6 +37,8 @@ EDITOR.plugin({
 		var folders = UTIL.getFolders(folderPath, true);
 		
 		search(folders.pop()); // Search down recursively 
+		
+		return true;
 		
 		function search(currentFolder) {
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {

@@ -29,7 +29,7 @@
 		EDITOR.on("fileOpen", tabFileOpen, 2);
 		EDITOR.on("fileClose", closeFile_tabs, 2);
 		EDITOR.on("fileChange", tabFileChange);
-		EDITOR.on("fileSave", tabFileSave);
+		EDITOR.on("afterFileSave", tabFileSave);
 		EDITOR.on("fileShow", tabFileShow);
 		
 		var key_pageUP = 33;
@@ -206,6 +206,7 @@ for(var i=0; i<list.length; i++) {
 		
 		closeFileButton.setAttribute("class", "closeFileTab");
 
+		return true;
 	}
 	
 	

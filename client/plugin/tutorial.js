@@ -1,6 +1,6 @@
 (function() {
-"use strict";
-
+	"use strict";
+	
 	if(window.location.href.indexOf("tutorial") == -1) return;
 	
 	var achievements = null; // Wait for storage!
@@ -20,7 +20,7 @@
 		load: loadTutorial,
 		unload: unloadTutorial,
 	});
-
+	
 	function loadTutorial() {
 		EDITOR.on("storageReady", loadAchievements);
 		
@@ -28,19 +28,19 @@
 			tutorialMessages.appMode = function() {
 				alertBox("<i>Friendly tip:</i><br>Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
 				delete tutorialMessages.appMode;
-		}
+			}
 		} else console.log("isChrome=" + isChrome() + " isInWebAppiOS=" + isInWebAppiOS + " isInWebAppChrome=" + isInWebAppChrome + "");
 		
 		// Show a friendly "message" every second (messages should remove themselves once they have executed)
 		tutorialMessageInterval = setInterval(showTotorialMessage, 60000);
 		
-		}
+	}
 	
 	function unloadTutorial() {
 		EDITOR.removeEvent("storageReady", loadAchievements);
-		EDITOR.removeEvent("fileSave", achiveSaveFile);
+		EDITOR.removeEvent("afterFileSave", achiveSaveFile);
 		EDITOR.removeEvent("fileChange", achiveFileChange);
-	
+		
 		clearInterval(tutorialMessageInterval);
 	}
 	
@@ -54,29 +54,30 @@
 		
 		tutorialMessages[msg[random]]();
 		
-		}
+	}
 	
 	function achiveFileChange(file) {
 		if(!achievements) return true;
 		if(!achievements.fileSave) {
 			clearTimeout(achiveFileChangeTimeout);
 			achiveFileChangeTimeout = setTimeout(function() {
-			if(file.changed) {
-				if(EDITOR.hasKeyboard) alertBox('Press Ctrl + S to save changes!');
-				else alertBox('Use long touch-down to show the menu and select "Save file" to save! Or if you have a keyboard use Ctrl + S');
+				if(file.changed) {
+					if(EDITOR.hasKeyboard) alertBox('Press Ctrl + S to save changes!');
+					else alertBox('Use long touch-down to show the menu and select "Save file" to save! Or if you have a keyboard use Ctrl + S');
 					
-				EDITOR.removeEvent("fileChange", achiveFileChange);
-			}
+					EDITOR.removeEvent("fileChange", achiveFileChange);
+				}
 			}, 500);
 		}
 		else if(achievements.fileSave) EDITOR.removeEvent("fileChange", achiveFileChange);
 		
 		//achived("fileChange");
-		}
+	}
 	
 	function achiveSaveFile(file) {
 		achived("fileSave");
-		EDITOR.removeEvent("fileSave", achiveSaveFile);
+		EDITOR.removeEvent("afterFileSave", achiveSaveFile);
+		return true;
 	}
 	
 	
@@ -94,14 +95,14 @@
 				throw new Error("Unable to parse achievements: " + err.message);
 			}
 			if(!achievements) achievements = {};
-			}
+		}
 		else achievements = {};
 		
 		// storageReady gets called every time we are re-connected to the server!
 		if(firstTimeLoadAchievements) {
-		EDITOR.on("fileSave", achiveSaveFile);
-		EDITOR.on("fileChange", achiveFileChange);
-	}
+			EDITOR.on("fileSave", achiveSaveFile);
+			EDITOR.on("fileChange", achiveFileChange);
+		}
 		
 		firstTimeLoadAchievements = false;
 	}

@@ -3467,22 +3467,18 @@ var File; // File object is global
 	}
 	
 	
-	File.prototype.saved = function(path) {
+	File.prototype.saved = function() {
 		/*
-			Only call listeners. 
+			Only set state
 			Let the editor handle saving and loading from disk
-		*/
+			As well as calling save listeners
+			*/
 		var file = this;
 		
 		file.isSaved = true;
 		file.changed = false;
 		file.savedAs = true;
-		
-		for(var i=0; i<EDITOR.eventListeners.fileSave.length; i++) {
-			EDITOR.eventListeners.fileSave[i].fun(file);
 		}
-		
-	}
 	
 	// Prevent setting file.saved = true
 	Object.defineProperty(File.prototype, "saved", {
