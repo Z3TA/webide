@@ -42,9 +42,6 @@ Extensive testing on WysiwygEditor!!
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!
 
-Safari don't show inline nodej console.log's
-
-
 
 implementing jsql example on webide.se
 
