@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-release.sh doesn't appear to remove tests scripts from index.htm !
-
 Extensive testing on WysiwygEditor!!
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !!

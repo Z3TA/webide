@@ -27,12 +27,6 @@ echo "Set devMode and toolbar to false"
 sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
-echo "Remove tests"
-sed -i 's/(<!-- BEGIN TESTS -->).*(<!-- END TESTS -->)//' temp/release/linux/client/index.htm
-
-#echo Remove test users
-#sed -i '4,$d' temp/release/linux/server/users.pw
-
 echo "Clean up"
 rm -rf temp/release/linux/.hg/
 rm -rf temp/release/linux/release.sh
