@@ -505,19 +505,25 @@
 			EDITOR.openFile(testFolder + someScriptFileName, undefined, function(err, someScriptFile) {
 				if(err) return callback(err);
 				
-				launchServe({sourcePage: fileHtml, compiledPage: compiledHtml, testFile: "reloadAndRecompileWhenScriptIsSaved.htm", onlyPreview: false}, function servedPreview(err, wEditor, cleanup, reCompile) {
+				var reCompileCalled = false;
+				reCompile = function(cb) {
+					console.log("reCompile called!");
+					reCompileCalled = true;
+					cb(null);
+				}
+				
+				launchServe({sourcePage: fileHtml, compiledPage: compiledHtml, testFile: "reloadAndRecompileWhenScriptIsSaved.htm", onlyPreview: false, reCompile: reCompile}, function servedPreview(err, wEditor, cleanup, reCompile) {
 					if(err) throw err;
 					
 					var win = wEditor.previewWin;
 					var doc = win.document;
 					
-					console.log(win);
-					console.log(doc);
+					//console.log(win);
+					//console.log(doc);
 					
-					if(!doc) throw new Error("document not yet available!");
-					
-					if(win == window) throw new Error("win==window");
-					if(doc == document) throw new Error("doc==document");
+					//if(!doc) throw new Error("document not yet available!");
+					//if(win == window) throw new Error("win==window");
+					//if(doc == document) throw new Error("doc==document");
 					
 					var paragraph = doc.getElementById("paragraph");
 					
@@ -532,13 +538,6 @@
 					// Update the script
 					someScriptFile.removeRow(1);
 					someScriptFile.insertTextRow("document.getElementById('paragraph').innerText = '" + successText + "';",1);
-					
-					var reCompileCalled = false;
-					reCompile = function(cb) {
-						console.log("reCompile called!");
-						reCompileCalled = true;
-						cb(null);
-					}
 					
 					EDITOR.saveFile(someScriptFile, someScriptFile.path, function saved(err, path) {
 						// The WysiwygEditor should now have reloaded (and called reCompile since it's a compiled file)
@@ -626,7 +625,7 @@
 								callback(null, wysiwygEditor, cleanUp);
 							}
 							
-						},30); 
+						},0); 
 						
 					}
 					

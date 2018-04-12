@@ -38,14 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-hmm, sometimes the window from EDITOR.createWindow has only loaded partially ... and document.getElementById wont find the element
-
-wysiwyg should not call close when reloading!
-
-hmm EDITOR.saveFile should probably wait for all onSave events before calling back!
-
-Implementing reload wysywyg when script file is saved.
-
 Extensive testing on WysiwygEditor!!
 
 Can precompiled pages safely be reloaded ? When for example a script file changes, like in web_preview ? It cant !! Why! ?!?

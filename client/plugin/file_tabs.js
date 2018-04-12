@@ -504,7 +504,7 @@ for(var i=0; i<list.length; i++) {
 								for(var i=0; i<list.length; i++) {
 									if(list[i].path != testFiles[i]) {
 										console.log("Waiting for file to close: " + list[i].path);
-										return setTimeout(wait, 10);
+										return setTimeout(wait, 100);
 									}
 								}
 								console.log("No unknown files found. Running test ...");
