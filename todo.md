@@ -52,6 +52,8 @@ See if vumoviemaker can run in the editor
 todo
 ----
 
+Fix indentation when file is saved instead of at every change !!?
+
 When inlining console.log's and you are editing the file, the position of the console log might have changed!!
 Investigate hot code loading. 
 
