@@ -43,7 +43,7 @@
 			reopenFilesCalled = false;
 			allFilesOpenedAlreadyCalled = false;
 			
-			EDITOR.on("storageReady", reopenFiles);
+			CLIENT.on("loginSuccess", reopenFiles);
 			/*
 				problem: storageReady can be called many times, for example if the user re-login (as another user)
 				
@@ -66,7 +66,7 @@
 		},
 		unload: function unloadReopenFilesPlugin() {
 			
-			EDITOR.removeEvent("storageReady", reopenFiles);
+			CLIENT.removeEvent("loginSuccess", reopenFiles);
 		
 			clearInterval(insaneBugCatcherInterval);
 			
@@ -84,6 +84,8 @@
 	
 	function reopenFiles() {
 
+		console.log("reopenFiles!");
+		
 		if(reopenFilesCalled) {
 			// Happens when you get disconnected, and storageReady is called.
 			console.warn("reopenFiles called twice!");

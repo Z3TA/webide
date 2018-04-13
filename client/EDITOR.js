@@ -179,6 +179,7 @@ EDITOR.input = false; // Wheter inputs should go to the current file in focus or
 
 EDITOR.fileOpenCallback = undefined;
 EDITOR.lastKeyPressed = "";
+EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an internal variable, but exposed so plugins can check if there's any files in it)
 
 (function() { // Non global editor code ...
 	
@@ -200,9 +201,6 @@ EDITOR.lastKeyPressed = "";
 	var tildeActive = false;
 	var tildeShiftActive = false;
 	var tildeAltActive = false;
-	
-	
-	var openFileQueue = []; // Files listed here are waiting for data
 	
 	var canvas, ctx; 
 	
@@ -549,9 +547,9 @@ EDITOR.lastKeyPressed = "";
 			}
 		}
 		
-		if(openFileQueue.indexOf(path) != -1) {
+		if(EDITOR.openFileQueue.indexOf(path) != -1) {
 			
-			console.log("File in openFileQueue! path=" + path);
+			console.log("File in EDITOR.openFileQueue! path=" + path);
 			
 			/*
 				If two things are waiting for a particular file to open, call both things once it has opened.
@@ -591,8 +589,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		if(!UTIL.isString(path)) return fileOpenError(new Error("path is not a string: " + path));
 		
-		openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
-		console.log("File path=" + path + " added to openFileQueue=" + JSON.stringify(openFileQueue));
+		EDITOR.openFileQueue.push(path); // Add the file to the queue AFTER checking if it's in the queue
+		console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
 		
 		if(text == undefined) {
 			
@@ -756,10 +754,10 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		}
 		
 		function removeFromQueue(path) {
-			if(openFileQueue.indexOf(path) == -1) throw new Error("File path=" + path + " not in openFileQueue=" + JSON.stringify(openFileQueue));
-			openFileQueue.splice(openFileQueue.indexOf(path), 1); // Take the file off the queue
-			if(openFileQueue.indexOf(path) != -1) throw new Error("File path=" + path + " still in openFileQueue=" + JSON.stringify(openFileQueue));
-			console.log("Removed from openFileQueue! path=" + path);
+			if(EDITOR.openFileQueue.indexOf(path) == -1) throw new Error("File path=" + path + " not in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			EDITOR.openFileQueue.splice(EDITOR.openFileQueue.indexOf(path), 1); // Take the file off the queue
+			if(EDITOR.openFileQueue.indexOf(path) != -1) throw new Error("File path=" + path + " still in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			console.log("Removed from EDITOR.openFileQueue! path=" + path);
 		}
 		
 	}
@@ -1876,7 +1874,7 @@ if(callback) return callback(err, path);
 	EDITOR.addEvent = function(eventName, options) {
 		
 		if(!(eventName in EDITOR.eventListeners)) {
-			throw "eventName=" + eventName + " does not exist in EDITOR.eventListeners!";
+			throw new Error("eventName=" + eventName + " does not exist in EDITOR.eventListeners!");
 		}
 		
 		if(arguments.length > 2) {
