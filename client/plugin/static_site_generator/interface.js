@@ -1413,7 +1413,7 @@
 					
 					var relativePath = getRelativePath(sourceFile.path, site.source);
 					
-					var text = sourceFile.text; // Don't change file.text directoy or we'll mess up the grid!
+					var text = sourceFile.text; // Don't change file.text directly or we'll mess up the grid!
 					
 					text = text.replace(/(href\s?=\s?['"])\/(['"])/i, "$1" + relativePath + "index.htm$2");
 					text = text.replace(/(href\s?=\s?['"])\//i, "$1" + relativePath);
@@ -1456,7 +1456,8 @@
 			else {
 				
 				console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
-				compile(site.source, site.preview, ignoreDraft, function compiled_static() {
+				compile(site.source, site.preview, ignoreDraft, function compiled_static(err) {
+					if(err) throw err;
 					
 					var protocol = UTIL.urlProtocol(site.preview);
 					
@@ -1598,7 +1599,6 @@
 								
 								if(previewWin) previewWin.close();
 								
-								
 								console.log("SSG url=" + url + " RUNTIME=" + RUNTIME + " newWindow=" + newWindow);
 								previewWin = new WysiwygEditor({
 									sourceFile: sourceFile,
@@ -1612,7 +1612,8 @@
 									top: top,
 									left: left,
 									width: width,
-									height: height
+									height: height,
+									reCompile: reCompile
 								});
 								
 								previewWin.onClose = function() {
@@ -1622,6 +1623,13 @@
 										wysiwygEnabled = false;
 									}
 								}
+								
+								function reCompile(reCompileCallback) {
+									compile(site.source, site.preview, ignoreDraft, function recompiled(err) {
+										reCompileCallback(err);
+									});
+								}
+								
 							}
 						}
 					}
@@ -2117,7 +2125,8 @@
 			if(!site.source) throw new Error("Site name=" + site.name + " has no source folder specified! site.source=" + site.source);
 			if(!site.publish) throw new Error("Site name=" + site.name + " has no publish url specified! site.publish=" + site.publish);
 			
-			compile(site.source, site.publish, true, function buildDone() {
+			compile(site.source, site.publish, true, function buildDone(err) {
+				if(err) throw err;
 				
 				alertBox('<b>' + site.name + '</b> published to:<br>' + site.publish + (site.url ? '<br>URL:' + urlElementString(site.url) : ''));
 				
@@ -2169,10 +2178,12 @@
 	
 	function compile(source, destination, publish, callback) {
 		
-		CLIENT.cmd("SSG.compile", {source: source, destination: destination, publish: publish, pubUser: selectedSite.pubUser, pubPw: selectedSite.pubPw, pubKey: selectedSite.key}, function(err, json) {
+		var opt = {source: source, destination: destination, publish: publish, pubUser: selectedSite.pubUser, pubPw: selectedSite.pubPw, pubKey: selectedSite.key};
+		
+		CLIENT.cmd("SSG.compile", opt, function(err, json) {
 			
-			if(err) throw err;
-			else callback(json.ssgWorkerExitCode);
+			if(err) callback(err);
+			else callback(null);
 			
 		});
 		

@@ -31,6 +31,33 @@ API.countLines = function countLines(user, json, callback) {
 	
 }
 
+API.hash = function hash(user, json, callback) {
+	// Useful for example comparing files, so that files don't need to be uploaded to the client for comparison.
+	
+	var path = user.translatePath(json.path);
+	if(path instanceof Error) return callback(path);
+	
+	var crypto = require('crypto');
+	var fs = require('fs');
+	
+	// Algorithm depends on availability of OpenSSL on platform
+	// Another algorithms: 'sha1', 'md5', 'sha256', 'sha512' ...
+	var algorithm = 'sha1';
+	var shasum = crypto.createHash(algorithm);
+	
+	// Updating shasum with file content
+	var stream = fs.ReadStream(path);
+	stream.on('data', function(data) {
+		shasum.update(data);
+	})
+	
+	// making digest
+	stream.on('end', function() {
+		var hash = shasum.digest('hex');
+		callback(null, {hash: hash, path: path});
+		})
+	}
+
 API.readLines = function readLines(user, json, callback) {
 
 	console.log("readLines: json=" + JSON.stringify(json)); 

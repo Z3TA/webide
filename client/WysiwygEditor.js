@@ -1450,7 +1450,7 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 		if(wysiwygEditor.hasLoaded) {
 
 			if(!wysiwygEditor.sourceFileIsSaved) {
-			var err = new Error("It's not safe to reoad because the wysiwygEditor source file has not been saved!");
+			var err = new Error("It's not safe to reload because the wysiwygEditor source file has not been saved!");
 			if(reloadCallback) return reloadCallback(err);
 			else alertBox(err.message);
 		}
@@ -1470,16 +1470,16 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 					else alertBox(err.message);
 					}
 				
-				wysiwygEditor.reCompile(function(err) {
-				if(err) {
-						if(reloadCallback) return reloadCallback(err);
-						else return alertBox(err.message);
-					}
+				// note: Source files can't change during reCompile ! (so need to check if it has changed)
+				
+					wysiwygEditor.reCompile(function(err) {
+						if(err) {
+							if(reloadCallback) return reloadCallback(err);
+							else return alertBox(err.message);
+						}
+					else readyToRefresh();
+						});
 					
-					readyToRefresh();
-				
-			});
-				
 				return; // Wait for reCompile
 			
 			}
