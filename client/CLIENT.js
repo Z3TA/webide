@@ -15,7 +15,7 @@ var CLIENT = {}; // Client object is global
 	console.log("Hello from CLIENT.js");
 	
 	var eventListeners = {}; // Events are added on demand via CLIENT.on("someEvent"). It can be *anything* so that you can easaily add new server events
-	var counter = 0;
+	var idCounter = 0;
 	var callbackWaitList = {};
 	var cache = {};
 	var connection = {readyState: 0};
@@ -199,9 +199,7 @@ var CLIENT = {}; // Client object is global
 		
 		var GS = String.fromCharCode(29);
 		
-		counter++;
-		
-		var id = counter;
+		var id = ++idCounter;
 		
 		var string = id + GS + req
 		
