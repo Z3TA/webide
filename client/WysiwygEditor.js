@@ -129,7 +129,7 @@ var WysiwygEditor;
 		wysiwygEditor.reCompile = options.reCompile;
 		
 		if(compiledSource) {
-/*
+			/*
 				If the source code has been "compiled". For example in case of the built in Static Site Generator (SSG) the 
 				content of the body element is now in the main element. And header and footer have been added to the body element.
 			*/
@@ -224,7 +224,7 @@ var WysiwygEditor;
 		
 		/*
 			Problem: wysiwygEditor.getSourceCodeBody() trims all white space and then ads one line padding ??!
-			*/
+		*/
 		
 		wysiwygEditor.setStartRow();
 		
@@ -244,7 +244,7 @@ var WysiwygEditor;
 			
 			/*
 				The newWindow object will not have window.location populated until DOMContentLoaded!!
-				*/
+			*/
 			
 			if(!newWindow) throw new Error("newWindow=" + newWindow);
 			
@@ -254,7 +254,7 @@ var WysiwygEditor;
 					wysiwygEditor.reload(firstLoad);
 				}
 				else throw new Error("url=" + url + " The window need to have an URL!");
-				}
+			}
 			else {
 				wysiwygEditor.attachTo(newWindow, firstLoad);
 			}
@@ -288,10 +288,10 @@ var WysiwygEditor;
 				setTimeout(function makeitAsync() {
 					if(!wysiwygEditor.whenLoaded) throw new Error("wysiwygEditor.whenLoaded has gone away!");
 					console.log("Calling whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
-				wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
+					wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
 					wysiwygEditor.whenLoaded = null;
 				}, 1);
-				}
+			}
 		}
 	}
 	
@@ -335,8 +335,8 @@ var WysiwygEditor;
 					" (wysiwygEditor.startRow=" + wysiwygEditor.startRow + " + row=" + row + " = " + (wysiwygEditor.startRow + row) + " of the source");
 				}
 			}
-			}
 		}
+	}
 	
 	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {
 		var wysiwygEditor = this;
@@ -367,9 +367,9 @@ var WysiwygEditor;
 			
 			/*
 				wysiwygEditor.screenX = previewWin.screenX || previewWin.screenLeft;
-			wysiwygEditor.screenY = previewWin.screenY || previewWin.screenTop;
-			wysiwygEditor.innerWidth = previewWin.innerWidth;
-			wysiwygEditor.innerHeight = previewWin.innerHeight;
+				wysiwygEditor.screenY = previewWin.screenY || previewWin.screenTop;
+				wysiwygEditor.innerWidth = previewWin.innerWidth;
+				wysiwygEditor.innerHeight = previewWin.innerHeight;
 			*/
 			
 			// Resize the editor
@@ -395,17 +395,17 @@ var WysiwygEditor;
 		var doc = previewWin.window.document;
 		
 		var selection = doc.getSelection();
-
-if(!selection) throw new Error("Unable to get selection");
-
-		 
+		
+		if(!selection) throw new Error("Unable to get selection");
+		
+		
 		/*
-				anchorNode/baseNode: Where selection starts
-				focusNode/extentNode: Where selection ends
-			*/
-			
-			var baseNode = selection.baseNode ? selection.baseNode : selection.anchorNode
-			
+			anchorNode/baseNode: Where selection starts
+			focusNode/extentNode: Where selection ends
+		*/
+		
+		var baseNode = selection.baseNode ? selection.baseNode : selection.anchorNode
+		
 		if(!baseNode) {
 			console.log("selection:");
 			console.log(selection);
@@ -417,40 +417,40 @@ if(!selection) throw new Error("Unable to get selection");
 			var error = new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
 			return console.warn(error.message);
 			//else throw error; 
-			}
+		}
 		
 		if(baseNode.nodeType == Node.TEXT_NODE) {
-					// Measure the parent node (can't measure text nodes)
-					var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
-					var pos = parentNode.getBoundingClientRect();
-					console.log("parentNode:");
-					console.log(parentNode);
-					console.log("parentNode nodeType=" + parentNode.nodeType);
-				}
-				else if(baseNode.nodeType == Node.ELEMENT_NODE) {
-					// The node probably don't have any text yet
-					var pos = baseNode.getBoundingClientRect();
-					console.log("baseNode:");
-					console.log(baseNode);
-				}
-				else {
-					console.log(baseNode);
-					throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
-				}
-				
-				if (selection.rangeCount) {
-					var selRange = selection.getRangeAt(0);
-					var testRange = selRange.cloneRange();
-					
-					testRange.selectNodeContents(baseNode);
-					testRange.setEnd(selRange.startContainer, selRange.startOffset);
-					var caretPos = testRange.toString().length;
-					
-				} else throw new Error("no selection.rangeCount");
-				
-				// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
-				return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos, text: parentNode ? parentNode.innerText : baseNode.innerText };
-				
+			// Measure the parent node (can't measure text nodes)
+			var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
+			var pos = parentNode.getBoundingClientRect();
+			console.log("parentNode:");
+			console.log(parentNode);
+			console.log("parentNode nodeType=" + parentNode.nodeType);
+		}
+		else if(baseNode.nodeType == Node.ELEMENT_NODE) {
+			// The node probably don't have any text yet
+			var pos = baseNode.getBoundingClientRect();
+			console.log("baseNode:");
+			console.log(baseNode);
+		}
+		else {
+			console.log(baseNode);
+			throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
+		}
+		
+		if (selection.rangeCount) {
+			var selRange = selection.getRangeAt(0);
+			var testRange = selRange.cloneRange();
+			
+			testRange.selectNodeContents(baseNode);
+			testRange.setEnd(selRange.startContainer, selRange.startOffset);
+			var caretPos = testRange.toString().length;
+			
+		} else throw new Error("no selection.rangeCount");
+		
+		// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
+		return {x: Math.round(pos.left + 1), y: Math.round(pos.top + 1), char: caretPos, text: parentNode ? parentNode.innerText : baseNode.innerText };
+		
 		
 		
 		
@@ -525,9 +525,9 @@ if(!selection) throw new Error("Unable to get selection");
 			return false;
 		}
 		else {
-		var childNode = element.childNodes[0]; // The text node
-		
-		return wysiwygEditor.placeCaretOnTextNode(childNode, charPos);
+			var childNode = element.childNodes[0]; // The text node
+			
+			return wysiwygEditor.placeCaretOnTextNode(childNode, charPos);
 		}
 	}
 	
@@ -547,7 +547,7 @@ if(!selection) throw new Error("Unable to get selection");
 		if(browser=="Firefox" && node.tagName == "BR") {
 			// Firefox can set the caret position, but it's not possible to input/write after the caret has been set in a br element
 			node = node.parentNode; // Most likely a p element
-			}
+		}
 		
 		try {
 			range.setStart(node, charPos);
@@ -563,7 +563,7 @@ if(!selection) throw new Error("Unable to get selection");
 		
 		return true;
 		
-		}
+	}
 	
 	WysiwygEditor.prototype.sourceFileChange = function sourceFileChange(file, type, characters, caretIndex, row, col) {
 		var wysiwygEditor = this;
@@ -705,25 +705,25 @@ if(!selection) throw new Error("Unable to get selection");
 	}
 	
 	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file, path, saveCallback) {
-var wysiwygEditor = this;
-
+		var wysiwygEditor = this;
+		
 		if(!file) throw new Error("file=" + file);
 		
 		console.log("WysiwygEditor.anyFileSaved: " + file.path);
-
+		
 		if(file == wysiwygEditor.sourceFile) wysiwygEditor.sourceFileIsSaved = true;
 		
-var previewWin = wysiwygEditor.previewWin;
-
-try {
-var doc = previewWin.window.document;
-}
-catch(err) {
-console.error(err);
-// Most likely the user has closed the preview window
-wysiwygEditor.close();
+		var previewWin = wysiwygEditor.previewWin;
+		
+		try {
+			var doc = previewWin.window.document;
+		}
+		catch(err) {
+			console.error(err);
+			// Most likely the user has closed the preview window
+			wysiwygEditor.close();
 			return saveCallback(null);
-}
+		}
 		
 		//console.log("Checking for CSS file ...");
 		var fileExt = UTIL.getFileExtension(file.path);
@@ -773,17 +773,17 @@ wysiwygEditor.close();
 			}
 			
 			//console.log("fileName=" + fileName + " was not found on the page in preview.");
-			}
+		}
 		if(fileExt == "js") {
 			/*
 				It's not a good idea to reload just the JS unless the file's are design to be able to do that (like plugins in jzedit)
 				As variables might still hold state. Old html elements would still linger, etc.
 				
 				It's better to store state in web storage. For example localStorage. And have the "app" go to where you last left when you refresh.
-			
+				
 			*/
 			// todo: Check if the file was any of the <script elements. and if so Reload!
-		
+			
 			var scripts = doc.getElementsByTagName('script');
 			for (var i=0; i<scripts.length; i++) {
 				if(scripts[i].src.indexOf(fileName) != -1) {
@@ -792,7 +792,7 @@ wysiwygEditor.close();
 						saveCallback(null);
 					});
 					break;
-					}
+				}
 			}
 		}
 	}
@@ -863,28 +863,28 @@ wysiwygEditor.close();
 			
 			
 			
-				// The currently opened css file is in the web document!
-				// Go to the related place in the css file
-				
-				console.log("Current file is a stylesheet to the file in preview!");
-				
-				var cssRules = css(e.target);
-				
-				console.log("cssRules: " + cssRules);
-				
-				var rule = "";
-				var index = 0;
-				for (var i=0; i<cssRules.length; i++) {
-					rule = cssRules[i].slice(0, cssRules[i].indexOf("{"));
-					index = file.text.indexOf(rule);
-					if(index != -1) {
-						var loc = file.rowFromIndex(index);
-						//alertBox(JSON.stringify(loc));
-						file.scrollTo(undefined, loc.row);
-						break;
-					}
+			// The currently opened css file is in the web document!
+			// Go to the related place in the css file
+			
+			console.log("Current file is a stylesheet to the file in preview!");
+			
+			var cssRules = css(e.target);
+			
+			console.log("cssRules: " + cssRules);
+			
+			var rule = "";
+			var index = 0;
+			for (var i=0; i<cssRules.length; i++) {
+				rule = cssRules[i].slice(0, cssRules[i].indexOf("{"));
+				index = file.text.indexOf(rule);
+				if(index != -1) {
+					var loc = file.rowFromIndex(index);
+					//alertBox(JSON.stringify(loc));
+					file.scrollTo(undefined, loc.row);
+					break;
 				}
-				
+			}
+			
 		}
 		
 		
@@ -911,29 +911,29 @@ wysiwygEditor.close();
 			var nodeName = el.nodeName;
 			var combos = [];
 			combos.push(nodeName);
-				if(elClass.indexOf(" ") != -1) {
-					// It has many classes
-					var elClassArr = elClass.split(" ");
-					var longStr = nodeName;
-					for (var i=0; i<elClassArr.length; i++) {
+			if(elClass.indexOf(" ") != -1) {
+				// It has many classes
+				var elClassArr = elClass.split(" ");
+				var longStr = nodeName;
+				for (var i=0; i<elClassArr.length; i++) {
 					combos.push(nodeName + "." + className);
-						longStr += "." + className;
-					}
+					longStr += "." + className;
+				}
 				combos.push(longStr);
-				}
-				else {
+			}
+			else {
 				combos.push(nodeName + "." + className);
-				}
-				
+			}
+			
 			findStyleLocation.push(combos);
 			
-				if(el.parentElement) {
-					var parent = getCssSearchArray(el.parentElement);
-					if(parent != null) findStyleLocation.concat(parent);
-				}
-				
-				return findStyleLocation;
+			if(el.parentElement) {
+				var parent = getCssSearchArray(el.parentElement);
+				if(parent != null) findStyleLocation.concat(parent);
 			}
+			
+			return findStyleLocation;
+		}
 	}
 	
 	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(e) {
@@ -1118,7 +1118,7 @@ wysiwygEditor.close();
 				row = diff.removed[i].row + startRow;
 				
 				if(row >= sourceFile.grid.length) {
-throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.length + " diff.removed=" + JSON.stringify(diff.removed, null, 2));
+					throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.length + " diff.removed=" + JSON.stringify(diff.removed, null, 2));
 				}
 				
 				if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
@@ -1132,21 +1132,21 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 					console.log("prevBodyHtml:");
 					for(var j = 0; j<rowsPrewBodyHtml.length; j++) console.log(j + ": " + rowsPrewBodyHtml[j]);
 					console.log("sourceFile:");
-						for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
-						
-						console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
-						console.log("remove=" + diff.removed[i].text.trim());
+					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+					
+					console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
+					console.log("remove=" + diff.removed[i].text.trim());
 					console.log("source code body before:" + UTIL.lbChars(srcBodyHtml));
 					console.log("source code body after:" + wysiwygEditor.getSourceCodeBody());
 					console.log("prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
-						console.log("diff=" + JSON.stringify(diff, null, 2));
-						console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
-						
-						
-						
-						throw new Error("Text on row=" + row + " doesn't match text to be removed! (see console log)");
-						
-					}
+					console.log("diff=" + JSON.stringify(diff, null, 2));
+					console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+					
+					
+					
+					throw new Error("Text on row=" + row + " doesn't match text to be removed! (see console log)");
+					
+				}
 				
 				removedText = sourceFile.removeAllTextOnRow(row);
 				
@@ -1283,12 +1283,12 @@ throw new Error("row=" + row + " sourceFile.grid.length=" + sourceFile.grid.leng
 		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 		
 		if(wysiwygEditor.onClose) {
-wysiwygEditor.onClose();
+			wysiwygEditor.onClose();
 			wysiwygEditor.onClose = null;
 		}
 		
 		console.warn("WysiwygEditor" + wysiwygEditor.id + " closed!");
-		}
+	}
 	
 	WysiwygEditor.prototype.isOpen = function isOpen() {
 		var wysiwygEditor = this;
@@ -1347,7 +1347,7 @@ wysiwygEditor.onClose();
 		
 		// Sanity check:
 		if(wysiwygEditor.lineBreak == "\n" && html.indexOf("\r") != -1) {
-throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) + " but html contains CR!");
+			throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak) + " but html contains CR!");
 		}
 		
 		return prewHTML;	
@@ -1404,7 +1404,7 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 		var srcBodyHtml = getElementContent(wysiwygEditor.sourceFile.text, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak)
 		
 		return srcBodyHtml;
-		}
+	}
 	
 	WysiwygEditor.prototype.bodyExistInSource = function bodyExistInSource(close) {
 		var wysiwygEditor = this;
@@ -1456,14 +1456,14 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 		
 		
 		if(wysiwygEditor.hasLoaded) {
-
+			
 			if(!wysiwygEditor.sourceFileIsSaved) {
-			var err = new Error("It's not safe to reload because the wysiwygEditor source file has not been saved!");
-			if(reloadCallback) return reloadCallback(err);
-			else alertBox(err.message);
-		}
-		
-		if(wysiwygEditor.isCompiled) {
+				var err = new Error("It's not safe to reload because the wysiwygEditor source file has not been saved!");
+				if(reloadCallback) return reloadCallback(err);
+				else alertBox(err.message);
+			}
+			
+			if(wysiwygEditor.isCompiled) {
 				/*
 					The source code has most likely been changed during the "dance" where contentediable code is synced
 					with source code (tbody etc elements are added). The "dance" mangles the source code so it should be
@@ -1476,63 +1476,63 @@ throw new Error("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBrea
 					var err = new Error("No reCompile method found. Can not reload (a second time) if the source code have been compiled !");
 					if(reloadCallback) return reloadCallback(err);
 					else alertBox(err.message);
-					}
+				}
 				
 				// note: Source files can't change during reCompile ! (so need to check if it has changed)
 				
-					wysiwygEditor.reCompile(function(err) {
-						if(err) {
-							if(reloadCallback) return reloadCallback(err);
-							else return alertBox(err.message);
-						}
+				wysiwygEditor.reCompile(function(err) {
+					if(err) {
+						if(reloadCallback) return reloadCallback(err);
+						else return alertBox(err.message);
+					}
 					else readyToRefresh();
-						});
-					
+				});
+				
 				return; // Wait for reCompile
-			
+				
 			}
 		}
 		
 		readyToRefresh();
 		
 		function readyToRefresh() {
-		// We don't want to use wysiwygEditor.previewWin.location = wysiwygEditor.previewWin.location.href redirect.
-		// Because it would not be possible to capture early events as there is no way to add event listeners to it until it has loaded!
-		
+			// We don't want to use wysiwygEditor.previewWin.location = wysiwygEditor.previewWin.location.href redirect.
+			// Because it would not be possible to capture early events as there is no way to add event listeners to it until it has loaded!
+			
 			wysiwygEditor.isReloading = true; // Prevent onbeforeunload from calling wysiwygEditor.close() when the window closes
 			
-		if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
-		
-		EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
-		
-		function windowCreated(err, newWindow) {
-			console.log("WysiwygEditor reload windowCreated!");
+			if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 			
+			EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
+			
+			function windowCreated(err, newWindow) {
+				console.log("WysiwygEditor reload windowCreated!");
+				
 				wysiwygEditor.isReloading = false;
 				
-if(err) {
-				if(reloadCallback) return reloadCallback(err);
-else throw err;
-			}
-			
-			wysiwygEditor.attachTo(newWindow, function attached(err) {
-				console.log("WysiwygEditor reload attached!");
-			if(err) {
-				if(reloadCallback) return reloadCallback(err);
-				else throw err;
-			}
-			else {
-				console.log("Successfully attached WysiwygetEdtior to new window");
+				if(err) {
+					if(reloadCallback) return reloadCallback(err);
+					else throw err;
+				}
 				
-				console.log("Done (re)loading preview window");
-				
-				if(reloadCallback) reloadCallback(null);
-				
-				wysiwygEditor.ignoreSourceFileChange = false;
+				wysiwygEditor.attachTo(newWindow, function attached(err) {
+					console.log("WysiwygEditor reload attached!");
+					if(err) {
+						if(reloadCallback) return reloadCallback(err);
+						else throw err;
+					}
+					else {
+						console.log("Successfully attached WysiwygetEdtior to new window");
+						
+						console.log("Done (re)loading preview window");
+						
+						if(reloadCallback) reloadCallback(null);
+						
+						wysiwygEditor.ignoreSourceFileChange = false;
+					}
+				});
 			}
-		});
 		}
-	}
 	}
 	
 	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback) {
@@ -1576,12 +1576,12 @@ else throw err;
 				1522935134102 attached
 				1522935134322 console.log hi
 				So why is it not captured !!?!?!?!?!?!?!?
-				*/
+			*/
 			/*
-			setTimeout(function checkAgainConsoleLogOverloaded() {
+				setTimeout(function checkAgainConsoleLogOverloaded() {
 				if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
 				else console.log("consoleLogCapturer *still* attached ! " +  + UTIL.timeStamp());
-			},30);
+				},30);
 			*/
 			// Just adding the code above seems to make it capture it!!! why ?
 			// Because it now always attaches before load !?
@@ -1600,7 +1600,7 @@ else throw err;
 		
 		if(previewWin.loaded === true) attachEvents();
 		else previewWin.addEventListener("load", function windowLoaded() {
-			 attachEvents();
+			attachEvents();
 		});
 		
 		function captureError(err) {
@@ -1612,34 +1612,34 @@ else throw err;
 		}
 		
 		function attachEvents() {
-		
+			
 			if(previewWin.loaded !== true) throw new Error("The preview window has not loaded!");
 			
 			var doc = previewWin.document;
-		var win = previewWin.window;
-		
-		if(!doc.documentElement) {
-				throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
-		}
-		
-		if(!previewWin) throw new Error("Unable to get preview window!");
-		if(!doc) throw new Error("Unable to get preview window document!");
-		if(!win) throw new Error("Unable to get preview window window!");
-		
-		/*
-			var prewviewContent = doc.documentElement.outerHTML;
-			console.log("prewviewContent=" + prewviewContent);
-			if(prewviewContent != html && prewviewContent) {
+			var win = previewWin.window;
 			
-			console.log("html=" + html);
-			console.log("prewviewContent=" + prewviewContent);
-			throw new Error("Failed to write HTML to preview window!");
+			if(!doc.documentElement) {
+				throw new Error("Failed to get doc.documentElement after " + retries + " retries.");
 			}
-		*/
-		
-		var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
-		
-		if(bodyTags.length == 0) {
+			
+			if(!previewWin) throw new Error("Unable to get preview window!");
+			if(!doc) throw new Error("Unable to get preview window document!");
+			if(!win) throw new Error("Unable to get preview window window!");
+			
+			/*
+				var prewviewContent = doc.documentElement.outerHTML;
+				console.log("prewviewContent=" + prewviewContent);
+				if(prewviewContent != html && prewviewContent) {
+				
+				console.log("html=" + html);
+				console.log("prewviewContent=" + prewviewContent);
+				throw new Error("Failed to write HTML to preview window!");
+				}
+			*/
+			
+			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
+			
+			if(bodyTags.length == 0) {
 				console.log((new Date()).getTime() + " unable to get " + wysiwygEditor.bodyTagPreview + " element! doc.readyState=" + doc.readyState +
 				" doc.documentElement.readyState=" + doc.documentElement.readyState);
 				return callback(new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview +
@@ -1647,63 +1647,63 @@ else throw err;
 			}
 			
 			var body = bodyTags[0];
-		
+			
 			/*
 				"dancing" will mess up the source code, so we want to avoid it if possible.
 				I'ts only needed if we want to edit in WYSIWYG mode !?
 			*/
 			if(!wysiwygEditor.onlyPreview) wysiwygEditor.dance();
 			
-		
-		if(!wysiwygEditor.onlyPreview) {
-			// Make body editable and attatch event listeners
 			
-			body.setAttribute("contenteditable", "true");
+			if(!wysiwygEditor.onlyPreview) {
+				// Make body editable and attatch event listeners
+				
+				body.setAttribute("contenteditable", "true");
+				
+				body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
+				body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
+				body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
+				
+				// body.input doesn't work on nw.js gui, has to use window instead
+				//body.input = function(e) {wysiwygEditor.previewInput(e)};
+				body.oninput = function(e) {wysiwygEditor.previewInput(e)};
+				//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
+			}
+			else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
 			
-			body.onkeyup = function(e) {wysiwygEditor.previewKeyup(e)};
-			body.onselectionchange = function(e) {wysiwygEditor.previewSelectionchange(e)};
-			body.onpaste = function(e) {wysiwygEditor.previewPaste(e, doc)};
-			
-			// body.input doesn't work on nw.js gui, has to use window instead
-			//body.input = function(e) {wysiwygEditor.previewInput(e)};
-			body.oninput = function(e) {wysiwygEditor.previewInput(e)};
-			//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
-		}
-		else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
-		
 			body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
 			
-		// Capture F5 and make a soft reload
-		previewWin.window.onkeydown = function keyDown(keyDownEvent) {
-			//console.log("previewWin.window.onkeydown:", keyDownEvent);
-			var keyF5 = 116;
-			if(keyDownEvent.keyCode == keyF5) {
-				keyDownEvent.preventDefault();
-				wysiwygEditor.reload();
-				return false;
-			}
-			else return true;
-		};
-		
-		attachFileChangeListener(wysiwygEditor);
+			// Capture F5 and make a soft reload
+			previewWin.window.onkeydown = function keyDown(keyDownEvent) {
+				//console.log("previewWin.window.onkeydown:", keyDownEvent);
+				var keyF5 = 116;
+				if(keyDownEvent.keyCode == keyF5) {
+					keyDownEvent.preventDefault();
+					wysiwygEditor.reload();
+					return false;
+				}
+				else return true;
+			};
+			
+			attachFileChangeListener(wysiwygEditor);
 			attachFileSaveListener(wysiwygEditor);
 			attachAutoCompleteListener(wysiwygEditor);
 			
 			/*
 				Remove the fileChange and afterFileSave event listener when closing the content-editable window
-			
+				
 				Note: If the window loads fast, onbeforeunload will be called (Chrome)!
 				We put it behind a timeout in the hopes of it not firing 
 			*/
-		
+			
 			setTimeout(function afterWeirdStuff() {
-			previewWin.window.onbeforeunload = function onbeforeunload() {
-				console.warn("onbeforeunload called!");
+				previewWin.window.onbeforeunload = function onbeforeunload() {
+					console.warn("onbeforeunload called!");
 					if(!wysiwygEditor.isReloading) wysiwygEditor.close();
-			//return true; // Shows a "are you sure" message
-		};
-		
-			callback(null);
+					//return true; // Shows a "are you sure" message
+				};
+				
+				callback(null);
 			}, 1);
 			
 		}
@@ -1863,6 +1863,7 @@ else throw err;
 		console.log("Console log detected!");
 		var msg = "";
 		for (var i=0; i<arg.length; i++) {
+			console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
 			if(typeof arg[i] == "string") msg = msg + " " + arg[i];
 			else if(typeof arg[i] == "object") {
 				var stringifyError = false;
@@ -1878,7 +1879,13 @@ else throw err;
 				else msg = msg + " " + jsonStr;
 			}
 			else {
-				msg = msg + " " + arg[i].toString();
+				try {
+					msg = msg + " " + arg[i].toString();
+				}
+				catch(err) {
+					console.warn("Unable to convert to string:");
+					console.log(arg[i]);
+				}
 			}
 		}
 		if(msg.length > 1) msg = msg.slice(1, msg.length); // Remove the first space
@@ -1906,13 +1913,13 @@ else throw err;
 			
 			index = arrStack[i].trim().indexOf("at consoleLogCapturer"); // Chrome
 			if(index == -1) index = arrStack[i].indexOf("consoleLogCapturer@"); // Firefox
-				
-				console.log("index=" + index);
-				if(index != -1) {
-					stackLineWithFile = arrStack[i+1];
-					break;
-				}
+			
+			console.log("index=" + index);
+			if(index != -1) {
+				stackLineWithFile = arrStack[i+1];
+				break;
 			}
+		}
 		
 		if(stackLineWithFile) {
 			
@@ -1929,7 +1936,7 @@ else throw err;
 			if(!matchFile) {
 				console.warn("Could not get file path from stackLineWithFile=" + stackLineWithFile + ". Most likely it's from another domain.");
 				return;
-				}
+			}
 			console.log(matchFile);
 			var filePath = folder + matchFile[1];
 			var row = parseInt(matchFile[2])-1;
@@ -2021,7 +2028,7 @@ else throw err;
 			var col = colno ? colno - file.grid[row].indentationCharacters : 0;
 			if(EDITOR.currentFile != file) {
 				EDITOR.showFile(file);
-				}
+			}
 			
 			file.scrollToLine(lineno);
 			
@@ -2034,14 +2041,14 @@ else throw err;
 			alertBox(sourceLink + "\n\n" + message + "");
 		}
 	}
-
+	
 	WysiwygEditor.prototype.autoComplete = function autoComplete(file, word, wordLength, gotOptions) {
 		/*
 			Autocomplete global variables from the window in preview
 		*/
 		
 		var wysiwygEditor = this;
-	
+		
 		var theWindow = wysiwygEditor.previewWin;
 		
 		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
@@ -2053,16 +2060,16 @@ else throw err;
 		if(file != wysiwygEditor.sourceFile) {
 			// Check if file has anything to do with the web page in preview (eg a script)
 			var related = false;
-		var fileName = UTIL.getFilenameFromPath(file.path);
+			var fileName = UTIL.getFilenameFromPath(file.path);
 			var scripts = theWindow.document.getElementsByTagName('script');
-		for (var i=0; i<scripts.length; i++) {
-			//console.log(scripts[i].src);
-			if(scripts[i].src.indexOf(fileName) != -1) {
+			for (var i=0; i<scripts.length; i++) {
+				//console.log(scripts[i].src);
+				if(scripts[i].src.indexOf(fileName) != -1) {
 					related = true;
-				break;
+					break;
 				}
 			}
-		if(!related) return;
+			if(!related) return;
 		}
 		
 		var options = [];
@@ -2083,11 +2090,11 @@ else throw err;
 				console.log("Evaulated: " + before.slice(0,-1) + " = " + obj);
 			}
 			else obj = obj[words[i]];
-				if(!obj) {
+			if(!obj) {
 				console.log("Object does not exist: " + before.slice(0,-1) + " (" + words[i] + ")");
-					return;
-				}
+				return;
 			}
+		}
 		
 		console.log(obj);
 		
@@ -2190,9 +2197,9 @@ else throw err;
 		
 		/*
 			var parser=new DOMParser();
-		var htmlDoc=parser.parseFromString(srcBodyHtml, "text/html");
-		while (body.firstChild) body.removeChild(body.firstChild); // Clear content
-		while (htmlDoc.firstChild) body.appendChild(htmlDoc.firstChild); // Add new content
+			var htmlDoc=parser.parseFromString(srcBodyHtml, "text/html");
+			while (body.firstChild) body.removeChild(body.firstChild); // Clear content
+			while (htmlDoc.firstChild) body.appendChild(htmlDoc.firstChild); // Add new content
 		*/
 		
 		//var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
@@ -2242,7 +2249,7 @@ else throw err;
 	}
 	
 	function attachAutoCompleteListener(wysiwygEditor) {
-	// All EDITOR events wants an uniqe function name ...
+		// All EDITOR events wants an uniqe function name ...
 		var name = "wysiwygEditorAutoComplete" + wysiwygEditor.id;
 		console.log("Unique function name for autoComplete event: " + name);
 		var customAction = function(file, word, wordLength, gotOptions) {
@@ -2256,7 +2263,7 @@ else throw err;
 		EDITOR.on("autoComplete", func, order);
 		
 		wysiwygEditor.autoCompleteListener = func;
-		}
+	}
 	
 	function changeCodeInBody(newBodyCode, html, bodyTag, lineBreak) {
 		
@@ -2559,14 +2566,14 @@ else throw err;
 			return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\r\\n([\\s\\S]*)\\r\\n[\\t ]*<\\/" + bodyTag + ">", "i");
 		}
 		else {
-return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + bodyTag + ">", "i");
+			return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\n([\\s\\S]*)\\n[\\t ]*<\\/" + bodyTag + ">", "i");
 		}
 		
 		//return new RegExp("<" + bodyTag + "[^>]*>\\s*[\\n|\\r\\n]([\\s\\S]*)[\\n|\\r\\n]\\s*<\\/" + bodyTag + ">", "i");
 		
 		/*
 			* = Matches the preceding expression 0 or more times
-			*/
+		*/
 		
 	}
 	
