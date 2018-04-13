@@ -469,6 +469,8 @@ var WysiwygEditor;
 			
 			var caretPos = wysiwygEditor.getCaretPosition();
 			
+			if(!caretPos) return console.warn("Unable to get caret position!");
+			
 			var index = sourceFile.text.indexOf(innerText);
 			
 			if(index == -1 && caretPos.text != undefined) {
@@ -1036,7 +1038,7 @@ var WysiwygEditor;
 				
 				console.log("caretPosition: " + JSON.stringify(caretPosition));
 				
-				wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
+				if(caretPosition) wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
 				
 				console.log("Sanitized garbage from WYSIWYG");
 				
