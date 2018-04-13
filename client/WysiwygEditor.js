@@ -411,7 +411,12 @@ if(!selection) throw new Error("Unable to get selection");
 			console.log(selection);
 			console.log(selection.baseNode);
 			console.log(selection.anchorNode);
-			throw new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
+			//We get no baseNode in Safari when clicking on buttons!!
+			//var browser = UTIL.checkBrowser();
+			//Chromium also gets no baseNode the first time you click on a button. (it works afterwards)
+			var error = new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
+			return console.warn(error.message);
+			//else throw error; 
 			}
 		
 		if(baseNode.nodeType == Node.TEXT_NODE) {
@@ -829,7 +834,10 @@ wysiwygEditor.close();
 		
 		var file = EDITOR.currentFile;
 		
-		if(!EDITOR.input && file == wysiwygEditor.sourceFile) wysiwygEditor.placeCaretInSourceCode(e.target);
+		// Safari blurs the editor before the mouseup is triggered, while other browsers does not
+		// Should we always place the caret !?
+		if(file == wysiwygEditor.sourceFile) wysiwygEditor.placeCaretInSourceCode(e.target);
+		//else console.log("EDITOR.input=" + EDITOR.input + " file==wysiwygEditor.sourceFile?" + (file==wysiwygEditor.sourceFile) + "");
 		
 		if(file.path.slice(-3) == "css") {
 			console.log("Current file is a CSS file!");
