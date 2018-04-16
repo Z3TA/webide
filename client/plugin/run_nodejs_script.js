@@ -151,24 +151,31 @@
 				actualLine = parseInt(line) - 20;
 				text = text.replace(reFileRun, filePath + ":" + actualLine);
 			}
+			
+			text = text.trim(); // throw "foo" errors start with a line break ! :P
+			
 			msg.stderr = text;
 			
 			// Get the path from the first line of the error message
 			var firstLine = text.slice(0, text.indexOf("\n"));
 			var reFirstLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
 			var matchFirstLine = firstLine.match(reFirstLine);
+			if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in firstLine=" + firstLine + " text=" + text);
 			var pathOnFirstLine = matchFirstLine[1];
-			if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in error message: " + text);
 			console.log("pathOnFirstLine=" + pathOnFirstLine);
 			
-			
-			var stackTrace = text.match(/\((.*):(\d+)\)/g);
-			// remove the parentheses and line:column
+			/*
+				if you use throw "foo" instead of throw new Error("foo") nodejs wont give a proper call stack!
+			*/
+			var reStack = /\((.*):(\d+)\)/g;
+			var stackTrace = text.match(reStack);
+			if(stackTrace == null) console.warn("Unable to find " + reStack + " in text=" + text)
+			else {// remove the parentheses and line:column
 			for (var i=0; i<stackTrace.length; i++) {
 				stackTrace[i] = stackTrace[i].slice(1, stackTrace[i].indexOf(":"));
 			}
 			console.log("stackTrace=" + JSON.stringify(stackTrace));
-			
+			}
 			//console.log("msg.stderr=" + msg.stderr);
 			//console.log("text=" + text);
 			
@@ -199,7 +206,7 @@
 						else showErrorMessage(file, msg.stderr);
 					});
 				}
-				else {
+				else if(stackTrace) {
 					// The error is in a native nodejs library ...
 					// Traverse the stack to find a file we can actually open
 					// Does the file in view or the file being run show up in the stack ? Then open it !
@@ -233,12 +240,9 @@
 						}
 						if(!found) alertBox(text);
 					}
-					
-					
+					}
+				else console.warn("No stack trace vailable. Unable to find source of error in text=" + text);
 				}
-				
-				
-			}
 			
 			// Remove debug strings from error message before showing it in the stdout file
 			while(msg.stderr.indexOf(debugStr) != -1) {
@@ -431,7 +435,11 @@
 		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
 		
-		EDITOR.addInfo(lineNr-1, col, desc, file, 1);
+		file.scrollToLine(lineNr);
+		
+		if(EDITOR.currentFile != file) EDITOR.showFile(file);
+		
+		EDITOR.addInfo(lineNr-1, col, desc, file, 1); // row, col, desc, file, level (1=error, 2=warn, 3=info)
 		
 	}
 	
