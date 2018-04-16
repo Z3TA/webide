@@ -38,9 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Error: The following event listeners failed to return something trueish or call back in a timely fashion: ["wysiwygEditorFileSave1"]
-    at checkIfReturnedOrCalledCallback (EDITOR.js:1163)
-
 implementing jsql example on webide.se
 
 Writing blog post about jsql

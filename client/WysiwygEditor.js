@@ -709,7 +709,7 @@ var WysiwygEditor;
 	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file, saveEventCallback) {
 		var wysiwygEditor = this;
 		
-		if(!file) throw new Error("file=" + file);
+		if(!file) return saveEventCallback(new Error("file=" + file));
 		
 		console.log("WysiwygEditor.anyFileSaved: " + file.path);
 		
@@ -774,9 +774,10 @@ var WysiwygEditor;
 				}
 			}
 			
+			return saveEventCallback(null);
 			//console.log("fileName=" + fileName + " was not found on the page in preview.");
 		}
-		if(fileExt == "js") {
+		else if(fileExt == "js") {
 			/*
 				It's not a good idea to reload just the JS unless the file's are design to be able to do that (like plugins in jzedit)
 				As variables might still hold state. Old html elements would still linger, etc.
@@ -793,10 +794,13 @@ var WysiwygEditor;
 						if(err) alertBox(err.message);
 						saveEventCallback(null);
 					});
-					break;
+					return;
 				}
 			}
+			
+			return saveEventCallback(null)
 		}
+		else return saveEventCallback(null);
 	}
 	
 	

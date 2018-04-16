@@ -83,7 +83,7 @@ if(err) throw err;
 			});
 		}
 		
-		});
+		}, 1);
 	
 	
 	EDITOR.addTest(function mercurialCloneRepo(callback) {

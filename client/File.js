@@ -3497,8 +3497,12 @@ var File; // File object is global
 			var errors = [];
 			var alreadyTooLate = false;
 			var eventListeners = EDITOR.eventListeners[ev];
-			
-				for(var i=0; i<eventListeners.length; i++) callListener(eventListeners[i].fun);
+			var uniqueFunctionNames = [];
+			var returnedOrCalledBack = [];
+				
+				for(var i=0; i<eventListeners.length; i++) {
+					callListener(eventListeners[i].fun);
+				}
 				
 				if(waitingFor.length > 0) {
 					var maxWait = 5;
@@ -3508,20 +3512,30 @@ var File; // File object is global
 				
 				function callListener(fun) {
 					var fName = UTIL.getFunctionName(fun);
-					waitingFor.push(fName);
-					console.log("Calling eventListener: " + fName);
-				var ret = fun(file, evCallback);
-					eventFunsCalled++;
-				if(ret) evCallback(null);// The function did not return void, asume it's done!
 					
-				function evCallback(err) {
+					if(!fName) throw new Error("A " + ev + " event listener function has no name!");
+					if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
+					uniqueFunctionNames.push(fName);
+					
+					waitingFor.push(fName);
+					console.log("Calling " + ev + " eventListener: " + fName);
+					var ret = fun(file, evCallback);
+					eventFunsCalled++;
+					console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
+					if(ret) evCallback(null);// The function did not return void, asume it's done!
+					
+					function evCallback(err) {
+						console.log("Got " + ev + " event callback from " + fName + " err=" + err);
+						if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back!");
+						returnedOrCalledBack.push(fName);
+						
 						if(err) errors.push(err);
 						var index = waitingFor.indexOf(fName);
-					if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" + 
-					" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
+						if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" + 
+						" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
 						
-					waitingFor.splice(index, 1);
-						if(waitingFor.length == 0 && eventFunsCalled == eventListeners.length && !alreadyTooLate) {
+						waitingFor.splice(index, 1);
+						if(waitingFor.length == 0 && returnedOrCalledBack.length == eventListeners.length && !alreadyTooLate) {
 							if(checkInterval) clearInterval(checkInterval);
 							allListenersCalled(errors);
 						}
