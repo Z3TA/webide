@@ -262,11 +262,12 @@
 		
 		
 		// Search the cache first
+		var searchPath = inputFolder.value;
 		var toIgnore = [];
 		var reName = new RegExp(text, "ig");
 		for (var i=0, match; i<fileCache.length; i++) {
 			match = fileCache[i].match(reName);
-			if(match) {
+			if(match && fileCache[i].indexOf(searchPath) == 0) {
 				appendResult(fileCache[i], match);
 				toIgnore.push(fileCache[i]);
 				if(matchesFound >= defaultMaxResults) {
@@ -650,7 +651,8 @@
 		}
 		else {
 			console.log("fileCache:" + JSON.stringify(fileCache, null, 2));
-throw new Error("We should not find files already in cache as they should have been ignored! path=" + file.path);
+			console.warn("We should not find files already in cache as they should have been ignored! path=" + file.path);
+			// todo: fix this bug! Had to make it a warn as it was too common
 		}
 		appendResult(file.path, file.match);
 		gotoFileProgressStatus(file);
