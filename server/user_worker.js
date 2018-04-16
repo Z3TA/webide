@@ -1072,6 +1072,10 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	npmExecFileOptions.cwd = directory;
 	
 	var patchedFilePath = filePath + ".tmp";
+	/*
+		Clean up .tmp files when nodejs script exit !?
+		Keep them in case we need to debug.
+	*/
 	
 	var fs = require("fs");
 	

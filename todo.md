@@ -38,9 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Clean up .tmp files when nodejs script exit !?
-Add a dot in the start and keep them for debugging purpose!
-
 If there's an error in run_nodejs, scroll to it!
 
 Error: The following event listeners failed to return something trueish or call back in a timely fashion: ["wysiwygEditorFileSave1"]
