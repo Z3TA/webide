@@ -1110,11 +1110,6 @@ if(callback) return callback(err, path);
 			// Change state to saved, and call afterFileSave listeners
 			file.saved(function(err) {
 				
-				if(errors.length > 0) console.warn("Some afterFileSave event listeners failed:");
-				for (var i=0; i<errors.length; i++) {
-					console.error(errors[i]);
-				}
-				
 				// Call back without an error even though some of the afterFileSave events failed.
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
 				if(callback) callback(null, path);

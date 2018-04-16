@@ -3480,7 +3480,15 @@ var File; // File object is global
 		
 		// The afterFileSave event listeners need to take a callback or return something, so we can know when they're done'
 		callEventListeners("afterFileSave", function allListenersCalled(errors) {
-			if(callback) callback(errors);
+			
+			if(errors.length > 0) console.warn("Some afterFileSave event listeners failed:");
+			for (var i=0; i<errors.length; i++) {
+				console.error(errors[i]);
+			}
+			
+			if(errors) var err = new Error("Some afterFileSave event listeners failed! (see console log's in dev tools)");
+			
+			if(callback) callback(err);
 		});
 		
 		function callEventListeners(ev, allListenersCalled) {
