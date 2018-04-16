@@ -2201,9 +2201,9 @@ console.log("mercurial.status : " + JSON.stringify(status));
 			
 			if(err) return alertBox(err.message);
 			
-			CLIENT.cmd("mercurial.pull", {directory: fileDirectory}, hgPull);
+			CLIENT.cmd("mercurial.pull", {directory: fileDirectory}, pulledMaybe);
 			
-			function hgPull(err, resp) {
+			function pulledMaybe(err, resp) {
 				if(err) {
 					
 					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
@@ -2527,11 +2527,25 @@ if(callback) callback(null, filePath);
 			}
 			else {
 				// All files are resolved
-				if(showAlert) alertBox("All files are resolved. You need to commit!");
-				showCommitDialog();
+				// We might not need to commit though (for example if we reverted)
+				CLIENT.cmd("mercurial.status", {directory: fileDirectory}, function hgstatus(err, status) {
+if(err) return alertBox(err.message);
+
+// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
+
+					if(status.modified.length == 0 && status.added.length == 0 && status.removed.length == 0 && status.missing.length == 0) {
+						checkForMultipleHeads(fileDirectory, callback);
+}
+					else {
+						if(showAlert) alertBox("All files are resolved. You need to commit!");
+						showCommitDialog();
+					}
+				});
+				
+				
 				//if(callback) callback(null, resp);
 			}
-			});
+		});
 	}
 	
 	function checkForMultipleHeads(fileDirectory, callback) {
@@ -2544,7 +2558,7 @@ if(callback) callback(null, filePath);
 			if(resp.heads.length == 1) {
 				if(callback) callback(null, resp);
 				else alertBox("Local repo at " + fileDirectory + " does Not contain multiple heads!");
-				}
+			}
 			else {
 				
 				var merge = "Merge";

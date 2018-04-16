@@ -38,7 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Mercurial problem: When you have merged, but then reverted, it says you need to commit, but there's nothing to commit
+Racing to open terminal file, when starting a terminal
 
 Clean up .tmp files when nodejs script exit !?
 Add a dot in the start and keep them for debugging purpose!
