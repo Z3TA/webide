@@ -931,7 +931,7 @@ var stdout = "";
 var stderr = "";
 
 var progressCounter = 0;
-var progressMax = 10;
+		var progressMax = 100;
 
 		user.send({mercurialProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
 		
@@ -998,8 +998,6 @@ bash-4.3$ hg push --debug
 
 console.log("exitCode=" + exitCode);
 
-			clearInterval(progressInterval);
-			
 if(exitCode || stderr) {
 				
 				var errMessage = stderr || stdout;
@@ -1061,12 +1059,12 @@ err.code = exitCode;
 					
 					if(resp == undefined || resp.directory == undefined) resp = {directory: user.toVirtualPath(rootDir)};
 					
+				clearInterval(progressInterval);
+				user.send({mercurialProgress: {max: progressCounter, value: progressCounter}}); // show full progress
+				
 					if(callback) callback(err, resp);
 					callback = null;
 					
-					// show full progress
-				user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
-				
 			}
 			
 		});

@@ -38,10 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-push progress bar is not much helpful, it goes to max, then stays there and does nothing, and sometimes dissappears before it's finished.
-
 "update" button on commit widget for when you've made some updates and want to commit again.
-Or should it refresh automaticall !?
+Or should it refresh automatically !?
 
 Clean up .tmp files when nodejs script exit !?
 Add a dot in the start and keep them for debugging purpose!
