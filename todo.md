@@ -38,8 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-"update" button on commit widget for when you've made some updates and want to commit again.
-Or should it refresh automatically !?
+Mercurial problem: When you have merged, but then reverted, it says you need to commit, but there's nothing to commit
 
 Clean up .tmp files when nodejs script exit !?
 Add a dot in the start and keep them for debugging purpose!

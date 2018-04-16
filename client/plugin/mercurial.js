@@ -462,7 +462,26 @@
 		
 		group.appendChild(deleteButton);
 		
+		
+		// ### Revert button
+		var revertButton = document.createElement("button");
+		revertButton.setAttribute("class", "button");
+		revertButton.setAttribute("title", "Restore files to their checkout state");
+		revertButton.appendChild(document.createTextNode("Revert"));
+		revertButton.onclick = mercurialRevert;
+		
+		group.appendChild(revertButton);
+		
 		div.appendChild(group);
+		
+		
+		// ### Refresh button
+		var refreshButton = document.createElement("button");
+		refreshButton.setAttribute("class", "button");
+		refreshButton.appendChild(document.createTextNode("Refresh"));
+		refreshButton.onclick = updateCommitFileSelect;
+		
+		group.appendChild(refreshButton);
 		
 		
 		/*
@@ -473,7 +492,63 @@
 		
 		return div;
 		
-		
+		function mercurialRevert(buttonClickEvent) {
+			
+			var revertFiles = [];
+			var selectedFiles = fileSelect.options;
+			for(var i=0, filePath; i<selectedFiles.length; i++) {
+				if(selectedFiles[i].selected) {
+					filePath = selectedFiles[i].value;
+					revertFiles.push(filePath);
+				}
+			}
+			console.log("revertFiles=" + JSON.stringify(revertFiles, null, 2));
+			
+			if(revertFiles.length == 0) return alertBox("No files selected!");
+			
+			if(!buttonClickEvent.ctrlKey) {
+				var msg = "Are you sure you want to Revert the following files to last revision ? All changes will be lost !\n" + revertFiles.join("\n");
+				var yes = "Revert";
+				var no = "Canel";
+				
+				confirmBox(msg, [yes, no], function shouldDelete(answer) {
+					if(answer == yes) revertTheFiles();
+					else updateCommitFileSelect(rootDir);
+				});
+			}
+			else revertTheFiles();
+			
+			function revertTheFiles() {
+				
+				CLIENT.cmd("mercurial.revert", {directory: rootDir, files: revertFiles}, function reverted(err, resp) {
+						
+						if(err) alertBox(err.message);
+					
+					updateCommitFileSelect(rootDir);
+				
+					// Reload the files opened in the editor
+					var fullPath;
+					for (var i=0; i<revertFiles.length; i++) {
+						fullPath = rootDir + revertFiles[i];
+						for(var path in EDITOR.files) {
+							if(path == fullPath) reload(EDITOR.files[path]);
+						}
+					}
+					
+					function reload(file) {
+						EDITOR.readFromDisk(file.path, function(err, path, text) {
+							if(err) throw err;
+						else {
+							file.reload(text);
+							file.saved(); // Because we reloaded from disk
+								}
+						});
+					}
+					
+				});
+				
+			}
+		}
 		
 		function mercurialDelete(buttonClickEvent) {
 			
@@ -491,7 +566,7 @@
 			console.log("removeFiles=" + JSON.stringify(removeFiles, null, 2));
 			
 			if(removeFiles.length == 0 && deleteUntracked.length == 0) return alertBox("No files selected!");
-				
+			
 			if(!buttonClickEvent.ctrlKey) {
 				var msg = "Are you sure you want to delete the following files ?\n" + removeFiles.concat(deleteUntracked).join("\n");
 				var yes = "Yes, Delete them";
@@ -499,18 +574,18 @@
 				
 				confirmBox(msg, [yes, no], function shouldDelete(answer) {
 					if(answer == yes) deleteTheFiles();
-						else updateCommitFileSelect(rootDir);
-					});
+					else updateCommitFileSelect(rootDir);
+				});
 			}
 			else deleteTheFiles();
 			
-		function deleteTheFiles() {
+			function deleteTheFiles() {
 				
 				var filesToBeDeleted = removeFiles.length + deleteUntracked.length;
 				
 				if(removeFiles.length > 0) {
-			CLIENT.cmd("mercurial.remove", {directory: rootDir, files: removeFiles}, function removed(err, resp) {
-				
+					CLIENT.cmd("mercurial.remove", {directory: rootDir, files: removeFiles}, function removed(err, resp) {
+						
 				if(err) alertBox(err.message);
 				else {
 							
@@ -923,7 +998,7 @@
 		var div = document.createElement("div");
 		
 		var text = document.createElement("p");
-		text.appendChild(document.createTextNode("The files below needs to be resolved. Click on the check box to mark/unmark a file as resolved. Click on the file path to open it."));
+		text.appendChild(document.createTextNode("The files below needs to be resolved. Click on the file path to open it. And click on the check-box to mark/unmark a file as resolved/unresolved. "));
 		
 		resolveFileList = document.createElement("ul");
 		resolveFileList.setAttribute("class", "resolveList");
@@ -2446,7 +2521,7 @@ if(callback) callback(null, filePath);
 				checkForMultipleHeads(fileDirectory, callback);
 			}
 			else if(resp.unresolved.length > 0) {
-				if(showAlert) alertBox("There are unresolved files!\nFix problems and then mark them as resolved.");
+				if(showAlert) alertBox("There are unresolved files! You have to edit the files manually. Then mark them as resolved.");
 				showResolveDialog(resp.resolved, resp.unresolved, fileDirectory);
 				//if(callback) callback(null, resp);
 			}
