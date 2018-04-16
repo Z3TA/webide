@@ -3467,17 +3467,75 @@ var File; // File object is global
 	}
 	
 	
-	File.prototype.saved = function() {
+	File.prototype.saved = function(callback) {
 		/*
 			Only set state
 			Let the editor handle saving and loading from disk
-			As well as calling save listeners
 			*/
 		var file = this;
 		
 		file.isSaved = true;
 		file.changed = false;
 		file.savedAs = true;
+		
+		// The afterFileSave event listeners need to take a callback or return something, so we can know when they're done'
+		callEventListeners("afterFileSave", function allListenersCalled(errors) {
+			if(callback) callback(errors);
+		});
+		
+		function callEventListeners(ev, allListenersCalled) {
+			var waitingFor = [];
+			var eventFunsCalled = 0;
+			var errors = [];
+			var alreadyTooLate = false;
+			var eventListeners = EDITOR.eventListeners[ev];
+			
+				for(var i=0; i<eventListeners.length; i++) callListener(eventListeners[i].fun);
+				
+				if(waitingFor.length > 0) {
+					var maxWait = 5;
+					var waitCounter = 0;
+					var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
+				}
+				
+				function callListener(fun) {
+					var fName = UTIL.getFunctionName(fun);
+					waitingFor.push(fName);
+					console.log("Calling eventListener: " + fName);
+				var ret = fun(file, evCallback);
+					eventFunsCalled++;
+				if(ret) evCallback(null);// The function did not return void, asume it's done!
+					
+				function evCallback(err) {
+						if(err) errors.push(err);
+						var index = waitingFor.indexOf(fName);
+					if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" + 
+					" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
+						
+					waitingFor.splice(index, 1);
+						if(waitingFor.length == 0 && eventFunsCalled == eventListeners.length && !alreadyTooLate) {
+							if(checkInterval) clearInterval(checkInterval);
+							allListenersCalled(errors);
+						}
+						return;
+					}
+				}
+				
+				function checkIfReturnedOrCalledCallback() {
+					console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
+					
+					if(++waitCounter >= maxWait) {
+						clearInterval(checkInterval);
+						errors.push(new Error("The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor)));
+						alreadyTooLate = true;
+						allListenersCalled(errors);
+					}
+					
+				}
+				
+			}
+		
+		
 		}
 	
 	// Prevent setting file.saved = true
@@ -4595,9 +4653,6 @@ var File; // File object is global
 		return {row: row, col: column};
 		
 	}
-	
-	
-	
 	
 	
 	

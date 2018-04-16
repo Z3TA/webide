@@ -706,7 +706,7 @@ var WysiwygEditor;
 		return true;
 	}
 	
-	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file, path, saveCallback) {
+	WysiwygEditor.prototype.anyFileSaved = function anyFileSaved(file, saveEventCallback) {
 		var wysiwygEditor = this;
 		
 		if(!file) throw new Error("file=" + file);
@@ -724,7 +724,7 @@ var WysiwygEditor;
 			console.error(err);
 			// Most likely the user has closed the preview window
 			wysiwygEditor.close();
-			return saveCallback(null);
+			return saveEventCallback(null);
 		}
 		
 		//console.log("Checking for CSS file ...");
@@ -756,7 +756,7 @@ var WysiwygEditor;
 						
 						console.log("Replaced link css with style for " + fileName);
 						
-						return saveCallback(null);
+						return saveEventCallback(null);
 						
 					}
 				}
@@ -769,7 +769,7 @@ var WysiwygEditor;
 					if(href.indexOf(fileName) != -1) {
 						style[i].innerText = file.text;
 						console.log("Replaced style content for " + fileName);
-						return saveCallback(null);
+						return saveEventCallback(null);
 					}
 				}
 			}
@@ -791,7 +791,7 @@ var WysiwygEditor;
 				if(scripts[i].src.indexOf(fileName) != -1) {
 					wysiwygEditor.reload(function(err) {
 						if(err) alertBox(err.message);
-						saveCallback(null);
+						saveEventCallback(null);
 					});
 					break;
 				}
@@ -2237,10 +2237,10 @@ var WysiwygEditor;
 		// All EDITOR events wants an uniqe function name ...
 		var name = "wysiwygEditorFileSave" + wysiwygEditor.id;
 		console.log("Unique function name for afterFileSave event: " + name);
-		var customAction = function(file, path, saveCallback) {
-			return wysiwygEditor.anyFileSaved(file, path, saveCallback);
+		var customAction = function(file, saveCallback) {
+			return wysiwygEditor.anyFileSaved(file, saveCallback);
 		}
-		var func = new Function("action" + name, "return function " + name + "(file, path, saveCallback){ return action" + name + "(file, path, saveCallback) };")(customAction);
+		var func = new Function("action" + name, "return function " + name + "(file, saveCallback){ return action" + name + "(file, saveCallback) };")(customAction);
 		
 		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterFileSave", wysiwygEditor.afterFileSaveEventListener);
 		

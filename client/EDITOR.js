@@ -1101,73 +1101,22 @@ if(callback) return callback(err, path);
 				
 				console.log("Successfully saved " + file.path);
 				
-				file.saved(); // Change state to saved
-				
-				// Call functions that listen for save events
-				// The file save event listeners need to take a callback or return something
-				callEventListeners(EDITOR.eventListeners.afterFileSave, function allListenersCalled(errors) {
+			// Change state to saved, and call afterFileSave listeners
+			file.saved(function(err) {
 				
 				if(errors.length > 0) console.warn("Some afterFileSave event listeners failed:");
-				
 				for (var i=0; i<errors.length; i++) {
 					console.error(errors[i]);
-					}
-					
+				}
+				
 				// Call back without an error even though some of the afterFileSave events failed.
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
-					if(callback) callback(null, path);
-					
-			});
+				if(callback) callback(null, path);
+				
+			}); 
+			
 		}
 		
-		function callEventListeners(eventListeners, allListenersCalled) {
-			var waitingFor = [];
-			var eventFunsCalled = 0;
-			var errors = [];
-			var alreadyTooLate = false;
-			
-			for(var i=0; i<eventListeners.length; i++) callSaveListener(eventListeners[i].fun);
-			
-			if(waitingFor.length > 0) {
-				var maxWait = 5;
-				var waitCounter = 0;
-				var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
-			}
-			
-			function callSaveListener(fun) {
-				var fName = UTIL.getFunctionName(fun);
-				waitingFor.push(fName);
-				console.log("Calling fileSave eventListener: " + fName);
-				var ret = fun(file, path, saveCallback);
-				eventFunsCalled++;
-				if(ret) saveCallback(null);// The function did not return void, asume it's done!
-				
-				function saveCallback(err) {
-					if(err) errors.push(err);
-					var index = waitingFor.indexOf(fName);
-					if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back! Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
-					waitingFor.splice(index, 1);
-					if(waitingFor.length == 0 && eventFunsCalled == eventListeners.length && !alreadyTooLate) {
-						if(checkInterval) clearInterval(checkInterval);
-						allListenersCalled(errors);
-					}
-					return;
-				}
-			}
-			
-			function checkIfReturnedOrCalledCallback() {
-				console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
-				
-				if(++waitCounter >= maxWait) {
-					clearInterval(checkInterval);
-					errors.push(new Error("The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor)));
-					alreadyTooLate = true;
-					allListenersCalled(errors);
-				}
-				
-			}
-			
-		}
 		
 	}
 	
