@@ -102,6 +102,12 @@
 		
 		if(!name) throw new Error("name=" + name);
 		
+		if(EDITOR.openFileQueue.indexOf(name) != -1) {
+			console.warn("The terminal name=" + name + " is already in the openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			EDITOR.whenFileOpens(name, callback);
+			return;
+		}
+		
 		if(EDITOR.files.hasOwnProperty(name)) {
 			if(callback) callback(null, EDITOR.files[name]); 
 			return;

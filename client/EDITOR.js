@@ -762,6 +762,12 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 	}
 	
+	EDITOR.whenFileOpens = function whenFileOpens(path, callback) {
+		// Call back when the file with the specified path have been opened
+		if(path in EDITOR.files) callback(null, EDITOR.files[path]);
+		if(fileOpenExtraCallbacks.hasOwnProperty(path)) fileOpenExtraCallbacks[path].push(callback);
+		else fileOpenExtraCallbacks[path] = [callback];
+	}
 	
 	EDITOR.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
