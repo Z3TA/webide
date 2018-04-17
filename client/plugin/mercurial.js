@@ -1185,29 +1185,80 @@
 		
 		function cloneRepo(e) {
 			
-			var command = "mercurial.clone";
+			// First make sure the parent folder exist!
+			var folderName = UTIL.getFolderName(localDir.value);
+			var parentFolder = UTIL.parentFolder(localDir.value);
 			
-			var commandOptions = {
-				local: localDir.value,
-				remote: repo.value,
-				user: user.value,
-				pw: pw.value,
-				save: savePassword.checked
+			console.log("Cloning to folderName=" + folderName + " in parentFolder=" + parentFolder);
+			
+			if(parentFolder == "/") doClone(); // No need to check
+			else {
+				CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
+					console.log("listFiles in parentFolder=" + parentFolder + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
+					if(err) {
+						if(err.code == "ENOENT") {
+							var yes = "Create it";
+							var no = "Abort";
+							confirmBox(parentFolder + " does not exist!", [yes, no], function confirmCreate(answer) {
+								if(answer == yes) {
+									CLIENT.cmd("createPath", {pathToCreate: parentFolder}, function folderCreated(err, json) {
+										if(err) return alertBox(err.message);
+										else doClone();
+									});
+									}
+								else console.log("clone aborted by user!");
+							});
+						}
+						else return alertBox(err.message);
+					}
+					else {
+						// Chech if the folder already exist
+						for(var i=0; i<files.length; i++) {
+							if(files[i].name == folderName && files[i].type == "d") {
+								console.log("Destination folder exist! Check if it's emty: " + localDir.value);
+								CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
+									console.log("listFiles in folderName=" + folderName + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
+									if(err) return alertBox(err.message);
+									else if(files.length == 0) doClone(); // It's emty
+									else {
+										alertBox("Destination folder is not empty!\n" + localDir.value);
+									}
+								});
+								return;
+							}
+							}
+						// Folder does not exist
+						doClone();
+					}
+				});
 			}
 			
-			CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
-				
-				if(err) alertBox(err.message);
-				else {
-					
-					alertBox("Successfully cloned to:\n" + resp.path);
-					hideCloneDialog();
-					
-				};
-				
-			});
+			return false; // Do not make a HTTP get
 			
-			return false; // Do not make HTTP get
+			function doClone() {
+				
+				var command = "mercurial.clone";
+				
+				var commandOptions = {
+					local: localDir.value,
+					remote: repo.value,
+					user: user.value,
+					pw: pw.value,
+					save: savePassword.checked
+				}
+				
+				CLIENT.cmd(command, commandOptions, function cloned(err, resp) {
+					
+					if(err) alertBox(err.message);
+					else {
+						
+						alertBox("Successfully cloned to:\n" + resp.path);
+						hideCloneDialog();
+						
+					};
+					
+				});
+			}
 		}
 	}
 	
@@ -1407,12 +1458,12 @@
 					" typeof changeId = " + (typeof changeId) + " changesets.hasOwnProperty(" + changeId + ")=" + changesets.hasOwnProperty(changeId) + 
 					" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') +
 					" lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
-					}
+				}
 				console.log("change=" + change);
-					annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
-					console.log("changesets=" + JSON.stringify(changesets, null, 2));
-					console.log("showing changeset changeId=" + changeId);
-					}
+				annotationWidget.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
+				console.log("changesets=" + JSON.stringify(changesets, null, 2));
+				console.log("showing changeset changeId=" + changeId);
+			}
 			else {
 				console.warn("No annotations for line " + line + " in " + file.path + " changeId=" + changeId + " lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 				annotationWidget.innerText = "No annotations for line " + line + " in " + file.path;
@@ -1699,43 +1750,43 @@
 		/*
 			todo: 
 			
-		var diffRev = document.createElement("button");
-		diffRev.setAttribute("class", "button");
-		diffRev.innerText = "Diff Rev.";
-		diffRev.setAttribute("title", "Compare selected files in selected revision with the last revison for the file below selected revison.");
-		diffRev.onclick = revDiffSelectedRev;
-		div.appendChild(diffRev);
-		
-		var diffHead = document.createElement("button");
-		diffHead.setAttribute("class", "button");
-		diffHead.innerText = "Diff Current";
-		diffHead.setAttribute("title", "Compare selected files in selected revison with latest (head)");
-		div.appendChild(diffHead);
-		
-		var openRev = document.createElement("button");
-		openRev.setAttribute("class", "button");
-		openRev.setAttribute("title", "Open selected file in selected revision");
-		openRev.innerText = "Open rev";
-		div.appendChild(openRev);
-		
-		var openCurrent = document.createElement("button");
-		openCurrent.setAttribute("class", "button");
-		openCurrent.setAttribute("title", "Open the selected file (current version/head)");
-		openCurrent.innerText = "Open current";
-		div.appendChild(openCurrent);
-		
-		var revertSelected = document.createElement("button");
-		revertSelected.setAttribute("class", "button");
-		revertSelected.setAttribute("title", "Revert selected files to selected revision");
-		revertSelected.innerText = "Revert selected";
-		div.appendChild(revertSelected);
-		
-		var checkout = document.createElement("button");
-		checkout.setAttribute("class", "button");
-		checkout.setAttribute("title", "Move all files to selected revision");
-		checkout.innerText = "Checkout";
-		div.appendChild(checkout);
-		
+			var diffRev = document.createElement("button");
+			diffRev.setAttribute("class", "button");
+			diffRev.innerText = "Diff Rev.";
+			diffRev.setAttribute("title", "Compare selected files in selected revision with the last revison for the file below selected revison.");
+			diffRev.onclick = revDiffSelectedRev;
+			div.appendChild(diffRev);
+			
+			var diffHead = document.createElement("button");
+			diffHead.setAttribute("class", "button");
+			diffHead.innerText = "Diff Current";
+			diffHead.setAttribute("title", "Compare selected files in selected revison with latest (head)");
+			div.appendChild(diffHead);
+			
+			var openRev = document.createElement("button");
+			openRev.setAttribute("class", "button");
+			openRev.setAttribute("title", "Open selected file in selected revision");
+			openRev.innerText = "Open rev";
+			div.appendChild(openRev);
+			
+			var openCurrent = document.createElement("button");
+			openCurrent.setAttribute("class", "button");
+			openCurrent.setAttribute("title", "Open the selected file (current version/head)");
+			openCurrent.innerText = "Open current";
+			div.appendChild(openCurrent);
+			
+			var revertSelected = document.createElement("button");
+			revertSelected.setAttribute("class", "button");
+			revertSelected.setAttribute("title", "Revert selected files to selected revision");
+			revertSelected.innerText = "Revert selected";
+			div.appendChild(revertSelected);
+			
+			var checkout = document.createElement("button");
+			checkout.setAttribute("class", "button");
+			checkout.setAttribute("title", "Move all files to selected revision");
+			checkout.innerText = "Checkout";
+			div.appendChild(checkout);
+			
 		*/
 		
 		var butCancel = document.createElement("button");
@@ -1853,14 +1904,14 @@
 				tr = document.createElement("tr");
 				tr.setAttribute("id", "rev" + changes[i].rev);
 				
-					td = document.createElement("td");
-					td.innerText = changes[i].rev;
-					tr.appendChild(td);
-					
+				td = document.createElement("td");
+				td.innerText = changes[i].rev;
+				tr.appendChild(td);
+				
 				d = new Date((changes[i].date[0] +  changes[i].date[1]) * 1000);
 				
 				// date
-					td = document.createElement("td");
+				td = document.createElement("td");
 				//td.innerText = d.getDate() + " " + UTIL.monthName(d.getMonth()) + " " + d.getFullYear().toString().slice(-2); // d.toLocaleDateString();
 				//td.innerText = d.toLocaleDateString();
 				//td.innerText = UTIL.dayName(d.getDay()) + " " + UTIL.zeroPad(d.getFullYear().toString().slice(-2)) + "-" + UTIL.zeroPad(d.getMonth()+1) + "-" + UTIL.zeroPad(d.getDate());
@@ -1871,9 +1922,9 @@
 				td = document.createElement("td");
 				td.innerText = UTIL.zeroPad(d.getHours()) + ":" + UTIL.zeroPad(d.getMinutes());  // d.toLocaleTimeString();
 				tr.appendChild(td);
-					
+				
 				// Author
-					td = document.createElement("td");
+				td = document.createElement("td");
 				matchEmail = reEmail.exec(changes[i].user);
 				if(matchEmail) {
 					email = matchEmail[1];
@@ -1900,20 +1951,20 @@
 				if(changes[i].files) {
 					sel = document.createElement("select");
 					sel.setAttribute("id", "rev_" + changes[i].rev + "_file_sel");
-						for (var j=0; j<changes[i].files.length; j++) {
-							opt = document.createElement("option");
-							opt.innerText = changes[i].files[j];
-							sel.appendChild(opt);
-						}
-					} else console.warn("No files: " + changes[i]);
-					td.appendChild(sel);
-					tr.appendChild(td);
-					
-					tr.onclick = tableRowClick;
-					
-					historyTableBody.appendChild(tr);
-					
-				}
+					for (var j=0; j<changes[i].files.length; j++) {
+						opt = document.createElement("option");
+						opt.innerText = changes[i].files[j];
+						sel.appendChild(opt);
+					}
+				} else console.warn("No files: " + changes[i]);
+				td.appendChild(sel);
+				tr.appendChild(td);
+				
+				tr.onclick = tableRowClick;
+				
+				historyTableBody.appendChild(tr);
+				
+			}
 			
 			//EDITOR.resizeNeeded();
 			
@@ -1959,21 +2010,21 @@
 		
 		if(typeof directory != "string") throw new Error("directory need to be a file path! directory=" + directory + " (not a string)");
 		if(!filePaths instanceof Array) throw new Error("filePaths need to be a list (array) of file paths! filePaths=" + filePaths);
-			
-		CLIENT.cmd("mercurial.diff", {directory: directory, files: filePaths}, function hgDiff(err, resp) {
-				
-				if(err) return alertBox(err.message);
-				
-				var text = resp.text;
-				var fileName = "hg.diff";
-				if(filePaths.length == 1) fileName = filePaths[0] + ".diff";
-			console.log("filePaths=" + filePaths);
-				EDITOR.openFile(fileName, text, function(err, file) {
-					if(err) alertBox(err.message);
-				});
-			});
 		
-		}
+		CLIENT.cmd("mercurial.diff", {directory: directory, files: filePaths}, function hgDiff(err, resp) {
+			
+			if(err) return alertBox(err.message);
+			
+			var text = resp.text;
+			var fileName = "hg.diff";
+			if(filePaths.length == 1) fileName = filePaths[0] + ".diff";
+			console.log("filePaths=" + filePaths);
+			EDITOR.openFile(fileName, text, function(err, file) {
+				if(err) alertBox(err.message);
+			});
+		});
+		
+	}
 	
 	function diffWorkingDirectory() {
 		mercurialDiff(rootDir);
@@ -1981,17 +2032,17 @@
 	}
 	
 	function buildVersionControlWidget(widget) {
-
+		
 		var div = document.createElement("div");
 		
 		/*
 			
-		
-		var labRev = document.createElement("button");
-		labRev.setAttribute("for", "selRev");
+			
+			var labRev = document.createElement("button");
+			labRev.setAttribute("for", "selRev");
 			labRev.appendChild(document.createTextNode("Rev:"));
-		
-		var selRev = document.createElement("select");
+			
+			var selRev = document.createElement("select");
 		*/
 		
 		//var diff = document.createElement("fieldset");
@@ -2067,7 +2118,7 @@
 		butPush.setAttribute("class", "button half");
 		butPush.onclick = function() {
 			mercurialPush(rootDir);
-			}
+		}
 		div.appendChild(butPush);
 		
 		var butPull = document.createElement("button");
@@ -2107,14 +2158,14 @@
 				if(resp.heads && resp.heads.length == 1) {
 					var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
 					CLIENT.cmd("mercurial.status", {directory: fileDirectory}, function hgstatus(err, status) {
-if(err) {
+						if(err) {
 							alertBox(err.message);
-}
-else {
-
-console.log("mercurial.status : " + JSON.stringify(status));
-
-// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
+						}
+						else {
+							
+							console.log("mercurial.status : " + JSON.stringify(status));
+							
+							// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 							
 							if(status.modified.length > 0 || status.added.length > 0 || status.removed.length > 0) {
 								var msg = "There are ";
@@ -2128,9 +2179,9 @@ console.log("mercurial.status : " + JSON.stringify(status));
 							
 							if(status.missing.length > 0) {
 								if(status.missing.length > 10) {
-								var msg = "There are " + status.missing.length + " file(s) missing!";
+									var msg = "There are " + status.missing.length + " file(s) missing!";
 									EDITOR.openFile("missingfiles.txt", "Files missing:\n" + status.missing.join("\n") + "\n");
-							}
+								}
 								else {
 									var msg = "The following files are missing:\n" + status.missing.join("\n");
 								}
@@ -2140,7 +2191,7 @@ console.log("mercurial.status : " + JSON.stringify(status));
 							if(status.untracked.length > 0) {
 								if(status.untracked.length > 10) {
 									var msg = "There are " + status.untracked.length + " untracked file(s).";
-									}
+								}
 								else {
 									var msg = "The following files are not tracked:\n" + status.untracked.join("\n") + "\n";
 								}
@@ -2245,9 +2296,9 @@ console.log("mercurial.status : " + JSON.stringify(status));
 						var msg = "No new changes on " + repoUrl;
 					}
 					
-				alertBox(msg);
+					alertBox(msg);
 				}
-		}
+			}
 		});
 	}
 	
@@ -2257,98 +2308,98 @@ console.log("mercurial.status : " + JSON.stringify(status));
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
 		checkForUnresolved(fileDirectory, function(err) {
-
-if(err) return alertBox(err.message);
-		
-		CLIENT.cmd("mercurial.pull", {directory: fileDirectory}, hgPull);
-		
-		function hgPull(err, resp) {
-			if(err) {
-				
-				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
-				var authFailed = err.message.match(/abort: authorization failed/);
-				
-				if(authNeeded) {
-					var repoUrl = authNeeded[1];
-					showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", resp.directory, function authorized(username, password, save) {
-						if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
-					}, "Pull");
-					return;
+			
+			if(err) return alertBox(err.message);
+			
+			CLIENT.cmd("mercurial.pull", {directory: fileDirectory}, hgPull);
+			
+			function hgPull(err, resp) {
+				if(err) {
+					
+					var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
+					var authFailed = err.message.match(/abort: authorization failed/);
+					
+					if(authNeeded) {
+						var repoUrl = authNeeded[1];
+						showAuthDialog("Need authorization for pulling changes from " + repoUrl + ": ", resp.directory, function authorized(username, password, save) {
+							if(username != null) CLIENT.cmd("mercurial.pull", {directory: rootDir, user: username, pw: password, save: save}, hgPull);
+						}, "Pull");
+						return;
+					}
+					else if(authFailed) {
+						alertBox("Authorization filed!\nUnable to Pull from " + repoUrl);
+					}
+					else throw err;
 				}
-				else if(authFailed) {
-					alertBox("Authorization filed!\nUnable to Pull from " + repoUrl);
-				}
-				else throw err;
-			}
-			else {
+				else {
 					mercurialUpdate();
+				}
 			}
-		}
 		});
-		}
+	}
 	
 	
 	function mercurialUpdate(fileDirectory, reloadFiles) {
 		
-/*
-For files opened in the editor:
-if not saved but will be updated: ask
-if saved but not commited: ask
-*/
-
+		/*
+			For files opened in the editor:
+			if not saved but will be updated: ask
+			if saved but not commited: ask
+		*/
+		
 		console.log("Mercurial: Update");
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
-var reopenFiles = []; // Files closed during the update, but will be reopened afterwards
-
+		var reopenFiles = []; // Files closed during the update, but will be reopened afterwards
+		
 		checkForUnresolved(fileDirectory, function checkedForUnresolved(err) {
-		if(err) throw err;
-
-		// Check what revision we are on, and if we need to update
-		CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, summary) {
-if(err) throw err;
+			if(err) throw err;
 			
-			var currentRevision = parseInt(summary.parent.slice(0, summary.parent.indexOf(":")));
-			
-			if(isNaN(currentRevision)) throw new Error("resp.summary=" + JSON.stringify(resp.summary));
-			
-			if(summary.update == "(current)") return alertBox("Nothing to update!");
-			
-			// Check status of current revision to see if anything needs to be commited before updating
-			CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: "."}, function hgStatus(err, current) {
-if(err) throw err;
-
-// Check status between current (.) revision and latested (tip) revision
-CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, updated) {
-if(err) throw err;
-
-// We only care about the files opened in the editor of which will also be updated
-// either if it's not saved, or not commited
-
-var uncommited = current.modified.concat(current.added);
-var toBeUpdated = updated.modified.concat(updated.added).concat(updated.removed);
-
-checkOpenedFiles();
-
-					function checkOpenedFiles() {
-						var filePath;
-						for(var path in EDITOR.files) {
-							filePath = path.replace(rootDir, ""); // So they can be compared
-							
-							if(!EDITOR.files[path].isSaved && toBeUpdated.indexOf(filePath) != -1) {
-								// File opened in the editor that is not saved.
-								return askDiscard(EDITOR.files[path], "Discard unsaved changes to " + filePath + " ?");
-							}
-							else if(uncommited.indexOf(filePath) != -1 && toBeUpdated.indexOf(filePath) != -1) {
-								// File opened in the editor has not been commited
-								return askCommit(EDITOR.files[path], "Commit changes before updating ?\n" + filePath + "\nUncommited changes will be lost!");
-							}
-							}
+			// Check what revision we are on, and if we need to update
+			CLIENT.cmd("mercurial.summary", {directory: fileDirectory}, function hgStatus(err, summary) {
+				if(err) throw err;
+				
+				var currentRevision = parseInt(summary.parent.slice(0, summary.parent.indexOf(":")));
+				
+				if(isNaN(currentRevision)) throw new Error("resp.summary=" + JSON.stringify(resp.summary));
+				
+				if(summary.update == "(current)") return alertBox("Nothing to update!");
+				
+				// Check status of current revision to see if anything needs to be commited before updating
+				CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: "."}, function hgStatus(err, current) {
+					if(err) throw err;
+					
+					// Check status between current (.) revision and latested (tip) revision
+					CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, updated) {
+						if(err) throw err;
 						
-// It's safe to update
-doTheUpdate();
-}
+						// We only care about the files opened in the editor of which will also be updated
+						// either if it's not saved, or not commited
+						
+						var uncommited = current.modified.concat(current.added);
+						var toBeUpdated = updated.modified.concat(updated.added).concat(updated.removed);
+						
+						checkOpenedFiles();
+						
+						function checkOpenedFiles() {
+							var filePath;
+							for(var path in EDITOR.files) {
+								filePath = path.replace(rootDir, ""); // So they can be compared
+								
+								if(!EDITOR.files[path].isSaved && toBeUpdated.indexOf(filePath) != -1) {
+									// File opened in the editor that is not saved.
+									return askDiscard(EDITOR.files[path], "Discard unsaved changes to " + filePath + " ?");
+								}
+								else if(uncommited.indexOf(filePath) != -1 && toBeUpdated.indexOf(filePath) != -1) {
+									// File opened in the editor has not been commited
+									return askCommit(EDITOR.files[path], "Commit changes before updating ?\n" + filePath + "\nUncommited changes will be lost!");
+								}
+							}
+							
+							// It's safe to update
+							doTheUpdate();
+						}
 						
 						function askDiscard(file, msg) {
 							// File is not saved
