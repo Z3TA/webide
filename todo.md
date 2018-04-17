@@ -38,10 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-implementing jsql example on webide.se
-
-Writing blog post about jsql
-
 
 npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
 npm ERR! Exit status -2
