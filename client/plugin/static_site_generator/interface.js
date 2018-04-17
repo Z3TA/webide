@@ -2034,6 +2034,8 @@
 							CLIENT.cmd("mercurial.update", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function hgUpdated(err, resp) {
 								if(err) return alertBox(err.message);
 								
+								console.log("mercurial.update: resp=" + JSON.stringify(resp));
+								
 								var whenAllFilesReloaded = null;
 								
 								var alertMsg = resp.updated + " files updated, " + resp.merged + " files merged, " + resp.removed + " files removed and " + resp.unresolved + " files unresolved.";
@@ -2043,6 +2045,7 @@
 									whenAllFilesReloaded = function resolveFiles() {
 										if(syncRepositoryCallback) syncRepositoryCallback("UNRESOLVED");
 										else alertBox(alertMsg);
+										
 										EDITOR.resolveTool(resp.resolved, resp.unresolved, selectedSite.projectFolder);
 									}
 									
@@ -2053,11 +2056,15 @@
 										//alertBox(alertMsg);
 										pushToRepo();
 									} 
-									
-								}
+									}
 								
 								var filesReloaded = 0;
-								for(var path in filesOpenedInEditorThatChanged) reloadFile(filesOpenedInEditorThatChanged[path]);
+								if(filesOpenedInEditorThatChanged.length == 0) {
+whenAllFilesReloaded();
+								}
+								else {
+									for(var path in filesOpenedInEditorThatChanged) reloadFile(filesOpenedInEditorThatChanged[path]);
+								}
 								
 								function reloadFile(file) {
 									EDITOR.readFromDisk(file.path, fileRead);
@@ -2079,7 +2086,10 @@
 			}
 			
 			function pushToRepo() {
+				console.log("Calling mercurial.push!");
 				CLIENT.cmd("mercurial.push", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function pushed(err, resp) {
+					
+					console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
 					
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);
