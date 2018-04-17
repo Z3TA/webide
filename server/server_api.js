@@ -828,7 +828,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						});
 					}
 					
-					listFilesCallback(null, {list: list});
+					listFilesCallback(null, list);
 					
 				}
 				
@@ -855,7 +855,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 				var statCounter = 0;
 				if(folderItems.length == 0) {
 					// It's an emty folder
-					listFilesCallback(null, {list: list});
+					listFilesCallback(null, list);
 				}
 				else {
 					var path = require("path");
@@ -919,7 +919,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					//console.log("Finished stat: " + filePath + " statCounter=" + statCounter + " folderItems.length=" + folderItems.length);
 					
-					if(statCounter==folderItems.length) listFilesCallback(null, {list: list});
+					if(statCounter==folderItems.length) listFilesCallback(null, list);
 					
 					
 				});
@@ -993,7 +993,7 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 						list.push({type: type, name: folderItems[i].name, path: path, size: parseFloat(folderItems[i].size), date: folderItems[i].date});
 					}
 					
-					listFilesCallback(null, {list: list});
+					listFilesCallback(null, list);
 					
 					runFtpQueue();
 					
@@ -1074,7 +1074,7 @@ errors.push(err.message + " path=" + path);
 		
 		API.listFiles(user, {pathToFolder: pathToCreate}, listFileResult);
 		
-		function listFileResult(err, json) {
+		function listFileResult(err, files) {
 			
 			if(err) {
 				console.warn("List failed! " + err.message + " pathToCreate=" + pathToCreate);
@@ -1998,13 +1998,12 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 		folderDepth++;
 		totalFoldersToSearch++;
 		
-		API.listFiles(user, {pathToFolder: folderPath}, function fileList(err, json) {
+		API.listFiles(user, {pathToFolder: folderPath}, function gotFileList(err, fileList) {
 			
 			if(abort) return console.log("Aborting file search/replace");
 			
 			if(err) return abortError(err);
 			
-			var fileList = json.list;
 			/*
 				type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
 				name - string - File or folder name
@@ -2312,7 +2311,7 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 			foldersToSearch.push(folder);
 			FIND_FILES_IN_FLIGHT++;
 			sendProgress();
-			API.listFiles(user, {pathToFolder: folder}, function listFilesCallback(err, resp) {
+		API.listFiles(user, {pathToFolder: folder}, function listFilesCallback(err, fileList) {
 				FIND_FILES_IN_FLIGHT--;
 				totalFoldersSearched++;
 				
@@ -2323,7 +2322,6 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 					return;
 				}
 				
-				var fileList = resp.list;
 				for (var i=0, path, matchArr; i<fileList.length; i++) {
 					path = user.toVirtualPath(fileList[i].path);
 					

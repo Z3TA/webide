@@ -108,12 +108,11 @@
 		
 			var json = {pathToFolder: testFolder};
 		
-		CLIENT.cmd("listFiles", json, function(err, json) {
+			CLIENT.cmd("listFiles", json, function(err, list) {
 			if(err) throw err
 			else {
 				
 				// Make sure testfile is in the list
-				var list = json.list;
 				var hasFile = false;
 					var lookForFileName = testFile;
 				

@@ -60,14 +60,13 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 	//if(localPath.split(/\/|\\/).length < 4) return callback(new Error("Can not clone into a root folder. Use an intermediary directly like /repo" + localPath + ""));
 	
 	// First make sure that a Mercurial repo does Not already exist at the target locatino
-	CORE.listFiles(user, {pathToFolder: localPath}, function(err, listFilesResp) {
+	CORE.listFiles(user, {pathToFolder: localPath}, function(err, fileList) {
 		
 		if(err) {
 			if(err.code == "ENOENT") clone();
 			else callback(err);
 		}
 		else {
-			var fileList = listFilesResp.list;
 			for (var i=0; i<fileList.length; i++) {
 				if(fileList[i].name == ".hg") return callback( new Error(".hg folder already exist in " + localPath) );
 			}
@@ -160,12 +159,15 @@ console.log("exitCode=" + exitCode);
 		//execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
 			//console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 			
-			if(stderr) {
+			if(stderr || exitCode != 0) {
 				
 				if(stderr.match(/: No such file or directory$/)) {
 					cloneDone("Directory does not exist: " + local);
 				}			
-				else cloneDone(stderr);
+				else if(stderr) cloneDone(stderr);
+				else {
+					cloneDone(new Error("Clone failed with exit code " + exitCode));
+				}
 			}
 			else {
 				
@@ -1826,11 +1828,10 @@ function checkDir(user, virtualPath, callback) {
 		// Recursively dig down the path to find a .hg folder
 		var dirList = UTIL.getFolders(dir);
 		dir = dirList.pop();
-		CORE.listFiles(user, {pathToFolder: dir}, function(err, listFilesResp) {
+		CORE.listFiles(user, {pathToFolder: dir}, function(err, fileList) {
 			
 			if(err) findDotHgCallback(err);
 			else {
-				var fileList = listFilesResp.list;
 				for (var i=0; i<fileList.length; i++) {
 					if(fileList[i].name == ".hg") return findDotHgCallback(null, dir);
 				}

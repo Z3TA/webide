@@ -3415,9 +3415,9 @@ if(callback) return callback(err, path);
 		
 		var json = {pathToFolder: pathToFolder};
 		
-		CLIENT.cmd("listFiles", json, function listFilesResp(err, json) {
+		CLIENT.cmd("listFiles", json, function listFilesResp(err, fileList) {
 			if(err) listFilesCallback(err);
-			else listFilesCallback(null, json.list);
+			else listFilesCallback(null, fileList);
 		});
 		
 	}
