@@ -152,22 +152,24 @@ if(stdout.length < 500) console.log("hg clone stdout=" + stdout);
 else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
 
 //console.log("stdout=" + stdout);
-//console.log("stderr=" + stderr);
+			console.log("stderr=" + stderr + " stderr.length=" + (stderr && stderr.length));
 
 console.log("exitCode=" + exitCode);
-		
+			console.log("exitCode != 0 ? " + (exitCode != 0) + " stderr ? " + !!stderr);
+			
 		//execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
 			//console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 			
-			if(stderr || exitCode != 0) {
+			if(stderr) {
 				
 				if(stderr.match(/: No such file or directory$/)) {
 					cloneDone("Directory does not exist: " + local);
 				}			
-				else if(stderr) cloneDone(stderr);
-				else {
-					cloneDone(new Error("Clone failed with exit code " + exitCode));
-				}
+				else cloneDone(stderr);
+			
+			}
+			else if(exitCode != 0) {
+				cloneDone("Clone failed with exit code " + exitCode);
 			}
 			else {
 				
@@ -197,14 +199,16 @@ console.log("exitCode=" + exitCode);
 			}
 		});
 		
-		function cloneDone(err) {
-			if(callback) {
-callback(null, {path: local});
-				callback = null;
-				clearInterval(progressInterval);
-				user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
-				}
-			else if(callback === null) throw new Error("clone callback already called!");
+		function cloneDone(errorMessage) {
+			if(callback === null) throw new Error("clone callback already called!");
+			
+			clearInterval(progressInterval);
+			user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
+			
+			if(errorMessage) callback(new Error(errorMessage));
+			else callback(errorMessage, {path: local});
+				
+			callback = null;
 			}
 	}
 }
