@@ -217,7 +217,7 @@
 	
 	function fixIndentationBeforeSave(file, callback) {
 		for (var row=0; row<file.grid.length; row++) {
-			if(file.grid[row].owned) fixIndentation(file, row, true);
+			if(file.grid[row].owned) fixIndentation(file, row);
 		}
 		return true; // We must return true XOR call the callback!
 	}
@@ -318,9 +318,7 @@
 		
 	}
 	
-	function fixIndentation(file, row, updateIndex) {
-		
-		if(updateIndex == undefined) updateIndex = true;
+	function fixIndentation(file, row) {
 		
 		console.log("Fixing indentation on row=" + row);
 		
@@ -364,7 +362,7 @@
 			// Remove and add
 			file.text = file.text.substr(0, index-charactersToRemove) + gridRow.indentationCharacters + file.text.substring(index, file.text.length);
 			
-			if(updateIndex) {
+			
 			// Update indexes
 			for(var i=row; i<grid.length; i++) {
 				grid[i].startIndex += totalCharactersAdded;
@@ -442,7 +440,6 @@
 						break;
 					}
 				}
-			}
 			}
 		}
 		
