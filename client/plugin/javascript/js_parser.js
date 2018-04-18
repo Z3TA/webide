@@ -135,7 +135,7 @@
 		//console.log("file.fileExtension=" + file.fileExtension + " file.parse=" + file.parse);
 		
 		if(file.parse === false) return;
-		
+			
 		/* 
 			Dilemma: Should we also parse ASP and PHP here!? (Go into vbScript PHP , etc mode when encontering <% or <?PHP)
 			Yes, this is the easiest solution, and we do not have to redo xmlParsing (like we would have to if we had separate plugins)
@@ -143,7 +143,7 @@
 		*/
 		
 		if( file.fileExtension == "" || 
-		file.fileExtension == "js" || 
+			file.fileExtension == "js" || 
 		file.fileExtension == "php" || 
 		file.fileExtension == "asp" || 
 		file.fileExtension == "vbs" ||  // Visual Basic Script
@@ -185,54 +185,54 @@
 				type=="delete": Deleted one character
 				
 				Hmm, we might be inside a variable, and typing thus changes the variable name!
-				*/
+			*/
 			
-var specialCharacters = "{}<>/\\\"'";
-
+			var specialCharacters = "{}<>/\\\"'";
+			
 			if(file.parsed && characters.length == 1 && (type =="insert" || type=="delete") && specialCharacters.indexOf(characters) == -1)  {
-			
+				
 				console.log("no re-parse opt");
 				
-var charactersLength = 1;
-if(type=="delete") charactersLength = -1;
-				var oldParse = file.parsed;
+				var charactersLength = 1;
+				if(type=="delete") charactersLength = -1;
+					var oldParse = file.parsed;
 				// Update functions
-updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
-
+				updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
+				
 				// Update quotes
-for(var i=0; i<oldParse.quotes.length; i++) {
+				for(var i=0; i<oldParse.quotes.length; i++) {
 					if(oldParse.quotes[i].start >= caretIndex) {
-oldParse.quotes[i].start += charactersLength;
-oldParse.quotes[i].end += charactersLength;
-}
+						oldParse.quotes[i].start += charactersLength;
+						oldParse.quotes[i].end += charactersLength;
+					}
 					else if(oldParse.quotes[i].end >= caretIndex) {
-oldParse.quotes[i].end += charactersLength;
-}
-}
-
+						oldParse.quotes[i].end += charactersLength;
+					}
+				}
+				
 				// Update comments
 				for(var i=0; i<oldParse.comments.length; i++) {
 					if(oldParse.comments[i].start >= caretIndex) {
-oldParse.comments[i].start += charactersLength;
-oldParse.comments[i].end += charactersLength;
-}
+						oldParse.comments[i].start += charactersLength;
+						oldParse.comments[i].end += charactersLength;
+					}
 					else if(oldParse.comments[i].end >= caretIndex) {
-oldParse.comments[i].end += charactersLength;
-}
-}
-
-// Update xmlTags
+						oldParse.comments[i].end += charactersLength;
+					}
+				}
+				
+				// Update xmlTags
 				for(var i=0; i<oldParse.xmlTags.length; i++) {
 					if(oldParse.xmlTags[i].start >= caretIndex) {
 						oldParse.xmlTags[i].start += charactersLength;
-oldParse.xmlTags[i].end += charactersLength;
-						}
+						oldParse.xmlTags[i].end += charactersLength;
+					}
 					else if(oldParse.xmlTags[i].end >= caretIndex) {
 						console.log("between " + JSON.stringify(oldParse.xmlTags[i]) + " caretIndex=" + caretIndex + " charactersLength=" + charactersLength + " characters=" + UTIL.lbChars(characters) );
 						oldParse.xmlTags[i].end += charactersLength;
 						if( (oldParse.xmlTags[i].start + oldParse.xmlTags[i].wordLength + 1) > caretIndex && characters!=" ") {
 							console.log("update wordLength!");
-oldParse.xmlTags[i].wordLength += charactersLength;
+							oldParse.xmlTags[i].wordLength += charactersLength;
 						}
 					}
 				}
@@ -363,7 +363,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 							}
 							
 							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + 
-							" funcDecText=" + funcDecText + " text @index=f.start-15: " + file.text.substr(Math.max(0, f.start-15), 15));
+								" funcDecText=" + funcDecText + " text @index=f.start-15: " + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
 							// Make a full parse instead of throwing an error when not in dev mode !?
 							
@@ -401,7 +401,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 									spliceLen++;
 									//console.log("remove quote " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.quotes[i].start, oldParse.quotes[i].end));
 									if(spliceStart==-1) spliceStart = i;
-									continue;
+										continue;
 								}
 								else if(spliceLen > 0) {
 									break;
@@ -452,7 +452,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 									spliceLen++;
 									//console.log("remove comments " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.comments[i].start, oldParse.comments[i].end));
 									if(spliceStart==-1) spliceStart = i;
-									continue;
+										continue;
 								}
 								else if(spliceLen > 0) {
 									break;
@@ -501,7 +501,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 									spliceLen++;
 									//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
 									if(spliceStart==-1) spliceStart = i;
-									continue;
+										continue;
 								}
 								else if(spliceLen > 0) {
 									break;
@@ -559,15 +559,15 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 							
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
-							
+								
 							if(newParse.functions.length == 0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
-							
+								
 							var ff = newParse.functions[0]; // Ref to the same function in new parse
 							
 							if(ff.end < 0) {
 								// The parsed function did not get an ending.
 								if(newParse.blockMatch) throw new Error("New parse of function " + ff.name + " did not get an ending! end=" + ff.end);	
-								else {
+									else {
 									// Give it a temporary/virtual ending
 									// Next parse should be a full parse due to the block missmatch (could probably skip the full parse because of block missmatch if we need to optimize)
 									
@@ -606,13 +606,13 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 									throw new Error("fullParse.comments.length=" + fullParse.comments.length + " oldParse.comments.length=" + oldParse.comments.length + " " + compareObjects(fullParse.comments, oldParse.comments));
 								}
 								if(fullParse.quotes.length != oldParse.quotes.length) throw new Error("fullParse.quotes.length=" + fullParse.quotes.length + " oldParse.quotes.length=" + oldParse.quotes.length + " ");
-								if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
-								
+									if(fullParse.xmlTags.length != oldParse.xmlTags.length) throw new Error("fullParse.xmlTags.length=" + fullParse.xmlTags.length + " oldParse.xmlTags.length=" + oldParse.xmlTags.length + " ");
+									
 								if(fullParse.functions.length != oldParse.functions.length) throw new Error("fullParse.functions=" + fullParse.functions.length + " oldParse.functions=" + oldParse.functions.length + " ");
-								if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse=" + JSON.stringify(fullParse.globalVariables, null, 2));
-								
+									if(Object.keys(fullParse.globalVariables).length != Object.keys(oldParse.globalVariables).length) throw new Error("fullParse.globalVariables=" + Object.keys(fullParse.globalVariables).length + " oldParse.globalVariables=" + Object.keys(oldParse.globalVariables).length + " oldParse=" + JSON.stringify(oldParse.globalVariables, null, 2) + "\nfullParse=" + JSON.stringify(fullParse.globalVariables, null, 2));
+									
 								if(fullParse.blockMatch != oldParse.blockMatch) throw new Error("Not the same: fullParse.blockMatch=" + fullParse.blockMatch  + " oldParse.blockMatch=" + oldParse.blockMatch);
-								
+									
 								
 								// Sanity check (we had some problems with functions having bad start and end, witch need to be correct for the "parse only current function" optimizer)
 								if(EDITOR.settings.devMode && newParse.blockMatch) {
@@ -682,7 +682,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				//console.log("func " + func.name + " start=" + func.start + " end=" + func.end + " isBelow=" + isBelow + " isParent=" + isParent + " oldEnd=" + oldEnd);
 				
 				if(isBelow || isParent) updateThingsFunctions(func.subFunctions, oldEnd, endRowDiff, charactersLength); // Check/Update subfunctions
-				
+					
 				if(isBelow) {
 					//console.log("func " + func.name + " start=" + func.start + " below old end=" + oldEnd);
 					
@@ -783,11 +783,11 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		var textLength = text.length;
 		
 		if(baseIndentation == undefined) baseIndentation = 0;
-		if(parseStartRow == undefined) parseStartRow = 0;
-		
+			if(parseStartRow == undefined) parseStartRow = 0;
+			
 		if(parseStart == undefined) parseStart = 0;
-		if(parseEnd == undefined) parseEnd = textLength;
-		
+			if(parseEnd == undefined) parseEnd = textLength;
+			
 		var singleStatementContext = 0;
 		
 		// Optimization to try: Putting all the bools into an int for less memory lookups
@@ -918,10 +918,10 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		
 		
 		if(options.jsMode) xmlMode = false;
-		else {
+			else {
 			//console.log("file.fileExtension=" + file.fileExtension);
 			if(file.fileExtension == "htm" || 
-			file.fileExtension == "html" || 
+				file.fileExtension == "html" || 
 			file.fileExtension == "asp" || 
 			file.fileExtension == "php" || 
 			file.fileExtension == "xml") xmlMode = true; // Start in xml mode
@@ -938,7 +938,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		
 		
 		if(file.fileExtension == "vbs" || file.fileExtension == "vb") vbScript = true;
-		
+			
 		xmlModeBeforeTag = xmlMode;
 		xmlModeBeforeScript = xmlMode;
 		
@@ -962,7 +962,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		
 		
 		if(insideLineComment) comments.push(new Comment(commentStart, i)); // Find comment on last line
-		
+			
 		
 		console.timeEnd("parseJavaScript");
 		
@@ -1004,7 +1004,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 			//console.log("new codeBlock(" +codeBlockDepth + ") word=" + lastWord + " (line=" + lineNumber + ")");
 			
 			if(parentCodeBlock.indentation < 0) throw new Error("Line:" + lineNumber + " parentCodeBlock.indentation=" + parentCodeBlock.indentation);
-			
+				
 			codeBlock[codeBlockDepth] = {word: lastWord, indentation: parentCodeBlock.indentation+1, line: lineNumber};
 			afterPointer[codeBlockDepth] = false;
 			insideArray[codeBlockDepth] = false;
@@ -1015,7 +1015,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 			
 			
 			if(codeBlockDepth == 0) throw new Error("codeBlockDepth can not be zero")
-			
+				
 			insideVariableDeclaration[codeBlockDepth] = false;
 			
 			if(codeBlockDepth > 1) {
@@ -1044,7 +1044,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 			
 			// Never after a pointer after a } unless in an array
 			if(!insideArray[codeBlockDepth]) afterPointer[codeBlockDepth] = false;  
-			
+				
 			
 			
 			//insideVariableDeclaration[codeBlockDepth] = false; // Don't change because of bug with multi line var.
@@ -1160,7 +1160,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				
 				while(d>0) {
 					if(afterPointer[d] != ":") break;
-					
+						
 					if(insideArray[d-1]) {
 						leftSide = insideArray[d-1] + "." + arrayItemCount[d-1] + "." + leftSide; // leftSide=arr.0.foo
 					}
@@ -1282,7 +1282,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				rightSide = "";
 				
 				if(insideVariableDeclaration[codeBlockDepth]) foundVariableInVariableDeclaration = true;
-				
+					
 			}
 			else {
 				//console.log("Nothing to do?");
@@ -1324,7 +1324,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 			
 			
 			if(char != " " && char != "\t" && char != "\r" && char != "\n") lnw = char; // Last non whitespace character
-			
+				
 			//char = text.charAt(charIndex);
 			char = text[charIndex];
 			
@@ -1380,7 +1380,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				*/
 				
 				if(char == "/"
-				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
+					&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
 				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag &&
 				!CSS && !insideTemplateLiteral) {
 					insideRegExp = true;
@@ -1399,7 +1399,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					insideRegExp = false;
 					//console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp + " file.path=" + file.path);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
-				}
+					}
 				
 				/*
 					console.log(" i=" + i + " char=" + char + " line=" + lineNumber + " col=" + column + " insideRegExp=" + insideRegExp + " regExpStart=" + regExpStart + 
@@ -1413,7 +1413,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					commentStart = i-1;
 					//console.log("insideLineComment!");
 					if(insideArrowFunction) endArrowFunction(1);
-				}
+					}
 				else if(char == "\n" && insideLineComment) {
 					insideLineComment = false;
 					comments.push(new Comment(commentStart, i));
@@ -1577,7 +1577,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 						vbScript = false;
 						
 						if(!insideScriptTag) xmlMode = true;
-						
+							
 						if(insideDblQuoteBeforeLangTag) {
 							insideDblQuote = true;
 							quoteStart = i+1;
@@ -1634,8 +1634,8 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					*/
 					
 					if(insideDblQuote) xmlTagInsideDblQuote = true;
-					if(insideSingleQuote) xmlTagInsideSingleQuote = true;
-					
+						if(insideSingleQuote) xmlTagInsideSingleQuote = true;
+						
 					xmlTagSelfEnding = false;
 					xmlTagStart = i;
 					xmlTagWordLength = 0;
@@ -1644,7 +1644,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 						xmlMode = false; // Why end xmlMode inside tags !?? 
 					}
 					if(insideHTMLComment) throw new Error("WTF");
-				}
+					}
 				
 				// Exit out of style
 				else if(CSS && pastChar5 == "<" && pastChar4 == "/" && pastChar3 == "s" && pastChar2 == "t" && pastChar1 == "y" && pastChar0 == "l" && char == "e") {
@@ -1688,7 +1688,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					}
 					
 					if(xmlTagWordLength === 0) xmlTagWordLength = i - xmlTagStart;
-					xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
+						xmlTag = text.substr(xmlTagStart + 1 + insideXmlTagEnding, xmlTagWordLength - 1 - insideXmlTagEnding);
 					xmlTags.push(new XmlTag(xmlTagStart, i, xmlTagWordLength, xmlTagSelfEnding) );
 					
 					xmlMode = xmlModeBeforeTag; // Set the xmlMode we had when the tag started
@@ -1733,7 +1733,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 							// It's a ending tag </tag>
 							openXmlTags--;
 							if(xmlTagLastOpenRow != row && file.grid[row].indentation > 0 && indentate) file.grid[row].indentation--;
-						}
+							}
 						else {
 							// It's a tag opening
 							openXmlTags++;
@@ -1801,7 +1801,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					variableName = "";
 					
 					if(insideArrowFunction) endArrowFunction(); // Arrow functions without {angel wings} can't have ; inside it
-				}
+					}
 				
 				else if(char == "," && !insideParenthesis[codeBlockDepth]) {
 					
@@ -1839,9 +1839,9 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					insideArray[codeBlockDepth] = false;
 					
 					if(codeBlock[codeBlockDepth].indentation > 0) codeBlock[codeBlockDepth].indentation--;
-					
+						
 					if(file.grid[row].indentation > 0 && arrayStartRow != row && indentate) file.grid[row].indentation--;				
-					
+						
 				}
 				else if(char == "}") {
 					
@@ -1919,16 +1919,16 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 						
 						if(match) {
 							if(match[1]) functionName = match[1];
-							else functionName = "";
+								else functionName = "";
 						}
 						else if(variableName != "") functionName = variableName;
 						else if(lastWord == "function") functionName = ""; // Anonymous!
 						else functionName = (lastWord=="function" ? llWord : lastWord) || word.replace("(", "");
 						
 						if(functionName.indexOf("||") != -1) functionName = ""; // Fix: foo = baz || \n function ...
-						
+							
 						if(functionName.indexOf("(") != -1) functionName = ""; // Fix for foo(bar(), function() {}); where functionName becomes= ()
-						
+							
 						//if(functionName.indexOf("=") != -1) functionName = "";
 						
 						// Note: we do not want to give names to anonymous functions! Or the function-list would be too cluttered
@@ -1965,7 +1965,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					// ## Found Arrow function
 					
 					if(insideArrowFunction) endArrowFunction(1);
-					
+						
 					console.log("Arrow function! line=" + lineNumber + " char=" + i + " lastChar = " + lastChar + " word=" + word + " lastWord=" + lastWord + " llWord=" + llWord + " variableName=" + variableName + " lastVariableName=" + lastVariableName + " functionName=" + functionName + " insideParenthesis[" + codeBlockDepth + "]=" + insideParenthesis[codeBlockDepth] + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth] + " afterPointer[" + codeBlockDepth + "]=" + afterPointer[codeBlockDepth]);
 					
 					insideArrowFunction = true;
@@ -1978,11 +1978,11 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 						if(word.indexOf("=>") != -1) {
 							functionArguments = word.substring(0, word.indexOf("=>"));
 							if(functionArguments.indexOf(",") != -1) functionArguments = functionArguments.substring(functionArguments.lastIndexOf(",")+1).trim();
-						}
+							}
 					}
 					
 					if(functionArguments.indexOf(">") != -1) functionArguments = functionArguments.replace(">", "").trim();
-					
+						
 					insideFunctionDeclaration = true;
 					functionName = lastVariableName;
 					
@@ -1995,16 +1995,16 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				else if(char == "{") {
 					
 					if(singleStatementContext == 1) singleStatementContext = 0;
-					
+						
 					if(singleStatementContext == 2 && file.grid[row].indentation > 0) {
 						file.grid[row].indentation--;
-						}
+					}
 					// ### Found function maybe
 					
 					//console.log("{ insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
 					
 					if(insideFunctionBody[subFunctionDepth]) L[subFunctionDepth]++;
-					
+						
 					if((insideFunctionDeclaration) && !insideFunctionArguments) {
 						
 						// We have found a new function !
@@ -2027,12 +2027,12 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 						newFunc = new Func(functionName, functionArguments, i, lineNumber+parseStartRow, codeBlockLeft, codeBlockRight);
 						
 						if(insideArrowFunction) newFunc.arrowFunction = true;
-						
+							
 						//console.log("functionName=" + functionName + " type=" + typeof functionName);
 						
 						
 						if(functionName === false) functionName = "unknownmeh"; // Why can functionName be a boolean (false) !???
-						
+							
 						properties = functionName.split(".");
 						
 						
@@ -2144,7 +2144,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 							variableName = word || lastWord;
 							insideVariableDeclaration[codeBlockDepth] = false;
 							if(variableName) globalVariables[variableName] = new Variable();
-							console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
+								console.log("LLBS New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 						}
 						else if(word == "dim") {
 							insideVariableDeclaration[codeBlockDepth] = true;
@@ -2156,7 +2156,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 							if(insideVariableDeclaration[codeBlockDepth]) {
 								variableName = word || lastWord;
 								if(variableName) globalVariables[variableName] = new Variable();
-								//console.log("New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
+									//console.log("New variable found=" + variableName + " line=" + lineNumber + " column=" + column);
 							}
 							
 							// ### IF .. THEN .. ELSE ..
@@ -2274,7 +2274,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 					else {
 						
 						if(insideVariableDeclaration[codeBlockDepth]) word += char // Keep case (for auto completion of variable names)
-						else word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
+							else word += char.toLowerCase(); // Add to the word, vbScript is not case sensitive!
 						
 						//console.log("word++" + char);
 						
@@ -2309,6 +2309,8 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 			
 			
 			if(insideArrowFunction && (char == "\r" || char=="\n")) endArrowFunction();
+				
+			
 			
 			
 			if( (char == "\r" || char=="\n") && insideVariableDeclaration[codeBlockDepth] && !(pastChar0 == "," || pastChar1 == "," || pastChar2 == ",") ) {
@@ -2322,6 +2324,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				
 				
 			}
+			
 			
 			if(char == lastLineBreakCharacter) {
 				// ## Line breaks
@@ -2352,7 +2355,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				
 				//console.log("--- new line=" + (row) + " vb_thisRowIndentation=" + vb_thisRowIndentation + " ---");
 				if(indentate) file.grid[row].indentation = Math.max(0, file.grid[row].indentation + vb_thisRowIndentation);
-				
+					
 				if(vb_nextRowIndentation == 1) {
 					vb_thisRowIndentation++;
 					vb_nextRowIndentation = 0;
@@ -2365,7 +2368,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				column = 0;
 				
 				if(singleStatementContext == 2) singleStatementContext = 0;
-				
+					
 				//console.log("i=" + i + " lineNumber=" + lineNumber + " lastWord=" + lastWord + " word=" + word);
 				
 				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
@@ -2373,13 +2376,13 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				//console.log("Setting indentation on line=" + lineNumber + " : " + Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation));
 				
 				if(!file.grid[row]) throw new Error("Grid row=" + row + " does not exist!");
-				
+					
 				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
-				
+					
 				if(insideXmlTag && (insideDblQuote || insideSingleQuote) && !insideQuote) insideXmlTag = false;
-				
+					
 				if(singleStatementContext==1) singleStatementContext++;
-				
+					
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
 			}
@@ -2534,6 +2537,13 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				
 				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
 				
+				console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
+				
+				if(singleStatementContext == 1 && !insideParenthesis[codeBlockDepth] && char != "/" && word && word.slice(-1) != ")") {
+					console.log("i=" + i + " line=" + lineNumber + " reset singleStatementContext!");
+					singleStatementContext = 0;
+				}
+				
 				if(word.length > 0 && word != "/") { // Ignore / slash
 					
 					if(word == "if" || word == "else" || word == "new" || word == "while" || word == "for") {
@@ -2652,8 +2662,8 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				word = word + char;
 				
 				if(word == " ") word = "";
-				if(word == "/") word = ""; // Prevent words after comments having /
-				
+					if(word == "/") word = ""; // Prevent words after comments having /
+					
 			}
 			
 			//console.log("word=" + word + " lastWord=" + lastWord);
@@ -2665,7 +2675,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		function getFunctionWithName(functions, name) {
 			for(var i=0; i<functions.length; i++) {
 				if(functions[i].name == name) return functions[i];
-			}
+				}
 			return null;
 		}
 		
@@ -2735,7 +2745,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		for(var i=0; i<arr1.length && i<arr2.length; i++) {
 			for(var key in arr1[i]) {
 				if(arr1[i][key] != arr2[i][key]) return "Item " + i + ": " + JSON.stringify(arr2[i]);
-			}	
+				}	
 		}
 		return "Same!";
 	}

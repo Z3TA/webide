@@ -343,7 +343,12 @@ EDITOR.addTest(function cantFindFunctionWithAngelbracketsBelow(callback) {
 });
 	
 EDITOR.addTest(function singleStatementContext(callback) {
-	EDITOR.openFile("singleStatementContext.js", 'if(1==2)\nconsole.log("1");\nif(1==2)\n{\nconsole.log("2")\n}\nif(1==2) // comment\nconsole.log("3");\nif(1==2) {\nconsole.log("4");\n}\n', function(err, file) {
+	EDITOR.openFile("singleStatementContext.js", 
+	'if(1==2)\nconsole.log("1");\n' + 
+	'if(1==2)\n{\nconsole.log("2")\n}\n' + 
+	'if(1==2) // comment\nconsole.log("3");\n' +
+'if(1==2) {\nconsole.log("4");\n}\n' +
+	'if(1==2) console.log("5");\nelse console.log("5.5")', function(err, file) {
 		
 		// 1. Single statement contexts should be indented!
 		ind(0, 0);
@@ -363,6 +368,10 @@ EDITOR.addTest(function singleStatementContext(callback) {
 		ind(8, 0);
 		ind(9, 1);
 		ind(10, 0);
+		
+		// 5. hmm
+		ind(11, 0);
+		ind(12, 0);
 		
 		EDITOR.closeFile(file.path);
 		callback(true);

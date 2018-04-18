@@ -38,6 +38,17 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Trying to figure out a way to detect a statement after single-statement that is not a comment. example:
+if(foo) "this is a statement"
+// So this line should not be inlined
+
+if(foo) // this is just a comment
+  // So this line Sould be inlined!
+
+don't parse opt out if last char entered was a \ (backslash) as it might have ended a string etc.
+
+test indentation! (is it fixed at before save !?)
+
 npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
 npm ERR! Exit status -2
 
