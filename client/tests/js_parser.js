@@ -328,6 +328,18 @@ EDITOR.addTest(function varPointAtAnonFunction(callback) {
 	});
 	});
 	
-	
+EDITOR.addTest(function cantFindFunctionWithAngelbracketsBelow(callback) {
+	EDITOR.openFile("cantFindFunctionWithAngelbracketsBelow.js", 'function f()\n{\n\n}\n', function(err, file) {
+		
+		file.moveCaret(undefined, 2);
+		EDITOR.mock("keydown", {charCode: 65, target: "canvas"}); // Simulate entering a character. 65 = A
+		
+		// Uncaught Error: Unable to find start of function=*f* 
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+	});
+}, 1);
 	
 	

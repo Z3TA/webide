@@ -233,7 +233,7 @@
 							// We need to start parsing at the function declaration so that the parser will find it
 							var parseEnd = f.end + charactersLength + 1;
 							var parseStartRow = f.lineNumber-1;
-							var baseIndentation = file.grid[parseStartRow].indentation;
+							
 							var oldStart = f.start;
 							var oldEnd = f.end;
 							
@@ -242,9 +242,22 @@
 							// Prevent from searching too far
 							var funcDecText = file.text.substring(gridRowStartIndex, f.start);
 							
+							if(funcDecText.indexOf("function") == -1) {
+								// The function declaration is probably above
+								// Seek to the left until we find a line that has function in it 
+								while(parseStartRow > 0 && funcDecText.indexOf("function") == -1) {
+									parseStartRow--;
+									gridRowStartIndex = file.grid[parseStartRow].startIndex;
+									funcDecText = file.text.substring(gridRowStartIndex, f.start);
+								}
+								}
+							
+							var baseIndentation = file.grid[parseStartRow].indentation;
+							
 							//console.log("funcDecText=" + funcDecText);
 							
-							var parseStart = funcDecText.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : "") + "(", f.start); // Search backwards in file.text starting from f.start
+							// Search backwards in file.text starting from f.start
+							var parseStart = funcDecText.lastIndexOf("function" + (f.name.length > 0 ? " " + f.name : "") + "(", f.start); 
 							
 							
 							// I do not trust reLastIndexOf ...
@@ -284,7 +297,8 @@
 								
 							}
 							
-							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + file.text.substr(Math.max(0, f.start-15), 15));
+							if(parseStart == -1) throw new Error("Unable to find start of function=*" + f.name + "* f.start=" + f.start + " parseStart=" + parseStart + "\n" + 
+							" funcDecText=" + funcDecText + " text @index=f.start-15: " + file.text.substr(Math.max(0, f.start-15), 15));
 							// function names can include the string "function" ex: function function_function ( )  {
 							// Make a full parse instead of throwing an error when not in dev mode !?
 							
