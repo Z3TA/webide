@@ -1189,51 +1189,68 @@
 			var folderName = UTIL.getFolderName(localDir.value);
 			var parentFolder = UTIL.parentFolder(localDir.value);
 			
-			console.log("Cloning to folderName=" + folderName + " in parentFolder=" + parentFolder);
-			
-			if(parentFolder == "/") doClone(); // No need to check
-			else {
-				CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
-					console.log("listFiles in parentFolder=" + parentFolder + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
-					if(err) {
-						if(err.code == "ENOENT") {
-							var yes = "Create it";
-							var no = "Abort";
-							confirmBox(parentFolder + " does not exist!", [yes, no], function confirmCreate(answer) {
-								if(answer == yes) {
-									CLIENT.cmd("createPath", {pathToCreate: parentFolder}, function folderCreated(err, json) {
-										if(err) return alertBox(err.message);
-										else doClone();
-									});
-									}
-								else console.log("clone aborted by user!");
-							});
-						}
-						else return alertBox(err.message);
+			if(repo.value.indexOf("github.com") != -1 && repo.value.slice(-4) != ".git") {
+				var yes = "Yes";
+				var no = "No";
+				var abort = "Abort";
+				confirmBox("Did you mean " + repo.value + ".git ?", [yes, no, abort], function(answer) {
+					if(answer == yes) {
+						repo.value = repo.value + ".git";
+						checkFolders();
 					}
-					else {
-						// Chech if the folder already exist
-						for(var i=0; i<files.length; i++) {
-							if(files[i].name == folderName && files[i].type == "d") {
-								console.log("Destination folder exist! Check if it's emty: " + localDir.value);
-								CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
-									console.log("listFiles in folderName=" + folderName + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
-									if(err) return alertBox(err.message);
-									else if(files.length == 0) doClone(); // It's emty
-									else {
-										alertBox("Destination folder is not empty!\n" + localDir.value);
-									}
-								});
-								return;
-							}
-							}
-						// Folder does not exist
-						doClone();
-					}
+					else if(answer == no) checkFolders();
 				});
 			}
+			else checkFolders();
 			
 			return false; // Do not make a HTTP get
+			
+			function checkFolders() {
+				
+				console.log("Cloning to folderName=" + folderName + " in parentFolder=" + parentFolder);
+				
+				if(parentFolder == "/") doClone(); // No need to check
+				else {
+					CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
+						console.log("listFiles in parentFolder=" + parentFolder + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
+						if(err) {
+							if(err.code == "ENOENT") {
+								var yes = "Create it";
+								var no = "Abort";
+								confirmBox(parentFolder + " does not exist!", [yes, no], function confirmCreate(answer) {
+									if(answer == yes) {
+										CLIENT.cmd("createPath", {pathToCreate: parentFolder}, function folderCreated(err, json) {
+											if(err) return alertBox(err.message);
+											else doClone();
+										});
+									}
+									else console.log("clone aborted by user!");
+								});
+							}
+							else return alertBox(err.message);
+						}
+						else {
+							// Chech if the folder already exist
+							for(var i=0; i<files.length; i++) {
+								if(files[i].name == folderName && files[i].type == "d") {
+									console.log("Destination folder exist! Check if it's emty: " + localDir.value);
+									CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
+										console.log("listFiles in folderName=" + folderName + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
+										if(err) return alertBox(err.message);
+										else if(files.length == 0) doClone(); // It's emty
+										else {
+											alertBox("Destination folder is not empty!\n" + localDir.value);
+										}
+									});
+									return;
+								}
+							}
+							// Folder does not exist
+							doClone();
+						}
+					});
+				}
+			}
 			
 			function doClone() {
 				

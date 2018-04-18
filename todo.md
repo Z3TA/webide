@@ -38,10 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-todo: Give a friendly message if the user is trying to clone the wrong url from github.
-Example https://github.com/Z3TA/vumoviemaker (wrong url) instead of https://github.com/Z3TA/vumoviemaker.git
-
-
 npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
 npm ERR! Exit status -2
 
