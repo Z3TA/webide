@@ -80,6 +80,11 @@
 		foo(
 		bar(
 		baz(done)));
+		
+		indentation after if, for, while ? ex:
+		if(1==1) 
+		console.log("hi");
+		
 	*/
 	
 	"use strict";
@@ -173,7 +178,67 @@
 		
 		if(shouldParse(file)) { // If the file should be parsed or not
 			
-			if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "deleteCharacter" || type == "removeRow")) { // If the file was parsed before
+			/*
+				We should not need to re-parse if we're just typeing, unless we type some special character like { or } or " or '
+				And probably shouln't re-parse if we typed { or } and it would cause a block-missmatch !? No always parse after { or } or users will be annoyed because of no indention.
+				type=="insert": Inserted one character
+				type=="delete": Deleted one character
+				
+				Hmm, we might be inside a variable, and typing thus changes the variable name!
+				*/
+			
+var specialCharacters = "{}<>/\\\"'";
+
+			if(file.parsed && characters.length == 1 && (type =="insert" || type=="delete") && specialCharacters.indexOf(characters) == -1)  {
+			
+				console.log("no re-parse opt");
+				
+var charactersLength = 1;
+if(type=="delete") charactersLength = -1;
+				var oldParse = file.parsed;
+				// Update functions
+updateThingsFunctions(oldParse.functions, caretIndex, 0, charactersLength);
+
+				// Update quotes
+for(var i=0; i<oldParse.quotes.length; i++) {
+					if(oldParse.quotes[i].start >= caretIndex) {
+oldParse.quotes[i].start += charactersLength;
+oldParse.quotes[i].end += charactersLength;
+}
+					else if(oldParse.quotes[i].end >= caretIndex) {
+oldParse.quotes[i].end += charactersLength;
+}
+}
+
+				// Update comments
+				for(var i=0; i<oldParse.comments.length; i++) {
+					if(oldParse.comments[i].start >= caretIndex) {
+oldParse.comments[i].start += charactersLength;
+oldParse.comments[i].end += charactersLength;
+}
+					else if(oldParse.comments[i].end >= caretIndex) {
+oldParse.comments[i].end += charactersLength;
+}
+}
+
+// Update xmlTags
+				for(var i=0; i<oldParse.xmlTags.length; i++) {
+					if(oldParse.xmlTags[i].start >= caretIndex) {
+						oldParse.xmlTags[i].start += charactersLength;
+oldParse.xmlTags[i].end += charactersLength;
+						}
+					else if(oldParse.xmlTags[i].end >= caretIndex) {
+						console.log("between " + JSON.stringify(oldParse.xmlTags[i]) + " caretIndex=" + caretIndex + " charactersLength=" + charactersLength + " characters=" + UTIL.lbChars(characters) );
+						oldParse.xmlTags[i].end += charactersLength;
+						if( (oldParse.xmlTags[i].start + oldParse.xmlTags[i].wordLength + 1) > caretIndex && characters!=" ") {
+							console.log("update wordLength!");
+oldParse.xmlTags[i].wordLength += charactersLength;
+						}
+					}
+				}
+				return;
+			}
+			else if(file.parsed && (type=="delete" || type == "linebreak" || type == "insert" || type == "text" || type == "deleteTextRange" || type == "removeRow")) { // If the file was parsed before
 				
 				//console.log("type=" + type + " characters=" + characters);
 				
@@ -200,7 +265,7 @@
 					
 					var charactersLength = characters.length;
 					
-					if(type == "delete" || type == "deleteTextRange" || type == "deleteCharacter" || type == "removeRow") {
+					if(type == "delete" || type == "deleteTextRange" || type == "removeRow") {
 						charactersLength = -charactersLength;
 					}
 					
@@ -250,7 +315,7 @@
 									gridRowStartIndex = file.grid[parseStartRow].startIndex;
 									funcDecText = file.text.substring(gridRowStartIndex, f.start);
 								}
-								}
+							}
 							
 							var baseIndentation = file.grid[parseStartRow].indentation;
 							
@@ -1333,12 +1398,12 @@
 					insideRegExp = false;
 					//console.log("RegExp: Exit! : line:" + lineNumber + " col:" + column + " regexContentLength=" + (i - regExpStart) + " insideRegExp=" + insideRegExp + " typeof=" + typeof insideRegExp + " file.path=" + file.path);
 					if((i - regExpStart) > 1) return; // Do not return if we see a // line comment (regExp with zero content)
-					}
-
+				}
+				
 				/*
-				console.log(" i=" + i + " char=" + char + " line=" + lineNumber + " col=" + column + " insideRegExp=" + insideRegExp + " regExpStart=" + regExpStart + 
-				" insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideHTMLComment=" + insideHTMLComment + 
-				" insideBlockComment=" + insideBlockComment + " insideTemplateLiteral=" + insideTemplateLiteral + " check=" + (insideRegExp && regExpStart != i-1));
+					console.log(" i=" + i + " char=" + char + " line=" + lineNumber + " col=" + column + " insideRegExp=" + insideRegExp + " regExpStart=" + regExpStart + 
+					" insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideHTMLComment=" + insideHTMLComment + 
+					" insideBlockComment=" + insideBlockComment + " insideTemplateLiteral=" + insideTemplateLiteral + " check=" + (insideRegExp && regExpStart != i-1));
 				*/
 				
 				// ### Comments: //

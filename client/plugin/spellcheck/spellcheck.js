@@ -286,9 +286,7 @@
 			//if(change=="linebreak") return;
 			if(change=="undo-redo") return;
 			
-			if(change == "deleteCharacter") return;
 			
-
 			// clear text decoration from current line
 			for(var x = 0; x < grid[row].length; x++) {
 				grid[row][x].wave = false;
