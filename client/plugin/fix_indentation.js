@@ -13,7 +13,9 @@
 	var indentationBefore;
 	
 	function unloadFixIndentationPlugin() {
-		EDITOR.removeEvent("fileChange", fixIndentationOnChange);
+		EDITOR.removeEvent("fileChange", takeOwnageOnChange);
+		EDITOR.removeEvent("fileChange", checkIndentationOnBeforeParser);
+		EDITOR.removeEvent("beforeSave", fixIndentationBeforeSave);
 	}
 	
 	function fixIndentationMain() {
@@ -34,18 +36,24 @@
 		var runOrderOfParser = 100; 
 		
 		// Make sure this runs after the parser
-		EDITOR.on("fileChange", fixIndentationOnChange, runOrderOfParser+20);
+		//EDITOR.on("fileChange", fixIndentationOnChange, runOrderOfParser+20);
+		EDITOR.on("fileChange", takeOwnageOnChange);
 		
 		// Make sure this runs before the parser
 		EDITOR.on("fileChange", checkIndentationOnBeforeParser, runOrderOfParser-20);
 		
-		if(window.location.href.indexOf("checkIndentation") != -1) {
+		EDITOR.on("beforeSave", fixIndentationBeforeSave);
+		
+		/*
+			if(window.location.href.indexOf("checkIndentation") != -1) {
 		// Make sure this runs after fixIndentationOnChange
 		EDITOR.on("fileChange", checkIndentationAfterFix, runOrderOfParser+20+5);
 		
 		// Make sure this runs after the parser
 		EDITOR.on("fileOpen", checkIndentationOnFileOpen, runOrderOfParser+20);
 	}
+		*/
+
 	}
 	
 	function checkIndentationOnFileOpen(file) {
@@ -142,6 +150,77 @@
 		return {above: above, below: below, current: current};
 	}
 	
+	function takeOwnageOnChange(file, type, character, index, row, col) {
+	if(file.mode != "code") return true; // Don't bother checking indentation of non code
+		if(!file.parsed) return true; // Don't bother with files that has not been parsed
+		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return true; // Something is not right
+		
+		if(file.parsed.blockMatch === false) return true; // Don't do anything if there is a block missmatch
+		
+		if(type=="linebreak") {
+			// We now "own" this new line.
+			var newRowNr = row+1;
+			file.grid[newRowNr].owned = true;
+			if(file.grid.length <= 2 && newRowNr > 0) {
+				file.grid[row].owned = true; // Also take ownership of the start row
+				}
+			return true;
+		}
+		else if(type=="text") {
+			// A bunch of text was inserted. We own this text !
+			for(var i = row; i<=file.caret.row; i++) {
+				file.grid[i].owned = true; // Take ownership because a bunch of text was inserted.
+				}
+			return true;
+		}
+		else if(type=="insert") {
+			// A character was inserted.
+			if(file.grid[row].length == 1) file.grid[row].owned = true; // We put the first char on this line, so we now own it
+			}
+		
+		if(!indentationBefore) return true; // For exampe when reloading from disk without changing the file
+		
+		var indentation = indentationAround(file, row);
+		
+		if(indentation == null) throw new Error("(in)sanity: file.path=" + file.path + " row=" + row + " indentation=" + indentation);
+		
+		if(indentationBefore.below == indentation.below && indentationBefore.above == indentation.above) return true;
+		
+		if(insideParsedObject(file.caret.index, file.parsed.quotes) || insideParsedObject(file.caret.index, file.parsed.comments)) return true;
+		
+		var rowIndentation = 0;
+		if(indentation.below != indentationBefore.below && file.grid.length > (row+1)) {
+			// Take ownership until the code block below ends
+			var currentIndentation = file.grid[row].indentation;
+			
+			for (var i=row+1; i<file.grid.length; i++) {
+				rowIndentation = file.grid[i].indentation;
+				
+				//console.log("currentIndentation=" + currentIndentation + " rowIndentation=" + rowIndentation);
+				
+				file.grid[i].owned = true;
+				
+				if(rowIndentation == currentIndentation) break;
+				}
+		}
+		else if(indentation.above != indentationBefore.above && row > 0) {
+			var currentIndentation = file.grid[row].indentation;
+			for (var i=row-1; i>-1; i--) {
+				rowIndentation = file.grid[i].indentation;
+				
+				file.grid[i].owned = true;
+				
+				if(rowIndentation == currentIndentation) break;
+			}
+		}
+	}
+	
+	function fixIndentationBeforeSave(file, callback) {
+		for (var row=0; row<file.grid.length; row++) {
+			if(file.grid[row].owned) fixIndentation(file, row, true);
+		}
+		return true; // We must return true XOR call the callback!
+	}
 	
 	function fixIndentationOnChange(file, type, character, index, row, col) {
 		
@@ -239,7 +318,9 @@
 		
 	}
 	
-	function fixIndentation(file, row) {
+	function fixIndentation(file, row, updateIndex) {
+		
+		if(updateIndex == undefined) updateIndex = true;
 		
 		console.log("Fixing indentation on row=" + row);
 		
@@ -283,6 +364,7 @@
 			// Remove and add
 			file.text = file.text.substr(0, index-charactersToRemove) + gridRow.indentationCharacters + file.text.substring(index, file.text.length);
 			
+			if(updateIndex) {
 			// Update indexes
 			for(var i=row; i<grid.length; i++) {
 				grid[i].startIndex += totalCharactersAdded;
@@ -361,7 +443,7 @@
 					}
 				}
 			}
-			
+			}
 		}
 		
 		file.sanityCheck();

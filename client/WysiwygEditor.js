@@ -1271,7 +1271,7 @@ var WysiwygEditor;
 		if(wysiwygEditor.closed) return console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		if(wysiwygEditor.fileChangeEventListener) EDITOR.removeEvent("fileChange", wysiwygEditor.fileChangeEventListener);
-		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterFileSave", wysiwygEditor.afterFileSaveEventListener);
+		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterSave", wysiwygEditor.afterFileSaveEventListener);
 		if(wysiwygEditor.autoCompleteListener) EDITOR.removeEvent("autoComplete", wysiwygEditor.autoCompleteListener);
 		
 		/*
@@ -1696,7 +1696,7 @@ var WysiwygEditor;
 			attachAutoCompleteListener(wysiwygEditor);
 			
 			/*
-				Remove the fileChange and afterFileSave event listener when closing the content-editable window
+				Remove the fileChange and afterSave event listener when closing the content-editable window
 				
 				Note: If the window loads fast, onbeforeunload will be called (Chrome)!
 				We put it behind a timeout in the hopes of it not firing 
@@ -2240,15 +2240,15 @@ var WysiwygEditor;
 	function attachFileSaveListener(wysiwygEditor) {
 		// All EDITOR events wants an uniqe function name ...
 		var name = "wysiwygEditorFileSave" + wysiwygEditor.id;
-		console.log("Unique function name for afterFileSave event: " + name);
+		console.log("Unique function name for afterSave event: " + name);
 		var customAction = function(file, saveCallback) {
 			return wysiwygEditor.anyFileSaved(file, saveCallback);
 		}
 		var func = new Function("action" + name, "return function " + name + "(file, saveCallback){ return action" + name + "(file, saveCallback) };")(customAction);
 		
-		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterFileSave", wysiwygEditor.afterFileSaveEventListener);
+		if(wysiwygEditor.afterFileSaveEventListener) EDITOR.removeEvent("afterSave", wysiwygEditor.afterFileSaveEventListener);
 		
-		EDITOR.on("afterFileSave", func);
+		EDITOR.on("afterSave", func);
 		
 		wysiwygEditor.afterFileSaveEventListener = func;
 		

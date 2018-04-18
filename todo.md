@@ -49,8 +49,6 @@ todo
 
 prio: Fix indentation characters!
 
-Fix indentation when file is saved instead of at every change !!?
-
 When changing indentation to two spaces, also make the indentation two characters wide! And 4 if you change to 4 spaces (or tabs?).
 
 When inlining console.log's and you are editing the file, the position of the console log might have changed!!

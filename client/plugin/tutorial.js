@@ -38,7 +38,7 @@
 	
 	function unloadTutorial() {
 		EDITOR.removeEvent("storageReady", loadAchievements);
-		EDITOR.removeEvent("afterFileSave", achiveSaveFile);
+		EDITOR.removeEvent("afterSave", achiveSaveFile);
 		EDITOR.removeEvent("fileChange", achiveFileChange);
 		
 		clearInterval(tutorialMessageInterval);
@@ -76,7 +76,7 @@
 	
 	function achiveSaveFile(file) {
 		achived("fileSave");
-		EDITOR.removeEvent("afterFileSave", achiveSaveFile);
+		EDITOR.removeEvent("afterSave", achiveSaveFile);
 		return true;
 	}
 	

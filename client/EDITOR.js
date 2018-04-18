@@ -126,8 +126,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	fileHide: [],
 	fileShow: [],
 	fileParse: [],
-	beforeFileSave: [], // todo: event that is called before a file is saved (to disk)
-	afterFileSave: [],
+	beforeSave: [],
+	afterSave: [],
 	fileChange: [], 
 		mouseScroll: [], 
 		mouseClick: [], 
@@ -1051,6 +1051,19 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		var text = file.text; // Save the text, do not count on the garbage collector the be "slow"
 		
+		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors) {
+			if(errors.length > 0) {
+				var errorMessages = [];
+				for (var i=0; i<errors.length; i++) {
+					console.error(errors[i]);
+					errorMessages.push(errors[i].message);
+				}
+				alertBox(errors.length + " tool(s) failed. Which might effect formatting etc of the file on disk!\n" + errorMessages.join("\n"), "warning");
+			}
+			beginSaving();
+		});
+		
+		function beginSaving() {
 		if(file.path != path) {
 			if(EDITOR.files.hasOwnProperty(path)) {
 				var err = new Error("There is already a file open with path=" + path);
@@ -1079,6 +1092,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		else {
 			EDITOR.saveToDisk(file.path, file.text, doneSaving);
 		}
+		}
 		
 		function reOpen(oldPath, newPath) {
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
@@ -1095,9 +1109,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			}); 
 		}
 		
-		
 		function doneSaving(err, path) {
-			
 			if(err) {
 if(callback) return callback(err, path);
 				else throw err;
@@ -1107,18 +1119,15 @@ if(callback) return callback(err, path);
 				
 				console.log("Successfully saved " + file.path);
 				
-			// Change state to saved, and call afterFileSave listeners
+			// Change state to saved, and call afterSave listeners
 			file.saved(function(err) {
 				
-				// Call back without an error even though some of the afterFileSave events failed.
+				// Call back without an error even though some of the afterSave events failed.
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
 				if(callback) callback(null, path);
 				
 			}); 
-			
 		}
-		
-		
 	}
 	
 	
@@ -4057,6 +4066,81 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 		});
 		
 	}
+	
+	EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCalled) {
+		/*
+			Generic function for calling event listeners.
+			Each event listener gets file and callback as parameters
+			And must return true(ish) or call the callback function, or the event-listener is considered failed
+			
+			allListenersCalled will be called with an array of errors as the first parameter
+		*/
+		
+		var waitingFor = [];
+		var eventFunsCalled = 0;
+		var errors = [];
+		var alreadyTooLate = false;
+		var eventListeners = EDITOR.eventListeners[ev];
+		var uniqueFunctionNames = [];
+		var returnedOrCalledBack = [];
+		
+		for(var i=0; i<eventListeners.length; i++) {
+			callListener(eventListeners[i].fun);
+		}
+		
+		if(waitingFor.length > 0) {
+			var maxWait = 5;
+			var waitCounter = 0;
+			var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
+		}
+		
+		function callListener(fun) {
+			var fName = UTIL.getFunctionName(fun);
+			
+			if(!fName) throw new Error("A " + ev + " event listener function has no name!");
+			if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
+			uniqueFunctionNames.push(fName);
+			
+			waitingFor.push(fName);
+			console.log("Calling " + ev + " eventListener: " + fName);
+			var ret = fun(file, evCallback);
+			eventFunsCalled++;
+			console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
+			if(ret) evCallback(null);// The function did not return void, asume it's done!
+			
+			function evCallback(err) {
+				console.log("Got " + ev + " event callback from " + fName + " err=" + err);
+				if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back!");
+				returnedOrCalledBack.push(fName);
+				
+				if(err) errors.push(err);
+				var index = waitingFor.indexOf(fName);
+				if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" +
+				" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
+				
+				waitingFor.splice(index, 1);
+				if(waitingFor.length == 0 && returnedOrCalledBack.length == eventListeners.length && !alreadyTooLate) {
+					if(checkInterval) clearInterval(checkInterval);
+					allListenersCalled(errors);
+				}
+				return;
+			}
+		}
+		
+		function checkIfReturnedOrCalledCallback() {
+			console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
+			
+			if(++waitCounter >= maxWait) {
+				clearInterval(checkInterval);
+				errors.push(new Error("The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor)));
+				alreadyTooLate = true;
+				allListenersCalled(errors);
+			}
+			
+		}
+		
+	}
+	
 	
 	
 	// # Virtual keyboard

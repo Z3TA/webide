@@ -3478,85 +3478,18 @@ var File; // File object is global
 		file.changed = false;
 		file.savedAs = true;
 		
-		// The afterFileSave event listeners need to take a callback or return something, so we can know when they're done'
-		callEventListeners("afterFileSave", function allListenersCalled(errors) {
+		// The afterSave event listeners need to take a callback or return something, so we can know when they're done'
+		EDITOR.callEventListeners("afterSave", file, function allListenersCalled(errors) {
 			
-			if(errors.length > 0) console.warn("Some afterFileSave event listeners failed:");
+			if(errors.length > 0) console.warn("Some afterSave event listeners failed:");
 			for (var i=0; i<errors.length; i++) {
 				console.error(errors[i]);
 			}
 			
-			if(errors) var err = new Error("Some afterFileSave event listeners failed! (see console log's in dev tools)");
+			if(errors) var err = new Error("Some afterSave event listeners failed! (see console log's in dev tools)");
 			
 			if(callback) callback(err);
 		});
-		
-		function callEventListeners(ev, allListenersCalled) {
-			var waitingFor = [];
-			var eventFunsCalled = 0;
-			var errors = [];
-			var alreadyTooLate = false;
-			var eventListeners = EDITOR.eventListeners[ev];
-			var uniqueFunctionNames = [];
-			var returnedOrCalledBack = [];
-				
-				for(var i=0; i<eventListeners.length; i++) {
-					callListener(eventListeners[i].fun);
-				}
-				
-				if(waitingFor.length > 0) {
-					var maxWait = 5;
-					var waitCounter = 0;
-					var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
-				}
-				
-				function callListener(fun) {
-					var fName = UTIL.getFunctionName(fun);
-					
-					if(!fName) throw new Error("A " + ev + " event listener function has no name!");
-					if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
-					uniqueFunctionNames.push(fName);
-					
-					waitingFor.push(fName);
-					console.log("Calling " + ev + " eventListener: " + fName);
-					var ret = fun(file, evCallback);
-					eventFunsCalled++;
-					console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
-					if(ret) evCallback(null);// The function did not return void, asume it's done!
-					
-					function evCallback(err) {
-						console.log("Got " + ev + " event callback from " + fName + " err=" + err);
-						if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back!");
-						returnedOrCalledBack.push(fName);
-						
-						if(err) errors.push(err);
-						var index = waitingFor.indexOf(fName);
-						if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" + 
-						" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
-						
-						waitingFor.splice(index, 1);
-						if(waitingFor.length == 0 && returnedOrCalledBack.length == eventListeners.length && !alreadyTooLate) {
-							if(checkInterval) clearInterval(checkInterval);
-							allListenersCalled(errors);
-						}
-						return;
-					}
-				}
-				
-				function checkIfReturnedOrCalledCallback() {
-					console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
-					
-					if(++waitCounter >= maxWait) {
-						clearInterval(checkInterval);
-						errors.push(new Error("The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor)));
-						alreadyTooLate = true;
-						allListenersCalled(errors);
-					}
-					
-				}
-				
-			}
-		
 		
 		}
 	

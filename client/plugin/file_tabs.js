@@ -29,7 +29,7 @@
 		EDITOR.on("fileOpen", tabFileOpen, 2);
 		EDITOR.on("fileClose", closeFile_tabs, 2);
 		EDITOR.on("fileChange", tabFileChange);
-		EDITOR.on("afterFileSave", tabFileSave);
+		EDITOR.on("afterSave", tabFileSave);
 		EDITOR.on("fileShow", tabFileShow);
 		
 		var key_pageUP = 33;

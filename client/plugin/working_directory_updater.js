@@ -13,13 +13,13 @@ EDITOR.plugin({
 		load: function loadWorkingDirectoryUpdater() {
 		
 			EDITOR.on("fileShow", updateWorkingDirectory);
-			EDITOR.on("afterFileSave", updateWorkingDirectory);
+			EDITOR.on("afterSave", updateWorkingDirectory);
 			
 		},
 		unload: function unloadWorkingDirectoryUpdater() {
 			
 			EDITOR.removeEvent("fileShow", updateWorkingDirectory);
-			EDITOR.removeEvent("afterFileSave", updateWorkingDirectory);
+			EDITOR.removeEvent("afterSave", updateWorkingDirectory);
 		
 		}
 	});
