@@ -788,6 +788,7 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 		if(parseStart == undefined) parseStart = 0;
 		if(parseEnd == undefined) parseEnd = textLength;
 		
+		var singleStatementContext = 0;
 		
 		// Optimization to try: Putting all the bools into an int for less memory lookups
 		
@@ -1993,6 +1994,11 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				
 				else if(char == "{") {
 					
+					if(singleStatementContext == 1) singleStatementContext = 0;
+					
+					if(singleStatementContext == 2 && file.grid[row].indentation > 0) {
+						file.grid[row].indentation--;
+						}
 					// ### Found function maybe
 					
 					//console.log("{ insideFunctionBody[" + subFunctionDepth + "]=" + insideFunctionBody[subFunctionDepth] + " insideFunctionDeclaration=" + insideFunctionDeclaration + " insideFunctionArguments=" + insideFunctionArguments + " line:" + lineNumber + "");
@@ -2358,15 +2364,21 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				row++;
 				column = 0;
 				
+				if(singleStatementContext == 2) singleStatementContext = 0;
+				
+				//console.log("i=" + i + " lineNumber=" + lineNumber + " lastWord=" + lastWord + " word=" + word);
+				
 				//console.log("(Indent) codeBlockDepth=" + codeBlockDepth + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]  + " insideBlockComment=" + insideBlockComment + " line:" + lineNumber);
 				
 				//console.log("Setting indentation on line=" + lineNumber + " : " + Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation));
 				
 				if(!file.grid[row]) throw new Error("Grid row=" + row + " does not exist!");
 				
-				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation);
+				if(indentate) file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
 				
 				if(insideXmlTag && (insideDblQuote || insideSingleQuote) && !insideQuote) insideXmlTag = false;
+				
+				if(singleStatementContext==1) singleStatementContext++;
 				
 				//console.warn("Line=" + lineNumber + " file.grid[" + row + "].indentation=" + file.grid[row].indentation + " insideBlockComment=" + insideBlockComment + " codeBlock[" + codeBlockDepth + "].indentation=" + codeBlock[codeBlockDepth].indentation + " insideVariableDeclaration[" + codeBlockDepth + "]=" + insideVariableDeclaration[codeBlockDepth]);
 				//console.log("Row " + row);
@@ -2520,10 +2532,13 @@ oldParse.xmlTags[i].wordLength += charactersLength;
 				
 				word = word.trim();
 				
+				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
+				
 				if(word.length > 0 && word != "/") { // Ignore / slash
 					
 					if(word == "if" || word == "else" || word == "new" || word == "while" || word == "for") {
 						word = "";
+						singleStatementContext = 1;
 						return;
 					}
 					else if(word == "function") {

@@ -340,6 +340,36 @@ EDITOR.addTest(function cantFindFunctionWithAngelbracketsBelow(callback) {
 		callback(true);
 		
 	});
+});
+	
+EDITOR.addTest(function singleStatementContext(callback) {
+	EDITOR.openFile("singleStatementContext.js", 'if(1==2)\nconsole.log("1");\nif(1==2)\n{\nconsole.log("2")\n}\nif(1==2) // comment\nconsole.log("3");\nif(1==2) {\nconsole.log("4");\n}\n', function(err, file) {
+		
+		// 1. Single statement contexts should be indented!
+		ind(0, 0);
+		ind(1, 1);
+		ind(2, 0);
+		
+		// 2. Don't indentate the { after if
+		ind(3, 0);
+		ind(4, 1);
+		ind(5, 0);
+		
+		// 3. We have a comment
+		ind(6, 0);
+		ind(7, 1);
+		
+		// 4. Angel brackets should not give double indentation
+		ind(8, 0);
+		ind(9, 1);
+		ind(10, 0);
+		
+		EDITOR.closeFile(file.path);
+		callback(true);
+		
+		function ind(row, val) {
+			if(file.grid[row].indentation != val) throw new Error("Expected file.grid[" + row + "].indentation=" + file.grid[row].indentation + " (line " + (row+1) + ") to be " + val);
+		}
+		
+	});
 }, 1);
-	
-	
