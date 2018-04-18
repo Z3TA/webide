@@ -2537,10 +2537,9 @@
 				
 				//console.log("i=" + i + " line=" + lineNumber + " word=" + word + " lastWord=" + lastWord);
 				
-				console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
-				
-				if(singleStatementContext == 1 && !insideParenthesis[codeBlockDepth] && char != "/" && word && word.slice(-1) != ")") {
-					console.log("i=" + i + " line=" + lineNumber + " reset singleStatementContext!");
+				//console.log("i=" + i + " word=" + word + " singleStatementContext=" + singleStatementContext)
+				if(singleStatementContext == 1 && !insideParenthesis[codeBlockDepth] && word && word.slice(-1) != ")" && word.slice(-1) != "/") {
+					//console.log("i=" + i + " line=" + lineNumber + " char=" + char + " reset singleStatementContext!");
 					singleStatementContext = 0;
 				}
 				
