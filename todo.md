@@ -38,12 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-test indentation! (is it fixed at before save !?)
 
-npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
-npm ERR! Exit status -2
-
-See if vumoviemaker can run in the editor
 
 
 todo
@@ -133,6 +128,14 @@ investigate build.js vs ssg-build.js
 
 What I'm thinking
 -----------------
+
+How to manage different versions of nodejs ? Or just run the latest !?
+each node version would need it's own apparmor profile.
+Issue with nodejs breaking abi (native modules) compability 
+
+Make managing nodejs version a pro feature ? Run on own server 
+
+---
 
 Test are run async (all at the same time). Some tests want to be run alone.
 Some tests fails due to timing. For example the console log inlining test fails in Firefox when running all tests ...
