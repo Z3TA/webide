@@ -381,4 +381,4 @@ EDITOR.addTest(function singleStatementContext(callback) {
 		}
 		
 	});
-}, 1);
+});
