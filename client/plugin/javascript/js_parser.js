@@ -89,6 +89,9 @@
 	
 	"use strict";
 	
+	var character = "";     // Keep track of what character was inserted before
+	var lastCharacter = "";
+	
 	EDITOR.plugin({
 		desc: "Parse JavaScript etc",
 		order: 100,
@@ -189,7 +192,12 @@
 			
 			var specialCharacters = "{}<>/\\\"'";
 			
-			if(file.parsed && characters.length == 1 && (type =="insert" || type=="delete") && specialCharacters.indexOf(characters) == -1)  {
+			if(type == "insert") {
+				lastCharacter = character;
+				character = characters;
+			}
+			
+			if(file.parsed && characters.length == 1 && (type =="insert" || type=="delete") && lastCharacter != "\\" && specialCharacters.indexOf(characters) == -1)  {
 				
 				console.log("no re-parse opt");
 				

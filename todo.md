@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-don't parse opt out if last char entered was a \ (backslash) as it might have ended a string etc.
-
 test indentation! (is it fixed at before save !?)
 
 npm ERR! canvas@1.6.9 install: `node-gyp rebuild`
@@ -2085,8 +2083,8 @@ Use node-inspect instead of "nodejs debug"
 Optimization
 ============
 
-Speed and performance is a selling point for the editor, so we need to look into that!
-Worst performance hog is currently writing javascript in global scope within a large javascript file.
+Check js_parser for performance regressions to figure out how to optimize, did anything added slow it down ?
+Make a tool to automatically perf test each revision of js_parser. Turn it into a nodejs module, parse a file from nodejs.
 
 add a perf mode, that don't run console log's but do run console.time!
 
