@@ -45,20 +45,19 @@ eachUser(HOME, function(user) {
 		
 		// Update apparmor profiles (for each user)
 	createApparmorProfile("./etc/apparmor/usr.bin.nodejs_someuser", user.name);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.nodejs", user.name);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.node", user.name);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.python", user.name);
 	createApparmorProfile("./etc/apparmor/home.someuser.usr.bin.hg", user.name);
-	createApparmorProfile("./etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", user.name);
+	createApparmorProfile("./etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js", user.name);
 	createApparmorProfile("./etc/apparmor/home.someuser.bin.bash", user.name);
 	
-		// Make sure files exist and file permissions is rights ...
+	// Make sure files exist and file permissions are rights ...
 		
 		
 		// Create a directory where nginx can save logs
 	try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, "log/"])); } catch(err) { console.log(err.message); }
 	chmodrSync(UTIL.joinPaths([user.homeDir, "log/"]), "2770"); // Set the group-id bit so that all new files created will belong to the group
 	chownrDirSync(UTIL.joinPaths([user.homeDir, "log/"]), user.uid, user.gid);
-		
 		
 		// Create a directory for putting "in production" files
 	try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, ".prod/"])); } catch(err) { console.log(err.message); }
@@ -69,6 +68,9 @@ eachUser(HOME, function(user) {
 	run("chmod 2755 " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
 	run("chown -R " + user.name + ":www-data " + UTIL.joinPaths([user.homeDir, "wwwpub/"]));
 		
+	
+	
+	
 	}, function allUsersFound() {
 
 run("systemctl reload apparmor");

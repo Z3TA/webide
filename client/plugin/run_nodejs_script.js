@@ -252,8 +252,8 @@
 			stdout(msg);
 			
 			// end if(msg.stderr)
-		} 
-		else if(msg.exit) {
+		}
+		else if(msg.close) {
 			runningScripts.splice(runningScripts.indexOf(filePath), 1);
 			stdout(msg);
 		}
@@ -553,7 +553,7 @@
 		if(msg.stdout) write( (msg.type ? msg.type + ": " : "") + msg.stdout );
 		if(msg["console.log"]) write(msg["console.log"] + "\n");
 		
-		if(msg.exit) write((eof ? "\n" : "") + msg.scriptName + " exited with exit code " + msg.exit.code + " and signal " + msg.exit.signal);
+		if(msg.close) write((eof ? "\n" : "") + msg.scriptName + " closed with code " + msg.close.code + " and signal " + msg.close.signal);
 		
 		EDITOR.renderNeeded();
 		

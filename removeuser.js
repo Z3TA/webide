@@ -68,14 +68,14 @@ catch(err) {
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.nodejs");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
-	unlink("/etc/apparmor.d/home." + username + ".usr.share.npm.bin.npm-cli.js");
+unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-cli.js");
 	
 	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 	//if(reloadApparmor != "") throw reloadApparmor;
 	
 	
 	umount("/usr/bin/nodejs_" + username); // Used by user_worker.js 
-	unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted!
+unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted""
 	
 	// We don't want to accidently mess with any of these, so just in case we are doing some debugging
 	/*

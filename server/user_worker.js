@@ -1,5 +1,6 @@
 /*
 	
+	Note: Always use execPath (/usr/bin/node) when forking under chroot!
 	
 */
 
@@ -7,11 +8,9 @@
 
 // Need to require non native modules here before we are chrooted
 
-
 var UTIL = require("../client/UTIL.js");
 
 var API = require("./server_api.js");
-
 
 // Server plugin API's
 //API.test = require("./plugin/test.js"); // Make sure the files have read persmission!
@@ -43,21 +42,18 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
-
 var USER_PROD_FOLDER = "/.prod/";
-
 
 var USE_CHROOT = !!(getArg(["chroot", "chroot"]) || false);
 log("USE_CHROOT=" + USE_CHROOT + " getArg('chroot'):" + getArg('chroot') + " (" + JSON.stringify(process.argv) + ")", 7);
 log("process.env.uid=" + process.env.uid, 7);
 
-var npmExecFileOptions = {
+var npmOptions = {
 	env: {
 		HOME: "/",
 		dev: true
-	}
-}
-
+	},
+};
 
 if(parseInt(process.env.uid)) {
 	
@@ -715,7 +711,7 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 	if(filePath instanceof Error) return callback(filePath);
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
-	npmExecFileOptions.cwd = directory;
+	npmOptions.cwd = directory;
 	
 	var saveType = "--save"; // Package will appear in your dependencies.
 	if(json.saveDev) saveType = "--save-dev"; // Package will appear in your devDependencies
@@ -933,9 +929,9 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 	var directory = UTIL.getDirectoryFromPath(filePath);
 	var fileName = UTIL.getFilenameFromPath(filePath);
 	var folderName = UTIL.getFolderName(filePath);
-	npmExecFileOptions.cwd = directory;
+	npmOptions.cwd = directory;
 	
-	console.log("installNodejsModule: moduleName=" + moduleName + " saveType=" + saveType + " npmExecFileOptions=" + JSON.stringify(npmExecFileOptions)); 
+	console.log("installNodejsModule: moduleName=" + moduleName + " saveType=" + saveType + " npmOptions=" + JSON.stringify(npmOptions)); 
 	
 	fs.readFile(directory + "package.json", "utf-8", function(err, packageTxt) {
 		if(err) {
@@ -978,9 +974,9 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 	});
 	
 	function installModule() {
-		var execFile = require('child_process').execFile;
 		var arg = ["install", moduleName, saveType];
-		execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
+		npm(arg, function(err, stdout, stderr) {
+			
 			console.log("npm " + JSON.stringify(arg) + " err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 			
 			if(err) return callback(new Error("Failed to install '" + moduleName + "': " + err.message));
@@ -989,6 +985,7 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 				
 				stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
 				stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
+				stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
 				
 				if(stderr) return callback(new Error("Problem installing '" + moduleName + "': " + stderr));
 			}
@@ -1001,6 +998,153 @@ function installNodejsModule(filePath, moduleName, saveType, callback) {
 			
 		});
 	}
+}
+
+function npm(arg, extraOptions, callback) {
+	// Run a NPM command
+	
+	if(typeof extraOptions == "function" && callback == undefined) {
+		callback = extraOptions;
+		extraOptions = undefined;
+	}
+	
+	if(typeof callback != "function") throw new Error("callback need to be a function!"); // sanity
+	
+	if(typeof extraOptions == "object") {
+		for(var name in extraOptions) {
+			npmOptions[name] = extraOptions[name];
+		}
+	}
+	
+	npmOptions.execPath = USE_CHROOT ? "/usr/bin/node" : process.argv[0];
+	npmOptions.silent = true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
+	
+	//stdio: ['pipe', 'pipe', 'pipe', 'ipc']; // To be able to access stdout from npmProcess.stdout
+	
+	var npmPath = "/usr/lib/node_modules/npm/bin/npm-cli.js";
+	var stdout = "";
+	var stderr = "";
+	var npmError = null;
+	console.log("Spawning npm with arg=" + JSON.stringify(arg) + " npmOptions=" + JSON.stringify(npmOptions) + " ...");
+	npmPath = (npmPath + " ").trim();
+	// Use fork instead of spawn to prevent running shebang ? 
+	// Nope: Fork also executes the shebang!? or does it!? todo: find out!
+	var npmProcess =  require('child_process').fork(npmPath, arg, npmOptions);
+	
+	/*
+		var progressCounter = 0;
+		var progressMax = 30;
+		user.send({npmProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
+		
+		var progressInterval = setInterval(function() {
+		progressCounter++;
+		progressMax++;
+		user.send({npmProgress: {max: progressCounter,value: Math.max(progressCounter, progressMax)}});
+		}, 500); // Fake progress
+	*/
+	
+	npmProcess.stdout.on('data', function npmProcessStdout(data) {
+		stdout += data;
+		
+		console.log("npm stdout data=" + data);
+		
+		//progressCounter++;
+		//user.send({npmProgress: {max: progressCounter, value: Math.max(progressCounter, progressMax)}});
+	});
+	
+	npmProcess.stderr.on('data', function npmProcessStderr(data) {
+		stderr += data;
+	});
+	
+	npmProcess.on('error', function npmProcessError(err) {
+		
+		npmError = err;
+		
+		console.log("npm error stdout=" + stdout + " stderr=" + stderr + " err.code=" + err.code);
+		
+		//user.send({npmProgress: {max: 1, value: 1}});
+		
+		if(err.code == "ENOENT") {
+			/*
+				
+				Possible causes:
+				1. It can't find /usr/bin/env 
+				
+			*/
+			var fs = require("fs");
+			
+			fs.access(npmPath, fs.constants.R_OK, function (err) {
+				console.log(err ? 'No Read access to ' +  npmPath: 'Got read access to ' + npmPath);
+			});
+			
+			var folder = UTIL.getDirectoryFromPath(npmPath);
+			
+			fs.access(folder, fs.constants.R_OK, function (err) {
+				console.log(err ? 'No Read access to ' +  folder: 'Got read access to ' + folder);
+			});
+			
+			fs.access(npmPath, fs.constants.F_OK, function (err) {
+				console.log(err ? 'No access to ' +  npmPath + " (it doesn't seem to exist)" : 'Got access to ' + npmPath + " (it exist!)");
+			});
+			
+			fs.access(npmPath, fs.constants.X_OK, function (err) {
+				console.log(err ? 'No execute access to ' +  npmPath: 'Got execute access to ' + npmPath);
+			});
+			
+			fs.open(npmPath, 'r', (err, fd) => {
+				if (err) console.log("Not able to fs.open read " + npmPath);
+				else console.log("It's possible to fs.open read " + npmPath);
+			});
+			
+			fs.stat(npmPath, function(err, stats) {
+				if(err && err.code == "ENOENT") console.warn("Unable to stat (it doesn't exist): " + npmPath);
+				else if(err) throw err;
+				else {
+					console.log(JSON.stringify(stats, null, 2));
+					console.log("isBlockDevice ? " + stats.isBlockDevice());
+					console.log("isCharacterDevice ? " + stats.isCharacterDevice());
+					console.log("isDirectory ? " + stats.isDirectory());
+					console.log("isFIFO ? " + stats.isFIFO());
+					console.log("isFile ? " + stats.isFile());
+					console.log("isSocket ? " + stats.isSocket());
+					console.log("isSymbolicLink ? " + stats.isSymbolicLink());
+				}
+			});
+			
+			fs.readFile(npmPath, "utf8", function(err, data) {
+				if(err) console.log("Not able to fs.readFile " + npmPath + " (" + err.message + ") code=" + err.code);
+				else console.log("It's possible to fs.readFile " + npmPath);
+			});
+			
+			fs.readdir(folder, function(err, files) {
+				if(err) return console.log("Not able to fs.readdir " + folder + " (" + err.message + ") code=" + err.code);
+				
+				console.log("It's possible to fs.readdir " + folder);
+				
+				var exist = false;
+				var fileName = UTIL.getFilenameFromPath(npmPath);
+				for (var i=0; i<files.length; i++) {
+					if(files[i] == fileName) {
+exist = true;
+						break;
+					}
+				}
+				
+				if(exist) console.log(fileName + " exists in " + folder);
+				else console.log(fileName + " does Not exists in " + folder);
+			});
+			
+		}
+		
+		// We always get the close event !? Yep
+		
+	});
+	
+	npmProcess.on('close', function npmProcessClose(exitCode) {
+		console.log("npm " + arg[0] + " exitCode=" + exitCode + " stdout=" + UTIL.shortString(stdout) + "stderr=" + stderr + " stderr.length=" + (stderr && stderr.length));
+		if(callback) callback(npmError, stdout, stderr);
+	});
+	
 }
 
 
@@ -1069,7 +1213,6 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 	debugit = false;
 	
 	var directory = UTIL.getDirectoryFromPath(filePath);
-	npmExecFileOptions.cwd = directory;
 	
 	var patchedFilePath = filePath + ".tmp";
 	/*
@@ -1096,7 +1239,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			// package.json was found. Lets make sure dependencies exist
 			var execFile = require('child_process').execFile;
 			var arg = ["install"];
-			execFile("/usr/share/npm/bin/npm-cli.js", arg, npmExecFileOptions, function (err, stdout, stderr) {
+			npm(arg, {cwd: directory}, function (err, stdout, stderr) {
 				
 				console.log("npm install err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
 				
@@ -1107,9 +1250,12 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 					stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
 					stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
 					stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
+					stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
 					
 					if(stderr) return callback(new Error("Problem installing modules/dependencies': " + stderr));
 				}
+				
+				stdout = stdout.replace(/up to date in [0-9.]*s/, "").trim();
 				
 				if(stdout) {
 					user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
@@ -1181,7 +1327,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		var lineNr = 0;
 		
 		if(USE_CHROOT) {
-			var nodejsPath = "/usr/bin/nodejs";
+			var nodejsPath = "/usr/bin/node";
 		}
 		else {
 			var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
@@ -1232,7 +1378,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			
 			nodeScript.on("message", messageFromNodeScript);
 			nodeScript.on("error", nodeScriptError);
-			nodeScript.on("exit", nodejScriptExit);
+			nodeScript.on("close", nodejScriptClose); // Use close instead of exit, becuase it will not exit if it fails to start (but will always close)
 			
 			nodeScript.stdout.on('data', nodejsScriptStdout);
 			nodeScript.stderr.on('data', nodejsScriptStderr);
@@ -1241,7 +1387,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				nodeScript.stdin.setEncoding('utf-8');
 			}
 			
-			// note: The worker process will not exit (unless there's an error) if it has to listen for messages from parent
+			// note: The worker process will not close/exit (unless there's an error) if it has to listen for messages from parent
 			
 			user.runningNodeJsScripts[filePath] = {childProcess: nodeScript, isDebugger: debugit};
 			callback(null, {filePath: filePath});
@@ -1253,17 +1399,25 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 			user.send({nodejsMessage: {scriptName: filePath, ICP: message}});
 		}
 		
-		function nodejScriptExit(code, signal) {
-			console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
+		function nodejScriptClose(code, signal) {
+			console.log(user.name + ":" + filePath + ":close: code=" + code + " signal=" + signal);
 			
 			delete user.runningNodeJsScripts[filePath];
 			
-			user.send({nodejsMessage: {scriptName: filePath, exit: {code: code, signal: signal}}});
+			user.send({nodejsMessage: {scriptName: filePath, close: {code: code, signal: signal}}});
 			
 		}
 		
 		function nodeScriptError(err) {
 			console.log(user.name + " nodejs script error: err=" + err);
+			
+			// Note: There will be no exit event if nodejs fail to start! So we'll listen for close instead, which will always fire, even if it fails to start.
+			
+			console.log("err.code=" + err.code);
+			console.log("err.message=" + err.message);
+			
+			if(err.message == "spawn /usr/bin/node ENOENT") user.send("Failed to start nodejs. Contact system administrator.");
+			
 			//user.send({nodejsMessage: {scriptName: filePath, error: err.message}});
 		}
 		
@@ -1488,7 +1642,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 	var nodeInspectArgs = [];
 	
 	if(USE_CHROOT) {
-		var nodejsPath = "/usr/bin/nodejs";
+		var nodejsPath = "/usr/bin/node";
 	}
 	else {
 		var nodejsPath = process.argv[0]; // First argument is the path to the nodejs executable!
@@ -1537,7 +1691,7 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 		
 		nodeInspect.on("message", messageFromNodeScript);
 		nodeInspect.on("error", nodeInspectError);
-		nodeInspect.on("exit", nodejScriptExit);
+		nodeInspect.on("close", nodejScriptClose);
 		
 		nodeInspect.stdout.on('data', nodejsScriptStdout);
 		nodeInspect.stderr.on('data', nodejsScriptStderr);
@@ -1558,12 +1712,12 @@ function debugUsingChromeDebuggingProtocol(remotePort, visitUrl, breakPoints, so
 		user.send({nodejsMessage: {scriptName: filePath, ICP: message}});
 	}
 	
-	function nodejScriptExit(code, signal) {
-		console.log(user.name + ":" + filePath + ":exit: code=" + code + " signal=" + signal);
+	function nodejScriptClose(code, signal) {
+		console.log(user.name + ":" + filePath + ":close: code=" + code + " signal=" + signal);
 		
 		delete user.runningNodeJsScripts[filePath];
 		
-		user.send({nodejsMessage: {scriptName: filePath, exit: {code: code, signal: signal}}});
+		user.send({nodejsMessage: {scriptName: filePath, close: {code: code, signal: signal}}});
 		
 	}
 	

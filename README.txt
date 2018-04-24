@@ -12,17 +12,39 @@ See contribute.txt on how to send your changes.
 Install instructions
 ====================
 
+Linux:
+------
+1. Open a terminal ...
+
+2. Install nodejs from nodesource:
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+3. Navigate to the folder where you put jzedit: cd jzedit
+
+4. Install "node_modules" packages: npm install
+
+5. Make jzedit.desktop and start.sh executable:
+Via terminal: chmod +x jzedit.desktop start.sh
+Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
+
+6. "install": Double click on jzedit.desktop to start the editor. 
+Then right click on the JZedit icon on the Launcher (left side), and select "Lock to Launcher"
+
+Or run the editor via ./start.sh
 
 
 Windows
 -------
 
-Download and install nodejs from https://nodejs.org/
+1. Download and install nodejs from https://nodejs.org/
 It should come with a packet manager called npm.
 
-Open a command prompt (Click on start menu => run, then type "cmd.exe")
-Navigate to the folder this file is located in via the command prompt: cd path\to\jzedit
-Then install the dependencies by typing "npm install" and hit enter in the command prompt.
+2. Open a command prompt (Click on start menu => run, then type "cmd.exe")
+
+3. Navigate to the folder this file is located in via the command prompt: cd path\to\jzedit
+
+4. Install the dependencies by typing "npm install" and hit enter in the command prompt.
 
 After nodejs and all dependencies are installed, double click (run) start.bat
 
@@ -30,37 +52,23 @@ After nodejs and all dependencies are installed, double click (run) start.bat
 
 If you want the editor to auto "restart", add restart after target in the shortcut, like this: C:\Users\Z\dev-repositories\jzedit\start.bat restart
 
-Linux:
-------
-Open a terminal ...
-Navigate to the folder where you put jzedit: cd jzedit
-Install nodejs: sudo apt install nodejs
-Link nodejs to node: sudo ln -s `which nodejs` /usr/bin/node
-Install npm (Node Package Manager): sudo apt install npm
-Install "node_modules" packages: npm install
-
-
-Make jzedit.desktop and start.sh executable:
-Via terminal: chmod +x jzedit.desktop start.sh
-Via GUI: Right click, Properties, Permissions tab, Allow executing file as program. Then double click on the icon.
-
-"install": Double click on jzedit.desktop, then: Right click on the icon on the Launcher (left side), select "Lock to Launcher"
-
-Or run it via ./start.sh
 
 
 Mac OS X
 --------
-Download and install nodejs from https://nodejs.org/
+1. Download and install nodejs from https://nodejs.org/
 It should come with a packet manager called npm.
 
-Open a terminal: Function-key + Space, and type "terminal"
-Navigate to the folder this file is located in via the terminal: cd path\to\jzedit
-Then install the dependencies by typing "npm install" and hit enter in the terminal.
-After nodejs and all dependencies are installed, type this in the terminal:
+2. Open a terminal: Function-key + Space, and type "terminal"
+
+3. Navigate to the folder this file is located in via the terminal: cd path\to\jzedit
+
+4. Install the dependencies by typing "npm install" and hit enter in the terminal.
+
+5. After nodejs and all dependencies are installed, type this in the terminal:
 node server/server.js --port=8080 --user=admin --pw=admin -nochroot
 
-Then navigate to this address in your favorite web browser: http://127.0.0.1:8080/
+6. Navigate to the following address in your favorite web browser: http://127.0.0.1:8080/
 
 
 
@@ -145,8 +153,9 @@ It's also uneccesary with a high-res monitor.
 
 Turn off "LCD Text" / sub-pixel-antialas
 -----------------------------------------
-Start the program with the argument --disable-lcd-text. (See start.bat / start.sh)
-And set "global.settings.sub_pixel_antialias = false" in settings_overload.js
+Start the program with the argument --disable-lcd-text. See start.bat (Windows) or /start.sh (Linux)
+
+Set "global.settings.sub_pixel_antialias = false" in settings_overload.js
 
 Or turn it off in your operating system! (It's already turned off if you have a Mac with "Retina" display)
 
@@ -154,34 +163,67 @@ Or turn it off in your operating system! (It's already turned off if you have a 
 
 Running as a cloud editor
 =========================
-You can use the editor as a native standalone editor. But it's also possible to use it as a cloud editor!
+You can use the editor "natively" running on your desktop via nw.js or in the browser. 
+But it's also possible to use the editor as a "cloud" editor, running on a server, and access it via a web browser.
 
-Make sure nodejs is installed:
-# apt install nodejs
+It's recommended to use ZFS on the server, so each user can have their own file-system and be able to take snapshots etc.
 
-If you have a Linux (Ubunt) server you can run this install script:
+Installing/upgrading Nodejs
+---------------------------
+Uninstall nodejs if it's already installed, then install it form nodesource.
+See https://github.com/nodesource/distributions
+
+# Using Ubuntu
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
+
+
+Installing certbot (letsencrypt)
+--------------------------------
+$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo add-apt-repository ppa:certbot/certbot
+$ sudo apt-get update
+$ sudo apt-get install python-certbot-nginx 
+
+
+Automatically set up the server for running jzedit as a cloud ide:
+------------------------------------------------------------------
+If you have a Linux (Ubuntu) server you can run this install script:
 nodejs cloudide_install.js --domain=yourdomain.com
 
-Edit /etc/nginx/sites-available/yourdomain.com.nginx
+The editor will be installed as a SystemD daemon.
 
+Start the jzedit server: sudo systemctl start jzedit
+
+Edit /etc/nginx/sites-available/yourdomain.com.nginx
 
 To check for Nginx config problems:
 # nginx -T
 
+
+Installing vnc dependencies
+---------------------------
+sudo apt update
+sudo apt install xvfb x11vnc chromium-browser
+
+
 Adding and removing users
 -------------------------
+Use the following script to add users to the cloud ide:
+./adduser.js name passw
+
+To remove a user:
+./removeuser name
 
 # Error: Command failed: umount "target is busy"
 ps -aux | grep nodejs
 kill -s 2 810460 
 sudo -u username kill 810460
 
-You might have to: sudo systemctl disable jzedit_user_mounts && sudo reboot
-
-Installing vnc dependencies
----------------------------
-sudo apt update
-sudo apt install xvfb x11vnc chromium-browser
+You might have to reboot in order to unmount all directories.
 
 
 Apparmor debugging
@@ -221,16 +263,6 @@ sudo aa-complain /home/demo/usr/bin/hg
 sudo aa-enforce /home/demo/usr/bin/hg
 
 
-Installing certbot (letsencrypt)
---------------------------------
-$ sudo apt-get update
-$ sudo apt-get install software-properties-common
-$ sudo add-apt-repository ppa:certbot/certbot
-$ sudo apt-get update
-$ sudo apt-get install python-certbot-nginx 
-
-
-
 
 Installing more programs to the users folder (chroot)
 -----------------------------------------------------
@@ -241,28 +273,39 @@ which python
 
 # What libs are used ?
 ldd /usr/bin/python
-# Copy them to user home dir
+# Make sure they are mounted in the user's home dir. See server/server.js function checkMounts
 
 # Try to run it in chroot
 chroot /home/demonisse/ /usr/bin/python -c 'print "hi"'
 
-# Find all other dependencies and put them in the chroot (users home dir)
+# Find all other dependencies and mount or copy them into the chroot (users home dir)
 # See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program
 wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
 sudo chmod +x tracefile
 ./tracefile python
 
 
-# Cate an apparmor profile
+# Create an apparmor profile
 
 
-Moving user from a server to another using zfs
-----------------------------------------------
+Debugging Error: spawn EACCES
+-----------------------------
+
+1. Figure out where the spawning error is by console.log spawn exe and arg at every spawn
+2. Try running the command in a chroot, for example: sudo chroot /home/ltest4/ node -v
+3. Try running the command as that user: sudo -u ltest4 node -v
+
+
+
+
+Moving user to another using ZFS
+--------------------------------
+Run this command from the server you want to move the user TO:
 ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser
 
 (The same method can be used to make backups)
 
-# Enable the user on the new server: 
+# Enable the user on the new server by adding a new system account: 
 sudo useradd -r -s /bin/false nameofuser
 
 
@@ -283,13 +326,15 @@ sudo apt update && sudo apt upgrade
 sudo apt autoremove
 
 # Always reboot after a system upgrade to check if the system boots with the new upgrades
-# You don't want the system to be stuck att boot during a unplanned reboot (for example automatic start after power failure)
+# You don't want the system to be stuck at boot during a unplanned reboot (for example automatic start after power failure)
+
 
 
 Compiling dependencies for old nw.js
 ====================================
 
-for the right modules version:
+For running jzedit in older versions of nw.js
+
 node-gyp rebuild --target=1.2.0 --msvs_version=2015
 
 
@@ -320,8 +365,8 @@ Problems running apt
 You might get an error like this:
 unable to make backup link of './usr/bin/python2.7' before installing new version: Invalid cross-device link
 
- This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
-E:
+This is because the program is mounted in user dir's. Stop jzedit and then reboot the server to release all mountpoints.
+
 
 
 

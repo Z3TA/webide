@@ -3,6 +3,8 @@
 
 "use strict";
 
+if(process.version.indexOf("v8.") != 0) console.warn("The editor has only been tested with node.js version 8!");
+
 var DEFAULT = require("../default.js");
 
 var getArg = require("../shared/getArg.js");
@@ -140,7 +142,6 @@ process.on("exit", function () {
 
 function main() {
 	
-	
 	// Get the current user (who runs this server)
 	var os = require("os");
 	var info = os.userInfo ? os.userInfo() : {username: "ROOT", uid: process.geteuid()};
@@ -157,8 +158,6 @@ function main() {
 		log(info);
 		process.exit();
 	}
-	
-	
 	
 	var sockJs = require("sockjs");
 	var wsServer = sockJs.createServer();
@@ -593,10 +592,8 @@ idFail("Wrong password for user: " + username);
 							console.log("Checking mounts ...");
 							
 							var nginxProfileOK = false;
-							var nodeJsLinkOK = false;
 							var nullNodCreated = false;
-							var urandomCreated = false;
-							var foldersToMount = 12;
+							var foldersToMount = 17;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -677,13 +674,6 @@ idFail("Wrong password for user: " + username);
 								});
 								
 								// Make sure mounts exist
-								// We need separate executables (hard link works) to have separate apparmor profiles
-								mount(process.argv[0], '/usr/bin/nodejs_' + username, function(err) {
-									if(err) throw err;
-									
-									nodeJsLinkOK = true;
-									checkMountsReadyMaybe();
-								});
 								
 								makeDirP(homeDir + "dev", function() {
 									if(checkMountsAbort) return;
@@ -712,36 +702,52 @@ idFail("Wrong password for user: " + username);
 											checkMountsReadyMaybe();
 										}
 									});
-									
-									// On some systems we need to mount --bind urandom (not create it)
-									mount("/dev/urandom", HOME_DIR + username + "/dev/urandom", function (err) {
-										if(err) throw err;
-										
-										urandomCreated = true;
-										checkMountsReadyMaybe();
 									});
-								});
 								
-								// Mount these instead of copying to save hdd space
+								// On some systems we need to mount --bind urandom (not create it) or we'll get ... errors ?
+								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
+								
+								/*
+									Mount these instead of copying to save hdd space
+									Don't forget to update var foldersToMount=
+									
+									Problem: Racing to create folders
+									Solution: Create folder before mounting
+								*/
+								
 								mount("/lib/", homeDir + "lib", folderMounted);
 								mount("/lib64/", homeDir + "lib64", folderMounted);
 								mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
 								mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-								mount("/usr/share/", homeDir + "usr/share", folderMounted); // npm dependencies
-								mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-								mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-								mount(process.argv[0], homeDir + "usr/bin/nodejs", folderMounted);
-								mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+								//mount("/usr/share/", homeDir + "usr/share", folderMounted); // npm dependencies
 								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+								mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
-								mount("/dev/pts/", homeDir + "/dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
+								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								
-								// Create apparmor proiles unless they exist
+								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for require('os').cpus()
+								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
+								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
+								if(false) {
+									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
+									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+									mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
+								}
+								else {
+									// For testing
+									foldersToMount = foldersToMount - 3;
+									mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
+								}
+								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
+								mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted); 
+								
+								// Create apparmor profiles unless they already exist
 								createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.nodejs", username, apparmorProfileCreated);
+								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.node", username, apparmorProfileCreated);
 								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.python", username, apparmorProfileCreated);
 								createApparmorProfile("../etc/apparmor/home.someuser.usr.bin.hg", username, apparmorProfileCreated);
-								createApparmorProfile("../etc/apparmor/home.someuser.usr.share.npm.bin.npm-cli.js", username, apparmorProfileCreated);
+								createApparmorProfile("../etc/apparmor/home.someuser.usr.lib.node_modules.npm.bin.npm-cli.js", username, apparmorProfileCreated);
 								createApparmorProfile("../etc/apparmor/home.someuser.bin.bash", username, apparmorProfileCreated);
 								
 							});
@@ -844,8 +850,7 @@ idFail("Wrong password for user: " + username);
 									}
 									else console.log("checkUserRights: toChown=" + toChown + " toStat=" + toStat);
 								}
-								
-							}
+								}
 							
 							function apparmorProfileCreated(err) {
 								if(err) throw err;
@@ -873,12 +878,13 @@ idFail("Wrong password for user: " + username);
 									return checkMountsError(err);
 									//throw err;
 								}
+								if(foldersToMount < 0) throw new Error("foldersToMount=" + foldersToMount);
 								checkMountsReadyMaybe();
 							}
 							
 							function checkMountsReadyMaybe() {
 								if(checkMountsAbort) return;
-								if(nginxProfileOK && nodeJsLinkOK && nullNodCreated && urandomCreated && foldersToMount == 0 && 
+								if(nginxProfileOK && nullNodCreated && foldersToMount == 0 && 
 								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) &&
 								sslCertChecked) {
 									if(!userAccepted) { // Prevent double accept
@@ -887,8 +893,8 @@ idFail("Wrong password for user: " + username);
 									}
 									else throw new Error("User already accepted!");
 								}
-								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " nodeJsLinkOK=" + nodeJsLinkOK + " nullNodCreated=" + nullNodCreated + 
-								" urandomCreated=" + urandomCreated + " foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
+								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " nullNodCreated=" + nullNodCreated + 
+								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
 								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked);
 							}
 							
@@ -1047,7 +1053,7 @@ idFail("Wrong password for user: " + username);
 							
 							userWorker.send({identify: userInfo});
 							userWorker.on("message", messageFromWorker);
-							userWorker.on("exit", workerExitHandler);
+							userWorker.on("close", workerCloseHandler);
 							
 							/*
 								setTimeout(function() {
@@ -1148,10 +1154,10 @@ idFail("Wrong password for user: " + username);
 								
 							}
 							
-							function workerExitHandler(code, signal) {
-								console.log(userConnectionName + " worker exit: code=" + code + " signal=" + signal);
+							function workerCloseHandler(code, signal) {
+								console.log(userConnectionName + " worker close: code=" + code + " signal=" + signal);
 								
-								var msg = "Your worker process exited with code=" + code + " and signal=" + signal;
+								var msg = "Your worker process closed with code=" + code + " and signal=" + signal;
 								
 								if(code !== 0) {
 									msg += " Which means it crashed. And you should probably file a bug report!\n\n(worker process is being restarted ...)";
@@ -1162,7 +1168,7 @@ idFail("Wrong password for user: " + username);
 									userWorker.send({identify: userInfo});
 									
 									userWorker.on("message", messageFromWorker);
-									userWorker.on("exit", workerExitHandler);
+									userWorker.on("close", workerCloseHandler);
 									
 								}
 								
@@ -1624,11 +1630,10 @@ function createUserWorker(name, uid, gid) {
 		console.log(name + " worker error: err.message=" + err.message);
 	});
 	
-	/*
-		worker.on("exit", function workerExit(code, signal) {
+	// Update between node4 and node8: It no longer calls exit, only close
+	worker.on("exit", function workerExit(code, signal) {
 		console.log(name + " worker exit: code=" + code + " signal=" + signal);
 		});
-	*/
 	
 	return worker;
 	
@@ -2160,29 +2165,44 @@ function mount(sourcePath, targetPath, callback) {
 		
 		if(err) return mountDone(err);
 		
+		console.log("Folder exist: " + sourcePath);
+		
 		// Does the target exist ?
 		fs.stat(targetPath, function(err, targetStats) {
 			
 			if(err) {
 				if(err.code != "ENOENT") return mountDone(err);
 				
+				console.log("Target doesn't exist: " + targetPath);
+				
 				if(sourceStats.isDirectory()) {
+					console.log("Source is a directory: " + targetPath);
 					makeDirP(targetPath, function(err) {
 						if(err) return mountDone(err);
+						console.log("Target directory created: " + targetPath);
 						targetCreated();
 					});
 				}
 				else {
+					console.log("Source is a file: " + targetPath);
 					var parentFolder = UTIL.parentFolder(targetPath);
 					makeDirP(parentFolder, function(err) {
-						if(err) return mountDone(err);
+						if(err) {
+							if(err.code == "EEXIST" && err.message.indexOf(parentFolder) != -1) {
+								// If mount is called several time with the same root folders there can be racing 
+								console.log("Racing to create parentFolder=" + parentFolder + ": " + err.message);
+							}
+							else return mountDone(err);
+						}
 						
 						// Create emty file
+						console.log("Creating emty file: " + targetPath);
 						fs.open(targetPath, 'w', function (err, fileDescriptor) {
 							if(err) return mountDone(err);
 							
 							fs.close(fileDescriptor, function(err) {
 								if(err) return mountDone(err);
+								console.log("Emty file created: " + targetPath);
 								targetCreated();
 							}); 
 						});
@@ -2190,6 +2210,8 @@ function mount(sourcePath, targetPath, callback) {
 				}
 			}
 			else {
+				
+				console.log("Target exist: " + targetPath);
 				
 				if(sourceStats.ino == targetStats.ino) return mountDone(null); // Already mounted!
 				
@@ -2209,7 +2231,10 @@ function mount(sourcePath, targetPath, callback) {
 				}
 				else {
 					// Make sure the file is emty
-					if(targetStats.size !== 0) mountDone(new Error("Target file not emty! Can not mount to targetPath=" + targetPath + " targetStats=" + targetStats + " "));
+					if(targetStats.size !== 0) {
+mountDone(new Error("Target file not emty! Can not mount sourcePath=" + sourcePath + " to targetPath=" + targetPath + 
+						" targetStats=" + targetStats + " sourceStats.ino=" + sourceStats.ino + " targetStats.ino=" + targetStats.ino + ""));
+					}
 					else targetCreated();
 					
 				}

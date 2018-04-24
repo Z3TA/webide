@@ -16,7 +16,6 @@
   "version": "1.0.0",
   "author": "Johan Zetterberg <zeta@zetafiles.org>",
   "dependencies": {
-    "chokidar": "^1.7.0",
     "diff": "^2.2.3",
     "ftp": "https://github.com/Z3TA/node-ftp/tarball/master",
     "http-proxy": "^1.16.2",
@@ -27,16 +26,15 @@
     "posix": "^4.1.1",
     "ps-node": "^0.1.6",
     "pty.js": "^0.3.1",
-    "replacestream": "^4.0.0",
     "sockjs": "^0.3.4",
     "ssh2": "^0.5.0",
-    "walk": "^2.3.9"
+    "walk": "^2.3.13"
   },
   "repository": {
     "type": "Mercurial",
     "url": "http://hg.webtigerteam.com/repo/jzedit/"
   },
   "devDependencies": {
-    "uglify-js": "^3.1.4"
+    "uglify-js": "^3.3.21"
   }
 }

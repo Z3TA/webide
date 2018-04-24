@@ -38,11 +38,51 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+problem: npm deletes unknown module dirname (which is used by nw.js)
+
+
+We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
 
 
 todo
 ----
+
+Prevent user_worker.js process from closing/restarting several times in a row!
+
+biggest update to node4 -> node8 is that child processes don't call exit, they instead call close
+
+
+File explorer doesn't become visible until there is a resize when no files can be found ...
+
+---
+When typing in a full file path in File (search)
+Try to open the file
+change dir and search
+
+ex: /usr/lib/node_modules/npm/node_modules/update-notifier/index.js in directory /home/Z/Projects/jzedit/
+/home/Z/Projects/jzedit/ is not in the file path !
+1. Try to open the file path
+2. Change to that folder and search for the file eg set directory to /usr/lib/node_modules/npm/node_modules/update-notifier/ and file (search) to index.js (whatever is after the path delimiter / (slash)
+
+---
+
+When insert an if-statement and typing after it, the line below is indented which is annoying (due to optimizer not doing a full parse)
+Make a full parse if the line starts with if,for,while and the line below is indented !? Or de-indent the line below !?
+
+---
+more work on autocompletion !? Add completions for the ctx web 2d canvas api. Via canvas.getContext('2d') !?
+can the editor figure out that var ctx = canvas.getContext('2d') !? And give dynamic auto-complete !?
+Record demo video, or take screenshots and write a blog post.
+---
+
+Unable to save as on ftp, "unable to get file size".
+
+Should Not be indented:
+if(1==2) ; <-- semicolon
+	console.log("Hello!");
+
+when hitting backspace to delete left to a } it get indented
 
 prio: Fix indentation characters!
 
@@ -115,8 +155,8 @@ Make spellchecker work on server-side and use node_modules instead of compiled f
 
 investigate build.js vs ssg-build.js
 
-
-
+Use ip namespaces and redirect via nginx ex: user.webide.se/port8080 => port 8080 on users ip namespace
+Reason: Many tools want to listen on localhost:someport
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -1331,6 +1371,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+
+---
 
 Autocomplete doesn't not always work! which is annoying! It should be able to work reliably !
 

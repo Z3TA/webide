@@ -109,6 +109,7 @@
 					
 					if(err) {
 						console.error(err);
+						alertBox(err.message);
 						showLoginDialog();
 					}
 					else {

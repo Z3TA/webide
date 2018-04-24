@@ -325,25 +325,23 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		var letsencrypt = require("./shared/letsencrypt.js");
 		letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL);
 		
+		/*
+			In order to have a separate apparmor profile for user_worker.js we need a separate executable (scripts also work, but we need the node rcp channel so we need to use fork and not spawn)
+			Use mount --bind instead of hard link to prevent EXDEV: cross-device link not permitted (we sometimes got that error even though the link was on the same device!)
+			Note: user_worker.js needs capability setgid, setuid, and sys_chroot, which we don't want to give to user scripts, only user_worker.js!
+			It's thus important that when user_worker.js forks, it has to set execPath in fork options!!
+			
+			It will be mounted the first time user logs in.
+		*/
+		//mount('/usr/bin/node', '/usr/bin/nodejs_' + username);
 		
-		// Create a hard link to nodejs for use with user_worker.js so that we can have a separate apparmor profile on it and still use nodejs fork
-		//fs.linkSync('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
-		// Use mount --bind instead of hard link to prevent EXDEV: cross-device link not permitted (we sometimes got that error even though the link was on the same device!)
-		mount('/usr/bin/nodejs', '/usr/bin/nodejs_' + username);
+		//var makeNull = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/null c 1 3").toString(ENCODING);
+	//if(makeNull.trim() != "") throw makeNull;
+		// /dev/null will be created when user first login
 		
-		
-	// Nodejs needs /dev/urandom and /dev/null to start
-	fs.mkdirSync(homeDir + "dev");
-	
-		//var makdeUrandom = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/urandom c 1 9").toString(ENCODING);
-	//if(makdeUrandom.trim() != "") throw makdeUrandom;
-	
-		var makeNull = child_process.execSync("mknod -m 444 " + HOME + username + "/dev/null c 1 3").toString(ENCODING);
-	if(makeNull.trim() != "") throw makeNull;
-	
 	// On some systems we need to mount --bind urandom !??
-		mount("/dev/urandom", HOME + username + "/dev/urandom");
-	
+		//mount("/dev/urandom", HOME + username + "/dev/urandom");
+		// Will be mounted when the user logs in
 	
 	// Create directory for executables
 		fs.mkdirSync(HOME + username + "/usr/");

@@ -5,12 +5,18 @@
 	
 	Only run this script if you want to install the editor as a cloud editor!
 	
+	Before running this you need to uninstall nodejs and then re-install it:
+	curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+	sudo apt-get install -y nodejs
 	
 */
 
 if(process.platform == "win32") throw new Error("This install script only runs under Linux (Ubuntu)");
 // You might be able to figure out the steps needed by reading this file ...
 // While it's possible to run the server in Windows, we highly recommend running in a unix-like system like Linux (Ubuntu)'
+
+if(process.version.indexOf("v8.") != 0) throw new Error("The editor currently only supports nodejs version 8.");
+// It will most likely also work with newer versions. But they have yet not been tested.
 
 var os = require("os");
 var info = os.userInfo ? os.userInfo() : {username: "ROOT", uid: process.geteuid()};

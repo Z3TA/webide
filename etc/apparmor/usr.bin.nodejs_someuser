@@ -1,8 +1,8 @@
 #
-# Profile for the hard link to nodejs running user_worker.js 
+# Profile for user_worker.js 
 # which will setuid, setgid and chroot itself to the user's home dir
 #
-# This process will spawn %HOME%%USERNAME%/usr/bin/nodejs 
+# This process can spawn %HOME%%USERNAME%/usr/bin/nodejs 
 # which is responsible for running user scripts
 # 
 
@@ -66,7 +66,7 @@
   # P means "use profile" (and clear enviroment), x means execute
   %HOME%%USERNAME%/usr/bin/hg Px,
   %HOME%%USERNAME%/usr/bin/nodejs Px,
-  %HOME%%USERNAME%/usr/share/npm/bin/npm-cli.js Px,
+  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
   %HOME%%USERNAME%/bin/bash Px,
 
 }
