@@ -38,7 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-problem: npm deletes unknown module dirname (which is used by nw.js)
 
 
 We better support the latest (LTS?) version of nodejs or hipsters will diss us.
@@ -48,12 +47,13 @@ We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 todo
 ----
 
+move spellchecker to server
+
+upgrade to latest nw.js
+
+fix problem: npm deletes unknown module dirname (which is used by nw.js)
+
 Prevent user_worker.js process from closing/restarting several times in a row!
-
-biggest update to node4 -> node8 is that child processes don't call exit, they instead call close
-
-
-File explorer doesn't become visible until there is a resize when no files can be found ...
 
 ---
 When typing in a full file path in File (search)

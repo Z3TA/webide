@@ -855,13 +855,19 @@ idFail("Wrong password for user: " + username);
 							function apparmorProfileCreated(err) {
 								if(err) throw err;
 								apparmorProfilesToCreate--;
-								
+								var counter = 0;
 								if(apparmorProfilesToCreate == 0 && reloadApparmor) {
 									var exec = require('child_process').exec;
+									console.log("exec: service apparmor reload ...");
+									var apparmorReloadTimer = setInterval(checkApparmorReloaded, 500);
 									exec("service apparmor reload", function(error, stdout, stderr) {
 										if(error) throw(error);
 										if(stderr) throw new Error(stderr);
 										if(stdout) throw new Error(stdout);
+										
+										console.log("done: service apparmor reload");
+										
+										clearInterval(apparmorReloadTimer);
 										
 										reloadedApparmor = true;
 										checkMountsReadyMaybe();
@@ -869,6 +875,11 @@ idFail("Wrong password for user: " + username);
 								} 
 								
 								checkMountsReadyMaybe();
+								
+								function checkApparmorReloaded() {
+									console.log("Waiting for apparmor to reload ... " + ++counter);
+								}
+								
 							}
 							
 							function folderMounted(err) {
@@ -943,6 +954,7 @@ idFail("Wrong password for user: " + username);
 													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 												*/
 												
+												return callback(null);
 											});
 										});
 									}
@@ -2192,16 +2204,29 @@ function mount(sourcePath, targetPath, callback) {
 								// If mount is called several time with the same root folders there can be racing 
 								console.log("Racing to create parentFolder=" + parentFolder + ": " + err.message);
 							}
-							else return mountDone(err);
+							else {
+								console.log("makeDirP failed!");
+								console.log("err.code=" + err.code + " ==EEXIST ? " + (err.code == "EEXIST") + "");
+								console.log("parentFolder=" + parentFolder);
+								console.log("err.message=" + err.message + " (err.message.indexOf(parentFolder)=" + err.message.indexOf(parentFolder) + ")");
+								return mountDone(err);
+							}
 						}
 						
 						// Create emty file
 						console.log("Creating emty file: " + targetPath);
 						fs.open(targetPath, 'w', function (err, fileDescriptor) {
-							if(err) return mountDone(err);
+							if(err) {
+								console.log("fs.open targetPath=" + targetPath + " error: " + err.message);
+								return mountDone(err);
+							}
+							console.log("File opened for write: " + targetPath);
 							
 							fs.close(fileDescriptor, function(err) {
-								if(err) return mountDone(err);
+								if(err) {
+									console.log("fs.close targetPath=" + targetPath + " error: " + err.message);
+									return mountDone(err);
+								}
 								console.log("Emty file created: " + targetPath);
 								targetCreated();
 							}); 
@@ -2343,7 +2368,7 @@ function makeDirP(path, callback) {
 				
 				// The path does not exist. Create it!
 				fs.mkdir(folderPath, function (err) {
-					if(err) return makeDirPDone(err);
+					if(err && err.code != "EEXIST") return makeDirPDone(err);
 					
 					if(folders.length > 0) checkFolder(folders.shift());
 					else makeDirPDone(null);
