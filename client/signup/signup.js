@@ -78,7 +78,9 @@
 					else if(code == "serviceError") alertGeneralMessage(arr[1]);
 					else if(code == "created") {
 						alertGeneralMessage("Successfully created user " + arr[1]);
-						document.location = location.protocol + "://" + arr[2] + "/";
+					var url = location.protocol + "://" + arr[2] + "/";
+					console.log("Navigating to url=" + url + " location.protocol=" + location.protocol);
+					document.location = url;
 					}
 					else {
 						throw new Error("Unknown message from signup service: " + msg);
@@ -132,7 +134,8 @@
 				
 				if(charCode == CHARCODE_ENTER && 
 				inputUsername.value.length >= MIN_USERNAME_LENGTH &&
-				password == password2) createAccount(inputUsername.value, inputPassword.value);
+			inputPassword.value.length >= MIN_PW_LENGTH &&
+			password == password2) createAccount(inputUsername.value, inputPassword.value);
 				
 			}
 			
