@@ -38,7 +38,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-can't stop nodejs scripts!
+write a test for starting and stopping nodejs processes
+
+
 
 We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
@@ -46,6 +48,8 @@ We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
 todo
 ----
+
+in Firefox, if the function list is longer then 100% you get annoying orange color
 
 move spellchecker to server
 
