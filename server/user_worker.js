@@ -1178,11 +1178,12 @@ function stopNodeJsScript(filePath, callback) {
 	var killTimeout = setTimeout(function kill() {
 		// Now kill it for good
 		childProcess.kill('SIGKILL');
+		if(childProcess.connected) childProcess.disconnect();
 		setTimeout(function wait() {
 			// Make sure it has exited
 			if(user.runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
 			callback(null);
-		}, 1000);
+		}, 300);
 	}, 3000);
 	
 	setTimeout(function checkIfStillRunning() {
@@ -1190,14 +1191,12 @@ function stopNodeJsScript(filePath, callback) {
 		if(!user.runningNodeJsScripts.hasOwnProperty(filePath)) {
 			//clearTimeout(signalTimeout);
 			clearTimeout(killTimeout);
+			if(childProcess.connected) childProcess.disconnect();
 			callback(null);
 		}
 	}, 500);
 	
 	function sendSignals() {
-		
-		if(childProcess.connected) childProcess.disconnect();
-		
 		// Give it a chance to teardown before killing it
 		childProcess.kill('SIGTERM');
 		childProcess.kill('SIGINT');
