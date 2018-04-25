@@ -21,7 +21,7 @@
 
 var getArg = require("./shared/getArg.js");
 
-var DEFAULT = require("default.js");
+var DEFAULT = require("./default.js");
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 

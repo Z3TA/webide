@@ -21,7 +21,7 @@
 
 "use strict";
 
-var DEFAULT = require("default.js"");
+var DEFAULT = require("./default.js");
 
 
 // Don't allow these usernames
