@@ -1258,6 +1258,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 				stdout = stdout.replace(/up to date in [0-9.]*s/, "").trim();
 				
 				if(stdout) {
+					stdout += "\n"; // Re-add the new line after running trim()
 					user.send({nodejsMessage: {scriptName: filePath, stdout: stdout, type: "npm"}});
 				}
 				return patchIt(true);
