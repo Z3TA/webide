@@ -1183,7 +1183,7 @@ function stopNodeJsScript(filePath, callback) {
 			// Make sure it has exited
 			if(user.runningNodeJsScripts.hasOwnProperty(filePath)) throw new Error("Script should not be running: " + filePath);
 			callback(null);
-		}, 300);
+		}, 1000);
 	}, 3000);
 	
 	setTimeout(function checkIfStillRunning() {
