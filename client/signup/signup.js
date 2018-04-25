@@ -111,8 +111,6 @@
 			var urlUser = document.getElementById("urlUser");
 			urlUser.innerText = username;
 			
-			
-			
 			if(!usernameCheck()) return;
 			
 			clearTimeout(typingTimer);
@@ -129,11 +127,10 @@
 			if(!passwordCheck()) return;
 			
 			if(charCode == CHARCODE_ENTER && formCheck()) createAccount(inputUsername.value, inputPassword.value);
-			
 		}
 		
 		function createButtonClick() {
-			if(checkForm()) createAccount(username, password);
+			if(formCheck()) createAccount(username, password);
 		}
 		
 		function formCheck() {
