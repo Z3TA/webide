@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-
-
 We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
 
@@ -168,6 +166,11 @@ Reason: Many tools want to listen on localhost:someport
 
 What I'm thinking
 -----------------
+
+I always seem to screw up when pushing changes and making updates to prod.
+Should have a prod-middlewhere server with the same config and test it there first ? Or just roll back when I screw up !?
+
+---
 
 How to manage different versions of nodejs ? Or just run the latest !?
 each node version would need it's own apparmor profile.

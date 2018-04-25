@@ -173,9 +173,11 @@ Installing/upgrading Nodejs
 Uninstall nodejs if it's already installed, then install it form nodesource.
 See https://github.com/nodesource/distributions
 
+sudo apt remove nodejs && sudo apt remove npm
+
 # Using Ubuntu
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get install -y nodejs
+sudo apt update && sudo apt install -y nodejs
 
 # Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
 

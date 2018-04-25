@@ -1373,8 +1373,11 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, callback) {
 		
 		function start() {
 			var child_process = require("child_process");
+			console.log("Forking " + patchedFilePath + " ...");
+			console.log("nodeScriptArgs=" + JSON.stringify(nodeScriptArgs) + "");
+			console.log("nodeScriptOptions=" + JSON.stringify(nodeScriptOptions));
 			nodeScript = child_process.fork(patchedFilePath, nodeScriptArgs, nodeScriptOptions);
-			// The node worker will chroot to user's home dir, setegid and seteuid
+			// The node worker will chroot to user's home dir, setegid and seteuid ????? HUH ?
 			
 			nodeScript.on("message", messageFromNodeScript);
 			nodeScript.on("error", nodeScriptError);

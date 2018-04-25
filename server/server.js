@@ -728,7 +728,7 @@ idFail("Wrong password for user: " + username);
 								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for require('os').cpus()
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
-								if(false) {
+								if(true) {
 									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
