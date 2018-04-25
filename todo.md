@@ -51,6 +51,15 @@ We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 todo
 ----
 
+indentation:
+
+if(charCode == CHARCODE_ENTER && 
+				inputUsername.value.length >= MIN_USERNAME_LENGTH &&
+				password == password2) createAccount(inputUsername.value, inputPassword.value);
+
+---
+
+
 First time a user logs in it takes a while ... show a welcome message !?
 
 in Firefox, if the function list is longer then 100% you get annoying orange color
