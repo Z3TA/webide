@@ -12,7 +12,7 @@ body {
 	background-color: #f5f7fa;
 	background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
 	background-repeat: no-repeat;
-	}
+}
 
 .main {
 	margin: 2em;
@@ -89,7 +89,7 @@ legend {
 	background-color: white;
 	border-radius: 3px;
 	
-border: 1px solid #d9d9d9;
+	border: 1px solid #d9d9d9;
 }
 
 legend img {
@@ -119,7 +119,7 @@ fieldset {
 	background-repeat: repeat;
 	box-shadow: 0 0 0 1px rgba(14,41,57,.12),0 2px 5px #c9cfd5,inset 0 -1px 2px rgba(14,41,57,.15);
 	
-	}
+}
 
 .alpha.warning {
 	margin: 26px;
@@ -142,7 +142,7 @@ label {
 	text-shadow: none;
 	color: #1e2b32;
 	font-family: 'sans-serif';
-	}
+}
 
 input[type=text], input[type=password], select.select {
 	border-radius: 2px;
@@ -154,10 +154,10 @@ input[type=text], input[type=password], select.select {
 	margin-bottom: 10px;
 	margin-top: 3px;
 	background-color: white;
-	}
+}
 
-	
-	
+
+
 input[type=button], button, .button {
 	box-shadow: 0 1px 1px rgba(0,0,0,.16);
 	background: linear-gradient(#28a0e5,#015e94);
@@ -173,7 +173,12 @@ input[type=button], button, .button {
 	padding: 0.5em;
 	color: white;
 	text-decoration: none;
-	
+}
+
+input[type=button]:disabled, button:disabled, .button:disabled {
+	background: #C0C0C0;
+	border: 1px solid black;
+	color: #555555;
 }
 
 .alert {
@@ -185,7 +190,7 @@ input[type=button], button, .button {
 	font-size: 0.9em;
 	text-shadow: none;
 	font-family: 'sans-serif';
-	}
+}
 
 div.alert {
 	margin-top: 1em;
@@ -196,7 +201,7 @@ ul {
 	margin: 0;
 	padding: 0;
 	margin-left: 1em;
-	}
+}
 
 li {
 	display: list-item;
@@ -205,7 +210,7 @@ li {
 	margin: 0;
 	padding: 0;
 	margin-left: 2em;
-	}
+}
 
 ul.horizontal {
 	border: 0px solid green;
@@ -216,7 +221,7 @@ ul.horizontal {
 ul.horizontal li {
 	display: inline-block;
 	margin-left: 1em;
-	}
+}
 
 ul.horizontal li:first-child {
 	margin-left: 0;
