@@ -51,8 +51,8 @@ var eachUser = require("./shared/eachUser.js");
 
 eachUser(HOME_DIR, userFound, allUsersFound);
 
-function userFound(username, hashedPw, homeDir, uid, gid) {
-	startNodejsInitWorker(homeDir, username, uid, gid);
+function userFound(user) {
+	startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
 }
 
 function allUsersFound() {
@@ -209,7 +209,12 @@ function httpServerListening() {
 	log("Listening on http://" + HTTP_IP + ":" + HTTP_PORT);
 }
 
-function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
+function startNodejsInitWorker(homeDir, name, uid, gid) {
+	
+	if(typeof homeDir != "string") throw new Error("homeDir=" + homeDir + " needs to be a string (folder)!");
+	if(typeof name != "string") throw new Error("name=" + name + " needs to be a string!");
+	if(typeof uid != "number") throw new Error("uid=" + uid + " needs to be a number!");
+	if(typeof gid != "number") throw new Error("gid=" + gid + " needs to be a number!");
 	
 	var restartWaitTime  = 1000; // How long to wait for restart
 	var restartTimer;
@@ -241,8 +246,9 @@ function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
 			NODE_INIT_WORKER[name].kill('SIGKILL');
 		}
 		
-		log("Starting init worker for " + name + " ...");
-		NODE_INIT_WORKER[name] = child_process.fork("./nodejs_init_worker.js", nodeWorkerArgs, nodeWorkerOptions);
+		var workerScript = "./nodejs_init_worker.js";
+		log("Starting init worker for " + JSON.stringify(name) + ": Forking " + workerScript + " nodeWorkerArgs=" + JSON.stringify(nodeWorkerArgs) + " nodeWorkerOptions=" + JSON.stringify(nodeWorkerOptions));
+		NODE_INIT_WORKER[name] = child_process.fork(workerScript, nodeWorkerArgs, nodeWorkerOptions);
 		var worker = NODE_INIT_WORKER[name];
 		
 		worker.on("close", workerClose);
@@ -251,12 +257,8 @@ function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
 		worker.on("message", messageFromWorker);
 		worker.on("exit", workerExitHandler);
 		
-		
-		
 		worker.send({ping: firstPing});
-		
-	}
-	
+		}
 	
 	function workerDisconnect() {
 		log(name + " worker disconnect: worker.connected=" + NODE_INIT_WORKER[name].connected);
@@ -267,17 +269,14 @@ function startNodejsInitWorker(homeDir, name, uid, gid, callback) {
 	}
 	
 	function messageFromWorker(msg, handle) {
-		
 		if(msg.message) {
 			log(name + " worker message: " + msg.message.msg, msg.message.level);
 		}
 		else if(msg.pong) {
 			if(msg.pong == firstPing) {
-				//callback(null);
 				firstPing = randomNr(6);
 			}
 		}
-		
 	}
 	
 	function workerClose(code, signal) {

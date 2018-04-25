@@ -55,6 +55,7 @@
   %JZEDIT%/shared/** r,
   %JZEDIT%/client/** r,
   %JZEDIT%/nodejs_init_worker.js r,
+  %JZEDIT%/default.js r,
 
   /etc/ld.so.cache r,
   /etc/nsswitch.conf r,

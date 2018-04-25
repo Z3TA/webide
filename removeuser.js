@@ -65,7 +65,7 @@ catch(err) {
 	
 	// Remove apparmor profiles
 	unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
-	unlink("/etc/apparmor.d/home." + username + ".usr.bin.nodejs");
+	unlink("/etc/apparmor.d/home." + username + ".usr.bin.node");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
 unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-cli.js");

@@ -38,9 +38,11 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+check if signup works in prod
+
 write a test for starting and stopping nodejs processes
 
-
+hmm, node8 seems to exit on sigquit ...
 
 We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
@@ -48,6 +50,8 @@ We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
 todo
 ----
+
+First time a user logs in it takes a while ... show a welcome message !?
 
 in Firefox, if the function list is longer then 100% you get annoying orange color
 
