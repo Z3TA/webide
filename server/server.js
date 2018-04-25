@@ -1611,7 +1611,7 @@ function createUserWorker(name, uid, gid) {
 		}
 	}
 	
-	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid, DEBUG);
+	log("Spawning worker name=" + name + " uid=" + uid + " gid=" + gid + " options=" + JSON.stringify(options), DEBUG);
 	
 	try {
 		var worker = childProcess.fork("user_worker.js", args, options);

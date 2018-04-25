@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+can't stop nodejs scripts!
+
 We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 
 

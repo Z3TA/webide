@@ -57,6 +57,8 @@ var npmOptions = {
 
 if(parseInt(process.env.uid)) {
 	
+	console.log("process.env.uid=" + process.env.uid);
+	
 	USE_CHROOT = true;
 	/* Change root ...
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
