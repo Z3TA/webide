@@ -57,8 +57,6 @@ var npmOptions = {
 
 if(parseInt(process.env.uid)) {
 	
-	console.log("process.env.uid=" + process.env.uid);
-	
 	USE_CHROOT = true;
 	/* Change root ...
 		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
@@ -101,7 +99,8 @@ if(parseInt(process.env.uid)) {
 }
 else {
 	var isRoot = process.getuid && process.getuid() === 0;
-	if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
+	if(isRoot && !USE_CHROOT) log("It's strongly adviced not to run worker process as superuser unless chroot flag is used!")
+	//if(isRoot && !USE_CHROOT) throw new Error("Can not run worker process as superuser unless chroot flag is used!")
 }
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
