@@ -73,8 +73,18 @@ unlink("/etc/apparmor.d/home." + username + ".usr.lib.node_modules.npm.bin.npm-c
 	//var reloadApparmor = child_process.execSync("service apparmor reload").toString(ENCODING).trim();
 	//if(reloadApparmor != "") throw reloadApparmor;
 	
+/*
+	What if the user is logged in ? We wont be able to umount nodejs_username !
+	If we restart the server the user will auto-relogion (and re-create the mount-points).
+	It's probably *not* a good idea to delete a user while he/she is using the system.
+	But here's how to do it:
+	1. Delete the system account so the user can't re-login: userdel username
+	2. Restart the jzedit.service to force a logout: systemctl restart jzedit
+	3. Do the unmounting and deletion of data : ./removeuser.js username
 	
-	umount("/usr/bin/nodejs_" + username); // Used by user_worker.js 
+	Unmounting nodejs_username will fail if the user is still logged in:
+*/
+umount("/usr/bin/nodejs_" + username); // Used by user_worker.js 
 unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very important that umount comes before unlink!! Or the target which the mount points to will be deleted""
 	
 	// We don't want to accidently mess with any of these, so just in case we are doing some debugging
@@ -137,7 +147,7 @@ umount("/home/" + username + "/usr/bin/env");
 			if(++zfsDestroyRetry > 2) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
 				
 				try {
-				var zfsDestroyStdout = child_process.execSync("sleep 1 && zfs destroy " + zfsPool + userHomeDir);
+				var zfsDestroyStdout = child_process.execSync("sleep 2 && zfs destroy " + zfsPool + userHomeDir);
 					zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
 				}
 				catch(zfsDestroyErr) {
@@ -148,16 +158,12 @@ umount("/home/" + username + "/usr/bin/env");
 						// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
 						// Try to restart jzedit server to see if it helps
 					// Last resort is to reboot to get rid of all the mounts
-						try {
-						var restartJzeditStdout = child_process.execSync("service jzedit restart");
-							restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
-						}
-						catch(restartJzeditErr) {
-							console.log("restartJzeditErr: " + restartJzeditErr.message);
-							throw new Error("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
-						}
-						if(restartJzeditStdout) console.log(restartJzeditStdout);
-						return zfsDestroy(zfsPool, userHomeDir); // Try again
+					
+					restartEditorService();
+					
+					console.log("Retrying zfs destroy " + zfsPool + userHomeDir);
+					
+					return zfsDestroy(zfsPool, userHomeDir); // Try again
 						
 					}
 					else throw zfsDestroyErr;
@@ -165,6 +171,7 @@ umount("/home/" + username + "/usr/bin/env");
 				
 				if(zfsDestroyStdout) console.log(zfsDestroyStdout);
 				
+			//console.log("Successfully destroyed: " + zfsPool + userHomeDir);
 				
 				userdel();
 			}
@@ -173,6 +180,20 @@ umount("/home/" + username + "/usr/bin/env");
 	}
 	else userdel();
 	
+
+function restartEditorService() {
+	console.log("Restarting jzedit service ...");
+	try {
+		var restartJzeditStdout = child_process.execSync("service jzedit restart");
+		restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
+	}
+	catch(restartJzeditErr) {
+		console.log("restartJzeditErr: " + restartJzeditErr.message);
+		throw new Error("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
+	}
+	if(restartJzeditStdout) console.log(restartJzeditStdout);
+}
+
 	
 function userdel() {
 		
@@ -224,6 +245,8 @@ function userdel() {
 		return;
 		// Server was unable to boot after adding stuff to fstab!!
 		// We made jzedit_user_mounts.service instead, that mounts the mount-points on system upstart
+	// But then we got issues after re-installing server
+	// So we ended up with server.js being responsible for mounting the mount-points.
 	}
 	
 	function regExpEsc(str) {
