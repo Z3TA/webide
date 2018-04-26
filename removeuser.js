@@ -94,7 +94,7 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very impor
 umount("/home/" + username + "/usr/lib");
 	umount("/home/" + username + "/usr/local/lib");
 	//umount("/home/" + username + "/usr/share");
-umount("/home/" + username + "/usr/bin/bash");
+umount("/home/" + username + "/bin/bash");
 umount("/home/" + username + "/dev/ptmx");
 umount("/home/" + username + "/dev/pts");
 umount("/home/" + username + "/proc/cpuinfo");
