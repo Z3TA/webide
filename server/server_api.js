@@ -2078,7 +2078,7 @@ searchDir(fileList[i].path, folderDepth);
 		if(fileQueue.length == 0 && filesBeingSearched == 0) doneFinish();
 		else {
 			//continueSearchFiles(); // RangeError: Maximum call stack size exceeded
-			setTimeout(continueSearchFiles, 10); // Give a few milliseconds of rest
+			setTimeout(continueSearchFiles, 500); // Give a few milliseconds of rest
 	}
 	}
 	
