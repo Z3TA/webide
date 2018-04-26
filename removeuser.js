@@ -134,10 +134,10 @@ umount("/home/" + username + "/usr/bin/env");
 			
 			function zfsDestroy(zfsPool, userHomeDir) {
 				
-				if(++zfsDestroyRetry > 1) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
+			if(++zfsDestroyRetry > 2) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
 				
 				try {
-					var zfsDestroyStdout = child_process.execSync("zfs destroy " + zfsPool + userHomeDir);
+					var zfsDestroyStdout = child_process.execSync("sleep 2 && zfs destroy " + zfsPool + userHomeDir);
 					zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
 				}
 				catch(zfsDestroyErr) {
@@ -149,7 +149,7 @@ umount("/home/" + username + "/usr/bin/env");
 						// Try to restart jzedit server to see if it helps
 					// Last resort is to reboot to get rid of all the mounts
 						try {
-							var restartJzeditStdout = child_process.execSync("service jzedit restart");
+						var restartJzeditStdout = child_process.execSync("service jzedit restart");
 							restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
 						}
 						catch(restartJzeditErr) {
