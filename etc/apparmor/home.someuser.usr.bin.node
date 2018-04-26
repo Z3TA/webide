@@ -27,14 +27,20 @@
   network unix,
 
   # Running npm
-  /usr/lib/node_modules** r,
-	
+  /lib/** r,
+  /usr/lib/** r,
+  /run/resolvconf/resolv.conf r,
+
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** rw,
+  %HOME%%USERNAME%/** rwl,
 		
   # Let node spawn/fork itselft
   %HOME%%USERNAME%/usr/bin/node px,
+
+  # Possible to run npm:
+  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
+  %HOME%%USERNAME%/bin/bash Px,
 
   #/dev/tty rw,
 

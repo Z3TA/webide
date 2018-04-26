@@ -600,6 +600,7 @@ idFail("Wrong password for user: " + username);
 							var checkMountsAbort = false;
 							var sslCertChecked = false;
 							var userAccepted = false;
+							var npmSymLinkCreated = false;
 							
 							checkUserRights(username, function (err) {
 								if(err) throw err;
@@ -728,19 +729,20 @@ idFail("Wrong password for user: " + username);
 								mount("/proc/cpuinfo", homeDir + "proc/cpuinfo", folderMounted); // Needed for require('os').cpus()
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
-								if(true) {
-									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
+								
+								mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-									mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
-								}
-								else {
-									// For testing
-									foldersToMount = foldersToMount - 3;
-									mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
-								}
+								mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
+								
 								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 								mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted); 
+								
+								// Be able to type npm in terminal:
+								fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+									if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+									npmSymLinkCreated = true;
+								});
 								
 								// Create apparmor profiles unless they already exist
 								createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
@@ -895,9 +897,8 @@ idFail("Wrong password for user: " + username);
 							
 							function checkMountsReadyMaybe() {
 								if(checkMountsAbort) return;
-								if(nginxProfileOK && nullNodCreated && foldersToMount == 0 && 
-								apparmorProfilesToCreate == 0 && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) &&
-								sslCertChecked) {
+								if(nginxProfileOK && nullNodCreated && foldersToMount == 0 && apparmorProfilesToCreate == 0 && 
+								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
 									if(!userAccepted) { // Prevent double accept
 										acceptUser();
 										userAccepted = true;
@@ -906,7 +907,8 @@ idFail("Wrong password for user: " + username);
 								}
 								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " nullNodCreated=" + nullNodCreated + 
 								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
-								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked);
+								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
+								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
 							}
 							
 							function checkMountsError(err) {

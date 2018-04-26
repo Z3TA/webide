@@ -255,10 +255,10 @@ ls /etc/apparmor.d/ | grep nodejs
 ls /etc/apparmor.d/disable/
 
 # Temporary stopping apparmor
-service apparmor stop
-service apparmor teardown
+sudo service apparmor stop
+sudo service apparmor teardown
 
-# Complain to allow evrything but show logs
+# Complain to allow everything but show logs
 sudo aa-complain /home/demo/usr/bin/hg
 
 # Put a profile back into enforce

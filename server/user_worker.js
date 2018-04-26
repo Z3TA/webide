@@ -1020,13 +1020,17 @@ function npm(arg, extraOptions, callback) {
 	npmOptions.execPath = USE_CHROOT ? "/usr/bin/node" : process.argv[0];
 	npmOptions.silent = true // Makes us able to capture stdout and stderr, otherwise it will use our stdout and stderr
 	
+	// The update notifier gives spawn EACCESS because in one of those 238 files it tries to read or write to a file or folder it doesn't have access to.
+	// I have not been able to figure out which one it is, just that it does a file operation and spawn pass on the error code
+	arg.push("--no-update-notifier"); 
+	
 	//stdio: ['pipe', 'pipe', 'pipe', 'ipc']; // To be able to access stdout from npmProcess.stdout
 	
 	var npmPath = "/usr/lib/node_modules/npm/bin/npm-cli.js";
 	var stdout = "";
 	var stderr = "";
 	var npmError = null;
-	console.log("Spawning npm with arg=" + JSON.stringify(arg) + " npmOptions=" + JSON.stringify(npmOptions) + " ...");
+	console.log("Spawning npmPath=" + npmPath + " with arg=" + JSON.stringify(arg) + " npmOptions=" + JSON.stringify(npmOptions) + " ...");
 	npmPath = (npmPath + " ").trim();
 	// Use fork instead of spawn to prevent running shebang ? 
 	// Nope: Fork also executes the shebang!? or does it!? todo: find out!
