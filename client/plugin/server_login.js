@@ -109,7 +109,13 @@
 					
 					if(err) {
 						console.error(err);
-						alertBox(err.message);
+						if(userValue == DEFAULT_USERNAME) alertBox("Failed to automatically login as " + userValue + "." +
+						" Fill in your username and password below, or <a href='/signup/signup.html'>create an account</a> !\n" +
+						"\n(" + err.message + ")") 
+						else alertBox(err.message);
+						
+						
+
 						showLoginDialog();
 					}
 					else {

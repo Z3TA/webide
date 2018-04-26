@@ -51,11 +51,21 @@ We better support the latest (LTS?) version of nodejs or hipsters will diss us.
 todo
 ----
 
+Autocomplete even if we are next to a ) or } or ,
+
+---
+
 indentation:
 
 if(charCode == CHARCODE_ENTER && 
 				inputUsername.value.length >= MIN_USERNAME_LENGTH &&
 				password == password2) createAccount(inputUsername.value, inputPassword.value);
+
+
+const var =
+  val == 1 ? 1 :
+  va1 == 2 ? 2 :
+  null;
 
 ---
 
@@ -2120,6 +2130,10 @@ Use The Insert key for insertingn speach to text !?
 ---
 
 Better support for large files, like being able to edit and search.
+
+---
+
+Don't store username/password in localStorage!! third party modules/scripts will be able to access localStorage
 
 
 ### Debugging

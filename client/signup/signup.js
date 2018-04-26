@@ -73,12 +73,21 @@
 				
 				if(code == "availableError") alertUsername("Problem checking if username " + arr[1] + " is available: " + arr[2]);
 				else if(code == "available") {
-					if(arr[2]=="false") alertUsername("Username " + arr[1] + " is " + (arr[2]=="true" ? "" : "not") + " available!");
+					if(arr[2]=="false") {
+						alertUsername("Username " + arr[1] + " is " + (arr[2]=="true" ? "" : "not") + " available!");
+						createButton.disabled = true;
+					}
 				}
 				else if(code == "createError") alertGeneralMessage("Unable to create user " + arr[1] + " on " + arr[2] + ": " + arr[3]);
 				else if(code == "serviceError") alertGeneralMessage(arr[1]);
 				else if(code == "created") {
 					alertGeneralMessage("Successfully created user " + arr[1]);
+					
+					if(localStorage) {
+						localStorage.setItem("editorServerUser", arr[1]);
+						// todo: use access token instead of saving pw
+					}
+					
 					// location.protocol includes the colon. eg https:
 					var url = location.protocol + "//" + arr[2] + "/";
 					console.log("Navigating to url=" + url + " location.protocol=" + location.protocol);
@@ -96,7 +105,7 @@
 				}
 				else {
 					if(connectedSuccessful) alertGeneralMessage("Connection to signup service closed!");
-					else alertGeneralMessage("Unable to connect to signup service!");
+					else alertGeneralMessage("Unable to connect to signup service! Please contact server administrator!");
 				}
 			};
 		}
@@ -118,7 +127,7 @@
 				checkNameAvailability(inputUsername.value);
 			}, 500);
 			
-			if(charCode == CHARCODE_ENTER && formCheck()) createAccount(inputUsername.value, inputPassword.value);
+			if(charCode == CHARCODE_ENTER && formCheck()) createAccount();
 		}
 		
 		function inputPasswordKeyUp(keyUpEvent) {
@@ -126,18 +135,22 @@
 			
 			if(!passwordCheck()) return;
 			
-			if(charCode == CHARCODE_ENTER && formCheck()) createAccount(inputUsername.value, inputPassword.value);
+			if(charCode == CHARCODE_ENTER && formCheck()) createAccount();
 		}
 		
 		function createButtonClick() {
-			if(formCheck()) createAccount(username, password);
+			if(formCheck()) createAccount();
 		}
 		
 		function formCheck() {
-			if(usernameCheck() && passwordCheck()) {
+			if(usernameCheck() === true && passwordCheck() === true) {
+				
+				if(connectedSuccessful) createButton.disabled = false;
+				
 				return true;
 			}
 			else {
+				createButton.disabled = true;
 				return false;
 			}
 		}
@@ -148,10 +161,16 @@
 			
 			pwAlertDiv.style.display = "none";
 			
-			if(password.length < MIN_PW_LENGTH) alertPassword("The password needs to be at least " + MIN_PW_LENGTH + " characters!");
-			else if(password != password2 && password2) alertPassword("The repeated password is not the same!");
-			//else if(!password.match(/[^a-zA-Z]/)) alertPassword("It's a good idea to have special characters in the password!");
-			else return true;
+			createButton.disabled = true;
+			
+			if(password.length < MIN_PW_LENGTH) return alertPassword("The password needs to be at least " + MIN_PW_LENGTH + " characters!");
+			else if(password2.length == 0) return alertPassword("Please repeat the password!");
+			else if(password != password2) return alertPassword("The repeated password is not the same!");
+			//else if(!password.match(/[^a-zA-Z]/)) return alertPassword("It's a good idea to have special characters in the password!");
+			else {
+				if(connectedSuccessful) createButton.disabled = false;
+				return true;
+			}
 		}
 		
 		function usernameCheck() {
@@ -159,8 +178,13 @@
 			
 			usernameAlertDiv.style.display="none";
 			
+			createButton.disabled = true;
+			
 			if(username.length < MIN_USERNAME_LENGTH) return alertUsername("Username needs to be at least " + MIN_USERNAME_LENGTH + " characters!");
-			else return true;
+			else {
+				if(connectedSuccessful) createButton.disabled = false;
+				return true;
+			}
 		}
 		
 		function checkNameAvailability(username) {
@@ -170,8 +194,15 @@
 			else connSend("usernameAvailable:" + username);
 		}
 		
-		function createAccount(username, password) {
-			alertGeneralMessage("Creating user " + username + ". Please wait ...");
+		function createAccount() {
+			var username = inputUsername.value;
+			var password = inputPassword.value;
+			alertGeneralMessage("Creating user " + username + ". Please wait ... You will be redirected to the editor once the account is created.");
+			createButton.disabled = true;
+			if(localStorage) {
+				localStorage.setItem("editorServerPw", password);
+				// todo: use access token instead of saving pw
+			}
 			connSend("createAccount:" + username + "," + password);
 		}
 		

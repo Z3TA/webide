@@ -91,12 +91,19 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very impor
 	umount("/home/" + username + "/dev/urandom");
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
-	umount("/home/" + username + "/usr/lib");
+umount("/home/" + username + "/usr/lib");
 	umount("/home/" + username + "/usr/local/lib");
-	umount("/home/" + username + "/usr/share");
+	//umount("/home/" + username + "/usr/share");
+umount("/home/" + username + "/usr/bin/bash");
+umount("/home/" + username + "/dev/ptmx");
+umount("/home/" + username + "/dev/pts");
+umount("/home/" + username + "/proc/cpuinfo");
+umount("/home/" + username + "/proc/stat");
+umount("/home/" + username + "/proc/sys/vm/overcommit_memory");
+umount("/home/" + username + "/usr/bin/env");
 	umount("/home/" + username + "/usr/bin/hg");
 	umount("/home/" + username + "/usr/bin/python");
-	umount("/home/" + username + "/usr/bin/nodejs");
+	umount("/home/" + username + "/usr/bin/node");
 	umount("/home/" + username + "/etc/ssl/certs");
 	
 	if(!NOZFS) {
@@ -140,6 +147,7 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very impor
 					if(zfsDestroyErr.message.indexOf("umount: " + HOME + username + ": target is busy") != -1) {
 						// If you get umount: target is busy, try: sudo lsof | grep '/home/username'
 						// Try to restart jzedit server to see if it helps
+					// Last resort is to reboot to get rid of all the mounts
 						try {
 							var restartJzeditStdout = child_process.execSync("service jzedit restart");
 							restartJzeditStdout = restartJzeditStdout.toString(ENCODING);
