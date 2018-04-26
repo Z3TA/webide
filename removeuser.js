@@ -57,7 +57,7 @@ catch(err) {
 	
 	// Reload nginx to remove descriptors to files in user home dir
 	try {
-		var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 2");
+	var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 1");
 	}
 	catch(err) {
 		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1) throw err;
@@ -137,7 +137,7 @@ umount("/home/" + username + "/usr/bin/env");
 			if(++zfsDestroyRetry > 2) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
 				
 				try {
-					var zfsDestroyStdout = child_process.execSync("sleep 2 && zfs destroy " + zfsPool + userHomeDir);
+				var zfsDestroyStdout = child_process.execSync("sleep 1 && zfs destroy " + zfsPool + userHomeDir);
 					zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
 				}
 				catch(zfsDestroyErr) {
@@ -157,15 +157,13 @@ umount("/home/" + username + "/usr/bin/env");
 							throw new Error("Unable to restart jzedit service. You have to manually run sudo lsof " + HOME + username + " and kill the processes that are using it.");
 						}
 						if(restartJzeditStdout) console.log(restartJzeditStdout);
-						zfsDestroy(zfsPool, userHomeDir); // Try again
+						return zfsDestroy(zfsPool, userHomeDir); // Try again
 						
 					}
 					else throw zfsDestroyErr;
 				}
 				
 				if(zfsDestroyStdout) console.log(zfsDestroyStdout);
-				
-				
 				
 				
 				userdel();
@@ -176,13 +174,13 @@ umount("/home/" + username + "/usr/bin/env");
 	else userdel();
 	
 	
-	function userdel() {
+function userdel() {
 		
 		var userDelCmd = 'userdel -f ';
 		
 		if(NOZFS) userDelCmd += " -r"; // Also remove home dir
 		
-		userDelCmd += " " + username;
+		userDelCmd += username;
 		
 		child_process.exec(userDelCmd, function execAddUser(err, stdout, stderr) {
 			if (err) throw err;
