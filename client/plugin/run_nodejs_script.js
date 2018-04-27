@@ -160,7 +160,11 @@
 			var firstLine = text.slice(0, text.indexOf("\n"));
 			var reFirstLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
 			var matchFirstLine = firstLine.match(reFirstLine);
-			if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in firstLine=" + firstLine + " text=" + text);
+			if(!matchFirstLine) {
+				// Somtimes !? The first line wont hold the location. Then check on the first line of the stack 
+				matchFirstLine = text.match(reFirstLine);
+				if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in firstLine=" + firstLine + " or in text=" + text);
+			}
 			var pathOnFirstLine = matchFirstLine[1];
 			console.log("pathOnFirstLine=" + pathOnFirstLine);
 			
