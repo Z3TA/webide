@@ -674,7 +674,7 @@
 			callback(true);
 			
 		});
-	}, 1);
+	});
 	
 	EDITOR.addTest(function selectUpAndDelete(callback) {
 		EDITOR.openFile("selectUpAndDelete.js", 'abc\n', function(err, file) {

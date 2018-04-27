@@ -38,11 +38,30 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Trying to get error message to show! See tests (run test)
+
+Trying to make minesweeper example to run
+
+progress bar while installing nodejs modules !? (when running a nodejs script)
+
 nodejs suggestion: spawn, more details in errors, like EACCESS or ENOENT, which file !???
 
 
 
 We better support the latest (LTS?) version of nodejs or hipsters will diss us.
+
+
+Make a cool io-game, website or blog from anywhere, well, it will not work on a potato (image of a guy holding a potato) but will will work on and old Android device.
+No setup, no installation, works in the browser.
+
+Code Like a pro
+
+Want to learn web development ? Jump right in! 
+
+Support for HTML, CSS and JavaScript baked in. It can even run NodeJS and do source control with Mercurial and Github.
+
+
+
 
 
 
@@ -608,6 +627,10 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+nginx doesn't seem to log anything in the users /log/ folder! (after log files have been rotated)
+
+---
 
 Some characters wont show up (not even as question marks) for example: abortFindFile<-typehere
 

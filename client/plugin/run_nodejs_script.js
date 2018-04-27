@@ -120,6 +120,9 @@
 			// ## stderr
 			
 			/*
+				
+				Error example:
+				
 				_http_outgoing.js:333
 				throw new Error('`value` required in setHeader("' + name + '", value).');
 				^
@@ -136,6 +139,21 @@
 				
 				Prefer opening the file currently in view, then the main file, 
 				then file's opened, then any file with a file path ...
+				
+				
+				Another example:
+				
+				TypeError: Cannot read property 'indexOf' of undefined\n
+				at /nodejs/minesweeper/server.js.tmp:37:34\n
+				at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"}
 				
 			*/
 			
@@ -158,14 +176,19 @@
 			
 			// Get the path from the first line of the error message
 			var firstLine = text.slice(0, text.indexOf("\n"));
-			var reFirstLine = new RegExp("(.*)(\\.tmp)?:(\\d+)");
+			console.log("firstLine=" + firstLine);
+			var reFirstLine = new RegExp("(.*)(\\.tmp)?(:\\d+)");
 			var matchFirstLine = firstLine.match(reFirstLine);
 			if(!matchFirstLine) {
+				console.log("Can't find " + reFirstLine + " in firstLine=" + firstLine + "");
 				// Somtimes !? The first line wont hold the location. Then check on the first line of the stack 
 				matchFirstLine = text.match(reFirstLine);
 				if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in firstLine=" + firstLine + " or in text=" + text);
 			}
-			var pathOnFirstLine = matchFirstLine[1];
+			console.log("matchFirstLine=" + JSON.stringify(matchFirstLine));
+			var pathOnFirstLine = matchFirstLine[1].trim();
+			console.log("pathOnFirstLine=" + pathOnFirstLine);
+			if(pathOnFirstLine.indexOf("at ") == 0) pathOnFirstLine = pathOnFirstLine.slice(3);
 			console.log("pathOnFirstLine=" + pathOnFirstLine);
 			
 			/*
@@ -183,16 +206,21 @@
 			//console.log("msg.stderr=" + msg.stderr);
 			//console.log("text=" + text);
 			
-			if(pathOnFirstLine == EDITOR.currentFile.path) {
+			console.log("EDITOR.currentFile ? " + !!EDITOR.currentFile);
+			if(EDITOR.currentFile) console.log("EDITOR.currentFile.path ? " + EDITOR.currentFile.path );
+			console.log("pathOnFirstLine=" + pathOnFirstLine);
+			console.log("filePath=" + filePath);
+			
+			if(EDITOR.currentFile && EDITOR.currentFile.path == pathOnFirstLine) {
 				// The error is in the file currently in view
 				showErrorMessage(EDITOR.currentFile, text);
 			}
 			else if(pathOnFirstLine == filePath) {
 				// The error is in the file being run
 				console.log("Opening " + pathOnFirstLine + " because it's the file bing run");
-				attemptOpen(pathOnFirstLine, function opened(err, file) {
+				attemptOpen(pathOnFirstLine, function opened(attemptOpenErr, file) {
 					// We should not have any problems opening this file ...
-					if(err) throw err;
+					if(attemptOpenErr) throw attemptOpenErr;
 					else showErrorMessage(file, msg.stderr);
 				});
 			}
@@ -227,6 +255,8 @@
 						});
 					}
 					else {
+						var stdOutFile = msg.scriptName + ".stdout";
+						
 						// Attempt to open any file that has a real file path
 						var found = false;
 						for (var i=0; i<stackTrace.length; i++) {
@@ -236,17 +266,24 @@
 								attemptOpen(stackTrace[i], function opened(err, file) {
 									if(err) {
 										console.error(err);
-										alertBox(text);
+										console.warn("Couln't open " + stackTrace[i] + " to show error=" + text);
+										
+										if(EDITOR.files.hasOwnProperty(stdOutFile)) EDITOR.showFile(stdOutFile);
+										else alertBox(text);
+										
 									}
 									else showErrorMessage(file, msg.stderr);
 								});
 							}
 						}
-						if(!found) alertBox(text);
+						if(!found) {
+							if(EDITOR.files.hasOwnProperty(stdOutFile)) EDITOR.showFile(stdOutFile);
+							else alertBox(text);
+						}
 					}
-					}
-				else console.warn("No stack trace vailable. Unable to find source of error in text=" + text);
 				}
+				else console.warn("No stack trace vailable. Unable to find source of error in text=" + text);
+			}
 			
 			// Remove debug strings from error message before showing it in the stdout file
 			while(msg.stderr.indexOf(debugStr) != -1) {
@@ -315,6 +352,7 @@
 				return callback(null, file);
 			}
 			else {
+				console.log("EDITOR.files=" + Object.keys(EDITOR.files));
 				EDITOR.openFile(path, undefined, function open(err, file) {
 					if(err) return callback(err);
 					else {
@@ -354,6 +392,20 @@
 			at HTTPParser.parserOnHeadersComplete (_http_common.js:88:23)
 			
 			
+			Another example:
+			
+			TypeError: Cannot read property 'indexOf' of undefined\n
+			at /nodejs/minesweeper/server.js.tmp:37:34\n
+			at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+			at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"}
+			
 		*/
 		
 		// Get the error description
@@ -362,14 +414,15 @@
 		var loc = arr[0];
 		var inline = arr[1];
 		var point = arr[2];
-		var desc = arr[3];
+		var desc = arr[3].trim();
 		var inDebugStr = false;
 		var matchLine = text.match(reLine);
 		var inlineTrim = 0;
 		
-		if(!desc) desc = arr[4];
+		if(desc == "^") desc = arr[5].trim();
+		if(desc == "") desc = arr[4].trim();
 		
-		console.log("!showErrorMessage arr=", arr);
+		console.warn("!showErrorMessage arr=", JSON.stringify(arr, null, 2));
 		
 		if(!matchLine) throw new Error("Unable to get line number! text=" + text);
 		
@@ -576,6 +629,47 @@
 		}
 		
 	}
+	
+	
+	
+	EDITOR.addTest(function testNodeErroMessage1(callback) {
+		
+		var msg = {
+			"scriptName":"/some_node_script1.js",
+			"stderr": "/some_node_script1.js:1\n\nhi Johan;\n    ^\n\nError: What a great name!\nat fo (foo.js:333:11)\nat bar (bar.js:69:11)"
+		};
+		
+		EDITOR.openFile("/some_node_script1.js", 'hi Johan;\n', function(err, sourceFile) {
+			if(err) throw err;
+			
+			nodejsMessage(msg);
+			
+			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+			
+			EDITOR.closeFile(sourceFile.path);
+			callback(true);
+		});
+	})
+	
+	EDITOR.addTest(function testNodeErroMessage2(callback) {
+		
+		var msg = {
+			"scriptName":"/some_node_script2.js",
+			"stderr":"ErrorExample: This is the error description\n    at /some_node_script2.js.tmp:1:1\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
+		};
+		
+		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js.tmp:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"
+		
+		EDITOR.openFile("/some_node_script2.js", 'console.log("hello world!");\n', function(err, sourceFile) {
+			if(err) throw err;
+			nodejsMessage(msg);
+			
+			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+			
+			EDITOR.closeFile(sourceFile.path);
+			callback(true);
+		});
+	}, 1);
 	
 	
 })();
