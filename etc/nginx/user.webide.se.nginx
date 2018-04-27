@@ -8,8 +8,8 @@
 #SSL#}
 
 server {
-  listen 80;
-  listen [::]:80;
+  listen 80;#NOSSL#
+  listen [::]:80;#NOSSL#
   #SSL#listen 443 ssl;
   #SSL#listen [::]:443 ssl;
   server_name %USERNAME%.%DOMAIN%;

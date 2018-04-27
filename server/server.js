@@ -1012,6 +1012,9 @@ idFail("Wrong password for user: " + username);
 												fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
 													if(err) throw err;
 													data = data.replace(/#SSL#/g, "");
+													data = data.replace(/listen 80;#NOSSL#/g, "");
+													data = data.replace(/listen [::]:80;#NOSSL#/g, "");
+													
 													fs.writeFile(nginxProfilePath, data, function(err) {
 														if(err) throw err;
 														
