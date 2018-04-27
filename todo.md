@@ -65,10 +65,21 @@ if(charCode == CHARCODE_ENTER &&
 				password == password2) createAccount(inputUsername.value, inputPassword.value);
 
 
+if(1==2) 
+  
+
+  console.log("Hello!")
+console.log("World!")
+
+(indent until there's come kind of expression)
+
 const var =
   val == 1 ? 1 :
   va1 == 2 ? 2 :
   null;
+
+
+
 ---
 
 

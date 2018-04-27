@@ -595,8 +595,14 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		if(text == undefined) {
 			
 			if(RUNTIME!="browser") {
-				path = UTIL.makePathAbsolute(path);
+				var absolutePath = UTIL.makePathAbsolute(path);
+				if(absolutePath != path) {
+					removeFromQueue(path);
+					path = absolutePath;
+					EDITOR.openFileQueue.push(path);
+				}
 			}
+			
 			console.warn("Text is undefined! Reading file from disk: " + path)
 			
 			// Check the file size

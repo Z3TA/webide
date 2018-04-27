@@ -354,6 +354,11 @@
 							console.warn("Loading last saved state for file path=" + path);
 							content = lastFileState.text;
 							
+							if(typeof content != "string") {
+								console.warn("The content of lastFileState.path=" + lastFileState.path + " is '" + content + "'. It will not be reopened!");
+								return;
+							}
+							
 						}
 						else if(notFound) {
 							// The file was not found and the user didn't want to load last state
@@ -696,6 +701,10 @@
 			//return;
 			console.warn("File='" + path + "' not open! EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + "");
 			return false;
+		}
+		
+		if(typeof file.text != "string") {
+			throw new Error("File (file.path=" + file.path + ") text is not a string! file.text=" + file.text);
 		}
 		
 		if(file == EDITOR.currentFile) {
