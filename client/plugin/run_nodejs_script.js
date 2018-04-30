@@ -202,10 +202,10 @@
 			var stackTrace = text.match(reStack);
 			if(stackTrace == null) console.warn("Unable to find " + reStack + " in text=" + text)
 			else {// remove the parentheses and line:column
-			for (var i=0; i<stackTrace.length; i++) {
-				stackTrace[i] = stackTrace[i].slice(1, stackTrace[i].indexOf(":"));
-			}
-			console.log("stackTrace=" + JSON.stringify(stackTrace));
+				for (var i=0; i<stackTrace.length; i++) {
+					stackTrace[i] = stackTrace[i].slice(1, stackTrace[i].indexOf(":"));
+				}
+				console.log("stackTrace=" + JSON.stringify(stackTrace));
 			}
 			//console.log("msg.stderr=" + msg.stderr);
 			//console.log("text=" + text);
@@ -396,102 +396,141 @@
 			at HTTPParser.parserOnHeadersComplete (_http_common.js:88:23)
 			
 			
-			Another example:
+			----
 			
-			TypeError: Cannot read property 'indexOf' of undefined\n
-			at /nodejs/minesweeper/server.js.tmp:37:34\n
-			at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
-			at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
-			at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"}
+			/nodejs/errortestmodule.js:1
+			(function (exports, require, module, __filename, __dirname) { throw ("mo mo");
+			^
+			mo mo
 			
 		*/
 		
 		// Get the error description
 		var reLine = new RegExp("(" + UTIL.escapeRegExp(file.path) + "):(\\d+)");
 		var arr = text.split("\n");
+		
+		console.log("!showErrorMessage arr=", JSON.stringify(arr, null, 2));
+		
 		var loc = arr[0];
 		var inline = arr[1];
 		var point = arr[2];
 		var desc = arr[3].trim();
-		var inDebugStr = false;
-		var matchLine = text.match(reLine);
-		var inlineTrim = 0;
 		
-		if(desc == "^") desc = arr[5].trim();
-		if(desc == "") desc = arr[4].trim();
-		
-		console.warn("!showErrorMessage arr=", JSON.stringify(arr, null, 2));
-		
-		if(!matchLine) throw new Error("Unable to get line number! text=" + text);
-		
-		console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
-		
-		var lineNr = parseInt(matchLine[2]);
-		console.log("lineNr=" + lineNr);
-		
-		// Remove debug console.log's
-		console.log("inline=" + inline);
-		console.log("inDebugStr=" + inDebugStr);
-		if(inline.indexOf(debugStr) != -1) {
-			inDebugStr = true;
-			inline = inline.replace(debugStr, "");
+		if(desc == "^") {
+			desc = arr[5].trim();
+			point = arr[3];
+			inline = arr[2];
 		}
-		console.log("inDebugStr=" + inDebugStr);
 		
-		// Trim inline string
-		while(inline.charAt(0).match(/\s/)) {
-			inlineTrim++;
-			inline = inline.slice(1);
-		}
-		console.log("inlineTrim=" + inlineTrim);
-		console.log("point.length=" + point.length);
+		console.log("loc.match(reLine)=" + loc.match(reLine));
+		console.log("point.trim()=" + point.trim() + "");
 		
-		
-		// Figure out where to place the text
-		var includeIndentationCharacters;
-		var rowText = file.rowText(lineNr-1, includeIndentationCharacters=false);
-		var col = rowText.indexOf(inline);
-		
-		if(col == -1) {
-			console.log("Unable to find inline=" + inline + " on rowText=" + rowText);
-			/*
-				throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
-				
-				
-				The "throw error" can be in another file, and we are going to show the error in one of the files in the stack trace ...
-				Example: 
-				Error: Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
-				Line: response.setHeader("Access-Control-Allow-Origin", origin)
-				
-				Run a diff to see if there's anything in common !?
-				
-			*/
-			var jsdiff = JsDiff;
-			var diff = jsdiff.diffChars(rowText, inline);
-			diff = diff.concat(jsdiff.diffChars(rowText, desc)); // The error can also be helpful
-			diff.sort(function(a, b) {
-				if(a.added || a.removed) return 1;
-				if(a.count > b.count) return -1;
-				if(b.count > a.count) return 1;
-				return 0;
-			});
-			var common = diff[0].value;
+		if(loc.match(reLine) && point.trim() == "^") {
+			// Normal error message
+
+			var inDebugStr = false;
 			
-			console.log("common=" + common + " diff=" + JSON.stringify(diff, null, 2));
+			var inlineTrim = 0;
 			
-			if(common.length > 1) col = rowText.indexOf(common);
-			else col = 0;
+			if(desc == "") desc = arr[4].trim();
+			
+			var matchLine = text.match(reLine);
+			if(!matchLine) throw new Error("Unable to get line number! text=" + text);
+			
+			console.log("reLine=" + reLine);
+			console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
+			
+			var lineNr = parseInt(matchLine[2]);
+			console.log("lineNr=" + lineNr);
+			
+			// Remove debug console.log's
+			console.log("inline=" + inline);
+			console.log("inDebugStr=" + inDebugStr);
+			if(inline.indexOf(debugStr) != -1) {
+				inDebugStr = true;
+				inline = inline.replace(debugStr, "");
+			}
+			console.log("inDebugStr=" + inDebugStr);
+			
+			// Trim inline string
+			while(inline.charAt(0).match(/\s/)) {
+				inlineTrim++;
+				inline = inline.slice(1);
+			}
+			console.log("inlineTrim=" + inlineTrim);
+			console.log("point.length=" + point.length);
+			
+			
+			// Figure out where to place the text
+			var includeIndentationCharacters;
+			var rowText = file.rowText(lineNr-1, includeIndentationCharacters=false);
+			var col = rowText.indexOf(inline);
+			
+			if(col == -1) {
+				console.log("Unable to find inline=" + inline + " on rowText=" + rowText);
+				/*
+					throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
+					
+					
+					The "throw error" can be in another file, and we are going to show the error in one of the files in the stack trace ...
+					Example: 
+					Error: Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
+					Line: response.setHeader("Access-Control-Allow-Origin", origin)
+					
+					Run a diff to see if there's anything in common !?
+					
+				*/
+				var jsdiff = JsDiff;
+				var diff = jsdiff.diffChars(rowText, inline);
+				diff = diff.concat(jsdiff.diffChars(rowText, desc)); // The error can also be helpful
+				diff.sort(function(a, b) {
+					if(a.added || a.removed) return 1;
+					if(a.count > b.count) return -1;
+					if(b.count > a.count) return 1;
+					return 0;
+				});
+				var common = diff[0].value;
+				
+				console.log("common=" + common + " diff=" + JSON.stringify(diff, null, 2));
+				
+				if(common.length > 1) col = rowText.indexOf(common);
+				else col = 0;
+			}
+			else {
+				if(inDebugStr && col >= 30) col = col - 30;
+				col = col + point.length - 1; // The marker
+				col = col - inlineTrim;
+			}
 		}
 		else {
-			if(inDebugStr && col >= 30) col = col - 30;
-			col = col + point.length - 1; // The marker
-			col = col - inlineTrim;
+			/*
+				Special error message:
+				
+				TypeError: Cannot read property 'indexOf' of undefined\n
+				at /nodejs/minesweeper/server.js.tmp:37:34\n
+				at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n
+				at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"}
+			*/
+			
+			var desc = arr[0].trim();
+			var reLine = new RegExp("(" + UTIL.escapeRegExp(file.path) + "):(\\d+):(\\d+)");
+			
+			var matchLine = text.match(reLine);
+			if(!matchLine) throw new Error("Unable to get line number and column! " + reLine + " from text=" + text);
+			
+			console.log("reLine=" + reLine);
+			console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
+			
+			var lineNr = parseInt(matchLine[2]);
+			var col = parseInt(matchLine[3]);
+			
 		}
 		
 		//desc = desc + "\nNostrud ipsum ullamco exercitation ex esse elit enim excepteur\nipsum eu nulla do excepteur dolor esse anim voluptate adipisicing id.";
@@ -638,9 +677,11 @@
 	
 	EDITOR.addTest(function testNodeErroMessage1(callback) {
 		
+		var errMsg = "Error: What a great name!";
+		
 		var msg = {
 			"scriptName":"/some_node_script1.js",
-			"stderr": "/some_node_script1.js:" + (1) + "\n\nhi Johan;\n    ^\n\nError: What a great name!\nat fo (foo.js:333:11)\nat bar (bar.js:69:11)"
+			"stderr": "/some_node_script1.js:" + (1) + "\n\nhi Johan;\n    ^\n\n" + errMsg + "\nat fo (foo.js:333:11)\nat bar (bar.js:69:11)"
 		};
 		
 		EDITOR.openFile("/some_node_script1.js", 'hi Johan;\n', function(err, file) {
@@ -649,22 +690,39 @@
 			nodejsMessage(msg);
 			
 			setTimeout(function checkEditorInfo() {
-				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+				
+				if(!infoHas({file: file, str: errMsg})) throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
 				
 				EDITOR.removeAllInfo(file);
 				EDITOR.closeFile(file.path + ".stdout");
 				EDITOR.closeFile(file.path);
 				callback(true);
+				
 			},100);
 			
 		});
-	}, 1)
+	}, 1);
+	
+	function infoHas(obj) {
+		outer: for (var i=0; i<EDITOR.info.length; i++) {
+			for(var prop in obj) {
+				console.log("info " + 1 + " " + prop + "=" + EDITOR.info[i][prop] + " = " + obj[prop]);
+				if(EDITOR.info[i][prop] != obj[prop]) continue outer;
+			}
+			console.log("TRUE!");
+			return true;
+		}
+		console.log("FALSE!");
+		return false;
+	}
 	
 	EDITOR.addTest(function testNodeErroMessage2(callback) {
 		
+		var errMsg = "ErrorExample: This is the error description";
+		
 		var msg = {
 			"scriptName":"/some_node_script2.js",
-			"stderr":"ErrorExample: This is the error description\n    at /some_node_script2.js.tmp:" + (1+LINE_DEBUG) + ":1\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
+			"stderr" : errMsg + "\n    at /some_node_script2.js.tmp:" + (1+LINE_DEBUG) + ":12\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
 		};
 		
 		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js.tmp:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"
@@ -675,16 +733,15 @@
 			nodejsMessage(msg);
 			
 			setTimeout(function checkEditorInfo() {
-			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
-			
-			EDITOR.removeAllInfo(file);
+				if(!infoHas({file: file, str: errMsg, row: 0, col: 12})) throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
+				
+				EDITOR.removeAllInfo(file);
 				EDITOR.closeFile(file.path + ".stdout");
 				EDITOR.closeFile(file.path);
-			callback(true);
+				callback(true);
 			},100);
 			
 		});
 	}, 2);
-	
 	
 })();
