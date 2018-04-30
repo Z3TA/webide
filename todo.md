@@ -38,186 +38,35 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Trying to make minesweeper example to run
-
-progress bar while installing nodejs modules !? (when running a nodejs script)
-
-nodejs suggestion: spawn, more details in errors, like EACCESS or ENOENT, which file !???
+Make some multiplayer game exampes 
 
 
-
-We better support the latest (LTS?) version of nodejs or hipsters will diss us.
-
-
-Make a cool io-game, website or blog from anywhere, well, it will not work on a potato (image of a guy holding a potato) but will will work on and old Android device.
+Make a cool io-game, website or blog from anywhere ...
+ it will not work on a potato (image of a guy holding a potato) but will will work on any device that have a browser.
 No setup, no installation, works in the browser.
-
-Code Like a pro
-
-Want to learn web development ? Jump right in! 
-
-Support for HTML, CSS and JavaScript baked in. It can even run NodeJS and do source control with Mercurial and Github.
-
-
-
 
 
 
 todo
 ----
 
-copy/pasting in terminal!!
+prio: Fix indentation characters so the source code gets clean.
 
 write a test for starting and stopping nodejs processes
 
-hmm, node8 seems to exit on sigquit ... wait to send the sigquit when stopping a nodej script !?
-
-Autocomplete even if we are next to a ) or } or ,
-
----
-indentation:
-
-if(charCode == CHARCODE_ENTER && 
-				inputUsername.value.length >= MIN_USERNAME_LENGTH &&
-				password == password2) createAccount(inputUsername.value, inputPassword.value);
-
-
-if(1==2) 
-  
-
-  console.log("Hello!")
-console.log("World!")
-
-(indent until there's come kind of expression)
-
-const var =
-  val == 1 ? 1 :
-  va1 == 2 ? 2 :
-  null;
-
-
-
----
-
-
-First time a user logs in it takes a while ... show a welcome message !?
-
-in Firefox, if the function list is longer then 100% you get annoying orange color
-
 move spellchecker to server
+Make spellchecker work on server-side and use node_modules instead of compiled file.
 
 upgrade to latest nw.js
 
 fix problem: npm deletes unknown module dirname (which is used by nw.js)
-
-Prevent user_worker.js process from closing/restarting several times in a row!
-
----
-When typing in a full file path in File (search)
-Try to open the file
-change dir and search
-
-ex: /usr/lib/node_modules/npm/node_modules/update-notifier/index.js in directory /home/Z/Projects/jzedit/
-/home/Z/Projects/jzedit/ is not in the file path !
-1. Try to open the file path
-2. Change to that folder and search for the file eg set directory to /usr/lib/node_modules/npm/node_modules/update-notifier/ and file (search) to index.js (whatever is after the path delimiter / (slash)
-
----
-
-When insert an if-statement and typing after it, the line below is indented which is annoying (due to optimizer not doing a full parse)
-Make a full parse if the line starts with if,for,while and the line below is indented !? Or de-indent the line below !?
-
----
-more work on autocompletion !? Add completions for the ctx web 2d canvas api. Via canvas.getContext('2d') !?
-can the editor figure out that var ctx = canvas.getContext('2d') !? And give dynamic auto-complete !?
-Record demo video, or take screenshots and write a blog post.
----
-
-Unable to save as on ftp, "unable to get file size".
-
-Should Not be indented:
-if(1==2) ; <-- semicolon
-	console.log("Hello!");
-
-when hitting backspace to delete left to a } it get indented
-
-prio: Fix indentation characters!
-
-When changing indentation to two spaces, also make the indentation two characters wide! And 4 if you change to 4 spaces (or tabs?).
-
-When inlining console.log's and you are editing the file, the position of the console log might have changed!!
-Investigate hot code loading. 
-
-Can two wysiwygEditor windows be open and do stuff at the same time !?
-
-Every time a property or a method is accessed when running a node/javascript add 
-
-__checkObj(foo.bar, "foo.bar", __line);
-
-function __checkObj(obj, oname, line) {
-  var val;
-  if(typeof obj != "object") val = obj;
-  else val = __safeStringify(obj);
-  console.log(line + ":" + oname + ":" + val);
-}
-
-Then when you hover the mouse over it and holds down shift you see the value.
-And you get a warning for all properties that are undefined
-
----
-
-Able to set breakpoint in JavaScript and pause the execution !?
-
-Could "pause" with alert() !?
-
----
+Remove all dependendcies on dirname !?
 
 Investigate making an app for chrome-book !?
 
-When a user is connected from two computers and have the same file open, send all file changes to the server that then broadcast to all clients logged in as that user
-and runs a transorm ? Or just don't apply the changes until they come in from the server (like in the terminal)
-Need to send a message to the server when a file is closed by the client to keep track of which files are open.
-
-
-Better documentation (maybe a blog post!?) on how unix sockets work in jzedit
-problem: When running web_preview files are loaded from webide.se.
-How to know which user to access ? johan.webide.se
-
-Does apparmor even work on webide !?
-on dev machine:
-Failed to install dependencies: spawn /usr/share/npm/bin/npm-cli.js ENOENT
-
-bug in terminal:
-/home/Z/Projects/jzedit/client/plugin/terminal.js:463
-Uncaught TypeError: Cannot read property 'length' of undefined
-
-School signup: Se progress and usage statistics from team members
-
-
-terminal emulator
-- Copy/pasting
-- Placing the cursor using the mouse
-
-Issue when copying text rows with lf into a file with crlf line breaks !
-
-See last changed and file size on file when hovering on it in file explorer !?
-
-Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?
-
-Investigate why fix_indendation.js is not fixing the indentation!
-
 Investigate adding the editor to chrome web store. Test in a Chromebook.
 
-Make spellchecker work on server-side and use node_modules instead of compiled file.
 
-investigate build.js vs ssg-build.js
-
----
-Use ip namespaces and redirect via nginx ex: user.webide.se/port8080 => port 8080 on users ip namespace
-Reason: Many tools want to listen on localhost:someport
-
-username.webide.se/_port#### redirects to ip namespace port ####
----
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -230,9 +79,12 @@ username.webide.se/_port#### redirects to ip namespace port ####
 What I'm thinking
 -----------------
 
+---
+Include domain in wwwfolder so users can have many domains !? No the editor should not be used as a web hosting service.
+Instead have a separate web hosting service with ftps access and redudancy.
+---
 I always seem to screw up when pushing changes and making updates to prod.
 Should have a prod-middlewhere server with the same config and test it there first ? Or just roll back when I screw up !?
-
 ---
 
 How to manage different versions of nodejs ? Or just run the latest !?
@@ -629,6 +481,18 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?
+
+---
+bug in terminal:
+/home/Z/Projects/jzedit/client/plugin/terminal.js:463
+Uncaught TypeError: Cannot read property 'length' of undefined
+---
+
+Unable to save as on ftp, "unable to get file size".
+
+---
 
 nginx doesn't seem to log anything in the users /log/ folder! (after log files have been rotated)
 
@@ -1442,6 +1306,116 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+---
+Use ip namespaces and redirect via nginx ex: user.webide.se/port8080 => port 8080 on users ip namespace
+Reason: Many tools want to listen on localhost:someport
+
+username.webide.se/_port#### redirects to ip namespace port ####
+---
+
+Better documentation (maybe a blog post!?) on how unix sockets work in jzedit
+problem: When running web_preview files are loaded from webide.se.
+How to know which user to access ? johan.webide.se
+
+School signup: Se progress and usage statistics from team members
+
+terminal emulator
+- Copy/pasting
+- Placing the cursor using the mouse
+
+Issue when copying text rows with lf into a file with crlf line breaks !
+
+See last changed and file size on file when hovering on it in file explorer !?
+
+When changing indentation to two spaces, also make the indentation two characters wide! And 4 if you change to 4 spaces (or tabs?).
+
+---
+
+Every time a property or a method is accessed when running a node/javascript add 
+
+__checkObj(foo.bar, "foo.bar", __line);
+
+function __checkObj(obj, oname, line) {
+  var val;
+  if(typeof obj != "object") val = obj;
+  else val = __safeStringify(obj);
+  console.log(line + ":" + oname + ":" + val);
+}
+
+Then when you hover the mouse over it and holds down shift you see the value.
+And you get a warning for all properties that are undefined
+
+---
+
+Able to set breakpoint in JavaScript and pause the execution !?
+
+Could "pause" with alert() !?
+
+---
+
+Prevent user_worker.js process from closing/restarting several times in a row!
+
+---
+When typing in a full file path in File (search)
+Try to open the file
+change dir and search
+
+ex: /usr/lib/node_modules/npm/node_modules/update-notifier/index.js in directory /home/Z/Projects/jzedit/
+/home/Z/Projects/jzedit/ is not in the file path !
+1. Try to open the file path
+2. Change to that folder and search for the file eg set directory to /usr/lib/node_modules/npm/node_modules/update-notifier/ and file (search) to index.js (whatever is after the path delimiter / (slash)
+
+---
+
+When insert an if-statement and typing after it, the line below is indented which is annoying (due to optimizer not doing a full parse)
+Make a full parse if the line starts with if,for,while and the line below is indented !? Or de-indent the line below !?
+
+---
+more work on autocompletion !? Add completions for the ctx web 2d canvas api. Via canvas.getContext('2d') !?
+can the editor figure out that var ctx = canvas.getContext('2d') !? And give dynamic auto-complete !?
+Record demo video, or take screenshots and write a blog post.
+---
+
+Autocomplete even if we are next to a ) or } or ,
+
+---
+indentation:
+
+if(charCode == CHARCODE_ENTER && 
+				inputUsername.value.length >= MIN_USERNAME_LENGTH &&
+				password == password2) createAccount(inputUsername.value, inputPassword.value);
+
+
+if(1==2) 
+  
+
+  console.log("Hello!")
+console.log("World!")
+
+(indent until there's come kind of expression)
+
+const var =
+  val == 1 ? 1 :
+  va1 == 2 ? 2 :
+  null;
+
+Should Not be indented:
+if(1==2) ; <-- semicolon
+	console.log("Hello!");
+
+when hitting backspace to delete left to a } it get indented
+
+---
+
+First time a user logs in it takes a while ... show a welcome message !?
+
+in Firefox, if the function list is longer then 100% you get annoying orange color
+
+progress bar while installing nodejs modules !? (when running a nodejs script)
+
+Able to link folders to wwwpub, ex: linking mygame/pub to wwwpub/mydomain.com/mygame/
+
+copy/pasting in terminal!!
 
 ---
 
@@ -1492,6 +1466,10 @@ If the user don't exist or is inactive: You get an invite URL that automatically
 If the users have the same username, show the host name, with the diff (foo.bar,baz.bar => foo,baz), in the chat"
 
 ---
+
+When a user is connected from two computers and have the same file open, send all file changes to the server that then broadcast to all clients logged in as that user
+and runs a transorm ? Or just don't apply the changes until they come in from the server (like in the terminal)
+Need to send a message to the server when a file is closed by the client to keep track of which files are open.
 
 When two users are logged in with the same username, or one have been invited to join a session. 
 Colaboration mode will be active. And events will be mirrored.
