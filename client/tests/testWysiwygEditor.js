@@ -367,6 +367,7 @@
 				console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 				
+				EDITOR.removeAllInfo(preview.sourceFile);
 				cleanup();
 				
 				callback(true);
@@ -389,6 +390,7 @@
 				console.log("EDITOR.info: " + JSON.stringify(EDITOR.info));
 				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info.length=" +EDITOR.info.length + " to be at least 1. EDITOR.info=" + EDITOR.info);
 				
+				EDITOR.removeAllInfo(preview.sourceFile);
 				cleanup();
 				
 				callback(true);

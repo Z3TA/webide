@@ -38,8 +38,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Trying to get error message to show! See tests (run test)
-
 Trying to make minesweeper example to run
 
 progress bar while installing nodejs modules !? (when running a nodejs script)
@@ -214,8 +212,12 @@ Make spellchecker work on server-side and use node_modules instead of compiled f
 
 investigate build.js vs ssg-build.js
 
+---
 Use ip namespaces and redirect via nginx ex: user.webide.se/port8080 => port 8080 on users ip namespace
 Reason: Many tools want to listen on localhost:someport
+
+username.webide.se/_port#### redirects to ip namespace port ####
+---
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -2358,6 +2360,10 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Authenitcation:
+Support SAML 2.0 Federation at a minimum but OAuth 2.0 or OpenID Connect 1.0 preferably. Also supporting SCIM provisioning would be a plus
+SAML 2.0 is a bit of a beast to deal with but it's one of the most used SSO protocols in the Enterprise although it's slowly dying for new OAuth based protocols.
 
 User management. User roles and directories. Able to specify which URL's (web directories) can be accessed by which users/roles.
 Assign users to roles. Add and modify users. Automatically create .htaccess files and manage Nginx configs.

@@ -7,6 +7,8 @@
 	
 	var debugStr = "__C_S_L_O_G_O_R('\x02' + __line);";
 	
+	var LINE_DEBUG = 20;
+	
 	EDITOR.plugin({
 		desc: "Allows running Node.JS scripts",
 		load: loadNodeJS,
@@ -166,7 +168,7 @@
 			while(arr = reFileRun.exec(text)) {
 				console.log(arr);
 				line = arr[1];
-				actualLine = parseInt(line) - 20;
+				actualLine = parseInt(line) - LINE_DEBUG;
 				text = text.replace(reFileRun, filePath + ":" + actualLine);
 			}
 			
@@ -177,18 +179,20 @@
 			// Get the path from the first line of the error message
 			var firstLine = text.slice(0, text.indexOf("\n"));
 			console.log("firstLine=" + firstLine);
-			var reFirstLine = new RegExp("(.*)(\\.tmp)?(:\\d+)");
+			var reFirstLine = new RegExp("(.*)(\\.tmp)?(:\\d+(\\d*))");
 			var matchFirstLine = firstLine.match(reFirstLine);
 			if(!matchFirstLine) {
 				console.log("Can't find " + reFirstLine + " in firstLine=" + firstLine + "");
 				// Somtimes !? The first line wont hold the location. Then check on the first line of the stack 
-				matchFirstLine = text.match(reFirstLine);
+				matchFirstLine = text.match(reFirstLine); // matchFirstLine=["    at /some_node_script2.js:1:1","    at /some_node_script2.js:1",null,":1"]
 				if(!matchFirstLine) throw new Error("Unable to find " + reFirstLine + " in firstLine=" + firstLine + " or in text=" + text);
 			}
 			console.log("matchFirstLine=" + JSON.stringify(matchFirstLine));
 			var pathOnFirstLine = matchFirstLine[1].trim();
 			console.log("pathOnFirstLine=" + pathOnFirstLine);
 			if(pathOnFirstLine.indexOf("at ") == 0) pathOnFirstLine = pathOnFirstLine.slice(3);
+			pathOnFirstLine = pathOnFirstLine.replace(/:\d+$/, ""); // row
+			pathOnFirstLine = pathOnFirstLine.replace(/:\d+$/, ""); // column
 			console.log("pathOnFirstLine=" + pathOnFirstLine);
 			
 			/*
@@ -636,40 +640,51 @@
 		
 		var msg = {
 			"scriptName":"/some_node_script1.js",
-			"stderr": "/some_node_script1.js:1\n\nhi Johan;\n    ^\n\nError: What a great name!\nat fo (foo.js:333:11)\nat bar (bar.js:69:11)"
+			"stderr": "/some_node_script1.js:" + (1) + "\n\nhi Johan;\n    ^\n\nError: What a great name!\nat fo (foo.js:333:11)\nat bar (bar.js:69:11)"
 		};
 		
-		EDITOR.openFile("/some_node_script1.js", 'hi Johan;\n', function(err, sourceFile) {
+		EDITOR.openFile("/some_node_script1.js", 'hi Johan;\n', function(err, file) {
 			if(err) throw err;
 			
 			nodejsMessage(msg);
 			
-			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+			setTimeout(function checkEditorInfo() {
+				if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
+				
+				EDITOR.removeAllInfo(file);
+				EDITOR.closeFile(file.path + ".stdout");
+				EDITOR.closeFile(file.path);
+				callback(true);
+			},100);
 			
-			EDITOR.closeFile(sourceFile.path);
-			callback(true);
 		});
-	})
+	}, 1)
 	
 	EDITOR.addTest(function testNodeErroMessage2(callback) {
 		
 		var msg = {
 			"scriptName":"/some_node_script2.js",
-			"stderr":"ErrorExample: This is the error description\n    at /some_node_script2.js.tmp:1:1\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
+			"stderr":"ErrorExample: This is the error description\n    at /some_node_script2.js.tmp:" + (1+LINE_DEBUG) + ":1\n    at foo (foo.js:95:5)\n    at bar (bar.js:137:13)\n"
 		};
 		
 		// "stderr":"TypeError: Cannot read property \'indexOf\' of undefined\n    at /nodejs/minesweeper/server.js.tmp:37:34\n    at Layer.handle [as handle_request] (/nodejs/minesweeper/node_modules/express/lib/router/layer.js:95:5)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:137:13)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at next (/nodejs/minesweeper/node_modules/express/lib/router/route.js:131:14)\n    at Route.dispatch (/nodejs/minesweeper/node_modules/express/lib/router/route.js:112:3)\n"
 		
-		EDITOR.openFile("/some_node_script2.js", 'console.log("hello world!");\n', function(err, sourceFile) {
+		EDITOR.openFile("/some_node_script2.js", 'console.log("hello world!");\n', function(err, file) {
 			if(err) throw err;
+			
 			nodejsMessage(msg);
 			
+			setTimeout(function checkEditorInfo() {
 			if(EDITOR.info.length == 0) throw new Error("Expected EDITOR.info!");
 			
-			EDITOR.closeFile(sourceFile.path);
+			EDITOR.removeAllInfo(file);
+				EDITOR.closeFile(file.path + ".stdout");
+				EDITOR.closeFile(file.path);
 			callback(true);
+			},100);
+			
 		});
-	}, 1);
+	}, 2);
 	
 	
 })();
