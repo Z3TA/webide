@@ -1,7 +1,7 @@
 
 Prio:
 
-1) Demoable. Make sure things work when demoing the editor
+1) Demoable. Make sure things work when demoing the editor: use happy path, stay on happy path! (make tests that coverst the demo happy path)
 - SCM integration
 
 2) Beta release?, get USER FEEDBACK!
@@ -37,6 +37,19 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 
 What I'm working on
 -------------------
+
+this has happaned before!!
+how to make sure it doesn't happen again !?
+
+can clone on system, but not in chroot!
+
+it's not because of apparmor
+
+Can't clone:
+https://github.com/Z3TA/vumoviemaker.git
+
+trying vumoviemaker again ... got npm error ... trying to clone on dev, get cert error !
+
 
 Make some multiplayer game exampes 
 
