@@ -425,7 +425,7 @@
 		console.log("loc.match(reLine)=" + loc.match(reLine));
 		console.log("point.trim()=" + point.trim() + "");
 		
-		if(loc.match(reLine) && point.trim() == "^") {
+		if(loc.match(reLine) && point.trim().charAt(0) == "^") {
 			// Normal error message
 
 			var inDebugStr = false;
