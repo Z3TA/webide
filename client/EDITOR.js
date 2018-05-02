@@ -5659,7 +5659,7 @@ CLIENT.cmd("mirror", {
 		
 		EDITOR.interact("keyPressed", keyPressEvent);
 		
-		
+		if(typeof keyPressEvent.preventDefault == "function") {
 		// Prevent Firefox's quick search (/ slash)
 		if(EDITOR.input && charCode == 47) keyPressEvent.preventDefault();
 		
@@ -5668,7 +5668,7 @@ CLIENT.cmd("mirror", {
 		
 		// Prevent scrolling down when hitting space in Firefox
 		if(EDITOR.input && charCode == 32) keyPressEvent.preventDefault();
-		
+		}
 	}
 	
 	function resizeAndRender() {
