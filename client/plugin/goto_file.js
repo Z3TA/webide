@@ -659,7 +659,7 @@
 	}
 	
 	function gotoFilePathGlob(folder) {
-		inputFolder.value = folder;
+		if(inputFolder) inputFolder.value = folder;
 	}
 	
 	function abortFindFiles() {
