@@ -592,8 +592,8 @@ idFail("Wrong password for user: " + username);
 							console.log("Checking mounts ...");
 							
 							var nginxProfileOK = false;
-							var nullNodCreated = false;
-							var foldersToMount = 18;
+							var nullNodCreated = true;
+							var foldersToMount = 19;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -705,43 +705,10 @@ idFail("Wrong password for user: " + username);
 								
 								// Make sure mounts exist
 								
-								makeDirP(homeDir + "dev", function() {
-									if(checkMountsAbort) return;
-									
-									fs.stat(homeDir + "dev/null", function (err, stats) {
-										if(checkMountsAbort) return;
-										
-										if(err) {
-											if(err.code != "ENOENT") throw err;
-											
-											// dev/null doesn't exist. Create it!
-											var exec = require('child_process').exec;
-											exec("mknod -m 666 " + homeDir + "dev/null c 1 3", function(error, stdout, stderr) {
-												if(error) throw(error);
-												if(stderr) throw new Error(stderr);
-												if(stdout) throw new Error(stdout);
-												// /dev/null needs to be write-able!
-												// We make it writeable using the -m parameter!
-												/*
-													fs.chmod(homeDir + "dev/null", "666", function(err) {
-													if(err) return checkMountsError(err);
-													nullNodCreated = true;
-													checkMountsReadyMaybe();
-													});
-												*/
-											});
-										}
-										else {
-											// dev/null already exist!
-											nullNodCreated = true;
-											checkMountsReadyMaybe();
-										}
-									});
-								});
 								
 								// On some systems we need to mount --bind urandom (not create it) or we'll get ... errors ?
 								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
-								
+								mount("/dev/null", homeDir + "dev/null", folderMounted);
 								/*
 									Mount these instead of copying to save hdd space
 									Don't forget to update var foldersToMount=
