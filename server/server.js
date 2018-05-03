@@ -593,7 +593,7 @@ idFail("Wrong password for user: " + username);
 							
 							var nginxProfileOK = false;
 							var nullNodCreated = true;
-							var foldersToMount = 19;
+							var foldersToMount = 20;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -602,8 +602,9 @@ idFail("Wrong password for user: " + username);
 							var userAccepted = false;
 							var npmSymLinkCreated = false;
 							var hgrccacertsUptodate = true;
+							var passwdCreated = false;
 							
-							checkUserRights(username, function (err) {
+							checkUserRights(username, function checkedUserRights(err) {
 								if(err) return checkMountsError(err);
 								
 								console.log("User rights OK for username=" + username);
@@ -635,6 +636,13 @@ idFail("Wrong password for user: " + username);
 									});
 									});
 								*/
+								
+								// Create a fake /etc/passwd that some programs use to lookup home dir and username
+								// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
+								fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
+									passwdCreated = true;
+									checkMountsReadyMaybe();
+								});
 								
 								// Make sure nginx profile exist
 								var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
@@ -723,7 +731,9 @@ idFail("Wrong password for user: " + username);
 								mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
 								//mount("/usr/share/", homeDir + "usr/share", folderMounted); // npm dependencies
 								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
+								mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
 								mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+								
 								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								
@@ -731,7 +741,7 @@ idFail("Wrong password for user: " + username);
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 								
-								mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted);
+								mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
 								mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 								mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 								mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
@@ -899,15 +909,15 @@ idFail("Wrong password for user: " + username);
 							
 							function checkMountsReadyMaybe() {
 								if(checkMountsAbort) return;
-								if(nginxProfileOK && nullNodCreated && foldersToMount == 0 && apparmorProfilesToCreate == 0 && 
-								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated && hgrccacertsUptodate) {
+								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && 
+								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
 									if(!userAccepted) { // Prevent double accept
 										acceptUser();
 										userAccepted = true;
 									}
 									else throw new Error("User already accepted!");
 								}
-								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " nullNodCreated=" + nullNodCreated + 
+								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + 
 								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
 								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
 								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
@@ -1594,7 +1604,11 @@ function createUserWorker(name, uid, gid) {
 	
 	options.env = {
 		username: name,
-		loglevel: LOGLEVEL
+		loglevel: LOGLEVEL,
+		HOME: "/",
+		USER: name,
+		LOGNAME: name,
+		USER_NAME: name
 	}
 	
 	if(NO_CHROOT) {

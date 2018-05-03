@@ -1,6 +1,7 @@
 /*
 	
-	/bin/sh is NOT the same thing as bash. bash is the login shell while sh is used for shell scripts.
+	/bin/sh is NOT the same thing as bash! 
+	bash is the login shell while sh is used for shell scripts.
 	
 */
 
