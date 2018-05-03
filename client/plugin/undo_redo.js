@@ -20,7 +20,7 @@
 		
 		// When to save state !??
 
-		EDITOR.on("paste", saveState); // Before pasting text
+		EDITOR.on("paste", undo_redo_paste); // Before pasting text
 		
 		EDITOR.on("fileOpen", saveState); // When loading a file
 
@@ -203,7 +203,10 @@
 		
 	}
 	
-	
+	function undo_redo_paste(file) {
+		saveState(file);
+		return true;
+	}
 	
 	function saveState(file) {
 		

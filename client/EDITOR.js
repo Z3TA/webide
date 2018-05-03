@@ -5468,7 +5468,7 @@ CLIENT.cmd("mirror", {
 				
 				ret = fun(EDITOR.currentFile, text, pasteEvent);
 				
-				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned:\n" + ret);
+				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(fun) + " returned: (" + (typeof ret) + ") \n" + ret);
 				
 				if(typeof ret == "string") {
 					if(textChanged) {
@@ -5476,6 +5476,9 @@ CLIENT.cmd("mirror", {
 					}
 					text = ret;
 					textChanged = true;
+				}
+				else if(ret === false) {
+					return; // So plugins can cancel the default behaviour (inserting the text)
 				}
 			}
 			

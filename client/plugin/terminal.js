@@ -20,6 +20,7 @@
 			EDITOR.on("keyPressed", terminalKeyPressed);
 			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
 			EDITOR.on("fileClose", terminalCloseFile);
+			EDITOR.on("paste", terminalPaste);
 			
 			if(QUERY_STRING["start"] && QUERY_STRING["start"].indexOf("terminal") != -1) {
 				CLIENT.on("loginSuccess", startTerminalOnLogin);
@@ -35,10 +36,29 @@
 			EDITOR.removeEvent("afterResize", resizeTerminals);
 			EDITOR.removeEvent("keyDown", terminalKeyDown);
 			EDITOR.removeEvent("fileClose", terminalCloseFile);
+			EDITOR.removeEvent("paste", terminalPaste);
 			
 			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 		}
 	});
+	
+	function terminalPaste(file, text, pasteEvent) {
+		console.log("terminal paste: text=" + text);
+		
+		if(terminalFiles.indexOf(file) == -1) return true;
+		
+		var id = file.path.match(reTerm)[1];
+		
+		if(!EDITOR.input) return true;
+		
+		
+		
+		CLIENT.cmd("terminal.write", {id: id, data: text}, function terminalWrite(err) {
+			if(err) alertBox(err.message);
+		});
+		
+		return false;
+	}
 	
 	function startTerminalFromMenu(file, combo, character, charCode, direction) {
 		startTerminal();
@@ -124,6 +144,10 @@
 			file.parsed = null;
 			
 			terminalFiles.push(file);
+			
+			file.writeLine("Use Alt key instead of Ctrl to sent control characters!\n\n");
+			file.writeLineBreak();
+			file.writeLineBreak();
 			
 			console.log(typeof callback)
 			console.log(callback);
