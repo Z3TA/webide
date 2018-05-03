@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+
+
 "--traceback" wasn't much help:
 Traceback (most recent call last):
                         File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 191, in _runcatch
@@ -1379,6 +1381,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Take into account the full path when grouping file tabs so that server/plugin/foo and client/plugin/foo doesn't get grouped together.
 
 ---
 Use ip namespaces and redirect via nginx ex: user.webide.se/port8080 => port 8080 on users ip namespace

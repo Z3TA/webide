@@ -1,14 +1,22 @@
 
 (function() {
 	/*
-		Allows placing the caret using the mouse
+		
 		
 	*/
 	
 	"use strict";
 	
-	// Set dir to "up" so that the caret col and row doesn't change between down and up !??
-	EDITOR.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "down", targetClass:"fileCanvas", button: 0, combo: 0}); 
+	EDITOR.plugin({
+		desc: "Place the caret using the mouse",
+		load: function loadMousePlaceCaret() {
+			// Set dir to "up" so that the caret col and row doesn't change between down and up !??
+			EDITOR.addEvent("mouseClick", {fun: placeCaretOnCursor, dir: "down", targetClass:"fileCanvas", button: 0, combo: 0});
+},
+unload: function unloadMousePlaceCaret() {
+			EDITOR.removeEvent("mouseClick", placeCaretOnCursor);
+},
+	});
 	
 	function placeCaretOnCursor(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 

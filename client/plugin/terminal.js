@@ -3,10 +3,9 @@
 	"use strict";
 	
 	var menuItem;
-	
 	var terminalFiles = [];
-	
 	var reTerm = /terminal(\d+)/;
+	var ESC = String.fromCharCode(27);
 	
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -21,6 +20,7 @@
 			EDITOR.on("keyDown", terminalKeyDown); // Needed to detect enter
 			EDITOR.on("fileClose", terminalCloseFile);
 			EDITOR.on("paste", terminalPaste);
+			EDITOR.on("mouseClick", terminalMouseClick);
 			
 			if(QUERY_STRING["start"] && QUERY_STRING["start"].indexOf("terminal") != -1) {
 				CLIENT.on("loginSuccess", startTerminalOnLogin);
@@ -41,6 +41,71 @@
 			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
 		}
 	});
+	
+	function terminalMouseClick(mouseX, mouseY, caret, mouseDirection, button) {
+		if(!caret) return true; // Means the click was outside the file grid
+		var file = EDITOR.currentFile;
+		if(terminalFiles.indexOf(file) == -1) return true;
+		
+		var terminalState = file.terminal;
+		
+		// Another module places the caret when we push mouse button down!
+		if(mouseDirection == "up") {
+			if(terminalState && (terminalState.caret.row || terminalState.caret.col)) {
+				if(terminalState.caret.row == caret.row) {
+					/*
+						Send the new position to the terminal server
+						
+						Problem 1: How to calculate the position to send to the server ?
+						Solution: Save terminalState.caret
+						
+						Problem 2: Server don't understand [3D or [3C
+						Solution: Send many [D and [C
+						
+						Problem 3: The server will echo the commands
+						Solution: Move the file caret to terminalState.caret before sending
+					*/
+					
+					var deltaCol = caret.col - terminalState.caret.col;
+					
+					if(deltaCol != 0) {
+						file.moveCaret(undefined, terminalState.caret.row, terminalState.caret.col);
+						
+						var id = file.path.match(reTerm)[1];
+						
+						console.log("deltaCol=" + deltaCol);
+						
+						if(deltaCol > 0) var code = "C";
+						else var code = "D";
+						
+						deltaCol = Math.abs(deltaCol);
+						
+						// Seems we can't specify [3D to move 3 steps ...
+						
+						code = ESC + "[" + code;
+						
+						var data = code;
+						
+						for (var i=0; i<deltaCol; i++) CLIENT.cmd("terminal.write", {id: id, data: data}, caretMoved);
+						
+					}
+				}
+			}
+		}
+		
+		if(mouseDirection == "up") {
+			
+		}
+		else return true;
+		
+		// scroll wheel = paste sel, or clipboard !?
+		
+		function caretMoved(err) {
+			if(err) alertBox(err.message);
+			
+		}
+		
+	}
 	
 	function terminalPaste(file, text, pasteEvent) {
 		console.log("terminal paste: text=" + text);
@@ -70,7 +135,7 @@
 			
 			// Wait for other plugins like reopenFiles to do it's thing
 			setTimeout(function() {
-			EDITOR.showFile(file);
+				EDITOR.showFile(file);
 			}, 1000);
 		});
 	}
@@ -110,8 +175,8 @@
 		
 		function resizeTerminal(id) {
 			if(CLIENT.connected) {
-			CLIENT.cmd("terminal.resize", {id: id, cols: cols, rows: rows}, function terminalResized(err) {
-				if(err) console.warn(err.message);
+				CLIENT.cmd("terminal.resize", {id: id, cols: cols, rows: rows}, function terminalResized(err) {
+					if(err) console.warn(err.message);
 			});
 		}
 			else console.warn("Not connected to server!");
@@ -221,12 +286,7 @@
 			var foregroundColor = defaultForeGroundColor;
 			var backgroundColor = defaultBackgroundColor;
 			
-			if(!file.terminal) file.terminal = {
-				topLine: 0,
-				bottomLine: EDITOR.view.visibleRows,
-				topScrollRowBuffer: [],
-				bottomScrollRowBuffer: []
-			};
+			if(!file.terminal) file.terminal = new TerminalState();
 			var terminalState = file.terminal;
 			
 			for (var i=0; i<data.length; i++) {
@@ -921,8 +981,11 @@ file.insertLineBreak();
 							file.grid[file.caret.row][file.caret.col-1].bgColor = EDITOR.settings.style.textColor;
 							file.grid[file.caret.row][file.caret.col-1].color = EDITOR.settings.style.bgColor;
 						}
-						
-					}
+						}
+					
+					terminalState.caret.row = file.caret.row;
+					terminalState.caret.col = file.caret.col;
+					
 				}
 			}
 			EDITOR.renderNeeded();
@@ -968,9 +1031,6 @@ file.insertLineBreak();
 		
 		var id = file.path.match(reTerm)[1];
 		var data;
-		
-		var ESC = String.fromCharCode(27);
-		
 		
 		
 		if(code == 8) { // backspace
@@ -1117,5 +1177,14 @@ file.insertLineBreak();
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 		
 	}
+	
+	function TerminalState() {
+		this.topLine = 0;
+		this.bottomLine = EDITOR.view.visibleRows;
+		this.topScrollRowBuffer = [];
+		this.bottomScrollRowBuffer = [];
+		this.caret = {row: 0, col: 0};
+	}
+	
 	
 })();
