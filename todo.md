@@ -126,6 +126,8 @@ No setup, no installation, works in the browser.
 todo
 ----
 
+in terminal, when selecting text and pressing delete
+
 prio: Fix indentation characters so the source code gets clean.
 
 write a test for starting and stopping nodejs processes
