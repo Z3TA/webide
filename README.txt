@@ -278,7 +278,9 @@ ldd /usr/bin/python
 # Make sure they are mounted in the user's home dir. See server/server.js function checkMounts
 
 # Try to run it in chroot
-chroot /home/demonisse/ /usr/bin/python -c 'print "hi"'
+chroot --userspec=ltest1:ltest1 /home/ltest1/ /usr/bin/python -c 'print "hi"'
+
+# Find 
 
 # Find all other dependencies and mount or copy them into the chroot (users home dir)
 # See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program

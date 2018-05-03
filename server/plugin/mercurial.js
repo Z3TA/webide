@@ -84,9 +84,12 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		*/
 		
 		//var execFile = require('child_process').execFile;
-		var arg = ["clone", "-v", remote, localPath].concat(config);
+		var arg = ["clone", "--verbose", "--debug", "--insecure", remote, localPath];
+		
+		if(hguser) arg = arg.concat(config);
 		
 		var spawn = require('child_process').spawn;
+		console.log("Spawning hg with arg=" + JSON.stringify(arg));
 var clone = spawn("hg", arg, {env: execFileOptions.env, shell: false});
 var stdout = "";
 var stderr = "";
@@ -151,11 +154,11 @@ clone.on('close', function cloneClose(exitCode) {
 if(stdout.length < 500) console.log("hg clone stdout=" + stdout);
 else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
 
-//console.log("stdout=" + stdout);
-			console.log("stderr=" + stderr + " stderr.length=" + (stderr && stderr.length));
+			//console.log("hg clone stdout=" + stdout);
+			console.log("hg clone stderr=" + stderr + " stderr.length=" + (stderr && stderr.length));
 
-console.log("exitCode=" + exitCode);
-			console.log("exitCode != 0 ? " + (exitCode != 0) + " stderr ? " + !!stderr);
+			console.log("hg clone exitCode=" + exitCode);
+			console.log("hg clone exitCode != 0 ? " + (exitCode != 0) + " stderr ? " + !!stderr);
 			
 		//execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
 			//console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));

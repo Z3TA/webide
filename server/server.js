@@ -593,7 +593,7 @@ idFail("Wrong password for user: " + username);
 							
 							var nginxProfileOK = false;
 							var nullNodCreated = false;
-							var foldersToMount = 17;
+							var foldersToMount = 18;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -601,11 +601,40 @@ idFail("Wrong password for user: " + username);
 							var sslCertChecked = false;
 							var userAccepted = false;
 							var npmSymLinkCreated = false;
+							var hgrccacertsUptodate = true;
 							
 							checkUserRights(username, function (err) {
-								if(err) throw err;
+								if(err) return checkMountsError(err);
 								
 								console.log("User rights OK for username=" + username);
+								
+								/*
+									// Check if cacerts need to be updated
+									var userHgrccacertsPath = HOME_DIR + username + "/etc/mercurial/hgrc.d/cacerts.rc";
+									var systemHgrccacertsPath = "/etc/mercurial/hgrc.d/cacerts.rc";
+									fs.stat(userHgrccacertsPath, function (err, userHgrccacerts) {
+									if(err) return checkMountsError(err);
+									if(checkMountsAbort) return;
+									fs.stat(userHgrccacertsPath, function (err, systemHgrccacerts) {
+									if(err) return checkMountsError(err);
+									console.log("userHgrccacerts.mtimeMs=" + userHgrccacerts.mtimeMs);
+									console.log("systemHgrccacerts.mtimeMs=" + systemHgrccacerts.mtimeMs);
+									process.exit();
+									if(userHgrccacerts.mtimeMs >= systemHgrccacerts.mtimeMs) {
+									// The cacerts.rc file is up to date or have been modified by the user
+									hgrccacertsUptodate = true;
+									checkMountsReadyMaybe();
+									}
+									else {
+									copyFile(systemHgrccacertsPath, userHgrccacertsPath, function copied(err) {
+									if(err) return checkMountsError(err);
+									hgrccacertsUptodate = true;
+									checkMountsReadyMaybe();
+									});
+									}
+									});
+									});
+								*/
 								
 								// Make sure nginx profile exist
 								var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
@@ -687,15 +716,20 @@ idFail("Wrong password for user: " + username);
 											
 											// dev/null doesn't exist. Create it!
 											var exec = require('child_process').exec;
-											exec("mknod -m 444 " + homeDir + "dev/null c 1 3", function(error, stdout, stderr) {
+											exec("mknod -m 666 " + homeDir + "dev/null c 1 3", function(error, stdout, stderr) {
 												if(error) throw(error);
 												if(stderr) throw new Error(stderr);
 												if(stdout) throw new Error(stdout);
-												
-												nullNodCreated = true;
-												checkMountsReadyMaybe();
+												// /dev/null needs to be write-able!
+												// We make it writeable using the -m parameter!
+												/*
+													fs.chmod(homeDir + "dev/null", "666", function(err) {
+													if(err) return checkMountsError(err);
+													nullNodCreated = true;
+													checkMountsReadyMaybe();
+													});
+												*/
 											});
-											
 										}
 										else {
 											// dev/null already exist!
@@ -703,7 +737,7 @@ idFail("Wrong password for user: " + username);
 											checkMountsReadyMaybe();
 										}
 									});
-									});
+								});
 								
 								// On some systems we need to mount --bind urandom (not create it) or we'll get ... errors ?
 								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
@@ -730,9 +764,10 @@ idFail("Wrong password for user: " + username);
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 								
+								mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted);
 								mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
-									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+								mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+								mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
 								mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
 								
 								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
@@ -898,7 +933,7 @@ idFail("Wrong password for user: " + username);
 							function checkMountsReadyMaybe() {
 								if(checkMountsAbort) return;
 								if(nginxProfileOK && nullNodCreated && foldersToMount == 0 && apparmorProfilesToCreate == 0 && 
-								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
+								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated && hgrccacertsUptodate) {
 									if(!userAccepted) { // Prevent double accept
 										acceptUser();
 										userAccepted = true;
@@ -2393,6 +2428,30 @@ function makeDirP(path, callback) {
 		if(callback) {
 			callback(err);
 			callback = null;
+		}
+	}
+}
+
+function copyFile(source, target, cb) {
+	var cbCalled = false;
+	
+	var rd = fs.createReadStream(source);
+	rd.on("error", function(err) {
+		done(err);
+	});
+	var wr = fs.createWriteStream(target);
+	wr.on("error", function(err) {
+		done(err);
+	});
+	wr.on("close", function(ex) {
+		done();
+	});
+	rd.pipe(wr);
+	
+	function done(err) {
+		if (!cbCalled) {
+			cb(err);
+			cbCalled = true;
 		}
 	}
 }

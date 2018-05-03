@@ -2,11 +2,22 @@
 #include <tunables/global>
 
 %HOME%%USERNAME%/usr/bin/hg {
-  #include <abstractions/base>
-  #include <abstractions/python>
 
   deny capability dac_override,
   deny capability dac_read_search,
+
+  signal receive set=hup peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=int peer=%HOME%%USERNAME%/usr/bin/node,
+  signal receive set=int peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=kill peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=quit peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=rtmin+1 peer=/usr/bin/nodejs_%USERNAME%,
+  signal receive set=term peer=%HOME%%USERNAME%/usr/bin/node,
+  signal receive set=term peer=/usr/bin/nodejs_%USERNAME%,
+
+  signal send set=int peer=%HOME%%USERNAME%/usr/bin/node,
+  signal send set=rtmin+1 peer=%HOME%%USERNAME%/usr/bin/node,
+	 signal send set=term peer=%HOME%%USERNAME%/usr/bin/node,
 
   network inet dgram,
   network inet stream,
@@ -14,9 +25,26 @@
   network inet6 stream,
   network unix,
 
-  #/dev/tty rw,
+  /dev/urandom r,
+  /etc/mercurial/hgrc.d/** r,
+  /etc/resolv.conf r,
+
+
+  /lib/** r,
+  /usr/lib/** r,
+  #/run/resolvconf/resolv.conf r, # copied from userdir_skeleton
+  #/etc/mercurial/hgrc.d/cacerts.rc # copied from userdir_skeleton
+  /usr/lib/** r,
+  /usr/local/lib/** r,
+  
+
+  /usr/bin/python2.7 ix,
+  /usr/bin/ssh px,
+
+  # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
-  %HOME%%USERNAME%/** rw,
-  #/usr/bin/python2.7 ix,
+  %HOME%%USERNAME%/** rwl,
+
+
 
 }

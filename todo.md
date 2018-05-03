@@ -38,8 +38,69 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+"--traceback" wasn't much help:
+Traceback (most recent call last):
+                        File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 191, in _runcatch
+                          return _dispatch(req)
+                        File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 924, in _dispatch
+                          cmdpats, cmdoptions)
+                        File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 681, in runcommand
+                          ret = _runcommand(ui, options, cmd, d)
+                        File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 1055, in _runcommand
+                          return checkargs()
+                        File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 1015, in checkargs
+                          return cmdfunc()
+                        File "/usr/lib/python2.7/dist-packages/mercurial/dispatch.py", line 921, in <lambda>
+                          d = lambda: util.checksignature(func)(ui, *args, **cmdoptions)
+                        File "/usr/lib/python2.7/dist-packages/mercurial/util.py", line 993, in check
+                          return func(*args, **kwargs)
+                        File "/usr/lib/python2.7/dist-packages/mercurial/commands.py", line 1563, in clone
+                          shareopts=opts.get('shareopts'))
+                        File "/usr/lib/python2.7/dist-packages/mercurial/hg.py", line 595, in clone
+                          streamclonerequested=stream)
+                        File "/usr/lib/python2.7/dist-packages/mercurial/extensions.py", line 195, in closure
+                          return func(*(args + a), **kw)
+                        File "/usr/local/lib/python2.7/dist-packages/hg_git-0.8.10-py2.7.egg/hggit/util.py", line 56, in inner
+                          return f(*args, **kwargs)
+                        File "/usr/local/lib/python2.7/dist-packages/hg_git-0.8.10-py2.7.egg/hggit/__init__.py", line 348, in exchangepull
+                          pullop.cgresult = repo.githandler.fetch(remote.path, heads)
+                        File "/usr/local/lib/python2.7/dist-packages/hg_git-0.8.10-py2.7.egg/hggit/git_handler.py", line 266, in fetch
+                          refs = self.fetch_pack(remote, heads)
+                        File "/usr/local/lib/python2.7/dist-packages/hg_git-0.8.10-py2.7.egg/hggit/git_handler.py", line 1206, in fetch_pack
+                          f.write, progress.progress)
+                        File "/usr/local/lib/python2.7/dist-packages/dulwich-0.18.6-py2.7-linux-x86_64.egg/dulwich/client.py", line 1398, in fetch_pack
+                          b"git-upload-pack", url)
+                        File "/usr/local/lib/python2.7/dist-packages/dulwich-0.18.6-py2.7-linux-x86_64.egg/dulwich/client.py", line 1282, in _discover_references
+                          resp, read = self._http_request(url, headers, allow_compression=True)
+                        File "/usr/local/lib/python2.7/dist-packages/dulwich-0.18.6-py2.7-linux-x86_64.egg/dulwich/client.py", line 1261, in _http_request
+                          resp = self.opener.open(req)
+                        File "/usr/lib/python2.7/urllib2.py", line 429, in open
+                          response = self._open(req, data)
+                        File "/usr/lib/python2.7/urllib2.py", line 447, in _open
+                          '_open', req)
+                        File "/usr/lib/python2.7/urllib2.py", line 407, in _call_chain
+                          result = func(*args)
+                        File "/usr/lib/python2.7/urllib2.py", line 1241, in https_open
+                          context=self._context)
+                        File "/usr/lib/python2.7/urllib2.py", line 1198, in do_open
+                          raise URLError(err)
+                      URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:590)>
+                      abort: error: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:590)
+
+
+abort: error: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:590)
+
+/etc/mercurial/hgrc.d/cacerts.rc is copied from userdir_skeleton! (but that was not the problem)
+
+Server: API error: abort: HTTP Error 406: Not Acceptable
+Workaround: Use git+ssh:// where possible.
+https://github.com/Z3TA/vumoviemaker.git
+git@github.com:Z3TA/vumoviemaker.git
+
+
 this has happaned before!!
 how to make sure it doesn't happen again !?
+should checking the certificate be disabled !?
 
 can clone on system, but not in chroot!
 
