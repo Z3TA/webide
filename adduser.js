@@ -218,7 +218,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
-		copyFolderRecursiveSync("etc/userdir_skeleton/.ssl/", homeDir);
+		copyFolderRecursiveSync("etc/userdir_skeleton/.ssh/", homeDir);
 		
 		copyFileSync("etc/userdir_skeleton/.bashrc", homeDir + ".bashrc"); // bash settings, how the prompt look etc
 		
