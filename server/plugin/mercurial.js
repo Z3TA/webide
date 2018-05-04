@@ -155,13 +155,18 @@ if(stdout.length < 500) console.log("hg clone stdout=" + stdout);
 else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
 
 			//console.log("hg clone stdout=" + stdout);
-			console.log("hg clone stderr=" + stderr + " stderr.length=" + (stderr && stderr.length));
+			console.log("hg clone stderr=" + stderr + " stderr.length=" + (stderr.length));
 
 			console.log("hg clone exitCode=" + exitCode);
 			console.log("hg clone exitCode != 0 ? " + (exitCode != 0) + " stderr ? " + !!stderr);
 			
 		//execFile("hg", arg, execFileOptions, function (err, stdout, stderr) {
 			//console.log("hg clone err=" + err + "stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(arg));
+			
+			if(arg.indexOf("--insecure") != -1) {
+				// Ignore the warning
+				stderr = stderr.replace(/warning: (.*) certificate with fingerprint (.*) not verified \(check hostfingerprints or web.cacerts config setting\)/g, "").trim();
+			}
 			
 			if(stderr) {
 				

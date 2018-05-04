@@ -22,6 +22,7 @@ var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
 if(HOME_DIR != defaultHomeDir) HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path delimiter
 
+var DEBUG_CHROOT = false;
 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
@@ -383,7 +384,12 @@ function sockJsConnection(connection) {
 	
 	function unmountMounts(username, callback) {
 		
-		var toUnmount = 10;
+		var toUnmount = 9;
+		
+		if(!DEBUG_CHROOT) {
+			toUnmount++;
+			umount(UTIL.joinPaths([HOME_DIR, username, "/etc/ssl/certs"]), unmounted);
+		}
 		
 		umount(UTIL.joinPaths([HOME_DIR, username, "/dev/urandom"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/lib"]), unmounted);
@@ -394,7 +400,6 @@ function sockJsConnection(connection) {
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/hg"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/python"]), unmounted);
 		umount(UTIL.joinPaths([HOME_DIR, username, "/usr/bin/nodejs"]), unmounted);
-		umount(UTIL.joinPaths([HOME_DIR, username, "/etc/ssl/certs"]), unmounted);
 		
 		function unmounted(err) {
 			toUnmount--;
@@ -593,7 +598,7 @@ idFail("Wrong password for user: " + username);
 							
 							var nginxProfileOK = false;
 							var nullNodCreated = true;
-							var foldersToMount = 20;
+							var foldersToMount = 15;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
 							var reloadedApparmor = false;
@@ -602,7 +607,7 @@ idFail("Wrong password for user: " + username);
 							var userAccepted = false;
 							var npmSymLinkCreated = false;
 							var hgrccacertsUptodate = true;
-							var passwdCreated = false;
+							var passwdCreated = true;
 							
 							checkUserRights(username, function checkedUserRights(err) {
 								if(err) return checkMountsError(err);
@@ -639,10 +644,13 @@ idFail("Wrong password for user: " + username);
 								
 								// Create a fake /etc/passwd that some programs use to lookup home dir and username
 								// We don't want to use the systems /etc/passwd or these program will complain about /home/user not exist in the chroot
-								fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
-									passwdCreated = true;
-									checkMountsReadyMaybe();
-								});
+								if(!DEBUG_CHROOT) {
+									fs.writeFile(homeDir + "etc/passwd", username + ":x:" + uid + ":" + gid + "::/:/bin/bash", function(err) {
+										passwdCreated = true;
+										checkMountsReadyMaybe();
+									});
+								}
+								else passwdCreated = true;
 								
 								// Make sure nginx profile exist
 								var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
@@ -711,13 +719,9 @@ idFail("Wrong password for user: " + username);
 									
 								});
 								
-								// Make sure mounts exist
-								
-								
-								// On some systems we need to mount --bind urandom (not create it) or we'll get ... errors ?
-								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
-								mount("/dev/null", homeDir + "dev/null", folderMounted);
 								/*
+									Make sure mounts exist
+									----------------------
 									Mount these instead of copying to save hdd space
 									Don't forget to update var foldersToMount=
 									
@@ -725,14 +729,42 @@ idFail("Wrong password for user: " + username);
 									Solution: Create folder before mounting
 								*/
 								
+								if(!DEBUG_CHROOT) {
+									foldersToMount += 6;
+mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+									
+									mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
+									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
+									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
+									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
+									mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
+									
+									// Be able to type npm in terminal:
+									fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
+										if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
+										npmSymLinkCreated = true;
+									});
+								}
+								else {
+									foldersToMount += 2;
+									mount("/usr/bin/", homeDir + "usr/bin/", folderMounted);
+									mount("/etc/", homeDir + "etc/", folderMounted);
+									npmSymLinkCreated = true;
+								}
+								
+								// Some programs don't like if we create them using mkdnod 
+								mount("/dev/urandom", homeDir + "dev/urandom", folderMounted);
+								mount("/dev/null", homeDir + "dev/null", folderMounted);
+								
+								mount("/usr/share/", homeDir + "usr/share", folderMounted); // Some python scripts (Mercurial) and others need it (sometimes)
+								
 								mount("/lib/", homeDir + "lib", folderMounted);
 								mount("/lib64/", homeDir + "lib64", folderMounted);
 								mount("/usr/lib/", homeDir + "usr/lib", folderMounted);
 								mount("/usr/local/lib", homeDir + "usr/local/lib", folderMounted); // Needed for Python packages (hggit)
-								//mount("/usr/share/", homeDir + "usr/share", folderMounted); // npm dependencies
+								
 								mount("/bin/bash", homeDir + "bin/bash", folderMounted); // Shell for "terminal"
 								mount("/bin/ls", homeDir + "bin/ls", folderMounted); // for debugging
-								mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 								
 								mount("/dev/ptmx", homeDir + "dev/ptmx", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
 								mount("/dev/pts/", homeDir + "dev/pts/", folderMounted); // Needed for pseudo terminals (forkpty / pty.js)
@@ -741,20 +773,9 @@ idFail("Wrong password for user: " + username);
 								mount("/proc/stat", homeDir + "proc/stat", folderMounted); // Needed for nodejs/npm
 								mount("/proc/sys/vm/overcommit_memory", homeDir + "proc/sys/vm/overcommit_memory", folderMounted); // Needed for nodejs/npm
 								
-								mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
-								mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
-								mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
-								mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
-								mount(process.argv[0], homeDir + "usr/bin/node", folderMounted);
-								
 								// We need separate executables to have separate apparmor profiles for user scripts and user_worker.js script
 								mount(process.argv[0], '/usr/bin/nodejs_' + username, folderMounted); 
 								
-								// Be able to type npm in terminal:
-								fs.symlink("../lib/node_modules/npm/bin/npm-cli.js", homeDir + "usr/bin/npm", function symLinkCreated(err) {
-									if(err && err.code != "EEXIST") throw err; // It's allright if the link already exist
-									npmSymLinkCreated = true;
-								});
 								
 								// Create apparmor profiles unless they already exist
 								createApparmorProfile("../etc/apparmor/usr.bin.nodejs_someuser", username, apparmorProfileCreated);
