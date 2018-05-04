@@ -39,6 +39,7 @@
 			EDITOR.removeEvent("paste", terminalPaste);
 			
 			CLIENT.removeEvent("loginSuccess", startTerminalOnLogin);
+			CLIENT.removeEvent("terminal", terminalMessage);
 		}
 	});
 	
