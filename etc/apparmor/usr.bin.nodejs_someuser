@@ -2,7 +2,7 @@
 # Profile for user_worker.js 
 # which will setuid, setgid and chroot itself to the user's home dir
 #
-# This process can spawn %HOME%%USERNAME%/usr/bin/nodejs 
+# This process can spawn %HOME%%USERNAME%/usr/bin/node
 # which is responsible for running user scripts
 # 
 
@@ -65,10 +65,10 @@
   /usr/share/zoneinfo/** r,
 
   # P means "use profile" (and clear enviroment), x means execute
-  %HOME%%USERNAME%/usr/bin/hg Px,
-  %HOME%%USERNAME%/usr/bin/node Px,
-  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
-  %HOME%%USERNAME%/bin/bash Px,
+  %HOME%%USERNAME%/usr/bin/hg px,
+  %HOME%%USERNAME%/usr/bin/node px,
+  %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js px,
+  %HOME%%USERNAME%/bin/bash px,
 
 }
 

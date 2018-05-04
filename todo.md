@@ -38,6 +38,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+testing apparmor profiles ...
 
 trying vumoviemaker again ... 
 
@@ -1312,6 +1313,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+When source control detects a missing file, ask if it was renamed!? And let user select which file, then do a hg mv
+
 Take into account the full path when grouping file tabs so that server/plugin/foo and client/plugin/foo doesn't get grouped together.
 
 ---
@@ -1388,6 +1391,15 @@ Autocomplete even if we are next to a ) or } or ,
 
 ---
 indentation:
+
+if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && 
+								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
+									if(!userAccepted) { // Prevent double accept
+										acceptUser();
+										userAccepted = true;
+									}
+									else throw new Error("User already accepted!");
+								}
 
 if(charCode == CHARCODE_ENTER && 
 				inputUsername.value.length >= MIN_USERNAME_LENGTH &&

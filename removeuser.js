@@ -65,6 +65,7 @@ catch(err) {
 	
 	// Remove apparmor profiles
 	unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
+unlink("/etc/apparmor.d/home." + username + ".usr.bin.bash");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.node");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
@@ -99,12 +100,14 @@ unlink("/usr/bin/nodejs_" + username); // Remove the dummy file. It's very impor
 	
 	// Very important that these are unmounted before the directories are deleted! (or we might delete the host systems files)
 	umount("/home/" + username + "/dev/urandom");
+umount("/home/" + username + "/dev/null");
 	umount("/home/" + username + "/lib");
 	umount("/home/" + username + "/lib64");
 umount("/home/" + username + "/usr/lib");
 	umount("/home/" + username + "/usr/local/lib");
-	//umount("/home/" + username + "/usr/share");
+	umount("/home/" + username + "/usr/share");
 umount("/home/" + username + "/bin/bash");
+umount("/home/" + username + "/bin/ls");
 umount("/home/" + username + "/dev/ptmx");
 umount("/home/" + username + "/dev/pts");
 umount("/home/" + username + "/proc/cpuinfo");
@@ -114,6 +117,7 @@ umount("/home/" + username + "/usr/bin/env");
 	umount("/home/" + username + "/usr/bin/hg");
 	umount("/home/" + username + "/usr/bin/python");
 	umount("/home/" + username + "/usr/bin/node");
+umount("/home/" + username + "/usr/bin/ssh");
 	umount("/home/" + username + "/etc/ssl/certs");
 	
 	if(!NOZFS) {

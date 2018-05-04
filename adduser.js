@@ -218,7 +218,11 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	//copyFolderRecursiveSync("etc/userdir_skeleton/usr", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/.jzeditStorage", homeDir);
 	copyFolderRecursiveSync("etc/userdir_skeleton/wwwpub", homeDir);
-	
+		copyFolderRecursiveSync("etc/userdir_skeleton/.ssl/", homeDir);
+		
+		copyFileSync("etc/userdir_skeleton/.bashrc", homeDir + ".bashrc"); // bash settings, how the prompt look etc
+		
+		
 		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "testfile.txt");
 		
 	// Use the systems dns settings !?
@@ -241,7 +245,10 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	chmodrSync(homeDir + "etc/", "444");
 	chmodrSync(homeDir + "run/", "444");
 	
-	
+		// .ssh folder is secret!
+		chmodrSync(homeDir + ".ssh/", "700");
+		
+		
 	// Try Copy over the test file (only exist in dev)
 	try {
 			copyFileSync("./testfile.txt", HOME + username + "/testfile.txt");

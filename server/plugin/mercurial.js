@@ -84,7 +84,14 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		*/
 		
 		//var execFile = require('child_process').execFile;
-		var arg = ["clone", "--verbose", "--debug", "--insecure", remote, localPath];
+		var arg = ["clone"];
+		
+		//arg.push("--verbose");
+		//arg.push("--debug");
+		if(json.noCertCheck) arg.push("--insecure");
+		
+		arg.push(remote);
+		arg.push(localPath);
 		
 		if(hguser) arg = arg.concat(config);
 		

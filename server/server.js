@@ -597,7 +597,6 @@ idFail("Wrong password for user: " + username);
 							console.log("Checking mounts ...");
 							
 							var nginxProfileOK = false;
-							var nullNodCreated = true;
 							var foldersToMount = 15;
 							var apparmorProfilesToCreate = 6;
 							var reloadApparmor = false;
@@ -607,7 +606,7 @@ idFail("Wrong password for user: " + username);
 							var userAccepted = false;
 							var npmSymLinkCreated = false;
 							var hgrccacertsUptodate = true;
-							var passwdCreated = true;
+							var passwdCreated = false;
 							
 							checkUserRights(username, function checkedUserRights(err) {
 								if(err) return checkMountsError(err);
@@ -730,10 +729,12 @@ idFail("Wrong password for user: " + username);
 								*/
 								
 								if(!DEBUG_CHROOT) {
-									foldersToMount += 6;
+									foldersToMount += 7;
 mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 									
 									mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
+									mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
+									
 									mount("/usr/bin/env", homeDir + "usr/bin/env", folderMounted); // common in shebangs (npm needs it)
 									mount("/usr/bin/hg", homeDir + "usr/bin/hg", folderMounted);
 									mount("/usr/bin/python", homeDir + "usr/bin/python", folderMounted);
@@ -930,6 +931,12 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 							
 							function checkMountsReadyMaybe() {
 								if(checkMountsAbort) return;
+								
+								console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated +
+								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate
+								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
+								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
+								
 								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && 
 								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
 									if(!userAccepted) { // Prevent double accept
@@ -938,11 +945,8 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 									}
 									else throw new Error("User already accepted!");
 								}
-								else console.log("checkMounts: nginxProfileOK=" + nginxProfileOK + " passwdCreated=" + passwdCreated + 
-								" foldersToMount=" + foldersToMount + " apparmorProfilesToCreate=" + apparmorProfilesToCreate 
-								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
-								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
-							}
+								}
+							
 							
 							function checkMountsError(err) {
 								if(checkMountsAbort) return;

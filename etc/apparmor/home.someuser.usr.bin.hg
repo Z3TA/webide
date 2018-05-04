@@ -28,23 +28,17 @@
   /dev/urandom r,
   /etc/mercurial/hgrc.d/** r,
   /etc/resolv.conf r,
-
-
   /lib/** r,
   /usr/lib/** r,
-  #/run/resolvconf/resolv.conf r, # copied from userdir_skeleton
-  #/etc/mercurial/hgrc.d/cacerts.rc # copied from userdir_skeleton
-  /usr/lib/** r,
   /usr/local/lib/** r,
-  
-
   /usr/bin/python2.7 ix,
   /usr/bin/ssh px,
+
+  #/run/resolvconf/resolv.conf r, # copied from userdir_skeleton
+  #/etc/mercurial/hgrc.d/cacerts.rc # copied from userdir_skeleton
 
   # Allow access to everything in home folder
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rwl,
-
-
 
 }
