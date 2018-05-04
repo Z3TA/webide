@@ -731,7 +731,7 @@
 			state.text = file.text;
 		}
 		else {
-			console.warn("Not saving state for file because it has over " + sizeLimit + " characters file.path=" + path);
+			console.warn("Not saving state for " + file.path + " because it has " + file.text.length + " (over " + sizeLimit + ") characters");
 		}
 		
 		// Hash the state so that we do not spam the server !?
