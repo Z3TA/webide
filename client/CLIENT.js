@@ -201,9 +201,18 @@ var CLIENT = {}; // Client object is global
 		
 		var id = ++idCounter;
 		
-		var string = id + GS + req
+		var string = id + GS + req;
 		
-		if(json) string += GS + JSON.stringify(json);
+		
+		if(json) {
+			try {
+				string += GS + JSON.stringify(json);
+			}
+			catch(err) {
+				console.log(json);
+				throw new Error("Unable to stringify json=" + json);
+			}
+		}
 		
 		if(callback) callbackWaitList[id] = callback;
 		else console.warn("No callback defined in req=" + req);

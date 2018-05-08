@@ -479,8 +479,9 @@
 		var refreshButton = document.createElement("button");
 		refreshButton.setAttribute("class", "button");
 		refreshButton.appendChild(document.createTextNode("Refresh"));
-		refreshButton.onclick = updateCommitFileSelect;
-		
+		refreshButton.onclick = function() {
+updateCommitFileSelect();
+		};
 		group.appendChild(refreshButton);
 		
 		
@@ -908,6 +909,8 @@
 			if(EDITOR.currentFile) directory = UTIL.getDirectoryFromPath(EDITOR.currentFile.path);
 			else directory = EDITOR.workingDirectory;
 		}
+		
+		if(typeof directory != "string") throw new Error("Not a string: directory=" + directory);
 		
 		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, resp) {
 			if(err) {
