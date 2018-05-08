@@ -627,7 +627,7 @@
 								callback(null, wysiwygEditor, cleanUp);
 							}
 							
-						},0); 
+						},10); 
 						
 					}
 					
