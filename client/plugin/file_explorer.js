@@ -155,6 +155,17 @@
 			fsSelect.appendChild(option);
 		}
 		
+		
+		/*
+			We choose not to have support for Google Drive because it's very complicated to impelement.
+			And would pose a significant threat to user privacity. And we would have to specify Google as a third party in the eula.
+			
+			var googleDrive = document.createElement("option");
+			googleDrive.appendChild(document.createTextNode("Google Drive"));
+			googleDrive.setAttribute("id", "GoogleDrive");
+			fsSelect.appendChild(googleDrive);
+		*/
+		
 		// We want to start from the root, then work our way towards the actual dir
 		
 		var folders = UTIL.getFolders(fullPath, true);
@@ -632,6 +643,53 @@
 			var root = UTIL.getFolders(process.cwd())[0];
 			exploreDir(root);
 		}
+		/*
+			else if(host == "GoogleDrive") {
+			var key = "AIzaSyC-zAO6nFL16iwBaLy0o5suVKsA-58CsyM";
+			var filesUrl = "https://content.googleapis.com/drive/v3/files?corpus=user&includeTeamDriveItems=true&supportsTeamDrives=true&key=" + key;
+			console.log("filesUrl=" + filesUrl);
+			UTIL.httpGet(filesUrl, function googleDriveDir(err, resp) {
+			if(err) {
+			var json = parseJson(err.message);
+			// Try to parse the error as JSON
+			if(json == null) return alertBox(err.message);
+			}
+			else {
+			var json = parseJson(resp);
+			if(json == null) return alertBox("Unable to parse: " + resp);
+			}
+			
+			console.log(json);
+			
+			if(json.error && json.error.message) return alertBox("Google Drive Error: " + json.error.message);
+			
+			
+			function parseJson(text) {
+			text = text.trim(); // Remove ending line breaks or spaces
+			var firstChar = text.charAt(0);
+			var lastChar = text.slice(-1);
+			console.log("firstChar=" + firstChar + " lastChar=" + lastChar);
+			
+			if(firstChar != "{" || lastChar != "}") {
+			console.warn("Not JSON: " + text);
+return null;
+}
+			
+			try {
+			var json = JSON.parse(text);
+			}
+			catch(parseJsonError) {
+console.warn("Unable to parse JSON: " + text);
+console.error(parseJsonError);
+			return null;
+			}
+
+			return json;
+			}
+			
+			});
+			}
+		*/
 		else {
 			if(EDITOR.connections.hasOwnProperty(host)) {
 				var url = EDITOR.connections[host].protocol;

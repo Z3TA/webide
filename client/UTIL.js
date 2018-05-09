@@ -880,12 +880,18 @@ else {
 				clearTimeout(timeoutTimer);
 				if(xmlHttp.status == 200) callback(null, xmlHttp.responseText);
 				else {
-					var err = new Error(xmlHttp.responseText + 
-					" status: " + xmlHttp.status + 
-					" readyState: " + xmlHttp.readyState + 
-					" headers: " + XMLHttpRequest.getAllResponseHeaders() + 
-					" url: " + url);
-					err.CODE = xmlHttp.status;
+					
+					var headers = "Not available";
+					if(typeof XMLHttpRequest.getAllResponseHeaders == "function") {
+						headers = XMLHttpRequest.getAllResponseHeaders();
+					}
+					
+					var err = new Error(xmlHttp.responseText);
+					err.status = xmlHttp.status;
+					err.readyState = xmlHttp.readyState;
+					err.headers = headers;
+					err.url = url;
+					err.code = xmlHttp.status;
 					callback(err);
 				}
 			}
