@@ -37,9 +37,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Chrome OS app!
 
-Chrome OS app!?
-
+Create a webide account when the app is installed: chrome-background.js
 
 
 
