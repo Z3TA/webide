@@ -5,7 +5,7 @@
 	"manifest_version": 2,
 	
 	"icons": {
-		"64": "icons/jz64.png"
+		"64": "gfx/jz64.png"
 	},
 	
 	"app": {
