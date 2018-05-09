@@ -1,7 +1,6 @@
-
 Prio:
 
-1) Demoable. Make sure things work when demoing the editor: use happy path, stay on happy path! (make tests that coverst the demo happy path)
+1) Demoable. Make sure things work when demoing the editor: use happy path, stay on happy path! (make tests that covers the demo happy path)
 - SCM integration
 
 2) Beta release?, get USER FEEDBACK!
@@ -38,22 +37,26 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-testing apparmor profiles ...
+Investigating/Implementing Google Drive file access.
 
-trying vumoviemaker again ... 
-
-
-Make some multiplayer game exampes 
+Chrome OS app!?
 
 
-Make a cool io-game, website or blog from anywhere ...
- it will not work on a potato (image of a guy holding a potato) but will will work on any device that have a browser.
-No setup, no installation, works in the browser.
 
 
 
 todo
 ----
+
+Moving spellchecker to server side.
+
+Upgrading nw.js
+
+
+trying vumoviemaker again ... 
+
+
+Make some multiplayer game exampes 
 
 in terminal, when selecting text and pressing delete
 
@@ -488,6 +491,9 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+
+When opening a file, you get results from cache, but it's annoying when a file has been moved or deleted. Update cache !?
 
 Save-as didn't take away focus from the editor! (text entered into file path also gets entered into the file editor) Old bug! Make a test case !?
 
@@ -1312,6 +1318,9 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Pressing tab in file(search) open should fuzzy auto-complete from the results ... 
+Ex: I want to open package.json inside /projects/foo/bar/ 
 
 When source control detects a missing file, ask if it was renamed!? And let user select which file, then do a hg mv
 

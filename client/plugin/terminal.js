@@ -211,7 +211,7 @@
 			
 			terminalFiles.push(file);
 			
-			file.writeLine("Use Alt key instead of Ctrl to sent control characters!\n\n");
+			file.writeLine("Use Alt key instead of Ctrl to send control characters!\n\n");
 			file.writeLineBreak();
 			file.writeLineBreak();
 			
