@@ -1,0 +1,27 @@
+
+
+Test the app
+------------
+chrome://extensions/
+
+Click "load unpacked extension"
+
+( yes, this is not an extension, but you also test apps in chrome://extensions/ )
+
+
+Start the app
+--------------
+chrome://apps/
+
+Click on the app icon
+
+
+"app": {
+"urls": [
+			"https://webide.se/"
+],
+"launch": {
+			"web_url": "https://webide.se/"
+}
+}
+

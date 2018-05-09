@@ -3,15 +3,14 @@
 	"description": "Easily create or edit a web site, blog, or make a io/multiplayer game with JavaScript. Built in NodeJS and editor/IDE for JavaScript, HTML and CSS. And static site generator. You will get a free shell account for hosting web sites and running nodejs. Currently in Alpha!",
 "version": "1.0.0",
 	"manifest_version": 2,
-"icons": {
-		"64": "gfx/jz64.png"
-},
-"app": {
-"urls": [
-			"https://webide.se/"
-],
-"launch": {
-			"web_url": "https://webide.se/"
-}
+	
+	"icons": {
+		"64": "icons/jz64.png"
+	},
+	
+	"app": {
+		"background": {
+			"scripts": ["chrome-background.js"]
+		}
 }
 }
