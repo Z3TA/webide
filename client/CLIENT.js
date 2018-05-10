@@ -39,6 +39,10 @@ var CLIENT = {}; // Client object is global
 			
 			if(RUNTIME == "browser") console.warn("It's recommended to access the editor via a HTTP server!");
 		}
+		else if(protocol.toLowerCase() == "chrome-extension") {
+			// We are running as *the* chromeos app !?
+			defaultURL = "https://webide.se/jzedit";
+		}
 		
 		console.log("defaultURL=" + defaultURL);
 		

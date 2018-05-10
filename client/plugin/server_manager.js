@@ -54,24 +54,29 @@
 		
 		console.log("Loading server manager");
 		
-		if(!window.localStorage) {
-			console.warn("window.localStorage not available! server_manager.js plugin disabled.");
+		if(!EDITOR.localStorage) {
+			console.warn("EDITOR.localStorage not available! server_manager.js plugin disabled.");
 			return false;
 		}
+		
+		// todo: Refactor to use EDITOR.storage !?
 		
 		var charP = 80;
 		var charEscape = 27;
 		var charEnter = 13;
 		
-		remoteConnections = window.localStorage.remoteConnections ? JSON.parse(window.localStorage.remoteConnections) : [defaultServer];
+		EDITOR.localStorage.getItem("remoteConnections", function(err, value) {
+			remoteConnections = value ? JSON.parse(value) : [defaultServer];
+			
+			//build();
+			
+			EDITOR.bindKey({desc: "Show the FTP/SSH server manager", fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
+			EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
+			EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
+			
+			menuItem = EDITOR.addMenuItem("Remote connections", showServerManger);
+		});
 		
-		//build();
-		
-		EDITOR.bindKey({desc: "Show the FTP/SSH server manager", fun: showServerManger, charCode: charP, combo: CTRL + SHIFT});
-		EDITOR.bindKey({desc: "Hide the FTP/SSH server manager", fun: hideServerManger, charCode: charEscape, combo: 0});
-		EDITOR.bindKey({desc: "Connect to remove server in server manager", fun: serverManagerEnter, charCode: charEnter, combo: 0});
-		
-		menuItem = EDITOR.addMenuItem("Remote connections", showServerManger);
 		
 	}
 	
@@ -430,7 +435,7 @@
 		
 		function saveNewConnection() {
 			
-			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			if(!EDITOR.localStorage) throw new Error("localStorage not available!");
 			
 			// Make sure the name/alias is not in use
 			var name = inputName.value;
@@ -456,11 +461,11 @@
 			
 			selectConnection.selectedIndex = selectedIndex;// Select the new option
 			
-			window.localStorage.remoteConnections = JSON.stringify(remoteConnections);
-			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view
 			EDITOR.resizeNeeded();
+			
+			EDITOR.localStorage.setItem("remoteConnections", JSON.stringify(remoteConnections));
 			
 		}
 		
@@ -504,7 +509,7 @@
 			
 			if(inputPw) inputPw.value = inputEditPw.value;
 			
-			window.localStorage.remoteConnections = JSON.stringify(remoteConnections);
+			EDITOR.localStorage.setItem("remoteConnections", JSON.stringify(remoteConnections));
 			
 			editView.style.display = "none"; // Hide the edit view
 			connectionView.style.display = "block"; // Show the connection view

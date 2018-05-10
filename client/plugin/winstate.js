@@ -7,8 +7,8 @@
 		return;
 	}
 	
-	if(!window.localStorage) {
-		console.warn("window.localStorage not available! winstate.js plugin disabled.");
+	if(!EDITOR.localStorage) {
+		console.warn("localStorage not available! winstate.js plugin disabled.");
 		return false;
 	}
 	
@@ -62,10 +62,18 @@
 		// check for dev tools - they can't be open on the app start, so if
 		// dev tools are open, LiveReload was used.
 		
-		if(!window.localStorage) throw new Error("window.localStorage not available!");
+		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
 		//if (!win.isDevToolsOpen()) {
-			winState = window.localStorage.windowState ? JSON.parse(window.localStorage.windowState) : null;
+		
+		EDITOR.localStorage.getItem("windowState", function(err, winState) {
+			
+if(err) {
+console.warn(err.message)
+winState = null;
+}
+
+			if(winState) winState = JSON.parse(winState);
 
 			if (winState) {
 				currWinMode = winState.mode;
@@ -74,13 +82,14 @@
 				} else {
 					restoreWindowState();
 				}
-			} else {
+			} 
+else {
 				currWinMode = 'normal';
 				dumpWindowState();
 			}
 
 			win.show();
-		//}
+		});
 	}
 	
 	function dumpWindowState() {
@@ -149,9 +158,11 @@
 
 	function saveWindowState() {
 		dumpWindowState();
-		if(winState) window.localStorage.windowState = JSON.stringify(winState);
+		if(winState) {
+			EDITOR.localStorage.setItem("windowState", JSON.stringify(winState));
+		}
 	}
-
+	
 	win.on('maximize', function () {
 		isMaximizationEvent = true;
 		currWinMode = 'maximized';

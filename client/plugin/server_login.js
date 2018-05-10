@@ -20,7 +20,6 @@
 	
 	
 	function loadServerLogin() {
-		
 		/*
 			Wait before start events and plugins have loaded before connecting to the server !..
 			Or plugins listening for events from the server, or loginSuccess etc will not fire.
@@ -28,16 +27,12 @@
 		
 		var server = undefined;
 		
-		if(localStorage) {
-			var url = localStorage.getItem("editorServerUrl");
-			if(url) server = {url: url};
-		}
-		
-		CLIENT.connect(server, function connectedToServer(err) {
-			
-			
-		});
-		
+		if(EDITOR.localStorage) {
+			EDITOR.localStorage.getItem("editorServerUrl", function(err, url) {
+				if(url) server = {url: url};
+				CLIENT.connect(server, connectedToServer);
+			});
+		} else CLIENT.connect(server, connectedToServer);
 		
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
@@ -48,9 +43,11 @@
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
-		
 		menuItem = EDITOR.addMenuItem("Switch user", showLoginDialog);
 		
+		function connectedToServer(err) {
+			
+		}
 	}
 	
 	function unloadServerLogin() {
@@ -95,14 +92,21 @@
 			showLoginDialog();
 		}
 		else {
-			
-			// Attempt to login ...
-			
-			if(localStorage) {
-				var userValue = QUERY_STRING["user"] || localStorage.getItem("editorServerUser") || DEFAULT_USERNAME;
-				var pwValue = QUERY_STRING["pw"] || localStorage.getItem("editorServerPw") || DEFAULT_PASSWORD;
+			if(EDITOR.localStorage) {
+				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function(err, obj) {
+					var userValue = QUERY_STRING["user"] || obj["editorServerUser"] || DEFAULT_USERNAME;
+					var pwValue = QUERY_STRING["pw"] || obj["editorServerPw"] || DEFAULT_PASSWORD;
+					 attemptLogin(userValue, pwValue);
+				});
 			}
-			
+			else {
+				var userValue = QUERY_STRING["user"] || DEFAULT_USERNAME;
+				var pwValue = QUERY_STRING["pw"] || DEFAULT_PASSWORD;
+				attemptLogin(userValue, pwValue);
+			}
+		}
+		
+		function attemptLogin(userValue, pwValue) {
 			if(userValue && pwValue) {
 				console.log("Attempting to login to server with user=" + userValue + " ...");
 				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
@@ -111,11 +115,11 @@
 						console.error(err);
 						if(userValue == DEFAULT_USERNAME) alertBox("Failed to automatically login as " + userValue + "." +
 						" Fill in your username and password below, or <a href='/signup/signup.html'>create an account</a> !\n" +
-						"\n(" + err.message + ")") 
+						"\n(" + err.message + ")")
 						else alertBox(err.message);
 						
 						
-
+						
 						showLoginDialog();
 					}
 					else {
@@ -127,7 +131,6 @@
 				
 			}
 			else showLoginDialog();
-			
 		}
 		
 	}

@@ -8,6 +8,10 @@
 		"64": "gfx/jz64.png"
 	},
 	
+	"permissions": [
+		"storage"
+	],
+	
 	"app": {
 		"background": {
 			"scripts": ["chrome-background.js"]
