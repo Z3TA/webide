@@ -133,6 +133,7 @@
 	}
 	
 	function showLoginDialog(options) {
+		if(serverLoginDialog.visible) return true;
 		EDITOR.hideMenu();
 		return serverLoginDialog.show(options);
 	}
