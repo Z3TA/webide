@@ -1127,7 +1127,7 @@ else {
             hash: ""
         };
 		
-        var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps"];
+		var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps", "chrome-extension"];
 		
         function firstSplit (str, splitter) {
             var array;
