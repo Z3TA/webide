@@ -92,21 +92,27 @@
 			showLoginDialog();
 		}
 		else {
+			var userValue = QUERY_STRING["user"];
+			var pwValue = QUERY_STRING["pw"];
+
 			if(EDITOR.localStorage) {
 				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function(err, obj) {
-					var userValue = QUERY_STRING["user"] || obj["editorServerUser"] || DEFAULT_USERNAME;
-					var pwValue = QUERY_STRING["pw"] || obj["editorServerPw"] || DEFAULT_PASSWORD;
-					 attemptLogin(userValue, pwValue);
+					if(err) console.error(err);
+					if(obj) { 
+						userValue = userValue || obj["editorServerUser"];
+						pwValue = pwValue || obj["editorServerPw"];
+					}
+					attemptLogin();
 				});
 			}
 			else {
-				var userValue = QUERY_STRING["user"] || DEFAULT_USERNAME;
-				var pwValue = QUERY_STRING["pw"] || DEFAULT_PASSWORD;
-				attemptLogin(userValue, pwValue);
+				attemptLogin();
 			}
 		}
 		
-		function attemptLogin(userValue, pwValue) {
+		function attemptLogin() {
+			userValue = userValue || DEFAULT_USERNAME;
+			pwValue = pwValue || DEFAULT_PASSWORD;
 			if(userValue && pwValue) {
 				console.log("Attempting to login to server with user=" + userValue + " ...");
 				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
