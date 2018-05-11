@@ -493,7 +493,7 @@
 		
 		function saveConnection() {
 			
-			if(!window.localStorage) throw new Error("window.localStorage not available!");
+			if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 			
 			if(!selectedConnection) throw new Error("No selectedConnection!");
 			

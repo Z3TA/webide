@@ -407,7 +407,7 @@
 					EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 						if(err) throw err;
 						openedFilesString = removeFromStringList(openedFilesString, path, fileDelimiter);
-						window.localStorage.setItem("openedFiles", openedFilesString, function(err) {
+						EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 							if(err) throw err;
 							callback(file, false, openFileError);
 						});
@@ -547,16 +547,16 @@
 			if(err) throw err;
 			if(openedFilesString == null) openedFilesString = "";
 			if(openedFilesString.split(fileDelimiter).indexOf(file.path) != -1) {
-				console.warn("File already in window.localStorage: " + file.path);
+				console.warn("File already in EDITOR.localStorage: " + file.path);
 			}
 			else {
 				console.log(UTIL.getStack("Adding file to openedFiles path='" + file.path + "'"));
 				
 				console.log("List before=" + openedFilesString);
 				openedFilesString = addToStringList(openedFilesString, file.path, fileDelimiter)
-				console.log("List after=" + window.localStorage.getItem("openedFiles"));
+				console.log("List after=" + openedFilesString);
 				
-				window.localStorage.setItem("openedFiles", openedFilesString, function(err) {
+				EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 					if(err) throw err;
 					findBugs();
 				});
@@ -634,11 +634,11 @@
 			
 			console.log("List before=" + openedFilesString);
 			openedFilesString = removeFromStringList(openedFilesString, file.path, fileDelimiter);
-			console.log("List after=" + window.localStorage.getItem("openedFiles"));
-			window.localStorage.setItem("openedFiles", openedFilesString, function(err) {
+			console.log("List after=" + openedFilesString);
+			EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 
 				// Remove state
-				window.localStorage.removeItem("state_" + file.path, function(err) {
+				EDITOR.localStorage.removeItem("state_" + file.path, function(err) {
 					if(err) throw err;
 					findBugs(false, function(err) {
 						console.log("File removed from opened files: path=" + file.path);
@@ -653,7 +653,7 @@
 		console.log("saveStateOfOpenFiles!");
 		if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
-		if(!EDITOR.localStorage) throw new Error("window.localStorage not available!");
+		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 if(openedFilesString == null || openedFilesString == "") {

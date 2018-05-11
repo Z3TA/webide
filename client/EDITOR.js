@@ -418,7 +418,7 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 	
 	// Because of Chrome app's doesn't have window.localStorage, and chrome.storage.local doesn't look the same
 	var chromeStorage = (typeof chrome == "object") && chrome.storage && chrome.storage.local;
-	if(!window.localStorage && chromeStorage) {
+	if(chromeStorage) {
 		EDITOR.localStorage = {
 			setItem: function localStorageSetItem(itemsObject, callback, callbackMaybe) {
 				if(typeof itemsObject == "string") {
@@ -482,7 +482,7 @@ var value = itemsObject[key];
 			}
 		};
 	}
-	else if(window.localStorage) {
+	else if(typeof window.localStorage == "object") {
 		// Use window.localStorage but with the same interface as chrome.storage
 		EDITOR.localStorage = {
 			setItem: function localStorageSetItem(key, value, callback) {
