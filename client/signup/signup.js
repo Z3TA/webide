@@ -83,8 +83,8 @@
 				else if(code == "created") {
 					alertGeneralMessage("Successfully created user " + arr[1]);
 					
-					if(localStorage) {
-						localStorage.setItem("editorServerUser", arr[1]);
+					if(typeof window.localStorage == "object") {
+						window.localStorage.setItem("editorServerUser", arr[1]);
 						// todo: use access token instead of saving pw
 					}
 					
@@ -199,7 +199,7 @@
 			var password = inputPassword.value;
 			alertGeneralMessage("Creating user " + username + ". Please wait ... You will be redirected to the editor once the account is created.");
 			createButton.disabled = true;
-			if(localStorage) {
+			if(typeof window.localStorage == "object") {
 				localStorage.setItem("editorServerPw", password);
 				// todo: use access token instead of saving pw
 			}

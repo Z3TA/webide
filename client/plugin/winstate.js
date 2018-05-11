@@ -2,8 +2,8 @@
 	
 	//alert("RUNTIME=" + RUNTIME);
 	
-	if(RUNTIME == "browser") {
-		console.warn("Winstate not yet supported in the browser!");
+	if(RUNTIME != "nw.js") {
+		console.warn("Winstate only supported in nw.js!");
 		return;
 	}
 	

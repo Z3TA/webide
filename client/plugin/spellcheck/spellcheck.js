@@ -6,8 +6,8 @@
 	*/
 	"use strict";
 	
-	if(RUNTIME == "browser") {
-		console.warn("Spell-checking not yet supported in the browser!");
+	if(RUNTIME != "nw.js") {
+		console.warn("Spell-checking currently only works in nw.js!");
 		return;
 	}
 	if(RUNTIME == "nw.js") {

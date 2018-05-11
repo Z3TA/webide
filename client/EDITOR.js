@@ -4771,9 +4771,7 @@ CLIENT.cmd("mirror", {
 		
 		keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		
-		var isChromeApp = window.chrome && chrome.runtime && chrome.runtime.id;
-		
-		if(!isChromeApp) window.onbeforeunload = confirmExit;
+		if(RUNTIME != "chromeApp") window.onbeforeunload = confirmExit;
 		
 		
 		// Handle file save dialog
@@ -4953,11 +4951,9 @@ CLIENT.cmd("mirror", {
 				EDITOR.virtualKeyboard.show();
 				EDITOR.updateMenuItem(virtualKeyboardMenuItem, true);
 			}
-			
-		}
+			}
 		
-		
-		if(RUNTIME != "browser") {
+		if(RUNTIME == "nw.js") {
 			/*
 				NOTE: IT IS NOT POSSIBLE TO CAPTURE STDIN FROM NW!
 				We will have to use a wrapper and send the data via a socket
@@ -6814,7 +6810,7 @@ CLIENT.cmd("mirror", {
 			if(err) {
 				// Failed to read file 
 				
-				if(RUNTIME != "browser") {
+				if(RUNTIME == "nw.js") {
 					
 					// Try Mercurial
 					var exec = require('child_process').exec;

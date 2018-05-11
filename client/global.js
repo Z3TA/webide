@@ -12,16 +12,14 @@
 
 "use strict";
 
-var RUNTIME = (function is_nwjs() {
-	if(typeof require != "undefined") {
-		return (typeof require('nw.gui') !== "undefined");
-	}
-	return false;
-})() ? "nw.js" : "browser";
-
+var RUNTIME = (function getRuntime() {
+	if(window.chrome && chrome.runtime && chrome.runtime.id) return "chromeApp";
+	else if(typeof require != "undefined" && typeof require('nw.gui') !== "undefined") return "nw.js";
+	else return "browser";
+})();
 
 var __dirname;
-if(RUNTIME == "browser") {
+if(RUNTIME != "nw.js") {
 	//alert("RUNTIME=" + RUNTIME);
 	var process = {
 		platform: (function findPlatForm() {
@@ -52,7 +50,7 @@ if(RUNTIME == "browser") {
 	// but in the editor we want all directories to have a trailing slash, except __dirname
 	
 }
-else {
+else if(RUNTIME == "nw.js") {
 	// Hack to make nw.js return the correct __dirname
 	__dirname = require("dirname");
 }

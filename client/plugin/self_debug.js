@@ -220,7 +220,7 @@
 				else process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
-				if(EDITOR.settings.devMode && RUNTIME != "browser") {
+				if(EDITOR.settings.devMode && RUNTIME == "nw.js") {
 					// Show the chrome dev tools
 					var gui = require('nw.gui').Window.get();
 					gui.showDevTools();

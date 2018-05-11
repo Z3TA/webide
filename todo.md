@@ -37,11 +37,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-todo: Make EDITOR.localStorage using window.localStorage handle itemsObject same as chrome.storage
-
 todo: Make EDITOR.storage work like EDITOR.localStorage
-
-todo: Replace/refactor all window.localstorage to use EDITOR.localStorage (so they work in Chrome apps)
 
 todo: Update/refactor all usage of EDITOR.storage to the new interface
 

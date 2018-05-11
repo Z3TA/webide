@@ -66,6 +66,8 @@
 		var charEnter = 13;
 		
 		EDITOR.localStorage.getItem("remoteConnections", function(err, value) {
+			if(err) throw err;
+			
 			remoteConnections = value ? JSON.parse(value) : [defaultServer];
 			
 			//build();

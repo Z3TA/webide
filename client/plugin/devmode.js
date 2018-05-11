@@ -213,9 +213,14 @@
 						
 						//document.location = "about:blank";
 						//document.location = "file:///" + require("dirname") + "/client/index.htm";
-						window.onbeforeunload = null;
-						location.reload();
 						
+						if(RUNTIME == "chromeApp") {
+chrome.runtime.reload();
+						}
+						else {
+							window.onbeforeunload = null;
+						location.reload();
+						}
 						// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
 						
 					}
