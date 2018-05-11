@@ -53,6 +53,10 @@ todo: Create a webide account when the app is installed: chrome-background.js
 todo
 ----
 
+Password protect files and folders
+
+Persistent storage! People need somewhere to host their data.
+
 Moving spellchecker to server side.
 
 Upgrading nw.js
