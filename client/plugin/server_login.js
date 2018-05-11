@@ -98,6 +98,7 @@
 			if(EDITOR.localStorage) {
 				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function(err, obj) {
 					if(err) console.error(err);
+					console.log("credentials: ", obj);
 					if(obj) { 
 						userValue = userValue || obj["editorServerUser"];
 						pwValue = pwValue || obj["editorServerPw"];

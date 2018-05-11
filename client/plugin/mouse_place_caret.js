@@ -37,7 +37,7 @@ unload: function unloadMousePlaceCaret() {
 		
 			EDITOR.currentFile.caret = caret;
 			
-			EDITOR.fireEvent("moveCaret", EDITOR.currentFile, caret);
+			EDITOR.fireEvent("moveCaret", [EDITOR.currentFile, caret]);
 			
 			EDITOR.renderNeeded();
 			

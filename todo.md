@@ -501,6 +501,8 @@ Make server run under apparmor profile ...
 BUGS (and issues)
 =================
 
+False posetive (red circle);
+if(value == undefined) throw new Error("value=" + value + " can not be undefined if key=" + key + " is a key string");
 
 When opening a file, you get results from cache, but it's annoying when a file has been moved or deleted. Update cache !?
 

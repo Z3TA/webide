@@ -171,67 +171,55 @@
 		var yes = "Yes, reload!";
 		var no = "No, dont reload";
 		confirmBox("Do you want to reload the editor ?", [yes, no], function (answer) {
-			
 			if(answer == yes) {
-				var func, name, ret = true;
-				
 				//EDITOR.closeFile(testfile);
 				
 				// Call exit listeners before reloading
-				for(var i=0, f; i<EDITOR.eventListeners.exit.length; i++) {
+				EDITOR.fireEvent("exit", [], function(err, returns) {
+					if(err) throw err;
 					
-					func = EDITOR.eventListeners.exit[i].fun;
-					name = UTIL.getFunctionName(func);
+					var gotError = false;
 					
-					if(typeof func != "function") {
-						
-						console.warn(typeof f + " name=" + name + " json=" + JSON.stringify(f));
-						//console.warn(UTIL.objInfo(f));
-						
-						throw  new Error("Index=" + i + " of EDITOR.eventListeners.exit has no valid function!");
-						
+					for(var fName in returns) {
+						console.log(fName + " returned " + returns[fName]);
+						if(returns[fName] === false || returns[fName] instanceof Error) {
+							gotError = true;
+							break;
+						}
+					}
+					
+					if(gotError) {
+						throw new Error("There was an error in " + name + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
 					}
 					else {
-						ret = func();
-					}
-					
-					
-					console.log(name + " returned " + ret);
-					
-					if(ret !== true) break; // Not true means there's an error
-				}
-				
-				if(ret !== true) {
-					throw new Error("There was an error in " + name + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
-				}
-				else {
-					
-					// Unload all plugins
-					for(var i=0; i<EDITOR.plugins.length; i++) {
-						console.log("unloading plugin: " + EDITOR.plugins[i].desc);
-						EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
-					}
-					
-					// Close all open windows
-					for(var win in EDITOR.openedWindows) {
-						try{EDITOR.openWindows[win].close();}
-						catch(err) {};
-					}
-					
-					/*
-						for(var file in EDITOR.files) {
-						delete EDITOR.files[file];
+						
+						// Unload all plugins
+						for(var i=0; i<EDITOR.plugins.length; i++) {
+							console.log("unloading plugin: " + EDITOR.plugins[i].desc);
+							EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
 						}
-					*/
-					
-					//document.location = "about:blank";
-					//document.location = "file:///" + require("dirname") + "/client/index.htm";
-					window.onbeforeunload = null;
-					location.reload();
-					
-					// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
-					
-				}
+						
+						// Close all open windows
+						for(var win in EDITOR.openedWindows) {
+							try{EDITOR.openWindows[win].close();}
+							catch(err) {};
+						}
+						
+						/*
+							for(var file in EDITOR.files) {
+							delete EDITOR.files[file];
+							}
+						*/
+						
+						//document.location = "about:blank";
+						//document.location = "file:///" + require("dirname") + "/client/index.htm";
+						window.onbeforeunload = null;
+						location.reload();
+						
+						// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+						
+					}
+				});
 			}
 		});
 		

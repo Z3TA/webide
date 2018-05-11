@@ -252,7 +252,7 @@ var File; // File object is global
 			file.fixCaret(caret);
 
 			if(caret == file.caret) {
-				EDITOR.fireEvent("moveCaret", file, file.caret);
+				EDITOR.fireEvent("moveCaret", [file, file.caret]);
 				EDITOR.renderNeeded();
 			}
 			return caret;
@@ -2149,7 +2149,7 @@ var File; // File object is global
 		file.change("linebreak", file.lineBreak, index, row, col) // change, text, index, row, col
 		
 		
-		EDITOR.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		EDITOR.renderNeeded();
 		
@@ -2208,7 +2208,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		EDITOR.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		//if(caret == file.caret) EDITOR.renderNeeded();
 
@@ -2279,7 +2279,7 @@ var File; // File object is global
 			file.moveCaretLeft(caret, times);
 		}
 		
-		EDITOR.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		if(caret == file.caret) EDITOR.renderNeeded();
 		
@@ -2345,7 +2345,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		EDITOR.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		//if(caret == file.caret) EDITOR.renderNeeded();
 		
@@ -2420,7 +2420,7 @@ var File; // File object is global
 		
 		file.sanityCheck();
 		
-		EDITOR.fireEvent("moveCaret", file, caret);
+		EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		//if(caret == file.caret) EDITOR.renderNeeded();
 		
@@ -2749,7 +2749,7 @@ var File; // File object is global
 		file.checkCaret(caret);
 		
 		if(caret == file.caret) {
-			EDITOR.fireEvent("moveCaret", file, caret);
+			EDITOR.fireEvent("moveCaret", [file, caret]);
 			file.scrollToCaret();
 			EDITOR.renderNeeded();
 		}
@@ -2775,7 +2775,7 @@ var File; // File object is global
 		
 			file.checkCaret(caret);
 			
-			EDITOR.fireEvent("moveCaret", file, caret);
+			EDITOR.fireEvent("moveCaret", [file, caret]);
 			
 			return caret;
 		}
@@ -2794,7 +2794,7 @@ var File; // File object is global
 		
 		file.checkCaret(caret);
 		
-			EDITOR.fireEvent("moveCaret", file, caret);
+			EDITOR.fireEvent("moveCaret", [file, caret]);
 			
 			return caret;
 		}
@@ -3380,7 +3380,7 @@ var File; // File object is global
 		
 		file.checkCaret(caret);
 		
-		if(caret == file.caret) EDITOR.fireEvent("moveCaret", file, caret);
+		if(caret == file.caret) EDITOR.fireEvent("moveCaret", [file, caret]);
 		
 		return caret;
 		
@@ -3614,7 +3614,7 @@ var File; // File object is global
 			//file.scrollTo(undefined, Math.max(0, fileRow-topSpace));
 			file.scrollToCaret();
 			
-			EDITOR.fireEvent("moveCaret", file, file.caret); // Always fire an event when we move the file caret!
+			EDITOR.fireEvent("moveCaret", [file, file.caret]); // Always fire an event when we move the file caret!
 			
 			EDITOR.renderNeeded();
 			if(callback) callback();

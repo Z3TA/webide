@@ -412,7 +412,7 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 		
 		This big difference between EDITOR.localStorage and EDITOR.storage is that EDITOR.localStorage works offline!
 		
-		EDITOR.localStorage and EDITOR.storage has the same interface to make it easy to switch beteen them.
+		EDITOR.localStorage and EDITOR.storage has the same interface to make it easy to switch between them.
 		
 	*/
 	
@@ -440,9 +440,7 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 				
 				chrome.storage.sync.set(itemsObject, function chromeStorageSet() {
 					var err = checkForChromeAppError(stack);
-					if(!err) var json = {saved: key};
-					
-					if(callback) callback(err, json);
+					if(callback) callback(err);
 					else if(err) throw err;
 					console.log("chrome.storage.sync.set " + key + " done!");
 				});
@@ -468,11 +466,7 @@ var value = itemsObject[key];
 				var stack = UTIL.getStack("EDITOR.localStorage.removeItem");
 				chrome.storage.sync.remove(key, function chromeStorageRemove() {
 					var err = checkForChromeAppError(stack);
-					if(!err) {
-						var json = {removed: key};
-					}
-					
-					if(callback) callback(err, json);
+					if(callback) callback(err);
 					else if(err) throw err;
 				});
 			},
@@ -492,19 +486,53 @@ var value = itemsObject[key];
 		// Use window.localStorage but with the same interface as chrome.storage
 		EDITOR.localStorage = {
 			setItem: function localStorageSetItem(key, value, callback) {
-				window.localStorage.setItem(key, value);
+				if(typeof key == "object") {
+					var itemsObject = key;
+					if(typeof value == "function" && callback == undefined) {
+callback = value; 
+					}
+				}
+				else if(typeof key == "string") {
+					if(typeof value != "string") throw new Error("value=" + value + " needs to be a string when key:" + key + " is a key string");
+					var itemsObject = {};
+					itemsObject[key] = value;
+				}
+				for(var name in itemsObject) window.localStorage.setItem(key, value);
 				var json = {saved: key};
 				if(callback) callback(null, json);
 			},
 			getItem: function localStorageGetItem(key, callback) {
 				if(typeof callback != "function") throw new Error("getItem is async and needs a callback function!");
-				var value = window.localStorage.getItem(key);
+				if(Array.isArray(key)) {
+					var itemsArray = key;
+					var itemsObject = {};
+					for (var i=0; i<itemsArray.length; i++) {
+						itemsObject[itemsArray[i]] =  window.localStorage.getItem(itemsArray[i]);
+					}
+					var value = itemsObject;
+				}
+				else if(typeof key == "string") {
+					var value = window.localStorage.getItem(key);
+				}
+				else throw new Error("Epected first argument/parameter to be a string or array, not " + (typeof key) + " " + key);
+				
+				if(value === undefined) throw new Error("value=" + value); // Sanity check
+				
 				callback(null, value);
 			},
 			removeItem: function localStorageRemoveItem(key, callback) {
-				window.localStorage.removeItem(key);
-				var json = {removed: key};
-				if(callback) callback(null, json);
+				if(Array.isArray(key)) {
+					var itemsArray = key;
+					for (var i=0; i<itemsArray.length; i++) {
+						window.localStorage.removeItem(itemsArray[i]);
+					}
+				}
+				else if(typeof key == "string") {
+					window.localStorage.removeItem(key);
+				}
+				else throw new Error("Epected first argument/parameter to be a string or array, not " + (typeof key) + " " + key);
+				
+				if(callback) callback(null);
 			},
 			clear: function storageClear(callback) {
 				console.warn("Clearing ALL data from window.localStorage!");
@@ -2581,35 +2609,66 @@ if(callback) return callback(err, path);
 		
 	}
 	
-	EDITOR.fireEvent = function(eventName) {
+	EDITOR.fireEvent = function(eventName, args, callback) {
 		
-		//throw new Error("todo: shift/splice arguments before sending them to listener");
+		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) {
+			var err = new Error("Uknown event listener:" + eventName);
+			if(callback) return callback(err);
+			else throw err; 
+		}
 		
-		var eventListeners;
-		var func;
+		var waitingForEventListenerCallbacks = 0;
+			var eventListeners = EDITOR.eventListeners[eventName];
+		var returns = {};
 		
-		if(eventName in EDITOR.eventListeners) {
-			
-			eventListeners = EDITOR.eventListeners[eventName];
-			
 			console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
-			for(var i=0; i<eventListeners.length; i++) {
-				func = eventListeners[i].fun;
-				
+		for(var i=0; i<eventListeners.length; i++) runFunc(eventListeners[i].fun);
+		
+		if(waitingForEventListenerCallbacks <= 0) allDone();
+		
+		function runFunc(func) {
+			
+			var fName = UTIL.getFunctionName(func);
 				if(func == undefined) throw new Error("Undefined function in " + eventName + " listener!");
 				
 				//fun.apply(this, Array.prototype.shift.call(arguments)); // Remove eventName from arguments
 				
-				func.apply(this, Array.prototype.slice.call(arguments, 1));
-				
+			// Add callback function
+			var fargs = args.concat(function(err, ret) {
+				returns[fName] = ret;
+				if(--waitingForEventListenerCallbacks == 0) {
+					allDone();
+				}
+			});
+			
+			try {
+				var ret = func.apply(this, fargs);
+			}
+			catch(err) {
+				returns[fName] = err;
+				return;
 			}
 			
-			// EDITOR.eventListeners[eventName] // ?????
-		}
-		else {
-			throw new Error("Uknown event listener:" + eventName);
+			if(ret === undefined) {
+				// Asume it's an async function, wait for it to call the callback function.
+				waitingForEventListenerCallbacks++;
+			}
+			else {
+				returns[fName] = ret;
+			}
 		}
 		
+		function allDone() {
+			if(callback) {
+				callback(null, returns);
+				callback = null;
+			}
+			
+			if(waitingForEventListenerCallbacks < 0) {
+				throw new Error("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks +
+				" one or more " + eventName + " event listeners both returned something And called the callback function!");
+			}
+		}
 	}
 	
 	EDITOR.addRender = function(fun) {
@@ -4394,28 +4453,26 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 				console.warn("EDITOR.storage not ready!");
 			}
 			
-			console.log("Calling exit listeners (" + EDITOR.eventListeners.exit.length + ")");
-			for(var i=0, f; i<EDITOR.eventListeners.exit.length; i++) {
+			EDITOR.fireEvent("exit", [], function(err, returns) {
+				if(err) throw err;
 				
-				f = EDITOR.eventListeners.exit[i].fun;
-				name = UTIL.getFunctionName(f);
-				ret = f();
+				for(var fName in returns) {
+					console.log(fName + " returned " + returns[fName]);
+					if(returns[fName] === false || returns[fName] instanceof Error) {
+						gotError = true;
+						break;
+					}
+				}
 				
-				console.log(name + " returned " + ret);
+				if(gotError) {
+					this.show();
+					throw new Error("Something went wrong when closing the editor!");
+				}
+				else {
+					this.close(true);
+				}
 				
-				if(ret !== true) break;
-			}
-			
-			if(ret == true) {
-				this.close(true);
-			}
-			else {
-				this.show();
-				throw new Error("Something went wrong when closing the editor!");
-			}
-			
-			CLIENT.disconnect();
-			
+			});
 		});
 		
 		// Use event listeners for these so that they also fire when "reloading" the editor
@@ -6742,7 +6799,7 @@ CLIENT.cmd("mirror", {
 				
 				if(json) {
 					EDITOR.bootstrap = json;
-					EDITOR.fireEvent("bootstrap", json);
+					EDITOR.fireEvent("bootstrap", [json]);
 				}
 				
 			});
