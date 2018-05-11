@@ -743,7 +743,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		if(text == undefined) {
 			
-			if(RUNTIME!="browser") {
+			if(RUNTIME=="nw.js") {
 				var absolutePath = UTIL.makePathAbsolute(path);
 				if(absolutePath != path) {
 					removeFromQueue(path);

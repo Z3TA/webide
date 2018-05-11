@@ -1,7 +1,22 @@
+
 // Check whether new version is installed
 chrome.runtime.onInstalled.addListener(function(details){
 	if(details.reason == "install"){
 		//console.log("This is a first install!");
+		
+		// Signup for an account !?
+		
+		var user = {
+			editorServerUrl: "https://webide.se/jzedit",
+			editorServerUser: "demo",
+			editorServerPw: "demo"
+		}
+		
+		// storage.local and storage.sync seems to be different! The editor uses storage.sync!
+		
+		chrome.storage.sync.set(user, function() {
+			console.log("chrome.storage.sync.set: ", user);
+		});
 		
 	}
 	else if(details.reason == "update"){

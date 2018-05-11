@@ -37,6 +37,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+todo: use domain instead of "Local file-system" when listing files in file explorer - when not showing local files!
+
 todo: Make EDITOR.storage work like EDITOR.localStorage
 
 todo: Update/refactor all usage of EDITOR.storage to the new interface

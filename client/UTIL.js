@@ -962,6 +962,7 @@ else {
 	},
 	
 	makePathAbsolute: function makePathAbsolute(path) {
+		if(RUNTIME != "nw.js") throw new Error("makePathAbsolute only available in nw.js!");
 		if(path.match(/^.*:\/\//) == null) { // It's already absolute if it starts with a protocol, like ftp://
 			var fspath = require("path");
 			if(!fspath.isAbsolute(path)) {
