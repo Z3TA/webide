@@ -139,9 +139,23 @@
 		
 		while(fsSelect.firstChild) fsSelect.removeChild(fsSelect.firstChild); // Emty select options
 		
+		var domain = document.domain;
+		if(domain == "localhost" || domain == "127.0.0.1") {
+			var localName = "Local file-system";
+		}
+		else if(RUNTIME == "chromeApp") {
+			// The domain is some random characters
+			// Use the hostname of the server we are connected to
+			var loc = UTIL.getLocation(CLIENT.url); 
+			var localName = EDITOR.user + "@" + loc.host;
+		}
+		else {
+			var localName = domain;
+		}
+		
 		// Make a list of connected file-systems
 		var option = document.createElement("option");
-		option.appendChild(document.createTextNode("Local file-system"));
+		option.appendChild(document.createTextNode(localName));
 		option.setAttribute("id", "local");
 		fsSelect.appendChild(option);
 		
