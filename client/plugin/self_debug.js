@@ -217,7 +217,7 @@
 			
 			if(answer == yes) {
 				if(RUNTIME == "browser") document.location = document.location.href;
-				else process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
+				else if(RUNTIME=="nw.js") process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
 			}
 			else {
 				if(EDITOR.settings.devMode && RUNTIME == "nw.js") {

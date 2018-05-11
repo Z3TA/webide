@@ -68,12 +68,13 @@ EDITOR.settings = {
 	topMargin: 10,
 	bottomMargin: 5,
 	gridHeight: 23, // 23, 22
-	gridWidth: 8.25, // Needs to be the same as font's character width!
+	gridWidth: 9, // Needs to be the same as font's character width!
 	sub_pixel_antialias: true, // For the main text area (canvas) only. If set to false, you want to start the editor with --disable-lcd-text
 	style: {
+		// These are the default/fallback styles. Over-ride them in settings_overload.js !
 		fontSize: 15, // Don't forget to change gridHeight and gridWidth after chaning fontSize!
-		font: "Consolas, DejaVu Sans Mono, Liberation Mono, monospace",
-		highlightMatchFont: "bold 15px Consolas, DejaVu Sans Mono, Liberation Mono, monospace",
+		font: "Courier New, Courier, monospace", 
+		highlightMatchFont: "bold 15px Courier New, Courier, monospace",
 		highlightMatchFontColor: "rgb(200, 119, 32)",
 		highlightMissMatchFontColor: "rgb(255, 159, 0)",
 		highlightMatchBackground: "rgb(255, 255, 230)",
@@ -86,7 +87,7 @@ EDITOR.settings = {
 		addedTextColor: "#ff4a4a",
 		selectedTextBg: "rgb(193, 214, 253)",
 		currentLineColor: "rgb(255, 255, 230)",
-		highlightTextBg: "rgb(155, 255, 155)"          // For text highlighting
+		highlightTextBg: "rgb(155, 255, 155)"    // For text highlighting
 	},
 	scrollSpeedMultiplier: 1/17,
 	defaultLineBreakCharacter: (navigator.platform.indexOf("Win") != -1) ? "\r\n" : "\n", // Use Windows standard if on Windows, else use line-feed. \n == LF, \r == CR
@@ -428,7 +429,7 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 					if(typeof value != "string") throw new Error("value needs to be a string!");
 					var itemsObject = {};
 					itemsObject[key] = value;
-					console.log("chrome.storage.sync.set " + key + "=" + value);
+					//console.log("chrome.storage.sync.set " + key + "=" + value);
 				}
 				else if(typeof itemsObject != "object") throw new Error("Use: key, value. or a itemsObject ! itemsObject=" + itemsObject);
 				
@@ -5718,7 +5719,6 @@ CLIENT.cmd("mirror", {
 		var funReturn = true;
 		
 		console.log("keyPressed: " + charCode + " = " + character + " (charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
-		
 		
 		console.log("Calling keyPressed listeners (" + EDITOR.eventListeners.keyPressed.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.keyPressed.length; i++) {

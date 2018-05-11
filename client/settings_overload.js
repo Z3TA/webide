@@ -16,7 +16,7 @@
 	
 	console.log("RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform);
 
-	if(RUNTIME=="browser") {
+	if(RUNTIME=="browser" || RUNTIME == "chromeApp") {
 	
 	// We better use a web safe font in the browser
 		EDITOR.settings.style.font = "Courier New, Courier, monospace";
