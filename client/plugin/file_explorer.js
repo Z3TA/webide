@@ -111,7 +111,7 @@
 		EDITOR.updateMenuItem(menuItem, visible, "File explorer");
 		
 		if(visible) {
-			exploreDir(EDITOR.workingDirectory)
+			exploreDir(EDITOR.workingDirectory);
 			fileExplorerWrap.style.display="block";
 			
 		}
@@ -133,7 +133,7 @@
 	
 	function exploreDir(fullPath) {
 		
-		//console.log("Exploring fullPath=" + fullPath);
+		console.warn("Exploring fullPath=" + fullPath);
 		
 		while(fileExplorerFolders.firstChild) fileExplorerFolders.removeChild(fileExplorerFolders.firstChild); // Emty list
 		
@@ -162,9 +162,11 @@
 		var connName = "";
 		for(var conn in EDITOR.connections) {
 			option = document.createElement("option");
-			connName = EDITOR.connections[conn].protocol + "://" + conn
+			connName = EDITOR.connections[conn].protocol.toLowerCase() + "://" + conn
 			option.appendChild(document.createTextNode(connName));
 			option.setAttribute("id", conn);
+			// Select the file-system that we are currently exploring
+			console.log("connName=" + connName + " fullPath=" + fullPath);
 			if(fullPath.indexOf(connName) != -1) option.setAttribute("selected", "true");
 			fsSelect.appendChild(option);
 		}
@@ -180,6 +182,10 @@
 			fsSelect.appendChild(googleDrive);
 		*/
 		
+		
+		
+		
+		
 		// We want to start from the root, then work our way towards the actual dir
 		
 		var folders = UTIL.getFolders(fullPath, true);
@@ -191,9 +197,10 @@
 		
 		function lookUpPath(folders, index, parent) {
 			var dir = folders[index];
+			console.log("Looking up path dir=" + dir);
 			var findDir = index < (folders.length-1) ? folders[index+1] : null;
 			
-			buildList(dir, parent, findDir, function(parent) {
+			buildList(dir, parent, findDir, function listBuilt(parent) {
 				
 				index++;
 				
@@ -280,7 +287,7 @@
 	
 	function buildList(dir, parent, findDir, callback) {
 		
-		console.log("Building file explorer tree for dir=" + dir + "in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
+		console.warn("Building file explorer tree for dir=" + dir + "in parent.path=" + (parent ? parent.getAttribute("path") : "(no parent)"));
 		
 		var dirFound = null;
 		
@@ -653,9 +660,17 @@
 		
 		//alert("host=" + host);
 		
+		console.log("Chaning fs host=" + host);
+		
 		if(host=="local") {
-			var root = UTIL.getFolders(process.cwd())[0];
-			exploreDir(root);
+			// Find a local folder to explore
+			var files = EDITOR.sortFileList();
+			for (var i=0; i<files.length; i++) {
+				if(UTIL.isLocalPath(files[i].path)) {
+					return exploreDir(files[i].path);
+				}
+			}
+			exploreDir("/"); // root folder (todo: Check if this works on Windows)
 		}
 		/*
 			else if(host == "GoogleDrive") {
@@ -686,18 +701,18 @@
 			
 			if(firstChar != "{" || lastChar != "}") {
 			console.warn("Not JSON: " + text);
-return null;
-}
+			return null;
+			}
 			
 			try {
 			var json = JSON.parse(text);
 			}
 			catch(parseJsonError) {
-console.warn("Unable to parse JSON: " + text);
-console.error(parseJsonError);
+			console.warn("Unable to parse JSON: " + text);
+			console.error(parseJsonError);
 			return null;
 			}
-
+			
 			return json;
 			}
 			

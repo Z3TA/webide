@@ -133,6 +133,12 @@ var UTIL = {
 		
 		},
 	
+	isLocalPath: function isLocalPath(path) {
+		if(path.charAt(0) == "/") return true; // Unix
+		else if(path.indexOf("\\") > 0) return true; // Windows !?
+		else return false;
+	},
+	
 	getFolders: function getFolders(fullPath, includeHostInfo) {
 		/* 
 			Returns each folder in the path. Can take an url or a local filesystem path
