@@ -38,7 +38,7 @@
 				
 				var xml = parseXML(file);
 				
-				//console.log("xml=" + JSON.stringify(xml));
+				console.log("xml=" + JSON.stringify(xml));
 				
 				file.haveParsed(xml); // Tell the file that it has been parsed so that functions depending on the parsed data can update
 				
@@ -133,7 +133,8 @@
 			lastChar0 = char;
 			char = text.charAt(charIndex);
 			
-			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
+			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideSingleQuote=" + insideSingleQuote 
+			+ " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
 			
 			/*
 				<![CDATA[ " and end with the string " ]]>
@@ -187,7 +188,6 @@
 					if(insideSingleQuote) {
 						insideSingleQuote = false;
 						quotes.push(new Quote(singleQuoteStart, charIndex));
-						return;
 					}
 					else {
 						insideSingleQuote = true;
