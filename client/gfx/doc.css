@@ -1,3 +1,6 @@
+html, body {
+	overflow-y: visible;
+}
 
 body {
 	font-family: 'sans-serif';
