@@ -1,3 +1,4 @@
+"use strict";
 
 // Check whether new version is installed
 chrome.runtime.onInstalled.addListener(function(details){
@@ -5,23 +6,27 @@ chrome.runtime.onInstalled.addListener(function(details){
 		//console.log("This is a first install!");
 		
 		// Signup for an account !?
-		var user = "";
+		var username = "";
 		if(chrome.identity) {
 			console.log("Requesting user info ...");
 			chrome.identity.getProfileUserInfo(function(userInfo) {
+				console.log("Got user info: ", userInfo);
 				if(userInfo.email) {
-					var matchUser = userInfo.email.match(/(.*)@.*/);
-					if(matchUser) user = matchUser[1].replace(/\W/g, '')
+					var reUser = /(.*)@.*/;
+					var matchUser = userInfo.email.match(reUser);
+					if(matchUser) username = matchUser[1].replace(/\W/g, '')
+					else console.warn(userInfo.email, " does not match ", reUser);
 				}
 				else if(userInfo.id) {
-					user = userInfo.id;
+					username = userInfo.id;
 				}
 				else {
 					// The user is most likely not logged in
+					username = "zetafiles";
 				}
 				
-				if(user) signup(user, saveLogin);
-				else console.warn("userInfo=", userInfo);
+				if(username) signup(username);
+				else console.warn("Unable to retrieve username from ", userInfo);
 			});
 		}
 		else {
@@ -63,30 +68,37 @@ function appLaunched() {
 	});
 }
 
-function saveLogin(user, pw, url) {
-	console.log("Saving login details ...");
+function saveLogin(username, pw, url) {
+	console.log("Saving login details username=" + username + " pw=" + pw + " url=" + url + "...");
 	var user = {};
 	user.editorServerUrl = "https://webide.se/jzedit";
-	if(user) user.editorServerUser = user;
+	if(username) user.editorServerUser = username;
 	if(pw) user.editorServerPw = pw;
 	if(url) user.editorServerUrl = url;
 	
+	if(username || pw || url) {
 	// storage.local and storage.sync seems to be different! The editor uses storage.sync!
 	chrome.storage.sync.set(user, function() {
-		console.log("Login details saved!");
+		console.log("Login details saved:", user);
 	});
+	}
+	else console.warn("Nothing to save!");
 }
 
-function signup(user) {
-	console.log("Signing up user=" + user + " ...");
+function signup(username) {
+	console.log("Signing up username=" + username + " ...");
 	
 	var pw = generatePassword();
 	
-	httpPost("https://signup.webide.se/createAccount", {user: user, pw: pw}, function(err, data) {
+	httpPost("https://signup.webide.se/createAccount", {user: username, pw: pw}, function(err, data) {
 		if(err) {
-			console.log(err);
+			console.log("Problem signing up (code=" + err.code + " readyState=" + err.readyState + ")");
+			console.error(err);
 		}
-		else saveLogin(user, pw);
+		else {
+			console.log("Successfully signed up!");
+			saveLogin(username, pw);
+		}
 	});
 }
 

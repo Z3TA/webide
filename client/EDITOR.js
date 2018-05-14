@@ -498,9 +498,13 @@ callback = value;
 					var itemsObject = {};
 					itemsObject[key] = value;
 				}
-				for(var name in itemsObject) window.localStorage.setItem(key, value);
-				var json = {saved: key};
-				if(callback) callback(null, json);
+				
+				for(var name in itemsObject) {
+					if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in ", itemsObject, " should be a string!");
+					window.localStorage.setItem(name, itemsObject[name]);
+				}
+				
+				if(callback) callback(null);
 			},
 			getItem: function localStorageGetItem(key, callback) {
 				if(typeof callback != "function") throw new Error("getItem is async and needs a callback function!");
