@@ -168,24 +168,22 @@
 		labelUrl.appendChild(document.createTextNode("Server URL: "));
 		form.appendChild(labelUrl);
 		
-		if(window.location.protocol == "file:") {
+		if(RUNTIME=="chromeApp") {
+var defaultUrl =  "https://webide.se/jzedit";
+		}
+		else if(RUNTIME == "nw.js") {
+var defaultUrl =  "http://localhost:8099/jzedit";
+		}
+		else if(window.location.protocol == "file:") { // Firefox (chrome-less)
 			var defaultUrl = "http://localhost:8099/jzedit";
 		}
-		else {
+		else { // Browser (other)
 			var defaultUrl = window.location.protocol + "//" + window.location.host + "/jzedit";
 		}
-		
-		if(defaultUrl.indexOf("chrome-extension") == 0) defaultUrl =  "http://localhost:8099/jzedit";
 		
 		var urlValue;
 		var userValue;
 		var pwValue;
-		
-		if(localStorage) {
-			urlValue = localStorage.getItem("editorServerUrl");
-			userValue = localStorage.getItem("editorServerUser");
-			pwValue = localStorage.getItem("editorServerPw");
-		}
 		
 		if(!urlValue) urlValue = defaultUrl;
 		if(!userValue) {
@@ -200,7 +198,7 @@
 		url.setAttribute("title", "URL to JZedit server");
 		url.setAttribute("size", "30");
 		url.setAttribute("value", urlValue);
-		url.onchange = save;
+		url.onchange = saveUserPw;
 		form.appendChild(url);
 		
 		// ### user
@@ -215,7 +213,7 @@
 		user.setAttribute("class", "inputtext username");
 		user.setAttribute("size", "10");
 		user.setAttribute("value", userValue);
-		user.onchange = save;
+		user.onchange = saveUserPw;
 		form.appendChild(user);
 		
 		// ### password
@@ -230,7 +228,7 @@
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
 		pw.setAttribute("value", pwValue);
-		pw.onchange = save;
+		pw.onchange = saveUserPw;
 		form.appendChild(pw);
 		
 		// ### Connect button
@@ -265,7 +263,7 @@
 		}, false);
 		form.appendChild(cancel);
 		
-		// Signup message
+		// ### Signup
 		var signupLink = document.createElement("a");
 		signupLink.appendChild(document.createTextNode("Signup"));
 		signupLink.setAttribute("title", "Click here to create an account");
@@ -285,7 +283,7 @@
 		}
 		form.appendChild(signupLink);
 		
-		//about
+		// ### about
 		var aboutLink = document.createElement("a");
 		aboutLink.appendChild(document.createTextNode("About"));
 		aboutLink.setAttribute("title", "More information");
@@ -305,6 +303,18 @@
 		}
 		form.appendChild(aboutLink);
 		
+		if(EDITOR.localStorage) {
+			EDITOR.localStorage.getItem(["editorServerUrl","editorServerUser", "editorServerPw"], function(err, obj) {
+				urlValue = obj.editorServerUrl;
+				userValue = obj.editorServerUser;
+				pwValue = obj.editorServerPw;
+				
+				if(urlValue) url.value = urlValue;
+				if(userValue) user.value = userValue;
+				if(pwValue) pw.value = pwValue;
+			});
+		}
+		
 		return form;
 		
 		
@@ -318,19 +328,21 @@
 			}
 		}
 		
-		function save(e) {
-			
+		function saveUserPw(e) {
 			var urlValue = url.value;
 			var userValue = user.value;
 			var pwValue = pw.value;
 			
-			if(!localStorage) console.warn("No localstorage available! Server URL and credentials will not be remembered!");
+			if(!EDITOR.localStorage) console.warn("No EDITOR.localstorage available! Server URL and credentials will not be remembered!");
 			else {
-				if(urlValue && localStorage.getItem("editorServerUrl") != urlValue) localStorage.setItem("editorServerUrl", urlValue);
-				if(userValue && localStorage.getItem("editorServerUser") != userValue) localStorage.setItem("editorServerUser", userValue);
-				if(pwValue && localStorage.getItem("editorServerPw") != pwValue) localStorage.setItem("editorServerPw", pwValue);
+				EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser", "editorServerPw"], function(err, obj) {
+					if(err) throw err;
+					
+					if(urlValue && obj.editorServerUrl != urlValue) EDITOR.localStorage.setItem("editorServerUrl", urlValue);
+					if(userValue && obj.editorServerUser != userValue) EDITOR.localStorage.setItem("editorServerUser", userValue);
+					if(pwValue && obj.editorServerPw != pwValue) EDITOR.localStorage.setItem("editorServerPw", pwValue);
+				});
 			}
-			
 		}
 		
 		
