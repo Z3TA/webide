@@ -379,13 +379,14 @@
 			if(file.caret.row >= row) file.caret.index += totalCharactersAdded;
 			
 			// Update index's for parsed data
-			var js = file.parsed;
+			var parsed = file.parsed;
 			
 			// return {functions: functions, quotes: quotes, comments: comments, globalVariables: globalVariables};
 			
 			// Update functions
-			for(var fun, i=0; i<js.functions.length; i++) {
-				fun = js.functions[i];
+			if(parsed.functions) 
+				for(var fun, i=0; i<parsed.functions.length; i++) {
+				fun = parsed.functions[i];
 				if(fun.end >= index || fun.start >= index) {
 					updateFunction(fun);
 					somethingChanged = true;
@@ -393,11 +394,11 @@
 			}
 			
 			// Update quotes
-			//console.log("js.quotes=" + JSON.stringify(js.quotes));
-			if(js.quotes) {
+			//console.log("parsed.quotes=" + JSON.stringify(parsed.quotes));
+			if(parsed.quotes) {
 				var quote;
-				for(var i=js.quotes.length-1; i>-1; i--) { // start from bottom
-					quote = js.quotes[i];
+				for(var i=parsed.quotes.length-1; i>-1; i--) { // start from bottom
+					quote = parsed.quotes[i];
 					//console.log("quote.start=" + quote.start + " quote.end=" + quote.end + " index=" + index);
 					if(quote.start >= index || quote.end >= index) {
 						if(quote.start >= index) quote.start += totalCharactersAdded;
@@ -411,10 +412,10 @@
 			}
 			
 			// Update comments
-			if(js.comments) {
+			if(parsed.comments) {
 				var comment;
-				for(var i=js.comments.length-1; i>-1; i--) { // start from bottom
-					comment = js.comments[i];
+				for(var i=parsed.comments.length-1; i>-1; i--) { // start from bottom
+					comment = parsed.comments[i];
 					if(comment.start >= index || comment.end >= index) {
 						if(comment.start >= index) comment.start += totalCharactersAdded;
 						if(comment.end >= index) comment.end += totalCharactersAdded;
@@ -427,10 +428,10 @@
 			}
 			
 			// Update xmlTags
-			if(js.xmlTags) {
+			if(parsed.xmlTags) {
 				var xmlTag;
-				for(var i=js.xmlTags.length-1; i>-1; i--) { // start from bottom
-					xmlTag = js.xmlTags[i];
+				for(var i=parsed.xmlTags.length-1; i>-1; i--) { // start from bottom
+					xmlTag = parsed.xmlTags[i];
 					if(xmlTag.start >= index || xmlTag.end >= index) {
 						if(xmlTag.start >= index) xmlTag.start += totalCharactersAdded;
 						if(xmlTag.end >= index) xmlTag.end += totalCharactersAdded;
