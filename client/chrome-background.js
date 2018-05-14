@@ -64,6 +64,7 @@ function appLaunched() {
 }
 
 function saveLogin(user, pw, url) {
+	console.log("Saving login details ...");
 	var user = {};
 	user.editorServerUrl = "https://webide.se/jzedit";
 	if(user) user.editorServerUser = user;
@@ -72,7 +73,7 @@ function saveLogin(user, pw, url) {
 	
 	// storage.local and storage.sync seems to be different! The editor uses storage.sync!
 	chrome.storage.sync.set(user, function() {
-		console.log("chrome.storage.sync.set: ", user);
+		console.log("Login details saved!");
 	});
 }
 
@@ -82,9 +83,11 @@ function signup(user) {
 	var pw = generatePassword();
 	
 	httpPost("https://signup.webide.se/createAccount", {user: user, pw: pw}, function(err, data) {
-		if(!err) saveLogin(user, pw);
-		else console.warn(err.message);
-	})
+		if(err) {
+			console.log(err);
+		}
+		else saveLogin(user, pw);
+	});
 }
 
 function httpPost(url, form, callback) {

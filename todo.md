@@ -37,6 +37,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Chrome app user signs up, but doesn't seem to store login/pw ...
+
 Create a webide account when the app is installed: chrome-background.js
 
 Chrome OS app!

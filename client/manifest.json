@@ -8,6 +8,8 @@
 		"64": "gfx/jz64.png"
 	},
 	
+	"key": "dbjfibmamafaaflakgjndhpfmlijkofo",
+	
 	"permissions": [
 		"storage",
 		"identity",
