@@ -56,14 +56,11 @@ function appLaunched() {
 		
 		if(obj.editorServerUser) {
 			// User will be auto logged-in
-			chrome.app.window.create('index.htm', {id: 'main'});
+			chrome.app.window.create('index.htm', {id: 'main', innerBounds: {width: 800, height: 600}});
 		}
 		else {
 			console.log("No username saved! Showing signup");
-			chrome.app.window.create('signup/signup.html', {
-				id: 'signup',
-				bounds: { width: 850, height: 900 }
-			});
+			chrome.app.window.create('signup/signup.html', {id: 'signup', innerBounds: { width: 850, height: 900 }});
 		}
 	});
 }
