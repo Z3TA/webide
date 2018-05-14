@@ -49,6 +49,8 @@ Chrome OS app!
 todo
 ----
 
+Write tests for signup service in prod, run test once every hour and send e-mail report if it doesn't work!!
+
 Password protect files and folders
 
 Persistent storage! People need somewhere to host their data.
