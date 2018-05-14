@@ -103,10 +103,17 @@ console.warn = function() {
 function handleHttpRequest(request, response){
 	
 	var IP = request.headers["x-real-ip"] || request.connection.remoteAddress;
+	var origin = request.headers["origin"];
 	
-	log("HTTP request from IP=" + IP + " to request.url=" + request.url);
+	log("HTTP " + request.method + " request from IP=" + IP + " origin=" + origin + " to request.url=" + request.url);
 	
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
+	
+	// Handle CORS
+	if(!origin) origin = "*";
+	responseHeaders["Access-Control-Allow-Origin"] = origin;
+	response.setHeader("Access-Control-Allow-Credentials", "true")
+	
 	
 	if(request.method === "GET") {
 		if (request.url === "/favicon.ico") {
@@ -256,7 +263,7 @@ function usernameAvailable(username, callback) {
 			
 			for (var i=0, name; i<homeDirs.length; i++) {
 				name = homeDirs[i];
-				log("name=" + name + " == " + username + " ?", 7);
+				//log("name=" + name + " == " + username + " ?", 7);
 				if(name == username) return callback(null, name, notAvailable);
 			}
 			
@@ -266,7 +273,7 @@ function usernameAvailable(username, callback) {
 				var users = usersPwString.split(/\n|\r\n/);
 				for (var i=0, name; i<users.length; i++) {
 					name = users[i].substring(0, users[i].indexOf(":"));
-					log("name=" + name + " == " + username + " ?", 7);
+					//log("name=" + name + " == " + username + " ?", 7);
 					if(name == username) return callback(null, name, notAvailable);
 				}
 				

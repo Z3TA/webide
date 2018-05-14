@@ -112,7 +112,7 @@ function httpPost(url, form, callback) {
 			else {
 				var err = new Error(xmlHttp.responseText);
 				err.readyState = xmlHttp.readyState;
-				err.CODE = xmlHttp.status;
+				err.code = xmlHttp.status;
 				callback(err);
 			}
 		}

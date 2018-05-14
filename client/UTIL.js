@@ -852,8 +852,9 @@ else {
 				clearTimeout(timeoutTimer);
 				if(xmlHttp.status == 200) callback(null, xmlHttp.responseText);
 				else {
-					var err = new Error(xmlHttp.responseText + " xmlHttp.status=" + xmlHttp.status + " xmlHttp.readyState=" + xmlHttp.readyState);
-					err.CODE = xmlHttp.status;
+					var err = new Error(xmlHttp.responseText);
+					err.readyState = xmlHttp.readyState;
+					err.code = xmlHttp.status;
 					callback(err);
 				}
 			}
@@ -866,7 +867,8 @@ else {
 		timeoutTimer = setTimeout(timeout, timeoutTimeMs);
 		
 		function timeout() {
-			var err = new Error("HTTP POST request timed out. xmlHttp.readyState=" + xmlHttp.readyState);
+			var err = new Error("HTTP POST request timed out!");
+			err.readyState = xmlHttp.readyState;
 			xmlHttp.onreadystatechange = null;
 			xmlHttp.abort();
 			callback(err);
