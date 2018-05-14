@@ -49,7 +49,7 @@ function appLaunched() {
 	chrome.storage.sync.get("editorServerUser", function(obj) {
 		console.log("obj=", obj);
 		
-		if(obj.user) {
+		if(obj.editorServerUser) {
 			// User will be auto logged-in
 			chrome.app.window.create('index.htm', {id: 'main'});
 		}
