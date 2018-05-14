@@ -37,15 +37,11 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-todo: Make EDITOR.storage work like EDITOR.localStorage
-
-todo: Update/refactor all usage of EDITOR.storage to the new interface
-
-window.localStorage doesn't work in Chrome apps!
+Create a webide account when the app is installed: chrome-background.js
 
 Chrome OS app!
 
-todo: Create a webide account when the app is installed: chrome-background.js
+
 
 
 
@@ -2190,6 +2186,9 @@ Better support for large files, like being able to edit and search.
 ---
 
 Don't store username/password in localStorage!! third party modules/scripts will be able to access localStorage
+
+
+Make EDITOR.storage work like EDITOR.localStorage so they can easiliy replace each other !?
 
 
 ### Debugging

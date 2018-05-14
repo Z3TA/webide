@@ -53,6 +53,7 @@ var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 var NOZFS = !!getArg(["nozfs", "nozfs"]);
 var HOME = getArg(["home", "home"]) || defaultHome;
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
+var NO_CERT = !!getArg(["nocert", "no_cert"]);
 
 if(HOME.charAt(0) != "/") throw new Error("HOME needs to be an absolute path! (start with a slash) HOME=" + HOME);
 // Only linux or other unix-like systems are supported (sorry Windows)
@@ -72,6 +73,7 @@ if(scriptArguments) {
 	username = scriptArguments.username;
 	password = scriptArguments.password;
 	NO_PW_HASH = scriptArguments.noPwHash;
+	NO_CERT = scriptArguments.noCert;
 	DOMAIN = scriptArguments.domain || defaultDomain;
 	HOME = scriptArguments.home || defaultHome;
 	}
@@ -328,9 +330,12 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
 	}
 	
+		if(!NO_CERT) {
 		// Register SSL certificate for user web page
 		var letsencrypt = require("./shared/letsencrypt.js");
 		letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL);
+		}
+		
 		
 		/*
 			In order to have a separate apparmor profile for user_worker.js we need a separate executable (scripts also work, but we need the node rcp channel so we need to use fork and not spawn)

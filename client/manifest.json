@@ -9,7 +9,9 @@
 	},
 	
 	"permissions": [
-		"storage"
+		"storage",
+		"identity",
+		"identity.email"
 	],
 	
 	"app": {

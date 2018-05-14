@@ -122,10 +122,8 @@
 						console.error(err);
 						if(userValue == DEFAULT_USERNAME) alertBox("Failed to automatically login as " + userValue + "." +
 						" Fill in your username and password below, or <a href='/signup/signup.html'>create an account</a> !\n" +
-						"\n(" + err.message + ")")
+						"\n(" + err.message + ")");
 						else alertBox(err.message);
-						
-						
 						
 						showLoginDialog();
 					}
@@ -135,8 +133,7 @@
 					}
 					
 				});
-				
-			}
+				}
 			else showLoginDialog();
 		}
 		
@@ -274,6 +271,18 @@
 		signupLink.setAttribute("title", "Click here to create an account");
 		signupLink.setAttribute("href", "/signup/signup.html");
 		signupLink.setAttribute("class", "signup link");
+		signupLink.onclick = function() {
+			// Can't follow links in chrome apps
+			if(typeof chrome == "object" && chrome.app && chrome.app.window && chrome.app.window.create) {
+				console.log("No username saved! Showing signup");
+				chrome.app.window.create('signup/signup.html', {
+					id: 'signup',
+					bounds: { width: 850, height: 900 }
+				});
+				return false;
+			}
+			return true; // Default browser action (open link)
+		}
 		form.appendChild(signupLink);
 		
 		//about
@@ -282,6 +291,18 @@
 		aboutLink.setAttribute("title", "More information");
 		aboutLink.setAttribute("href", "/about/about.htm");
 		aboutLink.setAttribute("class", "signup link");
+		aboutLink.onclick = function() {
+			// Can't follow links in chrome apps
+			if(typeof chrome == "object" && chrome.app && chrome.app.window && chrome.app.window.create) {
+				console.log("No username saved! Showing signup");
+				chrome.app.window.create('about/about.htm', {
+					id: 'about',
+					bounds: { width: 850, height: 900 }
+				});
+				return false;
+			}
+			return true; // Default browser action (open link)
+		}
 		form.appendChild(aboutLink);
 		
 		return form;

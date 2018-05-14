@@ -47,6 +47,7 @@ var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 var defaultHomeDir = DEFAULT.home_dir;
 var HOME_DIR = getArg(["h", "homedir"]) || defaultHomeDir;
+var NO_CERT = !!getArg(["nocert", "no_cert"]);
 
 var serviceError = "The signup service has a problem!"; // Message to show if there's an internal error
 
@@ -107,10 +108,65 @@ function handleHttpRequest(request, response){
 	
 	var responseHeaders = {'Content-Type': 'text/plain; charset=utf-8'};
 	
-	response.writeHead(404, "Not found", responseHeaders);
-	response.end('This is the signup service for ' + HOSTNAME + ' editor.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html\n');
-	
+	if(request.method === "GET") {
+		if (request.url === "/favicon.ico") {
+			response.writeHead(404, "Not found", responseHeaders);
+			response.end("Sorry, there's no favicon!");
+		} 
+		else {
+			response.writeHead(404, "Not found", responseHeaders);
+			response.end('This is the signup service for ' + HOSTNAME + ' editor.\nYou need to connect using SockJS. Or navigate to https://' + HOSTNAME + '/signup/signup.html\n');
 }
+	}
+	else if(request.method === "POST") {
+		if (request.url === "/createAccount") {
+			var requestBody = '';
+			request.on('data', function(data) {
+				requestBody += data;
+				if(requestBody.length > 1e7) {
+					response.writeHead(413, 'Request Entity Too Large', responseHeaders);
+					response.end('Request Entity Too Large');
+				}
+			});
+			request.on('end', function() {
+var qs = require('querystring');
+				var formData = qs.parse(requestBody);
+				var data = formData.user + "," + formData.pw; 
+				usernameAvailable(data, function available(err, name, isAvailable) {
+					if(err) {
+						response.writeHead(500, 'Error', responseHeaders);
+						response.end(err.message);
+					}
+					else if(!isAvailable) {
+						response.writeHead(404, 'Error', responseHeaders);
+						response.end("Username is not available: " + name);
+					}
+					else createAccount(data, function account(err, username) {
+						if(err) {
+answer("createError:" + username + ":" + HOSTNAME + ":" + err);
+							response.writeHead(500, 'Error', responseHeaders);
+							response.end(err.message);
+						}
+						else {
+							response.writeHead(200, 'OK', responseHeaders);
+							response.end("User " + username + " successfully created!");
+							sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP + " using HTTP POST");
+						}
+					});
+				});
+				});
+		}
+		else {
+			response.writeHead(404, 'Resource Not Found', responseHeaders);
+			response.end('Can not handle HTTP POST requests to ' + request.url);
+		}
+	}
+	else {
+		response.writeHead(405, 'Method Not Supported', {'Content-Type': 'text/html'});
+		return response.end('<!doctype html><html><head><title>405</title></head><body>405: Method Not Supported</body></html>');
+	}
+}
+
 
 function sockJsConnection(connection) {
 	
@@ -142,7 +198,7 @@ function sockJsConnection(connection) {
 	
 	log("Connection on " + connection.protocol + " from " + IP);
 	
-	connection.on("data", function(message) {
+	connection.on("data", function sockJsData(message) {
 		
 		log(IP + " => " + UTIL.shortString(message));
 		
@@ -164,7 +220,7 @@ function sockJsConnection(connection) {
 				if(err) answer("createError:" + username + ":" + HOSTNAME + ":" + err);
 				else {
 					answer("created:" + username + ":" + HOSTNAME);
-					sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP);
+					sendMail("jzedit_signup_service@" + HOSTNAME, ADMIN_EMAIL, username + " signed up to " + HOSTNAME, username + " signed up from " + IP + " using sockJS connection");
 				}
 			});
 		});
@@ -176,127 +232,124 @@ function sockJsConnection(connection) {
 			connection.write(str);
 		}
 	});
+	}
+
+function usernameAvailable(username, callback) {
+	var fs = require("fs");
 	
+	username = username.split(",")[0];
 	
-	function usernameAvailable(username, callback) {
-		var fs = require("fs");
+	if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
+	
+	var encoding = "utf8";
+	var notAvailable = false;
+	
+	fs.readdir(HOME_DIR, function(err, homeDirs) {
 		
-		username = username.split(",")[0];
-		
-		if(RESERVED_USERNAMES.indexOf(username) != -1) return callback(null, username, false);
-		
-		var encoding = "utf8";
-		var notAvailable = false;
-		
-		fs.readdir(HOME_DIR, function(err, homeDirs) {
+		if(err) {
+			log("Unable to read home dirs HOME_DIR=" + HOME_DIR + "! " + err.message, ERROR);
+			callback(serviceError);
+			sendAlert(err.message + "\n" + err.stack);
+		}
+		else {
+			//console.log("usersPwString:\n" + usersPwString);
 			
-			if(err) {
-				log("Unable to read home dirs HOME_DIR=" + HOME_DIR + "! " + err.message, ERROR);
-				callback(serviceError);
-				sendAlert(err.message + "\n" + err.stack);
+			for (var i=0, name; i<homeDirs.length; i++) {
+				name = homeDirs[i];
+				log("name=" + name + " == " + username + " ?", 7);
+				if(name == username) return callback(null, name, notAvailable);
 			}
-			else {
+			
+			// Also check for system users
+			fs.readFile("/etc/passwd", encoding, function(err, usersPwString) {
 				//console.log("usersPwString:\n" + usersPwString);
-				
-				for (var i=0, name; i<homeDirs.length; i++) {
-					name = homeDirs[i];
+				var users = usersPwString.split(/\n|\r\n/);
+				for (var i=0, name; i<users.length; i++) {
+					name = users[i].substring(0, users[i].indexOf(":"));
 					log("name=" + name + " == " + username + " ?", 7);
 					if(name == username) return callback(null, name, notAvailable);
 				}
 				
-				// Also check for system users
-				fs.readFile("/etc/passwd", encoding, function(err, usersPwString) {
-					//console.log("usersPwString:\n" + usersPwString);
-					var users = usersPwString.split(/\n|\r\n/);
-					for (var i=0, name; i<users.length; i++) {
-						name = users[i].substring(0, users[i].indexOf(":"));
-						log("name=" + name + " == " + username + " ?", 7);
-						if(name == username) return callback(null, name, notAvailable);
-					}
-					
-					return callback(null, username, true);
-					
-				});
+				return callback(null, username, true);
 				
-				
-			}
-		});
-	}
-	
-	function createAccount(userData, callback) {
-		console.time("createAccount");
-		var username = userData.substring(0, userData.indexOf(","));
-		var password = userData.substring(userData.indexOf(",") + 1);
-		
-		if(username.match(/[^a-zA-Z0-9]/)) return callback("Username can only contain letters a-z, A-Z, 0-9");
-		
-		
-		var exec = require('child_process').exec;
-		
-		// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
-		var commandArg = {
-			username: username,
-			password: password,
-			noPwHash: !!NO_PW_HASH // bang bang (!!) converts the value to a boolean
-		};
-		
-		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
-		var command = "./adduser.js '" + JSON.stringify(commandArg) + "'";
-		console.log("command=" + command);
-		var options = {
-			pwd: __dirname
+			});
 		}
-		exec(command, function adduser(error, stdout, stderr) {
-			if (error) {
-				log("Unable to create username=" + username + "! error=" + error, ERROR);
+	});
+}
+
+function createAccount(userData, callback) {
+	console.time("createAccount");
+	var username = userData.substring(0, userData.indexOf(","));
+	var password = userData.substring(userData.indexOf(",") + 1);
+	
+	if(username.match(/[^a-zA-Z0-9]/)) return callback("Username can only contain letters a-z, A-Z, 0-9");
+	
+	
+	var exec = require('child_process').exec;
+	
+	// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
+	var commandArg = {
+		username: username,
+		password: password,
+		noPwHash: !!NO_PW_HASH, // bang bang (!!) converts the value to a boolean
+		noCert: NO_CERT
+	};
+	
+	// Enclose argument with '' to send it "as is" (bash/sh will remove ")
+	var command = "./adduser.js '" + JSON.stringify(commandArg) + "'";
+	console.log("command=" + command);
+	var options = {
+		pwd: __dirname
+	}
+	exec(command, function adduser(error, stdout, stderr) {
+		if (error) {
+			log("Unable to create username=" + username + "! error=" + error, ERROR);
+			callback(serviceError, username);
+			sendAlert(error);
+		}
+		else if(stderr) {
+			log(stderr, DEBUG);
+			log("Unable to create username=" + username + "! stderr=" + stderr, ERROR);
+			callback(serviceError, username);
+			sendAlert(stderr);
+		}
+		else if(stdout) {
+			log("stdout=" + stdout, DEBUG);
+			var checkre = /User with username=(.*) and password=(.*) successfully added/g;
+			var check = checkre.exec(stdout);
+			// User with username=demo4 and password=demo4 successfully added!
+			var reG1User = check[1];
+			var reG2Pw = check[2];
+			
+			if(check == null) {
+				log("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout, ERROR);
 				callback(serviceError, username);
-				sendAlert(error);
+				sendAlert("check=" + check + " failed on stdout=" + stdout);
 			}
-			else if(stderr) {
-				log("Unable to create username=" + username + "! stderr=" + stderr, ERROR);
-				callback(serviceError, username);
-				sendAlert(stderr);
-			}
-			else if(stdout) {
-				log("stdout=" + stdout, DEBUG);
-				var checkre = /User with username=(.*) and password=(.*) successfully added/g;
-				var check = checkre.exec(stdout);
-				// User with username=demo4 and password=demo4 successfully added!
-				var reG1User = check[1];
-				var reG2Pw = check[2];
-				
-				if(check == null) {
-					log("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout, ERROR);
-					callback(serviceError, username);
-					sendAlert("check=" + check + " failed on stdout=" + stdout);
-				}
-				else if(reG1User == username && reG2Pw == password) {
-					log("Account username=" + username + "! successfully created!");
-					callback(null, username);
-				}
-				else {
-					log("Problem when creating username=" + username + " with password=" + password + 
-					" reG1User=" + reG1User + " reG2Pw=" + reG2Pw + " " +
-					" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout, ERROR);
-					
-					callback(serviceError, username);
-					sendAlert("Problem when creating username=" + username + " with password=" + password + 
-					" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout);
-					
-				}
-				
-				console.timeEnd("createAccount");
+			else if(reG1User == username && reG2Pw == password) {
+				log("Account username=" + username + "! successfully created!");
+				callback(null, username);
 			}
 			else {
-				log("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!", ERROR);
+				log("Problem when creating username=" + username + " with password=" + password +
+				" reG1User=" + reG1User + " reG2Pw=" + reG2Pw + " " +
+				" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout, ERROR);
+				
 				callback(serviceError, username);
-				sendAlert(stdout);
+				sendAlert("Problem when creating username=" + username + " with password=" + password +
+				" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout);
+				
 			}
 			
-		});
-	}
-	
-	
+			console.timeEnd("createAccount");
+		}
+		else {
+			log("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!", ERROR);
+			callback(serviceError, username);
+			sendAlert(stdout);
+		}
+		
+	});
 }
 
 function sendAlert(text) {
@@ -327,9 +380,12 @@ function sendMail(from, to, subject, text) {
 		subject: subject,
 		text: text
 		
-	}, function(error, info){
-		if(error) {
-			throw new Error(error);
+	}, function(err, info){
+		if(err) {
+			if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
+				console.warn(err.message);
+			}
+			else throw new Error(err);
 		}
 		else {
 			log("Mail sent: " + info.response);
