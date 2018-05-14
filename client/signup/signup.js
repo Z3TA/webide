@@ -11,6 +11,12 @@
 	
 	function signup() {
 		
+		var aboutLink = document.getElementById("aboutLink");
+		aboutLink.onclick = UTIL.chromeAppLinkClick;
+		
+		var homeLink = document.getElementById("homeLink");
+		homeLink.onclick = UTIL.chromeAppLinkClick;
+		
 		var host = window.location.hostname;
 		
 		var devUrl = "http://127.0.0.1:8100/signup"

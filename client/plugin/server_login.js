@@ -269,18 +269,7 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 		signupLink.setAttribute("title", "Click here to create an account");
 		signupLink.setAttribute("href", "/signup/signup.html");
 		signupLink.setAttribute("class", "signup link");
-		signupLink.onclick = function() {
-			// Can't follow links in chrome apps
-			if(typeof chrome == "object" && chrome.app && chrome.app.window && chrome.app.window.create) {
-				console.log("No username saved! Showing signup");
-				chrome.app.window.create('signup/signup.html', {
-					id: 'signup',
-					bounds: { width: 850, height: 900 }
-				});
-				return false;
-			}
-			return true; // Default browser action (open link)
-		}
+		signupLink.onclick = UTIL.chromeAppLinkClick;
 		form.appendChild(signupLink);
 		
 		// ### about
@@ -289,18 +278,8 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 		aboutLink.setAttribute("title", "More information");
 		aboutLink.setAttribute("href", "/about/about.htm");
 		aboutLink.setAttribute("class", "signup link");
-		aboutLink.onclick = function() {
-			// Can't follow links in chrome apps
-			if(typeof chrome == "object" && chrome.app && chrome.app.window && chrome.app.window.create) {
-				console.log("No username saved! Showing signup");
-				chrome.app.window.create('about/about.htm', {
-					id: 'about',
-					bounds: { width: 850, height: 900 }
-				});
-				return false;
-			}
-			return true; // Default browser action (open link)
-		}
+		aboutLink.setAttribute("target", "_blank");
+		aboutLink.onclick = UTIL.chromeAppLinkClick;
 		form.appendChild(aboutLink);
 		
 		if(EDITOR.localStorage) {
@@ -312,8 +291,36 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 				if(urlValue) url.value = urlValue;
 				if(userValue) user.value = userValue;
 				if(pwValue) pw.value = pwValue;
+				
+				if(!userValue && RUNTIME == "chromeApp") {
+		if(chrome.identity) {
+						console.log("Requesting user info ...");
+						chrome.identity.getProfileUserInfo(function(userInfo) {
+							console.log("Got user info: ", userInfo);
+							if(userInfo.email) {
+								var reUser = /(.*)@.*/;
+								var matchUser = userInfo.email.match(reUser);
+								if(matchUser) var username = matchUser[1].replace(/\W/g, '')
+								else console.warn(userInfo.email, " does not match ", reUser);
+							}
+							else if(userInfo.id) {
+								var username = userInfo.id;
+							}
+							else {
+								// The user is most likely not logged in
+							}
+							
+							if(username) {
+								userValue = username;
+								user.value = userValue;
+							}
+							else console.warn("Unable to retrieve username from ", userInfo);
+						});
+					}
+				}
 			});
 		}
+		
 		
 		return form;
 		

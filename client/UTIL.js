@@ -50,6 +50,34 @@ var UTIL = {
 		
 	},
 	
+	chromeAppLinkClick: function chromeAppLinkClick() {
+		// You can't click on links in chrome apps
+		var page = this.href;
+		var target = this.target;
+		
+		console.log("Clicked link to page=" + page);
+		
+		if(typeof chrome == "object" && chrome.app && chrome.app.window && chrome.app.window.create) {
+			// page = chrome-extension://jeeekmoeamjaecnnfkdjhfmhgpicaedn/foo
+			var rePage = /^chrome-extension:\/\/[^/]*\/(.*)$/;
+			var matchPage = page.match(rePage);
+			console.log("matchPage=", matchPage);
+			if(!matchPage) throw new Error("page=" + page + " does not match " + rePage);
+			page = matchPage[1];
+			if(page == "") page = "index.htm";
+			var reName = /\/?([^/]*)\..*/;
+			var matchName = page.match(name);
+			if(matchName) var id = matchName[1];
+			else var id = "newWindow";
+			console.log("Opening chrome window page=" + page + " id=" + id + " ...");
+			chrome.app.window.create(page, {id: id, bounds: { width: 850, height: 900 }}, function windowOpened() {
+				if(target != "_blank") chrome.app.window.current().close();
+			});
+			return false;
+		}
+		return true; // Default browser action (open link)
+	},
+	
 	trailingSlash: function trailingSlash(folderPath) {
 		// Makes sure the folder has a trailing slash
 		//console.log("Get trailing slash for folderPath=" + folderPath);
@@ -69,7 +97,7 @@ var UTIL = {
 		}
 		return folderPath;
 	},
-
+	
 	getDirectoryFromPath: function getDirectoryFromPath(path) {
 		/*
 			Returns the directory of a file path
@@ -96,12 +124,12 @@ var UTIL = {
 		
 		return UTIL.trailingSlash(path.substring(0, lastSlash));
 	},
-
+	
 	getFolderName: function getFolderName(path) {
 		/*
 			Returns the name of the last folder in a folder path
-		/foo/bar returns bar,
-		/foo/bar/baz returns bar
+			/foo/bar returns bar,
+			/foo/bar/baz returns bar
 			foo/bar returns foo
 		*/
 		
@@ -121,7 +149,7 @@ var UTIL = {
 			return arr[0];
 		}
 		else return arr[arr.length-1];
-		},
+	},
 	
 	parentFolder: function parentFolder(path) {
 		// Returns a file's or folder's parent folder
@@ -131,7 +159,7 @@ var UTIL = {
 		if(folders.length > 1) return folders[folders.length-2];
 		else return folders[0];
 		
-		},
+	},
 	
 	isLocalPath: function isLocalPath(path) {
 		if(path.charAt(0) == "/") return true; // Unix
