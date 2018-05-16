@@ -256,6 +256,8 @@
 		
 		function parse(data) {
 			
+			console.log("Parse data=" + data);
+			
 			var char = "";
 			var code = 0;
 			var inEsc = false;
