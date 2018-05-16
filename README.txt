@@ -71,6 +71,20 @@ node server/server.js --port=8080 --user=admin --pw=admin -nochroot
 6. Navigate to the following address in your favorite web browser: http://127.0.0.1:8080/
 
 
+Chromebook
+----------
+1. Download: https://www.webtigerteam.com/jzedit/jzedit.crx
+
+2. Open Chrome browser and navigate to chrome://extensions/
+
+3. Drag the jzedit.crx file to the chrome://extensions/ tab in Chrome browser.
+
+
+Android
+--------
+
+
+
 
 
 Reporting bugs
