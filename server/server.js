@@ -448,7 +448,7 @@ function sockJsConnection(connection) {
 				//console.log("Adding Command '" + command + "' to command queue because client has not yet identified");
 				//commandQueue.push(message);
 				
-				send({error: "You need to login!", resp: {loginNeeded: command}});
+				send({error: "You need to login!", errorCode: "LOGIN_NEEDED", resp: {loginNeeded: command}});
 				
 			}
 			else {

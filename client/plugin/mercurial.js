@@ -185,7 +185,7 @@
 				if(err) {
 				console.log("mercurial.status error: " + err.message);
 				// Most likely no local repository found !?
-				if(err.code != "NO_HG_FOLDER") alertBox(err.message);
+				if(err.code != "NO_HG_FOLDER" && err.code != "LOGIN_NEEDED" && err.code != "CONNECTION_CLOSED") alertBox(err.message);
 			}
 				else {
 				

@@ -37,11 +37,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Chrome app user signs up, but doesn't seem to store login/pw ...
+Chromebook, web preview
 
-Create a webide account when the app is installed: chrome-background.js
 
-Chrome OS app!
 
 
 
@@ -50,6 +48,14 @@ Chrome OS app!
 
 todo
 ----
+
+debug zetafiles bash terminal
+
+hide sysyem folders in file explorer.
+
+Simple tutorial apps, eyes that looks at the mouse.
+Making a clock in the canvas
+
 
 Write tests for signup service in prod, run test once every hour and send e-mail report if it doesn't work!!
 
@@ -97,6 +103,9 @@ Investigate adding the editor to chrome web store. Test in a Chromebook.
 
 What I'm thinking
 -----------------
+
+Skip webide.se part on Chromebook app ? Because connecticvity issues ...
+Chromebook users are most likely always online, or what would be the reason to use a computer that is basically just a web browser !?
 
 ---
 Include domain in wwwfolder so users can have many domains !? No the editor should not be used as a web hosting service.

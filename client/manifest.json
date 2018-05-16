@@ -1,7 +1,7 @@
 {
 	"name": "JZedit",
-	"description": "Full stack Web Editor/IDE and cloud based development enviroment. Run NodeJS apps! Built in static-site-generator. Edit documents or write blog posts in WYSIWYG-mode. Currently in Alpha!",
-"version": "1.0.0",
+	"description": "Full stack Web Editor/IDE and cloud based development enviroment. Run NodeJS apps! Built in static-site-generator. Edit documents or write blog posts in WYSIWYG-mode. Currently in Alpha! Requires Internet connection for full operation.",
+	"version": "1.0.0",
 	"manifest_version": 2,
 	
 	"icons": {
@@ -20,5 +20,5 @@
 		"background": {
 			"scripts": ["chrome-background.js"]
 		}
-}
+	}
 }
