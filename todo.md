@@ -37,9 +37,14 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+So much stuff is different in chrome apps. We can't for example open a web site for preview
+Just use webide.se !?!?
+
 Chromebook, web preview
 
-
+chrome.browser.openTab({
+   url: "your_url"
+ });
 
 
 
