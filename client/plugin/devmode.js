@@ -214,6 +214,8 @@
 						//document.location = "about:blank";
 						//document.location = "file:///" + require("dirname") + "/client/index.htm";
 						
+						console.log("Reloading! RUNTIME=" + RUNTIME);
+						
 						if(RUNTIME == "chromeApp") {
 chrome.runtime.reload();
 						}

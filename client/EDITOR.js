@@ -2616,6 +2616,8 @@ if(callback) return callback(err, path);
 	
 	EDITOR.fireEvent = function(eventName, args, callback) {
 		
+		console.log("Firing event: " + eventName);
+		
 		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) {
 			var err = new Error("Uknown event listener:" + eventName);
 			if(callback) return callback(err);
@@ -2629,7 +2631,8 @@ if(callback) return callback(err, path);
 			console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
 		for(var i=0; i<eventListeners.length; i++) runFunc(eventListeners[i].fun);
 		
-		if(waitingForEventListenerCallbacks <= 0) allDone();
+		if(waitingForEventListenerCallbacks == 0) allDone();
+		else if(waitingForEventListenerCallbacks < 0) throw new Error("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 		
 		function runFunc(func) {
 			
@@ -2640,16 +2643,20 @@ if(callback) return callback(err, path);
 				
 			// Add callback function
 			var fargs = args.concat(function(err, ret) {
+				console.log("Callback called from fName=" + fName + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 				returns[fName] = ret;
 				if(--waitingForEventListenerCallbacks == 0) {
 					allDone();
 				}
 			});
 			
+			console.log("Calling " + eventName + " listener fName=" + fName);
+			
 			try {
 				var ret = func.apply(this, fargs);
 			}
 			catch(err) {
+				console.log("Error in fName=" + fName + " err.message=" + err.message);
 				returns[fName] = err;
 				return;
 			}
@@ -2657,8 +2664,10 @@ if(callback) return callback(err, path);
 			if(ret === undefined) {
 				// Asume it's an async function, wait for it to call the callback function.
 				waitingForEventListenerCallbacks++;
+				console.log("fName=" + fName + " returned undefined. Asuming it's an async function. waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 			}
 			else {
+				console.log("fName=" + fName + " returned ret=" + ret + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 				returns[fName] = ret;
 			}
 		}

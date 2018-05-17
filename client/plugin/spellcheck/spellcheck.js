@@ -6,6 +6,8 @@
 	*/
 	"use strict";
 	
+	console.log("spellChecker.js");
+	
 	if(RUNTIME != "nw.js") {
 		console.warn("Spell-checking currently only works in nw.js!");
 		return;
@@ -55,6 +57,8 @@
 	EDITOR.on("start", spellCheckerMain);
 	
 	function spellCheckerMain() {
+		
+		console.log("spellCheckerMain");
 		
 		menuItem = EDITOR.addMenuItem("Spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
 		

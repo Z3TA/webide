@@ -13,10 +13,12 @@
 "use strict";
 
 var RUNTIME = (function getRuntime() {
-	if(window.chrome && chrome.runtime && chrome.runtime.id) return "chromeApp";
-	else if(typeof require != "undefined" && typeof require('nw.gui') !== "undefined") return "nw.js";
+	if(typeof require != "undefined" && typeof require('nw.gui') !== "undefined") return "nw.js";
+	else if(window.chrome && chrome.runtime && chrome.runtime.id) return "chromeApp";
 	else return "browser";
 })();
+
+console.log("RUNTIME=" + RUNTIME);
 
 var __dirname;
 if(RUNTIME != "nw.js") {
