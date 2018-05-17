@@ -27,7 +27,7 @@ while ((arr = reScripts.exec(bundle)) !== null) {
 
 // Find stylesheets
 // <link rel="stylesheet" type="text/css" href="gfx/style.css">
-var reStylesheets = /<link.*href="(.*)">/g;
+var reStylesheets = /<link.*stylesheet.*href="(.*)">/g;
 var stylesheets = [];
 var arr;
 while ((arr = reStylesheets.exec(bundle)) !== null) {
@@ -102,4 +102,3 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 	
 	
 	//console.log(JSON.stringify(scripts, null, 2));
-	
