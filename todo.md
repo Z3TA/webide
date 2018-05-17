@@ -37,6 +37,15 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+
+Skip chrome app stuff, and just make a basic chrome app web app (that loads webide.se) !?
+The reason I wanted a chrome app was the auto signup and faked "native" "chrome-less" app feel.
+Solve offline mode by using service worker !?
+
+Web Chrome apps just opens up in a new browser tab!
+Can we get one without crome, like for example when "adding to desktop" !?
+Can we detect if the app was started as a web chrome app !?
+
 So much stuff is different in chrome apps. We can't for example open a web site for preview
 Just use webide.se !?!?
 
