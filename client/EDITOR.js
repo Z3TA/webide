@@ -1766,10 +1766,10 @@ if(callback) return callback(err, path);
 		
 		
 		// Position the virtual keyboard
-		var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
+		if(virtualKeyboardElement) {
+			var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
 		var vkWidth = parseInt(vkcs.width);
 		var vkHeight = parseInt(vkcs.height);
-		
 		console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
 		
 		// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
@@ -1778,6 +1778,7 @@ if(callback) return callback(err, path);
 		
 		//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
 		//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
+		}
 		
 		/*
 			console.log("windowWidth=" + windowWidth);
