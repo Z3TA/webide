@@ -1,7 +1,7 @@
 {
 	"version": "1.0.0",
-	"name": "JZedit",
-	"description": "Web IDE: Editor for creating wep sites and apps",
+ "name": "JZedit",
+	"description": "Web IDE: Editor for creating web sites, web apps, nodejs apps, and writing blog posts",
 	"launch_path": "/index.htm",
 	"icons": {
 		"64": "/gfx/jz64.png"
