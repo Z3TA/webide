@@ -9,6 +9,8 @@
 
 (function() { 
 	
+	if(DISPLAY_MODE == "standalone") return console.log('Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE + '). Will not ask user to add to desktop/home screen"');
+	
 	var deferredPrompt;
 	
 	window.addEventListener('beforeinstallprompt', beforeinstallprompt);
@@ -16,8 +18,12 @@
 	
 	var askInterval = setInterval(ask, 10000);
 	
+	var installed = false;
+	
 	function appinstalled(evt) {
-		console.log('a2hs', 'installed');
+		console.log('a2hs installed!');
+		
+		if(installed) return console.warn("Already got appinstalled event!");
 		
 		var yes = "OK, I will click on the JZ icon";
 		var no = "No, I'll keep using this"
@@ -27,13 +33,15 @@
 				window.close();
 			}
 		});
+		
+		installed = true;
 	}
 	
-	function beforeinstallprompt() {
+	function beforeinstallprompt(evt) {
 		// Prevent Chrome 67 and earlier from automatically showing the prompt
-		e.preventDefault();
+		evt.preventDefault();
 		// Stash the event so it can be triggered later.
-		deferredPrompt = e;
+		deferredPrompt = evt;
 	}
 	
 	function ask() {
@@ -43,7 +51,7 @@
 		var yes = "Yes, make it look like a native app!";
 		var no = "No, I prefer the browser";
 		
-		confirmBox("Do you want add a shortcut to this web app to your home scree/desktop !?\It will give the app a more native feel.", [yes, no], function(answer) {
+		confirmBox("Do you want add JZedit to your home screen/desktop ?\nIt will give the editor a more native feel.", [yes, no], function(answer) {
 			if(answer == yes) {
 				// Show the prompt
 				deferredPrompt.prompt();
@@ -56,10 +64,13 @@
 						console.log('User dismissed the A2HS prompt');
 					}
 					deferredPrompt = null;
-					clearInterval(askInterval);
+					
 				});
 			}
 		});
+		
+		clearInterval(askInterval);
+		
 	}
 	
 })();
