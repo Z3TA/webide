@@ -1,15 +1,27 @@
 {
-  "name": "JZedit",
+  "name": "JZedit Cloud editor/IDE",
   "short_name": "JZedit",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
-  "description": "Web IDE: Editor for creating wep sites and apps",
-  "icons": [{
+  "description": "Web IDE: Editor for creating web sites, web apps, nodejs apps, and writing blog posts",
+  "icons": [
+{
     "src": "/gfx/jz64.png",
     "sizes": "64x64",
     "type": "image/png"
-  }],
+},
+{
+      "src": "/gfx/jz192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+},
+{
+      "src": "/gfx/jz512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+}
+],
   "related_applications": [{
     "platform": "web",
     "url": "https://webide.se/"

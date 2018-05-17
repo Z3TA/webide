@@ -20,6 +20,24 @@ var RUNTIME = (function getRuntime() {
 
 console.log("RUNTIME=" + RUNTIME);
 
+// With a web-app-manifest, users can add the app to home screen!
+// https://developers.google.com/web/fundamentals/web-app-manifest/
+var DISPLAY_MODE = "browser";
+// detect if the display-mode is standalone from JavaScript:
+if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+	console.log('display-mode is standalone');
+	DISPLAY_MODE = "standalone";
+}
+
+// To determine if the app was launched in standalone mode in Safari,
+if (window.navigator.standalone === true) {
+	console.log('display-mode is standalone');
+	DISPLAY_MODE = "standalone";
+}
+
+
+
+
 var __dirname;
 if(RUNTIME != "nw.js") {
 	//alert("RUNTIME=" + RUNTIME);
