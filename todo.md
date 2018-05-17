@@ -37,10 +37,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Debugging Same-origin security policy
-*Not to be confused with CORS!
-Does it have to do with the service worker !?
-
 
 Test add to desktop
 

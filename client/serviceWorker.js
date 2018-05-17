@@ -29,7 +29,10 @@ self.addEventListener('install', function(event) {
 	);
 });
 
-// Is fetch handler needed to satisfy Chrome for offline mode !?
+/*
+	Without the fetch event listener (and some console.logs in it) Chrome will give:
+	"Site cannot be installed: the page does not work offline" and thus we get no "add to desktop" option.
+*/
 self.addEventListener('fetch', function(event) {
 	console.log("serviceWorker fetch url=" + event.request.url);
 	event.respondWith(caches.match(event.request).then(function(response) {
@@ -43,3 +46,4 @@ self.addEventListener('fetch', function(event) {
 		}
 	}));
 });
+

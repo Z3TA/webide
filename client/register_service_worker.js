@@ -1,3 +1,4 @@
+
 if ('serviceWorker' in navigator) {
 	navigator.serviceWorker.register('/serviceWorker.js', {scope: '/'}).then(function(reg) {
 // registration worked
