@@ -673,8 +673,6 @@
 		
 	}
 	
-	
-	
 	EDITOR.addTest(function testNodeErroMessage1(callback) {
 		
 		var errMsg = "Error: What a great name!";
@@ -701,7 +699,7 @@
 			},100);
 			
 		});
-	}, 1);
+	});
 	
 	function infoHas(obj) {
 		outer: for (var i=0; i<EDITOR.info.length; i++) {

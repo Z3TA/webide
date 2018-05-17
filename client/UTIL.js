@@ -928,6 +928,7 @@ else {
 					err.headers = headers;
 					err.url = url;
 					err.code = xmlHttp.status;
+					console.error(err);
 					callback(err);
 				}
 			}

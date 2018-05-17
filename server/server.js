@@ -114,7 +114,7 @@ var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might ru
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 
 var defaultDomain = DEFAULT.domain;
-var DOMAIN = getArg(["d", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME);
+var DOMAIN = getArg(["d", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME); // Use hostname!
 
 var CHROMIUM_DEBUG_PORT = 9222;
 var VNC_PORT = 5901;

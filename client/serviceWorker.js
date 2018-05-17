@@ -31,15 +31,14 @@ self.addEventListener('install', function(event) {
 
 // Is fetch handler needed to satisfy Chrome for offline mode !?
 self.addEventListener('fetch', function(event) {
-	console.log("serviceWorker fetch event: ");
-	console.log(event.request);
+	console.log("serviceWorker fetch url=" + event.request.url);
 	event.respondWith(caches.match(event.request).then(function(response) {
 		// Cache hit - return response
 		if (response) {
 			return response;
 		}
 		else {
-			console.log("Cache miss");
+			console.warn("Cache miss url=" + event.request.url);
 			return fetch(event.request);
 		}
 	}));

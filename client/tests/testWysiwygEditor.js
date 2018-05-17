@@ -559,7 +559,7 @@
 				});
 			});
 		}
-	});
+	}, 1);
 	
 	
 	function launchServe(opt, callback) {
@@ -595,7 +595,7 @@
 							callback(new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors! You might also have to enable popups!"));
 							callback =  null; // Prevent it from calling again
 						}
-					}, 5000);
+					}, 10000);
 					
 					var wOptions = {
 						sourceFile: sourceFile,

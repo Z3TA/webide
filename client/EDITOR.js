@@ -4002,12 +4002,30 @@ if(callback) return callback(err, path);
 		
 		function testWindow(theWindow) {
 			
-			// Due to CORS we might get errors accessing properties on the new window
+			
+			/*
+				Due to CORS we might get errors accessing properties on the new window
+				
+				Then there's Same-origin security policy (Not to be confused with CORS!)
+				Origin is considered different if at least one of the following parts of the address isn't maintained:
+				<protocol>://<hostname>:<port>/path/to/page.html
+				
+			*/
+			
 			try {
 				var test = theWindow.document.domain;
 				}
 				catch(err) {
-				return callback(new Error("Unable to access " + url + " \n" + err.message));
+				
+				var origin = UTIL.getLocation(document.location.href);
+				var other = UTIL.getLocation(url);
+				var diff = [];
+				
+				if(origin.protocol != other.protocol) diff.push("protocol: " + origin.protocol + " vs " + other.protocol);
+				if(origin.host != other.host) diff.push("host: " + origin.host + " vs " + other.host);
+				if(origin.port != other.port) diff.push("port: " + origin.port + " vs " + other.port);
+				
+				return callback(new Error( "Unable to access " + url + " \n" + err.message + " diff=" + JSON.stringify(diff) ));
 				}
 			
 			/*
