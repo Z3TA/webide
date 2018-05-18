@@ -13,7 +13,8 @@
 	"permissions": [
 		"storage",
 		"identity",
-		"identity.email"
+		"identity.email",
+		"browser"
 	],
 	
 	"app": {
