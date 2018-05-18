@@ -4,6 +4,7 @@
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
+  "theme_color": "#4c4944",
   "description": "Web IDE: Editor for creating web sites, web apps, nodejs apps, and writing blog posts",
   "icons": [
 {

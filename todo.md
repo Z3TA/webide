@@ -37,46 +37,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-
-Test add to desktop
-
-Investigate if "A2DT" can work instead of chrome app
-
-
-Chrome will automatically show the Add to Home Screen prompt to the user when the following criteria are met:
-
-    The web app is not already installed
-    Meets a user engagement heuristic (currently, the user has interacted with the domain for at least 30 seconds)
-    Meets the Progressive Web App criteria:
-        Includes a web app manifest that includes:
-            short_name or name
-            icons including a 192px and a 512px version
-            start_url
-        Served over HTTPS (required for service workers)
-        Has registered a service worker with a fetch event handler
-
-
-
-Skip chrome app stuff, and just make a basic chrome app web app (that loads webide.se) !?
-The reason I wanted a chrome app was the auto signup and faked "native" "chrome-less" app feel.
-Solve offline mode by using service worker !?
-
-Web Chrome apps just opens up in a new browser tab!
-Can we get one without "chrome", like for example when "adding to desktop" !?
-Can we detect if the app was started as a web chrome app !?
-
-
-So much stuff is different in chrome apps. We can't for example open a web site for preview
-Just use webide.se !?!?
-
-Chromebook, web preview
-
-chrome.browser.openTab({
-   url: "your_url"
- });
-
-
-
+Chrome hosted app with app.launch=container quacks just like a chrome packaged app, 
+while at the same time running browser api's (no need to rewrite everything to support chome packaged app api's)
+Only disadvantage is that we can not auto-signup users ... !? 
 
 
 

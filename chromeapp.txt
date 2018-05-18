@@ -1,3 +1,20 @@
+Chrome apps for Chromebooks
+===========================
+
+There are two types of Chrome apps:
+
+hosted app: Hosted on a http server. Works like a normal web browser app.
+https://developer.chrome.com/webstore/hosted_apps
+
+packaged app: All files are contained in a package. Uses app.background.scripts that runs chrome.app.window.create
+Uses API's that are different from web API's. For example localStorage and window.open works very differentingly.
+
+Then there's also "add to shelf" or "add to home screen" A2HS apps that also quacks like a chrome app!
+A2HS needs a Service worker and uses manifest.webmanifest 
+
+Also note webapp manifest (manifest.webapp), not to be confused with A2HS, 
+that I think browser used for a short period but is now depreciated and A2HS (manifest.webmanifest) is used instead.
+See: https://developer.mozilla.org/en-US/docs/Archive/B2G_OS/Firefox_OS_apps/Building_apps_for_Firefox_OS/Manifest
 
 
 Test the app
@@ -6,7 +23,7 @@ chrome://extensions/
 
 Click "load unpacked extension"
 
-( yes, this is not an extension, but you also test apps in chrome://extensions/ )
+( yes, you also test Apps in chrome://extensions/ )
 
 
 Start the app
@@ -16,12 +33,32 @@ chrome://apps/
 Click on the app icon
 
 
+
+manifest.json
+=============
+
+Hosted app:
+
 "app": {
-"urls": [
-			"https://webide.se/"
-],
-"launch": {
-			"web_url": "https://webide.se/"
+  "urls": [
+    "https://webide.se/"
+  ],
+  "launch": {
+    "web_url": "https://webide.se/"
+  }
 }
+
+Packaged app:
+
+"permissions": [
+		"storage",
+		"identity",
+		"identity.email",
+		"browser"
+	],
+"app": {
+  "background": {
+    "scripts": ["chrome-background.js"]
+  }
 }
 
