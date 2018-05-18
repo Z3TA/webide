@@ -4504,7 +4504,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 					throw new Error("Something went wrong when closing the editor!");
 				}
 				else {
-					this.close(true);
+					win.close(true);
 				}
 				
 			});
