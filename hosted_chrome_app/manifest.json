@@ -5,9 +5,9 @@
 	"manifest_version": 2,
 	
 	"icons": {
-		"64": "gfx/jz64.png",
-		"192": "gfx/jz192.png",
-		"512": "gfx/jz512.png"
+		"64": "jz64.png",
+		"192": "jz192.png",
+		"512": "jz512.png"
 	},
 	
 	"key": "dbjfibmamafaaflakgjndhpfmlijkofo",
