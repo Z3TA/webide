@@ -71,9 +71,23 @@ self.addEventListener('install', function(event) {
 /*
 	Without the fetch event listener (and some console.logs in it) Chrome will give:
 	"Site cannot be installed: the page does not work offline" and thus we get no "add to desktop" option.
+	
+	The following rules do Not apply the first time the page is loaded! 
+	Only when it's loaded After the service worked has been activated!
 */
 self.addEventListener('fetch', function(event) {
-	console.log("serviceWorker fetch url=" + event.request.url);
+	//var url = new URL(event.request.url);
+	//console.log(url)
+	//console.log("url.pathname=" + url.pathname);
+	
+	console.log("serviceWorker fetch url=" + event.request.url + " *");
+	//console.log(event.request);
+	
+	var dummy = new Response('<p>Hello from your friendly neighbourhood service worker!</p><p>You requested url=' + event.request.url + '</p>', {
+		headers: { 'Content-Type': 'text/html' }
+	});
+	//return event.respondWith(dummy);
+	
 	event.respondWith(caches.match(event.request).then(function(response) {
 		// Cache hit - return response
 		if (response) {
@@ -85,4 +99,3 @@ self.addEventListener('fetch', function(event) {
 		}
 	}));
 });
-

@@ -37,10 +37,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Chrome hosted app with app.launch=container quacks just like a chrome packaged app, 
-while at the same time running browser api's (no need to rewrite everything to support chome packaged app api's)
-Only disadvantage is that we can not auto-signup users ... !? 
-
+Add app to chrome web store !?
 
 
 todo
@@ -508,6 +505,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Ctrl + or minus tries to insert a key while zooming when running as A2HS app in Chrome
 
 False posetive (red circle);
 if(value == undefined) throw new Error("value=" + value + " can not be undefined if key=" + key + " is a key string");

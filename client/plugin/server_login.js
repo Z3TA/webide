@@ -28,9 +28,16 @@
 		var server = undefined;
 		
 		if(EDITOR.localStorage) {
-			EDITOR.localStorage.getItem("editorServerUrl", function(err, url) {
+			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser"], function(err, stored) {
+				var url = stored.url;
 				if(url) server = {url: url};
-				CLIENT.connect(server, connectedToServer);
+				
+				if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser") {
+					console.log("First time we run the editor! Go directly to signup page.");
+					window.onbeforeunload = null;
+					document.location = "/signup/signup.html";
+				}
+				else CLIENT.connect(server, connectedToServer);
 			});
 		} else CLIENT.connect(server, connectedToServer);
 		

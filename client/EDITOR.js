@@ -269,10 +269,15 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 		Feel free to add more EDITOR methods below. Do not extend the EDITOR object elsewhere!!
 	*/
 	
-	
 	EDITOR.touchDown = false; // Is the user still holding down/touching ?
 	EDITOR.scrollingEnabled = false;
 	EDITOR.hasKeyboard = false; // true if keyup is detected
+	
+	// Keep track of how many times the editor has been started, so we can know if it's the first time the editor runs
+	EDITOR.startedCounter = parseInt(UTIL.getCookie("startedCounter")); 
+	if(isNaN(EDITOR.startedCounter)) EDITOR.startedCounter = 0;
+	UTIL.setCookie("startedCounter", ++EDITOR.startedCounter, 999);
+	
 	
 	var lastMouseDownEventType = "";
 	
