@@ -161,6 +161,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 EDITOR.renderFunctions = [];
 EDITOR.preRenderFunctions = [];
 
+EDITOR.animationFunctions = [];
+
 EDITOR.plugins = [];
 
 EDITOR.view = {
@@ -337,6 +339,10 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 			console.log(UTIL.getStack("renderNeeded"));
 		}
 		EDITOR.shouldRender = true;
+		
+		if(EDITOR.animationFunctions.length > 0 && !isAnimating) {
+			if(window.requestAnimationFrame) window.requestAnimationFrame(animate);
+		}
 	}
 	
 	function setWorkingDirectory(workingDir) {
@@ -1451,7 +1457,6 @@ if(callback) return callback(err, path);
 			
 			
 			EDITOR.renderCaret(file.caret);
-			
 			
 			console.timeEnd("render");
 			
@@ -2621,6 +2626,18 @@ if(callback) return callback(err, path);
 		}
 	}
 	
+	EDITOR.addAnimation = function(fun) {
+		if(typeof fun != "function") throw new Error("The animation to be added needs to be a function!");
+		console.log("Adding animation: " + UTIL.getFunctionName(fun));
+		if(EDITOR.animationFunctions.indexOf(fun) != -1) console.warn("Animation " + UTIL.getFunctionName(fun) + " is already running!");
+		return EDITOR.animationFunctions.push(fun) - 1;
+	}
+	EDITOR.removeAnimation = function(fun) {
+		if(typeof fun != "function") throw new Error("The animation to be removed needs to be a function!");
+		console.log("Removing animation: " + UTIL.getFunctionName(fun));
+		return removeFrom(EDITOR.animationFunctions, fun);
+	}
+	
 	EDITOR.addRender = function(fun) {
 		console.log("Adding render: " + UTIL.getFunctionName(fun));
 		if(EDITOR.renderFunctions.indexOf(fun) != -1) throw new Error("The function is already registered as a renderer: " + UTIL.getFunctionName(fun));
@@ -2628,7 +2645,7 @@ if(callback) return callback(err, path);
 	}
 	EDITOR.removeRender = function(fun) {
 		console.log("Removing render: " + UTIL.getFunctionName(fun));
-		return removeFrom(EDITOR.renderFunctions, fun)
+		return removeFrom(EDITOR.renderFunctions, fun);
 	}
 	
 	EDITOR.addPreRender = function(renderFunction) {
@@ -5070,6 +5087,24 @@ CLIENT.cmd("mirror", {
 			alertBox("STDIN: END: " + endData);
 		}
 		
+	}
+	
+	var animationFrame = 0;
+	var isAnimating = false;
+	function animate() {
+		
+		runAnimations(++animationFrame);
+		
+		// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
+		if(EDITOR.animationFunctions.length > 0) {
+			isAnimating = true;
+			window.requestAnimationFrame(animate);
+		}
+		else isAnimating = false;
+	}
+	
+	function runAnimations(animationFrame) {
+		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
 	}
 	
 	function runTests_5616458984153156() { // Random numbers to make sure it's unique

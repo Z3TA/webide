@@ -39,6 +39,10 @@ What I'm working on
 
 Add app to chrome web store !?
 
+Add something that distinguish the editor from other editors, that you can see on first look.
+For example animations !? Exploding letters when you delete !?
+
+ 
 
 todo
 ----
