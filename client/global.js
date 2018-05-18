@@ -14,7 +14,6 @@
 
 var RUNTIME = (function getRuntime() {
 	if(typeof require != "undefined" && typeof require('nw.gui') !== "undefined") return "nw.js";
-	else if(window.chrome && chrome.runtime && chrome.runtime.id) return "chromeApp";
 	else return "browser";
 })();
 
@@ -34,8 +33,6 @@ if (window.navigator.standalone === true) {
 	console.log('display-mode is standalone');
 	DISPLAY_MODE = "standalone";
 }
-
-
 
 
 var __dirname;

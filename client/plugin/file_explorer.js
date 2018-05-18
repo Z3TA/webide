@@ -143,14 +143,10 @@
 		if(domain == "localhost" || domain == "127.0.0.1") {
 			var localName = "Local file-system";
 		}
-		else if(RUNTIME == "chromeApp") {
-			// The domain is some random characters
+		else {
 			// Use the hostname of the server we are connected to
 			var loc = UTIL.getLocation(CLIENT.url); 
 			var localName = EDITOR.user + "@" + loc.host;
-		}
-		else {
-			var localName = domain;
 		}
 		
 		// Make a list of connected file-systems

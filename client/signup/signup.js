@@ -11,22 +11,12 @@
 	
 	function signup() {
 		
-		var aboutLink = document.getElementById("aboutLink");
-		aboutLink.onclick = UTIL.chromeAppLinkClick;
-		
-		var homeLink = document.getElementById("homeLink");
-		homeLink.onclick = UTIL.chromeAppLinkClick;
-		
 		var host = window.location.hostname;
 		
 		var devUrl = "http://127.0.0.1:8100/signup"
 		
 		if(host == "127.0.0.1") {
 			var signupUrl1 = devUrl; // For development
-		}
-		else if(RUNTIME == "chromeApp") {
-			var signupUrl1 = devUrl; // Try dev first
-			var signupUrl2 = "https://signup.webide.se/signup";
 		}
 		else {
 			var port = window.location.port ? ":" + window.location.port : "";
@@ -94,20 +84,6 @@
 				else if(code == "serviceError") alertGeneralMessage(arr[1]);
 				else if(code == "created") {
 					alertGeneralMessage("Successfully created user " + arr[1]);
-					
-					if(RUNTIME == "chromeApp") {
-						var user = {
-							editorServerUser:  arr[1],
-							editorServerPw: inputPassword.value
-						}
-						
-						chrome.storage.sync.set(user, function() {
-							chrome.app.window.create('index.htm', {id: 'main', bounds: { width: 800, height: 600 }}, function whenOpened() { 
-								chrome.app.window.current().close();
-							});
-						});
-						return;
-					}
 					
 					if(typeof window.localStorage == "object") {
 						window.localStorage.setItem("editorServerUser", arr[1]);

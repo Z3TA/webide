@@ -407,83 +407,25 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 				
 			}
 		}
-	};	
+	};
 	
 	/*
 		
 		This big difference between EDITOR.localStorage and EDITOR.storage is that EDITOR.localStorage works offline!
 		
-		EDITOR.localStorage and EDITOR.storage has the same interface to make it easy to switch between them.
+		todo: EDITOR.localStorage and EDITOR.storage (should) have the same interface to make it easy to switch between them.
+		
+		I started making a Packaged chrome app, but it was too much work to get everything to work,
+		for example, Packaged chrome apps doesn't support localStorage, 
+		instead it have it's own "chrome.storage" that works differently from localStorage.
+		
+		chrome.storage is async while localStorage is sync. So I had to refactor everything that used localStorage.
+		Now when I've decided to use Hosted Chrome app instead, localStorage works like in the browser.
+		But I choose to keep the sync version, because "storage" probably needs to be async if we choose to support more platforms in the future.
 		
 	*/
 	
-	// Because of Chrome app's doesn't have window.localStorage, and chrome.storage.local doesn't look the same
-	var chromeStorage = (typeof chrome == "object") && chrome.storage && chrome.storage.local;
-	if(chromeStorage) {
-		EDITOR.localStorage = {
-			setItem: function localStorageSetItem(itemsObject, callback, callbackMaybe) {
-				if(typeof itemsObject == "string") {
-					var key = itemsObject;
-					var value = callback;
-					callback = callbackMaybe;
-					if(typeof value != "string") throw new Error("value needs to be a string!");
-					var itemsObject = {};
-					itemsObject[key] = value;
-					//console.log("chrome.storage.sync.set " + key + "=" + value);
-				}
-				else if(typeof itemsObject != "object") throw new Error("Use: key, value. or a itemsObject ! itemsObject=" + itemsObject);
-				
-				for(var name in itemsObject) {
-					if(typeof itemsObject[name] != "string") throw new Error("Each item needs to be serialized to a string! " + name + "=" + itemsObject[name]);
-				}
-				
-				var stack = UTIL.getStack("EDITOR.localStorage.setItem");
-				
-				chrome.storage.sync.set(itemsObject, function chromeStorageSet() {
-					var err = checkForChromeAppError(stack);
-					if(callback) callback(err);
-					else if(err) throw err;
-					console.log("chrome.storage.sync.set " + key + " done!");
-				});
-			},
-			getItem: function localStorageGetItem(key, callback) {
-				if(typeof callback != "function") throw new Error("getItem is async and needs a callback function!");
-				var stack = UTIL.getStack("EDITOR.localStorage.getItem");
-				chrome.storage.sync.get(key, function chromeStorageGet(itemsObject) {
-					var err = checkForChromeAppError(stack);
-					if(!err) {
-						if(typeof key == "string") {
-var value = itemsObject[key];
-						}
-						else {
-							var value = itemsObject;
-						}
-					}
-					// if key doesn't exist the value will be undefined!
-					callback(err, value);
-				});
-			},
-			removeItem: function localStorageRemoveItem(key, callback) {
-				var stack = UTIL.getStack("EDITOR.localStorage.removeItem");
-				chrome.storage.sync.remove(key, function chromeStorageRemove() {
-					var err = checkForChromeAppError(stack);
-					if(callback) callback(err);
-					else if(err) throw err;
-				});
-			},
-			clear: function storageClear(callback) {
-				console.warn("Clearing ALL data from chrome.storage!");
-				var stack = UTIL.getStack("EDITOR.localStorage.clear");
-				chrome.storage.sync.clear(function chromeStorageClear() {
-					var err = checkForChromeAppError(stack);
-					
-					if(callback) callback(err);
-					else if(err) throw err;
-				});
-			}
-		};
-	}
-	else if(typeof window.localStorage == "object") {
+	if(typeof window.localStorage == "object") {
 		// Use window.localStorage but with the same interface as chrome.storage
 		EDITOR.localStorage = {
 			setItem: function localStorageSetItem(key, value, callback) {
@@ -548,19 +490,7 @@ callback = value;
 	}
 	else {
 		EDITOR.localStorage = null;
-		console.warn("window.localStorage and  chrome.storage.local not available!");
-	}
-	
-	function checkForChromeAppError(stack) {
-		var err = null;
-		if(typeof chrome == "object" && chrome.runtime && chrome.runtime.lastError) {
-			err = chrome.runtime.lastError;
-			if(err) {
-				if(stack) console.log(stack);
-				console.warn(err.message);
-			}
-		}
-		return err;
+		console.warn("window.localStorage not available!");
 	}
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
@@ -4806,7 +4736,7 @@ CLIENT.cmd("mirror", {
 		
 		keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		
-		if(RUNTIME != "chromeApp") window.onbeforeunload = confirmExit;
+		window.onbeforeunload = confirmExit;
 		
 		
 		// Handle file save dialog
