@@ -183,7 +183,7 @@
 				throw new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors!");
 				// The test can however succeed without any errors! It just takes too long. WHY??
 			}
-		}, 8000);
+		}, 15000);
 		
 		function windowOpened(err, theWindow) {
 			if(err) throw err;
@@ -595,7 +595,7 @@
 							callback(new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors! You might also have to enable popups!"));
 							callback =  null; // Prevent it from calling again
 						}
-					}, 10000);
+					}, 15000);
 					
 					var wOptions = {
 						sourceFile: sourceFile,

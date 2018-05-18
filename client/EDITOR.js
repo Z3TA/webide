@@ -4489,6 +4489,8 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 			EDITOR.fireEvent("exit", [], function(err, returns) {
 				if(err) throw err;
 				
+				var gotError = false;
+				
 				for(var fName in returns) {
 					console.log(fName + " returned " + returns[fName]);
 					if(returns[fName] === false || returns[fName] instanceof Error) {
