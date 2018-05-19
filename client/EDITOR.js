@@ -1476,11 +1476,12 @@ if(callback) return callback(err, path);
 			else {
 				//console.log("Fading caret");
 				EDITOR.addAnimation(fadeInCaretAnimation);
+				document.getElementById('canvas').style.cursor = 'none'; // Remove mouse pointer while typing
 				renderCaretTimer = setTimeout(function() {
 					EDITOR.removeAnimation(fadeInCaretAnimation);
 					EDITOR.renderCaret(file.caret);
 					document.getElementById('canvas').style.cursor = 'text';
-				}, 3000);
+				}, 1000);
 			}
 			
 			console.timeEnd("render");
@@ -6576,6 +6577,8 @@ CLIENT.cmd("mirror", {
 		//console.log("EDITOR.input=" + EDITOR.input);
 		
 		EDITOR.interact("mouseMove", mouseMoveEvent);
+		
+		document.getElementById('canvas').style.cursor = 'text';
 		
 		//return false;
 		
