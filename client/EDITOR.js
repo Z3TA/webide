@@ -1472,6 +1472,7 @@ if(callback) return callback(err, path);
 			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20) {
 				//console.log("Rendering caret");
 				EDITOR.renderCaret(file.caret);
+				document.getElementById('canvas').style.cursor = 'text';
 			}
 			else {
 				//console.log("Fading caret");
@@ -1481,7 +1482,7 @@ if(callback) return callback(err, path);
 					EDITOR.removeAnimation(fadeInCaretAnimation);
 					EDITOR.renderCaret(file.caret);
 					document.getElementById('canvas').style.cursor = 'text';
-				}, 1000);
+				}, 3000);
 			}
 			
 			console.timeEnd("render");
