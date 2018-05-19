@@ -114,6 +114,8 @@
 		
 		if(!noAlert) alertBox("devMode OFF!");
 		
+		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("devModeOff");
+		
 	}
 	
 	function enableDevMode() {
@@ -132,6 +134,8 @@
 		
 		console.time = consoleTimeOriginal
 		console.timeEnd = consoleTimeEndOriginal
+		
+		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("devModeOn");
 		
 		//alertBox("devMode now active!");
 		

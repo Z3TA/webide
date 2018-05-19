@@ -7,6 +7,19 @@
 
 console.log("Running serviceWorker.js");
 
+var devMode = false;
+
+self.addEventListener('message', function(msg) {
+	console.log("serviceWorker Received Message: ", msg.data);
+	
+	if(msg.data == "devModeOff") {
+		devMode = false;
+	}
+	else if(msg.data == "devModeOn") {
+		devMode = true;
+	}
+});
+
 self.addEventListener('install', function(event) {
 	console.log("serviceWorker install event");
 	event.waitUntil(
@@ -76,26 +89,20 @@ self.addEventListener('install', function(event) {
 	Only when it's loaded After the service worked has been activated!
 */
 self.addEventListener('fetch', function(event) {
-	//var url = new URL(event.request.url);
-	//console.log(url)
-	//console.log("url.pathname=" + url.pathname);
-	
-	console.log("serviceWorker fetch url=" + event.request.url + " *");
-	//console.log(event.request);
-	
-	var dummy = new Response('<p>Hello from your friendly neighbourhood service worker!</p><p>You requested url=' + event.request.url + '</p>', {
-		headers: { 'Content-Type': 'text/html' }
-	});
-	//return event.respondWith(dummy);
-	
-	event.respondWith(caches.match(event.request).then(function(response) {
-		// Cache hit - return response
-		if (response) {
-			return response;
-		}
-		else {
-			console.warn("Cache miss url=" + event.request.url);
-			return fetch(event.request);
-		}
-	}));
+	console.log("serviceWorker fetch url=" + event.request.url + " * devMode=" + devMode);
+	if(devMode) { // Skip cache
+		event.respondWith(fetch(event.request));
+	}
+	else {
+		// Check cache first
+		event.respondWith(caches.match(event.request).then(function(response) {
+			if (response) {
+				return response;
+			}
+			else {
+				console.warn("Cache miss url=" + event.request.url);
+				return fetch(event.request);
+			}
+		}));
+	}
 });
