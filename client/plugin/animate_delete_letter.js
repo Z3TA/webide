@@ -19,10 +19,13 @@
 	
 	function animate_delete_letter(file, type, characters, caretIndex, row, col) {
 		
-		//console.log("animate_delete_letter: type=" + type + " row=" + row + " col=" + col);
+		console.log("animate_delete_letter: type=" + type + " row=" + row + " col=" + col);
 		
 		if(type == "delete") {
 			startAnimation(file, row, col, 1);
+		}
+		else if(type == "deleteTextRange") {
+			if(characters.indexOf("\n") == -1) startAnimation(file, row, col, characters.length);
 		}
 		else return true;
 	}
@@ -44,28 +47,23 @@
 		
 		var ctx = EDITOR.canvasContext;
 		
-		var image = ctx.getImageData(left, top, width, height);
-		var bgColor = pixelColor(image, 1, 1);
+		var charImage = ctx.getImageData(left, top, width, height);
+		var bgColor = pixelColor(charImage, 1, 1);
 		
 		var pixels = [];
 		var color = "";
 		for(var x=1; x<width; x++) {
 			for(var y=1; y<height; y++) {
-				color = pixelColor(image, x, y);
-				if(color != EDITOR.settings.style.highlightMatchBackground) {
-					pixels.push({x: x+left, y: y+top, color: pixelColor(image, x, y)});
+				color = pixelColor(charImage, x, y);
+				if(color != EDITOR.settings.style.highlightMatchBackground &&
+					color != EDITOR.settings.style.selectedTextBg &&
+				color != EDITOR.settings.style.highlightTextBg) {
+					pixels.push({x: x+left, y: y+top, color: pixelColor(charImage, x, y)});
 				}
 			}
 		}
 		
-		var bgX = top-width;
-		var bgY = left-height;
-		var bgW = width*3;
-		var bgH = height*3;
-		
-		var background = ctx.getImageData(bgX, bgY, bgW, bgH);
-		
-		var animationFunction = createAnimation(left, top, width, height, background, bgX, bgY, bgColor, pixels, EDITOR.animationFrame)
+		var animationFunction = createAnimation(left, top, width, height, pixels, EDITOR.animationFrame)
 		
 		EDITOR.addAnimation(animationFunction);
 		EDITOR.renderNeeded();
@@ -103,22 +101,12 @@
 		}
 	}
 	
-	function createAnimation(x, y, width, height, background, bgX, bgY, bgColor, pixels, frameStart) {
+	function createAnimation(x, y, width, height, pixels, frameStart) {
 		return function deleteLetterAnimation(ctx, frameCount) {
-			
+			// Called by the editor at every frame
 			var frame = frameCount-frameStart;
 			
-			console.time("deleteLetterAnimation frame=" + frame);
-			// Called by the editor at every frame
-			
-			
-			//ctx.save();
-			
-			//ctx.putImageData(background, bgX, bgY);
-			
-			// Fill instead of clearing!
-			//ctx.fillStyle = bgColor;
-			//ctx.fillRect(x, y, width, height); 
+			//console.time("deleteLetterAnimation frame=" + frame);
 			
 			var dx = 0;
 			var dy = 0;
@@ -126,19 +114,15 @@
 			var centerX = x + width/2;
 			var centerY = y + height/2;
 			
-			//ctx.beginPath();
 			for (var i=0; i<pixels.length; i++) {
 				dx = (pixels[i].x - centerX) / width * frame*2;
 				dy = (pixels[i].y - centerY+3) / height * frame*2;
 				
 				ctx.fillStyle = pixels[i].color;
 				ctx.fillRect(pixels[i].x + dx, pixels[i].y + dy, 1, 1);
-				//console.log(pixels[i].x, pixels[i].y, pixels[i].color);
 			}
-			//ctx.stroke();
 			
-			//console.log("Running animation! x=" + x + " y=" + y + " frame=" + frame);
-			console.timeEnd("deleteLetterAnimation frame=" + frame);
+			//console.timeEnd("deleteLetterAnimation frame=" + frame);
 		};
 	}
 	
