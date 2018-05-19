@@ -5089,11 +5089,11 @@ CLIENT.cmd("mirror", {
 		
 	}
 	
-	var animationFrame = 0;
+	EDITOR.animationFrame = 0;
 	var isAnimating = false;
 	function animate() {
 		
-		runAnimations(++animationFrame);
+		runAnimations(++EDITOR.animationFrame);
 		
 		// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
 		if(EDITOR.animationFunctions.length > 0) {
