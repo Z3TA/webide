@@ -54,11 +54,12 @@
 		var color = "";
 		for(var x=1; x<width; x++) {
 			for(var y=1; y<height; y++) {
-				color = pixelColor(charImage, x, y);
+				color = pixelColor(charImage, x, y, null);
 				if(color != EDITOR.settings.style.highlightMatchBackground &&
 					color != EDITOR.settings.style.selectedTextBg &&
 				color != EDITOR.settings.style.highlightTextBg) {
-					pixels.push({x: x+left, y: y+top, color: pixelColor(charImage, x, y)});
+					
+					pixels.push({x: x+left, y: y+top, color: pixelColor(charImage, x, y, .24)});
 				}
 			}
 		}
@@ -75,7 +76,9 @@
 		
 	}
 	
-	function pixelColor(img, x, y) {
+	function pixelColor(img, x, y, opacity) {
+		if(opacity === undefined) opacity = 1;
+		
 		var colorIndices = getColorIndicesForCoord(x, y, img.width);
 		var redIndex = colorIndices[0];
 		var greenIndex = colorIndices[1];
@@ -92,7 +95,8 @@
 		
 		//console.log("redForCoord=" + redForCoord + " greenForCoord=" + greenForCoord + " blueForCoord=" + blueForCoord + " alphaForCoord=" + alphaForCoord);
 		
-		return "rgb(" + redForCoord + ", " + greenForCoord + ", " + blueForCoord + ")";
+		if(opacity) return "rgba(" + redForCoord + ", " + greenForCoord + ", " + blueForCoord + ", " + opacity + ")";
+		else return "rgb(" + redForCoord + ", " + greenForCoord + ", " + blueForCoord + ")";
 		
 		function getColorIndicesForCoord(x, y, width) {
 			var red = y * (width * 4) + x * 4;
