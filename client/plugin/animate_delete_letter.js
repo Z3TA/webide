@@ -49,10 +49,12 @@
 		
 		var pixels = [];
 		var color = "";
-		for(var x=left; x<left+width; x++) {
-			for(var y=top; y<top+height; y++) {
+		for(var x=1; x<width; x++) {
+			for(var y=1; y<height; y++) {
 				color = pixelColor(image, x, y);
-				pixels.push({x: x, y: y, img: ctx.getImageData(x, y, 1, 1)});
+				if(color != EDITOR.settings.style.highlightMatchBackground) {
+					pixels.push({x: x+left, y: y+top, color: pixelColor(image, x, y)});
+				}
 			}
 		}
 		
@@ -71,7 +73,7 @@
 		setTimeout(function() {
 			EDITOR.removeAnimation(animationFunction);
 			EDITOR.renderNeeded();
-		}, 150);
+		}, 100);
 		
 	}
 	
@@ -92,7 +94,7 @@
 		
 		//console.log("redForCoord=" + redForCoord + " greenForCoord=" + greenForCoord + " blueForCoord=" + blueForCoord + " alphaForCoord=" + alphaForCoord);
 		
-		return "rgb(" + redForCoord + "," + greenForCoord + "," + blueForCoord + ")";
+		return "rgb(" + redForCoord + ", " + greenForCoord + ", " + blueForCoord + ")";
 		
 		function getColorIndicesForCoord(x, y, width) {
 			var red = y * (width * 4) + x * 4;
@@ -103,29 +105,40 @@
 	
 	function createAnimation(x, y, width, height, background, bgX, bgY, bgColor, pixels, frameStart) {
 		return function deleteLetterAnimation(ctx, frameCount) {
-			console.time("deleteLetterAnimation");
-			// Called by the editor at every frame
 			
 			var frame = frameCount-frameStart;
 			
-			ctx.save();
+			console.time("deleteLetterAnimation frame=" + frame);
+			// Called by the editor at every frame
 			
-			ctx.putImageData(background, bgX, bgY);
+			
+			//ctx.save();
+			
+			//ctx.putImageData(background, bgX, bgY);
 			
 			// Fill instead of clearing!
-			ctx.fillStyle = bgColor;
-			ctx.fillRect(x, y, width, height); 
+			//ctx.fillStyle = bgColor;
+			//ctx.fillRect(x, y, width, height); 
 			
 			var dx = 0;
 			var dy = 0;
 			
+			var centerX = x + width/2;
+			var centerY = y + height/2;
+			
+			//ctx.beginPath();
 			for (var i=0; i<pixels.length; i++) {
-				dx = Math.random() * 2 - 1;
-				dy = Math.random() * 2 - 1;
-				ctx.putImageData(pixels[i].img, pixels[i].x += dx, pixels[i].y += dy);
+				dx = (pixels[i].x - centerX) / width * frame*2;
+				dy = (pixels[i].y - centerY+3) / height * frame*2;
+				
+				ctx.fillStyle = pixels[i].color;
+				ctx.fillRect(pixels[i].x + dx, pixels[i].y + dy, 1, 1);
+				//console.log(pixels[i].x, pixels[i].y, pixels[i].color);
 			}
+			//ctx.stroke();
+			
 			//console.log("Running animation! x=" + x + " y=" + y + " frame=" + frame);
-			console.timeEnd("deleteLetterAnimation");
+			console.timeEnd("deleteLetterAnimation frame=" + frame);
 		};
 	}
 	
