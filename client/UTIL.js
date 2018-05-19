@@ -1106,6 +1106,46 @@ else {
 		
 	},
 	
+	parseColor: function parseColor(input) {
+		// https://stackoverflow.com/questions/11068240/what-is-the-most-efficient-way-to-parse-a-css-color-in-javascript
+		var m = input.match(/^#([0-9a-f]{3})$/i);
+		if(m) {
+			// in three-character format, each value is multiplied by 0x11 to give an
+			// even scale from 0x00 to 0xff
+			return [
+				parseInt(m[1].charAt(0),16)*0x11,
+				parseInt(m[1].charAt(1),16)*0x11,
+				parseInt(m[1].charAt(2),16)*0x11
+			];
+		}
+		m = input.match(/^#([0-9a-f]{6})$/i);
+		if(m) {
+			return [
+				parseInt(m[1].substr(0,2),16),
+				parseInt(m[1].substr(2,2),16),
+				parseInt(m[1].substr(4,2),16)
+			];
+		}
+		m = input.match(/^rgb?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+		if(m) {
+			return [
+				parseInt(m[1]),
+				parseInt(m[2]),
+				parseInt(m[3]),
+			];
+		}
+		m = input.match(/^rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+		if(m) {
+			return [
+				parseInt(m[1]),
+				parseInt(m[2]),
+				parseInt(m[3]),
+				parseInt(m[4])
+			];
+		}
+		else throw new Error("Failed to get color from input=" + input + "");
+	},
+	
 	urlProtocol: function urlProtocol(url) {
 		var protocolIndex = url.indexOf("://");
 		

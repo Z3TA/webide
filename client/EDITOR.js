@@ -185,6 +185,7 @@ EDITOR.lastKeyPressed = "";
 EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an internal variable, but exposed so plugins can check if there's any files in it)
 
 EDITOR.lastTimeKeyPressed = new Date();
+EDITOR.lastTimeCharacterInserted = new Date();
 
 (function() { // Non global editor code ...
 	
@@ -344,8 +345,8 @@ EDITOR.lastTimeKeyPressed = new Date();
 		}
 		EDITOR.shouldRender = true;
 		
-		if(EDITOR.animationFunctions.length > 0 && !isAnimating) {
-			if(window.requestAnimationFrame) window.requestAnimationFrame(animate);
+		if(EDITOR.animationFunctions.length > 0 && !isAnimating && window.requestAnimationFrame) {
+			window.requestAnimationFrame(animate);
 		}
 	}
 	
@@ -1460,14 +1461,20 @@ if(callback) return callback(err, path);
 			//console.timeEnd("renders");
 			
 			// Experiment: Hide the array while typing !?
-			clearTimeout(renderCaretTimer);
-			if(new Date() - EDITOR.lastTimeKeyPressed > 1000 ) {
+			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 ) {
 EDITOR.renderCaret(file.caret);
 			}
 			else {
+				
+				// First remove any old ones so they do not stop before the caret is fully filled
+				clearTimeout(renderCaretTimer);
+				EDITOR.removeAnimation(fadeInCaretAnimation);
+				EDITOR.addAnimation(fadeInCaretAnimation);
+				
 				renderCaretTimer = setTimeout(function() {
+					EDITOR.removeAnimation(fadeInCaretAnimation);
 					EDITOR.renderCaret(file.caret);
-				}, 750);
+				}, 3000);
 			}
 			
 			console.timeEnd("render");
@@ -1617,9 +1624,10 @@ EDITOR.renderCaret(file.caret);
 		
 	}
 	
-	EDITOR.renderCaret = function(caret, colPlus) {
+	EDITOR.renderCaret = function(caret, colPlus, fillStyle) {
 		
 		if(colPlus == undefined) colPlus = 0;
+		if(fillStyle == undefined) fillStyle = EDITOR.settings.caret.color;
 		
 		var row = caret.row;
 		var col = caret.col + colPlus;
@@ -1632,7 +1640,7 @@ EDITOR.renderCaret(file.caret);
 		var top = Math.floor(EDITOR.settings.topMargin + (row - file.startRow) * EDITOR.settings.gridHeight);
 		var left = Math.floor(EDITOR.settings.leftMargin + (col + (file.grid[row].indentation * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		
-		ctx.fillStyle = EDITOR.settings.caret.color;
+		ctx.fillStyle = fillStyle;
 		
 		ctx.fillRect(left, top, EDITOR.settings.caret.width, EDITOR.settings.gridHeight);
 		
@@ -2642,6 +2650,7 @@ EDITOR.renderCaret(file.caret);
 		if(typeof fun != "function") throw new Error("The animation to be added needs to be a function!");
 		console.log("Adding animation: " + UTIL.getFunctionName(fun));
 		if(EDITOR.animationFunctions.indexOf(fun) != -1) console.warn("Animation " + UTIL.getFunctionName(fun) + " is already running!");
+		if(!isAnimating && window.requestAnimationFrame) window.requestAnimationFrame(animate);
 		return EDITOR.animationFunctions.push(fun) - 1;
 	}
 	EDITOR.removeAnimation = function(fun) {
@@ -5399,6 +5408,13 @@ CLIENT.cmd("mirror", {
 		EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
 	}
 	
+	function fadeInCaretAnimation() {
+		var c = UTIL.parseColor(EDITOR.settings.caret.color);
+		var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.005)";
+		if(EDITOR.currentFile) {
+			EDITOR.renderCaret(EDITOR.currentFile.caret, 0, transparentColor);
+		}
+	}
 	
 	function fileDrop(fileDropEvent) {
 		fileDropEvent.preventDefault();

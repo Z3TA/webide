@@ -1356,7 +1356,7 @@ var File; // File object is global
 			//console.log("Done fixing grid indexes");
 			
 			file.scrollToCaret(caret);
-			
+			EDITOR.lastTimeCharacterInserted = new Date();
 			
 		}
 		
