@@ -37,12 +37,17 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Only hide the mouse caret if it's near the fading caret !? It's annoying when it's blinking!
+
 Add app to chrome web store !?
 
 Add something that distinguish the editor from other editors, that you can see on first look.
 For example animations !? Exploding letters when you delete !?
 
- 
+
+idea: Able to "fork" any web page !? An extension with for button, that downloads assents and open the site in the editor !?
+inspired by codepen: http://cdpn.io/FpiJw 
+
 
 todo
 ----
@@ -509,6 +514,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Doesn't reopen big files when closing/reloading the editor!
 
 Ctrl + or minus tries to insert a key while zooming when running as A2HS app in Chrome
 
@@ -2234,6 +2241,7 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+Double-clicking on a word in a large file is slow !! Try double clicking on EDITOR in EDITOR.js
 
 Check js_parser for performance regressions to figure out how to optimize, did anything added slow it down ?
 Make a tool to automatically perf test each revision of js_parser. Turn it into a nodejs module, parse a file from nodejs.
