@@ -184,8 +184,8 @@ EDITOR.fileOpenCallback = undefined;
 EDITOR.lastKeyPressed = "";
 EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an internal variable, but exposed so plugins can check if there's any files in it)
 
-EDITOR.lastTimeKeyPressed = new Date();
 EDITOR.lastTimeCharacterInserted = new Date();
+EDITOR.lastTimeInteraction = new Date();
 
 (function() { // Non global editor code ...
 	
@@ -1461,19 +1461,25 @@ if(callback) return callback(err, path);
 			//console.timeEnd("renders");
 			
 			// Experiment: Hide the array while typing !?
-			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 ) {
-EDITOR.renderCaret(file.caret);
+			// First remove any old ones so they do not stop before the caret is fully filled
+			clearTimeout(renderCaretTimer);
+			EDITOR.removeAnimation(fadeInCaretAnimation);
+			/*
+				console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) + 
+				" since insert vs action=" + (EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction) + 
+				" lastTimeCharacterInserted=" + EDITOR.lastTimeCharacterInserted.getTime() + " lastTimeInteraction=" + EDITOR.lastTimeInteraction.getTime());
+			*/
+			if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20) {
+				//console.log("Rendering caret");
+				EDITOR.renderCaret(file.caret);
 			}
 			else {
-				
-				// First remove any old ones so they do not stop before the caret is fully filled
-				clearTimeout(renderCaretTimer);
-				EDITOR.removeAnimation(fadeInCaretAnimation);
+				//console.log("Fading caret");
 				EDITOR.addAnimation(fadeInCaretAnimation);
-				
 				renderCaretTimer = setTimeout(function() {
 					EDITOR.removeAnimation(fadeInCaretAnimation);
 					EDITOR.renderCaret(file.caret);
+					document.getElementById('canvas').style.cursor = 'text';
 				}, 3000);
 			}
 			
@@ -2552,6 +2558,8 @@ EDITOR.renderCaret(file.caret);
 		// This function will be called on every interaction
 		
 		nextInteractionFunctions();
+		
+		EDITOR.lastTimeInteraction = new Date();
 		
 		if(EDITOR.eventListeners.interaction.length > 0) {
 			console.log("Calling interaction listeners (" + EDITOR.eventListeners.interaction.length + ") ...");
@@ -5800,7 +5808,6 @@ CLIENT.cmd("mirror", {
 		*/
 		
 		EDITOR.lastKeyPressed = character;
-		EDITOR.lastTimeKeyPressed = new Date();
 		
 		if(file) {
 			if(EDITOR.input && !preventDefault) {
@@ -6124,7 +6131,6 @@ CLIENT.cmd("mirror", {
 		}
 		
 		lastKeyDown = charCode;
-		
 		
 		if(preventDefault) {
 			//alert("Preventing default browser action!");

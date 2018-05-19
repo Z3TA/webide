@@ -1304,6 +1304,7 @@ var File; // File object is global
 			return;
 		}
 		
+		EDITOR.lastTimeCharacterInserted = new Date();
 		
 		// Sanity check in case someting is wrong
 		file.sanityCheck();
@@ -1356,7 +1357,6 @@ var File; // File object is global
 			//console.log("Done fixing grid indexes");
 			
 			file.scrollToCaret(caret);
-			EDITOR.lastTimeCharacterInserted = new Date();
 			
 		}
 		
