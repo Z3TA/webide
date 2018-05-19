@@ -184,6 +184,8 @@ EDITOR.fileOpenCallback = undefined;
 EDITOR.lastKeyPressed = "";
 EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an internal variable, but exposed so plugins can check if there's any files in it)
 
+EDITOR.lastTimeKeyPressed = new Date();
+
 (function() { // Non global editor code ...
 	
 	// These variables and functions are private ...
@@ -204,6 +206,8 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 	var tildeActive = false;
 	var tildeShiftActive = false;
 	var tildeAltActive = false;
+	
+	var renderCaretTimer;
 	
 	var canvas, ctx; 
 	
@@ -1455,8 +1459,16 @@ if(callback) return callback(err, path);
 			}
 			//console.timeEnd("renders");
 			
-			
-			EDITOR.renderCaret(file.caret);
+			// Experiment: Hide the array while typing !?
+			clearTimeout(renderCaretTimer);
+			if(new Date() - EDITOR.lastTimeKeyPressed > 1000 ) {
+EDITOR.renderCaret(file.caret);
+			}
+			else {
+				renderCaretTimer = setTimeout(function() {
+					EDITOR.renderCaret(file.caret);
+				}, 750);
+			}
 			
 			console.timeEnd("render");
 			
@@ -5771,11 +5783,8 @@ CLIENT.cmd("mirror", {
 			}
 		*/
 		
-		
-		
-		
 		EDITOR.lastKeyPressed = character;
-		
+		EDITOR.lastTimeKeyPressed = new Date();
 		
 		if(file) {
 			if(EDITOR.input && !preventDefault) {
