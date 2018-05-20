@@ -37,8 +37,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Only hide the mouse caret if it's near the fading caret !? It's annoying when it's blinking!
-
 Add app to chrome web store !?
 
 Add something that distinguish the editor from other editors, that you can see on first look.
@@ -1347,6 +1345,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Ctrl+S is used so frequently, that you sometimes hit Ctrl+D. So don't allow binding anything to Ctrl+D !?
 
 Pressing tab in file(search) open should fuzzy auto-complete from the results ... 
 Ex: I want to open package.json inside /projects/foo/bar/ 

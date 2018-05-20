@@ -609,6 +609,25 @@ originalRow.push("");
 		}
 	},
 
+	drawCircle: function drawCircle(ctx, centerX, centerY, radius, color) {
+		// Useful for debugging scren locations
+		var defaultRadius = 16;
+		if(radius == undefined) radius = defaultRadius;
+		if(typeof radius == "string" && color == undefined) {
+			color = radius;
+			radius = defaultRadius;
+		}
+		if(color == undefined) color = "rgba(255,0,0,0.1)";
+		
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+		ctx.fillStyle = color;
+		ctx.fill();
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = "rgba(0,0,0,0.5)";
+		ctx.stroke();
+	},
+	
 	occurrences: function occurrences(string, subString, allowOverlapping) {
 		/** Function count the occurrences of substring in a string;
 			* @param {String} string   Required. The string;
@@ -931,7 +950,27 @@ else {
 		}
 	},
 
-
+	canvasLocation: function screenLocation(row, col) {
+		// Returns the screen location of the center of the box located at row,col
+		
+		if(typeof row == "object" && row.row != undefined && row.col != undefined) {
+			col = row.col;
+			row = row.row;
+		}
+		if(typeof row != "number") throw new Error("row=" + row + " (" + (typeof row) + ") needs to be a number!");
+		if(typeof col != "number") throw new Error("col=" + col + " (" + (typeof col) + ") needs to be a number!");
+		
+		var file = EDITOR.currentFile;
+		
+		if(!file) throw new Error("No current file open!");
+		
+		var indentationWidth = file.grid[row].indentation * EDITOR.settings.tabSpace;
+		var top = EDITOR.settings.topMargin + (row-file.startRow) * EDITOR.settings.gridHeight;
+		var left = EDITOR.settings.leftMargin + (Math.max(0, indentationWidth - file.startColumn) + col) * EDITOR.settings.gridWidth;
+		
+		return {x: left + EDITOR.settings.gridWidth / 2, y: top + EDITOR.settings.gridHeight /2};
+	},
+	
 	spacePad: function spacePad(str, padLength) {
 		
 		if(padLength == undefined) padLength = 42;

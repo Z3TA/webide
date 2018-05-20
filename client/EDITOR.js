@@ -1460,7 +1460,7 @@ if(callback) return callback(err, path);
 			}
 			//console.timeEnd("renders");
 			
-			// Experiment: Hide the array while typing !?
+			// Experiment: Hide the caret while typing !?
 			// First remove any old ones so they do not stop before the caret is fully filled
 			clearTimeout(renderCaretTimer);
 			EDITOR.removeAnimation(fadeInCaretAnimation);
@@ -1477,7 +1477,22 @@ if(callback) return callback(err, path);
 			else {
 				//console.log("Fading caret");
 				EDITOR.addAnimation(fadeInCaretAnimation);
-				document.getElementById('canvas').style.cursor = 'none'; // Remove mouse pointer while typing
+				
+				var caret = UTIL.canvasLocation(file.caret);
+				var mouse = {x: EDITOR.canvasMouseX, y: EDITOR.canvasMouseY};
+				var distanceX = caret.x - mouse.x;
+				var distanceY = caret.y - mouse.y;
+				//console.log("distanceX=" + distanceX + " Math.abs(distanceY)=" + Math.abs(distanceY) + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
+				var mouseCursorAhead = distanceX < 0 && Math.abs(distanceY) < EDITOR.settings.gridHeight*2;
+				var distanceToMouseCursor = Math.sqrt(Math.pow (distanceX, 2) + Math.pow (distanceY, 2));
+				
+				//UTIL.drawCircle(ctx, caret.x, caret.y, "blue");
+				//UTIL.drawCircle(ctx, mouse.x, mouse.y, "green");
+				
+				if(mouseCursorAhead || distanceToMouseCursor < EDITOR.settings.gridHeight*3) {
+					document.getElementById('canvas').style.cursor = 'none'; // Hide mouse pointer while typing
+				}
+				
 				renderCaretTimer = setTimeout(function() {
 					EDITOR.removeAnimation(fadeInCaretAnimation);
 					EDITOR.renderCaret(file.caret);
@@ -6499,9 +6514,14 @@ CLIENT.cmd("mirror", {
 	
 	function getMousePosition(mouseEvent) {
 		
-		// Mouse position is on the current object (Canvas) 
+		// Mouse position is on the current element (most likely Canvas) 
 		var mouseX = mouseEvent.offsetX==undefined?mouseEvent.layerX:mouseEvent.offsetX;
 		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
+		
+		if(mouseX != undefined && mouseY != undefined && mouseEvent.target && mouseEvent.target == canvas) {
+			EDITOR.canvasMouseX = mouseX;
+			EDITOR.canvasMouseY = mouseY;
+		}
 		
 		/*
 			if(e.page) console.log("mouseEvent.page.x=" + mouseEvent.page.x);
@@ -6512,28 +6532,47 @@ CLIENT.cmd("mirror", {
 		*/
 		
 		if(UTIL.isNumeric(mouseEvent.clientX) && UTIL.isNumeric(mouseEvent.clientY)) {
+			// clientX and clientY is always on the window/veiwport!
 			EDITOR.mouseX = parseInt(mouseEvent.clientX);
 			EDITOR.mouseY = parseInt(mouseEvent.clientY);
 		}
-		else if(mouseEvent.changedTouches) {
+		
+		if(mouseEvent.changedTouches && mouseX == undefined && mouseY == undefined) {
 			
 			mouseX = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageX); // pageX
 			mouseY = Math.round(mouseEvent.changedTouches[mouseEvent.changedTouches.length-1].pageY);
 			
-			// Touch events only have pageX with is the whole page. We only want the position on the canvas!
+			// The editor doesn't allow scrolling so pageX is thus the same as clientX !
+			
+			// Touch events only have pageX with is the whole page. We only want the position on the canvas !?
+			if(mouseEvent.target == canvas) {
 			var rect = canvas.getBoundingClientRect();
 			//console.log(rect.top, rect.right, rect.bottom, rect.left);
-			
 			mouseX = mouseX - rect.left;
 			mouseY = mouseY - rect.top;
+				
+				EDITOR.canvasMouseX = mouseX;
+				EDITOR.canvasMouseY = mouseY;
+				
+			}
+			else {
+				EDITOR.mouseX = mouseX;
+				EDITOR.mouseY = mouseY;
+			}
 			
 		}
-		else {
-			mouseX = EDITOR.mouseX;
+		
+		if(mouseX == undefined && mouseY == undefined) {
+			if(mouseEvent.target == canvas) {
+				mouseX = EDITOR.canvasMouseX;
+				mouseY = EDITOR.canvasMouseY;
+			}
+			else {
+				mouseX = EDITOR.mouseX;
 			mouseY = EDITOR.mouseY;
+			}
 			console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
-			
-		}
+			}
 		
 		//console.log("mouseX=" + mouseX);
 		//console.log("mouseY=" + mouseY);
@@ -6555,11 +6594,11 @@ CLIENT.cmd("mirror", {
 		
 		//mouseMoveEvent.preventDefault();
 		
-		var mouse = getMousePosition(mouseMoveEvent);
+		var mouse = getMousePosition(mouseMoveEvent); // Sets EDITOR.mouseX&Y and EDITOR.canvasMouseX&Y
 		var mouseX = mouse.x;
 		var mouseY = mouse.y;
-		
 		var target = mouseMoveEvent.target;
+		
 		
 		//console.log("mouseY=" + mouseY);
 		
