@@ -15,6 +15,8 @@
 		
 		//console.warn(new Error("File loaded!").stack);
 		
+		if(!file.savedAs) return console.warn("encoding_converter.js currently do not suppor unsaved files!"); 
+		
 		var maxCharacters = 500; // Limit on how many characters to check for problems
 		var problem = false;
 		for(var i=0; i<Math.min(maxCharacters, file.text.length); i++) {
@@ -32,10 +34,17 @@
 		function problemFound(i) {
 			EDITOR.resizeNeeded(); // Just in case, to prevent weird look
 			EDITOR.renderNeeded(); // Render so the user can make a better decision whether to convert or not
-			if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + " ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
-				EDITOR.readFromDisk(file.path, false, "binary", fileRead);
+			if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + 
+			" ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
+				if(file.savedAs) EDITOR.readFromDisk(file.path, false, "binary", fileRead);
+				else {
+					var byteArr = stringToBytes(file.text);
+					var buffer = byteArr.map(function(b) {return String.fromCharCode(b);}).join("");
+					var text = decodeBytes(buffer, "cp1252"); // or cp1251
+					file.reload(text);
+				}
 			}
-
+			
 			function fileRead(err, path, buffer) {
 				// Todo: Detect the right encoding ... (probably impossibe)
 				if(err) throw err;
@@ -48,7 +57,6 @@
 		}
 		
 	}
-	
 	
 	function decodeBytes(bytes, encoding) {
 		var encodings= {

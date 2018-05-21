@@ -37,6 +37,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+convert charset when doing server httpGet
 
 Add app to chrome web store !?
 

@@ -86,6 +86,8 @@ API.httpGet = function httpGet(user, options, callback) {
 	req.end();
 	
 	function gotResp(resp) {
+		//resp.setEncoding('utf8');
+		
 		var data = "";
 		
 		resp.on('data', function(chunk) {
