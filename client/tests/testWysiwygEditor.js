@@ -559,7 +559,7 @@
 				});
 			});
 		}
-	}, 1);
+	});
 	
 	
 	function launchServe(opt, callback) {

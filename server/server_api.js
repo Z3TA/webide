@@ -58,8 +58,51 @@ API.hash = function hash(user, json, callback) {
 		})
 	}
 
-API.readLines = function readLines(user, json, callback) {
+API.httpGet = function httpGet(user, options, callback) {
+	var url = options.url;
+	
+	if(url == undefined) return callback(new Error("URL is needed!"));
+	
+	var loc = UTIL.getLocation(url);
+	
+	if(loc.protocol == "http") {
+		var reqModule = require("http");
+	}
+	else if(loc.protocol == "https") {
+		var reqModule = require("https");
+	}
+	else {
+		return callback(new Error("Unsupported protocol: " + loc.protocol + " in url=" + url));
+	}
+	
+	var req = reqModule.request(url, gotResp);
+	var gotError = null;
+	
+	req.on("error", function(err) {
+		callback(err);
+		gotError = true;
+	});
+	
+	req.end();
+	
+	function gotResp(resp) {
+		var data = "";
+		
+		resp.on('data', function(chunk) {
+			data += chunk;
+		});
+		
+		resp.on('end', function() {
+			if(!gotError) {
+				callback(null, data);
+			}
+		});
+	}
+	
+}
 
+API.readLines = function readLines(user, json, callback) {
+	
 	console.log("readLines: json=" + JSON.stringify(json)); 
 	
 	var path = user.translatePath(json.path);
@@ -79,21 +122,21 @@ API.readLines = function readLines(user, json, callback) {
 	var totalLines = 1; // The first line is line 1 (even if the file contains no line breaks)
 	var flush = false;
 	
-		if(!callback) {
-			throw new Error("No callback defined!");
-		}
+	if(!callback) {
+		throw new Error("No callback defined!");
+	}
 	
 	if(startLine < 1) return callback("start line can not be below line 1 (line 1 is the first line)");
 	if(startLine > endLine) return callback("start line can not be above end line!");
-		
+	
 	// todo: Support ftp/ftps and ftps !!?
 	
-		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
-			
+	if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
+		
 		return callback(new Error("readLines on ftp or ftps not yet supported!"));
 		
-			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
-				
+		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
+			
 				var c = user.remoteConnections[parse.hostname].client;
 				
 				console.log("Getting file from FTP server: " + parse.pathname);

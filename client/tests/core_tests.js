@@ -1569,6 +1569,24 @@
 		});
 	});
 	
+	EDITOR.addTest(function testUtilResolvePath(callback) {
+		
+		var R = UTIL.resolvePath;
+		
+		UTIL.assert(R("/foo/bar/", "baz"), "/foo/bar/baz");
+		UTIL.assert(R("/foo/bar/", "../baz"), "/foo/baz");
+		UTIL.assert(R("/foo/bar/", "../../baz"), "/baz");
+		UTIL.assert(R("/foo/bar/", "./baz"), "/foo/bar/baz");
+		
+		UTIL.assert(R("http://www.foo.com/foo/bar/", "/baz"), "http://www.foo.com/baz");
+		UTIL.assert(R("http://www.foo.com/foo/bar/", "/baz/"), "http://www.foo.com/baz/");
+		UTIL.assert(R("http://www.foo.com/foo/bar/", "../baz/"), "http://www.foo.com/foo/baz/");
+		UTIL.assert(R("http://www.foo.com/", "/baz"), "http://www.foo.com/baz");
+		
+		callback(true);
+		
+	}, 1);
+	
 	
 	function existFunctionWithName(functions, name) {
 		for(var i=0; i<functions.length; i++) {
@@ -1589,7 +1607,6 @@
 			throw new Error("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a }");
 		}
 	}
-	
 	
 	
 	

@@ -67,6 +67,11 @@ var UTIL = {
 			folderPath += delimiter;
 			//console.log("Added trailing slash to path=" + folderPath);
 		}
+		else {
+			// Prevent double traling flashes
+			while(folderPath.slice(-2) == delimiter+delimiter) folderPath = folderPath.slice(0,-1);
+		}
+		
 		return folderPath;
 	},
 	
@@ -1022,6 +1027,101 @@ else {
 		return path;
 	},
 
+	resolvePath: function resolveRelativePath(base, path) {
+		/*
+			Takes a relative path and returns a absolute path
+			
+			/foo/ + ../bar = /bar
+		*/
+		
+		console.log("resolvePath: base=" + base + " path=" + path);
+		
+		if(base.indexOf("://") != -1) {
+			console.log("Probably an url: base=" + base);
+			var loc = UTIL.getLocation(base);
+			var url = base.slice(0, base.lastIndexOf(loc.pathname));
+			base = loc.pathname;
+			console.log("new base=" + base + "");
+			if(url.indexOf("://") == -1) { // Sanity check
+				console.warn("url lost it's protocol!");
+				throw new Error("url=" + url + " (no protocol!) loc.pathname=" + loc.pathname);
+			}
+		}
+		
+		var delimiter = UTIL.getPathDelimiter(base);
+		
+		if(url) {
+			// Remove all ending delimiters from url so we can add one later and prevent double
+while(url.slice(-1) == delimiter) url = url.slice(0,-1);
+		}
+		
+		// Remode dublicate delimiters
+		while(base.indexOf(delimiter+delimiter) != -1) base = base.replace(delimiter+delimiter, delimiter);
+		while(path.indexOf(delimiter+delimiter) != -1) path = path.replace(delimiter+delimiter, delimiter);
+		
+		// Base should always start with a delimiter!
+		if(base.slice(0,1) != delimiter) base = delimiter + base;
+		
+		// Base should always end with a delimiter!
+		if(base.slice(-1) != delimiter) base = base + delimiter;
+		
+		console.log("base=" + base);
+		
+		var folders = base.split(delimiter);
+		
+		// Remove emty folders
+		var noEmtyFolders = [];
+		for (var i=0; i<folders.length; i++) {
+			if(folders[i] != "") noEmtyFolders.push(folders[i]);
+		}
+		folders = noEmtyFolders;
+		
+		console.log("folders=" + folders);
+		
+		if(path.charAt(0) == delimiter) {
+			// ex: /foo/bar
+			// resolve to root!
+			console.log("path=" + path + " is absolute!");
+			if(url) return url + path;
+			else return path;
+		}
+		else if(path.charAt(0) != ".") {
+			// ex: foo/bar
+			console.log("path=" + path + " is relative-absolute!");
+			if(url) return url + delimiter + UTIL.trailingSlash(base) + path;
+			else return base + path;
+		}
+		else if(path.charAt(0) == "." && path.charAt(1) == delimiter) {
+			// ex: ./foo
+			console.log("path=" + path + " is relative DOT absolute!");
+			path = path.slice(2); // Remove starting ./
+			if(url) return url + base + path;
+			else return base + path;
+		}
+		
+		while(path.slice(0,3) == ".." + delimiter) {
+			var popped = folders.pop();
+			console.log("popped " + popped);
+			path = path.slice(3);
+		}
+		
+		base = folders.join(delimiter);
+		if(base.length > 1) {
+			console.log("concatenating base");
+			var absolutePath = delimiter + base + delimiter + path;
+		}
+		else {
+			console.log("base is emty");
+			var absolutePath = delimiter + path;
+		}
+		
+		console.log("absolutePath=" + absolutePath);
+		
+		if(url) return url + absolutePath
+		else return absolutePath;
+		
+	},
+	
 	reIndexOf: function reIndexOf(reIn, str, startIndex) {
 		var re = new RegExp(reIn.source, 'g' + (reIn.ignoreCase ? 'i' : '') + (reIn.multiLine ? 'm' : ''));
 		re.lastIndex = startIndex || 0;

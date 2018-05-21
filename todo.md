@@ -37,18 +37,22 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+
 Add app to chrome web store !?
 
 Add something that distinguish the editor from other editors, that you can see on first look.
 For example animations !? Exploding letters when you delete !?
 
 
-idea: Able to "fork" any web page !? An extension with for button, that downloads assents and open the site in the editor !?
-inspired by codepen: http://cdpn.io/FpiJw 
+
 
 
 todo
 ----
+
+Make encoding_converter.js plugin not require reloading from disk, so we can convert unsaved files.
+
+Piping to the edito. Send stdin stream to server, that sends to the client !?
 
 debug: Editor freaks out when trying to scroll (first scroll up -negative row) bundle.htm
 
@@ -2241,6 +2245,11 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+idea: performance regression tests:
+Check out each commit and run a bunch on stuff, like edit small and big files.
+Nuke console.log and save all results of console.time
+
 Double-clicking on a word in a large file is slow !! Try double clicking on EDITOR in EDITOR.js
 
 Check js_parser for performance regressions to figure out how to optimize, did anything added slow it down ?
