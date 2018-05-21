@@ -32,7 +32,8 @@
 				var url = stored.url;
 				if(url) server = {url: url};
 				
-				if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser") {
+				if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser" && 
+				window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
 					console.log("First time we run the editor! Go directly to signup page.");
 					window.onbeforeunload = null;
 					document.location = "/signup/signup.html";
