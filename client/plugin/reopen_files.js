@@ -12,6 +12,9 @@
 		Reset from bricket state:
 		EDITOR.localStorage.removeItem("openedFiles")
 	
+		Problem: How to do regression tests for this plugin !?
+		
+		
 	*/
 
 	if(QUERY_STRING["embed"]) return;
@@ -83,8 +86,7 @@
 
 	
 	function reopenFiles() {
-
-		console.log("reopenFiles!");
+console.log("reopenFiles!");
 		
 		if(reopenFilesCalled) {
 			// Happens when you get disconnected, and storageReady is called.
@@ -113,20 +115,18 @@
 		serverUser = CLIENT.user;
 		
 		if(firstRun) {
-			
 			EDITOR.on("fileOpen", addToOpenedFiles, 1);
-			
 			EDITOR.on("fileClose", removeFromOpenedFiles, 1);
 		}
 		
 		firstRun = false;
 		
 		reopenFilesMain(function allFilesHaveReopened() {
-			
 			// Save state when exiting the editor
 			EDITOR.on("exit", saveStateOfOpenFiles);
 			
 			// Save state on regular intervals in case the editor crashes (or refresh)
+			console.log("Started saveStateIntervalTimer");
 			saveStateIntervalTimer = setInterval(function() {
 				saveStateOfOpenFiles(function(err) {
 					if(err) {
@@ -140,13 +140,8 @@
 			insaneBugCatcherInterval = setInterval(insaneBugCatcher, 1000);
 			
 			console.log("reopenFiles: All files reopened!");
-			
-		});
-		
-		
-		
-	}
-	
+			});
+		}
 	
 	function reopenFilesMain(reopenFilesCallback) {
 		
@@ -200,16 +195,13 @@
 			if(err) {
 				if(err.code === 'ENOENT') {
 					// File did not exist, and the user did not want to load the last state. 
-					// It has also been removed from localStorage.getItem("openedFiles")
-					compareAndDone();
-					return;
+					// It has also been removed from openedFiles storage
 				}
 				else console.warn(err.message);
 				
-				// We should aready got a confirm box about this ...
-				return;
-				
-			}
+				return compareAndDone();
+				}
+			
 			console.log("we now have it open: file.path=" + file.path);
 			
 			if(wasCurrent) setCurrent = file.path;
@@ -266,7 +258,7 @@
 		
 		function openFile(path, callback) {
 			
-			if(!callback) throw "Internal error: Expected a callback!";
+			if(!callback) throw new Error("Internal error: Expected a callback!");
 			
 			var content;
 			var notFound = false;
@@ -340,6 +332,8 @@
 				
 				function open() {
 					
+					console.log("open file path=" + path);
+					
 					if(lastFileState) {
 					
 						if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved. Because it was "Not found" or "Emty on disk"
@@ -350,26 +344,23 @@
 							content = lastFileState.text;
 							
 							if(typeof content != "string") {
-								console.warn("The content of lastFileState.path=" + lastFileState.path + " is '" + content + "'. It will not be reopened!");
+								var contentError = new Error("The content of lastFileState.path=" + lastFileState.path + " is '" + content + "'. It will not be reopened!");
+								removeFromOpenedFiles(path, function(err) {
+									if(err) throw err;
+									callback(path, false, contentError);
+								});
 								return;
 							}
-							
-						}
+							}
 						else if(notFound) {
 							// The file was not found and the user didn't want to load last state
 							// Do not open it! Remove from openedFiles
-							EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
+							
+							removeFromOpenedFiles(path, function(err) {
 								if(err) throw err;
-								if(openedFilesString == null) openedFilesString = "";
-								openedFilesString = removeFromStringList(openedFilesString, path, fileDelimiter);
-								EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
-									// Should we remove the state!?
-									EDITOR.localStorage.removeItem("state_" + path, function(err) {
-										if(err) throw err;
-										callback(path, false, getFileSizeError);
-									});
-								});
+								callback(path, false, getFileSizeError);
 							});
+							
 							return; // Don't attempt to open the file
 						}
 					}
@@ -391,8 +382,8 @@
 				
 				console.log("Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
 				
-				if(openFileError) console.log("openFileError.path=" + openFileError.path);
-				if(file) console.log("file.path=" + file.path);
+				if(openFileError) console.log("fileReopened openFileError.path=" + openFileError.path);
+				if(file) console.log("fileReopened file.path=" + file.path);
 				
 				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
 				
@@ -442,6 +433,7 @@
 				else updateLastSate();
 				
 				function updateLastSate() {
+					console.log("updateLastSate path=" + path);
 				if(lastFileState) {
 					console.log("lastFileState.partStartRow=" + lastFileState.partStartRow + "");
 					
@@ -622,26 +614,40 @@
 	
 	
 	
-	function removeFromOpenedFiles(file) {
+	function removeFromOpenedFiles(filePath, callback) {
 		// Called when the editor close a file
-		if(!file.path) {
-			throw new Error("Argument need to be a file object!");
-		}
+		if(filePath instanceof File) filePath = filePath.path;
 		
-		console.log(UTIL.getStack("Removing file from openedFiles path='" + file.path + "'"));
+		console.log(UTIL.getStack("Removing file from openedFiles path='" + filePath + "'"));
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
+			if(err) {
+				if(callback) return callback(err);
+				else throw err;
+			}
 			
 			console.log("List before=" + openedFilesString);
-			openedFilesString = removeFromStringList(openedFilesString, file.path, fileDelimiter);
+			openedFilesString = removeFromStringList(openedFilesString, filePath, fileDelimiter);
 			console.log("List after=" + openedFilesString);
 			EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
-
+				if(err) {
+					if(callback) return callback(err);
+					else throw err;
+				}
+				
 				// Remove state
-				EDITOR.localStorage.removeItem("state_" + file.path, function(err) {
-					if(err) throw err;
+				EDITOR.localStorage.removeItem("state_" + filePath, function(err) {
+					if(err) {
+						if(callback) return callback(err);
+						else throw err;
+					}
 					findBugs(false, function(err) {
-						console.log("File removed from opened files: path=" + file.path);
+						if(err) {
+							if(callback) return callback(err);
+							else throw err;
+						}
+						console.log("File removed from opened files: path=" + filePath);
+						if(callback) callback(null);
 					});
 				});
 			});
@@ -693,7 +699,7 @@ if(openedFilesString == null || openedFilesString == "") {
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		//console.log("Saving state for: " + path);
+		console.log("Saving state for: " + path);
 		
 		if(path.length == 0) {
 			fundBugs(false, function(err, openedFilesString) {
