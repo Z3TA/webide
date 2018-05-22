@@ -19,6 +19,7 @@
     "diff": "^2.2.3",
     "ftp": "https://github.com/Z3TA/node-ftp/tarball/master",
     "http-proxy": "^1.16.2",
+    "iconv-lite": "git+https://git@github.com/Z3TA/iconv-lite.git",
     "iroh": "https://github.com/Z3TA/Iroh/tarball/a45218b13ce9754a2429817923ad749d7c49658d",
     "ncp": "^2.0.0",
     "nodemailer": "^2.6.4",

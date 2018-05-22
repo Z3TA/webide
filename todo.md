@@ -37,7 +37,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-convert charset when doing server httpGet
 
 Add app to chrome web store !?
 
@@ -47,9 +46,15 @@ For example animations !? Exploding letters when you delete !?
 
 
 
-
 todo
 ----
+
+use server storage for reopen files. !? ...
+Server storage always makes a local storage copy. when online, also query local storage and compare date stamp. Use the newest.
+if the local copy is newer, update the server storage. !??
+
+
+regression bug on reopened files. It's not saving state at all! And can't reopen unsaved files. And some big files (EDITOR.js) is not reopened.
 
 Make encoding_converter.js plugin not require reloading from disk, so we can convert unsaved files.
 

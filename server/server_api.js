@@ -3,6 +3,8 @@
 
 // Need to require non native modules here before we are chrooted
 
+var iconv = require('iconv-lite');
+
 var UTIL = require("../client/UTIL.js");
 
 var FTP = require('ftp');
@@ -88,19 +90,63 @@ API.httpGet = function httpGet(user, options, callback) {
 	function gotResp(resp) {
 		//resp.setEncoding('utf8');
 		
-		var data = "";
+		var data = [];
 		
-		resp.on('data', function(chunk) {
-			data += chunk;
-		});
-		
-		resp.on('end', function() {
-			if(!gotError) {
-				callback(null, data);
+		resp.on('data', respData);
+		resp.on('end', respEnd);
+
+function respData(chunk) {
+			data.push(chunk);
+		}
+
+function respEnd() {
+if(gotError) return;
+			
+			
+			var buffer = Buffer.concat(data);
+			var body = buffer.toString('utf8');
+			
+			// Detect encoding
+			console.log("Headers: " + JSON.stringify(resp.headers));
+			
+			if(resp.headers.hasOwnProperty("content-type")) {
+				// Ex: Content-Type: text/html; charset=utf-8
+				var matchCharset = resp.headers["content-type"].match(/charset=([^;]*)/i);
+				if(matchCharset) {
+					var charset = matchCharset[1].trim().toLowerCase();
+				}
 			}
-		});
+			
+			if(!charset) {
+				var matchCharset = body.match(/charset\s*=\s*["']([^'"]*)["']/i); // ex:  <meta charset="UTF-8">
+				if(matchCharset) {
+					var charset = matchCharset[1].trim().toLowerCase();
+				}
+			}
+			
+			if(!charset) {
+				var matchCharset = body.match(/charset=([^;'"]*)/i); // ex:  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+				if(matchCharset) {
+					var charset = matchCharset[1].trim().toLowerCase();
+				}
+			}
+			
+			if(charset && !(charset == "utf-8" || charset == "utf8")) {
+				console.log("Detected charset=" + charset);
+				
+				console.log("iconv.encodingExists('" + charset + "')=" + iconv.encodingExists(charset));
+				
+				if(!iconv.encodingExists(charset)) {
+					gotError = true;
+					return callback(new Error("Unable to decode charset=" + charset));
+				}
+				else {
+					body = iconv.decode(buffer, charset);
+				}
+			}
+			callback(null, body);
+		}
 	}
-	
 }
 
 API.readLines = function readLines(user, json, callback) {
@@ -139,32 +185,32 @@ API.readLines = function readLines(user, json, callback) {
 		
 		if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 			
-				var c = user.remoteConnections[parse.hostname].client;
+			var c = user.remoteConnections[parse.hostname].client;
+			
+			console.log("Getting file from FTP server: " + parse.pathname);
+			
+			c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
 				
-				console.log("Getting file from FTP server: " + parse.pathname);
+				if(err) throw err;
 				
-				c.get(parse.pathname, function getFtpFileStream(err, fileReadStream) {
-					
-					if(err) throw err;
-					
-					console.log("Reading file from FTP ...");
-					
-					console.log(fileReadStream);
-					
-					stream = fileReadStream;
-					
-					stream.setEncoding('utf8');
-					stream.on('readable', readStream);
-					stream.on("end", streamEnded);
-					stream.on("error", streamError);
-					stream.on("close", streamClose);
-					
-					// Hmm it seems the FTP module uses "old" streams:
-					var StringDecoder = require('string_decoder').StringDecoder;
-					var decoder = new StringDecoder('utf8');
-					var str;
-					stream.on('data', function(data) {
-						str = decoder.write(data);
+				console.log("Reading file from FTP ...");
+				
+				console.log(fileReadStream);
+				
+				stream = fileReadStream;
+				
+				stream.setEncoding('utf8');
+				stream.on('readable', readStream);
+				stream.on("end", streamEnded);
+				stream.on("error", streamError);
+				stream.on("close", streamClose);
+				
+				// Hmm it seems the FTP module uses "old" streams:
+				var StringDecoder = require('string_decoder').StringDecoder;
+				var decoder = new StringDecoder('utf8');
+				var str;
+				stream.on('data', function(data) {
+					str = decoder.write(data);
 						fileContent += str;
 						console.log('loaded part of the file');
 					});
