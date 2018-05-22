@@ -37,6 +37,7 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+reconnect loop kills browser
 
 Add app to chrome web store !?
 
@@ -522,6 +523,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+When removing lines using backspace, function locations doesn't seem to be updated!
 
 Doesn't reopen big files when closing/reloading the editor!
 

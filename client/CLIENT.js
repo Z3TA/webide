@@ -20,8 +20,13 @@ var CLIENT = {}; // Client object is global
 	var cache = {};
 	var connection = {readyState: 0};
 	var loggedIn = null;
+	var reconnectTimeoutOriginal = 2000;
+	var reconnectTimeout = reconnectTimeoutOriginal;
+	var reconnectTimeout;
 	
 	CLIENT.connected = false;
+	
+	var checkEditorInterval = setInterval(checkEditor);
 	
 	CLIENT.connect = function(server, callback) {
 		
@@ -72,6 +77,8 @@ var CLIENT = {}; // Client object is global
 			callback = null; // Prevent calling the connect callback when connection is closed after a successful onopen
 			
 			CLIENT.fireEvent("connectionConnected");
+			
+			reconnectTimeout = reconnectTimeoutOriginal;
 			
 			function loggedIn(err, resp) {
 				if(err) {
@@ -171,14 +178,16 @@ var CLIENT = {}; // Client object is global
 			
 			// Attempt to reconnect ...
 			
-			setTimeout(function reconnect() {
+			reconnectTimeout = setTimeout(function reconnect() {
 				
 				if(CLIENT.connected) return;
 				
 				console.log("Reconnecting to server=" + JSON.stringify(server));
 				CLIENT.connect(server);
 				
-			}, 2000);
+			}, reconnectTimeout);
+			
+			reconnectTimeout += 1000;
 			
 		}
 		
@@ -318,6 +327,26 @@ var CLIENT = {}; // Client object is global
 		}
 		
 	}
+	
+	function checkEditor() {
+		// Wait for editor to load and then attach events for afk
+		if(EDITOR) {
+			clearInterval(checkEditorInterval);
+			
+			EDITOR.on("afk", function increaseReconnectTime() {
+				if(!CLIENT.connected) reconnectTimeout += 10000;
+			});
+			
+			EDITOR.on("btk", function tryReconnectAndUpdateReconnectTime() {
+				reconnectTimeout = reconnectTimeoutOriginal;
+				if(!CLIENT.connected) {
+					clearTimeout(reconnectTimeout);
+					CLIENT.connect(server);
+				}
+			});
+		}
+	}
+	
 	
 	console.log("End of CLIENT.js");
 	

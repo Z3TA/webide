@@ -122,6 +122,8 @@ EDITOR.collaborationMode = false;
 
 
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
+	afk: [], // Away from keyboard
+	btk: [], // Back to keyboard
 	fileClose: [], 
 	fileOpen: [], 
 	fileHide: [],
@@ -202,6 +204,10 @@ EDITOR.lastTimeInteraction = new Date();
 	var keyBindings = []; // Push objects {char, charCode, combo dir, fun} for key events
 	
 	var executeOnNextInteraction = [];
+	
+	var afk = false; // Not away from keyboard
+	var afkTimeout = 5000; // How long time since last interaction to fire afk event
+	var mainLoopInterval;
 	
 	var lastKeyDown = 0;
 	var tildeActive = false;
@@ -2576,6 +2582,13 @@ if(callback) return callback(err, path);
 		
 		nextInteractionFunctions();
 		
+		if(afk) {
+			afk = false;
+EDITOR.fireEvent("btk");
+			console.log("Setting mainLoopInterval because btk!");
+			mainLoopInterval = setInterval(resizeAndRender, 16); // Start main loop
+		}
+		
 		EDITOR.lastTimeInteraction = new Date();
 		
 		if(EDITOR.eventListeners.interaction.length > 0) {
@@ -4663,11 +4676,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 					
 				}
 			}
-			
-			
-			
-		});
-		
+			});
 		
 		EDITOR.on("moveCaret", function mirrorCaretMovement(file, caret) {
 			
@@ -4687,14 +4696,10 @@ CLIENT.cmd("mirror", {
 			
 		});
 		
-		
 		getVersion(function(version) {
-			
 			console.log("Editor version: " + version);
-			
 			bootstrap();
-			
-		});
+			});
 		
 		canvas = document.getElementById("canvas");
 		
@@ -4715,8 +4720,6 @@ CLIENT.cmd("mirror", {
 		virtualKeyboardGroups.appendChild(virtualKeyboard.misc.el);
 		
 		EDITOR.virtualKeyboard.hide();
-		
-		
 		
 		canvas.onpaste = function() {alert("paste canvas");};
 		
@@ -4848,14 +4851,10 @@ CLIENT.cmd("mirror", {
 			
 		}, false);
 		
-		
 		var body = document.getElementById('body');
-		
-		
 		
 		// Attatch CLIENT listeners before plugins and start events load
 		CLIENT.on("loginSuccess", function loggedInToServer(login) {
-			
 			EDITOR.user = login.user;
 			
 			EDITOR.installDirectory = login.installDirectory || "/";
@@ -4887,22 +4886,12 @@ CLIENT.cmd("mirror", {
 					fun = EDITOR.eventListeners.storageReady[i].fun;
 					fun(_serverStorage);
 				}
-				
+				});
 			});
-			
-		});
 		
 		CLIENT.on("connectionLost", function() {
-			
 			EDITOR.user = null;
-			
-		});
-		
-		
-		
-		
-		
-		
+			});
 		
 		//console.log("main function loaded");
 		
@@ -4937,8 +4926,6 @@ CLIENT.cmd("mirror", {
 		}
 		calledStartListeners = true;
 		
-		
-		
 		// Sort and load plugins
 		EDITOR.plugins.sort(function(a, b) {
 			if(a.order < b.order) {
@@ -4968,7 +4955,6 @@ CLIENT.cmd("mirror", {
 				alertBox('Failed to (fully) load plugin:\n<i>"' + EDITOR.plugins[i].desc + '"</i>\nError: ' + err.message);
 			}
 		}
-		
 		
 		// Add the virtual keyboard menu item after the plugins so it will be placed low in the menu
 		var virtualKeyboardMenuItem = EDITOR.addMenuItem("Virtual Keyboard", toggleVirtualKeyboard); // Add items to the canvas context menu
@@ -5021,7 +5007,6 @@ CLIENT.cmd("mirror", {
 			httpClient.on("data", stdIn);
 			httpClient.on("end", stdEnd);
 			
-			
 			// Command arguments
 			var gui = require('nw.gui');
 			var commandArguments = gui.App.argv;
@@ -5031,7 +5016,6 @@ CLIENT.cmd("mirror", {
 			if(commandArguments.indexOf("--disable-lcd-text") != -1) {
 				EDITOR.settings.sub_pixel_antialias = false;
 			}
-			
 			
 			// Menu test:
 			// https://github.com/nwjs/nw.js/wiki/Window-menu
@@ -5056,15 +5040,10 @@ CLIENT.cmd("mirror", {
 				
 				gui.Window.get().menu = menu;
 			*/
-			
-		}
+			}
 		
-		
-		
-		
-		setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
-		
-		
+		console.log("Setting mainLoopInterval because first load!");
+		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 		
 		// note to self: Just temorary, dont forget to remove:
 		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
@@ -5092,8 +5071,6 @@ CLIENT.cmd("mirror", {
 		*/
 		
 		windowLoaded = true;
-		
-		
 		
 		function stdIn(data) {
 			
@@ -5901,7 +5878,7 @@ CLIENT.cmd("mirror", {
 	}
 	
 	function resizeAndRender() {
-		
+		//console.warn("resizeAndRender");
 		// Only do the resize or render if it's actually needed
 		
 		if(EDITOR.shouldResize) EDITOR.resize();
@@ -5912,8 +5889,14 @@ CLIENT.cmd("mirror", {
 		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
 		
 		// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
+		
+		if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
+			afk = true;
+			EDITOR.fireEvent("afk");
+			// Try do do as little as possible to save power
+			clearInterval(mainLoopInterval);
+		}
 	}
-	
 	
 	function keyIsDown(keyDownEvent) {
 		/*
