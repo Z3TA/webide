@@ -2615,6 +2615,8 @@ EDITOR.fireEvent("btk");
 	
 	EDITOR.fireEvent = function(eventName, args, callback) {
 		
+		if(args == undefined) args = [];
+		
 		console.log("Firing event: " + eventName);
 		
 		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) {
@@ -2655,8 +2657,9 @@ EDITOR.fireEvent("btk");
 				var ret = func.apply(this, fargs);
 			}
 			catch(err) {
-				console.log("Error in fName=" + fName + " err.message=" + err.message);
+				console.warn("Error in fName=" + fName + " err.message=" + err.message);
 				returns[fName] = err;
+				if(!callback) throw err;
 				return;
 			}
 			

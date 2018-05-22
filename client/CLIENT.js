@@ -20,9 +20,10 @@ var CLIENT = {}; // Client object is global
 	var cache = {};
 	var connection = {readyState: 0};
 	var loggedIn = null;
-	var reconnectTimeoutOriginal = 2000;
-	var reconnectTimeout = reconnectTimeoutOriginal;
+	var reconnectTimeoutTimeOriginal = 2000;
+	var reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 	var reconnectTimeout;
+	var lastUsedserver = null;
 	
 	CLIENT.connected = false;
 	
@@ -67,6 +68,8 @@ var CLIENT = {}; // Client object is global
 			CLIENT.connected = true;
 			CLIENT.url = url;
 			
+			lastUsedserver = server;
+			
 			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
 			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
 			
@@ -78,7 +81,8 @@ var CLIENT = {}; // Client object is global
 			
 			CLIENT.fireEvent("connectionConnected");
 			
-			reconnectTimeout = reconnectTimeoutOriginal;
+			console.log("Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
+			reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 			
 			function loggedIn(err, resp) {
 				if(err) {
@@ -179,15 +183,15 @@ var CLIENT = {}; // Client object is global
 			// Attempt to reconnect ...
 			
 			reconnectTimeout = setTimeout(function reconnect() {
-				
 				if(CLIENT.connected) return;
 				
-				console.log("Reconnecting to server=" + JSON.stringify(server));
+				console.log("Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
 				CLIENT.connect(server);
 				
-			}, reconnectTimeout);
+			}, reconnectTimeoutTime);
 			
-			reconnectTimeout += 1000;
+			reconnectTimeoutTime += 1000;
+			console.log("Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because many attempts");
 			
 		}
 		
@@ -329,19 +333,25 @@ var CLIENT = {}; // Client object is global
 	}
 	
 	function checkEditor() {
-		// Wait for editor to load and then attach events for afk
-		if(EDITOR) {
+		console.log("Wait for editor to load and then attach events for afk2");
+		if(typeof EDITOR != "undefined" && typeof EDITOR.on == "function") {
+			console.log("Editor loaded. Attaching afk and btk events!");
 			clearInterval(checkEditorInterval);
 			
 			EDITOR.on("afk", function increaseReconnectTime() {
-				if(!CLIENT.connected) reconnectTimeout += 10000;
+				if(!CLIENT.connected) {
+reconnectTimeoutTime += 10000;
+					console.log("Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
+				}
 			});
 			
 			EDITOR.on("btk", function tryReconnectAndUpdateReconnectTime() {
-				reconnectTimeout = reconnectTimeoutOriginal;
+				console.log("Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because btk");
+				reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 				if(!CLIENT.connected) {
 					clearTimeout(reconnectTimeout);
-					CLIENT.connect(server);
+					console.log("Attempting connect after btk");
+					CLIENT.connect(lastUsedserver);
 				}
 			});
 		}
