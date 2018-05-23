@@ -2661,7 +2661,7 @@ var File; // File object is global
 						found = true;
 						break main;
 					}
-					else console.log("grid[" + row + "].startIndex < " + index);
+					//else console.log("grid[" + row + "].startIndex < " + index);
 					
 					for(var col=0; col<grid[row].length; col++) {
 						
