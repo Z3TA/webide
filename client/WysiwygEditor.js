@@ -419,9 +419,12 @@ var WysiwygEditor;
 			//else throw error; 
 		}
 		
+		// Make it visible (scrollIntoView), or elementFromPoint(x, y) will fail !
+		
 		if(baseNode.nodeType == Node.TEXT_NODE) {
 			// Measure the parent node (can't measure text nodes)
 			var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
+			parentNode.scrollIntoView();
 			var pos = parentNode.getBoundingClientRect();
 			console.log("parentNode:");
 			console.log(parentNode);
@@ -429,6 +432,7 @@ var WysiwygEditor;
 		}
 		else if(baseNode.nodeType == Node.ELEMENT_NODE) {
 			// The node probably don't have any text yet
+			baseNode.scrollIntoView();
 			var pos = baseNode.getBoundingClientRect();
 			console.log("baseNode:");
 			console.log(baseNode);
@@ -522,14 +526,34 @@ var WysiwygEditor;
 		var doc = previewWin.window.document;
 		var element = doc.elementFromPoint(x, y);
 		
-		if(element == null) {
-			alertBox("Unable to get element on x=" + x + " y=" + y);
+		if(element == null) { // Will probably cause the care to be placed at the top of the document which is very annoying!
+			
+			console.warn("Unable to get element on x=" + x + " y=" + y);
+			alertBox("Unable to get element on x=" + x + " y=" + y + " in order to place caret in contentEditable!");
+			
+			// Take focus away from the contentEditable
+			var body = doc.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
+			body.blur();
+			// The above takes focus away from the contentEditable
+			// Keep writing in editors text area !?
+			// But how do we get focus on the editor window so it can detect key strokes !?
+			// https://stackoverflow.com/questions/6910278/how-to-return-focus-to-the-parent-window-using-javascript
+			var goBack = previewWin.window.open('', 'editor'); // editor is window.name
+			goBack.focus();
+			
+			// Additional key strokes should now register in the editor (code area)
+			// The location of the caret might be a bit off though
+			// If we show an alert EDITOR.input will be set to false!
+			// So don't give input in order to prevent additional characters to be inserted.
+			//EDITOR.input = true;
+			
 			return false;
 		}
 		else {
 			var childNode = element.childNodes[0]; // The text node
 			
 			return wysiwygEditor.placeCaretOnTextNode(childNode, charPos);
+			
 		}
 	}
 	
@@ -983,6 +1007,7 @@ var WysiwygEditor;
 		var sourceFile = wysiwygEditor.sourceFile;
 		var previewWin = wysiwygEditor.previewWin;
 		var ignoreTransform = wysiwygEditor.ignoreTransform;
+		var placeCaretSuccess = true;
 		
 		if(!previewWin) throw new Error("The content-editable window is gone!");
 		
@@ -1006,6 +1031,8 @@ var WysiwygEditor;
 			var prevBody = previewWin.window.document.getElementsByTagName(wysiwygEditor.bodyTagPreview)[0];
 			var prevBodyHtml = wysiwygEditor.getContentEditableCode();
 			
+			
+			
 			/*
 				
 				problem 1: Contenteditable produce mangled/garbled HTML code. 
@@ -1026,6 +1053,7 @@ var WysiwygEditor;
 				
 				console.log("prevBodyHtml=\n" + UTIL.debugWhiteSpace(prevBodyHtml) + "\n");
 				console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
+				console.log("diff=" + JSON.stringify(UTIL.textDiff(prevBodyHtml, sanitized)));
 				
 				/*
 					Problem: contenteditable will lose the caret when the html is updated, 
@@ -1042,7 +1070,10 @@ var WysiwygEditor;
 				
 				console.log("caretPosition: " + JSON.stringify(caretPosition));
 				
-				if(caretPosition) wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
+				if(caretPosition) {
+					placeCaretSuccess = wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
+					console.log("placeCaretSuccess=" + placeCaretSuccess);
+				}
 				
 				console.log("Sanitized garbage from WYSIWYG");
 				
@@ -1106,15 +1137,15 @@ var WysiwygEditor;
 			var col = -1;
 			var text = "";
 			
-			console.log("diff.removed=" + JSON.stringify(diff.removed, null, 2));
-			console.log("diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
+			//console.log("diff.removed=" + JSON.stringify(diff.removed, null, 2));
+			//console.log("diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 			
 			//console.log("source:" + UTIL.lbChars(wysiwygEditor.sourceFile.text));
-			console.log("srcBodyHtml: " + UTIL.lbChars(srcBodyHtml));
-			console.log("prevBodyHtml: " + UTIL.lbChars(prevBodyHtml));
+			//console.log("srcBodyHtml: " + UTIL.lbChars(srcBodyHtml));
+			//console.log("prevBodyHtml: " + UTIL.lbChars(prevBodyHtml));
 			
-			console.log("source before:");
-			for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+			//console.log("source before:");
+			//for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 			
 			// Apply the transformation to the source code ...
 			var removedText = "";
@@ -1197,7 +1228,7 @@ var WysiwygEditor;
 					linesToBeRemoved.push(diff.removed[i].row);
 				}
 				
-				console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
+				//console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 			}
 			
 			// Add lines left to be inserted before removing removed lines (backwards)
@@ -1227,10 +1258,10 @@ var WysiwygEditor;
 			}
 			
 			//console.log("source after:" + UTIL.lbChars(wysiwygEditor.sourceFile.text));
-			console.log("source after:");
-			for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+			//console.log("source after:");
+			//for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 			
-			console.log("source code body after:" + UTIL.lbChars(wysiwygEditor.getSourceCodeBody()));
+			//console.log("source code body after:" + UTIL.lbChars(wysiwygEditor.getSourceCodeBody()));
 			
 			// after the transformation: Update what should be ignored again ? Nope
 			
@@ -1250,9 +1281,11 @@ var WysiwygEditor;
 			// We don't want to take away focus from the content-editable
 		}
 		
+		if(placeCaretSuccess) {
 		// Focus the content-edit window
 		wysiwygEditor.previewWin.focus();
 		EDITOR.input = false;
+		}
 		
 		console.timeEnd("previewInput");
 		
@@ -2388,12 +2421,32 @@ var WysiwygEditor;
 		// Can not change the file in a fileChange event or it would create an endless loop
 		// Witch means we can not sanitize on source code changes,
 		// witch also means we can not sanitize on content-editable canges! WHY??!! It should work!
+		// Also note that the location of the node the caret/cursor is in needs to be at the same place! Or it will not be able to replace the caret after the sanitiazion!
 		
-		html = insertLineBreaks(html, LB)
+		html = insertLineBreaks(html, LB);
 		
 		return html;
 	}
 	
+	function insertLineBreaks2(html, LB) {
+		/*
+			The goal of this function is to insert white space to make the HTML easier to read.
+			And to keep the position of the elements the same
+			
+		*/
+		
+		// Make sure there are at least two line breaks between each p-tag <p>foo</p><p>bar</p>
+		
+		if(LB != "\n") throw new Error("Line break convention now supported: " + UTIL.lbChars(LB));
+		
+		html = html.replace(/<\/p><p/gi, "</p>" + LB + LB + "<p");
+		
+		//html = html.replace(/<\/tr><tr/gi, "</tr>" + LB + "<tr");
+		//html = html.replace(/<\/td><td/gi, "</td>" + LB + "<td");
+		//html = html.replace(/<\/th><th/gi, "</th>" + LB + "<th");
+		
+		return html;
+	}
 	
 	function insertLineBreaks(html, LB) {
 		

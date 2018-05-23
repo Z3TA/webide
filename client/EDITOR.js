@@ -4667,6 +4667,8 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 		
 		console.log("Starting the editor ...");
 		
+		window.name = "editor"; // For focus access
+		
 		//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
 		
 		CLIENT.on("mirror", function clientMirror(json) {
