@@ -76,6 +76,8 @@
 			EDITOR.removeEvent("fileOpen", addToOpenedFiles);
 			EDITOR.removeEvent("fileClose", removeFromOpenedFiles);
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
+			EDITOR.removeEvent("afk", stopSavingState);
+			EDITOR.removeEvent("btk", continueSavingState);
 			
 			clearInterval(saveStateIntervalTimer);
 			
@@ -118,17 +120,8 @@ console.log("reopenFiles!");
 			EDITOR.on("fileOpen", addToOpenedFiles, 1);
 			EDITOR.on("fileClose", removeFromOpenedFiles, 1);
 			
-			EDITOR.on("afk", function stopSavingState() {
-				console.log("Stopping saveStateIntervalTimer because afk!");
-				clearInterval(saveStateIntervalTimer);
-				return true;
-			});
-			
-			EDITOR.on("btk", function continueSavingState() {
-				console.log("Starting saveStateIntervalTimer because back to keyboard!");
-				saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
-				return true;
-			});
+			EDITOR.on("afk", stopSavingState);
+			EDITOR.on("btk", continueSavingState);
 		}
 		
 		firstRun = false;
@@ -659,6 +652,18 @@ console.log("reopenFiles!");
 		});
 	}
 	
+	function stopSavingState() {
+		console.log("Stopping saveStateIntervalTimer because afk!");
+		clearInterval(saveStateIntervalTimer);
+		return true;
+	}
+	
+	function continueSavingState() {
+		console.log("Starting saveStateIntervalTimer because back to keyboard!");
+		saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
+		return true;
+	}
+	
 	function saveStateOfOpenFiles(callback) {
 		// Called when the editor closes, and at an time interval
 		console.log("saveStateOfOpenFiles!");
@@ -702,8 +707,6 @@ if(openedFilesString == null || openedFilesString == "") {
 				});
 			}
 		});
-		
-		return true;
 	}
 	
 	function saveSate(path, callback) {
