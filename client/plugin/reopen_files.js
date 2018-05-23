@@ -117,6 +117,18 @@ console.log("reopenFiles!");
 		if(firstRun) {
 			EDITOR.on("fileOpen", addToOpenedFiles, 1);
 			EDITOR.on("fileClose", removeFromOpenedFiles, 1);
+			
+			EDITOR.on("afk", function stopSavingState() {
+				console.log("Stopping saveStateIntervalTimer because afk!");
+				clearInterval(saveStateIntervalTimer);
+				return true;
+			});
+			
+			EDITOR.on("btk", function continueSavingState() {
+				console.log("Starting saveStateIntervalTimer because back to keyboard!");
+				saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
+				return true;
+			});
 		}
 		
 		firstRun = false;
@@ -127,14 +139,7 @@ console.log("reopenFiles!");
 			
 			// Save state on regular intervals in case the editor crashes (or refresh)
 			console.log("Started saveStateIntervalTimer");
-			saveStateIntervalTimer = setInterval(function() {
-				saveStateOfOpenFiles(function(err) {
-					if(err) {
-						clearInterval(saveStateIntervalTimer);
-						console.warn(err.message);
-					}
-				});
-			}, saveStateInterval);
+			saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
 			
 			// Catch bugs
 			insaneBugCatcherInterval = setInterval(insaneBugCatcher, 1000);
@@ -657,18 +662,22 @@ console.log("reopenFiles!");
 	function saveStateOfOpenFiles(callback) {
 		// Called when the editor closes, and at an time interval
 		console.log("saveStateOfOpenFiles!");
-		if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
+		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
 		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 if(openedFilesString == null || openedFilesString == "") {
 				console.warn("No open files!?");
-				return callback(null);
+				if(callback) callback(null);
+				return;
 			}
 			else {
 				findBugs(true, function(err, openedFilesString) { // true == also check if the list match EDITOR.files
-					if(err) return callback(err);
+					if(err) {
+						if(callback) callback(err);
+						return;
+					}
 					
 					var openFiles = openedFilesString.split(fileDelimiter);
 					var statesSaved = 0;
@@ -681,18 +690,20 @@ if(openedFilesString == null || openedFilesString == "") {
 							saveSate(openFiles[i], stateSaved);
 						}
 					}
-					else callback(null);
+					else if(callback) callback(null);
 					
 					function stateSaved(err, path) {
 						if(err) console.warn("Problem saving state for path=" + path + ": " + err.message);
 						if(++statesSaved == openFiles.length) {
 							console.log("Done saving state!");
-							callback(null);
+							if(callback) callback(null);
 						}
 					}
 				});
 			}
 		});
+		
+		return true;
 	}
 	
 	function saveSate(path, callback) {
