@@ -67,7 +67,6 @@
 		var animationFunction = createAnimation(left, top, width, height, pixels, EDITOR.animationFrame)
 		
 		EDITOR.addAnimation(animationFunction);
-		EDITOR.renderNeeded();
 		
 		setTimeout(function() {
 			EDITOR.removeAnimation(animationFunction);

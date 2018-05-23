@@ -37,10 +37,6 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-reconnect loop kills browser
-
-Make sure no loops are running after afk (reopen_files/savestate)
-
 Add app to chrome web store !?
 
 Add something that distinguish the editor from other editors, that you can see on first look.

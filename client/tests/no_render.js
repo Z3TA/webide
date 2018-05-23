@@ -7,10 +7,10 @@ EDITOR.addTest(function doNotCallRender(testCallback) {
 
 	*/
 	
-	var renderCalled = false;
+	var renderCalled = null;
 	
 	function mockRender() {
-		renderCalled = true;
+		renderCalled = UTIL.getStack("render");
 	}
 
 	var renderOriginal = EDITOR.render;
@@ -25,11 +25,11 @@ EDITOR.addTest(function doNotCallRender(testCallback) {
 		
 		file.moveCaretRight();
 		
-		if(renderCalled) throw new Error("file.moveCaretRight told the editor to render");
+		if(renderCalled) throw new Error("file.moveCaretRight told the editor to render\n" + renderCalled);
 		
 		file.deleteCharacter();
 		
-		if(renderCalled) throw new Error("file.deleteCharacter told the editor to render");
+		if(renderCalled) throw new Error("file.deleteCharacter told the editor to render\n" + renderCalled);
 		
 		
 		EDITOR.render = renderOriginal;
