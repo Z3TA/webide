@@ -113,7 +113,6 @@
 	}
 	
 	function highlightCurrentFunction(file, caret) {
-		
 		// Selects the option for the function the file care is currently in
 		
 		var parent = {};
@@ -129,6 +128,8 @@
 			}
 			parent = domModel[i];
 		}
+		
+		return true;
 	}
 		
 	

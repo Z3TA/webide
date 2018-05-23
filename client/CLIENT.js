@@ -329,8 +329,7 @@ var CLIENT = {}; // Client object is global
 			CLIENT.fireEvent("connectionLost");
 			//serverMessage(formatText(currentChannel.name) + GS + formatText(nickName) + GS + formatText(text))
 		}
-		
-	}
+		}
 	
 	function checkEditor() {
 		console.log("Wait for editor to load and then attach events for afk2");
@@ -343,6 +342,7 @@ var CLIENT = {}; // Client object is global
 reconnectTimeoutTime += 10000;
 					console.log("Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
 				}
+				return true;
 			});
 			
 			EDITOR.on("btk", function tryReconnectAndUpdateReconnectTime() {
@@ -353,6 +353,7 @@ reconnectTimeoutTime += 10000;
 					console.log("Attempting connect after btk");
 					CLIENT.connect(lastUsedserver);
 				}
+				return true;
 			});
 		}
 	}

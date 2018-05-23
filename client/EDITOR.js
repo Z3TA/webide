@@ -2628,12 +2628,26 @@ EDITOR.fireEvent("btk");
 		var waitingForEventListenerCallbacks = 0;
 			var eventListeners = EDITOR.eventListeners[eventName];
 		var returns = {};
+		var waitingForFunction = [];
 		
 			console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
 		for(var i=0; i<eventListeners.length; i++) runFunc(eventListeners[i].fun);
 		
 		if(waitingForEventListenerCallbacks == 0) allDone();
 		else if(waitingForEventListenerCallbacks < 0) throw new Error("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
+		else {
+			var waitInterval = setInterval(wait, 1000);
+			var maxWaitTimes = 10;
+			var waitCounter = 0;
+		}
+		
+		function wait() {
+			console.log("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks + " Still waiting for " + JSON.stringify(waitingForFunction));
+			if(++waitCounter >= maxWaitTimes) {
+				clearTimeout(waitInterval);
+				throw new Error("The following " + waitingForEventListenerCallbacks + " " + eventName + " event listeners never returned or called back: " + JSON.stringify(waitingForFunction));
+			}
+		}
 		
 		function runFunc(func) {
 			
@@ -2667,6 +2681,7 @@ EDITOR.fireEvent("btk");
 				// Asume it's an async function, wait for it to call the callback function.
 				waitingForEventListenerCallbacks++;
 				console.log("fName=" + fName + " returned undefined. Asuming it's an async function. waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
+				waitingForFunction.push(fName);
 			}
 			else {
 				console.log("fName=" + fName + " returned ret=" + ret + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);

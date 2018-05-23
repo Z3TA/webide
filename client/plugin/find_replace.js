@@ -29,6 +29,7 @@
 		
 		EDITOR.on("moveCaret", function resetLastSearchStrLength(file, caret) {
 			lastSearchStrLength = 0; // Reset this so that we do not start search from the wrong position
+			return true;
 		});
 		
 		EDITOR.addEvent("voiceCommand", {
