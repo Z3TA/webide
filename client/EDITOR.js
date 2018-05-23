@@ -2660,6 +2660,7 @@ EDITOR.fireEvent("btk");
 			var fargs = args.concat(function(err, ret) {
 				console.log("Callback called from fName=" + fName + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 				returns[fName] = ret;
+				waitingForFunction.splice(waitingForFunction.indexOf(fName), 1);
 				if(--waitingForEventListenerCallbacks == 0) {
 					allDone();
 				}
