@@ -37,6 +37,13 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+The exploding lines makes the WYSIWYG laggy!
+
+
+Annoying when whole lines explode when typing in WYSIWYG.
+Is the exploding letters really a great feature !?
+Make a diff on the line and only insert the missing characters, or delete the removed ones.
+
 Add app to chrome web store !?
 
 Add something that distinguish the editor from other editors, that you can see on first look.
