@@ -206,7 +206,7 @@ EDITOR.lastTimeInteraction = new Date();
 	var executeOnNextInteraction = [];
 	
 	var afk = false; // Not away from keyboard
-	var afkTimeout = 5000; // How long time since last interaction to fire afk event
+	var afkTimeout = 300000; // How long time since last interaction to fire afk event (5 minutes)
 	var mainLoopInterval;
 	
 	var lastKeyDown = 0;
