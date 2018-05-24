@@ -1309,10 +1309,10 @@ var File; // File object is global
 		// Sanity check in case someting is wrong
 		file.sanityCheck();
 		
-		console.log("Inserting character: " + character);
+		//console.log("Inserting character: " + character);
 		
 		console.time("putCharacter");
-		console.time("putCharacterCore");
+		//console.time("putCharacterCore");
 		// Insert the character in the text string
 		file.text = file.text.substr(0, index) + character + file.text.substring(index+EDITOR.settings.insert, file.text.length);
 		
@@ -1332,7 +1332,7 @@ var File; // File object is global
 			}
 			
 			
-			console.log("Added " + character + " at index=" + index + " row=" + row + " col=" + col + "");
+			//console.log("Added " + character + " at index=" + index + " row=" + row + " col=" + col + "");
 			
 			// Update the caret
 			caret.col++;
@@ -1360,7 +1360,7 @@ var File; // File object is global
 			
 		}
 		
-		console.timeEnd("putCharacterCore");
+		//console.timeEnd("putCharacterCore");
 		
 		// Call file edit listeners
 		file.change("insert", character, index, row, col) // change, text, index, row, col
@@ -3318,16 +3318,16 @@ var File; // File object is global
 			
 		*/
 		
+		// Optimization note: console.time adds around 1ms, so for 6 eventListeners it adds 6ms!
+		//console.time("fileChange eventListeners");
 		for(var i=0; i<EDITOR.eventListeners.fileChange.length; i++) {
 			file.isCallingChangeEventListeners = EDITOR.eventListeners.fileChange[i].fun;
 			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
-			if(EDITOR.settings.devMode) {
-				var timeName = "fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + "";
-				console.time(timeName);
-			}
+			//console.time("fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + "");
 			EDITOR.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
-			if(EDITOR.settings.devMode) console.timeEnd(timeName);
+			//console.timeEnd("fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + "");
 		}
+		//console.timeEnd("fileChange eventListeners");
 		file.isCallingChangeEventListeners = undefined;
 	}
 	
