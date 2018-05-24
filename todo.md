@@ -37,6 +37,9 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Sitting on backspace (deleting characters) is slow! (due to exploding characters animation !?)
+It's laggy because timeout that removes animationFunction also calls renderNeeded
+
 The exploding lines makes the WYSIWYG laggy!
 
 
@@ -48,6 +51,25 @@ Add app to chrome web store !?
 
 Add something that distinguish the editor from other editors, that you can see on first look.
 For example animations !? Exploding letters when you delete !?
+
+
+Why a new text editor ? 
+
+
+What makes JZeidt better then existing editors/IDE's, or what does it do differently !?
+
+JZedit is a cloud based editor with separate front-end (browser client) and back-end (nodejs server).
+You can run both the server and the client on your computer and it will feel just like a nomral editor/IDE.
+But you can also run the back-end on a server machine, eihter self hosted, on a public server like webide.se or a server hosted by your organisation 
+- and connect to it from anywhere to get a full developer enviroment that lets you run nodejs, and more. Making it possible to develop from a smartohone or Chromebook.
+JZedit has a graphical interface for accessing files on remote servers via SSH/FTP. 
+But you can also use the built in terminal, and get a meta experience by ssh:ing to another machine, and run a terminal editor inside the editor.
+
+JZedit is easier to use then some code editors. And if you know HTML/CSS/JavaScript, you will also find it easier to add new features to JZedit compared to other editors.
+JZedit is actually the only editor written in "vanilla" JavaScript, where other simlar editors use "compile to javascript" languages like CoffiScript and  TypeScript.
+JZedit has no build step and you can use the editor to make changes to the editor itself, and hit refresh or hot load to instanctly see the new changes in effect.
+JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it fast and performant.
+
 
 
 
