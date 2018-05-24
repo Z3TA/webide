@@ -342,20 +342,6 @@ EDITOR.lastTimeInteraction = new Date();
 		if(__dirname != EDITOR.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 	}
 	
-	EDITOR.renderNeeded = function renderNeeded() {
-		// Tell the editor that it needs to render
-		
-		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
-			// For debugging, so we know why a render was needed
-			console.log(UTIL.getStack("renderNeeded"));
-		}
-		EDITOR.shouldRender = true;
-		
-		if(EDITOR.animationFunctions.length > 0 && !isAnimating && window.requestAnimationFrame) {
-			window.requestAnimationFrame(animate);
-		}
-	}
-	
 	function setWorkingDirectory(workingDir) {
 		
 		// Private function to internally change working directory and calling event listeners that listen for workingDirectory changes.
@@ -1372,11 +1358,11 @@ if(callback) return callback(err, path);
 		
 		EDITOR.shouldRender = false; // Flag (change to true whenever we need to render)
 		
-		//console.log("rendering ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
+		//console.warn("rendering ...");
 		
 		if(EDITOR.currentFile && menuVisibleOnce) {
 			
-			console.log("render file=" + EDITOR.currentFile.path);
+			//console.log("render file=" + EDITOR.currentFile.path);
 			
 			console.time("render");
 			
@@ -1459,10 +1445,10 @@ if(callback) return callback(err, path);
 			
 			//console.time("renders");
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-				funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
-				console.time("render: " + funName);
+				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
+				//console.time("render: " + funName);
 				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, startRow, containZeroWidthCharacters); // Call render
-				console.timeEnd("render: " + funName);
+				//console.timeEnd("render: " + funName);
 			}
 			//console.timeEnd("renders");
 			
@@ -1678,6 +1664,21 @@ if(callback) return callback(err, path);
 		
 	}
 	
+	EDITOR.renderNeeded = function renderNeeded() {
+		// Tell the editor that it needs to render
+		
+		//console.warn("Render needed!");
+		
+		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
+			// For debugging, so we know why a render was needed
+			console.log(UTIL.getStack("renderNeeded"));
+		}
+		EDITOR.shouldRender = true;
+		
+		if(EDITOR.animationFunctions.length > 0 && !isAnimating && window.requestAnimationFrame) {
+			window.requestAnimationFrame(animate);
+		}
+	}
 	
 	EDITOR.resize = function(resizeEvent) {
 		/*

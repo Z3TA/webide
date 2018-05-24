@@ -1,6 +1,8 @@
 (function() {
 	"use strict";
 	
+	if(!QUERY_STRING.explodingCharacters) return; // Flag
+	
 	console.log("animate_delete_letter ...");
 	
 	EDITOR.plugin({
@@ -70,7 +72,7 @@
 		
 		setTimeout(function() {
 			EDITOR.removeAnimation(animationFunction);
-			EDITOR.renderNeeded();
+			//EDITOR.renderNeeded();
 		}, 100);
 		
 	}

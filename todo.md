@@ -37,23 +37,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Sitting on backspace (deleting characters) is slow! (due to exploding characters animation !?)
-It's laggy because timeout that removes animationFunction also calls renderNeeded
-
-The exploding lines makes the WYSIWYG laggy!
-
-
-Annoying when whole lines explode when typing in WYSIWYG.
-Is the exploding letters really a great feature !?
-Make a diff on the line and only insert the missing characters, or delete the removed ones.
-
 Add app to chrome web store !?
 
-Add something that distinguish the editor from other editors, that you can see on first look.
-For example animations !? Exploding letters when you delete !?
-
-
-Why a new text editor ? 
 
 
 What makes JZeidt better then existing editors/IDE's, or what does it do differently !?
@@ -76,47 +61,36 @@ JZedit does Not use the DOM (content-editable) for text rendering like other web
 
 todo
 ----
+hide sysyem folders in file explorer.
+
+prio: Fix indentation characters so the source code gets clean.
 
 use server storage for reopen files. !? ...
 Server storage always makes a local storage copy. when online, also query local storage and compare date stamp. Use the newest.
 if the local copy is newer, update the server storage. !??
 
-
-regression bug on reopened files. It's not saving state at all! And can't reopen unsaved files. And some big files (EDITOR.js) is not reopened.
-
 Make encoding_converter.js plugin not require reloading from disk, so we can convert unsaved files.
 
-Piping to the edito. Send stdin stream to server, that sends to the client !?
+Piping to the editor. Send stdin stream to server, that sends to the client !?
 
 debug: Editor freaks out when trying to scroll (first scroll up -negative row) bundle.htm
 
-debug zetafiles bash terminal
-
-hide sysyem folders in file explorer.
+debug having zetafiles as username in bash terminal
 
 Simple tutorial apps, eyes that looks at the mouse.
 Making a clock in the canvas
-
 
 Write tests for signup service in prod, run test once every hour and send e-mail report if it doesn't work!!
 
 Password protect files and folders
 
-Persistent storage! People need somewhere to host their data.
-
-Moving spellchecker to server side.
-
-Upgrading nw.js
-
+Persistent storage! Database !? People need somewhere to host their data.
 
 trying vumoviemaker again ... 
-
 
 Make some multiplayer game exampes 
 
 in terminal, when selecting text and pressing delete
-
-prio: Fix indentation characters so the source code gets clean.
 
 write a test for starting and stopping nodejs processes
 
@@ -127,11 +101,6 @@ upgrade to latest nw.js
 
 fix problem: npm deletes unknown module dirname (which is used by nw.js)
 Remove all dependendcies on dirname !?
-
-Investigate making an app for chrome-book !?
-
-Investigate adding the editor to chrome web store. Test in a Chromebook.
-
 
 
 * Fix bugs!
