@@ -3321,8 +3321,12 @@ var File; // File object is global
 		for(var i=0; i<EDITOR.eventListeners.fileChange.length; i++) {
 			file.isCallingChangeEventListeners = EDITOR.eventListeners.fileChange[i].fun;
 			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
-			
+			if(EDITOR.settings.devMode) {
+				var timeName = "fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + "";
+				console.time(timeName);
+			}
 			EDITOR.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
+			if(EDITOR.settings.devMode) console.timeEnd(timeName);
 		}
 		file.isCallingChangeEventListeners = undefined;
 	}

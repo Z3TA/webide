@@ -54,7 +54,10 @@
 	}
 	
 	function ask() {
-		if(deferredPrompt === undefined) return console.warn("A2HS: Have not got beforeinstallprompt event from the browser!");
+		if(deferredPrompt === undefined) {
+			//console.warn("A2HS: Have not got beforeinstallprompt event from the browser!");
+			return;
+		}
 		else if(!deferredPrompt) throw new Error("deferredPrompt=" + deferredPrompt)
 		
 		var yes = "Yes, make it look like a native app!";

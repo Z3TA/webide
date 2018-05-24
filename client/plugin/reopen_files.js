@@ -668,7 +668,7 @@ console.log("reopenFiles!");
 	
 	function saveStateOfOpenFiles(callback) {
 		// Called when the editor closes, and at an time interval
-		console.log("saveStateOfOpenFiles!");
+		//console.log("saveStateOfOpenFiles!");
 		//if(typeof callback != "function") throw new Error("Expected callback=" + callback + " to be a callback function!");
 		
 		if(!EDITOR.localStorage) throw new Error("EDITOR.localStorage not available!");
@@ -691,9 +691,9 @@ if(openedFilesString == null || openedFilesString == "") {
 					
 					// note: "".split(fileDelimiter).length == 1 !! (an empty string gives one item in the array)
 					if(openedFilesString != "") {
-						console.log("openFiles.length=" + openFiles.length);
+						//console.log("openFiles.length=" + openFiles.length);
 						for(var i=0; i<openFiles.length; i++) {
-							console.log("Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
+							//console.log("Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
 							saveSate(openFiles[i], stateSaved);
 						}
 					}
@@ -702,7 +702,7 @@ if(openedFilesString == null || openedFilesString == "") {
 					function stateSaved(err, path) {
 						if(err) console.warn("Problem saving state for path=" + path + ": " + err.message);
 						if(++statesSaved == openFiles.length) {
-							console.log("Done saving state!");
+							//console.log("Done saving state!");
 							if(callback) callback(null);
 						}
 					}
@@ -715,7 +715,7 @@ if(openedFilesString == null || openedFilesString == "") {
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		console.log("Saving state for: " + path);
+		//console.log("Saving state for: " + path);
 		
 		if(path.length == 0) {
 			fundBugs(false, function(err, openedFilesString) {
