@@ -188,7 +188,7 @@ console.log("reopenFiles!");
 			
 		});
 	
-	function fileInListOpened(file, wasCurrent, err) {
+		function fileInListOpened(err, file, wasCurrent) {
 			
 			if(err) {
 				if(err.code === 'ENOENT') {
@@ -342,21 +342,23 @@ console.log("reopenFiles!");
 							content = lastFileState.text;
 							
 							if(typeof content != "string") {
-								var contentError = new Error("The content of lastFileState.path=" + lastFileState.path + " is '" + content + "'. It will not be reopened!");
+								var contentError = new Error("lastFileState.text=" + lastFileState.text + " lastFileState.path=" + lastFileState.path + ". " + path + " will not be reopened!");
+								console.warn(contentError.message);
+								console.log(lastFileState);
 								removeFromOpenedFiles(path, function(err) {
 									if(err) throw err;
-									callback(path, false, contentError);
+									callback(contentError, path, false);
 								});
 								return;
 							}
 							}
 						else if(notFound) {
-							// The file was not found and the user didn't want to load last state
+							console.log("The file (" + path + ") was not found and the user didn't want to load last state");
 							// Do not open it! Remove from openedFiles
 							
 							removeFromOpenedFiles(path, function(err) {
 								if(err) throw err;
-								callback(path, false, getFileSizeError);
+								callback(getFileSizeError, path, false);
 							});
 							
 							return; // Don't attempt to open the file
@@ -398,7 +400,7 @@ console.log("reopenFiles!");
 						openedFilesString = removeFromStringList(openedFilesString, path, fileDelimiter);
 						EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 							if(err) throw err;
-							callback(file, false, openFileError);
+							callback(openFileError, file, false);
 						});
 						
 					});
@@ -445,13 +447,13 @@ console.log("reopenFiles!");
 						
 						console.log("setStateAtReopen");
 						setLastState();
-						callback(file, fileWasCurrentfile);
+						callback(null, file, fileWasCurrentfile);
 						
 					});
 					}
 				else {
 					setLastState();
-					callback(file, fileWasCurrentfile);
+					callback(null, file, fileWasCurrentfile);
 				}
 				}
 				
@@ -761,14 +763,14 @@ if(openedFilesString == null || openedFilesString == "") {
 		state.mode = file.mode;
 		
 		
-		var sizeLimit = 100000;
+		var sizeLimit = 2551000; // Max size for localStorage in Chrome is 2,551,000 characters (5 MB)
 		
-		if(file.text.length < 100000) {
+		if(file.text.length < sizeLimit) {
 			// Always save the text, even if it's saved to disk. (it can be deleted, or disk space limit truncated it)
 			state.text = file.text;
 		}
 		else {
-			console.warn("Not saving state for " + file.path + " because it has " + file.text.length + " (over " + sizeLimit + ") characters");
+			console.warn("Not saving state for " + file.path + " because it has " + file.text.length + " (over " + (sizeLimit-1) + ") characters");
 		}
 		
 		// Hash the state so that we do not spam the server !?
