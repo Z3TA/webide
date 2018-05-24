@@ -39,6 +39,11 @@ What I'm working on
 
 Add app to chrome web store !?
 
+Make JavaScript/Node.js apps on your Chromebook!
+Early alpha release. Send feedback and bug reports to zeta@zetafiles.org
+
+Easy to use editor/IDE for coding JavaScript/HTML/CSS, making NodeJS apps, web sites, writing blog posts etc.
+Each user gets their own shell account for storing files, running nodejs scripts, hosting web sites etc.
 
 
 What makes JZeidt better then existing editors/IDE's, or what does it do differently !?
