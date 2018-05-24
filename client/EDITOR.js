@@ -1459,10 +1459,10 @@ if(callback) return callback(err, path);
 			
 			//console.time("renders");
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
-				//funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
-				//console.time("render: " + funName);
+				funName = UTIL.getFunctionName(EDITOR.renderFunctions[i]);
+				console.time("render: " + funName);
 				EDITOR.renderFunctions[i](ctx, buffer, EDITOR.currentFile, startRow, containZeroWidthCharacters); // Call render
-				//console.timeEnd("render: " + funName);
+				console.timeEnd("render: " + funName);
 			}
 			//console.timeEnd("renders");
 			
@@ -4817,7 +4817,7 @@ CLIENT.cmd("mirror", {
 		}
 		
 		// Set the font only once for performance
-		ctx.font=EDITOR.settings.fontSize + "px " + EDITOR.settings.font;
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 		ctx.textBaseline = "top";
 		
 		EDITOR.canvas = canvas;

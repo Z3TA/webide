@@ -182,7 +182,7 @@
 			}
 			
 			// Reset the font
-			ctx.font=EDITOR.settings.fontSize + "px " + EDITOR.settings.font;
+			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 			
 			
 			//ctx.fill(); // Needed for rect to fill!

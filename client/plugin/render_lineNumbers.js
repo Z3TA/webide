@@ -1,4 +1,3 @@
-
 (function() {
 	
 	/*
@@ -8,62 +7,62 @@
 	*/
 	
 	var leftMargin = 1;
+	var lastLineNr = 0 | 0;
+	var lastRowCount = 0 | 0;
 	
-	// Add new item for lineNumberColor to EDITOR.settings if it's not already added
-	EDITOR.settings.lineNumberColor = EDITOR.settings.lineNumberColor ? EDITOR.settings.lineNumberColor : "rgb(200,200,200)";
+	// Optimization: Store the line numbers in a seperate buffer and only write to the main canvas if they change
+	var cacheCanvas = document.createElement('canvas');
+	var cacheCtx = cacheCanvas.getContext('2d');
 	
-	
-	
-	EDITOR.renderFunctions.push(paintLineNumbers); // lineNumbers function will be called on every frame render
-	
-	
-	console.log("Loaded lineNumbers");
-	
-	
-	function giveLineNumbers(file) {
-		
-		var lineNumber = 0;
-		
-		for(var row=0; row<file.grid; row++) {
-			file.grid[row] = lineNumber++;
+	EDITOR.plugin({
+		desc: "Render line numbers",
+		load: function() {
+			// lineNumbers function will be called on every frame render
+			EDITOR.addRender(paintLineNumbers);
+			
+			// Add new item for lineNumberColor to EDITOR.settings if it's not already added
+			EDITOR.settings.style.lineNumberColor = EDITOR.settings.style.lineNumberColor ? EDITOR.settings.style.lineNumberColor : "rgb(200,200,200)";
+			
+			cacheCtx.textBaseline = "top";
+			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
+			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			
+		},
+		unload: function() {
+			EDITOR.removeRender(paintLineNumbers);
+			cacheCanvas = null;
 		}
-	}
-	
+	});
 	
 	function paintLineNumbers(ctx, buffer, file, startRow) {
-		var line = 0,
+		var lineNr = buffer[0].lineNumber + file.partStartRow,
 			lastLine = -1;
 		
+		if(!(lineNr == lastLineNr && lastRowCount == buffer.length)) {
+			
+			lastLineNr = lineNr;
+			lastRowCount = buffer.length;
+			
 		if(startRow == undefined) startRow = 0;
 		
-		ctx.fillStyle = EDITOR.settings.lineNumberColor;
-		
+			cacheCanvas.width = EDITOR.settings.leftMargin - leftMargin;
+			cacheCanvas.height = EDITOR.canvas.height;
+			
+			cacheCtx.textBaseline = "top";
+			cacheCtx.fillStyle = EDITOR.settings.style.lineNumberColor;
+			cacheCtx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			
 		for(var row = 0; row < buffer.length; row++) {
-			
-			line = buffer[row].lineNumber + file.partStartRow;
-			
-			
-			
+			lineNr = buffer[row].lineNumber + file.partStartRow;
 			//console.log("Line " + line);
-			
-			if(line > lastLine) {
-				lastLine = line;
-				ctx.fillText(line, leftMargin, EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight);
-				
-				/*
-				if(file.partStartRow > 0 && EDITOR.settings.devMode) {
-					ctx.save();
-					ctx.font = "10px " + EDITOR.settings.style.font;
-					ctx.fillStyle="rgb(0,0,255)";
-					ctx.fillText("" + (buffer[row].lineNumber-1), leftMargin+22, EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight);
-					ctx.restore();
+			if(lineNr > lastLine) {
+					lastLine = lineNr;
+					cacheCtx.fillText(lineNr, leftMargin, EDITOR.settings.topMargin + (row+startRow) * EDITOR.settings.gridHeight);
 				}
-				*/
-				
 			}
-			
 		}
-
+		
+		ctx.drawImage(cacheCanvas, leftMargin, 0);
 		
 	}
 	
