@@ -23,16 +23,35 @@
 	
 	function xmlParserInit() {
 		
+		var isXmlFile = {}; // Cache result from isXml
+		
 		EDITOR.on("fileOpen", parseXmlOnFileOpen);
 		EDITOR.on("fileChange", parseXmlMaybe, 100);
+		EDITOR.on("fileClose", parseXmlOnFileClose);
 		
 		function parseXmlMaybe(file, type, character, index, row, col) {
-			parseXmlOnFileOpen(file); //  optimization is evil
+			// Called every time the file change
+			
+			if(file.text.length < 200) {
+				// Check every time
+				isXmlFile[file] = isXML(file);
+			}
+			
+			if(isXmlFile[file]) {
+				var xml = parseXML(file);
+				file.haveParsed(xml);
+			}
+		}
+		
+		function parseXmlOnFileClose(file) {
+			delete isXmlFile[file];
 		}
 		
 		function parseXmlOnFileOpen(file) {
 			
-			if(isXML(file)) {
+			isXmlFile[file] = isXML(file);
+			
+			if(isXmlFile[file]) {
 				
 				console.log("File is XML: " + file.path + " ...");
 				
