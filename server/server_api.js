@@ -1001,8 +1001,25 @@ API.listFiles = function listFiles(user, json, listFilesCallback) {
 					
 					//console.log("stat: " + stats);
 					
-					var mountedPaths = ["/dev/", "/usr/", "/lib/", "/lib64/"]; // Ignore mounted files and folders
-					if(user.workingDirectory != "/" || mountedPaths.indexOf(filePath) == -1) {
+					var systemFolders = [
+						"/dev/", 
+						"/usr/", 
+						"/lib/", 
+						"/lib64/", 
+						"/bin/", 
+						"/etc/", 
+						"/proc/", 
+						"/run/", 
+						"/sock/", 
+						"/.jzeditStorage/", 
+						"/.config/", 
+						"/.npm/", 
+						"/.ssh/",
+						"/.bash_history",
+						"/.jzeditpw",
+						"/.node_repl_history"
+					]; // Ignore mounted files and folders
+					if(!user.chrooted || systemFolders.indexOf(filePath) == -1) {
 						list.push({type: type, name: fileName, path: user.toVirtualPath(filePath), size: size, date: mtime, problem: problem});
 					}
 					

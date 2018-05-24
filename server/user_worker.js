@@ -129,6 +129,8 @@ user.isSavingStorage = [];
 user.rootPath = undefined;
 user.runningNodeJsScripts = {};
 
+if(USE_CHROOT) user.chrooted = true;
+
 user.identify = function identify(info) {
 	
 	console.log("info: ", JSON.stringify(info));

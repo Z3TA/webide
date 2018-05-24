@@ -66,7 +66,6 @@ JZedit does Not use the DOM (content-editable) for text rendering like other web
 
 todo
 ----
-hide sysyem folders in file explorer.
 
 prio: Fix indentation characters so the source code gets clean.
 
