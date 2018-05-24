@@ -61,7 +61,7 @@
 		
 		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 
-		console.log("infoRender: comments.length=" + comments.length);
+		//console.log("infoRender: comments.length=" + comments.length);
 		
 		for(var i=0; i<comments.length; i++) {
 			

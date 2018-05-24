@@ -216,7 +216,7 @@ var File; // File object is global
 			throw new Error("Caret (first argument) need to be an object! (but not necessarily a caret)");
 		}
 		
-		console.log("File:mutateCaret");
+		//console.log("File:mutateCaret");
 		
 		file.checkCaret(newCaret);
 		
@@ -2223,7 +2223,7 @@ var File; // File object is global
 		*/
 		var file = this;
 		
-		console.log("File:moveCaretLeft");
+		//console.log("File:moveCaretLeft");
 		
 		if(caret == undefined) {
 			caret = file.caret;
@@ -2239,7 +2239,7 @@ var File; // File object is global
 		var grid = file.grid;
 		var row = caret.row;
 		
-		console.log("Moving caret left from " + JSON.stringify(caret) + "...");
+		//console.log("Moving caret left from " + JSON.stringify(caret) + "...");
 		
 		
 		// Sanity check in case something is wrong
@@ -3320,7 +3320,8 @@ var File; // File object is global
 		
 		for(var i=0; i<EDITOR.eventListeners.fileChange.length; i++) {
 			file.isCallingChangeEventListeners = EDITOR.eventListeners.fileChange[i].fun;
-			console.log("Calling fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
+			//console.log("Calling fileChange event listener: " + UTIL.getFunctionName(EDITOR.eventListeners.fileChange[i].fun) + " (file.recursiveFileChange=" + file.recursiveFileChange + ")");
+			
 			EDITOR.eventListeners.fileChange[i].fun(file, change, text, index, row, col);
 		}
 		file.isCallingChangeEventListeners = undefined;

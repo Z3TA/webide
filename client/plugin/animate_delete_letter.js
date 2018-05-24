@@ -19,7 +19,7 @@
 	
 	function animate_delete_letter(file, type, characters, caretIndex, row, col) {
 		
-		console.log("animate_delete_letter: type=" + type + " row=" + row + " col=" + col);
+		//console.log("animate_delete_letter: type=" + type + " row=" + row + " col=" + col);
 		
 		if(type == "delete") {
 			startAnimation(file, row, col, 1);
@@ -32,7 +32,7 @@
 	
 	function startAnimation(file, row, col, textLength) {
 		
-		console.log("Starting animation on row=" + row + " col=" + col);
+		//console.log("Starting animation on row=" + row + " col=" + col);
 		
 		var indentation = file.grid[row].indentation;
 		var indentationWidth = indentation * EDITOR.settings.tabSpace;
@@ -43,7 +43,7 @@
 		var width = parseInt(EDITOR.settings.gridWidth * textLength);
 		var height = parseInt(EDITOR.settings.gridHeight);
 		
-		console.log("top=" + top + " left=" + left);
+		//console.log("top=" + top + " left=" + left);
 		
 		var ctx = EDITOR.canvasContext;
 		

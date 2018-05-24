@@ -2551,7 +2551,7 @@ if(callback) return callback(err, path);
 	EDITOR.removeAllInfo = function(file, row, col) {
 		// Find the item in the array, then splice it ...
 		
-		console.log(UTIL.getStack("EDITOR.removeAllInfo!"));
+		//console.log(UTIL.getStack("EDITOR.removeAllInfo!"));
 		
 		if(!(file instanceof File)) throw new Error("Firs argument file=" + file + " needs to be a file object!");
 		
@@ -2630,7 +2630,7 @@ EDITOR.fireEvent("btk");
 		var returns = {};
 		var waitingForFunction = [];
 		
-			console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
+			//console.log("Calling " + eventName + " listeners (" + EDITOR.eventListeners[eventName].length + ") ...");
 		for(var i=0; i<eventListeners.length; i++) runFunc(eventListeners[i].fun);
 		
 		if(waitingForEventListenerCallbacks == 0) allDone();
@@ -2666,7 +2666,7 @@ EDITOR.fireEvent("btk");
 				}
 			});
 			
-			console.log("Calling " + eventName + " listener fName=" + fName);
+			//console.log("Calling " + eventName + " listener fName=" + fName);
 			
 			try {
 				var ret = func.apply(this, fargs);
@@ -2681,11 +2681,11 @@ EDITOR.fireEvent("btk");
 			if(ret === undefined) {
 				// Asume it's an async function, wait for it to call the callback function.
 				waitingForEventListenerCallbacks++;
-				console.log("fName=" + fName + " returned undefined. Asuming it's an async function. waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
+				//console.log("fName=" + fName + " returned undefined. Asuming it's an async function. waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 				waitingForFunction.push(fName);
 			}
 			else {
-				console.log("fName=" + fName + " returned ret=" + ret + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
+				//console.log("fName=" + fName + " returned ret=" + ret + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 				returns[fName] = ret;
 			}
 		}
@@ -5973,7 +5973,7 @@ CLIENT.cmd("mirror", {
 				}
 			}
 		}
-		else console.log("recognition: Not ctrl! charCode=" + charCode);
+		//else console.log("recognition: Not ctrl! charCode=" + charCode);
 		
 		
 		
@@ -5996,7 +5996,7 @@ CLIENT.cmd("mirror", {
 		// AltGr is the same as hitting Ctrl+ Alt
 		
 		// You probably want to use bindKey instead of eventListeners.keyDown!
-		console.log("Calling keyDown listeners (" + EDITOR.eventListeners.keyDown.length + ") ...");
+		//console.log("Calling keyDown listeners (" + EDITOR.eventListeners.keyDown.length + ") ...");
 		for(var i=0; i<EDITOR.eventListeners.keyDown.length; i++) {
 			funReturn = EDITOR.eventListeners.keyDown[i].fun(EDITOR.currentFile, character, combo, keyDownEvent); // Call function
 			
@@ -6029,11 +6029,11 @@ CLIENT.cmd("mirror", {
 						
 						funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "down", targetElementClass);
 						
-						console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
+						//console.log(UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
 						
 						if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 							preventDefault = true;
-							console.log("Default action will be prevented!");
+							//console.log("Default action will be prevented!");
 						}
 						else if(funReturn !== true) {
 							throw new Error("You must make an active choise wheter to allow (return true) or prevent (return false) default (chromium) browser action,\
@@ -6155,7 +6155,7 @@ CLIENT.cmd("mirror", {
 		
 		if(preventDefault) {
 			//alert("Preventing default browser action!");
-			console.log("Preventing default browser action!");
+			//console.log("Preventing default browser action!");
 			
 			if(typeof keyDownEvent.stopPropagation == "function") keyDownEvent.stopPropagation();
 			if(window.event && typeof window.event.cancelBubble != "undefined") window.event.cancelBubble = true;
@@ -6165,8 +6165,8 @@ CLIENT.cmd("mirror", {
 			return false;
 		}
 		else {
-			console.log("Executing default browser/OS action ...");
-			// 
+			//console.log("Executing default browser/OS action ...");
+			
 			return true;
 		}
 		

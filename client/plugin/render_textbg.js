@@ -28,7 +28,7 @@
 	
 	function textBgRender(ctx, buffer, file, startRow) {
 		
-		console.time("textBgRender");
+		//console.time("textBgRender");
 		
 		if(startRow == undefined) startRow = 0;
 		
@@ -80,7 +80,6 @@
 			}
 			//console.log("yyy row=" + row);
 			
-			
 			// For the last bgcolor
 			if(oldBgColor) {
 				width = EDITOR.settings.gridWidth * chars;
@@ -88,13 +87,10 @@
 				ctx.fillRect(left, top,	width, EDITOR.settings.gridHeight);
 				//console.log("oldBgColor=" + oldBgColor + " chars=" + chars + " row=" + row + " col=" + col + " left=" + left + " top=" + top + " width=" + width + " EOL!");
 			}
-			
-			
 			}
 		
-
 		//ctx.stroke();
-		console.timeEnd("textBgRender");
+		//console.timeEnd("textBgRender");
 
 	}
 

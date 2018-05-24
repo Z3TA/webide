@@ -69,9 +69,9 @@
 			problemRow = Math.max(0, lastInsertCBLRow[file.path] - file.startRow + startRow);
 		}
 		
-		console.log("problem=" + problem + "");
-		console.log("lastInsertCBLRow[" + file.path + "]=" + lastInsertCBLRow[file.path] + "");
-		console.log("file.startRow=" + file.startRow + " ");
+		//console.log("problem=" + problem + "");
+		//console.log("lastInsertCBLRow[" + file.path + "]=" + lastInsertCBLRow[file.path] + "");
+		//console.log("file.startRow=" + file.startRow + " ");
 		
 		if(problem > 0 || force) {
 		
