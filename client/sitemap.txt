@@ -1,3 +1,5 @@
 https://webide.se/
 https://webide.se/about/about.htm
 https://webide.se/signup/signup.html
+https://webide.se/about/privacy.htm
+https://webide.se/about/tos.htm
