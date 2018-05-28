@@ -35,6 +35,8 @@
 	});
 	
 	function paintLineNumbers(ctx, buffer, file, startRow) {
+		if(buffer.length == 0) return;
+		
 		var lineNr = buffer[0].lineNumber + file.partStartRow,
 			lastLine = -1;
 		
