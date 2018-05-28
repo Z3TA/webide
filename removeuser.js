@@ -44,8 +44,9 @@ catch(err) {
 }
 
 	// Remove nginx profile
-	var nginxProfile = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
-	var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "";
+var url_user = UTIL.urlFriendly(username);
+var nginxProfile = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
+var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "";
 	try {
 		fs.unlinkSync(nginxProfileSymlink);
 		fs.unlinkSync(nginxProfile);
