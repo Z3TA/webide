@@ -652,7 +652,8 @@ idFail("Wrong password for user: " + username);
 								else passwdCreated = true;
 								
 								// Make sure nginx profile exist
-								var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
+								var url_user = UTIL.urlFriendly(username);
+								var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
 								fs.stat(nginxProfilePath, function (err, stats) {
 									if(checkMountsAbort) return;
 									
@@ -664,7 +665,7 @@ idFail("Wrong password for user: " + username);
 											
 											if(err) throw err;
 											
-											nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
+											nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 											nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
 											nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 											
@@ -681,7 +682,7 @@ idFail("Wrong password for user: " + username);
 									
 									function checkNginxEnabled() {
 										
-										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + username + "." + DOMAIN;
+										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
 										fs.stat(nginxProfileEnabledPath, function (err, stats) {
 											if(checkMountsAbort) return;
 											
