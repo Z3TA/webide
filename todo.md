@@ -34,16 +34,25 @@ and we want to be sane, and debug the same code that the users are running.
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
 Eg. only show save if file is unsaved, or only show Run in Node.js is it's a JavaScript file (detect nodejs ? require, no window)
 
+
 What I'm working on
 -------------------
 
-Add app to chrome web store !?
+Fiddling with service worker. It doesn't seem to want to update itself !? ...
 
-Make JavaScript/Node.js apps on your Chromebook!
-Early alpha release. Send feedback and bug reports to zeta@zetafiles.org
+Made a script that updates version in hosted chrome app manifest (update_version.js). 
+Also use it to update service worker cache key (if we manage to get the service worker to update itslef)
 
-Easy to use editor/IDE for coding JavaScript/HTML/CSS, making NodeJS apps, web sites, writing blog posts etc.
-Each user gets their own shell account for storing files, running nodejs scripts, hosting web sites etc.
+
+Show Function parameter hinting and function list in screenshots on chrome web store ...
+
+Regression bug: function parameter hinting no longer works!!
+
+
+Updating the app on chrome web store ...
+Writing a blog post about adding the editor to chrome web store.
+
+
 
 
 What makes JZeidt better then existing editors/IDE's, or what does it do differently !?

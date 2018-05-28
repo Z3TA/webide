@@ -4,7 +4,11 @@ echo -n "Have you done extensive manual testing and do All automatic tests pass 
 read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi
 
+
 cd /home/Z/Projects/jzedit/
+
+nodejs update_version.js
+
 ./release.sh
 
 rsync -r --delete temp/release/server/ root@ben.100m.se:/srv/jzedit/

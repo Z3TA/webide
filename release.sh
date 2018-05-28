@@ -5,7 +5,7 @@ node changeset.js
 #commit=$(nodejs getCommitId.js)
 commit=$(cat version.inc)
 version=1
-beta=_beta
+beta=_alpha
 name=jzedit
 echo $name-v$version$beta-$commit
 

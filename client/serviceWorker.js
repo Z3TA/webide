@@ -3,27 +3,31 @@
 	Debugging the service worker:
 	ur: chrome://inspect/#service-workers
 	
+	The browser will automatically activate a *new* service worker if something in this file changes!
 */
 
-console.log("Running serviceWorker.js");
+
 
 var devMode = false;
+var version = "v1"; // Will automatically update in new releases
+
+console.log("Running serviceWorker.js version=" + version + " devMode=" + devMode);
 
 self.addEventListener('message', function(msg) {
 	console.log("serviceWorker Received Message: ", msg.data);
-	
+	return;
 	if(msg.data == "devModeOff") {
 		devMode = false;
 	}
 	else if(msg.data == "devModeOn") {
 		devMode = true;
 	}
+	console.log("serviceWorker devMode=" + devMode);
 });
 
 self.addEventListener('install', function(event) {
 	console.log("serviceWorker install event");
-	event.waitUntil(
-	caches.open('v1').then(function(cache) {
+	event.waitUntil(caches.open(version).then(function(cache) {
 		console.log("serviceWorker adding files to cache");
 		return cache.addAll([
 			'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
@@ -77,9 +81,26 @@ self.addEventListener('install', function(event) {
 			// Cache other
 			
 		]);
-	})
-	);
+	}));
 });
+
+
+self.addEventListener('activate', function(event) {
+	console.log("serviceWorker activate event");
+	// Called when the browser has created a *new* service worker
+	// Delete old caches
+	return event.waitUntil(caches.keys().then(function(keys) {
+return Promise.all(keys.map(function(key) {
+			if(key != version) {
+				console.log("serviceWorker deleting old cache: " + key);
+				return caches.delete(key);
+			}
+		})).then(function() {
+			console.log("serviceWorker " + version + " now ready to handle fetches!");
+		});
+	}));
+});
+
 
 /*
 	Without the fetch event listener (and some console.logs in it) Chrome will give:
@@ -89,7 +110,7 @@ self.addEventListener('install', function(event) {
 	Only when it's loaded After the service worked has been activated!
 */
 self.addEventListener('fetch', function(event) {
-	console.log("serviceWorker fetch url=" + event.request.url + " * devMode=" + devMode);
+	console.log("serviceWorker fetch url=" + event.request.url + " * devMode=" + devMode + " version=" + version);
 	if(devMode) { // Skip cache
 		event.respondWith(fetch(event.request));
 	}

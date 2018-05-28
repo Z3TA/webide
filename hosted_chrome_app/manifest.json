@@ -1,7 +1,7 @@
 {
-	"name": "JZedit Cloud editor/IDE",
+	"name": "JavaScript editor/IDE",
 	"short_name": "JZedit",
-	"description": "Make JavaScript/Node.js apps on your Chromebook! Early alpha release. Send feedback and bug reports to zeta@zetafiles.org",
+	"description": "JavaScript language support. Able to run Node.JS! HTML preview and WYSIWYG. A new editor implemented from scratch.  Early alpha release.",
 	"version": "1.0.0",
 	"manifest_version": 2,
 	

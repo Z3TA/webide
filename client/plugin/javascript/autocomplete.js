@@ -465,6 +465,9 @@
 			// Find the function in the function list
 			var property = functionName.split(".");
 			
+			console.log("js.functions=" + JSON.stringify(js.functions));
+			console.log("js.globalVariables=" + JSON.stringify(js.globalVariables));
+			
 			var scope = getScope(charIndex, js.functions, js.globalVariables);
 			
 			console.log("scope=" + JSON.stringify(scope, null, 2));
