@@ -33,7 +33,7 @@ server {
   ssl_certificate_key  /etc/ssl/private/webide.se.key;
 
   gzip on;
-  gzip_types text/plain text/html text/javascript application/json;
+  gzip_types text/plain text/javascript application/json;
 
   location / {
     
