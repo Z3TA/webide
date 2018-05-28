@@ -1008,17 +1008,19 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 							function checkSslCert() {
 								// Check ssl certificate
 								
-								var certPath = "/etc/letsencrypt/live/" + username + "." + DOMAIN + "/fullchain.pem";
+								var url_user = UTIL.urlFriendly(username);
+								
+								var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
 								fs.stat(certPath, function(err, stat) {
 									if(err == null) {
-										console.log("SSL certificate for " + username + "." + DOMAIN + " exist!");
+										console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
 										return checkMountsReadyMaybe();
 										}
 									else if(err.code == 'ENOENT') {
 										console.log("ENOENT: certPath=" + certPath);
 										
-										if(FAILED_SSL_REG.hasOwnProperty(username + "." + DOMAIN)) {
+										if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
 											log("Skipping SSL registration because of too many failed attempts!");
 											sslCertChecked = true;
 											return checkMountsReadyMaybe();
@@ -1026,11 +1028,11 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 										
 										// the cert does not exist. Try to register it
 										var letsencrypt = require("../shared/letsencrypt.js");
-										letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL, function(err) {
+										letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL, function(err) {
 											if(err) {
 												
-												if(FAILED_SSL_REG.hasOwnProperty(username + "." + DOMAIN)) FAILED_SSL_REG[username + "." + DOMAIN]++;
-												else FAILED_SSL_REG[username + "." + DOMAIN] = 1;
+												if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) FAILED_SSL_REG[url_user + "." + DOMAIN]++;
+												else FAILED_SSL_REG[url_user + "." + DOMAIN] = 1;
 												
 												if(err.code == "ENOENT") console.warn("certbot not installed!");
 												else if(err.code == "RATE_LIMIT") console.warn("Unable to create letsencrypt cert because of rate limit!");
@@ -1042,10 +1044,10 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 												return checkMountsReadyMaybe();
 											}
 											else {
-												console.log("SSL certificate for " + username + "." + DOMAIN + " installed!");
+												console.log("SSL certificate for " + url_user + "." + DOMAIN + " installed!");
 												
 												// Enable SSL on the site
-												var nginxProfilePath = "/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx";
+												var nginxProfilePath = "/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx";
 												fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
 													if(err) throw err;
 													data = data.replace(/#SSL#/g, "");

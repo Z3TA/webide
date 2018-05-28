@@ -312,15 +312,17 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		chownrDirSync(homeDir + ".prod", uid, gid);
 		
 	
+		var url_user = UTIL.urlFriendly(username);
+		
 		// Create nginx profile
 		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
-		nginxProfile = nginxProfile.replace(/%USERNAME%/g, username);
+		nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
 		nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
 		
 	try {
-		fs.writeFileSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", nginxProfile);
-		fs.symlinkSync("/etc/nginx/sites-available/" + username + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + username + "." + DOMAIN + "");
+			fs.writeFileSync("/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx", nginxProfile);
+			fs.symlinkSync("/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "");
 		
 		var reloadNginxStdout = child_process.execSync("service nginx reload");
 		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
@@ -333,7 +335,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		if(!NO_CERT) {
 		// Register SSL certificate for user web page
 		var letsencrypt = require("./shared/letsencrypt.js");
-		letsencrypt.register(username + "." + DOMAIN, ADMIN_EMAIL);
+			letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL);
 		}
 		
 		

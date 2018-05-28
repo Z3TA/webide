@@ -1483,6 +1483,19 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
 		}
 		return null;
+	},
+	
+	urlFriendly: function urlFriendly(str) {
+		
+		str = str.toLowerCase()
+		
+		str = str.replace(/å|ä|ã|â/g, "a");
+		str = str.replace(/ö|ô|ø/g, "o");
+		str = str.replace(/œ/g, "ae");
+		
+		str = str.replace(/[^a-z0-9]/g,'');
+		
+		return str;
 	}
 	
 }
