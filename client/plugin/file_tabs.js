@@ -498,7 +498,7 @@ for(var i=0; i<list.length; i++) {
 							wait();
 							
 							function wait() {
-								if(waitCounter++ > 200) throw new Error("Waiting for other files to close before running file-order test max waitCounter=" + waitCounter + " reached! ");
+								if(waitCounter++ > 1000) throw new Error("Waiting for other files to close before running file-order test max waitCounter=" + waitCounter + " reached! ");
 								
 								var list = EDITOR.sortFileList();
 								for(var i=0; i<list.length; i++) {

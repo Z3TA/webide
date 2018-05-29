@@ -4109,7 +4109,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 				theWindow.document.close();
 				}
 				
-				EDITOR.openWindows.push(theWindow); // So that they can be convinently closed on reload
+			EDITOR.openWindows.push(theWindow); // So that they can be conveniently closed on reload
 				
 			if(!waitUntilLoaded) return callback(null, theWindow);
 			}
@@ -4341,7 +4341,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 		}
 		
 		if(waitingFor.length > 0) {
-			var maxWait = 5;
+			var maxWait = 15;
 			var waitCounter = 0;
 			var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
 		}
@@ -4384,7 +4384,8 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 			
 			if(++waitCounter >= maxWait) {
 				clearInterval(checkInterval);
-				errors.push(new Error("The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor)));
+				errors.push(  new Error( "The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor) + 
+				"And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
 				alreadyTooLate = true;
 				allListenersCalled(errors);
 			}

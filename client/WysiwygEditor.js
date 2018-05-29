@@ -526,7 +526,7 @@ var WysiwygEditor;
 		var doc = previewWin.window.document;
 		var element = doc.elementFromPoint(x, y);
 		
-		if(element == null) { // Will probably cause the care to be placed at the top of the document which is very annoying!
+		if(element == null) { // Will probably cause the caret to be placed at the top of the document which is very annoying!
 			
 			console.warn("Unable to get element on x=" + x + " y=" + y);
 			alertBox("Unable to get element on x=" + x + " y=" + y + " in order to place caret in contentEditable!");
@@ -550,7 +550,14 @@ var WysiwygEditor;
 			return false;
 		}
 		else {
+			if(element.childNodes.length > 0) {
 			var childNode = element.childNodes[0]; // The text node
+			}
+			else {
+				console.warn("Unable to find text node !?");
+				console.log(element);
+				var childNode = element;
+			}
 			
 			return wysiwygEditor.placeCaretOnTextNode(childNode, charPos);
 			
@@ -803,13 +810,13 @@ var WysiwygEditor;
 		}
 		else if(fileExt == "js") {
 			/*
-				It's not a good idea to reload just the JS unless the file's are design to be able to do that (like plugins in jzedit)
+				It's not a good idea to reload just the JS unless the file's are designed to be able to do that (like plugins in jzedit)
 				As variables might still hold state. Old html elements would still linger, etc.
 				
 				It's better to store state in web storage. For example localStorage. And have the "app" go to where you last left when you refresh.
 				
+				Check if the file was any of the <script elements. and if so Reload!
 			*/
-			// todo: Check if the file was any of the <script elements. and if so Reload!
 			
 			var scripts = doc.getElementsByTagName('script');
 			for (var i=0; i<scripts.length; i++) {
@@ -1542,6 +1549,7 @@ var WysiwygEditor;
 			
 			if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 			
+			console.log("Waiting for new window with url=" + wysiwygEditor.url + " to be created ...");
 			EDITOR.createWindow({url: wysiwygEditor.url}, windowCreated);
 			
 			function windowCreated(err, newWindow) {
