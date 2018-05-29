@@ -38,6 +38,8 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
+Make separate chrome web store release !? eg linux, windows, server, osx, chrome web store (only manifest)
+
 Fiddling with service worker. It doesn't seem to want to update itself !? ...
 
 Made a script that updates version in hosted chrome app manifest (update_version.js). 
