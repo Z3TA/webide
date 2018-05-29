@@ -332,7 +332,7 @@ var CLIENT = {}; // Client object is global
 		}
 	
 	function checkEditor() {
-		console.log("Wait for editor to load and then attach events for afk2");
+		console.log("Wait for editor to load and then attach events for afk");
 		if(typeof EDITOR != "undefined" && typeof EDITOR.on == "function") {
 			console.log("Editor loaded. Attaching afk and btk events!");
 			clearInterval(checkEditorInterval);
