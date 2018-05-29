@@ -1345,6 +1345,7 @@ if(callback) return callback(err, path);
 		if(EDITOR.shouldResize) {
 			console.warn("Resizing before rendering!");
 			EDITOR.resize();
+			return; // resize always re-renders!
 		}
 		
 		// Fix blurryness for screens with high pixel ratio
@@ -1683,7 +1684,7 @@ if(callback) return callback(err, path);
 	EDITOR.resize = function(resizeEvent) {
 		/*
 			
-			Why does the resize clear the canvas's !???
+			Note: Chaning the width/height of the canvas will clear it!
 			
 		*/
 		
@@ -1869,12 +1870,18 @@ if(callback) return callback(err, path);
 		//console.log("topMargin=" + EDITOR.settings.topMargin);
 		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
-		
+		if(canvas) {
 		canvas.style.width = EDITOR.view.canvasWidth + "px";
 		canvas.style.height = EDITOR.view.canvasHeight + "px";
 		
 		canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
 		canvas.height = EDITOR.view.canvasHeight * pixelRatio;
+		
+			// The canvas seem to be reset when resizing!
+			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
+			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			EDITOR.canvasContext.textBaseline = "top";
+		}
 		
 		if(EDITOR.currentFile) {
 			// Fix horizontal column after resizing
@@ -1909,10 +1916,6 @@ if(callback) return callback(err, path);
 		
 		// Show the file canvas again and set focus
 		
-		// The canvas seem to be reset when resizing!
-		//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
-		EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		EDITOR.canvasContext.textBaseline = "top";
 		
 		
 		console.timeEnd("resize");
