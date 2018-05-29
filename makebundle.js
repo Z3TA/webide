@@ -17,6 +17,9 @@ var bundle = fs.readFileSync("client/index.htm", "utf8");
 // Remove tests
 bundle = bundle.replace(/<!-- BEGIN TESTS -->[\s\S]+<!-- END TESTS -->/mg, "");
 
+// Make it cache-able
+bundle = bundle.replace(/<!-- BEGIN NOCACHE -->[\s\S]+<!-- END NOCACHE -->/mg, "");
+
 // Find scripts
 var reScripts = /<script.*src="(.*)"><\/script>/g;
 var scripts = [];
