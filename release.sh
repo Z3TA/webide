@@ -22,7 +22,7 @@ echo "Copy the files"
 hg clone . temp/release/linux/
 
 echo "Update version"
-node update_version.js
+node update_version.js ./temp/release/linux/
 # Note: Updates the version in the release files, not the source code (or we would have a commit/version update loop)
 
 echo "Set devMode and toolbar to false"
@@ -31,14 +31,19 @@ sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
 echo "Clean up"
 rm -rf temp/release/linux/.hg/
+rm -rf temp/release/linux/webide_release.sh
 rm -rf temp/release/linux/release.sh
 rm -rf temp/release/linux/todo.md
 rm -rf temp/release/linux/testfile.txt
 rm -rf temp/release/linux/.hgignore
 rm -rf temp/release/linux/webextension
 rm -rf temp/release/linux/hosted_chrome_app
+rm -rf temp/release/linux/chromeapp.txt
+rm -rf temp/release/linux/getCommitId.js
+rm -rf temp/release/linux/jz.xcf
+rm -rf temp/release/linux/makebundle.js
 rm -rf temp/release/linux/changeset.js
-
+rm -rf temp/release/linux/update_version.js
 
 echo "Copy over version.inc"
 cp version.inc temp/release/linux/

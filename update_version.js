@@ -6,7 +6,7 @@
 	
 */
 
-var relDir = "./temp/release/server/";
+var relDir = process.argv[2];
 
 var serviceWorkerUpdated = false;
 
@@ -22,6 +22,7 @@ var child = exec('hg log -l 1', function(err, stdout, stderr) {
 		if(match) {
 version = match[1];
 			
+			var fs = require("fs");
 			
 			// ### Update service worker
 			// This will hopefully make the service worker replace itself and reload cache
