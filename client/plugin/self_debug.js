@@ -213,7 +213,7 @@
 				
 			}
 			
-			if(document && document.body) document.body.removeChild(death);
+			if(document && document.body && document.body.contains(death)) document.body.removeChild(death);
 			
 			if(answer == yes) {
 				if(RUNTIME == "browser") document.location = document.location.href;
