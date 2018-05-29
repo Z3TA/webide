@@ -37,6 +37,10 @@ Click on the app icon
 manifest.json
 =============
 
+name can be max 45 characters
+description max 132 characters
+
+
 Hosted app:
 
 "app": {

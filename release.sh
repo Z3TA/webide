@@ -29,6 +29,13 @@ echo "Set devMode and toolbar to false"
 sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
 sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
+
+# Generate bundle
+cd temp/release/linux/
+nodejs makebundle.js
+gzip client/bundle.htm --best --keep
+cd ../../../
+
 echo "Clean up"
 rm -rf temp/release/linux/.hg/
 rm -rf temp/release/linux/webide_release.sh
@@ -51,12 +58,6 @@ cp version.inc temp/release/linux/
 # Update version (Use double quotes to make the shell expand variables while preserving whitespace)
 sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 
-
-# Generate bundle
-cd temp/release/linux/
-nodejs makebundle.js
-gzip client/bundle.htm --best --keep
-cd ../../../
 
 # Minify .js files
 # (npm install uglify-js -g)

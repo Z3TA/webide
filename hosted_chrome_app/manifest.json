@@ -1,8 +1,8 @@
 {
-	"name": "JavaScript & Node JS & HTML CSS editor / IDE & Static site generator",
+	"name": "JavaScript & Node JS & HTML CSS editor / IDE",
 	"short_name": "JZedit",
-	"description": "EDitor/IDE with JavaScript language support. Able to run Node.JS! HTML preview and WYSIWYG. A new editor implemented from scratch. Built in static site generator. Early alpha release.",
-	"version": "2",
+	"description": "JavaScript language support. Run Node.JS! HTML preview and WYSIWYG. Static site generator. A new editor implemented from scratch.",
+	"version": "200",
 	"manifest_version": 2,
 	
 	"icons": {

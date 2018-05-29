@@ -16,7 +16,7 @@ console.log("Running serviceWorker.js version=" + version + " devMode=" + devMod
 
 self.addEventListener('message', function(msg) {
 	console.log("serviceWorker Received Message: ", msg.data);
-	return;
+	//return;
 	if(msg.data == "devModeOff") {
 		devMode = false;
 	}
