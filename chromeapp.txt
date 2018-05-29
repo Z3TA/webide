@@ -62,3 +62,12 @@ Packaged app:
   }
 }
 
+
+version
+-------
+
+The version in manifest.json is the version of the manifest.json file and Not the version of the app!
+ref: https://developer.chrome.com/webstore/hosted_apps
+
+version: Required. The version of this metadata. Each time you update the metadata this number must be incremented. Up to four dot-separated integers are allowed. 
+

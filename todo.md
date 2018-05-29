@@ -38,20 +38,15 @@ Eg. only show save if file is unsaved, or only show Run in Node.js is it's a Jav
 What I'm working on
 -------------------
 
-Make separate chrome web store release !? eg linux, windows, server, osx, chrome web store (only manifest)
-
-Fiddling with service worker. It doesn't seem to want to update itself !? ...
-
-Made a script that updates version in hosted chrome app manifest (update_version.js). 
-Also use it to update service worker cache key (if we manage to get the service worker to update itslef)
-
-
 Show Function parameter hinting and function list in screenshots on chrome web store ...
 
 Regression bug: function parameter hinting no longer works!!
 
 
 Updating the app on chrome web store ...
+
+Update promo images to make it look more like a editor/IDE. {} brackets and lines of code
+
 Writing a blog post about adding the editor to chrome web store.
 
 

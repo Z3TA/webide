@@ -9,11 +9,6 @@ cd /home/Z/Projects/jzedit/
 
 ./release.sh
 
-cd hosted_chrome_app
-node set_version.js
-zip jzedit.zip jz64.png jz128.png jz192.png jz512.png manifest.json
-cd ..
-
 rsync -r --delete temp/release/server/ root@ben.100m.se:/srv/jzedit/
 rsync -r --delete node_modules/ root@ben.100m.se:/srv/jzedit/node_modules/
 rsync -r --delete client/noVNC/ root@ben.100m.se:/srv/jzedit/client/noVNC/
