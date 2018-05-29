@@ -1585,7 +1585,7 @@
 		
 		callback(true);
 		
-	}, 1);
+	});
 	
 	
 	function existFunctionWithName(functions, name) {

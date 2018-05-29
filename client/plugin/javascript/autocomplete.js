@@ -622,6 +622,15 @@
 		
 		console.log("foundFunctions=" + JSON.stringify(foundFunctions, null, 2));
 		
+		if(foundFunctions.length == 0) {
+			// We are in the global scope!
+			// Add the global functions
+			for(var i=0; i<functions.length; i++) {
+				if(functions[i].name.length > 0) foundFunctions.push(functions[i]);
+			}
+		}
+		else {
+			// Insade a function scope
 		foundFunctions = overWriteDublicates(foundFunctions); // Recursively overwrites (removes) functions with the same name
 		
 		// Add local varibales for each function
@@ -634,10 +643,12 @@
 		}
 		
 		// "this" is always the latest function
+			// Or is it the first !?!?
 		if(foundFunctions.length > 0) {
 			thisIs = foundFunctions[foundFunctions.length-1];
 		}
-
+		}
+		
 		// Make foundFunctions into an object literal, now when the order doesn't matter
 		var foundFunctionsObj = {};
 		for(var i=0, func; i<foundFunctions.length; i++) {
@@ -679,7 +690,7 @@
 			
 			return foundFunctions;
 			/*
-			foundFunctions.sort(function(a, b) {
+				foundFunctions.sort(function(a, b) {
 				// Sort by position in the code (line number) ascending
 				return a.start - b.start;
 			});

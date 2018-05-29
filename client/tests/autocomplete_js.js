@@ -72,7 +72,9 @@
 			callback(true);
 			
 		});
-	});
+	}, 1);
+	
+	
 	
 	function autoComplete(file, index) {
 		
