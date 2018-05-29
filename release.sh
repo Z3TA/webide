@@ -9,10 +9,8 @@ beta=_alpha
 name=jzedit
 echo $name-v$version$beta-$commit
 
-
 echo "Delete old files if they exists"
 rm -rf temp/release/
-
 
 echo "Create the temporary directory if it doesn't exist"
 mkdir -p temp/release/linux
@@ -22,6 +20,10 @@ mkdir -p temp/release/server
 
 echo "Copy the files"
 hg clone . temp/release/linux/
+
+echo "Update version"
+node update_version.js
+# Note: Updates the version in the release files, not the source code (or we would have a commit/version update loop)
 
 echo "Set devMode and toolbar to false"
 sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
@@ -34,6 +36,7 @@ rm -rf temp/release/linux/todo.md
 rm -rf temp/release/linux/testfile.txt
 rm -rf temp/release/linux/.hgignore
 rm -rf temp/release/linux/webextension
+rm -rf temp/release/linux/hosted_chrome_app
 rm -rf temp/release/linux/changeset.js
 
 

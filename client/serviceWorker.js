@@ -4,12 +4,13 @@
 	ur: chrome://inspect/#service-workers
 	
 	The browser will automatically activate a *new* service worker if something in this file changes!
+	But it will only check for changes if more then 24 hours has passed !?
 */
 
 
 
 var devMode = false;
-var version = "v1"; // Will automatically update in new releases
+var version = "dev"; // Will automatically update in new releases using ./release.sh
 
 console.log("Running serviceWorker.js version=" + version + " devMode=" + devMode);
 
@@ -91,6 +92,7 @@ self.addEventListener('activate', function(event) {
 	// Delete old caches
 	return event.waitUntil(caches.keys().then(function(keys) {
 return Promise.all(keys.map(function(key) {
+			console.log("serviceWorker cache key=" + key);
 			if(key != version) {
 				console.log("serviceWorker deleting old cache: " + key);
 				return caches.delete(key);

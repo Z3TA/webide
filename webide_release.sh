@@ -7,9 +7,12 @@ if echo "$answer" | grep -iq "^n" ;then exit;fi
 
 cd /home/Z/Projects/jzedit/
 
-nodejs update_version.js
-
 ./release.sh
+
+cd hosted_chrome_app
+nodejs set_version.js
+zip jzedit.zip jz64.png jz128.png jz192.png jz512.png manifest.json
+cd ..
 
 rsync -r --delete temp/release/server/ root@ben.100m.se:/srv/jzedit/
 rsync -r --delete node_modules/ root@ben.100m.se:/srv/jzedit/node_modules/
