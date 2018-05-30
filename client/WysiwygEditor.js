@@ -1938,7 +1938,8 @@ var WysiwygEditor;
 		if(msg.length > 1) msg = msg.slice(1, msg.length); // Remove the first space
 		
 		//consoleLogOriginal(msg);
-		consoleLogOriginal.apply(undefined, arg);
+		// Gives eligal invocation error in nw.js
+		if(RUNTIME != "nw.js") consoleLogOriginal.apply(undefined, arg);
 		
 		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
 		// Figure out what script made the log
