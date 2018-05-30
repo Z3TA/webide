@@ -65,7 +65,7 @@ sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux
 
 
 echo "Make a Windows release"
-#cp -rf temp/release/linux/. temp/release/windows/
+cp -rf temp/release/linux/. temp/release/windows/
 
 echo "Make a OSX release"
 #cp -rf temp/release/linux/. temp/release/osx/
@@ -120,13 +120,13 @@ rm -rf temp/release/server/bin
 rm -rf temp/release/server/userdirs
 
 
-#echo "zip and remove the Windows release (cant be run under Windows git bash)"
+echo "zip and remove the Windows release (cant be run under Windows git bash)"
 cd temp/release/
 mv windows $name-v$version$beta-$commit-win-x64
-#zip -9 -y -r -q $name-v$version$beta-$commit-win-x64.zip $name-v$version$beta-$commit
-#cd ..
-#cd ..
-#rm -rf temp/release/$name-v$version$beta-$commit
+zip -9 -y -r -q $name-v$version$beta-$commit-win-x64.zip $name-v$version$beta-$commit
+cd ..
+cd ..
+rm -rf temp/release/$name-v$version$beta-$commit
 
 
 #echo "Create a tarball and compress it for the Linux release"

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=0.8, user-scalable=yes" />
+  <link rel="stylesheet" type="text/css" href="../gfx/doc.css" />
+  <script type="text/javascript" src="../gfx/clouds.js"></script>
+</head>
+<body>
+
+
+<div class="main">
+  
+  <h1>Instructions for hosting the editor yourself</h1>
+  
+  <p>Note that the editor can be <a href="../about/download_instructions.htm">downloaded and run like a native app</a>.</p>
+	
+	<p>This is a tutorial for setting up the <i>back-end/server</i> only (which can then be accessed from a web browser).</p>
+  
+	<p>Unless you are setting it up for one user (yourself) the server needs to be a Linux server, preferably Ubuntu.<br>
+  The server/back-end is a Node.js script, so the editor back-end should be able to run on any system that can run <a href="https://nodejs.org/">Node.js</a></p>
+  
+  <p>This guide assumes you are familiar with the terminal/command prompt.</p>
+  
+  
+  <h4>1. Install Node.JS if it's not already installed on your system</h4>
+  
+  <p>Read instructions on <a href="https://github.com/nodesource/distributions"> nodesource distributions</a>
+  or <a href="https://nodejs.org/en/download/">download</a> a package or installation file.</p>
+  
+  
+  <h4>2. <a href="https://www.webtigerteam.com/jzedit/download/">download</a> the server package tar.gz:</h4>
+  
+  <p>Take notice of the latest server release for jzedit. Then download it:<br>
+  (Replace the number 3037 with the latest jzedit server relase!)</p>
+  <textarea cols="60" rows="2">wget https://www.webtigerteam.com/jzedit/download/jzedit-v1_alpha-3037-server.tar.gz
+  </textarea>
+  
+  <h4>3. unpack the tarball</h4>
+  
+  <textarea cols="60" rows="2">tar xf jzedit-v1_alpha-3037-server.tar.gz
+  </textarea>
+  
+  
+  <h4>4. Go into it's folder</h4>
+  <textarea cols="60" rows="2">cd jzedit-v1_beta-2580-server
+  </textarea>
+  
+  
+  <h4>5. Install dependencies</h4>
+  <textarea cols="60" rows="2">npm install
+  </textarea>
+  
+  
+	<h4>6. Try running the server</h4>
+	
+	<p>Replace IP below with your server's IP.</p>
+	
+	<textarea cols="82" rows="2">node server.js --username=$(whoami) --password=somethingsecret --port=8080 --ip=127.0.0.1 -nochroot
+  </textarea>
+  
+	<p>If it seems to work, open up a browser and type in the ip:port into the URL. For example: http://127.0.0.1:8080</p>
+	
+	
+	<h2>Running for a single user</h2>
+	
+	<p>If you followed the instructions above and got it to work, there's little else you need to do.<br>
+	You might want to edit the settings in default.js and setup the server to run as a service (see examples in /etc/)</p>
+	
+	
+	<h2>Running as a cloud IDE for multiple users</h2>
+	
+	<p>For example for a software team or school.</p>
+	
+	<p>This might require a bit of fiddling and is currently covered in README.txt</p>
+	
+	<p>Todo: Put relative info from the readme here.</p>
+  
+</div>
+
+</body>
+</html>

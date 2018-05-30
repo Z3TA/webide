@@ -73,6 +73,8 @@ JZedit does Not use the DOM (content-editable) for text rendering like other web
 todo
 ----
 
+Google drive integration
+
 prio: Fix indentation characters so the source code gets clean.
 
 use server storage for reopen files. !? ...
