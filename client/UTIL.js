@@ -1296,14 +1296,16 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	
 	getLocation: function getLocation(url) {
 		
+		if(url == undefined) throw new Error("url=" + url);
+		
 		// From: https://github.com/PxyUp/uri-parse-lib
 		
 		// todo: Handle file:///C:/Users/Z/somefile.txt
 		
+		console.log("getLocation url=" + url);
+		
         var badCharater = [":", "@", "://"];
 
-		var firstSplit, lastSplit, parsing, urlObject, checkerBadCharater, protoArray;
-        
 		var urlObject = {
             host: "",
             port: "",

@@ -13,16 +13,10 @@
 		
 		var host = window.location.hostname;
 		
-		var devUrl = "http://127.0.0.1:8100/signup"
-		
-		if(host == "127.0.0.1") {
-			var signupUrl1 = devUrl; // For development
-		}
-		else {
-			var port = window.location.port ? ":" + window.location.port : "";
-			var signupUrl1 = window.location.protocol + "//" + host + port + "/signup";
-			var signupUrl2 = window.location.protocol + "//signup." + host + port + "/signup";
-		}
+		var port = window.location.port ? ":" + window.location.port : "";
+		var signupUrl1 = window.location.protocol + "//signup." + host + port + "/signup";
+		var signupUrl2 = window.location.protocol + "//" + host + port + "/signup";
+		var signupUrl3 = window.location.protocol + "//" + host + ":8100/signup";  // For development
 		
 		var connection;
 		var connectedSuccessful = false;
@@ -52,6 +46,9 @@
 		connect(signupUrl1);
 		
 		function connect(signupUrl) {
+			
+			var closeConnectionForever = false;
+			
 			connectionTries++;
 			console.log("Connecting to " + signupUrl);
 			connection = new SockJS(signupUrl, sockJsReservedQuirk, sockJsOptions);
@@ -59,6 +56,9 @@
 				console.log("Connected to signup service!");
 				connectedSuccessful = true;
 				createButton.disabled = false;
+				
+				emtyGeneralAlerts();
+				
 			};
 			
 			connection.onmessage = function serverMessage(e) {
@@ -69,9 +69,7 @@
 				var arr = msg.split(":");
 				var code = arr[0];
 				
-				generalAlertDiv.style.display = "none";
-				usernameAlertDiv.style.display = "none";
-				pwAlertDiv.style.display = "none";
+				emtyAllAlerts();
 				
 				if(code == "availableError") alertUsername("Problem checking if username " + arr[1] + " is available: " + arr[2]);
 				else if(code == "available") {
@@ -80,7 +78,10 @@
 						createButton.disabled = true;
 					}
 				}
-				else if(code == "createError") alertGeneralMessage("Unable to create user " + arr[1] + " on " + arr[2] + ": " + arr[3]);
+				else if(code == "createError") {
+					emtyGeneralAlerts();
+					alertGeneralMessage("Unable to create user " + arr[1] + " on " + arr[2] + ": " + arr[3]);
+				}
 				else if(code == "serviceError") alertGeneralMessage(arr[1]);
 				else if(code == "created") {
 					alertGeneralMessage("Successfully created user " + arr[1]);
@@ -93,6 +94,7 @@
 					// location.protocol includes the colon. eg https:
 					var url = location.protocol + "//" + arr[2] + "/";
 					console.log("Navigating to url=" + url + " location.protocol=" + location.protocol);
+					closeConnectionForever = true;
 					document.location = url;
 				}
 				else {
@@ -102,12 +104,23 @@
 			
 			connection.onclose = function serverDisconnected() {
 				console.log("Connection to signup service Closed!");
-				if(!connectedSuccessful && connectionTries < 2 && signupUrl2) {
+				if(!connectedSuccessful && connectionTries < 2 && signupUrl == signupUrl1) {
 					connect(signupUrl2);
 				}
+				else if(!connectedSuccessful && connectionTries < 4 && signupUrl == signupUrl2) {
+					connect(signupUrl3);
+				}
 				else {
-					if(connectedSuccessful) alertGeneralMessage("Connection to signup service closed!");
-					else alertGeneralMessage("Unable to connect to signup service! Please contact server administrator!");
+					if(connectedSuccessful) {
+						if(!closeConnectionForever && connectionTries < 6) {
+alertGeneralMessage("Connection to signup service closed! Attempting to reconnect ...");
+							setTimeout(function() { connect(signupUrl); }, 3000);
+						}
+						else if(connectionTries >= 6) {
+							alertGeneralMessage("Unable to reconnect to signup service. Please try again later by refreshing the page!");
+						}
+					}
+					else alertGeneralMessage("Unable to connect to signup service! Please contact server administrator!\nTry again by refreshing the page!");
 				}
 			};
 		}
@@ -166,7 +179,7 @@
 			createButton.disabled = true;
 			
 			if(password.length < MIN_PW_LENGTH) return alertPassword("The password needs to be at least " + MIN_PW_LENGTH + " characters!");
-			else if(password2.length == 0) return alertPassword("Please repeat the password!");
+			else if(password2.length == 0) return alertPassword("Please repeat the password in the box below:");
 			else if(password != password2) return alertPassword("The repeated password is not the same!");
 			//else if(!password.match(/[^a-zA-Z]/)) return alertPassword("It's a good idea to have special characters in the password!");
 			else {
@@ -199,6 +212,7 @@
 		function createAccount() {
 			var username = inputUsername.value;
 			var password = inputPassword.value;
+			emtyGeneralAlerts();
 			alertGeneralMessage("Creating user " + username + ". Please wait ... You will be redirected to the editor once the account is created.");
 			createButton.disabled = true;
 			if(typeof window.localStorage == "object") {
@@ -214,6 +228,22 @@
 			generalAlertDiv.appendChild(newMessage);
 			generalAlertDiv.style.display = "block";
 			return false;
+		}
+		
+		function emtyGeneralAlerts() {
+			// Emty all messages
+			while (generalAlertDiv.firstChild) generalAlertDiv.removeChild(generalAlertDiv.firstChild);
+			generalAlertDiv.style.display = "none";
+		}
+		
+		function emtyAllAlerts() {
+			emtyGeneralAlerts()
+			
+			while (usernameAlertDiv.firstChild) usernameAlertDiv.removeChild(usernameAlertDiv.firstChild);
+			usernameAlertDiv.style.display = "none";
+			
+			while (pwAlertDiv.firstChild) pwAlertDiv.removeChild(pwAlertDiv.firstChild);
+			pwAlertDiv.style.display = "none";
 		}
 		
 		function alertUsername(msg) {

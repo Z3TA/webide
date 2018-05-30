@@ -25,25 +25,25 @@ Commit messages should explain WHY you did the change, we can already see what y
 Note to myself
 --------------
 Always make a ZFS snapshot before running apt upgrade!!!
-on ZOL (ZFS on Linux) running apt upgrade might brick the server
+on ZOL (ZFS on Linux) running apt upgrade might make the server unable to boot.
 
 ship with node_modules!
 can't depend on a third party package manager to do the right thing.
 and we want to be sane, and debug the same code that the users are running.
 
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
-Eg. only show save if file is unsaved, or only show Run in Node.js is it's a JavaScript file (detect nodejs ? require, no window)
+Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a JavaScript file (detect nodejs ? require, no window)
 
 
 What I'm working on
 -------------------
 
-Show Function parameter hinting and function list in screenshots on chrome web store ...
-
-Regression bug: function parameter hinting no longer works!!
-
+Instructions for self hosting
 
 Updating the app on chrome web store ...
+
+Add: A free signup is needed for cloud functionality. But if you just want to use basic features you can click "Already have an account" and then "Cancel" on the login screen.
+
 
 Update promo images to make it look more like a editor/IDE. {} brackets and lines of code
 
@@ -1364,6 +1364,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Static site generator: When publising an article from draft, eg renaming from _foo to foo . Add a button for it in the ssg interface and make a hg mv if it's in source control.
 
 Ctrl+S is used so frequently, that you sometimes hit Ctrl+D. So don't allow binding anything to Ctrl+D !?
 

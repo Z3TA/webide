@@ -143,10 +143,14 @@
 		if(domain == "localhost" || domain == "127.0.0.1") {
 			var localName = "Local file-system";
 		}
-		else {
+		else if(CLIENT.url) {
 			// Use the hostname of the server we are connected to
-			var loc = UTIL.getLocation(CLIENT.url); 
+			var loc = UTIL.getLocation(CLIENT.url);
 			var localName = EDITOR.user + "@" + loc.host;
+		}
+		else {
+			// Use the hostname
+			localName = window.location.hostname;
 		}
 		
 		// Make a list of connected file-systems

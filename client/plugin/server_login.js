@@ -38,9 +38,9 @@
 					window.onbeforeunload = null;
 					document.location = "/signup/signup.html";
 				}
-				else CLIENT.connect(server, connectedToServer);
+				else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
 			});
-		} else CLIENT.connect(server, connectedToServer);
+		} else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
 		
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
@@ -148,6 +148,7 @@
 	}
 	
 	function showLoginDialog(options) {
+		if(QUERY_STRING["skiplogin"]) return true;
 		if(serverLoginDialog.visible) return true;
 		EDITOR.hideMenu();
 		return serverLoginDialog.show(options);
