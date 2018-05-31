@@ -17,8 +17,9 @@ var API = require("./server_api.js");
 API.SSG = require("./plugin/static_site_generator/ssg-api.js");
 API.mercurial = require("./plugin/mercurial.js");
 
+if(process.platform !== "win32") {
 API.terminal = require("./plugin/terminal.js");
-
+}
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 

@@ -9,7 +9,7 @@ if "%ERRORLEVEL%"=="0" (
 ) else (
   echo Starting server ...
   cd server
-  start %NODE% server.js --username=admin --password=admin
+  start %NODE% server.js --username=admin --password=admin -nochroot
   cd ..
 )
 

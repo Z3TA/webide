@@ -6627,7 +6627,10 @@ CLIENT.cmd("mirror", {
 		
 		EDITOR.interact("mouseMove", mouseMoveEvent);
 		
-		document.getElementById('canvas').style.cursor = 'text';
+		// Canvas not available on IE before mouse move
+		if(typeof EDITOR.canvas != "undefined" && typeof EDITOR.canvas.style != "undefined") {
+			EDITOR.canvas.style.cursor = 'text';
+		}
 		
 		//return false;
 		
