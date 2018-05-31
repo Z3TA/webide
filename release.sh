@@ -145,6 +145,12 @@ cd temp/release/
 echo "Fix line breaks in Windows release"
 find windows/ | xargs unix2dos
 
+echo "Remove nodejs packages not needed in Windows release"
+sed -i '/nodemailer/d' windows/package.json
+sed -i '/posix/d' windows/package.json
+sed -i '/ps-node/d' windows/package.json
+sed -i '/iroh/d' windows/package.json
+sed -i '/pty.js/d' windows/package.json
 
 echo "zip and remove the Windows release (cant be run under Windows git bash)"
 mv windows $name-v$version$beta-$commit-win-x64
