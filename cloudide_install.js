@@ -47,10 +47,10 @@ var ENCODING = "utf-8";
 
 
 // Edit default's
-var defaults = fs.readFileSync("default.js", ENCODING);
+var defaults = fs.readFileSync("./server/default_settings.js", ENCODING);
 defaults = defaults.replace("zeta@zetafiles.org", ADMIN_EMAIL);
 defaults = defaults.replace("webide.se", HOSTNAME);
-fs.writeFileSync("default.js", defaults);
+fs.writeFileSync("./server/default_settings.js", defaults);
 
 
 // Install apparmor for extra security, each user will have their own apparmor profile that only allow them to access their home dir

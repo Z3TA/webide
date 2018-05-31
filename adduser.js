@@ -19,7 +19,7 @@
 	
 */
 
-var DEFAULT = require("./default.js");
+var DEFAULT = require("./server/default_settings.js");
 
 var UTIL = require("./client/UTIL.js");
 

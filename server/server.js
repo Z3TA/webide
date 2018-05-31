@@ -5,7 +5,7 @@
 
 if(process.version.indexOf("v8.") != 0) console.warn("The editor has only been tested with node.js version 8!");
 
-var DEFAULT = require("../default.js");
+var DEFAULT = require("./default_settings.js");
 
 var getArg = require("../shared/getArg.js");
 
