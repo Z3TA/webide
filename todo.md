@@ -38,6 +38,8 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+Testin Windows release
+
 Instructions for self hosting
 
 Updating the app on chrome web store ...

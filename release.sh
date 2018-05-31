@@ -82,16 +82,30 @@ rm -rf temp/release/linux/create_shortcut.vbs
 rm -rf temp/release/linux/osx_start.sh
 rm -rf temp/release/linux/etc/
 rm -rf temp/release/linux/adduser.js
+rm -rf temp/release/linux/cloudide_install.js
+rm -rf temp/release/linux/hashPw.js
+rm -rf temp/release/linux/nodejs_init.js
+rm -rf temp/release/linux/nodejs_init_worker.js
+rm -rf temp/release/linux/removeuser.js
+rm -rf temp/release/linux/signup_service.js
+rm -rf temp/release/linux/update.js
 
 echo "Clean up the Windows release"
 rm -rf temp/release/windows/runtime/nwjs-v0.12.3-linux-x64
 rm -rf temp/release/windows/runtime/nwjs-v0.12.3-osx-x64/
 rm -rf temp/release/windows/client/plugin/spellcheck/nodehun_linux.node
 rm -rf temp/release/windows/start.sh
-rm -rf temp/release/windows/JZedit.desktop
+rm -rf temp/release/windows/jzedit.desktop
 rm -rf temp/release/windows/osx_start.sh
 rm -rf temp/release/windows/etc/
 rm -rf temp/release/windows/adduser.js
+rm -rf temp/release/windows/cloudide_install.js
+rm -rf temp/release/windows/hashPw.js
+rm -rf temp/release/windows/nodejs_init.js
+rm -rf temp/release/windows/nodejs_init_worker.js
+rm -rf temp/release/windows/removeuser.js
+rm -rf temp/release/windows/signup_service.js
+rm -rf temp/release/windows/update.js
 
 echo "Clean up the OSX release"
 rm -rf temp/release/osx/runtime/nwjs-v0.12.3-win-x64
@@ -99,11 +113,18 @@ rm -rf temp/release/osx/runtime/nwjs-v0.12.3-linux-x64/
 rm -rf temp/release/osx/plugin/client/spellcheck/nodehun_linux.node
 rm -rf temp/release/osx/plugin/client/spellcheck/nodehun_windows.node
 rm -rf temp/release/osx/start.sh
-rm -rf temp/release/osx/JZedit.desktop
+rm -rf temp/release/osx/jzedit.desktop
 rm -rf temp/release/osx/start.bat
 rm -rf temp/release/osx/create_shortcut.vbs
 rm -rf temp/release/osx/etc/
 rm -rf temp/release/osx/adduser.js
+rm -rf temp/release/osx/cloudide_install.js
+rm -rf temp/release/osx/hashPw.js
+rm -rf temp/release/osx/nodejs_init.js
+rm -rf temp/release/osx/nodejs_init_worker.js
+rm -rf temp/release/osx/removeuser.js
+rm -rf temp/release/osx/signup_service.js
+rm -rf temp/release/osx/update.js
 
 echo "Clean up the server release"
 # CLient is meant to run in the browser
@@ -113,48 +134,41 @@ rm -rf temp/release/server/plugin/client/spellcheck/nodehun_windows.node
 rm -rf temp/release/server/start.sh
 rm -rf temp/release/server/start.bat
 rm -rf temp/release/server/create_shortcut.vbs
-rm -rf temp/release/server/JZedit.desktop
+rm -rf temp/release/server/jzedit.desktop
 rm -rf temp/release/server/osx_start.sh
 rm -rf temp/release/server/start.js
 rm -rf temp/release/server/bin
 rm -rf temp/release/server/userdirs
 
+cd temp/release/
+
+echo "Fix line breaks in Windows release"
+find windows/ | xargs unix2dos
+
 
 echo "zip and remove the Windows release (cant be run under Windows git bash)"
-cd temp/release/
 mv windows $name-v$version$beta-$commit-win-x64
-zip -9 -y -r -q $name-v$version$beta-$commit-win-x64.zip $name-v$version$beta-$commit
-cd ..
-cd ..
-rm -rf temp/release/$name-v$version$beta-$commit
-
+zip -9 -y -r -q $name-v$version$beta-$commit-win-x64.zip $name-v$version$beta-$commit-win-x64
+rm -rf $name-v$version$beta-$commit-win-x64
 
 #echo "Create a tarball and compress it for the Linux release"
-#cd temp/release/
 mv linux $name-v$version$beta-$commit-linux-x64
-#tar -zcf $name-v$version$beta-$commit-linux-x64.tar.gz $name-v$version$beta-$commit
-#cd ..
-#cd ..
-#rm -rf temp/release/$name-v$version$beta-$commit
+#tar -zcf $name-v$version$beta-$commit-linux-x64.tar.gz $name-v$version$beta-$commit-linux-x64
+#rm -rf $name-v$version$beta-$commit-linux-x64
 
 #echo "Create a tarball and compress it for OSX"
-#cd temp/release/
 mv osx $name-v$version$beta-$commit-osx-x64
-#tar -zcf $name-v$version$beta-$commit-osx-x64.tar.gz $name-v$version$beta-$commit
-cd ..
-cd ..
-#rm -rf temp/release/$name-v$version$beta-$commit
+#tar -zcf $name-v$version$beta-$commit-osx-x64.tar.gz $name-v$version$beta-$commit-osx-x64
+#rm -rf $name-v$version$beta-$commit-osx-x64
 
 echo "Create a tarball and compress server release"
-cd temp/release/
 mv server $name-v$version$beta-$commit-server
 tar -zcf $name-v$version$beta-$commit-server.tar.gz $name-v$version$beta-$commit-server
 
 # Move it back to just "server" so other batch scripts don't have to figure out the version
 mv $name-v$version$beta-$commit-server server
 
-cd ..
-cd ..
+cd ../../
 #rm -rf temp/release/$name-v$version$beta-$commit-server
 
 echo "Remove files no longer needed"
@@ -163,7 +177,7 @@ rm version.inc
 
 # Move the files to www
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
-
+scp temp/release/$name-v$version$beta-$commit-win-x64.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 
 # Update the homepage
 
