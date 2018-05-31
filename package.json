@@ -1,5 +1,5 @@
 {
-  "name": "JZedit",
+  "name": "jzedit",
   "main": "client/index.htm",
   "window": {
     "title": "JZedit",
@@ -17,14 +17,15 @@
   "author": "Johan Zetterberg <zeta@zetafiles.org>",
   "dependencies": {
     "diff": "^2.2.3",
+    "dirname": "https://github.com/Z3TA/nwjs_dirname/tarball/master",
     "ftp": "https://github.com/Z3TA/node-ftp/tarball/master",
-    "http-proxy": "^1.16.2",
+    "http-proxy": "^1.17.0",
     "iconv-lite": "https://github.com/Z3TA/iconv-lite/tarball/master",
     "iroh": "https://github.com/Z3TA/Iroh/tarball/a45218b13ce9754a2429817923ad749d7c49658d",
     "ncp": "^2.0.0",
     "nodemailer": "^2.6.4",
     "nodemailer-smtp-transport": "^2.7.2",
-    "posix": "^4.1.1",
+    "posix": "^4.1.2",
     "ps-node": "^0.1.6",
     "pty.js": "^0.3.1",
     "sockjs": "^0.3.4",
@@ -35,6 +36,6 @@
     "url": "http://hg.webtigerteam.com/repo/jzedit/"
   },
   "devDependencies": {
-    "uglify-js": "^3.3.21"
+    "uglify-js": "^3.3.28"
   }
 }
