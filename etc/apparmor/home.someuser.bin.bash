@@ -7,6 +7,9 @@
 
 %HOME%%USERNAME%/bin/bash {
 
+  signal receive set=hup peer= %HOME%%USERNAME%/bin/bash,
+  signal send set=hup peer= %HOME%%USERNAME%/bin/bash,
+
   %HOME%%USERNAME%/ r,
   %HOME%%USERNAME%/** rwl,
 
@@ -15,6 +18,7 @@
 
   #/dev/tty rw,
 
+  %HOME%%USERNAME%/** Cx -> scripts,
   %HOME%%USERNAME%/usr/bin/hg Px,
   %HOME%%USERNAME%/usr/bin/node Px,
   %HOME%%USERNAME%/usr/bin/bash Px,
@@ -24,5 +28,12 @@
   %HOME%%USERNAME%/usr/bin/ssh-keygen ix,
   %HOME%%USERNAME%/bin/ls ix,
   %HOME%%USERNAME%/usr/lib/node_modules/npm/bin/npm-cli.js Px,
+
+  profile scripts {
+    %HOME%%USERNAME%/ r,
+    %HOME%%USERNAME%/** rwl,
+    %HOME%%USERNAME%/usr/bin/node Px,
+    %HOME%%USERNAME%/usr/bin/bash Px,
+  }
 
 }
