@@ -66,7 +66,7 @@ var nginxProfileSymlink = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN 
 	
 	// Remove apparmor profiles
 	unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
-unlink("/etc/apparmor.d/home." + username + ".usr.bin.bash");
+unlink("/etc/apparmor.d/home." + username + ".bin.bash");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.node");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.python");
 	unlink("/etc/apparmor.d/home." + username + ".usr.bin.hg");
