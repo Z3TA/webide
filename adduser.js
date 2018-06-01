@@ -223,7 +223,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		copyFolderRecursiveSync("etc/userdir_skeleton/.ssh/", homeDir);
 		
 		copyFileSync("etc/userdir_skeleton/.bashrc", homeDir + ".bashrc"); // bash settings, how the prompt look etc
-		
+		copyFileSync("etc/userdir_skeleton/.npmrc", homeDir + ".npmrc"); // settings for npm
 		
 		//copyFileSync("etc/userdir_skeleton/testfile.txt", homeDir + "testfile.txt");
 		
@@ -311,10 +311,15 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		chmodrSync(homeDir + ".prod", "770");
 		chownrDirSync(homeDir + ".prod", uid, gid);
 		
+		// Create a directory where npm can install packages globally
+		fs.mkdirSync(homeDir + ".npm-packages");
+		chmodrSync(homeDir + ".npm-packages", "770");
+		chownrDirSync(homeDir + ".npm-packages", uid, gid);
 	
-		var url_user = UTIL.urlFriendly(username);
 		
 		// Create nginx profile
+		var url_user = UTIL.urlFriendly(username);
+		
 		var nginxProfile = fs.readFileSync("./etc/nginx/user.webide.se.nginx", ENCODING);
 		nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
 		nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
