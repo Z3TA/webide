@@ -63,7 +63,7 @@ var log; // Using small caps because it looks and feels better
 	
 	//console.log('Starting directory: ' + dir + " lastFolder=" + lastFolder);
 	
-	if(lastFolder == "jzedit") {
+	if(lastFolder != "server") {
 		try {
 			process.chdir('./server');
 			//console.log('New directory: ' + process.cwd());
@@ -71,6 +71,7 @@ var log; // Using small caps because it looks and feels better
 		catch (err) {
 			console.log('chdir: ' + err);
 		}
+		
 	}
 })();
 
