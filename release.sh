@@ -52,6 +52,10 @@ rm -rf temp/release/linux/makebundle.js
 rm -rf temp/release/linux/changeset.js
 rm -rf temp/release/linux/update_version.js
 
+echo "Removing unused fonts"
+find temp/release/linux/client/gfx/font/ ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
+find temp/release/linux/client/gfx/font/ -type d -empty -delete
+
 echo "Copy over version.inc"
 cp version.inc temp/release/linux/
 
