@@ -52,6 +52,9 @@ defaults = defaults.replace("zeta@zetafiles.org", ADMIN_EMAIL);
 defaults = defaults.replace("webide.se", HOSTNAME);
 fs.writeFileSync("./server/default_settings.js", defaults);
 
+// Set hostname
+fs.writeFileSync("/etc/hostname", HOSTNAME + "\n");
+
 
 // Install apparmor for extra security, each user will have their own apparmor profile that only allow them to access their home dir
 exec("apt install apparmor -y");
