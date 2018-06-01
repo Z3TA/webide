@@ -38,19 +38,9 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
-Testin Windows release
+By getting rid of nw.js I can make the package super small!
 
 Instructions for self hosting
-
-Updating the app on chrome web store ...
-
-Add: A free signup is needed for cloud functionality. But if you just want to use basic features you can click "Already have an account" and then "Cancel" on the login screen.
-
-
-Update promo images to make it look more like a editor/IDE. {} brackets and lines of code
-
-Writing a blog post about adding the editor to chrome web store.
-
 
 
 
@@ -74,6 +64,14 @@ JZedit does Not use the DOM (content-editable) for text rendering like other web
 
 todo
 ----
+
+Make the spellchecker work on therver.
+
+Compleatly ditch nw.js
+
+Use node-pty insted of pty.js and try to get Terminal to work on Windows
+
+Update promo images on Chrome app store to make it look more like a editor/IDE. {} brackets and lines of code
 
 Google drive integration
 
@@ -533,6 +531,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+When you login as another user and get user.send, for example when using the terminal. You get double messages!
 
 When removing lines using backspace, function locations doesn't seem to be updated!
 
@@ -2430,6 +2430,15 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+
+---
+Able to edit a file with sudo. eg sudo jzedit /etc/somefile
+runs a script that tries to located a jzedit server, and if the same user (as system user) is logged in, 
+the server sends the file to the editor client.
+And when the file is saved, the sudo script recives the file and saves it.
+And finally when the file is closed, the sudo script exits.
+---
 
 Authenitcation:
 Support SAML 2.0 Federation at a minimum but OAuth 2.0 or OpenID Connect 1.0 preferably. Also supporting SCIM provisioning would be a plus
