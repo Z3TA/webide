@@ -27,6 +27,7 @@
     "mammoth": "^1.4.6",
     "marked": "^0.4.0",
     "ncp": "^2.0.0",
+    "nodehun": "^2.0.12",
     "nodemailer": "^2.6.4",
     "nodemailer-smtp-transport": "^2.7.2",
     "posix": "^4.1.2",

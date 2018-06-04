@@ -16,6 +16,7 @@ var API = require("./server_api.js");
 //API.test = require("./plugin/test.js"); // Make sure the files have read persmission!
 API.SSG = require("./plugin/static_site_generator/ssg-api.js");
 API.mercurial = require("./plugin/mercurial.js");
+API.spellcheck = require("./plugin/spellcheck/spellcheck.js");
 
 if(process.platform !== "win32") {
 API.terminal = require("./plugin/terminal.js");

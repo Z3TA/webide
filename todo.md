@@ -38,6 +38,15 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+Make the spellchecker work on therver.
+
+move spellchecker to server
+Make spellchecker work on server-side and use node_modules instead of compiled file.
+
+upgrade to latest nw.js
+
+Compleatly ditch nw.js
+
 By getting rid of nw.js I can make the package super small!
 
 Instructions for self hosting
@@ -78,11 +87,9 @@ git push webide
 todo
 ----
 
+new line btw right click to show menu and drag files here
+
 Some multiplayer game examples. like multiplayer snake
-
-Make the spellchecker work on therver.
-
-Compleatly ditch nw.js
 
 Use node-pty insted of pty.js and try to get Terminal to work on Windows
 
@@ -120,11 +127,6 @@ Make some multiplayer game exampes
 in terminal, when selecting text and pressing delete
 
 write a test for starting and stopping nodejs processes
-
-move spellchecker to server
-Make spellchecker work on server-side and use node_modules instead of compiled file.
-
-upgrade to latest nw.js
 
 fix problem: npm deletes unknown module dirname (which is used by nw.js)
 Remove all dependendcies on dirname !?

@@ -6,24 +6,12 @@
 	*/
 	"use strict";
 	
-	console.log("spellChecker.js");
-	
-	if(RUNTIME != "nw.js") {
-		console.warn("Spell-checking currently only works in nw.js!");
-		return;
-	}
-	if(RUNTIME == "nw.js") {
-		if(!process.versions['node-webkit'].match(/^0\.12\.*/)) {
-			console.warn("Spellchecker not yet supported in nw.js later then 0.12.x");
-			return;
-		}
-	}
-	
-
-	if(EDITOR.settings.enableSpellchecker===undefined) {
-		// Add ourself to settings
-		EDITOR.settings.enableSpellchecker = true;
-	}
+	// Add plugin to editor
+	EDITOR.plugin({
+		desc: "Spellcheck using Nodehun",
+		load: loadSpellchecker,
+		unload: unloadSpellchecker,
+	});
 	
 	/*
 	
@@ -47,54 +35,54 @@
 	
 	var waitTimer;
 	var isWaiting = false;
-	var wordsInQueue = 0; // Only adds to this country if we are asking a worker.
+	var wordsInQueue = 0;
 	var waitBeforeSpellcheckingMiddleOfWord = 1200;  // So that we do not spell-check a word that we are currently typing
-	var numWorkers = 1; // How many workers to use (one for every cpu core!?)
-	var worker = [];
-	var workersReady = 0;
 	var menuItem;
+	var enabled = false;
 	
-	EDITOR.on("start", spellCheckerMain);
-	
-	function spellCheckerMain() {
+	function loadSpellchecker() {
 		
-		console.log("spellCheckerMain");
+		menuItem = EDITOR.addMenuItem("Spellcheck ", toggleSpellCheck);
 		
-		menuItem = EDITOR.addMenuItem("Spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on"), toggleSpellCheck);
+		CLIENT.on("loginSuccess", loadDictionaries);
 		
-		for(var i=0; i<numWorkers; i++) {
-			loadWorker(useLanguages);
-		}
-
 	}
 	
-	function allWorkersReady() {
+	function loadDictionaries(login) {
+		CLIENT.cmd("spellcheck.languages", useLanguages, function(err, dictsLoaded) {
+			if(err && dictsLoaded == 0) return alertBox("Failed to load spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
+			else if(dictsLoaded != useLanguages.length) alertBox("Failed to load all spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
+			
+			EDITOR.on("fileChange", runSpellCheck);
+			
+			EDITOR.on("fileOpen", spellCheckFile);
+			
+			EDITOR.on("mouseClick", showSpellSuggestion);
+			
+			// Spellcheck currently opened files
+			for(var file in EDITOR.files) {
+				runSpellCheck(EDITOR.files[file]);
+			}
+		});
+	}
+	
+	function unloadSpellchecker() {
+		EDITOR.removeEvent("fileChange", runSpellCheck);
 		
-		console.log("All spell-check workers ready!");
+		EDITOR.removeEvent("fileOpen", spellCheckFile);
 		
-		EDITOR.on("fileChange", runSpellCheck);
+		EDITOR.removeEvent("mouseClick", showSpellSuggestion);
 		
-		EDITOR.on("fileOpen", spellCheckFile);
-		
-		EDITOR.on("mouseClick", showSpellSuggestion);
-		
-		console.log("All workers ready!");
-		
-		// Spellcheck currently opened files
-		for(var file in EDITOR.files) {
-			runSpellCheck(EDITOR.files[file]);
-		}
-		
+		EDITOR.removeMenuItem(menuItem);
 	}
 	
 	function toggleSpellCheck() {
-		EDITOR.settings.enableSpellchecker = EDITOR.settings.enableSpellchecker ? false : true;
-		console.log("EDITOR.settings.enableSpellchecker=" + EDITOR.settings.enableSpellchecker);
 		
-		menuItem.innerHTML = "Spellchecker " + (EDITOR.settings.enableSpellchecker ? "off":"on");
+		var enabled = enabled ? false : true;
 		
-		if(EDITOR.settings.enableSpellchecker) {
-			
+		EDITOR.updateMenuItem(menuItem, enabled, "Spellcheck");
+		
+		if(enabled) {
 			// Begin spell-checking all opened files
 			
 			var change = "toggleSpellcheckerOn"
@@ -108,96 +96,17 @@
 			for(var path in EDITOR.files) {
 				if(EDITOR.currentFile != EDITOR.files[path]) runSpellCheck(EDITOR.files[path], change, text, index, row, col);
 			}
-			
-		}
+			}
 		
 		EDITOR.hideMenu();
 		}
 
-	
-	function loadWorker(languages) {
-		var childProcess = require("child_process");
-		
-		var path = require("path");
-		
-		var pathToWorker = path.join(require("dirname"), "/client/plugin/spellcheck/spellcheck_worker.js");
-		
-		console.log("pathToWorker=" + pathToWorker);
-		
-		var id = worker.push(childProcess.fork(pathToWorker, [languages.join(";")])) -1;
-		
-		console.log("spell-check worker " + id + "/" + worker.length + " loaded!");
-
-		worker[id].on('message', worker_message);
-		worker[id].on('error', worker_error);
-		worker[id].on('exit', worker_exit);
-		
-		//worker[id].send("foo;test;0;0"); // Send test
-		
-	}
-	
-
-	function worker_message(data) {
-		
-		console.log("spell-check worker data:" + data);
-		
-		if(data == "ready!") {
-			workersReady++;
-		
-			if(workersReady == numWorkers) allWorkersReady();
-		}
-		else {
-			var arr = data.split(";");
-			var filePath = arr[0];
-			var word = arr[1];
-			var row = arr[2];
-			var col = arr[3];
-			var textLength = arr[4];
-			var spell = arr[5]; // Added by the worker, * for correct, or a (list?) of suggestions
-			
-			
-			var correct = (spell == "*");
-			
-			if(correct) {
-				cache[word] = true;
-			}
-			else {
-				// All dictionaries think it's spelled wrong
-				cache[word] = false;
-				misspelled[word] = spell;
-				
-				spellingError(filePath, word, row, col, textLength);
-			}
-			
-			
-			wordsInQueue--;
-			//console.log("wordsInQueue=" + wordsInQueue);
-			if(wordsInQueue==0) {
-				EDITOR.renderNeeded();
-			}
-			
-			
-			
-			
-		}
-	}
-
-	function worker_error(code) {
-		console.warn("spell-check worker error:" + code);
-	}
-
-	function worker_exit(code) {
-		throw new Error("spell-check worker exit:" + code + "\nSee spellcheck-worker-debug.log");
-	}
-		
 	function spellCheckFile(file) {
 		runSpellCheck(file);
 	}
 	
-	
 	function showSpellSuggestion(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo) {
-
-		if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
+if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, and right
 
 		var file = EDITOR.currentFile;
 		
@@ -225,7 +134,6 @@
 			*/
 			
 			function replaceWord() {
-				
 				EDITOR.hideMenu();
 				
 				console.log("replacing " + word + " for " + suggestion);
@@ -241,19 +149,11 @@
 				file.insertText(suggestion);
 				
 				EDITOR.renderNeeded();
-				
+				}
 			}
-			
-		}
-
-		
-		
-	}
-	
+}
 	
 	function runSpellCheck(file, change, text, index, row, col) {
-		
-		if(EDITOR.settings.enableSpellchecker === false) return;
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
@@ -386,9 +286,7 @@
 		}
 	}
 	
-	
 	function spellingError(filePath, origWord, row, col, textLength) {
-		
 		var file = EDITOR.files[filePath];
 		
 		if(file === undefined) {
@@ -431,12 +329,8 @@
 				//EDITOR.renderRow(row);
 					}
 				}
-				
-			
-		}
-
-			
-	}
+				}
+}
 	
 	function spellCheck(file, word, row, col) {
 		/*
@@ -471,25 +365,29 @@
 			if(cache[word] == false) spellingError(file.path, word, row, col);
 		}
 		else {
-			
-			/* 
-				Tell any of the workers to spell-check the word
-			*/
-			
-			var workerId = wordsInQueue % numWorkers;
-			
-			var data = file.path + ";" + word + ";" + row + ";" + col + ";" + file.text.length;
-			
-			//console.log("Sending data to spell-check worker " + workerId + "\ndata=" + data);
-			
-			worker[workerId].send(data);
 			wordsInQueue++;
-			
+			CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
+				
+				if(spell.correct) {
+					cache[word] = true;
+				}
+				else {
+					// All dictionaries think it's spelled wrong
+					cache[word] = false;
+					misspelled[word] = spell.suggestion;
+					
+					spellingError(file.path, word, row, col, file.text.length);
+				}
+				
+				wordsInQueue--;
+				//console.log("wordsInQueue=" + wordsInQueue);
+				if(wordsInQueue==0) {
+					EDITOR.renderNeeded();
+				}
+				
+			});
 		}
-		
 		//console.timeEnd("spell-check " + word);
-
-	}
+}
 	
-
 })();
