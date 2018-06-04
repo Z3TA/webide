@@ -1521,7 +1521,7 @@ if(callback) return callback(err, path);
 				}
 			*/
 			
-			var friendlyString = "Right click or long-touch to show the menu!"
+			var friendlyString = "Right click or long-touch to show the menu!\nUpload files and folders by draging them here"
 			
 			if(friendlyString) {
 				// Place the string in the center
@@ -4259,7 +4259,7 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 	}
 	
 	EDITOR.fileExplorer = function fileExplorerTool(directory) {
-		console.log("Calling fileExplorer listeners (" + EDITOR.eventListeners.fileExplorer.length + ")");
+		console.log("Calling fileExplorer listeners (" + EDITOR.eventListeners.fileExplorer.length + ") to explore directory=" + directory);
 		
 		var ret = false;
 		
@@ -5473,6 +5473,40 @@ CLIENT.cmd("mirror", {
 		
 		if(fileDropEvent.dataTransfer.files.length == 0) return alertBox("The dropped object doesn't seem to be a file!");
 		
+		console.log( fileDropEvent.dataTransfer);
+		
+		var items = fileDropEvent.dataTransfer.items;
+		var files = fileDropEvent.dataTransfer.files;
+		
+		console.log("items.length=" + items.length + " files.length=" + files.length);
+		
+		var filesToSave = 0;
+		var filesSaved = 0;
+		var lastPath; // The last path if many files where saved
+		var uploadErrors = []; // List of errors during the upload
+		var fileToOpen; // Open this file (if specified) when all files have been uploaded
+		var foldersToRead = 0;
+		var foldersRead = 0;
+		var done = false;
+		
+		if(items.length > 0) {
+			var progressBar = document.createElement("progress");
+			progressBar.max = items.length;
+			progressBar.value = 0;
+			var footer = document.getElementById("footer");
+			footer.appendChild(progressBar);
+			EDITOR.resizeNeeded(); // To show the progress bar
+			
+			for (var i=0; i<items.length; i++) {
+				// webkitGetAsEntry is where the magic happens
+				var item = items[i].webkitGetAsEntry();
+				if (item) {
+					traverseFileTree(item);
+				}
+			}
+			return;
+		}
+		
 		var file = fileDropEvent.dataTransfer.files[0];
 		var filePath = file.path || file.name;
 		
@@ -5490,7 +5524,7 @@ CLIENT.cmd("mirror", {
 			}
 			
 			if(!handled) promptBox("Do you want to save the dropped " + fileType + " file ?", false, filePath, function(path) {
-				if(path) saveFileFunction(path, function(err, path) {
+				if(path) saveFile(file, path, false, function(err, path) {
 					if(err) alertBox(err.message);
 					else alertBox("The file has been saved: " + path);
 				});
@@ -5504,30 +5538,115 @@ CLIENT.cmd("mirror", {
 		return false;
 		
 		
-		function saveFileFunction(filePath, callback) {
+		function traverseFileTree(item, path) {
+			path = path || "/upload/";
+			if (item.isFile) {
+				// Get file
+				filesToSave++;
+				
+				item.file(function(file) {
+					var filePath = path + file.name;
+					console.log("File:", filePath);
+					if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
+					saveFile(file, path + file.name, true, fileSaved);
+				});
+			} else if (item.isDirectory) {
+				// Get folder contents
+				var dirReader = item.createReader();
+				foldersToRead++;
+				dirReader.readEntries(function(entries) {
+					foldersRead++;
+					progressBar.value = filesSaved+foldersRead;
+					for (var i=0; i<entries.length; i++) {
+						traverseFileTree(entries[i], path + item.name + "/");
+					}
+					if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
+				});
+			}
+			progressBar.max = Math.max(progressBar.max, filesToSave+foldersToRead);
+		}
+		
+		function fileSaved(err, path) {
+			if(err) {
+console.error(err);
+				uploadErrors.push(err);
+			}
+			filesSaved++;
+			progressBar.value = filesSaved+foldersRead;
+			if(path) lastPath = path;
+			if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
+		}
+		
+		function uploadComplete() {
+			console.log("Upload complete! filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
+			
+			if(done) return console.warn("Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
+			done = true;
+			
+			if(lastPath == undefined) {
+				var failMsg = "Upload failed!";
+				for (var i=0; i<uploadErrors.length; i++) failMsg += "\n" + uploadErrors[i];
+				return alertBox(failMsg);
+			}
+			var folder = UTIL.getDirectoryFromPath(lastPath);
+			var folders = UTIL.getFolders(folder);
+			var baseFolder = folders[2];
+			
+			footer.removeChild(progressBar);
+			
+			if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
+			else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
+			
+			if(fileToOpen) EDITOR.openFile(fileToOpen);
+			
+			EDITOR.resizeNeeded(); // To get rid of progress bar
+			
+		}
+		
+		function saveFile(file, filePath, createPath, callback) {
+			if(typeof filePath != "string") throw new Error("filePath=" + filePath + " (" + typeof filePath + ") needs to be a string!");
+			
+			if(typeof createPath == "function" && callback == undefined) {
+				callback = createPath;
+				createPath = false;
+			}
+			
+			if(typeof createPath != "boolean") throw new Error("createPath=" + createPath + " (" + typeof createPath + ") needs to be a boolean!");
+			
 			var reader = new FileReader();
 			reader.onload = function (readerEvent) {
 				var data = readerEvent.target.result;
 				
 				// Specifying encoding:base64 will magically convert to binary! 
 				// We do have to remove the data:image/png metadata though!
-				data = data.replace("data:" + fileType + ";base64,", "");
-				EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+				data = data.replace("data:" + file.type + ";base64,", "");
+				
+				if(createPath) {
+					var folder = UTIL.getDirectoryFromPath(filePath);
+					EDITOR.createPath(folder, function(err) {
+						if(err) {
+							if(callback) return callback(err);
+							else throw(err);
+						}
+						saveToDisk();
+					});
+				}
+				else saveToDisk();
+				
+				function saveToDisk() {
+					EDITOR.saveToDisk(filePath, data, callback, false, "base64");
+				}
 			};
 			reader.readAsDataURL(file); // For binary files (will be base64 encoded)
-			
 		}
 		
 		function notSupported(fileType) {
-			
 			return fileType && // Some files will have fileType=="" (most of them we want to open)
 			fileType.indexOf("text") == -1 && 
 			fileType.indexOf("javascript") == -1 && 
 			fileType.indexOf("xml") == -1 && 
 			fileType.indexOf("json") == -1;
-			
 		}
-		
 		
 		function readFile() {
 			

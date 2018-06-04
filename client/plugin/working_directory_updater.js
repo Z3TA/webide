@@ -43,6 +43,12 @@ EDITOR.plugin({
 		function search(currentFolder) {
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 				
+				if(err && err.code == "ENOENT") {
+					// File/folder has probably been deleted!
+					console.error(err);
+					return;
+}
+				
 				if(err) throw err;
 				
 				console.log("Checking if working directory: " + currentFolder);

@@ -59,11 +59,26 @@ JZedit has no build step and you can use the editor to make changes to the edito
 JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it fast and performant.
 
 
+Git server
+Upload your work. git add remote webide
+yourname.webide.se if you want it to be private
+or just webide.se if you want it to be public
+
+Then go to webide.se/repo/name-of-your-repo
+
+There you can develop and commit, or just use it for free storage and public access :)
+
+
+git push webide
+
+
 
 
 
 todo
 ----
+
+Some multiplayer game examples. like multiplayer snake
 
 Make the spellchecker work on therver.
 
@@ -2431,6 +2446,7 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+Preview markdown files
 
 ---
 Able to edit a file with sudo. eg sudo jzedit /etc/somefile

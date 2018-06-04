@@ -156,6 +156,8 @@ var UTIL = {
 			
 		*/
 		
+		if(typeof fullPath != "string") throw new Error("fullPath=" + fullPath + " (" + typeof fullPath + ") needs to be a string!\n" + JSON.stringify(fullPath));
+		
 		if(includeHostInfo == undefined) includeHostInfo = true;
 		
 		fullPath = fullPath.trim(); // Remove white space before and after

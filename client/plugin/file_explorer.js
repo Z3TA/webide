@@ -94,7 +94,10 @@
 	function openFileExplorerTool(directory) {
 		// The user wants to explore ...
 		// ATM this is the only file explorer, so always take the job!
-		toggleFileExplorer();
+		
+		if(typeof directory == "string") EDITOR.changeWorkingDir(directory);
+		
+		toggleFileExplorer(true);
 		return true; 
 	}
 	
