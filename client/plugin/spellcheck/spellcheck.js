@@ -53,26 +53,11 @@
 			if(err && dictsLoaded == 0) return alertBox("Failed to load spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
 			else if(dictsLoaded != useLanguages.length) alertBox("Failed to load all spellcheck dictionaries " + JSON.stringify(useLanguages) + ": " + err.message);
 			
-			EDITOR.on("fileChange", runSpellCheck);
-			
-			EDITOR.on("fileOpen", spellCheckFile);
-			
-			EDITOR.on("mouseClick", showSpellSuggestion);
-			
-			// Spellcheck currently opened files
-			for(var file in EDITOR.files) {
-				runSpellCheck(EDITOR.files[file]);
-			}
 		});
 	}
 	
 	function unloadSpellchecker() {
-		EDITOR.removeEvent("fileChange", runSpellCheck);
-		
-		EDITOR.removeEvent("fileOpen", spellCheckFile);
-		
-		EDITOR.removeEvent("mouseClick", showSpellSuggestion);
-		
+		disable();
 		EDITOR.removeMenuItem(menuItem);
 	}
 	
@@ -82,25 +67,38 @@
 		
 		EDITOR.updateMenuItem(menuItem, enabled, "Spellcheck");
 		
-		if(enabled) {
-			// Begin spell-checking all opened files
-			
-			var change = "toggleSpellcheckerOn"
-			var text = "";
-			var index = 0;
-			var row = 0;
-			var col = 0;
-			
-			if(EDITOR.currentFile) runSpellCheck(EDITOR.currentFile, change, text, index, row, col); // Start with the file in view
-			
-			for(var path in EDITOR.files) {
-				if(EDITOR.currentFile != EDITOR.files[path]) runSpellCheck(EDITOR.files[path], change, text, index, row, col);
-			}
-			}
+		if(enabled) enable();
+		else disable();
 		
 		EDITOR.hideMenu();
 		}
 
+	function enable() {
+		// Begin spell-checking all opened files
+		
+		var change = "toggleSpellcheckerOn"
+		var text = "";
+		var index = 0;
+		var row = 0;
+		var col = 0;
+		
+		if(EDITOR.currentFile) runSpellCheck(EDITOR.currentFile, change, text, index, row, col); // Start with the file in view
+		
+		for(var path in EDITOR.files) {
+			if(EDITOR.currentFile != EDITOR.files[path]) runSpellCheck(EDITOR.files[path], change, text, index, row, col);
+		}
+		
+		EDITOR.on("fileChange", runSpellCheck);
+		EDITOR.on("fileOpen", spellCheckFile);
+		EDITOR.on("mouseClick", showSpellSuggestion);
+	}
+	
+	function disable() {
+		EDITOR.removeEvent("fileChange", runSpellCheck);
+		EDITOR.removeEvent("fileOpen", spellCheckFile);
+		EDITOR.removeEvent("mouseClick", showSpellSuggestion);
+	}
+	
 	function spellCheckFile(file) {
 		runSpellCheck(file);
 	}
