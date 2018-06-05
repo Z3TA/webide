@@ -156,11 +156,17 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 				file.moveCaretToIndex(start);
 				
 				// Delete the word
-				for(var i=0; i<word.length; i++) {
-					file.deleteCharacter();
-				}
+				file.deleteTextRange(start, start + word.length - 1);
 				
 				file.insertText(suggestion);
+				
+				/*
+					console.log("waves yo? start=" + start + " suggestion.length=" + suggestion.length);
+					for(var i=start, pos; i<start+suggestion.length; i++) {
+					pos = file.rowFromIndex(i);
+					console.log("i=" + i + " row=" + pos.row + " col=" + pos.col + " char=" + file.text.charAt(i) + " wave=" + file.grid[pos.row][pos.col].wave);
+					}
+				*/
 				
 				EDITOR.renderNeeded();
 				}
@@ -168,6 +174,8 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 }
 	
 	function runSpellCheck(file, change, text, index, row, col) {
+		
+		console.log("runSpellCheck change=" + change);
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
