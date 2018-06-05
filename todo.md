@@ -38,14 +38,12 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
-Make the spellchecker work on therver.
 
-move spellchecker to server
-Make spellchecker work on server-side and use node_modules instead of compiled file.
+same release for all platforms
 
-upgrade to latest nw.js
+ditch start.bat and make start.js work on all platforms.
 
-Compleatly ditch nw.js
+
 
 By getting rid of nw.js I can make the package super small!
 
