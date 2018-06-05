@@ -63,7 +63,11 @@
 	
 	function toggleSpellCheck() {
 		
-		var enabled = enabled ? false : true;
+		console.log("Currently enabled=" + enabled);
+		
+		enabled = enabled ? false : true;
+		
+		console.log("Change status to enabled=" + enabled);
 		
 		EDITOR.updateMenuItem(menuItem, enabled, "Spellcheck");
 		
