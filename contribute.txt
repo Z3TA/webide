@@ -1,23 +1,28 @@
 Contributing
 ============
-
 If you make changes to this software, feel free to send them to zeta@zetafiles.org
 
 If it's a big update, (more then a couple lines of code), you also have to include the following note:
-"I give you full irrevocable copyright for this code, including but not limited to the right to sell, and distribute."
+"I give you full irrevocable copy rights for this code, including but not limited to the right to sell, and distribute."
 
 
-Get the source code
--------------------
-Install Mercurial SCM: https://www.mercurial-scm.org (try "hg --version" in command-prompt/terminal to see if it exists)
+Mercurial 
+---------
+Mercurial is a free, distributed source control management tool.
 
+We currently support version 3.7.3 (the one in Ubuntu LTS)
+
+windows: https://www.mercurial-scm.org/release/windows/Mercurial-3.7.3-x64.exe
+linux: https://www.mercurial-scm.org/release/mercurial-3.7.3.tar.gz
+
+Follow the install instructions. Make sure hg is added to "PATH" !
+
+
+Get the jzedit source code
+--------------------------
 Clone the project: 
 cd my-projects (where you want to place the files)
 hg clone https://hg.webtigerteam.com/repo/jzedit/
-
-
-
-
 
 
 Mercurial commands:
@@ -46,7 +51,6 @@ $ hg export 123:150 > changes.txt
 
 Importing (notes to self)
 -------------------------
-
 Guide from: https://www.mercurial-scm.org/guide
 
 # First clone the repository/folder to have an integration sandbox
