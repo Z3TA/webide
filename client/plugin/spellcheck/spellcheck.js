@@ -101,6 +101,18 @@
 		EDITOR.removeEvent("fileChange", runSpellCheck);
 		EDITOR.removeEvent("fileOpen", spellCheckFile);
 		EDITOR.removeEvent("mouseClick", showSpellSuggestion);
+		
+		// clear text decorations
+		for(var filePath in EDITOR.files) clearFile(EDITOR.files[filePath])
+		
+		function clearFile(file) {
+			for(var row = 0; row < file.grid.length; row++) {
+				for(var col = 0; col < file.grid[row].length; col++) {
+					file.grid[row][col].wave = false;
+				}
+			}
+		}
+		EDITOR.renderNeeded();
 	}
 	
 	function spellCheckFile(file) {
@@ -369,6 +381,7 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 		else {
 			wordsInQueue++;
 			CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
+				if(!enabled) return;
 				
 				if(spell.correct) {
 					cache[word] = true;
