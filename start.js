@@ -40,6 +40,24 @@ checkServer("127.0.0.1", serverChecked);
 var adresses = getIpv4Ips();
 for(var i=0; i<adresses.length; i++) checkServer(adresses[i], serverChecked);
 
+var getArg = require("./shared/getArg.js");
+var no_module_check = !!getArg(["no-module-check", "no-module-check"]);
+
+console.log("no_module_check=" + no_module_check);
+if(!no_module_check) {
+	// Check if node modules are installed
+	var fs = require("fs");
+	fs.readdir("./node_modules/", function(err, files) {
+		if(err && err.code == "ENOENT") {
+			console.log("\nYou need to npm install module dependencies! (node_modules folder is emty)\n"
+			 + "Or use the flag -no-module-check\n"
+			 +	"Type the following in the termial/command-line to install the modules:");
+			console.log("npm install");
+			process.exit(1);
+		}
+	});
+}
+
 
 function serverChecked(online, ip, port) {
 	//log("server ip:" + ip + " is", online ? "ON" : "offline");
