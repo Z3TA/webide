@@ -1348,6 +1348,8 @@ if(callback) return callback(err, path);
 			return; // resize always re-renders!
 		}
 		
+		if(ctx == undefined) return; // If render runs too early (Uncaught TypeError: Cannot set property 'fillStyle' of undefined)
+		
 		// Fix blurryness for screens with high pixel ratio
 		var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		if(pixelRatio !== 1) {
