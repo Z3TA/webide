@@ -44,7 +44,7 @@
     "uglify-js": "^3.3.28"
   },
   "scripts": {
-    "start": "./start.js",
-    "server": "./server/server.js"
+    "start": "node ./start.js",
+    "server": "node ./server/server.js"
   }
 }
