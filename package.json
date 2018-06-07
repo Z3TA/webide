@@ -42,5 +42,9 @@
   },
   "devDependencies": {
     "uglify-js": "^3.3.28"
+  },
+  "scripts": {
+    "start": "./start.js",
+    "server": "./server/server.js"
   }
 }
