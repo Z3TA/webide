@@ -3,8 +3,3 @@ Copyright (c) Johan Zetterberg, All rights reserved! Do NOT distribute!
 
 The software is provided "as is" without any warranty. Use at your own risk!
 Under no circumstance should the authors be hold responsible for any damages that this software might cause.
-
-You are Not allowed to make copies (except backups and version control) of the software. And you are Not allowed to distribute the software.
-
-You are allowed to make changes to the software, but are Not allowed to distribute the changes (for example bug fixes, new features, or derivative work).
-You are however welcome to send patches (to the authors of this software), with a note granting full copyright permission for the code you add.

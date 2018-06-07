@@ -2,11 +2,12 @@ Contributing
 ============
 If you make changes to this software, feel free to send them to zeta@zetafiles.org
 
-If it's a big update, (more then a couple lines of code), you also have to include the following note:
-"I give you full irrevocable copy rights for this code, including but not limited to the right to sell, and distribute."
+If it's a big update, (for example a new plugin), you also have to include the following note:
+"I give you full irrevocable copy rights for this code, including but not limited to the right to sell, distribute, and make changes."
+Or use a permissive licence such as MIT, Apache, BSD, Mozilla lincenses, with a disclaimer that it only applies to *your* code/plugin.
 
 
-Mercurial 
+Mercurial
 ---------
 Mercurial is a free, distributed source control management tool.
 
@@ -48,7 +49,6 @@ $ hg export 4 > change4.diff
 $ hg export 123:150 > changes.txt
 
 
-
 Importing (notes to self)
 -------------------------
 Guide from: https://www.mercurial-scm.org/guide
@@ -64,7 +64,6 @@ $ hg import change4.diff
 
 $ cd ../project
 $ hg pull ../integration
- 
 
 
 Support and maintenance
@@ -85,7 +84,6 @@ EDITOR.addTest(function myTest(callback) {
   return callback(false); // Test failed
   throw new Error(""); // Test failed
 }
-
 
 
 Documentation

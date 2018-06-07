@@ -3003,6 +3003,10 @@ Integrated testing and code coverage tools. See which lines that wasn't executed
 Need though
 -----------
 
+Tooling for managers to measure productivity. (Only problem productivity can't  be measured simply from LOC, commits, tickets, etc)
+Could however use self-assesments like "How productive do you feel today ? " "What makes you more productive?" "What makes you less productive?"
+
+
 hmm ... Should all files be opened as streams!? ReadableStream 
 
 Give string variables and number variables different colors ? green (like "string") for string variables and blue for numbers.

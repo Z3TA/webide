@@ -1,3 +1,6 @@
+Notes to self for releasing a chrome app
+
+
 Chrome apps for Chromebooks
 ===========================
 
@@ -13,7 +16,7 @@ Then there's also "add to shelf" or "add to home screen" A2HS apps that also qua
 A2HS needs a Service worker and uses manifest.webmanifest 
 
 Also note webapp manifest (manifest.webapp), not to be confused with A2HS, 
-that I think browser used for a short period but is now depreciated and A2HS (manifest.webmanifest) is used instead.
+that I think browsers used for a short period but is now depreciated and A2HS (manifest.webmanifest) is used instead.
 See: https://developer.mozilla.org/en-US/docs/Archive/B2G_OS/Firefox_OS_apps/Building_apps_for_Firefox_OS/Manifest
 
 

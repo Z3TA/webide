@@ -1,12 +1,19 @@
 
+Welcome to the web tiger team!
+
+
 JZedit/webIDE
 =============
 
-This is a text/code editor/IDE that specialize in JavaScript, CSS and HTML.
+JZedit is a text/code editor/IDE geared for JavaScript, CSS, HTML and Node.JS development.
 
-See LICENCE.txt to know what you are allowed to do with it.
+Also see LICENCE.txt and contribute.txt.
 
-See contribute.txt on how to send your changes.
+
+webide.se
+---------
+webide.se is the jzedit editor as a hosted service.
+In this file you will find instructions on how to run the editor locally on your computer, or host it on your own server.
 
 
 Install instructions
