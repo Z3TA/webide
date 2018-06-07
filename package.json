@@ -45,6 +45,6 @@
   },
   "scripts": {
     "start": "node ./start.js",
-    "server": "node ./server/server.js"
+    "server": "node ./server/server.js --loglevel=6 --username=admin --password=admin --ip=127.0.0.1 --port=8099 -nochroot"
   }
 }
