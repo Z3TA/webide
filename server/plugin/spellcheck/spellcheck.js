@@ -1,6 +1,21 @@
 
+var nodehunExist = true;
+try {
 var Nodehun = require("nodehun");
-var fs = require("fs");
+}
+catch(err) {
+	nodehunExist = false;
+	console.warn("Can not find module nodehun!");
+}
+
+if(!nodehunExist) {
+	var SPELLCHECK = {};
+	SPELLCHECK.languages = nodehunNotInstalled
+	SPELLCHECK.check = nodehunNotInstalled
+}
+else {
+	
+	var fs = require("fs");
 
 var SPELLCHECK = {};
 
@@ -77,7 +92,7 @@ SPELLCHECK.check = function check(user, json, callback) {
 		}
 	}
 }
-
+}
 
 function loadDictionary(lang, callback) {
 	console.log("Loading dictionary " + lang);
@@ -149,5 +164,9 @@ function readFromDisk(path, callback) {
 		else callback(null, buffer);
 	});
 }
+
+function nodehunNotInstalled(user, json, callback) {
+	callback(new Error("nodehun module is not installed on the server!"));
+};
 
 module.exports = SPELLCHECK;

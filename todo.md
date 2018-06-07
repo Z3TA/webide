@@ -49,7 +49,9 @@ By getting rid of nw.js I can make the package super small!
 
 Instructions for self hosting
 
-
+npm install jzedit !?
+npm start
+(need a way to automatically generate semver version !?)
 
 What makes JZeidt better then existing editors/IDE's, or what does it do differently !?
 

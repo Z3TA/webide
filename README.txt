@@ -53,6 +53,12 @@ It should come with a packet manager called npm.
 
 4. Install the dependencies by typing "npm install" and hit enter in the command prompt.
 
+5. If the npm install fails you probably need to install build dependencies for Windows!
+You probably need both Visual Studio build tools 2015 and Python 2.7
+Easiest method is to open a command prompt (Click on start menu => run, then type "cmd.exe")
+but right click on "cmd.exe" select "Run as administrator". Then type:
+npm install --global --production windows-build-tools
+
 After nodejs and all dependencies are installed, double click (run) start.bat
 
 "install": Double click (run) create_shortcut.vbs, it will place a shortcut to start.bat on your desktop.
