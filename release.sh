@@ -19,6 +19,7 @@ rm -rf temp/release/
 echo "Create the temporary directory if it doesn't exist"
 mkdir -p temp/release/linux
 mkdir -p temp/release/server
+mkdir -p temp/release/npm
 
 echo "Copy the files"
 hg clone . temp/release/linux/
@@ -72,6 +73,9 @@ sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
+echo "Make a npm release"
+cp -rf temp/release/linux/. temp/release/npm/
+
 echo "Clean up the local-desktop release"
 rm -rf temp/release/linux/etc/
 rm -rf temp/release/linux/adduser.js
@@ -92,6 +96,9 @@ rm -rf temp/release/server/linux_launcher.desktop
 rm -rf temp/release/server/osx_start.sh
 rm -rf temp/release/server/start.js
 rm -rf temp/release/server/bin
+
+#echo "Clean up the npm release"
+
 
 cd temp/release/
 
@@ -123,10 +130,13 @@ cd ../../
 echo "Remove files no longer needed"
 rm version.inc
 
-
 # Move the files to www
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+
+#echo "Make NPM release"
+# cd temp/release/npm
+# npm publish
 
 # Update the homepage
 

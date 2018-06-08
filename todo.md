@@ -38,14 +38,10 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+create readme file for npm
 
-same release for all platforms
+npm install -g ?
 
-ditch start.bat and make start.js work on all platforms.
-
-
-
-By getting rid of nw.js I can make the package super small!
 
 Instructions for self hosting
 
@@ -86,6 +82,7 @@ git push webide
 
 todo
 ----
+can I fix Annoying Chrome icon when clicking on the jzedit launcher in Linux ?
 
 new line btw right click to show menu and drag files here
 
@@ -2448,7 +2445,7 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
-Preview markdown files
+Preview markdown files (preview in menu)
 
 ---
 Able to edit a file with sudo. eg sudo jzedit /etc/somefile

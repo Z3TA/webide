@@ -13,7 +13,7 @@ Also see LICENCE.txt and contribute.txt.
 webide.se
 ---------
 webide.se is the jzedit editor as a hosted service.
-In this file you will find instructions on how to run the editor locally on your computer, or host it on your own server.
+In this readme you will find instructions on how to run the editor locally on your computer, or host it on your own server.
 
 
 Install instructions
