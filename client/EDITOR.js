@@ -5502,7 +5502,7 @@ CLIENT.cmd("mirror", {
 		var foldersRead = 0;
 		var done = false;
 		
-		if(items.length > 0) {
+		if(items.length > 1) {
 			var progressBar = document.createElement("progress");
 			progressBar.max = items.length;
 			progressBar.value = 0;
