@@ -1,9 +1,13 @@
 #!/bin/bash
 
+node semver.js
+rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+
 # Get the current version (generates version.inc)
 node changeset.js
 #commit=$(nodejs getCommitId.js)
 commit=$(cat version.inc)
+semver=$(cat semver)
 version=1
 beta=_alpha
 name=jzedit
@@ -22,6 +26,8 @@ hg clone . temp/release/linux/
 echo "Update version"
 node update_version.js ./temp/release/linux/
 # Note: Updates the version in the release files, not the source code (or we would have a commit/version update loop)
+
+sed -i -e "s/\"version\": \"1.0.0\"/\"version\": \"$semver\"/g" temp/release/linux/package.json
 
 echo "Set devMode and toolbar to false"
 sed -i -e 's/devMode: true/devMode: false/g' temp/release/linux/client/EDITOR.js
@@ -50,6 +56,8 @@ rm -rf temp/release/linux/makebundle.js
 rm -rf temp/release/linux/changeset.js
 rm -rf temp/release/linux/update_version.js
 rm -rf temp/release/linux/runtime/
+rm -rf temp/release/linux/semver.js
+rm -rf temp/release/linux/semver
 
 echo "Removing unused fonts"
 find temp/release/linux/client/gfx/font/ ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
