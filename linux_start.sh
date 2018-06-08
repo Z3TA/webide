@@ -8,12 +8,12 @@
 #
 
 # Update the path to the icon
-mv jzedit.desktop jzedit.desktop-bak
-sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" jzedit.desktop-bak > jzedit.desktop
-rm jzedit.desktop-bak
+mv linux.desktop linux.desktop-bak
+sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" linux.desktop-bak > linux.desktop
+rm linux.desktop-bak
 
 # Make it runable again
-chmod +x jzedit.desktop
+chmod +x linux.desktop
 
 
 function startClient {
