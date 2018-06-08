@@ -3852,7 +3852,7 @@ EDITOR.fireEvent("btk");
 				
 				if(parentNode.contains(widget.mainElement)) {
 					wasHidden = false;
-					parentNode.removeChild(widget.mainElement);
+					if(parentNode.contains(widget.mainElement)) parentNode.removeChild(widget.mainElement);
 				}
 				
 				/*

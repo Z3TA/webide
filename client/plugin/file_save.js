@@ -283,7 +283,7 @@
 		if(saveDialog) {
 			
 			var footer = document.getElementById("footer");
-			footer.removeChild(saveDialog);
+			if(footer.contains(saveDialog)) footer.removeChild(saveDialog);
 			
 			//saveDialog.style.display = "none";
 			
