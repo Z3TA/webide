@@ -64,11 +64,24 @@ if(!no_module_check) {
 	var fs = require("fs");
 	fs.readdir("./node_modules/", function(err, files) {
 		if(err && err.code == "ENOENT") {
-			console.log("\nYou need to npm install module dependencies! (node_modules folder is emty)\n"
+			/*
+				console.log("\nYou need to npm install module dependencies! (node_modules folder is emty)\n"
 			 + "Or use the flag -no-module-check\n"
 			 +	"Type the following in the termial/command-line to install the modules:");
 			console.log("npm install");
-			process.exit(1);
+				process.exit(1);
+			*/
+			
+			var exec = require('child_process').exec;
+			log("Attempting to install node modules ...");
+			var child = exec('npm install', function (error, stdout, stderr) {
+				console.log('stdout: ' + stdout);
+				console.log('stderr: ' + stderr);
+				if (error !== null) {
+					console.log('exec error: ' + error);
+				}
+			});
+			
 		}
 	});
 }
@@ -438,8 +451,13 @@ function startClient(ip, port, proto) {
 
 function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 
-	if(typeof callback != "function") throw new Error("No callback function!");
-
+	if(typeof callbackFunction != "function") throw new Error("No callback function!");
+	
+	function callback(err) {
+		if(callbackFunction) callbackFunction(err);
+		callbackFunction = null; // Only callback once!
+	}
+	
 	var childProcess = require("child_process");
 	
 	// You can have different group and user. Default is the user/group running the node process
@@ -523,10 +541,5 @@ function attemptLaunch(process, args, callbackFunction, options, uid, gid) {
 		callback(null);
 	}, waitTime);
 	*/
-	
-	function callback(err) {
-		if(callbackFunction) callbackFunction(err);
-		callbackFunction = null; // Only callback once!
-	}
 	
 }
