@@ -372,10 +372,12 @@ function sockJsConnection(connection) {
 		}
 		else console.log("Client had no worker process! userConnectionName=" + userConnectionName + " userConnectionId=" + userConnectionId + " IP=" + IP);
 		
-		if(IP == "127.0.0.1" && HTTP_PORT == "8099") {
+		/*
+			if(IP == "127.0.0.1" && HTTP_PORT == "8099") {
 			console.log("We are running locally. Close down the server when client exit.");
 			process.exit(0);
 		}
+		*/
 		
 		// The user might reconnect, so we don't want to unmount stuff!
 		/*
