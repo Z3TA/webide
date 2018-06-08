@@ -332,11 +332,11 @@ function startClient(ip, port, proto) {
 	log("Starting client ...");
 	
 	if(port == undefined) port = LOCAL_SERVER_PORT;
-	if(ip == undefined) ip = LOCAL_SERVER_IP;
+	if(ip === undefined) ip = LOCAL_SERVER_IP;
 	
 	var portPart = "";
 	
-	if(port != undefined) portPart = ":" + port;
+	if(port != undefined && port != "80") portPart = ":" + port;
 	
 	if(proto == undefined) proto = "http";
 	var url = "http://" + ip + portPart + "/";
@@ -356,8 +356,8 @@ function startClient(ip, port, proto) {
 	//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
 	
 	// We prefer the chromium/chrome browser!
-	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
 	tryPrograms.push(["chrome", ["--app=" + url]]);
+	tryPrograms.push(["chromium-browser", ["--app=" + url]]); 
 	
 	// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files 
 	// We want to open files via http/https though! Using file:// protocol will cause issues.
