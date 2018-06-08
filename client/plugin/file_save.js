@@ -259,7 +259,10 @@
 		
 		inputPath.setAttribute("size", Math.max(inputPathMinSize, inputPath.value + 5, EDITOR.workingDirectory.length));
 		
-		saveDialog.style.display = "block";
+		//saveDialog.style.display = "block";
+		
+		var footer = document.getElementById("footer");
+		if(!footer.contains(saveDialog)) footer.appendChild(saveDialog);
 		
 		EDITOR.input = false;
 		inputPath.focus();
@@ -278,7 +281,12 @@
 		}
 		
 		if(saveDialog) {
-			saveDialog.style.display = "none";
+			
+			var footer = document.getElementById("footer");
+			footer.removeChild(saveDialog);
+			
+			//saveDialog.style.display = "none";
+			
 			EDITOR.resizeNeeded();
 		}
 		
