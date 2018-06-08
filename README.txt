@@ -45,7 +45,7 @@ Windows
 -------
 
 1. Download and install nodejs from https://nodejs.org/
-It should come with a packet manager called npm.
+(It should come with a packet manager called npm.)
 
 2. Open a command prompt (Click on start menu => run, then type "cmd.exe")
 
@@ -53,24 +53,22 @@ It should come with a packet manager called npm.
 
 4. Install the dependencies by typing "npm install" and hit enter in the command prompt.
 
-5. If the npm install fails you probably need to install build dependencies for Windows!
-You probably need both Visual Studio build tools 2015 and Python 2.7
+4.5. If the npm install fails you probably need to install build dependencies for Windows!
 Easiest method is to open a command prompt (Click on start menu => run, then type "cmd.exe")
-but right click on "cmd.exe" select "Run as administrator". Then type:
-npm install --global --production windows-build-tools
+but right click on "cmd.exe" and select "Run as administrator". 
+Then type: npm install --global --production windows-build-tools
 
 After nodejs and all dependencies are installed, double click (run) start.bat
 
-"install": Double click (run) create_shortcut.vbs, it will place a shortcut to start.bat on your desktop.
-
-If you want the editor to auto "restart", add restart after target in the shortcut, like this: C:\Users\Z\dev-repositories\jzedit\start.bat restart
+Add a desktop shorcut:
+Double click (run) windows_create_desktop_shortcut.vbs
 
 
 
 Mac OS X
 --------
 1. Download and install nodejs from https://nodejs.org/
-It should come with a packet manager called npm.
+(It should come with a packet manager called npm.)
 
 2. Open a terminal: Function-key + Space, and type "terminal"
 
@@ -86,16 +84,28 @@ node server/server.js --port=8080 --user=admin --pw=admin -nochroot
 
 Chromebook
 ----------
-1. Download: https://www.webtigerteam.com/jzedit/jzedit.crx
 
-2. Open Chrome browser and navigate to chrome://extensions/
+Go to the chrome web store and search for jzedit.
+It's named "JavaScript & Node JS & HTML CSS editor / IDE" and has an pink/rainbow promo image.
 
-3. Drag the jzedit.crx file to the chrome://extensions/ tab in Chrome browser.
+That will use the hosted version on webide.se
+
+We tried to make a pure Chrome app, but that turned out to be too much work.
+
+If you root the device you might be able to install nodejs. Then
+npm install jzedit
+npm start
+
+
 
 
 Android
 --------
 
+We recommend installing the editor on a server. See "Running as a cloud editor" below in this file.
+And then you will get a "add to desktop" request.
+
+But of course you can also run the editor locally on your phone ...
 
 
 

@@ -8,12 +8,14 @@
 #
 
 # Update the path to the icon
-mv linux.desktop linux.desktop-bak
-sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" linux.desktop-bak > linux.desktop
-rm linux.desktop-bak
+# The linux_launcher.desktop will make the editor appear in the launcher
+# Users can then right click on the icon and select "Lock to launcher"
+mv linux_launcher.desktop linux_launcher.desktop-bak
+sed -e "s,Icon=.*,Icon=$PWD/client/gfx/jz64.png,g" linux_launcher.desktop-bak > linux_launcher.desktop
+rm linux_launcher.desktop-bak
 
 # Make it runable again
-chmod +x linux.desktop
+chmod +x linux_launcher.desktop
 
 
 function startClient {

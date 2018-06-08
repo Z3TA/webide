@@ -14,8 +14,6 @@ rm -rf temp/release/
 
 echo "Create the temporary directory if it doesn't exist"
 mkdir -p temp/release/linux
-mkdir -p temp/release/windows
-mkdir -p temp/release/osx
 mkdir -p temp/release/server
 
 echo "Copy the files"
@@ -63,20 +61,10 @@ cp version.inc temp/release/linux/
 # Update version (Use double quotes to make the shell expand variables while preserving whitespace)
 sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 
-
-echo "Make a Windows release"
-cp -rf temp/release/linux/. temp/release/windows/
-
-echo "Make a OSX release"
-#cp -rf temp/release/linux/. temp/release/osx/
-
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
-echo "Clean up the Linux release"
-rm -rf temp/release/linux/start.bat
-rm -rf temp/release/linux/create_shortcut.vbs
-rm -rf temp/release/linux/osx_start.sh
+echo "Clean up the local-desktop release"
 rm -rf temp/release/linux/etc/
 rm -rf temp/release/linux/adduser.js
 rm -rf temp/release/linux/cloudide_install.js
@@ -87,75 +75,32 @@ rm -rf temp/release/linux/removeuser.js
 rm -rf temp/release/linux/signup_service.js
 rm -rf temp/release/linux/update.js
 
-echo "Clean up the Windows release"
-rm -rf temp/release/windows/start.sh
-rm -rf temp/release/windows/jzedit.desktop
-rm -rf temp/release/windows/osx_start.sh
-rm -rf temp/release/windows/etc/
-rm -rf temp/release/windows/adduser.js
-rm -rf temp/release/windows/cloudide_install.js
-rm -rf temp/release/windows/hashPw.js
-rm -rf temp/release/windows/nodejs_init.js
-rm -rf temp/release/windows/nodejs_init_worker.js
-rm -rf temp/release/windows/removeuser.js
-rm -rf temp/release/windows/signup_service.js
-rm -rf temp/release/windows/update.js
-
-echo "Clean up the OSX release"
-rm -rf temp/release/osx/start.sh
-rm -rf temp/release/osx/jzedit.desktop
-rm -rf temp/release/osx/start.bat
-rm -rf temp/release/osx/create_shortcut.vbs
-rm -rf temp/release/osx/etc/
-rm -rf temp/release/osx/adduser.js
-rm -rf temp/release/osx/cloudide_install.js
-rm -rf temp/release/osx/hashPw.js
-rm -rf temp/release/osx/nodejs_init.js
-rm -rf temp/release/osx/nodejs_init_worker.js
-rm -rf temp/release/osx/removeuser.js
-rm -rf temp/release/osx/signup_service.js
-rm -rf temp/release/osx/update.js
-
 echo "Clean up the server release"
 # CLient is meant to run in the browser
-rm -rf temp/release/server/runtime/
-rm -rf temp/release/server/plugin/client/spellcheck/nodehun_linux.node
-rm -rf temp/release/server/plugin/client/spellcheck/nodehun_windows.node
-rm -rf temp/release/server/start.sh
-rm -rf temp/release/server/start.bat
-rm -rf temp/release/server/create_shortcut.vbs
-rm -rf temp/release/server/jzedit.desktop
+rm -rf temp/release/server/linux_start.sh
+rm -rf temp/release/server/windows_start.bat
+rm -rf temp/release/server/windows_create_desktop_shortcut.vbs
+rm -rf temp/release/server/linux_launcher.desktop
 rm -rf temp/release/server/osx_start.sh
 rm -rf temp/release/server/start.js
 rm -rf temp/release/server/bin
-rm -rf temp/release/server/userdirs
 
 cd temp/release/
 
-echo "Fix line breaks in Windows release"
-find windows/ | xargs unix2dos
+#echo "Fix line breaks in Windows release"
+#find windows/ | xargs unix2dos
 
-echo "Remove nodejs packages not needed in Windows release"
-sed -i '/nodemailer/d' windows/package.json
-sed -i '/posix/d' windows/package.json
-sed -i '/ps-node/d' windows/package.json
-sed -i '/iroh/d' windows/package.json
-sed -i '/pty.js/d' windows/package.json
+#echo "Remove nodejs packages not needed in Windows release"
+#sed -i '/nodemailer/d' windows/package.json
+#sed -i '/posix/d' windows/package.json
+#sed -i '/ps-node/d' windows/package.json
+#sed -i '/iroh/d' windows/package.json
+#sed -i '/pty.js/d' windows/package.json
 
-echo "zip and remove the Windows release (cant be run under Windows git bash)"
-mv windows $name-v$version$beta-$commit-windows
-zip -9 -y -r -q $name-v$version$beta-$commit-windows.zip $name-v$version$beta-$commit-windows
-rm -rf $name-v$version$beta-$commit-windows
-
-#echo "Create a tarball and compress it for the Linux release"
-mv linux $name-v$version$beta-$commit-linux
-#tar -zcf $name-v$version$beta-$commit-linux.tar.gz $name-v$version$beta-$commit-linux
-#rm -rf $name-v$version$beta-$commit-linux
-
-#echo "Create a tarball and compress it for OSX"
-mv osx $name-v$version$beta-$commit-osx
-#tar -zcf $name-v$version$beta-$commit-osx.tar.gz $name-v$version$beta-$commit-osx
-#rm -rf $name-v$version$beta-$commit-osx
+echo "zip the local-desktop release"
+mv linux $name-v$version$beta-$commit-local-desktop
+zip -9 -y -r -q $name-v$version$beta-$commit-local-desktop.zip $name-v$version$beta-$commit-local-desktop
+rm -rf $name-v$version$beta-$commit-local-desktop
 
 echo "Create a tarball and compress server release"
 mv server $name-v$version$beta-$commit-server
@@ -173,7 +118,7 @@ rm version.inc
 
 # Move the files to www
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
-scp temp/release/$name-v$version$beta-$commit-windows.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+scp temp/release/$name-v$version$beta-$commit-local-desktop.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 
 # Update the homepage
 

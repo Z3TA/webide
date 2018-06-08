@@ -73,7 +73,7 @@ if(!no_module_check) {
 			*/
 			
 			var exec = require('child_process').exec;
-			log("Attempting to install node modules ...");
+			log("Attempting to install node modules ... Try again once node_modules are installed!");
 			var child = exec('npm install', function (error, stdout, stderr) {
 				console.log('stdout: ' + stdout);
 				console.log('stderr: ' + stderr);
@@ -81,8 +81,7 @@ if(!no_module_check) {
 					console.log('exec error: ' + error);
 				}
 			});
-			
-		}
+			}
 	});
 }
 
