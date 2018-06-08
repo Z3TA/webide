@@ -22,7 +22,7 @@ function startClient {
 	# Start the client (editor)
 	#runtime/nwjs-v0.12.3-linux-x64/nw . --remote-debugging-port=57341
 	#runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1
-	runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1 ||
+	#runtime/nwjs-v0.12.3-linux-x64/nw . --disable-lcd-text > /dev/null 2>&1 ||
 	#chromium-browser --app=$url > /dev/null 2>&1 ||
 	chromium-browser --app=$url ||
 	chrome --app=$url > /dev/null 2>&1 ||
