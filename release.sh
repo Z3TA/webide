@@ -51,6 +51,7 @@ rm -rf temp/release/linux/jz.xcf
 rm -rf temp/release/linux/makebundle.js
 rm -rf temp/release/linux/changeset.js
 rm -rf temp/release/linux/update_version.js
+rm -rf temp/release/linux/runtime/
 
 echo "Removing unused fonts"
 find temp/release/linux/client/gfx/font/ ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
@@ -63,11 +64,6 @@ cp version.inc temp/release/linux/
 sed -i -e "s/EDITOR.version = 0;/EDITOR.version = $commit;/g" temp/release/linux/client/EDITOR.js
 
 
-# Minify .js files
-# (npm install uglify-js -g)
-# find temp/release/linux/ -name '*.js' | xargs uglifyjs
-
-
 echo "Make a Windows release"
 cp -rf temp/release/linux/. temp/release/windows/
 
@@ -78,9 +74,6 @@ echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/
 
 echo "Clean up the Linux release"
-rm -rf temp/release/linux/runtime/nwjs-v0.12.3-win-x64/
-rm -rf temp/release/linux/runtime/nwjs-v0.12.3-osx-x64/
-rm -rf temp/release/linux/client/plugin/spellcheck/nodehun_windows.node
 rm -rf temp/release/linux/start.bat
 rm -rf temp/release/linux/create_shortcut.vbs
 rm -rf temp/release/linux/osx_start.sh
@@ -95,9 +88,6 @@ rm -rf temp/release/linux/signup_service.js
 rm -rf temp/release/linux/update.js
 
 echo "Clean up the Windows release"
-rm -rf temp/release/windows/runtime/nwjs-v0.12.3-linux-x64
-rm -rf temp/release/windows/runtime/nwjs-v0.12.3-osx-x64/
-rm -rf temp/release/windows/client/plugin/spellcheck/nodehun_linux.node
 rm -rf temp/release/windows/start.sh
 rm -rf temp/release/windows/jzedit.desktop
 rm -rf temp/release/windows/osx_start.sh
@@ -112,10 +102,6 @@ rm -rf temp/release/windows/signup_service.js
 rm -rf temp/release/windows/update.js
 
 echo "Clean up the OSX release"
-rm -rf temp/release/osx/runtime/nwjs-v0.12.3-win-x64
-rm -rf temp/release/osx/runtime/nwjs-v0.12.3-linux-x64/
-rm -rf temp/release/osx/plugin/client/spellcheck/nodehun_linux.node
-rm -rf temp/release/osx/plugin/client/spellcheck/nodehun_windows.node
 rm -rf temp/release/osx/start.sh
 rm -rf temp/release/osx/jzedit.desktop
 rm -rf temp/release/osx/start.bat
@@ -157,19 +143,19 @@ sed -i '/iroh/d' windows/package.json
 sed -i '/pty.js/d' windows/package.json
 
 echo "zip and remove the Windows release (cant be run under Windows git bash)"
-mv windows $name-v$version$beta-$commit-win-x64
-zip -9 -y -r -q $name-v$version$beta-$commit-win-x64.zip $name-v$version$beta-$commit-win-x64
-rm -rf $name-v$version$beta-$commit-win-x64
+mv windows $name-v$version$beta-$commit-windows
+zip -9 -y -r -q $name-v$version$beta-$commit-windows.zip $name-v$version$beta-$commit-windows
+rm -rf $name-v$version$beta-$commit-windows
 
 #echo "Create a tarball and compress it for the Linux release"
-mv linux $name-v$version$beta-$commit-linux-x64
-#tar -zcf $name-v$version$beta-$commit-linux-x64.tar.gz $name-v$version$beta-$commit-linux-x64
-#rm -rf $name-v$version$beta-$commit-linux-x64
+mv linux $name-v$version$beta-$commit-linux
+#tar -zcf $name-v$version$beta-$commit-linux.tar.gz $name-v$version$beta-$commit-linux
+#rm -rf $name-v$version$beta-$commit-linux
 
 #echo "Create a tarball and compress it for OSX"
-mv osx $name-v$version$beta-$commit-osx-x64
-#tar -zcf $name-v$version$beta-$commit-osx-x64.tar.gz $name-v$version$beta-$commit-osx-x64
-#rm -rf $name-v$version$beta-$commit-osx-x64
+mv osx $name-v$version$beta-$commit-osx
+#tar -zcf $name-v$version$beta-$commit-osx.tar.gz $name-v$version$beta-$commit-osx
+#rm -rf $name-v$version$beta-$commit-osx
 
 echo "Create a tarball and compress server release"
 mv server $name-v$version$beta-$commit-server
@@ -187,7 +173,7 @@ rm version.inc
 
 # Move the files to www
 scp temp/release/$name-v$version$beta-$commit-server.tar.gz zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
-scp temp/release/$name-v$version$beta-$commit-win-x64.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
+scp temp/release/$name-v$version$beta-$commit-windows.zip zeta@192.168.0.1:/tank/www/webtigerteam.com/jzedit/download/
 
 # Update the homepage
 
