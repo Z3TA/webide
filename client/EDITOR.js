@@ -3816,7 +3816,11 @@ EDITOR.fireEvent("btk");
 			
 			if(!widget.mainElement) widget.build(); // Build the GUI if it's not already built
 			
-			widget.mainElement.style.display = "block";
+			if(!parentNode.contains(widget.mainElement)) {
+				parentNode.appendChild(widget.mainElement);
+			}
+			
+			//widget.mainElement.style.display = "block";
 			
 			//if(options.stealFocus === false) widget.blur();
 			
@@ -3846,9 +3850,16 @@ EDITOR.fireEvent("btk");
 			// Only need to hide if the object is created!
 			if(widget.mainElement) {
 				
-				if(!widget.mainElement.style.display != "none") wasHidden = false;
+				if(parentNode.contains(widget.mainElement)) {
+					wasHidden = false;
+					parentNode.removeChild(widget.mainElement);
+				}
 				
-				widget.mainElement.style.display = "none";
+				/*
+					if(widget.mainElement.style.display != "none") wasHidden = false;
+					widget.mainElement.style.display = "none";
+				*/
+				
 				EDITOR.resizeNeeded();
 			}
 			
