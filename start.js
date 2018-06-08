@@ -23,10 +23,15 @@ var NOTICE = 5;
 var INFO = 6;
 var DEBUG = 7;
 
+var getArg = require("./shared/getArg.js");
+
+var LOCAL_SERVER_IP = "127.0.0.1";
+var LOCAL_SERVER_PORT = "8099";
+
+var localOnly = !!getArg(["local", "local"]);
+
 var serverFound = false;
-
-setTimeout(startNewServer, 1000); // 3000ms
-
+var clientStarting = false;
 var serversChecked = 0;
 var serversToCheck = 0;
 
@@ -34,13 +39,23 @@ var HTTP_REQUESTS = [];
 //return startClient("127.0.0.1", "8099");
 
 
-log("Check if server is running on localhost ...", INFO);
-checkServer("127.0.0.1", serverChecked);
-
-var adresses = getIpv4Ips();
+if(localOnly) {
+	startClient();
+	startNewServer();
+	
+}
+else {
+	// Check the network for servers (but first check localhost)
+	// And if no server is found withing 1? seconds we'll start our own
+	setTimeout(startNewServer, 1000); // 3000ms
+	
+	log("Check if server is running on localhost ...", INFO);
+	checkServer(LOCAL_SERVER_IP, serverChecked);
+	
+	var adresses = getIpv4Ips();
 for(var i=0; i<adresses.length; i++) checkServer(adresses[i], serverChecked);
+}
 
-var getArg = require("./shared/getArg.js");
 var no_module_check = !!getArg(["no-module-check", "no-module-check"]);
 
 console.log("no_module_check=" + no_module_check);
@@ -90,7 +105,6 @@ function abortHttpRequests() {
 
 
 function startNewServer() {
-	
 	if(serverFound) return;
 	
 	abortHttpRequests();
@@ -99,10 +113,10 @@ function startNewServer() {
 
 	log("Starting new server ...");
 	
-	var serverPort = "8099";
-	var serverIp = "127.0.0.1";
-
-	var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
+	var serverIp = LOCAL_SERVER_IP;
+	var serverPort = LOCAL_SERVER_PORT;
+	
+var serverArg = ["server/server.js", "--loglevel=6", "--username=admin", "--password=admin", "--ip=" + serverIp, "--port=" + serverPort, "-nochroot"];
 
 	var serverOptions = {
 		stdio: "inherit"
@@ -110,31 +124,23 @@ function startNewServer() {
 
 	//var child = require('child_process').spawn("node", serverArg, serverOptions); 
 
-
-
-
 	/*
 	child.stdout.on('data', function(data) {
 	    console.log(data.toString()); 
 	});
 	*/
 
-	
 	attemptLaunch("node", serverArg, function(err) {
 		if(err) log("Unable to start server!");
 		else {
 			log("Server started!");
-			startClient(serverIp, serverPort);
+			if(!clientStarting) startClient();
 		}
 	}, serverOptions);
-	
- 
-}
-
+	}
 
 function broadcast() {
-
-	// Listen to and send broadcast messages asking for jzedit server
+// Listen to and send broadcast messages asking for jzedit server
 	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 	
 	var broadcastPort = 6024;
@@ -206,12 +212,7 @@ function broadcast() {
 		arr[3] = "255";
 		return arr.join(".");
 	}
-
-
-
-	
 }
-
 
 function getIpv4Ips() {
 	var os = require('os');
@@ -323,7 +324,15 @@ function timeStamp() {
 
 function startClient(ip, port, proto) {
 	
+	if(clientStarting) {
+		log("Client already about to start!");
+		return;
+	}
+	clientStarting = true;
 	log("Starting client ...");
+	
+	if(port == undefined) port = LOCAL_SERVER_PORT;
+	if(ip == undefined) ip = LOCAL_SERVER_IP;
 	
 	var portPart = "";
 	
