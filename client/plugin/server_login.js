@@ -34,9 +34,10 @@
 				
 				if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser" && 
 				window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
-					console.log("First time we run the editor! Go directly to signup page.");
+					console.log("First time we run the editor!");
+					console.log("Go directly to signup page.");
 					window.onbeforeunload = null;
-					document.location = "/signup/signup.html";
+					document.location = "/signup/signup.html" + window.location.search;
 				}
 				else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
 			});

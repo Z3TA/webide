@@ -92,7 +92,7 @@
 					}
 					
 					// location.protocol includes the colon. eg https:
-					var url = location.protocol + "//" + arr[2] + "/";
+					var url = location.protocol + "//" + arr[2] + "/" + window.location.search;
 					console.log("Navigating to url=" + url + " location.protocol=" + location.protocol);
 					closeConnectionForever = true;
 					document.location = url;
