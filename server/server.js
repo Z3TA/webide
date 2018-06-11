@@ -122,6 +122,9 @@ var VNC_PORT = 5901;
 
 var PORTS_IN_USE = [HTTP_PORT];
 
+var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
+var GUEST_POOL = []; // Because it's a bit slow to create new users
+
 var fs = require("fs");
 
 var FAILED_SSL_REG = {}; // List of failed letsencrypt registrations, in order to not hit quota limits
@@ -161,124 +164,219 @@ function main() {
 		process.exit();
 	}
 	
-	var sockJs = require("sockjs");
-	var wsServer = sockJs.createServer();
-	wsServer.on("connection", sockJsConnection);
-	
-	var http = require("http");
-	
-	HTTP_SERVER = http.createServer(handleHttpRequest);
-	
-	HTTP_SERVER.on("error", function(err) {
-		console.log("err.code=" + err.code);
-		if(err.code == "EACCES") {
-			log("Unable to create server on port=" + HTTP_PORT + " and ip=" + HTTP_IP + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
-			process.exit(1);
+	fs.readFile("./GUEST_COUNTER", "utf8", function(err, data) {
+		if(err) {
+			if(err.code != "ENOENT") throw err;
 		}
-		else throw err;
+else {
+			GUEST_COUNTER = parseInt(data);
+		}
+		startServer();
 	});
 	
-	if(isIpV4(HTTP_IP)) {
-		if(!isPrivatev4IP(HTTP_IP)) log("NOT A PRIVATE IP=" + HTTP_IP, 4);
+	function startServer() {
+		
+		var sockJs = require("sockjs");
+		var wsServer = sockJs.createServer();
+		wsServer.on("connection", sockJsConnection);
+		
+		var http = require("http");
+		
+		HTTP_SERVER = http.createServer(handleHttpRequest);
+		
+		HTTP_SERVER.on("error", function(err) {
+			console.log("err.code=" + err.code);
+			if(err.code == "EACCES") {
+				log("Unable to create server on port=" + HTTP_PORT + " and ip=" + HTTP_IP + "\nUse -p or --port to use another port.\nOr try with a privileged (sudo) user account.", 5, true);
+				process.exit(1);
+			}
+			else throw err;
+		});
+		
+		if(isIpV4(HTTP_IP)) {
+			if(!isPrivatev4IP(HTTP_IP)) log("NOT A PRIVATE IP=" + HTTP_IP, 4);
+		}
+		else log("Not a IPv4 address");
+		
+		
+		HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
+		
+		
+		wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
+		
+		
+		if(HTTP_IP != "127.0.0.1") {
+			broadcast(HTTP_IP);
+		}
 	}
-	else log("Not a IPv4 address");
+}
+
+function createGuestUser(callback) {
+console.time("createAccount");
+
+	var guestId = ++GUEST_COUNTER;
+// Save guest counter so that we can continue the number serie after server restarts
+	// It's not that bad if there are holes in the number serie. 
+	// We however don't want to give two people the same guest account!
+	fs.writeFile("./GUEST_COUNTER", guestId, function(err, data) {
+		if(err) return callback(err);
+
+		var username = "guest" + guestId;
+var generator = require('generate-password');
+		var password = generator.generate({
+			length: 10,
+			numbers: true
+		});
+
+		console.log("Creating guest user: " + username);
+		
+		var exec = require('child_process').exec;
+		
+		// Pass the arguments as JSON in case some hacker use -pwfile /etc/something in their password
+		var commandArg = {
+			username: username,
+			password: password,
+			noPwHash: NO_PW_HASH, // bang bang (!!) converts the value to a boolean
+			noCert: false
+		};
+		
+var path = require("path");
+		var options = {
+			cwd: path.join(__dirname, "../") // Run in jzedit folder where adduser.js is located
+		}
+		console.log("Running in options.cwd=" + options.cwd);
+		var scriptPath = UTIL.trailingSlash(options.cwd) + "adduser.js";
+		
+		// Enclose argument with '' to send it "as is" (bash/sh will remove ")
+		var command = scriptPath + " '" + JSON.stringify(commandArg) + "'";
+		console.log("command=" + command);
+		
+		exec(command, options, function adduser(error, stdout, stderr) {
+if(error) {
+				log("Error when adding user: (error is probably in " + scriptPath + ")");
+				throw error;
+			}
+			
+			console.log("stderr=" + UTIL.lbChars(stderr));
+			
+			stderr = stderr.trim(); // Can be a space
+			stdout = stdout.trim();
+			
+			if(stderr) throw new Error("stderr=" + stderr + " (stderr.length=" + stderr.length + ")");
+			if(!stdout) throw new Error("Problem when creating username=" + username + "! Exec command=" + command + " did not return anyting!");
+
+			log("stdout=" + stdout, DEBUG);
+			var checkre = /User with username=(.*) and password=(.*) successfully added/g;
+			var check = checkre.exec(stdout);
+			// User with username=demo4 and password=demo4 successfully added!
+			var reG1User = check[1];
+			var reG2Pw = check[2];
+			
+			if(check == null) {
+				return callback(new Error("Unable to create username=" + username + "! checkre=" + checkre + " failed! check=" + check + " stdout=" + stdout));
+			}
+			else if(reG1User == username && reG2Pw == password) {
+				log("Account username=" + username + "! successfully created!");
+				return callback(null, username, password);
+			}
+			else {
+				return callback(new Error("Problem when creating username=" + username + " with password=" + password +
+				" reG1User=" + reG1User + " reG2Pw=" + reG2Pw + " " +
+				" check=" + JSON.stringify(check, null, 2) + " stdout=" + stdout));
+			}
+			
+			console.timeEnd("createAccount");
+			
+			
+		});
+	});
+}
+
+
+function broadcast(myIp) {
 	
-	
-	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
-	
-	
-	wsServer.installHandlers(HTTP_SERVER, {prefix:'/jzedit'});
+	// Listen to and answer broadcast messages
+	// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
 	
 	var serverAdvertiseMessage = "jzedit server url: " + makeUrl();
 	
 	log(serverAdvertiseMessage);
 	
-	// Open client url in browser !?
+	var broadcastAddresses = [];
 	
-	if(HTTP_IP != "127.0.0.1") {
-		(function broadcast(myIp) {
-			
-			// Listen to and answer broadcast messages
-			// http://stackoverflow.com/questions/6177423/send-broadcast-datagram
-			
-			var broadcastAddresses = [];
-			
-			var broadcastPort = 6024;
-			
-			if(myIp == "0.0.0.0") {
-				// We'll have to find all broadcast addresses ...
-				var os = require('os');
-				
-				var interfaces = os.networkInterfaces();
-				var addresses = [];
-				for (var k in interfaces) {
-					for (var k2 in interfaces[k]) {
-						var address = interfaces[k][k2];
-						if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
-							broadcastAddresses.push(broadcastAddress(address.address));
-						}
-					}
+	var broadcastPort = 6024;
+	
+	if(myIp == "0.0.0.0") {
+		// We'll have to find all broadcast addresses ...
+		var os = require('os');
+		
+		var interfaces = os.networkInterfaces();
+		var addresses = [];
+		for (var k in interfaces) {
+			for (var k2 in interfaces[k]) {
+				var address = interfaces[k][k2];
+				if (address.family === 'IPv4' && !address.internal && isPrivatev4IP(address.address)) {
+					broadcastAddresses.push(broadcastAddress(address.address));
 				}
 			}
-			else if(isPrivatev4IP(myIp)) broadcastAddresses.push(broadcastAddress(myIp));
+		}
+	}
+	else if(isPrivatev4IP(myIp)) broadcastAddresses.push(broadcastAddress(myIp));
+	
+	if(broadcastAddresses.length > 0) {
+		
+		console.log("broadcastAddresses: ", broadcastAddresses);
+		
+		var dgram = require('dgram');
+		
+		// Server
+		var broadcastServer = dgram.createSocket("udp4");
+		broadcastServer.bind(function() {
+			broadcastServer.setBroadcast(true);
+			// We must send at least one broadcast message to be able to receive messages!
+			for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
+		});
+		
+		// Client
+		var broadcastClient = dgram.createSocket('udp4');
+		
+		broadcastClient.on('listening', function () {
+			var address = broadcastClient.address();
+			console.log('UDP Client listening on ' + address.address + ":" + address.port);
+			broadcastClient.setBroadcast(true);
+		});
+		
+		broadcastClient.on('message', function (message, rinfo) {
+			console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
 			
-			if(broadcastAddresses.length > 0) {
-				
-				console.log("broadcastAddresses: ", broadcastAddresses);
-				
-				var dgram = require('dgram');
-				
-				// Server
-				var broadcastServer = dgram.createSocket("udp4");
-				broadcastServer.bind(function() {
-					broadcastServer.setBroadcast(true);
-					// We must send at least one broadcast message to be able to receive messages!
-					for(var i=0; i<broadcastAddresses.length; i++) setAdvertiseInterval(broadcastAddresses[i]);
-				});
-				
-				// Client
-				var broadcastClient = dgram.createSocket('udp4');
-				
-				broadcastClient.on('listening', function () {
-					var address = broadcastClient.address();
-					console.log('UDP Client listening on ' + address.address + ":" + address.port);
-					broadcastClient.setBroadcast(true);
-				});
-				
-				broadcastClient.on('message', function (message, rinfo) {
-					console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
-					
-					var lookForServerMessage = "Where can I find a jzedit server?"
-					
-					if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
-					
-				});
-				
-				broadcastClient.bind(broadcastPort);
-			}
+			var lookForServerMessage = "Where can I find a jzedit server?"
 			
-			function setAdvertiseInterval(broadcastAddress) {
-				// We need to keep sending messages, or we will not receive any!
-				setInterval(function() {
-					advertise(broadcastAddress, broadcastServer);
-				}, 4500); // Need to send often (every 4500ms) to be able to receive messages
-			}
+			if(rinfo.address != myIp && message == lookForServerMessage) advertise(rinfo.address);
 			
-			function advertise(broadcastAddress) {
-				var message = new Buffer(serverAdvertiseMessage);
-				broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
-					console.log("Sent '" + message + "'");
-				});
-			}
-			
-			function broadcastAddress(ip) {
-				// Asume 255.255.255.0 netmask
-				var arr = ip.split(".");
-				arr[3] = "255";
-				return arr.join(".");
-			}
-			
-		})(HTTP_IP);
+		});
+		
+		broadcastClient.bind(broadcastPort);
+	}
+	
+	function setAdvertiseInterval(broadcastAddress) {
+		// We need to keep sending messages, or we will not receive any!
+		setInterval(function() {
+			advertise(broadcastAddress, broadcastServer);
+		}, 4500); // Need to send often (every 4500ms) to be able to receive messages
+	}
+	
+	function advertise(broadcastAddress) {
+		var message = new Buffer(serverAdvertiseMessage);
+		broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
+			console.log("Sent '" + message + "'");
+		});
+	}
+	
+	function broadcastAddress(ip) {
+		// Asume 255.255.255.0 netmask
+		var arr = ip.split(".");
+		arr[3] = "255";
+		return arr.join(".");
 	}
 	
 }
@@ -468,7 +566,44 @@ function sockJsConnection(connection) {
 						password = pwHash(password);
 					}
 					
-					if(USERNAME) {
+					if(username == "guest") {
+// ### Login as guest
+// Asign a user from the guest pool
+if(GUEST_POOL.length == 0) {
+							// Need to wait until a new guest account is created
+							console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
+							createGuestUser(function guestUserCreated(err, guestUser, guestPw) {
+								if(err) throw err;
+								loginAsGuest(guestUser, guestPw);
+});
+						}
+else {
+							var guestUser = GUEST_POOL.shift();
+							console.log("Using guest account " + guestUser + " from GUEST_POOL");
+							var generator = require('generate-password');
+							var guestPw = generator.generate({
+								length: 10,
+								numbers: true
+							});
+							loginAsGuest(guestUser, guestPw);
+// Save/Reset the password
+if(!NO_PW_HASH) {
+								var pwHash = require("./pwHash.js");
+								guestPw = pwHash(guestPw);
+							}
+							fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), guestPw, function(err) {
+								if(err) throw err;
+								console.log("Saved guest=" + guestUser + " new password");
+							});
+}
+
+// Increase the guest pool
+						createGuestUser(function guestPoolIncreased(err, guestUser, guestPw) {
+							if(err) throw err;
+GUEST_POOL.push(guestUser);
+						});
+}
+else if(USERNAME) {
 						console.log("Using USERNAME=" + USERNAME+ " from argument ...")
 						
 						// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
@@ -496,6 +631,14 @@ function sockJsConnection(connection) {
 						});
 					}
 					
+					function loginAsGuest(guestUser, guestPassword) {
+
+username = guestUser;
+idSuccess();
+
+						send({saveLogin: {user: username, pw: guestPassword}, id: 0});
+}
+					
 					function checkPw() {
 						
 						fs.readFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), "utf8", function readPw(err, pwstringFromFile) {
@@ -506,7 +649,7 @@ function sockJsConnection(connection) {
 							else {
 								if(password == pwstringFromFile) idSuccess();
 								else {
-idFail("Wrong password for user: " + username);
+									idFail("Wrong password for user: " + username);
 									console.log("Hashed pw *" + password + "* (entered by user) != *" + pwstringFromFile + "* (.jzeditpw file)");
 								}
 							}
@@ -737,7 +880,7 @@ idFail("Wrong password for user: " + username);
 								
 								if(!DEBUG_CHROOT) {
 									foldersToMount += 7;
-mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
+									mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes? Needed for SSL verfification
 									
 									mount("/usr/bin/ssh", homeDir + "usr/bin/ssh", folderMounted); // So users can ssh into other machines (and use git+ssh !?)
 									mount("/usr/bin/ssh-keygen", homeDir + "usr/bin/ssh-keygen", folderMounted); // Generating ssh keys
@@ -893,7 +1036,7 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 									}
 									else console.log("checkUserRights: toChown=" + toChown + " toStat=" + toStat);
 								}
-								}
+							}
 							
 							function apparmorProfileCreated(err) {
 								if(err) throw err;
@@ -952,7 +1095,7 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 									}
 									else throw new Error("User already accepted!");
 								}
-								}
+							}
 							
 							
 							function checkMountsError(err) {
@@ -1023,7 +1166,7 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 										console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
 										return checkMountsReadyMaybe();
-										}
+									}
 									else if(err.code == 'ENOENT') {
 										console.log("ENOENT: certPath=" + certPath);
 										
@@ -1077,7 +1220,7 @@ mount("/etc/ssl/certs", homeDir + "etc/ssl/certs", folderMounted); // Sometimes?
 															sslCertChecked = true;
 															return checkMountsReadyMaybe();
 														});
-														});
+													});
 												});
 											}
 										});

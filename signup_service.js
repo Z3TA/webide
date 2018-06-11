@@ -290,7 +290,7 @@ function createAccount(userData, callback) {
 	var password = userData.substring(userData.indexOf(",") + 1);
 	
 	if(username.match(/[^a-zA-Z0-9]/)) return callback("Username can only contain letters a-z, A-Z, 0-9");
-	
+	if(username.match(/^guest.*/i)) return callback("Username can not start with guest!");
 	
 	var exec = require('child_process').exec;
 	
@@ -306,9 +306,9 @@ function createAccount(userData, callback) {
 	var command = "./adduser.js '" + JSON.stringify(commandArg) + "'";
 	console.log("command=" + command);
 	var options = {
-		pwd: __dirname
+		cwd: __dirname
 	}
-	exec(command, function adduser(error, stdout, stderr) {
+	exec(command, options, function adduser(error, stdout, stderr) {
 		if (error) {
 			log("Unable to create username=" + username + "! error=" + error, ERROR);
 			callback(serviceError, username);

@@ -25,37 +25,40 @@
 			Or plugins listening for events from the server, or loginSuccess etc will not fire.
 		*/
 		
-		var server = undefined;
-		
-		if(EDITOR.localStorage) {
-			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser"], function(err, stored) {
-				var url = stored.url;
-				if(url) server = {url: url};
-				
-				if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser" && 
-				window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
-					console.log("First time we run the editor!");
-					console.log("Go directly to signup page.");
-					window.onbeforeunload = null;
-					document.location = "/signup/signup.html" + window.location.search;
-				}
-				else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
-			});
-		} else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
-		
 		CLIENT.on("loginFail", showLoginDialog);
 		CLIENT.on("loginSuccess", hideLoginDialog);
 		CLIENT.on("connectionConnected", serverLoginOnConnected);
 		CLIENT.on("connectionLost", serverLoginOnConnectionLost);
 		CLIENT.on("loginNeeded", serverLoginLoginNeeded);
+		CLIENT.on("saveLogin", saveLogin);
+		
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: "Hide the login widget", charCode: char_Esc, fun: hideLoginDialog});
 		
 		menuItem = EDITOR.addMenuItem("Switch user", showLoginDialog);
 		
+		var server = undefined;
+		if(EDITOR.localStorage) {
+			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser"], function(err, stored) {
+				var url = stored.editorServerUrl;
+				if(url) server = {url: url};
+				
+				/*
+					if(EDITOR.startedCounter == 1 && !stored.editorServerUser && RUNTIME == "browser" &&
+					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
+					console.log("First time we run the editor!");
+					console.log("Go directly to signup page.");
+					window.onbeforeunload = null;
+					document.location = "/signup/signup.html" + window.location.search;
+					}
+				*/
+				
+				if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
+			});
+		} else if(!QUERY_STRING["skiplogin"]) CLIENT.connect(server, connectedToServer);
+		
 		function connectedToServer(err) {
-			
 		}
 	}
 	
@@ -70,6 +73,7 @@
 		CLIENT.removeEvent("connectionConnected", serverLoginOnConnected);
 		CLIENT.removeEvent("connectionLost", serverLoginOnConnectionLost);
 		CLIENT.removeEvent("loginNeeded", serverLoginLoginNeeded);
+		CLIENT.removeEvent("saveLogin", saveLogin);
 		
 		EDITOR.unbindKey(hideLoginDialog);
 		
@@ -108,9 +112,19 @@
 				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function(err, obj) {
 					if(err) console.error(err);
 					console.log("credentials: ", obj);
-					if(obj) { 
+					if(obj && obj.editorServerUser) {
+						console.log("Using saved credentials to login");
 						userValue = userValue || obj["editorServerUser"];
 						pwValue = pwValue || obj["editorServerPw"];
+					}
+					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && 
+					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
+						console.log("Logging in as guest!");
+						userValue = "guest";
+						pwValue = "guest";
+					}
+					else {
+						console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " RUNTIME=" + RUNTIME + " window.location.hostname=" + window.location.hostname);
 					}
 					attemptLogin();
 				});
@@ -157,6 +171,13 @@
 	
 	function hideLoginDialog() {
 		return serverLoginDialog.hide();
+	}
+	
+	function saveLogin(user) {
+		console.log("SaveLogin:", user);
+		EDITOR.localStorage.setItem("editorServerUrl", CLIENT.url);
+		EDITOR.localStorage.setItem("editorServerUser", user.user);
+		EDITOR.localStorage.setItem("editorServerPw", user.pw);
 	}
 	
 	function buildServerLoginDialog(widget) {

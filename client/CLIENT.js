@@ -70,9 +70,6 @@ var CLIENT = {}; // Client object is global
 			
 			lastUsedserver = server;
 			
-			//CLIENT.cmd("identify", {username: "demo", password: "demo"}, loggedIn);
-			//CLIENT.cmd("identify", {username: "admin", password: "admin"}, loggedIn);
-			
 			console.log("connection.onopen: connection.readyState=" + connection.readyState);
 			// readyState when using xhr !? Wait for readyState !?
 			
@@ -84,17 +81,6 @@ var CLIENT = {}; // Client object is global
 			console.log("Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
 			reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 			
-			function loggedIn(err, resp) {
-				if(err) {
-					console.warn(err);
-					alertBox(err.message);
-				}
-				else {
-					if(!resp.loginSuccess) throw new Error("Did not get loginSuccess!");
-					if(!resp.loginSuccess.cId) throw new Error("Got no client id from server!");
-					// CLIENT.connectionId is set further down: CLIENT.on("loginSuccess", )
-				}
-			}
 		}
 		
 		connection.onmessage = function serverMessage(e) {

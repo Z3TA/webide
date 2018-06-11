@@ -79,7 +79,7 @@ letsencrypt.register = function register(domain, adminEmail, callback) {
 			}
 			
 			if(callback) callback(err);
-			else console.warn("CERTBOT ERROR: " + err.message);
+			else console.warn("CERTBOT ERROR: " + err.message ? err.message : "Certbot gave no error message. See certbot logs!");
 			
 			callback = null;
 			return;

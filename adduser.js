@@ -19,6 +19,10 @@
 	
 */
 
+if(process.cwd() != __dirname) throw new Error("adduser.js needs to be run in the same dir as the script eg " + __dirname + " while current directory is " + process.cwd());
+
+console.time("Adding user");
+
 var DEFAULT = require("./server/default_settings.js");
 
 var UTIL = require("./client/UTIL.js");
@@ -93,8 +97,8 @@ if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters
 if(username.length < 3) throw new Error("username needs to be at least 3 letters!");
 if(username.length > 20) throw new Error("username can not be more then 20 letters!");
 
+console.time("check exist");
 // Make sure user not already exist
-
 var userDirs = fs.readdirSync(HOME);
 for (var i=0; i<userDirs.length; i++) {
 	if(userDirs[i] == username) throw new Error(HOME + "/" + userDirs[i]+ " already exist!");
@@ -108,7 +112,7 @@ for (var i=0, name; i<users.length; i++) {
 	//console.log("name=" + name); // Why does it not find name !?
 	if(name == username) throw new Error("User " + username + " already exist in /etc/passwd! username=");
 }
-
+console.timeEnd("check exist");
 
 var userHomeDir = HOME + username;
 
@@ -117,6 +121,7 @@ if(fs.existsSync(userHomeDir)) throw new Error("Directory already exist: " + use
 var zfsPool;
 
 if(!NOZFS) {
+	console.time("ZFS");
 child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 	// If zfs doesn't exist we get both an err and stderr.
 	// If not super user we get both an err and stderr.
@@ -147,6 +152,7 @@ child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 			}
 			}
 		
+		console.timeEnd("ZFS");
 		adduser();
 		
 });
@@ -156,24 +162,37 @@ else adduser();
 function adduser() {
 	
 	// old: 'adduser --system --ingroup jzedit_users ' + username
-	var adduserCmd = 'adduser ' + username + ' --system --group'
+	//var adduserCmd = 'adduser ' + username + ' --system --group'
+	
+	// There are often very few uid's available for system users. So create a "regular" user.
+	var adduserCmd = 'adduser ' + username + ' --group --disabled-login --shell /bin/false'
 	if(!NOZFS) adduserCmd += " --no-create-home";
 	
-child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
-	if (err) throw err;
+	// adduser: `/usr/sbin/useradd -d /home/guest6 -g guest6 -s /bin/false -u 126 guest6'
 	
+	console.time("create system user");
+child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
+	if (err) {
+			console.log("adduserCmd=" + adduserCmd);
+			throw err;
+		}
+		
 	if(stderr) throw new Error(stderr);
 	
+		console.timeEnd("create system user");
+		
 	/*
 		Format:
 			Adding system user `pelle' (UID 111) ...
 			Adding new user `pelle' (UID 111) with group `jzedit_users' ...
 			Creating home directory `/home/pelle' ...
-		
+			----
 		Adding new group `test123' (GID 140) ...
 		Adding new user `test123' (UID 126) with group `test123' ...
 		Creating home directory `/home/test123' ...
-		
+			---
+			Adding group `test2' (GID 1005) ...
+			Done.
 		*/
 		
 	//console.log("stdout=" + stdout);
@@ -182,19 +201,33 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	var matchGid = stdout.match(/\(GID (\d*)\)/);
 	var matchHomeDir = stdout.match(/home directory `([^' ]*)'/);
 	
-		if(!matchUid) throw new Error("Unable to fund UID in stdout=" + stdout);
-	if(!matchGid) throw new Error("Unable to fund GID in stdout=" + stdout);
-		if(!matchHomeDir) throw new Error("Unable to fund UID in stdout=" + stdout);
+		if(!matchUid && !matchGid) throw new Error("Unable to fund UID or GUID in stdout=" + stdout);
+	//if(!matchGid) throw new Error("Unable to fund GID in stdout=" + stdout);
+		if(NOZFS && !matchHomeDir) throw new Error("Unable to fund home directory in stdout=" + stdout);
 		
 	// Sanity check
-	var matchUserName = stdout.match(/new user `([^' ]*)'/);
+	//var matchUserName = stdout.match(/new user `([^' ]*)'/);
+		var matchUserName = stdout.match(/Adding (group|new user) `([^' ]*)'/);
 	if(!matchUserName) throw new Error("Could not match user name in stdout=" + stdout);
-	if(username != matchUserName[1]) throw new Error("The added user's username=" + matchUserName[1] + " is not the username=" + username + " we wanted! stdout=" + stdout);
+		if(username != matchUserName[2]) throw new Error("The added user's username=" + matchUserName[2] + 
+		" is not the username=" + username + " we wanted! stdout=" + stdout + " matchUserName=" + JSON.stringify(matchUserName));
 	
-		var uid = parseInt(matchUid[1]);
-	var gid = parseInt(matchGid[1]);
-		var homeDir = UTIL.trailingSlash(matchHomeDir[1]);
+		var uid = -1;
+		var gid = -1;
+		if(matchUid) {
+uid = parseInt(matchUid[1]);
+		}
+		else if(matchGid) {
+gid = parseInt(matchGid[1]);
+			uid = gid;
+		}
+		else throw new Error("Unable to find uid or gid from stdout=" + stdout);
+		
+		var homeDir = UTIL.trailingSlash(userHomeDir);
+		if(NOZFS) homeDir = UTIL.trailingSlash(matchHomeDir[1]);
 	
+		if(homeDir == undefined) throw new Error("Unable to find homeDir from stdout=" + stdout);
+		
 	//var gid = getGroupId(groupName);
 	
 	if(NO_PW_HASH) {
@@ -328,10 +361,12 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	try {
 			fs.writeFileSync("/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx", nginxProfile);
 			fs.symlinkSync("/etc/nginx/sites-available/" + url_user + "." + DOMAIN + ".nginx", "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN + "");
-		
+			
+			console.time("Reload nginx");
 		var reloadNginxStdout = child_process.execSync("service nginx reload");
 		reloadNginxStdout = reloadNginxStdout.toString(ENCODING);
-		if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
+			console.timeEnd("Reload nginx");
+			if(reloadNginxStdout.trim()) throw new Error(reloadNginxStdout);
 	}
 	catch (err) {
 		console.warn(err.message + " Nginx web server is probably not installed. Or there's a problem with the profiles. Try sudo nginx -T && sudo service nginx restart");
@@ -339,8 +374,10 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	
 		if(!NO_CERT) {
 		// Register SSL certificate for user web page
+			console.time("Letsencrypt");
 		var letsencrypt = require("./shared/letsencrypt.js");
 			letsencrypt.register(url_user + "." + DOMAIN, ADMIN_EMAIL);
+			console.timeEnd("Letsencrypt");
 		}
 		
 		
@@ -403,6 +440,8 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		*/
 		
 		console.log("User with username=" + username + " and password=" + password + " successfully added!");
+		
+		console.timeEnd("Adding user");
 		
 	//console.log("Wait a few seconds, then sudo service apparmor reload to prevent EACCESS errors");
 	

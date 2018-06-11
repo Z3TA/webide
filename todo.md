@@ -38,12 +38,30 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+After creating guest23 it can't find it in /etc/passwd
+Unable to find username=guest23 in /etc/passwd
+
+
+Working on guest login
+using guest pool
+handle server crashes and restarts
+don't reuse guest accounts, just keep creating new ones
+
+
 create readme file for npm
 
 npm install -g ?
 
 
 Instructions for self hosting
+
+
+A signup screen is a major blocker and will cause 50% of users to just uninstall the app.
+Automatically login as guest if no cookie or localStorage user entry exist!
+As creating users is slow, use current (GUEST_COUNTER) pre-created guest, and then create a new guest account and increment GUEST_COUNTER
+
+GUEST_COUNTER = nr (keep track of current guest)
+
 
 npm install jzedit !?
 npm start
@@ -2280,6 +2298,8 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Optimize creation of guest/new user! And login time/mounts check
 
 idea: performance regression tests:
 Check out each commit and run a bunch on stuff, like edit small and big files.
