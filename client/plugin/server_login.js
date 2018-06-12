@@ -6,6 +6,7 @@
 	
 	var serverLoginDialog = EDITOR.createWidget(buildServerLoginDialog);
 	var menuItem;
+	var clickedConnectLogin = false; // If the user has clicked login from the login dialog
 	
 	// Page speed score hack
 	if(navigator.userAgent.indexOf("Speed Insights") != -1) return; // Don't connect to server or show login screen
@@ -117,9 +118,9 @@
 						userValue = userValue || obj["editorServerUser"];
 						pwValue = pwValue || obj["editorServerPw"];
 					}
-					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && 
+					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin &&
 					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
-						console.log("Logging in as guest!");
+						console.log("Logging in as guest because it's the first time using the editor ...");
 						userValue = "guest";
 						pwValue = "guest";
 					}
@@ -362,7 +363,7 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 		
 		
 		function connectToServer() {
-			
+			clickedConnectLogin = true;
 			console.log("Login form submitted! Connecting to server ...");
 			
 			var server = {url: url.value};
