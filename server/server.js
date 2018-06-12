@@ -612,6 +612,7 @@ if(GUEST_POOL.length == 0) {
 								var pwHash = require("./pwHash.js");
 								guestPw = pwHash(guestPw);
 							}
+							var fs = require("fs");
 							fs.writeFile(UTIL.joinPaths([HOME_DIR, username, ".jzeditpw"]), guestPw, function(err) {
 								if(err) throw err;
 								console.log("Saved guest=" + guestUser + " new password");
@@ -628,7 +629,6 @@ if(GUEST_POOL.length == 0) {
 					else {
 						
 						var fs = require("fs");
-						
 						fs.readdir(HOME_DIR, function readDir(err, files) {
 							if(err) throw err;
 							
