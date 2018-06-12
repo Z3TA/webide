@@ -124,6 +124,7 @@ var PORTS_IN_USE = [HTTP_PORT];
 
 var GUEST_COUNTER = 0; // Incremented each time we create a new guest user
 var GUEST_POOL = []; // Because it's a bit slow to create new users
+var CREATE_USER_LOCK = false; // Can only create one user at a time
 
 var fs = require("fs");
 
@@ -214,6 +215,13 @@ else {
 function createGuestUser(callback) {
 console.time("createAccount");
 
+	if(CREATE_USER_LOCK) {
+		var err = new Error("A user is already about the be created!");
+		err.code = "LOCK";
+		return callback(err);
+	}
+	CREATE_USER_LOCK = true;
+	
 	var guestId = ++GUEST_COUNTER;
 // Save guest counter so that we can continue the number serie after server restarts
 	// It's not that bad if there are holes in the number serie. 
@@ -252,14 +260,16 @@ var path = require("path");
 		console.log("command=" + command);
 		
 		exec(command, options, function adduser(error, stdout, stderr) {
-if(error) {
+			CREATE_USER_LOCK = false;
+			
+			if(error) {
 				log("Error when adding user: (error is probably in " + scriptPath + ")");
 				throw error;
 			}
 			
 			console.log("stderr=" + UTIL.lbChars(stderr));
 			
-			stderr = stderr.trim(); // Can be a space
+			stderr = stderr.trim(); // Can be a new line (LF)
 			stdout = stdout.trim();
 			
 			if(stderr) throw new Error("stderr=" + stderr + " (stderr.length=" + stderr.length + ")");
@@ -268,6 +278,7 @@ if(error) {
 			log("stdout=" + stdout, DEBUG);
 			var checkre = /User with username=(.*) and password=(.*) successfully added/g;
 			var check = checkre.exec(stdout);
+			if(check == null) throw new Error("It seems command=" + command + " failed! error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout);
 			// User with username=demo4 and password=demo4 successfully added!
 			var reG1User = check[1];
 			var reG2Pw = check[2];
@@ -558,6 +569,7 @@ function sockJsConnection(connection) {
 			else {
 				
 				// # Identify
+				var createUserRetries = 0;
 				
 				(function checkUser(username, password) {
 					
@@ -573,11 +585,20 @@ if(GUEST_POOL.length == 0) {
 							// Need to wait until a new guest account is created
 							console.log("Creating new guest user because GUEST_POOL.length=" + GUEST_POOL.length);
 							createGuestUser(function guestUserCreated(err, guestUser, guestPw) {
-								if(err) throw err;
-								loginAsGuest(guestUser, guestPw);
-});
+								if(err) {
+									if(err.code != "LOCK") throw err;
+									if(++createUserRetries > 3) {
+										return send({error: "Unable to create guest account. Try again later. Or login with existing account."});
+									}
+									return setTimeout(function retryCreateAccount() {
+										console.log("Retrying guest login ...");
+										checkUser(username, password);
+									}, 1000);
+								}
+								else loginAsGuest(guestUser, guestPw);
+							});
 						}
-else {
+						else {
 							var guestUser = GUEST_POOL.shift();
 							console.log("Using guest account " + guestUser + " from GUEST_POOL");
 							var generator = require('generate-password');
@@ -586,8 +607,8 @@ else {
 								numbers: true
 							});
 							loginAsGuest(guestUser, guestPw);
-// Save/Reset the password
-if(!NO_PW_HASH) {
+							// Save/Reset the password
+							if(!NO_PW_HASH) {
 								var pwHash = require("./pwHash.js");
 								guestPw = pwHash(guestPw);
 							}
@@ -595,15 +616,9 @@ if(!NO_PW_HASH) {
 								if(err) throw err;
 								console.log("Saved guest=" + guestUser + " new password");
 							});
-}
-
-// Increase the guest pool
-						createGuestUser(function guestPoolIncreased(err, guestUser, guestPw) {
-							if(err) throw err;
-GUEST_POOL.push(guestUser);
-						});
-}
-else if(USERNAME) {
+						}
+					}
+					else if(USERNAME) {
 						console.log("Using USERNAME=" + USERNAME+ " from argument ...")
 						
 						// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
@@ -637,7 +652,18 @@ username = guestUser;
 idSuccess();
 
 						send({saveLogin: {user: username, pw: guestPassword}, id: 0});
-}
+						
+						// Increase the guest pool
+						createGuestUser(function guestPoolIncreased(err, guestUser, guestPw) {
+							if(err) {
+								if(err.code != "LOCK") throw err;
+							}
+							else {
+								GUEST_POOL.push(guestUser);
+								console.log("Guest account " + guestUser + " added to GUEST_POOL.length=" + GUEST_POOL.length);
+							}
+						});
+					}
 					
 					function checkPw() {
 						

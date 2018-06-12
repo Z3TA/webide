@@ -72,6 +72,8 @@ catch (err) {
 var scriptArguments = null; 
 }
 
+var UID, GID;
+
 if(scriptArguments) {
 	console.log("Using JSON parameters!");
 	username = scriptArguments.username;
@@ -80,6 +82,8 @@ if(scriptArguments) {
 	NO_CERT = scriptArguments.noCert;
 	DOMAIN = scriptArguments.domain || defaultDomain;
 	HOME = scriptArguments.home || defaultHome;
+	UID = scriptArguments.uid || undefined;
+	GID = scriptArguments.gid || undefined;
 	}
 
 
@@ -88,11 +92,7 @@ var ENCODING = "utf8";
 if(!username) throw new Error("No username specified! scriptArguments=" + scriptArguments + " argv=" + maybeJson);
 if(!password) throw new Error("No password specified! scriptArguments=" + scriptArguments + " argv=" + maybeJson);
 	
-	
-var etcPasswdString = fs.readFileSync("/etc/passwd", ENCODING);
-
-
-if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters that is not a-z or 0-9");
+	if(username.match(/[^A-Za-z0-9]/)) throw new Error("Username contains characters that is not a-z or 0-9");
 
 if(username.length < 3) throw new Error("username needs to be at least 3 letters!");
 if(username.length > 20) throw new Error("username can not be more then 20 letters!");
@@ -101,22 +101,42 @@ console.time("check exist");
 // Make sure user not already exist
 var userDirs = fs.readdirSync(HOME);
 for (var i=0; i<userDirs.length; i++) {
-	if(userDirs[i] == username) throw new Error(HOME + "/" + userDirs[i]+ " already exist!");
+	if(userDirs[i] == username) throw new Error("Directory " + HOME + userDirs[i]+ " already exist!");
 }
 
+var etcPasswdString = fs.readFileSync("/etc/passwd", ENCODING);
 //console.log("etcPasswdString=" + etcPasswdString);
 var users = etcPasswdString.split(/\n|\r\n/);
 //console.log("users.length=" + users.length);
-for (var i=0, name; i<users.length; i++) {
-	name = users[i].substring(0, users[i].indexOf(":"));
-	//console.log("name=" + name); // Why does it not find name !?
-	if(name == username) throw new Error("User " + username + " already exist in /etc/passwd! username=");
+var user, name, uid, gid;
+var takenUid = [];
+var takenGid = [];
+for (var i=0; i<users.length; i++) {
+	user = users[i].split(":");
+	name = user[0];
+	uid = parseInt(user[2]);
+	gid = parseInt(user[3]);
+	if(name == username) throw new Error("User " + username + " already exist in /etc/passwd!");
+	takenUid.push(uid);
+	takenGid.push(gid);
 }
-console.timeEnd("check exist");
+
+var etcGroupString = fs.readFileSync("/etc/group", ENCODING);
+var groups = etcGroupString.split(/\n|\r\n/);
+for (var i=0; i<groups.length; i++) {
+	group = groups[i].split(":");
+	name = group[0];
+	gid = parseInt(group[2]);
+	if(name == username) throw new Error("Group name " + username + " already exist in /etc/group!");
+	takenGid.push(gid);
+}
 
 var userHomeDir = HOME + username;
-
 if(fs.existsSync(userHomeDir)) throw new Error("Directory already exist: " + userHomeDir);
+
+console.timeEnd("check exist");
+
+
 
 var zfsPool;
 
@@ -159,82 +179,121 @@ child_process.exec("zfs list", function execAddUser(err, stdout, stderr) {
 }
 else adduser();
 
+function findFreeUid() {
+	var minUid = 1000;
+	var maxUid = 60000;
+	for (var uid=minUid; uid<maxUid; uid++) {
+		if(takenGid.indexOf(uid) != -1) continue; // Try to get the same uid as gid
+		if(takenUid.indexOf(uid) == -1) return uid;
+	}
+	throw new Error("All uid's are taken! Try deleting some users.");
+}
+
+function findFreeGid() {
+	var minGid = 1000;
+	var maxGid = 60000;
+	for (var gid=minGid; gid<maxGid; gid++) {
+		if(takenGid.indexOf(gid) == -1) return gid;
+	}
+	throw new Error("All gid's are taken! Try deleting some users/groups.");
+}
+
+function createSystemUser(name, uid, gid, homeDir, callback) {
+	if(typeof uid == "function" && gid == undefined) {
+		callback = uid;
+		uid = undefined;
+	}
+	
+	if(callback == undefined) throw new Error("No callback defined!");
+	
+	if(uid == undefined) uid = findFreeUid();
+	if(gid == undefined) gid = findFreeGid();
+	
+if(homeDir == undefined) {
+// Create the home dir
+homeDir = HOME + name;
+		fs.mkdir(homeDir, function(err) {
+			if(err) return callback(err);
+			
+			addGroupAndUser();
+			// No need to chmod or chown as that will be done later in this script
+			/*
+				fs.chown(homeDir, uid, gid, function(err) {
+				if(err) throw err;
+				
+				fs.chmod(homeDir, mode, function() {
+				if(err) throw err;
+				addGroupAndUser();
+				});
+				});
+			*/
+		});
+	}
+	else addGroupAndUser();
+	
+	function addGroupAndUser() {
+		
+var groupName = name;
+		var groupaddCmd = "groupadd -g " + gid + " " + groupName;
+		// sudo groupadd -g 144 testgroup
+var shell = "/bin/false";
+		var useraddCmd = "useradd -d " + homeDir + " -g " + groupName + " -s " + shell + " -u " + uid + " " + name;
+		// sudo useradd -d /home/testuser -g testgroup -s /bin/false -u 133 testuser
+		
+		child_process.exec(groupaddCmd, function execGroupadd(err, stdout, stderr) {
+			if(err || stderr) console.log("groupaddCmd=" + groupaddCmd + " err.message=" + (err && err.message) + " stderr=" + stderr);
+			
+			if (err) return callback(err);
+			if(stderr) return callback(new Error(stderr));
+			
+			console.log("groupadd stdout=" + stdout);
+			
+			/*
+				groupadd: GID '144' already exists
+				(Might already have been added to /etc/group)
+				
+				If groupadd is success it will not return anything
+			*/
+			
+			child_process.exec(useraddCmd, function execUseradd(err, stdout, stderr) {
+				if(err || stderr) console.log("useraddCmd=" + useraddCmd + " err.message=" + (err && err.message) + " stderr=" + stderr);
+				
+				if(stderr) {
+					if(stderr.match(/useradd: UID (\d*) is not unique/)) console.warn("Race condition detected!");
+					return callback(new Error(stderr));
+				}
+				
+				if (err) return callback(err);
+				
+				console.log("useradd stdout=" + stdout);
+				
+				/*
+					If useradd is success it will not return anything
+				*/
+				
+				return callback(null, name, uid, gid, homeDir);
+				
+			});
+			
+		});
+	}
+	
+	
+}
+
+
 function adduser() {
 	
 	/*
-		old: 'adduser --system --ingroup jzedit_users ' + username
-	//var adduserCmd = 'adduser ' + username + ' --system --group'
-	
-	There are often very few uid's available for system users. (as specified in /etc/login.defs)
-		So create a "regular" user !? Only problem adduser wont add it to /etc/passwd unless it has shell access and a pw !?
-		
-		
-		Hmm. I got an error about dublicate uid, adduser can't geek track of uid's !? 
-		So we might have to use more low level useradd, groupadd, mkdir /home/user, 
-		and make sure UID and GUID conforms to the distro policy !?
-		adduser: `/usr/sbin/useradd -d /home/guest6 -g guest6 -s /bin/false -u 126 guest6'
-		
+		We get errors like "useradd: UID 132 is not unique" when using adduser. 
+		So we'll use the low level useradd and groupadd instead.
 	*/
 	
-	var adduserCmd = 'adduser ' + username + ' --system --group --shell /bin/false'
-	if(!NOZFS) adduserCmd += " --no-create-home";
-	
 	console.time("create system user");
-child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
-	if (err) {
-			console.log("adduserCmd=" + adduserCmd);
-			throw err;
-		}
+	createSystemUser(username, UID, GID, NOZFS ? undefined : userHomeDir, function systemUserCreated(err, username, uid, gid, homeDir) {
+		if(err) throw err;
 		
-	if(stderr) throw new Error(stderr);
-	
 		console.timeEnd("create system user");
-		
-	/*
-		Format:
-			Adding system user `pelle' (UID 111) ...
-			Adding new user `pelle' (UID 111) with group `jzedit_users' ...
-			Creating home directory `/home/pelle' ...
-			----
-		Adding new group `test123' (GID 140) ...
-		Adding new user `test123' (UID 126) with group `test123' ...
-		Creating home directory `/home/test123' ...
-			---
-			Adding group `test2' (GID 1005) ...
-			Done.
-		*/
-		
-	//console.log("stdout=" + stdout);
-	
-		var matchUid = stdout.match(/\(UID (\d*)\)/);
-	var matchGid = stdout.match(/\(GID (\d*)\)/);
-	var matchHomeDir = stdout.match(/home directory `([^' ]*)'/);
-	
-		if(!matchUid && !matchGid) throw new Error("Unable to fund UID or GUID in stdout=" + stdout);
-	//if(!matchGid) throw new Error("Unable to fund GID in stdout=" + stdout);
-		if(NOZFS && !matchHomeDir) throw new Error("Unable to find home directory in stdout=" + stdout);
-		
-	// Sanity check
-	//var matchUserName = stdout.match(/new user `([^' ]*)'/);
-		var matchUserName = stdout.match(/Adding (group|new user) `([^' ]*)'/);
-	if(!matchUserName) throw new Error("Could not match user name in stdout=" + stdout);
-		if(username != matchUserName[2]) throw new Error("The added user's username=" + matchUserName[2] + 
-		" is not the username=" + username + " we wanted! stdout=" + stdout + " matchUserName=" + JSON.stringify(matchUserName));
-	
-		var uid;
-		var gid;
-		if(matchUid) {
-			uid = parseInt(matchUid[1]);
-		}
-		
-		if(matchGid) {
-gid = parseInt(matchGid[1]);
-		}
-		
-		if(!uid && gid) {
-uid = gid;
-			console.warn("Unable to find uid in stdout=" + stdout + " the gid=" + gid + " will be used as uid!");
-		}
 		
 		if(typeof uid != "number") throw new Error("uid=" + uid + " needs to be a number. Not a " + (typeof uid));
 		if(typeof gid != "number") throw new Error("gid=" + gid + " needs to be a number. Not a " + (typeof gid));
@@ -242,14 +301,13 @@ uid = gid;
 		console.log("uid=" + uid);
 		console.log("gid=" + gid);
 		
-		var homeDir = UTIL.trailingSlash(userHomeDir);
-		if(NOZFS) homeDir = UTIL.trailingSlash(matchHomeDir[1]);
-	
-		if(homeDir == undefined) throw new Error("Unable to find homeDir from stdout=" + stdout);
+		if(homeDir == undefined) throw new Error("createSystemUser called back with homeDir=" + homeDir);
 		
-	//var gid = getGroupId(groupName);
-	
-	if(NO_PW_HASH) {
+		homeDir = UTIL.trailingSlash(homeDir);
+		
+		//var gid = getGroupId(groupName);
+		
+		if(NO_PW_HASH) {
 			var hashedPassword = password;
 		}
 		else {
@@ -259,8 +317,6 @@ uid = gid;
 		
 		fs.writeFileSync(UTIL.joinPaths([HOME, username, "/.jzeditpw"]), hashedPassword, ENCODING);
 		
-	
-	
 		
 		// Add skeleton files ...
 	copyFolderRecursiveSync("etc/userdir_skeleton/etc", homeDir);
