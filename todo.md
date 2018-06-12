@@ -38,34 +38,8 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
-After creating guest23 it can't find it in /etc/passwd
-Unable to find username=guest23 in /etc/passwd
 
 
-Working on guest login
-using guest pool
-handle server crashes and restarts
-don't reuse guest accounts, just keep creating new ones
-
-
-create readme file for npm
-
-npm install -g ?
-
-
-Instructions for self hosting
-
-
-A signup screen is a major blocker and will cause 50% of users to just uninstall the app.
-Automatically login as guest if no cookie or localStorage user entry exist!
-As creating users is slow, use current (GUEST_COUNTER) pre-created guest, and then create a new guest account and increment GUEST_COUNTER
-
-GUEST_COUNTER = nr (keep track of current guest)
-
-
-npm install jzedit !?
-npm start
-(need a way to automatically generate semver version !?)
 
 What makes JZeidt better then existing editors/IDE's, or what does it do differently !?
 
@@ -82,17 +56,6 @@ JZedit has no build step and you can use the editor to make changes to the edito
 JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it fast and performant.
 
 
-Git server
-Upload your work. git add remote webide
-yourname.webide.se if you want it to be private
-or just webide.se if you want it to be public
-
-Then go to webide.se/repo/name-of-your-repo
-
-There you can develop and commit, or just use it for free storage and public access :)
-
-
-git push webide
 
 
 
@@ -100,6 +63,16 @@ git push webide
 
 todo
 ----
+
+Google drive integration.
+Detect if running from chrome-book, then auto connect to Google drive.
+If not running in Chrome app mode, you must click on Google drive icon in file explorer.
+
+Able to use the editor as a "native" editor. Open files from network smb
+
+Make it possible to install the editor via : npm install jzedit
+npm install -g ?
+
 can I fix Annoying Chrome icon when clicking on the jzedit launcher in Linux ?
 
 new line btw right click to show menu and drag files here
@@ -157,6 +130,8 @@ Remove all dependendcies on dirname !?
 
 What I'm thinking
 -----------------
+
+How do you make "pull requests" !?
 
 Skip webide.se part on Chromebook app ? Because connecticvity issues ...
 Chromebook users are most likely always online, or what would be the reason to use a computer that is basically just a web browser !?
@@ -1400,6 +1375,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+When opening a file and you paste in a full path (starting with /) automatically switch to that folder when searching for files to open
 
 Static site generator: When publising an article from draft, eg renaming from _foo to foo . Add a button for it in the ssg interface and make a hg mv if it's in source control.
 
