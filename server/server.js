@@ -209,12 +209,15 @@ else {
 		if(HTTP_IP != "127.0.0.1") {
 			broadcast(HTTP_IP);
 		}
+		else {
+			log("Server running on URL/address: http://" + makeUrl() + "");
+		}
 	}
 }
 
 function createGuestUser(callback) {
-console.time("createAccount");
-
+	console.time("createAccount");
+	
 	if(CREATE_USER_LOCK) {
 		var err = new Error("A user is already about the be created!");
 		err.code = "LOCK";
