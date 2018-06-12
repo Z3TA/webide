@@ -578,7 +578,14 @@ function sockJsConnection(connection) {
 						password = pwHash(password);
 					}
 					
-					if(username == "guest") {
+					if(USERNAME) {
+						console.log("Using USERNAME=" + USERNAME+ " from argument ...")
+						
+						// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
+						if(USERNAME == username && PASSWORD == password) idSuccess();
+						else idFail("Wong username or password! (Username specified in server arguments)");
+					}
+					else if(username == "guest") {
 // ### Login as guest
 // Asign a user from the guest pool
 if(GUEST_POOL.length == 0) {
@@ -618,13 +625,6 @@ if(GUEST_POOL.length == 0) {
 								console.log("Saved guest=" + guestUser + " new password");
 							});
 						}
-					}
-					else if(USERNAME) {
-						console.log("Using USERNAME=" + USERNAME+ " from argument ...")
-						
-						// Use CURRENT_USER instead of USERNAME as username to prevent issies with /home/username
-						if(USERNAME == username && PASSWORD == password) idSuccess();
-						else idFail("Wong username or password! (Username specified in server arguments)");
 					}
 					else {
 						
