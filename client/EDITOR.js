@@ -1523,16 +1523,31 @@ if(callback) return callback(err, path);
 				}
 			*/
 			
-			var friendlyString = "Right click or long-touch to show the menu!\nUpload files and folders by draging them here"
+			var friendlyString = [
+				"Right click or long-touch to show the menu!",
+				"Upload files and folders by draging them here"
+			];
 			
-			if(friendlyString) {
-				// Place the string in the center
-				var textMeasure = ctx.measureText(friendlyString);
+			if(friendlyString.length > 0) {
+				// Place the string(s) in the center
+				var maxLength = 0;
+				var longestString = "";
+				for (var i=0; i<friendlyString.length; i++) {
+					if(friendlyString[i].length > maxLength) {
+						longestString = friendlyString[i];
+						maxLength = friendlyString[i].length;
+					}
+				}
+				
+				var textMeasure = ctx.measureText(longestString);
 				var left = EDITOR.view.canvasWidth / 2 - textMeasure.width / 2;
-				var top =  EDITOR.view.canvasHeight / 2 - 20;
+				var top =  EDITOR.view.canvasHeight / 2 - 20*friendlyString.length;
 				
 				ctx.beginPath(); // Reset all the paths!
-				ctx.fillText(friendlyString, left, top);
+				for (var i=0; i<friendlyString.length; i++) {
+					ctx.fillText(friendlyString[i], left, top + 20 * i);
+				}
+				
 			}
 			
 			// Render clouds !?
@@ -1761,16 +1776,16 @@ if(callback) return callback(err, path);
 		// Position the virtual keyboard
 		if(virtualKeyboardElement) {
 			var vkcs = window.getComputedStyle(virtualKeyboardElement, null);
-		var vkWidth = parseInt(vkcs.width);
-		var vkHeight = parseInt(vkcs.height);
-		console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
-		
-		// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
-		virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
-		virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
-		
-		//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
-		//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
+			var vkWidth = parseInt(vkcs.width);
+			var vkHeight = parseInt(vkcs.height);
+			console.log("vkHeight=" + vkHeight + " windowHeight=" + windowHeight + " vkWidth=" + vkWidth + " windowWidth=" + windowWidth);
+			
+			// Place virtual keyboard inside the canvas, so that it doesn't cover widgets
+			virtualKeyboardElement.style.top = (headerHeight + contentHeight - vkHeight) + "px"; 
+			virtualKeyboardElement.style.left = (windowWidth - rightColumnWidth - vkWidth) + "px";
+			
+			//virtualKeyboardElement.style.bottom = (footerHeight + vkHeight) + "px"; 
+			//virtualKeyboardElement.style.right = (rightColumnWidth + vkWidth) + "px";
 		}
 		
 		/*
@@ -1873,12 +1888,12 @@ if(callback) return callback(err, path);
 		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
 		
 		if(canvas) {
-		canvas.style.width = EDITOR.view.canvasWidth + "px";
-		canvas.style.height = EDITOR.view.canvasHeight + "px";
-		
-		canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
-		canvas.height = EDITOR.view.canvasHeight * pixelRatio;
-		
+			canvas.style.width = EDITOR.view.canvasWidth + "px";
+			canvas.style.height = EDITOR.view.canvasHeight + "px";
+			
+			canvas.width  = EDITOR.view.canvasWidth * pixelRatio;
+			canvas.height = EDITOR.view.canvasHeight * pixelRatio;
+			
 			// The canvas seem to be reset when resizing!
 			//EDITOR.canvas.mozOpaque = true; // Doesn't seem to improve performance in Firefox
 			EDITOR.canvasContext.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
