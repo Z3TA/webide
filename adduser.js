@@ -161,14 +161,23 @@ else adduser();
 
 function adduser() {
 	
-	// old: 'adduser --system --ingroup jzedit_users ' + username
+	/*
+		old: 'adduser --system --ingroup jzedit_users ' + username
 	//var adduserCmd = 'adduser ' + username + ' --system --group'
 	
-	// There are often very few uid's available for system users. So create a "regular" user.
-	var adduserCmd = 'adduser ' + username + ' --group --disabled-login --shell /bin/false'
-	if(!NOZFS) adduserCmd += " --no-create-home";
+	There are often very few uid's available for system users. (as specified in /etc/login.defs)
+		So create a "regular" user !? Only problem adduser wont add it to /etc/passwd unless it has shell access and a pw !?
+		
+		
+		Hmm. I got an error about dublicate uid, adduser can't geek track of uid's !? 
+		So we might have to use more low level useradd, groupadd, mkdir /home/user, 
+		and make sure UID and GUID conforms to the distro policy !?
+		adduser: `/usr/sbin/useradd -d /home/guest6 -g guest6 -s /bin/false -u 126 guest6'
+		
+	*/
 	
-	// adduser: `/usr/sbin/useradd -d /home/guest6 -g guest6 -s /bin/false -u 126 guest6'
+	var adduserCmd = 'adduser ' + username + ' --system --group --shell /bin/false'
+	if(!NOZFS) adduserCmd += " --no-create-home";
 	
 	console.time("create system user");
 child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
@@ -203,7 +212,7 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 	
 		if(!matchUid && !matchGid) throw new Error("Unable to fund UID or GUID in stdout=" + stdout);
 	//if(!matchGid) throw new Error("Unable to fund GID in stdout=" + stdout);
-		if(NOZFS && !matchHomeDir) throw new Error("Unable to fund home directory in stdout=" + stdout);
+		if(NOZFS && !matchHomeDir) throw new Error("Unable to find home directory in stdout=" + stdout);
 		
 	// Sanity check
 	//var matchUserName = stdout.match(/new user `([^' ]*)'/);
@@ -212,16 +221,26 @@ child_process.exec(adduserCmd, function execAddUser(err, stdout, stderr) {
 		if(username != matchUserName[2]) throw new Error("The added user's username=" + matchUserName[2] + 
 		" is not the username=" + username + " we wanted! stdout=" + stdout + " matchUserName=" + JSON.stringify(matchUserName));
 	
-		var uid = -1;
-		var gid = -1;
+		var uid;
+		var gid;
 		if(matchUid) {
-uid = parseInt(matchUid[1]);
+			uid = parseInt(matchUid[1]);
 		}
-		else if(matchGid) {
+		
+		if(matchGid) {
 gid = parseInt(matchGid[1]);
-			uid = gid;
 		}
-		else throw new Error("Unable to find uid or gid from stdout=" + stdout);
+		
+		if(!uid && gid) {
+uid = gid;
+			console.warn("Unable to find uid in stdout=" + stdout + " the gid=" + gid + " will be used as uid!");
+		}
+		
+		if(typeof uid != "number") throw new Error("uid=" + uid + " needs to be a number. Not a " + (typeof uid));
+		if(typeof gid != "number") throw new Error("gid=" + gid + " needs to be a number. Not a " + (typeof gid));
+		
+		console.log("uid=" + uid);
+		console.log("gid=" + gid);
 		
 		var homeDir = UTIL.trailingSlash(userHomeDir);
 		if(NOZFS) homeDir = UTIL.trailingSlash(matchHomeDir[1]);
