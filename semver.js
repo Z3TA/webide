@@ -21,7 +21,7 @@ fs.readFile("SEMVER", "utf8", function(err, data) {
 		semver[i] = parseInt(semver[i]);
 	}
 	
-	ask("Have the EDITOR/File/plugin API's got Major or Minor updates since last release ? ", undefined, function(err, answer) {
+	ask("Have the EDITOR/File/server API's got Major or Minor updates since last release ? ", undefined, function(err, answer) {
 		if(answer.match(/maj|br/i)) {
 			semver[0]++;
 			semver[1] = 0;
