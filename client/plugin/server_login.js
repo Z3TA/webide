@@ -178,6 +178,15 @@
 		EDITOR.localStorage.setItem("editorServerUrl", CLIENT.url);
 		EDITOR.localStorage.setItem("editorServerUser", user.user);
 		EDITOR.localStorage.setItem("editorServerPw", user.pw);
+		
+		var inputUser = document.getElementById("serverLoginUser");
+		var inputPw = document.getElementById("serverLoginPw");
+		
+		if(inputUser) inputUser.value = user.user;
+		if(inputPw) inputPw.value = user.pw;
+		
+		// The user will soon be logged in!
+		serverLoginDialog.hide();
 	}
 	
 	function buildServerLoginDialog(widget) {

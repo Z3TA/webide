@@ -770,6 +770,7 @@ idSuccess();
 							}
 							
 							console.log("Checking mounts ...");
+							console.time("check mounts");
 							
 							var nginxProfileOK = false;
 							var foldersToMount = 15;
@@ -856,7 +857,7 @@ idSuccess();
 									}
 									
 									function checkNginxEnabled() {
-										
+										console.time("Check Nginx enabled");
 										var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
 										fs.stat(nginxProfileEnabledPath, function (err, stats) {
 											if(checkMountsAbort) return;
@@ -874,6 +875,7 @@ idSuccess();
 														if(stdout) throw new Error(stdout);
 														
 														nginxProfileOK = true;
+														console.timeEnd("Check Nginx enabled");
 														
 														checkSslCert();
 														
@@ -884,6 +886,7 @@ idSuccess();
 											}
 											else {
 												nginxProfileOK = true;
+												console.timeEnd("Check Nginx enabled");
 												
 												checkSslCert();
 												
@@ -969,7 +972,7 @@ idSuccess();
 								var toStat = 0;
 								
 								console.log("Checking user rights ...");
-								
+								console.time("Check user rights");
 								fs.stat(HOME_DIR + username, function (err, stats) {
 									if(err) throw err;
 									
@@ -1056,6 +1059,7 @@ idSuccess();
 								function checkedUserRights() {
 									if(toChown == 0 && toStat == 0) {
 										if(callback) {
+											console.timeEnd("Check user rights");
 											callback(null);
 											callback = null;
 										}
@@ -1118,6 +1122,7 @@ idSuccess();
 									if(!userAccepted) { // Prevent double accept
 										acceptUser();
 										userAccepted = true;
+										console.timeEnd("check mounts");
 									}
 									else throw new Error("User already accepted!");
 								}
@@ -1134,7 +1139,7 @@ idSuccess();
 								/*
 									example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
 								*/
-								
+								console.time("Create apparmor profile");
 								var dest = template.replace("someuser", username);
 								var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
 								dest = dest.replace("home.", homeDot);
@@ -1168,13 +1173,14 @@ idSuccess();
 													//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
 													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 												*/
-												
+												console.timeEnd("Create apparmor profile");
 												return callback(null);
 											});
 										});
 									}
 									else {
 										// profile already exist!
+										console.timeEnd("Create apparmor profile");
 										return callback(null);
 									}
 									
@@ -1183,7 +1189,7 @@ idSuccess();
 							
 							function checkSslCert() {
 								// Check ssl certificate
-								
+								console.time("Check SSL Cert");
 								var url_user = UTIL.urlFriendly(username);
 								
 								var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
@@ -1191,6 +1197,7 @@ idSuccess();
 									if(err == null) {
 										console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
 										sslCertChecked = true;
+										console.timeEnd("Check SSL Cert");
 										return checkMountsReadyMaybe();
 									}
 									else if(err.code == 'ENOENT') {
@@ -1199,6 +1206,7 @@ idSuccess();
 										if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
 											log("Skipping SSL registration because of too many failed attempts!");
 											sslCertChecked = true;
+											console.timeEnd("Check SSL Cert");
 											return checkMountsReadyMaybe();
 										}
 										
@@ -1217,6 +1225,7 @@ idSuccess();
 												}
 												
 												sslCertChecked = true;
+												console.timeEnd("Check SSL Cert");
 												return checkMountsReadyMaybe();
 											}
 											else {
@@ -1244,6 +1253,7 @@ idSuccess();
 															console.log("nginx reloaded!");
 															
 															sslCertChecked = true;
+															console.timeEnd("Check SSL Cert");
 															return checkMountsReadyMaybe();
 														});
 													});

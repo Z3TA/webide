@@ -38,6 +38,7 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+It takes like 10s for a guest user to be created/checkmounts etc
 
 
 
