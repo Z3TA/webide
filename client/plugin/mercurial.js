@@ -121,24 +121,27 @@
 			
 			Example url: https://webide.se/?repo=https://github.com/Z3TA/vumoviemaker.git
 		*/
-		if(QUERY_STRING.repo) {
+		var repo = QUERY_STRING.repo || QUERY_STRING.clone;
+		if(repo) {
 			var folder = "/repo/";
 			
-			var matchGit = QUERY_STRING.repo.match(/\/([^/]*)\.git$/);
-			var matchUrl = QUERY_STRING.repo.match(/\/([^/]*)$/);
+			var matchGit = repo.match(/\/([^/]*)\.git$/);
+			var matchUrl = repo.match(/\/([^/]*)$/);
 			
-			if(QUERY_STRING.repo.slice(-1) == "/") folder += UTIL.getFolderName(QUERY_STRING.repo) + "/";
+			if(repo.slice(-1) == "/") folder += UTIL.getFolderName(repo) + "/";
 			else if(matchGit) folder += matchGit[1] + "/";
 			else if(matchUrl) folder += matchUrl[1] + "/";
 			
 			testRepo = {
-				url: QUERY_STRING.repo,
+				url: repo,
 				into: folder,
 				user: "",
 				pw: ""
 			}
 			showCloneDialog();
-			QUERY_STRING.repo = null; // Don't attempt to clone again after reconnection
+			// Don't attempt to clone again after reconnection
+			QUERY_STRING.repo = null; 
+			QUERY_STRING.clone = null; 
 		}
 	}
 	
