@@ -7,7 +7,7 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 node changeset.js
 #commit=$(nodejs getCommitId.js)
 commit=$(cat version.inc)
-semver=$(cat semver)
+semver=$(cat SEMVER)
 version=1
 beta=_alpha
 name=jzedit

@@ -3,8 +3,17 @@
 	Run this script for each new release
 */
 
+var done = false;
+
+process.on("exit", function () {
+	console.log("Semver tool exit: done=" + done);
+	var exitCode = 0;
+	if(!done) exitCode = 1;
+	process.exit(exitCode);
+});
+
 var fs = require("fs");
-fs.readFile("semver", "utf8", function(err, data) {
+fs.readFile("SEMVER", "utf8", function(err, data) {
 	if(err) throw err;
 	
 	var semver = data.split(".");
@@ -30,8 +39,9 @@ fs.readFile("semver", "utf8", function(err, data) {
 		
 		ask("Update semver from " + data + " to " + semverString + " ? ", ["y", "n"], function(err, answer) {
 			if(answer == "y") {
-				fs.writeFile("semver", semverString, function(err) {
+				fs.writeFile("SEMVER", semverString, function(err) {
 					console.log("Semver updated from " + data + " to " + semverString);
+					done = true;
 					process.exit(0);
 				});
 			}
