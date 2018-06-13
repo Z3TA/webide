@@ -1,11 +1,13 @@
 
+var logModule = require("../../../shared/log.js");
+var log = logModule.log;
 var nodehunExist = true;
 try {
 var Nodehun = require("nodehun");
 }
 catch(err) {
 	nodehunExist = false;
-	console.warn("Can not find module nodehun!");
+	log("Can not find module nodehun!", logModule.WARN);
 }
 
 if(!nodehunExist) {
@@ -14,7 +16,6 @@ if(!nodehunExist) {
 	SPELLCHECK.check = nodehunNotInstalled
 }
 else {
-	
 	var fs = require("fs");
 
 var SPELLCHECK = {};
@@ -24,12 +25,12 @@ var dictFiles = {};
 
 // Preload all languages before we are chrooted
 // Need to load them sync so we get them before we are chrooted
-console.log("Preloading spellcheck dictionaries ...");
+	log("Preloading spellcheck dictionaries ...", logModule.INFO);
 var langFolder = __dirname + "/languages/";
 var folders = fs.readdirSync(langFolder);
 for (var i=0, name=""; i<folders.length; i++) {
 		name = folders[i];
-		console.log("Found spellcheck dictionary for language " + name);
+		log("Found spellcheck dictionary for language " + name, logModule.INFO);
 		dictFiles[name] = {};
 		dictFiles[name].aff = fs.readFileSync(langFolder + name + "/" + name + ".aff");
 	dictFiles[name].dic = fs.readFileSync(langFolder + name + "/" + name + ".dic");
@@ -64,7 +65,7 @@ SPELLCHECK.check = function check(user, json, callback) {
 	var checkedDictionaries = 0;
 	var voteCorrect = 0;
 	
-	console.log("Spellchecking word=" + word);
+		log("Spellchecking word=" + word, logModule.DEBUG);
 	
 	for(var i=0; i<dict.length; i++) {
 		dict[i].spellSuggest(word, spellAnswer);
@@ -74,7 +75,8 @@ SPELLCHECK.check = function check(user, json, callback) {
 	function spellAnswer(err, correct, sugg, origWord){
 		checkedDictionaries++;
 		
-		console.log("Got answer from Nodehun err=" + (err && err.message) + " currect=" + correct + " sugg=" + sugg + " origWord=" + origWord + "");
+			log("Got answer from Nodehun err=" + (err && err.message) + 
+			" currect=" + correct + " sugg=" + sugg + " origWord=" + origWord + "", logModule.DEBUG);
 		
 		if(err) return callback(err);
 		
@@ -95,7 +97,7 @@ SPELLCHECK.check = function check(user, json, callback) {
 }
 
 function loadDictionary(lang, callback) {
-	console.log("Loading dictionary " + lang);
+	log("Loading dictionary " + lang, logModule.DEBUG);
 	
 	// Async load the .aff and .dic files. Then create a dictionary
 	
@@ -150,7 +152,7 @@ if(err.code == "ENOENT") {
 		
 		dict.push(new Nodehun(affBuffer,dictBuffer));
 		
-		console.log("Dictionary " + lang + " loaded");
+		log("Dictionary " + lang + " loaded", logModule.DEBUG);
 		
 		callback(null);
 	}

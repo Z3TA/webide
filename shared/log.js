@@ -6,6 +6,7 @@ var LOGLEVEL = 7;
 var CONSOLE_LOG_ORIGINAL = console.log;
 var CONSOLE_WARN_ORIGINAL = console.warn;
 
+
 function log(msg, lvl, noTrace) {
 	
 	var USE_COLORS = true;
@@ -160,6 +161,11 @@ function setLogLevel(logLevel) {
 module.exports = {
 	log: log,
 	setLogFile: setLogFile,
-	setLogLevel: setLogLevel
+	setLogLevel: setLogLevel,
+	ERROR: 3,
+	WARN: 4,
+	NOTICE: 5,
+	INFO: 6,
+	DEBUG: 7
 };
 

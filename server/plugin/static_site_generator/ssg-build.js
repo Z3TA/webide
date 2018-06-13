@@ -82,6 +82,7 @@ var PATH = require('path');
 var MAMMOTH = require("mammoth");
 var MARKED = require('marked');
 var JSCHARDET = require("jschardet");
+var LOGMODULE = require("../../../shared/log.js");
 
 // These paths needs to be absolute!
 var BASEPATH; // Path to files that should be processed
@@ -1791,7 +1792,7 @@ function occurrences(string, subString, allowOverlapping) {
 
 function log(str) {
 	if(SEND_MESSAGE) SEND_MESSAGE({type: "debug", msg: str});
-	else console.log(str);
+	else LOGMODULE.log(str);
 }
 
 function resolvePath(dir, file) {
