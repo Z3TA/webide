@@ -38,6 +38,14 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+Google drive integration.
+Detect if running from chrome-book, then auto connect to Google drive.
+If not running in Chrome app mode, you must click on Google drive icon in file explorer.
+
+Advertise Google drive integration by showing a Google Drive logo, that is gray, but turns "on" when connected to google drive.
+
+---
+
 It took fucking 25s for a guest user to be created and logged in!!
 
 Instead of fixing the perf issues, as it's only on first load. Show a loading bar or spinner with BS messages like:
@@ -48,9 +56,6 @@ Instead of fixing the perf issues, as it's only on first load. Show a loading ba
 todo
 ----
 
-Google drive integration.
-Detect if running from chrome-book, then auto connect to Google drive.
-If not running in Chrome app mode, you must click on Google drive icon in file explorer.
 
 When using repo/clone in url search, automatically make a shallow clone !?
 Add option in clone dialog to make shallow clone.
