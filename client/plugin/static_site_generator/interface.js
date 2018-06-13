@@ -1461,7 +1461,7 @@
 					
 					var protocol = UTIL.urlProtocol(site.preview);
 					
-					if(protocol != "file") {
+					if(protocol) {
 						alertBox("Preview uploaded to: " + site.preview);
 						return;
 					}

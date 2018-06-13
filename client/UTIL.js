@@ -763,7 +763,10 @@ originalRow.push("");
 
 	getFileExtension: function getFileExtension(filePath) {
 		// Returns the file extension, not including the dot. eg foo.bar => bar
-		return filePath.substr((~-filePath.lastIndexOf(".") >>> 0) + 2);
+		var lastDot = filePath.lastIndexOf(".");
+		if(lastDot == -1) return "";
+		
+		return filePath.slice(lastDot+1);
 	},
 
 	getFileNameWithoutExtension: function getFileNameWithoutExtension(filePath) {
@@ -1290,10 +1293,31 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 	urlProtocol: function urlProtocol(url) {
 		var protocolIndex = url.indexOf("://");
 		
-		if(protocolIndex != -1) return fullPath.substr(0, protocolIndex).toLowerCase();
+		if(protocolIndex != -1) return url.slice(0, protocolIndex).toLowerCase();
 	
-		else return "file"; // file://C:\Windows\blah
+		else return ""; // Probably a local file path (should we return "file" ?)
 		
+	},
+	
+	urlHost: function urlHost(url) {
+		/*
+			googledrive://foo/ => foo
+			http://google.com => google.com
+			/some/file => ""
+		*/
+		
+		var protocolIndex = url.indexOf("://");
+		if(protocolIndex == -1) {
+			console.warn("url=" + url + " is not formatted as a URL!");
+			return "";
+		}
+		
+		var host = url.slice(protocolIndex+3);
+		var slashIndex = host.indexOf("/");
+		if(slashIndex == -1) return host;
+		
+		host = host.slice(0,slashIndex);
+		return host;
 	},
 	
 	getLocation: function getLocation(url) {

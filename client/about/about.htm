@@ -34,8 +34,8 @@
 	<!--<p><a href="https://webide.se/">webide.se</a> is a free <a href="#jzedit">JZedit</a> server.</p>-->
 	
 	<p><a href="https://webide.se/">webide.se</a> is a online web editor/IDE, 
-	and a workspace for developing web-sites, apps and Node.JS services.
-	With integrated dev-tools and cloud hosting service.
+	and cloud shell/workspace for developing and editing web sites/documents, apps and Node.JS services.
+	With integrated dev-tools, cloud hosting service, source control and content management system.
 	Making it easy to both develop and deploy (run, in production) full stack JavaScript web applications 
 	<i>from anywhere</i> in any device or platform that comes with a web browser. 
 	And Without installing anything, config, setup, or touching a terminal or command line!</p>
@@ -81,7 +81,7 @@
 	
 	<h2>Architecture</h2>
 	
-	<p>JZedit is made in JavaScript, HTML and CSS. And it use hardware accalerated HTML 2d Canvas for text rendering.</p>
+	<p>JZedit is made in JavaScript, HTML and CSS. And it use hardware accelerated HTML 2d Canvas for text rendering.</p>
 	
 	<p>JZEdit's architecture is plugin and event driven, which makes it fun and easy to extend with new features.</p>
 	
@@ -91,6 +91,24 @@
 	<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
 	Each plugin is an independent unit and do not depend on, or interfere with other plugins.<br>
 	Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
+	
+	
+	<h2>What makes JZeidt better then existing editors/IDE's, or what does it do differently !?</h2>
+	
+	<p>JZedit is a cloud based editor with separate front-end (browser client) and back-end (Nodejs server).<br>
+	You can run both the server and the client on your computer and it will feel just like a normal editor/IDE.<br>
+	But you can also run the back-end on a server machine, either self hosted, 
+	on a public server like webide.se or a server hosted by your organisation
+	- and connect to it from anywhere to get a full developer environment that lets you run Nodejs, and more. 
+	Making it possible to develop from a smartphone or Chromebook.</p>
+	
+	<p>JZedit has a graphical interface for accessing files on remote servers via SSH/FTP.
+	But you can also use the built in terminal, and get a meta experience by ssh:ing to another machine, and run a terminal editor inside the editor.</p>
+	
+	<p>JZedit is easier to use then some code editors. And if you know HTML/CSS/JavaScript, you will also find it easier to add new features to JZedit compared to other editors.<br>
+	JZedit is written in "vanilla" JavaScript, where other similar editors use "compile to Javascript" languages like CoffeeScript and  TypeScript.<br>
+	JZedit has no build step and you can use the editor to make changes to the editor itself, and hit refresh or hot load to instantly see the new changes in effect.<br>
+	JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it faster.</p>
 	
 	<hr>
 	

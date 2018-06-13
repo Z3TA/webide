@@ -44,31 +44,6 @@ Instead of fixing the perf issues, as it's only on first load. Show a loading ba
 "Downloading modules", "Running tests", "Optimizing binaries", "Applying patches"
 
 
-Save login date so it's easy to know which users are inactive
-Recycle guest users (clean data !?) when the guest has not logged in for 10 days
-Prompt returned guests (who's account has been recyckled/wrong pw) to create an account.
-
-
-
-What makes JZeidt better then existing editors/IDE's, or what does it do differently !?
-
-JZedit is a cloud based editor with separate front-end (browser client) and back-end (nodejs server).
-You can run both the server and the client on your computer and it will feel just like a nomral editor/IDE.
-But you can also run the back-end on a server machine, eihter self hosted, on a public server like webide.se or a server hosted by your organisation 
-- and connect to it from anywhere to get a full developer enviroment that lets you run nodejs, and more. Making it possible to develop from a smartohone or Chromebook.
-JZedit has a graphical interface for accessing files on remote servers via SSH/FTP. 
-But you can also use the built in terminal, and get a meta experience by ssh:ing to another machine, and run a terminal editor inside the editor.
-
-JZedit is easier to use then some code editors. And if you know HTML/CSS/JavaScript, you will also find it easier to add new features to JZedit compared to other editors.
-JZedit is actually the only editor written in "vanilla" JavaScript, where other simlar editors use "compile to javascript" languages like CoffiScript and  TypeScript.
-JZedit has no build step and you can use the editor to make changes to the editor itself, and hit refresh or hot load to instanctly see the new changes in effect.
-JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it fast and performant.
-
-
-
-
-
-
 
 todo
 ----
@@ -1400,6 +1375,10 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Save login date so it's easy to know which users are inactive
+Recycle guest users (clean data !?) when the guest has not logged in for 10 days
+Prompt returned guests (who's account has been recyckled/wrong pw) to create an account.
 
 When opening a file and you paste in a full path (starting with /) automatically switch to that folder when searching for files to open
 

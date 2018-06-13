@@ -26,6 +26,16 @@
 	var lastMovedFrom = "";
 	var lastMovedTo = "";
 	
+	// Google API Client ID and API key from the Developer Console
+	var CLIENT_ID = '987730033948-rupie76gqs1f6ir3u45kg06isli8jnmt.apps.googleusercontent.com';
+	var API_KEY = 'AIzaSyC-zAO6nFL16iwBaLy0o5suVKsA-58CsyM';
+	// Array of API discovery doc URLs for APIs used by the quickstart
+	var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+	// Authorization scopes required by the API; multiple scopes can be
+	// included, separated by spaces.
+	var SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+	
+	
 	EDITOR.plugin({
 		desc: "File explorer window widget",
 		load: load,
@@ -89,6 +99,13 @@
 		
 		EDITOR.removeEvent("fileExplorer", openFileExplorerTool);
 		
+		if(typeof gapi == "object" && typeof gapi.auth2 == "object") {
+gapi.auth2.getAuthInstance().signOut();
+		}
+	}
+	
+	function updateSigninStatus(isSignedIn) {
+		console.log("gapi isSignedIn=" + isSignedIn);
 	}
 	
 	function openFileExplorerTool(directory) {
@@ -174,18 +191,10 @@
 			fsSelect.appendChild(option);
 		}
 		
-		
-		/*
-			We choose not to have support for Google Drive because it's very complicated to impelement.
-			And would pose a significant threat to user privacity. And we would have to specify Google as a third party in the eula.
-			
-			var googleDrive = document.createElement("option");
+		var googleDrive = document.createElement("option");
 			googleDrive.appendChild(document.createTextNode("Google Drive"));
-			googleDrive.setAttribute("id", "GoogleDrive");
+		googleDrive.setAttribute("id", "googledrive");
 			fsSelect.appendChild(googleDrive);
-		*/
-		
-		
 		
 		
 		
@@ -340,7 +349,7 @@
 			var li = document.createElement("li");
 			var icon = document.createElement("img");
 			var type = "";
-			var filetype = UTIL.getFileExtension(item.path);
+			var filetype = UTIL.getFileExtension(item.path) || UTIL.getFileExtension(item.name); // googledrive paths is just an id
 			
 			icon.setAttribute("width", "22");
 			icon.setAttribute("height", "22");
@@ -663,7 +672,7 @@
 		
 		//alert("host=" + host);
 		
-		console.log("Chaning fs host=" + host);
+		console.log("Changing fs host=" + host);
 		
 		if(host=="local") {
 			// Find a local folder to explore
@@ -675,53 +684,36 @@
 			}
 			exploreDir("/"); // root folder (todo: Check if this works on Windows)
 		}
-		/*
-			else if(host == "GoogleDrive") {
-			var key = "AIzaSyC-zAO6nFL16iwBaLy0o5suVKsA-58CsyM";
-			var filesUrl = "https://content.googleapis.com/drive/v3/files?corpus=user&includeTeamDriveItems=true&supportsTeamDrives=true&key=" + key;
-			console.log("filesUrl=" + filesUrl);
-			UTIL.httpGet(filesUrl, function googleDriveDir(err, resp) {
-			if(err) {
-			var json = parseJson(err.message);
-			// Try to parse the error as JSON
-			if(json == null) return alertBox(err.message);
+		else if(host == "googledrive") {
+			if(typeof gapi == "undefined") {
+EDITOR.loadScript("https://apis.google.com/js/api.js", true, function() {
+					if(typeof gapi == "undefined") return alertBox("Failed to load google api library!");
+					
+					gapi.load('client:auth2', function initGoogleApiClient() {
+						gapi.client.init({
+							apiKey: API_KEY,
+							clientId: CLIENT_ID,
+							discoveryDocs: DISCOVERY_DOCS,
+							scope: SCOPES
+						}).then(function () {
+							// Handle the initial sign-in state.
+							var isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+							
+							if(!isSignedIn) {
+								// Listen for sign-in state changes.
+								gapi.auth2.getAuthInstance().isSignedIn.listen(function signedInMaybe(isSignedIn) {
+									if(isSignedIn) exploreDir("googledrive://root/");
+									else alertBox("Problems signing in to Google Drive");
+								});
+								gapi.auth2.getAuthInstance().signIn();
+							}
+							else exploreDir("googledrive://root/");
+						});
+					});
+				});
 			}
-			else {
-			var json = parseJson(resp);
-			if(json == null) return alertBox("Unable to parse: " + resp);
-			}
-			
-			console.log(json);
-			
-			if(json.error && json.error.message) return alertBox("Google Drive Error: " + json.error.message);
-			
-			
-			function parseJson(text) {
-			text = text.trim(); // Remove ending line breaks or spaces
-			var firstChar = text.charAt(0);
-			var lastChar = text.slice(-1);
-			console.log("firstChar=" + firstChar + " lastChar=" + lastChar);
-			
-			if(firstChar != "{" || lastChar != "}") {
-			console.warn("Not JSON: " + text);
-			return null;
-			}
-			
-			try {
-			var json = JSON.parse(text);
-			}
-			catch(parseJsonError) {
-			console.warn("Unable to parse JSON: " + text);
-			console.error(parseJsonError);
-			return null;
-			}
-			
-			return json;
-			}
-			
-			});
-			}
-		*/
+			else exploreDir("googledrive://root/");
+		}
 		else {
 			if(EDITOR.connections.hasOwnProperty(host)) {
 				var url = EDITOR.connections[host].protocol;
@@ -731,6 +723,7 @@
 			}
 			else throw new Error("Not connected to " + host);
 		}
+		
 	}
 	
 	function dragItem(dragEvent) {

@@ -870,8 +870,13 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 	EDITOR.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
+		console.log("EDITOR.getFileSizeOnDisk: path=" + path);
+		
 		if(!callback) throw new Error("Callback not defined!");
 		
+		var protocol = UTIL.urlProtocol(path);
+		
+		if(protocol == "http" || protocol == "https") {
 		if(!CLIENT.connected) {
 			var xhr = new XMLHttpRequest();
 			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
@@ -887,16 +892,39 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				callback(err);
 			}
 		}
+		}
+		else if(protocol == "googledrive") {
+			var googleDriveFileId = UTIL.urlHost(path);
+			getGoogleDriveFileSize(googleDriveFileId, function(err, size) {
+				callback(err, size);
+			});
+		}
 		else {
-			
 			var json = {path: path};
-			
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
 				if(err) callback(err);
 				else callback(null, json.size);
 			});
-			
+			}
+		
+		function getGoogleDriveFileSize(fileId, callback) {
+			var request = gapi.client.drive.files.get({
+				'fileId': fileId
+			});
+			request.execute(function(resp) {
+				console.log("resp=" + resp);
+				
+				if(resp.error) {
+					var err = makeGoogleDriveError(resp.error);
+					return callback(err);
+				}
+				
+				return callback(null, resp.size);
+				
+			});
 		}
+		
+		
 	}
 	
 	EDITOR.doesFileExist = function(path, callback) {
@@ -3674,15 +3702,55 @@ EDITOR.fireEvent("btk");
 		if(pathToFolder == undefined) throw new Error("Need to specity a pathToFolder!");
 		if(listFilesCallback == undefined) throw new Error("Need to specity a callback!");
 		
-		var json = {pathToFolder: pathToFolder};
+		var protocol = UTIL.urlProtocol(pathToFolder);
 		
-		CLIENT.cmd("listFiles", json, function listFilesResp(err, fileList) {
-			if(err) listFilesCallback(err);
-			else listFilesCallback(null, fileList);
-		});
+		console.log("EDITOR.listFiles: pathToFolder=" + pathToFolder + " protocol=" + protocol);
+		
+		if(protocol == "googledrive") {
+			/*
+				The the host part is either root or a drive#file id
+				
+				GoogleDrive://root/
+			*/
+			
+			var parentId = UTIL.urlHost(pathToFolder);
+			var query = "'" + parentId + "' in parents"; // and trashed = false and hidden = false
+			
+			retrieveAllGoogleDriveFiles(query, function googleDriveFiles(err, files) {
+				if(err) return listFilesCallback(err);
+				if(!Array.isArray(files)) throw new Error("files=", files, " is not an array!");
+				
+				/*
+					Google drive doesn't have a file structure. Everything is just a file!
+					
+					id:       "asdfasdfasfasfadsf"
+					kind:     "drive#file"
+					mimeType: "application/vnd.google-apps.folder"
+					name:     "Name of file"
+					
+					We do however want to keep the list as compatible as possible to avaid special case code everywhere
+				 */
+				
+				for (var i=0; i<files.length; i++) {
+					if(files[i].mimeType == "application/vnd.google-apps.folder") files[i].type = "d";
+					else files[i].type = "-";
+					
+					files[i].path = "googledrive://" + files[i].id;
+				}
+				
+				listFilesCallback(null, files);
+			});
+		}
+		else {
+			var json = {pathToFolder: pathToFolder};
+			
+			CLIENT.cmd("listFiles", json, function listFilesResp(err, fileList) {
+				if(err) listFilesCallback(err);
+				else listFilesCallback(null, fileList);
+			});
+		}
 		
 	}
-	
 	
 	EDITOR.createPath = function(directoryPathToCreate, createPathCallback) {
 		/*
@@ -4422,6 +4490,42 @@ if(theWindow.loaded === true) throw new Error("It seems the window has already l
 		
 	}
 	
+	EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
+		
+		if(typeof dontAsk == "function" && callback == undefined) {
+			callback = dontAsk;
+			dontAsk = undefined;
+		}
+		
+		if(dontAsk == undefined) dontAsk = false;
+		
+		var host = window.location.hostname;
+		var protocol = window.location.protocol;
+		
+		var loc = UTIL.getLocation(src);
+		
+		if(host == loc.host) dontAsk = true;
+		
+		if(!dontAsk) {
+			var yes = "Yes, I trust " + loc.host;
+			var no = "No";
+			confirmBox("Do you trust " + loc.host + " to load the following script:\n" + src, [yes, no], function(answer) {
+				if(answer == yes) load();
+				else callback(new Error("User declined loading the script!"));
+			});
+		}
+		else load();
+		
+		function load() {
+			var script = document.createElement('script');
+			script.onload = function () {
+				callback(null);
+			};
+			script.src = src;
+			
+			document.head.appendChild(script);
+		}
+	}
 	
 	
 	// # Virtual keyboard
@@ -5708,9 +5812,10 @@ console.error(err);
 	
 	function onMessage(windowMessageEvent) {
 		// For (example) recieving message from a page that has the editor embeded
-		console.log("Window message from: origin=" + windowMessageEvent.origin);
-		
+		var origin = windowMessageEvent.origin
 		var msg = windowMessageEvent.data;
+		
+		console.log("Window message from: origin=" + origin);
 		
 		if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content, function fileOpened(err, file) {
 			if(err) throw err;
@@ -5721,13 +5826,15 @@ console.error(err);
 						name: msg.openFile.name,
 						content: file.text
 					}
-				}, "*");
+				}, origin ? origin : "*");
 			});
 			
 		});
 		else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin)
-		else throw new Error("Unable to handle message: " + msg);
-		
+		else {
+			console.warn("jzedit does not recognise msg=" + msg);
+			//throw new Error("Unable to handle message: " + msg);
+		}
 	}
 	
 	function copy(copyEvent) {
@@ -7160,8 +7267,64 @@ console.error(err);
 		EDITOR.scrollingEnabled = false;
 		menuIsFullScreen = false;
 		EDITOR.resizeNeeded();
+		}
+	
+	function makeErrorIfNotGoogleDriveApiAvailable() {
+		if(typeof gapi == "undefined") return new Error("Google api library is not loaded!");
+		//console.log("typeof gapi = " + typeof gapi);
 		
+		if(typeof gapi.client == "undefined") return new Error("gapi.client is not loaded!");
+		//console.log("typeof gapi.client = " + typeof gapi.client);
 		
+		if(typeof gapi.client.drive == "undefined") return new Error("gapi.client.drive is not loaded!");
+		//console.log("typeof gapi.client.drive = " + typeof gapi.client.drive);
+		
+		return null;
+	}
+	
+	function retrieveAllGoogleDriveFiles(query, callback) {
+		
+		var err = makeErrorIfNotGoogleDriveApiAvailable();
+		if(err) return callback(err);
+
+		var listOptions = {
+			fields: "files(id,name,size,modifiedTime,mimeType)"
+		};
+		
+		// fields=items(id,name,size,modifiedTime,mimeType)
+		
+		if(query) listOptions.q = query;
+		
+		var initialRequest = gapi.client.drive.files.list(listOptions);
+		retrievePageOfFiles(initialRequest, []);
+		
+		function retrievePageOfFiles(request, result) {
+			request.execute(function(resp) {
+				console.log("resp=", resp);
+				
+				if(resp.error) {
+					var err = makeGoogleDriveError(resp.error);
+					return callback(err);
+				}
+				
+				result = result.concat(resp.files);
+				var nextPageToken = resp.nextPageToken;
+				if (nextPageToken) {
+					listOptions.pageToken = nextPageToken;
+					request = gapi.client.drive.files.list(listOptions);
+					retrievePageOfFiles(request, result);
+				} else {
+					callback(null, result);
+				}
+			});
+		}
+	}
+	
+	function makeGoogleDriveError(respError) {
+		var err = new Error(respError.message);
+		if(respError.code == "404") err.code = "ENOENT";
+		else err.code = respError.code;
+		return err;
 	}
 	
 })();
