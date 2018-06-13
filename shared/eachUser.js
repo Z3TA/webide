@@ -66,11 +66,10 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 		});
 		
 		function checkPw(username) {
-			fs.readFile(UTIL.joinPaths([HOME, username, ".jzeditpw"]), ENCODING, function readpw(err, hashedPw) {
+		fs.readFile(UTIL.joinPaths([HOME, username, ".jzeditpw"]), ENCODING, function readpw(err, hashedPw) {
 				if(err) {
 					// No .jzeditpw file means it's not a jzedit user
-					
-					if(err.code != "ENOENT") throw err; // Only throw if we get something else then "file not found"
+				if(err.code != "ENOENT" && err.code != "ENOTDIR") throw err; // Only throw if we get something else then "file not found"
 					console.log("Not a jzedit user: " + username);
 				}
 				else {
@@ -80,12 +79,13 @@ module.exports = function eachUser(HOME, userFoundCb, allFoundCb) {
 					userFoundCb(users[username]);
 				}
 				else {
-					console.warn(".jzeditpw found but user does not exist in " + etcPasswPath);
+					console.warn(".jzeditpw found in " + HOME + username + " but user does not exist in " + etcPasswPath);
 				}
 				
 				}
 			
 			if(--usersToCheck==0 && allFoundCb) allFoundCb();
+			//console.log("usersToCheck=" + usersToCheck);
 			});
 		}
 		

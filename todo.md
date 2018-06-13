@@ -40,6 +40,13 @@ What I'm working on
 
 It took fucking 25s for a guest user to be created and logged in!!
 
+Instead of fixing the perf issues, as it's only on first load. Show a loading bar or spinner with BS messages like:
+"Downloading modules", "Running tests", "Optimizing binaries", "Applying patches"
+
+
+Save login date so it's easy to know which users are inactive
+Recycle guest users (clean data !?) when the guest has not logged in for 10 days
+Prompt returned guests (who's account has been recyckled/wrong pw) to create an account.
 
 
 
@@ -69,6 +76,9 @@ todo
 Google drive integration.
 Detect if running from chrome-book, then auto connect to Google drive.
 If not running in Chrome app mode, you must click on Google drive icon in file explorer.
+
+When using repo/clone in url search, automatically make a shallow clone !?
+Add option in clone dialog to make shallow clone.
 
 Able to use the editor as a "native" editor. Open files from network smb
 
@@ -133,7 +143,18 @@ Remove all dependendcies on dirname !?
 What I'm thinking
 -----------------
 
-How do you make "pull requests" !?
+Have a poll to see what users are most interested in:
+"What jzedit feature are you most interested in ?"
+- Content management (CMS) of web sites/documents
+- Developing and testing Node.js applications
+- Making full stack JavaScript progressive web apps
+- Editing and manageing a static web site
+- Developing/designing HTML/CSS web sites
+- Hosting a web site
+- Deploying a Node.js app
+- Other: 
+
+How do you do/make "pull requests" !?
 
 Skip webide.se part on Chromebook app ? Because connecticvity issues ...
 Chromebook users are most likely always online, or what would be the reason to use a computer that is basically just a web browser !?
@@ -540,6 +561,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Can't browse for keys to SSH/SFTP server when running in browser!
 
 When you login as another user and get user.send, for example when using the terminal. You get double messages!
 

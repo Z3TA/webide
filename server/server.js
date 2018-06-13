@@ -1336,6 +1336,11 @@ idSuccess();
 								commandQueue.length = 0;
 							}
 							
+							var fs = require("fs");
+							fs.writeFile(UTIL.joinPaths([homeDir, ".jzeditStorage/lastLogin"]), Math.floor(Date.now() / 1000), function(err) {
+								if(err) throw err;
+							});
+							
 							return true;
 							
 							function messageFromWorker(workerMessage, handle) {
