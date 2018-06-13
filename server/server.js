@@ -13,6 +13,11 @@ var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower 
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
 
+var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
+var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
+var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
+var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
+
 var CRAZY = getArg(["crazy", "crazy"]); // If specified in arguments, allows user workers to run as root
 
 var UTIL = require("../client/UTIL.js");
@@ -651,6 +656,10 @@ if(GUEST_POOL.length == 0) {
 					
 					function loginAsGuest(guestUser, guestPassword) {
 
+						console.log("New guest login: " + guestUser);
+						
+						sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: " + guestUser);
+						
 username = guestUser;
 idSuccess();
 
@@ -2653,6 +2662,42 @@ function copyFile(source, target, cb) {
 			cbCalled = true;
 		}
 	}
+}
+
+function sendMail(from, to, subject, text) {
+	
+	log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
+	
+	var nodemailer = require('nodemailer');
+	var smtpTransport = require('nodemailer-smtp-transport');
+	
+	var mailSettings = {
+		port: SMTP_PORT,
+		host: SMTP_HOST
+	};
+	
+	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
+	
+	var transporter = nodemailer.createTransport(smtpTransport(mailSettings));
+	
+	transporter.sendMail({
+		from: from,
+		to: to,
+		subject: subject,
+		text: text
+		
+	}, function(err, info){
+		if(err) {
+			//if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
+			console.warn(err.message);
+			//}
+			//else throw new Error(err);
+		}
+		else {
+			log("Mail sent: " + info.response);
+		}
+	});
+	
 }
 
 main();
