@@ -1129,8 +1129,8 @@ idSuccess();
 								+ " reloadApparmor=" + reloadApparmor + " reloadedApparmor=" + reloadedApparmor + " sslCertChecked=" + sslCertChecked
 								+ " npmSymLinkCreated=" + npmSymLinkCreated + " ");
 								
-								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && 
-								((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
+								if(nginxProfileOK && foldersToMount == 0 && apparmorProfilesToCreate == 0 && passwdCreated && ((reloadApparmor && reloadedApparmor) || !reloadApparmor ) && sslCertChecked && npmSymLinkCreated) {
+									
 									if(!userAccepted) { // Prevent double accept
 										acceptUser();
 										userAccepted = true;
@@ -1151,8 +1151,9 @@ idSuccess();
 								/*
 									example profile: "../etc/apparmor/usr.bin.nodejs_someuser"
 								*/
-								console.time("Create apparmor profile");
 								var dest = template.replace("someuser", username);
+								console.time("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
+								
 								var homeDot = HOME_DIR.substr(1).replace(/\//g, "."); // Remove first slash and replace remaining slashes with dots
 								dest = dest.replace("home.", homeDot);
 								dest = dest.replace("../etc/apparmor/", "/etc/apparmor.d/");
@@ -1185,14 +1186,14 @@ idSuccess();
 													//var enforceApparmorProfileStdout = child_process.execSync("aa-enforce " + bin).toString(ENCODING).trim();
 													//if(!enforceApparmorProfileStdout.match(/Setting (.*) to enforce mode./)) throw new Error(enforceApparmorProfileStdout);
 												*/
-												console.timeEnd("Create apparmor profile");
+												console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 												return callback(null);
 											});
 										});
 									}
 									else {
 										// profile already exist!
-										console.timeEnd("Create apparmor profile");
+										console.timeEnd("Create " + dest.slice(dest.lastIndexOf("/")) + " apparmor profile");
 										return callback(null);
 									}
 									
