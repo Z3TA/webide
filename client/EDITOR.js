@@ -7377,13 +7377,26 @@ console.error(err);
 		}
 	
 	function makeErrorIfNotGoogleDriveApiAvailable() {
-		if(typeof gapi == "undefined") return new Error("Google api library is not loaded!");
+		
+		var err = new Error();
+		err.code = "ENOENT";
+		
+		if(typeof gapi == "undefined") {
+			err.message = "Google Drive api not loaded!"
+			return err;
+		}
 		//console.log("typeof gapi = " + typeof gapi);
 		
-		if(typeof gapi.client == "undefined") return new Error("gapi.client is not loaded!");
+		if(typeof gapi.client == "undefined") {
+			err.message = "gapi.client is not loaded!"
+			return err;
+		}
 		//console.log("typeof gapi.client = " + typeof gapi.client);
 		
-		if(typeof gapi.client.drive == "undefined") return new Error("gapi.client.drive is not loaded!");
+		if(typeof gapi.client.drive == "undefined") {
+			err.message = "gapi.client.drive is not loaded!"
+			return err;
+		}
 		//console.log("typeof gapi.client.drive = " + typeof gapi.client.drive);
 		
 		return null;
