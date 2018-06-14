@@ -101,7 +101,7 @@ var CLIENT = {}; // Client object is global
 					return;
 				}
 				
-				if(json.error) console.warn("Server ERROR: " + json.error);
+				if(json.error) console.warn("Server ERROR: " + json.error + " id=" + json.id);
 				
 				if(json.resp) {
 					var resp = json.resp;
@@ -117,6 +117,8 @@ var CLIENT = {}; // Client object is global
 				
 				if(json.id) {
 					if(callbackWaitList.hasOwnProperty(json.id)) {
+						
+						console.log("Got server response for id=" + json.id);
 						
 						var err = null;
 						
@@ -198,14 +200,14 @@ var CLIENT = {}; // Client object is global
 		}
 		else if(typeof json != "object") throw new Error("Second argument json (if specified) must be an object!");
 		
-		console.log("CLIENT.cmd req=" + req);
-		
 		var GS = String.fromCharCode(29);
 		
 		var id = ++idCounter;
 		
 		var string = id + GS + req;
 		
+		// console.warn so we get a stack trace and can find out where the request was made while debugging
+		console.warn("CLIENT.cmd id=" + id + " req=" + req);
 		
 		if(json) {
 			try {

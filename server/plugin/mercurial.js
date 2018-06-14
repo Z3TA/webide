@@ -238,13 +238,10 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 	
 	if(directory == undefined) return callback(new Error("No directory defined"));
 	if(typeof directory != "string") throw new Error("directory=" + directory + " (" + typeof directory + ") needs to be a string!");
-	
 	directory = UTIL.trailingSlash(json.directory);
 	
 	var localDirectory = user.translatePath(directory);
-	
 	if(localDirectory instanceof Error) return callback(localDirectory);
-	
 	localDirectory = UTIL.trailingSlash(localDirectory);
 	
 	var execFile = require('child_process').execFile;
@@ -270,8 +267,8 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 				
 				console.log("hg status (err=" + err + ") localDirectory=" + localDirectory + " rootDir=" + rootDir + " stderr=" + stderr + " stdout=" + stdout + " ");
 				
-				if(err) callback(err);
-				else if(stderr) callback(stderr);
+				if(err) return callback(err);
+				else if(stderr) return callback(stderr);
 				else {
 					
 					var modified = [];
@@ -320,7 +317,7 @@ MERCURIAL.status = function hgstatus(user, json, callback) {
 						rootDir: virtualRootDir
 					}
 					
-					callback(null, resp);
+					return callback(null, resp);
 					
 				}
 			});
@@ -1822,7 +1819,7 @@ function checkDir(user, virtualPath, callback) {
 	var localDirectory = UTIL.getDirectoryFromPath(localPath);
 	
 	findDotHg(localDirectory, function(err, mercurialRoot) {
-		if(err) callback(err);
+		if(err) return callback(err);
 		else {
 			mercurialRoot = UTIL.trailingSlash(mercurialRoot);
 			
@@ -1835,12 +1832,12 @@ function checkDir(user, virtualPath, callback) {
 			
 			var virtualRootDir = user.toVirtualPath(mercurialRoot);
 			
-			if(virtualRootDir instanceof Error) callback("Unable to find a mercurial reposity from path=" + virtualPath);
-			else {
-				
-				callback(null, mercurialRoot, localPath, virtualRootDir);
-				
+			if(virtualRootDir instanceof Error) {
+				return callback("Unable to find a mercurial reposity from path=" + virtualPath);
 			}
+			else {
+				return callback(null, mercurialRoot, localPath, virtualRootDir);
+				}
 		}
 	});
 	
@@ -1850,7 +1847,9 @@ function checkDir(user, virtualPath, callback) {
 		dir = dirList.pop();
 		CORE.listFiles(user, {pathToFolder: dir}, function(err, fileList) {
 			
-			if(err) findDotHgCallback(err);
+			if(err) {
+return findDotHgCallback(err);
+			}
 			else {
 				for (var i=0; i<fileList.length; i++) {
 					if(fileList[i].name == ".hg") return findDotHgCallback(null, dir);
@@ -1865,7 +1864,7 @@ function checkDir(user, virtualPath, callback) {
 				// No .hg folder found!
 				var err = new Error("No .hg folder found!");
 				err.code = "NO_HG_FOLDER";
-				findDotHgCallback(err);
+				return findDotHgCallback(err);
 			}
 			
 		});
