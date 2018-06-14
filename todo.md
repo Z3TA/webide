@@ -38,6 +38,8 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+Can't switch back to local fs after changing to Google Drive in file explorer.
+
 Google drive integration.
 Detect if running from chrome-book, then auto connect to Google drive.
 If not running in Chrome app mode, you must click on Google drive icon in file explorer.
@@ -124,6 +126,11 @@ Remove all dependendcies on dirname !?
 
 What I'm thinking
 -----------------
+
+Google drive integration is a must have for a Chromebook users, since that's where they store their files.
+Most editor functionality however depends on the Editor-server-api, for example previewing html files, or running nodejs scripts.
+Should Google Drive be mounted on the server side instead !?
+
 
 Have a poll to see what users are most interested in:
 "What jzedit feature are you most interested in ?"
@@ -2452,6 +2459,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Able to move/copy files and folders between different servers (different connected sft servers)
+Some nice GUI with drag and drop support.
 
 Preview markdown files (preview in menu)
 
