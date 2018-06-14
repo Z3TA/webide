@@ -710,6 +710,7 @@ EDITOR.loadScript("https://apis.google.com/js/api.js", true, function() {
 							else exploreDir("googledrive://root/");
 						});
 					});
+					// If the user closes the auth dialog you get a Uncaught {error: "popup_closed_by_user"} which I haven't figured out how to catch!
 				});
 			}
 			else exploreDir("googledrive://root/");
