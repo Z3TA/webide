@@ -708,7 +708,7 @@ var hostname = parse.hostname;
 var protocol = parse.protocol;
 var pathname = parse.pathname;
 
-	if(!json.public && pathname.slice(1,7) == "wwwpub") json.public = true; 
+	if(!json.public && pathname && pathname.slice(1,7) == "wwwpub") json.public = true; 
 	
 console.log("Saving to disk ... protocol: " + protocol + " hostname=" + hostname + " pathname=" + pathname);
 

@@ -908,11 +908,16 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			}
 		
 		function getGoogleDriveFileSize(fileId, callback) {
+			
+			var err = makeErrorIfNotGoogleDriveApiAvailable();
+			if(err) return callback(err);
+			
 			var request = gapi.client.drive.files.get({
-				'fileId': fileId
+				'fileId': fileId,
+				"fields": "size"
 			});
 			request.execute(function(resp) {
-				console.log("resp=" + resp);
+				console.log("resp=", resp);
 				
 				if(resp.error) {
 					var err = makeGoogleDriveError(resp.error);
@@ -920,11 +925,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				}
 				
 				return callback(null, resp.size);
-				
-			});
+				});
 		}
-		
-		
 	}
 	
 	EDITOR.doesFileExist = function(path, callback) {
@@ -1056,28 +1058,23 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		}
 	}
 	
-	
 	EDITOR.readFile = function(path, callback) {
+		throw new Error("EDITOR.readFile is Not implemented!");
 		/* 
 			Returns a readable stream ...
 			
 			We should probably use streams everywhere! So that opening small and large files use the same method.
-			
-		*/
+			*/
 	}
 	
-	
 	EDITOR.copyFolder = function(source, destination) {
+		throw new Error("EDITOR.copyFolder is Not implemented!");
 		/*
 			Copies a folder and files in source location to destination.
 			Source and destination can be local filesystem, FTP or SFTP (SSH)
 		*/
 		
-		
-		
 	}
-	
-	
 	
 	EDITOR.readFromDisk = function readFromDisk(path, returnBuffer, encoding, callback) {
 		
@@ -1085,6 +1082,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			callback = encoding;
 			encoding = "utf8";
 		}
+		
 		if(callback == undefined && typeof returnBuffer == "function") {
 			callback = returnBuffer;
 			returnBuffer = false;
@@ -1094,12 +1092,51 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		console.log("Reading file: " + path);
 		
-		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
+		var protocol = UTIL.urlProtocol(path);
+		
+		if(protocol == "googledrive") {
+			var fileId = UTIL.urlHost(path);
+			getGoogleDriveFileContent(fileId, function(err, data) {
+				if(err) return callback(err);
+				else return callback(null, path, data);
+			});
+		}
+		else {
+			var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
 			if(err) callback(err);
 			else callback(null, json.path, json.data);
 		});
+		}
+		
+		function getGoogleDriveFileContent(fileId, callback) {
+			
+			var err = makeErrorIfNotGoogleDriveApiAvailable();
+			if(err) return callback(err);
+			
+			var request = gapi.client.drive.files.get({
+				fileId: fileId,
+				fields: 'name',
+				alt: 'media'
+			});
+			// Must use .then(), request.execute will return result false
+			request.then(function(resp) {
+				if(resp == false) return callback(new Error("Got bad response from Google Drive Api: resp=" + resp));
+				
+				if(resp && resp.error) {
+					var err = makeGoogleDriveError(resp.error);
+					return callback(err);
+				}
+				
+				console.log("resp=", resp); //response.body contains the string value of the file
+				if (typeof callback === "function") callback(null, resp.body);
+				
+			}, function(error) {
+				callback(error)
+			});
+			
+			}
 		
 	}
 	
@@ -3735,7 +3772,7 @@ EDITOR.fireEvent("btk");
 					if(files[i].mimeType == "application/vnd.google-apps.folder") files[i].type = "d";
 					else files[i].type = "-";
 					
-					files[i].path = "googledrive://" + files[i].id;
+					files[i].path = "googledrive://" + files[i].id + "/" + files[i].name;
 				}
 				
 				listFilesCallback(null, files);
@@ -7323,6 +7360,7 @@ console.error(err);
 	function makeGoogleDriveError(respError) {
 		var err = new Error(respError.message);
 		if(respError.code == "404") err.code = "ENOENT";
+		else if(respError.code == "403") err.code = "EACCESS";
 		else err.code = respError.code;
 		return err;
 	}
