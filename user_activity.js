@@ -54,7 +54,7 @@ function done() {
 	});
 	
 	times.forEach(function(user) {
-		console.log(user.name, user.hours/24 + " D");
+		console.log(user.name, Math.round(user.hours/24 *10)/10 + " D");
 	});
 }
 
