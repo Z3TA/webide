@@ -1302,10 +1302,32 @@ if(callback) return callback(err, path);
 		
 		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
 		
-		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
+		var protocol = UTIL.urlProtocol(path);
 		
-		CLIENT.cmd("saveToDisk", json, function(err, json) {
-			if(err) {
+		if(protocol == "googledrive") {
+			return saveToDiskCallback(new Error("Saving to Google Drive not yet implemented!"));
+			// We need to ask permission to save this file first !
+			var fileId = UTIL.urlHost(path);
+			var fileMetadata = {};
+			var fileData = new Blob([text], {type : 'text/plain'});
+			var fileName = path.substring(path.lastIndexOf("/")+1);
+			updateFileOnGoogleDrive(fileId, fileMetadata, fileData, function(err) {
+				if(err) {
+					err.message = "Unable to save " + fileName + " to Google Drive: " + err.message;
+					if(saveToDiskCallback) return saveToDiskCallback(err);
+					else throw err;
+				}
+				else {
+					if(saveToDiskCallback) return saveToDiskCallback(null, path);
+					else console.log("File saved to Google Drive: " + path);
+				}
+			});
+return false;
+		}
+		else {
+			var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
+			CLIENT.cmd("saveToDisk", json, function(err, json) {
+				if(err) {
 				if(saveToDiskCallback) saveToDiskCallback(err);
 				else throw err;
 			}
@@ -1314,7 +1336,55 @@ if(callback) return callback(err, path);
 				else console.log("File saved to disk: " + json.path);
 			}
 		});
+		}
 		
+		function updateFileOnGoogleDrive(fileId, fileMetadata, fileData, callback) {
+			
+			var err = makeErrorIfNotGoogleDriveApiAvailable();
+			if(err) return callback(err);
+			
+			var boundary = '-------314159265358979323846';
+			var delimiter = "\r\n--" + boundary + "\r\n";
+			var close_delim = "\r\n--" + boundary + "--";
+			
+			var reader = new FileReader();
+			//reader.readAsBinaryString(fileData);
+			reader.readAsText(fileData);
+			reader.onload = function(e) {
+				var contentType = "text/plain"; // 'application/octet-stream'
+				// Updating the metadata is optional and you can instead use the value from drive.files.get.
+				var base64Data = btoa(reader.result);
+				var multipartRequestBody =
+				delimiter +
+				'Content-Type: application/json\r\n\r\n' +
+				JSON.stringify(fileMetadata) +
+				delimiter +
+				'Content-Type: ' + contentType + '\r\n' +
+				'Content-Transfer-Encoding: base64\r\n' +
+				'\r\n' +
+				base64Data +
+				close_delim;
+				
+				var request = gapi.client.request({
+					'path': '/upload/drive/v2/files/' + fileId,
+					'method': 'PUT',
+					'params': {'uploadType': 'multipart', 'alt': 'json'},
+					'headers': {
+						'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+					},
+				'body': multipartRequestBody});
+				request.execute(function(resp) {
+					console.log("resp=", resp);
+					
+					if(resp.error) {
+						var err = makeGoogleDriveError(resp.error);
+						return callback(err);
+					}
+					
+					callback(null);
+				});
+			}
+		}
 	}
 	
 	EDITOR.copyFile = function(from, to, callback) {
