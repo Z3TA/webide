@@ -44,6 +44,8 @@ If not running in Chrome app mode, you must click on Google drive icon in file e
 
 Advertise Google drive integration by showing a Google Drive logo, that is gray, but turns "on" when connected to google drive.
 
+Select Google drive first in File Explorer when not logged in !?
+
 ---
 
 It took fucking 25s for a guest user to be created and logged in!!
