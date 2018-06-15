@@ -38,6 +38,13 @@ Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a
 What I'm working on
 -------------------
 
+Investigating using Google Drive on server side using google-drive-ocamlfuse
+
+Issue with users having to copy/paste the auth. Better use redirect ...
+
+Have to edit let redirect_uri = "urn:ietf:wg:oauth:2.0:oob" in /src/oauth2.ml
+
+
 Can't switch back to local fs after changing to Google Drive in file explorer.
 
 Google drive integration.
