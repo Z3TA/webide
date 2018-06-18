@@ -14,8 +14,9 @@
 	
 	function editPage(nodes, url) {
 		var editorUrl = "https://webide.se/"; // Change this to the editor URL
+		var editorUser = "demo"; // Change this to the real user (optional)
 		
-		document.location = editorUrl + "?editPage=" + encodeURIComponent(url) + "&nodes=" + encodeURIComponent(nodes.join(",")) + "";
+		document.location = editorUrl + "?user=" + editorUser + "&editPage=" + encodeURIComponent(url) + "&nodes=" + encodeURIComponent(nodes.join(",")) + "";
 	}
 	
 	document.addEventListener( "click", function(e) {

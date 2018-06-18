@@ -1412,6 +1412,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+When doing a new search and typing in the search box: Auto search for each key stroke (like in Sublime)
+
 Save login date so it's easy to know which users are inactive
 Recycle guest users (clean data !?) when the guest has not logged in for 10 days
 Prompt returned guests (who's account has been recyckled/wrong pw) to create an account.

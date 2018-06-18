@@ -119,7 +119,7 @@
 						pwValue = pwValue || obj["editorServerPw"];
 					}
 					else if(EDITOR.startedCounter == 1 && RUNTIME == "browser" && !clickedConnectLogin &&
-					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost") {
+					window.location.hostname != "127.0.0.1" && window.location.hostname != "localhost" && !userValue) {
 						console.log("Logging in as guest because it's the first time using the editor ...");
 						userValue = "guest";
 						pwValue = "guest";
@@ -136,8 +136,11 @@
 		}
 		
 		function attemptLogin() {
-			userValue = userValue || DEFAULT_USERNAME;
-			pwValue = pwValue || DEFAULT_PASSWORD;
+			if(!userValue) {
+				userValue = DEFAULT_USERNAME;
+				pwValue = DEFAULT_PASSWORD;
+			}
+			
 			if(userValue && pwValue) {
 				console.log("Attempting to login to server with user=" + userValue + " ...");
 				CLIENT.cmd("identify", {username: userValue, password: pwValue}, function loggedIn(err, resp) {
@@ -158,7 +161,11 @@
 					
 				});
 				}
-			else showLoginDialog();
+			else {
+showLoginDialog();
+				var serverLoginPw = document.getElementById("serverLoginPw");
+				if(serverLoginPw) serverLoginPw.focus();
+			}
 		}
 		
 	}
@@ -220,10 +227,11 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 		}
 		
 		var urlValue;
-		var userValue;
-		var pwValue;
+		var userValue = QUERY_STRING.user;
+		var pwValue = QUERY_STRING.pw;
 		
 		if(!urlValue) urlValue = defaultUrl;
+		
 		if(!userValue) {
 			userValue = DEFAULT_USERNAME;
 			pwValue = DEFAULT_PASSWORD;
@@ -250,7 +258,7 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 		user.setAttribute("id", "serverLoginUser");
 		user.setAttribute("class", "inputtext username");
 		user.setAttribute("size", "10");
-		user.setAttribute("value", userValue);
+		if(userValue) user.setAttribute("value", userValue);
 		user.onchange = saveUserPw;
 		form.appendChild(user);
 		
@@ -265,7 +273,7 @@ var defaultUrl =  "http://localhost:8099/jzedit";
 		pw.setAttribute("id", "serverLoginPw");
 		pw.setAttribute("class", "inputtext password");
 		pw.setAttribute("size", "10");
-		pw.setAttribute("value", pwValue);
+		if(pwValue) pw.setAttribute("value", pwValue);
 		pw.onchange = saveUserPw;
 		form.appendChild(pw);
 		
