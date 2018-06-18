@@ -82,43 +82,66 @@ Instead of fixing the perf issues, as it's only on first load. Show a loading ba
 todo
 ----
 
+Figure out why I don't get any errors when prod server crashes
+
+Figure out why no GUEST_COUNTER file exist on prod server.
+
+/srv/jzedit/server/server.js:275
+Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                 throw error;
+Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                 ^
+Jun 17 16:07:07 ben.100m.se nodejs[25062]: Error: Command failed: /srv/jzedit/adduser.js '{"username":"guest9","password":"3DF0kGJ1Ob","noPwHash":false,"noCert":false}'
+Jun 17 16:07:07 ben.100m.se nodejs[25062]: /srv/jzedit/adduser.js:104
+Jun 17 16:07:07 ben.100m.se nodejs[25062]:         if(userDirs[i] == username) throw new Error("Directory " + HOME + userDirs[i]+ " already exist!");
+Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                     ^
+Jun 17 16:07:07 ben.100m.se nodejs[25062]: Error: Directory /home/guest9 already exist!
+
+
+
+prio: Fix indentation characters so the source code gets clean.
+
+Make it possible to install the editor via : npm install jzedit
+npm install -g ?
+
+Support for vi/vim key bindings!
+
+---
+Opening the editor from command line. eg jzedit somefile
+Piping to the editor. Send stdin stream to server, that sends to the client !?
+---
 
 When using repo/clone in url search, automatically make a shallow clone !?
 Add option in clone dialog to make shallow clone.
 
 Able to use the editor as a "native" editor. Open files from network smb
 
-Make it possible to install the editor via : npm install jzedit
-npm install -g ?
-
 can I fix Annoying Chrome icon when clicking on the jzedit launcher in Linux ?
 
-new line btw right click to show menu and drag files here
-
+---
 Some multiplayer game examples. like multiplayer snake
+Simple tutorial apps, eyes that looks at the mouse.
+Making a clock in the canvas
+---
 
 Use node-pty insted of pty.js and try to get Terminal to work on Windows
 
 Update promo images on Chrome app store to make it look more like a editor/IDE. {} brackets and lines of code
 
-Google drive integration
+---
 
-prio: Fix indentation characters so the source code gets clean.
+Able to just leave the "console" and continue developing somwhere else, on another machine ...
+Save state to server !?
 
 use server storage for reopen files. !? ...
 Server storage always makes a local storage copy. when online, also query local storage and compare date stamp. Use the newest.
 if the local copy is newer, update the server storage. !??
 
-Make encoding_converter.js plugin not require reloading from disk, so we can convert unsaved files.
+----
 
-Piping to the editor. Send stdin stream to server, that sends to the client !?
+Make encoding_converter.js plugin not require reloading from disk, so we can convert unsaved files.
 
 debug: Editor freaks out when trying to scroll (first scroll up -negative row) bundle.htm
 
 debug having zetafiles as username in bash terminal
-
-Simple tutorial apps, eyes that looks at the mouse.
-Making a clock in the canvas
 
 Write tests for signup service in prod, run test once every hour and send e-mail report if it doesn't work!!
 
@@ -149,10 +172,16 @@ Remove all dependendcies on dirname !?
 What I'm thinking
 -----------------
 
+Workflow for colaborating:
+Something like an internal wiki ... 
+
+
+---
 Google drive integration is a must have for a Chromebook users, since that's where they store their files.
 Most editor functionality however depends on the Editor-server-api, for example previewing html files, or running nodejs scripts.
 Should Google Drive be mounted on the server side instead !?
 
+---
 
 Have a poll to see what users are most interested in:
 "What jzedit feature are you most interested in ?"
@@ -165,10 +194,12 @@ Have a poll to see what users are most interested in:
 - Deploying a Node.js app
 - Other: 
 
+---
+
 How do you do/make "pull requests" !?
 
-Skip webide.se part on Chromebook app ? Because connecticvity issues ...
-Chromebook users are most likely always online, or what would be the reason to use a computer that is basically just a web browser !?
+"Make pull request" button in source control. 
+Another webide.se user. Or via e-mail.
 
 ---
 Include domain in wwwfolder so users can have many domains !? No the editor should not be used as a web hosting service.
@@ -572,6 +603,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+When file explorer already have been open, and you click "explore" (EDITOR.fileExplorer) and file explorer takes it, the folder gets appended twice!
 
 Can't browse for keys to SSH/SFTP server when running in browser!
 
