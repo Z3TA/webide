@@ -73,8 +73,8 @@
 			
 			if(QUERY_STRING.editPage) {
 				// ### quickedit.js ...
-				var url = QueryString.editPage;
-				var nodes = QueryString.nodes.split(",");
+				var url = QUERY_STRING.editPage;
+				var nodes = QUERY_STRING.nodes.split(",");
 				
 				var site = isSite(url);
 				
@@ -124,9 +124,9 @@
 			}
 			else {
 				// Find where to edit
-				if(QueryString.nodes) {
+				if(QUERY_STRING.nodes) {
 					
-					var element = QueryString.nodes.split(",");
+					var element = QUERY_STRING.nodes.split(",");
 					
 					element.reverse();
 					

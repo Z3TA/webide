@@ -34,9 +34,24 @@ and we want to be sane, and debug the same code that the users are running.
 Add things to the menu, but only add them to the menu if needed for the file the user clicks on.
 Eg. only show "save" if file is unsaved, or only show "Run in Node.js" is it's a JavaScript file (detect nodejs ? require, no window)
 
+Happy path: (manually check on prod after each release)
+1. Ctrl+Alt + Right click on web page should open the SSG source file in the editor
+2. WYSIWYG edit said fail
+3. Publish changes
+
 
 What I'm working on
 -------------------
+
+
+bug: Got error, unable to stat "new file" och som notes got lost!!
+
+Before logging in ask guest, ask the user:
+
+Welcome to webide.se do you want to login as guest ?
+
+Login as guest, Create new account, I want to login to existing account
+
 
 Investigating using Google Drive on server side using google-drive-ocamlfuse
 
