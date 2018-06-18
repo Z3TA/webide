@@ -658,7 +658,7 @@ if(GUEST_POOL.length == 0) {
 
 						console.log("New guest login: " + guestUser);
 						
-						sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: " + guestUser);
+						sendMail("jzedit@" + HOSTNAME, ADMIN_EMAIL, guestUser, "New guest login: user=" + guestUser + " IP=" + IP);
 						
 username = guestUser;
 idSuccess();
