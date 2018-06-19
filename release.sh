@@ -58,7 +58,7 @@ rm -rf temp/release/linux/changeset.js
 rm -rf temp/release/linux/update_version.js
 rm -rf temp/release/linux/runtime/
 rm -rf temp/release/linux/semver.js
-rm -rf temp/release/linux/semver
+rm -rf temp/release/linux/SEMVER
 
 echo "Removing unused fonts"
 find temp/release/linux/client/gfx/font/ ! -name 'DejaVuSansMono.css' ! -name 'DejaVuSansMono.ttf' ! -name 'DejaVuSansMono-Bold.ttf' -type f -exec rm -f {} +
