@@ -50,6 +50,7 @@
 	which enables edits in the preview window aka. "What you see is what you get".</p>
 	
 	
+	
 	<a name="jzedit"></a>
 	<h1>JZedit</h1>
 	
@@ -60,6 +61,19 @@
 	<p>While being a "cloud editor" it can also run locally on a PC, 
 	or any device that can run <a href="https://www.nodejs.org/">Node.JS</a>.</p>
 	
+	<h3>Install jzeidt locally</h3>
+	
+	<p>First install nodejs, (apt install nodejs) or download from <a href="https://nodejs.org/">Node.js website</a>.<br>
+	With nodejs you should get a program called <i>npm</i>. Open a terminal/command-prompt and type: <b>npm install jzedit</b>. To run the editor type <b>npm start</b>. 
+	Or if you only want to run the server and open the editor in a browser, type <b>npm run server</b>.<br>
+	
+	<!--
+	<h3>Using as a cloud ide</h3>
+	
+	<p>You can have your team all share the same customzed enviroment and be able to use it from anywhere.</p>
+	
+	<p>You can find detailed instructions on how to run jzedit as a cloud server like webide.se in the readme.</p>
+	-->
 	
 	
 	<h2>Some features</h2>
@@ -67,8 +81,8 @@
 	<ul>
 		<li>Grouped file tabs</li>
 		<li>Function list for quick navigation</li>
-		<li>Automatic indentation. You never have to indent your code!</li>
-		<li>Smart auto-completion and function-argument hinting using <kbd>Tab</kbd>.</li>
+		<li>Automatic indentation</li>
+		<li>Auto-completion and function-argument hinting.</li>
 		<li>Connect to FTP/FTPS/SFTP servers and edit files remotely.</li>
 		<li>Zoom out <kbd>Alt+Z</kbd> with markdown topics highlighted for faster navigation.</li>
 		<li>Static site generator with scripting capabilities using JavaScript, with support for Node.JS modules.</li>
@@ -83,7 +97,7 @@
 	
 	<p>The editor is not only for developers, it can also be setup so that a non-technical user can use it,
 	for example to edit their web site via WYSIWYG, write a blog post, edit documentation, etc. with automated source control management.<br>
-	For example when using the built in static site generator together with a software repository, it will pull new updates from the repo,
+	For example when using the built in static site generator together with a software repository, it will automatically pull new updates from the repo,
 	merge if neccesary, and ask the user to write a commit message before publishing.</p>
 	
 	
@@ -97,7 +111,7 @@
 	And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
 	
 	<p>JZedit has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
-	Each plugin is an independent unit and do not depend on, or interfere with other plugins.<br>
+	Each plugin is a independent unit and do not depend on, or interfere with other plugins.<br>
 	Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 	
 	
@@ -113,10 +127,28 @@
 	<p>JZedit has a graphical interface for accessing files on remote servers via SSH/FTP.
 	But you can also use the built in terminal, and get a meta experience by ssh:ing to another machine, and run a terminal editor inside the editor.</p>
 	
-	<p>JZedit is easier to use then some code editors. And if you know HTML/CSS/JavaScript, you will also find it easier to add new features to JZedit compared to other editors.<br>
+	<p>JZedit is easier to use then some code editors. 
+	And if you know HTML/CSS/JavaScript, you will also find it easier to add new features.<br>
 	JZedit is written in "vanilla" JavaScript, where other similar editors use "compile to Javascript" languages like CoffeeScript and  TypeScript.<br>
-	JZedit has no build step and you can use the editor to make changes to the editor itself, and hit refresh or hot load to instantly see the new changes in effect.<br>
+	JZedit has no build step. You do not need to compile! Just refresh it like a normal web page.
+	You can use the editor to make changes to the editor itself, and modules can be hot loaded (hitting F7 reloads only the file/module you are working on).<br>
 	JZedit does Not use the DOM (content-editable) for text rendering like other web based editors do, JZedit uses 2d Canvas, which makes it faster.</p>
+	
+	
+	<h2>But does it have Vim keybindings?</h2>
+	
+	<p>It turns out implementing vi/vim key-bindings is very hard. 
+	The editor has basic support, we are working on satifsfying the hardcore vi/vim users.</p>
+	
+	<p>
+	
+	
+	
+	<h2>Why are you not working on something more important, text-editors is a solved problem</h2>
+	
+	<p>
+	
+	
 	
 	<hr>
 	
