@@ -172,9 +172,22 @@ Remove all dependendcies on dirname !?
 What I'm thinking
 -----------------
 
+vim/modal editing: One mode for inserting text and one mode for navigating text.
+So that you do not have to take your hands off the keyboard, and not reach for arrow keys.
+Most useful on laptops that does not have a mouse.
+Many developers are used to vi/vim, vim commands mode is however very hard to implement,
+and most user have special key bindings and lots of plugins, so it's very hard to satisfy all vim users.
+
+Can we make a *better* command mode then in vim !?
+
+Most useful command seems to be "change between brackets" or "delete until x"
+
+
+
+----
+
 Workflow for colaborating:
 Something like an internal wiki ... 
-
 
 ---
 Google drive integration is a must have for a Chromebook users, since that's where they store their files.
@@ -1444,8 +1457,6 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
-
-When doing a new search and typing in the search box: Auto search for each key stroke (like in Sublime)
 
 Save login date so it's easy to know which users are inactive
 Recycle guest users (clean data !?) when the guest has not logged in for 10 days

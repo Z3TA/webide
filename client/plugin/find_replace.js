@@ -11,6 +11,7 @@
 	var searchReportCounter = 0;
 	var searchVisible = false;
 	var lastSearchStrLength = 0;
+	var lastSearchDirection = "right"; // right|left
 	
 	EDITOR.on("start", find_replace_main, 10);
 	
@@ -262,6 +263,11 @@
 			if (keyUpEvent.keyCode == keyEnter) {
 				findButtonRight.click();
 			}
+			
+			// Find while typing
+			lastSearchStrLength = 0; // So we keep searching the same word until it no longer match
+			find(inputFind.value, EDITOR.currentFile, regexOption.checked, false, false, "right", ignoreCaseOption.checked);
+			
 		}, false);
 		
 		inputReplace.addEventListener("keyup", function(keyUpEvent) {
@@ -412,6 +418,8 @@
 		if(keepSelection == undefined) keepSelection = false;
 		if(dontLoop == undefined) dontLoop = false;
 		if(direction == undefined) direction = "right";
+		
+		lastSearchDirection = direction;
 		
 		console.log("search: useRegex=" + useRegex + " ignoreCase=" + ignoreCase);
 		
