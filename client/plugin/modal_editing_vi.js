@@ -30,8 +30,7 @@
 	
 	var ENABLED = false;
 	
-	var ENABLE_STR = "Enable modal editing (vim key bindings)";
-	var DISABLE_STR = "Disable modal editing (vim key bindings)"
+	var VI_MODE_STR = "vi/modal mode";
 	
 	var INSERT_MODE = false;
 	
@@ -40,10 +39,9 @@
 		EDITOR.plugin({
 			desc: "Modal editing using vim key bindings",
 			load: function loadModalEditing() {
-				modalEditMenuItem = EDITOR.addMenuItem(ENABLE_STR, enableModalEditing);
+			modalEditMenuItem = EDITOR.addMenuItem(VI_MODE_STR, enableModalEditing);
 				modalEditCommandWidget = EDITOR.createWidget(buildModalEditCommandWidget);
-				
-			},
+				},
 		unload: function unloadModalEditing() {
 				EDITOR.removeMenuItem(modalEditMenuItem);
 				
@@ -52,8 +50,7 @@
 				disableCommandKeys();
 				
 				modalEditCommandWidget.unload();
-				
-			}
+				}
 		});
 		
 		function buildModalEditCommandWidget(widget) {
@@ -225,13 +222,14 @@
 		// p = paste below the current line
 		// P = paste above the current line
 		
-		// ex (not vi standard): ysiw' = {yank}{substitute single character with new text}{Select all inside the next character}{one word}{single quote}
+		// example: (not vi standard): 
+		// ysiw' = {yank}{substitute single character with new text}{Select all inside the next character}{one word}{single quote}
 		
 		
 		
 		
 		// Repetition, the dot command
-		// ex: ci' + foo + esc (a single motion) ... go to another string and . repeats is
+		// ex: ci' + foo + esc (a single motion) ... go to another string and . repeats it
 		
 		
 		// Additional commands
@@ -262,16 +260,19 @@
 		
 		enableCommandKeys();
 		var KEY_ESC = 27;
-		EDITOR.bindKey({desc: "Create new file", charCode: KEY_ESC, combo: 0, fun: normalMode});
+		EDITOR.bindKey({desc: "Change mode to normal (vim) mode", charCode: KEY_ESC, combo: 0, fun: normalMode});
 		
-		
-		var menuItemPosition = EDITOR.removeMenuItem(modalEditMenuItem);
-		modalEditMenuItem = EDITOR.addMenuItem(DISABLE_STR, disableModalEditing, menuItemPosition);
+		EDITOR.updateMenuItem(modalEditMenuItem, ENABLED);
 		
 		EDITOR.hideMenu();
 		
-		EDITOR.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
+		//EDITOR.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
 		
+	}
+	
+	function toggleModalEditing() {
+		if(ENABLED) disableModalEditing();
+		else enableModalEditing();
 	}
 	
 	function disableModalEditing() {
@@ -280,15 +281,13 @@
 		disableCommandKeys();
 		EDITOR.unbindKey(normalMode);
 		
-		
-		var menuItemPosition = EDITOR.removeMenuItem(modalEditMenuItem);
-		modalEditMenuItem = EDITOR.addMenuItem(DISABLE_STR, enableModalEditing, menuItemPosition);
+		EDITOR.updateMenuItem(modalEditMenuItem, false);
 		
 		EDITOR.hideMenu();
 	}
 	
 	function normalMode() {
-		// Goes into normal mode
+		// Goes into "normal" mode
 		
 		//modalEditingCommandInput.value = "";
 		EDITOR.input = false;

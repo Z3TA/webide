@@ -182,6 +182,14 @@ Can we make a *better* command mode then in vim !?
 
 Most useful command seems to be "change between brackets" or "delete until x"
 
+When in navigate mode, pressing any letter will go to the right and search for the next word that match that character,
+and when pressing shift it searches left.
+
+Typing foo will search right until it finds foo
+hitting space will quit search mode ?
+
+
+
 
 
 ----
@@ -2361,6 +2369,8 @@ Use node-inspect instead of "nodejs debug"
 
 Optimization
 ============
+
+Spellchecking while having many files open takes a shit-load of resources! And keeps the server busy so you can not save!
 
 Optimize creation of guest/new user! And login time/mounts check
 
