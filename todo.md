@@ -43,7 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-
 bug: Got error, unable to stat "new file" och som notes got lost!!
 
 Before logging in ask guest, ask the user:
@@ -172,13 +171,40 @@ Remove all dependendcies on dirname !?
 What I'm thinking
 -----------------
 
+stackoverflow review 2018
+-------------------------
+Visual Studio Code  34.9%
+Visual Studio  34.3%
+Notepad++ 34.2%
+Sublime Text  28.9%
+Vim  25.8%
+IntelliJ 24.9%
+Android Studio  19.3%
+Eclipse  18.9%
+Atom  18.0%
+PyCharm   12.0%
+Xcode    10.6%
+PHPStorm    9.0%
+NetBeans    8.2%
+IPython / Jupyter    7.4%
+Emacs    4.1%
+RStudio    3.3%
+RubyMine    1.6%
+TextMate   1.1%
+
+vi/vim (keybindings) modal editing support seems to be a must-have feature for IDE adaption !?
+Should I wait until a user actually mentions vim/modal !?
+Should I try to make a *better* modal mode !? Maybe something that takes less brain capacity, and is more inutitive !?
+
+Making a proper vim support module seems extreamly hard! Because most users use a bunch of vim-plugins and costom key-bindings.
+
+Is vim support a core feature !? Is it the reason why someone want to use this editor !? Nope
+
+Strategy for implementing vim: Start with basic support, make sure it does the same thing as vim.
+
 vim/modal editing: One mode for inserting text and one mode for navigating text.
 So that you do not have to take your hands off the keyboard, and not reach for arrow keys.
 Most useful on laptops that does not have a mouse.
-Many developers are used to vi/vim, vim commands mode is however very hard to implement,
-and most user have special key bindings and lots of plugins, so it's very hard to satisfy all vim users.
-
-Can we make a *better* command mode then in vim !?
 
 Most useful command seems to be "change between brackets" or "delete until x"
 
@@ -188,8 +214,7 @@ and when pressing shift it searches left.
 Typing foo will search right until it finds foo
 hitting space will quit search mode ?
 
-
-
+Change mode by hiting shift+space (not Esc)
 
 
 ----
