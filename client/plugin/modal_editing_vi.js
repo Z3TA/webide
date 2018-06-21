@@ -17,6 +17,11 @@
 	Emacs:
 	Ctrl + K = Kill, kills in context, eg kill inside a paranthesis removes all text from the cursor to the end of the paranthesis
 	
+	
+	Hmm, we probably don't need editor first class support for modal mode !
+	For example Ctrl+E should show the file explorer in all modes !?
+	Do we really need .mode in keybinding options !?
+	
 */
 
 (function() {
@@ -24,76 +29,129 @@
 	
 	if(window.location.href.indexOf("&vim") == -1) return; // Work in progress!
 	
-	var modalEditMenuItem;
-	var modalEditCommandWidget;
-	var modalEditingCommandInput;
-	
-	var ENABLED = false;
-	
-	var VI_MODE_STR = "vi/modal mode";
+	var vimMenuItem;
+	var vimCommandBuffer;
 	
 	var INSERT_MODE = false;
 	
-	var disabledKeyBindings = [];
+	var originalNormalMap = {}; // The original/default vim key mapping
+	originalNormalMap["h"] = function moveCursorLeft(repeat) {
+		var file = EDITOR.currentFile;
+		if(!file) return;
+		if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
+	}
+	originalNormalMap["h"] = function moveCursorLeft(repeat) {
+		var file = EDITOR.currentFile;
+		if(!file) return;
+		if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
+	}
 	
-		EDITOR.plugin({
-			desc: "Modal editing using vim key bindings",
-			load: function loadModalEditing() {
-			modalEditMenuItem = EDITOR.addMenuItem(VI_MODE_STR, enableModalEditing);
-				modalEditCommandWidget = EDITOR.createWidget(buildModalEditCommandWidget);
-				},
-		unload: function unloadModalEditing() {
-				EDITOR.removeMenuItem(modalEditMenuItem);
+	
+	var normalMap = {};
+	for (var str in originalNormalMap) {
+		normalMap[str]  = originalNormalMap[str];
+	}
+	
+	EDITOR.plugin({
+		desc: "Modal editing using vim key bindings",
+		load: function loadVim() {
+			vimMenuItem = EDITOR.addMenuItem("Vim mode", toggleVim);
+			
+			EDITOR.addMode("vim_normal", {}); // Command mode
+			EDITOR.addMode("vim_insert", {});
+			
+			bindKeys();
+		},
+		unload: function unloadVim() {
+			EDITOR.removeMenuItem(vimMenuItem);
 				
-				EDITOR.unbindKey(normalMode);
-				
-				disableCommandKeys();
-				
-				modalEditCommandWidget.unload();
-				}
+			unbindKeys();
+			
+			delete EDITOR.modes["vim_normal"];
+			delete EDITOR.modes["vim_insert"];
+		}
 		});
 		
-		function buildModalEditCommandWidget(widget) {
+	function bindKeys() {
+		/*
+			https://stackoverflow.com/questions/5400806/what-are-the-most-used-vim-commands-keypresses
 			
-		var div = document.createElement("div");
+			https://www.youtube.com/watch?v=5r6yzFEXajQ
+		*/
 		
-		modalEditingCommandInput = document.createElement("input");
-		modalEditingCommandInput.setAttribute("type", "text");
-		modalEditingCommandInput.keyup = inputKeyUp;
-		div.appendChild(modalEditingCommandInput);
+		var KEY_E = 69;
+		var KEY_Y = 89;
+		var KEY_F = 70;
+		var KEY_B = 66;
 		
-		info = document.createElement("span");
-		div.appendChild(info);
+		EDITOR.bindKey({desc: "cursor left", charCode: KEY_H, combo: CTRL, fun: scrollWindowDown, disableOthers: true}) );
 		
-		return div;
-		}
+		EDITOR.bindKey({desc: "Scroll the window down", charCode: KEY_E, combo: CTRL, fun: scrollWindowDown, disableOthers: true}) );
+		EDITOR.bindKey({desc: "Scroll the window up", charCode: KEY_Y, combo: CTRL, fun: scrollWindowUp, disableOthers: true}) );
+		EDITOR.bindKey({desc: "Scroll down one page", charCode: KEY_F, combo: CTRL, fun: scrollDownOnePage, disableOthers: true}) );
+		EDITOR.bindKey({desc: "Scroll up one page", charCode: KEY_B, combo: CTRL, fun: scrollUpOnePage, disableOthers: true}) );
 		
-		function inputKeyUp(inputEvent) {
+		vimBind("h", function cursorLeft() {
 			
-		console.log(inputEvent);
+		});
 		
+	}
+	
+	function unbindKeys() {
+		EDITOR.unbindKey(normalMode);
+		EDITOR.unbindKey(scrollWindowDown);
+		EDITOR.unbindKey(scrollWindowUp);
+		EDITOR.unbindKey(scrollDownOnePage);
+		EDITOR.unbindKey(scrollUpOnePage);
+	}
+	
+		
+	function keyPressed(file, char, combo) {
+			
 			/*
 				Should we use flags eg. command="delete" when detecting d ? 
 				It's better to always parse the command though, then you can edit the command and it will ease debugging and testing
 				
 			*/
 			
-			if(INSERT_MODE) {
+		if(EDITOR.mode == "vim_insert") {
 				
 			//if(backspace ...
 				
-				file.putCharacter(character);
-			}
+			file.putCharacter(char);
 			
-		if(modalEditingCommandInput.value.charAt(0) == ":") return do_cmdline(modalEditingCommandInput.value.splice(1))
+			return false; // Prevent defult browser action
+			}
+		else if(EDITOR.mode == "vim_normal") {
+			
+			vimCommandBuffer += char;
+			
+			if(vimCommandBuffer.charAt(0) == ":") return do_cmdline(vimCommandBuffer.splice(1))
 			
 		// if <CR> or <Esc> and :  do_cmdline
 		
-		var command = modalEditingCommandInput.value.match(/(\d+)?([^\d])?(\d+)?(.)/);
+			var command = vimCommandBuffer.match(/(\d+)?([^\d])?(\d+)?(.)/);
 			
 		if(command) normal_cmd(command[1] || 1, command[2], command[3] || 1, command[3]);
+			
+			return false; // Prevent defult browser action
 		}
-		
+		else return true; // Allow default browser action
+	}
+	
+	function esc() {
+		EDITOR.mode = "vim_normal";
+	}
+	
+	function nmap(str, oldStr) {
+		// Allow recursive mapping
+		normalMap[str] = normalMap[oldStr];
+	}
+	
+	function nnoremap(str, originalStr) {
+		normalMap[str] = originalNormalMap[originalStr];
+	}
+	
 	function normal_cmd(commandNr, command, actionNr, action) {
 			
 		/*
@@ -255,81 +313,22 @@
 		// Connect to server !?
 	}
 	
-	function enableModalEditing() {
-		ENABLED = true;
-		
-		enableCommandKeys();
-		var KEY_ESC = 27;
-		EDITOR.bindKey({desc: "Change mode to normal (vim) mode", charCode: KEY_ESC, combo: 0, fun: normalMode});
-		
-		EDITOR.updateMenuItem(modalEditMenuItem, ENABLED);
-		
-		EDITOR.hideMenu();
-		
-		//EDITOR.bindKey({desc: "Reload/Update the editor", charCode: keyF5, fun: reloadEditor});
-		
-	}
-	
-	function toggleModalEditing() {
-		if(ENABLED) disableModalEditing();
-		else enableModalEditing();
-	}
-	
-	function disableModalEditing() {
-		ENABLED = false;
-		
-		disableCommandKeys();
-		EDITOR.unbindKey(normalMode);
-		
-		EDITOR.updateMenuItem(modalEditMenuItem, false);
-		
+	function toggleVim() {
+		if(EDITOR.mode.slice(0, 3) == "vim") {
+			EDITOR.mode = "default";
+			EDITOR.updateMenuItem(vimMenuItem, false);
+		}
+		else {
+			EDITOR.mode = "vim_normal";
+			EDITOR.updateMenuItem(vimMenuItem, true);
+		}
 		EDITOR.hideMenu();
 	}
 	
 	function normalMode() {
 		// Goes into "normal" mode
-		
-		//modalEditingCommandInput.value = "";
-		EDITOR.input = false;
-		modalEditingCommandInput.focus();
-		
-		modalEditCommandWidget.show();
-		
+		EDITOR.mode = "vim_normal";
 		return false;
-	}
-	
-	
-	function disableCommandKeys() {
-		
-		EDITOR.unbindKey(scrollWindowDown);
-		EDITOR.unbindKey(scrollWindowUp);
-		EDITOR.unbindKey(scrollDownOnePage);
-		EDITOR.unbindKey(scrollUpOnePage);
-		
-		// Rebind the key bindings that we disabled
-		for (var i=0; i<disabledKeyBindings.length; i++) {
-			EDITOR.bindKey(disabledKeyBindings[i]);
-		}
-	}
-	
-	function enableCommandKeys() {
-		/*
-			https://stackoverflow.com/questions/5400806/what-are-the-most-used-vim-commands-keypresses
-			
-			https://www.youtube.com/watch?v=5r6yzFEXajQ
-		*/
-		
-		var KEY_E = 69;
-		var KEY_Y = 89;
-		var KEY_F = 70;
-		var KEY_B = 66;
-		
-		disabledKeyBindings.concat( EDITOR.bindKey({desc: "Scroll the window down", charCode: KEY_E, combo: CTRL, fun: scrollWindowDown, disableOthers: true}) );
-		disabledKeyBindings.concat( EDITOR.bindKey({desc: "Scroll the window up", charCode: KEY_Y, combo: CTRL, fun: scrollWindowUp, disableOthers: true}) );
-		disabledKeyBindings.concat( EDITOR.bindKey({desc: "Scroll down one page", charCode: KEY_F, combo: CTRL, fun: scrollDownOnePage, disableOthers: true}) );
-		disabledKeyBindings.concat( EDITOR.bindKey({desc: "Scroll up one page", charCode: KEY_B, combo: CTRL, fun: scrollUpOnePage, disableOthers: true}) );
-		
-		
 	}
 	
 	function scrollWindowDown() {

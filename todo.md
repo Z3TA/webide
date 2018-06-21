@@ -43,47 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-bug: Got error, unable to stat "new file" och som notes got lost!!
-
-Before logging in ask guest, ask the user:
-
-Welcome to webide.se do you want to login as guest ?
-
-Login as guest, Create new account, I want to login to existing account
-
-
-Investigating using Google Drive on server side using google-drive-ocamlfuse
-
-Issue with users having to copy/paste the auth. Better use redirect ...
-
-Have to edit let redirect_uri = "urn:ietf:wg:oauth:2.0:oob" in /src/oauth2.ml
-
-
-Can't switch back to local fs after changing to Google Drive in file explorer.
-
-Google drive integration.
-Detect if running from chrome-book, then auto connect to Google drive.
-If not running in Chrome app mode, you must click on Google drive icon in file explorer.
-
-Advertise Google drive integration by showing a Google Drive logo, that is gray, but turns "on" when connected to google drive.
-
-Select Google drive first in File Explorer when not logged in !?
+Figure out why and fix: I don't get any errors when prod server crashes
 
 ---
 
-It took fucking 25s for a guest user to be created and logged in!!
-
-Instead of fixing the perf issues, as it's only on first load. Show a loading bar or spinner with BS messages like:
-"Downloading modules", "Running tests", "Optimizing binaries", "Applying patches"
-
-
-
-todo
-----
-
-Figure out why I don't get any errors when prod server crashes
-
-Figure out why no GUEST_COUNTER file exist on prod server.
+Figure out why and fix: no GUEST_COUNTER file exist on prod server.
 
 /srv/jzedit/server/server.js:275
 Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                 throw error;
@@ -94,14 +58,54 @@ Jun 17 16:07:07 ben.100m.se nodejs[25062]:         if(userDirs[i] == username) t
 Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                     ^
 Jun 17 16:07:07 ben.100m.se nodejs[25062]: Error: Directory /home/guest9 already exist!
 
+---
 
+bug: Got error, unable to stat "new file" and som notes got lost!!
+
+---
+Investigating using Google Drive on server side using google-drive-ocamlfuse
+Having a very hard time trying to compile it ...
+Issue with users having to copy/paste the auth. It would be better to use redirect_uri ...
+Have to edit let redirect_uri = "urn:ietf:wg:oauth:2.0:oob" in /src/oauth2.ml
+
+Then replace the current Google drive integration with google-drive-ocamlfuse
+so that you can run nodejs script etc, that are saved on google drive.
+
+Detect if running from chrome-book, then auto connect to Google drive.
+If not running in Chrome app mode, you must click on Google drive in the menu.
+
+---
+
+It took fucking 25s for a guest user to be created and logged in!!
+
+Instead of fixing the perf issues :P  as it's only on first load. Show a loading bar or spinner with BS messages like:
+"Downloading modules", "Running tests", "Optimizing binaries", "Applying patches"
+
+
+
+todo
+----
 
 prio: Fix indentation characters so the source code gets clean.
 
+---
 Make it possible to install the editor via : npm install jzedit
 npm install -g ?
 
-Support for vi/vim key bindings!
+---
+Support for vi/vim key bindings: We don't want to implement all of vim!
+Just enough commands so that you can use the editor without a mouse!
+And withour reaching for the arrows keys or using the navigation keys (Home/End/PgUp/PgDn).
+
+Use shift+space to enter/exit "vi/modal mode" which is vim modal mode.
+Whenever you hit shift+space again you go back to editor defaults, which is insert. 
+Commands that puts you into input mode will go to editors default mode and you have to hit shift+space to go back in to vi-like normal mode.
+
+https://web.archive.org/web/20150523044838/http://www.visimulator.com:80/faq.html
+https://stackoverflow.com/questions/5400806/what-are-the-most-used-vim-commands-keypresses
+https://www.fprintf.net/vimCheatSheet.html
+https://gist.github.com/awidegreen/3854277
+
 
 ---
 Opening the editor from command line. eg jzedit somefile
@@ -171,32 +175,28 @@ Remove all dependendcies on dirname !?
 What I'm thinking
 -----------------
 
-stackoverflow review 2018
--------------------------
+An existing user got logged in as guest ...
+
+Before logging in as guest, ask the user !?:
+Welcome to webide.se do you want to login as guest ?
+Login as guest, Create new account, I want to login to existing account
+
+
+---
+stackoverflow review 2018:
 Visual Studio Code  34.9%
 Visual Studio  34.3%
 Notepad++ 34.2%
 Sublime Text  28.9%
 Vim  25.8%
 IntelliJ 24.9%
-Android Studio  19.3%
-Eclipse  18.9%
-Atom  18.0%
-PyCharm   12.0%
-Xcode    10.6%
-PHPStorm    9.0%
-NetBeans    8.2%
-IPython / Jupyter    7.4%
-Emacs    4.1%
-RStudio    3.3%
-RubyMine    1.6%
-TextMate   1.1%
 
 vi/vim (keybindings) modal editing support seems to be a must-have feature for IDE adaption !?
-Should I wait until a user actually mentions vim/modal !?
-Should I try to make a *better* modal mode !? Maybe something that takes less brain capacity, and is more inutitive !?
-
-Making a proper vim support module seems extreamly hard! Because most users use a bunch of vim-plugins and costom key-bindings.
+But vim is too much hard work to implement! We would end up with vim inside the editor.
+Vim is a whole ecosystem with plugins, we can't put all that into the editor.
+Our editor already has it's own plugin system!
+Vim is hard for beginners, and we want to make a editor that is easy for beginners.
+We however want to make it fun to use the editor on a laptop without a mouse or touch screen.
 
 Is vim support a core feature !? Is it the reason why someone want to use this editor !? Nope
 
@@ -207,15 +207,6 @@ So that you do not have to take your hands off the keyboard, and not reach for a
 Most useful on laptops that does not have a mouse.
 
 Most useful command seems to be "change between brackets" or "delete until x"
-
-When in navigate mode, pressing any letter will go to the right and search for the next word that match that character,
-and when pressing shift it searches left.
-
-Typing foo will search right until it finds foo
-hitting space will quit search mode ?
-
-Change mode by hiting shift+space (not Esc)
-
 
 ----
 
