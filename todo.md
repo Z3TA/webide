@@ -43,23 +43,6 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Figure out why and fix: I don't get any errors when prod server crashes
-
----
-
-Figure out why and fix: no GUEST_COUNTER file exist on prod server.
-
-/srv/jzedit/server/server.js:275
-Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                 throw error;
-Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                 ^
-Jun 17 16:07:07 ben.100m.se nodejs[25062]: Error: Command failed: /srv/jzedit/adduser.js '{"username":"guest9","password":"3DF0kGJ1Ob","noPwHash":false,"noCert":false}'
-Jun 17 16:07:07 ben.100m.se nodejs[25062]: /srv/jzedit/adduser.js:104
-Jun 17 16:07:07 ben.100m.se nodejs[25062]:         if(userDirs[i] == username) throw new Error("Directory " + HOME + userDirs[i]+ " already exist!");
-Jun 17 16:07:07 ben.100m.se nodejs[25062]:                                     ^
-Jun 17 16:07:07 ben.100m.se nodejs[25062]: Error: Directory /home/guest9 already exist!
-
----
-
 bug: Got error, unable to stat "new file" and som notes got lost!!
 
 ---
@@ -197,6 +180,7 @@ Vim is a whole ecosystem with plugins, we can't put all that into the editor.
 Our editor already has it's own plugin system!
 Vim is hard for beginners, and we want to make a editor that is easy for beginners.
 We however want to make it fun to use the editor on a laptop without a mouse or touch screen.
+If someone wants to get the full vim experience they can always run vim in the built in terminal :P
 
 Is vim support a core feature !? Is it the reason why someone want to use this editor !? Nope
 
