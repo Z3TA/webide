@@ -173,6 +173,11 @@ function main() {
 	fs.readFile("./GUEST_COUNTER", "utf8", function(err, data) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
+			// Create the file if it doesn't exist
+			fs.writeFile("./GUEST_COUNTER", "0", { flag: 'wx' }, function (err) {
+				if (err) throw err;
+				console.log("Created GUEST_COUNTER file");
+			});
 		}
 else {
 			GUEST_COUNTER = parseInt(data);
