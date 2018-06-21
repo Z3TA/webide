@@ -32,9 +32,9 @@
 	var vimMenuItem;
 	var vimCommandBuffer;
 	
-	var INSERT_MODE = false;
+	var VIM_ACTIVE = false;
 	
-	var originalNormalMap = {}; // The original/default vim key mapping
+	var originalNormalMap = {}; // The original/default vim normal key mapping
 	originalNormalMap["h"] = function moveCursorLeft(repeat) {
 		var file = EDITOR.currentFile;
 		if(!file) return;
@@ -45,7 +45,11 @@
 		if(!file) return;
 		if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
 	}
-	
+	originalNormalMap["0"] = function moveToColumnZero() {
+		var file = EDITOR.currentFile;
+		if(!file) return;
+		file.moveCaret(undefined, file.caret.row, 0);
+	}
 	
 	var normalMap = {};
 	for (var str in originalNormalMap) {
@@ -55,93 +59,47 @@
 	EDITOR.plugin({
 		desc: "Modal editing using vim key bindings",
 		load: function loadVim() {
-			vimMenuItem = EDITOR.addMenuItem("Vim mode", toggleVim);
+			vimMenuItem = EDITOR.addMenuItem("Vim/modal mode", toggleVim);
 			
-			EDITOR.addMode("vim_normal", {}); // Command mode
-			EDITOR.addMode("vim_insert", {});
+			EDITOR.on("keyPressed", vimKeyPress);
 			
-			bindKeys();
+			var keySpace = 32;
+			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: keyF9, combo: SHIFT});
+			
 		},
 		unload: function unloadVim() {
 			EDITOR.removeMenuItem(vimMenuItem);
-				
-			unbindKeys();
-			
-			delete EDITOR.modes["vim_normal"];
-			delete EDITOR.modes["vim_insert"];
+			EDITOR.unbindKey(toggleVim);
+			EDITOR.removeEvent("keyPressed", vimKeyPress);
 		}
 		});
 		
-	function bindKeys() {
+	
+	
+		
+	function vimKeyPress(file, char, combo) {
+			
+		if(!VIM_ACTIVE) return true; // Do the default
+		
 		/*
-			https://stackoverflow.com/questions/5400806/what-are-the-most-used-vim-commands-keypresses
-			
-			https://www.youtube.com/watch?v=5r6yzFEXajQ
-		*/
-		
-		var KEY_E = 69;
-		var KEY_Y = 89;
-		var KEY_F = 70;
-		var KEY_B = 66;
-		
-		EDITOR.bindKey({desc: "cursor left", charCode: KEY_H, combo: CTRL, fun: scrollWindowDown, disableOthers: true}) );
-		
-		EDITOR.bindKey({desc: "Scroll the window down", charCode: KEY_E, combo: CTRL, fun: scrollWindowDown, disableOthers: true}) );
-		EDITOR.bindKey({desc: "Scroll the window up", charCode: KEY_Y, combo: CTRL, fun: scrollWindowUp, disableOthers: true}) );
-		EDITOR.bindKey({desc: "Scroll down one page", charCode: KEY_F, combo: CTRL, fun: scrollDownOnePage, disableOthers: true}) );
-		EDITOR.bindKey({desc: "Scroll up one page", charCode: KEY_B, combo: CTRL, fun: scrollUpOnePage, disableOthers: true}) );
-		
-		vimBind("h", function cursorLeft() {
-			
-		});
-		
-	}
-	
-	function unbindKeys() {
-		EDITOR.unbindKey(normalMode);
-		EDITOR.unbindKey(scrollWindowDown);
-		EDITOR.unbindKey(scrollWindowUp);
-		EDITOR.unbindKey(scrollDownOnePage);
-		EDITOR.unbindKey(scrollUpOnePage);
-	}
-	
-		
-	function keyPressed(file, char, combo) {
-			
-			/*
 				Should we use flags eg. command="delete" when detecting d ? 
 				It's better to always parse the command though, then you can edit the command and it will ease debugging and testing
 				
 			*/
 			
-		if(EDITOR.mode == "vim_insert") {
-				
-			//if(backspace ...
-				
-			file.putCharacter(char);
-			
-			return false; // Prevent defult browser action
-			}
-		else if(EDITOR.mode == "vim_normal") {
-			
-			vimCommandBuffer += char;
-			
-			if(vimCommandBuffer.charAt(0) == ":") return do_cmdline(vimCommandBuffer.splice(1))
+		vimCommandBuffer += char;
+		
+		if(vimCommandBuffer.charAt(0) == ":") return do_cmdline(vimCommandBuffer.splice(1))
 			
 		// if <CR> or <Esc> and :  do_cmdline
 		
-			var command = vimCommandBuffer.match(/(\d+)?([^\d])?(\d+)?(.)/);
+		var command = vimCommandBuffer.match(/(\d+)?([^\d])?(\d+)?(.)/);
 			
 		if(command) normal_cmd(command[1] || 1, command[2], command[3] || 1, command[3]);
-			
-			return false; // Prevent defult browser action
+		
+		return false; // Prevent defult browser action
 		}
-		else return true; // Allow default browser action
-	}
 	
-	function esc() {
-		EDITOR.mode = "vim_normal";
-	}
 	
 	function nmap(str, oldStr) {
 		// Allow recursive mapping
@@ -177,24 +135,8 @@
 		
 			// Motions (cursor motion command)
 			
-		var MOVE_TO_COLUMN_ZERO = "0";
 		
 		
-		for (var i=0; i<commandNr; i++) {
-			
-			
-			for (var i=0; i<actionNr; i++) {
-				
-				// 
-				
-				if(action == MOVE_TO_COLUMN_ZERO) file.moveCaret(undefined, file.caret.row, 0);
-				else if(action == MOVE_LEFT_ONE_CHARACTER) file.moveCaretLeft(file.caret, actionNr);
-				
-			}
-			
-			// Commands
-			
-		}
 		
 		
 		if(action == MOVE_TO_COLUMN_ZERO) {
@@ -314,43 +256,17 @@
 	}
 	
 	function toggleVim() {
-		if(EDITOR.mode.slice(0, 3) == "vim") {
-			EDITOR.mode = "default";
+		if(VIM_ACTIVE) {
+			VIM_ACTIVE = false;
 			EDITOR.updateMenuItem(vimMenuItem, false);
 		}
 		else {
-			EDITOR.mode = "vim_normal";
+			VIM_ACTIVE = true;
 			EDITOR.updateMenuItem(vimMenuItem, true);
 		}
 		EDITOR.hideMenu();
 	}
 	
-	function normalMode() {
-		// Goes into "normal" mode
-		EDITOR.mode = "vim_normal";
-		return false;
-	}
-	
-	function scrollWindowDown() {
-		// Keep caret at the same column
-		
-		return false;
-	}
-	
-	function scrollWindowUp() {
-		
-		return false;
-	}
-	
-	function scrollDownOnePage() {
-		
-		return false;
-	}
-	
-	function scrollUpOnePage() {
-		
-		return false;
-	}
 	
 })();
 

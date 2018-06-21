@@ -189,9 +189,6 @@ EDITOR.openFileQueue = []; // Files listed here are waiting for data (it's an in
 EDITOR.lastTimeCharacterInserted = new Date();
 EDITOR.lastTimeInteraction = new Date();
 
-EDITOR.modes = []; // You can bind keys for use in different modes
-EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
-
 (function() { // Non global editor code ...
 	
 	// These variables and functions are private ...
@@ -502,11 +499,6 @@ callback = value;
 	else {
 		EDITOR.localStorage = null;
 		console.warn("window.localStorage not available!");
-	}
-	
-	EDITOR.addMode = function addMode(name, options) {
-		if(EDITOR.modes.hasOwnProperty(name)) throw new Error(name + " mode is already registered!");
-		EDITOR.modes[name] = options;
 	}
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
@@ -3566,9 +3558,6 @@ EDITOR.fireEvent("btk");
 		
 		if(!b.desc) UTIL.getStack("Key binding should have a description!");
 		
-		if(b.mode == undefined) console.warn('No mode defined for "' + b.desc + '" ');
-		else if(!EDITOR.modes.hasOwnProperty(b.mode)) throw new Error(b.mode + " is not registered. Register using EDITOR.addMode() or make sure the plugin loads after the plugin that registers the mode using the order property in plugin options.");
-		
 		var disable = [];
 		
 		// Make sure the function name is unique. It needs to be unique to be able to unbind it. Unique names also makes it easier to debug
@@ -6202,7 +6191,7 @@ console.error(err);
 		
 		EDITOR.lastKeyPressed = character;
 		
-		if(file && EDITOR.mode == "default") {
+		if(file) {
 			if(EDITOR.input && !preventDefault) {
 				// Put character at current caret position:
 				
@@ -6390,7 +6379,7 @@ console.error(err);
 				
 				binding = keyBindings[i];
 				
-				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || (binding.mode == undefined && EDITOR.mode == "edfault") || binding.mode == "*") ) { // down is the default direction
+				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) ) { // down is the default direction
 					
 					if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
 						throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
@@ -6645,7 +6634,7 @@ console.error(err);
 			
 			binding = keyBindings[i];
 			
-			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") && (binding.mode == EDITOR.mode || (binding.mode == undefined && EDITOR.mode == "edfault") || binding.mode == "*") ) { // down is the default direction
+			if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "up") ) { // down is the default direction
 				
 				console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 				
