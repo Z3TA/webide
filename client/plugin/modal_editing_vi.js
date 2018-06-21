@@ -2,25 +2,24 @@
 	
 	Proof of concept modal editing like in vi/vim
 	The goal of this plugin is to let old vi/vim users use their reflexes.
+	And make it so you can use the editor conforably on a laptop without a mouse.
+	Without having to reach for arrow or navigation keys.
+	
 	"Good design is when the program does what the user expects will happen"
 	
-	Activate via context menu
-	After activation: Esc = Enters command mode (or should we use tab!?)
-	
 	Problem: A lot of key bindings overlap "modern" key bindings like Ctrl+V for pasting, while in vim it goes into visual block mode.
-	Solution: Disable other key bindings when enabling modal editing and Enable them again when Disabling modal editing
+	Solution: Existing key bindings have to co-exist with vim/modal mode. We only want the "essential" vim commands.
+	We know we will *never* be able to satisfy hardcore vim users. 
 	
+	Visual Mode: Basically highlight stuff ... plus some magic !? We will only support normal mode!
+	But maybe we'll add some custom commands !?
 	
-	Visual Mode: Basically highlight stuff ... plus some magic !?
+	You are free to make your own vim plugin!
+	If you want the full vim experience you will probably need to run vim via the built in terminal though :P
 	
-	
-	Emacs:
-	Ctrl + K = Kill, kills in context, eg kill inside a paranthesis removes all text from the cursor to the end of the paranthesis
-	
-	
-	Hmm, we probably don't need editor first class support for modal mode !
+	We probably don't need editor first class support for modal mode !
 	For example Ctrl+E should show the file explorer in all modes !?
-	Do we really need .mode in keybinding options !?
+	We don't really need .mode in keybinding options.
 	
 */
 
@@ -40,10 +39,10 @@
 		if(!file) return;
 		if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
 	}
-	originalNormalMap["h"] = function moveCursorLeft(repeat) {
+	originalNormalMap["l"] = function moveCursorRight(repeat) {
 		var file = EDITOR.currentFile;
 		if(!file) return;
-		if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
+		if(file.caret.col < file.grid[file.caret.row].length) file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.caret.col, repeat));
 	}
 	originalNormalMap["0"] = function moveToColumnZero() {
 		var file = EDITOR.currentFile;

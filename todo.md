@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Trying to come up with a strategy to implement advanced vim commands with both action and command.
+
 bug: Got error, unable to stat "new file" and som notes got lost!!
 
 ---
@@ -2537,6 +2539,9 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+Idea from Emacs:
+	Ctrl + K = Kill, kills in context, eg kill inside a paranthesis removes all text from the cursor to the end of the paranthesis
 
 Able to move/copy files and folders between different servers (different connected sft servers)
 Some nice GUI with drag and drop support.
