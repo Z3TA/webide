@@ -6212,9 +6212,12 @@ console.error(err);
 		*/
 		
 		EDITOR.lastKeyPressed = character;
+		/*
+			Different modes need to preventDefault (have a keyPressed event listener that returns false)
+			in order to prevent characters from being inserted to the document. 
+		*/
 		
-		if(file && EDITOR.mode == "default") {
-			if(EDITOR.input && !preventDefault) {
+			if(file && EDITOR.input && !preventDefault) {
 				// Put character at current caret position:
 				
 				if(EDITOR.settings.renderColumnOptimization && file.caret.eol) { //  && character == benchmarkCharacter    && inputCount++ > 5 (if setTimeout is used, The benchmarking tool need 4 "test" inputs before benchmarking)
@@ -6267,11 +6270,7 @@ console.error(err);
 					file.putCharacter(character);
 					EDITOR.renderNeeded();
 				}
-				
-				
-			}
-			
-		}
+				}
 		
 		EDITOR.interact("keyPressed", keyPressEvent);
 		

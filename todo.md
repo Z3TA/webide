@@ -42,10 +42,16 @@ Happy path: (manually check on prod after each release)
 
 What I'm working on
 -------------------
+http://vimdoc.sourceforge.net/htmldoc/usr_02.html
 
-Trying to come up with a strategy to implement advanced vim commands with both action and command.
+Add vimInput mode and not just vimCommand !?
 
-bug: Got error, unable to stat "new file" and som notes got lost!!
+Esc should go to vimCommand mode, but there are already so many things bound to Esc, like hiding widgets.
+
+Implementing vim/modal mode (command mode)
+
+Trying to come up with a strategy to implement advanced vim commands with both action and command ...
+
 
 ---
 Investigating using Google Drive on server side using google-drive-ocamlfuse
@@ -168,6 +174,7 @@ Login as guest, Create new account, I want to login to existing account
 
 
 ---
+
 stackoverflow review 2018:
 Visual Studio Code  34.9%
 Visual Studio  34.3%
@@ -626,6 +633,10 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Got error, unable to stat "new file" and som notes got lost!!
+
+Folder and files within did not get read+exec persmission when moved into wwwpub folder on webide.se resulting in 404 errors!
 
 When file explorer already have been open, and you click "explore" (EDITOR.fileExplorer) and file explorer takes it, the folder gets appended twice!
 
