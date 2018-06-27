@@ -11,15 +11,13 @@
 	Solution: Existing key bindings have to co-exist with vim/modal mode. We only want the "essential" vim commands.
 	We know we will *never* be able to satisfy hardcore vim users. 
 	
-	Visual Mode: Basically highlight stuff ... plus some magic !? We will only support normal mode!
+	Visual Mode: Basically highlight stuff ... plus some magic !? 
+	We will only support normal mode for now.
 	But maybe we'll add some custom commands !?
 	
-	You are free to make your own vim plugin!
+	Feel free to make your own vim plugin!
 	If you want the full vim experience you will probably need to run vim via the built in terminal though :P
 	
-	We probably don't need editor to have built insupport for modal mode !?
-	For example Ctrl+E should show the file explorer in all modes !?
-	We don't really need option.mode in keybinding options.
 	
 	Some vim key bindings:
 	
@@ -69,6 +67,10 @@
 		normalMap[str]  = originalNormalMap[str];
 	}
 	
+	EDITOR.on("start", function addVimNormalMode() {
+		EDITOR.addMode("vimNormal");
+	});
+	
 	EDITOR.plugin({
 		desc: "Modal editing using vim key bindings",
 		load: function loadVim() {
@@ -77,7 +79,7 @@
 			EDITOR.on("keyPressed", vimKeyPress);
 			
 			var charCodeSpace = 32;
-			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: charCodeSpace, combo: SHIFT});
+			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: charCodeSpace, combo: SHIFT, mode: "*"});
 			
 			EDITOR.addRender(showCommandBuffer);
 			
@@ -642,13 +644,16 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 	function toggleVim() {
 		if(COMMAND_NORMAL) {
 			COMMAND_NORMAL = false;
+			EDITOR.setMode("default");
 			EDITOR.updateMenuItem(vimMenuItem, false);
 		}
 		else {
 			COMMAND_NORMAL = true;
+			EDITOR.setMode("vimNormal");
 			EDITOR.updateMenuItem(vimMenuItem, true);
 		}
 		EDITOR.hideMenu();
+		return false;
 	}
 	
 	function updateCommandVisual() {
