@@ -5092,8 +5092,8 @@ CLIENT.cmd("mirror", {
 		
 		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 		
-		
-		keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
+		EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
+		//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		
 		window.onbeforeunload = confirmExit;
 		
