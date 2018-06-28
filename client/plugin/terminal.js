@@ -1016,6 +1016,8 @@ file.insertLineBreak();
 		
 		if(!EDITOR.input) return true;
 		
+		if(EDITOR.mode != "default") return true;
+			
 		CLIENT.cmd("terminal.write", {id: id, data: character}, function terminalWrite(err) {
 			if(err) alertBox(err.message);
 		});

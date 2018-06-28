@@ -21,6 +21,10 @@
 	
 	Some vim key bindings:
 	
+	
+	While in normal/command mode
+	-----------------------------
+	
 	CTRL-G = You get a message like this (assuming the 'ruler' option is off):
 	"usr_03.txt" line 233 of 650 --35%-- col 45-52
 	
@@ -41,6 +45,20 @@
 	
 	CTRL-I = Jump forward to where you where before you jumped back
 	
+	CTRL-] = Jump to a subject under the cursor.
+	
+	
+	While in insert mode:
+	---------------------
+	Ctrl + O = Waits for a normal mode command, executes it, then goes back to insert mode
+	CTRL-W = Delete word at cursor
+	CTRL-U = Delete current line
+	CTRL-r {reg} = Puts text from a register
+	CTRL+N = Auto complete
+	CTRL-E  insert the character from below the cursor (row below)
+	CTRL-Y  insert the character from above the cursor (row above)
+	CTRL-A  insert previously inserted text
+	
 	
 */
 
@@ -55,8 +73,10 @@
 	var searchStringHistory = [];
 	var commandLineHistory = [];
 	var highlightAllSearchMatches = false;
-	
-	var COMMAND_NORMAL = false;
+	var keyPressHistory = [];
+	var VIM_ACTIVE = false;
+	var lastCommand = "";
+	var lastInsert = "";
 	
 	// The original/default vim normal key mapping
 	// a=a, b=b, c=c etc so they can be remapped
@@ -78,8 +98,11 @@
 			
 			EDITOR.on("keyPressed", vimKeyPress);
 			
-			var charCodeSpace = 32;
-			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: charCodeSpace, combo: SHIFT, mode: "*"});
+			var SPACE = 32;
+			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: SPACE, combo: SHIFT, mode: "*"});
+			
+			var ESC = 27;
+			EDITOR.bindKey({desc: "Goes to vim normal/command mode (if vim/modal mode is active)", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "*"});
 			
 			EDITOR.addRender(showCommandBuffer);
 			
@@ -87,27 +110,57 @@
 		unload: function unloadVim() {
 			EDITOR.removeMenuItem(vimMenuItem);
 			EDITOR.unbindKey(toggleVim);
+			EDITOR.unbindKey(toVimNormalMode);
 			EDITOR.removeEvent("keyPressed", vimKeyPress);
 			EDITOR.removeRender(showCommandBuffer);
 		}
 		});
 		
-	
-	
-		
-	function vimKeyPress(file, char, combo) {
+	function toVimNormalMode() {
+		if(VIM_ACTIVE) {
+			console.log("Setting vim mode to normal (command)");
+EDITOR.setMode("vimNormal");
 			
-		if(!COMMAND_NORMAL) return true; // Do the editor defailt (insert)
-		
-		vimCommandBuffer += char;
-		
-		parseCommand(vimCommandBuffer);
-		
-		return false; // Prevent defult browser action
+			if(keyPressHistory.length > 0) {
+				/*
+					Using the arrow keys in insert mode in vim seems to clear the command history 
+					and . will repeat the insert that happened after the move
+				*/
+				lastInsert = keyPressHistory.join();
+			}
+			
+			keyPressHistory.length = 0;
+			
+			
+return false;
 		}
+		else {
+			return true;
+		}
+}
+	
+	function vimKeyPress(file, char, combo) {
+		/*
+			
+			EDITOR.mode=="default" when in insert mode!
+			
+		*/
+		
+		if(!VIM_ACTIVE) return true;
+		
+		if(EDITOR.mode == "vimNormal") {
+			vimCommandBuffer += char;
+			parseCommand(vimCommandBuffer);
+			return false; // Prevent defult browser action
+		}
+		else {
+			// Record key presses in order to repeat
+			keyPressHistory.push(char);
+			return true; // Do the editor default (input)
+		}
+	}
 	
 	function parseCommand(str) {
-		
 		/*
 			Example:
 			d2w = delete two words
@@ -125,8 +178,10 @@
 		var LEFT = String.fromCharCode(37);
 		var RIGHT = String.fromCharCode(39);
 		
-		var commandNr = "";
+		
+		var nr = "";
 		var repeat = 1;
+		var repeatOperator = 1;
 		var char = "";
 		var lastChar = "";
 		var findLeft = false;
@@ -134,6 +189,9 @@
 		var findToLeft = false;
 		var findToRight = false;
 		var inSearchCommand = false;
+		var del = false;
+		var change = false;
+		var replace = false;
 		
 		
 		if(str.charAt(0) == ":") {
@@ -141,6 +199,9 @@
 				# Command line
 				The commands starting with ":" also have a history.  That allows you to recall
 				a previous command and execute it again.  These two histories are separate.
+				
+				set: set some option ex: :set option or :set nooption to turn it off
+				a question mark shows if it's on or not: ex: :set compatible? shows compatible if its on or nocompatible if it's off
 			*/
 			if(str == ":set number") {
 				// Turn line numbers on
@@ -186,9 +247,26 @@
 			lastChar = char;
 			char = getNormalMap(str.charAt(i)); // Converts to default keys
 			
-			if(UTIL.isNumeric(char)) {
-				commandNr += char;
-				repeat = parseInt(commandNr);
+			if(replace) {
+				console.log("repeat=" + repeat);
+				// Replace the character under the cursor with char
+				while(repeat--) {
+					file.deleteCharacter();
+					file.putCharacter(char);
+				}
+				EDITOR.renderNeeded();
+				return done();
+			}
+			else if((char == "0" && !nr || char == HOME)) {
+				// moves to the very first character of the line
+			}
+			
+			/*
+				"3d2w" deletes two words, repeated three times, for a total of six words.
+			*/
+			else if(UTIL.isNumeric(char)) {
+				nr += char;
+				repeat = parseInt(nr);
 			}
 			
 			// ## Quick search single letter
@@ -276,8 +354,61 @@ else if(findRight) {
 				// Moves the search history, like pressing down in bash
 			}
 			
-			// ## Word movement
-			// A word ends at a non-word character, such as a ".", "-" or ")".
+			/*
+				## Operators
+				
+				Operators are followed by a motion ex: d2w (delete two words)
+			*/
+			else if(char == "d") {
+				del = true;
+				foundOperator();
+			}
+			else if(char == "c") {
+				change = true;
+			}
+			else if(char == "d" && lastChar == "d") {
+				// Delete whole line (removes it)
+				done();
+			}
+			else if(char == "c" && lastChar == "c") {
+				// Delete whole line and go into insert mode
+				done();
+			}
+			else if( char == "x" || (char == "l" && lastChar == "d") ) {
+				// delete character under the cursor
+				done();
+			}
+			else if( char == "X" || (char == "h" && lastChar == "d") ) {
+				// delete character left of the cursor
+				done();
+			}
+			else if( char == "D" || (char == "$" && lastChar == "d") ) {
+				// delete to end of the line
+				done();
+			}
+			else if( char == "D" || (char == "$" && lastChar == "d") ) {
+				// delete to end of the line
+				done();
+			}
+			else if( char == "C" || (char == "$" && lastChar == "c") ) {
+				// change to end of the line
+				done();
+			}
+			else if (char == "s" || (char == "l" && lastChar == "c") ) {
+				// change one character
+				done();
+			}
+			else if( char == "S" || (char == "c" && lastChar == "c") ) {
+				// change a whole line (clears the text and goes into insert mode)
+				done();
+			}
+			
+			// # Movement
+			
+			/*
+				## Word movement
+				A word ends at a non-word character, such as a ".", "-" or ")".
+			*/
 			else if(char == "w") {
 				// Word movement forward
 				cb();
@@ -325,9 +456,6 @@ else if(findRight) {
 			else if(char == "^") {
 				// moves to the first non-blank character of the line
 			}
-			else if(char == "0" || char == HOME) {
-				// moves to the very first character of the line
-			}
 			
 			/*
 				## Moving to a character
@@ -352,7 +480,7 @@ else if(findRight) {
 				%
 			*/
 			else if(char == "%") {
-				if(commandNr == "") {
+				if(nr == "") {
 					//  moves to the matching parenthesis
 				}
 				else {
@@ -389,6 +517,17 @@ else if(findRight) {
 			else if(char == "j") {
 				// Move cursor down one line
 			}
+			else if(char == "h" && (del || change)) {
+				// Delete left n steps
+				for (var i=0; i<Math.min(file.caret.col, repeat*operatorRepeat); i++) {
+					file.moveCaretLeft();
+					if(del || change) file.deleteCharacter();
+				}
+				if(change) EDITOR.setMode("default");
+				clearCommandBuffer();
+				EDITOR.renderNeeded();
+				return;
+			}
 			else if(char == "h") {
 				// Move cursor left n steps
 				if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
@@ -408,6 +547,7 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 			else if(char == "0") {
 				// Move to column zero
 				file.moveCaret(undefined, file.caret.row, 0);
+				clearCommandBuffer();
 			}
 			
 			// ## Misc
@@ -422,7 +562,13 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 			}
 			else if(char == "o") {
 				// Adds a new line and goes into input mode
-				COMMAND_NORMAL = false;
+				file.moveCaretToEndOfLine();
+				file.insertLineBreak();
+				EDITOR.setMode("default");
+			}
+			
+			else if(char == "r") {
+				replace = true;
 			}
 			
 			/*
@@ -470,10 +616,39 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 				// Goes to the beginning of line of last change
 			}
 			
+			else if(char == "i" && del || change) {
+				/*
+					 Deletes or changes inside something.
+					 Ex: ci" delets all text inside "here" (seeks to closest " or if inbetween) and goes to input mode
+				*/
+				EDITOR.setMode("default");
+			}
+			
+			else if(char == "i") {
+				// Goes to input mode
+				EDITOR.setMode("default");
+				return done();
+			}
+			
 		}
 		
 		updateCommandVisual();
+		
+		function done() {
+			// The command have been executed
+			lastCommand = vimCommandBuffer;
+			clearCommandBuffer();
 		}
+		
+		function foundOperator() {
+			if(repeat > 1) {
+repeatOperator = repeat;
+				repeat = 1;
+				nr = "";
+			}
+		}
+		
+	}
 	
 	function commandLineDone(str) {
 		commandLineHistory.push(str);
@@ -481,8 +656,7 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 	
 	function clearCommandBuffer() {
 		vimCommandBuffer = "";
-		searchString = "";
-		
+		clearCommandVisual(EDITOR.canvasContext);
 	}
 	
 	
@@ -642,13 +816,13 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 	
 	
 	function toggleVim() {
-		if(COMMAND_NORMAL) {
-			COMMAND_NORMAL = false;
+		if(VIM_ACTIVE) {
+			VIM_ACTIVE = false;
 			EDITOR.setMode("default");
 			EDITOR.updateMenuItem(vimMenuItem, false);
 		}
 		else {
-			COMMAND_NORMAL = true;
+			VIM_ACTIVE = true;
 			EDITOR.setMode("vimNormal");
 			EDITOR.updateMenuItem(vimMenuItem, true);
 		}
