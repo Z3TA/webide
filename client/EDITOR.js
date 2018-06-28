@@ -511,7 +511,7 @@ callback = value;
 	EDITOR.setMode = function setMode(name) {
 		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
 		EDITOR.mode = name;
-		console.log("EDITOR.mode=" + EDITOR.mode);
+		console.warn("Set EDITOR.mode=" + EDITOR.mode);
 	}
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
@@ -6397,18 +6397,25 @@ console.error(err);
 		
 		if(!preventDefault) {
 			// Check key bindings
+			console.log("combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
 			for(var i=0, binding; i<keyBindings.length; i++) {
 				
 				binding = keyBindings[i];
 				
-				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined)) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
+				console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
+				" char=" + (binding.char == character || binding.charCode == charCode) +
+				" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
+				" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
+				" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
+				
+				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
 					
 					if(binding.charCode == charCodeShift || binding.charCode == charCodeAlt || binding.charCode == charCodeCtrl) {
 						throw new Error("Can't have nice things! Causes a bug that will make native shift+ or algGr+ keyboard combos not work");
 					}
 					else {
 						
-						//console.log("keyDown: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
+						console.log("keyDown: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 						
 						if(captured) console.warn("Key combo has already been captured by " + UTIL.getFunctionName(captured) + " : charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " binding.fun=" + UTIL.getFunctionName(binding.fun));
 						
