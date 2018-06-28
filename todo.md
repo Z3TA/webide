@@ -84,6 +84,15 @@ Make it possible to install the editor via : npm install jzedit
 npm install -g ?
 
 ---
+Able to make a react app work flow:
+npm install create-react-app
+npm init react-app my-app
+
+Able to right click on a folder in file explorer and create a new folder (or file)
+Also allow mkdir in the terminal
+
+---
+
 Support for vi/vim key bindings: We don't want to implement all of vim!
 Just enough commands so that you can use the editor without a mouse!
 And withour reaching for the arrows keys or using the navigation keys (Home/End/PgUp/PgDn).

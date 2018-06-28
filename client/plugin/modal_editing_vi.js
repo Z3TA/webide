@@ -77,6 +77,9 @@
 	var VIM_ACTIVE = false;
 	var lastCommand = "";
 	var lastInsert = "";
+	var history = []; // Undo redo history {undo, redo} functions
+	history.index = -1; // Keep track of where in the history
+	// The history can branche
 	
 	// The original/default vim normal key mapping
 	// a=a, b=b, c=c etc so they can be remapped
@@ -104,15 +107,21 @@
 			var ESC = 27;
 			EDITOR.bindKey({desc: "Goes to vim normal/command mode (if vim/modal mode is active)", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "*"});
 			
+			var R = 82;
+			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: 0, mode: "vimNormal"});
+			
+			
 			EDITOR.addRender(showCommandBuffer);
 			
 		},
 		unload: function unloadVim() {
 			EDITOR.removeMenuItem(vimMenuItem);
-			EDITOR.unbindKey(toggleVim);
-			EDITOR.unbindKey(toVimNormalMode);
 			EDITOR.removeEvent("keyPressed", vimKeyPress);
 			EDITOR.removeRender(showCommandBuffer);
+			
+			EDITOR.unbindKey(toggleVim);
+			EDITOR.unbindKey(toVimNormalMode);
+			EDITOR.unbindKey(vimRedo);
 		}
 		});
 		
@@ -149,15 +158,55 @@ return false;
 		if(!VIM_ACTIVE) return true;
 		
 		if(EDITOR.mode == "vimNormal") {
+			
 			vimCommandBuffer += char;
+			
+			if(vimCommandBuffer == "u") {
+				// Undo
+				vimUndo();
+				clearCommandBuffer();
+			}
+			else if(vimCommandBuffer == ".") {
+				// Repeat last command
+				if(lastCommand) parseCommand(lastCommand + lastInsert);
+				else console.warn("No command has yet been registered. Unable to repeat!");
+				
+				clearCommandBuffer();
+			}
+			else {
+				
 			parseCommand(vimCommandBuffer);
+			}
+			
 			return false; // Prevent defult browser action
 		}
 		else {
 			// Record key presses in order to repeat
 			keyPressHistory.push(char);
-			return true; // Do the editor default (input)
+			return true; // Do the editor default (insert)
 		}
+	}
+	
+	function vimRedo() {
+		if(history.length == 0) return console.warn("Unable to redo! No recorded history!");
+		var branch = history[history.index];
+		while(Array.isArray(branch) && branch.index != -1) {
+			branch = branch[branch.index];
+		}
+		
+		branch.index++;
+		branch.redo();
+	}
+	
+	function vimUndo() {
+		if(history.length == 0) return console.warn("Unable to undo! No recorded history!");
+		var branch = history[history.index];
+		while(Array.isArray(branch) && branch.index > -1) {
+			branch = branch[branch.index];
+		}
+		
+		branch.undo();
+		branch.index--;
 	}
 	
 	function parseCommand(str) {
@@ -168,6 +217,10 @@ return false;
 			ref: http://vimdoc.sourceforge.net/htmldoc/usr_03.html
 			
 		*/
+		
+		if(typeof str != "string") throw new Error("Nothing to parse: str=" + str);
+		
+		console.log("Parsing vim command: " + str);
 		
 		// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 		var END = String.fromCharCode(35);
@@ -181,7 +234,7 @@ return false;
 		
 		var nr = "";
 		var repeat = 1;
-		var repeatOperator = 1;
+		var operatorRepeat = 1;
 		var char = "";
 		var lastChar = "";
 		var findLeft = false;
@@ -378,8 +431,8 @@ else if(findRight) {
 				// delete character under the cursor
 				done();
 			}
-			else if( char == "X" || (char == "h" && lastChar == "d") ) {
-				// delete character left of the cursor
+			else if( char == "X" || (char == "h" && lastChar == "d" && !repeat) ) {
+				console.log("Vim: delete character left of the cursor");
 				done();
 			}
 			else if( char == "D" || (char == "$" && lastChar == "d") ) {
@@ -518,15 +571,14 @@ else if(findRight) {
 				// Move cursor down one line
 			}
 			else if(char == "h" && (del || change)) {
-				// Delete left n steps
-				for (var i=0; i<Math.min(file.caret.col, repeat*operatorRepeat); i++) {
-					file.moveCaretLeft();
-					if(del || change) file.deleteCharacter();
-				}
-				if(change) EDITOR.setMode("default");
-				clearCommandBuffer();
+				console.log("Vim: Delete left n steps");
+				var startRange = file.caret.index - Math.max(file.grid[file.caret.row].startIndex, file.caret.index - repeat*operatorRepeat);
+				var removedText = file.deleteTextRange(startRange, file.caret.index-1);
+				if(change) toInsert();
 				EDITOR.renderNeeded();
-				return;
+				return done(function () {
+					file.insertText(removedText);
+				});
 			}
 			else if(char == "h") {
 				// Move cursor left n steps
@@ -561,10 +613,10 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 				// puts the cursor line at at the bottom.
 			}
 			else if(char == "o") {
-				// Adds a new line and goes into input mode
+				// Adds a new line and goes into insert mode
 				file.moveCaretToEndOfLine();
 				file.insertLineBreak();
-				EDITOR.setMode("default");
+return toInsert();
 			}
 			
 			else if(char == "r") {
@@ -619,33 +671,63 @@ file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.c
 			else if(char == "i" && del || change) {
 				/*
 					 Deletes or changes inside something.
-					 Ex: ci" delets all text inside "here" (seeks to closest " or if inbetween) and goes to input mode
+					Ex: ci" delets all text inside "here" (seeks to closest " or if inbetween) and goes to insert mode
 				*/
-				EDITOR.setMode("default");
+				
 			}
 			
 			else if(char == "i") {
-				// Goes to input mode
-				EDITOR.setMode("default");
-				return done();
+				// Goes to insert mode
+				return toInsert();
 			}
 			
 		}
 		
 		updateCommandVisual();
 		
-		function done() {
+		function done(undo) {
 			// The command have been executed
 			lastCommand = vimCommandBuffer;
+			
+			if(history.index != history.length-1) {
+				// We are in the middle of the history, so branche out
+				var branch = [history[history.index]];
+				branch.index = 0;
+				history[history.index] = branch;
+			}
+			else {
+				var branch = history; // Tree stem
+			}
+			
+			var newIndex = branch.push({
+				undo: undo, 
+				redo: function() {
+					parseCommand(vimCommandBuffer);
+				}
+			}) - 1; // Push returns the length of the array
+			branch.index = newIndex;
+			
 			clearCommandBuffer();
 		}
 		
 		function foundOperator() {
 			if(repeat > 1) {
-repeatOperator = repeat;
+				operatorRepeat = repeat;
 				repeat = 1;
 				nr = "";
 			}
+		}
+		
+		function toInsert() {
+			// Switch to insert mode and insert remaining characters (str)
+			console.log("str=" + str + " i=" + i);
+			if(i < str.length-1) {
+				var text = str.slice(i+1);
+				file.insertText(text);
+			}
+			lastInsert = "";
+			clearCommandBuffer();
+			EDITOR.setMode("default");
 		}
 		
 	}
@@ -780,8 +862,8 @@ repeatOperator = repeat;
 		
 		// u = undo()
 		// y = yank (copy) selected text or followed by text object and or motion
-		// c = change, deletes and goes into input mode
-		// ex: ci' = change (delete) inside single quote and go into input mode
+		// c = change, deletes and goes into insert mode
+		// ex: ci' = change (delete) inside single quote and go into insert mode
 		
 		// p = paste below the current line
 		// P = paste above the current line
@@ -800,8 +882,8 @@ repeatOperator = repeat;
 		// dd/yy = delete/yank the current line
 		// D/C = delete/change until end of line
 		// ^$ = move to the beginning/end of line
-		// I/A = move to the beginning/end of line and go into input mode
-		// o/O = insert new line above/below current line and go into input mode
+		// I/A = move to the beginning/end of line and go into insert mode
+		// o/O = insert new line above/below current line and go into insert mode
 		
 		// ex: yyp = yank current line, then paste it
 		
