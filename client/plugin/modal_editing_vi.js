@@ -1,3 +1,5 @@
+"use strict";
+
 /*
 	
 	Proof of concept modal editing like in vi/vim
@@ -73,14 +75,15 @@
 	if(window.location.href.indexOf("&vim") == -1) return; // Work in progress!
 	
 	// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-	var BACKSPACE = String.fromCharCode(8);
-	var UP = String.fromCharCode(38);
-	var DOWN = String.fromCharCode(40);
-	var LEFT = String.fromCharCode(37);
-	var RIGHT = String.fromCharCode(39);
+	var BACKSPACE = 8;
+	var UP = 38;
+	var DOWN = 40;
+	var LEFT = 37;
+	var RIGHT = 39;
 	var SPACE = 32;
 	var ESC = 27;
 	var R = 82;
+	var DELETE = 46;
 	
 	var vimMenuItem;
 	var vimCommandBuffer = "";
@@ -89,14 +92,10 @@
 	var searchStringHistory = [];
 	var commandLineHistory = [];
 	var highlightAllSearchMatches = false;
-	var keyPressHistory = [];
 	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
-	var lastCommand = "";
-	var lastInsert = "";
-	var history = []; // Undo redo history {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
-	history.index = -1; // Keep track of where in the history
 	
-	var undoBeforeInsert; // The command before insert example i or c, or ci"
+	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
+	
 	var commandHistory = [];
 	commandHistory.index = -1;
 	var searchOnlyCommandHistoryStartingWith = ""; // When using up/down arrows to toggle command history
@@ -124,22 +123,26 @@
 			
 			EDITOR.on("keyPressed", vimKeyPress);
 			
+			EDITOR.on("fileOpen", vimFileOpen);
+			EDITOR.on("fileClose", vimFileClose);
 			
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: SPACE, combo: SHIFT, mode: "*"});
 			
-			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: 0, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			
-			EDITOR.bindKey({desc: "Goes to vim normal/command mode", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "vimInsert"});
-			EDITOR.bindKey({desc: "Delete the character left of the caret in Vim insert mode", fun: vimInsertBackspace, charCode: BACKSPACE, combo: 0, mode: "vimInsert"});
-			EDITOR.bindKey({desc: "Move the caret left in Vim/modal mode", fun: vimLeft, charCode: LEFT, combo: 0, mode: "*"});
-			EDITOR.bindKey({desc: "Move the caret left in Vim/modal mode", fun: vimLeft, charCode: LEFT, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "vimInsert"});
+			
+			EDITOR.bindKey({desc: "Vim backspace", fun: vimBackspace, charCode: BACKSPACE, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Vim arrow left: Move caret left", fun: vimLeft, charCode: LEFT, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Vim arrow right: Move caret right", fun: vimRight, charCode: RIGHT, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Vim arrow up", fun: vimUp, charCode: UP, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Vim arrow down", fun: vimDown, charCode: DOWN, combo: 0, mode: "*"});
 			
 			EDITOR.addRender(showCommandBuffer);
 			
 			if((window.location.href.indexOf("&vimactive") != -1)) {
 				toggleVim();
 			}
-			
 			
 		},
 		unload: function unloadVim() {
@@ -153,35 +156,22 @@
 		}
 		});
 		
+	function vimFileOpen(file) {
+		if(!VIM_ACTIVE) return true;
+		history[file.path] = [{undo: [], redo: [], date: new Date()}];
+		history[file.path].index = 0;
+		return true;
+	}
+	
+	function vimFileClose(file) {
+		delete history[file];
+		return true;
+	}
+	
 	function toVimNormalMode() {
 		if(VIM_ACTIVE) {
 			console.log("Setting vim mode to normal (command)");
 EDITOR.setMode("vimNormal");
-			
-			if(keyPressHistory.length > 0) {
-				/*
-					Using the arrow keys in insert mode in vim seems to clear the command history
-					and . will repeat the insert that happened after the move
-					Each arrow-move in insert-mode adds to the history (starts a new history)
-					
-					ci" (change inside ") and inserting text, then undo undoes both inserted text and change (deletion)
-				*/
-				lastInsert = keyPressHistory.join();
-				var undoCommandBeforeInsert = undoBeforeInsert; // Closure magic
-				addHistory({
-					undo: function() {
-						if(typeof undoCommandBeforeInsert == "function") undoCommandBeforeInsert();
-						parseCommand("d" + lastInsert.length + "h");
-					},
-					redo: function() {
-						parseCommand(lastCommand + lastInsert); // ex: ifoo (insert) foo
-					}
-				})
-			}
-			
-			keyPressHistory.length = 0;
-			
-			
 			return false;
 		}
 		else {
@@ -210,15 +200,13 @@ EDITOR.setMode("vimNormal");
 			
 			if(vimCommandBuffer == "u") {
 				// Undo
-				vimUndo();
+				vimUndo(file);
 				clearCommandBuffer();
 			}
 			else if(vimCommandBuffer == ".") {
 				// Repeat last command
-				if(lastCommand) parseCommand(lastCommand + lastInsert);
-				else console.warn("No command has yet been registered. Unable to repeat!");
-				
-				clearCommandBuffer();
+				vimRedo(file);
+				return clearCommandBuffer();
 			}
 			else {
 				
@@ -243,9 +231,6 @@ EDITOR.setMode("vimNormal");
 						file.insertLineBreak();
 					}
 				}
-				ev.redo();
-				EDITOR.renderNeeded();
-				updateHistory(ev);
 			}
 			else if(char.charCodeAt(0) == DELETE) {
 				var deletedCharacter = file.text.charAt(file.caret.index);
@@ -257,11 +242,8 @@ EDITOR.setMode("vimNormal");
 						file.deleteCharacter();
 					}
 				}
-				ev.redo();
-				EDITOR.renderNeeded();
 			}
 			else {
-				
 				var ev = {
 					undo: function() {
 						file.moveCaretLeft();
@@ -271,12 +253,11 @@ EDITOR.setMode("vimNormal");
 						file.putCharacter(char);
 					}
 				}
-				ev.redo();
-				EDITOR.renderNeeded();
-				
-				// Record key presses in order to repeat
-				keyPressHistory.push(char);
 			}
+			
+			ev.redo();
+			EDITOR.renderNeeded();
+			updateHistory(file, ev);
 			
 			return false;
 		}
@@ -285,12 +266,32 @@ EDITOR.setMode("vimNormal");
 		}
 	}
 	
-	function vimBackspace() {
+	function vimBackspace(file, combo) {
+		// Backspace is not captured by keyPress!
+		if(!VIM_ACTIVE) return true;
 		if(EDITOR.mode == "vimInsert") {
-			keyPressHistory.pop();
-			file.moveCaretLeft();
-			file.deleteCharacter();
+			var ev = {
+				redo: function() {
+					file.moveCaretLeft();
+					file.deleteCharacter();
+				}
+			};
+			
+			if(file.caret.eol) {
+				ev.undo = function() {
+					file.insertLineBreak();
+				}
+			}
+			else {
+				var removedCharacter = file.text.charAt(file.caret.index-1);
+				ev.undo = function() {
+					file.putCharacter(removedCharacter);
+				}
+			}
+			
+			ev.redo();
 			EDITOR.renderNeeded();
+			updateHistory(file, ev);
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -310,10 +311,20 @@ EDITOR.setMode("vimNormal");
 		}
 	}
 	
-	function vimLeft() {
-		if(EDITOR.mode == "vimInsert") {
+	/*
+		Each arrow-move in insert-mode adds to the history (starts a new history)
+		and . will repeat the insert that happened after the move
+		
+		ci" (change inside ") and inserting text, then undo undoes both inserted text and change (deletion)
+	*/
+	
+	function vimLeft(file, combo) {
+		if(!VIM_ACTIVE) return true;
+		
+		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
 			file.moveCaretLeft();
 			EDITOR.renderNeeded();
+			addHistory(file, undefined); // Start a new history
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -326,10 +337,37 @@ EDITOR.setMode("vimNormal");
 		}
 	}
 	
-	function vimUp() {
+	function vimRight(file, combo) {
+		if(!VIM_ACTIVE) return true;
+		
+		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
+			file.moveCaretRight();
+			EDITOR.renderNeeded();
+			addHistory(file, undefined); // Start a new history
+			return false;
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			vimCommandCaretPosition--;
+			updateCommandVisual();
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
+	function vimUp(file, combo) {
+		if(!VIM_ACTIVE) return true;
+		
+		if(commandHistory.length == 0) {
+console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
+			return false;
+		}
+		
 		if(EDITOR.mode == "vimInsert") {
 			file.moveCaretUp();
 			EDITOR.renderNeeded();
+			addHistory(file, undefined); // Start a new history
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -346,6 +384,8 @@ EDITOR.setMode("vimNormal");
 					if(commandHistory[i].slice(0,vimCommandBuffer.length) == searchOnlyCommandHistoryStartingWith) {
 						vimCommandBuffer = commandHistory[i];
 						vimCommandCaretPosition = vimCommandBuffer.length;
+						commandHistory.index = i;
+						break;
 					}
 				}
 			}
@@ -354,7 +394,7 @@ EDITOR.setMode("vimNormal");
 				vimCommandBuffer = commandHistory[commandHistory.index];
 				vimCommandCaretPosition = vimCommandBuffer.length;
 			}
-			
+			updateCommandVisual();
 			return false;
 		}
 		else {
@@ -362,9 +402,50 @@ EDITOR.setMode("vimNormal");
 		}
 	}
 	
-	function vimRedo() {
-		if(history.length == 0) return console.warn("Unable to redo! No recorded history!");
-		var branch = history[history.index];
+	function vimDown(file, combo) {
+		if(!VIM_ACTIVE) return true;
+		
+		if(EDITOR.mode == "vimInsert") {
+			file.moveCaretDown();
+			EDITOR.renderNeeded();
+			addHistory(file, undefined); // Start a new history
+			return false;
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			// Toggle vim command history
+			
+			// Do nothing if we're already at the history tip
+			if(commandHistory.index-1 == commandHistory.length) return false; 
+			
+			if(searchOnlyCommandHistoryStartingWith) {
+				for (var i=commandHistory.index; i<commandHistory.length; i) {
+					if(commandHistory[i].slice(0,vimCommandBuffer.length) == searchOnlyCommandHistoryStartingWith) {
+						vimCommandBuffer = commandHistory[i];
+						vimCommandCaretPosition = vimCommandBuffer.length;
+						commandHistory.index = i;
+						break;
+					}
+				}
+			}
+			else {
+				commandHistory.index++;
+				vimCommandBuffer = commandHistory[commandHistory.index];
+				vimCommandCaretPosition = vimCommandBuffer.length;
+			}
+			updateCommandVisual();
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
+	function vimRedo(file) {
+		console.log("vimRedo: file.path=" + file.path);
+		var fileHistory = history[file.path];
+		
+		if(fileHistory.length == 0) return console.warn("Unable to redo! No recorded history!");
+		var branch = fileHistory[fileHistory.index];
 		while(Array.isArray(branch) && branch.index != -1) {
 			branch = branch[branch.index];
 		}
@@ -374,67 +455,124 @@ EDITOR.setMode("vimNormal");
 		for (var i=0; i<branch.redo.length; i++) {
 			branch.redo[i]();
 		}
+		
+		// No need to have EDITOR.renderNeeded() inside each redo function
+		EDITOR.renderNeeded();
+		return false;
 	}
 	
-	function vimUndo() {
-		if(history.length == 0) return console.warn("Unable to undo! No recorded history!");
-		var branch = history[history.index];
+	function vimUndo(file) {
+		console.log("vimUndo: file.path=" + file.path);
+		var fileHistory = history[file.path];
+		
+		console.log("fileHistory: fileHistory.index=" + fileHistory.index);
+		console.log(fileHistory);
+		
+		if(fileHistory.length == 0) {
+console.warn("Unable to undo! No recorded history!");
+			return false;
+		}
+		if(fileHistory.index == -1) {
+			console.log("No more history to undo!");
+			return false;
+		}
+		
+		var branch = fileHistory[fileHistory.index];
 		while(Array.isArray(branch) && branch.index > -1) {
 			branch = branch[branch.index];
+			console.log("Changed history branch to ", branch);
 		}
 		
-		branch.index--;
+		console.log("root branch ? " + (branch==fileHistory));
 		
-		for (var i=0; i<branch.undo.length; i++) {
+		if(branch.index == undefined) {
+			console.log("branch:");
+			console.log(branch);
+			throw new Error("branch.index=" + branch.index);
+		}
+		
+		console.log("before: branch.index=" + branch.index);
+		branch.index--;
+		console.log("after: branch.index=" + branch.index);
+		
+		// Should the undo be done backwards !? Last in last out !?
+		for (var i=branch.undo.length-1; i>-1; i--) {
 			branch.undo[i]();
 		}
+		
+		// No need to have EDITOR.renderNeeded() inside each undo function
+		EDITOR.renderNeeded();
+		return false;
 	}
 	
-	function updateHistory(ev) {
-		// Adds to existing undo/redo history
+	function updateHistory(file, ev) {
+		// Adds to existing/current undo/redo history
 		if(typeof ev != "object") throw new Error("Want a history object with undo and redo functions! ev=" + ev + " is not an object!");
 		if(typeof ev.undo != "function") throw new Error("ev.undo=" + ev.undo + " needs to be a function!");
 		if(typeof ev.redo != "function") throw new Error("ev.redo=" + ev.redo + " needs to be a function!");
 		
-		if(history.length == 0) throw new Error("There is no history to add to! history.length=" + history.length);
+		var fileHistory = history[file.path];
+		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
+		
+		if(fileHistory.length == 0) {
+			console.warn("There is no history to add to! fileHistory.length=" + fileHistory.length + " Adding new history item ...");
+			return addHistory(file, ev);
+		}
+		
 		// Figure out current branch
-		var branch = history[history.index];
+		var branch = fileHistory[fileHistory.index];
 		while(Array.isArray(branch) && branch.index > -1) {
 			branch = branch[branch.index];
 		}
+		
+		if(branch == undefined) {
+			console.log("fileHistory.index=" + fileHistory.index);
+			
+			console.log("fileHistory:");
+			console.log(fileHistory);
+		}
+		
+		if(branch.undo == undefined) {
+			console.log("branch:");
+			console.log(branch);
+			console.log("fileHistory:");
+			console.log(fileHistory);
+		}
+		
 		branch.undo.push(ev.undo);
 		branch.redo.push(ev.redo);
+		branch.date = new Date();
 	}
 	
-	function addHistory(ev) {
-		// Create a new Undo, redo history
+	function addHistory(file, ev) {
+		// Add/Create a new undo/redo history item
 		
+		var fileHistory = history[file.path];
+		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
 		
-		if(history.index != history.length-1) {
+		if(fileHistory.index != fileHistory.length-1) {
 			// We are in the middle of the history, so branche out
-			var branch = [history[history.index]];
+			var branch = [fileHistory[fileHistory.index]];
 			branch.index = 0;
-			history[history.index] = branch;
+			fileHistory[fileHistory.index] = branch;
 		}
 		else {
-			var branch = history; // Tree stem
+			var branch = fileHistory; // Tree stem
 		}
 		
-		// Don't create a new history entry if last one is empty!
-		...var empty = branch.redo.length == 0 && branch.undo.length == 0;
+		// Don't create a new Emty history entry if last one is already Empty!
+if(ev == undefined && branch.redo.length == 0 && branch.undo.length == 0) return;
 		
 		
-		if() {
-			
-			var newEvent = {
-				date: new Date();
-				undo: ev && ev.undo ? [ev.undo] : [],
-				redo: ev && ev.redo ? [ev.redo] : []
-			};
-			
-			var newIndex = branch.push(newEvent) - 1; // Push returns the length of the array
-			branch.index = newIndex;
-		}
+		var newEvent = {
+			date: new Date(),
+			undo: ev && ev.undo ? [ev.undo] : [],
+			redo: ev && ev.redo ? [ev.redo] : []
+		};
+		
+		var newIndex = branch.push(newEvent) - 1; // Push returns the length of the array
+		branch.index = newIndex;
+		
 	}
 	
 	function addCommandHistory(command) {
@@ -601,18 +739,13 @@ else if(findRight) {
 			else if(searchString.length > 0) {
 				searchString += char;
 			}
-			else if(searchString.length > 0 && char == BACKSPACE) {
-				
+			
 				// Search while typing! (use regexp)
 				// Arrow keys moves the caret in the input field
 				// Use already existing find plugin !?
-			}
-			else if(searchString.length > 0 && char == ENTER) {
-				// Executes search command
+			
 				// Searches left is starting with ? or right if starting with /
-				inSearchCommand = true;
-				searchStringHistory.push(searchString);
-			}
+			
 			else if(inSearchCommand && char == "n") {
 				// Search next
 				// ex: 3n = third match
@@ -630,13 +763,12 @@ else if(findRight) {
 				you can type "/o<Up>" and Vim will put "/one" on the command line.
 				
 			*/
-			else if(searchString.length > 0 && char == UP) {
+			
 				// Use last search, like pressing up in bash
 				// if there's already something in searchString, search the search history for a match
-			}
-			else if(searchString.length > 0 && char == DOWN) {
+			
 				// Moves the search history, like pressing down in bash
-			}
+			
 			
 			/*
 				## Operators
@@ -694,16 +826,16 @@ else if(findRight) {
 				A word ends at a non-word character, such as a ".", "-" or ")".
 			*/
 			else if(char == "w") {
-				// Word movement forward
-				cb();
+				console.log("Word movement forward");
+				
 			}
 			else if(char == "b") {
 				// Word movement backwards
-				cb();
+				
 			}
 			else if(char == "e" && lastChar == "g") {
 				// Moves to the previous end of a word
-				cb();
+				
 			}
 			else if(char == "e") {
 				// Moves to the next end of a word
@@ -801,22 +933,29 @@ else if(findRight) {
 			else if(char == "j") {
 				// Move cursor down one line
 			}
-			else if(char == "h" && (del || change)) {
-				console.log("Vim: Delete left n steps");
-				var startRange = file.caret.index - Math.max(file.grid[file.caret.row].startIndex, file.caret.index - repeat*operatorRepeat);
+			else if(char == "h" && del) {
+				console.log("Vim: Delete left " + (repeat*operatorRepeat) + " steps");
+				var startRange = Math.max(file.grid[file.caret.row].startIndex, file.caret.index - repeat*operatorRepeat);
 				var removedText = file.deleteTextRange(startRange, file.caret.index-1);
-				if(change) toInsert();
 				EDITOR.renderNeeded();
-				return done(function () {
+				return done(function undoDeleteLeft() {
+					file.insertText(removedText);
+				});
+			}
+			else if(char == "h" && change) {
+				console.log("Vim: Change left " + (repeat*operatorRepeat) + " steps");
+				var startRange = Math.max(file.grid[file.caret.row].startIndex, file.caret.index - repeat*operatorRepeat);
+				var removedText = file.deleteTextRange(startRange, file.caret.index-1);
+				EDITOR.renderNeeded();
+				return toInsert(function undoChangeLeft() {
 					file.insertText(removedText);
 				});
 			}
 			else if(char == "h") {
 				// Move cursor left n steps
 				if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
-				clearCommandBuffer();
 				EDITOR.renderNeeded();
-				return;
+				return clearCommandBuffer();;
 			}
 			else if(char == "l") {
 				// Move cursor right n steps
@@ -904,7 +1043,7 @@ return toInsert();
 					 Deletes or changes inside something.
 					Ex: ci" delets all text inside "here" (seeks to closest " or if inbetween) and goes to insert mode
 				*/
-				
+				return toInsert();
 			}
 			
 			else if(char == "i") {
@@ -916,10 +1055,15 @@ return toInsert();
 		
 		updateCommandVisual();
 		
+		/*
+			When a command have been executed, call either done(), toInsert() or clearCommandBuffer()
+		*/
+		
 		function done(undo) {
+			// Only 
 			if(typeof undo != "function") throw new Error("done must be called with a undo function!");
 			
-			addHistory({
+			addHistory(file, {
 				undo: undo,
 				redo: function() {
 					parseCommand(vimCommandBuffer);
@@ -928,7 +1072,7 @@ return toInsert();
 			
 			addCommandHistory(vimCommandBuffer);
 			
-			clearCommandBuffer();
+			return clearCommandBuffer();
 		}
 		
 		function foundOperator() {
@@ -949,12 +1093,9 @@ return toInsert();
 				var text = str.slice(i+1);
 				file.insertText(text);
 			}
-			else {
-				undoBeforeInsert = undo;
-			}
-			lastInsert = "";
-			clearCommandBuffer();
 			EDITOR.setMode("vimInsert");
+			
+			return clearCommandBuffer();
 		}
 		
 	}
@@ -964,10 +1105,10 @@ return toInsert();
 	}
 	
 	function clearCommandBuffer() {
-		lastCommand = vimCommandBuffer;
 		vimCommandBuffer = "";
 		vimCommandCaretPosition = 0;
 		clearCommandVisual(EDITOR.canvasContext);
+		return false; // false to prevent editor default
 	}
 	
 	
@@ -1177,6 +1318,24 @@ return toInsert();
 		
 	}
 	
+	EDITOR.addTest(function testVimCommands(callback) {
+		
+		EDITOR.openFile("testVimCommands.txt", "abc def ghi\njkl mno pqr\n", function(err, file) {
+			
+			var vimWasActive = VIM_ACTIVE;
+			if(!vimWasActive) toggleVim(); // Turn Vim/modal mode on
+			
+			// Tests here
+			
+			
+			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
+			
+			EDITOR.closeFile(file.path);
+			callback(true);
+			
+		});
+		
+	}, 1);
 	
 })();
 

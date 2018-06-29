@@ -610,7 +610,7 @@ API.move = function move(user, json, callback) {
 		callback(null, {path: newPath});
 		
 		user.send({
-			fileMove": {from: from, to: to}
+			fileMove: {from: from, to: to}
 		});
 
 	});
