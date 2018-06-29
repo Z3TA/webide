@@ -9,8 +9,9 @@
 	EDITOR.bindKey({desc: 'Moves the caret to the end of file', charCode: 35, combo: CTRL, fun: end});
 	EDITOR.bindKey({desc: 'Moves the caret to the beginning of file', charCode: 36, combo: CTRL, fun: home});
 	
-	EDITOR.bindKey({desc: 'Moves the caret to the end of the line', charCode: 35, combo: 0, fun: endOfLine});
-	EDITOR.bindKey({desc: 'Moves the caret to the beginning of the line', charCode: 36, combo: 0, fun: startOfLine});
+	// Using Home and End to move to first colum and last column seems to be universal
+	EDITOR.bindKey({desc: 'Moves the caret to the end of the line', charCode: 35, combo: 0, fun: endOfLine, mode: "*"});
+	EDITOR.bindKey({desc: 'Moves the caret to the beginning of the line', charCode: 36, combo: 0, fun: startOfLine, mode: "*"});
 	
 	
 	function pageUp(file, combo, character, charCode, pushDirection) {

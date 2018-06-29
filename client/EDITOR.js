@@ -6345,10 +6345,7 @@ console.error(err);
 			}
 		*/
 		
-		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + 
-		" targetElementClass=" + targetElementClass && " EDITOR.mode=" + EDITOR.mode);
-		
-		
+		console.log("keyDown: " + charCode + " = " + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode);
 		
 		// Mac command key ?
 		if(charCode == charCodeCtrl) {
@@ -6402,11 +6399,13 @@ console.error(err);
 				
 				binding = keyBindings[i];
 				
+				/*
 				console.log( UTIL.getFunctionName(binding.fun) + ": " + JSON.stringify(binding) + 
 				" char=" + (binding.char == character || binding.charCode == charCode) +
 				" combo=" + (binding.combo == combo.sum || binding.combo === undefined) + 
 				" dir=" + (binding.dir == "down" || binding.dir === undefined) + 
 				" mode=" + (binding.mode == EDITOR.mode || binding.mode == "*") );
+				*/
 				
 				if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || binding.combo === undefined) && (binding.dir == "down" || binding.dir === undefined) && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
 					

@@ -60,6 +60,11 @@
 	CTRL-A  insert previously inserted text
 	
 	
+	Registers on keyPress: Enter,Delete
+	
+	
+	
+	
 */
 
 (function() {
@@ -67,19 +72,35 @@
 	
 	if(window.location.href.indexOf("&vim") == -1) return; // Work in progress!
 	
+	// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+	var BACKSPACE = String.fromCharCode(8);
+	var UP = String.fromCharCode(38);
+	var DOWN = String.fromCharCode(40);
+	var LEFT = String.fromCharCode(37);
+	var RIGHT = String.fromCharCode(39);
+	var SPACE = 32;
+	var ESC = 27;
+	var R = 82;
+	
 	var vimMenuItem;
 	var vimCommandBuffer = "";
+	var vimCommandCaretPosition = "0";
 	var searchString = "";
 	var searchStringHistory = [];
 	var commandLineHistory = [];
 	var highlightAllSearchMatches = false;
 	var keyPressHistory = [];
-	var VIM_ACTIVE = false;
+	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
 	var lastCommand = "";
 	var lastInsert = "";
-	var history = []; // Undo redo history {undo, redo} functions
+	var history = []; // Undo redo history {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	history.index = -1; // Keep track of where in the history
-	// The history can branche
+	
+	var undoBeforeInsert; // The command before insert example i or c, or ci"
+	var commandHistory = [];
+	commandHistory.index = -1;
+	var searchOnlyCommandHistoryStartingWith = ""; // When using up/down arrows to toggle command history
+	
 	
 	// The original/default vim normal key mapping
 	// a=a, b=b, c=c etc so they can be remapped
@@ -92,6 +113,8 @@
 	
 	EDITOR.on("start", function addVimNormalMode() {
 		EDITOR.addMode("vimNormal");
+		EDITOR.addMode("vimInsert");
+		//EDITOR.addMode("vimVisual");
 	});
 	
 	EDITOR.plugin({
@@ -101,17 +124,22 @@
 			
 			EDITOR.on("keyPressed", vimKeyPress);
 			
-			var SPACE = 32;
+			
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: SPACE, combo: SHIFT, mode: "*"});
 			
-			var ESC = 27;
-			EDITOR.bindKey({desc: "Goes to vim normal/command mode (if vim/modal mode is active)", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "*"});
-			
-			var R = 82;
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: 0, mode: "vimNormal"});
 			
+			EDITOR.bindKey({desc: "Goes to vim normal/command mode", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "vimInsert"});
+			EDITOR.bindKey({desc: "Delete the character left of the caret in Vim insert mode", fun: vimInsertBackspace, charCode: BACKSPACE, combo: 0, mode: "vimInsert"});
+			EDITOR.bindKey({desc: "Move the caret left in Vim/modal mode", fun: vimLeft, charCode: LEFT, combo: 0, mode: "*"});
+			EDITOR.bindKey({desc: "Move the caret left in Vim/modal mode", fun: vimLeft, charCode: LEFT, combo: 0, mode: "*"});
 			
 			EDITOR.addRender(showCommandBuffer);
+			
+			if((window.location.href.indexOf("&vimactive") != -1)) {
+				toggleVim();
+			}
+			
 			
 		},
 		unload: function unloadVim() {
@@ -132,34 +160,53 @@ EDITOR.setMode("vimNormal");
 			
 			if(keyPressHistory.length > 0) {
 				/*
-					Using the arrow keys in insert mode in vim seems to clear the command history 
+					Using the arrow keys in insert mode in vim seems to clear the command history
 					and . will repeat the insert that happened after the move
+					Each arrow-move in insert-mode adds to the history (starts a new history)
+					
+					ci" (change inside ") and inserting text, then undo undoes both inserted text and change (deletion)
 				*/
 				lastInsert = keyPressHistory.join();
+				var undoCommandBeforeInsert = undoBeforeInsert; // Closure magic
+				addHistory({
+					undo: function() {
+						if(typeof undoCommandBeforeInsert == "function") undoCommandBeforeInsert();
+						parseCommand("d" + lastInsert.length + "h");
+					},
+					redo: function() {
+						parseCommand(lastCommand + lastInsert); // ex: ifoo (insert) foo
+					}
+				})
 			}
 			
 			keyPressHistory.length = 0;
 			
 			
-return false;
+			return false;
 		}
 		else {
 			return true;
 		}
-}
+	}
 	
 	function vimKeyPress(file, char, combo) {
 		/*
 			
-			EDITOR.mode=="default" when in insert mode!
-			
 		*/
+		
+		console.log("vimKeyPress: VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode);
 		
 		if(!VIM_ACTIVE) return true;
 		
 		if(EDITOR.mode == "vimNormal") {
 			
+			if(char == "\n") { // Press Enter
+				parseCommand(vimCommandBuffer);
+				return false;
+			}
+			
 			vimCommandBuffer += char;
+			vimCommandCaretPosition++;
 			
 			if(vimCommandBuffer == "u") {
 				// Undo
@@ -175,15 +222,143 @@ return false;
 			}
 			else {
 				
-			parseCommand(vimCommandBuffer);
+				parseCommand(vimCommandBuffer);
 			}
 			
 			return false; // Prevent defult browser action
 		}
+		else if(EDITOR.mode == "vimInsert") {
+			/*
+				The only "function" keys that get registered in keyPress in JavaScript is Enter and Delete!
+				We need to EDITOR.bindKey for example backspace and arrow keys.
+			*/
+			
+			if(char == "\n") {
+				var ev = {
+					undo: function() {
+						file.moveCaretLeft();
+						file.deleteCharacter();
+					},
+					redo: function() {
+						file.insertLineBreak();
+					}
+				}
+				ev.redo();
+				EDITOR.renderNeeded();
+				updateHistory(ev);
+			}
+			else if(char.charCodeAt(0) == DELETE) {
+				var deletedCharacter = file.text.charAt(file.caret.index);
+				var ev = {
+					undo: function() {
+						file.putCharacter(deletedCharacter);
+					},
+					redo: function () {
+						file.deleteCharacter();
+					}
+				}
+				ev.redo();
+				EDITOR.renderNeeded();
+			}
+			else {
+				
+				var ev = {
+					undo: function() {
+						file.moveCaretLeft();
+						file.deleteCharacter();
+					},
+					redo: function () {
+						file.putCharacter(char);
+					}
+				}
+				ev.redo();
+				EDITOR.renderNeeded();
+				
+				// Record key presses in order to repeat
+				keyPressHistory.push(char);
+			}
+			
+			return false;
+		}
 		else {
-			// Record key presses in order to repeat
-			keyPressHistory.push(char);
-			return true; // Do the editor default (insert)
+			return true; // Do the editor default
+		}
+	}
+	
+	function vimBackspace() {
+		if(EDITOR.mode == "vimInsert") {
+			keyPressHistory.pop();
+			file.moveCaretLeft();
+			file.deleteCharacter();
+			EDITOR.renderNeeded();
+			return false;
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			if(vimCommandCaretPosition == vimCommandBuffer.length) {
+				vimCommandBuffer = vimCommandBuffer.slice(0,-1);
+			}
+			else {
+				vimCommandBuffer = vimCommandBuffer.slice(0,vimCommandCaretPosition) + vimCommandBuffer.slice(vimCommandCaretPosition+1);
+			}
+			vimCommandCaretPosition--;
+			updateCommandVisual();
+			// Wait for Enter before parsing/executing the command !?
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
+	function vimLeft() {
+		if(EDITOR.mode == "vimInsert") {
+			file.moveCaretLeft();
+			EDITOR.renderNeeded();
+			return false;
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			vimCommandCaretPosition--;
+			updateCommandVisual();
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
+	function vimUp() {
+		if(EDITOR.mode == "vimInsert") {
+			file.moveCaretUp();
+			EDITOR.renderNeeded();
+			return false;
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			// Toggle vim command history
+			if(commandHistory.index-1 == commandHistory.length && vimCommandBuffer) {
+				searchOnlyCommandHistoryStartingWith = vimCommandBuffer;
+			}
+			else if(!vimCommandBuffer) {
+				searchOnlyCommandHistoryStartingWith = "";
+			}
+			
+			if(searchOnlyCommandHistoryStartingWith) {
+				for (var i=commandHistory.index; i>-1; i--) {
+					if(commandHistory[i].slice(0,vimCommandBuffer.length) == searchOnlyCommandHistoryStartingWith) {
+						vimCommandBuffer = commandHistory[i];
+						vimCommandCaretPosition = vimCommandBuffer.length;
+					}
+				}
+			}
+			else {
+				commandHistory.index--;
+				vimCommandBuffer = commandHistory[commandHistory.index];
+				vimCommandCaretPosition = vimCommandBuffer.length;
+			}
+			
+			return false;
+		}
+		else {
+			return true;
 		}
 	}
 	
@@ -195,7 +370,10 @@ return false;
 		}
 		
 		branch.index++;
-		branch.redo();
+		
+		for (var i=0; i<branch.redo.length; i++) {
+			branch.redo[i]();
+		}
 	}
 	
 	function vimUndo() {
@@ -205,8 +383,67 @@ return false;
 			branch = branch[branch.index];
 		}
 		
-		branch.undo();
 		branch.index--;
+		
+		for (var i=0; i<branch.undo.length; i++) {
+			branch.undo[i]();
+		}
+	}
+	
+	function updateHistory(ev) {
+		// Adds to existing undo/redo history
+		if(typeof ev != "object") throw new Error("Want a history object with undo and redo functions! ev=" + ev + " is not an object!");
+		if(typeof ev.undo != "function") throw new Error("ev.undo=" + ev.undo + " needs to be a function!");
+		if(typeof ev.redo != "function") throw new Error("ev.redo=" + ev.redo + " needs to be a function!");
+		
+		if(history.length == 0) throw new Error("There is no history to add to! history.length=" + history.length);
+		// Figure out current branch
+		var branch = history[history.index];
+		while(Array.isArray(branch) && branch.index > -1) {
+			branch = branch[branch.index];
+		}
+		branch.undo.push(ev.undo);
+		branch.redo.push(ev.redo);
+	}
+	
+	function addHistory(ev) {
+		// Create a new Undo, redo history
+		
+		
+		if(history.index != history.length-1) {
+			// We are in the middle of the history, so branche out
+			var branch = [history[history.index]];
+			branch.index = 0;
+			history[history.index] = branch;
+		}
+		else {
+			var branch = history; // Tree stem
+		}
+		
+		// Don't create a new history entry if last one is empty!
+		...var empty = branch.redo.length == 0 && branch.undo.length == 0;
+		
+		
+		if() {
+			
+			var newEvent = {
+				date: new Date();
+				undo: ev && ev.undo ? [ev.undo] : [],
+				redo: ev && ev.redo ? [ev.redo] : []
+			};
+			
+			var newIndex = branch.push(newEvent) - 1; // Push returns the length of the array
+			branch.index = newIndex;
+		}
+	}
+	
+	function addCommandHistory(command) {
+		// normal mode history
+		
+		// Don't add to command history if the command was repeated
+		if(commandHistory.length > 0 && commandHistory[commandHistory.length-1] != command) {
+			commandHistory.push(command);
+		}
 	}
 	
 	function parseCommand(str) {
@@ -222,14 +459,6 @@ return false;
 		
 		console.log("Parsing vim command: " + str);
 		
-		// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-		var END = String.fromCharCode(35);
-		var HOME = String.fromCharCode(36);
-		var BACKSPACE = String.fromCharCode(8);
-		var UP = String.fromCharCode(38);
-		var DOWN = String.fromCharCode(40);
-		var LEFT = String.fromCharCode(37);
-		var RIGHT = String.fromCharCode(39);
 		
 		
 		var nr = "";
@@ -308,9 +537,11 @@ return false;
 					file.putCharacter(char);
 				}
 				EDITOR.renderNeeded();
-				return done();
+				return done(function() {
+
+				});
 			}
-			else if((char == "0" && !nr || char == HOME)) {
+			else if((char == "0" && !nr)) {
 				// moves to the very first character of the line
 			}
 			
@@ -371,7 +602,7 @@ else if(findRight) {
 				searchString += char;
 			}
 			else if(searchString.length > 0 && char == BACKSPACE) {
-				searchString = searchString.slice(0,-1);
+				
 				// Search while typing! (use regexp)
 				// Arrow keys moves the caret in the input field
 				// Use already existing find plugin !?
@@ -502,7 +733,7 @@ else if(findRight) {
 				part of the count.  Unexpectedly, using a count with "^" doesn't have any
 				effect.
 			*/ 
-			else if(char == "$" || char == END) {
+			else if(char == "$") {
 				// moves the cursor to the end of a line
 				
 			}
@@ -686,26 +917,16 @@ return toInsert();
 		updateCommandVisual();
 		
 		function done(undo) {
-			// The command have been executed
-			lastCommand = vimCommandBuffer;
+			if(typeof undo != "function") throw new Error("done must be called with a undo function!");
 			
-			if(history.index != history.length-1) {
-				// We are in the middle of the history, so branche out
-				var branch = [history[history.index]];
-				branch.index = 0;
-				history[history.index] = branch;
-			}
-			else {
-				var branch = history; // Tree stem
-			}
-			
-			var newIndex = branch.push({
-				undo: undo, 
+			addHistory({
+				undo: undo,
 				redo: function() {
 					parseCommand(vimCommandBuffer);
 				}
-			}) - 1; // Push returns the length of the array
-			branch.index = newIndex;
+});
+			
+			addCommandHistory(vimCommandBuffer);
 			
 			clearCommandBuffer();
 		}
@@ -718,16 +939,22 @@ return toInsert();
 			}
 		}
 		
-		function toInsert() {
-			// Switch to insert mode and insert remaining characters (str)
+		function toInsert(undo) {
+			/*
+				Switch to insert mode
+				insert remaining characters (str) if any
+			*/
 			console.log("str=" + str + " i=" + i);
 			if(i < str.length-1) {
 				var text = str.slice(i+1);
 				file.insertText(text);
 			}
+			else {
+				undoBeforeInsert = undo;
+			}
 			lastInsert = "";
 			clearCommandBuffer();
-			EDITOR.setMode("default");
+			EDITOR.setMode("vimInsert");
 		}
 		
 	}
@@ -737,7 +964,9 @@ return toInsert();
 	}
 	
 	function clearCommandBuffer() {
+		lastCommand = vimCommandBuffer;
 		vimCommandBuffer = "";
+		vimCommandCaretPosition = 0;
 		clearCommandVisual(EDITOR.canvasContext);
 	}
 	
@@ -916,6 +1145,7 @@ return toInsert();
 		var ctx = EDITOR.canvasContext;
 		clearCommandVisual(ctx);
 		showCommandBuffer(ctx);
+		renderCommandCaret(ctx);
 	}
 	
 	function clearCommandVisual(ctx) {
@@ -938,6 +1168,12 @@ return toInsert();
 		ctx.fillStyle = EDITOR.settings.style.textColor;
 		//ctx.beginPath(); // Reset all the paths!
 		ctx.fillText(vimCommandBuffer, left, top);
+		
+	}
+	
+	function renderCommandCaret(ctx) {
+		// Don't sow the caret if it's at the end of the buffer
+		if(vimCommandBuffer.length == vimCommandCaretPosition) return;
 		
 	}
 	

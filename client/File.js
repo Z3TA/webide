@@ -2155,16 +2155,18 @@ var File; // File object is global
 		
 	}
 	
-	File.prototype.moveCaretRight = function(caret) {
+	File.prototype.moveCaretRight = function(caret, repeat) {
 		var file = this;
 		
 		console.log("File:moveCaretRight");
 		
 		if(caret == undefined) caret = file.caret;
+		if(repeat == undefined) repeat = 1;
 		
 		file.checkCaret(caret);
 		
 		file.sanityCheck();
+		
 		
 		if(caret.index < file.text.length) {
 			
@@ -2205,6 +2207,14 @@ var File; // File object is global
 			}
 			
 		}
+		
+		repeat = repeat - 1;
+		
+		if(repeat > 0) {
+			file.moveCaretRight(caret, repeat);
+			return;
+		}
+		
 		
 		file.sanityCheck();
 		
@@ -2449,16 +2459,15 @@ var File; // File object is global
 		
 		//console.log("Deleting character at " + JSON.stringify(caret) + " ...");
 		
-		var grid = file.grid,
-		row = caret.row,
-		col = caret.col,
-		index = caret.index,
-		thisRow = grid[row],
-		rowBelow = row < grid.length ? grid[row+1] : undefined,
-		character = caret.eof ? undefined : file.text.charAt(index),
-		indexDecrementor = 1, // How many characters to remove
-		box;
-		
+		var grid = file.grid;
+		var row = caret.row;
+		var col = caret.col;
+		var index = caret.index;
+		var thisRow = grid[row];
+		var rowBelow = row < grid.length ? grid[row+1] : undefined;
+		var character = caret.eof ? undefined : file.text.charAt(index);
+		var indexDecrementor = 1; // How many characters to remove
+		var box;
 		
 		file.checkCaret(caret); // Sanity check in case something is wrong
 		
