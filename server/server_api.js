@@ -609,6 +609,31 @@ API.move = function move(user, json, callback) {
 		
 		callback(null, {path: newPath});
 		
+		user.send({
+			fileMove": {from: from, to: to}
+		});
+
+	});
+}
+
+API.rename = function rename(user, json, callback) {
+	
+	var oldPath = json.oldPath;
+	var newPath = json.newPath;
+	
+	if(oldPath == undefined) return callback(new Error("oldPath=" + oldPath + " can not be null or undefined!"));
+	if(newPath == undefined) return callback(new Error("newPath=" + newPath + " can not be null or undefined!"));
+	
+	// First make a copy of the file, and then delete it !?
+	
+	var fs = require("fs");
+	fs.rename(oldPath, newPath, function(err) {
+		
+		if(err) {
+			if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not a directory! " + err.message);
+		}
+		
+		callback(err, {oldPath: oldPath, newPath: newPath});
 	});
 	
 }
@@ -2003,27 +2028,6 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 }
 
 
-API.rename = function rename(user, json, callback) {
-	
-	var oldPath = json.oldPath;
-	var newPath = json.newPath;
-	
-	if(oldPath == undefined) return callback(new Error("oldPath=" + oldPath + " can not be null or undefined!"));
-	if(newPath == undefined) return callback(new Error("newPath=" + newPath + " can not be null or undefined!"));
-	
-	// First make a copy of the file, and then delete it !?
-	
-	var fs = require("fs");
-	fs.rename(oldPath, newPath, function(err) {
-		
-		if(err) {
-		if(err.code == "EISDIR") err = new Error("Make sure " + newPath + " is not a directory! " + err.message);
-		}
-		
-		callback(err, {oldPath: oldPath, newPath: newPath});
-	});
-	
-}
 
 API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFilesCallback) {
 	/*

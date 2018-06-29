@@ -42,6 +42,10 @@ Happy path: (manually check on prod after each release)
 
 What I'm working on
 -------------------
+
+Should we have a moveFile event !? Or should we rely on the editor closing and reopening a file when it's renamed !?
+(there are both a move and rename event in the server api!??)
+
 http://vimdoc.sourceforge.net/htmldoc/usr_02.html
 
 Add vimInput mode and not just vimCommand !?
