@@ -90,6 +90,8 @@
 	var vimMenuItem;
 	var vimCommandBuffer = "";
 	var vimCommandCaretPosition = "0";
+	var insertedString = "";
+	var lastCommand = "";
 	var searchString = "";
 	var searchStringHistory = [];
 	var commandLineHistory = [];
@@ -173,6 +175,7 @@
 	function toVimNormalMode() {
 		if(VIM_ACTIVE) {
 			console.log("Setting vim mode to normal (command)");
+			lastCommand += insertedString; // So it can be repeated with . (dot)
 EDITOR.setMode("vimNormal");
 			return false;
 		}
@@ -207,7 +210,7 @@ EDITOR.setMode("vimNormal");
 			}
 			else if(vimCommandBuffer == ".") {
 				// Repeat last command
-				vimRedo(file);
+				parseCommand(lastCommand);
 				return clearCommandBuffer();
 			}
 			else {
@@ -223,38 +226,52 @@ EDITOR.setMode("vimNormal");
 				We need to EDITOR.bindKey for example backspace and arrow keys.
 			*/
 			
-			if(char == "\n") {
+			console.log("VimInsert:");
+			var caretIndex = file.caret.index;
+			if(char == "\n" || char == "\r") {
+				console.log("Line break");
 				var ev = {
 					undo: function undoNewLine() {
+						file.moveCaretToIndex(caretIndex);
 						file.moveCaretLeft();
 						file.deleteCharacter();
 					},
 					redo: function redoNewLine() {
+						file.moveCaretToIndex(caretIndex);
 						file.insertLineBreak();
 					}
 				}
+				insertedString += "\n";
 			}
 			else if(char.charCodeAt(0) == DELETE) {
+				console.log("DELETE");
 				var deletedCharacter = file.text.charAt(file.caret.index);
 				var ev = {
 					undo: function undoDelete() {
+						file.moveCaretToIndex(caretIndex);
 						file.putCharacter(deletedCharacter);
 					},
 					redo: function redoDelete() {
+						file.moveCaretToIndex(caretIndex);
 						file.deleteCharacter();
 					}
 				}
+				insertedString = insertedString.slice(0,-1);
 			}
 			else {
+				console.log("character=" + UTIL.lbChars(char));
 				var ev = {
 					undo: function undoInsert() {
+						file.moveCaretToIndex(caretIndex);
 						file.moveCaretLeft();
 						file.deleteCharacter();
 					},
 					redo: function redoInsert() {
+						file.moveCaretToIndex(caretIndex);
 						file.putCharacter(char);
 					}
 				}
+				insertedString += char;
 			}
 			
 			ev.redo();
@@ -327,6 +344,7 @@ EDITOR.setMode("vimNormal");
 			file.moveCaretLeft();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
+			insertedString = "";
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -346,6 +364,7 @@ EDITOR.setMode("vimNormal");
 			file.moveCaretRight();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
+			insertedString = "";
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -370,6 +389,7 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 			file.moveCaretUp();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
+			insertedString = "";
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -411,6 +431,7 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 			file.moveCaretDown();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
+			insertedString = "";
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -462,7 +483,7 @@ console.warn("Unable to redo! No recorded history!");
 		var branch = tip.branch;
 		var historyItem = tip.item;
 		
-		if(branch.currentItem == branch.length) {
+		if(branch.currentItem == branch.length-1) {
 			console.log("Already at the tip");
 			return false;
 		}
@@ -513,7 +534,7 @@ console.warn("Unable to undo! No recorded history!");
 		branch.currentItem--;
 		console.log("after: branch.currentItem=" + branch.currentItem);
 		
-		// Should the undo be done backwards !? Last in last out !?
+		// Should the undo run backwards !? Last in last out !?
 		for (var i=historyItem.undo.length-1, f; i>-1; i--) {
 			f = historyItem.undo[i];
 			console.log("undo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString()); 
@@ -556,6 +577,7 @@ console.warn("Unable to undo! No recorded history!");
 	
 	function getHistoryTip(fileHistory) {
 		if(fileHistory.currentItem <= -1) throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:", fileHistory);
+		if(fileHistory.currentItem >= fileHistory.length) throw new Error("fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:", fileHistory);
 		var branch = fileHistory;
 		var historyItem = branch[branch.currentItem];
 		while(historyItem.branches.length > 0 && historyItem.currentBranch >= -1 && historyItem.branches[historyItem.currentBranch].currentItem > -1) {
@@ -585,14 +607,23 @@ console.warn("Unable to undo! No recorded history!");
 		// Don't create a new Emty history entry if last one is already Empty!
 		if(ev == undefined && historyItem.redo.length == 0 && historyItem.undo.length == 0) return;
 		
+		var newEvent = new HistoryItem(ev && ev.undo, ev && ev.redo);
+		
 		if(branch.currentItem != branch.length-1) {
 			// We are in the middle of the history, so branche out
 			branch = [];
 			historyItem.currentBranch = historyItem.branches.push(branch)-1;
 		}
+		else {
+			// We are at the tip
+			// Replace current item if it's empty!
+			if(historyItem.undo.length == 0) {
+				historyItem = newEvent;
+				return;
+			}
+		}
 		
-		var newEvent = new HistoryItem(ev.undo, ev.redo);
-		
+		// Add new history item/event
 		branch.currentItem = branch.push(newEvent) - 1; // Push returns the length of the array
 		
 	}
@@ -693,6 +724,8 @@ console.warn("Unable to undo! No recorded history!");
 		var file = EDITOR.currentFile;
 		if(!file) return;
 		
+		var caretIndex = file.caret.index;
+		
 		for (var i=0; i<str.length; i++) {
 			lastChar = char;
 			char = getNormalMap(str.charAt(i)); // Converts to default keys
@@ -700,13 +733,20 @@ console.warn("Unable to undo! No recorded history!");
 			if(replace) {
 				console.log("repeat=" + repeat);
 				// Replace the character under the cursor with char
-				while(repeat--) {
-					file.deleteCharacter();
-					file.putCharacter(char);
+				var charsToReplace = Math.min(repeat, file.grid[file.caret.row].length - file.caret.col);
+				var removedText = file.text.slice(file.caret.index, file.caret.index + charsToReplace);
+				var insertedText = "";
+				for (var j=0; j<charsToReplace; j++) {
+					insertedText += char;
 				}
-				EDITOR.renderNeeded();
-				return done(function() {
-
+				return done(function undoReplaceChar() {
+					file.moveCaretToIndex(caretIndex);
+					file.deleteTextRange(caretIndex, caretIndex + charsToReplace - 1);
+					file.insertText(removedText);
+				}, function redoReplaceChar() {
+					file.moveCaretToIndex(caretIndex);
+					file.deleteTextRange(caretIndex, caretIndex + charsToReplace - 1);
+					file.insertText(insertedText);
 				});
 			}
 			else if((char == "0" && !nr)) {
@@ -814,39 +854,39 @@ else if(findRight) {
 			}
 			else if(char == "d" && lastChar == "d") {
 				// Delete whole line (removes it)
-				done();
+				
 			}
 			else if(char == "c" && lastChar == "c") {
 				// Delete whole line and go into insert mode
-				done();
+				
 			}
 			else if( char == "x" || (char == "l" && lastChar == "d") ) {
 				// delete character under the cursor
-				done();
+				
 			}
 			else if( char == "X" || (char == "h" && lastChar == "d" && !repeat) ) {
 				console.log("Vim: delete character left of the cursor");
-				done();
+				
 			}
 			else if( char == "D" || (char == "$" && lastChar == "d") ) {
 				// delete to end of the line
-				done();
+				
 			}
 			else if( char == "D" || (char == "$" && lastChar == "d") ) {
 				// delete to end of the line
-				done();
+				
 			}
 			else if( char == "C" || (char == "$" && lastChar == "c") ) {
 				// change to end of the line
-				done();
+				
 			}
 			else if (char == "s" || (char == "l" && lastChar == "c") ) {
 				// change one character
-				done();
+				
 			}
 			else if( char == "S" || (char == "c" && lastChar == "c") ) {
 				// change a whole line (clears the text and goes into insert mode)
-				done();
+				
 			}
 			
 			// # Movement
@@ -968,19 +1008,25 @@ else if(findRight) {
 				var moveLeft =  Math.min(file.caret.col, repeat * operatorRepeat);
 				if(file.caret.col <= 0) return clearCommandBuffer();
 				file.moveCaretLeft(file.caret, moveLeft);
-				
+				var caretIndex = file.caret.index;
 				if(del || change) {
-					var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
+					var removedText = file.text.slice(file.caret.index, file.caret.index + moveLeft);
+					//var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
 					var undo = function undoDeleteText() {
+						file.moveCaretToIndex(caretIndex);
 						file.insertText(removedText);
 						//file.moveCaretRight(file.caret, moveLeft);
 					};
+					var redo = function redoDeleteText() {
+						file.moveCaretToIndex(caretIndex);
+						file.deleteTextRange(caretIndex, caretIndex + moveLeft - 1);
+						//file.moveCaretRight(file.caret, moveLeft);
+					};
+					
 				}
 				
-				EDITOR.renderNeeded();
-				
-				if(del) return done(undo);
-				else if(change) return done(undo, true);
+				if(del) return done(undo, redo);
+				else if(change) return done(undo, redo, true);
 				else return clearCommandBuffer();
 			}
 			else if(char == "l") {
@@ -1084,18 +1130,22 @@ return toInsert();
 			When a command have been executed, call either done(), toInsert() or clearCommandBuffer()
 		*/
 		
-		function done(undo, toInput) {
-			// We did something 
+		function done(undo, redo, toInput) {
 			if(typeof undo != "function") throw new Error("done must be called with a undo function!");
+			if(typeof redo != "function") throw new Error("done must be called with a redo function!");
+			
+			redo(); // Do it
+			
+			EDITOR.renderNeeded(); // Asume the command did something. So that we don't need to have EDITOR.renderNeeded() in all undo and redo functions.
 			
 			addHistory(file, {
 				undo: undo,
-				redo: function() {
-					parseCommand(vimCommandBuffer);
-				}
+				redo: redo
 });
 			
 			addCommandHistory(vimCommandBuffer);
+			
+			lastCommand = str;
 			
 			if(toInput) return toInsert();
 			else {
@@ -1119,9 +1169,16 @@ return toInsert();
 			console.log("str=" + str + " i=" + i);
 			if(i < str.length-1) {
 				var text = str.slice(i+1);
-				file.insertText(text);
+				//file.insertText(text);
+				// Need to handle line breaks
+				for (var j=0; i<text.length; i++) {
+					if(text.charAt(j) == "\n") file.insertLineBreak(file.caret);
+					else file.putCharacter(text.charAt(j));
+				}
+				EDITOR.renderNeeded();
 			}
 			EDITOR.setMode("vimInsert");
+			insertedString = "";
 			
 			return clearCommandBuffer();
 		}
@@ -1168,10 +1225,10 @@ return toInsert();
 			
 		*/
 		
-			var file = EDITOR.currentFile;
-			
-			if(!file) return;
-			
+		var file = EDITOR.currentFile;
+		
+		if(!file) return;
+		
 		var YANK = "y";
 		
 		if(command == YANK) pasteBuffer = ""; // Clear the paste buffer
@@ -1182,8 +1239,8 @@ return toInsert();
 		var DELETE = "d";
 		var CHANGE = "c";
 		
-			// Motions (cursor motion command)
-			
+		// Motions (cursor motion command)
+		
 		
 		
 		
@@ -1195,10 +1252,10 @@ return toInsert();
 				undo.push("i" + str);
 			}
 			if(command == CHANGE) INSERT_MODE = true;
-				EDITOR.renderNeeded();
-				clearCmd();
-			}
-			
+			EDITOR.renderNeeded();
+			clearCmd();
+		}
+		
 		var MOVE_LEFT_ONE_CHARACTER = "h";
 		var VISUAL_SELECT = "v";
 		
