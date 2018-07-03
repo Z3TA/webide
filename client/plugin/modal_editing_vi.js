@@ -225,11 +225,11 @@ EDITOR.setMode("vimNormal");
 			
 			if(char == "\n") {
 				var ev = {
-					undo: function() {
+					undo: function undoNewLine() {
 						file.moveCaretLeft();
 						file.deleteCharacter();
 					},
-					redo: function() {
+					redo: function redoNewLine() {
 						file.insertLineBreak();
 					}
 				}
@@ -237,21 +237,21 @@ EDITOR.setMode("vimNormal");
 			else if(char.charCodeAt(0) == DELETE) {
 				var deletedCharacter = file.text.charAt(file.caret.index);
 				var ev = {
-					undo: function() {
+					undo: function undoDelete() {
 						file.putCharacter(deletedCharacter);
 					},
-					redo: function () {
+					redo: function redoDelete() {
 						file.deleteCharacter();
 					}
 				}
 			}
 			else {
 				var ev = {
-					undo: function() {
+					undo: function undoInsert() {
 						file.moveCaretLeft();
 						file.deleteCharacter();
 					},
-					redo: function () {
+					redo: function redoInsert() {
 						file.putCharacter(char);
 					}
 				}
@@ -443,12 +443,19 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 	}
 	
 	function vimRedo(file) {
-		console.log("vimRedo: file.path=" + file.path);
 		var fileHistory = history[file.path];
+		
+		console.log("vimRedo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
 		
 		if(fileHistory.length == 0) {
 console.warn("Unable to redo! No recorded history!");
 			return false;
+		}
+		
+		if(fileHistory.currentItem == -1 && fileHistory.length > 0) {
+			// The item index has reached the bottom in order to prevent repetition of the first undo
+			// Now go forward
+			fileHistory.currentItem = 0;
 		}
 		
 		var tip = getHistoryTip(fileHistory);
@@ -462,8 +469,10 @@ console.warn("Unable to redo! No recorded history!");
 		
 		branch.currentItem++;
 		
-		for (var i=0; i<historyItem.redo.length; i++) {
-			historyItem.redo[i]();
+		for (var i=0, f; i<historyItem.redo.length; i++) {
+			f = historyItem.redo[i]
+			console.log("redo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString()); 
+			f();
 		}
 		
 		// No need to have EDITOR.renderNeeded() inside each redo function
@@ -472,8 +481,9 @@ console.warn("Unable to redo! No recorded history!");
 	}
 	
 	function vimUndo(file) {
-		console.log("vimUndo: file.path=" + file.path);
 		var fileHistory = history[file.path];
+		
+		console.log("vimUndo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
 		
 		console.log("fileHistory: fileHistory.currentItem=" + fileHistory.currentItem);
 		console.log(fileHistory);
@@ -504,8 +514,10 @@ console.warn("Unable to undo! No recorded history!");
 		console.log("after: branch.currentItem=" + branch.currentItem);
 		
 		// Should the undo be done backwards !? Last in last out !?
-		for (var i=historyItem.undo.length-1; i>-1; i--) {
-			historyItem.undo[i]();
+		for (var i=historyItem.undo.length-1, f; i>-1; i--) {
+			f = historyItem.undo[i];
+			console.log("undo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString()); 
+			f();
 		}
 		
 		// No need to have EDITOR.renderNeeded() inside each undo function
@@ -959,7 +971,7 @@ else if(findRight) {
 				
 				if(del || change) {
 					var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
-					var undo = function() {
+					var undo = function undoDeleteText() {
 						file.insertText(removedText);
 						//file.moveCaretRight(file.caret, moveLeft);
 					};

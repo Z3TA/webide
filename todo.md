@@ -43,6 +43,17 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+problem (vim undo/redo):
+1. insert
+2. delete
+3. undo (delete)
+4. redo (delete)
+5. redo (insert)
+
+while vim doesn't redo the insert.
+
+
+
 Should we have a moveFile event !? Or should we rely on the editor closing and reopening a file when it's renamed !?
 (there are both a move and rename event in the server api!??)
 
