@@ -65,7 +65,9 @@
 	Registers on keyPress: Enter,Delete
 	
 	
-	
+	Idea:
+	:q = window.close
+	:q! = nuke onbeforeunload then window.close (eg don't ask if sure)
 	
 */
 
@@ -158,8 +160,8 @@
 		
 	function vimFileOpen(file) {
 		if(!VIM_ACTIVE) return true;
-		history[file.path] = [{undo: [], redo: [], date: new Date()}];
-		history[file.path].index = 0;
+		history[file.path] = [new HistoryItem()];
+		history[file.path].currentItem = 0;
 		return true;
 	}
 	
@@ -444,16 +446,24 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 		console.log("vimRedo: file.path=" + file.path);
 		var fileHistory = history[file.path];
 		
-		if(fileHistory.length == 0) return console.warn("Unable to redo! No recorded history!");
-		var branch = fileHistory[fileHistory.index];
-		while(Array.isArray(branch) && branch.index != -1) {
-			branch = branch[branch.index];
+		if(fileHistory.length == 0) {
+console.warn("Unable to redo! No recorded history!");
+			return false;
 		}
 		
-		branch.index++;
+		var tip = getHistoryTip(fileHistory);
+		var branch = tip.branch;
+		var historyItem = tip.item;
 		
-		for (var i=0; i<branch.redo.length; i++) {
-			branch.redo[i]();
+		if(branch.currentItem == branch.length) {
+			console.log("Already at the tip");
+			return false;
+		}
+		
+		branch.currentItem++;
+		
+		for (var i=0; i<historyItem.redo.length; i++) {
+			historyItem.redo[i]();
 		}
 		
 		// No need to have EDITOR.renderNeeded() inside each redo function
@@ -465,39 +475,37 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 		console.log("vimUndo: file.path=" + file.path);
 		var fileHistory = history[file.path];
 		
-		console.log("fileHistory: fileHistory.index=" + fileHistory.index);
+		console.log("fileHistory: fileHistory.currentItem=" + fileHistory.currentItem);
 		console.log(fileHistory);
 		
 		if(fileHistory.length == 0) {
 console.warn("Unable to undo! No recorded history!");
 			return false;
 		}
-		if(fileHistory.index == -1) {
+		
+		if(fileHistory.currentItem == -1) {
 			console.log("No more history to undo!");
 			return false;
 		}
 		
-		var branch = fileHistory[fileHistory.index];
-		while(Array.isArray(branch) && branch.index > -1) {
-			branch = branch[branch.index];
-			console.log("Changed history branch to ", branch);
-		}
+		var tip = getHistoryTip(fileHistory);
+		var branch = tip.branch;
+		var historyItem = tip.item;
 		
 		console.log("root branch ? " + (branch==fileHistory));
 		
-		if(branch.index == undefined) {
-			console.log("branch:");
-			console.log(branch);
-			throw new Error("branch.index=" + branch.index);
+		if(branch.currentItem == undefined) {
+			console.log("branch:", branch);
+			throw new Error("branch.currentItem=" + branch.currentItem);
 		}
 		
-		console.log("before: branch.index=" + branch.index);
-		branch.index--;
-		console.log("after: branch.index=" + branch.index);
+		console.log("before: branch.currentItem=" + branch.currentItem);
+		branch.currentItem--;
+		console.log("after: branch.currentItem=" + branch.currentItem);
 		
 		// Should the undo be done backwards !? Last in last out !?
-		for (var i=branch.undo.length-1; i>-1; i--) {
-			branch.undo[i]();
+		for (var i=historyItem.undo.length-1; i>-1; i--) {
+			historyItem.undo[i]();
 		}
 		
 		// No need to have EDITOR.renderNeeded() inside each undo function
@@ -506,73 +514,83 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function updateHistory(file, ev) {
-		// Adds to existing/current undo/redo history
+		// Adds to existing/current undo/redo history, when adding insert to current command
 		if(typeof ev != "object") throw new Error("Want a history object with undo and redo functions! ev=" + ev + " is not an object!");
 		if(typeof ev.undo != "function") throw new Error("ev.undo=" + ev.undo + " needs to be a function!");
 		if(typeof ev.redo != "function") throw new Error("ev.redo=" + ev.redo + " needs to be a function!");
 		
 		var fileHistory = history[file.path];
-		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
 		
 		if(fileHistory.length == 0) {
 			console.warn("There is no history to add to! fileHistory.length=" + fileHistory.length + " Adding new history item ...");
 			return addHistory(file, ev);
 		}
 		
-		// Figure out current branch
-		var branch = fileHistory[fileHistory.index];
-		while(Array.isArray(branch) && branch.index > -1) {
-			branch = branch[branch.index];
-		}
+		var tip = getHistoryTip(fileHistory);
+		var branch = tip.branch;
+		var historyItem = tip.item;
 		
-		if(branch == undefined) {
-			console.log("fileHistory.index=" + fileHistory.index);
-			
-			console.log("fileHistory:");
-			console.log(fileHistory);
-		}
-		
-		if(branch.undo == undefined) {
+		if(historyItem.undo == undefined) {
 			console.log("branch:");
 			console.log(branch);
 			console.log("fileHistory:");
 			console.log(fileHistory);
 		}
 		
-		branch.undo.push(ev.undo);
-		branch.redo.push(ev.redo);
-		branch.date = new Date();
+		historyItem.undo.push(ev.undo);
+		historyItem.redo.push(ev.redo);
+		historyItem.date = new Date();
+	}
+	
+	function getHistoryTip(fileHistory) {
+		if(fileHistory.currentItem <= -1) throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:", fileHistory);
+		var branch = fileHistory;
+		var historyItem = branch[branch.currentItem];
+		while(historyItem.branches.length > 0 && historyItem.currentBranch >= -1 && historyItem.branches[historyItem.currentBranch].currentItem > -1) {
+			branch = historyItem.branches[historyItem.currentBranch];
+			historyItem = branch[branch.currentItem];
+		}
+		if(branch.currentItem <= -1) throw new Error("branch.currentItem=" + branch.currentItem + " branch:", branch);
+		return {branch: branch, item: historyItem};
 	}
 	
 	function addHistory(file, ev) {
-		// Add/Create a new undo/redo history item
+		// Add/Create a new undo/redo history item, when running a command
 		
 		var fileHistory = history[file.path];
 		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
 		
-		if(fileHistory.index != fileHistory.length-1) {
-			// We are in the middle of the history, so branche out
-			var branch = [fileHistory[fileHistory.index]];
-			branch.index = 0;
-			fileHistory[fileHistory.index] = branch;
+		if(fileHistory.currentItem <= -1) {
+			// Create a new empt history item (that we will branch out from)
+			fileHistory.unshift(new HistoryItem());
+			fileHistory.currentItem = 0;
 		}
-		else {
-			var branch = fileHistory; // Tree stem
-		}
+		
+		var tip = getHistoryTip(fileHistory);
+		var branch = tip.branch;
+		var historyItem = tip.item;
 		
 		// Don't create a new Emty history entry if last one is already Empty!
-if(ev == undefined && branch.redo.length == 0 && branch.undo.length == 0) return;
+		if(ev == undefined && historyItem.redo.length == 0 && historyItem.undo.length == 0) return;
 		
+		if(branch.currentItem != branch.length-1) {
+			// We are in the middle of the history, so branche out
+			branch = [];
+			historyItem.currentBranch = historyItem.branches.push(branch)-1;
+		}
 		
-		var newEvent = {
-			date: new Date(),
-			undo: ev && ev.undo ? [ev.undo] : [],
-			redo: ev && ev.redo ? [ev.redo] : []
-		};
+		var newEvent = new HistoryItem(ev.undo, ev.redo);
 		
-		var newIndex = branch.push(newEvent) - 1; // Push returns the length of the array
-		branch.index = newIndex;
+		branch.currentItem = branch.push(newEvent) - 1; // Push returns the length of the array
 		
+	}
+	
+	function HistoryItem(undo, redo) {
+		this.date = new Date();
+		this.undo = undo ? [undo] : [];
+		this.redo = redo ? [redo] : [];
+		this.branches = [];
+		this.currentBranch = -1;
 	}
 	
 	function addCommandHistory(command) {
@@ -933,38 +951,33 @@ else if(findRight) {
 			else if(char == "j") {
 				// Move cursor down one line
 			}
-			else if(char == "h" && del) {
-				console.log("Vim: Delete left " + (repeat*operatorRepeat) + " steps");
-				var startRange = Math.max(file.grid[file.caret.row].startIndex, file.caret.index - repeat*operatorRepeat);
-				var removedText = file.deleteTextRange(startRange, file.caret.index-1);
-				EDITOR.renderNeeded();
-				return done(function undoDeleteLeft() {
-					file.insertText(removedText);
-				});
-			}
-			else if(char == "h" && change) {
-				console.log("Vim: Change left " + (repeat*operatorRepeat) + " steps");
-				var startRange = Math.max(file.grid[file.caret.row].startIndex, file.caret.index - repeat*operatorRepeat);
-				var removedText = file.deleteTextRange(startRange, file.caret.index-1);
-				EDITOR.renderNeeded();
-				return toInsert(function undoChangeLeft() {
-					file.insertText(removedText);
-				});
-			}
 			else if(char == "h") {
 				// Move cursor left n steps
-				if(file.caret.col > 0) file.moveCaretLeft(file.caret, Math.min(file.caret.col, repeat));
+				var moveLeft =  Math.min(file.caret.col, repeat * operatorRepeat);
+				if(file.caret.col <= 0) return clearCommandBuffer();
+				file.moveCaretLeft(file.caret, moveLeft);
+				
+				if(del || change) {
+					var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
+					var undo = function() {
+						file.insertText(removedText);
+						//file.moveCaretRight(file.caret, moveLeft);
+					};
+				}
+				
 				EDITOR.renderNeeded();
-				return clearCommandBuffer();;
+				
+				if(del) return done(undo);
+				else if(change) return done(undo, true);
+				else return clearCommandBuffer();
 			}
 			else if(char == "l") {
 				// Move cursor right n steps
 				if(file.caret.col < file.grid[file.caret.row].length) {
 file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.caret.col, repeat));
 				}
-				clearCommandBuffer();
 				EDITOR.renderNeeded();
-				return;
+				return clearCommandBuffer();;
 			}
 			else if(char == "0") {
 				// Move to column zero
@@ -1059,8 +1072,8 @@ return toInsert();
 			When a command have been executed, call either done(), toInsert() or clearCommandBuffer()
 		*/
 		
-		function done(undo) {
-			// Only 
+		function done(undo, toInput) {
+			// We did something 
 			if(typeof undo != "function") throw new Error("done must be called with a undo function!");
 			
 			addHistory(file, {
@@ -1072,7 +1085,10 @@ return toInsert();
 			
 			addCommandHistory(vimCommandBuffer);
 			
-			return clearCommandBuffer();
+			if(toInput) return toInsert();
+			else {
+				return clearCommandBuffer();
+		}
 		}
 		
 		function foundOperator() {
@@ -1083,7 +1099,7 @@ return toInsert();
 			}
 		}
 		
-		function toInsert(undo) {
+		function toInsert() {
 			/*
 				Switch to insert mode
 				insert remaining characters (str) if any
