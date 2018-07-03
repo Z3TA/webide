@@ -48,10 +48,10 @@ problem (vim undo/redo):
 2. delete
 3. undo (delete)
 4. redo (delete)
-5. redo (insert)
+5. redo (insert) = should be back to the delete
 
 while vim doesn't redo the insert.
-
+Should an 
 
 
 Should we have a moveFile event !? Or should we rely on the editor closing and reopening a file when it's renamed !?
@@ -126,6 +126,8 @@ https://gist.github.com/awidegreen/3854277
 Opening the editor from command line. eg jzedit somefile
 Piping to the editor. Send stdin stream to server, that sends to the client !?
 ---
+
+When running "npm start" but there are no browsers to start, also stop the server!
 
 When using repo/clone in url search, automatically make a shallow clone !?
 Add option in clone dialog to make shallow clone.
@@ -657,6 +659,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+When using console.log in Node.js apps, the messages sometimes doesn't show inline, and sometimes show at another console.log
 
 Got error, unable to stat "new file" and som notes got lost!!
 
