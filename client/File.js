@@ -2621,7 +2621,7 @@ var File; // File object is global
 			
 		*/
 		
-		console.log("moveCaretToIndex: " + index + "(text.length=" + file.text.length + ")");
+		console.log("moveCaretToIndex: " + index + " (text.length=" + file.text.length + ")");
 		
 		if(file.text.length == 0) {
 			caret.index = 0;

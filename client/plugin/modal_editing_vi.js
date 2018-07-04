@@ -90,6 +90,8 @@
 	var vimMenuItem;
 	var vimCommandBuffer = "";
 	var vimCommandCaretPosition = "0";
+	var messageToShow = "ENTER COMMAND"; // Helper message to show if there is nothing in command buffer 
+	var lastMessageShowed = "" // Used for measuring text width
 	var insertedString = "";
 	var lastCommand = "";
 	var searchString = "";
@@ -177,6 +179,7 @@
 			console.log("Setting vim mode to normal (command)");
 			lastCommand += insertedString; // So it can be repeated with . (dot)
 EDITOR.setMode("vimNormal");
+			showMessage(""); // Clear
 			return false;
 		}
 		else {
@@ -202,11 +205,11 @@ EDITOR.setMode("vimNormal");
 			
 			vimCommandBuffer += char;
 			vimCommandCaretPosition++;
+			showMessage("");
 			
 			if(vimCommandBuffer == "u") {
 				// Undo
 				vimUndo(file);
-				clearCommandBuffer();
 			}
 			else if(vimCommandBuffer == ".") {
 				// Repeat last command
@@ -464,9 +467,11 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 	}
 	
 	function vimRedo(file) {
+		clearCommandBuffer();
+		
 		var fileHistory = history[file.path];
 		
-		console.log("vimRedo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
+		console.log("vim:redo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
 		
 		if(fileHistory.length == 0) {
 console.warn("Unable to redo! No recorded history!");
@@ -481,14 +486,16 @@ console.warn("Unable to redo! No recorded history!");
 		
 		var tip = getHistoryTip(fileHistory);
 		var branch = tip.branch;
-		var historyItem = tip.item;
 		
 		if(branch.currentItem == branch.length-1) {
 			console.log("Already at the tip");
+			showMessage("Already at newest change");
 			return false;
 		}
 		
 		branch.currentItem++;
+		
+		var historyItem = branch[branch.currentItem];
 		
 		for (var i=0, f; i<historyItem.redo.length; i++) {
 			f = historyItem.redo[i]
@@ -502,9 +509,11 @@ console.warn("Unable to redo! No recorded history!");
 	}
 	
 	function vimUndo(file) {
+		clearCommandBuffer();
+		
 		var fileHistory = history[file.path];
 		
-		console.log("vimUndo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
+		console.log("vim:undo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
 		
 		console.log("fileHistory: fileHistory.currentItem=" + fileHistory.currentItem);
 		console.log(fileHistory);
@@ -516,6 +525,7 @@ console.warn("Unable to undo! No recorded history!");
 		
 		if(fileHistory.currentItem == -1) {
 			console.log("No more history to undo!");
+			showMessage("Already at oldest change");
 			return false;
 		}
 		
@@ -591,6 +601,8 @@ console.warn("Unable to undo! No recorded history!");
 	function addHistory(file, ev) {
 		// Add/Create a new undo/redo history item, when running a command
 		
+		console.log("vim:addHistory: file.path=" + file.path + " ev=", ev); 
+		
 		var fileHistory = history[file.path];
 		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
 		
@@ -613,12 +625,14 @@ console.warn("Unable to undo! No recorded history!");
 			// We are in the middle of the history, so branche out
 			branch = [];
 			historyItem.currentBranch = historyItem.branches.push(branch)-1;
+			console.log("brancing out");
 		}
 		else {
 			// We are at the tip
 			// Replace current item if it's empty!
 			if(historyItem.undo.length == 0) {
-				historyItem = newEvent;
+				console.log("Replacing tip because it's empty");
+				branch[branch.currentItem] = newEvent;
 				return;
 			}
 		}
@@ -626,6 +640,7 @@ console.warn("Unable to undo! No recorded history!");
 		// Add new history item/event
 		branch.currentItem = branch.push(newEvent) - 1; // Push returns the length of the array
 		
+		console.log("Added new history item/event to branch=", branch);
 	}
 	
 	function HistoryItem(undo, redo) {
@@ -1178,9 +1193,11 @@ return toInsert();
 				EDITOR.renderNeeded();
 			}
 			EDITOR.setMode("vimInsert");
-			insertedString = "";
 			
-			return clearCommandBuffer();
+			insertedString = "";
+			showMessage("-- INSERT --");
+			
+			return clearCommandBuffer(true);
 		}
 		
 	}
@@ -1189,10 +1206,10 @@ return toInsert();
 		commandLineHistory.push(str);
 	}
 	
-	function clearCommandBuffer() {
+	function clearCommandBuffer(dontClearMsg) {
 		vimCommandBuffer = "";
 		vimCommandCaretPosition = 0;
-		clearCommandVisual(EDITOR.canvasContext);
+		if(!dontClearMsg) clearCommandVisual(EDITOR.canvasContext);
 		return false; // false to prevent editor default
 	}
 	
@@ -1369,31 +1386,48 @@ return toInsert();
 	
 	function updateCommandVisual() {
 		var ctx = EDITOR.canvasContext;
+		
 		clearCommandVisual(ctx);
 		showCommandBuffer(ctx);
 		renderCommandCaret(ctx);
 	}
 	
 	function clearCommandVisual(ctx) {
+		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length);
+		
+		console.warn("vim:clearCommandVisual: charCount=" + charCount);
+		
 		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin
-		var textWidth = ctx.measureText(vimCommandBuffer).width;
+		var textWidth = charCount * EDITOR.settings.gridWidth;
 		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin;
 		var height = EDITOR.settings.gridHeight;
-		var width = textWidth;
 		
 		ctx.fillStyle = EDITOR.settings.style.bgColor;
-		ctx.fillRect(left, top, width, height);
+		ctx.fillRect(left, top, textWidth, height);
+	}
+	
+	function showMessage(msg) {
+		console.log("Vim:showMessage:", msg);
+		if(msg == undefined) msg = "";
+		if(typeof msg != "string") msg = JSON.stringify(msg);
+		lastMessageShowed = messageToShow;
+		messageToShow = msg;
+		updateCommandVisual();
 	}
 	
 	function showCommandBuffer(ctx) {
+		var text = messageToShow || vimCommandBuffer;
+		
+		console.log("vim:showCommandBuffer: text=" + text);
+		
+		if(text.length == 0) return;
 		
 		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin
-		var textWidth = ctx.measureText(vimCommandBuffer).width;
+		var textWidth = ctx.measureText(text).width;
 		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin;
 		
 		ctx.fillStyle = EDITOR.settings.style.textColor;
-		//ctx.beginPath(); // Reset all the paths!
-		ctx.fillText(vimCommandBuffer, left, top);
+		ctx.fillText(text, left, top);
 		
 	}
 	
