@@ -92,6 +92,7 @@
 	var vimCommandCaretPosition = "0";
 	var messageToShow = "ENTER COMMAND"; // Helper message to show if there is nothing in command buffer 
 	var lastMessageShowed = "" // Used for measuring text width
+	var discardedCommand = "";
 	var insertedString = "";
 	var lastCommand = "";
 	var searchString = "";
@@ -137,6 +138,7 @@
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			
 			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "vimInsert"});
+			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: resetCommand, charCode: ESC, combo: 0, mode: "vimNormal"});
 			
 			EDITOR.bindKey({desc: "Vim backspace", fun: vimBackspace, charCode: BACKSPACE, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow left: Move caret left", fun: vimLeft, charCode: LEFT, combo: 0, mode: "*"});
@@ -175,16 +177,19 @@
 	}
 	
 	function toVimNormalMode() {
-		if(VIM_ACTIVE) {
 			console.log("Setting vim mode to normal (command)");
 			lastCommand += insertedString; // So it can be repeated with . (dot)
 EDITOR.setMode("vimNormal");
 			showMessage(""); // Clear
-			return false;
-		}
-		else {
-			return true;
-		}
+		return false;
+	}
+	
+	function resetCommand() {
+		console.log("vim:resetCommand: vimCommandBuffer=" + vimCommandBuffer + " EDITOR.mode=" + EDITOR.mode);
+		discardedCommand = vimCommandBuffer;
+		vimCommandBuffer = "";
+		showMessage(""); // Clear
+		return false;
 	}
 	
 	function vimKeyPress(file, char, combo) {
@@ -1017,6 +1022,19 @@ else if(findRight) {
 			*/
 			else if(char == "j") {
 				// Move cursor down one line
+				for (var i=0; i<repeat; i++) {
+					editor.moveCaretDown();
+				}
+				EDITOR.renderNeeded();
+				return clearCommandBuffer();
+			}
+			else if(char == "k") {
+				// Move cursor up one line
+				for (var i=0; i<repeat; i++) {
+					editor.moveCaretUp();
+				}
+				EDITOR.renderNeeded();
+				return clearCommandBuffer();
 			}
 			else if(char == "h") {
 				// Move cursor left n steps
@@ -1129,12 +1147,31 @@ return toInsert();
 					 Deletes or changes inside something.
 					Ex: ci" delets all text inside "here" (seeks to closest " or if inbetween) and goes to insert mode
 				*/
-				return toInsert();
+				var startIndex = file.text.lastIndexOf(char, file.caret.index);
+				var EndIndex = file.text.indexOf(char, file.caret.index);
+				var lineStart = file.grid[file.caret.row].startIndex;
+				var lineEnd = lineStart + file.grid[file.caret.row].length;
+				var caretIndex = file.caret.index;
+				if(startIndex < lineStart) return clearCommandBuffer();
+				else if(EndIndex > lineEnd) return clearCommandBuffer();
+				else {
+					var removedText = file.text.slice(startIndex, EndIndex);
+return done(function undoChangeIn() {
+						file.moveCaretToIndex(startIndex);
+						file.insertText(removedText);
+						file.moveCaretToIndex(caretIndex);
+}, function redoChangeIn() {
+						file.deleteTextRange(startIndex, EndIndex);
+						file.moveCaretToIndex(startIndex);
+}, true);
+				}
 			}
-			
 			else if(char == "i") {
 				// Goes to insert mode
 				return toInsert();
+			}
+			else {
+				console.log("Did not match any known commands: vimCommandBuffer=" + vimCommandBuffer);
 			}
 			
 		}
@@ -1207,12 +1244,12 @@ return toInsert();
 	}
 	
 	function clearCommandBuffer(dontClearMsg) {
+		discardedCommand = vimCommandBuffer;
 		vimCommandBuffer = "";
 		vimCommandCaretPosition = 0;
 		if(!dontClearMsg) clearCommandVisual(EDITOR.canvasContext);
 		return false; // false to prevent editor default
 	}
-	
 	
 	function getNormalMap(char) {
 		// Returns the default vim key-map
@@ -1393,9 +1430,9 @@ return toInsert();
 	}
 	
 	function clearCommandVisual(ctx) {
-		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length);
+		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length, discardedCommand.length);
 		
-		console.warn("vim:clearCommandVisual: charCount=" + charCount);
+		console.warn("vim:clearCommandVisual: charCount=" + charCount + " discardedCommand=" + discardedCommand);
 		
 		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin
 		var textWidth = charCount * EDITOR.settings.gridWidth;
