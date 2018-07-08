@@ -45,7 +45,9 @@ function log(msg, lvl, noTrace) {
 			//CONSOLE_LOG_ORIGINAL("dir=" + dir);
 			//CONSOLE_LOG_ORIGINAL("dir2=" + dir2);
 			var row = stack[2];
-			if(row.indexOf("at Console.console.log") != -1 || row.indexOf("at Console.console.warn") != -1) row = stack[3];
+			if(row.indexOf("at Console.console.log") != -1 || 
+			row.indexOf("at Console.console.warn") != -1 ||
+			row.indexOf("at Console.timeEnd") != -1) row = stack[3];
 			//CONSOLE_LOG_ORIGINAL("row=" + row);
 			var indexDir = row.indexOf(dir);
 			var indexDir2 = row.indexOf(dir2);
