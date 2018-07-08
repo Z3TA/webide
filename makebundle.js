@@ -49,9 +49,10 @@ while ((arr = reStylesheets.exec(bundle)) !== null) {
 		console.log(stylesheet.tag);
 			
 			// Any $ dollar sign will do weird stuff in JavaScript's string replace, here's a workaround:
+			bundle = bundle.replace(stylesheet.tag, function(){return '<style>\n' + content + '\n</style>\n'});
 			
-		bundle = bundle.replace(stylesheet.tag, function(){return '<style><!--\n' + content + '\n--></style>\n'});
-			
+		// Do we have to wrap style code in <!-- --> html comments !?
+		
 		if(++counter == (scripts.length + stylesheets.length)) done();
 			
 		});
