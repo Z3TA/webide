@@ -391,6 +391,13 @@ if(mouseDirection != "up" || button != 2) return; // Only add suggestion on up, 
 			CLIENT.cmd("spellcheck.check", {word: word}, function(err, spell) {
 				if(!enabled) return;
 				
+				if(err) {
+					alertBox("Failed to spellcheck word=" + word + " Error: " + err.message);
+					return;
+				}
+				
+				if(spell == undefined) throw new Error("Did not get a spell object from spellcheck.check word=" + word);
+				
 				if(spell.correct) {
 					cache[word] = true;
 				}
