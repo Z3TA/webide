@@ -438,7 +438,14 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	
 	// You can sometimes get a "Access is denied" error when trying to access window.localStorage for example if the page is running in an iframe
 	
-	if(window.localStorage) {
+	try {
+		var localStorageAvailable = !!window.localStorage;
+	}
+	catch (err) {
+		var localStorageAvailable = false;
+	}
+	
+	if(localStorageAvailable) {
 		// Use window.localStorage but with the same interface as chrome.storage
 		EDITOR.localStorage = {
 			setItem: function localStorageSetItem(key, value, callback) {
