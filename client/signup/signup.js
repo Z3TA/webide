@@ -4,12 +4,18 @@
 	var CHARCODE_ENTER = 13;
 	var MIN_PW_LENGTH = 5;
 	var MIN_USERNAME_LENGTH = 3;
-	
-	
+	var localStorageAvailable = false;
 	
 	window.addEventListener("load", signup, false);
 	
 	function signup() {
+		
+		try {
+			localStorageAvailable = !!window.localStorage;
+		}
+		catch (err) {
+			localStorageAvailable = false;
+		}
 		
 		var host = window.location.hostname;
 		
@@ -86,7 +92,7 @@
 				else if(code == "created") {
 					alertGeneralMessage("Successfully created user " + arr[1]);
 					
-					if(typeof window.localStorage == "object") {
+					if(localStorageAvailable) {
 						window.localStorage.setItem("editorServerUser", arr[1]);
 						// todo: use access token instead of saving pw
 					}
@@ -215,7 +221,7 @@ alertGeneralMessage("Connection to signup service closed! Attempting to reconnec
 			emtyGeneralAlerts();
 			alertGeneralMessage("Creating user " + username + ". Please wait ... You will be redirected to the editor once the account is created.");
 			createButton.disabled = true;
-			if(typeof window.localStorage == "object") {
+			if(localStorageAvailable) {
 				localStorage.setItem("editorServerPw", password);
 				// todo: use access token instead of saving pw
 			}
