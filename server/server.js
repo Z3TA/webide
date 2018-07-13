@@ -165,7 +165,7 @@ function main() {
 	if(info.uid < 0) log("RUNNING IN INSECURE OPERATING SYSTEM\nThe editor will not be able to isolate users.\nMake sure you trust all users.", 4);
 	
 	if(info.uid !== 0 && !USERNAME && !NO_CHROOT) {
-		log("You need to start the server with a previleged user (using sudo) or root account.", 5);
+		log("Run the server with a previleged user (sudo). Or use the -nochroot flag.", 5);
 		log(info);
 		process.exit();
 	}
