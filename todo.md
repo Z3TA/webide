@@ -47,11 +47,8 @@ problem (vim undo/redo):
 1. insert
 2. delete
 3. undo (delete)
-4. redo (delete)
-5. redo (insert) = should be back to the delete
-
-while vim doesn't redo the insert.
-Should an 
+4. redo (delete) but redid the insert! (expected it to redo the delete)
+5. redo (insert) = should be back to the delete (vim: Already at newest change)
 
 
 Should we have a moveFile event !? Or should we rely on the editor closing and reopening a file when it's renamed !?
@@ -59,14 +56,7 @@ Should we have a moveFile event !? Or should we rely on the editor closing and r
 
 http://vimdoc.sourceforge.net/htmldoc/usr_02.html
 
-Add vimInput mode and not just vimCommand !?
-
-Esc should go to vimCommand mode, but there are already so many things bound to Esc, like hiding widgets.
-
 Implementing vim/modal mode (command mode)
-
-Trying to come up with a strategy to implement advanced vim commands with both action and command ...
-
 
 ---
 Investigating using Google Drive on server side using google-drive-ocamlfuse
@@ -93,6 +83,8 @@ todo
 ----
 
 prio: Fix indentation characters so the source code gets clean.
+
+Change hostname in production to webide.se instead of ben
 
 ---
 Make it possible to install the editor via : npm install jzedit
@@ -659,6 +651,8 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+In Firefox when hitting Alt+Z (to zoom) a z gets inserted !
 
 When using console.log in Node.js apps, the messages sometimes doesn't show inline, and sometimes show at another console.log
 
@@ -1506,6 +1500,12 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+See markdown topics that are commented out for example:
+// topic
+// -----
+
+Amend option in source control commit widget
 
 Save login date so it's easy to know which users are inactive
 Recycle guest users (clean data !?) when the guest has not logged in for 10 days
