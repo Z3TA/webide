@@ -4,21 +4,18 @@
 	
 	Proof of concept modal editing like in vi/vim
 	The goal of this plugin is to let old vi/vim users use their reflexes.
-	And make it so you can use the editor conforably on a laptop without a mouse.
+	And make it so you can use the editor comfortably on a laptop without a mouse.
 	Without having to reach for arrow or navigation keys.
 	
 	"Good design is when the program does what the user expects will happen"
 	
 	Problem: A lot of key bindings overlap "modern" key bindings like Ctrl+V for pasting, while in vim it goes into visual block mode.
-	Solution: Existing key bindings have to co-exist with vim/modal mode. We only want the "essential" vim commands.
-	We know we will *never* be able to satisfy hardcore vim users. 
+	Solution: The editor will have different modes, where Ctrl+V to paste is in "default" mode and vim mode is "vimNormal" or "vimInsert".
+	
 	
 	Visual Mode: Basically highlight stuff ... plus some magic !? 
-	We will only support normal mode for now.
-	But maybe we'll add some custom commands !?
+	We will only support normal and insert mode for now.
 	
-	Feel free to make your own vim plugin!
-	If you want the full vim experience you will probably need to run vim via the built in terminal though :P
 	
 	
 	Some vim key bindings:
@@ -68,6 +65,62 @@
 	Idea:
 	:q = window.close
 	:q! = nuke onbeforeunload then window.close (eg don't ask if sure)
+	
+	
+	
+	
+	https://hea-www.harvard.edu/~fine/Tech/vi.html#defs
+	https://www.youtube.com/watch?v=5r6yzFEXajQ
+	
+	
+	
+	
+	// {Command}{Text object || Motion}
+	
+	
+	
+	// Commands d=delete/cut c=delete+insert y=copy v=visually select
+	// Can have a number before, eg repeat this command n times
+	// Example: diw = delete in word
+	// Example: caw = change all word, and go into insert mode
+	// Example: yi) = yank all text inside parentheses (yank=copy)
+	// Example: da[ = delete all text inside the brackets, including the brackets
+	// Example: dtx = delete until the x
+	// Example: dfx = delete until the x, including the f
+	// va" = Visually select all inside the double quotes, uincluding the quotes
+	
+	// u = undo()
+	// y = yank (copy) selected text or followed by text object and or motion
+	// c = change, deletes and goes into insert mode
+	// ex: ci' = change (delete) inside single quote and go into insert mode
+	
+	// p = paste below the current line
+	// P = paste above the current line
+	
+	// example: (not vi standard):
+	// ysiw' = {yank}{substitute single character with new text}{Select all inside the next character}{one word}{single quote}
+	
+	
+	
+	
+	// Repetition, the dot command
+	// ex: ci' + foo + esc (a single motion) ... go to another string and . repeats it
+	
+	
+	// Additional commands
+	// dd/yy = delete/yank the current line
+	// D/C = delete/change until end of line
+	// ^$ = move to the beginning/end of line
+	// I/A = move to the beginning/end of line and go into insert mode
+	// o/O = insert new line above/below current line and go into insert mode
+	
+	// ex: yyp = yank current line, then paste it
+	
+	
+	// Macros: A sequence of commands recorded to a register
+	// ex: q{register} ... starts recording the marcro ... do stuff ... q = ends the macro
+	// @{register} = replays the macro
+	
 	
 */
 
@@ -201,6 +254,16 @@ EDITOR.setMode("vimNormal");
 		
 		if(!VIM_ACTIVE) return true;
 		
+		char = getNormalMap(char); // It's possible to remap keys
+		
+		if(typeof char != "string" && Array.isArray(char)) {
+			// Many characters/commands mapped to the same key or recursive
+			for (var i=0; i<char.length; i++) {
+				vimKeyPress(file, char[i], combo);
+			}
+			return;
+		}
+		
 		if(EDITOR.mode == "vimNormal") {
 			
 			if(char == "\n") { // Press Enter
@@ -236,90 +299,84 @@ EDITOR.setMode("vimNormal");
 			
 			console.log("VimInsert:");
 			var caretIndex = file.caret.index;
+
 			if(char == "\n" || char == "\r") {
 				console.log("Line break");
-				var ev = {
-					undo: function undoNewLine() {
+insertedString += "\n";
+return do(function undoNewLine() {
 						file.moveCaretToIndex(caretIndex);
 						file.moveCaretLeft();
 						file.deleteCharacter();
-					},
-					redo: function redoNewLine() {
+					},function redoNewLine() {
 						file.moveCaretToIndex(caretIndex);
 						file.insertLineBreak();
-					}
+					});
 				}
-				insertedString += "\n";
-			}
 			else if(char.charCodeAt(0) == DELETE) {
 				console.log("DELETE");
+insertedString = insertedString.slice(0,-1);
 				var deletedCharacter = file.text.charAt(file.caret.index);
-				var ev = {
-					undo: function undoDelete() {
+return do(function undoDelete() {
 						file.moveCaretToIndex(caretIndex);
 						file.putCharacter(deletedCharacter);
-					},
-					redo: function redoDelete() {
+					}, function redoDelete() {
 						file.moveCaretToIndex(caretIndex);
 						file.deleteCharacter();
-					}
+					});
 				}
-				insertedString = insertedString.slice(0,-1);
-			}
 			else {
 				console.log("character=" + UTIL.lbChars(char));
-				var ev = {
-					undo: function undoInsert() {
+				insertedString += char;
+				return do(function undoInsertCharacter() {
 						file.moveCaretToIndex(caretIndex);
 						file.moveCaretLeft();
 						file.deleteCharacter();
-					},
-					redo: function redoInsert() {
+				}, function redoInsertCharacter() {
 						file.moveCaretToIndex(caretIndex);
 						file.putCharacter(char);
-					}
+					});
 				}
-				insertedString += char;
-			}
-			
-			ev.redo();
-			EDITOR.renderNeeded();
-			updateHistory(file, ev);
-			
-			return false;
 		}
-		else {
+		else { // Not vimInsert or VimNormal
 			return true; // Do the editor default
 		}
+	}
+	
+	function do(undo, redo) {
+		var ev = {undo: undo, redo: redo};
+		ev.redo();
+		EDITOR.renderNeeded();
+		updateHistory(file, ev);
+		
+		return false;
 	}
 	
 	function vimBackspace(file, combo) {
 		// Backspace is not captured by keyPress!
 		if(!VIM_ACTIVE) return true;
 		if(EDITOR.mode == "vimInsert") {
-			var ev = {
-				redo: function() {
-					file.moveCaretLeft();
-					file.deleteCharacter();
-				}
-			};
+			
+			var backspaceRedo = function moveLeftAndDeleteCharacter() {
+				file.moveCaretLeft();
+				file.deleteCharacter();
+			}
+			
+			var backspaceUndo;
 			
 			if(file.caret.eol) {
-				ev.undo = function() {
+				backspaceUndo = function reinsertLineBreak() {
 					file.insertLineBreak();
 				}
 			}
 			else {
 				var removedCharacter = file.text.charAt(file.caret.index-1);
-				ev.undo = function() {
+				backspaceUndo = function reinsertCharacter() {
 					file.putCharacter(removedCharacter);
 				}
 			}
 			
-			ev.redo();
-			EDITOR.renderNeeded();
-			updateHistory(file, ev);
-			return false;
+			return do(backspaceUndo, backspaceRedo);
+			
 		}
 		else if(EDITOR.mode == "vimNormal") {
 			if(vimCommandCaretPosition == vimCommandBuffer.length) {
@@ -343,6 +400,9 @@ EDITOR.setMode("vimNormal");
 		and . will repeat the insert that happened after the move
 		
 		ci" (change inside ") and inserting text, then undo undoes both inserted text and change (deletion)
+		
+		Arrow keys are not captured by keyPress
+		You can not undo arrow keys (move caret)
 	*/
 	
 	function vimLeft(file, combo) {
@@ -514,6 +574,7 @@ console.warn("Unable to redo! No recorded history!");
 	}
 	
 	function vimUndo(file) {
+		if(!(file instanceof File)) throw new Error("file=" + file); 
 		clearCommandBuffer();
 		
 		var fileHistory = history[file.path];
@@ -649,6 +710,7 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function HistoryItem(undo, redo) {
+		// Object model for history items
 		this.date = new Date();
 		this.undo = undo ? [undo] : [];
 		this.redo = redo ? [redo] : [];
@@ -759,7 +821,7 @@ console.warn("Unable to undo! No recorded history!");
 				for (var j=0; j<charsToReplace; j++) {
 					insertedText += char;
 				}
-				return done(function undoReplaceChar() {
+				return do(function undoReplaceChar() {
 					file.moveCaretToIndex(caretIndex);
 					file.deleteTextRange(caretIndex, caretIndex + charsToReplace - 1);
 					file.insertText(removedText);
@@ -1045,21 +1107,16 @@ else if(findRight) {
 				if(del || change) {
 					var removedText = file.text.slice(file.caret.index, file.caret.index + moveLeft);
 					//var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
-					var undo = function undoDeleteText() {
+					return do(function undoDeleteTextLeft() {
 						file.moveCaretToIndex(caretIndex);
 						file.insertText(removedText);
 						//file.moveCaretRight(file.caret, moveLeft);
-					};
-					var redo = function redoDeleteText() {
+					}, function redoDeleteTextLeft() {
 						file.moveCaretToIndex(caretIndex);
 						file.deleteTextRange(caretIndex, caretIndex + moveLeft - 1);
 						//file.moveCaretRight(file.caret, moveLeft);
-					};
-					
-				}
-				
-				if(del) return done(undo, redo);
-				else if(change) return done(undo, redo, true);
+					}, change);
+					}
 				else return clearCommandBuffer();
 			}
 			else if(char == "l") {
@@ -1156,7 +1213,7 @@ return toInsert();
 				else if(EndIndex > lineEnd) return clearCommandBuffer();
 				else {
 					var removedText = file.text.slice(startIndex, EndIndex);
-return done(function undoChangeIn() {
+					return do(function undoChangeIn() {
 						file.moveCaretToIndex(startIndex);
 						file.insertText(removedText);
 						file.moveCaretToIndex(caretIndex);
@@ -1179,12 +1236,12 @@ return done(function undoChangeIn() {
 		updateCommandVisual();
 		
 		/*
-			When a command have been executed, call either done(), toInsert() or clearCommandBuffer()
+			When a command have been executed, call either do(), toInsert() or clearCommandBuffer()
 		*/
 		
-		function done(undo, redo, toInput) {
-			if(typeof undo != "function") throw new Error("done must be called with a undo function!");
-			if(typeof redo != "function") throw new Error("done must be called with a redo function!");
+		function do(undo, redo, toInput) {
+			if(typeof undo != "function") throw new Error("do must be called with a undo function!");
+			if(typeof redo != "function") throw new Error("do must be called with a redo function!");
 			
 			redo(); // Do it
 			
@@ -1200,9 +1257,8 @@ return done(function undoChangeIn() {
 			lastCommand = str;
 			
 			if(toInput) return toInsert();
-			else {
-				return clearCommandBuffer();
-		}
+			else return clearCommandBuffer();
+		
 		}
 		
 		function foundOperator() {
@@ -1269,142 +1325,6 @@ return done(function undoChangeIn() {
 		if(originalNormalMap[originalStr] == undefined) originalNormalMap[originalStr] = originalStr;
 		normalMap[str] = originalNormalMap[originalStr];
 	}
-	
-	function normal_cmd(commandNr, command, actionNr, action) {
-		
-		/*
-			https://hea-www.harvard.edu/~fine/Tech/vi.html#defs
-			https://www.youtube.com/watch?v=5r6yzFEXajQ
-			
-			
-		*/
-		
-		var file = EDITOR.currentFile;
-		
-		if(!file) return;
-		
-		var YANK = "y";
-		
-		if(command == YANK) pasteBuffer = ""; // Clear the paste buffer
-		
-		
-		var startIndex = file.caret.index;
-		
-		var DELETE = "d";
-		var CHANGE = "c";
-		
-		// Motions (cursor motion command)
-		
-		
-		
-		
-		
-		if(action == MOVE_TO_COLUMN_ZERO) {
-			file.moveCaret(undefined, file.caret.row, 0);
-			if(command == DELETE || command == CHANGE) {
-				var str = file.deleteTextRange(file.caret.index, startIndex);
-				undo.push("i" + str);
-			}
-			if(command == CHANGE) INSERT_MODE = true;
-			EDITOR.renderNeeded();
-			clearCmd();
-		}
-		
-		var MOVE_LEFT_ONE_CHARACTER = "h";
-		var VISUAL_SELECT = "v";
-		
-		if(action == MOVE_LEFT_ONE_CHARACTER) {
-			for (var i=0; i<commandNr*actionNr; i++) {
-				file.moveCaretLeft(file.caret, actionNr);
-				if(command == DELETE || command == CHANGE) {
-					file.deleteCharacter();
-				}
-				else if(command == YANK) pasteBuffer = file.text.charAt(file.caret.index) + paste;
-				else if(command == VISUAL_SELECT) file.select(file.grid[file.caret.row][file.caret.col]);
-			}
-			EDITOR.renderNeeded();
-		}
-		if(lastChar == "j") file.moveCaretDown(file.caret,actionNr);
-		if(lastChar == "k") file.moveCaretUp(file.caret, actionNr);
-		
-		
-		if(lastChar == "e") file.moveCaretToEndOfNextWord()
-		
-		
-		if(lastChar == "H") file.moveCaretToTheTopOfTheWindow();
-		if(lastChar == "M") file.moveCaretToTheMiddleOfTheWindow();
-		if(lastChar == "L") file.moveCaretToTheBottomOfTheWindow();
-		
-		if(lastChar == "g" && llChar == "g") file.moveCaretToTopOfFile();
-		
-		if(lastChar == "G") file.moveCaretToEndOfFile();
-		
-		
-		// Special ? motions a=all i=in til='till f=find-worard F=find-backwards
-		// Doesn't seem to be available in command line vim !?'
-		if(lastChar == "a") file.selectAll(); // All what ?
-		if(lastChar == "i") file.selectIn(); // Select all inside the next character ... eg ' selects all inside the single quotes
-		if(lastChar == "f") file.findForward();
-		if(lastChar == "F") file.findBackward();
-		
-		
-		// Text objects w=word s=sentence p=paragraph t=tag (xml tags)
-		if(lastChar == "w") file.moveCaretToNextWord()
-		if(lastChar == "s") file.moveCaretToNextSentence()
-		if(lastChar == "p") file.moveCaretToNextParagraph()
-		if(lastChar == "t") file.moveCaretToNextTag(); // Available in XML/HTML files
-		
-		
-		// {Command}{Text object || Motion}
-		
-		
-		
-		// Commands d=delete/cut c=delete+insert y=copy v=visually select 
-		// Can have a number before, eg repeat this command n times
-		// Example: diw = delete in word
-		// Example: caw = change all word, and go into insert mode
-		// Example: yi) = yank all text inside parentheses (yank=copy)
-		// Example: da[ = delete all text inside the brackets, including the brackets
-		// Example: dtx = delete until the x
-		// Example: dfx = delete until the x, including the f
-		// va" = Visually select all inside the double quotes, uincluding the quotes
-		
-		// u = undo()
-		// y = yank (copy) selected text or followed by text object and or motion
-		// c = change, deletes and goes into insert mode
-		// ex: ci' = change (delete) inside single quote and go into insert mode
-		
-		// p = paste below the current line
-		// P = paste above the current line
-		
-		// example: (not vi standard): 
-		// ysiw' = {yank}{substitute single character with new text}{Select all inside the next character}{one word}{single quote}
-		
-		
-		
-		
-		// Repetition, the dot command
-		// ex: ci' + foo + esc (a single motion) ... go to another string and . repeats it
-		
-		
-		// Additional commands
-		// dd/yy = delete/yank the current line
-		// D/C = delete/change until end of line
-		// ^$ = move to the beginning/end of line
-		// I/A = move to the beginning/end of line and go into insert mode
-		// o/O = insert new line above/below current line and go into insert mode
-		
-		// ex: yyp = yank current line, then paste it
-		
-		
-		// Macros: A sequence of commands recorded to a register
-		// ex: q{register} ... starts recording the marcro ... do stuff ... q = ends the macro
-		// @{register} = replays the macro
-		
-		
-		
-	}
-	
 	
 	function toggleVim() {
 		if(VIM_ACTIVE) {
@@ -1482,6 +1402,8 @@ return done(function undoChangeIn() {
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal mode on
 			
 			// Tests here
+			
+			
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
