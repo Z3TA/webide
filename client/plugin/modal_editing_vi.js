@@ -127,7 +127,7 @@
 (function() {
 	"use strict";
 	
-	if(window.location.href.indexOf("&vim") == -1) return; // Work in progress!
+	if(window.location.href.indexOf("&vim") == -1) return console.warn("vim mode hidden behind &vim query string flag"); // Work in progress!
 	
 	// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	var BACKSPACE = 8;
@@ -147,7 +147,7 @@
 	var lastMessageShowed = "" // Used for measuring text width
 	var discardedCommand = "";
 	var insertedString = "";
-	var lastCommand = "";
+	var lastCommand = ""; // Used for repeating last command with .
 	var searchString = "";
 	var searchStringHistory = [];
 	var commandLineHistory = [];
@@ -185,6 +185,8 @@
 			
 			EDITOR.on("fileOpen", vimFileOpen);
 			EDITOR.on("fileClose", vimFileClose);
+			EDITOR.on("fileShow", vimFileShow);
+			
 			
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: SPACE, combo: SHIFT, mode: "*"});
 			
@@ -198,6 +200,11 @@
 			EDITOR.bindKey({desc: "Vim arrow right: Move caret right", fun: vimRight, charCode: RIGHT, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow up", fun: vimUp, charCode: UP, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow down", fun: vimDown, charCode: DOWN, combo: 0, mode: "*"});
+			
+			if(EDITOR.settings.devMode) {
+				var DOT = 190;
+				EDITOR.bindKey({desc: "Test vim commands", fun: testVimCommands, charCode: DOT, combo: CTRL+SHIFT, mode: "*"});
+			}
 			
 			EDITOR.addRender(showCommandBuffer);
 			
@@ -218,15 +225,24 @@
 		});
 		
 	function vimFileOpen(file) {
-		if(!VIM_ACTIVE) return true;
-		history[file.path] = [new HistoryItem()];
-		history[file.path].currentItem = 0;
-		return true;
+		if(VIM_ACTIVE) return startHistory(file);
+		else return true;
 	}
 	
 	function vimFileClose(file) {
 		delete history[file];
 		return true;
+	}
+	
+	function vimFileShow(file) {
+		if(!history.hasOwnProperty(file.path)) return startHistory(file);
+		else return true;
+	}
+	
+	function startHistory(file) {
+		history[file.path] = [new HistoryItem()];
+		history[file.path].currentItem = 0;
+		return false;
 	}
 	
 	function toVimNormalMode() {
@@ -340,16 +356,17 @@ insertedString = insertedString.slice(0,-1);
 		else { // Not vimInsert or VimNormal
 			return true; // Do the editor default
 		}
+		
+		function rdo(undo, redo) {
+			var ev = {undo: undo, redo: redo};
+			ev.redo();
+			EDITOR.renderNeeded();
+			updateHistory(file, ev);
+			
+			return false;
+		}
 	}
 	
-	function rdo(undo, redo) {
-		var ev = {undo: undo, redo: redo};
-		ev.redo();
-		EDITOR.renderNeeded();
-		updateHistory(file, ev);
-		
-		return false;
-	}
 	
 	function vimBackspace(file, combo) {
 		// Backspace is not captured by keyPress!
@@ -376,6 +393,15 @@ insertedString = insertedString.slice(0,-1);
 			}
 			
 			return rdo(backspaceUndo, backspaceRedo);
+			
+			function rdo(undo, redo) {
+				var ev = {undo: undo, redo: redo};
+				ev.redo();
+				EDITOR.renderNeeded();
+				updateHistory(file, ev);
+				
+				return false;
+			}
 			
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -627,6 +653,8 @@ console.warn("Unable to undo! No recorded history!");
 		if(typeof ev != "object") throw new Error("Want a history object with undo and redo functions! ev=" + ev + " is not an object!");
 		if(typeof ev.undo != "function") throw new Error("ev.undo=" + ev.undo + " needs to be a function!");
 		if(typeof ev.redo != "function") throw new Error("ev.redo=" + ev.redo + " needs to be a function!");
+		
+		if(!history.hasOwnProperty(file.path)) throw new Error("file.path=" + file.path + " does not exist in history=" + Object.keys(history) + " VIM_ACTIVE=" + VIM_ACTIVE);
 		
 		var fileHistory = history[file.path];
 		
@@ -1240,8 +1268,9 @@ return toInsert();
 		*/
 		
 		function rdo(undo, redo, toInput) {
-			if(typeof undo != "function") throw new Error("do must be called with a undo function!");
-			if(typeof redo != "function") throw new Error("do must be called with a redo function!");
+			// (do is a reserved word thus the function is named rdo)
+			if(typeof undo != "function") throw new Error("rdo() must be called with a undo function!");
+			if(typeof redo != "function") throw new Error("rdo() must be called with a redo function!");
 			
 			redo(); // Do it
 			
@@ -1336,6 +1365,7 @@ return toInsert();
 			VIM_ACTIVE = true;
 			EDITOR.setMode("vimNormal");
 			EDITOR.updateMenuItem(vimMenuItem, true);
+			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
 		}
 		EDITOR.hideMenu();
 		return false;
@@ -1373,6 +1403,8 @@ return toInsert();
 	}
 	
 	function showCommandBuffer(ctx) {
+		if(EDITOR.mode != "vimNormal" && EDITOR.mode != "vimInsert") return;
+		
 		var text = messageToShow || vimCommandBuffer;
 		
 		console.log("vim:showCommandBuffer: text=" + text);
@@ -1394,26 +1426,43 @@ return toInsert();
 		
 	}
 	
-	EDITOR.addTest(function testVimCommands(callback) {
-		
-		EDITOR.openFile("testVimCommands.txt", "abc def ghi\njkl mno pqr\n", function(err, file) {
-			
+	function testVimCommands(callback) {
+		EDITOR.openFile("testVimCommands.txt", "\n", function(err, file) {
 			var vimWasActive = VIM_ACTIVE;
-			if(!vimWasActive) toggleVim(); // Turn Vim/modal mode on
+			if(!vimWasActive) toggleVim();
+			var assert = UTIL.assert();
 			
-			// Tests here
+			/*
+				
+				Following the guide at: http://vimdoc.sourceforge.net/htmldoc/
+				Also repeating the commands in vim to see if they do the same
+				
+				 Tests here:
+			*/
 			
+			// ### *02.2*Inserting text
 			
+			EDITOR.mock("keydown", "i");
+			if(EDITOR.mode != "vimInsert") throw new Error("Expected mode to change to vimInsert after pressing i");
+			EDITOR.mock("typing", "A very intelligent turtle");
+			EDITOR.mock("keydown", "\n");
+			EDITOR.mock("typing", "Found programming UNIX a hurdle");
+			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle\n") throw new Error("Unexpected text: " + file.text);
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			
-			EDITOR.closeFile(file.path);
-			callback(true);
-			
+			//EDITOR.closeFile(file.path);
+			if(typeof callback == "function") callback(true);
+			else {
+alertBox("All vim commands suceeded!");
+			}
 		});
 		
-	}, 1);
+		if(typeof callback != "function") return false;
+		};
+	
+	EDITOR.addTest(testVimCommands, 1);
 	
 })();
 

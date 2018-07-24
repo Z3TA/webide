@@ -3921,6 +3921,12 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 		// Simulate ... 
 		
 		if(mock == "keydown") {
+			if(typeof options == "string") {
+				var letter = options;
+				if(letter.length != 1) throw new Error("keydown can only have one letter or a option object!");
+				options = {charCode: letter.charCodeAt(0)};
+			}
+			
 			if(!options.charCode) throw new Error("options need to contain charCode");
 			if(!options.target) options.target = "fileCanvas";
 			
@@ -3988,6 +3994,12 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 			mouseUp(doubleClickEvent);
 			mouseDown(doubleClickEvent);
 			mouseUp(doubleClickEvent);
+		}
+		else if(mock == "typing") {
+			var text = options;
+			for (var i=0, uppercase; i<text.length; i++) {
+				EDITOR.mock("keypress", { charCode: text.charCodeAt(i), shiftKey: (text.charAt(i).toUpperCase() ==  text.charAt(i)) });
+			}
 		}
 	}
 	
