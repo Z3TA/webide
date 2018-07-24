@@ -303,7 +303,7 @@ EDITOR.setMode("vimNormal");
 			if(char == "\n" || char == "\r") {
 				console.log("Line break");
 insertedString += "\n";
-return do(function undoNewLine() {
+				return rdo(function undoNewLine() {
 						file.moveCaretToIndex(caretIndex);
 						file.moveCaretLeft();
 						file.deleteCharacter();
@@ -316,7 +316,7 @@ return do(function undoNewLine() {
 				console.log("DELETE");
 insertedString = insertedString.slice(0,-1);
 				var deletedCharacter = file.text.charAt(file.caret.index);
-return do(function undoDelete() {
+				return rdo(function undoDelete() {
 						file.moveCaretToIndex(caretIndex);
 						file.putCharacter(deletedCharacter);
 					}, function redoDelete() {
@@ -327,7 +327,7 @@ return do(function undoDelete() {
 			else {
 				console.log("character=" + UTIL.lbChars(char));
 				insertedString += char;
-				return do(function undoInsertCharacter() {
+				return rdo(function undoInsertCharacter() {
 						file.moveCaretToIndex(caretIndex);
 						file.moveCaretLeft();
 						file.deleteCharacter();
@@ -342,7 +342,7 @@ return do(function undoDelete() {
 		}
 	}
 	
-	function do(undo, redo) {
+	function rdo(undo, redo) {
 		var ev = {undo: undo, redo: redo};
 		ev.redo();
 		EDITOR.renderNeeded();
@@ -375,7 +375,7 @@ return do(function undoDelete() {
 				}
 			}
 			
-			return do(backspaceUndo, backspaceRedo);
+			return rdo(backspaceUndo, backspaceRedo);
 			
 		}
 		else if(EDITOR.mode == "vimNormal") {
@@ -821,7 +821,7 @@ console.warn("Unable to undo! No recorded history!");
 				for (var j=0; j<charsToReplace; j++) {
 					insertedText += char;
 				}
-				return do(function undoReplaceChar() {
+				return rdo(function undoReplaceChar() {
 					file.moveCaretToIndex(caretIndex);
 					file.deleteTextRange(caretIndex, caretIndex + charsToReplace - 1);
 					file.insertText(removedText);
@@ -1107,7 +1107,7 @@ else if(findRight) {
 				if(del || change) {
 					var removedText = file.text.slice(file.caret.index, file.caret.index + moveLeft);
 					//var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
-					return do(function undoDeleteTextLeft() {
+					return rdo(function undoDeleteTextLeft() {
 						file.moveCaretToIndex(caretIndex);
 						file.insertText(removedText);
 						//file.moveCaretRight(file.caret, moveLeft);
@@ -1213,7 +1213,7 @@ return toInsert();
 				else if(EndIndex > lineEnd) return clearCommandBuffer();
 				else {
 					var removedText = file.text.slice(startIndex, EndIndex);
-					return do(function undoChangeIn() {
+					return rdo(function undoChangeIn() {
 						file.moveCaretToIndex(startIndex);
 						file.insertText(removedText);
 						file.moveCaretToIndex(caretIndex);
@@ -1236,10 +1236,10 @@ return toInsert();
 		updateCommandVisual();
 		
 		/*
-			When a command have been executed, call either do(), toInsert() or clearCommandBuffer()
+			When a command have been executed, call either rdo(), toInsert() or clearCommandBuffer()
 		*/
 		
-		function do(undo, redo, toInput) {
+		function rdo(undo, redo, toInput) {
 			if(typeof undo != "function") throw new Error("do must be called with a undo function!");
 			if(typeof redo != "function") throw new Error("do must be called with a redo function!");
 			
