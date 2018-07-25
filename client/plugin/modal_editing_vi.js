@@ -1380,7 +1380,7 @@ return toInsert();
 	}
 	
 	function clearCommandVisual(ctx) {
-		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length, discardedCommand.length);
+		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length, discardedCommand.length) + 1;
 		
 		console.warn("vim:clearCommandVisual: charCount=" + charCount + " discardedCommand=" + discardedCommand);
 		
@@ -1448,6 +1448,7 @@ return toInsert();
 			EDITOR.mock("keydown", "\n");
 			EDITOR.mock("typing", "Found programming UNIX a hurdle");
 			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle\n") throw new Error("Unexpected text: " + file.text);
+			
 			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
