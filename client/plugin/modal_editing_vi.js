@@ -160,6 +160,18 @@
 	commandHistory.index = -1;
 	var searchOnlyCommandHistoryStartingWith = ""; // When using up/down arrows to toggle command history
 	
+	var option = {
+		showmode: true, // show EDITOR.mode
+		number: true, // Show line numbers
+		ruler: false, /*
+			When enabled, the ruler is displayed on the right side of the status line at the bottom of the window.
+			By default, it displays the line number, the column number, the virtual column number,
+			and the relative position of the cursor in the file (as a percentage).
+		*/
+		ignorecase: false, // Ignore case when searching
+		hlsearch: false // Highlight text when searching ??
+	}
+	
 	
 	// The original/default vim normal key mapping
 	// a=a, b=b, c=c etc so they can be remapped
@@ -266,11 +278,12 @@ EDITOR.setMode("vimNormal");
 			
 		*/
 		
-		console.log("vimKeyPress: char=" + char + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode);
+		console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode);
 		
 		if(!VIM_ACTIVE) return true;
 		
-		char = getNormalMap(char); // It's possible to remap keys
+		//char = getNormalMap(char); // It's possible to remap keys
+		// map keys inside the parse function !?
 		
 		if(typeof char != "string" && Array.isArray(char)) {
 			// Many characters/commands mapped to the same key or recursive
@@ -282,14 +295,35 @@ EDITOR.setMode("vimNormal");
 		
 		if(EDITOR.mode == "vimNormal") {
 			
-			if(char == "\n") { 
+			if(char == "\n" || char == "\r") { // Sometimes it's LF and sometime CR !? 
 				// Pressed Enter
-				var command = parseCommand(vimCommandBuffer);
-				
-				if(!command) {
-					showMessage("Unknown command: " + vimCommandBuffer);
+				console.log("Vim: pressed Enter: vimCommandBuffer=" + vimCommandBuffer);
+				if(vimCommandBuffer.charAt(0) == ":") {
+					var editorCommand = vimCommandBuffer.slice(1);
+					var runOption = parseOption(vimCommandBuffer);
+					
 					clearCommandBuffer();
+					
+					if(runOption instanceof Error) {
+						showMessage(runOption.message);
+					}
+					else if(typeof runOption == "function") {
+						runOption();
+					}
+					else if(runOption == null) {
+						showMessage("Unknown editor command: " + editorCommand);
+					}
+					else throw new Error("Unexpected: runOption=" + runOption);
+					return false;
 				}
+				else {
+				var command = parseCommand(vimCommandBuffer);
+					if(!command) {
+						showMessage("Unknown command: " + vimCommandBuffer);
+						clearCommandBuffer();
+					}
+				}
+				
 			}
 			else {
 				
@@ -307,15 +341,13 @@ EDITOR.setMode("vimNormal");
 				// Repeat last command
 				var command = parseCommand(lastCommand);
 				}
-			else {
+				else if(vimCommandBuffer.charAt(0) != ":") {
 				var command = parseCommand(vimCommandBuffer);
 			}
+				else console.log("Entering editor command : " + vimCommandBuffer + " ...");
 			}
 			
-			
-			
 			if(command) {
-				
 				if(command.moveCursor) {
 					command.moveCursor();
 				}
@@ -338,6 +370,8 @@ command.redo(); // Runs the command
 					lastCommand = vimCommandBuffer;
 					}
 				
+				clearCommandBuffer();
+				
 if(command.insert) {
 // Insert some text
 					var text = command.insert;
@@ -352,14 +386,14 @@ EDITOR.renderNeeded();
 if(command.toInsert) {
 // Switch to insert mode
 EDITOR.setMode("vimInsert");
-					showMessage("-- INSERT --");
+					if(option.showmode) showMessage("-- INSERT --");
+					
 }
-				
-clearCommandBuffer();
-
-			return false; // Prevent defult browser action
 		}
 			
+			if(vimCommandBuffer.indexOf("\n") != -1) throw new Error("Command buffer contains new-line character! vimCommandBuffer=" + UTIL.lbChars(vimCommandBuffer));
+			
+			return false; // Prevent defult browser action
 		}
 		else if(EDITOR.mode == "vimInsert") {
 			/*
@@ -810,39 +844,45 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function parseOption(str) {
-		if(str.charAt(0) == ":") {
+		
+		console.log("Parsing vim option: " + str);
+		
 			/*
 				# Command line
 				The commands starting with ":" also have a history.  That allows you to recall
 				a previous command and execute it again.  These two histories are separate.
 				
+			*/
+		if(str.slice(0, 5) == ":set ") {
+			/*
 				set: set some option ex: :set option or :set nooption to turn it off
 				a question mark shows if it's on or not: ex: :set compatible? shows compatible if its on or nocompatible if it's off
 			*/
-			if(str == ":set number") {
-				// Turn line numbers on
+			var activate = str.slice(5,7) != "no";
+			var key = activate ? str.slice(5) : str.slice(7);
+			var question = str.slice(-1) == "?";
+			
+			if(question) key = key.slice(0,-1);
+			
+			if(!option.hasOwnProperty(key)) return new Error("Unknown option: " + key);
+			
+			if(question) {
+				return function showStatus() {
+					showMessage( option[key] ? key : "no" + key );
+				}
 			}
-			else if(str == ":set nonumber") {
-				// Turn line numbers off
+			else if(activate) {
+				return function enable() {
+					option[key] = true;
+				}
 			}
-			else if(str == ":set ruler") {
-				/*
-					When enabled, the ruler is displayed on the right side of the status line at the bottom of the window. By default, it displays the line number, the column number, the virtual column number, and the relative position of the cursor in the file (as a percentage).
-				*/
+			else {
+				return function disable() {
+					option[key] = false;
+				}
 			}
-			else if(str == ":set ignorecase") {
-				// Ignores case when searching /i
-			}
-			else if(str == ":set noignorecase") {
-				// Case sensitive searching
-			}
-			else if(str == ":set hlsearch") {
-				highlightAllSearchMatches = true;
-			}
-			else if(str == ":set nohlsearch") {
-				highlightAllSearchMatches = false;
-			}
-			else if(str == ":nohlsearch") {
+		}
+		else if(str == ":nohlsearch") {
 				// Clear all highlighted text
 			}
 			else if(str.slice(0,5) == ":edit") {
@@ -852,10 +892,8 @@ console.warn("Unable to undo! No recorded history!");
 				// Show a list of marks (a-z)
 			}
 			
-			
-			return;
+			else return null;
 		}
-	}
 	
 	function parseCommand(str, file) {
 		/*
@@ -875,6 +913,8 @@ console.warn("Unable to undo! No recorded history!");
 		if(typeof str != "string") throw new Error("Nothing to parse: str=" + str);
 		
 		console.log("Parsing vim command: " + str);
+		
+		if(str.charAt(0) == ":") throw new Error("Parse using parseOption instead!");
 		
 		var nr = "";
 		var repeat = 1;
@@ -1514,7 +1554,13 @@ insertedString = "";
 			EDITOR.mock("typing", "Found programming UNIX a hurdle");
 			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle\n") throw new Error("Unexpected text: " + file.text);
 			
-				
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(EDITOR.mode != "vimNormal") throw new Error("Expected ESC to go back to vimNormal");
+			
+			EDITOR.mock(":set noshowmode");
+			if(settings.showmode != false) throw new Error("Expected :set noshowmode to turn off showmode");
+			
+			
 			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			

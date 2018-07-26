@@ -43,6 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Toggling vim editor commands : up/down arrow keys
+
+Vim tests, continue with vim tutorial and write a test for each feature in the tutorial:
+http://vimdoc.sourceforge.net/htmldoc/usr_02.html
+
 problem (vim undo/redo):
 1. insert
 2. delete
@@ -57,6 +62,38 @@ Should we have a moveFile event !? Or should we rely on the editor closing and r
 http://vimdoc.sourceforge.net/htmldoc/usr_02.html
 
 Implementing vim/modal mode (command mode)
+
+https://www.funfunforum.com/t/vim-tips/4541/16
+(common vim usage) example:
+Anders Evenrud
+Apr 17
+
+I made some mental notes today while I was doing some work, so I could compile a list of keycombos I use a lot (that you’d possibly find interesting) :slight_smile:
+
+    gt & gT - Move bewteen tabs
+    gg - Jump to first line
+    G - Jump to last line
+    ci’ - Remove text inside single quote and go to insert mode (or use v instead of c to select)
+        Very useful for selecting blocks, ex: vi{.
+    cw - Same as above, just for a word
+    ~ - Change casing of letter under cursor
+    Ctrl-a / Ctrl-x - Increment/decrement number under cursor
+    Ctrl-w| - Maximize current split
+    Ctrl-w_ - Minimize current split
+    Ctrl-w= - Restore all split sizes
+    Ctrl-wo - Close all splits except current
+    Ctrl-wv - Split vertically
+    Ctrl-ww - Split horizontally
+    m[register] & ˜[register] - Create a mark on register (a letter) and jump (respectively)
+    * - Search for word under cursor
+    gi - Go to last edit position. Saves a lot of time when farting around to look at stuff
+    Ctrl-v (select rows) Shift-i (insert character) Esc
+        An example here would be to prepend something to a set of lines or comment out blocks
+
+
+
+
+
 
 ---
 Investigating using Google Drive on server side using google-drive-ocamlfuse
@@ -1500,6 +1537,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Add local echo to the terminal plugin. For when the key presses are laggy like in Google cloud shell preview.
 
 See markdown topics that are commented out for example:
 // topic
