@@ -142,7 +142,7 @@
 	
 	var vimMenuItem;
 	var vimCommandBuffer = "";
-	var vimCommandCaretPosition = "0";
+	var commandCaretPosition = 0;
 	var messageToShow = "ENTER COMMAND"; // Helper message to show if there is nothing in command buffer 
 	var lastMessageShowed = "" // Used for measuring text width
 	var discardedCommand = "";
@@ -150,7 +150,6 @@
 	var lastCommand = ""; // Used for repeating last command with .
 	var searchString = "";
 	var searchStringHistory = [];
-	var commandLineHistory = [];
 	var highlightAllSearchMatches = false;
 	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
 	
@@ -278,6 +277,8 @@ EDITOR.setMode("vimNormal");
 			
 		*/
 		
+		if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+		
 		console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode);
 		
 		if(!VIM_ACTIVE) return true;
@@ -314,6 +315,7 @@ EDITOR.setMode("vimNormal");
 						showMessage("Unknown editor command: " + editorCommand);
 					}
 					else throw new Error("Unexpected: runOption=" + runOption);
+					addCommandHistory(editorCommand);
 					return false;
 				}
 				else {
@@ -328,7 +330,7 @@ EDITOR.setMode("vimNormal");
 			else {
 				
 				vimCommandBuffer += char;
-				vimCommandCaretPosition++;
+				commandCaretPosition++;
 				showMessage("");
 				updateCommandVisual();
 				
@@ -364,8 +366,6 @@ command.redo(); // Runs the command
 						undo: command.undo,
 						redo: command.redo
 					});
-					
-					addCommandHistory(vimCommandBuffer);
 					
 					lastCommand = vimCommandBuffer;
 					}
@@ -492,16 +492,27 @@ insertedString = insertedString.slice(0,-1);
 			}
 			
 		}
-		else if(EDITOR.mode == "vimNormal") {
-			if(vimCommandCaretPosition == vimCommandBuffer.length) {
+		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
+			console.log("commandCaretPosition=" + commandCaretPosition);
+			console.log("vimCommandBuffer=" + vimCommandBuffer);
+			
+			if(commandCaretPosition == vimCommandBuffer.length) {
 				vimCommandBuffer = vimCommandBuffer.slice(0,-1);
 			}
 			else {
-				vimCommandBuffer = vimCommandBuffer.slice(0,vimCommandCaretPosition) + vimCommandBuffer.slice(vimCommandCaretPosition+1);
+				vimCommandBuffer = vimCommandBuffer.slice(0,commandCaretPosition) + vimCommandBuffer.slice(commandCaretPosition+1);
 			}
-			vimCommandCaretPosition--;
+			
+			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+			
+			commandCaretPosition--;
 			updateCommandVisual();
-			// Wait for Enter before parsing/executing the command !?
+			// Wait for Enter before parsing/executing the command !? Yes! Only commands starting with : can be edited!
+			
+			return false;
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			clearCommandBuffer();
 			return false;
 		}
 		else {
@@ -529,8 +540,8 @@ insertedString = insertedString.slice(0,-1);
 			insertedString = "";
 			return false;
 		}
-		else if(EDITOR.mode == "vimNormal") {
-			vimCommandCaretPosition--;
+		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":" && commandCaretPosition > 1) {
+			commandCaretPosition--;
 			updateCommandVisual();
 			return false;
 		}
@@ -550,7 +561,7 @@ insertedString = insertedString.slice(0,-1);
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
-			vimCommandCaretPosition--;
+			commandCaretPosition--;
 			updateCommandVisual();
 			return false;
 		}
@@ -562,11 +573,6 @@ insertedString = insertedString.slice(0,-1);
 	function vimUpArrowKey(file, combo) {
 		if(!VIM_ACTIVE) return true;
 		
-		if(commandHistory.length == 0) {
-console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
-			return false;
-		}
-		
 		if(EDITOR.mode == "vimInsert") {
 			file.moveCaretUp();
 			EDITOR.renderNeeded();
@@ -574,7 +580,13 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 			insertedString = "";
 			return false;
 		}
-		else if(EDITOR.mode == "vimNormal") {
+		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
+			
+			if(commandHistory.length == 0) {
+				console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
+				return false;
+			}
+			
 			// Toggle vim command history
 			if(commandHistory.index-1 == commandHistory.length && vimCommandBuffer) {
 				searchOnlyCommandHistoryStartingWith = vimCommandBuffer;
@@ -587,7 +599,7 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 				for (var i=commandHistory.index; i>-1; i--) {
 					if(commandHistory[i].slice(0,vimCommandBuffer.length) == searchOnlyCommandHistoryStartingWith) {
 						vimCommandBuffer = commandHistory[i];
-						vimCommandCaretPosition = vimCommandBuffer.length;
+						commandCaretPosition = vimCommandBuffer.length;
 						commandHistory.index = i;
 						break;
 					}
@@ -596,9 +608,12 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 			else {
 				commandHistory.index--;
 				vimCommandBuffer = commandHistory[commandHistory.index];
-				vimCommandCaretPosition = vimCommandBuffer.length;
+				commandCaretPosition = vimCommandBuffer.length;
 			}
 			updateCommandVisual();
+			
+			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+			
 			return false;
 		}
 		else {
@@ -616,8 +631,13 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 			insertedString = "";
 			return false;
 		}
-		else if(EDITOR.mode == "vimNormal") {
+		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
 			// Toggle vim command history
+			
+			if(commandHistory.length == 0) {
+				console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
+				return false;
+			}
 			
 			// Do nothing if we're already at the history tip
 			if(commandHistory.index-1 == commandHistory.length) return false; 
@@ -626,7 +646,7 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 				for (var i=commandHistory.index; i<commandHistory.length; i) {
 					if(commandHistory[i].slice(0,vimCommandBuffer.length) == searchOnlyCommandHistoryStartingWith) {
 						vimCommandBuffer = commandHistory[i];
-						vimCommandCaretPosition = vimCommandBuffer.length;
+						commandCaretPosition = vimCommandBuffer.length;
 						commandHistory.index = i;
 						break;
 					}
@@ -634,10 +654,17 @@ console.warn("No commands have been entered! commandHistory.length=" + commandHi
 			}
 			else {
 				commandHistory.index++;
+				console.log("commandHistory:", commandHistory);
+				console.log("commandHistory.length=" + commandHistory.length);
+				console.log("commandHistory.index=" + commandHistory.index);
 				vimCommandBuffer = commandHistory[commandHistory.index];
-				vimCommandCaretPosition = vimCommandBuffer.length;
+				commandCaretPosition = vimCommandBuffer.length;
 			}
+			
+			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+			
 			updateCommandVisual();
+			
 			return false;
 		}
 		else {
@@ -835,10 +862,10 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function addCommandHistory(command) {
-		// normal mode history
+		if(command.charAt(0) != ":") throw new Error("Only store commands starting with :");
 		
 		// Don't add to command history if the command was repeated
-		if(commandHistory.length > 0 && commandHistory[commandHistory.length-1] != command) {
+		if(commandHistory.length == 0 || commandHistory[commandHistory.length-1] != command) {
 			commandHistory.push(command);
 		}
 	}
@@ -1429,16 +1456,12 @@ insertedString = "";
 		
 	}
 	
-	function commandLineDone(str) {
-		commandLineHistory.push(str);
-	}
-	
 	function clearCommandBuffer(dontClearMsg) {
 		discardedCommand = vimCommandBuffer;
 		vimCommandBuffer = "";
-		vimCommandCaretPosition = 0;
+		commandCaretPosition = 0;
 		if(!dontClearMsg) clearCommandVisual(EDITOR.canvasContext);
-		return false; // false to prevent editor default
+		return false; // false to prevent editor default, so we can return call to this function
 	}
 	
 	function getNormalMap(char) {
@@ -1485,6 +1508,16 @@ insertedString = "";
 	}
 	
 	function clearCommandVisual(ctx) {
+		
+		// Why is vimCommandBuffer undefined !?
+		console.log("typeof vimCommandBuffer: " + typeof vimCommandBuffer);
+		console.log("vimCommandBuffer=" + vimCommandBuffer);
+		console.log(vimCommandBuffer.length);
+		console.log(lastCommand.length);
+		console.log(messageToShow.length);
+		console.log(lastMessageShowed.length);
+		console.log(discardedCommand.length);
+		
 		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length, discardedCommand.length) + 1;
 		
 		console.warn("vim:clearCommandVisual: charCount=" + charCount + " discardedCommand=" + discardedCommand);
@@ -1527,7 +1560,7 @@ insertedString = "";
 	
 	function renderCommandCaret(ctx) {
 		// Don't sow the caret if it's at the end of the buffer
-		if(vimCommandBuffer.length == vimCommandCaretPosition) return;
+		if(vimCommandBuffer.length == commandCaretPosition) return;
 		
 	}
 	

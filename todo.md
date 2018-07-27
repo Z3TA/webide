@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Moving cursor in vim editor command (left/right arrow)
+
 Toggling vim editor commands : up/down arrow keys
 
 Vim tests, continue with vim tutorial and write a test for each feature in the tutorial:
