@@ -127,7 +127,10 @@
 (function() {
 	"use strict";
 	
-	if(window.location.href.indexOf("&vim") == -1) return console.warn("vim mode hidden behind &vim query string flag"); // Work in progress!
+	if(window.location.href.indexOf("&vim") == -1) {
+console.warn("vim mode hidden behind &vim query string flag"); // Work in progress!
+		return;
+	}
 	
 	// https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	var BACKSPACE = 8;
@@ -202,7 +205,7 @@
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			
 			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "vimInsert"});
-			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: resetCommand, charCode: ESC, combo: 0, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: clearCommandBuffer, charCode: ESC, combo: 0, mode: "vimNormal"});
 			
 			EDITOR.bindKey({desc: "Vim backspace", fun: vimBackspace, charCode: BACKSPACE, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow left: Move caret left", fun: vimLeftArrowKey, charCode: LEFT, combo: 0, mode: "*"});
@@ -255,18 +258,12 @@
 	}
 	
 	function toVimNormalMode() {
-			console.log("Setting vim mode to normal (command)");
+		
+		
+		console.log("Setting vim mode to normal (command)");
 			lastCommand += insertedString; // So it can be repeated with . (dot)
 EDITOR.setMode("vimNormal");
 			showMessage(""); // Clear
-		clearCommandBuffer();
-		return false;
-	}
-	
-	function resetCommand() {
-		console.log("vim:resetCommand: vimCommandBuffer=" + vimCommandBuffer + " EDITOR.mode=" + EDITOR.mode);
-		vimCommandBuffer = "";
-		showMessage(""); // Clear
 		return false;
 	}
 	
@@ -572,6 +569,8 @@ insertedString = insertedString.slice(0,-1);
 	function vimUpArrowKey(file, combo) {
 		if(!VIM_ACTIVE) return true;
 		
+		console.log("vim key up");
+		
 		if(EDITOR.mode == "vimInsert") {
 			file.moveCaretUp();
 			EDITOR.renderNeeded();
@@ -581,8 +580,20 @@ insertedString = insertedString.slice(0,-1);
 		}
 		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
 			
+			console.log("commandHistory.length=" + commandHistory.length + " commandHistory.index=" + commandHistory.index);
+			
 			if(commandHistory.length == 0) {
 				console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
+				return false;
+			}
+			
+			if(commandHistory.index+1 == commandHistory.length) {
+				// Add current command to the history before selecting an older entry
+				addCommandHistory(vimCommandBuffer);
+			}
+			
+			if(commandHistory.index == 0) {
+				console.log("Already at the oldest commandHistory entry! commandHistory.index=" + commandHistory.index + " commandHistory.length=" + commandHistory + "");
 				return false;
 			}
 			
@@ -606,6 +617,7 @@ insertedString = insertedString.slice(0,-1);
 			}
 			else {
 				commandHistory.index--;
+				if(commandHistory.index < 0) throw new Error("commandHistory.index=" + commandHistory.index);
 				vimCommandBuffer = commandHistory[commandHistory.index];
 				commandCaretPosition = vimCommandBuffer.length;
 			}
@@ -639,10 +651,13 @@ insertedString = insertedString.slice(0,-1);
 			}
 			
 			// Do nothing if we're already at the history tip
-			if(commandHistory.index-1 == commandHistory.length) return false; 
+			if(commandHistory.index+1 == commandHistory.length) {
+				console.log("Already at history tip"); 
+				return false;
+			}
 			
 			if(searchOnlyCommandHistoryStartingWith) {
-				for (var i=commandHistory.index; i<commandHistory.length; i) {
+				for (var i=commandHistory.index; i<commandHistory.length; i++) {
 					if(commandHistory[i].slice(0,vimCommandBuffer.length) == searchOnlyCommandHistoryStartingWith) {
 						vimCommandBuffer = commandHistory[i];
 						commandCaretPosition = vimCommandBuffer.length;
@@ -861,11 +876,23 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function addCommandHistory(command) {
-		if(command.charAt(0) != ":") throw new Error("Only store commands starting with :");
+		if(command.charAt(0) != ":") {
+console.warn("Only store commands starting with :");
+			return null;
+		}
 		
 		// Don't add to command history if the command was repeated
 		if(commandHistory.length == 0 || commandHistory[commandHistory.length-1] != command) {
-			commandHistory.push(command);
+			if(commandHistory.index+1 == commandHistory.length) {
+				// At the tip
+				commandHistory.index++;
+			}
+			var index = commandHistory.push(command);
+			return index;
+		}
+		else {
+			console.log("command=" + command + " same ast last command in history");
+			return null;
 		}
 	}
 	
@@ -873,8 +900,8 @@ console.warn("Unable to undo! No recorded history!");
 		
 		console.log("Parsing vim option: " + str);
 		
-			/*
-				# Command line
+		/*
+			# Command line
 				The commands starting with ":" also have a history.  That allows you to recall
 				a previous command and execute it again.  These two histories are separate.
 				
@@ -1456,9 +1483,17 @@ insertedString = "";
 	}
 	
 	function clearCommandBuffer() {
+		console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
+		
+		addCommandHistory(vimCommandBuffer);
+		
 		vimCommandBuffer = "";
 		commandCaretPosition = 0;
-		return false; // false to prevent editor default, so we can return call to this function
+		messageToShow = "";
+		EDITOR.renderNeeded();
+		
+		console.log("Cleared command buffer!");
+		return false; // false to prevent editor default
 	}
 	
 	function getNormalMap(char) {
@@ -1588,10 +1623,18 @@ insertedString = "";
 			
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(vimCommandBuffer != "") throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer);
-			if(commandCaretPosition != 0) throw new Error("Expected reset when pressing Esc: commandCaretPosition=" + commandCaretPosition);
+			if(commandCaretPosition != 0) throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer + " commandCaretPosition=" + commandCaretPosition);
+			
+			EDITOR.mock("keydown", ":");
+			EDITOR.mock("keydown", {charCode: UP});
+			if(vimCommandBuffer != ":foo") throw new Error("Expected key up to toggle command history! vimCommandBuffer=" + vimCommandBuffer + " commandHistory.length=" + commandHistory.length);
+			
 			
 			EDITOR.mock("typing", ":set noshowmode");
-			if(settings.showmode != false) throw new Error("Expected :set noshowmode to turn off showmode");
+			if(setting.showmode != false) throw new Error("Expected :set noshowmode to turn off showmode");
+			
+			EDITOR.mock("typing", ":set showmode?");
+			if(messageToShow != "noshowmode") throw new Error("Expected :set showmode? to show noshowmode because it's turned off");
 			
 			
 			
