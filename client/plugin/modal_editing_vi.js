@@ -258,8 +258,6 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	}
 	
 	function toVimNormalMode() {
-		
-		
 		console.log("Setting vim mode to normal (command)");
 			lastCommand += insertedString; // So it can be repeated with . (dot)
 EDITOR.setMode("vimNormal");
@@ -1482,8 +1480,47 @@ insertedString = "";
 		
 	}
 	
+	function beep(volume, frequency, type, duration) {
+		
+		// What I imagine the beep sound like
+		if(volume == undefined) volume = 0.15;
+		if(frequency == undefined) frequency = 100;
+		if(type == undefined) type = "square";
+		if(duration == undefined) duration = 120;
+		
+		var audio = window.AudioContext || window.webkitAudioContext
+		var audioCtx = new audio;
+		var oscillator = audioCtx.createOscillator();
+		var gainNode = audioCtx.createGain();
+		
+		oscillator.connect(gainNode);
+		gainNode.connect(audioCtx.destination);
+		
+		gainNode.gain.value = volume;
+		oscillator.frequency.value = frequency;
+		oscillator.type = type;
+		
+		oscillator.start();
+		oscillator.stop(audioCtx.currentTime + duration/1000)
+		
+		//setTimeout(function() {oscillator.stop();},duration);
+		
+	};
+	
 	function clearCommandBuffer() {
 		console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
+		
+		if(EDITOR.mode == "vimNormal" && vimCommandBuffer == "" && messageToShow == "") {
+			beep();
+			console.log("beep!");
+			return false;
+		}
+		else {
+			console.log("nobeep");
+			console.log("EDITOR.mode=" + EDITOR.mode);
+			console.log("vimCommandBuffer=" + vimCommandBuffer);
+			console.log("messageToShow=" + messageToShow);
+		}
 		
 		addCommandHistory(vimCommandBuffer);
 		

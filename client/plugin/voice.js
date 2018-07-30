@@ -2,7 +2,7 @@
 	
 	"use strict";
 	
-	return console.warn("under construction");
+	return console.warn("Speech Synthesis under construction");
 	
 	if (!('speechSynthesis' in window)) {
 		console.warn("Speech Synthesis not possible in your browser!");
@@ -18,6 +18,8 @@
 	EDITOR.plugin({
 		desc: "Speech Synthesis",
 		load: function loadVoicePlugin() {
+			
+			console.log("Loading " + this.desc + " ...");
 			
 			var key_M = 77;
 			
@@ -185,4 +187,3 @@
 	
 	
 })();
-	
