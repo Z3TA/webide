@@ -111,33 +111,14 @@
 				
 				//console.log("rendering: " + char);
 				
-				ctx.fillStyle = makeTransparent(box.color); // for fillText rgb 
+				ctx.fillStyle = UTIL.makeColorTransparent(box.color, transpLvl); // for fillText rgb 
 				
-				//console.log("ctx.fillStyle=" + ctx.fillStyle + " hmm=" + makeTransparent(box.color));
+				//console.log("ctx.fillStyle=" + ctx.fillStyle + " hmm=" + UTIL.makeColorTransparent(box.color));
 				
 				ctx.fillText(char, left, top);
 			}
 		}
 		
-		function makeTransparent(colorString) {
-			// Take a rgb color and make it transparent rgba
-			var useTranspLvl;
-			
-			if(transpLvl < 10) {
-				useTranspLvl = "0" + transpLvl;
-			}
-			else {
-				useTranspLvl = transpLvl;
-			}
-			
-			if(colorString.substr(0, 4) == "rgb(") {
-				return "rgba(" + colorString.substring(4, colorString.indexOf(")")) + ", 0." + useTranspLvl + ")";
-			}
-			else {
-				console.warn("Unknown color: " + colorString);
-				return "rgba(255,0,0, 0.5)";
-			}
-		}
 		
 	}
 	

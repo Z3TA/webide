@@ -1524,6 +1524,26 @@ while(url.slice(-1) == delimiter) url = url.slice(0,-1);
 		str = str.replace(/[^a-z0-9]/g,'');
 		
 		return str;
+	},
+	
+	makeColorTransparent: function makeTransparent(colorString, transpLvl) {
+		// Take a rgb color and make it transparent rgba
+		var useTranspLvl;
+		
+		if(transpLvl < 10) {
+			useTranspLvl = "0" + transpLvl;
+		}
+		else {
+			useTranspLvl = transpLvl;
+		}
+		
+		if(colorString.substr(0, 4) == "rgb(") {
+			return "rgba(" + colorString.substring(4, colorString.indexOf(")")) + ", 0." + useTranspLvl + ")";
+		}
+		else {
+			console.warn("Unknown color: " + colorString);
+			return "rgba(255,0,0, 0.5)";
+		}
 	}
 	
 }

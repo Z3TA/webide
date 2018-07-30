@@ -144,8 +144,6 @@
 	var vimCommandBuffer = "";
 	var commandCaretPosition = 0;
 	var messageToShow = "ENTER COMMAND"; // Helper message to show if there is nothing in command buffer 
-	var lastMessageShowed = "" // Used for measuring text width
-	var discardedCommand = "";
 	var insertedString = "";
 	var lastCommand = ""; // Used for repeating last command with .
 	var searchString = "";
@@ -261,12 +259,12 @@
 			lastCommand += insertedString; // So it can be repeated with . (dot)
 EDITOR.setMode("vimNormal");
 			showMessage(""); // Clear
+		clearCommandBuffer();
 		return false;
 	}
 	
 	function resetCommand() {
 		console.log("vim:resetCommand: vimCommandBuffer=" + vimCommandBuffer + " EDITOR.mode=" + EDITOR.mode);
-		discardedCommand = vimCommandBuffer;
 		vimCommandBuffer = "";
 		showMessage(""); // Clear
 		return false;
@@ -315,7 +313,8 @@ EDITOR.setMode("vimNormal");
 						showMessage("Unknown editor command: " + editorCommand);
 					}
 					else throw new Error("Unexpected: runOption=" + runOption);
-					addCommandHistory(editorCommand);
+					
+					addCommandHistory(":" + editorCommand);
 					return false;
 				}
 				else {
@@ -332,7 +331,6 @@ EDITOR.setMode("vimNormal");
 				vimCommandBuffer += char;
 				commandCaretPosition++;
 				showMessage("");
-				updateCommandVisual();
 				
 				if(vimCommandBuffer == "u") {
 					// Undo
@@ -506,7 +504,8 @@ insertedString = insertedString.slice(0,-1);
 			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
 			
 			commandCaretPosition--;
-			updateCommandVisual();
+			EDITOR.renderNeeded();
+			
 			// Wait for Enter before parsing/executing the command !? Yes! Only commands starting with : can be edited!
 			
 			return false;
@@ -542,7 +541,7 @@ insertedString = insertedString.slice(0,-1);
 		}
 		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":" && commandCaretPosition > 1) {
 			commandCaretPosition--;
-			updateCommandVisual();
+			EDITOR.renderNeeded();
 			return false;
 		}
 		else {
@@ -561,8 +560,8 @@ insertedString = insertedString.slice(0,-1);
 			return false;
 		}
 		else if(EDITOR.mode == "vimNormal") {
-			commandCaretPosition--;
-			updateCommandVisual();
+			commandCaretPosition++;
+			EDITOR.renderNeeded();
 			return false;
 		}
 		else {
@@ -610,7 +609,7 @@ insertedString = insertedString.slice(0,-1);
 				vimCommandBuffer = commandHistory[commandHistory.index];
 				commandCaretPosition = vimCommandBuffer.length;
 			}
-			updateCommandVisual();
+			EDITOR.renderNeeded();
 			
 			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
 			
@@ -663,7 +662,7 @@ insertedString = insertedString.slice(0,-1);
 			
 			if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
 			
-			updateCommandVisual();
+			EDITOR.renderNeeded();
 			
 			return false;
 		}
@@ -1456,11 +1455,9 @@ insertedString = "";
 		
 	}
 	
-	function clearCommandBuffer(dontClearMsg) {
-		discardedCommand = vimCommandBuffer;
+	function clearCommandBuffer() {
 		vimCommandBuffer = "";
 		commandCaretPosition = 0;
-		if(!dontClearMsg) clearCommandVisual(EDITOR.canvasContext);
 		return false; // false to prevent editor default, so we can return call to this function
 	}
 	
@@ -1499,45 +1496,12 @@ insertedString = "";
 		return false;
 	}
 	
-	function updateCommandVisual() {
-		var ctx = EDITOR.canvasContext;
-		
-		clearCommandVisual(ctx);
-		showCommandBuffer(ctx);
-		renderCommandCaret(ctx);
-	}
-	
-	function clearCommandVisual(ctx) {
-		
-		// Why is vimCommandBuffer undefined !?
-		console.log("typeof vimCommandBuffer: " + typeof vimCommandBuffer);
-		console.log("vimCommandBuffer=" + vimCommandBuffer);
-		console.log(vimCommandBuffer.length);
-		console.log(lastCommand.length);
-		console.log(messageToShow.length);
-		console.log(lastMessageShowed.length);
-		console.log(discardedCommand.length);
-		
-		var charCount = Math.max(vimCommandBuffer.length, lastCommand.length, messageToShow.length, lastMessageShowed.length, discardedCommand.length) + 1;
-		
-		console.warn("vim:clearCommandVisual: charCount=" + charCount + " discardedCommand=" + discardedCommand);
-		
-		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin
-		var textWidth = charCount * EDITOR.settings.gridWidth;
-		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin;
-		var height = EDITOR.settings.gridHeight;
-		
-		ctx.fillStyle = EDITOR.settings.style.bgColor;
-		ctx.fillRect(left, top, textWidth, height);
-	}
-	
 	function showMessage(msg) {
 		console.log("Vim:showMessage:", msg);
 		if(msg == undefined) msg = "";
 		if(typeof msg != "string") msg = JSON.stringify(msg);
-		lastMessageShowed = messageToShow;
 		messageToShow = msg;
-		updateCommandVisual();
+		EDITOR.renderNeeded();
 	}
 	
 	function showCommandBuffer(ctx) {
@@ -1550,19 +1514,38 @@ insertedString = "";
 		if(text.length == 0) return;
 		
 		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin
-		var textWidth = ctx.measureText(text).width;
+		var measuredText = ctx.measureText(text)
+		var textWidth = measuredText.width;
+		var textHeight = measuredText.height || EDITOR.settings.gridHeight;
 		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin;
 		
+		console.log("measuredText=", measuredText);
+		
+		// Transparent padding / text fade out before cut
+		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.bgColor, 70);
+		ctx.fillRect(left-40, top-16, 24, textHeight+64);
+		
+		// Background for the text
+		ctx.fillStyle = EDITOR.settings.style.bgColor;
+		ctx.fillRect(left-16, top-16, textWidth+64, textHeight+64);
+		
+		// Print the text
 		ctx.fillStyle = EDITOR.settings.style.textColor;
 		ctx.fillText(text, left, top);
 		
-	}
-	
-	function renderCommandCaret(ctx) {
-		// Don't sow the caret if it's at the end of the buffer
+		// Don't show the caret if it's at the end of the buffer
 		if(vimCommandBuffer.length == commandCaretPosition) return;
 		
+		var textToCaret = ctx.measureText(text.slice(0, commandCaretPosition)).width;
+		
+		ctx.fillStyle = EDITOR.settings.caret.color;
+		
+		ctx.fillRect(left + textToCaret + 1, top, EDITOR.settings.caret.width, textHeight);
+		
 	}
+	
+	
+	// TEST-CODE-START
 	
 	function testVimCommands(callback) {
 		EDITOR.openFile("testVimCommands.txt", "\n", function(err, file) {
@@ -1590,7 +1573,24 @@ insertedString = "";
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(EDITOR.mode != "vimNormal") throw new Error("Expected ESC to go back to vimNormal");
 			
-			EDITOR.mock(":set noshowmode");
+			EDITOR.mock("typing", ":foo");
+			if(vimCommandBuffer != ":foo") throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+			if(commandCaretPosition != vimCommandBuffer.length) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition);
+			
+			EDITOR.mock("keydown", {charCode: LEFT});
+			if(commandCaretPosition != vimCommandBuffer.length-1) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected arrow left to move the caret left!");
+			
+			EDITOR.mock("keydown", {charCode: LEFT});
+			if(commandCaretPosition != vimCommandBuffer.length-2) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected two arrow left to move the caret left two steps!");
+			
+			EDITOR.mock("keydown", {charCode: RIGHT});
+			if(commandCaretPosition != vimCommandBuffer.length-1) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected two arrow right to move the caret right!");
+			
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(vimCommandBuffer != "") throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer);
+			if(commandCaretPosition != 0) throw new Error("Expected reset when pressing Esc: commandCaretPosition=" + commandCaretPosition);
+			
+			EDITOR.mock("typing", ":set noshowmode");
 			if(settings.showmode != false) throw new Error("Expected :set noshowmode to turn off showmode");
 			
 			
@@ -1608,6 +1608,8 @@ alertBox("All vim commands suceeded!");
 		};
 	
 	EDITOR.addTest(testVimCommands, 1);
+	
+	// TEST-CODE-END
 	
 })();
 
