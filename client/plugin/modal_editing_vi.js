@@ -236,6 +236,18 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 		}
 		});
 		
+	function noEol() {
+		var file = EDITOR.currentFile;
+		if(file == undefined) return null;
+		//console.log("file.caret.row=" + file.caret.row + " file.grid[" + file.caret.row + "].length=" + file.grid[file.caret.row].length + " file.caret.eol=" + file.caret.eol);
+		if(file.grid[file.caret.row].length > 0 && file.caret.eol) 
+		{
+file.moveCaretLeft();
+			return true;
+		}
+		else return false;
+	}
+	
 	function vimFileOpen(file) {
 		if(VIM_ACTIVE) return startHistory(file);
 		else return true;
@@ -258,10 +270,16 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	}
 	
 	function toVimNormalMode() {
-		console.log("Setting vim mode to normal (command)");
-			lastCommand += insertedString; // So it can be repeated with . (dot)
-EDITOR.setMode("vimNormal");
+		if(EDITOR.mode != "vimInsert") throw new Error("Expected vimInsert: EDITOR.mode=" + EDITOR.mode);
+		console.log("Setting vim mode to normal (command mode)");
+			
+		lastCommand += insertedString; // So it can be repeated with . (dot)
+
+		noEol();
+		
+		EDITOR.setMode("vimNormal");
 			showMessage(""); // Clear
+		
 		return false;
 	}
 	
@@ -1260,7 +1278,7 @@ else if(findRight) {
 				// Move cursor down one line
 				return cursorMovement(function moveCursorDown() {
 				for (var i=0; i<repeat; i++) {
-					editor.moveCaretDown();
+						file.moveCaretDown();
 				}
 				});
 			}
@@ -1268,7 +1286,7 @@ else if(findRight) {
 				// Move cursor up one line
 				return cursorMovement(function moveCursorUp() {
 				for (var i=0; i<repeat; i++) {
-					editor.moveCaretUp();
+						file.moveCaretUp();
 				}
 				});
 			}
@@ -1300,10 +1318,10 @@ else if(findRight) {
 				}
 			}
 			else if(char == "l") {
-				// Move cursor right n steps
+				console.log("Move cursor right " + repeat + " steps: file.grid[file.caret.row].length=" + file.grid[file.caret.row].length + " file.caret.col=" + file.caret.col);
 				if(file.caret.col < file.grid[file.caret.row].length) {
 					return cursorMovement(function moveCursorRight() {
-file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length-file.caret.col, repeat));
+						file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length - file.caret.col - 2, repeat));
 				});
 				}
 				else return nil();
@@ -1510,7 +1528,10 @@ insertedString = "";
 	function clearCommandBuffer() {
 		console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
 		
-		if(EDITOR.mode == "vimNormal" && vimCommandBuffer == "" && messageToShow == "") {
+		var moved = noEol();
+		
+		if(EDITOR.mode == "vimNormal" && vimCommandBuffer == "" && messageToShow == "" && !moved) {
+			// A beep means we did nothing, and are already in normal mode
 			beep();
 			console.log("beep!");
 			return false;
@@ -1563,6 +1584,7 @@ insertedString = "";
 			EDITOR.setMode("vimNormal");
 			EDITOR.updateMenuItem(vimMenuItem, true);
 			if(EDITOR.currentFile && !history.hasOwnProperty(EDITOR.currentFile)) startHistory(EDITOR.currentFile);
+			noEol();
 		}
 		EDITOR.hideMenu();
 		return false;
@@ -1591,7 +1613,7 @@ insertedString = "";
 		var textHeight = measuredText.height || EDITOR.settings.gridHeight;
 		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin;
 		
-		console.log("measuredText=", measuredText);
+		//console.log("measuredText=", measuredText);
 		
 		// Transparent padding / text fade out before cut
 		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.bgColor, 70);
@@ -1641,9 +1663,29 @@ insertedString = "";
 			EDITOR.mock("keydown", "\n");
 			EDITOR.mock("typing", "Found programming UNIX a hurdle");
 			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle\n") throw new Error("Unexpected text: " + file.text);
+			if(file.caret.col != 31 || file.caret.eol !== true) throw new Error("file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
 			
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(EDITOR.mode != "vimNormal") throw new Error("Expected ESC to go back to vimNormal");
+			if(file.caret.col != 30 || file.caret.eol !== false) throw new Error("ESC should place the caret at the last caret and not at end of line! file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
+			
+			EDITOR.mock("typing", ":set showmode");
+			EDITOR.mock("keydown", "\n"); // Enter is caputured by keyPress
+			if(option.showmode != true) throw new Error("Expected :set showmode to turn on showmode");
+			
+			EDITOR.mock("typing", "h");
+			if(file.caret.col != 29 || file.caret.eol !== false) throw new Error("Expected h to move the cursor left! file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
+			
+			EDITOR.mock("typing", "l");
+			if(file.caret.col != 30) throw new Error("Expected l to move the cursor right! file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
+			
+			EDITOR.mock("typing", "l");
+			if(file.caret.col != 30) throw new Error("Expected l to Not move the cursor to end of line! file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
+			
+			
+			
+			return true;
+			
 			
 			EDITOR.mock("typing", ":foo");
 			if(vimCommandBuffer != ":foo") throw new Error("vimCommandBuffer=" + vimCommandBuffer);
@@ -1667,8 +1709,6 @@ insertedString = "";
 			if(vimCommandBuffer != ":foo") throw new Error("Expected key up to toggle command history! vimCommandBuffer=" + vimCommandBuffer + " commandHistory.length=" + commandHistory.length);
 			
 			
-			EDITOR.mock("typing", ":set noshowmode");
-			if(setting.showmode != false) throw new Error("Expected :set noshowmode to turn off showmode");
 			
 			EDITOR.mock("typing", ":set showmode?");
 			if(messageToShow != "noshowmode") throw new Error("Expected :set showmode? to show noshowmode because it's turned off");
