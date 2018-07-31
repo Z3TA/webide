@@ -153,6 +153,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var searchStringHistory = [];
 	var highlightAllSearchMatches = false;
 	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
+	var lastCol = 0; // When moving the cursor up/down try to place the cursor at this column
 	
 	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	
@@ -236,8 +237,8 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 		}
 		});
 		
-	function noEol() {
-		var file = EDITOR.currentFile;
+	function noEol(file) {
+		if(file == undefined) file = EDITOR.currentFile;
 		if(file == undefined) return null;
 		//console.log("file.caret.row=" + file.caret.row + " file.grid[" + file.caret.row + "].length=" + file.grid[file.caret.row].length + " file.caret.eol=" + file.caret.eol);
 		if(file.grid[file.caret.row].length > 0 && file.caret.eol) 
@@ -361,8 +362,11 @@ file.moveCaretLeft();
 			}
 			
 			if(command) {
+				clearCommandBuffer();
+				
 				if(command.moveCursor) {
 					command.moveCursor();
+					showCursorPosition();
 				}
 				
 				if(command.undo && !command.redo || command.redo && !command.undo) {
@@ -380,8 +384,6 @@ command.redo(); // Runs the command
 					
 					lastCommand = vimCommandBuffer;
 					}
-				
-				clearCommandBuffer();
 				
 if(command.insert) {
 // Insert some text
@@ -547,6 +549,7 @@ insertedString = insertedString.slice(0,-1);
 		
 		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
 			file.moveCaretLeft();
+			showCursorPosition();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
 			insertedString = "";
@@ -567,6 +570,7 @@ insertedString = insertedString.slice(0,-1);
 		
 		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
 			file.moveCaretRight();
+			showCursorPosition();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
 			insertedString = "";
@@ -587,8 +591,9 @@ insertedString = insertedString.slice(0,-1);
 		
 		console.log("vim key up");
 		
-		if(EDITOR.mode == "vimInsert") {
+		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
 			file.moveCaretUp();
+			showCursorPosition();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
 			insertedString = "";
@@ -651,8 +656,9 @@ insertedString = insertedString.slice(0,-1);
 	function vimDownArrowKey(file, combo) {
 		if(!VIM_ACTIVE) return true;
 		
-		if(EDITOR.mode == "vimInsert") {
+		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
 			file.moveCaretDown();
+			showCursorPosition();
 			EDITOR.renderNeeded();
 			addHistory(file, undefined); // Start a new history
 			insertedString = "";
@@ -1277,17 +1283,41 @@ else if(findRight) {
 			else if(char == "j") {
 				// Move cursor down one line
 				return cursorMovement(function moveCursorDown() {
+					var colBefore = file.caret.col;
 				for (var i=0; i<repeat; i++) {
 						file.moveCaretDown();
 				}
+					var rowLength = file.grid[file.caret.row].length;
+					noEol(file);
+					
+					if(file.caret.col < lastCol && rowLength > file.caret.col) {
+						file.moveCaretRight( file.caret, Math.min(lastCol-file.caret.col, rowLength-file.caret.col-1) );
+					}
+					else if(file.caret.col < colBefore) {
+						lastCol = colBefore;
+					}
+					if(rowLength > 0 && file.caret.eol) throw new Error("We should not place the caret at eol! file.caret=", file.caret);
+					
 				});
 			}
 			else if(char == "k") {
 				// Move cursor up one line
 				return cursorMovement(function moveCursorUp() {
-				for (var i=0; i<repeat; i++) {
+					var colBefore = file.caret.col;
+					for (var i=0; i<repeat; i++) {
 						file.moveCaretUp();
 				}
+					var rowLength = file.grid[file.caret.row].length;
+					noEol(file);
+					
+					if(file.caret.col < lastCol && rowLength > file.caret.col) {
+						file.moveCaretRight( file.caret, Math.min(lastCol-file.caret.col, rowLength-file.caret.col-1) );
+					}
+					else if(file.caret.col < colBefore) {
+						lastCol = colBefore;
+					}
+					if(rowLength > 0 && file.caret.eol) throw new Error("We should not place the caret at eol! file.caret=", JSON.stringify(file.caret));
+					
 				});
 			}
 			else if(char == "h") {
@@ -1321,7 +1351,8 @@ else if(findRight) {
 				console.log("Move cursor right " + repeat + " steps: file.grid[file.caret.row].length=" + file.grid[file.caret.row].length + " file.caret.col=" + file.caret.col);
 				if(file.caret.col < file.grid[file.caret.row].length) {
 					return cursorMovement(function moveCursorRight() {
-						file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length - file.caret.col - 2, repeat));
+						file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length - file.caret.col - 1, repeat));
+						if(file.caret.eol) throw new Error("We should not move the caret to end-of-line! file.caret=" + JSON.stringify(file.caret));
 				});
 				}
 				else return nil();
@@ -1590,6 +1621,16 @@ insertedString = "";
 		return false;
 	}
 	
+	function showCursorPosition(file) {
+		if(file == undefined && EDITOR.currentFile == undefined) return;
+		else if(file == undefined) file = EDITOR.currentFile;
+		
+		var str = "row=" + (file.caret.row) + " col=" + (file.caret.col);
+		if(file.caret.eol) str += " EOL";
+		if(file.caret.eof) str += " EOF";
+		showMessage(str);
+	}
+	
 	function showMessage(msg) {
 		console.log("Vim:showMessage:", msg);
 		if(msg == undefined) msg = "";
@@ -1682,6 +1723,11 @@ insertedString = "";
 			EDITOR.mock("typing", "l");
 			if(file.caret.col != 30) throw new Error("Expected l to Not move the cursor to end of line! file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
 			
+			EDITOR.mock("typing", "k");
+			if(file.caret.col != 24 || file.caret.row != 0) throw new Error("Expected k to move the cursor up! file.caret.col=" + file.caret.col + " file.caret.row=" + file.caret.row);
+			
+			EDITOR.mock("typing", "j");
+			if(file.caret.col != 30 || file.caret.row != 1) throw new Error("Expected j to move the cursor back up to old position! file.caret.col=" + file.caret.col + " file.caret.row=" + file.caret.row);
 			
 			
 			return true;

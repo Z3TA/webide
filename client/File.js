@@ -2161,7 +2161,9 @@ var File; // File object is global
 		console.log("File:moveCaretRight");
 		
 		if(caret == undefined) caret = file.caret;
-		if(repeat == undefined) repeat = 1;
+		if(repeat === undefined) repeat = 1;
+		if(repeat === 0) return;
+		if(repeat < 0) throw new Error("repeat=" + repeat);
 		
 		file.checkCaret(caret);
 		
@@ -2233,6 +2235,9 @@ var File; // File object is global
 		*/
 		var file = this;
 		
+		if(times == undefined) times = 0;
+		if(times < 0) throw new Error("times=" + times);
+		
 		//console.log("File:moveCaretLeft");
 		
 		if(caret == undefined) {
@@ -2280,8 +2285,6 @@ var File; // File object is global
 		}
 		
 		file.sanityCheck();
-		
-		if(times == undefined) times = 0;
 		
 		times = times - 1;
 		
