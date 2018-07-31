@@ -1540,6 +1540,58 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 Polishing (only existing features)
 ==================================
 
+---
+
+Format code when parsing.
+Remove line breaks for lines:
+* Doesn't start with // or /*
+* Doesn't end with ;,{[
+
+Test:
+
+const { Future } = require("fluture");
+const S = require("sanctuary");
+
+const validateGreet = array =>
+  array.includes("HELLO")       ?
+  S.Right( array )    :
+  S.Left( "Invalid Greeting!" );
+  
+
+// Receives an array, and returns Either <String, Array>
+const transform = S.pipe( [
+  S.map( S.pipe( [ S.trim, S.toUpper ] ) ),
+  validateGreet
+] );
+
+//Play with me!
+const queryResult = Future.of( 
+  S.Just( ["  heello", "  world!"] ) 
+);
+
+//Play with me!
+//const queryResult = Future.of( S.Nothing );
+
+const execute = 
+  queryResult
+    .map( S.map( transform ) )
+    .fork(
+      err => {
+          console.error(`The end is near!: ${err}`);
+          process.exit(1);
+      },
+      res => {
+        // fromMaybe: https://sanctuary.js.org/#fromMaybe
+        const maybeResult = S.fromMaybe( S.Right([]) ) (res);
+
+        //https://sanctuary.js.org/#either
+        S.either( console.error ) (  console.log ) ( maybeResult )
+      }
+    );
+
+
+---
+
 Add local echo to the terminal plugin. For when the key presses are laggy like in Google cloud shell preview.
 
 See markdown topics that are commented out for example:
