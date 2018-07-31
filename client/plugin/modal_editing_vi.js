@@ -237,12 +237,12 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 		}
 		});
 		
-	function noEol(file) {
+	function noEol(file, caret) {
 		if(file == undefined) file = EDITOR.currentFile;
 		if(file == undefined) return null;
-		//console.log("file.caret.row=" + file.caret.row + " file.grid[" + file.caret.row + "].length=" + file.grid[file.caret.row].length + " file.caret.eol=" + file.caret.eol);
-		if(file.grid[file.caret.row].length > 0 && file.caret.eol) 
-		{
+		if(caret == undefined) caret = file.caret;
+		//console.log("caret.row=" + caret.row + " file.grid[" + caret.row + "].length=" +file.grid[caret.row].length + " caret.eol=" + caret.eol);
+		if(file.grid[caret.row].length > 0 && caret.eol) {
 file.moveCaretLeft();
 			return true;
 		}
@@ -831,7 +831,7 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function getHistoryTip(fileHistory) {
-		if(fileHistory.currentItem <= -1) throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:", fileHistory);
+		if(fileHistory.currentItem <= -1) throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:" + JSON.stringify(fileHistory, null, 2));
 		if(fileHistory.currentItem >= fileHistory.length) throw new Error("fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:", fileHistory);
 		var branch = fileHistory;
 		var historyItem = branch[branch.currentItem];
@@ -1010,20 +1010,21 @@ console.warn("Only store commands starting with :");
 			lastChar = char;
 			char = getNormalMap(str.charAt(i)); // Converts to default keys
 			
+			console.log("vim:Parse char=" + char + " lastChar=" + lastChar);
+			
 			if(replace) {
-				console.log("repeat=" + repeat);
-				// Replace the character under the cursor with char
-				var charsToReplace = Math.min(repeat, file.grid[file.caret.row].length - file.caret.col);
+				console.log("Replace " + repeat * operatorRepeat + " character(s) under the cursor with char=" + char);
+				var charsToReplace = Math.min(repeat * operatorRepeat, file.grid[file.caret.row].length - file.caret.col);
 				var removedText = file.text.slice(file.caret.index, file.caret.index + charsToReplace);
 				var insertedText = "";
 				for (var j=0; j<charsToReplace; j++) {
 					insertedText += char;
 				}
-				return cmd(function undoReplaceChar() {
+				return cmd(function replaceCharUndo() {
 					file.moveCaretToIndex(caretIndex);
 					file.deleteTextRange(caretIndex, caretIndex + charsToReplace - 1);
 					file.insertText(removedText);
-				}, function redoReplaceChar() {
+				}, function replaceCharRedo() {
 					file.moveCaretToIndex(caretIndex);
 					file.deleteTextRange(caretIndex, caretIndex + charsToReplace - 1);
 					file.insertText(insertedText);
@@ -1126,25 +1127,92 @@ else if(findRight) {
 				Operators are followed by a motion ex: d2w (delete two words)
 			*/
 			else if(char == "d") {
+				if(lastChar == "d") {
+					console.log("Delete " + repeat * operatorRepeat + " whole line(s)");
+					var rowsToBeDeleted = Math.min(repeat * operatorRepeat, file.grid.length - file.caret.row);
+					var removedRows = [];
+					for (var i=0; i<rowsToBeDeleted; i++) {
+						removedRows.push(file.rowText(file.caret.row + i));
+					}
+					
+					var rowBefore = file.caret.row;
+					
+					var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
+					file.moveCaretUp(caret);
+					file.moveCaretToEndOfLine(caret);
+					var indexEndOfLineBefore = caret.index;
+					
+					return cmd(function deleteLineUndo() {
+						file.moveCaretToIndex(indexEndOfLineBefore);
+						for (var i=0; i<rowsToBeDeleted; i++) {
+							console.log("inserting on row=" + (rowBefore+i) + ": " + removedRows[i]);
+							if(removedRows[i].length > 0) file.insertTextRow(removedRows[i], rowBefore+i);
+							else file.insertLineBreak();
+						}
+						file.moveCaretToIndex(caretIndex);
+					}, function deleteLineRedo() {
+						file.moveCaretToIndex(caretIndex);
+						for (var i=0; i<rowsToBeDeleted; i++) {
+							file.removeRow(file.caret.row);
+						}
+						file.moveCaretToStartOfLine();
+					});
+				}
+				else {
 				del = true;
 				foundOperator();
+				}
+			}
+			else if(char == "J") {
+				console.log("Delete " + (repeat-1) + " line breaks to join " + (repeat) + " rows");
+				var lineBreaksToBeRemoved = Math.min(repeat > 1 ? repeat-1: 1, file.grid.length - file.caret.row);
+				
+				var lbIndex = [];
+				var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
+				for (var i=0; i<lineBreaksToBeRemoved; i++) {
+					file.moveCaretToEndOfLine(caret);
+					lbIndex.push(caret.index);
+					file.moveCaretDown(caret);
+				}
+				
+				return cmd(function joinRowsUndo() {
+					file.moveCaretToIndex(caretIndex);
+					for (var i=0; i<lineBreaksToBeRemoved; i++) {
+						console.log("Inserting line break on index=" + lbIndex[i]);
+						file.moveCaretToIndex(lbIndex[i]);
+						file.insertLineBreak();
+					}
+					file.moveCaretToIndex(caretIndex);
+				}, function joinRowsRedo() {
+					file.moveCaretToIndex(caretIndex);
+					for (var i=0; i<lineBreaksToBeRemoved; i++) {
+						file.moveCaretToEndOfLine();
+						file.deleteCharacter();
+					}
+				});
 			}
 			else if(char == "c") {
-				change = true;
+				if(lastChar == "c") {
+					// Delete whole line and go into insert mode
+				}
+				else {
+					change = true;
 			}
-			else if(char == "d" && lastChar == "d") {
-				// Delete whole line (removes it)
-				
-			}
-			else if(char == "c" && lastChar == "c") {
-				// Delete whole line and go into insert mode
-				
 			}
 			else if( char == "x" || (char == "l" && lastChar == "d") ) {
-				// delete character under the cursor
-				
+				console.log("Delete " + repeat + " character(s) under the cursor");
+				var charsToDelete = Math.min(repeat, file.grid[file.caret.row].length - file.caret.col);
+				var removedText = file.text.slice(file.caret.index, file.caret.index + charsToDelete);
+				return cmd(function deleteCharacterUndo() {
+					file.moveCaretToIndex(caretIndex);
+					file.insertText(removedText);
+					file.moveCaretToIndex(caretIndex);
+				}, function deleteCharacterRedo() {
+					file.moveCaretToIndex(caretIndex);
+					file.deleteTextRange(caretIndex, caretIndex + charsToDelete - 1);
+				});
 			}
-			else if( char == "X" || (char == "h" && lastChar == "d" && !repeat) ) {
+			else if( char == "X") {
 				console.log("Vim: delete character left of the cursor");
 				
 			}
@@ -1331,11 +1399,11 @@ else if(findRight) {
 				if(del || change) {
 					var removedText = file.text.slice(file.caret.index, file.caret.index + moveLeft);
 					//var removedText = file.deleteTextRange(file.caret.index, file.caret.index + moveLeft - 1);
-					return cmd(function undoDeleteTextLeft() {
+					return cmd(function deleteTextLeftUndo() {
 						file.moveCaretToIndex(caretIndex);
 						file.insertText(removedText);
 						//file.moveCaretRight(file.caret, moveLeft);
-					}, function redoDeleteTextLeft() {
+					}, function deleteTextLeftRedo() {
 						file.moveCaretToIndex(caretIndex);
 						file.deleteTextRange(caretIndex, caretIndex + moveLeft - 1);
 						//file.moveCaretRight(file.caret, moveLeft);
@@ -1377,12 +1445,12 @@ else if(findRight) {
 			else if(char == "o") {
 				// Adds a new line and goes into insert mode
 				var caretIndex = file.caret.index;
-				return cmd(function undoAddLine() {
+				return cmd(function addLineUndo() {
 					file.moveCaretToIndex(caretIndex);
 					file.moveCaretToEndOfLine();
 					file.deleteCharacter();
 					file.moveCaretToIndex(caretIndex);
-				}, function redoAddLine() {
+				}, function addLineRedo() {
 					file.moveCaretToEndOfLine();
 					file.insertLineBreak();
 }, true);
@@ -1451,11 +1519,11 @@ else if(findRight) {
 				else if(EndIndex > lineEnd) return nil();
 				else {
 					var removedText = file.text.slice(startIndex, EndIndex);
-					return cmd(function undoChangeIn() {
+					return cmd(function changeInUndo() {
 						file.moveCaretToIndex(startIndex);
 						file.insertText(removedText);
 						file.moveCaretToIndex(caretIndex);
-}, function redoChangeIn() {
+					}, function changeInRedo() {
 						file.deleteTextRange(startIndex, EndIndex);
 						file.moveCaretToIndex(startIndex);
 }, true);
@@ -1714,6 +1782,8 @@ insertedString = "";
 			EDITOR.mock("keydown", "\n"); // Enter is caputured by keyPress
 			if(option.showmode != true) throw new Error("Expected :set showmode to turn on showmode");
 			
+			// ### *02.3*	Moving around
+			
 			EDITOR.mock("typing", "h");
 			if(file.caret.col != 29 || file.caret.eol !== false) throw new Error("Expected h to move the cursor left! file.caret.col=" + file.caret.col + " file.caret.eol=" + file.caret.eol);
 			
@@ -1729,6 +1799,33 @@ insertedString = "";
 			EDITOR.mock("typing", "j");
 			if(file.caret.col != 30 || file.caret.row != 1) throw new Error("Expected j to move the cursor back up to old position! file.caret.col=" + file.caret.col + " file.caret.row=" + file.caret.row);
 			
+			
+			// ### *02.4*Deleting characters
+			
+			file.moveCaretToIndex(0);
+			
+			EDITOR.mock("typing", "xxxxxxx");
+			if(file.text != "intelligent turtle\nFound programming UNIX a hurdle\n") throw new Error("Expected the 7 first letters to be deleted: " + file.text);
+			
+			EDITOR.mock("typing", "iA young ");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "A young intelligent turtle\nFound programming UNIX a hurdle\n") throw new Error("Unexpected after insert: " + file.text);
+			
+			EDITOR.mock("typing", "dd");
+			if(file.text != "Found programming UNIX a hurdle\n") throw new Error("Expected dd to delete the row: " + file.text);
+			
+			EDITOR.mock("typing", "dd");
+			if(file.text != "") throw new Error("Expected dd to delete the row: file.text=" + UTIL.lbChars(file.text) + " (" + file.text.length + " characters)");
+			
+			EDITOR.mock("typing", "iA young intelligent \nturtle");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "A young intelligent \nturtle") throw new Error("Unexpected: " + UTIL.lbChars(file.text));
+			
+			EDITOR.mock("typing", "k");
+			if(file.caret.row !== 0) throw new Error("Expected cursor to move up when pressing k: " + JSON.stringify(file.caret));
+			
+			EDITOR.mock("typing", "J");
+			if(file.text != "A young intelligent turtle") throw new Error("Expected J to merge the rows: " + file.text);
 			
 			return true;
 			

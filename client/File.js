@@ -752,7 +752,7 @@ var File; // File object is global
 		}
 		if(caret.eol) {
 			if(caret.col != file.grid[caret.row].length) {
-				throw new Error("Caret on column " + caret.col + ". Expected it to be on column " + file.grid[caret.row].length + " because caret.eol = true");
+				throw new Error("Caret on column " + caret.col + ". Expected it to be on column " + file.grid[caret.row].length + " because caret.eol = true=" + caret.eol + " and caret.row=" + caret.row + " ");
 			}
 			if(!caret.eof) {
 				char = file.text.charAt(caret.index);
@@ -1029,6 +1029,7 @@ var File; // File object is global
 	
 	File.prototype.removeRow = function(row) {
 		// Removes all text on that row, plus the line break
+		
 		var file = this;
 		
 		console.log("++++++++++ removeRow row=" + row + " ++++++++++");
@@ -2800,7 +2801,7 @@ var File; // File object is global
 		if(caret == undefined) caret = file.caret;
 		
 		caret.index -= caret.col;
-		caret.col = file.grid[file.caret.row].length;
+		caret.col = file.grid[caret.row].length;
 		caret.index += caret.col;
 		caret.eol = true;
 		
