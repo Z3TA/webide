@@ -267,6 +267,8 @@ file.moveCaretLeft();
 	function startHistory(file) {
 		history[file.path] = [new HistoryItem()];
 		history[file.path].currentItem = 0;
+		history[file.path].lastEditedRow = -1;
+		history[file.path].rowContentBeforeEdit = "";
 		return false;
 	}
 	
@@ -1138,8 +1140,15 @@ else if(findRight) {
 					var rowBefore = file.caret.row;
 					
 					var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
-					file.moveCaretUp(caret);
-					file.moveCaretToEndOfLine(caret);
+					if(caret.row > 0) {
+						file.moveCaretUp(caret);
+						file.moveCaretToEndOfLine(caret);
+					}
+					else {
+file.moveCaretToStartOfLine(caret);
+						//caretIndex = 0;
+					}
+					
 					var indexEndOfLineBefore = caret.index;
 					
 					return cmd(function deleteLineUndo() {
@@ -1153,7 +1162,8 @@ else if(findRight) {
 					}, function deleteLineRedo() {
 						file.moveCaretToIndex(caretIndex);
 						for (var i=0; i<rowsToBeDeleted; i++) {
-							file.removeRow(file.caret.row);
+							if(file.grid.length > 1) file.removeRow(file.caret.row);
+							else file.removeAllTextOnRow(0);
 						}
 						file.moveCaretToStartOfLine();
 					});
@@ -1217,6 +1227,7 @@ file.putCharacter(" "); // Insert white space between the merged lines
 					file.insertText(removedText);
 					file.moveCaretToIndex(caretIndex);
 				}, function deleteCharacterRedo() {
+					editFileRow(file, file.caret.row);
 					file.moveCaretToIndex(caretIndex);
 					file.deleteTextRange(caretIndex, caretIndex + charsToDelete - 1);
 				});
@@ -1542,6 +1553,24 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				// Goes to insert mode
 				return toInsert();
 			}
+			else if(char == "U") {
+				var row = history[file.path].lastEditedRow
+				console.log("Undo edit on last edited row=" + row);
+				if(row == -1) return nil();
+				var oldContent = history[file.path].rowContentBeforeEdit;
+				var currentContent = file.rowText(row);
+				
+				return cmd(function undoLineUndo() {
+					file.removeAllTextOnRow(row);
+					file.insertTextOnRow(currentContent, row);
+					file.moveCaretToIndex(caretIndex);
+				}, function undoLineRedo() {
+					history[file.path].rowContentBeforeEdit = currentContent;
+					file.removeAllTextOnRow(row);
+					file.insertTextOnRow(oldContent, row);
+				});
+				
+			}
 			else {
 				console.log("Did not match any known commands: vimCommandBuffer=" + vimCommandBuffer);
 				}
@@ -1604,6 +1633,13 @@ insertedString = "";
 			return {moveCursor: move};
 		}
 		
+	}
+	
+	function editFileRow(file, row) {
+		if(history[file.path].lastEditedRow != row) {
+			history[file.path].lastEditedRow = row;
+			history[file.path].rowContentBeforeEdit = file.rowText(row);
+		}
 	}
 	
 	function beep(volume, frequency, type, duration) {
@@ -1835,6 +1871,71 @@ insertedString = "";
 			
 			EDITOR.mock("typing", "J");
 			if(file.text != "A young intelligent turtle") throw new Error("Expected J to merge the rows: " + file.text);
+			
+			
+			// ### 02.5  Undo and Redo
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "A young intelligent \nturtle") throw new Error("Expected u (undo) to put the lb back: " + file.text);
+			
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			if(file.text != "A young intelligent turtle") throw new Error("Expected Ctrl+R to redo merge! file.text=" + file.text);
+			
+			file.moveCaretToIndex(0);
+			
+			EDITOR.mock("typing", "xxxxxxx");
+			if(file.text != " intelligent turtle") throw new Error("Expected xxxxxxx to remove 'A young': " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "g intelligent turtle") throw new Error("Expected u (undo) to put back one character! file.text=" + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "ng intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "ung intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "oung intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "young intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != " young intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "A young intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
+			
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			if(file.text != "young intelligent turtle") throw new Error("Unexpected after two redo: " + file.text);
+			
+			/*
+				### Special undo (U)
+				The undo line command undoes all the changes made on the last line that was
+				edited.  Typing this command twice cancels the preceding "U".
+			*/
+			
+			EDITOR.mock("typing", "dd"); // Delete whole line
+			if(file.text != "") throw new Error("Unexpected: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "iA very intelligent turtle");
+			EDITOR.mock("keydown", {charCode: ESC});
+			file.moveCaretToIndex(2);
+			EDITOR.mock("typing", "xxxx"); // Delete very
+			if(file.text != "A  intelligent turtle") throw new Error("Unexpected: " + file.text);
+			EDITOR.mock("typing", "13l");
+			EDITOR.mock("typing", "xxxxxx"); // Delete turtle
+			if(file.text != "A  intelligent ") throw new Error("Unexpected: " + file.text);
+			EDITOR.mock("typing", "U"); // Restore line with "U"
+			if(file.text != "A very intelligent turtle") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "u"); // Undo "U" with "u"
+			if(file.text != "A  intelligent ") throw new Error("Unexpected: " + file.text);
+			
+			
+			// ### 02.6  Other editing commands
+			
 			
 			return true;
 			

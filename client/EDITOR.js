@@ -3927,7 +3927,12 @@ console.warn('No mode defined for "' + b.desc + '" asuming default mode');
 				options = {charCode: letter.charCodeAt(0)};
 			}
 			
+			if(options.char && !options.charCode) {
+				options.charCode = options.char.charCodeAt(0);
+			}
+			
 			if(!options.charCode) throw new Error("options need to contain charCode");
+			
 			if(!options.target) options.target = "fileCanvas";
 			
 			if(!options.target.className) options.target = {className: options.target}; // Shorter to write

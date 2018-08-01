@@ -43,7 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-Test if I can join many rows with J example 3J
+
 
 Moving cursor in vim editor command (left/right arrow)
 

@@ -2805,6 +2805,8 @@ var File; // File object is global
 		caret.index += caret.col;
 		caret.eol = true;
 		
+		if(file.text.length == caret.index) caret.eof = true;
+		
 		file.checkCaret(caret);
 		
 			EDITOR.fireEvent("moveCaret", [file, caret]);
