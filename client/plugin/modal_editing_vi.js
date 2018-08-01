@@ -1167,19 +1167,24 @@ else if(findRight) {
 				console.log("Delete " + (repeat-1) + " line breaks to join " + (repeat) + " rows");
 				var lineBreaksToBeRemoved = Math.min(repeat > 1 ? repeat-1: 1, file.grid.length - file.caret.row);
 				
-				var lbIndex = [];
+				var lb = [];
 				var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
 				for (var i=0; i<lineBreaksToBeRemoved; i++) {
 					file.moveCaretToEndOfLine(caret);
-					lbIndex.push(caret.index);
+					lb.push({
+						index: caret.index, 
+						spaceBefore: (file.text.charAt(caret.index-1) == " "),
+						spaceAfter: (file.text.charAt(caret.index+file.lineBreak.length) == " ")
+					});
 					file.moveCaretDown(caret);
 				}
 				
 				return cmd(function joinRowsUndo() {
 					file.moveCaretToIndex(caretIndex);
 					for (var i=0; i<lineBreaksToBeRemoved; i++) {
-						console.log("Inserting line break on index=" + lbIndex[i]);
-						file.moveCaretToIndex(lbIndex[i]);
+						console.log("Inserting line break on index=" + lb[i].index);
+						file.moveCaretToIndex(lb[i].index);
+						if(!lb[i].spaceBefore && !lb[i].spaceAfter) file.deleteCharacter(); // Delete the added white space
 						file.insertLineBreak();
 					}
 					file.moveCaretToIndex(caretIndex);
@@ -1187,7 +1192,11 @@ else if(findRight) {
 					file.moveCaretToIndex(caretIndex);
 					for (var i=0; i<lineBreaksToBeRemoved; i++) {
 						file.moveCaretToEndOfLine();
-						file.deleteCharacter();
+						file.deleteCharacter(); // Delete the line break
+						if(!lb[i].spaceBefore && !lb[i].spaceAfter) {
+file.putCharacter(" "); // Insert white space between the merged lines
+							file.moveCaretLeft();
+						}
 					}
 				});
 			}
@@ -1197,7 +1206,7 @@ else if(findRight) {
 				}
 				else {
 					change = true;
-			}
+				}
 			}
 			else if( char == "x" || (char == "l" && lastChar == "d") ) {
 				console.log("Delete " + repeat + " character(s) under the cursor");
@@ -1299,7 +1308,7 @@ else if(findRight) {
 			}
 			
 			/*
-				 ## Matching a parenthesis
+				## Matching a parenthesis
 				
 				If the cursor is on a "(" it will move to the matching ")".  
 				If it's on a ")" it will move to the matching "(".
@@ -1352,7 +1361,7 @@ else if(findRight) {
 				// Move cursor down one line
 				return cursorMovement(function moveCursorDown() {
 					var colBefore = file.caret.col;
-				for (var i=0; i<repeat; i++) {
+					for (var i=0; i<repeat; i++) {
 						file.moveCaretDown();
 				}
 					var rowLength = file.grid[file.caret.row].length;
