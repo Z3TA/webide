@@ -978,7 +978,7 @@ console.warn("Only store commands starting with :");
 			Example:
 			d2w = delete two words
 			
-			ref: http://vimdoc.sourceforge.net/htmldoc/usr_03.html
+			ref: http://vimhelp.appspot.com/
 			
 		*/
 		
@@ -1767,7 +1767,7 @@ insertedString = "";
 			
 			/*
 				
-				Following the guide at: http://vimdoc.sourceforge.net/htmldoc/
+				Following the guide at: http://vimhelp.appspot.com/
 				Also repeating the commands in vim to see if they do the same
 				
 				 Tests here:
