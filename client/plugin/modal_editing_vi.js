@@ -431,7 +431,10 @@ insertedString += "\n";
 						file.insertLineBreak();
 					});
 				}
-			else if(char.charCodeAt(0) == DELETE) {
+			else if(char == String.fromCharCode(127)) {
+				/*
+					
+				*/
 				console.log("DELETE");
 insertedString = insertedString.slice(0,-1);
 				var deletedCharacter = file.text.charAt(file.caret.index);
@@ -1128,51 +1131,49 @@ else if(findRight) {
 				
 				Operators are followed by a motion ex: d2w (delete two words)
 			*/
-			else if(char == "d") {
-				if(lastChar == "d") {
-					console.log("Delete " + repeat * operatorRepeat + " whole line(s)");
-					var rowsToBeDeleted = Math.min(repeat * operatorRepeat, file.grid.length - file.caret.row);
-					var removedRows = [];
-					for (var i=0; i<rowsToBeDeleted; i++) {
-						removedRows.push(file.rowText(file.caret.row + i));
-					}
-					
-					var rowBefore = file.caret.row;
-					
-					var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
-					if(caret.row > 0) {
-						file.moveCaretUp(caret);
-						file.moveCaretToEndOfLine(caret);
-					}
-					else {
-file.moveCaretToStartOfLine(caret);
-						//caretIndex = 0;
-					}
-					
-					var indexEndOfLineBefore = caret.index;
-					
-					return cmd(function deleteLineUndo() {
-						file.moveCaretToIndex(indexEndOfLineBefore);
-						for (var i=0; i<rowsToBeDeleted; i++) {
-							console.log("inserting on row=" + (rowBefore+i) + ": " + removedRows[i]);
-							if(removedRows[i].length > 0) file.insertTextRow(removedRows[i], rowBefore+i);
-							else file.insertLineBreak();
-						}
-						file.moveCaretToIndex(caretIndex);
-					}, function deleteLineRedo() {
-						file.moveCaretToIndex(caretIndex);
-						for (var i=0; i<rowsToBeDeleted; i++) {
-							if(file.grid.length > 1) file.removeRow(file.caret.row);
-							else file.removeAllTextOnRow(0);
-						}
-						file.moveCaretToStartOfLine();
-					});
+			else if(char == "d" && lastChar == "d") {
+				console.log("Delete " + repeat * operatorRepeat + " whole line(s)");
+				var rowsToBeDeleted = Math.min(repeat * operatorRepeat, file.grid.length - file.caret.row);
+				var removedRows = [];
+				for (var i=0; i<rowsToBeDeleted; i++) {
+					removedRows.push(file.rowText(file.caret.row + i));
+				}
+				
+				var rowBefore = file.caret.row;
+				
+				var caret = file.createCaret(file.caret.index, file.caret.col, file.caret.row);
+				if(caret.row > 0) {
+					file.moveCaretUp(caret);
+					file.moveCaretToEndOfLine(caret);
 				}
 				else {
+					file.moveCaretToStartOfLine(caret);
+					//caretIndex = 0;
+				}
+				
+				var indexEndOfLineBefore = caret.index;
+				
+				return cmd(function deleteLineUndo() {
+					file.moveCaretToIndex(indexEndOfLineBefore);
+					for (var i=0; i<rowsToBeDeleted; i++) {
+						console.log("inserting on row=" + (rowBefore+i) + ": " + removedRows[i]);
+						if(removedRows[i].length > 0) file.insertTextRow(removedRows[i], rowBefore+i);
+						else file.insertLineBreak();
+					}
+					file.moveCaretToIndex(caretIndex);
+				}, function deleteLineRedo() {
+					file.moveCaretToIndex(caretIndex);
+					for (var i=0; i<rowsToBeDeleted; i++) {
+						if(file.grid.length > 1) file.removeRow(file.caret.row);
+						else file.removeAllTextOnRow(0);
+					}
+					file.moveCaretToStartOfLine();
+				});
+			}
+			else if(char == "d") {
 				del = true;
 				foundOperator();
 				}
-			}
 			else if(char == "J") {
 				console.log("Delete " + (repeat-1) + " line breaks to join " + (repeat) + " rows");
 				var lineBreaksToBeRemoved = Math.min(repeat > 1 ? repeat-1: 1, file.grid.length - file.caret.row);
@@ -1515,6 +1516,12 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			else if(char == "a" && lastChar == "'") {
 				// Goes to mark a, but moves you to the beginning of the line containing the mark.
 			}
+			else if(char == "a") {
+				console.log("Append at eol")
+				return toInsert(function moveCursorToEol() {
+					file.moveCaretToEndOfLine(file.caret);
+				});
+			}
 			else if(char == "[" && lastChar == "`") {
 				// Goes to the start (of word) of last change
 			}
@@ -1607,16 +1614,24 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				return command;
 		}
 		
-		function toInsert() {
+		function toInsert(moveCursor) {
 /*
 Switch to insert mode
 insert remaining characters (str) if any
 */
+			
+			if(moveCursor && typeof moveCursor != "function") throw new Error("First argument should be a move function that moves the cursors, or undefined");
+			
 			console.log("str=" + str + " i=" + i);
 			if(i < str.length-1) {
 				var text = str.slice(i+1);
 			}
-			return  {toInsert: true, insert: text};
+			
+			var action = {toInsert: true, insert: text}
+			
+			if(moveCursor) action.moveCursor = moveCursor;
+			
+			return action;
 			
 insertedString = "";
 
@@ -1628,9 +1643,9 @@ insertedString = "";
 			return null;
 		}
 		
-		function cursorMovement(move) {
+		function cursorMovement(move, toInsert) {
 			if(typeof move != "function") throw new Error("First argument to cursorMovement needs to be a function that moves the cursor/caret");
-			return {moveCursor: move};
+			return {moveCursor: move, toInsert: !!toInsert};
 		}
 		
 	}
@@ -1809,6 +1824,10 @@ insertedString = "";
 				 Tests here:
 			*/
 			
+			// Get out from any mode
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("keydown", {charCode: ESC});
+			
 			// ### *02.2*Inserting text
 			
 			EDITOR.mock("keydown", "i");
@@ -1941,7 +1960,7 @@ insertedString = "";
 			EDITOR.mock("typing", "iand that's not saying much for the turtle.");
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "and that's not saying much for the turtle.") throw new Error("Unexpected: " + file.text);
-			if(file.caret.col != 40) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			if(file.caret.col != 41) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			EDITOR.mock("typing", "x"); // delete the period
 			if(file.text != "and that's not saying much for the turtle") throw new Error("Unexpected: " + file.text);
 			EDITOR.mock("typing", "a!!!"); // append three exclamation points after the e in turtle
