@@ -199,6 +199,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.on("fileOpen", vimFileOpen);
 			EDITOR.on("fileClose", vimFileClose);
 			EDITOR.on("fileShow", vimFileShow);
+			EDITOR.on("fileHide", vimFileHide);
 			
 			
 			EDITOR.bindKey({desc: "Toggle vim/modal mode", fun: toggleVim, charCode: SPACE, combo: SHIFT, mode: "*"});
@@ -264,6 +265,13 @@ file.moveCaretLeft();
 		else return true;
 	}
 	
+	function vimFileHide(file) {
+		if(EDITOR.mode == "vimInsert") {
+			toVimNormalMode(file);
+		}
+		return true;
+	}
+	
 	function startHistory(file) {
 		history[file.path] = [new HistoryItem()];
 		history[file.path].currentItem = 0;
@@ -272,7 +280,9 @@ file.moveCaretLeft();
 		return false;
 	}
 	
-	function toVimNormalMode() {
+	function toVimNormalMode(file) {
+		if(file == undefined) throw new Error("file=" + file);
+		
 		if(EDITOR.mode != "vimInsert") throw new Error("Expected vimInsert: EDITOR.mode=" + EDITOR.mode);
 		console.log("Setting vim mode to normal (command mode)");
 			
