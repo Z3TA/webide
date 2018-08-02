@@ -444,7 +444,7 @@ insertedString = insertedString.slice(0,-1);
 					});
 				}
 			else {
-				console.log("character=" + UTIL.lbChars(char));
+				console.log("Vim insert character=" + UTIL.lbChars(char));
 				insertedString += char;
 				return rdo(function undoInsertCharacter() {
 						file.moveCaretToIndex(caretIndex);
@@ -1935,6 +1935,19 @@ insertedString = "";
 			
 			
 			// ### 02.6  Other editing commands
+			
+			EDITOR.mock("typing", "dd"); // Delete whole line
+			if(file.text != "") throw new Error("Unexpected: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "iand that's not saying much for the turtle.");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "and that's not saying much for the turtle.") throw new Error("Unexpected: " + file.text);
+			if(file.caret.col != 40) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "x"); // delete the period
+			if(file.text != "and that's not saying much for the turtle") throw new Error("Unexpected: " + file.text);
+			EDITOR.mock("typing", "a!!!"); // append three exclamation points after the e in turtle
+			if(file.text != "and that's not saying much for the turtle!!!") throw new Error("Unexpected: " + file.text);
+			
+			
 			
 			
 			return true;

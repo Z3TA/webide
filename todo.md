@@ -43,7 +43,7 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
-
+Can't insert . (dot) in vim insert mode !!?
 
 Moving cursor in vim editor command (left/right arrow)
 
