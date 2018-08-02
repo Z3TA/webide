@@ -154,7 +154,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var highlightAllSearchMatches = false;
 	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
 	var lastCol = 0; // When moving the cursor up/down try to place the cursor at this column
-	
+	var repeatInsert = 1; // How many times the insert should be repeated after pressing Esc
 	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	
 	var commandHistory = [];
@@ -288,6 +288,13 @@ file.moveCaretLeft();
 			
 		lastCommand += insertedString; // So it can be repeated with . (dot)
 
+		if(repeatInsert && repeatInsert > 1) {
+			for (var i=0; i<repeatInsert; i++) {
+				file.insertText(insertedString);
+			}
+			repeatInsert = 1; // Don't repeat when pressing Esc again
+		}
+		
 		noEol();
 		
 		EDITOR.setMode("vimNormal");
@@ -379,6 +386,7 @@ file.moveCaretLeft();
 				if(command.moveCursor) {
 					command.moveCursor();
 					showCursorPosition();
+					addHistory(file, undefined); // Start a new history
 				}
 				
 				if(command.undo && !command.redo || command.redo && !command.undo) {
@@ -400,10 +408,13 @@ command.redo(); // Runs the command
 if(command.insert) {
 // Insert some text
 					var text = command.insert;
-for (var j=0; i<text.length; i++) {
-						if(text.charAt(j) == "\n") file.insertLineBreak(file.caret);
-else file.putCharacter(text.charAt(j));
-}
+					var repeat = command.repeat || 1;
+					for (var i=0; i<repeat; i++) {
+						for (var j=0; i<text.length; i++) {
+							if(text.charAt(j) == "\n") file.insertLineBreak(file.caret);
+							else file.putCharacter(text.charAt(j));
+						}
+					}
 EDITOR.renderNeeded();
 					insertedString = "";
 }
@@ -413,6 +424,10 @@ if(command.toInsert) {
 EDITOR.setMode("vimInsert");
 					if(option.showmode) showMessage("-- INSERT --");
 					
+					if(command.repeat) repeatInsert = command.repeat-1;
+					else repeatInsert = 1;
+					
+					insertedString = "";
 }
 		}
 			
@@ -459,11 +474,11 @@ insertedString = insertedString.slice(0,-1);
 			else {
 				console.log("Vim insert character=" + UTIL.lbChars(char));
 				insertedString += char;
-				return rdo(function undoInsertCharacter() {
+				return rdo(function insertCharacterUndo() {
 						file.moveCaretToIndex(caretIndex);
-						file.moveCaretLeft();
+						//file.moveCaretLeft();
 						file.deleteCharacter();
-				}, function redoInsertCharacter() {
+				}, function insertCharacterRedo() {
 						file.moveCaretToIndex(caretIndex);
 						file.putCharacter(char);
 					});
@@ -1476,7 +1491,9 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			else if(char == "o") {
 				// Adds a new line and goes into insert mode
 				var caretIndex = file.caret.index;
+				var row = file.caret.row + 1;
 				return cmd(function addLineUndo() {
+					//file.removeRow(row);
 					file.moveCaretToIndex(caretIndex);
 					file.moveCaretToEndOfLine();
 					file.deleteCharacter();
@@ -1527,10 +1544,10 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				// Goes to mark a, but moves you to the beginning of the line containing the mark.
 			}
 			else if(char == "a") {
-				console.log("Append at eol")
+				console.log("Append text after the cursor " + repeat + " times")
 				return toInsert(function moveCursorToEol() {
-					file.moveCaretToEndOfLine(file.caret);
-				});
+					file.moveCaretRight(file.caret);
+				}, repeat);
 			}
 			else if(char == "[" && lastChar == "`") {
 				// Goes to the start (of word) of last change
@@ -1624,20 +1641,23 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				return command;
 		}
 		
-		function toInsert(moveCursor) {
+		function toInsert(moveCursor, repeat) {
 /*
 Switch to insert mode
 insert remaining characters (str) if any
 */
 			
 			if(moveCursor && typeof moveCursor != "function") throw new Error("First argument should be a move function that moves the cursors, or undefined");
+			if(repeat && typeof repeat != "number") throw new Error("Seceond parameter should be how many times the insert should be repeated");
+			
+			if(repeat == undefined) repeat = 1;
 			
 			console.log("str=" + str + " i=" + i);
 			if(i < str.length-1) {
 				var text = str.slice(i+1);
 			}
 			
-			var action = {toInsert: true, insert: text}
+			var action = {toInsert: true, insert: text, repeat: repeat};
 			
 			if(moveCursor) action.moveCursor = moveCursor;
 			
@@ -1964,7 +1984,7 @@ insertedString = "";
 			
 			
 			// ### 02.6  Other editing commands
-			
+			// Appending "a"
 			EDITOR.mock("typing", "dd"); // Delete whole line
 			if(file.text != "") throw new Error("Unexpected: " + UTIL.lbChars(file.text));
 			EDITOR.mock("typing", "iand that's not saying much for the turtle.");
@@ -1974,10 +1994,43 @@ insertedString = "";
 			EDITOR.mock("typing", "x"); // delete the period
 			if(file.text != "and that's not saying much for the turtle") throw new Error("Unexpected: " + file.text);
 			EDITOR.mock("typing", "a!!!"); // append three exclamation points after the e in turtle
+			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "and that's not saying much for the turtle!!!") throw new Error("Unexpected: " + file.text);
 			
+			// Open a new line "o"
+			EDITOR.mock("typing", "dd"); // Delete whole line
+			EDITOR.mock("typing", "iA very intelligent turtle\nFound programming UNIX a hurdle");
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "k"); // Move to first line
+			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
+			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
+			if(file.caret.col != 24) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "oThat liked using Vim");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "A very intelligent turtle\nThat liked using Vim\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
+			EDITOR.mock("typing", "u"); // Undo open new line
+			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
+			if(file.caret.col != 24) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo open new line (with text)
+			if(file.text != "A very intelligent turtle\nThat liked using Vim\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
 			
+			// Using a count
+			EDITOR.mock("typing", "k"); // Move up
+			EDITOR.mock("typing", "3dd"); // Delete 3 lines
+			if(file.text != "") throw new Error("Unexpected: " + file.text);
 			
+			EDITOR.mock("typing", "3ihello"); // Insert hello 3 times
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "hellohellohello") throw new Error("Unexpected: " + file.text);
+			if(!file.caret.col != 14) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
+			
+			EDITOR.mock("typing", "3aworld"); // Append world 3 times
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "hellohellohelloworldworldworld") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "3oMany turtles"); // Open 3 rows 
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtles") throw new Error("Unexpected: " + file.text);
 			
 			return true;
 			
