@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Getting undo/redo history to work in vim mode
+
 Moving cursor in vim editor command (left/right arrow)
 
 Toggling vim editor commands : up/down arrow keys

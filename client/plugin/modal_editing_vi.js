@@ -154,7 +154,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var highlightAllSearchMatches = false;
 	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
 	var lastCol = 0; // When moving the cursor up/down try to place the cursor at this column
-	var repeatInsert = 1; // How many times the insert should be repeated after pressing Esc
+	var repeatInsert = 0; // How many times the insert should be repeated after pressing Esc
 	var repeatCommand = null; // If the insert is preceded by a command, repeat this command before each insert
 	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	
@@ -313,12 +313,31 @@ return escapeFromInsert(file);
 			
 		lastCommand += insertedString; // So it can be repeated with . (dot)
 
-		if(repeatInsert && repeatInsert > 1) {
+		if(repeatInsert && repeatInsert > 0) {
+			var str = insertedString; // Closure
+			var caretIndex = file.caret.index - str.length; // Closure
+			console.log("Repeating last insert command " + repeatInsert + " times and repeatCommand ? " + !!repeatCommand + " caretIndex=" + caretIndex);
+			
 			for (var i=0; i<repeatInsert; i++) {
-				if(repeatCommand) repeatCommand();
-				file.insertText(insertedString);
+				if(repeatCommand) {
+					updateHistory(file, repeatCommand);
+					repeatCommand.redo();
+				}
+				
+				if(str.length > 0) {
+					updateHistory(file, undoRedo(function repeatInsertStringUndo() {
+						file.moveCaretToIndex(caretIndex);
+						file.deleteTextRange(caretIndex, caretIndex+str.length-1);
+					}, function repeatInsertStringRedo() {
+						file.moveCaretToIndex(caretIndex);
+						file.insertText(str);
+					}));
+					
+					file.insertText(str);
+				}
 			}
-			repeatInsert = 1; // Don't repeat when pressing Esc again
+			repeatInsert = 0;
+			repeatCommand = null;
 		}
 		
 		noEol();
@@ -329,6 +348,13 @@ return escapeFromInsert(file);
 		EDITOR.renderNeeded();
 		
 		return false;
+		
+		
+		
+	}
+	
+	function undoRedo(undo, redo) {
+		return {undo: undo, redo: redo};
 	}
 	
 	function vimKeyPress(file, char, combo) {
@@ -360,7 +386,7 @@ return escapeFromInsert(file);
 				console.log("Vim: pressed Enter: vimCommandBuffer=" + vimCommandBuffer);
 				if(vimCommandBuffer.charAt(0) == ":") {
 					var editorCommand = vimCommandBuffer.slice(1);
-					var runOption = parseOption(vimCommandBuffer);
+					var runOption = parseLineCommand(vimCommandBuffer);
 					
 					clearCommandBuffer();
 					
@@ -379,7 +405,7 @@ return escapeFromInsert(file);
 					return false;
 				}
 				else {
-				var command = parseCommand(vimCommandBuffer);
+					var command = parseNormalCommand(vimCommandBuffer);
 					if(!command) {
 						showMessage("Unknown command: " + vimCommandBuffer);
 						clearCommandBuffer();
@@ -392,6 +418,7 @@ return escapeFromInsert(file);
 				vimCommandBuffer += char;
 				commandCaretPosition++;
 				messageToShow = "";
+				EDITOR.renderNeeded();
 				
 				if(vimCommandBuffer == "u") {
 					// Undo
@@ -400,10 +427,10 @@ return escapeFromInsert(file);
 			}
 			else if(vimCommandBuffer == ".") {
 				// Repeat last command
-				var command = parseCommand(lastCommand);
+					var command = parseNormalCommand(lastCommand);
 				}
 				else if(vimCommandBuffer.charAt(0) != ":") {
-				var command = parseCommand(vimCommandBuffer);
+					var command = parseNormalCommand(vimCommandBuffer);
 			}
 				else console.log("Entering editor command : " + vimCommandBuffer + " ...");
 			}
@@ -411,10 +438,11 @@ return escapeFromInsert(file);
 			if(command) {
 				clearCommandBuffer();
 				
+				addHistory(file, undefined); // Start a new history entry
+				
 				if(command.moveCursor) {
 					command.moveCursor();
 					showCursorPosition();
-					addHistory(file, undefined); // Start a new history
 				}
 				
 				if(command.undo && !command.redo || command.redo && !command.undo) {
@@ -453,17 +481,19 @@ EDITOR.setMode("vimInsert");
 					if(option.showmode) showMessage("-- INSERT --");
 					
 					if(command.repeat) repeatInsert = command.repeat-1;
-					else repeatInsert = 1;
+					else repeatInsert = 0;
 					
-					if(repeatInsert > 1 && command.redo) repeatCommand = command.redo;
+					if(repeatInsert > 0 && command.redo) {
+repeatCommand = {undo: command.undo, redo: command.redo};
+					}
 					else repeatCommand = null;
 					
 					insertedString = "";
-}
+				}
 				
 				
 				
-		}
+			}
 			
 			if(vimCommandBuffer.indexOf("\n") != -1) throw new Error("Command buffer contains new-line character! vimCommandBuffer=" + UTIL.lbChars(vimCommandBuffer));
 			
@@ -477,46 +507,43 @@ EDITOR.setMode("vimInsert");
 			
 			console.log("VimInsert:");
 			var caretIndex = file.caret.index;
-
+			
 			if(char == "\n" || char == "\r") {
 				console.log("Line break");
-insertedString += "\n";
+				insertedString += "\n";
 				return rdo(function undoNewLine() {
-						file.moveCaretToIndex(caretIndex);
-						file.moveCaretLeft();
-						file.deleteCharacter();
-					},function redoNewLine() {
-						file.moveCaretToIndex(caretIndex);
-						file.insertLineBreak();
-					});
-				}
-			else if(char == String.fromCharCode(127)) {
-				/*
-					
-				*/
+					file.moveCaretToIndex(caretIndex);
+					file.moveCaretLeft();
+					file.deleteCharacter();
+				},function redoNewLine() {
+					file.moveCaretToIndex(caretIndex);
+					file.insertLineBreak();
+				});
+			}
+			else if(char == String.fromCharCode(127)) { // Delete
 				console.log("DELETE");
-insertedString = insertedString.slice(0,-1);
+				insertedString = insertedString.slice(0,-1);
 				var deletedCharacter = file.text.charAt(file.caret.index);
-				return rdo(function undoDelete() {
-						file.moveCaretToIndex(caretIndex);
-						file.putCharacter(deletedCharacter);
-					}, function redoDelete() {
-						file.moveCaretToIndex(caretIndex);
-						file.deleteCharacter();
-					});
-				}
+				return rdo(function deleteUndo() {
+					file.moveCaretToIndex(caretIndex);
+					file.putCharacter(deletedCharacter);
+				}, function deleteRedo() {
+					file.moveCaretToIndex(caretIndex);
+					file.deleteCharacter();
+				});
+			}
 			else {
 				console.log("Vim insert character=" + UTIL.lbChars(char));
 				insertedString += char;
 				return rdo(function insertCharacterUndo() {
-						file.moveCaretToIndex(caretIndex);
-						//file.moveCaretLeft();
-						file.deleteCharacter();
+					file.moveCaretToIndex(caretIndex);
+					//file.moveCaretLeft();
+					file.deleteCharacter();
 				}, function insertCharacterRedo() {
-						file.moveCaretToIndex(caretIndex);
-						file.putCharacter(char);
-					});
-				}
+					file.moveCaretToIndex(caretIndex);
+					file.putCharacter(char);
+				});
+			}
 		}
 		else { // Not vimInsert or VimNormal
 			return true; // Do the editor default
@@ -787,19 +814,38 @@ console.warn("Unable to redo! No recorded history!");
 		if(fileHistory.currentItem == -1 && fileHistory.length > 0) {
 			// The item index has reached the bottom in order to prevent repetition of the first undo
 			// Now go forward
+			console.log("set fileHistory.currentItem = 0");
 			fileHistory.currentItem = 0;
+		}
+		
+		if(fileHistory.currentItem >= fileHistory.length) {
+			console.log("fileHistory already at the tip! fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory.length=" + fileHistory.length);
+			console.log(fileHistory);
+			showMessage("Already at newest change");
+			return false;
 		}
 		
 		var tip = getHistoryTip(fileHistory);
 		var branch = tip.branch;
 		
-		if(branch.currentItem == branch.length-1) {
-			console.log("Already at the tip");
+		console.log("root branch ? " + (branch==fileHistory));
+		console.log("before redo: branch.currentItem=" + branch.currentItem);
+		
+		if(branch == fileHistory && branch.currentItem != fileHistory.currentItem) {
+			console.log(branch);
+			console.log(fileHistory);
+			throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " branch.currentItem=" + branch.currentItem + " branch===fileHistory ? " + (branch===fileHistory));
+		}
+		
+		if( branch.currentItem >= branch.length) {
+			console.log("branch already at the tip! branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
+			console.log(fileHistory);
 			showMessage("Already at newest change");
 			return false;
 		}
-		
-		branch.currentItem++;
+		else {
+			console.log("branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
+		}
 		
 		var historyItem = branch[branch.currentItem];
 		
@@ -808,6 +854,10 @@ console.warn("Unable to redo! No recorded history!");
 			console.log("redo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString()); 
 			f();
 		}
+		
+		branch.currentItem++;
+		
+		console.log("after redo: branch.currentItem=" + branch.currentItem);
 		
 		// No need to have EDITOR.renderNeeded() inside each redo function
 		EDITOR.renderNeeded();
@@ -836,6 +886,12 @@ console.warn("Unable to undo! No recorded history!");
 			return false;
 		}
 		
+		if(fileHistory.currentItem == fileHistory.length) {
+			// The item index has reached above the ceiling in order to prevent aditional redo
+			console.log("set fileHistory.currentItem = " + fileHistory.length-1);
+			fileHistory.currentItem = fileHistory.length-1;
+		}
+		
 		var tip = getHistoryTip(fileHistory);
 		var branch = tip.branch;
 		var historyItem = tip.item;
@@ -847,9 +903,9 @@ console.warn("Unable to undo! No recorded history!");
 			throw new Error("branch.currentItem=" + branch.currentItem);
 		}
 		
-		console.log("before: branch.currentItem=" + branch.currentItem);
+		console.log("before undo: branch.currentItem=" + branch.currentItem);
 		branch.currentItem--;
-		console.log("after: branch.currentItem=" + branch.currentItem);
+		console.log("after undo: branch.currentItem=" + branch.currentItem);
 		
 		// Should the undo run backwards !? Last in last out !?
 		for (var i=historyItem.undo.length-1, f; i>-1; i--) {
@@ -895,8 +951,15 @@ console.warn("Unable to undo! No recorded history!");
 	}
 	
 	function getHistoryTip(fileHistory) {
-		if(fileHistory.currentItem <= -1) throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:" + JSON.stringify(fileHistory, null, 2));
-		if(fileHistory.currentItem >= fileHistory.length) throw new Error("fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory:", fileHistory);
+		if(fileHistory.currentItem <= -1) {
+			console.log(fileHistory);
+			throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + "");
+		}
+		if(fileHistory.currentItem >= fileHistory.length) {
+			console.log(fileHistory);
+			throw new Error("fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + "");
+		}
+		
 		var branch = fileHistory;
 		var historyItem = branch[branch.currentItem];
 		while(historyItem.branches.length > 0 && historyItem.currentBranch >= -1 && historyItem.branches[historyItem.currentBranch].currentItem > -1) {
@@ -919,6 +982,10 @@ console.warn("Unable to undo! No recorded history!");
 			// Create a new empt history item (that we will branch out from)
 			fileHistory.unshift(new HistoryItem());
 			fileHistory.currentItem = 0;
+		}
+		else if(fileHistory.currentItem >= fileHistory.length) {
+			// Most likely the currentItem has reached over the ceiling to prevent additional redo's
+			fileHistory.currentItem = fileHistory.length-1;
 		}
 		
 		var tip = getHistoryTip(fileHistory);
@@ -982,9 +1049,11 @@ console.warn("Only store commands starting with :");
 		}
 	}
 	
-	function parseOption(str) {
+	function parseLineCommand(str) {
 		
 		console.log("Parsing vim option: " + str);
+		
+		var file = EDITOR.currentFile;
 		
 		/*
 			# Command line
@@ -1030,11 +1099,16 @@ console.warn("Only store commands starting with :");
 			else if(str == ":marks") {
 				// Show a list of marks (a-z)
 			}
-			
-			else return null;
+		else if(str == ":q!") {
+			// Close file without saving
+			return function closeFile() {
+				EDITOR.closeFile(file.path);
+			}
 		}
+		else return null;
+	}
 	
-	function parseCommand(str, file) {
+	function parseNormalCommand(str, file) {
 		/*
 			Returns the following object:
 			{undo: Function, redo: Function, insert: String, toInsert: Boolean}
@@ -1053,7 +1127,7 @@ console.warn("Only store commands starting with :");
 		
 		console.log("Parsing vim command: " + str);
 		
-		if(str.charAt(0) == ":") throw new Error("Parse using parseOption instead!");
+		if(str.charAt(0) == ":") throw new Error("Parse using parseLineCommand instead!");
 		
 		var nr = "";
 		var repeat = 1;
@@ -1580,7 +1654,7 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			else if(char == "a") {
 				console.log("Append text after the cursor " + repeat + " times")
 				return toInsert(function moveCursorToEol() {
-					file.moveCaretRight(file.caret);
+					if(!file.caret.eol) file.moveCaretRight(file.caret);
 				}, repeat);
 			}
 			else if(char == "[" && lastChar == "`") {
@@ -1767,8 +1841,9 @@ insertedString = "";
 		}
 		else {
 
-			addCommandHistory(vimCommandBuffer);
-		vimCommandBuffer = "";
+			if(vimCommandBuffer.charAt(0) == ":") addCommandHistory(vimCommandBuffer);
+		
+vimCommandBuffer = "";
 		commandCaretPosition = 0;
 		messageToShow = "";
 		EDITOR.renderNeeded();
@@ -1819,7 +1894,7 @@ insertedString = "";
 		if(file == undefined && EDITOR.currentFile == undefined) return;
 		else if(file == undefined) file = EDITOR.currentFile;
 		
-		var str = "row=" + (file.caret.row) + " col=" + (file.caret.col);
+		var str = "index=" + file.caret.index + " row=" + (file.caret.row) + " col=" + (file.caret.col);
 		if(file.caret.eol) str += " EOL";
 		if(file.caret.eof) str += " EOF";
 		showMessage(str);
@@ -1884,15 +1959,66 @@ insertedString = "";
 			
 			/*
 				
-				Following the guide at: http://vimhelp.appspot.com/
-				Also repeating the commands in vim to see if they do the same
-				
-				 Tests here:
 			*/
 			
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});
+			
+			// Make sure undo/redo history works with only one item in the history
+			EDITOR.mock("typing", "i123");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Undo insert
+			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Should do nothing
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Undo insert (again)
+			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Should do nothing
+			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			
+			// See if we can travel the history
+			EDITOR.mock("typing", "a456");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "123456\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Undo insert 456
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Undo insert 123
+			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Should do nothing
+			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 123
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 456
+			if(file.text != "123456\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			// See if the history can branch
+			EDITOR.mock("typing", "u"); // Undo insert 456
+			EDITOR.mock("typing", "adef"); // Branch the history by appending def
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "123def\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Undo insert def
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("typing", "u"); // Undo insert 123
+			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 123
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert def
+			// Note: It should now pick the def branch (test shouldbe 123def and not 123456)
+			if(file.text != "123def\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			
+			/*
+				
+				Following the guide at: http://vimhelp.appspot.com/
+				
+			*/
 			
 			// ### *02.2*Inserting text
 			
@@ -1995,6 +2121,16 @@ insertedString = "";
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "young intelligent turtle") throw new Error("Unexpected after two redo: " + file.text);
+			if(file.caret.col != 0) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
+			
+			EDITOR.mock("typing", "iSome ");
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "u");
+			if(file.text != "young intelligent turtle") throw new Error("Unexpected: " + file.text);
+			if(file.caret.col != 0) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			if(file.text != "Some young intelligent turtle") throw new Error("Unexpected: " + file.text);
+			
 			
 			/*
 				### Special undo (U)
@@ -2068,6 +2204,32 @@ insertedString = "";
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtles") throw new Error("Unexpected: " + file.text);
 			
+			EDITOR.mock("typing", "2ihello"); // Insert hello 2 times
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellos") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "2aworld"); // Append world 2 times
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "2oMore turtles"); // Open 2 rows
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld\nMore turtles\nMore turtles") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellos") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("typing", "u");
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtles") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellos") throw new Error("Unexpected: " + file.text);
+			
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
 			
 			
 			
