@@ -43,6 +43,8 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+Investigate why I get the wrong history branch 
+
 Getting undo/redo history to work in vim mode
 
 Moving cursor in vim editor command (left/right arrow)

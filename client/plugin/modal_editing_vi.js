@@ -2011,7 +2011,11 @@ vimCommandBuffer = "";
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert def
 			// Note: It should now pick the def branch (test shouldbe 123def and not 123456)
-			if(file.text != "123def\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			if(file.text != "123def\n") {
+				console.log(history[file.path]);
+				throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			}
+			
 			
 			
 			/*
