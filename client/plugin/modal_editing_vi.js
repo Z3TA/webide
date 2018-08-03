@@ -1637,7 +1637,17 @@ file.putCharacter(" "); // Insert white space between the merged lines
 					file.removeAllTextOnRow(row);
 					file.insertTextOnRow(oldContent, row);
 				});
-				
+				}
+			else if(char == "Z" && lastChar == "Z") {
+				// Save the file and close it
+				return cmd(function saveAndCloseUndo() {
+					// Reopen the file again !?
+				}, function saveAndClose() {
+					EDITOR.saveFile(file, file.path, function fileSaved(err, path) {
+						if(err) return alertBox("Unable to save file! " + err.message);
+						else EDITOR.closeFile(path);
+					});
+				});
 			}
 			else {
 				console.log("Did not match any known commands: vimCommandBuffer=" + vimCommandBuffer);
