@@ -155,6 +155,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	var VIM_ACTIVE = false; // Always start with false, see plugin.load (toggles vim mode if &vimactive in url query)
 	var lastCol = 0; // When moving the cursor up/down try to place the cursor at this column
 	var repeatInsert = 1; // How many times the insert should be repeated after pressing Esc
+	var repeatCommand = null; // If the insert is preceded by a command, repeat this command before each insert
 	var history = {}; // Undo redo history [file.path] = {undo: [f,f,f], redo: [f,f,f]} or a new branch/array
 	
 	var commandHistory = [];
@@ -206,8 +207,8 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			
 			EDITOR.bindKey({desc: "Vim redo", fun: vimRedo, charCode: R, combo: CTRL, mode: "vimNormal"});
 			
-			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: toVimNormalMode, charCode: ESC, combo: 0, mode: "vimInsert"});
-			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: clearCommandBuffer, charCode: ESC, combo: 0, mode: "vimNormal"});
+			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: escapeFromInsert, charCode: ESC, combo: 0, mode: "vimInsert"});
+			EDITOR.bindKey({desc: "Vim Esc to normal/command mode", fun: vimEscape, charCode: ESC, combo: 0, mode: "vimNormal"});
 			
 			EDITOR.bindKey({desc: "Vim backspace", fun: vimBackspace, charCode: BACKSPACE, combo: 0, mode: "*"});
 			EDITOR.bindKey({desc: "Vim arrow left: Move caret left", fun: vimLeftArrowKey, charCode: LEFT, combo: 0, mode: "*"});
@@ -233,7 +234,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.removeRender(showCommandBuffer);
 			
 			EDITOR.unbindKey(toggleVim);
-			EDITOR.unbindKey(toVimNormalMode);
+			EDITOR.unbindKey(escapeFromInsert);
 			EDITOR.unbindKey(vimRedo);
 		}
 		});
@@ -245,6 +246,7 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 		//console.log("caret.row=" + caret.row + " file.grid[" + caret.row + "].length=" +file.grid[caret.row].length + " caret.eol=" + caret.eol);
 		if(file.grid[caret.row].length > 0 && caret.eol) {
 file.moveCaretLeft();
+			EDITOR.renderNeeded();
 			return true;
 		}
 		else return false;
@@ -267,7 +269,7 @@ file.moveCaretLeft();
 	
 	function vimFileHide(file) {
 		if(EDITOR.mode == "vimInsert") {
-			toVimNormalMode(file);
+			vimEscape(file);
 		}
 		return true;
 	}
@@ -280,7 +282,30 @@ file.moveCaretLeft();
 		return false;
 	}
 	
-	function toVimNormalMode(file) {
+function vimEscape(file) {
+if(EDITOR.mode == "vimInsert") {
+return escapeFromInsert(file);
+		}
+		else if(EDITOR.mode == "vimNormal") {
+			
+			var moved = noEol();
+			var cleared = clearCommandBuffer();
+			
+			if(!moved && !cleared) {
+				// A beep means we did nothing, and are already in normal mode
+				beep();
+				console.warn("beep!");
+				return false;
+			}
+			else {
+				console.log("nobeep");
+			}
+			
+			return false; // false to prevent editor default
+		}
+}
+
+	function escapeFromInsert(file) {
 		if(file == undefined) throw new Error("file=" + file);
 		
 		if(EDITOR.mode != "vimInsert") throw new Error("Expected vimInsert: EDITOR.mode=" + EDITOR.mode);
@@ -290,6 +315,7 @@ file.moveCaretLeft();
 
 		if(repeatInsert && repeatInsert > 1) {
 			for (var i=0; i<repeatInsert; i++) {
+				if(repeatCommand) repeatCommand();
 				file.insertText(insertedString);
 			}
 			repeatInsert = 1; // Don't repeat when pressing Esc again
@@ -298,7 +324,9 @@ file.moveCaretLeft();
 		noEol();
 		
 		EDITOR.setMode("vimNormal");
-			showMessage(""); // Clear
+		messageToShow = "ENTER COMMAND";
+		
+		EDITOR.renderNeeded();
 		
 		return false;
 	}
@@ -363,7 +391,7 @@ file.moveCaretLeft();
 				
 				vimCommandBuffer += char;
 				commandCaretPosition++;
-				showMessage("");
+				messageToShow = "";
 				
 				if(vimCommandBuffer == "u") {
 					// Undo
@@ -403,10 +431,10 @@ command.redo(); // Runs the command
 					});
 					
 					lastCommand = vimCommandBuffer;
-					}
+				}
 				
-if(command.insert) {
-// Insert some text
+				if(command.insert) {
+					// Insert some text
 					var text = command.insert;
 					var repeat = command.repeat || 1;
 					for (var i=0; i<repeat; i++) {
@@ -427,8 +455,14 @@ EDITOR.setMode("vimInsert");
 					if(command.repeat) repeatInsert = command.repeat-1;
 					else repeatInsert = 1;
 					
+					if(repeatInsert > 1 && command.redo) repeatCommand = command.redo;
+					else repeatCommand = null;
+					
 					insertedString = "";
 }
+				
+				
+				
 		}
 			
 			if(vimCommandBuffer.indexOf("\n") != -1) throw new Error("Command buffer contains new-line character! vimCommandBuffer=" + UTIL.lbChars(vimCommandBuffer));
@@ -1501,7 +1535,7 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				}, function addLineRedo() {
 					file.moveCaretToEndOfLine();
 					file.insertLineBreak();
-}, true);
+}, true, repeat);
 			}
 			
 			else if(char == "r") {
@@ -1585,7 +1619,7 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			}
 			else if(char == "i") {
 				// Goes to insert mode
-				return toInsert();
+				return toInsert(undefined, repeat);
 			}
 			else if(char == "U") {
 				var row = history[file.path].lastEditedRow
@@ -1623,14 +1657,15 @@ file.putCharacter(" "); // Insert white space between the merged lines
 			When a command have been found, call either cmd(), toInsert() or nil()
 		*/
 		
-		function cmd(undo, redo, toInsert) {
+		function cmd(undo, redo, toInsert, repeat) {
 			if(typeof undo != "function") throw new Error("cmd() must be called with a undo function!");
 			if(typeof redo != "function") throw new Error("cmd() must be called with a redo function!");
 			
 				var command = {
 					undo: undo,
 					redo: redo,
-				toInsert: !!toInsert
+				toInsert: !!toInsert,
+				repeat: repeat || 1
 				}
 			
 			if(toInsert && i < str.length-1) {
@@ -1717,30 +1752,21 @@ insertedString = "";
 	function clearCommandBuffer() {
 		console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
 		
-		var moved = noEol();
-		
-		if(EDITOR.mode == "vimNormal" && vimCommandBuffer == "" && messageToShow == "" && !moved) {
-			// A beep means we did nothing, and are already in normal mode
-			beep();
-			console.log("beep!");
-			return false;
+		if(vimCommandBuffer == "" && commandCaretPosition == 0 && messageToShow == "") {
+			return false; // We did nothing
 		}
 		else {
-			console.log("nobeep");
-			console.log("EDITOR.mode=" + EDITOR.mode);
-			console.log("vimCommandBuffer=" + vimCommandBuffer);
-			console.log("messageToShow=" + messageToShow);
-		}
-		
-		addCommandHistory(vimCommandBuffer);
-		
+
+			addCommandHistory(vimCommandBuffer);
 		vimCommandBuffer = "";
 		commandCaretPosition = 0;
 		messageToShow = "";
 		EDITOR.renderNeeded();
 		
 		console.log("Cleared command buffer!");
-		return false; // false to prevent editor default
+
+			return true; // We did something
+	}
 	}
 	
 	function getNormalMap(char) {
@@ -2022,7 +2048,7 @@ insertedString = "";
 			EDITOR.mock("typing", "3ihello"); // Insert hello 3 times
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "hellohellohello") throw new Error("Unexpected: " + file.text);
-			if(!file.caret.col != 14) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
+			if(file.caret.col != 14) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
 			
 			EDITOR.mock("typing", "3aworld"); // Append world 3 times
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -2031,6 +2057,9 @@ insertedString = "";
 			EDITOR.mock("typing", "3oMany turtles"); // Open 3 rows 
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtles") throw new Error("Unexpected: " + file.text);
+			
+			
+			
 			
 			return true;
 			
