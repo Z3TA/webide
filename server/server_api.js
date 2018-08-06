@@ -745,6 +745,11 @@ API.saveToDisk = function saveToDisk(user, json, saveToDiskCallback) {
 	var encoding = json.encoding;
 	var text = json.text;
 	
+	var crypto = require('crypto');
+	var shaSum = crypto.createHash('sha256');
+	shaSum.update(text);
+	var hash = shaSum.digest('hex')
+	
 if(encoding == undefined) encoding = "utf-8";
 
 // Check path for protocol
@@ -788,7 +793,7 @@ else if(protocol == "sftp:") {
 			}
 			else {
 				console.log("Saved " + destPath + " on SFTP " + hostname);
-					saveToDiskCallback(null, {path: path});
+					saveToDiskCallback(null, {path: path, hash: hash});
 				}
 				
 			});
@@ -829,7 +834,7 @@ else if(protocol == "sftp:") {
 			}
 			else {
 				//console.log("The file was successfully saved: " + path + "");
-				saveToDiskCallback(null, {path: user.toVirtualPath(path)});
+				saveToDiskCallback(null, {path: user.toVirtualPath(path), hash: hash});
 			}
 		});
 	}
@@ -864,7 +869,7 @@ else if(protocol == "sftp:") {
 				
 				console.log("Successfully saved pathname=" + pathname + "");
 				
-				saveToDiskCallback(null, {path: path});
+				saveToDiskCallback(null, {path: path, hash: hash});
 				
 				runFtpQueue();
 			}

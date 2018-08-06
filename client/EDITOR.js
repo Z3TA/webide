@@ -1307,13 +1307,15 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			}); 
 		}
 		
-		function doneSaving(err, path) {
+		function doneSaving(err, path, hash) {
 			if(err) {
 				if(callback) return callback(err, path);
 				else throw err;
 			}
 			
 			if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
+			
+			if(hash) file.hash = hash;
 			
 			console.log("Successfully saved " + file.path);
 			
@@ -1367,7 +1369,7 @@ return false;
 				else throw err;
 			}
 			else {
-				if(saveToDiskCallback) saveToDiskCallback(null, json.path);
+				if(saveToDiskCallback) saveToDiskCallback(null, json.path, json.hash);
 				else console.log("File saved to disk: " + json.path);
 			}
 		});
