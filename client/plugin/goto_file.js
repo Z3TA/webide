@@ -123,7 +123,7 @@
 		inputGoto.setAttribute("type", "text");
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
-		inputGoto.setAttribute("placeholder", "Filename");
+		inputGoto.setAttribute("placeholder", "Filename (regexp)");
 		
 		inputFolder = document.createElement("input");
 		inputFolder.setAttribute("type", "text");
