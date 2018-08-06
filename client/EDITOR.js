@@ -13,9 +13,6 @@ var inputCount = 0;
 var menuVisibleOnce = false;
 var menuIsFullScreen = false;
 
-// Don't show the firendly message on how to show the menu if the menu is disabled
-if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1) menuVisibleOnce = true;
-
 // List of file extensions of supported files. Extensions Not in this list will be loaded in plain text mode.
 // important: Add file format that are supported by the parsers here:
 EDITOR.supportedFiles = [
@@ -294,6 +291,8 @@ EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
 	if(isNaN(EDITOR.startedCounter)) EDITOR.startedCounter = 0;
 	UTIL.setCookie("startedCounter", ++EDITOR.startedCounter, 999);
 	
+	// Don't show the firendly message on how to show the menu if the menu is disabled
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("menu") != -1 || EDITOR.startedCounter > 100) menuVisibleOnce = true;
 	
 	var lastMouseDownEventType = "";
 	
