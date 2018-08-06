@@ -7395,7 +7395,9 @@ console.error(err);
 	}
 	
 	function confirmExit() {
-		return "Are you sure you want to close the editor ?";
+		for(var path in EDITOR.files) {
+			if(!EDITOR.files[path].isSaved) return "Are you sure you want to close the editor ?";
+		}
 	}
 	
 	function clearSelection() {
