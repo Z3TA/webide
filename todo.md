@@ -139,6 +139,11 @@ Make it possible to install the editor via : npm install jzedit
 npm install -g ?
 
 ---
+
+Open repo readme after cloning using query string
+
+---
+
 Able to make a react app work flow:
 npm install create-react-app
 npm init react-app my-app
@@ -220,6 +225,22 @@ write a test for starting and stopping nodejs processes
 fix problem: npm deletes unknown module dirname (which is used by nw.js)
 Remove all dependendcies on dirname !?
 
+---
+Recive pull request!
+(for example when using the editor as a CMS/ document management)
+SSG: Send pull request / You have 3 new pull requests
+Easy merging
+(see how it's done on Github)
+Able to create new repositories and manage users piblic read or push access
+(in app purchase)
+---
+
+Support embedding the editor at places ...
+https://oembed.com/
+try on discorse
+
+---
+
 
 * Fix bugs!
 * Add features that makes it easier to fix bugs !?
@@ -231,6 +252,12 @@ Remove all dependendcies on dirname !?
 
 What I'm thinking
 -----------------
+
+Should opened files and their state be saved on the server ?
+So that when a user switch to another device, it will reopen the same files !?
+
+
+---
 
 An existing user got logged in as guest ...
 
@@ -699,6 +726,12 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+Issue when calling CLIENT.cmd but it never recives an answer, eg the socket has been closed but appear open.
+
+---
+on Google dev tools screenshot:
+Key binding for xxx ... can not be ..
 
 ---
 
@@ -1565,6 +1598,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+Able to hide the function list, enabled by default.
 
 When a version control widget is active (visible) Show green "active" indicator on "version control" in the menu !?
 
@@ -2699,6 +2734,24 @@ Optimize if needed
 
 Feature list (Not ordered/prioritized)
 --------------------------------------
+
+
+
+---
+Inline assertion and code coverage.
+ex:
+// assert(plus(1,2), 3)
+eval's the plus(1,2) function and if it returns 3 an "OK" or check mark sign is shown after the comment:
+// assert(plus(1,2), 3) ✓
+Appends console.log(__line) after each LOC to get code coveregate, then high-lights line's that are not covered by the assertions.
+---
+
+Mercurial File history. Like log but shows all versions of a file. And lets you load/open them.
+(blog about how to implement)
+
+A code that you can run in the browsers dev tools console, that replaces a text area with the editor.
+
+irc chat, each channel is a file
 
 Idea from Emacs:
 	Ctrl + K = Kill, kills in context, eg kill inside a paranthesis removes all text from the cursor to the end of the paranthesis
