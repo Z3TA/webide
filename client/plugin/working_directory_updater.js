@@ -43,12 +43,13 @@ EDITOR.plugin({
 		function search(currentFolder) {
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 				
-				if(err && err.code == "ENOENT") {
-					// File/folder has probably been deleted!
+				if(err) {
+if(err.code == "ENOENT" || err.message.indexOf("Not connected to") != -1) {
+					// File/folder has probably been deleted! Or we have been disconnected
 					console.error(err);
 					return;
 }
-				
+				}
 				if(err) throw err;
 				
 				console.log("Checking if working directory: " + currentFolder);
