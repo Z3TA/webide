@@ -2280,7 +2280,7 @@ alertBox("All vim commands suceeded!");
 		if(typeof callback != "function") return false;
 		};
 	
-	EDITOR.addTest(testVimCommands, 1);
+	EDITOR.addTest(testVimCommands);
 	
 	// TEST-CODE-END
 	

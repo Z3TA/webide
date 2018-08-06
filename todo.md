@@ -43,6 +43,11 @@ Happy path: (manually check on prod after each release)
 What I'm working on
 -------------------
 
+
+---
+
+Vim mode:
+
 Investigate why I get the wrong history branch 
 
 Getting undo/redo history to work in vim mode
@@ -694,6 +699,23 @@ Make server run under apparmor profile ...
 
 BUGS (and issues)
 =================
+
+---
+
+One equal in if-statement false-positive:
+
+if(confirm(file.text.charCodeAt(i) + "=" + file.text.charAt(i) + " at index " + i + " in " + file.path + 
+			" ... Do you want to try converting the document to UTF8 encoding?\nIf you save without converting first, all non-supported characters will be lost!")) {
+				if(file.savedAs) EDITOR.readFromDisk(file.path, false, "binary", fileRead);
+				else {
+					var byteArr = stringToBytes(file.text);
+					var buffer = byteArr.map(function(b) {return String.fromCharCode(b);}).join("");
+					var text = decodeBytes(buffer, "cp1252"); // or cp1251
+					file.reload(text);
+				}
+			}
+
+---
 
 In Firefox when hitting Alt+Z (to zoom) a z gets inserted !
 
@@ -1543,6 +1565,8 @@ Links: When selecting a link, show a list of current files, plus a box for url.
 
 Polishing (only existing features)
 ==================================
+
+When a version control widget is active (visible) Show green "active" indicator on "version control" in the menu !?
 
 ---
 

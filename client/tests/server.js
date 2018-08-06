@@ -225,6 +225,7 @@
 		var testFile = "testfile.txt";
 		var testText = "Hello World!\n";
 		
+
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
 			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
@@ -286,6 +287,98 @@
 		
 		
 	});
+	
+	EDITOR.addTest(function testHash(callback) {
+		
+		// Todo: Also test the hash when reading from ftp/sftp (need to implement ftp/sftp support for the hash function)
+		
+		var testFolder = "/testHash/";
+		var testFile = "testHash.txt";
+		var testText = "";
+		var testRow = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö0123456789\n";
+		
+		
+var didReadString = false;
+		var didReadBuffer = false;
+		var didHash = false;
+
+		for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
+		var correctHash = "91f8cbc3be52354a9387d2e32348e529c71d2b8aa77656f63d7815d3959a9de0"; // sha256
+		
+		EDITOR.createPath(testFolder, function folderCreated(err, path) {
+			if(err) throw err;
+			EDITOR.saveToDisk(testFolder + testFile, testText, fileCreated);
+		});
+		
+		function fileCreated(err, path) {
+			if(err) throw err;
+			
+			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: true}, readBuffer);
+			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: false, encoding: "utf8"}, readString);
+			CLIENT.cmd("hash", {path: path}, readHash);
+		}
+		
+		function readBuffer(err, json) {
+			didReadBuffer = true;
+			if(err) throw err
+			
+			console.log("readBuffer hash=" + json.hash);
+			
+			if(json.hash != correctHash) throw new Error("json.hash=" + json.hash + " correctHash=" + correctHash);
+			
+			checkDone();
+		}
+		
+		function readString(err, json) {
+			didReadString = true;
+			if(err) throw err
+			
+			console.log("readString hash=" + json.hash);
+			
+			if(json.hash != correctHash) throw new Error("json.hash=" + json.hash + " correctHash=" + correctHash);
+			
+			checkDone();
+			
+		}
+		
+		function readHash(err, hash) {
+			didHash = true;
+			if(err) throw err
+			
+			console.log("readHash hash=" + hash);
+			
+			if(hash != correctHash) throw new Error("hash=" + hash + " correctHash=" + correctHash);
+			
+			checkDone();
+		}
+		
+		function checkDone() {
+			if(didReadBuffer && didReadString && didHash) cleanup();
+			else console.log("didReadBuffer=" + didReadBuffer + " didReadString=" + didReadString + " didHash=" + didHash);
+		}
+		
+		function cleanup() {
+			// Cleanup
+			CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
+				if(err) throw err
+				else {
+					
+					// Cleanup
+					CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+						if(err) throw err
+						else {
+							
+							callback(true);
+							callback = null;
+							
+						}
+					});
+					
+				}
+			});
+		}
+		
+	}, 1);
 	
 	
 	

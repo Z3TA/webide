@@ -363,6 +363,24 @@ console.log("reopenFiles!");
 							
 							return; // Don't attempt to open the file
 						}
+						else if(lastFileState.isSaved && lastFileState.hash && lastFileState.text != undefined && lastFileState.text != "") {
+							// Compare hashes to prevent losing data
+							
+							CLIENT.cmd("hash", {path: path}, function gotHash(err, hash) {
+								
+								if(hash != lastFileState.hash) {
+									console.warn("The file on disk has changed! hash=" + hash + " lastFileState.hash=" + lastFileState.hash);
+									lastFileState.isSaved = false;
+									content = lastFileState.text;
+								}
+								
+								EDITOR.openFile(path, content, fileReopened); 
+								
+							});
+							
+							return;
+						}
+						
 					}
 					console.log("Reopening file path=" + path +" typeof content=" + typeof content);
 					
@@ -468,6 +486,7 @@ console.log("reopenFiles!");
 						if(lastFileState.order !== undefined) file.order = lastFileState.order;
 						if(lastFileState.mode !== undefined) file.mode = lastFileState.mode;
 						if(lastFileState.savedAs !== undefined) file.savedAs = lastFileState.savedAs;
+						if(lastFileState.hash !== undefined) file.hash = lastFileState.hash;
 						
 						if(lastFileState.isSaved !== undefined && content) {
 							file.isSaved = lastFileState.isSaved;
@@ -761,7 +780,7 @@ if(openedFilesString == null || openedFilesString == "") {
 		state.caret = file.caret;
 		state.order = file.order;
 		state.mode = file.mode;
-		
+		state.hash = file.hash;
 		
 		var sizeLimit = 2551000; // Max size for localStorage in Chrome is 2,551,000 characters (5 MB)
 		

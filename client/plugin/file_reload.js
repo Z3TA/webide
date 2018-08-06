@@ -45,12 +45,12 @@ if(!file) return true;
 		EDITOR.hideMenu();
 		
 		function reload() {
-			EDITOR.readFromDisk(file.path, function(err, path, text) {
+			EDITOR.readFromDisk(file.path, function(err, path, text, hash) {
 				
 				if(err) throw err;
 				else {
 				file.reload(text);
-				
+					file.hash = hash;
 				file.saved(); // Because we reloaded from disk
 				}
 				

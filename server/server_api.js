@@ -42,23 +42,27 @@ API.hash = function hash(user, json, callback) {
 	var crypto = require('crypto');
 	var fs = require('fs');
 	
-	// Algorithm depends on availability of OpenSSL on platform
-	// Another algorithms: 'sha1', 'md5', 'sha256', 'sha512' ...
-	var algorithm = 'sha1';
-	var shasum = crypto.createHash(algorithm);
+	var hash = crypto.createHash('sha256');
 	
-	// Updating shasum with file content
-	var stream = fs.ReadStream(path);
-	stream.on('data', function(data) {
-		shasum.update(data);
-	})
-	
-	// making digest
-	stream.on('end', function() {
-		var hash = shasum.digest('hex');
-		callback(null, {hash: hash, path: path});
-		})
-	}
+	var input = fs.createReadStream(path);
+	input.on('readable', function readStream() {
+		//console.log("Stream readable! path=" + path);
+		var data = input.read();
+		//console.log("Stream data: " + data);
+		if (data)
+			hash.update(data);
+		else {
+			if(callback) {
+				callback(null, hash.digest('hex'));
+			}
+		}
+	});
+	input.on('error', function streamError(err){ 
+		//console.log("Stream error! path=" + path);
+		callback(new Error("Unable to hash file: " + path + "\n " + err.message));
+		callback = null;
+	});
+}
 
 API.httpGet = function httpGet(user, options, callback) {
 	var url = options.url;
@@ -94,13 +98,13 @@ API.httpGet = function httpGet(user, options, callback) {
 		
 		resp.on('data', respData);
 		resp.on('end', respEnd);
-
-function respData(chunk) {
+		
+		function respData(chunk) {
 			data.push(chunk);
 		}
-
-function respEnd() {
-if(gotError) return;
+		
+		function respEnd() {
+			if(gotError) return;
 			
 			
 			var buffer = Buffer.concat(data);
@@ -355,7 +359,10 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 		}
 		
 		var fs = require("fs");
-		
+	var crypto = require('crypto');
+	
+	var shasum = crypto.createHash('sha256');
+	
 		console.log("Reading file from disk: " + path + " returnBuffer=" + returnBuffer + " encoding=" + encoding);
 		//console.log(UTIL.getStack("Read from disk"));
 		
@@ -395,6 +402,7 @@ API.readFromDisk = function readFromDisk(user, json, callback) {
 					if(returnBuffer) fileBuffer.push(data);
 					else {
 str = decoder.write(data);
+						shasum.update(data);
 						fileContent += str;
 					}
 					console.log('loaded part of the file');
@@ -423,8 +431,12 @@ str = decoder.write(data);
 					
 					if(err) console.warn(err.message);
 					
+				shasum.update(buffer);
+				
 					var resp = {path: path};
 					
+				resp.hash = shasum.digest('hex');
+				
 					if(returnBuffer) {
 						resp.data = buffer;
 						}
@@ -444,33 +456,38 @@ str = decoder.write(data);
 		}
 		
 		else {
-			
+		
 			// Asume local file system
 			
 			if(path.indexOf("file://") == 0) path = path.substr(7); // Remove file://
 			
-			if(returnBuffer) {
-				// If no encoding is specified in fs.readFile, then the raw buffer is returned.
+		// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 				
 				fs.readFile(path, function(err, buffer) {
 					if(err) console.warn(err.message);
 					
-					callback(err, {path: user.toVirtualPath(path), data: buffer});
+			//shasum.update(buffer.toString(encoding));
+			shasum.update(buffer); // Doesn't seem to matter if you pass it buffer or utf8 string!
+			
+			if(encoding == undefined) encoding = "utf8";
+			
+			callback(err, {
+				path: user.toVirtualPath(path), 
+				data: returnBuffer ? buffer : buffer.toString(encoding), 
+				hash: shasum.digest('hex')
+			});
 					
 				});
-			}
-			else {
-				
-				if(encoding == undefined) encoding = "utf8";
+			
+		/*
+			if(encoding == undefined) encoding = "utf8";
 				fs.readFile(path, encoding, function(err, string) {
 					if(err) console.warn(err.message);
-					
 					callback(err, {path: user.toVirtualPath(path), data: string});
-					
-				});
-			}
-		}
+					});
+		*/
 		
+		}
 		
 		// Functions to handle NodeJS ReadableStream's
 		function streamClose() {
@@ -487,6 +504,8 @@ str = decoder.write(data);
 			
 		var resp = {path: path};
 
+		resp.hash = shasum.digest('hex');
+		
 		if(returnBuffer) {
 			resp.data = fileBuffer;
 }
@@ -512,6 +531,8 @@ str = decoder.write(data);
 			
 			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
 				
+			shasum.update(chunk);
+			
 				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
 				str = decoder.write(chunk);
 				

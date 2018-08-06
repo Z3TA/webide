@@ -740,7 +740,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 						var notFromDisk = false;
 						var tooBig = true;
 						var text = "";
-						load(null, path, text, notFromDisk, tooBig);
+						load(null, path, text, notFromDisk, null, tooBig);
 					}
 					else {
 						EDITOR.readFromDisk(path, load);
@@ -758,12 +758,12 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				
 			}
 			else {
-				load(null, path, text, true);
+				load(null, path, text, null, true);
 			}
 			
 		}
 		
-		function load(err, path, text, notFromDisk, tooBig) {
+		function load(err, path, text, hash, notFromDisk, tooBig) {
 			
 			if(err) return callCallbacks(err);
 			
@@ -774,6 +774,8 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			// Do not add file to EDITOR.files until its fully loaded! And fileOpen events can be run sync
 			
 			var newFile = new File(text, path, ++EDITOR.fileIndex, tooBig, fileLoaded);
+			
+			if(hash) newFile.hash = hash;
 			
 			if(!newFile.path) fileOpenError(new Error("The file has no path!")); // For sanity
 			
@@ -1119,7 +1121,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 			var fileId = UTIL.urlHost(path);
 			getGoogleDriveFileContent(fileId, function(err, data) {
 				if(err) return callback(err);
-				else return callback(null, path, data);
+				else return callback(null, path, data, null);
 			});
 		}
 		else {
@@ -1127,7 +1129,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
 			if(err) callback(err);
-			else callback(null, json.path, json.data);
+			else callback(null, json.path, json.data, json.hash);
 		});
 		}
 		
@@ -1248,6 +1250,7 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		});
 		
 		function beginSaving() {
+			console.log("beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash);
 		if(file.path != path) {
 			if(EDITOR.files.hasOwnProperty(path)) {
 				var err = new Error("There is already a file open with path=" + path);
@@ -1273,9 +1276,20 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 				else reOpen(file.path, path);
 			});
 		}
-		else {
-			EDITOR.saveToDisk(file.path, file.text, doneSaving);
-		}
+		else if(file.hash)  {
+				// Check the hash before saving to prevent over-writing something
+				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
+					if(err) throw err;
+					if(file.hash != hash) {
+						console.log("file.hash=" + file.hash + " hash=" + hash);
+						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "warning");
+					}
+					else EDITOR.saveToDisk(file.path, file.text, doneSaving);
+				});
+			}
+			else {
+				EDITOR.saveToDisk(file.path, file.text, doneSaving);
+			}
 		}
 		
 		function reOpen(oldPath, newPath) {
@@ -1295,14 +1309,14 @@ throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in f
 		
 		function doneSaving(err, path) {
 			if(err) {
-if(callback) return callback(err, path);
+				if(callback) return callback(err, path);
 				else throw err;
 			}
 			
 			if(file.savedAs && path != file.path) throw new Error("Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
-				
-				console.log("Successfully saved " + file.path);
-				
+			
+			console.log("Successfully saved " + file.path);
+			
 			// Change state to saved, and call afterSave listeners
 			file.saved(function(err) {
 				

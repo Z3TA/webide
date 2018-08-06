@@ -21,6 +21,8 @@ var File; // File object is global
 		
 		if(!UTIL.isString(path)) throw new Error("path is not a string! path=" + path);
 		
+		file.hash == ""; // For storing the file hash for convenient access. Only the last saved state! To prevent overwriting changed files
+		
 		file.changed = false; // If the file has changed from last save
 		file.isSaved = false;
 		file.savedAs = false;
@@ -34,7 +36,7 @@ var File; // File object is global
 		file.index = fileIndex;
 		file.order = fileIndex; // For ordering files, in for example a tab list
 		file.name = UTIL.getFilenameFromPath(path);
-		file.mode = "code"; // text, code, or other, ...
+		file.mode = "code"; // text, code, or other, ... Not to be confused with EDITOR.mode
 		file.lineBreak = UTIL.determineLineBreakCharacters(text);
 		
 		
