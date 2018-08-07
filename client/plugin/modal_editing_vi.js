@@ -122,6 +122,8 @@
 	// @{register} = replays the macro
 	
 	
+	Because the editor does auto indentation we could have Esc=Tab so it's easier to reach
+	
 */
 
 (function() {
@@ -178,7 +180,6 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 	// The original/default vim normal key mapping
 	// a=a, b=b, c=c etc so they can be remapped
 	var originalNormalMap = {}; 
-	
 	var normalMap = {};
 	for (var str in originalNormalMap) {
 		normalMap[str]  = originalNormalMap[str];
@@ -275,10 +276,13 @@ file.moveCaretLeft();
 	}
 	
 	function startHistory(file) {
-		history[file.path] = [new HistoryItem()];
+		history[file.path] = []; // A history branch is just an Array with a currentItem property
+		history[file.path].push(new HistoryItem());
 		history[file.path].currentItem = 0;
 		history[file.path].lastEditedRow = -1;
 		history[file.path].rowContentBeforeEdit = "";
+		//history[file.path].currentBranch = -1;
+		
 		return false;
 	}
 	
@@ -542,15 +546,15 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 				}, function insertCharacterRedo() {
 					file.moveCaretToIndex(caretIndex);
 					file.putCharacter(char);
-				});
+				}, "char=" + char);
 			}
 		}
 		else { // Not vimInsert or VimNormal
 			return true; // Do the editor default
 		}
 		
-		function rdo(undo, redo) {
-			var ev = {undo: undo, redo: redo};
+		function rdo(undo, redo, comment) {
+			var ev = {undo: undo, redo: redo, comment: comment};
 			ev.redo();
 			EDITOR.renderNeeded();
 			updateHistory(file, ev);
@@ -558,6 +562,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			return false;
 		}
 	}
+	
 	
 	
 	function vimBackspace(file, combo) {
@@ -804,18 +809,22 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 		
 		var fileHistory = history[file.path];
 		
-		console.log("vim:redo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
+		console.log("vim:redo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + "");
+		console.log("file.text=" + file.text);
 		
 		if(fileHistory.length == 0) {
 console.warn("Unable to redo! No recorded history!");
 			return false;
 		}
 		
+		var alreadyGoneForward = false;
+		
 		if(fileHistory.currentItem == -1 && fileHistory.length > 0) {
 			// The item index has reached the bottom in order to prevent repetition of the first undo
 			// Now go forward
 			console.log("set fileHistory.currentItem = 0");
 			fileHistory.currentItem = 0;
+			alreadyGoneForward = true;
 		}
 		
 		if(fileHistory.currentItem >= fileHistory.length) {
@@ -827,9 +836,12 @@ console.warn("Unable to redo! No recorded history!");
 		
 		var tip = getHistoryTip(fileHistory);
 		var branch = tip.branch;
+		var historyItem = tip.item;
 		
-		console.log("root branch ? " + (branch==fileHistory));
-		console.log("before redo: branch.currentItem=" + branch.currentItem);
+		var isRootBranch = (branch==fileHistory)
+		console.log("isRootBranch=" + isRootBranch);
+		
+		if(!isRootBranch) alreadyGoneForward = false;
 		
 		if(branch == fileHistory && branch.currentItem != fileHistory.currentItem) {
 			console.log(branch);
@@ -837,27 +849,39 @@ console.warn("Unable to redo! No recorded history!");
 			throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " branch.currentItem=" + branch.currentItem + " branch===fileHistory ? " + (branch===fileHistory));
 		}
 		
+		if(!alreadyGoneForward) {
+		// Go forward in history
+		// Redo goes forward Before redoing, while Undo goes backwards After undoing
+		console.log(branch);
+		console.log("branch.currentItem=" + branch.currentItem);
+		console.log("branch[" + branch.currentItem + "].branches.length = " + branch[branch.currentItem].branches.length + "");
+		console.log("branch[" + branch.currentItem + "].currentBranch=" + (branch[branch.currentItem] && branch[branch.currentItem].currentBranch) + "");
+			//historyItem = branch[branch.currentItem];
+			while(historyItem && historyItem.currentBranch > -1) {
+				console.log("Go forward into historyItem.currentBranch=", historyItem.currentBranch);
+				branch = historyItem.branches[historyItem.currentBranch];
+				historyItem = branch[branch.currentItem];
+				//branch[branch.currentItem].branches[ branch[branch.currentItem].currentBranch ].currentItem++;
+			}
+			branch.currentItem++;
+			historyItem = branch[branch.currentItem];
+		}
+		
+		console.log("branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
+		
 		if( branch.currentItem >= branch.length) {
 			console.log("branch already at the tip! branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
 			console.log(fileHistory);
 			showMessage("Already at newest change");
 			return false;
 		}
-		else {
-			console.log("branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
-		}
-		
-		var historyItem = branch[branch.currentItem];
 		
 		for (var i=0, f; i<historyItem.redo.length; i++) {
 			f = historyItem.redo[i]
-			console.log("redo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString()); 
+			console.log( "redo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString() + (historyItem.comment && historyItem.comment[i] ? "// " + historyItem.comment[i] : "") ); 
 			f();
 		}
 		
-		branch.currentItem++;
-		
-		console.log("after redo: branch.currentItem=" + branch.currentItem);
 		
 		// No need to have EDITOR.renderNeeded() inside each redo function
 		EDITOR.renderNeeded();
@@ -888,12 +912,13 @@ console.warn("Unable to undo! No recorded history!");
 		
 		if(fileHistory.currentItem == fileHistory.length) {
 			// The item index has reached above the ceiling in order to prevent aditional redo
-			console.log("set fileHistory.currentItem = " + fileHistory.length-1);
 			fileHistory.currentItem = fileHistory.length-1;
+			console.log("set fileHistory.currentItem = " + fileHistory.currentItem);
 		}
 		
 		var tip = getHistoryTip(fileHistory);
 		var branch = tip.branch;
+		var parentBranch = tip.parentBranch;
 		var historyItem = tip.item;
 		
 		console.log("root branch ? " + (branch==fileHistory));
@@ -903,16 +928,33 @@ console.warn("Unable to undo! No recorded history!");
 			throw new Error("branch.currentItem=" + branch.currentItem);
 		}
 		
-		console.log("before undo: branch.currentItem=" + branch.currentItem);
-		branch.currentItem--;
-		console.log("after undo: branch.currentItem=" + branch.currentItem);
+		if(branch.currentItem == branch.length) {
+			// The item index has reached above the ceiling in order to prevent aditional redo
+			branch.currentItem = branch.length-1;
+			console.log("set branch.currentItem = " + branch.currentItem );
+			historyItem = branch[branch.currentItem];
+		}
+		
+		console.log(branch);
+		console.log("branch.currentItem=" + branch.currentItem);
+		console.log("branch.length=" + branch.length);
+		console.log("historyItem=" + historyItem);
 		
 		// Should the undo run backwards !? Last in last out !?
 		for (var i=historyItem.undo.length-1, f; i>-1; i--) {
 			f = historyItem.undo[i];
-			console.log("undo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString()); 
+			console.log( "undo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString() + (historyItem.comment && historyItem.comment[i] ? "// " + historyItem.comment[i] : "") ); 
 			f();
 		}
+		
+		// Go backwards in history
+		console.log("before undo: branch.currentItem=" + branch.currentItem + " parentBranch ? " + !!parentBranch);
+		branch.currentItem--;
+		if(parentBranch && branch.currentItem == -1 && parentBranch.currentBranch > -1) {
+			console.log("Step back out of the branch");
+			parentBranch.currentBranch = -1;
+		}
+		console.log("after undo: branch.currentItem=" + branch.currentItem);
 		
 		// No need to have EDITOR.renderNeeded() inside each undo function
 		EDITOR.renderNeeded();
@@ -947,6 +989,7 @@ console.warn("Unable to undo! No recorded history!");
 		
 		historyItem.undo.push(ev.undo);
 		historyItem.redo.push(ev.redo);
+		historyItem.comment.push(ev.comment);
 		historyItem.date = new Date();
 	}
 	
@@ -961,22 +1004,39 @@ console.warn("Unable to undo! No recorded history!");
 		}
 		
 		var branch = fileHistory;
+		var parentBranch = null;
 		var historyItem = branch[branch.currentItem];
-		while(historyItem.branches.length > 0 && historyItem.currentBranch >= -1 && historyItem.branches[historyItem.currentBranch].currentItem > -1) {
+		console.log(fileHistory);
+		console.log("branch.currentItem=" + branch.currentItem);
+		console.log("historyItem.branches.length=" + historyItem.branches.length);
+		console.log("historyItem.currentBranch=" + historyItem.currentBranch);
+		console.log("historyItem.branches[" + historyItem.currentBranch + "]=", historyItem.branches[historyItem.currentBranch]);
+		console.log("historyItem.branches[" + historyItem.currentBranch + "].currentItem=" + (historyItem.branches[historyItem.currentBranch] && historyItem.branches[historyItem.currentBranch].currentItem) );
+		while(historyItem && historyItem.branches.length > 0 && historyItem.currentBranch >= -1 && historyItem.branches[historyItem.currentBranch].currentItem > -1) {
+			console.log("Selecting history branch historyItem.currentBranch=" + historyItem.currentBranch);
+			parentBranch = branch;
 			branch = historyItem.branches[historyItem.currentBranch];
+			console.log("branch.currentItem=" + branch.currentItem);
+			console.log("branch.length=" + branch.length);
 			historyItem = branch[branch.currentItem];
+			console.log("historyItem:", historyItem);
+			console.log("branch:", branch);
 		}
 		if(branch.currentItem <= -1) throw new Error("branch.currentItem=" + branch.currentItem + " branch:", branch);
-		return {branch: branch, item: historyItem};
+		if(branch == undefined) throw new Error("branch=" + branch);
+		if(branch.currentItem == undefined) throw new Error("branch.currentItem=" + branch.currentItem);
+		//if(historyItem == undefined) throw new Error("historyItem=" + historyItem);
+		return {branch: branch, item: historyItem, parentBranch: parentBranch};
 	}
 	
 	function addHistory(file, ev) {
 		// Add/Create a new undo/redo history item, when running a command
 		
-		console.log("vim:addHistory: file.path=" + file.path + " ev=", ev); 
-		
 		var fileHistory = history[file.path];
 		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
+		
+		console.log("vim:addHistory: file.path=" + file.path + " ev=", ev, " fileHistory.currentItem=" + fileHistory.currentItem); 
+		console.log("file.text=" + file.text);
 		
 		if(fileHistory.currentItem <= -1) {
 			// Create a new empt history item (that we will branch out from)
@@ -992,18 +1052,22 @@ console.warn("Unable to undo! No recorded history!");
 		var branch = tip.branch;
 		var historyItem = tip.item;
 		
+		console.log(branch);
+		console.log("branch.currentItem=" + branch.currentItem);
+		console.log("branch.length=" + branch.length);
+		
 		// Don't create a new Emty history entry if last one is already Empty!
-		if(ev == undefined && historyItem.redo.length == 0 && historyItem.undo.length == 0) return;
+		if(ev == undefined && historyItem && historyItem.redo.length == 0 && historyItem.undo.length == 0) return;
 		
-		var newEvent = new HistoryItem(ev && ev.undo, ev && ev.redo);
+		var newEvent = new HistoryItem(ev && ev.undo, ev && ev.redo, ev && ev.comment);
 		
-		if(branch.currentItem != branch.length-1) {
+		if(branch.currentItem < (branch.length-1) && branch.currentItem > -1) {
 			// We are in the middle of the history, so branche out
+			console.log("brancing out on branch.currentItem=" + branch.currentItem);
 			branch = [];
 			historyItem.currentBranch = historyItem.branches.push(branch)-1;
-			console.log("brancing out");
 		}
-		else {
+		else if(branch.currentItem == branch.length-1) {
 			// We are at the tip
 			// Replace current item if it's empty!
 			if(historyItem.undo.length == 0) {
@@ -1019,11 +1083,12 @@ console.warn("Unable to undo! No recorded history!");
 		console.log("Added new history item/event to branch=", branch);
 	}
 	
-	function HistoryItem(undo, redo) {
+	function HistoryItem(undo, redo, comment) {
 		// Object model for history items
 		this.date = new Date();
 		this.undo = undo ? [undo] : [];
 		this.redo = redo ? [redo] : [];
+		this.comment = comment ? [comment]: []; // For debugging
 		this.branches = [];
 		this.currentBranch = -1;
 	}
@@ -1965,56 +2030,143 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});
 			
+			
 			// Make sure undo/redo history works with only one item in the history
+			
+			console.log("Test: inserting 123")
 			EDITOR.mock("typing", "i123");
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo insert 123");
 			EDITOR.mock("typing", "u"); // Undo insert
 			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo insert 123");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo when there is no more to redo (should do nothing)");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Should do nothing
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo insert 123 (again)");
 			EDITOR.mock("typing", "u"); // Undo insert (again)
 			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo when there is no more to undo (should do nothing)");
 			EDITOR.mock("typing", "u"); // Should do nothing
 			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo insert 123");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
 			
 			
-			// See if we can travel the history
+			// Test if we can travel the history
+			console.log("Test: appending 456");
 			EDITOR.mock("typing", "a456");
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "123456\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: undoing append 456");
 			EDITOR.mock("typing", "u"); // Undo insert 456
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: undoing insert 123");
 			EDITOR.mock("typing", "u"); // Undo insert 123
 			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: For a second time - undo when there is no more to undo (should do nothing)");
 			EDITOR.mock("typing", "u"); // Should do nothing
 			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo insert 123");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 123
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo append 456");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 456
 			if(file.text != "123456\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
 			
-			// See if the history can branch
+			console.log("Test: For a second time - redo when there is no more to redo (should do nothing)");
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Should do nothing
+			if(file.text != "123456\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo append 456");
+			EDITOR.mock("typing", "u"); // Remove 456
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo append 456");
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 456
+			if(file.text != "123456\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			
+			// Test if the history can branch
+			console.log("Test: Undo append 456");
 			EDITOR.mock("typing", "u"); // Undo insert 456
+			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Append def to branch the history");
 			EDITOR.mock("typing", "adef"); // Branch the history by appending def
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "123def\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo append 456");
 			EDITOR.mock("typing", "u"); // Undo insert def
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo insert 123");
 			EDITOR.mock("typing", "u"); // Undo insert 123
 			if(file.text != "\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo insert 123");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert 123
 			if(file.text != "123\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
-			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert def
+			
+			console.log("Test: Redo append 456");
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert def (this is what vim does! confirmed!)
 			// Note: It should now pick the def branch (test shouldbe 123def and not 123456)
 			if(file.text != "123def\n") {
 				console.log(history[file.path]);
 				throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
 			}
+			
+			// Test if we can travel the history after branching
+			console.log("Test: append ghi");
+			EDITOR.mock("typing", "aghi");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "123defghi\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo append ghi");
+			EDITOR.mock("typing", "u"); // Undo insert ghi
+			if(file.text != "123def\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo append ghi");
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert ghi
+			if(file.text != "123defghi\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Append jkl");
+			EDITOR.mock("typing", "ijkl");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "123defghijkl\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo append jkl");
+			EDITOR.mock("typing", "u"); // Undo insert jkl
+			if(file.text != "123defghi\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Undo append ghi");
+			EDITOR.mock("typing", "u"); // Undo insert ghi
+			if(file.text != "123def\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo append ghi");
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert ghi
+			if(file.text != "123defghi\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Redo append jkl");
+			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert jkl
+			if(file.text != "123defghijkl\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
+			
 			
 			
 			
@@ -2024,10 +2176,20 @@ vimCommandBuffer = "";
 				
 			*/
 			
-			// ### *02.2*Inserting text
+			// Reset
+			EDITOR.mock("typing", "ddi\n"); // Clean up
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "k");
+			if(file.text != "\n") throw new Error("Unexpected text: " + file.text);
+			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
+			
+			// ### *02.2*Inserting text
+			console.log("Test: Should go into insert mode after pressing i");
 			EDITOR.mock("keydown", "i");
 			if(EDITOR.mode != "vimInsert") throw new Error("Expected mode to change to vimInsert after pressing i");
+			
 			EDITOR.mock("typing", "A very intelligent turtle");
 			EDITOR.mock("keydown", "\n");
 			EDITOR.mock("typing", "Found programming UNIX a hurdle");
@@ -2089,10 +2251,11 @@ vimCommandBuffer = "";
 			
 			
 			// ### 02.5  Undo and Redo
-			
+			console.log("Test: Undo Join line");
 			EDITOR.mock("typing", "u");
 			if(file.text != "A young intelligent \nturtle") throw new Error("Expected u (undo) to put the lb back: " + file.text);
 			
+			console.log("Test: Redo Join line");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "A young intelligent turtle") throw new Error("Expected Ctrl+R to redo merge! file.text=" + file.text);
 			
@@ -2101,37 +2264,54 @@ vimCommandBuffer = "";
 			EDITOR.mock("typing", "xxxxxxx");
 			if(file.text != " intelligent turtle") throw new Error("Expected xxxxxxx to remove 'A young': " + file.text);
 			
+			console.log("Test: Undo remove: g");
 			EDITOR.mock("typing", "u");
 			if(file.text != "g intelligent turtle") throw new Error("Expected u (undo) to put back one character! file.text=" + file.text);
 			
+			console.log("Test: Undo remove: n");
 			EDITOR.mock("typing", "u");
 			if(file.text != "ng intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
 			
+			console.log("Test: Undo remove: u");
 			EDITOR.mock("typing", "u");
 			if(file.text != "ung intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
 			
+			console.log("Test: Undo remove: o");
 			EDITOR.mock("typing", "u");
 			if(file.text != "oung intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
 			
+			console.log("Test: Undo remove: y");
 			EDITOR.mock("typing", "u");
 			if(file.text != "young intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
 			
+			console.log("Test: Undo remove: space");
 			EDITOR.mock("typing", "u");
 			if(file.text != " young intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
 			
+			console.log("Test: Undo remove: A");
 			EDITOR.mock("typing", "u");
 			if(file.text != "A young intelligent turtle") throw new Error("Unexpected u (undo): " + file.text);
 			
+			console.log("Test: Redo remove: A");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
+			if(file.text != " young intelligent turtle") throw new Error("Unexpected after two redo: " + file.text);
+			
+			console.log("Test: Redo remove: space");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "young intelligent turtle") throw new Error("Unexpected after two redo: " + file.text);
 			if(file.caret.col != 0) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
 			
+			console.log("Test: Inserting: Some ");
 			EDITOR.mock("typing", "iSome ");
 			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "Some young intelligent turtle") throw new Error("Unexpected: " + file.text);
+			
+			console.log("Test: Undo inserting: Some ");
 			EDITOR.mock("typing", "u");
 			if(file.text != "young intelligent turtle") throw new Error("Unexpected: " + file.text);
 			if(file.caret.col != 0) throw new Error("Unexpected: file.caret.col=" + file.caret.col);
+			
+			console.log("Test: Redo inserting: Some ");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "Some young intelligent turtle") throw new Error("Unexpected: " + file.text);
 			
@@ -2142,19 +2322,30 @@ vimCommandBuffer = "";
 				edited.  Typing this command twice cancels the preceding "U".
 			*/
 			
+			console.log("Test: Delete whole line");
 			EDITOR.mock("typing", "dd"); // Delete whole line
 			if(file.text != "") throw new Error("Unexpected: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Insert: A very intelligent turtle");
 			EDITOR.mock("typing", "iA very intelligent turtle");
 			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.text != "A very intelligent turtle") throw new Error("Unexpected: " + UTIL.lbChars(file.text));
+			
+			console.log("Test: Remove: very");
 			file.moveCaretToIndex(2);
 			EDITOR.mock("typing", "xxxx"); // Delete very
 			if(file.text != "A  intelligent turtle") throw new Error("Unexpected: " + file.text);
+			
+			console.log("Test: Remove: turtle");
 			EDITOR.mock("typing", "13l");
 			EDITOR.mock("typing", "xxxxxx"); // Delete turtle
 			if(file.text != "A  intelligent ") throw new Error("Unexpected: " + file.text);
+			
+			console.log("Test: Restore line");
 			EDITOR.mock("typing", "U"); // Restore line with "U"
 			if(file.text != "A very intelligent turtle") throw new Error("Unexpected: " + file.text);
 			
+			console.log("Test: Undo restore line");
 			EDITOR.mock("typing", "u"); // Undo "U" with "u"
 			if(file.text != "A  intelligent ") throw new Error("Unexpected: " + file.text);
 			
@@ -2184,9 +2375,13 @@ vimCommandBuffer = "";
 			EDITOR.mock("typing", "oThat liked using Vim");
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "A very intelligent turtle\nThat liked using Vim\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
+			
+			console.log("Test: Undo open new line");
 			EDITOR.mock("typing", "u"); // Undo open new line
 			if(file.text != "A very intelligent turtle\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
 			if(file.caret.col != 24) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			console.log("Test: Redo open new line");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo open new line (with text)
 			if(file.text != "A very intelligent turtle\nThat liked using Vim\nFound programming UNIX a hurdle") throw new Error("Unexpected: " + file.text);
 			
@@ -2220,18 +2415,23 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {charCode: ESC});
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld\nMore turtles\nMore turtles") throw new Error("Unexpected: " + file.text);
 			
+			console.log("Test: Undo opening two rows containing: More turtles");
 			EDITOR.mock("typing", "u");
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
 			
+			console.log("Test: Undo appending two strings containing: world");
 			EDITOR.mock("typing", "u");
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellos") throw new Error("Unexpected: " + file.text);
 			
+			console.log("Test: Undo inserting two strings containing: hello");
 			EDITOR.mock("typing", "u");
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtles") throw new Error("Unexpected: " + file.text);
 			
+			console.log("Test: Redo inserting two strings containing: hello");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellos") throw new Error("Unexpected: " + file.text);
 			
+			console.log("Test: Redo appending two strings containing: world");
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
 			

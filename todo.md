@@ -2735,7 +2735,8 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
-
+Built in functionality for folding and adding extra rows that are not part of the file buffer.
+So that you can have nicer diffs
 
 ---
 Inline assertion and code coverage.
