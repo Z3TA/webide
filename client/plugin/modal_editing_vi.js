@@ -1190,6 +1190,24 @@ console.warn("Only store commands starting with :");
 				}
 			}
 		}
+		else if(str == ":e!") {
+			// Relead file from disk, ignore changes
+			return function reloadFromDisk() {
+				EDITOR.readFromDisk(file.path, function(err, path, text, hash) {
+					if(err) {
+						showMessage("Failed to load file: " + err.message);
+						beep();
+					}
+					else {
+						file.reload(text);
+						file.hash = hash;
+						file.saved(); // Because we reloaded from disk
+					}
+				});
+			}
+			
+		}
+		
 		else return null;
 	}
 	
