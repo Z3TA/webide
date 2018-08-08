@@ -1216,6 +1216,13 @@ console.warn("Only store commands starting with :");
 		else return null;
 	}
 	
+	function isKeyword(char) {
+		// vim default: @,48-57,_,192-255
+		var code = char.charCodeAt(0);
+		if( char == "_" || (code >= 48 && code <= 57) || (code >= 192 && code <= 255) ) return true;
+		else return false;
+	}
+	
 	function parseNormalCommand(str, file) {
 		/*
 			Returns the following object:
@@ -1505,38 +1512,110 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				## Word movement
 				A word ends at a non-word character, such as a ".", "-" or ")".
 			*/
-			else if(char == "w") {
-				// Word movement forward
-				
-				return cursorMovement(function wordForward() {
+			else if(char == "W") {
+				// Word movement forward by WORD
+				// A WORD ends strictly with a white-space. This may not be a word in normal sense, hence the uppercase.
+				return cursorMovement(function wordForwardByWORD() {
 					var toRepeat =  repeat * operatorRepeat;
 					while(toRepeat--) {
 						file.moveCaretRight();
 						for (var i=file.caret.index, char="", afterLineBreak=false, afterWhiteSpace=false; i<file.text.length; i++) {
-							if(afterLineBreak) break;
-							
-							char = file.text.charAt(i);
+							char = file.text.charAt(file.caret.index);
 
-							if(char == " ") afterWhiteSpace = true;
-							else if(char == "\r" || char == "\n") afterLineBreak = true;
+							// Stop if we got onto a new line. And it's empty or starts with a non-white-space
+							if( file.caret.col == 0 && (file.grid[file.caret.row].length == 0 || char.match(/\S/)) ) break;
+								
+							if(char.match(/\s/)) afterWhiteSpace = true;
 							else if(afterWhiteSpace) break;
 							
 							file.moveCaretRight();
 						}
 					}
-					
 				});
 			}
-			else if(char == "b") {
-				// Word movement backwards
+			else if(char == "w") {
+				// Word movement forward by word
+				// A word ends at a non-word character, such as a ".", "-" or ")".
+				return cursorMovement(function wordForwardByWord() {
+					var toRepeat =  repeat * operatorRepeat;
+					while(toRepeat--) {
+						file.moveCaretRight();
+						for (var i=file.caret.index, char="", afterWhiteSpace=false, afterLineBreak=false; i<file.text.length; i++) {
+							char = file.text.charAt(file.caret.index);
+							
+							// Stop at anything if it's after a line-break'. Unless it's a white-space
+							if( afterLineBreak && !char.match(/\s/) ) break; 
+							
+							// Stop if we got onto a new line. And it's empty or starts with a word
+							if( file.caret.col == 0 && (file.grid[file.caret.row].length == 0 || char.match(/\w/)) ) break; 
+							
+							if(char == "\r" || char == "\n") afterLineBreak = true;
+							else if( char.match(/\s/) ) afterWhiteSpace = true;
+							else if( char.match(/\W/) ) break; // Stop at any character that is not a word (^A-Za-z0-9_)
+							else if(afterWhiteSpace) break; // Stop at antything if it's after white-space
+							
+							//console.log("col=" + file.caret.col + " char=" + UTIL.lbChars(char) + " afterLineBreak=" + afterLineBreak + " afterWhiteSpace=" + afterWhiteSpace);
+							
+							file.moveCaretRight();
+						}
+					}
+				});
+			}
+			else if(char == "B") {
+				// Word movement backwards (separated by space)
+				return cursorMovement(function backToStartOfWord() {
+					var toRepeat =  repeat * operatorRepeat;
+					while(toRepeat--) {
+						file.moveCaretLeft();
+						for (var i=file.caret.index-2, char="", afterLineBreak=false, afterWhiteSpace=false; i>-2; i--) {
+							if(afterLineBreak) break;
+							
+							char = file.text.charAt(file.caret.index);
+							
+							if(char == " ") afterWhiteSpace = true;
+							else if(char == "\r" || char == "\n") afterLineBreak = true;
+							else if(afterWhiteSpace) break;
+							
+							file.moveCaretLeft();
+						}
+					}
+				});
 				
 			}
-			else if(char == "e" && lastChar == "g") {
-				// Moves to the previous end of a word
+			else if(char == "E" && lastChar == "g") {
+				// Moves to the previous end of a word (separated by space)
+				// Stop at empty lines!
+				return cursorMovement(function endOfPreviousWord() {
+					var toRepeat =  repeat * operatorRepeat;
+					while(toRepeat--) {
+						file.moveCaretLeft();
+						for (var i=file.caret.index+1, char="", afterLineBreak=false, afterWhiteSpace=false; i>1; i--) {
+							char = file.text.charAt(file.caret.index);
+							
+							if(char == " " || char == "\r" || char == "\n") break;
+							
+							file.moveCaretLeft();
+						}
+					}
+				});
 				
 			}
-			else if(char == "e") {
-				// Moves to the next end of a word
+			else if(char == "E") {
+				// Moves to the next end of a word (separated by space)
+				return cursorMovement(function endOfWordNext() {
+					var toRepeat =  repeat * operatorRepeat;
+					while(toRepeat--) {
+						file.moveCaretRight();
+						for (var i=file.caret.index+2, char="", afterLineBreak=false, afterWhiteSpace=false; i<file.text.length+2; i++) {
+							char = file.text.charAt(file.caret.index);
+							
+							if(char == " ") afterWhiteSpace = true;
+							else if(afterWhiteSpace) break;
+							
+							file.moveCaretRight();
+						}
+					}
+				});
 			}
 			
 			// ### Move by white-space separated WORDs
@@ -2077,6 +2156,8 @@ vimCommandBuffer = "";
 	
 	// TEST-CODE-START
 	
+	// todo: Test with both CRLF and LF (\r\n and \n) !
+	
 	function vimTest1(callback) {
 		EDITOR.openFile("vimTest1.txt", "\n", function(err, file) {
 			var vimWasActive = VIM_ACTIVE;
@@ -2574,8 +2655,48 @@ vimCommandBuffer = "";
 			EDITOR.mock("typing", "3w");
 			if(file.caret.col != 28) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
+			// Move word back
+			EDITOR.mock("typing", "b");
+			if(file.caret.col != 20) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "2b");
+			if(file.caret.col != 10) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b");
+			if(file.caret.col != 8) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b");
+			if(file.caret.col != 5) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b");
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
+			// Move to end of word
+			EDITOR.mock("typing", "e"); 
+			if(file.caret.col != 3) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "2e");
+			if(file.caret.col != 8) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "3e");
+			if(file.caret.col != 26) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
+			// Move to previous end of word
+			EDITOR.mock("typing", "ge");
+			if(file.caret.col != 18) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "2ge");
+			if(file.caret.col != 8) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			//                        0                    21                      45
+			EDITOR.mock("typing", "ddiThis is-a line, with special/separated/words (and some more).");
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(file.caret.col != 60) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b"); // move caret to |)
+			if(file.caret.col != 59) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "4b"); // move caret to |(
+			if(file.caret.col != 45) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b"); // Move caret to |words
+			if(file.caret.col != 39) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b"); // Move caret to |/words
+			if(file.caret.col != 38) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "b"); // Move caret to |separated
+			if(file.caret.col != 29) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "7b"); // Move caret to |-a line
+			if(file.caret.col != 7) throw new Error("Unexpected file.caret.col=" + file.caret.col);
 			
 			
 			
