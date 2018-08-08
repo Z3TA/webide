@@ -1191,7 +1191,7 @@ console.warn("Only store commands starting with :");
 			}
 		}
 		else if(str == ":e!") {
-			// Relead file from disk, ignore changes
+			// Reload file from disk, ignore changes
 			return function reloadFromDisk() {
 				EDITOR.readFromDisk(file.path, function(err, path, text, hash) {
 					if(err) {
@@ -1205,7 +1205,12 @@ console.warn("Only store commands starting with :");
 					}
 				});
 			}
-			
+		}
+		else if(str == ":help") {
+			// Reload file from disk, ignore changes
+			return function help() {
+				alertBox("Sorry, there is not yet any documentation besides the README.txt that comes with the program.");
+			}
 		}
 		
 		else return null;
@@ -1501,8 +1506,26 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				A word ends at a non-word character, such as a ".", "-" or ")".
 			*/
 			else if(char == "w") {
-				console.log("Word movement forward");
+				// Word movement forward
 				
+				return cursorMovement(function wordForward() {
+					var toRepeat =  repeat * operatorRepeat;
+					while(toRepeat--) {
+						file.moveCaretRight();
+						for (var i=file.caret.index, char="", afterLineBreak=false, afterWhiteSpace=false; i<file.text.length; i++) {
+							if(afterLineBreak) break;
+							
+							char = file.text.charAt(i);
+
+							if(char == " ") afterWhiteSpace = true;
+							else if(char == "\r" || char == "\n") afterLineBreak = true;
+							else if(afterWhiteSpace) break;
+							
+							file.moveCaretRight();
+						}
+					}
+					
+				});
 			}
 			else if(char == "b") {
 				// Word movement backwards
@@ -2056,7 +2079,9 @@ vimCommandBuffer = "";
 	
 	function vimTest1(callback) {
 		EDITOR.openFile("vimTest1.txt", "\n", function(err, file) {
-			if(!VIM_ACTIVE) toggleVim();
+			var vimWasActive = VIM_ACTIVE;
+			if(!vimWasActive) toggleVim();
+			
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});
@@ -2197,7 +2222,37 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert jkl
 			if(file.text != "123defghijkl\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
 			
-			//EDITOR.closeFile(file.path);
+			
+			// Moving the caret inside a line command
+			EDITOR.mock("typing", ":foo");
+			if(vimCommandBuffer != ":foo") throw new Error("vimCommandBuffer=" + vimCommandBuffer);
+			if(commandCaretPosition != vimCommandBuffer.length) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition);
+			
+			EDITOR.mock("keydown", {charCode: LEFT});
+			if(commandCaretPosition != vimCommandBuffer.length-1) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected arrow left to move the caret left!");
+			
+			EDITOR.mock("keydown", {charCode: LEFT});
+			if(commandCaretPosition != vimCommandBuffer.length-2) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected two arrow left to move the caret left two steps!");
+			
+			EDITOR.mock("keydown", {charCode: RIGHT});
+			if(commandCaretPosition != vimCommandBuffer.length-1) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected two arrow right to move the caret right!");
+			
+			EDITOR.mock("keydown", {charCode: ESC});
+			if(vimCommandBuffer != "") throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer);
+			if(commandCaretPosition != 0) throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer + " commandCaretPosition=" + commandCaretPosition);
+			
+			
+			// Moving up/down the line command history
+			EDITOR.mock("keydown", ":");
+			EDITOR.mock("keydown", {charCode: UP});
+			if(vimCommandBuffer != ":foo") throw new Error("Expected key up to toggle command history! vimCommandBuffer=" + vimCommandBuffer + " commandHistory.length=" + commandHistory.length);
+			
+			
+			
+			EDITOR.mock("typing", ":set showmode?");
+			if(messageToShow != "noshowmode") throw new Error("Expected :set showmode? to show noshowmode because it's turned off");
+			
+			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			if(typeof callback == "function") callback(true);
 			else {
 				EDITOR.mock("typing", "dd");
@@ -2479,42 +2534,6 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true});
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
 			
-			
-			// 02.7  Getting out
-			
-			
-			
-			return true;
-			
-			
-			EDITOR.mock("typing", ":foo");
-			if(vimCommandBuffer != ":foo") throw new Error("vimCommandBuffer=" + vimCommandBuffer);
-			if(commandCaretPosition != vimCommandBuffer.length) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition);
-			
-			EDITOR.mock("keydown", {charCode: LEFT});
-			if(commandCaretPosition != vimCommandBuffer.length-1) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected arrow left to move the caret left!");
-			
-			EDITOR.mock("keydown", {charCode: LEFT});
-			if(commandCaretPosition != vimCommandBuffer.length-2) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected two arrow left to move the caret left two steps!");
-			
-			EDITOR.mock("keydown", {charCode: RIGHT});
-			if(commandCaretPosition != vimCommandBuffer.length-1) throw new Error("vimCommandBuffer=" + vimCommandBuffer + " (" + vimCommandBuffer.length + " characters) commandCaretPosition=" + commandCaretPosition + ". Expected two arrow right to move the caret right!");
-			
-			EDITOR.mock("keydown", {charCode: ESC});
-			if(vimCommandBuffer != "") throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer);
-			if(commandCaretPosition != 0) throw new Error("Expected reset when pressing Esc: vimCommandBuffer=" + vimCommandBuffer + " commandCaretPosition=" + commandCaretPosition);
-			
-			EDITOR.mock("keydown", ":");
-			EDITOR.mock("keydown", {charCode: UP});
-			if(vimCommandBuffer != ":foo") throw new Error("Expected key up to toggle command history! vimCommandBuffer=" + vimCommandBuffer + " commandHistory.length=" + commandHistory.length);
-			
-			
-			
-			EDITOR.mock("typing", ":set showmode?");
-			if(messageToShow != "noshowmode") throw new Error("Expected :set showmode? to show noshowmode because it's turned off");
-			
-			
-			
 			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			
 			//EDITOR.closeFile(file.path);
@@ -2529,13 +2548,38 @@ vimCommandBuffer = "";
 		}
 	
 	function vimTest3(callback) {
-		EDITOR.openFile("vimTest1.txt", "\n", function(err, file) {
-			if(!VIM_ACTIVE) toggleVim();
+		EDITOR.openFile("vimTest3.txt", "\n", function(err, file) {
+			var vimWasActive = VIM_ACTIVE;
+			if(!vimWasActive) toggleVim();
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});
 			
+			// http://vimhelp.appspot.com/usr_03.txt.html#usr_03.txt
 			
+			// Setup
+			EDITOR.mock("typing", "iThis is a line with example text");
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("typing", "32h");
+			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
+			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			// 03.1  Word movement
+			EDITOR.mock("typing", "w");
+			if(file.caret.col != 5) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "w");
+			if(file.caret.col != 8) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "w");
+			if(file.caret.col != 10) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			EDITOR.mock("typing", "3w");
+			if(file.caret.col != 28) throw new Error("Unexpected file.caret.col=" + file.caret.col);
+			
+			
+			
+			
+			
+			
+			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
 			if(typeof callback == "function") callback(true);
 			else {
 				EDITOR.mock("typing", "dd");
@@ -2545,6 +2589,30 @@ vimCommandBuffer = "";
 		});
 		if(typeof callback != "function") return false;
 	}
+	
+	function vimTest4(callback) {
+		EDITOR.openFile("vimTest4.txt", "\n", function(err, file) {
+			var vimWasActive = VIM_ACTIVE;
+			if(!vimWasActive) toggleVim();
+			// Get out from any mode
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("keydown", {charCode: ESC});
+			
+			
+			
+			if(!vimWasActive) toggleVim(); // Turn Vim/modal off again
+			if(typeof callback == "function") callback(true);
+			else {
+				EDITOR.mock("typing", "dd");
+				EDITOR.mock("typing", "aTest4 passed!");
+			}
+		});
+		if(typeof callback != "function") return false;
+	}
+	
+	
+	
+	
 	
 	EDITOR.addTest(vimTest1);
 	EDITOR.addTest(vimTest2);
