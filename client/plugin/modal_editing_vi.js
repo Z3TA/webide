@@ -218,8 +218,14 @@ console.warn("vim mode hidden behind &vim query string flag"); // Work in progre
 			EDITOR.bindKey({desc: "Vim arrow down", fun: vimDownArrowKey, charCode: DOWN, combo: 0, mode: "*"});
 			
 			if(EDITOR.settings.devMode) {
-				var DOT = 190;
-				EDITOR.bindKey({desc: "Test vim commands", fun: testVimCommands, charCode: DOT, combo: CTRL+SHIFT, mode: "*"});
+				var ONE = 49;
+				var TWO = 50;
+				var THREE = 51;
+				var FOUR = 52;
+				EDITOR.bindKey({desc: "Vim test 1", fun: vimTest1, charCode: ONE, combo: CTRL+SHIFT, mode: "*"});
+				EDITOR.bindKey({desc: "Vim test 2", fun: vimTest2, charCode: TWO, combo: CTRL+SHIFT, mode: "*"});
+				EDITOR.bindKey({desc: "Vim test 3", fun: vimTest3, charCode: THREE, combo: CTRL+SHIFT, mode: "*"});
+				
 			}
 			
 			EDITOR.addRender(showCommandBuffer);
@@ -2016,20 +2022,12 @@ vimCommandBuffer = "";
 	
 	// TEST-CODE-START
 	
-	function testVimCommands(callback) {
-		EDITOR.openFile("testVimCommands.txt", "\n", function(err, file) {
-			var vimWasActive = VIM_ACTIVE;
-			if(!vimWasActive) toggleVim();
-			var assert = UTIL.assert();
-			
-			/*
-				
-			*/
-			
+	function vimTest1(callback) {
+		EDITOR.openFile("vimTest1.txt", "\n", function(err, file) {
+			if(!VIM_ACTIVE) toggleVim();
 			// Get out from any mode
 			EDITOR.mock("keydown", {charCode: ESC});
 			EDITOR.mock("keydown", {charCode: ESC});
-			
 			
 			// Make sure undo/redo history works with only one item in the history
 			
@@ -2167,8 +2165,25 @@ vimCommandBuffer = "";
 			EDITOR.mock("keydown", {char: "R", ctrlKey: true}); // Redo insert jkl
 			if(file.text != "123defghijkl\n") throw new Error("Unexpected text: " + UTIL.lbChars(file.text));
 			
+			//EDITOR.closeFile(file.path);
+			if(typeof callback == "function") callback(true);
+			else {
+				EDITOR.mock("typing", "dd");
+				EDITOR.mock("typing", "aTest1 passed!");
+			}
 			
+		});
+		if(typeof callback != "function") return false;
+	}
+	
+	function vimTest2(callback) {
+		EDITOR.openFile("vimTest2.txt", "\n", function(err, file) {
+			var vimWasActive = VIM_ACTIVE;
+			if(!vimWasActive) toggleVim();
 			
+			// Get out from any mode
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("keydown", {charCode: ESC});
 			
 			/*
 				
@@ -2176,10 +2191,7 @@ vimCommandBuffer = "";
 				
 			*/
 			
-			// Reset
-			EDITOR.mock("typing", "ddi\n"); // Clean up
-			EDITOR.mock("keydown", {charCode: ESC});
-			EDITOR.mock("typing", "k");
+			
 			if(file.text != "\n") throw new Error("Unexpected text: " + file.text);
 			if(file.caret.row != 0) throw new Error("Unexpected file.caret.row=" + file.caret.row);
 			if(file.caret.col != 0) throw new Error("Unexpected file.caret.col=" + file.caret.col);
@@ -2436,6 +2448,9 @@ vimCommandBuffer = "";
 			if(file.text != "hellohellohelloworldworldworld\nMany turtles\nMany turtles\nMany turtlehellohellosworldworld") throw new Error("Unexpected: " + file.text);
 			
 			
+			// 02.7  Getting out
+			
+			
 			
 			return true;
 			
@@ -2473,14 +2488,34 @@ vimCommandBuffer = "";
 			//EDITOR.closeFile(file.path);
 			if(typeof callback == "function") callback(true);
 			else {
-alertBox("All vim commands suceeded!");
+				EDITOR.mock("typing", "kkk4dd");
+				EDITOR.mock("typing", "aTest2 passed!");
 			}
 		});
 		
 		if(typeof callback != "function") return false;
-		};
+		}
 	
-	EDITOR.addTest(testVimCommands);
+	function vimTest3(callback) {
+		EDITOR.openFile("vimTest1.txt", "\n", function(err, file) {
+			if(!VIM_ACTIVE) toggleVim();
+			// Get out from any mode
+			EDITOR.mock("keydown", {charCode: ESC});
+			EDITOR.mock("keydown", {charCode: ESC});
+			
+			
+			if(typeof callback == "function") callback(true);
+			else {
+				EDITOR.mock("typing", "dd");
+				EDITOR.mock("typing", "aTest3 passed!");
+			}
+			
+		});
+		if(typeof callback != "function") return false;
+	}
+	
+	EDITOR.addTest(vimTest1);
+	EDITOR.addTest(vimTest2);
 	
 	// TEST-CODE-END
 	
